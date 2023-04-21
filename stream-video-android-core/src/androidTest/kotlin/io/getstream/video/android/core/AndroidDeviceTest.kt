@@ -63,23 +63,18 @@ import org.webrtc.VideoFrame
 class AndroidDeviceTest : IntegrationTestBase(connectCoordinatorWS = false) {
 
     private val logger by taggedLogger("Test:AndroidDeviceTest")
-    val mediaManager = MediaManagerImpl(
-        context,
-        CoroutineScope( DispatcherProvider.IO),
-        clientImpl.peerConnectionFactory.eglBase.eglBaseContext
-    )
 
     @Test
     fun camera() = runTest {
 
-        val camera = mediaManager.camera
+        val camera = call.mediaManager.camera
         assertThat(camera).isNotNull()
         camera.startCapture()
     }
 
     @Test
     fun microphone() = runTest {
-        val mic = mediaManager.microphone
+        val mic = call.mediaManager.microphone
         assertThat(mic).isNotNull()
         mic.startCapture()
     }
@@ -138,100 +133,6 @@ class AndroidDeviceTest : IntegrationTestBase(connectCoordinatorWS = false) {
 
     }
 
-    @Test
-    fun tempCameraTest() = runTest {
-        val scope = CoroutineScope(DispatcherProvider.IO)
-        val surfaceTextureHelper = SurfaceTextureHelper.create(
-            "CaptureThread", clientImpl.peerConnectionFactory.eglBase.eglBaseContext
-        )
-
-        // audio and video source for rendering on tracks
-        val audioConstraints = buildAudioConstraints()
-        val videoSource = clientImpl.peerConnectionFactory.makeVideoSource(false)
-        val audioSource = clientImpl.peerConnectionFactory.makeAudioSource(audioConstraints)
-        val audioTrack = clientImpl.peerConnectionFactory.makeAudioTrack(
-            source = audioSource, trackId = "audioTrack"
-        )
-        val videoTrack = clientImpl.peerConnectionFactory.makeVideoTrack(
-            source = videoSource, trackId = "videoTrack"
-        )
-
-
-        val manager = context.getSystemService<CameraManager>()!!
-        val enumerator = Camera2Enumerator(context)
-        val names = enumerator.deviceNames.toList()
-
-        val ids = manager?.cameraIdList ?: emptyArray()
-        var foundCamera = false
-        var cameraId = ""
-
-        // TODO: group the cameras by facing and select the one with the highest resolution
-        val devices = mutableListOf<CameraDeviceWrapped>()
-
-        for (id in ids) {
-            val characteristics = manager.getCameraCharacteristics(id)
-            val cameraLensFacing = characteristics.get(CameraCharacteristics.LENS_FACING) ?: -1
-
-            if (cameraLensFacing == CameraMetadata.LENS_FACING_FRONT) {
-                foundCamera = true
-                cameraId = id
-            }
-            val supportedFormats = enumerator.getSupportedFormats(id)
-            val selectedResolution = mediaManager.selectDesiredResolution(supportedFormats, 960)
-            println(selectedResolution)
-            val maxResolution = supportedFormats?.map { it.width * it.height }?.maxOrNull() ?: 0
-            val device = CameraDeviceWrapped(id=id, cameraLensFacing=cameraLensFacing, characteristics=characteristics, supportedFormats=supportedFormats, maxResolution=maxResolution)
-            devices.add(device)
-        }
-
-        val sortedDevices = devices.sortedBy { it.maxResolution }.groupBy { it.cameraLensFacing }
-        println(sortedDevices)
-
-        if (!foundCamera && ids.isNotEmpty()) {
-            cameraId = ids.first()
-        }
-
-        val videoCapturer = Camera2Capturer(context, cameraId, null)
-
-        runBlocking(scope.coroutineContext) {
-            videoCapturer?.initialize(
-                surfaceTextureHelper,
-                context,
-                object: CapturerObserver {
-                    override fun onCapturerStarted(success: Boolean) {
-                        TODO("Not yet implemented")
-                    }
-
-                    override fun onCapturerStopped() {
-                        TODO("Not yet implemented")
-                    }
-
-                    override fun onFrameCaptured(frame: VideoFrame?) {
-                        TODO("Not yet implemented")
-                    }
-                }
-            )
-        }
-
-        val position = 0
-        val frontCamera = enumerator.deviceNames.first {
-            if (position == 0) {
-                enumerator.isFrontFacing(it)
-            } else {
-                enumerator.isBackFacing(it)
-            }
-        }
-
-        val supportedFormats = enumerator.getSupportedFormats(frontCamera) ?: emptyList()
-
-        // TODO: server uses 960 480 240
-        val resolution = supportedFormats.firstOrNull {
-            (it.width == 720 || it.width == 480 || it.width == 360)
-        } ?: throw java.lang.IllegalStateException("No supported resolution found")
-        runBlocking(scope.coroutineContext) {
-            videoCapturer!!.startCapture(resolution.width, resolution.height, 30)
-        }
-    }
 
     @Test
     fun audioAndVideoSource() = runTest {
@@ -320,7 +221,7 @@ class AndroidDeviceTest : IntegrationTestBase(connectCoordinatorWS = false) {
     fun receiving() = runTest {
         // TODO: have a specific SFU setting to send back fake data
         // TODO: replace the id with your active call
-        val call = client.call("default", "rXmr0HUSshWz")
+        val call = client.call("default", "AYIh97yMpCXV")
         val joinResult = call.join()
         assertSuccess(joinResult)
         delay(1000)

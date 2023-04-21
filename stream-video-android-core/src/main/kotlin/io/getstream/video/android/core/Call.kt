@@ -86,7 +86,7 @@ public class Call(
 
     /** Session handles all real time communication for video and audio */
     internal var session: RtcSession? = null
-    internal val mediaManager by lazy { MediaManagerImpl(clientImpl.context, clientImpl.scope, clientImpl.peerConnectionFactory.eglBase.eglBaseContext) }
+    internal val mediaManager by lazy { MediaManagerImpl(clientImpl.context, this, clientImpl.scope, clientImpl.peerConnectionFactory.eglBase.eglBaseContext) }
 
     /** Basic crud operations */
     suspend fun get(): Result<GetCallResponse> {

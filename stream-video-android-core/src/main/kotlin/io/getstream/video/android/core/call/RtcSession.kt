@@ -394,7 +394,7 @@ public class RtcSession internal constructor(
     private var videoCapturer: VideoCapturer? = null
     private var isCapturingVideo: Boolean = false
     // TODO: nicer way to monitor this
-    private val captureResolution by lazy { call.mediaManager.captureResolution }
+
 
     fun clear() {
         logger.i { "[clear] #sfu; no args" }
@@ -761,6 +761,8 @@ public class RtcSession internal constructor(
                 if (joinEventResponse.value == null) {
                     throw IllegalStateException("SFU WS isn't connected")
                 }
+
+                val captureResolution = call.camera.resolution.value
 
                 val transceivers = peerConnection.connection.transceivers
                 val trackInfos = transceivers.filter {
