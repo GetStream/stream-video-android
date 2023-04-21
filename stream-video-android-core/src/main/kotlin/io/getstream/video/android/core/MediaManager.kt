@@ -36,12 +36,8 @@ import kotlinx.coroutines.runBlocking
 import org.webrtc.Camera2Capturer
 import org.webrtc.Camera2Enumerator
 import org.webrtc.CameraEnumerationAndroid
-import org.webrtc.CapturerObserver
 import org.webrtc.EglBase
 import org.webrtc.SurfaceTextureHelper
-import org.webrtc.VideoCapturer
-import org.webrtc.VideoFrame
-import org.webrtc.VideoSource
 
 sealed class DeviceStatus {
     object Disabled : DeviceStatus()
@@ -99,83 +95,113 @@ class SpeakerManager(val mediaManager: MediaManagerImpl) {
     }
 }
 
+/**
+ * The Microphone manager makes it easy to use your microphone in a call
+ *
+ * @sample
+ *
+ * val call = client.call("default", "123")
+ * val microphone = call.microphone
+ *
+ * microphone.enable() // enable the microphone
+ * microphone.disable() // disable the microphone
+ * microphone.setEnabled(true) // enable the microphone
+ * microphone.setSpeaker(true) // enable the speaker
+ *
+ * microphone.listDevices() // return stateflow with the list of available devices
+ * microphone.status // the status of the microphone
+ * microphone.selectedDevice // the selected device
+ * microphone.speakerPhoneEnabled // the status of the speaker. true/false
+ */
 class MicrophoneManager(val mediaManager: MediaManagerImpl) {
+    private lateinit var audioHandler: AudioSwitchHandler
+    private var audioManager: AudioManager? = null
+    private val logger by taggedLogger("Media:MicrophoneManager")
 
+    /** The status of the audio */
     val _status = MutableStateFlow<DeviceStatus>(DeviceStatus.Disabled)
     val status: StateFlow<DeviceStatus> = _status
 
-    val _selectedDevice = MutableStateFlow<String?>(null)
-    val selectedDevice: StateFlow<String?> = _selectedDevice
+    val _selectedDevice = MutableStateFlow<AudioDevice?>(null)
+    val selectedDevice: StateFlow<AudioDevice?> = _selectedDevice
 
-    val _devices = MutableStateFlow<List<String>>(emptyList())
-    val devices: StateFlow<List<String>> = _devices
+    val _devices = MutableStateFlow<List<AudioDevice>>(emptyList())
+    val devices: StateFlow<List<AudioDevice>> = _devices
 
-    fun devices(): List<String> {
-        return emptyList()
-    }
+    internal var selectedBeforeSpeaker: AudioDevice? = null
 
-    fun select(deviceId: String) {
-    }
-    fun setEnabled(enabled: Boolean) {
-    }
-    fun startCapture() {
-    }
-
+    /** Enable the audio, the rtc engine will automatically inform the SFU */
     fun enable() {
+        setup()
+        _status.value = DeviceStatus.Enabled
+        mediaManager.audioTrack.setEnabled(true)
     }
 
+    /** Disable the audio track. Audio is still captured, but not send.
+     * This allows for the "you are muted" toast to indicate you are talking while muted */
     fun disable() {
+        _status.value = DeviceStatus.Disabled
+        mediaManager.audioTrack.setEnabled(false)
     }
-}
 
-class AudioManager(val context: Context) {
-    private val logger by taggedLogger("Media:AudioManager")
-
-    var audioManager = context.getSystemService<AudioManager>()
-    val audioHandler = AudioSwitchHandler(context)
-
-//    val audioSource = clientImpl.peerConnectionFactory.makeAudioSource(audioConstraints)
-//    val audioTrack = clientImpl.peerConnectionFactory.makeAudioTrack(
-//        source = audioSource, trackId = "audioTrack"
-//    )
-
-    init {
-        audioHandler.start()
-        audioManager?.mode = AudioManager.MODE_IN_COMMUNICATION
-
-        val speakerOn = true
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-            val devices = audioManager?.availableCommunicationDevices ?: throw java.lang.IllegalStateException("No devices found")
-            val deviceType = if (speakerOn) {
-                AudioDeviceInfo.TYPE_BUILTIN_SPEAKER
-            } else {
-                AudioDeviceInfo.TYPE_BUILTIN_EARPIECE
-            }
-
-            val device = devices.firstOrNull { it.type == deviceType } ?: throw java.lang.IllegalStateException("No devices found")
-
-            val isCommunicationDeviceSet = audioManager?.setCommunicationDevice(device)
-            logger.d { "[setupAudio] #sfu; isCommunicationDeviceSet: $isCommunicationDeviceSet" }
+    /**
+     * Enable or disable the microphone
+     */
+    fun setEnabled(enabled: Boolean) {
+        if (enabled) {
+            enable()
+        } else {
+            disable()
         }
-
-        // listing devices..
-        val allDevices =  audioHandler.availableAudioDevices
     }
 
-    fun setDevice(device: AudioDevice) {
+    /** enables or disables the speakerphone */
+    fun setSpeaker(enable: Boolean) {
+        setup()
+        val devices = _devices.value
+        if (enable) {
+            val speaker = devices.filterIsInstance<AudioDevice.Speakerphone>().firstOrNull()
+            selectedBeforeSpeaker = _selectedDevice.value
+            select(speaker)
+        } else {
+            // swap back to the old one
+            val fallback = selectedBeforeSpeaker ?: devices.firstOrNull { it !is AudioDevice.Speakerphone }
+            select(fallback)
+        }
+    }
+
+    /**
+     * Select a specific device
+     */
+    fun select(device: AudioDevice?) {
         audioHandler.selectDevice(device)
+        _selectedDevice.value = device
     }
-//
-//    fun setSpeaker(speakerOn: Boolean = true) {
-//        val activeDevice = allDevices.firstOrNull {
-//            if (true) {
-//                it.name.contains("speaker", true)
-//            } else {
-//                !it.name.contains("speaker", true)
-//            }
-//        }
-//    }
+
+    /**
+     * List the devices, returns a stateflow with audio devices
+     */
+    fun listDevices(): StateFlow<List<AudioDevice>> {
+        setup()
+        return devices
+    }
+
+
+    internal fun setup() {
+        if (setupCompleted) return
+
+
+        audioManager = mediaManager.context.getSystemService<AudioManager>()
+        audioHandler = AudioSwitchHandler(mediaManager.context)
+        val devices = audioHandler.availableAudioDevices
+        _devices.value = devices
+
+        setupCompleted = true
+    }
+    private var setupCompleted: Boolean = false
+
 }
+
 
 
 public sealed class CameraDirection {
@@ -406,7 +432,7 @@ public class CameraManager(public val mediaManager: MediaManagerImpl, eglBaseCon
  *
  * The Rtc session observes these stateflows and updates accordingly
  *
- * Also see:
+ * For development on this library also see:
  *
  * @see AudioSwitchHandler
  * @see AudioSwitch
@@ -419,13 +445,15 @@ class MediaManagerImpl(val context: Context, val call: Call, val scope: Coroutin
 
     // source & tracks
     val videoSource = call.clientImpl.peerConnectionFactory.makeVideoSource(false)
+    val videoTrack = call.clientImpl.peerConnectionFactory.makeVideoTrack(
+        source = videoSource, trackId = "videoTrack"
+    )
+    // TODO: make unique
     val audioSource = call.clientImpl.peerConnectionFactory.makeAudioSource(buildAudioConstraints())
     val audioTrack = call.clientImpl.peerConnectionFactory.makeAudioTrack(
         source = audioSource, trackId = "audioTrack"
     )
-    val videoTrack = call.clientImpl.peerConnectionFactory.makeVideoTrack(
-        source = videoSource, trackId = "videoTrack"
-    )
+
 
     val camera = CameraManager(this, eglBaseContext)
     val microphone = MicrophoneManager(this)
