@@ -104,18 +104,51 @@ public final class io/getstream/video/android/core/CallState {
 	public final fun updateParticipantTrackSize (Ljava/lang/String;II)V
 }
 
+public final class io/getstream/video/android/core/CameraDeviceWrapped {
+	public fun <init> (Ljava/lang/String;Landroid/hardware/camera2/CameraCharacteristics;Ljava/util/List;ILio/getstream/video/android/core/CameraDirection;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Landroid/hardware/camera2/CameraCharacteristics;
+	public final fun component3 ()Ljava/util/List;
+	public final fun component4 ()I
+	public final fun component5 ()Lio/getstream/video/android/core/CameraDirection;
+	public final fun copy (Ljava/lang/String;Landroid/hardware/camera2/CameraCharacteristics;Ljava/util/List;ILio/getstream/video/android/core/CameraDirection;)Lio/getstream/video/android/core/CameraDeviceWrapped;
+	public static synthetic fun copy$default (Lio/getstream/video/android/core/CameraDeviceWrapped;Ljava/lang/String;Landroid/hardware/camera2/CameraCharacteristics;Ljava/util/List;ILio/getstream/video/android/core/CameraDirection;ILjava/lang/Object;)Lio/getstream/video/android/core/CameraDeviceWrapped;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getCharacteristics ()Landroid/hardware/camera2/CameraCharacteristics;
+	public final fun getDirection ()Lio/getstream/video/android/core/CameraDirection;
+	public final fun getId ()Ljava/lang/String;
+	public final fun getMaxResolution ()I
+	public final fun getSupportedFormats ()Ljava/util/List;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public abstract class io/getstream/video/android/core/CameraDirection {
+}
+
+public final class io/getstream/video/android/core/CameraDirection$Back : io/getstream/video/android/core/CameraDirection {
+	public static final field INSTANCE Lio/getstream/video/android/core/CameraDirection$Back;
+}
+
+public final class io/getstream/video/android/core/CameraDirection$Front : io/getstream/video/android/core/CameraDirection {
+	public static final field INSTANCE Lio/getstream/video/android/core/CameraDirection$Front;
+}
+
 public final class io/getstream/video/android/core/CameraManager {
-	public fun <init> (Lio/getstream/video/android/core/MediaManagerImpl;)V
+	public fun <init> (Lio/getstream/video/android/core/MediaManagerImpl;Lorg/webrtc/EglBase$Context;Lio/getstream/video/android/core/CameraDirection;)V
+	public synthetic fun <init> (Lio/getstream/video/android/core/MediaManagerImpl;Lorg/webrtc/EglBase$Context;Lio/getstream/video/android/core/CameraDirection;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun disable ()V
 	public final fun enable ()V
 	public final fun flip ()V
-	public final fun getDevices ()Lkotlinx/coroutines/flow/StateFlow;
+	public final fun getDirection ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun getMediaManager ()Lio/getstream/video/android/core/MediaManagerImpl;
+	public final fun getResolution ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun getSelectedDevice ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun getStatus ()Lkotlinx/coroutines/flow/StateFlow;
-	public final fun select (Ljava/lang/String;)V
+	public final fun listDevices ()Ljava/util/List;
+	public final fun select (Ljava/lang/String;Z)V
+	public static synthetic fun select$default (Lio/getstream/video/android/core/CameraManager;Ljava/lang/String;ZILjava/lang/Object;)V
 	public final fun setEnabled (Z)V
-	public final fun startCapture ()V
 }
 
 public final class io/getstream/video/android/core/ClientState {
@@ -198,10 +231,6 @@ public final class io/getstream/video/android/core/DeviceStatus$Enabled : io/get
 	public static final field INSTANCE Lio/getstream/video/android/core/DeviceStatus$Enabled;
 }
 
-public final class io/getstream/video/android/core/DeviceStatus$NoPermission : io/getstream/video/android/core/DeviceStatus {
-	public static final field INSTANCE Lio/getstream/video/android/core/DeviceStatus$NoPermission;
-}
-
 public final class io/getstream/video/android/core/EventSubscription {
 	public fun <init> (Lio/getstream/video/android/core/events/VideoEventListener;Lkotlin/jvm/functions/Function1;)V
 	public synthetic fun <init> (Lio/getstream/video/android/core/events/VideoEventListener;Lkotlin/jvm/functions/Function1;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
@@ -220,25 +249,22 @@ public final class io/getstream/video/android/core/GEO$GlobalEdgeNetwork : io/ge
 }
 
 public final class io/getstream/video/android/core/MediaManagerImpl {
-	public fun <init> (Landroid/content/Context;)V
-	public final fun buildCameraCapturer ()Lorg/webrtc/VideoCapturer;
-	public final fun flipCamera ()V
+	public fun <init> (Landroid/content/Context;Lio/getstream/video/android/core/Call;Lkotlinx/coroutines/CoroutineScope;Lorg/webrtc/EglBase$Context;)V
 	public final fun getAudioDevices ()Ljava/util/List;
 	public final fun getAudioHandler ()Lio/getstream/video/android/core/audio/AudioSwitchHandler;
+	public final fun getAudioSource ()Lorg/webrtc/AudioSource;
+	public final fun getAudioTrack ()Lorg/webrtc/AudioTrack;
+	public final fun getCall ()Lio/getstream/video/android/core/Call;
 	public final fun getCamera ()Lio/getstream/video/android/core/CameraManager;
-	public final fun getCameraDevices ()Ljava/util/List;
 	public final fun getContext ()Landroid/content/Context;
-	public final fun getEnumerator ()Lorg/webrtc/Camera2Enumerator;
+	public final fun getEglBaseContext ()Lorg/webrtc/EglBase$Context;
 	public final fun getMicrophone ()Lio/getstream/video/android/core/MicrophoneManager;
+	public final fun getScope ()Lkotlinx/coroutines/CoroutineScope;
 	public final fun getSpeaker ()Lio/getstream/video/android/core/SpeakerManager;
-	public final fun getVideoCapturer ()Lorg/webrtc/Camera2Capturer;
+	public final fun getVideoSource ()Lorg/webrtc/VideoSource;
+	public final fun getVideoTrack ()Lorg/webrtc/VideoTrack;
 	public final fun selectAudioDevice (Lio/getstream/video/android/core/audio/AudioDevice;)V
-	public final fun selectCamera (Ljava/lang/String;)V
-	public final fun setCameraEnabled (Z)V
 	public final fun setSpeakerphoneEnabled (Z)V
-	public final fun setVideoCapturer (Lorg/webrtc/Camera2Capturer;)V
-	public final fun startCapturingLocalVideo (I)V
-	public final fun toggle ()V
 }
 
 public final class io/getstream/video/android/core/MemberState {
@@ -269,7 +295,6 @@ public final class io/getstream/video/android/core/MemberState {
 
 public final class io/getstream/video/android/core/MicrophoneManager {
 	public fun <init> (Lio/getstream/video/android/core/MediaManagerImpl;)V
-	public final fun devices ()Ljava/util/List;
 	public final fun disable ()V
 	public final fun enable ()V
 	public final fun getDevices ()Lkotlinx/coroutines/flow/StateFlow;
@@ -279,9 +304,11 @@ public final class io/getstream/video/android/core/MicrophoneManager {
 	public final fun get_devices ()Lkotlinx/coroutines/flow/MutableStateFlow;
 	public final fun get_selectedDevice ()Lkotlinx/coroutines/flow/MutableStateFlow;
 	public final fun get_status ()Lkotlinx/coroutines/flow/MutableStateFlow;
-	public final fun select (Ljava/lang/String;)V
+	public final fun listDevices ()Lkotlinx/coroutines/flow/StateFlow;
+	public final fun select (Lio/getstream/video/android/core/audio/AudioDevice;)V
 	public final fun setEnabled (Z)V
-	public final fun startCapture ()V
+	public final fun setSpeaker (Z)V
+	public final fun setVolume (I)V
 }
 
 public final class io/getstream/video/android/core/ParticipantState {
@@ -303,8 +330,6 @@ public final class io/getstream/video/android/core/ParticipantState {
 	public final fun getCall ()Lio/getstream/video/android/core/Call;
 	public final fun getConnectionQuality ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun getDominantSpeaker ()Lkotlinx/coroutines/flow/StateFlow;
-	public final fun getHasAudio ()Z
-	public final fun getHasVideo ()Z
 	public final fun getInitialUser ()Lio/getstream/video/android/core/model/User;
 	public final fun getJoinedAt ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun getLastSpeakingAt ()Lkotlinx/coroutines/flow/StateFlow;
@@ -324,13 +349,11 @@ public final class io/getstream/video/android/core/ParticipantState {
 	public final fun getVideoTrackWrapped ()Lio/getstream/video/android/core/model/TrackWrapper;
 	public fun hashCode ()I
 	public final fun isLocal ()Z
-	public final fun isSpeaking ()Z
 	public fun muteAudio (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public fun muteScreenshare (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public fun muteVideo (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public final fun setScreenSharingTrackSize (Lkotlin/Pair;)V
 	public final fun setSessionId (Ljava/lang/String;)V
-	public final fun setSpeaking (Z)V
 	public final fun setVideoTrackSize (Lkotlin/Pair;)V
 	public fun toString ()Ljava/lang/String;
 	public final fun updateFromParticipantInfo (Lstream/video/sfu/models/Participant;)V
@@ -379,9 +402,6 @@ public final class io/getstream/video/android/core/RingingState$TimeoutNoAnswer 
 
 public final class io/getstream/video/android/core/SpeakerManager {
 	public fun <init> (Lio/getstream/video/android/core/MediaManagerImpl;)V
-	public final fun devices ()Ljava/util/List;
-	public final fun disable ()V
-	public final fun enable ()V
 	public final fun getDevices ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun getMediaManager ()Lio/getstream/video/android/core/MediaManagerImpl;
 	public final fun getSelectedDevice ()Lkotlinx/coroutines/flow/StateFlow;
@@ -391,10 +411,7 @@ public final class io/getstream/video/android/core/SpeakerManager {
 	public final fun get_selectedDevice ()Lkotlinx/coroutines/flow/MutableStateFlow;
 	public final fun get_speakerPhoneEnabled ()Lkotlinx/coroutines/flow/MutableStateFlow;
 	public final fun get_status ()Lkotlinx/coroutines/flow/MutableStateFlow;
-	public final fun select (Ljava/lang/String;)V
 	public final fun setEnabled (Z)V
-	public final fun setSpeakerPhone (Z)V
-	public final fun setVolume (J)V
 }
 
 public abstract interface class io/getstream/video/android/core/StreamVideo {
@@ -568,13 +585,13 @@ public final class io/getstream/video/android/core/call/RtcSession {
 	public final fun handleIceTrickle (Lio/getstream/video/android/core/events/ICETrickleEvent;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public final fun handleSubscriberOffer (Lio/getstream/video/android/core/events/SubscriberOfferEvent;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public final fun listenToMediaChanges (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public final fun mangleSdp (Lorg/webrtc/SessionDescription;)Lorg/webrtc/SessionDescription;
 	public final fun onNegotiationNeeded (Lio/getstream/video/android/core/call/connection/StreamPeerConnection;Lio/getstream/video/android/core/model/StreamPeerType;)V
 	public final fun parseError (Ljava/lang/Throwable;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public final fun sendAnswer (Lstream/video/sfu/signal/SendAnswerRequest;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public final fun sendIceCandidate (Lstream/video/sfu/models/ICETrickle;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
-	public final fun setCameraEnabled (Z)V
 	public final fun setLocalTrack (Lstream/video/sfu/models/TrackType;Lio/getstream/video/android/core/model/TrackWrapper;)V
-	public final fun setMicrophoneEnabled (Z)V
+	public final fun setMuteState (ZLstream/video/sfu/models/TrackType;)V
 	public final fun setPublisher (Lio/getstream/video/android/core/call/connection/StreamPeerConnection;)V
 	public final fun setPublisher (Lstream/video/sfu/signal/SetPublisherRequest;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public final fun setSubscriber (Lio/getstream/video/android/core/call/connection/StreamPeerConnection;)V
@@ -785,6 +802,12 @@ public abstract interface class io/getstream/video/android/core/engine/StreamCal
 	public abstract fun onSfuJoinSent (Lstream/video/sfu/event/JoinRequest;)V
 }
 
+public final class io/getstream/video/android/core/errors/CameraException : java/lang/Exception {
+	public fun <init> ()V
+	public fun <init> (Ljava/lang/String;Ljava/lang/Throwable;)V
+	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/Throwable;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+}
+
 public abstract class io/getstream/video/android/core/errors/DisconnectCause {
 }
 
@@ -806,6 +829,18 @@ public final class io/getstream/video/android/core/errors/DisconnectCause$Networ
 public final class io/getstream/video/android/core/errors/DisconnectCause$UnrecoverableError : io/getstream/video/android/core/errors/DisconnectCause {
 	public fun <init> (Lio/getstream/result/Error$NetworkError;)V
 	public final fun getError ()Lio/getstream/result/Error$NetworkError;
+}
+
+public final class io/getstream/video/android/core/errors/MicrophoneException : java/lang/Exception {
+	public fun <init> ()V
+	public fun <init> (Ljava/lang/String;Ljava/lang/Throwable;)V
+	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/Throwable;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+}
+
+public final class io/getstream/video/android/core/errors/RtcException : java/lang/Exception {
+	public fun <init> ()V
+	public fun <init> (Ljava/lang/String;Ljava/lang/Throwable;ZZLstream/video/sfu/models/Error;)V
+	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/Throwable;ZZLstream/video/sfu/models/Error;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 }
 
 public final class io/getstream/video/android/core/errors/VideoErrorCode : java/lang/Enum {
@@ -2725,8 +2760,8 @@ public final class io/getstream/video/android/core/utils/AndroidUtilsKt {
 }
 
 public final class io/getstream/video/android/core/utils/CallClientUtilsKt {
-	public static final fun mangleSDP (Lorg/webrtc/SessionDescription;ZZ)Lorg/webrtc/SessionDescription;
-	public static synthetic fun mangleSDP$default (Lorg/webrtc/SessionDescription;ZZILjava/lang/Object;)Lorg/webrtc/SessionDescription;
+	public static final fun mangleSdpUtil (Lorg/webrtc/SessionDescription;ZZ)Lorg/webrtc/SessionDescription;
+	public static synthetic fun mangleSdpUtil$default (Lorg/webrtc/SessionDescription;ZZILjava/lang/Object;)Lorg/webrtc/SessionDescription;
 }
 
 public final class io/getstream/video/android/core/utils/ConstantsKt {
