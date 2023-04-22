@@ -75,15 +75,6 @@ public data class ParticipantState(
         call.session?.getTrack(sessionId, TrackType.TRACK_TYPE_SCREEN_SHARE)
     }
 
-    val hasVideo: Boolean
-        get() = videoTrack != null
-
-    val hasAudio: Boolean
-        get() = audioTrack != null
-
-    // TODO
-    public var isSpeaking: Boolean = true
-
     /**
      * The user, automatically updates when we receive user events
      */

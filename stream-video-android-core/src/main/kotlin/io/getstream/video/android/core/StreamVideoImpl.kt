@@ -416,7 +416,7 @@ internal class StreamVideoImpl internal constructor(
      * After that it loops over the subscriptions and calls their listener
      */
     internal fun fireEvent(event: VideoEvent, cid: String = "") {
-
+        logger.d { "Event received $event" }
         // update state for the client
         state.handleEvent(event)
 

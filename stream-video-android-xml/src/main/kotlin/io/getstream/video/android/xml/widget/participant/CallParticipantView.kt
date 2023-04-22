@@ -144,7 +144,7 @@ public class CallParticipantView : CallCardView, VideoRenderer {
         setUserData(participant.user.value)
         setTrack(participant.videoTrackWrapped)
         setAvatarVisibility(participant)
-        setHasAudio(participant.hasAudio)
+        setHasAudio(participant.audioEnabled.value)
     }
 
     /**

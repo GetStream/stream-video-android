@@ -249,14 +249,12 @@ open class PersistentSocket<T>(
 
     /** Invoked when a binary (type `0x2`) message has been received. */
     override fun onMessage(webSocket: WebSocket, bytes: ByteString) {
-        logger.d { "[onMessage] bytes: $bytes" }
         val byteBuffer = bytes.asByteBuffer()
         val byteArray = ByteArray(byteBuffer.capacity())
         byteBuffer.get(byteArray)
         scope.launch {
             try {
                 val rawEvent = SfuEvent.ADAPTER.decode(byteArray)
-                logger.v { "[onMessage] rawEvent: $rawEvent" }
                 val message = RTCEventMapper.mapEvent(rawEvent)
                 if (message is ErrorEvent) {
                     val errorEvent = message as ErrorEvent

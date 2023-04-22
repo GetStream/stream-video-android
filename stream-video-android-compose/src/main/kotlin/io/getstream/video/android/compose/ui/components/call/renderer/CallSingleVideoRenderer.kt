@@ -211,8 +211,8 @@ internal fun BoxScope.ParticipantLabel(
 
         SoundIndicator(
             state = getSoundIndicatorState(
-                hasAudio = participant.hasAudio,
-                isSpeaking = participant.isSpeaking
+                hasAudio = participant.audioEnabled.collectAsState().value,
+                isSpeaking = participant.speaking.collectAsState().value
             ),
             modifier = Modifier
                 .align(CenterVertically)

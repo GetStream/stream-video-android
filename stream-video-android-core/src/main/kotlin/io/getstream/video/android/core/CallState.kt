@@ -72,6 +72,7 @@ import org.openapitools.client.models.VideoEvent
 import org.threeten.bp.Clock
 import org.threeten.bp.OffsetDateTime
 import stream.video.sfu.models.Participant
+import stream.video.sfu.models.TrackType
 import java.util.SortedMap
 
 /**
@@ -440,10 +441,22 @@ public class CallState(private val call: Call, private val user: User) {
 
             is TrackPublishedEvent -> {
                 // handled by ActiveSFUSession
+                val participant = getOrCreateParticipant(event.sessionId, event.userId)
+                if (event.trackType== TrackType.TRACK_TYPE_AUDIO) {
+                    participant._audioEnabled.value = true
+                } else if (event.trackType == TrackType.TRACK_TYPE_VIDEO) {
+                    participant._videoEnabled.value = true
+                }
             }
 
             is TrackUnpublishedEvent -> {
                 // handled by ActiveSFUSession
+                val participant = getOrCreateParticipant(event.sessionId, event.userId)
+                if (event.trackType== TrackType.TRACK_TYPE_AUDIO) {
+                    participant._audioEnabled.value = false
+                } else if (event.trackType == TrackType.TRACK_TYPE_VIDEO) {
+                    participant._videoEnabled.value = false
+                }
             }
 
             is ConnectedEvent -> {
