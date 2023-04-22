@@ -238,7 +238,7 @@ class SfuSocketTest : SocketTestBase() {
     }
 
     @Test
-    @Ignore("disabled, this is a long running test for manual debugging")
+    //@Ignore("disabled, this is a long running test for manual debugging")
     fun `sfu socket should connect and stay connected`() = runTest {
         val sessionId = randomUUID().toString()
         val updateSdp: () -> String = {

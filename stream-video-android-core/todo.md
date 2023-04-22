@@ -17,7 +17,7 @@ Not as important
 ### Week 4: LLC & state test coverage + Demo & Dogfooding apps + RTC & Media fixes
 ### Week 5: Sample app stability
 
-- Socket stability. 
+- Socket stability. Verify the healtcheck runs
 
 
 ### High level issues

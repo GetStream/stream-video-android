@@ -357,27 +357,28 @@ open class PersistentSocket<T>(
     }
 
     internal fun sendHealthCheck() {
+        println("sending health check")
         val healthCheckRequest = HealthCheckRequest()
         socket.send(healthCheckRequest.encodeByteString())
     }
 
     private val healthMonitor = HealthMonitor(object : HealthMonitor.HealthCallback {
-        override fun reconnect() {
+        override suspend fun reconnect() {
+            logger.i {"health monitor triggered a reconnect"}
             val state = connectionState.value
             if (state is SocketState.DisconnectedTemporarily) {
-                scope.launch {
-                    this@PersistentSocket.reconnect()
-                }
+                this@PersistentSocket.reconnect()
             }
         }
 
         override fun check() {
+            logger.d {"health monitor ping"}
             val state = connectionState.value
             (state as? SocketState.Connected)?.let {
                 sendHealthCheck()
             }
         }
-    })
+    }, scope)
 
     internal companion object {
         internal const val CODE_CLOSE_SOCKET_FROM_CLIENT = 1000
