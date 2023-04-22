@@ -81,7 +81,7 @@ class HomeActivity : AppCompatActivity() {
     private val logger by taggedLogger("Call:HomeView")
 
     private val callCidState: MutableState<StreamCallId> = mutableStateOf(
-        "default:${Random.nextInt(1000)}"
+        "default:j8B8hMm2wSAj"
     )
 
     private val connectionState: StateFlow<ConnectionState> by lazy { streamVideo.state.connection }
@@ -155,6 +155,7 @@ class HomeActivity : AppCompatActivity() {
 
     private fun joinCall() {
         lifecycleScope.launch {
+
             val (type, id) = callCidState.value.typeToId
             val call = streamVideo.call(type = type, id = id)
 
