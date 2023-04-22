@@ -29,6 +29,7 @@ import com.google.common.truth.Truth.assertThat
 import io.getstream.log.taggedLogger
 import io.getstream.video.android.core.audio.AudioSwitchHandler
 import io.getstream.video.android.core.dispatchers.DispatcherProvider
+import io.getstream.video.android.core.events.ChangePublishQualityEvent
 import io.getstream.video.android.core.events.JoinCallResponseEvent
 import io.getstream.video.android.core.utils.buildAudioConstraints
 import kotlinx.coroutines.CoroutineScope
@@ -46,6 +47,7 @@ import org.webrtc.MediaStreamTrack
 import org.webrtc.PeerConnection
 import org.webrtc.SurfaceTextureHelper
 import org.webrtc.VideoFrame
+import stream.video.sfu.event.ChangePublishQuality
 
 /**
  * Things to test in a real android environment
@@ -209,11 +211,17 @@ class AndroidDeviceTest : IntegrationTestBase(connectCoordinatorWS = false) {
     }
 
     @Test
-    fun logging() = runTest {
-        logger.e { "androidTest logging e " }
-        logger.w { "androidTest logging w " }
-        logger.i { "androidTest logging i " }
-        logger.d { "androidTest logging d " }
+    fun dynascale() = runTest {
+        // join will automatically start the audio and video capture
+        // based on the call settings
+        val joinResult = call.join()
+        assertSuccess(joinResult)
+        delay(500)
+
+        val quality = ChangePublishQuality()
+        val event = ChangePublishQualityEvent(changePublishQuality= quality)
+        call.session?.updatePublishQuality(event)
+
     }
 
     @Test

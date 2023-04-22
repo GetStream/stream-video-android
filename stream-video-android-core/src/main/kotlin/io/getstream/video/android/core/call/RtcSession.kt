@@ -524,10 +524,12 @@ public class RtcSession internal constructor(
      * Change the quality of video we upload when the ChangePublishQualityEvent event is received
      * This is used for dynsacle
      */
-    private fun updatePublishQuality(event: ChangePublishQualityEvent) {
-        val transceiver = publisher?.videoTransceiver ?: return
+    internal fun updatePublishQuality(event: ChangePublishQualityEvent) {
+        if (publisher == null) {
+            return
+        }
 
-        return
+        val transceiver = publisher?.videoTransceiver ?: return
         // TODO: fixme
 
         val enabledRids =

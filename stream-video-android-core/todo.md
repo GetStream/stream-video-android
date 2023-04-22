@@ -17,7 +17,7 @@ Not as important
 ### Week 4: LLC & state test coverage + Demo & Dogfooding apps + RTC & Media fixes
 ### Week 5: Sample app stability
 
-- Socket stability. Verify the healtcheck runs
+- Dynascale... updatePublishQuality & ChangePublishQualityEvent
 
 
 ### High level issues
@@ -26,6 +26,12 @@ Not as important
 - [ ] Reconnection support needs work
 - [ ] Docs need a lot of work
 - [ ] SDK doesn't handle all edge cases yet
+
+
+### App & Compose
+- Token expiration isn't handled well in dogfooding app
+- Crashlytics for sample and dogfooding apps
+- PIP
 
 
 ### RTC & Media TODO
