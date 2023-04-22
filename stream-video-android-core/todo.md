@@ -31,9 +31,10 @@ Not as important
 
 - [ ] Review how UI changes & pagination are connected to the video tracks. See call initRenderer and updateParticipantsSubscriptions
 - [ ] Implement dynascale
+- [ ] Tests for the media manager
 - [ ] Screensharing
-- [ ] Opus Red
-- [ ] Opus DTX
+- [X] Opus Red
+- [X] Opus DTX
 - [X] Clean up the media manager class Mic management
 - [ ] Error classes for Media/Camera/Mic & Joining a call. That wrap the many things that can go wrong.
 - [ ] Leave & End flows

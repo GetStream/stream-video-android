@@ -184,6 +184,16 @@ class SdpTest: TestBase() {
         // enabling dtx is easy
         val new = mangleSdpUtil(sdp1, true, true)
         assertThat(new.description).contains("useinbandfec=1;usedtx=1")
+        println(new.description)
+        assert(redIsFirst(new.description))
+    }
+
+    fun redIsFirst(description: String): Boolean {
+        val lines = description.split("\r", "\n").toMutableList()
+        val redLine = lines.indices.find { lines[it].contains("a=rtpmap") && lines[it].contains("red/48000") }!!
+        val opusLine = lines.indices.find { lines[it].contains("a=rtpmap") && lines[it].contains("opus/48000") }!!
+
+        return redLine < opusLine
     }
 
 }

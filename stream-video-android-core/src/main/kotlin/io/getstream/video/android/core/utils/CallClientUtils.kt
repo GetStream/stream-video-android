@@ -39,7 +39,21 @@ fun mangleSdpUtil(
     }
 
     if (enableRed) {
-
+        val lines = description.split("\r", "\n").toMutableList()
+        val redLine = lines.indices.find { lines[it].contains("a=rtpmap") && lines[it].contains("red/48000") }
+        val opusLine = lines.indices.find { lines[it].contains("a=rtpmap") && lines[it].contains("opus/48000") }
+        // we only do something if both are enabled
+        if (redLine != null && opusLine != null) {
+            val opusIsFirst = opusLine < redLine
+            if (opusIsFirst) {
+                // we need to swap the red and opus lines
+                val redLineString = lines[redLine]
+                val opusLineString = lines[opusLine]
+                lines[redLine] = opusLineString
+                lines[opusLine] = redLineString
+            }
+        }
+        description = lines.joinToString("\r")
     }
 
     return SessionDescription(sdp.type, description)
