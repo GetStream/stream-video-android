@@ -241,6 +241,7 @@ open class PersistentSocket<T>(
                 if (processedEvent == null) {
                     logger.w { "[onMessage] failed to parse event: $text" }
                 } else {
+                    healthMonitor.ack()
                     events.emit(processedEvent)
                 }
             }
@@ -261,6 +262,7 @@ open class PersistentSocket<T>(
                     handleError(SfuSocketError(errorEvent.error))
                 }
                 // TODO: This logic is specific to the SfuSocket, move it
+                healthMonitor.ack()
                 events.emit(message)
                 if (message is JoinCallResponseEvent) {
                     _connectionState.value = SocketState.Connected(message)
@@ -354,6 +356,11 @@ open class PersistentSocket<T>(
         handleError(t)
     }
 
+    internal fun sendHealthCheck() {
+        val healthCheckRequest = HealthCheckRequest()
+        socket.send(healthCheckRequest.encodeByteString())
+    }
+
     private val healthMonitor = HealthMonitor(object : HealthMonitor.HealthCallback {
         override fun reconnect() {
             val state = connectionState.value
@@ -367,8 +374,7 @@ open class PersistentSocket<T>(
         override fun check() {
             val state = connectionState.value
             (state as? SocketState.Connected)?.let {
-                val healthCheckRequest = HealthCheckRequest()
-                socket.send(healthCheckRequest.encodeByteString())
+                sendHealthCheck()
             }
         }
     })

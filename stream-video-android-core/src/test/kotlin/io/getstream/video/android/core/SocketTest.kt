@@ -238,6 +238,7 @@ class SfuSocketTest : SocketTestBase() {
     }
 
     @Test
+    @Ignore("disabled, this is a long running test for manual debugging")
     fun `sfu socket should connect and stay connected`() = runTest {
         val sessionId = randomUUID().toString()
         val updateSdp: () -> String = {
@@ -252,20 +253,25 @@ class SfuSocketTest : SocketTestBase() {
             buildOkHttp(),
             networkStateProvider
         )
-        try {
-            socket.connect()
-        } catch (e: Throwable) {
-            // ignore
-            println(e)
-        }
+        socket.connect()
+        socket.sendHealthCheck()
 
         scope.launch {
-            while (true) {
-                delay(1000)
-                println("socket state: ${socket.connectionState.value}")
+            socket.events.collect {
+                println("event: $it")
             }
         }
-        delay(120000)
+        scope.launch {
+            socket.errors.collect {
+                println("errors: $it")
+            }
+        }
+
+
+        while (true) {
+            Thread.sleep(5_000)
+            println("socket state: ${socket.connectionState.value}")
+        }
 
 
     }
