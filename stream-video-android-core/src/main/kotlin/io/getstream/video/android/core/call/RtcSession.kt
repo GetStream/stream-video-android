@@ -348,7 +348,6 @@ public class RtcSession internal constructor(
             call.mediaManager.microphone.enable()
 
             timer.split("media enabled")
-
             // step 4 add the audio track to the publisher
             setLocalTrack(TrackType.TRACK_TYPE_AUDIO, TrackWrapper(streamId = buildTrackId(TrackType.TRACK_TYPE_AUDIO), audio = call.mediaManager.audioTrack))
             publisher?.addAudioTransceiver(call.mediaManager.audioTrack, listOf(sessionId))
@@ -362,6 +361,9 @@ public class RtcSession internal constructor(
         // step 6 - onNegotiationNeeded will trigger and complete the setup using SetPublisherRequest
         timer.finish()
         listenToMediaChanges()
+
+        // TODO: this needs to be connected to viewmodel pagination
+        updateParticipantsSubscriptions(call.state.participants.value)
         return
     }
 
@@ -574,9 +576,13 @@ public class RtcSession internal constructor(
             if (user.id != userId) {
                 logger.d { "[updateParticipantsSubscriptions] #sfu; user.id: ${user.id}" }
 
-                val dimension = VideoDimension(
+                var dimension = VideoDimension(
                     width = participant.videoTrackSize.first,
                     height = participant.videoTrackSize.second
+                )
+                dimension = VideoDimension(
+                    width = 960,
+                    height = 480
                 )
                 logger.d { "[updateParticipantsSubscriptions] #sfu; user.id: ${user.id}, dimension: $dimension" }
                 subscriptions[participant] = dimension

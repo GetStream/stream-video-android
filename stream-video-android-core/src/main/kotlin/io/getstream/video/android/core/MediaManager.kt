@@ -70,30 +70,14 @@ class SpeakerManager(val mediaManager: MediaManagerImpl) {
     val _speakerPhoneEnabled = MutableStateFlow(false)
     val speakerPhoneEnabled: StateFlow<Boolean> = _speakerPhoneEnabled
 
-    fun devices(): List<String> {
-        return emptyList()
-    }
-
-    fun select(deviceId: String) {
-    }
-
-    fun enable() {
-    }
-
-    fun setVolume(volumeLevel: Long) {
-    }
-
-    fun setSpeakerPhone(speakerPhone: Boolean) {
-        mediaManager.setSpeakerphoneEnabled(speakerPhone)
-        _speakerPhoneEnabled.value = speakerPhone
-    }
-
     fun setEnabled(enabled: Boolean) {
+
     }
 
-    fun disable() {
-    }
+
 }
+
+
 
 /**
  * The Microphone manager makes it easy to use your microphone in a call
@@ -171,6 +155,18 @@ class MicrophoneManager(val mediaManager: MediaManagerImpl) {
     }
 
     /**
+     * Set the volume as a percentage, 0-100
+     */
+    fun setVolume(volumePercentage: Int) {
+        setup()
+        audioManager?.let {
+            val max = it.getStreamMaxVolume(AudioManager.STREAM_VOICE_CALL);
+            val level = max/100*volumePercentage
+            it.setStreamVolume(AudioManager.STREAM_VOICE_CALL, level, 0)
+        }
+    }
+
+    /**
      * Select a specific device
      */
     fun select(device: AudioDevice?) {
@@ -189,7 +185,6 @@ class MicrophoneManager(val mediaManager: MediaManagerImpl) {
 
     internal fun setup() {
         if (setupCompleted) return
-
 
         audioManager = mediaManager.context.getSystemService<AudioManager>()
         audioHandler = AudioSwitchHandler(mediaManager.context)

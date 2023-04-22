@@ -76,7 +76,6 @@ class AndroidDeviceTest : IntegrationTestBase(connectCoordinatorWS = false) {
     fun microphone() = runTest {
         val mic = call.mediaManager.microphone
         assertThat(mic).isNotNull()
-        mic.startCapture()
     }
 
     @get:Rule

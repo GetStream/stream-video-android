@@ -1,14 +1,23 @@
 
+## Essentials for a good Beta
+
+Important
+* Docs & developer experience
+* Sample /demo app
+* Excellent stability
+
+Not as important
+* Supporting all features
+
 ## Timeline
 
 ### Week 1: Refactor LLC & State. Setup testing
 ### Week 2: LLC & State Stability. Compose testing & previews
 ### Week 3: Sample app, update compose to LLC & State changes. New events, socket & token provider. Call UI. Guest users & moderation endpoints
 ### Week 4: LLC & state test coverage + Demo & Dogfooding apps + RTC & Media fixes
+### Week 5: Sample app stability
 
 
-
-### Week 5: Dogfooding & Example apps
 
 ### High level issues
 
@@ -20,13 +29,14 @@
 
 ### RTC & Media TODO
 
+- [ ] Review how UI changes & pagination are connected to the video tracks. See call initRenderer and updateParticipantsSubscriptions
+- [ ] Implement dynascale
+- [ ] Screensharing
 - [ ] Opus Red
 - [ ] Opus DTX
 - [ ] Clean up the media manager class Mic management
 - [ ] Error classes for Media/Camera/Mic & Joining a call. That wrap the many things that can go wrong.
 - [ ] Leave & End flows
-- [ ] Review how UI changes & pagination are connected to the video tracks. See call initRenderer and updateParticipantsSubscriptions
-- [ ] Implement dynascale
 - [ ] Talking while muted notification
 - [X] Move enabling/disabling/state and clean it up
 - [X] Move setCameraEnabled & setMicrophoneEnabled
@@ -140,8 +150,8 @@
 
 ### Documentation (code level)
 
-- [ ] Client docs
-- [ ] Call docs
+- [X] Client docs
+- [X] Call docs
 
 ### Documentation Markdown
 
