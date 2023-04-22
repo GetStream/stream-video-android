@@ -34,7 +34,7 @@ Not as important
 - [ ] Screensharing
 - [ ] Opus Red
 - [ ] Opus DTX
-- [ ] Clean up the media manager class Mic management
+- [X] Clean up the media manager class Mic management
 - [ ] Error classes for Media/Camera/Mic & Joining a call. That wrap the many things that can go wrong.
 - [ ] Leave & End flows
 - [ ] Talking while muted notification

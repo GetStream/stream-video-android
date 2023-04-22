@@ -56,7 +56,7 @@ import io.getstream.video.android.core.utils.buildAudioConstraints
 import io.getstream.video.android.core.utils.buildConnectionConfiguration
 import io.getstream.video.android.core.utils.buildMediaConstraints
 import io.getstream.video.android.core.utils.buildRemoteIceServers
-import io.getstream.video.android.core.utils.mangleSDP
+import io.getstream.video.android.core.utils.mangleSdpUtil
 import io.getstream.video.android.core.utils.mapState
 import io.getstream.video.android.core.utils.stringify
 import kotlinx.coroutines.CoroutineScope
@@ -484,10 +484,18 @@ public class RtcSession internal constructor(
         val result = subscriber!!.createOffer()
 
         return if (result is Success) {
-            mangleSDP(result.value)
+            mangleSdp(result.value)
         } else {
             throw Error("Couldn't create a generic SDP")
         }
+    }
+
+    fun mangleSdp(sdp: SessionDescription): SessionDescription {
+        val settings = call.state.settings.value
+        val red = settings?.audio?.redundantCodingEnabled ?: true
+        val opus = settings?.audio?.opusDtxEnabled ?: true
+
+        return mangleSdpUtil(sdp, red, opus)
     }
 
     @VisibleForTesting
@@ -723,7 +731,7 @@ public class RtcSession internal constructor(
             logger.w { "[handleSubscriberOffer] #sfu; #subscriber; rejected (createAnswer failed): $answerResult" }
             return
         }
-        val answerSdp = mangleSDP(answerResult.value)
+        val answerSdp = mangleSdp(answerResult.value)
 
         logger.v { "[handleSubscriberOffer] #sfu; #subscriber; answerSdp: ${answerSdp.description}" }
         val setAnswerResult = subscriber.setLocalDescription(answerSdp)
@@ -762,7 +770,7 @@ public class RtcSession internal constructor(
         logger.d { "[negotiate] #$id; #sfu; #${peerType.stringify()}; peerConnection: $peerConnection" }
         coroutineScope.launch {
             peerConnection.createOffer().onSuccessSuspend { originalSDP ->
-                val data = mangleSDP(originalSDP, true, enableDtx = true)
+                val data = mangleSdp(originalSDP)
                 logger.v { "[negotiate] #$id; #sfu; #${peerType.stringify()}; offerSdp: $data" }
 
                 val result = peerConnection.setLocalDescription(data)

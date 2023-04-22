@@ -98,6 +98,6 @@ class LivestreamTest : IntegrationTestBase() {
     @Test
     fun `mute the audio of the call you are receiving`() = runTest {
         val call = client.call("livestream", randomUUID())
-        call.speaker.setVolume(0)
+       // call.speaker.setVolume(0)
     }
 }

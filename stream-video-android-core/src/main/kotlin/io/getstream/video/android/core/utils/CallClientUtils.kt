@@ -24,32 +24,25 @@ import org.webrtc.SessionDescription
 /**
  * Enabling DTX or RED requires mangling the SDP a bit
  */
-fun mangleSDP(
+fun mangleSdpUtil(
     sdp: SessionDescription,
     enableRed: Boolean = true,
     enableDtx: Boolean = true
 ): SessionDescription {
-    return sdp
-    val lines = sdp.description.split("\r\n")
-    val modifiedLines = mutableListOf<String>()
-    var opusPayloadType: String? = null
-
-    for (line in lines) {
-        when {
-            enableRed && line.contains("opus/48000") -> {
-                opusPayloadType = line.split(" ")[0].substringAfter("a=rtpmap:")
-                modifiedLines.add("$line;red=1;useinbandfec=1") // Enable RED
-            }
-
-            enableDtx && line.startsWith("a=extmap") && line.contains("urn:ietf:params:rtp-hdrext:ssrc-audio-level") && opusPayloadType != null -> {
-                modifiedLines.add("$line\r\na=fmtp:$opusPayloadType usedtx=1") // Enable DTX
-            }
-
-            else -> modifiedLines.add(line)
-        }
+    // we don't touch the answer (for now)
+    if (sdp.type == SessionDescription.Type.ANSWER) {
+        return sdp
+    }
+    var description = sdp.description
+    if (enableDtx) {
+        description = description.replace("useinbandfec=1", "useinbandfec=1;usedtx=1")
     }
 
-    return SessionDescription(sdp.type, modifiedLines.joinToString("\r\n"))
+    if (enableRed) {
+
+    }
+
+    return SessionDescription(sdp.type, description)
 }
 
 @JvmSynthetic

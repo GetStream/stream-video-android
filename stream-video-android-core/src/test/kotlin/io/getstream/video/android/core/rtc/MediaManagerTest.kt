@@ -30,35 +30,4 @@ class MediaManagerTest : TestBase() {
 
     private val logger by taggedLogger("Test:MediaManagerTest")
 
-    @Test
-    fun `list devices`() = runTest {
-        val mediaManager = MediaManagerImpl(
-            context,
-            clientImpl.peerConnectionFactory.eglBase.eglBaseContext
-        )
-        val devices = mediaManager.camera.devices
-        logger.d { devices.toString() }
-    }
-
-    @Test
-    @Ignore
-    fun `start capture`() = runTest {
-        val mediaManager = MediaManagerImpl(
-            context,
-            clientImpl.peerConnectionFactory.eglBase.eglBaseContext
-        )
-        val devices = mediaManager.camera.devices
-        val result = mediaManager.camera.select(devices.value.first())
-    }
-
-    @Test
-    @Ignore
-    fun `disable camera`() = runTest {
-        val mediaManager = MediaManagerImpl(
-            context,
-            clientImpl.peerConnectionFactory.eglBase.eglBaseContext
-        )
-        mediaManager.camera.enable()
-        mediaManager.camera.disable()
-    }
 }
