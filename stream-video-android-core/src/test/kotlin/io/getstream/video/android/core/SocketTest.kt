@@ -67,10 +67,10 @@ import java.util.concurrent.TimeUnit
 open class SocketTestBase : TestBase() {
     val coordinatorUrl =
         "https://video.stream-io-api.com/video/connect?api_key=hd8szvscpxvd&stream-auth-type=jwt&X-Stream-Client=stream-video-android"
-    val sfuUrl = "https://sfu-039364a.lsw-ams1.stream-io-video.com/ws?api_key=hd8szvscpxvd"
+    val sfuUrl = "wss://sfu-9c0dc03.ovh-lim1.stream-io-video.com/ws"
 
     val sfuToken =
-        "eyJhbGciOiJFUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiI4ZDBlYjU0NDg4ZDFiYTUxOTk3Y2Y1NWRmYTY0Y2NiMCIsInN1YiI6InVzZXIvdGhpZXJyeSIsImF1ZCI6WyJzZnUtMDM5MzY0YS5sc3ctYW1zMS5zdHJlYW0taW8tdmlkZW8uY29tIl0sImV4cCI6MTY4MTM4MTUzOSwibmJmIjoxNjgxMzU5OTM5LCJpYXQiOjE2ODEzNTk5MzksImFwcF9pZCI6MTEyOTUyOCwiY2FsbF9pZCI6ImRlZmF1bHQ6ZmZlZDM5MDgtYTM0Ni00ZjM5LTg4MWYtZjJkMWNjOGM4YTE5IiwidXNlciI6eyJpZCI6InRoaWVycnkiLCJuYW1lIjoiVGhpZXJyeSIsImltYWdlIjoiaGVsbG8iLCJ0cCI6IjJ0T21iVVZoQVNSdytnaDNFM2hheWJTZEpwdUVwTWk0In0sInJvbGVzIjpbInVzZXIiXSwib3duZXIiOnRydWV9.9MAI0if2Uxc-m7pu56bSPxpoP_Yu8TB-QVd3187NmA4v_O1uoRkWPNV-l-ieTgUoqKsJtncvmgG0Xts0W7nSMw"
+        "eyJhbGciOiJFUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiI4ZDBlYjU0NDg4ZDFiYTUxOTk3Y2Y1NWRmYTY0Y2NiMCIsInN1YiI6InVzZXIvdGhpZXJyeSIsImF1ZCI6WyJzZnUtOWMwZGMwMy5vdmgtbGltMS5zdHJlYW0taW8tdmlkZW8uY29tIl0sImV4cCI6MTY4MjIwMDYxMiwibmJmIjoxNjgyMTc5MDEyLCJpYXQiOjE2ODIxNzkwMTIsImFwcF9pZCI6MTEyOTUyOCwiY2FsbF9pZCI6ImRlZmF1bHQ6ajhCOGhNbTJ3U0FqIiwidXNlciI6eyJpZCI6InRoaWVycnkiLCJuYW1lIjoiVGhpZXJyeSIsImltYWdlIjoiaGVsbG8iLCJ0cCI6IjByYlhXV2trRy8zRWF6OFl3OFdnak5JdlNSZlNIQWszIn0sInJvbGVzIjpbInVzZXIiXSwib3duZXIiOmZhbHNlfQ.Xb1ysM0s7qXfOPvAHYRxnXfgfVScEMQyk_GKMucmwWbgdkd8-_Vl2xps38FL4uXidFzRuVRIcVTtJSupn2ePNA"
 
     @RelaxedMockK
     lateinit var mockedWebSocket: WebSocket
@@ -238,8 +238,7 @@ class SfuSocketTest : SocketTestBase() {
     }
 
     @Test
-    @Ignore
-    fun `sfu socket should connect`() = runTest {
+    fun `sfu socket should connect and stay connected`() = runTest {
         val sessionId = randomUUID().toString()
         val updateSdp: () -> String = {
             "hello"
@@ -260,9 +259,15 @@ class SfuSocketTest : SocketTestBase() {
             println(e)
         }
 
-        val (events, errors) = collectEvents(socket)
-        println(events)
-        println(errors)
+        scope.launch {
+            while (true) {
+                delay(1000)
+                println("socket state: ${socket.connectionState.value}")
+            }
+        }
+        delay(120000)
+
+
     }
 
     @Test

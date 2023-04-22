@@ -17,6 +17,7 @@ Not as important
 ### Week 4: LLC & state test coverage + Demo & Dogfooding apps + RTC & Media fixes
 ### Week 5: Sample app stability
 
+- Socket stability. 
 
 
 ### High level issues
@@ -33,12 +34,12 @@ Not as important
 - [ ] Implement dynascale
 - [ ] Tests for the media manager
 - [ ] Screensharing
-- [X] Opus Red
-- [X] Opus DTX
-- [X] Clean up the media manager class Mic management
 - [ ] Error classes for Media/Camera/Mic & Joining a call. That wrap the many things that can go wrong.
 - [ ] Leave & End flows
 - [ ] Talking while muted notification
+- [X] Opus Red
+- [X] Opus DTX
+- [X] Clean up the media manager class Mic management
 - [X] Move enabling/disabling/state and clean it up
 - [X] Move setCameraEnabled & setMicrophoneEnabled
 - [X] Clean up the media manager class Camera management
@@ -55,7 +56,7 @@ Not as important
 
 ### LLC TODO
 
-- [ ] Error.NetworkError vs ErrorResponse. Having 2 classes is confusing. Error format is slightly differences in 3 places. 
+- [ ] Error.NetworkError vs ErrorResponse. Having 2 classes is confusing. Error format is slightly differences in 4 places. 
 - [ ] Remove unused code
 - [ ] Move SFU event to swap between SFUs and handle failure
 - [ ] Reconnect after SFU breaks (https://www.notion.so/Reconnection-Failure-handling-f6991fd2e5584380bb2d2cb5e8ac5303)

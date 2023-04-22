@@ -219,8 +219,8 @@ open class PersistentSocket<T>(
                 connectionId = processedEvent.connectionId
                 _connectionState.value = SocketState.Connected(processedEvent)
                 if (!continuationCompleted) {
-                    connected.resume(processedEvent as T)
                     continuationCompleted = true
+                    connected.resume(processedEvent as T)
                 }
             }
 
@@ -265,8 +265,8 @@ open class PersistentSocket<T>(
                 if (message is JoinCallResponseEvent) {
                     _connectionState.value = SocketState.Connected(message)
                     if (!continuationCompleted) {
-                        connected.resume(message as T)
                         continuationCompleted = true
+                        connected.resume(message as T)
                     }
                 }
             } catch (error: Throwable) {
@@ -304,8 +304,8 @@ open class PersistentSocket<T>(
         if (permanentError) {
             // close the connection loop
             if (!continuationCompleted) {
-                connected.resumeWithException(error)
                 continuationCompleted = true
+                connected.resumeWithException(error)
             }
             logger.e { "[handleError] permanent error: $error" }
             // mark us permanently disconnected
