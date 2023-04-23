@@ -29,7 +29,6 @@ import io.getstream.result.onSuccessSuspend
 import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.CameraDirection
 import io.getstream.video.android.core.DeviceStatus
-import io.getstream.video.android.core.ParticipantState
 import io.getstream.video.android.core.StreamVideo
 import io.getstream.video.android.core.StreamVideoImpl
 import io.getstream.video.android.core.call.connection.StreamPeerConnection
@@ -102,6 +101,20 @@ import stream.video.sfu.signal.UpdateSubscriptionsResponse
 import kotlin.math.absoluteValue
 import kotlin.random.Random
 
+
+/**
+ * Keeps track of which track is being rendered at what resolution.
+ * Also stores if the track is visible or not
+ */
+data class TrackDisplayResolution(
+    val sessionId: String,
+    val trackType: TrackType,
+    var dimensions: VideoDimension,
+    var visible: Boolean = false
+) {
+
+}
+
 /**
  * The RtcSession sets up 2 peer connection
  * - The publisher peer connection
@@ -148,7 +161,7 @@ public class RtcSession internal constructor(
     private val clientImpl = client as StreamVideoImpl
     private val scope = clientImpl.scope
 
-    private val sessionId = clientImpl.sessionId
+    internal val sessionId = clientImpl.sessionId
 
     private var connectionState: ConnectionState = ConnectionState.DISCONNECTED
 
@@ -168,6 +181,8 @@ public class RtcSession internal constructor(
     // We need to update tracks for all participants
     // It's cleaner to store here and have the participant state reference to it
     var tracks: MutableMap<String, MutableMap<TrackType, TrackWrapper>> = mutableMapOf()
+
+    var trackDisplayResolution: MutableMap<String, MutableMap<TrackType, TrackDisplayResolution>> = mutableMapOf()
 
     fun getTrack(sessionId: String, type: TrackType): TrackWrapper? {
         if (!tracks.containsKey(sessionId)) {
@@ -363,7 +378,7 @@ public class RtcSession internal constructor(
         listenToMediaChanges()
 
         // TODO: this needs to be connected to viewmodel pagination
-        updateParticipantsSubscriptions(call.state.participants.value)
+        updateParticipantsSubscriptions()
         return
     }
 
@@ -574,59 +589,25 @@ public class RtcSession internal constructor(
      *
      * It tells the SFU that we want to receive person a's video at 1080p, and person b at 360p
      *
-     * TODO: right now this is called by the SFU session, it should be called by the viewmodel
      * Since the viewmodel knows what's actually displayed
      */
-    private fun updateParticipantsSubscriptions(participants: List<ParticipantState>) {
-        val subscriptions = mutableMapOf<ParticipantState, VideoDimension>()
-        val userId = client.user.id
+    private fun updateParticipantsSubscriptions() {
+        val participants = call.state.participants.value
 
-        for (participant in participants) {
-            val user = participant.user.value
-            if (user.id != userId) {
-                logger.d { "[updateParticipantsSubscriptions] #sfu; user.id: ${user.id}" }
-
-                var dimension = VideoDimension(
-                    width = participant.videoTrackSize.first,
-                    height = participant.videoTrackSize.second
-                )
-                dimension = VideoDimension(
-                    width = 960,
-                    height = 480
-                )
-                logger.d { "[updateParticipantsSubscriptions] #sfu; user.id: ${user.id}, dimension: $dimension" }
-                subscriptions[participant] = dimension
-            }
-        }
-        if (subscriptions.isEmpty()) {
-            return
-        }
+        val tracks = participants.map {participant ->
+            val trackDisplay = trackDisplayResolution[participant.sessionId] ?: emptyMap<TrackType, TrackDisplayResolution>()
+            trackDisplay.values.filter { it.visible }.map { display ->
+                TrackSubscriptionDetails(
+                    user_id = participant.user.value.id,
+                    track_type = display.trackType,
+                    dimension = display.dimensions,
+                    session_id = participant.sessionId
+                ) }
+        }.flatten()
 
         val request = UpdateSubscriptionsRequest(
             session_id = sessionId,
-            tracks = subscriptions.flatMap { (participant, videoDimensions) ->
-                val user = participant.user.value
-                listOf(
-                    TrackSubscriptionDetails(
-                        user_id = user.id,
-                        track_type = TrackType.TRACK_TYPE_VIDEO,
-                        dimension = videoDimensions,
-                        session_id = participant.sessionId
-                    ),
-                    TrackSubscriptionDetails(
-                        user_id = user.id,
-                        track_type = TrackType.TRACK_TYPE_SCREEN_SHARE,
-                        dimension = videoDimensions,
-                        session_id = participant.sessionId
-                    ),
-                    TrackSubscriptionDetails(
-                        user_id = user.id,
-                        track_type = TrackType.TRACK_TYPE_AUDIO,
-                        dimension = null,
-                        session_id = participant.sessionId
-                    )
-                )
-            }
+            tracks = tracks
         )
         logger.d { "[updateParticipantsSubscriptions] #sfu; request: $request" }
 
@@ -636,7 +617,7 @@ public class RtcSession internal constructor(
                     logger.v { "[updateParticipantsSubscriptions] #sfu; succeed" }
                 }
 
-                is Result.Failure -> {
+                is Failure -> {
                     logger.e { "[updateParticipantsSubscriptions] #sfu; failed: $result" }
                 }
             }
@@ -954,4 +935,28 @@ public class RtcSession internal constructor(
             }
             result
         }
+
+    fun updateDisplayedTrackSize(sessionId: String, trackType: TrackType, measuredWidth: Int, measuredHeight: Int) {
+        var videoMap = trackDisplayResolution[sessionId]
+        if (videoMap == null) {
+            videoMap = mutableMapOf()
+            trackDisplayResolution[sessionId] = videoMap
+        }
+        val dimensions = VideoDimension(measuredWidth, measuredHeight)
+
+        val trackDisplayResolution = videoMap[trackType] ?: TrackDisplayResolution(sessionId, trackType, dimensions)
+        trackDisplayResolution.dimensions = dimensions
+    }
+
+    // TODO: call this function
+    fun updateDisplayedTrackVisibility(sessionId: String, trackType: TrackType, visible: Boolean) {
+        var videoMap = trackDisplayResolution[sessionId]
+        if (videoMap == null) {
+            videoMap = mutableMapOf()
+            trackDisplayResolution[sessionId] = videoMap
+        }
+        val defaultDimensions = VideoDimension(960, 720)
+        val trackDisplayResolution = videoMap[trackType] ?: TrackDisplayResolution(sessionId, trackType, defaultDimensions)
+        trackDisplayResolution.visible = visible
+    }
 }

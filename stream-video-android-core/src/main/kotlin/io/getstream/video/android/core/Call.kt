@@ -268,8 +268,8 @@ public class Call(
                 override fun onFirstFrameRendered() {
                     logger.d { "[initRenderer.onFirstFrameRendered] #sfu; sessionId: $sessionId" }
                     if (trackType != TrackType.TRACK_TYPE_SCREEN_SHARE) {
-                        state.updateParticipantTrackSize(
-                            sessionId, videoRenderer.measuredWidth, videoRenderer.measuredHeight
+                        session?.updateDisplayedTrackSize(
+                            sessionId, trackType, videoRenderer.measuredWidth, videoRenderer.measuredHeight
                         )
                     }
                     onRender(videoRenderer)
@@ -279,8 +279,8 @@ public class Call(
                     logger.d { "[initRenderer.onFrameResolutionChanged] #sfu; sessionId: $sessionId" }
 
                     if (trackType != TrackType.TRACK_TYPE_SCREEN_SHARE) {
-                        state.updateParticipantTrackSize(
-                            sessionId, videoRenderer.measuredWidth, videoRenderer.measuredHeight
+                        session?.updateDisplayedTrackSize(
+                            sessionId, trackType, videoRenderer.measuredWidth, videoRenderer.measuredHeight
                         )
                     }
                 }

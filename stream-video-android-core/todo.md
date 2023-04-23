@@ -28,11 +28,13 @@ Not as important
 - [ ] SDK doesn't handle all edge cases yet
 
 
+
 ### App & Compose
+
 - Token expiration isn't handled well in dogfooding app
 - Crashlytics for sample and dogfooding apps
 - PIP
-
+- Ringing calls (wait for push and updated endpoints from server)
 
 ### RTC & Media TODO
 

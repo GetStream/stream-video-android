@@ -46,15 +46,14 @@ public data class ParticipantState(
     val call: Call,
     /** The current version of the user, this is the start for participant.user stateflow */
     val initialUser: User,
-    /** If this participant is the you/ the local participant */
-    val isLocal: Boolean = false,
-    var videoTrackSize: Pair<Int, Int> = Pair(0, 0),
-    var screenSharingTrackSize: Pair<Int, Int> = Pair(0, 0),
     /** A prefix to identify tracks, internal */
     internal var trackLookupPrefix: String = "",
 
 ) {
 
+    val isLocal by lazy {
+        sessionId == call.session?.sessionId
+    }
     /** video track */
     val videoTrack by lazy {
         videoTrackWrapped?.video

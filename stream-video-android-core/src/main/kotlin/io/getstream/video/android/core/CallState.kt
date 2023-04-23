@@ -254,19 +254,6 @@ public class CallState(private val call: Call, private val user: User) {
         MutableStateFlow(emptyList())
     public val errors: StateFlow<List<ErrorEvent>> = _errors
 
-    public fun updateParticipantTrackSize(
-        sessionId: String,
-        measuredWidth: Int,
-        measuredHeight: Int
-    ) {
-        logger.v { "[updateParticipantTrackSize] SessionId: $sessionId, width:$measuredWidth, height:$measuredHeight" }
-        val participant = getParticipantBySessionId(sessionId)
-        participant?.let {
-            val updated = participant.copy(videoTrackSize = measuredWidth to measuredHeight)
-            updateParticipant(updated)
-        }
-    }
-
     fun handleEvent(event: VideoEvent) {
         logger.d { "Updating call state with event $event" }
         when (event) {
@@ -527,7 +514,6 @@ public class CallState(private val call: Call, private val user: User) {
                 sessionId = sessionId,
                 call = call,
                 initialUser = user ?: User(userId),
-                isLocal = userId == this.user.id
             )
         }
         if (updateFlow) {

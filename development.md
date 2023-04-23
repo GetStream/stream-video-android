@@ -209,6 +209,30 @@ The media manager should support capturing local video with or without joining a
 * demo app allows you to type in the call id and join, or create a new
 * dogfooding joins via a url deeplink
 
+### Dynascale
+
+Sfu -> Client
+- ChangePublishQualityEvent triggers RtcSession.updatePublishQuality. It enables/disables different resolutions in the simulcast
+
+Client -> Sfu
+- updateParticipantsSubscriptions subscribes to the participants we want to display
+- call.initRender tracks the resolution we render the video at. It writes it to updateParticipantTrackSize
+
+Question:
+- How do we know if a given video element is visible or not?
+- https://developer.android.com/jetpack/compose/side-effects#disposableeffect
+- https://proandroiddev.com/the-life-cycle-of-a-view-in-android-6a2c4665b95e (onDetachedFromWindow)
+- Our VideoRenderer removes the sink. But it doesn't unsubcribe from the SFU.
+- Requirements for any custom video renderer: Informs the state of the size it's rendering at, informs if it's visible or not
+
+Current issues
+- The view layer doesn't update the state to mark a participant as not displayed
+- updateParticipantsSubscriptions should run whenever the UI changes with a debounce of 100ms or so
+
+Goals
+- A customer integrating without the SDK knowing the size and visibility of video elements will lead to crashes in large calls. So we should prevent that.
+- 
+
 ### Participant State
 
 Basically there are 2 possible approaches
