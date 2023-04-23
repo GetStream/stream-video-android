@@ -16,8 +16,6 @@
 
 package io.getstream.video.android.core.socket.internal
 
-import android.os.Handler
-import android.os.Looper
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
@@ -65,7 +63,6 @@ internal class HealthMonitor(private val healthCallback: HealthCallback, private
                 delay(HEALTH_CHECK_INTERVAL)
                 // send the ping
                 healthCallback.check()
-
             }
         }
 
@@ -76,11 +73,9 @@ internal class HealthMonitor(private val healthCallback: HealthCallback, private
                 if (needToReconnect()) {
                     reconnect()
                 }
-
             }
         }
     }
-
 
     fun stop() {
         healthPingJob.cancel()
@@ -102,7 +97,6 @@ internal class HealthMonitor(private val healthCallback: HealthCallback, private
             healthCallback.reconnect()
             reconnectInProgress = false
         }
-
     }
 
     private fun needToReconnect() =
@@ -110,7 +104,7 @@ internal class HealthMonitor(private val healthCallback: HealthCallback, private
 
     @Suppress("MagicNumber")
     private fun getRetryInterval(consecutiveFailures: Int): Long {
-        if (consecutiveFailures ==0) return 0
+        if (consecutiveFailures == 0) return 0
         val max = min(500 + consecutiveFailures * 2000, 25000)
         val min = min(
             max(250, (consecutiveFailures - 1) * 2000),

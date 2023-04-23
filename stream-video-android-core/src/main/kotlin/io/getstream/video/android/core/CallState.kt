@@ -442,7 +442,7 @@ public class CallState(private val call: Call, private val user: User) {
             is TrackPublishedEvent -> {
                 // handled by ActiveSFUSession
                 val participant = getOrCreateParticipant(event.sessionId, event.userId)
-                if (event.trackType== TrackType.TRACK_TYPE_AUDIO) {
+                if (event.trackType == TrackType.TRACK_TYPE_AUDIO) {
                     participant._audioEnabled.value = true
                 } else if (event.trackType == TrackType.TRACK_TYPE_VIDEO) {
                     participant._videoEnabled.value = true
@@ -452,7 +452,7 @@ public class CallState(private val call: Call, private val user: User) {
             is TrackUnpublishedEvent -> {
                 // handled by ActiveSFUSession
                 val participant = getOrCreateParticipant(event.sessionId, event.userId)
-                if (event.trackType== TrackType.TRACK_TYPE_AUDIO) {
+                if (event.trackType == TrackType.TRACK_TYPE_AUDIO) {
                     participant._audioEnabled.value = false
                 } else if (event.trackType == TrackType.TRACK_TYPE_VIDEO) {
                     participant._videoEnabled.value = false

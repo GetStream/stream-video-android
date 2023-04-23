@@ -35,7 +35,6 @@ import kotlinx.coroutines.test.runTest
 import okhttp3.OkHttpClient
 import okhttp3.WebSocket
 import okhttp3.logging.HttpLoggingInterceptor
-import org.junit.Ignore
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.openapitools.client.models.VideoEvent
@@ -238,7 +237,7 @@ class SfuSocketTest : SocketTestBase() {
     }
 
     @Test
-    //@Ignore("disabled, this is a long running test for manual debugging")
+    // @Ignore("disabled, this is a long running test for manual debugging")
     fun `sfu socket should connect and stay connected`() = runTest {
         val sessionId = randomUUID().toString()
         val updateSdp: () -> String = {
@@ -267,13 +266,10 @@ class SfuSocketTest : SocketTestBase() {
             }
         }
 
-
         while (true) {
             Thread.sleep(5_000)
             println("socket state: ${socket.connectionState.value}")
         }
-
-
     }
 
     @Test

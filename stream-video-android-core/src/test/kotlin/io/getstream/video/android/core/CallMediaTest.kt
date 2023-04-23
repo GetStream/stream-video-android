@@ -16,9 +16,6 @@
 
 package io.getstream.video.android.core
 
-import kotlinx.coroutines.test.runTest
-import org.junit.Ignore
-import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 
@@ -35,6 +32,4 @@ class CallMediaTest : IntegrationTestBase() {
      *
      *
      */
-
-
 }
