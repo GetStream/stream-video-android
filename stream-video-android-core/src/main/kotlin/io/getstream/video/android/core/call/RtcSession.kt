@@ -168,6 +168,11 @@ public class RtcSession internal constructor(
 
     internal val sessionId = clientImpl.sessionId
 
+    // TODO: rename
+    val trackDisplayResolutionUpdates = MutableStateFlow<MutableMap<String, MutableMap<TrackType, TrackDisplayResolution>>>(
+        mutableMapOf()
+    )
+    val trackUpdatesDebounced = trackDisplayResolutionUpdates.debounce(100)
     private var connectionState: ConnectionState = ConnectionState.DISCONNECTED
 
     // run all calls on a supervisor job so we can easily cancel them
@@ -610,7 +615,7 @@ public class RtcSession internal constructor(
         // send the subscriptions based on what's visible
         var tracks = participants.map {participant ->
             val trackDisplay = trackDisplayResolution[participant.sessionId] ?: emptyMap<TrackType, TrackDisplayResolution>()
-            trackDisplay.values.filter { it.visible }.map { display ->
+            trackDisplay.values.filter { it.visible && it.sessionId != sessionId }.map { display ->
                 TrackSubscriptionDetails(
                     user_id = participant.user.value.id,
                     track_type = display.trackType,
@@ -637,19 +642,25 @@ public class RtcSession internal constructor(
             session_id = sessionId,
             tracks = tracks
         )
+
         logger.d { "[updateParticipantsSubscriptions] #sfu; request: $request" }
 
-        coroutineScope.launch {
-            when (val result = updateSubscriptions(request)) {
-                is Success -> {
-                    logger.v { "[updateParticipantsSubscriptions] #sfu; succeed" }
-                }
+        // can be empty if you're alone in a call
+        if (tracks.isNotEmpty()) {
+            coroutineScope.launch {
+                when (val result = updateSubscriptions(request)) {
+                    is Success -> {
+                        logger.v { "[updateParticipantsSubscriptions] #sfu; succeed" }
+                    }
 
-                is Failure -> {
-                    logger.e { "[updateParticipantsSubscriptions] #sfu; failed: $result" }
+                    is Failure -> {
+                        logger.e { "[updateParticipantsSubscriptions] #sfu; failed: $result" }
+                    }
                 }
             }
         }
+
+
     }
 
     fun handleEvent(event: VideoEvent) {
@@ -964,11 +975,7 @@ public class RtcSession internal constructor(
             result
         }
 
-    // TODO: rename
-    val trackDisplayResolutionUpdates = MutableStateFlow<MutableMap<String, MutableMap<TrackType, TrackDisplayResolution>>>(
-        mutableMapOf()
-    )
-    val trackUpdatesDebounced = trackDisplayResolutionUpdates.debounce(100)
+
 
     // sets the dimension that we render things at
     fun updateDisplayedTrackSize(sessionId: String, trackType: TrackType, measuredWidth: Int, measuredHeight: Int) {
