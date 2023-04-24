@@ -252,7 +252,20 @@ public class Call(
         return clientImpl.muteUsers(type, id, request)
     }
 
+    fun setVisibility(sessionId: String, trackType: TrackType, visible: Boolean) {
+        session?.updateDisplayedTrackVisibility(sessionId, trackType, visible)
+    }
+
+
+
     // TODO: review this
+    /**
+     * Perhaps it would be nicer to have an interface. Any UI elements that renders video should implement it
+     *
+     * And call a callback for
+     * - visible/hidden
+     * - resolution changes
+     */
     public fun initRenderer(
         videoRenderer: VideoTextureViewRenderer,
         sessionId: String,

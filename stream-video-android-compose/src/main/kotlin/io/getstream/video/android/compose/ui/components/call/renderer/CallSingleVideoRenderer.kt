@@ -161,11 +161,6 @@ internal fun ParticipantVideoRenderer(
         )
     } else {
         UserAvatar(
-            modifier = Modifier.onSizeChanged {
-                call.state.updateParticipantTrackSize(
-                    participant.sessionId, it.width, it.height
-                )
-            },
             shape = RectangleShape,
             user = participant.user.collectAsState().value
         )

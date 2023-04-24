@@ -79,6 +79,7 @@ public fun VideoRenderer(
     DisposableEffect(call, videoTrackWrapper) {
         onDispose {
             cleanTrack(view, trackState)
+            call.setVisibility(sessionId, trackType, false)
         }
     }
 
@@ -91,6 +92,7 @@ public fun VideoRenderer(
                     trackType = trackType,
                     onRender = onRender
                 )
+                call.setVisibility(sessionId, trackType,true)
                 setScalingType(scalingType = videoScalingType.toCommonScalingType())
                 setupVideo(trackState, videoTrackWrapper, this)
 

@@ -19,6 +19,7 @@ package io.getstream.video.android.core.call
 import android.media.AudioAttributes.ALLOW_CAPTURE_BY_ALL
 import android.media.AudioManager
 import android.os.Build
+import androidx.annotation.Dimension
 import androidx.annotation.VisibleForTesting
 import androidx.core.content.getSystemService
 import io.getstream.log.taggedLogger
@@ -60,9 +61,13 @@ import io.getstream.video.android.core.utils.mapState
 import io.getstream.video.android.core.utils.stringify
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -261,6 +266,12 @@ public class RtcSession internal constructor(
                 }
             }
         }
+        scope.launch {
+            // call update participant subscriptions debounced
+            trackUpdatesDebounced.collect {
+                updateParticipantsSubscriptions()
+            }
+        }
     }
 
     suspend fun connect() {
@@ -377,8 +388,8 @@ public class RtcSession internal constructor(
         timer.finish()
         listenToMediaChanges()
 
-        // TODO: this needs to be connected to viewmodel pagination
-        updateParticipantsSubscriptions()
+        // subscribe to the tracks of other participants
+        updateParticipantsSubscriptions(true)
         return
     }
 
@@ -591,10 +602,13 @@ public class RtcSession internal constructor(
      *
      * Since the viewmodel knows what's actually displayed
      */
-    private fun updateParticipantsSubscriptions() {
+    private fun updateParticipantsSubscriptions(useDefaults: Boolean = false) {
+        // if we're loading the UI for the first time we should subscribe to the top 5 by default
+
         val participants = call.state.participants.value
 
-        val tracks = participants.map {participant ->
+        // send the subscriptions based on what's visible
+        var tracks = participants.map {participant ->
             val trackDisplay = trackDisplayResolution[participant.sessionId] ?: emptyMap<TrackType, TrackDisplayResolution>()
             trackDisplay.values.filter { it.visible }.map { display ->
                 TrackSubscriptionDetails(
@@ -604,6 +618,20 @@ public class RtcSession internal constructor(
                     session_id = participant.sessionId
                 ) }
         }.flatten()
+
+        // by default subscribe to the top 5 sorted participants
+        if (useDefaults && tracks.isEmpty()) {
+            tracks =
+                call.state.sortedParticipants.value.filter { it.sessionId != sessionId }.take(5)
+                    .map { participant ->
+                        TrackSubscriptionDetails(
+                            user_id = participant.user.value.id,
+                            track_type = TrackType.TRACK_TYPE_VIDEO,
+                            dimension = VideoDimension(960, 720),
+                            session_id = participant.sessionId
+                        )
+                    }
+        }
 
         val request = UpdateSubscriptionsRequest(
             session_id = sessionId,
@@ -936,6 +964,13 @@ public class RtcSession internal constructor(
             result
         }
 
+    // TODO: rename
+    val trackDisplayResolutionUpdates = MutableStateFlow<MutableMap<String, MutableMap<TrackType, TrackDisplayResolution>>>(
+        mutableMapOf()
+    )
+    val trackUpdatesDebounced = trackDisplayResolutionUpdates.debounce(100)
+
+    // sets the dimension that we render things at
     fun updateDisplayedTrackSize(sessionId: String, trackType: TrackType, measuredWidth: Int, measuredHeight: Int) {
         var videoMap = trackDisplayResolution[sessionId]
         if (videoMap == null) {
@@ -944,11 +979,14 @@ public class RtcSession internal constructor(
         }
         val dimensions = VideoDimension(measuredWidth, measuredHeight)
 
-        val trackDisplayResolution = videoMap[trackType] ?: TrackDisplayResolution(sessionId, trackType, dimensions)
-        trackDisplayResolution.dimensions = dimensions
+        val resolution = videoMap[trackType] ?: TrackDisplayResolution(sessionId, trackType, dimensions)
+        resolution.dimensions = dimensions
+
+        // Updates are debounced
+        trackDisplayResolutionUpdates.value = trackDisplayResolution
     }
 
-    // TODO: call this function
+    // sets display track visiblity
     fun updateDisplayedTrackVisibility(sessionId: String, trackType: TrackType, visible: Boolean) {
         var videoMap = trackDisplayResolution[sessionId]
         if (videoMap == null) {
@@ -956,7 +994,11 @@ public class RtcSession internal constructor(
             trackDisplayResolution[sessionId] = videoMap
         }
         val defaultDimensions = VideoDimension(960, 720)
-        val trackDisplayResolution = videoMap[trackType] ?: TrackDisplayResolution(sessionId, trackType, defaultDimensions)
-        trackDisplayResolution.visible = visible
+        val resolution = videoMap[trackType] ?: TrackDisplayResolution(sessionId, trackType, defaultDimensions)
+        resolution.visible = visible
+
+        updateParticipantsSubscriptions()
+        // Updates are debounced
+        trackDisplayResolutionUpdates.value = trackDisplayResolution
     }
 }
