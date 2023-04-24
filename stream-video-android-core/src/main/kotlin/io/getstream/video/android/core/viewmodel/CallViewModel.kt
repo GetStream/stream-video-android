@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-@file:OptIn(ExperimentalCoroutinesApi::class)
-
 package io.getstream.video.android.core.viewmodel
 
 import androidx.lifecycle.ViewModel
@@ -35,7 +33,6 @@ import io.getstream.video.android.core.call.state.ToggleCamera
 import io.getstream.video.android.core.call.state.ToggleMicrophone
 import io.getstream.video.android.core.call.state.ToggleSpeakerphone
 import io.getstream.video.android.core.permission.PermissionManager
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
@@ -90,6 +87,8 @@ public class CallViewModel(
                 val result = call.join()
                 result.onSuccess {
                     onSuccess.invoke(it)
+                    permissions?.requestPermission(android.Manifest.permission.CAMERA)
+                    permissions?.requestPermission(android.Manifest.permission.RECORD_AUDIO)
                 }.onError {
                     onFailure.invoke(it)
                 }

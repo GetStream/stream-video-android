@@ -326,7 +326,7 @@ public class RtcSession internal constructor(
             "TRACK_TYPE_SCREEN_SHARE_AUDIO" to TrackType.TRACK_TYPE_SCREEN_SHARE_AUDIO,
         )
         val trackType = trackTypeMap[trackTypeString] ?: TrackType.fromValue(trackTypeString.toInt())
-        ?: throw IllegalStateException("trackType not recognized: $trackTypeString")
+            ?: throw IllegalStateException("trackType not recognized: $trackTypeString")
 
         logger.i { "[] #sfu; mediaStream: $mediaStream" }
         mediaStream.audioTracks.forEach { track ->
@@ -432,7 +432,6 @@ public class RtcSession internal constructor(
     private var videoCapturer: VideoCapturer? = null
     private var isCapturingVideo: Boolean = false
     // TODO: nicer way to monitor this
-
 
     fun clear() {
         logger.i { "[clear] #sfu; no args" }
@@ -548,7 +547,7 @@ public class RtcSession internal constructor(
         val trackType = trackTypeVideo.value
         val trackPrefix = call.state?.me?.value?.trackLookupPrefix
         val old = "$trackPrefix:$trackType:${(Math.random() * 100).toInt()}"
-        return old//UUID.randomUUID().toString()
+        return old // UUID.randomUUID().toString()
     }
 
     /**
@@ -930,7 +929,7 @@ public class RtcSession internal constructor(
         wrapAPICall {
             val result = sfuConnectionModule.signalService.sendAnswer(request)
             result.error?.let {
-                throw RtcException(error=it, message=it.message)
+                throw RtcException(error = it, message = it.message)
             }
             result
         }
@@ -940,7 +939,7 @@ public class RtcSession internal constructor(
         wrapAPICall {
             val result = sfuConnectionModule.signalService.iceTrickle(request)
             result.error?.let {
-                throw RtcException(error=it, message=it.message)
+                throw RtcException(error = it, message = it.message)
             }
             result
         }
@@ -950,7 +949,7 @@ public class RtcSession internal constructor(
         wrapAPICall {
             val result = sfuConnectionModule.signalService.setPublisher(request)
             result.error?.let {
-                throw RtcException(error=it, message=it.message)
+                throw RtcException(error = it, message = it.message)
             }
             result
         }
@@ -960,17 +959,16 @@ public class RtcSession internal constructor(
         wrapAPICall {
             val result = sfuConnectionModule.signalService.updateSubscriptions(request)
             result.error?.let {
-                throw RtcException(error=it, message=it.message)
+                throw RtcException(error = it, message = it.message)
             }
             result
-
         }
 
     suspend fun updateMuteState(request: UpdateMuteStatesRequest): Result<UpdateMuteStatesResponse> =
         wrapAPICall {
             val result = sfuConnectionModule.signalService.updateMuteStates(request)
             result.error?.let {
-                throw RtcException(error=it, message=it.message)
+                throw RtcException(error = it, message = it.message)
             }
             result
         }

@@ -17,9 +17,6 @@
 package io.getstream.video.android.core
 
 import android.Manifest
-import android.hardware.camera2.CameraCharacteristics
-import android.hardware.camera2.CameraManager
-import android.hardware.camera2.CameraMetadata
 import android.media.AudioDeviceInfo
 import android.media.AudioManager
 import android.os.Build
@@ -32,17 +29,12 @@ import io.getstream.video.android.core.dispatchers.DispatcherProvider
 import io.getstream.video.android.core.events.ChangePublishQualityEvent
 import io.getstream.video.android.core.events.JoinCallResponseEvent
 import io.getstream.video.android.core.utils.buildAudioConstraints
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collect
-import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.runTest
 import org.junit.Ignore
 import org.junit.Rule
 import org.junit.Test
-import org.webrtc.Camera2Capturer
-import org.webrtc.Camera2Enumerator
-import org.webrtc.CapturerObserver
 import org.webrtc.MediaStreamTrack
 import org.webrtc.PeerConnection
 import org.webrtc.SurfaceTextureHelper
@@ -108,7 +100,7 @@ class AndroidDeviceTest : IntegrationTestBase(connectCoordinatorWS = false) {
         }
 
         // listing devices..
-        val allDevices =  audioHandler.availableAudioDevices
+        val allDevices = audioHandler.availableAudioDevices
         // switching device: device: io.getstream.video.android.core.audio.AudioDevice
         audioHandler.selectDevice(allDevices.first())
         // speaker on
@@ -131,9 +123,7 @@ class AndroidDeviceTest : IntegrationTestBase(connectCoordinatorWS = false) {
             }
         }
         audioHandler.selectDevice(activeDevice)
-
     }
-
 
     @Test
     fun audioAndVideoSource() = runTest {

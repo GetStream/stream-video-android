@@ -44,7 +44,6 @@ sealed class DeviceStatus {
     object Enabled : DeviceStatus()
 }
 
-
 data class CameraDeviceWrapped(
     val id: String,
 
@@ -52,9 +51,7 @@ data class CameraDeviceWrapped(
     val supportedFormats: MutableList<CameraEnumerationAndroid.CaptureFormat>?,
     val maxResolution: Int,
     val direction: CameraDirection?
-) {
-
-}
+)
 
 class SpeakerManager(val mediaManager: MediaManagerImpl) {
 
@@ -71,13 +68,8 @@ class SpeakerManager(val mediaManager: MediaManagerImpl) {
     val speakerPhoneEnabled: StateFlow<Boolean> = _speakerPhoneEnabled
 
     fun setEnabled(enabled: Boolean) {
-
     }
-
-
 }
-
-
 
 /**
  * The Microphone manager makes it easy to use your microphone in a call
@@ -160,8 +152,8 @@ class MicrophoneManager(val mediaManager: MediaManagerImpl) {
     fun setVolume(volumePercentage: Int) {
         setup()
         audioManager?.let {
-            val max = it.getStreamMaxVolume(AudioManager.STREAM_VOICE_CALL);
-            val level = max/100*volumePercentage
+            val max = it.getStreamMaxVolume(AudioManager.STREAM_VOICE_CALL)
+            val level = max / 100 * volumePercentage
             it.setStreamVolume(AudioManager.STREAM_VOICE_CALL, level, 0)
         }
     }
@@ -182,7 +174,6 @@ class MicrophoneManager(val mediaManager: MediaManagerImpl) {
         return devices
     }
 
-
     internal fun setup() {
         if (setupCompleted) return
 
@@ -194,16 +185,12 @@ class MicrophoneManager(val mediaManager: MediaManagerImpl) {
         setupCompleted = true
     }
     private var setupCompleted: Boolean = false
-
 }
-
-
 
 public sealed class CameraDirection {
     public object Front : CameraDirection()
     public object Back : CameraDirection()
 }
-
 
 /**
  * The CameraManager class makes it easy to manage the camera for your video call
@@ -237,7 +224,6 @@ public class CameraManager(public val mediaManager: MediaManagerImpl, eglBaseCon
     /** if we're using the front facing or back facing camera */
     private val _direction = MutableStateFlow<CameraDirection>(defaultCameraDirection)
     public val direction: StateFlow<CameraDirection> = _direction
-
 
     private val _selectedDevice = MutableStateFlow<CameraDeviceWrapped?>(null)
     public val selectedDevice: StateFlow<CameraDeviceWrapped?> = _selectedDevice
@@ -338,7 +324,6 @@ public class CameraManager(public val mediaManager: MediaManagerImpl, eglBaseCon
             videoCapturer!!.startCapture(selectedResolution.width, selectedResolution.height, selectedResolution.framerate.max)
         }
         isCapturingVideo = true
-
     }
 
     /**
@@ -407,13 +392,12 @@ public class CameraManager(public val mediaManager: MediaManagerImpl, eglBaseCon
     /**
      * Gets the resolution that's closest to our target resolution
      */
-    internal fun selectDesiredResolution(supportedFormats: MutableList<CameraEnumerationAndroid.CaptureFormat>?, targetResolution:Int = 960,): CameraEnumerationAndroid.CaptureFormat? {
+    internal fun selectDesiredResolution(supportedFormats: MutableList<CameraEnumerationAndroid.CaptureFormat>?, targetResolution: Int = 960,): CameraEnumerationAndroid.CaptureFormat? {
         // needs the settings that we're going for
         // sort and get the one closest to 960
         val sorted = supportedFormats?.toList()?.sortedBy { kotlin.math.abs(it.height - targetResolution) }
         return sorted?.first()
     }
-
 }
 
 /**
@@ -449,13 +433,9 @@ class MediaManagerImpl(val context: Context, val call: Call, val scope: Coroutin
         source = audioSource, trackId = "audioTrack"
     )
 
-
     val camera = CameraManager(this, eglBaseContext)
     val microphone = MicrophoneManager(this)
     val speaker = SpeakerManager(this)
-
-
-
 
     fun setSpeakerphoneEnabled(isEnabled: Boolean) {
         val devices = getAudioDevices()
@@ -512,6 +492,4 @@ class MediaManagerImpl(val context: Context, val call: Call, val scope: Coroutin
             logger.d { "[setupAudio] #sfu; isCommunicationDeviceSet: $isCommunicationDeviceSet" }
         }
     }
-
-
 }

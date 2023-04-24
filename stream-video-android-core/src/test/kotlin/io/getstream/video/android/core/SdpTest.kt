@@ -1,9 +1,22 @@
+/*
+ * Copyright (c) 2014-2023 Stream.io Inc. All rights reserved.
+ *
+ * Licensed under the Stream License;
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    https://github.com/GetStream/stream-video-android/blob/main/LICENSE
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package io.getstream.video.android.core
 
-import com.google.common.truth.Truth
 import com.google.common.truth.Truth.assertThat
-import io.getstream.video.android.core.socket.CoordinatorSocket
-import io.getstream.video.android.core.socket.SocketState
 import io.getstream.video.android.core.utils.mangleSdpUtil
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
@@ -12,7 +25,7 @@ import org.robolectric.RobolectricTestRunner
 import org.webrtc.SessionDescription
 
 @RunWith(RobolectricTestRunner::class)
-class SdpTest: TestBase() {
+class SdpTest : TestBase() {
     // see https://github.com/GetStream/stream-video-swift/blob/main/StreamVideoTests/Utils/StringExtensions_Tests.swift
 
     val first = """
@@ -171,9 +184,9 @@ class SdpTest: TestBase() {
     /**
      * For DTX
 *             updatedSdp = initialOffer.sdp.replacingOccurrences(
-        of: "useinbandfec=1",
-        with: "useinbandfec=1;usedtx=1"
-      )
+     of: "useinbandfec=1",
+     with: "useinbandfec=1;usedtx=1"
+     )
      */
 
     val sdp1 = SessionDescription(SessionDescription.Type.OFFER, first)
@@ -195,5 +208,4 @@ class SdpTest: TestBase() {
 
         return redLine < opusLine
     }
-
 }

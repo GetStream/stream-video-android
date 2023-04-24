@@ -1,3 +1,19 @@
+/*
+ * Copyright (c) 2014-2023 Stream.io Inc. All rights reserved.
+ *
+ * Licensed under the Stream License;
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    https://github.com/GetStream/stream-video-android/blob/main/LICENSE
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package io.getstream.video.android.core.utils
 
 import io.getstream.log.taggedLogger
@@ -15,7 +31,7 @@ internal data class Timer(val name: String, val start: Long) {
         durations += s to (now - last)
     }
 
-    fun finish(s: String?=null): Long {
+    fun finish(s: String? = null): Long {
         s?.let {
             split(s)
         }
@@ -28,14 +44,14 @@ internal data class Timer(val name: String, val start: Long) {
 /**
  * Handy helper gathering all relevant debug information
  */
-internal class DebugInfo () {
+internal class DebugInfo() {
     private val logger by taggedLogger("DebugInfo")
     // timers to help track performance issues in prod
     val timers = mutableListOf<Timer>()
     // last 20 events
 
     // phone type
-    val phoneModel = android.os.Build.MODEL;
+    val phoneModel = android.os.Build.MODEL
 
     // android version
     val version = android.os.Build.VERSION.SDK_INT
@@ -47,11 +63,11 @@ internal class DebugInfo () {
     // supported codecs
 
     fun log() {
-        logger.i { "Debug info ${phoneModel} runnin android ${version}" }
+        logger.i { "Debug info $phoneModel runnin android $version" }
         timers.forEach {
-            logger.i { "${it.name} took ${it.duration}"}
+            logger.i { "${it.name} took ${it.duration}" }
             it.durations.forEach { (s, t) ->
-                logger.i {" - ${it.name}:$s took $t"}
+                logger.i { " - ${it.name}:$s took $t" }
             }
         }
     }
@@ -60,11 +76,9 @@ internal class DebugInfo () {
         // see https://developer.android.com/reference/kotlin/android/media/MediaCodecInfo
     }
 
-
     fun trackTime(s: String): Timer {
         val timer = Timer(s, System.currentTimeMillis())
         timers += timer
         return timer
     }
-
 }
