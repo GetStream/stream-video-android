@@ -17,8 +17,8 @@ Not as important
 ### Week 4: LLC & state test coverage + Demo & Dogfooding apps + RTC & Media fixes
 ### Week 5: Sample app stability
 
-- Dynascale... updatePublishQuality & ChangePublishQualityEvent
-
+- Dynascale... visibility isn't handled well in CallSingleVideoRendered & VideoRenderer
+- Video track isn't published somehow
 
 ### High level issues
 
@@ -31,6 +31,7 @@ Not as important
 
 ### App & Compose
 
+- Camera mute button doesn't work
 - Token expiration isn't handled well in dogfooding app
 - Crashlytics for sample and dogfooding apps
 - PIP

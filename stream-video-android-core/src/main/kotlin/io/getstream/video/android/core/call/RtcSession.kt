@@ -39,6 +39,7 @@ import io.getstream.video.android.core.errors.RtcException
 import io.getstream.video.android.core.events.ChangePublishQualityEvent
 import io.getstream.video.android.core.events.ICETrickleEvent
 import io.getstream.video.android.core.events.JoinCallResponseEvent
+import io.getstream.video.android.core.events.ParticipantJoinedEvent
 import io.getstream.video.android.core.events.PublisherAnswerEvent
 import io.getstream.video.android.core.events.SfuDataEvent
 import io.getstream.video.android.core.events.SubscriberOfferEvent
@@ -559,6 +560,8 @@ public class RtcSession internal constructor(
             return
         }
 
+        return
+
         val transceiver = publisher?.videoTransceiver ?: return
         // TODO: fixme
 
@@ -624,7 +627,9 @@ public class RtcSession internal constructor(
         }.flatten()
 
         // by default subscribe to the top 5 sorted participants
-        if (useDefaults && tracks.isEmpty()) {
+        //useDefaults && tracks.isEmpty()
+        // TODO: fix this after the UI better indicates what's being shown
+        if (true) {
             tracks =
                 call.state.sortedParticipants.value.filter { it.sessionId != sessionId }.take(5)
                     .map { participant ->
@@ -685,6 +690,11 @@ public class RtcSession internal constructor(
 
                     is TrackUnpublishedEvent -> {
                         updatePublishState(event.userId, event.sessionId, event.trackType, false)
+                    }
+
+                    is ParticipantJoinedEvent -> {
+                        // TODO: remove this once the UI layer lets us know visibility accurately
+                        updateParticipantsSubscriptions()
                     }
 
                     else -> {

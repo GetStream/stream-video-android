@@ -356,7 +356,7 @@ public class StreamPeerConnection(
      * Triggered whenever there's a new negotiation needed for the active [PeerConnection].
      */
     override fun onRenegotiationNeeded() {
-        logger.i { "[onRenegotiationNeeded] #sfu; #$typeTag; no args" }
+        logger.w { "[onRenegotiationNeeded] #sfu; #$typeTag; no args" }
         onNegotiationNeeded?.invoke(this, type)
     }
 

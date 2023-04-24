@@ -285,7 +285,7 @@ public class CameraManager(public val mediaManager: MediaManagerImpl, eglBaseCon
         val selectedDevice = devices.first { it.id == deviceId }
         _direction.value = selectedDevice.direction ?: CameraDirection.Back
         _selectedDevice.value = selectedDevice
-        _resolution.value = selectDesiredResolution(selectedDevice.supportedFormats, 960)
+        _resolution.value = selectDesiredResolution(selectedDevice.supportedFormats, 720)
 
         if (startCapture) {
             startCapture()
