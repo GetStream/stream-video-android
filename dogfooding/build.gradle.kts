@@ -27,7 +27,6 @@ plugins {
 }
 
 android {
-    namespace = "io.getstream.video.android.dogfooding"
     compileSdk = Configuration.compileSdk
 
     defaultConfig {

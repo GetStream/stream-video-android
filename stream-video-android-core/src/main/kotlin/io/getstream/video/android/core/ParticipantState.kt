@@ -16,17 +16,28 @@
 
 package io.getstream.video.android.core
 
+import android.util.Log
 import io.getstream.result.Result
+import io.getstream.video.android.core.call.RtcSession
+import io.getstream.video.android.core.model.TrackWrapper
 import io.getstream.video.android.core.model.User
-import io.getstream.video.android.core.utils.mapState
+import io.getstream.video.android.core.utils.mapUIState
+import java.util.*
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.filterNotNull
+import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.launch
 import org.openapitools.client.models.MuteUsersResponse
 import org.openapitools.client.models.ReactionResponse
+import org.webrtc.AudioTrack
+import org.webrtc.VideoTrack
 import stream.video.sfu.models.ConnectionQuality
 import stream.video.sfu.models.Participant
 import stream.video.sfu.models.TrackType
-import java.util.*
 
 /**
  * Represents the state of a participant in a call.
@@ -48,31 +59,45 @@ public data class ParticipantState(
     val initialUser: User,
     /** A prefix to identify tracks, internal */
     internal var trackLookupPrefix: String = "",
-
 ) {
 
-    val isLocal by lazy {
-        sessionId == call.session?.sessionId
+    val session: StateFlow<RtcSession?> = call.session
+
+    private val tracks: MutableStateFlow<MutableMap<String, MutableMap<TrackType, TrackWrapper>>> =
+        MutableStateFlow(mutableMapOf())
+
+    init {
+        call.scope.launch {
+            session.filterNotNull().collectLatest {
+                it.tracks.collectLatest { tracks.value = it }
+            }
+        }
     }
-    /** video track */
-    val videoTrack by lazy {
-        videoTrackWrapped?.video
+
+    val isLocal: StateFlow<Boolean> = session.mapUIState { sessionId == it?.sessionId }
+
+    val videoTrackWrapped: StateFlow<TrackWrapper?> = combine(session, tracks) { session, tracks ->
+        val wrapper = tracks[sessionId]?.get(TrackType.TRACK_TYPE_VIDEO) ?: session?.getTrack(
+            sessionId,
+            TrackType.TRACK_TYPE_VIDEO
+        )
+        Log.e("Test", "id : ${initialUser.id} tracks: $tracks, wrapper: $wrapper")
+        wrapper
+    }.stateIn(call.scope, SharingStarted.Lazily, null)
+
+    val videoTrack: StateFlow<VideoTrack?> = videoTrackWrapped.mapUIState { it?.video }
+
+    val audioTrackWrapped: StateFlow<TrackWrapper?> = session.mapUIState {
+        it?.getTrack(sessionId, TrackType.TRACK_TYPE_AUDIO)
     }
-    val videoTrackWrapped by lazy {
-        call.session?.getTrack(sessionId, TrackType.TRACK_TYPE_VIDEO)
+
+    val audioTrack: StateFlow<AudioTrack?> = audioTrackWrapped.mapUIState { it?.audio }
+
+    val screenSharingTrackWrapped: StateFlow<TrackWrapper?> = session.mapUIState {
+        it?.getTrack(sessionId, TrackType.TRACK_TYPE_SCREEN_SHARE)
     }
-    val audioTrack by lazy {
-        audioTrackWrapped?.audio
-    }
-    val audioTrackWrapped by lazy {
-        call.session?.getTrack(sessionId, TrackType.TRACK_TYPE_AUDIO)
-    }
-    val screenSharingTrack by lazy {
-        screenSharingTrackWrapped?.video
-    }
-    val screenSharingTrackWrapped by lazy {
-        call.session?.getTrack(sessionId, TrackType.TRACK_TYPE_SCREEN_SHARE)
-    }
+
+    val screenSharingTrack = screenSharingTrackWrapped.mapUIState { it?.video }
 
     /**
      * The user, automatically updates when we receive user events
@@ -80,7 +105,7 @@ public data class ParticipantState(
     internal val _user: MutableStateFlow<User> = MutableStateFlow(initialUser)
     val user: StateFlow<User> = _user
 
-    val userNameOrId: StateFlow<String> = _user.mapState { it.name.ifEmpty { it.id } }
+    val userNameOrId: StateFlow<String> = _user.mapUIState { it.name.ifEmpty { it.id } }
 
     /**
      * When you joined the call

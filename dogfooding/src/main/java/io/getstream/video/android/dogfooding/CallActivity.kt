@@ -100,7 +100,7 @@ class CallActivity : AppCompatActivity() {
 
         fun getIntent(context: Context, cid: StreamCallId): Intent {
             return Intent(context, CallActivity::class.java).apply {
-                flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+//                flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
                 putExtra(EXTRA_CID, cid)
             }
         }

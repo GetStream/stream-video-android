@@ -27,6 +27,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Card
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -89,7 +90,7 @@ public fun LocalVideoContent(
 
     val paddingOffset = density.run { VideoTheme.dimens.floatingVideoPadding.toPx() }
 
-    val track = localParticipant.videoTrack
+    val track by localParticipant.videoTrack.collectAsState()
 
     if (LocalInspectionMode.current) {
         Card(

@@ -26,6 +26,8 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -62,7 +64,7 @@ internal fun PortraitScreenSharingVideoRenderer(
     onBackPressed: () -> Unit,
 ) {
     val sharingParticipant = session.participant
-    val me = participants.firstOrNull { it.isLocal }
+    val me by call.state.me.collectAsState()
 
     Column(
         modifier = modifier.background(VideoTheme.colors.screenSharingBackground)
@@ -109,7 +111,7 @@ private fun PortraitScreenSharingContentPreview() {
         PortraitScreenSharingVideoRenderer(
             call = mockCall,
             session = ScreenSharingSession(
-                track = mockParticipants[1].videoTrackWrapped ?: mockVideoTrackWrapper,
+                track = mockVideoTrackWrapper,
                 participant = mockParticipants[1]
             ),
             participants = mockParticipants,
@@ -130,7 +132,7 @@ private fun PortraitScreenSharingMyContentPreview() {
         PortraitScreenSharingVideoRenderer(
             call = mockCall,
             session = ScreenSharingSession(
-                track = mockParticipants[0].videoTrackWrapped ?: mockVideoTrackWrapper,
+                track = mockVideoTrackWrapper,
                 participant = mockParticipants[0]
             ),
             participants = mockParticipants,

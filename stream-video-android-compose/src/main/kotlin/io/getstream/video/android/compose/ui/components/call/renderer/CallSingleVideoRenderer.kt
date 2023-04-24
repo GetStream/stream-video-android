@@ -42,7 +42,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
-import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.res.stringResource
@@ -131,7 +130,7 @@ internal fun ParticipantVideoRenderer(
     participant: ParticipantState,
     onRender: (View) -> Unit
 ) {
-    val track = participant.videoTrackWrapped
+    val track by participant.videoTrackWrapped.collectAsState()
 
     val isVideoEnabled = try {
         track?.video?.enabled() == true
@@ -154,7 +153,7 @@ internal fun ParticipantVideoRenderer(
     if (track != null && isVideoEnabled) {
         VideoRenderer(
             call = call,
-            videoTrackWrapper = track,
+            videoTrackWrapper = track!!,
             sessionId = participant.sessionId,
             onRender = onRender,
             trackType = TrackType.TRACK_TYPE_VIDEO
@@ -172,8 +171,9 @@ internal fun BoxScope.ParticipantLabel(
     participant: ParticipantState,
     labelPosition: Alignment
 ) {
+    val isLocal by participant.isLocal.collectAsState()
     val userNameOrId by participant.userNameOrId.collectAsState()
-    val nameLabel = if (participant.isLocal) {
+    val nameLabel = if (isLocal) {
         stringResource(id = io.getstream.video.android.ui.common.R.string.stream_video_myself)
     } else {
         userNameOrId

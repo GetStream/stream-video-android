@@ -30,6 +30,8 @@ import io.getstream.video.android.core.model.UpdateUserPermissionsData
 import io.getstream.video.android.core.model.User
 import io.getstream.video.android.core.model.toIceServer
 import io.getstream.webrtc.android.ui.VideoTextureViewRenderer
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import org.openapitools.client.models.BlockUserResponse
 import org.openapitools.client.models.CallSettingsRequest
 import org.openapitools.client.models.GetCallEdgeServerRequest
@@ -85,8 +87,10 @@ public class Call(
     val cid = "$type:$id"
 
     /** Session handles all real time communication for video and audio */
-    internal var session: RtcSession? = null
-    internal val mediaManager by lazy { MediaManagerImpl(clientImpl.context, this, clientImpl.scope, clientImpl.peerConnectionFactory.eglBase.eglBaseContext) }
+    private var _session: MutableStateFlow<RtcSession?> = MutableStateFlow(null)
+    internal var session: StateFlow<RtcSession?> = _session
+    internal val scope = clientImpl.scope
+    internal val mediaManager by lazy { MediaManagerImpl(clientImpl.context, this, scope, clientImpl.peerConnectionFactory.eglBase.eglBaseContext) }
 
     /** Basic crud operations */
     suspend fun get(): Result<GetCallResponse> {
@@ -191,7 +195,7 @@ public class Call(
         val iceServers =
             selectEdgeServerResult.value.credentials.iceServers.map { it.toIceServer() }
 
-        session = RtcSession(
+        _session.value = RtcSession(
             client = client,
             call = this,
             sfuUrl = url,
@@ -203,11 +207,11 @@ public class Call(
 
         timer.split("rtc session init")
 
-        session?.connect()
+        _session.value?.connect()
 
         timer.finish("rtc connect completed")
 
-        return Success(value = session!!)
+        return Success(value = session.value!!)
     }
 
     /** Leave the call, but don't end it for other users */
@@ -252,7 +256,7 @@ public class Call(
     }
 
     fun setVisibility(sessionId: String, trackType: TrackType, visible: Boolean) {
-        session?.updateDisplayedTrackVisibility(sessionId, trackType, visible)
+        session.value?.updateDisplayedTrackVisibility(sessionId, trackType, visible)
     }
 
 
@@ -280,7 +284,7 @@ public class Call(
                 override fun onFirstFrameRendered() {
                     logger.d { "[initRenderer.onFirstFrameRendered] #sfu; sessionId: $sessionId" }
                     if (trackType != TrackType.TRACK_TYPE_SCREEN_SHARE) {
-                        session?.updateDisplayedTrackSize(
+                        _session.value?.updateDisplayedTrackSize(
                             sessionId, trackType, videoRenderer.measuredWidth, videoRenderer.measuredHeight
                         )
                     }
@@ -291,7 +295,7 @@ public class Call(
                     logger.d { "[initRenderer.onFrameResolutionChanged] #sfu; sessionId: $sessionId" }
 
                     if (trackType != TrackType.TRACK_TYPE_SCREEN_SHARE) {
-                        session?.updateDisplayedTrackSize(
+                        _session.value?.updateDisplayedTrackSize(
                             sessionId, trackType, videoRenderer.measuredWidth, videoRenderer.measuredHeight
                         )
                     }

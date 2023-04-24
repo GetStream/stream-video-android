@@ -61,7 +61,7 @@ public class ParticipantContentView : LinearLayout {
     }
 
     public fun renderParticipants(call: Call, participants: List<ParticipantState>) {
-        val otherParticipants = participants.filter { !it.isLocal }
+        val otherParticipants = participants.filter { !it.isLocal.value }
         Log.d("RoomState", otherParticipants.toString())
 
         when (otherParticipants.size) {
@@ -86,14 +86,14 @@ public class ParticipantContentView : LinearLayout {
     private fun renderSingleParticipant(call: Call, callParticipant: ParticipantState) {
         Log.d("RoomState", "Rendering single, $callParticipant")
 
-        cleanUpViews()
-        setSecondRowVisibility(View.GONE)
-
-        renderTrack(
-            findViewById(R.id.firstParticipant),
-            call,
-            callParticipant.videoTrackWrapped
-        )
+//        cleanUpViews()
+//        setSecondRowVisibility(View.GONE)
+//
+//        renderTrack(
+//            findViewById(R.id.firstParticipant),
+//            call,
+//            callParticipant.videoTrackWrapped
+//        )
     }
 
     private fun renderTwoParticipants(
@@ -102,21 +102,21 @@ public class ParticipantContentView : LinearLayout {
         second: ParticipantState
     ) {
         Log.d("RoomState", "Rendering two, $first $second")
-
-        cleanUpViews()
-        setSecondRowVisibility(View.VISIBLE)
-
-        renderTrack(
-            findViewById(R.id.firstParticipant),
-            call,
-            first.videoTrackWrapped
-        )
-
-        renderTrack(
-            findViewById(R.id.secondParticipant),
-            call,
-            second.videoTrackWrapped
-        )
+//
+//        cleanUpViews()
+//        setSecondRowVisibility(View.VISIBLE)
+//
+//        renderTrack(
+//            findViewById(R.id.firstParticipant),
+//            call,
+//            first.videoTrackWrapped
+//        )
+//
+//        renderTrack(
+//            findViewById(R.id.secondParticipant),
+//            call,
+//            second.videoTrackWrapped
+//        )
     }
 
     private fun renderThreeParticipants(
@@ -127,24 +127,24 @@ public class ParticipantContentView : LinearLayout {
     ) {
         cleanUpViews()
         setSecondRowVisibility(View.VISIBLE)
-
-        renderTrack(
-            findViewById(R.id.firstParticipant),
-            call,
-            first.videoTrackWrapped
-        )
-
-        renderTrack(
-            findViewById(R.id.secondParticipant),
-            call,
-            second.videoTrackWrapped
-        )
-
-        renderTrack(
-            findViewById(R.id.thirdParticipant),
-            call,
-            third.videoTrackWrapped
-        )
+//
+//        renderTrack(
+//            findViewById(R.id.firstParticipant),
+//            call,
+//            first.videoTrackWrapped
+//        )
+//
+//        renderTrack(
+//            findViewById(R.id.secondParticipant),
+//            call,
+//            second.videoTrackWrapped
+//        )
+//
+//        renderTrack(
+//            findViewById(R.id.thirdParticipant),
+//            call,
+//            third.videoTrackWrapped
+//        )
     }
 
     private fun renderFourParticipants(
@@ -156,30 +156,30 @@ public class ParticipantContentView : LinearLayout {
     ) {
         cleanUpViews()
         setSecondRowVisibility(View.VISIBLE)
-
-        renderTrack(
-            findViewById(R.id.firstParticipant),
-            call,
-            first.videoTrackWrapped
-        )
-
-        renderTrack(
-            findViewById(R.id.secondParticipant),
-            call,
-            second.videoTrackWrapped
-        )
-
-        renderTrack(
-            findViewById(R.id.thirdParticipant),
-            call,
-            third.videoTrackWrapped
-        )
-
-        renderTrack(
-            findViewById(R.id.fourthParticipant),
-            call,
-            fourth.videoTrackWrapped
-        )
+//
+//        renderTrack(
+//            findViewById(R.id.firstParticipant),
+//            call,
+//            first.videoTrackWrapped
+//        )
+//
+//        renderTrack(
+//            findViewById(R.id.secondParticipant),
+//            call,
+//            second.videoTrackWrapped
+//        )
+//
+//        renderTrack(
+//            findViewById(R.id.thirdParticipant),
+//            call,
+//            third.videoTrackWrapped
+//        )
+//
+//        renderTrack(
+//            findViewById(R.id.fourthParticipant),
+//            call,
+//            fourth.videoTrackWrapped
+//        )
     }
 
     private fun renderTrack(

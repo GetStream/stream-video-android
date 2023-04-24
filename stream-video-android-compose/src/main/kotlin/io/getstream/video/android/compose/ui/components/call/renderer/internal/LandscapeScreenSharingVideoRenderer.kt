@@ -25,6 +25,8 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.width
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -66,7 +68,7 @@ internal fun LandscapeScreenSharingVideoRenderer(
     onBackPressed: () -> Unit,
 ) {
     val sharingParticipant = session.participant
-    val me = participants.firstOrNull { it.isLocal }
+    val me by call.state.me.collectAsState()
 
     Row(
         modifier = modifier
@@ -122,7 +124,7 @@ private fun LandscapeScreenSharingContentPreview() {
         LandscapeScreenSharingVideoRenderer(
             call = mockCall,
             session = ScreenSharingSession(
-                track = mockParticipants[1].videoTrackWrapped ?: mockVideoTrackWrapper,
+                track = mockVideoTrackWrapper,
                 participant = mockParticipants[1]
             ),
             participants = mockParticipants,
@@ -151,7 +153,7 @@ private fun LandscapeScreenSharingMyContentPreview() {
         LandscapeScreenSharingVideoRenderer(
             call = mockCall,
             session = ScreenSharingSession(
-                track = mockParticipants[0].videoTrackWrapped ?: mockVideoTrackWrapper,
+                track = mockVideoTrackWrapper,
                 participant = mockParticipants[0]
             ),
             participants = mockParticipants,

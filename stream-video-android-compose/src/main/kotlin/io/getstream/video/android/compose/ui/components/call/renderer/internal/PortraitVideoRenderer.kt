@@ -31,6 +31,8 @@ import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -69,7 +71,7 @@ internal fun BoxScope.PortraitVideoRenderer(
     parentSize: IntSize,
     onRender: (View) -> Unit
 ) {
-    val remoteParticipants = callParticipants.filter { !it.isLocal }
+    val remoteParticipants = callParticipants.filter { !it.isLocal.value }
 
     if (callParticipants.isEmpty() ||
         (remoteParticipants.isEmpty() && callParticipants.size > 1)
@@ -205,11 +207,11 @@ internal fun BoxScope.PortraitVideoRenderer(
     }
 
     if (callParticipants.size in 2..3) {
-        val currentLocal = callParticipants.first { it.isLocal }
+        val currentLocal by call.state.me.collectAsState()
 
         LocalVideoContent(
             call = call,
-            localParticipant = currentLocal,
+            localParticipant = currentLocal!!,
             parentBounds = parentSize,
             modifier = Modifier
                 .size(

@@ -429,9 +429,7 @@ internal class StreamVideoImpl internal constructor(
         if (selectedCid.isNotEmpty()) {
             calls[selectedCid]?.let {
                 it.state.handleEvent(event)
-                it.session?.let {
-                    it.handleEvent(event)
-                }
+                it.session.value?.handleEvent(event)
             }
         }
 

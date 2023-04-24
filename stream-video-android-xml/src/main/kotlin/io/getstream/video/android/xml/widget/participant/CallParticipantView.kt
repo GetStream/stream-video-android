@@ -140,9 +140,9 @@ public class CallParticipantView : CallCardView, VideoRenderer {
      * @param participant The call participant whose video we wish to show.
      */
     public fun setParticipant(participant: ParticipantState) {
-        binding.labelHolder.isVisible = !participant.isLocal
-        setUserData(participant.user.value)
-        setTrack(participant.videoTrackWrapped)
+//        binding.labelHolder.isVisible = !participant.isLocal
+//        setUserData(participant.user.value)
+//        setTrack(participant.videoTrackWrapped)
         setAvatarVisibility(participant)
         setHasAudio(participant.audioEnabled.value)
     }
@@ -225,11 +225,11 @@ public class CallParticipantView : CallCardView, VideoRenderer {
      */
     private fun setAvatarVisibility(participant: ParticipantState) {
         val track = participant.videoTrackWrapped
-        val isVideoEnabled = try {
-            track?.video?.enabled() == true
-        } catch (error: Throwable) {
-            false
-        }
+//        val isVideoEnabled = try {
+//            track?.video?.enabled() == true
+//        } catch (error: Throwable) {
+//            false
+//        }
         // TODO
         val shouldShowAvatar = false
         binding.participantAvatar.isVisible = shouldShowAvatar

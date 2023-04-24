@@ -71,7 +71,7 @@ internal fun BoxScope.LandscapeVideoRenderer(
     parentSize: IntSize,
     onRender: (View) -> Unit
 ) {
-    val remoteParticipants = callParticipants.filter { !it.isLocal }.take(3)
+    val remoteParticipants = callParticipants.filter { !it.isLocal.value }.take(3)
     val primarySpeakingUser = primarySpeaker?.initialUser
 
     when (callParticipants.size) {
@@ -188,7 +188,7 @@ internal fun BoxScope.LandscapeVideoRenderer(
     if (callParticipants.size in 2..3) {
         LocalVideoContent(
             call = call,
-            localParticipant = callParticipants.first { it.isLocal },
+            localParticipant = callParticipants.first { it.isLocal.value },
             parentBounds = parentSize,
             modifier = Modifier
                 .size(

@@ -16,11 +16,13 @@
 
 package io.getstream.video.android.compose.ui.components.video
 
+import android.util.Log
 import android.view.View
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -83,6 +85,17 @@ public fun VideoRenderer(
         }
     }
 
+    LaunchedEffect(key1 = videoTrackWrapper) {
+        Log.e("Test", "visible")
+        view?.let {
+            call.setVisibility(
+                sessionId,
+                trackType,
+                videoTrackWrapper.video?.enabled() ?: true
+            )
+        }
+    }
+
     AndroidView(
         factory = { context ->
             VideoTextureViewRenderer(context).apply {
@@ -92,7 +105,7 @@ public fun VideoRenderer(
                     trackType = trackType,
                     onRender = onRender
                 )
-                call.setVisibility(sessionId, trackType,true)
+                call.setVisibility(sessionId, trackType, true)
                 setScalingType(scalingType = videoScalingType.toCommonScalingType())
                 setupVideo(trackState, videoTrackWrapper, this)
 

@@ -19,7 +19,7 @@ package io.getstream.video.android.core.call
 import android.media.AudioAttributes.ALLOW_CAPTURE_BY_ALL
 import android.media.AudioManager
 import android.os.Build
-import androidx.annotation.Dimension
+import android.util.Log
 import androidx.annotation.VisibleForTesting
 import androidx.core.content.getSystemService
 import io.getstream.log.taggedLogger
@@ -59,13 +59,12 @@ import io.getstream.video.android.core.utils.buildRemoteIceServers
 import io.getstream.video.android.core.utils.mangleSdpUtil
 import io.getstream.video.android.core.utils.mapState
 import io.getstream.video.android.core.utils.stringify
+import kotlin.math.absoluteValue
+import kotlin.random.Random
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.first
@@ -103,8 +102,6 @@ import stream.video.sfu.signal.UpdateMuteStatesRequest
 import stream.video.sfu.signal.UpdateMuteStatesResponse
 import stream.video.sfu.signal.UpdateSubscriptionsRequest
 import stream.video.sfu.signal.UpdateSubscriptionsResponse
-import kotlin.math.absoluteValue
-import kotlin.random.Random
 
 
 /**
@@ -164,14 +161,15 @@ public class RtcSession internal constructor(
     private val context = client.context
     private val logger by taggedLogger("Call:RtcSession")
     private val clientImpl = client as StreamVideoImpl
-    private val scope = clientImpl.scope
+    internal val scope = clientImpl.scope
 
     internal val sessionId = clientImpl.sessionId
 
     // TODO: rename
-    val trackDisplayResolutionUpdates = MutableStateFlow<MutableMap<String, MutableMap<TrackType, TrackDisplayResolution>>>(
-        mutableMapOf()
-    )
+    val trackDisplayResolutionUpdates =
+        MutableStateFlow<MutableMap<String, MutableMap<TrackType, TrackDisplayResolution>>>(
+            mutableMapOf()
+        )
     val trackUpdatesDebounced = trackDisplayResolutionUpdates.debounce(100)
     private var connectionState: ConnectionState = ConnectionState.DISCONNECTED
 
@@ -190,22 +188,26 @@ public class RtcSession internal constructor(
 
     // We need to update tracks for all participants
     // It's cleaner to store here and have the participant state reference to it
-    var tracks: MutableMap<String, MutableMap<TrackType, TrackWrapper>> = mutableMapOf()
+    private val _tracks: MutableStateFlow<MutableMap<String, MutableMap<TrackType, TrackWrapper>>> =
+        MutableStateFlow(mutableMapOf())
+    val tracks: StateFlow<MutableMap<String, MutableMap<TrackType, TrackWrapper>>> = _tracks
 
-    var trackDisplayResolution: MutableMap<String, MutableMap<TrackType, TrackDisplayResolution>> = mutableMapOf()
+    var trackDisplayResolution: MutableMap<String, MutableMap<TrackType, TrackDisplayResolution>> =
+        mutableMapOf()
 
     fun getTrack(sessionId: String, type: TrackType): TrackWrapper? {
-        if (!tracks.containsKey(sessionId)) {
-            tracks[sessionId] = mutableMapOf()
+        if (!_tracks.value.containsKey(sessionId)) {
+            _tracks.value[sessionId] = mutableMapOf()
         }
-        return tracks[sessionId]?.get(type)
+        return _tracks.value[sessionId]?.get(type)
     }
 
     fun setTrack(sessionId: String, type: TrackType, track: TrackWrapper) {
-        if (!tracks.containsKey(sessionId)) {
-            tracks[sessionId] = mutableMapOf()
+        Log.e("Test", "setTrack sessionId: ${sessionId}")
+        if (!_tracks.value.containsKey(sessionId)) {
+            _tracks.value[sessionId] = mutableMapOf()
         }
-        tracks[sessionId]?.set(type, track)
+        _tracks.value[sessionId]?.set(type, track)
     }
 
     fun getLocalTrack(type: TrackType): TrackWrapper? {
@@ -255,7 +257,8 @@ public class RtcSession internal constructor(
         val getSdp = suspend {
             getSubscriberSdp().description
         }
-        sfuConnectionModule = connectionModule.createSFUConnectionModule(sfuUrl, sessionId, sfuToken, getSdp)
+        sfuConnectionModule =
+            connectionModule.createSFUConnectionModule(sfuUrl, sessionId, sfuToken, getSdp)
         // listen to socket events and errors
         scope.launch {
             sfuConnectionModule.sfuSocket.events.collect() {
@@ -325,7 +328,8 @@ public class RtcSession internal constructor(
             "TRACK_TYPE_SCREEN_SHARE" to TrackType.TRACK_TYPE_SCREEN_SHARE,
             "TRACK_TYPE_SCREEN_SHARE_AUDIO" to TrackType.TRACK_TYPE_SCREEN_SHARE_AUDIO,
         )
-        val trackType = trackTypeMap[trackTypeString] ?: TrackType.fromValue(trackTypeString.toInt())
+        val trackType =
+            trackTypeMap[trackTypeString] ?: TrackType.fromValue(trackTypeString.toInt())
             ?: throw IllegalStateException("trackType not recognized: $trackTypeString")
 
         logger.i { "[] #sfu; mediaStream: $mediaStream" }
@@ -380,13 +384,25 @@ public class RtcSession internal constructor(
 
             timer.split("media enabled")
             // step 4 add the audio track to the publisher
-            setLocalTrack(TrackType.TRACK_TYPE_AUDIO, TrackWrapper(streamId = buildTrackId(TrackType.TRACK_TYPE_AUDIO), audio = call.mediaManager.audioTrack))
+            setLocalTrack(
+                TrackType.TRACK_TYPE_AUDIO,
+                TrackWrapper(
+                    streamId = buildTrackId(TrackType.TRACK_TYPE_AUDIO),
+                    audio = call.mediaManager.audioTrack
+                )
+            )
             publisher?.addAudioTransceiver(call.mediaManager.audioTrack, listOf(sessionId))
             // step 5 create the video track
-            setLocalTrack(TrackType.TRACK_TYPE_VIDEO, TrackWrapper(streamId = buildTrackId(TrackType.TRACK_TYPE_VIDEO), video = call.mediaManager.videoTrack))
+            setLocalTrack(
+                TrackType.TRACK_TYPE_VIDEO,
+                TrackWrapper(
+                    streamId = buildTrackId(TrackType.TRACK_TYPE_VIDEO),
+                    video = call.mediaManager.videoTrack
+                )
+            )
             // render it on the surface. but we need to start this before forwarding it to the publisher
             logger.v { "[createUserTracks] #sfu; videoTrack: ${call.mediaManager.videoTrack.stringify()}" }
-            publisher?.addVideoTransceiver(call.mediaManager.videoTrack!!, listOf(sessionId))
+            publisher?.addVideoTransceiver(call.mediaManager.videoTrack, listOf(sessionId))
         }
 
         // step 6 - onNegotiationNeeded will trigger and complete the setup using SetPublisherRequest
@@ -535,6 +551,7 @@ public class RtcSession internal constructor(
             configuration = connectionConfiguration,
             type = StreamPeerType.PUBLISHER,
             mediaConstraints = MediaConstraints(),
+            onStreamAdded = { addStream(it) }, // addTrack
             onNegotiationNeeded = ::onNegotiationNeeded,
             onIceCandidateRequest = ::sendIceCandidate,
         )
@@ -566,6 +583,7 @@ public class RtcSession internal constructor(
             event.changePublishQuality.video_senders.firstOrNull()?.layers?.filter { it.active }
                 ?.map { it.name } ?: emptyList()
 
+        return
         logger.v { "[updatePublishQuality] #sfu; updateQuality: $enabledRids" }
         val params = transceiver.sender.parameters
 
@@ -612,15 +630,16 @@ public class RtcSession internal constructor(
         val participants = call.state.participants.value
 
         // send the subscriptions based on what's visible
-        var tracks = participants.map {participant ->
-            val trackDisplay = trackDisplayResolution[participant.sessionId] ?: emptyMap<TrackType, TrackDisplayResolution>()
+        var tracks = participants.map { participant ->
+            val trackDisplay = trackDisplayResolution[participant.sessionId] ?: emptyMap()
             trackDisplay.values.filter { it.visible && it.sessionId != sessionId }.map { display ->
                 TrackSubscriptionDetails(
                     user_id = participant.user.value.id,
                     track_type = display.trackType,
                     dimension = display.dimensions,
                     session_id = participant.sessionId
-                ) }
+                )
+            }
         }.flatten()
 
         // by default subscribe to the top 5 sorted participants
@@ -696,7 +715,7 @@ public class RtcSession internal constructor(
     }
 
     /**
-     Section, basic webrtc calls
+    Section, basic webrtc calls
      */
 
     /**
@@ -974,9 +993,13 @@ public class RtcSession internal constructor(
         }
 
 
-
     // sets the dimension that we render things at
-    fun updateDisplayedTrackSize(sessionId: String, trackType: TrackType, measuredWidth: Int, measuredHeight: Int) {
+    fun updateDisplayedTrackSize(
+        sessionId: String,
+        trackType: TrackType,
+        measuredWidth: Int,
+        measuredHeight: Int
+    ) {
         var videoMap = trackDisplayResolution[sessionId]
         if (videoMap == null) {
             videoMap = mutableMapOf()
@@ -984,7 +1007,8 @@ public class RtcSession internal constructor(
         }
         val dimensions = VideoDimension(measuredWidth, measuredHeight)
 
-        val resolution = videoMap[trackType] ?: TrackDisplayResolution(sessionId, trackType, dimensions)
+        val resolution =
+            videoMap[trackType] ?: TrackDisplayResolution(sessionId, trackType, dimensions)
         resolution.dimensions = dimensions
 
         // Updates are debounced
@@ -999,7 +1023,8 @@ public class RtcSession internal constructor(
             trackDisplayResolution[sessionId] = videoMap
         }
         val defaultDimensions = VideoDimension(960, 720)
-        val resolution = videoMap[trackType] ?: TrackDisplayResolution(sessionId, trackType, defaultDimensions)
+        val resolution =
+            videoMap[trackType] ?: TrackDisplayResolution(sessionId, trackType, defaultDimensions)
         resolution.visible = visible
 
         updateParticipantsSubscriptions()

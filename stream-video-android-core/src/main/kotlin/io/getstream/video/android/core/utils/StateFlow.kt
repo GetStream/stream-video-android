@@ -37,6 +37,16 @@ fun <T, K> StateFlow<T>.mapState(
         .stateIn(scope, SharingStarted.Eagerly, transform(value))
 }
 
+fun <T, K> StateFlow<T>.mapUIState(
+    scope: CoroutineScope = CoroutineScope(context = DispatcherProvider.Main),
+    transform: (data: T) -> K
+): StateFlow<K> {
+    return mapLatest {
+        transform(it)
+    }
+        .stateIn(scope, SharingStarted.Lazily, transform(value))
+}
+
 fun <T, K> StateFlow<T>.mapState(
     scope: CoroutineScope,
     initialValue: K,
