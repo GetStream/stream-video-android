@@ -311,7 +311,7 @@ internal class ParticipantsPortraitTest : BaseComposeTest() {
             PortraitScreenSharingVideoRenderer(
                 call = mockCall,
                 session = ScreenSharingSession(
-                    track = mockParticipantList[1].videoTrackWrapped ?: mockVideoTrackWrapper,
+                    track = mockVideoTrackWrapper,
                     participant = mockParticipantList[1]
                 ),
                 participants = mockParticipantList,
@@ -330,7 +330,7 @@ internal class ParticipantsPortraitTest : BaseComposeTest() {
             PortraitScreenSharingVideoRenderer(
                 call = mockCall,
                 session = ScreenSharingSession(
-                    track = mockParticipantList[0].videoTrackWrapped ?: mockVideoTrackWrapper,
+                    track = mockVideoTrackWrapper,
                     participant = mockParticipantList[0]
                 ),
                 participants = mockParticipantList,
