@@ -131,12 +131,7 @@ internal fun ParticipantVideoRenderer(
     onRender: (View) -> Unit
 ) {
     val track = participant.videoTrackWrapped
-
-    val isVideoEnabled = try {
-        track?.video?.enabled() == true
-    } catch (error: Throwable) {
-        false
-    }
+    val isVideoEnabled by participant.videoEnabled.collectAsState()
 
     if ((LocalInspectionMode.current)) {
         VideoRenderer(

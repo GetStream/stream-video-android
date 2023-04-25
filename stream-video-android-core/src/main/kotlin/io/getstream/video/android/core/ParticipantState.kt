@@ -156,6 +156,8 @@ public data class ParticipantState(
         _speaking.value = participant.is_speaking
         _dominantSpeaker.value = participant.is_dominant_speaker
         _audioLevel.value = participant.audio_level
+        _audioEnabled.value = participant.published_tracks.contains(TrackType.TRACK_TYPE_AUDIO)
+        _videoEnabled.value = participant.published_tracks.contains(TrackType.TRACK_TYPE_VIDEO)
         val currentUser = _user.value
         _user.value = currentUser.copy(
             name = participant.name,

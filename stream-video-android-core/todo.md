@@ -17,8 +17,9 @@ Not as important
 ### Week 4: LLC & state test coverage + Demo & Dogfooding apps + RTC & Media fixes
 ### Week 5: Sample app stability
 
-- Dynascale... updatePublishQuality & ChangePublishQualityEvent
-
+- Dynascale... visibility isn't handled well in CallSingleVideoRendered & VideoRenderer
+- Publishing: The video doesn't render in react, I suspect simulcast issue
+- Receiving
 
 ### High level issues
 
@@ -31,13 +32,19 @@ Not as important
 
 ### App & Compose
 
+- Camera mute button doesn't work
 - Token expiration isn't handled well in dogfooding app
 - Crashlytics for sample and dogfooding apps
 - PIP
 - Ringing calls (wait for push and updated endpoints from server)
+- Key "thierry@getstream.io" was already used. If you are using LazyColumn/Row please make sure you provide a unique key for each item
+- Make buttons easier to customize. right now there is a list of items. something like this would be nicer:
+  <CallControls><VolumeControl /><CameraMuteControl> </CallControls>etc
+- Fix the buttons, right now they don't all work
 
 ### RTC & Media TODO
 
+- [ ] Improve how we mangle SDP tokens. (edit the audio line and video line, don't swap lines)
 - [ ] Review how UI changes & pagination are connected to the video tracks. See call initRenderer and updateParticipantsSubscriptions
 - [ ] Implement dynascale
 - [ ] Tests for the media manager

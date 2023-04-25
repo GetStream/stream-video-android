@@ -80,7 +80,7 @@ class HomeActivity : AppCompatActivity() {
     private val logger by taggedLogger("Call:HomeView")
 
     private val callCidState: MutableState<StreamCallId> = mutableStateOf(
-        "default:j8B8hMm2wSAj"
+        "default:NnXAIvBKE4Hy"
     )
 
     private val connectionState: StateFlow<ConnectionState> by lazy { streamVideo.state.connection }
