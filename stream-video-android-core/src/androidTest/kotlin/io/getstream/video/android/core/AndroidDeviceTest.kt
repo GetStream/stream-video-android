@@ -17,31 +17,27 @@
 package io.getstream.video.android.core
 
 import android.Manifest
-import android.media.AudioDeviceInfo
-import android.media.AudioManager
-import android.os.Build
-import androidx.core.content.getSystemService
 import androidx.test.rule.GrantPermissionRule
 import com.google.common.truth.Truth.assertThat
 import io.getstream.log.taggedLogger
-import io.getstream.video.android.core.audio.AudioSwitchHandler
-import io.getstream.video.android.core.dispatchers.DispatcherProvider
 import io.getstream.video.android.core.events.ChangePublishQualityEvent
 import io.getstream.video.android.core.events.JoinCallResponseEvent
 import io.getstream.video.android.core.utils.buildAudioConstraints
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.withTimeout
-import org.junit.Ignore
 import org.junit.Rule
 import org.junit.Test
+import org.webrtc.DefaultVideoDecoderFactory
+import org.webrtc.DefaultVideoEncoderFactory
 import org.webrtc.HardwareVideoEncoderFactory
 import org.webrtc.MediaStreamTrack
 import org.webrtc.PeerConnection
+import org.webrtc.PeerConnectionFactory
 import org.webrtc.RTCStats
 import org.webrtc.SoftwareVideoEncoderFactory
 import org.webrtc.SurfaceTextureHelper
+import org.webrtc.VideoCodecInfo
 import org.webrtc.VideoFrame
 import stream.video.sfu.event.ChangePublishQuality
 
@@ -76,17 +72,32 @@ class AndroidDeviceTest : IntegrationTestBase(connectCoordinatorWS = false) {
 
     @Test
     fun codecsFun() = runTest {
-        val eglBase = clientImpl.peerConnectionFactory.eglBase.eglBaseContext
-        val softwareFactory = SoftwareVideoEncoderFactory()
-        val softwareSupported = softwareFactory.getSupportedCodecs()
-        val hardwareFactory = HardwareVideoEncoderFactory(eglBase, true, true)
-        val hardwareSupported = hardwareFactory.supportedCodecs
-        println(softwareSupported)
-        println(hardwareSupported)
-//        val softwareEncoder = softwareFactory.createEncoder(info)
-//        val hardwareEncoder = hardwareFactory.createEncoder(info)
+        val codecs = getSupportedCodecs()
+        println("Supported codecs:")
+        codecs.forEach { codec ->
+            println("Name: ${codec.name}, Payload: ${codec}")
+        }
+        println(codecs)
+
     }
 
+    fun getSupportedCodecs(): List<VideoCodecInfo> {
+        val rootEglBase = clientImpl.peerConnectionFactory.eglBase
+        val encoderFactory = DefaultVideoEncoderFactory(rootEglBase.eglBaseContext, true, true)
+        val decoderFactory = DefaultVideoDecoderFactory(rootEglBase.eglBaseContext)
+
+        val supportedEncoderCodecs: MutableList<VideoCodecInfo> = mutableListOf()
+        encoderFactory.supportedCodecs.forEach { codec ->
+            supportedEncoderCodecs.add(codec)
+        }
+
+        val supportedDecoderCodecs: MutableList<VideoCodecInfo> = mutableListOf()
+        decoderFactory.supportedCodecs.forEach { codec ->
+            supportedDecoderCodecs.add(codec)
+        }
+
+        return (supportedEncoderCodecs + supportedDecoderCodecs).distinctBy { it.name }
+    }
 
 
 
@@ -174,7 +185,6 @@ class AndroidDeviceTest : IntegrationTestBase(connectCoordinatorWS = false) {
         val report = call.session?.getPublisherStats()?.value
         assertThat(report).isNotNull()
 
-
         // verify we are sending data to the SFU
         // it is RTCOutboundRtpStreamStats && it.bytesSent > 0
         val allStats = report?.statsMap?.values
@@ -213,7 +223,6 @@ class AndroidDeviceTest : IntegrationTestBase(connectCoordinatorWS = false) {
         val iceConnectionState = call.session?.subscriber?.connection?.iceConnectionState()
         assertThat(iceConnectionState).isEqualTo(PeerConnection.IceConnectionState.CONNECTED)
 
-
         assertThat(call.state.participants.value.size).isGreaterThan(1)
         // loop over the participants
         call.state.participants.value.forEach { participant ->
@@ -240,7 +249,6 @@ class AndroidDeviceTest : IntegrationTestBase(connectCoordinatorWS = false) {
         assertThat(report).isNotNull()
     }
 
-
     @Test
     fun dynascale() = runTest {
         // join will automatically start the audio and video capture
@@ -250,8 +258,7 @@ class AndroidDeviceTest : IntegrationTestBase(connectCoordinatorWS = false) {
         delay(500)
 
         val quality = ChangePublishQuality()
-        val event = ChangePublishQualityEvent(changePublishQuality= quality)
+        val event = ChangePublishQualityEvent(changePublishQuality = quality)
         call.session?.updatePublishQuality(event)
-
     }
 }

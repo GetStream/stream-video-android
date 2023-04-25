@@ -42,7 +42,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
-import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.res.stringResource
@@ -132,12 +131,7 @@ internal fun ParticipantVideoRenderer(
     onRender: (View) -> Unit
 ) {
     val track = participant.videoTrackWrapped
-
-    val isVideoEnabled = try {
-        track?.video?.enabled() == true
-    } catch (error: Throwable) {
-        false
-    }
+    val isVideoEnabled by participant.videoEnabled.collectAsState()
 
     if ((LocalInspectionMode.current)) {
         VideoRenderer(

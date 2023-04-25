@@ -119,7 +119,7 @@ internal class StreamVideoImpl internal constructor(
     /** the state for the client, includes the current user */
     override val state = ClientState(this)
 
-    val debugInfo = DebugInfo()
+    val debugInfo = DebugInfo(this)
 
     /** session id is generated client side */
     public val sessionId = UUID.randomUUID().toString()

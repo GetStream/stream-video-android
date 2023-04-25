@@ -209,6 +209,8 @@ public class Call(
 
         timer.finish("rtc connect completed")
 
+        client.state.setActiveCall(this)
+
         return Success(value = session!!)
     }
 
@@ -256,8 +258,6 @@ public class Call(
     fun setVisibility(sessionId: String, trackType: TrackType, visible: Boolean) {
         session?.updateDisplayedTrackVisibility(sessionId, trackType, visible)
     }
-
-
 
     // TODO: review this
     /**

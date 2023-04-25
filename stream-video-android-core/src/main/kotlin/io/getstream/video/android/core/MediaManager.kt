@@ -34,6 +34,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.runBlocking
+import okhttp3.internal.toImmutableList
 import org.webrtc.Camera2Capturer
 import org.webrtc.Camera2Enumerator
 import org.webrtc.CameraEnumerationAndroid
@@ -216,6 +217,7 @@ public sealed class CameraDirection {
  *
  */
 public class CameraManager(public val mediaManager: MediaManagerImpl, eglBaseContext: EglBase.Context, defaultCameraDirection: CameraDirection = CameraDirection.Front) {
+
     private lateinit var devices: List<CameraDeviceWrapped>
     private var isCapturingVideo: Boolean = false
     private lateinit var videoCapturer: Camera2Capturer
@@ -287,10 +289,14 @@ public class CameraManager(public val mediaManager: MediaManagerImpl, eglBaseCon
     /**
      * Selects a specific device
      */
+    private val _availableResolutions: MutableStateFlow<List<CameraEnumerationAndroid.CaptureFormat>> = MutableStateFlow(emptyList())
+    public val availableResolutions: StateFlow<List<CameraEnumerationAndroid.CaptureFormat>> = _availableResolutions
+
     fun select(deviceId: String, startCapture: Boolean = false) {
         val selectedDevice = devices.first { it.id == deviceId }
         _direction.value = selectedDevice.direction ?: CameraDirection.Back
         _selectedDevice.value = selectedDevice
+        _availableResolutions.value = selectedDevice.supportedFormats?.toImmutableList() ?: emptyList()
         _resolution.value = selectDesiredResolution(selectedDevice.supportedFormats, 720)
 
         if (startCapture) {
@@ -318,7 +324,7 @@ public class CameraManager(public val mediaManager: MediaManagerImpl, eglBaseCon
 
         // initialize it
         runBlocking(mediaManager.scope.coroutineContext) {
-            videoCapturer?.initialize(
+            videoCapturer.initialize(
                 surfaceTextureHelper,
                 mediaManager.context,
                 mediaManager.videoSource.capturerObserver
@@ -327,7 +333,7 @@ public class CameraManager(public val mediaManager: MediaManagerImpl, eglBaseCon
 
         // and start capture
         runBlocking(mediaManager.scope.coroutineContext) {
-            videoCapturer!!.startCapture(selectedResolution.width, selectedResolution.height, selectedResolution.framerate.max)
+            videoCapturer.startCapture(selectedResolution.width, selectedResolution.height, selectedResolution.framerate.max)
         }
         isCapturingVideo = true
     }
@@ -357,6 +363,7 @@ public class CameraManager(public val mediaManager: MediaManagerImpl, eglBaseCon
         val selectedDevice = devicesMatchingDirection.first()
         _selectedDevice.value = selectedDevice
         _resolution.value = selectDesiredResolution(selectedDevice.supportedFormats, 960)
+        _availableResolutions.value = selectedDevice.supportedFormats?.toImmutableList() ?: emptyList()
 
         setupCompleted = true
     }
@@ -398,11 +405,12 @@ public class CameraManager(public val mediaManager: MediaManagerImpl, eglBaseCon
     /**
      * Gets the resolution that's closest to our target resolution
      */
-    internal fun selectDesiredResolution(supportedFormats: MutableList<CameraEnumerationAndroid.CaptureFormat>?, targetResolution: Int = 960,): CameraEnumerationAndroid.CaptureFormat? {
+    internal fun selectDesiredResolution(supportedFormats: MutableList<CameraEnumerationAndroid.CaptureFormat>?, targetResolution: Int = 1440,): CameraEnumerationAndroid.CaptureFormat? {
         // needs the settings that we're going for
         // sort and get the one closest to 960
-        val sorted = supportedFormats?.toList()?.sortedBy { kotlin.math.abs(it.height - targetResolution) }
-        return sorted?.first()
+        val matchingTarget = supportedFormats?.toList()?.sortedBy { kotlin.math.abs(it.height - targetResolution) }
+        val sorted = supportedFormats?.toList()?.sortedByDescending { it.height*it.width }?.filter { it.framerate.max >= 30 }
+        return matchingTarget?.first()
     }
 }
 
