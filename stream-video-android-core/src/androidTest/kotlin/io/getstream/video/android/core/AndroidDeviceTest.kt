@@ -195,21 +195,29 @@ class AndroidDeviceTest : IntegrationTestBase(connectCoordinatorWS = false) {
         assertThat(iceConnectionState).isEqualTo(PeerConnection.IceConnectionState.CONNECTED)
 
 
+        assertThat(call.state.participants.value.size).isGreaterThan(1)
         // loop over the participants
         call.state.participants.value.forEach { participant ->
             val videoTrack = participant.videoTrackWrapped?.video
             assertThat(videoTrack).isNotNull()
             assertThat(videoTrack?.enabled()).isTrue()
             assertThat(videoTrack?.state()).isEqualTo(MediaStreamTrack.State.LIVE)
+            assertThat(participant.videoEnabled.value).isTrue()
 
             val audioTrack = participant.audioTrackWrapped?.audio
             assertThat(audioTrack).isNotNull()
             assertThat(audioTrack?.enabled()).isTrue()
             assertThat(audioTrack?.state()).isEqualTo(MediaStreamTrack.State.LIVE)
+            assertThat(participant.audioEnabled.value).isTrue()
         }
 
         // verify the stats are being tracked
         val report = call.session?.getSubscriberStats()?.value
+
+        Thread.sleep(20000)
+        val allStats = report?.statsMap?.values
+        val networkOut = allStats?.filter { it.type == "inbound-rtp" }?.map { it as RTCStats }
+
         assertThat(report).isNotNull()
     }
 
