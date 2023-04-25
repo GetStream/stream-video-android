@@ -30,15 +30,10 @@ import org.junit.Rule
 import org.junit.Test
 import org.webrtc.DefaultVideoDecoderFactory
 import org.webrtc.DefaultVideoEncoderFactory
-import org.webrtc.HardwareVideoEncoderFactory
 import org.webrtc.MediaStreamTrack
 import org.webrtc.PeerConnection
-import org.webrtc.PeerConnectionFactory
 import org.webrtc.RTCStats
-import org.webrtc.SoftwareVideoEncoderFactory
-import org.webrtc.SurfaceTextureHelper
 import org.webrtc.VideoCodecInfo
-import org.webrtc.VideoFrame
 import stream.video.sfu.event.ChangePublishQuality
 
 /**
@@ -75,10 +70,9 @@ class AndroidDeviceTest : IntegrationTestBase(connectCoordinatorWS = false) {
         val codecs = getSupportedCodecs()
         println("Supported codecs:")
         codecs.forEach { codec ->
-            println("Name: ${codec.name}, Payload: ${codec}")
+            println("Name: ${codec.name}, Payload: $codec")
         }
         println(codecs)
-
     }
 
     fun getSupportedCodecs(): List<VideoCodecInfo> {
@@ -98,8 +92,6 @@ class AndroidDeviceTest : IntegrationTestBase(connectCoordinatorWS = false) {
 
         return (supportedEncoderCodecs + supportedDecoderCodecs).distinctBy { it.name }
     }
-
-
 
     @Test
     fun audioAndVideoSource() = runTest {
@@ -192,10 +184,8 @@ class AndroidDeviceTest : IntegrationTestBase(connectCoordinatorWS = false) {
         val localSdp = call.session?.publisher?.localSdp
         val remoteSdp = call.session?.publisher?.remoteSdp
 
-
         println(call.session?.publisher?.localSdp)
         println(call.session?.publisher?.remoteSdp)
-
 
         println(networkOut)
     }

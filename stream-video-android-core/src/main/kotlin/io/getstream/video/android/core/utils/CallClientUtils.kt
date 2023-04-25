@@ -75,7 +75,6 @@ fun mangleSdpUtil(
         }
         description = lines.joinToString("\r\n")
         description = description.replace("m=video 9 UDP/TLS/RTP/SAVPF 100 101 96 97 98 99 35 36 125 124 127", "m=video 9 UDP/TLS/RTP/SAVPF 96 100 101 97 98 99 35 36 125 124 127")
-
     }
 
     return SessionDescription(sdp.type, description)

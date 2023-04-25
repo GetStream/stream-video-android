@@ -409,7 +409,7 @@ public class CameraManager(public val mediaManager: MediaManagerImpl, eglBaseCon
         // needs the settings that we're going for
         // sort and get the one closest to 960
         val matchingTarget = supportedFormats?.toList()?.sortedBy { kotlin.math.abs(it.height - targetResolution) }
-        val sorted = supportedFormats?.toList()?.sortedByDescending { it.height*it.width }?.filter { it.framerate.max >= 30 }
+        val sorted = supportedFormats?.toList()?.sortedByDescending { it.height * it.width }?.filter { it.framerate.max >= 30 }
         return matchingTarget?.first()
     }
 }

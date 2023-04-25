@@ -32,6 +32,8 @@ import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -186,19 +188,23 @@ internal fun BoxScope.LandscapeVideoRenderer(
     }
 
     if (callParticipants.size in 2..3) {
-        LocalVideoContent(
-            call = call,
-            localParticipant = callParticipants.first { it.isLocal },
-            parentBounds = parentSize,
-            modifier = Modifier
-                .size(
-                    height = VideoTheme.dimens.floatingVideoHeight,
-                    width = VideoTheme.dimens.floatingVideoWidth
-                )
-                .clip(VideoTheme.shapes.floatingParticipant)
-                .align(Alignment.TopEnd),
-            paddingValues = paddingValues
-        )
+        val currentLocal by call.state.me.collectAsState()
+
+        if (currentLocal != null) {
+            LocalVideoContent(
+                call = call,
+                localParticipant = currentLocal!!,
+                parentBounds = parentSize,
+                modifier = Modifier
+                    .size(
+                        height = VideoTheme.dimens.floatingVideoHeight,
+                        width = VideoTheme.dimens.floatingVideoWidth
+                    )
+                    .clip(VideoTheme.shapes.floatingParticipant)
+                    .align(Alignment.TopEnd),
+                paddingValues = paddingValues
+            )
+        }
     }
 }
 

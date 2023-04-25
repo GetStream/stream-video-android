@@ -17,6 +17,7 @@ public final class io/getstream/video/android/core/Call {
 	public final fun getCid ()Ljava/lang/String;
 	public final fun getId ()Ljava/lang/String;
 	public final fun getMicrophone ()Lio/getstream/video/android/core/MicrophoneManager;
+	public final fun getSessionId ()Ljava/lang/String;
 	public final fun getSpeaker ()Lio/getstream/video/android/core/SpeakerManager;
 	public final fun getState ()Lio/getstream/video/android/core/CallState;
 	public final fun getType ()Ljava/lang/String;
@@ -140,6 +141,7 @@ public final class io/getstream/video/android/core/CameraManager {
 	public final fun disable ()V
 	public final fun enable ()V
 	public final fun flip ()V
+	public final fun getAvailableResolutions ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun getDirection ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun getMediaManager ()Lio/getstream/video/android/core/MediaManagerImpl;
 	public final fun getResolution ()Lkotlinx/coroutines/flow/StateFlow;
