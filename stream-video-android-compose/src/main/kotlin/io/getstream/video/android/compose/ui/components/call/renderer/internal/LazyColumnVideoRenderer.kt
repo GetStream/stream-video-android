@@ -55,7 +55,7 @@ internal fun LazyColumnVideoRenderer(
         verticalArrangement = Arrangement.spacedBy(VideoTheme.dimens.screenShareParticipantsListItemMargin),
         horizontalAlignment = Alignment.CenterHorizontally,
         content = {
-            items(items = participants, key = { it.user.value.id }) { participant ->
+            items(items = participants, key = { it.sessionId }) { participant ->
                 ListVideoRenderer(
                     call = call, participant = participant, primarySpeaker = primarySpeaker
                 )
@@ -84,7 +84,7 @@ private fun ListVideoRenderer(
         participant = participant,
         labelPosition = Alignment.BottomStart,
         isScreenSharing = true,
-        isFocused = participant.initialUser.id == primarySpeaker?.initialUser?.id,
+        isFocused = participant.sessionId == primarySpeaker?.sessionId,
         isShowConnectionQualityIndicator = false
     )
 }

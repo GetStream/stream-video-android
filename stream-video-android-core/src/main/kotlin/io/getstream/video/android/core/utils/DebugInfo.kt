@@ -21,10 +21,8 @@ import io.getstream.video.android.core.StreamVideoImpl
 import io.getstream.video.android.core.dispatchers.DispatcherProvider
 import io.getstream.video.android.core.input.internal.DefaultCallAndroidInputLauncher.launch
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import kotlin.coroutines.CoroutineContext
 
 internal data class Timer(val name: String, val start: Long) {
     var end: Long = 0
@@ -70,7 +68,7 @@ internal class DebugInfo(val client: StreamVideoImpl) {
     val call by lazy { client.state.activeCall.value }
 
     // call session id
-    val sessionId by lazy {call?.sessionId}
+    val sessionId by lazy { call?.sessionId }
 
     // how many times the network dropped
 
@@ -79,8 +77,8 @@ internal class DebugInfo(val client: StreamVideoImpl) {
     // supported codecs
 
     // publisher peer connection
-    val subscriber by lazy {call?.session?.subscriber}
-    val publisher by lazy {call?.session?.publisher}
+    val subscriber by lazy { call?.session?.subscriber }
+    val publisher by lazy { call?.session?.publisher }
     val publisherLocalSdp by lazy { publisher?.localSdp }
     val publisherRemoteSdp by lazy { publisher?.remoteSdp }
 
@@ -94,9 +92,7 @@ internal class DebugInfo(val client: StreamVideoImpl) {
             if (client.developmentMode) {
                 log()
             }
-
         }
-
     }
 
     fun log() {
@@ -113,8 +109,8 @@ internal class DebugInfo(val client: StreamVideoImpl) {
         // good spot to attach your debugger
 
         logger.i { "Debug info $phoneModel running android $version" }
-        logger.i { "Active call is ${call?.cid}, session id ${sessionId} capturing video at ${resolution}" }
-        logger.i { "Coordinator socket: ${coordinatorSocket}, SFU socket: ${sfuSocket} Subscriber: ${publisherIce} Publisher: ${subIce}"}
+        logger.i { "Active call is ${call?.cid}, session id $sessionId capturing video at $resolution" }
+        logger.i { "Coordinator socket: $coordinatorSocket, SFU socket: $sfuSocket Subscriber: $publisherIce Publisher: $subIce" }
         logger.i { "Performance details" }
         timers.forEach {
             logger.i { "${it.name} took ${it.duration}" }

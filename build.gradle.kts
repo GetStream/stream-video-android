@@ -21,6 +21,7 @@ plugins {
     alias(libs.plugins.dokka) apply false
     alias(libs.plugins.spotless) apply false
     alias(libs.plugins.paparazzi) apply false
+    alias(libs.plugins.firebase.crashlytics) apply false
 }
 
 subprojects {

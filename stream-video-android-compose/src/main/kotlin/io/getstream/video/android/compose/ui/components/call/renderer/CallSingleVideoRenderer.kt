@@ -133,7 +133,7 @@ internal fun ParticipantVideoRenderer(
     val track = participant.videoTrack.collectAsState()
     val isVideoEnabled by participant.videoEnabled.collectAsState()
 
-    if ((LocalInspectionMode.current)) {
+    if (LocalInspectionMode.current) {
         VideoRenderer(
             modifier = Modifier.fillMaxSize(),
             call = call,
