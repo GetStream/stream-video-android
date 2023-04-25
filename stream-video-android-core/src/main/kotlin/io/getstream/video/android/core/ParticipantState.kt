@@ -60,7 +60,6 @@ public data class ParticipantState(
     val _videoTrack = MutableStateFlow<TrackWrapper?>(null)
     val videoTrack: StateFlow<TrackWrapper?> = _videoTrack
 
-
     /**
      * State that indicates whether the camera is capturing and sending video or not.
      */
@@ -106,8 +105,6 @@ public data class ParticipantState(
     internal val _connectionQuality: MutableStateFlow<ConnectionQuality> =
         MutableStateFlow(ConnectionQuality.CONNECTION_QUALITY_UNSPECIFIED)
     val connectionQuality: StateFlow<ConnectionQuality> = _connectionQuality
-
-
 
     /**
      * State that indicates whether the speakerphone is on or not.

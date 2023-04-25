@@ -213,7 +213,6 @@ public class RtcSession internal constructor(
                 logger.w { "Unspecified track type" }
             }
         }
-
     }
 
     fun getLocalTrack(type: TrackType): TrackWrapper? {
