@@ -300,7 +300,8 @@ public class RtcSession internal constructor(
                 // set the mute /unumute status
                 setMuteState(isEnabled = it == DeviceStatus.Enabled, TrackType.TRACK_TYPE_VIDEO)
             }
-
+        }
+        coroutineScope.launch {
             call.mediaManager.microphone.status.collectLatest {
                 // set the mute /unumute status
                 setMuteState(isEnabled = it == DeviceStatus.Enabled, TrackType.TRACK_TYPE_AUDIO)
@@ -362,32 +363,34 @@ public class RtcSession internal constructor(
         // TODO: real settings check
         val publishing = true
         if (publishing) {
-            createPublisher()
+            publisher = createPublisher()
             timer.split("createPublisher")
         }
 
         if (publishing) {
-            // step 2 ensure all tracks are setup correctly
-            // start capturing the video
-            val manager = context.getSystemService<AudioManager>()
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                manager?.allowedCapturePolicy = ALLOW_CAPTURE_BY_ALL
+            if (publisher == null) {
+                throw IllegalStateException("Cant send audio and video since publisher hasn't been setup to connect")
+            }
+            publisher?.let {publisher ->
+                // step 2 ensure all tracks are setup correctly
+                // start capturing the video
+
+                // TODO: hook up the settings, front or back...
+
+                call.mediaManager.camera.enable()
+                call.mediaManager.microphone.enable()
+
+                timer.split("media enabled")
+                // step 4 add the audio track to the publisher
+                setLocalTrack(TrackType.TRACK_TYPE_AUDIO, TrackWrapper(streamId = buildTrackId(TrackType.TRACK_TYPE_AUDIO), audio = call.mediaManager.audioTrack))
+                publisher.addAudioTransceiver(call.mediaManager.audioTrack, listOf(buildTrackId(TrackType.TRACK_TYPE_AUDIO)))
+                // step 5 create the video track
+                setLocalTrack(TrackType.TRACK_TYPE_VIDEO, TrackWrapper(streamId = buildTrackId(TrackType.TRACK_TYPE_VIDEO), video = call.mediaManager.videoTrack))
+                // render it on the surface. but we need to start this before forwarding it to the publisher
+                logger.v { "[createUserTracks] #sfu; videoTrack: ${call.mediaManager.videoTrack.stringify()}" }
+                publisher.addVideoTransceiver(call.mediaManager.videoTrack!!, listOf(buildTrackId(TrackType.TRACK_TYPE_VIDEO)))
             }
 
-            // TODO: hook up the settings, front or back...
-
-            call.mediaManager.camera.enable()
-            call.mediaManager.microphone.enable()
-
-            timer.split("media enabled")
-            // step 4 add the audio track to the publisher
-            setLocalTrack(TrackType.TRACK_TYPE_AUDIO, TrackWrapper(streamId = buildTrackId(TrackType.TRACK_TYPE_AUDIO), audio = call.mediaManager.audioTrack))
-            publisher?.addAudioTransceiver(call.mediaManager.audioTrack, listOf(sessionId))
-            // step 5 create the video track
-            setLocalTrack(TrackType.TRACK_TYPE_VIDEO, TrackWrapper(streamId = buildTrackId(TrackType.TRACK_TYPE_VIDEO), video = call.mediaManager.videoTrack))
-            // render it on the surface. but we need to start this before forwarding it to the publisher
-            logger.v { "[createUserTracks] #sfu; videoTrack: ${call.mediaManager.videoTrack.stringify()}" }
-            publisher?.addVideoTransceiver(call.mediaManager.videoTrack!!, listOf(sessionId))
         }
 
         // step 6 - onNegotiationNeeded will trigger and complete the setup using SetPublisherRequest
@@ -463,7 +466,7 @@ public class RtcSession internal constructor(
      *
      */
     fun setMuteState(isEnabled: Boolean, trackType: TrackType) {
-        logger.d { "[setMuteState] #sfu; isEnabled: $isEnabled" }
+        logger.d { "[setMuteState] #sfu; $trackType isEnabled: $isEnabled" }
 
         coroutineScope.launch {
 
@@ -477,7 +480,11 @@ public class RtcSession internal constructor(
                 ),
             )
             updateMuteState(request).onSuccessSuspend {
+            }.onError {
+                // TODO: handle error better
+                throw IllegalStateException(it.message)
             }
+
         }
     }
 
@@ -531,7 +538,7 @@ public class RtcSession internal constructor(
 
     @VisibleForTesting
     fun createPublisher(): StreamPeerConnection? {
-        publisher = clientImpl.peerConnectionFactory.makePeerConnection(
+        val publisher = clientImpl.peerConnectionFactory.makePeerConnection(
             coroutineScope = coroutineScope,
             configuration = connectionConfiguration,
             type = StreamPeerType.PUBLISHER,

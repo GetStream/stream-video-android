@@ -19,6 +19,7 @@ package io.getstream.video.android.core
 import android.content.Context
 import android.hardware.camera2.CameraCharacteristics
 import android.hardware.camera2.CameraManager
+import android.media.AudioAttributes
 import android.media.AudioDeviceInfo
 import android.media.AudioManager
 import android.os.Build
@@ -92,6 +93,7 @@ class SpeakerManager(val mediaManager: MediaManagerImpl) {
 class MicrophoneManager(val mediaManager: MediaManagerImpl) {
     private lateinit var audioHandler: AudioSwitchHandler
     private var audioManager: AudioManager? = null
+
     private val logger by taggedLogger("Media:MicrophoneManager")
 
     /** The status of the audio */
@@ -178,6 +180,10 @@ class MicrophoneManager(val mediaManager: MediaManagerImpl) {
         if (setupCompleted) return
 
         audioManager = mediaManager.context.getSystemService<AudioManager>()
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            audioManager?.allowedCapturePolicy = AudioAttributes.ALLOW_CAPTURE_BY_ALL
+        }
         audioHandler = AudioSwitchHandler(mediaManager.context)
         val devices = audioHandler.availableAudioDevices
         _devices.value = devices

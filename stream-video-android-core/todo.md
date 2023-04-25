@@ -18,7 +18,8 @@ Not as important
 ### Week 5: Sample app stability
 
 - Dynascale... visibility isn't handled well in CallSingleVideoRendered & VideoRenderer
-- Video track isn't published somehow
+- Publishing: The video doesn't render in react, I suspect simulcast issue
+- Receiving
 
 ### High level issues
 
