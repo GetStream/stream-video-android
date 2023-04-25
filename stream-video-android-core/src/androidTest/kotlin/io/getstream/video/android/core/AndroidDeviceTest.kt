@@ -36,9 +36,11 @@ import kotlinx.coroutines.withTimeout
 import org.junit.Ignore
 import org.junit.Rule
 import org.junit.Test
+import org.webrtc.HardwareVideoEncoderFactory
 import org.webrtc.MediaStreamTrack
 import org.webrtc.PeerConnection
 import org.webrtc.RTCStats
+import org.webrtc.SoftwareVideoEncoderFactory
 import org.webrtc.SurfaceTextureHelper
 import org.webrtc.VideoFrame
 import stream.video.sfu.event.ChangePublishQuality
@@ -60,6 +62,10 @@ class AndroidDeviceTest : IntegrationTestBase(connectCoordinatorWS = false) {
 
     private val logger by taggedLogger("Test:AndroidDeviceTest")
 
+    @get:Rule
+    var mRuntimePermissionRule = GrantPermissionRule
+        .grant(Manifest.permission.BLUETOOTH_CONNECT)
+
     @Test
     fun camera() = runTest {
 
@@ -69,14 +75,20 @@ class AndroidDeviceTest : IntegrationTestBase(connectCoordinatorWS = false) {
     }
 
     @Test
-    fun microphone() = runTest {
-        val mic = call.mediaManager.microphone
-        assertThat(mic).isNotNull()
+    fun codecsFun() = runTest {
+        val eglBase = clientImpl.peerConnectionFactory.eglBase.eglBaseContext
+        val softwareFactory = SoftwareVideoEncoderFactory()
+        val softwareSupported = softwareFactory.getSupportedCodecs()
+        val hardwareFactory = HardwareVideoEncoderFactory(eglBase, true, true)
+        val hardwareSupported = hardwareFactory.supportedCodecs
+        println(softwareSupported)
+        println(hardwareSupported)
+//        val softwareEncoder = softwareFactory.createEncoder(info)
+//        val hardwareEncoder = hardwareFactory.createEncoder(info)
     }
 
-    @get:Rule
-    var mRuntimePermissionRule = GrantPermissionRule
-        .grant(Manifest.permission.BLUETOOTH_CONNECT)
+
+
 
     @Test
     fun audioAndVideoSource() = runTest {
@@ -167,6 +179,13 @@ class AndroidDeviceTest : IntegrationTestBase(connectCoordinatorWS = false) {
         // it is RTCOutboundRtpStreamStats && it.bytesSent > 0
         val allStats = report?.statsMap?.values
         val networkOut = allStats?.filter { it.type == "outbound-rtp" }?.map { it as RTCStats }
+        val localSdp = call.session?.publisher?.localSdp
+        val remoteSdp = call.session?.publisher?.remoteSdp
+
+
+        println(call.session?.publisher?.localSdp)
+        println(call.session?.publisher?.remoteSdp)
+
 
         println(networkOut)
     }

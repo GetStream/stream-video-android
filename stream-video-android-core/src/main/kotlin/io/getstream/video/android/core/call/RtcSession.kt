@@ -62,6 +62,7 @@ import io.getstream.video.android.core.utils.mapState
 import io.getstream.video.android.core.utils.stringify
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -162,6 +163,7 @@ public class RtcSession internal constructor(
     private val latencyResults: Map<String, List<Float>>,
     private val remoteIceServers: List<IceServer>,
 ) {
+
     private val context = client.context
     private val logger by taggedLogger("Call:RtcSession")
     private val clientImpl = client as StreamVideoImpl
@@ -277,6 +279,10 @@ public class RtcSession internal constructor(
             trackUpdatesDebounced.collect {
                 updateParticipantsSubscriptions()
             }
+        }
+        scope.launch {
+            delay(20000)
+            println(publisher?.localSdp)
         }
     }
 
@@ -882,6 +888,7 @@ public class RtcSession internal constructor(
                     val answerDescription = SessionDescription(
                         SessionDescription.Type.ANSWER, it.sdp
                     )
+
                     // set the remote peer connection, and handle queued ice candidates
                     peerConnection.setRemoteDescription(answerDescription)
                 }.onError {

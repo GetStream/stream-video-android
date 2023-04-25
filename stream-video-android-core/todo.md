@@ -37,9 +37,14 @@ Not as important
 - Crashlytics for sample and dogfooding apps
 - PIP
 - Ringing calls (wait for push and updated endpoints from server)
+- Key "thierry@getstream.io" was already used. If you are using LazyColumn/Row please make sure you provide a unique key for each item
+- Make buttons easier to customize. right now there is a list of items. something like this would be nicer:
+  <CallControls><VolumeControl /><CameraMuteControl> </CallControls>etc
+- Fix the buttons, right now they don't all work
 
 ### RTC & Media TODO
 
+- [ ] Improve how we mangle SDP tokens. (edit the audio line and video line, don't swap lines)
 - [ ] Review how UI changes & pagination are connected to the video tracks. See call initRenderer and updateParticipantsSubscriptions
 - [ ] Implement dynascale
 - [ ] Tests for the media manager

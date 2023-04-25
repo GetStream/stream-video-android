@@ -72,6 +72,8 @@ public class StreamPeerConnection(
     private val onIceCandidate: ((IceCandidate, StreamPeerType) -> Unit)?,
 ) : PeerConnection.Observer {
 
+    internal lateinit var localSdp: SessionDescription
+    internal lateinit var remoteSdp: SessionDescription
     private val typeTag = type.stringify()
 
     private val logger by taggedLogger("Call:PeerConnection")
@@ -158,6 +160,9 @@ public class StreamPeerConnection(
      */
     public suspend fun setRemoteDescription(sessionDescription: SessionDescription): Result<Unit> {
         logger.d { "[setRemoteDescription] #sfu; #$typeTag; answerSdp: ${sessionDescription.stringify()}" }
+
+        remoteSdp = sessionDescription
+
         return setValue {
             connection.setRemoteDescription(
                 it,
@@ -188,6 +193,9 @@ public class StreamPeerConnection(
         val sdp = SessionDescription(
             sessionDescription.type, sessionDescription.description.mungeCodecs()
         )
+
+        localSdp = sdp
+
         logger.d { "[setLocalDescription] #sfu; #$typeTag; offerSdp: ${sessionDescription.stringify()}" }
         return setValue { connection.setLocalDescription(it, sdp) }
     }

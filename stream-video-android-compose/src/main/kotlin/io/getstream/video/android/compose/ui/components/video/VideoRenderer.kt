@@ -127,7 +127,7 @@ private fun setupVideo(
     cleanTrack(renderer, trackState)
 
     trackState.value = track
-    track.video?.addSink(renderer)
+    track.video?.addSink(renderer) //cAZo0tsELD9B
 }
 
 @Preview
