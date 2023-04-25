@@ -76,6 +76,8 @@ public class Call(
     /** The call state contains all state such as the participant list, reactions etc */
     val state = CallState(this, user)
 
+    val sessionId by lazy { session?.sessionId }
+
     /** Camera gives you access to the local camera */
     val camera by lazy { mediaManager.camera }
     val microphone by lazy { mediaManager.microphone }

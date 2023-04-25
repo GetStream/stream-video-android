@@ -73,6 +73,9 @@ public fun VideoRenderer(
         return
     }
 
+    val isLocalVideo = sessionId == call.sessionId
+    println(isLocalVideo)
+
     val trackState: MutableState<TrackWrapper?> = remember { mutableStateOf(null) }
     var view: VideoTextureViewRenderer? by remember { mutableStateOf(null) }
 
