@@ -130,14 +130,14 @@ internal fun ParticipantVideoRenderer(
     participant: ParticipantState,
     onRender: (View) -> Unit
 ) {
-    val track = participant.videoTrackWrapped
+    val track = participant.videoTrack.collectAsState()
     val isVideoEnabled by participant.videoEnabled.collectAsState()
 
     if ((LocalInspectionMode.current)) {
         VideoRenderer(
             modifier = Modifier.fillMaxSize(),
             call = call,
-            videoTrackWrapper = track ?: mockVideoTrackWrapper,
+            videoTrackWrapper = track.value ?: mockVideoTrackWrapper,
             sessionId = participant.sessionId,
             onRender = onRender,
             trackType = TrackType.TRACK_TYPE_VIDEO
@@ -145,10 +145,16 @@ internal fun ParticipantVideoRenderer(
         return
     }
 
-    if (track != null && isVideoEnabled) {
+    val isLocalVideo = participant.sessionId == call.sessionId
+    if (!isLocalVideo) {
+        println(isLocalVideo)
+    }
+
+    val videoTrack = track.value
+    if (videoTrack != null && isVideoEnabled) {
         VideoRenderer(
             call = call,
-            videoTrackWrapper = track,
+            videoTrackWrapper = videoTrack,
             sessionId = participant.sessionId,
             onRender = onRender,
             trackType = TrackType.TRACK_TYPE_VIDEO

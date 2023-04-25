@@ -122,7 +122,7 @@ private fun LandscapeScreenSharingContentPreview() {
         LandscapeScreenSharingVideoRenderer(
             call = mockCall,
             session = ScreenSharingSession(
-                track = mockParticipants[1].videoTrackWrapped ?: mockVideoTrackWrapper,
+                track = mockParticipants[1].videoTrack.value ?: mockVideoTrackWrapper,
                 participant = mockParticipants[1]
             ),
             participants = mockParticipants,
@@ -151,7 +151,7 @@ private fun LandscapeScreenSharingMyContentPreview() {
         LandscapeScreenSharingVideoRenderer(
             call = mockCall,
             session = ScreenSharingSession(
-                track = mockParticipants[0].videoTrackWrapped ?: mockVideoTrackWrapper,
+                track = mockParticipants[0].videoTrack.value ?: mockVideoTrackWrapper,
                 participant = mockParticipants[0]
             ),
             participants = mockParticipants,

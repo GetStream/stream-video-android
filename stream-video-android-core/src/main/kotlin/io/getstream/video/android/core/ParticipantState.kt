@@ -17,6 +17,7 @@
 package io.getstream.video.android.core
 
 import io.getstream.result.Result
+import io.getstream.video.android.core.model.TrackWrapper
 import io.getstream.video.android.core.model.User
 import io.getstream.video.android.core.utils.mapState
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -55,24 +56,29 @@ public data class ParticipantState(
         sessionId == call.session?.sessionId
     }
     /** video track */
-    val videoTrack by lazy {
-        videoTrackWrapped?.video
-    }
-    val videoTrackWrapped by lazy {
-        call.session?.getTrack(sessionId, TrackType.TRACK_TYPE_VIDEO)
-    }
-    val audioTrack by lazy {
-        audioTrackWrapped?.audio
-    }
-    val audioTrackWrapped by lazy {
-        call.session?.getTrack(sessionId, TrackType.TRACK_TYPE_AUDIO)
-    }
-    val screenSharingTrack by lazy {
-        screenSharingTrackWrapped?.video
-    }
-    val screenSharingTrackWrapped by lazy {
-        call.session?.getTrack(sessionId, TrackType.TRACK_TYPE_SCREEN_SHARE)
-    }
+    // TODO: do we return the track wrapper or the track?
+    val _videoTrack = MutableStateFlow<TrackWrapper?>(null)
+    val videoTrack: StateFlow<TrackWrapper?> = _videoTrack
+
+
+    /**
+     * State that indicates whether the camera is capturing and sending video or not.
+     */
+    // todo: videoAvailable might be more descriptive
+    internal val _videoEnabled: MutableStateFlow<Boolean> = MutableStateFlow(false)
+    val videoEnabled: StateFlow<Boolean> = _videoEnabled
+
+    /**
+     * State that indicates whether the mic is capturing and sending the audio or not.
+     */
+    internal val _audioEnabled: MutableStateFlow<Boolean> = MutableStateFlow(false)
+    val audioEnabled: StateFlow<Boolean> = _audioEnabled
+
+    val _audioTrack = MutableStateFlow<TrackWrapper?>(null)
+    val audioTrack: StateFlow<TrackWrapper?> = _audioTrack
+
+    val _screenSharingTrack = MutableStateFlow<TrackWrapper?>(null)
+    val screenSharingTrack: StateFlow<TrackWrapper?> = _screenSharingTrack
 
     /**
      * The user, automatically updates when we receive user events
@@ -101,17 +107,7 @@ public data class ParticipantState(
         MutableStateFlow(ConnectionQuality.CONNECTION_QUALITY_UNSPECIFIED)
     val connectionQuality: StateFlow<ConnectionQuality> = _connectionQuality
 
-    /**
-     * State that indicates whether the camera is capturing and sending video or not.
-     */
-    internal val _videoEnabled: MutableStateFlow<Boolean> = MutableStateFlow(false)
-    val videoEnabled: StateFlow<Boolean> = _videoEnabled
 
-    /**
-     * State that indicates whether the mic is capturing and sending the audio or not.
-     */
-    internal val _audioEnabled: MutableStateFlow<Boolean> = MutableStateFlow(false)
-    val audioEnabled: StateFlow<Boolean> = _audioEnabled
 
     /**
      * State that indicates whether the speakerphone is on or not.

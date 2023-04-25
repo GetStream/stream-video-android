@@ -21,6 +21,15 @@ Not as important
 - Publishing: The video doesn't render in react, I suspect simulcast issue
 - Receiving
 
+### Biggest open tasks & estimates
+
+* Docs. 4 weeks or so
+* Cross device testing. 2-4 weeks
+* Reconnect. 2 weeks
+* Server/little endpoint stuff etc. 1 week
+* User app testing. Ie have people use it. 2 weeks or so
+* Compose & App: Unsure
+
 ### High level issues
 
 - [ ] Join flow is too slow
@@ -32,15 +41,18 @@ Not as important
 
 ### App & Compose
 
-- Camera mute button doesn't work
+- Reactions don't show up
+- Use participant.sessionId instead of user id. Key "thierry@getstream.io" was already used. If you are using LazyColumn/Row please make sure you provide a unique key for each item
+- Make buttons easier to customize. right now there is a list of items. something like this would be nicer:
+  <CallControls><VolumeControl /><CameraMuteControl> </CallControls>etc
+- Fix the buttons, right now they don't all work
+- Screensharing doesn't show up
+- Chat integration (we need an event from the server though)
 - Token expiration isn't handled well in dogfooding app
 - Crashlytics for sample and dogfooding apps
 - PIP
 - Ringing calls (wait for push and updated endpoints from server)
-- Key "thierry@getstream.io" was already used. If you are using LazyColumn/Row please make sure you provide a unique key for each item
-- Make buttons easier to customize. right now there is a list of items. something like this would be nicer:
-  <CallControls><VolumeControl /><CameraMuteControl> </CallControls>etc
-- Fix the buttons, right now they don't all work
+
 
 ### RTC & Media TODO
 

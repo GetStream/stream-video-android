@@ -92,7 +92,7 @@ public class ParticipantContentView : LinearLayout {
         renderTrack(
             findViewById(R.id.firstParticipant),
             call,
-            callParticipant.videoTrackWrapped
+            callParticipant.videoTrack.value
         )
     }
 
@@ -109,13 +109,13 @@ public class ParticipantContentView : LinearLayout {
         renderTrack(
             findViewById(R.id.firstParticipant),
             call,
-            first.videoTrackWrapped
+            first.videoTrack.value
         )
 
         renderTrack(
             findViewById(R.id.secondParticipant),
             call,
-            second.videoTrackWrapped
+            second.videoTrack.value
         )
     }
 
@@ -131,19 +131,19 @@ public class ParticipantContentView : LinearLayout {
         renderTrack(
             findViewById(R.id.firstParticipant),
             call,
-            first.videoTrackWrapped
+            first.videoTrack.value
         )
 
         renderTrack(
             findViewById(R.id.secondParticipant),
             call,
-            second.videoTrackWrapped
+            second.videoTrack.value
         )
 
         renderTrack(
             findViewById(R.id.thirdParticipant),
             call,
-            third.videoTrackWrapped
+            third.videoTrack.value
         )
     }
 
@@ -160,25 +160,25 @@ public class ParticipantContentView : LinearLayout {
         renderTrack(
             findViewById(R.id.firstParticipant),
             call,
-            first.videoTrackWrapped
+            first.videoTrack.value
         )
 
         renderTrack(
             findViewById(R.id.secondParticipant),
             call,
-            second.videoTrackWrapped
+            second.videoTrack.value
         )
 
         renderTrack(
             findViewById(R.id.thirdParticipant),
             call,
-            third.videoTrackWrapped
+            third.videoTrack.value
         )
 
         renderTrack(
             findViewById(R.id.fourthParticipant),
             call,
-            fourth.videoTrackWrapped
+            fourth.videoTrack.value
         )
     }
 

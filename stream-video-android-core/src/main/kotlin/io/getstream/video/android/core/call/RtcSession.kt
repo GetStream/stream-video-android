@@ -201,6 +201,22 @@ public class RtcSession internal constructor(
             tracks[sessionId] = mutableMapOf()
         }
         tracks[sessionId]?.set(type, track)
+
+        when (type) {
+            TrackType.TRACK_TYPE_VIDEO -> {
+                call.state.getParticipantBySessionId(sessionId)?._videoTrack?.value = track
+            }
+            TrackType.TRACK_TYPE_AUDIO -> {
+                call.state.getParticipantBySessionId(sessionId)?._audioTrack?.value = track
+            }
+            TrackType.TRACK_TYPE_SCREEN_SHARE, TrackType.TRACK_TYPE_SCREEN_SHARE_AUDIO -> {
+                call.state.getParticipantBySessionId(sessionId)?._screenSharingTrack?.value = track
+            }
+            TrackType.TRACK_TYPE_UNSPECIFIED -> {
+                logger.w { "Unspecified track type" }
+            }
+        }
+
     }
 
     fun getLocalTrack(type: TrackType): TrackWrapper? {

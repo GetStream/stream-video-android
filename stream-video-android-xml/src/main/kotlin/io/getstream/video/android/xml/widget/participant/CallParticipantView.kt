@@ -142,7 +142,7 @@ public class CallParticipantView : CallCardView, VideoRenderer {
     public fun setParticipant(participant: ParticipantState) {
         binding.labelHolder.isVisible = !participant.isLocal
         setUserData(participant.user.value)
-        setTrack(participant.videoTrackWrapped)
+        setTrack(participant.videoTrack.value)
         setAvatarVisibility(participant)
         setHasAudio(participant.audioEnabled.value)
     }
@@ -224,7 +224,7 @@ public class CallParticipantView : CallCardView, VideoRenderer {
      * @param participant The [CallParticipantState] for the current participant.
      */
     private fun setAvatarVisibility(participant: ParticipantState) {
-        val track = participant.videoTrackWrapped
+        val track = participant.videoTrack.value
         val isVideoEnabled = try {
             track?.video?.enabled() == true
         } catch (error: Throwable) {
