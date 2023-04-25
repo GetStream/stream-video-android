@@ -25,7 +25,6 @@ import androidx.test.rule.GrantPermissionRule
 import com.google.common.truth.Truth.assertThat
 import io.getstream.log.taggedLogger
 import io.getstream.video.android.core.audio.AudioSwitchHandler
-import io.getstream.video.android.core.dispatchers.DispatcherProvider
 import io.getstream.video.android.core.events.ChangePublishQualityEvent
 import io.getstream.video.android.core.events.JoinCallResponseEvent
 import io.getstream.video.android.core.utils.buildAudioConstraints
@@ -37,8 +36,6 @@ import org.junit.Rule
 import org.junit.Test
 import org.webrtc.MediaStreamTrack
 import org.webrtc.PeerConnection
-import org.webrtc.SurfaceTextureHelper
-import org.webrtc.VideoFrame
 import stream.video.sfu.event.ChangePublishQuality
 
 /**
@@ -209,9 +206,8 @@ class AndroidDeviceTest : IntegrationTestBase(connectCoordinatorWS = false) {
         delay(500)
 
         val quality = ChangePublishQuality()
-        val event = ChangePublishQualityEvent(changePublishQuality= quality)
+        val event = ChangePublishQualityEvent(changePublishQuality = quality)
         call.session?.updatePublishQuality(event)
-
     }
 
     @Test

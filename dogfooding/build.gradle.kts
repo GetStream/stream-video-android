@@ -24,6 +24,7 @@ plugins {
     id("io.getstream.android.application.compose")
     id("io.getstream.spotless")
     id("com.google.gms.google-services")
+    id(libs.plugins.firebase.crashlytics.get().pluginId)
 }
 
 android {
@@ -146,6 +147,9 @@ dependencies {
     implementation(libs.androidx.compose.material)
     implementation(libs.androidx.compose.material.iconsExtended)
     implementation(libs.landscapist.coil)
+
+    // firebase
+    implementation(libs.firebase.crashlytics)
 
     // memory detection
     debugImplementation(libs.leakCanary)

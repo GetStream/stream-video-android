@@ -19,7 +19,6 @@ package io.getstream.video.android.core.call
 import android.media.AudioAttributes.ALLOW_CAPTURE_BY_ALL
 import android.media.AudioManager
 import android.os.Build
-import androidx.annotation.Dimension
 import androidx.annotation.VisibleForTesting
 import androidx.core.content.getSystemService
 import io.getstream.log.taggedLogger
@@ -61,8 +60,6 @@ import io.getstream.video.android.core.utils.mapState
 import io.getstream.video.android.core.utils.stringify
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.collect
@@ -106,7 +103,6 @@ import stream.video.sfu.signal.UpdateSubscriptionsResponse
 import kotlin.math.absoluteValue
 import kotlin.random.Random
 
-
 /**
  * Keeps track of which track is being rendered at what resolution.
  * Also stores if the track is visible or not
@@ -116,9 +112,7 @@ data class TrackDisplayResolution(
     val trackType: TrackType,
     var dimensions: VideoDimension,
     var visible: Boolean = false
-) {
-
-}
+)
 
 /**
  * The RtcSession sets up 2 peer connection
@@ -612,7 +606,7 @@ public class RtcSession internal constructor(
         val participants = call.state.participants.value
 
         // send the subscriptions based on what's visible
-        var tracks = participants.map {participant ->
+        var tracks = participants.map { participant ->
             val trackDisplay = trackDisplayResolution[participant.sessionId] ?: emptyMap<TrackType, TrackDisplayResolution>()
             trackDisplay.values.filter { it.visible && it.sessionId != sessionId }.map { display ->
                 TrackSubscriptionDetails(
@@ -620,7 +614,8 @@ public class RtcSession internal constructor(
                     track_type = display.trackType,
                     dimension = display.dimensions,
                     session_id = participant.sessionId
-                ) }
+                )
+            }
         }.flatten()
 
         // by default subscribe to the top 5 sorted participants
@@ -658,8 +653,6 @@ public class RtcSession internal constructor(
                 }
             }
         }
-
-
     }
 
     fun handleEvent(event: VideoEvent) {
@@ -972,8 +965,6 @@ public class RtcSession internal constructor(
             }
             result
         }
-
-
 
     // sets the dimension that we render things at
     fun updateDisplayedTrackSize(sessionId: String, trackType: TrackType, measuredWidth: Int, measuredHeight: Int) {

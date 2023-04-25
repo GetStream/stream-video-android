@@ -255,8 +255,6 @@ public class Call(
         session?.updateDisplayedTrackVisibility(sessionId, trackType, visible)
     }
 
-
-
     // TODO: review this
     /**
      * Perhaps it would be nicer to have an interface. Any UI elements that renders video should implement it

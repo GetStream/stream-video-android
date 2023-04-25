@@ -92,7 +92,7 @@ public fun VideoRenderer(
                     trackType = trackType,
                     onRender = onRender
                 )
-                call.setVisibility(sessionId, trackType,true)
+                call.setVisibility(sessionId, trackType, true)
                 setScalingType(scalingType = videoScalingType.toCommonScalingType())
                 setupVideo(trackState, videoTrackWrapper, this)
 
