@@ -174,7 +174,7 @@ internal fun BoxScope.PortraitVideoRenderer(
                         call = call,
                         participant = fiveParticipant,
                         onRender = onRender,
-                        isFocused = primarySpeaker?.initialUser?.id == fiveParticipant.initialUser.id,
+                        isFocused = primarySpeaker?.sessionId == fiveParticipant.sessionId,
                         paddingValues = paddingValues
                     )
                 }
@@ -191,7 +191,7 @@ internal fun BoxScope.PortraitVideoRenderer(
             ) {
                 items(
                     items = callParticipants.take(maxGridItemCount),
-                    key = { it.initialUser.id }
+                    key = { it.sessionId }
                 ) { participant ->
                     CallSingleVideoRenderer(
                         modifier = Modifier
@@ -199,7 +199,7 @@ internal fun BoxScope.PortraitVideoRenderer(
                             .height(parentSize.height.dp / heightDivision),
                         call = call,
                         participant = participant,
-                        isFocused = primarySpeaker?.initialUser?.id == participant.initialUser.id
+                        isFocused = primarySpeaker?.sessionId == participant.sessionId
                     )
                 }
             }

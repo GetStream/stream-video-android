@@ -74,7 +74,6 @@ internal fun BoxScope.LandscapeVideoRenderer(
     onRender: (View) -> Unit
 ) {
     val remoteParticipants = callParticipants.filter { !it.isLocal }.take(3)
-    val primarySpeakingUser = primarySpeaker?.initialUser
 
     when (callParticipants.size) {
         0 -> Unit
@@ -86,7 +85,7 @@ internal fun BoxScope.LandscapeVideoRenderer(
                 call = call,
                 participant = participant,
                 onRender = onRender,
-                isFocused = primarySpeakingUser?.id == participant.initialUser.id,
+                isFocused = primarySpeaker?.sessionId == participant.sessionId,
                 paddingValues = paddingValues
             )
         }
@@ -102,7 +101,7 @@ internal fun BoxScope.LandscapeVideoRenderer(
                             .weight(rowItemWeight),
                         call = call,
                         participant = participant,
-                        isFocused = primarySpeakingUser?.id == participant.initialUser.id,
+                        isFocused = primarySpeaker?.sessionId == participant.sessionId,
                         paddingValues = paddingValues
                     )
                 }
@@ -114,7 +113,7 @@ internal fun BoxScope.LandscapeVideoRenderer(
             val secondParticipant = callParticipants[1]
             val thirdParticipant = callParticipants[2]
             val fourthParticipant = callParticipants[3]
-            val fiveParticipant = callParticipants[4]
+            val fifthParticipant = callParticipants[4]
 
             Column(modifier) {
                 Row(modifier = Modifier.weight(1f)) {
@@ -122,14 +121,14 @@ internal fun BoxScope.LandscapeVideoRenderer(
                         modifier = Modifier.weight(1f),
                         call = call,
                         participant = firstParticipant,
-                        isFocused = primarySpeakingUser?.id == firstParticipant.initialUser.id
+                        isFocused = primarySpeaker?.sessionId == firstParticipant.sessionId,
                     )
 
                     CallSingleVideoRenderer(
                         modifier = Modifier.weight(1f),
                         call = call,
                         participant = secondParticipant,
-                        isFocused = primarySpeakingUser?.id == secondParticipant.initialUser.id
+                        isFocused = primarySpeaker?.sessionId == secondParticipant.sessionId,
                     )
                 }
 
@@ -138,7 +137,7 @@ internal fun BoxScope.LandscapeVideoRenderer(
                         modifier = Modifier.weight(1f),
                         call = call,
                         participant = thirdParticipant,
-                        isFocused = primarySpeakingUser?.id == thirdParticipant.initialUser.id,
+                        isFocused = primarySpeaker?.sessionId == thirdParticipant.sessionId,
                         paddingValues = paddingValues
                     )
 
@@ -147,16 +146,16 @@ internal fun BoxScope.LandscapeVideoRenderer(
                         call = call,
                         participant = fourthParticipant,
                         onRender = onRender,
-                        isFocused = primarySpeakingUser?.id == fourthParticipant.initialUser.id,
+                        isFocused = primarySpeaker?.sessionId == fourthParticipant.sessionId,
                         paddingValues = paddingValues
                     )
 
                     CallSingleVideoRenderer(
                         modifier = Modifier.weight(1f),
                         call = call,
-                        participant = fiveParticipant,
+                        participant = fifthParticipant,
                         onRender = onRender,
-                        isFocused = primarySpeakingUser?.id == fiveParticipant.initialUser.id,
+                        isFocused = primarySpeaker?.sessionId == fifthParticipant.sessionId,
                         paddingValues = paddingValues
                     )
                 }
@@ -172,7 +171,7 @@ internal fun BoxScope.LandscapeVideoRenderer(
             ) {
                 items(
                     items = callParticipants.take(maxGridItemCount),
-                    key = { it.initialUser.id }
+                    key = { it.sessionId }
                 ) { participant ->
                     CallSingleVideoRenderer(
                         modifier = Modifier
@@ -180,7 +179,7 @@ internal fun BoxScope.LandscapeVideoRenderer(
                             .height(parentSize.height.dp / heightDivision),
                         call = call,
                         participant = participant,
-                        isFocused = primarySpeakingUser?.id == participant.initialUser.id
+                        isFocused = primarySpeaker?.sessionId == participant.sessionId,
                     )
                 }
             }
