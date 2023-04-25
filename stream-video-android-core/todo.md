@@ -25,7 +25,7 @@ Not as important
 
 * Docs. 4 weeks or so
 * Cross device testing. 2-4 weeks
-* Reconnect. 2 weeks
+* Reconnect & cleanup. 2 weeks
 * Server/little endpoint stuff etc. 1 week
 * User app testing. Ie have people use it. 2 weeks or so
 * Compose & App: Unsure
@@ -235,4 +235,3 @@ Not as important
 - Pinning of participants. You pin/unpin and it sets pinnedAt and sorting takes it into account
 - Currently we use UserPreferencesManager. Jaewoong mentioned we should perhaps explore https://developer.android.com/topic/libraries/architecture/datastore
 - Measure latency isn't 100% ok. You can't set a timeout using withTimeout and collect the measurements that we have. This relates to threading vs coroutines and withTimeout not working
-- Disconnect/ garbage collect flow needs a full round of review
