@@ -15,7 +15,7 @@
 
 package org.openapitools.client.models
 
-import org.openapitools.client.models.EdgeResponse
+import org.openapitools.client.models.Device
 
 
 
@@ -25,19 +25,19 @@ import com.squareup.moshi.Json
 /**
  * 
  *
- * @param duration Duration of the request in human-readable format
- * @param edges 
+ * @param devices List of devices
+ * @param duration 
  */
 
 
-data class GetEdgesResponse (
+data class ListDevicesResponse (
 
-    /* Duration of the request in human-readable format */
+    /* List of devices */
+    @Json(name = "devices")
+    val devices: kotlin.collections.List<Device>,
+
     @Json(name = "duration")
-    val duration: kotlin.String,
-
-    @Json(name = "edges")
-    val edges: kotlin.collections.List<EdgeResponse>
+    val duration: kotlin.String
 
 )
 
