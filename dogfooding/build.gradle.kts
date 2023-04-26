@@ -25,6 +25,7 @@ plugins {
     id("io.getstream.spotless")
     id("com.google.gms.google-services")
     id(libs.plugins.firebase.crashlytics.get().pluginId)
+    id(libs.plugins.kotlin.serialization.get().pluginId)
 }
 
 android {
@@ -138,6 +139,8 @@ dependencies {
 
     implementation(libs.retrofit)
     implementation(libs.kotlinx.coroutines.android)
+    implementation(libs.kotlinx.serialization.json)
+    implementation(libs.kotlinx.serialization.converter)
 
     // Compose
     implementation(libs.androidx.activity.compose)

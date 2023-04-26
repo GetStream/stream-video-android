@@ -49,7 +49,7 @@ public final class io/getstream/video/android/common/util/MockUtilsKt {
 	public static final fun getMockParticipantList ()Ljava/util/List;
 	public static final fun getMockParticipants ()Ljava/util/List;
 	public static final fun getMockUsers ()Ljava/util/List;
-	public static final fun getMockVideoTrackWrapper ()Lio/getstream/video/android/core/model/TrackWrapper;
+	public static final fun getMockVideoMediaTrack ()Lio/getstream/video/android/core/model/MediaTrack;
 }
 
 public final class io/getstream/video/android/common/util/ParticipantsTextKt {

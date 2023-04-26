@@ -18,7 +18,6 @@ package io.getstream.video.android.dogfooding
 
 import android.app.Application
 import android.content.Context
-import android.widget.Toast
 import com.google.firebase.auth.FirebaseAuth
 import io.getstream.android.push.firebase.FirebasePushDeviceGenerator
 import io.getstream.log.Priority
@@ -29,9 +28,7 @@ import io.getstream.video.android.core.logging.LoggingLevel
 import io.getstream.video.android.core.model.ApiKey
 import io.getstream.video.android.core.model.User
 import io.getstream.video.android.core.user.UserPreferencesManager
-import kotlinx.coroutines.async
-import okhttp3.OkHttpClient
-import okhttp3.Request
+import io.getstream.video.android.dogfooding.token.StreamVideoNetwork
 
 class DogfoodingApp : Application() {
 
@@ -72,14 +69,11 @@ class DogfoodingApp : Application() {
             pushDeviceGenerators = listOf(FirebasePushDeviceGenerator()),
             tokenProvider = {
                 val email = user.custom["email"]
-                val client = OkHttpClient()
-                val request = Request.Builder()
-                    .url("https://stream-calls-dogfood.vercel.app/api/auth/create-token?user_id=$email&api_key=$API_KEY")
-                    .build()
-                val response = async { client.newCall(request).execute() }.await()
-                Toast.makeText(applicationContext, "${response.body?.string()}", Toast.LENGTH_SHORT)
-                    .show()
-                response.body?.string() ?: ""
+                val response = StreamVideoNetwork.tokenService.fetchToken(
+                    userId = email,
+                    apiKey = API_KEY
+                )
+                response.token
             }
         ).build().also {
             video = it

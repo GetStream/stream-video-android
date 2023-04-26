@@ -20,8 +20,8 @@ import android.content.Context
 import android.util.AttributeSet
 import android.view.View
 import androidx.constraintlayout.widget.ConstraintLayout
+import io.getstream.video.android.core.model.MediaTrack
 import io.getstream.video.android.core.model.ScreenSharingSession
-import io.getstream.video.android.core.model.TrackWrapper
 import io.getstream.video.android.xml.databinding.StreamVideoViewScreenShareBinding
 import io.getstream.video.android.xml.utils.extensions.createStreamThemeWrapper
 import io.getstream.video.android.xml.utils.extensions.streamThemeInflater
@@ -47,7 +47,7 @@ public class ScreenShareView : ConstraintLayout, VideoRenderer, JobHolder {
     /**
      * The track of the current screen share.
      */
-    private var track: TrackWrapper? = null
+    private var track: MediaTrack? = null
 
     /**
      * Handler when the video renders.
@@ -59,9 +59,7 @@ public class ScreenShareView : ConstraintLayout, VideoRenderer, JobHolder {
     public constructor(context: Context) : this(context, null, 0)
     public constructor(context: Context, attrs: AttributeSet?) : this(context, attrs, 0)
     public constructor(context: Context, attrs: AttributeSet?, defStyleAttr: Int) : super(
-        context.createStreamThemeWrapper(),
-        attrs,
-        defStyleAttr
+        context.createStreamThemeWrapper(), attrs, defStyleAttr
     ) {
         init(context, attrs)
     }
@@ -97,9 +95,7 @@ public class ScreenShareView : ConstraintLayout, VideoRenderer, JobHolder {
             if (::rendererInitializer.isInitialized) {
                 track?.let {
                     rendererInitializer.initRenderer(
-                        binding.screenShare,
-                        it.streamId,
-                        TrackType.TRACK_TYPE_VIDEO
+                        binding.screenShare, it.streamId, TrackType.TRACK_TYPE_VIDEO
                     ) { onRender(it) }
                     wasRendererInitialised = true
                 }
@@ -121,15 +117,15 @@ public class ScreenShareView : ConstraintLayout, VideoRenderer, JobHolder {
      *
      * @param track The [VideoTrackWrapper] of the participant.
      */
-    private fun setTrack(track: TrackWrapper?) {
+    private fun setTrack(track: MediaTrack?) {
         if (this.track == track) return
 
-        this.track?.video?.removeSink(binding.screenShare)
+        this.track?.asVideoTrack()?.video?.removeSink(binding.screenShare)
         this.track = track
 
         if (track == null) return
 
-        this.track!!.video?.addSink(binding.screenShare)
+        this.track!!.asVideoTrack()?.video?.addSink(binding.screenShare)
         initRenderer()
     }
 
@@ -137,7 +133,7 @@ public class ScreenShareView : ConstraintLayout, VideoRenderer, JobHolder {
         super.onDetachedFromWindow()
         stopAllJobs()
         binding.screenShare.apply {
-            track?.video?.removeSink(this)
+            track?.asVideoTrack()?.video?.removeSink(this)
         }
         track = null
     }
