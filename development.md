@@ -239,6 +239,34 @@ Goals
 - Locally you call updateMuteState. It's not clear what this does. 
 Is muting connected to track publish/unpublish?
 
+### Retry Behaviour
+
+There are many things that can go wrong in a video call
+- The websocket connections with the SFU or coordinator can fail
+- Any API call to the coordinator can fail
+- Any API call to the SFU can fail
+- Camera and Audio can fail and require a restart
+- The publisher or subscriber peer connection can fail
+- Video codec can fail
+
+If failures are temporary we should retry them.
+If the SFU is down, we need to switch to a different SFU.
+Alternatively when a SFU is gracefully shutting down we should receive an event
+
+Detecting SFU outages
+- If I can reach the Coordinator but not the SFU that's clear sign the SFU is down
+- What's the easiest way to detect this?
+
+In most cases the subscriber peer connection will fail first since we have constant traffic on it
+Detecting a broken peer connection
+
+TODO:
+
+[ ] - Socket retry behaviour check
+[ ] - Logic to switch to a new SFU
+[ ] - Retry camera on error
+[ ] - Detect SFU outage
+
 ### Participant State
 
 Basically there are 2 possible approaches

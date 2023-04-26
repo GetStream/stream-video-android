@@ -24,6 +24,7 @@ import io.getstream.video.android.core.events.ChangePublishQualityEvent
 import io.getstream.video.android.core.events.JoinCallResponseEvent
 import io.getstream.video.android.core.utils.buildAudioConstraints
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.withTimeout
 import org.junit.Rule
@@ -63,6 +64,42 @@ class AndroidDeviceTest : IntegrationTestBase(connectCoordinatorWS = false) {
         val camera = call.mediaManager.camera
         assertThat(camera).isNotNull()
         camera.startCapture()
+    }
+
+    @Test
+    fun cleanup() = runTest {
+        // coroutine job at the client level
+        // at the call level
+        // cleanup coroutines
+        // cleanup video elements
+    }
+
+    @Test
+    fun reconnect() = runTest {
+        call.state.connection // pre connect
+        backgroundScope.launch {
+            call.join()
+            call.state.connection // loading
+        }
+        // show a loading icon while loading
+        call.state.connection // temporary error/ reconnecting
+        // permanent error -> Failed to join call. Mention this call id to tech support
+        // happy connection
+
+        /**
+         * From a UI Perspective, the first joinRequest already sets up state
+         * Then the JoinEventResponse gives more state
+         *
+         * Video is only available after peer connections are ready.
+         * And after updateSubscriptions is called
+         * And the track is received
+         *
+         * PeerConnection states
+         * PeerConnection.IceConnectionState.CLOSED, PeerConnection.IceConnectionState.FAILED, PeerConnection.IceConnectionState.DISCONNECTED
+         *
+         *
+         */
+
     }
 
     @Test
@@ -135,12 +172,12 @@ class AndroidDeviceTest : IntegrationTestBase(connectCoordinatorWS = false) {
         assertSuccess(joinResult)
 
         // verify the video track is present and working
-        val videoWrapper = call.state.me.value?.videoTrackWrapped
+        val videoWrapper = call.state.me.value?.videoTrack?.value
         assertThat(videoWrapper?.video?.enabled()).isTrue()
         assertThat(videoWrapper?.video?.state()).isEqualTo(MediaStreamTrack.State.LIVE)
 
         // verify the audio track is present and working
-        val audioWrapper = call.state.me.value?.audioTrackWrapped
+        val audioWrapper = call.state.me.value?.audioTrack?.value
         assertThat(audioWrapper?.audio?.enabled()).isTrue()
         assertThat(audioWrapper?.audio?.state()).isEqualTo(MediaStreamTrack.State.LIVE)
     }
@@ -216,13 +253,13 @@ class AndroidDeviceTest : IntegrationTestBase(connectCoordinatorWS = false) {
         assertThat(call.state.participants.value.size).isGreaterThan(1)
         // loop over the participants
         call.state.participants.value.forEach { participant ->
-            val videoTrack = participant.videoTrackWrapped?.video
+            val videoTrack = participant.videoTrack.value?.video
             assertThat(videoTrack).isNotNull()
             assertThat(videoTrack?.enabled()).isTrue()
             assertThat(videoTrack?.state()).isEqualTo(MediaStreamTrack.State.LIVE)
             assertThat(participant.videoEnabled.value).isTrue()
 
-            val audioTrack = participant.audioTrackWrapped?.audio
+            val audioTrack = participant.audioTrack.value?.audio
             assertThat(audioTrack).isNotNull()
             assertThat(audioTrack?.enabled()).isTrue()
             assertThat(audioTrack?.state()).isEqualTo(MediaStreamTrack.State.LIVE)
