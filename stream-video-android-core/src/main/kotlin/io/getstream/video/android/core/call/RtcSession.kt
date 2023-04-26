@@ -59,7 +59,6 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.first
@@ -77,8 +76,6 @@ import org.webrtc.RTCStatsReport
 import org.webrtc.RtpParameters
 import org.webrtc.RtpTransceiver
 import org.webrtc.SessionDescription
-import org.webrtc.SurfaceTextureHelper
-import org.webrtc.VideoCapturer
 import retrofit2.HttpException
 import stream.video.sfu.models.ICETrickle
 import stream.video.sfu.models.PeerType
@@ -156,6 +153,8 @@ public class RtcSession internal constructor(
     private val context = client.context
     private val logger by taggedLogger("Call:RtcSession")
     private val clientImpl = client as StreamVideoImpl
+
+    internal val lastVideoStreamAdded = MutableStateFlow<MediaStream?>(null)
 
     internal val sessionId = clientImpl.sessionId
 
@@ -320,6 +319,9 @@ public class RtcSession internal constructor(
      *
      * Loop over the audio and video tracks
      * Update the local tracks
+     *
+     * Audio is available from the start.
+     * Video only becomes available after we update the subscription
      */
     internal fun addStream(mediaStream: MediaStream) {
 
@@ -357,6 +359,10 @@ public class RtcSession internal constructor(
             )
             setTrack(sessionId, trackType, wrappedTrack)
         }
+        if (sessionId != this.sessionId && mediaStream.videoTracks.isNotEmpty()) {
+            lastVideoStreamAdded.value = mediaStream
+        }
+
     }
 
     suspend fun connectRtc() {
@@ -441,8 +447,8 @@ public class RtcSession internal constructor(
         subscriber = null
         publisher = null
 
-        // cleanup the tracks
-        tracks.values.map { it.values }.flatten().forEach {wrapper->
+        // cleanup all non-local tracks
+        tracks.filter{it.key != sessionId}.values.map { it.values }.flatten().forEach {wrapper->
             if (wrapper.audio != null) {
                 try {
                     wrapper.audio?.dispose()

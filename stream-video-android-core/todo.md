@@ -15,11 +15,8 @@ Not as important
 ### Week 2: LLC & State Stability. Compose testing & previews
 ### Week 3: Sample app, update compose to LLC & State changes. New events, socket & token provider. Call UI. Guest users & moderation endpoints
 ### Week 4: LLC & state test coverage + Demo & Dogfooding apps + RTC & Media fixes
-### Week 5: Sample app stability
+### Week 5: Sample app stability, S23 sdp munging, dynascale, reconnect, cleanup for reconnect
 
-- Dynascale... visibility isn't handled well in CallSingleVideoRendered & VideoRenderer
-- Publishing: The video doesn't render in react, I suspect simulcast issue
-- Receiving
 
 ### Biggest open tasks & estimates
 
@@ -33,11 +30,6 @@ Not as important
 ### High level issues
 
 - [ ] Join flow is too slow
-- [ ] Reconnection support needs work
-- [ ] Docs need a lot of work
-- [ ] SDK doesn't handle all edge cases yet
-
-
 
 ### App & Compose
 
@@ -227,6 +219,7 @@ Not as important
 [ ] should video be default on or off?
 [ ] should audio be default on or off?
 [ ] am i allowed to publish (IE should i create the publisher peer connection)
+[ ] health check http request on the SFU (no auth, nothing that can give errors, just health) (for the recovery flow)
 
 ### Available tasks up for grabs
 

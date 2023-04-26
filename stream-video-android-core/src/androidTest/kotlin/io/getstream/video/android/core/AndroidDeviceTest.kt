@@ -93,6 +93,17 @@ class AndroidDeviceTest : IntegrationTestBase(connectCoordinatorWS = false) {
     }
 
     @Test
+    fun switchSfuTest() = runTest {
+        call.join()
+
+        // TODO: exclude the SFU that failed...
+        // TODO: can we remove any API calls here or resuse latency measurements
+        // TODO: add loading/status indicators
+
+        call.switchSfu()
+    }
+
+    @Test
     fun reconnect() = runTest {
         call.state.connection // pre connect
         backgroundScope.launch {
@@ -103,6 +114,7 @@ class AndroidDeviceTest : IntegrationTestBase(connectCoordinatorWS = false) {
         call.state.connection // temporary error/ reconnecting
         // permanent error -> Failed to join call. Mention this call id to tech support
         // happy connection
+
 
         /**
          * From a UI Perspective, the first joinRequest already sets up state
@@ -115,6 +127,8 @@ class AndroidDeviceTest : IntegrationTestBase(connectCoordinatorWS = false) {
          * PeerConnection states
          * PeerConnection.IceConnectionState.CLOSED, PeerConnection.IceConnectionState.FAILED, PeerConnection.IceConnectionState.DISCONNECTED
          *
+         * - Ok so we need to be able to monitor ice connection state (simple stateflow?)
+         * - When the ice connection fails... ask if we need a new SFU to the coordinator. maybe ping the SFU if possible. if so switch sfu
          *
          */
 
@@ -180,6 +194,9 @@ class AndroidDeviceTest : IntegrationTestBase(connectCoordinatorWS = false) {
         assertThat(participantsResponse.size).isEqualTo(1)
         val participants = call.state.participants
         assertThat(participants.value.size).isEqualTo(1)
+
+        Thread.sleep(2000)
+        clientImpl.debugInfo.log()
     }
 
     @Test
@@ -252,7 +269,7 @@ class AndroidDeviceTest : IntegrationTestBase(connectCoordinatorWS = false) {
         val call = client.call("default", "NnXAIvBKE4Hy")
         val joinResult = call.join()
         assertSuccess(joinResult)
-        clientImpl.debugInfo.log()
+
 
         // wait for the ice connection state
         withTimeout(3000) {
@@ -292,6 +309,7 @@ class AndroidDeviceTest : IntegrationTestBase(connectCoordinatorWS = false) {
         val networkOut = allStats?.filter { it.type == "inbound-rtp" }?.map { it as RTCStats }
 
         assertThat(report).isNotNull()
+        clientImpl.debugInfo.log()
     }
 
     @Test

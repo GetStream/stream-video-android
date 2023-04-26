@@ -32,6 +32,9 @@ import io.getstream.video.android.core.model.toIceServer
 import io.getstream.webrtc.android.ui.VideoTextureViewRenderer
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.launch
 import org.openapitools.client.models.BlockUserResponse
 import org.openapitools.client.models.CallSettingsRequest
 import org.openapitools.client.models.GetCallEdgeServerRequest
@@ -213,7 +216,16 @@ public class Call(
 
         session?.connect()
 
-        timer.finish("rtc connect completed")
+        timer.split("rtc connect completed")
+
+        scope.launch {
+            // wait for the first stream to be added
+            session?.let { rtcSession ->
+                val result = rtcSession.lastVideoStreamAdded.filter { it!=null }.first()
+                timer.finish("stream added, rtc completed, ready to display video $result")
+            }
+
+        }
 
         client.state.setActiveCall(this)
 
@@ -475,6 +487,12 @@ public class Call(
         session?.cleanup()
         supervisorJob.cancel()
         // TODO: does anything else need to cleaned up?
+    }
+
+    suspend fun switchSfu() {
+        session?.cleanup()
+        // TODO: maybe exclude the last sfu?
+        join()
     }
 }
 
