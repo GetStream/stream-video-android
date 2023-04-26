@@ -57,8 +57,7 @@ public data class ParticipantState(
     }
 
     /** video track */
-    // TODO: do we return the track wrapper or the track?
-    val _videoTrack = MutableStateFlow<VideoTrack?>(null)
+    internal val _videoTrack = MutableStateFlow<VideoTrack?>(null)
     val videoTrack: StateFlow<VideoTrack?> = _videoTrack
 
     /**
@@ -74,10 +73,10 @@ public data class ParticipantState(
     internal val _audioEnabled: MutableStateFlow<Boolean> = MutableStateFlow(false)
     val audioEnabled: StateFlow<Boolean> = _audioEnabled
 
-    val _audioTrack = MutableStateFlow<AudioTrack?>(null)
+    internal val _audioTrack = MutableStateFlow<AudioTrack?>(null)
     val audioTrack: StateFlow<AudioTrack?> = _audioTrack
 
-    val _screenSharingTrack = MutableStateFlow<VideoTrack?>(null)
+    internal val _screenSharingTrack = MutableStateFlow<VideoTrack?>(null)
     val screenSharingTrack: StateFlow<VideoTrack?> = _screenSharingTrack
 
     /**
@@ -128,16 +127,16 @@ public data class ParticipantState(
     internal val _reactions = MutableStateFlow<List<ReactionResponse>>(emptyList())
     val reactions: StateFlow<List<ReactionResponse>> = _reactions
 
-    open suspend fun muteAudio(): Result<MuteUsersResponse> {
+    suspend fun muteAudio(): Result<MuteUsersResponse> {
         // how do i mute another user?
         return call.muteUser(user.value.id, audio = true, video = false, screenShare = false)
     }
 
-    open suspend fun muteVideo(): Result<MuteUsersResponse> {
+    suspend fun muteVideo(): Result<MuteUsersResponse> {
         return call.muteUser(user.value.id, audio = false, video = true, screenShare = false)
     }
 
-    open suspend fun muteScreenshare(): Result<MuteUsersResponse> {
+    suspend fun muteScreenshare(): Result<MuteUsersResponse> {
         return call.muteUser(user.value.id, audio = false, video = false, screenShare = true)
     }
 

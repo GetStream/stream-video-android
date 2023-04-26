@@ -341,14 +341,11 @@ public final class io/getstream/video/android/core/ParticipantState {
 	public final fun getUserNameOrId ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun getVideoEnabled ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun getVideoTrack ()Lkotlinx/coroutines/flow/StateFlow;
-	public final fun get_audioTrack ()Lkotlinx/coroutines/flow/MutableStateFlow;
-	public final fun get_screenSharingTrack ()Lkotlinx/coroutines/flow/MutableStateFlow;
-	public final fun get_videoTrack ()Lkotlinx/coroutines/flow/MutableStateFlow;
 	public fun hashCode ()I
 	public final fun isLocal ()Z
-	public fun muteAudio (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
-	public fun muteScreenshare (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
-	public fun muteVideo (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public final fun muteAudio (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public final fun muteScreenshare (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public final fun muteVideo (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public final fun setSessionId (Ljava/lang/String;)V
 	public fun toString ()Ljava/lang/String;
 	public final fun updateFromParticipantInfo (Lstream/video/sfu/models/Participant;)V
