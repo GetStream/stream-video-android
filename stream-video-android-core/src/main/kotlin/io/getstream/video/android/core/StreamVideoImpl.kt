@@ -112,7 +112,7 @@ internal class StreamVideoImpl internal constructor(
     private val loggingLevel: LoggingLevel,
     internal val connectionModule: ConnectionModule,
     internal val pushDeviceGenerators: List<PushDeviceGenerator>,
-    internal val tokenProvider: (suspend CoroutineScope.(error: Throwable?) -> String)?,
+    internal val tokenProvider: (suspend (error: Throwable?) -> String)?,
     internal val preferences: UserPreferences,
 ) : StreamVideo {
 
@@ -164,7 +164,7 @@ internal class StreamVideoImpl internal constructor(
                 if (parsedError.serverErrorCode == VideoErrorCode.TOKEN_EXPIRED.code) {
                     if (tokenProvider != null) {
                         // TODO - handle this better, error structure is not great right now
-                        val newToken = tokenProvider.invoke(scope, null)
+                        val newToken = tokenProvider.invoke(null)
                         preferences.storeUserToken(newToken)
                         connectionModule.updateToken(newToken)
                     }
@@ -312,7 +312,7 @@ internal class StreamVideoImpl internal constructor(
                 if (e.code == VideoErrorCode.TOKEN_EXPIRED.code) {
                     // refresh the the token
                     if (tokenProvider != null) {
-                        val newToken = tokenProvider.invoke(scope, e)
+                        val newToken = tokenProvider.invoke(e)
                         preferences.storeUserToken(newToken)
                         connectionModule.updateToken(newToken)
                     }
