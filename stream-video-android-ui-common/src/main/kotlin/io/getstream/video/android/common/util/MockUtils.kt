@@ -50,8 +50,8 @@ public val mockCall: Call
     )
 
 @InternalStreamVideoApi
-public val mockVideoTrackWrapper: io.getstream.video.android.core.model.TrackWrapper
-    inline get() = io.getstream.video.android.core.model.TrackWrapper(
+public val mockVideoMediaTrack: io.getstream.video.android.core.model.MediaTrack
+    inline get() = io.getstream.video.android.core.model.VideoTrack(
         UUID.randomUUID().toString(), VideoTrack(123)
     )
 

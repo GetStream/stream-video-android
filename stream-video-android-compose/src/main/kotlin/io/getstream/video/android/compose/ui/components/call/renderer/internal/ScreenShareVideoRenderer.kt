@@ -56,7 +56,7 @@ public fun ScreenShareVideoRenderer(
                 .fillMaxSize()
                 .align(Alignment.Center),
             call = call,
-            videoTrackWrapper = session.track,
+            mediaTrack = session.track,
             onRender = onRender,
             trackType = TrackType.TRACK_TYPE_SCREEN_SHARE,
             sessionId = session.participant.sessionId
