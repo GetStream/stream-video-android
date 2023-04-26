@@ -423,8 +423,8 @@ public abstract interface class io/getstream/video/android/core/StreamVideo {
 }
 
 public final class io/getstream/video/android/core/StreamVideoBuilder {
-	public fun <init> (Landroid/content/Context;Ljava/lang/String;Lio/getstream/video/android/core/GEO;Lio/getstream/video/android/core/model/User;Ljava/lang/String;Lkotlin/jvm/functions/Function3;Ljava/util/List;Ljava/util/List;JLio/getstream/video/android/core/logging/LoggingLevel;Lkotlin/jvm/functions/Function1;Ljava/util/List;Z)V
-	public synthetic fun <init> (Landroid/content/Context;Ljava/lang/String;Lio/getstream/video/android/core/GEO;Lio/getstream/video/android/core/model/User;Ljava/lang/String;Lkotlin/jvm/functions/Function3;Ljava/util/List;Ljava/util/List;JLio/getstream/video/android/core/logging/LoggingLevel;Lkotlin/jvm/functions/Function1;Ljava/util/List;ZILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun <init> (Landroid/content/Context;Ljava/lang/String;Lio/getstream/video/android/core/GEO;Lio/getstream/video/android/core/model/User;Ljava/lang/String;Lkotlin/jvm/functions/Function2;Ljava/util/List;Ljava/util/List;JLio/getstream/video/android/core/logging/LoggingLevel;Lkotlin/jvm/functions/Function1;Ljava/util/List;Z)V
+	public synthetic fun <init> (Landroid/content/Context;Ljava/lang/String;Lio/getstream/video/android/core/GEO;Lio/getstream/video/android/core/model/User;Ljava/lang/String;Lkotlin/jvm/functions/Function2;Ljava/util/List;Ljava/util/List;JLio/getstream/video/android/core/logging/LoggingLevel;Lkotlin/jvm/functions/Function1;Ljava/util/List;ZILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun build ()Lio/getstream/video/android/core/StreamVideo;
 	public final fun getVideoDomain ()Ljava/lang/String;
 	public final fun setVideoDomain (Ljava/lang/String;)V
