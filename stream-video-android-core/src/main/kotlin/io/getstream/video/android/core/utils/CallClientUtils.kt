@@ -24,32 +24,60 @@ import org.webrtc.SessionDescription
 /**
  * Enabling DTX or RED requires mangling the SDP a bit
  */
-fun mangleSDP(
+fun mangleSdpUtil(
     sdp: SessionDescription,
     enableRed: Boolean = true,
     enableDtx: Boolean = true
 ): SessionDescription {
-    return sdp
-    val lines = sdp.description.split("\r\n")
-    val modifiedLines = mutableListOf<String>()
-    var opusPayloadType: String? = null
-
-    for (line in lines) {
-        when {
-            enableRed && line.contains("opus/48000") -> {
-                opusPayloadType = line.split(" ")[0].substringAfter("a=rtpmap:")
-                modifiedLines.add("$line;red=1;useinbandfec=1") // Enable RED
-            }
-
-            enableDtx && line.startsWith("a=extmap") && line.contains("urn:ietf:params:rtp-hdrext:ssrc-audio-level") && opusPayloadType != null -> {
-                modifiedLines.add("$line\r\na=fmtp:$opusPayloadType usedtx=1") // Enable DTX
-            }
-
-            else -> modifiedLines.add(line)
-        }
+    // we don't touch the answer (for now)
+    if (sdp.type == SessionDescription.Type.ANSWER) {
+        return sdp
+    }
+    var description = sdp.description
+    if (enableDtx) {
+        description = description.replace("useinbandfec=1", "useinbandfec=1;usedtx=1")
     }
 
-    return SessionDescription(sdp.type, modifiedLines.joinToString("\r\n"))
+    if (enableRed) {
+        val lines = description.split("\r\n").toMutableList()
+        val redLine = lines.indices.find { lines[it].contains("a=rtpmap") && lines[it].contains("red/48000") }
+        val opusLine = lines.indices.find { lines[it].contains("a=rtpmap") && lines[it].contains("opus/48000") }
+        // we only do something if both are enabled
+        if (redLine != null && opusLine != null) {
+            val opusIsFirst = opusLine < redLine
+            if (opusIsFirst) {
+                // we need to swap the red and opus lines
+                val redLineString = lines[redLine]
+                val opusLineString = lines[opusLine]
+                lines[redLine] = opusLineString
+                lines[opusLine] = redLineString
+            }
+        }
+        description = lines.joinToString("\r\n")
+    }
+
+    if (true) {
+        // prefer vp8
+
+        val lines = description.split("\r\n").toMutableList()
+        val h264Line = lines.indices.find { lines[it].contains("a=rtpmap:100 H264/90000") }
+        val vp8Line = lines.indices.find { lines[it].contains("a=rtpmap:96 VP8/90000") }
+        // we only do something if both are enabled
+        if (h264Line != null && vp8Line != null) {
+            val h264IsFirst = h264Line < vp8Line
+            if (h264IsFirst) {
+                // we need to swap the h264 and vp8 lines
+                val h264LineString = lines[h264Line]
+                val vp8LineString = lines[vp8Line]
+                lines[h264Line] = vp8LineString
+                lines[vp8Line] = h264LineString
+            }
+        }
+        description = lines.joinToString("\r\n")
+        description = description.replace("m=video 9 UDP/TLS/RTP/SAVPF 100 101 96 97 98 99 35 36 125 124 127", "m=video 9 UDP/TLS/RTP/SAVPF 96 100 101 97 98 99 35 36 125 124 127")
+    }
+
+    return SessionDescription(sdp.type, description)
 }
 
 @JvmSynthetic

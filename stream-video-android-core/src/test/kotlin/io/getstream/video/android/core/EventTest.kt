@@ -302,13 +302,6 @@ class EventTest : IntegrationTestBase(connectCoordinatorWS = false) {
     }
 
     @Test
-    fun `Member added or removed event`() = runTest {
-//        val event = CallMemberAddedEvent(
-//            callCid = call.cid
-//        )
-    }
-
-    @Test
     fun `Reaction event`() = runTest {
         val reactionEvent = CallReactionEvent(
             callCid = call.cid,

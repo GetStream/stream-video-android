@@ -16,8 +16,10 @@
 
 package io.getstream.video.android.core.socket.internal
 
-import android.os.Handler
-import android.os.Looper
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import java.util.*
 import kotlin.math.floor
 import kotlin.math.max
@@ -28,65 +30,73 @@ private const val MONITOR_INTERVAL = 1000L
 private const val NO_EVENT_INTERVAL_THRESHOLD = 30 * 1000L
 private const val MONITOR_START_DELAY = 1000L
 
-internal class HealthMonitor(private val healthCallback: HealthCallback) {
+/**
+ * The health monitor sends a health check ping every HEALTH_CHECK_INTERVAL milliseconds.
+ *
+ * It tracks when we last received (any) event.
+ * If we go more than NO_EVENT_INTERVAL_THRESHOLD milliseconds without receiving an event
+ * We know the connection is broken and disconnect
+ *
+ * The healthCallback exposes 2 methods
+ * - reconnect (tells the socket to reconnect)
+ * - check (tells the socket to send a healthcheck ping)
+ *
+ * Whenever the socket receives an event, monitor.ack should be called
+ */
+internal class HealthMonitor(private val healthCallback: HealthCallback, private val scope: CoroutineScope) {
 
-    private val delayHandler = Handler(Looper.getMainLooper())
+    private var reconnectInProgress: Boolean = false
+    private lateinit var healthPingJob: Job
+    private lateinit var monitorJob: Job
+
     private var consecutiveFailures = 0
     private var disconnected = false
     private var lastEventDate: Date = Date()
 
-    private val reconnect = Runnable {
-        if (needToReconnect()) {
-            healthCallback.reconnect()
-        }
-    }
-
-    private val healthCheck: Runnable = Runnable {
-        healthCallback.check()
-        delayHandler.postDelayed(monitor, HEALTH_CHECK_INTERVAL)
-    }
-
-    private val monitor = Runnable {
-        if (needToReconnect()) {
-            reconnect()
-        } else {
-            delayHandler.postDelayed(healthCheck, MONITOR_INTERVAL)
-        }
-    }
-
     fun start() {
         lastEventDate = Date()
         disconnected = false
-        resetHealthMonitor()
+
+        healthPingJob = scope.launch {
+
+            while (true) {
+                delay(HEALTH_CHECK_INTERVAL)
+                // send the ping
+                healthCallback.check()
+            }
+        }
+
+        monitorJob = scope.launch {
+
+            while (true) {
+                delay(MONITOR_INTERVAL)
+                if (needToReconnect()) {
+                    reconnect()
+                }
+            }
+        }
     }
 
     fun stop() {
-        delayHandler.removeCallbacks(monitor)
-        delayHandler.removeCallbacks(reconnect)
-        delayHandler.removeCallbacks(healthCheck)
+        healthPingJob.cancel()
+        monitorJob.cancel()
     }
 
     fun ack() {
         lastEventDate = Date()
-        delayHandler.removeCallbacks(reconnect)
         disconnected = false
         consecutiveFailures = 0
     }
 
-    fun onDisconnected() {
-        disconnected = true
-        resetHealthMonitor()
-    }
-
-    private fun resetHealthMonitor() {
-        stop()
-        delayHandler.postDelayed(monitor, MONITOR_START_DELAY)
-    }
-
-    private fun reconnect() {
-        stop()
-        val retryInterval = getRetryInterval(++consecutiveFailures)
-        delayHandler.postDelayed(reconnect, retryInterval)
+    private suspend fun reconnect() {
+        if (!reconnectInProgress) {
+            reconnectInProgress = true
+            val retryInterval = getRetryInterval(consecutiveFailures)
+            consecutiveFailures++
+            delay(retryInterval)
+            healthCallback.reconnect()
+            reconnectInProgress = false
+        }
     }
 
     private fun needToReconnect() =
@@ -94,6 +104,7 @@ internal class HealthMonitor(private val healthCallback: HealthCallback) {
 
     @Suppress("MagicNumber")
     private fun getRetryInterval(consecutiveFailures: Int): Long {
+        if (consecutiveFailures == 0) return 0
         val max = min(500 + consecutiveFailures * 2000, 25000)
         val min = min(
             max(250, (consecutiveFailures - 1) * 2000),
@@ -104,6 +115,6 @@ internal class HealthMonitor(private val healthCallback: HealthCallback) {
 
     interface HealthCallback {
         fun check()
-        fun reconnect()
+        suspend fun reconnect()
     }
 }

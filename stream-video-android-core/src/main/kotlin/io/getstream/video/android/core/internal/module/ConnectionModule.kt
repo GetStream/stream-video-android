@@ -143,6 +143,7 @@ internal class ConnectionModule(
     ): OkHttpClient {
         // create a new OkHTTP client and set timeouts
         // TODO: map logging level
+
         return OkHttpClient.Builder()
             .addInterceptor(
                 authInterceptor
@@ -199,9 +200,9 @@ internal class ConnectionModule(
             sfuUrl,
             sessionId,
             sfuToken,
+            preferences.getApiKey(),
             getSubscriberSdp,
             scope,
-            okHttpClient,
             networkStateProvider
         )
     }
@@ -227,18 +228,47 @@ internal class SfuConnectionModule(
     /** the session id, generated when we join/ client side */
     sessionId: String,
     /** A token which gives you access to the sfu */
-    sfuToken: String,
+    val sfuToken: String,
+    /** A token which gives you access to the sfu */
+    val apiKey: String,
     /** Function that gives a fresh SDP */
     getSubscriberSdp: suspend () -> String,
     /** The scope to use for the socket */
     scope: CoroutineScope = CoroutineScope(DispatcherProvider.IO),
-    /** Inject your ok HttpClient */
-    okHttpClient: OkHttpClient,
     /** Network monitoring */
     networkStateProvider: NetworkStateProvider
 ) {
     internal lateinit var sfuSocket: SfuSocket
     val updatedSignalUrl = sfuUrl.removeSuffix(suffix = "/twirp")
+
+    private fun buildSfuOkHttpClient(): OkHttpClient {
+        val connectionTimeoutInMs = 10000L
+        // create a new OkHTTP client and set timeouts
+        // TODO: map logging level
+        val authInterceptor =
+            CoordinatorAuthInterceptor(apiKey, sfuToken)
+        val baseUrlInterceptor = BaseUrlInterceptor(null)
+        return OkHttpClient.Builder()
+            .addInterceptor(
+                authInterceptor
+            )
+            .addInterceptor(
+                HttpLoggingInterceptor().apply {
+                    level = HttpLoggingInterceptor.Level.BASIC
+                }
+            )
+            .addInterceptor(
+                baseUrlInterceptor
+            )
+            .retryOnConnectionFailure(true)
+            .connectTimeout(connectionTimeoutInMs, TimeUnit.MILLISECONDS)
+            .writeTimeout(connectionTimeoutInMs, TimeUnit.MILLISECONDS)
+            .readTimeout(connectionTimeoutInMs, TimeUnit.MILLISECONDS)
+            .callTimeout(connectionTimeoutInMs, TimeUnit.MILLISECONDS)
+            .build()
+    }
+
+    val okHttpClient = buildSfuOkHttpClient()
 
     internal val signalRetrofitClient: Retrofit by lazy {
         Retrofit.Builder()

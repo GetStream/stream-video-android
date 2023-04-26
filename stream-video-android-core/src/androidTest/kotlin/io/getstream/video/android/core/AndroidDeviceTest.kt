@@ -16,12 +16,25 @@
 
 package io.getstream.video.android.core
 
+import android.Manifest
+import androidx.test.rule.GrantPermissionRule
 import com.google.common.truth.Truth.assertThat
 import io.getstream.log.taggedLogger
+import io.getstream.video.android.core.events.ChangePublishQualityEvent
 import io.getstream.video.android.core.events.JoinCallResponseEvent
 import io.getstream.video.android.core.utils.buildAudioConstraints
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.test.runTest
+import kotlinx.coroutines.withTimeout
+import org.junit.Rule
 import org.junit.Test
+import org.webrtc.DefaultVideoDecoderFactory
+import org.webrtc.DefaultVideoEncoderFactory
+import org.webrtc.MediaStreamTrack
+import org.webrtc.PeerConnection
+import org.webrtc.RTCStats
+import org.webrtc.VideoCodecInfo
+import stream.video.sfu.event.ChangePublishQuality
 
 /**
  * Things to test in a real android environment
@@ -36,24 +49,48 @@ import org.junit.Test
  * * Does the SFU WS connect
  * * Do we receive the join event
  */
-class AndroidDeviceTest : IntegrationTestBase() {
+class AndroidDeviceTest : IntegrationTestBase(connectCoordinatorWS = false) {
 
     private val logger by taggedLogger("Test:AndroidDeviceTest")
 
+    @get:Rule
+    var mRuntimePermissionRule = GrantPermissionRule
+        .grant(Manifest.permission.BLUETOOTH_CONNECT)
+
     @Test
     fun camera() = runTest {
-        val manager = MediaManagerImpl(context)
-        val camera = manager.camera
+
+        val camera = call.mediaManager.camera
         assertThat(camera).isNotNull()
         camera.startCapture()
     }
 
     @Test
-    fun microphone() = runTest {
-        val manager = MediaManagerImpl(context)
-        val mic = manager.microphone
-        assertThat(mic).isNotNull()
-        mic.startCapture()
+    fun codecsFun() = runTest {
+        val codecs = getSupportedCodecs()
+        println("Supported codecs:")
+        codecs.forEach { codec ->
+            println("Name: ${codec.name}, Payload: $codec")
+        }
+        println(codecs)
+    }
+
+    fun getSupportedCodecs(): List<VideoCodecInfo> {
+        val rootEglBase = clientImpl.peerConnectionFactory.eglBase
+        val encoderFactory = DefaultVideoEncoderFactory(rootEglBase.eglBaseContext, true, true)
+        val decoderFactory = DefaultVideoDecoderFactory(rootEglBase.eglBaseContext)
+
+        val supportedEncoderCodecs: MutableList<VideoCodecInfo> = mutableListOf()
+        encoderFactory.supportedCodecs.forEach { codec ->
+            supportedEncoderCodecs.add(codec)
+        }
+
+        val supportedDecoderCodecs: MutableList<VideoCodecInfo> = mutableListOf()
+        decoderFactory.supportedCodecs.forEach { codec ->
+            supportedDecoderCodecs.add(codec)
+        }
+
+        return (supportedEncoderCodecs + supportedDecoderCodecs).distinctBy { it.name }
     }
 
     @Test
@@ -81,8 +118,6 @@ class AndroidDeviceTest : IntegrationTestBase() {
     fun joinACall() = runTest {
         val joinResult = call.join()
         assertSuccess(joinResult)
-        println("showing events")
-        println(events)
         val joinResponse = waitForNextEvent<JoinCallResponseEvent>()
         assertThat(call.state.connection.value).isEqualTo(ConnectionState.Connected)
 
@@ -90,5 +125,130 @@ class AndroidDeviceTest : IntegrationTestBase() {
         assertThat(participantsResponse.size).isEqualTo(1)
         val participants = call.state.participants
         assertThat(participants.value.size).isEqualTo(1)
+    }
+
+    @Test
+    fun localTrack() = runTest {
+        // join will automatically start the audio and video capture
+        // based on the call settings
+        val joinResult = call.join()
+        assertSuccess(joinResult)
+
+        // verify the video track is present and working
+        val videoWrapper = call.state.me.value?.videoTrackWrapped
+        assertThat(videoWrapper?.video?.enabled()).isTrue()
+        assertThat(videoWrapper?.video?.state()).isEqualTo(MediaStreamTrack.State.LIVE)
+
+        // verify the audio track is present and working
+        val audioWrapper = call.state.me.value?.audioTrackWrapped
+        assertThat(audioWrapper?.audio?.enabled()).isTrue()
+        assertThat(audioWrapper?.audio?.state()).isEqualTo(MediaStreamTrack.State.LIVE)
+    }
+
+    @Test
+    fun publishing() = runTest {
+        // TODO: disable simulcast
+        // join will automatically start the audio and video capture
+        val call = client.call("default", "NnXAIvBKE4Hy")
+        val joinResult = call.join()
+        assertSuccess(joinResult)
+
+        // wait for the ice connection state
+        withTimeout(3000) {
+            while (true) {
+                val iceConnectionState = call.session?.publisher?.connection?.iceConnectionState()
+                if (iceConnectionState == PeerConnection.IceConnectionState.CONNECTED) {
+                    break
+                }
+            }
+        }
+
+        // verify we have running tracks
+        assertThat(call.mediaManager.videoTrack.enabled())
+        assertThat(call.mediaManager.audioTrack.enabled())
+        assertThat(call.mediaManager.videoTrack.state()).isEqualTo(MediaStreamTrack.State.LIVE)
+
+        // check that the transceiver is setup
+        assertThat(call.session?.publisher?.videoTransceiver).isNotNull()
+
+        // see if we're sending data
+
+        Thread.sleep(20000)
+        val report = call.session?.getPublisherStats()?.value
+        assertThat(report).isNotNull()
+
+        // verify we are sending data to the SFU
+        // it is RTCOutboundRtpStreamStats && it.bytesSent > 0
+        val allStats = report?.statsMap?.values
+        val networkOut = allStats?.filter { it.type == "outbound-rtp" }?.map { it as RTCStats }
+        val localSdp = call.session?.publisher?.localSdp
+        val remoteSdp = call.session?.publisher?.remoteSdp
+
+        println(call.session?.publisher?.localSdp)
+        println(call.session?.publisher?.remoteSdp)
+
+        println(networkOut)
+    }
+
+    @Test
+    fun receiving() = runTest {
+        // TODO: have a specific SFU setting to send back fake data
+        // TODO: replace the id with your active call
+        val call = client.call("default", "NnXAIvBKE4Hy")
+        val joinResult = call.join()
+        assertSuccess(joinResult)
+        clientImpl.debugInfo.log()
+
+        // wait for the ice connection state
+        withTimeout(3000) {
+            while (true) {
+                val iceConnectionState = call.session?.subscriber?.connection?.iceConnectionState()
+                if (iceConnectionState == PeerConnection.IceConnectionState.CONNECTED) {
+                    break
+                }
+            }
+        }
+
+        // see if the ice connection is ok on the subscriber
+        val iceConnectionState = call.session?.subscriber?.connection?.iceConnectionState()
+        assertThat(iceConnectionState).isEqualTo(PeerConnection.IceConnectionState.CONNECTED)
+
+        assertThat(call.state.participants.value.size).isGreaterThan(1)
+        // loop over the participants
+        call.state.participants.value.forEach { participant ->
+            val videoTrack = participant.videoTrackWrapped?.video
+            assertThat(videoTrack).isNotNull()
+            assertThat(videoTrack?.enabled()).isTrue()
+            assertThat(videoTrack?.state()).isEqualTo(MediaStreamTrack.State.LIVE)
+            assertThat(participant.videoEnabled.value).isTrue()
+
+            val audioTrack = participant.audioTrackWrapped?.audio
+            assertThat(audioTrack).isNotNull()
+            assertThat(audioTrack?.enabled()).isTrue()
+            assertThat(audioTrack?.state()).isEqualTo(MediaStreamTrack.State.LIVE)
+            assertThat(participant.audioEnabled.value).isTrue()
+        }
+
+        // verify the stats are being tracked
+        val report = call.session?.getSubscriberStats()?.value
+
+        Thread.sleep(20000)
+        val allStats = report?.statsMap?.values
+        val networkOut = allStats?.filter { it.type == "inbound-rtp" }?.map { it as RTCStats }
+
+        assertThat(report).isNotNull()
+    }
+
+    @Test
+    fun dynascale() = runTest {
+        // join will automatically start the audio and video capture
+        // based on the call settings
+        val joinResult = call.join()
+        assertSuccess(joinResult)
+        delay(500)
+
+        val quality = ChangePublishQuality()
+        val event = ChangePublishQualityEvent(changePublishQuality = quality)
+        call.session?.updatePublishQuality(event)
     }
 }

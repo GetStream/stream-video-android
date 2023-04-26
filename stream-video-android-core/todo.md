@@ -1,41 +1,90 @@
 
+## Essentials for a good Beta
+
+Important
+* Docs & developer experience
+* Sample /demo app
+* Excellent stability
+
+Not as important
+* Supporting all features
+
 ## Timeline
 
 ### Week 1: Refactor LLC & State. Setup testing
 ### Week 2: LLC & State Stability. Compose testing & previews
 ### Week 3: Sample app, update compose to LLC & State changes. New events, socket & token provider. Call UI. Guest users & moderation endpoints
-### Week 4: LLC & state test coverage + Demo & Dogfooding apps
+### Week 4: LLC & state test coverage + Demo & Dogfooding apps + RTC & Media fixes
+### Week 5: Sample app stability
+
+- Dynascale... visibility isn't handled well in CallSingleVideoRendered & VideoRenderer
+- Publishing: The video doesn't render in react, I suspect simulcast issue
+- Receiving
+
+### Biggest open tasks & estimates
+
+* Docs. 4 weeks or so
+* Cross device testing. 2-4 weeks
+* Reconnect & cleanup. 2 weeks
+* Server/little endpoint stuff etc. 1 week
+* User app testing. Ie have people use it. 2 weeks or so
+* Compose & App: Unsure
+
+### High level issues
+
+- [ ] Join flow is too slow
+- [ ] Reconnection support needs work
+- [ ] Docs need a lot of work
+- [ ] SDK doesn't handle all edge cases yet
 
 
 
-### Week 5: Render video/join calls
+### App & Compose
 
-- RTC & Audio testing
-- How to ensure that video resolutions are sent to the server
-- 
-- Step 1: Render local video using the new API and compose
-- Step 2: Upload local video to the SFU
-- Step 3: Join a call and render participants
+- Reactions don't show up
+- Use participant.sessionId instead of user id. Key "thierry@getstream.io" was already used. If you are using LazyColumn/Row please make sure you provide a unique key for each item
+- Make buttons easier to customize. right now there is a list of items. something like this would be nicer:
+  <CallControls><VolumeControl /><CameraMuteControl> </CallControls>etc
+- Fix the buttons, right now they don't all work
+- Screensharing doesn't show up
+- Chat integration (we need an event from the server though)
+- Token expiration isn't handled well in dogfooding app
+- Crashlytics for sample and dogfooding apps
+- PIP
+- Ringing calls (wait for push and updated endpoints from server)
 
-### RTC TODO
 
-- [X] Media manager class to enable easy testing of all audio/video stuff
-- [ ] Move setCameraEnabled & setMicrophoneEnabled
-- [ ] Move muting and clean it up
-- [ ] Leave & End flows
+### RTC & Media TODO
+
+- [ ] Improve how we mangle SDP tokens. (edit the audio line and video line, don't swap lines)
 - [ ] Review how UI changes & pagination are connected to the video tracks. See call initRenderer and updateParticipantsSubscriptions
 - [ ] Implement dynascale
+- [ ] Tests for the media manager
+- [ ] Screensharing
+- [ ] Error classes for Media/Camera/Mic & Joining a call. That wrap the many things that can go wrong.
+- [ ] Leave & End flows
+- [ ] Talking while muted notification
+- [X] Opus Red
+- [X] Opus DTX
+- [X] Clean up the media manager class Mic management
+- [X] Move enabling/disabling/state and clean it up
+- [X] Move setCameraEnabled & setMicrophoneEnabled
+- [X] Clean up the media manager class Camera management
+- [X] Ensure errors from sfu are bubbled up
+- [X] Media manager class to enable easy testing of all audio/video stuff
+- [X] Tests that verify the local track is working
+- [X] Tests that verify we are sending our local track
+- [X] setLocalTrack is not called
 
-### TODOs
+### Other
 
 - Review the 200 todos
-
+- Unit test on Android that customer success can run to test the SDK/ edit things for a customer
 
 ### LLC TODO
 
-- [ ] Error.NetworkError vs ErrorResponse. Having 2 classes is confusing. Error format is slightly differences in 3 places. 
+- [ ] Error.NetworkError vs ErrorResponse. Having 2 classes is confusing. Error format is slightly differences in 4 places. 
 - [ ] Remove unused code
-- [ ] Join flow performance
 - [ ] Move SFU event to swap between SFUs and handle failure
 - [ ] Reconnect after SFU breaks (https://www.notion.so/Reconnection-Failure-handling-f6991fd2e5584380bb2d2cb5e8ac5303)
 - [ ] Audio filter example
@@ -130,8 +179,8 @@
 
 ### Documentation (code level)
 
-- [ ] Client docs
-- [ ] Call docs
+- [X] Client docs
+- [X] Call docs
 
 ### Documentation Markdown
 
@@ -160,9 +209,9 @@
 [X] Update call endpoints doesn’t expose team or startsAt. I get why we don’t expose team, not sure about startsAt
 [X] Get/Create etc don’t specify connection_id, this breaks the ability to watch
 [X] Not being able to edit settings on a call you created seems like the wrong default: “”User ‘thierry’ with role ‘user’ is not allowed to perform action UpdateCallSettings in scope ‘video:default’“, serverErrorCode=17, statusCode=-1, cause=java.lang.Throwable: ))”
+[X] Participant.online field is weird. Aren't you always online as a participant?
 [ ] Events for updating users 
 [ ] Participant count (for livestreams you cant rely on the list)
-[ ] Participant.online field is weird. Aren't you always online as a participant?
 [ ] ConnectionQualityInfo is a list, audio levels is a map. Lets standardize
 [ ] Accept/reject call endpoints
 [ ] What about codec switching?
@@ -173,6 +222,11 @@
 [ ] CallMemberUpdatedPermissionEvent. Weird that call and members are included
 [ ] message=GetOrCreateCall failed with error: "The following users are involved in call create operation, but don't exist: [jaewoong]. Please create the user objects before setting up the call.
 [ ] review QueryMembersRequest
+[ ] target resolution / max resolution (default 960)
+[ ] if we should default to front or back camera
+[ ] should video be default on or off?
+[ ] should audio be default on or off?
+[ ] am i allowed to publish (IE should i create the publisher peer connection)
 
 ### Available tasks up for grabs
 
@@ -181,4 +235,3 @@
 - Pinning of participants. You pin/unpin and it sets pinnedAt and sorting takes it into account
 - Currently we use UserPreferencesManager. Jaewoong mentioned we should perhaps explore https://developer.android.com/topic/libraries/architecture/datastore
 - Measure latency isn't 100% ok. You can't set a timeout using withTimeout and collect the measurements that we have. This relates to threading vs coroutines and withTimeout not working
-- Disconnect/ garbage collect flow needs a full round of review

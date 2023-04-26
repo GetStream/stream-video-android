@@ -70,9 +70,13 @@ public class Call(
     val id: String,
     val user: User,
 ) {
+    internal val clientImpl = client as StreamVideoImpl
     private val logger by taggedLogger("Call")
+
     /** The call state contains all state such as the participant list, reactions etc */
     val state = CallState(this, user)
+
+    val sessionId by lazy { session?.sessionId }
 
     /** Camera gives you access to the local camera */
     val camera by lazy { mediaManager.camera }
@@ -84,8 +88,7 @@ public class Call(
 
     /** Session handles all real time communication for video and audio */
     internal var session: RtcSession? = null
-    private val clientImpl = client as StreamVideoImpl
-    internal val mediaManager by lazy { MediaManagerImpl(clientImpl.context) }
+    internal val mediaManager by lazy { MediaManagerImpl(clientImpl.context, this, clientImpl.scope, clientImpl.peerConnectionFactory.eglBase.eglBaseContext) }
 
     /** Basic crud operations */
     suspend fun get(): Result<GetCallResponse> {
@@ -161,16 +164,19 @@ public class Call(
 
     suspend fun join(create: CreateCallOptions? = null): Result<RtcSession> {
         // step 1. call the join endpoint to get a list of SFUs
+        val timer = clientImpl.debugInfo.trackTime("call.join")
         val result = joinRequest(create)
 
         if (result !is Success) {
             return result as Failure
         }
+        timer.split("join request completed")
 
         // step 2. measure latency
         val edgeUrls = result.value.edges.map { it.latencyUrl }
         // measure latency in parallel
         val measurements = clientImpl.measureLatency(edgeUrls)
+        timer.split("latency measured")
 
         // upload our latency measurements to the server
         val selectEdgeServerResult = clientImpl.selectEdgeServer(
@@ -197,14 +203,21 @@ public class Call(
             latencyResults = measurements.associate { it.latencyUrl to it.measurements }
         )
 
+        timer.split("rtc session init")
+
         session?.connect()
+
+        timer.finish("rtc connect completed")
+
+        client.state.setActiveCall(this)
 
         return Success(value = session!!)
     }
 
     /** Leave the call, but don't end it for other users */
-    fun leave() {
+    fun leave(): Result<Unit> {
         // TODO
+        return Result.Success(Unit)
     }
 
     /** ends the call for yourself as well as other users */
@@ -242,7 +255,18 @@ public class Call(
         return clientImpl.muteUsers(type, id, request)
     }
 
+    fun setVisibility(sessionId: String, trackType: TrackType, visible: Boolean) {
+        session?.updateDisplayedTrackVisibility(sessionId, trackType, visible)
+    }
+
     // TODO: review this
+    /**
+     * Perhaps it would be nicer to have an interface. Any UI elements that renders video should implement it
+     *
+     * And call a callback for
+     * - visible/hidden
+     * - resolution changes
+     */
     public fun initRenderer(
         videoRenderer: VideoTextureViewRenderer,
         sessionId: String,
@@ -258,8 +282,8 @@ public class Call(
                 override fun onFirstFrameRendered() {
                     logger.d { "[initRenderer.onFirstFrameRendered] #sfu; sessionId: $sessionId" }
                     if (trackType != TrackType.TRACK_TYPE_SCREEN_SHARE) {
-                        state.updateParticipantTrackSize(
-                            sessionId, videoRenderer.measuredWidth, videoRenderer.measuredHeight
+                        session?.updateDisplayedTrackSize(
+                            sessionId, trackType, videoRenderer.measuredWidth, videoRenderer.measuredHeight
                         )
                     }
                     onRender(videoRenderer)
@@ -269,8 +293,8 @@ public class Call(
                     logger.d { "[initRenderer.onFrameResolutionChanged] #sfu; sessionId: $sessionId" }
 
                     if (trackType != TrackType.TRACK_TYPE_SCREEN_SHARE) {
-                        state.updateParticipantTrackSize(
-                            sessionId, videoRenderer.measuredWidth, videoRenderer.measuredHeight
+                        session?.updateDisplayedTrackSize(
+                            sessionId, trackType, videoRenderer.measuredWidth, videoRenderer.measuredHeight
                         )
                     }
                 }

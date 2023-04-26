@@ -14,14 +14,13 @@
  * limitations under the License.
  */
 
-@file:OptIn(ExperimentalCoroutinesApi::class)
-
 package io.getstream.video.android.core.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import io.getstream.log.taggedLogger
 import io.getstream.result.Error
+import io.getstream.result.Result
 import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.StreamVideo
 import io.getstream.video.android.core.StreamVideoImpl
@@ -34,7 +33,6 @@ import io.getstream.video.android.core.call.state.ToggleCamera
 import io.getstream.video.android.core.call.state.ToggleMicrophone
 import io.getstream.video.android.core.call.state.ToggleSpeakerphone
 import io.getstream.video.android.core.permission.PermissionManager
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
@@ -78,6 +76,8 @@ public class CallViewModel(
     private val _callDeviceState = MutableStateFlow(CallDeviceState())
     public val callDeviceState: StateFlow<CallDeviceState> = _callDeviceState
 
+    private var onLeaveCall: ((Result<Unit>) -> Unit)? = null
+
     public fun joinCall(
         onSuccess: (RtcSession) -> Unit = {},
         onFailure: (Error) -> Unit = {}
@@ -87,6 +87,8 @@ public class CallViewModel(
                 val result = call.join()
                 result.onSuccess {
                     onSuccess.invoke(it)
+                    permissions?.requestPermission(android.Manifest.permission.CAMERA)
+                    permissions?.requestPermission(android.Manifest.permission.RECORD_AUDIO)
                 }.onError {
                     onFailure.invoke(it)
                 }
@@ -102,13 +104,23 @@ public class CallViewModel(
 
     public fun onCallAction(callAction: CallAction) {
         when (callAction) {
-            is ToggleSpeakerphone -> call.speaker.enable(callAction.isEnabled)
-            is ToggleCamera -> call.camera.enable(callAction.isEnabled)
-            is ToggleMicrophone -> call.microphone.enable(callAction.isEnabled)
+            is ToggleSpeakerphone -> call.speaker.setEnabled(callAction.isEnabled)
+            is ToggleCamera -> call.camera.setEnabled(callAction.isEnabled)
+            is ToggleMicrophone -> call.microphone.setEnabled(callAction.isEnabled)
             is FlipCamera -> call.camera.flip()
-            is LeaveCall -> call.leave()
+            is LeaveCall -> onLeaveCall()
+
             else -> Unit
         }
+    }
+
+    private fun onLeaveCall() {
+        val result = call.leave()
+        onLeaveCall?.invoke(result)
+    }
+
+    public fun setOnLeaveCall(onLeaveCall: (Result<Unit>) -> Unit) {
+        this.onLeaveCall = onLeaveCall
     }
 
     public fun dismissCallInfoMenu() {

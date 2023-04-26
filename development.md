@@ -106,6 +106,7 @@ Typically for development you want to fail fast and loud. For production you wan
 ## WebRTC layer
 
 * RtcSession maintains all the tracks and the webrtc logic
+  https://www.notion.so/stream-wiki/WebRTC-SFU-Setup-37b5a4a260264d3f92332774e5ec9ee9#ee96064deb73480383f6be2a6a36a315
 
 ### RTC offer/answer cycle
 
@@ -125,6 +126,11 @@ Camera/device changes -> listener in ActiveSFUSession -> updates the tracks.
   * It should be triggered as we paginate through participants
   * Or when the UI layout changes
 * The SFU tells us what resolution to publish using the ChangePublishQualityEvent event
+
+For dynascale to work, we always need which participants are displayed and at what resolution.
+The current approach calls `updateParticipantsSubscriptions` from the viewModel.
+If someone doesn't use our viewmodel, dynascale stops working. 
+Ideally we find a way to integrate this in such a way that customers can't forget to use it by accident.
 
 ### ParticipantState
 
@@ -189,11 +195,49 @@ sealed class RingingState() {
 }
 ```
 
+### Media Manager
+
+The media manager should support capturing local video with or without joining a call
+
+* Camera2Capturer starts capture the video
+* It captures it on SurfaceTextureHelper
+* The webrtc part needs to know the video capture resolution
+
 ### Dogfooding vs Demo App
 
 * dogfooding has google authentication. demo app has no authentication
 * demo app allows you to type in the call id and join, or create a new
 * dogfooding joins via a url deeplink
+
+### Dynascale
+
+Sfu -> Client
+- ChangePublishQualityEvent triggers RtcSession.updatePublishQuality. It enables/disables different resolutions in the simulcast
+
+Client -> Sfu
+- updateParticipantsSubscriptions subscribes to the participants we want to display
+- call.initRender tracks the resolution we render the video at. It writes it to updateParticipantTrackSize
+
+Question:
+- How do we know if a given video element is visible or not?
+- https://developer.android.com/jetpack/compose/side-effects#disposableeffect
+- https://proandroiddev.com/the-life-cycle-of-a-view-in-android-6a2c4665b95e (onDetachedFromWindow)
+- Our VideoRenderer removes the sink. But it doesn't unsubcribe from the SFU.
+- Requirements for any custom video renderer: Informs the state of the size it's rendering at, informs if it's visible or not
+
+Current issues
+- The view layer doesn't update the state to mark a participant as not displayed
+- updateParticipantsSubscriptions should run whenever the UI changes with a debounce of 100ms or so
+
+Goals
+- A customer integrating without the SDK knowing the size and visibility of video elements will lead to crashes in large calls. So we should prevent that.
+
+### Knowing if participant is publishing tracks
+
+- JoinCallResponse, ParticipantJoinedEvent contain published_tracks
+- TrackPublishedEvent, TrackUnpublishedEvent
+- Locally you call updateMuteState. It's not clear what this does. 
+Is muting connected to track publish/unpublish?
 
 ### Participant State
 

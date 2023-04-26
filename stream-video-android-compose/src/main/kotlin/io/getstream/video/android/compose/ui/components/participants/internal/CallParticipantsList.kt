@@ -110,7 +110,7 @@ private fun CallParticipantInfoItem(
         )
 
         Row(verticalAlignment = Alignment.CenterVertically) {
-            if (!participant.hasAudio) {
+            if (!participant.audioEnabled.collectAsState().value) {
                 Icon(
                     painter = painterResource(id = R.drawable.stream_video_ic_mic_off),
                     tint = VideoTheme.colors.errorAccent,
@@ -120,7 +120,7 @@ private fun CallParticipantInfoItem(
 
             Spacer(modifier = Modifier.width(8.dp))
 
-            if (!participant.hasVideo) {
+            if (!participant.videoEnabled.collectAsState().value) {
                 Icon(
                     painter = painterResource(id = R.drawable.stream_video_ic_videocam_off),
                     tint = VideoTheme.colors.errorAccent,

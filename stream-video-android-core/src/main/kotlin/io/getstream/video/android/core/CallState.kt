@@ -30,8 +30,8 @@ import io.getstream.video.android.core.events.SFUHealthCheckEvent
 import io.getstream.video.android.core.events.SubscriberOfferEvent
 import io.getstream.video.android.core.events.TrackPublishedEvent
 import io.getstream.video.android.core.events.TrackUnpublishedEvent
+import io.getstream.video.android.core.model.MediaTrack
 import io.getstream.video.android.core.model.ScreenSharingSession
-import io.getstream.video.android.core.model.TrackWrapper
 import io.getstream.video.android.core.model.User
 import io.getstream.video.android.core.utils.mapState
 import io.getstream.video.android.core.utils.toUser
@@ -72,6 +72,7 @@ import org.openapitools.client.models.VideoEvent
 import org.threeten.bp.Clock
 import org.threeten.bp.OffsetDateTime
 import stream.video.sfu.models.Participant
+import stream.video.sfu.models.TrackType
 import java.util.SortedMap
 
 /**
@@ -86,7 +87,7 @@ import java.util.SortedMap
  *
  *
  */
-public class CallState(private val call: Call, user: User) {
+public class CallState(private val call: Call, private val user: User) {
     private val logger by taggedLogger("CallState")
 
     /**
@@ -105,7 +106,9 @@ public class CallState(private val call: Call, user: User) {
         _participants.mapState { it.values.toList() }
 
     /** Your own participant state */
-    val me: StateFlow<ParticipantState?> = _participants.mapState { it.get(user.id) }
+    val me: StateFlow<ParticipantState?> = _participants.mapState {
+        it.get(call.clientImpl.sessionId)
+    }
 
     /** participants who are currently speaking */
     public val activeSpeakers =
@@ -179,10 +182,12 @@ public class CallState(private val call: Call, user: User) {
     }
 
     private val _backstage: MutableStateFlow<Boolean> = MutableStateFlow(false)
+
     /** if we are in backstage mode or not */
     val backstage: StateFlow<Boolean> = _backstage
 
     private val _broadcasting: MutableStateFlow<Boolean> = MutableStateFlow(false)
+
     /** if the call is being broadcasted to HLS */
     val broadcasting: StateFlow<Boolean> = _broadcasting
 
@@ -195,6 +200,7 @@ public class CallState(private val call: Call, user: User) {
     val startsAt: StateFlow<OffsetDateTime?> = _startsAt
 
     private val _updatedAt: MutableStateFlow<OffsetDateTime?> = MutableStateFlow(null)
+
     /** updatedAt */
     val updatedAt: StateFlow<OffsetDateTime?> = _updatedAt
 
@@ -216,7 +222,7 @@ public class CallState(private val call: Call, user: User) {
     private val _ingress: MutableStateFlow<CallIngressResponse?> = MutableStateFlow(null)
     val ingress: StateFlow<CallIngressResponse?> = _ingress
 
-    private val _screenSharingTrack: MutableStateFlow<TrackWrapper?> = MutableStateFlow(null)
+    private val _screenSharingTrack: MutableStateFlow<MediaTrack?> = MutableStateFlow(null)
 
     private val userToSessionIdMap = participants.mapState { participants ->
         participants.map { it.user.value.id to it.sessionId }.toMap()
@@ -247,19 +253,6 @@ public class CallState(private val call: Call, user: User) {
     private val _errors: MutableStateFlow<List<ErrorEvent>> =
         MutableStateFlow(emptyList())
     public val errors: StateFlow<List<ErrorEvent>> = _errors
-
-    public fun updateParticipantTrackSize(
-        sessionId: String,
-        measuredWidth: Int,
-        measuredHeight: Int
-    ) {
-        logger.v { "[updateParticipantTrackSize] SessionId: $sessionId, width:$measuredWidth, height:$measuredHeight" }
-        val participant = getParticipantBySessionId(sessionId)
-        participant?.let {
-            val updated = participant.copy(videoTrackSize = measuredWidth to measuredHeight)
-            updateParticipant(updated)
-        }
-    }
 
     fun handleEvent(event: VideoEvent) {
         logger.d { "Updating call state with event $event" }
@@ -435,10 +428,22 @@ public class CallState(private val call: Call, user: User) {
 
             is TrackPublishedEvent -> {
                 // handled by ActiveSFUSession
+                val participant = getOrCreateParticipant(event.sessionId, event.userId)
+                if (event.trackType == TrackType.TRACK_TYPE_AUDIO) {
+                    participant._audioEnabled.value = true
+                } else if (event.trackType == TrackType.TRACK_TYPE_VIDEO) {
+                    participant._videoEnabled.value = true
+                }
             }
 
             is TrackUnpublishedEvent -> {
                 // handled by ActiveSFUSession
+                val participant = getOrCreateParticipant(event.sessionId, event.userId)
+                if (event.trackType == TrackType.TRACK_TYPE_AUDIO) {
+                    participant._audioEnabled.value = false
+                } else if (event.trackType == TrackType.TRACK_TYPE_VIDEO) {
+                    participant._videoEnabled.value = false
+                }
             }
 
             is ConnectedEvent -> {
@@ -505,7 +510,11 @@ public class CallState(private val call: Call, user: User) {
         val participantState = if (participantMap.contains(sessionId)) {
             participantMap[sessionId]!!
         } else {
-            ParticipantState(sessionId = sessionId, call = call, initialUser = user ?: User(userId))
+            ParticipantState(
+                sessionId = sessionId,
+                call = call,
+                initialUser = user ?: User(userId),
+            )
         }
         if (updateFlow) {
             upsertParticipants(listOf(participantState))

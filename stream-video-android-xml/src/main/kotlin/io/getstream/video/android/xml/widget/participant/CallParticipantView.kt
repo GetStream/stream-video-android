@@ -24,7 +24,7 @@ import androidx.constraintlayout.widget.ConstraintSet
 import androidx.core.view.isVisible
 import io.getstream.log.taggedLogger
 import io.getstream.video.android.core.ParticipantState
-import io.getstream.video.android.core.model.TrackWrapper
+import io.getstream.video.android.core.model.MediaTrack
 import io.getstream.video.android.core.model.User
 import io.getstream.video.android.xml.databinding.StreamVideoViewCallParticipantBinding
 import io.getstream.video.android.xml.font.setTextStyle
@@ -63,7 +63,7 @@ public class CallParticipantView : CallCardView, VideoRenderer {
     /**
      * The track of the current participant.
      */
-    private var track: TrackWrapper? = null
+    private var track: MediaTrack? = null
 
     /**
      * Handler when the video renders.
@@ -142,9 +142,9 @@ public class CallParticipantView : CallCardView, VideoRenderer {
     public fun setParticipant(participant: ParticipantState) {
         binding.labelHolder.isVisible = !participant.isLocal
         setUserData(participant.user.value)
-        setTrack(participant.videoTrackWrapped)
+        setTrack(participant.videoTrack.value)
         setAvatarVisibility(participant)
-        setHasAudio(participant.hasAudio)
+        setHasAudio(participant.audioEnabled.value)
     }
 
     /**
@@ -178,11 +178,11 @@ public class CallParticipantView : CallCardView, VideoRenderer {
      *
      * @param track The [VideoTrackWrapper] of the participant.
      */
-    private fun setTrack(track: TrackWrapper?) {
+    private fun setTrack(track: MediaTrack?) {
         if (this.track == track) return
 
         try {
-            this.track?.video?.removeSink(binding.participantVideoRenderer)
+            this.track?.asVideoTrack()?.video?.removeSink(binding.participantVideoRenderer)
             this.track = track
         } catch (e: java.lang.Exception) {
             logger.e { "[setTrack] Failed to remove sink." }
@@ -192,7 +192,7 @@ public class CallParticipantView : CallCardView, VideoRenderer {
         if (track == null) return
 
         try {
-            this.track!!.video?.addSink(binding.participantVideoRenderer)
+            this.track!!.asVideoTrack()?.video?.addSink(binding.participantVideoRenderer)
             initRenderer()
         } catch (e: IllegalStateException) {
             logger.e { "[setTrack] Failed to add sink." }
@@ -224,7 +224,7 @@ public class CallParticipantView : CallCardView, VideoRenderer {
      * @param participant The [CallParticipantState] for the current participant.
      */
     private fun setAvatarVisibility(participant: ParticipantState) {
-        val track = participant.videoTrackWrapped
+        val track = participant.videoTrack.value
         val isVideoEnabled = try {
             track?.video?.enabled() == true
         } catch (error: Throwable) {
@@ -250,14 +250,17 @@ public class CallParticipantView : CallCardView, VideoRenderer {
                     constrainViewToParentBySide(holder, ConstraintSet.TOP, style.labelMargin)
                     constrainViewToParentBySide(holder, ConstraintSet.START, style.labelMargin)
                 }
+
                 CallParticipantLabelAlignment.TOP_RIGHT -> {
                     constrainViewToParentBySide(holder, ConstraintSet.TOP, style.labelMargin)
                     constrainViewToParentBySide(holder, ConstraintSet.END, style.labelMargin)
                 }
+
                 CallParticipantLabelAlignment.BOTTOM_LEFT -> {
                     constrainViewToParentBySide(holder, ConstraintSet.BOTTOM, style.labelMargin)
                     constrainViewToParentBySide(holder, ConstraintSet.START, style.labelMargin)
                 }
+
                 CallParticipantLabelAlignment.BOTTOM_RIGHT -> {
                     constrainViewToParentBySide(holder, ConstraintSet.BOTTOM, style.labelMargin)
                     constrainViewToParentBySide(holder, ConstraintSet.END, style.labelMargin)
@@ -269,7 +272,7 @@ public class CallParticipantView : CallCardView, VideoRenderer {
     override fun onDetachedFromWindow() {
         super.onDetachedFromWindow()
         binding.participantVideoRenderer.apply {
-            track?.video?.removeSink(this)
+            track?.asVideoTrack()?.video?.removeSink(this)
         }
         track = null
     }

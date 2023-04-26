@@ -219,8 +219,8 @@ open class PersistentSocket<T>(
                 connectionId = processedEvent.connectionId
                 _connectionState.value = SocketState.Connected(processedEvent)
                 if (!continuationCompleted) {
-                    connected.resume(processedEvent as T)
                     continuationCompleted = true
+                    connected.resume(processedEvent as T)
                 }
             }
 
@@ -241,6 +241,7 @@ open class PersistentSocket<T>(
                 if (processedEvent == null) {
                     logger.w { "[onMessage] failed to parse event: $text" }
                 } else {
+                    healthMonitor.ack()
                     events.emit(processedEvent)
                 }
             }
@@ -249,28 +250,27 @@ open class PersistentSocket<T>(
 
     /** Invoked when a binary (type `0x2`) message has been received. */
     override fun onMessage(webSocket: WebSocket, bytes: ByteString) {
-        logger.d { "[onMessage] bytes: $bytes" }
         val byteBuffer = bytes.asByteBuffer()
         val byteArray = ByteArray(byteBuffer.capacity())
         byteBuffer.get(byteArray)
         scope.launch {
             try {
                 val rawEvent = SfuEvent.ADAPTER.decode(byteArray)
-                logger.v { "[onMessage] rawEvent: $rawEvent" }
                 val message = RTCEventMapper.mapEvent(rawEvent)
                 if (message is ErrorEvent) {
                     val errorEvent = message as ErrorEvent
                     handleError(SfuSocketError(errorEvent.error))
                 }
                 // TODO: This logic is specific to the SfuSocket, move it
+                healthMonitor.ack()
+                events.emit(message)
                 if (message is JoinCallResponseEvent) {
                     _connectionState.value = SocketState.Connected(message)
                     if (!continuationCompleted) {
-                        connected.resume(message as T)
                         continuationCompleted = true
+                        connected.resume(message as T)
                     }
                 }
-                events.emit(message)
             } catch (error: Throwable) {
                 logger.e { "[onMessage] failed: $error" }
                 handleError(error)
@@ -306,8 +306,8 @@ open class PersistentSocket<T>(
         if (permanentError) {
             // close the connection loop
             if (!continuationCompleted) {
-                connected.resumeWithException(error)
                 continuationCompleted = true
+                connected.resumeWithException(error)
             }
             logger.e { "[handleError] permanent error: $error" }
             // mark us permanently disconnected
@@ -356,24 +356,32 @@ open class PersistentSocket<T>(
         handleError(t)
     }
 
-    private val healthMonitor = HealthMonitor(object : HealthMonitor.HealthCallback {
-        override fun reconnect() {
-            val state = connectionState.value
-            if (state is SocketState.DisconnectedTemporarily) {
-                scope.launch {
+    internal fun sendHealthCheck() {
+        println("sending health check")
+        val healthCheckRequest = HealthCheckRequest()
+        socket.send(healthCheckRequest.encodeByteString())
+    }
+
+    private val healthMonitor = HealthMonitor(
+        object : HealthMonitor.HealthCallback {
+            override suspend fun reconnect() {
+                logger.i { "health monitor triggered a reconnect" }
+                val state = connectionState.value
+                if (state is SocketState.DisconnectedTemporarily) {
                     this@PersistentSocket.reconnect()
                 }
             }
-        }
 
-        override fun check() {
-            val state = connectionState.value
-            (state as? SocketState.Connected)?.let {
-                val healthCheckRequest = HealthCheckRequest()
-                socket.send(healthCheckRequest.encodeByteString())
+            override fun check() {
+                logger.d { "health monitor ping" }
+                val state = connectionState.value
+                (state as? SocketState.Connected)?.let {
+                    sendHealthCheck()
+                }
             }
-        }
-    })
+        },
+        scope
+    )
 
     internal companion object {
         internal const val CODE_CLOSE_SOCKET_FROM_CLIENT = 1000

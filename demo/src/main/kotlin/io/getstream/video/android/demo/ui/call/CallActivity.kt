@@ -57,6 +57,8 @@ class CallActivity : AppCompatActivity() {
             finish()
         }
 
+        vm.setOnLeaveCall { finish() }
+
         setContent {
             VideoTheme {
                 CallContainer(
