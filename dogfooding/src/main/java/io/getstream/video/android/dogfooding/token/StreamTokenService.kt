@@ -17,7 +17,6 @@
 package io.getstream.video.android.dogfooding.token
 
 import com.jakewharton.retrofit2.converter.kotlinx.serialization.asConverterFactory
-import io.getstream.result.call.retrofit.RetrofitCallAdapterFactory
 import kotlinx.serialization.json.Json
 import okhttp3.MediaType.Companion.toMediaType
 import retrofit2.Retrofit
