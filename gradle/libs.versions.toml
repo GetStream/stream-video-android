@@ -4,6 +4,7 @@ spotless = "6.7.0"
 nexusPlugin = "1.3.0"
 kotlin = "1.8.10"
 kotlinSerialization = "1.5.0"
+kotlinSerializationConverter = "1.0.0"
 kotlinxCoroutines = "1.6.4"
 kotlinDokka = "1.8.10"
 jvmTarget = "1.8"
@@ -49,6 +50,8 @@ junit = "4.13.2"
 truth = "1.1.3"
 mockk = "1.13.4"
 kotlinTestJunit = "1.8.20"
+firebaseBom = "31.5.0"
+firebaseCrashlytics = "2.9.5"
 
 desugar = "1.2.2"
 
@@ -118,6 +121,7 @@ kotlin-test-junit = { group = "org.jetbrains.kotlin", name = "kotlin-test-junit"
 kotlinx-coroutines-android = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-android", version.ref = "kotlinxCoroutines" }
 kotlinx-coroutines-test = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-test",  version.ref = "kotlinxCoroutines" }
 kotlinx-serialization-json = { group = "org.jetbrains.kotlinx", name = "kotlinx-serialization-json", version.ref = "kotlinSerialization" }
+kotlinx-serialization-converter = { group = "com.jakewharton.retrofit", name = "retrofit2-kotlinx-serialization-converter", version.ref = "kotlinSerializationConverter" }
 
 androidx-profileinstaller = { group = "androidx.profileinstaller", name = "profileinstaller", version.ref = "androidxProfileinstaller" }
 androidx-benchmark-macro = { group = "androidx.benchmark", name = "benchmark-macro-junit4", version.ref = "androidxMacroBenchmark" }
@@ -130,6 +134,10 @@ androidx-espresso-core = { group = "androidx.test.espresso", name = "espresso-co
 junit = { group = "junit", name = "junit", version.ref = "junit" }
 truth = { group = "com.google.truth", name = "truth", version.ref = "truth" }
 mockk = { group = "io.mockk", name = "mockk", version.ref = "mockk" }
+
+firebase-bom = { group = "com.google.firebase", name = "firebase-bom", version.ref = "firebaseBom" }
+firebase-crashlytics = { group = "com.google.firebase", name = "firebase-crashlytics-ktx" }
+firebase-analyrics = { group = "com.google.firebase", name = "firebase-analytics-ktx" }
 
 robolectric = { group = "org.robolectric", name = "robolectric", version.ref = "robolectric" }
 leakCanary = { group = "com.squareup.leakcanary", name = "leakcanary-android", version.ref = "leakCanary" }
@@ -151,4 +159,5 @@ nexus = { id = "io.github.gradle-nexus.publish-plugin", version.ref = "nexusPlug
 google-gms = { id = "com.google.gms.google-services", version.ref = "googleService" }
 wire = { id = "com.squareup.wire", version.ref = "wire" }
 paparazzi = { id = "app.cash.paparazzi", version.ref = "paparazzi" }
+firebase-crashlytics = { id = "com.google.firebase.crashlytics", version.ref = "firebaseCrashlytics" }
 

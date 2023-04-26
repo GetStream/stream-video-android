@@ -30,7 +30,7 @@ import io.getstream.video.android.common.util.mockCall
 import io.getstream.video.android.common.util.mockParticipant
 import io.getstream.video.android.common.util.mockParticipantList
 import io.getstream.video.android.common.util.mockParticipants
-import io.getstream.video.android.common.util.mockVideoTrackWrapper
+import io.getstream.video.android.common.util.mockVideoMediaTrack
 import io.getstream.video.android.compose.base.BaseComposeTest
 import io.getstream.video.android.compose.state.ui.internal.InviteUserItemState
 import io.getstream.video.android.compose.state.ui.internal.ParticipantList
@@ -311,7 +311,7 @@ internal class ParticipantsPortraitTest : BaseComposeTest() {
             PortraitScreenSharingVideoRenderer(
                 call = mockCall,
                 session = ScreenSharingSession(
-                    track = mockParticipantList[1].videoTrackWrapped ?: mockVideoTrackWrapper,
+                    track = mockVideoMediaTrack,
                     participant = mockParticipantList[1]
                 ),
                 participants = mockParticipantList,
@@ -330,7 +330,7 @@ internal class ParticipantsPortraitTest : BaseComposeTest() {
             PortraitScreenSharingVideoRenderer(
                 call = mockCall,
                 session = ScreenSharingSession(
-                    track = mockParticipantList[0].videoTrackWrapped ?: mockVideoTrackWrapper,
+                    track = mockVideoMediaTrack,
                     participant = mockParticipantList[0]
                 ),
                 participants = mockParticipantList,

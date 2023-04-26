@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014-2022 Stream.io Inc. All rights reserved.
+ * Copyright (c) 2014-2023 Stream.io Inc. All rights reserved.
  *
  * Licensed under the Stream License;
  * you may not use this file except in compliance with the License.
@@ -14,14 +14,12 @@
  * limitations under the License.
  */
 
-package io.getstream.video.android.core.model
+package io.getstream.video.android.dogfooding.token
 
-import org.webrtc.AudioTrack
-import org.webrtc.VideoTrack
+import kotlinx.serialization.Serializable
 
-// sealed class would be cleaner TODO
-public data class TrackWrapper(
-    public val streamId: String,
-    public val video: VideoTrack? = null,
-    public val audio: AudioTrack? = null,
+@Serializable
+data class TokenResponse(
+    val userId: String,
+    val token: String
 )

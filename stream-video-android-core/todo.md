@@ -17,8 +17,18 @@ Not as important
 ### Week 4: LLC & state test coverage + Demo & Dogfooding apps + RTC & Media fixes
 ### Week 5: Sample app stability
 
-- Dynascale... updatePublishQuality & ChangePublishQualityEvent
+- Dynascale... visibility isn't handled well in CallSingleVideoRendered & VideoRenderer
+- Publishing: The video doesn't render in react, I suspect simulcast issue
+- Receiving
 
+### Biggest open tasks & estimates
+
+* Docs. 4 weeks or so
+* Cross device testing. 2-4 weeks
+* Reconnect & cleanup. 2 weeks
+* Server/little endpoint stuff etc. 1 week
+* User app testing. Ie have people use it. 2 weeks or so
+* Compose & App: Unsure
 
 ### High level issues
 
@@ -31,13 +41,22 @@ Not as important
 
 ### App & Compose
 
+- Reactions don't show up
+- Use participant.sessionId instead of user id. Key "thierry@getstream.io" was already used. If you are using LazyColumn/Row please make sure you provide a unique key for each item
+- Make buttons easier to customize. right now there is a list of items. something like this would be nicer:
+  <CallControls><VolumeControl /><CameraMuteControl> </CallControls>etc
+- Fix the buttons, right now they don't all work
+- Screensharing doesn't show up
+- Chat integration (we need an event from the server though)
 - Token expiration isn't handled well in dogfooding app
 - Crashlytics for sample and dogfooding apps
 - PIP
 - Ringing calls (wait for push and updated endpoints from server)
 
+
 ### RTC & Media TODO
 
+- [ ] Improve how we mangle SDP tokens. (edit the audio line and video line, don't swap lines)
 - [ ] Review how UI changes & pagination are connected to the video tracks. See call initRenderer and updateParticipantsSubscriptions
 - [ ] Implement dynascale
 - [ ] Tests for the media manager
@@ -216,4 +235,3 @@ Not as important
 - Pinning of participants. You pin/unpin and it sets pinnedAt and sorting takes it into account
 - Currently we use UserPreferencesManager. Jaewoong mentioned we should perhaps explore https://developer.android.com/topic/libraries/architecture/datastore
 - Measure latency isn't 100% ok. You can't set a timeout using withTimeout and collect the measurements that we have. This relates to threading vs coroutines and withTimeout not working
-- Disconnect/ garbage collect flow needs a full round of review

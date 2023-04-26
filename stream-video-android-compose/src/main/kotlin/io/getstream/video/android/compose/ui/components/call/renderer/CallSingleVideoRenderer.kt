@@ -42,7 +42,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
-import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.res.stringResource
@@ -53,7 +52,7 @@ import io.getstream.video.android.common.model.getSoundIndicatorState
 import io.getstream.video.android.common.util.MockUtils
 import io.getstream.video.android.common.util.mockCall
 import io.getstream.video.android.common.util.mockParticipants
-import io.getstream.video.android.common.util.mockVideoTrackWrapper
+import io.getstream.video.android.common.util.mockVideoMediaTrack
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.audio.SoundIndicator
 import io.getstream.video.android.compose.ui.components.avatar.UserAvatar
@@ -61,6 +60,7 @@ import io.getstream.video.android.compose.ui.components.connection.ConnectionQua
 import io.getstream.video.android.compose.ui.components.video.VideoRenderer
 import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.ParticipantState
+import io.getstream.video.android.core.model.MediaTrack
 import stream.video.sfu.models.TrackType
 
 /**
@@ -131,19 +131,14 @@ internal fun ParticipantVideoRenderer(
     participant: ParticipantState,
     onRender: (View) -> Unit
 ) {
-    val track = participant.videoTrackWrapped
+    val videoTrack by participant.videoTrack.collectAsState()
+    val isVideoEnabled by participant.videoEnabled.collectAsState()
 
-    val isVideoEnabled = try {
-        track?.video?.enabled() == true
-    } catch (error: Throwable) {
-        false
-    }
-
-    if ((LocalInspectionMode.current)) {
+    if (LocalInspectionMode.current) {
         VideoRenderer(
             modifier = Modifier.fillMaxSize(),
             call = call,
-            videoTrackWrapper = track ?: mockVideoTrackWrapper,
+            mediaTrack = videoTrack ?: mockVideoMediaTrack,
             sessionId = participant.sessionId,
             onRender = onRender,
             trackType = TrackType.TRACK_TYPE_VIDEO
@@ -151,10 +146,10 @@ internal fun ParticipantVideoRenderer(
         return
     }
 
-    if (track != null && isVideoEnabled) {
+    if (videoTrack != null && isVideoEnabled) {
         VideoRenderer(
             call = call,
-            videoTrackWrapper = track,
+            mediaTrack = videoTrack as MediaTrack,
             sessionId = participant.sessionId,
             onRender = onRender,
             trackType = TrackType.TRACK_TYPE_VIDEO

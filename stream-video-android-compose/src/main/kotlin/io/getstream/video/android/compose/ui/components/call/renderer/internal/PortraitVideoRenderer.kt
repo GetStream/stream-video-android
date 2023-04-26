@@ -31,6 +31,8 @@ import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -172,7 +174,7 @@ internal fun BoxScope.PortraitVideoRenderer(
                         call = call,
                         participant = fiveParticipant,
                         onRender = onRender,
-                        isFocused = primarySpeaker?.initialUser?.id == fiveParticipant.initialUser.id,
+                        isFocused = primarySpeaker?.sessionId == fiveParticipant.sessionId,
                         paddingValues = paddingValues
                     )
                 }
@@ -189,7 +191,7 @@ internal fun BoxScope.PortraitVideoRenderer(
             ) {
                 items(
                     items = callParticipants.take(maxGridItemCount),
-                    key = { it.initialUser.id }
+                    key = { it.sessionId }
                 ) { participant ->
                     CallSingleVideoRenderer(
                         modifier = Modifier
@@ -197,7 +199,7 @@ internal fun BoxScope.PortraitVideoRenderer(
                             .height(parentSize.height.dp / heightDivision),
                         call = call,
                         participant = participant,
-                        isFocused = primarySpeaker?.initialUser?.id == participant.initialUser.id
+                        isFocused = primarySpeaker?.sessionId == participant.sessionId
                     )
                 }
             }
@@ -205,21 +207,23 @@ internal fun BoxScope.PortraitVideoRenderer(
     }
 
     if (callParticipants.size in 2..3) {
-        val currentLocal = callParticipants.first { it.isLocal }
+        val currentLocal by call.state.me.collectAsState()
 
-        LocalVideoContent(
-            call = call,
-            localParticipant = currentLocal,
-            parentBounds = parentSize,
-            modifier = Modifier
-                .size(
-                    height = VideoTheme.dimens.floatingVideoHeight,
-                    width = VideoTheme.dimens.floatingVideoWidth
-                )
-                .clip(VideoTheme.shapes.floatingParticipant)
-                .align(Alignment.TopEnd),
-            paddingValues = paddingValues
-        )
+        if (currentLocal != null) {
+            LocalVideoContent(
+                call = call,
+                localParticipant = currentLocal!!,
+                parentBounds = parentSize,
+                modifier = Modifier
+                    .size(
+                        height = VideoTheme.dimens.floatingVideoHeight,
+                        width = VideoTheme.dimens.floatingVideoWidth
+                    )
+                    .clip(VideoTheme.shapes.floatingParticipant)
+                    .align(Alignment.TopEnd),
+                paddingValues = paddingValues
+            )
+        }
     }
 }
 

@@ -58,7 +58,7 @@ public class StreamVideoBuilder(
     /** The token for this user generated using your API secret on your server */
     private val userToken: String = "",
     /** If a token is expired, the token provider makes a request to your backend for a new token */
-    private val tokenProvider: ((error: Throwable?) -> String)? = null,
+    private val tokenProvider: (suspend (error: Throwable?) -> String)? = null,
     /** Audio filters enable you to add custom effects to your audio before its send to the server */
     private val audioFilters: List<AudioFilter> = emptyList(),
     /** Video filters enable you to change the video before it's send. */

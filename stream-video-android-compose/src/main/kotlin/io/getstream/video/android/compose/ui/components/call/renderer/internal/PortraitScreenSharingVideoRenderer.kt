@@ -33,7 +33,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import io.getstream.video.android.common.util.MockUtils
 import io.getstream.video.android.common.util.mockCall
 import io.getstream.video.android.common.util.mockParticipants
-import io.getstream.video.android.common.util.mockVideoTrackWrapper
+import io.getstream.video.android.common.util.mockVideoMediaTrack
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.internal.OverlayScreenSharingAppBar
 import io.getstream.video.android.core.Call
@@ -109,7 +109,7 @@ private fun PortraitScreenSharingContentPreview() {
         PortraitScreenSharingVideoRenderer(
             call = mockCall,
             session = ScreenSharingSession(
-                track = mockParticipants[1].videoTrackWrapped ?: mockVideoTrackWrapper,
+                track = mockParticipants[1].videoTrack.value ?: mockVideoMediaTrack,
                 participant = mockParticipants[1]
             ),
             participants = mockParticipants,
@@ -130,7 +130,7 @@ private fun PortraitScreenSharingMyContentPreview() {
         PortraitScreenSharingVideoRenderer(
             call = mockCall,
             session = ScreenSharingSession(
-                track = mockParticipants[0].videoTrackWrapped ?: mockVideoTrackWrapper,
+                track = mockParticipants[0].videoTrack.value ?: mockVideoMediaTrack,
                 participant = mockParticipants[0]
             ),
             participants = mockParticipants,

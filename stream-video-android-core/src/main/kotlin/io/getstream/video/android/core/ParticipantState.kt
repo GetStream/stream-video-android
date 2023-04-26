@@ -17,7 +17,9 @@
 package io.getstream.video.android.core
 
 import io.getstream.result.Result
+import io.getstream.video.android.core.model.AudioTrack
 import io.getstream.video.android.core.model.User
+import io.getstream.video.android.core.model.VideoTrack
 import io.getstream.video.android.core.utils.mapState
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -48,31 +50,34 @@ public data class ParticipantState(
     val initialUser: User,
     /** A prefix to identify tracks, internal */
     internal var trackLookupPrefix: String = "",
-
 ) {
 
     val isLocal by lazy {
         sessionId == call.session?.sessionId
     }
+
     /** video track */
-    val videoTrack by lazy {
-        videoTrackWrapped?.video
-    }
-    val videoTrackWrapped by lazy {
-        call.session?.getTrack(sessionId, TrackType.TRACK_TYPE_VIDEO)
-    }
-    val audioTrack by lazy {
-        audioTrackWrapped?.audio
-    }
-    val audioTrackWrapped by lazy {
-        call.session?.getTrack(sessionId, TrackType.TRACK_TYPE_AUDIO)
-    }
-    val screenSharingTrack by lazy {
-        screenSharingTrackWrapped?.video
-    }
-    val screenSharingTrackWrapped by lazy {
-        call.session?.getTrack(sessionId, TrackType.TRACK_TYPE_SCREEN_SHARE)
-    }
+    internal val _videoTrack = MutableStateFlow<VideoTrack?>(null)
+    val videoTrack: StateFlow<VideoTrack?> = _videoTrack
+
+    /**
+     * State that indicates whether the camera is capturing and sending video or not.
+     */
+    // todo: videoAvailable might be more descriptive
+    internal val _videoEnabled: MutableStateFlow<Boolean> = MutableStateFlow(false)
+    val videoEnabled: StateFlow<Boolean> = _videoEnabled
+
+    /**
+     * State that indicates whether the mic is capturing and sending the audio or not.
+     */
+    internal val _audioEnabled: MutableStateFlow<Boolean> = MutableStateFlow(false)
+    val audioEnabled: StateFlow<Boolean> = _audioEnabled
+
+    internal val _audioTrack = MutableStateFlow<AudioTrack?>(null)
+    val audioTrack: StateFlow<AudioTrack?> = _audioTrack
+
+    internal val _screenSharingTrack = MutableStateFlow<VideoTrack?>(null)
+    val screenSharingTrack: StateFlow<VideoTrack?> = _screenSharingTrack
 
     /**
      * The user, automatically updates when we receive user events
@@ -102,18 +107,6 @@ public data class ParticipantState(
     val connectionQuality: StateFlow<ConnectionQuality> = _connectionQuality
 
     /**
-     * State that indicates whether the camera is capturing and sending video or not.
-     */
-    internal val _videoEnabled: MutableStateFlow<Boolean> = MutableStateFlow(false)
-    val videoEnabled: StateFlow<Boolean> = _videoEnabled
-
-    /**
-     * State that indicates whether the mic is capturing and sending the audio or not.
-     */
-    internal val _audioEnabled: MutableStateFlow<Boolean> = MutableStateFlow(false)
-    val audioEnabled: StateFlow<Boolean> = _audioEnabled
-
-    /**
      * State that indicates whether the speakerphone is on or not.
      */
     internal val _speakerPhoneEnabled: MutableStateFlow<Boolean> = MutableStateFlow(false)
@@ -134,16 +127,16 @@ public data class ParticipantState(
     internal val _reactions = MutableStateFlow<List<ReactionResponse>>(emptyList())
     val reactions: StateFlow<List<ReactionResponse>> = _reactions
 
-    open suspend fun muteAudio(): Result<MuteUsersResponse> {
+    suspend fun muteAudio(): Result<MuteUsersResponse> {
         // how do i mute another user?
         return call.muteUser(user.value.id, audio = true, video = false, screenShare = false)
     }
 
-    open suspend fun muteVideo(): Result<MuteUsersResponse> {
+    suspend fun muteVideo(): Result<MuteUsersResponse> {
         return call.muteUser(user.value.id, audio = false, video = true, screenShare = false)
     }
 
-    open suspend fun muteScreenshare(): Result<MuteUsersResponse> {
+    suspend fun muteScreenshare(): Result<MuteUsersResponse> {
         return call.muteUser(user.value.id, audio = false, video = false, screenShare = true)
     }
 
@@ -156,6 +149,8 @@ public data class ParticipantState(
         _speaking.value = participant.is_speaking
         _dominantSpeaker.value = participant.is_dominant_speaker
         _audioLevel.value = participant.audio_level
+        _audioEnabled.value = participant.published_tracks.contains(TrackType.TRACK_TYPE_AUDIO)
+        _videoEnabled.value = participant.published_tracks.contains(TrackType.TRACK_TYPE_VIDEO)
         val currentUser = _user.value
         _user.value = currentUser.copy(
             name = participant.name,

@@ -56,6 +56,27 @@ fun mangleSdpUtil(
         description = lines.joinToString("\r\n")
     }
 
+    if (true) {
+        // prefer vp8
+
+        val lines = description.split("\r\n").toMutableList()
+        val h264Line = lines.indices.find { lines[it].contains("a=rtpmap:100 H264/90000") }
+        val vp8Line = lines.indices.find { lines[it].contains("a=rtpmap:96 VP8/90000") }
+        // we only do something if both are enabled
+        if (h264Line != null && vp8Line != null) {
+            val h264IsFirst = h264Line < vp8Line
+            if (h264IsFirst) {
+                // we need to swap the h264 and vp8 lines
+                val h264LineString = lines[h264Line]
+                val vp8LineString = lines[vp8Line]
+                lines[h264Line] = vp8LineString
+                lines[vp8Line] = h264LineString
+            }
+        }
+        description = lines.joinToString("\r\n")
+        description = description.replace("m=video 9 UDP/TLS/RTP/SAVPF 100 101 96 97 98 99 35 36 125 124 127", "m=video 9 UDP/TLS/RTP/SAVPF 96 100 101 97 98 99 35 36 125 124 127")
+    }
+
     return SessionDescription(sdp.type, description)
 }
 

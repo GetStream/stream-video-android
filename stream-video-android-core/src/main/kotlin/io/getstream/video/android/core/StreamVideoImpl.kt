@@ -112,14 +112,14 @@ internal class StreamVideoImpl internal constructor(
     private val loggingLevel: LoggingLevel,
     internal val connectionModule: ConnectionModule,
     internal val pushDeviceGenerators: List<PushDeviceGenerator>,
-    internal val tokenProvider: ((error: Throwable?) -> String)?,
+    internal val tokenProvider: (suspend (error: Throwable?) -> String)?,
     internal val preferences: UserPreferences,
 ) : StreamVideo {
 
     /** the state for the client, includes the current user */
     override val state = ClientState(this)
 
-    val debugInfo = DebugInfo()
+    val debugInfo = DebugInfo(this)
 
     /** session id is generated client side */
     public val sessionId = UUID.randomUUID().toString()
@@ -162,8 +162,6 @@ internal class StreamVideoImpl internal constructor(
                 val failure = parseError(e)
                 val parsedError = failure.value as Error.NetworkError
                 if (parsedError.serverErrorCode == VideoErrorCode.TOKEN_EXPIRED.code) {
-                    // invalid token
-                    // val newToken = tokenProvider.getToken()
                     if (tokenProvider != null) {
                         // TODO - handle this better, error structure is not great right now
                         val newToken = tokenProvider.invoke(null)
@@ -305,14 +303,13 @@ internal class StreamVideoImpl internal constructor(
     suspend fun connectAsync(): Deferred<Unit> {
         return scope.async {
             // wait for the guest user setup if we're using guest users
-            guestUserJob?.let { it.await() }
+            guestUserJob?.await()
             try {
                 val timer = debugInfo.trackTime("coordinator connect")
-                val result = socketImpl.connect()
+                socketImpl.connect()
                 timer.finish()
-                result
             } catch (e: ErrorResponse) {
-                if (e.code == 40) {
+                if (e.code == VideoErrorCode.TOKEN_EXPIRED.code) {
                     // refresh the the token
                     if (tokenProvider != null) {
                         val newToken = tokenProvider.invoke(e)
@@ -320,8 +317,7 @@ internal class StreamVideoImpl internal constructor(
                         connectionModule.updateToken(newToken)
                     }
                     // quickly reconnect with the new token
-                    val result = socketImpl.reconnect(0)
-                    result
+                    socketImpl.reconnect(0)
                 }
             }
         }

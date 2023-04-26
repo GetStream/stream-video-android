@@ -231,7 +231,13 @@ Current issues
 
 Goals
 - A customer integrating without the SDK knowing the size and visibility of video elements will lead to crashes in large calls. So we should prevent that.
-- 
+
+### Knowing if participant is publishing tracks
+
+- JoinCallResponse, ParticipantJoinedEvent contain published_tracks
+- TrackPublishedEvent, TrackUnpublishedEvent
+- Locally you call updateMuteState. It's not clear what this does. 
+Is muting connected to track publish/unpublish?
 
 ### Participant State
 

@@ -17,28 +17,23 @@
 package io.getstream.video.android.core
 
 import android.Manifest
-import android.media.AudioDeviceInfo
-import android.media.AudioManager
-import android.os.Build
-import androidx.core.content.getSystemService
 import androidx.test.rule.GrantPermissionRule
 import com.google.common.truth.Truth.assertThat
 import io.getstream.log.taggedLogger
-import io.getstream.video.android.core.audio.AudioSwitchHandler
-import io.getstream.video.android.core.dispatchers.DispatcherProvider
 import io.getstream.video.android.core.events.ChangePublishQualityEvent
 import io.getstream.video.android.core.events.JoinCallResponseEvent
 import io.getstream.video.android.core.utils.buildAudioConstraints
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.test.runTest
-import org.junit.Ignore
+import kotlinx.coroutines.withTimeout
 import org.junit.Rule
 import org.junit.Test
+import org.webrtc.DefaultVideoDecoderFactory
+import org.webrtc.DefaultVideoEncoderFactory
 import org.webrtc.MediaStreamTrack
 import org.webrtc.PeerConnection
-import org.webrtc.SurfaceTextureHelper
-import org.webrtc.VideoFrame
+import org.webrtc.RTCStats
+import org.webrtc.VideoCodecInfo
 import stream.video.sfu.event.ChangePublishQuality
 
 /**
@@ -58,6 +53,10 @@ class AndroidDeviceTest : IntegrationTestBase(connectCoordinatorWS = false) {
 
     private val logger by taggedLogger("Test:AndroidDeviceTest")
 
+    @get:Rule
+    var mRuntimePermissionRule = GrantPermissionRule
+        .grant(Manifest.permission.BLUETOOTH_CONNECT)
+
     @Test
     fun camera() = runTest {
 
@@ -67,62 +66,31 @@ class AndroidDeviceTest : IntegrationTestBase(connectCoordinatorWS = false) {
     }
 
     @Test
-    fun microphone() = runTest {
-        val mic = call.mediaManager.microphone
-        assertThat(mic).isNotNull()
+    fun codecsFun() = runTest {
+        val codecs = getSupportedCodecs()
+        println("Supported codecs:")
+        codecs.forEach { codec ->
+            println("Name: ${codec.name}, Payload: $codec")
+        }
+        println(codecs)
     }
 
-    @get:Rule
-    var mRuntimePermissionRule = GrantPermissionRule
-        .grant(Manifest.permission.BLUETOOTH_CONNECT)
+    fun getSupportedCodecs(): List<VideoCodecInfo> {
+        val rootEglBase = clientImpl.peerConnectionFactory.eglBase
+        val encoderFactory = DefaultVideoEncoderFactory(rootEglBase.eglBaseContext, true, true)
+        val decoderFactory = DefaultVideoDecoderFactory(rootEglBase.eglBaseContext)
 
-    @Test
-    fun tempAudioTest() = runTest {
-        var audioManager = context.getSystemService<AudioManager>()
-        val audioHandler = AudioSwitchHandler(context)
-        logger.d { "[setupAudio] #sfu; no args" }
-        audioHandler.start()
-        audioManager?.mode = AudioManager.MODE_IN_COMMUNICATION
-
-        val speakerOn = true
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-            val devices = audioManager?.availableCommunicationDevices ?: throw java.lang.IllegalStateException("No devices found")
-            val deviceType = if (speakerOn) {
-                AudioDeviceInfo.TYPE_BUILTIN_SPEAKER
-            } else {
-                AudioDeviceInfo.TYPE_BUILTIN_EARPIECE
-            }
-
-            val device = devices.firstOrNull { it.type == deviceType } ?: throw java.lang.IllegalStateException("No devices found")
-
-            val isCommunicationDeviceSet = audioManager?.setCommunicationDevice(device)
-            logger.d { "[setupAudio] #sfu; isCommunicationDeviceSet: $isCommunicationDeviceSet" }
+        val supportedEncoderCodecs: MutableList<VideoCodecInfo> = mutableListOf()
+        encoderFactory.supportedCodecs.forEach { codec ->
+            supportedEncoderCodecs.add(codec)
         }
 
-        // listing devices..
-        val allDevices = audioHandler.availableAudioDevices
-        // switching device: device: io.getstream.video.android.core.audio.AudioDevice
-        audioHandler.selectDevice(allDevices.first())
-        // speaker on
-
-        // alternative way to find the speaker device
-        val speakerDevice: AudioDeviceInfo?
-        val devices = audioManager!!.availableCommunicationDevices
-        for (device in devices) {
-            if (device.type == AudioDeviceInfo.TYPE_BUILTIN_SPEAKER) {
-                speakerDevice = device
-                break
-            }
+        val supportedDecoderCodecs: MutableList<VideoCodecInfo> = mutableListOf()
+        decoderFactory.supportedCodecs.forEach { codec ->
+            supportedDecoderCodecs.add(codec)
         }
 
-        val activeDevice = allDevices.firstOrNull {
-            if (true) {
-                it.name.contains("speaker", true)
-            } else {
-                !it.name.contains("speaker", true)
-            }
-        }
-        audioHandler.selectDevice(activeDevice)
+        return (supportedEncoderCodecs + supportedDecoderCodecs).distinctBy { it.name }
     }
 
     @Test
@@ -178,26 +146,97 @@ class AndroidDeviceTest : IntegrationTestBase(connectCoordinatorWS = false) {
     }
 
     @Test
-    @Ignore
     fun publishing() = runTest {
+        // TODO: disable simulcast
         // join will automatically start the audio and video capture
-        // based on the call settings
+        val call = client.call("default", "NnXAIvBKE4Hy")
         val joinResult = call.join()
         assertSuccess(joinResult)
-        delay(500)
 
-        // see if the ice connection is ok
-        val iceConnectionState = call.session?.publisher?.connection?.iceConnectionState()
-        assertThat(iceConnectionState).isEqualTo(PeerConnection.IceConnectionState.CONNECTED)
-        // verify the stats are being tracked
+        // wait for the ice connection state
+        withTimeout(3000) {
+            while (true) {
+                val iceConnectionState = call.session?.publisher?.connection?.iceConnectionState()
+                if (iceConnectionState == PeerConnection.IceConnectionState.CONNECTED) {
+                    break
+                }
+            }
+        }
+
+        // verify we have running tracks
+        assertThat(call.mediaManager.videoTrack.enabled())
+        assertThat(call.mediaManager.audioTrack.enabled())
+        assertThat(call.mediaManager.videoTrack.state()).isEqualTo(MediaStreamTrack.State.LIVE)
+
+        // check that the transceiver is setup
+        assertThat(call.session?.publisher?.videoTransceiver).isNotNull()
+
+        // see if we're sending data
+
+        Thread.sleep(20000)
         val report = call.session?.getPublisherStats()?.value
         assertThat(report).isNotNull()
 
         // verify we are sending data to the SFU
-
-        // TODO: PeerConnection.IceConnectionState.CONNECTED isn't reached
         // it is RTCOutboundRtpStreamStats && it.bytesSent > 0
-        report?.statsMap?.values?.any { it is Throwable }
+        val allStats = report?.statsMap?.values
+        val networkOut = allStats?.filter { it.type == "outbound-rtp" }?.map { it as RTCStats }
+        val localSdp = call.session?.publisher?.localSdp
+        val remoteSdp = call.session?.publisher?.remoteSdp
+
+        println(call.session?.publisher?.localSdp)
+        println(call.session?.publisher?.remoteSdp)
+
+        println(networkOut)
+    }
+
+    @Test
+    fun receiving() = runTest {
+        // TODO: have a specific SFU setting to send back fake data
+        // TODO: replace the id with your active call
+        val call = client.call("default", "NnXAIvBKE4Hy")
+        val joinResult = call.join()
+        assertSuccess(joinResult)
+        clientImpl.debugInfo.log()
+
+        // wait for the ice connection state
+        withTimeout(3000) {
+            while (true) {
+                val iceConnectionState = call.session?.subscriber?.connection?.iceConnectionState()
+                if (iceConnectionState == PeerConnection.IceConnectionState.CONNECTED) {
+                    break
+                }
+            }
+        }
+
+        // see if the ice connection is ok on the subscriber
+        val iceConnectionState = call.session?.subscriber?.connection?.iceConnectionState()
+        assertThat(iceConnectionState).isEqualTo(PeerConnection.IceConnectionState.CONNECTED)
+
+        assertThat(call.state.participants.value.size).isGreaterThan(1)
+        // loop over the participants
+        call.state.participants.value.forEach { participant ->
+            val videoTrack = participant.videoTrackWrapped?.video
+            assertThat(videoTrack).isNotNull()
+            assertThat(videoTrack?.enabled()).isTrue()
+            assertThat(videoTrack?.state()).isEqualTo(MediaStreamTrack.State.LIVE)
+            assertThat(participant.videoEnabled.value).isTrue()
+
+            val audioTrack = participant.audioTrackWrapped?.audio
+            assertThat(audioTrack).isNotNull()
+            assertThat(audioTrack?.enabled()).isTrue()
+            assertThat(audioTrack?.state()).isEqualTo(MediaStreamTrack.State.LIVE)
+            assertThat(participant.audioEnabled.value).isTrue()
+        }
+
+        // verify the stats are being tracked
+        val report = call.session?.getSubscriberStats()?.value
+
+        Thread.sleep(20000)
+        val allStats = report?.statsMap?.values
+        val networkOut = allStats?.filter { it.type == "inbound-rtp" }?.map { it as RTCStats }
+
+        assertThat(report).isNotNull()
     }
 
     @Test
@@ -209,40 +248,7 @@ class AndroidDeviceTest : IntegrationTestBase(connectCoordinatorWS = false) {
         delay(500)
 
         val quality = ChangePublishQuality()
-        val event = ChangePublishQualityEvent(changePublishQuality= quality)
+        val event = ChangePublishQualityEvent(changePublishQuality = quality)
         call.session?.updatePublishQuality(event)
-
-    }
-
-    @Test
-    fun receiving() = runTest {
-        // TODO: have a specific SFU setting to send back fake data
-        // TODO: replace the id with your active call
-        val call = client.call("default", "j8B8hMm2wSAj")
-        val joinResult = call.join()
-        assertSuccess(joinResult)
-        delay(20000)
-        clientImpl.debugInfo.log()
-
-        call.state.participants.collect()
-        // see if the ice connection is ok on the subscriber
-        val iceConnectionState = call.session?.subscriber?.connection?.iceConnectionState()
-        assertThat(iceConnectionState).isEqualTo(PeerConnection.IceConnectionState.CONNECTED)
-        // verify the stats are being tracked
-        val report = call.session?.getSubscriberStats()?.value
-        assertThat(report).isNotNull()
-
-        // loop over the participants
-        call.state.participants.value.forEach { participant ->
-            val videoTrack = participant.videoTrackWrapped?.video
-            assertThat(videoTrack).isNotNull()
-            assertThat(videoTrack?.enabled()).isTrue()
-            assertThat(videoTrack?.state()).isEqualTo(MediaStreamTrack.State.LIVE)
-
-            val audioTrack = participant.audioTrackWrapped?.audio
-            assertThat(audioTrack).isNotNull()
-            assertThat(audioTrack?.enabled()).isTrue()
-            assertThat(audioTrack?.state()).isEqualTo(MediaStreamTrack.State.LIVE)
-        }
     }
 }
