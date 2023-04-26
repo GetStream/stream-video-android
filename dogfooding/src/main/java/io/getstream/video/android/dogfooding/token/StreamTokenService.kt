@@ -40,7 +40,6 @@ object StreamVideoNetwork {
     private val retrofit = Retrofit.Builder()
         .baseUrl("https://stream-calls-dogfood.vercel.app/")
         .addConverterFactory(Json.asConverterFactory(contentType))
-        .addCallAdapterFactory(RetrofitCallAdapterFactory.create())
         .build()
 
     val tokenService = retrofit.create<StreamTokenService>()
