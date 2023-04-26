@@ -569,12 +569,12 @@ public final class io/getstream/video/android/core/call/RtcSession {
 	public final fun connectWs (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public final fun createPublisher ()Lio/getstream/video/android/core/call/connection/StreamPeerConnection;
 	public final fun createSubscriber ()Lio/getstream/video/android/core/call/connection/StreamPeerConnection;
-	public final fun getLocalTrack (Lstream/video/sfu/models/TrackType;)Lio/getstream/video/android/core/model/TrackWrapper;
+	public final fun getLocalTrack (Lstream/video/sfu/models/TrackType;)Lio/getstream/video/android/core/model/MediaTrack;
 	public final fun getPublisher ()Lio/getstream/video/android/core/call/connection/StreamPeerConnection;
 	public final fun getPublisherStats ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun getSubscriber ()Lio/getstream/video/android/core/call/connection/StreamPeerConnection;
 	public final fun getSubscriberStats ()Lkotlinx/coroutines/flow/StateFlow;
-	public final fun getTrack (Ljava/lang/String;Lstream/video/sfu/models/TrackType;)Lio/getstream/video/android/core/model/TrackWrapper;
+	public final fun getTrack (Ljava/lang/String;Lstream/video/sfu/models/TrackType;)Lio/getstream/video/android/core/model/MediaTrack;
 	public final fun getTrackDisplayResolution ()Ljava/util/Map;
 	public final fun getTrackDisplayResolutionUpdates ()Lkotlinx/coroutines/flow/MutableStateFlow;
 	public final fun getTrackUpdatesDebounced ()Lkotlinx/coroutines/flow/Flow;
@@ -588,12 +588,12 @@ public final class io/getstream/video/android/core/call/RtcSession {
 	public final fun parseError (Ljava/lang/Throwable;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public final fun sendAnswer (Lstream/video/sfu/signal/SendAnswerRequest;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public final fun sendIceCandidate (Lstream/video/sfu/models/ICETrickle;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
-	public final fun setLocalTrack (Lstream/video/sfu/models/TrackType;Lio/getstream/video/android/core/model/TrackWrapper;)V
+	public final fun setLocalTrack (Lstream/video/sfu/models/TrackType;Lio/getstream/video/android/core/model/MediaTrack;)V
 	public final fun setMuteState (ZLstream/video/sfu/models/TrackType;)V
 	public final fun setPublisher (Lio/getstream/video/android/core/call/connection/StreamPeerConnection;)V
 	public final fun setPublisher (Lstream/video/sfu/signal/SetPublisherRequest;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public final fun setSubscriber (Lio/getstream/video/android/core/call/connection/StreamPeerConnection;)V
-	public final fun setTrack (Ljava/lang/String;Lstream/video/sfu/models/TrackType;Lio/getstream/video/android/core/model/TrackWrapper;)V
+	public final fun setTrack (Ljava/lang/String;Lstream/video/sfu/models/TrackType;Lio/getstream/video/android/core/model/MediaTrack;)V
 	public final fun setTrackDisplayResolution (Ljava/util/Map;)V
 	public final fun setTracks (Ljava/util/Map;)V
 	public final fun updateDisplayedTrackSize (Ljava/lang/String;Lstream/video/sfu/models/TrackType;II)V
@@ -1388,6 +1388,19 @@ public final class io/getstream/video/android/core/logging/LoggingLevel : java/l
 	public static fun values ()[Lio/getstream/video/android/core/logging/LoggingLevel;
 }
 
+public final class io/getstream/video/android/core/model/AudioTrack : io/getstream/video/android/core/model/MediaTrack {
+	public fun <init> (Ljava/lang/String;Lorg/webrtc/AudioTrack;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Lorg/webrtc/AudioTrack;
+	public final fun copy (Ljava/lang/String;Lorg/webrtc/AudioTrack;)Lio/getstream/video/android/core/model/AudioTrack;
+	public static synthetic fun copy$default (Lio/getstream/video/android/core/model/AudioTrack;Ljava/lang/String;Lorg/webrtc/AudioTrack;ILjava/lang/Object;)Lio/getstream/video/android/core/model/AudioTrack;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getAudio ()Lorg/webrtc/AudioTrack;
+	public fun getStreamId ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
 public final class io/getstream/video/android/core/model/CallData {
 	public fun <init> (Ljava/util/List;Lio/getstream/video/android/core/model/CallInfo;Ljava/util/List;Lio/getstream/video/android/core/model/CallUser;)V
 	public final fun component1 ()Ljava/util/List;
@@ -1766,6 +1779,15 @@ public final class io/getstream/video/android/core/model/JoinedCall : java/io/Se
 	public fun toString ()Ljava/lang/String;
 }
 
+public abstract class io/getstream/video/android/core/model/MediaTrack {
+	public synthetic fun <init> (Ljava/lang/String;Lkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun asAudioTrack ()Lio/getstream/video/android/core/model/AudioTrack;
+	public final fun asVideoTrack ()Lio/getstream/video/android/core/model/VideoTrack;
+	public final fun enableAudio (Z)V
+	public final fun enableVideo (Z)V
+	public fun getStreamId ()Ljava/lang/String;
+}
+
 public final class io/getstream/video/android/core/model/MuteUsersData {
 	public fun <init> ()V
 	public fun <init> (Ljava/util/List;Ljava/lang/Boolean;Ljava/lang/Boolean;Ljava/lang/Boolean;Ljava/lang/Boolean;)V
@@ -1883,14 +1905,14 @@ public final class io/getstream/video/android/core/model/ReactionData {
 }
 
 public final class io/getstream/video/android/core/model/ScreenSharingSession {
-	public fun <init> (Lio/getstream/video/android/core/model/TrackWrapper;Lio/getstream/video/android/core/ParticipantState;)V
-	public final fun component1 ()Lio/getstream/video/android/core/model/TrackWrapper;
+	public fun <init> (Lio/getstream/video/android/core/model/MediaTrack;Lio/getstream/video/android/core/ParticipantState;)V
+	public final fun component1 ()Lio/getstream/video/android/core/model/MediaTrack;
 	public final fun component2 ()Lio/getstream/video/android/core/ParticipantState;
-	public final fun copy (Lio/getstream/video/android/core/model/TrackWrapper;Lio/getstream/video/android/core/ParticipantState;)Lio/getstream/video/android/core/model/ScreenSharingSession;
-	public static synthetic fun copy$default (Lio/getstream/video/android/core/model/ScreenSharingSession;Lio/getstream/video/android/core/model/TrackWrapper;Lio/getstream/video/android/core/ParticipantState;ILjava/lang/Object;)Lio/getstream/video/android/core/model/ScreenSharingSession;
+	public final fun copy (Lio/getstream/video/android/core/model/MediaTrack;Lio/getstream/video/android/core/ParticipantState;)Lio/getstream/video/android/core/model/ScreenSharingSession;
+	public static synthetic fun copy$default (Lio/getstream/video/android/core/model/ScreenSharingSession;Lio/getstream/video/android/core/model/MediaTrack;Lio/getstream/video/android/core/ParticipantState;ILjava/lang/Object;)Lio/getstream/video/android/core/model/ScreenSharingSession;
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getParticipant ()Lio/getstream/video/android/core/ParticipantState;
-	public final fun getTrack ()Lio/getstream/video/android/core/model/TrackWrapper;
+	public final fun getTrack ()Lio/getstream/video/android/core/model/MediaTrack;
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
 }
@@ -1992,22 +2014,6 @@ public final class io/getstream/video/android/core/model/StreamPeerType : java/l
 
 public final class io/getstream/video/android/core/model/StreamPeerTypeKt {
 	public static final fun toPeerType (Lio/getstream/video/android/core/model/StreamPeerType;)Lstream/video/sfu/models/PeerType;
-}
-
-public final class io/getstream/video/android/core/model/TrackWrapper {
-	public fun <init> (Ljava/lang/String;Lorg/webrtc/VideoTrack;Lorg/webrtc/AudioTrack;)V
-	public synthetic fun <init> (Ljava/lang/String;Lorg/webrtc/VideoTrack;Lorg/webrtc/AudioTrack;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
-	public final fun component1 ()Ljava/lang/String;
-	public final fun component2 ()Lorg/webrtc/VideoTrack;
-	public final fun component3 ()Lorg/webrtc/AudioTrack;
-	public final fun copy (Ljava/lang/String;Lorg/webrtc/VideoTrack;Lorg/webrtc/AudioTrack;)Lio/getstream/video/android/core/model/TrackWrapper;
-	public static synthetic fun copy$default (Lio/getstream/video/android/core/model/TrackWrapper;Ljava/lang/String;Lorg/webrtc/VideoTrack;Lorg/webrtc/AudioTrack;ILjava/lang/Object;)Lio/getstream/video/android/core/model/TrackWrapper;
-	public fun equals (Ljava/lang/Object;)Z
-	public final fun getAudio ()Lorg/webrtc/AudioTrack;
-	public final fun getStreamId ()Ljava/lang/String;
-	public final fun getVideo ()Lorg/webrtc/VideoTrack;
-	public fun hashCode ()I
-	public fun toString ()Ljava/lang/String;
 }
 
 public final class io/getstream/video/android/core/model/UpdateUserPermissionsData {
@@ -2153,6 +2159,19 @@ public final class io/getstream/video/android/core/model/VideoModelKt {
 	public static final fun merge (Lio/getstream/video/android/core/model/CallUserState;Lio/getstream/video/android/core/model/CallUserState;)Lio/getstream/video/android/core/model/CallUserState;
 	public static final fun merge (Ljava/util/Map;Lio/getstream/video/android/core/model/CallUser;)Ljava/util/Map;
 	public static final fun merge (Ljava/util/Map;Ljava/util/Map;)Ljava/util/Map;
+}
+
+public final class io/getstream/video/android/core/model/VideoTrack : io/getstream/video/android/core/model/MediaTrack {
+	public fun <init> (Ljava/lang/String;Lorg/webrtc/VideoTrack;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Lorg/webrtc/VideoTrack;
+	public final fun copy (Ljava/lang/String;Lorg/webrtc/VideoTrack;)Lio/getstream/video/android/core/model/VideoTrack;
+	public static synthetic fun copy$default (Lio/getstream/video/android/core/model/VideoTrack;Ljava/lang/String;Lorg/webrtc/VideoTrack;ILjava/lang/Object;)Lio/getstream/video/android/core/model/VideoTrack;
+	public fun equals (Ljava/lang/Object;)Z
+	public fun getStreamId ()Ljava/lang/String;
+	public final fun getVideo ()Lorg/webrtc/VideoTrack;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
 }
 
 public final class io/getstream/video/android/core/model/mapper/StreamCallCidMapperKt {

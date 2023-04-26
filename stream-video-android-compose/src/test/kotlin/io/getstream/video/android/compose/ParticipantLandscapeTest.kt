@@ -30,7 +30,7 @@ import io.getstream.video.android.common.util.mockCall
 import io.getstream.video.android.common.util.mockParticipant
 import io.getstream.video.android.common.util.mockParticipantList
 import io.getstream.video.android.common.util.mockParticipants
-import io.getstream.video.android.common.util.mockVideoTrackWrapper
+import io.getstream.video.android.common.util.mockVideoMediaTrack
 import io.getstream.video.android.compose.base.BaseComposeTest
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.call.renderer.internal.LandscapeScreenSharingVideoRenderer
@@ -191,7 +191,7 @@ internal class ParticipantLandscapeTest : BaseComposeTest() {
             LandscapeScreenSharingVideoRenderer(
                 call = mockCall,
                 session = ScreenSharingSession(
-                    track = mockVideoTrackWrapper,
+                    track = mockVideoMediaTrack,
                     participant = mockParticipantList[1]
                 ),
                 participants = mockParticipantList,
@@ -210,7 +210,7 @@ internal class ParticipantLandscapeTest : BaseComposeTest() {
             LandscapeScreenSharingVideoRenderer(
                 call = mockCall,
                 session = ScreenSharingSession(
-                    track = mockVideoTrackWrapper,
+                    track = mockVideoMediaTrack,
                     participant = mockParticipantList[0]
                 ),
                 participants = mockParticipantList,
