@@ -30,6 +30,8 @@ import io.getstream.video.android.core.model.UpdateUserPermissionsData
 import io.getstream.video.android.core.model.User
 import io.getstream.video.android.core.model.toIceServer
 import io.getstream.webrtc.android.ui.VideoTextureViewRenderer
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.SupervisorJob
 import org.openapitools.client.models.BlockUserResponse
 import org.openapitools.client.models.CallSettingsRequest
 import org.openapitools.client.models.GetCallEdgeServerRequest
@@ -86,9 +88,13 @@ public class Call(
     /** The cid is type:id */
     val cid = "$type:$id"
 
+    private val supervisorJob = SupervisorJob()
+    private val scope = CoroutineScope(clientImpl.scope.coroutineContext + supervisorJob)
+
+
     /** Session handles all real time communication for video and audio */
     internal var session: RtcSession? = null
-    internal val mediaManager by lazy { MediaManagerImpl(clientImpl.context, this, clientImpl.scope, clientImpl.peerConnectionFactory.eglBase.eglBaseContext) }
+    internal val mediaManager by lazy { MediaManagerImpl(clientImpl.context, this, scope, clientImpl.peerConnectionFactory.eglBase.eglBaseContext) }
 
     /** Basic crud operations */
     suspend fun get(): Result<GetCallResponse> {
@@ -463,6 +469,12 @@ public class Call(
             state.updateFromResponse(it)
         }
         return result
+    }
+
+    fun cleanup() {
+        session?.cleanup()
+        supervisorJob.cancel()
+        // TODO: does anything else need to cleaned up?
     }
 }
 

@@ -26,6 +26,7 @@ import io.getstream.video.android.core.events.SfuSocketError
 import io.getstream.video.android.core.internal.network.NetworkStateProvider
 import io.getstream.video.android.core.socket.internal.HealthMonitor
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -62,9 +63,6 @@ open class PersistentSocket<T>(
     private val url: String,
     /** Inject your http client */
     private val httpClient: OkHttpClient,
-
-    /** The token for authentication */
-    private val token: String,
     /** Inject your network state provider */
     private val networkStateProvider: NetworkStateProvider,
     /** Set the scope everything should run in */
@@ -124,6 +122,10 @@ open class PersistentSocket<T>(
             // also monitor if we are offline/online
             networkStateProvider.subscribe(networkStateListener)
         }
+    }
+
+    fun cleanup() {
+        disconnect()
     }
 
     /**

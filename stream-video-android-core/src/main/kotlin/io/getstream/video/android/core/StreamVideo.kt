@@ -102,4 +102,6 @@ public interface StreamVideo {
     public fun logOut()
 
     public suspend fun registerPushDevice()
+
+    public fun cleanup()
 }

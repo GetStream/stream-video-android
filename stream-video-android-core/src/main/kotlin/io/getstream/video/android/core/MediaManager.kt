@@ -191,6 +191,12 @@ class MicrophoneManager(val mediaManager: MediaManagerImpl) {
 
         setupCompleted = true
     }
+
+    fun cleanup() {
+        audioHandler.stop()
+        setupCompleted = false
+    }
+
     private var setupCompleted: Boolean = false
 }
 
@@ -216,8 +222,9 @@ public sealed class CameraDirection {
  * camera.resolution // the selected camera resolution
  *
  */
-public class CameraManager(public val mediaManager: MediaManagerImpl, eglBaseContext: EglBase.Context, defaultCameraDirection: CameraDirection = CameraDirection.Front) {
+public class CameraManager(public val mediaManager: MediaManagerImpl, private val eglBaseContext: EglBase.Context, defaultCameraDirection: CameraDirection = CameraDirection.Front) {
 
+    private lateinit var surfaceTextureHelper: SurfaceTextureHelper
     private lateinit var devices: List<CameraDeviceWrapped>
     private var isCapturingVideo: Boolean = false
     private lateinit var videoCapturer: Camera2Capturer
@@ -304,12 +311,6 @@ public class CameraManager(public val mediaManager: MediaManagerImpl, eglBaseCon
         }
     }
 
-    private val surfaceTextureHelper by lazy {
-        SurfaceTextureHelper.create(
-            "CaptureThread", eglBaseContext
-        )
-    }
-
     private var setupCompleted: Boolean = false
 
     /**
@@ -365,6 +366,10 @@ public class CameraManager(public val mediaManager: MediaManagerImpl, eglBaseCon
         _resolution.value = selectDesiredResolution(selectedDevice.supportedFormats, 960)
         _availableResolutions.value = selectedDevice.supportedFormats?.toImmutableList() ?: emptyList()
 
+        surfaceTextureHelper = SurfaceTextureHelper.create(
+            "CaptureThread", eglBaseContext
+        )
+
         setupCompleted = true
     }
 
@@ -412,6 +417,13 @@ public class CameraManager(public val mediaManager: MediaManagerImpl, eglBaseCon
         val sorted = supportedFormats?.toList()?.sortedByDescending { it.height * it.width }?.filter { it.framerate.max >= 30 }
         return matchingTarget?.first()
     }
+
+    fun cleanup() {
+        stopCapture()
+        videoCapturer?.dispose()
+        surfaceTextureHelper?.dispose()
+        setupCompleted = false
+    }
 }
 
 /**
@@ -451,59 +463,12 @@ class MediaManagerImpl(val context: Context, val call: Call, val scope: Coroutin
     val microphone = MicrophoneManager(this)
     val speaker = SpeakerManager(this)
 
-    fun setSpeakerphoneEnabled(isEnabled: Boolean) {
-        val devices = getAudioDevices()
-
-        val activeDevice = devices.firstOrNull {
-            if (isEnabled) {
-                it.name.contains("speaker", true)
-            } else {
-                !it.name.contains("speaker", true)
-            }
-        }
-
-        getAudioHandler()?.selectDevice(activeDevice)
-    }
-
-    fun selectAudioDevice(device: io.getstream.video.android.core.audio.AudioDevice) {
-        logger.d { "[selectAudioDevice] #sfu; device: $device" }
-        val handler = getAudioHandler() ?: return
-
-        handler.selectDevice(device)
-    }
-
-    public fun getAudioHandler(): AudioSwitchHandler? {
-        return audioHandler as? AudioSwitchHandler
-    }
-
-    fun getAudioDevices(): List<io.getstream.video.android.core.audio.AudioDevice> {
-        logger.d { "[getAudioDevices] #sfu; no args" }
-        val handler = getAudioHandler() ?: return emptyList()
-
-        return handler.availableAudioDevices
-    }
-
-    internal val audioHandler: AudioHandler by lazy {
-        AudioSwitchHandler(context)
-    }
-
-    internal fun setupAudio(callSettings: CallSettings) {
-        logger.d { "[setupAudio] #sfu; no args" }
-        audioHandler.start()
-        audioManager?.mode = AudioManager.MODE_IN_COMMUNICATION
-
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-            val devices = audioManager?.availableCommunicationDevices ?: return
-            val deviceType = if (callSettings.speakerOn) {
-                AudioDeviceInfo.TYPE_BUILTIN_SPEAKER
-            } else {
-                AudioDeviceInfo.TYPE_BUILTIN_EARPIECE
-            }
-
-            val device = devices.firstOrNull { it.type == deviceType } ?: return
-
-            val isCommunicationDeviceSet = audioManager?.setCommunicationDevice(device)
-            logger.d { "[setupAudio] #sfu; isCommunicationDeviceSet: $isCommunicationDeviceSet" }
-        }
+    fun cleanup() {
+        videoSource.dispose()
+        videoTrack.dispose()
+        audioSource.dispose()
+        audioTrack.dispose()
+        camera.cleanup()
+        microphone.cleanup()
     }
 }

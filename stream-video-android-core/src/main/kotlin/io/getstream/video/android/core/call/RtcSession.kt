@@ -156,7 +156,6 @@ public class RtcSession internal constructor(
     private val context = client.context
     private val logger by taggedLogger("Call:RtcSession")
     private val clientImpl = client as StreamVideoImpl
-    private val scope = clientImpl.scope
 
     internal val sessionId = clientImpl.sessionId
 
@@ -169,7 +168,7 @@ public class RtcSession internal constructor(
 
     // run all calls on a supervisor job so we can easily cancel them
     private val supervisorJob = SupervisorJob()
-    private val coroutineScope = CoroutineScope(scope.coroutineContext + supervisorJob)
+    private val coroutineScope = CoroutineScope(clientImpl.scope.coroutineContext + supervisorJob)
 
     /**
      * We can't publish tracks till we've received the join event response
@@ -265,12 +264,12 @@ public class RtcSession internal constructor(
         }
         sfuConnectionModule = connectionModule.createSFUConnectionModule(sfuUrl, sessionId, sfuToken, getSdp)
         // listen to socket events and errors
-        scope.launch {
+        coroutineScope.launch {
             sfuConnectionModule.sfuSocket.events.collect() {
                 clientImpl.fireEvent(it, call.cid)
             }
         }
-        scope.launch {
+        coroutineScope.launch {
             sfuConnectionModule.sfuSocket.errors.collect() {
                 if (clientImpl.developmentMode) {
                     throw it
@@ -279,7 +278,7 @@ public class RtcSession internal constructor(
                 }
             }
         }
-        scope.launch {
+        coroutineScope.launch {
             // call update participant subscriptions debounced
             trackUpdatesDebounced.collect {
                 updateParticipantsSubscriptions()
@@ -429,40 +428,40 @@ public class RtcSession internal constructor(
         track?.audio?.setEnabled(isEnabled)
     }
 
-    /**
-     * Video track helpers.
-     */
+    fun cleanup() {
+        logger.i { "[cleanup] #sfu; no args" }
+        supervisorJob.cancel()
 
-    private val surfaceTextureHelper by lazy {
-        SurfaceTextureHelper.create(
-            "CaptureThread", clientImpl.peerConnectionFactory.eglBase.eglBaseContext
-        )
-    }
-
-    private var videoCapturer: VideoCapturer? = null
-    private var isCapturingVideo: Boolean = false
-    // TODO: nicer way to monitor this
-
-    fun clear() {
-        logger.i { "[clear] #sfu; no args" }
-        // supervisorJob.cancelChildren()
-
+        // mark ourselves as disconnected
         connectionState = ConnectionState.DISCONNECTED
 
+        // cleanup the publisher and subcriber peer connections
         subscriber?.connection?.close()
         publisher?.connection?.close()
         subscriber = null
         publisher = null
 
-        sfuConnectionModule.sfuSocket.disconnect()
+        // cleanup the tracks
+        tracks.values.map { it.values }.flatten().forEach {wrapper->
+            if (wrapper.audio != null) {
+                try {
+                    wrapper.audio?.dispose()
+                }catch (e: Exception) {
+                    logger.e { "[cleanup] #sfu; error disposing audio track: ${e.message}" }
+                }
+            } else {
+                try {
+                    wrapper.video?.dispose()
+                }catch (e: Exception) {
+                    logger.e { "[cleanup] #sfu; error disposing audio track: ${e.message}" }
+                }
+            }
+        }
+        tracks.clear()
 
-        videoCapturer?.stopCapture()
-        videoCapturer?.dispose()
-        videoCapturer = null
+        // disconnect the socket and clean it up
+        sfuConnectionModule.sfuSocket.cleanup()
 
-        surfaceTextureHelper.stopListening()
-
-        isCapturingVideo = false
     }
 
     /**
@@ -686,7 +685,7 @@ public class RtcSession internal constructor(
             joinEventResponse.value = event
         }
         if (event is SfuDataEvent) {
-            scope.launch {
+            coroutineScope.launch {
                 logger.v { "[onRtcEvent] event: $event" }
                 when (event) {
                     is ICETrickleEvent -> handleIceTrickle(event)
@@ -916,7 +915,7 @@ public class RtcSession internal constructor(
      */
 
     internal suspend fun <T : Any> wrapAPICall(apiCall: suspend () -> T): Result<T> {
-        return withContext(scope.coroutineContext) {
+        return withContext(coroutineScope.coroutineContext) {
             try {
                 val result = apiCall()
                 Success(result)

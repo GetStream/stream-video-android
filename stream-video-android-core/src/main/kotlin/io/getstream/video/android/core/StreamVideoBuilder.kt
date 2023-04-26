@@ -116,7 +116,7 @@ public class StreamVideoBuilder(
         // create the client
         val client = StreamVideoImpl(
             context = context,
-            scope = scope,
+            _scope = scope,
             user = user,
             preferences = preferences,
             tokenProvider = tokenProvider,

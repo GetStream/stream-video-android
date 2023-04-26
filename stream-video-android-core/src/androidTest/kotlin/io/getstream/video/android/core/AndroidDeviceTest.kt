@@ -67,11 +67,29 @@ class AndroidDeviceTest : IntegrationTestBase(connectCoordinatorWS = false) {
     }
 
     @Test
-    fun cleanup() = runTest {
-        // coroutine job at the client level
-        // at the call level
-        // cleanup coroutines
-        // cleanup video elements
+    fun cleanupCall() = runTest {
+        val result = call.join()
+        // cleanup the media manager
+        call.mediaManager.cleanup()
+        // cleanup rtc
+        call.session?.cleanup()
+        // cleanup the call
+        call.cleanup()
+    }
+
+    @Test
+    fun cleanupClient() = runTest {
+        val newClient = StreamVideoBuilder(
+            context = context,
+            apiKey = apiKey,
+            geo = GEO.GlobalEdgeNetwork,
+            testData.users["thierry"]!!,
+            testData.tokens["thierry"]!!,
+        ).build()
+        val call = newClient.call("default", randomUUID())
+        val result = call.join()
+        // destroy and cleanup the client
+        newClient.cleanup()
     }
 
     @Test
