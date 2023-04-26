@@ -127,9 +127,9 @@ class AndroidDeviceTest : IntegrationTestBase(connectCoordinatorWS = false) {
          * PeerConnection states
          * PeerConnection.IceConnectionState.CLOSED, PeerConnection.IceConnectionState.FAILED, PeerConnection.IceConnectionState.DISCONNECTED
          *
-         * - Ok so we need to be able to monitor ice connection state (simple stateflow?)
-         * - When the ice connection fails... ask if we need a new SFU to the coordinator. maybe ping the SFU if possible. if so switch sfu
-         *
+         * - When the ice connection fails
+         * -- we check for disconnected, closed or failed. if failed, closed or disconnected for more than 3 seconds
+         * -- call the coordinator and ask if we should switch SFU
          */
 
     }

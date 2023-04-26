@@ -76,6 +76,9 @@ public class StreamPeerConnection(
     internal lateinit var remoteSdp: SessionDescription
     private val typeTag = type.stringify()
 
+    // see https://developer.mozilla.org/en-US/docs/Web/API/RTCPeerConnection/iceConnectionState
+    internal val state = MutableStateFlow<PeerConnection.IceConnectionState?>(null)
+
     private val logger by taggedLogger("Call:PeerConnection")
 
     /**
@@ -382,6 +385,7 @@ public class StreamPeerConnection(
      */
     override fun onIceConnectionChange(newState: PeerConnection.IceConnectionState?) {
         logger.i { "[onIceConnectionChange] #sfu; #$typeTag; newState: $newState" }
+        state.value = newState
         when (newState) {
             PeerConnection.IceConnectionState.CLOSED, PeerConnection.IceConnectionState.FAILED, PeerConnection.IceConnectionState.DISCONNECTED -> {
                 statsJob?.cancel()
