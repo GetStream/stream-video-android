@@ -97,8 +97,8 @@ public fun CallContainer(
     },
     callContent: @Composable (call: Call) -> Unit = {
         DefaultCallContent(
+            modifier = modifier.testTag("call_content"),
             callViewModel = callViewModel,
-            modifier = modifier,
             onBackPressed = onBackPressed,
             onCallAction = onCallAction,
             callControlsContent = callControlsContent,
@@ -189,7 +189,7 @@ internal fun DefaultCallContent(
     pictureInPictureContent: @Composable (call: Call) -> Unit = { DefaultPictureInPictureContent(it) }
 ) {
     CallContent(
-        modifier = modifier.testTag("call_content"),
+        modifier = modifier,
         callViewModel = callViewModel,
         onBackPressed = onBackPressed,
         onCallAction = onCallAction,

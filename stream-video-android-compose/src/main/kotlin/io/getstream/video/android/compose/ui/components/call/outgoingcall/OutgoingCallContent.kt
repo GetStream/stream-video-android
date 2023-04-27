@@ -117,7 +117,6 @@ public fun OutgoingCallContent(
     ) {
 
         Column {
-
             CallAppBar(
                 onBackPressed = onBackPressed,
                 onCallAction = onCallAction

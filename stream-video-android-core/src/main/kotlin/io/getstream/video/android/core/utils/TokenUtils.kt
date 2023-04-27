@@ -16,44 +16,7 @@
 
 package io.getstream.video.android.core.utils
 
-import android.util.Base64
 import kotlinx.serialization.Serializable
-import kotlinx.serialization.encodeToString
-import kotlinx.serialization.json.Json
-
-// TODO - remove after testing & Coordinator integration
-public fun generateSFUToken(
-    userId: String,
-    callId: String,
-    imageUrl: String? = null
-): String {
-    val params = UserTokenWrapper(
-        app_id = 42,
-        call_id = callId,
-        user = UserWrapper(
-            id = userId,
-            image_url = imageUrl ?: "",
-        ),
-        grants = mapOf(
-            "can_join_call" to true,
-            "can_publish_video" to true,
-            "can_publish_audio" to true,
-            "can_screen_share" to true,
-            "can_mute_video" to true,
-            "can_mute_audio" to true
-        ),
-        iss = "dev-only.pubkey.ecdsa256",
-        aud = listOf("localhost")
-    )
-
-    val json = Json.encodeToString(params)
-
-    val paramsString =
-        Base64.encodeToString(json.toByteArray(), Base64.NO_WRAP)
-
-    return "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.$paramsString.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c"
-        .replace("=", "")
-}
 
 @Serializable
 internal data class UserTokenWrapper(

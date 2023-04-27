@@ -63,7 +63,7 @@ public fun CallControls(
             modifier = modifier,
             callDeviceState = callDeviceState,
             onCallAction = onCallAction,
-            isScreenSharing = true,
+            isScreenSharing = isScreenSharing,
             actions = actions
         )
     }

@@ -17,6 +17,7 @@
 package io.getstream.video.android.core
 
 import android.content.Context
+import android.util.Log
 import io.getstream.video.android.core.model.User
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -79,6 +80,7 @@ class ClientState(client: StreamVideo) {
         // mark connected
         if (event is ConnectedEvent) {
 
+            Log.e("Test", "connectionId: ${event.connectionId}")
             _connection.value = ConnectionState.Connected
         } else if (event is CallCreatedEvent) {
             // what's the right thing to do here?
@@ -109,10 +111,10 @@ class ClientState(client: StreamVideo) {
 }
 
 public fun ConnectionState.formatAsTitle(context: Context): String = when (this) {
-    ConnectionState.PreConnect -> "PreConnect"
-    ConnectionState.Loading -> "Loading"
+    ConnectionState.PreConnect -> "Connecting.."
+    ConnectionState.Loading -> "Loading.."
     ConnectionState.Connected -> "Connected"
-    ConnectionState.Reconnecting -> "Reconnecting"
+    ConnectionState.Reconnecting -> "Reconnecting.."
     ConnectionState.Disconnected -> "Disconnected"
     is ConnectionState.Failed -> "Failed"
 }
