@@ -23,8 +23,8 @@ import io.getstream.video.android.core.StreamVideo
 import io.getstream.video.android.core.StreamVideoBuilder
 import io.getstream.video.android.core.internal.InternalStreamVideoApi
 import io.getstream.video.android.core.model.User
-import org.webrtc.VideoTrack
 import java.util.UUID
+import org.webrtc.VideoTrack
 
 @InternalStreamVideoApi
 public object MockUtils {
@@ -103,10 +103,16 @@ public val mockParticipants: List<ParticipantState>
     inline get() {
         val participants = arrayListOf<ParticipantState>()
         mockUsers.forEach {
+            val sessionId = if (it == mockUsers.first()) {
+                mockCall.sessionId ?: UUID.randomUUID().toString()
+            } else {
+                UUID.randomUUID().toString()
+            }
             participants.add(
+
                 ParticipantState(
                     initialUser = it,
-                    sessionId = UUID.randomUUID().toString(),
+                    sessionId = sessionId,
                     call = mockCall
                 )
             )

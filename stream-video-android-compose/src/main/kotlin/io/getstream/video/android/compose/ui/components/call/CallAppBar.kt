@@ -83,7 +83,6 @@ public fun CallAppBar(
         modifier = modifier
             .fillMaxWidth()
             .height(height)
-            .background(VideoTheme.colors.appBackground)
             .padding(VideoTheme.dimens.callAppBarPadding),
         verticalAlignment = Alignment.CenterVertically,
     ) {
