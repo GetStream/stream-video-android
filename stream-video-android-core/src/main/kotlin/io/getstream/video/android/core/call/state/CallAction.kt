@@ -78,6 +78,11 @@ public object DeclineCall : CallAction
 public object LeaveCall : CallAction
 
 /**
+ * Action to show a chat dialog.
+ */
+public object ChatDialog : CallAction
+
+/**
  * Action to invite other users to a call.
  */
 public data class InviteUsersToCall(

@@ -70,6 +70,9 @@ public data class StreamColors(
     public val callGradientStart: Color,
     public val callGradientEnd: Color,
     public val callDescription: Color,
+    public val callActionIconEnabledBackground: Color,
+    public val callActionIconDisabledBackground: Color,
+    public val callActionIcon: Color,
 ) {
 
     public companion object {
@@ -108,6 +111,9 @@ public data class StreamColors(
             callGradientStart = colorResource(id = R.color.stream_video_call_gradient_start),
             callGradientEnd = colorResource(id = R.color.stream_video_call_gradient_end),
             callDescription = colorResource(id = R.color.stream_video_text_high_emphasis),
+            callActionIconEnabledBackground = colorResource(id = R.color.stream_video_text_high_emphasis),
+            callActionIcon = colorResource(id = R.color.stream_video_app_background),
+            callActionIconDisabledBackground = colorResource(id = R.color.stream_video_disabled),
         )
 
         /**
@@ -145,6 +151,9 @@ public data class StreamColors(
             callGradientStart = colorResource(id = R.color.stream_video_call_gradient_start),
             callGradientEnd = colorResource(id = R.color.stream_video_call_gradient_end),
             callDescription = colorResource(id = R.color.stream_video_call_description),
+            callActionIconEnabledBackground = colorResource(id = R.color.stream_video_text_high_emphasis_dark),
+            callActionIcon = colorResource(id = R.color.stream_video_app_background_dark),
+            callActionIconDisabledBackground = colorResource(id = R.color.stream_video_disabled_dark),
         )
     }
 }

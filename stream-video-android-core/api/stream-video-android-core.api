@@ -697,6 +697,10 @@ public final class io/getstream/video/android/core/call/state/CancelCall : io/ge
 	public static final field INSTANCE Lio/getstream/video/android/core/call/state/CancelCall;
 }
 
+public final class io/getstream/video/android/core/call/state/ChatDialog : io/getstream/video/android/core/call/state/CallAction {
+	public static final field INSTANCE Lio/getstream/video/android/core/call/state/ChatDialog;
+}
+
 public final class io/getstream/video/android/core/call/state/ConnectionState : java/lang/Enum {
 	public static final field CONNECTED Lio/getstream/video/android/core/call/state/ConnectionState;
 	public static final field CONNECTING Lio/getstream/video/android/core/call/state/ConnectionState;
