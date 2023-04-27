@@ -72,8 +72,8 @@ public class StreamPeerConnection(
     private val onIceCandidate: ((IceCandidate, StreamPeerType) -> Unit)?,
 ) : PeerConnection.Observer {
 
-    internal lateinit var localSdp: SessionDescription
-    internal lateinit var remoteSdp: SessionDescription
+    internal var localSdp: SessionDescription? = null
+    internal var remoteSdp: SessionDescription? = null
     private val typeTag = type.stringify()
 
     // see https://developer.mozilla.org/en-US/docs/Web/API/RTCPeerConnection/iceConnectionState

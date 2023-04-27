@@ -32,6 +32,8 @@ import io.getstream.video.android.core.model.toIceServer
 import io.getstream.webrtc.android.ui.VideoTextureViewRenderer
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
@@ -55,6 +57,7 @@ import org.openapitools.client.models.UpdateCallRequest
 import org.openapitools.client.models.UpdateCallResponse
 import org.openapitools.client.models.UpdateUserPermissionsResponse
 import org.openapitools.client.models.VideoEvent
+import org.webrtc.PeerConnection
 import org.webrtc.RendererCommon
 import stream.video.sfu.models.TrackType
 
@@ -223,6 +226,25 @@ public class Call(
             session?.let { rtcSession ->
                 val result = rtcSession.lastVideoStreamAdded.filter { it!=null }.first()
                 timer.finish("stream added, rtc completed, ready to display video $result")
+            }
+
+        }
+
+        scope.launch {
+            session?.let {
+                // failed and closed indicate we should retry connecting to this or another SFU
+                // disconnected is temporary, only if it lasts for a certain duration we should reconnect or switch
+                val badStates = listOf(
+                    PeerConnection.IceConnectionState.DISCONNECTED,
+                    PeerConnection.IceConnectionState.FAILED,
+                    PeerConnection.IceConnectionState.CLOSED
+                )
+                it.subscriber?.state?.filter { it in badStates }?.collect() {
+                    logger.w { "ice connection state changed to $it" }
+                    // TODO: UI indications
+                    // TODO: some logic here about when to reconnect or switch
+                    switchSfu()
+                }
             }
 
         }
