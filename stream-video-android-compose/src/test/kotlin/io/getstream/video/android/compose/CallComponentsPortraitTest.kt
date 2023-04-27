@@ -44,8 +44,9 @@ internal class CallComponentsPortraitTest : BaseComposeTest() {
     fun `snapshot RegularCallControls composable`() {
         snapshotWithDarkMode {
             RegularCallControls(
-                callDeviceState = CallDeviceState(), isScreenSharing = false
-            ) {}
+                callDeviceState = CallDeviceState(),
+                onCallAction = {}
+            )
         }
     }
 
@@ -53,8 +54,9 @@ internal class CallComponentsPortraitTest : BaseComposeTest() {
     fun `snapshot CallControls composable`() {
         snapshotWithDarkMode {
             CallControls(
-                callDeviceState = CallDeviceState(), isScreenSharing = false
-            ) {}
+                callDeviceState = CallDeviceState(),
+                onCallAction = {}
+            )
         }
     }
 }
