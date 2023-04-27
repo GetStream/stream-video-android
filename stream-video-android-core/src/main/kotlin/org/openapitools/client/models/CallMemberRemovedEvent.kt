@@ -23,16 +23,25 @@
 
 package org.openapitools.client.models
 
+import org.openapitools.client.models.CallResponse
+
+
+
+
 import com.squareup.moshi.Json
 
 /**
  * This event is sent when one or more members are removed from a call
  *
- * @param call * @param callCid * @param createdAt * @param members the list of member IDs removed from the call
+ * @param call
+ * @param callCid
+ * @param createdAt
+ * @param members the list of member IDs removed from the call
  * @param type The type of event: \"call.member_added\" in this case
  */
 
-data class CallMemberRemovedEvent(
+
+data class CallMemberRemovedEvent (
 
     @Json(name = "call")
     val call: CallResponse,
@@ -51,7 +60,7 @@ data class CallMemberRemovedEvent(
     @Json(name = "type")
     val type: kotlin.String = "call.member_removed"
 
-) : VideoEvent(), WSCallEvent {
+) : VideoEvent(), WSCallEvent{
 
     override fun getCallCID(): String {
         return callCid

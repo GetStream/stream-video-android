@@ -23,13 +23,21 @@
 
 package org.openapitools.client.models
 
+import org.openapitools.client.models.RTMPIngress
+
+
+
+
 import com.squareup.moshi.Json
 
 /**
- * *
- * @param rtmp */
+ *
+ *
+ * @param rtmp
+ */
 
-data class CallIngressResponse(
+
+data class CallIngressResponse (
 
     @Json(name = "rtmp")
     val rtmp: RTMPIngress

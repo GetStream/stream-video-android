@@ -23,13 +23,22 @@
 
 package org.openapitools.client.models
 
+
+
+
+
 import com.squareup.moshi.Json
 
 /**
- * *
- * @param accessRequestEnabled * @param opusDtxEnabled * @param redundantCodingEnabled */
+ *
+ *
+ * @param accessRequestEnabled
+ * @param opusDtxEnabled
+ * @param redundantCodingEnabled
+ */
 
-data class AudioSettingsRequest(
+
+data class AudioSettingsRequest (
 
     @Json(name = "access_request_enabled")
     val accessRequestEnabled: kotlin.Boolean? = null,

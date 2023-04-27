@@ -23,14 +23,23 @@
 
 package org.openapitools.client.models
 
+import org.openapitools.client.models.CallRequest
+
+
+
+
 import com.squareup.moshi.Json
 
 /**
- * *
- * @param `data` * @param membersLimit * @param ring if provided it overrides the default ring setting for this call
+ *
+ *
+ * @param `data`
+ * @param membersLimit
+ * @param ring if provided it overrides the default ring setting for this call
  */
 
-data class GetOrCreateCallRequest(
+
+data class GetOrCreateCallRequest (
 
     @Json(name = "data")
     val `data`: CallRequest? = null,

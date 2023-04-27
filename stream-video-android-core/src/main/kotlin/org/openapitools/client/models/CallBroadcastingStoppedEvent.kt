@@ -23,15 +23,22 @@
 
 package org.openapitools.client.models
 
+
+
+
+
 import com.squareup.moshi.Json
 
 /**
  * This event is sent when call broadcasting has stopped
  *
- * @param callCid * @param createdAt * @param type The type of event: \"call.broadcasting_stopped\" in this case
+ * @param callCid
+ * @param createdAt
+ * @param type The type of event: \"call.broadcasting_stopped\" in this case
  */
 
-data class CallBroadcastingStoppedEvent(
+
+data class CallBroadcastingStoppedEvent (
 
     @Json(name = "call_cid")
     val callCid: kotlin.String,
@@ -43,7 +50,7 @@ data class CallBroadcastingStoppedEvent(
     @Json(name = "type")
     val type: kotlin.String = "call.broadcasting_stopped"
 
-) : VideoEvent(), WSCallEvent {
+) : VideoEvent(), WSCallEvent{
 
     override fun getCallCID(): String {
         return callCid

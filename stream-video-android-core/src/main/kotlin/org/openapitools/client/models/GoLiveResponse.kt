@@ -23,14 +23,22 @@
 
 package org.openapitools.client.models
 
+import org.openapitools.client.models.CallResponse
+
+
+
+
 import com.squareup.moshi.Json
 
 /**
- * *
- * @param call * @param duration Duration of the request in human-readable format
+ *
+ *
+ * @param call
+ * @param duration Duration of the request in human-readable format
  */
 
-data class GoLiveResponse(
+
+data class GoLiveResponse (
 
     @Json(name = "call")
     val call: CallResponse,

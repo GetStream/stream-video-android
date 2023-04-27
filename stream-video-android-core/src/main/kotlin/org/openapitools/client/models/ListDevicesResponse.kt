@@ -23,14 +23,22 @@
 
 package org.openapitools.client.models
 
+import org.openapitools.client.models.Device
+
+
+
+
 import com.squareup.moshi.Json
 
 /**
- * *
+ *
+ *
  * @param devices List of devices
- * @param duration */
+ * @param duration
+ */
 
-data class ListDevicesResponse(
+
+data class ListDevicesResponse (
 
     /* List of devices */
     @Json(name = "devices")

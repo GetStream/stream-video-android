@@ -23,16 +23,28 @@
 
 package org.openapitools.client.models
 
+
+
+
+
 import com.squareup.moshi.Json
 
 /**
- * *
+ *
+ *
  * @param createdAt Date/time of creation
- * @param custom * @param id * @param role * @param teams * @param updatedAt Date/time of the last update
+ * @param custom
+ * @param id
+ * @param role
+ * @param teams
+ * @param updatedAt Date/time of the last update
  * @param deletedAt Date/time of deletion
- * @param image * @param name */
+ * @param image
+ * @param name
+ */
 
-data class UserResponse(
+
+data class UserResponse (
 
     /* Date/time of creation */
     @Json(name = "created_at")

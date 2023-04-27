@@ -23,6 +23,10 @@
 
 package org.openapitools.client.models
 
+
+
+
+
 import com.squareup.moshi.Json
 
 /**
@@ -103,8 +107,8 @@ enum class OwnCapability(val value: kotlin.String) {
     updateCallSettings("update-call-settings"),
 
     /**
-     * This case is used when decoding an unknown value.
-     */
+    * This case is used when decoding an unknown value.
+    */
     unknown("unknown");
 
     /**
@@ -126,10 +130,10 @@ enum class OwnCapability(val value: kotlin.String) {
          * Returns a valid [OwnCapability] for [data], unknown otherwise.
          */
         fun decode(data: kotlin.Any?): OwnCapability? = data?.let {
-            val normalizedData = "$it".lowercase()
-            values().firstOrNull { value ->
-                it == value || normalizedData == "$value".lowercase()
-            } ?: unknown
+          val normalizedData = "$it".lowercase()
+          values().firstOrNull { value ->
+            it == value || normalizedData == "$value".lowercase()
+          }?: unknown
         }
     }
 }

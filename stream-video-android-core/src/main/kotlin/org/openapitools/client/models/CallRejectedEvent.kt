@@ -23,15 +23,24 @@
 
 package org.openapitools.client.models
 
+import org.openapitools.client.models.UserResponse
+
+
+
+
 import com.squareup.moshi.Json
 
 /**
  * This event is sent when a user rejects a ringing call. Clients receiving this event should dismiss  the call screen unless the call includes more users.
  *
- * @param callCid * @param createdAt * @param type The type of event: \"call.rejected\" in this case
- * @param user */
+ * @param callCid
+ * @param createdAt
+ * @param type The type of event: \"call.rejected\" in this case
+ * @param user
+ */
 
-data class CallRejectedEvent(
+
+data class CallRejectedEvent (
 
     @Json(name = "call_cid")
     val callCid: kotlin.String,
@@ -46,7 +55,7 @@ data class CallRejectedEvent(
     @Json(name = "user")
     val user: UserResponse
 
-) : VideoEvent(), WSCallEvent {
+) : VideoEvent(), WSCallEvent{
 
     override fun getCallCID(): String {
         return callCid

@@ -16,23 +16,32 @@
 
 package org.openapitools.client.apis
 
-import org.openapitools.client.models.CreateDeviceRequest
-import org.openapitools.client.models.ListDevicesResponse
-import org.openapitools.client.models.Response
+
 import retrofit2.http.Body
 import retrofit2.http.DELETE
 import retrofit2.http.GET
 import retrofit2.http.POST
 import retrofit2.http.Query
 
+
+
+
+
+
+import org.openapitools.client.models.CreateDeviceRequest
+import org.openapitools.client.models.ListDevicesResponse
+import org.openapitools.client.models.Response
+
 interface DevicesApi {
     /**
      * Create device
-     * Adds a new device to a user, if the same device already exists the call will have no effect * Responses:
+     * Adds a new device to a user, if the same device already exists the call will have no effect
+     * Responses:
      *  - 400: Bad request
      *  - 429: Too many requests
      *
-     * @param createDeviceRequest * @return [Unit]
+     * @param createDeviceRequest
+     * @return [Unit]
      */
     @POST("/video/devices")
     suspend fun createDevice(
@@ -41,7 +50,8 @@ interface DevicesApi {
 
     /**
      * Delete device
-     * Deletes one device * Responses:
+     * Deletes one device
+     * Responses:
      *  - 200: Successful response
      *  - 400: Bad request
      *  - 429: Too many requests
@@ -58,7 +68,8 @@ interface DevicesApi {
 
     /**
      * List devices
-     * Returns all available devices * Responses:
+     * Returns all available devices
+     * Responses:
      *  - 200: Successful response
      *  - 400: Bad request
      *  - 429: Too many requests
@@ -70,4 +81,5 @@ interface DevicesApi {
     suspend fun listDevices(
         @Query("user_id") userId: String? = null
     ): ListDevicesResponse
+
 }

@@ -23,16 +23,25 @@
 
 package org.openapitools.client.models
 
+
+
+
+
 import com.squareup.moshi.Json
 
 /**
- * *
+ *
+ *
  * @param createdAt Date/time of creation
- * @param id * @param pushProvider * @param disabled Whether device is disabled or not
+ * @param id
+ * @param pushProvider
+ * @param disabled Whether device is disabled or not
  * @param disabledReason Reason explaining why device had been disabled
- * @param pushProviderName */
+ * @param pushProviderName
+ */
 
-data class Device(
+
+data class Device (
 
     /* Date/time of creation */
     @Json(name = "created_at")

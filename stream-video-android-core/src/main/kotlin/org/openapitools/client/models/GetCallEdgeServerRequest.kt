@@ -23,13 +23,20 @@
 
 package org.openapitools.client.models
 
+
+
+
+
 import com.squareup.moshi.Json
 
 /**
- * *
- * @param latencyMeasurements */
+ *
+ *
+ * @param latencyMeasurements
+ */
 
-data class GetCallEdgeServerRequest(
+
+data class GetCallEdgeServerRequest (
 
     @Json(name = "latency_measurements")
     val latencyMeasurements: kotlin.collections.Map<kotlin.String, kotlin.collections.List<kotlin.Float>>

@@ -23,13 +23,21 @@
 
 package org.openapitools.client.models
 
+import org.openapitools.client.models.UserRequest
+
+
+
+
 import com.squareup.moshi.Json
 
 /**
- * *
- * @param user */
+ *
+ *
+ * @param user
+ */
 
-data class CreateGuestRequest(
+
+data class CreateGuestRequest (
 
     @Json(name = "user")
     val user: UserRequest

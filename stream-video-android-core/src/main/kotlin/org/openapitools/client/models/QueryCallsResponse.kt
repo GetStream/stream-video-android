@@ -23,13 +23,24 @@
 
 package org.openapitools.client.models
 
+import org.openapitools.client.models.CallStateResponseFields
+
+
+
+
 import com.squareup.moshi.Json
 
 /**
- * *
- * @param calls * @param duration * @param next * @param prev */
+ *
+ *
+ * @param calls
+ * @param duration
+ * @param next
+ * @param prev
+ */
 
-data class QueryCallsResponse(
+
+data class QueryCallsResponse (
 
     @Json(name = "calls")
     val calls: kotlin.collections.List<CallStateResponseFields>,

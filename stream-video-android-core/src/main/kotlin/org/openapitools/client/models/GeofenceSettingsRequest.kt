@@ -23,13 +23,20 @@
 
 package org.openapitools.client.models
 
+
+
+
+
 import com.squareup.moshi.Json
 
 /**
- * *
- * @param names */
+ *
+ *
+ * @param names
+ */
 
-data class GeofenceSettingsRequest(
+
+data class GeofenceSettingsRequest (
 
     @Json(name = "names")
     val names: kotlin.collections.List<kotlin.String>? = null

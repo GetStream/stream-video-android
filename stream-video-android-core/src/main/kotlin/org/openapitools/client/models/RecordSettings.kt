@@ -23,13 +23,22 @@
 
 package org.openapitools.client.models
 
+
+
+
+
 import com.squareup.moshi.Json
 
 /**
- * *
- * @param audioOnly * @param mode * @param quality */
+ *
+ *
+ * @param audioOnly
+ * @param mode
+ * @param quality
+ */
 
-data class RecordSettings(
+
+data class RecordSettings (
 
     @Json(name = "audio_only")
     val audioOnly: kotlin.Boolean,
@@ -40,10 +49,13 @@ data class RecordSettings(
     @Json(name = "quality")
     val quality: RecordSettings.Quality
 
-) {
+)
+
+{
 
     /**
-     * *
+     *
+     *
      * Values: available,disabled,autoOn
      */
     enum class Mode(val value: kotlin.String) {
@@ -52,7 +64,8 @@ data class RecordSettings(
         @Json(name = "auto-on") autoOn("auto-on");
     }
     /**
-     * *
+     *
+     *
      * Values: audioOnly,_360p,_480p,_720p,_1080p,_1440p
      */
     enum class Quality(val value: kotlin.String) {
@@ -63,4 +76,5 @@ data class RecordSettings(
         @Json(name = "1080p") _1080p("1080p"),
         @Json(name = "1440p") _1440p("1440p");
     }
+
 }

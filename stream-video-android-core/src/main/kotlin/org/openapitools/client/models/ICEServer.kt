@@ -23,13 +23,22 @@
 
 package org.openapitools.client.models
 
+
+
+
+
 import com.squareup.moshi.Json
 
 /**
- * *
- * @param password * @param urls * @param username */
+ *
+ *
+ * @param password
+ * @param urls
+ * @param username
+ */
 
-data class ICEServer(
+
+data class ICEServer (
 
     @Json(name = "password")
     val password: kotlin.String,

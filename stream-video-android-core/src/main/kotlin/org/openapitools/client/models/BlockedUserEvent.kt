@@ -23,15 +23,25 @@
 
 package org.openapitools.client.models
 
+import org.openapitools.client.models.UserResponse
+
+
+
+
 import com.squareup.moshi.Json
 
 /**
  * This event is sent to call participants to notify when a user is blocked on a call, clients can use this event to show a notification.  If the user is the current user, the client should leave the call screen as well
  *
- * @param callCid * @param createdAt * @param type The type of event: \"call.blocked_user\" in this case
- * @param user * @param blockedByUser */
+ * @param callCid
+ * @param createdAt
+ * @param type The type of event: \"call.blocked_user\" in this case
+ * @param user
+ * @param blockedByUser
+ */
 
-data class BlockedUserEvent(
+
+data class BlockedUserEvent (
 
     @Json(name = "call_cid")
     val callCid: kotlin.String,
@@ -49,7 +59,7 @@ data class BlockedUserEvent(
     @Json(name = "blocked_by_user")
     val blockedByUser: UserResponse? = null
 
-) : VideoEvent(), WSCallEvent {
+) : VideoEvent(), WSCallEvent{
 
     override fun getCallCID(): String {
         return callCid

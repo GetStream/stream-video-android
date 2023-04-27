@@ -23,15 +23,22 @@
 
 package org.openapitools.client.models
 
+
+
+
+
 import com.squareup.moshi.Json
 
 /**
- * *
+ *
+ *
  * @param id Device ID
- * @param pushProvider * @param pushProviderName Name of the push provider configuration
+ * @param pushProvider
+ * @param pushProviderName Name of the push provider configuration
  */
 
-data class DeviceFieldsRequest(
+
+data class DeviceFieldsRequest (
 
     /* Device ID */
     @Json(name = "id")
@@ -44,10 +51,13 @@ data class DeviceFieldsRequest(
     @Json(name = "push_provider_name")
     val pushProviderName: kotlin.String? = null
 
-) {
+)
+
+{
 
     /**
-     * *
+     *
+     *
      * Values: firebase,apn,huawei,xiaomi
      */
     enum class PushProvider(val value: kotlin.String) {
@@ -56,4 +66,5 @@ data class DeviceFieldsRequest(
         @Json(name = "huawei") huawei("huawei"),
         @Json(name = "xiaomi") xiaomi("xiaomi");
     }
+
 }

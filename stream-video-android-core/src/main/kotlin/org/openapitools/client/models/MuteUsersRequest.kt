@@ -23,13 +23,24 @@
 
 package org.openapitools.client.models
 
+
+
+
+
 import com.squareup.moshi.Json
 
 /**
- * *
- * @param audio * @param muteAllUsers * @param screenshare * @param userIds * @param video */
+ *
+ *
+ * @param audio
+ * @param muteAllUsers
+ * @param screenshare
+ * @param userIds
+ * @param video
+ */
 
-data class MuteUsersRequest(
+
+data class MuteUsersRequest (
 
     @Json(name = "audio")
     val audio: kotlin.Boolean? = null,

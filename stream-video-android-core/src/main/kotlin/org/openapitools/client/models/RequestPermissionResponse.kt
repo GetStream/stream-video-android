@@ -23,13 +23,20 @@
 
 package org.openapitools.client.models
 
+
+
+
+
 import com.squareup.moshi.Json
 
 /**
- * *
- * @param duration */
+ *
+ *
+ * @param duration
+ */
 
-data class RequestPermissionResponse(
+
+data class RequestPermissionResponse (
 
     @Json(name = "duration")
     val duration: kotlin.String

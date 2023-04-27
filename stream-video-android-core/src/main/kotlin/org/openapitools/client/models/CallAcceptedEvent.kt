@@ -23,14 +23,24 @@
 
 package org.openapitools.client.models
 
+import org.openapitools.client.models.UserResponse
+
+
+
+
 import com.squareup.moshi.Json
 
 /**
  * This event is sent by a user accepting an incoming ringing call. Clients receiving this event should dismiss the call screen and move to the call.
  *
- * @param callCid * @param createdAt * @param type * @param user */
+ * @param callCid
+ * @param createdAt
+ * @param type
+ * @param user
+ */
 
-data class CallAcceptedEvent(
+
+data class CallAcceptedEvent (
 
     @Json(name = "call_cid")
     val callCid: kotlin.String,
@@ -44,7 +54,7 @@ data class CallAcceptedEvent(
     @Json(name = "user")
     val user: UserResponse
 
-) : VideoEvent(), WSCallEvent {
+) : VideoEvent(), WSCallEvent{
 
     override fun getCallCID(): String {
         return callCid

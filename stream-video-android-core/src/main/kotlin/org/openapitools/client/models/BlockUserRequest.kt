@@ -23,14 +23,20 @@
 
 package org.openapitools.client.models
 
+
+
+
+
 import com.squareup.moshi.Json
 
 /**
- * *
+ *
+ *
  * @param userId the user to block
  */
 
-data class BlockUserRequest(
+
+data class BlockUserRequest (
 
     /* the user to block */
     @Json(name = "user_id")

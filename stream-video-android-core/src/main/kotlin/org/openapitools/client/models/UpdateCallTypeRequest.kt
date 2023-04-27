@@ -23,13 +23,22 @@
 
 package org.openapitools.client.models
 
+import org.openapitools.client.models.CallSettingsRequest
+
+
+
+
 import com.squareup.moshi.Json
 
 /**
- * *
- * @param grants * @param settings */
+ *
+ *
+ * @param grants
+ * @param settings
+ */
 
-data class UpdateCallTypeRequest(
+
+data class UpdateCallTypeRequest (
 
     @Json(name = "grants")
     val grants: kotlin.collections.Map<kotlin.String, kotlin.collections.List<kotlin.String>>? = null,

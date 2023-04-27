@@ -23,6 +23,7 @@
 
 package org.openapitools.client.models
 
+
 sealed interface WSCallEvent {
     fun getCallCID(): String
 }

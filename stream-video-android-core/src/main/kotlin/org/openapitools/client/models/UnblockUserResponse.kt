@@ -23,14 +23,20 @@
 
 package org.openapitools.client.models
 
+
+
+
+
 import com.squareup.moshi.Json
 
 /**
- * *
+ *
+ *
  * @param duration Duration of the request in human-readable format
  */
 
-data class UnblockUserResponse(
+
+data class UnblockUserResponse (
 
     /* Duration of the request in human-readable format */
     @Json(name = "duration")

@@ -23,14 +23,29 @@
 
 package org.openapitools.client.models
 
+import org.openapitools.client.models.CallResponse
+import org.openapitools.client.models.Credentials
+import org.openapitools.client.models.MemberResponse
+import org.openapitools.client.models.UserResponse
+
+
+
+
 import com.squareup.moshi.Json
 
 /**
- * *
- * @param blockedUsers * @param call * @param credentials * @param duration Duration of the request in human-readable format
- * @param members * @param membership */
+ *
+ *
+ * @param blockedUsers
+ * @param call
+ * @param credentials
+ * @param duration Duration of the request in human-readable format
+ * @param members
+ * @param membership
+ */
 
-data class GetCallEdgeServerResponse(
+
+data class GetCallEdgeServerResponse (
 
     @Json(name = "blocked_users")
     val blockedUsers: kotlin.collections.List<UserResponse>,

@@ -23,14 +23,20 @@
 
 package org.openapitools.client.models
 
+
+
+
+
 import com.squareup.moshi.Json
 
 /**
- * *
+ *
+ *
  * @param userId the user to unblock
  */
 
-data class UnblockUserRequest(
+
+data class UnblockUserRequest (
 
     /* the user to unblock */
     @Json(name = "user_id")

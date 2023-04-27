@@ -23,13 +23,22 @@
 
 package org.openapitools.client.models
 
+import org.openapitools.client.models.CallTypeResponse
+
+
+
+
 import com.squareup.moshi.Json
 
 /**
- * *
- * @param callTypes * @param duration */
+ *
+ *
+ * @param callTypes
+ * @param duration
+ */
 
-data class ListCallTypeResponse(
+
+data class ListCallTypeResponse (
 
     @Json(name = "call_types")
     val callTypes: kotlin.collections.Map<kotlin.String, CallTypeResponse>,

@@ -23,16 +23,26 @@
 
 package org.openapitools.client.models
 
+import org.openapitools.client.models.OwnCapability
+import org.openapitools.client.models.UserResponse
+
+
+
+
 import com.squareup.moshi.Json
 
 /**
  * This event is sent to notify about permission changes for a user, clients receiving this event should update their UI accordingly
  *
- * @param callCid * @param createdAt * @param ownCapabilities The capabilities of the current user
+ * @param callCid
+ * @param createdAt
+ * @param ownCapabilities The capabilities of the current user
  * @param type The type of event: \"call.permissions_updated\" in this case
- * @param user */
+ * @param user
+ */
 
-data class UpdatedCallPermissionsEvent(
+
+data class UpdatedCallPermissionsEvent (
 
     @Json(name = "call_cid")
     val callCid: kotlin.String,
@@ -51,7 +61,7 @@ data class UpdatedCallPermissionsEvent(
     @Json(name = "user")
     val user: UserResponse
 
-) : VideoEvent(), WSCallEvent {
+) : VideoEvent(), WSCallEvent{
 
     override fun getCallCID(): String {
         return callCid

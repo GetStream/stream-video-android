@@ -23,14 +23,22 @@
 
 package org.openapitools.client.models
 
+
+
+
+
 import com.squareup.moshi.Json
 
 /**
- * *
- * @param userId * @param custom Custom data for this object
- * @param role */
+ *
+ *
+ * @param userId
+ * @param custom Custom data for this object
+ * @param role
+ */
 
-data class MemberRequest(
+
+data class MemberRequest (
 
     @Json(name = "user_id")
     val userId: kotlin.String,

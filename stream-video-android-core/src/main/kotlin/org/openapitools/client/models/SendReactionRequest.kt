@@ -23,13 +23,22 @@
 
 package org.openapitools.client.models
 
+
+
+
+
 import com.squareup.moshi.Json
 
 /**
- * *
- * @param type * @param custom * @param emojiCode */
+ *
+ *
+ * @param type
+ * @param custom
+ * @param emojiCode
+ */
 
-data class SendReactionRequest(
+
+data class SendReactionRequest (
 
     @Json(name = "type")
     val type: kotlin.String,

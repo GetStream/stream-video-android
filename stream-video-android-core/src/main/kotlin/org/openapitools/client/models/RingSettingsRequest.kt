@@ -23,13 +23,21 @@
 
 package org.openapitools.client.models
 
+
+
+
+
 import com.squareup.moshi.Json
 
 /**
- * *
- * @param autoCancelTimeoutMs * @param autoRejectTimeoutMs */
+ *
+ *
+ * @param autoCancelTimeoutMs
+ * @param autoRejectTimeoutMs
+ */
 
-data class RingSettingsRequest(
+
+data class RingSettingsRequest (
 
     @Json(name = "auto_cancel_timeout_ms")
     val autoCancelTimeoutMs: kotlin.Int? = null,

@@ -23,13 +23,24 @@
 
 package org.openapitools.client.models
 
+import org.openapitools.client.models.ConnectUserDetailsRequest
+import org.openapitools.client.models.DeviceFieldsRequest
+
+
+
+
 import com.squareup.moshi.Json
 
 /**
- * *
- * @param token * @param userDetails * @param device */
+ *
+ *
+ * @param token
+ * @param userDetails
+ * @param device
+ */
 
-data class WSAuthMessageRequest(
+
+data class WSAuthMessageRequest (
 
     @Json(name = "token")
     val token: kotlin.String,

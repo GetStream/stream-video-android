@@ -23,15 +23,22 @@
 
 package org.openapitools.client.models
 
+
+
+
+
 import com.squareup.moshi.Json
 
 /**
- * *
+ *
+ *
  * @param connectionId The connection_id for this client
- * @param createdAt * @param type The type of event: \"health.check\" in this case
+ * @param createdAt
+ * @param type The type of event: \"health.check\" in this case
  */
 
-data class HealthCheckEvent(
+
+data class HealthCheckEvent (
 
     /* The connection_id for this client */
     @Json(name = "connection_id")
@@ -44,7 +51,7 @@ data class HealthCheckEvent(
     @Json(name = "type")
     val type: kotlin.String = "health.check"
 
-) : VideoEvent(), WSClientEvent {
+) : VideoEvent(), WSClientEvent{
 
     override fun getEventType(): String {
         return type

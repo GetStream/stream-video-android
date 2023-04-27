@@ -23,15 +23,23 @@
 
 package org.openapitools.client.models
 
+import org.openapitools.client.models.CallSettingsRequest
+
+
+
+
 import com.squareup.moshi.Json
 
 /**
- * *
+ *
+ *
  * @param custom Custom data for this object
- * @param settingsOverride * @param startsAt the time the call is scheduled to start
+ * @param settingsOverride
+ * @param startsAt the time the call is scheduled to start
  */
 
-data class UpdateCallRequest(
+
+data class UpdateCallRequest (
 
     /* Custom data for this object */
     @Json(name = "custom")

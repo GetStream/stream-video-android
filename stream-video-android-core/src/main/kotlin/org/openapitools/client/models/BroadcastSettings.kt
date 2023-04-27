@@ -23,13 +23,22 @@
 
 package org.openapitools.client.models
 
+import org.openapitools.client.models.HLSSettings
+
+
+
+
 import com.squareup.moshi.Json
 
 /**
- * *
- * @param enabled * @param hls */
+ *
+ *
+ * @param enabled
+ * @param hls
+ */
 
-data class BroadcastSettings(
+
+data class BroadcastSettings (
 
     @Json(name = "enabled")
     val enabled: kotlin.Boolean,

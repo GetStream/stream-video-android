@@ -16,21 +16,32 @@
 
 package org.openapitools.client.apis
 
-import org.openapitools.client.models.SendEventRequest
-import org.openapitools.client.models.SendEventResponse
+
 import retrofit2.http.Body
 import retrofit2.http.POST
 import retrofit2.http.Path
 
+
+
+
+
+
+import org.openapitools.client.models.SendEventRequest
+import org.openapitools.client.models.SendEventResponse
+
 interface EventsApi {
     /**
      * Send event
-     * Sends event to the call  Sends events: - call.accepted - call.rejected - custom  Required permissions: - SendEvent * Responses:
+     * Sends event to the call  Sends events: - call.accepted - call.rejected - custom  Required permissions: - SendEvent
+     * Responses:
      *  - 201: Successful response
      *  - 400: Bad request
      *  - 429: Too many requests
      *
-     * @param type * @param id * @param sendEventRequest * @return [SendEventResponse]
+     * @param type
+     * @param id
+     * @param sendEventRequest
+     * @return [SendEventResponse]
      */
     @POST("/video/call/{type}/{id}/event")
     suspend fun sendEvent(
@@ -38,4 +49,5 @@ interface EventsApi {
         @Path("id") id: String,
         @Body sendEventRequest: SendEventRequest
     ): SendEventResponse
+
 }

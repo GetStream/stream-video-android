@@ -23,15 +23,23 @@
 
 package org.openapitools.client.models
 
+
+
+
+
 import com.squareup.moshi.Json
 
 /**
  * This event is sent when call broadcasting has started
  *
- * @param callCid * @param createdAt * @param hlsPlaylistUrl * @param type The type of event: \"call.broadcasting_started\" in this case
+ * @param callCid
+ * @param createdAt
+ * @param hlsPlaylistUrl
+ * @param type The type of event: \"call.broadcasting_started\" in this case
  */
 
-data class CallBroadcastingStartedEvent(
+
+data class CallBroadcastingStartedEvent (
 
     @Json(name = "call_cid")
     val callCid: kotlin.String,
@@ -46,7 +54,7 @@ data class CallBroadcastingStartedEvent(
     @Json(name = "type")
     val type: kotlin.String = "call.broadcasting_started"
 
-) : VideoEvent(), WSCallEvent {
+) : VideoEvent(), WSCallEvent{
 
     override fun getCallCID(): String {
         return callCid

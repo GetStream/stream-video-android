@@ -23,10 +23,15 @@
 
 package org.openapitools.client.models
 
+
+
+
+
 import com.squareup.moshi.Json
 
 /**
- * *
+ *
+ *
  * @param statusCode Response HTTP status code
  * @param code API error code
  * @param details Additional error-specific information
@@ -36,7 +41,8 @@ import com.squareup.moshi.Json
  * @param exceptionFields Additional error info
  */
 
-data class APIError(
+
+data class APIError (
 
     /* Response HTTP status code */
     @Json(name = "StatusCode")
@@ -66,7 +72,9 @@ data class APIError(
     @Json(name = "exception_fields")
     val exceptionFields: kotlin.collections.Map<kotlin.String, kotlin.String>? = null
 
-) {
+)
+
+{
 
     /**
      * API error code
@@ -107,4 +115,5 @@ data class APIError(
         @Json(name = "video-join-call-failure") videoJoinCallFailure("video-join-call-failure"),
         @Json(name = "query-calls-permissions-mismatch") queryCallsPermissionsMismatch("query-calls-permissions-mismatch");
     }
+
 }

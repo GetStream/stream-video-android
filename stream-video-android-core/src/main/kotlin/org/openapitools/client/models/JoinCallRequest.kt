@@ -23,15 +23,25 @@
 
 package org.openapitools.client.models
 
+import org.openapitools.client.models.CallRequest
+
+
+
+
 import com.squareup.moshi.Json
 
 /**
- * *
+ *
+ *
  * @param create if true the call will be created if it doesn't exist
- * @param `data` * @param datacenterHintedId * @param membersLimit * @param ring if true and the call is created, the notification will include ring=true
+ * @param `data`
+ * @param datacenterHintedId
+ * @param membersLimit
+ * @param ring if true and the call is created, the notification will include ring=true
  */
 
-data class JoinCallRequest(
+
+data class JoinCallRequest (
 
     /* if true the call will be created if it doesn't exist */
     @Json(name = "create")

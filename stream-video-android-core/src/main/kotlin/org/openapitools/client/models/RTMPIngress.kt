@@ -23,14 +23,20 @@
 
 package org.openapitools.client.models
 
+
+
+
+
 import com.squareup.moshi.Json
 
 /**
  * RTMP input settings
  *
- * @param address */
+ * @param address
+ */
 
-data class RTMPIngress(
+
+data class RTMPIngress (
 
     @Json(name = "address")
     val address: kotlin.String

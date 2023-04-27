@@ -23,13 +23,26 @@
 
 package org.openapitools.client.models
 
+import org.openapitools.client.models.SortParamRequest
+
+
+
+
 import com.squareup.moshi.Json
 
 /**
- * *
- * @param sort * @param filterConditions * @param limit * @param next * @param prev * @param watch */
+ *
+ *
+ * @param sort
+ * @param filterConditions
+ * @param limit
+ * @param next
+ * @param prev
+ * @param watch
+ */
 
-data class QueryCallsRequest(
+
+data class QueryCallsRequest (
 
     @Json(name = "sort")
     val sort: kotlin.collections.List<SortParamRequest>,

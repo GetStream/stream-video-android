@@ -23,15 +23,25 @@
 
 package org.openapitools.client.models
 
+
+
+
+
 import com.squareup.moshi.Json
 
 /**
- * *
+ *
+ *
  * @param id User ID
- * @param custom * @param image * @param name Optional name of user
- * @param role * @param teams */
+ * @param custom
+ * @param image
+ * @param name Optional name of user
+ * @param role
+ * @param teams
+ */
 
-data class UserRequest(
+
+data class UserRequest (
 
     /* User ID */
     @Json(name = "id")

@@ -16,18 +16,28 @@
 
 package org.openapitools.client.apis
 
-import org.openapitools.client.models.StopLiveResponse
+
 import retrofit2.http.POST
 import retrofit2.http.Path
+
+
+
+
+
+
+import org.openapitools.client.models.StopLiveResponse
 
 interface LivestreamingApi {
     /**
      * Start broadcasting
-     * Starts broadcasting * Responses:
+     * Starts broadcasting
+     * Responses:
      *  - 400: Bad request
      *  - 429: Too many requests
      *
-     * @param type * @param id * @return [Unit]
+     * @param type
+     * @param id
+     * @return [Unit]
      */
     @POST("/video/call/{type}/{id}/start_broadcasting")
     suspend fun startBroadcasting(
@@ -37,11 +47,14 @@ interface LivestreamingApi {
 
     /**
      * Stop broadcasting
-     * Stops broadcasting * Responses:
+     * Stops broadcasting
+     * Responses:
      *  - 400: Bad request
      *  - 429: Too many requests
      *
-     * @param type * @param id * @return [Unit]
+     * @param type
+     * @param id
+     * @return [Unit]
      */
     @POST("/video/call/{type}/{id}/stop_broadcasting")
     suspend fun stopBroadcasting(
@@ -51,12 +64,15 @@ interface LivestreamingApi {
 
     /**
      * Set call as not live
-     *   Sends events: - call.updated  Required permissions: - UpdateCall * Responses:
+     *   Sends events: - call.updated  Required permissions: - UpdateCall
+     * Responses:
      *  - 201: Successful response
      *  - 400: Bad request
      *  - 429: Too many requests
      *
-     * @param type * @param id * @return [StopLiveResponse]
+     * @param type
+     * @param id
+     * @return [StopLiveResponse]
      */
     @POST("/video/call/{type}/{id}/stop_live")
     suspend fun stopLive(
@@ -66,15 +82,19 @@ interface LivestreamingApi {
 
     /**
      * Stop recording
-     * Stops recording  Sends events: - call.recording_stopped  Required permissions: - StopRecording * Responses:
+     * Stops recording  Sends events: - call.recording_stopped  Required permissions: - StopRecording
+     * Responses:
      *  - 400: Bad request
      *  - 429: Too many requests
      *
-     * @param type * @param id * @return [Unit]
+     * @param type
+     * @param id
+     * @return [Unit]
      */
     @POST("/video/call/{type}/{id}/stop_recording")
     suspend fun stopRecording(
         @Path("type") type: String,
         @Path("id") id: String
     ): Unit
+
 }

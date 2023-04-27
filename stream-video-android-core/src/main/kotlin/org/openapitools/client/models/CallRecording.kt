@@ -23,13 +23,23 @@
 
 package org.openapitools.client.models
 
+
+
+
+
 import com.squareup.moshi.Json
 
 /**
- * *
- * @param endTime * @param filename * @param startTime * @param url */
+ *
+ *
+ * @param endTime
+ * @param filename
+ * @param startTime
+ * @param url
+ */
 
-data class CallRecording(
+
+data class CallRecording (
 
     @Json(name = "end_time")
     val endTime: org.threeten.bp.OffsetDateTime,

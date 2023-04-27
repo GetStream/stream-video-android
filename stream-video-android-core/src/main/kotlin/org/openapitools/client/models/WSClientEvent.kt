@@ -23,4 +23,6 @@
 
 package org.openapitools.client.models
 
-sealed interface WSClientEvent
+
+
+sealed interface WSClientEvent {}

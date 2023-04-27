@@ -23,16 +23,26 @@
 
 package org.openapitools.client.models
 
+import org.openapitools.client.models.CallResponse
+import org.openapitools.client.models.MemberResponse
+
+
+
+
 import com.squareup.moshi.Json
 
 /**
  * This event is sent when one or more members are added to a call
  *
- * @param call * @param callCid * @param createdAt * @param members the members added to this call
+ * @param call
+ * @param callCid
+ * @param createdAt
+ * @param members the members added to this call
  * @param type The type of event: \"call.member_added\" in this case
  */
 
-data class CallMemberAddedEvent(
+
+data class CallMemberAddedEvent (
 
     @Json(name = "call")
     val call: CallResponse,
@@ -51,7 +61,7 @@ data class CallMemberAddedEvent(
     @Json(name = "type")
     val type: kotlin.String = "call.member_added"
 
-) : VideoEvent(), WSCallEvent {
+) : VideoEvent(), WSCallEvent{
 
     override fun getCallCID(): String {
         return callCid

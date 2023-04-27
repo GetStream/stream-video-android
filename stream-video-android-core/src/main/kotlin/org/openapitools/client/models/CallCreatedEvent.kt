@@ -23,17 +23,27 @@
 
 package org.openapitools.client.models
 
+import org.openapitools.client.models.CallResponse
+import org.openapitools.client.models.MemberResponse
+
+
+
+
 import com.squareup.moshi.Json
 
 /**
  * This event is sent when a call is created. Clients receiving this event should check if the ringing  field is set to true and if so, show the call screen
  *
- * @param call * @param callCid * @param createdAt * @param members the members added to this call
+ * @param call
+ * @param callCid
+ * @param createdAt
+ * @param members the members added to this call
  * @param ringing true when the call was created with ring enabled
  * @param type The type of event: \"call.created\" in this case
  */
 
-data class CallCreatedEvent(
+
+data class CallCreatedEvent (
 
     @Json(name = "call")
     val call: CallResponse,
@@ -56,7 +66,7 @@ data class CallCreatedEvent(
     @Json(name = "type")
     val type: kotlin.String = "call.created"
 
-) : VideoEvent(), WSCallEvent {
+) : VideoEvent(), WSCallEvent{
 
     override fun getCallCID(): String {
         return callCid

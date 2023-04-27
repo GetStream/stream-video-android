@@ -23,17 +23,27 @@
 
 package org.openapitools.client.models
 
+import org.openapitools.client.models.CallResponse
+import org.openapitools.client.models.MemberResponse
+
+
+
+
 import com.squareup.moshi.Json
 
 /**
  * This event is sent when one or more members get its role updated
  *
- * @param call * @param callCid * @param capabilitiesByRole The capabilities by role for this call
- * @param createdAt * @param members The list of members that were updated
+ * @param call
+ * @param callCid
+ * @param capabilitiesByRole The capabilities by role for this call
+ * @param createdAt
+ * @param members The list of members that were updated
  * @param type The type of event: \"call.member_added\" in this case
  */
 
-data class CallMemberUpdatedPermissionEvent(
+
+data class CallMemberUpdatedPermissionEvent (
 
     @Json(name = "call")
     val call: CallResponse,
@@ -56,7 +66,7 @@ data class CallMemberUpdatedPermissionEvent(
     @Json(name = "type")
     val type: kotlin.String = "call.updated_permission"
 
-) : VideoEvent(), WSCallEvent {
+) : VideoEvent(), WSCallEvent{
 
     override fun getCallCID(): String {
         return callCid

@@ -23,13 +23,25 @@
 
 package org.openapitools.client.models
 
+import org.openapitools.client.models.CallSettingsResponse
+
+
+
+
 import com.squareup.moshi.Json
 
 /**
- * *
- * @param createdAt * @param grants * @param name * @param settings * @param updatedAt */
+ *
+ *
+ * @param createdAt
+ * @param grants
+ * @param name
+ * @param settings
+ * @param updatedAt
+ */
 
-data class CallTypeResponse(
+
+data class CallTypeResponse (
 
     @Json(name = "created_at")
     val createdAt: org.threeten.bp.OffsetDateTime,

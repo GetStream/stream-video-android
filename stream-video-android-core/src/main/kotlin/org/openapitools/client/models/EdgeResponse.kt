@@ -23,13 +23,29 @@
 
 package org.openapitools.client.models
 
+
+
+
+
 import com.squareup.moshi.Json
 
 /**
- * *
- * @param continentCode * @param countryIsoCode * @param green * @param id * @param latencyTestUrl * @param latitude * @param longitude * @param red * @param subdivisionIsoCode * @param yellow */
+ *
+ *
+ * @param continentCode
+ * @param countryIsoCode
+ * @param green
+ * @param id
+ * @param latencyTestUrl
+ * @param latitude
+ * @param longitude
+ * @param red
+ * @param subdivisionIsoCode
+ * @param yellow
+ */
 
-data class EdgeResponse(
+
+data class EdgeResponse (
 
     @Json(name = "continent_code")
     val continentCode: kotlin.String,

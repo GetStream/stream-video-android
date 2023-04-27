@@ -23,13 +23,24 @@
 
 package org.openapitools.client.models
 
+import org.openapitools.client.models.ICEServer
+import org.openapitools.client.models.SFUResponse
+
+
+
+
 import com.squareup.moshi.Json
 
 /**
- * *
- * @param iceServers * @param server * @param token */
+ *
+ *
+ * @param iceServers
+ * @param server
+ * @param token
+ */
 
-data class Credentials(
+
+data class Credentials (
 
     @Json(name = "ice_servers")
     val iceServers: kotlin.collections.List<ICEServer>,

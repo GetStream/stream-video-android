@@ -76,6 +76,8 @@ rm "$APIS_ROOT/UsersApi.kt"
 API_REQUEST_REGEX="@(?:POST|DELETE|GET|PUT|PATCH)\(\"(.*?)\""
 RETROFIT_IMPORTS_REGEX="(Body)|^[[:space:]]*@([^()]*)\("
 
+find "$CLIENT_ROOT" -type f -name '*.kt' -exec sed -i '' 's@): VideoEvent()@) : VideoEvent()@g' {} \;
+
 for FILE in "$APIS_ROOT"/*.kt; do
   echo "Processing ${FILE}"
   sed -i '' 's/kotlin.//g; s/Response<//g; s/>//g' "${FILE}"

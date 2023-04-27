@@ -23,13 +23,37 @@
 
 package org.openapitools.client.models
 
+import org.openapitools.client.models.AudioSettings
+import org.openapitools.client.models.BackstageSettings
+import org.openapitools.client.models.BroadcastSettings
+import org.openapitools.client.models.GeofenceSettings
+import org.openapitools.client.models.RecordSettings
+import org.openapitools.client.models.RingSettings
+import org.openapitools.client.models.ScreensharingSettings
+import org.openapitools.client.models.TranscriptionSettings
+import org.openapitools.client.models.VideoSettings
+
+
+
+
 import com.squareup.moshi.Json
 
 /**
- * *
- * @param audio * @param backstage * @param broadcasting * @param geofencing * @param recording * @param ring * @param screensharing * @param transcription * @param video */
+ *
+ *
+ * @param audio
+ * @param backstage
+ * @param broadcasting
+ * @param geofencing
+ * @param recording
+ * @param ring
+ * @param screensharing
+ * @param transcription
+ * @param video
+ */
 
-data class CallSettingsResponse(
+
+data class CallSettingsResponse (
 
     @Json(name = "audio")
     val audio: AudioSettings,

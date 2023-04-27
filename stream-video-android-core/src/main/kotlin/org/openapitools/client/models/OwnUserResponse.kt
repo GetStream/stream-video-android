@@ -23,13 +23,30 @@
 
 package org.openapitools.client.models
 
+import org.openapitools.client.models.Device
+
+
+
+
 import com.squareup.moshi.Json
 
 /**
- * *
- * @param createdAt * @param custom * @param devices * @param id * @param role * @param teams * @param updatedAt * @param deletedAt * @param image * @param name */
+ *
+ *
+ * @param createdAt
+ * @param custom
+ * @param devices
+ * @param id
+ * @param role
+ * @param teams
+ * @param updatedAt
+ * @param deletedAt
+ * @param image
+ * @param name
+ */
 
-data class OwnUserResponse(
+
+data class OwnUserResponse (
 
     @Json(name = "created_at")
     val createdAt: org.threeten.bp.OffsetDateTime,

@@ -23,13 +23,20 @@
 
 package org.openapitools.client.models
 
+
+
+
+
 import com.squareup.moshi.Json
 
 /**
- * *
- * @param enabled */
+ *
+ *
+ * @param enabled
+ */
 
-data class BackstageSettingsRequest(
+
+data class BackstageSettingsRequest (
 
     @Json(name = "enabled")
     val enabled: kotlin.Boolean? = null

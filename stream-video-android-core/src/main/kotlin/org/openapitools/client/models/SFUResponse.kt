@@ -23,13 +23,21 @@
 
 package org.openapitools.client.models
 
+
+
+
+
 import com.squareup.moshi.Json
 
 /**
- * *
- * @param edgeName * @param url */
+ *
+ *
+ * @param edgeName
+ * @param url
+ */
 
-data class SFUResponse(
+
+data class SFUResponse (
 
     @Json(name = "edge_name")
     val edgeName: kotlin.String,

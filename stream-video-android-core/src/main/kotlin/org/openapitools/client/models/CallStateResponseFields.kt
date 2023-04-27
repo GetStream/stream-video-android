@@ -23,14 +23,26 @@
 
 package org.openapitools.client.models
 
+import org.openapitools.client.models.CallResponse
+import org.openapitools.client.models.MemberResponse
+import org.openapitools.client.models.UserResponse
+
+
+
+
 import com.squareup.moshi.Json
 
 /**
- * *
- * @param blockedUsers * @param call * @param members List of call members
- * @param membership */
+ *
+ *
+ * @param blockedUsers
+ * @param call
+ * @param members List of call members
+ * @param membership
+ */
 
-data class CallStateResponseFields(
+
+data class CallStateResponseFields (
 
     @Json(name = "blocked_users")
     val blockedUsers: kotlin.collections.List<UserResponse>,

@@ -23,13 +23,27 @@
 
 package org.openapitools.client.models
 
+import org.openapitools.client.models.SortParamRequest
+
+
+
+
 import com.squareup.moshi.Json
 
 /**
- * *
- * @param filterConditions * @param type * @param id * @param limit * @param next * @param prev * @param sort */
+ *
+ *
+ * @param filterConditions
+ * @param type
+ * @param id
+ * @param limit
+ * @param next
+ * @param prev
+ * @param sort
+ */
 
-data class QueryMembersRequest(
+
+data class QueryMembersRequest (
 
     @Json(name = "filter_conditions")
     val filterConditions: kotlin.collections.Map<kotlin.String, kotlin.Any>,

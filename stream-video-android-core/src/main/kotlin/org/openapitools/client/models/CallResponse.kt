@@ -23,23 +23,42 @@
 
 package org.openapitools.client.models
 
+import org.openapitools.client.models.CallIngressResponse
+import org.openapitools.client.models.CallSettingsResponse
+import org.openapitools.client.models.OwnCapability
+import org.openapitools.client.models.UserResponse
+
+
+
+
 import com.squareup.moshi.Json
 
 /**
  * Represents a call
  *
- * @param backstage * @param blockedUserIds * @param broadcasting * @param cid The unique identifier for a call (<type>:<id>)
+ * @param backstage
+ * @param blockedUserIds
+ * @param broadcasting
+ * @param cid The unique identifier for a call (<type>:<id>)
  * @param createdAt Date/time of creation
- * @param createdBy * @param custom Custom data for this object
- * @param hlsPlaylistUrl * @param id Call ID
- * @param ingress * @param ownCapabilities The capabilities of the current user
- * @param recording * @param settings * @param transcribing * @param type The type of call
+ * @param createdBy
+ * @param custom Custom data for this object
+ * @param hlsPlaylistUrl
+ * @param id Call ID
+ * @param ingress
+ * @param ownCapabilities The capabilities of the current user
+ * @param recording
+ * @param settings
+ * @param transcribing
+ * @param type The type of call
  * @param updatedAt Date/time of the last update
  * @param endedAt Date/time when the call ended
  * @param startsAt Date/time when the call will start
- * @param team */
+ * @param team
+ */
 
-data class CallResponse(
+
+data class CallResponse (
 
     @Json(name = "backstage")
     val backstage: kotlin.Boolean,

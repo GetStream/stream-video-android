@@ -23,13 +23,22 @@
 
 package org.openapitools.client.models
 
+
+
+
+
 import com.squareup.moshi.Json
 
 /**
- * *
- * @param userId * @param grantPermissions * @param revokePermissions */
+ *
+ *
+ * @param userId
+ * @param grantPermissions
+ * @param revokePermissions
+ */
 
-data class UpdateUserPermissionsRequest(
+
+data class UpdateUserPermissionsRequest (
 
     @Json(name = "user_id")
     val userId: kotlin.String,

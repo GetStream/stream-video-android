@@ -23,13 +23,22 @@
 
 package org.openapitools.client.models
 
+import org.openapitools.client.models.CallRecording
+
+
+
+
 import com.squareup.moshi.Json
 
 /**
- * *
- * @param duration * @param recordings */
+ *
+ *
+ * @param duration
+ * @param recordings
+ */
 
-data class ListRecordingsResponse(
+
+data class ListRecordingsResponse (
 
     @Json(name = "duration")
     val duration: kotlin.String,

@@ -23,13 +23,23 @@
 
 package org.openapitools.client.models
 
+import org.openapitools.client.models.CallSettingsRequest
+
+
+
+
 import com.squareup.moshi.Json
 
 /**
- * *
- * @param name * @param grants * @param settings */
+ *
+ *
+ * @param name
+ * @param grants
+ * @param settings
+ */
 
-data class CreateCallTypeRequest(
+
+data class CreateCallTypeRequest (
 
     @Json(name = "name")
     val name: kotlin.String,

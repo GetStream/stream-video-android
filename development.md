@@ -33,7 +33,7 @@ BuildConfig.CORE_TEST_LOCAL
 
 ## OpenAPI build
 
-Clone the protocl
+Clone the protocol
 ```bash
 ```
 

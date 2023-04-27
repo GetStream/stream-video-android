@@ -23,15 +23,24 @@
 
 package org.openapitools.client.models
 
+import org.openapitools.client.models.ReactionResponse
+
+
+
+
 import com.squareup.moshi.Json
 
 /**
  * This event is sent when a reaction is sent in a call, clients should use this to show the reaction in the call screen
  *
- * @param callCid * @param createdAt * @param reaction * @param type The type of event: \"call.reaction_new\" in this case
+ * @param callCid
+ * @param createdAt
+ * @param reaction
+ * @param type The type of event: \"call.reaction_new\" in this case
  */
 
-data class CallReactionEvent(
+
+data class CallReactionEvent (
 
     @Json(name = "call_cid")
     val callCid: kotlin.String,
@@ -46,7 +55,7 @@ data class CallReactionEvent(
     @Json(name = "type")
     val type: kotlin.String = "call.reaction_new"
 
-) : VideoEvent(), WSCallEvent {
+) : VideoEvent(), WSCallEvent{
 
     override fun getCallCID(): String {
         return callCid

@@ -23,13 +23,23 @@
 
 package org.openapitools.client.models
 
+import org.openapitools.client.models.Coordinates
+
+
+
+
 import com.squareup.moshi.Json
 
 /**
- * *
- * @param coordinates * @param latencyUrl * @param name */
+ *
+ *
+ * @param coordinates
+ * @param latencyUrl
+ * @param name
+ */
 
-data class DatacenterResponse(
+
+data class DatacenterResponse (
 
     @Json(name = "coordinates")
     val coordinates: Coordinates,

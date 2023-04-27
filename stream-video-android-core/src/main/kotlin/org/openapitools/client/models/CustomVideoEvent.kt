@@ -23,16 +23,25 @@
 
 package org.openapitools.client.models
 
+import org.openapitools.client.models.UserResponse
+
+
+
+
 import com.squareup.moshi.Json
 
 /**
  * A custom event, this event is used to send custom events to other participants in the call.
  *
- * @param callCid * @param createdAt * @param custom Custom data for this object
+ * @param callCid
+ * @param createdAt
+ * @param custom Custom data for this object
  * @param type The type of event, \"custom\" in this case
- * @param user */
+ * @param user
+ */
 
-data class CustomVideoEvent(
+
+data class CustomVideoEvent (
 
     @Json(name = "call_cid")
     val callCid: kotlin.String,
@@ -51,7 +60,7 @@ data class CustomVideoEvent(
     @Json(name = "user")
     val user: UserResponse
 
-) : VideoEvent(), WSCallEvent {
+) : VideoEvent(), WSCallEvent{
 
     override fun getCallCID(): String {
         return callCid
