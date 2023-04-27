@@ -697,6 +697,10 @@ public final class io/getstream/video/android/core/call/state/CancelCall : io/ge
 	public static final field INSTANCE Lio/getstream/video/android/core/call/state/CancelCall;
 }
 
+public final class io/getstream/video/android/core/call/state/ChatDialog : io/getstream/video/android/core/call/state/CallAction {
+	public static final field INSTANCE Lio/getstream/video/android/core/call/state/ChatDialog;
+}
+
 public final class io/getstream/video/android/core/call/state/ConnectionState : java/lang/Enum {
 	public static final field CONNECTED Lio/getstream/video/android/core/call/state/ConnectionState;
 	public static final field CONNECTING Lio/getstream/video/android/core/call/state/ConnectionState;
@@ -2834,7 +2838,6 @@ public final class io/getstream/video/android/core/utils/LatencyUtilsKt {
 }
 
 public final class io/getstream/video/android/core/utils/ListUtilsKt {
-	public static final fun updateAll (Ljava/util/List;Lkotlin/jvm/functions/Function1;)Ljava/util/List;
 	public static final fun updateValue (Ljava/util/List;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;)Ljava/util/List;
 }
 
@@ -2847,11 +2850,6 @@ public final class io/getstream/video/android/core/utils/StateFlowKt {
 public final class io/getstream/video/android/core/utils/StringUtilsKt {
 	public static final fun formatAsTitle (Lio/getstream/video/android/core/model/state/StreamCallState;Landroid/content/Context;)Ljava/lang/String;
 	public static final fun initials (Ljava/lang/String;)Ljava/lang/String;
-}
-
-public final class io/getstream/video/android/core/utils/TokenUtilsKt {
-	public static final fun generateSFUToken (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)Ljava/lang/String;
-	public static synthetic fun generateSFUToken$default (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)Ljava/lang/String;
 }
 
 public final class io/getstream/video/android/core/viewmodel/CallViewModel : androidx/lifecycle/ViewModel {

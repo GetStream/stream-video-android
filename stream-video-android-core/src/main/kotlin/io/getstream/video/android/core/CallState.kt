@@ -16,6 +16,7 @@
 
 package io.getstream.video.android.core
 
+import android.util.Log
 import io.getstream.log.taggedLogger
 import io.getstream.video.android.core.events.AudioLevelChangedEvent
 import io.getstream.video.android.core.events.ChangePublishQualityEvent
@@ -409,6 +410,7 @@ public class CallState(private val call: Call, private val user: User) {
             }
 
             is JoinCallResponseEvent -> {
+                Log.e("Test", "call cid: ${call.cid}")
                 _connection.value = ConnectionState.Connected
                 // time to update call state based on the join response
                 updateFromJoinResponse(event)

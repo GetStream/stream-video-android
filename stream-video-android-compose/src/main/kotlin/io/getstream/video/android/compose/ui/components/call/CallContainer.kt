@@ -33,7 +33,6 @@ import io.getstream.video.android.compose.ui.components.call.activecall.CallCont
 import io.getstream.video.android.compose.ui.components.call.activecall.DefaultPictureInPictureContent
 import io.getstream.video.android.compose.ui.components.call.activecall.internal.InviteUsersDialog
 import io.getstream.video.android.compose.ui.components.call.controls.CallControls
-import io.getstream.video.android.compose.ui.components.call.controls.internal.DefaultCallControlsContent
 import io.getstream.video.android.compose.ui.components.call.incomingcall.IncomingCallContent
 import io.getstream.video.android.compose.ui.components.call.outgoingcall.OutgoingCallContent
 import io.getstream.video.android.compose.ui.components.participants.CallParticipantsInfoMenu
@@ -73,9 +72,9 @@ public fun CallContainer(
     onBackPressed: () -> Unit = {},
     onCallAction: (CallAction) -> Unit = callViewModel::onCallAction,
     callControlsContent: @Composable (call: Call) -> Unit = {
-        DefaultCallControlsContent(
-            viewModel = callViewModel,
-            onCallAction = onCallAction
+        CallControls(
+            callViewModel = callViewModel,
+            onCallAction = onCallAction,
         )
     },
     pictureInPictureContent: @Composable (call: Call) -> Unit = { DefaultPictureInPictureContent(it) },
@@ -97,8 +96,8 @@ public fun CallContainer(
     },
     callContent: @Composable (call: Call) -> Unit = {
         DefaultCallContent(
+            modifier = modifier.testTag("call_content"),
             callViewModel = callViewModel,
-            modifier = modifier,
             onBackPressed = onBackPressed,
             onCallAction = onCallAction,
             callControlsContent = callControlsContent,
@@ -130,8 +129,7 @@ public fun CallContainer(
     onBackPressed: () -> Unit = {},
     onCallAction: (CallAction) -> Unit = {},
     callControlsContent: @Composable (call: Call) -> Unit = {
-        DefaultCallControlsContent(
-            call = it,
+        CallControls(
             callDeviceState = callDeviceState,
             onCallAction = onCallAction
         )
@@ -189,7 +187,7 @@ internal fun DefaultCallContent(
     pictureInPictureContent: @Composable (call: Call) -> Unit = { DefaultPictureInPictureContent(it) }
 ) {
     CallContent(
-        modifier = modifier.testTag("call_content"),
+        modifier = modifier,
         callViewModel = callViewModel,
         onBackPressed = onBackPressed,
         onCallAction = onCallAction,

@@ -60,8 +60,9 @@ internal fun OverlayAppBar(
         horizontalArrangement = Arrangement.Start,
         verticalAlignment = Alignment.CenterVertically
     ) {
+
         IconButton(
-            enabled = true, // TODO - we would need the info of displayed overlays
+            enabled = true,
             onClick = onBackPressed,
             modifier = Modifier.padding(
                 start = VideoTheme.dimens.callAppBarLeadingContentSpacingStart,
