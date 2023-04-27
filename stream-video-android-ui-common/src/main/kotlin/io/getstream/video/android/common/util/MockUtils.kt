@@ -23,8 +23,8 @@ import io.getstream.video.android.core.StreamVideo
 import io.getstream.video.android.core.StreamVideoBuilder
 import io.getstream.video.android.core.internal.InternalStreamVideoApi
 import io.getstream.video.android.core.model.User
-import java.util.UUID
 import org.webrtc.VideoTrack
+import java.util.UUID
 
 @InternalStreamVideoApi
 public object MockUtils {
