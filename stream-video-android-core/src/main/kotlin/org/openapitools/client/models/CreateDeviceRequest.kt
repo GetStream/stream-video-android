@@ -15,6 +15,7 @@
 
 package org.openapitools.client.models
 
+import org.openapitools.client.models.UserRequest
 
 
 
@@ -24,24 +25,30 @@ import com.squareup.moshi.Json
 /**
  * 
  *
- * @param id Device ID
+ * @param id 
  * @param pushProvider 
- * @param pushProviderName Name of the push provider configuration
+ * @param pushProviderName 
+ * @param user 
+ * @param userId 
  */
 
 
-data class DeviceFieldsRequest (
+data class CreateDeviceRequest (
 
-    /* Device ID */
     @Json(name = "id")
-    val id: kotlin.String,
+    val id: kotlin.String? = null,
 
     @Json(name = "push_provider")
-    val pushProvider: DeviceFieldsRequest.PushProvider,
+    val pushProvider: CreateDeviceRequest.PushProvider? = null,
 
-    /* Name of the push provider configuration */
     @Json(name = "push_provider_name")
-    val pushProviderName: kotlin.String? = null
+    val pushProviderName: kotlin.String? = null,
+
+    @Json(name = "user")
+    val user: UserRequest? = null,
+
+    @Json(name = "user_id")
+    val userId: kotlin.String? = null
 
 )
 
