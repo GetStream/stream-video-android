@@ -34,7 +34,7 @@ class ReconnectTest : IntegrationTestBase(connectCoordinatorWS = false) {
         call.join()
         // the socket and rtc connection disconnect...,
         // or ice candidate don't arrive due to temporary network failure
-        call.session.reconnect()
+        call.session?.reconnect()
         // reconnect recreates the peer connections
 
     }

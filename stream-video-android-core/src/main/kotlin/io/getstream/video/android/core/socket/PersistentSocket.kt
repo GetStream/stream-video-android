@@ -43,6 +43,9 @@ import org.openapitools.client.models.ConnectedEvent
 import org.openapitools.client.models.VideoEvent
 import stream.video.sfu.event.HealthCheckRequest
 import stream.video.sfu.event.SfuEvent
+import java.io.IOException
+import java.io.InterruptedIOException
+import java.net.SocketTimeoutException
 import java.net.UnknownHostException
 import kotlin.coroutines.Continuation
 import kotlin.coroutines.resume
@@ -292,6 +295,9 @@ open class PersistentSocket<T>(
             // code errors are permanent
             isPermanent = when (error) {
                 is UnknownHostException -> false
+                is SocketTimeoutException -> false
+                is InterruptedIOException -> false
+                is IOException -> false
                 else -> true
             }
         }

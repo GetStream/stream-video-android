@@ -486,18 +486,15 @@ public class RtcSession internal constructor(
 
         // cleanup all non-local tracks
         tracks.filter{it.key != sessionId}.values.map { it.values }.flatten().forEach {wrapper->
-            if (wrapper.audio != null) {
-                try {
-                    wrapper.audio?.dispose()
-                }catch (e: Exception) {
-                    logger.e { "[cleanup] #sfu; error disposing audio track: ${e.message}" }
-                }
-            } else {
-                try {
-                    wrapper.video?.dispose()
-                }catch (e: Exception) {
-                    logger.e { "[cleanup] #sfu; error disposing audio track: ${e.message}" }
-                }
+            try {
+            wrapper.asAudioTrack()?.let {
+                it.audio.dispose()
+            }
+            wrapper.asVideoTrack()?.let {
+                it.video.dispose()
+            }
+            }catch (e: Exception) {
+                logger.w { "Error disposing track: ${e.message}" }
             }
         }
         tracks.clear()
