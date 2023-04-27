@@ -56,7 +56,11 @@ public fun ToggleMicrophoneAction(
                         ToggleMicrophone(isMicrophoneEnabled.not())
                     )
                 },
-            tint = VideoTheme.colors.callActionIcon,
+            tint = if (isMicrophoneEnabled) {
+                VideoTheme.colors.callActionIconEnabled
+            } else {
+                VideoTheme.colors.callActionIconDisabled
+            },
             painter = microphoneIcon,
             contentDescription = stringResource(R.string.stream_video_call_controls_toggle_camera)
         )

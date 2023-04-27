@@ -42,7 +42,7 @@ public fun FlipCameraAction(
             modifier = Modifier
                 .padding(13.dp)
                 .clickable { onCallAction(FlipCamera) },
-            tint = VideoTheme.colors.callActionIcon,
+            tint = VideoTheme.colors.callActionIconEnabled,
             painter = painterResource(id = R.drawable.stream_video_ic_camera_flip),
             contentDescription = stringResource(R.string.stream_video_call_controls_flip_camera)
         )

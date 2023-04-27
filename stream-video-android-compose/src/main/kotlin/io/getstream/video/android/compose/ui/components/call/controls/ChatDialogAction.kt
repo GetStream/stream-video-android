@@ -42,7 +42,7 @@ public fun ChatDialogAction(
             modifier = Modifier
                 .padding(13.dp)
                 .clickable { onCallAction(ChatDialog) },
-            tint = VideoTheme.colors.callActionIcon,
+            tint = VideoTheme.colors.callActionIconEnabled,
             painter = painterResource(id = R.drawable.stream_video_ic_message),
             contentDescription = stringResource(R.string.stream_video_call_controls_chat_dialog)
         )

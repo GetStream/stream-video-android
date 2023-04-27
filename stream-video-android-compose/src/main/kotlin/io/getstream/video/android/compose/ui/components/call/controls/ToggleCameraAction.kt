@@ -55,7 +55,11 @@ public fun ToggleCameraAction(
                         ToggleCamera(isCameraEnabled.not())
                     )
                 },
-            tint = VideoTheme.colors.callActionIcon,
+            tint = if (isCameraEnabled) {
+                VideoTheme.colors.callActionIconEnabled
+            } else {
+                VideoTheme.colors.callActionIconDisabled
+            },
             painter = cameraIcon,
             contentDescription = stringResource(R.string.stream_video_call_controls_toggle_camera)
         )
