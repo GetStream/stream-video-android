@@ -21,7 +21,6 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
-import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -39,7 +38,8 @@ import io.getstream.video.android.common.util.mockCall
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.video.VideoScalingType.Companion.toCommonScalingType
 import io.getstream.video.android.core.Call
-import io.getstream.video.android.core.model.TrackWrapper
+import io.getstream.video.android.core.model.MediaTrack
+import io.getstream.video.android.core.model.VideoTrack
 import io.getstream.webrtc.android.ui.VideoTextureViewRenderer
 import stream.video.sfu.models.TrackType
 
@@ -47,14 +47,14 @@ import stream.video.sfu.models.TrackType
  * Renders a single video track based on the call state.
  *
  * @param call The call state that contains all the tracks and participants.
- * @param videoTrackWrapper The track containing the video stream for a given participant.
+ * @param videoMediaTrack The track containing the video stream for a given participant.
  * @param modifier Modifier for styling.
  * @param onRender Handler when the view is rendered.
  */
 @Composable
 public fun VideoRenderer(
     call: Call,
-    videoTrackWrapper: TrackWrapper,
+    mediaTrack: MediaTrack,
     sessionId: String,
     trackType: TrackType,
     modifier: Modifier = Modifier,
@@ -73,18 +73,11 @@ public fun VideoRenderer(
         return
     }
 
-    val isLocalVideo = sessionId == call.sessionId
-
-    if (!isLocalVideo) {
-        println(isLocalVideo)
-    }
-
-    val trackState: MutableState<TrackWrapper?> = remember { mutableStateOf(null) }
     var view: VideoTextureViewRenderer? by remember { mutableStateOf(null) }
 
-    DisposableEffect(call, videoTrackWrapper) {
+    DisposableEffect(call, mediaTrack) {
         onDispose {
-            cleanTrack(view, trackState)
+            cleanTrack(view, mediaTrack)
             call.setVisibility(sessionId, trackType, false)
         }
     }
@@ -100,37 +93,34 @@ public fun VideoRenderer(
                 )
                 call.setVisibility(sessionId, trackType, true)
                 setScalingType(scalingType = videoScalingType.toCommonScalingType())
-                setupVideo(trackState, videoTrackWrapper, this)
+                setupVideo(mediaTrack, this)
 
                 view = this
             }
         },
-        update = { v -> setupVideo(trackState, videoTrackWrapper, v) },
+        update = { v -> setupVideo(mediaTrack, v) },
         modifier = modifier.testTag("video_renderer"),
     )
 }
 
 private fun cleanTrack(
     view: VideoTextureViewRenderer?,
-    trackState: MutableState<TrackWrapper?>,
+    mediaTrack: MediaTrack?,
 ) {
-    view?.let { trackState.value?.video?.removeSink(it) }
-    trackState.value = null
+    if (view != null && mediaTrack is VideoTrack) {
+        mediaTrack.video.removeSink(view)
+    }
 }
 
 private fun setupVideo(
-    trackState: MutableState<TrackWrapper?>,
-    track: TrackWrapper,
+    mediaTrack: MediaTrack,
     renderer: VideoTextureViewRenderer,
 ) {
-    if (trackState.value == track) {
-        return
+    cleanTrack(renderer, mediaTrack)
+
+    if (mediaTrack is VideoTrack) {
+        mediaTrack.video.addSink(renderer) // cAZo0tsELD9B
     }
-
-    cleanTrack(renderer, trackState)
-
-    trackState.value = track
-    track.video?.addSink(renderer) // cAZo0tsELD9B
 }
 
 @Preview
@@ -140,7 +130,7 @@ private fun VideoRendererPreview() {
     VideoTheme {
         VideoRenderer(
             call = mockCall,
-            videoTrackWrapper = TrackWrapper("", org.webrtc.VideoTrack(123)),
+            mediaTrack = VideoTrack("", org.webrtc.VideoTrack(123)),
             sessionId = "",
             trackType = TrackType.TRACK_TYPE_VIDEO
         )

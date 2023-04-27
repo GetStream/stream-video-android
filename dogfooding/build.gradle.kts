@@ -25,6 +25,7 @@ plugins {
     id("io.getstream.spotless")
     id("com.google.gms.google-services")
     id(libs.plugins.firebase.crashlytics.get().pluginId)
+    id(libs.plugins.kotlin.serialization.get().pluginId)
 }
 
 android {
@@ -121,7 +122,7 @@ android {
 }
 
 dependencies {
-    implementation(platform("com.google.firebase:firebase-bom:31.0.0"))
+    implementation(platform(libs.firebase.bom))
     implementation("com.google.firebase:firebase-auth")
     implementation("com.firebaseui:firebase-ui-auth:7.2.0")
 
@@ -137,6 +138,9 @@ dependencies {
     implementation(libs.androidx.lifecycle.runtime)
 
     implementation(libs.retrofit)
+    implementation(libs.kotlinx.coroutines.android)
+    implementation(libs.kotlinx.serialization.json)
+    implementation(libs.kotlinx.serialization.converter)
 
     // Compose
     implementation(libs.androidx.activity.compose)

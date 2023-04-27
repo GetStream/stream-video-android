@@ -16,6 +16,7 @@
 
 package io.getstream.video.android.core
 
+import android.util.Log
 import io.getstream.log.taggedLogger
 import io.getstream.video.android.core.events.AudioLevelChangedEvent
 import io.getstream.video.android.core.events.ChangePublishQualityEvent
@@ -30,8 +31,8 @@ import io.getstream.video.android.core.events.SFUHealthCheckEvent
 import io.getstream.video.android.core.events.SubscriberOfferEvent
 import io.getstream.video.android.core.events.TrackPublishedEvent
 import io.getstream.video.android.core.events.TrackUnpublishedEvent
+import io.getstream.video.android.core.model.MediaTrack
 import io.getstream.video.android.core.model.ScreenSharingSession
-import io.getstream.video.android.core.model.TrackWrapper
 import io.getstream.video.android.core.model.User
 import io.getstream.video.android.core.utils.mapState
 import io.getstream.video.android.core.utils.toUser
@@ -222,7 +223,7 @@ public class CallState(private val call: Call, private val user: User) {
     private val _ingress: MutableStateFlow<CallIngressResponse?> = MutableStateFlow(null)
     val ingress: StateFlow<CallIngressResponse?> = _ingress
 
-    private val _screenSharingTrack: MutableStateFlow<TrackWrapper?> = MutableStateFlow(null)
+    private val _screenSharingTrack: MutableStateFlow<MediaTrack?> = MutableStateFlow(null)
 
     private val userToSessionIdMap = participants.mapState { participants ->
         participants.map { it.user.value.id to it.sessionId }.toMap()
@@ -409,6 +410,7 @@ public class CallState(private val call: Call, private val user: User) {
             }
 
             is JoinCallResponseEvent -> {
+                Log.e("Test", "call cid: ${call.cid}")
                 _connection.value = ConnectionState.Connected
                 // time to update call state based on the join response
                 updateFromJoinResponse(event)

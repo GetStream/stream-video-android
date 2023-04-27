@@ -25,7 +25,7 @@ import android.widget.LinearLayout
 import io.getstream.video.android.R
 import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.ParticipantState
-import io.getstream.video.android.core.model.TrackWrapper
+import io.getstream.video.android.core.model.MediaTrack
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
@@ -73,6 +73,7 @@ public class ParticipantContentView : LinearLayout {
                 otherParticipants[1],
                 otherParticipants[2]
             )
+
             4 -> renderFourParticipants(
                 call,
                 otherParticipants[0],
@@ -185,9 +186,9 @@ public class ParticipantContentView : LinearLayout {
     private fun renderTrack(
         participantItemView: ParticipantItemView,
         call: Call,
-        track: TrackWrapper?
+        track: MediaTrack?
     ) {
-        val video = track?.video
+        val video = track?.asVideoTrack()?.video
 
         if (video != null) {
             participantItemView.visibility = View.VISIBLE

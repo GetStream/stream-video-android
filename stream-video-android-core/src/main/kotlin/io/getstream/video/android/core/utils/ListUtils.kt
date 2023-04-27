@@ -37,10 +37,3 @@ public inline fun <T> List<T>.updateValue(
 
     return mutableList
 }
-
-@InternalStreamVideoApi
-public inline fun <T> List<T>.updateAll(transformer: (T) -> T): List<T> {
-    val mutableList = toMutableList()
-
-    return mutableList.map(transformer)
-}

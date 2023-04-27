@@ -70,6 +70,10 @@ public data class StreamColors(
     public val callGradientStart: Color,
     public val callGradientEnd: Color,
     public val callDescription: Color,
+    public val callActionIconEnabledBackground: Color,
+    public val callActionIconDisabledBackground: Color,
+    public val callActionIconEnabled: Color,
+    public val callActionIconDisabled: Color,
 ) {
 
     public companion object {
@@ -107,7 +111,11 @@ public data class StreamColors(
             callFocusedBorder = colorResource(id = R.color.stream_video_focused_border_color),
             callGradientStart = colorResource(id = R.color.stream_video_call_gradient_start),
             callGradientEnd = colorResource(id = R.color.stream_video_call_gradient_end),
-            callDescription = colorResource(id = R.color.stream_video_text_high_emphasis),
+            callDescription = colorResource(id = R.color.stream_video_call_description),
+            callActionIconEnabled = colorResource(id = R.color.stream_video_action_icon_enabled),
+            callActionIconDisabled = colorResource(id = R.color.stream_video_action_icon_disabled),
+            callActionIconEnabledBackground = colorResource(id = R.color.stream_video_action_icon_enabled_background),
+            callActionIconDisabledBackground = colorResource(id = R.color.stream_video_action_icon_disabled_background),
         )
 
         /**
@@ -144,7 +152,11 @@ public data class StreamColors(
             callFocusedBorder = colorResource(id = R.color.stream_video_focused_border_color),
             callGradientStart = colorResource(id = R.color.stream_video_call_gradient_start),
             callGradientEnd = colorResource(id = R.color.stream_video_call_gradient_end),
-            callDescription = colorResource(id = R.color.stream_video_call_description),
+            callDescription = colorResource(id = R.color.stream_video_call_description_dark),
+            callActionIconEnabled = colorResource(id = R.color.stream_video_action_icon_enabled_dark),
+            callActionIconDisabled = colorResource(id = R.color.stream_video_action_icon_disabled_dark),
+            callActionIconEnabledBackground = colorResource(id = R.color.stream_video_action_icon_enabled_background_dark),
+            callActionIconDisabledBackground = colorResource(id = R.color.stream_video_action_icon_disabled_background_dark),
         )
     }
 }

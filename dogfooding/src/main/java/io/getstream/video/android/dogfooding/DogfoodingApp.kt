@@ -28,9 +28,7 @@ import io.getstream.video.android.core.logging.LoggingLevel
 import io.getstream.video.android.core.model.ApiKey
 import io.getstream.video.android.core.model.User
 import io.getstream.video.android.core.user.UserPreferencesManager
-import java.io.BufferedReader
-import java.io.InputStreamReader
-import java.net.URL
+import io.getstream.video.android.dogfooding.token.StreamVideoNetwork
 
 class DogfoodingApp : Application() {
 
@@ -71,24 +69,12 @@ class DogfoodingApp : Application() {
             pushDeviceGenerators = listOf(FirebasePushDeviceGenerator()),
             tokenProvider = {
                 val email = user.custom["email"]
-                val request = URL(
-                    "https://stream-calls-dogfood.vercel.app/api/auth/create-token?user_id=$email&api_key=$API_KEY"
+                val response = StreamVideoNetwork.tokenService.fetchToken(
+                    userId = email,
+                    apiKey = API_KEY
                 )
-                val connection = request.openConnection()
-
-                connection.connect()
-
-                // Read and print the input
-                val inputStream = BufferedReader(InputStreamReader(connection.getInputStream()))
-                val response = inputStream.readLines().toString()
-                inputStream.close()
-                response
+                response.token
             }
-//            androidInputs = setOf(
-//                CallServiceInput.from(CallService::class),
-//                // CallActivityInput.from(XmlCallActivity::class),
-//                CallActivityInput.from(CallActivity::class),
-//            )
         ).build().also {
             video = it
         }
@@ -111,10 +97,7 @@ class DogfoodingApp : Application() {
         }
 
         dogfoodingApp.initializeStreamVideo(
-            apiKey = apiKey,
-            user = user,
-            loggingLevel = LoggingLevel.NONE,
-            token = token
+            apiKey = apiKey, user = user, loggingLevel = LoggingLevel.NONE, token = token
         )
         return true
     }

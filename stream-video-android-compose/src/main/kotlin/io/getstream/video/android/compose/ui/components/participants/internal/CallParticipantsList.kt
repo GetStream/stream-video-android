@@ -65,14 +65,14 @@ internal fun CallParticipantsList(
         horizontalAlignment = Alignment.Start,
         verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
-        items(participantsState) {
+        items(participantsState, key = { it.sessionId }) {
             CallParticipantInfoItem(it, onUserOptionsSelected)
         }
     }
 }
 
 /**
- * Represents a single active [CallParticipantState] item.
+ * Represents a single active [ParticipantState] item.
  *
  * @param participant The participant data.
  * @param onUserOptionsSelected Handler when the options for a given participant are selected.
