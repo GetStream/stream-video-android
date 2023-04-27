@@ -257,7 +257,7 @@ public class RtcSession internal constructor(
         ) throw IllegalArgumentException("The API key, user ID and token cannot be empty!")
 
         // step 1 setup the peer connections
-        createSubscriber()
+        subscriber = createSubscriber()
         val getSdp = suspend {
             getSubscriberSdp().description
         }
@@ -283,6 +283,14 @@ public class RtcSession internal constructor(
                 updateParticipantsSubscriptions()
             }
         }
+    }
+
+    suspend fun reconnect() {
+        // recreate the peer connections
+
+        // wait for the socket to be healthy (it should auto recover)
+
+        // call connectRtc
     }
 
     suspend fun connect() {
@@ -500,7 +508,7 @@ public class RtcSession internal constructor(
 
     @VisibleForTesting
     public fun createSubscriber(): StreamPeerConnection? {
-        subscriber = clientImpl.peerConnectionFactory.makePeerConnection(
+        clientImpl.peerConnectionFactory.makePeerConnection(
             coroutineScope = coroutineScope,
             configuration = connectionConfiguration,
             type = StreamPeerType.SUBSCRIBER,

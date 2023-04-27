@@ -24,7 +24,6 @@ import io.getstream.video.android.core.events.ChangePublishQualityEvent
 import io.getstream.video.android.core.events.JoinCallResponseEvent
 import io.getstream.video.android.core.utils.buildAudioConstraints
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.withTimeout
 import org.junit.Rule
@@ -36,6 +35,7 @@ import org.webrtc.PeerConnection
 import org.webrtc.RTCStats
 import org.webrtc.VideoCodecInfo
 import stream.video.sfu.event.ChangePublishQuality
+
 
 /**
  * Things to test in a real android environment
@@ -92,47 +92,7 @@ class AndroidDeviceTest : IntegrationTestBase(connectCoordinatorWS = false) {
         newClient.cleanup()
     }
 
-    @Test
-    fun switchSfuTest() = runTest {
-        call.join()
 
-        // TODO: exclude the SFU that failed...
-        // TODO: can we remove any API calls here or resuse latency measurements
-        // TODO: add loading/status indicators
-
-        call.switchSfu()
-    }
-
-    @Test
-    fun reconnect() = runTest {
-        call.state.connection // pre connect
-        backgroundScope.launch {
-            call.join()
-            call.state.connection // loading
-        }
-        // show a loading icon while loading
-        call.state.connection // temporary error/ reconnecting
-        // permanent error -> Failed to join call. Mention this call id to tech support
-        // happy connection
-
-
-        /**
-         * From a UI Perspective, the first joinRequest already sets up state
-         * Then the JoinEventResponse gives more state
-         *
-         * Video is only available after peer connections are ready.
-         * And after updateSubscriptions is called
-         * And the track is received
-         *
-         * PeerConnection states
-         * PeerConnection.IceConnectionState.CLOSED, PeerConnection.IceConnectionState.FAILED, PeerConnection.IceConnectionState.DISCONNECTED
-         *
-         * - When the ice connection fails
-         * -- we check for disconnected, closed or failed. if failed, closed or disconnected for more than 3 seconds
-         * -- call the coordinator and ask if we should switch SFU
-         */
-
-    }
 
     @Test
     fun codecsFun() = runTest {
