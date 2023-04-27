@@ -45,7 +45,7 @@ import io.getstream.video.android.core.viewmodel.CallViewModel
 @Composable
 public fun CallControls(
     callViewModel: CallViewModel,
-    onCallAction: (CallAction) -> Unit,
+    onCallAction: (CallAction) -> Unit = {},
     actions: List<(@Composable () -> Unit)> = buildDefaultCallControlActions(
         callViewModel = callViewModel,
         onCallAction
