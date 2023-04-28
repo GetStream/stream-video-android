@@ -44,16 +44,14 @@ class DogfoodingApp : Application() {
     override fun onCreate() {
         super.onCreate()
         AndroidStreamLogger.installOnDebuggableApp(this, minPriority = Priority.DEBUG)
-//        StreamGlobalExceptionHandler.install(
-//            application = this,
-//            packageName = LoginActivity::class.java.name
-//        )
+        //        StreamGlobalExceptionHandler.install(
+        //            application = this,
+        //            packageName = LoginActivity::class.java.name
+        //        )
         UserPreferencesManager.initialize(this)
     }
 
-    /**
-     * Sets up and returns the [streamVideo] required to connect to the API.
-     */
+    /** Sets up and returns the [streamVideo] required to connect to the API. */
     fun initializeStreamVideo(
         user: User,
         token: String,
@@ -69,15 +67,13 @@ class DogfoodingApp : Application() {
             pushDeviceGenerators = listOf(FirebasePushDeviceGenerator()),
             tokenProvider = {
                 val email = user.custom["email"]
-                val response = StreamVideoNetwork.tokenService.fetchToken(
-                    userId = email,
-                    apiKey = API_KEY
-                )
+                val response =
+                    StreamVideoNetwork.tokenService.fetchToken(userId = email, apiKey = API_KEY)
                 response.token
             }
-        ).build().also {
-            video = it
-        }
+        )
+            .build()
+            .also { video = it }
     }
 
     fun logOut() {
@@ -105,4 +101,5 @@ class DogfoodingApp : Application() {
 
 internal const val API_KEY = BuildConfig.DOGFOODING_API_KEY
 
-val Context.dogfoodingApp get() = applicationContext as DogfoodingApp
+val Context.dogfoodingApp
+    get() = applicationContext as DogfoodingApp

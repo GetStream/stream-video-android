@@ -81,14 +81,7 @@ class HomeActivity : AppCompatActivity() {
 
     private val participantsOptions: MutableState<List<AppUser>> by lazy {
         mutableStateOf(
-            getUsers().filter {
-                it.id != streamVideo.user.id
-            }.map { user ->
-                AppUser(
-                    user,
-                    false
-                )
-            }
+            getUsers().filter { it.id != streamVideo.user.id }.map { user -> AppUser(user, false) }
         )
     }
 
@@ -105,22 +98,14 @@ class HomeActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         logger.d { "[onCreate] savedInstanceState: $savedInstanceState" }
         super.onCreate(savedInstanceState)
-        setContent {
-            VideoTheme {
-                HomeScreen()
-            }
-        }
+        setContent { VideoTheme { HomeScreen() } }
     }
 
     @Composable
     private fun HomeScreen() {
         Box(modifier = Modifier.fillMaxSize()) {
             UserIcon()
-            Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .verticalScroll(rememberScrollState())
-            ) {
+            Column(modifier = Modifier.fillMaxSize().verticalScroll(rememberScrollState())) {
                 CallOptions()
 
                 val selectedOption by remember { selectedOption }
@@ -134,11 +119,10 @@ class HomeActivity : AppCompatActivity() {
                 Spacer(modifier = Modifier.height(16.dp))
 
                 Button(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 16.dp),
+                    modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp),
                     onClick = ::logOut,
-                    colors = ButtonDefaults.buttonColors(
+                    colors =
+                    ButtonDefaults.buttonColors(
                         backgroundColor = VideoTheme.colors.errorAccent, contentColor = Color.White
                     )
                 ) {
@@ -175,35 +159,25 @@ class HomeActivity : AppCompatActivity() {
         val isRinging by remember { ringingState }
 
         Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp),
+            modifier = Modifier.fillMaxWidth().padding(16.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text(text = "Call ringing")
 
-            Switch(checked = isRinging, onCheckedChange = { isRinging ->
-                ringingState.value = isRinging
-            })
+            Switch(checked = isRinging, onCheckedChange = { isRinging -> ringingState.value = isRinging })
         }
 
         Button(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 16.dp)
-                .align(CenterHorizontally),
+            modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp).align(CenterHorizontally),
             enabled = isDataValid,
             onClick = {
                 createCall(
                     callId = callIdState.value,
-                    participants = participantsOptions.value.filter { it.isSelected }
-                        .map { it.user.id },
+                    participants = participantsOptions.value.filter { it.isSelected }.map { it.user.id },
                     isRinging
                 )
             }
-        ) {
-            Text(text = if (isRinging) "Create call" else "Create meeting")
-        }
+        ) { Text(text = if (isRinging) "Create call" else "Create meeting") }
     }
 
     @Composable
@@ -213,17 +187,10 @@ class HomeActivity : AppCompatActivity() {
         val isDataValid = callIdState.value.isNotBlank()
 
         Button(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 16.dp)
-                .align(CenterHorizontally),
+            modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp).align(CenterHorizontally),
             enabled = isDataValid,
-            onClick = {
-                joinCall(callId = callIdState.value)
-            }
-        ) {
-            Text(text = "Join call")
-        }
+            onClick = { joinCall(callId = callIdState.value) }
+        ) { Text(text = "Join call") }
     }
 
     private fun createCall(
@@ -243,24 +210,22 @@ class HomeActivity : AppCompatActivity() {
         }
     }
 
-    private fun createMeeting(callId: String, participants: List<String>) {
-    }
+    private fun createMeeting(callId: String, participants: List<String>) {}
 
-    private fun dialUsers(callId: String, participants: List<String>) {
-    }
+    private fun dialUsers(callId: String, participants: List<String>) {}
 
     private fun joinCall(callId: String) {
         lifecycleScope.launch {
             loadingState.value = true
 
-//            streamVideo.joinCall(
-//                "default",
-//                id = callId,
-//                participantIds = emptyList(),
-//                ring = false
-//            ).onError {
-//                Toast.makeText(this@HomeActivity, it.message, Toast.LENGTH_SHORT).show()
-//            }
+            //            streamVideo.joinCall(
+            //                "default",
+            //                id = callId,
+            //                participantIds = emptyList(),
+            //                ring = false
+            //            ).onError {
+            //                Toast.makeText(this@HomeActivity, it.message, Toast.LENGTH_SHORT).show()
+            //            }
 
             loadingState.value = false
         }
@@ -271,16 +236,10 @@ class HomeActivity : AppCompatActivity() {
         val inputState by remember { callIdState }
 
         OutlinedTextField(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp),
+            modifier = Modifier.fillMaxWidth().padding(16.dp),
             value = inputState,
-            onValueChange = { input ->
-                callIdState.value = input
-            },
-            label = {
-                Text(text = "Enter the call ID")
-            }
+            onValueChange = { input -> callIdState.value = input },
+            label = { Text(text = "Enter the call ID") }
         )
     }
 
@@ -288,31 +247,32 @@ class HomeActivity : AppCompatActivity() {
     fun CallOptions() {
         val selectedOption by remember { selectedOption }
 
-        Row(
-            modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center
-        ) {
+        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center) {
             Button(
                 modifier = Modifier.padding(8.dp),
-                colors = ButtonDefaults.buttonColors(
-                    backgroundColor = if (selectedOption == HomeScreenOption.CREATE_CALL) MaterialTheme.colors.primary else Color.LightGray,
+                colors =
+                ButtonDefaults.buttonColors(
+                    backgroundColor =
+                    if (selectedOption == HomeScreenOption.CREATE_CALL)
+                        MaterialTheme.colors.primary
+                    else Color.LightGray,
                     contentColor = Color.White
                 ),
                 onClick = { this@HomeActivity.selectedOption.value = HomeScreenOption.CREATE_CALL },
-                content = {
-                    Text(text = "Create Call")
-                }
+                content = { Text(text = "Create Call") }
             )
 
             Button(
                 modifier = Modifier.padding(8.dp),
-                colors = ButtonDefaults.buttonColors(
-                    backgroundColor = if (selectedOption == HomeScreenOption.JOIN_CALL) MaterialTheme.colors.primary else Color.LightGray,
+                colors =
+                ButtonDefaults.buttonColors(
+                    backgroundColor =
+                    if (selectedOption == HomeScreenOption.JOIN_CALL) MaterialTheme.colors.primary
+                    else Color.LightGray,
                     contentColor = Color.White
                 ),
                 onClick = { this@HomeActivity.selectedOption.value = HomeScreenOption.JOIN_CALL },
-                content = {
-                    Text(text = "Join Call")
-                }
+                content = { Text(text = "Join Call") }
             )
         }
     }
@@ -327,9 +287,7 @@ class HomeActivity : AppCompatActivity() {
 
         val users by remember { participantsOptions }
 
-        UserList(userItems = users, onClick = { user ->
-            toggleSelectState(user, users)
-        })
+        UserList(userItems = users, onClick = { user -> toggleSelectState(user, users) })
     }
 
     @Composable
@@ -337,11 +295,10 @@ class HomeActivity : AppCompatActivity() {
         val user = UserPreferencesManager.initialize(this).getUserCredentials() ?: return
 
         Avatar(
-            modifier = Modifier
-                .size(40.dp)
-                .padding(top = 8.dp, start = 8.dp),
+            modifier = Modifier.size(40.dp).padding(top = 8.dp, start = 8.dp),
             imageUrl = user.image.orEmpty(),
-            initials = if (user.image == null) {
+            initials =
+            if (user.image == null) {
                 user.name.initials()
             } else {
                 null
@@ -365,8 +322,9 @@ class HomeActivity : AppCompatActivity() {
     }
 
     companion object {
-        fun getIntent(context: Context): Intent = Intent(context, HomeActivity::class.java).apply {
-            flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
-        }
+        fun getIntent(context: Context): Intent =
+            Intent(context, HomeActivity::class.java).apply {
+                flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+            }
     }
 }

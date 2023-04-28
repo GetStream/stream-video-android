@@ -45,26 +45,25 @@ internal fun StreamPrimaryButton(
     content: @Composable (RowScope.() -> Unit)? = null,
 ) {
     Button(
-        modifier = modifier
-            .fillMaxWidth()
-            .padding(16.dp)
-            .heightIn(min = 54.dp),
+        modifier = modifier.fillMaxWidth().padding(16.dp).heightIn(min = 54.dp),
         shape = RoundedCornerShape(8.dp),
         enabled = enabled,
-        colors = ButtonDefaults.buttonColors(
+        colors =
+        ButtonDefaults.buttonColors(
             contentColor = contentColor ?: VideoTheme.colors.primaryAccent,
             backgroundColor = contentColor ?: VideoTheme.colors.primaryAccent,
             disabledContentColor = disabledContentColor ?: VideoTheme.colors.disabled,
         ),
         onClick = onClick,
-        content = content ?: {
-            Text(
-                modifier = Modifier.fillMaxWidth(),
-                text = stringResource(id = text),
-                color = Color.White,
-                textAlign = TextAlign.Center,
-                fontSize = 16.sp,
-            )
-        },
+        content = content
+            ?: {
+                Text(
+                    modifier = Modifier.fillMaxWidth(),
+                    text = stringResource(id = text),
+                    color = Color.White,
+                    textAlign = TextAlign.Center,
+                    fontSize = 16.sp,
+                )
+            },
     )
 }

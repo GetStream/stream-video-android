@@ -55,7 +55,7 @@ data class CallEndedEvent (
     @Json(name = "user")
     val user: UserResponse? = null
 
-) : VideoEvent(), WSCallEvent{
+) : VideoEvent(), WSCallEvent {
 
     override fun getCallCID(): String {
         return callCid

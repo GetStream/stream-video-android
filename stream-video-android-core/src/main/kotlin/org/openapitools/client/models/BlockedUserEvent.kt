@@ -59,7 +59,7 @@ data class BlockedUserEvent (
     @Json(name = "blocked_by_user")
     val blockedByUser: UserResponse? = null
 
-) : VideoEvent(), WSCallEvent{
+) : VideoEvent(), WSCallEvent {
 
     override fun getCallCID(): String {
         return callCid

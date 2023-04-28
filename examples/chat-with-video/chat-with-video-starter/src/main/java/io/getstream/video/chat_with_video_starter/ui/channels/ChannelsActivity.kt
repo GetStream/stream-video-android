@@ -37,11 +37,8 @@ class ChannelsActivity : ComponentActivity() {
         setContent {
             ChatTheme {
                 Column(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .background(color = ChatTheme.colors.appBackground)
-                ) {
-                }
+                    modifier = Modifier.fillMaxSize().background(color = ChatTheme.colors.appBackground)
+                ) {}
             }
         }
     }

@@ -42,29 +42,25 @@ class VideoApp : Application() {
         UserPreferencesManager.initialize(this)
     }
 
-    /**
-     * Sets up and returns the [streamVideo] required to connect to the API.
-     */
-    fun initializeStreamVideo(
-        user: User,
-        apiKey: ApiKey,
-        loggingLevel: LoggingLevel
-    ): StreamVideo {
+    /** Sets up and returns the [streamVideo] required to connect to the API. */
+    fun initializeStreamVideo(user: User, apiKey: ApiKey, loggingLevel: LoggingLevel): StreamVideo {
         StreamLog.d(TAG) { "[initializeStreamCalls] loggingLevel: $loggingLevel" }
 
         return StreamVideoBuilder(
             context = this,
             user = user,
             apiKey = apiKey,
-//            androidInputs = setOf(
-//                CallServiceInput.from(CallService::class),
-//                CallActivityInput.from(CallActivity::class),
-//            ),
+            //            androidInputs = setOf(
+            //                CallServiceInput.from(CallService::class),
+            //                CallActivityInput.from(CallActivity::class),
+            //            ),
             loggingLevel = loggingLevel
-        ).build().also {
-            video = it
-            StreamLog.v(TAG) { "[initializeStreamCalls] completed" }
-        }
+        )
+            .build()
+            .also {
+                video = it
+                StreamLog.v(TAG) { "[initializeStreamCalls] completed" }
+            }
     }
 
     fun logOut() {
@@ -78,4 +74,5 @@ class VideoApp : Application() {
     }
 }
 
-internal val Context.videoApp get() = applicationContext as VideoApp
+internal val Context.videoApp
+    get() = applicationContext as VideoApp

@@ -53,9 +53,9 @@ rm -rf "${CLIENT_ROOT}"
 #   -g kotlin \
 #   -o "${GENERATED_CODE_ROOT}"
 
-docker pull ghcr.io/getstream/openapi-generator:master
-
 if [[ -n "${LOCAL_ENV}" ]]; then
+  OPENAPI_GENERATOR="${OPENAPI_GENERATOR:-ghcr.io/getstream/openapi-generator:master}"
+
   # Local environment needs an additional mount for the newly generated openapi
   # spec. We assume that you have cloned the GetStream/protocol repository and
   # the file is located in "${PROTOCOL_ROOT}/openapi/video-openapi.yaml"
@@ -74,7 +74,7 @@ if [[ -n "${LOCAL_ENV}" ]]; then
   docker run --rm \
     -v "${GENERATED_CODE_ROOT}:/local" \
     -v "${OPENAPI_CONFIG_ROOT}:/config" \
-    ghcr.io/getstream/openapi-generator:master generate \
+    "${OPENAPI_GENERATOR}" generate \
     -i "/config/video-openapi.yaml" \
     --additional-properties=library=jvm-retrofit2,useCoroutines,dateLibrary=threetenbp \
     -g kotlin \

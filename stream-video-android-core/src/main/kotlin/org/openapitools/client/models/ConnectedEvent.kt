@@ -56,7 +56,7 @@ data class ConnectedEvent (
     @Json(name = "type")
     val type: kotlin.String = "connection.ok"
 
-) : VideoEvent(), WSClientEvent{
+) : VideoEvent(), WSClientEvent {
 
     override fun getEventType(): String {
         return type

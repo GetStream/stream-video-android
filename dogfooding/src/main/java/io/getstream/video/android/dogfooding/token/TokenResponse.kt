@@ -18,8 +18,4 @@ package io.getstream.video.android.dogfooding.token
 
 import kotlinx.serialization.Serializable
 
-@Serializable
-data class TokenResponse(
-    val userId: String,
-    val token: String
-)
+@Serializable data class TokenResponse(val userId: String, val token: String)

@@ -54,7 +54,7 @@ data class CallBroadcastingStartedEvent (
     @Json(name = "type")
     val type: kotlin.String = "call.broadcasting_started"
 
-) : VideoEvent(), WSCallEvent{
+) : VideoEvent(), WSCallEvent {
 
     override fun getCallCID(): String {
         return callCid

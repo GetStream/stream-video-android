@@ -66,22 +66,21 @@ import java.net.URL
 
 class LoginActivity : ComponentActivity() {
 
-    private val signInLauncher = registerForActivityResult(
-        FirebaseAuthUIActivityResultContract()
-    ) { result ->
-        if (result.resultCode != RESULT_OK) {
-            onSignInFailed()
-            return@registerForActivityResult
-        }
+    private val signInLauncher =
+        registerForActivityResult(FirebaseAuthUIActivityResultContract()) { result ->
+            if (result.resultCode != RESULT_OK) {
+                onSignInFailed()
+                return@registerForActivityResult
+            }
 
-        val email = result?.idpResponse?.email
+            val email = result?.idpResponse?.email
 
-        if (email != null) {
-            onSignInSuccess(email)
-        } else {
-            onSignInFailed()
+            if (email != null) {
+                onSignInSuccess(email)
+            } else {
+                onSignInFailed()
+            }
         }
-    }
 
     private val isShowingGuestLogin = mutableStateOf(false)
 
@@ -98,70 +97,43 @@ class LoginActivity : ComponentActivity() {
 
         setContent {
             VideoTheme {
-                Box(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .background(VideoTheme.colors.appBackground)
-                ) {
-                    Column(
-                        modifier = Modifier.fillMaxSize(),
-                        verticalArrangement = Arrangement.Center
-                    ) {
+                Box(modifier = Modifier.fillMaxSize().background(VideoTheme.colors.appBackground)) {
+                    Column(modifier = Modifier.fillMaxSize(), verticalArrangement = Arrangement.Center) {
                         Button(
-                            modifier = Modifier
-                                .fillMaxWidth()
+                            modifier =
+                            Modifier.fillMaxWidth()
                                 .height(72.dp)
                                 .padding(horizontal = 32.dp, vertical = 8.dp),
-                            colors = ButtonDefaults.buttonColors(
-                                backgroundColor = VideoTheme.colors.primaryAccent
-                            ),
-                            content = {
-                                Text(
-                                    text = "Authenticate",
-                                    color = Color.White
-                                )
-                            },
+                            colors =
+                            ButtonDefaults.buttonColors(backgroundColor = VideoTheme.colors.primaryAccent),
+                            content = { Text(text = "Authenticate", color = Color.White) },
                             onClick = ::authenticate
                         )
 
                         Button(
-                            modifier = Modifier
-                                .fillMaxWidth()
+                            modifier =
+                            Modifier.fillMaxWidth()
                                 .height(72.dp)
                                 .padding(horizontal = 32.dp, vertical = 8.dp),
-                            content = {
-                                Text(
-                                    text = "Login as Guest",
-                                    color = Color.White
-                                )
-                            },
-                            colors = ButtonDefaults.buttonColors(
-                                backgroundColor = VideoTheme.colors.primaryAccent
-                            ),
-                            onClick = {
-                                isShowingGuestLogin.value = true
-                            }
+                            content = { Text(text = "Login as Guest", color = Color.White) },
+                            colors =
+                            ButtonDefaults.buttonColors(backgroundColor = VideoTheme.colors.primaryAccent),
+                            onClick = { isShowingGuestLogin.value = true }
                         )
 
                         if (BuildConfig.BENCHMARK) {
                             Button(
-                                modifier = Modifier
-                                    .fillMaxWidth()
+                                modifier =
+                                Modifier.fillMaxWidth()
                                     .height(72.dp)
                                     .padding(horizontal = 32.dp, vertical = 8.dp)
                                     .testTag("authenticate"),
-                                content = {
-                                    Text(
-                                        text = "Login for Benchmark",
-                                        color = Color.White
-                                    )
-                                },
-                                colors = ButtonDefaults.buttonColors(
+                                content = { Text(text = "Login for Benchmark", color = Color.White) },
+                                colors =
+                                ButtonDefaults.buttonColors(
                                     backgroundColor = VideoTheme.colors.primaryAccent
                                 ),
-                                onClick = {
-                                    onSignInSuccess("benchmark.test@getstream.io")
-                                }
+                                onClick = { onSignInSuccess("benchmark.test@getstream.io") }
                             )
                         }
                     }
@@ -181,31 +153,24 @@ class LoginActivity : ComponentActivity() {
         var guestLoginEmailState by remember { mutableStateOf("") }
 
         Dialog(
-            onDismissRequest = {
-                isShowingGuestLogin.value = false
-            },
+            onDismissRequest = { isShowingGuestLogin.value = false },
             content = {
                 Surface(modifier = Modifier.width(300.dp)) {
                     Column {
                         TextField(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(horizontal = 16.dp, vertical = 8.dp),
+                            modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp),
                             value = guestLoginEmailState,
                             onValueChange = { guestLoginEmailState = it },
                             label = { Text(text = "Enter your e-mail address") },
-                            colors = TextFieldDefaults.textFieldColors(
+                            colors =
+                            TextFieldDefaults.textFieldColors(
                                 textColor = VideoTheme.colors.textLowEmphasis
                             ),
-                            keyboardOptions = KeyboardOptions.Default.copy(
-                                keyboardType = KeyboardType.Email
-                            )
+                            keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Email)
                         )
 
                         Button(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(horizontal = 16.dp),
+                            modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp),
                             onClick = {
                                 onSignInSuccess(guestLoginEmailState)
                                 isShowingGuestLogin.value = false
@@ -224,22 +189,20 @@ class LoginActivity : ComponentActivity() {
     }
 
     private fun authenticate() {
-        val providers = arrayListOf(
-            AuthUI.IdpConfig.GoogleBuilder().build()
-        )
+        val providers = arrayListOf(AuthUI.IdpConfig.GoogleBuilder().build())
 
         // Create and launch sign-in intent
         val signInIntent =
-            AuthUI.getInstance().createSignInIntentBuilder().setAvailableProviders(providers)
-                .build()
+            AuthUI.getInstance().createSignInIntentBuilder().setAvailableProviders(providers).build()
         signInLauncher.launch(signInIntent)
     }
 
     private fun onSignInSuccess(email: String) {
         lifecycleScope.launch(Dispatchers.IO) {
-            val request = URL(
-                "https://stream-calls-dogfood.vercel.app/api/auth/create-token?user_id=$email&api_key=$API_KEY"
-            )
+            val request =
+                URL(
+                    "https://stream-calls-dogfood.vercel.app/api/auth/create-token?user_id=$email&api_key=$API_KEY"
+                )
             val connection = request.openConnection()
 
             connection.connect()
@@ -268,13 +231,14 @@ class LoginActivity : ComponentActivity() {
 
         if (userJSON != null) {
             val token = userJSON.getString("token")
-            val user = User(
-                id = authUser?.email ?: userJSON.getString("userId"),
-                name = authUser?.displayName ?: "",
-                image = authUser?.photoUrl?.toString() ?: "",
-                role = "admin",
-                custom = mapOf("email" to userJSON.getString("userId"))
-            )
+            val user =
+                User(
+                    id = authUser?.email ?: userJSON.getString("userId"),
+                    name = authUser?.displayName ?: "",
+                    image = authUser?.photoUrl?.toString() ?: "",
+                    role = "admin",
+                    custom = mapOf("email" to userJSON.getString("userId"))
+                )
 
             startHome(user, token)
         }
@@ -282,10 +246,7 @@ class LoginActivity : ComponentActivity() {
 
     private fun startHome(user: User, token: String) {
         dogfoodingApp.initializeStreamVideo(
-            apiKey = API_KEY,
-            user = user,
-            loggingLevel = LoggingLevel.BODY,
-            token = token
+            apiKey = API_KEY, user = user, loggingLevel = LoggingLevel.BODY, token = token
         )
         startActivity(HomeActivity.getIntent(this))
     }

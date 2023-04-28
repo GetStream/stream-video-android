@@ -51,7 +51,7 @@ data class HealthCheckEvent (
     @Json(name = "type")
     val type: kotlin.String = "health.check"
 
-) : VideoEvent(), WSClientEvent{
+) : VideoEvent(), WSClientEvent {
 
     override fun getEventType(): String {
         return type

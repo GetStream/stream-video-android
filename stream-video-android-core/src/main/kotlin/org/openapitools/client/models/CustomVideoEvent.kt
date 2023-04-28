@@ -60,7 +60,7 @@ data class CustomVideoEvent (
     @Json(name = "user")
     val user: UserResponse
 
-) : VideoEvent(), WSCallEvent{
+) : VideoEvent(), WSCallEvent {
 
     override fun getCallCID(): String {
         return callCid

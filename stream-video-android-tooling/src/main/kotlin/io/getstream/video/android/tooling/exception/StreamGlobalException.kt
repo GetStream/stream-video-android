@@ -20,23 +20,19 @@ import android.annotation.SuppressLint
 import io.getstream.log.StreamLog
 import io.getstream.video.android.tooling.handler.StreamGlobalExceptionHandler
 
-/**
- * Installer for the [StreamGlobalExceptionHandler].
- */
+/** Installer for the [StreamGlobalExceptionHandler]. */
 public object StreamGlobalException {
 
     /**
-     * Represents if [StreamGlobalExceptionHandler] is already installed or not.
-     * Lets you know if the internal [StreamGlobalExceptionHandler] instance is being used as the
-     * uncaught exception handler when true or if it is using the default one if false.
+     * Represents if [StreamGlobalExceptionHandler] is already installed or not. Lets you know if the
+     * internal [StreamGlobalExceptionHandler] instance is being used as the uncaught exception
+     * handler when true or if it is using the default one if false.
      */
     @JvmStatic
     public var isInstalled: Boolean = false
         private set
 
-    /**
-     * [StreamGlobalExceptionHandler] instance to be used.
-     */
+    /** [StreamGlobalExceptionHandler] instance to be used. */
     @SuppressLint("StaticFieldLeak")
     @Volatile
     @PublishedApi
@@ -46,9 +42,7 @@ public object StreamGlobalException {
             field = value
         }
 
-    /**
-     * Installs a new [StreamGlobalExceptionHandler] instance to be used.
-     */
+    /** Installs a new [StreamGlobalExceptionHandler] instance to be used. */
     @JvmStatic
     public fun install(exceptionHandler: StreamGlobalExceptionHandler) {
         synchronized(this) {

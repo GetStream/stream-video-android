@@ -32,9 +32,7 @@ class ChatWithVideoApp : Application() {
 
     val usersLoginProvider: UsersProvider by lazy { FakeUsersProvider() }
 
-    val chatClient: ChatClient by lazy {
-        TODO("Implement ChatClient")
-    }
+    val chatClient: ChatClient by lazy { TODO("Implement ChatClient") }
 
     val attachmentFactories by lazy {
         StreamAttachmentFactories.defaultFactories() // TODO add custom attachment
@@ -45,11 +43,7 @@ class ChatWithVideoApp : Application() {
     val streamVideo: StreamVideo
         get() = requireNotNull(video)
 
-    fun initializeStreamVideo(
-        user: User,
-        apiKey: ApiKey,
-        loggingLevel: LoggingLevel
-    ): StreamVideo {
+    fun initializeStreamVideo(user: User, apiKey: ApiKey, loggingLevel: LoggingLevel): StreamVideo {
         TODO()
     }
 
@@ -60,4 +54,5 @@ class ChatWithVideoApp : Application() {
 
 internal const val API_KEY = BuildConfig.SAMPLE_STREAM_VIDEO_API_KEY
 
-internal val Context.chatWithVideoApp get() = applicationContext as ChatWithVideoApp
+internal val Context.chatWithVideoApp
+    get() = applicationContext as ChatWithVideoApp

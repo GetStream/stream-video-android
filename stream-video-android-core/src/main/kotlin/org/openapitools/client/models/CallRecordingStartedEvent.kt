@@ -50,7 +50,7 @@ data class CallRecordingStartedEvent (
     @Json(name = "type")
     val type: kotlin.String = "call.recording_started"
 
-) : VideoEvent(), WSCallEvent{
+) : VideoEvent(), WSCallEvent {
 
     override fun getCallCID(): String {
         return callCid

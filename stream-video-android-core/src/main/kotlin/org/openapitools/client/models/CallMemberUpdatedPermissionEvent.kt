@@ -66,7 +66,7 @@ data class CallMemberUpdatedPermissionEvent (
     @Json(name = "type")
     val type: kotlin.String = "call.updated_permission"
 
-) : VideoEvent(), WSCallEvent{
+) : VideoEvent(), WSCallEvent {
 
     override fun getCallCID(): String {
         return callCid

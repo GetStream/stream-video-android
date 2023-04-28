@@ -55,7 +55,7 @@ data class CallReactionEvent (
     @Json(name = "type")
     val type: kotlin.String = "call.reaction_new"
 
-) : VideoEvent(), WSCallEvent{
+) : VideoEvent(), WSCallEvent {
 
     override fun getCallCID(): String {
         return callCid

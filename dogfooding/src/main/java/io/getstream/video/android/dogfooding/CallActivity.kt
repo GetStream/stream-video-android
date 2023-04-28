@@ -47,10 +47,7 @@ class CallActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
 
         vm.joinCall {
-            Toast.makeText(
-                this,
-                "failed to join call (${vm.call.cid}): $it", Toast.LENGTH_SHORT
-            ).show()
+            Toast.makeText(this, "failed to join call (${vm.call.cid}): $it", Toast.LENGTH_SHORT).show()
             finish()
         }
 
@@ -68,8 +65,9 @@ class CallActivity : AppCompatActivity() {
     }
 
     private fun callViewModelFactory(): CallViewModelFactory {
-        val (type, id) = intent.getStringExtra(EXTRA_CID)?.typeToId
-            ?: throw IllegalArgumentException("You must pass correct channel id.")
+        val (type, id) =
+            intent.getStringExtra(EXTRA_CID)?.typeToId
+                ?: throw IllegalArgumentException("You must pass correct channel id.")
 
         return CallViewModelFactory(
             streamVideo = streamVideo,
@@ -84,11 +82,7 @@ class CallActivity : AppCompatActivity() {
             onPermissionResult = { permission, isGranted ->
                 when (permission) {
                     android.Manifest.permission.CAMERA -> vm.onCallAction(ToggleCamera(isGranted))
-                    android.Manifest.permission.RECORD_AUDIO -> vm.onCallAction(
-                        ToggleMicrophone(
-                            isGranted
-                        )
-                    )
+                    android.Manifest.permission.RECORD_AUDIO -> vm.onCallAction(ToggleMicrophone(isGranted))
                 }
             },
             onShowSettings = {}

@@ -48,18 +48,20 @@ import io.getstream.chat.android.compose.ui.theme.ChatTheme
 import io.getstream.chat.android.ui.common.helper.DateFormatter
 import kotlinx.coroutines.launch
 
-fun CallAttachmentFactory(): AttachmentFactory = AttachmentFactory(
-    previewContent = null,
-    content = { modifier, state -> CallAttachment(modifier, state) },
-    canHandle = ::canHandleCallAttachments
-)
+fun CallAttachmentFactory(): AttachmentFactory =
+    AttachmentFactory(
+        previewContent = null,
+        content = { modifier, state -> CallAttachment(modifier, state) },
+        canHandle = ::canHandleCallAttachments
+    )
 
 private fun canHandleCallAttachments(attachments: List<Attachment>): Boolean {
-    val result = attachments.any {
-        it.extraData["callCid"] != null &&
-            it.extraData["members"] != null &&
-            it.extraData["callName"] != null
-    }
+    val result =
+        attachments.any {
+            it.extraData["callCid"] != null &&
+                it.extraData["members"] != null &&
+                it.extraData["callName"] != null
+        }
 
     Log.d("customAttachments", result.toString())
 
@@ -68,10 +70,7 @@ private fun canHandleCallAttachments(attachments: List<Attachment>): Boolean {
 
 @OptIn(ExperimentalMaterialApi::class, ExperimentalFoundationApi::class)
 @Composable
-private fun CallAttachment(
-    modifier: Modifier,
-    attachmentState: AttachmentState
-) {
+private fun CallAttachment(modifier: Modifier, attachmentState: AttachmentState) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
     val message = attachmentState.message
@@ -83,32 +82,16 @@ private fun CallAttachment(
     val cid = callAttachment.extraData["callCid"] as String
 
     Surface(
-        modifier = modifier
-            .fillMaxWidth()
-            .combinedClickable(onLongClick = {
-                attachmentState.onLongItemClick(message)
-            }) { },
+        modifier =
+        modifier.fillMaxWidth().combinedClickable(
+            onLongClick = { attachmentState.onLongItemClick(message) }
+        ) {},
         shape = RoundedCornerShape(16.dp),
         color = ChatTheme.colors.infoAccent,
-        onClick = {
-            scope.launch {
-                joinCall(
-                    cid,
-                    context
-                )
-            }
-        },
+        onClick = { scope.launch { joinCall(cid, context) } },
     ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp)
-        ) {
-
-            Column(
-                modifier = Modifier.weight(1f),
-                horizontalAlignment = Alignment.Start
-            ) {
+        Row(modifier = Modifier.fillMaxWidth().padding(16.dp)) {
+            Column(modifier = Modifier.weight(1f), horizontalAlignment = Alignment.Start) {
                 Text(
                     text = name ?: "Unknown",
                     style = ChatTheme.typography.bodyBold,
@@ -125,14 +108,7 @@ private fun CallAttachment(
             Button(
                 shape = RoundedCornerShape(16.dp),
                 colors = ButtonDefaults.buttonColors(backgroundColor = Color.White),
-                onClick = {
-                    scope.launch {
-                        joinCall(
-                            cid,
-                            context
-                        )
-                    }
-                },
+                onClick = { scope.launch { joinCall(cid, context) } },
                 content = {
                     Row(
                         horizontalArrangement = Arrangement.Center,
@@ -140,11 +116,7 @@ private fun CallAttachment(
                     ) {
                         Icon(imageVector = Icons.Default.Videocam, contentDescription = null)
 
-                        Text(
-                            text = "Join",
-                            style = ChatTheme.typography.body,
-                            color = Color.Black
-                        )
+                        Text(text = "Join", style = ChatTheme.typography.body, color = Color.Black)
                     }
                 }
             )
@@ -154,5 +126,5 @@ private fun CallAttachment(
 
 private suspend fun joinCall(callId: String, context: Context) {
     val (type, id) = callId.split(":").take(2)
-//    context.chatWithVideoApp.streamVideo.joinCall(type, id)
+    //    context.chatWithVideoApp.streamVideo.joinCall(type, id)
 }
