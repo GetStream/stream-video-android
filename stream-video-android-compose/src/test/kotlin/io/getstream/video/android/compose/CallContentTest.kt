@@ -67,7 +67,7 @@ internal class CallContentTest : BaseComposeTest() {
         snapshotWithDarkMode {
             IncomingCallControls(
                 isVideoCall = true,
-                isVideoEnabled = true,
+                isCameraEnabled = true,
                 onCallAction = { }
             )
         }
@@ -79,7 +79,7 @@ internal class CallContentTest : BaseComposeTest() {
             IncomingCallContent(
                 participants = mockParticipants.takeLast(1),
                 callType = CallType.VIDEO,
-                isVideoEnabled = false,
+                isCameraEnabled = false,
                 onBackPressed = {}
             ) {}
         }
@@ -91,7 +91,7 @@ internal class CallContentTest : BaseComposeTest() {
             IncomingCallContent(
                 participants = mockParticipants,
                 callType = CallType.VIDEO,
-                isVideoEnabled = false,
+                isCameraEnabled = false,
                 onBackPressed = {}
             ) {}
         }

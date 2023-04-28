@@ -146,9 +146,9 @@ public fun CallContainer(
     },
     outgoingCallContent: @Composable (call: Call) -> Unit = {
         OutgoingCallContent(
-            modifier = modifier.testTag("outgoing_call_content"),
             call = call,
             callDeviceState = callDeviceState,
+            modifier = modifier.testTag("outgoing_call_content"),
             onBackPressed = onBackPressed,
             onCallAction = onCallAction
         )
@@ -156,7 +156,7 @@ public fun CallContainer(
     callContent: @Composable (call: Call) -> Unit = {
         CallContent(
             call = call,
-            modifier = modifier,
+            modifier = modifier.testTag("call_content"),
             callDeviceState = callDeviceState,
             onBackPressed = onBackPressed,
             onCallAction = onCallAction,

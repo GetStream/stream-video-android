@@ -557,23 +557,10 @@ public final class io/getstream/video/android/compose/ui/components/call/activec
 	public final fun getLambda-2$stream_video_android_compose_release ()Lkotlin/jvm/functions/Function3;
 }
 
-public final class io/getstream/video/android/compose/ui/components/call/controls/CallControlActionBackgroundKt {
-	public static final fun CallControlActionBackground-t6yy7ic (Landroidx/compose/ui/Modifier;ZJJLkotlin/jvm/functions/Function2;Landroidx/compose/runtime/Composer;II)V
-}
-
-public final class io/getstream/video/android/compose/ui/components/call/controls/CallControlsActionsKt {
-	public static final fun buildDefaultCallControlActions (Lio/getstream/video/android/core/call/state/CallDeviceState;Lkotlin/jvm/functions/Function1;Landroidx/compose/runtime/Composer;I)Ljava/util/List;
-	public static final fun buildDefaultCallControlActions (Lio/getstream/video/android/core/viewmodel/CallViewModel;Lkotlin/jvm/functions/Function1;Landroidx/compose/runtime/Composer;I)Ljava/util/List;
-}
-
 public final class io/getstream/video/android/compose/ui/components/call/controls/CallControlsKt {
 	public static final fun CallControls (Lio/getstream/video/android/core/call/state/CallDeviceState;Landroidx/compose/ui/Modifier;Lkotlin/jvm/functions/Function1;Ljava/util/List;Landroidx/compose/runtime/Composer;II)V
 	public static final fun CallControls (Lio/getstream/video/android/core/call/state/CallDeviceState;Lkotlin/jvm/functions/Function1;Ljava/util/List;Landroidx/compose/runtime/Composer;II)V
 	public static final fun CallControls (Lio/getstream/video/android/core/viewmodel/CallViewModel;Lkotlin/jvm/functions/Function1;Ljava/util/List;Landroidx/compose/runtime/Composer;II)V
-}
-
-public final class io/getstream/video/android/compose/ui/components/call/controls/ChatDialogActionKt {
-	public static final fun ChatDialogAction (Landroidx/compose/ui/Modifier;Lkotlin/jvm/functions/Function1;Landroidx/compose/runtime/Composer;II)V
 }
 
 public final class io/getstream/video/android/compose/ui/components/call/controls/ComposableSingletons$CallControlsKt {
@@ -585,19 +572,54 @@ public final class io/getstream/video/android/compose/ui/components/call/control
 	public final fun getLambda-2$stream_video_android_compose_release ()Lkotlin/jvm/functions/Function2;
 }
 
-public final class io/getstream/video/android/compose/ui/components/call/controls/FlipCameraActionKt {
+public final class io/getstream/video/android/compose/ui/components/call/controls/actions/AcceptCallActionKt {
+	public static final fun AcceptCallAction (Landroidx/compose/ui/Modifier;Lkotlin/jvm/functions/Function1;Landroidx/compose/runtime/Composer;II)V
+}
+
+public final class io/getstream/video/android/compose/ui/components/call/controls/actions/CallControlActionBackgroundKt {
+	public static final fun CallControlActionBackground-t6yy7ic (Landroidx/compose/ui/Modifier;ZJJLkotlin/jvm/functions/Function2;Landroidx/compose/runtime/Composer;II)V
+}
+
+public final class io/getstream/video/android/compose/ui/components/call/controls/actions/CallControlsActionsKt {
+	public static final fun buildDefaultCallControlActions (Lio/getstream/video/android/core/call/state/CallDeviceState;Lkotlin/jvm/functions/Function1;Landroidx/compose/runtime/Composer;I)Ljava/util/List;
+	public static final fun buildDefaultCallControlActions (Lio/getstream/video/android/core/viewmodel/CallViewModel;Lkotlin/jvm/functions/Function1;Landroidx/compose/runtime/Composer;I)Ljava/util/List;
+}
+
+public final class io/getstream/video/android/compose/ui/components/call/controls/actions/CancelCallActionKt {
+	public static final fun CancelCallAction (Landroidx/compose/ui/Modifier;Lkotlin/jvm/functions/Function1;Landroidx/compose/runtime/Composer;II)V
+}
+
+public final class io/getstream/video/android/compose/ui/components/call/controls/actions/ChatDialogActionKt {
+	public static final fun ChatDialogAction (Landroidx/compose/ui/Modifier;Lkotlin/jvm/functions/Function1;Landroidx/compose/runtime/Composer;II)V
+}
+
+public final class io/getstream/video/android/compose/ui/components/call/controls/actions/ComposableSingletons$AcceptCallActionKt {
+	public static final field INSTANCE Lio/getstream/video/android/compose/ui/components/call/controls/actions/ComposableSingletons$AcceptCallActionKt;
+	public static field lambda-1 Lkotlin/jvm/functions/Function2;
+	public fun <init> ()V
+	public final fun getLambda-1$stream_video_android_compose_release ()Lkotlin/jvm/functions/Function2;
+}
+
+public final class io/getstream/video/android/compose/ui/components/call/controls/actions/ComposableSingletons$CancelCallActionKt {
+	public static final field INSTANCE Lio/getstream/video/android/compose/ui/components/call/controls/actions/ComposableSingletons$CancelCallActionKt;
+	public static field lambda-1 Lkotlin/jvm/functions/Function2;
+	public fun <init> ()V
+	public final fun getLambda-1$stream_video_android_compose_release ()Lkotlin/jvm/functions/Function2;
+}
+
+public final class io/getstream/video/android/compose/ui/components/call/controls/actions/FlipCameraActionKt {
 	public static final fun FlipCameraAction (Landroidx/compose/ui/Modifier;Lkotlin/jvm/functions/Function1;Landroidx/compose/runtime/Composer;II)V
 }
 
-public final class io/getstream/video/android/compose/ui/components/call/controls/LeaveCallActionKt {
+public final class io/getstream/video/android/compose/ui/components/call/controls/actions/LeaveCallActionKt {
 	public static final fun LeaveCallAction (Landroidx/compose/ui/Modifier;Lkotlin/jvm/functions/Function1;Landroidx/compose/runtime/Composer;II)V
 }
 
-public final class io/getstream/video/android/compose/ui/components/call/controls/ToggleCameraActionKt {
+public final class io/getstream/video/android/compose/ui/components/call/controls/actions/ToggleCameraActionKt {
 	public static final fun ToggleCameraAction (Landroidx/compose/ui/Modifier;ZLkotlin/jvm/functions/Function1;Landroidx/compose/runtime/Composer;II)V
 }
 
-public final class io/getstream/video/android/compose/ui/components/call/controls/ToggleMicrophoneActionKt {
+public final class io/getstream/video/android/compose/ui/components/call/controls/actions/ToggleMicrophoneActionKt {
 	public static final fun ToggleMicrophoneAction (Landroidx/compose/ui/Modifier;ZLkotlin/jvm/functions/Function1;Landroidx/compose/runtime/Composer;II)V
 }
 
@@ -636,12 +658,8 @@ public final class io/getstream/video/android/compose/ui/components/call/incomin
 public final class io/getstream/video/android/compose/ui/components/call/incomingcall/internal/ComposableSingletons$IncomingCallControlsKt {
 	public static final field INSTANCE Lio/getstream/video/android/compose/ui/components/call/incomingcall/internal/ComposableSingletons$IncomingCallControlsKt;
 	public static field lambda-1 Lkotlin/jvm/functions/Function2;
-	public static field lambda-2 Lkotlin/jvm/functions/Function2;
-	public static field lambda-3 Lkotlin/jvm/functions/Function2;
 	public fun <init> ()V
 	public final fun getLambda-1$stream_video_android_compose_release ()Lkotlin/jvm/functions/Function2;
-	public final fun getLambda-2$stream_video_android_compose_release ()Lkotlin/jvm/functions/Function2;
-	public final fun getLambda-3$stream_video_android_compose_release ()Lkotlin/jvm/functions/Function2;
 }
 
 public final class io/getstream/video/android/compose/ui/components/call/incomingcall/internal/ComposableSingletons$IncomingCallDetailsKt {
@@ -649,6 +667,10 @@ public final class io/getstream/video/android/compose/ui/components/call/incomin
 	public static field lambda-1 Lkotlin/jvm/functions/Function2;
 	public fun <init> ()V
 	public final fun getLambda-1$stream_video_android_compose_release ()Lkotlin/jvm/functions/Function2;
+}
+
+public final class io/getstream/video/android/compose/ui/components/call/incomingcall/internal/IncomingCallControlsKt {
+	public static final fun IncomingCallControls (Landroidx/compose/ui/Modifier;ZZLkotlin/jvm/functions/Function1;Landroidx/compose/runtime/Composer;II)V
 }
 
 public final class io/getstream/video/android/compose/ui/components/call/outgoingcall/ComposableSingletons$OutgoingCallContentKt {
@@ -666,29 +688,18 @@ public final class io/getstream/video/android/compose/ui/components/call/outgoin
 	public static final fun OutgoingCallContent (Lio/getstream/video/android/core/viewmodel/CallViewModel;Landroidx/compose/ui/Modifier;Lkotlin/jvm/functions/Function2;Lkotlin/jvm/functions/Function2;Lkotlin/jvm/functions/Function2;Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function1;Landroidx/compose/runtime/Composer;II)V
 }
 
+public final class io/getstream/video/android/compose/ui/components/call/outgoingcall/internal/ComposableSingletons$OutgoingCallControlsKt {
+	public static final field INSTANCE Lio/getstream/video/android/compose/ui/components/call/outgoingcall/internal/ComposableSingletons$OutgoingCallControlsKt;
+	public static field lambda-1 Lkotlin/jvm/functions/Function2;
+	public fun <init> ()V
+	public final fun getLambda-1$stream_video_android_compose_release ()Lkotlin/jvm/functions/Function2;
+}
+
 public final class io/getstream/video/android/compose/ui/components/call/outgoingcall/internal/ComposableSingletons$OutgoingCallDetailsKt {
 	public static final field INSTANCE Lio/getstream/video/android/compose/ui/components/call/outgoingcall/internal/ComposableSingletons$OutgoingCallDetailsKt;
 	public static field lambda-1 Lkotlin/jvm/functions/Function2;
 	public fun <init> ()V
 	public final fun getLambda-1$stream_video_android_compose_release ()Lkotlin/jvm/functions/Function2;
-}
-
-public final class io/getstream/video/android/compose/ui/components/call/outgoingcall/internal/ComposableSingletons$OutgoingGroupCallControlsKt {
-	public static final field INSTANCE Lio/getstream/video/android/compose/ui/components/call/outgoingcall/internal/ComposableSingletons$OutgoingGroupCallControlsKt;
-	public static field lambda-1 Lkotlin/jvm/functions/Function2;
-	public static field lambda-2 Lkotlin/jvm/functions/Function2;
-	public fun <init> ()V
-	public final fun getLambda-1$stream_video_android_compose_release ()Lkotlin/jvm/functions/Function2;
-	public final fun getLambda-2$stream_video_android_compose_release ()Lkotlin/jvm/functions/Function2;
-}
-
-public final class io/getstream/video/android/compose/ui/components/call/outgoingcall/internal/ComposableSingletons$OutgoingSingleCallControlsKt {
-	public static final field INSTANCE Lio/getstream/video/android/compose/ui/components/call/outgoingcall/internal/ComposableSingletons$OutgoingSingleCallControlsKt;
-	public static field lambda-1 Lkotlin/jvm/functions/Function2;
-	public static field lambda-2 Lkotlin/jvm/functions/Function2;
-	public fun <init> ()V
-	public final fun getLambda-1$stream_video_android_compose_release ()Lkotlin/jvm/functions/Function2;
-	public final fun getLambda-2$stream_video_android_compose_release ()Lkotlin/jvm/functions/Function2;
 }
 
 public final class io/getstream/video/android/compose/ui/components/call/renderer/CallSingleVideoRendererKt {

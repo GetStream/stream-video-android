@@ -21,27 +21,22 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.size
-import androidx.compose.material.Icon
-import androidx.compose.material.IconButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import io.getstream.video.android.compose.theme.VideoTheme
+import io.getstream.video.android.compose.ui.components.call.controls.actions.AcceptCallAction
+import io.getstream.video.android.compose.ui.components.call.controls.actions.CancelCallAction
+import io.getstream.video.android.compose.ui.components.call.controls.actions.ToggleCameraAction
 import io.getstream.video.android.compose.ui.components.extensions.toggleAlpha
-import io.getstream.video.android.core.call.state.AcceptCall
 import io.getstream.video.android.core.call.state.CallAction
-import io.getstream.video.android.core.call.state.DeclineCall
-import io.getstream.video.android.core.call.state.ToggleCamera
-import io.getstream.video.android.ui.common.R
 
 @Composable
-internal fun IncomingCallControls(
+public fun IncomingCallControls(
     modifier: Modifier = Modifier,
     isVideoCall: Boolean,
-    isVideoEnabled: Boolean,
+    isCameraEnabled: Boolean,
     onCallAction: (CallAction) -> Unit,
 ) {
     Row(
@@ -49,66 +44,28 @@ internal fun IncomingCallControls(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.SpaceEvenly
     ) {
-        IconButton(
-            modifier = Modifier
-                .background(
-                    color = VideoTheme.colors.errorAccent,
-                    shape = VideoTheme.shapes.callButton
-                )
-                .size(VideoTheme.dimens.largeButtonSize),
-            onClick = { onCallAction(DeclineCall) },
-            content = {
-                Icon(
-                    painter = painterResource(id = R.drawable.stream_video_ic_call_end),
-                    tint = Color.White,
-                    contentDescription = "End call"
-                )
-            }
+        CancelCallAction(
+            modifier = Modifier.size(VideoTheme.dimens.largeButtonSize),
+            onCallAction = onCallAction
         )
 
         if (isVideoCall) {
-            IconButton(
+            ToggleCameraAction(
                 modifier = Modifier
-                    .toggleAlpha(isVideoEnabled)
+                    .toggleAlpha(isCameraEnabled)
                     .background(
                         color = VideoTheme.colors.appBackground,
                         shape = VideoTheme.shapes.callButton
                     )
                     .size(VideoTheme.dimens.mediumButtonSize),
-                onClick = { onCallAction(ToggleCamera(!isVideoEnabled)) },
-                content = {
-                    val cameraIcon = painterResource(
-                        id = if (isVideoEnabled) {
-                            R.drawable.stream_video_ic_videocam_on
-                        } else {
-                            R.drawable.stream_video_ic_videocam_off
-                        }
-                    )
-
-                    Icon(
-                        painter = cameraIcon,
-                        contentDescription = "Toggle Video",
-                        tint = VideoTheme.colors.textHighEmphasis
-                    )
-                }
+                isCameraEnabled = isCameraEnabled,
+                onCallAction = onCallAction
             )
         }
 
-        IconButton(
-            modifier = Modifier
-                .background(
-                    color = VideoTheme.colors.infoAccent,
-                    shape = VideoTheme.shapes.callButton
-                )
-                .size(VideoTheme.dimens.largeButtonSize),
-            onClick = { onCallAction(AcceptCall) },
-            content = {
-                Icon(
-                    painter = painterResource(id = R.drawable.stream_video_ic_call),
-                    tint = Color.White,
-                    contentDescription = "Accept call"
-                )
-            }
+        AcceptCallAction(
+            modifier = Modifier.size(VideoTheme.dimens.largeButtonSize),
+            onCallAction = onCallAction
         )
     }
 }
@@ -119,7 +76,7 @@ private fun IncomingCallOptionsPreview() {
     VideoTheme {
         IncomingCallControls(
             isVideoCall = true,
-            isVideoEnabled = true,
+            isCameraEnabled = true,
             onCallAction = { }
         )
     }

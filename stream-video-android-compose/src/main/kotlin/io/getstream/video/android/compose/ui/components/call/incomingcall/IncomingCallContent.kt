@@ -87,7 +87,7 @@ public fun IncomingCallContent(
     IncomingCallContent(
         callType = CallType.VIDEO,
         participants = participants,
-        isVideoEnabled = callDeviceState.isCameraEnabled,
+        isCameraEnabled = callDeviceState.isCameraEnabled,
         modifier = modifier,
         callHeader = callHeader,
         callDetails = callDetails,
@@ -103,7 +103,7 @@ public fun IncomingCallContent(
  *
  * @param callType The type of call, Audio or Video.
  * @param participants People participating in the call.
- * @param isVideoEnabled Whether the video should be enabled when entering the call or not.
+ * @param isCameraEnabled Whether the video should be enabled when entering the call or not.
  * @param modifier Modifier for styling.
  * @param showHeader If the app bar header is shown or not.
  * @param onBackPressed Handler when the user taps on the back button.
@@ -113,7 +113,7 @@ public fun IncomingCallContent(
 internal fun IncomingCallContent(
     callType: CallType,
     participants: List<ParticipantState>,
-    isVideoEnabled: Boolean,
+    isCameraEnabled: Boolean,
     modifier: Modifier = Modifier,
     showHeader: Boolean = true,
     callHeader: (@Composable () -> Unit)? = null,
@@ -152,7 +152,7 @@ internal fun IncomingCallContent(
                 .align(Alignment.BottomCenter)
                 .padding(bottom = VideoTheme.dimens.incomingCallOptionsBottomPadding),
             isVideoCall = callType == CallType.VIDEO,
-            isVideoEnabled = isVideoEnabled,
+            isCameraEnabled = isCameraEnabled,
             onCallAction = onCallAction
         )
     }
@@ -166,7 +166,7 @@ private fun IncomingCallPreview1() {
         IncomingCallContent(
             participants = mockParticipants.takeLast(1),
             callType = CallType.VIDEO,
-            isVideoEnabled = false,
+            isCameraEnabled = false,
             onBackPressed = {}
         ) {}
     }
@@ -180,7 +180,7 @@ private fun IncomingCallPreview2() {
         IncomingCallContent(
             participants = mockParticipants,
             callType = CallType.VIDEO,
-            isVideoEnabled = false,
+            isCameraEnabled = false,
             onBackPressed = {}
         ) {}
     }

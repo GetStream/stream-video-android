@@ -30,9 +30,8 @@ import io.getstream.video.android.common.util.mockParticipants
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.background.CallBackground
 import io.getstream.video.android.compose.ui.components.call.CallAppBar
+import io.getstream.video.android.compose.ui.components.call.outgoingcall.internal.OutgoingCallControls
 import io.getstream.video.android.compose.ui.components.call.outgoingcall.internal.OutgoingCallDetails
-import io.getstream.video.android.compose.ui.components.call.outgoingcall.internal.OutgoingGroupCallControls
-import io.getstream.video.android.compose.ui.components.call.outgoingcall.internal.OutgoingSingleCallControls
 import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.ParticipantState
 import io.getstream.video.android.core.call.state.CallAction
@@ -149,23 +148,13 @@ public fun OutgoingCallContent(
             )
         }
 
-        callControls?.invoke() ?: if (participants.size == 1) {
-            OutgoingSingleCallControls(
-                modifier = Modifier
-                    .align(Alignment.BottomCenter)
-                    .padding(bottom = VideoTheme.dimens.outgoingCallOptionsBottomPadding),
-                callDeviceState = callDeviceState,
-                onCallAction = onCallAction
-            )
-        } else {
-            OutgoingGroupCallControls(
-                modifier = Modifier
-                    .align(Alignment.BottomCenter)
-                    .padding(bottom = VideoTheme.dimens.outgoingCallOptionsBottomPadding),
-                callDeviceState = callDeviceState,
-                onCallAction = onCallAction
-            )
-        }
+        callControls?.invoke() ?: OutgoingCallControls(
+            modifier = Modifier
+                .align(Alignment.BottomCenter)
+                .padding(bottom = VideoTheme.dimens.outgoingCallOptionsBottomPadding),
+            callDeviceState = callDeviceState,
+            onCallAction = onCallAction
+        )
     }
 }
 

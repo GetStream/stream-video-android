@@ -14,54 +14,39 @@
  * limitations under the License.
  */
 
-package io.getstream.video.android.compose.ui.components.call.controls
+package io.getstream.video.android.compose.ui.components.call.controls.actions
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.Icon
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.core.call.state.CallAction
-import io.getstream.video.android.core.call.state.ToggleCamera
+import io.getstream.video.android.core.call.state.LeaveCall
 import io.getstream.video.android.ui.common.R
 
 @Composable
-public fun ToggleCameraAction(
+public fun LeaveCallAction(
     modifier: Modifier = Modifier,
-    isCameraEnabled: Boolean,
     onCallAction: (CallAction) -> Unit
 ) {
-    val cameraIcon = painterResource(
-        id = if (isCameraEnabled) {
-            R.drawable.stream_video_ic_videocam_on
-        } else {
-            R.drawable.stream_video_ic_videocam_off
-        }
-    )
-
     CallControlActionBackground(
         modifier = modifier,
-        isEnabled = isCameraEnabled
+        isEnabled = true,
+        enabledColor = VideoTheme.colors.errorAccent
     ) {
         Icon(
             modifier = Modifier
-                .padding(13.dp)
-                .clickable {
-                    onCallAction(
-                        ToggleCamera(isCameraEnabled.not())
-                    )
-                },
-            tint = if (isCameraEnabled) {
-                VideoTheme.colors.callActionIconEnabled
-            } else {
-                VideoTheme.colors.callActionIconDisabled
-            },
-            painter = cameraIcon,
-            contentDescription = stringResource(R.string.stream_video_call_controls_toggle_camera)
+                .padding(12.dp)
+                .clickable { onCallAction(LeaveCall) },
+            tint = Color.White,
+            painter = painterResource(id = R.drawable.stream_video_ic_call_end),
+            contentDescription = stringResource(R.string.stream_video_call_controls_leave_call)
         )
     }
 }
