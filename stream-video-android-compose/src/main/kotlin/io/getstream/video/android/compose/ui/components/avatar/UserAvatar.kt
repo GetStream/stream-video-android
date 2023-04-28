@@ -35,7 +35,6 @@ import io.getstream.video.android.common.util.MockUtils
 import io.getstream.video.android.common.util.mockParticipants
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.core.model.User
-import io.getstream.video.android.ui.common.R
 
 /**
  * Represents the [User] avatar that's shown on the Messages screen or in headers of DMs.
@@ -60,8 +59,8 @@ public fun UserAvatar(
     contentScale: ContentScale = ContentScale.Crop,
     contentDescription: String? = null,
     requestSize: IntSize = IntSize(DEFAULT_IMAGE_SIZE, DEFAULT_IMAGE_SIZE),
-    @DrawableRes loadingPlaceholder: Int? = null,
-    @DrawableRes previewPlaceholder: Int = R.drawable.stream_video_ic_preview_avatar,
+    @DrawableRes previewPlaceholder: Int = LocalAvatarPreviewProvider.getLocalAvatarPreviewPlaceholder(),
+    @DrawableRes loadingPlaceholder: Int? = LocalAvatarPreviewProvider.getLocalAvatarLoadingPlaceholder(),
     showOnlineIndicator: Boolean = false,
     onlineIndicatorAlignment: OnlineIndicatorAlignment = OnlineIndicatorAlignment.TopEnd,
     initialsAvatarOffset: DpOffset = DpOffset(0.dp, 0.dp),
@@ -106,8 +105,7 @@ private fun UserAvatarPreview() {
     MockUtils.initializeStreamVideo(LocalContext.current)
     VideoTheme {
         UserAvatar(
-            user = mockParticipants[0].initialUser,
-            modifier = Modifier.size(82.dp)
+            user = mockParticipants[0].initialUser, modifier = Modifier.size(82.dp)
         )
     }
 }

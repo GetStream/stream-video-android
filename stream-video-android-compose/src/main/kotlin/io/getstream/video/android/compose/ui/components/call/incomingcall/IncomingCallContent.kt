@@ -16,7 +16,6 @@
 
 package io.getstream.video.android.compose.ui.components.call.incomingcall
 
-import androidx.annotation.DrawableRes
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
@@ -39,7 +38,6 @@ import io.getstream.video.android.core.call.state.CallAction
 import io.getstream.video.android.core.call.state.CallDeviceState
 import io.getstream.video.android.core.model.CallType
 import io.getstream.video.android.core.viewmodel.CallViewModel
-import io.getstream.video.android.ui.common.R
 
 /**
  * Represents the Incoming Call state and UI, when the user receives a call from other people.
@@ -56,7 +54,6 @@ public fun IncomingCallContent(
     callHeader: (@Composable () -> Unit)? = null,
     callDetails: (@Composable () -> Unit)? = null,
     callControls: (@Composable () -> Unit)? = null,
-    @DrawableRes previewPlaceholder: Int = R.drawable.stream_video_ic_preview_avatar,
     onBackPressed: () -> Unit,
     onCallAction: (CallAction) -> Unit = callViewModel::onCallAction,
 ) {
@@ -66,7 +63,6 @@ public fun IncomingCallContent(
         call = callViewModel.call,
         callDeviceState = callDeviceState,
         modifier = modifier,
-        previewPlaceholder = previewPlaceholder,
         callHeader = callHeader,
         callDetails = callDetails,
         callControls = callControls,
@@ -83,7 +79,6 @@ public fun IncomingCallContent(
     callHeader: (@Composable () -> Unit)? = null,
     callDetails: (@Composable () -> Unit)? = null,
     callControls: (@Composable () -> Unit)? = null,
-    @DrawableRes previewPlaceholder: Int = R.drawable.stream_video_ic_preview_avatar,
     onBackPressed: () -> Unit,
     onCallAction: (CallAction) -> Unit = {},
 ) {
@@ -94,7 +89,6 @@ public fun IncomingCallContent(
         participants = participants,
         isVideoEnabled = callDeviceState.isCameraEnabled,
         modifier = modifier,
-        previewPlaceholder = previewPlaceholder,
         callHeader = callHeader,
         callDetails = callDetails,
         callControls = callControls,
@@ -125,21 +119,16 @@ internal fun IncomingCallContent(
     callHeader: (@Composable () -> Unit)? = null,
     callDetails: (@Composable () -> Unit)? = null,
     callControls: (@Composable () -> Unit)? = null,
-    @DrawableRes previewPlaceholder: Int = R.drawable.stream_video_ic_preview_avatar,
     onBackPressed: () -> Unit,
     onCallAction: (CallAction) -> Unit,
 ) {
     CallBackground(
-        modifier = modifier,
-        participants = participants,
-        callType = callType,
-        isIncoming = true
+        modifier = modifier, participants = participants, callType = callType, isIncoming = true
     ) {
         Column {
             if (showHeader) {
                 callHeader?.invoke() ?: CallAppBar(
-                    onBackPressed = onBackPressed,
-                    onCallAction = onCallAction
+                    onBackPressed = onBackPressed, onCallAction = onCallAction
                 )
             }
 
@@ -155,7 +144,6 @@ internal fun IncomingCallContent(
                     .padding(top = topPadding),
                 callType = callType,
                 participants = participants,
-                previewPlaceholder = previewPlaceholder
             )
         }
 
@@ -179,7 +167,6 @@ private fun IncomingCallPreview1() {
             participants = mockParticipants.takeLast(1),
             callType = CallType.VIDEO,
             isVideoEnabled = false,
-            previewPlaceholder = R.drawable.stream_video_call_sample,
             onBackPressed = {}
         ) {}
     }
@@ -194,7 +181,6 @@ private fun IncomingCallPreview2() {
             participants = mockParticipants,
             callType = CallType.VIDEO,
             isVideoEnabled = false,
-            previewPlaceholder = R.drawable.stream_video_call_sample,
             onBackPressed = {}
         ) {}
     }

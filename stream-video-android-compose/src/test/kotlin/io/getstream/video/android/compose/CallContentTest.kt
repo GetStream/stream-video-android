@@ -32,7 +32,6 @@ import io.getstream.video.android.compose.ui.components.call.outgoingcall.intern
 import io.getstream.video.android.compose.ui.components.call.outgoingcall.internal.OutgoingGroupCallControls
 import io.getstream.video.android.core.call.state.CallDeviceState
 import io.getstream.video.android.core.model.CallType
-import io.getstream.video.android.ui.common.R
 import org.junit.Rule
 import org.junit.Test
 
@@ -81,7 +80,6 @@ internal class CallContentTest : BaseComposeTest() {
                 participants = mockParticipants.takeLast(1),
                 callType = CallType.VIDEO,
                 isVideoEnabled = false,
-                previewPlaceholder = R.drawable.stream_video_call_sample,
                 onBackPressed = {}
             ) {}
         }
@@ -94,7 +92,6 @@ internal class CallContentTest : BaseComposeTest() {
                 participants = mockParticipants,
                 callType = CallType.VIDEO,
                 isVideoEnabled = false,
-                previewPlaceholder = R.drawable.stream_video_call_sample,
                 onBackPressed = {}
             ) {}
         }
@@ -161,7 +158,6 @@ internal class CallContentTest : BaseComposeTest() {
                 callType = CallType.VIDEO,
                 participants = mockParticipants,
                 callDeviceState = CallDeviceState(),
-                previewPlaceholder = R.drawable.stream_video_call_sample,
                 onBackPressed = {}
             ) {}
         }
