@@ -1,7 +1,7 @@
 public abstract class io/getstream/video/android/common/AbstractCallActivity : androidx/appcompat/app/AppCompatActivity, io/getstream/video/android/core/StreamVideoProvider, io/getstream/video/android/core/permission/PermissionManagerProvider, io/getstream/video/android/core/viewmodel/CallViewModelFactoryProvider {
+	public static final field Companion Lio/getstream/video/android/common/AbstractCallActivity$Companion;
 	public fun <init> ()V
-	public final fun defaultViewModelFactory ()Lio/getstream/video/android/core/viewmodel/CallViewModelFactory;
-	protected final fun getCallViewModel ()Lio/getstream/video/android/core/viewmodel/CallViewModel;
+	public final fun getCallViewModel ()Lio/getstream/video/android/core/viewmodel/CallViewModel;
 	public fun getCallViewModelFactory ()Lio/getstream/video/android/core/viewmodel/CallViewModelFactory;
 	public fun getPermissionManager ()Lio/getstream/video/android/core/permission/PermissionManager;
 	protected fun handleBackPressed ()V
@@ -10,6 +10,9 @@ public abstract class io/getstream/video/android/common/AbstractCallActivity : a
 	protected fun onCreate (Landroid/os/Bundle;)V
 	protected fun onStop ()V
 	public abstract fun setupUi ()V
+}
+
+public final class io/getstream/video/android/common/AbstractCallActivity$Companion {
 }
 
 public final class io/getstream/video/android/common/model/Muted : io/getstream/video/android/common/model/SoundState {

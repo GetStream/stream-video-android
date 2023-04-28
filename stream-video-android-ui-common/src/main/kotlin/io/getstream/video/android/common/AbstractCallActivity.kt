@@ -16,8 +16,10 @@
 
 package io.getstream.video.android.common
 
+import android.Manifest
 import android.annotation.SuppressLint
 import android.app.PictureInPictureParams
+import android.content.Context
 import android.content.Intent
 import android.content.pm.ActivityInfo
 import android.content.res.Configuration
@@ -34,12 +36,16 @@ import androidx.activity.viewModels
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import io.getstream.video.android.core.ConnectionState
 import io.getstream.video.android.core.StreamVideo
 import io.getstream.video.android.core.StreamVideoProvider
+import io.getstream.video.android.core.call.state.ToggleCamera
+import io.getstream.video.android.core.call.state.ToggleMicrophone
 import io.getstream.video.android.core.call.state.ToggleScreenConfiguration
+import io.getstream.video.android.core.model.StreamCallId
+import io.getstream.video.android.core.model.typeToId
 import io.getstream.video.android.core.permission.PermissionManager
 import io.getstream.video.android.core.permission.PermissionManagerProvider
-import io.getstream.video.android.core.permission.StreamPermissionManagerImpl
 import io.getstream.video.android.core.viewmodel.CallViewModel
 import io.getstream.video.android.core.viewmodel.CallViewModelFactory
 import io.getstream.video.android.core.viewmodel.CallViewModelFactoryProvider
@@ -51,23 +57,20 @@ public abstract class AbstractCallActivity :
     PermissionManagerProvider {
 
     private val streamVideo: StreamVideo by lazy { getStreamVideo(this) }
-
-    private lateinit var callPermissionManager: PermissionManager
-    private val factory by lazy {
-        getCallViewModelFactory() ?: defaultViewModelFactory()
-    }
-
-    protected val callViewModel: CallViewModel by viewModels(factoryProducer = { factory })
+    private val factory by lazy { callViewModelFactory() }
+    public val callViewModel: CallViewModel by viewModels { factory }
 
     /**
      * Provides the default ViewModel factory.
      */
-    public fun defaultViewModelFactory(): CallViewModelFactory {
+    private fun callViewModelFactory(): CallViewModelFactory {
+        val (type, id) = intent.getStringExtra(EXTRA_CID)?.typeToId
+            ?: throw IllegalArgumentException("You must pass correct channel id.")
+
         return CallViewModelFactory(
             streamVideo = streamVideo,
-            permissionManager = callPermissionManager,
-            // TODO: ->
-            call = streamVideo.call("default", "123")
+            call = streamVideo.call(type = type, id = id),
+            permissionManager = initPermissionManager()
         )
     }
 
@@ -75,28 +78,25 @@ public abstract class AbstractCallActivity :
      * Provides the default [PermissionManager] implementation.
      */
     override fun initPermissionManager(): PermissionManager {
-        return StreamPermissionManagerImpl(
+        return PermissionManager.create(
             activity = this,
             onPermissionResult = { permission, isGranted ->
                 when (permission) {
-//                    Manifest.permission.CAMERA -> callViewModel.onCallAction(ToggleCamera(isGranted))
-//                    Manifest.permission.RECORD_AUDIO -> callViewModel.onCallAction(
-//                        ToggleMicrophone(
-//                            isGranted
-//                        )
-//                    )
+                    Manifest.permission.CAMERA -> callViewModel.onCallAction(ToggleCamera(isGranted))
+                    Manifest.permission.RECORD_AUDIO -> callViewModel.onCallAction(
+                        ToggleMicrophone(isGranted)
+                    )
                 }
             },
-            onShowSettings = {
+            onShowRequestPermissionRationale = {
                 showPermissionsDialog()
             }
         )
     }
 
-    override fun getPermissionManager(): PermissionManager = callPermissionManager
+    override fun getPermissionManager(): PermissionManager = initPermissionManager()
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        callPermissionManager = initPermissionManager()
         showWhenLockedAndTurnScreenOn()
         super.onCreate(savedInstanceState)
         setupUi()
@@ -204,12 +204,12 @@ public abstract class AbstractCallActivity :
      * the feature.
      */
     protected open fun handleBackPressed() {
-//        val callState = callViewModel.streamCallState.value
-//
-//        if (callState !is StreamCallState.Connected) {
-//            closeCall()
-//            return
-//        }
+        val callState = callViewModel.call.state.connection.value
+
+        if (callState !is ConnectionState.Connected) {
+            closeCall()
+            return
+        }
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
             try {
@@ -269,6 +269,21 @@ public abstract class AbstractCallActivity :
         super.onConfigurationChanged(newConfig)
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
             callViewModel.onPictureInPictureModeChanged(isInPictureInPictureMode)
+        }
+    }
+
+    public companion object {
+        @PublishedApi
+        internal const val EXTRA_CID: String = "EXTRA_CID"
+
+        @JvmStatic
+        public inline fun <reified T : AbstractCallActivity> createIntent(
+            context: Context,
+            cid: StreamCallId,
+        ): Intent {
+            return Intent(context, T::class.java).apply {
+                putExtra(EXTRA_CID, cid)
+            }
         }
     }
 }

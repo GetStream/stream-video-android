@@ -52,8 +52,6 @@ import io.getstream.video.android.core.utils.LatencyResult
 import io.getstream.video.android.core.utils.getLatencyMeasurementsOKHttp
 import io.getstream.video.android.core.utils.toEdge
 import io.getstream.video.android.core.utils.toUser
-import java.util.*
-import kotlin.coroutines.Continuation
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.Dispatchers
@@ -100,6 +98,8 @@ import org.openapitools.client.models.UserRequest
 import org.openapitools.client.models.VideoEvent
 import org.openapitools.client.models.WSCallEvent
 import retrofit2.HttpException
+import java.util.*
+import kotlin.coroutines.Continuation
 
 /**
  * @param lifecycle The lifecycle used to observe changes in the process
@@ -546,7 +546,7 @@ internal class StreamVideoImpl internal constructor(
             val results = jobs.awaitAll().sortedBy { it.average }
             results
         }
-    
+
     public suspend fun selectEdgeServer(
         type: String,
         id: String,

@@ -57,6 +57,20 @@ public interface PermissionManager {
      * @return Returns true if permission is already granted and false if the permission needs to be requested.
      */
     public fun requestPermission(permission: String): Boolean
+
+    public companion object {
+        public fun create(
+            activity: ComponentActivity,
+            onPermissionResult: (String, Boolean) -> Unit,
+            onShowRequestPermissionRationale: (String) -> Unit,
+        ): PermissionManager {
+            return StreamPermissionManagerImpl(
+                activity = activity,
+                onPermissionResult = onPermissionResult,
+                onShowRequestPermissionRationale = onShowRequestPermissionRationale
+            )
+        }
+    }
 }
 
 /**
@@ -65,13 +79,13 @@ public interface PermissionManager {
  *
  * permissions.
  * @param onPermissionResult Callback used to notify when user grants/denys a permission.
- * @param onShowSettings Callback used when the user has selected don't allow and we need to take them to the
+ * @param onShowRequestPermissionRationale Callback used when the user has selected don't allow and we need to take them to the
  * settings to grant the permissions
  */
-public class StreamPermissionManagerImpl(
+private class StreamPermissionManagerImpl(
     private val activity: ComponentActivity,
-    private val onPermissionResult: (String, Boolean) -> Unit,
-    private val onShowSettings: (String) -> Unit,
+    private inline val onPermissionResult: (String, Boolean) -> Unit,
+    private inline val onShowRequestPermissionRationale: (String) -> Unit,
 ) : PermissionManager {
 
     /**
@@ -119,7 +133,7 @@ public class StreamPermissionManagerImpl(
 
     /**
      * Used to request a permission or returns true if already granted. If the user has already selected don't allow,
-     * will notify that we need to take the user to the settings using [onShowSettings] callback.
+     * will notify that we need to take the user to the settings using [onShowRequestPermissionRationale] callback.
      *
      * @param permission The permission which we want to be be granted.
      *
@@ -128,7 +142,7 @@ public class StreamPermissionManagerImpl(
     override fun requestPermission(permission: String): Boolean {
         if (checkPermission(permission)) return true
         if (ActivityCompat.shouldShowRequestPermissionRationale(activity, permission)) {
-            onShowSettings(permission)
+            onShowRequestPermissionRationale(permission)
         } else {
             permissionsContract.launch(arrayOf(permission))
         }
