@@ -52,6 +52,8 @@ import io.getstream.video.android.core.utils.LatencyResult
 import io.getstream.video.android.core.utils.getLatencyMeasurementsOKHttp
 import io.getstream.video.android.core.utils.toEdge
 import io.getstream.video.android.core.utils.toUser
+import java.util.*
+import kotlin.coroutines.Continuation
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.Dispatchers
@@ -98,8 +100,6 @@ import org.openapitools.client.models.UserRequest
 import org.openapitools.client.models.VideoEvent
 import org.openapitools.client.models.WSCallEvent
 import retrofit2.HttpException
-import java.util.*
-import kotlin.coroutines.Continuation
 
 /**
  * @param lifecycle The lifecycle used to observe changes in the process
@@ -285,12 +285,12 @@ internal class StreamVideoImpl internal constructor(
 
         // listen to socket events and errors
         scope.launch {
-            connectionModule.coordinatorSocket.events.collect() {
+            connectionModule.coordinatorSocket.events.collect {
                 fireEvent(it)
             }
         }
         scope.launch {
-            connectionModule.coordinatorSocket.errors.collect() {
+            connectionModule.coordinatorSocket.errors.collect {
                 if (developmentMode) {
                     throw it
                 } else {
@@ -425,9 +425,7 @@ internal class StreamVideoImpl internal constructor(
         if (selectedCid.isNotEmpty()) {
             calls[selectedCid]?.let {
                 it.state.handleEvent(event)
-                it.session?.let {
-                    it.handleEvent(event)
-                }
+                it.session?.handleEvent(event)
             }
         }
 
@@ -449,9 +447,7 @@ internal class StreamVideoImpl internal constructor(
         }
         // call level subscriptions
         if (selectedCid.isNotEmpty()) {
-            calls[selectedCid]?.let {
-                it.fireEvent(event)
-            }
+            calls[selectedCid]?.fireEvent(event)
         }
     }
 
@@ -466,9 +462,6 @@ internal class StreamVideoImpl internal constructor(
     }
 
     // caller: DIAL and wait answer
-    /**
-     * @see StreamVideo.getOrCreateCall
-     */
     internal suspend fun getOrCreateCall(
         type: String,
         id: String,
@@ -529,9 +522,6 @@ internal class StreamVideoImpl internal constructor(
         }
     }
 
-    /**
-     * @see StreamVideo.inviteUsers
-     */
     internal suspend fun inviteUsers(type: String, id: String, users: List<User>): Result<Unit> {
         logger.d { "[inviteUsers] users: $users" }
 
@@ -543,7 +533,6 @@ internal class StreamVideoImpl internal constructor(
     /**
      * Measures and prepares the latency which describes how much time it takes to ping the server.
      *
-     * @param edgeUrl The edge we want to measure.
      *
      * @return [List] of [Float] values which represent measurements from ping connections.
      */
@@ -557,10 +546,7 @@ internal class StreamVideoImpl internal constructor(
             val results = jobs.awaitAll().sortedBy { it.average }
             results
         }
-
-    /**
-     * @see CallCoordinatorClient.selectEdgeServer for details.
-     */
+    
     public suspend fun selectEdgeServer(
         type: String,
         id: String,
@@ -621,9 +607,6 @@ internal class StreamVideoImpl internal constructor(
     }
 
     // callee: SEND Accepted or Rejected
-    /**
-     * @see StreamVideo.sendEvent
-     */
     internal suspend fun sendEvent(
         type: String,
         id: String,
@@ -640,9 +623,6 @@ internal class StreamVideoImpl internal constructor(
         }
     }
 
-    /**
-     * @see StreamVideo.sendCustomEvent
-     */
     internal suspend fun sendCustomEvent(
         type: String,
         id: String,
@@ -662,9 +642,6 @@ internal class StreamVideoImpl internal constructor(
         }
     }
 
-    /**
-     * @see StreamVideo.queryMembers
-     */
     internal suspend fun queryMembers(
         type: String,
         id: String,
@@ -685,9 +662,6 @@ internal class StreamVideoImpl internal constructor(
         }
     }
 
-    /**
-     * @see StreamVideo.blockUser
-     */
     suspend fun blockUser(type: String, id: String, userId: String): Result<BlockUserResponse> {
         logger.d { "[blockUser] callCid: $type:$id, userId: $userId" }
 
@@ -700,9 +674,6 @@ internal class StreamVideoImpl internal constructor(
         }
     }
 
-    /**
-     * @see StreamVideo.unblockUser
-     */
     suspend fun unblockUser(type: String, id: String, userId: String): Result<Unit> {
         logger.d { "[unblockUser] callCid: $type:$id, userId: $userId" }
 
@@ -715,33 +686,21 @@ internal class StreamVideoImpl internal constructor(
         }
     }
 
-    /**
-     * @see StreamVideo.endCall
-     */
     suspend fun endCall(type: String, id: String): Result<Unit> {
         return wrapAPICall { connectionModule.videoCallsApi.endCall(type, id) }
     }
 
-    /**
-     * @see StreamVideo.goLive
-     */
     suspend fun goLive(type: String, id: String): Result<GoLiveResponse> {
         logger.d { "[goLive] callCid: $type:$id" }
 
         return wrapAPICall { connectionModule.videoCallsApi.goLive(type, id) }
     }
 
-    /**
-     * @see StreamVideo.stopLive
-     */
     suspend fun stopLive(type: String, id: String): Result<StopLiveResponse> {
 
         return wrapAPICall { connectionModule.videoCallsApi.stopLive(type, id) }
     }
 
-    /**
-     * @see StreamVideo.muteUsers
-     */
     suspend fun muteUsers(
         type: String,
         id: String,
@@ -777,9 +736,6 @@ internal class StreamVideoImpl internal constructor(
         return result
     }
 
-    /**
-     * @see StreamVideo.requestPermissions
-     */
     suspend fun requestPermissions(
         type: String,
         id: String,
@@ -796,34 +752,22 @@ internal class StreamVideoImpl internal constructor(
         }
     }
 
-    /**
-     * @see StreamVideo.startBroadcasting
-     */
     suspend fun startBroadcasting(type: String, id: String): Result<Unit> {
         logger.d { "[startBroadcasting] callCid: $type $id" }
 
         return wrapAPICall { connectionModule.livestreamingApi.startBroadcasting(type, id) }
     }
 
-    /**
-     * @see StreamVideo.stopBroadcasting
-     */
     suspend fun stopBroadcasting(type: String, id: String): Result<Unit> {
 
         return wrapAPICall { connectionModule.livestreamingApi.stopBroadcasting(type, id) }
     }
 
-    /**
-     * @see StreamVideo.startRecording
-     */
     suspend fun startRecording(type: String, id: String): Result<Unit> {
 
         return wrapAPICall { connectionModule.recordingApi.startRecording(type, id) }
     }
 
-    /**
-     * @see StreamVideo.stopRecording
-     */
     suspend fun stopRecording(type: String, id: String): Result<Unit> {
 
         return wrapAPICall {
@@ -831,9 +775,6 @@ internal class StreamVideoImpl internal constructor(
         }
     }
 
-    /**
-     * @see StreamVideo.updateUserPermissions
-     */
     suspend fun updateUserPermissions(
         type: String,
         id: String,
@@ -848,9 +789,6 @@ internal class StreamVideoImpl internal constructor(
         }
     }
 
-    /**
-     * @see StreamVideo.listRecordings
-     */
     suspend fun listRecordings(
         type: String,
         id: String,
@@ -862,9 +800,6 @@ internal class StreamVideoImpl internal constructor(
         }
     }
 
-    /**
-     * @see StreamVideo.sendReaction
-     */
     suspend fun sendReaction(
         type: String,
         id: String,
@@ -900,43 +835,19 @@ internal class StreamVideoImpl internal constructor(
         preferences.clear()
     }
 
-    /**
-     * Creates an instance of the [SFUSession] for the given call input, which is persisted and
-     * used to communicate with the BE.
-     *
-     * Use it to control the track state, mute/unmute devices and listen to call events.
-     *
-     * @param callGuid The GUID of the Call, containing the ID and its type.
-     * @param signalUrl The URL of the server in which the call is being hosted.
-     * @param sfuToken User's ticket to enter the call.
-     * @param iceServers Servers required to appropriately connect to the call and receive tracks.
-     *
-     * @return An instance of [SFUSession] ready to connect to a call. Make sure to call
-     * [SFUSession.connectToCall] when you're ready to fully join a call.
-     */
-
     suspend fun acceptCall(type: String, id: String) {
         TODO("Not yet implemented")
     }
 
-    /**
-     * @see StreamVideo.rejectCall
-     */
     suspend fun rejectCall(type: String, id: String): Result<SendEventResponse> {
         logger.d { "[rejectCall] cid: $type:$id" }
         return sendEvent(type, id, CallEventType.REJECTED)
     }
 
-    /**
-     * @see StreamVideo.cancelCall
-     */
     suspend fun cancelCall(type: String, id: String): Result<SendEventResponse> {
         return sendEvent(type = type, id = id, CallEventType.CANCELLED)
     }
 
-    /**
-     * @see StreamVideo.handlePushMessage
-     */
     suspend fun handlePushMessage(payload: Map<String, Any>): Result<Unit> =
         withContext(scope.coroutineContext) {
             val callCid = payload[INTENT_EXTRA_CALL_CID] as? String
