@@ -32,10 +32,10 @@ import android.view.View
 import android.view.WindowInsets
 import android.view.WindowInsetsController
 import android.view.WindowManager
+import androidx.activity.ComponentActivity
 import androidx.activity.viewModels
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AlertDialog
-import androidx.appcompat.app.AppCompatActivity
 import io.getstream.video.android.core.ConnectionState
 import io.getstream.video.android.core.StreamVideo
 import io.getstream.video.android.core.StreamVideoProvider
@@ -51,7 +51,7 @@ import io.getstream.video.android.core.viewmodel.CallViewModelFactory
 import io.getstream.video.android.core.viewmodel.CallViewModelFactoryProvider
 
 public abstract class AbstractCallActivity :
-    AppCompatActivity(),
+    ComponentActivity(),
     StreamVideoProvider,
     CallViewModelFactoryProvider,
     PermissionManagerProvider {
@@ -192,7 +192,8 @@ public abstract class AbstractCallActivity :
             setTurnScreenOn(true)
         } else {
             window.addFlags(
-                WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED or WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON
+                WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED or
+                    WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON
             )
         }
     }

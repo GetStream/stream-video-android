@@ -1,4 +1,4 @@
-public abstract class io/getstream/video/android/common/AbstractCallActivity : androidx/appcompat/app/AppCompatActivity, io/getstream/video/android/core/StreamVideoProvider, io/getstream/video/android/core/permission/PermissionManagerProvider, io/getstream/video/android/core/viewmodel/CallViewModelFactoryProvider {
+public abstract class io/getstream/video/android/common/AbstractCallActivity : androidx/activity/ComponentActivity, io/getstream/video/android/core/StreamVideoProvider, io/getstream/video/android/core/permission/PermissionManagerProvider, io/getstream/video/android/core/viewmodel/CallViewModelFactoryProvider {
 	public static final field Companion Lio/getstream/video/android/common/AbstractCallActivity$Companion;
 	public fun <init> ()V
 	public final fun getCallViewModel ()Lio/getstream/video/android/core/viewmodel/CallViewModel;

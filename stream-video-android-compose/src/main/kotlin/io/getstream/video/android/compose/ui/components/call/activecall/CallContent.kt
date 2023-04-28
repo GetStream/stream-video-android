@@ -210,11 +210,18 @@ internal fun DefaultPictureInPictureContent(call: Call) {
         )
     } else {
         val activeSpeakers by call.state.activeSpeakers.collectAsState(initial = emptyList())
+        val me by call.state.me.collectAsState()
 
         if (activeSpeakers.isNotEmpty()) {
             CallSingleVideoRenderer(
                 call = call,
                 participant = activeSpeakers.first(),
+                labelPosition = Alignment.BottomStart
+            )
+        } else if (me != null) {
+            CallSingleVideoRenderer(
+                call = call,
+                participant = me!!,
                 labelPosition = Alignment.BottomStart
             )
         }
