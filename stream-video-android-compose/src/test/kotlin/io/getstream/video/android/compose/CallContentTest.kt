@@ -25,14 +25,13 @@ import io.getstream.video.android.common.util.mockParticipantList
 import io.getstream.video.android.common.util.mockParticipants
 import io.getstream.video.android.compose.base.BaseComposeTest
 import io.getstream.video.android.compose.ui.components.call.incomingcall.IncomingCallContent
+import io.getstream.video.android.compose.ui.components.call.incomingcall.internal.IncomingCallControls
 import io.getstream.video.android.compose.ui.components.call.incomingcall.internal.IncomingCallDetails
-import io.getstream.video.android.compose.ui.components.call.incomingcall.internal.IncomingCallOptions
 import io.getstream.video.android.compose.ui.components.call.outgoingcall.OutgoingCallContent
+import io.getstream.video.android.compose.ui.components.call.outgoingcall.internal.OutgoingCallControls
 import io.getstream.video.android.compose.ui.components.call.outgoingcall.internal.OutgoingCallDetails
-import io.getstream.video.android.compose.ui.components.call.outgoingcall.internal.OutgoingGroupCallOptions
 import io.getstream.video.android.core.call.state.CallDeviceState
 import io.getstream.video.android.core.model.CallType
-import io.getstream.video.android.ui.common.R
 import org.junit.Rule
 import org.junit.Test
 
@@ -66,9 +65,9 @@ internal class CallContentTest : BaseComposeTest() {
     @Test
     fun `snapshot IncomingCallOptions composable`() {
         snapshotWithDarkMode {
-            IncomingCallOptions(
+            IncomingCallControls(
                 isVideoCall = true,
-                isVideoEnabled = true,
+                isCameraEnabled = true,
                 onCallAction = { }
             )
         }
@@ -80,8 +79,7 @@ internal class CallContentTest : BaseComposeTest() {
             IncomingCallContent(
                 participants = mockParticipants.takeLast(1),
                 callType = CallType.VIDEO,
-                isVideoEnabled = false,
-                previewPlaceholder = R.drawable.stream_video_call_sample,
+                isCameraEnabled = false,
                 onBackPressed = {}
             ) {}
         }
@@ -93,8 +91,7 @@ internal class CallContentTest : BaseComposeTest() {
             IncomingCallContent(
                 participants = mockParticipants,
                 callType = CallType.VIDEO,
-                isVideoEnabled = false,
-                previewPlaceholder = R.drawable.stream_video_call_sample,
+                isCameraEnabled = false,
                 onBackPressed = {}
             ) {}
         }
@@ -124,7 +121,7 @@ internal class CallContentTest : BaseComposeTest() {
     fun `snapshot OutgoingCallOptions composable`() {
         snapshotWithDarkMode {
             Column {
-                OutgoingGroupCallOptions(
+                OutgoingCallControls(
                     callDeviceState = CallDeviceState(
                         isMicrophoneEnabled = true,
                         isSpeakerphoneEnabled = true,
@@ -132,7 +129,7 @@ internal class CallContentTest : BaseComposeTest() {
                     ),
                     onCallAction = { }
                 )
-                OutgoingGroupCallOptions(
+                OutgoingCallControls(
                     callDeviceState = CallDeviceState(),
                     onCallAction = { }
                 )
@@ -161,7 +158,6 @@ internal class CallContentTest : BaseComposeTest() {
                 callType = CallType.VIDEO,
                 participants = mockParticipants,
                 callDeviceState = CallDeviceState(),
-                previewPlaceholder = R.drawable.stream_video_call_sample,
                 onBackPressed = {}
             ) {}
         }

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package io.getstream.video.android.compose.ui.components.call.controls
+package io.getstream.video.android.compose.ui.components.call.controls.actions
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.padding
@@ -26,42 +26,41 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.core.call.state.CallAction
-import io.getstream.video.android.core.call.state.ToggleMicrophone
+import io.getstream.video.android.core.call.state.ToggleCamera
 import io.getstream.video.android.ui.common.R
 
 @Composable
-public fun ToggleMicrophoneAction(
+public fun ToggleCameraAction(
     modifier: Modifier = Modifier,
-    isMicrophoneEnabled: Boolean,
+    isCameraEnabled: Boolean,
     onCallAction: (CallAction) -> Unit
 ) {
-    val microphoneIcon =
-        painterResource(
-            id = if (isMicrophoneEnabled) {
-                R.drawable.stream_video_ic_mic_on
-            } else {
-                R.drawable.stream_video_ic_mic_off
-            }
-        )
+    val cameraIcon = painterResource(
+        id = if (isCameraEnabled) {
+            R.drawable.stream_video_ic_videocam_on
+        } else {
+            R.drawable.stream_video_ic_videocam_off
+        }
+    )
 
     CallControlActionBackground(
         modifier = modifier,
-        isEnabled = isMicrophoneEnabled
+        isEnabled = isCameraEnabled
     ) {
         Icon(
             modifier = Modifier
                 .padding(13.dp)
                 .clickable {
                     onCallAction(
-                        ToggleMicrophone(isMicrophoneEnabled.not())
+                        ToggleCamera(isCameraEnabled.not())
                     )
                 },
-            tint = if (isMicrophoneEnabled) {
+            tint = if (isCameraEnabled) {
                 VideoTheme.colors.callActionIconEnabled
             } else {
                 VideoTheme.colors.callActionIconDisabled
             },
-            painter = microphoneIcon,
+            painter = cameraIcon,
             contentDescription = stringResource(R.string.stream_video_call_controls_toggle_camera)
         )
     }

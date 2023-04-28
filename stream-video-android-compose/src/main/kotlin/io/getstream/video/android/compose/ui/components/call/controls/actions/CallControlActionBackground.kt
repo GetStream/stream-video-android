@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package io.getstream.video.android.compose.ui.components.call.controls
+package io.getstream.video.android.compose.ui.components.call.controls.actions
 
 import androidx.compose.material.Card
 import androidx.compose.runtime.Composable

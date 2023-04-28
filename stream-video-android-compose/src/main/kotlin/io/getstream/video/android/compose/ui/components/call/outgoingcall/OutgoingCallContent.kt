@@ -16,7 +16,6 @@
 
 package io.getstream.video.android.compose.ui.components.call.outgoingcall
 
-import androidx.annotation.DrawableRes
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
@@ -31,16 +30,14 @@ import io.getstream.video.android.common.util.mockParticipants
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.background.CallBackground
 import io.getstream.video.android.compose.ui.components.call.CallAppBar
+import io.getstream.video.android.compose.ui.components.call.outgoingcall.internal.OutgoingCallControls
 import io.getstream.video.android.compose.ui.components.call.outgoingcall.internal.OutgoingCallDetails
-import io.getstream.video.android.compose.ui.components.call.outgoingcall.internal.OutgoingGroupCallOptions
-import io.getstream.video.android.compose.ui.components.call.outgoingcall.internal.OutgoingSingleCallOptions
 import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.ParticipantState
 import io.getstream.video.android.core.call.state.CallAction
 import io.getstream.video.android.core.call.state.CallDeviceState
 import io.getstream.video.android.core.model.CallType
 import io.getstream.video.android.core.viewmodel.CallViewModel
-import io.getstream.video.android.ui.common.R
 
 /**
  * Represents the Outgoing Call state and UI, when the user is calling other people.
@@ -53,7 +50,11 @@ import io.getstream.video.android.ui.common.R
 @Composable
 public fun OutgoingCallContent(
     callViewModel: CallViewModel,
+    callType: CallType,
     modifier: Modifier = Modifier,
+    callHeader: (@Composable () -> Unit)? = null,
+    callDetails: (@Composable () -> Unit)? = null,
+    callControls: (@Composable () -> Unit)? = null,
     onBackPressed: () -> Unit,
     onCallAction: (CallAction) -> Unit = callViewModel::onCallAction,
 ) {
@@ -61,8 +62,12 @@ public fun OutgoingCallContent(
 
     OutgoingCallContent(
         call = callViewModel.call,
+        callType = callType,
         callDeviceState = callDeviceState,
         modifier = modifier,
+        callHeader = callHeader,
+        callDetails = callDetails,
+        callControls = callControls,
         onBackPressed = onBackPressed,
         onCallAction = onCallAction
     )
@@ -71,18 +76,25 @@ public fun OutgoingCallContent(
 @Composable
 public fun OutgoingCallContent(
     call: Call,
+    callType: CallType,
     callDeviceState: CallDeviceState,
     modifier: Modifier = Modifier,
+    callHeader: (@Composable () -> Unit)? = null,
+    callDetails: (@Composable () -> Unit)? = null,
+    callControls: (@Composable () -> Unit)? = null,
     onBackPressed: () -> Unit,
     onCallAction: (CallAction) -> Unit = {},
 ) {
     val participants: List<ParticipantState> by call.state.participants.collectAsState()
 
     OutgoingCallContent(
-        callType = CallType.VIDEO,
+        callType = callType,
         participants = participants,
         callDeviceState = callDeviceState,
         modifier = modifier,
+        callHeader = callHeader,
+        callDetails = callDetails,
+        callControls = callControls,
         onBackPressed = onBackPressed,
         onCallAction = onCallAction
     )
@@ -100,12 +112,14 @@ public fun OutgoingCallContent(
  * @param onCallAction Handler when the user clicks on some of the call controls.
  */
 @Composable
-public fun OutgoingCallContent(
+internal fun OutgoingCallContent(
     callType: CallType,
     participants: List<ParticipantState>,
     callDeviceState: CallDeviceState,
     modifier: Modifier = Modifier,
-    @DrawableRes previewPlaceholder: Int = R.drawable.stream_video_ic_preview_avatar,
+    callHeader: (@Composable () -> Unit)? = null,
+    callDetails: (@Composable () -> Unit)? = null,
+    callControls: (@Composable () -> Unit)? = null,
     onBackPressed: () -> Unit,
     onCallAction: (CallAction) -> Unit,
 ) {
@@ -117,7 +131,7 @@ public fun OutgoingCallContent(
     ) {
 
         Column {
-            CallAppBar(
+            callHeader?.invoke() ?: CallAppBar(
                 onBackPressed = onBackPressed,
                 onCallAction = onCallAction
             )
@@ -128,33 +142,22 @@ public fun OutgoingCallContent(
                 VideoTheme.dimens.avatarAppbarPadding
             }
 
-            OutgoingCallDetails(
+            callDetails?.invoke() ?: OutgoingCallDetails(
                 modifier = Modifier
                     .align(Alignment.CenterHorizontally)
                     .padding(top = topPadding),
                 participants = participants,
-                previewPlaceholder = previewPlaceholder,
                 callType = callType
             )
         }
 
-        if (participants.size == 1) {
-            OutgoingSingleCallOptions(
-                modifier = Modifier
-                    .align(Alignment.BottomCenter)
-                    .padding(bottom = VideoTheme.dimens.outgoingCallOptionsBottomPadding),
-                callDeviceState = callDeviceState,
-                onCallAction = onCallAction
-            )
-        } else {
-            OutgoingGroupCallOptions(
-                modifier = Modifier
-                    .align(Alignment.BottomCenter)
-                    .padding(bottom = VideoTheme.dimens.outgoingCallOptionsBottomPadding),
-                callDeviceState = callDeviceState,
-                onCallAction = onCallAction
-            )
-        }
+        callControls?.invoke() ?: OutgoingCallControls(
+            modifier = Modifier
+                .align(Alignment.BottomCenter)
+                .padding(bottom = VideoTheme.dimens.outgoingCallOptionsBottomPadding),
+            callDeviceState = callDeviceState,
+            onCallAction = onCallAction
+        )
     }
 }
 
@@ -167,7 +170,6 @@ private fun OutgoingCallVideoPreview() {
             callType = CallType.VIDEO,
             participants = mockParticipants,
             callDeviceState = CallDeviceState(),
-            previewPlaceholder = R.drawable.stream_video_call_sample,
             onBackPressed = {}
         ) {}
     }
@@ -182,7 +184,6 @@ private fun OutgoingCallAudioPreview() {
             callType = CallType.AUDIO,
             participants = mockParticipants,
             callDeviceState = CallDeviceState(),
-            previewPlaceholder = R.drawable.stream_video_call_sample,
             onBackPressed = {}
         ) {}
     }

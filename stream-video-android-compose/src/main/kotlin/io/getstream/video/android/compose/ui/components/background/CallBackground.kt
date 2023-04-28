@@ -77,25 +77,28 @@ public fun CallBackground(
 }
 
 @Composable
-private fun IncomingCallBackground(participants: List<CallUser>) {
-    if (participants.size == 1) {
-        ParticipantImageBackground(participants = participants, modifier = Modifier.blur(20.dp))
+private fun IncomingCallBackground(callUsers: List<CallUser>) {
+    if (callUsers.size == 1) {
+        ParticipantImageBackground(
+            participant = callUsers.first(),
+            modifier = Modifier.blur(20.dp)
+        )
     } else {
         DefaultCallBackground()
     }
 }
 
 @Composable
-private fun OutgoingCallBackground(participants: List<CallUser>, callType: CallType) {
+private fun OutgoingCallBackground(callUsers: List<CallUser>, callType: CallType) {
     if (callType == CallType.AUDIO) {
-        if (participants.size == 1) {
-            ParticipantImageBackground(participants, modifier = Modifier.blur(20.dp))
+        if (callUsers.size == 1) {
+            ParticipantImageBackground(callUsers.first(), modifier = Modifier.blur(20.dp))
         } else {
             DefaultCallBackground()
         }
     } else {
-        if (participants.isNotEmpty()) {
-            ParticipantImageBackground(participants = participants)
+        if (callUsers.isNotEmpty()) {
+            ParticipantImageBackground(participant = callUsers.first())
         } else {
             DefaultCallBackground()
         }
@@ -104,15 +107,13 @@ private fun OutgoingCallBackground(participants: List<CallUser>, callType: CallT
 
 @Composable
 private fun ParticipantImageBackground(
-    participants: List<CallUser>,
+    participant: CallUser,
     modifier: Modifier = Modifier
 ) {
-    val firstUser = participants.first()
-
-    if (firstUser.imageUrl.isNotEmpty()) {
+    if (participant.imageUrl.isNotEmpty()) {
         CoilImage(
             modifier = modifier.fillMaxSize(),
-            imageModel = { firstUser.imageUrl },
+            imageModel = { participant.imageUrl },
             previewPlaceholder = R.drawable.stream_video_call_sample,
             imageOptions = ImageOptions(
                 contentScale = ContentScale.Crop, contentDescription = null

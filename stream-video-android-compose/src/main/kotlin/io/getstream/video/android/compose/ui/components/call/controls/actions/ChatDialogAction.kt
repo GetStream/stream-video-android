@@ -14,39 +14,37 @@
  * limitations under the License.
  */
 
-package io.getstream.video.android.compose.ui.components.call.controls
+package io.getstream.video.android.compose.ui.components.call.controls.actions
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.Icon
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.core.call.state.CallAction
-import io.getstream.video.android.core.call.state.LeaveCall
+import io.getstream.video.android.core.call.state.ChatDialog
 import io.getstream.video.android.ui.common.R
 
 @Composable
-public fun LeaveCallAction(
+public fun ChatDialogAction(
     modifier: Modifier = Modifier,
     onCallAction: (CallAction) -> Unit
 ) {
     CallControlActionBackground(
         modifier = modifier,
         isEnabled = true,
-        enabledColor = VideoTheme.colors.errorAccent
     ) {
         Icon(
             modifier = Modifier
-                .padding(12.dp)
-                .clickable { onCallAction(LeaveCall) },
-            tint = Color.White,
-            painter = painterResource(id = R.drawable.stream_video_ic_call_end),
-            contentDescription = stringResource(R.string.stream_video_call_controls_leave_call)
+                .padding(13.dp)
+                .clickable { onCallAction(ChatDialog) },
+            tint = VideoTheme.colors.callActionIconEnabled,
+            painter = painterResource(id = R.drawable.stream_video_ic_message),
+            contentDescription = stringResource(R.string.stream_video_call_controls_chat_dialog)
         )
     }
 }

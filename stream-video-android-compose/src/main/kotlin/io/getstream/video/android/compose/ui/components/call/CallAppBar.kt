@@ -30,6 +30,8 @@ import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -83,7 +85,14 @@ public fun CallAppBar(
         modifier = modifier
             .fillMaxWidth()
             .height(height)
-            .background(VideoTheme.colors.appBackground)
+            .background(
+                brush = Brush.verticalGradient(
+                    listOf(
+                        Color.Black.copy(alpha = 0.2f),
+                        Color.Transparent
+                    )
+                )
+            )
             .padding(VideoTheme.dimens.callAppBarPadding),
         verticalAlignment = Alignment.CenterVertically,
     ) {
