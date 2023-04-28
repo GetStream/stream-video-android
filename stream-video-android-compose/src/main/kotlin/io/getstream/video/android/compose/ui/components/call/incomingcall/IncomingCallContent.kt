@@ -31,8 +31,8 @@ import io.getstream.video.android.common.util.mockParticipants
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.background.CallBackground
 import io.getstream.video.android.compose.ui.components.call.CallAppBar
+import io.getstream.video.android.compose.ui.components.call.incomingcall.internal.IncomingCallControls
 import io.getstream.video.android.compose.ui.components.call.incomingcall.internal.IncomingCallDetails
-import io.getstream.video.android.compose.ui.components.call.incomingcall.internal.IncomingCallOptions
 import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.ParticipantState
 import io.getstream.video.android.core.call.state.CallAction
@@ -53,6 +53,10 @@ import io.getstream.video.android.ui.common.R
 public fun IncomingCallContent(
     callViewModel: CallViewModel,
     modifier: Modifier = Modifier,
+    callHeader: (@Composable () -> Unit)? = null,
+    callDetails: (@Composable () -> Unit)? = null,
+    callControls: (@Composable () -> Unit)? = null,
+    @DrawableRes previewPlaceholder: Int = R.drawable.stream_video_ic_preview_avatar,
     onBackPressed: () -> Unit,
     onCallAction: (CallAction) -> Unit = callViewModel::onCallAction,
 ) {
@@ -62,6 +66,10 @@ public fun IncomingCallContent(
         call = callViewModel.call,
         callDeviceState = callDeviceState,
         modifier = modifier,
+        previewPlaceholder = previewPlaceholder,
+        callHeader = callHeader,
+        callDetails = callDetails,
+        callControls = callControls,
         onBackPressed = onBackPressed,
         onCallAction = onCallAction
     )
@@ -72,6 +80,10 @@ public fun IncomingCallContent(
     call: Call,
     callDeviceState: CallDeviceState,
     modifier: Modifier = Modifier,
+    callHeader: (@Composable () -> Unit)? = null,
+    callDetails: (@Composable () -> Unit)? = null,
+    callControls: (@Composable () -> Unit)? = null,
+    @DrawableRes previewPlaceholder: Int = R.drawable.stream_video_ic_preview_avatar,
     onBackPressed: () -> Unit,
     onCallAction: (CallAction) -> Unit = {},
 ) {
@@ -82,6 +94,10 @@ public fun IncomingCallContent(
         participants = participants,
         isVideoEnabled = callDeviceState.isCameraEnabled,
         modifier = modifier,
+        previewPlaceholder = previewPlaceholder,
+        callHeader = callHeader,
+        callDetails = callDetails,
+        callControls = callControls,
         onBackPressed = onBackPressed,
         onCallAction = onCallAction
     )
@@ -106,6 +122,9 @@ internal fun IncomingCallContent(
     isVideoEnabled: Boolean,
     modifier: Modifier = Modifier,
     showHeader: Boolean = true,
+    callHeader: (@Composable () -> Unit)? = null,
+    callDetails: (@Composable () -> Unit)? = null,
+    callControls: (@Composable () -> Unit)? = null,
     @DrawableRes previewPlaceholder: Int = R.drawable.stream_video_ic_preview_avatar,
     onBackPressed: () -> Unit,
     onCallAction: (CallAction) -> Unit,
@@ -117,9 +136,8 @@ internal fun IncomingCallContent(
         isIncoming = true
     ) {
         Column {
-
             if (showHeader) {
-                CallAppBar(
+                callHeader?.invoke() ?: CallAppBar(
                     onBackPressed = onBackPressed,
                     onCallAction = onCallAction
                 )
@@ -131,7 +149,7 @@ internal fun IncomingCallContent(
                 VideoTheme.dimens.avatarAppbarPadding
             }
 
-            IncomingCallDetails(
+            callDetails?.invoke() ?: IncomingCallDetails(
                 modifier = Modifier
                     .align(Alignment.CenterHorizontally)
                     .padding(top = topPadding),
@@ -141,7 +159,7 @@ internal fun IncomingCallContent(
             )
         }
 
-        IncomingCallOptions(
+        callControls?.invoke() ?: IncomingCallControls(
             modifier = Modifier
                 .align(Alignment.BottomCenter)
                 .padding(bottom = VideoTheme.dimens.incomingCallOptionsBottomPadding),

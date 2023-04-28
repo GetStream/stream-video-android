@@ -43,7 +43,7 @@ import io.getstream.video.android.core.call.state.ToggleMicrophone
 import io.getstream.video.android.ui.common.R
 
 @Composable
-internal fun OutgoingGroupCallOptions(
+internal fun OutgoingSingleCallControls(
     callDeviceState: CallDeviceState,
     modifier: Modifier = Modifier,
     onCallAction: (CallAction) -> Unit,
@@ -96,14 +96,13 @@ internal fun OutgoingGroupCallOptions(
                     .size(VideoTheme.dimens.mediumButtonSize),
                 onClick = { onCallAction(ToggleCamera(!callDeviceState.isCameraEnabled)) },
                 content = {
-                    val cameraIcon =
-                        painterResource(
-                            id = if (isVideoEnabled) {
-                                R.drawable.stream_video_ic_videocam_on
-                            } else {
-                                R.drawable.stream_video_ic_videocam_off
-                            }
-                        )
+                    val cameraIcon = painterResource(
+                        id = if (isVideoEnabled) {
+                            R.drawable.stream_video_ic_videocam_on
+                        } else {
+                            R.drawable.stream_video_ic_videocam_off
+                        }
+                    )
 
                     Icon(
                         painter = cameraIcon,
@@ -137,10 +136,10 @@ internal fun OutgoingGroupCallOptions(
 
 @Preview
 @Composable
-private fun OutgoingCallGroupOptions() {
+private fun OutgoingCallOptionsPreview() {
     VideoTheme {
         Column {
-            OutgoingGroupCallOptions(
+            OutgoingSingleCallControls(
                 callDeviceState = CallDeviceState(
                     isMicrophoneEnabled = true,
                     isSpeakerphoneEnabled = true,
@@ -149,7 +148,7 @@ private fun OutgoingCallGroupOptions() {
                 onCallAction = { }
             )
 
-            OutgoingGroupCallOptions(
+            OutgoingSingleCallControls(
                 callDeviceState = CallDeviceState(),
                 onCallAction = { }
             )

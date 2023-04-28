@@ -47,7 +47,7 @@ import io.getstream.video.android.core.model.CallType
 import io.getstream.video.android.core.utils.toCallUser
 
 @Composable
-internal fun ParticipantInformation(
+public fun ParticipantInformation(
     callType: CallType,
     callStatus: CallStatus,
     participants: List<ParticipantState>

@@ -67,7 +67,7 @@ private fun OutgoingCallDetailsPreview() {
     MockUtils.initializeStreamVideo(LocalContext.current)
     VideoTheme {
         OutgoingCallDetails(
-            callType = CallType.VIDEO,
+            callType = CallType.AUDIO,
             participants = mockParticipantList,
             previewPlaceholder = R.drawable.stream_video_call_sample
         )

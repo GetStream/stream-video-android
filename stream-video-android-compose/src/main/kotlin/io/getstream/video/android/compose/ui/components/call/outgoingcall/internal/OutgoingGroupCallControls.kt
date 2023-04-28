@@ -43,7 +43,7 @@ import io.getstream.video.android.core.call.state.ToggleMicrophone
 import io.getstream.video.android.ui.common.R
 
 @Composable
-internal fun OutgoingSingleCallOptions(
+internal fun OutgoingGroupCallControls(
     callDeviceState: CallDeviceState,
     modifier: Modifier = Modifier,
     onCallAction: (CallAction) -> Unit,
@@ -96,13 +96,14 @@ internal fun OutgoingSingleCallOptions(
                     .size(VideoTheme.dimens.mediumButtonSize),
                 onClick = { onCallAction(ToggleCamera(!callDeviceState.isCameraEnabled)) },
                 content = {
-                    val cameraIcon = painterResource(
-                        id = if (isVideoEnabled) {
-                            R.drawable.stream_video_ic_videocam_on
-                        } else {
-                            R.drawable.stream_video_ic_videocam_off
-                        }
-                    )
+                    val cameraIcon =
+                        painterResource(
+                            id = if (isVideoEnabled) {
+                                R.drawable.stream_video_ic_videocam_on
+                            } else {
+                                R.drawable.stream_video_ic_videocam_off
+                            }
+                        )
 
                     Icon(
                         painter = cameraIcon,
@@ -136,10 +137,10 @@ internal fun OutgoingSingleCallOptions(
 
 @Preview
 @Composable
-private fun OutgoingCallOptionsPreview() {
+private fun OutgoingCallGroupOptions() {
     VideoTheme {
         Column {
-            OutgoingSingleCallOptions(
+            OutgoingGroupCallControls(
                 callDeviceState = CallDeviceState(
                     isMicrophoneEnabled = true,
                     isSpeakerphoneEnabled = true,
@@ -148,7 +149,7 @@ private fun OutgoingCallOptionsPreview() {
                 onCallAction = { }
             )
 
-            OutgoingSingleCallOptions(
+            OutgoingGroupCallControls(
                 callDeviceState = CallDeviceState(),
                 onCallAction = { }
             )

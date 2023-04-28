@@ -25,11 +25,11 @@ import io.getstream.video.android.common.util.mockParticipantList
 import io.getstream.video.android.common.util.mockParticipants
 import io.getstream.video.android.compose.base.BaseComposeTest
 import io.getstream.video.android.compose.ui.components.call.incomingcall.IncomingCallContent
+import io.getstream.video.android.compose.ui.components.call.incomingcall.internal.IncomingCallControls
 import io.getstream.video.android.compose.ui.components.call.incomingcall.internal.IncomingCallDetails
-import io.getstream.video.android.compose.ui.components.call.incomingcall.internal.IncomingCallOptions
 import io.getstream.video.android.compose.ui.components.call.outgoingcall.OutgoingCallContent
 import io.getstream.video.android.compose.ui.components.call.outgoingcall.internal.OutgoingCallDetails
-import io.getstream.video.android.compose.ui.components.call.outgoingcall.internal.OutgoingGroupCallOptions
+import io.getstream.video.android.compose.ui.components.call.outgoingcall.internal.OutgoingGroupCallControls
 import io.getstream.video.android.core.call.state.CallDeviceState
 import io.getstream.video.android.core.model.CallType
 import io.getstream.video.android.ui.common.R
@@ -66,7 +66,7 @@ internal class CallContentTest : BaseComposeTest() {
     @Test
     fun `snapshot IncomingCallOptions composable`() {
         snapshotWithDarkMode {
-            IncomingCallOptions(
+            IncomingCallControls(
                 isVideoCall = true,
                 isVideoEnabled = true,
                 onCallAction = { }
@@ -124,7 +124,7 @@ internal class CallContentTest : BaseComposeTest() {
     fun `snapshot OutgoingCallOptions composable`() {
         snapshotWithDarkMode {
             Column {
-                OutgoingGroupCallOptions(
+                OutgoingGroupCallControls(
                     callDeviceState = CallDeviceState(
                         isMicrophoneEnabled = true,
                         isSpeakerphoneEnabled = true,
@@ -132,7 +132,7 @@ internal class CallContentTest : BaseComposeTest() {
                     ),
                     onCallAction = { }
                 )
-                OutgoingGroupCallOptions(
+                OutgoingGroupCallControls(
                     callDeviceState = CallDeviceState(),
                     onCallAction = { }
                 )

@@ -38,7 +38,7 @@ import io.getstream.video.android.core.call.state.ToggleCamera
 import io.getstream.video.android.ui.common.R
 
 @Composable
-internal fun IncomingCallOptions(
+internal fun IncomingCallControls(
     modifier: Modifier = Modifier,
     isVideoCall: Boolean,
     isVideoEnabled: Boolean,
@@ -117,7 +117,7 @@ internal fun IncomingCallOptions(
 @Composable
 private fun IncomingCallOptionsPreview() {
     VideoTheme {
-        IncomingCallOptions(
+        IncomingCallControls(
             isVideoCall = true,
             isVideoEnabled = true,
             onCallAction = { }

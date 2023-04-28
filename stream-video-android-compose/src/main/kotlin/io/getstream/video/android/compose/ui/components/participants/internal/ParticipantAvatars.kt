@@ -38,7 +38,7 @@ import io.getstream.video.android.core.ParticipantState
 import io.getstream.video.android.ui.common.R
 
 @Composable
-internal fun ParticipantAvatars(
+public fun ParticipantAvatars(
     participants: List<ParticipantState>,
     @DrawableRes previewPlaceholder: Int = R.drawable.stream_video_ic_preview_avatar,
 ) {

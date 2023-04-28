@@ -32,8 +32,8 @@ import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.background.CallBackground
 import io.getstream.video.android.compose.ui.components.call.CallAppBar
 import io.getstream.video.android.compose.ui.components.call.outgoingcall.internal.OutgoingCallDetails
-import io.getstream.video.android.compose.ui.components.call.outgoingcall.internal.OutgoingGroupCallOptions
-import io.getstream.video.android.compose.ui.components.call.outgoingcall.internal.OutgoingSingleCallOptions
+import io.getstream.video.android.compose.ui.components.call.outgoingcall.internal.OutgoingGroupCallControls
+import io.getstream.video.android.compose.ui.components.call.outgoingcall.internal.OutgoingSingleCallControls
 import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.ParticipantState
 import io.getstream.video.android.core.call.state.CallAction
@@ -54,6 +54,10 @@ import io.getstream.video.android.ui.common.R
 public fun OutgoingCallContent(
     callViewModel: CallViewModel,
     modifier: Modifier = Modifier,
+    callHeader: (@Composable () -> Unit)? = null,
+    callDetails: (@Composable () -> Unit)? = null,
+    callControls: (@Composable () -> Unit)? = null,
+    @DrawableRes previewPlaceholder: Int = R.drawable.stream_video_ic_preview_avatar,
     onBackPressed: () -> Unit,
     onCallAction: (CallAction) -> Unit = callViewModel::onCallAction,
 ) {
@@ -63,6 +67,10 @@ public fun OutgoingCallContent(
         call = callViewModel.call,
         callDeviceState = callDeviceState,
         modifier = modifier,
+        previewPlaceholder = previewPlaceholder,
+        callHeader = callHeader,
+        callDetails = callDetails,
+        callControls = callControls,
         onBackPressed = onBackPressed,
         onCallAction = onCallAction
     )
@@ -73,6 +81,10 @@ public fun OutgoingCallContent(
     call: Call,
     callDeviceState: CallDeviceState,
     modifier: Modifier = Modifier,
+    callHeader: (@Composable () -> Unit)? = null,
+    callDetails: (@Composable () -> Unit)? = null,
+    callControls: (@Composable () -> Unit)? = null,
+    @DrawableRes previewPlaceholder: Int = R.drawable.stream_video_ic_preview_avatar,
     onBackPressed: () -> Unit,
     onCallAction: (CallAction) -> Unit = {},
 ) {
@@ -83,6 +95,10 @@ public fun OutgoingCallContent(
         participants = participants,
         callDeviceState = callDeviceState,
         modifier = modifier,
+        previewPlaceholder = previewPlaceholder,
+        callHeader = callHeader,
+        callDetails = callDetails,
+        callControls = callControls,
         onBackPressed = onBackPressed,
         onCallAction = onCallAction
     )
@@ -105,6 +121,9 @@ public fun OutgoingCallContent(
     participants: List<ParticipantState>,
     callDeviceState: CallDeviceState,
     modifier: Modifier = Modifier,
+    callHeader: (@Composable () -> Unit)? = null,
+    callDetails: (@Composable () -> Unit)? = null,
+    callControls: (@Composable () -> Unit)? = null,
     @DrawableRes previewPlaceholder: Int = R.drawable.stream_video_ic_preview_avatar,
     onBackPressed: () -> Unit,
     onCallAction: (CallAction) -> Unit,
@@ -117,7 +136,7 @@ public fun OutgoingCallContent(
     ) {
 
         Column {
-            CallAppBar(
+            callHeader?.invoke() ?: CallAppBar(
                 onBackPressed = onBackPressed,
                 onCallAction = onCallAction
             )
@@ -128,7 +147,7 @@ public fun OutgoingCallContent(
                 VideoTheme.dimens.avatarAppbarPadding
             }
 
-            OutgoingCallDetails(
+            callDetails?.invoke() ?: OutgoingCallDetails(
                 modifier = Modifier
                     .align(Alignment.CenterHorizontally)
                     .padding(top = topPadding),
@@ -138,8 +157,8 @@ public fun OutgoingCallContent(
             )
         }
 
-        if (participants.size == 1) {
-            OutgoingSingleCallOptions(
+        callControls?.invoke() ?: if (participants.size == 1) {
+            OutgoingSingleCallControls(
                 modifier = Modifier
                     .align(Alignment.BottomCenter)
                     .padding(bottom = VideoTheme.dimens.outgoingCallOptionsBottomPadding),
@@ -147,7 +166,7 @@ public fun OutgoingCallContent(
                 onCallAction = onCallAction
             )
         } else {
-            OutgoingGroupCallOptions(
+            OutgoingGroupCallControls(
                 modifier = Modifier
                     .align(Alignment.BottomCenter)
                     .padding(bottom = VideoTheme.dimens.outgoingCallOptionsBottomPadding),
