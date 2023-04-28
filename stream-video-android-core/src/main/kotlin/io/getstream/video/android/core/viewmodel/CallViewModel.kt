@@ -34,9 +34,14 @@ import io.getstream.video.android.core.call.state.ToggleMicrophone
 import io.getstream.video.android.core.call.state.ToggleSpeakerphone
 import io.getstream.video.android.core.permission.PermissionManager
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withTimeout
+import org.openapitools.client.models.CallSettingsResponse
 
 private const val CONNECT_TIMEOUT = 30_000L
 
@@ -56,13 +61,13 @@ private const val CONNECT_TIMEOUT = 30_000L
 public class CallViewModel(
     public val client: StreamVideo,
     public val call: Call,
-    private val permissions: PermissionManager?,
+    private val permissionManager: PermissionManager,
 ) : ViewModel() {
 
     private val logger by taggedLogger("Call:ViewModel")
 
     // shortcut to the call settings
-    private val settings = call.state.settings
+    private val settings: StateFlow<CallSettingsResponse?> = call.state.settings
 
     private val clientImpl = client as StreamVideoImpl
 
@@ -73,8 +78,33 @@ public class CallViewModel(
     private val _isShowingCallInfoMenu = MutableStateFlow(false)
     public val isShowingCallInfoMenu: StateFlow<Boolean> = _isShowingCallInfoMenu
 
-    private val _callDeviceState = MutableStateFlow(CallDeviceState())
-    public val callDeviceState: StateFlow<CallDeviceState> = _callDeviceState
+    private val isVideoOn: MutableStateFlow<Boolean> = MutableStateFlow(
+        (settings.value?.video?.enabled == true) &&
+            (permissionManager.hasCameraPermission.value)
+    )
+
+    private val isAudioOn: MutableStateFlow<Boolean> = MutableStateFlow(
+        permissionManager.hasRecordAudioPermission.value
+    )
+
+    private val isSpeakerPhoneOn: MutableStateFlow<Boolean> = MutableStateFlow(
+        false
+    )
+
+    public val callDeviceState: StateFlow<CallDeviceState> =
+        combine(isAudioOn, isVideoOn, isSpeakerPhoneOn) { isAudioOn, isVideoOn, isSpeakerPhoneOn ->
+            CallDeviceState(
+                isMicrophoneEnabled = isAudioOn,
+                isSpeakerphoneEnabled = isSpeakerPhoneOn,
+                isCameraEnabled = isVideoOn
+            )
+        }.onEach {
+            logger.d { "[callMediaState] callMediaState: $it" }
+        }.stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.Eagerly,
+            initialValue = CallDeviceState()
+        )
 
     private var onLeaveCall: ((Result<Unit>) -> Unit)? = null
 
@@ -87,8 +117,14 @@ public class CallViewModel(
                 val result = call.join()
                 result.onSuccess {
                     onSuccess.invoke(it)
-                    permissions?.requestPermission(android.Manifest.permission.CAMERA)
-                    permissions?.requestPermission(android.Manifest.permission.RECORD_AUDIO)
+
+                    if (isVideoOn.value) {
+                        permissionManager.requestPermission(android.Manifest.permission.CAMERA)
+                    }
+
+                    if (isAudioOn.value) {
+                        permissionManager.requestPermission(android.Manifest.permission.RECORD_AUDIO)
+                    }
                 }.onError {
                     onFailure.invoke(it)
                 }
@@ -104,14 +140,41 @@ public class CallViewModel(
 
     public fun onCallAction(callAction: CallAction) {
         when (callAction) {
-            is ToggleSpeakerphone -> call.speaker.setEnabled(callAction.isEnabled)
-            is ToggleCamera -> call.camera.setEnabled(callAction.isEnabled)
-            is ToggleMicrophone -> call.microphone.setEnabled(callAction.isEnabled)
+            is ToggleCamera -> onVideoChanged(callAction.isEnabled)
+            is ToggleMicrophone -> onMicrophoneChanged(callAction.isEnabled)
+            is ToggleSpeakerphone -> onSpeakerphoneChanged(callAction.isEnabled)
             is FlipCamera -> call.camera.flip()
             is LeaveCall -> onLeaveCall()
 
             else -> Unit
         }
+    }
+
+    private fun onVideoChanged(videoEnabled: Boolean) {
+        logger.d { "[onVideoChanged] videoEnabled: $videoEnabled" }
+        if (!permissionManager.hasCameraPermission.value) {
+            permissionManager.requestPermission(android.Manifest.permission.CAMERA)
+            logger.w { "[onVideoChanged] the [Manifest.permissions.CAMERA] has to be granted for video to be sent" }
+        }
+
+        call.camera.setEnabled(videoEnabled)
+        isVideoOn.value = videoEnabled
+    }
+
+    private fun onMicrophoneChanged(microphoneEnabled: Boolean) {
+        logger.d { "[onMicrophoneChanged] microphoneEnabled: $microphoneEnabled" }
+        if (!permissionManager.hasRecordAudioPermission.value) {
+            permissionManager.requestPermission(android.Manifest.permission.RECORD_AUDIO)
+            logger.w { "[onMicrophoneChanged] the [Manifest.permissions.RECORD_AUDIO] has to be granted for audio to be sent" }
+        }
+        call.microphone.setEnabled(microphoneEnabled)
+        isAudioOn.value = microphoneEnabled
+    }
+
+    private fun onSpeakerphoneChanged(speakerPhoneEnabled: Boolean) {
+        logger.d { "[onSpeakerphoneChanged] speakerPhoneEnabled: $speakerPhoneEnabled" }
+        call.speaker.setEnabled(speakerPhoneEnabled)
+        isSpeakerPhoneOn.value = speakerPhoneEnabled
     }
 
     private fun onLeaveCall() {

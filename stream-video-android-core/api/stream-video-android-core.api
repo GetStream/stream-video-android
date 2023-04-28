@@ -84,9 +84,9 @@ public final class io/getstream/video/android/core/CallState {
 	public final fun getPermissionRequests ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun getReactions ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun getRecording ()Lkotlinx/coroutines/flow/StateFlow;
-	public final fun getRingingState ()Lkotlinx/coroutines/flow/MutableStateFlow;
+	public final fun getRingingState ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun getScreenSharingSession ()Lkotlinx/coroutines/flow/StateFlow;
-	public final fun getSettings ()Lkotlinx/coroutines/flow/MutableStateFlow;
+	public final fun getSettings ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun getSortedParticipants ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun getStartsAt ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun getTeam ()Lkotlinx/coroutines/flow/StateFlow;
@@ -2514,23 +2514,20 @@ public abstract class io/getstream/video/android/core/notifications/AbstractNoti
 }
 
 public abstract interface class io/getstream/video/android/core/permission/PermissionManager {
+	public static final field Companion Lio/getstream/video/android/core/permission/PermissionManager$Companion;
 	public abstract fun checkPermission (Ljava/lang/String;)Z
 	public abstract fun getHasCameraPermission ()Lkotlinx/coroutines/flow/StateFlow;
 	public abstract fun getHasRecordAudioPermission ()Lkotlinx/coroutines/flow/StateFlow;
 	public abstract fun requestPermission (Ljava/lang/String;)Z
 }
 
+public final class io/getstream/video/android/core/permission/PermissionManager$Companion {
+	public final fun create (Landroidx/activity/ComponentActivity;Lkotlin/jvm/functions/Function2;Lkotlin/jvm/functions/Function1;)Lio/getstream/video/android/core/permission/PermissionManager;
+}
+
 public abstract interface class io/getstream/video/android/core/permission/PermissionManagerProvider {
 	public abstract fun getPermissionManager ()Lio/getstream/video/android/core/permission/PermissionManager;
 	public abstract fun initPermissionManager ()Lio/getstream/video/android/core/permission/PermissionManager;
-}
-
-public final class io/getstream/video/android/core/permission/StreamPermissionManagerImpl : io/getstream/video/android/core/permission/PermissionManager {
-	public fun <init> (Landroidx/fragment/app/FragmentActivity;Lkotlin/jvm/functions/Function2;Lkotlin/jvm/functions/Function1;)V
-	public fun checkPermission (Ljava/lang/String;)Z
-	public fun getHasCameraPermission ()Lkotlinx/coroutines/flow/StateFlow;
-	public fun getHasRecordAudioPermission ()Lkotlinx/coroutines/flow/StateFlow;
-	public fun requestPermission (Ljava/lang/String;)Z
 }
 
 public abstract class io/getstream/video/android/core/service/AbstractStreamCallService : android/app/Service, io/getstream/video/android/core/StreamVideoProvider {

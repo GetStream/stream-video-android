@@ -28,8 +28,11 @@ import androidx.compose.ui.Modifier
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.call.CallContainer
 import io.getstream.video.android.core.StreamVideo
+import io.getstream.video.android.core.call.state.ToggleCamera
+import io.getstream.video.android.core.call.state.ToggleMicrophone
 import io.getstream.video.android.core.model.StreamCallId
 import io.getstream.video.android.core.model.typeToId
+import io.getstream.video.android.core.permission.PermissionManager
 import io.getstream.video.android.core.viewmodel.CallViewModel
 import io.getstream.video.android.core.viewmodel.CallViewModelFactory
 import io.getstream.video.android.demo.demoVideoApp
@@ -80,7 +83,24 @@ class CallActivity : AppCompatActivity() {
         return CallViewModelFactory(
             streamVideo = streamVideo,
             call = streamVideo.call(type = type, id = id),
-            permissionManager = null
+            permissionManager = initPermissionManager()
+        )
+    }
+
+    private fun initPermissionManager(): PermissionManager {
+        return PermissionManager.create(
+            activity = this,
+            onPermissionResult = { permission, isGranted ->
+                when (permission) {
+                    android.Manifest.permission.CAMERA -> vm.onCallAction(ToggleCamera(isGranted))
+                    android.Manifest.permission.RECORD_AUDIO -> vm.onCallAction(
+                        ToggleMicrophone(
+                            isGranted
+                        )
+                    )
+                }
+            },
+            onShowRequestPermissionRationale = {}
         )
     }
 

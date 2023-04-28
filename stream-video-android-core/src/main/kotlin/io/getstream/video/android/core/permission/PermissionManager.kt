@@ -18,10 +18,10 @@ package io.getstream.video.android.core.permission
 
 import android.Manifest
 import android.content.pm.PackageManager
+import androidx.activity.ComponentActivity
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
-import androidx.fragment.app.FragmentActivity
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 
@@ -57,28 +57,41 @@ public interface PermissionManager {
      * @return Returns true if permission is already granted and false if the permission needs to be requested.
      */
     public fun requestPermission(permission: String): Boolean
+
+    public companion object {
+        public fun create(
+            activity: ComponentActivity,
+            onPermissionResult: (String, Boolean) -> Unit,
+            onShowRequestPermissionRationale: (String) -> Unit,
+        ): PermissionManager {
+            return StreamPermissionManagerImpl(
+                activity = activity,
+                onPermissionResult = onPermissionResult,
+                onShowRequestPermissionRationale = onShowRequestPermissionRationale
+            )
+        }
+    }
 }
 
 /**
  * Implementation of [PermissionManager] which keeps track of app permissions and gives us the possibility to react
  * to permission results and to show settings.
  *
- * @param fragmentActivity [FragmentActivity] used to [FragmentActivity.registerForActivityResult] so we can request
  * permissions.
  * @param onPermissionResult Callback used to notify when user grants/denys a permission.
- * @param onShowSettings Callback used when the user has selected don't allow and we need to take them to the
+ * @param onShowRequestPermissionRationale Callback used when the user has selected don't allow and we need to take them to the
  * settings to grant the permissions
  */
-public class StreamPermissionManagerImpl(
-    private val fragmentActivity: FragmentActivity,
-    private val onPermissionResult: (String, Boolean) -> Unit,
-    private val onShowSettings: (String) -> Unit,
+private class StreamPermissionManagerImpl(
+    private val activity: ComponentActivity,
+    private inline val onPermissionResult: (String, Boolean) -> Unit,
+    private inline val onShowRequestPermissionRationale: (String) -> Unit,
 ) : PermissionManager {
 
     /**
      * Used to request permissions. Notifies of result using [onPermissionResult].
      */
-    private val permissionsContract = fragmentActivity
+    private val permissionsContract = activity
         .registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { permissions ->
             permissions.forEach { (permission, isGranted) ->
                 when (permission) {
@@ -113,14 +126,14 @@ public class StreamPermissionManagerImpl(
      */
     override fun checkPermission(permission: String): Boolean {
         return ContextCompat.checkSelfPermission(
-            fragmentActivity.applicationContext,
+            activity.applicationContext,
             permission
         ) == PackageManager.PERMISSION_GRANTED
     }
 
     /**
      * Used to request a permission or returns true if already granted. If the user has already selected don't allow,
-     * will notify that we need to take the user to the settings using [onShowSettings] callback.
+     * will notify that we need to take the user to the settings using [onShowRequestPermissionRationale] callback.
      *
      * @param permission The permission which we want to be be granted.
      *
@@ -128,8 +141,8 @@ public class StreamPermissionManagerImpl(
      */
     override fun requestPermission(permission: String): Boolean {
         if (checkPermission(permission)) return true
-        if (ActivityCompat.shouldShowRequestPermissionRationale(fragmentActivity, permission)) {
-            onShowSettings(permission)
+        if (ActivityCompat.shouldShowRequestPermissionRationale(activity, permission)) {
+            onShowRequestPermissionRationale(permission)
         } else {
             permissionsContract.launch(arrayOf(permission))
         }

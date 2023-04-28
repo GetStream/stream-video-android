@@ -30,9 +30,8 @@ import io.getstream.video.android.core.call.state.CallDeviceState
 import io.getstream.video.android.core.viewmodel.CallViewModel
 
 /**
- * Builds the default set of Call Control actions based on the [callDeviceState].
+ * Builds the default set of Call Control actions based on the [CallDeviceState].
  *
- * @param callDeviceState Information of whether microphone, speaker and camera are on or off.
  * @return [List] of [CallControlAction]s that the user can trigger.
  */
 @Composable
