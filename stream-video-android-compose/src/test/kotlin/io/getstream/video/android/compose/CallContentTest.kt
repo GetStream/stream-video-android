@@ -28,6 +28,7 @@ import io.getstream.video.android.compose.ui.components.call.incomingcall.Incomi
 import io.getstream.video.android.compose.ui.components.call.incomingcall.internal.IncomingCallControls
 import io.getstream.video.android.compose.ui.components.call.incomingcall.internal.IncomingCallDetails
 import io.getstream.video.android.compose.ui.components.call.outgoingcall.OutgoingCallContent
+import io.getstream.video.android.compose.ui.components.call.outgoingcall.internal.OutgoingCallControls
 import io.getstream.video.android.compose.ui.components.call.outgoingcall.internal.OutgoingCallDetails
 import io.getstream.video.android.core.call.state.CallDeviceState
 import io.getstream.video.android.core.model.CallType
@@ -120,18 +121,18 @@ internal class CallContentTest : BaseComposeTest() {
     fun `snapshot OutgoingCallOptions composable`() {
         snapshotWithDarkMode {
             Column {
-                OutgoingCallContent(
-                    callType = CallType.VIDEO,
-                    participants = mockParticipants,
+                OutgoingCallControls(
+                    callDeviceState = CallDeviceState(
+                        isMicrophoneEnabled = true,
+                        isSpeakerphoneEnabled = true,
+                        isCameraEnabled = true
+                    ),
+                    onCallAction = { }
+                )
+                OutgoingCallControls(
                     callDeviceState = CallDeviceState(),
-                    onBackPressed = {}
-                ) {}
-                OutgoingCallContent(
-                    callType = CallType.AUDIO,
-                    participants = mockParticipants,
-                    callDeviceState = CallDeviceState(),
-                    onBackPressed = {}
-                ) {}
+                    onCallAction = { }
+                )
             }
         }
     }

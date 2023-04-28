@@ -21,6 +21,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -31,6 +32,7 @@ import androidx.compose.ui.unit.Dp
 import io.getstream.video.android.common.util.MockUtils
 import io.getstream.video.android.common.util.mockParticipants
 import io.getstream.video.android.compose.theme.VideoTheme
+import io.getstream.video.android.compose.ui.components.avatar.LocalAvatarPreviewPlaceholder
 import io.getstream.video.android.compose.ui.components.background.CallBackground
 import io.getstream.video.android.compose.ui.components.call.CallAppBar
 import io.getstream.video.android.compose.ui.components.call.incomingcall.internal.IncomingCallControls
@@ -185,12 +187,17 @@ internal fun IncomingCallContent(
 private fun IncomingCallPreview1() {
     MockUtils.initializeStreamVideo(LocalContext.current)
     VideoTheme {
-        IncomingCallContent(
-            participants = mockParticipants.takeLast(1),
-            callType = CallType.VIDEO,
-            isCameraEnabled = false,
-            onBackPressed = {}
-        ) {}
+        CompositionLocalProvider(
+            LocalAvatarPreviewPlaceholder provides
+                io.getstream.video.android.ui.common.R.drawable.stream_video_call_sample
+        ) {
+            IncomingCallContent(
+                participants = mockParticipants.takeLast(1),
+                callType = CallType.VIDEO,
+                isCameraEnabled = false,
+                onBackPressed = {}
+            ) {}
+        }
     }
 }
 
@@ -199,11 +206,16 @@ private fun IncomingCallPreview1() {
 private fun IncomingCallPreview2() {
     MockUtils.initializeStreamVideo(LocalContext.current)
     VideoTheme {
-        IncomingCallContent(
-            participants = mockParticipants,
-            callType = CallType.VIDEO,
-            isCameraEnabled = false,
-            onBackPressed = {}
-        ) {}
+        CompositionLocalProvider(
+            LocalAvatarPreviewPlaceholder provides
+                io.getstream.video.android.ui.common.R.drawable.stream_video_call_sample
+        ) {
+            IncomingCallContent(
+                participants = mockParticipants,
+                callType = CallType.VIDEO,
+                isCameraEnabled = false,
+                onBackPressed = {}
+            ) {}
+        }
     }
 }
