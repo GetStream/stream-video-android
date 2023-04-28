@@ -112,7 +112,7 @@ public fun OutgoingCallContent(
  * @param onCallAction Handler when the user clicks on some of the call controls.
  */
 @Composable
-public fun OutgoingCallContent(
+internal fun OutgoingCallContent(
     callType: CallType,
     participants: List<ParticipantState>,
     callDeviceState: CallDeviceState,

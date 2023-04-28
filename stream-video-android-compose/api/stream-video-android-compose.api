@@ -684,7 +684,6 @@ public final class io/getstream/video/android/compose/ui/components/call/outgoin
 
 public final class io/getstream/video/android/compose/ui/components/call/outgoingcall/OutgoingCallContentKt {
 	public static final fun OutgoingCallContent (Lio/getstream/video/android/core/Call;Lio/getstream/video/android/core/model/CallType;Lio/getstream/video/android/core/call/state/CallDeviceState;Landroidx/compose/ui/Modifier;Lkotlin/jvm/functions/Function2;Lkotlin/jvm/functions/Function2;Lkotlin/jvm/functions/Function2;Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function1;Landroidx/compose/runtime/Composer;II)V
-	public static final fun OutgoingCallContent (Lio/getstream/video/android/core/model/CallType;Ljava/util/List;Lio/getstream/video/android/core/call/state/CallDeviceState;Landroidx/compose/ui/Modifier;Lkotlin/jvm/functions/Function2;Lkotlin/jvm/functions/Function2;Lkotlin/jvm/functions/Function2;Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function1;Landroidx/compose/runtime/Composer;II)V
 	public static final fun OutgoingCallContent (Lio/getstream/video/android/core/viewmodel/CallViewModel;Lio/getstream/video/android/core/model/CallType;Landroidx/compose/ui/Modifier;Lkotlin/jvm/functions/Function2;Lkotlin/jvm/functions/Function2;Lkotlin/jvm/functions/Function2;Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function1;Landroidx/compose/runtime/Composer;II)V
 }
 

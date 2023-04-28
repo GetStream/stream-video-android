@@ -29,7 +29,6 @@ import io.getstream.video.android.compose.ui.components.call.incomingcall.intern
 import io.getstream.video.android.compose.ui.components.call.incomingcall.internal.IncomingCallDetails
 import io.getstream.video.android.compose.ui.components.call.outgoingcall.OutgoingCallContent
 import io.getstream.video.android.compose.ui.components.call.outgoingcall.internal.OutgoingCallDetails
-import io.getstream.video.android.compose.ui.components.call.outgoingcall.internal.OutgoingGroupCallControls
 import io.getstream.video.android.core.call.state.CallDeviceState
 import io.getstream.video.android.core.model.CallType
 import org.junit.Rule
@@ -121,18 +120,18 @@ internal class CallContentTest : BaseComposeTest() {
     fun `snapshot OutgoingCallOptions composable`() {
         snapshotWithDarkMode {
             Column {
-                OutgoingGroupCallControls(
-                    callDeviceState = CallDeviceState(
-                        isMicrophoneEnabled = true,
-                        isSpeakerphoneEnabled = true,
-                        isCameraEnabled = true
-                    ),
-                    onCallAction = { }
-                )
-                OutgoingGroupCallControls(
+                OutgoingCallContent(
+                    callType = CallType.VIDEO,
+                    participants = mockParticipants,
                     callDeviceState = CallDeviceState(),
-                    onCallAction = { }
-                )
+                    onBackPressed = {}
+                ) {}
+                OutgoingCallContent(
+                    callType = CallType.AUDIO,
+                    participants = mockParticipants,
+                    callDeviceState = CallDeviceState(),
+                    onBackPressed = {}
+                ) {}
             }
         }
     }
