@@ -142,16 +142,6 @@ public fun CallContent(
         Scaffold(
             modifier = modifier,
             contentColor = VideoTheme.colors.appBackground,
-            topBar = {
-                if (orientation != ORIENTATION_LANDSCAPE) {
-                    ActiveCallAppBar(
-                        call = call,
-                        isShowingCallInfo = isShowingCallInfo,
-                        onBackPressed = onBackPressed,
-                        onCallAction = onCallAction
-                    )
-                }
-            },
             bottomBar = {
                 if (orientation != ORIENTATION_LANDSCAPE) {
                     callControlsContent.invoke(call)
@@ -183,6 +173,15 @@ public fun CallContent(
                     if (orientation == ORIENTATION_LANDSCAPE) {
                         callControlsContent.invoke(call)
                     }
+                }
+
+                if (orientation != ORIENTATION_LANDSCAPE) {
+                    ActiveCallAppBar(
+                        call = call,
+                        isShowingCallInfo = isShowingCallInfo,
+                        onBackPressed = onBackPressed,
+                        onCallAction = onCallAction
+                    )
                 }
             }
         )

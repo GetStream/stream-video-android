@@ -16,7 +16,9 @@
 
 package io.getstream.video.android.compose.ui.components.call.incomingcall
 
+import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -25,6 +27,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.Dp
 import io.getstream.video.android.common.util.MockUtils
 import io.getstream.video.android.common.util.mockParticipants
 import io.getstream.video.android.compose.theme.VideoTheme
@@ -50,10 +53,16 @@ import io.getstream.video.android.core.viewmodel.CallViewModel
 @Composable
 public fun IncomingCallContent(
     callViewModel: CallViewModel,
+    callType: CallType,
     modifier: Modifier = Modifier,
-    callHeader: (@Composable () -> Unit)? = null,
-    callDetails: (@Composable () -> Unit)? = null,
-    callControls: (@Composable () -> Unit)? = null,
+    showHeader: Boolean = true,
+    callHeader: (@Composable ColumnScope.() -> Unit)? = null,
+    callDetails: (
+        @Composable ColumnScope.(
+            participants: List<ParticipantState>, topPadding: Dp
+        ) -> Unit
+    )? = null,
+    callControls: (@Composable BoxScope.() -> Unit)? = null,
     onBackPressed: () -> Unit,
     onCallAction: (CallAction) -> Unit = callViewModel::onCallAction,
 ) {
@@ -61,8 +70,10 @@ public fun IncomingCallContent(
 
     IncomingCallContent(
         call = callViewModel.call,
+        callType = callType,
         callDeviceState = callDeviceState,
         modifier = modifier,
+        showHeader = showHeader,
         callHeader = callHeader,
         callDetails = callDetails,
         callControls = callControls,
@@ -74,20 +85,27 @@ public fun IncomingCallContent(
 @Composable
 public fun IncomingCallContent(
     call: Call,
+    callType: CallType,
     callDeviceState: CallDeviceState,
     modifier: Modifier = Modifier,
-    callHeader: (@Composable () -> Unit)? = null,
-    callDetails: (@Composable () -> Unit)? = null,
-    callControls: (@Composable () -> Unit)? = null,
+    showHeader: Boolean = true,
+    callHeader: (@Composable ColumnScope.() -> Unit)? = null,
+    callDetails: (
+        @Composable ColumnScope.(
+            participants: List<ParticipantState>, topPadding: Dp
+        ) -> Unit
+    )? = null,
+    callControls: (@Composable BoxScope.() -> Unit)? = null,
     onBackPressed: () -> Unit,
     onCallAction: (CallAction) -> Unit = {},
 ) {
     val participants: List<ParticipantState> by call.state.participants.collectAsState()
 
     IncomingCallContent(
-        callType = CallType.VIDEO,
+        callType = callType,
         participants = participants,
         isCameraEnabled = callDeviceState.isCameraEnabled,
+        showHeader = showHeader,
         modifier = modifier,
         callHeader = callHeader,
         callDetails = callDetails,
@@ -116,9 +134,13 @@ internal fun IncomingCallContent(
     isCameraEnabled: Boolean,
     modifier: Modifier = Modifier,
     showHeader: Boolean = true,
-    callHeader: (@Composable () -> Unit)? = null,
-    callDetails: (@Composable () -> Unit)? = null,
-    callControls: (@Composable () -> Unit)? = null,
+    callHeader: (@Composable ColumnScope.() -> Unit)? = null,
+    callDetails: (
+        @Composable ColumnScope.(
+            participants: List<ParticipantState>, topPadding: Dp
+        ) -> Unit
+    )? = null,
+    callControls: (@Composable BoxScope.() -> Unit)? = null,
     onBackPressed: () -> Unit,
     onCallAction: (CallAction) -> Unit,
 ) {
@@ -127,7 +149,7 @@ internal fun IncomingCallContent(
     ) {
         Column {
             if (showHeader) {
-                callHeader?.invoke() ?: CallAppBar(
+                callHeader?.invoke(this) ?: CallAppBar(
                     onBackPressed = onBackPressed, onCallAction = onCallAction
                 )
             }
@@ -138,7 +160,7 @@ internal fun IncomingCallContent(
                 VideoTheme.dimens.avatarAppbarPadding
             }
 
-            callDetails?.invoke() ?: IncomingCallDetails(
+            callDetails?.invoke(this, participants, topPadding) ?: IncomingCallDetails(
                 modifier = Modifier
                     .align(Alignment.CenterHorizontally)
                     .padding(top = topPadding),
@@ -147,7 +169,7 @@ internal fun IncomingCallContent(
             )
         }
 
-        callControls?.invoke() ?: IncomingCallControls(
+        callControls?.invoke(this) ?: IncomingCallControls(
             modifier = Modifier
                 .align(Alignment.BottomCenter)
                 .padding(bottom = VideoTheme.dimens.incomingCallOptionsBottomPadding),

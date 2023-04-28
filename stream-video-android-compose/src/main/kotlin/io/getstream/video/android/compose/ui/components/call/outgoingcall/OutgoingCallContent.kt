@@ -50,6 +50,7 @@ import io.getstream.video.android.core.viewmodel.CallViewModel
 @Composable
 public fun OutgoingCallContent(
     callViewModel: CallViewModel,
+    callType: CallType,
     modifier: Modifier = Modifier,
     callHeader: (@Composable () -> Unit)? = null,
     callDetails: (@Composable () -> Unit)? = null,
@@ -61,6 +62,7 @@ public fun OutgoingCallContent(
 
     OutgoingCallContent(
         call = callViewModel.call,
+        callType = callType,
         callDeviceState = callDeviceState,
         modifier = modifier,
         callHeader = callHeader,
@@ -74,6 +76,7 @@ public fun OutgoingCallContent(
 @Composable
 public fun OutgoingCallContent(
     call: Call,
+    callType: CallType,
     callDeviceState: CallDeviceState,
     modifier: Modifier = Modifier,
     callHeader: (@Composable () -> Unit)? = null,
@@ -85,7 +88,7 @@ public fun OutgoingCallContent(
     val participants: List<ParticipantState> by call.state.participants.collectAsState()
 
     OutgoingCallContent(
-        callType = CallType.VIDEO,
+        callType = callType,
         participants = participants,
         callDeviceState = callDeviceState,
         modifier = modifier,

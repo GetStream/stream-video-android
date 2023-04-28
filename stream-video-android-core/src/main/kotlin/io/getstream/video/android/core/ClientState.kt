@@ -17,7 +17,6 @@
 package io.getstream.video.android.core
 
 import android.content.Context
-import android.util.Log
 import io.getstream.video.android.core.model.User
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -79,8 +78,6 @@ class ClientState(client: StreamVideo) {
     fun handleEvent(event: VideoEvent) {
         // mark connected
         if (event is ConnectedEvent) {
-
-            Log.e("Test", "connectionId: ${event.connectionId}")
             _connection.value = ConnectionState.Connected
         } else if (event is CallCreatedEvent) {
             // what's the right thing to do here?

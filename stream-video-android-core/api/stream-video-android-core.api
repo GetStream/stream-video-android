@@ -303,9 +303,6 @@ public final class io/getstream/video/android/core/MicrophoneManager {
 	public final fun getMediaManager ()Lio/getstream/video/android/core/MediaManagerImpl;
 	public final fun getSelectedDevice ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun getStatus ()Lkotlinx/coroutines/flow/StateFlow;
-	public final fun get_devices ()Lkotlinx/coroutines/flow/MutableStateFlow;
-	public final fun get_selectedDevice ()Lkotlinx/coroutines/flow/MutableStateFlow;
-	public final fun get_status ()Lkotlinx/coroutines/flow/MutableStateFlow;
 	public final fun listDevices ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun select (Lio/getstream/video/android/core/audio/AudioDevice;)V
 	public final fun setEnabled (Z)V
@@ -399,10 +396,6 @@ public final class io/getstream/video/android/core/SpeakerManager {
 	public final fun getSelectedDevice ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun getSpeakerPhoneEnabled ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun getStatus ()Lkotlinx/coroutines/flow/StateFlow;
-	public final fun get_devices ()Lkotlinx/coroutines/flow/MutableStateFlow;
-	public final fun get_selectedDevice ()Lkotlinx/coroutines/flow/MutableStateFlow;
-	public final fun get_speakerPhoneEnabled ()Lkotlinx/coroutines/flow/MutableStateFlow;
-	public final fun get_status ()Lkotlinx/coroutines/flow/MutableStateFlow;
 	public final fun setEnabled (Z)V
 }
 
