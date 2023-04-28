@@ -268,27 +268,32 @@ public class CameraManager(
     }
 
     fun disable() {
-        // 1. update our local state
-        // 2. update the track enabled status
-        // 3. Rtc listens and sends the update mute state request
-        _status.value = DeviceStatus.Disabled
-        mediaManager.videoTrack.setEnabled(false)
-        videoCapturer.stopCapture()
+        if (isCapturingVideo) {
+            // 1. update our local state
+            // 2. update the track enabled status
+            // 3. Rtc listens and sends the update mute state request
+            _status.value = DeviceStatus.Disabled
+            mediaManager.videoTrack.setEnabled(false)
+            videoCapturer.stopCapture()
+            isCapturingVideo = false
+        }
     }
 
     /**
      * Flips the camera
      */
     fun flip() {
-        setup()
-        val newDirection = when (_direction.value) {
-            CameraDirection.Front -> CameraDirection.Back
-            CameraDirection.Back -> CameraDirection.Front
-        }
-        val device = devices.first { it.direction == newDirection }
-        select(device.id, false)
+        if (isCapturingVideo) {
+            setup()
+            val newDirection = when (_direction.value) {
+                CameraDirection.Front -> CameraDirection.Back
+                CameraDirection.Back -> CameraDirection.Front
+            }
+            val device = devices.first { it.direction == newDirection }
+            select(device.id, false)
 
-        videoCapturer.switchCamera(null)
+            videoCapturer.switchCamera(null)
+        }
     }
 
     /**
