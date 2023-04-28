@@ -24,32 +24,27 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.size
-import androidx.compose.material.Icon
-import androidx.compose.material.IconButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import io.getstream.video.android.compose.theme.VideoTheme
+import io.getstream.video.android.compose.ui.components.call.controls.actions.CancelCallAction
+import io.getstream.video.android.compose.ui.components.call.controls.actions.ToggleCameraAction
+import io.getstream.video.android.compose.ui.components.call.controls.actions.ToggleMicrophoneAction
 import io.getstream.video.android.compose.ui.components.extensions.toggleAlpha
 import io.getstream.video.android.core.call.state.CallAction
 import io.getstream.video.android.core.call.state.CallDeviceState
-import io.getstream.video.android.core.call.state.CancelCall
-import io.getstream.video.android.core.call.state.ToggleCamera
-import io.getstream.video.android.core.call.state.ToggleMicrophone
-import io.getstream.video.android.ui.common.R
 
 @Composable
-internal fun OutgoingGroupCallOptions(
+internal fun OutgoingCallControls(
     callDeviceState: CallDeviceState,
     modifier: Modifier = Modifier,
     onCallAction: (CallAction) -> Unit,
 ) {
     val isMicEnabled = callDeviceState.isMicrophoneEnabled
-    val isVideoEnabled = callDeviceState.isCameraEnabled
+    val isCameraEnabled = callDeviceState.isCameraEnabled
 
     Column(
         modifier = modifier.fillMaxWidth(),
@@ -60,7 +55,7 @@ internal fun OutgoingGroupCallOptions(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceEvenly
         ) {
-            IconButton(
+            ToggleMicrophoneAction(
                 modifier = Modifier
                     .toggleAlpha(isMicEnabled)
                     .background(
@@ -68,79 +63,38 @@ internal fun OutgoingGroupCallOptions(
                         shape = VideoTheme.shapes.callButton
                     )
                     .size(VideoTheme.dimens.mediumButtonSize),
-                onClick = { onCallAction(ToggleMicrophone(!callDeviceState.isMicrophoneEnabled)) },
-                content = {
-                    val micIcon = painterResource(
-                        id = if (isMicEnabled) {
-                            R.drawable.stream_video_ic_mic_on
-                        } else {
-                            R.drawable.stream_video_ic_mic_off
-                        }
-                    )
-
-                    Icon(
-                        painter = micIcon,
-                        contentDescription = "Toggle Mic",
-                        tint = VideoTheme.colors.textHighEmphasis
-                    )
-                }
+                isMicrophoneEnabled = isMicEnabled,
+                onCallAction = onCallAction,
             )
 
-            IconButton(
+            ToggleCameraAction(
                 modifier = Modifier
-                    .toggleAlpha(isVideoEnabled)
+                    .toggleAlpha(isCameraEnabled)
                     .background(
                         color = VideoTheme.colors.appBackground,
                         shape = VideoTheme.shapes.callButton
                     )
                     .size(VideoTheme.dimens.mediumButtonSize),
-                onClick = { onCallAction(ToggleCamera(!callDeviceState.isCameraEnabled)) },
-                content = {
-                    val cameraIcon =
-                        painterResource(
-                            id = if (isVideoEnabled) {
-                                R.drawable.stream_video_ic_videocam_on
-                            } else {
-                                R.drawable.stream_video_ic_videocam_off
-                            }
-                        )
-
-                    Icon(
-                        painter = cameraIcon,
-                        contentDescription = "Toggle Video",
-                        tint = VideoTheme.colors.textHighEmphasis
-                    )
-                }
+                isCameraEnabled = isCameraEnabled,
+                onCallAction = onCallAction
             )
         }
 
         Spacer(modifier = Modifier.height(32.dp))
 
-        IconButton(
-            modifier = Modifier
-                .background(
-                    color = VideoTheme.colors.errorAccent,
-                    shape = VideoTheme.shapes.callButton
-                )
-                .size(VideoTheme.dimens.largeButtonSize),
-            onClick = { onCallAction(CancelCall) },
-            content = {
-                Icon(
-                    painter = painterResource(id = R.drawable.stream_video_ic_call_end),
-                    tint = Color.White,
-                    contentDescription = "End call"
-                )
-            }
+        CancelCallAction(
+            modifier = Modifier.size(VideoTheme.dimens.largeButtonSize),
+            onCallAction = onCallAction
         )
     }
 }
 
 @Preview
 @Composable
-private fun OutgoingCallGroupOptions() {
+private fun OutgoingCallOptionsPreview() {
     VideoTheme {
         Column {
-            OutgoingGroupCallOptions(
+            OutgoingCallControls(
                 callDeviceState = CallDeviceState(
                     isMicrophoneEnabled = true,
                     isSpeakerphoneEnabled = true,
@@ -149,7 +103,7 @@ private fun OutgoingCallGroupOptions() {
                 onCallAction = { }
             )
 
-            OutgoingGroupCallOptions(
+            OutgoingCallControls(
                 callDeviceState = CallDeviceState(),
                 onCallAction = { }
             )

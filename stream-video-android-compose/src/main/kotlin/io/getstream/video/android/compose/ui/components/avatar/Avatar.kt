@@ -71,8 +71,10 @@ public fun Avatar(
     contentScale: ContentScale = ContentScale.Crop,
     contentDescription: String? = null,
     requestSize: IntSize = IntSize(DEFAULT_IMAGE_SIZE, DEFAULT_IMAGE_SIZE),
-    @DrawableRes loadingPlaceholder: Int? = null,
-    @DrawableRes previewPlaceholder: Int = R.drawable.stream_video_ic_preview_avatar,
+    @DrawableRes previewPlaceholder: Int =
+        LocalAvatarPreviewProvider.getLocalAvatarPreviewPlaceholder(),
+    @DrawableRes loadingPlaceholder: Int? =
+        LocalAvatarPreviewProvider.getLocalAvatarLoadingPlaceholder(),
     initialsAvatarOffset: DpOffset = DpOffset(0.dp, 0.dp),
     onClick: (() -> Unit)? = null,
 ) {

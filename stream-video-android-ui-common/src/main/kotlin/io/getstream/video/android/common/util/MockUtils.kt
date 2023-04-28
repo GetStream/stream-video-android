@@ -103,10 +103,16 @@ public val mockParticipants: List<ParticipantState>
     inline get() {
         val participants = arrayListOf<ParticipantState>()
         mockUsers.forEach {
+            val sessionId = if (it == mockUsers.first()) {
+                mockCall.sessionId ?: UUID.randomUUID().toString()
+            } else {
+                UUID.randomUUID().toString()
+            }
             participants.add(
+
                 ParticipantState(
                     initialUser = it,
-                    sessionId = UUID.randomUUID().toString(),
+                    sessionId = sessionId,
                     call = mockCall
                 )
             )

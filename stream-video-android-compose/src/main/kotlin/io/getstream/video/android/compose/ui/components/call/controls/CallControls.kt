@@ -19,16 +19,84 @@ package io.getstream.video.android.compose.ui.components.call.controls
 import android.content.res.Configuration.ORIENTATION_LANDSCAPE
 import android.content.res.Configuration.ORIENTATION_PORTRAIT
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.width
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.tooling.preview.Preview
-import io.getstream.video.android.compose.state.ui.call.CallControlAction
 import io.getstream.video.android.compose.theme.VideoTheme
+import io.getstream.video.android.compose.ui.components.call.controls.actions.buildDefaultCallControlActions
 import io.getstream.video.android.compose.ui.components.call.controls.internal.LandscapeCallControls
 import io.getstream.video.android.compose.ui.components.call.controls.internal.RegularCallControls
 import io.getstream.video.android.core.call.state.CallAction
 import io.getstream.video.android.core.call.state.CallDeviceState
+import io.getstream.video.android.core.viewmodel.CallViewModel
+
+/**
+ * Shows the default Call controls content that allow the user to trigger various actions.
+ *
+ * @param callViewModel Used to fetch the state of the call and its media.
+ * @param onCallAction Handler when the user triggers a Call Control Action.
+ */
+@Composable
+public fun CallControls(
+    callViewModel: CallViewModel,
+    onCallAction: (CallAction) -> Unit = {},
+    actions: List<(@Composable () -> Unit)> = buildDefaultCallControlActions(
+        callViewModel = callViewModel,
+        onCallAction
+    ),
+) {
+    val callDeviceState by callViewModel.callDeviceState.collectAsState()
+
+    CallControls(
+        callDeviceState = callDeviceState,
+        actions = actions,
+        onCallAction = onCallAction
+    )
+}
+
+/**
+ * Stateless version of [DefaultCallControlsContent].
+ * Shows the default Call controls content that allow the user to trigger various actions.
+ *
+ * @param call State of the Call.
+ * @param callDeviceState Media state of the call.
+ * @param onCallAction Handler when the user triggers a Call Control Action.
+ */
+@Composable
+public fun CallControls(
+    callDeviceState: CallDeviceState,
+    onCallAction: (CallAction) -> Unit = {},
+    actions: List<(@Composable () -> Unit)> = buildDefaultCallControlActions(
+        callDeviceState,
+        onCallAction
+    ),
+) {
+    val orientation = LocalConfiguration.current.orientation
+
+    val modifier = if (orientation == ORIENTATION_LANDSCAPE) {
+        Modifier
+            .fillMaxHeight()
+            .width(VideoTheme.dimens.landscapeCallControlsSheetWidth)
+    } else {
+        Modifier
+            .fillMaxWidth()
+            .height(VideoTheme.dimens.callControlsSheetHeight)
+    }
+
+    CallControls(
+        modifier = modifier,
+        callDeviceState = callDeviceState,
+        actions = actions,
+        onCallAction = onCallAction
+    )
+}
 
 /**
  * Represents the set of controls the user can use to change their audio and video device state, or
@@ -43,10 +111,12 @@ import io.getstream.video.android.core.call.state.CallDeviceState
 @Composable
 public fun CallControls(
     callDeviceState: CallDeviceState,
-    isScreenSharing: Boolean,
     modifier: Modifier = Modifier,
-    actions: List<CallControlAction> = buildDefaultCallControlActions(callDeviceState = callDeviceState),
-    onCallAction: (CallAction) -> Unit
+    onCallAction: (CallAction) -> Unit,
+    actions: List<(@Composable () -> Unit)> = buildDefaultCallControlActions(
+        callDeviceState,
+        onCallAction
+    ),
 ) {
     val orientation = LocalConfiguration.current.orientation
 
@@ -54,7 +124,6 @@ public fun CallControls(
         RegularCallControls(
             modifier = modifier,
             callDeviceState = callDeviceState,
-            isScreenSharing = isScreenSharing,
             onCallAction = onCallAction,
             actions = actions
         )
@@ -63,7 +132,6 @@ public fun CallControls(
             modifier = modifier,
             callDeviceState = callDeviceState,
             onCallAction = onCallAction,
-            isScreenSharing = true,
             actions = actions
         )
     }
@@ -76,14 +144,14 @@ private fun CallControlsPreview() {
         VideoTheme {
             CallControls(
                 callDeviceState = CallDeviceState(),
-                isScreenSharing = false
-            ) {}
+                onCallAction = {}
+            )
         }
         VideoTheme(isInDarkMode = true) {
             CallControls(
                 callDeviceState = CallDeviceState(),
-                isScreenSharing = false
-            ) {}
+                onCallAction = {}
+            )
         }
     }
 }

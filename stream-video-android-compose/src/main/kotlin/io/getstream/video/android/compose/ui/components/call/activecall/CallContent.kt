@@ -38,7 +38,7 @@ import androidx.compose.ui.unit.coerceAtLeast
 import androidx.compose.ui.unit.dp
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.call.activecall.internal.ActiveCallAppBar
-import io.getstream.video.android.compose.ui.components.call.controls.internal.DefaultCallControlsContent
+import io.getstream.video.android.compose.ui.components.call.controls.CallControls
 import io.getstream.video.android.compose.ui.components.call.renderer.CallSingleVideoRenderer
 import io.getstream.video.android.compose.ui.components.call.renderer.CallVideoRenderer
 import io.getstream.video.android.compose.ui.components.call.renderer.internal.ScreenShareAspectRatio
@@ -69,9 +69,9 @@ public fun CallContent(
     onBackPressed: () -> Unit = { callViewModel.onCallAction(LeaveCall) },
     onCallAction: (CallAction) -> Unit = callViewModel::onCallAction,
     callControlsContent: @Composable (call: Call) -> Unit = {
-        DefaultCallControlsContent(
-            callViewModel,
-            onCallAction
+        CallControls(
+            callViewModel = callViewModel,
+            onCallAction = onCallAction
         )
     },
     pictureInPictureContent: @Composable (Call) -> Unit = { DefaultPictureInPictureContent(it) }
@@ -129,10 +129,9 @@ public fun CallContent(
     onBackPressed: () -> Unit = {},
     onCallAction: (CallAction) -> Unit = {},
     callControlsContent: @Composable (call: Call) -> Unit = {
-        DefaultCallControlsContent(
-            call,
-            callDeviceState,
-            onCallAction
+        CallControls(
+            callDeviceState = callDeviceState,
+            onCallAction = onCallAction
         )
     },
     pictureInPictureContent: @Composable (Call) -> Unit = { DefaultPictureInPictureContent(it) }
@@ -143,16 +142,6 @@ public fun CallContent(
         Scaffold(
             modifier = modifier,
             contentColor = VideoTheme.colors.appBackground,
-            topBar = {
-                if (orientation != ORIENTATION_LANDSCAPE) {
-                    ActiveCallAppBar(
-                        call = call,
-                        isShowingCallInfo = isShowingCallInfo,
-                        onBackPressed = onBackPressed,
-                        onCallAction = onCallAction
-                    )
-                }
-            },
             bottomBar = {
                 if (orientation != ORIENTATION_LANDSCAPE) {
                     callControlsContent.invoke(call)
@@ -185,6 +174,15 @@ public fun CallContent(
                         callControlsContent.invoke(call)
                     }
                 }
+
+                if (orientation != ORIENTATION_LANDSCAPE) {
+                    ActiveCallAppBar(
+                        call = call,
+                        isShowingCallInfo = isShowingCallInfo,
+                        onBackPressed = onBackPressed,
+                        onCallAction = onCallAction
+                    )
+                }
             }
         )
     } else {
@@ -211,11 +209,18 @@ internal fun DefaultPictureInPictureContent(call: Call) {
         )
     } else {
         val activeSpeakers by call.state.activeSpeakers.collectAsState(initial = emptyList())
+        val me by call.state.me.collectAsState()
 
         if (activeSpeakers.isNotEmpty()) {
             CallSingleVideoRenderer(
                 call = call,
                 participant = activeSpeakers.first(),
+                labelPosition = Alignment.BottomStart
+            )
+        } else if (me != null) {
+            CallSingleVideoRenderer(
+                call = call,
+                participant = me!!,
                 labelPosition = Alignment.BottomStart
             )
         }

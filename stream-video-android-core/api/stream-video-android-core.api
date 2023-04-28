@@ -84,9 +84,9 @@ public final class io/getstream/video/android/core/CallState {
 	public final fun getPermissionRequests ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun getReactions ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun getRecording ()Lkotlinx/coroutines/flow/StateFlow;
-	public final fun getRingingState ()Lkotlinx/coroutines/flow/MutableStateFlow;
+	public final fun getRingingState ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun getScreenSharingSession ()Lkotlinx/coroutines/flow/StateFlow;
-	public final fun getSettings ()Lkotlinx/coroutines/flow/MutableStateFlow;
+	public final fun getSettings ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun getSortedParticipants ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun getStartsAt ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun getTeam ()Lkotlinx/coroutines/flow/StateFlow;
@@ -303,9 +303,6 @@ public final class io/getstream/video/android/core/MicrophoneManager {
 	public final fun getMediaManager ()Lio/getstream/video/android/core/MediaManagerImpl;
 	public final fun getSelectedDevice ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun getStatus ()Lkotlinx/coroutines/flow/StateFlow;
-	public final fun get_devices ()Lkotlinx/coroutines/flow/MutableStateFlow;
-	public final fun get_selectedDevice ()Lkotlinx/coroutines/flow/MutableStateFlow;
-	public final fun get_status ()Lkotlinx/coroutines/flow/MutableStateFlow;
 	public final fun listDevices ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun select (Lio/getstream/video/android/core/audio/AudioDevice;)V
 	public final fun setEnabled (Z)V
@@ -399,10 +396,6 @@ public final class io/getstream/video/android/core/SpeakerManager {
 	public final fun getSelectedDevice ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun getSpeakerPhoneEnabled ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun getStatus ()Lkotlinx/coroutines/flow/StateFlow;
-	public final fun get_devices ()Lkotlinx/coroutines/flow/MutableStateFlow;
-	public final fun get_selectedDevice ()Lkotlinx/coroutines/flow/MutableStateFlow;
-	public final fun get_speakerPhoneEnabled ()Lkotlinx/coroutines/flow/MutableStateFlow;
-	public final fun get_status ()Lkotlinx/coroutines/flow/MutableStateFlow;
 	public final fun setEnabled (Z)V
 }
 
@@ -695,6 +688,10 @@ public final class io/getstream/video/android/core/call/state/CallDeviceState {
 
 public final class io/getstream/video/android/core/call/state/CancelCall : io/getstream/video/android/core/call/state/CallAction {
 	public static final field INSTANCE Lio/getstream/video/android/core/call/state/CancelCall;
+}
+
+public final class io/getstream/video/android/core/call/state/ChatDialog : io/getstream/video/android/core/call/state/CallAction {
+	public static final field INSTANCE Lio/getstream/video/android/core/call/state/ChatDialog;
 }
 
 public final class io/getstream/video/android/core/call/state/ConnectionState : java/lang/Enum {
@@ -2510,23 +2507,20 @@ public abstract class io/getstream/video/android/core/notifications/AbstractNoti
 }
 
 public abstract interface class io/getstream/video/android/core/permission/PermissionManager {
+	public static final field Companion Lio/getstream/video/android/core/permission/PermissionManager$Companion;
 	public abstract fun checkPermission (Ljava/lang/String;)Z
 	public abstract fun getHasCameraPermission ()Lkotlinx/coroutines/flow/StateFlow;
 	public abstract fun getHasRecordAudioPermission ()Lkotlinx/coroutines/flow/StateFlow;
 	public abstract fun requestPermission (Ljava/lang/String;)Z
 }
 
+public final class io/getstream/video/android/core/permission/PermissionManager$Companion {
+	public final fun create (Landroidx/activity/ComponentActivity;Lkotlin/jvm/functions/Function2;Lkotlin/jvm/functions/Function1;)Lio/getstream/video/android/core/permission/PermissionManager;
+}
+
 public abstract interface class io/getstream/video/android/core/permission/PermissionManagerProvider {
 	public abstract fun getPermissionManager ()Lio/getstream/video/android/core/permission/PermissionManager;
 	public abstract fun initPermissionManager ()Lio/getstream/video/android/core/permission/PermissionManager;
-}
-
-public final class io/getstream/video/android/core/permission/StreamPermissionManagerImpl : io/getstream/video/android/core/permission/PermissionManager {
-	public fun <init> (Landroidx/fragment/app/FragmentActivity;Lkotlin/jvm/functions/Function2;Lkotlin/jvm/functions/Function1;)V
-	public fun checkPermission (Ljava/lang/String;)Z
-	public fun getHasCameraPermission ()Lkotlinx/coroutines/flow/StateFlow;
-	public fun getHasRecordAudioPermission ()Lkotlinx/coroutines/flow/StateFlow;
-	public fun requestPermission (Ljava/lang/String;)Z
 }
 
 public abstract class io/getstream/video/android/core/service/AbstractStreamCallService : android/app/Service, io/getstream/video/android/core/StreamVideoProvider {
@@ -2834,7 +2828,6 @@ public final class io/getstream/video/android/core/utils/LatencyUtilsKt {
 }
 
 public final class io/getstream/video/android/core/utils/ListUtilsKt {
-	public static final fun updateAll (Ljava/util/List;Lkotlin/jvm/functions/Function1;)Ljava/util/List;
 	public static final fun updateValue (Ljava/util/List;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;)Ljava/util/List;
 }
 
@@ -2847,11 +2840,6 @@ public final class io/getstream/video/android/core/utils/StateFlowKt {
 public final class io/getstream/video/android/core/utils/StringUtilsKt {
 	public static final fun formatAsTitle (Lio/getstream/video/android/core/model/state/StreamCallState;Landroid/content/Context;)Ljava/lang/String;
 	public static final fun initials (Ljava/lang/String;)Ljava/lang/String;
-}
-
-public final class io/getstream/video/android/core/utils/TokenUtilsKt {
-	public static final fun generateSFUToken (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)Ljava/lang/String;
-	public static synthetic fun generateSFUToken$default (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)Ljava/lang/String;
 }
 
 public final class io/getstream/video/android/core/viewmodel/CallViewModel : androidx/lifecycle/ViewModel {

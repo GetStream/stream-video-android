@@ -16,7 +16,6 @@
 
 package io.getstream.video.android.compose.ui.components.participants.internal
 
-import androidx.annotation.DrawableRes
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -35,12 +34,10 @@ import io.getstream.video.android.common.util.mockParticipantList
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.avatar.UserAvatar
 import io.getstream.video.android.core.ParticipantState
-import io.getstream.video.android.ui.common.R
 
 @Composable
-internal fun ParticipantAvatars(
-    participants: List<ParticipantState>,
-    @DrawableRes previewPlaceholder: Int = R.drawable.stream_video_ic_preview_avatar,
+public fun ParticipantAvatars(
+    participants: List<ParticipantState>
 ) {
     Box(
         modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center
@@ -51,8 +48,7 @@ internal fun ParticipantAvatars(
 
                 UserAvatar(
                     modifier = Modifier.size(VideoTheme.dimens.singleAvatarSize),
-                    user = participant.initialUser,
-                    previewPlaceholder = previewPlaceholder
+                    user = participant.initialUser
                 )
             } else {
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
@@ -60,8 +56,7 @@ internal fun ParticipantAvatars(
                         items(participants.take(2)) { participant ->
                             UserAvatar(
                                 modifier = Modifier.size(VideoTheme.dimens.callAvatarSize),
-                                user = participant.initialUser,
-                                previewPlaceholder = previewPlaceholder
+                                user = participant.initialUser
                             )
                         }
                     }
@@ -69,8 +64,7 @@ internal fun ParticipantAvatars(
                     if (participants.size >= 3) {
                         UserAvatar(
                             modifier = Modifier.size(VideoTheme.dimens.callAvatarSize),
-                            user = participants[2].initialUser,
-                            previewPlaceholder = previewPlaceholder
+                            user = participants[2].initialUser
                         )
                     }
                 }
@@ -85,8 +79,7 @@ private fun ParticipantAvatarsPreview() {
     MockUtils.initializeStreamVideo(LocalContext.current)
     VideoTheme {
         ParticipantAvatars(
-            participants = mockParticipantList,
-            previewPlaceholder = R.drawable.stream_video_call_sample
+            participants = mockParticipantList
         )
     }
 }

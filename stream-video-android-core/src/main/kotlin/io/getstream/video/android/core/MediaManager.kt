@@ -48,7 +48,6 @@ sealed class DeviceStatus {
 
 data class CameraDeviceWrapped(
     val id: String,
-
     val characteristics: CameraCharacteristics?,
     val supportedFormats: MutableList<CameraEnumerationAndroid.CaptureFormat>?,
     val maxResolution: Int,
@@ -57,16 +56,16 @@ data class CameraDeviceWrapped(
 
 class SpeakerManager(val mediaManager: MediaManagerImpl) {
 
-    val _status = MutableStateFlow<DeviceStatus>(DeviceStatus.Disabled)
+    private val _status = MutableStateFlow<DeviceStatus>(DeviceStatus.Disabled)
     val status: StateFlow<DeviceStatus> = _status
 
-    val _selectedDevice = MutableStateFlow<String?>(null)
+    private val _selectedDevice = MutableStateFlow<String?>(null)
     val selectedDevice: StateFlow<String?> = _selectedDevice
 
-    val _devices = MutableStateFlow<List<String>>(emptyList())
+    private val _devices = MutableStateFlow<List<String>>(emptyList())
     val devices: StateFlow<List<String>> = _devices
 
-    val _speakerPhoneEnabled = MutableStateFlow(false)
+    private val _speakerPhoneEnabled = MutableStateFlow(false)
     val speakerPhoneEnabled: StateFlow<Boolean> = _speakerPhoneEnabled
 
     fun setEnabled(enabled: Boolean) {
@@ -98,13 +97,13 @@ class MicrophoneManager(val mediaManager: MediaManagerImpl) {
     private val logger by taggedLogger("Media:MicrophoneManager")
 
     /** The status of the audio */
-    val _status = MutableStateFlow<DeviceStatus>(DeviceStatus.Disabled)
+    private val _status = MutableStateFlow<DeviceStatus>(DeviceStatus.Disabled)
     val status: StateFlow<DeviceStatus> = _status
 
-    val _selectedDevice = MutableStateFlow<AudioDevice?>(null)
+    private val _selectedDevice = MutableStateFlow<AudioDevice?>(null)
     val selectedDevice: StateFlow<AudioDevice?> = _selectedDevice
 
-    val _devices = MutableStateFlow<List<AudioDevice>>(emptyList())
+    private val _devices = MutableStateFlow<List<AudioDevice>>(emptyList())
     val devices: StateFlow<List<AudioDevice>> = _devices
 
     internal var selectedBeforeSpeaker: AudioDevice? = null
@@ -144,7 +143,8 @@ class MicrophoneManager(val mediaManager: MediaManagerImpl) {
             select(speaker)
         } else {
             // swap back to the old one
-            val fallback = selectedBeforeSpeaker ?: devices.firstOrNull { it !is AudioDevice.Speakerphone }
+            val fallback =
+                selectedBeforeSpeaker ?: devices.firstOrNull { it !is AudioDevice.Speakerphone }
             select(fallback)
         }
     }
@@ -191,6 +191,7 @@ class MicrophoneManager(val mediaManager: MediaManagerImpl) {
 
         setupCompleted = true
     }
+
     private var setupCompleted: Boolean = false
 }
 
@@ -216,7 +217,11 @@ public sealed class CameraDirection {
  * camera.resolution // the selected camera resolution
  *
  */
-public class CameraManager(public val mediaManager: MediaManagerImpl, eglBaseContext: EglBase.Context, defaultCameraDirection: CameraDirection = CameraDirection.Front) {
+public class CameraManager(
+    public val mediaManager: MediaManagerImpl,
+    eglBaseContext: EglBase.Context,
+    defaultCameraDirection: CameraDirection = CameraDirection.Front
+) {
 
     private lateinit var devices: List<CameraDeviceWrapped>
     private var isCapturingVideo: Boolean = false
@@ -263,40 +268,48 @@ public class CameraManager(public val mediaManager: MediaManagerImpl, eglBaseCon
     }
 
     fun disable() {
-        // 1. update our local state
-        // 2. update the track enabled status
-        // 3. Rtc listens and sends the update mute state request
-        _status.value = DeviceStatus.Disabled
-        mediaManager.videoTrack.setEnabled(false)
-        videoCapturer.stopCapture()
+        if (isCapturingVideo) {
+            // 1. update our local state
+            // 2. update the track enabled status
+            // 3. Rtc listens and sends the update mute state request
+            _status.value = DeviceStatus.Disabled
+            mediaManager.videoTrack.setEnabled(false)
+            videoCapturer.stopCapture()
+            isCapturingVideo = false
+        }
     }
 
     /**
      * Flips the camera
      */
     fun flip() {
-        setup()
-        val newDirection = when (_direction.value) {
-            CameraDirection.Front -> CameraDirection.Back
-            CameraDirection.Back -> CameraDirection.Front
-        }
-        val device = devices.first { it.direction == newDirection }
-        select(device.id, false)
+        if (isCapturingVideo) {
+            setup()
+            val newDirection = when (_direction.value) {
+                CameraDirection.Front -> CameraDirection.Back
+                CameraDirection.Back -> CameraDirection.Front
+            }
+            val device = devices.first { it.direction == newDirection }
+            select(device.id, false)
 
-        videoCapturer?.switchCamera(null)
+            videoCapturer.switchCamera(null)
+        }
     }
 
     /**
      * Selects a specific device
      */
-    private val _availableResolutions: MutableStateFlow<List<CameraEnumerationAndroid.CaptureFormat>> = MutableStateFlow(emptyList())
-    public val availableResolutions: StateFlow<List<CameraEnumerationAndroid.CaptureFormat>> = _availableResolutions
+    private val _availableResolutions: MutableStateFlow<List<CameraEnumerationAndroid.CaptureFormat>> =
+        MutableStateFlow(emptyList())
+    public val availableResolutions: StateFlow<List<CameraEnumerationAndroid.CaptureFormat>> =
+        _availableResolutions
 
     fun select(deviceId: String, startCapture: Boolean = false) {
         val selectedDevice = devices.first { it.id == deviceId }
         _direction.value = selectedDevice.direction ?: CameraDirection.Back
         _selectedDevice.value = selectedDevice
-        _availableResolutions.value = selectedDevice.supportedFormats?.toImmutableList() ?: emptyList()
+        _availableResolutions.value =
+            selectedDevice.supportedFormats?.toImmutableList() ?: emptyList()
         _resolution.value = selectDesiredResolution(selectedDevice.supportedFormats, 720)
 
         if (startCapture) {
@@ -333,7 +346,11 @@ public class CameraManager(public val mediaManager: MediaManagerImpl, eglBaseCon
 
         // and start capture
         runBlocking(mediaManager.scope.coroutineContext) {
-            videoCapturer.startCapture(selectedResolution.width, selectedResolution.height, selectedResolution.framerate.max)
+            videoCapturer.startCapture(
+                selectedResolution.width,
+                selectedResolution.height,
+                selectedResolution.framerate.max
+            )
         }
         isCapturingVideo = true
     }
@@ -343,7 +360,7 @@ public class CameraManager(public val mediaManager: MediaManagerImpl, eglBaseCon
      */
     internal fun stopCapture() {
         if (isCapturingVideo) {
-            videoCapturer?.stopCapture()
+            videoCapturer.stopCapture()
             isCapturingVideo = false
         }
     }
@@ -363,7 +380,8 @@ public class CameraManager(public val mediaManager: MediaManagerImpl, eglBaseCon
         val selectedDevice = devicesMatchingDirection.first()
         _selectedDevice.value = selectedDevice
         _resolution.value = selectDesiredResolution(selectedDevice.supportedFormats, 960)
-        _availableResolutions.value = selectedDevice.supportedFormats?.toImmutableList() ?: emptyList()
+        _availableResolutions.value =
+            selectedDevice.supportedFormats?.toImmutableList() ?: emptyList()
 
         setupCompleted = true
     }
@@ -405,11 +423,16 @@ public class CameraManager(public val mediaManager: MediaManagerImpl, eglBaseCon
     /**
      * Gets the resolution that's closest to our target resolution
      */
-    internal fun selectDesiredResolution(supportedFormats: MutableList<CameraEnumerationAndroid.CaptureFormat>?, targetResolution: Int = 1440,): CameraEnumerationAndroid.CaptureFormat? {
+    internal fun selectDesiredResolution(
+        supportedFormats: MutableList<CameraEnumerationAndroid.CaptureFormat>?,
+        targetResolution: Int = 1440,
+    ): CameraEnumerationAndroid.CaptureFormat? {
         // needs the settings that we're going for
         // sort and get the one closest to 960
-        val matchingTarget = supportedFormats?.toList()?.sortedBy { kotlin.math.abs(it.height - targetResolution) }
-        val sorted = supportedFormats?.toList()?.sortedByDescending { it.height * it.width }?.filter { it.framerate.max >= 30 }
+        val matchingTarget =
+            supportedFormats?.toList()?.sortedBy { kotlin.math.abs(it.height - targetResolution) }
+        val sorted = supportedFormats?.toList()?.sortedByDescending { it.height * it.width }
+            ?.filter { it.framerate.max >= 30 }
         return matchingTarget?.first()
     }
 }
@@ -432,7 +455,12 @@ public class CameraManager(public val mediaManager: MediaManagerImpl, eglBaseCon
  * @see BluetoothHeadsetManager
  */
 // TODO: add the call, or the settings object
-class MediaManagerImpl(val context: Context, val call: Call, val scope: CoroutineScope, val eglBaseContext: EglBase.Context) {
+class MediaManagerImpl(
+    val context: Context,
+    val call: Call,
+    val scope: CoroutineScope,
+    val eglBaseContext: EglBase.Context
+) {
     private val logger by taggedLogger("Call:MediaManagerImpl")
     private var audioManager = context.getSystemService<AudioManager>()
 
@@ -441,6 +469,7 @@ class MediaManagerImpl(val context: Context, val call: Call, val scope: Coroutin
     val videoTrack = call.clientImpl.peerConnectionFactory.makeVideoTrack(
         source = videoSource, trackId = "videoTrack"
     )
+
     // TODO: make unique
     val audioSource = call.clientImpl.peerConnectionFactory.makeAudioSource(buildAudioConstraints())
     val audioTrack = call.clientImpl.peerConnectionFactory.makeAudioTrack(
@@ -465,7 +494,7 @@ class MediaManagerImpl(val context: Context, val call: Call, val scope: Coroutin
         getAudioHandler()?.selectDevice(activeDevice)
     }
 
-    fun selectAudioDevice(device: io.getstream.video.android.core.audio.AudioDevice) {
+    fun selectAudioDevice(device: AudioDevice) {
         logger.d { "[selectAudioDevice] #sfu; device: $device" }
         val handler = getAudioHandler() ?: return
 
@@ -476,7 +505,7 @@ class MediaManagerImpl(val context: Context, val call: Call, val scope: Coroutin
         return audioHandler as? AudioSwitchHandler
     }
 
-    fun getAudioDevices(): List<io.getstream.video.android.core.audio.AudioDevice> {
+    fun getAudioDevices(): List<AudioDevice> {
         logger.d { "[getAudioDevices] #sfu; no args" }
         val handler = getAudioHandler() ?: return emptyList()
 
