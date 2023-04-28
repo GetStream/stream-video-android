@@ -84,9 +84,9 @@ public final class io/getstream/video/android/core/CallState {
 	public final fun getPermissionRequests ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun getReactions ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun getRecording ()Lkotlinx/coroutines/flow/StateFlow;
-	public final fun getRingingState ()Lkotlinx/coroutines/flow/MutableStateFlow;
+	public final fun getRingingState ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun getScreenSharingSession ()Lkotlinx/coroutines/flow/StateFlow;
-	public final fun getSettings ()Lkotlinx/coroutines/flow/MutableStateFlow;
+	public final fun getSettings ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun getSortedParticipants ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun getStartsAt ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun getTeam ()Lkotlinx/coroutines/flow/StateFlow;
@@ -2526,7 +2526,7 @@ public abstract interface class io/getstream/video/android/core/permission/Permi
 }
 
 public final class io/getstream/video/android/core/permission/StreamPermissionManagerImpl : io/getstream/video/android/core/permission/PermissionManager {
-	public fun <init> (Landroidx/fragment/app/FragmentActivity;Lkotlin/jvm/functions/Function2;Lkotlin/jvm/functions/Function1;)V
+	public fun <init> (Landroidx/activity/ComponentActivity;Lkotlin/jvm/functions/Function2;Lkotlin/jvm/functions/Function1;)V
 	public fun checkPermission (Ljava/lang/String;)Z
 	public fun getHasCameraPermission ()Lkotlinx/coroutines/flow/StateFlow;
 	public fun getHasRecordAudioPermission ()Lkotlinx/coroutines/flow/StateFlow;

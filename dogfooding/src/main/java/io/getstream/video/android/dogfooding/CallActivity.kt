@@ -80,7 +80,7 @@ class CallActivity : AppCompatActivity() {
 
     private fun initPermissionManager(): PermissionManager {
         return StreamPermissionManagerImpl(
-            fragmentActivity = this,
+            activity = this,
             onPermissionResult = { permission, isGranted ->
                 when (permission) {
                     android.Manifest.permission.CAMERA -> vm.onCallAction(ToggleCamera(isGranted))

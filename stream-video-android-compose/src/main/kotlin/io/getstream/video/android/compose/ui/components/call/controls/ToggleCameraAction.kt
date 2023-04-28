@@ -50,7 +50,7 @@ public fun ToggleCameraAction(
         Icon(
             modifier = Modifier
                 .padding(13.dp)
-                .clickable(enabled = isCameraEnabled) {
+                .clickable {
                     onCallAction(
                         ToggleCamera(isCameraEnabled.not())
                     )

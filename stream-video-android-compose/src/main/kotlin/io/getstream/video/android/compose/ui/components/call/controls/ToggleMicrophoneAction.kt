@@ -51,7 +51,7 @@ public fun ToggleMicrophoneAction(
         Icon(
             modifier = Modifier
                 .padding(13.dp)
-                .clickable(enabled = isMicrophoneEnabled) {
+                .clickable {
                     onCallAction(
                         ToggleMicrophone(isMicrophoneEnabled.not())
                     )

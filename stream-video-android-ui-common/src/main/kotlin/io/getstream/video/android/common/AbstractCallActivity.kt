@@ -76,7 +76,7 @@ public abstract class AbstractCallActivity :
      */
     override fun initPermissionManager(): PermissionManager {
         return StreamPermissionManagerImpl(
-            fragmentActivity = this,
+            activity = this,
             onPermissionResult = { permission, isGranted ->
                 when (permission) {
 //                    Manifest.permission.CAMERA -> callViewModel.onCallAction(ToggleCamera(isGranted))
