@@ -28,7 +28,13 @@ import org.openapitools.client.models.UserResponse
 
 
 
+import com.squareup.moshi.FromJson
 import com.squareup.moshi.Json
+import com.squareup.moshi.JsonAdapter
+import com.squareup.moshi.JsonReader
+import com.squareup.moshi.JsonWriter
+import com.squareup.moshi.ToJson
+import org.openapitools.client.infrastructure.Serializer
 
 /**
  * This event is sent by a user accepting an incoming ringing call. Clients receiving this event should dismiss the call screen and move to the call.
