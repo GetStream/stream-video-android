@@ -26,7 +26,10 @@ import org.junit.Before
 import org.junit.Test
 import org.openapitools.client.infrastructure.Serializer
 import org.openapitools.client.models.APIError
+import org.openapitools.client.models.APIError.Code.*
+import java.lang.String.format
 import kotlin.test.assertEquals
+import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 import kotlin.test.fail
 
@@ -157,7 +160,7 @@ class JsonSerializeDeserializeTest {
         // known field value
         val apiError = APIError(
             statusCode = 500,
-            code = APIError.Code.InternalError,
+            code = InternalError,
             details = emptyList(),
             duration = "1s",
             message = "something went wrong",
@@ -170,7 +173,7 @@ class JsonSerializeDeserializeTest {
         // unknown field value
         val apiUnknownError = APIError(
             statusCode = 1500,
-            code = APIError.Code.Unknown("some-weird-error"),
+            code = Unknown("some-weird-error"),
             details = emptyList(),
             duration = "1s",
             message = "something went wrong",
@@ -181,4 +184,40 @@ class JsonSerializeDeserializeTest {
         assertEquals(apiUnknownError, moshi.adapter(APIError::class.java).fromJson(generatedJsonWithUnknownError))
     }
 
+    @Test
+    fun `illustrate APIError usage in the context of retries`() {
+        val jsonTemplate = """{"StatusCode":500,"code":"%s","details":[],"duration":"1s","message":"something went wrong","more_info":"server-side error"}"""
+
+        val internalServerError = format(jsonTemplate, "internal-error")
+        val rateLimited = format(jsonTemplate, "rate-limited")
+        val expiredToken = format(jsonTemplate, "expired-token")
+        val authFailed = format(jsonTemplate, "auth-failed")
+        val unknownErr = format(jsonTemplate, "unknown-weird-error")
+
+        assertEquals(true, isRetriable(parseJson(internalServerError)))
+        assertEquals(true, isRetriable(parseJson(rateLimited)))
+        assertEquals(true, isRetriable(parseJson(expiredToken)))
+        assertEquals(false, isRetriable(parseJson(authFailed)))
+        assertEquals(null, isRetriable(parseJson(unknownErr)))
+    }
+
+    private fun parseJson(json: String): APIError.Code {
+        val moshi = Serializer.moshi
+        return moshi.adapter(APIError::class.java).fromJson(json)!!.code
+    }
+
+    private fun isRetriable(code: APIError.Code): Boolean? {
+        return when (code) {
+            is RateLimited -> {
+                println("waiting for some time")
+                return true
+            }
+            is InternalError, ExpiredToken -> true
+            is Unknown -> {
+                println(code.value)
+                return null
+            }
+            else -> false
+        }
+    }
 }
