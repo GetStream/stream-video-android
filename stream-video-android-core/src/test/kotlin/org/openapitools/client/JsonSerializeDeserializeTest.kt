@@ -208,16 +208,42 @@ class JsonSerializeDeserializeTest {
 
     private fun isRetriable(code: APIError.Code): Boolean? {
         return when (code) {
-            is RateLimited -> {
-                println("waiting for some time")
-                return true
-            }
-            is InternalError, ExpiredToken -> true
+            AccessKeyError -> false
+            AppSuspended -> false
+            AuthFailed -> false
+            ChannelFeatureNotSupported -> false
+            ConnectionIdNotFound -> false
+            CoolDown -> true
+            CustomCommandEndpointEqualCallError -> false
+            CustomCommandEndpointMissing -> false
+            DuplicateUsername -> false
+            EventNotSupported -> false
+            InputError -> false
+            InvalidTokenSignature -> false
+            MessageTooLong -> false
+            ModerationFailed -> false
+            MultipleNestingLevel -> false
+            NotAllowed -> false
+            NotFound -> false
+            NotSupportedInPushV1 -> false
+            PayloadTooBig -> false
+            QueryCallsPermissionsMismatch -> false
+            QueryChannelPermissionsMismatch -> false
+            TokenNotValidYet -> true // but only after some time
+            TokenUsedBeforeIat -> true // but only after some time
+            TooManyConnections -> true // by closing a few connections
+            VideoCreateCallFailed -> true // maybe could not contact SFU
+            VideoInvalidCallId -> false
+            VideoJoinCallFailure -> true // maybe could not contact SFU
+            VideoNoDatacentersAvailable -> false
+            VideoProviderNotConfigured -> false
+            ExpiredToken -> true
+            InternalError -> true
+            RateLimited -> true
             is Unknown -> {
                 println(code.value)
                 return null
             }
-            else -> false
         }
     }
 }
