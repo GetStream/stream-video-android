@@ -128,7 +128,6 @@ class HomeActivity : AppCompatActivity() {
 
     private fun logOut() {
         dogfoodingApp.logOut()
-        startActivity(Intent(this, LoginActivity::class.java))
         finish()
     }
 
