@@ -27,19 +27,24 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import io.getstream.video.android.compose.theme.VideoTheme
+import io.getstream.video.android.dogfooding.ui.theme.Colors.Description
 
 @Composable
 fun StreamButton(
     modifier: Modifier = Modifier,
     text: String,
+    enabled: Boolean = true,
     onClick: () -> Unit
 ) {
     Button(
         modifier = modifier.clip(RoundedCornerShape(8.dp)),
+        enabled = enabled,
         onClick = onClick,
         colors = ButtonDefaults.buttonColors(
             backgroundColor = VideoTheme.colors.primaryAccent,
             contentColor = VideoTheme.colors.primaryAccent,
+            disabledBackgroundColor = Description,
+            disabledContentColor = Description
         )
     ) {
         Text(

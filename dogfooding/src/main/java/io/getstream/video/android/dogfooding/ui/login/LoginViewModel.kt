@@ -25,6 +25,7 @@ import io.getstream.video.android.core.logging.LoggingLevel
 import io.getstream.video.android.core.model.User
 import io.getstream.video.android.core.user.UserPreferencesManager
 import io.getstream.video.android.dogfooding.API_KEY
+import io.getstream.video.android.dogfooding.BuildConfig
 import io.getstream.video.android.dogfooding.dogfoodingApp
 import io.getstream.video.android.dogfooding.token.StreamVideoNetwork
 import io.getstream.video.android.dogfooding.token.TokenResponse
@@ -65,6 +66,15 @@ class LoginViewModel @Inject constructor() : ViewModel() {
         emit(LoginUiState.SignInComplete(response))
     }.flowOn(Dispatchers.IO)
 
+    fun sigInInIfValidUserExist(context: Context) {
+        val preferenceManager = UserPreferencesManager.initialize(context)
+        val user = preferenceManager.getUserCredentials()
+
+        if (user != null && user.isValid() && !BuildConfig.BENCHMARK) {
+            handleUiEvent(LoginEvent.SignInInSuccess(email = user.id))
+        }
+    }
+
     fun initializeStreamVideo(
         context: Context,
         tokenResponse: TokenResponse,
@@ -72,10 +82,6 @@ class LoginViewModel @Inject constructor() : ViewModel() {
         val authUser = FirebaseAuth.getInstance().currentUser
         val userId = tokenResponse.userId
         val token = tokenResponse.token
-
-        val userPreferences = UserPreferencesManager.initialize(context)
-        userPreferences.storeUserToken(token)
-
         val user = User(
             id = authUser?.email ?: userId,
             name = authUser?.displayName ?: "",
@@ -83,6 +89,10 @@ class LoginViewModel @Inject constructor() : ViewModel() {
             role = "admin",
             custom = mapOf("email" to userId)
         )
+
+        val userPreferences = UserPreferencesManager.initialize(context)
+        userPreferences.storeUserCredentials(user)
+        userPreferences.storeUserToken(token)
 
         context.dogfoodingApp.initializeStreamVideo(
             apiKey = API_KEY,
@@ -99,8 +109,6 @@ sealed interface LoginUiState {
     object GoogleSignIn : LoginUiState
 
     data class SignInComplete(val tokenResponse: TokenResponse) : LoginUiState
-
-    object LoginFailure : LoginUiState
 }
 
 sealed interface LoginEvent {
@@ -109,6 +117,4 @@ sealed interface LoginEvent {
     data class GoogleSignIn(val id: String = UUID.randomUUID().toString()) : LoginEvent
 
     data class SignInInSuccess(val email: String) : LoginEvent
-
-    data class SignInComplete(val tokenResponse: TokenResponse) : LoginEvent
 }

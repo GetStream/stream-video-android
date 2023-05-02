@@ -32,6 +32,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -55,6 +57,7 @@ fun LoginScreen(
     navigateToCallJoin: () -> Unit
 ) {
     val uiState by loginViewModel.uiState.collectAsState()
+    val isLoading by remember(uiState) { mutableStateOf(uiState !is LoginUiState.Nothing) }
 
     HandleLoginUiStates(loginUiState = uiState, navigateToCallJoin = navigateToCallJoin)
 
@@ -94,6 +97,7 @@ fun LoginScreen(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(horizontal = 55.dp),
+            enabled = !isLoading,
             text = stringResource(id = R.string.stream_sign_in_google),
             onClick = { loginViewModel.handleUiEvent(LoginEvent.GoogleSignIn()) }
         )
@@ -102,9 +106,9 @@ fun LoginScreen(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(horizontal = 55.dp),
+            enabled = !isLoading,
             text = stringResource(id = R.string.stream_sign_in_email),
-            onClick = {
-            }
+            onClick = {}
         )
 
         Spacer(modifier = Modifier.height(47.dp))
@@ -133,6 +137,10 @@ private fun HandleLoginUiStates(
             Toast.makeText(context, "Verification failed!", Toast.LENGTH_SHORT).show()
         }
     )
+
+    LaunchedEffect(key1 = Unit) {
+        loginViewModel.sigInInIfValidUserExist(context)
+    }
 
     LaunchedEffect(key1 = loginUiState) {
         when (loginUiState) {

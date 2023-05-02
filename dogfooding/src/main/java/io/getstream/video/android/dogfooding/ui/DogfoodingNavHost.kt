@@ -39,7 +39,9 @@ fun DogfoodingNavHost(
         composable(DogfoodingScreens.Login.destination) {
             LoginScreen(
                 navigateToCallJoin = {
-                    navController.navigate(DogfoodingScreens.CallJoin.destination)
+                    navController.navigate(DogfoodingScreens.CallJoin.destination) {
+                        popUpTo(DogfoodingScreens.Login.destination) { inclusive = true }
+                    }
                 }
             )
         }
