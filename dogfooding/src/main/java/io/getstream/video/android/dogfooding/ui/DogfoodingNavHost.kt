@@ -16,29 +16,42 @@
 
 package io.getstream.video.android.dogfooding.ui
 
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import io.getstream.video.android.dogfooding.ui.login.LoginScreen
 
 @Composable
 fun DogfoodingNavHost(
     modifier: Modifier = Modifier,
     navController: NavHostController = rememberNavController(),
-    startDestination: String = "login"
+    startDestination: String = DogfoodingScreens.Login.destination
 ) {
     NavHost(
-        modifier = modifier,
+        modifier = modifier.fillMaxSize(),
         navController = navController,
         startDestination = startDestination
     ) {
-        composable("login") {
+        composable(DogfoodingScreens.Login.destination) {
+            LoginScreen(
+                navigateToCallJoin = {
+                    navController.navigate(DogfoodingScreens.CallJoin.destination)
+                }
+            )
         }
-        composable("call_join") {
+        composable(DogfoodingScreens.CallJoin.destination) {
         }
-        composable("call_preview") {
+        composable(DogfoodingScreens.CallPreview.destination) {
         }
     }
+}
+
+enum class DogfoodingScreens(val destination: String) {
+    Login("login"),
+    CallJoin("call_join"),
+    CallPreview("call_preview");
 }
