@@ -847,6 +847,19 @@ public final class io/getstream/video/android/compose/ui/components/participants
 	public static final fun CallParticipantsInfoMenu (Ljava/util/List;Landroidx/compose/ui/Modifier;Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function1;Landroidx/compose/runtime/Composer;II)V
 }
 
+public final class io/getstream/video/android/compose/ui/components/participants/ComposableSingletons$ParticipantIndicatorKt {
+	public static final field INSTANCE Lio/getstream/video/android/compose/ui/components/participants/ComposableSingletons$ParticipantIndicatorKt;
+	public static field lambda-1 Lkotlin/jvm/functions/Function2;
+	public static field lambda-2 Lkotlin/jvm/functions/Function2;
+	public fun <init> ()V
+	public final fun getLambda-1$stream_video_android_compose_release ()Lkotlin/jvm/functions/Function2;
+	public final fun getLambda-2$stream_video_android_compose_release ()Lkotlin/jvm/functions/Function2;
+}
+
+public final class io/getstream/video/android/compose/ui/components/participants/ParticipantIndicatorKt {
+	public static final fun ParticipantIndicatorIcon-DTcfvLk (IJJZLkotlin/jvm/functions/Function0;Landroidx/compose/runtime/Composer;II)V
+}
+
 public final class io/getstream/video/android/compose/ui/components/participants/internal/ComposableSingletons$CallParticipantsInfoAppBarKt {
 	public static final field INSTANCE Lio/getstream/video/android/compose/ui/components/participants/internal/ComposableSingletons$CallParticipantsInfoAppBarKt;
 	public static field lambda-1 Lkotlin/jvm/functions/Function2;
