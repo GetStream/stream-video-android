@@ -27,7 +27,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import io.getstream.video.android.compose.theme.VideoTheme
-import io.getstream.video.android.dogfooding.ui.theme.Colors.Description
+import io.getstream.video.android.dogfooding.ui.theme.Colors.description
 
 @Composable
 fun StreamButton(
@@ -43,8 +43,8 @@ fun StreamButton(
         colors = ButtonDefaults.buttonColors(
             backgroundColor = VideoTheme.colors.primaryAccent,
             contentColor = VideoTheme.colors.primaryAccent,
-            disabledBackgroundColor = Description,
-            disabledContentColor = Description
+            disabledBackgroundColor = description,
+            disabledContentColor = description
         )
     ) {
         Text(

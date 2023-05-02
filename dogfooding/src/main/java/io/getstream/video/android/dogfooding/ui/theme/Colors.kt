@@ -19,7 +19,6 @@ package io.getstream.video.android.dogfooding.ui.theme
 import androidx.compose.ui.graphics.Color
 
 object Colors {
-    val Background: Color = Color(0xFF2C2C2E)
-    val Description: Color = Color(0xFF979797)
-    val StreamPrimary: Color = Color(0xFF005FFF)
+    val background: Color = Color(0xFF2C2C2E)
+    val description: Color = Color(0xFF979797)
 }
