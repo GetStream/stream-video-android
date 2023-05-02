@@ -21,6 +21,7 @@ googleService = "4.3.14"
 androidxComposeBom = "2023.04.00"
 androidxComposeCompiler = "1.4.4"
 androidxComposeTracing = "1.0.0-alpha01"
+androidxComposeNavigation = "2.5.3"
 
 coil = "2.2.2"
 landscapist = "2.1.9"
@@ -78,6 +79,7 @@ androidx-compose-foundation-layout = { group = "androidx.compose.foundation", na
 androidx-compose-material-iconsExtended = { group = "androidx.compose.material", name = "material-icons-extended" }
 androidx-compose-material = { group = "androidx.compose.material", name = "material" }
 androidx-compose-material3 = { group = "androidx.compose.material3", name = "material3" }
+androidx-compose-navigation = { group = "androidx.navigation", name = "navigation-compose", version.ref = "androidxComposeNavigation" }
 androidx-compose-runtime = { group = "androidx.compose.runtime", name = "runtime" }
 androidx-compose-ui = { group = "androidx.compose.ui", name = "ui" }
 androidx-compose-ui-tooling = { group = "androidx.compose.ui", name = "ui-tooling" }
