@@ -16,8 +16,99 @@
 
 package io.getstream.video.android.dogfooding.ui.login
 
+import android.content.Context
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import com.google.firebase.auth.FirebaseAuth
 import dagger.hilt.android.lifecycle.HiltViewModel
+import io.getstream.video.android.core.logging.LoggingLevel
+import io.getstream.video.android.core.model.User
+import io.getstream.video.android.core.user.UserPreferencesManager
+import io.getstream.video.android.dogfooding.API_KEY
+import io.getstream.video.android.dogfooding.dogfoodingApp
+import io.getstream.video.android.dogfooding.token.StreamVideoNetwork
+import io.getstream.video.android.dogfooding.token.TokenResponse
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.flow.flowOn
+import kotlinx.coroutines.flow.stateIn
+import java.util.UUID
+import javax.inject.Inject
 
 @HiltViewModel
-class LoginViewModel : ViewModel()
+class LoginViewModel @Inject constructor() : ViewModel() {
+
+    private val event: MutableStateFlow<LoginEvent> = MutableStateFlow(LoginEvent.Nothing)
+    internal val uiState: StateFlow<LoginUiState> = event
+        .flatMapLatest { event ->
+            when (event) {
+                is LoginEvent.GoogleSignIn -> flowOf(LoginUiState.GoogleSignIn)
+                is LoginEvent.SignInInSuccess -> signInInSuccess(event.email)
+                else -> flowOf(LoginUiState.Nothing)
+            }
+        }.stateIn(viewModelScope, SharingStarted.Lazily, LoginUiState.Nothing)
+
+    fun handleUiEvent(event: LoginEvent) {
+        this.event.value = event
+    }
+
+    private fun signInInSuccess(email: String) = flow<LoginUiState> {
+        val response = StreamVideoNetwork.tokenService.fetchToken(
+            userId = email,
+            apiKey = API_KEY
+        )
+        emit(LoginUiState.SignInComplete(response))
+    }.flowOn(Dispatchers.IO)
+
+    fun initializeStreamVideo(
+        context: Context,
+        tokenResponse: TokenResponse,
+    ) {
+        val authUser = FirebaseAuth.getInstance().currentUser
+        val userId = tokenResponse.userId
+        val token = tokenResponse.token
+
+        val userPreferences = UserPreferencesManager.initialize(context)
+        userPreferences.storeUserToken(token)
+
+        val user = User(
+            id = authUser?.email ?: userId,
+            name = authUser?.displayName ?: "",
+            image = authUser?.photoUrl?.toString() ?: "",
+            role = "admin",
+            custom = mapOf("email" to userId)
+        )
+
+        context.dogfoodingApp.initializeStreamVideo(
+            apiKey = API_KEY,
+            user = user,
+            loggingLevel = LoggingLevel.BODY,
+            token = token
+        )
+    }
+}
+
+sealed interface LoginUiState {
+    object Nothing : LoginUiState
+
+    object GoogleSignIn : LoginUiState
+
+    data class SignInComplete(val tokenResponse: TokenResponse) : LoginUiState
+
+    object LoginFailure : LoginUiState
+}
+
+sealed interface LoginEvent {
+    object Nothing : LoginEvent
+
+    data class GoogleSignIn(val id: String = UUID.randomUUID().toString()) : LoginEvent
+
+    data class SignInInSuccess(val email: String) : LoginEvent
+
+    data class SignInComplete(val tokenResponse: TokenResponse) : LoginEvent
+}

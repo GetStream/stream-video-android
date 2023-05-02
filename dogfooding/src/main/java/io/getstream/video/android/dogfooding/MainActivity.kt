@@ -19,9 +19,11 @@ package io.getstream.video.android.dogfooding
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import dagger.hilt.android.AndroidEntryPoint
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.dogfooding.ui.DogfoodingNavHost
 
+@AndroidEntryPoint
 class MainActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {

@@ -16,6 +16,7 @@
 
 package io.getstream.video.android.dogfooding.ui.login
 
+import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -28,9 +29,13 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
@@ -38,6 +43,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.firebase.ui.auth.AuthUI
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.dogfooding.R
 import io.getstream.video.android.dogfooding.ui.theme.Colors
@@ -48,6 +54,10 @@ fun LoginScreen(
     loginViewModel: LoginViewModel = hiltViewModel(),
     navigateToCallJoin: () -> Unit
 ) {
+    val uiState by loginViewModel.uiState.collectAsState()
+
+    HandleLoginUiStates(loginUiState = uiState, navigateToCallJoin = navigateToCallJoin)
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -85,8 +95,7 @@ fun LoginScreen(
                 .fillMaxWidth()
                 .padding(horizontal = 55.dp),
             text = stringResource(id = R.string.stream_sign_in_google),
-            onClick = {
-            }
+            onClick = { loginViewModel.handleUiEvent(LoginEvent.GoogleSignIn()) }
         )
 
         StreamButton(
@@ -106,6 +115,49 @@ fun LoginScreen(
             textAlign = TextAlign.Center,
             fontSize = 18.sp,
         )
+    }
+}
+
+@Composable
+private fun HandleLoginUiStates(
+    loginUiState: LoginUiState,
+    navigateToCallJoin: () -> Unit,
+    loginViewModel: LoginViewModel = hiltViewModel()
+) {
+    val context = LocalContext.current
+    val signInLauncher = rememberRegisterForActivityResult(
+        onSignInSuccess = { email ->
+            loginViewModel.handleUiEvent(LoginEvent.SignInInSuccess(email = email))
+        },
+        onSignInFailed = {
+            Toast.makeText(context, "Verification failed!", Toast.LENGTH_SHORT).show()
+        }
+    )
+
+    LaunchedEffect(key1 = loginUiState) {
+        when (loginUiState) {
+            is LoginUiState.GoogleSignIn -> {
+                val providers = arrayListOf(
+                    AuthUI.IdpConfig.GoogleBuilder().build()
+                )
+
+                val signInIntent = AuthUI.getInstance().createSignInIntentBuilder()
+                    .setAvailableProviders(providers)
+                    .build()
+                signInLauncher.launch(signInIntent)
+            }
+
+            is LoginUiState.SignInComplete -> {
+                loginViewModel.initializeStreamVideo(
+                    context = context,
+                    tokenResponse = loginUiState.tokenResponse
+                )
+
+                navigateToCallJoin.invoke()
+            }
+
+            else -> Unit
+        }
     }
 }
 

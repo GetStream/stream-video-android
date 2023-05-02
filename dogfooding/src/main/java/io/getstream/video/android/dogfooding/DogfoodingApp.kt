@@ -19,6 +19,7 @@ package io.getstream.video.android.dogfooding
 import android.app.Application
 import android.content.Context
 import com.google.firebase.auth.FirebaseAuth
+import dagger.hilt.android.HiltAndroidApp
 import io.getstream.android.push.firebase.FirebasePushDeviceGenerator
 import io.getstream.log.Priority
 import io.getstream.log.android.AndroidStreamLogger
@@ -30,6 +31,7 @@ import io.getstream.video.android.core.model.User
 import io.getstream.video.android.core.user.UserPreferencesManager
 import io.getstream.video.android.dogfooding.token.StreamVideoNetwork
 
+@HiltAndroidApp
 class DogfoodingApp : Application() {
 
     private var video: StreamVideo? = null
@@ -103,6 +105,6 @@ class DogfoodingApp : Application() {
     }
 }
 
-internal const val API_KEY = BuildConfig.DOGFOODING_API_KEY
+const val API_KEY = BuildConfig.DOGFOODING_API_KEY
 
 val Context.dogfoodingApp get() = applicationContext as DogfoodingApp
