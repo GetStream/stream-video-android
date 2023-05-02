@@ -26,6 +26,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import io.getstream.video.android.common.util.MockUtils
+import io.getstream.video.android.common.util.mockCall
 import io.getstream.video.android.common.util.mockParticipants
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.background.CallBackground
@@ -88,6 +89,7 @@ public fun OutgoingCallContent(
     val participants: List<ParticipantState> by call.state.participants.collectAsState()
 
     OutgoingCallContent(
+        call = call,
         callType = callType,
         participants = participants,
         callDeviceState = callDeviceState,
@@ -113,6 +115,7 @@ public fun OutgoingCallContent(
  */
 @Composable
 internal fun OutgoingCallContent(
+    call: Call,
     callType: CallType,
     participants: List<ParticipantState>,
     callDeviceState: CallDeviceState,
@@ -132,6 +135,7 @@ internal fun OutgoingCallContent(
 
         Column {
             callHeader?.invoke() ?: CallAppBar(
+                call = call,
                 onBackPressed = onBackPressed,
                 onCallAction = onCallAction
             )
@@ -167,6 +171,7 @@ private fun OutgoingCallVideoPreview() {
     MockUtils.initializeStreamVideo(LocalContext.current)
     VideoTheme {
         OutgoingCallContent(
+            call = mockCall,
             callType = CallType.VIDEO,
             participants = mockParticipants,
             callDeviceState = CallDeviceState(),
@@ -181,6 +186,7 @@ private fun OutgoingCallAudioPreview() {
     MockUtils.initializeStreamVideo(LocalContext.current)
     VideoTheme {
         OutgoingCallContent(
+            call = mockCall,
             callType = CallType.AUDIO,
             participants = mockParticipants,
             callDeviceState = CallDeviceState(),

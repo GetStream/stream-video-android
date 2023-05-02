@@ -18,6 +18,7 @@ package io.getstream.video.android.compose.ui.components.participants
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
 import androidx.compose.material.Text
@@ -29,6 +30,7 @@ import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -68,8 +70,10 @@ public fun ParticipantIndicatorIcon(
                             cornerRadius = CornerRadius(this.size.maxDimension)
                         )
                     }
+                    .widthIn(min = 21.dp)
                     .padding(3.dp),
                 text = number.toString(),
+                textAlign = TextAlign.Center,
                 fontSize = 12.sp,
                 color = numberColor,
                 maxLines = 1,
