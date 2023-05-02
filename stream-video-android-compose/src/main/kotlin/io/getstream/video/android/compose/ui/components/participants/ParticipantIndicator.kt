@@ -42,7 +42,7 @@ public fun ParticipantIndicatorIcon(
     number: Int,
     numberColor: Color = Color.White,
     numberBackgroundColor: Color = VideoTheme.colors.textLowEmphasis,
-    showNumber: Boolean = true,
+    isShowingNumber: Boolean = true,
     onClick: () -> Unit
 ) {
     Box {
@@ -60,7 +60,7 @@ public fun ParticipantIndicatorIcon(
             )
         }
 
-        if (showNumber) {
+        if (isShowingNumber) {
             Text(
                 modifier = Modifier
                     .align(Alignment.TopEnd)
