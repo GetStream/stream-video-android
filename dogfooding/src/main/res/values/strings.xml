@@ -18,4 +18,9 @@
     <string name="app_name">Dogfooding</string>
     <string name="filter_call_link">call_link</string>
     <string name="unauthorized_error">Your login token is expired. Please re-login.</string>
+    <string name="stream_meetings">Stream Meetings</string>
+    <string name="stream_sign_in_description">Please sign in with your Google \nStream account.</string>
+    <string name="stream_sign_in_google">Google Sign In</string>
+    <string name="stream_sign_in_email">Sign In with Email</string>
+    <string name="stream_sign_in_contact">Having problems logging in, contact us.</string>
 </resources>
