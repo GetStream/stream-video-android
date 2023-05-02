@@ -37,6 +37,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.dogfooding.R
 import io.getstream.video.android.dogfooding.ui.theme.Colors
@@ -44,6 +45,7 @@ import io.getstream.video.android.dogfooding.ui.theme.StreamButton
 
 @Composable
 fun LoginScreen(
+    loginViewModel: LoginViewModel = hiltViewModel(),
     navigateToCallJoin: () -> Unit
 ) {
     Column(
@@ -83,7 +85,8 @@ fun LoginScreen(
                 .fillMaxWidth()
                 .padding(horizontal = 55.dp),
             text = stringResource(id = R.string.stream_sign_in_google),
-            onClick = { }
+            onClick = {
+            }
         )
 
         StreamButton(
@@ -91,7 +94,8 @@ fun LoginScreen(
                 .fillMaxWidth()
                 .padding(horizontal = 55.dp),
             text = stringResource(id = R.string.stream_sign_in_email),
-            onClick = { }
+            onClick = {
+            }
         )
 
         Spacer(modifier = Modifier.height(47.dp))

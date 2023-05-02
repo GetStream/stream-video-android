@@ -26,6 +26,8 @@ plugins {
     id("com.google.gms.google-services")
     id(libs.plugins.firebase.crashlytics.get().pluginId)
     id(libs.plugins.kotlin.serialization.get().pluginId)
+    id(libs.plugins.hilt.get().pluginId)
+    kotlin("kapt")
 }
 
 android {
@@ -151,7 +153,12 @@ dependencies {
     implementation(libs.androidx.compose.foundation)
     implementation(libs.androidx.compose.material)
     implementation(libs.androidx.compose.material.iconsExtended)
+    implementation(libs.androidx.hilt.navigation)
     implementation(libs.landscapist.coil)
+
+    // hilt
+    implementation(libs.hilt.android)
+    kapt(libs.hilt.compiler)
 
     // firebase
     implementation(libs.firebase.crashlytics)
