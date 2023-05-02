@@ -22,6 +22,7 @@ import io.getstream.video.android.compose.base.BaseComposeTest
 import io.getstream.video.android.compose.ui.components.call.CallAppBar
 import io.getstream.video.android.compose.ui.components.call.controls.CallControls
 import io.getstream.video.android.compose.ui.components.call.controls.internal.RegularCallControls
+import io.getstream.video.android.compose.ui.components.participants.ParticipantIndicatorIcon
 import io.getstream.video.android.core.call.state.CallDeviceState
 import org.junit.Rule
 import org.junit.Test
@@ -57,6 +58,13 @@ internal class CallComponentsPortraitTest : BaseComposeTest() {
                 callDeviceState = CallDeviceState(),
                 onCallAction = {}
             )
+        }
+    }
+
+    @Test
+    fun `snapshot ParticipantIndicatorIcon composable`() {
+        snapshot {
+            ParticipantIndicatorIcon(number = 42) {}
         }
     }
 }
