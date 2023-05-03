@@ -400,6 +400,7 @@ public final class io/getstream/video/android/core/SpeakerManager {
 }
 
 public abstract interface class io/getstream/video/android/core/StreamVideo {
+	public static final field Companion Lio/getstream/video/android/core/StreamVideo$Companion;
 	public abstract fun call (Ljava/lang/String;Ljava/lang/String;)Lio/getstream/video/android/core/Call;
 	public abstract fun createDevice (Ljava/lang/String;Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public abstract fun deleteDevice (Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
@@ -413,6 +414,13 @@ public abstract interface class io/getstream/video/android/core/StreamVideo {
 	public abstract fun registerPushDevice (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public abstract fun subscribe (Lio/getstream/video/android/core/events/VideoEventListener;)Lio/getstream/video/android/core/EventSubscription;
 	public abstract fun subscribeFor ([Ljava/lang/Class;Lio/getstream/video/android/core/events/VideoEventListener;)Lio/getstream/video/android/core/EventSubscription;
+}
+
+public final class io/getstream/video/android/core/StreamVideo$Companion {
+	public final fun install (Lio/getstream/video/android/core/StreamVideo;)V
+	public final fun instance ()Lio/getstream/video/android/core/StreamVideo;
+	public final fun isInstalled ()Z
+	public final fun unInstall ()V
 }
 
 public final class io/getstream/video/android/core/StreamVideoBuilder {

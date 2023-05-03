@@ -19,9 +19,9 @@ package io.getstream.video.android.dogfooding.ui.join
 import android.content.Context
 import androidx.lifecycle.ViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
+import io.getstream.video.android.core.StreamVideo
 import io.getstream.video.android.core.model.User
 import io.getstream.video.android.core.user.UserPreferences
-import io.getstream.video.android.dogfooding.dogfoodingApp
 import javax.inject.Inject
 
 @HiltViewModel
@@ -38,6 +38,6 @@ class CallJoinViewModel @Inject constructor(
     }
 
     fun signOut(context: Context) {
-        context.dogfoodingApp.logOut()
+        StreamVideo.instance().logOut()
     }
 }

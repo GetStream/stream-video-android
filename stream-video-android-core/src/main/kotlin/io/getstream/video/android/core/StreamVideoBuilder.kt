@@ -137,6 +137,9 @@ public class StreamVideoBuilder(
             connectionModule.updateAuthType("anonymous")
         }
 
+        // installs Stream Video instance
+        StreamVideo.install(client)
+
         return client
     }
 }

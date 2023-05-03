@@ -37,15 +37,6 @@ import io.getstream.video.android.tooling.handler.StreamGlobalExceptionHandler
 @HiltAndroidApp
 class DogfoodingApp : Application() {
 
-    private var video: StreamVideo? = null
-
-    val streamVideo: StreamVideo
-        get() = requireNotNull(video)
-
-    fun isInitialized(): Boolean {
-        return video != null
-    }
-
     override fun onCreate() {
         super.onCreate()
         AndroidStreamLogger.installOnDebuggableApp(this, minPriority = Priority.DEBUG)
@@ -81,15 +72,13 @@ class DogfoodingApp : Application() {
                 )
                 response.token
             }
-        ).build().also {
-            video = it
-        }
+        ).build()
     }
 
     fun logOut() {
         FirebaseAuth.getInstance().signOut()
-        streamVideo.logOut()
-        video = null
+        StreamVideo.instance().logOut()
+        StreamVideo.unInstall()
     }
 
     fun initializeFromCredentials(): Boolean {
