@@ -23,11 +23,11 @@ import io.getstream.video.android.core.notifications.AbstractNotificationActivit
 class NotificationActivity : AbstractNotificationActivity() {
 
     override fun getStreamVideo(context: Context): StreamVideo {
-        return dogfoodingApp.streamVideo
+        return StreamVideo.instance()
     }
 
     override fun initializeVideoIfNeeded() {
-        if (!dogfoodingApp.isInitialized()) {
+        if (!StreamVideo.isInstalled) {
             val hasInitialized = dogfoodingApp.initializeFromCredentials()
 
             if (!hasInitialized) {
