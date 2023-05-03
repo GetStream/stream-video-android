@@ -22,6 +22,8 @@ public final class io/getstream/video/android/tooling/handler/StreamGlobalExcept
 
 public final class io/getstream/video/android/tooling/handler/StreamGlobalExceptionHandler$Companion {
 	public final fun install (Landroid/app/Application;Ljava/lang/String;Lkotlin/jvm/functions/Function1;)V
+	public static synthetic fun install$default (Lio/getstream/video/android/tooling/handler/StreamGlobalExceptionHandler$Companion;Landroid/app/Application;Ljava/lang/String;Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)V
 	public final fun installOnDebuggableApp (Landroid/app/Application;Ljava/lang/String;Lkotlin/jvm/functions/Function1;)V
+	public static synthetic fun installOnDebuggableApp$default (Lio/getstream/video/android/tooling/handler/StreamGlobalExceptionHandler$Companion;Landroid/app/Application;Ljava/lang/String;Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)V
 }
 

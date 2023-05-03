@@ -129,7 +129,7 @@ public class StreamGlobalExceptionHandler constructor(
         public fun installOnDebuggableApp(
             application: Application,
             packageName: String,
-            exceptionHandler: (String) -> Unit
+            exceptionHandler: (String) -> Unit = {}
         ) {
             val defaultExceptionHandler = Thread.getDefaultUncaughtExceptionHandler() ?: return
             if (!StreamGlobalException.isInstalled && application.isDebuggableApp) {
@@ -154,7 +154,7 @@ public class StreamGlobalExceptionHandler constructor(
         public fun install(
             application: Application,
             packageName: String,
-            exceptionHandler: (String) -> Unit
+            exceptionHandler: (String) -> Unit = {}
         ) {
             val defaultExceptionHandler = Thread.getDefaultUncaughtExceptionHandler() ?: return
             StreamGlobalException.install(
