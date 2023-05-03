@@ -14,14 +14,24 @@
  * limitations under the License.
  */
 
-package io.getstream.video.android.dogfooding.ui.join
+package io.getstream.video.android.dogfooding.di
 
-import androidx.lifecycle.ViewModel
-import dagger.hilt.android.lifecycle.HiltViewModel
+import android.content.Context
+import dagger.Provides
+import dagger.hilt.InstallIn
+import dagger.hilt.android.qualifiers.ApplicationContext
+import dagger.hilt.components.SingletonComponent
 import io.getstream.video.android.core.user.UserPreferences
-import javax.inject.Inject
+import io.getstream.video.android.core.user.UserPreferencesManager
+import javax.inject.Singleton
 
-@HiltViewModel
-class CallJoinViewModel @Inject constructor(
-    private val userPreferences: UserPreferences
-) : ViewModel()
+@dagger.Module
+@InstallIn(SingletonComponent::class)
+object AppModule {
+
+    @Provides
+    @Singleton
+    fun provideUserPreferences(@ApplicationContext context: Context): UserPreferences {
+        return UserPreferencesManager.initialize(context)
+    }
+}

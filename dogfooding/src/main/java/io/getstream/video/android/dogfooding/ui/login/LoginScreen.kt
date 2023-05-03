@@ -212,7 +212,7 @@ private fun HandleLoginUiStates(
     )
 
     LaunchedEffect(key1 = Unit) {
-        loginViewModel.sigInInIfValidUserExist(context)
+        loginViewModel.sigInInIfValidUserExist()
     }
 
     LaunchedEffect(key1 = loginUiState) {
