@@ -35,8 +35,9 @@ internal class CallComponentsLandscapeTest : BaseComposeTest() {
     fun `snapshot LandscapeCallControls composable`() {
         snapshot {
             LandscapeCallControls(
-                callDeviceState = CallDeviceState(), isScreenSharing = false
-            ) {}
+                callDeviceState = CallDeviceState(),
+                onCallAction = {}
+            )
         }
     }
 }

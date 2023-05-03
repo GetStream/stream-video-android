@@ -163,11 +163,11 @@ public class CallState(private val call: Call, private val user: User) {
 
     /** Specific to ringing calls, additional state about incoming, outgoing calls */
     private val _ringingState: MutableStateFlow<RingingState?> = MutableStateFlow(null)
-    public val ringingState: MutableStateFlow<RingingState?> = _ringingState
+    public val ringingState: StateFlow<RingingState?> = _ringingState
 
     /** The settings for the call */
     private val _settings: MutableStateFlow<CallSettingsResponse?> = MutableStateFlow(null)
-    public val settings: MutableStateFlow<CallSettingsResponse?> = _settings
+    public val settings: StateFlow<CallSettingsResponse?> = _settings
 
     /** Check if you have permissions to do things like share your audio, video, screen etc */
     public fun hasPermission(permission: String): StateFlow<Boolean> {

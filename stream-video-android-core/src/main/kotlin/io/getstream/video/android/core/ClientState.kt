@@ -78,7 +78,6 @@ class ClientState(client: StreamVideo) {
     fun handleEvent(event: VideoEvent) {
         // mark connected
         if (event is ConnectedEvent) {
-
             _connection.value = ConnectionState.Connected
         } else if (event is CallCreatedEvent) {
             // what's the right thing to do here?
@@ -109,10 +108,10 @@ class ClientState(client: StreamVideo) {
 }
 
 public fun ConnectionState.formatAsTitle(context: Context): String = when (this) {
-    ConnectionState.PreConnect -> "PreConnect"
-    ConnectionState.Loading -> "Loading"
+    ConnectionState.PreConnect -> "Connecting.."
+    ConnectionState.Loading -> "Loading.."
     ConnectionState.Connected -> "Connected"
-    ConnectionState.Reconnecting -> "Reconnecting"
+    ConnectionState.Reconnecting -> "Reconnecting.."
     ConnectionState.Disconnected -> "Disconnected"
     is ConnectionState.Failed -> "Failed"
 }

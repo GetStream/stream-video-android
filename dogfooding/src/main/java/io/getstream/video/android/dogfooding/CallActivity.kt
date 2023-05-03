@@ -20,9 +20,9 @@ import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.widget.Toast
+import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
-import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.foundation.background
 import androidx.compose.ui.Modifier
 import io.getstream.video.android.compose.theme.VideoTheme
@@ -30,14 +30,14 @@ import io.getstream.video.android.compose.ui.components.call.CallContainer
 import io.getstream.video.android.core.StreamVideo
 import io.getstream.video.android.core.call.state.ToggleCamera
 import io.getstream.video.android.core.call.state.ToggleMicrophone
+import io.getstream.video.android.core.model.CallType
 import io.getstream.video.android.core.model.StreamCallId
 import io.getstream.video.android.core.model.typeToId
 import io.getstream.video.android.core.permission.PermissionManager
-import io.getstream.video.android.core.permission.StreamPermissionManagerImpl
 import io.getstream.video.android.core.viewmodel.CallViewModel
 import io.getstream.video.android.core.viewmodel.CallViewModelFactory
 
-class CallActivity : AppCompatActivity() {
+class CallActivity : ComponentActivity() {
 
     private val streamVideo: StreamVideo by lazy { dogfoodingApp.streamVideo }
     private val factory by lazy { callViewModelFactory() }
@@ -58,6 +58,7 @@ class CallActivity : AppCompatActivity() {
                 CallContainer(
                     modifier = Modifier.background(color = VideoTheme.colors.appBackground),
                     callViewModel = vm,
+                    callType = CallType.VIDEO,
                     onBackPressed = { finish() },
                 )
             }
@@ -77,15 +78,15 @@ class CallActivity : AppCompatActivity() {
     }
 
     private fun initPermissionManager(): PermissionManager {
-        return StreamPermissionManagerImpl(
-            fragmentActivity = this,
+        return PermissionManager.create(
+            activity = this,
             onPermissionResult = { permission, isGranted ->
                 when (permission) {
                     android.Manifest.permission.CAMERA -> vm.onCallAction(ToggleCamera(isGranted))
                     android.Manifest.permission.RECORD_AUDIO -> vm.onCallAction(ToggleMicrophone(isGranted))
                 }
             },
-            onShowSettings = {}
+            onShowRequestPermissionRationale = {}
         )
     }
 

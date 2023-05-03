@@ -16,25 +16,17 @@
 
 package io.getstream.video.android.compose.ui.components.call.controls.internal
 
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material.Card
-import androidx.compose.material.Icon
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.dp
-import io.getstream.video.android.compose.state.ui.call.CallControlAction
 import io.getstream.video.android.compose.theme.VideoTheme
-import io.getstream.video.android.compose.ui.components.call.controls.buildDefaultCallControlActions
+import io.getstream.video.android.compose.ui.components.call.controls.actions.buildDefaultCallControlActions
 import io.getstream.video.android.core.call.state.CallAction
 import io.getstream.video.android.core.call.state.CallDeviceState
-import io.getstream.video.android.core.call.state.FlipCamera
 
 /**
  * Shows the call controls in a different way when in landscape mode.
@@ -48,10 +40,12 @@ import io.getstream.video.android.core.call.state.FlipCamera
 @Composable
 internal fun LandscapeCallControls(
     callDeviceState: CallDeviceState,
-    isScreenSharing: Boolean,
     modifier: Modifier = Modifier,
-    actions: List<CallControlAction> = buildDefaultCallControlActions(callDeviceState = callDeviceState),
-    onCallAction: (CallAction) -> Unit
+    onCallAction: (CallAction) -> Unit,
+    actions: List<(@Composable () -> Unit)> = buildDefaultCallControlActions(
+        callDeviceState,
+        onCallAction
+    ),
 ) {
 
     LazyColumn(
@@ -60,22 +54,7 @@ internal fun LandscapeCallControls(
         verticalArrangement = Arrangement.SpaceEvenly
     ) {
         items(actions) { action ->
-            val isEnabled = !(action.callAction is FlipCamera && isScreenSharing)
-
-            Card(
-                modifier = Modifier.size(VideoTheme.dimens.landscapeCallControlButtonSize),
-                shape = VideoTheme.shapes.callControlsButton,
-                backgroundColor = if (isEnabled) action.actionBackgroundTint else VideoTheme.colors.disabled
-            ) {
-                Icon(
-                    modifier = Modifier
-                        .padding(10.dp)
-                        .clickable(enabled = isEnabled) { onCallAction(action.callAction) },
-                    tint = action.iconTint,
-                    painter = action.icon,
-                    contentDescription = action.description
-                )
-            }
+            action.invoke()
         }
     }
 }
@@ -86,7 +65,7 @@ private fun LandscapeCallControlsPreview() {
     VideoTheme {
         LandscapeCallControls(
             callDeviceState = CallDeviceState(),
-            isScreenSharing = true,
-        ) {}
+            onCallAction = {}
+        )
     }
 }

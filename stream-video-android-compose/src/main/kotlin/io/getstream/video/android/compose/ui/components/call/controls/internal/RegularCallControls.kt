@@ -17,26 +17,19 @@
 package io.getstream.video.android.compose.ui.components.call.controls.internal
 
 import android.content.res.Configuration
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material.Card
-import androidx.compose.material.Icon
 import androidx.compose.material.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import io.getstream.video.android.compose.state.ui.call.CallControlAction
 import io.getstream.video.android.compose.theme.VideoTheme
-import io.getstream.video.android.compose.ui.components.call.controls.buildDefaultCallControlActions
+import io.getstream.video.android.compose.ui.components.call.controls.actions.buildDefaultCallControlActions
 import io.getstream.video.android.core.call.state.CallAction
 import io.getstream.video.android.core.call.state.CallDeviceState
-import io.getstream.video.android.core.call.state.FlipCamera
 
 /**
  * Represents the set of controls the user can use to change their audio and video device state, or
@@ -49,12 +42,14 @@ import io.getstream.video.android.core.call.state.FlipCamera
  * @param onCallAction Handler when the user triggers an action.
  */
 @Composable
-internal fun RegularCallControls(
+public fun RegularCallControls(
     callDeviceState: CallDeviceState,
-    isScreenSharing: Boolean,
     modifier: Modifier = Modifier,
-    actions: List<CallControlAction> = buildDefaultCallControlActions(callDeviceState = callDeviceState),
-    onCallAction: (CallAction) -> Unit
+    onCallAction: (CallAction) -> Unit,
+    actions: List<(@Composable () -> Unit)> = buildDefaultCallControlActions(
+        callDeviceState,
+        onCallAction
+    ),
 ) {
     Surface(
         modifier = modifier,
@@ -62,47 +57,12 @@ internal fun RegularCallControls(
         color = VideoTheme.colors.barsBackground,
         elevation = 8.dp
     ) {
-        RegularCallControlsActions(
-            actions = actions,
-            isScreenSharing = isScreenSharing,
-            onCallAction = onCallAction
-        )
-    }
-}
-
-/**
- * Represents the list of Call Control actions the user can trigger while in a call.
- *
- * @param actions The list of actions to render.
- * @param isScreenSharing If there is a screen sharing session active.
- * @param onCallAction Handler when a given action is triggered.
- */
-@Composable
-public fun RegularCallControlsActions(
-    actions: List<CallControlAction>,
-    isScreenSharing: Boolean,
-    onCallAction: (CallAction) -> Unit
-) {
-    LazyRow(
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.SpaceEvenly
-    ) {
-        items(actions) { action ->
-            val isEnabled = !(action.callAction is FlipCamera && isScreenSharing)
-
-            Card(
-                modifier = Modifier.size(VideoTheme.dimens.callControlButtonSize),
-                shape = VideoTheme.shapes.callControlsButton,
-                backgroundColor = if (isEnabled) action.actionBackgroundTint else VideoTheme.colors.disabled
-            ) {
-                Icon(
-                    modifier = Modifier
-                        .padding(10.dp)
-                        .clickable(enabled = isEnabled) { onCallAction(action.callAction) },
-                    tint = action.iconTint,
-                    painter = action.icon,
-                    contentDescription = action.description
-                )
+        LazyRow(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceEvenly
+        ) {
+            items(actions) { action ->
+                action.invoke()
             }
         }
     }
@@ -115,8 +75,7 @@ private fun RegularCallControlsActionsPreview() {
     VideoTheme {
         RegularCallControls(
             callDeviceState = CallDeviceState(),
-            isScreenSharing = true
-        ) {
-        }
+            onCallAction = {}
+        )
     }
 }
