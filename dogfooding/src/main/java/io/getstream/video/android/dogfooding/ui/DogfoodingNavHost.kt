@@ -49,7 +49,7 @@ fun DogfoodingNavHost(
         }
         composable(DogfoodingScreens.CallJoin.destination) {
             CallJoinScreen(
-                navigateToCallPreview = {
+                navigateToCallLobby = {
                     navController.navigate(DogfoodingScreens.CallLobby.destination)
                 },
                 navigateUpToLogin = {

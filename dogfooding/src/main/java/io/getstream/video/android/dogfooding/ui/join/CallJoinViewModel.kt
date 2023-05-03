@@ -31,7 +31,6 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.onCompletion
-import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.stateIn
 import org.openapitools.client.models.GetOrCreateCallResponse
 import javax.inject.Inject
@@ -52,6 +51,7 @@ class CallJoinViewModel @Inject constructor(
         .flatMapLatest { event ->
             when (event) {
                 is CallJoinEvent.CreateCall -> {
+                    _isLoading.value = true
                     val result = startNewCall()
 
                     if (result.isSuccess) {
@@ -63,6 +63,7 @@ class CallJoinViewModel @Inject constructor(
                 }
 
                 is CallJoinEvent.JoinCall -> {
+                    _isLoading.value = true
                     val result = joinCall(event.callId)
 
                     if (result.isSuccess) {
@@ -75,7 +76,7 @@ class CallJoinViewModel @Inject constructor(
                 is CallJoinEvent.JoinCompleted -> flowOf(CallJoinUiState.JoinCompletedUi(event.callId))
                 else -> flowOf(CallJoinUiState.Nothing)
             }
-        }.onStart { _isLoading.value = true }
+        }
         .onCompletion { _isLoading.value = false }
         .stateIn(viewModelScope, SharingStarted.Lazily, CallJoinUiState.Nothing)
 
