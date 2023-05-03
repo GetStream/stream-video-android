@@ -23,7 +23,20 @@
 
 package org.openapitools.client.models
 
+import org.openapitools.client.models.CallSettingsRequest
+import org.openapitools.client.models.MemberRequest
+import org.openapitools.client.models.UserRequest
+
+
+
+
+import com.squareup.moshi.FromJson
 import com.squareup.moshi.Json
+import com.squareup.moshi.JsonAdapter
+import com.squareup.moshi.JsonReader
+import com.squareup.moshi.JsonWriter
+import com.squareup.moshi.ToJson
+import org.openapitools.client.infrastructure.Serializer
 
 /**
  *
@@ -37,7 +50,8 @@ import com.squareup.moshi.Json
  * @param team
  */
 
-data class CallRequest(
+
+data class CallRequest (
 
     @Json(name = "created_by")
     val createdBy: UserRequest? = null,

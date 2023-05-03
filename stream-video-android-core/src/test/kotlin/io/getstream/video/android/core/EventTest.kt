@@ -164,7 +164,7 @@ class EventTest : IntegrationTestBase(connectCoordinatorWS = false) {
 
     @Test
     fun `Call updates`() = runTest {
-        val capability = OwnCapability.decode("end-call")!!
+        val capability = OwnCapability.fromString("end-call")!!
         val ownCapabilities = mutableListOf<OwnCapability>(capability)
         val custom = mutableMapOf<String, Any>("fruit" to "apple")
 //        val callInfo = CallInfo(
@@ -210,7 +210,7 @@ class EventTest : IntegrationTestBase(connectCoordinatorWS = false) {
             testData.users["thierry"]!!.toUserResponse()
         )
         clientImpl.fireEvent(requestEvent)
-        val capability = OwnCapability.decode("screenshare")!!
+        val capability = OwnCapability.fromString("screenshare")!!
         val ownCapabilities = mutableListOf(capability)
         val permissionsUpdated = UpdatedCallPermissionsEvent(
             call.cid,

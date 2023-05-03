@@ -23,13 +23,24 @@
 
 package org.openapitools.client.models
 
+import org.openapitools.client.models.SortParamRequest
+
+
+
+
+import com.squareup.moshi.FromJson
 import com.squareup.moshi.Json
+import com.squareup.moshi.JsonAdapter
+import com.squareup.moshi.JsonReader
+import com.squareup.moshi.JsonWriter
+import com.squareup.moshi.ToJson
+import org.openapitools.client.infrastructure.Serializer
 
 /**
  *
  *
- * @param filterConditions
  * @param type
+ * @param filterConditions
  * @param id
  * @param limit
  * @param next
@@ -37,23 +48,21 @@ import com.squareup.moshi.Json
  * @param sort
  */
 
-data class QueryMembersRequest(
 
-    @Json(name = "filter_conditions")
-    val filterConditions: kotlin.collections.Map<kotlin.String, kotlin.Any>,
+data class QueryMembersRequest (
 
-    // What's type?
     @Json(name = "type")
     val type: kotlin.String,
+
+    @Json(name = "filter_conditions")
+    val filterConditions: kotlin.collections.Map<kotlin.String, kotlin.Any>? = null,
 
     @Json(name = "id")
     val id: kotlin.String? = null,
 
-    // Where is the offset?
     @Json(name = "limit")
     val limit: kotlin.Int? = null,
 
-    // What do next and prev mean on a request. I'd expect to see it on a response, not a request
     @Json(name = "next")
     val next: kotlin.String? = null,
 

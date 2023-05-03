@@ -33,7 +33,7 @@ BuildConfig.CORE_TEST_LOCAL
 
 ## OpenAPI build
 
-Clone the protocl
+Clone the protocol
 ```bash
 ```
 
@@ -56,6 +56,11 @@ diff -rq ~/workspace/generated/src/main/kotlin/org/openapitools/client ~/workspa
 
 * Protocol is visible here: https://getstream.github.io/protocol/
 * https://www.notion.so/Getting-Started-to-Video-for-Android-Developers-be5ae7e2e9584f78b757163ecff1033b
+
+### Advanced use cases (Most people don't need this)
+* If you want to use the locally checked out `protocol` repository, then use `LOCAL_ENV=1` with the generate command.
+* (For stream developers only) If you want to directly get it from the coordinator repository then use `OPENAPI_ROOT_USE_COORDINATOR_REPO=1`
+  switch along with `LOCAL_ENV=1` with the generate command. This is a shortcut.
 
 ## Writing integration tests
 

@@ -28,5 +28,5 @@ public data class ReactionData(
     public val type: String,
     public val user: User,
     public val emoji: String?,
-    public val custom: Map<String, Any>
+    public val custom: Map<String, Any>?
 )

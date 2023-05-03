@@ -80,18 +80,14 @@ class HomeActivity : AppCompatActivity() {
 
     private val logger by taggedLogger("Call:HomeView")
 
-    private val callCidState: MutableState<StreamCallId> = mutableStateOf(
-        "default:NnXAIvBKE4Hy"
-    )
+    private val callCidState: MutableState<StreamCallId> = mutableStateOf("default:NnXAIvBKE4Hy")
 
     private val connectionState: StateFlow<ConnectionState> by lazy { streamVideo.state.connection }
 
     @Composable
     private fun HomeScreen() {
         Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .background(VideoTheme.colors.appBackground),
+            modifier = Modifier.fillMaxSize().background(VideoTheme.colors.appBackground),
             verticalArrangement = Arrangement.Center
         ) {
             UserDetails()
@@ -101,17 +97,14 @@ class HomeActivity : AppCompatActivity() {
             Spacer(modifier = Modifier.height(16.dp))
 
             Button(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 16.dp),
+                modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp),
                 onClick = ::logOut,
-                colors = ButtonDefaults.buttonColors(
+                colors =
+                ButtonDefaults.buttonColors(
                     backgroundColor = VideoTheme.colors.errorAccent, contentColor = Color.White
                 )
             ) {
-                Text(
-                    text = "Log Out", color = Color.White
-                )
+                Text(text = "Log Out", color = Color.White)
             }
 
             val connectionState by connectionState.collectAsState()
@@ -137,82 +130,68 @@ class HomeActivity : AppCompatActivity() {
         CallIdInput()
 
         Button(
-            modifier = Modifier
-                .fillMaxWidth()
+            modifier =
+            Modifier.fillMaxWidth()
                 .height(64.dp)
                 .padding(horizontal = 16.dp)
                 .align(Alignment.CenterHorizontally)
                 .testTag("join_call"),
-            colors = ButtonDefaults.buttonColors(
-                backgroundColor = VideoTheme.colors.primaryAccent
-            ),
+            colors = ButtonDefaults.buttonColors(backgroundColor = VideoTheme.colors.primaryAccent),
             onClick = { joinCall() }
-        ) {
-            Text(text = "Join call", color = Color.White)
-        }
+        ) { Text(text = "Join call", color = Color.White) }
     }
 
     private fun joinCall() {
         lifecycleScope.launch {
-
             val (type, id) = callCidState.value.typeToId
             val call = streamVideo.call(type = type, id = id)
 
             val result = call.create(memberIds = listOf(streamVideo.userId))
-            result.onSuccess {
-                logger.d { "[joinCall] onSuccess: $it" }
-                val intent = CallActivity.getIntent(this@HomeActivity, callCidState.value)
-                startActivity(intent)
-            }.onError {
-                logger.d { "[joinCall] onError: $it" }
-                Toast.makeText(this@HomeActivity, it.message, Toast.LENGTH_SHORT).show()
-            }
+            result
+                .onSuccess {
+                    logger.d { "[joinCall] onSuccess: $it" }
+                    val intent = CallActivity.getIntent(this@HomeActivity, callCidState.value)
+                    startActivity(intent)
+                }
+                .onError {
+                    logger.d { "[joinCall] onError: $it" }
+                    Toast.makeText(this@HomeActivity, it.message, Toast.LENGTH_SHORT).show()
+                }
         }
     }
 
     @Composable
     fun CallIdInput() {
         OutlinedTextField(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp),
+            modifier = Modifier.fillMaxWidth().padding(16.dp),
             value = callCidState.value,
-            onValueChange = { input ->
-                callCidState.value = input
-            },
-            colors = TextFieldDefaults.outlinedTextFieldColors(
+            onValueChange = { input -> callCidState.value = input },
+            colors =
+            TextFieldDefaults.outlinedTextFieldColors(
                 textColor = VideoTheme.colors.textHighEmphasis,
                 focusedBorderColor = VideoTheme.colors.primaryAccent,
                 focusedLabelColor = VideoTheme.colors.primaryAccent,
                 unfocusedBorderColor = VideoTheme.colors.primaryAccent,
                 unfocusedLabelColor = VideoTheme.colors.primaryAccent,
             ),
-            label = {
-                Text(text = "Enter the call ID")
-            }
+            label = { Text(text = "Enter the call ID") }
         )
     }
 
     @Composable
     private fun UserDetails() {
         Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(40.dp),
+            modifier = Modifier.fillMaxWidth().height(40.dp),
             horizontalArrangement = Arrangement.Start
         ) {
             UserIcon()
 
             val user by streamVideo.state.user.collectAsState()
 
-            val name = user?.name?.ifEmpty {
-                user?.id
-            }
+            val name = user?.name?.ifEmpty { user?.id }
 
             Text(
-                modifier = Modifier
-                    .padding(horizontal = 16.dp)
-                    .align(CenterVertically),
+                modifier = Modifier.padding(horizontal = 16.dp).align(CenterVertically),
                 color = VideoTheme.colors.textHighEmphasis,
                 text = name ?: "Missing name",
                 overflow = TextOverflow.Ellipsis,
@@ -226,11 +205,10 @@ class HomeActivity : AppCompatActivity() {
         val user = UserPreferencesManager.initialize(this).getUserCredentials() ?: return
 
         Avatar(
-            modifier = Modifier
-                .size(40.dp)
-                .padding(top = 8.dp, start = 8.dp),
+            modifier = Modifier.size(40.dp).padding(top = 8.dp, start = 8.dp),
             imageUrl = user.image,
-            initials = if (user.image.isEmpty()) {
+            initials =
+            if (user.image.isEmpty()) {
                 user.name.initials()
             } else {
                 null

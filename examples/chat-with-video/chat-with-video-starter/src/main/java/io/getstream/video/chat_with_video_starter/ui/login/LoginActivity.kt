@@ -56,13 +56,9 @@ class LoginActivity : ComponentActivity() {
         setContent {
             VideoTheme {
                 UserList(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .background(VideoTheme.colors.appBackground),
+                    modifier = Modifier.fillMaxSize().background(VideoTheme.colors.appBackground),
                     userItems = dataSet,
-                    onClick = { user ->
-                        logIn(user)
-                    }
+                    onClick = { user -> logIn(user) }
                 )
             }
         }
@@ -83,11 +79,7 @@ class LoginActivity : ComponentActivity() {
     }
 
     @Composable
-    fun UserList(
-        userItems: List<User>,
-        modifier: Modifier = Modifier,
-        onClick: (User) -> Unit
-    ) {
+    fun UserList(userItems: List<User>, modifier: Modifier = Modifier, onClick: (User) -> Unit) {
         Column(
             modifier = modifier,
             horizontalAlignment = Alignment.CenterHorizontally,
@@ -102,32 +94,21 @@ class LoginActivity : ComponentActivity() {
     }
 
     @Composable
-    fun UserItem(
-        credentials: User,
-        onClick: (User) -> Unit
-    ) {
+    fun UserItem(credentials: User, onClick: (User) -> Unit) {
         Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .clickable(onClick = { onClick(credentials) }),
+            modifier = Modifier.fillMaxWidth().clickable(onClick = { onClick(credentials) }),
         ) {
             Spacer(modifier = Modifier.height(8.dp))
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 16.dp)
-            ) {
+            Row(modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp)) {
                 Box(
-                    modifier = Modifier
-                        .size(46.dp)
+                    modifier =
+                    Modifier.size(46.dp)
                         .align(alignment = Alignment.CenterVertically)
                         .clip(CircleShape)
                         .background(VideoTheme.colors.appBackground)
                 ) {
                     Avatar(
-                        modifier = Modifier
-                            .size(40.dp)
-                            .align(alignment = Alignment.Center),
+                        modifier = Modifier.size(40.dp).align(alignment = Alignment.Center),
                         imageUrl = credentials.image
                     )
                 }
@@ -135,9 +116,7 @@ class LoginActivity : ComponentActivity() {
                 Spacer(modifier = Modifier.width(16.dp))
 
                 Text(
-                    modifier = Modifier
-                        .align(Alignment.CenterVertically)
-                        .weight(1f),
+                    modifier = Modifier.align(Alignment.CenterVertically).weight(1f),
                     text = credentials.name,
                     fontSize = 16.sp,
                     color = VideoTheme.colors.textHighEmphasis

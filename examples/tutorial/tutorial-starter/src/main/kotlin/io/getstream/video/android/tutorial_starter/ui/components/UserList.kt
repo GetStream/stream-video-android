@@ -27,11 +27,7 @@ import androidx.compose.ui.unit.dp
 import io.getstream.video.android.tutorial_starter.user.AppUser
 
 @Composable
-fun UserList(
-    userItems: List<AppUser>,
-    modifier: Modifier = Modifier,
-    onClick: (AppUser) -> Unit
-) {
+fun UserList(userItems: List<AppUser>, modifier: Modifier = Modifier, onClick: (AppUser) -> Unit) {
     Column(
         modifier = modifier,
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -41,10 +37,7 @@ fun UserList(
             if (index > 0) {
                 Divider(startIndent = 16.dp, thickness = 0.5.dp, color = Color.LightGray)
             }
-            UserItem(
-                appUser = user,
-                onClick = onClick
-            )
+            UserItem(appUser = user, onClick = onClick)
         }
     }
 }

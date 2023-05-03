@@ -35,9 +35,7 @@ class FakeUsersProvider : UsersProvider {
                 name = BuildConfig.SAMPLE_USER_00_NAME,
                 role = BuildConfig.SAMPLE_USER_00_ROLE,
                 image = BuildConfig.SAMPLE_USER_00_IMAGE,
-                custom = mapOf(
-                    "chatToken" to BuildConfig.SAMPLE_USER_00_CHAT_TOKEN
-                ),
+                custom = mapOf("chatToken" to BuildConfig.SAMPLE_USER_00_CHAT_TOKEN),
                 teams = emptyList()
             ),
             User(
@@ -45,9 +43,7 @@ class FakeUsersProvider : UsersProvider {
                 name = BuildConfig.SAMPLE_USER_01_NAME,
                 role = BuildConfig.SAMPLE_USER_01_ROLE,
                 image = BuildConfig.SAMPLE_USER_01_IMAGE,
-                custom = mapOf(
-                    "chatToken" to BuildConfig.SAMPLE_USER_01_CHAT_TOKEN
-                ),
+                custom = mapOf("chatToken" to BuildConfig.SAMPLE_USER_01_CHAT_TOKEN),
                 teams = emptyList()
             ),
             User(
@@ -55,9 +51,7 @@ class FakeUsersProvider : UsersProvider {
                 name = BuildConfig.SAMPLE_USER_02_NAME,
                 role = BuildConfig.SAMPLE_USER_02_ROLE,
                 image = BuildConfig.SAMPLE_USER_02_IMAGE,
-                custom = mapOf(
-                    "chatToken" to BuildConfig.SAMPLE_USER_02_CHAT_TOKEN
-                ),
+                custom = mapOf("chatToken" to BuildConfig.SAMPLE_USER_02_CHAT_TOKEN),
                 teams = emptyList()
             ),
             User(
@@ -65,9 +59,7 @@ class FakeUsersProvider : UsersProvider {
                 name = BuildConfig.SAMPLE_USER_03_NAME,
                 role = BuildConfig.SAMPLE_USER_03_ROLE,
                 image = BuildConfig.SAMPLE_USER_03_IMAGE,
-                custom = mapOf(
-                    "chatToken" to BuildConfig.SAMPLE_USER_03_CHAT_TOKEN
-                ),
+                custom = mapOf("chatToken" to BuildConfig.SAMPLE_USER_03_CHAT_TOKEN),
                 teams = emptyList()
             ),
             User(
@@ -75,9 +67,7 @@ class FakeUsersProvider : UsersProvider {
                 name = BuildConfig.SAMPLE_USER_04_NAME,
                 role = BuildConfig.SAMPLE_USER_04_ROLE,
                 image = BuildConfig.SAMPLE_USER_04_IMAGE,
-                custom = mapOf(
-                    "chatToken" to BuildConfig.SAMPLE_USER_04_CHAT_TOKEN
-                ),
+                custom = mapOf("chatToken" to BuildConfig.SAMPLE_USER_04_CHAT_TOKEN),
                 teams = emptyList()
             ),
             User(
@@ -85,9 +75,7 @@ class FakeUsersProvider : UsersProvider {
                 name = BuildConfig.SAMPLE_USER_05_NAME,
                 role = BuildConfig.SAMPLE_USER_05_ROLE,
                 image = BuildConfig.SAMPLE_USER_05_IMAGE,
-                custom = mapOf(
-                    "chatToken" to BuildConfig.SAMPLE_USER_05_CHAT_TOKEN
-                ),
+                custom = mapOf("chatToken" to BuildConfig.SAMPLE_USER_05_CHAT_TOKEN),
                 teams = emptyList()
             ),
         )

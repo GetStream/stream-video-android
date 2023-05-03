@@ -23,7 +23,18 @@
 
 package org.openapitools.client.models
 
+import org.openapitools.client.models.ReactionResponse
+
+
+
+
+import com.squareup.moshi.FromJson
 import com.squareup.moshi.Json
+import com.squareup.moshi.JsonAdapter
+import com.squareup.moshi.JsonReader
+import com.squareup.moshi.JsonWriter
+import com.squareup.moshi.ToJson
+import org.openapitools.client.infrastructure.Serializer
 
 /**
  *
@@ -32,7 +43,8 @@ import com.squareup.moshi.Json
  * @param reaction
  */
 
-data class SendReactionResponse(
+
+data class SendReactionResponse (
 
     /* Duration of the request in human-readable format */
     @Json(name = "duration")

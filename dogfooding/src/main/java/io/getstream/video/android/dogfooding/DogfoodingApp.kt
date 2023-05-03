@@ -48,9 +48,7 @@ class DogfoodingApp : Application() {
         UserPreferencesManager.initialize(this)
     }
 
-    /**
-     * Sets up and returns the [streamVideo] required to connect to the API.
-     */
+    /** Sets up and returns the [streamVideo] required to connect to the API. */
     fun initializeStreamVideo(
         user: User,
         token: String,

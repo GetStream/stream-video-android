@@ -23,7 +23,21 @@
 
 package org.openapitools.client.models
 
+import org.openapitools.client.models.CallIngressResponse
+import org.openapitools.client.models.CallSettingsResponse
+import org.openapitools.client.models.OwnCapability
+import org.openapitools.client.models.UserResponse
+
+
+
+
+import com.squareup.moshi.FromJson
 import com.squareup.moshi.Json
+import com.squareup.moshi.JsonAdapter
+import com.squareup.moshi.JsonReader
+import com.squareup.moshi.JsonWriter
+import com.squareup.moshi.ToJson
+import org.openapitools.client.infrastructure.Serializer
 
 /**
  * Represents a call
@@ -35,6 +49,7 @@ import com.squareup.moshi.Json
  * @param createdAt Date/time of creation
  * @param createdBy
  * @param custom Custom data for this object
+ * @param hlsPlaylistUrl
  * @param id Call ID
  * @param ingress
  * @param ownCapabilities The capabilities of the current user
@@ -48,7 +63,8 @@ import com.squareup.moshi.Json
  * @param team
  */
 
-data class CallResponse(
+
+data class CallResponse (
 
     @Json(name = "backstage")
     val backstage: kotlin.Boolean,
@@ -73,6 +89,9 @@ data class CallResponse(
     /* Custom data for this object */
     @Json(name = "custom")
     val custom: kotlin.collections.Map<kotlin.String, kotlin.Any>,
+
+    @Json(name = "hls_playlist_url")
+    val hlsPlaylistUrl: kotlin.String,
 
     /* Call ID */
     @Json(name = "id")

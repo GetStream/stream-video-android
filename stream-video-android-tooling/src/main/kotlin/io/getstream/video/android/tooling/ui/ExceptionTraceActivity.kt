@@ -36,12 +36,7 @@ internal class ExceptionTraceActivity : ComponentActivity() {
         }
 
         setContent {
-            VideoTheme {
-                ExceptionTraceScreen(
-                    packageName = packageName!!,
-                    message = throwable!!
-                )
-            }
+            VideoTheme { ExceptionTraceScreen(packageName = packageName!!, message = throwable!!) }
         }
     }
 

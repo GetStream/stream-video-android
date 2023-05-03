@@ -28,8 +28,7 @@ import org.junit.Test
 
 @ExperimentalStableBaselineProfilesApi
 internal class BaselineProfileGenerator {
-    @get:Rule
-    internal val baselineProfileRule = BaselineProfileRule()
+    @get:Rule internal val baselineProfileRule = BaselineProfileRule()
 
     @Test
     fun startup() =

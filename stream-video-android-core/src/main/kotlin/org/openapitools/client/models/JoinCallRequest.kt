@@ -23,7 +23,18 @@
 
 package org.openapitools.client.models
 
+import org.openapitools.client.models.CallRequest
+
+
+
+
+import com.squareup.moshi.FromJson
 import com.squareup.moshi.Json
+import com.squareup.moshi.JsonAdapter
+import com.squareup.moshi.JsonReader
+import com.squareup.moshi.JsonWriter
+import com.squareup.moshi.ToJson
+import org.openapitools.client.infrastructure.Serializer
 
 /**
  *
@@ -35,7 +46,8 @@ import com.squareup.moshi.Json
  * @param ring if true and the call is created, the notification will include ring=true
  */
 
-data class JoinCallRequest(
+
+data class JoinCallRequest (
 
     /* if true the call will be created if it doesn't exist */
     @Json(name = "create")

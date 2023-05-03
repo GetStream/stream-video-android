@@ -23,7 +23,18 @@
 
 package org.openapitools.client.models
 
+import org.openapitools.client.models.CallResponse
+
+
+
+
+import com.squareup.moshi.FromJson
 import com.squareup.moshi.Json
+import com.squareup.moshi.JsonAdapter
+import com.squareup.moshi.JsonReader
+import com.squareup.moshi.JsonWriter
+import com.squareup.moshi.ToJson
+import org.openapitools.client.infrastructure.Serializer
 
 /**
  * This event is sent when a call is updated, clients should use this update the local state of the call.  This event also contains the capabilities by role for the call, clients should update the own_capability for the current.
@@ -35,7 +46,8 @@ import com.squareup.moshi.Json
  * @param type The type of event: \"call.ended\" in this case
  */
 
-data class CallUpdatedEvent(
+
+data class CallUpdatedEvent (
 
     @Json(name = "call")
     val call: CallResponse,

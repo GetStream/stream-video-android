@@ -31,4 +31,5 @@ class OffsetDateTimeAdapter {
     fun fromJson(value: String): OffsetDateTime {
         return OffsetDateTime.parse(value, DateTimeFormatter.ISO_OFFSET_DATE_TIME)
     }
+
 }
