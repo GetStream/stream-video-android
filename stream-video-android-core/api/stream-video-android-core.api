@@ -4754,17 +4754,17 @@ public final class org/openapitools/client/models/QueryCallsResponse {
 }
 
 public final class org/openapitools/client/models/QueryMembersRequest {
-	public fun <init> (Ljava/util/Map;Ljava/lang/String;Ljava/lang/String;Ljava/lang/Integer;Ljava/lang/String;Ljava/lang/String;Ljava/util/List;)V
-	public synthetic fun <init> (Ljava/util/Map;Ljava/lang/String;Ljava/lang/String;Ljava/lang/Integer;Ljava/lang/String;Ljava/lang/String;Ljava/util/List;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
-	public final fun component1 ()Ljava/util/Map;
-	public final fun component2 ()Ljava/lang/String;
+	public fun <init> (Ljava/lang/String;Ljava/util/Map;Ljava/lang/String;Ljava/lang/Integer;Ljava/lang/String;Ljava/lang/String;Ljava/util/List;)V
+	public synthetic fun <init> (Ljava/lang/String;Ljava/util/Map;Ljava/lang/String;Ljava/lang/Integer;Ljava/lang/String;Ljava/lang/String;Ljava/util/List;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Ljava/util/Map;
 	public final fun component3 ()Ljava/lang/String;
 	public final fun component4 ()Ljava/lang/Integer;
 	public final fun component5 ()Ljava/lang/String;
 	public final fun component6 ()Ljava/lang/String;
 	public final fun component7 ()Ljava/util/List;
-	public final fun copy (Ljava/util/Map;Ljava/lang/String;Ljava/lang/String;Ljava/lang/Integer;Ljava/lang/String;Ljava/lang/String;Ljava/util/List;)Lorg/openapitools/client/models/QueryMembersRequest;
-	public static synthetic fun copy$default (Lorg/openapitools/client/models/QueryMembersRequest;Ljava/util/Map;Ljava/lang/String;Ljava/lang/String;Ljava/lang/Integer;Ljava/lang/String;Ljava/lang/String;Ljava/util/List;ILjava/lang/Object;)Lorg/openapitools/client/models/QueryMembersRequest;
+	public final fun copy (Ljava/lang/String;Ljava/util/Map;Ljava/lang/String;Ljava/lang/Integer;Ljava/lang/String;Ljava/lang/String;Ljava/util/List;)Lorg/openapitools/client/models/QueryMembersRequest;
+	public static synthetic fun copy$default (Lorg/openapitools/client/models/QueryMembersRequest;Ljava/lang/String;Ljava/util/Map;Ljava/lang/String;Ljava/lang/Integer;Ljava/lang/String;Ljava/lang/String;Ljava/util/List;ILjava/lang/Object;)Lorg/openapitools/client/models/QueryMembersRequest;
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getFilterConditions ()Ljava/util/Map;
 	public final fun getId ()Ljava/lang/String;
@@ -4807,14 +4807,14 @@ public final class org/openapitools/client/models/RTMPIngress {
 }
 
 public final class org/openapitools/client/models/ReactionResponse {
-	public fun <init> (Ljava/util/Map;Ljava/lang/String;Lorg/openapitools/client/models/UserResponse;Ljava/lang/String;)V
-	public synthetic fun <init> (Ljava/util/Map;Ljava/lang/String;Lorg/openapitools/client/models/UserResponse;Ljava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
-	public final fun component1 ()Ljava/util/Map;
-	public final fun component2 ()Ljava/lang/String;
-	public final fun component3 ()Lorg/openapitools/client/models/UserResponse;
+	public fun <init> (Ljava/lang/String;Lorg/openapitools/client/models/UserResponse;Ljava/util/Map;Ljava/lang/String;)V
+	public synthetic fun <init> (Ljava/lang/String;Lorg/openapitools/client/models/UserResponse;Ljava/util/Map;Ljava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Lorg/openapitools/client/models/UserResponse;
+	public final fun component3 ()Ljava/util/Map;
 	public final fun component4 ()Ljava/lang/String;
-	public final fun copy (Ljava/util/Map;Ljava/lang/String;Lorg/openapitools/client/models/UserResponse;Ljava/lang/String;)Lorg/openapitools/client/models/ReactionResponse;
-	public static synthetic fun copy$default (Lorg/openapitools/client/models/ReactionResponse;Ljava/util/Map;Ljava/lang/String;Lorg/openapitools/client/models/UserResponse;Ljava/lang/String;ILjava/lang/Object;)Lorg/openapitools/client/models/ReactionResponse;
+	public final fun copy (Ljava/lang/String;Lorg/openapitools/client/models/UserResponse;Ljava/util/Map;Ljava/lang/String;)Lorg/openapitools/client/models/ReactionResponse;
+	public static synthetic fun copy$default (Lorg/openapitools/client/models/ReactionResponse;Ljava/lang/String;Lorg/openapitools/client/models/UserResponse;Ljava/util/Map;Ljava/lang/String;ILjava/lang/Object;)Lorg/openapitools/client/models/ReactionResponse;
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getCustom ()Ljava/util/Map;
 	public final fun getEmojiCode ()Ljava/lang/String;
