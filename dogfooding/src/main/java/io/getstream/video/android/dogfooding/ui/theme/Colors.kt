@@ -20,5 +20,6 @@ import androidx.compose.ui.graphics.Color
 
 object Colors {
     val background: Color = Color(0xFF2C2C2E)
+    val secondBackground: Color = Color(0xFF1C1E22)
     val description: Color = Color(0xFF979797)
 }

@@ -31,16 +31,16 @@ import kotlin.system.exitProcess
 
 /**
  * A global exception handler that snatches all exceptions in the application and forward to the
- * exception tracing screen. The exception tracing screen helps you to debug the error messages, and
- * users can restart the crashed application or share the log messages.
+ * exception tracing screen. The exception tracing screen helps you to debug the error messages,
+ * and users can restart the crashed application or share the log messages.
  *
- * You can install the exception handler with the [install] or [installOnDebuggableApp] methods.
+ *  You can install the exception handler with the [install] or [installOnDebuggableApp] methods.
  */
-public class StreamGlobalExceptionHandler
-constructor(
+public class StreamGlobalExceptionHandler constructor(
     application: Application,
     private val packageName: String,
     private val defaultExceptionHandler: Thread.UncaughtExceptionHandler,
+    private val exceptionHandler: (String) -> Unit
 ) : Thread.UncaughtExceptionHandler {
 
     private var lastActivity: Activity? = null
@@ -54,7 +54,8 @@ constructor(
 
                 override fun onActivityPaused(activity: Activity) = Unit
 
-                override fun onActivitySaveInstanceState(activity: Activity, outState: Bundle) = Unit
+                override fun onActivitySaveInstanceState(activity: Activity, outState: Bundle) =
+                    Unit
 
                 override fun onActivityDestroyed(activity: Activity) = Unit
 
@@ -95,8 +96,8 @@ constructor(
 
             val stackTrace = stringWriter.toString()
             startExceptionActivity(this, stackTrace, throwable.message ?: "")
-        }
-            ?: defaultExceptionHandler.uncaughtException(thread, throwable)
+            exceptionHandler.invoke(stackTrace)
+        } ?: defaultExceptionHandler.uncaughtException(thread, throwable)
 
         Process.killProcess(Process.myPid())
         exitProcess(-1)
@@ -104,13 +105,12 @@ constructor(
 
     private fun startExceptionActivity(activity: Activity, exception: String, message: String) =
         activity.run {
-            val intent =
-                ExceptionTraceActivity.getIntent(
-                    context = this,
-                    exception = exception,
-                    message = message,
-                    this@StreamGlobalExceptionHandler.packageName
-                )
+            val intent = ExceptionTraceActivity.getIntent(
+                context = this,
+                exception = exception,
+                message = message,
+                this@StreamGlobalExceptionHandler.packageName
+            )
             startActivity(intent)
             finish()
         }
@@ -123,12 +123,13 @@ constructor(
          * Installs a new [StreamGlobalExceptionHandler] if the application is debuggable.
          *
          * @param application Application.
-         * @param packageName The package name of the Activity that should be started when user restarts
-         * the application.
+         * @param packageName The package name of the Activity that should be started when user
+         * restarts the application.
          */
         public fun installOnDebuggableApp(
             application: Application,
             packageName: String,
+            exceptionHandler: (String) -> Unit = {}
         ) {
             val defaultExceptionHandler = Thread.getDefaultUncaughtExceptionHandler() ?: return
             if (!StreamGlobalException.isInstalled && application.isDebuggableApp) {
@@ -136,6 +137,7 @@ constructor(
                     StreamGlobalExceptionHandler(
                         application = application,
                         packageName = packageName,
+                        exceptionHandler = exceptionHandler,
                         defaultExceptionHandler = defaultExceptionHandler
                     )
                 )
@@ -146,19 +148,21 @@ constructor(
          * Install a new [StreamGlobalExceptionHandler].
          *
          * @param application Application.
-         * @param packageName The package name of the Activity that should be started when user restarts
-         * the application.
+         * @param packageName The package name of the Activity that should be started when user
+         * restarts the application.
          */
         public fun install(
             application: Application,
             packageName: String,
+            exceptionHandler: (String) -> Unit = {}
         ) {
             val defaultExceptionHandler = Thread.getDefaultUncaughtExceptionHandler() ?: return
             StreamGlobalException.install(
                 StreamGlobalExceptionHandler(
                     application = application,
                     packageName = packageName,
-                    defaultExceptionHandler = defaultExceptionHandler
+                    exceptionHandler = exceptionHandler,
+                    defaultExceptionHandler = defaultExceptionHandler,
                 )
             )
         }
