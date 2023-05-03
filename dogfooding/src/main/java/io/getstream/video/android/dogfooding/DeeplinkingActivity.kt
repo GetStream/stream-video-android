@@ -22,6 +22,7 @@ import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import io.getstream.log.taggedLogger
+import io.getstream.video.android.core.StreamVideo
 import io.getstream.video.android.core.logging.LoggingLevel
 import io.getstream.video.android.core.user.UserPreferencesManager
 import kotlinx.coroutines.launch
@@ -30,7 +31,9 @@ class DeeplinkingActivity : AppCompatActivity() {
 
     private val logger by taggedLogger("Call:DeeplinkView")
 
-    private val controller by lazy { dogfoodingApp.streamVideo }
+    private val controller by lazy {
+        StreamVideo.instance()
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         logger.d { "[onCreate] savedInstanceState: $savedInstanceState" }
@@ -49,20 +52,19 @@ class DeeplinkingActivity : AppCompatActivity() {
 
     private fun joinCall(callId: String) {
         lifecycleScope.launch {
-            //            val createCallResult = controller.joinCall("default", callId)
-            //
-            //            createCallResult.onSuccess {
-            //                /**
-            //                 * Since we're using launchers, we don't need to worry about starting the
-            //                 * CallActivity ourselves.
-            //                 */
-            //                Log.d("Joined", it.toString())
-            //            }
-            //            createCallResult.onError {
-            //                Log.d("Couldn't select server", it.message ?: "")
-            //                Toast.makeText(this@DeeplinkingActivity, it.message,
-            // Toast.LENGTH_SHORT).show()
-            //            }
+//            val createCallResult = controller.joinCall("default", callId)
+//
+//            createCallResult.onSuccess {
+//                /**
+//                 * Since we're using launchers, we don't need to worry about starting the
+//                 * CallActivity ourselves.
+//                 */
+//                Log.d("Joined", it.toString())
+//            }
+//            createCallResult.onError {
+//                Log.d("Couldn't select server", it.message ?: "")
+//                Toast.makeText(this@DeeplinkingActivity, it.message, Toast.LENGTH_SHORT).show()
+//            }
         }
     }
 
@@ -75,7 +77,10 @@ class DeeplinkingActivity : AppCompatActivity() {
         if (user != null) {
             logger.d { "[logIn] selectedUser: $user" }
             dogfoodingApp.initializeStreamVideo(
-                user = user, token = token, apiKey = apiKey, loggingLevel = LoggingLevel.BODY
+                user = user,
+                token = token,
+                apiKey = apiKey,
+                loggingLevel = LoggingLevel.BODY
             )
         }
     }

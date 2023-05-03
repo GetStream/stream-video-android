@@ -57,6 +57,7 @@ import io.getstream.log.taggedLogger
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.avatar.Avatar
 import io.getstream.video.android.core.ConnectionState
+import io.getstream.video.android.core.StreamVideo
 import io.getstream.video.android.core.model.StreamCallId
 import io.getstream.video.android.core.model.typeToId
 import io.getstream.video.android.core.user.UserPreferencesManager
@@ -68,7 +69,7 @@ class HomeActivity : AppCompatActivity() {
 
     private val streamVideo by lazy {
         logger.d { "[initStreamVideo] no args" }
-        dogfoodingApp.streamVideo
+        StreamVideo.instance()
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {

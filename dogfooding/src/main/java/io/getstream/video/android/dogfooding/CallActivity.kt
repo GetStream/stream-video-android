@@ -39,7 +39,7 @@ import io.getstream.video.android.core.viewmodel.CallViewModelFactory
 
 class CallActivity : ComponentActivity() {
 
-    private val streamVideo: StreamVideo by lazy { dogfoodingApp.streamVideo }
+    private val streamVideo: StreamVideo by lazy { StreamVideo.instance() }
     private val factory by lazy { callViewModelFactory() }
     private val vm by viewModels<CallViewModel> { factory }
 
