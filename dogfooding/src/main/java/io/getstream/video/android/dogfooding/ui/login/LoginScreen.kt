@@ -44,6 +44,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
@@ -55,6 +56,7 @@ import androidx.compose.ui.window.Dialog
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.firebase.ui.auth.AuthUI
 import io.getstream.video.android.compose.theme.VideoTheme
+import io.getstream.video.android.dogfooding.BuildConfig
 import io.getstream.video.android.dogfooding.R
 import io.getstream.video.android.dogfooding.ui.theme.Colors
 import io.getstream.video.android.dogfooding.ui.theme.StreamButton
@@ -146,6 +148,21 @@ private fun LoginContent(
             textAlign = TextAlign.Center,
             fontSize = 18.sp,
         )
+
+        if (BuildConfig.BENCHMARK) {
+            StreamButton(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 55.dp)
+                    .testTag("authenticate"),
+                text = "Login for Benchmark",
+                onClick = {
+                    loginViewModel.handleUiEvent(
+                        LoginEvent.SignInInSuccess("benchmark.test@getstream.io")
+                    )
+                }
+            )
+        }
     }
 }
 

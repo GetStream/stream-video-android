@@ -16,13 +16,25 @@
 
 package io.getstream.video.android.dogfooding.ui.join
 
-import android.content.Context
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
+import io.getstream.result.Result
 import io.getstream.video.android.core.StreamVideo
+import io.getstream.video.android.core.call.RtcSession
 import io.getstream.video.android.core.model.User
+import io.getstream.video.android.core.model.mapper.toTypeAndId
 import io.getstream.video.android.core.user.UserPreferences
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.flow.onCompletion
+import kotlinx.coroutines.flow.stateIn
+import org.openapitools.client.models.GetOrCreateCallResponse
 import javax.inject.Inject
+import kotlin.random.Random
 
 @HiltViewModel
 class CallJoinViewModel @Inject constructor(
@@ -31,13 +43,81 @@ class CallJoinViewModel @Inject constructor(
 
     val user: User? = userPreferences.getUserCredentials()
 
-    fun startNewCall() {
+    private val _isLoading: MutableStateFlow<Boolean> = MutableStateFlow(false)
+    internal val isLoading: StateFlow<Boolean> = _isLoading
+
+    private val event: MutableStateFlow<CallJoinEvent> = MutableStateFlow(CallJoinEvent.Nothing)
+    internal val uiState: StateFlow<CallJoinUiState> = event
+        .flatMapLatest { event ->
+            when (event) {
+                is CallJoinEvent.CreateCall -> {
+                    _isLoading.value = true
+                    val result = startNewCall()
+
+                    if (result.isSuccess) {
+                        val cid = result.getOrThrow().call.cid
+                        flowOf(CallJoinUiState.JoinCompletedUi(callId = cid))
+                    } else {
+                        flowOf(CallJoinUiState.JoiningFailed(result.errorOrNull()?.message.orEmpty()))
+                    }
+                }
+
+                is CallJoinEvent.JoinCall -> {
+                    _isLoading.value = true
+                    val result = joinCall(event.callId)
+
+                    if (result.isSuccess) {
+                        flowOf(CallJoinUiState.JoinCompletedUi(callId = event.callId))
+                    } else {
+                        flowOf(CallJoinUiState.JoiningFailed(result.errorOrNull()?.message.orEmpty()))
+                    }
+                }
+
+                is CallJoinEvent.JoinCompleted -> flowOf(CallJoinUiState.JoinCompletedUi(event.callId))
+                else -> flowOf(CallJoinUiState.Nothing)
+            }
+        }
+        .onCompletion { _isLoading.value = false }
+        .stateIn(viewModelScope, SharingStarted.Lazily, CallJoinUiState.Nothing)
+
+    fun handleUiEvent(event: CallJoinEvent) {
+        this.event.value = event
     }
 
-    fun joinCall(callId: String) {
+    private suspend fun startNewCall(): Result<GetOrCreateCallResponse> {
+        val streamVideo = StreamVideo.instance()
+        val callId = "default:NnXAIvBKE4Hy" + Random.nextInt(10000)
+        val (type, id) = callId.toTypeAndId()
+        val call = streamVideo.call(type = type, id = id)
+        return call.create(memberIds = listOf(streamVideo.userId))
     }
 
-    fun signOut(context: Context) {
+    private suspend fun joinCall(callId: String): Result<RtcSession> {
+        val streamVideo = StreamVideo.instance()
+        val (type, id) = callId.toTypeAndId()
+        val call = streamVideo.call(type = type, id = id)
+        return call.join()
+    }
+
+    fun signOut() {
         StreamVideo.instance().logOut()
     }
+}
+
+sealed interface CallJoinUiState {
+    object Nothing : CallJoinUiState
+
+    data class JoiningFailed(val reason: String) : CallJoinUiState
+
+    data class JoinCompletedUi(val callId: String) : CallJoinUiState
+}
+
+sealed interface CallJoinEvent {
+    object Nothing : CallJoinEvent
+
+    object CreateCall : CallJoinEvent
+
+    data class JoinCall(val callId: String) : CallJoinEvent
+
+    data class JoinCompleted(val callId: String) : CallJoinEvent
 }

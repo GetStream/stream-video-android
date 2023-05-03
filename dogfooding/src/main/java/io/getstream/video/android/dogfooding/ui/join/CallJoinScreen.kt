@@ -16,10 +16,12 @@
 
 package io.getstream.video.android.dogfooding.ui.join
 
+import android.widget.Toast
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -32,10 +34,13 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.Text
 import androidx.compose.material.TextField
 import androidx.compose.material.TextFieldDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -44,6 +49,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
@@ -61,23 +67,41 @@ import io.getstream.video.android.dogfooding.ui.theme.StreamButton
 @Composable
 fun CallJoinScreen(
     callJoinViewModel: CallJoinViewModel = hiltViewModel(),
-    navigateToCallPreview: () -> Unit,
+    navigateToCallLobby: (callId: String) -> Unit,
     navigateUpToLogin: () -> Unit
 ) {
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(Colors.background),
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        CallJoinHeader(navigateUpToLogin = navigateUpToLogin)
+    val uiState by callJoinViewModel.uiState.collectAsState()
+    val isLoading by callJoinViewModel.isLoading.collectAsState()
 
-        CallJoinBody(
+    HandleCallJoinUiState(
+        callJoinUiState = uiState,
+        navigateToCallLobby = navigateToCallLobby
+    )
+
+    Box(modifier = Modifier.fillMaxSize()) {
+        Column(
             modifier = Modifier
-                .align(Alignment.CenterHorizontally)
-                .fillMaxWidth()
-                .weight(1f)
-        )
+                .fillMaxSize()
+                .background(Colors.background),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            CallJoinHeader(navigateUpToLogin = navigateUpToLogin)
+
+            CallJoinBody(
+                modifier = Modifier
+                    .align(Alignment.CenterHorizontally)
+                    .fillMaxWidth()
+                    .weight(1f),
+                isLoading = isLoading
+            )
+        }
+
+        if (isLoading) {
+            CircularProgressIndicator(
+                modifier = Modifier.align(Alignment.Center),
+                color = VideoTheme.colors.primaryAccent
+            )
+        }
     }
 }
 
@@ -100,12 +124,11 @@ private fun CallJoinHeader(
             fontSize = 16.sp
         )
 
-        val context = LocalContext.current
         StreamButton(
             modifier = Modifier.width(125.dp),
             text = stringResource(id = R.string.sign_out),
             onClick = {
-                callJoinViewModel.signOut(context)
+                callJoinViewModel.signOut()
                 navigateUpToLogin.invoke()
             }
         )
@@ -115,6 +138,7 @@ private fun CallJoinHeader(
 @Composable
 private fun CallJoinBody(
     modifier: Modifier,
+    isLoading: Boolean,
     callJoinViewModel: CallJoinViewModel = hiltViewModel(),
 ) {
     val user = callJoinViewModel.user
@@ -159,8 +183,9 @@ private fun CallJoinBody(
                 .fillMaxWidth()
                 .height(52.dp)
                 .padding(horizontal = 35.dp),
+            enabled = !isLoading,
             text = stringResource(id = R.string.start_a_new_call),
-            onClick = { callJoinViewModel.startNewCall() }
+            onClick = { callJoinViewModel.handleUiEvent(CallJoinEvent.CreateCall) }
         )
 
         Spacer(modifier = Modifier.height(40.dp))
@@ -209,10 +234,35 @@ private fun CallJoinBody(
             StreamButton(
                 modifier = Modifier
                     .padding(horizontal = 16.dp)
-                    .fillMaxHeight(),
-                onClick = { callJoinViewModel.joinCall(callId) },
+                    .fillMaxHeight()
+                    .testTag("join_call"),
+                enabled = !isLoading,
+                onClick = {
+                    callJoinViewModel.handleUiEvent(CallJoinEvent.JoinCall(callId = callId))
+                },
                 text = stringResource(id = R.string.join_call)
             )
+        }
+    }
+}
+
+@Composable
+private fun HandleCallJoinUiState(
+    callJoinUiState: CallJoinUiState,
+    navigateToCallLobby: (callId: String) -> Unit,
+) {
+    val context = LocalContext.current
+    LaunchedEffect(key1 = callJoinUiState) {
+        when (callJoinUiState) {
+            is CallJoinUiState.JoinCompletedUi -> {
+                navigateToCallLobby.invoke(callJoinUiState.callId)
+            }
+
+            is CallJoinUiState.JoiningFailed -> {
+                Toast.makeText(context, callJoinUiState.reason, Toast.LENGTH_SHORT).show()
+            }
+
+            else -> Unit
         }
     }
 }
@@ -225,7 +275,7 @@ private fun CallJoinScreenPreview() {
         val preference = UserPreferencesManager.initialize(context)
         CallJoinScreen(
             callJoinViewModel = CallJoinViewModel(preference),
-            navigateToCallPreview = {},
+            navigateToCallLobby = {},
             navigateUpToLogin = {}
         )
     }
