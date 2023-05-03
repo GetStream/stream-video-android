@@ -47,7 +47,7 @@ import kotlinx.coroutines.launch
  *  )
  *
  */
-public class StreamVideoBuilder(
+public class StreamVideoBuilder @JvmOverloads constructor(
     context: Context,
     /** Your Stream API Key, you can find it in the dashboard */
     private val apiKey: ApiKey,
