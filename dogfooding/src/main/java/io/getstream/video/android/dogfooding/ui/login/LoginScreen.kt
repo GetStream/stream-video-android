@@ -112,7 +112,7 @@ private fun LoginContent(
         Spacer(modifier = Modifier.height(17.dp))
 
         Text(
-            text = stringResource(id = R.string.stream_sign_in_description),
+            text = stringResource(id = R.string.sign_in_description),
             color = Colors.description,
             textAlign = TextAlign.Center,
             fontSize = 18.sp,
@@ -125,7 +125,7 @@ private fun LoginContent(
                 .fillMaxWidth()
                 .padding(horizontal = 55.dp),
             enabled = !isLoading,
-            text = stringResource(id = R.string.stream_sign_in_google),
+            text = stringResource(id = R.string.sign_in_google),
             onClick = { loginViewModel.handleUiEvent(LoginEvent.GoogleSignIn()) }
         )
 
@@ -134,14 +134,14 @@ private fun LoginContent(
                 .fillMaxWidth()
                 .padding(horizontal = 55.dp),
             enabled = !isLoading,
-            text = stringResource(id = R.string.stream_sign_in_email),
+            text = stringResource(id = R.string.sign_in_email),
             onClick = { showEmailLoginDialog.invoke() }
         )
 
         Spacer(modifier = Modifier.height(47.dp))
 
         Text(
-            text = stringResource(id = R.string.stream_sign_in_contact),
+            text = stringResource(id = R.string.sign_in_contact),
             color = Colors.description,
             textAlign = TextAlign.Center,
             fontSize = 18.sp,
@@ -212,7 +212,7 @@ private fun HandleLoginUiStates(
     )
 
     LaunchedEffect(key1 = Unit) {
-        loginViewModel.sigInInIfValidUserExist(context)
+        loginViewModel.sigInInIfValidUserExist()
     }
 
     LaunchedEffect(key1 = loginUiState) {

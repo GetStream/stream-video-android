@@ -23,6 +23,7 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import io.getstream.video.android.dogfooding.ui.join.CallJoinScreen
 import io.getstream.video.android.dogfooding.ui.login.LoginScreen
 
 @Composable
@@ -46,6 +47,16 @@ fun DogfoodingNavHost(
             )
         }
         composable(DogfoodingScreens.CallJoin.destination) {
+            CallJoinScreen(
+                navigateToCallPreview = {
+                    navController.navigate(DogfoodingScreens.CallPreview.destination)
+                },
+                navigateUpToLogin = {
+                    navController.navigate(DogfoodingScreens.Login.destination) {
+                        popUpTo(DogfoodingScreens.CallJoin.destination) { inclusive = true }
+                    }
+                }
+            )
         }
         composable(DogfoodingScreens.CallPreview.destination) {
         }
