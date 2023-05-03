@@ -24,6 +24,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import io.getstream.video.android.dogfooding.ui.join.CallJoinScreen
+import io.getstream.video.android.dogfooding.ui.lobby.CallLobbyScreen
 import io.getstream.video.android.dogfooding.ui.login.LoginScreen
 
 @Composable
@@ -49,7 +50,7 @@ fun DogfoodingNavHost(
         composable(DogfoodingScreens.CallJoin.destination) {
             CallJoinScreen(
                 navigateToCallPreview = {
-                    navController.navigate(DogfoodingScreens.CallPreview.destination)
+                    navController.navigate(DogfoodingScreens.CallLobby.destination)
                 },
                 navigateUpToLogin = {
                     navController.navigate(DogfoodingScreens.Login.destination) {
@@ -58,7 +59,8 @@ fun DogfoodingNavHost(
                 }
             )
         }
-        composable(DogfoodingScreens.CallPreview.destination) {
+        composable(DogfoodingScreens.CallLobby.destination) {
+            CallLobbyScreen()
         }
     }
 }
@@ -66,5 +68,5 @@ fun DogfoodingNavHost(
 enum class DogfoodingScreens(val destination: String) {
     Login("login"),
     CallJoin("call_join"),
-    CallPreview("call_preview");
+    CallLobby("call_preview");
 }

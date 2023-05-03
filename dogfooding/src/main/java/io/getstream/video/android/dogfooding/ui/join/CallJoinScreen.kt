@@ -43,7 +43,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
@@ -54,15 +53,13 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.avatar.UserAvatar
-import io.getstream.video.android.core.user.UserPreferencesManager
 import io.getstream.video.android.dogfooding.R
 import io.getstream.video.android.dogfooding.ui.theme.Colors
 import io.getstream.video.android.dogfooding.ui.theme.StreamButton
 
 @Composable
 fun CallJoinScreen(
-    callJoinViewModel: CallJoinViewModel = hiltViewModel(),
-    navigateToCallPreview: () -> Unit,
+    navigateToCallLobby: () -> Unit,
     navigateUpToLogin: () -> Unit
 ) {
     Column(
@@ -160,7 +157,7 @@ private fun CallJoinBody(
                 .height(52.dp)
                 .padding(horizontal = 35.dp),
             text = stringResource(id = R.string.start_a_new_call),
-            onClick = { callJoinViewModel.startNewCall() }
+            onClick = { callJoinViewModel.handleUiEvent(CallJoinEvent.CreateCall) }
         )
 
         Spacer(modifier = Modifier.height(40.dp))
@@ -211,7 +208,9 @@ private fun CallJoinBody(
                     .padding(horizontal = 16.dp)
                     .fillMaxHeight()
                     .testTag("join_call"),
-                onClick = { callJoinViewModel.joinCall(callId) },
+                onClick = {
+                    callJoinViewModel.handleUiEvent(CallJoinEvent.JoinCall(callId = callId))
+                },
                 text = stringResource(id = R.string.join_call)
             )
         }
@@ -222,11 +221,8 @@ private fun CallJoinBody(
 @Composable
 private fun CallJoinScreenPreview() {
     VideoTheme {
-        val context = LocalContext.current
-        val preference = UserPreferencesManager.initialize(context)
         CallJoinScreen(
-            callJoinViewModel = CallJoinViewModel(preference),
-            navigateToCallPreview = {},
+            navigateToCallLobby = {},
             navigateUpToLogin = {}
         )
     }
