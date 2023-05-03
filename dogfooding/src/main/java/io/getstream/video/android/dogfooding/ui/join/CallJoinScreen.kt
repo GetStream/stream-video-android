@@ -101,12 +101,11 @@ private fun CallJoinHeader(
             fontSize = 16.sp
         )
 
-        val context = LocalContext.current
         StreamButton(
             modifier = Modifier.width(125.dp),
             text = stringResource(id = R.string.sign_out),
             onClick = {
-                callJoinViewModel.signOut(context)
+                callJoinViewModel.signOut()
                 navigateUpToLogin.invoke()
             }
         )
