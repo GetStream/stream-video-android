@@ -16,7 +16,9 @@
 
 package io.getstream.video.android.dogfooding.ui.join
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -178,22 +180,26 @@ private fun CallJoinBody(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(48.dp)
+                .height(50.dp)
                 .padding(horizontal = 35.dp),
         ) {
             TextField(
                 modifier = Modifier
                     .weight(1f)
-                    .fillMaxHeight(),
+                    .fillMaxHeight()
+                    .border(
+                        BorderStroke(1.dp, Color(0xFF4C525C)),
+                        RoundedCornerShape(6.dp)
+                    ),
                 shape = RoundedCornerShape(6.dp),
                 value = callId,
                 onValueChange = { callId = it },
                 colors = TextFieldDefaults.textFieldColors(
                     textColor = VideoTheme.colors.textHighEmphasis,
                     focusedLabelColor = VideoTheme.colors.primaryAccent,
-                    unfocusedIndicatorColor = VideoTheme.colors.primaryAccent,
-                    focusedIndicatorColor = VideoTheme.colors.primaryAccent,
-                    backgroundColor = Color(0xFF1C1E22)
+                    unfocusedIndicatorColor = Colors.secondBackground,
+                    focusedIndicatorColor = Colors.secondBackground,
+                    backgroundColor = Colors.secondBackground
                 ),
                 keyboardOptions = KeyboardOptions.Default.copy(
                     keyboardType = KeyboardType.Email
