@@ -39,23 +39,23 @@ import org.openapitools.client.infrastructure.Serializer
 /**
  *
  *
- * @param custom
  * @param type
  * @param user
+ * @param custom
  * @param emojiCode
  */
 
 
 data class ReactionResponse (
 
-    @Json(name = "custom")
-    val custom: kotlin.collections.Map<kotlin.String, kotlin.Any>,
-
     @Json(name = "type")
     val type: kotlin.String,
 
     @Json(name = "user")
     val user: UserResponse,
+
+    @Json(name = "custom")
+    val custom: kotlin.collections.Map<kotlin.String, kotlin.Any>? = null,
 
     @Json(name = "emoji_code")
     val emojiCode: kotlin.String? = null

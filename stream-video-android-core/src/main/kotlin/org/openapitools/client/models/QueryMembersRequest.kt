@@ -39,8 +39,8 @@ import org.openapitools.client.infrastructure.Serializer
 /**
  *
  *
- * @param filterConditions
  * @param type
+ * @param filterConditions
  * @param id
  * @param limit
  * @param next
@@ -51,11 +51,11 @@ import org.openapitools.client.infrastructure.Serializer
 
 data class QueryMembersRequest (
 
-    @Json(name = "filter_conditions")
-    val filterConditions: kotlin.collections.Map<kotlin.String, kotlin.Any>,
-
     @Json(name = "type")
     val type: kotlin.String,
+
+    @Json(name = "filter_conditions")
+    val filterConditions: kotlin.collections.Map<kotlin.String, kotlin.Any>? = null,
 
     @Json(name = "id")
     val id: kotlin.String? = null,
