@@ -23,7 +23,7 @@ import com.google.firebase.auth.FirebaseAuth
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.getstream.video.android.core.logging.LoggingLevel
 import io.getstream.video.android.core.model.User
-import io.getstream.video.android.core.user.UserPreferencesManager
+import io.getstream.video.android.core.user.UserPreferences
 import io.getstream.video.android.dogfooding.API_KEY
 import io.getstream.video.android.dogfooding.BuildConfig
 import io.getstream.video.android.dogfooding.dogfoodingApp
@@ -42,7 +42,9 @@ import java.util.UUID
 import javax.inject.Inject
 
 @HiltViewModel
-class LoginViewModel @Inject constructor() : ViewModel() {
+class LoginViewModel @Inject constructor(
+    private val userPreferences: UserPreferences
+) : ViewModel() {
 
     private val event: MutableStateFlow<LoginEvent> = MutableStateFlow(LoginEvent.Nothing)
     internal val uiState: StateFlow<LoginUiState> = event
@@ -66,9 +68,8 @@ class LoginViewModel @Inject constructor() : ViewModel() {
         emit(LoginUiState.SignInComplete(response))
     }.flowOn(Dispatchers.IO)
 
-    fun sigInInIfValidUserExist(context: Context) {
-        val preferenceManager = UserPreferencesManager.initialize(context)
-        val user = preferenceManager.getUserCredentials()
+    fun sigInInIfValidUserExist() {
+        val user = userPreferences.getUserCredentials()
 
         if (user != null && user.isValid() && !BuildConfig.BENCHMARK) {
             handleUiEvent(LoginEvent.SignInInSuccess(email = user.id))
@@ -90,7 +91,6 @@ class LoginViewModel @Inject constructor() : ViewModel() {
             custom = mapOf("email" to userId)
         )
 
-        val userPreferences = UserPreferencesManager.initialize(context)
         userPreferences.storeUserCredentials(user)
         userPreferences.storeUserToken(token)
 

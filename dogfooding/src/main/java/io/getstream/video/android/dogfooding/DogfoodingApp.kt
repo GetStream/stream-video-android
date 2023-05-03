@@ -19,6 +19,8 @@ package io.getstream.video.android.dogfooding
 import android.app.Application
 import android.content.Context
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.crashlytics.ktx.crashlytics
+import com.google.firebase.ktx.Firebase
 import dagger.hilt.android.HiltAndroidApp
 import io.getstream.android.push.firebase.FirebasePushDeviceGenerator
 import io.getstream.log.Priority
@@ -30,6 +32,7 @@ import io.getstream.video.android.core.model.ApiKey
 import io.getstream.video.android.core.model.User
 import io.getstream.video.android.core.user.UserPreferencesManager
 import io.getstream.video.android.dogfooding.token.StreamVideoNetwork
+import io.getstream.video.android.tooling.handler.StreamGlobalExceptionHandler
 
 @HiltAndroidApp
 class DogfoodingApp : Application() {
@@ -46,10 +49,11 @@ class DogfoodingApp : Application() {
     override fun onCreate() {
         super.onCreate()
         AndroidStreamLogger.installOnDebuggableApp(this, minPriority = Priority.DEBUG)
-//        StreamGlobalExceptionHandler.install(
-//            application = this,
-//            packageName = LoginActivity::class.java.name
-//        )
+        StreamGlobalExceptionHandler.install(
+            application = this,
+            packageName = MainActivity::class.java.name,
+            exceptionHandler = { stackTrace -> Firebase.crashlytics.log(stackTrace) }
+        )
         UserPreferencesManager.initialize(this)
     }
 

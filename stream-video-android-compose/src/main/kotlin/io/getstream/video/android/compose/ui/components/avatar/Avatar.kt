@@ -91,7 +91,7 @@ public fun Avatar(
         return
     }
 
-    if (!initials.isNullOrBlank()) {
+    if (imageUrl.isNullOrEmpty() && !initials.isNullOrBlank()) {
         InitialsAvatar(
             modifier = modifier,
             initials = initials,
