@@ -22,6 +22,7 @@ import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import io.getstream.log.taggedLogger
+import io.getstream.video.android.core.StreamVideo
 import io.getstream.video.android.core.logging.LoggingLevel
 import io.getstream.video.android.core.user.UserPreferencesManager
 import kotlinx.coroutines.launch
@@ -31,7 +32,7 @@ class DeeplinkingActivity : AppCompatActivity() {
     private val logger by taggedLogger("Call:DeeplinkView")
 
     private val controller by lazy {
-        dogfoodingApp.streamVideo
+        StreamVideo.instance()
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {

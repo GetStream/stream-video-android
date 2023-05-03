@@ -17,6 +17,7 @@
 package io.getstream.video.android.core
 
 import android.content.Context
+import io.getstream.log.StreamLog
 import io.getstream.result.Result
 import io.getstream.video.android.core.events.VideoEventListener
 import io.getstream.video.android.core.model.Device
@@ -102,4 +103,53 @@ public interface StreamVideo {
     public fun logOut()
 
     public suspend fun registerPushDevice()
+
+    public companion object {
+        /**
+         * Represents if [StreamVideo] is already installed or not.
+         * Lets you know if the internal [StreamVideo] instance is being used as the
+         * uncaught exception handler when true or if it is using the default one if false.
+         */
+        public var isInstalled: Boolean = false
+            get() = internalStreamVideo != null
+            private set
+
+        /**
+         * [StreamVideo] instance to be used.
+         */
+        @Volatile
+        private var internalStreamVideo: StreamVideo? = null
+
+        /**
+         * Returns an installed [StreamVideo] instance or throw an exception if its not installed.
+         */
+        public fun instance(): StreamVideo {
+            return internalStreamVideo
+                ?: throw IllegalStateException(
+                    "StreamVideoBuilder.build() must be called before obtaining StreamVideo instance."
+                )
+        }
+
+        /**
+         * Installs a new [StreamVideo] instance to be used.
+         */
+        public fun install(streamVideo: StreamVideo) {
+            synchronized(this) {
+                if (isInstalled) {
+                    StreamLog.e("StreamVideo") {
+                        "The $internalStreamVideo is already installed but you've tried to " +
+                            "install a new exception handler: $streamVideo"
+                    }
+                }
+                internalStreamVideo = streamVideo
+            }
+        }
+
+        /**
+         * Uninstall a previous [StreamVideo] instance.
+         */
+        public fun unInstall() {
+            internalStreamVideo = null
+        }
+    }
 }

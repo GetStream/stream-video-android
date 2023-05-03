@@ -139,6 +139,9 @@ public class StreamVideoBuilder @JvmOverloads constructor(
             connectionModule.updateAuthType("anonymous")
         }
 
+        // installs Stream Video instance
+        StreamVideo.install(client)
+
         return client
     }
 }
