@@ -50,6 +50,11 @@ fun DogfoodingNavHost(
             CallJoinScreen(
                 navigateToCallPreview = {
                     navController.navigate(DogfoodingScreens.CallPreview.destination)
+                },
+                navigateUpToLogin = {
+                    navController.navigate(DogfoodingScreens.Login.destination) {
+                        popUpTo(DogfoodingScreens.CallJoin.destination) { inclusive = true }
+                    }
                 }
             )
         }

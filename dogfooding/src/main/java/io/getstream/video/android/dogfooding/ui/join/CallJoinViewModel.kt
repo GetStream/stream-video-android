@@ -16,12 +16,22 @@
 
 package io.getstream.video.android.dogfooding.ui.join
 
+import android.content.Context
 import androidx.lifecycle.ViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.getstream.video.android.core.user.UserPreferences
+import io.getstream.video.android.dogfooding.dogfoodingApp
 import javax.inject.Inject
 
 @HiltViewModel
 class CallJoinViewModel @Inject constructor(
     private val userPreferences: UserPreferences
-) : ViewModel()
+) : ViewModel() {
+
+    val userId: String
+        get() = userPreferences.getUserCredentials()?.id.orEmpty()
+
+    fun signOut(context: Context) {
+        context.dogfoodingApp.logOut()
+    }
+}

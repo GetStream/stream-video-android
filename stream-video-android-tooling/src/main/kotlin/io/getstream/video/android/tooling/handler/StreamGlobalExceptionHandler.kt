@@ -40,6 +40,7 @@ public class StreamGlobalExceptionHandler constructor(
     application: Application,
     private val packageName: String,
     private val defaultExceptionHandler: Thread.UncaughtExceptionHandler,
+    private val exceptionHandler: (String) -> Unit
 ) : Thread.UncaughtExceptionHandler {
 
     private var lastActivity: Activity? = null
@@ -95,6 +96,7 @@ public class StreamGlobalExceptionHandler constructor(
 
             val stackTrace = stringWriter.toString()
             startExceptionActivity(this, stackTrace, throwable.message ?: "")
+            exceptionHandler.invoke(stackTrace)
         } ?: defaultExceptionHandler.uncaughtException(thread, throwable)
 
         Process.killProcess(Process.myPid())
@@ -127,6 +129,7 @@ public class StreamGlobalExceptionHandler constructor(
         public fun installOnDebuggableApp(
             application: Application,
             packageName: String,
+            exceptionHandler: (String) -> Unit
         ) {
             val defaultExceptionHandler = Thread.getDefaultUncaughtExceptionHandler() ?: return
             if (!StreamGlobalException.isInstalled && application.isDebuggableApp) {
@@ -134,6 +137,7 @@ public class StreamGlobalExceptionHandler constructor(
                     StreamGlobalExceptionHandler(
                         application = application,
                         packageName = packageName,
+                        exceptionHandler = exceptionHandler,
                         defaultExceptionHandler = defaultExceptionHandler
                     )
                 )
@@ -150,13 +154,15 @@ public class StreamGlobalExceptionHandler constructor(
         public fun install(
             application: Application,
             packageName: String,
+            exceptionHandler: (String) -> Unit
         ) {
             val defaultExceptionHandler = Thread.getDefaultUncaughtExceptionHandler() ?: return
             StreamGlobalException.install(
                 StreamGlobalExceptionHandler(
                     application = application,
                     packageName = packageName,
-                    defaultExceptionHandler = defaultExceptionHandler
+                    exceptionHandler = exceptionHandler,
+                    defaultExceptionHandler = defaultExceptionHandler,
                 )
             )
         }

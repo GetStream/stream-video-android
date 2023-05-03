@@ -28,10 +28,12 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.dogfooding.R
 import io.getstream.video.android.dogfooding.ui.theme.Colors
@@ -39,7 +41,9 @@ import io.getstream.video.android.dogfooding.ui.theme.StreamButton
 
 @Composable
 fun CallJoinScreen(
-    navigateToCallPreview: () -> Unit
+    callJoinViewModel: CallJoinViewModel = hiltViewModel(),
+    navigateToCallPreview: () -> Unit,
+    navigateUpToLogin: () -> Unit
 ) {
     Column(
         modifier = Modifier
@@ -47,12 +51,15 @@ fun CallJoinScreen(
             .background(Colors.background),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        CallJoinHeader()
+        CallJoinHeader(navigateUpToLogin = navigateUpToLogin)
     }
 }
 
 @Composable
-private fun CallJoinHeader() {
+private fun CallJoinHeader(
+    callJoinViewModel: CallJoinViewModel = hiltViewModel(),
+    navigateUpToLogin: () -> Unit
+) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -62,14 +69,18 @@ private fun CallJoinHeader() {
         Text(
             modifier = Modifier.weight(1f),
             color = Color.White,
-            text = "email",
+            text = callJoinViewModel.userId,
             fontSize = 16.sp
         )
 
+        val context = LocalContext.current
         StreamButton(
             modifier = Modifier.width(125.dp),
             text = stringResource(id = R.string.sign_out),
-            onClick = { }
+            onClick = {
+                callJoinViewModel.signOut(context)
+                navigateUpToLogin.invoke()
+            }
         )
     }
 }
@@ -78,6 +89,9 @@ private fun CallJoinHeader() {
 @Composable
 private fun CallJoinScreenPreview() {
     VideoTheme {
-        CallJoinScreen() {}
+        CallJoinScreen(
+            navigateToCallPreview = {},
+            navigateUpToLogin = {}
+        )
     }
 }

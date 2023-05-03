@@ -16,12 +16,12 @@ public final class io/getstream/video/android/tooling/exception/StreamGlobalExce
 public final class io/getstream/video/android/tooling/handler/StreamGlobalExceptionHandler : java/lang/Thread$UncaughtExceptionHandler {
 	public static final field $stable I
 	public static final field Companion Lio/getstream/video/android/tooling/handler/StreamGlobalExceptionHandler$Companion;
-	public fun <init> (Landroid/app/Application;Ljava/lang/String;Ljava/lang/Thread$UncaughtExceptionHandler;)V
+	public fun <init> (Landroid/app/Application;Ljava/lang/String;Ljava/lang/Thread$UncaughtExceptionHandler;Lkotlin/jvm/functions/Function1;)V
 	public fun uncaughtException (Ljava/lang/Thread;Ljava/lang/Throwable;)V
 }
 
 public final class io/getstream/video/android/tooling/handler/StreamGlobalExceptionHandler$Companion {
-	public final fun install (Landroid/app/Application;Ljava/lang/String;)V
-	public final fun installOnDebuggableApp (Landroid/app/Application;Ljava/lang/String;)V
+	public final fun install (Landroid/app/Application;Ljava/lang/String;Lkotlin/jvm/functions/Function1;)V
+	public final fun installOnDebuggableApp (Landroid/app/Application;Ljava/lang/String;Lkotlin/jvm/functions/Function1;)V
 }
 
