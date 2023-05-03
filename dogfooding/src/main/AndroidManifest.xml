@@ -26,7 +26,7 @@
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
-        android:theme="@style/Theme.Streamvideoandroid"
+        android:theme="@style/Dogfooding"
         tools:targetApi="31">
 
         <profileable
@@ -34,9 +34,9 @@
             tools:targetApi="29" />
 
         <activity
-            android:name=".LoginActivity"
+            android:name=".MainActivity"
             android:exported="true"
-            android:theme="@style/Theme.Streamvideoandroid">
+            android:theme="@style/Dogfooding">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 

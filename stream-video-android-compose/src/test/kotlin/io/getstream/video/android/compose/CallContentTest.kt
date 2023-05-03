@@ -21,6 +21,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.ui.Modifier
 import app.cash.paparazzi.DeviceConfig
 import app.cash.paparazzi.Paparazzi
+import io.getstream.video.android.common.util.mockCall
 import io.getstream.video.android.common.util.mockParticipantList
 import io.getstream.video.android.common.util.mockParticipants
 import io.getstream.video.android.compose.base.BaseComposeTest
@@ -77,6 +78,7 @@ internal class CallContentTest : BaseComposeTest() {
     fun `snapshot IncomingCallContent Video type with one participant composable`() {
         snapshot {
             IncomingCallContent(
+                call = mockCall,
                 participants = mockParticipants.takeLast(1),
                 callType = CallType.VIDEO,
                 isCameraEnabled = false,
@@ -89,6 +91,7 @@ internal class CallContentTest : BaseComposeTest() {
     fun `snapshot IncomingCallContent Video type with multiple participants composable`() {
         snapshot {
             IncomingCallContent(
+                call = mockCall,
                 participants = mockParticipants,
                 callType = CallType.VIDEO,
                 isCameraEnabled = false,
@@ -141,6 +144,7 @@ internal class CallContentTest : BaseComposeTest() {
     fun `snapshot OutgoingCallContent Video type with one participant composable`() {
         snapshot {
             OutgoingCallContent(
+                call = mockCall,
                 callType = CallType.VIDEO,
                 participants = mockParticipants.take(1),
                 callDeviceState = CallDeviceState(),
@@ -155,6 +159,7 @@ internal class CallContentTest : BaseComposeTest() {
     fun `snapshot OutgoingCallContent Video type with multiple participants composable`() {
         snapshot {
             OutgoingCallContent(
+                call = mockCall,
                 callType = CallType.VIDEO,
                 participants = mockParticipants,
                 callDeviceState = CallDeviceState(),

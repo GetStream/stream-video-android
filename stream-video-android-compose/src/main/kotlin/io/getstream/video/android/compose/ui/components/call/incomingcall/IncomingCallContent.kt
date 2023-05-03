@@ -30,6 +30,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import io.getstream.video.android.common.util.MockUtils
+import io.getstream.video.android.common.util.mockCall
 import io.getstream.video.android.common.util.mockParticipants
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.avatar.LocalAvatarPreviewPlaceholder
@@ -104,6 +105,7 @@ public fun IncomingCallContent(
     val participants: List<ParticipantState> by call.state.participants.collectAsState()
 
     IncomingCallContent(
+        call = call,
         callType = callType,
         participants = participants,
         isCameraEnabled = callDeviceState.isCameraEnabled,
@@ -131,6 +133,7 @@ public fun IncomingCallContent(
  */
 @Composable
 internal fun IncomingCallContent(
+    call: Call,
     callType: CallType,
     participants: List<ParticipantState>,
     isCameraEnabled: Boolean,
@@ -152,7 +155,9 @@ internal fun IncomingCallContent(
         Column {
             if (showHeader) {
                 callHeader?.invoke(this) ?: CallAppBar(
-                    onBackPressed = onBackPressed, onCallAction = onCallAction
+                    call = call,
+                    onBackPressed = onBackPressed,
+                    onCallAction = onCallAction
                 )
             }
 
@@ -192,6 +197,7 @@ private fun IncomingCallPreview1() {
                 io.getstream.video.android.ui.common.R.drawable.stream_video_call_sample
         ) {
             IncomingCallContent(
+                call = mockCall,
                 participants = mockParticipants.takeLast(1),
                 callType = CallType.VIDEO,
                 isCameraEnabled = false,
@@ -211,6 +217,7 @@ private fun IncomingCallPreview2() {
                 io.getstream.video.android.ui.common.R.drawable.stream_video_call_sample
         ) {
             IncomingCallContent(
+                call = mockCall,
                 participants = mockParticipants,
                 callType = CallType.VIDEO,
                 isCameraEnabled = false,

@@ -45,6 +45,7 @@ public fun ActiveCallAppBar(
     }
 
     CallAppBar(
+        call = call,
         title = title,
         isShowingOverlays = isShowingCallInfo,
         onBackPressed = onBackPressed,
