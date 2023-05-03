@@ -47,11 +47,7 @@ class LoginActivity : AppCompatActivity() {
 
     private val logger by taggedLogger("Call:LoginView")
 
-    private val loginItemsState = mutableStateOf(
-        getUsers().map {
-            AppUser(it, false)
-        }
-    )
+    private val loginItemsState = mutableStateOf(getUsers().map { AppUser(it, false) })
 
     init {
         logger.i { "<init> this: $this" }
@@ -61,11 +57,7 @@ class LoginActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         checkIfUserLoggedIn()
 
-        setContent {
-            VideoTheme {
-                LoginContent()
-            }
-        }
+        setContent { VideoTheme { LoginContent() } }
     }
 
     private fun checkIfUserLoggedIn() {
@@ -80,15 +72,8 @@ class LoginActivity : AppCompatActivity() {
 
     @Composable
     private fun LoginContent() {
-        Column(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            Text(
-                modifier = Modifier.padding(8.dp),
-                text = "Select a user to log in!",
-                fontSize = 18.sp
-            )
+        Column(modifier = Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
+            Text(modifier = Modifier.padding(8.dp), text = "Select a user to log in!", fontSize = 18.sp)
 
             val loginItems by remember { loginItemsState }
 
@@ -96,11 +81,11 @@ class LoginActivity : AppCompatActivity() {
                 modifier = Modifier.fillMaxWidth(),
                 userItems = loginItems,
                 onClick = { credentials ->
-//                    val updated = loginItemsState.value.map {
-//                        it.copy(isSelected = it.user.token == credentials.user.token)
-//                    }
-//
-//                    loginItemsState.value = updated
+                    //                    val updated = loginItemsState.value.map {
+                    //                        it.copy(isSelected = it.user.token == credentials.user.token)
+                    //                    }
+                    //
+                    //                    loginItemsState.value = updated
                 }
             )
 
@@ -109,9 +94,7 @@ class LoginActivity : AppCompatActivity() {
             Spacer(modifier = Modifier.height(16.dp))
 
             Button(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 16.dp),
+                modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp),
                 enabled = isDataValid,
                 onClick = {
                     val wrapper = loginItemsState.value.firstOrNull { it.isSelected }

@@ -40,14 +40,8 @@ class VideoApp : Application() {
         UserPreferencesManager.initialize(this)
     }
 
-    /**
-     * Sets up and returns the [streamVideo] required to connect to the API.
-     */
-    fun initializeStreamVideo(
-        user: User,
-        apiKey: ApiKey,
-        loggingLevel: LoggingLevel
-    ): StreamVideo {
+    /** Sets up and returns the [streamVideo] required to connect to the API. */
+    fun initializeStreamVideo(user: User, apiKey: ApiKey, loggingLevel: LoggingLevel): StreamVideo {
         TODO("Implement Stream Video")
     }
 
@@ -61,4 +55,5 @@ class VideoApp : Application() {
     }
 }
 
-internal val Context.videoApp get() = applicationContext as VideoApp
+internal val Context.videoApp
+    get() = applicationContext as VideoApp

@@ -23,7 +23,18 @@
 
 package org.openapitools.client.models
 
+import org.openapitools.client.models.UserResponse
+
+
+
+
+import com.squareup.moshi.FromJson
 import com.squareup.moshi.Json
+import com.squareup.moshi.JsonAdapter
+import com.squareup.moshi.JsonReader
+import com.squareup.moshi.JsonWriter
+import com.squareup.moshi.ToJson
+import org.openapitools.client.infrastructure.Serializer
 
 /**
  * A custom event, this event is used to send custom events to other participants in the call.
@@ -35,7 +46,8 @@ import com.squareup.moshi.Json
  * @param user
  */
 
-data class CustomVideoEvent(
+
+data class CustomVideoEvent (
 
     @Json(name = "call_cid")
     val callCid: kotlin.String,

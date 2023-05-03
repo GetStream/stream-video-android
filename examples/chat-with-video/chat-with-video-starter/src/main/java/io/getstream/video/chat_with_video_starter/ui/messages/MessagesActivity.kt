@@ -46,9 +46,7 @@ class MessagesActivity : ComponentActivity() {
     @Composable
     private fun CallButton() {
         Icon(
-            modifier = Modifier
-                .padding(end = 8.dp)
-                .clickable { startCall() },
+            modifier = Modifier.padding(end = 8.dp).clickable { startCall() },
             imageVector = Icons.Default.Call,
             contentDescription = null,
             tint = ChatTheme.colors.textHighEmphasis

@@ -23,8 +23,6 @@ import io.getstream.video.android.tutorial_starter.videoApp
 
 class CallActivity : AbstractComposeCallActivity() {
 
-    /**
-     * Provides the StreamVideo instance through the videoApp.
-     */
+    /** Provides the StreamVideo instance through the videoApp. */
     override fun getStreamVideo(context: Context): StreamVideo = context.videoApp.streamVideo
 }

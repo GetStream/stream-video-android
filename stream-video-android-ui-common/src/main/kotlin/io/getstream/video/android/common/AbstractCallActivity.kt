@@ -43,7 +43,7 @@ import io.getstream.video.android.core.call.state.ToggleCamera
 import io.getstream.video.android.core.call.state.ToggleMicrophone
 import io.getstream.video.android.core.call.state.ToggleScreenConfiguration
 import io.getstream.video.android.core.model.StreamCallId
-import io.getstream.video.android.core.model.typeToId
+import io.getstream.video.android.core.model.mapper.toTypeAndId
 import io.getstream.video.android.core.permission.PermissionManager
 import io.getstream.video.android.core.permission.PermissionManagerProvider
 import io.getstream.video.android.core.viewmodel.CallViewModel
@@ -64,7 +64,7 @@ public abstract class AbstractCallActivity :
      * Provides the default ViewModel factory.
      */
     private fun callViewModelFactory(): CallViewModelFactory {
-        val (type, id) = intent.getStringExtra(EXTRA_CID)?.typeToId
+        val (type, id) = intent.getStringExtra(EXTRA_CID)?.toTypeAndId()
             ?: throw IllegalArgumentException("You must pass correct channel id.")
 
         return CallViewModelFactory(

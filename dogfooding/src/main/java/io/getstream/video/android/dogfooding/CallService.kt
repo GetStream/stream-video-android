@@ -23,6 +23,6 @@ import io.getstream.video.android.core.service.AbstractStreamCallService
 class CallService : AbstractStreamCallService() {
 
     override fun getStreamVideo(context: Context): StreamVideo {
-        return dogfoodingApp.streamVideo
+        return StreamVideo.instance()
     }
 }

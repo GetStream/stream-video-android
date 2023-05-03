@@ -51,14 +51,11 @@ import io.getstream.video.android.tooling.R
 import io.getstream.video.android.tooling.extensions.toast
 
 @Composable
-internal fun ExceptionTraceScreen(
-    packageName: String,
-    message: String
-) {
+internal fun ExceptionTraceScreen(packageName: String, message: String) {
     val scrollState = rememberScrollState()
     Column(
-        modifier = Modifier
-            .verticalScroll(scrollState)
+        modifier =
+        Modifier.verticalScroll(scrollState)
             .background(VideoTheme.colors.appBackground)
             .padding(16.dp),
     ) {
@@ -82,12 +79,11 @@ internal fun ExceptionTraceScreen(
 
             val clipboardManager: ClipboardManager = LocalClipboardManager.current
             Icon(
-                modifier = Modifier
-                    .align(Alignment.CenterEnd)
-                    .clickable {
-                        clipboardManager.setText(AnnotatedString(message))
-                        context.toast(R.string.stream_video_tooling_copy_into_clipboard)
-                    },
+                modifier =
+                Modifier.align(Alignment.CenterEnd).clickable {
+                    clipboardManager.setText(AnnotatedString(message))
+                    context.toast(R.string.stream_video_tooling_copy_into_clipboard)
+                },
                 imageVector = Icons.Filled.ContentCopy,
                 tint = VideoTheme.colors.textHighEmphasis,
                 contentDescription = null,
@@ -97,11 +93,11 @@ internal fun ExceptionTraceScreen(
         Spacer(modifier = Modifier.height(12.dp))
 
         Text(
-            modifier = Modifier
-                .border(
-                    border = BorderStroke(2.dp, VideoTheme.colors.primaryAccent),
-                    shape = RoundedCornerShape(6.dp),
-                )
+            modifier =
+            Modifier.border(
+                border = BorderStroke(2.dp, VideoTheme.colors.primaryAccent),
+                shape = RoundedCornerShape(6.dp),
+            )
                 .padding(12.dp),
             text = message,
             color = VideoTheme.colors.textHighEmphasis,

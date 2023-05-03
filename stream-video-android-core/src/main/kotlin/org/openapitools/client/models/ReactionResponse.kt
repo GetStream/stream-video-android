@@ -23,27 +23,39 @@
 
 package org.openapitools.client.models
 
+import org.openapitools.client.models.UserResponse
+
+
+
+
+import com.squareup.moshi.FromJson
 import com.squareup.moshi.Json
+import com.squareup.moshi.JsonAdapter
+import com.squareup.moshi.JsonReader
+import com.squareup.moshi.JsonWriter
+import com.squareup.moshi.ToJson
+import org.openapitools.client.infrastructure.Serializer
 
 /**
  *
  *
- * @param custom
  * @param type
  * @param user
+ * @param custom
  * @param emojiCode
  */
 
-data class ReactionResponse(
 
-    @Json(name = "custom")
-    val custom: kotlin.collections.Map<kotlin.String, kotlin.Any>,
+data class ReactionResponse (
 
     @Json(name = "type")
     val type: kotlin.String,
 
     @Json(name = "user")
     val user: UserResponse,
+
+    @Json(name = "custom")
+    val custom: kotlin.collections.Map<kotlin.String, kotlin.Any>? = null,
 
     @Json(name = "emoji_code")
     val emojiCode: kotlin.String? = null

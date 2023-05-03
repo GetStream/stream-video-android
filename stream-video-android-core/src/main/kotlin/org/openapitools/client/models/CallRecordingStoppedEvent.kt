@@ -23,7 +23,17 @@
 
 package org.openapitools.client.models
 
+
+
+
+
+import com.squareup.moshi.FromJson
 import com.squareup.moshi.Json
+import com.squareup.moshi.JsonAdapter
+import com.squareup.moshi.JsonReader
+import com.squareup.moshi.JsonWriter
+import com.squareup.moshi.ToJson
+import org.openapitools.client.infrastructure.Serializer
 
 /**
  * This event is sent when call recording has stopped
@@ -33,7 +43,8 @@ import com.squareup.moshi.Json
  * @param type The type of event: \"call.recording_stopped\" in this case
  */
 
-data class CallRecordingStoppedEvent(
+
+data class CallRecordingStoppedEvent (
 
     @Json(name = "call_cid")
     val callCid: kotlin.String,

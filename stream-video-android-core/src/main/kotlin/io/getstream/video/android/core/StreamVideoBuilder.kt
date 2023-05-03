@@ -47,8 +47,8 @@ import kotlinx.coroutines.launch
  *  )
  *
  */
-public class StreamVideoBuilder(
-    private val context: Context,
+public class StreamVideoBuilder @JvmOverloads constructor(
+    context: Context,
     /** Your Stream API Key, you can find it in the dashboard */
     private val apiKey: ApiKey,
     /** Your GEO routing policy, supports geofencing for privacy concerns */
@@ -74,6 +74,8 @@ public class StreamVideoBuilder(
     /** Enable push notifications if you want to receive calls etc */
     private val enablePush: Boolean = false,
 ) {
+    private val context: Context = context.applicationContext
+
     /** URL overwrite to allow for testing against a local instance of video */
     var videoDomain: String = "video.stream-io-api.com"
 
@@ -136,6 +138,9 @@ public class StreamVideoBuilder(
         } else if (user.type == UserType.Anonymous) {
             connectionModule.updateAuthType("anonymous")
         }
+
+        // installs Stream Video instance
+        StreamVideo.install(client)
 
         return client
     }

@@ -32,14 +32,14 @@ import io.getstream.video.android.core.call.state.ToggleCamera
 import io.getstream.video.android.core.call.state.ToggleMicrophone
 import io.getstream.video.android.core.model.CallType
 import io.getstream.video.android.core.model.StreamCallId
-import io.getstream.video.android.core.model.typeToId
+import io.getstream.video.android.core.model.mapper.toTypeAndId
 import io.getstream.video.android.core.permission.PermissionManager
 import io.getstream.video.android.core.viewmodel.CallViewModel
 import io.getstream.video.android.core.viewmodel.CallViewModelFactory
 
 class CallActivity : ComponentActivity() {
 
-    private val streamVideo: StreamVideo by lazy { dogfoodingApp.streamVideo }
+    private val streamVideo: StreamVideo by lazy { StreamVideo.instance() }
     private val factory by lazy { callViewModelFactory() }
     private val vm by viewModels<CallViewModel> { factory }
 
@@ -47,10 +47,8 @@ class CallActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
 
         vm.joinCall {
-            Toast.makeText(
-                this,
-                "failed to join call (${vm.call.cid}): $it", Toast.LENGTH_SHORT
-            ).show()
+            Toast.makeText(this, "failed to join call (${vm.call.cid}): $it", Toast.LENGTH_SHORT)
+                .show()
             finish()
         }
 
@@ -69,8 +67,9 @@ class CallActivity : ComponentActivity() {
     }
 
     private fun callViewModelFactory(): CallViewModelFactory {
-        val (type, id) = intent.getStringExtra(EXTRA_CID)?.typeToId
-            ?: throw IllegalArgumentException("You must pass correct channel id.")
+        val (type, id) =
+            intent.getStringExtra(EXTRA_CID)?.toTypeAndId()
+                ?: throw IllegalArgumentException("You must pass correct channel id.")
 
         return CallViewModelFactory(
             streamVideo = streamVideo,

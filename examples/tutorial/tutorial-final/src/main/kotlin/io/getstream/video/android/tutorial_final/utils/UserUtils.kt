@@ -31,7 +31,8 @@ fun getUsers(): List<User> {
         User(
             id = "thierry",
             name = "Thierry",
-            image = "https://upload.wikimedia.org/wikipedia/commons/thumb/e/e3/Mile_Kitic_from_BISO0675.jpg/300px-Mile_Kitic_from_BISO0675.jpg",
+            image =
+            "https://upload.wikimedia.org/wikipedia/commons/thumb/e/e3/Mile_Kitic_from_BISO0675.jpg/300px-Mile_Kitic_from_BISO0675.jpg",
             role = "admin",
             teams = emptyList(),
             custom = emptyMap()

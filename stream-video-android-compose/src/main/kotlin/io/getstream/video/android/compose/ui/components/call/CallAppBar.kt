@@ -28,6 +28,8 @@ import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
@@ -38,7 +40,10 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
+import io.getstream.video.android.common.util.mockCall
 import io.getstream.video.android.compose.theme.VideoTheme
+import io.getstream.video.android.compose.ui.components.participants.ParticipantIndicatorIcon
+import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.call.state.CallAction
 import io.getstream.video.android.core.call.state.ShowCallInfo
 import io.getstream.video.android.ui.common.R
@@ -57,6 +62,7 @@ import io.getstream.video.android.ui.common.R
  * */
 @Composable
 public fun CallAppBar(
+    call: Call,
     modifier: Modifier = Modifier,
     isShowingOverlays: Boolean = false,
     onBackPressed: () -> Unit = {},
@@ -70,7 +76,8 @@ public fun CallAppBar(
     },
     trailingContent: @Composable () -> Unit = {
         DefaultCallAppBarTrailingContent(
-            onCallAction
+            call = call,
+            onCallAction = onCallAction
         )
     }
 ) {
@@ -153,20 +160,16 @@ internal fun RowScope.DefaultCallAppBarCenterContent(title: String) {
  * Default trailing content slot, representing an icon to show the call participants menu.
  */
 @Composable
-internal fun DefaultCallAppBarTrailingContent(onCallAction: (CallAction) -> Unit) {
-    IconButton(
-        onClick = { onCallAction(ShowCallInfo) },
-        modifier = Modifier.padding(
-            start = VideoTheme.dimens.callAppBarLeadingContentSpacingStart,
-            end = VideoTheme.dimens.callAppBarLeadingContentSpacingEnd
-        )
-    ) {
-        Icon(
-            painter = painterResource(id = R.drawable.stream_video_ic_participants),
-            contentDescription = stringResource(id = R.string.stream_video_call_participants_menu_content_description),
-            tint = VideoTheme.colors.callDescription,
-        )
-    }
+internal fun DefaultCallAppBarTrailingContent(
+    call: Call,
+    onCallAction: (CallAction) -> Unit
+) {
+    val participants by call.state.participants.collectAsState()
+
+    ParticipantIndicatorIcon(
+        number = participants.size,
+        onClick = { onCallAction(ShowCallInfo) }
+    )
 }
 
 @Preview
@@ -174,6 +177,6 @@ internal fun DefaultCallAppBarTrailingContent(onCallAction: (CallAction) -> Unit
 @Composable
 private fun CallTopAppbarPreview() {
     VideoTheme {
-        CallAppBar()
+        CallAppBar(call = mockCall)
     }
 }

@@ -24,15 +24,10 @@ import io.getstream.video.chat_with_video_starter.application.chatWithVideoApp
 
 class CallActivity : AbstractComposeCallActivity() {
 
-    /**
-     * Provides the StreamVideo instance through the videoApp.
-     */
-    override fun getStreamVideo(context: Context): StreamVideo =
-        context.chatWithVideoApp.streamVideo
+    /** Provides the StreamVideo instance through the videoApp. */
+    override fun getStreamVideo(context: Context): StreamVideo = context.chatWithVideoApp.streamVideo
 
-    /**
-     * Provides a custom factory for the ViewModel, that provides fake users for invites.
-     */
+    /** Provides a custom factory for the ViewModel, that provides fake users for invites. */
     override fun getCallViewModelFactory(): CallViewModelFactory {
         return CallViewModelFactory(
             streamVideo = getStreamVideo(this),

@@ -23,7 +23,17 @@
 
 package org.openapitools.client.models
 
+
+
+
+
+import com.squareup.moshi.FromJson
 import com.squareup.moshi.Json
+import com.squareup.moshi.JsonAdapter
+import com.squareup.moshi.JsonReader
+import com.squareup.moshi.JsonWriter
+import com.squareup.moshi.ToJson
+import org.openapitools.client.infrastructure.Serializer
 
 /**
  * This event is sent when call broadcasting has started
@@ -34,7 +44,8 @@ import com.squareup.moshi.Json
  * @param type The type of event: \"call.broadcasting_started\" in this case
  */
 
-data class CallBroadcastingStartedEvent(
+
+data class CallBroadcastingStartedEvent (
 
     @Json(name = "call_cid")
     val callCid: kotlin.String,

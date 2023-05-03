@@ -23,7 +23,18 @@
 
 package org.openapitools.client.models
 
+import org.openapitools.client.models.UserResponse
+
+
+
+
+import com.squareup.moshi.FromJson
 import com.squareup.moshi.Json
+import com.squareup.moshi.JsonAdapter
+import com.squareup.moshi.JsonReader
+import com.squareup.moshi.JsonWriter
+import com.squareup.moshi.ToJson
+import org.openapitools.client.infrastructure.Serializer
 
 /**
  * This event is sent when a call is mark as ended for all its participants. Clients receiving this event should leave the call screen
@@ -34,7 +45,8 @@ import com.squareup.moshi.Json
  * @param user
  */
 
-data class CallEndedEvent(
+
+data class CallEndedEvent (
 
     @Json(name = "call_cid")
     val callCid: kotlin.String,

@@ -57,8 +57,9 @@ import io.getstream.log.taggedLogger
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.avatar.Avatar
 import io.getstream.video.android.core.ConnectionState
+import io.getstream.video.android.core.StreamVideo
 import io.getstream.video.android.core.model.StreamCallId
-import io.getstream.video.android.core.model.typeToId
+import io.getstream.video.android.core.model.mapper.toTypeAndId
 import io.getstream.video.android.core.user.UserPreferencesManager
 import io.getstream.video.android.core.utils.initials
 import kotlinx.coroutines.flow.StateFlow
@@ -68,7 +69,7 @@ class HomeActivity : AppCompatActivity() {
 
     private val streamVideo by lazy {
         logger.d { "[initStreamVideo] no args" }
-        dogfoodingApp.streamVideo
+        StreamVideo.instance()
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -79,9 +80,7 @@ class HomeActivity : AppCompatActivity() {
 
     private val logger by taggedLogger("Call:HomeView")
 
-    private val callCidState: MutableState<StreamCallId> = mutableStateOf(
-        "default:NnXAIvBKE4Hy"
-    )
+    private val callCidState: MutableState<StreamCallId> = mutableStateOf("default:NnXAIvBKE4Hy")
 
     private val connectionState: StateFlow<ConnectionState> by lazy { streamVideo.state.connection }
 
@@ -104,13 +103,12 @@ class HomeActivity : AppCompatActivity() {
                     .fillMaxWidth()
                     .padding(horizontal = 16.dp),
                 onClick = ::logOut,
-                colors = ButtonDefaults.buttonColors(
+                colors =
+                ButtonDefaults.buttonColors(
                     backgroundColor = VideoTheme.colors.errorAccent, contentColor = Color.White
                 )
             ) {
-                Text(
-                    text = "Log Out", color = Color.White
-                )
+                Text(text = "Log Out", color = Color.White)
             }
 
             val connectionState by connectionState.collectAsState()
@@ -128,7 +126,6 @@ class HomeActivity : AppCompatActivity() {
 
     private fun logOut() {
         dogfoodingApp.logOut()
-        startActivity(Intent(this, LoginActivity::class.java))
         finish()
     }
 
@@ -137,36 +134,34 @@ class HomeActivity : AppCompatActivity() {
         CallIdInput()
 
         Button(
-            modifier = Modifier
+            modifier =
+            Modifier
                 .fillMaxWidth()
                 .height(64.dp)
                 .padding(horizontal = 16.dp)
                 .align(Alignment.CenterHorizontally)
                 .testTag("join_call"),
-            colors = ButtonDefaults.buttonColors(
-                backgroundColor = VideoTheme.colors.primaryAccent
-            ),
+            colors = ButtonDefaults.buttonColors(backgroundColor = VideoTheme.colors.primaryAccent),
             onClick = { joinCall() }
-        ) {
-            Text(text = "Join call", color = Color.White)
-        }
+        ) { Text(text = "Join call", color = Color.White) }
     }
 
     private fun joinCall() {
         lifecycleScope.launch {
-
-            val (type, id) = callCidState.value.typeToId
+            val (type, id) = callCidState.value.toTypeAndId()
             val call = streamVideo.call(type = type, id = id)
 
             val result = call.create(memberIds = listOf(streamVideo.userId))
-            result.onSuccess {
-                logger.d { "[joinCall] onSuccess: $it" }
-                val intent = CallActivity.getIntent(this@HomeActivity, callCidState.value)
-                startActivity(intent)
-            }.onError {
-                logger.d { "[joinCall] onError: $it" }
-                Toast.makeText(this@HomeActivity, it.message, Toast.LENGTH_SHORT).show()
-            }
+            result
+                .onSuccess {
+                    logger.d { "[joinCall] onSuccess: $it" }
+                    val intent = CallActivity.getIntent(this@HomeActivity, callCidState.value)
+                    startActivity(intent)
+                }
+                .onError {
+                    logger.d { "[joinCall] onError: $it" }
+                    Toast.makeText(this@HomeActivity, it.message, Toast.LENGTH_SHORT).show()
+                }
         }
     }
 
@@ -177,19 +172,16 @@ class HomeActivity : AppCompatActivity() {
                 .fillMaxWidth()
                 .padding(16.dp),
             value = callCidState.value,
-            onValueChange = { input ->
-                callCidState.value = input
-            },
-            colors = TextFieldDefaults.outlinedTextFieldColors(
+            onValueChange = { input -> callCidState.value = input },
+            colors =
+            TextFieldDefaults.outlinedTextFieldColors(
                 textColor = VideoTheme.colors.textHighEmphasis,
                 focusedBorderColor = VideoTheme.colors.primaryAccent,
                 focusedLabelColor = VideoTheme.colors.primaryAccent,
                 unfocusedBorderColor = VideoTheme.colors.primaryAccent,
                 unfocusedLabelColor = VideoTheme.colors.primaryAccent,
             ),
-            label = {
-                Text(text = "Enter the call ID")
-            }
+            label = { Text(text = "Enter the call ID") }
         )
     }
 
@@ -205,9 +197,7 @@ class HomeActivity : AppCompatActivity() {
 
             val user by streamVideo.state.user.collectAsState()
 
-            val name = user?.name?.ifEmpty {
-                user?.id
-            }
+            val name = user?.name?.ifEmpty { user?.id }
 
             Text(
                 modifier = Modifier
@@ -230,7 +220,8 @@ class HomeActivity : AppCompatActivity() {
                 .size(40.dp)
                 .padding(top = 8.dp, start = 8.dp),
             imageUrl = user.image,
-            initials = if (user.image.isEmpty()) {
+            initials =
+            if (user.image.isEmpty()) {
                 user.name.initials()
             } else {
                 null

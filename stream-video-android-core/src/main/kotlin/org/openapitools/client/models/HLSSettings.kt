@@ -23,7 +23,17 @@
 
 package org.openapitools.client.models
 
+
+
+
+
+import com.squareup.moshi.FromJson
 import com.squareup.moshi.Json
+import com.squareup.moshi.JsonAdapter
+import com.squareup.moshi.JsonReader
+import com.squareup.moshi.JsonWriter
+import com.squareup.moshi.ToJson
+import org.openapitools.client.infrastructure.Serializer
 
 /**
  *
@@ -33,7 +43,8 @@ import com.squareup.moshi.Json
  * @param qualityTracks
  */
 
-data class HLSSettings(
+
+data class HLSSettings (
 
     @Json(name = "auto_on")
     val autoOn: kotlin.Boolean,

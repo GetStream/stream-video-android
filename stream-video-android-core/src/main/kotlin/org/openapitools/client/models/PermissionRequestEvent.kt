@@ -23,7 +23,18 @@
 
 package org.openapitools.client.models
 
+import org.openapitools.client.models.UserResponse
+
+
+
+
+import com.squareup.moshi.FromJson
 import com.squareup.moshi.Json
+import com.squareup.moshi.JsonAdapter
+import com.squareup.moshi.JsonReader
+import com.squareup.moshi.JsonWriter
+import com.squareup.moshi.ToJson
+import org.openapitools.client.infrastructure.Serializer
 
 /**
  * This event is sent when a user requests access to a feature on a call, clients receiving this event should display a permission request to the user
@@ -35,7 +46,8 @@ import com.squareup.moshi.Json
  * @param user
  */
 
-data class PermissionRequestEvent(
+
+data class PermissionRequestEvent (
 
     @Json(name = "call_cid")
     val callCid: kotlin.String,

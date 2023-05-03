@@ -56,54 +56,46 @@ import io.getstream.video.android.tutorial_starter.user.AppUser
 
 @OptIn(ExperimentalAnimationApi::class)
 @Composable
-fun UserItem(
-    appUser: AppUser,
-    onClick: (AppUser) -> Unit
-) {
+fun UserItem(appUser: AppUser, onClick: (AppUser) -> Unit) {
     val user = appUser.user
     val isSelected = appUser.isSelected
 
-    val buttonColor = if (isSelected) {
-        MaterialTheme.colors.primary
-    } else {
-        MaterialTheme.colors.secondary
-    }
+    val buttonColor =
+        if (isSelected) {
+            MaterialTheme.colors.primary
+        } else {
+            MaterialTheme.colors.secondary
+        }
 
     Column(
-        modifier = Modifier
-            .fillMaxWidth()
+        modifier =
+        Modifier.fillMaxWidth()
             .clickable(
                 interactionSource = remember { MutableInteractionSource() },
                 indication = rememberRipple(color = buttonColor),
-                onClick = {
-                    onClick(appUser)
-                }
+                onClick = { onClick(appUser) }
             ),
     ) {
         Spacer(modifier = Modifier.height(8.dp))
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 16.dp)
-        ) {
-            val colorState = animateColorAsState(
-                targetValue = when (isSelected) {
-                    true -> MaterialTheme.colors.secondary
-                    else -> Color.Transparent
-                },
-                animationSpec = spring(stiffness = Spring.StiffnessMediumLow)
-            )
+        Row(modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp)) {
+            val colorState =
+                animateColorAsState(
+                    targetValue =
+                    when (isSelected) {
+                        true -> MaterialTheme.colors.secondary
+                        else -> Color.Transparent
+                    },
+                    animationSpec = spring(stiffness = Spring.StiffnessMediumLow)
+                )
             Box(
-                modifier = Modifier
-                    .size(46.dp)
+                modifier =
+                Modifier.size(46.dp)
                     .align(alignment = Alignment.CenterVertically)
                     .clip(CircleShape)
                     .background(colorState.value)
             ) {
                 Avatar(
-                    modifier = Modifier
-                        .size(40.dp)
-                        .align(alignment = Alignment.Center),
+                    modifier = Modifier.size(40.dp).align(alignment = Alignment.Center),
                     imageUrl = user.image ?: "",
                     initials = user.name.initials()
                 )
@@ -112,9 +104,7 @@ fun UserItem(
             Spacer(modifier = Modifier.width(16.dp))
 
             Text(
-                modifier = Modifier
-                    .align(Alignment.CenterVertically)
-                    .weight(1f),
+                modifier = Modifier.align(Alignment.CenterVertically).weight(1f),
                 text = user.name,
                 fontSize = 16.sp,
             )
@@ -124,12 +114,7 @@ fun UserItem(
                 modifier = Modifier.align(Alignment.CenterVertically),
                 enter = fadeIn() + scaleIn(),
                 exit = fadeOut() + scaleOut()
-            ) {
-                Checkbox(
-                    checked = true,
-                    onCheckedChange = null
-                )
-            }
+            ) { Checkbox(checked = true, onCheckedChange = null) }
         }
         Spacer(modifier = Modifier.height(8.dp))
     }
