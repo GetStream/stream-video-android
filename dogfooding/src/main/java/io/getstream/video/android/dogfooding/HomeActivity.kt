@@ -59,7 +59,7 @@ import io.getstream.video.android.compose.ui.components.avatar.Avatar
 import io.getstream.video.android.core.ConnectionState
 import io.getstream.video.android.core.StreamVideo
 import io.getstream.video.android.core.model.StreamCallId
-import io.getstream.video.android.core.model.typeToId
+import io.getstream.video.android.core.model.mapper.toTypeAndId
 import io.getstream.video.android.core.user.UserPreferencesManager
 import io.getstream.video.android.core.utils.initials
 import kotlinx.coroutines.flow.StateFlow
@@ -87,7 +87,9 @@ class HomeActivity : AppCompatActivity() {
     @Composable
     private fun HomeScreen() {
         Column(
-            modifier = Modifier.fillMaxSize().background(VideoTheme.colors.appBackground),
+            modifier = Modifier
+                .fillMaxSize()
+                .background(VideoTheme.colors.appBackground),
             verticalArrangement = Arrangement.Center
         ) {
             UserDetails()
@@ -97,7 +99,9 @@ class HomeActivity : AppCompatActivity() {
             Spacer(modifier = Modifier.height(16.dp))
 
             Button(
-                modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp),
                 onClick = ::logOut,
                 colors =
                 ButtonDefaults.buttonColors(
@@ -131,7 +135,8 @@ class HomeActivity : AppCompatActivity() {
 
         Button(
             modifier =
-            Modifier.fillMaxWidth()
+            Modifier
+                .fillMaxWidth()
                 .height(64.dp)
                 .padding(horizontal = 16.dp)
                 .align(Alignment.CenterHorizontally)
@@ -143,7 +148,7 @@ class HomeActivity : AppCompatActivity() {
 
     private fun joinCall() {
         lifecycleScope.launch {
-            val (type, id) = callCidState.value.typeToId
+            val (type, id) = callCidState.value.toTypeAndId()
             val call = streamVideo.call(type = type, id = id)
 
             val result = call.create(memberIds = listOf(streamVideo.userId))
@@ -163,7 +168,9 @@ class HomeActivity : AppCompatActivity() {
     @Composable
     fun CallIdInput() {
         OutlinedTextField(
-            modifier = Modifier.fillMaxWidth().padding(16.dp),
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
             value = callCidState.value,
             onValueChange = { input -> callCidState.value = input },
             colors =
@@ -181,7 +188,9 @@ class HomeActivity : AppCompatActivity() {
     @Composable
     private fun UserDetails() {
         Row(
-            modifier = Modifier.fillMaxWidth().height(40.dp),
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(40.dp),
             horizontalArrangement = Arrangement.Start
         ) {
             UserIcon()
@@ -191,7 +200,9 @@ class HomeActivity : AppCompatActivity() {
             val name = user?.name?.ifEmpty { user?.id }
 
             Text(
-                modifier = Modifier.padding(horizontal = 16.dp).align(CenterVertically),
+                modifier = Modifier
+                    .padding(horizontal = 16.dp)
+                    .align(CenterVertically),
                 color = VideoTheme.colors.textHighEmphasis,
                 text = name ?: "Missing name",
                 overflow = TextOverflow.Ellipsis,
@@ -205,7 +216,9 @@ class HomeActivity : AppCompatActivity() {
         val user = UserPreferencesManager.initialize(this).getUserCredentials() ?: return
 
         Avatar(
-            modifier = Modifier.size(40.dp).padding(top = 8.dp, start = 8.dp),
+            modifier = Modifier
+                .size(40.dp)
+                .padding(top = 8.dp, start = 8.dp),
             imageUrl = user.image,
             initials =
             if (user.image.isEmpty()) {

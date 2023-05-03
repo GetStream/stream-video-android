@@ -1976,7 +1976,6 @@ public final class io/getstream/video/android/core/model/StartedCall {
 
 public final class io/getstream/video/android/core/model/StreamCallCidKt {
 	public static final fun StreamCallCid (Ljava/lang/String;Ljava/lang/String;)Ljava/lang/String;
-	public static final fun getTypeToId (Ljava/lang/String;)Lkotlin/Pair;
 }
 
 public final class io/getstream/video/android/core/model/StreamCallGuid : java/io/Serializable {

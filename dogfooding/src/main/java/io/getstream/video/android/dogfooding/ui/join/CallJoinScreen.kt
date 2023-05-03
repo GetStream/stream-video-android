@@ -44,6 +44,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
@@ -209,7 +210,8 @@ private fun CallJoinBody(
             StreamButton(
                 modifier = Modifier
                     .padding(horizontal = 16.dp)
-                    .fillMaxHeight(),
+                    .fillMaxHeight()
+                    .testTag("join_call"),
                 onClick = { callJoinViewModel.joinCall(callId) },
                 text = stringResource(id = R.string.join_call)
             )
