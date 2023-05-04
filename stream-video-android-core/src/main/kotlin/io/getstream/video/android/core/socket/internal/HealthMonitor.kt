@@ -88,6 +88,10 @@ internal class HealthMonitor(private val healthCallback: HealthCallback, private
         consecutiveFailures = 0
     }
 
+    fun cleanup() {
+        stop()
+    }
+
     private suspend fun reconnect() {
         if (!reconnectInProgress) {
             reconnectInProgress = true

@@ -55,8 +55,10 @@ import io.getstream.video.android.core.utils.toUser
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.decodeFromString
@@ -106,7 +108,7 @@ import kotlin.coroutines.Continuation
  */
 internal class StreamVideoImpl internal constructor(
     override val context: Context,
-    internal val scope: CoroutineScope,
+    internal val _scope: CoroutineScope,
     override val user: User,
     private val lifecycle: Lifecycle,
     private val loggingLevel: LoggingLevel,
@@ -118,6 +120,9 @@ internal class StreamVideoImpl internal constructor(
 
     /** the state for the client, includes the current user */
     override val state = ClientState(this)
+
+    private val supervisorJob = SupervisorJob()
+    internal val scope = CoroutineScope(_scope.coroutineContext + supervisorJob)
 
     val debugInfo = DebugInfo(this)
 
@@ -139,6 +144,16 @@ internal class StreamVideoImpl internal constructor(
     private var calls = mutableMapOf<String, Call>()
 
     val socketImpl = connectionModule.coordinatorSocket
+
+    override fun cleanup() {
+        // stop all running coroutines
+        supervisorJob.cancel()
+        // stop the socket
+        socketImpl.cleanup()
+        // call cleanup on the active call
+        val activeCall = state.activeCall.value
+        activeCall?.cleanup()
+    }
 
     /**
      * @see StreamVideo.createDevice

@@ -44,7 +44,6 @@ public class CoordinatorSocket(
     url = url,
     httpClient = httpClient,
     scope = scope,
-    token = token,
     networkStateProvider = networkStateProvider
 ) {
     override val logger by taggedLogger("PersistentCoordinatorSocket")

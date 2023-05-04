@@ -192,6 +192,11 @@ class MicrophoneManager(val mediaManager: MediaManagerImpl) {
         setupCompleted = true
     }
 
+    fun cleanup() {
+        audioHandler.stop()
+        setupCompleted = false
+    }
+
     private var setupCompleted: Boolean = false
 }
 
@@ -222,7 +227,7 @@ public class CameraManager(
     eglBaseContext: EglBase.Context,
     defaultCameraDirection: CameraDirection = CameraDirection.Front
 ) {
-
+    private lateinit var surfaceTextureHelper: SurfaceTextureHelper
     private lateinit var devices: List<CameraDeviceWrapped>
     private var isCapturingVideo: Boolean = false
     private lateinit var videoCapturer: Camera2Capturer
@@ -317,12 +322,6 @@ public class CameraManager(
         }
     }
 
-    private val surfaceTextureHelper by lazy {
-        SurfaceTextureHelper.create(
-            "CaptureThread", eglBaseContext
-        )
-    }
-
     private var setupCompleted: Boolean = false
 
     /**
@@ -383,6 +382,10 @@ public class CameraManager(
         _availableResolutions.value =
             selectedDevice.supportedFormats?.toImmutableList() ?: emptyList()
 
+        surfaceTextureHelper = SurfaceTextureHelper.create(
+            "CaptureThread", eglBaseContext
+        )
+
         setupCompleted = true
     }
 
@@ -435,6 +438,13 @@ public class CameraManager(
             ?.filter { it.framerate.max >= 30 }
         return matchingTarget?.first()
     }
+
+    fun cleanup() {
+        stopCapture()
+        videoCapturer?.dispose()
+        surfaceTextureHelper?.dispose()
+        setupCompleted = false
+    }
 }
 
 /**
@@ -480,6 +490,7 @@ class MediaManagerImpl(
     val microphone = MicrophoneManager(this)
     val speaker = SpeakerManager(this)
 
+<<<<<<< HEAD
     fun setSpeakerphoneEnabled(isEnabled: Boolean) {
         val devices = getAudioDevices()
 
@@ -534,5 +545,14 @@ class MediaManagerImpl(
             val isCommunicationDeviceSet = audioManager?.setCommunicationDevice(device)
             logger.d { "[setupAudio] #sfu; isCommunicationDeviceSet: $isCommunicationDeviceSet" }
         }
+    }
+
+    fun cleanup() {
+        videoSource.dispose()
+        videoTrack.dispose()
+        audioSource.dispose()
+        audioTrack.dispose()
+        camera.cleanup()
+        microphone.cleanup()
     }
 }

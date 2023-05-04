@@ -42,7 +42,6 @@ public class SfuSocket(
 ) : PersistentSocket<JoinCallResponseEvent> (
     url = url,
     httpClient = httpClient,
-    token = token,
     scope = scope,
     networkStateProvider = networkStateProvider
 ) {

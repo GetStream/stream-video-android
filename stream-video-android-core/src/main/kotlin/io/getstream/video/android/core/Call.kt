@@ -30,6 +30,13 @@ import io.getstream.video.android.core.model.UpdateUserPermissionsData
 import io.getstream.video.android.core.model.User
 import io.getstream.video.android.core.model.toIceServer
 import io.getstream.webrtc.android.ui.VideoTextureViewRenderer
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.launch
 import org.openapitools.client.models.BlockUserResponse
 import org.openapitools.client.models.CallSettingsRequest
 import org.openapitools.client.models.GetCallEdgeServerRequest
@@ -50,6 +57,7 @@ import org.openapitools.client.models.UpdateCallRequest
 import org.openapitools.client.models.UpdateCallResponse
 import org.openapitools.client.models.UpdateUserPermissionsResponse
 import org.openapitools.client.models.VideoEvent
+import org.webrtc.PeerConnection
 import org.webrtc.RendererCommon
 import stream.video.sfu.models.TrackType
 
@@ -86,9 +94,13 @@ public class Call(
     /** The cid is type:id */
     val cid = "$type:$id"
 
+    private val supervisorJob = SupervisorJob()
+    private val scope = CoroutineScope(clientImpl.scope.coroutineContext + supervisorJob)
+
+
     /** Session handles all real time communication for video and audio */
     internal var session: RtcSession? = null
-    internal val mediaManager by lazy { MediaManagerImpl(clientImpl.context, this, clientImpl.scope, clientImpl.peerConnectionFactory.eglBase.eglBaseContext) }
+    internal val mediaManager by lazy { MediaManagerImpl(clientImpl.context, this, scope, clientImpl.peerConnectionFactory.eglBase.eglBaseContext) }
 
     /** Basic crud operations */
     suspend fun get(): Result<GetCallResponse> {
@@ -207,7 +219,35 @@ public class Call(
 
         session?.connect()
 
-        timer.finish("rtc connect completed")
+        timer.split("rtc connect completed")
+
+        scope.launch {
+            // wait for the first stream to be added
+            session?.let { rtcSession ->
+                val result = rtcSession.lastVideoStreamAdded.filter { it!=null }.first()
+                timer.finish("stream added, rtc completed, ready to display video $result")
+            }
+
+        }
+
+        scope.launch {
+            session?.let {
+                // failed and closed indicate we should retry connecting to this or another SFU
+                // disconnected is temporary, only if it lasts for a certain duration we should reconnect or switch
+                val badStates = listOf(
+                    PeerConnection.IceConnectionState.DISCONNECTED,
+                    PeerConnection.IceConnectionState.FAILED,
+                    PeerConnection.IceConnectionState.CLOSED
+                )
+                it.subscriber?.state?.filter { it in badStates }?.collect() {
+                    logger.w { "ice connection state changed to $it" }
+                    // TODO: UI indications
+                    // TODO: some logic here about when to reconnect or switch
+                    switchSfu()
+                }
+            }
+
+        }
 
         client.state.setActiveCall(this)
 
@@ -463,6 +503,18 @@ public class Call(
             state.updateFromResponse(it)
         }
         return result
+    }
+
+    fun cleanup() {
+        session?.cleanup()
+        supervisorJob.cancel()
+        // TODO: does anything else need to cleaned up?
+    }
+
+    suspend fun switchSfu() {
+        session?.cleanup()
+        // TODO: maybe exclude the last sfu?
+        join()
     }
 }
 
