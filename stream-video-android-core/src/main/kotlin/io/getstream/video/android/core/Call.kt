@@ -32,8 +32,6 @@ import io.getstream.video.android.core.model.toIceServer
 import io.getstream.webrtc.android.ui.VideoTextureViewRenderer
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
-import kotlinx.coroutines.flow.collect
-import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
@@ -116,7 +114,7 @@ public class Call(
         memberIds: List<String>? = null,
         members: List<MemberRequest>? = null,
         custom: Map<String, Any>? = null,
-        settingsOverride: CallSettingsRequest? = null,
+        settings: CallSettingsRequest? = null,
         startsAt: org.threeten.bp.OffsetDateTime? = null,
         team: String? = null,
         ring: Boolean = false
@@ -128,7 +126,7 @@ public class Call(
                 id = id,
                 members = members,
                 custom = custom,
-                settingsOverride = settingsOverride,
+                settingsOverride = settings,
                 startsAt = startsAt,
                 team = team,
                 ring = ring
@@ -139,7 +137,7 @@ public class Call(
                 id = id,
                 memberIds = memberIds,
                 custom = custom,
-                settingsOverride = settingsOverride,
+                settingsOverride = settings,
                 startsAt = startsAt,
                 team = team,
                 ring = ring
@@ -174,10 +172,16 @@ public class Call(
         return response
     }
 
-    suspend fun join(create: CreateCallOptions? = null): Result<RtcSession> {
+    suspend fun join(create: Boolean=false, createOptions: CreateCallOptions? = null): Result<RtcSession> {
         // step 1. call the join endpoint to get a list of SFUs
         val timer = clientImpl.debugInfo.trackTime("call.join")
-        val result = joinRequest(create)
+        val options = createOptions
+            ?: if (create) {
+                CreateCallOptions()
+            } else {
+                null
+            }
+        val result = joinRequest(options)
 
         if (result !is Success) {
             return result as Failure
@@ -494,7 +498,7 @@ public class Call(
             create = create != null,
             members = create?.memberRequestsFromIds(),
             custom = create?.custom,
-            settingsOverride = create?.settingsOverride,
+            settingsOverride = create?.settings,
             startsAt = create?.startsAt,
             team = create?.team,
             ring = create?.ring ?: false,
@@ -522,7 +526,7 @@ public data class CreateCallOptions(
     val memberIds: List<String>? = null,
     val members: List<MemberRequest>? = null,
     val custom: Map<String, Any>? = null,
-    val settingsOverride: CallSettingsRequest? = null,
+    val settings: CallSettingsRequest? = null,
     val startsAt: org.threeten.bp.OffsetDateTime? = null,
     val team: String? = null,
     val ring: Boolean = false

@@ -1,9 +1,0 @@
-## Running Calls in the Background
-
-Most applications which provide an Audio/Video calling feature let users call continue their calls while browsing other applications in the background. Our SDK let's you implement this feature very easily, using an abstract Android `Service` that we provide.
-
-> **Note**: Because of Android OS background limitations, you have to keep a `ForegroundService` and notification active, while working on something in the background.
-
-In our SDK we provide an `AbstractStreamCallService`. It holds the necessary logic to set up the foreground notification that keeps the call alive, as well as controls to leave the call. Let's see how to use it.
-
-## Implementing AbstractStreamCallService

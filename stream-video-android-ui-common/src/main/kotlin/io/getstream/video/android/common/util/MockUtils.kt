@@ -37,7 +37,7 @@ public object MockUtils {
                 context = context.applicationContext,
                 apiKey = "stream-api-key",
                 user = mockUsers.first(),
-                userToken = "user-token"
+                token = "user-token"
             ).build()
         }
     }

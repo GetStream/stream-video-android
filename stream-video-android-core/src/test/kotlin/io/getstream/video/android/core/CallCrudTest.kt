@@ -84,6 +84,7 @@ public class CallCrudTest : IntegrationTestBase() {
     fun `Create a call with members and custom data`() = runTest {
         val members = mutableListOf("thierry", "tommaso")
         val call = client.call("default", randomUUID())
+
         val result = call.create(memberIds = members, custom = mapOf("color" to "red"))
         assert(result.isSuccess)
 

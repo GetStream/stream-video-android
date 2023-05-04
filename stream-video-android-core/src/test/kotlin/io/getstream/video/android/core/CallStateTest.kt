@@ -46,7 +46,7 @@ class CallStateTest : IntegrationTestBase() {
             custom = custom,
             members = listOf(MemberRequest("tommaso", mutableMapOf("color" to "green"))),
             // block screensharing completely for this call
-            settingsOverride = CallSettingsRequest(screensharing = ScreensharingSettingsRequest(accessRequestEnabled = false, enabled = false))
+            settings = CallSettingsRequest(screensharing = ScreensharingSettingsRequest(accessRequestEnabled = false, enabled = false))
         )
         assertSuccess(response)
 
