@@ -267,8 +267,9 @@ public class RtcSession internal constructor(
 
         // step 1 setup the peer connections
         subscriber = createSubscriber()
+        val session = this
         val getSdp = suspend {
-            getSubscriberSdp().description
+            session.getSubscriberSdp().description
         }
         sfuConnectionModule =
             connectionModule.createSFUConnectionModule(sfuUrl, sessionId, sfuToken, getSdp)
@@ -534,7 +535,8 @@ public class RtcSession internal constructor(
 
     @VisibleForTesting
     public fun createSubscriber(): StreamPeerConnection? {
-        clientImpl.peerConnectionFactory.makePeerConnection(
+        logger.i { "[createSubscriber] #sfu" }
+        return clientImpl.peerConnectionFactory.makePeerConnection(
             coroutineScope = coroutineScope,
             configuration = connectionConfiguration,
             type = StreamPeerType.SUBSCRIBER,
@@ -542,34 +544,33 @@ public class RtcSession internal constructor(
             onStreamAdded = { addStream(it) }, // addTrack
             onIceCandidateRequest = ::sendIceCandidate
         )
-        logger.i { "[createSubscriber] #sfu; subscriber: $subscriber" }
-        return subscriber
     }
 
     private suspend fun getSubscriberSdp(): SessionDescription {
-
-        subscriber!!.connection.apply {
-            addTransceiver(
-                MediaStreamTrack.MediaType.MEDIA_TYPE_VIDEO,
-                RtpTransceiver.RtpTransceiverInit(
-                    RtpTransceiver.RtpTransceiverDirection.RECV_ONLY
+        subscriber?.let {
+            it.connection.apply {
+                addTransceiver(
+                    MediaStreamTrack.MediaType.MEDIA_TYPE_VIDEO,
+                    RtpTransceiver.RtpTransceiverInit(
+                        RtpTransceiver.RtpTransceiverDirection.RECV_ONLY
+                    )
                 )
-            )
-            addTransceiver(
-                MediaStreamTrack.MediaType.MEDIA_TYPE_AUDIO,
-                RtpTransceiver.RtpTransceiverInit(
-                    RtpTransceiver.RtpTransceiverDirection.RECV_ONLY
+                addTransceiver(
+                    MediaStreamTrack.MediaType.MEDIA_TYPE_AUDIO,
+                    RtpTransceiver.RtpTransceiverInit(
+                        RtpTransceiver.RtpTransceiverDirection.RECV_ONLY
+                    )
                 )
-            )
-        }
+            }
 
-        val result = subscriber!!.createOffer()
+            val result = it.createOffer()
 
-        return if (result is Success) {
-            mangleSdp(result.value)
-        } else {
-            throw Error("Couldn't create a generic SDP")
-        }
+            return if (result is Success) {
+                mangleSdp(result.value)
+            } else {
+                throw Error("Couldn't create a generic SDP, create offer failed")
+            }
+        } ?: throw Error("Couldn't create a generic SDP, subscriber isn't setup")
     }
 
     fun mangleSdp(sdp: SessionDescription): SessionDescription {

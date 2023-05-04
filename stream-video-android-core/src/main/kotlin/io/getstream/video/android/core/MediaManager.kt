@@ -224,7 +224,7 @@ public sealed class CameraDirection {
  */
 public class CameraManager(
     public val mediaManager: MediaManagerImpl,
-    eglBaseContext: EglBase.Context,
+    public val eglBaseContext: EglBase.Context,
     defaultCameraDirection: CameraDirection = CameraDirection.Front
 ) {
     private lateinit var surfaceTextureHelper: SurfaceTextureHelper
@@ -490,7 +490,6 @@ class MediaManagerImpl(
     val microphone = MicrophoneManager(this)
     val speaker = SpeakerManager(this)
 
-<<<<<<< HEAD
     fun setSpeakerphoneEnabled(isEnabled: Boolean) {
         val devices = getAudioDevices()
 
