@@ -249,6 +249,11 @@ public class CameraManager(
     private val _resolution = MutableStateFlow<CameraEnumerationAndroid.CaptureFormat?>(null)
     public val resolution: StateFlow<CameraEnumerationAndroid.CaptureFormat?> = _resolution
 
+    private val _availableResolutions: MutableStateFlow<List<CameraEnumerationAndroid.CaptureFormat>> =
+        MutableStateFlow(emptyList())
+    public val availableResolutions: StateFlow<List<CameraEnumerationAndroid.CaptureFormat>> =
+        _availableResolutions
+
     public fun listDevices(): List<CameraDeviceWrapped> {
         setup()
         return devices
@@ -301,13 +306,7 @@ public class CameraManager(
         }
     }
 
-    /**
-     * Selects a specific device
-     */
-    private val _availableResolutions: MutableStateFlow<List<CameraEnumerationAndroid.CaptureFormat>> =
-        MutableStateFlow(emptyList())
-    public val availableResolutions: StateFlow<List<CameraEnumerationAndroid.CaptureFormat>> =
-        _availableResolutions
+
 
     fun select(deviceId: String, startCapture: Boolean = false) {
         val selectedDevice = devices.first { it.id == deviceId }

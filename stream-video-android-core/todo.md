@@ -16,7 +16,8 @@ Not as important
 ### Week 3: Sample app, update compose to LLC & State changes. New events, socket & token provider. Call UI. Guest users & moderation endpoints
 ### Week 4: LLC & state test coverage + Demo & Dogfooding apps + RTC & Media fixes
 ### Week 5: Sample app stability, S23 sdp munging, dynascale, reconnect, cleanup for reconnect
-
+### Break
+### Week 6: Docs
 
 ### Biggest open tasks & estimates
 
@@ -30,6 +31,8 @@ Not as important
 ### High level issues
 
 - [ ] Join flow is too slow
+- [ ] Test coverage reporting
+- [ ] Automated build flow for docusaurus
 
 ### App & Compose
 
