@@ -1,0 +1,79 @@
+---
+title: Livestream Tutorial
+description: How to build a livestream experience using Stream's video SDKs
+---
+
+## Livestream Tutorial
+
+In this tutorial we'll quickly build a low-latency livestreaming experience similar to Twitch.
+
+* We'll use ultra low latency streaming in this tutorial. Alternatively you can also broadcast to HLS
+* The livestream will run on Stream's Edge network of servers around the world
+* This architecture allows you to scale to millions of viewers
+* To publish the livestream you can use either RTMPs (which is supported by OBS and pretty much all streaming software) or you can publish from your phone
+
+Time to get started, if you have any questions or feedback be sure to let us know via the feedback button.
+
+### Step 1 - Install
+
+
+### Step 2A - Publish from your phone
+
+The following code shows how to publish from your phone's camera to the call.
+Livestreams by default will start in the backstage mode.
+The call works, you can join with your fellow call hosts, but participants aren't allowed to join yet.
+You can call call.goLive() to start your livestream.
+
+```kotlin
+val call = client.call("livestream", "id-here")
+call.join()
+call.camera.enable()
+call.camera.flip() // if you want to flip the camera
+
+call.goLive()
+
+```
+
+### Step 2B - Publish from RTMPs
+
+Alternatively you can publish from RTMPs
+
+TODO: example
+
+```kotlin
+```
+
+### Step 3A - Viewing a livestream (Webrtc)
+
+The client setup for someone watching the call is slightly different.
+
+```kotlin
+```
+
+```kotlin
+val call = client.call("livestream", "id-here")
+call.join()
+
+setContent {
+    VideoTheme {
+        Livestream(call)
+    }
+}
+```
+
+- Participant count?
+- Show how long the stream has been running
+- Link to docs on the chat integration
+- Manually changing the displayed quality
+- Muting the audio output of the livestream
+
+### Step 3B - Viewing a livestream (HLS)
+
+Alternatively you can use HLS to view the running call. This means the latency will be higher (typically an extra 10 seconds).
+The benefit is that HLS buffers better for viewers.
+
+### Step 4 - Recording a call
+
+The last piece of the puzzle is recording your livestream.
+
+
