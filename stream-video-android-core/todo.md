@@ -106,29 +106,29 @@
 
 ### Server wishlist
 
-[X] queryChannels doesn’t return members but CallUsers, this is wrong
-[X] Update call endpoints doesn’t expose team or startsAt. I get why we don’t expose team, not sure about startsAt
-[X] Get/Create etc don’t specify connection_id, this breaks the ability to watch
-[X] Not being able to edit settings on a call you created seems like the wrong default: “”User ‘thierry’ with role ‘user’ is not allowed to perform action UpdateCallSettings in scope ‘video:default’“, serverErrorCode=17, statusCode=-1, cause=java.lang.Throwable: ))”
-[X] Participant.online field is weird. Aren't you always online as a participant?
-[ ] Events for updating users
-[ ] Participant count (for livestreams you cant rely on the list)
-[ ] ConnectionQualityInfo is a list, audio levels is a map. Lets standardize
-[ ] Accept/reject call endpoints
-[ ] What about codec switching?
-[ ] What about graceful SFU shutdown/ an event to make clients move SFU?
-[ ] Events for creating a channel on chat. so you lazy load the chat when the first person opens it
-[ ] List of error codes via openapi
-[ ] getCall doesn't support member limits
-[ ] CallMemberUpdatedPermissionEvent. Weird that call and members are included
-[ ] message=GetOrCreateCall failed with error: "The following users are involved in call create operation, but don't exist: [jaewoong]. Please create the user objects before setting up the call.
-[ ] review QueryMembersRequest
-[ ] target resolution / max resolution (default 960)
-[ ] if we should default to front or back camera
-[ ] should video be default on or off?
-[ ] should audio be default on or off?
-[ ] am i allowed to publish (IE should i create the publisher peer connection)
-[ ] health check http request on the SFU (no auth, nothing that can give errors, just health) (for the recovery flow)
+- [X] queryChannels doesn’t return members but CallUsers, this is wrong
+- [X] Update call endpoints doesn’t expose team or startsAt. I get why we don’t expose team, not sure about startsAt
+- [X] Get/Create etc don’t specify connection_id, this breaks the ability to watch
+- [X] Not being able to edit settings on a call you created seems like the wrong default: “”User ‘thierry’ with role ‘user’ is not allowed to perform action UpdateCallSettings in scope ‘video:default’“, serverErrorCode=17, statusCode=-1, cause=java.lang.Throwable: ))”
+- [X] Participant.online field is weird. Aren't you always online as a participant?
+- [ ] Events for updating users
+- [ ] Participant count (for livestreams you cant rely on the list)
+- [ ] ConnectionQualityInfo is a list, audio levels is a map. Lets standardize
+- [ ] Accept/reject call endpoints
+- [ ] What about codec switching?
+- [ ] What about graceful SFU shutdown/ an event to make clients move SFU?
+- [ ] Events for creating a channel on chat. so you lazy load the chat when the first person opens it
+- [ ] List of error codes via openapi
+- [ ] getCall doesn't support member limits
+- [ ] CallMemberUpdatedPermissionEvent. Weird that call and members are included
+- [ ] message=GetOrCreateCall failed with error: "The following users are involved in call create operation, but don't exist: [jaewoong]. Please create the user objects before setting up the call.
+- [ ] review QueryMembersRequest
+- [ ] target resolution / max resolution (default 960)
+- [ ] if we should default to front or back camera
+- [ ] should video be default on or off?
+- [ ] should audio be default on or off?
+- [ ] am i allowed to publish (IE should i create the publisher peer connection)
+- [ ] health check http request on the SFU (no auth, nothing that can give errors, just health) (for the recovery flow). not sure about this one, tbd
 
 
 ### Review each file, fix TODOS and document
