@@ -1,14 +1,4 @@
 
-## Essentials for a good Beta
-
-Important
-* Docs & developer experience
-* Sample /demo app
-* Excellent stability
-
-Not as important
-* Supporting all features
-
 ## Timeline
 
 ### Week 1: Refactor LLC & State. Setup testing
@@ -17,44 +7,53 @@ Not as important
 ### Week 4: LLC & state test coverage + Demo & Dogfooding apps + RTC & Media fixes
 ### Week 5: Sample app stability, S23 sdp munging, dynascale, reconnect, cleanup for reconnect
 ### Break
-### Week 6: Docs
+### Week 6: Docs, docs & sample app
 
-### Biggest open tasks & estimates
-
-* Docs. 4 weeks or so
-* Cross device testing. 2-4 weeks
-* Reconnect & cleanup. 2 weeks
-* Server/little endpoint stuff etc. 1 week
-* User app testing. Ie have people use it. 2 weeks or so
-* Compose & App: Unsure
 
 ### High level issues
 
 - [ ] Join flow is too slow
-- [ ] Test coverage reporting
-- [ ] Automated build flow for docusaurus
+- [ ] Chat integration needs a good review to see what we can simplify
+- [ ] Several minor server changes are still needed
+
+### Available tasks up for grabs (little things, easy to do)
+
+- [ ] use standard debug, verbose, info, warning and error debug levels on StreamVideoBuilder
+- [ ] Participant sorting rules. See Call sortedParticipants
+- [ ] Pinning of participants. You pin/unpin and it sets pinnedAt and sorting takes it into account
+- [ ] Currently we use UserPreferencesManager. Jaewoong mentioned we should perhaps explore https://developer.android.com/topic/libraries/architecture/datastore
+
+### Docs ~4 weeks left
+
+- [ ] Video calling tutorial & Feedback cycle with team
+- [ ] Livestream tutorial & Feedback cycle with team
+- [ ] Audio room tutorial & Feedback cycle with team
+- [ ] Low level docs
+- [ ] UI cookbook
+- [ ] UI components
+
+### Reconnect & Cross device testing ~2 weeks
+
+- [ ] Max resolution, simulcast and codec preferences should be easy to change
+- [ ] SFU needs to support sending some testing tracks for integration testing
+- [ ] We might need overwrites for the defaults at the device level
+- [ ] Track the FPS messages from webrtc camera capture
 
 ### App & Compose
 
-- Reactions don't show up
-- Use participant.sessionId instead of user id. Key "thierry@getstream.io" was already used. If you are using LazyColumn/Row please make sure you provide a unique key for each item
-- Make buttons easier to customize. right now there is a list of items. something like this would be nicer:
-  <CallControls><VolumeControl /><CameraMuteControl> </CallControls>etc
-- Fix the buttons, right now they don't all work
-- Screensharing doesn't show up
-- Chat integration (we need an event from the server though)
-- Token expiration isn't handled well in dogfooding app
-- Crashlytics for sample and dogfooding apps
-- PIP
-- Ringing calls (wait for push and updated endpoints from server)
+- [ ] Reactions don't show up
+- [ ] Screensharing doesn't show up
+- [ ] Chat integration (we need an event from the server though)
+- [ ] Token expiration isn't handled well in dogfooding app
+- [ ] PIP
+- [ ] Ringing calls (wait for push and updated endpoints from server)
 
 
 ### RTC & Media TODO
 
 - [ ] Improve how we mangle SDP tokens. (edit the audio line and video line, don't swap lines)
-- [ ] Review how UI changes & pagination are connected to the video tracks. See call initRenderer and updateParticipantsSubscriptions
-- [ ] Implement dynascale
-- [ ] Tests for the media manager
+- [ ] Enable & Test dynascale
+- [ ] Media manager tests & decide on microphone/speaker split
 - [ ] Screensharing
 - [ ] Error classes for Media/Camera/Mic & Joining a call. That wrap the many things that can go wrong.
 - [ ] Leave & End flows
@@ -71,10 +70,14 @@ Not as important
 - [X] Tests that verify we are sending our local track
 - [X] setLocalTrack is not called
 
-### Other
 
-- Review the 200 todos
-- Unit test on Android that customer success can run to test the SDK/ edit things for a customer
+### State TODO
+
+- [ ] State for: Speaking while muted, Network issue (your own connection)
+- [X] Call settings need to be used everywhere. There are still some hardcoded settings
+- [X] Member state isn't implemented fully. Could be either a state or just a data class
+- [X] Call state isn't setup fully on join
+- [X] Member state isn't updated correctly or implemented
 
 ### LLC TODO
 
@@ -95,12 +98,38 @@ Not as important
   https://www.notion.so/stream-wiki/Call-Permissions-832f914ad4c545cf8f048012900ad21d
 - [X] Guest and anon user support
 
-### State TODO
+### Other & Process
 
-- [X] Call settings need to be used everywhere. There are still some hardcoded settings
-- [X] Member state isn't implemented fully. Could be either a state or just a data class
-- [X] Call state isn't setup fully on join
-- [X] Member state isn't updated correctly or implemented
+- [ ] Review the 200 todos
+- [ ] Coverage reporting
+- [ ] Build vars to generate tokens for testing
+
+### Server wishlist
+
+[X] queryChannels doesn’t return members but CallUsers, this is wrong
+[X] Update call endpoints doesn’t expose team or startsAt. I get why we don’t expose team, not sure about startsAt
+[X] Get/Create etc don’t specify connection_id, this breaks the ability to watch
+[X] Not being able to edit settings on a call you created seems like the wrong default: “”User ‘thierry’ with role ‘user’ is not allowed to perform action UpdateCallSettings in scope ‘video:default’“, serverErrorCode=17, statusCode=-1, cause=java.lang.Throwable: ))”
+[X] Participant.online field is weird. Aren't you always online as a participant?
+[ ] Events for updating users
+[ ] Participant count (for livestreams you cant rely on the list)
+[ ] ConnectionQualityInfo is a list, audio levels is a map. Lets standardize
+[ ] Accept/reject call endpoints
+[ ] What about codec switching?
+[ ] What about graceful SFU shutdown/ an event to make clients move SFU?
+[ ] Events for creating a channel on chat. so you lazy load the chat when the first person opens it
+[ ] List of error codes via openapi
+[ ] getCall doesn't support member limits
+[ ] CallMemberUpdatedPermissionEvent. Weird that call and members are included
+[ ] message=GetOrCreateCall failed with error: "The following users are involved in call create operation, but don't exist: [jaewoong]. Please create the user objects before setting up the call.
+[ ] review QueryMembersRequest
+[ ] target resolution / max resolution (default 960)
+[ ] if we should default to front or back camera
+[ ] should video be default on or off?
+[ ] should audio be default on or off?
+[ ] am i allowed to publish (IE should i create the publisher peer connection)
+[ ] health check http request on the SFU (no auth, nothing that can give errors, just health) (for the recovery flow)
+
 
 ### Review each file, fix TODOS and document
 
@@ -122,7 +151,7 @@ Not as important
 - [X] Build vars (run locally)
 - [X] Ability to run against local go codebase
 - [X] Make call level client API methods internal
-- [ ] Build vars (valid token generation)
+- [X] Build vars (valid token generation)
 
 ** Use cases **
 
@@ -172,62 +201,3 @@ Not as important
 - [X] Muting other users/ Moderation
 - [X] Token provider
 
-### Documentation (code level)
-
-- [X] Client docs
-- [X] Call docs
-
-### Documentation Markdown
-
-- [ ] 3 tutorials
-- [ ] Custom compose example
-- [ ] Authentication example
-- [ ] Docs on client setup
-
-
- 
-### Disconnect suggestion
-
-- supervisorJob at the call and client level
-- call.leave() method and call.end() method (which calls leave and then ends for everyone)
-- leave method shuts down the supervisorJob, remove local objects, cleans up any media tracks
-- client.disconnect() (leaves all calls, cleans up state)
-- call is connected to the call view model lifecycle methods. client to the application lifecycle
-
-### Muting/unmuting & permissions
-
-- There is significant complexity around muting
-
-### Server wishlist
-
-[X] queryChannels doesn’t return members but CallUsers, this is wrong
-[X] Update call endpoints doesn’t expose team or startsAt. I get why we don’t expose team, not sure about startsAt
-[X] Get/Create etc don’t specify connection_id, this breaks the ability to watch
-[X] Not being able to edit settings on a call you created seems like the wrong default: “”User ‘thierry’ with role ‘user’ is not allowed to perform action UpdateCallSettings in scope ‘video:default’“, serverErrorCode=17, statusCode=-1, cause=java.lang.Throwable: ))”
-[X] Participant.online field is weird. Aren't you always online as a participant?
-[ ] Events for updating users 
-[ ] Participant count (for livestreams you cant rely on the list)
-[ ] ConnectionQualityInfo is a list, audio levels is a map. Lets standardize
-[ ] Accept/reject call endpoints
-[ ] What about codec switching?
-[ ] What about graceful SFU shutdown/ an event to make clients move SFU?
-[ ] Events for creating a channel on chat. so you lazy load the chat when the first person opens it
-[ ] List of error codes via openapi
-[ ] getCall doesn't support member limits
-[ ] CallMemberUpdatedPermissionEvent. Weird that call and members are included
-[ ] message=GetOrCreateCall failed with error: "The following users are involved in call create operation, but don't exist: [jaewoong]. Please create the user objects before setting up the call.
-[ ] review QueryMembersRequest
-[ ] target resolution / max resolution (default 960)
-[ ] if we should default to front or back camera
-[ ] should video be default on or off?
-[ ] should audio be default on or off?
-[ ] am i allowed to publish (IE should i create the publisher peer connection)
-[ ] health check http request on the SFU (no auth, nothing that can give errors, just health) (for the recovery flow)
-
-### Available tasks up for grabs
-
-- use standard debug, verbose, info, warning and error debug levels on StreamVideoBuilder
-- Participant sorting rules. See Call sortedParticipants
-- Pinning of participants. You pin/unpin and it sets pinnedAt and sorting takes it into account
-- Currently we use UserPreferencesManager. Jaewoong mentioned we should perhaps explore https://developer.android.com/topic/libraries/architecture/datastore
-- Measure latency isn't 100% ok. You can't set a timeout using withTimeout and collect the measurements that we have. This relates to threading vs coroutines and withTimeout not working
