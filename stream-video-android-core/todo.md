@@ -1,13 +1,13 @@
 
 ## Timeline
 
-### Week 1: Refactor LLC & State. Setup testing
-### Week 2: LLC & State Stability. Compose testing & previews
-### Week 3: Sample app, update compose to LLC & State changes. New events, socket & token provider. Call UI. Guest users & moderation endpoints
-### Week 4: LLC & state test coverage + Demo & Dogfooding apps + RTC & Media fixes
-### Week 5: Sample app stability, S23 sdp munging, dynascale, reconnect, cleanup for reconnect
-### Break
-### Week 6: Docs, docs & sample app
+*  Week 1: Refactor LLC & State. Setup testing
+*  Week 2: LLC & State Stability. Compose testing & previews
+*  Week 3: Sample app, update compose to LLC & State changes. New events, socket & token provider. Call UI. Guest users & moderation endpoints
+*  Week 4: LLC & state test coverage + Demo & Dogfooding apps + RTC & Media fixes
+*  Week 5: Sample app stability, S23 sdp munging, dynascale, reconnect, cleanup for reconnect
+*  Break
+*  Week 6: Docs, docs & sample app
 
 
 ### High level issues
