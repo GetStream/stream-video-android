@@ -405,6 +405,8 @@ public class Call(
         return clientImpl.blockUser(type, id, userId)
     }
 
+    // TODO: add removeMember (single)
+
     public suspend fun removeMembers(userIds: List<String>): Result<UpdateCallMembersResponse> {
         val request = UpdateCallMembersRequest(removeMembers = userIds)
         return clientImpl.updateMembers(type, id, request)

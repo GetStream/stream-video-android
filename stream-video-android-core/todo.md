@@ -13,8 +13,8 @@
 ### High level issues
 
 - [ ] Join flow is too slow
+- [ ] Call id should probably be optional and default to a random UUID
 - [ ] Chat integration needs a good review to see what we can simplify
-- [ ] Several minor server changes are still needed
 
 ### Available tasks up for grabs (little things, easy to do)
 
@@ -123,12 +123,16 @@
 - [ ] CallMemberUpdatedPermissionEvent. Weird that call and members are included
 - [ ] message=GetOrCreateCall failed with error: "The following users are involved in call create operation, but don't exist: [jaewoong]. Please create the user objects before setting up the call.
 - [ ] review QueryMembersRequest
-- [ ] target resolution / max resolution (default 960)
-- [ ] if we should default to front or back camera
-- [ ] should video be default on or off?
-- [ ] should audio be default on or off?
-- [ ] am i allowed to publish (IE should i create the publisher peer connection)
 - [ ] health check http request on the SFU (no auth, nothing that can give errors, just health) (for the recovery flow). not sure about this one, tbd
+
+### Server side - Call type settings
+
+- [ ] target resolution / max resolution (default 960) (if you're livestreaming you want to publish at 1080p or 4k typically)
+- [ ] if we should default to front or back camera
+- [ ] should video be default on or off. I join a call, should i be publishing video?
+- [ ] should audio be default on or off. I join a call, should i publishing audio?
+- [ ] am i allowed to publish (IE should i create the publisher peer connection)
+- [ ] should volume be enabled by default (for livestreams and audio rooms its typically off by default)
 
 
 ### Review each file, fix TODOS and document
