@@ -306,8 +306,6 @@ public class CameraManager(
         }
     }
 
-
-
     fun select(deviceId: String, startCapture: Boolean = false) {
         val selectedDevice = devices.first { it.id == deviceId }
         _direction.value = selectedDevice.direction ?: CameraDirection.Back

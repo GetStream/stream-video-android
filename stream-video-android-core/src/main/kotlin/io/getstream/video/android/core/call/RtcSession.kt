@@ -382,7 +382,6 @@ public class RtcSession internal constructor(
         if (sessionId != this.sessionId && mediaStream.videoTracks.isNotEmpty()) {
             lastVideoStreamAdded.value = mediaStream
         }
-
     }
 
     suspend fun connectRtc() {
@@ -486,15 +485,15 @@ public class RtcSession internal constructor(
         publisher = null
 
         // cleanup all non-local tracks
-        tracks.filter{it.key != sessionId}.values.map { it.values }.flatten().forEach {wrapper->
+        tracks.filter { it.key != sessionId }.values.map { it.values }.flatten().forEach { wrapper ->
             try {
-            wrapper.asAudioTrack()?.let {
-                it.audio.dispose()
-            }
-            wrapper.asVideoTrack()?.let {
-                it.video.dispose()
-            }
-            }catch (e: Exception) {
+                wrapper.asAudioTrack()?.let {
+                    it.audio.dispose()
+                }
+                wrapper.asVideoTrack()?.let {
+                    it.video.dispose()
+                }
+            } catch (e: Exception) {
                 logger.w { "Error disposing track: ${e.message}" }
             }
         }
@@ -502,7 +501,6 @@ public class RtcSession internal constructor(
 
         // disconnect the socket and clean it up
         sfuConnectionModule.sfuSocket.cleanup()
-
     }
 
     /**

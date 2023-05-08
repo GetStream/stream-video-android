@@ -26,7 +26,6 @@ import io.getstream.video.android.core.events.SfuSocketError
 import io.getstream.video.android.core.internal.network.NetworkStateProvider
 import io.getstream.video.android.core.socket.internal.HealthMonitor
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow

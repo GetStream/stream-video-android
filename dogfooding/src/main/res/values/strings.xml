@@ -27,6 +27,7 @@
     <string name="join_description">Start or join a meeting by \nentering the call ID.</string>
     <string name="join_call">Join a Call</string>
     <string name="start_a_new_call">Start a New Call</string>
+    <string name="start_call">Start Call</string>
     <string name="call_id_number">Call ID Number</string>
     <string name="stream_video">Stream Video</string>
     <string name="call_lobby_description">Dogfood never tasted this good</string>

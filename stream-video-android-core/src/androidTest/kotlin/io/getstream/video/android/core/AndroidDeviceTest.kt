@@ -36,7 +36,6 @@ import org.webrtc.RTCStats
 import org.webrtc.VideoCodecInfo
 import stream.video.sfu.event.ChangePublishQuality
 
-
 /**
  * Things to test in a real android environment
  *
@@ -91,8 +90,6 @@ class AndroidDeviceTest : IntegrationTestBase(connectCoordinatorWS = false) {
         // destroy and cleanup the client
         newClient.cleanup()
     }
-
-
 
     @Test
     fun codecsFun() = runTest {
@@ -229,7 +226,6 @@ class AndroidDeviceTest : IntegrationTestBase(connectCoordinatorWS = false) {
         val call = client.call("default", "NnXAIvBKE4Hy")
         val joinResult = call.join()
         assertSuccess(joinResult)
-
 
         // wait for the ice connection state
         withTimeout(3000) {

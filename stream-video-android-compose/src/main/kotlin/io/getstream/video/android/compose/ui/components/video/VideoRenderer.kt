@@ -47,7 +47,6 @@ import stream.video.sfu.models.TrackType
  * Renders a single video track based on the call state.
  *
  * @param call The call state that contains all the tracks and participants.
- * @param videoMediaTrack The track containing the video stream for a given participant.
  * @param modifier Modifier for styling.
  * @param onRender Handler when the view is rendered.
  */
@@ -58,7 +57,7 @@ public fun VideoRenderer(
     sessionId: String,
     trackType: TrackType,
     modifier: Modifier = Modifier,
-    videoScalingType: VideoScalingType = VideoScalingType.SCALE_ASPECT_BALANCED,
+    videoScalingType: VideoScalingType = VideoScalingType.SCALE_ASPECT_FILL,
     onRender: (View) -> Unit = {},
 ) {
     if (LocalInspectionMode.current) {

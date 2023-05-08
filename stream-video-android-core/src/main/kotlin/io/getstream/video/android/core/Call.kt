@@ -95,10 +95,16 @@ public class Call(
     private val supervisorJob = SupervisorJob()
     private val scope = CoroutineScope(clientImpl.scope.coroutineContext + supervisorJob)
 
-
     /** Session handles all real time communication for video and audio */
     internal var session: RtcSession? = null
-    internal val mediaManager by lazy { MediaManagerImpl(clientImpl.context, this, scope, clientImpl.peerConnectionFactory.eglBase.eglBaseContext) }
+    internal val mediaManager by lazy {
+        MediaManagerImpl(
+            clientImpl.context,
+            this,
+            scope,
+            clientImpl.peerConnectionFactory.eglBase.eglBaseContext
+        )
+    }
 
     /** Basic crud operations */
     suspend fun get(): Result<GetCallResponse> {
@@ -172,7 +178,10 @@ public class Call(
         return response
     }
 
-    suspend fun join(create: Boolean=false, createOptions: CreateCallOptions? = null): Result<RtcSession> {
+    suspend fun join(
+        create: Boolean = false,
+        createOptions: CreateCallOptions? = null
+    ): Result<RtcSession> {
         // step 1. call the join endpoint to get a list of SFUs
         val timer = clientImpl.debugInfo.trackTime("call.join")
         val options = createOptions
@@ -228,10 +237,9 @@ public class Call(
         scope.launch {
             // wait for the first stream to be added
             session?.let { rtcSession ->
-                val result = rtcSession.lastVideoStreamAdded.filter { it!=null }.first()
+                val result = rtcSession.lastVideoStreamAdded.filter { it != null }.first()
                 timer.finish("stream added, rtc completed, ready to display video $result")
             }
-
         }
 
         scope.launch {
@@ -250,7 +258,6 @@ public class Call(
                     switchSfu()
                 }
             }
-
         }
 
         client.state.setActiveCall(this)
@@ -327,7 +334,10 @@ public class Call(
                     logger.d { "[initRenderer.onFirstFrameRendered] #sfu; sessionId: $sessionId" }
                     if (trackType != TrackType.TRACK_TYPE_SCREEN_SHARE) {
                         session?.updateDisplayedTrackSize(
-                            sessionId, trackType, videoRenderer.measuredWidth, videoRenderer.measuredHeight
+                            sessionId,
+                            trackType,
+                            videoRenderer.measuredWidth,
+                            videoRenderer.measuredHeight
                         )
                     }
                     onRender(videoRenderer)
@@ -338,7 +348,10 @@ public class Call(
 
                     if (trackType != TrackType.TRACK_TYPE_SCREEN_SHARE) {
                         session?.updateDisplayedTrackSize(
-                            sessionId, trackType, videoRenderer.measuredWidth, videoRenderer.measuredHeight
+                            sessionId,
+                            trackType,
+                            videoRenderer.measuredWidth,
+                            videoRenderer.measuredHeight
                         )
                     }
                 }

@@ -18,12 +18,19 @@ package io.getstream.video.android.dogfooding.ui.lobby
 
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.getstream.video.android.core.Call
+import io.getstream.video.android.core.DeviceStatus
 import io.getstream.video.android.core.StreamVideo
+import io.getstream.video.android.core.call.state.CallDeviceState
 import io.getstream.video.android.core.model.User
 import io.getstream.video.android.core.model.mapper.toTypeAndId
 import io.getstream.video.android.core.user.UserPreferences
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.stateIn
 import javax.inject.Inject
 
 @HiltViewModel
@@ -32,14 +39,30 @@ class CallLobbyViewModel @Inject constructor(
     userPreferences: UserPreferences
 ) : ViewModel() {
 
-    private val cid: String = checkNotNull(savedStateHandle["cid"])
+    val cid: String = checkNotNull(savedStateHandle["cid"])
+
+    val call: Call by lazy {
+        val streamVideo = StreamVideo.instance()
+        val (type, id) = cid.toTypeAndId()
+        streamVideo.call(type = type, id = id)
+    }
 
     val user: User? = userPreferences.getUserCredentials()
 
-    fun call(): Call {
-        val streamVideo = StreamVideo.instance()
-        val (type, id) = cid.toTypeAndId()
-        return streamVideo.call(type = type, id = id)
+    val deviceState: StateFlow<CallDeviceState> =
+        combine(call.camera.status, call.microphone.status) { cameraEnabled, microphoneEnabled ->
+            CallDeviceState(
+                isCameraEnabled = cameraEnabled is DeviceStatus.Enabled,
+                isMicrophoneEnabled = microphoneEnabled is DeviceStatus.Enabled
+            )
+        }.stateIn(viewModelScope, SharingStarted.Lazily, CallDeviceState())
+
+    fun enableCamera(enabled: Boolean) {
+        call.camera.setEnabled(enabled)
+    }
+
+    fun enableMicrophone(enabled: Boolean) {
+        call.microphone.setEnabled(enabled)
     }
 
     fun signOut() {
