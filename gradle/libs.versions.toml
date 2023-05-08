@@ -96,6 +96,7 @@ desugar = { group = "com.android.tools", name = "desugar_jdk_libs", version.ref 
 landscapist-coil = { group = "com.github.skydoves", name = "landscapist-coil", version.ref = "landscapist" }
 landscapist-animation = { group = "com.github.skydoves", name = "landscapist-animation", version.ref = "landscapist" }
 landscapist-placeholder = { group = "com.github.skydoves", name = "landscapist-placeholder", version.ref = "landscapist" }
+landscapist-transformation = { group = "com.github.skydoves", name = "landscapist-transformation", version.ref = "landscapist" }
 
 accompanist-permission = { group = "com.google.accompanist", name = "accompanist-permissions", version.ref = "accompanist" }
 

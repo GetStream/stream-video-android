@@ -480,23 +480,26 @@ public final class io/getstream/video/android/compose/ui/components/avatar/Onlin
 	public static final fun OnlineIndicator (Landroidx/compose/ui/Modifier;Landroidx/compose/runtime/Composer;II)V
 }
 
+public final class io/getstream/video/android/compose/ui/components/avatar/UserAvatarBackgroundKt {
+	public static final fun UserAvatarBackground-n-DQEY4 (Lio/getstream/video/android/core/model/User;Landroidx/compose/ui/Modifier;Landroidx/compose/ui/graphics/Shape;FLandroidx/compose/ui/text/TextStyle;Landroidx/compose/ui/layout/ContentScale;Ljava/lang/String;JJILjava/lang/Integer;Landroidx/compose/runtime/Composer;III)V
+}
+
 public final class io/getstream/video/android/compose/ui/components/avatar/UserAvatarKt {
 	public static final fun UserAvatar-VcqPlDs (Lio/getstream/video/android/core/model/User;Landroidx/compose/ui/Modifier;Landroidx/compose/ui/graphics/Shape;Landroidx/compose/ui/text/TextStyle;Landroidx/compose/ui/layout/ContentScale;Ljava/lang/String;JILjava/lang/Integer;ZLio/getstream/video/android/compose/ui/components/avatar/OnlineIndicatorAlignment;JLkotlin/jvm/functions/Function3;Lkotlin/jvm/functions/Function0;Landroidx/compose/runtime/Composer;III)V
 }
 
 public final class io/getstream/video/android/compose/ui/components/background/CallBackgroundKt {
 	public static final fun CallBackground (Ljava/util/List;Lio/getstream/video/android/core/model/CallType;ZLandroidx/compose/ui/Modifier;Lkotlin/jvm/functions/Function3;Landroidx/compose/runtime/Composer;II)V
+	public static final fun ParticipantImageBackground (Ljava/lang/String;Landroidx/compose/ui/Modifier;ILandroidx/compose/runtime/Composer;II)V
 }
 
 public final class io/getstream/video/android/compose/ui/components/background/ComposableSingletons$CallBackgroundKt {
 	public static final field INSTANCE Lio/getstream/video/android/compose/ui/components/background/ComposableSingletons$CallBackgroundKt;
 	public static field lambda-1 Lkotlin/jvm/functions/Function3;
-	public static field lambda-2 Lkotlin/jvm/functions/Function3;
-	public static field lambda-3 Lkotlin/jvm/functions/Function2;
+	public static field lambda-2 Lkotlin/jvm/functions/Function2;
 	public fun <init> ()V
 	public final fun getLambda-1$stream_video_android_compose_release ()Lkotlin/jvm/functions/Function3;
-	public final fun getLambda-2$stream_video_android_compose_release ()Lkotlin/jvm/functions/Function3;
-	public final fun getLambda-3$stream_video_android_compose_release ()Lkotlin/jvm/functions/Function2;
+	public final fun getLambda-2$stream_video_android_compose_release ()Lkotlin/jvm/functions/Function2;
 }
 
 public final class io/getstream/video/android/compose/ui/components/call/CallAppBarKt {

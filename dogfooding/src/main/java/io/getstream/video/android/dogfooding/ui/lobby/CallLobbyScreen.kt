@@ -196,7 +196,7 @@ private fun CallLobbyBody(
                 )
             }
 
-            Spacer(modifier = Modifier.height(40.dp))
+            Spacer(modifier = Modifier.height(50.dp))
 
             val context = LocalContext.current
             StreamButton(
