@@ -317,8 +317,6 @@ internal class ParticipantsPortraitTest : BaseComposeTest() {
                 participants = mockParticipantList,
                 primarySpeaker = mockParticipantList[1],
                 modifier = Modifier.fillMaxSize(),
-                onBackPressed = {},
-                onCallAction = {},
                 onRender = {}
             )
         }
@@ -337,8 +335,6 @@ internal class ParticipantsPortraitTest : BaseComposeTest() {
                 primarySpeaker = mockParticipantList[0],
                 modifier = Modifier.fillMaxSize(),
                 onRender = {},
-                onBackPressed = {},
-                onCallAction = {}
             )
         }
     }
