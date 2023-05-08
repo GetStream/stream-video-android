@@ -217,7 +217,7 @@ Not as important
 [ ] What about codec switching?
 [ ] What about graceful SFU shutdown/ an event to make clients move SFU?
 [ ] Events for creating a channel on chat. so you lazy load the chat when the first person opens it
-[ ] List of error codes via openapi
+[X] List of error codes via openapi
 [ ] getCall doesn't support member limits
 [ ] CallMemberUpdatedPermissionEvent. Weird that call and members are included
 [ ] message=GetOrCreateCall failed with error: "The following users are involved in call create operation, but don't exist: [jaewoong]. Please create the user objects before setting up the call.
