@@ -345,7 +345,12 @@ public class RtcSession internal constructor(
     internal fun addStream(mediaStream: MediaStream) {
 
         val (trackPrefix, trackTypeString) = mediaStream.id.split(':')
-        val sessionId = trackPrefixToSessionIdMap.value[trackPrefix]!!
+        val sessionId = trackPrefixToSessionIdMap.value[trackPrefix]
+
+        if (sessionId == null || trackPrefixToSessionIdMap.value[trackPrefix].isNullOrEmpty()) {
+            logger.d { "[addStream] skipping unrecognized trackPrefix $trackPrefix" }
+            return
+        }
 
         val trackTypeMap = mapOf(
             "TRACK_TYPE_UNSPECIFIED" to TrackType.TRACK_TYPE_UNSPECIFIED,
@@ -364,11 +369,6 @@ public class RtcSession internal constructor(
             track.setEnabled(true)
             val audioTrack = AudioTrack(streamId = mediaStream.id, audio = track)
             setTrack(sessionId, trackType, audioTrack)
-        }
-
-        if (trackPrefixToSessionIdMap.value[trackPrefix].isNullOrEmpty()) {
-            logger.w { "[addStream] skipping unrecognized trackPrefix $trackPrefix" }
-            return
         }
 
         mediaStream.videoTracks.forEach { track ->
@@ -485,18 +485,15 @@ public class RtcSession internal constructor(
         publisher = null
 
         // cleanup all non-local tracks
-        tracks.filter { it.key != sessionId }.values.map { it.values }.flatten().forEach { wrapper ->
-            try {
-                wrapper.asAudioTrack()?.let {
-                    it.audio.dispose()
+        tracks.filter { it.key != sessionId }.values.map { it.values }.flatten()
+            .forEach { wrapper ->
+                try {
+                    wrapper.asAudioTrack()?.audio?.dispose()
+                    wrapper.asVideoTrack()?.video?.dispose()
+                } catch (e: Exception) {
+                    logger.w { "Error disposing track: ${e.message}" }
                 }
-                wrapper.asVideoTrack()?.let {
-                    it.video.dispose()
-                }
-            } catch (e: Exception) {
-                logger.w { "Error disposing track: ${e.message}" }
             }
-        }
         tracks.clear()
 
         // disconnect the socket and clean it up
@@ -532,7 +529,7 @@ public class RtcSession internal constructor(
     }
 
     @VisibleForTesting
-    public fun createSubscriber(): StreamPeerConnection? {
+    public fun createSubscriber(): StreamPeerConnection {
         logger.i { "[createSubscriber] #sfu" }
         return clientImpl.peerConnectionFactory.makePeerConnection(
             coroutineScope = coroutineScope,
@@ -666,8 +663,7 @@ public class RtcSession internal constructor(
 
         // send the subscriptions based on what's visible
         var tracks = participants.map { participant ->
-            val trackDisplay = trackDisplayResolution[participant.sessionId]
-                ?: emptyMap<TrackType, TrackDisplayResolution>()
+            val trackDisplay = trackDisplayResolution[participant.sessionId] ?: emptyMap()
             trackDisplay.values.filter { it.visible && it.sessionId != sessionId }.map { display ->
                 TrackSubscriptionDetails(
                     user_id = participant.user.value.id,
@@ -964,7 +960,6 @@ public class RtcSession internal constructor(
                 parseError(e)
             } catch (e: RtcException) {
                 // TODO: understand the error conditions here
-                throw e
                 Failure(
                     io.getstream.result.Error.ThrowableError(
                         e.message ?: "RtcException",

@@ -41,6 +41,7 @@ import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.model.MediaTrack
 import io.getstream.video.android.core.model.VideoTrack
 import io.getstream.webrtc.android.ui.VideoTextureViewRenderer
+import org.webrtc.MediaStreamTrack
 import stream.video.sfu.models.TrackType
 
 /**
@@ -117,8 +118,8 @@ private fun setupVideo(
 ) {
     cleanTrack(renderer, mediaTrack)
 
-    if (mediaTrack is VideoTrack) {
-        mediaTrack.video.addSink(renderer) // cAZo0tsELD9B
+    if (mediaTrack is VideoTrack && mediaTrack.video.state() == MediaStreamTrack.State.LIVE) {
+        mediaTrack.video.addSink(renderer)
     }
 }
 
