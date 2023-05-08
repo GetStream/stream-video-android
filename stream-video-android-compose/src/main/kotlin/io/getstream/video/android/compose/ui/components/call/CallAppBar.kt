@@ -45,7 +45,7 @@ import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.participants.ParticipantIndicatorIcon
 import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.call.state.CallAction
-import io.getstream.video.android.core.call.state.ShowCallInfo
+import io.getstream.video.android.core.call.state.ShowCallParticipantInfo
 import io.getstream.video.android.ui.common.R
 
 /**
@@ -64,12 +64,11 @@ import io.getstream.video.android.ui.common.R
 public fun CallAppBar(
     call: Call,
     modifier: Modifier = Modifier,
-    isShowingOverlays: Boolean = false,
     onBackPressed: () -> Unit = {},
     onCallAction: (CallAction) -> Unit = {},
     title: String = stringResource(id = R.string.stream_video_default_app_bar_title),
     leadingContent: @Composable () -> Unit = {
-        DefaultCallAppBarLeadingContent(isShowingOverlays, onBackPressed)
+        DefaultCallAppBarLeadingContent(onBackPressed)
     },
     centerContent: @Composable (RowScope.() -> Unit) = {
         DefaultCallAppBarCenterContent(title)
@@ -116,11 +115,9 @@ public fun CallAppBar(
  */
 @Composable
 internal fun DefaultCallAppBarLeadingContent(
-    isShowingOverlays: Boolean,
     onBackButtonClicked: () -> Unit
 ) {
     IconButton(
-        enabled = !isShowingOverlays,
         onClick = onBackButtonClicked,
         modifier = Modifier.padding(
             start = VideoTheme.dimens.callAppBarLeadingContentSpacingStart,
@@ -168,7 +165,7 @@ internal fun DefaultCallAppBarTrailingContent(
 
     ParticipantIndicatorIcon(
         number = participants.size,
-        onClick = { onCallAction(ShowCallInfo) }
+        onClick = { onCallAction(ShowCallParticipantInfo) }
     )
 }
 

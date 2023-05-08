@@ -42,7 +42,7 @@ import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.ConnectionState
 import io.getstream.video.android.core.call.state.CallAction
-import io.getstream.video.android.core.call.state.ShowCallInfo
+import io.getstream.video.android.core.call.state.ShowCallParticipantInfo
 import io.getstream.video.android.core.formatAsTitle
 import io.getstream.video.android.ui.common.R
 
@@ -98,7 +98,7 @@ internal fun OverlayAppBar(
         )
 
         IconButton(
-            onClick = { onCallAction(ShowCallInfo) },
+            onClick = { onCallAction(ShowCallParticipantInfo) },
             modifier = Modifier.padding(
                 start = VideoTheme.dimens.callAppBarLeadingContentSpacingStart,
                 end = VideoTheme.dimens.callAppBarLeadingContentSpacingEnd

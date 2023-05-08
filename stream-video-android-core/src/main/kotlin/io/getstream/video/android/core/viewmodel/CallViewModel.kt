@@ -29,6 +29,7 @@ import io.getstream.video.android.core.call.state.CallAction
 import io.getstream.video.android.core.call.state.CallDeviceState
 import io.getstream.video.android.core.call.state.FlipCamera
 import io.getstream.video.android.core.call.state.LeaveCall
+import io.getstream.video.android.core.call.state.ShowCallParticipantInfo
 import io.getstream.video.android.core.call.state.ToggleCamera
 import io.getstream.video.android.core.call.state.ToggleMicrophone
 import io.getstream.video.android.core.call.state.ToggleSpeakerphone
@@ -145,6 +146,7 @@ public class CallViewModel(
             is ToggleSpeakerphone -> onSpeakerphoneChanged(callAction.isEnabled)
             is FlipCamera -> call.camera.flip()
             is LeaveCall -> onLeaveCall()
+            is ShowCallParticipantInfo -> _isShowingCallInfoMenu.value = true
 
             else -> Unit
         }

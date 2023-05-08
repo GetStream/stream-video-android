@@ -16,10 +16,13 @@
 
 package io.getstream.video.android.compose.ui.components.participants
 
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import io.getstream.video.android.compose.state.ui.participants.ParticipantInfoAction
 
 /**
@@ -39,6 +42,13 @@ public fun CallParticipantsInfoMenu(
     onDismiss: () -> Unit = {},
     onInfoMenuAction: (ParticipantInfoAction) -> Unit = {},
 ) {
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(Color.Black)
+            .clickable { onDismiss.invoke() }
+    ) {
+    }
 //    var infoStateMode by remember { mutableStateOf<CallParticipantInfoMode>(ParticipantList) }
 //    val isCurrentUserMuted = !(participantsState.firstOrNull { it.isLocal }?.hasAudio ?: false)
 //    var selectedUsers by remember {

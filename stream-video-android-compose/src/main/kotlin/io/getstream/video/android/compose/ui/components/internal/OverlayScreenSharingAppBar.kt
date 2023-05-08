@@ -33,11 +33,13 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import io.getstream.video.android.common.util.mockParticipant
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.core.ParticipantState
 import io.getstream.video.android.core.call.state.CallAction
-import io.getstream.video.android.core.call.state.ShowCallInfo
+import io.getstream.video.android.core.call.state.ShowCallParticipantInfo
 import io.getstream.video.android.ui.common.R
 
 @Composable
@@ -79,7 +81,7 @@ internal fun OverlayScreenSharingAppBar(
             overflow = TextOverflow.Ellipsis
         )
 
-        IconButton(onClick = { onCallAction(ShowCallInfo) }) {
+        IconButton(onClick = { onCallAction(ShowCallParticipantInfo) }) {
             Icon(
                 modifier = Modifier
                     .background(
@@ -92,5 +94,16 @@ internal fun OverlayScreenSharingAppBar(
                 tint = VideoTheme.colors.textHighEmphasis
             )
         }
+    }
+}
+
+@Preview
+@Composable
+private fun OverlayScreenSharingAppBarPreview() {
+    VideoTheme {
+        OverlayScreenSharingAppBar(
+            sharingParticipant = mockParticipant,
+            onBackPressed = {}
+        ) {}
     }
 }

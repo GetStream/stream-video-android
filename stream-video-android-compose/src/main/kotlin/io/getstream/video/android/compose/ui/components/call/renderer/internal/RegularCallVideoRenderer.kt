@@ -16,7 +16,6 @@
 
 package io.getstream.video.android.compose.ui.components.call.renderer.internal
 
-import android.content.res.Configuration.ORIENTATION_LANDSCAPE
 import android.view.View
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
@@ -36,7 +35,6 @@ import androidx.compose.ui.unit.IntSize
 import io.getstream.video.android.common.util.MockUtils
 import io.getstream.video.android.common.util.mockCall
 import io.getstream.video.android.compose.theme.VideoTheme
-import io.getstream.video.android.compose.ui.components.internal.OverlayAppBar
 import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.call.state.CallAction
 
@@ -74,14 +72,6 @@ internal fun RegularCallVideoRenderer(
                 onRender = onRender,
                 parentSize = parentSize
             )
-
-            if (orientation == ORIENTATION_LANDSCAPE) {
-                OverlayAppBar(
-                    call = call,
-                    onBackPressed = onBackPressed,
-                    onCallAction = onCallAction
-                )
-            }
         }
     }
 }
