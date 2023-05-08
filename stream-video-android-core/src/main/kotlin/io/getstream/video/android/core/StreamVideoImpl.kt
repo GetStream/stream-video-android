@@ -87,6 +87,7 @@ import org.openapitools.client.models.QueryMembersResponse
 import org.openapitools.client.models.RequestPermissionRequest
 import org.openapitools.client.models.SendEventRequest
 import org.openapitools.client.models.SendEventResponse
+import org.openapitools.client.models.SendReactionRequest
 import org.openapitools.client.models.SendReactionResponse
 import org.openapitools.client.models.SortParamRequest
 import org.openapitools.client.models.StopLiveResponse
@@ -816,14 +817,16 @@ internal class StreamVideoImpl internal constructor(
     }
 
     suspend fun sendReaction(
-        type: String,
+        callType: String,
         id: String,
-        sendReactionData: SendReactionData
+        type: String, emoji: String? = null, custom: Map<String, Any>? = null
     ): Result<SendReactionResponse> {
-        logger.d { "[sendVideoReaction] callCid: $type:$id, sendReactionData: $sendReactionData" }
+        val request = SendReactionRequest(type, custom, emoji)
+
+        logger.d { "[sendVideoReaction] callCid: $type:$id, sendReactionData: $request" }
 
         return wrapAPICall {
-            connectionModule.videoCallsApi.sendVideoReaction(type, id, sendReactionData.toRequest())
+            connectionModule.videoCallsApi.sendVideoReaction(callType, id, request)
         }
     }
 
@@ -890,11 +893,13 @@ internal class StreamVideoImpl internal constructor(
         }
 
     override fun call(type: String, id: String): Call {
-        val cid = "$type:$id"
+        var idOrRandom = id.ifEmpty { UUID.randomUUID().toString() }
+
+        val cid = "$type:$idOrRandom"
         return if (calls.contains(cid)) {
             calls[cid]!!
         } else {
-            val call = Call(this, type, id, user)
+            val call = Call(this, type, idOrRandom, user)
             calls[cid] = call
             call
         }

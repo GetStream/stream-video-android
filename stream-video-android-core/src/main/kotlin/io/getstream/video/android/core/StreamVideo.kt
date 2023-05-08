@@ -47,7 +47,7 @@ public interface StreamVideo {
      *
      *
      */
-    public fun call(type: String, id: String): Call
+    public fun call(type: String, id: String=""): Call
 
     /**
      * Queries calls with a given filter predicate and pagination.

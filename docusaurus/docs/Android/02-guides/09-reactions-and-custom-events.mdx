@@ -1,0 +1,26 @@
+---
+title: Reactions & Custom Events
+description: How reactions and custom events work
+---
+
+## Reactions
+
+It's easy to add reactions to your call.
+
+```kotlin
+val response = call.sendReaction("fireworks")
+```
+
+You can also add custom data to the reaction or specify a specific emoji
+
+```kotlin
+val response = call.sendReaction("raise-hand", "", mapOf("mycustomfield" to "hello"))
+```
+
+### Custom Events
+
+In case the reaction system isn't flexible enough we also support custom events.
+This is basically just a realtime layer that you can broadcast your own events to.
+
+```kotlin
+```

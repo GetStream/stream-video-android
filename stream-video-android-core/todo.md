@@ -73,6 +73,7 @@
 
 ### State TODO
 
+- [ ] Permissions requests need an accept/reject flow
 - [ ] State for: Speaking while muted, Network issue (your own connection)
 - [X] Call settings need to be used everywhere. There are still some hardcoded settings
 - [X] Member state isn't implemented fully. Could be either a state or just a data class

@@ -12,10 +12,16 @@ val call = client.call("default", "123")
 val result = call.create()
 ```
 
-The call type controls which features are enabled, and sets up permissions.
-For the call id you can pass any unique string.
-Note that you can reuse the same call multiple times.
-So if you're building a livestream service like Twitch you could have 1 call id per streamer.
+The **call type** controls which features are enabled, and sets up permissions.
+
+For the call id there are a few things to note:
+
+* You can reuse the same call multiple times
+* If you have a unique id for the call we recommend passing that as the id
+* If you don't have a unique id you can leave it empty and we'll generate one for you
+
+As an example, if you're building a telemedicine app calls will be connected to an appointment.
+Using your own appointment id as the call id makes it easy to find the call later.
 
 ### Joining a call
 
@@ -70,3 +76,24 @@ The following options are supported when creating a call:
 | `startsAt` | When the call will start. Used for calls scheduled in the future, livestreams, audio rooms etc | - |
 | `team` | Restrict the access to this call to a specific team | - |
 | `ring` | If you want the call to ring for each member | false |
+
+### Querying Members
+
+You can query the members of the call. This is helpful if you have thousands of members in a call and want to paginate.
+
+```kotlin
+val filters = mapOf("id" to "123")
+val sort = listOf(SortParamRequest("username", 1))
+val response = call.queryMembers(filters, sort, limit=100)
+```
+
+You can **filter** the member list on these fields, and sort on the selected fields.
+Note that you can also query on custom data for the member or the user.
+
+| Option | Description | Sorting Supported |
+| --- | --- | --- |
+| `id` | The user's id | Yes |
+| `name` | The user's name | Yes |
+| `created_at` | When the user was created | Yes |
+| `custom` | You can query custom data using the "custom.myfield" syntax | No |
+

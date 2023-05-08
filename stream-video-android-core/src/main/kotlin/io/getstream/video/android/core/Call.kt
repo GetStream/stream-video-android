@@ -46,6 +46,7 @@ import org.openapitools.client.models.ListRecordingsResponse
 import org.openapitools.client.models.MemberRequest
 import org.openapitools.client.models.MuteUsersResponse
 import org.openapitools.client.models.QueryMembersResponse
+import org.openapitools.client.models.SendReactionRequest
 import org.openapitools.client.models.SendReactionResponse
 import org.openapitools.client.models.SortParamRequest
 import org.openapitools.client.models.StopLiveResponse
@@ -276,8 +277,8 @@ public class Call(
         return clientImpl.endCall(type, id)
     }
 
-    suspend fun sendReaction(data: SendReactionData): Result<SendReactionResponse> {
-        return clientImpl.sendReaction(type, id, data)
+    suspend fun sendReaction(type: String, emoji: String? = null, custom: Map<String, Any>? = null): Result<SendReactionResponse> {
+        return clientImpl.sendReaction(this.type, id, type, emoji, custom)
     }
 
     suspend fun queryMembers(

@@ -293,3 +293,8 @@ What's better seems to depend on internal optimizations in Compose
 - How well does it's diffing algorithm work
 - How well optimized are multiple stateflows & observing them
 
+
+### Docs
+
+Run this for a local preview of the docs:
+npx stream-chat-docusaurus -i -s

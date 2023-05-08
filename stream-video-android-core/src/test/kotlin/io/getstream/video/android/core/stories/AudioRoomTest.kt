@@ -72,7 +72,8 @@ class AudioRoomTest : IntegrationTestBase() {
 
     @Test
     fun `send a reaction`() = runTest {
-        val response = call.sendReaction(SendReactionData("raise-hand"))
+        val response = call.sendReaction("raise-hand", "", mapOf("mycustomfield" to "hello"))
+
         assertSuccess(response)
     }
 

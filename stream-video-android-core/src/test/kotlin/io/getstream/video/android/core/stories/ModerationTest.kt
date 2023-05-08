@@ -116,4 +116,22 @@ class ModerationTest : IntegrationTestBase() {
         val result = call.muteUser("tommaso")
         assertSuccess(result)
     }
+
+    fun `Basic moderation - Request permission to talk`() = runTest {
+
+        val hasPermission = call.state.hasPermission("share-audio").value
+        assertThat(hasPermission).isTrue()
+
+        val response = call.requestPermissions("share-audio")
+        assertSuccess(response)
+        waitForNextEvent<PermissionRequestEvent>().also {
+            assertThat(it.user.id).isEqualTo(client.user.id)
+            assertThat(it.permissions).contains("screenshare")
+        }
+
+        val permissionRequest = call.state.permissionRequests.value.first()
+        //permissionRequest.grant()
+        //permissionRequest.reject()
+
+    }
 }
