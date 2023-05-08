@@ -186,7 +186,6 @@ public fun CallContainer(
             call = call,
             modifier = modifier.testTag("call_content"),
             callDeviceState = callDeviceState,
-            onBackPressed = onBackPressed,
             onCallAction = onCallAction,
             callAppBar = callAppBar,
             callControlsContent = callControlsContent,

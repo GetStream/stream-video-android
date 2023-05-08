@@ -36,10 +36,8 @@ import io.getstream.video.android.common.util.mockCall
 import io.getstream.video.android.common.util.mockParticipants
 import io.getstream.video.android.common.util.mockVideoMediaTrack
 import io.getstream.video.android.compose.theme.VideoTheme
-import io.getstream.video.android.compose.ui.components.internal.OverlayScreenSharingAppBar
 import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.ParticipantState
-import io.getstream.video.android.core.call.state.CallAction
 import io.getstream.video.android.core.model.ScreenSharingSession
 
 /**
@@ -48,11 +46,8 @@ import io.getstream.video.android.core.model.ScreenSharingSession
  * @param call The call containing state.
  * @param session Screen sharing session to render.
  * @param participants List of participants to render under the screen share track.
- * @param paddingValues Padding values from the parent.
  * @param modifier Modifier for styling.
  * @param onRender Handler when the video renders.
- * @param onCallAction Handler when the user performs various call actions.
- * @param onBackPressed Handler when the user taps back.
  */
 @Composable
 internal fun LandscapeScreenSharingVideoRenderer(
@@ -62,8 +57,6 @@ internal fun LandscapeScreenSharingVideoRenderer(
     primarySpeaker: ParticipantState?,
     modifier: Modifier = Modifier,
     onRender: (View) -> Unit,
-    onCallAction: (CallAction) -> Unit,
-    onBackPressed: () -> Unit,
 ) {
     val sharingParticipant = session.participant
     val me = participants.firstOrNull { it.isLocal }
@@ -85,9 +78,7 @@ internal fun LandscapeScreenSharingVideoRenderer(
                 onRender = onRender,
             )
 
-            if (me?.initialUser?.id == sharingParticipant.initialUser.id) {
-                OverlayScreenSharingAppBar(sharingParticipant, onBackPressed, onCallAction)
-            } else {
+            if (me?.initialUser?.id != sharingParticipant.initialUser.id) {
                 ScreenShareTooltip(
                     modifier = Modifier.align(Alignment.TopStart),
                     sharingParticipant = sharingParticipant
@@ -129,8 +120,6 @@ private fun LandscapeScreenSharingContentPreview() {
             primarySpeaker = mockParticipants[1],
             modifier = Modifier.fillMaxSize(),
             onRender = {},
-            onCallAction = {},
-            onBackPressed = {}
         )
     }
 }
@@ -158,8 +147,6 @@ private fun LandscapeScreenSharingMyContentPreview() {
             primarySpeaker = mockParticipants[0],
             modifier = Modifier.fillMaxSize(),
             onRender = {},
-            onCallAction = {},
-            onBackPressed = {}
         )
     }
 }

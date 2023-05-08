@@ -103,7 +103,6 @@ public fun CallContent(
         call = callViewModel.call,
         callDeviceState = callDeviceState,
         isInPictureInPicture = isInPiPMode,
-        onBackPressed = onBackPressed,
         onCallAction = onCallAction,
         callAppBar = callAppBar,
         callControlsContent = callControlsContent,
@@ -132,7 +131,6 @@ public fun CallContent(
     callDeviceState: CallDeviceState,
     isShowingOverlayCallAppBar: Boolean = true,
     isInPictureInPicture: Boolean = false,
-    onBackPressed: () -> Unit = {},
     onCallAction: (CallAction) -> Unit = {},
     callAppBar: @Composable () -> Unit = {
         CallAppBar(
@@ -175,12 +173,10 @@ public fun CallContent(
                         .padding(paddings)
                 ) {
                     CallVideoRenderer(
+                        call = call,
                         modifier = Modifier
                             .fillMaxSize()
                             .weight(1f),
-                        call = call,
-                        onCallAction = onCallAction,
-                        onBackPressed = onBackPressed,
                     )
 
                     if (orientation == ORIENTATION_LANDSCAPE) {
