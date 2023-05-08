@@ -117,6 +117,7 @@ class ModerationTest : IntegrationTestBase() {
         assertSuccess(result)
     }
 
+    @Test
     fun `Basic moderation - Request permission to talk`() = runTest {
 
         val hasPermission = call.state.hasPermission("share-audio").value
@@ -130,8 +131,8 @@ class ModerationTest : IntegrationTestBase() {
         }
 
         val permissionRequest = call.state.permissionRequests.value.first()
-        //permissionRequest.grant()
-        //permissionRequest.reject()
+        val grantResult = permissionRequest.grant()
+        assertSuccess(grantResult)
 
     }
 }

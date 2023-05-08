@@ -32,6 +32,7 @@ import io.getstream.video.android.core.events.TrackPublishedEvent
 import io.getstream.video.android.core.events.TrackUnpublishedEvent
 import io.getstream.video.android.core.model.ScreenSharingSession
 import io.getstream.video.android.core.model.User
+import io.getstream.video.android.core.permission.PermissionRequest
 import io.getstream.video.android.core.utils.mapState
 import io.getstream.video.android.core.utils.toUser
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -182,8 +183,8 @@ public class CallState(private val call: Call, private val user: User) {
         MutableStateFlow(emptyList())
     public val ownCapabilities: StateFlow<List<OwnCapability>> = _ownCapabilities
 
-    internal val _permissionRequests = MutableStateFlow<List<PermissionRequestEvent>>(emptyList())
-    val permissionRequests: StateFlow<List<PermissionRequestEvent>> = _permissionRequests
+    internal val _permissionRequests = MutableStateFlow<List<PermissionRequest>>(emptyList())
+    val permissionRequests: StateFlow<List<PermissionRequest>> = _permissionRequests
 
     private val _capabilitiesByRole: MutableStateFlow<Map<String, List<String>>> =
         MutableStateFlow(emptyMap())
@@ -329,7 +330,7 @@ public class CallState(private val call: Call, private val user: User) {
 
             is PermissionRequestEvent -> {
                 val newRequests = _permissionRequests.value.toMutableList()
-                newRequests.add(event)
+                newRequests.add(PermissionRequest(call, event))
                 _permissionRequests.value = newRequests
             }
 

@@ -23,10 +23,17 @@ val response = call.requestPermissions("send-audio")
 
 The host can proceed to grant you permission
 
-TODO: what about handling the permission request
+```
+val requests = call.state.permissionRequests.value
+request.forEach {
+    it.grant() // or it.reject()
+}
+```
+
+You can also grant permissions directly using call.grantPermissions
 
 ```kotlin
-val granResponse = call.grantPermissions("thierry", listOf("send-audio"))
+val grantResponse = call.grantPermissions("thierry", listOf("send-audio"))
 ```
 
 You can request the following 3 permissions atm: send-audio, send-video, screenshare
