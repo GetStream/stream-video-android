@@ -17,7 +17,6 @@
 package io.getstream.video.android.core
 
 import com.google.common.truth.Truth.assertThat
-import io.getstream.video.android.core.model.QueryCallsData
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import org.junit.runner.RunWith

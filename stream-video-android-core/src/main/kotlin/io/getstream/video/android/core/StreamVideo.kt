@@ -25,8 +25,6 @@ import io.getstream.video.android.core.model.DEFAULT_QUERY_CALLS_SORT
 import io.getstream.video.android.core.model.Device
 import io.getstream.video.android.core.model.EdgeData
 import io.getstream.video.android.core.model.QueriedCalls
-import io.getstream.video.android.core.model.QueryCallsData
-import io.getstream.video.android.core.model.SortData
 import io.getstream.video.android.core.model.SortField
 import io.getstream.video.android.core.model.User
 import org.openapitools.client.models.QueryCallsResponse
@@ -51,7 +49,7 @@ public interface StreamVideo {
      *
      *
      */
-    public fun call(type: String, id: String=""): Call
+    public fun call(type: String, id: String = ""): Call
 
     /**
      * Queries calls with a given filter predicate and pagination.

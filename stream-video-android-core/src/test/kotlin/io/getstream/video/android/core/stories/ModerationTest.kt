@@ -133,6 +133,5 @@ class ModerationTest : IntegrationTestBase() {
         val permissionRequest = call.state.permissionRequests.value.first()
         val grantResult = permissionRequest.grant()
         assertSuccess(grantResult)
-
     }
 }

@@ -17,10 +17,6 @@
 package io.getstream.video.android.core.stories
 
 import io.getstream.video.android.core.IntegrationTestBase
-import io.getstream.video.android.core.model.DEFAULT_QUERY_CALLS_SORT
-import io.getstream.video.android.core.model.QueryCallsData
-import io.getstream.video.android.core.model.SendReactionData
-import io.getstream.video.android.core.model.SortData
 import io.getstream.video.android.core.model.SortField
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
@@ -52,10 +48,10 @@ class AudioRoomTest : IntegrationTestBase() {
         val filters = mutableMapOf(
             "members" to mutableMapOf("\$in" to listOf("tommaso")),
             "starts_at" to mutableMapOf("\$lt" to threeHoursFromNow),
-            //"ended_at" to false,
+            // "ended_at" to false,
         )
         val sort = listOf(SortField.Asc("starts_at"))
-        val result = client.queryCalls(filters=filters, sort=sort, limit=10, watch=true)
+        val result = client.queryCalls(filters = filters, sort = sort, limit = 10, watch = true)
         assertSuccess(result)
     }
 
@@ -65,7 +61,7 @@ class AudioRoomTest : IntegrationTestBase() {
             "custom.color" to "red",
         )
         val sort = listOf(SortField.Asc("starts_at"))
-        val result = client.queryCalls(filters=filters, sort=sort, limit=10, watch=true)
+        val result = client.queryCalls(filters = filters, sort = sort, limit = 10, watch = true)
         assertSuccess(result)
     }
 

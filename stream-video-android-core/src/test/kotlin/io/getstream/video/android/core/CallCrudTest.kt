@@ -21,7 +21,6 @@ import io.getstream.log.taggedLogger
 import io.getstream.result.Error
 import io.getstream.video.android.core.model.SortField
 import kotlinx.coroutines.test.runTest
-import org.junit.Ignore
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner

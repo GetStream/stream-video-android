@@ -33,14 +33,9 @@ import io.getstream.video.android.core.lifecycle.LifecycleHandler
 import io.getstream.video.android.core.lifecycle.internal.StreamLifecycleObserver
 import io.getstream.video.android.core.logging.LoggingLevel
 import io.getstream.video.android.core.model.CallEventType
-import io.getstream.video.android.core.model.DEFAULT_QUERY_CALLS_LIMIT
-import io.getstream.video.android.core.model.DEFAULT_QUERY_CALLS_SORT
 import io.getstream.video.android.core.model.Device
 import io.getstream.video.android.core.model.EdgeData
 import io.getstream.video.android.core.model.MuteUsersData
-import io.getstream.video.android.core.model.QueryCallsData
-import io.getstream.video.android.core.model.SendReactionData
-import io.getstream.video.android.core.model.SortData
 import io.getstream.video.android.core.model.SortField
 import io.getstream.video.android.core.model.UpdateUserPermissionsData
 import io.getstream.video.android.core.model.User
@@ -94,7 +89,6 @@ import org.openapitools.client.models.SendEventRequest
 import org.openapitools.client.models.SendEventResponse
 import org.openapitools.client.models.SendReactionRequest
 import org.openapitools.client.models.SendReactionResponse
-import org.openapitools.client.models.SortParamRequest
 import org.openapitools.client.models.StopLiveResponse
 import org.openapitools.client.models.UnblockUserRequest
 import org.openapitools.client.models.UpdateCallMembersRequest
@@ -737,10 +731,12 @@ internal class StreamVideoImpl internal constructor(
     /**
      * @see StreamVideo.queryCalls
      */
-    override suspend fun queryCalls(filters: Map<String, Any>,
-                                    sort: List<SortField>,
-                                    limit: Int,
-                                    watch: Boolean): Result<QueryCallsResponse> {
+    override suspend fun queryCalls(
+        filters: Map<String, Any>,
+        sort: List<SortField>,
+        limit: Int,
+        watch: Boolean
+    ): Result<QueryCallsResponse> {
         logger.d { "[queryCalls] filters: $filters, sort: $sort, limit: $limit, watch: $watch" }
         val request = QueryCallsRequest(
             filterConditions = filters,
@@ -832,7 +828,9 @@ internal class StreamVideoImpl internal constructor(
     suspend fun sendReaction(
         callType: String,
         id: String,
-        type: String, emoji: String? = null, custom: Map<String, Any>? = null
+        type: String,
+        emoji: String? = null,
+        custom: Map<String, Any>? = null
     ): Result<SendReactionResponse> {
         val request = SendReactionRequest(type, custom, emoji)
 

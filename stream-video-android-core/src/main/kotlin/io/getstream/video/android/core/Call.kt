@@ -25,7 +25,6 @@ import io.getstream.result.Result.Success
 import io.getstream.video.android.core.call.RtcSession
 import io.getstream.video.android.core.events.VideoEventListener
 import io.getstream.video.android.core.model.MuteUsersData
-import io.getstream.video.android.core.model.SendReactionData
 import io.getstream.video.android.core.model.SortField
 import io.getstream.video.android.core.model.UpdateUserPermissionsData
 import io.getstream.video.android.core.model.User
@@ -48,9 +47,7 @@ import org.openapitools.client.models.MemberRequest
 import org.openapitools.client.models.MuteUsersResponse
 import org.openapitools.client.models.QueryMembersResponse
 import org.openapitools.client.models.SendEventResponse
-import org.openapitools.client.models.SendReactionRequest
 import org.openapitools.client.models.SendReactionResponse
-import org.openapitools.client.models.SortParamRequest
 import org.openapitools.client.models.StopLiveResponse
 import org.openapitools.client.models.UpdateCallMembersRequest
 import org.openapitools.client.models.UpdateCallMembersResponse
