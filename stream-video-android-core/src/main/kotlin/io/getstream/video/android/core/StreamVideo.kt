@@ -152,4 +152,6 @@ public interface StreamVideo {
             internalStreamVideo = null
         }
     }
+
+    public fun cleanup()
 }

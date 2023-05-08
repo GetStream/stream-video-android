@@ -1,0 +1,56 @@
+---
+title: Permissions & Moderation
+description: Explanation of call permissions and moderation features
+---
+
+## Permissions & Moderation
+
+Permissions for a video call can be quite complicated.
+Use cases like educational apps, live events, audio rooms and livestreams require detailed permissions.
+
+### Requesting & Granting permission
+
+This example shows how to check if you have permissions to do something and ask for permission.
+Let's say that you've joined an audio room and want to speak
+
+```kotlin
+// see if you currently have this permission
+val hasPermission = call.state.hasPermission("send-audio").value
+
+// request the host to grant you this permission
+val response = call.requestPermissions("send-audio")
+```
+
+The host can proceed to grant you permission
+
+TODO: what about handling the permission request
+
+```kotlin
+val granResponse = call.grantPermissions("thierry", listOf("send-audio"))
+```
+
+You can request the following 3 permissions atm: send-audio, send-video, screenshare
+
+### Moderation Capabilities
+
+You can block a user or remove them from a call
+
+```kotlin   
+// block a user
+val response = call.blockUser("tommaso")
+
+// remove a member from a call
+val response = call.removeMember("tommaso")
+```
+
+Alternatively you can also mute users
+
+```kotlin
+call.muteAllUsers() // mutes all users other than yourself
+call.muteUser("tommaso") // mute user with id "tommaso" specifically
+```
+
+
+
+
+https://www.notion.so/stream-wiki/Call-Types-9741753a0d77428fb4ff51dc1328314e

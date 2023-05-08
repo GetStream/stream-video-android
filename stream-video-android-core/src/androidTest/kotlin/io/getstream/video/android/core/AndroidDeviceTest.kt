@@ -36,6 +36,7 @@ import org.webrtc.RTCStats
 import org.webrtc.VideoCodecInfo
 import stream.video.sfu.event.ChangePublishQuality
 
+
 /**
  * Things to test in a real android environment
  *
@@ -64,6 +65,34 @@ class AndroidDeviceTest : IntegrationTestBase(connectCoordinatorWS = false) {
         assertThat(camera).isNotNull()
         camera.startCapture()
     }
+
+    @Test
+    fun cleanupCall() = runTest {
+        val result = call.join()
+        // cleanup the media manager
+        call.mediaManager.cleanup()
+        // cleanup rtc
+        call.session?.cleanup()
+        // cleanup the call
+        call.cleanup()
+    }
+
+    @Test
+    fun cleanupClient() = runTest {
+        val newClient = StreamVideoBuilder(
+            context = context,
+            apiKey = apiKey,
+            geo = GEO.GlobalEdgeNetwork,
+            testData.users["thierry"]!!,
+            testData.tokens["thierry"]!!,
+        ).build()
+        val call = newClient.call("default", randomUUID())
+        val result = call.join()
+        // destroy and cleanup the client
+        newClient.cleanup()
+    }
+
+
 
     @Test
     fun codecsFun() = runTest {
@@ -125,6 +154,9 @@ class AndroidDeviceTest : IntegrationTestBase(connectCoordinatorWS = false) {
         assertThat(participantsResponse.size).isEqualTo(1)
         val participants = call.state.participants
         assertThat(participants.value.size).isEqualTo(1)
+
+        Thread.sleep(2000)
+        clientImpl.debugInfo.log()
     }
 
     @Test
@@ -135,12 +167,12 @@ class AndroidDeviceTest : IntegrationTestBase(connectCoordinatorWS = false) {
         assertSuccess(joinResult)
 
         // verify the video track is present and working
-        val videoWrapper = call.state.me.value?.videoTrackWrapped
+        val videoWrapper = call.state.me.value?.videoTrack?.value
         assertThat(videoWrapper?.video?.enabled()).isTrue()
         assertThat(videoWrapper?.video?.state()).isEqualTo(MediaStreamTrack.State.LIVE)
 
         // verify the audio track is present and working
-        val audioWrapper = call.state.me.value?.audioTrackWrapped
+        val audioWrapper = call.state.me.value?.audioTrack?.value
         assertThat(audioWrapper?.audio?.enabled()).isTrue()
         assertThat(audioWrapper?.audio?.state()).isEqualTo(MediaStreamTrack.State.LIVE)
     }
@@ -197,7 +229,7 @@ class AndroidDeviceTest : IntegrationTestBase(connectCoordinatorWS = false) {
         val call = client.call("default", "NnXAIvBKE4Hy")
         val joinResult = call.join()
         assertSuccess(joinResult)
-        clientImpl.debugInfo.log()
+
 
         // wait for the ice connection state
         withTimeout(3000) {
@@ -216,13 +248,13 @@ class AndroidDeviceTest : IntegrationTestBase(connectCoordinatorWS = false) {
         assertThat(call.state.participants.value.size).isGreaterThan(1)
         // loop over the participants
         call.state.participants.value.forEach { participant ->
-            val videoTrack = participant.videoTrackWrapped?.video
+            val videoTrack = participant.videoTrack.value?.video
             assertThat(videoTrack).isNotNull()
             assertThat(videoTrack?.enabled()).isTrue()
             assertThat(videoTrack?.state()).isEqualTo(MediaStreamTrack.State.LIVE)
             assertThat(participant.videoEnabled.value).isTrue()
 
-            val audioTrack = participant.audioTrackWrapped?.audio
+            val audioTrack = participant.audioTrack.value?.audio
             assertThat(audioTrack).isNotNull()
             assertThat(audioTrack?.enabled()).isTrue()
             assertThat(audioTrack?.state()).isEqualTo(MediaStreamTrack.State.LIVE)
@@ -237,6 +269,7 @@ class AndroidDeviceTest : IntegrationTestBase(connectCoordinatorWS = false) {
         val networkOut = allStats?.filter { it.type == "inbound-rtp" }?.map { it as RTCStats }
 
         assertThat(report).isNotNull()
+        clientImpl.debugInfo.log()
     }
 
     @Test

@@ -85,6 +85,7 @@ public data class ParticipantState(
     internal val _user: MutableStateFlow<User> = MutableStateFlow(initialUser)
     val user: StateFlow<User> = _user
 
+    // TODO: make this a property on the user object
     val userNameOrId: StateFlow<String> = _user.mapState { it.name.ifEmpty { it.id } }
 
     /**
@@ -105,12 +106,6 @@ public data class ParticipantState(
     internal val _connectionQuality: MutableStateFlow<ConnectionQuality> =
         MutableStateFlow(ConnectionQuality.CONNECTION_QUALITY_UNSPECIFIED)
     val connectionQuality: StateFlow<ConnectionQuality> = _connectionQuality
-
-    /**
-     * State that indicates whether the speakerphone is on or not.
-     */
-    internal val _speakerPhoneEnabled: MutableStateFlow<Boolean> = MutableStateFlow(false)
-    val speakerPhoneEnabled: StateFlow<Boolean> = _speakerPhoneEnabled
 
     internal val _dominantSpeaker: MutableStateFlow<Boolean> = MutableStateFlow(false)
     val dominantSpeaker: StateFlow<Boolean> = _dominantSpeaker

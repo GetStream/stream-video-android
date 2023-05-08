@@ -192,6 +192,11 @@ class MicrophoneManager(val mediaManager: MediaManagerImpl) {
         setupCompleted = true
     }
 
+    fun cleanup() {
+        audioHandler.stop()
+        setupCompleted = false
+    }
+
     private var setupCompleted: Boolean = false
 }
 
@@ -219,10 +224,10 @@ public sealed class CameraDirection {
  */
 public class CameraManager(
     public val mediaManager: MediaManagerImpl,
-    eglBaseContext: EglBase.Context,
+    public val eglBaseContext: EglBase.Context,
     defaultCameraDirection: CameraDirection = CameraDirection.Front
 ) {
-
+    private lateinit var surfaceTextureHelper: SurfaceTextureHelper
     private lateinit var devices: List<CameraDeviceWrapped>
     private var isCapturingVideo: Boolean = false
     private lateinit var videoCapturer: Camera2Capturer
@@ -243,6 +248,11 @@ public class CameraManager(
 
     private val _resolution = MutableStateFlow<CameraEnumerationAndroid.CaptureFormat?>(null)
     public val resolution: StateFlow<CameraEnumerationAndroid.CaptureFormat?> = _resolution
+
+    private val _availableResolutions: MutableStateFlow<List<CameraEnumerationAndroid.CaptureFormat>> =
+        MutableStateFlow(emptyList())
+    public val availableResolutions: StateFlow<List<CameraEnumerationAndroid.CaptureFormat>> =
+        _availableResolutions
 
     public fun listDevices(): List<CameraDeviceWrapped> {
         setup()
@@ -296,13 +306,7 @@ public class CameraManager(
         }
     }
 
-    /**
-     * Selects a specific device
-     */
-    private val _availableResolutions: MutableStateFlow<List<CameraEnumerationAndroid.CaptureFormat>> =
-        MutableStateFlow(emptyList())
-    public val availableResolutions: StateFlow<List<CameraEnumerationAndroid.CaptureFormat>> =
-        _availableResolutions
+
 
     fun select(deviceId: String, startCapture: Boolean = false) {
         val selectedDevice = devices.first { it.id == deviceId }
@@ -315,12 +319,6 @@ public class CameraManager(
         if (startCapture) {
             startCapture()
         }
-    }
-
-    private val surfaceTextureHelper by lazy {
-        SurfaceTextureHelper.create(
-            "CaptureThread", eglBaseContext
-        )
     }
 
     private var setupCompleted: Boolean = false
@@ -383,6 +381,10 @@ public class CameraManager(
         _availableResolutions.value =
             selectedDevice.supportedFormats?.toImmutableList() ?: emptyList()
 
+        surfaceTextureHelper = SurfaceTextureHelper.create(
+            "CaptureThread", eglBaseContext
+        )
+
         setupCompleted = true
     }
 
@@ -434,6 +436,13 @@ public class CameraManager(
         val sorted = supportedFormats?.toList()?.sortedByDescending { it.height * it.width }
             ?.filter { it.framerate.max >= 30 }
         return matchingTarget?.first()
+    }
+
+    fun cleanup() {
+        stopCapture()
+        videoCapturer?.dispose()
+        surfaceTextureHelper?.dispose()
+        setupCompleted = false
     }
 }
 
@@ -534,5 +543,14 @@ class MediaManagerImpl(
             val isCommunicationDeviceSet = audioManager?.setCommunicationDevice(device)
             logger.d { "[setupAudio] #sfu; isCommunicationDeviceSet: $isCommunicationDeviceSet" }
         }
+    }
+
+    fun cleanup() {
+        videoSource.dispose()
+        videoTrack.dispose()
+        audioSource.dispose()
+        audioTrack.dispose()
+        camera.cleanup()
+        microphone.cleanup()
     }
 }

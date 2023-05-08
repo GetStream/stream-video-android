@@ -1,0 +1,57 @@
+---
+title: Camera & Microphone
+description: Docs on the media manager
+---
+
+The SDK does its best to make working with the camera and microphone easy.
+We expose the following objects on the call:
+
+```
+val call = client.call("default", "123")
+call.camera
+call.microphone
+call.speaker
+```
+
+### Camera Manager
+
+The following methods are available on the camera manager:
+
+```kotlin
+call.camera.enable() // enable the camera
+call.camera.disable() // disable the camera
+call.camera.flip() // switch between front and back camera
+call.camera.listDevices() // list of available devices
+```
+
+The camera manager also exposes these stateflow objects
+
+```kotlin
+call.camera.direction // front/back
+call.camera.status // enabled/ disabled.
+call.camera.selectedDevice // currently selected camera
+call.camera.resolution // resolution
+call.camera.availableResolutions // the resolutions that are available
+```
+
+### Microphone Manager
+
+The microphone manager supports both bluetooth and regular audio sources
+
+```kotlin
+call.microphone.enable() // enable the camera
+call.microphone.disable() // disable the camera
+call.microphone.select(AudioDevice?) // select a specific audio device
+```
+
+These stateflow objects are available:
+
+```kotlin
+call.microphone.status // enabled/ disabled.
+call.microphone.selectedDevice // currently selected camera
+```
+
+### Speaker Manager
+
+
+TODO:

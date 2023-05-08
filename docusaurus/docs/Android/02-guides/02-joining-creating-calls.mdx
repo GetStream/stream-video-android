@@ -1,0 +1,72 @@
+---
+title: Joining & Creating Calls
+description: An overview of how to create calls and join them
+---
+
+### Creating a call
+
+You create a call by specifying a "call type" and a call id.
+
+```kotlin
+val call = client.call("default", "123")
+val result = call.create()
+```
+
+The call type controls which features are enabled, and sets up permissions.
+For the call id you can pass any unique string.
+Note that you can reuse the same call multiple times.
+So if you're building a livestream service like Twitch you could have 1 call id per streamer.
+
+### Joining a call
+
+Joining a call sets up the realtime communication for audio and video.
+
+```kotlin
+val call = client.call("default", "123")
+val result = call.join()
+```
+
+### Call CRUD
+
+Basic CRUD operations are available on the call object
+
+```kotlin
+// create
+val call = client.call("default", "123")
+val result = call.create()
+
+// update
+val custom = mutableMapOf("secret" to secret)
+val updateResult = call.update(custom = custom)
+
+// get
+val getResult = call.get()
+```
+
+### Call Create Options
+
+This example shows how to create a call with members and custom data
+
+```kotlin
+val members = mutableListOf("thierry", "tommaso")
+val call = client.call("default", randomUUID())
+
+val result = call.create(memberIds = members, custom = mapOf("color" to "red"), ring=true)
+```
+
+Members are permanently associated with a call. It allows you to:
+
+* Restrict the ability to join a call only to members
+* Send a push notification to members when the call starts
+
+The following options are supported when creating a call:
+
+| Option | Description | Default |
+| --- | --- | --- |
+| `memberIds` | A list of users ids to add as members to this call | - |
+| `members` | A list of members to add to this call. You can specify the role and custom data on these members | - |
+| `custom` | Any custom data you want to store | - |
+| `settings` | You can overwrite certain call settings for this specific call. This overwrites the call type standard settings | - |
+| `startsAt` | When the call will start. Used for calls scheduled in the future, livestreams, audio rooms etc | - |
+| `team` | Restrict the access to this call to a specific team | - |
+| `ring` | If you want the call to ring for each member | false |

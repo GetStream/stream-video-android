@@ -1,0 +1,81 @@
+---
+title: Overview
+description: Overview of the UI components
+---
+
+# Overview
+
+This library aims to make it as easy as possible to build your own video calling, audio rooms and livestreams.
+We support a low level client, guides on building your own UI and several prebuild UI components.
+If you quickly want to add calling to your app you can do that in just hours with these UI components.
+
+### Rendering a single video
+
+If you only want to render a participant's video:
+
+```
+CallSingleVideoRenderer(
+    call = call,
+    participant = participant,
+    labelPosition = Alignment.BottomStart
+)
+```
+
+### Participant Card
+
+If you want to render a video together with:
+* A label/name for the participant
+* Network quality indicator
+* Mute/unmute indicator
+* Fallback for when video is muted
+* Speaking indicator
+Use this component:
+
+```
+CallSingleVideoRenderer(
+    call = call,
+    participant = participant,
+    labelPosition = Alignment.BottomStart
+)
+```
+
+### Video Call UI
+
+The following example renders a full video calling interface
+
+```Kotlin
+VideoTheme {
+    CallContent(
+        modifier = modifier,
+        callViewModel = callViewModel,
+        onBackPressed = onBackPressed,
+        onCallAction = onCallAction,
+        callControlsContent = callControlsContent,
+        pictureInPictureContent = pictureInPictureContent
+    )
+}
+```
+
+### Ringing (incoming/outgoing calls)
+
+```Kotlin
+VideoTheme {
+    RingingCall(
+        modifier = Modifier.background(color = VideoTheme.colors.appBackground),
+        callViewModel = vm,
+        onBackPressed = { finish() },
+    )
+}
+```
+
+## UI Component Customization
+
+The UI components are highly customizable.
+
+* You can change the theme
+* You can swap components with your own variations
+* Or you can build UI components from scratch
+
+
+
+

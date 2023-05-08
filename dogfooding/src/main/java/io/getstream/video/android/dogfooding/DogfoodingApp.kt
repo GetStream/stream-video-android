@@ -58,7 +58,7 @@ class DogfoodingApp : Application() {
         return StreamVideoBuilder(
             context = this,
             user = user,
-            userToken = token,
+            token = token,
             apiKey = apiKey,
             loggingLevel = loggingLevel,
             pushDeviceGenerators = listOf(FirebasePushDeviceGenerator()),
