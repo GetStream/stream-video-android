@@ -16,8 +16,78 @@
 
 package io.getstream.video.android.dogfooding.ui.lobby
 
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
+import io.getstream.video.android.compose.ui.components.avatar.UserAvatar
+import io.getstream.video.android.dogfooding.R
+import io.getstream.video.android.dogfooding.ui.theme.Colors
+import io.getstream.video.android.dogfooding.ui.theme.StreamButton
 
 @Composable
-fun CallLobbyScreen() {
+fun CallLobbyScreen(
+    navigateUpToLogin: () -> Unit
+) {
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(Colors.background),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        CallJoinHeader(navigateUpToLogin = navigateUpToLogin)
+    }
+}
+
+@Composable
+private fun CallJoinHeader(
+    callLobbyViewModel: CallLobbyViewModel = hiltViewModel(),
+    navigateUpToLogin: () -> Unit
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(24.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        val user = callLobbyViewModel.user
+        if (user != null) {
+            UserAvatar(
+                modifier = Modifier.size(100.dp),
+                user = user,
+            )
+        }
+
+        Text(
+            modifier = Modifier.weight(1f),
+            color = Color.White,
+            text = callLobbyViewModel.user?.id.orEmpty(),
+            overflow = TextOverflow.Ellipsis,
+            maxLines = 1,
+            fontSize = 16.sp
+        )
+
+        StreamButton(
+            modifier = Modifier.width(125.dp),
+            text = stringResource(id = R.string.sign_out),
+            onClick = {
+                callLobbyViewModel.signOut()
+                navigateUpToLogin.invoke()
+            }
+        )
+    }
 }
