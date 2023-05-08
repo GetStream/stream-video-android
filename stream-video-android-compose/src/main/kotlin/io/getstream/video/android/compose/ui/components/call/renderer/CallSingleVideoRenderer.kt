@@ -18,6 +18,7 @@ package io.getstream.video.android.compose.ui.components.call.renderer
 
 import android.view.View
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Box
@@ -42,8 +43,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalInspectionMode
+import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
@@ -52,7 +56,6 @@ import io.getstream.video.android.common.model.getSoundIndicatorState
 import io.getstream.video.android.common.util.MockUtils
 import io.getstream.video.android.common.util.mockCall
 import io.getstream.video.android.common.util.mockParticipants
-import io.getstream.video.android.common.util.mockVideoMediaTrack
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.audio.SoundIndicator
 import io.getstream.video.android.compose.ui.components.avatar.UserAvatarBackground
@@ -61,6 +64,7 @@ import io.getstream.video.android.compose.ui.components.video.VideoRenderer
 import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.ParticipantState
 import io.getstream.video.android.core.model.MediaTrack
+import io.getstream.video.android.ui.common.R
 import stream.video.sfu.models.TrackType
 
 /**
@@ -135,13 +139,13 @@ internal fun ParticipantVideoRenderer(
     val isVideoEnabled by participant.videoEnabled.collectAsState()
 
     if (LocalInspectionMode.current) {
-        VideoRenderer(
-            modifier = Modifier.fillMaxSize(),
-            call = call,
-            mediaTrack = videoTrack ?: mockVideoMediaTrack,
-            sessionId = participant.sessionId,
-            onRender = onRender,
-            trackType = TrackType.TRACK_TYPE_VIDEO
+        Image(
+            modifier = Modifier
+                .fillMaxSize()
+                .testTag("participant_video_renderer"),
+            painter = painterResource(id = R.drawable.stream_video_call_sample),
+            contentScale = ContentScale.Crop,
+            contentDescription = null
         )
         return
     }
