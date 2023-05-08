@@ -32,14 +32,14 @@ import org.webrtc.RendererCommon
  */
 public enum class VideoScalingType {
     SCALE_ASPECT_FIT,
-    SCAPE_ASPECT_FILL,
+    SCALE_ASPECT_FILL,
     SCALE_ASPECT_BALANCED;
 
     internal companion object {
         internal fun VideoScalingType.toCommonScalingType(): RendererCommon.ScalingType {
             return when (this) {
                 SCALE_ASPECT_FIT -> RendererCommon.ScalingType.SCALE_ASPECT_FIT
-                SCAPE_ASPECT_FILL -> RendererCommon.ScalingType.SCALE_ASPECT_FILL
+                SCALE_ASPECT_FILL -> RendererCommon.ScalingType.SCALE_ASPECT_FILL
                 SCALE_ASPECT_BALANCED -> RendererCommon.ScalingType.SCALE_ASPECT_BALANCED
             }
         }

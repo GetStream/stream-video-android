@@ -1,3 +1,19 @@
+/*
+ * Copyright (c) 2014-2023 Stream.io Inc. All rights reserved.
+ *
+ * Licensed under the Stream License;
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    https://github.com/GetStream/stream-video-android/blob/main/LICENSE
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package io.getstream.video.android.core
 
 import io.getstream.log.taggedLogger
@@ -36,7 +52,6 @@ class ReconnectTest : IntegrationTestBase(connectCoordinatorWS = false) {
         // or ice candidate don't arrive due to temporary network failure
         call.session?.reconnect()
         // reconnect recreates the peer connections
-
     }
 
     @Test
@@ -51,7 +66,6 @@ class ReconnectTest : IntegrationTestBase(connectCoordinatorWS = false) {
         // permanent error -> Failed to join call. Mention this call id to tech support
         // happy connection
 
-
         /**
          * From a UI Perspective, the first joinRequest already sets up state
          * Then the JoinEventResponse gives more state
@@ -65,7 +79,6 @@ class ReconnectTest : IntegrationTestBase(connectCoordinatorWS = false) {
          * -- call the coordinator and ask if we should switch SFU
          */
 
-
         /**
          * From a UI Perspective, the first joinRequest already sets up state
          * Then the JoinEventResponse gives more state
@@ -78,6 +91,5 @@ class ReconnectTest : IntegrationTestBase(connectCoordinatorWS = false) {
          * -- we check for disconnected, closed or failed. if failed, closed or disconnected for more than 3 seconds
          * -- call the coordinator and ask if we should switch SFU
          */
-
     }
 }

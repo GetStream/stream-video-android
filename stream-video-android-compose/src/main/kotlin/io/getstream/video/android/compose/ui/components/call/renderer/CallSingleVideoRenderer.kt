@@ -55,7 +55,7 @@ import io.getstream.video.android.common.util.mockParticipants
 import io.getstream.video.android.common.util.mockVideoMediaTrack
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.audio.SoundIndicator
-import io.getstream.video.android.compose.ui.components.avatar.UserAvatar
+import io.getstream.video.android.compose.ui.components.avatar.UserAvatarBackground
 import io.getstream.video.android.compose.ui.components.connection.ConnectionQualityIndicator
 import io.getstream.video.android.compose.ui.components.video.VideoRenderer
 import io.getstream.video.android.core.Call
@@ -155,10 +155,9 @@ internal fun ParticipantVideoRenderer(
             trackType = TrackType.TRACK_TYPE_VIDEO
         )
     } else {
-        UserAvatar(
-            shape = RectangleShape,
-            user = participant.user.collectAsState().value
-        )
+        val user by participant.user.collectAsState()
+
+        UserAvatarBackground(user = user)
     }
 }
 

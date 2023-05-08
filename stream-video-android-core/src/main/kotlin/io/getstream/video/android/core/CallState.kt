@@ -30,7 +30,6 @@ import io.getstream.video.android.core.events.SFUHealthCheckEvent
 import io.getstream.video.android.core.events.SubscriberOfferEvent
 import io.getstream.video.android.core.events.TrackPublishedEvent
 import io.getstream.video.android.core.events.TrackUnpublishedEvent
-import io.getstream.video.android.core.model.MediaTrack
 import io.getstream.video.android.core.model.ScreenSharingSession
 import io.getstream.video.android.core.model.User
 import io.getstream.video.android.core.utils.mapState
@@ -190,7 +189,6 @@ public class CallState(private val call: Call, private val user: User) {
         MutableStateFlow(emptyMap())
     val capabilitiesByRole: StateFlow<Map<String, List<String>>> = _capabilitiesByRole
 
-
     private val _backstage: MutableStateFlow<Boolean> = MutableStateFlow(false)
 
     /** if we are in backstage mode or not */
@@ -236,7 +234,6 @@ public class CallState(private val call: Call, private val user: User) {
         participants.map { it.user.value.id to it.sessionId }.toMap()
     }
 
-
     internal val _hasPermissionMap = mutableMapOf<String, StateFlow<Boolean>>()
 
     private val _endedAt: MutableStateFlow<OffsetDateTime?> = MutableStateFlow(null)
@@ -244,10 +241,8 @@ public class CallState(private val call: Call, private val user: User) {
     private val _endedByUser: MutableStateFlow<User?> = MutableStateFlow(null)
     val endedByUser: StateFlow<User?> = _endedByUser
 
-
     internal val _reactions = MutableStateFlow<List<ReactionResponse>>(emptyList())
     val reactions: StateFlow<List<ReactionResponse>> = _reactions
-
 
     private val _errors: MutableStateFlow<List<ErrorEvent>> =
         MutableStateFlow(emptyList())
