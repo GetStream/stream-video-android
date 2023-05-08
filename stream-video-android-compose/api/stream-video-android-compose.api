@@ -927,8 +927,8 @@ public final class io/getstream/video/android/compose/ui/components/video/VideoR
 
 public final class io/getstream/video/android/compose/ui/components/video/VideoScalingType : java/lang/Enum {
 	public static final field SCALE_ASPECT_BALANCED Lio/getstream/video/android/compose/ui/components/video/VideoScalingType;
+	public static final field SCALE_ASPECT_FILL Lio/getstream/video/android/compose/ui/components/video/VideoScalingType;
 	public static final field SCALE_ASPECT_FIT Lio/getstream/video/android/compose/ui/components/video/VideoScalingType;
-	public static final field SCAPE_ASPECT_FILL Lio/getstream/video/android/compose/ui/components/video/VideoScalingType;
 	public static fun valueOf (Ljava/lang/String;)Lio/getstream/video/android/compose/ui/components/video/VideoScalingType;
 	public static fun values ()[Lio/getstream/video/android/compose/ui/components/video/VideoScalingType;
 }
