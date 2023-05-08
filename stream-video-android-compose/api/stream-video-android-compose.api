@@ -507,7 +507,7 @@ public final class io/getstream/video/android/compose/ui/components/call/CallApp
 }
 
 public final class io/getstream/video/android/compose/ui/components/call/CallContainerKt {
-	public static final fun CallContainer (Lio/getstream/video/android/core/Call;Lio/getstream/video/android/core/model/CallType;Lio/getstream/video/android/core/call/state/CallDeviceState;Landroidx/compose/ui/Modifier;Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function3;Lkotlin/jvm/functions/Function3;Lkotlin/jvm/functions/Function3;Lkotlin/jvm/functions/Function3;Lkotlin/jvm/functions/Function3;Landroidx/compose/runtime/Composer;III)V
+	public static final fun CallContainer (Lio/getstream/video/android/core/Call;Lio/getstream/video/android/core/model/CallType;Lio/getstream/video/android/core/call/state/CallDeviceState;Landroidx/compose/ui/Modifier;Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function2;Lkotlin/jvm/functions/Function3;Lkotlin/jvm/functions/Function3;Lkotlin/jvm/functions/Function3;Lkotlin/jvm/functions/Function3;Lkotlin/jvm/functions/Function3;Landroidx/compose/runtime/Composer;III)V
 	public static final fun CallContainer (Lio/getstream/video/android/core/viewmodel/CallViewModel;Landroidx/compose/ui/Modifier;Lio/getstream/video/android/core/model/CallType;Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function2;Lkotlin/jvm/functions/Function3;Lkotlin/jvm/functions/Function3;Lkotlin/jvm/functions/Function3;Lkotlin/jvm/functions/Function3;Lkotlin/jvm/functions/Function3;Landroidx/compose/runtime/Composer;III)V
 }
 
@@ -555,9 +555,8 @@ public final class io/getstream/video/android/compose/ui/components/call/activec
 }
 
 public final class io/getstream/video/android/compose/ui/components/call/controls/CallControlsKt {
+	public static final fun CallControls (Landroidx/compose/ui/Modifier;Lio/getstream/video/android/core/viewmodel/CallViewModel;Lkotlin/jvm/functions/Function1;Ljava/util/List;Landroidx/compose/runtime/Composer;II)V
 	public static final fun CallControls (Lio/getstream/video/android/core/call/state/CallDeviceState;Landroidx/compose/ui/Modifier;Lkotlin/jvm/functions/Function1;Ljava/util/List;Landroidx/compose/runtime/Composer;II)V
-	public static final fun CallControls (Lio/getstream/video/android/core/call/state/CallDeviceState;Lkotlin/jvm/functions/Function1;Ljava/util/List;Landroidx/compose/runtime/Composer;II)V
-	public static final fun CallControls (Lio/getstream/video/android/core/viewmodel/CallViewModel;Lkotlin/jvm/functions/Function1;Ljava/util/List;Landroidx/compose/runtime/Composer;II)V
 }
 
 public final class io/getstream/video/android/compose/ui/components/call/controls/ComposableSingletons$CallControlsKt {
