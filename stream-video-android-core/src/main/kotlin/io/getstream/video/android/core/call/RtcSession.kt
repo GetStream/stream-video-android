@@ -345,7 +345,12 @@ public class RtcSession internal constructor(
     internal fun addStream(mediaStream: MediaStream) {
 
         val (trackPrefix, trackTypeString) = mediaStream.id.split(':')
-        val sessionId = trackPrefixToSessionIdMap.value[trackPrefix]!!
+        val sessionId = trackPrefixToSessionIdMap.value[trackPrefix]
+
+        if (sessionId == null || trackPrefixToSessionIdMap.value[trackPrefix].isNullOrEmpty()) {
+            logger.d { "[addStream] skipping unrecognized trackPrefix $trackPrefix" }
+            return
+        }
 
         val trackTypeMap = mapOf(
             "TRACK_TYPE_UNSPECIFIED" to TrackType.TRACK_TYPE_UNSPECIFIED,
@@ -364,11 +369,6 @@ public class RtcSession internal constructor(
             track.setEnabled(true)
             val audioTrack = AudioTrack(streamId = mediaStream.id, audio = track)
             setTrack(sessionId, trackType, audioTrack)
-        }
-
-        if (trackPrefixToSessionIdMap.value[trackPrefix].isNullOrEmpty()) {
-            logger.w { "[addStream] skipping unrecognized trackPrefix $trackPrefix" }
-            return
         }
 
         mediaStream.videoTracks.forEach { track ->

@@ -152,6 +152,7 @@ private fun CallJoinBody(
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         if (user != null) {
+            val name = user.name.ifBlank { user.id }.ifBlank { user.custom["email"] }.orEmpty()
             UserAvatar(
                 modifier = Modifier.size(100.dp),
                 user = user,
@@ -161,7 +162,7 @@ private fun CallJoinBody(
 
             Text(
                 modifier = Modifier.padding(horizontal = 30.dp),
-                text = "Welcome, ${user.name}",
+                text = "Welcome, $name",
                 color = Color.White,
                 fontSize = 32.sp,
                 textAlign = TextAlign.Center
