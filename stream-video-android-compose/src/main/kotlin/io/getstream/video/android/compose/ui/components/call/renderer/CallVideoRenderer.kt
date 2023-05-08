@@ -31,7 +31,6 @@ import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.call.renderer.internal.RegularCallVideoRenderer
 import io.getstream.video.android.compose.ui.components.call.renderer.internal.ScreenSharingCallVideoRenderer
 import io.getstream.video.android.core.Call
-import io.getstream.video.android.core.call.state.CallAction
 
 /**
  * Renders all the CallParticipants, based on the number of people in a call and the call state.
@@ -48,17 +47,13 @@ import io.getstream.video.android.core.call.state.CallAction
 public fun CallVideoRenderer(
     call: Call,
     modifier: Modifier = Modifier,
-    onCallAction: (CallAction) -> Unit = {},
     onRender: (View) -> Unit = {},
-    onBackPressed: () -> Unit = {}
 ) {
     if (LocalInspectionMode.current) {
         RegularCallVideoRenderer(
             call = call,
             modifier = modifier,
             onRender = onRender,
-            onCallAction = onCallAction,
-            onBackPressed = onBackPressed,
         )
         return
     }
@@ -71,8 +66,6 @@ public fun CallVideoRenderer(
             call = call,
             modifier = modifier,
             onRender = onRender,
-            onCallAction = onCallAction,
-            onBackPressed = onBackPressed,
         )
     } else {
         val participants by call.state.participants.collectAsState()
@@ -83,8 +76,6 @@ public fun CallVideoRenderer(
             session = screenSharing,
             participants = participants,
             onRender = onRender,
-            onCallAction = onCallAction,
-            onBackPressed = onBackPressed,
         )
     }
 }

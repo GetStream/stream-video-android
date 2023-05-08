@@ -33,8 +33,8 @@ import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.onCompletion
 import kotlinx.coroutines.flow.stateIn
+import java.util.UUID
 import javax.inject.Inject
-import kotlin.random.Random
 
 @HiltViewModel
 class CallJoinViewModel @Inject constructor(
@@ -85,7 +85,7 @@ class CallJoinViewModel @Inject constructor(
 
     private suspend fun startNewCall(): Pair<Result<RtcSession>, String> {
         val streamVideo = StreamVideo.instance()
-        val callId = "default:NnXAIvBKE4Hy" + Random.nextInt(1000)
+        val callId = "default:${UUID.randomUUID()}"
         val (type, id) = callId.toTypeAndId()
         val call = streamVideo.call(type = type, id = id)
         return call.join(

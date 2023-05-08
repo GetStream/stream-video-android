@@ -35,10 +35,8 @@ import io.getstream.video.android.common.util.mockCall
 import io.getstream.video.android.common.util.mockParticipants
 import io.getstream.video.android.common.util.mockVideoMediaTrack
 import io.getstream.video.android.compose.theme.VideoTheme
-import io.getstream.video.android.compose.ui.components.internal.OverlayScreenSharingAppBar
 import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.ParticipantState
-import io.getstream.video.android.core.call.state.CallAction
 import io.getstream.video.android.core.model.ScreenSharingSession
 
 /**
@@ -58,8 +56,6 @@ internal fun PortraitScreenSharingVideoRenderer(
     primarySpeaker: ParticipantState?,
     modifier: Modifier = Modifier,
     onRender: (View) -> Unit,
-    onCallAction: (CallAction) -> Unit,
-    onBackPressed: () -> Unit,
 ) {
     val sharingParticipant = session.participant
     val me = participants.firstOrNull { it.isLocal }
@@ -79,9 +75,7 @@ internal fun PortraitScreenSharingVideoRenderer(
                 onRender = onRender,
             )
 
-            if (me?.initialUser?.id == sharingParticipant.initialUser.id) {
-                OverlayScreenSharingAppBar(sharingParticipant, onBackPressed, onCallAction)
-            } else {
+            if (me?.initialUser?.id != sharingParticipant.initialUser.id) {
                 ScreenShareTooltip(
                     modifier = Modifier.align(Alignment.TopStart),
                     sharingParticipant = sharingParticipant
@@ -116,8 +110,6 @@ private fun PortraitScreenSharingContentPreview() {
             primarySpeaker = mockParticipants[1],
             modifier = Modifier.fillMaxSize(),
             onRender = {},
-            onBackPressed = {},
-            onCallAction = {}
         )
     }
 }
@@ -137,8 +129,6 @@ private fun PortraitScreenSharingMyContentPreview() {
             primarySpeaker = mockParticipants[0],
             modifier = Modifier.fillMaxSize(),
             onRender = {},
-            onBackPressed = {},
-            onCallAction = {}
         )
     }
 }

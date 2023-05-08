@@ -767,8 +767,8 @@ public final class io/getstream/video/android/core/call/state/SelectAudioDevice 
 	public fun toString ()Ljava/lang/String;
 }
 
-public final class io/getstream/video/android/core/call/state/ShowCallInfo : io/getstream/video/android/core/call/state/CallAction {
-	public static final field INSTANCE Lio/getstream/video/android/core/call/state/ShowCallInfo;
+public final class io/getstream/video/android/core/call/state/ShowCallParticipantInfo : io/getstream/video/android/core/call/state/CallAction {
+	public static final field INSTANCE Lio/getstream/video/android/core/call/state/ShowCallParticipantInfo;
 }
 
 public final class io/getstream/video/android/core/call/state/ToggleCamera : io/getstream/video/android/core/call/state/CallAction {
