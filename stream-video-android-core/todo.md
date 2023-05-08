@@ -211,8 +211,12 @@ Not as important
 [X] Not being able to edit settings on a call you created seems like the wrong default: “”User ‘thierry’ with role ‘user’ is not allowed to perform action UpdateCallSettings in scope ‘video:default’“, serverErrorCode=17, statusCode=-1, cause=java.lang.Throwable: ))”
 [X] Participant.online field is weird. Aren't you always online as a participant?
 [ ] Events for updating users 
-[ ] Participant count (for livestreams you cant rely on the list)
-[ ] ConnectionQualityInfo is a list, audio levels is a map. Lets standardize
+[X] Participant count (for livestreams you cant rely on the list)
+    * Count of participants is returned in the `health_check_response`. ([PR](https://github.com/GetStream/video-sfu/pull/198))
+    * Limiting broadcast for livestream events and extend counts to take SFU cascading into account. ([PR](https://github.com/GetStream/video-sfu/pull/199))
+[X] ~~ConnectionQualityInfo is a list, audio levels is a map. Lets standardize~~ (It was always a list)
+    * [Definition of ConnectionQuality proto](https://github.com/GetStream/protocol/blob/029ad737f69a1e096ceef7a6d252a3930875c659/protobuf/video/sfu/event/events.proto#L124-L128)
+    * [Definition of AudioLevelsChanged proto](https://github.com/GetStream/protocol/blob/029ad737f69a1e096ceef7a6d252a3930875c659/protobuf/video/sfu/event/events.proto#L150-L153)
 [ ] Accept/reject call endpoints
 [ ] What about codec switching?
 [ ] What about graceful SFU shutdown/ an event to make clients move SFU?
@@ -227,6 +231,8 @@ Not as important
 [ ] should video be default on or off?
 [ ] should audio be default on or off?
 [ ] am i allowed to publish (IE should i create the publisher peer connection)
+    * [Anonymous users cannot create Publisher peer connection](https://github.com/GetStream/video-sfu/pull/199)
+    * [Call permissions are communicated](https://github.com/GetStream/video-sfu/pull/183)
 
 ### Available tasks up for grabs
 
