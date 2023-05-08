@@ -110,6 +110,7 @@ private fun CallJoinHeader(
     callJoinViewModel: CallJoinViewModel = hiltViewModel(),
     navigateUpToLogin: () -> Unit
 ) {
+    val user = callJoinViewModel.user
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -119,7 +120,7 @@ private fun CallJoinHeader(
         Text(
             modifier = Modifier.weight(1f),
             color = Color.White,
-            text = callJoinViewModel.user?.id.orEmpty(),
+            text = user?.name?.ifBlank { user.id }?.ifBlank { user.custom["email"] }.orEmpty(),
             maxLines = 1,
             fontSize = 16.sp
         )

@@ -22,6 +22,7 @@ import io.getstream.log.taggedLogger
 import io.getstream.result.Error
 import io.getstream.result.Result
 import io.getstream.video.android.core.Call
+import io.getstream.video.android.core.DeviceStatus
 import io.getstream.video.android.core.StreamVideo
 import io.getstream.video.android.core.StreamVideoImpl
 import io.getstream.video.android.core.call.RtcSession
@@ -79,21 +80,29 @@ public class CallViewModel(
     private val _isShowingCallInfoMenu = MutableStateFlow(false)
     public val isShowingCallInfoMenu: StateFlow<Boolean> = _isShowingCallInfoMenu
 
-    private val isVideoOn: MutableStateFlow<Boolean> = MutableStateFlow(
-        (settings.value?.video?.enabled == true) &&
-            (permissionManager.hasCameraPermission.value)
-    )
+    private val isVideoOn: StateFlow<Boolean> =
+        combine(settings, call.mediaManager.camera.status) { settings, status ->
+            (settings?.video?.enabled == true) &&
+                (status is DeviceStatus.Enabled) &&
+                (permissionManager.hasCameraPermission.value)
+        }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(3000L), false)
 
-    private val isAudioOn: MutableStateFlow<Boolean> = MutableStateFlow(
-        permissionManager.hasRecordAudioPermission.value
-    )
+    private val isMicrophoneOn: StateFlow<Boolean> =
+        combine(settings, call.mediaManager.microphone.status) { _, status ->
+            (status is DeviceStatus.Enabled) &&
+                permissionManager.hasRecordAudioPermission.value
+        }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(3000L), false)
 
     private val isSpeakerPhoneOn: MutableStateFlow<Boolean> = MutableStateFlow(
         false
     )
 
     public val callDeviceState: StateFlow<CallDeviceState> =
-        combine(isAudioOn, isVideoOn, isSpeakerPhoneOn) { isAudioOn, isVideoOn, isSpeakerPhoneOn ->
+        combine(
+            isMicrophoneOn,
+            isVideoOn,
+            isSpeakerPhoneOn
+        ) { isAudioOn, isVideoOn, isSpeakerPhoneOn ->
             CallDeviceState(
                 isMicrophoneEnabled = isAudioOn,
                 isSpeakerphoneEnabled = isSpeakerPhoneOn,
@@ -103,7 +112,7 @@ public class CallViewModel(
             logger.d { "[callMediaState] callMediaState: $it" }
         }.stateIn(
             scope = viewModelScope,
-            started = SharingStarted.Eagerly,
+            started = SharingStarted.WhileSubscribed(3000L),
             initialValue = CallDeviceState()
         )
 
@@ -123,7 +132,7 @@ public class CallViewModel(
                         permissionManager.requestPermission(android.Manifest.permission.CAMERA)
                     }
 
-                    if (isAudioOn.value) {
+                    if (isMicrophoneOn.value) {
                         permissionManager.requestPermission(android.Manifest.permission.RECORD_AUDIO)
                     }
                 }.onError {
@@ -160,7 +169,6 @@ public class CallViewModel(
         }
 
         call.camera.setEnabled(videoEnabled)
-        isVideoOn.value = videoEnabled
     }
 
     private fun onMicrophoneChanged(microphoneEnabled: Boolean) {
@@ -170,7 +178,6 @@ public class CallViewModel(
             logger.w { "[onMicrophoneChanged] the [Manifest.permissions.RECORD_AUDIO] has to be granted for audio to be sent" }
         }
         call.microphone.setEnabled(microphoneEnabled)
-        isAudioOn.value = microphoneEnabled
     }
 
     private fun onSpeakerphoneChanged(speakerPhoneEnabled: Boolean) {
