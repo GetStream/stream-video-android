@@ -86,7 +86,7 @@ class CallStateTest : IntegrationTestBase() {
 //        val createResult = client.call("default", randomUUID()).create(custom=mapOf("color" to "green"))
 //        assertSuccess(createResult)
         val filters = mutableMapOf("color" to "green")
-        val queryResult = client.queryCalls(QueryCallsData(filters, limit = 1))
+        val queryResult = client.queryCalls(filters, limit = 1)
         assertSuccess(queryResult)
         // verify the call has settings setup correctly
         queryResult.onSuccess {

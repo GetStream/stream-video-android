@@ -18,16 +18,23 @@ The SDK makes it easy to query calls
 ** Calls that are about to start **
 
 ```kotlin
-{members:{$in:[thierry]}, starts_at:{"$lt":now.add(3 hour)'}, ended_at:nil}
-val filters = mutableMapOf("active" to true)
-val result = client.queryCalls(QueryCallsData(filters, limit = 1))
+val filters = mutableMapOf(
+    "members" to mutableMapOf("\$in" to listOf("tommaso")),
+    "starts_at" to mutableMapOf("\$lt" to threeHoursFromNow),
+    //"ended_at" to false,
+)
+val sort = listOf(SortField.Asc("starts_at"))
+val result = client.queryCalls(filters=filters, sort=sort, limit=10, watch=true)
 ```
 
 ** Calls filters on a custom property **
 
 ```kotlin
-val filters = mutableMapOf("custom.color" to "red")
-val result = client.queryCalls(QueryCallsData(filters, limit = 1))
+val filters = mutableMapOf(
+    "custom.color" to "red",
+)
+val sort = listOf(SortField.Asc("starts_at"))
+val result = client.queryCalls(filters=filters, sort=sort, limit=10, watch=true)
 ```
 
 ** Calls that live/ currently have participants **
@@ -63,3 +70,6 @@ Sorting is supported on these fields
 * type
 * id
 * cid
+
+If you specify "watch" the SDK will automatically keep the data about these calls updated.
+This allows you to show a live preview of who's in the call.

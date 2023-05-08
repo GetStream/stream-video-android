@@ -49,5 +49,5 @@ public fun QueryCallsData.toRequest(): QueryCallsRequest {
 }
 
 // TODO: have a better default
-private const val DEFAULT_QUERY_CALLS_SORT = "cid"
-private const val DEFAULT_QUERY_CALLS_LIMIT = 25
+const val DEFAULT_QUERY_CALLS_SORT = "cid"
+const val DEFAULT_QUERY_CALLS_LIMIT = 25

@@ -20,10 +20,14 @@ import android.content.Context
 import io.getstream.log.StreamLog
 import io.getstream.result.Result
 import io.getstream.video.android.core.events.VideoEventListener
+import io.getstream.video.android.core.model.DEFAULT_QUERY_CALLS_LIMIT
+import io.getstream.video.android.core.model.DEFAULT_QUERY_CALLS_SORT
 import io.getstream.video.android.core.model.Device
 import io.getstream.video.android.core.model.EdgeData
 import io.getstream.video.android.core.model.QueriedCalls
 import io.getstream.video.android.core.model.QueryCallsData
+import io.getstream.video.android.core.model.SortData
+import io.getstream.video.android.core.model.SortField
 import io.getstream.video.android.core.model.User
 import org.openapitools.client.models.QueryCallsResponse
 import org.openapitools.client.models.VideoEvent
@@ -57,7 +61,10 @@ public interface StreamVideo {
      * @return [Result] containing the [QueriedCalls].
      */
     public suspend fun queryCalls(
-        queryCallsData: QueryCallsData
+        filters: Map<String, Any>,
+        sort: List<SortField> = listOf(SortField.Asc(DEFAULT_QUERY_CALLS_SORT)),
+        limit: Int = DEFAULT_QUERY_CALLS_LIMIT,
+        watch: Boolean = false,
     ): Result<QueryCallsResponse>
 
     /** Subscribe for a specific list of events */

@@ -33,11 +33,15 @@ import io.getstream.video.android.core.lifecycle.LifecycleHandler
 import io.getstream.video.android.core.lifecycle.internal.StreamLifecycleObserver
 import io.getstream.video.android.core.logging.LoggingLevel
 import io.getstream.video.android.core.model.CallEventType
+import io.getstream.video.android.core.model.DEFAULT_QUERY_CALLS_LIMIT
+import io.getstream.video.android.core.model.DEFAULT_QUERY_CALLS_SORT
 import io.getstream.video.android.core.model.Device
 import io.getstream.video.android.core.model.EdgeData
 import io.getstream.video.android.core.model.MuteUsersData
 import io.getstream.video.android.core.model.QueryCallsData
 import io.getstream.video.android.core.model.SendReactionData
+import io.getstream.video.android.core.model.SortData
+import io.getstream.video.android.core.model.SortField
 import io.getstream.video.android.core.model.UpdateUserPermissionsData
 import io.getstream.video.android.core.model.User
 import io.getstream.video.android.core.model.mapper.toTypeAndId
@@ -81,6 +85,7 @@ import org.openapitools.client.models.JoinCallResponse
 import org.openapitools.client.models.ListRecordingsResponse
 import org.openapitools.client.models.MemberRequest
 import org.openapitools.client.models.MuteUsersResponse
+import org.openapitools.client.models.QueryCallsRequest
 import org.openapitools.client.models.QueryCallsResponse
 import org.openapitools.client.models.QueryMembersRequest
 import org.openapitools.client.models.QueryMembersResponse
@@ -732,9 +737,17 @@ internal class StreamVideoImpl internal constructor(
     /**
      * @see StreamVideo.queryCalls
      */
-    override suspend fun queryCalls(queryCallsData: QueryCallsData): Result<QueryCallsResponse> {
-        logger.d { "[queryCalls] queryCallsData: $queryCallsData" }
-        val request = queryCallsData.toRequest()
+    override suspend fun queryCalls(filters: Map<String, Any>,
+                                    sort: List<SortField>,
+                                    limit: Int,
+                                    watch: Boolean): Result<QueryCallsResponse> {
+        logger.d { "[queryCalls] filters: $filters, sort: $sort, limit: $limit, watch: $watch" }
+        val request = QueryCallsRequest(
+            filterConditions = filters,
+            sort = sort.map { it.toRequest() },
+            limit = limit,
+            watch = watch
+        )
         val connectionId = connectionModule.coordinatorSocket.connectionId
         val result = wrapAPICall {
             connectionModule.videoCallsApi.queryCalls(request, connectionId)

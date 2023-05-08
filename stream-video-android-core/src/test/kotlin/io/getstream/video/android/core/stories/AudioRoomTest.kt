@@ -17,12 +17,17 @@
 package io.getstream.video.android.core.stories
 
 import io.getstream.video.android.core.IntegrationTestBase
+import io.getstream.video.android.core.model.DEFAULT_QUERY_CALLS_SORT
 import io.getstream.video.android.core.model.QueryCallsData
 import io.getstream.video.android.core.model.SendReactionData
+import io.getstream.video.android.core.model.SortData
+import io.getstream.video.android.core.model.SortField
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
+import org.threeten.bp.Clock
+import org.threeten.bp.OffsetDateTime
 
 @RunWith(RobolectricTestRunner::class)
 class AudioRoomTest : IntegrationTestBase() {
@@ -41,15 +46,26 @@ class AudioRoomTest : IntegrationTestBase() {
      *
      */
     @Test
-    fun `query calls should succeed`() = runTest {
-        /**
-         * To test:
-         * - Filter on custom fields
-         * - Filter on about to start in X hours
-         * - Filter on currently live
-         */
-        val filters = mutableMapOf("active" to true)
-        val result = client.queryCalls(QueryCallsData(filters, limit = 1))
+    fun `query calls - about to start`() = runTest {
+        val threeHoursFromNow = OffsetDateTime.now(Clock.systemUTC()).plusHours(3)
+        // TODO: support null for ended_at
+        val filters = mutableMapOf(
+            "members" to mutableMapOf("\$in" to listOf("tommaso")),
+            "starts_at" to mutableMapOf("\$lt" to threeHoursFromNow),
+            //"ended_at" to false,
+        )
+        val sort = listOf(SortField.Asc("starts_at"))
+        val result = client.queryCalls(filters=filters, sort=sort, limit=10, watch=true)
+        assertSuccess(result)
+    }
+
+    @Test
+    fun `query calls - custom field`() = runTest {
+        val filters = mutableMapOf(
+            "custom.color" to "red",
+        )
+        val sort = listOf(SortField.Asc("starts_at"))
+        val result = client.queryCalls(filters=filters, sort=sort, limit=10, watch=true)
         assertSuccess(result)
     }
 
