@@ -17,24 +17,35 @@
 package io.getstream.video.android.dogfooding.ui.lobby
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import io.getstream.video.android.compose.ui.components.avatar.UserAvatar
+import io.getstream.video.android.compose.ui.components.call.renderer.CallSingleVideoRenderer
 import io.getstream.video.android.dogfooding.R
 import io.getstream.video.android.dogfooding.ui.theme.Colors
 import io.getstream.video.android.dogfooding.ui.theme.StreamButton
@@ -50,6 +61,13 @@ fun CallLobbyScreen(
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         CallJoinHeader(navigateUpToLogin = navigateUpToLogin)
+
+        CallLobbyBody(
+            modifier = Modifier
+                .align(Alignment.CenterHorizontally)
+                .fillMaxWidth()
+                .weight(1f),
+        )
     }
 }
 
@@ -67,9 +85,11 @@ private fun CallJoinHeader(
         val user = callLobbyViewModel.user
         if (user != null) {
             UserAvatar(
-                modifier = Modifier.size(100.dp),
+                modifier = Modifier.size(32.dp),
                 user = user,
             )
+
+            Spacer(modifier = Modifier.height(4.dp))
         }
 
         Text(
@@ -89,5 +109,53 @@ private fun CallJoinHeader(
                 navigateUpToLogin.invoke()
             }
         )
+    }
+}
+
+@Composable
+private fun CallLobbyBody(
+    modifier: Modifier,
+    callLobbyViewModel: CallLobbyViewModel = hiltViewModel()
+) {
+    val call by remember { mutableStateOf(callLobbyViewModel.call()) }
+    val me by call.state.me.collectAsState()
+
+    Column(
+        modifier = modifier
+            .fillMaxSize()
+            .background(Colors.background),
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Text(
+            modifier = Modifier.padding(horizontal = 30.dp),
+            text = stringResource(id = R.string.stream_video),
+            color = Color.White,
+            fontSize = 26.sp,
+            textAlign = TextAlign.Center
+        )
+
+        Spacer(modifier = Modifier.height(4.dp))
+
+        Text(
+            text = stringResource(id = R.string.call_lobby_description),
+            color = Colors.description,
+            textAlign = TextAlign.Center,
+            fontSize = 17.sp,
+        )
+
+        Spacer(modifier = Modifier.height(8.dp))
+
+        if (me != null) {
+            CallSingleVideoRenderer(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clip(RoundedCornerShape(12.dp))
+                    .padding(horizontal = 30.dp)
+                    .height(280.dp),
+                call = callLobbyViewModel.call(),
+                participant = me!!
+            )
+        }
     }
 }

@@ -19,8 +19,10 @@ package io.getstream.video.android.dogfooding.ui.lobby
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
+import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.StreamVideo
 import io.getstream.video.android.core.model.User
+import io.getstream.video.android.core.model.mapper.toTypeAndId
 import io.getstream.video.android.core.user.UserPreferences
 import javax.inject.Inject
 
@@ -30,9 +32,15 @@ class CallLobbyViewModel @Inject constructor(
     userPreferences: UserPreferences
 ) : ViewModel() {
 
-    val cid: String = checkNotNull(savedStateHandle["cid"])
+    private val cid: String = checkNotNull(savedStateHandle["cid"])
 
     val user: User? = userPreferences.getUserCredentials()
+
+    fun call(): Call {
+        val streamVideo = StreamVideo.instance()
+        val (type, id) = cid.toTypeAndId()
+        return streamVideo.call(type = type, id = id)
+    }
 
     fun signOut() {
         StreamVideo.instance().logOut()
