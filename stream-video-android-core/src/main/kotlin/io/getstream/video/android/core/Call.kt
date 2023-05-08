@@ -26,6 +26,7 @@ import io.getstream.video.android.core.call.RtcSession
 import io.getstream.video.android.core.events.VideoEventListener
 import io.getstream.video.android.core.model.MuteUsersData
 import io.getstream.video.android.core.model.SendReactionData
+import io.getstream.video.android.core.model.SortField
 import io.getstream.video.android.core.model.UpdateUserPermissionsData
 import io.getstream.video.android.core.model.User
 import io.getstream.video.android.core.model.toIceServer
@@ -46,6 +47,7 @@ import org.openapitools.client.models.ListRecordingsResponse
 import org.openapitools.client.models.MemberRequest
 import org.openapitools.client.models.MuteUsersResponse
 import org.openapitools.client.models.QueryMembersResponse
+import org.openapitools.client.models.SendEventResponse
 import org.openapitools.client.models.SendReactionRequest
 import org.openapitools.client.models.SendReactionResponse
 import org.openapitools.client.models.SortParamRequest
@@ -283,7 +285,7 @@ public class Call(
 
     suspend fun queryMembers(
         filter: Map<String, Any>,
-        sort: List<SortParamRequest> = mutableListOf(SortParamRequest(-1, "created_at")),
+        sort: List<SortField> = mutableListOf(SortField.Desc("created_at")),
         limit: Int = 100
     ): Result<QueryMembersResponse> {
         val result = clientImpl.queryMembers(type, id, filter, sort, limit)
@@ -368,8 +370,8 @@ public class Call(
         return clientImpl.stopLive(type, id)
     }
 
-    suspend fun sendCustomEvent(): Result<StopLiveResponse> {
-        TODO()
+    suspend fun sendCustomEvent(data: Map<String, Any>): Result<SendEventResponse> {
+        return clientImpl.sendCustomEvent(this.type, this.id, "custom", data)
     }
 
     /** Permissions */

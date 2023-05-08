@@ -23,4 +23,5 @@ In case the reaction system isn't flexible enough we also support custom events.
 This is basically just a realtime layer that you can broadcast your own events to.
 
 ```kotlin
+val response = call.sendCustomEvent(mapOf("type" to "draw", "x" to 10, "y" to 20))
 ```

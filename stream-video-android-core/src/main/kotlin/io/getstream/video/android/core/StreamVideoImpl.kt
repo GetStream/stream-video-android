@@ -647,8 +647,8 @@ internal class StreamVideoImpl internal constructor(
     internal suspend fun sendCustomEvent(
         type: String,
         id: String,
+        eventType: String,
         dataJson: Map<String, Any>,
-        eventType: String
     ): Result<SendEventResponse> {
         val callCid = "$type:$id"
         logger.d { "[sendCustomEvent] callCid: $callCid, dataJson: $dataJson, eventType: $eventType" }
@@ -668,7 +668,7 @@ internal class StreamVideoImpl internal constructor(
         id: String,
         // TODO: why can't the filter be null
         filter: Map<String, Any>,
-        sort: List<SortParamRequest> = mutableListOf(SortParamRequest(-1, "created_at")),
+        sort: List<SortField> = mutableListOf(SortField.Desc("created_at")),
         limit: Int = 100
     ): Result<QueryMembersResponse> {
 
@@ -677,7 +677,7 @@ internal class StreamVideoImpl internal constructor(
                 QueryMembersRequest(
                     type = type, id = id,
                     filterConditions = filter,
-                    sort = sort
+                    sort = sort.map { it.toRequest() }
                 )
             )
         }

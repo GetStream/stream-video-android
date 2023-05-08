@@ -94,6 +94,13 @@ class AudioRoomTest : IntegrationTestBase() {
     }
 
     @Test
+    fun `send a custom event`() = runTest {
+        val response = call.sendCustomEvent(mapOf("type" to "draw", "x" to 10, "y" to 20))
+
+        assertSuccess(response)
+    }
+
+    @Test
     fun `for audio rooms it's common to request permissions`() = runTest {
         val result = call.requestPermissions("screenshare", "send-audio")
         assertSuccess(result)
