@@ -50,6 +50,7 @@ class LoginViewModel @Inject constructor(
     internal val uiState: StateFlow<LoginUiState> = event
         .flatMapLatest { event ->
             when (event) {
+                is LoginEvent.Loading -> flowOf(LoginUiState.Loading)
                 is LoginEvent.GoogleSignIn -> flowOf(LoginUiState.GoogleSignIn)
                 is LoginEvent.SignInInSuccess -> signInInSuccess(event.email)
                 else -> flowOf(LoginUiState.Nothing)
@@ -67,6 +68,15 @@ class LoginViewModel @Inject constructor(
         )
         emit(LoginUiState.SignInComplete(response))
     }.flowOn(Dispatchers.IO)
+
+    init {
+        val user = userPreferences.getUserCredentials()
+
+        if (user != null) {
+            handleUiEvent(LoginEvent.Loading)
+            sigInInIfValidUserExist()
+        }
+    }
 
     fun sigInInIfValidUserExist() {
         val user = userPreferences.getUserCredentials()
@@ -106,6 +116,8 @@ class LoginViewModel @Inject constructor(
 sealed interface LoginUiState {
     object Nothing : LoginUiState
 
+    object Loading : LoginUiState
+
     object GoogleSignIn : LoginUiState
 
     data class SignInComplete(val tokenResponse: TokenResponse) : LoginUiState
@@ -113,6 +125,8 @@ sealed interface LoginUiState {
 
 sealed interface LoginEvent {
     object Nothing : LoginEvent
+
+    object Loading : LoginEvent
 
     data class GoogleSignIn(val id: String = UUID.randomUUID().toString()) : LoginEvent
 

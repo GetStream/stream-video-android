@@ -20,6 +20,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.getstream.result.Result
+import io.getstream.video.android.core.CreateCallOptions
 import io.getstream.video.android.core.StreamVideo
 import io.getstream.video.android.core.call.RtcSession
 import io.getstream.video.android.core.model.User
@@ -32,7 +33,6 @@ import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.onCompletion
 import kotlinx.coroutines.flow.stateIn
-import org.openapitools.client.models.GetOrCreateCallResponse
 import javax.inject.Inject
 import kotlin.random.Random
 
@@ -52,11 +52,10 @@ class CallJoinViewModel @Inject constructor(
             when (event) {
                 is CallJoinEvent.CreateCall -> {
                     _isLoading.value = true
-                    val result = startNewCall()
+                    val (result, callId) = startNewCall()
 
                     if (result.isSuccess) {
-                        val cid = result.getOrThrow().call.cid
-                        flowOf(CallJoinUiState.JoinCompletedUi(callId = cid))
+                        flowOf(CallJoinUiState.JoinCompletedUi(callId = callId))
                     } else {
                         flowOf(CallJoinUiState.JoiningFailed(result.errorOrNull()?.message.orEmpty()))
                     }
@@ -84,12 +83,15 @@ class CallJoinViewModel @Inject constructor(
         this.event.value = event
     }
 
-    private suspend fun startNewCall(): Result<GetOrCreateCallResponse> {
+    private suspend fun startNewCall(): Pair<Result<RtcSession>, String> {
         val streamVideo = StreamVideo.instance()
-        val callId = "default:NnXAIvBKE4Hy" + Random.nextInt(10000)
+        val callId = "default:NnXAIvBKE4Hy" + Random.nextInt(1000)
         val (type, id) = callId.toTypeAndId()
         val call = streamVideo.call(type = type, id = id)
-        return call.create(memberIds = listOf(streamVideo.userId))
+        return call.join(
+            create = true,
+            createOptions = CreateCallOptions(memberIds = listOf(streamVideo.userId))
+        ) to callId
     }
 
     private suspend fun joinCall(callId: String): Result<RtcSession> {
