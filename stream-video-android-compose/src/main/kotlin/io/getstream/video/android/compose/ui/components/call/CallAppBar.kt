@@ -67,13 +67,13 @@ public fun CallAppBar(
     onBackPressed: () -> Unit = {},
     onCallAction: (CallAction) -> Unit = {},
     title: String = stringResource(id = R.string.stream_video_default_app_bar_title),
-    leadingContent: @Composable () -> Unit = {
+    leadingContent: (@Composable () -> Unit)? = {
         DefaultCallAppBarLeadingContent(onBackPressed)
     },
-    centerContent: @Composable (RowScope.() -> Unit) = {
+    centerContent: (@Composable (RowScope.() -> Unit))? = {
         DefaultCallAppBarCenterContent(title)
     },
-    trailingContent: @Composable () -> Unit = {
+    trailingContent: (@Composable () -> Unit)? = {
         DefaultCallAppBarTrailingContent(
             call = call,
             onCallAction = onCallAction
@@ -85,6 +85,12 @@ public fun CallAppBar(
         VideoTheme.dimens.landscapeTopAppBarHeight
     } else {
         VideoTheme.dimens.topAppbarHeight
+    }
+
+    val endPadding = if (orientation == ORIENTATION_LANDSCAPE) {
+        VideoTheme.dimens.callControlsSheetHeight
+    } else {
+        VideoTheme.dimens.callAppBarPadding
     }
 
     Row(
@@ -99,14 +105,19 @@ public fun CallAppBar(
                     )
                 )
             )
-            .padding(VideoTheme.dimens.callAppBarPadding),
+            .padding(
+                start = VideoTheme.dimens.callAppBarPadding,
+                top = VideoTheme.dimens.callAppBarPadding,
+                bottom = VideoTheme.dimens.callAppBarPadding,
+                end = endPadding
+            ),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        leadingContent()
+        leadingContent?.invoke()
 
-        centerContent()
+        centerContent?.invoke(this)
 
-        trailingContent()
+        trailingContent?.invoke()
     }
 }
 

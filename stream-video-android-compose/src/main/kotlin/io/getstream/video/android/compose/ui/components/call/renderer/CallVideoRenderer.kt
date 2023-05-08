@@ -57,8 +57,6 @@ public fun CallVideoRenderer(
             call = call,
             modifier = modifier,
             onRender = onRender,
-            onCallAction = onCallAction,
-            onBackPressed = onBackPressed,
         )
         return
     }
@@ -71,8 +69,6 @@ public fun CallVideoRenderer(
             call = call,
             modifier = modifier,
             onRender = onRender,
-            onCallAction = onCallAction,
-            onBackPressed = onBackPressed,
         )
     } else {
         val participants by call.state.participants.collectAsState()

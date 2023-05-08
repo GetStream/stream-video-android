@@ -77,6 +77,7 @@ public fun CallContainer(
         CallAppBar(
             modifier = Modifier.testTag("call_appbar"),
             call = callViewModel.call,
+            leadingContent = null,
             onBackPressed = onBackPressed,
             onCallAction = onCallAction
         )

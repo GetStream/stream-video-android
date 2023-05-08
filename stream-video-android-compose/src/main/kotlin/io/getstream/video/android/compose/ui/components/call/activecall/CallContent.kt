@@ -71,7 +71,7 @@ public fun CallContent(
     callAppBar: @Composable () -> Unit = {
         CallAppBar(
             call = callViewModel.call,
-            onBackPressed = onBackPressed,
+            leadingContent = null,
             onCallAction = onCallAction
         )
     },
@@ -137,7 +137,7 @@ public fun CallContent(
     callAppBar: @Composable () -> Unit = {
         CallAppBar(
             call = call,
-            onBackPressed = onBackPressed,
+            leadingContent = null,
             onCallAction = onCallAction
         )
     },
