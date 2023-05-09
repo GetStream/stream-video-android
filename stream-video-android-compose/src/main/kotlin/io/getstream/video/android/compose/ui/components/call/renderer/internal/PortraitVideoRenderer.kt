@@ -71,7 +71,7 @@ internal fun BoxScope.PortraitVideoRenderer(
     parentSize: IntSize,
     onRender: (View) -> Unit
 ) {
-    val remoteParticipants = callParticipants.filter { !it.isLocal }
+    val remoteParticipants by call.state.remoteParticipants.collectAsStateWithLifecycle()
 
     if (callParticipants.isEmpty() ||
         (remoteParticipants.isEmpty() && callParticipants.size > 1)

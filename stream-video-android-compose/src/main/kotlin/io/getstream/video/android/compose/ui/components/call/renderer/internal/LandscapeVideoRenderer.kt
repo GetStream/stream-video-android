@@ -73,7 +73,7 @@ internal fun BoxScope.LandscapeVideoRenderer(
     parentSize: IntSize,
     onRender: (View) -> Unit
 ) {
-    val remoteParticipants = callParticipants.filter { !it.isLocal }.take(3)
+    val remoteParticipants by call.state.remoteParticipants.collectAsStateWithLifecycle()
 
     when (callParticipants.size) {
         0 -> Unit
