@@ -1340,42 +1340,6 @@ public final class io/getstream/video/android/core/filter/OrFilterObject : io/ge
 public abstract interface class io/getstream/video/android/core/filter/VideoFilter {
 }
 
-public final class io/getstream/video/android/core/input/CallActivityInput : io/getstream/video/android/core/input/CallAndroidInput {
-	public static final field Companion Lio/getstream/video/android/core/input/CallActivityInput$Companion;
-	public synthetic fun <init> (Ljava/lang/String;Lkotlin/jvm/internal/DefaultConstructorMarker;)V
-	public fun equals (Ljava/lang/Object;)Z
-	public fun getClassName ()Ljava/lang/String;
-	public fun hashCode ()I
-	public fun toString ()Ljava/lang/String;
-}
-
-public final class io/getstream/video/android/core/input/CallActivityInput$Companion {
-	public final fun from (Ljava/lang/Class;)Lio/getstream/video/android/core/input/CallActivityInput;
-	public final fun from (Lkotlin/reflect/KClass;)Lio/getstream/video/android/core/input/CallActivityInput;
-}
-
-public abstract class io/getstream/video/android/core/input/CallAndroidInput {
-	public abstract fun getClassName ()Ljava/lang/String;
-}
-
-public abstract interface class io/getstream/video/android/core/input/CallAndroidInputLauncher {
-	public abstract fun launch (Landroid/content/Context;Lio/getstream/video/android/core/input/CallAndroidInput;)V
-}
-
-public final class io/getstream/video/android/core/input/CallServiceInput : io/getstream/video/android/core/input/CallAndroidInput {
-	public static final field Companion Lio/getstream/video/android/core/input/CallServiceInput$Companion;
-	public synthetic fun <init> (Ljava/lang/String;Lkotlin/jvm/internal/DefaultConstructorMarker;)V
-	public fun equals (Ljava/lang/Object;)Z
-	public fun getClassName ()Ljava/lang/String;
-	public fun hashCode ()I
-	public fun toString ()Ljava/lang/String;
-}
-
-public final class io/getstream/video/android/core/input/CallServiceInput$Companion {
-	public final fun from (Ljava/lang/Class;)Lio/getstream/video/android/core/input/CallServiceInput;
-	public final fun from (Lkotlin/reflect/KClass;)Lio/getstream/video/android/core/input/CallServiceInput;
-}
-
 public abstract interface annotation class io/getstream/video/android/core/internal/InternalStreamVideoApi : java/lang/annotation/Annotation {
 }
 
