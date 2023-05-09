@@ -41,6 +41,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
@@ -65,7 +66,8 @@ fun CallLobbyScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(Colors.background),
+            .background(Colors.background)
+            .testTag("call_lobby"),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         CallJoinHeader(navigateUpToLogin = navigateUpToLogin)
@@ -203,7 +205,8 @@ private fun CallLobbyBody(
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(52.dp)
-                    .padding(horizontal = 35.dp),
+                    .padding(horizontal = 35.dp)
+                    .testTag("start_call"),
                 text = stringResource(id = R.string.start_call),
                 onClick = {
                     val intent = CallActivity.getIntent(context, cid = callLobbyViewModel.cid)

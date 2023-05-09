@@ -210,7 +210,7 @@ public class Call(
             request = GetCallEdgeServerRequest(latencyMeasurements = measurements.associate { it.latencyUrl to it.measurements })
         )
         if (selectEdgeServerResult !is Success) {
-            return result as Failure
+            return selectEdgeServerResult as Failure
         }
 
         val credentials = selectEdgeServerResult.value.credentials
@@ -237,8 +237,8 @@ public class Call(
         scope.launch {
             // wait for the first stream to be added
             session?.let { rtcSession ->
-                val result = rtcSession.lastVideoStreamAdded.filter { it != null }.first()
-                timer.finish("stream added, rtc completed, ready to display video $result")
+                val mainRtcSession = rtcSession.lastVideoStreamAdded.filter { it != null }.first()
+                timer.finish("stream added, rtc completed, ready to display video $mainRtcSession")
             }
         }
 
@@ -251,7 +251,7 @@ public class Call(
                     PeerConnection.IceConnectionState.FAILED,
                     PeerConnection.IceConnectionState.CLOSED
                 )
-                it.subscriber?.state?.filter { it in badStates }?.collect() {
+                it.subscriber?.state?.filter { it in badStates }?.collect {
                     logger.w { "ice connection state changed to $it" }
                     // TODO: UI indications
                     // TODO: some logic here about when to reconnect or switch
@@ -276,7 +276,11 @@ public class Call(
         return clientImpl.endCall(type, id)
     }
 
-    suspend fun sendReaction(type: String, emoji: String? = null, custom: Map<String, Any>? = null): Result<SendReactionResponse> {
+    suspend fun sendReaction(
+        type: String,
+        emoji: String? = null,
+        custom: Map<String, Any>? = null
+    ): Result<SendReactionResponse> {
         return clientImpl.sendReaction(this.type, id, type, emoji, custom)
     }
 

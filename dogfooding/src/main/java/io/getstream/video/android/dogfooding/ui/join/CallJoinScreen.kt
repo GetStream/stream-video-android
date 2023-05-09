@@ -184,7 +184,8 @@ private fun CallJoinBody(
             modifier = Modifier
                 .fillMaxWidth()
                 .height(52.dp)
-                .padding(horizontal = 35.dp),
+                .padding(horizontal = 35.dp)
+                .testTag("start_new_call"),
             enabled = !isLoading,
             text = stringResource(id = R.string.start_a_new_call),
             onClick = { callJoinViewModel.handleUiEvent(CallJoinEvent.CreateCall) }
@@ -203,7 +204,7 @@ private fun CallJoinBody(
 
         Spacer(modifier = Modifier.height(4.dp))
 
-        var callId by remember { mutableStateOf("default:NnXAIvBKE4Hy") }
+        var callId by remember { mutableStateOf("default:NnXAIvBKE4H12") }
         Row(
             modifier = Modifier
                 .fillMaxWidth()

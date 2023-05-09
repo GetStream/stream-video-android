@@ -33,6 +33,7 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.viewinterop.AndroidView
+import io.getstream.log.StreamLog
 import io.getstream.video.android.common.util.MockUtils
 import io.getstream.video.android.common.util.mockCall
 import io.getstream.video.android.compose.theme.VideoTheme
@@ -41,7 +42,6 @@ import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.model.MediaTrack
 import io.getstream.video.android.core.model.VideoTrack
 import io.getstream.webrtc.android.ui.VideoTextureViewRenderer
-import org.webrtc.MediaStreamTrack
 import stream.video.sfu.models.TrackType
 
 /**
@@ -118,8 +118,12 @@ private fun setupVideo(
 ) {
     cleanTrack(renderer, mediaTrack)
 
-    if (mediaTrack is VideoTrack && mediaTrack.video.state() == MediaStreamTrack.State.LIVE) {
-        mediaTrack.video.addSink(renderer)
+    try {
+        if (mediaTrack is VideoTrack) {
+            mediaTrack.video.addSink(renderer)
+        }
+    } catch (e: Exception) {
+        StreamLog.d("VideoRenderer") { e.message.toString() }
     }
 }
 
