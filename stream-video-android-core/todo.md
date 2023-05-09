@@ -73,8 +73,9 @@
 
 ### State TODO
 
-- [ ] Permissions requests need an accept/reject flow
 - [ ] State for: Speaking while muted, Network issue (your own connection)
+- [ ] If you answer a phone call while you're on this call, your audio and video should be muted automatically.]
+- [X] Permissions requests need an accept/reject flow
 - [X] Call settings need to be used everywhere. There are still some hardcoded settings
 - [X] Member state isn't implemented fully. Could be either a state or just a data class
 - [X] Call state isn't setup fully on join
