@@ -1,5 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!--
+<?xml version="1.0" encoding="utf-8"?><!--
      Copyright (c) 2023 Stream.io Inc. All rights reserved.
 
      Licensed under the Stream License;
@@ -45,11 +44,7 @@
         </activity>
 
         <activity
-            android:name=".HomeActivity"
-            android:windowSoftInputMode="adjustResize" />
-
-        <activity
-            android:name=".CallActivity"
+            android:name=".ui.call.CallActivity"
             android:configChanges="screenSize|smallestScreenSize|screenLayout|orientation"
             android:exported="true"
             android:hardwareAccelerated="true"
@@ -63,7 +58,7 @@
             android:supportsPictureInPicture="true" />
 
         <service
-            android:name=".CallService"
+            android:name=".ui.call.CallService"
             android:enabled="true"
             android:exported="false" />
 
