@@ -28,7 +28,8 @@ import org.junit.Test
 
 @ExperimentalStableBaselineProfilesApi
 internal class BaselineProfileGenerator {
-    @get:Rule internal val baselineProfileRule = BaselineProfileRule()
+    @get:Rule
+    internal val baselineProfileRule = BaselineProfileRule()
 
     @Test
     fun startup() =
@@ -46,9 +47,14 @@ internal class BaselineProfileGenerator {
             device.authenticateAndNavigateToHome()
 
             // -------------
-            // Authenticate
+            // JoinCall
             // -------------
-            device.navigateFromHomeToCall()
+            device.navigateFromJoinCallToLobby()
+
+            // -------------
+            // Lobby
+            // -------------
+            device.navigateFromLobbyToCall()
 
             // -------------
             // Call
@@ -57,18 +63,30 @@ internal class BaselineProfileGenerator {
         }
 }
 
-private fun UiDevice.authenticateAndNavigateToHome(): Boolean {
+private fun UiDevice.authenticateAndNavigateToHome() {
     wait(Until.hasObject(By.res("authenticate")), 5_000)
 
     // Click the Authenticate button and login.
     waitForObject(By.res("authenticate")).click()
 
-    return wait(Until.hasObject(By.res("join_call")), 5_000)
+    waitForIdle()
 }
 
-private fun UiDevice.navigateFromHomeToCall() {
-    // wait for the Join Call button and navigate to the call screen by clicking.
-    waitForObject(By.res("join_call")).click()
+private fun UiDevice.navigateFromJoinCallToLobby() {
+    wait(Until.hasObject(By.res("start_new_call")), 5_000)
+
+    // wait for the Join Call button and navigate to the lobby screen by clicking.
+    waitForObject(By.res("start_new_call")).click()
+
+    waitForIdle()
+}
+
+private fun UiDevice.navigateFromLobbyToCall() {
+    wait(Until.hasObject(By.res("call_lobby")), 15_000)
+    wait(Until.hasObject(By.res("participant_video_renderer")), 15_000)
+
+    // wait for the Start Call button and navigate to the call screen by clicking.
+    waitForObject(By.res("start_call"), 15_000).click()
 
     waitForIdle()
 }
