@@ -20,8 +20,7 @@ import android.content.Context
 import android.text.TextUtils
 import android.util.AttributeSet
 import androidx.appcompat.widget.AppCompatTextView
-import io.getstream.video.android.core.model.state.StreamCallState
-import io.getstream.video.android.core.utils.formatAsTitle
+import io.getstream.video.android.core.ConnectionState
 import io.getstream.video.android.xml.utils.extensions.createStreamThemeWrapper
 import io.getstream.video.android.xml.widget.appbar.CallAppBarContent
 
@@ -42,16 +41,7 @@ internal class DefaultCallAppBarCenterContent : AppCompatTextView, CallAppBarCon
         ellipsize = TextUtils.TruncateAt.END
     }
 
-    override fun renderState(callState: StreamCallState) {
-        val callId = when (callState) {
-            is StreamCallState.Active -> callState.callGuid.id
-            else -> ""
-        }
-        val status = callState.formatAsTitle(context)
-
-        text = when (callId.isBlank()) {
-            true -> status
-            else -> "$status: $callId"
-        }
+    override fun renderState(callState: ConnectionState) {
+        text = ""
     }
 }

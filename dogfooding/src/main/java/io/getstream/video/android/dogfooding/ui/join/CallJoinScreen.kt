@@ -223,7 +223,7 @@ private fun CallJoinBody(
                 value = callId,
                 onValueChange = { callId = it },
                 colors = TextFieldDefaults.textFieldColors(
-                    textColor = VideoTheme.colors.textHighEmphasis,
+                    textColor = Color.White,
                     focusedLabelColor = VideoTheme.colors.primaryAccent,
                     unfocusedIndicatorColor = Colors.secondBackground,
                     focusedIndicatorColor = Colors.secondBackground,

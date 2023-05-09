@@ -17,7 +17,7 @@
 package io.getstream.video.android.core.service.notification
 
 import android.app.Notification
-import io.getstream.video.android.core.model.state.StreamCallState
+import io.getstream.video.android.core.ConnectionState
 
 /**
  * Handler responsible for showing and dismissing notification.
@@ -27,7 +27,7 @@ public interface StreamNotificationBuilder {
     /**
      * Shows a notification for the given [state].
      */
-    public fun build(state: StreamCallState.Active): IdentifiedNotification
+    public fun build(cid: String, connectionState: ConnectionState): IdentifiedNotification
 }
 
 public data class IdentifiedNotification(val id: Int, val value: Notification)

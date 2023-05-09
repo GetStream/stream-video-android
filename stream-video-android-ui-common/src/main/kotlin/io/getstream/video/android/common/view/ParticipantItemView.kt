@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package io.getstream.video.android.core.ui
+package io.getstream.video.android.common.view
 
 import android.content.Context
 import android.util.AttributeSet

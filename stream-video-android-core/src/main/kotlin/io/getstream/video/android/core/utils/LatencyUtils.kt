@@ -25,8 +25,6 @@ import java.io.InputStreamReader
 import java.net.URL
 import java.util.concurrent.TimeUnit
 
-private const val TAG = "Call:LatencyUtils"
-
 data class LatencyResult(
     val latencyUrl: String,
     val measurements: List<Float> = emptyList(),

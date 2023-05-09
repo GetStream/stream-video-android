@@ -19,6 +19,7 @@ package io.getstream.video.chat_with_video_final.ui.call
 import android.content.Context
 import io.getstream.video.android.compose.ui.AbstractComposeCallActivity
 import io.getstream.video.android.core.StreamVideo
+import io.getstream.video.android.core.viewmodel.CallViewModelFactory
 import io.getstream.video.chat_with_video_final.application.chatWithVideoApp
 
 class CallActivity : AbstractComposeCallActivity() {
@@ -28,4 +29,12 @@ class CallActivity : AbstractComposeCallActivity() {
      */
     override fun getStreamVideo(context: Context): StreamVideo =
         context.chatWithVideoApp.streamVideo
+
+    override fun getCallViewModelFactory(): CallViewModelFactory {
+        return CallViewModelFactory(
+            streamVideo = getStreamVideo(this),
+            permissionManager = getPermissionManager(),
+            call = getStreamVideo(this).call("default", "replaceme")
+        )
+    }
 }

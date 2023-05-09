@@ -21,5 +21,5 @@ public interface CallViewModelFactoryProvider {
     /**
      * Allows for a custom implementation of the [CallViewModelFactory].
      */
-    public fun getCallViewModelFactory(): CallViewModelFactory? = null
+    public fun getCallViewModelFactory(): CallViewModelFactory
 }

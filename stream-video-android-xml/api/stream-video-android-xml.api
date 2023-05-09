@@ -252,7 +252,7 @@ public final class io/getstream/video/android/xml/utils/OrientationChangeListene
 }
 
 public abstract interface class io/getstream/video/android/xml/widget/appbar/CallAppBarContent {
-	public abstract fun renderState (Lio/getstream/video/android/core/model/state/StreamCallState;)V
+	public abstract fun renderState (Lio/getstream/video/android/core/ConnectionState;)V
 }
 
 public final class io/getstream/video/android/xml/widget/appbar/CallAppBarStyle {
@@ -305,7 +305,7 @@ public final class io/getstream/video/android/xml/widget/appbar/CallAppBarView :
 	public final fun getOnBackPressed ()Lkotlin/jvm/functions/Function0;
 	public final fun getOnParticipantsPressed ()Lkotlin/jvm/functions/Function0;
 	public fun onOrientationChanged (Z)V
-	public final fun renderState (Lio/getstream/video/android/core/model/state/StreamCallState;)V
+	public final fun renderState (Lio/getstream/video/android/core/ConnectionState;)V
 	public final fun setCenterContent (Landroid/view/View;Landroid/widget/FrameLayout$LayoutParams;)V
 	public static synthetic fun setCenterContent$default (Lio/getstream/video/android/xml/widget/appbar/CallAppBarView;Landroid/view/View;Landroid/widget/FrameLayout$LayoutParams;ILjava/lang/Object;)V
 	public final fun setLeadingContent (Landroid/view/View;Landroid/widget/FrameLayout$LayoutParams;)V
