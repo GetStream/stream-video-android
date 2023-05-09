@@ -87,6 +87,7 @@ public final class io/getstream/video/android/core/CallState {
 	public final fun getPermissionRequests ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun getReactions ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun getRecording ()Lkotlinx/coroutines/flow/StateFlow;
+	public final fun getRemoteParticipants ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun getRingingState ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun getScreenSharingSession ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun getSettings ()Lkotlinx/coroutines/flow/StateFlow;
