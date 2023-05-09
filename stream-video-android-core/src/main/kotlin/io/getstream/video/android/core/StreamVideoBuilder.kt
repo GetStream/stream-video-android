@@ -56,23 +56,25 @@ public class StreamVideoBuilder @JvmOverloads constructor(
     /** The user object, can be a regular user, guest user or anonymous */
     private val user: User,
     /** The token for this user generated using your API secret on your server */
-    private val userToken: String = "",
+    private val token: String = "",
     /** If a token is expired, the token provider makes a request to your backend for a new token */
     private val tokenProvider: (suspend (error: Throwable?) -> String)? = null,
+    /** Logging level */
+    private val loggingLevel: LoggingLevel = LoggingLevel.BASIC,
+
+    /** Enable push notifications if you want to receive calls etc */
+    private val enablePush: Boolean = false,
+    /** Support for different push providers */
+    private val pushDeviceGenerators: List<PushDeviceGenerator> = emptyList(),
+    /** Overwrite the default notification logic for incoming calls */
+    private val ringNotification: ((call: Call) -> Notification?)? = null,
+
     /** Audio filters enable you to add custom effects to your audio before its send to the server */
     private val audioFilters: List<AudioFilter> = emptyList(),
     /** Video filters enable you to change the video before it's send. */
     private val videoFilters: List<VideoFilter> = emptyList(),
     /** Connection timeout in seconds */
     private val connectionTimeoutInMs: Long = 10000,
-    /** Logging level */
-    private val loggingLevel: LoggingLevel = LoggingLevel.BASIC,
-    /** Overwrite the default notification logic for incoming calls */
-    private val ringNotification: ((call: Call) -> Notification?)? = null,
-    /** Support for different push providers */
-    private val pushDeviceGenerators: List<PushDeviceGenerator> = emptyList(),
-    /** Enable push notifications if you want to receive calls etc */
-    private val enablePush: Boolean = false,
 ) {
     private val context: Context = context.applicationContext
 
@@ -86,7 +88,7 @@ public class StreamVideoBuilder @JvmOverloads constructor(
         if (apiKey.isBlank()
         ) throw IllegalArgumentException("The API key can not be empty")
 
-        if (userToken.isBlank() && tokenProvider == null && user.type == UserType.Authenticated) {
+        if (token.isBlank() && tokenProvider == null && user.type == UserType.Authenticated) {
             throw IllegalArgumentException(
                 "Either a user token or a token provider must be provided"
             )
@@ -99,8 +101,8 @@ public class StreamVideoBuilder @JvmOverloads constructor(
         val preferences = UserPreferencesManager.initialize(context).apply {
             storeUserCredentials(user)
             storeApiKey(apiKey)
-            if (userToken.isNotEmpty()) {
-                storeUserToken(userToken)
+            if (token.isNotEmpty()) {
+                storeUserToken(token)
             }
         }
 
@@ -118,7 +120,7 @@ public class StreamVideoBuilder @JvmOverloads constructor(
         // create the client
         val client = StreamVideoImpl(
             context = context,
-            scope = scope,
+            _scope = scope,
             user = user,
             preferences = preferences,
             tokenProvider = tokenProvider,

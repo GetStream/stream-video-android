@@ -198,8 +198,6 @@ internal class ParticipantLandscapeTest : BaseComposeTest() {
                 primarySpeaker = mockParticipant,
                 modifier = Modifier.fillMaxSize(),
                 onRender = {},
-                onCallAction = {},
-                onBackPressed = {}
             )
         }
     }
@@ -217,8 +215,6 @@ internal class ParticipantLandscapeTest : BaseComposeTest() {
                 primarySpeaker = mockParticipant,
                 modifier = Modifier.fillMaxSize(),
                 onRender = {},
-                onCallAction = {},
-                onBackPressed = {}
             )
         }
     }

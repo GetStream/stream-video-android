@@ -71,7 +71,7 @@ class HomeActivity : AppCompatActivity() {
     private val selectedOption: MutableState<HomeScreenOption> =
         mutableStateOf(HomeScreenOption.CREATE_CALL)
 
-    private val callIdState: MutableState<String> = mutableStateOf("eoB8cs8QpEw4")
+    private val callIdState: MutableState<String> = mutableStateOf("NnXAIvBKE4Hy")
 
     private val loadingState: MutableState<Boolean> = mutableStateOf(false)
 

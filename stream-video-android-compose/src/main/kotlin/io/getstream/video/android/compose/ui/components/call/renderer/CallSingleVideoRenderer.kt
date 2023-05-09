@@ -18,6 +18,7 @@ package io.getstream.video.android.compose.ui.components.call.renderer
 
 import android.view.View
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Box
@@ -32,7 +33,6 @@ import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Alignment.Companion.BottomEnd
@@ -42,25 +42,29 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalInspectionMode
+import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.getstream.video.android.common.model.getSoundIndicatorState
 import io.getstream.video.android.common.util.MockUtils
 import io.getstream.video.android.common.util.mockCall
 import io.getstream.video.android.common.util.mockParticipants
-import io.getstream.video.android.common.util.mockVideoMediaTrack
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.audio.SoundIndicator
-import io.getstream.video.android.compose.ui.components.avatar.UserAvatar
+import io.getstream.video.android.compose.ui.components.avatar.UserAvatarBackground
 import io.getstream.video.android.compose.ui.components.connection.ConnectionQualityIndicator
 import io.getstream.video.android.compose.ui.components.video.VideoRenderer
 import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.ParticipantState
 import io.getstream.video.android.core.model.MediaTrack
+import io.getstream.video.android.ui.common.R
 import stream.video.sfu.models.TrackType
 
 /**
@@ -116,7 +120,7 @@ public fun CallSingleVideoRenderer(
         ParticipantLabel(participant, labelPosition)
 
         if (isShowConnectionQualityIndicator) {
-            val connectionQuality by participant.connectionQuality.collectAsState()
+            val connectionQuality by participant.connectionQuality.collectAsStateWithLifecycle()
             ConnectionQualityIndicator(
                 connectionQuality = connectionQuality,
                 modifier = Modifier.align(BottomEnd)
@@ -131,17 +135,17 @@ internal fun ParticipantVideoRenderer(
     participant: ParticipantState,
     onRender: (View) -> Unit
 ) {
-    val videoTrack by participant.videoTrack.collectAsState()
-    val isVideoEnabled by participant.videoEnabled.collectAsState()
+    val videoTrack by participant.videoTrack.collectAsStateWithLifecycle()
+    val isVideoEnabled by participant.videoEnabled.collectAsStateWithLifecycle()
 
     if (LocalInspectionMode.current) {
-        VideoRenderer(
-            modifier = Modifier.fillMaxSize(),
-            call = call,
-            mediaTrack = videoTrack ?: mockVideoMediaTrack,
-            sessionId = participant.sessionId,
-            onRender = onRender,
-            trackType = TrackType.TRACK_TYPE_VIDEO
+        Image(
+            modifier = Modifier
+                .fillMaxSize()
+                .testTag("participant_video_renderer"),
+            painter = painterResource(id = R.drawable.stream_video_call_sample),
+            contentScale = ContentScale.Crop,
+            contentDescription = null
         )
         return
     }
@@ -155,10 +159,9 @@ internal fun ParticipantVideoRenderer(
             trackType = TrackType.TRACK_TYPE_VIDEO
         )
     } else {
-        UserAvatar(
-            shape = RectangleShape,
-            user = participant.user.collectAsState().value
-        )
+        val user by participant.user.collectAsStateWithLifecycle()
+
+        UserAvatarBackground(user = user)
     }
 }
 
@@ -167,9 +170,9 @@ internal fun BoxScope.ParticipantLabel(
     participant: ParticipantState,
     labelPosition: Alignment
 ) {
-    val userNameOrId by participant.userNameOrId.collectAsState()
+    val userNameOrId by participant.userNameOrId.collectAsStateWithLifecycle()
     val nameLabel = if (participant.isLocal) {
-        stringResource(id = io.getstream.video.android.ui.common.R.string.stream_video_myself)
+        stringResource(id = R.string.stream_video_myself)
     } else {
         userNameOrId
     }
@@ -199,10 +202,12 @@ internal fun BoxScope.ParticipantLabel(
             overflow = TextOverflow.Ellipsis
         )
 
+        val hasAudio by participant.audioEnabled.collectAsStateWithLifecycle()
+        val isSpeaking by participant.speaking.collectAsStateWithLifecycle()
         SoundIndicator(
             state = getSoundIndicatorState(
-                hasAudio = participant.audioEnabled.collectAsState().value,
-                isSpeaking = participant.speaking.collectAsState().value
+                hasAudio = hasAudio,
+                isSpeaking = isSpeaking
             ),
             modifier = Modifier
                 .align(CenterVertically)

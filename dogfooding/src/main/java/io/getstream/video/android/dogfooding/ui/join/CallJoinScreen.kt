@@ -110,6 +110,7 @@ private fun CallJoinHeader(
     callJoinViewModel: CallJoinViewModel = hiltViewModel(),
     navigateUpToLogin: () -> Unit
 ) {
+    val user = callJoinViewModel.user
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -119,7 +120,7 @@ private fun CallJoinHeader(
         Text(
             modifier = Modifier.weight(1f),
             color = Color.White,
-            text = callJoinViewModel.user?.id.orEmpty(),
+            text = user?.name?.ifBlank { user.id }?.ifBlank { user.custom["email"] }.orEmpty(),
             maxLines = 1,
             fontSize = 16.sp
         )
@@ -151,6 +152,7 @@ private fun CallJoinBody(
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         if (user != null) {
+            val name = user.name.ifBlank { user.id }.ifBlank { user.custom["email"] }.orEmpty()
             UserAvatar(
                 modifier = Modifier.size(100.dp),
                 user = user,
@@ -160,7 +162,7 @@ private fun CallJoinBody(
 
             Text(
                 modifier = Modifier.padding(horizontal = 30.dp),
-                text = "Welcome, ${user.name}",
+                text = "Welcome, $name",
                 color = Color.White,
                 fontSize = 32.sp,
                 textAlign = TextAlign.Center
@@ -182,7 +184,8 @@ private fun CallJoinBody(
             modifier = Modifier
                 .fillMaxWidth()
                 .height(52.dp)
-                .padding(horizontal = 35.dp),
+                .padding(horizontal = 35.dp)
+                .testTag("start_new_call"),
             enabled = !isLoading,
             text = stringResource(id = R.string.start_a_new_call),
             onClick = { callJoinViewModel.handleUiEvent(CallJoinEvent.CreateCall) }
@@ -201,7 +204,7 @@ private fun CallJoinBody(
 
         Spacer(modifier = Modifier.height(4.dp))
 
-        var callId by remember { mutableStateOf("default:NnXAIvBKE4Hy") }
+        var callId by remember { mutableStateOf("default:NnXAIvBKE4H12") }
         Row(
             modifier = Modifier
                 .fillMaxWidth()

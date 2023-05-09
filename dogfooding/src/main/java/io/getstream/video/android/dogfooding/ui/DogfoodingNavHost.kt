@@ -20,9 +20,11 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavHostController
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
 import io.getstream.video.android.dogfooding.ui.join.CallJoinScreen
 import io.getstream.video.android.dogfooding.ui.lobby.CallLobbyScreen
 import io.getstream.video.android.dogfooding.ui.login.LoginScreen
@@ -49,8 +51,8 @@ fun DogfoodingNavHost(
         }
         composable(DogfoodingScreens.CallJoin.destination) {
             CallJoinScreen(
-                navigateToCallLobby = {
-                    navController.navigate(DogfoodingScreens.CallLobby.destination)
+                navigateToCallLobby = { cid ->
+                    navController.navigate("${DogfoodingScreens.CallLobby.destination}/$cid")
                 },
                 navigateUpToLogin = {
                     navController.navigate(DogfoodingScreens.Login.destination) {
@@ -59,8 +61,17 @@ fun DogfoodingNavHost(
                 }
             )
         }
-        composable(DogfoodingScreens.CallLobby.destination) {
-            CallLobbyScreen()
+        composable(
+            "${DogfoodingScreens.CallLobby.destination}/{cid}",
+            arguments = listOf(navArgument("cid") { type = NavType.StringType })
+        ) {
+            CallLobbyScreen(
+                navigateUpToLogin = {
+                    navController.navigate(DogfoodingScreens.Login.destination) {
+                        popUpTo(DogfoodingScreens.CallJoin.destination) { inclusive = true }
+                    }
+                }
+            )
         }
     }
 }

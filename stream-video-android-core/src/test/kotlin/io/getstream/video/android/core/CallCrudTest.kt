@@ -19,8 +19,8 @@ package io.getstream.video.android.core
 import com.google.common.truth.Truth.assertThat
 import io.getstream.log.taggedLogger
 import io.getstream.result.Error
+import io.getstream.video.android.core.model.SortField
 import kotlinx.coroutines.test.runTest
-import org.junit.Ignore
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
@@ -84,6 +84,7 @@ public class CallCrudTest : IntegrationTestBase() {
     fun `Create a call with members and custom data`() = runTest {
         val members = mutableListOf("thierry", "tommaso")
         val call = client.call("default", randomUUID())
+
         val result = call.create(memberIds = members, custom = mapOf("color" to "red"))
         assert(result.isSuccess)
 
@@ -110,7 +111,6 @@ public class CallCrudTest : IntegrationTestBase() {
     }
 
     @Test
-    @Ignore
     fun `Paginate members`() = runTest {
         val members = mutableListOf("thierry", "tommaso")
         val call = client.call("default", randomUUID())
@@ -118,8 +118,8 @@ public class CallCrudTest : IntegrationTestBase() {
         assert(result.isSuccess)
 
         // TODO: clarify the filter syntax with backend
-        val filters = mapOf("username" to "thierry")
-        val response = call.queryMembers(filters)
+        val filters = mapOf("user_id" to "thierry")
+        val response = call.queryMembers(filters, listOf(SortField.Desc("created_at")), 5)
         assertSuccess(response)
         response.onSuccess {
             assertThat(it.members).hasSize(1)

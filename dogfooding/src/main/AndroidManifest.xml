@@ -45,25 +45,14 @@
         </activity>
 
         <activity
-            android:name=".HomeActivity"
-            android:windowSoftInputMode="adjustResize" />
-
-        <activity
-            android:name=".CallActivity"
+            android:name=".ui.call.CallActivity"
             android:configChanges="screenSize|smallestScreenSize|screenLayout|orientation"
             android:exported="true"
             android:hardwareAccelerated="true"
             android:supportsPictureInPicture="true" />
 
-        <activity
-            android:name=".XmlCallActivity"
-            android:configChanges="screenSize|smallestScreenSize|screenLayout|orientation"
-            android:exported="false"
-            android:hardwareAccelerated="true"
-            android:supportsPictureInPicture="true" />
-
         <service
-            android:name=".CallService"
+            android:name=".ui.call.CallService"
             android:enabled="true"
             android:exported="false" />
 
@@ -75,22 +64,23 @@
                 <action android:name="io.getstream.video.android.action.ACCEPT_CALL" />
             </intent-filter>
         </activity>
+
         <activity
             android:name=".DeeplinkingActivity"
-            android:exported="true">
+            android:exported="true"
+            android:launchMode="singleTask">
+            <tools:validation testUrl="https://stream-video-demo.vercel.app" />
             <intent-filter
                 android:autoVerify="true"
                 android:label="@string/filter_call_link">
+
                 <action android:name="android.intent.action.VIEW" />
 
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
 
-
-                <data
-                    android:host="stream-calls-dogfood.vercel.app"
-                    android:pathPrefix="/join/"
-                    android:scheme="https" />
+                <data android:scheme="https" />
+                <data android:host="stream-video-demo.vercel.app" />
             </intent-filter>
         </activity>
     </application>

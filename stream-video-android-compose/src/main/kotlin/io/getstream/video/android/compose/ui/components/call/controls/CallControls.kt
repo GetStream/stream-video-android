@@ -24,11 +24,11 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.width
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.call.controls.actions.buildDefaultCallControlActions
 import io.getstream.video.android.compose.ui.components.call.controls.internal.LandscapeCallControls
@@ -45,6 +45,7 @@ import io.getstream.video.android.core.viewmodel.CallViewModel
  */
 @Composable
 public fun CallControls(
+    modifier: Modifier = Modifier,
     callViewModel: CallViewModel,
     onCallAction: (CallAction) -> Unit = {},
     actions: List<(@Composable () -> Unit)> = buildDefaultCallControlActions(
@@ -52,43 +53,7 @@ public fun CallControls(
         onCallAction
     ),
 ) {
-    val callDeviceState by callViewModel.callDeviceState.collectAsState()
-
-    CallControls(
-        callDeviceState = callDeviceState,
-        actions = actions,
-        onCallAction = onCallAction
-    )
-}
-
-/**
- * Stateless version of [DefaultCallControlsContent].
- * Shows the default Call controls content that allow the user to trigger various actions.
- *
- * @param call State of the Call.
- * @param callDeviceState Media state of the call.
- * @param onCallAction Handler when the user triggers a Call Control Action.
- */
-@Composable
-public fun CallControls(
-    callDeviceState: CallDeviceState,
-    onCallAction: (CallAction) -> Unit = {},
-    actions: List<(@Composable () -> Unit)> = buildDefaultCallControlActions(
-        callDeviceState,
-        onCallAction
-    ),
-) {
-    val orientation = LocalConfiguration.current.orientation
-
-    val modifier = if (orientation == ORIENTATION_LANDSCAPE) {
-        Modifier
-            .fillMaxHeight()
-            .width(VideoTheme.dimens.landscapeCallControlsSheetWidth)
-    } else {
-        Modifier
-            .fillMaxWidth()
-            .height(VideoTheme.dimens.callControlsSheetHeight)
-    }
+    val callDeviceState by callViewModel.callDeviceState.collectAsStateWithLifecycle()
 
     CallControls(
         modifier = modifier,
@@ -103,7 +68,6 @@ public fun CallControls(
  * browse other types of settings, leave the call, or implement something custom.
  *
  * @param callDeviceState The state of the media devices for the current user.
- * @param isScreenSharing If there is a screen sharing session active.
  * @param modifier Modifier for styling.
  * @param actions Actions to show to the user with different controls.
  * @param onCallAction Handler when the user triggers an action.
@@ -120,16 +84,26 @@ public fun CallControls(
 ) {
     val orientation = LocalConfiguration.current.orientation
 
+    val controlsModifier = if (orientation == ORIENTATION_LANDSCAPE) {
+        modifier
+            .fillMaxHeight()
+            .width(VideoTheme.dimens.landscapeCallControlsSheetWidth)
+    } else {
+        modifier
+            .fillMaxWidth()
+            .height(VideoTheme.dimens.callControlsSheetHeight)
+    }
+
     if (orientation == ORIENTATION_PORTRAIT) {
         RegularCallControls(
-            modifier = modifier,
+            modifier = controlsModifier,
             callDeviceState = callDeviceState,
             onCallAction = onCallAction,
             actions = actions
         )
     } else if (orientation == ORIENTATION_LANDSCAPE) {
         LandscapeCallControls(
-            modifier = modifier,
+            modifier = controlsModifier,
             callDeviceState = callDeviceState,
             onCallAction = onCallAction,
             actions = actions

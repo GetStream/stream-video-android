@@ -19,12 +19,12 @@ package io.getstream.video.android.compose.ui.components.call.outgoingcall
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.getstream.video.android.common.util.MockUtils
 import io.getstream.video.android.common.util.mockCall
 import io.getstream.video.android.common.util.mockParticipants
@@ -59,7 +59,7 @@ public fun OutgoingCallContent(
     onBackPressed: () -> Unit,
     onCallAction: (CallAction) -> Unit = callViewModel::onCallAction,
 ) {
-    val callDeviceState: CallDeviceState by callViewModel.callDeviceState.collectAsState()
+    val callDeviceState: CallDeviceState by callViewModel.callDeviceState.collectAsStateWithLifecycle()
 
     OutgoingCallContent(
         call = callViewModel.call,
@@ -86,7 +86,7 @@ public fun OutgoingCallContent(
     onBackPressed: () -> Unit,
     onCallAction: (CallAction) -> Unit = {},
 ) {
-    val participants: List<ParticipantState> by call.state.participants.collectAsState()
+    val participants: List<ParticipantState> by call.state.participants.collectAsStateWithLifecycle()
 
     OutgoingCallContent(
         call = call,

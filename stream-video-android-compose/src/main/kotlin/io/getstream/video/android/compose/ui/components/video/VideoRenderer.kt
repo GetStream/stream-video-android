@@ -33,6 +33,7 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.viewinterop.AndroidView
+import io.getstream.log.StreamLog
 import io.getstream.video.android.common.util.MockUtils
 import io.getstream.video.android.common.util.mockCall
 import io.getstream.video.android.compose.theme.VideoTheme
@@ -47,7 +48,6 @@ import stream.video.sfu.models.TrackType
  * Renders a single video track based on the call state.
  *
  * @param call The call state that contains all the tracks and participants.
- * @param videoMediaTrack The track containing the video stream for a given participant.
  * @param modifier Modifier for styling.
  * @param onRender Handler when the view is rendered.
  */
@@ -58,7 +58,7 @@ public fun VideoRenderer(
     sessionId: String,
     trackType: TrackType,
     modifier: Modifier = Modifier,
-    videoScalingType: VideoScalingType = VideoScalingType.SCALE_ASPECT_BALANCED,
+    videoScalingType: VideoScalingType = VideoScalingType.SCALE_ASPECT_FILL,
     onRender: (View) -> Unit = {},
 ) {
     if (LocalInspectionMode.current) {
@@ -118,8 +118,12 @@ private fun setupVideo(
 ) {
     cleanTrack(renderer, mediaTrack)
 
-    if (mediaTrack is VideoTrack) {
-        mediaTrack.video.addSink(renderer) // cAZo0tsELD9B
+    try {
+        if (mediaTrack is VideoTrack) {
+            mediaTrack.video.addSink(renderer)
+        }
+    } catch (e: Exception) {
+        StreamLog.d("VideoRenderer") { e.message.toString() }
     }
 }
 

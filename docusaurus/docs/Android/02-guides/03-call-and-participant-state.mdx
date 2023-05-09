@@ -1,0 +1,106 @@
+---
+title: Call & Participant State
+description: How the state is exposed
+---
+
+### Video Call State
+
+When you join a call, we'll automatically expose stateflow objects in 3 different places
+
+```kotlin
+client.state
+call.state
+call.state.participants
+```
+
+### Call State
+
+Here's an example of how you can access the call state:
+```kotlin
+val call = client.call("default", "mycall")
+val joinResult = call.join(create=true)
+// state is now available at
+call.state
+```
+
+The following fields are available on the call
+
+| Attribute | Description |
+| --- | --- | --- |
+| `connection` | Your connection state if you're currently connected to the call |
+| `participants` | The list of call participants |
+| `me` | Shortcut to your own participant state |
+| `activeSpeakers` | The list of participants who are currently speaking |
+| `dominantSpeaker` | The dominant speaker |
+| `sortedParticipants` | Participants sorted using the default sorting logic |
+| `members` | The list of call members |
+| `screenSharingSession` | If someone is screensharing, it will be available here |
+| `recording` | Boolean if the call is being recorded or not |
+| `blockedUsers` | The users who are blocked from this call |
+| `ringingState` | For ringing calls we expose additional state |
+| `settings` | The settings for this call |
+| `ownCapabilities` | Which actions you have permission to do |
+| `hasPermission` | function for checking if you have a certain permission |
+| `capabilitiesByRole` | What different roles (user, admin, moderator etc.) are allowed to do |
+| `permissionRequests` | If there are active permission requests |
+| `backstage` | If a call is in backstage mode or not |
+| `broadcasting` | If a call is broadcasting (to HLS) or not |
+| `createdAt` | When the call was created |
+| `updatedAt` | When the call was updated |
+| `startsAt` | When the call is scheduled to start |
+| `endedAt` | When the call ended |
+| `endedByUser` | User who ended the call |
+| `custom` | Custom data on the call |
+| `team` | Team that the call is restricted to. Default to null. |
+| `createdBy` | Who created the call |
+| `ingress` | If there is an active ingress session to this call. IE if you're sending RTMP into the call |
+| `reactions` | List of reactions this call received |
+| `errors` | Any errors we've encountered during this call |
+
+### Participant State
+
+Participant state is the most common state you'll be interacting with.
+Here's how you iterate over the participants
+
+```kotlin
+// all participants
+call.state.participants.forEach {
+}
+
+// you
+call.state.me
+```
+
+The following fields are available on the participant
+
+| Attribute | Description |
+| --- | --- | --- |
+| `user` | The user object for this participant |
+| `videoEnabled` | If video is enabled for this participant |
+| `videoTrack` | The video track for this participant. Note that the track will only be available after you try to render it. The SDK lazy loads the tracks to ensure that large calls work well |
+| `audioEnabled` | If audio is enabled for this participant |
+| `audioTrack` | The audio track. Audio track are available when you join a call |
+| `screenSharingTrack` | The screensharing track |
+| `joinedAt` | When this participant joined |
+| `audioLevel` | How loudly this user is talking |
+| `speaking` | If the user is speaking |
+| `connectionQuality` | The participant's connection quality |
+| `dominantSpeaker` | If this participant is the dominant speaker or not |
+| `lastSpeakingAt` | When this user last spoke (used for sorting in some apps) |
+
+### Client State
+
+```kotlin
+// client state is available on the client object
+client.state
+```
+
+And contains these fields:
+
+| Attribute | Description |
+| --- | --- | --- |
+| `user` | The user you're currently authenticated as |
+| `connection` | The connection state. See ConnectionState |
+| `activeCall` | The call you've currently joined |
+| `ringingCall` | Contains the call if you're calling someone or someone is calling you |
+

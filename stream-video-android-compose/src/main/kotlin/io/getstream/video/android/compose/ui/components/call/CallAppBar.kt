@@ -28,7 +28,6 @@ import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -40,12 +39,13 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.getstream.video.android.common.util.mockCall
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.participants.ParticipantIndicatorIcon
 import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.call.state.CallAction
-import io.getstream.video.android.core.call.state.ShowCallInfo
+import io.getstream.video.android.core.call.state.ShowCallParticipantInfo
 import io.getstream.video.android.ui.common.R
 
 /**
@@ -64,17 +64,16 @@ import io.getstream.video.android.ui.common.R
 public fun CallAppBar(
     call: Call,
     modifier: Modifier = Modifier,
-    isShowingOverlays: Boolean = false,
     onBackPressed: () -> Unit = {},
     onCallAction: (CallAction) -> Unit = {},
     title: String = stringResource(id = R.string.stream_video_default_app_bar_title),
-    leadingContent: @Composable () -> Unit = {
-        DefaultCallAppBarLeadingContent(isShowingOverlays, onBackPressed)
+    leadingContent: (@Composable () -> Unit)? = {
+        DefaultCallAppBarLeadingContent(onBackPressed)
     },
-    centerContent: @Composable (RowScope.() -> Unit) = {
+    centerContent: (@Composable (RowScope.() -> Unit))? = {
         DefaultCallAppBarCenterContent(title)
     },
-    trailingContent: @Composable () -> Unit = {
+    trailingContent: (@Composable () -> Unit)? = {
         DefaultCallAppBarTrailingContent(
             call = call,
             onCallAction = onCallAction
@@ -86,6 +85,12 @@ public fun CallAppBar(
         VideoTheme.dimens.landscapeTopAppBarHeight
     } else {
         VideoTheme.dimens.topAppbarHeight
+    }
+
+    val endPadding = if (orientation == ORIENTATION_LANDSCAPE) {
+        VideoTheme.dimens.callControlsSheetHeight
+    } else {
+        VideoTheme.dimens.callAppBarPadding
     }
 
     Row(
@@ -100,14 +105,19 @@ public fun CallAppBar(
                     )
                 )
             )
-            .padding(VideoTheme.dimens.callAppBarPadding),
+            .padding(
+                start = VideoTheme.dimens.callAppBarPadding,
+                top = VideoTheme.dimens.callAppBarPadding,
+                bottom = VideoTheme.dimens.callAppBarPadding,
+                end = endPadding
+            ),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        leadingContent()
+        leadingContent?.invoke()
 
-        centerContent()
+        centerContent?.invoke(this)
 
-        trailingContent()
+        trailingContent?.invoke()
     }
 }
 
@@ -116,11 +126,9 @@ public fun CallAppBar(
  */
 @Composable
 internal fun DefaultCallAppBarLeadingContent(
-    isShowingOverlays: Boolean,
     onBackButtonClicked: () -> Unit
 ) {
     IconButton(
-        enabled = !isShowingOverlays,
         onClick = onBackButtonClicked,
         modifier = Modifier.padding(
             start = VideoTheme.dimens.callAppBarLeadingContentSpacingStart,
@@ -164,11 +172,11 @@ internal fun DefaultCallAppBarTrailingContent(
     call: Call,
     onCallAction: (CallAction) -> Unit
 ) {
-    val participants by call.state.participants.collectAsState()
+    val participants by call.state.participants.collectAsStateWithLifecycle()
 
     ParticipantIndicatorIcon(
         number = participants.size,
-        onClick = { onCallAction(ShowCallInfo) }
+        onClick = { onCallAction(ShowCallParticipantInfo) }
     )
 }
 

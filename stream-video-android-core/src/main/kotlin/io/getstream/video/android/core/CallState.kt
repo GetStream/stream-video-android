@@ -30,9 +30,9 @@ import io.getstream.video.android.core.events.SFUHealthCheckEvent
 import io.getstream.video.android.core.events.SubscriberOfferEvent
 import io.getstream.video.android.core.events.TrackPublishedEvent
 import io.getstream.video.android.core.events.TrackUnpublishedEvent
-import io.getstream.video.android.core.model.MediaTrack
 import io.getstream.video.android.core.model.ScreenSharingSession
 import io.getstream.video.android.core.model.User
+import io.getstream.video.android.core.permission.PermissionRequest
 import io.getstream.video.android.core.utils.mapState
 import io.getstream.video.android.core.utils.toUser
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -150,9 +150,6 @@ public class CallState(private val call: Call, private val user: User) {
         MutableStateFlow(null)
     public val screenSharingSession: StateFlow<ScreenSharingSession?> = _screenSharingSession
 
-    /** if anyone is screensharing */
-    public val isScreenSharing: StateFlow<Boolean> = _screenSharingSession.mapState { it != null }
-
     /** if the call is being recorded */
     private val _recording: MutableStateFlow<Boolean> = MutableStateFlow(false)
     val recording: StateFlow<Boolean> = _recording
@@ -180,6 +177,18 @@ public class CallState(private val call: Call, private val user: User) {
             flow
         }
     }
+
+    // TODO: maybe this should just be a list of string, seems more forward compatible
+    private val _ownCapabilities: MutableStateFlow<List<OwnCapability>> =
+        MutableStateFlow(emptyList())
+    public val ownCapabilities: StateFlow<List<OwnCapability>> = _ownCapabilities
+
+    internal val _permissionRequests = MutableStateFlow<List<PermissionRequest>>(emptyList())
+    val permissionRequests: StateFlow<List<PermissionRequest>> = _permissionRequests
+
+    private val _capabilitiesByRole: MutableStateFlow<Map<String, List<String>>> =
+        MutableStateFlow(emptyMap())
+    val capabilitiesByRole: StateFlow<Map<String, List<String>>> = _capabilitiesByRole
 
     private val _backstage: MutableStateFlow<Boolean> = MutableStateFlow(false)
 
@@ -222,16 +231,9 @@ public class CallState(private val call: Call, private val user: User) {
     private val _ingress: MutableStateFlow<CallIngressResponse?> = MutableStateFlow(null)
     val ingress: StateFlow<CallIngressResponse?> = _ingress
 
-    private val _screenSharingTrack: MutableStateFlow<MediaTrack?> = MutableStateFlow(null)
-
     private val userToSessionIdMap = participants.mapState { participants ->
         participants.map { it.user.value.id to it.sessionId }.toMap()
     }
-
-    // TODO: maybe this should just be a list of string, seems more forward compatible
-    private val _ownCapabilities: MutableStateFlow<List<OwnCapability>> =
-        MutableStateFlow(emptyList())
-    public val ownCapabilities: StateFlow<List<OwnCapability>> = _ownCapabilities
 
     internal val _hasPermissionMap = mutableMapOf<String, StateFlow<Boolean>>()
 
@@ -240,15 +242,8 @@ public class CallState(private val call: Call, private val user: User) {
     private val _endedByUser: MutableStateFlow<User?> = MutableStateFlow(null)
     val endedByUser: StateFlow<User?> = _endedByUser
 
-    private val _capabilitiesByRole: MutableStateFlow<Map<String, List<String>>> =
-        MutableStateFlow(emptyMap())
-    val capabilitiesByRole: StateFlow<Map<String, List<String>>> = _capabilitiesByRole
-
     internal val _reactions = MutableStateFlow<List<ReactionResponse>>(emptyList())
     val reactions: StateFlow<List<ReactionResponse>> = _reactions
-
-    internal val _permissionRequests = MutableStateFlow<List<PermissionRequestEvent>>(emptyList())
-    val permissionRequests: StateFlow<List<PermissionRequestEvent>> = _permissionRequests
 
     private val _errors: MutableStateFlow<List<ErrorEvent>> =
         MutableStateFlow(emptyList())
@@ -335,7 +330,7 @@ public class CallState(private val call: Call, private val user: User) {
 
             is PermissionRequestEvent -> {
                 val newRequests = _permissionRequests.value.toMutableList()
-                newRequests.add(event)
+                newRequests.add(PermissionRequest(call, event))
                 _permissionRequests.value = newRequests
             }
 

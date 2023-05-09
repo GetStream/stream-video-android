@@ -1,0 +1,57 @@
+---
+title: Quickstart
+description: For when you're in a hurry and want to quickly get up and running
+---
+
+This quickstart gives you a quick overview of how Stream's video SDKs work
+
+### Client setup & Calls
+
+The example below creates the client. Normally you'd do that in your Application class.
+Next you create a call object and join the call. We'll specify create=true to create the call if it doesn't exist
+
+```kotlin
+val client = StreamVideoBuilder(
+     context = context,
+     apiKey = apiKey,
+     geo = GEO.GlobalEdgeNetwork,
+     user,
+     token,
+).build()
+
+val call = client.call("default", "123")
+val joinResult = call.join(create=true)
+```
+
+"default" is a call type. There are 4 built-in call types and you can also create your own.
+The call type controls the permissions and which features are enabled.
+
+### Rendering video
+
+This example shows how you can iterate over all participants in a call
+
+```kotlin
+
+val participants = call.state.participants.collectAsState()
+participants.value.forEach {
+   it.videoTrack // contains the video track
+   it.user.name // the user name
+}
+```
+
+TODO: show how to render the video
+
+The fields available on the participants are documented here.
+
+### UI components
+
+The goal of this library is to make it easy to build any type of video/calling experience. You have a few options for the UI:
+
+* Build your own UI components using the state as shown above
+* Use our library of built-in components
+* Mix & Match between your own and built-in components
+
+The built-in components you can customize using theming and modifiers. Compose is pretty flexible, but there are limits.
+So if you get stuck with the built-in components you can always work around it by building your own.
+
+

@@ -19,19 +19,18 @@ package io.getstream.video.android.compose.ui.components.call.renderer
 import android.view.View
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.getstream.video.android.common.util.MockUtils
 import io.getstream.video.android.common.util.mockCall
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.call.renderer.internal.RegularCallVideoRenderer
 import io.getstream.video.android.compose.ui.components.call.renderer.internal.ScreenSharingCallVideoRenderer
 import io.getstream.video.android.core.Call
-import io.getstream.video.android.core.call.state.CallAction
 
 /**
  * Renders all the CallParticipants, based on the number of people in a call and the call state.
@@ -48,22 +47,18 @@ import io.getstream.video.android.core.call.state.CallAction
 public fun CallVideoRenderer(
     call: Call,
     modifier: Modifier = Modifier,
-    onCallAction: (CallAction) -> Unit = {},
     onRender: (View) -> Unit = {},
-    onBackPressed: () -> Unit = {}
 ) {
     if (LocalInspectionMode.current) {
         RegularCallVideoRenderer(
             call = call,
             modifier = modifier,
             onRender = onRender,
-            onCallAction = onCallAction,
-            onBackPressed = onBackPressed,
         )
         return
     }
 
-    val screenSharingSession = call.state.screenSharingSession.collectAsState()
+    val screenSharingSession = call.state.screenSharingSession.collectAsStateWithLifecycle()
     val screenSharing = screenSharingSession.value
 
     if (screenSharing == null) {
@@ -71,11 +66,9 @@ public fun CallVideoRenderer(
             call = call,
             modifier = modifier,
             onRender = onRender,
-            onCallAction = onCallAction,
-            onBackPressed = onBackPressed,
         )
     } else {
-        val participants by call.state.participants.collectAsState()
+        val participants by call.state.participants.collectAsStateWithLifecycle()
 
         ScreenSharingCallVideoRenderer(
             call = call,
@@ -83,8 +76,6 @@ public fun CallVideoRenderer(
             session = screenSharing,
             participants = participants,
             onRender = onRender,
-            onCallAction = onCallAction,
-            onBackPressed = onBackPressed,
         )
     }
 }

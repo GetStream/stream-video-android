@@ -25,7 +25,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalConfiguration
 import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.ParticipantState
-import io.getstream.video.android.core.call.state.CallAction
 import io.getstream.video.android.core.model.ScreenSharingSession
 
 /**
@@ -45,10 +44,8 @@ internal fun ScreenSharingCallVideoRenderer(
     call: Call,
     session: ScreenSharingSession,
     participants: List<ParticipantState>,
-    onCallAction: (CallAction) -> Unit,
     modifier: Modifier = Modifier,
     onRender: (View) -> Unit = {},
-    onBackPressed: () -> Unit = {}
 ) {
     val configuration = LocalConfiguration.current
     val orientation = configuration.orientation
@@ -62,8 +59,6 @@ internal fun ScreenSharingCallVideoRenderer(
             primarySpeaker = screenSharingSession?.participant,
             modifier = modifier,
             onRender = onRender,
-            onCallAction = onCallAction,
-            onBackPressed = onBackPressed,
         )
     } else {
         LandscapeScreenSharingVideoRenderer(
@@ -73,8 +68,6 @@ internal fun ScreenSharingCallVideoRenderer(
             primarySpeaker = screenSharingSession?.participant,
             modifier = modifier,
             onRender = onRender,
-            onCallAction = onCallAction,
-            onBackPressed = onBackPressed,
         )
     }
 }

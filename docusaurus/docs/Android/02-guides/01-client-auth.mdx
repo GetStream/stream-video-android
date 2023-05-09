@@ -1,0 +1,93 @@
+---
+title: Client & Authentication
+description: How to setup the client and authenticate
+---
+
+## Client & Auth
+
+Before you join a call you need to setup the video client.
+This example shows a basic setup:
+
+```kotlin
+val client = StreamVideoBuilder(
+     context = context,
+     apiKey = apiKey,
+     geo = GEO.GlobalEdgeNetwork,
+     user,
+     token,
+).build()
+```
+
+* The API Key you can find in the dashboard
+* The user can be either authenticated, anonymous or guest
+* Note that you can store custom data on the user object if needed
+
+Typically you'll want to initialize the client in your app's Application class.
+
+### Generating a token
+
+* Tokens are generated server side.
+They provide a way to authenticate a user or give access to a specific set of calls.
+
+### Different types of users
+
+* Authenticated users are users that have an account on your app
+* Guest users are temporary user accounts. You can use it to temporarily give someon a name and image when joining a call
+* Anonymous users are users that are not authenticated. It's common to use this for watching a livestream or similar where you aren't authenticated.
+
+This example shows the client setup for a guest user.
+
+```kotlin
+val client = StreamVideoBuilder(
+    context = context,
+    apiKey = apiKey,
+    geo = GEO.GlobalEdgeNetwork,
+    user = User(id = "guest", type = UserType.Guest)
+).build()
+```
+
+And here's an example for an anonymous user
+
+```kotlin
+val client = StreamVideoBuilder(
+    context = context,
+    apiKey = apiKey,
+    geo = GEO.GlobalEdgeNetwork,
+    user = User(id = "anonymous", type = UserType.Anonymous)
+).build()
+```
+
+### Client options
+
+Here's a more complete example of the client options:
+
+```kotlin
+val client = StreamVideoBuilder(
+    context = context,
+    apiKey = apiKey,
+    geo = GEO.GlobalEdgeNetwork,
+    user,
+    token,
+    tokenProvider = { error ->
+        testData.tokens["thierry"]!!
+    },
+    loggingLevel = LoggingLevel.INFO,
+).build()
+```
+
+The full list of supported options is
+
+| Option | Description | Default |
+| --- | --- | --- |
+| `apiKey` | The API key to use. Found in the dashboard | - |
+| `geo` | The GEO routing policy. Defaults to the global edge network. Configure this if you need specific geofencing rules | GEO.GlobalEdgeNetwork |
+| `user` | The user object. You can store custom data on the user | - |
+| `token` | The JWT token to use for authentication | - |
+| `tokenProvider` | A function to call if the token is expired or invalid | - |
+| `loggingLevel` | The logging level. Recommend to set it to debug while in development | - |
+| `enablePush` | If push notifications should be enabled | false |
+| `pushDeviceGenerators` | Support firebase and other push providers | - |
+| `ringNotification` | A function to create your own notification when there's an incoming "ringing" call | - |
+| `audioFilters` | Run audio through a filter before sending it | - |
+| `videoFilters` | Run video through a filter before sending it | - |
+

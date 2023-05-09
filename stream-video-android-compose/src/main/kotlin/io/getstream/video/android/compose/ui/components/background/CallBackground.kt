@@ -26,16 +26,15 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.blur
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.dp
 import com.skydoves.landscapist.ImageOptions
 import com.skydoves.landscapist.animation.crossfade.CrossfadePlugin
 import com.skydoves.landscapist.coil.CoilImage
 import com.skydoves.landscapist.components.rememberImageComponent
+import com.skydoves.landscapist.transformation.blur.BlurTransformationPlugin
 import io.getstream.video.android.common.util.MockUtils
 import io.getstream.video.android.common.util.mockParticipants
 import io.getstream.video.android.compose.theme.VideoTheme
@@ -80,8 +79,7 @@ public fun CallBackground(
 private fun IncomingCallBackground(callUsers: List<CallUser>) {
     if (callUsers.size == 1) {
         ParticipantImageBackground(
-            participant = callUsers.first(),
-            modifier = Modifier.blur(20.dp)
+            userImage = callUsers.first().imageUrl
         )
     } else {
         DefaultCallBackground()
@@ -92,13 +90,13 @@ private fun IncomingCallBackground(callUsers: List<CallUser>) {
 private fun OutgoingCallBackground(callUsers: List<CallUser>, callType: CallType) {
     if (callType == CallType.AUDIO) {
         if (callUsers.size == 1) {
-            ParticipantImageBackground(callUsers.first(), modifier = Modifier.blur(20.dp))
+            ParticipantImageBackground(callUsers.first().imageUrl)
         } else {
             DefaultCallBackground()
         }
     } else {
         if (callUsers.isNotEmpty()) {
-            ParticipantImageBackground(participant = callUsers.first())
+            ParticipantImageBackground(userImage = callUsers.first().imageUrl)
         } else {
             DefaultCallBackground()
         }
@@ -106,20 +104,23 @@ private fun OutgoingCallBackground(callUsers: List<CallUser>, callType: CallType
 }
 
 @Composable
-private fun ParticipantImageBackground(
-    participant: CallUser,
-    modifier: Modifier = Modifier
+public fun ParticipantImageBackground(
+    userImage: String?,
+    modifier: Modifier = Modifier,
+    blurRadius: Int = 20,
 ) {
-    if (participant.imageUrl.isNotEmpty()) {
+    if (!userImage.isNullOrEmpty()) {
         CoilImage(
             modifier = modifier.fillMaxSize(),
-            imageModel = { participant.imageUrl },
+            imageModel = { userImage },
             previewPlaceholder = R.drawable.stream_video_call_sample,
             imageOptions = ImageOptions(
-                contentScale = ContentScale.Crop, contentDescription = null
+                contentScale = ContentScale.Crop,
+                contentDescription = null
             ),
             component = rememberImageComponent {
                 +CrossfadePlugin()
+                +BlurTransformationPlugin(blurRadius)
             }
         )
     } else {

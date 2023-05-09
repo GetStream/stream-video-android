@@ -15,7 +15,7 @@
      limitations under the License.
 -->
 <resources>
-    <string name="stream_video_default_app_bar_title">Call</string>
+    <string name="stream_video_default_app_bar_title"> </string>
     <string name="stream_video_back_button_content_description">Back</string>
 
     <string name="stream_video_call_participants_menu_content_description">Participants</string>

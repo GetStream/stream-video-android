@@ -17,7 +17,6 @@
 package io.getstream.video.android.core
 
 import com.google.common.truth.Truth.assertThat
-import io.getstream.video.android.core.model.QueryCallsData
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -46,7 +45,7 @@ class CallStateTest : IntegrationTestBase() {
             custom = custom,
             members = listOf(MemberRequest("tommaso", mutableMapOf("color" to "green"))),
             // block screensharing completely for this call
-            settingsOverride = CallSettingsRequest(screensharing = ScreensharingSettingsRequest(accessRequestEnabled = false, enabled = false))
+            settings = CallSettingsRequest(screensharing = ScreensharingSettingsRequest(accessRequestEnabled = false, enabled = false))
         )
         assertSuccess(response)
 
@@ -86,7 +85,7 @@ class CallStateTest : IntegrationTestBase() {
 //        val createResult = client.call("default", randomUUID()).create(custom=mapOf("color" to "green"))
 //        assertSuccess(createResult)
         val filters = mutableMapOf("color" to "green")
-        val queryResult = client.queryCalls(QueryCallsData(filters, limit = 1))
+        val queryResult = client.queryCalls(filters, limit = 1)
         assertSuccess(queryResult)
         // verify the call has settings setup correctly
         queryResult.onSuccess {

@@ -36,8 +36,7 @@ import io.getstream.video.android.core.model.CallEventType
 import io.getstream.video.android.core.model.Device
 import io.getstream.video.android.core.model.EdgeData
 import io.getstream.video.android.core.model.MuteUsersData
-import io.getstream.video.android.core.model.QueryCallsData
-import io.getstream.video.android.core.model.SendReactionData
+import io.getstream.video.android.core.model.SortField
 import io.getstream.video.android.core.model.UpdateUserPermissionsData
 import io.getstream.video.android.core.model.User
 import io.getstream.video.android.core.model.mapper.toTypeAndId
@@ -55,8 +54,10 @@ import io.getstream.video.android.core.utils.toUser
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.decodeFromString
@@ -79,14 +80,15 @@ import org.openapitools.client.models.JoinCallResponse
 import org.openapitools.client.models.ListRecordingsResponse
 import org.openapitools.client.models.MemberRequest
 import org.openapitools.client.models.MuteUsersResponse
+import org.openapitools.client.models.QueryCallsRequest
 import org.openapitools.client.models.QueryCallsResponse
 import org.openapitools.client.models.QueryMembersRequest
 import org.openapitools.client.models.QueryMembersResponse
 import org.openapitools.client.models.RequestPermissionRequest
 import org.openapitools.client.models.SendEventRequest
 import org.openapitools.client.models.SendEventResponse
+import org.openapitools.client.models.SendReactionRequest
 import org.openapitools.client.models.SendReactionResponse
-import org.openapitools.client.models.SortParamRequest
 import org.openapitools.client.models.StopLiveResponse
 import org.openapitools.client.models.UnblockUserRequest
 import org.openapitools.client.models.UpdateCallMembersRequest
@@ -106,7 +108,7 @@ import kotlin.coroutines.Continuation
  */
 internal class StreamVideoImpl internal constructor(
     override val context: Context,
-    internal val scope: CoroutineScope,
+    internal val _scope: CoroutineScope,
     override val user: User,
     private val lifecycle: Lifecycle,
     private val loggingLevel: LoggingLevel,
@@ -118,6 +120,9 @@ internal class StreamVideoImpl internal constructor(
 
     /** the state for the client, includes the current user */
     override val state = ClientState(this)
+
+    private val supervisorJob = SupervisorJob()
+    internal val scope = CoroutineScope(_scope.coroutineContext + supervisorJob)
 
     val debugInfo = DebugInfo(this)
 
@@ -139,6 +144,16 @@ internal class StreamVideoImpl internal constructor(
     private var calls = mutableMapOf<String, Call>()
 
     val socketImpl = connectionModule.coordinatorSocket
+
+    override fun cleanup() {
+        // stop all running coroutines
+        supervisorJob.cancel()
+        // stop the socket
+        socketImpl.cleanup()
+        // call cleanup on the active call
+        val activeCall = state.activeCall.value
+        activeCall?.cleanup()
+    }
 
     /**
      * @see StreamVideo.createDevice
@@ -626,8 +641,8 @@ internal class StreamVideoImpl internal constructor(
     internal suspend fun sendCustomEvent(
         type: String,
         id: String,
+        eventType: String,
         dataJson: Map<String, Any>,
-        eventType: String
     ): Result<SendEventResponse> {
         val callCid = "$type:$id"
         logger.d { "[sendCustomEvent] callCid: $callCid, dataJson: $dataJson, eventType: $eventType" }
@@ -647,7 +662,7 @@ internal class StreamVideoImpl internal constructor(
         id: String,
         // TODO: why can't the filter be null
         filter: Map<String, Any>,
-        sort: List<SortParamRequest> = mutableListOf(SortParamRequest(-1, "created_at")),
+        sort: List<SortField> = mutableListOf(SortField.Desc("created_at")),
         limit: Int = 100
     ): Result<QueryMembersResponse> {
 
@@ -656,7 +671,7 @@ internal class StreamVideoImpl internal constructor(
                 QueryMembersRequest(
                     type = type, id = id,
                     filterConditions = filter,
-                    sort = sort
+                    sort = sort.map { it.toRequest() }
                 )
             )
         }
@@ -716,9 +731,19 @@ internal class StreamVideoImpl internal constructor(
     /**
      * @see StreamVideo.queryCalls
      */
-    override suspend fun queryCalls(queryCallsData: QueryCallsData): Result<QueryCallsResponse> {
-        logger.d { "[queryCalls] queryCallsData: $queryCallsData" }
-        val request = queryCallsData.toRequest()
+    override suspend fun queryCalls(
+        filters: Map<String, Any>,
+        sort: List<SortField>,
+        limit: Int,
+        watch: Boolean
+    ): Result<QueryCallsResponse> {
+        logger.d { "[queryCalls] filters: $filters, sort: $sort, limit: $limit, watch: $watch" }
+        val request = QueryCallsRequest(
+            filterConditions = filters,
+            sort = sort.map { it.toRequest() },
+            limit = limit,
+            watch = watch
+        )
         val connectionId = connectionModule.coordinatorSocket.connectionId
         val result = wrapAPICall {
             connectionModule.videoCallsApi.queryCalls(request, connectionId)
@@ -801,14 +826,18 @@ internal class StreamVideoImpl internal constructor(
     }
 
     suspend fun sendReaction(
-        type: String,
+        callType: String,
         id: String,
-        sendReactionData: SendReactionData
+        type: String,
+        emoji: String? = null,
+        custom: Map<String, Any>? = null
     ): Result<SendReactionResponse> {
-        logger.d { "[sendVideoReaction] callCid: $type:$id, sendReactionData: $sendReactionData" }
+        val request = SendReactionRequest(type, custom, emoji)
+
+        logger.d { "[sendVideoReaction] callCid: $type:$id, sendReactionData: $request" }
 
         return wrapAPICall {
-            connectionModule.videoCallsApi.sendVideoReaction(type, id, sendReactionData.toRequest())
+            connectionModule.videoCallsApi.sendVideoReaction(callType, id, request)
         }
     }
 
@@ -875,11 +904,13 @@ internal class StreamVideoImpl internal constructor(
         }
 
     override fun call(type: String, id: String): Call {
-        val cid = "$type:$id"
+        var idOrRandom = id.ifEmpty { UUID.randomUUID().toString() }
+
+        val cid = "$type:$idOrRandom"
         return if (calls.contains(cid)) {
             calls[cid]!!
         } else {
-            val call = Call(this, type, id, user)
+            val call = Call(this, type, idOrRandom, user)
             calls[cid] = call
             call
         }

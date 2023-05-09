@@ -20,10 +20,10 @@ import android.view.View
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.getstream.video.android.compose.ui.components.call.renderer.ParticipantLabel
 import io.getstream.video.android.compose.ui.components.connection.ConnectionQualityIndicator
 import io.getstream.video.android.compose.ui.components.video.VideoRenderer
@@ -65,7 +65,7 @@ public fun ScreenShareVideoRenderer(
         ParticipantLabel(screenShareParticipant, labelPosition)
 
         if (isShowConnectionQualityIndicator) {
-            val connectionQuality by screenShareParticipant.connectionQuality.collectAsState()
+            val connectionQuality by screenShareParticipant.connectionQuality.collectAsStateWithLifecycle()
             ConnectionQualityIndicator(
                 connectionQuality = connectionQuality,
                 modifier = Modifier.align(Alignment.BottomEnd)

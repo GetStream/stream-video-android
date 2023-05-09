@@ -20,7 +20,6 @@ import com.google.common.truth.Truth.assertThat
 import io.getstream.log.taggedLogger
 import io.getstream.result.Error
 import io.getstream.video.android.core.errors.VideoErrorCode
-import io.getstream.video.android.core.model.QueryCallsData
 import io.getstream.video.android.core.model.User
 import io.getstream.video.android.core.model.UserType
 import kotlinx.coroutines.delay
@@ -230,7 +229,7 @@ class ClientAndAuthTest : TestBase() {
         val filters = mutableMapOf("active" to true)
         client.call("default", "123").join()
 
-        val result = client.queryCalls(QueryCallsData(filters))
+        val result = client.queryCalls(filters)
         assert(result.isSuccess)
     }
 }

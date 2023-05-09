@@ -30,6 +30,19 @@ public data class SortData(
     public val sortField: String
 )
 
+sealed class SortField(val field: String, val ascending: Boolean = true) {
+    class Asc(field: String) : SortField(field, true)
+    class Desc(field: String) : SortField(field, false)
+}
+
+public fun SortField.toRequest(): SortParamRequest {
+    val direction = if (ascending) 1 else -1
+    return SortParamRequest(
+        direction = direction,
+        field = field
+    )
+}
+
 /**
  * Maps the data to the request for the BE.
  */

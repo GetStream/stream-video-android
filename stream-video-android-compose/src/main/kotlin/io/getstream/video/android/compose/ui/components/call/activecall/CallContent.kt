@@ -36,8 +36,9 @@ import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.unit.coerceAtLeast
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.getstream.video.android.compose.theme.VideoTheme
-import io.getstream.video.android.compose.ui.components.call.activecall.internal.ActiveCallAppBar
+import io.getstream.video.android.compose.ui.components.call.CallAppBar
 import io.getstream.video.android.compose.ui.components.call.controls.CallControls
 import io.getstream.video.android.compose.ui.components.call.renderer.CallSingleVideoRenderer
 import io.getstream.video.android.compose.ui.components.call.renderer.CallVideoRenderer
@@ -68,6 +69,13 @@ public fun CallContent(
     modifier: Modifier = Modifier,
     onBackPressed: () -> Unit = { callViewModel.onCallAction(LeaveCall) },
     onCallAction: (CallAction) -> Unit = callViewModel::onCallAction,
+    callAppBar: @Composable () -> Unit = {
+        CallAppBar(
+            call = callViewModel.call,
+            leadingContent = null,
+            onCallAction = onCallAction
+        )
+    },
     callControlsContent: @Composable (call: Call) -> Unit = {
         CallControls(
             callViewModel = callViewModel,
@@ -78,8 +86,8 @@ public fun CallContent(
 ) {
     val callDeviceState by callViewModel.callDeviceState.collectAsState(initial = CallDeviceState())
 
-    val isInPiPMode by callViewModel.isInPictureInPicture.collectAsState()
-    val isShowingCallInfo by callViewModel.isShowingCallInfoMenu.collectAsState(false)
+    val isInPiPMode by callViewModel.isInPictureInPicture.collectAsStateWithLifecycle()
+    val isShowingCallInfo by callViewModel.isShowingCallInfoMenu.collectAsStateWithLifecycle()
 
     val backAction = {
         if (isShowingCallInfo) {
@@ -95,10 +103,9 @@ public fun CallContent(
         modifier = modifier,
         call = callViewModel.call,
         callDeviceState = callDeviceState,
-        isShowingCallInfo = isShowingCallInfo,
         isInPictureInPicture = isInPiPMode,
-        onBackPressed = onBackPressed,
         onCallAction = onCallAction,
+        callAppBar = callAppBar,
         callControlsContent = callControlsContent,
         pictureInPictureContent = pictureInPictureContent
     )
@@ -111,7 +118,6 @@ public fun CallContent(
  * @param call The state of the call with its participants.
  * @param callDeviceState Media state of the call, for audio and video.
  * @param modifier Modifier for styling.
- * @param isShowingCallInfo If the call info menu is being shown.
  * @param isInPictureInPicture If the user has engaged in Picture-In-Picture mode.
  * @param onBackPressed Handler when the user taps on the back button.
  * @param onCallAction Handler when the user triggers a Call Control Action.
@@ -124,10 +130,16 @@ public fun CallContent(
     call: Call,
     modifier: Modifier = Modifier,
     callDeviceState: CallDeviceState,
-    isShowingCallInfo: Boolean = false,
+    isShowingOverlayCallAppBar: Boolean = true,
     isInPictureInPicture: Boolean = false,
-    onBackPressed: () -> Unit = {},
     onCallAction: (CallAction) -> Unit = {},
+    callAppBar: @Composable () -> Unit = {
+        CallAppBar(
+            call = call,
+            leadingContent = null,
+            onCallAction = onCallAction
+        )
+    },
     callControlsContent: @Composable (call: Call) -> Unit = {
         CallControls(
             callDeviceState = callDeviceState,
@@ -162,12 +174,10 @@ public fun CallContent(
                         .padding(paddings)
                 ) {
                     CallVideoRenderer(
+                        call = call,
                         modifier = Modifier
                             .fillMaxSize()
                             .weight(1f),
-                        call = call,
-                        onCallAction = onCallAction,
-                        onBackPressed = onBackPressed,
                     )
 
                     if (orientation == ORIENTATION_LANDSCAPE) {
@@ -175,13 +185,8 @@ public fun CallContent(
                     }
                 }
 
-                if (orientation != ORIENTATION_LANDSCAPE) {
-                    ActiveCallAppBar(
-                        call = call,
-                        isShowingCallInfo = isShowingCallInfo,
-                        onBackPressed = onBackPressed,
-                        onCallAction = onCallAction
-                    )
+                if (isShowingOverlayCallAppBar) {
+                    callAppBar.invoke()
                 }
             }
         )
@@ -208,8 +213,8 @@ internal fun DefaultPictureInPictureContent(call: Call) {
             sessionId = session.participant.sessionId
         )
     } else {
-        val activeSpeakers by call.state.activeSpeakers.collectAsState(initial = emptyList())
-        val me by call.state.me.collectAsState()
+        val activeSpeakers by call.state.activeSpeakers.collectAsStateWithLifecycle()
+        val me by call.state.me.collectAsStateWithLifecycle()
 
         if (activeSpeakers.isNotEmpty()) {
             CallSingleVideoRenderer(
