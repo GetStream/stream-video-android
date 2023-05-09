@@ -18,33 +18,52 @@ package io.getstream.video.android.dogfooding
 
 import android.net.Uri
 import android.os.Bundle
-import android.util.Log
-import androidx.appcompat.app.AppCompatActivity
+import android.widget.Toast
+import androidx.activity.ComponentActivity
+import androidx.activity.compose.setContent
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.material.CircularProgressIndicator
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
 import androidx.lifecycle.lifecycleScope
 import io.getstream.log.taggedLogger
+import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.core.StreamVideo
 import io.getstream.video.android.core.logging.LoggingLevel
+import io.getstream.video.android.core.model.mapper.toTypeAndId
 import io.getstream.video.android.core.user.UserPreferencesManager
+import io.getstream.video.android.dogfooding.ui.call.CallActivity
 import kotlinx.coroutines.launch
 
-class DeeplinkingActivity : AppCompatActivity() {
+class DeeplinkingActivity : ComponentActivity() {
 
     private val logger by taggedLogger("Call:DeeplinkView")
-
-    private val controller by lazy {
-        StreamVideo.instance()
-    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         logger.d { "[onCreate] savedInstanceState: $savedInstanceState" }
         super.onCreate(savedInstanceState)
 
+        setContent {
+            VideoTheme {
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .background(VideoTheme.colors.appBackground)
+                ) {
+                    CircularProgressIndicator(
+                        modifier = Modifier.align(Alignment.Center),
+                        color = VideoTheme.colors.primaryAccent
+                    )
+                }
+            }
+        }
+
         val data: Uri = intent?.data ?: return
-
         val callId = data.toString().split("/").lastOrNull() ?: return
-
-        Log.d("ReceivedDeeplink", "Action: ${intent?.action}")
-        Log.d("ReceivedDeeplink", "Data: ${intent?.data}")
+        logger.d { "Action: ${intent?.action}" }
+        logger.d { "Data: ${intent?.data}" }
 
         logIn()
         joinCall(callId)
@@ -52,19 +71,17 @@ class DeeplinkingActivity : AppCompatActivity() {
 
     private fun joinCall(callId: String) {
         lifecycleScope.launch {
-//            val createCallResult = controller.joinCall("default", callId)
-//
-//            createCallResult.onSuccess {
-//                /**
-//                 * Since we're using launchers, we don't need to worry about starting the
-//                 * CallActivity ourselves.
-//                 */
-//                Log.d("Joined", it.toString())
-//            }
-//            createCallResult.onError {
-//                Log.d("Couldn't select server", it.message ?: "")
-//                Toast.makeText(this@DeeplinkingActivity, it.message, Toast.LENGTH_SHORT).show()
-//            }
+            val streamVideo = StreamVideo.instance()
+            val (type, id) = callId.toTypeAndId()
+            val call = streamVideo.call(type = type, id = id)
+            val result = call.join()
+            result.onSuccess {
+                val intent = CallActivity.getIntent(this@DeeplinkingActivity, cid = callId)
+                startActivity(intent)
+            }.onError {
+                Toast.makeText(this@DeeplinkingActivity, it.message, Toast.LENGTH_SHORT).show()
+            }
+            finish()
         }
     }
 

@@ -136,6 +136,13 @@ public interface StreamVideo {
         }
 
         /**
+         * Returns an installed [StreamVideo] instance lazy or throw an exception if its not installed.
+         */
+        public fun lazyInstance(): Lazy<StreamVideo> {
+            return lazy(LazyThreadSafetyMode.NONE) { instance() }
+        }
+
+        /**
          * Installs a new [StreamVideo] instance to be used.
          */
         public fun install(streamVideo: StreamVideo) {

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package io.getstream.video.android.dogfooding
+package io.getstream.video.android.dogfooding.ui.call
 
 import android.content.Context
 import io.getstream.video.android.core.StreamVideo
