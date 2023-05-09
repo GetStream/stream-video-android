@@ -2,7 +2,6 @@ public abstract class io/getstream/video/android/common/AbstractCallActivity : a
 	public static final field Companion Lio/getstream/video/android/common/AbstractCallActivity$Companion;
 	public fun <init> ()V
 	public final fun getCallViewModel ()Lio/getstream/video/android/core/viewmodel/CallViewModel;
-	public fun getCallViewModelFactory ()Lio/getstream/video/android/core/viewmodel/CallViewModelFactory;
 	public fun getPermissionManager ()Lio/getstream/video/android/core/permission/PermissionManager;
 	protected fun handleBackPressed ()V
 	public fun initPermissionManager ()Lio/getstream/video/android/core/permission/PermissionManager;

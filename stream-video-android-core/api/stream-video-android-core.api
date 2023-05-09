@@ -1477,48 +1477,6 @@ public final class io/getstream/video/android/core/model/CallMember : java/io/Se
 	public fun toString ()Ljava/lang/String;
 }
 
-public final class io/getstream/video/android/core/model/CallMetadata : java/io/Serializable {
-	public static final field Companion Lio/getstream/video/android/core/model/CallMetadata$Companion;
-	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Lio/getstream/video/android/core/model/StreamCallKind;Ljava/lang/String;JJZZLio/getstream/video/android/core/model/CallDetails;Ljava/util/Map;Ljava/util/Map;)V
-	public final fun component1 ()Ljava/lang/String;
-	public final fun component10 ()Lio/getstream/video/android/core/model/CallDetails;
-	public final fun component11 ()Ljava/util/Map;
-	public final fun component12 ()Ljava/util/Map;
-	public final fun component2 ()Ljava/lang/String;
-	public final fun component3 ()Ljava/lang/String;
-	public final fun component4 ()Lio/getstream/video/android/core/model/StreamCallKind;
-	public final fun component5 ()Ljava/lang/String;
-	public final fun component6 ()J
-	public final fun component7 ()J
-	public final fun component8 ()Z
-	public final fun component9 ()Z
-	public final fun copy (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Lio/getstream/video/android/core/model/StreamCallKind;Ljava/lang/String;JJZZLio/getstream/video/android/core/model/CallDetails;Ljava/util/Map;Ljava/util/Map;)Lio/getstream/video/android/core/model/CallMetadata;
-	public static synthetic fun copy$default (Lio/getstream/video/android/core/model/CallMetadata;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Lio/getstream/video/android/core/model/StreamCallKind;Ljava/lang/String;JJZZLio/getstream/video/android/core/model/CallDetails;Ljava/util/Map;Ljava/util/Map;ILjava/lang/Object;)Lio/getstream/video/android/core/model/CallMetadata;
-	public fun equals (Ljava/lang/Object;)Z
-	public final fun getBroadcastingEnabled ()Z
-	public final fun getCallDetails ()Lio/getstream/video/android/core/model/CallDetails;
-	public final fun getCid ()Ljava/lang/String;
-	public final fun getCreatedAt ()J
-	public final fun getCreatedByUserId ()Ljava/lang/String;
-	public final fun getCustom ()Ljava/util/Map;
-	public final fun getId ()Ljava/lang/String;
-	public final fun getKind ()Lio/getstream/video/android/core/model/StreamCallKind;
-	public final fun getRecordingEnabled ()Z
-	public final fun getType ()Ljava/lang/String;
-	public final fun getUpdatedAt ()J
-	public final fun getUsers ()Ljava/util/Map;
-	public fun hashCode ()I
-	public fun toString ()Ljava/lang/String;
-}
-
-public final class io/getstream/video/android/core/model/CallMetadata$Companion {
-	public final fun empty ()Lio/getstream/video/android/core/model/CallMetadata;
-}
-
-public final class io/getstream/video/android/core/model/CallMetadataKt {
-	public static final fun toInfo (Lio/getstream/video/android/core/model/CallMetadata;)Lio/getstream/video/android/core/model/CallInfo;
-}
-
 public final class io/getstream/video/android/core/model/CallRecordingData {
 	public fun <init> (Ljava/lang/String;Ljava/lang/String;JJ)V
 	public final fun component1 ()Ljava/lang/String;
@@ -1743,17 +1701,6 @@ public final class io/getstream/video/android/core/model/IceServerConfig : java/
 	public fun toString ()Ljava/lang/String;
 }
 
-public final class io/getstream/video/android/core/model/JoinedCall : java/io/Serializable {
-	public fun <init> (Lio/getstream/video/android/core/model/CallMetadata;Ljava/lang/String;Ljava/lang/String;Ljava/util/List;)V
-	public final fun component1 ()Lio/getstream/video/android/core/model/CallMetadata;
-	public final fun copy (Lio/getstream/video/android/core/model/CallMetadata;Ljava/lang/String;Ljava/lang/String;Ljava/util/List;)Lio/getstream/video/android/core/model/JoinedCall;
-	public static synthetic fun copy$default (Lio/getstream/video/android/core/model/JoinedCall;Lio/getstream/video/android/core/model/CallMetadata;Ljava/lang/String;Ljava/lang/String;Ljava/util/List;ILjava/lang/Object;)Lio/getstream/video/android/core/model/JoinedCall;
-	public fun equals (Ljava/lang/Object;)Z
-	public final fun getCall ()Lio/getstream/video/android/core/model/CallMetadata;
-	public fun hashCode ()I
-	public fun toString ()Ljava/lang/String;
-}
-
 public abstract class io/getstream/video/android/core/model/MediaTrack {
 	public synthetic fun <init> (Ljava/lang/String;Lkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun asAudioTrack ()Lio/getstream/video/android/core/model/AudioTrack;
@@ -1942,17 +1889,6 @@ public final class io/getstream/video/android/core/model/SortField$Asc : io/gets
 
 public final class io/getstream/video/android/core/model/SortField$Desc : io/getstream/video/android/core/model/SortField {
 	public fun <init> (Ljava/lang/String;)V
-}
-
-public final class io/getstream/video/android/core/model/StartedCall {
-	public fun <init> (Lio/getstream/video/android/core/model/CallMetadata;)V
-	public final fun component1 ()Lio/getstream/video/android/core/model/CallMetadata;
-	public final fun copy (Lio/getstream/video/android/core/model/CallMetadata;)Lio/getstream/video/android/core/model/StartedCall;
-	public static synthetic fun copy$default (Lio/getstream/video/android/core/model/StartedCall;Lio/getstream/video/android/core/model/CallMetadata;ILjava/lang/Object;)Lio/getstream/video/android/core/model/StartedCall;
-	public fun equals (Ljava/lang/Object;)Z
-	public final fun getCall ()Lio/getstream/video/android/core/model/CallMetadata;
-	public fun hashCode ()I
-	public fun toString ()Ljava/lang/String;
 }
 
 public final class io/getstream/video/android/core/model/StreamCallCidKt {
@@ -2562,10 +2498,6 @@ public final class io/getstream/video/android/core/viewmodel/CallViewModelFactor
 
 public abstract interface class io/getstream/video/android/core/viewmodel/CallViewModelFactoryProvider {
 	public abstract fun getCallViewModelFactory ()Lio/getstream/video/android/core/viewmodel/CallViewModelFactory;
-}
-
-public final class io/getstream/video/android/core/viewmodel/CallViewModelFactoryProvider$DefaultImpls {
-	public static fun getCallViewModelFactory (Lio/getstream/video/android/core/viewmodel/CallViewModelFactoryProvider;)Lio/getstream/video/android/core/viewmodel/CallViewModelFactory;
 }
 
 public abstract interface class org/openapitools/client/apis/CallTypesApi {
