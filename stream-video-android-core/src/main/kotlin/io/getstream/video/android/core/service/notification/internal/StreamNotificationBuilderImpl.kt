@@ -26,13 +26,13 @@ import androidx.annotation.RequiresApi
 import androidx.core.app.NotificationCompat
 import io.getstream.log.taggedLogger
 import io.getstream.video.android.R
+import io.getstream.video.android.core.ConnectionState
 import io.getstream.video.android.core.StreamVideo
 import io.getstream.video.android.core.service.notification.IdentifiedNotification
 import io.getstream.video.android.core.service.notification.StreamNotificationBuilder
 import io.getstream.video.android.core.utils.notificationManager
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
-import io.getstream.video.android.core.model.state.StreamCallState as State
 
 internal class StreamNotificationBuilderImpl(
     private val context: Context,
@@ -79,12 +79,12 @@ internal class StreamNotificationBuilderImpl(
         }
     }
 
-    override fun build(state: State.Active): IdentifiedNotification {
+    override fun build(cid: String, state: ConnectionState): IdentifiedNotification {
         val notificationId = getNotificationId()
         val notification = getNotificationBuilder(
-            contentTitle = getContentTitle(state),
-            contentText = getContentText(state),
-            groupKey = state.callGuid.cid,
+            contentTitle = "",
+            contentText = "",
+            groupKey = cid,
             intent = Intent(Intent.ACTION_CALL)
         ).apply {
             buildNotificationActions(notificationId, state).forEach {
@@ -96,40 +96,21 @@ internal class StreamNotificationBuilderImpl(
 
     private fun buildNotificationActions(
         notificationId: Int,
-        state: State.Active
+        state: ConnectionState
     ): Array<NotificationCompat.Action> {
-        return when (state) {
-            is State.Incoming -> arrayOf(
-                actionBuilder.createRejectAction(notificationId, state.callGuid),
-                actionBuilder.createAcceptAction(notificationId, state.callGuid)
-            )
-            is State.Outgoing,
-            is State.Joining,
-            is State.InCall -> arrayOf(
-                actionBuilder.createCancelAction(notificationId, state.callGuid)
-            )
-            is State.Drop -> emptyArray()
-        }
-    }
-
-    private fun getContentTitle(state: State.Active): String {
-        return "${state.callGuid.id}: " + when (state) {
-            is State.Outgoing -> "Outgoing Call"
-            is State.Incoming -> "Incoming"
-            is State.Joining -> "Joining"
-            is State.Joined -> "Joined"
-            is State.Connecting -> "Connecting"
-            is State.Connected -> "Connected"
-            is State.Drop -> "Drop"
-        }
-    }
-
-    private fun getContentText(state: State.Active): String {
-        return when (state) {
-            is State.Started -> state.users.values.filter { it.id != state.createdByUserId }
-                .joinToString { it.name }
-            is State.Drop -> ""
-        }
+//        return when (state) {
+//            is State.Incoming -> arrayOf(
+//                actionBuilder.createRejectAction(notificationId, state.callGuid),
+//                actionBuilder.createAcceptAction(notificationId, state.callGuid)
+//            )
+//            is State.Outgoing,
+//            is State.Joining,
+//            is State.InCall -> arrayOf(
+//                actionBuilder.createCancelAction(notificationId, state.callGuid)
+//            )
+//            is State.Drop -> emptyArray()
+//        }
+        return emptyArray()
     }
 
     private fun getNotificationBuilder(

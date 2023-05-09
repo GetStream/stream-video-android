@@ -18,10 +18,10 @@ package io.getstream.video.android.core.input.internal
 
 import android.content.Context
 import io.getstream.log.taggedLogger
+import io.getstream.video.android.core.ConnectionState
 import io.getstream.video.android.core.StreamVideo
 import io.getstream.video.android.core.input.CallAndroidInput
 import io.getstream.video.android.core.input.CallAndroidInputLauncher
-import io.getstream.video.android.core.model.state.StreamCallState
 import kotlinx.coroutines.CoroutineScope
 
 internal class StreamVideoStateLauncher(
@@ -33,7 +33,7 @@ internal class StreamVideoStateLauncher(
 
     private val logger by taggedLogger("Call:State-Launcher")
 
-    private var lastState: StreamCallState = StreamCallState.Idle
+    private var lastState: ConnectionState = ConnectionState.PreConnect
 
     fun run(scope: CoroutineScope) {
         // TODO: Move to call

@@ -19,7 +19,7 @@ package io.getstream.video.android.xml.widget.appbar.internal
 import android.content.Context
 import android.util.AttributeSet
 import androidx.appcompat.widget.AppCompatImageView
-import io.getstream.video.android.core.model.state.StreamCallState
+import io.getstream.video.android.core.ConnectionState
 import io.getstream.video.android.xml.utils.extensions.createStreamThemeWrapper
 import io.getstream.video.android.xml.utils.extensions.setBackgroundRipple
 import io.getstream.video.android.xml.widget.appbar.CallAppBarContent
@@ -40,5 +40,5 @@ internal class DefaultCallAppBarTrailingContent : AppCompatImageView, CallAppBar
         setBackgroundRipple()
     }
 
-    override fun renderState(callState: StreamCallState) {}
+    override fun renderState(callState: ConnectionState) {}
 }

@@ -23,6 +23,7 @@ import android.content.Intent
 import android.os.IBinder
 import io.getstream.log.taggedLogger
 import io.getstream.video.android.R
+import io.getstream.video.android.core.ConnectionState
 import io.getstream.video.android.core.StreamVideo
 import io.getstream.video.android.core.StreamVideoProvider
 import io.getstream.video.android.core.dispatchers.DispatcherProvider
@@ -33,7 +34,6 @@ import io.getstream.video.android.core.service.vibro.StreamVibroManagerImpl
 import io.getstream.video.android.core.utils.notificationManager
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.cancel
-import io.getstream.video.android.core.model.state.StreamCallState as State
 
 public abstract class AbstractStreamCallService : Service(), StreamVideoProvider {
 
@@ -51,7 +51,7 @@ public abstract class AbstractStreamCallService : Service(), StreamVideoProvider
 
     private val vibroManager: StreamVibroManager by lazy { createVibroManager(application) }
 
-    private var curState: State = State.Idle
+    private var curState: ConnectionState = ConnectionState.PreConnect
 
     protected open fun createNotificationBuilder(context: Context): StreamNotificationBuilder =
         StreamNotificationBuilderImpl(context, streamVideo, scope) {
@@ -88,30 +88,31 @@ public abstract class AbstractStreamCallService : Service(), StreamVideoProvider
 
     override fun onBind(intent: Intent?): IBinder? = null
 
-    private fun startForeground(state: State.Active) {
+    private fun startForeground(state: ConnectionState) {
         logger.v { "[startForeground] state: $state" }
-        val (notificationId, notification) = notificationBuilder.build(state)
+        val (notificationId, notification) = notificationBuilder.build("", state)
         startForeground(notificationId, notification)
     }
 
-    private fun handleState(state: State) {
+    private fun handleState(state: ConnectionState) {
         logger.v { "[handleState] state: $state" }
-        when (state) {
-            is State.Idle -> {
-                logger.i { "[handleState] state is Idle" }
-                destroySelf()
-            }
-            is State.Active -> {
-                updateNotification(state)
-                when (state) {
-                    is State.Incoming -> when (!state.acceptedByMe) {
-                        true -> vibroManager.vibrateIncoming()
-                        else -> vibroManager.cancel()
-                    }
-                    else -> {}
-                }
-            }
-        }
+//        when (state) {
+//            is ConnectionState.PreConnect -> {
+//                logger.i { "[handleState] state is Idle" }
+//                destroySelf()
+//            }
+//
+//            is ConnectionState.Connected -> {
+//                updateNotification(state)
+//                when (state) {
+//                    is State.Incoming -> when (!state.acceptedByMe) {
+//                        true -> vibroManager.vibrateIncoming()
+//                        else -> vibroManager.cancel()
+//                    }
+//                    else -> {}
+//                }
+//            }
+//        }
         curState = state
     }
 
@@ -120,9 +121,9 @@ public abstract class AbstractStreamCallService : Service(), StreamVideoProvider
         stopSelf()
     }
 
-    private fun updateNotification(state: State.Active) {
+    private fun updateNotification(state: ConnectionState) {
         logger.v { "[updateNotification] state: $state" }
-        val (notificationId, notification) = notificationBuilder.build(state)
+        val (notificationId, notification) = notificationBuilder.build("", state)
         notificationManager.notify(notificationId, notification)
     }
 }

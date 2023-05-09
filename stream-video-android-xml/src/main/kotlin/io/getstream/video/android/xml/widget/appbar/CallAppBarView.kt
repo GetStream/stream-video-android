@@ -24,7 +24,7 @@ import android.view.View
 import android.widget.FrameLayout
 import androidx.core.view.children
 import androidx.core.view.setPadding
-import io.getstream.video.android.core.model.state.StreamCallState
+import io.getstream.video.android.core.ConnectionState
 import io.getstream.video.android.xml.databinding.StreamVideoViewCallAppBarBinding
 import io.getstream.video.android.xml.font.TextStyle
 import io.getstream.video.android.xml.font.setTextStyle
@@ -213,7 +213,7 @@ public class CallAppBarView : CallConstraintLayout {
      *
      * @param callState The state that will be used to render the updated UI.
      */
-    public fun renderState(callState: StreamCallState) {
+    public fun renderState(callState: ConnectionState) {
         (binding.callAppBarLeadingContent.children.firstOrNull() as? CallAppBarContent)?.renderState(
             callState
         )
