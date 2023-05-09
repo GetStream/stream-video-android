@@ -32,7 +32,6 @@ import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -43,6 +42,7 @@ import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.getstream.video.android.common.util.MockUtils
 import io.getstream.video.android.common.util.mockCall
 import io.getstream.video.android.common.util.mockParticipants
@@ -187,7 +187,7 @@ internal fun BoxScope.LandscapeVideoRenderer(
     }
 
     if (callParticipants.size in 2..3) {
-        val currentLocal by call.state.me.collectAsState()
+        val currentLocal by call.state.me.collectAsStateWithLifecycle()
 
         if (currentLocal != null) {
             LocalVideoContent(

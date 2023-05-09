@@ -19,12 +19,12 @@ package io.getstream.video.android.compose.ui.components.call.renderer
 import android.view.View
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.getstream.video.android.common.util.MockUtils
 import io.getstream.video.android.common.util.mockCall
 import io.getstream.video.android.compose.theme.VideoTheme
@@ -58,7 +58,7 @@ public fun CallVideoRenderer(
         return
     }
 
-    val screenSharingSession = call.state.screenSharingSession.collectAsState()
+    val screenSharingSession = call.state.screenSharingSession.collectAsStateWithLifecycle()
     val screenSharing = screenSharingSession.value
 
     if (screenSharing == null) {
@@ -68,7 +68,7 @@ public fun CallVideoRenderer(
             onRender = onRender,
         )
     } else {
-        val participants by call.state.participants.collectAsState()
+        val participants by call.state.participants.collectAsStateWithLifecycle()
 
         ScreenSharingCallVideoRenderer(
             call = call,

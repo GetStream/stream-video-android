@@ -19,10 +19,10 @@ package io.getstream.video.android.compose.ui.components.call.controls.actions
 import android.content.res.Configuration
 import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalConfiguration
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.getstream.video.android.compose.state.ui.call.CallControlAction
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.core.call.state.CallAction
@@ -40,7 +40,7 @@ public fun buildDefaultCallControlActions(
     onCallAction: (CallAction) -> Unit
 ): List<@Composable () -> Unit> {
 
-    val callDeviceState by callViewModel.callDeviceState.collectAsState()
+    val callDeviceState by callViewModel.callDeviceState.collectAsStateWithLifecycle()
 
     return buildDefaultCallControlActions(
         callDeviceState = callDeviceState,

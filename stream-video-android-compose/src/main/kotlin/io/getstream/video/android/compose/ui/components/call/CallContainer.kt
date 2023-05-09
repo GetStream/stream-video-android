@@ -26,6 +26,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.getstream.video.android.compose.state.ui.participants.ChangeMuteState
 import io.getstream.video.android.compose.state.ui.participants.InviteUsers
 import io.getstream.video.android.compose.theme.VideoTheme
@@ -120,7 +121,7 @@ public fun CallContainer(
         )
     }
 ) {
-    val callDeviceState by callViewModel.callDeviceState.collectAsState()
+    val callDeviceState by callViewModel.callDeviceState.collectAsStateWithLifecycle()
 
     CallContainer(
         call = callViewModel.call,
@@ -225,8 +226,8 @@ internal fun DefaultCallContent(
         pictureInPictureContent = pictureInPictureContent
     )
 
-    val isShowingParticipantsInfo by callViewModel.isShowingCallInfoMenu.collectAsState()
-    val participantsState by callViewModel.call.state.participants.collectAsState(initial = emptyList())
+    val isShowingParticipantsInfo by callViewModel.isShowingCallInfoMenu.collectAsStateWithLifecycle()
+    val participantsState by callViewModel.call.state.participants.collectAsStateWithLifecycle()
     var usersToInvite by remember { mutableStateOf(emptyList<User>()) }
 
     if (isShowingParticipantsInfo && participantsState.isNotEmpty()) {

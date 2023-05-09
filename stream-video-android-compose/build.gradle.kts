@@ -53,7 +53,7 @@ dependencies {
     implementation(libs.androidx.compose.foundation)
     implementation(libs.androidx.compose.material)
     implementation(libs.androidx.compose.material.iconsExtended)
-    implementation(libs.androidx.compose.lifecycle)
+    implementation(libs.androidx.lifecycle.runtime.compose)
 
     // image loading
     implementation(libs.landscapist.coil)
