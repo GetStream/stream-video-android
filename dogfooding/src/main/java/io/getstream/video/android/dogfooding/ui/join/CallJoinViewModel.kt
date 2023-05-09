@@ -98,7 +98,10 @@ class CallJoinViewModel @Inject constructor(
         val streamVideo = StreamVideo.instance()
         val (type, id) = callId.toTypeAndId()
         val call = streamVideo.call(type = type, id = id)
-        return call.join()
+        return call.join(
+            create = true,
+            createOptions = CreateCallOptions(memberIds = listOf(streamVideo.userId))
+        )
     }
 
     fun signOut() {

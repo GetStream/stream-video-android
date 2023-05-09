@@ -19,7 +19,6 @@ package io.getstream.video.android.dogfooding
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
-import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
@@ -45,12 +44,6 @@ class CallActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
-        vm.joinCall {
-            Toast.makeText(this, "failed to join call (${vm.call.cid}): $it", Toast.LENGTH_SHORT)
-                .show()
-            finish()
-        }
 
         vm.setOnLeaveCall { finish() }
 
