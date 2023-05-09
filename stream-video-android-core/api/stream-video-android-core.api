@@ -2371,25 +2371,6 @@ public final class io/getstream/video/android/core/socket/SocketState$NotConnect
 	public fun toString ()Ljava/lang/String;
 }
 
-public final class io/getstream/video/android/core/ui/ParticipantContentView : android/widget/LinearLayout {
-	public fun <init> (Landroid/content/Context;)V
-	public fun <init> (Landroid/content/Context;Landroid/util/AttributeSet;)V
-	public fun <init> (Landroid/content/Context;Landroid/util/AttributeSet;I)V
-	public fun <init> (Landroid/content/Context;Landroid/util/AttributeSet;II)V
-	public final fun init (Landroid/content/Context;)V
-	public final fun renderParticipants (Lio/getstream/video/android/core/Call;Ljava/util/List;)V
-}
-
-public final class io/getstream/video/android/core/ui/ParticipantItemView : io/getstream/webrtc/android/ui/VideoTextureViewRenderer {
-	public fun <init> (Landroid/content/Context;)V
-	public fun <init> (Landroid/content/Context;Landroid/util/AttributeSet;)V
-	public final fun bindTrack (Lorg/webrtc/VideoTrack;)V
-	public final fun cleanUp ()V
-	public final fun initialize (Lio/getstream/video/android/core/Call;Ljava/lang/String;Lkotlin/jvm/functions/Function1;)V
-	public static synthetic fun initialize$default (Lio/getstream/video/android/core/ui/ParticipantItemView;Lio/getstream/video/android/core/Call;Ljava/lang/String;Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)V
-	public final fun isInitialized ()Z
-}
-
 public final class io/getstream/video/android/core/user/EmptyUsersProvider : io/getstream/video/android/core/user/UsersProvider {
 	public static final field INSTANCE Lio/getstream/video/android/core/user/EmptyUsersProvider;
 	public fun getUserState ()Lkotlinx/coroutines/flow/StateFlow;

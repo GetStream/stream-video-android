@@ -64,6 +64,25 @@ public final class io/getstream/video/android/common/util/ResourcesKt {
 	public static final fun getFloatResource (Landroid/content/Context;I)F
 }
 
+public final class io/getstream/video/android/common/view/ParticipantContentView : android/widget/LinearLayout {
+	public fun <init> (Landroid/content/Context;)V
+	public fun <init> (Landroid/content/Context;Landroid/util/AttributeSet;)V
+	public fun <init> (Landroid/content/Context;Landroid/util/AttributeSet;I)V
+	public fun <init> (Landroid/content/Context;Landroid/util/AttributeSet;II)V
+	public final fun init (Landroid/content/Context;)V
+	public final fun renderParticipants (Lio/getstream/video/android/core/Call;Ljava/util/List;)V
+}
+
+public final class io/getstream/video/android/common/view/ParticipantItemView : io/getstream/webrtc/android/ui/VideoTextureViewRenderer {
+	public fun <init> (Landroid/content/Context;)V
+	public fun <init> (Landroid/content/Context;Landroid/util/AttributeSet;)V
+	public final fun bindTrack (Lorg/webrtc/VideoTrack;)V
+	public final fun cleanUp ()V
+	public final fun initialize (Lio/getstream/video/android/core/Call;Ljava/lang/String;Lkotlin/jvm/functions/Function1;)V
+	public static synthetic fun initialize$default (Lio/getstream/video/android/common/view/ParticipantItemView;Lio/getstream/video/android/core/Call;Ljava/lang/String;Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)V
+	public final fun isInitialized ()Z
+}
+
 public final class io/getstream/video/android/common/viewmodel/CallLobbyViewModel : androidx/lifecycle/AndroidViewModel {
 	public fun <init> (Landroid/app/Application;Lio/getstream/video/android/core/StreamVideo;)V
 	public final fun flipCamera ()V
@@ -77,5 +96,39 @@ public final class io/getstream/video/android/ui/common/BuildConfig {
 	public static final field DEBUG Z
 	public static final field LIBRARY_PACKAGE_NAME Ljava/lang/String;
 	public fun <init> ()V
+}
+
+public final class io/getstream/video/android/ui/common/databinding/StreamVideoActivityCallBinding : androidx/viewbinding/ViewBinding {
+	public final field floatingParticipantView Lio/getstream/video/android/common/view/ParticipantItemView;
+	public final field participantContent Lio/getstream/video/android/common/view/ParticipantContentView;
+	public final field toolbar Landroidx/appcompat/widget/Toolbar;
+	public static fun bind (Landroid/view/View;)Lio/getstream/video/android/ui/common/databinding/StreamVideoActivityCallBinding;
+	public synthetic fun getRoot ()Landroid/view/View;
+	public fun getRoot ()Landroidx/constraintlayout/widget/ConstraintLayout;
+	public static fun inflate (Landroid/view/LayoutInflater;)Lio/getstream/video/android/ui/common/databinding/StreamVideoActivityCallBinding;
+	public static fun inflate (Landroid/view/LayoutInflater;Landroid/view/ViewGroup;Z)Lio/getstream/video/android/ui/common/databinding/StreamVideoActivityCallBinding;
+}
+
+public final class io/getstream/video/android/ui/common/databinding/StreamVideoContentParticipantBinding : androidx/viewbinding/ViewBinding {
+	public final field firstParticipant Lio/getstream/video/android/common/view/ParticipantItemView;
+	public final field firstParticipantRow Landroid/widget/LinearLayout;
+	public final field fourthParticipant Lio/getstream/video/android/common/view/ParticipantItemView;
+	public final field secondParticipant Lio/getstream/video/android/common/view/ParticipantItemView;
+	public final field secondParticipantRow Landroid/widget/LinearLayout;
+	public final field thirdParticipant Lio/getstream/video/android/common/view/ParticipantItemView;
+	public static fun bind (Landroid/view/View;)Lio/getstream/video/android/ui/common/databinding/StreamVideoContentParticipantBinding;
+	public synthetic fun getRoot ()Landroid/view/View;
+	public fun getRoot ()Landroidx/constraintlayout/widget/ConstraintLayout;
+	public static fun inflate (Landroid/view/LayoutInflater;)Lio/getstream/video/android/ui/common/databinding/StreamVideoContentParticipantBinding;
+	public static fun inflate (Landroid/view/LayoutInflater;Landroid/view/ViewGroup;Z)Lio/getstream/video/android/ui/common/databinding/StreamVideoContentParticipantBinding;
+}
+
+public final class io/getstream/video/android/ui/common/databinding/StreamVideoItemParticipantBinding : androidx/viewbinding/ViewBinding {
+	public final field participantView Lorg/webrtc/SurfaceViewRenderer;
+	public static fun bind (Landroid/view/View;)Lio/getstream/video/android/ui/common/databinding/StreamVideoItemParticipantBinding;
+	public synthetic fun getRoot ()Landroid/view/View;
+	public fun getRoot ()Lorg/webrtc/SurfaceViewRenderer;
+	public static fun inflate (Landroid/view/LayoutInflater;)Lio/getstream/video/android/ui/common/databinding/StreamVideoItemParticipantBinding;
+	public static fun inflate (Landroid/view/LayoutInflater;Landroid/view/ViewGroup;Z)Lio/getstream/video/android/ui/common/databinding/StreamVideoItemParticipantBinding;
 }
 
