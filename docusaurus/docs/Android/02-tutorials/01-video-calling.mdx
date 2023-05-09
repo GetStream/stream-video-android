@@ -11,21 +11,147 @@ This tutorial teaches you how to build your own Zoom/Whatsapp style video callin
 * Permissions give you fine grained control over who can do what
 * Dynascale automatically adjusts the video quality and codecs
 
-### Step 1 - Install the SDK & Setup the client
+### Step 1 - Create a new project in android studio
 
-### Step 2 - Create & Join a call
+Note that this tutorial was written using Android Studio Flamingo.
+Setup steps can vary slightly across Android Studio versions so if you run into trouble be sure to use the latest version of Android Studio.
+
+* Create a new project
+* Select "empty activity"
+* Name your project "VideoCall"
+
+### Step 2 - Install the SDK & Setup the client
+
+** Add the compose SDK ** to your app's build.gradle file found in app/build.gradle
+If you're new to android note that there are 2 build.gradle files, you want to open the one in the app folder.
+
+```groovy
+dependencies {
+    implementation "io.getstream:stream-video-android-compose:$stream_version"
+}
+```
+
+### Step 3 - Create & Join a call
+
+Open up `MainActivity.kt` and add the following code to the onCreate method
+
+```kotlin
+class MainActivity : ComponentActivity() {
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+
+        // for a production app we recommend adding the client to your Application class
+        val client = StreamVideoBuilder(
+             context = context,
+             apiKey = apiKey,
+             geo = GEO.GlobalEdgeNetwork,
+             user,
+             token,
+        ).build()
+
+        val call = client.call("default", "123")
+        call.join(create=true)
+
+        setContent {
+            VideoCallTheme {
+                // A surface container using the 'background' color from the theme
+                Surface(
+                    modifier = Modifier.fillMaxSize(),
+                    color = MaterialTheme.colorScheme.background
+                ) {
+                    Greeting("${call.id} has ${call.state.participants.value.size} participants")
+                }
+            }
+        }
+    }
+}
+```
+
+Run the sample app and now join this call via your browser here. Let's keep it open as you go through the tutorial.
+You'll see the participant count increase to 2 in your app. Awesome, but let's add some video
+
+### Step 4 - Rendering Video
+
+In this next step we're going to:
+
+A. Use a viewmodel (it nicely cleans up the call after you leave the UI)
+B. Render your local video
+C. Render the participant's video
+
+```kotlin
+class MainActivity : ComponentActivity() {
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+
+        val client = StreamVideoBuilder(
+             context = context,
+             apiKey = apiKey,
+             geo = GEO.GlobalEdgeNetwork,
+             user,
+             token,
+        ).build()
+
+        val call = client.call("default", "123")
+        call.join(create=true)
 
 
-### Step 3 - Render your call UI
 
-### Step 4 - Join from Web
+        setContent {
+            VideoCallTheme {
+                // A surface container using the 'background' color from the theme
+                Surface(
+                    modifier = Modifier.fillMaxSize(),
+                    color = MaterialTheme.colorScheme.background
+                ) {
+                    LocalVideo(call.state.me.video)
+                    ParticipantVideo(call.state.participants.value.first().video)
+                }
+            }
+        }
+    }
+}
+```
 
-### Step 5 - Build your own UI
+### Step 5 - A full UI
 
-- Custom component
-- Theming
+Stream's video SDK includes UI components that make it simple to launch a video calling experience in hours.
+Now that we've seen how to use the lower level APIs, lets build a fully polished calling experience
 
-13. Conclusion
+```kotlin
+setContent {
+    VideoCallTheme {
+        // A surface container using the 'background' color from the theme
+        Surface(
+            modifier = Modifier.fillMaxSize(),
+            color = MaterialTheme.colorScheme.background
+        ) {
+            VideoCall() {
+                VideoHeader()
+                VideoGrid(VideoCard=DefaultVideoCard)
+                CallControls()
+            }
+        }
+    }
+}
+
+```
+
+When you now run your app you'll see a more polished video UI.
+It supports reactions, screensharing, active speaker detection, network quality indicators etc.
+
+### Step 6 - Customizing the UI
+
+TODO: Theming
+TODO: Swap the call controls for your own
+
+### Step 7 - PIP
+
+To truly make the experience solid the call should continue running in the background using PIP.
+Also, if you answer a phone call while you're on this call, your audio and video should be muted automatically.
+
+TODO: include docs on PIP setup & service
+
+### Conclusion
 
 Mention that we also have quickstarts for livestream and audio rooms
 Repeat why you should use Stream
