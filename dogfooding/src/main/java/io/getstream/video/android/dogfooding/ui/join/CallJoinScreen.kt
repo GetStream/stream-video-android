@@ -204,7 +204,7 @@ private fun CallJoinBody(
 
         Spacer(modifier = Modifier.height(4.dp))
 
-        var callId by remember { mutableStateOf("default:NnXAIvBKE4Hy") }
+        var callId by remember { mutableStateOf("default:NnXAIvBKE4H12") }
         Row(
             modifier = Modifier
                 .fillMaxWidth()
