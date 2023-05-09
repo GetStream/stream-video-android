@@ -1,4 +1,5 @@
-<?xml version="1.0" encoding="utf-8"?><!--
+<?xml version="1.0" encoding="utf-8"?>
+<!--
      Copyright (c) 2023 Stream.io Inc. All rights reserved.
 
      Licensed under the Stream License;
@@ -50,13 +51,6 @@
             android:hardwareAccelerated="true"
             android:supportsPictureInPicture="true" />
 
-        <activity
-            android:name=".XmlCallActivity"
-            android:configChanges="screenSize|smallestScreenSize|screenLayout|orientation"
-            android:exported="false"
-            android:hardwareAccelerated="true"
-            android:supportsPictureInPicture="true" />
-
         <service
             android:name=".ui.call.CallService"
             android:enabled="true"
@@ -70,21 +64,19 @@
                 <action android:name="io.getstream.video.android.action.ACCEPT_CALL" />
             </intent-filter>
         </activity>
+
         <activity
             android:name=".DeeplinkingActivity"
-            android:exported="true">
-            <intent-filter
-                android:autoVerify="true"
-                android:label="@string/filter_call_link">
+            android:exported="true"
+            android:launchMode="singleTask">
+            <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
 
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
 
-
                 <data
-                    android:host="stream-calls-dogfood.vercel.app"
-                    android:pathPrefix="/join/"
+                    android:host="stream-video-demo.vercel.app"
                     android:scheme="https" />
             </intent-filter>
         </activity>
