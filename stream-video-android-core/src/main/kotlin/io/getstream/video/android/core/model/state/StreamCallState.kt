@@ -17,7 +17,6 @@
 package io.getstream.video.android.core.model.state
 
 import io.getstream.result.Error
-import io.getstream.video.android.core.engine.StreamCallEngine
 import io.getstream.video.android.core.model.CallDetails
 import io.getstream.video.android.core.model.CallUser
 import io.getstream.video.android.core.model.IceServer
@@ -62,7 +61,8 @@ public sealed interface StreamCallState : Serializable {
         public abstract val updatedAt: StreamDate
         public abstract val users: Map<String, CallUser>
         public abstract val callDetails: CallDetails
-//        public abstract val callEgress: CallEgress
+
+        //        public abstract val callEgress: CallEgress
         public abstract val custom: Map<String, Any>
     }
 
@@ -251,6 +251,7 @@ internal fun StreamCallState.Started.copy(
         updatedAt = updatedAt,
         users = users,
     )
+
     is StreamCallState.Connecting -> copy(
         createdByUserId = createdByUserId,
         broadcastingEnabled = broadcastingEnabled,
@@ -259,6 +260,7 @@ internal fun StreamCallState.Started.copy(
         updatedAt = updatedAt,
         users = users,
     )
+
     is StreamCallState.Connected -> copy(
         createdByUserId = createdByUserId,
         broadcastingEnabled = broadcastingEnabled,
@@ -267,6 +269,7 @@ internal fun StreamCallState.Started.copy(
         updatedAt = updatedAt,
         users = users,
     )
+
     is StreamCallState.Incoming -> copy(
         createdByUserId = createdByUserId,
         broadcastingEnabled = broadcastingEnabled,
@@ -275,6 +278,7 @@ internal fun StreamCallState.Started.copy(
         updatedAt = updatedAt,
         users = users,
     )
+
     is StreamCallState.Joining -> copy(
         createdByUserId = createdByUserId,
         broadcastingEnabled = broadcastingEnabled,
@@ -283,6 +287,7 @@ internal fun StreamCallState.Started.copy(
         updatedAt = updatedAt,
         users = users,
     )
+
     is StreamCallState.Outgoing -> copy(
         createdByUserId = createdByUserId,
         broadcastingEnabled = broadcastingEnabled,
