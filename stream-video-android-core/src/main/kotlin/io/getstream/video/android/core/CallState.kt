@@ -114,6 +114,11 @@ public class CallState(private val call: Call, private val user: User) {
     public val activeSpeakers =
         _participants.mapState { it.values.filter { participant -> participant.speaking.value } }
 
+    /** participants other than yourself */
+    public val remoteParticipants =
+        _participants.mapState { it.filterKeys { key -> key != me.value?.sessionId }}
+
+
     /** the dominant speaker */
     private val _dominantSpeaker: MutableStateFlow<ParticipantState?> =
         MutableStateFlow(null)

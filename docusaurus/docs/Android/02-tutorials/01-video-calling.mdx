@@ -104,7 +104,7 @@ class MainActivity : ComponentActivity() {
                     color = MaterialTheme.colorScheme.background
                 ) {
                     LocalVideo(call.state.me.video)
-                    ParticipantVideo(call.state.participants.value.first().video)
+                    ParticipantVideo(call.state.remoteParticipants.value.first().video)
                 }
             }
         }
@@ -141,8 +141,8 @@ It supports reactions, screensharing, active speaker detection, network quality 
 
 ### Step 6 - Customizing the UI
 
-TODO: Theming
-TODO: Swap the call controls for your own
+* TODO: Talk about basic theming
+* TODO: Swap the call controls for your own
 
 ### Step 7 - PIP
 
@@ -151,7 +151,18 @@ Also, if you answer a phone call while you're on this call, your audio and video
 
 TODO: include docs on PIP setup & service
 
+
+### Other Possibilities
+
+* ** Ringing ** If you want to ring the other participants before the docs explain how to do this here:
+* ** Push Notifications **
+* ** Reactions **
+* ** Chat Integration **
+
+
 ### Conclusion
+
+And that's all it takes to build a full calling experience with Stream.
 
 Mention that we also have quickstarts for livestream and audio rooms
 Repeat why you should use Stream
