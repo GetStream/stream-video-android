@@ -35,12 +35,11 @@ import io.getstream.video.android.core.call.state.ToggleCamera
 import io.getstream.video.android.core.call.state.ToggleMicrophone
 import io.getstream.video.android.core.call.state.ToggleSpeakerphone
 import io.getstream.video.android.core.permission.PermissionManager
+import io.getstream.video.android.core.utils.asStateFlow
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.onEach
-import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withTimeout
 import org.openapitools.client.models.CallSettingsResponse
@@ -85,13 +84,13 @@ public class CallViewModel(
             (settings?.video?.enabled == true) &&
                 (status is DeviceStatus.Enabled) &&
                 (permissionManager?.hasCameraPermission?.value == true)
-        }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(3000L), false)
+        }.asStateFlow(scope = viewModelScope, initialValue = false)
 
     private val isMicrophoneOn: StateFlow<Boolean> =
         combine(settings, call.mediaManager.microphone.status) { _, status ->
             (status is DeviceStatus.Enabled) &&
                 permissionManager?.hasRecordAudioPermission?.value == true
-        }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(3000L), false)
+        }.asStateFlow(scope = viewModelScope, initialValue = false)
 
     private val isSpeakerPhoneOn: MutableStateFlow<Boolean> = MutableStateFlow(
         false
@@ -110,11 +109,7 @@ public class CallViewModel(
             )
         }.onEach {
             logger.d { "[callMediaState] callMediaState: $it" }
-        }.stateIn(
-            scope = viewModelScope,
-            started = SharingStarted.WhileSubscribed(3000L),
-            initialValue = CallDeviceState()
-        )
+        }.asStateFlow(scope = viewModelScope, initialValue = CallDeviceState())
 
     private var onLeaveCall: ((Result<Unit>) -> Unit)? = null
 

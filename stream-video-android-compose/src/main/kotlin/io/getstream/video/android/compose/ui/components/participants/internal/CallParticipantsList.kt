@@ -30,7 +30,6 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material.Icon
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -39,6 +38,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.getstream.video.android.common.util.MockUtils
 import io.getstream.video.android.common.util.mockParticipants
 import io.getstream.video.android.compose.theme.VideoTheme
@@ -90,14 +90,14 @@ private fun CallParticipantInfoItem(
 
         Spacer(modifier = Modifier.width(8.dp))
 
-        val user by participant.user.collectAsState()
+        val user by participant.user.collectAsStateWithLifecycle()
         UserAvatar(
             modifier = Modifier.size(VideoTheme.dimens.callParticipantsInfoAvatarSize),
             user = user,
             showOnlineIndicator = true
         )
 
-        val userName by participant.userNameOrId.collectAsState()
+        val userName by participant.userNameOrId.collectAsStateWithLifecycle()
         Text(
             modifier = Modifier
                 .padding(start = 8.dp)
@@ -110,7 +110,8 @@ private fun CallParticipantInfoItem(
         )
 
         Row(verticalAlignment = Alignment.CenterVertically) {
-            if (!participant.audioEnabled.collectAsState().value) {
+            val audioEnabled by participant.audioEnabled.collectAsStateWithLifecycle()
+            if (!audioEnabled) {
                 Icon(
                     painter = painterResource(id = R.drawable.stream_video_ic_mic_off),
                     tint = VideoTheme.colors.errorAccent,
@@ -120,7 +121,8 @@ private fun CallParticipantInfoItem(
 
             Spacer(modifier = Modifier.width(8.dp))
 
-            if (!participant.videoEnabled.collectAsState().value) {
+            val videoEnabled by participant.videoEnabled.collectAsStateWithLifecycle()
+            if (!videoEnabled) {
                 Icon(
                     painter = painterResource(id = R.drawable.stream_video_ic_videocam_off),
                     tint = VideoTheme.colors.errorAccent,

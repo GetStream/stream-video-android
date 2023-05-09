@@ -28,7 +28,6 @@ import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -40,6 +39,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.getstream.video.android.common.util.mockCall
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.participants.ParticipantIndicatorIcon
@@ -172,7 +172,7 @@ internal fun DefaultCallAppBarTrailingContent(
     call: Call,
     onCallAction: (CallAction) -> Unit
 ) {
-    val participants by call.state.participants.collectAsState()
+    val participants by call.state.participants.collectAsStateWithLifecycle()
 
     ParticipantIndicatorIcon(
         number = participants.size,

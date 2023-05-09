@@ -24,11 +24,11 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.width
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.call.controls.actions.buildDefaultCallControlActions
 import io.getstream.video.android.compose.ui.components.call.controls.internal.LandscapeCallControls
@@ -53,7 +53,7 @@ public fun CallControls(
         onCallAction
     ),
 ) {
-    val callDeviceState by callViewModel.callDeviceState.collectAsState()
+    val callDeviceState by callViewModel.callDeviceState.collectAsStateWithLifecycle()
 
     CallControls(
         modifier = modifier,

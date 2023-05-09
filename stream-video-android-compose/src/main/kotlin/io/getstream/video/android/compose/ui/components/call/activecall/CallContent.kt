@@ -36,6 +36,7 @@ import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.unit.coerceAtLeast
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.call.CallAppBar
 import io.getstream.video.android.compose.ui.components.call.controls.CallControls
@@ -85,8 +86,8 @@ public fun CallContent(
 ) {
     val callDeviceState by callViewModel.callDeviceState.collectAsState(initial = CallDeviceState())
 
-    val isInPiPMode by callViewModel.isInPictureInPicture.collectAsState()
-    val isShowingCallInfo by callViewModel.isShowingCallInfoMenu.collectAsState(false)
+    val isInPiPMode by callViewModel.isInPictureInPicture.collectAsStateWithLifecycle()
+    val isShowingCallInfo by callViewModel.isShowingCallInfoMenu.collectAsStateWithLifecycle()
 
     val backAction = {
         if (isShowingCallInfo) {
@@ -212,8 +213,8 @@ internal fun DefaultPictureInPictureContent(call: Call) {
             sessionId = session.participant.sessionId
         )
     } else {
-        val activeSpeakers by call.state.activeSpeakers.collectAsState(initial = emptyList())
-        val me by call.state.me.collectAsState()
+        val activeSpeakers by call.state.activeSpeakers.collectAsStateWithLifecycle()
+        val me by call.state.me.collectAsStateWithLifecycle()
 
         if (activeSpeakers.isNotEmpty()) {
             CallSingleVideoRenderer(
