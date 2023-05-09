@@ -16,17 +16,128 @@ This tutorial will teach you how to build an audio room experience like Twitter 
 
 Time to get started
 
-### Step 1 - Install
+### Step 1 - Create a new project in android studio
 
-### Step 2 - Create a call
+Note that this tutorial was written using Android Studio Flamingo.
+Setup steps can vary slightly across Android Studio versions so if you run into trouble be sure to use the latest version of Android Studio.
 
-```kotlin
-Create a call with different roles
+* Create a new project
+* Select "empty activity"
+* Name your project "VideoCall"
+
+### Step 2 - Install the SDK & Setup the client
+
+** Add the compose SDK ** to your app's build.gradle file found in app/build.gradle
+If you're new to android note that there are 2 build.gradle files, you want to open the one in the app folder.
+
+```groovy
+dependencies {
+    implementation "io.getstream:stream-video-android-compose:$stream_version"
+}
 ```
 
-### Step 3 - Join a call
+### Step 3 - Create & Join a call
 
-### Step 4 - Recording
+Open up `MainActivity.kt` and add the following code to the onCreate method
 
+```kotlin
+class MainActivity : ComponentActivity() {
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+
+        // for a production app we recommend adding the client to your Application class
+        val client = StreamVideoBuilder(
+             context = context,
+             apiKey = apiKey,
+             geo = GEO.GlobalEdgeNetwork,
+             user,
+             token,
+        ).build()
+
+        // TODO: specify members with different roles
+        val call = client.call("audio-room", "123")
+        call.join(create=true)
+
+        setContent {
+            VideoCallTheme {
+                // A surface container using the 'background' color from the theme
+                Surface(
+                    modifier = Modifier.fillMaxSize(),
+                    color = MaterialTheme.colorScheme.background
+                ) {
+                    Greeting("${call.id} has ${call.state.participants.value.size} participants")
+                }
+            }
+        }
+    }
+}
+```
+
+Run the sample app and now join this call via your browser here. Let's keep it open as you go through the tutorial.
+You'll see the participant count increase to 2 in your app.
+
+### Step 4 - Adding audio room UI elements
+
+In this next step we'll add:
+
+* Room title, room description
+* A list of participants
+* An indicator for who's speaking
+
+
+```kotlin
+
+setContent {
+    VideoCallTheme {
+        // A surface container using the 'background' color from the theme
+        Surface(
+            modifier = Modifier.fillMaxSize(),
+            color = MaterialTheme.colorScheme.background
+        ) {
+            Call() {
+                call.state.custom["title"] - call.state.custom["description"]
+                //participant count... // time the call is running
+                SpeakerAvatar(call.state.dominantSpeaker)
+
+                participants.forEach {
+                    ParticipantAvatar(it)
+                }
+            }
+        }
+    }
+}
+
+// TODO: Define some minimal components
+
+```
+
+### Step 5 - Keeping Audio running in the background
+
+```
+Document how this works
+```
+
+### Step 6 - Requesting permission to speak
+
+Requesting permission to speak is easy.
+
+```kotlin
+val response = call.requestPermissions("send-audio")
+// and next the admin will call
+val requests = call.state.permissionRequests.value
+request.forEach {
+    it.grant() // or it.reject()
+}
+```
+
+### Conclusion
+
+Building an audio room took about 10 minutes.
+
+* Calls run on a global edge network for optimal latency
+* There is no cap to how many listeners you can have in a room
+* Audio quality is optimized using Opus RED & Opus DTX
+
+If you want to add chat you should also review our Kotlin Chat Tutorial.
 
 
