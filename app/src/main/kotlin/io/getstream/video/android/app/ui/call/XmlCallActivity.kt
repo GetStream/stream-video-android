@@ -19,6 +19,7 @@ package io.getstream.video.android.app.ui.call
 import android.content.Context
 import io.getstream.video.android.app.videoApp
 import io.getstream.video.android.core.StreamVideo
+import io.getstream.video.android.core.viewmodel.CallViewModelFactory
 import io.getstream.video.android.xml.AbstractXmlCallActivity
 
 class XmlCallActivity : AbstractXmlCallActivity() {
@@ -27,4 +28,12 @@ class XmlCallActivity : AbstractXmlCallActivity() {
      * Provides the StreamVideo instance through the videoApp.
      */
     override fun getStreamVideo(context: Context): StreamVideo = videoApp.streamVideo
+
+    override fun getCallViewModelFactory(): CallViewModelFactory {
+        return CallViewModelFactory(
+            streamVideo = getStreamVideo(this),
+            permissionManager = getPermissionManager(),
+            call = getStreamVideo(this).call("default", "replaceme")
+        )
+    }
 }

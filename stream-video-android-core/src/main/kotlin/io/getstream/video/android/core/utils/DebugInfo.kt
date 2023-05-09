@@ -19,7 +19,6 @@ package io.getstream.video.android.core.utils
 import io.getstream.log.taggedLogger
 import io.getstream.video.android.core.StreamVideoImpl
 import io.getstream.video.android.core.dispatchers.DispatcherProvider
-import io.getstream.video.android.core.input.internal.DefaultCallAndroidInputLauncher.launch
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -54,6 +53,7 @@ internal class DebugInfo(val client: StreamVideoImpl) {
     val scope = CoroutineScope(DispatcherProvider.IO)
 
     private val logger by taggedLogger("DebugInfo")
+
     // timers to help track performance issues in prod
     val timers = mutableListOf<Timer>()
     // last 20 events
@@ -104,7 +104,8 @@ internal class DebugInfo(val client: StreamVideoImpl) {
 
         val videoTrackState = call?.mediaManager?.videoTrack?.state()
         val coordinatorSocket = client.socketImpl.connectionState.value?.javaClass?.name
-        val sfuSocket = call?.session?.sfuConnectionModule?.sfuSocket?.connectionState?.value?.javaClass?.name
+        val sfuSocket =
+            call?.session?.sfuConnectionModule?.sfuSocket?.connectionState?.value?.javaClass?.name
 
         // good spot to attach your debugger
 

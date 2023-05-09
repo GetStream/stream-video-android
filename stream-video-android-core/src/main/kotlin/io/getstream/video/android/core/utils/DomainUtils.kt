@@ -19,57 +19,24 @@ package io.getstream.video.android.core.utils
 import io.getstream.video.android.core.ParticipantState
 import io.getstream.video.android.core.internal.InternalStreamVideoApi
 import io.getstream.video.android.core.model.CallData
-import io.getstream.video.android.core.model.CallDetails
-import io.getstream.video.android.core.model.CallMetadata
 import io.getstream.video.android.core.model.CallRecordingData
 import io.getstream.video.android.core.model.CallUser
 import io.getstream.video.android.core.model.CallUserState
 import io.getstream.video.android.core.model.EdgeData
 import io.getstream.video.android.core.model.QueriedCalls
 import io.getstream.video.android.core.model.ReactionData
-import io.getstream.video.android.core.model.StreamCallKind
 import io.getstream.video.android.core.model.User
 import io.getstream.video.android.core.model.toCallInfo
-import io.getstream.video.android.core.model.toCallUsers
 import org.openapitools.client.models.CallRecording
 import org.openapitools.client.models.CallStateResponseFields
 import org.openapitools.client.models.EdgeResponse
-import org.openapitools.client.models.GetOrCreateCallResponse
 import org.openapitools.client.models.MemberResponse
 import org.openapitools.client.models.QueryCallsResponse
 import org.openapitools.client.models.ReactionResponse
 import org.openapitools.client.models.UserResponse
 import stream.video.sfu.models.Participant
 import stream.video.sfu.models.TrackType
-import java.util.*
-
-@JvmSynthetic
-internal fun GetOrCreateCallResponse.toCall(kind: StreamCallKind): CallMetadata {
-    return with(call) {
-        CallMetadata(
-            cid = cid,
-            id = id,
-            type = type,
-            kind = kind,
-            createdByUserId = createdBy.id,
-            createdAt = createdAt.toEpochSecond(),
-            updatedAt = updatedAt.toEpochSecond(),
-            recordingEnabled = settings.recording.audioOnly, // TODO
-            broadcastingEnabled = settings.broadcasting.enabled,
-            users = members.toCallUsers(),
-//            callEgress = CallEgress(
-//                broadcastEgress = broadcastEgress,
-//                recordEgress = recordEgress
-//            ),
-            callDetails = CallDetails(
-                members = members.map { it.toCallUser() }.associateBy { it.id },
-                memberUserIds = members.map { it.userId },
-                ownCapabilities = ownCapabilities
-            ),
-            custom = custom
-        )
-    }
-}
+import java.util.Date
 
 @JvmSynthetic
 internal fun MemberResponse.toCallUser(): CallUser {

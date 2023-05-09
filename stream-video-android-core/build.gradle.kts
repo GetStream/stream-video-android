@@ -110,7 +110,6 @@ dependencies {
     api(libs.stream.webrtc.ui)
     api(libs.stream.result)
 
-    implementation(libs.androidx.material)
     implementation(libs.androidx.appcompat)
     implementation(libs.androidx.core.ktx)
 
