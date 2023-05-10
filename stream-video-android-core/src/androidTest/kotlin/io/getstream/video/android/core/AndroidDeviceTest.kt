@@ -288,15 +288,21 @@ class AndroidDeviceTest : IntegrationTestBase(connectCoordinatorWS = false) {
 
         // fake a participant joining
         val joinEvent = ParticipantJoinedEvent(callCid = call.cid, participant = Participant(session_id = "fake", user_id = "fake"))
-        clientImpl.fireEvent(joinEvent)
+        clientImpl.fireEvent(joinEvent, call.cid)
+        assertThat(call.state.participants.value.size).isEqualTo(2)
+        assertThat(call.state.remoteParticipants.value.size).isEqualTo(1)
+        assertThat(call.state.sortedParticipants.value.size).isEqualTo(2)
+
         // set their video as visible
         call.setVisibility(sessionId = "fake", TrackType.TRACK_TYPE_VIDEO, true)
+
         val tracks1 = call.session?.defaultTracks()
         val tracks2 = call.session?.visibleTracks()
-        assertThat(tracks1?.size).isEqualTo(1)
-        assertThat(tracks1?.map { it.session_id }).contains("fake")
+
         assertThat(tracks2?.size).isEqualTo(1)
         assertThat(tracks2?.map { it.session_id }).contains("fake")
+        assertThat(tracks1?.size).isEqualTo(1)
+        assertThat(tracks1?.map { it.session_id }).contains("fake")
 
         // if their video isn't visible it shouldn't be in the tracks
         call.setVisibility(sessionId = "fake", TrackType.TRACK_TYPE_VIDEO, false)

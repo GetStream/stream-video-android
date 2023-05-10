@@ -670,7 +670,7 @@ public class RtcSession internal constructor(
      */
     internal fun defaultTracks(): List<TrackSubscriptionDetails> {
         val sortedParticipants = call.state.sortedParticipants.value
-        println("sortedParticipants: $sortedParticipants")
+        println("defaultTracks: $sortedParticipants")
         val otherParticipants = sortedParticipants.filter { it.sessionId != sessionId }.take(5)
         val tracks = otherParticipants
             .map { participant ->
@@ -687,8 +687,10 @@ public class RtcSession internal constructor(
 
     internal fun visibleTracks(): List<TrackSubscriptionDetails> {
         val participants = call.state.remoteParticipants.value
+
         var tracks = participants.map { participant ->
             val trackDisplay = trackDisplayResolution[participant.sessionId] ?: emptyMap()
+            println("visibleTracks $participant $trackDisplay")
             trackDisplay.values.filter { it.visible }.map { display ->
                 TrackSubscriptionDetails(
                     user_id = participant.user.value.id,
@@ -1068,6 +1070,7 @@ public class RtcSession internal constructor(
         val resolution =
             videoMap[trackType] ?: TrackDisplayResolution(sessionId, trackType, dimensions)
         resolution.dimensions = dimensions
+        videoMap[trackType] = resolution
 
         // Updates are debounced
         trackDisplayResolutionUpdates.value = trackDisplayResolution
@@ -1084,6 +1087,7 @@ public class RtcSession internal constructor(
         val resolution =
             videoMap[trackType] ?: TrackDisplayResolution(sessionId, trackType, defaultDimensions)
         resolution.visible = visible
+        videoMap[trackType] = resolution
 
         // Updates are debounced
         trackDisplayResolutionUpdates.value = trackDisplayResolution

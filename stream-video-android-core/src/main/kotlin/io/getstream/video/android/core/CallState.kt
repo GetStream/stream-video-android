@@ -414,6 +414,7 @@ public class CallState(private val call: Call, private val user: User) {
             }
 
             is ParticipantJoinedEvent -> {
+                println("ParticipantJoinedEvent")
                 getOrCreateParticipant(event.participant)
             }
 
