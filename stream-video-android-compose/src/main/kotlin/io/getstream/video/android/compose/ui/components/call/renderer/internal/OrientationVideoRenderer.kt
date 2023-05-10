@@ -21,12 +21,12 @@ import android.view.View
 import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.getstream.video.android.core.Call
 
 /**
@@ -46,8 +46,8 @@ internal fun BoxScope.OrientationVideoRenderer(
     paddingValues: PaddingValues = PaddingValues(0.dp),
     parentSize: IntSize = IntSize(0, 0)
 ) {
-    val primarySpeaker by call.state.dominantSpeaker.collectAsState(initial = null)
-    val roomParticipants by call.state.participants.collectAsState(emptyList())
+    val primarySpeaker by call.state.dominantSpeaker.collectAsStateWithLifecycle()
+    val roomParticipants by call.state.participants.collectAsStateWithLifecycle()
 
     val orientation = LocalConfiguration.current.orientation
 

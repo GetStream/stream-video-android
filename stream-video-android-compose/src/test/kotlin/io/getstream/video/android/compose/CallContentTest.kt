@@ -26,11 +26,11 @@ import io.getstream.video.android.common.util.mockParticipantList
 import io.getstream.video.android.common.util.mockParticipants
 import io.getstream.video.android.compose.base.BaseComposeTest
 import io.getstream.video.android.compose.ui.components.call.incomingcall.IncomingCallContent
-import io.getstream.video.android.compose.ui.components.call.incomingcall.internal.IncomingCallControls
-import io.getstream.video.android.compose.ui.components.call.incomingcall.internal.IncomingCallDetails
+import io.getstream.video.android.compose.ui.components.call.incomingcall.IncomingCallControls
+import io.getstream.video.android.compose.ui.components.call.incomingcall.IncomingCallDetails
 import io.getstream.video.android.compose.ui.components.call.outgoingcall.OutgoingCallContent
-import io.getstream.video.android.compose.ui.components.call.outgoingcall.internal.OutgoingCallControls
-import io.getstream.video.android.compose.ui.components.call.outgoingcall.internal.OutgoingCallDetails
+import io.getstream.video.android.compose.ui.components.call.outgoingcall.OutgoingCallControls
+import io.getstream.video.android.compose.ui.components.call.outgoingcall.OutgoingCallDetails
 import io.getstream.video.android.core.call.state.CallDeviceState
 import io.getstream.video.android.core.model.CallType
 import org.junit.Rule
@@ -125,15 +125,13 @@ internal class CallContentTest : BaseComposeTest() {
         snapshotWithDarkMode {
             Column {
                 OutgoingCallControls(
-                    callDeviceState = CallDeviceState(
-                        isMicrophoneEnabled = true,
-                        isSpeakerphoneEnabled = true,
-                        isCameraEnabled = true
-                    ),
+                    isMicrophoneEnabled = true,
+                    isCameraEnabled = true,
                     onCallAction = { }
                 )
                 OutgoingCallControls(
-                    callDeviceState = CallDeviceState(),
+                    isMicrophoneEnabled = false,
+                    isCameraEnabled = false,
                     onCallAction = { }
                 )
             }

@@ -33,7 +33,7 @@ import io.getstream.video.android.compose.theme.VideoTheme
 import stream.video.sfu.models.ConnectionQuality
 
 /**
- * Shows the quality of the user's connection.
+ * Shows the quality of the user's connection depending on the [ConnectionQuality] level.
  *
  * @param connectionQuality The quality level.
  * @param modifier Modifier for styling.

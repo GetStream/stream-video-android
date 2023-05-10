@@ -68,13 +68,17 @@ import io.getstream.video.android.ui.common.R
 import stream.video.sfu.models.TrackType
 
 /**
- * Represents a single participant in a call.
+ * Renders a single participant with a given call, which contains all the call states.
+ * Also displays participant information with a label and connection quality indicator.
  *
- * @param call The active call.
+ * @param call The call that contains all the participants state and tracks.
  * @param participant Participant to render.
  * @param modifier Modifier for styling.
+ * @param paddingValues Padding values should be applied to this modifier.
  * @param labelPosition The position of the user audio state label.
  * @param isFocused If the participant is focused or not.
+ * @param isScreenSharing Represents is screen sharing or not.
+ * @param isShowingConnectionQualityIndicator Whether displays the connection quality indicator or not.
  * @param onRender Handler when the Video renders.
  */
 @Composable
@@ -86,7 +90,7 @@ public fun CallSingleVideoRenderer(
     labelPosition: Alignment = BottomStart,
     isFocused: Boolean = false,
     isScreenSharing: Boolean = false,
-    isShowConnectionQualityIndicator: Boolean = true,
+    isShowingConnectionQualityIndicator: Boolean = true,
     onRender: (View) -> Unit = {}
 ) {
     val containerModifier = if (isFocused) modifier.border(
@@ -119,7 +123,7 @@ public fun CallSingleVideoRenderer(
 
         ParticipantLabel(participant, labelPosition)
 
-        if (isShowConnectionQualityIndicator) {
+        if (isShowingConnectionQualityIndicator) {
             val connectionQuality by participant.connectionQuality.collectAsStateWithLifecycle()
             ConnectionQualityIndicator(
                 connectionQuality = connectionQuality,

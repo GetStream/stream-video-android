@@ -29,9 +29,17 @@ import io.getstream.video.android.core.call.state.CallAction
 import io.getstream.video.android.core.call.state.ChatDialog
 import io.getstream.video.android.ui.common.R
 
+/**
+ * A call action button represents displaying a chat dialog.
+ *
+ * @param modifier Optional Modifier for this action button.
+ * @param enabled Whether or not this action button will handle input events.
+ * @param onCallAction A [CallAction] event that will be fired.
+ */
 @Composable
 public fun ChatDialogAction(
     modifier: Modifier = Modifier,
+    enabled: Boolean = true,
     onCallAction: (CallAction) -> Unit
 ) {
     CallControlActionBackground(
@@ -41,7 +49,7 @@ public fun ChatDialogAction(
         Icon(
             modifier = Modifier
                 .padding(13.dp)
-                .clickable { onCallAction(ChatDialog) },
+                .clickable(enabled = enabled) { onCallAction(ChatDialog) },
             tint = VideoTheme.colors.callActionIconEnabled,
             painter = painterResource(id = R.drawable.stream_video_ic_message),
             contentDescription = stringResource(R.string.stream_video_call_controls_chat_dialog)

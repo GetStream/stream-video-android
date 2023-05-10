@@ -44,10 +44,9 @@ public object MockUtils {
 }
 
 @InternalStreamVideoApi
-public val mockCall: Call
-    inline get() = Call(
-        client = MockUtils.streamVideo, type = "default", id = "123", user = mockUsers[0]
-    )
+public val mockCall: Call = Call(
+    client = MockUtils.streamVideo, type = "default", id = "123", user = mockUsers[0]
+)
 
 @InternalStreamVideoApi
 public val mockVideoMediaTrack: io.getstream.video.android.core.model.MediaTrack
@@ -102,19 +101,19 @@ public val mockUsers: List<User>
 public val mockParticipants: List<ParticipantState>
     inline get() {
         val participants = arrayListOf<ParticipantState>()
-        mockUsers.forEach {
-            val sessionId = if (it == mockUsers.first()) {
+        mockCall.state.clearParticipants()
+        mockUsers.forEach { user ->
+            val sessionId = if (user == mockUsers.first()) {
                 mockCall.sessionId ?: UUID.randomUUID().toString()
             } else {
                 UUID.randomUUID().toString()
             }
             participants.add(
-
                 ParticipantState(
-                    initialUser = it,
+                    initialUser = user,
                     sessionId = sessionId,
                     call = mockCall
-                )
+                ).also { mockCall.state.updateParticipant(it) }
             )
         }
         return participants

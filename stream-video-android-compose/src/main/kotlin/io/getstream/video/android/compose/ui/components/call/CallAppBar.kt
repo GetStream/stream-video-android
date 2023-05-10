@@ -54,6 +54,7 @@ import io.getstream.video.android.ui.common.R
  *
  * Exposes slots required to customize the look and feel.
  *
+ * @param call The call that contains all the participants state and tracks.
  * @param modifier Modifier for styling.
  * @param onBackPressed Handler when the user taps on the default leading content slot.
  * @param leadingContent The leading content, by default [DefaultCallAppBarLeadingContent].

@@ -34,6 +34,22 @@ import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.background.ParticipantImageBackground
 import io.getstream.video.android.core.model.User
 
+/**
+ * A background that displays a user avatar and a background that reflects the avatar.
+ *
+ * @param user The user whose avatar we want to show.
+ * @param modifier Modifier for styling.
+ * @param shape The shape of the avatar.
+ * @param avatarSize The size to decide avatar image.
+ * @param textStyle The [TextStyle] that will be used for the initials.
+ * @param contentScale The scale option used for the content.
+ * @param contentDescription The content description of the avatar.
+ * @param requestSize The actual request size.
+ * @param initialsAvatarOffset The initials offset to apply to the avatar.
+ * @param previewPlaceholder A placeholder that will be displayed on the Compose preview (IDE).
+ * @param loadingPlaceholder A placeholder that will be displayed while loading an image.
+ * @param blurRadius A blur radius value to be applied on the background.
+ */
 @Composable
 public fun UserAvatarBackground(
     user: User,
@@ -45,13 +61,15 @@ public fun UserAvatarBackground(
     contentDescription: String? = null,
     requestSize: IntSize = IntSize(DEFAULT_IMAGE_SIZE, DEFAULT_IMAGE_SIZE),
     initialsAvatarOffset: DpOffset = DpOffset(0.dp, 0.dp),
+    blurRadius: Int = 20,
     @DrawableRes previewPlaceholder: Int = LocalAvatarPreviewProvider.getLocalAvatarPreviewPlaceholder(),
     @DrawableRes loadingPlaceholder: Int? = LocalAvatarPreviewProvider.getLocalAvatarLoadingPlaceholder(),
 ) {
     Box(modifier = modifier) {
         ParticipantImageBackground(
             modifier = Modifier.fillMaxSize(),
-            userImage = user.image
+            userImage = user.image,
+            blurRadius = blurRadius
         )
 
         UserAvatar(

@@ -51,7 +51,7 @@ internal class AvatarTest : BaseComposeTest() {
             UserAvatar(
                 user = mockParticipant.initialUser,
                 modifier = Modifier.size(82.dp),
-                showOnlineIndicator = true
+                isShowingOnlineIndicator = true
             )
         }
     }

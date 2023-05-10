@@ -85,7 +85,7 @@ private fun ListVideoRenderer(
         labelPosition = Alignment.BottomStart,
         isScreenSharing = true,
         isFocused = participant.sessionId == primarySpeaker?.sessionId,
-        isShowConnectionQualityIndicator = false
+        isShowingConnectionQualityIndicator = false
     )
 }
 

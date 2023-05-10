@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package io.getstream.video.android.compose.ui.components.call.incomingcall.internal
+package io.getstream.video.android.compose.ui.components.call.incomingcall
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -33,8 +33,15 @@ import io.getstream.video.android.core.ParticipantState
 import io.getstream.video.android.core.model.CallStatus
 import io.getstream.video.android.core.model.CallType
 
+/**
+ * A details of an incoming call that displays a list of participant information.
+ *
+ * @param modifier Modifier for styling.
+ * @param callType The type of call, Audio or Video.
+ * @param participants A list of participants to be displayed.
+ */
 @Composable
-internal fun IncomingCallDetails(
+public fun IncomingCallDetails(
     modifier: Modifier = Modifier,
     callType: CallType,
     participants: List<ParticipantState>

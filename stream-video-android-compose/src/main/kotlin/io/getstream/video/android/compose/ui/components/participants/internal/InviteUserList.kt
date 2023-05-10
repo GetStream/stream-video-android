@@ -89,7 +89,7 @@ internal fun InviteUserItem(
         UserAvatar(
             modifier = Modifier.size(VideoTheme.dimens.callParticipantsInfoAvatarSize),
             user = user,
-            showOnlineIndicator = true
+            isShowingOnlineIndicator = true
         )
 
         Spacer(modifier = Modifier.width(8.dp))

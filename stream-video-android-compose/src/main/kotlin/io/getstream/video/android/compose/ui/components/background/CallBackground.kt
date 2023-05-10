@@ -103,6 +103,15 @@ private fun OutgoingCallBackground(callUsers: List<CallUser>, callType: CallType
     }
 }
 
+/**
+ * A background that displays a different background depending on the [userImage].
+ * If the [userImage] is valid, the background will display a blurred user image.
+ * If the [userImage] is invalid, the background will display a gradient color.
+ *
+ * @param userImage A user image that will be blurred for the background.
+ * @param modifier Modifier for styling.
+ * @param blurRadius A blur radius value to be applied on the background.
+ */
 @Composable
 public fun ParticipantImageBackground(
     userImage: String?,

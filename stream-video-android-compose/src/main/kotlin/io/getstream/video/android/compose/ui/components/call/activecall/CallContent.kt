@@ -55,10 +55,11 @@ import stream.video.sfu.models.TrackType
  * Represents the UI in an Active call that shows participants and their video, as well as some
  * extra UI features to control the call settings, browse participants and more.
  *
- * @param callViewModel The ViewModel required to fetch the Call state and render the UI.
+ * @param callViewModel The ViewModel required to fetch the call states and render the UI.
  * @param modifier Modifier for styling.
  * @param onBackPressed Handler when the user taps on the back button.
  * @param onCallAction Handler when the user triggers a Call Control Action.
+ * @param callAppBarContent Content shown that a call information or an additional actions.
  * @param callControlsContent Content shown that allows users to trigger different actions.
  * @param pictureInPictureContent Content shown when the user enters Picture in Picture mode, if
  * it's been enabled in the app.
@@ -69,7 +70,7 @@ public fun CallContent(
     modifier: Modifier = Modifier,
     onBackPressed: () -> Unit = { callViewModel.onCallAction(LeaveCall) },
     onCallAction: (CallAction) -> Unit = callViewModel::onCallAction,
-    callAppBar: @Composable () -> Unit = {
+    callAppBarContent: @Composable () -> Unit = {
         CallAppBar(
             call = callViewModel.call,
             leadingContent = null,
@@ -105,7 +106,7 @@ public fun CallContent(
         callDeviceState = callDeviceState,
         isInPictureInPicture = isInPiPMode,
         onCallAction = onCallAction,
-        callAppBar = callAppBar,
+        callAppBarContent = callAppBarContent,
         callControlsContent = callControlsContent,
         pictureInPictureContent = pictureInPictureContent
     )
@@ -115,12 +116,12 @@ public fun CallContent(
  * Represents the UI in an Active call that shows participants and their video, as well as some
  * extra UI features to control the call settings, browse participants and more.
  *
- * @param call The state of the call with its participants.
- * @param callDeviceState Media state of the call, for audio and video.
+ * @param call The call includes states and will be rendered with participants.
  * @param modifier Modifier for styling.
+ * @param callDeviceState Media state of the call, for audio and video.
  * @param isInPictureInPicture If the user has engaged in Picture-In-Picture mode.
- * @param onBackPressed Handler when the user taps on the back button.
  * @param onCallAction Handler when the user triggers a Call Control Action.
+ * @param callAppBarContent Content shown that a call information or an additional actions.
  * @param callControlsContent Content shown that allows users to trigger different actions.
  * @param pictureInPictureContent Content shown when the user enters Picture in Picture mode, if
  * it's been enabled in the app.
@@ -133,7 +134,7 @@ public fun CallContent(
     isShowingOverlayCallAppBar: Boolean = true,
     isInPictureInPicture: Boolean = false,
     onCallAction: (CallAction) -> Unit = {},
-    callAppBar: @Composable () -> Unit = {
+    callAppBarContent: @Composable () -> Unit = {
         CallAppBar(
             call = call,
             leadingContent = null,
@@ -186,7 +187,7 @@ public fun CallContent(
                 }
 
                 if (isShowingOverlayCallAppBar) {
-                    callAppBar.invoke()
+                    callAppBarContent.invoke()
                 }
             }
         )
