@@ -106,14 +106,13 @@ android {
 }
 
 dependencies {
+    // webrtc
     api(libs.stream.webrtc)
     api(libs.stream.webrtc.ui)
-    api(libs.stream.result)
 
-    implementation(libs.androidx.appcompat)
+    // androidx
+    implementation(libs.androidx.activity)
     implementation(libs.androidx.core.ktx)
-
-    // lifecycle
     implementation(libs.androidx.lifecycle.runtime)
     implementation(libs.androidx.lifecycle.process)
     implementation(libs.androidx.lifecycle.viewmodel)
@@ -138,12 +137,12 @@ dependencies {
     api(libs.threentenabp2)
 
     // Stream
+    api(libs.stream.result)
     implementation(libs.stream.log)
     implementation(libs.stream.push)
     implementation(libs.stream.push.delegate)
 
-
-    // unit test
+    // unit tests
     testImplementation(libs.junit)
     testImplementation(libs.truth)
     testImplementation(libs.mockk)
@@ -153,6 +152,7 @@ dependencies {
     testImplementation(libs.kotlinx.coroutines.test)
     testImplementation(libs.kotlin.test.junit)
 
+    // instrument tests
     androidTestImplementation(libs.stream.log.android)
     androidTestImplementation(libs.androidx.espresso.core)
     androidTestImplementation(libs.junit)

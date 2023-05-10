@@ -102,7 +102,7 @@ internal class VideoPushDelegate(
         users: String,
     ) {
         val notification = NotificationCompat.Builder(context, CHANNEL_ID)
-            .setSmallIcon(androidx.loader.R.drawable.notification_bg)
+//            .setSmallIcon(androidx.loader.R.drawable.notification_bg)
             .setContentTitle("Incoming call")
             .setContentText(users)
             .setOngoing(false)

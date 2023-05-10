@@ -17,7 +17,7 @@
 package io.getstream.video.android.core.notifications
 
 import android.os.Bundle
-import androidx.appcompat.app.AppCompatActivity
+import androidx.activity.ComponentActivity
 import androidx.core.app.NotificationManagerCompat
 import androidx.lifecycle.lifecycleScope
 import io.getstream.video.android.core.StreamVideo
@@ -32,7 +32,8 @@ import kotlinx.coroutines.launch
  *
  * Allows you to easily integrate push notification handling in your app, by extending the Activity.
  */
-public abstract class AbstractNotificationActivity : AppCompatActivity(), StreamVideoProvider {
+public abstract class AbstractNotificationActivity : ComponentActivity(),
+    StreamVideoProvider {
 
     private val streamVideo: StreamVideo by lazy { getStreamVideo(this) }
 

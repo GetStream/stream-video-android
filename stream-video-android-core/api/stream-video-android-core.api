@@ -2108,7 +2108,7 @@ public final class io/getstream/video/android/core/model/mapper/StreamCallCidMap
 	public static final fun toTypeAndId (Ljava/lang/String;)Lkotlin/Pair;
 }
 
-public abstract class io/getstream/video/android/core/notifications/AbstractNotificationActivity : androidx/appcompat/app/AppCompatActivity, io/getstream/video/android/core/StreamVideoProvider {
+public abstract class io/getstream/video/android/core/notifications/AbstractNotificationActivity : androidx/activity/ComponentActivity, io/getstream/video/android/core/StreamVideoProvider {
 	public fun <init> ()V
 	protected abstract fun initializeVideoIfNeeded ()V
 	protected fun onCreate (Landroid/os/Bundle;)V
