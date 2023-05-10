@@ -26,17 +26,16 @@ import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import app.cash.paparazzi.DeviceConfig
 import app.cash.paparazzi.Paparazzi
-import io.getstream.video.android.common.util.mockCall
-import io.getstream.video.android.common.util.mockParticipant
-import io.getstream.video.android.common.util.mockParticipantList
-import io.getstream.video.android.common.util.mockParticipants
-import io.getstream.video.android.common.util.mockVideoMediaTrack
 import io.getstream.video.android.compose.base.BaseComposeTest
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.call.renderer.internal.LandscapeScreenSharingVideoRenderer
 import io.getstream.video.android.compose.ui.components.call.renderer.internal.LandscapeVideoRenderer
 import io.getstream.video.android.compose.ui.components.call.renderer.internal.LazyRowVideoRenderer
 import io.getstream.video.android.core.model.ScreenSharingSession
+import io.getstream.video.android.mock.mockCall
+import io.getstream.video.android.mock.mockParticipant
+import io.getstream.video.android.mock.mockParticipantList
+import io.getstream.video.android.mock.mockVideoMediaTrack
 import org.junit.Rule
 import org.junit.Test
 
@@ -53,7 +52,7 @@ internal class ParticipantLandscapeTest : BaseComposeTest() {
             val configuration = LocalConfiguration.current
             val screenWidth = configuration.screenWidthDp
             val screenHeight = configuration.screenHeightDp
-            val participants = mockParticipants
+            val participants = mockParticipantList
 
             Box(
                 modifier = Modifier.background(color = VideoTheme.colors.appBackground)
@@ -76,7 +75,7 @@ internal class ParticipantLandscapeTest : BaseComposeTest() {
             val configuration = LocalConfiguration.current
             val screenWidth = configuration.screenWidthDp
             val screenHeight = configuration.screenHeightDp
-            val participants = mockParticipants
+            val participants = mockParticipantList
 
             Box(
                 modifier = Modifier.background(color = VideoTheme.colors.appBackground)
@@ -99,7 +98,7 @@ internal class ParticipantLandscapeTest : BaseComposeTest() {
             val configuration = LocalConfiguration.current
             val screenWidth = configuration.screenWidthDp
             val screenHeight = configuration.screenHeightDp
-            val participants = mockParticipants
+            val participants = mockParticipantList
 
             Box(
                 modifier = Modifier.background(color = VideoTheme.colors.appBackground)
@@ -122,7 +121,7 @@ internal class ParticipantLandscapeTest : BaseComposeTest() {
             val configuration = LocalConfiguration.current
             val screenWidth = configuration.screenWidthDp
             val screenHeight = configuration.screenHeightDp
-            val participants = mockParticipants
+            val participants = mockParticipantList
 
             Box(
                 modifier = Modifier.background(color = VideoTheme.colors.appBackground)
@@ -145,7 +144,7 @@ internal class ParticipantLandscapeTest : BaseComposeTest() {
             val configuration = LocalConfiguration.current
             val screenWidth = configuration.screenWidthDp
             val screenHeight = configuration.screenHeightDp
-            val participants = mockParticipants
+            val participants = mockParticipantList
 
             Box(
                 modifier = Modifier.background(color = VideoTheme.colors.appBackground)
@@ -168,7 +167,7 @@ internal class ParticipantLandscapeTest : BaseComposeTest() {
             val configuration = LocalConfiguration.current
             val screenWidth = configuration.screenWidthDp
             val screenHeight = configuration.screenHeightDp
-            val participants = mockParticipants
+            val participants = mockParticipantList
 
             Box(
                 modifier = Modifier.background(color = VideoTheme.colors.appBackground)

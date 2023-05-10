@@ -40,12 +40,12 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import io.getstream.video.android.common.util.mockCall
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.participants.ParticipantIndicatorIcon
 import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.call.state.CallAction
 import io.getstream.video.android.core.call.state.ShowCallParticipantInfo
+import io.getstream.video.android.mock.mockCall
 import io.getstream.video.android.ui.common.R
 
 /**

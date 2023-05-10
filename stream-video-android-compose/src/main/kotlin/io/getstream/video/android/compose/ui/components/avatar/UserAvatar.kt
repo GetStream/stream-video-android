@@ -31,10 +31,10 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
-import io.getstream.video.android.common.util.MockUtils
-import io.getstream.video.android.common.util.mockParticipants
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.core.model.User
+import io.getstream.video.android.mock.StreamMockUtils
+import io.getstream.video.android.mock.mockParticipantList
 
 /**
  * Represents the [User] avatar that's shown on the Messages screen or in headers of DMs.
@@ -108,10 +108,10 @@ internal fun BoxScope.DefaultOnlineIndicator(onlineIndicatorAlignment: OnlineInd
 @Preview
 @Composable
 private fun UserAvatarPreview() {
-    MockUtils.initializeStreamVideo(LocalContext.current)
+    StreamMockUtils.initializeStreamVideo(LocalContext.current)
     VideoTheme {
         UserAvatar(
-            user = mockParticipants[0].initialUser, modifier = Modifier.size(82.dp)
+            user = mockParticipantList[0].initialUser, modifier = Modifier.size(82.dp)
         )
     }
 }

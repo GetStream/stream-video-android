@@ -25,9 +25,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import io.getstream.video.android.common.util.MockUtils
-import io.getstream.video.android.common.util.mockCall
-import io.getstream.video.android.common.util.mockParticipants
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.background.CallBackground
 import io.getstream.video.android.compose.ui.components.call.CallAppBar
@@ -37,6 +34,9 @@ import io.getstream.video.android.core.call.state.CallAction
 import io.getstream.video.android.core.call.state.CallDeviceState
 import io.getstream.video.android.core.model.CallType
 import io.getstream.video.android.core.viewmodel.CallViewModel
+import io.getstream.video.android.mock.StreamMockUtils
+import io.getstream.video.android.mock.mockCall
+import io.getstream.video.android.mock.mockParticipantList
 
 /**
  * Represents the Outgoing Call state and UI, when the user receives a call from other people.
@@ -195,12 +195,12 @@ internal fun OutgoingCallContent(
 @Preview
 @Composable
 private fun OutgoingCallVideoPreview() {
-    MockUtils.initializeStreamVideo(LocalContext.current)
+    StreamMockUtils.initializeStreamVideo(LocalContext.current)
     VideoTheme {
         OutgoingCallContent(
             call = mockCall,
             callType = CallType.VIDEO,
-            participants = mockParticipants,
+            participants = mockParticipantList,
             callDeviceState = CallDeviceState(),
             onBackPressed = {}
         ) {}
@@ -210,12 +210,12 @@ private fun OutgoingCallVideoPreview() {
 @Preview
 @Composable
 private fun OutgoingCallAudioPreview() {
-    MockUtils.initializeStreamVideo(LocalContext.current)
+    StreamMockUtils.initializeStreamVideo(LocalContext.current)
     VideoTheme {
         OutgoingCallContent(
             call = mockCall,
             callType = CallType.AUDIO,
-            participants = mockParticipants,
+            participants = mockParticipantList,
             callDeviceState = CallDeviceState(),
             onBackPressed = {}
         ) {}

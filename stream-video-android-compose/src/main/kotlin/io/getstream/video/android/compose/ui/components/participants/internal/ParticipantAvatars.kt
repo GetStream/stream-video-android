@@ -29,11 +29,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import io.getstream.video.android.common.util.MockUtils
-import io.getstream.video.android.common.util.mockParticipantList
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.avatar.UserAvatar
 import io.getstream.video.android.core.ParticipantState
+import io.getstream.video.android.mock.StreamMockUtils
+import io.getstream.video.android.mock.mockParticipantList
 
 @Composable
 public fun ParticipantAvatars(
@@ -76,7 +76,7 @@ public fun ParticipantAvatars(
 @Preview
 @Composable
 private fun ParticipantAvatarsPreview() {
-    MockUtils.initializeStreamVideo(LocalContext.current)
+    StreamMockUtils.initializeStreamVideo(LocalContext.current)
     VideoTheme {
         ParticipantAvatars(
             participants = mockParticipantList
