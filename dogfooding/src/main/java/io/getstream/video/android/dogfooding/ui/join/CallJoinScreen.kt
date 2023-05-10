@@ -198,13 +198,13 @@ private fun CallJoinBody(
                 .fillMaxWidth()
                 .padding(horizontal = 35.dp),
             text = stringResource(id = R.string.call_id_number),
-            color = Colors.description,
+            color = Color(0xFF979797),
             fontSize = 13.sp,
         )
 
         Spacer(modifier = Modifier.height(4.dp))
 
-        var callId by remember { mutableStateOf("default:NnXAIvBKE4H12") }
+        var callId by remember { mutableStateOf("default:NnXAIvBKE4Hy") }
         Row(
             modifier = Modifier
                 .fillMaxWidth()
