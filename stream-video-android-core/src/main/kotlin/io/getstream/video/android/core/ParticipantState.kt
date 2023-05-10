@@ -33,11 +33,7 @@ import java.util.*
 /**
  * Represents the state of a participant in a call.
  *
- * * A list of participants is shared when you join a call
- * * The SFU sens you the participant joined event
- *
- * @see ParticipantJoinedEvent which shares the basic participant info found in
- * @see Participant
+ * * A list of participants is shared when you join a call the SFU send you the participant joined event.
  *
  * TODO: we need equality functions here , data class will ignore the stateflows
  */

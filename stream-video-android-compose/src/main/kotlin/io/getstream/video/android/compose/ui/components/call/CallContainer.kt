@@ -130,6 +130,7 @@ public fun CallContainer(
         modifier = modifier,
         onBackPressed = onBackPressed,
         onCallAction = onCallAction,
+        callAppBarContent = callAppBarContent,
         callControlsContent = callControlsContent,
         pictureInPictureContent = pictureInPictureContent,
         incomingCallContent = incomingCallContent,
@@ -138,6 +139,26 @@ public fun CallContainer(
     )
 }
 
+/**
+ * Represents different call content based on the call state provided from the [call].
+ *
+ * The user can be in an Active Call state, if they've full joined the call, an Incoming Call state,
+ * if they're being invited to join a call, or Outgoing Call state, if they're inviting other people
+ * to join. Based on that, we show [CallContent], [IncomingCallContent] or [OutgoingCallContent],
+ * respectively.
+ *
+ * @param call The call that contains all the participants state and tracks.
+ * @param modifier Modifier for styling.
+ * @param onBackPressed Handler when the user taps on the back button.
+ * @param onCallAction Handler when the user clicks on some of the call controls.
+ * @param callControlsContent Content shown for the
+ * [CallControls] part of the UI.
+ * @param pictureInPictureContent Content shown when the user enters Picture in Picture mode, if
+ * it's been enabled in the app.
+ * @param incomingCallContent Content shown when we're receiving a [Call].
+ * @param outgoingCallContent Content shown when we're ringing other people.
+ * @param callContent Content shown when we're connected to a [Call] successfully.
+ */
 @Composable
 public fun CallContainer(
     call: Call,
@@ -146,7 +167,7 @@ public fun CallContainer(
     modifier: Modifier = Modifier,
     onBackPressed: () -> Unit = {},
     onCallAction: (CallAction) -> Unit = {},
-    callAppBar: @Composable () -> Unit = {
+    callAppBarContent: @Composable () -> Unit = {
         CallAppBar(
             modifier = Modifier.testTag("call_appbar"),
             call = call,
@@ -188,7 +209,7 @@ public fun CallContainer(
             modifier = modifier.testTag("call_content"),
             callDeviceState = callDeviceState,
             onCallAction = onCallAction,
-            callAppBarContent = callAppBar,
+            callAppBarContent = callAppBarContent,
             callControlsContent = callControlsContent,
             pictureInPictureContent = pictureInPictureContent
         )

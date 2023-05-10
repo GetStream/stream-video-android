@@ -162,7 +162,7 @@ public fun LocalVideoContent(
                     .clip(RoundedCornerShape(16.dp)),
                 call = call,
                 participant = localParticipant,
-                isShowConnectionQualityIndicator = false
+                isShowingConnectionQualityIndicator = false
             )
         }
     }

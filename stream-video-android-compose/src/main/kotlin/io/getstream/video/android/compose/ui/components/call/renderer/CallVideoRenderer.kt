@@ -33,15 +33,13 @@ import io.getstream.video.android.compose.ui.components.call.renderer.internal.S
 import io.getstream.video.android.core.Call
 
 /**
- * Renders all the CallParticipants, based on the number of people in a call and the call state.
+ * Renders all the participants, based on the number of people in a call and the call state.
  * Also takes into account if there are any screen sharing sessions active and adjusts the UI
  * accordingly.
  *
  * @param call The call that contains all the participants state and tracks.
- * @param onCallAction Handler when the user triggers a Call Control Action.
  * @param modifier Modifier for styling.
  * @param onRender Handler when each of the Video views render their first frame.
- * @param onBackPressed Handler when the user taps back.
  */
 @Composable
 public fun CallVideoRenderer(
