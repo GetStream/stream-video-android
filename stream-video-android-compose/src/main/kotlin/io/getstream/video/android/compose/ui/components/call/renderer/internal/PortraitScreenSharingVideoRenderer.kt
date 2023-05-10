@@ -30,14 +30,14 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
-import io.getstream.video.android.common.util.MockUtils
-import io.getstream.video.android.common.util.mockCall
-import io.getstream.video.android.common.util.mockParticipants
-import io.getstream.video.android.common.util.mockVideoMediaTrack
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.ParticipantState
 import io.getstream.video.android.core.model.ScreenSharingSession
+import io.getstream.video.android.mock.StreamMockUtils
+import io.getstream.video.android.mock.mockCall
+import io.getstream.video.android.mock.mockParticipantList
+import io.getstream.video.android.mock.mockVideoMediaTrack
 
 /**
  * Represents the portrait screen sharing content.
@@ -98,16 +98,16 @@ internal fun PortraitScreenSharingVideoRenderer(
 @Preview(uiMode = Configuration.UI_MODE_NIGHT_YES)
 @Composable
 private fun PortraitScreenSharingContentPreview() {
-    MockUtils.initializeStreamVideo(LocalContext.current)
+    StreamMockUtils.initializeStreamVideo(LocalContext.current)
     VideoTheme {
         PortraitScreenSharingVideoRenderer(
             call = mockCall,
             session = ScreenSharingSession(
-                track = mockParticipants[1].videoTrack.value ?: mockVideoMediaTrack,
-                participant = mockParticipants[1]
+                track = mockParticipantList[1].videoTrack.value ?: mockVideoMediaTrack,
+                participant = mockParticipantList[1]
             ),
-            participants = mockParticipants,
-            primarySpeaker = mockParticipants[1],
+            participants = mockParticipantList,
+            primarySpeaker = mockParticipantList[1],
             modifier = Modifier.fillMaxSize(),
             onRender = {},
         )
@@ -122,11 +122,11 @@ private fun PortraitScreenSharingMyContentPreview() {
         PortraitScreenSharingVideoRenderer(
             call = mockCall,
             session = ScreenSharingSession(
-                track = mockParticipants[0].videoTrack.value ?: mockVideoMediaTrack,
-                participant = mockParticipants[0]
+                track = mockParticipantList[0].videoTrack.value ?: mockVideoMediaTrack,
+                participant = mockParticipantList[0]
             ),
-            participants = mockParticipants,
-            primarySpeaker = mockParticipants[0],
+            participants = mockParticipantList,
+            primarySpeaker = mockParticipantList[0],
             modifier = Modifier.fillMaxSize(),
             onRender = {},
         )

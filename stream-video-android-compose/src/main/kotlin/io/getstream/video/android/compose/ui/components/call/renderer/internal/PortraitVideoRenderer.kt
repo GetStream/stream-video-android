@@ -42,14 +42,14 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import io.getstream.video.android.common.util.MockUtils
-import io.getstream.video.android.common.util.mockCall
-import io.getstream.video.android.common.util.mockParticipants
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.call.renderer.CallSingleVideoRenderer
 import io.getstream.video.android.compose.ui.components.call.renderer.LocalVideoContent
 import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.ParticipantState
+import io.getstream.video.android.mock.StreamMockUtils
+import io.getstream.video.android.mock.mockCall
+import io.getstream.video.android.mock.mockParticipantList
 
 /**
  * Renders call participants based on the number of people in a call, in portrait mode.
@@ -235,12 +235,12 @@ internal fun BoxScope.PortraitVideoRenderer(
 @Preview
 @Composable
 private fun PortraitParticipantsPreview1() {
-    MockUtils.initializeStreamVideo(LocalContext.current)
+    StreamMockUtils.initializeStreamVideo(LocalContext.current)
     VideoTheme {
         val configuration = LocalConfiguration.current
         val screenWidth = configuration.screenWidthDp
         val screenHeight = configuration.screenHeightDp
-        val participants = mockParticipants
+        val participants = mockParticipantList
 
         Box(
             modifier = Modifier.background(color = VideoTheme.colors.appBackground)
@@ -260,19 +260,19 @@ private fun PortraitParticipantsPreview1() {
 @Preview
 @Composable
 private fun PortraitParticipantsPreview2() {
-    MockUtils.initializeStreamVideo(LocalContext.current)
+    StreamMockUtils.initializeStreamVideo(LocalContext.current)
     VideoTheme {
         val configuration = LocalConfiguration.current
         val screenWidth = configuration.screenWidthDp
         val screenHeight = configuration.screenHeightDp
-        val participants = mockParticipants
+        val participants = mockParticipantList
 
         Box(
             modifier = Modifier.background(color = VideoTheme.colors.appBackground)
         ) {
             PortraitVideoRenderer(
                 call = mockCall,
-                primarySpeaker = mockParticipants[0],
+                primarySpeaker = mockParticipantList[0],
                 callParticipants = participants.take(2),
                 modifier = Modifier.fillMaxSize(),
                 paddingValues = PaddingValues(0.dp),
@@ -285,12 +285,12 @@ private fun PortraitParticipantsPreview2() {
 @Preview
 @Composable
 private fun PortraitParticipantsPreview3() {
-    MockUtils.initializeStreamVideo(LocalContext.current)
+    StreamMockUtils.initializeStreamVideo(LocalContext.current)
     VideoTheme {
         val configuration = LocalConfiguration.current
         val screenWidth = configuration.screenWidthDp
         val screenHeight = configuration.screenHeightDp
-        val participants = mockParticipants
+        val participants = mockParticipantList
 
         Box(
             modifier = Modifier.background(color = VideoTheme.colors.appBackground)
@@ -310,12 +310,12 @@ private fun PortraitParticipantsPreview3() {
 @Preview
 @Composable
 private fun PortraitParticipantsPreview4() {
-    MockUtils.initializeStreamVideo(LocalContext.current)
+    StreamMockUtils.initializeStreamVideo(LocalContext.current)
     VideoTheme {
         val configuration = LocalConfiguration.current
         val screenWidth = configuration.screenWidthDp
         val screenHeight = configuration.screenHeightDp
-        val participants = mockParticipants
+        val participants = mockParticipantList
 
         Box(
             modifier = Modifier.background(color = VideoTheme.colors.appBackground)
@@ -335,12 +335,12 @@ private fun PortraitParticipantsPreview4() {
 @Preview
 @Composable
 private fun PortraitParticipantsPreview5() {
-    MockUtils.initializeStreamVideo(LocalContext.current)
+    StreamMockUtils.initializeStreamVideo(LocalContext.current)
     VideoTheme {
         val configuration = LocalConfiguration.current
         val screenWidth = configuration.screenWidthDp
         val screenHeight = configuration.screenHeightDp
-        val participants = mockParticipants
+        val participants = mockParticipantList
 
         Box(
             modifier = Modifier.background(color = VideoTheme.colors.appBackground)
@@ -360,12 +360,12 @@ private fun PortraitParticipantsPreview5() {
 @Preview
 @Composable
 private fun PortraitParticipantsPreview6() {
-    MockUtils.initializeStreamVideo(LocalContext.current)
+    StreamMockUtils.initializeStreamVideo(LocalContext.current)
     VideoTheme {
         val configuration = LocalConfiguration.current
         val screenWidth = configuration.screenWidthDp
         val screenHeight = configuration.screenHeightDp
-        val participants = mockParticipants
+        val participants = mockParticipantList
 
         Box(
             modifier = Modifier.background(color = VideoTheme.colors.appBackground)

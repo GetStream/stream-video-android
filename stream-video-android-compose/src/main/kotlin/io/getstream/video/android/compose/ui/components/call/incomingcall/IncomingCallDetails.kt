@@ -24,14 +24,14 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
-import io.getstream.video.android.common.util.MockUtils
-import io.getstream.video.android.common.util.mockParticipantList
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.participants.internal.ParticipantAvatars
 import io.getstream.video.android.compose.ui.components.participants.internal.ParticipantInformation
 import io.getstream.video.android.core.ParticipantState
 import io.getstream.video.android.core.model.CallStatus
 import io.getstream.video.android.core.model.CallType
+import io.getstream.video.android.mock.StreamMockUtils
+import io.getstream.video.android.mock.mockParticipantList
 
 /**
  * A details of an incoming call that displays a list of participant information.
@@ -63,7 +63,7 @@ public fun IncomingCallDetails(
 @Preview
 @Composable
 private fun IncomingCallDetailsPreview() {
-    MockUtils.initializeStreamVideo(LocalContext.current)
+    StreamMockUtils.initializeStreamVideo(LocalContext.current)
     VideoTheme {
         IncomingCallDetails(
             callType = CallType.VIDEO,

@@ -31,14 +31,14 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import io.getstream.video.android.common.util.MockUtils
-import io.getstream.video.android.common.util.mockCall
-import io.getstream.video.android.common.util.mockParticipants
-import io.getstream.video.android.common.util.mockVideoMediaTrack
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.ParticipantState
 import io.getstream.video.android.core.model.ScreenSharingSession
+import io.getstream.video.android.mock.StreamMockUtils
+import io.getstream.video.android.mock.mockCall
+import io.getstream.video.android.mock.mockParticipantList
+import io.getstream.video.android.mock.mockVideoMediaTrack
 
 /**
  * Represents the landscape screen sharing content.
@@ -108,16 +108,16 @@ internal fun LandscapeScreenSharingVideoRenderer(
 )
 @Composable
 private fun LandscapeScreenSharingContentPreview() {
-    MockUtils.initializeStreamVideo(LocalContext.current)
+    StreamMockUtils.initializeStreamVideo(LocalContext.current)
     VideoTheme {
         LandscapeScreenSharingVideoRenderer(
             call = mockCall,
             session = ScreenSharingSession(
-                track = mockParticipants[1].videoTrack.value ?: mockVideoMediaTrack,
-                participant = mockParticipants[1]
+                track = mockParticipantList[1].videoTrack.value ?: mockVideoMediaTrack,
+                participant = mockParticipantList[1]
             ),
-            participants = mockParticipants,
-            primarySpeaker = mockParticipants[1],
+            participants = mockParticipantList,
+            primarySpeaker = mockParticipantList[1],
             modifier = Modifier.fillMaxSize(),
             onRender = {},
         )
@@ -135,16 +135,16 @@ private fun LandscapeScreenSharingContentPreview() {
 )
 @Composable
 private fun LandscapeScreenSharingMyContentPreview() {
-    MockUtils.initializeStreamVideo(LocalContext.current)
+    StreamMockUtils.initializeStreamVideo(LocalContext.current)
     VideoTheme {
         LandscapeScreenSharingVideoRenderer(
             call = mockCall,
             session = ScreenSharingSession(
-                track = mockParticipants[0].videoTrack.value ?: mockVideoMediaTrack,
-                participant = mockParticipants[0]
+                track = mockParticipantList[0].videoTrack.value ?: mockVideoMediaTrack,
+                participant = mockParticipantList[0]
             ),
-            participants = mockParticipants,
-            primarySpeaker = mockParticipants[0],
+            participants = mockParticipantList,
+            primarySpeaker = mockParticipantList[0],
             modifier = Modifier.fillMaxSize(),
             onRender = {},
         )

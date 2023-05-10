@@ -34,13 +34,13 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.viewinterop.AndroidView
 import io.getstream.log.StreamLog
-import io.getstream.video.android.common.util.MockUtils
-import io.getstream.video.android.common.util.mockCall
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.video.VideoScalingType.Companion.toCommonScalingType
 import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.model.MediaTrack
 import io.getstream.video.android.core.model.VideoTrack
+import io.getstream.video.android.mock.StreamMockUtils
+import io.getstream.video.android.mock.mockCall
 import io.getstream.webrtc.android.ui.VideoTextureViewRenderer
 import stream.video.sfu.models.TrackType
 
@@ -130,7 +130,7 @@ private fun setupVideo(
 @Preview
 @Composable
 private fun VideoRendererPreview() {
-    MockUtils.initializeStreamVideo(LocalContext.current)
+    StreamMockUtils.initializeStreamVideo(LocalContext.current)
     VideoTheme {
         VideoRenderer(
             call = mockCall,

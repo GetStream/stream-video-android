@@ -53,9 +53,6 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.getstream.video.android.common.model.getSoundIndicatorState
-import io.getstream.video.android.common.util.MockUtils
-import io.getstream.video.android.common.util.mockCall
-import io.getstream.video.android.common.util.mockParticipants
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.audio.SoundIndicator
 import io.getstream.video.android.compose.ui.components.avatar.UserAvatarBackground
@@ -64,6 +61,9 @@ import io.getstream.video.android.compose.ui.components.video.VideoRenderer
 import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.ParticipantState
 import io.getstream.video.android.core.model.MediaTrack
+import io.getstream.video.android.mock.StreamMockUtils
+import io.getstream.video.android.mock.mockCall
+import io.getstream.video.android.mock.mockParticipantList
 import io.getstream.video.android.ui.common.R
 import stream.video.sfu.models.TrackType
 
@@ -223,11 +223,11 @@ internal fun BoxScope.ParticipantLabel(
 @Preview
 @Composable
 private fun CallParticipantPreview() {
-    MockUtils.initializeStreamVideo(LocalContext.current)
+    StreamMockUtils.initializeStreamVideo(LocalContext.current)
     VideoTheme {
         CallSingleVideoRenderer(
             call = mockCall,
-            participant = mockParticipants[1],
+            participant = mockParticipantList[1],
             isFocused = true
         )
     }
@@ -236,11 +236,11 @@ private fun CallParticipantPreview() {
 @Preview
 @Composable
 private fun ParticipantLabelPreview() {
-    MockUtils.initializeStreamVideo(LocalContext.current)
+    StreamMockUtils.initializeStreamVideo(LocalContext.current)
     VideoTheme {
         Box {
             ParticipantLabel(
-                participant = mockParticipants[1],
+                participant = mockParticipantList[1],
                 BottomStart,
             )
         }
@@ -250,11 +250,11 @@ private fun ParticipantLabelPreview() {
 @Preview
 @Composable
 private fun ParticipantVideoPreview() {
-    MockUtils.initializeStreamVideo(LocalContext.current)
+    StreamMockUtils.initializeStreamVideo(LocalContext.current)
     VideoTheme {
         ParticipantVideoRenderer(
             call = mockCall,
-            participant = mockParticipants[1],
+            participant = mockParticipantList[1],
         ) {}
     }
 }

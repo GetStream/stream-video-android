@@ -23,9 +23,9 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalInspectionMode
 import app.cash.paparazzi.Paparazzi
-import io.getstream.video.android.common.util.MockUtils
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.avatar.LocalAvatarPreviewPlaceholder
+import io.getstream.video.android.mock.StreamMockUtils
 
 internal abstract class BaseComposeTest {
 
@@ -36,7 +36,7 @@ internal abstract class BaseComposeTest {
         composable: @Composable () -> Unit
     ) {
         basePaparazzi().snapshot {
-            MockUtils.initializeStreamVideo(LocalContext.current)
+            StreamMockUtils.initializeStreamVideo(LocalContext.current)
             CompositionLocalProvider(
                 LocalInspectionMode provides true,
                 LocalAvatarPreviewPlaceholder provides
@@ -49,7 +49,7 @@ internal abstract class BaseComposeTest {
 
     fun snapshotWithDarkMode(composable: @Composable () -> Unit) {
         basePaparazzi().snapshot {
-            MockUtils.initializeStreamVideo(LocalContext.current)
+            StreamMockUtils.initializeStreamVideo(LocalContext.current)
             CompositionLocalProvider(
                 LocalInspectionMode provides true,
                 LocalAvatarPreviewPlaceholder provides

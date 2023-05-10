@@ -29,9 +29,6 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import io.getstream.video.android.common.util.MockUtils
-import io.getstream.video.android.common.util.mockCall
-import io.getstream.video.android.common.util.mockParticipants
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.avatar.LocalAvatarPreviewPlaceholder
 import io.getstream.video.android.compose.ui.components.background.CallBackground
@@ -42,6 +39,9 @@ import io.getstream.video.android.core.call.state.CallAction
 import io.getstream.video.android.core.call.state.CallDeviceState
 import io.getstream.video.android.core.model.CallType
 import io.getstream.video.android.core.viewmodel.CallViewModel
+import io.getstream.video.android.mock.StreamMockUtils
+import io.getstream.video.android.mock.mockCall
+import io.getstream.video.android.mock.mockParticipantList
 
 /**
  * Represents the Incoming Call state and UI, when the user receives a call from other people.
@@ -208,7 +208,7 @@ internal fun IncomingCallContent(
 @Preview
 @Composable
 private fun IncomingCallPreview1() {
-    MockUtils.initializeStreamVideo(LocalContext.current)
+    StreamMockUtils.initializeStreamVideo(LocalContext.current)
     VideoTheme {
         CompositionLocalProvider(
             LocalAvatarPreviewPlaceholder provides
@@ -216,7 +216,7 @@ private fun IncomingCallPreview1() {
         ) {
             IncomingCallContent(
                 call = mockCall,
-                participants = mockParticipants.takeLast(1),
+                participants = mockParticipantList.takeLast(1),
                 callType = CallType.VIDEO,
                 isCameraEnabled = false,
                 onBackPressed = {}
@@ -228,7 +228,7 @@ private fun IncomingCallPreview1() {
 @Preview
 @Composable
 private fun IncomingCallPreview2() {
-    MockUtils.initializeStreamVideo(LocalContext.current)
+    StreamMockUtils.initializeStreamVideo(LocalContext.current)
     VideoTheme {
         CompositionLocalProvider(
             LocalAvatarPreviewPlaceholder provides
@@ -236,7 +236,7 @@ private fun IncomingCallPreview2() {
         ) {
             IncomingCallContent(
                 call = mockCall,
-                participants = mockParticipants,
+                participants = mockParticipantList,
                 callType = CallType.VIDEO,
                 isCameraEnabled = false,
                 onBackPressed = {}

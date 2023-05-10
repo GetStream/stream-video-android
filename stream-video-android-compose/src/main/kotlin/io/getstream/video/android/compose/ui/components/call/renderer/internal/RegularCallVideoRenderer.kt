@@ -31,10 +31,10 @@ import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.IntSize
-import io.getstream.video.android.common.util.MockUtils
-import io.getstream.video.android.common.util.mockCall
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.core.Call
+import io.getstream.video.android.mock.StreamMockUtils
+import io.getstream.video.android.mock.mockCall
 
 /**
  * Renders the CallParticipants when there are no screen sharing sessions, based on the orientation.
@@ -72,7 +72,7 @@ internal fun RegularCallVideoRenderer(
 @Preview
 @Composable
 private fun RegularCallVideoRendererPreview() {
-    MockUtils.initializeStreamVideo(LocalContext.current)
+    StreamMockUtils.initializeStreamVideo(LocalContext.current)
     VideoTheme {
         RegularCallVideoRenderer(
             call = mockCall,

@@ -25,12 +25,12 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import io.getstream.video.android.common.util.MockUtils
-import io.getstream.video.android.common.util.mockCall
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.call.renderer.internal.RegularCallVideoRenderer
 import io.getstream.video.android.compose.ui.components.call.renderer.internal.ScreenSharingCallVideoRenderer
 import io.getstream.video.android.core.Call
+import io.getstream.video.android.mock.StreamMockUtils
+import io.getstream.video.android.mock.mockCall
 
 /**
  * Renders all the participants, based on the number of people in a call and the call state.
@@ -81,7 +81,7 @@ public fun CallVideoRenderer(
 @Preview
 @Composable
 private fun CallVideoRendererPreview() {
-    MockUtils.initializeStreamVideo(LocalContext.current)
+    StreamMockUtils.initializeStreamVideo(LocalContext.current)
     VideoTheme {
         CallVideoRenderer(
             call = mockCall,

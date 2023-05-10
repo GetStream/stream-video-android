@@ -18,13 +18,13 @@ package io.getstream.video.android.compose
 
 import app.cash.paparazzi.DeviceConfig
 import app.cash.paparazzi.Paparazzi
-import io.getstream.video.android.common.util.mockCall
 import io.getstream.video.android.compose.base.BaseComposeTest
 import io.getstream.video.android.compose.ui.components.call.CallAppBar
 import io.getstream.video.android.compose.ui.components.call.controls.CallControls
 import io.getstream.video.android.compose.ui.components.call.controls.actions.RegularCallControls
 import io.getstream.video.android.compose.ui.components.participants.ParticipantIndicatorIcon
 import io.getstream.video.android.core.call.state.CallDeviceState
+import io.getstream.video.android.mock.mockCall
 import org.junit.Rule
 import org.junit.Test
 
