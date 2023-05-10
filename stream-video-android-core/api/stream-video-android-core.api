@@ -29,7 +29,7 @@ public final class io/getstream/video/android/core/Call {
 	public static synthetic fun initRenderer$default (Lio/getstream/video/android/core/Call;Lio/getstream/webrtc/android/ui/VideoTextureViewRenderer;Ljava/lang/String;Lstream/video/sfu/models/TrackType;Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)V
 	public final fun join (ZLio/getstream/video/android/core/CreateCallOptions;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public static synthetic fun join$default (Lio/getstream/video/android/core/Call;ZLio/getstream/video/android/core/CreateCallOptions;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
-	public final fun leave ()Lio/getstream/result/Result;
+	public final fun leave ()V
 	public final fun listRecordings (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public final fun muteAllUsers (ZZZLkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public static synthetic fun muteAllUsers$default (Lio/getstream/video/android/core/Call;ZZZLkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
@@ -2470,7 +2470,7 @@ public final class io/getstream/video/android/core/viewmodel/CallViewModel : and
 	public static synthetic fun joinCall$default (Lio/getstream/video/android/core/viewmodel/CallViewModel;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)V
 	public final fun onCallAction (Lio/getstream/video/android/core/call/state/CallAction;)V
 	public final fun onPictureInPictureModeChanged (Z)V
-	public final fun setOnLeaveCall (Lkotlin/jvm/functions/Function1;)V
+	public final fun setOnLeaveCall (Lkotlin/jvm/functions/Function0;)V
 }
 
 public final class io/getstream/video/android/core/viewmodel/CallViewModelFactory : androidx/lifecycle/ViewModelProvider$Factory {
