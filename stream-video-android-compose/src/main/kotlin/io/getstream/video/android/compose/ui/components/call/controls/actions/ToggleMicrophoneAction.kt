@@ -29,10 +29,19 @@ import io.getstream.video.android.core.call.state.CallAction
 import io.getstream.video.android.core.call.state.ToggleMicrophone
 import io.getstream.video.android.ui.common.R
 
+/**
+ * A call action button represents toggling a microphone.
+ *
+ * @param modifier Optional Modifier for this action button.
+ * @param isMicrophoneEnabled Represent is camera enabled.
+ * @param enabled Whether or not this action button will handle input events.
+ * @param onCallAction A [CallAction] event that will be fired.
+ */
 @Composable
 public fun ToggleMicrophoneAction(
     modifier: Modifier = Modifier,
     isMicrophoneEnabled: Boolean,
+    enabled: Boolean = true,
     onCallAction: (CallAction) -> Unit
 ) {
     val microphoneIcon =
@@ -51,7 +60,7 @@ public fun ToggleMicrophoneAction(
         Icon(
             modifier = Modifier
                 .padding(13.dp)
-                .clickable {
+                .clickable(enabled = enabled) {
                     onCallAction(
                         ToggleMicrophone(isMicrophoneEnabled.not())
                     )

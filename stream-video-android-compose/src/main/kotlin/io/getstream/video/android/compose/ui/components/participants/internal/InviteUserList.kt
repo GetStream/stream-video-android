@@ -34,11 +34,11 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import io.getstream.video.android.common.util.MockUtils
-import io.getstream.video.android.common.util.mockParticipants
 import io.getstream.video.android.compose.state.ui.internal.InviteUserItemState
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.avatar.UserAvatar
+import io.getstream.video.android.mock.StreamMockUtils
+import io.getstream.video.android.mock.mockParticipantList
 import io.getstream.video.android.ui.common.R
 
 /**
@@ -89,7 +89,7 @@ internal fun InviteUserItem(
         UserAvatar(
             modifier = Modifier.size(VideoTheme.dimens.callParticipantsInfoAvatarSize),
             user = user,
-            showOnlineIndicator = true
+            isShowingOnlineIndicator = true
         )
 
         Spacer(modifier = Modifier.width(8.dp))
@@ -124,10 +124,10 @@ internal fun InviteUserItem(
 @Preview
 @Composable
 private fun InviteUserListPreview() {
-    MockUtils.initializeStreamVideo(LocalContext.current)
+    StreamMockUtils.initializeStreamVideo(LocalContext.current)
     VideoTheme {
         InviteUserList(
-            mockParticipants.map {
+            mockParticipantList.map {
                 InviteUserItemState(it.initialUser)
             },
             onUserSelected = {}

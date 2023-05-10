@@ -37,6 +37,15 @@ import androidx.compose.ui.unit.sp
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.ui.common.R
 
+/**
+ * An icon that displays participant number.
+ *
+ * @param number Indicates the number of participants.
+ * @param numberColor A color of the number.
+ * @param numberBackgroundColor A color of the background of the color badge.
+ * @param isShowingNumber Whether displays the number or not.
+ * @param onClick A click callback for the icon.
+ */
 @Composable
 public fun ParticipantIndicatorIcon(
     number: Int,

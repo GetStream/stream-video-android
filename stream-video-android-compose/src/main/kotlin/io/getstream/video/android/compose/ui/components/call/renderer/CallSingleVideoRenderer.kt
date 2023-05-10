@@ -53,9 +53,6 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.getstream.video.android.common.model.getSoundIndicatorState
-import io.getstream.video.android.common.util.MockUtils
-import io.getstream.video.android.common.util.mockCall
-import io.getstream.video.android.common.util.mockParticipants
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.audio.SoundIndicator
 import io.getstream.video.android.compose.ui.components.avatar.UserAvatarBackground
@@ -64,17 +61,24 @@ import io.getstream.video.android.compose.ui.components.video.VideoRenderer
 import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.ParticipantState
 import io.getstream.video.android.core.model.MediaTrack
+import io.getstream.video.android.mock.StreamMockUtils
+import io.getstream.video.android.mock.mockCall
+import io.getstream.video.android.mock.mockParticipantList
 import io.getstream.video.android.ui.common.R
 import stream.video.sfu.models.TrackType
 
 /**
- * Represents a single participant in a call.
+ * Renders a single participant with a given call, which contains all the call states.
+ * Also displays participant information with a label and connection quality indicator.
  *
- * @param call The active call.
+ * @param call The call that contains all the participants state and tracks.
  * @param participant Participant to render.
  * @param modifier Modifier for styling.
+ * @param paddingValues Padding values should be applied to this modifier.
  * @param labelPosition The position of the user audio state label.
  * @param isFocused If the participant is focused or not.
+ * @param isScreenSharing Represents is screen sharing or not.
+ * @param isShowingConnectionQualityIndicator Whether displays the connection quality indicator or not.
  * @param onRender Handler when the Video renders.
  */
 @Composable
@@ -86,7 +90,7 @@ public fun CallSingleVideoRenderer(
     labelPosition: Alignment = BottomStart,
     isFocused: Boolean = false,
     isScreenSharing: Boolean = false,
-    isShowConnectionQualityIndicator: Boolean = true,
+    isShowingConnectionQualityIndicator: Boolean = true,
     onRender: (View) -> Unit = {}
 ) {
     val containerModifier = if (isFocused) modifier.border(
@@ -119,7 +123,7 @@ public fun CallSingleVideoRenderer(
 
         ParticipantLabel(participant, labelPosition)
 
-        if (isShowConnectionQualityIndicator) {
+        if (isShowingConnectionQualityIndicator) {
             val connectionQuality by participant.connectionQuality.collectAsStateWithLifecycle()
             ConnectionQualityIndicator(
                 connectionQuality = connectionQuality,
@@ -219,11 +223,11 @@ internal fun BoxScope.ParticipantLabel(
 @Preview
 @Composable
 private fun CallParticipantPreview() {
-    MockUtils.initializeStreamVideo(LocalContext.current)
+    StreamMockUtils.initializeStreamVideo(LocalContext.current)
     VideoTheme {
         CallSingleVideoRenderer(
             call = mockCall,
-            participant = mockParticipants[1],
+            participant = mockParticipantList[1],
             isFocused = true
         )
     }
@@ -232,11 +236,11 @@ private fun CallParticipantPreview() {
 @Preview
 @Composable
 private fun ParticipantLabelPreview() {
-    MockUtils.initializeStreamVideo(LocalContext.current)
+    StreamMockUtils.initializeStreamVideo(LocalContext.current)
     VideoTheme {
         Box {
             ParticipantLabel(
-                participant = mockParticipants[1],
+                participant = mockParticipantList[1],
                 BottomStart,
             )
         }
@@ -246,11 +250,11 @@ private fun ParticipantLabelPreview() {
 @Preview
 @Composable
 private fun ParticipantVideoPreview() {
-    MockUtils.initializeStreamVideo(LocalContext.current)
+    StreamMockUtils.initializeStreamVideo(LocalContext.current)
     VideoTheme {
         ParticipantVideoRenderer(
             call = mockCall,
-            participant = mockParticipants[1],
+            participant = mockParticipantList[1],
         ) {}
     }
 }

@@ -30,18 +30,22 @@ import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.getstream.video.android.compose.theme.VideoTheme
+import io.getstream.video.android.compose.ui.components.call.controls.actions.LandscapeCallControls
+import io.getstream.video.android.compose.ui.components.call.controls.actions.RegularCallControls
 import io.getstream.video.android.compose.ui.components.call.controls.actions.buildDefaultCallControlActions
-import io.getstream.video.android.compose.ui.components.call.controls.internal.LandscapeCallControls
-import io.getstream.video.android.compose.ui.components.call.controls.internal.RegularCallControls
 import io.getstream.video.android.core.call.state.CallAction
 import io.getstream.video.android.core.call.state.CallDeviceState
 import io.getstream.video.android.core.viewmodel.CallViewModel
 
 /**
- * Shows the default Call controls content that allow the user to trigger various actions.
+ * Represents the set of controls the user can use to change their audio and video device state, or
+ * browse other types of settings, leave the call, or implement something custom.
+ * You can simply custom the controls button by giving a list of custom call actions to [actions].
  *
+ * @param modifier The modifier to be applied to the call controls.
  * @param callViewModel Used to fetch the state of the call and its media.
  * @param onCallAction Handler when the user triggers a Call Control Action.
+ * @param actions A list of composable call actions that will be arranged in the layout.
  */
 @Composable
 public fun CallControls(
@@ -66,11 +70,12 @@ public fun CallControls(
 /**
  * Represents the set of controls the user can use to change their audio and video device state, or
  * browse other types of settings, leave the call, or implement something custom.
+ * You can simply custom the controls button by giving a list of custom call actions to [actions].
  *
- * @param callDeviceState The state of the media devices for the current user.
- * @param modifier Modifier for styling.
- * @param actions Actions to show to the user with different controls.
- * @param onCallAction Handler when the user triggers an action.
+ * @param callDeviceState A call device states that contains states for video, audio, and speaker.
+ * @param modifier The modifier to be applied to the call controls.
+ * @param onCallAction Handler when the user triggers a Call Control Action.
+ * @param actions A list of composable call actions that will be arranged in the layout.
  */
 @Composable
 public fun CallControls(

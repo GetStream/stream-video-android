@@ -39,11 +39,11 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import io.getstream.video.android.common.util.MockUtils
-import io.getstream.video.android.common.util.mockParticipants
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.avatar.UserAvatar
 import io.getstream.video.android.core.ParticipantState
+import io.getstream.video.android.mock.StreamMockUtils
+import io.getstream.video.android.mock.mockParticipantList
 import io.getstream.video.android.ui.common.R
 
 /**
@@ -94,7 +94,7 @@ private fun CallParticipantInfoItem(
         UserAvatar(
             modifier = Modifier.size(VideoTheme.dimens.callParticipantsInfoAvatarSize),
             user = user,
-            showOnlineIndicator = true
+            isShowingOnlineIndicator = true
         )
 
         val userName by participant.userNameOrId.collectAsStateWithLifecycle()
@@ -147,10 +147,10 @@ private fun CallParticipantInfoItem(
 @Preview
 @Composable
 private fun CallParticipantsListPreview() {
-    MockUtils.initializeStreamVideo(LocalContext.current)
+    StreamMockUtils.initializeStreamVideo(LocalContext.current)
     VideoTheme {
         CallParticipantsList(
-            participantsState = mockParticipants,
+            participantsState = mockParticipantList,
             onUserOptionsSelected = {}
         )
     }

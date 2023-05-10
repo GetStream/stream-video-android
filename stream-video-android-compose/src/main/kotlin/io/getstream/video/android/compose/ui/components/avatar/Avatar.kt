@@ -51,13 +51,16 @@ import io.getstream.video.android.ui.common.R
  * An avatar that renders an image from the provided image URL. In case the image URL
  * was empty or there was an error loading the image, it falls back to the initials avatar.
  *
+ * @param modifier Modifier for styling.
  * @param imageUrl The URL of the image to load.
  * @param initials The fallback text.
- * @param modifier Modifier for styling.
  * @param shape The shape of the avatar.
  * @param textStyle The text style of the [initials] text.
  * @param contentScale The scale option used for the content.
  * @param contentDescription Description of the image.
+ * @param requestSize The actual request size.
+ * @param previewPlaceholder A placeholder that will be displayed on the Compose preview (IDE).
+ * @param loadingPlaceholder A placeholder that will be displayed while loading an image.
  * @param initialsAvatarOffset The initials offset to apply to the avatar.
  * @param onClick OnClick action, that can be nullable.
  */

@@ -30,9 +30,17 @@ import io.getstream.video.android.core.call.state.CallAction
 import io.getstream.video.android.core.call.state.LeaveCall
 import io.getstream.video.android.ui.common.R
 
+/**
+ * A call action button represents leaving a call.
+ *
+ * @param modifier Optional Modifier for this action button.
+ * @param enabled Whether or not this action button will handle input events.
+ * @param onCallAction A [CallAction] event that will be fired.
+ */
 @Composable
 public fun LeaveCallAction(
     modifier: Modifier = Modifier,
+    enabled: Boolean = true,
     onCallAction: (CallAction) -> Unit
 ) {
     CallControlActionBackground(
@@ -43,7 +51,7 @@ public fun LeaveCallAction(
         Icon(
             modifier = Modifier
                 .padding(12.dp)
-                .clickable { onCallAction(LeaveCall) },
+                .clickable(enabled = enabled) { onCallAction(LeaveCall) },
             tint = Color.White,
             painter = painterResource(id = R.drawable.stream_video_ic_call_end),
             contentDescription = stringResource(R.string.stream_video_call_controls_leave_call)

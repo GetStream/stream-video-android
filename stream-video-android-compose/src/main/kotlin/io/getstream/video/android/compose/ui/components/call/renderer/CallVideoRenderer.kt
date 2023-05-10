@@ -25,23 +25,21 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import io.getstream.video.android.common.util.MockUtils
-import io.getstream.video.android.common.util.mockCall
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.call.renderer.internal.RegularCallVideoRenderer
 import io.getstream.video.android.compose.ui.components.call.renderer.internal.ScreenSharingCallVideoRenderer
 import io.getstream.video.android.core.Call
+import io.getstream.video.android.mock.StreamMockUtils
+import io.getstream.video.android.mock.mockCall
 
 /**
- * Renders all the CallParticipants, based on the number of people in a call and the call state.
+ * Renders all the participants, based on the number of people in a call and the call state.
  * Also takes into account if there are any screen sharing sessions active and adjusts the UI
  * accordingly.
  *
  * @param call The call that contains all the participants state and tracks.
- * @param onCallAction Handler when the user triggers a Call Control Action.
  * @param modifier Modifier for styling.
  * @param onRender Handler when each of the Video views render their first frame.
- * @param onBackPressed Handler when the user taps back.
  */
 @Composable
 public fun CallVideoRenderer(
@@ -83,7 +81,7 @@ public fun CallVideoRenderer(
 @Preview
 @Composable
 private fun CallVideoRendererPreview() {
-    MockUtils.initializeStreamVideo(LocalContext.current)
+    StreamMockUtils.initializeStreamVideo(LocalContext.current)
     VideoTheme {
         CallVideoRenderer(
             call = mockCall,

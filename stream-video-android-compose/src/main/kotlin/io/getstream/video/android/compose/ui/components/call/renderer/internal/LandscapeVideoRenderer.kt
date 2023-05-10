@@ -38,19 +38,20 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import io.getstream.video.android.common.util.MockUtils
-import io.getstream.video.android.common.util.mockCall
-import io.getstream.video.android.common.util.mockParticipants
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.call.renderer.CallSingleVideoRenderer
 import io.getstream.video.android.compose.ui.components.call.renderer.LocalVideoContent
 import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.ParticipantState
+import io.getstream.video.android.mock.StreamMockUtils
+import io.getstream.video.android.mock.mockCall
+import io.getstream.video.android.mock.mockParticipantList
 
 /**
  * Renders call participants based on the number of people in a call, in landscape mode.
@@ -73,7 +74,7 @@ internal fun BoxScope.LandscapeVideoRenderer(
     parentSize: IntSize,
     onRender: (View) -> Unit
 ) {
-    val remoteParticipants = callParticipants.filter { !it.isLocal }.take(3)
+    val remoteParticipants by call.state.remoteParticipants.collectAsStateWithLifecycle()
 
     when (callParticipants.size) {
         0 -> Unit
@@ -94,7 +95,7 @@ internal fun BoxScope.LandscapeVideoRenderer(
             val rowItemWeight = 1f / callParticipants.size
 
             Row(modifier = modifier) {
-                remoteParticipants.forEach { participant ->
+                remoteParticipants.take(callParticipants.size - 1).forEach { participant ->
                     CallSingleVideoRenderer(
                         modifier = Modifier
                             .fillMaxHeight()
@@ -189,10 +190,14 @@ internal fun BoxScope.LandscapeVideoRenderer(
     if (callParticipants.size in 2..3) {
         val currentLocal by call.state.me.collectAsStateWithLifecycle()
 
-        if (currentLocal != null) {
+        if (currentLocal != null || LocalInspectionMode.current) {
             LocalVideoContent(
                 call = call,
-                localParticipant = currentLocal!!,
+                localParticipant = if (LocalInspectionMode.current) {
+                    callParticipants.first()
+                } else {
+                    currentLocal!!
+                },
                 parentBounds = parentSize,
                 modifier = Modifier
                     .size(
@@ -210,12 +215,12 @@ internal fun BoxScope.LandscapeVideoRenderer(
 @Preview(device = Devices.AUTOMOTIVE_1024p, widthDp = 1440, heightDp = 720)
 @Composable
 private fun LandscapeParticipantsPreview1() {
-    MockUtils.initializeStreamVideo(LocalContext.current)
+    StreamMockUtils.initializeStreamVideo(LocalContext.current)
     VideoTheme {
         val configuration = LocalConfiguration.current
         val screenWidth = configuration.screenWidthDp
         val screenHeight = configuration.screenHeightDp
-        val participants = mockParticipants
+        val participants = mockParticipantList
 
         Box(
             modifier = Modifier.background(color = VideoTheme.colors.appBackground)
@@ -235,12 +240,12 @@ private fun LandscapeParticipantsPreview1() {
 @Preview(device = Devices.AUTOMOTIVE_1024p, widthDp = 1440, heightDp = 720)
 @Composable
 private fun LandscapeParticipantsPreview2() {
-    MockUtils.initializeStreamVideo(LocalContext.current)
+    StreamMockUtils.initializeStreamVideo(LocalContext.current)
     VideoTheme {
         val configuration = LocalConfiguration.current
         val screenWidth = configuration.screenWidthDp
         val screenHeight = configuration.screenHeightDp
-        val participants = mockParticipants
+        val participants = mockParticipantList
 
         Box(
             modifier = Modifier.background(color = VideoTheme.colors.appBackground)
@@ -260,12 +265,12 @@ private fun LandscapeParticipantsPreview2() {
 @Preview(device = Devices.AUTOMOTIVE_1024p, widthDp = 1440, heightDp = 720)
 @Composable
 private fun LandscapeParticipantsPreview3() {
-    MockUtils.initializeStreamVideo(LocalContext.current)
+    StreamMockUtils.initializeStreamVideo(LocalContext.current)
     VideoTheme {
         val configuration = LocalConfiguration.current
         val screenWidth = configuration.screenWidthDp
         val screenHeight = configuration.screenHeightDp
-        val participants = mockParticipants
+        val participants = mockParticipantList
 
         Box(
             modifier = Modifier.background(color = VideoTheme.colors.appBackground)
@@ -285,12 +290,12 @@ private fun LandscapeParticipantsPreview3() {
 @Preview(device = Devices.AUTOMOTIVE_1024p, widthDp = 1440, heightDp = 720)
 @Composable
 private fun LandscapeParticipantsPreview4() {
-    MockUtils.initializeStreamVideo(LocalContext.current)
+    StreamMockUtils.initializeStreamVideo(LocalContext.current)
     VideoTheme {
         val configuration = LocalConfiguration.current
         val screenWidth = configuration.screenWidthDp
         val screenHeight = configuration.screenHeightDp
-        val participants = mockParticipants
+        val participants = mockParticipantList
 
         Box(
             modifier = Modifier.background(color = VideoTheme.colors.appBackground)
@@ -310,12 +315,12 @@ private fun LandscapeParticipantsPreview4() {
 @Preview(device = Devices.AUTOMOTIVE_1024p, widthDp = 1440, heightDp = 720)
 @Composable
 private fun LandscapeParticipantsPreview5() {
-    MockUtils.initializeStreamVideo(LocalContext.current)
+    StreamMockUtils.initializeStreamVideo(LocalContext.current)
     VideoTheme {
         val configuration = LocalConfiguration.current
         val screenWidth = configuration.screenWidthDp
         val screenHeight = configuration.screenHeightDp
-        val participants = mockParticipants
+        val participants = mockParticipantList
 
         Box(
             modifier = Modifier.background(color = VideoTheme.colors.appBackground)
@@ -335,12 +340,12 @@ private fun LandscapeParticipantsPreview5() {
 @Preview(device = Devices.AUTOMOTIVE_1024p, widthDp = 1440, heightDp = 720)
 @Composable
 private fun LandscapeParticipantsPreview6() {
-    MockUtils.initializeStreamVideo(LocalContext.current)
+    StreamMockUtils.initializeStreamVideo(LocalContext.current)
     VideoTheme {
         val configuration = LocalConfiguration.current
         val screenWidth = configuration.screenWidthDp
         val screenHeight = configuration.screenHeightDp
-        val participants = mockParticipants
+        val participants = mockParticipantList
 
         Box(
             modifier = Modifier.background(color = VideoTheme.colors.appBackground)

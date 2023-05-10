@@ -29,9 +29,17 @@ import io.getstream.video.android.core.call.state.CallAction
 import io.getstream.video.android.core.call.state.FlipCamera
 import io.getstream.video.android.ui.common.R
 
+/**
+ * A call action button represents flipping a camera.
+ *
+ * @param modifier Optional Modifier for this action button.
+ * @param enabled Whether or not this action button will handle input events.
+ * @param onCallAction A [CallAction] event that will be fired.
+ */
 @Composable
 public fun FlipCameraAction(
     modifier: Modifier = Modifier,
+    enabled: Boolean = true,
     onCallAction: (CallAction) -> Unit
 ) {
     CallControlActionBackground(
@@ -41,7 +49,7 @@ public fun FlipCameraAction(
         Icon(
             modifier = Modifier
                 .padding(13.dp)
-                .clickable { onCallAction(FlipCamera) },
+                .clickable(enabled = enabled) { onCallAction(FlipCamera) },
             tint = VideoTheme.colors.callActionIconEnabled,
             painter = painterResource(id = R.drawable.stream_video_ic_camera_flip),
             contentDescription = stringResource(R.string.stream_video_call_controls_flip_camera)

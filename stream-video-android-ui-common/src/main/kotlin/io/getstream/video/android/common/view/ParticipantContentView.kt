@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package io.getstream.video.android.core.ui
+package io.getstream.video.android.common.view
 
 import android.content.Context
 import android.util.AttributeSet
@@ -22,10 +22,10 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.widget.LinearLayout
-import io.getstream.video.android.R
 import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.ParticipantState
 import io.getstream.video.android.core.model.MediaTrack
+import io.getstream.video.android.ui.common.R
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 

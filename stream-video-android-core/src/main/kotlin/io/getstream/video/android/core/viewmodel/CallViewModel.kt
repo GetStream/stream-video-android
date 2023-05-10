@@ -20,7 +20,6 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import io.getstream.log.taggedLogger
 import io.getstream.result.Error
-import io.getstream.result.Result
 import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.DeviceStatus
 import io.getstream.video.android.core.StreamVideo
@@ -111,7 +110,7 @@ public class CallViewModel(
             logger.d { "[callMediaState] callMediaState: $it" }
         }.asStateFlow(scope = viewModelScope, initialValue = CallDeviceState())
 
-    private var onLeaveCall: ((Result<Unit>) -> Unit)? = null
+    private var onLeaveCall: (() -> Unit)? = null
 
     public fun joinCall(
         onSuccess: (RtcSession) -> Unit = {},
@@ -174,11 +173,11 @@ public class CallViewModel(
     }
 
     private fun onLeaveCall() {
-        val result = call.leave()
-        onLeaveCall?.invoke(result)
+        call.leave()
+        onLeaveCall?.invoke()
     }
 
-    public fun setOnLeaveCall(onLeaveCall: (Result<Unit>) -> Unit) {
+    public fun setOnLeaveCall(onLeaveCall: () -> Unit) {
         this.onLeaveCall = onLeaveCall
     }
 

@@ -266,14 +266,17 @@ public class Call(
     }
 
     /** Leave the call, but don't end it for other users */
-    fun leave(): Result<Unit> {
-        // TODO
-        return Result.Success(Unit)
+    fun leave() {
+        cleanup()
     }
 
     /** ends the call for yourself as well as other users */
     suspend fun end(): Result<Unit> {
-        return clientImpl.endCall(type, id)
+        // end the call for everyone
+        val result = clientImpl.endCall(type, id)
+        // cleanup
+        leave()
+        return result
     }
 
     suspend fun sendReaction(

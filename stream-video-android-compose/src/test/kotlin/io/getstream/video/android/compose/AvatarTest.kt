@@ -21,10 +21,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import app.cash.paparazzi.DeviceConfig
 import app.cash.paparazzi.Paparazzi
-import io.getstream.video.android.common.util.mockParticipant
 import io.getstream.video.android.compose.base.BaseComposeTest
 import io.getstream.video.android.compose.ui.components.avatar.Avatar
 import io.getstream.video.android.compose.ui.components.avatar.UserAvatar
+import io.getstream.video.android.mock.mockParticipant
 import org.junit.Rule
 import org.junit.Test
 
@@ -51,7 +51,7 @@ internal class AvatarTest : BaseComposeTest() {
             UserAvatar(
                 user = mockParticipant.initialUser,
                 modifier = Modifier.size(82.dp),
-                showOnlineIndicator = true
+                isShowingOnlineIndicator = true
             )
         }
     }

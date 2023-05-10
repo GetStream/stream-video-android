@@ -106,13 +106,17 @@ public class CallState(private val call: Call, private val user: User) {
         _participants.mapState { it.values.toList() }
 
     /** Your own participant state */
-    val me: StateFlow<ParticipantState?> = _participants.mapState {
-        it.get(call.clientImpl.sessionId)
+    public val me: StateFlow<ParticipantState?> = _participants.mapState {
+        it[call.clientImpl.sessionId]
     }
 
     /** participants who are currently speaking */
-    public val activeSpeakers =
+    public val activeSpeakers: StateFlow<List<ParticipantState>> =
         _participants.mapState { it.values.filter { participant -> participant.speaking.value } }
+
+    /** participants other than yourself */
+    public val remoteParticipants: StateFlow<List<ParticipantState>> =
+        _participants.mapState { it.filterKeys { key -> key != me.value?.sessionId }.values.toList() }
 
     /** the dominant speaker */
     private val _dominantSpeaker: MutableStateFlow<ParticipantState?> =
@@ -541,6 +545,10 @@ public class CallState(private val call: Call, private val user: User) {
         val new = _participants.value.toSortedMap()
         new[participant.sessionId] = participant
         _participants.value = new
+    }
+
+    fun clearParticipants() {
+        _participants.value = emptyMap<String, ParticipantState>().toSortedMap()
     }
 
     internal fun disconnect() {

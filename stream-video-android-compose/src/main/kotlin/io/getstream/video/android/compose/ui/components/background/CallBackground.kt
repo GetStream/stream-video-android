@@ -35,14 +35,14 @@ import com.skydoves.landscapist.animation.crossfade.CrossfadePlugin
 import com.skydoves.landscapist.coil.CoilImage
 import com.skydoves.landscapist.components.rememberImageComponent
 import com.skydoves.landscapist.transformation.blur.BlurTransformationPlugin
-import io.getstream.video.android.common.util.MockUtils
-import io.getstream.video.android.common.util.mockParticipants
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.avatar.AvatarImagePreview
 import io.getstream.video.android.core.ParticipantState
 import io.getstream.video.android.core.model.CallType
 import io.getstream.video.android.core.model.CallUser
 import io.getstream.video.android.core.utils.toCallUser
+import io.getstream.video.android.mock.StreamMockUtils
+import io.getstream.video.android.mock.mockParticipantList
 import io.getstream.video.android.ui.common.R
 
 /**
@@ -103,6 +103,15 @@ private fun OutgoingCallBackground(callUsers: List<CallUser>, callType: CallType
     }
 }
 
+/**
+ * A background that displays a different background depending on the [userImage].
+ * If the [userImage] is valid, the background will display a blurred user image.
+ * If the [userImage] is invalid, the background will display a gradient color.
+ *
+ * @param userImage A user image that will be blurred for the background.
+ * @param modifier Modifier for styling.
+ * @param blurRadius A blur radius value to be applied on the background.
+ */
 @Composable
 public fun ParticipantImageBackground(
     userImage: String?,
@@ -147,10 +156,10 @@ private fun DefaultCallBackground() {
 @Preview
 @Composable
 private fun CallBackgroundPreview() {
-    MockUtils.initializeStreamVideo(LocalContext.current)
+    StreamMockUtils.initializeStreamVideo(LocalContext.current)
     VideoTheme {
         CallBackground(
-            participants = mockParticipants.take(1),
+            participants = mockParticipantList.take(1),
             callType = CallType.VIDEO,
             isIncoming = true
         ) {

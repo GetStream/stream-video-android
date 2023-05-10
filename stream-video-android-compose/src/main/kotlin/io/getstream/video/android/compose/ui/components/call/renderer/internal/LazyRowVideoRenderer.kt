@@ -28,13 +28,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
-import io.getstream.video.android.common.util.MockUtils
-import io.getstream.video.android.common.util.mockCall
-import io.getstream.video.android.common.util.mockParticipants
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.call.renderer.CallSingleVideoRenderer
 import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.ParticipantState
+import io.getstream.video.android.mock.StreamMockUtils
+import io.getstream.video.android.mock.mockCall
+import io.getstream.video.android.mock.mockParticipantList
 
 /**
  * Shows a row of call participants.
@@ -85,17 +85,17 @@ private fun ListVideoRenderer(
         labelPosition = Alignment.BottomStart,
         isScreenSharing = true,
         isFocused = participant.sessionId == primarySpeaker?.sessionId,
-        isShowConnectionQualityIndicator = false
+        isShowingConnectionQualityIndicator = false
     )
 }
 
 @Preview
 @Composable
 private fun ParticipantsRowPreview() {
-    MockUtils.initializeStreamVideo(LocalContext.current)
+    StreamMockUtils.initializeStreamVideo(LocalContext.current)
     VideoTheme {
         LazyRowVideoRenderer(
-            call = mockCall, participants = mockParticipants, primarySpeaker = mockParticipants[0]
+            call = mockCall, participants = mockParticipantList, primarySpeaker = mockParticipantList[0]
         )
     }
 }

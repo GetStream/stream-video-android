@@ -40,12 +40,12 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import io.getstream.video.android.common.util.mockCall
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.participants.ParticipantIndicatorIcon
 import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.call.state.CallAction
 import io.getstream.video.android.core.call.state.ShowCallParticipantInfo
+import io.getstream.video.android.mock.mockCall
 import io.getstream.video.android.ui.common.R
 
 /**
@@ -54,6 +54,7 @@ import io.getstream.video.android.ui.common.R
  *
  * Exposes slots required to customize the look and feel.
  *
+ * @param call The call that contains all the participants state and tracks.
  * @param modifier Modifier for styling.
  * @param onBackPressed Handler when the user taps on the default leading content slot.
  * @param leadingContent The leading content, by default [DefaultCallAppBarLeadingContent].

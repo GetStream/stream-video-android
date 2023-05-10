@@ -21,18 +21,17 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.ui.Modifier
 import app.cash.paparazzi.DeviceConfig
 import app.cash.paparazzi.Paparazzi
-import io.getstream.video.android.common.util.mockCall
-import io.getstream.video.android.common.util.mockParticipantList
-import io.getstream.video.android.common.util.mockParticipants
 import io.getstream.video.android.compose.base.BaseComposeTest
 import io.getstream.video.android.compose.ui.components.call.incomingcall.IncomingCallContent
-import io.getstream.video.android.compose.ui.components.call.incomingcall.internal.IncomingCallControls
-import io.getstream.video.android.compose.ui.components.call.incomingcall.internal.IncomingCallDetails
+import io.getstream.video.android.compose.ui.components.call.incomingcall.IncomingCallControls
+import io.getstream.video.android.compose.ui.components.call.incomingcall.IncomingCallDetails
 import io.getstream.video.android.compose.ui.components.call.outgoingcall.OutgoingCallContent
-import io.getstream.video.android.compose.ui.components.call.outgoingcall.internal.OutgoingCallControls
-import io.getstream.video.android.compose.ui.components.call.outgoingcall.internal.OutgoingCallDetails
+import io.getstream.video.android.compose.ui.components.call.outgoingcall.OutgoingCallControls
+import io.getstream.video.android.compose.ui.components.call.outgoingcall.OutgoingCallDetails
 import io.getstream.video.android.core.call.state.CallDeviceState
 import io.getstream.video.android.core.model.CallType
+import io.getstream.video.android.mock.mockCall
+import io.getstream.video.android.mock.mockParticipantList
 import org.junit.Rule
 import org.junit.Test
 
@@ -79,7 +78,7 @@ internal class CallContentTest : BaseComposeTest() {
         snapshot {
             IncomingCallContent(
                 call = mockCall,
-                participants = mockParticipants.takeLast(1),
+                participants = mockParticipantList.takeLast(1),
                 callType = CallType.VIDEO,
                 isCameraEnabled = false,
                 onBackPressed = {}
@@ -92,7 +91,7 @@ internal class CallContentTest : BaseComposeTest() {
         snapshot {
             IncomingCallContent(
                 call = mockCall,
-                participants = mockParticipants,
+                participants = mockParticipantList,
                 callType = CallType.VIDEO,
                 isCameraEnabled = false,
                 onBackPressed = {}
@@ -105,7 +104,7 @@ internal class CallContentTest : BaseComposeTest() {
         snapshot {
             OutgoingCallDetails(
                 callType = CallType.VIDEO,
-                participants = mockParticipants
+                participants = mockParticipantList
             )
         }
     }
@@ -115,7 +114,7 @@ internal class CallContentTest : BaseComposeTest() {
         snapshot {
             OutgoingCallDetails(
                 callType = CallType.VIDEO,
-                participants = mockParticipants
+                participants = mockParticipantList
             )
         }
     }
@@ -125,15 +124,13 @@ internal class CallContentTest : BaseComposeTest() {
         snapshotWithDarkMode {
             Column {
                 OutgoingCallControls(
-                    callDeviceState = CallDeviceState(
-                        isMicrophoneEnabled = true,
-                        isSpeakerphoneEnabled = true,
-                        isCameraEnabled = true
-                    ),
+                    isMicrophoneEnabled = true,
+                    isCameraEnabled = true,
                     onCallAction = { }
                 )
                 OutgoingCallControls(
-                    callDeviceState = CallDeviceState(),
+                    isMicrophoneEnabled = false,
+                    isCameraEnabled = false,
                     onCallAction = { }
                 )
             }
@@ -146,7 +143,7 @@ internal class CallContentTest : BaseComposeTest() {
             OutgoingCallContent(
                 call = mockCall,
                 callType = CallType.VIDEO,
-                participants = mockParticipants.take(1),
+                participants = mockParticipantList.take(1),
                 callDeviceState = CallDeviceState(),
                 modifier = Modifier.fillMaxSize(),
                 onBackPressed = {},
@@ -161,7 +158,7 @@ internal class CallContentTest : BaseComposeTest() {
             OutgoingCallContent(
                 call = mockCall,
                 callType = CallType.VIDEO,
-                participants = mockParticipants,
+                participants = mockParticipantList,
                 callDeviceState = CallDeviceState(),
                 onBackPressed = {}
             ) {}

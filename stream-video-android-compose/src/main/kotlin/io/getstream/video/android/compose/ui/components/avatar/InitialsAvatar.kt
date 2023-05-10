@@ -40,8 +40,10 @@ import io.getstream.video.android.core.utils.initials
  *
  * @param initials The initials to show.
  * @param modifier Modifier for styling.
+ * @param shape The shape of the avatar.
  * @param textStyle The [TextStyle] that will be used for the initials.
  * @param avatarOffset The initials offset to apply to the avatar.
+ * @param initialTransformer A custom transformer to tweak initials.
  */
 @Composable
 internal fun InitialsAvatar(

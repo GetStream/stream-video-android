@@ -14,20 +14,22 @@
  * limitations under the License.
  */
 
-package io.getstream.video.android.common.util
+package io.getstream.video.android.mock
 
 import android.content.Context
 import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.ParticipantState
 import io.getstream.video.android.core.StreamVideo
 import io.getstream.video.android.core.StreamVideoBuilder
-import io.getstream.video.android.core.internal.InternalStreamVideoApi
+import io.getstream.video.android.core.model.MediaTrack
 import io.getstream.video.android.core.model.User
 import org.webrtc.VideoTrack
 import java.util.UUID
 
-@InternalStreamVideoApi
-public object MockUtils {
+/**
+ * Stream Video mock utils to initialize [StreamVideo] for writing unit testings or supporting Compose previews.
+ */
+public object StreamMockUtils {
     @PublishedApi
     internal lateinit var streamVideo: StreamVideo
 
@@ -43,27 +45,18 @@ public object MockUtils {
     }
 }
 
-@InternalStreamVideoApi
-public val mockCall: Call
-    inline get() = Call(
-        client = MockUtils.streamVideo, type = "default", id = "123", user = mockUsers[0]
-    )
+/** Mock a [Call] that contains a mock user. */
+public val mockCall: Call = Call(
+    client = StreamMockUtils.streamVideo, type = "default", id = "123", user = mockUsers[0]
+)
 
-@InternalStreamVideoApi
-public val mockVideoMediaTrack: io.getstream.video.android.core.model.MediaTrack
+/** Mock a new [MediaTrack]. */
+public val mockVideoMediaTrack: MediaTrack
     inline get() = io.getstream.video.android.core.model.VideoTrack(
         UUID.randomUUID().toString(), VideoTrack(123)
     )
 
-@InternalStreamVideoApi
-public val mockParticipant: ParticipantState
-    inline get() = mockParticipants[0]
-
-@InternalStreamVideoApi
-public val mockParticipantList: List<ParticipantState>
-    inline get() = mockParticipants
-
-@InternalStreamVideoApi
+/** Mock a list of [User]. */
 public val mockUsers: List<User>
     inline get() = listOf(
         User(
@@ -98,24 +91,28 @@ public val mockUsers: List<User>
         ),
     )
 
-@InternalStreamVideoApi
-public val mockParticipants: List<ParticipantState>
+/** Mock a new list of [ParticipantState]. */
+public val mockParticipantList: List<ParticipantState>
     inline get() {
         val participants = arrayListOf<ParticipantState>()
-        mockUsers.forEach {
-            val sessionId = if (it == mockUsers.first()) {
+        mockCall.state.clearParticipants()
+        mockUsers.forEach { user ->
+            val sessionId = if (user == mockUsers.first()) {
                 mockCall.sessionId ?: UUID.randomUUID().toString()
             } else {
                 UUID.randomUUID().toString()
             }
             participants.add(
-
                 ParticipantState(
-                    initialUser = it,
+                    initialUser = user,
                     sessionId = sessionId,
                     call = mockCall
-                )
+                ).also { mockCall.state.updateParticipant(it) }
             )
         }
         return participants
     }
+
+/** Mock a new [ParticipantState]. */
+public val mockParticipant: ParticipantState
+    inline get() = mockParticipantList[0]

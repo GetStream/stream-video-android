@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package io.getstream.video.android.compose.ui.components.call.outgoingcall.internal
+package io.getstream.video.android.compose.ui.components.call.incomingcall
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -24,32 +24,37 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.dp
-import io.getstream.video.android.common.util.MockUtils
-import io.getstream.video.android.common.util.mockParticipantList
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.participants.internal.ParticipantAvatars
 import io.getstream.video.android.compose.ui.components.participants.internal.ParticipantInformation
 import io.getstream.video.android.core.ParticipantState
 import io.getstream.video.android.core.model.CallStatus
 import io.getstream.video.android.core.model.CallType
+import io.getstream.video.android.mock.StreamMockUtils
+import io.getstream.video.android.mock.mockParticipantList
 
+/**
+ * A details of an incoming call that displays a list of participant information.
+ *
+ * @param modifier Modifier for styling.
+ * @param callType The type of call, Audio or Video.
+ * @param participants A list of participants to be displayed.
+ */
 @Composable
-internal fun OutgoingCallDetails(
+public fun IncomingCallDetails(
     modifier: Modifier = Modifier,
     callType: CallType,
     participants: List<ParticipantState>
 ) {
     Column(modifier = modifier.fillMaxWidth()) {
-        if (callType == CallType.AUDIO) {
-            ParticipantAvatars(participants = participants)
 
-            Spacer(modifier = Modifier.height(32.dp))
-        }
+        ParticipantAvatars(participants = participants)
+
+        Spacer(modifier = Modifier.height(VideoTheme.dimens.callParticipantsAvatarsMargin))
 
         ParticipantInformation(
             callType = callType,
-            callStatus = CallStatus.Outgoing,
+            callStatus = CallStatus.Incoming,
             participants = participants
         )
     }
@@ -57,12 +62,12 @@ internal fun OutgoingCallDetails(
 
 @Preview
 @Composable
-private fun OutgoingCallDetailsPreview() {
-    MockUtils.initializeStreamVideo(LocalContext.current)
+private fun IncomingCallDetailsPreview() {
+    StreamMockUtils.initializeStreamVideo(LocalContext.current)
     VideoTheme {
-        OutgoingCallDetails(
-            callType = CallType.AUDIO,
-            participants = mockParticipantList,
+        IncomingCallDetails(
+            callType = CallType.VIDEO,
+            participants = mockParticipantList
         )
     }
 }

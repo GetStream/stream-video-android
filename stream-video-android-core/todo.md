@@ -13,7 +13,7 @@
 ### High level issues
 
 - [ ] Join flow is too slow
-- [ ] Call id should probably be optional and default to a random UUID
+- [X] Call id should probably be optional and default to a random UUID
 - [ ] Chat integration needs a good review to see what we can simplify
 
 ### Available tasks up for grabs (little things, easy to do)
@@ -28,7 +28,7 @@
 - [ ] Video calling tutorial & Feedback cycle with team
 - [ ] Livestream tutorial & Feedback cycle with team
 - [ ] Audio room tutorial & Feedback cycle with team
-- [ ] Low level docs
+- [X] Low level docs
 - [ ] UI cookbook
 - [ ] UI components
 
@@ -73,8 +73,9 @@
 
 ### State TODO
 
-- [ ] Permissions requests need an accept/reject flow
 - [ ] State for: Speaking while muted, Network issue (your own connection)
+- [ ] If you answer a phone call while you're on this call, your audio and video should be muted automatically.]
+- [X] Permissions requests need an accept/reject flow
 - [X] Call settings need to be used everywhere. There are still some hardcoded settings
 - [X] Member state isn't implemented fully. Could be either a state or just a data class
 - [X] Call state isn't setup fully on join

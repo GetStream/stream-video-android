@@ -29,27 +29,30 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import io.getstream.video.android.common.util.MockUtils
-import io.getstream.video.android.common.util.mockCall
-import io.getstream.video.android.common.util.mockParticipants
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.avatar.LocalAvatarPreviewPlaceholder
 import io.getstream.video.android.compose.ui.components.background.CallBackground
 import io.getstream.video.android.compose.ui.components.call.CallAppBar
-import io.getstream.video.android.compose.ui.components.call.incomingcall.internal.IncomingCallControls
-import io.getstream.video.android.compose.ui.components.call.incomingcall.internal.IncomingCallDetails
 import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.ParticipantState
 import io.getstream.video.android.core.call.state.CallAction
 import io.getstream.video.android.core.call.state.CallDeviceState
 import io.getstream.video.android.core.model.CallType
 import io.getstream.video.android.core.viewmodel.CallViewModel
+import io.getstream.video.android.mock.StreamMockUtils
+import io.getstream.video.android.mock.mockCall
+import io.getstream.video.android.mock.mockParticipantList
 
 /**
  * Represents the Incoming Call state and UI, when the user receives a call from other people.
  *
  * @param callViewModel The [CallViewModel] used to provide state and various handlers in the call.
+ * @param callType Represent the call type is a video or an audio.
  * @param modifier Modifier for styling.
+ * @param isShowingHeader Weather or not the app bar will be shown.
+ * @param callHeaderContent Content shown for the call header.
+ * @param callDetailsContent Content shown for call details, such as call participant information.
+ * @param callControlsContent Content shown for controlling call, such as accepting a call or declining a call.
  * @param onBackPressed Handler when the user taps on the back button.
  * @param onCallAction Handler used when the user interacts with Call UI.
  */
@@ -58,14 +61,14 @@ public fun IncomingCallContent(
     callViewModel: CallViewModel,
     callType: CallType,
     modifier: Modifier = Modifier,
-    showHeader: Boolean = true,
-    callHeader: (@Composable ColumnScope.() -> Unit)? = null,
-    callDetails: (
+    isShowingHeader: Boolean = true,
+    callHeaderContent: (@Composable ColumnScope.() -> Unit)? = null,
+    callDetailsContent: (
         @Composable ColumnScope.(
             participants: List<ParticipantState>, topPadding: Dp
         ) -> Unit
     )? = null,
-    callControls: (@Composable BoxScope.() -> Unit)? = null,
+    callControlsContent: (@Composable BoxScope.() -> Unit)? = null,
     onBackPressed: () -> Unit,
     onCallAction: (CallAction) -> Unit = callViewModel::onCallAction,
 ) {
@@ -76,29 +79,43 @@ public fun IncomingCallContent(
         callType = callType,
         callDeviceState = callDeviceState,
         modifier = modifier,
-        showHeader = showHeader,
-        callHeader = callHeader,
-        callDetails = callDetails,
-        callControls = callControls,
+        isShowingHeader = isShowingHeader,
+        callHeaderContent = callHeaderContent,
+        callDetailsContent = callDetailsContent,
+        callControlsContent = callControlsContent,
         onBackPressed = onBackPressed,
         onCallAction = onCallAction
     )
 }
 
+/**
+ * Represents the Incoming Call state and UI, when the user receives a call from other people.
+ *
+ * @param call The call contains states and will be rendered with participants.
+ * @param callDeviceState A call device states that contains states for video, audio, and speaker.
+ * @param callType Represent the call type is a video or an audio.
+ * @param modifier Modifier for styling.
+ * @param isShowingHeader Weather or not the app bar will be shown.
+ * @param callHeaderContent Content shown for the call header.
+ * @param callDetailsContent Content shown for call details, such as call participant information.
+ * @param callControlsContent Content shown for controlling call, such as accepting a call or declining a call.
+ * @param onBackPressed Handler when the user taps on the back button.
+ * @param onCallAction Handler used when the user interacts with Call UI.
+ */
 @Composable
 public fun IncomingCallContent(
     call: Call,
     callType: CallType,
     callDeviceState: CallDeviceState,
     modifier: Modifier = Modifier,
-    showHeader: Boolean = true,
-    callHeader: (@Composable ColumnScope.() -> Unit)? = null,
-    callDetails: (
+    isShowingHeader: Boolean = true,
+    callHeaderContent: (@Composable ColumnScope.() -> Unit)? = null,
+    callDetailsContent: (
         @Composable ColumnScope.(
             participants: List<ParticipantState>, topPadding: Dp
         ) -> Unit
     )? = null,
-    callControls: (@Composable BoxScope.() -> Unit)? = null,
+    callControlsContent: (@Composable BoxScope.() -> Unit)? = null,
     onBackPressed: () -> Unit,
     onCallAction: (CallAction) -> Unit = {},
 ) {
@@ -109,11 +126,11 @@ public fun IncomingCallContent(
         callType = callType,
         participants = participants,
         isCameraEnabled = callDeviceState.isCameraEnabled,
-        showHeader = showHeader,
+        isShowingHeader = isShowingHeader,
         modifier = modifier,
-        callHeader = callHeader,
-        callDetails = callDetails,
-        callControls = callControls,
+        callHeaderContent = callHeaderContent,
+        callDetailsContent = callDetailsContent,
+        callControlsContent = callControlsContent,
         onBackPressed = onBackPressed,
         onCallAction = onCallAction
     )
@@ -123,11 +140,12 @@ public fun IncomingCallContent(
  * Stateless variant of the Incoming call UI, which you can use to build your own custom logic that
  * powers the state and handlers.
  *
+ * @param call The call contains states and will be rendered with participants.
  * @param callType The type of call, Audio or Video.
  * @param participants People participating in the call.
  * @param isCameraEnabled Whether the video should be enabled when entering the call or not.
  * @param modifier Modifier for styling.
- * @param showHeader If the app bar header is shown or not.
+ * @param isShowingHeader If the app bar header is shown or not.
  * @param onBackPressed Handler when the user taps on the back button.
  * @param onCallAction Handler used when the user interacts with Call UI.
  */
@@ -138,14 +156,14 @@ internal fun IncomingCallContent(
     participants: List<ParticipantState>,
     isCameraEnabled: Boolean,
     modifier: Modifier = Modifier,
-    showHeader: Boolean = true,
-    callHeader: (@Composable ColumnScope.() -> Unit)? = null,
-    callDetails: (
+    isShowingHeader: Boolean = true,
+    callHeaderContent: (@Composable ColumnScope.() -> Unit)? = null,
+    callDetailsContent: (
         @Composable ColumnScope.(
             participants: List<ParticipantState>, topPadding: Dp
         ) -> Unit
     )? = null,
-    callControls: (@Composable BoxScope.() -> Unit)? = null,
+    callControlsContent: (@Composable BoxScope.() -> Unit)? = null,
     onBackPressed: () -> Unit,
     onCallAction: (CallAction) -> Unit,
 ) {
@@ -153,8 +171,8 @@ internal fun IncomingCallContent(
         modifier = modifier, participants = participants, callType = callType, isIncoming = true
     ) {
         Column {
-            if (showHeader) {
-                callHeader?.invoke(this) ?: CallAppBar(
+            if (isShowingHeader) {
+                callHeaderContent?.invoke(this) ?: CallAppBar(
                     call = call,
                     onBackPressed = onBackPressed,
                     onCallAction = onCallAction
@@ -167,7 +185,7 @@ internal fun IncomingCallContent(
                 VideoTheme.dimens.avatarAppbarPadding
             }
 
-            callDetails?.invoke(this, participants, topPadding) ?: IncomingCallDetails(
+            callDetailsContent?.invoke(this, participants, topPadding) ?: IncomingCallDetails(
                 modifier = Modifier
                     .align(Alignment.CenterHorizontally)
                     .padding(top = topPadding),
@@ -176,7 +194,7 @@ internal fun IncomingCallContent(
             )
         }
 
-        callControls?.invoke(this) ?: IncomingCallControls(
+        callControlsContent?.invoke(this) ?: IncomingCallControls(
             modifier = Modifier
                 .align(Alignment.BottomCenter)
                 .padding(bottom = VideoTheme.dimens.incomingCallOptionsBottomPadding),
@@ -190,7 +208,7 @@ internal fun IncomingCallContent(
 @Preview
 @Composable
 private fun IncomingCallPreview1() {
-    MockUtils.initializeStreamVideo(LocalContext.current)
+    StreamMockUtils.initializeStreamVideo(LocalContext.current)
     VideoTheme {
         CompositionLocalProvider(
             LocalAvatarPreviewPlaceholder provides
@@ -198,7 +216,7 @@ private fun IncomingCallPreview1() {
         ) {
             IncomingCallContent(
                 call = mockCall,
-                participants = mockParticipants.takeLast(1),
+                participants = mockParticipantList.takeLast(1),
                 callType = CallType.VIDEO,
                 isCameraEnabled = false,
                 onBackPressed = {}
@@ -210,7 +228,7 @@ private fun IncomingCallPreview1() {
 @Preview
 @Composable
 private fun IncomingCallPreview2() {
-    MockUtils.initializeStreamVideo(LocalContext.current)
+    StreamMockUtils.initializeStreamVideo(LocalContext.current)
     VideoTheme {
         CompositionLocalProvider(
             LocalAvatarPreviewPlaceholder provides
@@ -218,7 +236,7 @@ private fun IncomingCallPreview2() {
         ) {
             IncomingCallContent(
                 call = mockCall,
-                participants = mockParticipants,
+                participants = mockParticipantList,
                 callType = CallType.VIDEO,
                 isCameraEnabled = false,
                 onBackPressed = {}
