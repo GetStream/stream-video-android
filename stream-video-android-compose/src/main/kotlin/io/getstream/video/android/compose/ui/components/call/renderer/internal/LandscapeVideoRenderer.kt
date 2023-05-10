@@ -38,6 +38,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.IntSize
@@ -94,7 +95,7 @@ internal fun BoxScope.LandscapeVideoRenderer(
             val rowItemWeight = 1f / callParticipants.size
 
             Row(modifier = modifier) {
-                remoteParticipants.forEach { participant ->
+                remoteParticipants.take(callParticipants.size - 1).forEach { participant ->
                     CallSingleVideoRenderer(
                         modifier = Modifier
                             .fillMaxHeight()
@@ -189,10 +190,14 @@ internal fun BoxScope.LandscapeVideoRenderer(
     if (callParticipants.size in 2..3) {
         val currentLocal by call.state.me.collectAsStateWithLifecycle()
 
-        if (currentLocal != null) {
+        if (currentLocal != null || LocalInspectionMode.current) {
             LocalVideoContent(
                 call = call,
-                localParticipant = currentLocal!!,
+                localParticipant = if (LocalInspectionMode.current) {
+                    callParticipants.first()
+                } else {
+                    currentLocal!!
+                },
                 parentBounds = parentSize,
                 modifier = Modifier
                     .size(

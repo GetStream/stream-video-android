@@ -106,7 +106,7 @@ public class CallState(private val call: Call, private val user: User) {
         _participants.mapState { it.values.toList() }
 
     /** Your own participant state */
-    val me: StateFlow<ParticipantState?> = _participants.mapState {
+    public val me: StateFlow<ParticipantState?> = _participants.mapState {
         it[call.clientImpl.sessionId]
     }
 
@@ -545,6 +545,10 @@ public class CallState(private val call: Call, private val user: User) {
         val new = _participants.value.toSortedMap()
         new[participant.sessionId] = participant
         _participants.value = new
+    }
+
+    fun clearParticipants() {
+        _participants.value = emptyMap<String, ParticipantState>().toSortedMap()
     }
 
     internal fun disconnect() {
