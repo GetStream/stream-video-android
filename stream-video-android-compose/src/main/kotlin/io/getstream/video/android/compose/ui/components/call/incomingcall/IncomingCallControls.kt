@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package io.getstream.video.android.compose.ui.components.call.incomingcall.internal
+package io.getstream.video.android.compose.ui.components.call.incomingcall
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -32,6 +32,14 @@ import io.getstream.video.android.compose.ui.components.call.controls.actions.To
 import io.getstream.video.android.compose.ui.components.extensions.toggleAlpha
 import io.getstream.video.android.core.call.state.CallAction
 
+/**
+ * A list of call control action buttons that allows people to accept or cancel a call.
+ *
+ * @param modifier Modifier for styling.
+ * @param isVideoCall Represents is a video call or not.
+ * @param isCameraEnabled Represents is camera enabled or not.
+ * @param onCallAction Handler used when the user interacts with Call UI.
+ */
 @Composable
 public fun IncomingCallControls(
     modifier: Modifier = Modifier,

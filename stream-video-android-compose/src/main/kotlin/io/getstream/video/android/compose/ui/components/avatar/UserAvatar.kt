@@ -47,6 +47,12 @@ import io.getstream.video.android.core.model.User
  * @param textStyle The [TextStyle] that will be used for the initials.
  * @param contentScale The scale option used for the content.
  * @param contentDescription The content description of the avatar.
+ * @param requestSize The actual request size.
+ * @param previewPlaceholder A placeholder that will be displayed on the Compose preview (IDE).
+ * @param loadingPlaceholder A placeholder that will be displayed while loading an image.
+ * @param isShowingOnlineIndicator Represents to show an online indicator.
+ * @param onlineIndicatorAlignment An alignment for positioning the online indicator.
+ * @param onlineIndicator A custom composable to represent an online indicator.
  * @param initialsAvatarOffset The initials offset to apply to the avatar.
  * @param onClick The handler when the user clicks on the avatar.
  */
@@ -61,9 +67,9 @@ public fun UserAvatar(
     requestSize: IntSize = IntSize(DEFAULT_IMAGE_SIZE, DEFAULT_IMAGE_SIZE),
     @DrawableRes previewPlaceholder: Int = LocalAvatarPreviewProvider.getLocalAvatarPreviewPlaceholder(),
     @DrawableRes loadingPlaceholder: Int? = LocalAvatarPreviewProvider.getLocalAvatarLoadingPlaceholder(),
-    showOnlineIndicator: Boolean = false,
-    onlineIndicatorAlignment: OnlineIndicatorAlignment = OnlineIndicatorAlignment.TopEnd,
     initialsAvatarOffset: DpOffset = DpOffset(0.dp, 0.dp),
+    isShowingOnlineIndicator: Boolean = false,
+    onlineIndicatorAlignment: OnlineIndicatorAlignment = OnlineIndicatorAlignment.TopEnd,
     onlineIndicator: @Composable BoxScope.() -> Unit = {
         DefaultOnlineIndicator(onlineIndicatorAlignment)
     },
@@ -85,7 +91,7 @@ public fun UserAvatar(
             initialsAvatarOffset = initialsAvatarOffset
         )
 
-        if (showOnlineIndicator) {
+        if (isShowingOnlineIndicator) {
             onlineIndicator()
         }
     }

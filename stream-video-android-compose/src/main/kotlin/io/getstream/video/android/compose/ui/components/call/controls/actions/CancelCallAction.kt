@@ -29,9 +29,17 @@ import io.getstream.video.android.core.call.state.CallAction
 import io.getstream.video.android.core.call.state.DeclineCall
 import io.getstream.video.android.ui.common.R
 
+/**
+ * A call action button represents canceling a call.
+ *
+ * @param modifier Optional Modifier for this action button.
+ * @param enabled Whether or not this action button will handle input events.
+ * @param onCallAction A [CallAction] event that will be fired.
+ */
 @Composable
 public fun CancelCallAction(
     modifier: Modifier = Modifier,
+    enabled: Boolean = true,
     onCallAction: (CallAction) -> Unit,
 ) {
     IconButton(
@@ -39,6 +47,7 @@ public fun CancelCallAction(
             color = VideoTheme.colors.errorAccent,
             shape = VideoTheme.shapes.callButton
         ),
+        enabled = enabled,
         onClick = { onCallAction(DeclineCall) },
         content = {
             Icon(

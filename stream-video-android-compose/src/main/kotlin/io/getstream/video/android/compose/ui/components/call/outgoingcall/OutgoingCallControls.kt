@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package io.getstream.video.android.compose.ui.components.call.outgoingcall.internal
+package io.getstream.video.android.compose.ui.components.call.outgoingcall
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -35,17 +35,22 @@ import io.getstream.video.android.compose.ui.components.call.controls.actions.To
 import io.getstream.video.android.compose.ui.components.call.controls.actions.ToggleMicrophoneAction
 import io.getstream.video.android.compose.ui.components.extensions.toggleAlpha
 import io.getstream.video.android.core.call.state.CallAction
-import io.getstream.video.android.core.call.state.CallDeviceState
 
+/**
+ * A list of call control action buttons that allows people to accept or cancel a call.
+ *
+ * @param modifier Modifier for styling.
+ * @param isCameraEnabled Represents is camera enabled or not.
+ * @param isMicrophoneEnabled Represents is microphone enabled or not.
+ * @param onCallAction Handler used when the user interacts with Call UI.
+ */
 @Composable
-internal fun OutgoingCallControls(
-    callDeviceState: CallDeviceState,
+public fun OutgoingCallControls(
+    isCameraEnabled: Boolean,
+    isMicrophoneEnabled: Boolean,
     modifier: Modifier = Modifier,
     onCallAction: (CallAction) -> Unit,
 ) {
-    val isMicEnabled = callDeviceState.isMicrophoneEnabled
-    val isCameraEnabled = callDeviceState.isCameraEnabled
-
     Column(
         modifier = modifier.fillMaxWidth(),
         horizontalAlignment = Alignment.CenterHorizontally
@@ -57,13 +62,13 @@ internal fun OutgoingCallControls(
         ) {
             ToggleMicrophoneAction(
                 modifier = Modifier
-                    .toggleAlpha(isMicEnabled)
+                    .toggleAlpha(isMicrophoneEnabled)
                     .background(
                         color = VideoTheme.colors.appBackground,
                         shape = VideoTheme.shapes.callButton
                     )
                     .size(VideoTheme.dimens.mediumButtonSize),
-                isMicrophoneEnabled = isMicEnabled,
+                isMicrophoneEnabled = isMicrophoneEnabled,
                 onCallAction = onCallAction,
             )
 
@@ -95,16 +100,14 @@ private fun OutgoingCallOptionsPreview() {
     VideoTheme {
         Column {
             OutgoingCallControls(
-                callDeviceState = CallDeviceState(
-                    isMicrophoneEnabled = true,
-                    isSpeakerphoneEnabled = true,
-                    isCameraEnabled = true
-                ),
+                isMicrophoneEnabled = true,
+                isCameraEnabled = true,
                 onCallAction = { }
             )
 
             OutgoingCallControls(
-                callDeviceState = CallDeviceState(),
+                isMicrophoneEnabled = false,
+                isCameraEnabled = false,
                 onCallAction = { }
             )
         }

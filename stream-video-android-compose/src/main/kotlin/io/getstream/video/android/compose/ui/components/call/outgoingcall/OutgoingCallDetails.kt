@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package io.getstream.video.android.compose.ui.components.call.outgoingcall.internal
+package io.getstream.video.android.compose.ui.components.call.outgoingcall
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -34,8 +34,15 @@ import io.getstream.video.android.core.ParticipantState
 import io.getstream.video.android.core.model.CallStatus
 import io.getstream.video.android.core.model.CallType
 
+/**
+ * A details of an outgoing call that displays a list of participant information.
+ *
+ * @param callType The type of call, Audio or Video.
+ * @param callType The type of call, Audio or Video.
+ * @param participants A list of participants to be displayed.
+ */
 @Composable
-internal fun OutgoingCallDetails(
+public fun OutgoingCallDetails(
     modifier: Modifier = Modifier,
     callType: CallType,
     participants: List<ParticipantState>
