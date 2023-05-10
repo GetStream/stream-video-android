@@ -32,7 +32,8 @@ import kotlinx.coroutines.launch
  *
  * Allows you to easily integrate push notification handling in your app, by extending the Activity.
  */
-public abstract class AbstractNotificationActivity : ComponentActivity(),
+public abstract class AbstractNotificationActivity :
+    ComponentActivity(),
     StreamVideoProvider {
 
     private val streamVideo: StreamVideo by lazy { getStreamVideo(this) }
