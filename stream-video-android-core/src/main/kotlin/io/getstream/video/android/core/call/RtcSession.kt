@@ -606,46 +606,58 @@ public class RtcSession internal constructor(
         if (publisher == null) {
             return
         }
+        val enabledRids = event.changePublishQuality.video_senders.firstOrNull()?.layers?.associate { it.name to it.active }
+        val transceiver = publisher?.videoTransceiver ?: return
+        // enable or disable tracks
+        val encodings = transceiver.sender.parameters.encodings.toList()
+        for (encoding in encodings) {
+            println(encoding)
+            encoding.active = enabledRids?.get(encoding.rid ?: "") ?: false
+        }
+
+        logger.i { "marking layers active $enabledRids "}
+
+        transceiver.sender.parameters.encodings.clear()
+        transceiver.sender.parameters.encodings.addAll(encodings)
+
+        //publisher?.videoTransceiver?.sender?.parameters = transceiver.sender.parameters
+
 
         return
 
-        val transceiver = publisher?.videoTransceiver ?: return
-        // TODO: fixme
 
-        val enabledRids =
-            event.changePublishQuality.video_senders.firstOrNull()?.layers?.filter { it.active }
-                ?.map { it.name } ?: emptyList()
 
         logger.v { "[updatePublishQuality] #sfu; updateQuality: $enabledRids" }
         val params = transceiver.sender.parameters
 
-        val updatedEncodings = mutableListOf<RtpParameters.Encoding>()
+
+
 
         var encodingChanged = false
         logger.v { "[updatePublishQuality] #sfu; currentQuality: $params" }
 
-        for (encoding in params.encodings) {
-            if (encoding.rid != null) {
-                val shouldEnable = encoding.rid in enabledRids
-
-                if (shouldEnable && encoding.active) {
-                    updatedEncodings.add(encoding)
-                } else if (!shouldEnable && !encoding.active) {
-                    updatedEncodings.add(encoding)
-                } else {
-                    encodingChanged = true
-                    encoding.active = shouldEnable
-                    updatedEncodings.add(encoding)
-                }
-            }
-        }
-        if (encodingChanged) {
-            logger.v { "[updatePublishQuality] #sfu; updatedEncodings: $updatedEncodings" }
-            params.encodings.clear()
-            params.encodings.addAll(updatedEncodings)
-
-            publisher?.videoTransceiver?.sender?.parameters = params
-        }
+//        for (encoding in params.encodings) {
+//            if (encoding.rid != null) {
+//                val shouldEnable = encoding.rid in enabledRids
+//
+//                if (shouldEnable && encoding.active) {
+//                    updatedEncodings.add(encoding)
+//                } else if (!shouldEnable && !encoding.active) {
+//                    updatedEncodings.add(encoding)
+//                } else {
+//                    encodingChanged = true
+//                    encoding.active = shouldEnable
+//                    updatedEncodings.add(encoding)
+//                }
+//            }
+//        }
+//        if (encodingChanged && false) {
+////            logger.v { "[updatePublishQuality] #sfu; updatedEncodings: $updatedEncodings" }
+//            params.encodings.clear()
+//            params.encodings.addAll(updatedEncodings)
+//
+//            publisher?.videoTransceiver?.sender?.parameters = params
+//        }
     }
 
     /**
@@ -656,15 +668,28 @@ public class RtcSession internal constructor(
      *
      * Since the viewmodel knows what's actually displayed
      */
-    private fun updateParticipantsSubscriptions(useDefaults: Boolean = false) {
-        // if we're loading the UI for the first time we should subscribe to the top 5 by default
+    internal fun defaultTracks(): List<TrackSubscriptionDetails> {
+        val sortedParticipants = call.state.sortedParticipants.value
+        println("sortedParticipants: $sortedParticipants")
+        val otherParticipants = sortedParticipants.filter { it.sessionId != sessionId }.take(5)
+        val tracks = otherParticipants
+            .map { participant ->
+                TrackSubscriptionDetails(
+                    user_id = participant.user.value.id,
+                    track_type = TrackType.TRACK_TYPE_VIDEO,
+                    dimension = VideoDimension(960, 720),
+                    session_id = participant.sessionId
+                )
+            }
 
-        val participants = call.state.participants.value
+        return tracks
+    }
 
-        // send the subscriptions based on what's visible
+    internal fun visibleTracks(): List<TrackSubscriptionDetails> {
+        val participants = call.state.remoteParticipants.value
         var tracks = participants.map { participant ->
             val trackDisplay = trackDisplayResolution[participant.sessionId] ?: emptyMap()
-            trackDisplay.values.filter { it.visible && it.sessionId != sessionId }.map { display ->
+            trackDisplay.values.filter { it.visible }.map { display ->
                 TrackSubscriptionDetails(
                     user_id = participant.user.value.id,
                     track_type = display.trackType,
@@ -673,29 +698,25 @@ public class RtcSession internal constructor(
                 )
             }
         }.flatten()
+        return tracks
+    }
 
-        // by default subscribe to the top 5 sorted participants
-        // useDefaults && tracks.isEmpty()
-        // TODO: fix this after the UI better indicates what's being shown
-        if (true) {
-            tracks =
-                call.state.sortedParticipants.value.filter { it.sessionId != sessionId }.take(5)
-                    .map { participant ->
-                        TrackSubscriptionDetails(
-                            user_id = participant.user.value.id,
-                            track_type = TrackType.TRACK_TYPE_VIDEO,
-                            dimension = VideoDimension(960, 720),
-                            session_id = participant.sessionId
-                        )
-                    }
+    private fun updateParticipantsSubscriptions(useDefaults: Boolean = false) {
+        logger.d { "[updateParticipantsSubscriptions] #sfu; useDefaults: $useDefaults" }
+        // default is to subscribe to the top 5 sorted participants
+        val tracks = if (useDefaults) {
+            defaultTracks()
+        } else {
+            // if we're not using the default, sub to visible tracks
+            visibleTracks()
         }
 
         val request = UpdateSubscriptionsRequest(
             session_id = sessionId,
             tracks = tracks
         )
-
-        logger.d { "[updateParticipantsSubscriptions] #sfu; request: $request" }
+        val sessionsIds = tracks.map { it.session_id }
+        logger.d { "[updateParticipantsSubscriptions] #sfu; $sessionId subscribing to : $sessionsIds" }
 
         // can be empty if you're alone in a call
         if (tracks.isNotEmpty()) {
@@ -706,6 +727,7 @@ public class RtcSession internal constructor(
                     }
 
                     is Failure -> {
+                        // TODO: this breaks the call, we should handle this better
                         logger.e { "[updateParticipantsSubscriptions] #sfu; failed: $result" }
                     }
                 }
@@ -1063,7 +1085,6 @@ public class RtcSession internal constructor(
             videoMap[trackType] ?: TrackDisplayResolution(sessionId, trackType, defaultDimensions)
         resolution.visible = visible
 
-        updateParticipantsSubscriptions()
         // Updates are debounced
         trackDisplayResolutionUpdates.value = trackDisplayResolution
     }
