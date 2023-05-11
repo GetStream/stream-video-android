@@ -32,7 +32,7 @@ import io.getstream.log.taggedLogger
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.core.StreamVideo
 import io.getstream.video.android.core.logging.LoggingLevel
-import io.getstream.video.android.core.user.UserPreferencesManager
+import io.getstream.video.android.datastore.delegate.StreamUserDataStore
 import io.getstream.video.android.dogfooding.ui.call.CallActivity
 import io.getstream.video.android.model.mapper.toTypeAndId
 import kotlinx.coroutines.launch
@@ -86,10 +86,10 @@ class DeeplinkingActivity : ComponentActivity() {
     }
 
     private fun logIn() {
-        val userPreferences = UserPreferencesManager.initialize(this)
-        val user = userPreferences.getUserCredentials()
-        val apiKey = userPreferences.getApiKey()
-        val token = userPreferences.getUserToken()
+        val dataStore = StreamUserDataStore.install(this)
+        val user = dataStore.user.value
+        val apiKey = dataStore.apiKey.value
+        val token = dataStore.userToken.value
 
         if (user != null) {
             logger.d { "[logIn] selectedUser: $user" }

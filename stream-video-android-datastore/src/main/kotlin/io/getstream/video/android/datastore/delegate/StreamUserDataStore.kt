@@ -22,19 +22,29 @@ import androidx.datastore.core.DataStoreFactory
 import androidx.datastore.dataStoreFile
 import com.google.crypto.tink.Aead
 import com.google.crypto.tink.KeyTemplates
+import com.google.crypto.tink.aead.AeadConfig
 import com.google.crypto.tink.integration.android.AndroidKeysetManager
 import io.getstream.log.StreamLog
+import io.getstream.video.android.datastore.flow.asStateFlow
 import io.getstream.video.android.datastore.model.StreamUserPreferences
 import io.getstream.video.android.datastore.serializer.UserSerializer
 import io.getstream.video.android.datastore.serializer.encrypted
 import io.getstream.video.android.model.ApiKey
 import io.getstream.video.android.model.User
 import io.getstream.video.android.model.UserDevices
-import kotlinx.coroutines.flow.Flow
+import io.getstream.video.android.model.UserToken
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.cancel
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.map
 
 public class StreamUserDataStore constructor(dataStore: DataStore<StreamUserPreferences?>) :
     DataStore<StreamUserPreferences?> by dataStore {
+
+    @PublishedApi
+    internal val scope: CoroutineScope = CoroutineScope(Dispatchers.IO + SupervisorJob())
 
     public suspend fun updateUserPreferences(streamUserPreferences: StreamUserPreferences) {
         updateData { streamUserPreferences }
@@ -42,35 +52,45 @@ public class StreamUserDataStore constructor(dataStore: DataStore<StreamUserPref
 
     public suspend fun updateUser(user: User?) {
         updateData { preferences ->
-            preferences?.copy(user = user)
+            (preferences ?: StreamUserPreferences()).copy(user = user)
         }
     }
 
     public suspend fun updateApiKey(apiKey: ApiKey) {
         updateData { preferences ->
-            preferences?.copy(apiKey = apiKey)
+            (preferences ?: StreamUserPreferences()).copy(apiKey = apiKey)
+        }
+    }
+
+    public suspend fun updateUserToken(userToken: UserToken) {
+        updateData { preferences ->
+            (preferences ?: StreamUserPreferences()).copy(userToken = userToken)
         }
     }
 
     public suspend fun updateUserDevices(userDevices: UserDevices) {
         updateData { preferences ->
-            preferences?.copy(userDevices = userDevices)
+            (preferences ?: StreamUserPreferences()).copy(userDevices = userDevices)
         }
+    }
+
+    public fun cancelJobs() {
+        scope.cancel()
     }
 
     public suspend fun clear(): StreamUserPreferences? = updateData { null }
 
-    public val preferences: Flow<StreamUserPreferences?>
-        inline get() = data
+    public val user: StateFlow<User?> = data.map { it?.user }.asStateFlow(null, scope)
 
-    public val user: Flow<User?>
-        inline get() = preferences.map { it?.user }
+    public val apiKey: StateFlow<ApiKey> =
+        data.map { it?.apiKey.orEmpty() }.asStateFlow("", scope)
 
-    public val apiKey: Flow<ApiKey?>
-        inline get() = preferences.map { it?.apiKey }
+    public val userToken: StateFlow<UserToken> =
+        data.map { it?.userToken.orEmpty() }.asStateFlow("", scope)
 
-    public val userDevices: Flow<UserDevices?>
-        inline get() = preferences.map { it?.userDevices }
+    public val userDevices: StateFlow<UserDevices?> =
+        data.map { it?.userDevices ?: UserDevices() }
+            .asStateFlow(UserDevices(), scope)
 
     public companion object {
         /**
@@ -108,8 +128,17 @@ public class StreamUserDataStore constructor(dataStore: DataStore<StreamUserPref
         /**
          * Installs a new [StreamUserDataStore] instance to be used.
          */
-        public fun install(context: Context) {
+        public fun install(context: Context): StreamUserDataStore {
             synchronized(this) {
+                if (isInstalled) {
+                    StreamLog.e("StreamVideo") {
+                        "The $internalStreamUserDataStore is already installed but you've tried to " +
+                            "install a new exception handler."
+                    }
+                    return internalStreamUserDataStore!!
+                }
+
+                AeadConfig.register()
                 val aead = AndroidKeysetManager.Builder()
                     .withSharedPref(context, "master_keyset", "master_key_preference")
                     .withKeyTemplate(KeyTemplates.get("AES256_GCM"))
@@ -118,19 +147,15 @@ public class StreamUserDataStore constructor(dataStore: DataStore<StreamUserPref
                     .keysetHandle
                     .getPrimitive(Aead::class.java)
 
-                val dataStore = DataStoreFactory.create(UserSerializer().encrypted(aead)) {
-                    context.dataStoreFile("proto_stream_video_user.pb")
-                }
+                val dataStore =
+                    DataStoreFactory.create(serializer = UserSerializer().encrypted(aead)) {
+                        context.dataStoreFile("proto_stream_video_user.pb")
+                    }
 
                 val userDataStore = StreamUserDataStore(dataStore)
 
-                if (isInstalled) {
-                    StreamLog.e("StreamVideo") {
-                        "The $internalStreamUserDataStore is already installed but you've tried to " +
-                            "install a new exception handler: $userDataStore"
-                    }
-                }
                 internalStreamUserDataStore = userDataStore
+                return userDataStore
             }
         }
 

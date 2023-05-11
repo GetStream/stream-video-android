@@ -40,15 +40,16 @@ import io.getstream.video.android.core.model.UpdateUserPermissionsData
 import io.getstream.video.android.core.model.toRequest
 import io.getstream.video.android.core.socket.ErrorResponse
 import io.getstream.video.android.core.socket.SocketState
-import io.getstream.video.android.core.user.UserPreferences
-import io.getstream.video.android.core.user.UserPreferencesManager
 import io.getstream.video.android.core.utils.DebugInfo
 import io.getstream.video.android.core.utils.INTENT_EXTRA_CALL_CID
 import io.getstream.video.android.core.utils.LatencyResult
 import io.getstream.video.android.core.utils.getLatencyMeasurementsOKHttp
 import io.getstream.video.android.core.utils.toEdge
 import io.getstream.video.android.core.utils.toUser
+import io.getstream.video.android.datastore.delegate.StreamUserDataStore
+import io.getstream.video.android.model.Device
 import io.getstream.video.android.model.User
+import io.getstream.video.android.model.UserDevices
 import io.getstream.video.android.model.mapper.toTypeAndId
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Deferred
@@ -56,6 +57,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.decodeFromString
@@ -113,14 +115,13 @@ internal class StreamVideoImpl internal constructor(
     internal val connectionModule: ConnectionModule,
     internal val pushDeviceGenerators: List<PushDeviceGenerator>,
     internal val tokenProvider: (suspend (error: Throwable?) -> String)?,
-    internal val preferences: UserPreferences,
+    internal val dataStore: StreamUserDataStore,
 ) : StreamVideo {
 
     /** the state for the client, includes the current user */
     override val state = ClientState(this)
 
-    private val supervisorJob = SupervisorJob()
-    internal val scope = CoroutineScope(_scope.coroutineContext + supervisorJob)
+    internal val scope = CoroutineScope(_scope.coroutineContext + SupervisorJob())
 
     val debugInfo = DebugInfo(this)
 
@@ -145,7 +146,7 @@ internal class StreamVideoImpl internal constructor(
 
     override fun cleanup() {
         // stop all running coroutines
-        supervisorJob.cancel()
+        scope.cancel()
         // stop the socket
         socketImpl.cleanup()
         // call cleanup on the active call
@@ -181,7 +182,7 @@ internal class StreamVideoImpl internal constructor(
                     if (tokenProvider != null) {
                         // TODO - handle this better, error structure is not great right now
                         val newToken = tokenProvider.invoke(null)
-                        preferences.storeUserToken(newToken)
+                        dataStore.updateUserToken(newToken)
                         connectionModule.updateToken(newToken)
                     }
                     // retry the API call once
@@ -329,7 +330,7 @@ internal class StreamVideoImpl internal constructor(
                     // refresh the the token
                     if (tokenProvider != null) {
                         val newToken = tokenProvider.invoke(e)
-                        preferences.storeUserToken(newToken)
+                        dataStore.updateUserToken(newToken)
                         connectionModule.updateToken(newToken)
                     }
                     // quickly reconnect with the new token
@@ -339,11 +340,17 @@ internal class StreamVideoImpl internal constructor(
         }
     }
 
-    private fun storeDevice(device: io.getstream.video.android.model.Device) {
+    private fun storeDevice(device: Device) {
         logger.d { "[storeDevice] device: device" }
-        val preferences = UserPreferencesManager.initialize(context)
+        val dataStore = StreamUserDataStore.instance()
 
-        preferences.storeDevice(device)
+        scope.launch {
+            dataStore.updateUserDevices(
+                UserDevices(
+                    dataStore.userDevices.value?.let { it.devices + device } ?: listOf(device)
+                )
+            )
+        }
     }
 
     /**
@@ -385,8 +392,10 @@ internal class StreamVideoImpl internal constructor(
                 throw IllegalStateException("Failed to create guest user")
             }
             response.onSuccess {
-                preferences.storeUserCredentials(it.user.toUser())
-                preferences.storeUserToken(it.accessToken)
+                scope.launch {
+                    dataStore.updateUser(it.user.toUser())
+                    dataStore.updateUserToken(it.accessToken)
+                }
                 connectionModule.updateToken(it.accessToken)
             }
         }
@@ -863,10 +872,8 @@ internal class StreamVideoImpl internal constructor(
      * @see StreamVideo.logOut
      */
     override fun logOut() {
-        val preferences = UserPreferencesManager.getPreferences()
-
-        removeDevices(preferences.getDevices())
-        preferences.clear()
+        val dataStore = StreamUserDataStore.instance()
+        scope.launch { dataStore.clear() }
     }
 
     suspend fun acceptCall(type: String, id: String) {

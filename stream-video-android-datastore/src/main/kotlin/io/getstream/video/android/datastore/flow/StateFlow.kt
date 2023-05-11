@@ -14,23 +14,24 @@
  * limitations under the License.
  */
 
-package io.getstream.video.android.dogfooding.di
+package io.getstream.video.android.datastore.flow
 
-import android.content.Context
-import dagger.Provides
-import dagger.hilt.InstallIn
-import dagger.hilt.android.qualifiers.ApplicationContext
-import dagger.hilt.components.SingletonComponent
-import io.getstream.video.android.datastore.delegate.StreamUserDataStore
-import javax.inject.Singleton
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.stateIn
 
-@dagger.Module
-@InstallIn(SingletonComponent::class)
-object AppModule {
-
-    @Provides
-    @Singleton
-    fun provideUserDataStore(@ApplicationContext context: Context): StreamUserDataStore {
-        return StreamUserDataStore.install(context)
-    }
+@JvmSynthetic
+@PublishedApi
+internal fun <T> Flow<T>.asStateFlow(
+    initialValue: T,
+    scope: CoroutineScope = CoroutineScope(context = Dispatchers.IO),
+): StateFlow<T> {
+    return stateIn(
+        scope = scope,
+        started = SharingStarted.Eagerly,
+        initialValue = initialValue,
+    )
 }

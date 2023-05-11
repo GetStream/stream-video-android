@@ -37,7 +37,6 @@ import androidx.compose.ui.unit.sp
 import io.getstream.log.taggedLogger
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.core.logging.LoggingLevel
-import io.getstream.video.android.core.user.UserPreferencesManager
 import io.getstream.video.android.model.User
 import io.getstream.video.android.tutorial_final.VideoApp
 import io.getstream.video.android.tutorial_final.ui.components.UserList
@@ -64,13 +63,13 @@ class LoginActivity : AppCompatActivity() {
     }
 
     private fun checkIfUserLoggedIn() {
-        val preferences = UserPreferencesManager.initialize(this)
-
-        val user = preferences.getUserCredentials()
-
-        if (user != null && user.isValid()) {
-            logIn(user)
-        }
+//        val preferences = UserPreferencesManager.initialize(this)
+//
+//        val user = preferences.getUserCredentials()
+//
+//        if (user != null && user.isValid()) {
+//            logIn(user)
+//        }
     }
 
     @Composable

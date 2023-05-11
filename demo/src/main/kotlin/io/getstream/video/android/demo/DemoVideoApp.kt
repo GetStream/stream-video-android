@@ -25,7 +25,6 @@ import io.getstream.video.android.core.GEO
 import io.getstream.video.android.core.StreamVideo
 import io.getstream.video.android.core.StreamVideoBuilder
 import io.getstream.video.android.core.logging.LoggingLevel
-import io.getstream.video.android.core.user.UserPreferencesManager
 import io.getstream.video.android.model.User
 
 class DemoVideoApp : Application() {
@@ -53,7 +52,7 @@ class DemoVideoApp : Application() {
         ).build()
 
         StreamLog.i(TAG) { "[onCreate] no args" }
-        UserPreferencesManager.initialize(this)
+        StreamUserDataStore.install(this)
     }
 
     fun logOut() {

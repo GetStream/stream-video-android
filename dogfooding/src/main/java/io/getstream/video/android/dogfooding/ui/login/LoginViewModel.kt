@@ -22,7 +22,7 @@ import androidx.lifecycle.viewModelScope
 import com.google.firebase.auth.FirebaseAuth
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.getstream.video.android.core.logging.LoggingLevel
-import io.getstream.video.android.core.user.UserPreferences
+import io.getstream.video.android.datastore.delegate.StreamUserDataStore
 import io.getstream.video.android.dogfooding.API_KEY
 import io.getstream.video.android.dogfooding.BuildConfig
 import io.getstream.video.android.dogfooding.dogfoodingApp
@@ -33,17 +33,19 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.launch
 import java.util.UUID
 import javax.inject.Inject
 
 @HiltViewModel
 class LoginViewModel @Inject constructor(
-    private val userPreferences: UserPreferences
+    private val dataStore: StreamUserDataStore
 ) : ViewModel() {
 
     private val event: MutableStateFlow<LoginEvent> = MutableStateFlow(LoginEvent.Nothing)
@@ -70,19 +72,16 @@ class LoginViewModel @Inject constructor(
     }.flowOn(Dispatchers.IO)
 
     init {
-        val user = userPreferences.getUserCredentials()
-
-        if (user != null) {
-            handleUiEvent(LoginEvent.Loading)
-            sigInInIfValidUserExist()
-        }
+        sigInInIfValidUserExist()
     }
 
     fun sigInInIfValidUserExist() {
-        val user = userPreferences.getUserCredentials()
-
-        if (user != null && user.isValid() && !BuildConfig.BENCHMARK) {
-            handleUiEvent(LoginEvent.SignInInSuccess(email = user.id))
+        viewModelScope.launch {
+            dataStore.user.collectLatest { user ->
+                if (user != null && user.isValid() && !BuildConfig.BENCHMARK) {
+                    handleUiEvent(LoginEvent.SignInInSuccess(email = user.id))
+                }
+            }
         }
     }
 
@@ -100,9 +99,6 @@ class LoginViewModel @Inject constructor(
             role = "admin",
             custom = mapOf("email" to userId)
         )
-
-        userPreferences.storeUserCredentials(user)
-        userPreferences.storeUserToken(token)
 
         context.dogfoodingApp.initializeStreamVideo(
             apiKey = API_KEY,

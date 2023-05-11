@@ -25,7 +25,6 @@ import io.getstream.video.android.app.ui.login.LoginActivity
 import io.getstream.video.android.core.StreamVideo
 import io.getstream.video.android.core.StreamVideoBuilder
 import io.getstream.video.android.core.logging.LoggingLevel
-import io.getstream.video.android.core.user.UserPreferencesManager
 import io.getstream.video.android.model.User
 import io.getstream.video.android.tooling.handler.StreamGlobalExceptionHandler
 
@@ -42,7 +41,7 @@ class VideoApp : Application() {
             packageName = LoginActivity::class.java.name
         )
         StreamLog.i(TAG) { "[onCreate] no args" }
-        UserPreferencesManager.initialize(this)
+//        UserPreferencesManager.initialize(this)
     }
 
     /**

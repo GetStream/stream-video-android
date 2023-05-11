@@ -26,9 +26,10 @@ import io.getstream.video.android.core.filter.AudioFilter
 import io.getstream.video.android.core.filter.VideoFilter
 import io.getstream.video.android.core.internal.module.ConnectionModule
 import io.getstream.video.android.core.logging.LoggingLevel
-import io.getstream.video.android.core.user.UserPreferencesManager
+import io.getstream.video.android.datastore.delegate.StreamUserDataStore
 import io.getstream.video.android.model.ApiKey
 import io.getstream.video.android.model.User
+import io.getstream.video.android.model.UserToken
 import io.getstream.video.android.model.UserType
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
@@ -50,13 +51,13 @@ import kotlinx.coroutines.launch
 public class StreamVideoBuilder @JvmOverloads constructor(
     context: Context,
     /** Your Stream API Key, you can find it in the dashboard */
-    private val apiKey: io.getstream.video.android.model.ApiKey,
+    private val apiKey: ApiKey,
     /** Your GEO routing policy, supports geofencing for privacy concerns */
     private val geo: GEO = GEO.GlobalEdgeNetwork,
     /** The user object, can be a regular user, guest user or anonymous */
-    private val user: io.getstream.video.android.model.User,
+    private val user: User,
     /** The token for this user generated using your API secret on your server */
-    private val token: String = "",
+    private val token: UserToken = "",
     /** If a token is expired, the token provider makes a request to your backend for a new token */
     private val tokenProvider: (suspend (error: Throwable?) -> String)? = null,
     /** Logging level */
@@ -97,13 +98,16 @@ public class StreamVideoBuilder @JvmOverloads constructor(
         // initializes
         AndroidThreeTen.init(context)
 
-        // TODO: Don't user userpreference manager
-        val preferences = UserPreferencesManager.initialize(context).apply {
-            storeUserCredentials(user)
-            storeApiKey(apiKey)
-            if (token.isNotEmpty()) {
-                storeUserToken(token)
-            }
+        val dataStore = if (!StreamUserDataStore.isInstalled) {
+            StreamUserDataStore.install(context)
+        } else {
+            StreamUserDataStore.instance()
+        }
+
+        scope.launch {
+            dataStore.updateUser(user)
+            dataStore.updateApiKey(apiKey)
+            dataStore.updateUserToken(token)
         }
 
         // This connection module class exposes the connections to the various retrofit APIs
@@ -111,7 +115,7 @@ public class StreamVideoBuilder @JvmOverloads constructor(
             context = context,
             scope = scope,
             videoDomain = videoDomain,
-            preferences = preferences,
+            dataStore = dataStore,
             connectionTimeoutInMs = connectionTimeoutInMs,
             user = user,
             loggingLevel = loggingLevel,
@@ -122,7 +126,7 @@ public class StreamVideoBuilder @JvmOverloads constructor(
             context = context,
             _scope = scope,
             user = user,
-            preferences = preferences,
+            dataStore = dataStore,
             tokenProvider = tokenProvider,
             loggingLevel = loggingLevel,
             lifecycle = lifecycle,

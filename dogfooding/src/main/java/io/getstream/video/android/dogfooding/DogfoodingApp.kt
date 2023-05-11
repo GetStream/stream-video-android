@@ -26,7 +26,7 @@ import io.getstream.log.android.AndroidStreamLogger
 import io.getstream.video.android.core.StreamVideo
 import io.getstream.video.android.core.StreamVideoBuilder
 import io.getstream.video.android.core.logging.LoggingLevel
-import io.getstream.video.android.core.user.UserPreferencesManager
+import io.getstream.video.android.datastore.delegate.StreamUserDataStore
 import io.getstream.video.android.dogfooding.token.StreamVideoNetwork
 import io.getstream.video.android.model.ApiKey
 import io.getstream.video.android.model.User
@@ -42,7 +42,6 @@ class DogfoodingApp : Application() {
 //            packageName = MainActivity::class.java.name,
 //            exceptionHandler = { stackTrace -> Firebase.crashlytics.log(stackTrace) }
 //        )
-        UserPreferencesManager.initialize(this)
     }
 
     /** Sets up and returns the [streamVideo] required to connect to the API. */
@@ -77,10 +76,10 @@ class DogfoodingApp : Application() {
     }
 
     fun initializeFromCredentials(): Boolean {
-        val credentials = UserPreferencesManager.initialize(this)
-        val user = credentials.getUserCredentials()
-        val apiKey = credentials.getApiKey()
-        val token = credentials.getUserToken()
+        val dataStore = StreamUserDataStore.install(this)
+        val user = dataStore.user.value
+        val apiKey = dataStore.apiKey.value
+        val token = dataStore.userToken.value
 
         if (user == null || apiKey.isBlank()) {
             return false

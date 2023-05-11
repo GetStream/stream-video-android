@@ -43,7 +43,7 @@ import io.getstream.video.android.app.utils.getUsers
 import io.getstream.video.android.app.videoApp
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.core.logging.LoggingLevel
-import io.getstream.video.android.core.user.UserPreferencesManager
+import io.getstream.video.android.datastore.delegate.StreamUserDataStore
 import io.getstream.video.android.model.User
 
 class LoginActivity : AppCompatActivity() {
@@ -72,10 +72,8 @@ class LoginActivity : AppCompatActivity() {
     }
 
     private fun checkIfUserLoggedIn() {
-        val preferences = UserPreferencesManager.getPreferences()
-
-        val user = preferences.getUserCredentials()
-
+        val dataStore = StreamUserDataStore.install(this)
+        val user = dataStore.user.value
         if (user != null && user.isValid()) {
             logIn(user)
         }

@@ -24,7 +24,7 @@ import io.getstream.video.android.core.internal.network.NetworkStateProvider
 import io.getstream.video.android.core.logging.LoggingLevel
 import io.getstream.video.android.core.socket.CoordinatorSocket
 import io.getstream.video.android.core.socket.SfuSocket
-import io.getstream.video.android.core.user.UserPreferences
+import io.getstream.video.android.datastore.delegate.StreamUserDataStore
 import io.getstream.video.android.model.User
 import kotlinx.coroutines.CoroutineScope
 import okhttp3.HttpUrl
@@ -62,7 +62,7 @@ internal class ConnectionModule(
     private val context: Context,
     private val scope: CoroutineScope,
     internal val videoDomain: String,
-    internal val preferences: UserPreferences,
+    internal val dataStore: StreamUserDataStore,
     internal val connectionTimeoutInMs: Long,
     internal val loggingLevel: LoggingLevel = LoggingLevel.NONE,
     private val user: User,
@@ -83,11 +83,11 @@ internal class ConnectionModule(
     init {
         // setup the OKHttpClient
         authInterceptor =
-            CoordinatorAuthInterceptor(preferences.getApiKey(), preferences.getUserToken())
+            CoordinatorAuthInterceptor(dataStore.apiKey.value, dataStore.userToken.value)
         baseUrlInterceptor = BaseUrlInterceptor(null)
 
         okHttpClient = buildOkHttpClient(
-            preferences,
+            dataStore,
             null
         )
 
@@ -138,7 +138,7 @@ internal class ConnectionModule(
      */
 
     private fun buildOkHttpClient(
-        preferences: UserPreferences,
+        dataStore: StreamUserDataStore,
         baseUrl: HttpUrl?
     ): OkHttpClient {
         // create a new OkHTTP client and set timeouts
@@ -174,7 +174,7 @@ internal class ConnectionModule(
     internal fun createCoordinatorSocket(): CoordinatorSocket {
         val coordinatorUrl = "wss://$videoDomain/video/connect"
 
-        val token = preferences.getUserToken()
+        val token = dataStore.userToken.value
 
         return CoordinatorSocket(
             coordinatorUrl,
@@ -194,13 +194,13 @@ internal class ConnectionModule(
     ): SfuConnectionModule {
         val updatedSignalUrl = sfuUrl.removeSuffix(suffix = "/twirp")
         val baseUrl = updatedSignalUrl.toHttpUrl()
-        val okHttpClient = buildOkHttpClient(preferences, baseUrl)
+        val okHttpClient = buildOkHttpClient(dataStore, baseUrl)
 
         return SfuConnectionModule(
             sfuUrl,
             sessionId,
             sfuToken,
-            preferences.getApiKey(),
+            dataStore.apiKey.value,
             getSubscriberSdp,
             scope,
             networkStateProvider

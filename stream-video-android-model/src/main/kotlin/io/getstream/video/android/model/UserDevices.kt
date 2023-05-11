@@ -18,5 +18,5 @@ package io.getstream.video.android.model
 
 @kotlinx.serialization.Serializable
 public data class UserDevices(
-    val devices: List<Device>
+    val devices: List<Device> = emptyList()
 )

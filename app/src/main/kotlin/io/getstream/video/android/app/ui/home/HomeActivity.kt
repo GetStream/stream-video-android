@@ -63,8 +63,8 @@ import io.getstream.video.android.app.utils.getUsers
 import io.getstream.video.android.app.videoApp
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.avatar.Avatar
-import io.getstream.video.android.core.user.UserPreferencesManager
 import io.getstream.video.android.core.utils.initials
+import io.getstream.video.android.datastore.delegate.StreamUserDataStore
 import kotlinx.coroutines.launch
 
 class HomeActivity : AppCompatActivity() {
@@ -362,14 +362,15 @@ class HomeActivity : AppCompatActivity() {
 
     @Composable
     fun UserIcon() {
-        val user = UserPreferencesManager.initialize(this).getUserCredentials() ?: return
+        val dataStore = StreamUserDataStore.install(this)
+        val user = dataStore.user.value ?: return
 
         Avatar(
             modifier = Modifier
                 .size(40.dp)
                 .padding(top = 8.dp, start = 8.dp),
             imageUrl = user.image.orEmpty(),
-            initials = if (user.image == null) {
+            initials = if (user.image.isEmpty()) {
                 user.name.initials()
             } else {
                 null

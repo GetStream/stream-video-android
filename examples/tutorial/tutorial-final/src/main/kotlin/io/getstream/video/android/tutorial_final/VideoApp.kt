@@ -24,7 +24,6 @@ import io.getstream.log.android.AndroidStreamLogger
 import io.getstream.video.android.core.StreamVideo
 import io.getstream.video.android.core.StreamVideoBuilder
 import io.getstream.video.android.core.logging.LoggingLevel
-import io.getstream.video.android.core.user.UserPreferencesManager
 import io.getstream.video.android.model.ApiKey
 import io.getstream.video.android.model.User
 
@@ -39,7 +38,7 @@ class VideoApp : Application() {
         super.onCreate()
         AndroidStreamLogger.installOnDebuggableApp(this, minPriority = Priority.DEBUG)
         StreamLog.i(TAG) { "[onCreate] no args" }
-        UserPreferencesManager.initialize(this)
+//        UserPreferencesManager.initialize(this)
     }
 
     /** Sets up and returns the [streamVideo] required to connect to the API. */
