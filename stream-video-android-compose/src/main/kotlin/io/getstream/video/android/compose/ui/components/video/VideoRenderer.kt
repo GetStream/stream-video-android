@@ -75,10 +75,10 @@ public fun VideoRenderer(
 
     var view: VideoTextureViewRenderer? by remember { mutableStateOf(null) }
 
-    // inform the call that we want to render this video track. (this will trigger a subscription to the track)
-    call.setVisibility(sessionId, trackType, true)
-
     DisposableEffect(call, mediaTrack) {
+        // inform the call that we want to render this video track. (this will trigger a subscription to the track)
+        call.setVisibility(sessionId, trackType, true)
+
         onDispose {
             cleanTrack(view, mediaTrack)
             // inform the call that we no longer want to render this video track
