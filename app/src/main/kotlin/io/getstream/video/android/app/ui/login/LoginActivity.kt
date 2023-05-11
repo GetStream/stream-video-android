@@ -43,8 +43,8 @@ import io.getstream.video.android.app.utils.getUsers
 import io.getstream.video.android.app.videoApp
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.core.logging.LoggingLevel
-import io.getstream.video.android.core.model.User
 import io.getstream.video.android.core.user.UserPreferencesManager
+import io.getstream.video.android.model.User
 
 class LoginActivity : AppCompatActivity() {
 
@@ -128,7 +128,7 @@ class LoginActivity : AppCompatActivity() {
         }
     }
 
-    private fun logIn(selectedUser: User) {
+    private fun logIn(selectedUser: io.getstream.video.android.model.User) {
         logger.i { "[logIn] selectedUser: $selectedUser" }
         videoApp.initializeStreamVideo(
             user = selectedUser,

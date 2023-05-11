@@ -44,7 +44,6 @@ import io.getstream.video.android.core.call.state.CallDeviceState
 import io.getstream.video.android.core.call.state.InviteUsersToCall
 import io.getstream.video.android.core.call.state.ToggleMicrophone
 import io.getstream.video.android.core.model.CallType
-import io.getstream.video.android.core.model.User
 import io.getstream.video.android.core.viewmodel.CallViewModel
 
 /**
@@ -249,7 +248,7 @@ internal fun DefaultCallContent(
 
     val isShowingParticipantsInfo by callViewModel.isShowingCallInfoMenu.collectAsStateWithLifecycle()
     val participantsState by callViewModel.call.state.participants.collectAsStateWithLifecycle()
-    var usersToInvite by remember { mutableStateOf(emptyList<User>()) }
+    var usersToInvite by remember { mutableStateOf(emptyList<io.getstream.video.android.model.User>()) }
 
     if (isShowingParticipantsInfo && participantsState.isNotEmpty()) {
         CallParticipantsInfoMenu(

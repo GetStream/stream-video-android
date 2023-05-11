@@ -22,10 +22,10 @@ import io.getstream.video.android.core.api.SignalServerService
 import io.getstream.video.android.core.dispatchers.DispatcherProvider
 import io.getstream.video.android.core.internal.network.NetworkStateProvider
 import io.getstream.video.android.core.logging.LoggingLevel
-import io.getstream.video.android.core.model.User
 import io.getstream.video.android.core.socket.CoordinatorSocket
 import io.getstream.video.android.core.socket.SfuSocket
 import io.getstream.video.android.core.user.UserPreferences
+import io.getstream.video.android.model.User
 import kotlinx.coroutines.CoroutineScope
 import okhttp3.HttpUrl
 import okhttp3.HttpUrl.Companion.toHttpUrl
@@ -65,7 +65,7 @@ internal class ConnectionModule(
     internal val preferences: UserPreferences,
     internal val connectionTimeoutInMs: Long,
     internal val loggingLevel: LoggingLevel = LoggingLevel.NONE,
-    private val user: User,
+    private val user: io.getstream.video.android.model.User,
 ) {
     private var baseUrlInterceptor: BaseUrlInterceptor
     private var authInterceptor: CoordinatorAuthInterceptor

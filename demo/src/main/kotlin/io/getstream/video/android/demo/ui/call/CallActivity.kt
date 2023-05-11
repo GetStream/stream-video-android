@@ -31,12 +31,11 @@ import io.getstream.video.android.core.StreamVideo
 import io.getstream.video.android.core.call.state.ToggleCamera
 import io.getstream.video.android.core.call.state.ToggleMicrophone
 import io.getstream.video.android.core.model.CallType
-import io.getstream.video.android.core.model.StreamCallId
-import io.getstream.video.android.core.model.mapper.toTypeAndId
 import io.getstream.video.android.core.permission.PermissionManager
 import io.getstream.video.android.core.viewmodel.CallViewModel
 import io.getstream.video.android.core.viewmodel.CallViewModelFactory
 import io.getstream.video.android.demo.demoVideoApp
+import io.getstream.video.android.model.mapper.toTypeAndId
 
 class CallActivity : AppCompatActivity() {
 
@@ -109,7 +108,7 @@ class CallActivity : AppCompatActivity() {
     companion object {
         internal const val EXTRA_CID = "EXTRA_CID"
 
-        fun getIntent(context: Context, cid: StreamCallId): Intent {
+        fun getIntent(context: Context, cid: io.getstream.video.android.model.StreamCallId): Intent {
             return Intent(context, CallActivity::class.java).apply {
                 flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
                 putExtra(EXTRA_CID, cid)

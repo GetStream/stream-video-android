@@ -22,13 +22,13 @@ import androidx.lifecycle.viewModelScope
 import com.google.firebase.auth.FirebaseAuth
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.getstream.video.android.core.logging.LoggingLevel
-import io.getstream.video.android.core.model.User
 import io.getstream.video.android.core.user.UserPreferences
 import io.getstream.video.android.dogfooding.API_KEY
 import io.getstream.video.android.dogfooding.BuildConfig
 import io.getstream.video.android.dogfooding.dogfoodingApp
 import io.getstream.video.android.dogfooding.token.StreamVideoNetwork
 import io.getstream.video.android.dogfooding.token.TokenResponse
+import io.getstream.video.android.model.User
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -93,7 +93,7 @@ class LoginViewModel @Inject constructor(
         val authUser = FirebaseAuth.getInstance().currentUser
         val userId = tokenResponse.userId
         val token = tokenResponse.token
-        val user = User(
+        val user = io.getstream.video.android.model.User(
             id = authUser?.email ?: userId,
             name = authUser?.displayName ?: "",
             image = authUser?.photoUrl?.toString() ?: "",

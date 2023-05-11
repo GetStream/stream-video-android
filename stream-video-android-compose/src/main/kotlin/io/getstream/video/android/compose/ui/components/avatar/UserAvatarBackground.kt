@@ -32,7 +32,7 @@ import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.background.ParticipantImageBackground
-import io.getstream.video.android.core.model.User
+import io.getstream.video.android.model.User
 
 /**
  * A background that displays a user avatar and a background that reflects the avatar.
@@ -52,7 +52,7 @@ import io.getstream.video.android.core.model.User
  */
 @Composable
 public fun UserAvatarBackground(
-    user: User,
+    user: io.getstream.video.android.model.User,
     modifier: Modifier = Modifier,
     shape: Shape = VideoTheme.shapes.avatar,
     avatarSize: Dp = 72.dp,

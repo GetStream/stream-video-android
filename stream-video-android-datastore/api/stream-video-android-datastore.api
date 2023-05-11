@@ -7,17 +7,17 @@ public final class io/getstream/video/android/datastore/BuildConfig {
 
 public final class io/getstream/video/android/datastore/model/UserPreferences {
 	public static final field Companion Lio/getstream/video/android/datastore/model/UserPreferences$Companion;
-	public synthetic fun <init> (ILio/getstream/video/android/core/model/User;Lio/getstream/video/android/core/model/UserDevices;Ljava/lang/String;Lkotlinx/serialization/internal/SerializationConstructorMarker;)V
-	public fun <init> (Lio/getstream/video/android/core/model/User;Lio/getstream/video/android/core/model/UserDevices;Ljava/lang/String;)V
-	public final fun component1 ()Lio/getstream/video/android/core/model/User;
-	public final fun component2 ()Lio/getstream/video/android/core/model/UserDevices;
+	public synthetic fun <init> (ILio/getstream/video/android/model/User;Lio/getstream/video/android/model/UserDevices;Ljava/lang/String;Lkotlinx/serialization/internal/SerializationConstructorMarker;)V
+	public fun <init> (Lio/getstream/video/android/model/User;Lio/getstream/video/android/model/UserDevices;Ljava/lang/String;)V
+	public final fun component1 ()Lio/getstream/video/android/model/User;
+	public final fun component2 ()Lio/getstream/video/android/model/UserDevices;
 	public final fun component3 ()Ljava/lang/String;
-	public final fun copy (Lio/getstream/video/android/core/model/User;Lio/getstream/video/android/core/model/UserDevices;Ljava/lang/String;)Lio/getstream/video/android/datastore/model/UserPreferences;
-	public static synthetic fun copy$default (Lio/getstream/video/android/datastore/model/UserPreferences;Lio/getstream/video/android/core/model/User;Lio/getstream/video/android/core/model/UserDevices;Ljava/lang/String;ILjava/lang/Object;)Lio/getstream/video/android/datastore/model/UserPreferences;
+	public final fun copy (Lio/getstream/video/android/model/User;Lio/getstream/video/android/model/UserDevices;Ljava/lang/String;)Lio/getstream/video/android/datastore/model/UserPreferences;
+	public static synthetic fun copy$default (Lio/getstream/video/android/datastore/model/UserPreferences;Lio/getstream/video/android/model/User;Lio/getstream/video/android/model/UserDevices;Ljava/lang/String;ILjava/lang/Object;)Lio/getstream/video/android/datastore/model/UserPreferences;
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getApiToken ()Ljava/lang/String;
-	public final fun getUser ()Lio/getstream/video/android/core/model/User;
-	public final fun getUserDevices ()Lio/getstream/video/android/core/model/UserDevices;
+	public final fun getUser ()Lio/getstream/video/android/model/User;
+	public final fun getUserDevices ()Lio/getstream/video/android/model/UserDevices;
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
 	public static final fun write$Self (Lio/getstream/video/android/datastore/model/UserPreferences;Lkotlinx/serialization/encoding/CompositeEncoder;Lkotlinx/serialization/descriptors/SerialDescriptor;)V

@@ -16,9 +16,9 @@
 
 package io.getstream.video.android.core.user
 
-import io.getstream.video.android.core.model.ApiKey
-import io.getstream.video.android.core.model.Device
-import io.getstream.video.android.core.model.User
+import io.getstream.video.android.model.ApiKey
+import io.getstream.video.android.model.Device
+import io.getstream.video.android.model.User
 
 public interface UserPreferences {
 
@@ -27,35 +27,35 @@ public interface UserPreferences {
      *
      * @return The stored [User] credentials if they exist.
      */
-    public fun getUserCredentials(): User?
+    public fun getUserCredentials(): io.getstream.video.android.model.User?
 
     /**
      * Stores user credentials for the SDK to use. Useful when logging in to the SDK
      *
      * @param user The credentials to store.
      */
-    public fun storeUserCredentials(user: User)
+    public fun storeUserCredentials(user: io.getstream.video.android.model.User)
 
     /**
      * Fetches the cached ApiKey from SDK persistence.
      *
      * @return The stored [ApiKey] if it exist.
      */
-    public fun getApiKey(): ApiKey
+    public fun getApiKey(): io.getstream.video.android.model.ApiKey
 
     /**
      * Stores ApiKey for the SDK to use. Useful when logging in to the SDK.
      *
      * @param apiKey The [ApiKey] to store.
      */
-    public fun storeApiKey(apiKey: ApiKey)
+    public fun storeApiKey(apiKey: io.getstream.video.android.model.ApiKey)
 
     public fun storeUserToken(userToken: String)
     public fun getUserToken(): String
 
-    public fun storeDevice(device: Device)
+    public fun storeDevice(device: io.getstream.video.android.model.Device)
 
-    public fun getDevices(): List<Device>
+    public fun getDevices(): List<io.getstream.video.android.model.Device>
 
     public fun removeDevices()
 

@@ -33,13 +33,10 @@ import io.getstream.video.android.core.lifecycle.LifecycleHandler
 import io.getstream.video.android.core.lifecycle.internal.StreamLifecycleObserver
 import io.getstream.video.android.core.logging.LoggingLevel
 import io.getstream.video.android.core.model.CallEventType
-import io.getstream.video.android.core.model.Device
 import io.getstream.video.android.core.model.EdgeData
 import io.getstream.video.android.core.model.MuteUsersData
 import io.getstream.video.android.core.model.SortField
 import io.getstream.video.android.core.model.UpdateUserPermissionsData
-import io.getstream.video.android.core.model.User
-import io.getstream.video.android.core.model.mapper.toTypeAndId
 import io.getstream.video.android.core.model.toRequest
 import io.getstream.video.android.core.socket.ErrorResponse
 import io.getstream.video.android.core.socket.SocketState
@@ -51,13 +48,13 @@ import io.getstream.video.android.core.utils.LatencyResult
 import io.getstream.video.android.core.utils.getLatencyMeasurementsOKHttp
 import io.getstream.video.android.core.utils.toEdge
 import io.getstream.video.android.core.utils.toUser
+import io.getstream.video.android.model.mapper.toTypeAndId
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
-import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.decodeFromString
@@ -109,7 +106,7 @@ import kotlin.coroutines.Continuation
 internal class StreamVideoImpl internal constructor(
     override val context: Context,
     internal val _scope: CoroutineScope,
-    override val user: User,
+    override val user: io.getstream.video.android.model.User,
     private val lifecycle: Lifecycle,
     private val loggingLevel: LoggingLevel,
     internal val connectionModule: ConnectionModule,
@@ -158,7 +155,10 @@ internal class StreamVideoImpl internal constructor(
     /**
      * @see StreamVideo.createDevice
      */
-    override suspend fun createDevice(token: String, pushProvider: String): Result<Device> {
+    override suspend fun createDevice(
+        token: String,
+        pushProvider: String
+    ): Result<io.getstream.video.android.model.Device> {
         logger.d { "[createDevice] token: $token, pushProvider: $pushProvider" }
         return wrapAPICall {
             // TODO: handle this when backend has it
@@ -338,7 +338,7 @@ internal class StreamVideoImpl internal constructor(
         }
     }
 
-    private fun storeDevice(device: Device) {
+    private fun storeDevice(device: io.getstream.video.android.model.Device) {
         logger.d { "[storeDevice] device: device" }
         val preferences = UserPreferencesManager.initialize(context)
 
@@ -358,7 +358,7 @@ internal class StreamVideoImpl internal constructor(
     /**
      * @see StreamVideo.removeDevices
      */
-    fun removeDevices(devices: List<Device>) {
+    fun removeDevices(devices: List<io.getstream.video.android.model.Device>) {
         scope.launch {
             val operations = devices.map {
                 async { deleteDevice(it.token) }
@@ -368,7 +368,7 @@ internal class StreamVideoImpl internal constructor(
         }
     }
 
-    fun setupGuestUser(user: User) {
+    fun setupGuestUser(user: io.getstream.video.android.model.User) {
         guestUserJob = scope.async {
             val response = createGuestUser(
                 userRequest = UserRequest(
@@ -537,7 +537,11 @@ internal class StreamVideoImpl internal constructor(
         }
     }
 
-    internal suspend fun inviteUsers(type: String, id: String, users: List<User>): Result<Unit> {
+    internal suspend fun inviteUsers(
+        type: String,
+        id: String,
+        users: List<io.getstream.video.android.model.User>
+    ): Result<Unit> {
         logger.d { "[inviteUsers] users: $users" }
 
         return wrapAPICall {

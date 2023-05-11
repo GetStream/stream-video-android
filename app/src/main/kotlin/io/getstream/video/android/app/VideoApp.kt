@@ -25,8 +25,8 @@ import io.getstream.video.android.app.ui.login.LoginActivity
 import io.getstream.video.android.core.StreamVideo
 import io.getstream.video.android.core.StreamVideoBuilder
 import io.getstream.video.android.core.logging.LoggingLevel
-import io.getstream.video.android.core.model.User
 import io.getstream.video.android.core.user.UserPreferencesManager
+import io.getstream.video.android.model.User
 import io.getstream.video.android.tooling.handler.StreamGlobalExceptionHandler
 
 class VideoApp : Application() {
@@ -49,7 +49,7 @@ class VideoApp : Application() {
      * Sets up and returns the [streamVideo] required to connect to the API.
      */
     fun initializeStreamVideo(
-        user: User,
+        user: io.getstream.video.android.model.User,
         apiKey: String,
         loggingLevel: LoggingLevel,
     ): StreamVideo {

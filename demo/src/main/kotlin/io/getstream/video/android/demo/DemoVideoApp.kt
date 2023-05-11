@@ -25,8 +25,8 @@ import io.getstream.video.android.core.GEO
 import io.getstream.video.android.core.StreamVideo
 import io.getstream.video.android.core.StreamVideoBuilder
 import io.getstream.video.android.core.logging.LoggingLevel
-import io.getstream.video.android.core.model.User
 import io.getstream.video.android.core.user.UserPreferencesManager
+import io.getstream.video.android.model.User
 
 class DemoVideoApp : Application() {
 
@@ -44,7 +44,7 @@ class DemoVideoApp : Application() {
             context = applicationContext,
             apiKey = "hd8szvscpxvd",
             geo = GEO.GlobalEdgeNetwork,
-            User(
+            io.getstream.video.android.model.User(
                 id = "thierry", role = "admin", name = "Thierry", image = "hello",
                 teams = emptyList(), custom = mapOf()
             ),

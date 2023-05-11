@@ -39,7 +39,7 @@ android {
 }
 
 dependencies {
-    api(project(":stream-video-android-core"))
+    api(project(":stream-video-android-model"))
 
     implementation(libs.tink)
     implementation(libs.kotlinx.serialization.protobuf)

@@ -17,7 +17,7 @@ import io.getstream.video.android.Configuration
 
 @Suppress("DSL_SCOPE_VIOLATION")
 plugins {
-    id("kotlin")
+    id("io.getstream.android.library")
     id(libs.plugins.kotlin.serialization.get().pluginId)
     id("io.getstream.spotless")
 }
@@ -30,5 +30,17 @@ rootProject.extra.apply {
 
 apply(from = "${rootDir}/scripts/publish-module.gradle")
 
+android {
+    compileSdk = Configuration.compileSdk
+
+    defaultConfig {
+        minSdk = Configuration.minSdk
+    }
+}
+
+
 dependencies {
+    api(libs.threentenabp2)
+
+    implementation(libs.kotlinx.serialization.json)
 }

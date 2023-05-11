@@ -18,10 +18,10 @@ package io.getstream.video.android.core.user
 
 import android.content.SharedPreferences
 import androidx.core.content.edit
-import io.getstream.video.android.core.model.ApiKey
-import io.getstream.video.android.core.model.Device
-import io.getstream.video.android.core.model.User
-import io.getstream.video.android.core.model.UserDevices
+import io.getstream.video.android.model.ApiKey
+import io.getstream.video.android.model.Device
+import io.getstream.video.android.model.User
+import io.getstream.video.android.model.UserDevices
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
@@ -33,14 +33,14 @@ internal class UserPreferencesImpl(
     /**
      * @see UserPreferences.getUserCredentials
      */
-    override fun getUserCredentials(): User? {
+    override fun getUserCredentials(): io.getstream.video.android.model.User? {
         return parseUser(sharedPreferences.getString(KEY_USER, ""))
     }
 
     /**
      * @see UserPreferences.storeUserCredentials
      */
-    override fun storeUserCredentials(user: User) {
+    override fun storeUserCredentials(user: io.getstream.video.android.model.User) {
         sharedPreferences.edit {
             putString(KEY_USER, Json.encodeToString(user))
         }
@@ -49,13 +49,13 @@ internal class UserPreferencesImpl(
     /**
      * @see UserPreferences.getApiKey
      */
-    override fun getApiKey(): ApiKey =
+    override fun getApiKey(): io.getstream.video.android.model.ApiKey =
         sharedPreferences.getString(KEY_APIKEY, null) ?: ""
 
     /**
      * @see UserPreferences.storeApiKey
      */
-    override fun storeApiKey(apiKey: ApiKey) {
+    override fun storeApiKey(apiKey: io.getstream.video.android.model.ApiKey) {
         sharedPreferences.edit {
             putString(KEY_APIKEY, apiKey)
         }
@@ -75,7 +75,7 @@ internal class UserPreferencesImpl(
      *
      * @return The user value that's parsed.
      */
-    private fun parseUser(json: String?): User? {
+    private fun parseUser(json: String?): io.getstream.video.android.model.User? {
         json ?: return null
 
         return try {
@@ -85,11 +85,11 @@ internal class UserPreferencesImpl(
         }
     }
 
-    private fun parseDevices(json: String?): List<Device> {
+    private fun parseDevices(json: String?): List<io.getstream.video.android.model.Device> {
         json ?: return emptyList()
 
         return try {
-            val devices: UserDevices = Json.decodeFromString(json)
+            val devices: io.getstream.video.android.model.UserDevices = Json.decodeFromString(json)
 
             devices.devices
         } catch (error: Throwable) {
@@ -97,16 +97,16 @@ internal class UserPreferencesImpl(
         }
     }
 
-    override fun getDevices(): List<Device> {
+    override fun getDevices(): List<io.getstream.video.android.model.Device> {
         return parseDevices(sharedPreferences.getString(KEY_DEVICES, ""))
     }
 
     override fun removeDevices() {
     }
 
-    override fun storeDevice(device: Device) {
+    override fun storeDevice(device: io.getstream.video.android.model.Device) {
         val devices = getDevices() + device
-        val json = Json.encodeToString(UserDevices(devices))
+        val json = Json.encodeToString(io.getstream.video.android.model.UserDevices(devices))
 
         sharedPreferences.edit {
             putString(KEY_DEVICES, json)

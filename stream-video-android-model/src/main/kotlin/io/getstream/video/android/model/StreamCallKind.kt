@@ -14,19 +14,23 @@
  * limitations under the License.
  */
 
-package io.getstream.video.android.core.model
+package io.getstream.video.android.model
+
+import io.getstream.video.android.model.StreamCallKind.MEETING
+import io.getstream.video.android.model.StreamCallKind.RINGING
+import java.io.Serializable
 
 /**
- * The API key of your Stream Video app.
+ * The kind of call, either a [RINGING] or a [MEETING].
  */
-public typealias ApiKey = String
+// TODO: Remove this
+public enum class StreamCallKind : Serializable {
+    MEETING, RINGING;
 
-/**
- * User's ticket to join/initiate the call.
- */
-public typealias UserToken = String
-
-/**
- * User's ticket to enter the call when joined/initiated.
- */
-public typealias SfuToken = String
+    public companion object {
+        public fun fromRinging(ringing: Boolean): StreamCallKind = when (ringing) {
+            true -> RINGING
+            else -> MEETING
+        }
+    }
+}

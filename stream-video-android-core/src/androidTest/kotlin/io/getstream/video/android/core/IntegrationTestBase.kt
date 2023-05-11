@@ -26,7 +26,7 @@ import io.getstream.log.streamLog
 import io.getstream.result.Result
 import io.getstream.video.android.core.dispatchers.DispatcherProvider
 import io.getstream.video.android.core.logging.LoggingLevel
-import io.getstream.video.android.core.model.User
+import io.getstream.video.android.model.User
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.TestCoroutineScheduler
@@ -61,7 +61,7 @@ class DispatcherRule(
 
 class IntegrationTestHelper {
 
-    val users = mutableMapOf<String, User>()
+    val users = mutableMapOf<String, io.getstream.video.android.model.User>()
     val tokens = mutableMapOf<String, String>()
     val context: Context
 
@@ -88,7 +88,7 @@ class IntegrationTestHelper {
         val token =
             "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoidGhpZXJyeSJ9._4aZL6BR0VGKfZsKYdscsBm8yKVgG-2LatYeHRJUq0g"
 
-        val thierry = User(
+        val thierry = io.getstream.video.android.model.User(
             id = "thierry", role = "admin", name = "Thierry", image = "hello",
             teams = emptyList(), custom = mapOf()
         )

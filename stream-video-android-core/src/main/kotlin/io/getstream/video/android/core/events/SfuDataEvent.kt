@@ -16,7 +16,7 @@
 
 package io.getstream.video.android.core.events
 
-import io.getstream.video.android.core.model.UserAudioLevel
+import io.getstream.video.android.model.UserAudioLevel
 import org.openapitools.client.models.VideoEvent
 import stream.video.sfu.event.ChangePublishQuality
 import stream.video.sfu.event.ConnectionQualityInfo
@@ -60,7 +60,7 @@ public data class ConnectionQualityChangeEvent(
 ) : SfuDataEvent()
 
 public data class AudioLevelChangedEvent(
-    val levels: Map<String, UserAudioLevel>
+    val levels: Map<String, io.getstream.video.android.model.UserAudioLevel>
 ) : SfuDataEvent()
 
 public data class ChangePublishQualityEvent(

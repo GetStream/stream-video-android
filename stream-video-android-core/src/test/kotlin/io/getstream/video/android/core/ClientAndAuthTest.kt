@@ -20,8 +20,8 @@ import com.google.common.truth.Truth.assertThat
 import io.getstream.log.taggedLogger
 import io.getstream.result.Error
 import io.getstream.video.android.core.errors.VideoErrorCode
-import io.getstream.video.android.core.model.User
-import io.getstream.video.android.core.model.UserType
+import io.getstream.video.android.model.User
+import io.getstream.video.android.model.UserType
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
@@ -52,7 +52,10 @@ class ClientAndAuthTest : TestBase() {
             context = context,
             apiKey = apiKey,
             geo = GEO.GlobalEdgeNetwork,
-            user = User(id = "anonymous", type = UserType.Anonymous)
+            user = io.getstream.video.android.model.User(
+                id = "anonymous",
+                type = io.getstream.video.android.model.UserType.Anonymous
+            )
         ).build()
     }
 
@@ -66,7 +69,10 @@ class ClientAndAuthTest : TestBase() {
             context = context,
             apiKey = apiKey,
             geo = GEO.GlobalEdgeNetwork,
-            user = User(id = "guest", type = UserType.Guest)
+            user = io.getstream.video.android.model.User(
+                id = "guest",
+                type = io.getstream.video.android.model.UserType.Guest
+            )
         ).build()
     }
 
@@ -77,7 +83,10 @@ class ClientAndAuthTest : TestBase() {
             context = context,
             apiKey = apiKey,
             geo = GEO.GlobalEdgeNetwork,
-            user = User(id = "guest", type = UserType.Guest)
+            user = io.getstream.video.android.model.User(
+                id = "guest",
+                type = io.getstream.video.android.model.UserType.Guest
+            )
         ).build()
         val sub = client.subscribe { event: VideoEvent ->
             logger.d { event.toString() }
@@ -92,7 +101,10 @@ class ClientAndAuthTest : TestBase() {
             context = context,
             apiKey = apiKey,
             geo = GEO.GlobalEdgeNetwork,
-            user = User(id = "guest", type = UserType.Guest)
+            user = io.getstream.video.android.model.User(
+                id = "guest",
+                type = io.getstream.video.android.model.UserType.Guest
+            )
         ).build()
         // Subscribe for new message events
         val sub = client.subscribeFor<ConnectedEvent> { newMessageEvent ->

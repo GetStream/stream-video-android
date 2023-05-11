@@ -17,7 +17,7 @@
 package io.getstream.video.android.core
 
 import android.content.Context
-import io.getstream.video.android.core.model.User
+import io.getstream.video.android.model.User
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import org.openapitools.client.models.CallCreatedEvent
@@ -46,8 +46,8 @@ class ClientState(client: StreamVideo) {
     /**
      * Current user object
      */
-    private val _user: MutableStateFlow<User?> = MutableStateFlow(client.user)
-    public val user: StateFlow<User?> = _user
+    private val _user: MutableStateFlow<io.getstream.video.android.model.User?> = MutableStateFlow(client.user)
+    public val user: StateFlow<io.getstream.video.android.model.User?> = _user
 
     /**
      * connectionState shows if we've established a connection with the coordinator

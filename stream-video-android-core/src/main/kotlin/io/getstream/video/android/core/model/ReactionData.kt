@@ -16,6 +16,8 @@
 
 package io.getstream.video.android.core.model
 
+import io.getstream.video.android.model.User
+
 /**
  * Represents the information about a successfully sent reaction.
  *

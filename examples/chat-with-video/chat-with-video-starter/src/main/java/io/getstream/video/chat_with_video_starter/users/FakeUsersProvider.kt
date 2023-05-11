@@ -16,21 +16,21 @@
 
 package io.getstream.video.chat_with_video_starter.users
 
-import io.getstream.video.android.core.model.User
 import io.getstream.video.android.core.user.UsersProvider
+import io.getstream.video.android.model.User
 import io.getstream.video.chat_with_video_starter.BuildConfig
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 
 class FakeUsersProvider : UsersProvider {
 
-    override fun provideUsers(): List<User> {
+    override fun provideUsers(): List<io.getstream.video.android.model.User> {
         return mockUsers()
     }
 
-    private fun mockUsers(): List<User> {
+    private fun mockUsers(): List<io.getstream.video.android.model.User> {
         return listOf(
-            User(
+            io.getstream.video.android.model.User(
                 id = BuildConfig.SAMPLE_USER_00_ID,
                 name = BuildConfig.SAMPLE_USER_00_NAME,
                 role = BuildConfig.SAMPLE_USER_00_ROLE,
@@ -38,7 +38,7 @@ class FakeUsersProvider : UsersProvider {
                 custom = mapOf("chatToken" to BuildConfig.SAMPLE_USER_00_CHAT_TOKEN),
                 teams = emptyList()
             ),
-            User(
+            io.getstream.video.android.model.User(
                 id = BuildConfig.SAMPLE_USER_01_ID,
                 name = BuildConfig.SAMPLE_USER_01_NAME,
                 role = BuildConfig.SAMPLE_USER_01_ROLE,
@@ -46,7 +46,7 @@ class FakeUsersProvider : UsersProvider {
                 custom = mapOf("chatToken" to BuildConfig.SAMPLE_USER_01_CHAT_TOKEN),
                 teams = emptyList()
             ),
-            User(
+            io.getstream.video.android.model.User(
                 id = BuildConfig.SAMPLE_USER_02_ID,
                 name = BuildConfig.SAMPLE_USER_02_NAME,
                 role = BuildConfig.SAMPLE_USER_02_ROLE,
@@ -54,7 +54,7 @@ class FakeUsersProvider : UsersProvider {
                 custom = mapOf("chatToken" to BuildConfig.SAMPLE_USER_02_CHAT_TOKEN),
                 teams = emptyList()
             ),
-            User(
+            io.getstream.video.android.model.User(
                 id = BuildConfig.SAMPLE_USER_03_ID,
                 name = BuildConfig.SAMPLE_USER_03_NAME,
                 role = BuildConfig.SAMPLE_USER_03_ROLE,
@@ -62,7 +62,7 @@ class FakeUsersProvider : UsersProvider {
                 custom = mapOf("chatToken" to BuildConfig.SAMPLE_USER_03_CHAT_TOKEN),
                 teams = emptyList()
             ),
-            User(
+            io.getstream.video.android.model.User(
                 id = BuildConfig.SAMPLE_USER_04_ID,
                 name = BuildConfig.SAMPLE_USER_04_NAME,
                 role = BuildConfig.SAMPLE_USER_04_ROLE,
@@ -70,7 +70,7 @@ class FakeUsersProvider : UsersProvider {
                 custom = mapOf("chatToken" to BuildConfig.SAMPLE_USER_04_CHAT_TOKEN),
                 teams = emptyList()
             ),
-            User(
+            io.getstream.video.android.model.User(
                 id = BuildConfig.SAMPLE_USER_05_ID,
                 name = BuildConfig.SAMPLE_USER_05_NAME,
                 role = BuildConfig.SAMPLE_USER_05_ROLE,
@@ -81,5 +81,5 @@ class FakeUsersProvider : UsersProvider {
         )
     }
 
-    override val userState: StateFlow<List<User>> = MutableStateFlow(provideUsers())
+    override val userState: StateFlow<List<io.getstream.video.android.model.User>> = MutableStateFlow(provideUsers())
 }

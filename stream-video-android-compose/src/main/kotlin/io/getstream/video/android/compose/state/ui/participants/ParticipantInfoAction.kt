@@ -16,7 +16,7 @@
 
 package io.getstream.video.android.compose.state.ui.participants
 
-import io.getstream.video.android.core.model.User
+import io.getstream.video.android.model.User
 
 /**
  * Actions which can be taken in the participants info UI in a call.
@@ -37,4 +37,4 @@ public data class ChangeMuteState(
  *
  * @param users The users to invite.
  */
-public data class InviteUsers(val users: List<User>) : ParticipantInfoAction
+public data class InviteUsers(val users: List<io.getstream.video.android.model.User>) : ParticipantInfoAction

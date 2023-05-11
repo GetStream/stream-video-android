@@ -27,7 +27,7 @@ import io.getstream.result.Result
 import io.getstream.video.android.core.call.connection.StreamPeerConnectionFactory
 import io.getstream.video.android.core.dispatchers.DispatcherProvider
 import io.getstream.video.android.core.logging.LoggingLevel
-import io.getstream.video.android.core.model.User
+import io.getstream.video.android.model.User
 import io.mockk.MockKAnnotations
 import io.mockk.impl.annotations.MockK
 import io.mockk.junit4.MockKRule
@@ -67,7 +67,7 @@ class DispatcherRule(
 
 class IntegrationTestHelper {
 
-    val users = mutableMapOf<String, User>()
+    val users = mutableMapOf<String, io.getstream.video.android.model.User>()
     val tokens = mutableMapOf<String, String>()
     val context: Context
 
@@ -93,16 +93,16 @@ class IntegrationTestHelper {
         val token =
             "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoidGhpZXJyeSJ9._4aZL6BR0VGKfZsKYdscsBm8yKVgG-2LatYeHRJUq0g"
 
-        val thierry = User(
+        val thierry = io.getstream.video.android.model.User(
             id = "thierry", role = "admin", name = "Thierry", image = "hello",
             teams = emptyList(), custom = mapOf()
         )
         users["thierry"] = thierry
-        users["tommaso"] = User(
+        users["tommaso"] = io.getstream.video.android.model.User(
             id = "tommaso", role = "admin", name = "Tommaso", image = "hello",
             teams = emptyList(), custom = mapOf()
         )
-        users["jaewoong"] = User(
+        users["jaewoong"] = io.getstream.video.android.model.User(
             id = "jaewoong", role = "admin", name = "Jaewoong", image = "hello",
             teams = emptyList(), custom = mapOf()
         )

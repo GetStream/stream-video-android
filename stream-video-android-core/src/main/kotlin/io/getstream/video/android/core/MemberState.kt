@@ -16,10 +16,10 @@
 
 package io.getstream.video.android.core
 
-import io.getstream.video.android.core.model.User
+import io.getstream.video.android.model.User
 
 public data class MemberState(
-    val user: User,
+    val user: io.getstream.video.android.model.User,
     val custom: Map<String, Any>,
     val role: String?,
     val createdAt: org.threeten.bp.OffsetDateTime,

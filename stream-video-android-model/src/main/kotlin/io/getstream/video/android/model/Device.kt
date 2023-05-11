@@ -14,15 +14,10 @@
  * limitations under the License.
  */
 
-package io.getstream.video.android.core.model
+package io.getstream.video.android.model
 
-import java.io.Serializable
-
-/**
- * Represents combined call identifier as a set of [StreamCallType], [StreamCallId] and [StreamCallCid].
- */
-public data class StreamCallGuid(
-    val type: StreamCallType,
-    val id: StreamCallId,
-    val cid: StreamCallCid
-) : Serializable
+@kotlinx.serialization.Serializable
+public data class Device(
+    val token: String,
+    val pushProvider: String
+)

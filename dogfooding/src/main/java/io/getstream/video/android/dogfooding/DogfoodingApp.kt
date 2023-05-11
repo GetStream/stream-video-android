@@ -26,10 +26,10 @@ import io.getstream.log.android.AndroidStreamLogger
 import io.getstream.video.android.core.StreamVideo
 import io.getstream.video.android.core.StreamVideoBuilder
 import io.getstream.video.android.core.logging.LoggingLevel
-import io.getstream.video.android.core.model.ApiKey
-import io.getstream.video.android.core.model.User
 import io.getstream.video.android.core.user.UserPreferencesManager
 import io.getstream.video.android.dogfooding.token.StreamVideoNetwork
+import io.getstream.video.android.model.ApiKey
+import io.getstream.video.android.model.User
 
 @HiltAndroidApp
 class DogfoodingApp : Application() {
@@ -47,9 +47,9 @@ class DogfoodingApp : Application() {
 
     /** Sets up and returns the [streamVideo] required to connect to the API. */
     fun initializeStreamVideo(
-        user: User,
+        user: io.getstream.video.android.model.User,
         token: String,
-        apiKey: ApiKey,
+        apiKey: io.getstream.video.android.model.ApiKey,
         loggingLevel: LoggingLevel
     ): StreamVideo {
         return StreamVideoBuilder(

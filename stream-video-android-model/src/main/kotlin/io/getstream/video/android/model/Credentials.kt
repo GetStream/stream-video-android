@@ -14,30 +14,19 @@
  * limitations under the License.
  */
 
-package io.getstream.video.android.core.model
+package io.getstream.video.android.model
 
 /**
- * Represents call cid.
+ * The API key of your Stream Video app.
  */
-public typealias StreamCallCid = String
+public typealias ApiKey = String
 
 /**
- * Represents call type.
+ * User's ticket to join/initiate the call.
  */
-public typealias StreamCallType = String
+public typealias UserToken = String
 
 /**
- * Represents call id.
+ * User's ticket to enter the call when joined/initiated.
  */
-public typealias StreamCallId = String
-
-/**
- * Generates [StreamCallCid] from [StreamCallType] and [StreamCallId].
- */
-public fun StreamCallCid(type: StreamCallType, id: StreamCallId): StreamCallCid {
-    return when {
-        type.isNotEmpty() && id.isNotEmpty() -> "$type:$id"
-        id.isNotEmpty() -> id
-        else -> error("[StreamCallCid] invalid arguments; type=$type, id=$id")
-    }
-}
+public typealias SfuToken = String

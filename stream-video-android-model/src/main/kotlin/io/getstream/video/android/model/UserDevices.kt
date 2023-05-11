@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package io.getstream.video.android.core.model
+package io.getstream.video.android.model
 
 @kotlinx.serialization.Serializable
 public data class UserDevices(

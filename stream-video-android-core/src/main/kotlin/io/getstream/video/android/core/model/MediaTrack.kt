@@ -19,19 +19,19 @@ package io.getstream.video.android.core.model
 public sealed class MediaTrack(
     public open val streamId: String
 ) {
-    fun asVideoTrack(): VideoTrack? {
+    public fun asVideoTrack(): VideoTrack? {
         return this as? VideoTrack
     }
 
-    fun asAudioTrack(): AudioTrack? {
+    public fun asAudioTrack(): AudioTrack? {
         return this as? AudioTrack
     }
 
-    fun enableVideo(enabled: Boolean) {
+    public fun enableVideo(enabled: Boolean) {
         asVideoTrack()?.video?.setEnabled(enabled)
     }
 
-    fun enableAudio(enabled: Boolean) {
+    public fun enableAudio(enabled: Boolean) {
         asAudioTrack()?.audio?.setEnabled(enabled)
     }
 }

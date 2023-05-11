@@ -14,13 +14,22 @@
  * limitations under the License.
  */
 
-package io.getstream.video.android.core.model
+package io.getstream.video.android.core.utils
 
-/**
- * Represents the audio level and if a user is speaking.
- */
-public data class UserAudioLevel(
-    val userId: String,
-    val isSpeaking: Boolean,
-    val audioLevel: Float
-)
+import io.getstream.video.android.model.User
+import org.openapitools.client.models.UserResponse
+import org.threeten.bp.OffsetDateTime
+
+internal fun User.toResponse(): UserResponse {
+    return UserResponse(
+        id = id,
+        role = role,
+        name = name,
+        image = image,
+        teams = teams,
+        custom = custom,
+        createdAt = createdAt ?: OffsetDateTime.now(),
+        updatedAt = updatedAt ?: OffsetDateTime.now(),
+        deletedAt = deletedAt,
+    )
+}

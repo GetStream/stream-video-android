@@ -17,12 +17,12 @@
 package io.getstream.video.android.app.utils
 
 import io.getstream.video.android.app.BuildConfig
-import io.getstream.video.android.core.model.User
+import io.getstream.video.android.model.User
 
-fun getUsers(): List<User> {
+fun getUsers(): List<io.getstream.video.android.model.User> {
     // TODO: using buildconfig for this is not ideal
     return listOf(
-        User(
+        io.getstream.video.android.model.User(
             id = BuildConfig.SAMPLE_USER_00_ID,
             name = BuildConfig.SAMPLE_USER_00_NAME,
             image = BuildConfig.SAMPLE_USER_00_IMAGE,
@@ -30,7 +30,7 @@ fun getUsers(): List<User> {
             teams = emptyList(),
             custom = emptyMap()
         ),
-        User(
+        io.getstream.video.android.model.User(
             id = BuildConfig.SAMPLE_USER_01_ID,
             name = BuildConfig.SAMPLE_USER_01_NAME,
             image = BuildConfig.SAMPLE_USER_01_IMAGE,
@@ -38,7 +38,7 @@ fun getUsers(): List<User> {
             teams = emptyList(),
             custom = emptyMap()
         ),
-        User(
+        io.getstream.video.android.model.User(
             id = BuildConfig.SAMPLE_USER_02_ID,
             name = BuildConfig.SAMPLE_USER_02_NAME,
             image = BuildConfig.SAMPLE_USER_02_IMAGE,
@@ -46,7 +46,7 @@ fun getUsers(): List<User> {
             teams = emptyList(),
             custom = emptyMap()
         ),
-        User(
+        io.getstream.video.android.model.User(
             id = BuildConfig.SAMPLE_USER_03_ID,
             name = BuildConfig.SAMPLE_USER_03_NAME,
             image = BuildConfig.SAMPLE_USER_03_IMAGE,
@@ -54,7 +54,7 @@ fun getUsers(): List<User> {
             teams = emptyList(),
             custom = emptyMap()
         ),
-        User(
+        io.getstream.video.android.model.User(
             id = BuildConfig.SAMPLE_USER_04_ID,
             name = BuildConfig.SAMPLE_USER_04_NAME,
             image = BuildConfig.SAMPLE_USER_04_IMAGE,
@@ -62,7 +62,7 @@ fun getUsers(): List<User> {
             teams = emptyList(),
             custom = emptyMap()
         ),
-        User(
+        io.getstream.video.android.model.User(
             id = BuildConfig.SAMPLE_USER_05_ID,
             name = BuildConfig.SAMPLE_USER_05_NAME,
             image = BuildConfig.SAMPLE_USER_05_IMAGE,

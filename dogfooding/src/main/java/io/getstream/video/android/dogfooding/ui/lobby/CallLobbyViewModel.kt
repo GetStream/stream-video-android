@@ -24,9 +24,9 @@ import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.DeviceStatus
 import io.getstream.video.android.core.StreamVideo
 import io.getstream.video.android.core.call.state.CallDeviceState
-import io.getstream.video.android.core.model.User
-import io.getstream.video.android.core.model.mapper.toTypeAndId
 import io.getstream.video.android.core.user.UserPreferences
+import io.getstream.video.android.model.User
+import io.getstream.video.android.model.mapper.toTypeAndId
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
@@ -47,7 +47,7 @@ class CallLobbyViewModel @Inject constructor(
         streamVideo.call(type = type, id = id)
     }
 
-    val user: User? = userPreferences.getUserCredentials()
+    val user: io.getstream.video.android.model.User? = userPreferences.getUserCredentials()
 
     val deviceState: StateFlow<CallDeviceState> =
         combine(call.camera.status, call.microphone.status) { cameraEnabled, microphoneEnabled ->

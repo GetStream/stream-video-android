@@ -32,9 +32,9 @@ import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import io.getstream.video.android.compose.theme.VideoTheme
-import io.getstream.video.android.core.model.User
 import io.getstream.video.android.mock.StreamMockUtils
 import io.getstream.video.android.mock.mockParticipantList
+import io.getstream.video.android.model.User
 
 /**
  * Represents the [User] avatar that's shown on the Messages screen or in headers of DMs.
@@ -58,7 +58,7 @@ import io.getstream.video.android.mock.mockParticipantList
  */
 @Composable
 public fun UserAvatar(
-    user: User,
+    user: io.getstream.video.android.model.User,
     modifier: Modifier = Modifier,
     shape: Shape = VideoTheme.shapes.avatar,
     textStyle: TextStyle = VideoTheme.typography.title3Bold,

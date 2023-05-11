@@ -32,9 +32,9 @@ import io.getstream.log.taggedLogger
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.core.StreamVideo
 import io.getstream.video.android.core.logging.LoggingLevel
-import io.getstream.video.android.core.model.mapper.toTypeAndId
 import io.getstream.video.android.core.user.UserPreferencesManager
 import io.getstream.video.android.dogfooding.ui.call.CallActivity
+import io.getstream.video.android.model.mapper.toTypeAndId
 import kotlinx.coroutines.launch
 
 class DeeplinkingActivity : ComponentActivity() {

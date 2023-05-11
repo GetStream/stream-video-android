@@ -20,11 +20,10 @@ import android.content.Context
 import io.getstream.log.StreamLog
 import io.getstream.result.Result
 import io.getstream.video.android.core.events.VideoEventListener
-import io.getstream.video.android.core.model.Device
 import io.getstream.video.android.core.model.EdgeData
 import io.getstream.video.android.core.model.QueriedCalls
 import io.getstream.video.android.core.model.SortField
-import io.getstream.video.android.core.model.User
+import io.getstream.video.android.model.Device
 import org.openapitools.client.models.QueryCallsResponse
 import org.openapitools.client.models.VideoEvent
 
@@ -37,7 +36,7 @@ public interface StreamVideo {
      * Represents the default call config when starting a call.
      */
     public val context: Context
-    public val user: User
+    public val user: io.getstream.video.android.model.User
     public val userId: String
 
     val state: ClientState
@@ -85,7 +84,7 @@ public interface StreamVideo {
     public suspend fun createDevice(
         token: String,
         pushProvider: String,
-    ): Result<Device>
+    ): Result<io.getstream.video.android.model.Device>
 
     /**
      * Remove a device used to receive push notifications.

@@ -42,13 +42,13 @@ import io.getstream.video.android.core.StreamVideoProvider
 import io.getstream.video.android.core.call.state.ToggleCamera
 import io.getstream.video.android.core.call.state.ToggleMicrophone
 import io.getstream.video.android.core.call.state.ToggleScreenConfiguration
-import io.getstream.video.android.core.model.StreamCallId
-import io.getstream.video.android.core.model.mapper.toTypeAndId
 import io.getstream.video.android.core.permission.PermissionManager
 import io.getstream.video.android.core.permission.PermissionManagerProvider
 import io.getstream.video.android.core.viewmodel.CallViewModel
 import io.getstream.video.android.core.viewmodel.CallViewModelFactory
 import io.getstream.video.android.core.viewmodel.CallViewModelFactoryProvider
+import io.getstream.video.android.model.StreamCallId
+import io.getstream.video.android.model.mapper.toTypeAndId
 
 public abstract class AbstractCallActivity :
     ComponentActivity(),
@@ -280,7 +280,7 @@ public abstract class AbstractCallActivity :
         @JvmStatic
         public inline fun <reified T : AbstractCallActivity> createIntent(
             context: Context,
-            cid: StreamCallId,
+            cid: io.getstream.video.android.model.StreamCallId,
         ): Intent {
             return Intent(context, T::class.java).apply {
                 putExtra(EXTRA_CID, cid)

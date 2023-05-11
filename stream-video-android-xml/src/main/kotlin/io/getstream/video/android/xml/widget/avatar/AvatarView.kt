@@ -25,8 +25,8 @@ import com.google.android.material.shape.AbsoluteCornerSize
 import com.google.android.material.shape.RelativeCornerSize
 import com.google.android.material.shape.ShapeAppearanceModel
 import io.getstream.video.android.core.model.CallUser
-import io.getstream.video.android.core.model.User
 import io.getstream.video.android.core.utils.initials
+import io.getstream.video.android.model.User
 import io.getstream.video.android.xml.utils.extensions.createStreamThemeWrapper
 import io.getstream.video.android.xml.utils.extensions.load
 import io.getstream.video.android.xml.widget.avatar.internal.AvatarPlaceholderDrawable
@@ -65,7 +65,7 @@ public class AvatarView : ShapeableImageView {
      *
      * @param user The [User] for which we want to show the avatar.
      */
-    public fun setData(user: User) {
+    public fun setData(user: io.getstream.video.android.model.User) {
         load(
             data = user.image,
             placeholderDrawable = AvatarPlaceholderDrawable(

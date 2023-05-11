@@ -16,7 +16,7 @@
 
 package io.getstream.video.android.compose.state.ui.internal
 
-import io.getstream.video.android.core.model.User
+import io.getstream.video.android.model.User
 
 /**
  * State for the invite users UI in Call Participants Info.
@@ -25,6 +25,6 @@ import io.getstream.video.android.core.model.User
  * @param isSelected If the user is selected or not.
  */
 internal data class InviteUserItemState(
-    val user: User,
+    val user: io.getstream.video.android.model.User,
     val isSelected: Boolean = false
 )

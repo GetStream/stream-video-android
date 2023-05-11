@@ -364,7 +364,10 @@ public class RtcSession internal constructor(
         mediaStream.audioTracks.forEach { track ->
             logger.v { "[addStream] #sfu; audioTrack: ${track.stringify()}" }
             track.setEnabled(true)
-            val audioTrack = AudioTrack(streamId = mediaStream.id, audio = track)
+            val audioTrack = AudioTrack(
+                streamId = mediaStream.id,
+                audio = track
+            )
             setTrack(sessionId, trackType, audioTrack)
         }
 

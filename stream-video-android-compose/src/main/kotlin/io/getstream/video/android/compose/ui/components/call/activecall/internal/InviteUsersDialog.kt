@@ -34,7 +34,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import io.getstream.video.android.compose.theme.VideoTheme
-import io.getstream.video.android.core.model.User
+import io.getstream.video.android.model.User
 import io.getstream.video.android.ui.common.R
 
 /**
@@ -46,9 +46,9 @@ import io.getstream.video.android.ui.common.R
  */
 @Composable
 internal fun InviteUsersDialog(
-    users: List<User>,
+    users: List<io.getstream.video.android.model.User>,
     onDismiss: () -> Unit,
-    onInviteUsers: (List<User>) -> Unit
+    onInviteUsers: (List<io.getstream.video.android.model.User>) -> Unit
 ) {
 
     Dialog(onDismissRequest = onDismiss, content = {

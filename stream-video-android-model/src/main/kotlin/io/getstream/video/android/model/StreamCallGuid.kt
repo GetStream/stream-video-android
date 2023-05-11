@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014-2023 Stream.io Inc. All rights reserved.
+ * Copyright (c) 2014-2022 Stream.io Inc. All rights reserved.
  *
  * Licensed under the Stream License;
  * you may not use this file except in compliance with the License.
@@ -14,16 +14,15 @@
  * limitations under the License.
  */
 
-package io.getstream.video.android.datastore.model
+package io.getstream.video.android.model
 
-import io.getstream.video.android.model.ApiKey
-import io.getstream.video.android.model.User
-import io.getstream.video.android.model.UserDevices
-import kotlinx.serialization.Serializable
+import java.io.Serializable
 
-@Serializable
-public data class UserPreferences(
-    public val user: io.getstream.video.android.model.User?,
-    public val userDevices: io.getstream.video.android.model.UserDevices,
-    public val apiToken: io.getstream.video.android.model.ApiKey
-)
+/**
+ * Represents combined call identifier as a set of [StreamCallType], [StreamCallId] and [StreamCallCid].
+ */
+public data class StreamCallGuid(
+    val type: StreamCallType,
+    val id: StreamCallId,
+    val cid: StreamCallCid
+) : Serializable

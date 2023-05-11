@@ -26,10 +26,10 @@ import io.getstream.video.android.core.filter.AudioFilter
 import io.getstream.video.android.core.filter.VideoFilter
 import io.getstream.video.android.core.internal.module.ConnectionModule
 import io.getstream.video.android.core.logging.LoggingLevel
-import io.getstream.video.android.core.model.ApiKey
-import io.getstream.video.android.core.model.User
-import io.getstream.video.android.core.model.UserType
 import io.getstream.video.android.core.user.UserPreferencesManager
+import io.getstream.video.android.model.ApiKey
+import io.getstream.video.android.model.User
+import io.getstream.video.android.model.UserType
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
@@ -50,11 +50,11 @@ import kotlinx.coroutines.launch
 public class StreamVideoBuilder @JvmOverloads constructor(
     context: Context,
     /** Your Stream API Key, you can find it in the dashboard */
-    private val apiKey: ApiKey,
+    private val apiKey: io.getstream.video.android.model.ApiKey,
     /** Your GEO routing policy, supports geofencing for privacy concerns */
     private val geo: GEO = GEO.GlobalEdgeNetwork,
     /** The user object, can be a regular user, guest user or anonymous */
-    private val user: User,
+    private val user: io.getstream.video.android.model.User,
     /** The token for this user generated using your API secret on your server */
     private val token: String = "",
     /** If a token is expired, the token provider makes a request to your backend for a new token */
@@ -88,7 +88,7 @@ public class StreamVideoBuilder @JvmOverloads constructor(
         if (apiKey.isBlank()
         ) throw IllegalArgumentException("The API key can not be empty")
 
-        if (token.isBlank() && tokenProvider == null && user.type == UserType.Authenticated) {
+        if (token.isBlank() && tokenProvider == null && user.type == io.getstream.video.android.model.UserType.Authenticated) {
             throw IllegalArgumentException(
                 "Either a user token or a token provider must be provided"
             )
@@ -131,13 +131,13 @@ public class StreamVideoBuilder @JvmOverloads constructor(
         )
         scope.launch {
             // addDevice for push
-            if (enablePush && user.type == UserType.Authenticated) {
+            if (enablePush && user.type == io.getstream.video.android.model.UserType.Authenticated) {
                 client.registerPushDevice()
             }
         }
-        if (user.type == UserType.Guest) {
+        if (user.type == io.getstream.video.android.model.UserType.Guest) {
             client.setupGuestUser(user)
-        } else if (user.type == UserType.Anonymous) {
+        } else if (user.type == io.getstream.video.android.model.UserType.Anonymous) {
             connectionModule.updateAuthType("anonymous")
         }
 

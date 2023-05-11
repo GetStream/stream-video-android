@@ -17,7 +17,7 @@
 package io.getstream.video.android.core.call.state
 
 import io.getstream.video.android.core.audio.AudioDevice
-import io.getstream.video.android.core.model.User
+import io.getstream.video.android.model.User
 
 /**
  * Represents various actions users can take while in a call.
@@ -86,7 +86,7 @@ public object ChatDialog : CallAction
  * Action to invite other users to a call.
  */
 public data class InviteUsersToCall(
-    val users: List<User>
+    val users: List<io.getstream.video.android.model.User>
 ) : CallAction
 
 /**
