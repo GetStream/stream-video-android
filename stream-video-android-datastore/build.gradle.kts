@@ -45,4 +45,5 @@ dependencies {
     implementation(libs.kotlinx.serialization.protobuf)
     implementation(libs.androidx.datastore)
     implementation(libs.androidx.datastore.core)
+    implementation(libs.stream.log)
 }

@@ -6,6 +6,7 @@ public final class io/getstream/video/android/datastore/BuildConfig {
 }
 
 public final class io/getstream/video/android/datastore/delegate/StreamUserDataStore : androidx/datastore/core/DataStore {
+	public static final field Companion Lio/getstream/video/android/datastore/delegate/StreamUserDataStore$Companion;
 	public fun <init> (Landroidx/datastore/core/DataStore;)V
 	public final fun clear (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public final fun getApiKey ()Lkotlinx/coroutines/flow/Flow;
@@ -18,6 +19,14 @@ public final class io/getstream/video/android/datastore/delegate/StreamUserDataS
 	public final fun updateUser (Lio/getstream/video/android/model/User;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public final fun updateUserDevices (Lio/getstream/video/android/model/UserDevices;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public final fun updateUserPreferences (Lio/getstream/video/android/datastore/model/StreamUserPreferences;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+}
+
+public final class io/getstream/video/android/datastore/delegate/StreamUserDataStore$Companion {
+	public final fun install (Landroid/content/Context;)V
+	public final fun instance ()Lio/getstream/video/android/datastore/delegate/StreamUserDataStore;
+	public final fun isInstalled ()Z
+	public final fun lazyInstance ()Lkotlin/Lazy;
+	public final fun unInstall ()V
 }
 
 public final class io/getstream/video/android/datastore/model/StreamUserPreferences {

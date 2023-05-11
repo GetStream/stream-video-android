@@ -16,15 +16,24 @@
 
 package io.getstream.video.android.datastore.delegate
 
+import android.content.Context
 import androidx.datastore.core.DataStore
+import androidx.datastore.core.DataStoreFactory
+import androidx.datastore.dataStoreFile
+import com.google.crypto.tink.Aead
+import com.google.crypto.tink.KeyTemplates
+import com.google.crypto.tink.integration.android.AndroidKeysetManager
+import io.getstream.log.StreamLog
 import io.getstream.video.android.datastore.model.StreamUserPreferences
+import io.getstream.video.android.datastore.serializer.UserSerializer
+import io.getstream.video.android.datastore.serializer.encrypted
 import io.getstream.video.android.model.ApiKey
 import io.getstream.video.android.model.User
 import io.getstream.video.android.model.UserDevices
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 
-public class StreamUserDataStore(dataStore: DataStore<StreamUserPreferences?>) :
+public class StreamUserDataStore constructor(dataStore: DataStore<StreamUserPreferences?>) :
     DataStore<StreamUserPreferences?> by dataStore {
 
     public suspend fun updateUserPreferences(streamUserPreferences: StreamUserPreferences) {
@@ -62,4 +71,74 @@ public class StreamUserDataStore(dataStore: DataStore<StreamUserPreferences?>) :
 
     public val userDevices: Flow<UserDevices?>
         inline get() = preferences.map { it?.userDevices }
+
+    public companion object {
+        /**
+         * Represents if [StreamUserDataStore] is already installed or not.
+         * Lets you know if the internal [StreamUserDataStore] instance is being used as the
+         * uncaught exception handler when true or if it is using the default one if false.
+         */
+        public var isInstalled: Boolean = false
+            get() = internalStreamUserDataStore != null
+            private set
+
+        /**
+         * [StreamUserDataStore] instance to be used.
+         */
+        @Volatile
+        private var internalStreamUserDataStore: StreamUserDataStore? = null
+
+        /**
+         * Returns an installed [StreamUserDataStore] instance or throw an exception if its not installed.
+         */
+        public fun instance(): StreamUserDataStore {
+            return internalStreamUserDataStore
+                ?: throw IllegalStateException(
+                    "StreamUserDataStore.install() must be called before obtaining StreamUserDataStore instance."
+                )
+        }
+
+        /**
+         * Returns an installed [StreamUserDataStore] instance lazy or throw an exception if its not installed.
+         */
+        public fun lazyInstance(): Lazy<StreamUserDataStore> {
+            return lazy(LazyThreadSafetyMode.NONE) { instance() }
+        }
+
+        /**
+         * Installs a new [StreamUserDataStore] instance to be used.
+         */
+        public fun install(context: Context) {
+            synchronized(this) {
+                val aead = AndroidKeysetManager.Builder()
+                    .withSharedPref(context, "master_keyset", "master_key_preference")
+                    .withKeyTemplate(KeyTemplates.get("AES256_GCM"))
+                    .withMasterKeyUri("android-keystore://master_key")
+                    .build()
+                    .keysetHandle
+                    .getPrimitive(Aead::class.java)
+
+                val dataStore = DataStoreFactory.create(UserSerializer().encrypted(aead)) {
+                    context.dataStoreFile("proto_stream_video_user.pb")
+                }
+
+                val userDataStore = StreamUserDataStore(dataStore)
+
+                if (isInstalled) {
+                    StreamLog.e("StreamVideo") {
+                        "The $internalStreamUserDataStore is already installed but you've tried to " +
+                            "install a new exception handler: $userDataStore"
+                    }
+                }
+                internalStreamUserDataStore = userDataStore
+            }
+        }
+
+        /**
+         * Uninstall a previous [StreamUserDataStore] instance.
+         */
+        public fun unInstall() {
+            internalStreamUserDataStore = null
+        }
+    }
 }
