@@ -168,7 +168,6 @@ public class CallViewModel(
 
     private fun onSpeakerphoneChanged(speakerPhoneEnabled: Boolean) {
         logger.d { "[onSpeakerphoneChanged] speakerPhoneEnabled: $speakerPhoneEnabled" }
-        call.speaker.setEnabled(speakerPhoneEnabled)
         isSpeakerPhoneOn.value = speakerPhoneEnabled
     }
 

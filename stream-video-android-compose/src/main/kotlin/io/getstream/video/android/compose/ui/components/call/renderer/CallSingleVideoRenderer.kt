@@ -124,13 +124,13 @@ public fun CallSingleVideoRenderer(
         ParticipantLabel(participant, labelPosition)
 
         if (isShowingConnectionQualityIndicator) {
-            val connectionQuality by participant.connectionQuality.collectAsStateWithLifecycle()
-            ConnectionQualityIndicator(
+        val connectionQuality by participant.connectionQuality.collectAsStateWithLifecycle()
+                ConnectionQualityIndicator(
                 connectionQuality = connectionQuality,
-                modifier = Modifier.align(BottomEnd)
-            )
-        }
-    }
+    modifier = Modifier.align(BottomEnd)
+    )
+}
+}
 }
 
 @Composable
@@ -154,10 +154,10 @@ internal fun ParticipantVideoRenderer(
         return
     }
 
-    if (videoTrack != null && isVideoEnabled) {
+    if (isVideoEnabled) {
         VideoRenderer(
             call = call,
-            mediaTrack = videoTrack as MediaTrack,
+            mediaTrack = videoTrack,
             sessionId = participant.sessionId,
             onRender = onRender,
             trackType = TrackType.TRACK_TYPE_VIDEO
