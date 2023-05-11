@@ -54,22 +54,60 @@ data class CameraDeviceWrapped(
     val direction: CameraDirection?
 )
 
-class SpeakerManager(val mediaManager: MediaManagerImpl) {
+class SpeakerManager(val mediaManager: MediaManagerImpl, val microphoneManager: MicrophoneManager, val initialVolume: Int? = null) {
 
-    private val _status = MutableStateFlow<DeviceStatus>(DeviceStatus.Disabled)
-    val status: StateFlow<DeviceStatus> = _status
+    private val _volume = MutableStateFlow<Int?>(initialVolume)
+    val volume: StateFlow<Int?> = _volume
 
-    private val _selectedDevice = MutableStateFlow<String?>(null)
-    val selectedDevice: StateFlow<String?> = _selectedDevice
+    val selectedDevice: StateFlow<AudioDevice?> = microphoneManager.selectedDevice
 
-    private val _devices = MutableStateFlow<List<String>>(emptyList())
-    val devices: StateFlow<List<String>> = _devices
+    val devices: StateFlow<List<AudioDevice>> = microphoneManager.devices
 
     private val _speakerPhoneEnabled = MutableStateFlow(false)
     val speakerPhoneEnabled: StateFlow<Boolean> = _speakerPhoneEnabled
 
-    fun setEnabled(enabled: Boolean) {
+    internal var selectedBeforeSpeaker: AudioDevice? = null
+
+    fun enableSpeakerPhone() {
+        setSpeakerPhone(true)
     }
+
+    fun disableSpeakerPhone() {
+        setSpeakerPhone(false)
+    }
+
+    /** enables or disables the speakerphone */
+    fun setSpeakerPhone(enable: Boolean) {
+        microphoneManager.setup()
+        val devices = devices.value
+        if (enable) {
+            val speaker = devices.filterIsInstance<AudioDevice.Speakerphone>().firstOrNull()
+            selectedBeforeSpeaker = selectedDevice.value
+            _speakerPhoneEnabled.value = true
+            microphoneManager.select(speaker)
+        } else {
+            _speakerPhoneEnabled.value = false
+            // swap back to the old one
+            val fallback =
+                selectedBeforeSpeaker ?: devices.firstOrNull { it !is AudioDevice.Speakerphone }
+            microphoneManager.select(fallback)
+        }
+    }
+
+    /**
+     * Set the volume as a percentage, 0-100
+     */
+    fun setVolume(volumePercentage: Int) {
+        microphoneManager.setup()
+        microphoneManager.audioManager?.let {
+            val max = it.getStreamMaxVolume(AudioManager.STREAM_VOICE_CALL)
+            val level = max / 100 * volumePercentage
+            _volume.value = volumePercentage
+            it.setStreamVolume(AudioManager.STREAM_VOICE_CALL, level, 0)
+        }
+    }
+
+
 }
 
 /**
@@ -92,7 +130,7 @@ class SpeakerManager(val mediaManager: MediaManagerImpl) {
  */
 class MicrophoneManager(val mediaManager: MediaManagerImpl) {
     private lateinit var audioHandler: AudioSwitchHandler
-    private var audioManager: AudioManager? = null
+    internal var audioManager: AudioManager? = null
 
     private val logger by taggedLogger("Media:MicrophoneManager")
 
@@ -106,7 +144,7 @@ class MicrophoneManager(val mediaManager: MediaManagerImpl) {
     private val _devices = MutableStateFlow<List<AudioDevice>>(emptyList())
     val devices: StateFlow<List<AudioDevice>> = _devices
 
-    internal var selectedBeforeSpeaker: AudioDevice? = null
+
 
     /** Enable the audio, the rtc engine will automatically inform the SFU */
     fun enable() {
@@ -133,33 +171,7 @@ class MicrophoneManager(val mediaManager: MediaManagerImpl) {
         }
     }
 
-    /** enables or disables the speakerphone */
-    fun setSpeaker(enable: Boolean) {
-        setup()
-        val devices = _devices.value
-        if (enable) {
-            val speaker = devices.filterIsInstance<AudioDevice.Speakerphone>().firstOrNull()
-            selectedBeforeSpeaker = _selectedDevice.value
-            select(speaker)
-        } else {
-            // swap back to the old one
-            val fallback =
-                selectedBeforeSpeaker ?: devices.firstOrNull { it !is AudioDevice.Speakerphone }
-            select(fallback)
-        }
-    }
 
-    /**
-     * Set the volume as a percentage, 0-100
-     */
-    fun setVolume(volumePercentage: Int) {
-        setup()
-        audioManager?.let {
-            val max = it.getStreamMaxVolume(AudioManager.STREAM_VOICE_CALL)
-            val level = max / 100 * volumePercentage
-            it.setStreamVolume(AudioManager.STREAM_VOICE_CALL, level, 0)
-        }
-    }
 
     /**
      * Select a specific device
@@ -485,7 +497,7 @@ class MediaManagerImpl(
 
     val camera = CameraManager(this, eglBaseContext)
     val microphone = MicrophoneManager(this)
-    val speaker = SpeakerManager(this)
+    val speaker = SpeakerManager(this, microphone)
 
     fun setSpeakerphoneEnabled(isEnabled: Boolean) {
         val devices = getAudioDevices()

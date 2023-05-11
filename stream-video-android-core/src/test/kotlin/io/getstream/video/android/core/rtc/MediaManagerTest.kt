@@ -17,12 +17,20 @@
 package io.getstream.video.android.core.rtc
 
 import io.getstream.log.taggedLogger
+import io.getstream.video.android.core.IntegrationTestBase
 import io.getstream.video.android.core.TestBase
+import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 
 @RunWith(RobolectricTestRunner::class)
-class MediaManagerTest : TestBase() {
+class MediaManagerTest : IntegrationTestBase() {
 
     private val logger by taggedLogger("Test:MediaManagerTest")
+
+    @Test
+    fun `test media manager`() {
+        call.camera.enable()
+        call.camera.disable()
+    }
 }
