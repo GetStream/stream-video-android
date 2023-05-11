@@ -75,7 +75,6 @@ import org.webrtc.MediaStream
 import org.webrtc.MediaStreamTrack
 import org.webrtc.PeerConnection
 import org.webrtc.RTCStatsReport
-import org.webrtc.RtpParameters
 import org.webrtc.RtpTransceiver
 import org.webrtc.SessionDescription
 import retrofit2.HttpException
@@ -152,6 +151,7 @@ public class RtcSession internal constructor(
     private val remoteIceServers: List<IceServer>,
 ) {
 
+    private var lastTracks: List<TrackSubscriptionDetails>? = null
     private val context = client.context
     private val logger by taggedLogger("Call:RtcSession")
     private val clientImpl = client as StreamVideoImpl
@@ -160,12 +160,11 @@ public class RtcSession internal constructor(
 
     internal val sessionId = clientImpl.sessionId
 
-    // TODO: rename
-    val trackDisplayResolutionUpdates =
+    val trackResolutions =
         MutableStateFlow<MutableMap<String, MutableMap<TrackType, TrackDisplayResolution>>>(
             mutableMapOf()
         )
-    val trackUpdatesDebounced = trackDisplayResolutionUpdates.debounce(100)
+    val trackResolutionsDebounced = trackResolutions.debounce(100)
     private var connectionState: ConnectionState = ConnectionState.DISCONNECTED
 
     // run all calls on a supervisor job so we can easily cancel them
@@ -184,9 +183,6 @@ public class RtcSession internal constructor(
     // We need to update tracks for all participants
     // It's cleaner to store here and have the participant state reference to it
     var tracks: MutableMap<String, MutableMap<TrackType, MediaTrack>> = mutableMapOf()
-
-    var trackDisplayResolution: MutableMap<String, MutableMap<TrackType, TrackDisplayResolution>> =
-        mutableMapOf()
 
     fun getTrack(sessionId: String, type: TrackType): MediaTrack? {
         if (!tracks.containsKey(sessionId)) {
@@ -290,7 +286,8 @@ public class RtcSession internal constructor(
         }
         coroutineScope.launch {
             // call update participant subscriptions debounced
-            trackUpdatesDebounced.collect {
+            trackResolutionsDebounced.collect {
+                logger.d { "updateParticipantsSubscriptions 5 collected" }
                 updateParticipantsSubscriptions()
             }
         }
@@ -348,7 +345,7 @@ public class RtcSession internal constructor(
         val sessionId = trackPrefixToSessionIdMap.value[trackPrefix]
 
         if (sessionId == null || trackPrefixToSessionIdMap.value[trackPrefix].isNullOrEmpty()) {
-            logger.d { "[addStream] skipping unrecognized trackPrefix $trackPrefix" }
+            logger.d { "[addStream] skipping unrecognized trackPrefix $trackPrefix $mediaStream.id" }
             return
         }
 
@@ -611,7 +608,6 @@ public class RtcSession internal constructor(
         // enable or disable tracks
         val encodings = transceiver.sender.parameters.encodings.toList()
         for (encoding in encodings) {
-            println(encoding)
             encoding.active = enabledRids?.get(encoding.rid ?: "") ?: false
         }
 
@@ -670,7 +666,6 @@ public class RtcSession internal constructor(
      */
     internal fun defaultTracks(): List<TrackSubscriptionDetails> {
         val sortedParticipants = call.state.sortedParticipants.value
-        println("defaultTracks: $sortedParticipants")
         val otherParticipants = sortedParticipants.filter { it.sessionId != sessionId }.take(5)
         val tracks = otherParticipants
             .map { participant ->
@@ -687,10 +682,10 @@ public class RtcSession internal constructor(
 
     internal fun visibleTracks(): List<TrackSubscriptionDetails> {
         val participants = call.state.remoteParticipants.value
+        val trackDisplayResolution = trackResolutions.value
 
         var tracks = participants.map { participant ->
             val trackDisplay = trackDisplayResolution[participant.sessionId] ?: emptyMap()
-            println("visibleTracks $participant $trackDisplay")
             trackDisplay.values.filter { it.visible }.map { display ->
                 TrackSubscriptionDetails(
                     user_id = participant.user.value.id,
@@ -704,7 +699,7 @@ public class RtcSession internal constructor(
     }
 
     private fun updateParticipantsSubscriptions(useDefaults: Boolean = false) {
-        logger.d { "[updateParticipantsSubscriptions] #sfu; useDefaults: $useDefaults" }
+        logger.d { "[updateParticipantsSubscriptions 1] #sfu; useDefaults: $useDefaults" }
         // default is to subscribe to the top 5 sorted participants
         val tracks = if (useDefaults) {
             defaultTracks()
@@ -722,15 +717,22 @@ public class RtcSession internal constructor(
 
         // can be empty if you're alone in a call
         if (tracks.isNotEmpty()) {
+            // skip if nothing changed
+            if (lastTracks == tracks) {
+                logger.d { "[updateParticipantsSubscriptions] #sfu; tracks are the same, not updating" }
+                return
+            }
             coroutineScope.launch {
                 when (val result = updateSubscriptions(request)) {
                     is Success -> {
                         logger.v { "[updateParticipantsSubscriptions] #sfu; succeed" }
+                        lastTracks = tracks
                     }
 
                     is Failure -> {
                         // TODO: this breaks the call, we should handle this better
                         logger.e { "[updateParticipantsSubscriptions] #sfu; failed: $result" }
+
                     }
                 }
             }
@@ -763,8 +765,7 @@ public class RtcSession internal constructor(
                     }
 
                     is ParticipantJoinedEvent -> {
-                        // TODO: remove this once the UI layer lets us know visibility accurately
-                        updateParticipantsSubscriptions()
+                        // the UI layer will automatically trigger updateParticipantsSubscriptions
                     }
 
                     else -> {
@@ -1060,6 +1061,7 @@ public class RtcSession internal constructor(
         measuredWidth: Int,
         measuredHeight: Int
     ) {
+        val trackDisplayResolution = trackResolutions.value.toMutableMap()
         var videoMap = trackDisplayResolution[sessionId]
         if (videoMap == null) {
             videoMap = mutableMapOf()
@@ -1072,12 +1074,16 @@ public class RtcSession internal constructor(
         resolution.dimensions = dimensions
         videoMap[trackType] = resolution
 
+        logger.i { "updateParticipantsSubscriptions 3 $trackDisplayResolution" }
+
+
         // Updates are debounced
-        trackDisplayResolutionUpdates.value = trackDisplayResolution
+        trackResolutions.value = trackDisplayResolution
     }
 
     // sets display track visiblity
     fun updateDisplayedTrackVisibility(sessionId: String, trackType: TrackType, visible: Boolean) {
+        val trackDisplayResolution = trackResolutions.value.toMutableMap()
         var videoMap = trackDisplayResolution[sessionId]
         if (videoMap == null) {
             videoMap = mutableMapOf()
@@ -1089,7 +1095,9 @@ public class RtcSession internal constructor(
         resolution.visible = visible
         videoMap[trackType] = resolution
 
+        logger.i { "updateParticipantsSubscriptions 2 $trackDisplayResolution" }
+
         // Updates are debounced
-        trackDisplayResolutionUpdates.value = trackDisplayResolution
+        trackResolutions.value = trackDisplayResolution
     }
 }
