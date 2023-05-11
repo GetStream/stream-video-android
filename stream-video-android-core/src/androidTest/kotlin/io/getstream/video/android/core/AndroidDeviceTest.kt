@@ -162,9 +162,6 @@ class AndroidDeviceTest : IntegrationTestBase(connectCoordinatorWS = false) {
         clientImpl.debugInfo.log()
     }
 
-
-
-
     @Test
     fun localTrack() = runTest {
         // join will automatically start the audio and video capture
@@ -294,7 +291,6 @@ class AndroidDeviceTest : IntegrationTestBase(connectCoordinatorWS = false) {
         assertSuccess(endResult)
     }
 
-
     @Test
     fun dynascale() = runTest {
         // join will automatically start the audio and video capture
@@ -329,9 +325,9 @@ class AndroidDeviceTest : IntegrationTestBase(connectCoordinatorWS = false) {
         // test handling publish quality change
         val mediaRequest = VideoMediaRequest()
         val layers = listOf(
-            VideoLayerSetting(name="f", active=false) ,
-            VideoLayerSetting(name="h", active=true) ,
-            VideoLayerSetting(name="q", active=false)
+            VideoLayerSetting(name = "f", active = false),
+            VideoLayerSetting(name = "h", active = true),
+            VideoLayerSetting(name = "q", active = false)
         )
         val quality = ChangePublishQuality(video_senders = listOf(VideoSender(media_request = mediaRequest, layers = layers)))
         val event = ChangePublishQualityEvent(changePublishQuality = quality)

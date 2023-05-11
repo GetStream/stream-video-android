@@ -611,23 +611,17 @@ public class RtcSession internal constructor(
             encoding.active = enabledRids?.get(encoding.rid ?: "") ?: false
         }
 
-        logger.i { "marking layers active $enabledRids "}
+        logger.i { "marking layers active $enabledRids " }
 
         transceiver.sender.parameters.encodings.clear()
         transceiver.sender.parameters.encodings.addAll(encodings)
 
-        //publisher?.videoTransceiver?.sender?.parameters = transceiver.sender.parameters
-
+        // publisher?.videoTransceiver?.sender?.parameters = transceiver.sender.parameters
 
         return
 
-
-
         logger.v { "[updatePublishQuality] #sfu; updateQuality: $enabledRids" }
         val params = transceiver.sender.parameters
-
-
-
 
         var encodingChanged = false
         logger.v { "[updatePublishQuality] #sfu; currentQuality: $params" }
@@ -648,7 +642,7 @@ public class RtcSession internal constructor(
 //            }
 //        }
 //        if (encodingChanged && false) {
-////            logger.v { "[updatePublishQuality] #sfu; updatedEncodings: $updatedEncodings" }
+// //            logger.v { "[updatePublishQuality] #sfu; updatedEncodings: $updatedEncodings" }
 //            params.encodings.clear()
 //            params.encodings.addAll(updatedEncodings)
 //
@@ -732,7 +726,6 @@ public class RtcSession internal constructor(
                     is Failure -> {
                         // TODO: this breaks the call, we should handle this better
                         logger.e { "[updateParticipantsSubscriptions] #sfu; failed: $result" }
-
                     }
                 }
             }
@@ -1075,7 +1068,6 @@ public class RtcSession internal constructor(
         videoMap[trackType] = resolution
 
         logger.i { "updateParticipantsSubscriptions 3 $trackDisplayResolution" }
-
 
         // Updates are debounced
         trackResolutions.value = trackDisplayResolution

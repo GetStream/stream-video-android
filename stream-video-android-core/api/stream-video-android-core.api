@@ -314,8 +314,6 @@ public final class io/getstream/video/android/core/MicrophoneManager {
 	public final fun listDevices ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun select (Lio/getstream/video/android/core/audio/AudioDevice;)V
 	public final fun setEnabled (Z)V
-	public final fun setSpeaker (Z)V
-	public final fun setVolume (I)V
 }
 
 public final class io/getstream/video/android/core/ParticipantState {
@@ -397,13 +395,19 @@ public final class io/getstream/video/android/core/RingingState$TimeoutNoAnswer 
 }
 
 public final class io/getstream/video/android/core/SpeakerManager {
-	public fun <init> (Lio/getstream/video/android/core/MediaManagerImpl;)V
+	public fun <init> (Lio/getstream/video/android/core/MediaManagerImpl;Lio/getstream/video/android/core/MicrophoneManager;Ljava/lang/Integer;)V
+	public synthetic fun <init> (Lio/getstream/video/android/core/MediaManagerImpl;Lio/getstream/video/android/core/MicrophoneManager;Ljava/lang/Integer;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun disableSpeakerPhone ()V
+	public final fun enableSpeakerPhone ()V
 	public final fun getDevices ()Lkotlinx/coroutines/flow/StateFlow;
+	public final fun getInitialVolume ()Ljava/lang/Integer;
 	public final fun getMediaManager ()Lio/getstream/video/android/core/MediaManagerImpl;
+	public final fun getMicrophoneManager ()Lio/getstream/video/android/core/MicrophoneManager;
 	public final fun getSelectedDevice ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun getSpeakerPhoneEnabled ()Lkotlinx/coroutines/flow/StateFlow;
-	public final fun getStatus ()Lkotlinx/coroutines/flow/StateFlow;
-	public final fun setEnabled (Z)V
+	public final fun getVolume ()Lkotlinx/coroutines/flow/StateFlow;
+	public final fun setSpeakerPhone (Z)V
+	public final fun setVolume (I)V
 }
 
 public abstract interface class io/getstream/video/android/core/StreamVideo {
@@ -597,9 +601,8 @@ public final class io/getstream/video/android/core/call/RtcSession {
 	public final fun getSubscriber ()Lio/getstream/video/android/core/call/connection/StreamPeerConnection;
 	public final fun getSubscriberStats ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun getTrack (Ljava/lang/String;Lstream/video/sfu/models/TrackType;)Lio/getstream/video/android/core/model/MediaTrack;
-	public final fun getTrackDisplayResolution ()Ljava/util/Map;
-	public final fun getTrackDisplayResolutionUpdates ()Lkotlinx/coroutines/flow/MutableStateFlow;
-	public final fun getTrackUpdatesDebounced ()Lkotlinx/coroutines/flow/Flow;
+	public final fun getTrackResolutions ()Lkotlinx/coroutines/flow/MutableStateFlow;
+	public final fun getTrackResolutionsDebounced ()Lkotlinx/coroutines/flow/Flow;
 	public final fun getTracks ()Ljava/util/Map;
 	public final fun handleEvent (Lorg/openapitools/client/models/VideoEvent;)V
 	public final fun handleIceTrickle (Lio/getstream/video/android/core/events/ICETrickleEvent;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
@@ -617,7 +620,6 @@ public final class io/getstream/video/android/core/call/RtcSession {
 	public final fun setPublisher (Lstream/video/sfu/signal/SetPublisherRequest;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public final fun setSubscriber (Lio/getstream/video/android/core/call/connection/StreamPeerConnection;)V
 	public final fun setTrack (Ljava/lang/String;Lstream/video/sfu/models/TrackType;Lio/getstream/video/android/core/model/MediaTrack;)V
-	public final fun setTrackDisplayResolution (Ljava/util/Map;)V
 	public final fun setTracks (Ljava/util/Map;)V
 	public final fun updateDisplayedTrackSize (Ljava/lang/String;Lstream/video/sfu/models/TrackType;II)V
 	public final fun updateDisplayedTrackVisibility (Ljava/lang/String;Lstream/video/sfu/models/TrackType;Z)V
