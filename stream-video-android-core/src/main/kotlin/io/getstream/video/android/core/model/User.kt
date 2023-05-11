@@ -57,7 +57,6 @@ object OffsetDateTimeSerializer : KSerializer<OffsetDateTime> {
 @Serializable
 public data class User(
     /** ID is required, the rest is optional */
-    // TODO: TBD, do we generate the ID client side or not... TBD
     val id: String,
     val role: String = "",
     val type: UserType = UserType.Authenticated,

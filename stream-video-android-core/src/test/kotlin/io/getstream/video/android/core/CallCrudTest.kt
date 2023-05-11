@@ -117,7 +117,6 @@ public class CallCrudTest : IntegrationTestBase() {
         val result = call.create(memberIds = members, custom = mapOf("color" to "red"))
         assert(result.isSuccess)
 
-        // TODO: clarify the filter syntax with backend
         val filters = mapOf("user_id" to "thierry")
         val response = call.queryMembers(filters, listOf(SortField.Desc("created_at")), 5)
         assertSuccess(response)

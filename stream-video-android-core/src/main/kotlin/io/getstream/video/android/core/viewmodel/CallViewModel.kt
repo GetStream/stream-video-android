@@ -131,7 +131,8 @@ public class CallViewModel(
     override fun onCleared() {
         super.onCleared()
         dismissCallInfoMenu()
-        // TODO: properly clean up
+        // properly clean up
+        call.leave()
     }
 
     public fun onCallAction(callAction: CallAction) {

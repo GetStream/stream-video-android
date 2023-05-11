@@ -35,7 +35,6 @@ import java.util.*
  *
  * * A list of participants is shared when you join a call the SFU send you the participant joined event.
  *
- * TODO: we need equality functions here , data class will ignore the stateflows
  */
 public data class ParticipantState(
     /** The SFU returns a session id for each participant. This session id is unique */

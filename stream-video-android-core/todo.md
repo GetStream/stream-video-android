@@ -52,12 +52,12 @@
 ### RTC & Media TODO
 
 - [ ] Improve how we mangle SDP tokens. (edit the audio line and video line, don't swap lines)
-- [ ] Media manager tests & decide on microphone/speaker split
-- [ ] Leave & End flows
-- [X] Enable & Test dynascale
 - [ ] Screensharing
 - [ ] Error classes for Media/Camera/Mic & Joining a call. That wrap the many things that can go wrong.
 - [ ] Talking while muted notification
+- [X] Media manager tests & decide on microphone/speaker split
+- [X] Leave & End flows
+- [X] Enable & Test dynascale
 - [X] Opus Red
 - [X] Opus DTX
 - [X] Clean up the media manager class Mic management
@@ -102,7 +102,7 @@
 
 ### Other & Process
 
-- [ ] Review the 200 todos
+- [ ] Review the 104 todos
 - [ ] Coverage reporting
 - [ ] Build vars to generate tokens for testing
 
