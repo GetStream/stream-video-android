@@ -148,7 +148,7 @@ public interface StreamVideo {
                 if (isInstalled) {
                     StreamLog.e("StreamVideo") {
                         "The $internalStreamVideo is already installed but you've tried to " +
-                                "install a new exception handler: $streamVideo"
+                            "install a new exception handler: $streamVideo"
                     }
                 }
                 internalStreamVideo = streamVideo

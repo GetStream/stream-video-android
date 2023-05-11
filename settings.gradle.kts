@@ -24,6 +24,7 @@ include(":demo")
 
 // SDK
 include(":benchmark")
+include(":stream-video-android-model")
 include(":stream-video-android-core")
 include(":stream-video-android-ui-common")
 include(":stream-video-android-xml")
