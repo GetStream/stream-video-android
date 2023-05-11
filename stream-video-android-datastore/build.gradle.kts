@@ -18,6 +18,7 @@ import io.getstream.video.android.Configuration
 @Suppress("DSL_SCOPE_VIOLATION")
 plugins {
     id("io.getstream.android.library")
+    id(libs.plugins.kotlin.serialization.get().pluginId)
     id("io.getstream.spotless")
 }
 
@@ -27,7 +28,7 @@ rootProject.extra.apply {
     set("PUBLISH_VERSION", rootProject.extra.get("rootVersionName"))
 }
 
-apply(from ="${rootDir}/scripts/publish-module.gradle")
+apply(from = "${rootDir}/scripts/publish-module.gradle")
 
 android {
     compileSdk = Configuration.compileSdk
@@ -41,6 +42,7 @@ dependencies {
     api(project(":stream-video-android-core"))
 
     implementation(libs.tink)
+    implementation(libs.kotlinx.serialization.protobuf)
     implementation(libs.androidx.datastore)
     implementation(libs.androidx.datastore.core)
 }
