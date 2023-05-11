@@ -128,7 +128,7 @@ public class StreamUserDataStore constructor(dataStore: DataStore<StreamUserPref
         /**
          * Installs a new [StreamUserDataStore] instance to be used.
          */
-        public fun install(context: Context): StreamUserDataStore {
+        public fun install(context: Context, isEncrypted: Boolean = true): StreamUserDataStore {
             synchronized(this) {
                 if (isInstalled) {
                     StreamLog.e("StreamVideo") {
@@ -138,19 +138,24 @@ public class StreamUserDataStore constructor(dataStore: DataStore<StreamUserPref
                     return internalStreamUserDataStore!!
                 }
 
-                AeadConfig.register()
-                val aead = AndroidKeysetManager.Builder()
-                    .withSharedPref(context, "master_keyset", "master_key_preference")
-                    .withKeyTemplate(KeyTemplates.get("AES256_GCM"))
-                    .withMasterKeyUri("android-keystore://master_key")
-                    .build()
-                    .keysetHandle
-                    .getPrimitive(Aead::class.java)
+                val dataStore = if (isEncrypted) {
+                    AeadConfig.register()
+                    val aead = AndroidKeysetManager.Builder()
+                        .withSharedPref(context, "master_keyset", "master_key_preference")
+                        .withKeyTemplate(KeyTemplates.get("AES256_GCM"))
+                        .withMasterKeyUri("android-keystore://master_key")
+                        .build()
+                        .keysetHandle
+                        .getPrimitive(Aead::class.java)
 
-                val dataStore =
                     DataStoreFactory.create(serializer = UserSerializer().encrypted(aead)) {
                         context.dataStoreFile("proto_stream_video_user.pb")
                     }
+                } else {
+                    DataStoreFactory.create(serializer = UserSerializer()) {
+                        context.dataStoreFile("proto_stream_video_user.pb")
+                    }
+                }
 
                 val userDataStore = StreamUserDataStore(dataStore)
 
