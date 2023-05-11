@@ -24,12 +24,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.lazy.grid.GridCells
-import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
-import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -114,6 +109,7 @@ internal fun BoxScope.PortraitVideoRenderer(
                     modifier = Modifier.weight(1f),
                     call = call,
                     participant = firstParticipant,
+                    onRender = onRender,
                     isFocused = primarySpeaker?.sessionId == firstParticipant.sessionId
                 )
 
@@ -128,12 +124,11 @@ internal fun BoxScope.PortraitVideoRenderer(
             }
         }
 
-        5 -> {
+        4 -> {
             val firstParticipant = callParticipants[0]
             val secondParticipant = callParticipants[1]
             val thirdParticipant = callParticipants[2]
             val fourthParticipant = callParticipants[3]
-            val fiveParticipant = callParticipants[4]
 
             Row(modifier) {
                 Column(modifier = Modifier.weight(1f)) {
@@ -141,6 +136,7 @@ internal fun BoxScope.PortraitVideoRenderer(
                         modifier = Modifier.weight(1f),
                         call = call,
                         participant = firstParticipant,
+                        onRender = onRender,
                         isFocused = primarySpeaker?.sessionId == firstParticipant.sessionId
                     )
 
@@ -148,6 +144,7 @@ internal fun BoxScope.PortraitVideoRenderer(
                         modifier = Modifier.weight(1f),
                         call = call,
                         participant = secondParticipant,
+                        onRender = onRender,
                         isFocused = primarySpeaker?.sessionId == secondParticipant.sessionId
                     )
                 }
@@ -157,6 +154,55 @@ internal fun BoxScope.PortraitVideoRenderer(
                         modifier = Modifier.weight(1f),
                         call = call,
                         participant = thirdParticipant,
+                        onRender = onRender,
+                        isFocused = primarySpeaker?.sessionId == thirdParticipant.sessionId,
+                        paddingValues = paddingValues
+                    )
+
+                    CallSingleVideoRenderer(
+                        modifier = Modifier.weight(1f),
+                        call = call,
+                        participant = fourthParticipant,
+                        onRender = onRender,
+                        isFocused = primarySpeaker?.sessionId == fourthParticipant.sessionId,
+                        paddingValues = paddingValues
+                    )
+                }
+            }
+        }
+
+        5 -> {
+            val firstParticipant = callParticipants[0]
+            val secondParticipant = callParticipants[1]
+            val thirdParticipant = callParticipants[2]
+            val fourthParticipant = callParticipants[3]
+            val fifthParticipant = callParticipants[4]
+
+            Row(modifier) {
+                Column(modifier = Modifier.weight(1f)) {
+                    CallSingleVideoRenderer(
+                        modifier = Modifier.weight(1f),
+                        call = call,
+                        participant = firstParticipant,
+                        onRender = onRender,
+                        isFocused = primarySpeaker?.sessionId == firstParticipant.sessionId
+                    )
+
+                    CallSingleVideoRenderer(
+                        modifier = Modifier.weight(1f),
+                        call = call,
+                        participant = secondParticipant,
+                        onRender = onRender,
+                        isFocused = primarySpeaker?.sessionId == secondParticipant.sessionId
+                    )
+                }
+
+                Column(modifier = Modifier.weight(1f)) {
+                    CallSingleVideoRenderer(
+                        modifier = Modifier.weight(1f),
+                        call = call,
+                        participant = thirdParticipant,
+                        onRender = onRender,
                         isFocused = primarySpeaker?.sessionId == thirdParticipant.sessionId,
                         paddingValues = paddingValues
                     )
@@ -173,9 +219,9 @@ internal fun BoxScope.PortraitVideoRenderer(
                     CallSingleVideoRenderer(
                         modifier = Modifier.weight(1f),
                         call = call,
-                        participant = fiveParticipant,
+                        participant = fifthParticipant,
                         onRender = onRender,
-                        isFocused = primarySpeaker?.sessionId == fiveParticipant.sessionId,
+                        isFocused = primarySpeaker?.sessionId == fifthParticipant.sessionId,
                         paddingValues = paddingValues
                     )
                 }
@@ -183,24 +229,67 @@ internal fun BoxScope.PortraitVideoRenderer(
         }
 
         else -> {
-            val columnCount = 2
-            val heightDivision = callParticipants.size / 2
-            val maxGridItemCount = 6
-            LazyVerticalGrid(
-                modifier = modifier,
-                columns = GridCells.Fixed(columnCount)
-            ) {
-                items(
-                    items = callParticipants.take(maxGridItemCount),
-                    key = { it.sessionId }
-                ) { participant ->
+            val firstParticipant = callParticipants[0]
+            val secondParticipant = callParticipants[1]
+            val thirdParticipant = callParticipants[2]
+            val fourthParticipant = callParticipants[3]
+            val fifthParticipant = callParticipants[4]
+            val sixthParticipant = callParticipants[5]
+
+            Row(modifier) {
+                Column(modifier = Modifier.weight(1f)) {
                     CallSingleVideoRenderer(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(parentSize.height.dp / heightDivision),
+                        modifier = Modifier.weight(1f),
                         call = call,
-                        participant = participant,
-                        isFocused = primarySpeaker?.sessionId == participant.sessionId
+                        participant = firstParticipant,
+                        onRender = onRender,
+                        isFocused = primarySpeaker?.sessionId == firstParticipant.sessionId
+                    )
+
+                    CallSingleVideoRenderer(
+                        modifier = Modifier.weight(1f),
+                        call = call,
+                        participant = secondParticipant,
+                        onRender = onRender,
+                        isFocused = primarySpeaker?.sessionId == secondParticipant.sessionId
+                    )
+
+                    CallSingleVideoRenderer(
+                        modifier = Modifier.weight(1f),
+                        call = call,
+                        participant = thirdParticipant,
+                        onRender = onRender,
+                        isFocused = primarySpeaker?.sessionId == thirdParticipant.sessionId,
+                        paddingValues = paddingValues
+                    )
+                }
+
+                Column(modifier = Modifier.weight(1f)) {
+                    CallSingleVideoRenderer(
+                        modifier = Modifier.weight(1f),
+                        call = call,
+                        participant = fourthParticipant,
+                        onRender = onRender,
+                        isFocused = primarySpeaker?.sessionId == fourthParticipant.sessionId,
+                        paddingValues = paddingValues
+                    )
+
+                    CallSingleVideoRenderer(
+                        modifier = Modifier.weight(1f),
+                        call = call,
+                        participant = fifthParticipant,
+                        onRender = onRender,
+                        isFocused = primarySpeaker?.sessionId == fifthParticipant.sessionId,
+                        paddingValues = paddingValues
+                    )
+
+                    CallSingleVideoRenderer(
+                        modifier = Modifier.weight(1f),
+                        call = call,
+                        participant = sixthParticipant,
+                        onRender = onRender,
+                        isFocused = primarySpeaker?.sessionId == sixthParticipant.sessionId,
+                        paddingValues = paddingValues
                     )
                 }
             }
