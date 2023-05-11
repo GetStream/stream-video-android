@@ -35,8 +35,6 @@ android {
     defaultConfig {
         minSdk = Configuration.minSdk
     }
-
-    resourcePrefix = "stream_video_"
 }
 
 dependencies {
