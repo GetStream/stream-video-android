@@ -16,6 +16,7 @@ androidxAnnotation = "1.5.0"
 androidxLifecycle = "2.6.1"
 androidxStartup = "1.1.1"
 androidxActivity = "1.5.1"
+androidxDataStore = "1.0.0"
 googleService = "4.3.14"
 
 androidxComposeBom = "2023.04.00"
@@ -33,6 +34,7 @@ okhttp = "4.10.0"
 retrofit = "2.9.0"
 moshi = "1.14.0"
 threetenAbp = "1.4.6"
+tink = "1.7.0"
 
 streamWebRTC = "1.0.2"
 streamResult = "1.1.0"
@@ -60,7 +62,6 @@ hilt = "2.45"
 desugar = "1.2.2"
 leakCanary = "2.10"
 
-
 [libraries]
 
 androidx-material = { group = "com.google.android.material", name = "material", version.ref = "androidxMaterial" }
@@ -74,6 +75,8 @@ androidx-lifecycle-process = { group = "androidx.lifecycle", name = "lifecycle-p
 androidx-lifecycle-runtime-compose = { group = "androidx.lifecycle", name = "lifecycle-runtime-compose", version.ref = "androidxLifecycle" }
 androidx-lifecycle-viewmodel-compose = { group = "androidx.lifecycle", name = "lifecycle-viewmodel-compose", version.ref = "androidxLifecycle" }
 androidx-startup = { group = "androidx.startup", name = "startup-runtime", version.ref = "androidxStartup" }
+androidx-datastore = { group = "androidx.datastore", name = "datastore-preferences", version.ref = "androidxDataStore" }
+androidx-datastore-core = { group = "androidx.datastore", name = "datastore-preferences-core", version.ref = "androidxDataStore" }
 
 androidx-compose-bom = { group = "androidx.compose", name = "compose-bom", version.ref = "androidxComposeBom" }
 androidx-activity-compose = { group = "androidx.activity", name = "activity-compose", version.ref = "androidxActivity" }
@@ -110,6 +113,7 @@ moshi = { group = "com.squareup.moshi", name = "moshi", version.ref = "moshi" }
 moshi-kotlin = { group = "com.squareup.moshi", name = "moshi-kotlin", version.ref = "moshi" }
 moshi-adapters = { group = "com.squareup.moshi", name = "moshi-adapters", version.ref = "moshi" }
 threentenabp2 = { group = "com.jakewharton.threetenabp", name = "threetenabp", version.ref = "threetenAbp" }
+tink = { group = "com.google.crypto.tink", name = "tink-android", version.ref = "tink" }
 
 stream-webrtc = { group = "io.getstream", name = "stream-webrtc-android", version.ref = "streamWebRTC" }
 stream-webrtc-ui = { group = "io.getstream", name = "stream-webrtc-android-ui", version.ref = "streamWebRTC" }
