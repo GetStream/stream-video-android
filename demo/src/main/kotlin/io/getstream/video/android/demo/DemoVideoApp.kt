@@ -52,7 +52,6 @@ class DemoVideoApp : Application() {
         ).build()
 
         StreamLog.i(TAG) { "[onCreate] no args" }
-        StreamUserDataStore.install(this)
     }
 
     fun logOut() {
