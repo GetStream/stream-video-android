@@ -17,7 +17,7 @@
 package io.getstream.video.android.core.service.notification
 
 import android.content.Intent
-import io.getstream.video.android.core.model.StreamCallGuid
+import io.getstream.video.android.model.StreamCallGuid
 
 private const val KEY_TYPE = "type"
 private const val KEY_ID = "id"
@@ -45,7 +45,7 @@ internal fun Intent.setNotificationAction(action: NotificationAction): Intent {
     return this
 }
 
-private fun Intent.extractCallGuid() = StreamCallGuid(
+private fun Intent.extractCallGuid() = io.getstream.video.android.model.StreamCallGuid(
     type = getStringExtra(KEY_TYPE) ?: error("no type found"),
     id = getStringExtra(KEY_ID) ?: error("no id found"),
     cid = getStringExtra(KEY_CID) ?: error("no cid found")

@@ -18,9 +18,9 @@ package io.getstream.video.android.core
 
 import io.getstream.result.Result
 import io.getstream.video.android.core.model.AudioTrack
-import io.getstream.video.android.core.model.User
 import io.getstream.video.android.core.model.VideoTrack
 import io.getstream.video.android.core.utils.mapState
+import io.getstream.video.android.model.User
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import org.openapitools.client.models.MuteUsersResponse
@@ -78,7 +78,8 @@ public data class ParticipantState(
     /**
      * The user, automatically updates when we receive user events
      */
-    internal val _user: MutableStateFlow<User> = MutableStateFlow(initialUser)
+    internal val _user: MutableStateFlow<User> =
+        MutableStateFlow(initialUser)
     val user: StateFlow<User> = _user
 
     // TODO: make this a property on the user object

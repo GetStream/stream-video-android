@@ -17,22 +17,22 @@
 package io.getstream.video.android.core.service.notification.internal
 
 import androidx.core.app.NotificationCompat
-import io.getstream.video.android.core.model.StreamCallGuid
+import io.getstream.video.android.model.StreamCallGuid
 
 internal interface NotificationActionBuilder {
 
     fun createAcceptAction(
         notificationId: Int,
-        guid: StreamCallGuid
+        guid: io.getstream.video.android.model.StreamCallGuid
     ): NotificationCompat.Action
 
     fun createRejectAction(
         notificationId: Int,
-        guid: StreamCallGuid
+        guid: io.getstream.video.android.model.StreamCallGuid
     ): NotificationCompat.Action
 
     fun createCancelAction(
         notificationId: Int,
-        guid: StreamCallGuid
+        guid: io.getstream.video.android.model.StreamCallGuid
     ): NotificationCompat.Action
 }

@@ -14,13 +14,24 @@
  * limitations under the License.
  */
 
-package io.getstream.video.android.core.model
+package io.getstream.video.android.datastore.flow
 
-/**
- * Represents the audio level and if a user is speaking.
- */
-public data class UserAudioLevel(
-    val userId: String,
-    val isSpeaking: Boolean,
-    val audioLevel: Float
-)
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.stateIn
+
+@JvmSynthetic
+@PublishedApi
+internal fun <T> Flow<T>.asStateFlow(
+    initialValue: T,
+    scope: CoroutineScope = CoroutineScope(context = Dispatchers.IO),
+): StateFlow<T> {
+    return stateIn(
+        scope = scope,
+        started = SharingStarted.Eagerly,
+        initialValue = initialValue,
+    )
+}

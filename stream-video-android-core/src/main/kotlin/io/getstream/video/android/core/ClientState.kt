@@ -17,7 +17,7 @@
 package io.getstream.video.android.core
 
 import android.content.Context
-import io.getstream.video.android.core.model.User
+import io.getstream.video.android.model.User
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import org.openapitools.client.models.CallCreatedEvent

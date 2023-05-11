@@ -106,8 +106,6 @@ public fun VideoRenderer(
             modifier = modifier.testTag("video_renderer"),
         )
     }
-
-
 }
 
 private fun cleanTrack(

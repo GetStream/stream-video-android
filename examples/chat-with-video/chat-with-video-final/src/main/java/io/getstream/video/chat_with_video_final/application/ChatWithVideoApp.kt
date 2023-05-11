@@ -31,8 +31,9 @@ import io.getstream.video.android.core.StreamVideo
 import io.getstream.video.android.core.StreamVideoBuilder
 import io.getstream.video.android.core.StreamVideoConfig
 import io.getstream.video.android.core.logging.LoggingLevel
-import io.getstream.video.android.core.model.ApiKey
 import io.getstream.video.android.core.user.UsersProvider
+import io.getstream.video.android.model.ApiKey
+import io.getstream.video.android.model.User
 import io.getstream.video.chat_with_video_final.BuildConfig
 import io.getstream.video.chat_with_video_final.ui.messages.attachment.CallAttachmentFactory
 import io.getstream.video.chat_with_video_final.users.FakeUsersProvider
@@ -87,7 +88,7 @@ class ChatWithVideoApp : Application() {
         get() = requireNotNull(video)
 
     fun initializeStreamVideo(
-        user: io.getstream.video.android.core.model.User,
+        user: User,
         apiKey: ApiKey,
         loggingLevel: LoggingLevel
     ): StreamVideo {

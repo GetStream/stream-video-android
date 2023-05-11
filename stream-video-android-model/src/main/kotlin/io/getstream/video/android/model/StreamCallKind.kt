@@ -14,9 +14,23 @@
  * limitations under the License.
  */
 
-package io.getstream.video.android.core.model
+package io.getstream.video.android.model
 
-@kotlinx.serialization.Serializable
-public data class UserDevices(
-    val devices: List<Device>
-)
+import io.getstream.video.android.model.StreamCallKind.MEETING
+import io.getstream.video.android.model.StreamCallKind.RINGING
+import java.io.Serializable
+
+/**
+ * The kind of call, either a [RINGING] or a [MEETING].
+ */
+// TODO: Remove this
+public enum class StreamCallKind : Serializable {
+    MEETING, RINGING;
+
+    public companion object {
+        public fun fromRinging(ringing: Boolean): StreamCallKind = when (ringing) {
+            true -> RINGING
+            else -> MEETING
+        }
+    }
+}

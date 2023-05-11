@@ -14,23 +14,30 @@
  * limitations under the License.
  */
 
-package io.getstream.video.android.core.model
-
-import io.getstream.video.android.core.model.StreamCallKind.MEETING
-import io.getstream.video.android.core.model.StreamCallKind.RINGING
-import java.io.Serializable
+package io.getstream.video.android.model
 
 /**
- * The kind of call, either a [RINGING] or a [MEETING].
+ * Represents call cid.
  */
-// TODO: Remove this
-public enum class StreamCallKind : Serializable {
-    MEETING, RINGING;
+public typealias StreamCallCid = String
 
-    public companion object {
-        public fun fromRinging(ringing: Boolean): StreamCallKind = when (ringing) {
-            true -> RINGING
-            else -> MEETING
-        }
+/**
+ * Represents call type.
+ */
+public typealias StreamCallType = String
+
+/**
+ * Represents call id.
+ */
+public typealias StreamCallId = String
+
+/**
+ * Generates [StreamCallCid] from [StreamCallType] and [StreamCallId].
+ */
+public fun StreamCallCid(type: StreamCallType, id: StreamCallId): StreamCallCid {
+    return when {
+        type.isNotEmpty() && id.isNotEmpty() -> "$type:$id"
+        id.isNotEmpty() -> id
+        else -> error("[StreamCallCid] invalid arguments; type=$type, id=$id")
     }
 }

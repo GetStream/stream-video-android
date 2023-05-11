@@ -23,9 +23,9 @@ import io.getstream.result.Result
 import io.getstream.video.android.core.CreateCallOptions
 import io.getstream.video.android.core.StreamVideo
 import io.getstream.video.android.core.call.RtcSession
-import io.getstream.video.android.core.model.User
-import io.getstream.video.android.core.model.mapper.toTypeAndId
-import io.getstream.video.android.core.user.UserPreferences
+import io.getstream.video.android.datastore.delegate.StreamUserDataStore
+import io.getstream.video.android.model.User
+import io.getstream.video.android.model.mapper.toTypeAndId
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -38,10 +38,10 @@ import javax.inject.Inject
 
 @HiltViewModel
 class CallJoinViewModel @Inject constructor(
-    userPreferences: UserPreferences
+    dataStore: StreamUserDataStore,
 ) : ViewModel() {
 
-    val user: User? = userPreferences.getUserCredentials()
+    val user: StateFlow<User?> = dataStore.user
 
     private val _isLoading: MutableStateFlow<Boolean> = MutableStateFlow(false)
     internal val isLoading: StateFlow<Boolean> = _isLoading

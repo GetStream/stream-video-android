@@ -32,7 +32,7 @@ import io.getstream.video.android.core.events.SfuDataEvent
 import io.getstream.video.android.core.events.SubscriberOfferEvent
 import io.getstream.video.android.core.events.TrackPublishedEvent
 import io.getstream.video.android.core.events.TrackUnpublishedEvent
-import io.getstream.video.android.core.model.UserAudioLevel
+import io.getstream.video.android.model.UserAudioLevel
 import stream.video.sfu.event.SfuEvent
 
 public object RTCEventMapper {

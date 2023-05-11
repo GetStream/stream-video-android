@@ -30,9 +30,9 @@ public data class SortData(
     public val sortField: String
 )
 
-sealed class SortField(val field: String, val ascending: Boolean = true) {
-    class Asc(field: String) : SortField(field, true)
-    class Desc(field: String) : SortField(field, false)
+public sealed class SortField(public val field: String, public val ascending: Boolean = true) {
+    public class Asc(field: String) : SortField(field, true)
+    public class Desc(field: String) : SortField(field, false)
 }
 
 public fun SortField.toRequest(): SortParamRequest {

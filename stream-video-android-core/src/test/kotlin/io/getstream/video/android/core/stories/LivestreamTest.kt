@@ -99,7 +99,6 @@ class LivestreamTest : IntegrationTestBase() {
         broadcastResponse.onSuccess {
             println(it)
         }
-
     }
 
     @Test
