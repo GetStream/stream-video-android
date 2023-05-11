@@ -19,25 +19,25 @@
 package io.getstream.video.android.datastore.serializer
 
 import androidx.datastore.core.Serializer
-import io.getstream.video.android.datastore.model.UserPreferences
+import io.getstream.video.android.datastore.model.StreamUserPreferences
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.protobuf.ProtoBuf
 import java.io.InputStream
 import java.io.OutputStream
 
-internal class UserSerializer : Serializer<UserPreferences?> {
+internal class UserSerializer : Serializer<StreamUserPreferences?> {
 
-    override val defaultValue: UserPreferences? = null
+    override val defaultValue: StreamUserPreferences? = null
 
-    override suspend fun readFrom(input: InputStream): UserPreferences? {
+    override suspend fun readFrom(input: InputStream): StreamUserPreferences? {
         val userInput = input.readBytes()
         if (userInput.isEmpty()) return null
-        return ProtoBuf.decodeFromByteArray(UserPreferences.serializer(), userInput)
+        return ProtoBuf.decodeFromByteArray(StreamUserPreferences.serializer(), userInput)
     }
 
-    override suspend fun writeTo(t: UserPreferences?, output: OutputStream) {
+    override suspend fun writeTo(t: StreamUserPreferences?, output: OutputStream) {
         val userPreferences = t ?: return
-        val byteArray = ProtoBuf.encodeToByteArray(UserPreferences.serializer(), userPreferences)
+        val byteArray = ProtoBuf.encodeToByteArray(StreamUserPreferences.serializer(), userPreferences)
 
         @Suppress("BlockingMethodInNonBlockingContext")
         output.write(byteArray)

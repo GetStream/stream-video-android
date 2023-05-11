@@ -22,8 +22,8 @@ import io.getstream.video.android.model.UserDevices
 import kotlinx.serialization.Serializable
 
 @Serializable
-public data class UserPreferences(
-    public val user: io.getstream.video.android.model.User?,
-    public val userDevices: io.getstream.video.android.model.UserDevices,
-    public val apiToken: io.getstream.video.android.model.ApiKey
+public data class StreamUserPreferences(
+    public val user: User?,
+    public val apiKey: ApiKey,
+    public val userDevices: UserDevices,
 )

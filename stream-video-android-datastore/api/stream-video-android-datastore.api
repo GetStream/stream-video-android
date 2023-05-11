@@ -5,36 +5,51 @@ public final class io/getstream/video/android/datastore/BuildConfig {
 	public fun <init> ()V
 }
 
-public final class io/getstream/video/android/datastore/model/UserPreferences {
-	public static final field Companion Lio/getstream/video/android/datastore/model/UserPreferences$Companion;
-	public synthetic fun <init> (ILio/getstream/video/android/model/User;Lio/getstream/video/android/model/UserDevices;Ljava/lang/String;Lkotlinx/serialization/internal/SerializationConstructorMarker;)V
-	public fun <init> (Lio/getstream/video/android/model/User;Lio/getstream/video/android/model/UserDevices;Ljava/lang/String;)V
+public final class io/getstream/video/android/datastore/delegate/StreamUserDataStore : androidx/datastore/core/DataStore {
+	public fun <init> (Landroidx/datastore/core/DataStore;)V
+	public final fun clear (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public final fun getApiKey ()Lkotlinx/coroutines/flow/Flow;
+	public fun getData ()Lkotlinx/coroutines/flow/Flow;
+	public final fun getPreferences ()Lkotlinx/coroutines/flow/Flow;
+	public final fun getUser ()Lkotlinx/coroutines/flow/Flow;
+	public final fun getUserDevices ()Lkotlinx/coroutines/flow/Flow;
+	public final fun updateApiKey (Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public fun updateData (Lkotlin/jvm/functions/Function2;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public final fun updateUser (Lio/getstream/video/android/model/User;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public final fun updateUserDevices (Lio/getstream/video/android/model/UserDevices;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public final fun updateUserPreferences (Lio/getstream/video/android/datastore/model/StreamUserPreferences;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+}
+
+public final class io/getstream/video/android/datastore/model/StreamUserPreferences {
+	public static final field Companion Lio/getstream/video/android/datastore/model/StreamUserPreferences$Companion;
+	public synthetic fun <init> (ILio/getstream/video/android/model/User;Ljava/lang/String;Lio/getstream/video/android/model/UserDevices;Lkotlinx/serialization/internal/SerializationConstructorMarker;)V
+	public fun <init> (Lio/getstream/video/android/model/User;Ljava/lang/String;Lio/getstream/video/android/model/UserDevices;)V
 	public final fun component1 ()Lio/getstream/video/android/model/User;
-	public final fun component2 ()Lio/getstream/video/android/model/UserDevices;
-	public final fun component3 ()Ljava/lang/String;
-	public final fun copy (Lio/getstream/video/android/model/User;Lio/getstream/video/android/model/UserDevices;Ljava/lang/String;)Lio/getstream/video/android/datastore/model/UserPreferences;
-	public static synthetic fun copy$default (Lio/getstream/video/android/datastore/model/UserPreferences;Lio/getstream/video/android/model/User;Lio/getstream/video/android/model/UserDevices;Ljava/lang/String;ILjava/lang/Object;)Lio/getstream/video/android/datastore/model/UserPreferences;
+	public final fun component2 ()Ljava/lang/String;
+	public final fun component3 ()Lio/getstream/video/android/model/UserDevices;
+	public final fun copy (Lio/getstream/video/android/model/User;Ljava/lang/String;Lio/getstream/video/android/model/UserDevices;)Lio/getstream/video/android/datastore/model/StreamUserPreferences;
+	public static synthetic fun copy$default (Lio/getstream/video/android/datastore/model/StreamUserPreferences;Lio/getstream/video/android/model/User;Ljava/lang/String;Lio/getstream/video/android/model/UserDevices;ILjava/lang/Object;)Lio/getstream/video/android/datastore/model/StreamUserPreferences;
 	public fun equals (Ljava/lang/Object;)Z
-	public final fun getApiToken ()Ljava/lang/String;
+	public final fun getApiKey ()Ljava/lang/String;
 	public final fun getUser ()Lio/getstream/video/android/model/User;
 	public final fun getUserDevices ()Lio/getstream/video/android/model/UserDevices;
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
-	public static final fun write$Self (Lio/getstream/video/android/datastore/model/UserPreferences;Lkotlinx/serialization/encoding/CompositeEncoder;Lkotlinx/serialization/descriptors/SerialDescriptor;)V
+	public static final fun write$Self (Lio/getstream/video/android/datastore/model/StreamUserPreferences;Lkotlinx/serialization/encoding/CompositeEncoder;Lkotlinx/serialization/descriptors/SerialDescriptor;)V
 }
 
-public final class io/getstream/video/android/datastore/model/UserPreferences$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
-	public static final field INSTANCE Lio/getstream/video/android/datastore/model/UserPreferences$$serializer;
+public final class io/getstream/video/android/datastore/model/StreamUserPreferences$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
+	public static final field INSTANCE Lio/getstream/video/android/datastore/model/StreamUserPreferences$$serializer;
 	public fun childSerializers ()[Lkotlinx/serialization/KSerializer;
-	public fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Lio/getstream/video/android/datastore/model/UserPreferences;
+	public fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Lio/getstream/video/android/datastore/model/StreamUserPreferences;
 	public synthetic fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Ljava/lang/Object;
 	public fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
-	public fun serialize (Lkotlinx/serialization/encoding/Encoder;Lio/getstream/video/android/datastore/model/UserPreferences;)V
+	public fun serialize (Lkotlinx/serialization/encoding/Encoder;Lio/getstream/video/android/datastore/model/StreamUserPreferences;)V
 	public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
 	public fun typeParametersSerializers ()[Lkotlinx/serialization/KSerializer;
 }
 
-public final class io/getstream/video/android/datastore/model/UserPreferences$Companion {
+public final class io/getstream/video/android/datastore/model/StreamUserPreferences$Companion {
 	public final fun serializer ()Lkotlinx/serialization/KSerializer;
 }
 
