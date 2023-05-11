@@ -20,8 +20,6 @@ import android.content.Context
 import io.getstream.log.StreamLog
 import io.getstream.result.Result
 import io.getstream.video.android.core.events.VideoEventListener
-import io.getstream.video.android.core.model.DEFAULT_QUERY_CALLS_LIMIT
-import io.getstream.video.android.core.model.DEFAULT_QUERY_CALLS_SORT
 import io.getstream.video.android.core.model.Device
 import io.getstream.video.android.core.model.EdgeData
 import io.getstream.video.android.core.model.QueriedCalls
@@ -150,7 +148,7 @@ public interface StreamVideo {
                 if (isInstalled) {
                     StreamLog.e("StreamVideo") {
                         "The $internalStreamVideo is already installed but you've tried to " +
-                            "install a new exception handler: $streamVideo"
+                                "install a new exception handler: $streamVideo"
                     }
                 }
                 internalStreamVideo = streamVideo
@@ -167,3 +165,6 @@ public interface StreamVideo {
 
     public fun cleanup()
 }
+
+private const val DEFAULT_QUERY_CALLS_SORT = "cid"
+private const val DEFAULT_QUERY_CALLS_LIMIT = 25
