@@ -21,62 +21,44 @@ import androidx.benchmark.macro.CompilationMode
 import androidx.benchmark.macro.StartupMode
 import androidx.benchmark.macro.StartupTimingMetric
 import androidx.benchmark.macro.junit4.MacrobenchmarkRule
-import androidx.test.internal.runner.junit4.AndroidJUnit4ClassRunner
 import org.junit.Rule
 import org.junit.Test
-import org.junit.runner.RunWith
 
-/**
- * Run this benchmark from Studio to see startup measurements, and captured system traces for
- * investigating your app's performance from a cold state.
- */
-@RunWith(AndroidJUnit4ClassRunner::class)
-internal class ColdStartupBenchmark : AbstractStartupBenchmark(StartupMode.COLD)
+class StartupBenchmarks {
 
-/**
- * Run this benchmark from Studio to see startup measurements, and captured system traces for
- * investigating your app's performance from a warm state.
- */
-@RunWith(AndroidJUnit4ClassRunner::class)
-internal class WarmStartupBenchmark : AbstractStartupBenchmark(StartupMode.WARM)
-
-/**
- * Run this benchmark from Studio to see startup measurements, and captured system traces for
- * investigating your app's performance from a hot state.
- */
-@RunWith(AndroidJUnit4ClassRunner::class)
-internal class HotStartupBenchmark : AbstractStartupBenchmark(StartupMode.HOT)
-
-/**
- * Base class for benchmarks with different startup modes. Enables app startups from various states
- * of baseline profile or [CompilationMode]s.
- */
-internal abstract class AbstractStartupBenchmark(private val startupMode: StartupMode) {
-    @get:Rule val benchmarkRule = MacrobenchmarkRule()
-
-    @Test fun startupNoCompilation() = startup(CompilationMode.None())
+    @get:Rule
+    val rule = MacrobenchmarkRule()
 
     @Test
-    fun startupBaselineProfileDisabled() =
-        startup(
-            CompilationMode.Partial(
-                baselineProfileMode = BaselineProfileMode.Disable, warmupIterations = 1
-            )
-        )
+    fun startupCompilationNone() =
+        benchmark(CompilationMode.None())
 
     @Test
-    fun startupBaselineProfile() =
-        startup(CompilationMode.Partial(baselineProfileMode = BaselineProfileMode.Require))
+    fun startupCompilationBaselineProfiles() =
+        benchmark(CompilationMode.Partial(BaselineProfileMode.Require))
 
-    @Test fun startupFullCompilation() = startup(CompilationMode.Full())
-
-    private fun startup(compilationMode: CompilationMode) =
-        benchmarkRule.measureRepeated(
+    private fun benchmark(compilationMode: CompilationMode) {
+        rule.measureRepeated(
             packageName = packageName,
             metrics = listOf(StartupTimingMetric()),
             compilationMode = compilationMode,
+            startupMode = StartupMode.COLD,
             iterations = 10,
-            startupMode = startupMode,
-            setupBlock = { pressHome() }
-        ) { startActivityAndWait() }
+            setupBlock = {
+                pressHome()
+            },
+            measureBlock = {
+                startActivityAndWait()
+
+                // TODO Add interactions to wait for when your app is fully drawn.
+                // The app is fully drawn when Activity.reportFullyDrawn is called.
+                // For Jetpack Compose, you can use ReportDrawn, ReportDrawnWhen and ReportDrawnAfter
+                // from the AndroidX Activity library.
+
+                // Check the UiAutomator documentation for more information on how to
+                // interact with the app.
+                // https://d.android.com/training/testing/other-components/ui-automator
+            }
+        )
+    }
 }
