@@ -277,6 +277,23 @@ class AndroidDeviceTest : IntegrationTestBase(connectCoordinatorWS = false) {
         clientImpl.debugInfo.log()
     }
 
+    @Test
+    fun leaveCall() = runTest {
+        val joinResult = call.join()
+        assertSuccess(joinResult)
+        delay(500)
+        call.leave()
+    }
+
+    @Test
+    fun endCall() = runTest {
+        val joinResult = call.join()
+        assertSuccess(joinResult)
+        delay(500)
+        val endResult = call.end()
+        assertSuccess(endResult)
+    }
+
 
     @Test
     fun dynascale() = runTest {

@@ -52,11 +52,11 @@
 ### RTC & Media TODO
 
 - [ ] Improve how we mangle SDP tokens. (edit the audio line and video line, don't swap lines)
-- [ ] Enable & Test dynascale
 - [ ] Media manager tests & decide on microphone/speaker split
+- [ ] Leave & End flows
+- [X] Enable & Test dynascale
 - [ ] Screensharing
 - [ ] Error classes for Media/Camera/Mic & Joining a call. That wrap the many things that can go wrong.
-- [ ] Leave & End flows
 - [ ] Talking while muted notification
 - [X] Opus Red
 - [X] Opus DTX
