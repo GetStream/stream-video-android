@@ -27,14 +27,14 @@ public interface UserPreferences {
      *
      * @return The stored [User] credentials if they exist.
      */
-    public fun getUserCredentials(): io.getstream.video.android.model.User?
+    public fun getUserCredentials(): User?
 
     /**
      * Stores user credentials for the SDK to use. Useful when logging in to the SDK
      *
      * @param user The credentials to store.
      */
-    public fun storeUserCredentials(user: io.getstream.video.android.model.User)
+    public fun storeUserCredentials(user: User)
 
     /**
      * Fetches the cached ApiKey from SDK persistence.

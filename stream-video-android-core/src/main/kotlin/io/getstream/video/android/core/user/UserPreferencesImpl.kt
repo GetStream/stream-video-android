@@ -33,14 +33,14 @@ internal class UserPreferencesImpl(
     /**
      * @see UserPreferences.getUserCredentials
      */
-    override fun getUserCredentials(): io.getstream.video.android.model.User? {
+    override fun getUserCredentials(): User? {
         return parseUser(sharedPreferences.getString(KEY_USER, ""))
     }
 
     /**
      * @see UserPreferences.storeUserCredentials
      */
-    override fun storeUserCredentials(user: io.getstream.video.android.model.User) {
+    override fun storeUserCredentials(user: User) {
         sharedPreferences.edit {
             putString(KEY_USER, Json.encodeToString(user))
         }
@@ -75,7 +75,7 @@ internal class UserPreferencesImpl(
      *
      * @return The user value that's parsed.
      */
-    private fun parseUser(json: String?): io.getstream.video.android.model.User? {
+    private fun parseUser(json: String?): User? {
         json ?: return null
 
         return try {
@@ -85,11 +85,11 @@ internal class UserPreferencesImpl(
         }
     }
 
-    private fun parseDevices(json: String?): List<io.getstream.video.android.model.Device> {
+    private fun parseDevices(json: String?): List<Device> {
         json ?: return emptyList()
 
         return try {
-            val devices: io.getstream.video.android.model.UserDevices = Json.decodeFromString(json)
+            val devices: UserDevices = Json.decodeFromString(json)
 
             devices.devices
         } catch (error: Throwable) {
@@ -97,16 +97,16 @@ internal class UserPreferencesImpl(
         }
     }
 
-    override fun getDevices(): List<io.getstream.video.android.model.Device> {
+    override fun getDevices(): List<Device> {
         return parseDevices(sharedPreferences.getString(KEY_DEVICES, ""))
     }
 
     override fun removeDevices() {
     }
 
-    override fun storeDevice(device: io.getstream.video.android.model.Device) {
+    override fun storeDevice(device: Device) {
         val devices = getDevices() + device
-        val json = Json.encodeToString(io.getstream.video.android.model.UserDevices(devices))
+        val json = Json.encodeToString(UserDevices(devices))
 
         sharedPreferences.edit {
             putString(KEY_DEVICES, json)

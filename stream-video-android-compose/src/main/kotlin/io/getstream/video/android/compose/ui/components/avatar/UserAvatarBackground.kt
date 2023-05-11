@@ -52,7 +52,7 @@ import io.getstream.video.android.model.User
  */
 @Composable
 public fun UserAvatarBackground(
-    user: io.getstream.video.android.model.User,
+    user: User,
     modifier: Modifier = Modifier,
     shape: Shape = VideoTheme.shapes.avatar,
     avatarSize: Dp = 72.dp,

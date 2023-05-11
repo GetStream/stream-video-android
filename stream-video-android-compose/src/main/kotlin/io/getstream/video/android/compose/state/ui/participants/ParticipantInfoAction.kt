@@ -37,4 +37,4 @@ public data class ChangeMuteState(
  *
  * @param users The users to invite.
  */
-public data class InviteUsers(val users: List<io.getstream.video.android.model.User>) : ParticipantInfoAction
+public data class InviteUsers(val users: List<User>) : ParticipantInfoAction

@@ -28,6 +28,7 @@ import io.getstream.video.android.core.model.MuteUsersData
 import io.getstream.video.android.core.model.SortField
 import io.getstream.video.android.core.model.UpdateUserPermissionsData
 import io.getstream.video.android.core.model.toIceServer
+import io.getstream.video.android.model.User
 import io.getstream.webrtc.android.ui.VideoTextureViewRenderer
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
@@ -73,7 +74,7 @@ public class Call(
     internal val client: StreamVideo,
     val type: String,
     val id: String,
-    val user: io.getstream.video.android.model.User,
+    val user: User,
 ) {
     internal val clientImpl = client as StreamVideoImpl
     private val logger by taggedLogger("Call")

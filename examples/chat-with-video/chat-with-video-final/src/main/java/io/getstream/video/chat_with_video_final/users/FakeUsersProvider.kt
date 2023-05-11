@@ -24,13 +24,13 @@ import kotlinx.coroutines.flow.StateFlow
 
 class FakeUsersProvider : UsersProvider {
 
-    override fun provideUsers(): List<io.getstream.video.android.model.User> {
+    override fun provideUsers(): List<User> {
         return mockUsers()
     }
 
-    private fun mockUsers(): List<io.getstream.video.android.model.User> {
+    private fun mockUsers(): List<User> {
         return listOf(
-            io.getstream.video.android.model.User(
+            User(
                 id = BuildConfig.SAMPLE_USER_00_ID,
                 name = BuildConfig.SAMPLE_USER_00_NAME,
                 role = BuildConfig.SAMPLE_USER_00_ROLE,
@@ -40,7 +40,7 @@ class FakeUsersProvider : UsersProvider {
                 ),
                 teams = emptyList()
             ),
-            io.getstream.video.android.model.User(
+            User(
                 id = BuildConfig.SAMPLE_USER_01_ID,
                 name = BuildConfig.SAMPLE_USER_01_NAME,
                 role = BuildConfig.SAMPLE_USER_01_ROLE,
@@ -50,7 +50,7 @@ class FakeUsersProvider : UsersProvider {
                 ),
                 teams = emptyList()
             ),
-            io.getstream.video.android.model.User(
+            User(
                 id = BuildConfig.SAMPLE_USER_02_ID,
                 name = BuildConfig.SAMPLE_USER_02_NAME,
                 role = BuildConfig.SAMPLE_USER_02_ROLE,
@@ -60,7 +60,7 @@ class FakeUsersProvider : UsersProvider {
                 ),
                 teams = emptyList()
             ),
-            io.getstream.video.android.model.User(
+            User(
                 id = BuildConfig.SAMPLE_USER_03_ID,
                 name = BuildConfig.SAMPLE_USER_03_NAME,
                 role = BuildConfig.SAMPLE_USER_03_ROLE,
@@ -70,7 +70,7 @@ class FakeUsersProvider : UsersProvider {
                 ),
                 teams = emptyList()
             ),
-            io.getstream.video.android.model.User(
+            User(
                 id = BuildConfig.SAMPLE_USER_04_ID,
                 name = BuildConfig.SAMPLE_USER_04_NAME,
                 role = BuildConfig.SAMPLE_USER_04_ROLE,
@@ -80,7 +80,7 @@ class FakeUsersProvider : UsersProvider {
                 ),
                 teams = emptyList()
             ),
-            io.getstream.video.android.model.User(
+            User(
                 id = BuildConfig.SAMPLE_USER_05_ID,
                 name = BuildConfig.SAMPLE_USER_05_NAME,
                 role = BuildConfig.SAMPLE_USER_05_ROLE,
@@ -93,5 +93,5 @@ class FakeUsersProvider : UsersProvider {
         )
     }
 
-    override val userState: StateFlow<List<io.getstream.video.android.model.User>> = MutableStateFlow(provideUsers())
+    override val userState: StateFlow<List<User>> = MutableStateFlow(provideUsers())
 }

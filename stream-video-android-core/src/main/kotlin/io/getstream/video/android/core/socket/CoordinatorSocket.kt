@@ -35,7 +35,7 @@ import org.openapitools.client.models.WSAuthMessageRequest
  */
 public class CoordinatorSocket(
     private val url: String,
-    private val user: io.getstream.video.android.model.User,
+    private val user: User,
     internal var token: String,
     private val scope: CoroutineScope = CoroutineScope(DispatcherProvider.IO),
     private val httpClient: OkHttpClient,

@@ -29,12 +29,12 @@ public interface UsersProvider {
     /**
      * Provides a single instance of a user list that can be presented on the UI.
      */
-    public fun provideUsers(): List<io.getstream.video.android.model.User>
+    public fun provideUsers(): List<User>
 
     /**
      * Provides a state backed list of users that can change over time.
      */
-    public val userState: StateFlow<List<io.getstream.video.android.model.User>>
+    public val userState: StateFlow<List<User>>
 }
 
 /**
@@ -42,7 +42,7 @@ public interface UsersProvider {
  * your UI or call flow.
  */
 public object EmptyUsersProvider : UsersProvider {
-    override val userState: StateFlow<List<io.getstream.video.android.model.User>> = MutableStateFlow(provideUsers())
+    override val userState: StateFlow<List<User>> = MutableStateFlow(provideUsers())
 
-    override fun provideUsers(): List<io.getstream.video.android.model.User> = emptyList()
+    override fun provideUsers(): List<User> = emptyList()
 }

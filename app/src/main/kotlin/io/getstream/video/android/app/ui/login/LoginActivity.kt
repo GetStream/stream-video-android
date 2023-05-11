@@ -128,7 +128,7 @@ class LoginActivity : AppCompatActivity() {
         }
     }
 
-    private fun logIn(selectedUser: io.getstream.video.android.model.User) {
+    private fun logIn(selectedUser: User) {
         logger.i { "[logIn] selectedUser: $selectedUser" }
         videoApp.initializeStreamVideo(
             user = selectedUser,

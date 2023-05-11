@@ -46,9 +46,9 @@ import io.getstream.video.android.ui.common.R
  */
 @Composable
 internal fun InviteUsersDialog(
-    users: List<io.getstream.video.android.model.User>,
+    users: List<User>,
     onDismiss: () -> Unit,
-    onInviteUsers: (List<io.getstream.video.android.model.User>) -> Unit
+    onInviteUsers: (List<User>) -> Unit
 ) {
 
     Dialog(onDismissRequest = onDismiss, content = {

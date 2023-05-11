@@ -24,6 +24,7 @@ import io.getstream.video.android.core.model.EdgeData
 import io.getstream.video.android.core.model.QueriedCalls
 import io.getstream.video.android.core.model.SortField
 import io.getstream.video.android.model.Device
+import io.getstream.video.android.model.User
 import org.openapitools.client.models.QueryCallsResponse
 import org.openapitools.client.models.VideoEvent
 
@@ -36,7 +37,7 @@ public interface StreamVideo {
      * Represents the default call config when starting a call.
      */
     public val context: Context
-    public val user: io.getstream.video.android.model.User
+    public val user: User
     public val userId: String
 
     val state: ClientState

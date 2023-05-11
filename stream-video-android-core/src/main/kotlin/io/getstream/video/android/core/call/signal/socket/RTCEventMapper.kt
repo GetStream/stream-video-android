@@ -47,7 +47,7 @@ public object RTCEventMapper {
             }
             event.audio_level_changed != null -> AudioLevelChangedEvent(
                 event.audio_level_changed.audio_levels.associate {
-                    it.session_id to io.getstream.video.android.model.UserAudioLevel(
+                    it.session_id to UserAudioLevel(
                         it.user_id,
                         it.is_speaking,
                         it.level

@@ -64,22 +64,22 @@ class LoginActivity : ComponentActivity() {
         }
     }
 
-    private fun logIn(user: io.getstream.video.android.model.User) {
+    private fun logIn(user: User) {
         logInToChat(user)
         logInToVideo(user)
         startActivity(ChannelsActivity.getIntent(this))
     }
 
-    private fun logInToChat(user: io.getstream.video.android.model.User) {
+    private fun logInToChat(user: User) {
         // TODO
     }
 
-    private fun logInToVideo(user: io.getstream.video.android.model.User) {
+    private fun logInToVideo(user: User) {
         // TODO
     }
 
     @Composable
-    fun UserList(userItems: List<io.getstream.video.android.model.User>, modifier: Modifier = Modifier, onClick: (io.getstream.video.android.model.User) -> Unit) {
+    fun UserList(userItems: List<User>, modifier: Modifier = Modifier, onClick: (User) -> Unit) {
         Column(
             modifier = modifier,
             horizontalAlignment = Alignment.CenterHorizontally,
@@ -94,7 +94,7 @@ class LoginActivity : ComponentActivity() {
     }
 
     @Composable
-    fun UserItem(credentials: io.getstream.video.android.model.User, onClick: (io.getstream.video.android.model.User) -> Unit) {
+    fun UserItem(credentials: User, onClick: (User) -> Unit) {
         Column(
             modifier = Modifier.fillMaxWidth().clickable(onClick = { onClick(credentials) }),
         ) {

@@ -34,6 +34,7 @@ import io.getstream.video.android.core.model.ScreenSharingSession
 import io.getstream.video.android.core.permission.PermissionRequest
 import io.getstream.video.android.core.utils.mapState
 import io.getstream.video.android.core.utils.toUser
+import io.getstream.video.android.model.User
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import org.openapitools.client.models.BlockedUserEvent
@@ -86,7 +87,7 @@ import java.util.SortedMap
  *
  *
  */
-public class CallState(private val call: Call, private val user: io.getstream.video.android.model.User) {
+public class CallState(private val call: Call, private val user: User) {
     private val logger by taggedLogger("CallState")
 
     /**
@@ -228,8 +229,8 @@ public class CallState(private val call: Call, private val user: io.getstream.vi
     private val _team: MutableStateFlow<String?> = MutableStateFlow(null)
     val team: StateFlow<String?> = _team
 
-    private val _createdBy: MutableStateFlow<io.getstream.video.android.model.User?> = MutableStateFlow(null)
-    val createdBy: StateFlow<io.getstream.video.android.model.User?> = _createdBy
+    private val _createdBy: MutableStateFlow<User?> = MutableStateFlow(null)
+    val createdBy: StateFlow<User?> = _createdBy
 
     private val _ingress: MutableStateFlow<CallIngressResponse?> = MutableStateFlow(null)
     val ingress: StateFlow<CallIngressResponse?> = _ingress
@@ -242,8 +243,8 @@ public class CallState(private val call: Call, private val user: io.getstream.vi
 
     private val _endedAt: MutableStateFlow<OffsetDateTime?> = MutableStateFlow(null)
     val endedAt: StateFlow<OffsetDateTime?> = _endedAt
-    private val _endedByUser: MutableStateFlow<io.getstream.video.android.model.User?> = MutableStateFlow(null)
-    val endedByUser: StateFlow<io.getstream.video.android.model.User?> = _endedByUser
+    private val _endedByUser: MutableStateFlow<User?> = MutableStateFlow(null)
+    val endedByUser: StateFlow<User?> = _endedByUser
 
     internal val _reactions = MutableStateFlow<List<ReactionResponse>>(emptyList())
     val reactions: StateFlow<List<ReactionResponse>> = _reactions
@@ -502,7 +503,7 @@ public class CallState(private val call: Call, private val user: io.getstream.vi
     fun getOrCreateParticipant(
         sessionId: String,
         userId: String,
-        user: io.getstream.video.android.model.User? = null,
+        user: User? = null,
         updateFlow: Boolean = false
     ): ParticipantState {
         val participantMap = _participants.value.toSortedMap()
@@ -512,7 +513,7 @@ public class CallState(private val call: Call, private val user: io.getstream.vi
             ParticipantState(
                 sessionId = sessionId,
                 call = call,
-                initialUser = user ?: io.getstream.video.android.model.User(userId),
+                initialUser = user ?: User(userId),
             )
         }
         if (updateFlow) {

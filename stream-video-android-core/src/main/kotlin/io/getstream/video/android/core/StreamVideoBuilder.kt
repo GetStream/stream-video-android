@@ -88,7 +88,7 @@ public class StreamVideoBuilder @JvmOverloads constructor(
         if (apiKey.isBlank()
         ) throw IllegalArgumentException("The API key can not be empty")
 
-        if (token.isBlank() && tokenProvider == null && user.type == io.getstream.video.android.model.UserType.Authenticated) {
+        if (token.isBlank() && tokenProvider == null && user.type == UserType.Authenticated) {
             throw IllegalArgumentException(
                 "Either a user token or a token provider must be provided"
             )
@@ -131,13 +131,13 @@ public class StreamVideoBuilder @JvmOverloads constructor(
         )
         scope.launch {
             // addDevice for push
-            if (enablePush && user.type == io.getstream.video.android.model.UserType.Authenticated) {
+            if (enablePush && user.type == UserType.Authenticated) {
                 client.registerPushDevice()
             }
         }
-        if (user.type == io.getstream.video.android.model.UserType.Guest) {
+        if (user.type == UserType.Guest) {
             client.setupGuestUser(user)
-        } else if (user.type == io.getstream.video.android.model.UserType.Anonymous) {
+        } else if (user.type == UserType.Anonymous) {
             connectionModule.updateAuthType("anonymous")
         }
 

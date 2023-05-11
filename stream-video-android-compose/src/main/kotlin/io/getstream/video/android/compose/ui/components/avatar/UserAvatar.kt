@@ -58,7 +58,7 @@ import io.getstream.video.android.model.User
  */
 @Composable
 public fun UserAvatar(
-    user: io.getstream.video.android.model.User,
+    user: User,
     modifier: Modifier = Modifier,
     shape: Shape = VideoTheme.shapes.avatar,
     textStyle: TextStyle = VideoTheme.typography.title3Bold,

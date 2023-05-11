@@ -43,7 +43,7 @@ class ChatWithVideoApp : Application() {
     val streamVideo: StreamVideo
         get() = requireNotNull(video)
 
-    fun initializeStreamVideo(user: io.getstream.video.android.model.User, apiKey: io.getstream.video.android.model.ApiKey, loggingLevel: LoggingLevel): StreamVideo {
+    fun initializeStreamVideo(user: User, apiKey: ApiKey, loggingLevel: LoggingLevel): StreamVideo {
         TODO()
     }
 

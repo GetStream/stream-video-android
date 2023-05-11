@@ -18,9 +18,9 @@ package io.getstream.video.android.tutorial_final.utils
 
 import io.getstream.video.android.model.User
 
-fun getUsers(): List<io.getstream.video.android.model.User> {
+fun getUsers(): List<User> {
     return listOf(
-        io.getstream.video.android.model.User(
+        User(
             id = "filip",
             name = "Filip",
             image = "https://avatars.githubusercontent.com/u/17215808?v=4",
@@ -28,7 +28,7 @@ fun getUsers(): List<io.getstream.video.android.model.User> {
             teams = emptyList(),
             custom = emptyMap()
         ),
-        io.getstream.video.android.model.User(
+        User(
             id = "thierry",
             name = "Thierry",
             image =
@@ -37,7 +37,7 @@ fun getUsers(): List<io.getstream.video.android.model.User> {
             teams = emptyList(),
             custom = emptyMap()
         ),
-        io.getstream.video.android.model.User(
+        User(
             id = "martin",
             name = "Martin",
             image = "https://upload.wikimedia.org/wikipedia/commons/d/da/Toma_Zdravkovi%C4%87.jpg",
@@ -45,7 +45,7 @@ fun getUsers(): List<io.getstream.video.android.model.User> {
             teams = emptyList(),
             custom = emptyMap()
         ),
-        io.getstream.video.android.model.User(
+        User(
             id = "oliver",
             name = "Oliver",
             image = "https://www.biografija.org/wp-content/uploads/2020/01/boban-rajovic.jpg",
@@ -53,7 +53,7 @@ fun getUsers(): List<io.getstream.video.android.model.User> {
             teams = emptyList(),
             custom = emptyMap()
         ),
-        io.getstream.video.android.model.User(
+        User(
             id = "tomislav",
             name = "Tomislav",
             image = "https://i.scdn.co/image/ab67616d0000b2730ae491943a8668e81e212594",

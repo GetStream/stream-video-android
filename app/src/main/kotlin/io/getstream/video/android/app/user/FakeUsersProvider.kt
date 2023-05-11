@@ -24,13 +24,13 @@ import kotlinx.coroutines.flow.StateFlow
 
 class FakeUsersProvider(private val currentUserId: String) : UsersProvider {
 
-    override fun provideUsers(): List<io.getstream.video.android.model.User> {
+    override fun provideUsers(): List<User> {
         return mockUsers()
     }
 
-    private fun mockUsers(): List<io.getstream.video.android.model.User> {
+    private fun mockUsers(): List<User> {
         return getUsers().filter { it.id != currentUserId }
     }
 
-    override val userState: StateFlow<List<io.getstream.video.android.model.User>> = MutableStateFlow(provideUsers())
+    override val userState: StateFlow<List<User>> = MutableStateFlow(provideUsers())
 }

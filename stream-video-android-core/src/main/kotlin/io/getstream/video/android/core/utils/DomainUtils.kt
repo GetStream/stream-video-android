@@ -26,6 +26,7 @@ import io.getstream.video.android.core.model.EdgeData
 import io.getstream.video.android.core.model.QueriedCalls
 import io.getstream.video.android.core.model.ReactionData
 import io.getstream.video.android.core.model.toCallInfo
+import io.getstream.video.android.model.User
 import org.openapitools.client.models.CallRecording
 import org.openapitools.client.models.CallStateResponseFields
 import org.openapitools.client.models.EdgeResponse
@@ -86,13 +87,13 @@ internal fun Participant.toPartialUser(): CallUser {
 }
 
 @JvmSynthetic
-internal fun UserResponse.toUser(): io.getstream.video.android.model.User {
-    return io.getstream.video.android.model.User(
+internal fun UserResponse.toUser(): User {
+    return User(
         id = id,
         role = role,
         name = name ?: "",
         image = image ?: "",
-        teams = teams ?: emptyList(),
+        teams = teams,
         custom = custom.mapValues { it.value.toString() }
     )
 }

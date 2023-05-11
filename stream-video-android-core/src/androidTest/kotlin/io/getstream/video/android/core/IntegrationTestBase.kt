@@ -61,7 +61,7 @@ class DispatcherRule(
 
 class IntegrationTestHelper {
 
-    val users = mutableMapOf<String, io.getstream.video.android.model.User>()
+    val users = mutableMapOf<String, User>()
     val tokens = mutableMapOf<String, String>()
     val context: Context
 
@@ -88,7 +88,7 @@ class IntegrationTestHelper {
         val token =
             "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoidGhpZXJyeSJ9._4aZL6BR0VGKfZsKYdscsBm8yKVgG-2LatYeHRJUq0g"
 
-        val thierry = io.getstream.video.android.model.User(
+        val thierry = User(
             id = "thierry", role = "admin", name = "Thierry", image = "hello",
             teams = emptyList(), custom = mapOf()
         )

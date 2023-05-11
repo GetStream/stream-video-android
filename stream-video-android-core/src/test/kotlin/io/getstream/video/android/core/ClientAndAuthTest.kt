@@ -52,9 +52,9 @@ class ClientAndAuthTest : TestBase() {
             context = context,
             apiKey = apiKey,
             geo = GEO.GlobalEdgeNetwork,
-            user = io.getstream.video.android.model.User(
+            user = User(
                 id = "anonymous",
-                type = io.getstream.video.android.model.UserType.Anonymous
+                type = UserType.Anonymous
             )
         ).build()
     }
@@ -69,7 +69,7 @@ class ClientAndAuthTest : TestBase() {
             context = context,
             apiKey = apiKey,
             geo = GEO.GlobalEdgeNetwork,
-            user = io.getstream.video.android.model.User(
+            user = User(
                 id = "guest",
                 type = io.getstream.video.android.model.UserType.Guest
             )
@@ -83,7 +83,7 @@ class ClientAndAuthTest : TestBase() {
             context = context,
             apiKey = apiKey,
             geo = GEO.GlobalEdgeNetwork,
-            user = io.getstream.video.android.model.User(
+            user = User(
                 id = "guest",
                 type = io.getstream.video.android.model.UserType.Guest
             )
@@ -101,7 +101,7 @@ class ClientAndAuthTest : TestBase() {
             context = context,
             apiKey = apiKey,
             geo = GEO.GlobalEdgeNetwork,
-            user = io.getstream.video.android.model.User(
+            user = User(
                 id = "guest",
                 type = io.getstream.video.android.model.UserType.Guest
             )

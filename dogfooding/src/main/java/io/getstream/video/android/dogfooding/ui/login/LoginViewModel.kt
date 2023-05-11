@@ -93,7 +93,7 @@ class LoginViewModel @Inject constructor(
         val authUser = FirebaseAuth.getInstance().currentUser
         val userId = tokenResponse.userId
         val token = tokenResponse.token
-        val user = io.getstream.video.android.model.User(
+        val user = User(
             id = authUser?.email ?: userId,
             name = authUser?.displayName ?: "",
             image = authUser?.photoUrl?.toString() ?: "",

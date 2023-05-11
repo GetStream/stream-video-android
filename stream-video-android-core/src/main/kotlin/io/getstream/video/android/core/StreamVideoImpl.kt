@@ -48,6 +48,7 @@ import io.getstream.video.android.core.utils.LatencyResult
 import io.getstream.video.android.core.utils.getLatencyMeasurementsOKHttp
 import io.getstream.video.android.core.utils.toEdge
 import io.getstream.video.android.core.utils.toUser
+import io.getstream.video.android.model.User
 import io.getstream.video.android.model.mapper.toTypeAndId
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Deferred
@@ -106,7 +107,7 @@ import kotlin.coroutines.Continuation
 internal class StreamVideoImpl internal constructor(
     override val context: Context,
     internal val _scope: CoroutineScope,
-    override val user: io.getstream.video.android.model.User,
+    override val user: User,
     private val lifecycle: Lifecycle,
     private val loggingLevel: LoggingLevel,
     internal val connectionModule: ConnectionModule,
@@ -368,7 +369,7 @@ internal class StreamVideoImpl internal constructor(
         }
     }
 
-    fun setupGuestUser(user: io.getstream.video.android.model.User) {
+    fun setupGuestUser(user: User) {
         guestUserJob = scope.async {
             val response = createGuestUser(
                 userRequest = UserRequest(
@@ -540,7 +541,7 @@ internal class StreamVideoImpl internal constructor(
     internal suspend fun inviteUsers(
         type: String,
         id: String,
-        users: List<io.getstream.video.android.model.User>
+        users: List<User>
     ): Result<Unit> {
         logger.d { "[inviteUsers] users: $users" }
 

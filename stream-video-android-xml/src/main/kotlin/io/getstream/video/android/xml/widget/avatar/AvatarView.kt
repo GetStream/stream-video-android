@@ -65,7 +65,7 @@ public class AvatarView : ShapeableImageView {
      *
      * @param user The [User] for which we want to show the avatar.
      */
-    public fun setData(user: io.getstream.video.android.model.User) {
+    public fun setData(user: User) {
         load(
             data = user.image,
             placeholderDrawable = AvatarPlaceholderDrawable(

@@ -44,7 +44,7 @@ class DemoVideoApp : Application() {
             context = applicationContext,
             apiKey = "hd8szvscpxvd",
             geo = GEO.GlobalEdgeNetwork,
-            io.getstream.video.android.model.User(
+            User(
                 id = "thierry", role = "admin", name = "Thierry", image = "hello",
                 teams = emptyList(), custom = mapOf()
             ),

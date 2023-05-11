@@ -70,13 +70,13 @@ class LoginActivity : ComponentActivity() {
         }
     }
 
-    private fun logIn(user: io.getstream.video.android.model.User) {
+    private fun logIn(user: User) {
         logInToChat(user)
         logInToVideo(user)
         startActivity(ChannelsActivity.getIntent(this))
     }
 
-    private fun logInToChat(user: io.getstream.video.android.model.User) {
+    private fun logInToChat(user: User) {
         val userLogin = io.getstream.chat.android.client.models.User(
             id = user.id,
             name = user.name,
@@ -89,7 +89,7 @@ class LoginActivity : ComponentActivity() {
         ).enqueue()
     }
 
-    private fun logInToVideo(user: io.getstream.video.android.model.User) {
+    private fun logInToVideo(user: User) {
         chatWithVideoApp.initializeStreamVideo(
             apiKey = API_KEY,
             user = user,
@@ -99,9 +99,9 @@ class LoginActivity : ComponentActivity() {
 
     @Composable
     fun UserList(
-        userItems: List<io.getstream.video.android.model.User>,
+        userItems: List<User>,
         modifier: Modifier = Modifier,
-        onClick: (io.getstream.video.android.model.User) -> Unit
+        onClick: (User) -> Unit
     ) {
         Column(
             modifier = modifier,
@@ -118,8 +118,8 @@ class LoginActivity : ComponentActivity() {
 
     @Composable
     fun UserItem(
-        credentials: io.getstream.video.android.model.User,
-        onClick: (io.getstream.video.android.model.User) -> Unit
+        credentials: User,
+        onClick: (User) -> Unit
     ) {
         Column(
             modifier = Modifier

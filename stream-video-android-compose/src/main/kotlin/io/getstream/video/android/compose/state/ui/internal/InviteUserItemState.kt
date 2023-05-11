@@ -25,6 +25,6 @@ import io.getstream.video.android.model.User
  * @param isSelected If the user is selected or not.
  */
 internal data class InviteUserItemState(
-    val user: io.getstream.video.android.model.User,
+    val user: User,
     val isSelected: Boolean = false
 )

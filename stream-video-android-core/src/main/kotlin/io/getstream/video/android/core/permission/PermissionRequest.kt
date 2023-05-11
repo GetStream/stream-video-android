@@ -27,7 +27,7 @@ import org.threeten.bp.OffsetDateTime
 
 data class PermissionRequest(
     val call: Call,
-    val user: io.getstream.video.android.model.User,
+    val user: User,
     val createdAt: org.threeten.bp.OffsetDateTime,
     val permissions: List<String>,
     var grantedAt: org.threeten.bp.OffsetDateTime? = null,

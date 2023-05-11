@@ -60,7 +60,7 @@ public data class ConnectionQualityChangeEvent(
 ) : SfuDataEvent()
 
 public data class AudioLevelChangedEvent(
-    val levels: Map<String, io.getstream.video.android.model.UserAudioLevel>
+    val levels: Map<String, UserAudioLevel>
 ) : SfuDataEvent()
 
 public data class ChangePublishQualityEvent(

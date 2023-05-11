@@ -47,9 +47,9 @@ class DogfoodingApp : Application() {
 
     /** Sets up and returns the [streamVideo] required to connect to the API. */
     fun initializeStreamVideo(
-        user: io.getstream.video.android.model.User,
+        user: User,
         token: String,
-        apiKey: io.getstream.video.android.model.ApiKey,
+        apiKey: ApiKey,
         loggingLevel: LoggingLevel
     ): StreamVideo {
         return StreamVideoBuilder(

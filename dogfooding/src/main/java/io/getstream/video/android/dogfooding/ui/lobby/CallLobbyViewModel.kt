@@ -47,7 +47,7 @@ class CallLobbyViewModel @Inject constructor(
         streamVideo.call(type = type, id = id)
     }
 
-    val user: io.getstream.video.android.model.User? = userPreferences.getUserCredentials()
+    val user: User? = userPreferences.getUserCredentials()
 
     val deviceState: StateFlow<CallDeviceState> =
         combine(call.camera.status, call.microphone.status) { cameraEnabled, microphoneEnabled ->

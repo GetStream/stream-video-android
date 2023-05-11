@@ -43,7 +43,7 @@ class VideoApp : Application() {
     }
 
     /** Sets up and returns the [streamVideo] required to connect to the API. */
-    fun initializeStreamVideo(user: io.getstream.video.android.model.User, apiKey: io.getstream.video.android.model.ApiKey, loggingLevel: LoggingLevel): StreamVideo {
+    fun initializeStreamVideo(user: User, apiKey: ApiKey, loggingLevel: LoggingLevel): StreamVideo {
         StreamLog.d(TAG) { "[initializeStreamCalls] loggingLevel: $loggingLevel" }
 
         return StreamVideoBuilder(

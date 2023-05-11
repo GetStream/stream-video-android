@@ -19,6 +19,6 @@ package io.getstream.video.android.app.user
 import io.getstream.video.android.model.User
 
 data class AppUser(
-    val user: io.getstream.video.android.model.User,
+    val user: User,
     val isSelected: Boolean
 )

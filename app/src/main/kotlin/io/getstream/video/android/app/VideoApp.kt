@@ -49,7 +49,7 @@ class VideoApp : Application() {
      * Sets up and returns the [streamVideo] required to connect to the API.
      */
     fun initializeStreamVideo(
-        user: io.getstream.video.android.model.User,
+        user: User,
         apiKey: String,
         loggingLevel: LoggingLevel,
     ): StreamVideo {

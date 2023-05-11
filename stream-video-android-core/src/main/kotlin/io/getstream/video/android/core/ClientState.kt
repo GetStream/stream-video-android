@@ -46,8 +46,8 @@ class ClientState(client: StreamVideo) {
     /**
      * Current user object
      */
-    private val _user: MutableStateFlow<io.getstream.video.android.model.User?> = MutableStateFlow(client.user)
-    public val user: StateFlow<io.getstream.video.android.model.User?> = _user
+    private val _user: MutableStateFlow<User?> = MutableStateFlow(client.user)
+    public val user: StateFlow<User?> = _user
 
     /**
      * connectionState shows if we've established a connection with the coordinator

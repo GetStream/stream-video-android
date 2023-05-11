@@ -108,7 +108,7 @@ class LoginActivity : AppCompatActivity() {
         }
     }
 
-    private fun logIn(selectedUser: io.getstream.video.android.model.User) {
+    private fun logIn(selectedUser: User) {
         // TODO - log in the user
         startActivity(HomeActivity.getIntent(this))
         finish()

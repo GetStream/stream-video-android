@@ -65,7 +65,7 @@ internal class ConnectionModule(
     internal val preferences: UserPreferences,
     internal val connectionTimeoutInMs: Long,
     internal val loggingLevel: LoggingLevel = LoggingLevel.NONE,
-    private val user: io.getstream.video.android.model.User,
+    private val user: User,
 ) {
     private var baseUrlInterceptor: BaseUrlInterceptor
     private var authInterceptor: CoordinatorAuthInterceptor
