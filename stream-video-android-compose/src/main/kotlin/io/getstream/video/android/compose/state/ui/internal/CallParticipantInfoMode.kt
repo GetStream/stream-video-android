@@ -19,14 +19,14 @@ package io.getstream.video.android.compose.state.ui.internal
 /**
  * Represents the mode of the CallParticipantsInfo menu.
  */
-public sealed class CallParticipantInfoMode
+public sealed interface CallParticipantInfoMode
 
 /**
  * Shown when the user is observing the active list of participants.
  */
-internal object ParticipantList : CallParticipantInfoMode()
+internal object ParticipantListMode : CallParticipantInfoMode
 
 /**
  * Shown when the user is in the process of inviting people to an active call.
  */
-internal object ParticipantInvites : CallParticipantInfoMode()
+internal object ParticipantInvitesMode : CallParticipantInfoMode

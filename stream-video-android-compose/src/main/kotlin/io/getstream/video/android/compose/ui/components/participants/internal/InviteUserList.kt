@@ -34,11 +34,11 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import io.getstream.video.android.compose.state.ui.internal.InviteUserItemState
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.avatar.UserAvatar
 import io.getstream.video.android.mock.StreamMockUtils
 import io.getstream.video.android.mock.mockParticipantList
+import io.getstream.video.android.model.User
 import io.getstream.video.android.ui.common.R
 
 /**
@@ -50,8 +50,9 @@ import io.getstream.video.android.ui.common.R
  */
 @Composable
 internal fun InviteUserList(
-    users: List<InviteUserItemState>,
-    onUserSelected: (InviteUserItemState) -> Unit,
+    users: List<User>,
+    onUserSelected: (User) -> Unit,
+    onUserUnSelected: (User) -> Unit,
     modifier: Modifier = Modifier
 ) {
     LazyColumn(
@@ -59,7 +60,12 @@ internal fun InviteUserList(
         verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
         items(users) { user ->
-            InviteUserItem(user, onUserSelected)
+            InviteUserItem(
+                user = user,
+                isSelected = users.contains(user),
+                onUserSelected = onUserSelected,
+                onUserUnSelected = onUserUnSelected,
+            )
         }
     }
 }
@@ -67,23 +73,29 @@ internal fun InviteUserList(
 /**
  * Represents a single user item.
  *
- * @param state Item that holds the user data.
+ * @param user Item that holds the user data.
  * @param onUserSelected Handler when a user is selected.
  */
 @Composable
 internal fun InviteUserItem(
-    state: InviteUserItemState,
-    onUserSelected: (InviteUserItemState) -> Unit
+    user: User,
+    isSelected: Boolean,
+    onUserSelected: (User) -> Unit,
+    onUserUnSelected: (User) -> Unit,
 ) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .clickable { onUserSelected(state) },
+            .clickable {
+                if (isSelected) {
+                    onUserUnSelected.invoke(user)
+                } else {
+                    onUserSelected(user)
+                }
+            },
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.Start
     ) {
-        val user = state.user
-
         Spacer(modifier = Modifier.width(8.dp))
 
         UserAvatar(
@@ -109,7 +121,7 @@ internal fun InviteUserItem(
 
         Spacer(modifier = Modifier.width(8.dp))
 
-        if (state.isSelected) {
+        if (isSelected) {
             Image(
                 modifier = Modifier.size(24.dp),
                 painter = painterResource(id = R.drawable.stream_video_ic_selected),
@@ -127,10 +139,9 @@ private fun InviteUserListPreview() {
     StreamMockUtils.initializeStreamVideo(LocalContext.current)
     VideoTheme {
         InviteUserList(
-            mockParticipantList.map {
-                InviteUserItemState(it.initialUser)
-            },
-            onUserSelected = {}
+            mockParticipantList.map { it.initialUser },
+            onUserSelected = {},
+            onUserUnSelected = {}
         )
     }
 }

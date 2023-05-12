@@ -27,8 +27,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import io.getstream.video.android.compose.state.ui.participants.ChangeMuteState
-import io.getstream.video.android.compose.state.ui.participants.InviteUsers
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.call.activecall.CallContent
 import io.getstream.video.android.compose.ui.components.call.activecall.DefaultPictureInPictureContent
@@ -256,16 +254,18 @@ internal fun DefaultCallContent(
             modifier = Modifier
                 .fillMaxSize()
                 .background(VideoTheme.colors.appBackground),
-            participantsState = participantsState,
+            participants = participantsState,
             onDismiss = { callViewModel.dismissCallInfoMenu() },
         ) { action ->
             when (action) {
-                is InviteUsers -> {
+                is InviteUsersToCall -> {
                     usersToInvite = action.users
                     callViewModel.dismissCallInfoMenu()
                 }
 
-                is ChangeMuteState -> onCallAction(ToggleMicrophone(action.isEnabled))
+                is ToggleMicrophone -> onCallAction(action)
+
+                else -> Unit
             }
         }
     }

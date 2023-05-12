@@ -292,11 +292,13 @@ public class Call(
         sort: List<SortField> = mutableListOf(SortField.Desc("created_at")),
         limit: Int = 100
     ): Result<QueryMembersResponse> {
-        val result = clientImpl.queryMembers(type, id, filter, sort, limit)
-        result.onSuccess {
-            state.updateFromResponse(it)
-        }
-        return result
+        return clientImpl.queryMembers(
+            type = type,
+            id = id,
+            filter = filter,
+            sort = sort,
+            limit = limit
+        ).onSuccess { state.updateFromResponse(it) }
     }
 
     suspend fun muteAllUsers(
