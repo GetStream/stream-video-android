@@ -17,8 +17,8 @@
 package io.getstream.video.android.app.user
 
 import io.getstream.video.android.app.utils.getUsers
-import io.getstream.video.android.core.model.User
 import io.getstream.video.android.core.user.UsersProvider
+import io.getstream.video.android.model.User
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 

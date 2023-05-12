@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014-2022 Stream.io Inc. All rights reserved.
+ * Copyright (c) 2014-2023 Stream.io Inc. All rights reserved.
  *
  * Licensed under the Stream License;
  * you may not use this file except in compliance with the License.
@@ -14,19 +14,13 @@
  * limitations under the License.
  */
 
-package io.getstream.video.android.core.model
+package io.getstream.video.android.model
 
 /**
- * The API key of your Stream Video app.
+ * Represents the audio level and if a user is speaking.
  */
-public typealias ApiKey = String
-
-/**
- * User's ticket to join/initiate the call.
- */
-public typealias UserToken = String
-
-/**
- * User's ticket to enter the call when joined/initiated.
- */
-public typealias SfuToken = String
+public data class UserAudioLevel(
+    val userId: String,
+    val isSpeaking: Boolean,
+    val audioLevel: Float
+)

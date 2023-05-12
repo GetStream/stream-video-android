@@ -25,8 +25,8 @@ import io.getstream.video.android.core.model.CallUserState
 import io.getstream.video.android.core.model.EdgeData
 import io.getstream.video.android.core.model.QueriedCalls
 import io.getstream.video.android.core.model.ReactionData
-import io.getstream.video.android.core.model.User
 import io.getstream.video.android.core.model.toCallInfo
+import io.getstream.video.android.model.User
 import org.openapitools.client.models.CallRecording
 import org.openapitools.client.models.CallStateResponseFields
 import org.openapitools.client.models.EdgeResponse
@@ -93,7 +93,7 @@ internal fun UserResponse.toUser(): User {
         role = role,
         name = name ?: "",
         image = image ?: "",
-        teams = teams ?: emptyList(),
+        teams = teams,
         custom = custom.mapValues { it.value.toString() }
     )
 }

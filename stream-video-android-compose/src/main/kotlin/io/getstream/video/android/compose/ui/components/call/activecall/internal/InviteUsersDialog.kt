@@ -34,7 +34,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import io.getstream.video.android.compose.theme.VideoTheme
-import io.getstream.video.android.core.model.User
+import io.getstream.video.android.model.User
 import io.getstream.video.android.ui.common.R
 
 /**

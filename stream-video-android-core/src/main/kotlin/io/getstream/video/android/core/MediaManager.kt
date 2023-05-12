@@ -106,8 +106,6 @@ class SpeakerManager(val mediaManager: MediaManagerImpl, val microphoneManager: 
             it.setStreamVolume(AudioManager.STREAM_VOICE_CALL, level, 0)
         }
     }
-
-
 }
 
 /**
@@ -144,8 +142,6 @@ class MicrophoneManager(val mediaManager: MediaManagerImpl) {
     private val _devices = MutableStateFlow<List<AudioDevice>>(emptyList())
     val devices: StateFlow<List<AudioDevice>> = _devices
 
-
-
     /** Enable the audio, the rtc engine will automatically inform the SFU */
     fun enable() {
         setup()
@@ -170,8 +166,6 @@ class MicrophoneManager(val mediaManager: MediaManagerImpl) {
             disable()
         }
     }
-
-
 
     /**
      * Select a specific device

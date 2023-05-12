@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-package io.getstream.video.android.core.model
+package io.getstream.video.android.model
 
-/**
- * Represents SFU session id.
- */
-public typealias StreamSfuSessionId = String
+@kotlinx.serialization.Serializable
+public data class UserDevices(
+    val devices: List<Device> = emptyList()
+)

@@ -16,8 +16,8 @@
 
 package io.getstream.video.android.tutorial_starter.user
 
-import io.getstream.video.android.core.model.User
 import io.getstream.video.android.core.user.UsersProvider
+import io.getstream.video.android.model.User
 import io.getstream.video.android.tutorial_starter.BuildConfig
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow

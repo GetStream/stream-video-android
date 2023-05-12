@@ -14,15 +14,19 @@
  * limitations under the License.
  */
 
-package io.getstream.video.android.core.model
-
-import java.io.Serializable
+package io.getstream.video.android.model
 
 /**
- * Represents combined call identifier as a set of [StreamCallType], [StreamCallId] and [StreamCallCid].
+ * The API key of your Stream Video app.
  */
-public data class StreamCallGuid(
-    val type: StreamCallType,
-    val id: StreamCallId,
-    val cid: StreamCallCid
-) : Serializable
+public typealias ApiKey = String
+
+/**
+ * User's ticket to join/initiate the call.
+ */
+public typealias UserToken = String
+
+/**
+ * User's ticket to enter the call when joined/initiated.
+ */
+public typealias SfuToken = String

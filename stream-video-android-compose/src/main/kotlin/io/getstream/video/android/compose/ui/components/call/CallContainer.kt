@@ -44,8 +44,8 @@ import io.getstream.video.android.core.call.state.CallDeviceState
 import io.getstream.video.android.core.call.state.InviteUsersToCall
 import io.getstream.video.android.core.call.state.ToggleMicrophone
 import io.getstream.video.android.core.model.CallType
-import io.getstream.video.android.core.model.User
 import io.getstream.video.android.core.viewmodel.CallViewModel
+import io.getstream.video.android.model.User
 
 /**
  * Represents different call content based on the call state provided from the [callViewModel].

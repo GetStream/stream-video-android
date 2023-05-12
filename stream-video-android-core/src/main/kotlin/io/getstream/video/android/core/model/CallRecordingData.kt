@@ -24,7 +24,7 @@ package io.getstream.video.android.core.model
  * @param start The start time in epoch.
  * @param end The end time in epoch.
  */
-data class CallRecordingData(
+public data class CallRecordingData(
     val fileName: String,
     val url: String,
     val start: Long,

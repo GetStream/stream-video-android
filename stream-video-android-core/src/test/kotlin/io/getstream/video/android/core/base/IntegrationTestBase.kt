@@ -27,7 +27,7 @@ import io.getstream.result.Result
 import io.getstream.video.android.core.call.connection.StreamPeerConnectionFactory
 import io.getstream.video.android.core.dispatchers.DispatcherProvider
 import io.getstream.video.android.core.logging.LoggingLevel
-import io.getstream.video.android.core.model.User
+import io.getstream.video.android.model.User
 import io.mockk.MockKAnnotations
 import io.mockk.impl.annotations.MockK
 import io.mockk.junit4.MockKRule

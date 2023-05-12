@@ -22,9 +22,9 @@ import androidx.core.app.NotificationManagerCompat
 import androidx.lifecycle.lifecycleScope
 import io.getstream.video.android.core.StreamVideo
 import io.getstream.video.android.core.StreamVideoProvider
-import io.getstream.video.android.core.model.StreamCallCid
 import io.getstream.video.android.core.utils.INTENT_EXTRA_CALL_CID
 import io.getstream.video.android.core.utils.INTENT_EXTRA_NOTIFICATION_ID
+import io.getstream.video.android.model.StreamCallCid
 import kotlinx.coroutines.launch
 
 /**
@@ -54,7 +54,7 @@ public abstract class AbstractNotificationActivity :
      */
     private fun processNotificationData() {
         val hasAcceptedCall = intent.action == ACTION_ACCEPT_CALL
-        val callCid = intent.getStringExtra(INTENT_EXTRA_CALL_CID) as StreamCallCid
+        val callCid = intent.getStringExtra(INTENT_EXTRA_CALL_CID) as io.getstream.video.android.model.StreamCallCid
 
         if (callCid.isNullOrBlank()) {
             return

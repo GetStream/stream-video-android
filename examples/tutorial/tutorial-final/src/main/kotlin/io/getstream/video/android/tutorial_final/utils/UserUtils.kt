@@ -16,7 +16,7 @@
 
 package io.getstream.video.android.tutorial_final.utils
 
-import io.getstream.video.android.core.model.User
+import io.getstream.video.android.model.User
 
 fun getUsers(): List<User> {
     return listOf(

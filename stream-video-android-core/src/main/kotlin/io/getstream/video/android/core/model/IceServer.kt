@@ -19,10 +19,6 @@ package io.getstream.video.android.core.model
 import org.openapitools.client.models.ICEServer
 import java.io.Serializable
 
-public data class IceServerConfig(
-    val iceServers: List<IceServer>
-) : Serializable
-
 public data class IceServer(
     val urls: List<String>,
     val username: String,
@@ -31,8 +27,8 @@ public data class IceServer(
 
 internal fun ICEServer.toIceServer(): IceServer {
     return IceServer(
-        urls = urls ?: emptyList(),
-        username = username ?: "",
-        password = password ?: ""
+        urls = urls,
+        username = username,
+        password = password
     )
 }

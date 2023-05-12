@@ -22,7 +22,7 @@ plugins {
 }
 
 rootProject.extra.apply {
-    set("PUBLISH_GROUP_ID", io.getstream.video.android.Configuration.artifactGroup)
+    set("PUBLISH_GROUP_ID", Configuration.artifactGroup)
     set("PUBLISH_ARTIFACT_ID", "stream-video-android-mock")
     set("PUBLISH_VERSION", rootProject.extra.get("rootVersionName"))
 }
@@ -41,4 +41,5 @@ android {
 
 dependencies {
     api(project(":stream-video-android-core"))
+    implementation(project(":stream-video-android-datastore"))
 }

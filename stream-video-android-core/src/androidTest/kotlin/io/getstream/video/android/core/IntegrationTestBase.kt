@@ -26,7 +26,7 @@ import io.getstream.log.streamLog
 import io.getstream.result.Result
 import io.getstream.video.android.core.dispatchers.DispatcherProvider
 import io.getstream.video.android.core.logging.LoggingLevel
-import io.getstream.video.android.core.model.User
+import io.getstream.video.android.model.User
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.TestCoroutineScheduler

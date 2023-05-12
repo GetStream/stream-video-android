@@ -43,7 +43,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.avatar.Avatar
-import io.getstream.video.android.core.model.User
+import io.getstream.video.android.model.User
 import io.getstream.video.chat_with_video_starter.application.chatWithVideoApp
 import io.getstream.video.chat_with_video_starter.ui.channels.ChannelsActivity
 

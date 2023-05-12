@@ -52,8 +52,8 @@ import androidx.lifecycle.lifecycleScope
 import io.getstream.log.taggedLogger
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.avatar.Avatar
-import io.getstream.video.android.core.user.UserPreferencesManager
 import io.getstream.video.android.core.utils.initials
+import io.getstream.video.android.datastore.delegate.StreamUserDataStore
 import io.getstream.video.android.demo.demoVideoApp
 import io.getstream.video.android.demo.model.HomeScreenOption
 import io.getstream.video.android.demo.ui.call.CallActivity
@@ -227,7 +227,8 @@ class HomeActivity : AppCompatActivity() {
 
     @Composable
     fun UserIcon() {
-        val user = UserPreferencesManager.initialize(this).getUserCredentials() ?: return
+        val dataStore = StreamUserDataStore.install(this)
+        val user = dataStore.user.value ?: return
 
         Avatar(
             modifier = Modifier

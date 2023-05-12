@@ -106,6 +106,10 @@ android {
 }
 
 dependencies {
+    // stream modules
+    api(project(":stream-video-android-model"))
+    implementation(project(":stream-video-android-datastore"))
+
     // webrtc
     api(libs.stream.webrtc)
     api(libs.stream.webrtc.ui)
