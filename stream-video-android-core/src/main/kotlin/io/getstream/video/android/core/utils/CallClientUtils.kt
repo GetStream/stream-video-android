@@ -21,13 +21,11 @@ import org.webrtc.MediaConstraints
 import org.webrtc.PeerConnection
 import org.webrtc.SessionDescription
 
-data class RtpMapAttribute(val index: Int, val number: String, val codec: String, val line: String) {
-
-}
+data class RtpMapAttribute(val index: Int, val number: String, val codec: String, val line: String)
 
 data class MediaStream(val index: Int, var codecs: List<String>, val line: String) {
 
-    override fun toString():String {
+    override fun toString(): String {
         val parts = line.split(" ")
         val first = parts.subList(0, 3).toMutableList()
         first.addAll(codecs)
@@ -41,13 +39,13 @@ data class MediaStream(val index: Int, var codecs: List<String>, val line: Strin
 class MinimalSdpParser(var sdp: String) {
 
     private lateinit var lines: MutableList<String>
-    private var red: RtpMapAttribute?= null
-    private var opus: RtpMapAttribute?= null
-    private var h264: RtpMapAttribute?= null
-    private var vp8: RtpMapAttribute?= null
-    private var audioM: MediaStream?= null
-    private var videoM: MediaStream?= null
-    private var useinbandfecLine : Int? = null
+    private var red: RtpMapAttribute? = null
+    private var opus: RtpMapAttribute? = null
+    private var h264: RtpMapAttribute? = null
+    private var vp8: RtpMapAttribute? = null
+    private var audioM: MediaStream? = null
+    private var videoM: MediaStream? = null
+    private var useinbandfecLine: Int? = null
 
     init {
         parse()
@@ -78,9 +76,7 @@ class MinimalSdpParser(var sdp: String) {
                 }
             }
         }
-
     }
-
 
     fun mangle(enableDtx: Boolean = true, enableRed: Boolean = true, enableVp8: Boolean = true): String {
         if (enableDtx) {
@@ -89,7 +85,7 @@ class MinimalSdpParser(var sdp: String) {
             }
         }
         if (enableRed) {
-            if (audioM != null && red != null && opus != null ) {
+            if (audioM != null && red != null && opus != null) {
                 val codecs = audioM?.codecs
                 val redPosition = codecs?.indices?.find { codecs[it] == red?.number }
                 val opusPosition = codecs?.indices?.find { codecs[it] == opus?.number }
@@ -97,7 +93,7 @@ class MinimalSdpParser(var sdp: String) {
                 // swap the position in the M line
                 if (opusPosition != null && redPosition != null && opusPosition < redPosition) {
                     // remove red from the list
-                    val newCodecs = codecs.filter {it != red!!.number}.toMutableList()
+                    val newCodecs = codecs.filter { it != red!!.number }.toMutableList()
                     newCodecs.add(0, red!!.number)
                     audioM!!.codecs = newCodecs
 
@@ -108,7 +104,7 @@ class MinimalSdpParser(var sdp: String) {
             }
         }
         if (enableVp8) {
-            if (videoM != null && vp8 != null && h264 != null ) {
+            if (videoM != null && vp8 != null && h264 != null) {
                 val codecs = videoM?.codecs
                 val vp8Position = codecs?.indices?.find { codecs[it] == vp8?.number }
                 val h264Position = codecs?.indices?.find { codecs[it] == h264?.number }
@@ -116,7 +112,7 @@ class MinimalSdpParser(var sdp: String) {
                 // swap the position in the M line
                 if (vp8Position != null && h264Position != null && h264Position < vp8Position) {
                     // remove red from the list
-                    val newCodecs = codecs.filter {it != vp8!!.number}.toMutableList()
+                    val newCodecs = codecs.filter { it != vp8!!.number }.toMutableList()
                     newCodecs.add(0, vp8!!.number)
                     videoM!!.codecs = newCodecs
 
@@ -143,7 +139,6 @@ class MinimalSdpParser(var sdp: String) {
         return MediaStream(index, codecs, line)
     }
 }
-
 
 /**
  * Enabling DTX or RED requires mangling the SDP a bit

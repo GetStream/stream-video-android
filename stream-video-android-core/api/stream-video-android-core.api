@@ -2127,8 +2127,8 @@ public final class io/getstream/video/android/core/utils/AndroidUtilsKt {
 }
 
 public final class io/getstream/video/android/core/utils/CallClientUtilsKt {
-	public static final fun mangleSdpUtil (Lorg/webrtc/SessionDescription;ZZ)Lorg/webrtc/SessionDescription;
-	public static synthetic fun mangleSdpUtil$default (Lorg/webrtc/SessionDescription;ZZILjava/lang/Object;)Lorg/webrtc/SessionDescription;
+	public static final fun mangleSdpUtil (Lorg/webrtc/SessionDescription;ZZZ)Lorg/webrtc/SessionDescription;
+	public static synthetic fun mangleSdpUtil$default (Lorg/webrtc/SessionDescription;ZZZILjava/lang/Object;)Lorg/webrtc/SessionDescription;
 }
 
 public final class io/getstream/video/android/core/utils/ConstantsKt {
@@ -2165,6 +2165,50 @@ public final class io/getstream/video/android/core/utils/LatencyUtilsKt {
 
 public final class io/getstream/video/android/core/utils/ListUtilsKt {
 	public static final fun updateValue (Ljava/util/List;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;)Ljava/util/List;
+}
+
+public final class io/getstream/video/android/core/utils/MediaStream {
+	public fun <init> (ILjava/util/List;Ljava/lang/String;)V
+	public final fun component1 ()I
+	public final fun component2 ()Ljava/util/List;
+	public final fun component3 ()Ljava/lang/String;
+	public final fun copy (ILjava/util/List;Ljava/lang/String;)Lio/getstream/video/android/core/utils/MediaStream;
+	public static synthetic fun copy$default (Lio/getstream/video/android/core/utils/MediaStream;ILjava/util/List;Ljava/lang/String;ILjava/lang/Object;)Lio/getstream/video/android/core/utils/MediaStream;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getCodecs ()Ljava/util/List;
+	public final fun getIndex ()I
+	public final fun getLine ()Ljava/lang/String;
+	public fun hashCode ()I
+	public final fun setCodecs (Ljava/util/List;)V
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class io/getstream/video/android/core/utils/MinimalSdpParser {
+	public fun <init> (Ljava/lang/String;)V
+	public final fun getSdp ()Ljava/lang/String;
+	public final fun mangle (ZZZ)Ljava/lang/String;
+	public static synthetic fun mangle$default (Lio/getstream/video/android/core/utils/MinimalSdpParser;ZZZILjava/lang/Object;)Ljava/lang/String;
+	public final fun parse ()V
+	public final fun parseMLine (ILjava/lang/String;)Lio/getstream/video/android/core/utils/MediaStream;
+	public final fun parseRtpMap (ILjava/lang/String;)Lio/getstream/video/android/core/utils/RtpMapAttribute;
+	public final fun setSdp (Ljava/lang/String;)V
+}
+
+public final class io/getstream/video/android/core/utils/RtpMapAttribute {
+	public fun <init> (ILjava/lang/String;Ljava/lang/String;Ljava/lang/String;)V
+	public final fun component1 ()I
+	public final fun component2 ()Ljava/lang/String;
+	public final fun component3 ()Ljava/lang/String;
+	public final fun component4 ()Ljava/lang/String;
+	public final fun copy (ILjava/lang/String;Ljava/lang/String;Ljava/lang/String;)Lio/getstream/video/android/core/utils/RtpMapAttribute;
+	public static synthetic fun copy$default (Lio/getstream/video/android/core/utils/RtpMapAttribute;ILjava/lang/String;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)Lio/getstream/video/android/core/utils/RtpMapAttribute;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getCodec ()Ljava/lang/String;
+	public final fun getIndex ()I
+	public final fun getLine ()Ljava/lang/String;
+	public final fun getNumber ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
 }
 
 public final class io/getstream/video/android/core/utils/StateFlowKt {

@@ -25,9 +25,6 @@ import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.webrtc.SessionDescription
 
-
-
-
 @RunWith(RobolectricTestRunner::class)
 class SdpTest : TestBase() {
     // see https://github.com/GetStream/stream-video-swift/blob/main/StreamVideoTests/Utils/StringExtensions_Tests.swift
@@ -200,7 +197,6 @@ class SdpTest : TestBase() {
     fun `test parser`() = runTest {
         // enabling dtx is easy
         val result = MinimalSdpParser(sdp1.description)
-
     }
 
     @Test
