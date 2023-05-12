@@ -20,6 +20,7 @@ import android.view.View
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -49,6 +50,8 @@ public fun ScreenShareVideoRenderer(
     onRender: (View) -> Unit = {}
 ) {
     val screenShareParticipant = session.participant
+    val mediaTrack = session?.participant?.screenSharingTrack?.collectAsState()
+
 
     Box(modifier = modifier) {
         VideoRenderer(
@@ -56,7 +59,7 @@ public fun ScreenShareVideoRenderer(
                 .fillMaxSize()
                 .align(Alignment.Center),
             call = call,
-            mediaTrack = session.track,
+            mediaTrack = mediaTrack?.value,
             onRender = onRender,
             trackType = TrackType.TRACK_TYPE_SCREEN_SHARE,
             sessionId = session.participant.sessionId

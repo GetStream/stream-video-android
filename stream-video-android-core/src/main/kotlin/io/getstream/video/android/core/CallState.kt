@@ -433,6 +433,13 @@ public class CallState(private val call: Call, private val user: User) {
                     participant._audioEnabled.value = true
                 } else if (event.trackType == TrackType.TRACK_TYPE_VIDEO) {
                     participant._videoEnabled.value = true
+                } else if (event.trackType == TrackType.TRACK_TYPE_SCREEN_SHARE) {
+                    // mark the screen share enabled
+                    // create the _screenSharingSession
+                    participant._screenSharingEnabled.value = true
+                    _screenSharingSession.value = ScreenSharingSession(
+                        participant,
+                    )
                 }
             }
 
@@ -443,6 +450,14 @@ public class CallState(private val call: Call, private val user: User) {
                     participant._audioEnabled.value = false
                 } else if (event.trackType == TrackType.TRACK_TYPE_VIDEO) {
                     participant._videoEnabled.value = false
+                 }else if (event.trackType == TrackType.TRACK_TYPE_SCREEN_SHARE) {
+                    // mark the screen share enabled
+                    // create the _screenSharingSession
+                    participant._screenSharingEnabled.value = false
+                    val current = _screenSharingSession.value
+                    if (current?.participant?.sessionId == participant.sessionId) {
+                        _screenSharingSession.value = null
+                    }
                 }
             }
 
@@ -458,6 +473,7 @@ public class CallState(private val call: Call, private val user: User) {
             getOrCreateParticipant(it)
         }
         upsertParticipants(participantStates)
+
     }
 
     private fun removeParticipant(sessionId: String) {
@@ -468,10 +484,24 @@ public class CallState(private val call: Call, private val user: User) {
 
     private fun upsertParticipants(participants: List<ParticipantState>) {
         val new = _participants.value.toSortedMap()
+        val screensharing = mutableListOf<ParticipantState>()
         participants.forEach {
             new[it.sessionId] = it
+
+            if (it.screenSharingEnabled.value) {
+                screensharing.add(it)
+            }
+
         }
         _participants.value = new
+
+        if (screensharing.isNotEmpty()) {
+            _screenSharingSession.value = ScreenSharingSession(
+                screensharing[0],
+            )
+        }
+
+
     }
 
     private fun getOrCreateParticipants(participants: List<Participant>): List<ParticipantState> {

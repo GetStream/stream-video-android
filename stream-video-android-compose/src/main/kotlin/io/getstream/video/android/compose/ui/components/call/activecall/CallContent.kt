@@ -205,11 +205,12 @@ public fun CallContent(
 internal fun DefaultPictureInPictureContent(call: Call) {
     val screenSharingSession by call.state.screenSharingSession.collectAsState(initial = null)
     val session = screenSharingSession
+    val mediaTrack = session?.participant?.screenSharingTrack?.collectAsState()
     if (session != null) {
         VideoRenderer(
             modifier = Modifier.aspectRatio(ScreenShareAspectRatio, false),
             call = call,
-            mediaTrack = session.track,
+            mediaTrack = mediaTrack?.value,
             trackType = TrackType.TRACK_TYPE_SCREEN_SHARE,
             sessionId = session.participant.sessionId
         )
