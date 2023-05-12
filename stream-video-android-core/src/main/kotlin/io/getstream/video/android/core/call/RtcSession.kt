@@ -103,8 +103,6 @@ import kotlin.random.Random
  * Also stores if the track is visible or not
  */
 data class TrackDimensions(
-    val sessionId: String,
-    val trackType: TrackType,
     var dimensions: VideoDimension,
     var visible: Boolean = false
 )
@@ -666,15 +664,28 @@ public class RtcSession internal constructor(
     internal fun defaultTracks(): List<TrackSubscriptionDetails> {
         val sortedParticipants = call.state.sortedParticipants.value
         val otherParticipants = sortedParticipants.filter { it.sessionId != sessionId }.take(5)
-        val tracks = otherParticipants
-            .map { participant ->
-                TrackSubscriptionDetails(
+        val tracks = mutableListOf<TrackSubscriptionDetails>()
+        otherParticipants.forEach {participant ->
+            if (participant.videoEnabled.value) {
+                val track = TrackSubscriptionDetails(
                     user_id = participant.user.value.id,
                     track_type = TrackType.TRACK_TYPE_VIDEO,
                     dimension = VideoDimension(960, 720),
                     session_id = participant.sessionId
                 )
+                tracks.add(track)
             }
+            if (participant.screenSharingEnabled.value) {
+                val track = TrackSubscriptionDetails(
+                    user_id = participant.user.value.id,
+                    track_type = TrackType.TRACK_TYPE_SCREEN_SHARE,
+                    dimension = VideoDimension(960, 720),
+                    session_id = participant.sessionId
+                )
+                tracks.add(track)
+            }
+        }
+
 
         return tracks
     }
@@ -686,12 +697,12 @@ public class RtcSession internal constructor(
         var tracks = participants.map { participant ->
             val trackDisplay = trackDisplayResolution[participant.sessionId] ?: emptyMap()
 
-            trackDisplay.values.filter { it.visible }.map { display ->
-                dynascaleLogger.i { "[visibleTracks] $sessionId subscribing to : ${display.trackType} ${display.dimensions}" }
+            trackDisplay.entries.filter { it.value.visible }.map { display ->
+                dynascaleLogger.i { "[visibleTracks] $sessionId subscribing ${participant.sessionId} to : ${display.key}" }
                 TrackSubscriptionDetails(
                     user_id = participant.user.value.id,
-                    track_type = display.trackType,
-                    dimension = display.dimensions,
+                    track_type = display.key,
+                    dimension = display.value.dimensions,
                     session_id = participant.sessionId
                 )
             }
@@ -1070,7 +1081,7 @@ public class RtcSession internal constructor(
         }
 
         // last we get the dimensions for this specific track type
-        val oldTrack = participantTrackDimensions[trackType] ?: TrackDimensions(sessionId, trackType, dimensions)
+        val oldTrack = participantTrackDimensions[trackType] ?: TrackDimensions(dimensions=dimensions, visible=visible)
         val newTrack = oldTrack.copy(visible = visible, dimensions = dimensions)
         participantTrackDimensions[trackType] = newTrack
 
