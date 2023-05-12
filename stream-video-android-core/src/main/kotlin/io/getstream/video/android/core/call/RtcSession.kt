@@ -1070,10 +1070,9 @@ public class RtcSession internal constructor(
         }
 
         // last we get the dimensions for this specific track type
-        val track = participantTrackDimensions[trackType] ?: TrackDimensions(sessionId, trackType, dimensions)
-        participantTrackDimensions[trackType] = track
-        track.visible = visible
-        track.dimensions = dimensions
+        val oldTrack = participantTrackDimensions[trackType] ?: TrackDimensions(sessionId, trackType, dimensions)
+        val newTrack = oldTrack.copy(visible = visible, dimensions = dimensions)
+        participantTrackDimensions[trackType] = newTrack
 
         // Updates are debounced
         dynascaleLogger.i { "updateTrackDimensions $trackDimensionsMap" }
