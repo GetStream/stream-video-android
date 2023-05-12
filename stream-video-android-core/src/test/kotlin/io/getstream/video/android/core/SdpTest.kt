@@ -17,6 +17,7 @@
 package io.getstream.video.android.core
 
 import com.google.common.truth.Truth.assertThat
+import io.getstream.video.android.core.utils.MinimalSdpParser
 import io.getstream.video.android.core.utils.mangleSdpUtil
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
