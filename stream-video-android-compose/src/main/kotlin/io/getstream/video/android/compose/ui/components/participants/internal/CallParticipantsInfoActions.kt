@@ -49,7 +49,7 @@ import io.getstream.video.android.ui.common.R
  * @param modifier Modifier for styling.
  */
 @Composable
-internal fun CallParticipantsInfoOptions(
+internal fun CallParticipantsInfoActions(
     isCurrentUserMuted: Boolean,
     onOptionSelected: (CallParticipantsInfoOption) -> Unit,
     modifier: Modifier = Modifier
@@ -83,7 +83,7 @@ internal fun CallParticipantsInfoOptions(
                 .padding(start = 8.dp, end = 16.dp),
             colors = ButtonDefaults.buttonColors(backgroundColor = VideoTheme.colors.appBackground),
             border = BorderStroke(1.dp, VideoTheme.colors.textLowEmphasis),
-            onClick = { onOptionSelected(ToggleMute(isCurrentUserMuted)) },
+            onClick = { onOptionSelected(ToggleMute(!isCurrentUserMuted)) },
             shape = VideoTheme.shapes.participantsInfoMenuButton,
             content = {
                 Text(
@@ -100,7 +100,7 @@ internal fun CallParticipantsInfoOptions(
 @Composable
 private fun CallParticipantsInfoOptionsPreview() {
     VideoTheme {
-        CallParticipantsInfoOptions(
+        CallParticipantsInfoActions(
             isCurrentUserMuted = false,
             onOptionSelected = { }
         )

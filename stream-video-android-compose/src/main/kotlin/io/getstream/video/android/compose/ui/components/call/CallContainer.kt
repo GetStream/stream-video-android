@@ -256,7 +256,7 @@ internal fun DefaultCallContent(
             modifier = Modifier
                 .fillMaxSize()
                 .background(VideoTheme.colors.appBackground),
-            participantsState = participantsState,
+            participants = participantsState,
             onDismiss = { callViewModel.dismissCallInfoMenu() },
         ) { action ->
             when (action) {

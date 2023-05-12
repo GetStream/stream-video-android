@@ -27,8 +27,7 @@ import androidx.compose.ui.unit.dp
 import app.cash.paparazzi.DeviceConfig
 import app.cash.paparazzi.Paparazzi
 import io.getstream.video.android.compose.base.BaseComposeTest
-import io.getstream.video.android.compose.state.ui.internal.InviteUserItemState
-import io.getstream.video.android.compose.state.ui.internal.ParticipantList
+import io.getstream.video.android.compose.state.ui.internal.ParticipantListMode
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.call.renderer.CallSingleVideoRenderer
 import io.getstream.video.android.compose.ui.components.call.renderer.LocalVideoContent
@@ -36,8 +35,8 @@ import io.getstream.video.android.compose.ui.components.call.renderer.Participan
 import io.getstream.video.android.compose.ui.components.call.renderer.internal.LazyColumnVideoRenderer
 import io.getstream.video.android.compose.ui.components.call.renderer.internal.PortraitScreenSharingVideoRenderer
 import io.getstream.video.android.compose.ui.components.call.renderer.internal.PortraitVideoRenderer
+import io.getstream.video.android.compose.ui.components.participants.internal.CallParticipantsInfoActions
 import io.getstream.video.android.compose.ui.components.participants.internal.CallParticipantsInfoAppBar
-import io.getstream.video.android.compose.ui.components.participants.internal.CallParticipantsInfoOptions
 import io.getstream.video.android.compose.ui.components.participants.internal.CallParticipantsList
 import io.getstream.video.android.compose.ui.components.participants.internal.InviteUserList
 import io.getstream.video.android.compose.ui.components.participants.internal.ParticipantAvatars
@@ -81,8 +80,9 @@ internal class ParticipantsPortraitTest : BaseComposeTest() {
     fun `snapshot InviteUserList composable`() {
         snapshotWithDarkMode {
             InviteUserList(
-                mockParticipantList.map { InviteUserItemState(it.user.value) },
-                onUserSelected = {}
+                mockParticipantList.map { it.initialUser },
+                onUserSelected = {},
+                onUserUnSelected = {}
             )
         }
     }
@@ -90,7 +90,7 @@ internal class ParticipantsPortraitTest : BaseComposeTest() {
     @Test
     fun `snapshot CallParticipantsInfoOptions composable`() {
         snapshotWithDarkMode {
-            CallParticipantsInfoOptions(
+            CallParticipantsInfoActions(
                 isCurrentUserMuted = false,
                 onOptionSelected = { }
             )
@@ -102,7 +102,7 @@ internal class ParticipantsPortraitTest : BaseComposeTest() {
         snapshotWithDarkMode {
             CallParticipantsInfoAppBar(
                 numberOfParticipants = 10,
-                infoStateMode = ParticipantList,
+                infoStateMode = ParticipantListMode,
                 onBackPressed = {}
             ) {}
         }
@@ -161,7 +161,9 @@ internal class ParticipantsPortraitTest : BaseComposeTest() {
         snapshotWithDarkMode {
             CallParticipantsList(
                 participantsState = mockParticipantList,
-                onUserOptionsSelected = {}
+                onUserOptionsSelected = {},
+                isCurrentUserMuted = false,
+                onOptionSelected = {}
             )
         }
     }

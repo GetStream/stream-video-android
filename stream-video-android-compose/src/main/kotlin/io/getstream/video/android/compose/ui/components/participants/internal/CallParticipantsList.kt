@@ -16,11 +16,13 @@
 
 package io.getstream.video.android.compose.ui.components.participants.internal
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -39,6 +41,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import io.getstream.video.android.compose.state.ui.internal.CallParticipantsInfoOption
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.avatar.UserAvatar
 import io.getstream.video.android.core.ParticipantState
@@ -57,16 +60,26 @@ import io.getstream.video.android.ui.common.R
 internal fun CallParticipantsList(
     participantsState: List<ParticipantState>,
     onUserOptionsSelected: (ParticipantState) -> Unit,
+    onOptionSelected: (CallParticipantsInfoOption) -> Unit,
+    isCurrentUserMuted: Boolean,
     modifier: Modifier = Modifier
 ) {
     LazyColumn(
-        modifier = modifier,
+        modifier = modifier.background(VideoTheme.colors.appBackground),
         contentPadding = PaddingValues(16.dp),
         horizontalAlignment = Alignment.Start,
         verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
         items(participantsState, key = { it.sessionId }) {
             CallParticipantInfoItem(it, onUserOptionsSelected)
+        }
+
+        item {
+            CallParticipantsInfoActions(
+                modifier = Modifier.fillMaxWidth(),
+                isCurrentUserMuted = isCurrentUserMuted,
+                onOptionSelected = onOptionSelected
+            )
         }
     }
 }
@@ -151,7 +164,9 @@ private fun CallParticipantsListPreview() {
     VideoTheme {
         CallParticipantsList(
             participantsState = mockParticipantList,
-            onUserOptionsSelected = {}
+            onUserOptionsSelected = {},
+            isCurrentUserMuted = false,
+            onOptionSelected = {}
         )
     }
 }

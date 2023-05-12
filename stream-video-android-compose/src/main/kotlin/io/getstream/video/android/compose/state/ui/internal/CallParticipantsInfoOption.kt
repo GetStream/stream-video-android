@@ -30,5 +30,5 @@ internal object Invite : CallParticipantsInfoOption()
  * Triggers a mute toggle event for the current user.
  */
 internal data class ToggleMute(
-    val isMuted: Boolean
+    val isEnabled: Boolean
 ) : CallParticipantsInfoOption()

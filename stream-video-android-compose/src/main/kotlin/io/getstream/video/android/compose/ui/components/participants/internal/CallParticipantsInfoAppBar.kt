@@ -36,12 +36,10 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import io.getstream.video.android.compose.state.ui.internal.CallParticipantInfoMode
-import io.getstream.video.android.compose.state.ui.internal.InviteUserItemState
-import io.getstream.video.android.compose.state.ui.internal.ParticipantInvites
-import io.getstream.video.android.compose.state.ui.internal.ParticipantList
-import io.getstream.video.android.compose.state.ui.participants.InviteUsers
-import io.getstream.video.android.compose.state.ui.participants.ParticipantInfoAction
+import io.getstream.video.android.compose.state.ui.internal.ParticipantInvitesMode
+import io.getstream.video.android.compose.state.ui.internal.ParticipantListMode
 import io.getstream.video.android.compose.theme.VideoTheme
+import io.getstream.video.android.model.User
 import io.getstream.video.android.ui.common.R
 
 /**
@@ -57,10 +55,10 @@ import io.getstream.video.android.ui.common.R
 @Composable
 internal fun CallParticipantsInfoAppBar(
     numberOfParticipants: Int,
-    selectedParticipants: List<InviteUserItemState> = emptyList(),
+    selectedParticipants: List<User> = emptyList(),
     infoStateMode: CallParticipantInfoMode,
     onBackPressed: () -> Unit,
-    onInviteParticipants: (ParticipantInfoAction) -> Unit
+    onInviteParticipants: () -> Unit
 ) {
     val resources = LocalContext.current.resources
 
@@ -88,7 +86,7 @@ internal fun CallParticipantsInfoAppBar(
             },
         )
 
-        val titleText = if (infoStateMode is ParticipantInvites) {
+        val titleText = if (infoStateMode is ParticipantInvitesMode) {
             stringResource(R.string.stream_video_call_participants_info_add_participants)
         } else {
             resources.getQuantityString(
@@ -110,11 +108,11 @@ internal fun CallParticipantsInfoAppBar(
             color = VideoTheme.colors.textHighEmphasis
         )
 
-        if (infoStateMode is ParticipantInvites) {
+        if (infoStateMode is ParticipantInvitesMode) {
             TextButton(
-                onClick = { onInviteParticipants(InviteUsers(selectedParticipants.map { it.user })) },
+                onClick = { onInviteParticipants.invoke() },
                 content = { Text(text = stringResource(R.string.stream_video_call_participants_info_invite)) },
-                enabled = selectedParticipants.any { it.isSelected },
+                enabled = selectedParticipants.isNotEmpty(),
                 colors = ButtonDefaults.textButtonColors(
                     contentColor = VideoTheme.colors.primaryAccent,
                     disabledContentColor = VideoTheme.colors.disabled
@@ -130,7 +128,7 @@ private fun CallParticipantsInfoAppBarPreview() {
     VideoTheme {
         CallParticipantsInfoAppBar(
             numberOfParticipants = 10,
-            infoStateMode = ParticipantList,
+            infoStateMode = ParticipantListMode,
             onBackPressed = {}
         ) {}
     }
