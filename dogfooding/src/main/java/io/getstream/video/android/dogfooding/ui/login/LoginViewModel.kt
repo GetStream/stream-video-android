@@ -30,6 +30,7 @@ import io.getstream.video.android.dogfooding.token.StreamVideoNetwork
 import io.getstream.video.android.dogfooding.token.TokenResponse
 import io.getstream.video.android.model.User
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -79,6 +80,8 @@ class LoginViewModel @Inject constructor(
         viewModelScope.launch {
             dataStore.user.collectLatest { user ->
                 if (user != null && user.isValid() && !BuildConfig.BENCHMARK) {
+                    handleUiEvent(LoginEvent.Loading)
+                    delay(10)
                     handleUiEvent(LoginEvent.SignInInSuccess(email = user.id))
                 }
             }
