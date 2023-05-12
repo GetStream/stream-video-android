@@ -32,18 +32,14 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.getstream.video.android.compose.state.ui.internal.CallParticipantInfoMode
-import io.getstream.video.android.compose.state.ui.internal.Invite
-import io.getstream.video.android.compose.state.ui.internal.ParticipantInvitesMode
 import io.getstream.video.android.compose.state.ui.internal.ParticipantListMode
-import io.getstream.video.android.compose.state.ui.internal.ToggleMute
-import io.getstream.video.android.compose.state.ui.participants.ChangeMuteState
-import io.getstream.video.android.compose.state.ui.participants.InviteUsers
-import io.getstream.video.android.compose.state.ui.participants.ParticipantInfoAction
 import io.getstream.video.android.compose.theme.VideoTheme
-import io.getstream.video.android.compose.ui.components.participants.internal.CallParticipantsInfoAppBar
 import io.getstream.video.android.compose.ui.components.participants.internal.CallParticipantsList
 import io.getstream.video.android.compose.ui.components.participants.internal.InviteUserList
 import io.getstream.video.android.core.ParticipantState
+import io.getstream.video.android.core.call.state.CallAction
+import io.getstream.video.android.core.call.state.InviteUsersToCall
+import io.getstream.video.android.core.call.state.ToggleMicrophone
 import io.getstream.video.android.model.User
 
 /**
@@ -60,7 +56,7 @@ public fun CallParticipantsInfoMenu(
     participants: List<ParticipantState>,
     modifier: Modifier = Modifier,
     onDismiss: () -> Unit = {},
-    onInfoMenuAction: (ParticipantInfoAction) -> Unit = {},
+    onCallAction: (CallAction) -> Unit = {},
 ) {
     val me by remember(participants) { derivedStateOf { participants.first { it.isLocal } } }
     val isLocalAudioEnabled by me.audioEnabled.collectAsStateWithLifecycle()
@@ -68,12 +64,14 @@ public fun CallParticipantsInfoMenu(
     var infoStateMode by remember { mutableStateOf<CallParticipantInfoMode>(ParticipantListMode) }
     var selectedUsers: List<User> = remember { mutableStateListOf() }
 
-    BackHandler {
-        when {
-            infoStateMode is ParticipantListMode -> onDismiss()
+    val onBackPressed: () -> Unit = {
+        when (infoStateMode) {
+            is ParticipantListMode -> onDismiss()
             else -> onDismiss()
         }
     }
+
+    BackHandler { onBackPressed.invoke() }
 
     Box(
         modifier = Modifier
@@ -81,19 +79,6 @@ public fun CallParticipantsInfoMenu(
             .background(color = VideoTheme.colors.infoMenuOverlayColor)
     ) {
         Column(modifier) {
-            CallParticipantsInfoAppBar(
-                numberOfParticipants = participants.size,
-                infoStateMode = infoStateMode,
-                onBackPressed = {
-                    when (infoStateMode) {
-                        is ParticipantListMode -> onDismiss()
-                        else -> infoStateMode = ParticipantListMode
-                    }
-                },
-                selectedParticipants = emptyList(),
-                onInviteParticipants = { onInfoMenuAction.invoke(InviteUsers(selectedUsers)) }
-            )
-
             val listModifier = Modifier
                 .weight(2f)
                 .fillMaxWidth()
@@ -102,17 +87,12 @@ public fun CallParticipantsInfoMenu(
             if (infoStateMode is ParticipantListMode) {
                 CallParticipantsList(
                     modifier = listModifier,
-                    participantsState = participants,
+                    participants = participants,
+                    isLocalAudioEnabled = isLocalAudioEnabled,
                     onUserOptionsSelected = { },
-                    onOptionSelected = { option ->
-                        when (option) {
-                            Invite -> infoStateMode = ParticipantInvitesMode
-                            is ToggleMute -> {
-                                onInfoMenuAction.invoke(ChangeMuteState(!option.isEnabled))
-                            }
-                        }
-                    },
-                    isCurrentUserMuted = isLocalAudioEnabled
+                    onInviteUser = { onCallAction.invoke(InviteUsersToCall(selectedUsers)) },
+                    onMute = { enabled -> onCallAction.invoke(ToggleMicrophone(enabled)) },
+                    onBackPressed = onBackPressed
                 )
             } else {
                 InviteUserList(

@@ -22,6 +22,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -30,6 +31,7 @@ import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.Icon
+import androidx.compose.material.Scaffold
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -41,7 +43,6 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import io.getstream.video.android.compose.state.ui.internal.CallParticipantsInfoOption
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.avatar.UserAvatar
 import io.getstream.video.android.core.ParticipantState
@@ -52,34 +53,50 @@ import io.getstream.video.android.ui.common.R
 /**
  * Represents the list of active call participants.
  *
- * @param participantsState The list of participants.
+ * @param participants The list of participants.
  * @param onUserOptionsSelected Handler when the options for a given participant are selected.
  * @param modifier Modifier for styling.
  */
 @Composable
 internal fun CallParticipantsList(
-    participantsState: List<ParticipantState>,
+    modifier: Modifier = Modifier,
+    participants: List<ParticipantState>,
+    isLocalAudioEnabled: Boolean,
     onUserOptionsSelected: (ParticipantState) -> Unit,
-    onOptionSelected: (CallParticipantsInfoOption) -> Unit,
-    isCurrentUserMuted: Boolean,
-    modifier: Modifier = Modifier
+    onInviteUser: () -> Unit,
+    onMute: (Boolean) -> Unit,
+    onBackPressed: () -> Unit
 ) {
-    LazyColumn(
-        modifier = modifier.background(VideoTheme.colors.appBackground),
-        contentPadding = PaddingValues(16.dp),
-        horizontalAlignment = Alignment.Start,
-        verticalArrangement = Arrangement.spacedBy(8.dp)
-    ) {
-        items(participantsState, key = { it.sessionId }) {
-            CallParticipantInfoItem(it, onUserOptionsSelected)
-        }
-
-        item {
+    Scaffold(
+        modifier = modifier,
+        backgroundColor = VideoTheme.colors.appBackground,
+        topBar = {
+            CallParticipantListAppBar(
+                numberOfParticipants = participants.size,
+                onBackPressed = onBackPressed
+            )
+        },
+        bottomBar = {
             CallParticipantsInfoActions(
                 modifier = Modifier.fillMaxWidth(),
-                isCurrentUserMuted = isCurrentUserMuted,
-                onOptionSelected = onOptionSelected
+                isLocalAudioEnabled = isLocalAudioEnabled,
+                onInviteUser = onInviteUser,
+                onMute = onMute
             )
+        }
+    ) { padding ->
+        LazyColumn(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(padding)
+                .background(VideoTheme.colors.appBackground),
+            contentPadding = PaddingValues(16.dp),
+            horizontalAlignment = Alignment.Start,
+            verticalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            items(participants, key = { it.sessionId }) {
+                CallParticipantInfoItem(it, onUserOptionsSelected)
+            }
         }
     }
 }
@@ -163,10 +180,11 @@ private fun CallParticipantsListPreview() {
     StreamMockUtils.initializeStreamVideo(LocalContext.current)
     VideoTheme {
         CallParticipantsList(
-            participantsState = mockParticipantList,
+            participants = mockParticipantList,
             onUserOptionsSelected = {},
-            isCurrentUserMuted = false,
-            onOptionSelected = {}
-        )
+            isLocalAudioEnabled = false,
+            onInviteUser = {},
+            onMute = {}
+        ) {}
     }
 }
