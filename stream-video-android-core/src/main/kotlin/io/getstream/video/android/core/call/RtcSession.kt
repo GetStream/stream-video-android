@@ -1069,21 +1069,20 @@ public class RtcSession internal constructor(
     @Synchronized
     fun updateTrackDimensions(sessionId: String, trackType: TrackType, visible: Boolean, dimensions: VideoDimension = VideoDimension(960, 720)) {
         // The map contains all track dimensions for all participants
+        dynascaleLogger.i { "uuu23 $sessionId $trackType $visible $dimensions" }
 
         // first we make a copy of the dimensions
         val trackDimensionsMap = trackDimensions.value.toMutableMap()
 
         // next we get or create the dimensions for this participants
-        var participantTrackDimensions = trackDimensionsMap[sessionId]?.toMutableMap()
-        if (participantTrackDimensions == null) {
-            participantTrackDimensions = mutableMapOf()
-            trackDimensionsMap[sessionId] = participantTrackDimensions
-        }
+        var participantTrackDimensions = trackDimensionsMap[sessionId]?.toMutableMap() ?: mutableMapOf()
 
         // last we get the dimensions for this specific track type
         val oldTrack = participantTrackDimensions[trackType] ?: TrackDimensions(dimensions=dimensions, visible=visible)
         val newTrack = oldTrack.copy(visible = visible, dimensions = dimensions)
         participantTrackDimensions[trackType] = newTrack
+
+        trackDimensionsMap[sessionId] = participantTrackDimensions
 
         // Updates are debounced
         dynascaleLogger.i { "updateTrackDimensions $trackDimensionsMap" }
