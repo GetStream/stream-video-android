@@ -22,6 +22,7 @@ import com.google.common.truth.Truth.assertThat
 import io.getstream.log.taggedLogger
 import io.getstream.video.android.core.events.ChangePublishQualityEvent
 import io.getstream.video.android.core.events.JoinCallResponseEvent
+import io.getstream.video.android.core.events.ParticipantJoinedEvent
 import io.getstream.video.android.core.utils.buildAudioConstraints
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.test.runTest
@@ -35,6 +36,11 @@ import org.webrtc.PeerConnection
 import org.webrtc.RTCStats
 import org.webrtc.VideoCodecInfo
 import stream.video.sfu.event.ChangePublishQuality
+import stream.video.sfu.event.VideoLayerSetting
+import stream.video.sfu.event.VideoMediaRequest
+import stream.video.sfu.event.VideoSender
+import stream.video.sfu.models.Participant
+import stream.video.sfu.models.TrackType
 
 /**
  * Things to test in a real android environment
@@ -269,6 +275,23 @@ class AndroidDeviceTest : IntegrationTestBase(connectCoordinatorWS = false) {
     }
 
     @Test
+    fun leaveCall() = runTest {
+        val joinResult = call.join()
+        assertSuccess(joinResult)
+        delay(500)
+        call.leave()
+    }
+
+    @Test
+    fun endCall() = runTest {
+        val joinResult = call.join()
+        assertSuccess(joinResult)
+        delay(500)
+        val endResult = call.end()
+        assertSuccess(endResult)
+    }
+
+    @Test
     fun dynascale() = runTest {
         // join will automatically start the audio and video capture
         // based on the call settings
@@ -276,7 +299,37 @@ class AndroidDeviceTest : IntegrationTestBase(connectCoordinatorWS = false) {
         assertSuccess(joinResult)
         delay(500)
 
-        val quality = ChangePublishQuality()
+        // fake a participant joining
+        val joinEvent = ParticipantJoinedEvent(callCid = call.cid, participant = Participant(session_id = "fake", user_id = "fake"))
+        clientImpl.fireEvent(joinEvent, call.cid)
+        assertThat(call.state.participants.value.size).isEqualTo(2)
+        assertThat(call.state.remoteParticipants.value.size).isEqualTo(1)
+        assertThat(call.state.sortedParticipants.value.size).isEqualTo(2)
+
+        // set their video as visible
+        call.setVisibility(sessionId = "fake", TrackType.TRACK_TYPE_VIDEO, true)
+
+        val tracks1 = call.session?.defaultTracks()
+        val tracks2 = call.session?.visibleTracks()
+
+        assertThat(tracks2?.size).isEqualTo(1)
+        assertThat(tracks2?.map { it.session_id }).contains("fake")
+        assertThat(tracks1?.size).isEqualTo(1)
+        assertThat(tracks1?.map { it.session_id }).contains("fake")
+
+        // if their video isn't visible it shouldn't be in the tracks
+        call.setVisibility(sessionId = "fake", TrackType.TRACK_TYPE_VIDEO, false)
+        val tracks3 = call.session?.visibleTracks()
+        assertThat(tracks3?.size).isEqualTo(0)
+
+        // test handling publish quality change
+        val mediaRequest = VideoMediaRequest()
+        val layers = listOf(
+            VideoLayerSetting(name = "f", active = false),
+            VideoLayerSetting(name = "h", active = true),
+            VideoLayerSetting(name = "q", active = false)
+        )
+        val quality = ChangePublishQuality(video_senders = listOf(VideoSender(media_request = mediaRequest, layers = layers)))
         val event = ChangePublishQualityEvent(changePublishQuality = quality)
         call.session?.updatePublishQuality(event)
     }

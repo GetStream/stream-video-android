@@ -14,15 +14,18 @@
  * limitations under the License.
  */
 
-package io.getstream.video.android.core.rtc
+package io.getstream.video.android.datastore.model
 
-import io.getstream.log.taggedLogger
-import io.getstream.video.android.core.TestBase
-import org.junit.runner.RunWith
-import org.robolectric.RobolectricTestRunner
+import io.getstream.video.android.model.ApiKey
+import io.getstream.video.android.model.User
+import io.getstream.video.android.model.UserDevices
+import io.getstream.video.android.model.UserToken
+import kotlinx.serialization.Serializable
 
-@RunWith(RobolectricTestRunner::class)
-class MediaManagerTest : TestBase() {
-
-    private val logger by taggedLogger("Test:MediaManagerTest")
-}
+@Serializable
+public data class StreamUserPreferences(
+    public val user: User? = null,
+    public val apiKey: ApiKey = "",
+    public val userToken: UserToken = "",
+    public val userDevices: UserDevices = UserDevices(),
+)

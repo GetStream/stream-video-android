@@ -27,8 +27,8 @@ import io.getstream.video.android.core.events.VideoEventListener
 import io.getstream.video.android.core.model.MuteUsersData
 import io.getstream.video.android.core.model.SortField
 import io.getstream.video.android.core.model.UpdateUserPermissionsData
-import io.getstream.video.android.core.model.User
 import io.getstream.video.android.core.model.toIceServer
+import io.getstream.video.android.model.User
 import io.getstream.webrtc.android.ui.VideoTextureViewRenderer
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob

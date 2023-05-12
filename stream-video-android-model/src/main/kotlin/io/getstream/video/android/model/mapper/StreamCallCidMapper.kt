@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-package io.getstream.video.android.core.model.mapper
+package io.getstream.video.android.model.mapper
 
-import io.getstream.video.android.core.model.StreamCallCid
-import io.getstream.video.android.core.model.StreamCallId
-import io.getstream.video.android.core.model.StreamCallType
+import io.getstream.video.android.model.StreamCallCid
+import io.getstream.video.android.model.StreamCallId
+import io.getstream.video.android.model.StreamCallType
 
 private const val CID_SIZE = 2
 

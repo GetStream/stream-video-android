@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014-2022 Stream.io Inc. All rights reserved.
+ * Copyright (c) 2014-2023 Stream.io Inc. All rights reserved.
  *
  * Licensed under the Stream License;
  * you may not use this file except in compliance with the License.
@@ -14,9 +14,13 @@
  * limitations under the License.
  */
 
-package io.getstream.video.android.core.model
+package io.getstream.video.android.model
 
 /**
- * Represents SFU session id.
+ * Represents the audio level and if a user is speaking.
  */
-public typealias StreamSfuSessionId = String
+public data class UserAudioLevel(
+    val userId: String,
+    val isSpeaking: Boolean,
+    val audioLevel: Float
+)

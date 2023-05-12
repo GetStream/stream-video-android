@@ -25,7 +25,7 @@ import androidx.core.view.isVisible
 import io.getstream.log.taggedLogger
 import io.getstream.video.android.core.ParticipantState
 import io.getstream.video.android.core.model.MediaTrack
-import io.getstream.video.android.core.model.User
+import io.getstream.video.android.model.User
 import io.getstream.video.android.xml.databinding.StreamVideoViewCallParticipantBinding
 import io.getstream.video.android.xml.font.setTextStyle
 import io.getstream.video.android.xml.utils.extensions.clearConstraints
@@ -168,7 +168,7 @@ public class CallParticipantView : CallCardView, VideoRenderer {
      *
      * @param user The [User] whose video we are viewing.
      */
-    private fun setUserData(user: User) {
+    private fun setUserData(user: io.getstream.video.android.model.User) {
         binding.participantAvatar.setData(user)
         binding.participantLabel.text = user.name.ifBlank { user.id }
     }

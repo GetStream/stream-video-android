@@ -7,7 +7,7 @@
 *  Week 4: LLC & state test coverage + Demo & Dogfooding apps + RTC & Media fixes
 *  Week 5: Sample app stability, S23 sdp munging, dynascale, reconnect, cleanup for reconnect
 *  Break
-*  Week 6: Docs, docs & sample app
+*  Week 6: Docs, docs & sample app. Dynascale, SDP parsing
 
 
 ### High level issues
@@ -21,7 +21,7 @@
 - [ ] use standard debug, verbose, info, warning and error debug levels on StreamVideoBuilder
 - [ ] Participant sorting rules. See Call sortedParticipants
 - [ ] Pinning of participants. You pin/unpin and it sets pinnedAt and sorting takes it into account
-- [ ] Currently we use UserPreferencesManager. Jaewoong mentioned we should perhaps explore https://developer.android.com/topic/libraries/architecture/datastore
+- [X] Currently we use UserPreferencesManager. Jaewoong mentioned we should perhaps explore https://developer.android.com/topic/libraries/architecture/datastore
 
 ### Docs ~4 weeks left
 
@@ -51,13 +51,11 @@
 
 ### RTC & Media TODO
 
-- [ ] Improve how we mangle SDP tokens. (edit the audio line and video line, don't swap lines)
-- [ ] Enable & Test dynascale
-- [ ] Media manager tests & decide on microphone/speaker split
-- [ ] Screensharing
 - [ ] Error classes for Media/Camera/Mic & Joining a call. That wrap the many things that can go wrong.
-- [ ] Leave & End flows
-- [ ] Talking while muted notification
+- [X] Improve how we mangle SDP tokens. (edit the audio line and video line, don't swap lines)
+- [X] Media manager tests & decide on microphone/speaker split
+- [X] Leave & End flows
+- [X] Enable & Test dynascale
 - [X] Opus Red
 - [X] Opus DTX
 - [X] Clean up the media manager class Mic management
@@ -71,10 +69,9 @@
 - [X] setLocalTrack is not called
 
 
+
 ### State TODO
 
-- [ ] State for: Speaking while muted, Network issue (your own connection)
-- [ ] If you answer a phone call while you're on this call, your audio and video should be muted automatically.]
 - [X] Permissions requests need an accept/reject flow
 - [X] Call settings need to be used everywhere. There are still some hardcoded settings
 - [X] Member state isn't implemented fully. Could be either a state or just a data class
@@ -87,8 +84,6 @@
 - [ ] Remove unused code
 - [ ] Move SFU event to swap between SFUs and handle failure
 - [ ] Reconnect after SFU breaks (https://www.notion.so/Reconnection-Failure-handling-f6991fd2e5584380bb2d2cb5e8ac5303)
-- [ ] Audio filter example
-- [ ] Video filter example
 - [X] Test coverage
 - [X] Clean up tests
 - [X] Support for accepting/rejecting calls etc. HTTP endpoints seem cleaner
@@ -102,7 +97,7 @@
 
 ### Other & Process
 
-- [ ] Review the 200 todos
+- [ ] Review the 104 todos
 - [ ] Coverage reporting
 - [ ] Build vars to generate tokens for testing
 
@@ -136,6 +131,14 @@
 - [ ] am i allowed to publish (IE should i create the publisher peer connection)
 - [ ] should volume be enabled by default (for livestreams and audio rooms its typically off by default)
 
+### Out of scope for initial release
+
+- [ ] Screensharing (from mobile, display should work)
+- [ ] Talking while muted notification
+- [ ] If you answer a phone call while you're on this call, your audio and video should be muted automatically.]
+- [ ] State for: Speaking while muted, Network issue (your own connection)
+- [ ] Audio filter example
+- [ ] Video filter example
 
 ### Review each file, fix TODOS and document
 

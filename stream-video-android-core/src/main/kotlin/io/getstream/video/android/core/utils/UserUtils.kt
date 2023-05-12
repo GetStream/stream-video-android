@@ -14,27 +14,22 @@
  * limitations under the License.
  */
 
-package io.getstream.video.android.core.model
+package io.getstream.video.android.core.utils
 
-import org.openapitools.client.models.SendReactionRequest
+import io.getstream.video.android.model.User
+import org.openapitools.client.models.UserResponse
+import org.threeten.bp.OffsetDateTime
 
-/**
- * Represents the information about a reaction to be sent.
- *
- * @param type The type of reaction.
- * @param emoji Code of the emoji, if applicable.
- * @param custom Custom extra data to enrich the reaction.
- */
-public data class SendReactionData(
-    public val type: String,
-    public val emoji: String? = null,
-    public val custom: Map<String, Any>? = null
-)
-
-internal fun SendReactionData.toRequest(): SendReactionRequest {
-    return SendReactionRequest(
-        type = type,
+internal fun User.toResponse(): UserResponse {
+    return UserResponse(
+        id = id,
+        role = role,
+        name = name,
+        image = image,
+        teams = teams,
         custom = custom,
-        emojiCode = emoji
+        createdAt = createdAt ?: OffsetDateTime.now(),
+        updatedAt = updatedAt ?: OffsetDateTime.now(),
+        deletedAt = deletedAt,
     )
 }

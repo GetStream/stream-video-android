@@ -60,7 +60,6 @@ import io.getstream.video.android.compose.ui.components.connection.ConnectionQua
 import io.getstream.video.android.compose.ui.components.video.VideoRenderer
 import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.ParticipantState
-import io.getstream.video.android.core.model.MediaTrack
 import io.getstream.video.android.mock.StreamMockUtils
 import io.getstream.video.android.mock.mockCall
 import io.getstream.video.android.mock.mockParticipantList
@@ -154,10 +153,10 @@ internal fun ParticipantVideoRenderer(
         return
     }
 
-    if (videoTrack != null && isVideoEnabled) {
+    if (isVideoEnabled) {
         VideoRenderer(
             call = call,
-            mediaTrack = videoTrack as MediaTrack,
+            mediaTrack = videoTrack,
             sessionId = participant.sessionId,
             onRender = onRender,
             trackType = TrackType.TRACK_TYPE_VIDEO

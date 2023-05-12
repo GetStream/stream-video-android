@@ -16,7 +16,7 @@
 
 package io.getstream.video.android.core
 
-import io.getstream.video.android.core.model.User
+import io.getstream.video.android.model.User
 
 public data class MemberState(
     val user: User,

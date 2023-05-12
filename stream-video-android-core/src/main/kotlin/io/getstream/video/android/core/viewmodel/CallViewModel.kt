@@ -131,7 +131,8 @@ public class CallViewModel(
     override fun onCleared() {
         super.onCleared()
         dismissCallInfoMenu()
-        // TODO: properly clean up
+        // properly clean up
+        call.leave()
     }
 
     public fun onCallAction(callAction: CallAction) {
@@ -168,7 +169,6 @@ public class CallViewModel(
 
     private fun onSpeakerphoneChanged(speakerPhoneEnabled: Boolean) {
         logger.d { "[onSpeakerphoneChanged] speakerPhoneEnabled: $speakerPhoneEnabled" }
-        call.speaker.setEnabled(speakerPhoneEnabled)
         isSpeakerPhoneOn.value = speakerPhoneEnabled
     }
 

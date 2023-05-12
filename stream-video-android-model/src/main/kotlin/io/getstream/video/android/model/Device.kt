@@ -14,19 +14,10 @@
  * limitations under the License.
  */
 
-package io.getstream.video.android.core.model
+package io.getstream.video.android.model
 
-/**
- * The API key of your Stream Video app.
- */
-public typealias ApiKey = String
-
-/**
- * User's ticket to join/initiate the call.
- */
-public typealias UserToken = String
-
-/**
- * User's ticket to enter the call when joined/initiated.
- */
-public typealias SfuToken = String
+@kotlinx.serialization.Serializable
+public data class Device(
+    val token: String,
+    val pushProvider: String
+)

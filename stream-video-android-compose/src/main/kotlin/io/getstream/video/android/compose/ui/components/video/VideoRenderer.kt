@@ -54,7 +54,7 @@ import stream.video.sfu.models.TrackType
 @Composable
 public fun VideoRenderer(
     call: Call,
-    mediaTrack: MediaTrack,
+    mediaTrack: MediaTrack?,
     sessionId: String,
     trackType: TrackType,
     modifier: Modifier = Modifier,
@@ -76,31 +76,36 @@ public fun VideoRenderer(
     var view: VideoTextureViewRenderer? by remember { mutableStateOf(null) }
 
     DisposableEffect(call, mediaTrack) {
+        // inform the call that we want to render this video track. (this will trigger a subscription to the track)
+        call.setVisibility(sessionId, trackType, true)
+
         onDispose {
             cleanTrack(view, mediaTrack)
+            // inform the call that we no longer want to render this video track
             call.setVisibility(sessionId, trackType, false)
         }
     }
 
-    AndroidView(
-        factory = { context ->
-            VideoTextureViewRenderer(context).apply {
-                call.initRenderer(
-                    videoRenderer = this,
-                    sessionId = sessionId,
-                    trackType = trackType,
-                    onRender = onRender
-                )
-                call.setVisibility(sessionId, trackType, true)
-                setScalingType(scalingType = videoScalingType.toCommonScalingType())
-                setupVideo(mediaTrack, this)
+    if (mediaTrack != null) {
+        AndroidView(
+            factory = { context ->
+                VideoTextureViewRenderer(context).apply {
+                    call.initRenderer(
+                        videoRenderer = this,
+                        sessionId = sessionId,
+                        trackType = trackType,
+                        onRender = onRender
+                    )
+                    setScalingType(scalingType = videoScalingType.toCommonScalingType())
+                    setupVideo(mediaTrack, this)
 
-                view = this
-            }
-        },
-        update = { v -> setupVideo(mediaTrack, v) },
-        modifier = modifier.testTag("video_renderer"),
-    )
+                    view = this
+                }
+            },
+            update = { v -> setupVideo(mediaTrack, v) },
+            modifier = modifier.testTag("video_renderer"),
+        )
+    }
 }
 
 private fun cleanTrack(

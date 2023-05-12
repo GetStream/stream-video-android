@@ -21,61 +21,141 @@ import org.webrtc.MediaConstraints
 import org.webrtc.PeerConnection
 import org.webrtc.SessionDescription
 
+data class RtpMapAttribute(val index: Int, val number: String, val codec: String, val line: String)
+
+data class MediaStream(val index: Int, var codecs: List<String>, val line: String) {
+
+    override fun toString(): String {
+        val parts = line.split(" ")
+        val first = parts.subList(0, 3).toMutableList()
+        first.addAll(codecs)
+        return first.joinToString(" ")
+    }
+}
+
+/**
+ * A middle ground between a regex based approach vs a full parser
+ */
+class MinimalSdpParser(var sdp: String) {
+
+    private lateinit var lines: MutableList<String>
+    private var red: RtpMapAttribute? = null
+    private var opus: RtpMapAttribute? = null
+    private var h264: RtpMapAttribute? = null
+    private var vp8: RtpMapAttribute? = null
+    private var audioM: MediaStream? = null
+    private var videoM: MediaStream? = null
+    private var useinbandfecLine: Int? = null
+
+    init {
+        parse()
+    }
+
+    fun parse() {
+        lines = sdp.split("\r\n", "\n").toMutableList()
+        lines?.let { lines ->
+            lines.indices.forEach {
+                val line = lines[it]
+                if (line.contains("a=rtpmap")) {
+                    // we want to detect vp8, h264, red and opus
+                    if (line.contains("red/48000")) {
+                        red = parseRtpMap(it, line)
+                    } else if (line.contains("opus/48000")) {
+                        opus = parseRtpMap(it, line)
+                    } else if (line.contains("H264/90000")) {
+                        h264 = parseRtpMap(it, line)
+                    } else if (line.contains("VP8/90000")) {
+                        vp8 = parseRtpMap(it, line)
+                    }
+                } else if (line.contains("m=audio")) {
+                    audioM = parseMLine(it, line)
+                } else if (line.contains("m=video")) {
+                    videoM = parseMLine(it, line)
+                } else if (line.contains("useinbandfec=1")) {
+                    useinbandfecLine = it
+                }
+            }
+        }
+    }
+
+    fun mangle(enableDtx: Boolean = true, enableRed: Boolean = true, enableVp8: Boolean = true): String {
+        if (enableDtx) {
+            useinbandfecLine?.let {
+                lines[it] = lines[it].replace("useinbandfec=1", "useinbandfec=1;usedtx=1")
+            }
+        }
+        if (enableRed) {
+            if (audioM != null && red != null && opus != null) {
+                val codecs = audioM?.codecs
+                val redPosition = codecs?.indices?.find { codecs[it] == red?.number }
+                val opusPosition = codecs?.indices?.find { codecs[it] == opus?.number }
+
+                // swap the position in the M line
+                if (opusPosition != null && redPosition != null && opusPosition < redPosition) {
+                    // remove red from the list
+                    val newCodecs = codecs.filter { it != red!!.number }.toMutableList()
+                    newCodecs.add(0, red!!.number)
+                    audioM!!.codecs = newCodecs
+
+                    audioM?.let {
+                        lines[it.index] = it.toString()
+                    }
+                }
+            }
+        }
+        if (enableVp8) {
+            if (videoM != null && vp8 != null && h264 != null) {
+                val codecs = videoM?.codecs
+                val vp8Position = codecs?.indices?.find { codecs[it] == vp8?.number }
+                val h264Position = codecs?.indices?.find { codecs[it] == h264?.number }
+
+                // swap the position in the M line
+                if (vp8Position != null && h264Position != null && h264Position < vp8Position) {
+                    // remove red from the list
+                    val newCodecs = codecs.filter { it != vp8!!.number }.toMutableList()
+                    newCodecs.add(0, vp8!!.number)
+                    videoM!!.codecs = newCodecs
+
+                    videoM?.let {
+                        lines[it.index] = it.toString()
+                    }
+                }
+            }
+        }
+        val new = lines.joinToString("\r\n")
+        return new
+    }
+
+    fun parseRtpMap(index: Int, line: String): RtpMapAttribute {
+        val parts = line.split(" ")
+        val codec = parts[1]
+        val number = parts[0].split(":")[1]
+        return RtpMapAttribute(index, number, codec, line)
+    }
+
+    fun parseMLine(index: Int, line: String): MediaStream {
+        val parts = line.split(" ")
+        val codecs = parts.subList(3, parts.size)
+        return MediaStream(index, codecs, line)
+    }
+}
+
 /**
  * Enabling DTX or RED requires mangling the SDP a bit
  */
 fun mangleSdpUtil(
     sdp: SessionDescription,
     enableRed: Boolean = true,
-    enableDtx: Boolean = true
+    enableDtx: Boolean = true,
+    enableVp8: Boolean = true
 ): SessionDescription {
     // we don't touch the answer (for now)
     if (sdp.type == SessionDescription.Type.ANSWER) {
         return sdp
     }
     var description = sdp.description
-    if (enableDtx) {
-        description = description.replace("useinbandfec=1", "useinbandfec=1;usedtx=1")
-    }
-
-    if (enableRed) {
-        val lines = description.split("\r\n").toMutableList()
-        val redLine = lines.indices.find { lines[it].contains("a=rtpmap") && lines[it].contains("red/48000") }
-        val opusLine = lines.indices.find { lines[it].contains("a=rtpmap") && lines[it].contains("opus/48000") }
-        // we only do something if both are enabled
-        if (redLine != null && opusLine != null) {
-            val opusIsFirst = opusLine < redLine
-            if (opusIsFirst) {
-                // we need to swap the red and opus lines
-                val redLineString = lines[redLine]
-                val opusLineString = lines[opusLine]
-                lines[redLine] = opusLineString
-                lines[opusLine] = redLineString
-            }
-        }
-        description = lines.joinToString("\r\n")
-    }
-
-    if (true) {
-        // prefer vp8
-
-        val lines = description.split("\r\n").toMutableList()
-        val h264Line = lines.indices.find { lines[it].contains("a=rtpmap:100 H264/90000") }
-        val vp8Line = lines.indices.find { lines[it].contains("a=rtpmap:96 VP8/90000") }
-        // we only do something if both are enabled
-        if (h264Line != null && vp8Line != null) {
-            val h264IsFirst = h264Line < vp8Line
-            if (h264IsFirst) {
-                // we need to swap the h264 and vp8 lines
-                val h264LineString = lines[h264Line]
-                val vp8LineString = lines[vp8Line]
-                lines[h264Line] = vp8LineString
-                lines[vp8Line] = h264LineString
-            }
-        }
-        description = lines.joinToString("\r\n")
-        description = description.replace("m=video 9 UDP/TLS/RTP/SAVPF 100 101 96 97 98 99 35 36 125 124 127", "m=video 9 UDP/TLS/RTP/SAVPF 96 100 101 97 98 99 35 36 125 124 127")
-    }
+    var parser = MinimalSdpParser(description)
+    description = parser.mangle(enableDtx = enableDtx, enableRed = enableRed, enableVp8 = enableVp8)
 
     return SessionDescription(sdp.type, description)
 }

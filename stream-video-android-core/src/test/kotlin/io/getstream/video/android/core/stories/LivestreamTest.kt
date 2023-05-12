@@ -73,12 +73,32 @@ class LivestreamTest : IntegrationTestBase() {
     }
 
     @Test
-    @Ignore
     fun `calls should support RTMP in`() = runTest {
-        val call = client.call("livestream", randomUUID())
+        val call = client.call("default", "NnXAIvBKE4Hy")
+        val response = call.create()
+        assertSuccess(response)
+
+        val rtmp = call.state.ingress.value?.rtmp
+        val url = rtmp?.address + "/" + clientImpl.preferences.getUserToken()
+        println(rtmp?.address)
+        println(clientImpl.preferences.getUserToken())
         // TODO: not implemented on the server
         // Create a publishing token
         // TODO: do we ask the coordinator for it? or generate it locally?
+    }
+
+    @Test
+    fun `calls should support HLS out`() = runTest {
+        val call = client.call("livestream", "NnXAIvBKE4Hy")
+        val response = call.create()
+        assertSuccess(response)
+
+        val broadcastResponse = call.startBroadcasting()
+        assertSuccess(broadcastResponse)
+
+        broadcastResponse.onSuccess {
+            println(it)
+        }
     }
 
     @Test

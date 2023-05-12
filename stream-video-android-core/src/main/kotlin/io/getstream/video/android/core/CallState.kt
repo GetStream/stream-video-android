@@ -31,10 +31,10 @@ import io.getstream.video.android.core.events.SubscriberOfferEvent
 import io.getstream.video.android.core.events.TrackPublishedEvent
 import io.getstream.video.android.core.events.TrackUnpublishedEvent
 import io.getstream.video.android.core.model.ScreenSharingSession
-import io.getstream.video.android.core.model.User
 import io.getstream.video.android.core.permission.PermissionRequest
 import io.getstream.video.android.core.utils.mapState
 import io.getstream.video.android.core.utils.toUser
+import io.getstream.video.android.model.User
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import org.openapitools.client.models.BlockedUserEvent
@@ -414,6 +414,7 @@ public class CallState(private val call: Call, private val user: User) {
             }
 
             is ParticipantJoinedEvent -> {
+                println("ParticipantJoinedEvent")
                 getOrCreateParticipant(event.participant)
             }
 

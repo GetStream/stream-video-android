@@ -17,7 +17,7 @@
 package io.getstream.video.android.app.utils
 
 import io.getstream.video.android.app.BuildConfig
-import io.getstream.video.android.core.model.User
+import io.getstream.video.android.model.User
 
 fun getUsers(): List<User> {
     // TODO: using buildconfig for this is not ideal
