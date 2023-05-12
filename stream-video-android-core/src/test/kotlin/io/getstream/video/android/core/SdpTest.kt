@@ -17,12 +17,16 @@
 package io.getstream.video.android.core
 
 import com.google.common.truth.Truth.assertThat
+import io.getstream.video.android.core.utils.MinimalSdpParser
 import io.getstream.video.android.core.utils.mangleSdpUtil
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.webrtc.SessionDescription
+
+
+
 
 @RunWith(RobolectricTestRunner::class)
 class SdpTest : TestBase() {
@@ -36,7 +40,7 @@ class SdpTest : TestBase() {
         a=group:BUNDLE 0 1
         a=extmap-allow-mixed
         a=msid-semantic: WMS
-        m=video 9 UDP/TLS/RTP/SAVPF 96 97 98 99 35 36 100 101 125 124 127 37
+        m=video 9 UDP/TLS/RTP/SAVPF 97 98 99 35 36 100 101 125 124 127 37 96
         c=IN IP4 0.0.0.0
         a=rtcp:9 IN IP4 0.0.0.0
         a=ice-ufrag:OSLx
@@ -191,6 +195,13 @@ class SdpTest : TestBase() {
 
     val sdp1 = SessionDescription(SessionDescription.Type.OFFER, first)
     val sdp2 = SessionDescription(SessionDescription.Type.OFFER, second)
+
+    @Test
+    fun `test parser`() = runTest {
+        // enabling dtx is easy
+        val result = MinimalSdpParser(sdp1.description)
+
+    }
 
     @Test
     fun `enable dtx and opus red`() = runTest {
