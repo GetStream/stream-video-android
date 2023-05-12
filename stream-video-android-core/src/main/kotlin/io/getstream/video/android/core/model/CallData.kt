@@ -16,6 +16,8 @@
 
 package io.getstream.video.android.core.model
 
+import io.getstream.video.android.model.User
+
 public data class CallData(
     public val blockedUsers: List<User>,
     public val call: CallInfo,

@@ -49,7 +49,6 @@ import io.getstream.video.android.core.model.MediaTrack
 import io.getstream.video.android.core.model.StreamPeerType
 import io.getstream.video.android.core.model.VideoTrack
 import io.getstream.video.android.core.model.toPeerType
-import io.getstream.video.android.core.user.UserPreferencesManager
 import io.getstream.video.android.core.utils.buildAudioConstraints
 import io.getstream.video.android.core.utils.buildConnectionConfiguration
 import io.getstream.video.android.core.utils.buildMediaConstraints
@@ -57,6 +56,7 @@ import io.getstream.video.android.core.utils.buildRemoteIceServers
 import io.getstream.video.android.core.utils.mangleSdpUtil
 import io.getstream.video.android.core.utils.mapState
 import io.getstream.video.android.core.utils.stringify
+import io.getstream.video.android.datastore.delegate.StreamUserDataStore
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -255,11 +255,12 @@ public class RtcSession internal constructor(
     internal var sfuConnectionModule: SfuConnectionModule
 
     init {
-        val preferences = UserPreferencesManager.getPreferences()
-        val user = preferences.getUserCredentials()
-        if (preferences.getApiKey().isBlank() ||
-            user?.id.isNullOrBlank()
-        ) throw IllegalArgumentException("The API key, user ID and token cannot be empty!")
+        val dataStore = StreamUserDataStore.instance()
+        val user = dataStore.user.value
+        val apiKey = dataStore.apiKey.value
+        if (apiKey.isBlank() || user?.id.isNullOrBlank()) {
+            throw IllegalArgumentException("The API key, user ID and token cannot be empty!")
+        }
 
         // step 1 setup the peer connections
         subscriber = createSubscriber()
@@ -364,7 +365,10 @@ public class RtcSession internal constructor(
         mediaStream.audioTracks.forEach { track ->
             logger.v { "[addStream] #sfu; audioTrack: ${track.stringify()}" }
             track.setEnabled(true)
-            val audioTrack = AudioTrack(streamId = mediaStream.id, audio = track)
+            val audioTrack = AudioTrack(
+                streamId = mediaStream.id,
+                audio = track
+            )
             setTrack(sessionId, trackType, audioTrack)
         }
 
@@ -603,7 +607,8 @@ public class RtcSession internal constructor(
         if (publisher == null) {
             return
         }
-        val enabledRids = event.changePublishQuality.video_senders.firstOrNull()?.layers?.associate { it.name to it.active }
+        val enabledRids =
+            event.changePublishQuality.video_senders.firstOrNull()?.layers?.associate { it.name to it.active }
         val transceiver = publisher?.videoTransceiver ?: return
         // enable or disable tracks
         val encodings = transceiver.sender.parameters.encodings.toList()
@@ -611,23 +616,17 @@ public class RtcSession internal constructor(
             encoding.active = enabledRids?.get(encoding.rid ?: "") ?: false
         }
 
-        logger.i { "marking layers active $enabledRids "}
+        logger.i { "marking layers active $enabledRids " }
 
         transceiver.sender.parameters.encodings.clear()
         transceiver.sender.parameters.encodings.addAll(encodings)
 
-        //publisher?.videoTransceiver?.sender?.parameters = transceiver.sender.parameters
-
+        // publisher?.videoTransceiver?.sender?.parameters = transceiver.sender.parameters
 
         return
 
-
-
         logger.v { "[updatePublishQuality] #sfu; updateQuality: $enabledRids" }
         val params = transceiver.sender.parameters
-
-
-
 
         var encodingChanged = false
         logger.v { "[updatePublishQuality] #sfu; currentQuality: $params" }
@@ -648,7 +647,7 @@ public class RtcSession internal constructor(
 //            }
 //        }
 //        if (encodingChanged && false) {
-////            logger.v { "[updatePublishQuality] #sfu; updatedEncodings: $updatedEncodings" }
+// //            logger.v { "[updatePublishQuality] #sfu; updatedEncodings: $updatedEncodings" }
 //            params.encodings.clear()
 //            params.encodings.addAll(updatedEncodings)
 //
@@ -732,7 +731,6 @@ public class RtcSession internal constructor(
                     is Failure -> {
                         // TODO: this breaks the call, we should handle this better
                         logger.e { "[updateParticipantsSubscriptions] #sfu; failed: $result" }
-
                     }
                 }
             }
@@ -1075,7 +1073,6 @@ public class RtcSession internal constructor(
         videoMap[trackType] = resolution
 
         logger.i { "updateParticipantsSubscriptions 3 $trackDisplayResolution" }
-
 
         // Updates are debounced
         trackResolutions.value = trackDisplayResolution

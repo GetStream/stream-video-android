@@ -19,17 +19,8 @@ package io.getstream.video.android.core.notifications.internal
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
-import androidx.core.app.NotificationManagerCompat
 import io.getstream.log.taggedLogger
-import io.getstream.video.android.core.GEO
-import io.getstream.video.android.core.StreamVideoBuilder
 import io.getstream.video.android.core.notifications.internal.RejectCallBroadcastReceiver.Companion.ACTION_REJECT_CALL
-import io.getstream.video.android.core.user.UserPreferencesManager
-import io.getstream.video.android.core.utils.INTENT_EXTRA_CALL_CID
-import io.getstream.video.android.core.utils.INTENT_EXTRA_NOTIFICATION_ID
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
 
 /**
  * Used to process any pending intents that feature the [ACTION_REJECT_CALL] action. By consuming this
@@ -50,36 +41,36 @@ internal class RejectCallBroadcastReceiver : BroadcastReceiver() {
     override fun onReceive(context: Context?, intent: Intent?) {
         logger.d { "[onReceive] context: $context, intent: $intent" }
 
-        if (context != null && intent?.action == ACTION_REJECT_CALL) {
-            val callCid = intent.getStringExtra(INTENT_EXTRA_CALL_CID)
-
-            if (callCid.isNullOrBlank()) {
-                return
-            }
-            val (type, id) = callCid.split(":")
-            val preferences = UserPreferencesManager.initialize(context)
-
-            val user = preferences.getUserCredentials()
-            val apiKey = preferences.getApiKey()
-
-            if (user != null && apiKey.isNotBlank()) {
-                val streamVideo = StreamVideoBuilder(
-                    context,
-                    apiKey = apiKey,
-                    user = user,
-                    geo = GEO.GlobalEdgeNetwork
-                ).build()
-
-                CoroutineScope(Dispatchers.IO).launch {
+//        if (context != null && intent?.action == ACTION_REJECT_CALL) {
+//            val callCid = intent.getStringExtra(INTENT_EXTRA_CALL_CID)
+//
+//            if (callCid.isNullOrBlank()) {
+//                return
+//            }
+//            val (type, id) = callCid.split(":")
+//            val preferences = UserPreferencesManager.initialize(context)
+//
+//            val user = preferences.getUserCredentials()
+//            val apiKey = preferences.getApiKey()
+//
+//            if (user != null && apiKey.isNotBlank()) {
+//                val streamVideo = StreamVideoBuilder(
+//                    context,
+//                    apiKey = apiKey,
+//                    user = user,
+//                    geo = GEO.GlobalEdgeNetwork
+//                ).build()
+//
+//                CoroutineScope(Dispatchers.IO).launch {
 //                    when (val rejectResult = streamVideo.rejectCall(type, id)) {
 //                        is Success -> logger.d { "[onReceive] rejectCall, Success: $rejectResult" }
 //                        is Failure -> logger.d { "[onReceive] rejectCall, Failure: $rejectResult" }
 //                    }
-                }
-                val notificationId = intent.getIntExtra(INTENT_EXTRA_NOTIFICATION_ID, 0)
-                NotificationManagerCompat.from(context).cancel(notificationId)
-            }
-        }
+//                }
+//                val notificationId = intent.getIntExtra(INTENT_EXTRA_NOTIFICATION_ID, 0)
+//                NotificationManagerCompat.from(context).cancel(notificationId)
+//            }
+//        }
     }
 
     private companion object {

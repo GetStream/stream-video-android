@@ -16,8 +16,8 @@
 
 package io.getstream.video.chat_with_video_starter.users
 
-import io.getstream.video.android.core.model.User
 import io.getstream.video.android.core.user.UsersProvider
+import io.getstream.video.android.model.User
 import io.getstream.video.chat_with_video_starter.BuildConfig
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow

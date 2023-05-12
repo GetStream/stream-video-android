@@ -59,7 +59,7 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.avatar.UserAvatar
-import io.getstream.video.android.core.user.UserPreferencesManager
+import io.getstream.video.android.datastore.delegate.StreamUserDataStore
 import io.getstream.video.android.dogfooding.R
 import io.getstream.video.android.dogfooding.ui.theme.Colors
 import io.getstream.video.android.dogfooding.ui.theme.StreamButton
@@ -110,7 +110,8 @@ private fun CallJoinHeader(
     callJoinViewModel: CallJoinViewModel = hiltViewModel(),
     navigateUpToLogin: () -> Unit
 ) {
-    val user = callJoinViewModel.user
+    val user by callJoinViewModel.user.collectAsState()
+
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -120,7 +121,7 @@ private fun CallJoinHeader(
         Text(
             modifier = Modifier.weight(1f),
             color = Color.White,
-            text = user?.name?.ifBlank { user.id }?.ifBlank { user.custom["email"] }.orEmpty(),
+            text = user?.name?.ifBlank { user?.id }?.ifBlank { user!!.custom["email"] }.orEmpty(),
             maxLines = 1,
             fontSize = 16.sp
         )
@@ -142,7 +143,7 @@ private fun CallJoinBody(
     isLoading: Boolean,
     callJoinViewModel: CallJoinViewModel = hiltViewModel(),
 ) {
-    val user = callJoinViewModel.user
+    val user by callJoinViewModel.user.collectAsState()
 
     Column(
         modifier = modifier
@@ -152,10 +153,11 @@ private fun CallJoinBody(
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         if (user != null) {
-            val name = user.name.ifBlank { user.id }.ifBlank { user.custom["email"] }.orEmpty()
+            val name =
+                user?.name?.ifBlank { user?.id }?.ifBlank { user!!.custom["email"] }.orEmpty()
             UserAvatar(
                 modifier = Modifier.size(100.dp),
-                user = user,
+                user = user!!,
             )
 
             Spacer(modifier = Modifier.height(25.dp))
@@ -275,9 +277,9 @@ private fun HandleCallJoinUiState(
 private fun CallJoinScreenPreview() {
     VideoTheme {
         val context = LocalContext.current
-        val preference = UserPreferencesManager.initialize(context)
+        val dataStore = StreamUserDataStore.install(context)
         CallJoinScreen(
-            callJoinViewModel = CallJoinViewModel(preference),
+            callJoinViewModel = CallJoinViewModel(dataStore),
             navigateToCallLobby = {},
             navigateUpToLogin = {}
         )

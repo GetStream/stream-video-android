@@ -20,6 +20,7 @@ import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -29,6 +30,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.Surface
 import androidx.compose.material.Text
 import androidx.compose.material.TextField
@@ -90,77 +92,86 @@ private fun LoginContent(
     showEmailLoginDialog: () -> Unit,
     loginViewModel: LoginViewModel = hiltViewModel(),
 ) {
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(Colors.background),
-        verticalArrangement = Arrangement.Center,
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        Image(
-            modifier = Modifier.size(102.dp),
-            painter = painterResource(id = R.drawable.ic_stream_video_meeting),
-            contentDescription = null
-        )
-
-        Spacer(modifier = Modifier.height(27.dp))
-
-        Text(
-            text = stringResource(id = R.string.stream_meetings),
-            color = Color.White,
-            fontSize = 38.sp
-        )
-
-        Spacer(modifier = Modifier.height(17.dp))
-
-        Text(
-            text = stringResource(id = R.string.sign_in_description),
-            color = Colors.description,
-            textAlign = TextAlign.Center,
-            fontSize = 18.sp,
-        )
-
-        Spacer(modifier = Modifier.height(50.dp))
-
-        StreamButton(
+    Box(modifier = Modifier.fillMaxSize()) {
+        Column(
             modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 55.dp),
-            enabled = !isLoading,
-            text = stringResource(id = R.string.sign_in_google),
-            onClick = { loginViewModel.handleUiEvent(LoginEvent.GoogleSignIn()) }
-        )
+                .fillMaxSize()
+                .background(Colors.background),
+            verticalArrangement = Arrangement.Center,
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Image(
+                modifier = Modifier.size(102.dp),
+                painter = painterResource(id = R.drawable.ic_stream_video_meeting),
+                contentDescription = null
+            )
 
-        StreamButton(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 55.dp),
-            enabled = !isLoading,
-            text = stringResource(id = R.string.sign_in_email),
-            onClick = { showEmailLoginDialog.invoke() }
-        )
+            Spacer(modifier = Modifier.height(27.dp))
 
-        Spacer(modifier = Modifier.height(47.dp))
+            Text(
+                text = stringResource(id = R.string.stream_meetings),
+                color = Color.White,
+                fontSize = 38.sp
+            )
 
-        Text(
-            text = stringResource(id = R.string.sign_in_contact),
-            color = Colors.description,
-            textAlign = TextAlign.Center,
-            fontSize = 18.sp,
-        )
+            Spacer(modifier = Modifier.height(17.dp))
 
-        if (BuildConfig.BENCHMARK) {
+            Text(
+                text = stringResource(id = R.string.sign_in_description),
+                color = Colors.description,
+                textAlign = TextAlign.Center,
+                fontSize = 18.sp,
+            )
+
+            Spacer(modifier = Modifier.height(50.dp))
+
             StreamButton(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 55.dp)
-                    .testTag("authenticate"),
-                text = "Login for Benchmark",
-                onClick = {
-                    loginViewModel.handleUiEvent(
-                        LoginEvent.SignInInSuccess("benchmark.test@getstream.io")
-                    )
-                }
+                    .padding(horizontal = 55.dp),
+                enabled = !isLoading,
+                text = stringResource(id = R.string.sign_in_google),
+                onClick = { loginViewModel.handleUiEvent(LoginEvent.GoogleSignIn()) }
+            )
+
+            StreamButton(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 55.dp),
+                enabled = !isLoading,
+                text = stringResource(id = R.string.sign_in_email),
+                onClick = { showEmailLoginDialog.invoke() }
+            )
+
+            Spacer(modifier = Modifier.height(47.dp))
+
+            Text(
+                text = stringResource(id = R.string.sign_in_contact),
+                color = Colors.description,
+                textAlign = TextAlign.Center,
+                fontSize = 18.sp,
+            )
+
+            if (BuildConfig.BENCHMARK) {
+                StreamButton(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 55.dp)
+                        .testTag("authenticate"),
+                    text = "Login for Benchmark",
+                    onClick = {
+                        loginViewModel.handleUiEvent(
+                            LoginEvent.SignInInSuccess("benchmark.test@getstream.io")
+                        )
+                    }
+                )
+            }
+        }
+
+        if (isLoading) {
+            CircularProgressIndicator(
+                modifier = Modifier.align(Alignment.Center),
+                color = VideoTheme.colors.primaryAccent
             )
         }
     }

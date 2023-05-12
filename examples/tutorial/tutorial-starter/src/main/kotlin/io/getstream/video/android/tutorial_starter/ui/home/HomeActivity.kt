@@ -32,7 +32,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.Button
@@ -56,9 +55,6 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.lifecycleScope
 import io.getstream.log.taggedLogger
 import io.getstream.video.android.compose.theme.VideoTheme
-import io.getstream.video.android.compose.ui.components.avatar.Avatar
-import io.getstream.video.android.core.user.UserPreferencesManager
-import io.getstream.video.android.core.utils.initials
 import io.getstream.video.android.tutorial_starter.model.HomeScreenOption
 import io.getstream.video.android.tutorial_starter.ui.components.UserList
 import io.getstream.video.android.tutorial_starter.ui.login.LoginActivity
@@ -292,18 +288,18 @@ class HomeActivity : AppCompatActivity() {
 
     @Composable
     fun UserIcon() {
-        val user = UserPreferencesManager.initialize(this).getUserCredentials() ?: return
-
-        Avatar(
-            modifier = Modifier.size(40.dp).padding(top = 8.dp, start = 8.dp),
-            imageUrl = user.image.orEmpty(),
-            initials =
-            if (user.image == null) {
-                user.name.initials()
-            } else {
-                null
-            },
-        )
+//        val user = UserPreferencesManager.initialize(this).getUserCredentials() ?: return
+//
+//        Avatar(
+//            modifier = Modifier.size(40.dp).padding(top = 8.dp, start = 8.dp),
+//            imageUrl = user.image.orEmpty(),
+//            initials =
+//            if (user.image == null) {
+//                user.name.initials()
+//            } else {
+//                null
+//            },
+//        )
     }
 
     private fun toggleSelectState(wrapper: AppUser, users: List<AppUser>) {

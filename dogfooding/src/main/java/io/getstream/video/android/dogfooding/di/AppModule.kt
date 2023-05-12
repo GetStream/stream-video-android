@@ -21,8 +21,7 @@ import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
-import io.getstream.video.android.core.user.UserPreferences
-import io.getstream.video.android.core.user.UserPreferencesManager
+import io.getstream.video.android.datastore.delegate.StreamUserDataStore
 import javax.inject.Singleton
 
 @dagger.Module
@@ -31,7 +30,7 @@ object AppModule {
 
     @Provides
     @Singleton
-    fun provideUserPreferences(@ApplicationContext context: Context): UserPreferences {
-        return UserPreferencesManager.initialize(context)
+    fun provideUserDataStore(@ApplicationContext context: Context): StreamUserDataStore {
+        return StreamUserDataStore.install(context)
     }
 }

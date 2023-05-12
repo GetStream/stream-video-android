@@ -60,7 +60,6 @@ import io.getstream.video.android.compose.ui.components.connection.ConnectionQua
 import io.getstream.video.android.compose.ui.components.video.VideoRenderer
 import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.ParticipantState
-import io.getstream.video.android.core.model.MediaTrack
 import io.getstream.video.android.mock.StreamMockUtils
 import io.getstream.video.android.mock.mockCall
 import io.getstream.video.android.mock.mockParticipantList
@@ -124,13 +123,13 @@ public fun CallSingleVideoRenderer(
         ParticipantLabel(participant, labelPosition)
 
         if (isShowingConnectionQualityIndicator) {
-        val connectionQuality by participant.connectionQuality.collectAsStateWithLifecycle()
-                ConnectionQualityIndicator(
+            val connectionQuality by participant.connectionQuality.collectAsStateWithLifecycle()
+            ConnectionQualityIndicator(
                 connectionQuality = connectionQuality,
-    modifier = Modifier.align(BottomEnd)
-    )
-}
-}
+                modifier = Modifier.align(BottomEnd)
+            )
+        }
+    }
 }
 
 @Composable

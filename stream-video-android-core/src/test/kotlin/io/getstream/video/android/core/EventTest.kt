@@ -22,8 +22,8 @@ import io.getstream.video.android.core.events.ConnectionQualityChangeEvent
 import io.getstream.video.android.core.events.DominantSpeakerChangedEvent
 import io.getstream.video.android.core.events.ParticipantJoinedEvent
 import io.getstream.video.android.core.events.ParticipantLeftEvent
-import io.getstream.video.android.core.model.User
-import io.getstream.video.android.core.model.UserAudioLevel
+import io.getstream.video.android.model.User
+import io.getstream.video.android.model.UserAudioLevel
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -120,7 +120,10 @@ class EventTest : IntegrationTestBase(connectCoordinatorWS = false) {
         assertThat(call.state.getMember("thierry")?.acceptedAt).isNotNull()
 
         val rejectedEvent = CallRejectedEvent(
-            callCid = call.cid, nowUtc, "call.rejected", user = User(id = "thierry").toUserResponse()
+            callCid = call.cid, nowUtc, "call.rejected",
+            user = io.getstream.video.android.model.User(
+                id = "thierry"
+            ).toUserResponse()
         )
         clientImpl.fireEvent(rejectedEvent)
         assertThat(call.state.getMember("thierry")?.rejectedAt).isNotNull()
@@ -128,7 +131,13 @@ class EventTest : IntegrationTestBase(connectCoordinatorWS = false) {
 
     @Test
     fun `Audio level changes`() = runTest {
-        val levels = mutableMapOf("thierry" to UserAudioLevel("thierry", true, 10F))
+        val levels = mutableMapOf(
+            "thierry" to io.getstream.video.android.model.UserAudioLevel(
+                "thierry",
+                true,
+                10F
+            )
+        )
         val event = AudioLevelChangedEvent(levels = levels)
         clientImpl.fireEvent(event, call.cid)
 
@@ -326,7 +335,7 @@ class EventTest : IntegrationTestBase(connectCoordinatorWS = false) {
     }
 }
 
-private fun User.toUserResponse(): UserResponse {
+private fun io.getstream.video.android.model.User.toUserResponse(): UserResponse {
     return UserResponse(
         id = id,
         role = role,

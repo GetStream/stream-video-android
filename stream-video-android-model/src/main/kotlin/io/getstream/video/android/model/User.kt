@@ -14,35 +14,36 @@
  * limitations under the License.
  */
 
-package io.getstream.video.android.core.model
+@file:OptIn(ExperimentalSerializationApi::class)
 
-import androidx.annotation.VisibleForTesting
+package io.getstream.video.android.model
+
+import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.Serializer
 import kotlinx.serialization.encoding.Decoder
 import kotlinx.serialization.encoding.Encoder
-import org.openapitools.client.models.UserResponse
 import org.threeten.bp.OffsetDateTime
 import org.threeten.bp.format.DateTimeFormatter
 
 @Serializable
-sealed class UserType {
+public sealed class UserType {
     /** A user that's authenticated in your system */
     @Serializable
-    object Authenticated : UserType()
+    public object Authenticated : UserType()
 
     /** A temporary guest user, that can have an image, name etc */
     @Serializable
-    object Guest : UserType()
+    public object Guest : UserType()
 
     /** Not authentication, anonymous user. Commonly used for audio rooms and livestreams */
     @Serializable
-    object Anonymous : UserType()
+    public object Anonymous : UserType()
 }
 
 @Serializer(forClass = OffsetDateTime::class)
-object OffsetDateTimeSerializer : KSerializer<OffsetDateTime> {
+public object OffsetDateTimeSerializer : KSerializer<OffsetDateTime> {
     private val formatter: DateTimeFormatter = DateTimeFormatter.ISO_OFFSET_DATE_TIME
 
     override fun serialize(encoder: Encoder, value: OffsetDateTime) {
@@ -73,21 +74,5 @@ public data class User(
 ) {
     public fun isValid(): Boolean {
         return id.isNotEmpty()
-    }
-
-    @VisibleForTesting
-    internal fun toResponse(): UserResponse {
-
-        return UserResponse(
-            id = id,
-            role = role,
-            name = name,
-            image = image,
-            teams = teams,
-            custom = custom,
-            createdAt = createdAt ?: OffsetDateTime.now(),
-            updatedAt = updatedAt ?: OffsetDateTime.now(),
-            deletedAt = deletedAt,
-        )
     }
 }

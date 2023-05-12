@@ -18,10 +18,10 @@ package io.getstream.video.android.core.user
 
 import android.content.SharedPreferences
 import androidx.core.content.edit
-import io.getstream.video.android.core.model.ApiKey
-import io.getstream.video.android.core.model.Device
-import io.getstream.video.android.core.model.User
-import io.getstream.video.android.core.model.UserDevices
+import io.getstream.video.android.model.ApiKey
+import io.getstream.video.android.model.Device
+import io.getstream.video.android.model.User
+import io.getstream.video.android.model.UserDevices
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
@@ -49,13 +49,13 @@ internal class UserPreferencesImpl(
     /**
      * @see UserPreferences.getApiKey
      */
-    override fun getApiKey(): ApiKey =
+    override fun getApiKey(): io.getstream.video.android.model.ApiKey =
         sharedPreferences.getString(KEY_APIKEY, null) ?: ""
 
     /**
      * @see UserPreferences.storeApiKey
      */
-    override fun storeApiKey(apiKey: ApiKey) {
+    override fun storeApiKey(apiKey: io.getstream.video.android.model.ApiKey) {
         sharedPreferences.edit {
             putString(KEY_APIKEY, apiKey)
         }

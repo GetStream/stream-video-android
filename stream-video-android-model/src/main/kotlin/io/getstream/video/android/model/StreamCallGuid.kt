@@ -14,30 +14,15 @@
  * limitations under the License.
  */
 
-package io.getstream.video.android.core.model
+package io.getstream.video.android.model
+
+import java.io.Serializable
 
 /**
- * Represents call cid.
+ * Represents combined call identifier as a set of [StreamCallType], [StreamCallId] and [StreamCallCid].
  */
-public typealias StreamCallCid = String
-
-/**
- * Represents call type.
- */
-public typealias StreamCallType = String
-
-/**
- * Represents call id.
- */
-public typealias StreamCallId = String
-
-/**
- * Generates [StreamCallCid] from [StreamCallType] and [StreamCallId].
- */
-public fun StreamCallCid(type: StreamCallType, id: StreamCallId): StreamCallCid {
-    return when {
-        type.isNotEmpty() && id.isNotEmpty() -> "$type:$id"
-        id.isNotEmpty() -> id
-        else -> error("[StreamCallCid] invalid arguments; type=$type, id=$id")
-    }
-}
+public data class StreamCallGuid(
+    val type: StreamCallType,
+    val id: StreamCallId,
+    val cid: StreamCallCid
+) : Serializable

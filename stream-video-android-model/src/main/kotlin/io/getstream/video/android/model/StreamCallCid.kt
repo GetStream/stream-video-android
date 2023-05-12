@@ -14,9 +14,30 @@
  * limitations under the License.
  */
 
-package io.getstream.video.android.core.model
+package io.getstream.video.android.model
 
-@kotlinx.serialization.Serializable
-public data class UserDevices(
-    val devices: List<Device>
-)
+/**
+ * Represents call cid.
+ */
+public typealias StreamCallCid = String
+
+/**
+ * Represents call type.
+ */
+public typealias StreamCallType = String
+
+/**
+ * Represents call id.
+ */
+public typealias StreamCallId = String
+
+/**
+ * Generates [StreamCallCid] from [StreamCallType] and [StreamCallId].
+ */
+public fun StreamCallCid(type: StreamCallType, id: StreamCallId): StreamCallCid {
+    return when {
+        type.isNotEmpty() && id.isNotEmpty() -> "$type:$id"
+        id.isNotEmpty() -> id
+        else -> error("[StreamCallCid] invalid arguments; type=$type, id=$id")
+    }
+}

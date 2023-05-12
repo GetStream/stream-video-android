@@ -16,7 +16,7 @@
 
 package io.getstream.video.android.compose.state.ui.participants
 
-import io.getstream.video.android.core.model.User
+import io.getstream.video.android.model.User
 
 /**
  * Actions which can be taken in the participants info UI in a call.

@@ -22,9 +22,9 @@ import android.content.Intent
 import android.os.Build
 import androidx.core.app.NotificationCompat
 import io.getstream.video.android.R
-import io.getstream.video.android.core.model.StreamCallGuid
 import io.getstream.video.android.core.service.notification.NotificationAction
 import io.getstream.video.android.core.service.notification.setNotificationAction
+import io.getstream.video.android.model.StreamCallGuid
 
 internal class NotificationActionBuilderImpl(
     private val context: Context
@@ -32,7 +32,7 @@ internal class NotificationActionBuilderImpl(
 
     override fun createAcceptAction(
         notificationId: Int,
-        guid: StreamCallGuid
+        guid: io.getstream.video.android.model.StreamCallGuid
     ): NotificationCompat.Action {
         return NotificationCompat.Action.Builder(
             android.R.drawable.ic_menu_call,
@@ -43,7 +43,7 @@ internal class NotificationActionBuilderImpl(
 
     override fun createRejectAction(
         notificationId: Int,
-        guid: StreamCallGuid
+        guid: io.getstream.video.android.model.StreamCallGuid
     ): NotificationCompat.Action {
         return NotificationCompat.Action.Builder(
             android.R.drawable.ic_delete,
@@ -54,7 +54,7 @@ internal class NotificationActionBuilderImpl(
 
     override fun createCancelAction(
         notificationId: Int,
-        guid: StreamCallGuid
+        guid: io.getstream.video.android.model.StreamCallGuid
     ): NotificationCompat.Action {
         return NotificationCompat.Action.Builder(
             android.R.drawable.ic_delete,
@@ -65,7 +65,7 @@ internal class NotificationActionBuilderImpl(
 
     private fun createAcceptPendingIntent(
         notificationId: Int,
-        guid: StreamCallGuid
+        guid: io.getstream.video.android.model.StreamCallGuid
     ): PendingIntent = PendingIntent.getBroadcast(
         context,
         notificationId,
@@ -75,7 +75,7 @@ internal class NotificationActionBuilderImpl(
 
     private fun createRejectPendingIntent(
         notificationId: Int,
-        guid: StreamCallGuid
+        guid: io.getstream.video.android.model.StreamCallGuid
     ): PendingIntent = PendingIntent.getBroadcast(
         context,
         notificationId,
@@ -85,7 +85,7 @@ internal class NotificationActionBuilderImpl(
 
     private fun createCancelPendingIntent(
         notificationId: Int,
-        guid: StreamCallGuid
+        guid: io.getstream.video.android.model.StreamCallGuid
     ): PendingIntent = PendingIntent.getBroadcast(
         context,
         notificationId,

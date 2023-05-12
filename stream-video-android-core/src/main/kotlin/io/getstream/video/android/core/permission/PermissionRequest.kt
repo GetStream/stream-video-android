@@ -18,8 +18,8 @@ package io.getstream.video.android.core.permission
 
 import io.getstream.result.Result
 import io.getstream.video.android.core.Call
-import io.getstream.video.android.core.model.User
 import io.getstream.video.android.core.utils.toUser
+import io.getstream.video.android.model.User
 import org.openapitools.client.models.PermissionRequestEvent
 import org.openapitools.client.models.UpdateUserPermissionsResponse
 import org.threeten.bp.Clock
