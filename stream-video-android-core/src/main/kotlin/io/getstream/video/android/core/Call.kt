@@ -32,6 +32,7 @@ import io.getstream.video.android.model.User
 import io.getstream.webrtc.android.ui.VideoTextureViewRenderer
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
@@ -183,6 +184,38 @@ public class Call(
         create: Boolean = false,
         createOptions: CreateCallOptions? = null
     ): Result<RtcSession> {
+        // the join flow should retry up to 3 times
+        // if the error is not permanent
+        // and fail immediately on permanent errors
+        state._joinState.value = JoinState.InProgress
+        var retryCount = 0
+
+        while (retryCount < 3) {
+            val result = _join(create, createOptions)
+            if (result is Success) {
+                return result
+            }
+            if (result is Failure) {
+                if (isPermanentError(result.value)) {
+                    state._joinState.value = JoinState.Failed(result.value)
+                    return result
+                } else {
+                    retryCount += 1
+                }
+            }
+            delay(retryCount-1*1000L)
+        }
+    }
+
+    internal fun isPermanentError(error: Any): Boolean {
+        return true
+    }
+
+    internal suspend fun _join(
+        create: Boolean = false,
+        createOptions: CreateCallOptions? = null,
+    ): Result<RtcSession> {
+
         // step 1. call the join endpoint to get a list of SFUs
         val timer = clientImpl.debugInfo.trackTime("call.join")
         val options = createOptions
@@ -229,6 +262,10 @@ public class Call(
             latencyResults = measurements.associate { it.latencyUrl to it.measurements }
         )
 
+        session?.let {
+            state._joinState.value = JoinState.Joined(it)
+        }
+
         timer.split("rtc session init")
 
         session?.connect()
@@ -243,15 +280,18 @@ public class Call(
             }
         }
 
+        // TODO: move this
         scope.launch {
             session?.let {
                 // failed and closed indicate we should retry connecting to this or another SFU
                 // disconnected is temporary, only if it lasts for a certain duration we should reconnect or switch
+                // TODO: move to session
                 val badStates = listOf(
                     PeerConnection.IceConnectionState.DISCONNECTED,
                     PeerConnection.IceConnectionState.FAILED,
                     PeerConnection.IceConnectionState.CLOSED
                 )
+
                 it.subscriber?.state?.filter { it in badStates }?.collect {
                     logger.w { "ice connection state changed to $it" }
                     // TODO: UI indications
@@ -268,6 +308,7 @@ public class Call(
 
     /** Leave the call, but don't end it for other users */
     fun leave() {
+        state._joinState.value = JoinState.Disconnected
         cleanup()
     }
 

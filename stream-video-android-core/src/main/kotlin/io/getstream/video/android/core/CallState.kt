@@ -17,6 +17,7 @@
 package io.getstream.video.android.core
 
 import io.getstream.log.taggedLogger
+import io.getstream.video.android.core.call.RtcSession
 import io.getstream.video.android.core.events.AudioLevelChangedEvent
 import io.getstream.video.android.core.events.ChangePublishQualityEvent
 import io.getstream.video.android.core.events.ConnectionQualityChangeEvent
@@ -30,6 +31,7 @@ import io.getstream.video.android.core.events.SFUHealthCheckEvent
 import io.getstream.video.android.core.events.SubscriberOfferEvent
 import io.getstream.video.android.core.events.TrackPublishedEvent
 import io.getstream.video.android.core.events.TrackUnpublishedEvent
+import io.getstream.video.android.core.internal.network.NetworkStateProvider
 import io.getstream.video.android.core.model.ScreenSharingSession
 import io.getstream.video.android.core.permission.PermissionRequest
 import io.getstream.video.android.core.utils.mapState
@@ -37,6 +39,9 @@ import io.getstream.video.android.core.utils.toUser
 import io.getstream.video.android.model.User
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.zip
 import org.openapitools.client.models.BlockedUserEvent
 import org.openapitools.client.models.CallAcceptedEvent
 import org.openapitools.client.models.CallCreatedEvent
@@ -75,6 +80,77 @@ import stream.video.sfu.models.Participant
 import stream.video.sfu.models.TrackType
 import java.util.SortedMap
 
+
+public sealed interface JoinState {
+    public object PreJoin : JoinState
+    public object InProgress : JoinState
+    public data class Joined(val session: RtcSession) : JoinState
+    public object Reconnecting : JoinState // reconnecting to recover from temporary issues
+    // TODO: better error classes
+    public data class Failed(val error: Any) : JoinState // permanent failure
+    public object Disconnected : JoinState // normal disconnect by the app
+}
+
+
+/**
+ * Connection state shows if we've established a connection with the SFU
+ * - join state (did we try to setup the RtcSession yes or no?). API calls can fail during the join and require us to repeat it
+ * - socket connection health. the socket can disconnect.
+ * - peer connection subscriber
+ * - peer connection publisher
+ * - network detection might be faster than the peer connection
+ * The call connection state is the health of these 5 components
+ *
+ * Note that the video connection can still be working even if:
+ * * the socket is disconnected
+ * * publisher is disconnected
+ *
+ * When the connection breaks the subscriber peer connection will usually indicate the issue first (since it has constant traffic)
+ * The subscriber can break because of 2 reasons:
+ * * Something is wrong with your network (90% of the time)
+ * * Something is wrong with the SFU (should be rare)
+ *
+ * We want the reconnect to be as fast as possible.
+ * * If you can reach our edge network your connection is fine. So the optimal flow here is
+ * * When there is an error try to connect to the same SFU immediately
+ * * Meanwhile ask the API if we need to switch to a different
+ * * If the API says we need to switch, swap to the new SFU
+ *
+ * TODO: Understand ice restarts better
+ * TODO: Which API endpoint should we call to check if we need to switch SFU?
+ * TODO: session should expose stateflows for the subscriber and publisher
+ *
+ */
+class CallConnectionState(
+    var joinState : MutableStateFlow<JoinState>,
+    val networkStateProvider: NetworkStateProvider
+) {
+
+    init {
+        val session: RtcSession? = null
+        joinState.collect {
+            val joined = it as? JoinState.Joined
+            joined?.let {
+                val session = it.session
+
+                val connectionState = session.socket.connectionState
+                val peerStates = session._peerConnectionStates
+
+
+
+            }
+        }
+
+
+    }
+
+    fun changed() {
+
+    }
+
+}
+
+
 /**
  * The CallState class keeps all state for a call
  * It's available on every call object
@@ -90,13 +166,13 @@ import java.util.SortedMap
 public class CallState(private val call: Call, private val user: User) {
     private val logger by taggedLogger("CallState")
 
-    /**
-     * connection shows if we've established a connection with the SFU
-     */
-    private val _connection: MutableStateFlow<ConnectionState> = MutableStateFlow(
-        ConnectionState.PreConnect
+
+
+    private val connectionState = CallConnectionState(joinState, call.clientImpl.connectionModule.networkStateProvider)
+
+    internal val _joinState: MutableStateFlow<JoinState> = MutableStateFlow(
+        JoinState.PreJoin
     )
-    public val connection: StateFlow<ConnectionState> = _connection
 
     private val _participants: MutableStateFlow<SortedMap<String, ParticipantState>> =
         MutableStateFlow(emptyMap<String, ParticipantState>().toSortedMap())

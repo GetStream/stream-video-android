@@ -28,7 +28,6 @@ import io.getstream.video.android.core.DeviceStatus
 import io.getstream.video.android.core.StreamVideo
 import io.getstream.video.android.core.StreamVideoImpl
 import io.getstream.video.android.core.call.connection.StreamPeerConnection
-import io.getstream.video.android.core.call.state.ConnectionState
 import io.getstream.video.android.core.call.utils.stringify
 import io.getstream.video.android.core.errors.RtcException
 import io.getstream.video.android.core.events.ChangePublishQualityEvent
@@ -149,6 +148,8 @@ public class RtcSession internal constructor(
     private val remoteIceServers: List<IceServer>,
 ) {
 
+    internal val socket by lazy { sfuConnectionModule.sfuSocket }
+
     private var lastTracks: List<TrackSubscriptionDetails>? = null
     private val context = client.context
     private val logger by taggedLogger("Call:RtcSession")
@@ -157,6 +158,8 @@ public class RtcSession internal constructor(
 
     internal val lastVideoStreamAdded = MutableStateFlow<MediaStream?>(null)
 
+    internal val _peerConnectionStates = MutableStateFlow<Pair<PeerConnection.IceConnectionState?, PeerConnection.IceConnectionState?>?>(null)
+
     internal val sessionId = clientImpl.sessionId
 
     val trackDimensions =
@@ -164,7 +167,6 @@ public class RtcSession internal constructor(
             emptyMap()
         )
     val trackDimensionsDebounced = trackDimensions.debounce(100)
-    private var connectionState: ConnectionState = ConnectionState.DISCONNECTED
 
     // run all calls on a supervisor job so we can easily cancel them
     private val supervisorJob = SupervisorJob()
@@ -263,6 +265,16 @@ public class RtcSession internal constructor(
 
         // step 1 setup the peer connections
         subscriber = createSubscriber()
+
+        coroutineScope.launch {
+            // call update participant subscriptions debounced
+            subscriber?.let {
+                it.state.collect {
+                    updatePeerState()
+                }
+            }
+        }
+
         val session = this
         val getSdp = suspend {
             session.getSubscriberSdp().description
@@ -292,6 +304,13 @@ public class RtcSession internal constructor(
         }
     }
 
+    private fun updatePeerState() {
+        _peerConnectionStates.value = Pair(
+            subscriber?.state?.value,
+            publisher?.state?.value
+        )
+    }
+
     suspend fun reconnect() {
         // recreate the peer connections
 
@@ -308,6 +327,8 @@ public class RtcSession internal constructor(
         joinEventResponse.first { it != null }
         connectRtc()
     }
+
+
 
     suspend fun connectWs() {
         sfuConnectionModule.sfuSocket.connect()
@@ -395,6 +416,15 @@ public class RtcSession internal constructor(
         if (publishing) {
             publisher = createPublisher()
             timer.split("createPublisher")
+
+            coroutineScope.launch {
+                // call update participant subscriptions debounced
+                publisher?.let {
+                    it.state.collect {
+                        updatePeerState()
+                    }
+                }
+            }
         }
 
         if (publishing) {
@@ -473,9 +503,6 @@ public class RtcSession internal constructor(
     fun cleanup() {
         logger.i { "[cleanup] #sfu; no args" }
         supervisorJob.cancel()
-
-        // mark ourselves as disconnected
-        connectionState = ConnectionState.DISCONNECTED
 
         // cleanup the publisher and subcriber peer connections
         subscriber?.connection?.close()
