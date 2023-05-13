@@ -618,10 +618,27 @@ func (m *HealthCheckResponse) MarshalToSizedBufferVT(dAtA []byte) (int, error) {
 		i -= len(m.unknownFields)
 		copy(dAtA[i:], m.unknownFields)
 	}
-	if m.ParticipantCount != 0 {
-		i = encodeVarint(dAtA, i, uint64(m.ParticipantCount))
+	if m.ParticipantCount != nil {
+		if marshalto, ok := interface{}(m.ParticipantCount).(interface {
+			MarshalToSizedBufferVT([]byte) (int, error)
+		}); ok {
+			size, err := marshalto.MarshalToSizedBufferVT(dAtA[:i])
+			if err != nil {
+				return 0, err
+			}
+			i -= size
+			i = encodeVarint(dAtA, i, uint64(size))
+		} else {
+			encoded, err := proto.Marshal(m.ParticipantCount)
+			if err != nil {
+				return 0, err
+			}
+			i -= len(encoded)
+			copy(dAtA[i:], encoded)
+			i = encodeVarint(dAtA, i, uint64(len(encoded)))
+		}
 		i--
-		dAtA[i] = 0x8
+		dAtA[i] = 0xa
 	}
 	return len(dAtA) - i, nil
 }
@@ -884,11 +901,6 @@ func (m *JoinResponse) MarshalToSizedBufferVT(dAtA []byte) (int, error) {
 	if m.unknownFields != nil {
 		i -= len(m.unknownFields)
 		copy(dAtA[i:], m.unknownFields)
-	}
-	if m.ParticipantCount != 0 {
-		i = encodeVarint(dAtA, i, uint64(m.ParticipantCount))
-		i--
-		dAtA[i] = 0x10
 	}
 	if m.CallState != nil {
 		if marshalto, ok := interface{}(m.CallState).(interface {
@@ -2126,8 +2138,15 @@ func (m *HealthCheckResponse) SizeVT() (n int) {
 	}
 	var l int
 	_ = l
-	if m.ParticipantCount != 0 {
-		n += 1 + sov(uint64(m.ParticipantCount))
+	if m.ParticipantCount != nil {
+		if size, ok := interface{}(m.ParticipantCount).(interface {
+			SizeVT() int
+		}); ok {
+			l = size.SizeVT()
+		} else {
+			l = proto.Size(m.ParticipantCount)
+		}
+		n += 1 + l + sov(uint64(l))
 	}
 	if m.unknownFields != nil {
 		n += len(m.unknownFields)
@@ -2253,9 +2272,6 @@ func (m *JoinResponse) SizeVT() (n int) {
 			l = proto.Size(m.CallState)
 		}
 		n += 1 + l + sov(uint64(l))
-	}
-	if m.ParticipantCount != 0 {
-		n += 1 + sov(uint64(m.ParticipantCount))
 	}
 	if m.unknownFields != nil {
 		n += len(m.unknownFields)
@@ -3736,10 +3752,10 @@ func (m *HealthCheckResponse) UnmarshalVT(dAtA []byte) error {
 		}
 		switch fieldNum {
 		case 1:
-			if wireType != 0 {
+			if wireType != 2 {
 				return fmt.Errorf("proto: wrong wireType = %d for field ParticipantCount", wireType)
 			}
-			m.ParticipantCount = 0
+			var msglen int
 			for shift := uint(0); ; shift += 7 {
 				if shift >= 64 {
 					return ErrIntOverflow
@@ -3749,11 +3765,36 @@ func (m *HealthCheckResponse) UnmarshalVT(dAtA []byte) error {
 				}
 				b := dAtA[iNdEx]
 				iNdEx++
-				m.ParticipantCount |= uint32(b&0x7F) << shift
+				msglen |= int(b&0x7F) << shift
 				if b < 0x80 {
 					break
 				}
 			}
+			if msglen < 0 {
+				return ErrInvalidLength
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLength
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			if m.ParticipantCount == nil {
+				m.ParticipantCount = &models.ParticipantCount{}
+			}
+			if unmarshal, ok := interface{}(m.ParticipantCount).(interface {
+				UnmarshalVT([]byte) error
+			}); ok {
+				if err := unmarshal.UnmarshalVT(dAtA[iNdEx:postIndex]); err != nil {
+					return err
+				}
+			} else {
+				if err := proto.Unmarshal(dAtA[iNdEx:postIndex], m.ParticipantCount); err != nil {
+					return err
+				}
+			}
+			iNdEx = postIndex
 		default:
 			iNdEx = preIndex
 			skippy, err := skip(dAtA[iNdEx:])
@@ -4415,25 +4456,6 @@ func (m *JoinResponse) UnmarshalVT(dAtA []byte) error {
 				}
 			}
 			iNdEx = postIndex
-		case 2:
-			if wireType != 0 {
-				return fmt.Errorf("proto: wrong wireType = %d for field ParticipantCount", wireType)
-			}
-			m.ParticipantCount = 0
-			for shift := uint(0); ; shift += 7 {
-				if shift >= 64 {
-					return ErrIntOverflow
-				}
-				if iNdEx >= l {
-					return io.ErrUnexpectedEOF
-				}
-				b := dAtA[iNdEx]
-				iNdEx++
-				m.ParticipantCount |= uint32(b&0x7F) << shift
-				if b < 0x80 {
-					break
-				}
-			}
 		default:
 			iNdEx = preIndex
 			skippy, err := skip(dAtA[iNdEx:])
