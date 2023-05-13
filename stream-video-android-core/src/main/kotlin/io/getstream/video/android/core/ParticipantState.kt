@@ -85,7 +85,7 @@ public data class ParticipantState(
         MutableStateFlow(initialUser)
     val user: StateFlow<User> = _user
 
-    // TODO: make this a property on the user object
+    // Could also be a property on the user
     val userNameOrId: StateFlow<String> = _user.mapState { it.name.ifEmpty { it.id } }
 
     /**

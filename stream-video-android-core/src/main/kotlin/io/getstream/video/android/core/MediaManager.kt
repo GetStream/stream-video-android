@@ -483,7 +483,6 @@ class MediaManagerImpl(
         source = videoSource, trackId = "videoTrack"
     )
 
-    // TODO: make unique
     val audioSource = call.clientImpl.peerConnectionFactory.makeAudioSource(buildAudioConstraints())
     val audioTrack = call.clientImpl.peerConnectionFactory.makeAudioTrack(
         source = audioSource, trackId = "audioTrack"
