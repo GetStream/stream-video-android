@@ -46,7 +46,6 @@ import io.getstream.video.android.core.model.ScreenSharingSession
 import io.getstream.video.android.mock.mockCall
 import io.getstream.video.android.mock.mockParticipant
 import io.getstream.video.android.mock.mockParticipantList
-import io.getstream.video.android.mock.mockVideoMediaTrack
 import org.junit.Rule
 import org.junit.Test
 
@@ -311,10 +310,7 @@ internal class ParticipantsPortraitTest : BaseComposeTest() {
         snapshot(isInDarkMode = true) {
             PortraitScreenSharingVideoRenderer(
                 call = mockCall,
-                session = ScreenSharingSession(
-                    track = mockVideoMediaTrack,
-                    participant = mockParticipantList[1]
-                ),
+                session = ScreenSharingSession(participant = mockParticipantList[0]),
                 participants = mockParticipantList,
                 primarySpeaker = mockParticipantList[1],
                 modifier = Modifier.fillMaxSize(),
@@ -328,10 +324,7 @@ internal class ParticipantsPortraitTest : BaseComposeTest() {
         snapshot(isInDarkMode = true) {
             PortraitScreenSharingVideoRenderer(
                 call = mockCall,
-                session = ScreenSharingSession(
-                    track = mockVideoMediaTrack,
-                    participant = mockParticipantList[0]
-                ),
+                session = ScreenSharingSession(participant = mockParticipantList[0]),
                 participants = mockParticipantList,
                 primarySpeaker = mockParticipantList[0],
                 modifier = Modifier.fillMaxSize(),
