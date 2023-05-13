@@ -71,7 +71,6 @@ public data class ParticipantState(
     internal val _audioTrack = MutableStateFlow<AudioTrack?>(null)
     val audioTrack: StateFlow<AudioTrack?> = _audioTrack
 
-
     internal val _screenSharingEnabled: MutableStateFlow<Boolean> = MutableStateFlow(false)
     val screenSharingEnabled: StateFlow<Boolean> = _screenSharingEnabled
 

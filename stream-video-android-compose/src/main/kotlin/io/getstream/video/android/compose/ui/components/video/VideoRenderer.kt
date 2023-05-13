@@ -58,7 +58,7 @@ public fun VideoRenderer(
     sessionId: String,
     trackType: TrackType,
     modifier: Modifier = Modifier,
-    videoScalingType: VideoScalingType = VideoScalingType.SCALE_ASPECT_FILL,
+    videoScalingType: VideoScalingType = VideoScalingType.SCALE_ASPECT_BALANCED,
     onRender: (View) -> Unit = {},
 ) {
     if (LocalInspectionMode.current) {

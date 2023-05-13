@@ -37,7 +37,6 @@ import io.getstream.video.android.core.model.ScreenSharingSession
 import io.getstream.video.android.mock.StreamMockUtils
 import io.getstream.video.android.mock.mockCall
 import io.getstream.video.android.mock.mockParticipantList
-import io.getstream.video.android.mock.mockVideoMediaTrack
 
 /**
  * Represents the portrait screen sharing content.

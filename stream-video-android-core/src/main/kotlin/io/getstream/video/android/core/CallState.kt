@@ -450,7 +450,7 @@ public class CallState(private val call: Call, private val user: User) {
                     participant._audioEnabled.value = false
                 } else if (event.trackType == TrackType.TRACK_TYPE_VIDEO) {
                     participant._videoEnabled.value = false
-                 }else if (event.trackType == TrackType.TRACK_TYPE_SCREEN_SHARE) {
+                } else if (event.trackType == TrackType.TRACK_TYPE_SCREEN_SHARE) {
                     // mark the screen share enabled
                     // create the _screenSharingSession
                     participant._screenSharingEnabled.value = false
@@ -473,7 +473,6 @@ public class CallState(private val call: Call, private val user: User) {
             getOrCreateParticipant(it)
         }
         upsertParticipants(participantStates)
-
     }
 
     private fun removeParticipant(sessionId: String) {
@@ -491,7 +490,6 @@ public class CallState(private val call: Call, private val user: User) {
             if (it.screenSharingEnabled.value) {
                 screensharing.add(it)
             }
-
         }
         _participants.value = new
 
@@ -500,8 +498,6 @@ public class CallState(private val call: Call, private val user: User) {
                 screensharing[0],
             )
         }
-
-
     }
 
     private fun getOrCreateParticipants(participants: List<Participant>): List<ParticipantState> {
