@@ -336,6 +336,7 @@ public final class io/getstream/video/android/core/ParticipantState {
 	public final fun getLastSpeakingAt ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun getPinnedAt ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun getReactions ()Lkotlinx/coroutines/flow/StateFlow;
+	public final fun getScreenSharingEnabled ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun getScreenSharingTrack ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun getSessionId ()Ljava/lang/String;
 	public final fun getSpeaking ()Lkotlinx/coroutines/flow/StateFlow;
@@ -601,8 +602,8 @@ public final class io/getstream/video/android/core/call/RtcSession {
 	public final fun getSubscriber ()Lio/getstream/video/android/core/call/connection/StreamPeerConnection;
 	public final fun getSubscriberStats ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun getTrack (Ljava/lang/String;Lstream/video/sfu/models/TrackType;)Lio/getstream/video/android/core/model/MediaTrack;
-	public final fun getTrackResolutions ()Lkotlinx/coroutines/flow/MutableStateFlow;
-	public final fun getTrackResolutionsDebounced ()Lkotlinx/coroutines/flow/Flow;
+	public final fun getTrackDimensions ()Lkotlinx/coroutines/flow/MutableStateFlow;
+	public final fun getTrackDimensionsDebounced ()Lkotlinx/coroutines/flow/Flow;
 	public final fun getTracks ()Ljava/util/Map;
 	public final fun handleEvent (Lorg/openapitools/client/models/VideoEvent;)V
 	public final fun handleIceTrickle (Lio/getstream/video/android/core/events/ICETrickleEvent;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
@@ -621,25 +622,21 @@ public final class io/getstream/video/android/core/call/RtcSession {
 	public final fun setSubscriber (Lio/getstream/video/android/core/call/connection/StreamPeerConnection;)V
 	public final fun setTrack (Ljava/lang/String;Lstream/video/sfu/models/TrackType;Lio/getstream/video/android/core/model/MediaTrack;)V
 	public final fun setTracks (Ljava/util/Map;)V
-	public final fun updateDisplayedTrackSize (Ljava/lang/String;Lstream/video/sfu/models/TrackType;II)V
-	public final fun updateDisplayedTrackVisibility (Ljava/lang/String;Lstream/video/sfu/models/TrackType;Z)V
 	public final fun updateMuteState (Lstream/video/sfu/signal/UpdateMuteStatesRequest;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public final fun updateSubscriptions (Lstream/video/sfu/signal/UpdateSubscriptionsRequest;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public final fun updateTrackDimensions (Ljava/lang/String;Lstream/video/sfu/models/TrackType;ZLstream/video/sfu/models/VideoDimension;)V
+	public static synthetic fun updateTrackDimensions$default (Lio/getstream/video/android/core/call/RtcSession;Ljava/lang/String;Lstream/video/sfu/models/TrackType;ZLstream/video/sfu/models/VideoDimension;ILjava/lang/Object;)V
 }
 
-public final class io/getstream/video/android/core/call/TrackDisplayResolution {
-	public fun <init> (Ljava/lang/String;Lstream/video/sfu/models/TrackType;Lstream/video/sfu/models/VideoDimension;Z)V
-	public synthetic fun <init> (Ljava/lang/String;Lstream/video/sfu/models/TrackType;Lstream/video/sfu/models/VideoDimension;ZILkotlin/jvm/internal/DefaultConstructorMarker;)V
-	public final fun component1 ()Ljava/lang/String;
-	public final fun component2 ()Lstream/video/sfu/models/TrackType;
-	public final fun component3 ()Lstream/video/sfu/models/VideoDimension;
-	public final fun component4 ()Z
-	public final fun copy (Ljava/lang/String;Lstream/video/sfu/models/TrackType;Lstream/video/sfu/models/VideoDimension;Z)Lio/getstream/video/android/core/call/TrackDisplayResolution;
-	public static synthetic fun copy$default (Lio/getstream/video/android/core/call/TrackDisplayResolution;Ljava/lang/String;Lstream/video/sfu/models/TrackType;Lstream/video/sfu/models/VideoDimension;ZILjava/lang/Object;)Lio/getstream/video/android/core/call/TrackDisplayResolution;
+public final class io/getstream/video/android/core/call/TrackDimensions {
+	public fun <init> (Lstream/video/sfu/models/VideoDimension;Z)V
+	public synthetic fun <init> (Lstream/video/sfu/models/VideoDimension;ZILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Lstream/video/sfu/models/VideoDimension;
+	public final fun component2 ()Z
+	public final fun copy (Lstream/video/sfu/models/VideoDimension;Z)Lio/getstream/video/android/core/call/TrackDimensions;
+	public static synthetic fun copy$default (Lio/getstream/video/android/core/call/TrackDimensions;Lstream/video/sfu/models/VideoDimension;ZILjava/lang/Object;)Lio/getstream/video/android/core/call/TrackDimensions;
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getDimensions ()Lstream/video/sfu/models/VideoDimension;
-	public final fun getSessionId ()Ljava/lang/String;
-	public final fun getTrackType ()Lstream/video/sfu/models/TrackType;
 	public final fun getVisible ()Z
 	public fun hashCode ()I
 	public final fun setDimensions (Lstream/video/sfu/models/VideoDimension;)V
@@ -1730,14 +1727,12 @@ public final class io/getstream/video/android/core/model/ReactionData {
 }
 
 public final class io/getstream/video/android/core/model/ScreenSharingSession {
-	public fun <init> (Lio/getstream/video/android/core/model/MediaTrack;Lio/getstream/video/android/core/ParticipantState;)V
-	public final fun component1 ()Lio/getstream/video/android/core/model/MediaTrack;
-	public final fun component2 ()Lio/getstream/video/android/core/ParticipantState;
-	public final fun copy (Lio/getstream/video/android/core/model/MediaTrack;Lio/getstream/video/android/core/ParticipantState;)Lio/getstream/video/android/core/model/ScreenSharingSession;
-	public static synthetic fun copy$default (Lio/getstream/video/android/core/model/ScreenSharingSession;Lio/getstream/video/android/core/model/MediaTrack;Lio/getstream/video/android/core/ParticipantState;ILjava/lang/Object;)Lio/getstream/video/android/core/model/ScreenSharingSession;
+	public fun <init> (Lio/getstream/video/android/core/ParticipantState;)V
+	public final fun component1 ()Lio/getstream/video/android/core/ParticipantState;
+	public final fun copy (Lio/getstream/video/android/core/ParticipantState;)Lio/getstream/video/android/core/model/ScreenSharingSession;
+	public static synthetic fun copy$default (Lio/getstream/video/android/core/model/ScreenSharingSession;Lio/getstream/video/android/core/ParticipantState;ILjava/lang/Object;)Lio/getstream/video/android/core/model/ScreenSharingSession;
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getParticipant ()Lio/getstream/video/android/core/ParticipantState;
-	public final fun getTrack ()Lio/getstream/video/android/core/model/MediaTrack;
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
 }

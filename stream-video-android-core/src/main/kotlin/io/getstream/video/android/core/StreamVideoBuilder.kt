@@ -115,10 +115,11 @@ public class StreamVideoBuilder @JvmOverloads constructor(
             context = context,
             scope = scope,
             videoDomain = videoDomain,
-            dataStore = dataStore,
             connectionTimeoutInMs = connectionTimeoutInMs,
-            user = user,
             loggingLevel = loggingLevel,
+            user = user,
+            apiKey = apiKey,
+            userToken = token
         )
 
         // create the client

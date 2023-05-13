@@ -665,7 +665,7 @@ public class RtcSession internal constructor(
         val sortedParticipants = call.state.sortedParticipants.value
         val otherParticipants = sortedParticipants.filter { it.sessionId != sessionId }.take(5)
         val tracks = mutableListOf<TrackSubscriptionDetails>()
-        otherParticipants.forEach {participant ->
+        otherParticipants.forEach { participant ->
             if (participant.videoEnabled.value) {
                 val track = TrackSubscriptionDetails(
                     user_id = participant.user.value.id,
@@ -685,7 +685,6 @@ public class RtcSession internal constructor(
                 tracks.add(track)
             }
         }
-
 
         return tracks
     }
@@ -1064,7 +1063,6 @@ public class RtcSession internal constructor(
             result
         }
 
-
     // sets display track visiblity
     @Synchronized
     fun updateTrackDimensions(sessionId: String, trackType: TrackType, visible: Boolean, dimensions: VideoDimension = VideoDimension(960, 720)) {
@@ -1078,7 +1076,7 @@ public class RtcSession internal constructor(
         var participantTrackDimensions = trackDimensionsMap[sessionId]?.toMutableMap() ?: mutableMapOf()
 
         // last we get the dimensions for this specific track type
-        val oldTrack = participantTrackDimensions[trackType] ?: TrackDimensions(dimensions=dimensions, visible=visible)
+        val oldTrack = participantTrackDimensions[trackType] ?: TrackDimensions(dimensions = dimensions, visible = visible)
         val newTrack = oldTrack.copy(visible = visible, dimensions = dimensions)
         participantTrackDimensions[trackType] = newTrack
 

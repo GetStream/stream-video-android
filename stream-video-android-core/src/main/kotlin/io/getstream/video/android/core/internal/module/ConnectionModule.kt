@@ -24,8 +24,9 @@ import io.getstream.video.android.core.internal.network.NetworkStateProvider
 import io.getstream.video.android.core.logging.LoggingLevel
 import io.getstream.video.android.core.socket.CoordinatorSocket
 import io.getstream.video.android.core.socket.SfuSocket
-import io.getstream.video.android.datastore.delegate.StreamUserDataStore
+import io.getstream.video.android.model.ApiKey
 import io.getstream.video.android.model.User
+import io.getstream.video.android.model.UserToken
 import kotlinx.coroutines.CoroutineScope
 import okhttp3.HttpUrl
 import okhttp3.HttpUrl.Companion.toHttpUrl
@@ -62,10 +63,11 @@ internal class ConnectionModule(
     private val context: Context,
     private val scope: CoroutineScope,
     internal val videoDomain: String,
-    internal val dataStore: StreamUserDataStore,
     internal val connectionTimeoutInMs: Long,
     internal val loggingLevel: LoggingLevel = LoggingLevel.NONE,
     private val user: User,
+    internal val apiKey: ApiKey,
+    internal val userToken: UserToken,
 ) {
     private var baseUrlInterceptor: BaseUrlInterceptor
     private var authInterceptor: CoordinatorAuthInterceptor
@@ -83,13 +85,10 @@ internal class ConnectionModule(
     init {
         // setup the OKHttpClient
         authInterceptor =
-            CoordinatorAuthInterceptor(dataStore.apiKey.value, dataStore.userToken.value)
+            CoordinatorAuthInterceptor(apiKey, userToken)
         baseUrlInterceptor = BaseUrlInterceptor(null)
 
-        okHttpClient = buildOkHttpClient(
-            dataStore,
-            null
-        )
+        okHttpClient = buildOkHttpClient(null)
 
         networkStateProvider = NetworkStateProvider(
             connectivityManager = context
@@ -138,7 +137,6 @@ internal class ConnectionModule(
      */
 
     private fun buildOkHttpClient(
-        dataStore: StreamUserDataStore,
         baseUrl: HttpUrl?
     ): OkHttpClient {
         // create a new OkHTTP client and set timeouts
@@ -174,12 +172,10 @@ internal class ConnectionModule(
     internal fun createCoordinatorSocket(): CoordinatorSocket {
         val coordinatorUrl = "wss://$videoDomain/video/connect"
 
-        val token = dataStore.userToken.value
-
         return CoordinatorSocket(
             coordinatorUrl,
             user,
-            token,
+            userToken,
             scope,
             okHttpClient,
             networkStateProvider = networkStateProvider
@@ -194,13 +190,13 @@ internal class ConnectionModule(
     ): SfuConnectionModule {
         val updatedSignalUrl = sfuUrl.removeSuffix(suffix = "/twirp")
         val baseUrl = updatedSignalUrl.toHttpUrl()
-        val okHttpClient = buildOkHttpClient(dataStore, baseUrl)
+        val okHttpClient = buildOkHttpClient(baseUrl)
 
         return SfuConnectionModule(
             sfuUrl,
             sessionId,
             sfuToken,
-            dataStore.apiKey.value,
+            apiKey,
             getSubscriberSdp,
             scope,
             networkStateProvider

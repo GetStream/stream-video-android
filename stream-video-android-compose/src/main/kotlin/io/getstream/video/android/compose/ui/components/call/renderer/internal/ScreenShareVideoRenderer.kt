@@ -52,7 +52,6 @@ public fun ScreenShareVideoRenderer(
     val screenShareParticipant = session.participant
     val mediaTrack = session?.participant?.screenSharingTrack?.collectAsState()
 
-
     Box(modifier = modifier) {
         VideoRenderer(
             modifier = Modifier
