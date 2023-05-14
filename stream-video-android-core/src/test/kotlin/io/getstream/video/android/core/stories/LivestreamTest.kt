@@ -79,9 +79,9 @@ class LivestreamTest : IntegrationTestBase() {
         assertSuccess(response)
 
         val rtmp = call.state.ingress.value?.rtmp
-        val url = rtmp?.address + "/" + clientImpl.preferences.getUserToken()
+        val url = rtmp?.address + "/" + clientImpl.dataStore.getUserToken()
         println(rtmp?.address)
-        println(clientImpl.preferences.getUserToken())
+        println(clientImpl.dataStore.getUserToken())
         // TODO: not implemented on the server
         // Create a publishing token
         // TODO: do we ask the coordinator for it? or generate it locally?
