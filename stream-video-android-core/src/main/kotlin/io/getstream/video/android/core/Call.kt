@@ -190,8 +190,10 @@ public class Call(
         state._joinState.value = JoinState.InProgress
         var retryCount = 0
 
+        var result: Result<RtcSession>
+
         while (retryCount < 3) {
-            val result = _join(create, createOptions)
+            result = _join(create, createOptions)
             if (result is Success) {
                 return result
             }
@@ -205,6 +207,7 @@ public class Call(
             }
             delay(retryCount-1*1000L)
         }
+        return result
     }
 
     internal fun isPermanentError(error: Any): Boolean {

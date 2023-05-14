@@ -132,20 +132,10 @@ class CallConnectionState(
             val joined = it as? JoinState.Joined
             joined?.let {
                 val session = it.session
-
                 val connectionState = session.socket.connectionState
                 val peerStates = session._peerConnectionStates
-
-
-
             }
         }
-
-
-    }
-
-    fun changed() {
-
     }
 
 }
@@ -166,13 +156,12 @@ class CallConnectionState(
 public class CallState(private val call: Call, private val user: User) {
     private val logger by taggedLogger("CallState")
 
-
-
-    private val connectionState = CallConnectionState(joinState, call.clientImpl.connectionModule.networkStateProvider)
-
     internal val _joinState: MutableStateFlow<JoinState> = MutableStateFlow(
         JoinState.PreJoin
     )
+
+    private val connectionState = CallConnectionState(_joinState, call.clientImpl.connectionModule.networkStateProvider)
+
 
     private val _participants: MutableStateFlow<SortedMap<String, ParticipantState>> =
         MutableStateFlow(emptyMap<String, ParticipantState>().toSortedMap())
