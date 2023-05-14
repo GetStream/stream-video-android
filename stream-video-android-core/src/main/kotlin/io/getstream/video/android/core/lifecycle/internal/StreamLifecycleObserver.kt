@@ -19,6 +19,7 @@ package io.getstream.video.android.core.lifecycle.internal
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleOwner
+import io.getstream.video.android.core.dispatchers.DispatcherProvider
 import io.getstream.video.android.core.lifecycle.LifecycleHandler
 import kotlinx.coroutines.withContext
 
@@ -34,7 +35,7 @@ internal class StreamLifecycleObserver(
     suspend fun observe() {
         if (isObserving.not()) {
             isObserving = true
-            withContext(io.getstream.video.android.core.dispatchers.DispatcherProvider.Main) {
+            withContext(DispatcherProvider.Main) {
                 lifecycle.addObserver(this@StreamLifecycleObserver)
             }
         }
