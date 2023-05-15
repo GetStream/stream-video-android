@@ -16,7 +16,7 @@
 package org.openapitools.client.models
 
 import org.openapitools.client.models.CallResponse
-import org.openapitools.client.models.DatacenterResponse
+import org.openapitools.client.models.Credentials
 import org.openapitools.client.models.MemberResponse
 import org.openapitools.client.models.UserResponse
 
@@ -31,8 +31,8 @@ import com.squareup.moshi.Json
  * @param blockedUsers 
  * @param call 
  * @param created 
+ * @param credentials 
  * @param duration 
- * @param edges 
  * @param members 
  * @param membership 
  */
@@ -49,11 +49,11 @@ data class JoinCallResponse (
     @Json(name = "created")
     val created: kotlin.Boolean,
 
+    @Json(name = "credentials")
+    val credentials: Credentials,
+
     @Json(name = "duration")
     val duration: kotlin.String,
-
-    @Json(name = "edges")
-    val edges: kotlin.collections.List<DatacenterResponse>,
 
     @Json(name = "members")
     val members: kotlin.collections.List<MemberResponse>,

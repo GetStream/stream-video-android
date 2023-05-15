@@ -145,7 +145,6 @@ public class RtcSession internal constructor(
     private val call: Call,
     private val sfuUrl: String,
     private val sfuToken: String,
-    private val latencyResults: Map<String, List<Float>>,
     private val remoteIceServers: List<IceServer>,
 ) {
 
