@@ -14,7 +14,7 @@ val response = call.sendReaction("fireworks")
 You can also add custom data to the reaction or specify a specific emoji
 
 ```kotlin
-val response = call.sendReaction("raise-hand", "", mapOf("mycustomfield" to "hello"))
+val response = call.sendReaction(type = "raise-hand", emoji = "", custom = mapOf("mycustomfield" to "hello"))
 ```
 
 ### Custom Events
