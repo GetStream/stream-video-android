@@ -16,12 +16,12 @@ The **call type** controls which features are enabled, and sets up permissions.
 
 For the call id there are a few things to note:
 
-* You can reuse the same call multiple times
-* If you have a unique id for the call we recommend passing that as the id
-* If you don't have a unique id you can leave it empty and we'll generate one for you
+* You can reuse the same call multiple times.
+* If you have a unique id for the call we recommend passing that as the id.
+* If you don't have a unique id you can leave it empty and we'll generate one for you.
 
 As an example, if you're building a telemedicine app calls will be connected to an appointment.
-Using your own appointment id as the call id makes it easy to find the call later.
+Using your own appointment id as the **call id** makes it easy to find the call later.
 
 ### Joining a call
 
@@ -51,13 +51,13 @@ val getResult = call.get()
 
 ### Call Create Options
 
-This example shows how to create a call with members and custom data
+This example shows how to create a call with members and custom data:
 
 ```kotlin
-val members = mutableListOf("thierry", "tommaso")
+val members = listOf("thierry", "tommaso")
 val call = client.call("default", randomUUID())
 
-val result = call.create(memberIds = members, custom = mapOf("color" to "red"), ring=true)
+val result = call.create(memberIds = members, custom = mapOf("color" to "red"), ring = true)
 ```
 
 Members are permanently associated with a call. It allows you to:

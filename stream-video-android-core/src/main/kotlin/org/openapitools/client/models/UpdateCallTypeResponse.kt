@@ -24,17 +24,12 @@
 package org.openapitools.client.models
 
 import org.openapitools.client.models.CallSettingsResponse
+import org.openapitools.client.models.NotificationSettings
 
 
 
 
-import com.squareup.moshi.FromJson
 import com.squareup.moshi.Json
-import com.squareup.moshi.JsonAdapter
-import com.squareup.moshi.JsonReader
-import com.squareup.moshi.JsonWriter
-import com.squareup.moshi.ToJson
-import org.openapitools.client.infrastructure.Serializer
 
 /**
  *
@@ -43,6 +38,7 @@ import org.openapitools.client.infrastructure.Serializer
  * @param duration
  * @param grants
  * @param name
+ * @param notificationSettings
  * @param settings
  * @param updatedAt
  */
@@ -61,6 +57,9 @@ data class UpdateCallTypeResponse (
 
     @Json(name = "name")
     val name: kotlin.String,
+
+    @Json(name = "notification_settings")
+    val notificationSettings: NotificationSettings,
 
     @Json(name = "settings")
     val settings: CallSettingsResponse,

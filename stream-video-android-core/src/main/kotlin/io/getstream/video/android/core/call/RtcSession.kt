@@ -102,9 +102,7 @@ import kotlin.random.Random
  * Keeps track of which track is being rendered at what resolution.
  * Also stores if the track is visible or not
  */
-data class TrackDisplayResolution(
-    val sessionId: String,
-    val trackType: TrackType,
+data class TrackDimensions(
     var dimensions: VideoDimension,
     var visible: Boolean = false
 )
@@ -154,17 +152,18 @@ public class RtcSession internal constructor(
     private var lastTracks: List<TrackSubscriptionDetails>? = null
     private val context = client.context
     private val logger by taggedLogger("Call:RtcSession")
+    private val dynascaleLogger by taggedLogger("Call:RtcSession:Dynascale")
     private val clientImpl = client as StreamVideoImpl
 
     internal val lastVideoStreamAdded = MutableStateFlow<MediaStream?>(null)
 
     internal val sessionId = clientImpl.sessionId
 
-    val trackResolutions =
-        MutableStateFlow<MutableMap<String, MutableMap<TrackType, TrackDisplayResolution>>>(
-            mutableMapOf()
+    val trackDimensions =
+        MutableStateFlow<Map<String, Map<TrackType, TrackDimensions>>>(
+            emptyMap()
         )
-    val trackResolutionsDebounced = trackResolutions.debounce(100)
+    val trackDimensionsDebounced = trackDimensions.debounce(100)
     private var connectionState: ConnectionState = ConnectionState.DISCONNECTED
 
     // run all calls on a supervisor job so we can easily cancel them
@@ -287,8 +286,7 @@ public class RtcSession internal constructor(
         }
         coroutineScope.launch {
             // call update participant subscriptions debounced
-            trackResolutionsDebounced.collect {
-                logger.d { "updateParticipantsSubscriptions 5 collected" }
+            trackDimensions.collect {
                 updateParticipantsSubscriptions()
             }
         }
@@ -666,30 +664,44 @@ public class RtcSession internal constructor(
     internal fun defaultTracks(): List<TrackSubscriptionDetails> {
         val sortedParticipants = call.state.sortedParticipants.value
         val otherParticipants = sortedParticipants.filter { it.sessionId != sessionId }.take(5)
-        val tracks = otherParticipants
-            .map { participant ->
-                TrackSubscriptionDetails(
+        val tracks = mutableListOf<TrackSubscriptionDetails>()
+        otherParticipants.forEach { participant ->
+            if (participant.videoEnabled.value) {
+                val track = TrackSubscriptionDetails(
                     user_id = participant.user.value.id,
                     track_type = TrackType.TRACK_TYPE_VIDEO,
                     dimension = VideoDimension(960, 720),
                     session_id = participant.sessionId
                 )
+                tracks.add(track)
             }
+            if (participant.screenSharingEnabled.value) {
+                val track = TrackSubscriptionDetails(
+                    user_id = participant.user.value.id,
+                    track_type = TrackType.TRACK_TYPE_SCREEN_SHARE,
+                    dimension = VideoDimension(960, 720),
+                    session_id = participant.sessionId
+                )
+                tracks.add(track)
+            }
+        }
 
         return tracks
     }
 
     internal fun visibleTracks(): List<TrackSubscriptionDetails> {
         val participants = call.state.remoteParticipants.value
-        val trackDisplayResolution = trackResolutions.value
+        val trackDisplayResolution = trackDimensions.value
 
         var tracks = participants.map { participant ->
             val trackDisplay = trackDisplayResolution[participant.sessionId] ?: emptyMap()
-            trackDisplay.values.filter { it.visible }.map { display ->
+
+            trackDisplay.entries.filter { it.value.visible }.map { display ->
+                dynascaleLogger.i { "[visibleTracks] $sessionId subscribing ${participant.sessionId} to : ${display.key}" }
                 TrackSubscriptionDetails(
                     user_id = participant.user.value.id,
-                    track_type = display.trackType,
-                    dimension = display.dimensions,
+                    track_type = display.key,
+                    dimension = display.value.dimensions,
                     session_id = participant.sessionId
                 )
             }
@@ -698,7 +710,6 @@ public class RtcSession internal constructor(
     }
 
     private fun updateParticipantsSubscriptions(useDefaults: Boolean = false) {
-        logger.d { "[updateParticipantsSubscriptions 1] #sfu; useDefaults: $useDefaults" }
         // default is to subscribe to the top 5 sorted participants
         val tracks = if (useDefaults) {
             defaultTracks()
@@ -711,26 +722,26 @@ public class RtcSession internal constructor(
             session_id = sessionId,
             tracks = tracks
         )
-        val sessionsIds = tracks.map { it.session_id }
-        logger.d { "[updateParticipantsSubscriptions] #sfu; $sessionId subscribing to : $sessionsIds" }
+        val sessionsIds = tracks.map { it.track_type to it.session_id }
+        dynascaleLogger.i { "[updateParticipantsSubscriptions] $useDefaults #sfu; $sessionId subscribing to : $sessionsIds" }
 
         // can be empty if you're alone in a call
         if (tracks.isNotEmpty()) {
             // skip if nothing changed
             if (lastTracks == tracks) {
-                logger.d { "[updateParticipantsSubscriptions] #sfu; tracks are the same, not updating" }
+                dynascaleLogger.i { "[updateParticipantsSubscriptions] #sfu; tracks are the same, not updating" }
                 return
             }
             coroutineScope.launch {
                 when (val result = updateSubscriptions(request)) {
                     is Success -> {
-                        logger.v { "[updateParticipantsSubscriptions] #sfu; succeed" }
+                        dynascaleLogger.v { "[updateParticipantsSubscriptions] #sfu; succeed" }
                         lastTracks = tracks
                     }
 
                     is Failure -> {
                         // TODO: this breaks the call, we should handle this better
-                        logger.e { "[updateParticipantsSubscriptions] #sfu; failed: $result" }
+                        dynascaleLogger.e { "[updateParticipantsSubscriptions] #sfu; failed: $result" }
                     }
                 }
             }
@@ -1052,49 +1063,27 @@ public class RtcSession internal constructor(
             result
         }
 
-    // sets the dimension that we render things at
-    fun updateDisplayedTrackSize(
-        sessionId: String,
-        trackType: TrackType,
-        measuredWidth: Int,
-        measuredHeight: Int
-    ) {
-        val trackDisplayResolution = trackResolutions.value.toMutableMap()
-        var videoMap = trackDisplayResolution[sessionId]
-        if (videoMap == null) {
-            videoMap = mutableMapOf()
-            trackDisplayResolution[sessionId] = videoMap
-        }
-        val dimensions = VideoDimension(measuredWidth, measuredHeight)
-
-        val resolution =
-            videoMap[trackType] ?: TrackDisplayResolution(sessionId, trackType, dimensions)
-        resolution.dimensions = dimensions
-        videoMap[trackType] = resolution
-
-        logger.i { "updateParticipantsSubscriptions 3 $trackDisplayResolution" }
-
-        // Updates are debounced
-        trackResolutions.value = trackDisplayResolution
-    }
-
     // sets display track visiblity
-    fun updateDisplayedTrackVisibility(sessionId: String, trackType: TrackType, visible: Boolean) {
-        val trackDisplayResolution = trackResolutions.value.toMutableMap()
-        var videoMap = trackDisplayResolution[sessionId]
-        if (videoMap == null) {
-            videoMap = mutableMapOf()
-            trackDisplayResolution[sessionId] = videoMap
-        }
-        val defaultDimensions = VideoDimension(960, 720)
-        val resolution =
-            videoMap[trackType] ?: TrackDisplayResolution(sessionId, trackType, defaultDimensions)
-        resolution.visible = visible
-        videoMap[trackType] = resolution
+    @Synchronized
+    fun updateTrackDimensions(sessionId: String, trackType: TrackType, visible: Boolean, dimensions: VideoDimension = VideoDimension(960, 720)) {
+        // The map contains all track dimensions for all participants
+        dynascaleLogger.i { "uuu23 $sessionId $trackType $visible $dimensions" }
 
-        logger.i { "updateParticipantsSubscriptions 2 $trackDisplayResolution" }
+        // first we make a copy of the dimensions
+        val trackDimensionsMap = trackDimensions.value.toMutableMap()
+
+        // next we get or create the dimensions for this participants
+        var participantTrackDimensions = trackDimensionsMap[sessionId]?.toMutableMap() ?: mutableMapOf()
+
+        // last we get the dimensions for this specific track type
+        val oldTrack = participantTrackDimensions[trackType] ?: TrackDimensions(dimensions = dimensions, visible = visible)
+        val newTrack = oldTrack.copy(visible = visible, dimensions = dimensions)
+        participantTrackDimensions[trackType] = newTrack
+
+        trackDimensionsMap[sessionId] = participantTrackDimensions
 
         // Updates are debounced
-        trackResolutions.value = trackDisplayResolution
+        dynascaleLogger.i { "updateTrackDimensions $trackDimensionsMap" }
+        trackDimensions.value = trackDimensionsMap
     }
 }

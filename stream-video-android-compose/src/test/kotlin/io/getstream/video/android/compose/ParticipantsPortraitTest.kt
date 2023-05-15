@@ -27,8 +27,6 @@ import androidx.compose.ui.unit.dp
 import app.cash.paparazzi.DeviceConfig
 import app.cash.paparazzi.Paparazzi
 import io.getstream.video.android.compose.base.BaseComposeTest
-import io.getstream.video.android.compose.state.ui.internal.InviteUserItemState
-import io.getstream.video.android.compose.state.ui.internal.ParticipantList
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.call.renderer.CallSingleVideoRenderer
 import io.getstream.video.android.compose.ui.components.call.renderer.LocalVideoContent
@@ -36,8 +34,8 @@ import io.getstream.video.android.compose.ui.components.call.renderer.Participan
 import io.getstream.video.android.compose.ui.components.call.renderer.internal.LazyColumnVideoRenderer
 import io.getstream.video.android.compose.ui.components.call.renderer.internal.PortraitScreenSharingVideoRenderer
 import io.getstream.video.android.compose.ui.components.call.renderer.internal.PortraitVideoRenderer
-import io.getstream.video.android.compose.ui.components.participants.internal.CallParticipantsInfoAppBar
-import io.getstream.video.android.compose.ui.components.participants.internal.CallParticipantsInfoOptions
+import io.getstream.video.android.compose.ui.components.participants.internal.CallParticipantListAppBar
+import io.getstream.video.android.compose.ui.components.participants.internal.CallParticipantsInfoActions
 import io.getstream.video.android.compose.ui.components.participants.internal.CallParticipantsList
 import io.getstream.video.android.compose.ui.components.participants.internal.InviteUserList
 import io.getstream.video.android.compose.ui.components.participants.internal.ParticipantAvatars
@@ -48,7 +46,6 @@ import io.getstream.video.android.core.model.ScreenSharingSession
 import io.getstream.video.android.mock.mockCall
 import io.getstream.video.android.mock.mockParticipant
 import io.getstream.video.android.mock.mockParticipantList
-import io.getstream.video.android.mock.mockVideoMediaTrack
 import org.junit.Rule
 import org.junit.Test
 
@@ -81,8 +78,9 @@ internal class ParticipantsPortraitTest : BaseComposeTest() {
     fun `snapshot InviteUserList composable`() {
         snapshotWithDarkMode {
             InviteUserList(
-                mockParticipantList.map { InviteUserItemState(it.user.value) },
-                onUserSelected = {}
+                mockParticipantList.map { it.initialUser },
+                onUserSelected = {},
+                onUserUnSelected = {}
             )
         }
     }
@@ -90,9 +88,10 @@ internal class ParticipantsPortraitTest : BaseComposeTest() {
     @Test
     fun `snapshot CallParticipantsInfoOptions composable`() {
         snapshotWithDarkMode {
-            CallParticipantsInfoOptions(
-                isCurrentUserMuted = false,
-                onOptionSelected = { }
+            CallParticipantsInfoActions(
+                isLocalAudioEnabled = false,
+                onInviteUser = {},
+                onMute = {}
             )
         }
     }
@@ -100,11 +99,10 @@ internal class ParticipantsPortraitTest : BaseComposeTest() {
     @Test
     fun `snapshot CallParticipantsInfoAppBar composable`() {
         snapshotWithDarkMode {
-            CallParticipantsInfoAppBar(
+            CallParticipantListAppBar(
                 numberOfParticipants = 10,
-                infoStateMode = ParticipantList,
                 onBackPressed = {}
-            ) {}
+            )
         }
     }
 
@@ -160,9 +158,12 @@ internal class ParticipantsPortraitTest : BaseComposeTest() {
     fun `snapshot CallParticipantsList composable`() {
         snapshotWithDarkMode {
             CallParticipantsList(
-                participantsState = mockParticipantList,
-                onUserOptionsSelected = {}
-            )
+                participants = mockParticipantList,
+                onUserOptionsSelected = {},
+                isLocalAudioEnabled = false,
+                onInviteUser = {},
+                onMute = {}
+            ) {}
         }
     }
 
@@ -309,10 +310,7 @@ internal class ParticipantsPortraitTest : BaseComposeTest() {
         snapshot(isInDarkMode = true) {
             PortraitScreenSharingVideoRenderer(
                 call = mockCall,
-                session = ScreenSharingSession(
-                    track = mockVideoMediaTrack,
-                    participant = mockParticipantList[1]
-                ),
+                session = ScreenSharingSession(participant = mockParticipantList[0]),
                 participants = mockParticipantList,
                 primarySpeaker = mockParticipantList[1],
                 modifier = Modifier.fillMaxSize(),
@@ -326,10 +324,7 @@ internal class ParticipantsPortraitTest : BaseComposeTest() {
         snapshot(isInDarkMode = true) {
             PortraitScreenSharingVideoRenderer(
                 call = mockCall,
-                session = ScreenSharingSession(
-                    track = mockVideoMediaTrack,
-                    participant = mockParticipantList[0]
-                ),
+                session = ScreenSharingSession(participant = mockParticipantList[0]),
                 participants = mockParticipantList,
                 primarySpeaker = mockParticipantList[0],
                 modifier = Modifier.fillMaxSize(),

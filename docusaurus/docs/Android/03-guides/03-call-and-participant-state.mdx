@@ -5,28 +5,29 @@ description: How the state is exposed
 
 ### Video Call State
 
-When you join a call, we'll automatically expose stateflow objects in 3 different places
+When you join a call, we'll automatically expose stateflow objects in 3 different places:
 
 ```kotlin
-client.state
-call.state
-call.state.participants
+val clientState = streamVideo.state
+val callState = call.state
+val participants = call.state.participants
 ```
 
 ### Call State
 
 Here's an example of how you can access the call state:
+
 ```kotlin
 val call = client.call("default", "mycall")
 val joinResult = call.join(create=true)
 // state is now available at
-call.state
+val state = call.state
 ```
 
 The following fields are available on the call
 
 | Attribute | Description |
-| --- | --- | --- |
+| --- | --- |
 | `connection` | Your connection state if you're currently connected to the call |
 | `participants` | The list of call participants |
 | `me` | Shortcut to your own participant state |
@@ -61,21 +62,22 @@ The following fields are available on the call
 ### Participant State
 
 Participant state is the most common state you'll be interacting with.
-Here's how you iterate over the participants
+Here's how you iterate over the participants:
 
 ```kotlin
 // all participants
 call.state.participants.forEach {
+  ..
 }
 
 // you
-call.state.me
+val me = call.state.me
 ```
 
 The following fields are available on the participant
 
 | Attribute | Description |
-| --- | --- | --- |
+| --- | --- |
 | `user` | The user object for this participant |
 | `videoEnabled` | If video is enabled for this participant |
 | `videoTrack` | The video track for this participant. Note that the track will only be available after you try to render it. The SDK lazy loads the tracks to ensure that large calls work well |
@@ -93,13 +95,13 @@ The following fields are available on the participant
 
 ```kotlin
 // client state is available on the client object
-client.state
+val state = client.state
 ```
 
 And contains these fields:
 
 | Attribute | Description |
-| --- | --- | --- |
+| --- | --- |
 | `user` | The user you're currently authenticated as |
 | `connection` | The connection state. See ConnectionState |
 | `activeCall` | The call you've currently joined |

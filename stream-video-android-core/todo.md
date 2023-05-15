@@ -42,11 +42,10 @@
 ### App & Compose
 
 - [ ] Reactions don't show up
-- [ ] Screensharing doesn't show up
 - [ ] Chat integration (we need an event from the server though)
-- [ ] Token expiration isn't handled well in dogfooding app
 - [ ] PIP
 - [ ] Ringing calls (wait for push and updated endpoints from server)
+- [X] Screensharing doesn't show up
 
 
 ### RTC & Media TODO
@@ -99,6 +98,7 @@
 
 - [ ] Review the 104 todos
 - [ ] Coverage reporting
+- [ ] Better Mocks for testing RtcSession
 - [ ] Build vars to generate tokens for testing
 
 ### Server wishlist

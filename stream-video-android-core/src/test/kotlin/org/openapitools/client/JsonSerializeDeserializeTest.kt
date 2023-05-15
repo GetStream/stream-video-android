@@ -160,7 +160,7 @@ class JsonSerializeDeserializeTest {
         // known field value
         val apiError = APIError(
             statusCode = 500,
-            code = InternalError,
+            code = APIError.Code.internalError,
             details = emptyList(),
             duration = "1s",
             message = "something went wrong",
@@ -173,7 +173,7 @@ class JsonSerializeDeserializeTest {
         // unknown field value
         val apiUnknownError = APIError(
             statusCode = 1500,
-            code = Unknown("some-weird-error"),
+            code = APIError.Code.notFound,
             details = emptyList(),
             duration = "1s",
             message = "something went wrong",

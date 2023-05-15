@@ -658,9 +658,7 @@ internal class StreamVideoImpl internal constructor(
         eventType: String,
         dataJson: Map<String, Any>,
     ): Result<SendEventResponse> {
-        val callCid = "$type:$id"
-        logger.d { "[sendCustomEvent] callCid: $callCid, dataJson: $dataJson, eventType: $eventType" }
-        val (type, id) = callCid.toTypeAndId()
+        logger.d { "[sendCustomEvent] callCid: $type:$id, dataJson: $dataJson, eventType: $eventType" }
 
         return wrapAPICall {
             connectionModule.eventsApi.sendEvent(
@@ -685,7 +683,8 @@ internal class StreamVideoImpl internal constructor(
                 QueryMembersRequest(
                     type = type, id = id,
                     filterConditions = filter,
-                    sort = sort.map { it.toRequest() }
+                    sort = sort.map { it.toRequest() },
+                    limit = limit
                 )
             )
         }
@@ -916,7 +915,7 @@ internal class StreamVideoImpl internal constructor(
         }
 
     override fun call(type: String, id: String): Call {
-        var idOrRandom = id.ifEmpty { UUID.randomUUID().toString() }
+        val idOrRandom = id.ifEmpty { UUID.randomUUID().toString() }
 
         val cid = "$type:$idOrRandom"
         return if (calls.contains(cid)) {

@@ -29,6 +29,7 @@ import org.openapitools.client.models.CallBroadcastingStartedEvent
 import org.openapitools.client.models.CallBroadcastingStoppedEvent
 import org.openapitools.client.models.CallCreatedEvent
 import org.openapitools.client.models.CallEndedEvent
+import org.openapitools.client.models.CallLiveStartedEvent
 import org.openapitools.client.models.CallMemberAddedEvent
 import org.openapitools.client.models.CallMemberRemovedEvent
 import org.openapitools.client.models.CallMemberUpdatedEvent
@@ -38,6 +39,10 @@ import org.openapitools.client.models.CallRecordingStartedEvent
 import org.openapitools.client.models.CallRecordingStoppedEvent
 import org.openapitools.client.models.CallRejectedEvent
 import org.openapitools.client.models.CallResponse
+import org.openapitools.client.models.CallSessionEndedEvent
+import org.openapitools.client.models.CallSessionParticipantJoinedEvent
+import org.openapitools.client.models.CallSessionParticipantLeftEvent
+import org.openapitools.client.models.CallSessionStartedEvent
 import org.openapitools.client.models.CallUpdatedEvent
 import org.openapitools.client.models.ConnectedEvent
 import org.openapitools.client.models.CustomVideoEvent
@@ -54,12 +59,7 @@ import org.openapitools.client.models.UserResponse
 
 
 
-import com.squareup.moshi.FromJson
-import com.squareup.moshi.Json
-import com.squareup.moshi.JsonAdapter
-import com.squareup.moshi.JsonReader
-import com.squareup.moshi.JsonWriter
-import com.squareup.moshi.ToJson
+import com.squareup.moshi.*
 import org.openapitools.client.infrastructure.Serializer
 
 /**
@@ -68,7 +68,7 @@ import org.openapitools.client.infrastructure.Serializer
  */
 
 
-public abstract class VideoEvent {
+public abstract class VideoEvent{
     abstract fun getEventType(): String
 }
 
@@ -109,18 +109,23 @@ class VideoEventAdapter : JsonAdapter<VideoEvent>() {
             "call.broadcasting_stopped" -> CallBroadcastingStoppedEvent::class.java
             "call.created" -> CallCreatedEvent::class.java
             "call.ended" -> CallEndedEvent::class.java
+            "call.live_started" -> CallLiveStartedEvent::class.java
             "call.member_added" -> CallMemberAddedEvent::class.java
             "call.member_removed" -> CallMemberRemovedEvent::class.java
             "call.member_updated" -> CallMemberUpdatedEvent::class.java
+            "call.member_updated_permission" -> CallMemberUpdatedPermissionEvent::class.java
             "call.permission_request" -> PermissionRequestEvent::class.java
             "call.permissions_updated" -> UpdatedCallPermissionsEvent::class.java
             "call.reaction_new" -> CallReactionEvent::class.java
             "call.recording_started" -> CallRecordingStartedEvent::class.java
             "call.recording_stopped" -> CallRecordingStoppedEvent::class.java
             "call.rejected" -> CallRejectedEvent::class.java
+            "call.session_ended" -> CallSessionEndedEvent::class.java
+            "call.session_participant_joined" -> CallSessionParticipantJoinedEvent::class.java
+            "call.session_participant_left" -> CallSessionParticipantLeftEvent::class.java
+            "call.session_started" -> CallSessionStartedEvent::class.java
             "call.unblocked_user" -> UnblockedUserEvent::class.java
             "call.updated" -> CallUpdatedEvent::class.java
-            "call.updated_permission" -> CallMemberUpdatedPermissionEvent::class.java
             "connection.ok" -> ConnectedEvent::class.java
             "custom" -> CustomVideoEvent::class.java
             "health.check" -> HealthCheckEvent::class.java

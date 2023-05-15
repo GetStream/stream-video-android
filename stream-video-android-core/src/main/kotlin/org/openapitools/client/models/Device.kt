@@ -27,13 +27,7 @@ package org.openapitools.client.models
 
 
 
-import com.squareup.moshi.FromJson
 import com.squareup.moshi.Json
-import com.squareup.moshi.JsonAdapter
-import com.squareup.moshi.JsonReader
-import com.squareup.moshi.JsonWriter
-import com.squareup.moshi.ToJson
-import org.openapitools.client.infrastructure.Serializer
 
 /**
  *
@@ -44,6 +38,7 @@ import org.openapitools.client.infrastructure.Serializer
  * @param disabled Whether device is disabled or not
  * @param disabledReason Reason explaining why device had been disabled
  * @param pushProviderName
+ * @param voip When true the token is for Apple VoIP push notifications
  */
 
 
@@ -68,6 +63,10 @@ data class Device (
     val disabledReason: kotlin.String? = null,
 
     @Json(name = "push_provider_name")
-    val pushProviderName: kotlin.String? = null
+    val pushProviderName: kotlin.String? = null,
+
+    /* When true the token is for Apple VoIP push notifications */
+    @Json(name = "voip")
+    val voip: kotlin.Boolean? = null
 
 )

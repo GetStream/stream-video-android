@@ -29,13 +29,7 @@ import org.openapitools.client.models.MemberResponse
 
 
 
-import com.squareup.moshi.FromJson
 import com.squareup.moshi.Json
-import com.squareup.moshi.JsonAdapter
-import com.squareup.moshi.JsonReader
-import com.squareup.moshi.JsonWriter
-import com.squareup.moshi.ToJson
-import org.openapitools.client.infrastructure.Serializer
 
 /**
  * This event is sent when a call is created. Clients receiving this event should check if the ringing  field is set to true and if so, show the call screen
@@ -72,7 +66,7 @@ data class CallCreatedEvent (
     @Json(name = "type")
     val type: kotlin.String = "call.created"
 
-) : VideoEvent(), WSCallEvent {
+) : VideoEvent(), WSCallEvent{
 
     override fun getCallCID(): String {
         return callCid

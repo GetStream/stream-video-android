@@ -71,6 +71,9 @@ public data class ParticipantState(
     internal val _audioTrack = MutableStateFlow<AudioTrack?>(null)
     val audioTrack: StateFlow<AudioTrack?> = _audioTrack
 
+    internal val _screenSharingEnabled: MutableStateFlow<Boolean> = MutableStateFlow(false)
+    val screenSharingEnabled: StateFlow<Boolean> = _screenSharingEnabled
+
     internal val _screenSharingTrack = MutableStateFlow<VideoTrack?>(null)
     val screenSharingTrack: StateFlow<VideoTrack?> = _screenSharingTrack
 
@@ -81,7 +84,7 @@ public data class ParticipantState(
         MutableStateFlow(initialUser)
     val user: StateFlow<User> = _user
 
-    // TODO: make this a property on the user object
+    // Could also be a property on the user
     val userNameOrId: StateFlow<String> = _user.mapState { it.name.ifEmpty { it.id } }
 
     /**
@@ -142,6 +145,8 @@ public data class ParticipantState(
         _audioLevel.value = participant.audio_level
         _audioEnabled.value = participant.published_tracks.contains(TrackType.TRACK_TYPE_AUDIO)
         _videoEnabled.value = participant.published_tracks.contains(TrackType.TRACK_TYPE_VIDEO)
+        _screenSharingEnabled.value = participant.published_tracks.contains(TrackType.TRACK_TYPE_SCREEN_SHARE)
+
         val currentUser = _user.value
         _user.value = currentUser.copy(
             name = participant.name,

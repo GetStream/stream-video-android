@@ -32,9 +32,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import io.getstream.video.android.compose.state.ui.internal.CallParticipantsInfoOption
-import io.getstream.video.android.compose.state.ui.internal.Invite
-import io.getstream.video.android.compose.state.ui.internal.ToggleMute
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.ui.common.R
 
@@ -44,18 +41,18 @@ import io.getstream.video.android.ui.common.R
  *
  * Used to trigger invites or muting/unmuting the current user.
  *
- * @param isCurrentUserMuted If the current user has audio or not.
- * @param onOptionSelected Handler when the user triggers an option.
+ * @param isLocalAudioEnabled If the current user has audio or not.
  * @param modifier Modifier for styling.
  */
 @Composable
-internal fun CallParticipantsInfoOptions(
-    isCurrentUserMuted: Boolean,
-    onOptionSelected: (CallParticipantsInfoOption) -> Unit,
-    modifier: Modifier = Modifier
+internal fun CallParticipantsInfoActions(
+    modifier: Modifier = Modifier,
+    isLocalAudioEnabled: Boolean,
+    onInviteUser: () -> Unit,
+    onMute: (Boolean) -> Unit
 ) {
     Row(
-        modifier = modifier,
+        modifier = modifier.padding(vertical = 20.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.SpaceEvenly
     ) {
@@ -66,7 +63,7 @@ internal fun CallParticipantsInfoOptions(
                 .padding(start = 16.dp, end = 8.dp),
             colors = ButtonDefaults.buttonColors(backgroundColor = VideoTheme.colors.primaryAccent),
             shape = VideoTheme.shapes.participantsInfoMenuButton,
-            onClick = { onOptionSelected(Invite) },
+            onClick = { onInviteUser.invoke() },
             content = {
                 Text(
                     text = stringResource(R.string.stream_video_call_participants_info_options_invite),
@@ -83,11 +80,17 @@ internal fun CallParticipantsInfoOptions(
                 .padding(start = 8.dp, end = 16.dp),
             colors = ButtonDefaults.buttonColors(backgroundColor = VideoTheme.colors.appBackground),
             border = BorderStroke(1.dp, VideoTheme.colors.textLowEmphasis),
-            onClick = { onOptionSelected(ToggleMute(isCurrentUserMuted)) },
+            onClick = { onMute(!isLocalAudioEnabled) },
             shape = VideoTheme.shapes.participantsInfoMenuButton,
             content = {
                 Text(
-                    text = stringResource(if (isCurrentUserMuted) R.string.stream_video_call_participants_info_options_unmute else R.string.stream_video_call_participants_info_options_mute),
+                    text = stringResource(
+                        if (isLocalAudioEnabled) {
+                            R.string.stream_video_call_participants_info_options_mute
+                        } else {
+                            R.string.stream_video_call_participants_info_options_unmute
+                        }
+                    ),
                     style = VideoTheme.typography.bodyBold,
                     color = VideoTheme.colors.textLowEmphasis
                 )
@@ -100,9 +103,10 @@ internal fun CallParticipantsInfoOptions(
 @Composable
 private fun CallParticipantsInfoOptionsPreview() {
     VideoTheme {
-        CallParticipantsInfoOptions(
-            isCurrentUserMuted = false,
-            onOptionSelected = { }
+        CallParticipantsInfoActions(
+            isLocalAudioEnabled = false,
+            onInviteUser = {},
+            onMute = {}
         )
     }
 }

@@ -109,7 +109,7 @@ public class ScreenShareView : ConstraintLayout, VideoRenderer, JobHolder {
      * @param screenSharingSession The currently active screen sharing session.
      */
     public fun setScreenSharingSession(screenSharingSession: ScreenSharingSession) {
-        setTrack(screenSharingSession.track)
+        setTrack(screenSharingSession.participant.screenSharingTrack.value)
     }
 
     /**

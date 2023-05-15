@@ -37,8 +37,27 @@ enum TrackType {
   TRACK_TYPE_SCREEN_SHARE_AUDIO = 4;
 }
 
+// CallState is the current state of the call
+// as seen by an SFU.
 message CallState {
+  // participants is the list of participants in the call.
+  // In large calls, the list could be truncated in which
+  // case, the list of participants contains fewer participants
+  // than the counts returned in participant_count. Anonymous
+  // participants are **NOT** included in the list.
   repeated Participant participants = 1;
+  // started_at is the time the call session actually started.
+  google.protobuf.Timestamp started_at = 2;
+  // participant_count contains the summary of the counts.
+  ParticipantCount participant_count = 3;
+}
+
+message ParticipantCount {
+  // Total number of participants in the call including
+  // the anonymous participants.
+  uint32 total = 1;
+  // Total number of anonymous participants in the call.
+  uint32 anonymous = 2;
 }
 
 // those who are online in the call

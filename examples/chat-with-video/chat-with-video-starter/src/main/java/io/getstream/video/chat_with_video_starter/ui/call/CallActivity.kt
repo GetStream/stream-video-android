@@ -32,7 +32,6 @@ class CallActivity : AbstractComposeCallActivity() {
         return CallViewModelFactory(
             streamVideo = getStreamVideo(this),
             call = getStreamVideo(this).call("default", "123"),
-            permissionManager = getPermissionManager(),
         )
     }
 }

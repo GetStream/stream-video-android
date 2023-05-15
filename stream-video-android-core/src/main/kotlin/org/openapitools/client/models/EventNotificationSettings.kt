@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014-2022 Stream.io Inc. All rights reserved.
+ * Copyright (c) 2014-2023 Stream.io Inc. All rights reserved.
  *
  * Licensed under the Stream License;
  * you may not use this file except in compliance with the License.
@@ -14,17 +14,36 @@
  * limitations under the License.
  */
 
-package io.getstream.video.android.compose.state.ui.internal
+@file:Suppress(
+    "ArrayInDataClass",
+    "EnumEntryName",
+    "RemoveRedundantQualifierName",
+    "UnusedImport"
+)
 
-import io.getstream.video.android.model.User
+package org.openapitools.client.models
+
+import org.openapitools.client.models.APNS
+
+
+
+
+import com.squareup.moshi.Json
 
 /**
- * State for the invite users UI in Call Participants Info.
  *
- * @param user The user state.
- * @param isSelected If the user is selected or not.
+ *
+ * @param apns
+ * @param enabled
  */
-internal data class InviteUserItemState(
-    val user: User,
-    val isSelected: Boolean = false
+
+
+data class EventNotificationSettings (
+
+    @Json(name = "apns")
+    val apns: APNS,
+
+    @Json(name = "enabled")
+    val enabled: kotlin.Boolean
+
 )

@@ -86,7 +86,7 @@ public object ChatDialog : CallAction
  * Action to invite other users to a call.
  */
 public data class InviteUsersToCall(
-    val users: List<io.getstream.video.android.model.User>
+    val users: List<User>
 ) : CallAction
 
 /**

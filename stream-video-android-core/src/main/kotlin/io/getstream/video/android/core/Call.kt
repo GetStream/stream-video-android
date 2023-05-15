@@ -58,6 +58,7 @@ import org.openapitools.client.models.VideoEvent
 import org.webrtc.PeerConnection
 import org.webrtc.RendererCommon
 import stream.video.sfu.models.TrackType
+import stream.video.sfu.models.VideoDimension
 
 /**
  * The call class gives you access to all call level API calls
@@ -292,11 +293,13 @@ public class Call(
         sort: List<SortField> = mutableListOf(SortField.Desc("created_at")),
         limit: Int = 100
     ): Result<QueryMembersResponse> {
-        val result = clientImpl.queryMembers(type, id, filter, sort, limit)
-        result.onSuccess {
-            state.updateFromResponse(it)
-        }
-        return result
+        return clientImpl.queryMembers(
+            type = type,
+            id = id,
+            filter = filter,
+            sort = sort,
+            limit = limit
+        ).onSuccess { state.updateFromResponse(it) }
     }
 
     suspend fun muteAllUsers(
@@ -314,7 +317,7 @@ public class Call(
     }
 
     fun setVisibility(sessionId: String, trackType: TrackType, visible: Boolean) {
-        session?.updateDisplayedTrackVisibility(sessionId, trackType, visible)
+        session?.updateTrackDimensions(sessionId, trackType, visible)
     }
 
     // TODO: review this
@@ -340,11 +343,11 @@ public class Call(
                 override fun onFirstFrameRendered() {
                     logger.d { "[initRenderer.onFirstFrameRendered] #sfu; sessionId: $sessionId" }
                     if (trackType != TrackType.TRACK_TYPE_SCREEN_SHARE) {
-                        session?.updateDisplayedTrackSize(
+                        session?.updateTrackDimensions(
                             sessionId,
                             trackType,
-                            videoRenderer.measuredWidth,
-                            videoRenderer.measuredHeight
+                            true,
+                            VideoDimension(videoRenderer.measuredWidth, videoRenderer.measuredHeight)
                         )
                     }
                     onRender(videoRenderer)
@@ -354,11 +357,11 @@ public class Call(
                     logger.d { "[initRenderer.onFrameResolutionChanged] #sfu; sessionId: $sessionId" }
 
                     if (trackType != TrackType.TRACK_TYPE_SCREEN_SHARE) {
-                        session?.updateDisplayedTrackSize(
+                        session?.updateTrackDimensions(
                             sessionId,
                             trackType,
-                            videoRenderer.measuredWidth,
-                            videoRenderer.measuredHeight
+                            true,
+                            VideoDimension(videoRenderer.measuredWidth, videoRenderer.measuredHeight)
                         )
                     }
                 }

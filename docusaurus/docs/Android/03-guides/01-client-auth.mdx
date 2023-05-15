@@ -1,4 +1,4 @@
----
+`---
 title: Client & Authentication
 description: How to setup the client and authenticate
 ---
@@ -13,16 +13,16 @@ val client = StreamVideoBuilder(
      context = context,
      apiKey = apiKey,
      geo = GEO.GlobalEdgeNetwork,
-     user,
-     token,
+     user = user,
+     token = token,
 ).build()
 ```
 
-* The API Key you can find in the dashboard
-* The user can be either authenticated, anonymous or guest
-* Note that you can store custom data on the user object if needed
+* The API Key you can find in the dashboard.
+* The user can be either authenticated, anonymous or guest.
+* Note that you can store custom data on the user object if needed.
 
-Typically you'll want to initialize the client in your app's Application class.
+Typically, you'll want to initialize the client in your app's `Application` class or a DI module.
 
 ### Generating a token
 
@@ -31,14 +31,14 @@ They provide a way to authenticate a user or give access to a specific set of ca
 
 ### Different types of users
 
-* Authenticated users are users that have an account on your app
-* Guest users are temporary user accounts. You can use it to temporarily give someon a name and image when joining a call
+* Authenticated users are users that have an account on your app.
+* Guest users are temporary user accounts. You can use it to temporarily give someone a name and image when joining a call.
 * Anonymous users are users that are not authenticated. It's common to use this for watching a livestream or similar where you aren't authenticated.
 
-This example shows the client setup for a guest user.
+This example shows the client setup for a guest user:
 
 ```kotlin
-val client = StreamVideoBuilder(
+val streamVideo = StreamVideoBuilder(
     context = context,
     apiKey = apiKey,
     geo = GEO.GlobalEdgeNetwork,
@@ -49,7 +49,7 @@ val client = StreamVideoBuilder(
 And here's an example for an anonymous user
 
 ```kotlin
-val client = StreamVideoBuilder(
+val streamVideo = StreamVideoBuilder(
     context = context,
     apiKey = apiKey,
     geo = GEO.GlobalEdgeNetwork,
@@ -62,12 +62,12 @@ val client = StreamVideoBuilder(
 Here's a more complete example of the client options:
 
 ```kotlin
-val client = StreamVideoBuilder(
+val streamVideo = StreamVideoBuilder(
     context = context,
     apiKey = apiKey,
     geo = GEO.GlobalEdgeNetwork,
-    user,
-    token,
+    user = user,
+    token = token,
     tokenProvider = { error ->
         testData.tokens["thierry"]!!
     },
@@ -75,7 +75,15 @@ val client = StreamVideoBuilder(
 ).build()
 ```
 
-The full list of supported options is
+Once you invoke the `build()` method of `StreamVideoBuilder`, you can get the same instance of the `StreamVideo` with the `instance()` methods below:
+
+```kotlin
+val streamVideo = StreamVideo.instance()
+```
+
+If you don't need to use the `StreamVideo` instance anymore, you can uninstall by calling `StreamVideo.uninstall()`
+
+The full list of supported options is:
 
 | Option | Description | Default |
 | --- | --- | --- |
@@ -83,11 +91,12 @@ The full list of supported options is
 | `geo` | The GEO routing policy. Defaults to the global edge network. Configure this if you need specific geofencing rules | GEO.GlobalEdgeNetwork |
 | `user` | The user object. You can store custom data on the user | - |
 | `token` | The JWT token to use for authentication | - |
-| `tokenProvider` | A function to call if the token is expired or invalid | - |
-| `loggingLevel` | The logging level. Recommend to set it to debug while in development | - |
+| `tokenProvider` | A function to call if the token is expired or invalid | null |
+| `loggingLevel` | The logging level. Recommend to set it to debug while in development | LoggingLevel.BASIC |
 | `enablePush` | If push notifications should be enabled | false |
-| `pushDeviceGenerators` | Support firebase and other push providers | - |
-| `ringNotification` | A function to create your own notification when there's an incoming "ringing" call | - |
+| `pushDeviceGenerators` | Support firebase and other push providers | false |
+| `ringNotification` | A function to create your own notification when there's an incoming "ringing" call | null |
 | `audioFilters` | Run audio through a filter before sending it | - |
 | `videoFilters` | Run video through a filter before sending it | - |
 
+`

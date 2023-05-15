@@ -16,129 +16,98 @@
 
 package io.getstream.video.android.compose.ui.components.participants
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import io.getstream.video.android.compose.state.ui.participants.ParticipantInfoAction
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import io.getstream.video.android.compose.state.ui.internal.CallParticipantInfoMode
+import io.getstream.video.android.compose.state.ui.internal.ParticipantListMode
+import io.getstream.video.android.compose.theme.VideoTheme
+import io.getstream.video.android.compose.ui.components.participants.internal.CallParticipantsList
+import io.getstream.video.android.compose.ui.components.participants.internal.InviteUserList
+import io.getstream.video.android.core.ParticipantState
+import io.getstream.video.android.core.call.state.CallAction
+import io.getstream.video.android.core.call.state.InviteUsersToCall
+import io.getstream.video.android.core.call.state.ToggleMicrophone
+import io.getstream.video.android.model.User
 
 /**
  * Represents a menu that shows information on the current call participants, while allowing the user
  * to trigger the Invite Users flow as well as trigger actions on any participants in a call.
  *
- * @param participantsState The list of active participants.
- * @param users The list of users that can be invited to the call.
+ * @param participants The list of active participants.
  * @param modifier Modifier for styling.
  * @param onDismiss Handler when the user dismisses the UI through various actions.
  * @param onInfoMenuAction Handler when one of the menu actions is triggered.
  */
 @Composable
 public fun CallParticipantsInfoMenu(
-    participantsState: List<Any>,
+    participants: List<ParticipantState>,
     modifier: Modifier = Modifier,
     onDismiss: () -> Unit = {},
-    onInfoMenuAction: (ParticipantInfoAction) -> Unit = {},
+    onCallAction: (CallAction) -> Unit = {},
 ) {
+    val me by remember(participants) { derivedStateOf { participants.first { it.isLocal } } }
+    val isLocalAudioEnabled by me.audioEnabled.collectAsStateWithLifecycle()
+
+    var infoStateMode by remember { mutableStateOf<CallParticipantInfoMode>(ParticipantListMode) }
+    var selectedUsers: List<User> = remember { mutableStateListOf() }
+
+    val onBackPressed: () -> Unit = {
+        when (infoStateMode) {
+            is ParticipantListMode -> onDismiss()
+            else -> onDismiss()
+        }
+    }
+
+    BackHandler { onBackPressed.invoke() }
+
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color.Black)
-            .clickable { onDismiss.invoke() }
+            .background(color = VideoTheme.colors.infoMenuOverlayColor)
     ) {
+        Column(modifier) {
+            val listModifier = Modifier
+                .weight(2f)
+                .fillMaxWidth()
+                .background(VideoTheme.colors.appBackground)
+
+            if (infoStateMode is ParticipantListMode) {
+                CallParticipantsList(
+                    modifier = listModifier,
+                    participants = participants,
+                    isLocalAudioEnabled = isLocalAudioEnabled,
+                    onUserOptionsSelected = { },
+                    onInviteUser = { onCallAction.invoke(InviteUsersToCall(selectedUsers)) },
+                    onMute = { enabled -> onCallAction.invoke(ToggleMicrophone(enabled)) },
+                    onBackPressed = onBackPressed
+                )
+            } else {
+                InviteUserList(
+                    modifier = listModifier,
+                    users = emptyList(),
+                    onUserSelected = { user ->
+                        if (!selectedUsers.contains(user)) {
+                            selectedUsers = selectedUsers + user
+                        }
+                    },
+                    onUserUnSelected = { user ->
+                        selectedUsers = selectedUsers - user
+                    }
+                )
+            }
+        }
     }
-//    var infoStateMode by remember { mutableStateOf<CallParticipantInfoMode>(ParticipantList) }
-//    val isCurrentUserMuted = !(participantsState.firstOrNull { it.isLocal }?.hasAudio ?: false)
-//    var selectedUsers by remember {
-//        mutableStateOf(
-//            users.map { InviteUserItemState(it) }
-//        )
-//    }
-//    var selectedUser by remember { mutableStateOf<ParticipantState?>(null) }
-//
-//    BackHandler {
-//        when {
-//            infoStateMode is ParticipantList -> onDismiss()
-//            selectedUser != null -> selectedUser = null
-//            else -> {
-//                infoStateMode = ParticipantList
-//                val currentUsers = selectedUsers.updateAll { it.copy(isSelected = false) }
-//
-//                selectedUsers = currentUsers
-//            }
-//        }
-//    }
-//
-//    Box(
-//        modifier = Modifier
-//            .fillMaxSize()
-//            .background(color = VideoTheme.colors.infoMenuOverlayColor)
-//    ) {
-//        Column(modifier) {
-//            CallParticipantsInfoAppBar(
-//                numberOfParticipants = participantsState.size,
-//                infoStateMode = infoStateMode,
-//                onBackPressed = {
-//                    when (infoStateMode) {
-//                        is ParticipantList -> onDismiss()
-//                        else -> infoStateMode = ParticipantList
-//                    }
-//                },
-//                selectedParticipants = selectedUsers,
-//                onInviteParticipants = onInfoMenuAction
-//            )
-//
-//            val listModifier = Modifier
-//                .weight(2f)
-//                .fillMaxWidth()
-//                .background(VideoTheme.colors.appBackground)
-//
-//            if (infoStateMode is ParticipantList) {
-//                CallParticipantsList(
-//                    modifier = listModifier,
-//                    participantsState = participantsState,
-//                    onUserOptionsSelected = { selectedUser = it }
-//                )
-//            } else {
-//                InviteUserList(
-//                    modifier = listModifier,
-//                    users = selectedUsers,
-//                    onUserSelected = { item ->
-//                        val currentList = selectedUsers
-//
-//                        val updated = currentList.updateValue(
-//                            predicate = { it.user.id == item.user.id },
-//                            transformer = { it.copy(isSelected = !it.isSelected) }
-//                        )
-//
-//                        selectedUsers = updated
-//                    }
-//                )
-//            }
-//
-//            if (infoStateMode !is ParticipantInvites) {
-//                CallParticipantsInfoOptions(
-//                    isCurrentUserMuted = isCurrentUserMuted,
-//                    modifier = Modifier
-//                        .padding(12.dp)
-//                        .fillMaxWidth()
-//                        .background(color = VideoTheme.colors.appBackground)
-//                        .height(VideoTheme.dimens.callParticipantInfoMenuOptionsHeight),
-//                    onOptionSelected = { option ->
-//                        when (option) {
-//                            Invite -> infoStateMode = ParticipantInvites
-//                            is ToggleMute -> onInfoMenuAction(ChangeMuteState(option.isMuted))
-//                        }
-//                    }
-//                )
-//            }
-//
-//            val currentlyUser = selectedUser
-//            if (currentlyUser != null) {
-//                SelectedCallParticipantOptions()
-//            }
-//        }
-//    }
 }

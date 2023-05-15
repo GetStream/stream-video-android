@@ -150,7 +150,7 @@ interface VideoCallsApi {
 
     /**
      * Set call as live
-     *   Sends events: - call.updated  Required permissions: - UpdateCall
+     *   Sends events: - call.live_started  Required permissions: - UpdateCall
      * Responses:
      *  - 201: Successful response
      *  - 400: Bad request
@@ -302,7 +302,7 @@ interface VideoCallsApi {
 
     /**
      * Update Call Member
-     *   Required permissions: - RemoveCallMember - UpdateCallMember - UpdateCallMemberRole
+     *   Sends events: - call.member_added - call.member_removed - call.member_updated  Required permissions: - RemoveCallMember - UpdateCallMember - UpdateCallMemberRole
      * Responses:
      *  - 201: Successful response
      *  - 400: Bad request

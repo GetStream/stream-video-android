@@ -16,11 +16,14 @@
 
 package io.getstream.video.android.compose.ui.components.participants.internal
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -28,6 +31,7 @@ import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.Icon
+import androidx.compose.material.Scaffold
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -49,24 +53,50 @@ import io.getstream.video.android.ui.common.R
 /**
  * Represents the list of active call participants.
  *
- * @param participantsState The list of participants.
+ * @param participants The list of participants.
  * @param onUserOptionsSelected Handler when the options for a given participant are selected.
  * @param modifier Modifier for styling.
  */
 @Composable
 internal fun CallParticipantsList(
-    participantsState: List<ParticipantState>,
+    modifier: Modifier = Modifier,
+    participants: List<ParticipantState>,
+    isLocalAudioEnabled: Boolean,
     onUserOptionsSelected: (ParticipantState) -> Unit,
-    modifier: Modifier = Modifier
+    onInviteUser: () -> Unit,
+    onMute: (Boolean) -> Unit,
+    onBackPressed: () -> Unit
 ) {
-    LazyColumn(
+    Scaffold(
         modifier = modifier,
-        contentPadding = PaddingValues(16.dp),
-        horizontalAlignment = Alignment.Start,
-        verticalArrangement = Arrangement.spacedBy(8.dp)
-    ) {
-        items(participantsState, key = { it.sessionId }) {
-            CallParticipantInfoItem(it, onUserOptionsSelected)
+        backgroundColor = VideoTheme.colors.appBackground,
+        topBar = {
+            CallParticipantListAppBar(
+                numberOfParticipants = participants.size,
+                onBackPressed = onBackPressed
+            )
+        },
+        bottomBar = {
+            CallParticipantsInfoActions(
+                modifier = Modifier.fillMaxWidth(),
+                isLocalAudioEnabled = isLocalAudioEnabled,
+                onInviteUser = onInviteUser,
+                onMute = onMute
+            )
+        }
+    ) { padding ->
+        LazyColumn(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(padding)
+                .background(VideoTheme.colors.appBackground),
+            contentPadding = PaddingValues(16.dp),
+            horizontalAlignment = Alignment.Start,
+            verticalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            items(participants, key = { it.sessionId }) {
+                CallParticipantInfoItem(it, onUserOptionsSelected)
+            }
         }
     }
 }
@@ -150,8 +180,11 @@ private fun CallParticipantsListPreview() {
     StreamMockUtils.initializeStreamVideo(LocalContext.current)
     VideoTheme {
         CallParticipantsList(
-            participantsState = mockParticipantList,
-            onUserOptionsSelected = {}
-        )
+            participants = mockParticipantList,
+            onUserOptionsSelected = {},
+            isLocalAudioEnabled = false,
+            onInviteUser = {},
+            onMute = {}
+        ) {}
     }
 }

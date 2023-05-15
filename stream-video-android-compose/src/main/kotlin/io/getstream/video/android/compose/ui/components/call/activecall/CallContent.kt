@@ -33,7 +33,9 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLayoutDirection
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.coerceAtLeast
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -49,6 +51,8 @@ import io.getstream.video.android.core.call.state.CallAction
 import io.getstream.video.android.core.call.state.CallDeviceState
 import io.getstream.video.android.core.call.state.LeaveCall
 import io.getstream.video.android.core.viewmodel.CallViewModel
+import io.getstream.video.android.mock.StreamMockUtils
+import io.getstream.video.android.mock.mockCall
 import stream.video.sfu.models.TrackType
 
 /**
@@ -59,8 +63,8 @@ import stream.video.sfu.models.TrackType
  * @param modifier Modifier for styling.
  * @param onBackPressed Handler when the user taps on the back button.
  * @param onCallAction Handler when the user triggers a Call Control Action.
- * @param callAppBarContent Content shown that a call information or an additional actions.
- * @param callControlsContent Content shown that allows users to trigger different actions.
+ * @param callAppBarContent Content is shown that calls information or additional actions.
+ * @param callControlsContent Content is shown that allows users to trigger different actions to control a joined call.
  * @param pictureInPictureContent Content shown when the user enters Picture in Picture mode, if
  * it's been enabled in the app.
  */
@@ -121,8 +125,8 @@ public fun CallContent(
  * @param callDeviceState Media state of the call, for audio and video.
  * @param isInPictureInPicture If the user has engaged in Picture-In-Picture mode.
  * @param onCallAction Handler when the user triggers a Call Control Action.
- * @param callAppBarContent Content shown that a call information or an additional actions.
- * @param callControlsContent Content shown that allows users to trigger different actions.
+ * @param callAppBarContent Content is shown that calls information or additional actions.
+ * @param callControlsContent Content is shown that allows users to trigger different actions to control a joined call.
  * @param pictureInPictureContent Content shown when the user enters Picture in Picture mode, if
  * it's been enabled in the app.
  */
@@ -205,11 +209,12 @@ public fun CallContent(
 internal fun DefaultPictureInPictureContent(call: Call) {
     val screenSharingSession by call.state.screenSharingSession.collectAsState(initial = null)
     val session = screenSharingSession
+    val mediaTrack = session?.participant?.screenSharingTrack?.collectAsState()
     if (session != null) {
         VideoRenderer(
             modifier = Modifier.aspectRatio(ScreenShareAspectRatio, false),
             call = call,
-            mediaTrack = session.track,
+            mediaTrack = mediaTrack?.value,
             trackType = TrackType.TRACK_TYPE_SCREEN_SHARE,
             sessionId = session.participant.sessionId
         )
@@ -230,5 +235,17 @@ internal fun DefaultPictureInPictureContent(call: Call) {
                 labelPosition = Alignment.BottomStart
             )
         }
+    }
+}
+
+@Preview
+@Composable
+private fun CallContentPreview() {
+    StreamMockUtils.initializeStreamVideo(LocalContext.current)
+    VideoTheme {
+        CallContent(
+            call = mockCall,
+            callDeviceState = CallDeviceState()
+        )
     }
 }

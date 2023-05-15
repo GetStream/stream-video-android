@@ -83,8 +83,7 @@ class CallActivity : AppCompatActivity() {
 
         return CallViewModelFactory(
             streamVideo = streamVideo,
-            call = streamVideo.call(type = type, id = id),
-            permissionManager = initPermissionManager()
+            call = streamVideo.call(type = type, id = id)
         )
     }
 
@@ -108,7 +107,10 @@ class CallActivity : AppCompatActivity() {
     companion object {
         internal const val EXTRA_CID = "EXTRA_CID"
 
-        fun getIntent(context: Context, cid: io.getstream.video.android.model.StreamCallId): Intent {
+        fun getIntent(
+            context: Context,
+            cid: io.getstream.video.android.model.StreamCallId
+        ): Intent {
             return Intent(context, CallActivity::class.java).apply {
                 flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
                 putExtra(EXTRA_CID, cid)

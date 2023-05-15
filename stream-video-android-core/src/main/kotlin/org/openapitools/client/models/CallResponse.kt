@@ -31,13 +31,7 @@ import org.openapitools.client.models.UserResponse
 
 
 
-import com.squareup.moshi.FromJson
 import com.squareup.moshi.Json
-import com.squareup.moshi.JsonAdapter
-import com.squareup.moshi.JsonReader
-import com.squareup.moshi.JsonWriter
-import com.squareup.moshi.ToJson
-import org.openapitools.client.infrastructure.Serializer
 
 /**
  * Represents a call
@@ -48,6 +42,7 @@ import org.openapitools.client.infrastructure.Serializer
  * @param cid The unique identifier for a call (<type>:<id>)
  * @param createdAt Date/time of creation
  * @param createdBy
+ * @param currentSessionId
  * @param custom Custom data for this object
  * @param hlsPlaylistUrl
  * @param id Call ID
@@ -85,6 +80,9 @@ data class CallResponse (
 
     @Json(name = "created_by")
     val createdBy: UserResponse,
+
+    @Json(name = "current_session_id")
+    val currentSessionId: kotlin.String,
 
     /* Custom data for this object */
     @Json(name = "custom")
