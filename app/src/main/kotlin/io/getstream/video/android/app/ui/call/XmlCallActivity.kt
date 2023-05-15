@@ -32,7 +32,6 @@ class XmlCallActivity : AbstractXmlCallActivity() {
     override fun getCallViewModelFactory(): CallViewModelFactory {
         return CallViewModelFactory(
             streamVideo = getStreamVideo(this),
-            permissionManager = getPermissionManager(),
             call = getStreamVideo(this).call("default", "replaceme")
         )
     }

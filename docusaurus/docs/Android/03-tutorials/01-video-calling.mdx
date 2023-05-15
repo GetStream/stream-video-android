@@ -1,0 +1,316 @@
+---
+title: Video Call Tutorial
+description: How to build a video call similar to Zoom or facebook messenger
+---
+
+## Video Call Tutorial
+
+This tutorial teaches you how to build your own Zoom/Whatsapp style video calling.
+
+* Calls run on Stream's global edge network for optimal latency.
+* Permissions give you fine grained control over who can do what.
+* Dynascale automatically adjusts the video quality and codecs.
+
+### Step 1 - Create a new project in android studio
+
+Note that this tutorial was written using Android Studio Flamingo.
+Setup steps can vary slightly across Android Studio versions so if you run into trouble be sure to use the latest version of Android Studio.
+
+1. Create a new project.
+2. Select **empty activity**
+3. Name your project **VideoCall**.
+
+### Step 2 - Install the SDK & Setup the client
+
+**Add the compose SDK** to your app's `build.gradle` file found in app/build.gradle
+If you're new to android note that there are 2 build.gradle files, you want to open the one in the app folder.
+
+```groovy
+dependencies {
+    implementation "io.getstream:stream-video-android-compose:$stream_version"
+}
+```
+
+### Step 3 - Create & Join a call
+
+Open up `MainActivity.kt` and add the following code to the `onCreate` method:
+
+```kotlin
+class MainActivity : ComponentActivity() {
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+
+        // create a user.
+        val user = User(
+            id = "byron",
+            name = "Byron",
+            image = "https://getstream.io/chat/docs/sdk/avatars/jpg/Byron%20Waelchi.jpg",
+            role = "admin",
+            custom = mapOf("email" to "byron@example.com")
+        )
+
+        // for a production app we recommend adding the client to your Application class or di module.
+        val client = StreamVideoBuilder(
+             context = context,
+             apiKey = apiKey,
+             geo = GEO.GlobalEdgeNetwork,
+             user = user,
+             token = token,
+        ).build()
+
+        // join a call, which type is `default` and id is `123`.
+        val call = client.call("default", "123")
+        call.join(create = true)
+
+        setContent {
+            VideoTheme {
+                // A surface container using the 'background' color from the theme
+                Surface(
+                    modifier = Modifier.fillMaxSize(),
+                    color = VideoTheme.colors.appBackground
+                ) {
+                    Greeting("${call.id} has ${call.state.participants.value.size} participants")
+                }
+            }
+        }
+    }
+}
+```
+
+Run the sample app and now join this call via your browser here. Let's keep it open as you go through the tutorial.
+You'll see the participant count increase to 2 in your app. Awesome, but let's add some video
+
+### Step 4 - Rendering Video
+
+In this next step we're going to:
+
+1. Use a viewmodel (it nicely cleans up the call after you leave the UI).
+2. Render your local video.
+3. Render the participant's video.
+
+```kotlin
+class MainActivity : ComponentActivity() {
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+
+        // create a user.
+        val user = User(
+            id = "byron",
+            name = "Byron",
+            image = "https://getstream.io/chat/docs/sdk/avatars/jpg/Byron%20Waelchi.jpg",
+            role = "admin",
+            custom = mapOf("email" to "byron@example.com")
+        )
+
+        // for a production app we recommend adding the client to your Application class or di module.
+        val client = StreamVideoBuilder(
+             context = context,
+             apiKey = apiKey,
+             geo = GEO.GlobalEdgeNetwork,
+             user = user,
+             token = token,
+        ).build()
+
+        // join a call, which type is `default` and id is `123`.
+        val call = client.call("default", "123")
+        call.join(create = true)
+
+        // create a view model factory and a view model.
+        val factory = CallViewModelFactory(
+            streamVideo = client,
+            call = call,
+        )
+        val vm by viewModels<CallViewModel> { factory }
+
+        // create a permissionManager and set it to the CallViewModel.
+        val permissionManager = PermissionManager.create(
+               activity = this,
+               onPermissionResult = { permission, isGranted ->
+                   when (permission) {
+                       android.Manifest.permission.CAMERA -> vm.onCallAction(ToggleCamera(isGranted))
+                       android.Manifest.permission.RECORD_AUDIO -> vm.onCallAction(
+                           ToggleMicrophone(
+                               isGranted
+                           )
+                       )
+                   }
+               },
+               onShowRequestPermissionRationale = {}
+         ).also { vm.setPermissionManager(it) }
+
+        setContent {
+            VideoTheme {
+                val participants by call.state.remoteParticipants.collectAsState()
+                val me by call.state.me.collectAsState()
+
+                // A surface container using the 'background' color from the theme
+                Surface(
+                    modifier = Modifier.fillMaxSize(),
+                    color = VideoTheme.colors.appBackground
+                ) {
+                    // render a local video call
+                    Column(modifier = Modifier.fillMaxSize()) {
+                        CallSingleVideoRenderer(
+                            modifier = Modifier.weight(1f),
+                            call = call,
+                            participant = me,
+                        )
+                    }
+
+                    // render a remote video call
+                    val remoteParticipant = participants.firstOrNull()
+                        if (remoteParticipant != null) {
+                        Column(modifier = Modifier.fillMaxSize()) {
+                            CallSingleVideoRenderer(
+                                modifier = Modifier.weight(1f),
+                                call = call,
+                                participant = remoteParticipant,
+                            )
+                         }
+                    }
+                }
+            }
+        }
+    }
+}
+```
+
+### Step 5 - A full UI
+
+Stream's video SDK includes UI components that make it simple to launch a video calling experience in hours.
+Now that we've seen how to use the lower level APIs, lets build a fully polished calling experience with the example below:
+
+```kotlin
+setContent {
+    VideoTheme {
+        CallContainer(
+            modifier = Modifier.background(color = VideoTheme.colors.appBackground),
+            callViewModel = vm,
+            callType = CallType.VIDEO,
+            onBackPressed = { finish() },
+        )
+    }
+}
+```
+
+The result will be:
+
+![Compose CallContainer](../../assets/compose_call_container.jpg)
+
+When you now run your app you'll see a more polished video UI.
+It supports reactions, screensharing, active speaker detection, network quality indicators etc.
+
+### Step 6 - Customizing the UI
+
+All UI components in the SDK use our pre-defined themes and you can easily customize them in Jetpack Compose. You can customize the theme with the 4 components below:
+
+- **StreamColor**: This is used to decided colors of UI components.
+- **StreamDimens**: This is used to decide the size of UI components.
+- **StreamTypography**: This is used to decide the text styles of UI components.
+- **StreamShapes**: This is used to decide the shapes of UI components.
+
+In Jetpack Compose, you can simply customize those styles by passing the value into the `VideoTheme` like the example below:
+
+```kotlin
+VideoTheme(
+    colors = if (isSystemInDarkTheme()) {
+        StreamColors.defaultDarkColors().copy(appBackground = Color.Black)
+    } else {
+        StreamColors.defaultColors().copy(appBackground = Color.White)
+    }
+) {
+    CallContainer(
+        modifier = Modifier.background(color = VideoTheme.colors.appBackground),
+        callViewModel = vm,
+        callType = CallType.VIDEO,
+        onBackPressed = { finish() },
+    )
+}
+```
+
+With the same approaches, you can customize the rest of other styles:
+
+```kotlin
+VideoTheme(
+    colors = StreamColors.defaultColors().copy(appBackground = Color.Black),
+    dimens = StreamDimens.defaultDimens().copy(callAvatarSize = 72.dp),
+    typography = StreamTypography.defaultTypography().copy(title1 = TextStyle()),
+    shapes = StreamShapes.defaultShapes().copy(avatar = CircleShape)
+) {
+  ..
+}
+```
+
+Stream's Video SDK provides fully polished UI components, allowing you to build a video call quickly and customize them. As you've seen before, you can implement a full complete video call screen with `CallContainer` composable in Jetpack Compose. The `CallContainer` composable consists of three major parts below:
+
+- **callAppBarContent**: Content is shown that calls information or additional actions.
+- **callControlsContent**: Content is shown that allows users to trigger different actions to control a joined call.
+- **callContent**: Content shown to be rendered when we're connected to a call successfully.
+
+In the example below, you'll see how to customize each parts of the `CallContainer` composable:
+
+```kotlin
+VideoTheme {
+    CallContainer(
+        modifier = Modifier.background(color = VideoTheme.colors.appBackground),
+        callViewModel = vm,
+        callType = CallType.VIDEO,
+        onBackPressed = { finish() },
+        callAppBarContent = { /** custom call app bar */ },
+        callControlsContent = {
+            CallControls(
+                callViewModel = vm,
+                actions = listOf(
+                    {
+                        ToggleCameraAction(
+                            modifier = Modifier.size(52.dp),
+                            isCameraEnabled = vm.callDeviceState.value.isCameraEnabled,
+                            onCallAction = vm::onCallAction
+                        )
+                    },
+                    {
+                        ToggleMicrophoneAction(
+                            modifier = Modifier.size(52.dp),
+                            isMicrophoneEnabled = vm.callDeviceState.value.isMicrophoneEnabled,
+                            onCallAction = vm::onCallAction
+                        )
+                    },
+                    {
+                        FlipCameraAction(
+                            modifier = Modifier.size(52.dp),
+                            onCallAction = vm::onCallAction
+                        )
+                    },
+                ),
+                onCallAction = vm::onCallAction
+            )
+        },
+        callContent = { /** custom call content */ },
+    )
+}
+```
+
+### Step 7 - PIP
+
+To truly make the experience solid the call should continue running in the background using PIP.
+Also, if you answer a phone call while you're on this call, your audio and video should be muted automatically.
+
+TODO: include docs on PIP setup & service
+
+
+### Other Possibilities
+
+* **Ringing**: If you want to ring the other participants before the docs explain how to do this here:
+* **Push Notifications**:
+* **Reactions**:
+* **Chat Integration**:
+
+
+### Conclusion
+
+And that's all it takes to build a full calling experience with Stream.
+
+Mention that we also have quickstarts for livestream and audio rooms
+Repeat why you should use Stream
+Repeat why this SDK is awesome
+

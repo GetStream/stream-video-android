@@ -49,6 +49,7 @@ import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.ParticipantState
@@ -89,7 +90,7 @@ public fun LocalVideoContent(
 
     val paddingOffset = density.run { VideoTheme.dimens.floatingVideoPadding.toPx() }
 
-    val track = localParticipant.videoTrack
+    val track by localParticipant.videoTrack.collectAsStateWithLifecycle()
 
     if (LocalInspectionMode.current) {
         Card(

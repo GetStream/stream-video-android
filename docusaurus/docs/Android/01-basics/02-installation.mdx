@@ -31,9 +31,9 @@ allprojects {
 }
 ```
 
-Check the Releases page for the latest version and the changelog.
+Check the [Releases page](https://github.com/GetStream/stream-video-android/releases) for the latest version and the changelog.
 
-// TODO - embed version from GH
+[![Latest version badge](https://img.shields.io/github/v/release/GetStream/stream-video-android)](https://github.com/GetStream/stream-video-android/releases)
 
 ## Available Artifacts
 
@@ -42,7 +42,7 @@ To add the low-level Video client library to your app, open your module's build.
 
 ```groovy
 dependencies {
-    implementation "io.getstream:stream-video-android:$stream_version"
+    implementation "io.getstream:stream-video-android-core:$stream_version"
 }
 ```
 
@@ -78,10 +78,24 @@ Our Stream Video Android libraries do **not** follow semantic versioning.
 
 We increase the minor version whenever breaking changes are introduced. Patch releases only contain smaller fixes and improvements.
 
-You can keep track of all the changes in the Stream Video Android libraries via the [GitHub releases page](https://github.com/GetStream/stream-video-android/releases), and you can also find the release notes of all past releases in our CHANGELOG (TODO create one) file. These will always highlight breaking changes.
+You can keep track of all the changes in the Stream Video Android libraries via the [GitHub releases page](https://github.com/GetStream/stream-video-android/releases), and you can also find the release notes of all past releases in our [CHANGELOG](https://github.com/GetStream/stream-video-android/blob/main/CHANGELOG.md) file. These will always highlight breaking changes.
 
-We also maintain a separate document, DEPRECATIONS (TODO - create), which lists deprecated constructs in the SDK, with their expected time of further deprecations and eventual removal.
+We also maintain a separate document, [DEPRECATIONS](https://github.com/GetStream/stream-video-android/blob/main/DEPRECATIONS.md), which lists deprecated constructs in the SDK, with their expected time of further deprecations and eventual removal.
 
 ## Snapshot Builds
 
-// TODO - snapshot for video?
+We publish SNAPSHOT versions of our SDK, which contain the code as of the latest commit on [the develop branch](https://github.com/getStream/stream-video-android/tree/develop).
+
+These builds may contain bugs or breaking changes that will be fixed before the next proper release. However, you can use these builds temporarily to include the latest changes from our SDK in your project before the next release happens.
+
+:::warning Snapshot builds are not stable. Never use them in production. :::
+
+To use snapshot builds, you need to add the Sonatype snapshot repository in your Gradle build configuration (see at the top of this page for where to add this):
+
+```groovy
+maven { url 'https://oss.sonatype.org/content/repositories/snapshots/' }
+```
+
+Then you can add a snapshot dependency on any of our artifacts, replacing the normal version number with a version that has a `-SNAPSHOT` postfix. Our snapshot version is always one patch version ahead of the latest release we've published. If the last stable release was `X.Y.Z`, the snapshot version would be `X.Y.(Z+1)-SNAPSHOT`.
+
+You can browse our available snapshot builds in the [Sonatype snapshot repo](https://oss.sonatype.org/content/repositories/snapshots/io/getstream/stream-video-android-core/), which you can also check for what the latest available snapshot version is.

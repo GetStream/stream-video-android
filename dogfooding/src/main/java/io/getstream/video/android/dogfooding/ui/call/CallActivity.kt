@@ -44,6 +44,7 @@ class CallActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+        vm.setPermissionManager(getPermissionManager())
         vm.setOnLeaveCall { finish() }
 
         setContent {
@@ -65,12 +66,11 @@ class CallActivity : ComponentActivity() {
 
         return CallViewModelFactory(
             streamVideo = streamVideo,
-            call = streamVideo.call(type = type, id = id),
-            permissionManager = initPermissionManager()
+            call = streamVideo.call(type = type, id = id)
         )
     }
 
-    private fun initPermissionManager(): PermissionManager {
+    private fun getPermissionManager(): PermissionManager {
         return PermissionManager.create(
             activity = this,
             onPermissionResult = { permission, isGranted ->
@@ -90,7 +90,10 @@ class CallActivity : ComponentActivity() {
     companion object {
         internal const val EXTRA_CID = "EXTRA_CID"
 
-        fun getIntent(context: Context, cid: io.getstream.video.android.model.StreamCallId): Intent {
+        fun getIntent(
+            context: Context,
+            cid: io.getstream.video.android.model.StreamCallId
+        ): Intent {
             return Intent(context, CallActivity::class.java).apply {
                 flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
                 putExtra(EXTRA_CID, cid)

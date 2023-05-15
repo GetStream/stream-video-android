@@ -47,7 +47,6 @@ import io.getstream.video.android.core.permission.PermissionManagerProvider
 import io.getstream.video.android.core.viewmodel.CallViewModel
 import io.getstream.video.android.core.viewmodel.CallViewModelFactory
 import io.getstream.video.android.core.viewmodel.CallViewModelFactoryProvider
-import io.getstream.video.android.model.StreamCallId
 import io.getstream.video.android.model.mapper.toTypeAndId
 
 public abstract class AbstractCallActivity :
@@ -69,8 +68,7 @@ public abstract class AbstractCallActivity :
 
         return CallViewModelFactory(
             streamVideo = streamVideo,
-            call = streamVideo.call(type = type, id = id),
-            permissionManager = initPermissionManager()
+            call = streamVideo.call(type = type, id = id)
         )
     }
 
@@ -101,6 +99,7 @@ public abstract class AbstractCallActivity :
         super.onCreate(savedInstanceState)
         setupUi()
 
+        callViewModel.setPermissionManager(getPermissionManager())
         callViewModel.joinCall()
     }
 

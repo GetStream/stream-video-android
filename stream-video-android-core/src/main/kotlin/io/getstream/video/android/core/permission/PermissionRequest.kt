@@ -28,10 +28,10 @@ import org.threeten.bp.OffsetDateTime
 data class PermissionRequest(
     val call: Call,
     val user: User,
-    val createdAt: org.threeten.bp.OffsetDateTime,
+    val createdAt: OffsetDateTime,
     val permissions: List<String>,
-    var grantedAt: org.threeten.bp.OffsetDateTime? = null,
-    var rejectedAt: org.threeten.bp.OffsetDateTime? = null,
+    var grantedAt: OffsetDateTime? = null,
+    var rejectedAt: OffsetDateTime? = null,
 ) {
     constructor(call: Call, event: PermissionRequestEvent) : this(
         call = call,
