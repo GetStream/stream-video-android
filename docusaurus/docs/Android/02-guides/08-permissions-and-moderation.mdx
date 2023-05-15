@@ -21,22 +21,52 @@ val hasPermission = call.state.hasPermission("send-audio").value
 val response = call.requestPermissions("send-audio")
 ```
 
-The host can proceed to grant you permission
+The host can proceed to grant you permission:
 
 ```
 val requests = call.state.permissionRequests.value
-request.forEach {
+requests.forEach {
     it.grant() // or it.reject()
 }
 ```
 
-You can also grant permissions directly using call.grantPermissions
+You can also grant permissions directly using `call.grantPermissions()` method like the example below:
 
 ```kotlin
 val grantResponse = call.grantPermissions("thierry", listOf("send-audio"))
 ```
 
-You can request the following 3 permissions atm: send-audio, send-video, screenshare
+You can request the following 3 permissions: send-audio, send-video, and screenshare.
+
+#### Android Runtime Permissions
+
+If you want to facilitate an audio or video call, you should grant the following runtime permissions on Android: `CAMERA`, and `RECORD_AUDIO`.
+
+You can requests those permissions by yourself at the right moment, but you can also request permissions with Stream APIs like the example below:
+
+```kotlin
+val permissionManager = PermissionManager.create(
+    activity = this,
+    onPermissionResult = { permission, isGranted ->
+        when (permission) {
+            android.Manifest.permission.CAMERA -> { isGranted -> // toggle your camera }
+            android.Manifest.permission.RECORD_AUDIO -> { isGranted -> // toggle your microphone }
+        }
+    },
+    onShowRequestPermissionRationale = { // show a message when the user selected don't allow permissions }
+)
+```
+
+If you use `CallViewModel` with UI components, you can simply pass it to the `CallViewModelFactory` like the example below:
+
+```kotlin
+val factory = CallViewModelFactory(
+    streamVideo = streamVideo,
+    call = streamVideo.call(type = type, id = id),
+    permissionManager = permissionManager
+)
+val vm by viewModels<CallViewModel> { factory }
+```
 
 ### Moderation Capabilities
 
