@@ -35,7 +35,6 @@ import io.getstream.video.android.core.model.ScreenSharingSession
  * @param call The call that contains all the participants state and tracks.
  * @param session The screen sharing session which is active.
  * @param participants List of participants currently in the call.
- * @param onCallAction Handler when the user triggers a Call Control Action.
  * @param modifier Modifier for styling.
  * @param onRender Handler when each of the Video views render their first frame.
  */

@@ -481,7 +481,7 @@ public class CallState(private val call: Call, private val user: User) {
         _participants.value = new
     }
 
-    private fun upsertParticipants(participants: List<ParticipantState>) {
+    public fun upsertParticipants(participants: List<ParticipantState>) {
         val new = _participants.value.toSortedMap()
         val screensharing = mutableListOf<ParticipantState>()
         participants.forEach {
