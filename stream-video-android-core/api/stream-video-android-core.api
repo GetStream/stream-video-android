@@ -107,6 +107,7 @@ public final class io/getstream/video/android/core/CallState {
 	public final fun updateFromResponse (Lorg/openapitools/client/models/QueryMembersResponse;)V
 	public final fun updateFromResponse (Lorg/openapitools/client/models/UpdateCallResponse;)V
 	public final fun updateParticipant (Lio/getstream/video/android/core/ParticipantState;)V
+	public final fun upsertParticipants (Ljava/util/List;)V
 }
 
 public final class io/getstream/video/android/core/CameraDeviceWrapped {
@@ -2217,8 +2218,7 @@ public final class io/getstream/video/android/core/utils/StringUtilsKt {
 }
 
 public final class io/getstream/video/android/core/viewmodel/CallViewModel : androidx/lifecycle/ViewModel {
-	public fun <init> (Lio/getstream/video/android/core/StreamVideo;Lio/getstream/video/android/core/Call;Lio/getstream/video/android/core/permission/PermissionManager;)V
-	public synthetic fun <init> (Lio/getstream/video/android/core/StreamVideo;Lio/getstream/video/android/core/Call;Lio/getstream/video/android/core/permission/PermissionManager;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun <init> (Lio/getstream/video/android/core/StreamVideo;Lio/getstream/video/android/core/Call;)V
 	public final fun dismissCallInfoMenu ()V
 	public final fun getCall ()Lio/getstream/video/android/core/Call;
 	public final fun getCallDeviceState ()Lkotlinx/coroutines/flow/StateFlow;
@@ -2230,10 +2230,11 @@ public final class io/getstream/video/android/core/viewmodel/CallViewModel : and
 	public final fun onCallAction (Lio/getstream/video/android/core/call/state/CallAction;)V
 	public final fun onPictureInPictureModeChanged (Z)V
 	public final fun setOnLeaveCall (Lkotlin/jvm/functions/Function0;)V
+	public final fun setPermissionManager (Lio/getstream/video/android/core/permission/PermissionManager;)V
 }
 
 public final class io/getstream/video/android/core/viewmodel/CallViewModelFactory : androidx/lifecycle/ViewModelProvider$Factory {
-	public fun <init> (Lio/getstream/video/android/core/StreamVideo;Lio/getstream/video/android/core/Call;Lio/getstream/video/android/core/permission/PermissionManager;)V
+	public fun <init> (Lio/getstream/video/android/core/StreamVideo;Lio/getstream/video/android/core/Call;)V
 	public fun create (Ljava/lang/Class;)Landroidx/lifecycle/ViewModel;
 }
 

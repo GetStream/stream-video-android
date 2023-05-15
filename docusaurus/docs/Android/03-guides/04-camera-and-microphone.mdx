@@ -8,9 +8,9 @@ We expose the following objects on the call:
 
 ```
 val call = client.call("default", "123")
-call.camera
-call.microphone
-call.speaker
+val camera = call.camera
+val microphone = call.microphone
+val speaker = call.speaker
 ```
 
 ### Camera Manager
@@ -24,7 +24,7 @@ call.camera.flip() // switch between front and back camera
 call.camera.listDevices() // list of available devices
 ```
 
-The camera manager also exposes these stateflow objects
+The camera manager also exposes these stateflow objects:
 
 ```kotlin
 call.camera.direction // front/back
@@ -36,7 +36,7 @@ call.camera.availableResolutions // the resolutions that are available
 
 ### Microphone Manager
 
-The microphone manager supports both bluetooth and regular audio sources
+The microphone manager supports both bluetooth and regular audio sources:
 
 ```kotlin
 call.microphone.enable() // enable the camera

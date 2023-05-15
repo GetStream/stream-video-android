@@ -21,7 +21,6 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -31,6 +30,7 @@ import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.IntSize
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.core.Call
 import io.getstream.video.android.mock.StreamMockUtils
@@ -54,7 +54,7 @@ internal fun RegularCallVideoRenderer(
     Box(
         modifier = modifier.background(color = VideoTheme.colors.appBackground)
     ) {
-        val roomParticipants by call.state.participants.collectAsState(emptyList())
+        val roomParticipants by call.state.participants.collectAsStateWithLifecycle()
 
         if (roomParticipants.isNotEmpty()) {
             OrientationVideoRenderer(

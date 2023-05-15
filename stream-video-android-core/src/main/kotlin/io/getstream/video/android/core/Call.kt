@@ -223,48 +223,36 @@ public class Call(
 
         // step 1. call the join endpoint to get a list of SFUs
         val timer = clientImpl.debugInfo.trackTime("call.join")
+
+        val locationResult = clientImpl.selectLocation()
+        if (locationResult !is Success) {
+            return locationResult as Failure
+        }
+        timer.split("location found")
+
         val options = createOptions
             ?: if (create) {
                 CreateCallOptions()
             } else {
                 null
             }
-        val result = joinRequest(options)
+        val result = joinRequest(options, locationResult.value)
 
         if (result !is Success) {
             return result as Failure
         }
+        val sfuToken = result.value.credentials.token
+        val sfuUrl = result.value.credentials.server.url
+        val iceServers = result.value.credentials.iceServers.map { it.toIceServer() }
         timer.split("join request completed")
-
-        // step 2. measure latency
-        val edgeUrls = result.value.edges.map { it.latencyUrl }
-        // measure latency in parallel
-        val measurements = clientImpl.measureLatency(edgeUrls)
-        timer.split("latency measured")
-
-        // upload our latency measurements to the server
-        val selectEdgeServerResult = clientImpl.selectEdgeServer(
-            type = type,
-            id = id,
-            request = GetCallEdgeServerRequest(latencyMeasurements = measurements.associate { it.latencyUrl to it.measurements })
-        )
-        if (selectEdgeServerResult !is Success) {
-            return selectEdgeServerResult as Failure
-        }
-
-        val credentials = selectEdgeServerResult.value.credentials
-        val url = credentials.server.url
-        val iceServers =
-            selectEdgeServerResult.value.credentials.iceServers.map { it.toIceServer() }
 
         session = RtcSession(
             client = client,
             call = this,
-            sfuUrl = url,
-            sfuToken = credentials.token,
+            sfuUrl = sfuUrl,
+            sfuToken = sfuToken,
             connectionModule = (client as StreamVideoImpl).connectionModule,
             remoteIceServers = iceServers,
-            latencyResults = measurements.associate { it.latencyUrl to it.measurements }
         )
 
         session?.let {
@@ -306,6 +294,8 @@ public class Call(
         }
 
         client.state.setActiveCall(this)
+
+        timer.finish()
 
         return Success(value = session!!)
     }
@@ -587,7 +577,7 @@ public class Call(
     }
 
     @VisibleForTesting
-    internal suspend fun joinRequest(create: CreateCallOptions? = null, currentSfu: String?=null): Result<JoinCallResponse> {
+    internal suspend fun joinRequest(create: CreateCallOptions? = null, location: String, currentSfu: String?=null): Result<JoinCallResponse> {
         val result = clientImpl.joinCall(
             type, id,
             create = create != null,
@@ -597,6 +587,7 @@ public class Call(
             startsAt = create?.startsAt,
             team = create?.team,
             ring = create?.ring ?: false,
+            location = location
         )
         result.onSuccess {
             state.updateFromResponse(it)

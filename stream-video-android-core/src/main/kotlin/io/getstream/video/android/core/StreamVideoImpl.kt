@@ -54,14 +54,20 @@ import io.getstream.video.android.model.mapper.toTypeAndId
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.NonCancellable.cancel
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.Json
+import okhttp3.Callback
+import okhttp3.Request
+import okhttp3.Response
+import okio.IOException
 import org.openapitools.client.models.BlockUserRequest
 import org.openapitools.client.models.BlockUserResponse
 import org.openapitools.client.models.CallRequest
@@ -102,6 +108,7 @@ import org.openapitools.client.models.WSCallEvent
 import retrofit2.HttpException
 import java.util.*
 import kotlin.coroutines.Continuation
+import kotlin.coroutines.resumeWithException
 
 /**
  * @param lifecycle The lifecycle used to observe changes in the process
@@ -599,7 +606,8 @@ internal class StreamVideoImpl internal constructor(
         settingsOverride: CallSettingsRequest? = null,
         startsAt: org.threeten.bp.OffsetDateTime? = null,
         team: String? = null,
-        ring: Boolean = false
+        ring: Boolean = false,
+        location: String
     ): Result<JoinCallResponse> {
 
         val joinCallRequest = JoinCallRequest(
@@ -612,6 +620,7 @@ internal class StreamVideoImpl internal constructor(
                 team = team
             ),
             ring = ring,
+            location = location,
         )
 
         val result = wrapAPICall {
@@ -924,6 +933,35 @@ internal class StreamVideoImpl internal constructor(
             val call = Call(this, type, idOrRandom, user)
             calls[cid] = call
             call
+        }
+    }
+
+    suspend fun selectLocation(): Result<String> {
+        return wrapAPICall {
+            val url = "https://hint.stream-io-video.com/"
+            val request: Request = Request.Builder()
+                .url(url)
+                .method("HEAD", null)
+                .build()
+            val call = connectionModule.okHttpClient.newCall(request)
+            val response = suspendCancellableCoroutine<Response> {continuation ->
+                call.enqueue(object : Callback {
+                    override fun onFailure(call: okhttp3.Call, e: java.io.IOException) {
+                        continuation.resumeWithException(e)
+                    }
+                    override fun onResponse(call: okhttp3.Call, response: Response) {
+                        continuation.resume(response) {
+                            call.cancel()
+                        }
+                    }
+                })
+            }
+
+            if (!response.isSuccessful) {
+                throw Error("Unexpected code $response")
+            }
+            val locationHeader = response.headers["X-Amz-Cf-Pop"]
+            locationHeader?.take(3) ?: "missing-location"
         }
     }
 }

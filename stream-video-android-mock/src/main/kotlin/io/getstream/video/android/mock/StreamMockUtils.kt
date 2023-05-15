@@ -50,7 +50,21 @@ public object StreamMockUtils {
 /** Mock a [Call] that contains a mock user. */
 public val mockCall: Call = Call(
     client = StreamMockUtils.streamVideo, type = "default", id = "123", user = mockUsers[0]
-)
+).apply {
+    val participants = mockUsers.take(2).map { user ->
+        val sessionId = if (user == mockUsers.first()) {
+            sessionId ?: UUID.randomUUID().toString()
+        } else {
+            UUID.randomUUID().toString()
+        }
+        ParticipantState(
+            initialUser = user,
+            sessionId = sessionId,
+            call = this
+        )
+    }
+    state.upsertParticipants(participants)
+}
 
 /** Mock a new [MediaTrack]. */
 public val mockVideoMediaTrack: MediaTrack

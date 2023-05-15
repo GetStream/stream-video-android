@@ -43,7 +43,7 @@ internal class StreamLifecycleObserver(
 
     suspend fun dispose() {
         if (isObserving) {
-            withContext(io.getstream.video.android.core.dispatchers.DispatcherProvider.Main) {
+            withContext(DispatcherProvider.Main) {
                 lifecycle.removeObserver(this@StreamLifecycleObserver)
             }
         }

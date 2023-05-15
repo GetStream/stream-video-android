@@ -25,7 +25,9 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.call.activecall.CallContent
@@ -43,6 +45,8 @@ import io.getstream.video.android.core.call.state.InviteUsersToCall
 import io.getstream.video.android.core.call.state.ToggleMicrophone
 import io.getstream.video.android.core.model.CallType
 import io.getstream.video.android.core.viewmodel.CallViewModel
+import io.getstream.video.android.mock.StreamMockUtils
+import io.getstream.video.android.mock.mockCall
 import io.getstream.video.android.model.User
 
 /**
@@ -57,13 +61,13 @@ import io.getstream.video.android.model.User
  * @param modifier Modifier for styling.
  * @param onBackPressed Handler when the user taps on the back button.
  * @param onCallAction Handler when the user clicks on some of the call controls.
- * @param callControlsContent Content shown for the
- * [CallControls] part of the UI.
+ * @param callAppBarContent Content shown that a call information or an additional actions.
+ * @param callControlsContent Content is shown that allows users to trigger different actions to control a joined call.
  * @param pictureInPictureContent Content shown when the user enters Picture in Picture mode, if
  * it's been enabled in the app.
  * @param incomingCallContent Content shown when we're receiving a [Call].
  * @param outgoingCallContent Content shown when we're ringing other people.
- * @param callContent Content shown when we're connected to a [Call] successfully.
+ * @param callContent Content is shown by rendering video/audio when we're connected to a call successfully.
  */
 @Composable
 public fun CallContainer(
@@ -149,13 +153,13 @@ public fun CallContainer(
  * @param modifier Modifier for styling.
  * @param onBackPressed Handler when the user taps on the back button.
  * @param onCallAction Handler when the user clicks on some of the call controls.
- * @param callControlsContent Content shown for the
- * [CallControls] part of the UI.
+ * @param callAppBarContent Content is shown that calls information or additional actions.
+ * @param callControlsContent Content is shown that allows users to trigger different actions to control a joined call.
  * @param pictureInPictureContent Content shown when the user enters Picture in Picture mode, if
  * it's been enabled in the app.
  * @param incomingCallContent Content shown when we're receiving a [Call].
  * @param outgoingCallContent Content shown when we're ringing other people.
- * @param callContent Content shown when we're connected to a [Call] successfully.
+ * @param callContent Content is shown by rendering video/audio when we're connected to a call successfully.
  */
 @Composable
 public fun CallContainer(
@@ -278,6 +282,19 @@ internal fun DefaultCallContent(
                 usersToInvite = emptyList()
                 callViewModel.onCallAction(InviteUsersToCall(it))
             }
+        )
+    }
+}
+
+@Preview
+@Composable
+private fun CallContainerPreview() {
+    StreamMockUtils.initializeStreamVideo(LocalContext.current)
+    VideoTheme {
+        CallContainer(
+            call = mockCall,
+            callType = CallType.VIDEO,
+            callDeviceState = CallDeviceState()
         )
     }
 }

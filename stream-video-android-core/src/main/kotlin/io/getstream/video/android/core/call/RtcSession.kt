@@ -143,9 +143,8 @@ public class RtcSession internal constructor(
     private val client: StreamVideo,
     private val connectionModule: ConnectionModule,
     private val call: Call,
-    internal var sfuUrl: String,
-    internal var sfuToken: String,
-    private val latencyResults: Map<String, List<Float>>,
+    private val sfuUrl: String,
+    private val sfuToken: String,
     private val remoteIceServers: List<IceServer>,
 ) {
 

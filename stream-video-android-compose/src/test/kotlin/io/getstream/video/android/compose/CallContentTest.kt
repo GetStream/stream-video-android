@@ -22,6 +22,7 @@ import androidx.compose.ui.Modifier
 import app.cash.paparazzi.DeviceConfig
 import app.cash.paparazzi.Paparazzi
 import io.getstream.video.android.compose.base.BaseComposeTest
+import io.getstream.video.android.compose.ui.components.call.activecall.CallContent
 import io.getstream.video.android.compose.ui.components.call.incomingcall.IncomingCallContent
 import io.getstream.video.android.compose.ui.components.call.incomingcall.IncomingCallControls
 import io.getstream.video.android.compose.ui.components.call.incomingcall.IncomingCallDetails
@@ -162,6 +163,16 @@ internal class CallContentTest : BaseComposeTest() {
                 callDeviceState = CallDeviceState(),
                 onBackPressed = {}
             ) {}
+        }
+    }
+
+    @Test
+    fun `snapshot CallContent with multiple participants composable`() {
+        snapshot {
+            CallContent(
+                call = mockCall,
+                callDeviceState = CallDeviceState()
+            )
         }
     }
 }
