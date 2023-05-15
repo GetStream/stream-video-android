@@ -57,15 +57,18 @@ val permissionManager = PermissionManager.create(
 )
 ```
 
-If you use `CallViewModel` with UI components, you can simply pass it to the `CallViewModelFactory` like the example below:
+If you use `CallViewModel` with UI components, you can simply set it to the `CallViewModel` like the example below:
 
 ```kotlin
+// create a CallViewModel.
 val factory = CallViewModelFactory(
     streamVideo = streamVideo,
-    call = streamVideo.call(type = type, id = id),
-    permissionManager = permissionManager
+    call = streamVideo.call(type = type, id = id)
 )
 val vm by viewModels<CallViewModel> { factory }
+
+// set your permissionManager.
+vm.setPermissionManager(permissionManager)
 ```
 
 ### Moderation Capabilities

@@ -47,7 +47,6 @@ import io.getstream.video.android.core.permission.PermissionManagerProvider
 import io.getstream.video.android.core.viewmodel.CallViewModel
 import io.getstream.video.android.core.viewmodel.CallViewModelFactory
 import io.getstream.video.android.core.viewmodel.CallViewModelFactoryProvider
-import io.getstream.video.android.model.StreamCallId
 import io.getstream.video.android.model.mapper.toTypeAndId
 
 public abstract class AbstractCallActivity :
@@ -69,8 +68,7 @@ public abstract class AbstractCallActivity :
 
         return CallViewModelFactory(
             streamVideo = streamVideo,
-            call = streamVideo.call(type = type, id = id),
-            permissionManager = initPermissionManager()
+            call = streamVideo.call(type = type, id = id)
         )
     }
 
@@ -101,6 +99,7 @@ public abstract class AbstractCallActivity :
         super.onCreate(savedInstanceState)
         setupUi()
 
+        callViewModel.setPermissionManager(getPermissionManager())
         callViewModel.joinCall()
     }
 
@@ -137,13 +136,13 @@ public abstract class AbstractCallActivity :
         } else {
             @Suppress("DEPRECATION")
             window.decorView.systemUiVisibility = (
-                View.SYSTEM_UI_FLAG_FULLSCREEN
-                    or View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
-                    or View.SYSTEM_UI_FLAG_IMMERSIVE
-                    or View.SYSTEM_UI_FLAG_LAYOUT_STABLE
-                    or View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
-                    or View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
-                )
+                    View.SYSTEM_UI_FLAG_FULLSCREEN
+                            or View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
+                            or View.SYSTEM_UI_FLAG_IMMERSIVE
+                            or View.SYSTEM_UI_FLAG_LAYOUT_STABLE
+                            or View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
+                            or View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+                    )
         }
 
         requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE
@@ -193,7 +192,7 @@ public abstract class AbstractCallActivity :
         } else {
             window.addFlags(
                 WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED or
-                    WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON
+                        WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON
             )
         }
     }
