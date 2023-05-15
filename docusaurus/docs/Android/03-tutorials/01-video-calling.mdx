@@ -139,7 +139,7 @@ class MainActivity : ComponentActivity() {
          ).also { vm.setPermissionManager(it) }
 
         setContent {
-            VideoCallTheme {
+            VideoTheme {
                 val participants by call.state.remoteParticipants.collectAsState()
                 val me by call.state.me.collectAsState()
 
@@ -193,13 +193,102 @@ setContent {
 }
 ```
 
+The result will be:
+
+![Compose CallContainer](../../assets/compose_call_container.jpg)
+
 When you now run your app you'll see a more polished video UI.
 It supports reactions, screensharing, active speaker detection, network quality indicators etc.
 
 ### Step 6 - Customizing the UI
 
-* TODO: Talk about basic theming
-* TODO: Swap the call controls for your own
+All UI components in the SDK use our pre-defined themes and you can easily customize them in Jetpack Compose. You can customize the theme with the 4 components below:
+
+- **StreamColor**: This is used to decided colors of UI components.
+- **StreamDimens**: This is used to decide the size of UI components.
+- **StreamTypography**: This is used to decide the text styles of UI components.
+- **StreamShapes**: This is used to decide the shapes of UI components.
+
+In Jetpack Compose, you can simply customize those styles by passing the value into the `VideoTheme` like the example below:
+
+```kotlin
+VideoTheme(
+    colors = if (isSystemInDarkTheme()) {
+        StreamColors.defaultDarkColors().copy(appBackground = Color.Black)
+    } else {
+        StreamColors.defaultColors().copy(appBackground = Color.White)
+    }
+) {
+    CallContainer(
+        modifier = Modifier.background(color = VideoTheme.colors.appBackground),
+        callViewModel = vm,
+        callType = CallType.VIDEO,
+        onBackPressed = { finish() },
+    )
+}
+```
+
+With the same approaches, you can customize the rest of other styles:
+
+```kotlin
+VideoTheme(
+    colors = StreamColors.defaultColors().copy(appBackground = Color.Black),
+    dimens = StreamDimens.defaultDimens().copy(callAvatarSize = 72.dp),
+    typography = StreamTypography.defaultTypography().copy(title1 = TextStyle()),
+    shapes = StreamShapes.defaultShapes().copy(avatar = CircleShape)
+) {
+  ..
+}
+```
+
+Stream's Video SDK provides fully polished UI components, allowing you to build a video call quickly and customize them. As you've seen before, you can implement a full complete video call screen with `CallContainer` composable in Jetpack Compose. The `CallContainer` composable consists of three major parts below:
+
+- **callAppBarContent**: Content is shown that calls information or additional actions.
+- **callControlsContent**: Content is shown that allows users to trigger different actions to control a joined call.
+- **callContent**: Content shown to be rendered when we're connected to a call successfully.
+
+In the example below, you'll see how to customize each parts of the `CallContainer` composable:
+
+```kotlin
+VideoTheme {
+    CallContainer(
+        modifier = Modifier.background(color = VideoTheme.colors.appBackground),
+        callViewModel = vm,
+        callType = CallType.VIDEO,
+        onBackPressed = { finish() },
+        callAppBarContent = { /** custom call app bar */ },
+        callControlsContent = {
+            CallControls(
+                callViewModel = vm,
+                actions = listOf(
+                    {
+                        ToggleCameraAction(
+                            modifier = Modifier.size(52.dp),
+                            isCameraEnabled = vm.callDeviceState.value.isCameraEnabled,
+                            onCallAction = vm::onCallAction
+                        )
+                    },
+                    {
+                        ToggleMicrophoneAction(
+                            modifier = Modifier.size(52.dp),
+                            isMicrophoneEnabled = vm.callDeviceState.value.isMicrophoneEnabled,
+                            onCallAction = vm::onCallAction
+                        )
+                    },
+                    {
+                        FlipCameraAction(
+                            modifier = Modifier.size(52.dp),
+                            onCallAction = vm::onCallAction
+                        )
+                    },
+                ),
+                onCallAction = vm::onCallAction
+            )
+        },
+        callContent = { /** custom call content */ },
+    )
+}
+```
 
 ### Step 7 - PIP
 
@@ -211,10 +300,10 @@ TODO: include docs on PIP setup & service
 
 ### Other Possibilities
 
-* ** Ringing ** If you want to ring the other participants before the docs explain how to do this here:
-* ** Push Notifications **
-* ** Reactions **
-* ** Chat Integration **
+* **Ringing**: If you want to ring the other participants before the docs explain how to do this here:
+* **Push Notifications**:
+* **Reactions**:
+* **Chat Integration**:
 
 
 ### Conclusion

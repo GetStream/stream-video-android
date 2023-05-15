@@ -59,7 +59,7 @@ class MainActivity : ComponentActivity() {
         call.join(create=true)
 
         setContent {
-            VideoCallTheme {
+            VideoTheme {
                 // A surface container using the 'background' color from the theme
                 Surface(
                     modifier = Modifier.fillMaxSize(),
@@ -88,7 +88,7 @@ In this next step we'll add:
 ```kotlin
 
 setContent {
-    VideoCallTheme {
+    VideoTheme {
         // A surface container using the 'background' color from the theme
         Surface(
             modifier = Modifier.fillMaxSize(),
