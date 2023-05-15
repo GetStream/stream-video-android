@@ -189,7 +189,7 @@ public class Call(
         // the join flow should retry up to 3 times
         // if the error is not permanent
         // and fail immediately on permanent errors
-        state._joinState.value = JoinState.InProgress
+        state._connection.value = RtcConnectionState.InProgress
         var retryCount = 0
 
         var result: Result<RtcSession>
@@ -201,7 +201,7 @@ public class Call(
             }
             if (result is Failure) {
                 if (isPermanentError(result.value)) {
-                    state._joinState.value = JoinState.Failed(result.value)
+                    state._connection.value = RtcConnectionState.Failed(result.value)
                     return result
                 } else {
                     retryCount += 1
@@ -268,7 +268,7 @@ public class Call(
         )
 
         session?.let {
-            state._joinState.value = JoinState.Joined(it)
+            state._connection.value = RtcConnectionState.Joined(it)
         }
 
         timer.split("rtc session init")
@@ -291,6 +291,7 @@ public class Call(
                 // failed and closed indicate we should retry connecting to this or another SFU
                 // disconnected is temporary, only if it lasts for a certain duration we should reconnect or switch
                 // TODO: move to session
+
                 val badStates = listOf(
                     PeerConnection.IceConnectionState.DISCONNECTED,
                     PeerConnection.IceConnectionState.FAILED,
@@ -299,9 +300,7 @@ public class Call(
 
                 it.subscriber?.state?.filter { it in badStates }?.collect {
                     logger.w { "ice connection state changed to $it" }
-                    // TODO: UI indications
-                    // TODO: some logic here about when to reconnect or switch
-                    switchSfu()
+                    reconnectOrSwitchSfu()
                 }
             }
         }
@@ -311,9 +310,34 @@ public class Call(
         return Success(value = session!!)
     }
 
+    suspend fun reconnectOrSwitchSfu() {
+        // TODO: we should run this on repeat until we are connected again
+        // mark us as reconnecting
+        if (state._connection.value is RtcConnectionState.Joined) {
+            state._connection.value = RtcConnectionState.Reconnecting
+        }
+        val online = true
+
+        if (online) {
+            // start by retrying the current connection
+            session?.reconnect()
+
+            // ask if we should switch
+            val joinResponse = joinRequest(currentSfu = session?.sfuUrl)
+            val shouldSwitch = true
+
+            if (shouldSwitch && joinResponse is Success) {
+                // switch to the new SFU
+                // TODO: replace with a real setup
+                session?.switchSfu(joinResponse.value.edges.first().latencyUrl, "token")
+            }
+
+        }
+    }
+
     /** Leave the call, but don't end it for other users */
     fun leave() {
-        state._joinState.value = JoinState.Disconnected
+        state._connection.value = RtcConnectionState.Disconnected
         cleanup()
     }
 
@@ -563,7 +587,7 @@ public class Call(
     }
 
     @VisibleForTesting
-    internal suspend fun joinRequest(create: CreateCallOptions? = null): Result<JoinCallResponse> {
+    internal suspend fun joinRequest(create: CreateCallOptions? = null, currentSfu: String?=null): Result<JoinCallResponse> {
         val result = clientImpl.joinCall(
             type, id,
             create = create != null,

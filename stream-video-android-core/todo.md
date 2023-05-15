@@ -8,20 +8,20 @@
 *  Week 5: Sample app stability, S23 sdp munging, dynascale, reconnect, cleanup for reconnect
 *  Break
 *  Week 6: Docs, docs & sample app. Dynascale, SDP parsing
-*  Week 7: Reconnect, server side issues checklist
+*  Week 7: Reconnect, server side issues checklist, compose docs, fast join flow
 
 ### Reconnect
 
 - [X] Retry on joining a call
 - [X] Session.reconnect
 - [X] Session.switchSfu
-- [ ] Connection state for UI indicators. state.connection
-- [ ] Monitoring that determines when to reconnect, or switchSfu
+- [X] Connection state for UI indicators. state.connection
+- [X] Monitoring that determines when to reconnect, or switchSfu
 - [ ] Full test coverage
 
 ### High level issues
 
-- [ ] Join flow is too slow
+- [X] Join flow is too slow
 - [X] Call id should probably be optional and default to a random UUID
 - [ ] Chat integration needs a good review to see what we can simplify
 

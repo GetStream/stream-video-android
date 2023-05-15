@@ -16,20 +16,38 @@
 
 package io.getstream.video.android.core
 
+import com.google.common.truth.Truth.assertThat
 import io.getstream.log.taggedLogger
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
 
 /**
- * - Join failure should reconnect
- * -- Either to the same SFU
- * -- Or to a different SFU
- * - Ice connection failure should reconnect
- * -- Either to the same SFU
- * -- Or to a different SFU
- * - Sockets should reconnect
- * - Camera should restart
+ * Connection state shows if we've established a connection with the SFU
+ * - join state (did we try to setup the RtcSession yes or no?). API calls can fail during the join and require us to repeat it
+ * - socket connection health. the socket can disconnect.
+ * - peer connection subscriber
+ * - peer connection publisher
+ * - network detection might be faster than the peer connection
+ * The call connection state is the health of these 5 components
+ *
+ * Note that the video connection can still be working even if:
+ * * the socket is disconnected
+ * * publisher is disconnected
+ *
+ * When the connection breaks the subscriber peer connection will usually indicate the issue first (since it has constant traffic)
+ * The subscriber can break because of 2 reasons:
+ * * Something is wrong with your network (90% of the time)
+ * * Something is wrong with the SFU (should be rare)
+ *
+ * We want the reconnect to be as fast as possible.
+ * * If you can reach our edge network your connection is fine. So the optimal flow here is
+ * * When there is an error try to connect to the same SFU immediately
+ * * Meanwhile ask the API if we need to switch to a different
+ * * If the API says we need to switch, swap to the new SFU
+ *
+ * TODO: Which API endpoint should we call to check if we need to switch SFU?
+ *
  */
 class ReconnectTest : IntegrationTestBase(connectCoordinatorWS = false) {
 
@@ -68,6 +86,22 @@ class ReconnectTest : IntegrationTestBase(connectCoordinatorWS = false) {
     fun switchSfuQuickly() = runTest {
         call.join()
         Thread.sleep(2000)
+
+        // connect to the new socket
+        // do an ice restart
+        call.session?.let {
+            it.switchSfu(it.sfuUrl, it.sfuToken)
+        }
+
+    }
+
+    @Test
+    fun showErrors() = runTest {
+        call.join()
+        Thread.sleep(2000)
+
+        // Show an error if we are reconnecting
+        assertThat(call.state._connection.value).isEqualTo(RtcConnectionState.Reconnecting)
 
         // connect to the new socket
         // do an ice restart
