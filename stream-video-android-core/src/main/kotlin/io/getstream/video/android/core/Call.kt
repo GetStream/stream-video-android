@@ -19,6 +19,7 @@ package io.getstream.video.android.core
 import android.view.View
 import androidx.annotation.VisibleForTesting
 import io.getstream.log.taggedLogger
+import io.getstream.result.Error
 import io.getstream.result.Result
 import io.getstream.result.Result.Failure
 import io.getstream.result.Result.Success
@@ -60,6 +61,7 @@ import org.webrtc.PeerConnection
 import org.webrtc.RendererCommon
 import stream.video.sfu.models.TrackType
 import stream.video.sfu.models.VideoDimension
+import java.lang.Exception
 
 /**
  * The call class gives you access to all call level API calls
@@ -207,7 +209,7 @@ public class Call(
             }
             delay(retryCount-1*1000L)
         }
-        return result
+        return Failure(value= Error.GenericError("Join failed after 3 retries"))
     }
 
     internal fun isPermanentError(error: Any): Boolean {

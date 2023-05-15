@@ -46,50 +46,35 @@ class ReconnectTest : IntegrationTestBase(connectCoordinatorWS = false) {
     }
 
     @Test
-    fun sessionRetry() = runTest {
+    fun reconnectPeers() = runTest {
         call.join()
+        Thread.sleep(2000)
+        val a = call.session?.subscriber?.connection?.connectionState()
+        val b = call.session?.publisher?.connection?.connectionState()
+        println("yyyzzz $a and $b ${call.session?.subscriber}")
+
         // the socket and rtc connection disconnect...,
         // or ice candidate don't arrive due to temporary network failure
         call.session?.reconnect()
+        Thread.sleep(2000)
         // reconnect recreates the peer connections
+        val sub = call.session?.subscriber?.connection?.connectionState()
+        val pub = call.session?.publisher?.connection?.connectionState()
+
+        println("yyyzzz $sub and $pub ${call.session?.subscriber?.state?.value}")
     }
 
     @Test
-    fun reconnect() = runTest {
-        call.state.connection // pre connect
-        backgroundScope.launch {
-            call.join()
-            call.state.connection // loading
+    fun switchSfuQuickly() = runTest {
+        call.join()
+        Thread.sleep(2000)
+
+        // connect to the new socket
+        // do an ice restart
+        call.session?.let {
+            it.switchSfu(it.sfuUrl, it.sfuToken)
         }
-        // show a loading icon while loading
-        call.state.connection // temporary error/ reconnecting
-        // permanent error -> Failed to join call. Mention this call id to tech support
-        // happy connection
 
-        /**
-         * From a UI Perspective, the first joinRequest already sets up state
-         * Then the JoinEventResponse gives more state
-         *
-         * Video is only available after peer connections are ready.
-         * And after updateSubscriptions is called
-         * And the track is received
-         *
-         *
-         * -- we check for disconnected, closed or failed. if failed, closed or disconnected for more than 3 seconds
-         * -- call the coordinator and ask if we should switch SFU
-         */
-
-        /**
-         * From a UI Perspective, the first joinRequest already sets up state
-         * Then the JoinEventResponse gives more state
-         *
-         * Video is only available after peer connections are ready.
-         * And after updateSubscriptions is called
-         * And the track is received
-         *
-         *
-         * -- we check for disconnected, closed or failed. if failed, closed or disconnected for more than 3 seconds
-         * -- call the coordinator and ask if we should switch SFU
-         */
     }
+
 }

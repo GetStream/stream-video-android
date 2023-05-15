@@ -18,6 +18,7 @@ package io.getstream.video.android.core
 
 import io.getstream.log.taggedLogger
 import io.getstream.video.android.core.call.RtcSession
+import io.getstream.video.android.core.dispatchers.DispatcherProvider
 import io.getstream.video.android.core.events.AudioLevelChangedEvent
 import io.getstream.video.android.core.events.ChangePublishQualityEvent
 import io.getstream.video.android.core.events.ConnectionQualityChangeEvent
@@ -42,6 +43,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.zip
+import kotlinx.coroutines.runBlocking
 import org.openapitools.client.models.BlockedUserEvent
 import org.openapitools.client.models.CallAcceptedEvent
 import org.openapitools.client.models.CallCreatedEvent
@@ -128,14 +130,17 @@ class CallConnectionState(
 
     init {
         val session: RtcSession? = null
-        joinState.collect {
-            val joined = it as? JoinState.Joined
-            joined?.let {
-                val session = it.session
-                val connectionState = session.socket.connectionState
-                val peerStates = session._peerConnectionStates
-            }
-        }
+
+        // TODO: replace
+
+//            joinState.collect {
+//                val joined = it as? JoinState.Joined
+//                joined?.let {
+//                    val session = it.session
+//                    val connectionState = session.socket.connectionState
+//                    val peerStates = session._peerConnectionStates
+//                }
+//         }
     }
 
 }
@@ -473,7 +478,8 @@ public class CallState(private val call: Call, private val user: User) {
             }
 
             is JoinCallResponseEvent -> {
-                _connection.value = ConnectionState.Connected
+                // TODO: review
+                _joinState.value = JoinState.PreJoin
                 // time to update call state based on the join response
                 updateFromJoinResponse(event)
             }

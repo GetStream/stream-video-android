@@ -57,6 +57,7 @@ import io.getstream.video.android.core.utils.mapState
 import io.getstream.video.android.core.utils.stringify
 import io.getstream.video.android.datastore.delegate.StreamUserDataStore
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -142,12 +143,14 @@ public class RtcSession internal constructor(
     private val client: StreamVideo,
     private val connectionModule: ConnectionModule,
     private val call: Call,
-    private val sfuUrl: String,
-    private val sfuToken: String,
+    internal var sfuUrl: String,
+    internal var sfuToken: String,
     private val latencyResults: Map<String, List<Float>>,
     private val remoteIceServers: List<IceServer>,
 ) {
 
+    private var errorJob: Job? = null
+    private var eventJob: Job? = null
     internal val socket by lazy { sfuConnectionModule.sfuSocket }
 
     private var lastTracks: List<TrackSubscriptionDetails>? = null
@@ -281,25 +284,34 @@ public class RtcSession internal constructor(
         }
         sfuConnectionModule =
             connectionModule.createSFUConnectionModule(sfuUrl, sessionId, sfuToken, getSdp)
-        // listen to socket events and errors
+        listenToSocket()
+
         coroutineScope.launch {
+            // call update participant subscriptions debounced
+            trackDimensions.collect {
+                updateParticipantsSubscriptions()
+            }
+        }
+    }
+
+    private fun listenToSocket() {
+        // cancel any old socket monitoring if needed
+        eventJob?.cancel()
+        errorJob?.cancel()
+
+        // listen to socket events and errors
+        eventJob = coroutineScope.launch {
             sfuConnectionModule.sfuSocket.events.collect() {
                 clientImpl.fireEvent(it, call.cid)
             }
         }
-        coroutineScope.launch {
+        errorJob = coroutineScope.launch {
             sfuConnectionModule.sfuSocket.errors.collect() {
                 if (clientImpl.developmentMode) {
                     throw it
                 } else {
                     logger.e(it) { "permanent failure on socket connection" }
                 }
-            }
-        }
-        coroutineScope.launch {
-            // call update participant subscriptions debounced
-            trackDimensions.collect {
-                updateParticipantsSubscriptions()
             }
         }
     }
@@ -312,11 +324,10 @@ public class RtcSession internal constructor(
     }
 
     suspend fun reconnect() {
-        // recreate the peer connections
+        // ice restart
+        subscriber?.connection?.restartIce()
+        publisher?.connection?.restartIce()
 
-        // wait for the socket to be healthy (it should auto recover)
-
-        // call connectRtc
     }
 
     suspend fun connect() {
@@ -1112,5 +1123,27 @@ public class RtcSession internal constructor(
         // Updates are debounced
         dynascaleLogger.i { "updateTrackDimensions $trackDimensionsMap" }
         trackDimensions.value = trackDimensionsMap
+    }
+
+    suspend fun switchSfu(sfuUrl: String, sfuToken: String) {
+        val timer = clientImpl.debugInfo.trackTime("call.switchSfu")
+        // update internal vars ot the new SFU
+        this.sfuUrl = sfuUrl
+        this.sfuToken = sfuToken
+
+        // create the new socket
+        val getSdp = suspend {
+            getSubscriberSdp().description
+        }
+        sfuConnectionModule =
+            connectionModule.createSFUConnectionModule(sfuUrl, sessionId, sfuToken, getSdp)
+        listenToSocket()
+        sfuConnectionModule.sfuSocket.connect()
+        timer.split("socket connected")
+
+
+        // ice restart
+        reconnect()
+        timer.finish("ice restart in progress")
     }
 }

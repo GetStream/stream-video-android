@@ -205,12 +205,6 @@ public abstract class AbstractCallActivity :
      * the feature.
      */
     protected open fun handleBackPressed() {
-        val callState = callViewModel.call.state.connection.value
-
-        if (callState !is ConnectionState.Connected) {
-            closeCall()
-            return
-        }
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
             try {
