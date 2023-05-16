@@ -516,7 +516,7 @@ public class CallState(private val call: Call, private val user: User) {
     private fun updateFromJoinResponse(event: JoinCallResponseEvent) {
         // update the participant count
         val count = event.callState.participant_count
-        _participantCount.value = count
+        _participantCounts.value = count
 
         // creates the participants
         val participantStates = event.callState.participants.map {
