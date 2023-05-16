@@ -69,7 +69,9 @@ import kotlinx.coroutines.withContext
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
+import org.openapitools.client.models.OwnCapability
 import org.openapitools.client.models.VideoEvent
+import org.openapitools.client.models.VideoSettings
 import org.webrtc.MediaConstraints
 import org.webrtc.MediaStream
 import org.webrtc.MediaStreamTrack
@@ -418,26 +420,41 @@ public class RtcSession internal constructor(
         val settings = call.state.settings.value
         val timer = clientImpl.debugInfo.trackTime("connectRtc")
 
-        // TODO: this should come from settings
-        val defaultDirection = CameraDirection.Front
+        // turn of the speaker if needed
+        if (settings?.audio?.speakerDefaultOn == false) {
+            call.mediaManager.speaker.setVolume(0)
+        }
+
         // if we are allowed to publish, create a peer connection for it
-        // TODO: real settings check
-        val publishing = true
-        if (publishing) {
+        val canPublish =
+            call.state.ownCapabilities.value.any { it == OwnCapability.sendAudio || it == OwnCapability.sendVideo }
+
+        if (canPublish) {
             publisher = createPublisher()
             timer.split("createPublisher")
-
+        } else {
+            // enable the publisher if you receive the send audio or send video capability
             coroutineScope.launch {
-                // call update participant subscriptions debounced
-                publisher?.let {
-                    it.state.collect {
-                        updatePeerState()
+                call.state.ownCapabilities.collect {
+                    if (it.any { it == OwnCapability.sendAudio || it == OwnCapability.sendVideo }) {
+                        publisher = createPublisher()
+                        timer.split("createPublisher")
                     }
                 }
             }
         }
 
-        if (publishing) {
+        // update the peer state
+        coroutineScope.launch {
+            // call update participant subscriptions debounced
+            publisher?.let {
+                it.state.collect {
+                    updatePeerState()
+                }
+            }
+        }
+
+        if (canPublish) {
             if (publisher == null) {
                 throw IllegalStateException("Cant send audio and video since publisher hasn't been setup to connect")
             }
@@ -445,10 +462,27 @@ public class RtcSession internal constructor(
                 // step 2 ensure all tracks are setup correctly
                 // start capturing the video
 
-                // TODO: hook up the settings, front or back...
+                // if there is no preview and the camera hasn't been selected by the user fallback to settings
+                if (call.mediaManager.camera.status.value == DeviceStatus.NotSelected) {
+                    val enabled = settings?.video?.cameraDefaultOn == true
+                    call.mediaManager.camera.setEnabled(enabled)
+                    // check the settings if we should default to front or back facing camera
+                    val defaultDirection = if (settings?.video?.cameraFacing == VideoSettings.CameraFacing.front) {
+                        CameraDirection.Front
+                    } else {
+                        CameraDirection.Back
+                    }
+                    // TODO: would be nicer to initialize the camera on the right device to begin with
+                    if (defaultDirection != call.mediaManager.camera.direction.value) {
+                        call.mediaManager.camera.flip()
+                    }
+                }
 
-                call.mediaManager.camera.enable()
-                call.mediaManager.microphone.enable()
+                // if there is no preview and the microphone hasn't been selected by the user fallback to settings
+                if (call.mediaManager.microphone.status.value == DeviceStatus.NotSelected) {
+                    val enabled = settings?.audio?.micDefaultOn == true
+                    call.mediaManager.microphone.setEnabled(enabled)
+                }
 
                 timer.split("media enabled")
                 // step 4 add the audio track to the publisher
@@ -621,6 +655,7 @@ public class RtcSession internal constructor(
             mediaConstraints = MediaConstraints(),
             onNegotiationNeeded = ::onNegotiationNeeded,
             onIceCandidateRequest = ::sendIceCandidate,
+            maxPublishingBitrate = call.state.settings.value?.video?.targetResolution?.bitrate ?: 1_200_000
         )
         logger.i { "[createPublisher] #sfu; publisher: $publisher" }
         return publisher
