@@ -38,7 +38,6 @@ public typealias StreamCallType = String
  */
 public typealias StreamCallId = String
 
-
 @Parcelize
 @Serializable
 public data class StreamCallGuid constructor(

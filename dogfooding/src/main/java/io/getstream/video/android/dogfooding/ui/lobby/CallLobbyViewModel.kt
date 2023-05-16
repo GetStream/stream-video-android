@@ -27,11 +27,11 @@ import io.getstream.video.android.core.call.state.CallDeviceState
 import io.getstream.video.android.datastore.delegate.StreamUserDataStore
 import io.getstream.video.android.model.StreamCallGuid
 import io.getstream.video.android.model.User
-import javax.inject.Inject
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
+import javax.inject.Inject
 
 @HiltViewModel
 class CallLobbyViewModel @Inject constructor(

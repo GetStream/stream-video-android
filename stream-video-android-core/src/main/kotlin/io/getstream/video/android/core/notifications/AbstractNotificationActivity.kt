@@ -25,7 +25,6 @@ import io.getstream.video.android.core.StreamVideoProvider
 import io.getstream.video.android.core.utils.INTENT_EXTRA_CALL_CID
 import io.getstream.video.android.core.utils.INTENT_EXTRA_NOTIFICATION_ID
 import io.getstream.video.android.model.StreamCallGuid
-import io.getstream.video.android.model.StreamCallGuid.Companion.toTypeAndId
 import io.getstream.video.android.model.streamCallGuid
 import kotlinx.coroutines.launch
 
