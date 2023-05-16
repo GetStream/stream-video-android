@@ -57,6 +57,7 @@ import io.getstream.video.android.datastore.delegate.StreamUserDataStore
 import io.getstream.video.android.demo.demoVideoApp
 import io.getstream.video.android.demo.model.HomeScreenOption
 import io.getstream.video.android.demo.ui.call.CallActivity
+import io.getstream.video.android.model.StreamCallId
 import kotlinx.coroutines.launch
 
 class HomeActivity : AppCompatActivity() {
@@ -71,7 +72,9 @@ class HomeActivity : AppCompatActivity() {
     private val selectedOption: MutableState<HomeScreenOption> =
         mutableStateOf(HomeScreenOption.CREATE_CALL)
 
-    private val callIdState: MutableState<String> = mutableStateOf("NnXAIvBKE4Hy")
+    private val callIdState: MutableState<StreamCallId> = mutableStateOf(
+        StreamCallId(type = "default", id = "NnXAIvBKE4Hy")
+    )
 
     private val loadingState: MutableState<Boolean> = mutableStateOf(false)
 
@@ -102,7 +105,7 @@ class HomeActivity : AppCompatActivity() {
 
                 CallIdInput()
 
-                val isDataValid = callIdState.value.isNotBlank()
+                val isDataValid = callIdState.value.isValid
 
                 Spacer(modifier = Modifier.height(16.dp))
 
@@ -114,7 +117,7 @@ class HomeActivity : AppCompatActivity() {
                     enabled = isDataValid,
                     onClick = {
                         createMeeting(
-                            callId = callIdState.value,
+                            callId = callIdState.value.id,
                             participants = listOf(streamVideo.userId)
                         )
                     }
@@ -167,7 +170,10 @@ class HomeActivity : AppCompatActivity() {
     }
 
     private fun startCallActivity() {
-        val intent = CallActivity.getIntent(this@HomeActivity, "default:${callIdState.value}")
+        val intent = CallActivity.getIntent(
+            this@HomeActivity,
+            callIdState.value
+        )
         startActivity(intent)
     }
 
@@ -179,9 +185,9 @@ class HomeActivity : AppCompatActivity() {
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(16.dp),
-            value = inputState,
+            value = inputState.id,
             onValueChange = { input ->
-                callIdState.value = input
+                callIdState.value = callIdState.value.copy(id = input)
             },
             label = {
                 Text(text = "Enter the call ID")
