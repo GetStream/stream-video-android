@@ -33,8 +33,8 @@ import io.getstream.video.android.core.model.CallType
 import io.getstream.video.android.core.permission.PermissionManager
 import io.getstream.video.android.core.viewmodel.CallViewModel
 import io.getstream.video.android.core.viewmodel.CallViewModelFactory
-import io.getstream.video.android.model.StreamCallGuid
-import io.getstream.video.android.model.streamCallGuid
+import io.getstream.video.android.model.StreamCallId
+import io.getstream.video.android.model.streamCallId
 
 class CallActivity : ComponentActivity() {
 
@@ -62,7 +62,7 @@ class CallActivity : ComponentActivity() {
 
     private fun callViewModelFactory(): CallViewModelFactory {
         val (type, id) =
-            intent.streamCallGuid(EXTRA_GUID)
+            intent.streamCallId(EXTRA_CALL_ID)
                 ?: throw IllegalArgumentException("You must pass correct channel id.")
 
         return CallViewModelFactory(
@@ -89,15 +89,15 @@ class CallActivity : ComponentActivity() {
     }
 
     companion object {
-        internal const val EXTRA_GUID = "EXTRA_GUID"
+        internal const val EXTRA_CALL_ID = "EXTRA_CALL_ID"
 
         fun getIntent(
             context: Context,
-            guid: StreamCallGuid
+            callId: StreamCallId
         ): Intent {
             return Intent(context, CallActivity::class.java).apply {
                 flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
-                putExtra(EXTRA_GUID, guid)
+                putExtra(EXTRA_CALL_ID, callId)
             }
         }
     }

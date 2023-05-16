@@ -18,23 +18,23 @@ package io.getstream.video.android.core.service.notification.internal
 
 import android.content.Intent
 import io.getstream.video.android.core.service.notification.NotificationAction
-import io.getstream.video.android.model.StreamCallGuid
-import io.getstream.video.android.model.streamCallGuid
+import io.getstream.video.android.model.StreamCallId
+import io.getstream.video.android.model.streamCallId
 
-private const val KEY_GUID = "guid"
+private const val KEY_CAll_ID = "call_id"
 
 internal fun Intent.extractNotificationAction(): NotificationAction {
-    val callGuid = extractCallGuid()
+    val callId = extractCallId()
     return when (val action = action) {
-        NotificationAction.Accept.NAME -> NotificationAction.Accept(callGuid)
-        NotificationAction.Reject.NAME -> NotificationAction.Reject(callGuid)
-        NotificationAction.Cancel.NAME -> NotificationAction.Cancel(callGuid)
+        NotificationAction.Accept.NAME -> NotificationAction.Accept(callId)
+        NotificationAction.Reject.NAME -> NotificationAction.Reject(callId)
+        NotificationAction.Cancel.NAME -> NotificationAction.Cancel(callId)
         else -> error("unexpected action: $action")
     }
 }
 
 internal fun Intent.setNotificationAction(action: NotificationAction): Intent {
-    putExtra(KEY_GUID, action.guid)
+    putExtra(KEY_CAll_ID, action.callId)
     this.action = when (action) {
         is NotificationAction.Accept -> NotificationAction.Accept.NAME
         is NotificationAction.Reject -> NotificationAction.Reject.NAME
@@ -43,5 +43,5 @@ internal fun Intent.setNotificationAction(action: NotificationAction): Intent {
     return this
 }
 
-private fun Intent.extractCallGuid(): StreamCallGuid =
-    streamCallGuid(KEY_GUID) ?: error("no type found")
+private fun Intent.extractCallId(): StreamCallId =
+    streamCallId(KEY_CAll_ID) ?: error("no type found")

@@ -23,7 +23,7 @@ import android.os.Build
 import androidx.core.app.NotificationCompat
 import io.getstream.video.android.R
 import io.getstream.video.android.core.service.notification.NotificationAction
-import io.getstream.video.android.model.StreamCallGuid
+import io.getstream.video.android.model.StreamCallId
 
 internal class NotificationActionBuilderImpl(
     private val context: Context
@@ -31,7 +31,7 @@ internal class NotificationActionBuilderImpl(
 
     override fun createAcceptAction(
         notificationId: Int,
-        cid: StreamCallGuid
+        cid: StreamCallId
     ): NotificationCompat.Action {
         return NotificationCompat.Action.Builder(
             android.R.drawable.ic_menu_call,
@@ -42,7 +42,7 @@ internal class NotificationActionBuilderImpl(
 
     override fun createRejectAction(
         notificationId: Int,
-        cid: StreamCallGuid
+        cid: StreamCallId
     ): NotificationCompat.Action {
         return NotificationCompat.Action.Builder(
             android.R.drawable.ic_delete,
@@ -53,7 +53,7 @@ internal class NotificationActionBuilderImpl(
 
     override fun createCancelAction(
         notificationId: Int,
-        cid: StreamCallGuid
+        cid: StreamCallId
     ): NotificationCompat.Action {
         return NotificationCompat.Action.Builder(
             android.R.drawable.ic_delete,
@@ -64,7 +64,7 @@ internal class NotificationActionBuilderImpl(
 
     private fun createAcceptPendingIntent(
         notificationId: Int,
-        cid: StreamCallGuid
+        cid: StreamCallId
     ): PendingIntent = PendingIntent.getBroadcast(
         context,
         notificationId,
@@ -74,7 +74,7 @@ internal class NotificationActionBuilderImpl(
 
     private fun createRejectPendingIntent(
         notificationId: Int,
-        cid: StreamCallGuid
+        cid: StreamCallId
     ): PendingIntent = PendingIntent.getBroadcast(
         context,
         notificationId,
@@ -84,7 +84,7 @@ internal class NotificationActionBuilderImpl(
 
     private fun createCancelPendingIntent(
         notificationId: Int,
-        cid: StreamCallGuid
+        cid: StreamCallId
     ): PendingIntent = PendingIntent.getBroadcast(
         context,
         notificationId,

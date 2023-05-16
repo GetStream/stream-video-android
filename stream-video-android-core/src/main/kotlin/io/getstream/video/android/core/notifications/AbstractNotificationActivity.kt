@@ -24,8 +24,8 @@ import io.getstream.video.android.core.StreamVideo
 import io.getstream.video.android.core.StreamVideoProvider
 import io.getstream.video.android.core.utils.INTENT_EXTRA_CALL_CID
 import io.getstream.video.android.core.utils.INTENT_EXTRA_NOTIFICATION_ID
-import io.getstream.video.android.model.StreamCallGuid
-import io.getstream.video.android.model.streamCallGuid
+import io.getstream.video.android.model.StreamCallId
+import io.getstream.video.android.model.streamCallId
 import kotlinx.coroutines.launch
 
 /**
@@ -55,7 +55,7 @@ public abstract class AbstractNotificationActivity :
      */
     private fun processNotificationData() {
         val hasAcceptedCall = intent.action == ACTION_ACCEPT_CALL
-        val callCid = intent.streamCallGuid(INTENT_EXTRA_CALL_CID) ?: return
+        val callCid = intent.streamCallId(INTENT_EXTRA_CALL_CID) ?: return
 
         lifecycleScope.launch {
             if (hasAcceptedCall) {
@@ -72,7 +72,7 @@ public abstract class AbstractNotificationActivity :
      *
      * @param callCid The CID containing the call ID and type.
      */
-    private suspend fun loadCallData(guid: StreamCallGuid) {
+    private suspend fun loadCallData(guid: StreamCallId) {
 //        when (streamVideo.handlePushMessage(mapOf(INTENT_EXTRA_CALL_CID to callCid))) {
 //            is Result.Success -> Unit
 //            is Result.Failure -> finish()

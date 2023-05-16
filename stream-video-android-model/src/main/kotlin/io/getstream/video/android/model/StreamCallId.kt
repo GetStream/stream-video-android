@@ -23,27 +23,12 @@ import io.getstream.video.android.model.mapper.toTypeAndId
 import kotlinx.parcelize.Parcelize
 import kotlinx.serialization.Serializable
 
-/**
- * Represents call cid.
- */
-public typealias StreamCallCid = String
-
-/**
- * Represents call type.
- */
-public typealias StreamCallType = String
-
-/**
- * Represents call id.
- */
-public typealias StreamCallId = String
-
 @Parcelize
 @Serializable
-public data class StreamCallGuid constructor(
-    public val type: StreamCallType,
-    public val id: StreamCallId,
-    public val cid: StreamCallCid = when {
+public data class StreamCallId constructor(
+    public val type: String,
+    public val id: String,
+    public val cid: String = when {
         type.isNotEmpty() && id.isNotEmpty() -> "$type:$id"
         id.isNotEmpty() -> id
         else -> error("[StreamCallCid] invalid arguments; type=$type, id=$id")
@@ -53,24 +38,24 @@ public data class StreamCallGuid constructor(
     public companion object {
 
         /**
-         * Parses [StreamCallGuid] of call to callType and channelId.
+         * Parses [StreamCallId] of call to callType and channelId.
          *
          * @return Pair<StreamCallType, StreamCallId> Pair with callType and channelId.
          * @throws IllegalStateException Throws an exception if format of cid is incorrect.
          */
         @Throws(IllegalStateException::class)
-        public fun StreamCallGuid.toTypeAndId(): Pair<String, String> {
+        public fun StreamCallId.toTypeAndId(): Pair<String, String> {
             return cid.toTypeAndId()
         }
 
-        public fun fromCallCid(cid: String): StreamCallGuid {
+        public fun fromCallCid(cid: String): StreamCallId {
             val (type, id) = cid.toTypeAndId()
-            return StreamCallGuid(type, id)
+            return StreamCallId(type, id)
         }
     }
 }
 
-public fun Intent.streamCallGuid(key: String): StreamCallGuid? = when {
-    Build.VERSION.SDK_INT >= 33 -> getParcelableExtra(key, StreamCallGuid::class.java)
-    else -> @Suppress("DEPRECATION") getParcelableExtra(key) as? StreamCallGuid
+public fun Intent.streamCallId(key: String): StreamCallId? = when {
+    Build.VERSION.SDK_INT >= 33 -> getParcelableExtra(key, StreamCallId::class.java)
+    else -> @Suppress("DEPRECATION") getParcelableExtra(key) as? StreamCallId
 }
