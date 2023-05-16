@@ -326,7 +326,6 @@ public class RtcSession internal constructor(
         // ice restart
         subscriber?.connection?.restartIce()
         publisher?.connection?.restartIce()
-
     }
 
     suspend fun connect() {
@@ -337,8 +336,6 @@ public class RtcSession internal constructor(
         joinEventResponse.first { it != null }
         connectRtc()
     }
-
-
 
     suspend fun connectWs() {
         sfuConnectionModule.sfuSocket.connect()
@@ -1125,7 +1122,7 @@ public class RtcSession internal constructor(
     }
 
     suspend fun switchSfu(sfuUrl: String, sfuToken: String, remoteIceServers: List<IceServer>) {
-        logger.i { "switchSfu from ${this.sfuUrl} to $sfuUrl"}
+        logger.i { "switchSfu from ${this.sfuUrl} to $sfuUrl" }
         val timer = clientImpl.debugInfo.trackTime("call.switchSfu")
         // update internal vars ot the new SFU
         this.sfuUrl = sfuUrl
