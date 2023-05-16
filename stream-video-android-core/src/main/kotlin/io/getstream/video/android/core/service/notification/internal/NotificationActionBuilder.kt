@@ -23,16 +23,16 @@ internal interface NotificationActionBuilder {
 
     fun createAcceptAction(
         notificationId: Int,
-        guid: io.getstream.video.android.model.StreamCallGuid
+        cid: StreamCallGuid
     ): NotificationCompat.Action
 
     fun createRejectAction(
         notificationId: Int,
-        guid: io.getstream.video.android.model.StreamCallGuid
+        cid: StreamCallGuid
     ): NotificationCompat.Action
 
     fun createCancelAction(
         notificationId: Int,
-        guid: io.getstream.video.android.model.StreamCallGuid
+        cid: StreamCallGuid
     ): NotificationCompat.Action
 }

@@ -18,7 +18,6 @@ package io.getstream.video.android.core.service.notification.internal
 
 import android.content.Context
 import io.getstream.video.android.core.service.notification.NotificationAction
-import io.getstream.video.android.core.service.notification.extractNotificationAction
 import io.getstream.video.android.core.utils.registerReceiverAsFlow
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map

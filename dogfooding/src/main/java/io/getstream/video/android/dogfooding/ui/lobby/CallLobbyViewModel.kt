@@ -25,13 +25,13 @@ import io.getstream.video.android.core.DeviceStatus
 import io.getstream.video.android.core.StreamVideo
 import io.getstream.video.android.core.call.state.CallDeviceState
 import io.getstream.video.android.datastore.delegate.StreamUserDataStore
+import io.getstream.video.android.model.StreamCallGuid
 import io.getstream.video.android.model.User
-import io.getstream.video.android.model.mapper.toTypeAndId
+import javax.inject.Inject
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
-import javax.inject.Inject
 
 @HiltViewModel
 class CallLobbyViewModel @Inject constructor(
@@ -39,12 +39,11 @@ class CallLobbyViewModel @Inject constructor(
     dataStore: StreamUserDataStore
 ) : ViewModel() {
 
-    val cid: String = checkNotNull(savedStateHandle["cid"])
+    val guid: StreamCallGuid = checkNotNull(savedStateHandle["guid"])
 
     val call: Call by lazy {
         val streamVideo = StreamVideo.instance()
-        val (type, id) = cid.toTypeAndId()
-        streamVideo.call(type = type, id = id)
+        streamVideo.call(type = guid.type, id = guid.id)
     }
 
     val user: User? = dataStore.user.value

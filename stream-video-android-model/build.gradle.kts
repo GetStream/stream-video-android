@@ -19,6 +19,7 @@ import io.getstream.video.android.Configuration
 plugins {
     id("io.getstream.android.library")
     id(libs.plugins.kotlin.serialization.get().pluginId)
+    id(libs.plugins.kotlin.parcelize.get().pluginId)
     id("io.getstream.spotless")
 }
 
