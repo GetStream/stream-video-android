@@ -23,8 +23,6 @@ import io.getstream.video.android.model.mapper.toTypeAndId
 import kotlinx.parcelize.Parcelize
 import kotlinx.serialization.Serializable
 
-private const val CID_SIZE = 2
-
 /**
  * Represents call cid.
  */
