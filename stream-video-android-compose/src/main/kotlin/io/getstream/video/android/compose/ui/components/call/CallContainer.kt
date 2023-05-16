@@ -34,8 +34,8 @@ import io.getstream.video.android.compose.ui.components.call.activecall.CallCont
 import io.getstream.video.android.compose.ui.components.call.activecall.DefaultPictureInPictureContent
 import io.getstream.video.android.compose.ui.components.call.activecall.internal.InviteUsersDialog
 import io.getstream.video.android.compose.ui.components.call.controls.CallControls
-import io.getstream.video.android.compose.ui.components.call.incomingcall.IncomingCallContent
-import io.getstream.video.android.compose.ui.components.call.outgoingcall.OutgoingCallContent
+import io.getstream.video.android.compose.ui.components.call.ringing.incomingcall.IncomingCallContent
+import io.getstream.video.android.compose.ui.components.call.ringing.outgoingcall.OutgoingCallContent
 import io.getstream.video.android.compose.ui.components.participants.CallParticipantsInfoMenu
 import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.RingingState
