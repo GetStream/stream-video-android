@@ -16,80 +16,106 @@
 
 package io.getstream.video.android.core
 
+import com.google.common.truth.Truth.assertThat
 import io.getstream.log.taggedLogger
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
 
 /**
- * - Join failure should reconnect
- * -- Either to the same SFU
- * -- Or to a different SFU
- * - Ice connection failure should reconnect
- * -- Either to the same SFU
- * -- Or to a different SFU
- * - Sockets should reconnect
- * - Camera should restart
+ * Connection state shows if we've established a connection with the SFU
+ * - join state (did we try to setup the RtcSession yes or no?). API calls can fail during the join and require us to repeat it
+ * - socket connection health. the socket can disconnect.
+ * - peer connection subscriber
+ * - peer connection publisher
+ * - network detection might be faster than the peer connection
+ * The call connection state is the health of these 5 components
+ *
+ * Note that the video connection can still be working even if:
+ * * the socket is disconnected
+ * * publisher is disconnected
+ *
+ * When the connection breaks the subscriber peer connection will usually indicate the issue first (since it has constant traffic)
+ * The subscriber can break because of 2 reasons:
+ * * Something is wrong with your network (90% of the time)
+ * * Something is wrong with the SFU (should be rare)
+ *
+ * We want the reconnect to be as fast as possible.
+ * * If you can reach our edge network your connection is fine. So the optimal flow here is
+ * * When there is an error try to connect to the same SFU immediately
+ * * Meanwhile ask the API if we need to switch to a different
+ * * If the API says we need to switch, swap to the new SFU
+ *
  */
 class ReconnectTest : IntegrationTestBase(connectCoordinatorWS = false) {
 
     private val logger by taggedLogger("Test:AndroidDeviceTest")
+
+    /**
+     * If the join flow encounters an error it should retry
+     */
     @Test
-    fun switchSfuTest() = runTest {
+    fun retryJoin() = runTest {
+
+    }
+
+    /**
+     * If the peer connection breaks we should retry
+     */
+    @Test
+    fun restartIce() = runTest {
+
+    }
+
+    /**
+     * Switching an Sfu should be fast
+     */
+    @Test
+    fun switchSfuQuickly() = runTest {
         call.join()
+        Thread.sleep(2000)
 
-        // TODO: exclude the SFU that failed...
-        // TODO: can we remove any API calls here or resuse latency measurements
-        // TODO: add loading/status indicators
+        // connect to the new socket
+        // do an ice restart
+        call.session?.let {
+            it.switchSfu(it.sfuUrl, it.sfuToken, it.remoteIceServers)
+        }
 
-        call.switchSfu()
     }
 
     @Test
-    fun sessionRetry() = runTest {
+    fun reconnectPeers() = runTest {
         call.join()
+        Thread.sleep(2000)
+        val a = call.session?.subscriber?.connection?.connectionState()
+        val b = call.session?.publisher?.connection?.connectionState()
+        println("yyyzzz $a and $b ${call.session?.subscriber}")
+
         // the socket and rtc connection disconnect...,
         // or ice candidate don't arrive due to temporary network failure
         call.session?.reconnect()
+        Thread.sleep(2000)
         // reconnect recreates the peer connections
+        val sub = call.session?.subscriber?.connection?.connectionState()
+        val pub = call.session?.publisher?.connection?.connectionState()
+
+        println("yyyzzz $sub and $pub ${call.session?.subscriber?.state?.value}")
     }
 
     @Test
-    fun reconnect() = runTest {
-        call.state.connection // pre connect
-        backgroundScope.launch {
-            call.join()
-            call.state.connection // loading
+    fun showErrors() = runTest {
+        call.join()
+        Thread.sleep(2000)
+
+        // Show an error if we are reconnecting
+        assertThat(call.state._connection.value).isEqualTo(RtcConnectionState.Reconnecting)
+
+        // connect to the new socket
+        // do an ice restart
+        call.session?.let {
+            it.switchSfu(it.sfuUrl, it.sfuToken, it.remoteIceServers)
         }
-        // show a loading icon while loading
-        call.state.connection // temporary error/ reconnecting
-        // permanent error -> Failed to join call. Mention this call id to tech support
-        // happy connection
 
-        /**
-         * From a UI Perspective, the first joinRequest already sets up state
-         * Then the JoinEventResponse gives more state
-         *
-         * Video is only available after peer connections are ready.
-         * And after updateSubscriptions is called
-         * And the track is received
-         *
-         *
-         * -- we check for disconnected, closed or failed. if failed, closed or disconnected for more than 3 seconds
-         * -- call the coordinator and ask if we should switch SFU
-         */
-
-        /**
-         * From a UI Perspective, the first joinRequest already sets up state
-         * Then the JoinEventResponse gives more state
-         *
-         * Video is only available after peer connections are ready.
-         * And after updateSubscriptions is called
-         * And the track is received
-         *
-         *
-         * -- we check for disconnected, closed or failed. if failed, closed or disconnected for more than 3 seconds
-         * -- call the coordinator and ask if we should switch SFU
-         */
     }
+
 }

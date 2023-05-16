@@ -19,6 +19,7 @@ package io.getstream.video.android.core
 import android.view.View
 import androidx.annotation.VisibleForTesting
 import io.getstream.log.taggedLogger
+import io.getstream.result.Error
 import io.getstream.result.Result
 import io.getstream.result.Result.Failure
 import io.getstream.result.Result.Success
@@ -32,6 +33,7 @@ import io.getstream.video.android.model.User
 import io.getstream.webrtc.android.ui.VideoTextureViewRenderer
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
@@ -58,6 +60,7 @@ import org.webrtc.PeerConnection
 import org.webrtc.RendererCommon
 import stream.video.sfu.models.TrackType
 import stream.video.sfu.models.VideoDimension
+import java.lang.Exception
 
 /**
  * The call class gives you access to all call level API calls
@@ -76,6 +79,7 @@ public class Call(
     val id: String,
     val user: User,
 ) {
+    private lateinit var location: String
     internal val clientImpl = client as StreamVideoImpl
     private val logger by taggedLogger("Call")
 
@@ -182,6 +186,41 @@ public class Call(
         create: Boolean = false,
         createOptions: CreateCallOptions? = null
     ): Result<RtcSession> {
+        // the join flow should retry up to 3 times
+        // if the error is not permanent
+        // and fail immediately on permanent errors
+        state._connection.value = RtcConnectionState.InProgress
+        var retryCount = 0
+
+        var result: Result<RtcSession>
+
+        while (retryCount < 3) {
+            result = _join(create, createOptions)
+            if (result is Success) {
+                return result
+            }
+            if (result is Failure) {
+                if (isPermanentError(result.value)) {
+                    state._connection.value = RtcConnectionState.Failed(result.value)
+                    return result
+                } else {
+                    retryCount += 1
+                }
+            }
+            delay(retryCount-1*1000L)
+        }
+        return Failure(value= Error.GenericError("Join failed after 3 retries"))
+    }
+
+    internal fun isPermanentError(error: Any): Boolean {
+        return true
+    }
+
+    internal suspend fun _join(
+        create: Boolean = false,
+        createOptions: CreateCallOptions? = null,
+    ): Result<RtcSession> {
+
         // step 1. call the join endpoint to get a list of SFUs
         val timer = clientImpl.debugInfo.trackTime("call.join")
 
@@ -197,7 +236,8 @@ public class Call(
             } else {
                 null
             }
-        val result = joinRequest(options, locationResult.value)
+        location = locationResult.value
+        val result = joinRequest(options, location)
 
         if (result !is Success) {
             return result as Failure
@@ -216,6 +256,10 @@ public class Call(
             remoteIceServers = iceServers,
         )
 
+        session?.let {
+            state._connection.value = RtcConnectionState.Joined(it)
+        }
+
         timer.split("rtc session init")
 
         session?.connect()
@@ -230,20 +274,22 @@ public class Call(
             }
         }
 
+        // TODO: move this
         scope.launch {
             session?.let {
                 // failed and closed indicate we should retry connecting to this or another SFU
                 // disconnected is temporary, only if it lasts for a certain duration we should reconnect or switch
+                // TODO: move to session
+
                 val badStates = listOf(
                     PeerConnection.IceConnectionState.DISCONNECTED,
                     PeerConnection.IceConnectionState.FAILED,
                     PeerConnection.IceConnectionState.CLOSED
                 )
+
                 it.subscriber?.state?.filter { it in badStates }?.collect {
                     logger.w { "ice connection state changed to $it" }
-                    // TODO: UI indications
-                    // TODO: some logic here about when to reconnect or switch
-                    switchSfu()
+                    reconnectOrSwitchSfu()
                 }
             }
         }
@@ -255,8 +301,36 @@ public class Call(
         return Success(value = session!!)
     }
 
+    suspend fun reconnectOrSwitchSfu() {
+        // TODO: we should run this on repeat until we are connected again
+        // TODO: we should only run one at the time of these
+        // mark us as reconnecting
+        if (state._connection.value is RtcConnectionState.Joined) {
+            state._connection.value = RtcConnectionState.Reconnecting
+        }
+        val online = true
+
+        if (online) {
+            // start by retrying the current connection
+            session?.reconnect()
+
+            // ask if we should switch
+            val joinResponse = joinRequest(location=location, currentSfu = session?.sfuUrl)
+            val shouldSwitch = true
+
+            if (shouldSwitch && joinResponse is Success) {
+                // switch to the new SFU
+                val cred = joinResponse.value.credentials
+                val iceServers = cred.iceServers.map { it.toIceServer() }
+                session?.switchSfu(cred.server.url, cred.token, iceServers)
+            }
+
+        }
+    }
+
     /** Leave the call, but don't end it for other users */
     fun leave() {
+        state._connection.value = RtcConnectionState.Disconnected
         cleanup()
     }
 
@@ -506,7 +580,7 @@ public class Call(
     }
 
     @VisibleForTesting
-    internal suspend fun joinRequest(create: CreateCallOptions? = null, location: String): Result<JoinCallResponse> {
+    internal suspend fun joinRequest(create: CreateCallOptions? = null, location: String, currentSfu: String?=null): Result<JoinCallResponse> {
         val result = clientImpl.joinCall(
             type, id,
             create = create != null,
@@ -530,11 +604,6 @@ public class Call(
         // TODO: does anything else need to cleaned up?
     }
 
-    suspend fun switchSfu() {
-        session?.cleanup()
-        // TODO: maybe exclude the last sfu?
-        join()
-    }
 }
 
 public data class CreateCallOptions(
