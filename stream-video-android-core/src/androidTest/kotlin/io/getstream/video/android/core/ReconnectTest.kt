@@ -78,7 +78,7 @@ class ReconnectTest : IntegrationTestBase(connectCoordinatorWS = false) {
         // connect to the new socket
         // do an ice restart
         call.session?.let {
-            it.switchSfu(it.sfuUrl, it.sfuToken)
+            it.switchSfu(it.sfuUrl, it.sfuToken, it.remoteIceServers)
         }
 
     }
@@ -113,7 +113,7 @@ class ReconnectTest : IntegrationTestBase(connectCoordinatorWS = false) {
         // connect to the new socket
         // do an ice restart
         call.session?.let {
-            it.switchSfu(it.sfuUrl, it.sfuToken)
+            it.switchSfu(it.sfuUrl, it.sfuToken, it.remoteIceServers)
         }
 
     }

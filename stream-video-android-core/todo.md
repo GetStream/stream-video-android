@@ -17,6 +17,7 @@
 - [X] Session.switchSfu
 - [X] Connection state for UI indicators. state.connection
 - [X] Monitoring that determines when to reconnect, or switchSfu
+- [ ] Only run 1 retry flow at once. We should keep on retrying. See the socket health monitor
 - [ ] Full test coverage
 
 ### High level issues

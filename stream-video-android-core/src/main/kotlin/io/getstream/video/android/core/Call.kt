@@ -303,6 +303,7 @@ public class Call(
 
     suspend fun reconnectOrSwitchSfu() {
         // TODO: we should run this on repeat until we are connected again
+        // TODO: we should only run one at the time of these
         // mark us as reconnecting
         if (state._connection.value is RtcConnectionState.Joined) {
             state._connection.value = RtcConnectionState.Reconnecting
@@ -319,8 +320,9 @@ public class Call(
 
             if (shouldSwitch && joinResponse is Success) {
                 // switch to the new SFU
-                // TODO: replace with a real setup
-                session?.switchSfu(joinResponse.value.credentials.server.url, joinResponse.value.credentials.token)
+                val cred = joinResponse.value.credentials
+                val iceServers = cred.iceServers.map { it.toIceServer() }
+                session?.switchSfu(cred.server.url, cred.token, iceServers)
             }
 
         }

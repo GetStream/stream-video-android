@@ -145,7 +145,7 @@ public class RtcSession internal constructor(
     private val call: Call,
     internal var sfuUrl: String,
     internal var sfuToken: String,
-    private var remoteIceServers: List<IceServer>,
+    internal var remoteIceServers: List<IceServer>,
 ) {
 
     private var errorJob: Job? = null
@@ -234,7 +234,7 @@ public class RtcSession internal constructor(
      * Connection and WebRTC.
      */
 
-    private val iceServers by lazy { buildRemoteIceServers(remoteIceServers) }
+    private var iceServers = buildRemoteIceServers(remoteIceServers)
 
     private val connectionConfiguration: PeerConnection.RTCConfiguration by lazy {
         buildConnectionConfiguration(iceServers)
@@ -1124,23 +1124,25 @@ public class RtcSession internal constructor(
         trackDimensions.value = trackDimensionsMap
     }
 
-    suspend fun switchSfu(sfuUrl: String, sfuToken: String) {
+    suspend fun switchSfu(sfuUrl: String, sfuToken: String, remoteIceServers: List<IceServer>) {
+        logger.i { "switchSfu from ${this.sfuUrl} to $sfuUrl"}
         val timer = clientImpl.debugInfo.trackTime("call.switchSfu")
         // update internal vars ot the new SFU
         this.sfuUrl = sfuUrl
         this.sfuToken = sfuToken
+        this.remoteIceServers = remoteIceServers
+        this.iceServers = buildRemoteIceServers(remoteIceServers)
 
         // create the new socket
         val getSdp = suspend {
             getSubscriberSdp().description
         }
-        // TODO: ice candidates
+        // TODO: updating the turn server requires a new peer connection
         sfuConnectionModule =
             connectionModule.createSFUConnectionModule(sfuUrl, sessionId, sfuToken, getSdp)
         listenToSocket()
         sfuConnectionModule.sfuSocket.connect()
         timer.split("socket connected")
-
 
         // ice restart
         reconnect()
