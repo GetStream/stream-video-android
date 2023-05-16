@@ -258,6 +258,11 @@ public class RtcSession internal constructor(
     internal var sfuConnectionModule: SfuConnectionModule
 
     init {
+
+        println("AAA sfu token ${sfuToken}")
+        println("AAA sfu url ${sfuUrl}")
+
+
         val dataStore = StreamUserDataStore.instance()
         val user = dataStore.user.value
         val apiKey = dataStore.apiKey.value
@@ -291,6 +296,7 @@ public class RtcSession internal constructor(
                 updateParticipantSubscriptions()
             }
         }
+
     }
 
     private fun listenToSocket() {
@@ -330,15 +336,12 @@ public class RtcSession internal constructor(
 
     suspend fun connect() {
         val timer = clientImpl.debugInfo.trackTime("sfu ws")
-        connectWs()
+        sfuConnectionModule.sfuSocket.connect()
         timer.finish()
+
         // ensure that the join event has been handled before starting RTC
         joinEventResponse.first { it != null }
         connectRtc()
-    }
-
-    suspend fun connectWs() {
-        sfuConnectionModule.sfuSocket.connect()
     }
 
     suspend fun listenToMediaChanges() {

@@ -119,21 +119,27 @@ class ModerationTest : IntegrationTestBase() {
     }
 
     @Test
-    @Ignore
     fun `Basic moderation - Request permission to talk`() = runTest {
-
+        Thread.sleep(100L)
+        client.subscribe {
+            println("event $it all events ${events.map { it.javaClass.simpleName }}")
+        }
         val ownCapabilities = call.state.ownCapabilities.value
         // TODO: maybe not use strings for the permissions
         assertThat(ownCapabilities).contains(OwnCapability.decode("send-audio"))
         val hasPermission = call.state.hasPermission("send-audio").value
         assertThat(hasPermission).isTrue()
 
+        Thread.sleep(100L)
+
         val response = call.requestPermissions("send-audio")
+        Thread.sleep(100L)
         assertSuccess(response)
         waitForNextEvent<PermissionRequestEvent>().also {
             assertThat(it.user.id).isEqualTo(client.user.id)
             assertThat(it.permissions).contains("send-audio")
         }
+        Thread.sleep(100L)
 
         val permissionRequest = call.state.permissionRequests.value.first()
         val grantResult = permissionRequest.grant()

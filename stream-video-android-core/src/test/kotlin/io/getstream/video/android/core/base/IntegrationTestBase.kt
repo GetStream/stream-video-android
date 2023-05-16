@@ -290,18 +290,21 @@ open class IntegrationTestBase(connectCoordinatorWS: Boolean = true) : TestBase(
         withTimeout(10000) {
             suspendCoroutine { continuation ->
                 var finished = false
+
+                // check historical events
+                val matchingEvents = events.filterIsInstance<T>()
+                if (matchingEvents.isNotEmpty()) {
+                    continuation.resume(matchingEvents[0])
+                    finished = true
+                }
+
                 client.subscribe {
 
                     if (!finished) {
+                        // listen to the latest events
                         if (it is T) {
                             continuation.resume(it)
                             finished = true
-                        } else {
-                            val matchingEvents = events.filterIsInstance<T>()
-                            if (matchingEvents.isNotEmpty()) {
-                                continuation.resume(matchingEvents[0])
-                                finished = true
-                            }
                         }
                     }
                 }

@@ -67,10 +67,9 @@ import java.util.concurrent.TimeUnit
 open class SocketTestBase : TestBase() {
     val coordinatorUrl =
         "https://video.stream-io-api.com/video/connect?api_key=hd8szvscpxvd&stream-auth-type=jwt&X-Stream-Client=stream-video-android"
-    val sfuUrl = "wss://sfu-9c0dc03.ovh-lim1.stream-io-video.com/ws"
-
+    val sfuUrl = "wss://sfu-f079b1a.dpk-den1.stream-io-video.com/ws"
     val sfuToken =
-        "eyJhbGciOiJFUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiI4ZDBlYjU0NDg4ZDFiYTUxOTk3Y2Y1NWRmYTY0Y2NiMCIsInN1YiI6InVzZXIvdGhpZXJyeSIsImF1ZCI6WyJzZnUtOWMwZGMwMy5vdmgtbGltMS5zdHJlYW0taW8tdmlkZW8uY29tIl0sImV4cCI6MTY4MjIwMDYxMiwibmJmIjoxNjgyMTc5MDEyLCJpYXQiOjE2ODIxNzkwMTIsImFwcF9pZCI6MTEyOTUyOCwiY2FsbF9pZCI6ImRlZmF1bHQ6ajhCOGhNbTJ3U0FqIiwidXNlciI6eyJpZCI6InRoaWVycnkiLCJuYW1lIjoiVGhpZXJyeSIsImltYWdlIjoiaGVsbG8iLCJ0cCI6IjByYlhXV2trRy8zRWF6OFl3OFdnak5JdlNSZlNIQWszIn0sInJvbGVzIjpbInVzZXIiXSwib3duZXIiOmZhbHNlfQ.Xb1ysM0s7qXfOPvAHYRxnXfgfVScEMQyk_GKMucmwWbgdkd8-_Vl2xps38FL4uXidFzRuVRIcVTtJSupn2ePNA"
+        "eyJhbGciOiJFUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiI4ZDBlYjU0NDg4ZDFiYTUxOTk3Y2Y1NWRmYTY0Y2NiMCIsInN1YiI6InVzZXIvdGhpZXJyeSIsImF1ZCI6WyJzZnUtZjA3OWIxYS5kcGstZGVuMS5zdHJlYW0taW8tdmlkZW8uY29tIl0sImV4cCI6MTY4NDI5NTQyMiwibmJmIjoxNjg0MjczODIyLCJpYXQiOjE2ODQyNzM4MjIsImFwcF9pZCI6MTEyOTUyOCwiY2FsbF9pZCI6ImRlZmF1bHQ6ZTJjMDRkZjYtYTNiMy00YTcyLWIxMjctOTJiNjkyZmMxMDA2IiwidXNlciI6eyJpZCI6InRoaWVycnkiLCJuYW1lIjoiVGhpZXJyeSIsImltYWdlIjoiaGVsbG8iLCJ0cCI6IkdvNGhUc3R4MEhoUDFXRnBDa0NlT0w0ZmpxVDRCQWx1In0sInJvbGVzIjpbInVzZXIiXSwib3duZXIiOnRydWV9.Fp5z70vshi6UoGMMNV1aZd1AIAS4fvm46jJ_O3YGfdyReUXl7gDHeonxwrbT0OJ-rd2tyGVHCCrbvkqGEznwKg"
 
     @RelaxedMockK
     lateinit var mockedWebSocket: WebSocket
@@ -238,7 +237,7 @@ class SfuSocketTest : SocketTestBase() {
     }
 
     @Test
-    @Ignore("token is expired")
+    @Ignore
     fun `sfu socket should connect and stay connected`() = runTest {
         val sessionId = randomUUID().toString()
         val updateSdp: () -> String = {

@@ -191,6 +191,8 @@ public class Call(
         state._connection.value = RtcConnectionState.InProgress
         var retryCount = 0
 
+
+
         var result: Result<RtcSession>
 
         while (retryCount < 3) {
@@ -199,6 +201,7 @@ public class Call(
                 return result
             }
             if (result is Failure) {
+                logger.w { "Join failed with error ${result}" }
                 if (isPermanentError(result.value)) {
                     state._connection.value = RtcConnectionState.Failed(result.value)
                     return result
@@ -223,11 +226,15 @@ public class Call(
         // step 1. call the join endpoint to get a list of SFUs
         val timer = clientImpl.debugInfo.trackTime("call.join")
 
+
+
         val locationResult = clientImpl.selectLocation()
         if (locationResult !is Success) {
             return locationResult as Failure
         }
         timer.split("location found")
+
+
 
         val options = createOptions
             ?: if (create) {
@@ -237,6 +244,8 @@ public class Call(
             }
         location = locationResult.value
         val result = joinRequest(options, location)
+
+
 
         if (result !is Success) {
             return result as Failure
@@ -255,6 +264,8 @@ public class Call(
             remoteIceServers = iceServers,
         )
 
+
+
         session?.let {
             state._connection.value = RtcConnectionState.Joined(it)
         }
@@ -262,6 +273,8 @@ public class Call(
         timer.split("rtc session init")
 
         session?.connect()
+
+
 
         timer.split("rtc connect completed")
 

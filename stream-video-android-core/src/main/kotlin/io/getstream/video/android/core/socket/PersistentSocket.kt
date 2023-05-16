@@ -114,12 +114,16 @@ open class PersistentSocket<T>(
         // step 1 create the socket
         socket = mockSocket ?: createSocket()
 
+
+
         scope.launch {
             // step 2 authenticate the user/call etc
             authenticate()
 
+
             // step 3 monitor for health every 30 seconds
             healthMonitor.start()
+
 
             // also monitor if we are offline/online
             networkStateProvider.subscribe(networkStateListener)
@@ -265,6 +269,7 @@ open class PersistentSocket<T>(
                     val errorEvent = message as ErrorEvent
                     handleError(SfuSocketError(errorEvent.error))
                 }
+                println("received message $message")
                 // TODO: This logic is specific to the SfuSocket, move it
                 healthMonitor.ack()
                 events.emit(message)
