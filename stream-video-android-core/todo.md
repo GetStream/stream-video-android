@@ -54,6 +54,7 @@
 - [ ] Reactions don't show up
 - [ ] Chat integration (we need an event from the server though)
 - [ ] PIP
+- [ ] When state._connection.value = RtcConnectionState.Reconnecting we should show a little transparent. “Reconnecting” UI element
 - [ ] Ringing calls (wait for push and updated endpoints from server)
 - [X] Screensharing doesn't show up
 

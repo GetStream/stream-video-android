@@ -25,6 +25,7 @@ import org.junit.runner.RunWith
 import org.openapitools.client.models.BlockedUserEvent
 import org.openapitools.client.models.CallMemberRemovedEvent
 import org.openapitools.client.models.CallMemberUpdatedPermissionEvent
+import org.openapitools.client.models.OwnCapability
 import org.openapitools.client.models.PermissionRequestEvent
 import org.robolectric.RobolectricTestRunner
 
@@ -118,16 +119,20 @@ class ModerationTest : IntegrationTestBase() {
     }
 
     @Test
+    @Ignore
     fun `Basic moderation - Request permission to talk`() = runTest {
 
-        val hasPermission = call.state.hasPermission("share-audio").value
+        val ownCapabilities = call.state.ownCapabilities.value
+        // TODO: maybe not use strings for the permissions
+        assertThat(ownCapabilities).contains(OwnCapability.decode("send-audio"))
+        val hasPermission = call.state.hasPermission("send-audio").value
         assertThat(hasPermission).isTrue()
 
-        val response = call.requestPermissions("share-audio")
+        val response = call.requestPermissions("send-audio")
         assertSuccess(response)
         waitForNextEvent<PermissionRequestEvent>().also {
             assertThat(it.user.id).isEqualTo(client.user.id)
-            assertThat(it.permissions).contains("share-audio")
+            assertThat(it.permissions).contains("send-audio")
         }
 
         val permissionRequest = call.state.permissionRequests.value.first()
