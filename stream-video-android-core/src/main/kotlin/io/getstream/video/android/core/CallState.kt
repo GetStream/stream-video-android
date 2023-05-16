@@ -120,7 +120,7 @@ public class CallState(private val call: Call, private val user: User) {
     private val logger by taggedLogger("CallState")
 
     internal val _connection = MutableStateFlow<RtcConnectionState>(RtcConnectionState.PreJoin)
-    private val connection: StateFlow<RtcConnectionState> = _connection
+    val connection: StateFlow<RtcConnectionState> = _connection
 
     private val networkStateListener = object : NetworkStateProvider.NetworkStateListener {
         override fun onConnected() {
