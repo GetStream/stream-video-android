@@ -36,7 +36,6 @@ import androidx.activity.ComponentActivity
 import androidx.activity.viewModels
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AlertDialog
-import io.getstream.video.android.core.ConnectionState
 import io.getstream.video.android.core.StreamVideo
 import io.getstream.video.android.core.StreamVideoProvider
 import io.getstream.video.android.core.call.state.ToggleCamera

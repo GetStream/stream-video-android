@@ -18,7 +18,6 @@ package io.getstream.video.android.core
 
 import io.getstream.log.taggedLogger
 import io.getstream.video.android.core.call.RtcSession
-import io.getstream.video.android.core.dispatchers.DispatcherProvider
 import io.getstream.video.android.core.events.AudioLevelChangedEvent
 import io.getstream.video.android.core.events.ChangePublishQualityEvent
 import io.getstream.video.android.core.events.ConnectionQualityChangeEvent
@@ -40,11 +39,6 @@ import io.getstream.video.android.core.utils.toUser
 import io.getstream.video.android.model.User
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.collect
-import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.zip
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
 import org.openapitools.client.models.BlockedUserEvent
 import org.openapitools.client.models.CallAcceptedEvent
 import org.openapitools.client.models.CallCreatedEvent
@@ -83,7 +77,6 @@ import stream.video.sfu.models.Participant
 import stream.video.sfu.models.TrackType
 import java.util.SortedMap
 
-
 public sealed interface RtcConnectionState {
     /**
      * We start out in the PreJoin state. This is before call.join is called
@@ -111,7 +104,6 @@ public sealed interface RtcConnectionState {
     public object Disconnected : RtcConnectionState // normal disconnect by the app
 }
 
-
 /**
  * The CallState class keeps all state for a call
  * It's available on every call object
@@ -128,7 +120,7 @@ public class CallState(private val call: Call, private val user: User) {
     private val logger by taggedLogger("CallState")
 
     internal val _connection = MutableStateFlow<RtcConnectionState>(RtcConnectionState.PreJoin)
-    private val connection : StateFlow<RtcConnectionState> = _connection
+    private val connection: StateFlow<RtcConnectionState> = _connection
 
     private val networkStateListener = object : NetworkStateProvider.NetworkStateListener {
         override fun onConnected() {
@@ -681,8 +673,6 @@ public class CallState(private val call: Call, private val user: User) {
     fun updateFromResponse(it: QueryMembersResponse) {
         updateFromResponse(it.members)
     }
-
-
 }
 
 private fun MemberResponse.toMemberState(): MemberState {

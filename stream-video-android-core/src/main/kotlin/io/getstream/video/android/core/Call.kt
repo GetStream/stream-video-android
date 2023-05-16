@@ -60,7 +60,6 @@ import org.webrtc.PeerConnection
 import org.webrtc.RendererCommon
 import stream.video.sfu.models.TrackType
 import stream.video.sfu.models.VideoDimension
-import java.lang.Exception
 
 /**
  * The call class gives you access to all call level API calls
@@ -207,9 +206,9 @@ public class Call(
                     retryCount += 1
                 }
             }
-            delay(retryCount-1*1000L)
+            delay(retryCount - 1 * 1000L)
         }
-        return Failure(value= Error.GenericError("Join failed after 3 retries"))
+        return Failure(value = Error.GenericError("Join failed after 3 retries"))
     }
 
     internal fun isPermanentError(error: Any): Boolean {
@@ -315,7 +314,7 @@ public class Call(
             session?.reconnect()
 
             // ask if we should switch
-            val joinResponse = joinRequest(location=location, currentSfu = session?.sfuUrl)
+            val joinResponse = joinRequest(location = location, currentSfu = session?.sfuUrl)
             val shouldSwitch = true
 
             if (shouldSwitch && joinResponse is Success) {
@@ -324,7 +323,6 @@ public class Call(
                 val iceServers = cred.iceServers.map { it.toIceServer() }
                 session?.switchSfu(cred.server.url, cred.token, iceServers)
             }
-
         }
     }
 
@@ -580,7 +578,7 @@ public class Call(
     }
 
     @VisibleForTesting
-    internal suspend fun joinRequest(create: CreateCallOptions? = null, location: String, currentSfu: String?=null): Result<JoinCallResponse> {
+    internal suspend fun joinRequest(create: CreateCallOptions? = null, location: String, currentSfu: String? = null): Result<JoinCallResponse> {
         val result = clientImpl.joinCall(
             type, id,
             create = create != null,
@@ -603,7 +601,6 @@ public class Call(
         supervisorJob.cancel()
         // TODO: does anything else need to cleaned up?
     }
-
 }
 
 public data class CreateCallOptions(

@@ -18,7 +18,6 @@ package io.getstream.video.android.core
 
 import com.google.common.truth.Truth.assertThat
 import io.getstream.log.taggedLogger
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
 
@@ -56,7 +55,6 @@ class ReconnectTest : IntegrationTestBase(connectCoordinatorWS = false) {
      */
     @Test
     fun retryJoin() = runTest {
-
     }
 
     /**
@@ -64,7 +62,6 @@ class ReconnectTest : IntegrationTestBase(connectCoordinatorWS = false) {
      */
     @Test
     fun restartIce() = runTest {
-
     }
 
     /**
@@ -80,7 +77,6 @@ class ReconnectTest : IntegrationTestBase(connectCoordinatorWS = false) {
         call.session?.let {
             it.switchSfu(it.sfuUrl, it.sfuToken, it.remoteIceServers)
         }
-
     }
 
     @Test
@@ -115,7 +111,5 @@ class ReconnectTest : IntegrationTestBase(connectCoordinatorWS = false) {
         call.session?.let {
             it.switchSfu(it.sfuUrl, it.sfuToken, it.remoteIceServers)
         }
-
     }
-
 }
