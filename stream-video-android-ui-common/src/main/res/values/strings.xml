@@ -1,5 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!--
+<?xml version="1.0" encoding="utf-8"?><!--
      Copyright (c) 2023 Stream.io Inc. All rights reserved.
 
      Licensed under the Stream License;
@@ -42,6 +41,7 @@
     <string name="stream_video_call_participants_empty">No participants</string>
     <string name="stream_video_call_participants_conjunction">and</string>
     <string name="stream_video_call_participants_trailing">more</string>
+    <string name="stream_video_call_rendering_failed">This track failed to be loaded in the session (%s)</string>
 
     <string name="stream_video_call_status_incoming">Incoming %s call…</string>
     <string name="stream_video_call_status_outgoing">Calling…</string>

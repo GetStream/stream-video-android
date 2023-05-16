@@ -18,20 +18,31 @@ package io.getstream.video.android.compose.ui.components.video
 
 import android.view.View
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.height
+import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
 import io.getstream.log.StreamLog
 import io.getstream.video.android.compose.theme.VideoTheme
@@ -59,6 +70,12 @@ public fun VideoRenderer(
     trackType: TrackType,
     modifier: Modifier = Modifier,
     videoScalingType: VideoScalingType = VideoScalingType.SCALE_ASPECT_BALANCED,
+    mediaTrackFallbackContent: @Composable (Call) -> Unit = {
+        DefaultMediaTrackFallbackContent(
+            modifier,
+            call
+        )
+    },
     onRender: (View) -> Unit = {},
 ) {
     if (LocalInspectionMode.current) {
@@ -105,6 +122,8 @@ public fun VideoRenderer(
             update = { v -> setupVideo(mediaTrack, v) },
             modifier = modifier.testTag("video_renderer"),
         )
+    } else {
+        mediaTrackFallbackContent.invoke(call)
     }
 }
 
@@ -129,6 +148,40 @@ private fun setupVideo(
         }
     } catch (e: Exception) {
         StreamLog.d("VideoRenderer") { e.message.toString() }
+    }
+}
+
+@Composable
+private fun DefaultMediaTrackFallbackContent(
+    modifier: Modifier,
+    call: Call
+) {
+    Column(
+        modifier = modifier
+            .fillMaxSize()
+            .background(VideoTheme.colors.appBackground)
+            .testTag("video_renderer_fallback"),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
+    ) {
+        Image(
+            modifier = modifier.fillMaxSize(),
+            painter = painterResource(id = io.getstream.video.android.ui.common.R.drawable.stream_video_ic_preview_avatar),
+            contentScale = ContentScale.Crop,
+            contentDescription = null
+        )
+
+        Spacer(modifier = Modifier.height(12.dp))
+
+        Text(
+            text = stringResource(
+                id = io.getstream.video.android.ui.common.R.string.stream_video_call_rendering_failed,
+                call.sessionId.orEmpty()
+            ),
+            color = VideoTheme.colors.textLowEmphasis,
+            textAlign = TextAlign.Center,
+            fontSize = 14.sp
+        )
     }
 }
 
