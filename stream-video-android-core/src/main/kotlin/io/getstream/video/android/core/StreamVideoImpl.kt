@@ -944,7 +944,7 @@ internal class StreamVideoImpl internal constructor(
                 .method("HEAD", null)
                 .build()
             val call = connectionModule.okHttpClient.newCall(request)
-            val response = suspendCancellableCoroutine<Response> {continuation ->
+            val response = suspendCancellableCoroutine<Response> { continuation ->
                 call.enqueue(object : Callback {
                     override fun onFailure(call: okhttp3.Call, e: java.io.IOException) {
                         continuation.resumeWithException(e)
