@@ -127,7 +127,7 @@ class ModerationTest : IntegrationTestBase() {
         assertSuccess(response)
         waitForNextEvent<PermissionRequestEvent>().also {
             assertThat(it.user.id).isEqualTo(client.user.id)
-            assertThat(it.permissions).contains("screenshare")
+            assertThat(it.permissions).contains("share-audio")
         }
 
         val permissionRequest = call.state.permissionRequests.value.first()
