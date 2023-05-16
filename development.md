@@ -127,15 +127,27 @@ Camera/device changes -> listener in ActiveSFUSession -> updates the tracks.
 
 ### RTC dynascale
 
-* We send what resolutions we want using UpdateSubscriptionsRequest. 
-  * It should be triggered as we paginate through participants
-  * Or when the UI layout changes
-* The SFU tells us what resolution to publish using the ChangePublishQualityEvent event
+** Part one **
+We try to render the video if participant.videoEnabled is true
+VideoRenderer is responsible for marking:
+- the video as visible
+- the resolution that the video is rendered at
+And calls RtcSession.updateTrackDimensions
 
-For dynascale to work, we always need which participants are displayed and at what resolution.
-The current approach calls `updateParticipantsSubscriptions` from the viewModel.
-If someone doesn't use our viewmodel, dynascale stops working. 
-Ideally we find a way to integrate this in such a way that customers can't forget to use it by accident.
+All resolutions are stored in RtcSession.trackDimensions. 
+Which is a map of participants, track types and resolutions that the video is displayed at.
+
+Whenever visibility or resolutions change, we call updateParticipantSubscriptions
+- It runs debounced (100ms delay)
+- It only calls update subscriptions if the list of tracks we sub to changed
+
+This ensures that we can run large tracks (since video is lazy loaded at the right resolution)
+
+** Part two **
+
+The SFU tells us what resolution to publish using the ChangePublishQualityEvent event.
+So it will say: disable "f" (full) and only send h and q (half and quarter)
+
 
 ### ParticipantState
 

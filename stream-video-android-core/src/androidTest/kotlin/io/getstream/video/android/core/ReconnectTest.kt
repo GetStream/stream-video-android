@@ -46,21 +46,41 @@ import org.junit.Test
  * * Meanwhile ask the API if we need to switch to a different
  * * If the API says we need to switch, swap to the new SFU
  *
- * TODO: Which API endpoint should we call to check if we need to switch SFU?
- *
  */
 class ReconnectTest : IntegrationTestBase(connectCoordinatorWS = false) {
 
     private val logger by taggedLogger("Test:AndroidDeviceTest")
+
+    /**
+     * If the join flow encounters an error it should retry
+     */
     @Test
-    fun switchSfuTest() = runTest {
+    fun retryJoin() = runTest {
+
+    }
+
+    /**
+     * If the peer connection breaks we should retry
+     */
+    @Test
+    fun restartIce() = runTest {
+
+    }
+
+    /**
+     * Switching an Sfu should be fast
+     */
+    @Test
+    fun switchSfuQuickly() = runTest {
         call.join()
+        Thread.sleep(2000)
 
-        // TODO: exclude the SFU that failed...
-        // TODO: can we remove any API calls here or resuse latency measurements
-        // TODO: add loading/status indicators
+        // connect to the new socket
+        // do an ice restart
+        call.session?.let {
+            it.switchSfu(it.sfuUrl, it.sfuToken)
+        }
 
-        call.switchSfu()
     }
 
     @Test
@@ -80,19 +100,6 @@ class ReconnectTest : IntegrationTestBase(connectCoordinatorWS = false) {
         val pub = call.session?.publisher?.connection?.connectionState()
 
         println("yyyzzz $sub and $pub ${call.session?.subscriber?.state?.value}")
-    }
-
-    @Test
-    fun switchSfuQuickly() = runTest {
-        call.join()
-        Thread.sleep(2000)
-
-        // connect to the new socket
-        // do an ice restart
-        call.session?.let {
-            it.switchSfu(it.sfuUrl, it.sfuToken)
-        }
-
     }
 
     @Test

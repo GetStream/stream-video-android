@@ -143,9 +143,9 @@ public class RtcSession internal constructor(
     private val client: StreamVideo,
     private val connectionModule: ConnectionModule,
     private val call: Call,
-    private val sfuUrl: String,
-    private val sfuToken: String,
-    private val remoteIceServers: List<IceServer>,
+    internal var sfuUrl: String,
+    internal var sfuToken: String,
+    private var remoteIceServers: List<IceServer>,
 ) {
 
     private var errorJob: Job? = null
@@ -287,8 +287,8 @@ public class RtcSession internal constructor(
 
         coroutineScope.launch {
             // call update participant subscriptions debounced
-            trackDimensions.collect {
-                updateParticipantsSubscriptions()
+            trackDimensionsDebounced.collect {
+                updateParticipantSubscriptions()
             }
         }
     }
@@ -485,7 +485,7 @@ public class RtcSession internal constructor(
         listenToMediaChanges()
 
         // subscribe to the tracks of other participants
-        updateParticipantsSubscriptions(true)
+        updateParticipantSubscriptions(true)
         return
     }
 
@@ -746,7 +746,7 @@ public class RtcSession internal constructor(
         return tracks
     }
 
-    private fun updateParticipantsSubscriptions(useDefaults: Boolean = false) {
+    private fun updateParticipantSubscriptions(useDefaults: Boolean = false) {
         // default is to subscribe to the top 5 sorted participants
         val tracks = if (useDefaults) {
             defaultTracks()
@@ -1134,6 +1134,7 @@ public class RtcSession internal constructor(
         val getSdp = suspend {
             getSubscriberSdp().description
         }
+        // TODO: ice candidates
         sfuConnectionModule =
             connectionModule.createSFUConnectionModule(sfuUrl, sessionId, sfuToken, getSdp)
         listenToSocket()

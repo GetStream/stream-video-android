@@ -80,6 +80,7 @@ public class Call(
     val id: String,
     val user: User,
 ) {
+    private lateinit var location: String
     internal val clientImpl = client as StreamVideoImpl
     private val logger by taggedLogger("Call")
 
@@ -236,7 +237,8 @@ public class Call(
             } else {
                 null
             }
-        val result = joinRequest(options, locationResult.value)
+        location = locationResult.value
+        val result = joinRequest(options, location)
 
         if (result !is Success) {
             return result as Failure
@@ -313,13 +315,13 @@ public class Call(
             session?.reconnect()
 
             // ask if we should switch
-            val joinResponse = joinRequest(currentSfu = session?.sfuUrl)
+            val joinResponse = joinRequest(location=location, currentSfu = session?.sfuUrl)
             val shouldSwitch = true
 
             if (shouldSwitch && joinResponse is Success) {
                 // switch to the new SFU
                 // TODO: replace with a real setup
-                session?.switchSfu(joinResponse.value.edges.first().latencyUrl, "token")
+                session?.switchSfu(joinResponse.value.credentials.server.url, joinResponse.value.credentials.token)
             }
 
         }
@@ -601,11 +603,6 @@ public class Call(
         // TODO: does anything else need to cleaned up?
     }
 
-    suspend fun switchSfu() {
-        session?.cleanup()
-        // TODO: maybe exclude the last sfu?
-        join()
-    }
 }
 
 public data class CreateCallOptions(
