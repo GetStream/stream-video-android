@@ -16,7 +16,9 @@
 
 package io.getstream.video.android.compose.ui.components.call.ringing.outgoingcall
 
+import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -24,6 +26,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.Dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.background.CallBackground
@@ -57,9 +60,13 @@ public fun OutgoingCallContent(
     callType: CallType,
     modifier: Modifier = Modifier,
     isShowingHeader: Boolean = true,
-    callHeaderContent: (@Composable () -> Unit)? = null,
-    callDetailsContent: (@Composable () -> Unit)? = null,
-    callControlsContent: (@Composable () -> Unit)? = null,
+    callHeaderContent: (@Composable ColumnScope.() -> Unit)? = null,
+    callDetailsContent: (
+        @Composable ColumnScope.(
+            participants: List<ParticipantState>, topPadding: Dp
+        ) -> Unit
+    )? = null,
+    callControlsContent: (@Composable BoxScope.() -> Unit)? = null,
     onBackPressed: () -> Unit,
     onCallAction: (CallAction) -> Unit = callViewModel::onCallAction,
 ) {
@@ -99,9 +106,13 @@ public fun OutgoingCallContent(
     callDeviceState: CallDeviceState,
     modifier: Modifier = Modifier,
     isShowingHeader: Boolean = true,
-    callHeaderContent: (@Composable () -> Unit)? = null,
-    callDetailsContent: (@Composable () -> Unit)? = null,
-    callControlsContent: (@Composable () -> Unit)? = null,
+    callHeaderContent: (@Composable ColumnScope.() -> Unit)? = null,
+    callDetailsContent: (
+        @Composable ColumnScope.(
+            participants: List<ParticipantState>, topPadding: Dp
+        ) -> Unit
+    )? = null,
+    callControlsContent: (@Composable BoxScope.() -> Unit)? = null,
     onBackPressed: () -> Unit,
     onCallAction: (CallAction) -> Unit = {},
 ) {
@@ -144,9 +155,13 @@ internal fun OutgoingCallContent(
     callDeviceState: CallDeviceState,
     modifier: Modifier = Modifier,
     isShowingHeader: Boolean = true,
-    callHeaderContent: (@Composable () -> Unit)? = null,
-    callDetailsContent: (@Composable () -> Unit)? = null,
-    callControlsContent: (@Composable () -> Unit)? = null,
+    callHeaderContent: (@Composable ColumnScope.() -> Unit)? = null,
+    callDetailsContent: (
+        @Composable ColumnScope.(
+            participants: List<ParticipantState>, topPadding: Dp
+        ) -> Unit
+    )? = null,
+    callControlsContent: (@Composable BoxScope.() -> Unit)? = null,
     onBackPressed: () -> Unit,
     onCallAction: (CallAction) -> Unit,
 ) {
@@ -159,7 +174,7 @@ internal fun OutgoingCallContent(
 
         Column {
             if (isShowingHeader) {
-                callHeaderContent?.invoke() ?: CallAppBar(
+                callHeaderContent?.invoke(this) ?: CallAppBar(
                     call = call,
                     onBackPressed = onBackPressed,
                     onCallAction = onCallAction
@@ -172,7 +187,7 @@ internal fun OutgoingCallContent(
                 VideoTheme.dimens.avatarAppbarPadding
             }
 
-            callDetailsContent?.invoke() ?: OutgoingCallDetails(
+            callDetailsContent?.invoke(this, participants, topPadding) ?: OutgoingCallDetails(
                 modifier = Modifier
                     .align(Alignment.CenterHorizontally)
                     .padding(top = topPadding),
@@ -181,7 +196,7 @@ internal fun OutgoingCallContent(
             )
         }
 
-        callControlsContent?.invoke() ?: OutgoingCallControls(
+        callControlsContent?.invoke(this) ?: OutgoingCallControls(
             modifier = Modifier
                 .align(Alignment.BottomCenter)
                 .padding(bottom = VideoTheme.dimens.outgoingCallOptionsBottomPadding),
