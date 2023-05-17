@@ -1,8 +1,3 @@
----
-title: Theme
-description: How to use the VideoTheme
----
-
 # VideoTheme
 
 The `VideoTheme` component is a wrapper that **you should use as the root** of all Compose Components. It's used to provide the default properties that help us style the application, such as:
@@ -30,7 +25,7 @@ override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
     setContent {
         VideoTheme {
-            CallContainer(viewModel = callViewModel)
+            CallContainer(callViewModel = callViewModel)
         }
     }
 }
@@ -43,6 +38,8 @@ To customize the `VideoTheme`, simply override any of the default properties by 
 ```kotlin
 setContent {
     VideoTheme(
+        colors = StreamColors.defaultColors().copy(appBackground = Color.Black),
+        dimens = StreamDimens.defaultDimens().copy(callAvatarSize = 72.dp),
         shapes = StreamShapes.defaultShapes().copy(
             avatar = RoundedCornerShape(8.dp),
             callButton = RoundedCornerShape(16.dp),
@@ -51,16 +48,20 @@ setContent {
         )
     ) {
         CallContainer(
-            viewModel = callViewModel
+            modifier = Modifier.fillMaxSize(),
+            callViewModel = vm,
+            callType = CallType.VIDEO,
+            onBackPressed = { finish() },
         )
     }
 }
 ```
 
-<!-- TODO add a customized screenshot -->
-<!-- []() -->
+The sample above will show:
 
-<!-- TODO describe the customization -->
+![Compose CallContainer With Custom Themes](../assets/compose_video_theme_custom.png)
+
+Each UI component can be customized by giving preferred values to the `VideoTheme`, and the `VideoTheme` contains various themes below:
 
 ### StreamColors
 
@@ -109,3 +110,17 @@ You can easily customize the ripple colors in light and dark modes by overriding
 You can find out more about it by reading the [class documentation](https://github.com/GetStream/stream-video-android/blob/main/stream-video-android-compose/src/main/kotlin/io/getstream/video/android/compose/imageloading/DefaultStreamCoilImageLoader.kt).
 
 You can easily customize how the images are loaded by passing your own implementation of `StreamCoilImageLoaderFactory` to `VideoTheme`.
+
+## Bring Stream Themes to Your App
+
+If you want to utilize Stream Video theme to build your application, you can easily use the theme components like the sample below:
+
+```kotlin
+VideoTheme {
+  Box(modifier = Modifier.background(VideoTheme.colors.appBackground) {
+    ..
+  }
+}
+``
+
+Each UI component is provided with [CompositionLocal](https://developer.android.com/jetpack/compose/compositionlocal) under the [VideoTheme], so you can efficiently use them to build your video call screen.

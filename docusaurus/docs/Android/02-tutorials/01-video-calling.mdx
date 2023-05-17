@@ -184,7 +184,7 @@ Now that we've seen how to use the lower level APIs, lets build a fully polished
 setContent {
     VideoTheme {
         CallContainer(
-            modifier = Modifier.background(color = VideoTheme.colors.appBackground),
+            modifier = Modifier.fillMaxSize(),
             callViewModel = vm,
             callType = CallType.VIDEO,
             onBackPressed = { finish() },
@@ -220,7 +220,7 @@ VideoTheme(
     }
 ) {
     CallContainer(
-        modifier = Modifier.background(color = VideoTheme.colors.appBackground),
+        modifier = Modifier.fillMaxSize(),
         callViewModel = vm,
         callType = CallType.VIDEO,
         onBackPressed = { finish() },
@@ -252,7 +252,7 @@ In the example below, you'll see how to customize each parts of the `CallContain
 ```kotlin
 VideoTheme {
     CallContainer(
-        modifier = Modifier.background(color = VideoTheme.colors.appBackground),
+        modifier = Modifier.fillMaxSize(),
         callViewModel = vm,
         callType = CallType.VIDEO,
         onBackPressed = { finish() },
