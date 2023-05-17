@@ -13,16 +13,17 @@
 ### TODO
 
 - [ ] Mock eglBase so tests with the debugger on don't crash (seems related, not entirely sure)
+- [ ] Only run 1 connection retry flow at once. We should keep on retrying.
+- [ ] Full test coverage for retries
+- [ ] Go through all tests & TODOs and update with latest server changes.
 - [ ] Test the dogfooding app and iterate on things that don't work yet
 - [ ] RED error
 - [ ] Own permissions should be a sealed class
-- [ ] Go through all tests & TODOs and update with latest server changes. 
 - [ ] Fine tune the quality on S23
-- [ ] Only run 1 connection retry flow at once. We should keep on retrying.
-- [ ] Full test coverage for retries
 - [ ] Handle more camera errors. Camera2Session, message: Error: Camera device could not be opened due to a device policy
 - [ ] use standard debug, verbose, info, warning and error debug levels on StreamVideoBuilder
 - [ ] Improve our error classes. Right now there are 4 different formats. 
+- [ ] Add a timeout for waiting on the socket authentication events
 - [X] Participant sorting rules. See Call sortedParticipants
 - [X] Pinning of participants. You pin/unpin and it sets pinnedAt and sorting takes it into account
 
