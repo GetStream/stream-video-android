@@ -206,5 +206,4 @@ class SdpTest : TestBase() {
         assertThat(new.description).contains("useinbandfec=1;usedtx=1")
         println(new.description)
     }
-
 }

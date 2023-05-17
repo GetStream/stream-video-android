@@ -442,7 +442,7 @@ public class CameraManager(
         val matchingTarget =
             supportedFormats?.toList()?.sortedBy { kotlin.math.abs(it.height - targetHeight) + kotlin.math.abs(it.width - targetWidth) }
         val selectedFormat = matchingTarget?.first()
-        logger.i { "selectDesiredResolution: $selectedFormat"}
+        logger.i { "selectDesiredResolution: $selectedFormat" }
         return selectedFormat
     }
 

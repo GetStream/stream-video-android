@@ -261,9 +261,8 @@ public class RtcSession internal constructor(
 
     init {
 
-        println("AAA sfu token ${sfuToken}")
-        println("AAA sfu url ${sfuUrl}")
-
+        println("AAA sfu token $sfuToken")
+        println("AAA sfu url $sfuUrl")
 
         val dataStore = StreamUserDataStore.instance()
         val user = dataStore.user.value
@@ -298,7 +297,6 @@ public class RtcSession internal constructor(
                 updateParticipantSubscriptions()
             }
         }
-
     }
 
     private fun listenToSocket() {

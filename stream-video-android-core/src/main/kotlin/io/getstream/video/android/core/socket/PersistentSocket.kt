@@ -114,16 +114,12 @@ open class PersistentSocket<T>(
         // step 1 create the socket
         socket = mockSocket ?: createSocket()
 
-
-
         scope.launch {
             // step 2 authenticate the user/call etc
             authenticate()
 
-
             // step 3 monitor for health every 30 seconds
             healthMonitor.start()
-
 
             // also monitor if we are offline/online
             networkStateProvider.subscribe(networkStateListener)

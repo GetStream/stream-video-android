@@ -16,7 +16,6 @@
 
 package io.getstream.video.android.core
 
-import com.google.common.truth.Truth.assertThat
 import io.getstream.log.taggedLogger
 import kotlinx.coroutines.test.runTest
 import org.junit.Ignore
@@ -91,5 +90,4 @@ class ReconnectTest : IntegrationTestBase(connectCoordinatorWS = false) {
             it.switchSfu(it.sfuUrl, it.sfuToken, it.remoteIceServers)
         }
     }
-
 }

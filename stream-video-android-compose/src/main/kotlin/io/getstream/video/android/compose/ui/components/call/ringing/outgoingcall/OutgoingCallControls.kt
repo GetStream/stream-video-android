@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package io.getstream.video.android.compose.ui.components.call.outgoingcall
+package io.getstream.video.android.compose.ui.components.call.ringing.outgoingcall
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
