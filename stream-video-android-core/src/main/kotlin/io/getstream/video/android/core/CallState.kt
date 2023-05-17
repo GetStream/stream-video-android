@@ -184,7 +184,7 @@ public class CallState(private val call: Call, private val user: User) {
      * * audio only participants by when they joined
      *
      */
-    private val _pinnedParticipants: MutableStateFlow<Map<String, OffsetDateTime>> = MutableStateFlow(emptyMap())
+    internal val _pinnedParticipants: MutableStateFlow<Map<String, OffsetDateTime>> = MutableStateFlow(emptyMap())
     val pinnedParticipants: StateFlow<Map<String,OffsetDateTime>> = _pinnedParticipants
 
     public val sortedParticipants = _participants.combine(_pinnedParticipants) { participants, pinned ->

@@ -25,6 +25,10 @@ import org.openapitools.client.models.CallSettingsRequest
 import org.openapitools.client.models.MemberRequest
 import org.openapitools.client.models.ScreensharingSettingsRequest
 import org.robolectric.RobolectricTestRunner
+import org.threeten.bp.Clock
+import org.threeten.bp.LocalDate
+import org.threeten.bp.OffsetDateTime
+import java.util.Date
 
 @RunWith(RobolectricTestRunner::class)
 class CallStateTest : IntegrationTestBase() {
@@ -91,8 +95,34 @@ class CallStateTest : IntegrationTestBase() {
     @Test
     fun `Participants should be sorted`() = runTest {
         val call = client.call("default", randomUUID())
-        val one = ParticipantState("1", call, User())
-        call.state.updateParticipant()
+        call.state._pinnedParticipants.value = mutableMapOf(
+            "1" to OffsetDateTime.now(Clock.systemUTC())
+        )
+
+        call.state.updateParticipant(
+            ParticipantState("4", call, User("4")).apply { _lastSpeakingAt.value = Date() }
+        )
+        call.state.updateParticipant(
+            ParticipantState("5", call, User("5")).apply { _videoEnabled.value = true }
+        )
+        call.state.updateParticipant(
+            ParticipantState("6", call, User("6")).apply { _joinedAt.value = Date() }
+        )
+
+        call.state.updateParticipant(
+            ParticipantState("1", call, User("1"))
+        )
+        call.state.updateParticipant(
+            ParticipantState("2", call, User("2")).apply { _dominantSpeaker.value = true }
+        )
+        call.state.updateParticipant(
+            ParticipantState("3", call, User("3")).apply { _screenSharingEnabled.value = true }
+        )
+
+
+        val sorted = call.state.sortedParticipants.value.map { it.sessionId }
+        assertThat(sorted).isInOrder()
+
     }
 
     @Test
