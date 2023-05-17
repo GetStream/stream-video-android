@@ -58,17 +58,15 @@ private const val CONNECT_TIMEOUT = 30_000L
  * - Helpers for picture in picture and fullscreen
  * - Informs the call about what resolution video is displayed at
  */
-public class CallViewModel(
-    public val client: StreamVideo,
-    public val call: Call
-) : ViewModel() {
+public class CallViewModel(public val call: Call) : ViewModel() {
 
     private val logger by taggedLogger("Call:ViewModel")
 
     // shortcut to the call settings
     private val settings: StateFlow<CallSettingsResponse?> = call.state.settings
 
-    private val clientImpl = client as StreamVideoImpl
+    public val client: StreamVideo by lazy { StreamVideo.instance() }
+    private val clientImpl by lazy { client as StreamVideoImpl }
 
     /** if we are in picture in picture mode */
     private val _isInPictureInPicture: MutableStateFlow<Boolean> = MutableStateFlow(false)

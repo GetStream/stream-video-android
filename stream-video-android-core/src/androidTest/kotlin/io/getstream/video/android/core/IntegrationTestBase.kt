@@ -241,18 +241,18 @@ open class IntegrationTestBase(connectCoordinatorWS: Boolean = true) : TestBase(
     suspend inline fun <reified T : VideoEvent> waitForNextEvent(): T =
         suspendCoroutine { continuation ->
             var finished = false
-            client.subscribe {
 
+            val matchingEvents = events.filterIsInstance<T>()
+            if (matchingEvents.isNotEmpty()) {
+                continuation.resume(matchingEvents[0])
+                finished = true
+            }
+
+            client.subscribe {
                 if (!finished) {
                     if (it is T) {
                         continuation.resume(it)
                         finished = true
-                    } else {
-                        val matchingEvents = events.filterIsInstance<T>()
-                        if (matchingEvents.isNotEmpty()) {
-                            continuation.resume(matchingEvents[0])
-                            finished = true
-                        }
                     }
                 }
             }

@@ -14,29 +14,27 @@
  * limitations under the License.
  */
 
-package io.getstream.video.android.core.service.notification
+package io.getstream.video.android.core.service.notification.internal
 
 import android.content.Intent
-import io.getstream.video.android.model.StreamCallGuid
+import io.getstream.video.android.core.service.notification.NotificationAction
+import io.getstream.video.android.model.StreamCallId
+import io.getstream.video.android.model.streamCallId
 
-private const val KEY_TYPE = "type"
-private const val KEY_ID = "id"
-private const val KEY_CID = "cid"
+private const val KEY_CAll_ID = "call_id"
 
 internal fun Intent.extractNotificationAction(): NotificationAction {
-    val callGuid = extractCallGuid()
+    val callId = extractCallId()
     return when (val action = action) {
-        NotificationAction.Accept.NAME -> NotificationAction.Accept(callGuid)
-        NotificationAction.Reject.NAME -> NotificationAction.Reject(callGuid)
-        NotificationAction.Cancel.NAME -> NotificationAction.Cancel(callGuid)
+        NotificationAction.Accept.NAME -> NotificationAction.Accept(callId)
+        NotificationAction.Reject.NAME -> NotificationAction.Reject(callId)
+        NotificationAction.Cancel.NAME -> NotificationAction.Cancel(callId)
         else -> error("unexpected action: $action")
     }
 }
 
 internal fun Intent.setNotificationAction(action: NotificationAction): Intent {
-    putExtra(KEY_TYPE, action.guid.type)
-    putExtra(KEY_ID, action.guid.id)
-    putExtra(KEY_CID, action.guid.cid)
+    putExtra(KEY_CAll_ID, action.callId)
     this.action = when (action) {
         is NotificationAction.Accept -> NotificationAction.Accept.NAME
         is NotificationAction.Reject -> NotificationAction.Reject.NAME
@@ -45,8 +43,5 @@ internal fun Intent.setNotificationAction(action: NotificationAction): Intent {
     return this
 }
 
-private fun Intent.extractCallGuid() = io.getstream.video.android.model.StreamCallGuid(
-    type = getStringExtra(KEY_TYPE) ?: error("no type found"),
-    id = getStringExtra(KEY_ID) ?: error("no id found"),
-    cid = getStringExtra(KEY_CID) ?: error("no cid found")
-)
+private fun Intent.extractCallId(): StreamCallId =
+    streamCallId(KEY_CAll_ID) ?: error("no type found")

@@ -16,15 +16,10 @@
 
 package io.getstream.video.android.dogfooding
 
-import android.content.Context
 import io.getstream.video.android.core.StreamVideo
 import io.getstream.video.android.core.notifications.AbstractNotificationActivity
 
 class NotificationActivity : AbstractNotificationActivity() {
-
-    override fun getStreamVideo(context: Context): StreamVideo {
-        return StreamVideo.instance()
-    }
 
     override fun initializeVideoIfNeeded() {
         if (!StreamVideo.isInstalled) {

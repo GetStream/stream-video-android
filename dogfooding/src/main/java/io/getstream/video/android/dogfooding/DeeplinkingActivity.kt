@@ -34,7 +34,7 @@ import io.getstream.video.android.core.StreamVideo
 import io.getstream.video.android.core.logging.LoggingLevel
 import io.getstream.video.android.datastore.delegate.StreamUserDataStore
 import io.getstream.video.android.dogfooding.ui.call.CallActivity
-import io.getstream.video.android.model.mapper.toTypeAndId
+import io.getstream.video.android.model.StreamCallId
 import kotlinx.coroutines.launch
 
 class DeeplinkingActivity : ComponentActivity() {
@@ -69,14 +69,14 @@ class DeeplinkingActivity : ComponentActivity() {
         joinCall(callId)
     }
 
-    private fun joinCall(callId: String) {
+    private fun joinCall(cid: String) {
         lifecycleScope.launch {
             val streamVideo = StreamVideo.instance()
-            val (type, id) = callId.toTypeAndId()
-            val call = streamVideo.call(type = type, id = id)
+            val callId = StreamCallId.fromCallCid(cid)
+            val call = streamVideo.call(type = callId.type, id = callId.id)
             val result = call.join()
             result.onSuccess {
-                val intent = CallActivity.getIntent(this@DeeplinkingActivity, cid = callId)
+                val intent = CallActivity.getIntent(this@DeeplinkingActivity, callId = callId)
                 startActivity(intent)
             }.onError {
                 Toast.makeText(this@DeeplinkingActivity, it.message, Toast.LENGTH_SHORT).show()

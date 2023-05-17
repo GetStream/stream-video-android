@@ -17,6 +17,7 @@
 package io.getstream.video.android.core
 
 import io.getstream.log.taggedLogger
+import io.getstream.video.android.core.call.RtcSession
 import io.getstream.video.android.core.events.AudioLevelChangedEvent
 import io.getstream.video.android.core.events.ChangePublishQualityEvent
 import io.getstream.video.android.core.events.ConnectionQualityChangeEvent
@@ -30,6 +31,7 @@ import io.getstream.video.android.core.events.SFUHealthCheckEvent
 import io.getstream.video.android.core.events.SubscriberOfferEvent
 import io.getstream.video.android.core.events.TrackPublishedEvent
 import io.getstream.video.android.core.events.TrackUnpublishedEvent
+import io.getstream.video.android.core.internal.network.NetworkStateProvider
 import io.getstream.video.android.core.model.ScreenSharingSession
 import io.getstream.video.android.core.permission.PermissionRequest
 import io.getstream.video.android.core.utils.mapState
@@ -72,8 +74,36 @@ import org.openapitools.client.models.VideoEvent
 import org.threeten.bp.Clock
 import org.threeten.bp.OffsetDateTime
 import stream.video.sfu.models.Participant
+import stream.video.sfu.models.ParticipantCount
 import stream.video.sfu.models.TrackType
 import java.util.SortedMap
+
+public sealed interface RtcConnectionState {
+    /**
+     * We start out in the PreJoin state. This is before call.join is called
+     */
+    public object PreJoin : RtcConnectionState
+
+    /**
+     * Join is in progress
+     */
+    public object InProgress : RtcConnectionState
+
+    /**
+     * We set the state to Joined as soon as the call state is available
+     */
+    public data class Joined(val session: RtcSession) : RtcConnectionState
+
+    /**
+     * Reconnecting is true whenever Rtc isn't available and trying to recover
+     * If the subscriber peer connection breaks we'll reconnect
+     * If the publisher peer connection breaks we'll reconnect
+     * Also if the network provider from the OS says that internet is down we'll set it to reconnecting
+     */
+    public object Reconnecting : RtcConnectionState // reconnecting to recover from temporary issues
+    public data class Failed(val error: Any) : RtcConnectionState // permanent failure
+    public object Disconnected : RtcConnectionState // normal disconnect by the app
+}
 
 /**
  * The CallState class keeps all state for a call
@@ -88,15 +118,28 @@ import java.util.SortedMap
  *
  */
 public class CallState(private val call: Call, private val user: User) {
+
     private val logger by taggedLogger("CallState")
 
-    /**
-     * connection shows if we've established a connection with the SFU
-     */
-    private val _connection: MutableStateFlow<ConnectionState> = MutableStateFlow(
-        ConnectionState.PreConnect
-    )
-    public val connection: StateFlow<ConnectionState> = _connection
+    internal val _connection = MutableStateFlow<RtcConnectionState>(RtcConnectionState.PreJoin)
+    val connection: StateFlow<RtcConnectionState> = _connection
+
+    private val networkStateListener = object : NetworkStateProvider.NetworkStateListener {
+        override fun onConnected() {
+            // the peer connection will pick this up automatically
+            // maybe we need to speed it up, but lets evaluate and see if its needed
+        }
+
+        override fun onDisconnected() {
+            if (_connection.value is RtcConnectionState.Joined) {
+                _connection.value = RtcConnectionState.Reconnecting
+            }
+        }
+    }
+    init {
+        val network = call.clientImpl.connectionModule.networkStateProvider
+        network.subscribe(networkStateListener)
+    }
 
     private val _participants: MutableStateFlow<SortedMap<String, ParticipantState>> =
         MutableStateFlow(emptyMap<String, ParticipantState>().toSortedMap())
@@ -104,6 +147,9 @@ public class CallState(private val call: Call, private val user: User) {
     /** Participants returns a list of participant state object. @see [ParticipantState] */
     public val participants: StateFlow<List<ParticipantState>> =
         _participants.mapState { it.values.toList() }
+
+    private val _participantCounts: MutableStateFlow<ParticipantCount?> = MutableStateFlow(null)
+    val participantCounts: StateFlow<ParticipantCount?> = _participantCounts
 
     /** Your own participant state */
     public val me: StateFlow<ParticipantState?> = _participants.mapState {
@@ -408,7 +454,6 @@ public class CallState(private val call: Call, private val user: User) {
             }
 
             is JoinCallResponseEvent -> {
-                _connection.value = ConnectionState.Connected
                 // time to update call state based on the join response
                 updateFromJoinResponse(event)
             }
@@ -468,6 +513,10 @@ public class CallState(private val call: Call, private val user: User) {
     }
 
     private fun updateFromJoinResponse(event: JoinCallResponseEvent) {
+        // update the participant count
+        val count = event.callState.participant_count
+        _participantCounts.value = count
+
         // creates the participants
         val participantStates = event.callState.participants.map {
             getOrCreateParticipant(it)
@@ -576,19 +625,6 @@ public class CallState(private val call: Call, private val user: User) {
 
     fun clearParticipants() {
         _participants.value = emptyMap<String, ParticipantState>().toSortedMap()
-    }
-
-    internal fun disconnect() {
-        logger.i { "[disconnect] #sfu; no args" }
-        // audioHandler.stop()
-        val participants = _participants.value
-        _participants.value = emptyMap<String, ParticipantState>().toSortedMap()
-
-//        participants.values.forEach {
-//            val track = it.videoTrackWrapper
-//            it.videoTrackWrapper = null
-//            track?.video?.dispose()
-//        }
     }
 
     fun updateFromResponse(response: CallResponse) {

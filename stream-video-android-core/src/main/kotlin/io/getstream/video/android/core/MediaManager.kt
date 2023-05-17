@@ -35,6 +35,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.runBlocking
 import okhttp3.internal.toImmutableList
+import org.openapitools.client.models.VideoSettings
 import org.webrtc.Camera2Capturer
 import org.webrtc.Camera2Enumerator
 import org.webrtc.CameraEnumerationAndroid
@@ -42,6 +43,7 @@ import org.webrtc.EglBase
 import org.webrtc.SurfaceTextureHelper
 
 sealed class DeviceStatus {
+    object NotSelected : DeviceStatus()
     object Disabled : DeviceStatus()
     object Enabled : DeviceStatus()
 }
@@ -133,7 +135,7 @@ class MicrophoneManager(val mediaManager: MediaManagerImpl) {
     private val logger by taggedLogger("Media:MicrophoneManager")
 
     /** The status of the audio */
-    private val _status = MutableStateFlow<DeviceStatus>(DeviceStatus.Disabled)
+    private val _status = MutableStateFlow<DeviceStatus>(DeviceStatus.NotSelected)
     val status: StateFlow<DeviceStatus> = _status
 
     private val _selectedDevice = MutableStateFlow<AudioDevice?>(null)
@@ -242,7 +244,7 @@ public class CameraManager(
     private val logger by taggedLogger("Media:CameraManager")
 
     /** The status of the camera. enabled or disabled */
-    private val _status = MutableStateFlow<DeviceStatus>(DeviceStatus.Disabled)
+    private val _status = MutableStateFlow<DeviceStatus>(DeviceStatus.NotSelected)
     public val status: StateFlow<DeviceStatus> = _status
 
     /** if we're using the front facing or back facing camera */
@@ -318,7 +320,7 @@ public class CameraManager(
         _selectedDevice.value = selectedDevice
         _availableResolutions.value =
             selectedDevice.supportedFormats?.toImmutableList() ?: emptyList()
-        _resolution.value = selectDesiredResolution(selectedDevice.supportedFormats, 720)
+        _resolution.value = selectDesiredResolution(selectedDevice.supportedFormats, mediaManager.call.state.settings.value?.video)
 
         if (startCapture) {
             startCapture()
@@ -381,7 +383,7 @@ public class CameraManager(
         val devicesMatchingDirection = devices.filter { it.direction == _direction.value }
         val selectedDevice = devicesMatchingDirection.first()
         _selectedDevice.value = selectedDevice
-        _resolution.value = selectDesiredResolution(selectedDevice.supportedFormats, 960)
+        _resolution.value = selectDesiredResolution(selectedDevice.supportedFormats, mediaManager.call.state.settings.value?.video)
         _availableResolutions.value =
             selectedDevice.supportedFormats?.toImmutableList() ?: emptyList()
 
@@ -431,15 +433,17 @@ public class CameraManager(
      */
     internal fun selectDesiredResolution(
         supportedFormats: MutableList<CameraEnumerationAndroid.CaptureFormat>?,
-        targetResolution: Int = 1440,
+        videoSettings: VideoSettings?,
     ): CameraEnumerationAndroid.CaptureFormat? {
         // needs the settings that we're going for
         // sort and get the one closest to 960
+        val targetHeight = videoSettings?.targetResolution?.height ?: 720
+        val targetWidth = videoSettings?.targetResolution?.width ?: 1280
         val matchingTarget =
-            supportedFormats?.toList()?.sortedBy { kotlin.math.abs(it.height - targetResolution) }
-        val sorted = supportedFormats?.toList()?.sortedByDescending { it.height * it.width }
-            ?.filter { it.framerate.max >= 30 }
-        return matchingTarget?.first()
+            supportedFormats?.toList()?.sortedBy { kotlin.math.abs(it.height - targetHeight) + kotlin.math.abs(it.width - targetWidth) }
+        val selectedFormat = matchingTarget?.first()
+        logger.i { "selectDesiredResolution: $selectedFormat" }
+        return selectedFormat
     }
 
     fun cleanup() {

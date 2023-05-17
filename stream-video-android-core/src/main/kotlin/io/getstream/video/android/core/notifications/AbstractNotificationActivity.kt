@@ -21,10 +21,10 @@ import androidx.activity.ComponentActivity
 import androidx.core.app.NotificationManagerCompat
 import androidx.lifecycle.lifecycleScope
 import io.getstream.video.android.core.StreamVideo
-import io.getstream.video.android.core.StreamVideoProvider
 import io.getstream.video.android.core.utils.INTENT_EXTRA_CALL_CID
 import io.getstream.video.android.core.utils.INTENT_EXTRA_NOTIFICATION_ID
-import io.getstream.video.android.model.StreamCallCid
+import io.getstream.video.android.model.StreamCallId
+import io.getstream.video.android.model.streamCallId
 import kotlinx.coroutines.launch
 
 /**
@@ -32,11 +32,9 @@ import kotlinx.coroutines.launch
  *
  * Allows you to easily integrate push notification handling in your app, by extending the Activity.
  */
-public abstract class AbstractNotificationActivity :
-    ComponentActivity(),
-    StreamVideoProvider {
+public abstract class AbstractNotificationActivity : ComponentActivity() {
 
-    private val streamVideo: StreamVideo by lazy { getStreamVideo(this) }
+    private val streamVideo: StreamVideo by lazy { StreamVideo.instance() }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -54,12 +52,7 @@ public abstract class AbstractNotificationActivity :
      */
     private fun processNotificationData() {
         val hasAcceptedCall = intent.action == ACTION_ACCEPT_CALL
-        val callCid = intent.getStringExtra(INTENT_EXTRA_CALL_CID) as io.getstream.video.android.model.StreamCallCid
-
-        if (callCid.isNullOrBlank()) {
-            return
-        }
-        val (type, id) = callCid.split(":")
+        val callCid = intent.streamCallId(INTENT_EXTRA_CALL_CID) ?: return
 
         lifecycleScope.launch {
             if (hasAcceptedCall) {
@@ -76,7 +69,7 @@ public abstract class AbstractNotificationActivity :
      *
      * @param callCid The CID containing the call ID and type.
      */
-    private suspend fun loadCallData(callCid: String) {
+    private suspend fun loadCallData(guid: StreamCallId) {
 //        when (streamVideo.handlePushMessage(mapOf(INTENT_EXTRA_CALL_CID to callCid))) {
 //            is Result.Success -> Unit
 //            is Result.Failure -> finish()

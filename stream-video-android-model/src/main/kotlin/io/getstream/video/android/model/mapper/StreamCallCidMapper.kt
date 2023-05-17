@@ -16,24 +16,16 @@
 
 package io.getstream.video.android.model.mapper
 
-import io.getstream.video.android.model.StreamCallCid
-import io.getstream.video.android.model.StreamCallId
-import io.getstream.video.android.model.StreamCallType
-
 private const val CID_SIZE = 2
 
 /**
- * Parses [StreamCallCid] of call to callType and channelId.
+ * Parses cid of call to callType and channelId.
  *
  * @return Pair<StreamCallType, StreamCallId> Pair with callType and channelId.
  * @throws IllegalStateException Throws an exception if format of cid is incorrect.
- *
- * @see StreamCallCid
- * @see StreamCallType
- * @see StreamCallId
  */
 @Throws(IllegalStateException::class)
-public fun StreamCallCid.toTypeAndId(): Pair<StreamCallType, StreamCallId> {
+public fun String.toTypeAndId(): Pair<String, String> {
     check(isNotEmpty()) { "StreamCallCid can not be empty" }
     check(':' in this) {
         "StreamCallCid needs to be in the format StreamCallType:StreamCallId. For example, default:123"

@@ -33,9 +33,9 @@ import com.squareup.moshi.Json
 /**
  *
  *
+ * @param location
  * @param create if true the call will be created if it doesn't exist
  * @param `data`
- * @param datacenterHintedId
  * @param membersLimit
  * @param ring if true and the call is created, the notification will include ring=true
  */
@@ -43,15 +43,15 @@ import com.squareup.moshi.Json
 
 data class JoinCallRequest (
 
+    @Json(name = "location")
+    val location: kotlin.String,
+
     /* if true the call will be created if it doesn't exist */
     @Json(name = "create")
     val create: kotlin.Boolean? = null,
 
     @Json(name = "data")
     val `data`: CallRequest? = null,
-
-    @Json(name = "datacenter_hinted_id")
-    val datacenterHintedId: kotlin.String? = null,
 
     @Json(name = "members_limit")
     val membersLimit: kotlin.Int? = null,

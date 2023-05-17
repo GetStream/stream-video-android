@@ -32,17 +32,21 @@ import com.squareup.moshi.Json
 /**
  *
  *
- * @param latitude
- * @param longitude
+ * @param bitrate
+ * @param height
+ * @param width
  */
 
 
-data class Coordinates (
+data class TargetResolutionRequest (
 
-    @Json(name = "latitude")
-    val latitude: kotlin.Float,
+    @Json(name = "bitrate")
+    val bitrate: kotlin.Int? = null,
 
-    @Json(name = "longitude")
-    val longitude: kotlin.Float
+    @Json(name = "height")
+    val height: kotlin.Int? = null,
+
+    @Json(name = "width")
+    val width: kotlin.Int? = null
 
 )

@@ -74,7 +74,7 @@ class CallStateTest : IntegrationTestBase() {
     @Test
     fun `Joining a call should populate the state`() = runTest {
         val call = client.call("default", randomUUID())
-        val response = call.joinRequest(create = CreateCallOptions(custom = mapOf("color" to "green")))
+        val response = call.joinRequest(create = CreateCallOptions(custom = mapOf("color" to "green")), location = "AMS")
         assertSuccess(response)
         assertThat(call.state.settings.value).isNotNull()
         assertThat(call.state.custom.value["color"]).isEqualTo("green")

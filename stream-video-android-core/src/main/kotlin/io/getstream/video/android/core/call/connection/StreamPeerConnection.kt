@@ -70,6 +70,7 @@ public class StreamPeerConnection(
     private val onStreamAdded: ((MediaStream) -> Unit)?,
     private val onNegotiationNeeded: ((StreamPeerConnection, StreamPeerType) -> Unit)?,
     private val onIceCandidate: ((IceCandidate, StreamPeerType) -> Unit)?,
+    private val maxBitRate: Int,
 ) : PeerConnection.Observer {
 
     internal var localSdp: SessionDescription? = null
@@ -293,19 +294,19 @@ public class StreamPeerConnection(
         val quarterQuality = RtpParameters.Encoding(
             "q", true, 4.0
         ).apply {
-            maxBitrateBps = 125_000
+            maxBitrateBps = maxBitRate / 4
         }
 
         val halfQuality = RtpParameters.Encoding(
             "h", true, 2.0
         ).apply {
-            maxBitrateBps = 500_000
+            maxBitrateBps = maxBitRate / 2
         }
 
         val fullQuality = RtpParameters.Encoding(
             "f", true, 1.0
         ).apply {
-            maxBitrateBps = 1_200_000
+            maxBitrateBps = maxBitRate
         }
 
         val encodings = listOf(quarterQuality, halfQuality, fullQuality)

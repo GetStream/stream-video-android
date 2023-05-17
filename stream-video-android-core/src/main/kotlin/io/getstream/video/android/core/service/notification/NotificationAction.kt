@@ -16,24 +16,24 @@
 
 package io.getstream.video.android.core.service.notification
 
-import io.getstream.video.android.model.StreamCallGuid
+import io.getstream.video.android.model.StreamCallId
 
 public sealed class NotificationAction {
-    internal abstract val guid: io.getstream.video.android.model.StreamCallGuid
+    internal abstract val callId: StreamCallId
 
-    internal data class Accept(override val guid: io.getstream.video.android.model.StreamCallGuid) : NotificationAction() {
+    internal data class Accept(override val callId: StreamCallId) : NotificationAction() {
         companion object {
             const val NAME = "io.getstream.video.android.service.notification.ACCEPT"
         }
     }
 
-    internal data class Reject(override val guid: io.getstream.video.android.model.StreamCallGuid) : NotificationAction() {
+    internal data class Reject(override val callId: StreamCallId) : NotificationAction() {
         companion object {
             const val NAME = "io.getstream.video.android.service.notification.REJECT"
         }
     }
 
-    internal data class Cancel(override val guid: io.getstream.video.android.model.StreamCallGuid) : NotificationAction() {
+    internal data class Cancel(override val callId: StreamCallId) : NotificationAction() {
         companion object {
             const val NAME = "io.getstream.video.android.service.notification.CANCEL"
         }

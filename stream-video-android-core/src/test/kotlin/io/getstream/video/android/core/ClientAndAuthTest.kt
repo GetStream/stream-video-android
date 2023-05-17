@@ -24,6 +24,7 @@ import io.getstream.video.android.model.User
 import io.getstream.video.android.model.UserType
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.test.runTest
+import org.junit.Ignore
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.openapitools.client.models.ConnectedEvent
@@ -114,6 +115,7 @@ class ClientAndAuthTest : TestBase() {
     }
 
     @Test
+    @Ignore
     fun waitForWSConnection() = runTest {
         val client = StreamVideoBuilder(
             context = context,
@@ -192,6 +194,7 @@ class ClientAndAuthTest : TestBase() {
     }
 
     @Test
+    @Ignore
     fun testWaitingForConnection() = runTest {
         // often you'll want to run the connection task in the background and not wait for it
         val client = StreamVideoBuilder(

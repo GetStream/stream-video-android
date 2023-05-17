@@ -132,11 +132,19 @@ public fun CallSingleVideoRenderer(
     }
 }
 
+/**
+ * Renders a single participant with a given call, which contains all the call states.
+ * Also displays participant information with a label and connection quality indicator.
+ *
+ * @param call The call that contains all the participants state and tracks.
+ * @param participant Participant to render.
+ * @param onRender Handler when the Video renders.
+ */
 @Composable
-internal fun ParticipantVideoRenderer(
+public fun ParticipantVideoRenderer(
     call: Call,
     participant: ParticipantState,
-    onRender: (View) -> Unit
+    onRender: (View) -> Unit = {}
 ) {
     val videoTrack by participant.videoTrack.collectAsStateWithLifecycle()
     val isVideoEnabled by participant.videoEnabled.collectAsStateWithLifecycle()

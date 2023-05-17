@@ -34,6 +34,7 @@ import com.squareup.moshi.Json
  *
  * @param edgeName
  * @param url
+ * @param wsEndpoint
  */
 
 
@@ -43,6 +44,9 @@ data class SFUResponse (
     val edgeName: kotlin.String,
 
     @Json(name = "url")
-    val url: kotlin.String
+    val url: kotlin.String,
+
+    @Json(name = "ws_endpoint")
+    val wsEndpoint: kotlin.String
 
 )

@@ -8,15 +8,26 @@
 *  Week 5: Sample app stability, S23 sdp munging, dynascale, reconnect, cleanup for reconnect
 *  Break
 *  Week 6: Docs, docs & sample app. Dynascale, SDP parsing
+*  Week 7: Reconnect, server side issues checklist, compose docs, fast join flow
+* 
 
+### Reconnect
+
+- [X] Retry on joining a call
+- [X] Session.reconnect
+- [X] Session.switchSfu
+- [X] Connection state for UI indicators. state.connection
+- [X] Monitoring that determines when to reconnect, or switchSfu
+- [ ] Only run 1 retry flow at once. We should keep on retrying. See the socket health monitor
+- [ ] Full test coverage
 
 ### High level issues
 
-- [ ] Join flow is too slow
+- [X] Join flow is too slow
 - [X] Call id should probably be optional and default to a random UUID
-- [ ] Chat integration needs a good review to see what we can simplify
+- [ ] Mock eglBase
 
-### Available tasks up for grabs (little things, easy to do)
+### Available tasks up for grabs (little things)
 
 - [ ] use standard debug, verbose, info, warning and error debug levels on StreamVideoBuilder
 - [ ] Participant sorting rules. See Call sortedParticipants
@@ -41,12 +52,13 @@
 
 ### App & Compose
 
+- [ ] Telemetry to firebase/crashlytics (with an opt out)
 - [ ] Reactions don't show up
 - [ ] Chat integration (we need an event from the server though)
 - [ ] PIP
+- [ ] When state._connection.value = RtcConnectionState.Reconnecting we should show a little transparent. “Reconnecting” UI element
 - [ ] Ringing calls (wait for push and updated endpoints from server)
 - [X] Screensharing doesn't show up
-
 
 ### RTC & Media TODO
 
@@ -81,8 +93,6 @@
 
 - [ ] Error.NetworkError vs ErrorResponse. Having 2 classes is confusing. Error format is slightly differences in 4 places. 
 - [ ] Remove unused code
-- [ ] Move SFU event to swap between SFUs and handle failure
-- [ ] Reconnect after SFU breaks (https://www.notion.so/Reconnection-Failure-handling-f6991fd2e5584380bb2d2cb5e8ac5303)
 - [X] Test coverage
 - [X] Clean up tests
 - [X] Support for accepting/rejecting calls etc. HTTP endpoints seem cleaner
@@ -99,7 +109,6 @@
 - [ ] Review the 104 todos
 - [ ] Coverage reporting
 - [ ] Better Mocks for testing RtcSession
-- [ ] Build vars to generate tokens for testing
 
 ### Server wishlist
 
@@ -108,15 +117,15 @@
 - [X] Get/Create etc don’t specify connection_id, this breaks the ability to watch
 - [X] Not being able to edit settings on a call you created seems like the wrong default: “”User ‘thierry’ with role ‘user’ is not allowed to perform action UpdateCallSettings in scope ‘video:default’“, serverErrorCode=17, statusCode=-1, cause=java.lang.Throwable: ))”
 - [X] Participant.online field is weird. Aren't you always online as a participant?
+- [X] Participant count & Anonymous Participant Count (for livestreams you cant rely on the list). Returned by SFU. Updated by
+- [X] ConnectionQualityInfo is a list, audio levels is a map. Lets standardize
+- [ ] getCall doesn't support member limits
 - [ ] Events for updating users
-- [ ] Participant count (for livestreams you cant rely on the list)
-- [ ] ConnectionQualityInfo is a list, audio levels is a map. Lets standardize
 - [ ] Accept/reject call endpoints
 - [ ] What about codec switching?
 - [ ] What about graceful SFU shutdown/ an event to make clients move SFU?
 - [ ] Events for creating a channel on chat. so you lazy load the chat when the first person opens it
 - [ ] List of error codes via openapi
-- [ ] getCall doesn't support member limits
 - [ ] CallMemberUpdatedPermissionEvent. Weird that call and members are included
 - [ ] message=GetOrCreateCall failed with error: "The following users are involved in call create operation, but don't exist: [jaewoong]. Please create the user objects before setting up the call.
 - [ ] review QueryMembersRequest
@@ -124,21 +133,12 @@
 
 ### Server side - Call type settings
 
-- [ ] target resolution / max resolution (default 960) (if you're livestreaming you want to publish at 1080p or 4k typically)
-- [ ] if we should default to front or back camera
-- [ ] should video be default on or off. I join a call, should i be publishing video?
-- [ ] should audio be default on or off. I join a call, should i publishing audio?
-- [ ] am i allowed to publish (IE should i create the publisher peer connection)
-- [ ] should volume be enabled by default (for livestreams and audio rooms its typically off by default)
-
-### Out of scope for initial release
-
-- [ ] Screensharing (from mobile, display should work)
-- [ ] Talking while muted notification
-- [ ] If you answer a phone call while you're on this call, your audio and video should be muted automatically.]
-- [ ] State for: Speaking while muted, Network issue (your own connection)
-- [ ] Audio filter example
-- [ ] Video filter example
+- [X] target resolution / max resolution (default 960) (if you're livestreaming you want to publish at 1080p or 4k typically)
+- [X] if we should default to front or back camera
+- [X] should video be default on or off. I join a call, should i be publishing video?
+- [X] should audio be default on or off. I join a call, should i publishing audio?
+- [X] am i allowed to publish (IE should i create the publisher peer connection) (it's in own capabilitiy. send video and send audio)
+- [X] should volume be enabled by default (for livestreams and audio rooms its typically off by default)
 
 ### Review each file, fix TODOS and document
 
@@ -150,7 +150,6 @@
 - [X] Call
 - [X] StreamVideoImpl
 - [X] CallState
-
 
 ### Testing
 
@@ -210,3 +209,12 @@
 - [X] Muting other users/ Moderation
 - [X] Token provider
 
+### Out of scope for initial release
+
+- [ ] Screensharing (from mobile, display should work)
+- [ ] Talking while muted notification
+- [ ] If you answer a phone call while you're on this call, your audio and video should be muted automatically.]
+- [ ] State for: Speaking while muted, Network issue (your own connection)
+- [ ] Audio filter example
+- [ ] Video filter example
+- [ ] Build vars to generate tokens for testing

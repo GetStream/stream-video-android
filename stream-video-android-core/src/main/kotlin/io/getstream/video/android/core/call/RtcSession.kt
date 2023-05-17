@@ -28,7 +28,6 @@ import io.getstream.video.android.core.DeviceStatus
 import io.getstream.video.android.core.StreamVideo
 import io.getstream.video.android.core.StreamVideoImpl
 import io.getstream.video.android.core.call.connection.StreamPeerConnection
-import io.getstream.video.android.core.call.state.ConnectionState
 import io.getstream.video.android.core.call.utils.stringify
 import io.getstream.video.android.core.errors.RtcException
 import io.getstream.video.android.core.events.ChangePublishQualityEvent
@@ -58,6 +57,7 @@ import io.getstream.video.android.core.utils.mapState
 import io.getstream.video.android.core.utils.stringify
 import io.getstream.video.android.datastore.delegate.StreamUserDataStore
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -69,7 +69,9 @@ import kotlinx.coroutines.withContext
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
+import org.openapitools.client.models.OwnCapability
 import org.openapitools.client.models.VideoEvent
+import org.openapitools.client.models.VideoSettings
 import org.webrtc.MediaConstraints
 import org.webrtc.MediaStream
 import org.webrtc.MediaStreamTrack
@@ -143,11 +145,14 @@ public class RtcSession internal constructor(
     private val client: StreamVideo,
     private val connectionModule: ConnectionModule,
     private val call: Call,
-    private val sfuUrl: String,
-    private val sfuToken: String,
-    private val latencyResults: Map<String, List<Float>>,
-    private val remoteIceServers: List<IceServer>,
+    internal var sfuUrl: String,
+    internal var sfuToken: String,
+    internal var remoteIceServers: List<IceServer>,
 ) {
+
+    private var errorJob: Job? = null
+    private var eventJob: Job? = null
+    internal val socket by lazy { sfuConnectionModule.sfuSocket }
 
     private var lastTracks: List<TrackSubscriptionDetails>? = null
     private val context = client.context
@@ -157,6 +162,8 @@ public class RtcSession internal constructor(
 
     internal val lastVideoStreamAdded = MutableStateFlow<MediaStream?>(null)
 
+    internal val _peerConnectionStates = MutableStateFlow<Pair<PeerConnection.IceConnectionState?, PeerConnection.IceConnectionState?>?>(null)
+
     internal val sessionId = clientImpl.sessionId
 
     val trackDimensions =
@@ -164,7 +171,6 @@ public class RtcSession internal constructor(
             emptyMap()
         )
     val trackDimensionsDebounced = trackDimensions.debounce(100)
-    private var connectionState: ConnectionState = ConnectionState.DISCONNECTED
 
     // run all calls on a supervisor job so we can easily cancel them
     private val supervisorJob = SupervisorJob()
@@ -230,7 +236,7 @@ public class RtcSession internal constructor(
      * Connection and WebRTC.
      */
 
-    private val iceServers by lazy { buildRemoteIceServers(remoteIceServers) }
+    private var iceServers = buildRemoteIceServers(remoteIceServers)
 
     private val connectionConfiguration: PeerConnection.RTCConfiguration by lazy {
         buildConnectionConfiguration(iceServers)
@@ -254,6 +260,10 @@ public class RtcSession internal constructor(
     internal var sfuConnectionModule: SfuConnectionModule
 
     init {
+
+        println("AAA sfu token $sfuToken")
+        println("AAA sfu url $sfuUrl")
+
         val dataStore = StreamUserDataStore.instance()
         val user = dataStore.user.value
         val apiKey = dataStore.apiKey.value
@@ -263,19 +273,44 @@ public class RtcSession internal constructor(
 
         // step 1 setup the peer connections
         subscriber = createSubscriber()
+
+        coroutineScope.launch {
+            // call update participant subscriptions debounced
+            subscriber?.let {
+                it.state.collect {
+                    updatePeerState()
+                }
+            }
+        }
+
         val session = this
         val getSdp = suspend {
             session.getSubscriberSdp().description
         }
         sfuConnectionModule =
             connectionModule.createSFUConnectionModule(sfuUrl, sessionId, sfuToken, getSdp)
-        // listen to socket events and errors
+        listenToSocket()
+
         coroutineScope.launch {
+            // call update participant subscriptions debounced
+            trackDimensionsDebounced.collect {
+                updateParticipantSubscriptions()
+            }
+        }
+    }
+
+    private fun listenToSocket() {
+        // cancel any old socket monitoring if needed
+        eventJob?.cancel()
+        errorJob?.cancel()
+
+        // listen to socket events and errors
+        eventJob = coroutineScope.launch {
             sfuConnectionModule.sfuSocket.events.collect() {
                 clientImpl.fireEvent(it, call.cid)
             }
         }
-        coroutineScope.launch {
+        errorJob = coroutineScope.launch {
             sfuConnectionModule.sfuSocket.errors.collect() {
                 if (clientImpl.developmentMode) {
                     throw it
@@ -284,33 +319,29 @@ public class RtcSession internal constructor(
                 }
             }
         }
-        coroutineScope.launch {
-            // call update participant subscriptions debounced
-            trackDimensions.collect {
-                updateParticipantsSubscriptions()
-            }
-        }
+    }
+
+    private fun updatePeerState() {
+        _peerConnectionStates.value = Pair(
+            subscriber?.state?.value,
+            publisher?.state?.value
+        )
     }
 
     suspend fun reconnect() {
-        // recreate the peer connections
-
-        // wait for the socket to be healthy (it should auto recover)
-
-        // call connectRtc
+        // ice restart
+        subscriber?.connection?.restartIce()
+        publisher?.connection?.restartIce()
     }
 
     suspend fun connect() {
         val timer = clientImpl.debugInfo.trackTime("sfu ws")
-        connectWs()
+        sfuConnectionModule.sfuSocket.connect()
         timer.finish()
+
         // ensure that the join event has been handled before starting RTC
         joinEventResponse.first { it != null }
         connectRtc()
-    }
-
-    suspend fun connectWs() {
-        sfuConnectionModule.sfuSocket.connect()
     }
 
     suspend fun listenToMediaChanges() {
@@ -387,17 +418,41 @@ public class RtcSession internal constructor(
         val settings = call.state.settings.value
         val timer = clientImpl.debugInfo.trackTime("connectRtc")
 
-        // TODO: this should come from settings
-        val defaultDirection = CameraDirection.Front
-        // if we are allowed to publish, create a peer connection for it
-        // TODO: real settings check
-        val publishing = true
-        if (publishing) {
-            publisher = createPublisher()
-            timer.split("createPublisher")
+        // turn of the speaker if needed
+        if (settings?.audio?.speakerDefaultOn == false) {
+            call.mediaManager.speaker.setVolume(0)
         }
 
-        if (publishing) {
+        // if we are allowed to publish, create a peer connection for it
+        val canPublish =
+            call.state.ownCapabilities.value.any { it == OwnCapability.sendAudio || it == OwnCapability.sendVideo }
+
+        if (canPublish) {
+            publisher = createPublisher()
+            timer.split("createPublisher")
+        } else {
+            // enable the publisher if you receive the send audio or send video capability
+            coroutineScope.launch {
+                call.state.ownCapabilities.collect {
+                    if (it.any { it == OwnCapability.sendAudio || it == OwnCapability.sendVideo }) {
+                        publisher = createPublisher()
+                        timer.split("createPublisher")
+                    }
+                }
+            }
+        }
+
+        // update the peer state
+        coroutineScope.launch {
+            // call update participant subscriptions debounced
+            publisher?.let {
+                it.state.collect {
+                    updatePeerState()
+                }
+            }
+        }
+
+        if (canPublish) {
             if (publisher == null) {
                 throw IllegalStateException("Cant send audio and video since publisher hasn't been setup to connect")
             }
@@ -405,10 +460,27 @@ public class RtcSession internal constructor(
                 // step 2 ensure all tracks are setup correctly
                 // start capturing the video
 
-                // TODO: hook up the settings, front or back...
+                // if there is no preview and the camera hasn't been selected by the user fallback to settings
+                if (call.mediaManager.camera.status.value == DeviceStatus.NotSelected) {
+                    val enabled = settings?.video?.cameraDefaultOn == true
+                    call.mediaManager.camera.setEnabled(enabled)
+                    // check the settings if we should default to front or back facing camera
+                    val defaultDirection = if (settings?.video?.cameraFacing == VideoSettings.CameraFacing.front) {
+                        CameraDirection.Front
+                    } else {
+                        CameraDirection.Back
+                    }
+                    // TODO: would be nicer to initialize the camera on the right device to begin with
+                    if (defaultDirection != call.mediaManager.camera.direction.value) {
+                        call.mediaManager.camera.flip()
+                    }
+                }
 
-                call.mediaManager.camera.enable()
-                call.mediaManager.microphone.enable()
+                // if there is no preview and the microphone hasn't been selected by the user fallback to settings
+                if (call.mediaManager.microphone.status.value == DeviceStatus.NotSelected) {
+                    val enabled = settings?.audio?.micDefaultOn == true
+                    call.mediaManager.microphone.setEnabled(enabled)
+                }
 
                 timer.split("media enabled")
                 // step 4 add the audio track to the publisher
@@ -445,7 +517,7 @@ public class RtcSession internal constructor(
         listenToMediaChanges()
 
         // subscribe to the tracks of other participants
-        updateParticipantsSubscriptions(true)
+        updateParticipantSubscriptions(true)
         return
     }
 
@@ -473,9 +545,6 @@ public class RtcSession internal constructor(
     fun cleanup() {
         logger.i { "[cleanup] #sfu; no args" }
         supervisorJob.cancel()
-
-        // mark ourselves as disconnected
-        connectionState = ConnectionState.DISCONNECTED
 
         // cleanup the publisher and subcriber peer connections
         subscriber?.connection?.close()
@@ -584,6 +653,7 @@ public class RtcSession internal constructor(
             mediaConstraints = MediaConstraints(),
             onNegotiationNeeded = ::onNegotiationNeeded,
             onIceCandidateRequest = ::sendIceCandidate,
+            maxPublishingBitrate = call.state.settings.value?.video?.targetResolution?.bitrate ?: 1_200_000
         )
         logger.i { "[createPublisher] #sfu; publisher: $publisher" }
         return publisher
@@ -709,7 +779,7 @@ public class RtcSession internal constructor(
         return tracks
     }
 
-    private fun updateParticipantsSubscriptions(useDefaults: Boolean = false) {
+    private fun updateParticipantSubscriptions(useDefaults: Boolean = false) {
         // default is to subscribe to the top 5 sorted participants
         val tracks = if (useDefaults) {
             defaultTracks()
@@ -1085,5 +1155,30 @@ public class RtcSession internal constructor(
         // Updates are debounced
         dynascaleLogger.i { "updateTrackDimensions $trackDimensionsMap" }
         trackDimensions.value = trackDimensionsMap
+    }
+
+    suspend fun switchSfu(sfuUrl: String, sfuToken: String, remoteIceServers: List<IceServer>) {
+        logger.i { "switchSfu from ${this.sfuUrl} to $sfuUrl" }
+        val timer = clientImpl.debugInfo.trackTime("call.switchSfu")
+        // update internal vars ot the new SFU
+        this.sfuUrl = sfuUrl
+        this.sfuToken = sfuToken
+        this.remoteIceServers = remoteIceServers
+        this.iceServers = buildRemoteIceServers(remoteIceServers)
+
+        // create the new socket
+        val getSdp = suspend {
+            getSubscriberSdp().description
+        }
+        // TODO: updating the turn server requires a new peer connection
+        sfuConnectionModule =
+            connectionModule.createSFUConnectionModule(sfuUrl, sessionId, sfuToken, getSdp)
+        listenToSocket()
+        sfuConnectionModule.sfuSocket.connect()
+        timer.split("socket connected")
+
+        // ice restart
+        reconnect()
+        timer.finish("ice restart in progress")
     }
 }

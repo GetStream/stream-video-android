@@ -19,7 +19,6 @@ package io.getstream.video.android.compose.ui.components.call
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -34,11 +33,11 @@ import io.getstream.video.android.compose.ui.components.call.activecall.CallCont
 import io.getstream.video.android.compose.ui.components.call.activecall.DefaultPictureInPictureContent
 import io.getstream.video.android.compose.ui.components.call.activecall.internal.InviteUsersDialog
 import io.getstream.video.android.compose.ui.components.call.controls.CallControls
-import io.getstream.video.android.compose.ui.components.call.incomingcall.IncomingCallContent
-import io.getstream.video.android.compose.ui.components.call.outgoingcall.OutgoingCallContent
+import io.getstream.video.android.compose.ui.components.call.ringing.RingingCallContent
+import io.getstream.video.android.compose.ui.components.call.ringing.incomingcall.IncomingCallContent
+import io.getstream.video.android.compose.ui.components.call.ringing.outgoingcall.OutgoingCallContent
 import io.getstream.video.android.compose.ui.components.participants.CallParticipantsInfoMenu
 import io.getstream.video.android.core.Call
-import io.getstream.video.android.core.RingingState
 import io.getstream.video.android.core.call.state.CallAction
 import io.getstream.video.android.core.call.state.CallDeviceState
 import io.getstream.video.android.core.call.state.InviteUsersToCall
@@ -65,8 +64,7 @@ import io.getstream.video.android.model.User
  * @param callControlsContent Content is shown that allows users to trigger different actions to control a joined call.
  * @param pictureInPictureContent Content shown when the user enters Picture in Picture mode, if
  * it's been enabled in the app.
- * @param incomingCallContent Content shown when we're receiving a [Call].
- * @param outgoingCallContent Content shown when we're ringing other people.
+ * @param ringingCallContent Content shown when we're receiving or sending a [Call].
  * @param callContent Content is shown by rendering video/audio when we're connected to a call successfully.
  */
 @Composable
@@ -93,24 +91,6 @@ public fun CallContainer(
         )
     },
     pictureInPictureContent: @Composable (call: Call) -> Unit = { DefaultPictureInPictureContent(it) },
-    incomingCallContent: @Composable (call: Call) -> Unit = {
-        IncomingCallContent(
-            modifier = modifier.testTag("incoming_call_content"),
-            callType = callType,
-            callViewModel = callViewModel,
-            onBackPressed = onBackPressed,
-            onCallAction = onCallAction
-        )
-    },
-    outgoingCallContent: @Composable (call: Call) -> Unit = {
-        OutgoingCallContent(
-            modifier = modifier.testTag("outgoing_call_content"),
-            callType = callType,
-            callViewModel = callViewModel,
-            onBackPressed = onBackPressed,
-            onCallAction = onCallAction
-        )
-    },
     callContent: @Composable (call: Call) -> Unit = {
         DefaultCallContent(
             modifier = modifier.testTag("call_content"),
@@ -121,7 +101,17 @@ public fun CallContainer(
             callControlsContent = callControlsContent,
             pictureInPictureContent = pictureInPictureContent
         )
-    }
+    },
+    ringingCallContent: @Composable (call: Call) -> Unit = {
+        RingingCallContent(
+            modifier = modifier.testTag("ringing_call_content"),
+            callType = callType,
+            callViewModel = callViewModel,
+            onBackPressed = onBackPressed,
+            onCallAction = onCallAction,
+            onAcceptedCallContent = { callContent.invoke(it) }
+        )
+    },
 ) {
     val callDeviceState by callViewModel.callDeviceState.collectAsStateWithLifecycle()
 
@@ -135,8 +125,7 @@ public fun CallContainer(
         callAppBarContent = callAppBarContent,
         callControlsContent = callControlsContent,
         pictureInPictureContent = pictureInPictureContent,
-        incomingCallContent = incomingCallContent,
-        outgoingCallContent = outgoingCallContent,
+        ringingCallContent = ringingCallContent,
         callContent = callContent,
     )
 }
@@ -157,8 +146,7 @@ public fun CallContainer(
  * @param callControlsContent Content is shown that allows users to trigger different actions to control a joined call.
  * @param pictureInPictureContent Content shown when the user enters Picture in Picture mode, if
  * it's been enabled in the app.
- * @param incomingCallContent Content shown when we're receiving a [Call].
- * @param outgoingCallContent Content shown when we're ringing other people.
+ * @param ringingCallContent Content shown when we're receiving or sending a [Call].
  * @param callContent Content is shown by rendering video/audio when we're connected to a call successfully.
  */
 @Composable
@@ -185,26 +173,6 @@ public fun CallContainer(
         )
     },
     pictureInPictureContent: @Composable (call: Call) -> Unit = { DefaultPictureInPictureContent(it) },
-    incomingCallContent: @Composable (call: Call) -> Unit = {
-        IncomingCallContent(
-            call = call,
-            callType = callType,
-            callDeviceState = callDeviceState,
-            modifier = modifier.testTag("incoming_call_content"),
-            onBackPressed = onBackPressed,
-            onCallAction = onCallAction
-        )
-    },
-    outgoingCallContent: @Composable (call: Call) -> Unit = {
-        OutgoingCallContent(
-            call = call,
-            callType = callType,
-            callDeviceState = callDeviceState,
-            modifier = modifier.testTag("outgoing_call_content"),
-            onBackPressed = onBackPressed,
-            onCallAction = onCallAction
-        )
-    },
     callContent: @Composable (call: Call) -> Unit = {
         CallContent(
             call = call,
@@ -215,18 +183,20 @@ public fun CallContainer(
             callControlsContent = callControlsContent,
             pictureInPictureContent = pictureInPictureContent
         )
-    }
+    },
+    ringingCallContent: @Composable (call: Call) -> Unit = {
+        RingingCallContent(
+            call = call,
+            modifier = modifier.testTag("ringing_call_content"),
+            callType = callType,
+            callDeviceState = callDeviceState,
+            onBackPressed = onBackPressed,
+            onCallAction = onCallAction,
+            onAcceptedCallContent = { callContent.invoke(it) }
+        )
+    },
 ) {
-    val ringingStateHolder = call.state.ringingState.collectAsState(initial = RingingState.Idle)
-    val ringingState = ringingStateHolder.value
-
-    if (ringingState is RingingState.Incoming && !ringingState.acceptedByMe) {
-        incomingCallContent.invoke(call)
-    } else if (ringingState is RingingState.Outgoing && !ringingState.acceptedByCallee) {
-        outgoingCallContent.invoke(call)
-    } else {
-        callContent.invoke(call)
-    }
+    ringingCallContent.invoke(call)
 }
 
 @Composable

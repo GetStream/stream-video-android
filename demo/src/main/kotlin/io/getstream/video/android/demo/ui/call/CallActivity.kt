@@ -34,15 +34,9 @@ import io.getstream.video.android.core.model.CallType
 import io.getstream.video.android.core.permission.PermissionManager
 import io.getstream.video.android.core.viewmodel.CallViewModel
 import io.getstream.video.android.core.viewmodel.CallViewModelFactory
-import io.getstream.video.android.demo.demoVideoApp
-import io.getstream.video.android.model.mapper.toTypeAndId
+import io.getstream.video.android.model.streamCallId
 
 class CallActivity : AppCompatActivity() {
-
-    /**
-     * Provides the StreamVideo instance through the videoApp.
-     */
-    private val streamVideo: StreamVideo by lazy { demoVideoApp.streamVideo }
 
     private val factory by lazy { callViewModelFactory() }
     private val vm by viewModels<CallViewModel> { factory }
@@ -78,12 +72,11 @@ class CallActivity : AppCompatActivity() {
      * Provides the default ViewModel factory.
      */
     private fun callViewModelFactory(): CallViewModelFactory {
-        val (type, id) = intent.getStringExtra(EXTRA_CID)?.toTypeAndId()
+        val callId = intent.streamCallId(EXTRA_CALL_ID)
             ?: throw IllegalArgumentException("You must pass correct channel id.")
 
         return CallViewModelFactory(
-            streamVideo = streamVideo,
-            call = streamVideo.call(type = type, id = id)
+            call = StreamVideo.instance().call(type = callId.type, id = callId.id)
         )
     }
 
@@ -105,7 +98,7 @@ class CallActivity : AppCompatActivity() {
     }
 
     companion object {
-        internal const val EXTRA_CID = "EXTRA_CID"
+        internal const val EXTRA_CALL_ID = "EXTRA_CALL_ID"
 
         fun getIntent(
             context: Context,
@@ -113,7 +106,7 @@ class CallActivity : AppCompatActivity() {
         ): Intent {
             return Intent(context, CallActivity::class.java).apply {
                 flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
-                putExtra(EXTRA_CID, cid)
+                putExtra(EXTRA_CALL_ID, cid)
             }
         }
     }

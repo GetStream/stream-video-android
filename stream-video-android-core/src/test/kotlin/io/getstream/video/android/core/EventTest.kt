@@ -22,6 +22,7 @@ import io.getstream.video.android.core.events.ConnectionQualityChangeEvent
 import io.getstream.video.android.core.events.DominantSpeakerChangedEvent
 import io.getstream.video.android.core.events.ParticipantJoinedEvent
 import io.getstream.video.android.core.events.ParticipantLeftEvent
+import io.getstream.video.android.core.permission.PermissionRequest
 import io.getstream.video.android.model.User
 import io.getstream.video.android.model.UserAudioLevel
 import kotlinx.coroutines.test.runTest
@@ -293,8 +294,11 @@ class EventTest : IntegrationTestBase(connectCoordinatorWS = false) {
             permissions = mutableListOf("screenshare"),
             user = testData.users["thierry"]!!.toUserResponse()
         )
+        val permissionRequest = PermissionRequest(call, permissionRequestEvent)
         clientImpl.fireEvent(permissionRequestEvent)
-        assertThat(call.state.permissionRequests.value).contains(permissionRequestEvent)
+        assertThat(call.state.permissionRequests.value).contains(
+            permissionRequest
+        )
     }
 
     @Test

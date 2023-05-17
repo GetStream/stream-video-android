@@ -209,7 +209,7 @@ private fun CallLobbyBody(
                     .testTag("start_call"),
                 text = stringResource(id = R.string.start_call),
                 onClick = {
-                    val intent = CallActivity.getIntent(context, cid = callLobbyViewModel.cid)
+                    val intent = CallActivity.getIntent(context, callId = callLobbyViewModel.callId)
                     context.startActivity(intent)
                 }
             )

@@ -151,7 +151,7 @@ class AndroidDeviceTest : IntegrationTestBase(connectCoordinatorWS = false) {
         val joinResult = call.join()
         assertSuccess(joinResult)
         val joinResponse = waitForNextEvent<JoinCallResponseEvent>()
-        assertThat(call.state.connection.value).isEqualTo(ConnectionState.Connected)
+        assertThat(call.state._connection.value).isInstanceOf(RtcConnectionState.Joined::class.java)
 
         val participantsResponse = joinResponse.callState.participants
         assertThat(participantsResponse.size).isEqualTo(1)

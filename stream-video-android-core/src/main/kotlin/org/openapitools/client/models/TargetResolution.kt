@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014-2022 Stream.io Inc. All rights reserved.
+ * Copyright (c) 2014-2023 Stream.io Inc. All rights reserved.
  *
  * Licensed under the Stream License;
  * you may not use this file except in compliance with the License.
@@ -14,11 +14,39 @@
  * limitations under the License.
  */
 
-package io.getstream.video.android.core
+@file:Suppress(
+    "ArrayInDataClass",
+    "EnumEntryName",
+    "RemoveRedundantQualifierName",
+    "UnusedImport"
+)
 
-import android.content.Context
+package org.openapitools.client.models
 
-public interface StreamVideoProvider {
 
-    public fun getStreamVideo(context: Context): StreamVideo
-}
+
+
+
+import com.squareup.moshi.Json
+
+/**
+ *
+ *
+ * @param bitrate
+ * @param height
+ * @param width
+ */
+
+
+data class TargetResolution (
+
+    @Json(name = "bitrate")
+    val bitrate: kotlin.Int,
+
+    @Json(name = "height")
+    val height: kotlin.Int,
+
+    @Json(name = "width")
+    val width: kotlin.Int
+
+)

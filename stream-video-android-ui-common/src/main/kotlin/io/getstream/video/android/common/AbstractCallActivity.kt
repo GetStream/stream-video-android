@@ -36,9 +36,7 @@ import androidx.activity.ComponentActivity
 import androidx.activity.viewModels
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AlertDialog
-import io.getstream.video.android.core.ConnectionState
 import io.getstream.video.android.core.StreamVideo
-import io.getstream.video.android.core.StreamVideoProvider
 import io.getstream.video.android.core.call.state.ToggleCamera
 import io.getstream.video.android.core.call.state.ToggleMicrophone
 import io.getstream.video.android.core.call.state.ToggleScreenConfiguration
@@ -47,15 +45,15 @@ import io.getstream.video.android.core.permission.PermissionManagerProvider
 import io.getstream.video.android.core.viewmodel.CallViewModel
 import io.getstream.video.android.core.viewmodel.CallViewModelFactory
 import io.getstream.video.android.core.viewmodel.CallViewModelFactoryProvider
+import io.getstream.video.android.model.StreamCallId
 import io.getstream.video.android.model.mapper.toTypeAndId
 
 public abstract class AbstractCallActivity :
     ComponentActivity(),
-    StreamVideoProvider,
     CallViewModelFactoryProvider,
     PermissionManagerProvider {
 
-    private val streamVideo: StreamVideo by lazy { getStreamVideo(this) }
+    private val streamVideo: StreamVideo by lazy { StreamVideo.instance() }
     private val factory by lazy { callViewModelFactory() }
     public val callViewModel: CallViewModel by viewModels { factory }
 
@@ -67,7 +65,6 @@ public abstract class AbstractCallActivity :
             ?: throw IllegalArgumentException("You must pass correct channel id.")
 
         return CallViewModelFactory(
-            streamVideo = streamVideo,
             call = streamVideo.call(type = type, id = id)
         )
     }
@@ -204,12 +201,6 @@ public abstract class AbstractCallActivity :
      * the feature.
      */
     protected open fun handleBackPressed() {
-        val callState = callViewModel.call.state.connection.value
-
-        if (callState !is ConnectionState.Connected) {
-            closeCall()
-            return
-        }
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
             try {
@@ -279,10 +270,10 @@ public abstract class AbstractCallActivity :
         @JvmStatic
         public inline fun <reified T : AbstractCallActivity> createIntent(
             context: Context,
-            cid: io.getstream.video.android.model.StreamCallId,
+            callId: StreamCallId,
         ): Intent {
             return Intent(context, T::class.java).apply {
-                putExtra(EXTRA_CID, cid)
+                putExtra(EXTRA_CID, callId)
             }
         }
     }
