@@ -20,6 +20,7 @@ import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import org.junit.runner.RunWith
+import io.getstream.video.android.model.User
 import org.openapitools.client.models.CallSettingsRequest
 import org.openapitools.client.models.MemberRequest
 import org.openapitools.client.models.ScreensharingSettingsRequest
@@ -78,6 +79,20 @@ class CallStateTest : IntegrationTestBase() {
         assertSuccess(response)
         assertThat(call.state.settings.value).isNotNull()
         assertThat(call.state.custom.value["color"]).isEqualTo("green")
+    }
+    /**
+     * * anyone who is pinned
+     * * dominant speaker
+     * * if you are screensharing
+     * * last speaking at
+     * * all other video participants by when they joined
+     * * audio only participants by when they joined
+     */
+    @Test
+    fun `Participants should be sorted`() = runTest {
+        val call = client.call("default", randomUUID())
+        val one = ParticipantState("1", call, User())
+        call.state.updateParticipant()
     }
 
     @Test

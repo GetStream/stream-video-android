@@ -9,30 +9,32 @@
 *  Break
 *  Week 6: Docs, docs & sample app. Dynascale, SDP parsing
 *  Week 7: Reconnect, server side issues checklist, compose docs, fast join flow
-* 
 
-### Reconnect
+### TODO
 
-- [X] Retry on joining a call
-- [X] Session.reconnect
-- [X] Session.switchSfu
-- [X] Connection state for UI indicators. state.connection
-- [X] Monitoring that determines when to reconnect, or switchSfu
-- [ ] Only run 1 retry flow at once. We should keep on retrying. See the socket health monitor
-- [ ] Full test coverage
-
-### High level issues
-
-- [X] Join flow is too slow
-- [X] Call id should probably be optional and default to a random UUID
-- [ ] Mock eglBase
-
-### Available tasks up for grabs (little things)
-
+- [ ] Mock eglBase so tests with the debugger on don't crash (seems related, not entirely sure)
+- [ ] Test the dogfooding app and iterate on things that don't work yet
+- [ ] RED error
+- [ ] Own permissions should be a sealed class
+- [ ] Go through all tests & TODOs and update with latest server changes. 
+- [ ] Fine tune the quality on S23
+- [ ] Only run 1 connection retry flow at once. We should keep on retrying.
+- [ ] Full test coverage for retries
+- [ ] Handle more camera errors. Camera2Session, message: Error: Camera device could not be opened due to a device policy
 - [ ] use standard debug, verbose, info, warning and error debug levels on StreamVideoBuilder
-- [ ] Participant sorting rules. See Call sortedParticipants
-- [ ] Pinning of participants. You pin/unpin and it sets pinnedAt and sorting takes it into account
-- [X] Currently we use UserPreferencesManager. Jaewoong mentioned we should perhaps explore https://developer.android.com/topic/libraries/architecture/datastore
+- [ ] Improve our error classes. Right now there are 4 different formats. 
+- [X] Participant sorting rules. See Call sortedParticipants
+- [X] Pinning of participants. You pin/unpin and it sets pinnedAt and sorting takes it into account
+
+### App & Compose
+
+- [ ] Telemetry to firebase/crashlytics (with an opt out, or research alternatives)
+- [ ] Reactions don't show up
+- [ ] Chat integration (we need an event from the server though)
+- [ ] PIP
+- [ ] When state._connection.value = RtcConnectionState.Reconnecting we should show a little transparent. “Reconnecting” UI element
+- [ ] Ringing calls (wait for push and updated endpoints from server)
+- [X] Screensharing doesn't show up
 
 ### Docs ~4 weeks left
 
@@ -43,26 +45,38 @@
 - [ ] UI cookbook
 - [ ] UI components
 
+### Reconnect
+
+- [X] Retry on joining a call
+- [X] Session.reconnect
+- [X] Session.switchSfu
+- [X] Connection state for UI indicators. state.connection
+- [X] Monitoring that determines when to reconnect, or switchSfu
+
+
+### High level issues
+
+- [X] Join flow is too slow
+- [X] Call id should probably be optional and default to a random UUID
+
+
+### Available tasks up for grabs (little things)
+
+- [X] Currently we use UserPreferencesManager. Jaewoong mentioned we should perhaps explore https://developer.android.com/topic/libraries/architecture/datastore
+
+
+
 ### Reconnect & Cross device testing ~2 weeks
 
-- [ ] Max resolution, simulcast and codec preferences should be easy to change
-- [ ] SFU needs to support sending some testing tracks for integration testing
-- [ ] We might need overwrites for the defaults at the device level
-- [ ] Track the FPS messages from webrtc camera capture
+- [X] Max resolution, simulcast and codec preferences should be easy to change
+- [X] SFU needs to support sending some testing tracks for integration testing
+- [X] We might need overwrites for the defaults at the device level
+- [X] Track the FPS messages from webrtc camera capture
 
-### App & Compose
 
-- [ ] Telemetry to firebase/crashlytics (with an opt out)
-- [ ] Reactions don't show up
-- [ ] Chat integration (we need an event from the server though)
-- [ ] PIP
-- [ ] When state._connection.value = RtcConnectionState.Reconnecting we should show a little transparent. “Reconnecting” UI element
-- [ ] Ringing calls (wait for push and updated endpoints from server)
-- [X] Screensharing doesn't show up
 
 ### RTC & Media TODO
 
-- [ ] Error classes for Media/Camera/Mic & Joining a call. That wrap the many things that can go wrong.
 - [X] Improve how we mangle SDP tokens. (edit the audio line and video line, don't swap lines)
 - [X] Media manager tests & decide on microphone/speaker split
 - [X] Leave & End flows
@@ -91,8 +105,6 @@
 
 ### LLC TODO
 
-- [ ] Error.NetworkError vs ErrorResponse. Having 2 classes is confusing. Error format is slightly differences in 4 places. 
-- [ ] Remove unused code
 - [X] Test coverage
 - [X] Clean up tests
 - [X] Support for accepting/rejecting calls etc. HTTP endpoints seem cleaner
@@ -104,12 +116,6 @@
   https://www.notion.so/stream-wiki/Call-Permissions-832f914ad4c545cf8f048012900ad21d
 - [X] Guest and anon user support
 
-### Other & Process
-
-- [ ] Review the 104 todos
-- [ ] Coverage reporting
-- [ ] Better Mocks for testing RtcSession
-
 ### Server wishlist
 
 - [X] queryChannels doesn’t return members but CallUsers, this is wrong
@@ -119,10 +125,9 @@
 - [X] Participant.online field is weird. Aren't you always online as a participant?
 - [X] Participant count & Anonymous Participant Count (for livestreams you cant rely on the list). Returned by SFU. Updated by
 - [X] ConnectionQualityInfo is a list, audio levels is a map. Lets standardize
+- [ ] Accept/reject call endpoints
 - [ ] getCall doesn't support member limits
 - [ ] Events for updating users
-- [ ] Accept/reject call endpoints
-- [ ] What about codec switching?
 - [ ] What about graceful SFU shutdown/ an event to make clients move SFU?
 - [ ] Events for creating a channel on chat. so you lazy load the chat when the first person opens it
 - [ ] List of error codes via openapi
@@ -218,3 +223,4 @@
 - [ ] Audio filter example
 - [ ] Video filter example
 - [ ] Build vars to generate tokens for testing
+- [ ] What about codec switching?

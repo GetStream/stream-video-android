@@ -18,6 +18,7 @@ package io.getstream.video.android.core
 
 import io.getstream.log.taggedLogger
 import io.getstream.video.android.core.call.RtcSession
+import io.getstream.video.android.core.dispatchers.DispatcherProvider
 import io.getstream.video.android.core.events.AudioLevelChangedEvent
 import io.getstream.video.android.core.events.ChangePublishQualityEvent
 import io.getstream.video.android.core.events.ConnectionQualityChangeEvent
@@ -34,11 +35,15 @@ import io.getstream.video.android.core.events.TrackUnpublishedEvent
 import io.getstream.video.android.core.internal.network.NetworkStateProvider
 import io.getstream.video.android.core.model.ScreenSharingSession
 import io.getstream.video.android.core.permission.PermissionRequest
+import io.getstream.video.android.core.utils.asStateFlow
 import io.getstream.video.android.core.utils.mapState
 import io.getstream.video.android.core.utils.toUser
 import io.getstream.video.android.model.User
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.stateIn
 import org.openapitools.client.models.BlockedUserEvent
 import org.openapitools.client.models.CallAcceptedEvent
 import org.openapitools.client.models.CallCreatedEvent
@@ -173,18 +178,25 @@ public class CallState(private val call: Call, private val user: User) {
      * Sorted participants gives you the list of participants sorted by
      * * anyone who is pinned
      * * dominant speaker
+     * * if you are screensharing
      * * last speaking at
      * * all other video participants by when they joined
      * * audio only participants by when they joined
      *
      */
-    public val sortedParticipants = _participants.mapState {
-        it.values.sortedBy {
-            // TODO: implement actual sorting
-            val score = 1
-            score
-        }
-    }
+    private val _pinnedParticipants: MutableStateFlow<Map<String, OffsetDateTime>> = MutableStateFlow(emptyMap())
+    val pinnedParticipants: StateFlow<Map<String,OffsetDateTime>> = _pinnedParticipants
+
+    public val sortedParticipants = _participants.combine(_pinnedParticipants) { participants, pinned ->
+        participants.values.sortedWith(compareBy(
+            { pinned.containsKey(it.sessionId) },
+            { it.dominantSpeaker.value },
+            { it.screenSharingEnabled.value },
+            { it.lastSpeakingAt.value },
+            { it.videoEnabled.value },
+            { it.joinedAt.value }
+        ))
+    }.asStateFlow(CoroutineScope(context = DispatcherProvider.IO), emptyList())
 
     /** Members contains the list of users who are permanently associated with this call. This includes users who are currently not active in the call
      * As an example if you invite "john", "bob" and "jane" to a call and only Jane joins.
@@ -284,6 +296,8 @@ public class CallState(private val call: Call, private val user: User) {
     private val userToSessionIdMap = participants.mapState { participants ->
         participants.map { it.user.value.id to it.sessionId }.toMap()
     }
+
+
 
     internal val _hasPermissionMap = mutableMapOf<String, StateFlow<Boolean>>()
 
@@ -681,6 +695,18 @@ public class CallState(private val call: Call, private val user: User) {
 
     fun updateFromResponse(it: QueryMembersResponse) {
         updateFromResponse(it.members)
+    }
+
+    fun pin(sessionId: String) {
+        val pins = _pinnedParticipants.value.toMutableMap()
+        pins[sessionId] = OffsetDateTime.now(Clock.systemUTC())
+        _pinnedParticipants.value = pins
+    }
+
+    fun unpin(sessionId: String) {
+        val pins = _pinnedParticipants.value.toMutableMap()
+        pins.remove(sessionId)
+        _pinnedParticipants.value = pins
     }
 }
 

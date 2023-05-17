@@ -87,10 +87,12 @@ internal class DebugInfo(val client: StreamVideoImpl) {
     val availableResolutions by lazy { call?.camera?.availableResolutions?.value }
 
     init {
-        scope.launch {
-            delay(20000)
-            if (client.developmentMode) {
-                log()
+        if (client.developmentMode) {
+            scope.launch {
+                while (true) {
+                    delay(20000)
+                    log()
+                }
             }
         }
     }
