@@ -61,10 +61,7 @@ If you use `CallViewModel` with UI components, you can simply set it to the `Cal
 
 ```kotlin
 // create a CallViewModel.
-val factory = CallViewModelFactory(
-    streamVideo = streamVideo,
-    call = streamVideo.call(type = type, id = id)
-)
+val factory = CallViewModelFactory(call = streamVideo.call(type = type, id = id))
 val vm by viewModels<CallViewModel> { factory }
 
 // set your permissionManager.

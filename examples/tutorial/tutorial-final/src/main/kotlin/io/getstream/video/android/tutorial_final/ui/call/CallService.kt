@@ -16,12 +16,6 @@
 
 package io.getstream.video.android.tutorial_final.ui.call
 
-import android.content.Context
-import io.getstream.video.android.core.StreamVideo
 import io.getstream.video.android.core.service.AbstractStreamCallService
-import io.getstream.video.android.tutorial_final.videoApp
 
-class CallService : AbstractStreamCallService() {
-
-    override fun getStreamVideo(context: Context): StreamVideo = videoApp.streamVideo
-}
+class CallService : AbstractStreamCallService()

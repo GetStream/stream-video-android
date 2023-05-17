@@ -1,12 +1,12 @@
 # VideoRenderer
 
-One of the main utility components we provide is the `VideoRenderer`. It's a simple component built in Jetpack Compose, which utilizes [VideoTextureViewRenderer](https://getstream.github.io/webrtc-android/stream-webrtc-android-ui/io.getstream.webrtc.android.ui/-video-texture-view-renderer/index.html) under the hood. It supports rendering of both a user camera track and screen sharing track.
+One of the main low-level components we provide is the `VideoRenderer`. It's a simple component built in Jetpack Compose, which utilizes [VideoTextureViewRenderer](https://getstream.github.io/webrtc-android/stream-webrtc-android-ui/io.getstream.webrtc.android.ui/-video-texture-view-renderer/index.html) under the hood. It supports rendering of both a user camera track and screen sharing track.
 
 Let's see how to use the component in your UI.
 
 ## Usage
 
-To add the VideoRenderer component to your layout, you can use the `VideoRenderer` composable function like this:
+To add the `VideoRenderer` component to your layout, you can use the `VideoRenderer` composable function like this:
 
 ```kotlin
 import io.getstream.video.android.compose.ui.components.video.VideoRenderer
@@ -14,27 +14,28 @@ import io.getstream.video.android.compose.ui.components.video.VideoRenderer
 @Composable
 fun CustomVideoComponent(
     call: Call,
-    participant: CallParticipantState
+    participant: ParticipantState
 ) {
-    // 1
-    val localVideoTrack = localParticipant?.videoTrack
-    val sessionId = localParticipant?.sessionId ?: ""
+    // step 1 - observe video track from a participant.
+    val videoTrack by participant.videoTrack.collectAsState()
   
-    if (localVideoTrack != null) { // 2
+    if (videoTrack != null) { // step 2 - check whether the track is null or not.
         VideoRenderer(
-            modifier = Modifier.fillMaxSize(), // 3
+            modifier = Modifier.fillMaxSize(),
             call = call,
-            videoTrack = localVideoTrack,
-            sessionId = sessionId,
+            mediaTrack = videoTrack,
+            sessionId = participant.sessionId,
             trackType = TrackType.TRACK_TYPE_VIDEO
         ) 
+    } else {
+        // shows fallback of a video track by your taste
     }
 }
 ```
 
 There are a few steps going on here:
 
-1. Using the `participant`, you can get that participant's `videoTrack`. It also contains the `sessionId` of that participant, which is used to connect the tracks and rendering.
+1. Using the `ParticipantState`, you can get that participant's `videoTrack`. It also contains the `sessionId` of that participant, which is used to connect the tracks and rendering.
 2. When you have the track, it's not `null`, you're ready to show the UI using `VideoRenderer` and its parameters.
 3. Using the `modifier`, you can customize the size, shape, elevation and similar properties of the component UI.
 
@@ -42,17 +43,17 @@ This snippet of code will generate a single video track based on what the user i
 
 ## Choosing the VideoTrack
 
-The `videoTrack` parameter in the `VideoRenderer` is used to render the Video UI. To provide the video track, you can use the `CallParticipantState`. Within it, we store an instance of the `VideoTrack` class from the WebRTC library and we expose two possible tracks:
+The `mediaTrack` parameter in the `VideoRenderer` is used to render the Video UI. To provide the video track, you can use the `ParticipantState`. Within it, we store an instance of the `VideoTrack` class from the WebRTC library and we expose two possible tracks:
 
 * `videoTrack`: Represents the Video of the participant, from their camera feed.
 * `screenSharingTrack`: Represents the screen sharing track of the participant, based on what screen or window they're sharing.
 
-You can always determine if a person is screen sharing by checking the `CallParticipantState.publishedTracks` property as well as if the `videoTrack` or `screenSharingTrack` are `null` or valid.
+You can always determine if a person is screen sharing by checking the `ParticipantState.screenSharingTrack` property as well as if the `videoTrack` or `screenSharingTrack` are `null` or valid.
 
 ## VideoRenderer Lifecycle
 
 To ensure that the `VideoRenderer` component works correctly, you need to handle the component lifecycle. Specifically, you need to start and stop the video track when the component is added to and removed from the screen.
 
-Fortunately enough, we provide this for you, out of the box. While tracks are persisted within the `CallParticipantState`, the WebRTC subscription is managed under the hood.
+Fortunately enough, we provide this for you, out of the box. While tracks are persisted within the `ParticipantState`, the WebRTC subscription is managed under the hood.
 
 When the composable function is called within the UI, it's rendered and connected to the [VideoTextureViewRenderer](https://getstream.github.io/webrtc-android/stream-webrtc-android-ui/io.getstream.webrtc.android.ui/-video-texture-view-renderer/index.html) under the hood. When the state changes and it's removed from the UI, the renderer is disposed of and the state is cleaned up.

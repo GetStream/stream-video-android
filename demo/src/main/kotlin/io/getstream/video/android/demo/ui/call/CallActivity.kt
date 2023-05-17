@@ -34,15 +34,9 @@ import io.getstream.video.android.core.model.CallType
 import io.getstream.video.android.core.permission.PermissionManager
 import io.getstream.video.android.core.viewmodel.CallViewModel
 import io.getstream.video.android.core.viewmodel.CallViewModelFactory
-import io.getstream.video.android.demo.demoVideoApp
 import io.getstream.video.android.model.streamCallId
 
 class CallActivity : AppCompatActivity() {
-
-    /**
-     * Provides the StreamVideo instance through the videoApp.
-     */
-    private val streamVideo: StreamVideo by lazy { demoVideoApp.streamVideo }
 
     private val factory by lazy { callViewModelFactory() }
     private val vm by viewModels<CallViewModel> { factory }
@@ -82,8 +76,7 @@ class CallActivity : AppCompatActivity() {
             ?: throw IllegalArgumentException("You must pass correct channel id.")
 
         return CallViewModelFactory(
-            streamVideo = streamVideo,
-            call = streamVideo.call(type = callId.type, id = callId.id)
+            call = StreamVideo.instance().call(type = callId.type, id = callId.id)
         )
     }
 
