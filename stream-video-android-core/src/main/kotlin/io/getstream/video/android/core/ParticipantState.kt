@@ -134,6 +134,14 @@ public data class ParticipantState(
         return call.muteUser(user.value.id, audio = false, video = false, screenShare = true)
     }
 
+    suspend fun pin() {
+        return call.state.pin(this.sessionId)
+    }
+
+    suspend fun unpin() {
+        return call.state.unpin(this.sessionId)
+    }
+
     fun updateFromParticipantInfo(participant: Participant) {
         sessionId = participant.session_id
         _joinedAt.value = participant.joined_at?.toEpochMilli()?.let { Date(it) }
