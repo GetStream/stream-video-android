@@ -25,7 +25,7 @@
 
 - [X] Join flow is too slow
 - [X] Call id should probably be optional and default to a random UUID
-- [ ] Chat integration needs a good review to see what we can simplify
+- [ ] Mock eglBase
 
 ### Available tasks up for grabs (little things)
 

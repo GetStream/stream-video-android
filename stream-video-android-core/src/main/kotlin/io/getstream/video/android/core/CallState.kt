@@ -74,6 +74,7 @@ import org.openapitools.client.models.VideoEvent
 import org.threeten.bp.Clock
 import org.threeten.bp.OffsetDateTime
 import stream.video.sfu.models.Participant
+import stream.video.sfu.models.ParticipantCount
 import stream.video.sfu.models.TrackType
 import java.util.SortedMap
 
@@ -117,6 +118,7 @@ public sealed interface RtcConnectionState {
  *
  */
 public class CallState(private val call: Call, private val user: User) {
+
     private val logger by taggedLogger("CallState")
 
     internal val _connection = MutableStateFlow<RtcConnectionState>(RtcConnectionState.PreJoin)
@@ -145,6 +147,10 @@ public class CallState(private val call: Call, private val user: User) {
     /** Participants returns a list of participant state object. @see [ParticipantState] */
     public val participants: StateFlow<List<ParticipantState>> =
         _participants.mapState { it.values.toList() }
+
+
+    private val _participantCounts: MutableStateFlow<ParticipantCount?> = MutableStateFlow(null)
+    val participantCounts : StateFlow<ParticipantCount?> = _participantCounts
 
     /** Your own participant state */
     public val me: StateFlow<ParticipantState?> = _participants.mapState {
@@ -508,6 +514,10 @@ public class CallState(private val call: Call, private val user: User) {
     }
 
     private fun updateFromJoinResponse(event: JoinCallResponseEvent) {
+        // update the participant count
+        val count = event.callState.participant_count
+        _participantCounts.value = count
+
         // creates the participants
         val participantStates = event.callState.participants.map {
             getOrCreateParticipant(it)

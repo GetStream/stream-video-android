@@ -194,6 +194,7 @@ public class StreamPeerConnectionFactory(private val context: Context) {
         onStreamAdded: ((MediaStream) -> Unit)? = null,
         onNegotiationNeeded: ((StreamPeerConnection, StreamPeerType) -> Unit)? = null,
         onIceCandidateRequest: ((IceCandidate, StreamPeerType) -> Unit)? = null,
+        maxPublishingBitrate: Int = 1_200_000,
     ): StreamPeerConnection {
         val peerConnection = StreamPeerConnection(
             coroutineScope = coroutineScope,
@@ -202,6 +203,7 @@ public class StreamPeerConnectionFactory(private val context: Context) {
             onStreamAdded = onStreamAdded,
             onNegotiationNeeded = onNegotiationNeeded,
             onIceCandidate = onIceCandidateRequest,
+            maxBitRate = maxPublishingBitrate,
         )
         val connection = makePeerConnectionInternal(
             configuration = configuration,
