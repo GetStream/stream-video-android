@@ -77,12 +77,16 @@ You will see the result below:
 
 ### Ringing (incoming/outgoing calls)
 
+You can implement incoming/outgoing respectively screens depending on the call state with `RingingCallContent` composable:
+
 ```Kotlin
 VideoTheme {
-    RingingCall(
-        modifier = Modifier.background(color = VideoTheme.colors.appBackground),
-        callViewModel = vm,
-        onBackPressed = { finish() },
+    RingingCallContent(
+        callViewModel = callViewModel,
+        callType = CallType.VIDEO,
+        onAcceptedCallContent = {
+            // do something when a call is accepted
+        },
     )
 }
 ```

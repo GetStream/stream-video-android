@@ -22,8 +22,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.call.activecall.CallContent
 import io.getstream.video.android.compose.ui.components.call.ringing.incomingcall.IncomingCallContent
 import io.getstream.video.android.compose.ui.components.call.ringing.outgoingcall.OutgoingCallContent
@@ -34,6 +37,8 @@ import io.getstream.video.android.core.call.state.CallAction
 import io.getstream.video.android.core.call.state.CallDeviceState
 import io.getstream.video.android.core.model.CallType
 import io.getstream.video.android.core.viewmodel.CallViewModel
+import io.getstream.video.android.mock.StreamMockUtils
+import io.getstream.video.android.mock.mockCall
 
 /**
  * Represents different outgoing/incoming call content based on the call state provided from the [callViewModel].
@@ -116,7 +121,7 @@ public fun RingingCallContent(
         ) -> Unit
     )? = null,
     callControlsContent: (@Composable BoxScope.() -> Unit)? = null,
-    onBackPressed: () -> Unit,
+    onBackPressed: () -> Unit = {},
     onCallAction: (CallAction) -> Unit = {},
     onAcceptedCallContent: @Composable () -> Unit
 ) {
@@ -152,5 +157,19 @@ public fun RingingCallContent(
     } else {
         // TODO: rejected + fallback
         onAcceptedCallContent.invoke()
+    }
+}
+
+@Preview
+@Composable
+private fun RingingCallContentPreview() {
+    StreamMockUtils.initializeStreamVideo(LocalContext.current)
+    VideoTheme {
+        RingingCallContent(
+            call = mockCall,
+            callType = CallType.VIDEO,
+            callDeviceState = CallDeviceState(),
+            onAcceptedCallContent = {},
+        )
     }
 }
