@@ -294,13 +294,13 @@ public class StreamPeerConnection(
         val quarterQuality = RtpParameters.Encoding(
             "q", true, 4.0
         ).apply {
-            maxBitrateBps = maxBitRate/4
+            maxBitrateBps = maxBitRate / 4
         }
 
         val halfQuality = RtpParameters.Encoding(
             "h", true, 2.0
         ).apply {
-            maxBitrateBps = maxBitRate/2
+            maxBitrateBps = maxBitRate / 2
         }
 
         val fullQuality = RtpParameters.Encoding(

@@ -148,9 +148,8 @@ public class CallState(private val call: Call, private val user: User) {
     public val participants: StateFlow<List<ParticipantState>> =
         _participants.mapState { it.values.toList() }
 
-
     private val _participantCounts: MutableStateFlow<ParticipantCount?> = MutableStateFlow(null)
-    val participantCounts : StateFlow<ParticipantCount?> = _participantCounts
+    val participantCounts: StateFlow<ParticipantCount?> = _participantCounts
 
     /** Your own participant state */
     public val me: StateFlow<ParticipantState?> = _participants.mapState {
