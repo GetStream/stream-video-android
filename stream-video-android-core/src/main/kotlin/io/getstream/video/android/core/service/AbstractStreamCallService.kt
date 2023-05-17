@@ -25,7 +25,6 @@ import io.getstream.log.taggedLogger
 import io.getstream.video.android.R
 import io.getstream.video.android.core.ConnectionState
 import io.getstream.video.android.core.StreamVideo
-import io.getstream.video.android.core.StreamVideoProvider
 import io.getstream.video.android.core.dispatchers.DispatcherProvider
 import io.getstream.video.android.core.service.notification.StreamNotificationBuilder
 import io.getstream.video.android.core.service.notification.internal.StreamNotificationBuilderImpl
@@ -35,7 +34,7 @@ import io.getstream.video.android.core.utils.notificationManager
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.cancel
 
-public abstract class AbstractStreamCallService : Service(), StreamVideoProvider {
+public abstract class AbstractStreamCallService : Service() {
 
     private val logger by taggedLogger("Call:StreamService")
 
@@ -43,7 +42,7 @@ public abstract class AbstractStreamCallService : Service(), StreamVideoProvider
 
     private val notificationManager: NotificationManager by lazy { application.notificationManager }
 
-    private val streamVideo: StreamVideo by lazy { getStreamVideo(this) }
+    private val streamVideo: StreamVideo by lazy { StreamVideo.instance() }
 
     private val notificationBuilder: StreamNotificationBuilder by lazy {
         createNotificationBuilder(application)

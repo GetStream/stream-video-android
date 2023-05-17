@@ -116,10 +116,7 @@ class MainActivity : ComponentActivity() {
         call.join(create = true)
 
         // create a view model factory and a view model.
-        val factory = CallViewModelFactory(
-            streamVideo = client,
-            call = call,
-        )
+        val factory = CallViewModelFactory(call = call)
         val vm by viewModels<CallViewModel> { factory }
 
         // create a permissionManager and set it to the CallViewModel.

@@ -38,7 +38,6 @@ import io.getstream.video.android.model.streamCallId
 
 class CallActivity : ComponentActivity() {
 
-    private val streamVideo: StreamVideo by lazy { StreamVideo.instance() }
     private val factory by lazy { callViewModelFactory() }
     private val vm by viewModels<CallViewModel> { factory }
 
@@ -66,8 +65,7 @@ class CallActivity : ComponentActivity() {
                 ?: throw IllegalArgumentException("You must pass correct channel id.")
 
         return CallViewModelFactory(
-            streamVideo = streamVideo,
-            call = streamVideo.call(type = type, id = id)
+            call = StreamVideo.instance().call(type = type, id = id)
         )
     }
 

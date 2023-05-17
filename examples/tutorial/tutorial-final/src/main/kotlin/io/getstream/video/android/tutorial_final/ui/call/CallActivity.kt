@@ -16,21 +16,15 @@
 
 package io.getstream.video.android.tutorial_final.ui.call
 
-import android.content.Context
 import io.getstream.video.android.compose.ui.AbstractComposeCallActivity
 import io.getstream.video.android.core.StreamVideo
 import io.getstream.video.android.core.viewmodel.CallViewModelFactory
-import io.getstream.video.android.tutorial_final.videoApp
 
 class CallActivity : AbstractComposeCallActivity() {
 
-    /** Provides the StreamVideo instance through the videoApp. */
-    override fun getStreamVideo(context: Context): StreamVideo = context.videoApp.streamVideo
-
     override fun getCallViewModelFactory(): CallViewModelFactory {
         return CallViewModelFactory(
-            streamVideo = getStreamVideo(this),
-            call = getStreamVideo(this).call("default", "replaceme")
+            call = StreamVideo.instance().call("default", "replaceme")
         )
     }
 }

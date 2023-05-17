@@ -16,13 +16,6 @@
 
 package io.getstream.video.android.dogfooding.ui.call
 
-import android.content.Context
-import io.getstream.video.android.core.StreamVideo
 import io.getstream.video.android.core.service.AbstractStreamCallService
 
-class CallService : AbstractStreamCallService() {
-
-    override fun getStreamVideo(context: Context): StreamVideo {
-        return StreamVideo.instance()
-    }
-}
+class CallService : AbstractStreamCallService()

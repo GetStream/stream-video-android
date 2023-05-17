@@ -1,33 +1,44 @@
 # CallContainer
 
-The easiest way to setup a screen that shows incoming, outgoing and active call screens which contain the current participants video feeds and the call controls is to use the `CallContainer`.
+The easiest way to set up a screen that renders a video call, incoming, outgoing and active call screens which contain the current participants video feeds and the call controls is to use the `CallContainer`.
 
 `CallContainer` sets up the following functionality by connecting multiple components:
 
-* [**`OutgoingCall`**](../outgoing-call): When the user is calling other people. Shows other participants avatars and controls for switching audio/video and canceling the call.
-* [**`IncomingCall`**](../incoming-call): When the user is being called by another person. Shows the incoming
+* [**`CallAppBar`**](05-call-app-bar.mdx): Displays a call information or an additional actions, such as the number of participants,
+* [**`CallControls`**](04-call-controls.mdx): Allows a user to trigger different actions to control a joining call, such as enabling a camera/audio and flipping a camera.
+* [**`CallContent`**](03-call-content.mdx): Content is shown by rendering video/audio when we're connected to a call successfully.
+* [**`RingingCall`**](02-ringing-call.mdx): When the user calls other people or is called by another person, it shows other participants' avatars and controls for switching audio/video and canceling the call.
 
-In this section we will cover component at the highest top of the hierarchy which enable you to quickly implement a Video Call app.
-These components abstract the logic needed to write a functioning video call experience, which makes them less open to customisation.
+This section will cover components at the highest top of the hierarchy, enabling you to implement a Video Call app quickly.
+These components abstract the logic needed to write a functioning video call experience, which makes them less open to customization.
 
 ## Usage
 
-`CallContainer` is at the top of the hierarchy. It is a bound component that automatically handles Incoming/Outgoing and Active call components and states. All you have to do is pass it the `CallViewModel`:
+`CallContainer` is at the top of the hierarchy. It is a bound component that automatically renders live videos, Incoming/Outgoing and Active call components depending on call states.
 
 ```kotlin
 override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
     setContent {
         VideoTheme {
-            CallContainer(viewModel = callViewModel)
+            CallContainer(
+                modifier = Modifier.fillMaxSize(),
+                callViewModel = callViewModel,
+                callType = CallType.VIDEO,
+                onBackPressed = { finish() },
+            )
         }
     }
 }
 ```
 
-We require of you to provide a ViewModel, because of the underlying `StreamVideo` instance, which isn't a singleton. Using this UI component and our ViewModel, will show the following UI based on the Call state.kotlin
+:::note
+Please ensure that you were already initialized StreamVideo with the `StreamVideoBuilder(..).build()` method before using the `CallViewModel`.
+:::
 
-![Call Activity](https://user-images.githubusercontent.com/17215808/216000813-86ebd384-f5d1-4e53-9b23-ce1f14b6de4e.png)
+Using this UI component and our `CallViewModel`, will show the following UI based on call states.
+
+![Compose CallContainer](../../assets/compose_call_container.jpg)
 
 If you want to customize the behavior for your use case, you can override the action handlers.
 
@@ -46,17 +57,22 @@ override fun onCreate(savedInstanceState: Bundle?) {
     setContent {
         VideoTheme {
             CallContainer(
-                viewModel = callViewModel,
+                modifier = Modifier.fillMaxSize(),
+                callViewModel = callViewModel,
+                callType = CallType.VIDEO,
                 onCallAction = {
                     // TODO - handle call actions
-                }
+                },
+                onBackPressed = {
+                    // TODO - handle the back button is pressed
+                },
             )
         }
     }
 }
 ```
 
-You can also pass the actions to the `ViewModel` to handle the default actions we define in our UI, but you can handle any custom actions here, if you've built some custom UI.
+You can also pass the actions to the [CallViewModel](../05-view-model.mdx) to handle the default actions we define in our UI, but you can handle any custom actions here, if you've built some custom UI.
 
 When it comes to custom UI, the `CallContainer` exposes some Slot APIs for you to consume.
 
@@ -70,47 +86,51 @@ More specifically, the `CallContainer` exposes the following Slots:
 @Composable
 public fun CallContainer(
     ...
-    callControlsContent: @Composable () -> Unit = { // 1
-        DefaultCallControlsContent(
-            viewModel,
-            onCallAction
-        )
-    },
-    pictureInPictureContent: @Composable (Call) -> Unit = { DefaultPictureInPictureContent(it) }, // 2
-    incomingCallContent: @Composable () -> Unit = { // 3
-        IncomingCallContent(
-            modifier = modifier,
-            viewModel = viewModel,
+    callAppBarContent: @Composable () -> Unit = {
+        CallAppBar(
+            modifier = Modifier.testTag("call_appbar"),
+            call = callViewModel.call,
+            leadingContent = null,
             onBackPressed = onBackPressed,
             onCallAction = onCallAction
         )
     },
-    callContent: @Composable () -> Unit = { // 4
+    callControlsContent: @Composable (call: Call) -> Unit = {
+        CallControls(
+            modifier = Modifier.testTag("call_controls"),
+            callViewModel = callViewModel,
+            onCallAction = onCallAction,
+        )
+    },
+    pictureInPictureContent: @Composable (Call) -> Unit = { DefaultPictureInPictureContent(it) }, // 2
+    callContent: @Composable (call: Call) -> Unit = {
         DefaultCallContent(
-            viewModel = viewModel,
-            modifier = modifier,
+            modifier = modifier.testTag("call_content"),
+            callViewModel = callViewModel,
             onBackPressed = onBackPressed,
             onCallAction = onCallAction,
+            callAppBarContent = callAppBarContent,
             callControlsContent = callControlsContent,
             pictureInPictureContent = pictureInPictureContent
         )
     },
-    outgoingCallContent: @Composable () -> Unit = { // 5
-        OutgoingCallContent(
-            modifier = modifier,
-            viewModel = viewModel,
+    ringingCallContent: @Composable (call: Call) -> Unit = {
+        RingingCallContent(
+            modifier = modifier.testTag("ringing_call_content"),
+            callType = callType,
+            callViewModel = callViewModel,
             onBackPressed = onBackPressed,
-            onCallAction = onCallAction
+            onCallAction = onCallAction,
+            onAcceptedCallContent = { callContent.invoke(it) }
         )
-    }
+    },
 )
 ```
 
-
+* **callAppBarContent**: Represents the content that handle a back button and shows the call information, such as the status, the number of participants.
 * **callControlsContent**: Represents the content that features various controls and actions in a call, such as audio and video handles and leaving a call.
 * **pictureInPictureContent**: Represents the content that will be shown in Picture-In-Picture mode.
-* **incomingCallContent**: Represents the content shown when the active user is being ringed or called by other users, in the Incoming call state.
-* **outgoingCallContent**: Represents the content shown when the active user is calling or ringing other users, in the Outgoing call state.
+* **ringingCallContent**: Represents the incoming/outgoing content shown respectively when the active user is being ringed or ringing other users.
 * **callContent**: Represents the active call content, when the user fully joins and connects to a call.
 
 Using any of these slots, you can fully replace the content that's shown in different states and you can build these components to be rendered differently, as the state updates.
