@@ -21,13 +21,14 @@ private fun CustomUi() {
             bottomBar = {
                 CallControls(
                     modifier = ..,
+                    callViewModel = callViewModel,
                     onCallAction = ::handleCallAction
                 )
             }
         ) { paddings ->
             CallVideoRenderer(
                 modifier = Modifier.fillMaxSize().padding(paddings),
-                call = currentCall,
+                call = call,
             )
         }
 }
@@ -42,6 +43,15 @@ In this example, you're doing the following:
 If you're using this approach and our default set of components, you can expect a UI that's similar to our default implementation:
 
 ![Compose CallContainer](../../assets/compose_call_container.png)
+
+If you want to use your own `ViewModel` and use the stateless version of `CallControls`, you can implement it like the example below:
+
+```kotlin
+CallControls(
+    callDeviceState = callDeviceState,
+    onCallAction = { /* Handle call actions here */ }
+)
+```
 
 By default `CallControls` component covers both portrait and landscape orientation. This means that the actions you pass in will be rendered either in a `Row` of items, horizontally placed, when in portrait, or a `Column`, when in landscape. If you use [CallContent](03-call-content.mdx), `CallControls` will be configured the layout automatically by observing the configuration changes.
 
