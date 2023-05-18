@@ -50,7 +50,7 @@ public fun ScreenShareVideoRenderer(
     onRender: (View) -> Unit = {}
 ) {
     val screenShareParticipant = session.participant
-    val mediaTrack = session?.participant?.screenSharingTrack?.collectAsState()
+    val mediaTrack by session.participant.screenSharingTrack.collectAsState()
 
     Box(modifier = modifier) {
         VideoRenderer(
@@ -58,7 +58,7 @@ public fun ScreenShareVideoRenderer(
                 .fillMaxSize()
                 .align(Alignment.Center),
             call = call,
-            mediaTrack = mediaTrack?.value,
+            mediaTrack = mediaTrack,
             onRender = onRender,
             trackType = TrackType.TRACK_TYPE_SCREEN_SHARE,
             sessionId = session.participant.sessionId

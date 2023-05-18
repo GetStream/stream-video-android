@@ -34,7 +34,7 @@ import io.getstream.video.android.core.call.state.ToggleCamera
 import io.getstream.video.android.core.call.state.ToggleMicrophone
 import io.getstream.video.android.core.call.state.ToggleSpeakerphone
 import io.getstream.video.android.core.permission.PermissionManager
-import io.getstream.video.android.core.utils.asStateFlow
+import io.getstream.video.android.core.utils.asStateFlowWhileSubscribed
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
@@ -82,13 +82,13 @@ public class CallViewModel(public val call: Call) : ViewModel() {
             (settings?.video?.enabled == true) &&
                 (status is DeviceStatus.Enabled) &&
                 (permissionManager?.hasCameraPermission?.value == true)
-        }.asStateFlow(scope = viewModelScope, initialValue = false)
+        }.asStateFlowWhileSubscribed(scope = viewModelScope, initialValue = false)
 
     private val isMicrophoneOn: StateFlow<Boolean> =
         combine(settings, call.mediaManager.microphone.status) { _, status ->
             (status is DeviceStatus.Enabled) &&
                 permissionManager?.hasRecordAudioPermission?.value == true
-        }.asStateFlow(scope = viewModelScope, initialValue = false)
+        }.asStateFlowWhileSubscribed(scope = viewModelScope, initialValue = false)
 
     private val isSpeakerPhoneOn: MutableStateFlow<Boolean> = MutableStateFlow(
         false
@@ -107,7 +107,7 @@ public class CallViewModel(public val call: Call) : ViewModel() {
             )
         }.onEach {
             logger.d { "[callMediaState] callMediaState: $it" }
-        }.asStateFlow(scope = viewModelScope, initialValue = CallDeviceState())
+        }.asStateFlowWhileSubscribed(scope = viewModelScope, initialValue = CallDeviceState())
 
     private var onLeaveCall: (() -> Unit)? = null
 

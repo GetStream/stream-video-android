@@ -74,7 +74,7 @@ public fun CallContainer(
     callType: CallType,
     onBackPressed: () -> Unit = {},
     onCallAction: (CallAction) -> Unit = callViewModel::onCallAction,
-    callAppBarContent: @Composable () -> Unit = {
+    callAppBarContent: @Composable (call: Call) -> Unit = {
         CallAppBar(
             modifier = Modifier.testTag("call_appbar"),
             call = callViewModel.call,
@@ -157,7 +157,7 @@ public fun CallContainer(
     modifier: Modifier = Modifier,
     onBackPressed: () -> Unit = {},
     onCallAction: (CallAction) -> Unit = {},
-    callAppBarContent: @Composable () -> Unit = {
+    callAppBarContent: @Composable (call: Call) -> Unit = {
         CallAppBar(
             modifier = Modifier.testTag("call_appbar"),
             call = call,
@@ -205,7 +205,7 @@ internal fun DefaultCallContent(
     modifier: Modifier = Modifier,
     onBackPressed: () -> Unit = {},
     onCallAction: (CallAction) -> Unit = callViewModel::onCallAction,
-    callAppBarContent: @Composable () -> Unit,
+    callAppBarContent: @Composable (call: Call) -> Unit,
     callControlsContent: @Composable (call: Call) -> Unit,
     pictureInPictureContent: @Composable (call: Call) -> Unit = { DefaultPictureInPictureContent(it) }
 ) {

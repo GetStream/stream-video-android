@@ -58,7 +58,22 @@ fun <T, K> StateFlow<T>.mapState(
 }
 
 @JvmSynthetic
-internal fun <T> Flow<T>.asStateFlow(scope: CoroutineScope, initialValue: T): StateFlow<T> {
+internal fun <T> Flow<T>.asStateFlow(
+    initialValue: T,
+    scope: CoroutineScope = CoroutineScope(context = DispatcherProvider.IO),
+): StateFlow<T> {
+    return stateIn(
+        scope = scope,
+        started = SharingStarted.Eagerly,
+        initialValue = initialValue,
+    )
+}
+
+@JvmSynthetic
+internal fun <T> Flow<T>.asStateFlowWhileSubscribed(
+    scope: CoroutineScope,
+    initialValue: T
+): StateFlow<T> {
     return stateIn(
         scope = scope,
         started = WhileSubscribedOrRetained,

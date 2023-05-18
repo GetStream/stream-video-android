@@ -74,7 +74,7 @@ public fun CallContent(
     modifier: Modifier = Modifier,
     onBackPressed: () -> Unit = { callViewModel.onCallAction(LeaveCall) },
     onCallAction: (CallAction) -> Unit = callViewModel::onCallAction,
-    callAppBarContent: @Composable () -> Unit = {
+    callAppBarContent: @Composable (call: Call) -> Unit = {
         CallAppBar(
             call = callViewModel.call,
             leadingContent = null,
@@ -138,7 +138,7 @@ public fun CallContent(
     isShowingOverlayCallAppBar: Boolean = true,
     isInPictureInPicture: Boolean = false,
     onCallAction: (CallAction) -> Unit = {},
-    callAppBarContent: @Composable () -> Unit = {
+    callAppBarContent: @Composable (call: Call) -> Unit = {
         CallAppBar(
             call = call,
             leadingContent = null,
@@ -159,6 +159,7 @@ public fun CallContent(
         Scaffold(
             modifier = modifier,
             contentColor = VideoTheme.colors.appBackground,
+            topBar = { },
             bottomBar = {
                 if (orientation != ORIENTATION_LANDSCAPE) {
                     callControlsContent.invoke(call)
@@ -191,7 +192,7 @@ public fun CallContent(
                 }
 
                 if (isShowingOverlayCallAppBar) {
-                    callAppBarContent.invoke()
+                    callAppBarContent.invoke(call)
                 }
             }
         )

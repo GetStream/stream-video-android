@@ -173,18 +173,25 @@ public class CallState(private val call: Call, private val user: User) {
      * Sorted participants gives you the list of participants sorted by
      * * anyone who is pinned
      * * dominant speaker
+     * * if you are screensharing
      * * last speaking at
      * * all other video participants by when they joined
      * * audio only participants by when they joined
      *
      */
-    public val sortedParticipants = _participants.mapState {
-        it.values.sortedBy {
-            // TODO: implement actual sorting
-            val score = 1
-            score
-        }
-    }
+    internal val _pinnedParticipants: MutableStateFlow<Map<String, OffsetDateTime>> = MutableStateFlow(emptyMap())
+    val pinnedParticipants: StateFlow<Map<String, OffsetDateTime>> = _pinnedParticipants
+
+//    public val sortedParticipants = _participants.combine(_pinnedParticipants) { participants, pinned ->
+//        participants.values.sortedWith(compareBy(
+//            { pinned.containsKey(it.sessionId) },
+//            { it.dominantSpeaker.value },
+//            { it.screenSharingEnabled.value },
+//            { it.lastSpeakingAt.value },
+//            { it.videoEnabled.value },
+//            { it.joinedAt.value }
+//        ))
+//    }.asStateFlow(CoroutineScope(context = DispatcherProvider.IO), emptyList())
 
     /** Members contains the list of users who are permanently associated with this call. This includes users who are currently not active in the call
      * As an example if you invite "john", "bob" and "jane" to a call and only Jane joins.
@@ -681,6 +688,18 @@ public class CallState(private val call: Call, private val user: User) {
 
     fun updateFromResponse(it: QueryMembersResponse) {
         updateFromResponse(it.members)
+    }
+
+    fun pin(sessionId: String) {
+        val pins = _pinnedParticipants.value.toMutableMap()
+        pins[sessionId] = OffsetDateTime.now(Clock.systemUTC())
+        _pinnedParticipants.value = pins
+    }
+
+    fun unpin(sessionId: String) {
+        val pins = _pinnedParticipants.value.toMutableMap()
+        pins.remove(sessionId)
+        _pinnedParticipants.value = pins
     }
 }
 

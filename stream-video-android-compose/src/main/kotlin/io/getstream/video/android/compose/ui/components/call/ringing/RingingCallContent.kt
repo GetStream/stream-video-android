@@ -69,7 +69,7 @@ public fun RingingCallContent(
         ) -> Unit
     )? = null,
     callControlsContent: (@Composable BoxScope.() -> Unit)? = null,
-    onBackPressed: () -> Unit,
+    onBackPressed: () -> Unit = {},
     onCallAction: (CallAction) -> Unit = callViewModel::onCallAction,
     onAcceptedCallContent: @Composable () -> Unit
 ) {

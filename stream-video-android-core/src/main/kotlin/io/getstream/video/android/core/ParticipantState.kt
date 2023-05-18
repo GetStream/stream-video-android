@@ -115,9 +115,6 @@ public data class ParticipantState(
     internal val _lastSpeakingAt: MutableStateFlow<Date?> = MutableStateFlow(null)
     val lastSpeakingAt: StateFlow<Date?> = _lastSpeakingAt
 
-    internal val _pinnedAt: MutableStateFlow<Date?> = MutableStateFlow(null)
-    val pinnedAt: StateFlow<Date?> = _pinnedAt
-
     internal val _reactions = MutableStateFlow<List<ReactionResponse>>(emptyList())
     val reactions: StateFlow<List<ReactionResponse>> = _reactions
 
@@ -132,6 +129,14 @@ public data class ParticipantState(
 
     suspend fun muteScreenshare(): Result<MuteUsersResponse> {
         return call.muteUser(user.value.id, audio = false, video = false, screenShare = true)
+    }
+
+    suspend fun pin() {
+        return call.state.pin(this.sessionId)
+    }
+
+    suspend fun unpin() {
+        return call.state.unpin(this.sessionId)
     }
 
     fun updateFromParticipantInfo(participant: Participant) {

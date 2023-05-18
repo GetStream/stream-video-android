@@ -31,7 +31,6 @@ import io.getstream.video.android.core.call.state.CallDeviceState
  * Shows the call controls in a different way when in landscape mode.
  *
  * @param callDeviceState The state of the call media, such as video, audio.
- * @param isScreenSharing If there's currently an active screen sharing session.
  * @param modifier Modifier for styling.
  * @param actions Actions to show to the user with different controls.
  * @param onCallAction Handler when the user triggers various call actions.

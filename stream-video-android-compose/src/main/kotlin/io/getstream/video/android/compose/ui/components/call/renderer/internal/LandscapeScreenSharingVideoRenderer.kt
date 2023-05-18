@@ -25,12 +25,14 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.width
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.ParticipantState
@@ -58,7 +60,7 @@ internal fun LandscapeScreenSharingVideoRenderer(
     onRender: (View) -> Unit,
 ) {
     val sharingParticipant = session.participant
-    val me = participants.firstOrNull { it.isLocal }
+    val me by call.state.me.collectAsStateWithLifecycle()
 
     Row(
         modifier = modifier

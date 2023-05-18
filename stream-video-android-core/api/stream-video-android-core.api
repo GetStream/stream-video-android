@@ -87,19 +87,21 @@ public final class io/getstream/video/android/core/CallState {
 	public final fun getParticipantCounts ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun getParticipants ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun getPermissionRequests ()Lkotlinx/coroutines/flow/StateFlow;
+	public final fun getPinnedParticipants ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun getReactions ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun getRecording ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun getRemoteParticipants ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun getRingingState ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun getScreenSharingSession ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun getSettings ()Lkotlinx/coroutines/flow/StateFlow;
-	public final fun getSortedParticipants ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun getStartsAt ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun getTeam ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun getTranscribing ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun getUpdatedAt ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun handleEvent (Lorg/openapitools/client/models/VideoEvent;)V
 	public final fun hasPermission (Ljava/lang/String;)Lkotlinx/coroutines/flow/StateFlow;
+	public final fun pin (Ljava/lang/String;)V
+	public final fun unpin (Ljava/lang/String;)V
 	public final fun updateFromResponse (Lorg/openapitools/client/models/CallResponse;)V
 	public final fun updateFromResponse (Lorg/openapitools/client/models/CallStateResponseFields;)V
 	public final fun updateFromResponse (Lorg/openapitools/client/models/GetCallResponse;)V
@@ -340,7 +342,6 @@ public final class io/getstream/video/android/core/ParticipantState {
 	public final fun getInitialUser ()Lio/getstream/video/android/model/User;
 	public final fun getJoinedAt ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun getLastSpeakingAt ()Lkotlinx/coroutines/flow/StateFlow;
-	public final fun getPinnedAt ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun getReactions ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun getScreenSharingEnabled ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun getScreenSharingTrack ()Lkotlinx/coroutines/flow/StateFlow;
@@ -355,8 +356,10 @@ public final class io/getstream/video/android/core/ParticipantState {
 	public final fun muteAudio (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public final fun muteScreenshare (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public final fun muteVideo (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public final fun pin (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public final fun setSessionId (Ljava/lang/String;)V
 	public fun toString ()Ljava/lang/String;
+	public final fun unpin (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public final fun updateFromParticipantInfo (Lstream/video/sfu/models/Participant;)V
 }
 
