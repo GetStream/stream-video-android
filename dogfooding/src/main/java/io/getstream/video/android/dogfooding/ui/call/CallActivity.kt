@@ -109,7 +109,6 @@ class CallActivity : ComponentActivity() {
 
     private fun callViewModelFactory(): CallViewModelFactory {
 
-
         return CallViewModelFactory(
             call = call
         )

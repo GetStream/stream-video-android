@@ -136,8 +136,6 @@ internal class StreamVideoImpl internal constructor(
     /** session id is generated client side */
     public val sessionId = UUID.randomUUID().toString()
 
-
-
     private var guestUserJob: Deferred<Unit>? = null
     private lateinit var connectContinuation: Continuation<Result<ConnectedEvent>>
 

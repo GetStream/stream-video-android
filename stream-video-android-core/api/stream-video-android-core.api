@@ -92,8 +92,10 @@ public final class io/getstream/video/android/core/CallState {
 	public final fun getRecording ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun getRemoteParticipants ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun getRingingState ()Lkotlinx/coroutines/flow/StateFlow;
+	public final fun getScope ()Lkotlinx/coroutines/CoroutineScope;
 	public final fun getScreenSharingSession ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun getSettings ()Lkotlinx/coroutines/flow/StateFlow;
+	public final fun getSortedParticipants ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun getStartsAt ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun getTeam ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun getTranscribing ()Lkotlinx/coroutines/flow/StateFlow;
@@ -158,6 +160,8 @@ public final class io/getstream/video/android/core/CameraManager {
 	public final fun getSelectedDevice ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun getStatus ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun listDevices ()Ljava/util/List;
+	public final fun pause ()V
+	public final fun resume ()V
 	public final fun select (Ljava/lang/String;Z)V
 	public static synthetic fun select$default (Lio/getstream/video/android/core/CameraManager;Ljava/lang/String;ZILjava/lang/Object;)V
 	public final fun setEnabled (Z)V
@@ -320,6 +324,8 @@ public final class io/getstream/video/android/core/MicrophoneManager {
 	public final fun getSelectedDevice ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun getStatus ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun listDevices ()Lkotlinx/coroutines/flow/StateFlow;
+	public final fun pause ()V
+	public final fun resume ()V
 	public final fun select (Lio/getstream/video/android/core/audio/AudioDevice;)V
 	public final fun setEnabled (Z)V
 }
@@ -457,6 +463,8 @@ public final class io/getstream/video/android/core/SpeakerManager {
 	public final fun getSelectedDevice ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun getSpeakerPhoneEnabled ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun getVolume ()Lkotlinx/coroutines/flow/StateFlow;
+	public final fun pause ()V
+	public final fun resume ()V
 	public final fun setSpeakerPhone (Z)V
 	public final fun setVolume (I)V
 }
