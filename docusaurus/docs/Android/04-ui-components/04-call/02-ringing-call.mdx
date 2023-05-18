@@ -46,7 +46,7 @@ private fun showCallScreen() {
 
 This is a very basic example, which cancels the call when the user presses the back button. Additionally, you pass in the `CallViewModel`, as explained above, to bind all the state and event handling to our SDK internals.
 
-Alternatively, you could've used the stateless component variant that takes in a `CallType`, a list of `Participant`s and whether the video is enabled instead of the `CallViewModel`. You could get this information through custom logic, but you could also read it from our `ViewModel` and apply transformations before rendering it on the UI.
+Alternatively, you could've used the stateless component variant that takes in a `CallType`, a list of `Participant`s and whether the video is enabled instead of the `CallViewModel`. You could get this information through custom logic, but you could also read it from our `CallViewModel` and apply transformations before rendering it on the UI.
 
 Both components will show an incoming or outgoing call screen in different states depending on the number of participants and their information, such as if they have an avatar.
 
