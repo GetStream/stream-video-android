@@ -26,10 +26,12 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.ParticipantState
@@ -57,7 +59,7 @@ internal fun PortraitScreenSharingVideoRenderer(
     onRender: (View) -> Unit,
 ) {
     val sharingParticipant = session.participant
-    val me = participants.firstOrNull { it.isLocal }
+    val me by call.state.me.collectAsStateWithLifecycle()
 
     Column(
         modifier = modifier.background(VideoTheme.colors.screenSharingBackground)
