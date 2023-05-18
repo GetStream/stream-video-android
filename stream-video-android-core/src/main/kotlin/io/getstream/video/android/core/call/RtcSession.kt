@@ -732,7 +732,7 @@ public class RtcSession internal constructor(
      * Since the viewmodel knows what's actually displayed
      */
     internal fun defaultTracks(): List<TrackSubscriptionDetails> {
-        val sortedParticipants = call.state.sortedParticipants.value
+        val sortedParticipants = call.state.participants.value
         val otherParticipants = sortedParticipants.filter { it.sessionId != sessionId }.take(5)
         val tracks = mutableListOf<TrackSubscriptionDetails>()
         otherParticipants.forEach { participant ->

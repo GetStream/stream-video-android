@@ -187,16 +187,16 @@ public class CallState(private val call: Call, private val user: User) {
     internal val _pinnedParticipants: MutableStateFlow<Map<String, OffsetDateTime>> = MutableStateFlow(emptyMap())
     val pinnedParticipants: StateFlow<Map<String,OffsetDateTime>> = _pinnedParticipants
 
-    public val sortedParticipants = _participants.combine(_pinnedParticipants) { participants, pinned ->
-        participants.values.sortedWith(compareBy(
-            { pinned.containsKey(it.sessionId) },
-            { it.dominantSpeaker.value },
-            { it.screenSharingEnabled.value },
-            { it.lastSpeakingAt.value },
-            { it.videoEnabled.value },
-            { it.joinedAt.value }
-        ))
-    }.asStateFlow(CoroutineScope(context = DispatcherProvider.IO), emptyList())
+//    public val sortedParticipants = _participants.combine(_pinnedParticipants) { participants, pinned ->
+//        participants.values.sortedWith(compareBy(
+//            { pinned.containsKey(it.sessionId) },
+//            { it.dominantSpeaker.value },
+//            { it.screenSharingEnabled.value },
+//            { it.lastSpeakingAt.value },
+//            { it.videoEnabled.value },
+//            { it.joinedAt.value }
+//        ))
+//    }.asStateFlow(CoroutineScope(context = DispatcherProvider.IO), emptyList())
 
     /** Members contains the list of users who are permanently associated with this call. This includes users who are currently not active in the call
      * As an example if you invite "john", "bob" and "jane" to a call and only Jane joins.

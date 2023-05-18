@@ -12,14 +12,13 @@
 
 ### TODO
 
-- [ ] Mock eglBase so tests with the debugger on don't crash (seems related, not entirely sure)
+- [ ] Fine tune the quality on S23 (so it's not at Q)
 - [ ] Only run 1 connection retry flow at once. We should keep on retrying.
 - [ ] Full test coverage for retries
 - [ ] Go through all tests & TODOs and update with latest server changes.
 - [ ] Test the dogfooding app and iterate on things that don't work yet
 - [ ] RED error
 - [ ] Own permissions should be a sealed class
-- [ ] Fine tune the quality on S23
 - [ ] Handle more camera errors. Camera2Session, message: Error: Camera device could not be opened due to a device policy
 - [ ] use standard debug, verbose, info, warning and error debug levels on StreamVideoBuilder
 - [ ] Improve our error classes. Right now there are 4 different formats. 

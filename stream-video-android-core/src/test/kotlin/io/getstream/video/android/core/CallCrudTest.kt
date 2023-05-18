@@ -24,6 +24,7 @@ import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
+import org.webrtc.EglBase
 
 @RunWith(RobolectricTestRunner::class)
 public class CallCrudTest : IntegrationTestBase() {
