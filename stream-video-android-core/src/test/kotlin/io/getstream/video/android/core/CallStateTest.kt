@@ -17,16 +17,15 @@
 package io.getstream.video.android.core
 
 import com.google.common.truth.Truth.assertThat
+import io.getstream.video.android.model.User
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import org.junit.runner.RunWith
-import io.getstream.video.android.model.User
 import org.openapitools.client.models.CallSettingsRequest
 import org.openapitools.client.models.MemberRequest
 import org.openapitools.client.models.ScreensharingSettingsRequest
 import org.robolectric.RobolectricTestRunner
 import org.threeten.bp.Clock
-import org.threeten.bp.LocalDate
 import org.threeten.bp.OffsetDateTime
 import java.util.Date
 
@@ -119,10 +118,8 @@ class CallStateTest : IntegrationTestBase() {
             ParticipantState("3", call, User("3")).apply { _screenSharingEnabled.value = true }
         )
 
-
         val sorted = call.state.sortedParticipants.value.map { it.sessionId }
         assertThat(sorted).isInOrder()
-
     }
 
     @Test

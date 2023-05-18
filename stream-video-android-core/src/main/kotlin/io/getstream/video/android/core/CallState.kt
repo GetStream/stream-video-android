@@ -43,7 +43,6 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.stateIn
 import org.openapitools.client.models.BlockedUserEvent
 import org.openapitools.client.models.CallAcceptedEvent
 import org.openapitools.client.models.CallCreatedEvent
@@ -185,17 +184,19 @@ public class CallState(private val call: Call, private val user: User) {
      *
      */
     internal val _pinnedParticipants: MutableStateFlow<Map<String, OffsetDateTime>> = MutableStateFlow(emptyMap())
-    val pinnedParticipants: StateFlow<Map<String,OffsetDateTime>> = _pinnedParticipants
+    val pinnedParticipants: StateFlow<Map<String, OffsetDateTime>> = _pinnedParticipants
 
     public val sortedParticipants = _participants.combine(_pinnedParticipants) { participants, pinned ->
-        participants.values.sortedWith(compareBy(
-            { pinned.containsKey(it.sessionId) },
-            { it.dominantSpeaker.value },
-            { it.screenSharingEnabled.value },
-            { it.lastSpeakingAt.value },
-            { it.videoEnabled.value },
-            { it.joinedAt.value }
-        ))
+        participants.values.sortedWith(
+            compareBy(
+                { pinned.containsKey(it.sessionId) },
+                { it.dominantSpeaker.value },
+                { it.screenSharingEnabled.value },
+                { it.lastSpeakingAt.value },
+                { it.videoEnabled.value },
+                { it.joinedAt.value }
+            )
+        )
     }.asStateFlow(CoroutineScope(context = DispatcherProvider.IO), emptyList())
 
     /** Members contains the list of users who are permanently associated with this call. This includes users who are currently not active in the call
@@ -296,8 +297,6 @@ public class CallState(private val call: Call, private val user: User) {
     private val userToSessionIdMap = participants.mapState { participants ->
         participants.map { it.user.value.id to it.sessionId }.toMap()
     }
-
-
 
     internal val _hasPermissionMap = mutableMapOf<String, StateFlow<Boolean>>()
 
