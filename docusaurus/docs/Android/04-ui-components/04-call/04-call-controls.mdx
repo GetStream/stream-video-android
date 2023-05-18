@@ -67,7 +67,7 @@ public fun CallControls(
     .., // State and UI
     actions: List<(@Composable () -> Unit)> = buildDefaultCallControlActions(
         callViewModel = callViewModel,
-        onCallAction
+        onCallAction = onCallAction
     ),
     onCallAction: (CallAction) -> Unit
 )
@@ -92,15 +92,15 @@ CallControls(
         {
             ToggleMicrophoneAction(
                 modifier = Modifier.size(60.dp),
-                isCameraEnabled = callViewModel.callDeviceState.isCameraEnabled,
+                isMicrophoneEnabled = callViewModel.callDeviceState.isMicrophoneEnabled,
                 onCallAction = onCallAction
             )
         },
     ),
     onCallAction = { action ->
       when (action) {
-        is ToggleCamera -> // toggle camera
-        is ToggleMicrophone -> toggle microphone
+        is ToggleCamera -> // toggle the camera
+        is ToggleMicrophone -> toggle the microphone
          ...
         else -> callViewModel.onCallAction(action)
       }
@@ -116,9 +116,9 @@ CallControls(
 
 There are a couple of our predefined call control actions:
 
-- `ToggleCameraAction` Used to toggle a camera in a video call.
-- `ToggleMicrophoneAction` Used to toggle a microphone in a video call.
-- `FlipCameraAction` Used to flip a camera in a video call.
+- `ToggleCameraAction`: Used to toggle a camera in a video call.
+- `ToggleMicrophoneAction`: Used to toggle a microphone in a video call.
+- `FlipCameraAction`: Used to flip a camera in a video call.
 - 'LeaveCallAction': Used to leave a call in the call screen.
 - `AcceptCallAction`: Represents accepting a call. You can usually use on in the ringing call screen.
 - `CancelCallAction`: Represents canceling a call. You can usually use on in the ringing call screen.
