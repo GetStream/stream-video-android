@@ -125,8 +125,7 @@ class AudioRoomTest : IntegrationTestBase() {
         Thread.sleep(1000L)
 
         val anonCall = anonClient.call("audio_room", audioRoom.id)
-        val resultJoin = anonCall.join(create=false)
+        val resultJoin = anonCall.join(create = false)
         assertSuccess(resultJoin)
-
     }
 }
