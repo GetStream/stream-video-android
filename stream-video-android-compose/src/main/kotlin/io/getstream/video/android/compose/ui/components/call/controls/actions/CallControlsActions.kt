@@ -23,7 +23,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import io.getstream.video.android.compose.state.ui.call.CallControlAction
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.core.call.state.CallAction
 import io.getstream.video.android.core.call.state.CallDeviceState
@@ -32,7 +31,7 @@ import io.getstream.video.android.core.viewmodel.CallViewModel
 /**
  * Builds the default set of Call Control actions based on the [CallDeviceState].
  *
- * @return [List] of [CallControlAction]s that the user can trigger.
+ * @return [List] of call control actions that the user can trigger.
  */
 @Composable
 public fun buildDefaultCallControlActions(
@@ -52,7 +51,7 @@ public fun buildDefaultCallControlActions(
  * Builds the default set of Call Control actions based on the [callDeviceState].
  *
  * @param callDeviceState Information of whether microphone, speaker and camera are on or off.
- * @return [List] of [CallControlAction]s that the user can trigger.
+ * @return [List] of call control actions that the user can trigger.
  */
 @Composable
 public fun buildDefaultCallControlActions(

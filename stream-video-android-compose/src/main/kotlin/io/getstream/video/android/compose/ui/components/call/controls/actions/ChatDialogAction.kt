@@ -44,7 +44,7 @@ public fun ChatDialogAction(
 ) {
     CallControlActionBackground(
         modifier = modifier,
-        isEnabled = true,
+        isEnabled = enabled,
     ) {
         Icon(
             modifier = Modifier
