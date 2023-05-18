@@ -55,12 +55,16 @@ internal class CallControlsTest : BaseComposeTest() {
         snapshot {
             Column {
                 Row {
-                    ToggleCameraAction(modifier = Modifier.size(60.dp),
+                    ToggleCameraAction(
+                        modifier = Modifier.size(60.dp),
                         isCameraEnabled = true,
-                        onCallAction = {})
-                    ToggleMicrophoneAction(modifier = Modifier.size(60.dp),
+                        onCallAction = {}
+                    )
+                    ToggleMicrophoneAction(
+                        modifier = Modifier.size(60.dp),
                         isMicrophoneEnabled = true,
-                        onCallAction = {})
+                        onCallAction = {}
+                    )
                     FlipCameraAction(modifier = Modifier.size(60.dp), onCallAction = {})
                     ChatDialogAction(modifier = Modifier.size(60.dp), onCallAction = {})
                 }
