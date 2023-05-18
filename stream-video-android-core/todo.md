@@ -12,6 +12,7 @@
 
 ### TODO
 
+- [ ] Pause option on camera & microphone & speaker
 - [ ] Fine tune the quality on S23 (so it's not at Q)
 - [ ] When the phone is locked, we shouldn't be upload video
 - [ ] Background usage causes the camera to freeze and not recover when in foreground
