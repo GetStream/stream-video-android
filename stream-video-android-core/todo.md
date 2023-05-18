@@ -12,8 +12,8 @@
 
 ### TODO
 
-- [ ] Build for firebase app distribution
 - [ ] Fine tune the quality on S23 (so it's not at Q). Upload quality, make it easy to change
+- [ ] permission handling on the intro/preview screen is wrong. it starts out as video enabled
 - [ ] Only run 1 connection retry flow at once. We should keep on retrying.
 - [ ] Full test coverage for retries
 - [ ] Go through all tests & TODOs and update with latest server changes.

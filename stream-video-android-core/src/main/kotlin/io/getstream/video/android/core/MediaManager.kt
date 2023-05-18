@@ -485,8 +485,8 @@ public class CameraManager(
         var targetHeight = videoSettings?.targetResolution?.height ?: 720
         var targetWidth = videoSettings?.targetResolution?.width ?: 1280
 
-        targetHeight = 1908
-        targetWidth = 3392
+//        targetHeight = 1908
+//        targetWidth = 3392
 
         val matchingTarget =
             supportedFormats?.toList()?.sortedBy { kotlin.math.abs(it.height - targetHeight) + kotlin.math.abs(it.width - targetWidth) }
