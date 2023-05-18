@@ -29,11 +29,13 @@
 ### App & Compose
 
 - [ ] Telemetry to firebase/crashlytics (with an opt out, or research alternatives)
+- [ ] Preview components (CallLobbyContent + CallLobbyViewModel)
+- [ ] Improve screensharing (zoomable + fallback)
 - [ ] Reactions don't show up
 - [ ] Chat integration (we need an event from the server though)
 - [ ] PIP
 - [ ] When state._connection.value = RtcConnectionState.Reconnecting we should show a little transparent. “Reconnecting” UI element
-- [ ] Ringing calls (wait for push and updated endpoints from server)
+- [ ] Ringing calls + CallService + foreground services/notifications (wait for push and updated endpoints from server)
 - [X] Screensharing doesn't show up
 
 ### Docs ~4 weeks left
