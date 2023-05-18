@@ -482,8 +482,12 @@ public class CameraManager(
     ): CameraEnumerationAndroid.CaptureFormat? {
         // needs the settings that we're going for
         // sort and get the one closest to 960
-        val targetHeight = videoSettings?.targetResolution?.height ?: 720
-        val targetWidth = videoSettings?.targetResolution?.width ?: 1280
+        var targetHeight = videoSettings?.targetResolution?.height ?: 720
+        var targetWidth = videoSettings?.targetResolution?.width ?: 1280
+
+        targetHeight = 1908
+        targetWidth = 3392
+
         val matchingTarget =
             supportedFormats?.toList()?.sortedBy { kotlin.math.abs(it.height - targetHeight) + kotlin.math.abs(it.width - targetWidth) }
         val selectedFormat = matchingTarget?.first()

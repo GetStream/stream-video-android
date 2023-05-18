@@ -129,14 +129,14 @@ internal class StreamVideoImpl internal constructor(
     override val state = ClientState(this)
 
     internal val scope = CoroutineScope(_scope.coroutineContext + SupervisorJob())
-
+    /** if true we fail fast on errors instead of logging them */
+    var developmentMode = true
     val debugInfo = DebugInfo(this)
 
     /** session id is generated client side */
     public val sessionId = UUID.randomUUID().toString()
 
-    /** if true we fail fast on errors instead of logging them */
-    var developmentMode = true
+
 
     private var guestUserJob: Deferred<Unit>? = null
     private lateinit var connectContinuation: Continuation<Result<ConnectedEvent>>

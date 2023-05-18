@@ -62,6 +62,8 @@ public class CallViewModel(public val call: Call) : ViewModel() {
 
     private val logger by taggedLogger("Call:ViewModel")
 
+
+
     // shortcut to the call settings
     private val settings: StateFlow<CallSettingsResponse?> = call.state.settings
 

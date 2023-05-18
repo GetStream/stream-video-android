@@ -684,7 +684,7 @@ public class RtcSession internal constructor(
             encoding.active = enabledRids?.get(encoding.rid ?: "") ?: false
         }
 
-        logger.i { "marking layers active $enabledRids " }
+        logger.i { "video quality: marking layers active $enabledRids " }
 
         transceiver.sender.parameters.encodings.clear()
         transceiver.sender.parameters.encodings.addAll(encodings)

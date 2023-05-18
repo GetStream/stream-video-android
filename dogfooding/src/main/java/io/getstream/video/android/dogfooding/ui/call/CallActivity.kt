@@ -100,14 +100,29 @@ class CallActivity : ComponentActivity() {
         }
     }
 
-    private fun callViewModelFactory(): CallViewModelFactory {
+    val call by lazy {
         val (type, id) =
             intent.streamCallId(EXTRA_CALL_ID)
                 ?: throw IllegalArgumentException("You must pass correct channel id.")
+        StreamVideo.instance().call(type = type, id = id)
+    }
+
+    private fun callViewModelFactory(): CallViewModelFactory {
+
 
         return CallViewModelFactory(
-            call = StreamVideo.instance().call(type = type, id = id)
+            call = call
         )
+    }
+
+    override fun onPause() {
+        super.onPause()
+        call.camera.pause()
+    }
+
+    override fun onResume() {
+        super.onResume()
+        call.camera.resume()
     }
 
     private fun getPermissionManager(): PermissionManager {
