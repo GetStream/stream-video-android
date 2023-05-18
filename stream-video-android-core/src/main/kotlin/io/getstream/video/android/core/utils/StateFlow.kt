@@ -59,8 +59,8 @@ fun <T, K> StateFlow<T>.mapState(
 
 @JvmSynthetic
 internal fun <T> Flow<T>.asStateFlow(
+    initialValue: T,
     scope: CoroutineScope = CoroutineScope(context = DispatcherProvider.IO),
-    initialValue: T
 ): StateFlow<T> {
     return stateIn(
         scope = scope,
