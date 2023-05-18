@@ -159,6 +159,7 @@ public fun CallContent(
         Scaffold(
             modifier = modifier,
             contentColor = VideoTheme.colors.appBackground,
+            topBar = { },
             bottomBar = {
                 if (orientation != ORIENTATION_LANDSCAPE) {
                     callControlsContent.invoke(call)

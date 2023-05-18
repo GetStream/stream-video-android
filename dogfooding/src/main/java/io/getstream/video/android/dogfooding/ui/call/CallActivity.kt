@@ -23,9 +23,16 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.size
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.call.CallContainer
+import io.getstream.video.android.compose.ui.components.call.controls.CallControls
+import io.getstream.video.android.compose.ui.components.call.controls.actions.FlipCameraAction
+import io.getstream.video.android.compose.ui.components.call.controls.actions.LeaveCallAction
+import io.getstream.video.android.compose.ui.components.call.controls.actions.ToggleCameraAction
+import io.getstream.video.android.compose.ui.components.call.controls.actions.ToggleMicrophoneAction
 import io.getstream.video.android.core.StreamVideo
 import io.getstream.video.android.core.call.state.ToggleCamera
 import io.getstream.video.android.core.call.state.ToggleMicrophone
@@ -54,6 +61,40 @@ class CallActivity : ComponentActivity() {
                     callViewModel = vm,
                     callType = CallType.VIDEO,
                     onBackPressed = { finish() },
+                    callControlsContent = {
+                        CallControls(
+                            callViewModel = vm,
+                            actions = listOf(
+                                {
+                                    ToggleCameraAction(
+                                        modifier = Modifier.size(52.dp),
+                                        isCameraEnabled = vm.callDeviceState.value.isCameraEnabled,
+                                        onCallAction = vm::onCallAction
+                                    )
+                                },
+                                {
+                                    ToggleMicrophoneAction(
+                                        modifier = Modifier.size(52.dp),
+                                        isMicrophoneEnabled = vm.callDeviceState.value.isMicrophoneEnabled,
+                                        onCallAction = vm::onCallAction
+                                    )
+                                },
+                                {
+                                    FlipCameraAction(
+                                        modifier = Modifier.size(52.dp),
+                                        onCallAction = vm::onCallAction
+                                    )
+                                },
+                                {
+                                    LeaveCallAction(
+                                        modifier = Modifier.size(52.dp),
+                                        onCallAction = vm::onCallAction
+                                    )
+                                },
+                            ),
+                            onCallAction = vm::onCallAction
+                        )
+                    }
                 )
             }
         }
