@@ -16,7 +16,11 @@
 
 package io.getstream.video.android.compose
 
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.size
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
 import app.cash.paparazzi.DeviceConfig
 import app.cash.paparazzi.Paparazzi
 import io.getstream.video.android.compose.base.BaseComposeTest
@@ -42,24 +46,29 @@ internal class CallControlsTest : BaseComposeTest() {
     @Test
     fun `snapshot CallControls composable`() {
         snapshotWithDarkMode {
-            CallControls(
-                callDeviceState = CallDeviceState(),
-                onCallAction = {}
-            )
+            CallControls(callDeviceState = CallDeviceState(), onCallAction = {})
         }
     }
 
     @Test
     fun `snapshot CallControls Actions composable`() {
         snapshot {
-            Row {
-                ToggleCameraAction(isCameraEnabled = true, onCallAction = {})
-                ToggleMicrophoneAction(isMicrophoneEnabled = true, onCallAction = {})
-                FlipCameraAction(onCallAction = {})
-                ChatDialogAction(onCallAction = {})
-                LeaveCallAction(onCallAction = {})
-                AcceptCallAction(onCallAction = {})
-                CancelCallAction(onCallAction = {})
+            Column {
+                Row {
+                    ToggleCameraAction(modifier = Modifier.size(60.dp),
+                        isCameraEnabled = true,
+                        onCallAction = {})
+                    ToggleMicrophoneAction(modifier = Modifier.size(60.dp),
+                        isMicrophoneEnabled = true,
+                        onCallAction = {})
+                    FlipCameraAction(modifier = Modifier.size(60.dp), onCallAction = {})
+                    ChatDialogAction(modifier = Modifier.size(60.dp), onCallAction = {})
+                }
+                Row {
+                    LeaveCallAction(modifier = Modifier.size(60.dp), onCallAction = {})
+                    AcceptCallAction(modifier = Modifier.size(60.dp), onCallAction = {})
+                    CancelCallAction(modifier = Modifier.size(60.dp), onCallAction = {})
+                }
             }
         }
     }
