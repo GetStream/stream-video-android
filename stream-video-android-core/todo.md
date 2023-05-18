@@ -13,6 +13,9 @@
 ### TODO
 
 - [ ] Fine tune the quality on S23 (so it's not at Q)
+- [ ] When the phone is locked, we shouldn't be upload video
+- [ ] Background usage causes the camera to freeze and not recover when in foreground
+- [ ] When the app is in background (and PIP is disabled), what should the behaviour be?
 - [ ] Only run 1 connection retry flow at once. We should keep on retrying.
 - [ ] Full test coverage for retries
 - [ ] Go through all tests & TODOs and update with latest server changes.
