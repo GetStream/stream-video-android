@@ -69,7 +69,7 @@ public fun IncomingCallContent(
         ) -> Unit
     )? = null,
     callControlsContent: (@Composable BoxScope.() -> Unit)? = null,
-    onBackPressed: () -> Unit,
+    onBackPressed: () -> Unit = {},
     onCallAction: (CallAction) -> Unit = callViewModel::onCallAction,
 ) {
     val callDeviceState: CallDeviceState by callViewModel.callDeviceState.collectAsStateWithLifecycle()
@@ -116,7 +116,7 @@ public fun IncomingCallContent(
         ) -> Unit
     )? = null,
     callControlsContent: (@Composable BoxScope.() -> Unit)? = null,
-    onBackPressed: () -> Unit,
+    onBackPressed: () -> Unit = {},
     onCallAction: (CallAction) -> Unit = {},
 ) {
     val participants: List<ParticipantState> by call.state.participants.collectAsStateWithLifecycle()
@@ -150,7 +150,7 @@ public fun IncomingCallContent(
  * @param onCallAction Handler used when the user interacts with Call UI.
  */
 @Composable
-internal fun IncomingCallContent(
+public fun IncomingCallContent(
     call: Call,
     callType: CallType,
     participants: List<ParticipantState>,
@@ -164,8 +164,8 @@ internal fun IncomingCallContent(
         ) -> Unit
     )? = null,
     callControlsContent: (@Composable BoxScope.() -> Unit)? = null,
-    onBackPressed: () -> Unit,
-    onCallAction: (CallAction) -> Unit,
+    onBackPressed: () -> Unit = {},
+    onCallAction: (CallAction) -> Unit = {},
 ) {
     CallBackground(
         modifier = modifier, participants = participants, callType = callType, isIncoming = true

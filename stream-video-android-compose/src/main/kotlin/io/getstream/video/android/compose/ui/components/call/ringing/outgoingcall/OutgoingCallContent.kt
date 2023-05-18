@@ -42,7 +42,7 @@ import io.getstream.video.android.mock.mockCall
 import io.getstream.video.android.mock.mockParticipantList
 
 /**
- * Represents the Outgoing Call state and UI, when the user receives a call from other people.
+ * Represents the Outgoing Call state and UI, when the user is calling other people.
  *
  * @param callViewModel The [CallViewModel] used to provide state and various handlers in the call.
  * @param callType Represent the call type is a video or an audio.
@@ -67,7 +67,7 @@ public fun OutgoingCallContent(
         ) -> Unit
     )? = null,
     callControlsContent: (@Composable BoxScope.() -> Unit)? = null,
-    onBackPressed: () -> Unit,
+    onBackPressed: () -> Unit = {},
     onCallAction: (CallAction) -> Unit = callViewModel::onCallAction,
 ) {
     val callDeviceState: CallDeviceState by callViewModel.callDeviceState.collectAsStateWithLifecycle()
@@ -87,7 +87,7 @@ public fun OutgoingCallContent(
 }
 
 /**
- * Represents the Outgoing Call state and UI, when the user receives a call from other people.
+ * Represents the Outgoing Call state and UI, when the user is calling other people.
  *
  * @param call The call contains states and will be rendered with participants.
  * @param callType Represent the call type is a video or an audio.
@@ -113,7 +113,7 @@ public fun OutgoingCallContent(
         ) -> Unit
     )? = null,
     callControlsContent: (@Composable BoxScope.() -> Unit)? = null,
-    onBackPressed: () -> Unit,
+    onBackPressed: () -> Unit = {},
     onCallAction: (CallAction) -> Unit = {},
 ) {
     val participants: List<ParticipantState> by call.state.participants.collectAsStateWithLifecycle()
@@ -134,7 +134,7 @@ public fun OutgoingCallContent(
 }
 
 /**
- * Represents the Outgoing Call state and UI, when the user receives a call from other people.
+ * Represents the Outgoing Call state and UI, when the user is calling other people.
  *
  * @param call The call contains states and will be rendered with participants.
  * @param callType Represent the call type is a video or an audio.
@@ -148,7 +148,7 @@ public fun OutgoingCallContent(
  * @param onCallAction Handler used when the user interacts with Call UI.
  */
 @Composable
-internal fun OutgoingCallContent(
+public fun OutgoingCallContent(
     call: Call,
     callType: CallType,
     participants: List<ParticipantState>,
@@ -162,8 +162,8 @@ internal fun OutgoingCallContent(
         ) -> Unit
     )? = null,
     callControlsContent: (@Composable BoxScope.() -> Unit)? = null,
-    onBackPressed: () -> Unit,
-    onCallAction: (CallAction) -> Unit,
+    onBackPressed: () -> Unit = {},
+    onCallAction: (CallAction) -> Unit = {},
 ) {
     CallBackground(
         modifier = modifier,
