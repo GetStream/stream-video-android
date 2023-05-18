@@ -35,7 +35,6 @@ import io.getstream.video.android.core.call.state.CallDeviceState
  * browse other types of settings, leave the call, or implement something custom.
  *
  * @param callDeviceState The state of the media devices for the current user.
- * @param isScreenSharing If there is a screen sharing session active.
  * @param modifier Modifier for styling.
  * @param actions Actions to show to the user with different controls.
  * @param onCallAction Handler when the user triggers an action.
