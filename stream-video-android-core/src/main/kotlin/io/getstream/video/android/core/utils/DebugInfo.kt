@@ -64,16 +64,14 @@ internal class DebugInfo(val client: StreamVideoImpl) {
     // android version
     val version = android.os.Build.VERSION.SDK_INT
 
-
-
     // how many times the network dropped
 
     // how often the sockets reconnected
 
     // supported codecs
     // resolution
-    val resolution by lazy {  }
-    val availableResolutions by lazy {  }
+    val resolution by lazy { }
+    val availableResolutions by lazy { }
 
     init {
         if (client.developmentMode) {

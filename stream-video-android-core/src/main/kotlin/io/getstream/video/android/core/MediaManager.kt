@@ -158,7 +158,7 @@ class MicrophoneManager(val mediaManager: MediaManagerImpl) {
     private val _devices = MutableStateFlow<List<AudioDevice>>(emptyList())
     val devices: StateFlow<List<AudioDevice>> = _devices
 
-    internal var priorStatus : DeviceStatus? = null
+    internal var priorStatus: DeviceStatus? = null
 
     /** Enable the audio, the rtc engine will automatically inform the SFU */
     fun enable() {
