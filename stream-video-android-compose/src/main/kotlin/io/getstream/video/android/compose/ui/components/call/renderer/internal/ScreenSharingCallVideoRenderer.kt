@@ -19,7 +19,6 @@ package io.getstream.video.android.compose.ui.components.call.renderer.internal
 import android.content.res.Configuration.ORIENTATION_PORTRAIT
 import android.view.View
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalConfiguration
