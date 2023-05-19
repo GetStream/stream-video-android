@@ -21,6 +21,7 @@ import io.getstream.log.taggedLogger
 import kotlinx.coroutines.test.runTest
 import org.junit.Ignore
 import org.junit.Test
+import org.webrtc.PeerConnection.IceConnectionState
 import org.webrtc.PeerConnection.PeerConnectionState
 
 /**
@@ -57,11 +58,12 @@ class ReconnectTest : IntegrationTestBase(connectCoordinatorWS = false) {
         // verify we accurately detect the peer connection state
         val result = call.join()
         assertSuccess(result)
+        Thread.sleep(5000L)
         val subState = call.session?.subscriber?.state?.value
         val pubState = call.session?.publisher?.state?.value
 
-        assertThat(pubState).isEqualTo(PeerConnectionState.CONNECTED)
-        assertThat(subState).isEqualTo(PeerConnectionState.CONNECTED)
+        assertThat(pubState).isEqualTo(IceConnectionState.COMPLETED)
+        assertThat(subState).isEqualTo(IceConnectionState.COMPLETED)
     }
 
     @Test
