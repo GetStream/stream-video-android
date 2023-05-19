@@ -68,13 +68,13 @@ public fun CallAppBar(
     onBackPressed: () -> Unit = {},
     onCallAction: (CallAction) -> Unit = {},
     title: String = stringResource(id = R.string.stream_video_default_app_bar_title),
-    leadingContent: (@Composable () -> Unit)? = {
+    leadingContent: (@Composable RowScope.() -> Unit)? = {
         DefaultCallAppBarLeadingContent(onBackPressed)
     },
     centerContent: (@Composable (RowScope.() -> Unit))? = {
         DefaultCallAppBarCenterContent(call, title)
     },
-    trailingContent: (@Composable () -> Unit)? = {
+    trailingContent: (@Composable RowScope.() -> Unit)? = {
         DefaultCallAppBarTrailingContent(
             call = call,
             onCallAction = onCallAction
@@ -114,11 +114,11 @@ public fun CallAppBar(
             ),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        leadingContent?.invoke()
+        leadingContent?.invoke(this)
 
         centerContent?.invoke(this)
 
-        trailingContent?.invoke()
+        trailingContent?.invoke(this)
     }
 }
 
