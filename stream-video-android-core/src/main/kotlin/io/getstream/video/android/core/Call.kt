@@ -128,6 +128,17 @@ public class CallHealthMonitor(val call: Call, val callScope: CoroutineScope) {
         }
     }
 
+    fun unhealthyPeer() {
+        scope.launch {
+            reconnect()
+        }
+    }
+
+    fun healthyPeer() {
+        call.state._connection.value = RtcConnectionState.Connected
+        reconnectionAttempts = 0
+    }
+
     fun monitorPeerConnection() {
         val session = call.session
         scope.launch {
@@ -137,12 +148,9 @@ public class CallHealthMonitor(val call: Call, val callScope: CoroutineScope) {
                 it.subscriber?.state?.collect {
                     logger.w { "ice connection state changed to $it" }
                     if (it in badStates) {
-                        scope.launch {
-                            reconnect()
-                        }
+                        unhealthyPeer()
                     } else if (it in goodStates) {
-                        call.state._connection.value = RtcConnectionState.Connected
-                        reconnectionAttempts = 0
+                        healthyPeer()
                     }
                 }
             }

@@ -83,6 +83,15 @@ class ReconnectTest : IntegrationTestBase(connectCoordinatorWS = false) {
 
     @Test
     fun peerConnectionBad() = runTest {
+        // join a call
+        call.join()
+        // disconnect a peer connection
+        call.session?.subscriber?.connection?.dispose()
+        assertThat(call.state.connection.value).isEqualTo(RtcConnectionState.Reconnecting)
+        // if we wait a bit we should recover
+        Thread.sleep(2000L)
+        assertThat(call.state.connection.value).isEqualTo(RtcConnectionState.Connected)
+
     }
 
 
