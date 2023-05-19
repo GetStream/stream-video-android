@@ -23,8 +23,8 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalConfiguration
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.getstream.video.android.core.Call
-import io.getstream.video.android.core.ParticipantState
 import io.getstream.video.android.core.model.ScreenSharingSession
 
 /**
@@ -34,7 +34,6 @@ import io.getstream.video.android.core.model.ScreenSharingSession
  *
  * @param call The call that contains all the participants state and tracks.
  * @param session The screen sharing session which is active.
- * @param participants List of participants currently in the call.
  * @param modifier Modifier for styling.
  * @param onRender Handler when each of the Video views render their first frame.
  */
@@ -42,13 +41,13 @@ import io.getstream.video.android.core.model.ScreenSharingSession
 internal fun ScreenSharingCallVideoRenderer(
     call: Call,
     session: ScreenSharingSession,
-    participants: List<ParticipantState>,
     modifier: Modifier = Modifier,
     onRender: (View) -> Unit = {},
 ) {
     val configuration = LocalConfiguration.current
     val orientation = configuration.orientation
     val screenSharingSession by call.state.screenSharingSession.collectAsState(initial = null)
+    val participants by call.state.participants.collectAsStateWithLifecycle()
 
     if (orientation == ORIENTATION_PORTRAIT) {
         PortraitScreenSharingVideoRenderer(

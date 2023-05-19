@@ -66,13 +66,10 @@ public fun CallVideoRenderer(
             onRender = onRender,
         )
     } else {
-        val participants by call.state.participants.collectAsStateWithLifecycle()
-
         ScreenSharingCallVideoRenderer(
             call = call,
             modifier = modifier,
             session = screenSharing,
-            participants = participants,
             onRender = onRender,
         )
     }
