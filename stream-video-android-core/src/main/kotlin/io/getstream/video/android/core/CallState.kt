@@ -99,6 +99,9 @@ public sealed interface RtcConnectionState {
      */
     public data class Joined(val session: RtcSession) : RtcConnectionState
 
+    // TODO: do we need a connected state here?
+    public object Connected : RtcConnectionState // connected to RTC, able to receive and send video
+
     /**
      * Reconnecting is true whenever Rtc isn't available and trying to recover
      * If the subscriber peer connection breaks we'll reconnect
@@ -131,24 +134,6 @@ public class CallState(private val call: Call, private val user: User) {
 
     public val isReconnecting: StateFlow<Boolean> = _connection.mapState {
         it is RtcConnectionState.Reconnecting
-    }
-
-    private val networkStateListener = object : NetworkStateProvider.NetworkStateListener {
-        override fun onConnected() {
-            // the peer connection will pick this up automatically
-            // maybe we need to speed it up, but lets evaluate and see if its needed
-        }
-
-        override fun onDisconnected() {
-            if (_connection.value is RtcConnectionState.Joined) {
-                _connection.value = RtcConnectionState.Reconnecting
-            }
-        }
-    }
-
-    init {
-        val network = call.clientImpl.connectionModule.networkStateProvider
-        network.subscribe(networkStateListener)
     }
 
     private val _participants: MutableStateFlow<SortedMap<String, ParticipantState>> =

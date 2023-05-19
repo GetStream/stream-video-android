@@ -16,10 +16,13 @@
 
 package io.getstream.video.android.core
 
+import com.google.common.truth.Truth.assertThat
 import io.getstream.log.taggedLogger
 import kotlinx.coroutines.test.runTest
 import org.junit.Ignore
 import org.junit.Test
+import org.webrtc.PeerConnection.IceConnectionState
+import org.webrtc.PeerConnection.PeerConnectionState
 
 /**
  * Connection state shows if we've established a connection with the SFU
@@ -50,11 +53,45 @@ class ReconnectTest : IntegrationTestBase(connectCoordinatorWS = false) {
 
     private val logger by taggedLogger("Test:AndroidDeviceTest")
 
-    /**
-     * If the join flow encounters an error it should retry
-     */
     @Test
-    fun retryJoin() = runTest {
+    fun peerConnectionState() = runTest {
+        // verify we accurately detect the peer connection state
+        val result = call.join()
+        assertSuccess(result)
+        Thread.sleep(5000L)
+        val subState = call.session?.subscriber?.state?.value
+        val pubState = call.session?.publisher?.state?.value
+
+        assertThat(pubState).isEqualTo(IceConnectionState.COMPLETED)
+        assertThat(subState).isEqualTo(IceConnectionState.COMPLETED)
+    }
+
+    @Test
+    fun networkDown() = runTest {
+        // join a call
+        call.join()
+        // disconnect the network
+        call.monitor.networkStateListener.onDisconnected()
+        // verify that the connection state is reconnecting
+        assertThat(call.state.connection.value).isEqualTo(RtcConnectionState.Reconnecting)
+        // go online and verify we're reconnected
+        call.monitor.networkStateListener.onConnected()
+        Thread.sleep(2000L)
+        assertThat(call.state.connection.value).isInstanceOf(RtcConnectionState.Joined::class.java)
+
+    }
+
+    @Test
+    fun peerConnectionBad() = runTest {
+        // join a call
+        call.join()
+        // disconnect a peer connection
+        call.session?.subscriber?.connection?.dispose()
+        assertThat(call.state.connection.value).isEqualTo(RtcConnectionState.Reconnecting)
+        // if we wait a bit we should recover
+        Thread.sleep(2000L)
+        assertThat(call.state.connection.value).isEqualTo(RtcConnectionState.Connected)
+
     }
 
     /**
