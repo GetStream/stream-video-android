@@ -133,24 +133,6 @@ public class CallState(private val call: Call, private val user: User) {
         it is RtcConnectionState.Reconnecting
     }
 
-    private val networkStateListener = object : NetworkStateProvider.NetworkStateListener {
-        override fun onConnected() {
-            // the peer connection will pick this up automatically
-            // maybe we need to speed it up, but lets evaluate and see if its needed
-        }
-
-        override fun onDisconnected() {
-            if (_connection.value is RtcConnectionState.Joined) {
-                _connection.value = RtcConnectionState.Reconnecting
-            }
-        }
-    }
-
-    init {
-        val network = call.clientImpl.connectionModule.networkStateProvider
-        network.subscribe(networkStateListener)
-    }
-
     private val _participants: MutableStateFlow<SortedMap<String, ParticipantState>> =
         MutableStateFlow(emptyMap<String, ParticipantState>().toSortedMap())
 

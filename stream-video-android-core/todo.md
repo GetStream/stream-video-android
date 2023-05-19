@@ -13,23 +13,23 @@
 ### TODO
 
 - [ ] Fine tune the quality on S23 (so it's not at Q). Upload quality, make it easy to change
-- [ ] permission handling on the intro/preview screen is wrong. it starts out as video enabled
 - [ ] Only run 1 connection retry flow at once. We should keep on retrying.
+- [ ] Add a timeout for waiting on the socket authentication events
+- [ ] permission handling on the intro/preview screen is wrong. it starts out as video enabled
 - [ ] Full test coverage for retries
 - [ ] Go through all tests & TODOs and update with latest server changes.
-- [X] Pause option on camera & microphone & speaker
-- [ ] When the phone is locked, we shouldn't be upload video
-- [ ] Background usage causes the camera to freeze and not recover when in foreground
-- [ ] When the app is in background (and PIP is disabled), what should the behaviour be?
 - [ ] Test the dogfooding app and iterate on things that don't work yet
 - [ ] RED error
 - [ ] Own permissions should be a sealed class
-- [ ] Handle more camera errors. Camera2Session, message: Error: Camera device could not be opened due to a device policy
+- [ ] Use the right date time class everywhere
 - [ ] use standard debug, verbose, info, warning and error debug levels on StreamVideoBuilder
 - [ ] Improve our error classes. Right now there are 4 different formats. 
-- [ ] Add a timeout for waiting on the socket authentication events
 - [X] Participant sorting rules. See Call sortedParticipants
 - [X] Pinning of participants. You pin/unpin and it sets pinnedAt and sorting takes it into account
+- [X] Pause option on camera & microphone & speaker
+- [X] When the phone is locked, we shouldn't be upload video
+- [X] Background usage causes the camera to freeze and not recover when in foreground
+- [X] When the app is in background (and PIP is disabled), what should the behaviour be?
 
 ### App & Compose
 
