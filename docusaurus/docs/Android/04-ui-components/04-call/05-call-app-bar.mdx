@@ -61,13 +61,13 @@ public fun CallAppBar(
     call: Call,
     modifier: Modifier = Modifier,
     title: String = stringResource(id = R.string.default_app_bar_title),
-    leadingContent: @Composable () -> Unit = {
+    leadingContent: (@Composable RowScope.() -> Unit)? = {
         DefaultCallAppBarLeadingContent(onBackPressed)
     },
-    centerContent: @Composable (RowScope.() -> Unit) = {
+    centerContent: (@Composable (RowScope.() -> Unit))? = {
         DefaultCallAppBarCenterContent(call, title)
     },
-    trailingContent: @Composable () -> Unit = {
+    trailingContent: (@Composable RowScope.() -> Unit)? = {
         DefaultCallAppBarTrailingContent(
             call = call,
             onCallAction = onCallAction
