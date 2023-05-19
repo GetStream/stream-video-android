@@ -94,14 +94,6 @@ class ReconnectTest : IntegrationTestBase(connectCoordinatorWS = false) {
 
     }
 
-
-    /**
-     * If the join flow encounters an error it should retry
-     */
-    @Test
-    fun retryJoin() = runTest {
-    }
-
     /**
      * If the peer connection breaks we should retry
      */
