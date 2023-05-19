@@ -102,6 +102,7 @@ public final class io/getstream/video/android/core/CallState {
 	public final fun getUpdatedAt ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun handleEvent (Lorg/openapitools/client/models/VideoEvent;)V
 	public final fun hasPermission (Ljava/lang/String;)Lkotlinx/coroutines/flow/StateFlow;
+	public final fun isReconnecting ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun pin (Ljava/lang/String;)V
 	public final fun unpin (Ljava/lang/String;)V
 	public final fun updateFromResponse (Lorg/openapitools/client/models/CallResponse;)V
