@@ -127,7 +127,11 @@ public class CallState(private val call: Call, private val user: User) {
     private val logger by taggedLogger("CallState")
 
     internal val _connection = MutableStateFlow<RtcConnectionState>(RtcConnectionState.PreJoin)
-    val connection: StateFlow<RtcConnectionState> = _connection
+    public val connection: StateFlow<RtcConnectionState> = _connection
+
+    public val isReconnecting: StateFlow<Boolean> = _connection.mapState {
+        it is RtcConnectionState.Reconnecting
+    }
 
     private val networkStateListener = object : NetworkStateProvider.NetworkStateListener {
         override fun onConnected() {
@@ -141,6 +145,7 @@ public class CallState(private val call: Call, private val user: User) {
             }
         }
     }
+
     init {
         val network = call.clientImpl.connectionModule.networkStateProvider
         network.subscribe(networkStateListener)
@@ -184,23 +189,25 @@ public class CallState(private val call: Call, private val user: User) {
      * * audio only participants by when they joined
      *
      */
-    internal val _pinnedParticipants: MutableStateFlow<Map<String, OffsetDateTime>> = MutableStateFlow(emptyMap())
+    internal val _pinnedParticipants: MutableStateFlow<Map<String, OffsetDateTime>> =
+        MutableStateFlow(emptyMap())
     val pinnedParticipants: StateFlow<Map<String, OffsetDateTime>> = _pinnedParticipants
 
     val scope = CoroutineScope(context = DispatcherProvider.IO)
 
-    public val sortedParticipants = _participants.combine(_pinnedParticipants) { participants, pinned ->
-        participants.values.sortedWith(
-            compareBy(
-                { pinned.containsKey(it.sessionId) },
-                { it.dominantSpeaker.value },
-                { it.screenSharingEnabled.value },
-                { it.lastSpeakingAt.value },
-                { it.videoEnabled.value },
-                { it.joinedAt.value }
+    public val sortedParticipants =
+        _participants.combine(_pinnedParticipants) { participants, pinned ->
+            participants.values.sortedWith(
+                compareBy(
+                    { pinned.containsKey(it.sessionId) },
+                    { it.dominantSpeaker.value },
+                    { it.screenSharingEnabled.value },
+                    { it.lastSpeakingAt.value },
+                    { it.videoEnabled.value },
+                    { it.joinedAt.value }
+                )
             )
-        )
-    }.stateIn(scope, SharingStarted.WhileSubscribed(), emptyList())
+        }.stateIn(scope, SharingStarted.WhileSubscribed(), emptyList())
 
     /** Members contains the list of users who are permanently associated with this call. This includes users who are currently not active in the call
      * As an example if you invite "john", "bob" and "jane" to a call and only Jane joins.

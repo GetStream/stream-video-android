@@ -72,7 +72,7 @@ public fun CallAppBar(
         DefaultCallAppBarLeadingContent(onBackPressed)
     },
     centerContent: (@Composable (RowScope.() -> Unit))? = {
-        DefaultCallAppBarCenterContent(title)
+        DefaultCallAppBarCenterContent(call, title)
     },
     trailingContent: (@Composable () -> Unit)? = {
         DefaultCallAppBarTrailingContent(
@@ -148,7 +148,10 @@ internal fun DefaultCallAppBarLeadingContent(
  * Default center slot, representing the call title.
  */
 @Composable
-internal fun RowScope.DefaultCallAppBarCenterContent(title: String) {
+internal fun RowScope.DefaultCallAppBarCenterContent(call: Call, title: String) {
+
+    val isReconnecting by call.state.isReconnecting.collectAsStateWithLifecycle()
+
     Text(
         modifier = Modifier
             .weight(1f)
@@ -156,7 +159,11 @@ internal fun RowScope.DefaultCallAppBarCenterContent(title: String) {
                 start = VideoTheme.dimens.callAppBarCenterContentSpacingStart,
                 end = VideoTheme.dimens.callAppBarCenterContentSpacingEnd
             ),
-        text = title,
+        text = if (isReconnecting) {
+            stringResource(id = R.string.stream_video_call_reconnecting)
+        } else {
+            title
+        },
         fontSize = VideoTheme.dimens.topAppbarTextSize,
         color = VideoTheme.colors.callDescription,
         maxLines = 1,
