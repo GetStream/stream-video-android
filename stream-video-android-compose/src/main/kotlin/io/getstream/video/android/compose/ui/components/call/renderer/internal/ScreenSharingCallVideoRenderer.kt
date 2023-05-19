@@ -46,7 +46,7 @@ internal fun ScreenSharingCallVideoRenderer(
 ) {
     val configuration = LocalConfiguration.current
     val orientation = configuration.orientation
-    val screenSharingSession by call.state.screenSharingSession.collectAsState(initial = null)
+    val screenSharingSession by call.state.screenSharingSession.collectAsStateWithLifecycle()
     val participants by call.state.participants.collectAsStateWithLifecycle()
 
     if (orientation == ORIENTATION_PORTRAIT) {
