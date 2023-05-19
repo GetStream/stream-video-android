@@ -12,18 +12,18 @@
 
 ### TODO
 
+- [ ] Full test coverage for retries + some more logging
+- [ ] Own permissions should be a sealed class
+- [ ] Use the right date time class everywhere
 - [ ] Fine tune the quality on S23 (so it's not at Q). Upload quality, make it easy to change
-- [ ] Only run 1 connection retry flow at once. We should keep on retrying.
 - [ ] Add a timeout for waiting on the socket authentication events
 - [ ] permission handling on the intro/preview screen is wrong. it starts out as video enabled
-- [ ] Full test coverage for retries
 - [ ] Go through all tests & TODOs and update with latest server changes.
 - [ ] Test the dogfooding app and iterate on things that don't work yet
 - [ ] RED error
-- [ ] Own permissions should be a sealed class
-- [ ] Use the right date time class everywhere
 - [ ] use standard debug, verbose, info, warning and error debug levels on StreamVideoBuilder
 - [ ] Improve our error classes. Right now there are 4 different formats. 
+- [X] Only run 1 connection retry flow at once. We should keep on retrying.
 - [X] Participant sorting rules. See Call sortedParticipants
 - [X] Pinning of participants. You pin/unpin and it sets pinnedAt and sorting takes it into account
 - [X] Pause option on camera & microphone & speaker

@@ -16,10 +16,12 @@
 
 package io.getstream.video.android.core
 
+import com.google.common.truth.Truth.assertThat
 import io.getstream.log.taggedLogger
 import kotlinx.coroutines.test.runTest
 import org.junit.Ignore
 import org.junit.Test
+import org.webrtc.PeerConnection.PeerConnectionState
 
 /**
  * Connection state shows if we've established a connection with the SFU
@@ -49,6 +51,38 @@ import org.junit.Test
 class ReconnectTest : IntegrationTestBase(connectCoordinatorWS = false) {
 
     private val logger by taggedLogger("Test:AndroidDeviceTest")
+
+    @Test
+    fun peerConnectionState() = runTest {
+        // verify we accurately detect the peer connection state
+        val result = call.join()
+        assertSuccess(result)
+        val subState = call.session?.subscriber?.state?.value
+        val pubState = call.session?.publisher?.state?.value
+
+        assertThat(pubState).isEqualTo(PeerConnectionState.CONNECTED)
+        assertThat(subState).isEqualTo(PeerConnectionState.CONNECTED)
+    }
+
+    @Test
+    fun networkDown() = runTest {
+        // join a call
+        call.join()
+        // disconnect the network
+        call.monitor.networkStateListener.onDisconnected()
+        // verify that the connection state is reconnecting
+        assertThat(call.state.connection.value).isEqualTo(RtcConnectionState.Reconnecting)
+        // go online and verify we're reconnected
+        call.monitor.networkStateListener.onConnected()
+        Thread.sleep(2000L)
+        assertThat(call.state.connection.value).isInstanceOf(RtcConnectionState.Joined::class.java)
+
+    }
+
+    @Test
+    fun peerConnectionBad() = runTest {
+    }
+
 
     /**
      * If the join flow encounters an error it should retry

@@ -384,6 +384,8 @@ public class StreamPeerConnection(
      *
      * @param newState The new state of the [PeerConnection].
      */
+
+    // TODO: maybe better to monitor onConnectionChange for the state
     override fun onIceConnectionChange(newState: PeerConnection.IceConnectionState?) {
         logger.i { "[onIceConnectionChange] #sfu; #$typeTag; newState: $newState" }
         state.value = newState

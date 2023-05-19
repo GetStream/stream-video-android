@@ -99,6 +99,9 @@ public sealed interface RtcConnectionState {
      */
     public data class Joined(val session: RtcSession) : RtcConnectionState
 
+    // TODO: do we need a connected state here?
+    public object Connected : RtcConnectionState // connected to RTC, able to receive and send video
+
     /**
      * Reconnecting is true whenever Rtc isn't available and trying to recover
      * If the subscriber peer connection breaks we'll reconnect

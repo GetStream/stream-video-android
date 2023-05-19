@@ -71,7 +71,6 @@ import stream.video.sfu.models.VideoDimension
  */
 public class CallHealthMonitor(val call: Call, val callScope: CoroutineScope) {
     private val logger by taggedLogger("Call:HealthMonitor")
-    // TODO: add more logging
 
     private val network by lazy {call.clientImpl.connectionModule.networkStateProvider}
 
@@ -94,9 +93,9 @@ public class CallHealthMonitor(val call: Call, val callScope: CoroutineScope) {
 
     private suspend fun reconnect() {
         if (reconnectInProgress)  return
-
         reconnectInProgress = true
         reconnectionAttempts++
+        logger.i { "reconnect, attempt $reconnectionAttempts" }
 
         // don't hammer the server
         if (reconnectionAttempts > 1) delay(400L)
@@ -113,14 +112,16 @@ public class CallHealthMonitor(val call: Call, val callScope: CoroutineScope) {
 
     }
 
-    private val networkStateListener = object : NetworkStateProvider.NetworkStateListener {
+    internal val networkStateListener = object : NetworkStateProvider.NetworkStateListener {
         override fun onConnected() {
+            logger.i { "network connected, attempting to reconnect" }
             scope.launch {
                 reconnect()
             }
         }
 
         override fun onDisconnected() {
+            logger.i { "network disconnected, marking the connection as reconnecting" }
             if (call.state._connection.value is RtcConnectionState.Joined) {
                 call.state._connection.value = RtcConnectionState.Reconnecting
             }
@@ -140,6 +141,7 @@ public class CallHealthMonitor(val call: Call, val callScope: CoroutineScope) {
                             reconnect()
                         }
                     } else if (it in goodStates) {
+                        call.state._connection.value = RtcConnectionState.Connected
                         reconnectionAttempts = 0
                     }
                 }
@@ -153,6 +155,7 @@ public class CallHealthMonitor(val call: Call, val callScope: CoroutineScope) {
             val subscriberState = call.session?.subscriber?.state?.value
             // see if we need to reconnect
             if (subscriberState in badStates) {
+                logger.i { "ice connection state is $subscriberState, attempting to reconnect"}
                 reconnect()
             }
             // the check every 2 seconds handles scenarios where the connect goes away and doesn't reconnect
