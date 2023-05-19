@@ -56,7 +56,11 @@ data class CameraDeviceWrapped(
     val direction: CameraDirection?
 )
 
-class SpeakerManager(val mediaManager: MediaManagerImpl, val microphoneManager: MicrophoneManager, val initialVolume: Int? = null) {
+class SpeakerManager(
+    val mediaManager: MediaManagerImpl,
+    val microphoneManager: MicrophoneManager,
+    val initialVolume: Int? = null
+) {
 
     private var priorVolume: Int? = null
     private val _volume = MutableStateFlow<Int?>(initialVolume)
@@ -365,7 +369,10 @@ public class CameraManager(
         _selectedDevice.value = selectedDevice
         _availableResolutions.value =
             selectedDevice.supportedFormats?.toImmutableList() ?: emptyList()
-        _resolution.value = selectDesiredResolution(selectedDevice.supportedFormats, mediaManager.call.state.settings.value?.video)
+        _resolution.value = selectDesiredResolution(
+            selectedDevice.supportedFormats,
+            mediaManager.call.state.settings.value?.video
+        )
 
         if (startCapture) {
             startCapture()
@@ -428,7 +435,10 @@ public class CameraManager(
         val devicesMatchingDirection = devices.filter { it.direction == _direction.value }
         val selectedDevice = devicesMatchingDirection.first()
         _selectedDevice.value = selectedDevice
-        _resolution.value = selectDesiredResolution(selectedDevice.supportedFormats, mediaManager.call.state.settings.value?.video)
+        _resolution.value = selectDesiredResolution(
+            selectedDevice.supportedFormats,
+            mediaManager.call.state.settings.value?.video
+        )
         _availableResolutions.value =
             selectedDevice.supportedFormats?.toImmutableList() ?: emptyList()
 
@@ -482,14 +492,12 @@ public class CameraManager(
     ): CameraEnumerationAndroid.CaptureFormat? {
         // needs the settings that we're going for
         // sort and get the one closest to 960
-        var targetHeight = videoSettings?.targetResolution?.height ?: 720
-        var targetWidth = videoSettings?.targetResolution?.width ?: 1280
-
-//        targetHeight = 1908
-//        targetWidth = 3392
+        val targetWidth = videoSettings?.targetResolution?.width ?: 1280
+        val targetHeight = videoSettings?.targetResolution?.height ?: 720
 
         val matchingTarget =
-            supportedFormats?.toList()?.sortedBy { kotlin.math.abs(it.height - targetHeight) + kotlin.math.abs(it.width - targetWidth) }
+            supportedFormats?.toList()
+                ?.sortedBy { kotlin.math.abs(it.height - targetHeight) + kotlin.math.abs(it.width - targetWidth) }
         val selectedFormat = matchingTarget?.first()
         logger.i { "selectDesiredResolution: $selectedFormat" }
         return selectedFormat
@@ -497,8 +505,8 @@ public class CameraManager(
 
     fun cleanup() {
         stopCapture()
-        videoCapturer?.dispose()
-        surfaceTextureHelper?.dispose()
+        videoCapturer.dispose()
+        surfaceTextureHelper.dispose()
         setupCompleted = false
     }
 }

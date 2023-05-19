@@ -21,7 +21,6 @@ import io.getstream.video.android.core.ParticipantState
 /**
  * Contains a track with the screen sharing content and the participant that's sharing the screen.
  *
- * @param track The track with the screen video.
  * @param participant The person that's sharing the screen.
  */
 public data class ScreenSharingSession(
