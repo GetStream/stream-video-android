@@ -28,8 +28,11 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.getstream.video.android.compose.ui.components.call.renderer.ParticipantLabel
 import io.getstream.video.android.compose.ui.components.connection.ConnectionQualityIndicator
 import io.getstream.video.android.compose.ui.components.video.VideoRenderer
+import io.getstream.video.android.compose.ui.components.video.VideoScalingType
 import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.model.ScreenSharingSession
+import me.saket.telephoto.zoomable.rememberZoomableState
+import me.saket.telephoto.zoomable.zoomable
 import stream.video.sfu.models.TrackType
 
 /**
@@ -56,11 +59,13 @@ public fun ScreenShareVideoRenderer(
         VideoRenderer(
             modifier = Modifier
                 .fillMaxSize()
-                .align(Alignment.Center),
+                .align(Alignment.Center)
+                .zoomable(rememberZoomableState()),
             call = call,
             mediaTrack = mediaTrack,
             onRender = onRender,
             trackType = TrackType.TRACK_TYPE_SCREEN_SHARE,
+            videoScalingType = VideoScalingType.SCALE_ASPECT_FIT,
             sessionId = session.participant.sessionId
         )
 

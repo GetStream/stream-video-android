@@ -55,13 +55,16 @@ dependencies {
     implementation(libs.androidx.compose.material.iconsExtended)
     implementation(libs.androidx.lifecycle.runtime.compose)
 
-    // mock
-    compileOnly(project(":stream-video-android-mock"))
-    testImplementation(project(":stream-video-android-mock"))
-
     // image loading
     implementation(libs.landscapist.coil)
     implementation(libs.landscapist.animation)
     implementation(libs.landscapist.placeholder)
     implementation(libs.landscapist.transformation)
+
+    // telephoto
+    implementation(libs.telephoto)
+
+    // mock
+    compileOnly(project(":stream-video-android-mock"))
+    testImplementation(project(":stream-video-android-mock"))
 }
