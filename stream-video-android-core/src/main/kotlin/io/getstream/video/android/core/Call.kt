@@ -72,7 +72,7 @@ import stream.video.sfu.models.VideoDimension
 public class CallHealthMonitor(val call: Call, val callScope: CoroutineScope) {
     private val logger by taggedLogger("Call:HealthMonitor")
 
-    private val network by lazy {call.clientImpl.connectionModule.networkStateProvider}
+    private val network by lazy { call.clientImpl.connectionModule.networkStateProvider }
 
     private val supervisorJob = SupervisorJob()
     private val scope = CoroutineScope(callScope.coroutineContext + supervisorJob)
@@ -92,7 +92,7 @@ public class CallHealthMonitor(val call: Call, val callScope: CoroutineScope) {
     )
 
     private suspend fun reconnect() {
-        if (reconnectInProgress)  return
+        if (reconnectInProgress) return
         reconnectInProgress = true
         reconnectionAttempts++
         logger.i { "reconnect, attempt $reconnectionAttempts" }
@@ -109,7 +109,6 @@ public class CallHealthMonitor(val call: Call, val callScope: CoroutineScope) {
             call.reconnectOrSwitchSfu()
         }
         reconnectInProgress = false
-
     }
 
     internal val networkStateListener = object : NetworkStateProvider.NetworkStateListener {
@@ -163,7 +162,7 @@ public class CallHealthMonitor(val call: Call, val callScope: CoroutineScope) {
             val subscriberState = call.session?.subscriber?.state?.value
             // see if we need to reconnect
             if (subscriberState in badStates) {
-                logger.i { "ice connection state is $subscriberState, attempting to reconnect"}
+                logger.i { "ice connection state is $subscriberState, attempting to reconnect" }
                 reconnect()
             }
             // the check every 2 seconds handles scenarios where the connect goes away and doesn't reconnect
@@ -175,14 +174,12 @@ public class CallHealthMonitor(val call: Call, val callScope: CoroutineScope) {
         monitorPeerConnection()
 
         scope.launch { monitorInterval() }
-
     }
 
     fun stop() {
         supervisorJob.cancel()
         network.unsubscribe(networkStateListener)
     }
-
 }
 
 /**
@@ -210,7 +207,7 @@ public class Call(
     val state = CallState(this, user)
 
     val sessionId by lazy { session?.sessionId }
-    private val network by lazy {clientImpl.connectionModule.networkStateProvider}
+    private val network by lazy { clientImpl.connectionModule.networkStateProvider }
 
     /** Camera gives you access to the local camera */
     val camera by lazy { mediaManager.camera }
@@ -224,7 +221,6 @@ public class Call(
     private val scope = CoroutineScope(clientImpl.scope.coroutineContext + supervisorJob)
 
     val monitor = CallHealthMonitor(this, scope)
-
 
     /** Session handles all real time communication for video and audio */
     internal var session: RtcSession? = null
@@ -403,7 +399,6 @@ public class Call(
         }
 
         monitor.start()
-
 
         client.state.setActiveCall(this)
 
