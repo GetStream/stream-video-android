@@ -21,7 +21,9 @@ import android.view.View
 import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.unit.IntSize
@@ -47,7 +49,17 @@ internal fun BoxScope.OrientationVideoRenderer(
     parentSize: IntSize = IntSize(0, 0)
 ) {
     val primarySpeaker by call.state.dominantSpeaker.collectAsStateWithLifecycle()
-    val roomParticipants by call.state.participants.collectAsStateWithLifecycle()
+    val participants by call.state.participants.collectAsStateWithLifecycle()
+    val sortedParticipants by call.state.sortedParticipants.collectAsStateWithLifecycle()
+    val callParticipants by remember(participants) {
+        derivedStateOf {
+            if (sortedParticipants.size > 6) {
+                sortedParticipants
+            } else {
+                participants
+            }
+        }
+    }
 
     val orientation = LocalConfiguration.current.orientation
 
@@ -55,7 +67,7 @@ internal fun BoxScope.OrientationVideoRenderer(
         LandscapeVideoRenderer(
             call = call,
             primarySpeaker = primarySpeaker,
-            callParticipants = roomParticipants,
+            callParticipants = callParticipants,
             modifier = modifier,
             paddingValues = paddingValues,
             parentSize = parentSize,
@@ -65,7 +77,7 @@ internal fun BoxScope.OrientationVideoRenderer(
         PortraitVideoRenderer(
             call = call,
             primarySpeaker = primarySpeaker,
-            callParticipants = roomParticipants,
+            callParticipants = callParticipants,
             modifier = modifier,
             paddingValues = paddingValues,
             parentSize = parentSize,

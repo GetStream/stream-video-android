@@ -22,7 +22,6 @@ import kotlinx.coroutines.test.runTest
 import org.junit.Ignore
 import org.junit.Test
 import org.webrtc.PeerConnection.IceConnectionState
-import org.webrtc.PeerConnection.PeerConnectionState
 
 /**
  * Connection state shows if we've established a connection with the SFU
@@ -78,7 +77,6 @@ class ReconnectTest : IntegrationTestBase(connectCoordinatorWS = false) {
         call.monitor.networkStateListener.onConnected()
         Thread.sleep(2000L)
         assertThat(call.state.connection.value).isInstanceOf(RtcConnectionState.Joined::class.java)
-
     }
 
     @Test
@@ -91,7 +89,6 @@ class ReconnectTest : IntegrationTestBase(connectCoordinatorWS = false) {
         // if we wait a bit we should recover
         Thread.sleep(2000L)
         assertThat(call.state.connection.value).isEqualTo(RtcConnectionState.Connected)
-
     }
 
     /**

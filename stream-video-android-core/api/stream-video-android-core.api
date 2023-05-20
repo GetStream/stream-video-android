@@ -18,6 +18,7 @@ public final class io/getstream/video/android/core/Call {
 	public final fun getCid ()Ljava/lang/String;
 	public final fun getId ()Ljava/lang/String;
 	public final fun getMicrophone ()Lio/getstream/video/android/core/MicrophoneManager;
+	public final fun getMonitor ()Lio/getstream/video/android/core/CallHealthMonitor;
 	public final fun getSessionId ()Ljava/lang/String;
 	public final fun getSpeaker ()Lio/getstream/video/android/core/SpeakerManager;
 	public final fun getState ()Lio/getstream/video/android/core/CallState;
@@ -57,6 +58,24 @@ public final class io/getstream/video/android/core/Call {
 	public final fun update (Ljava/util/Map;Lorg/openapitools/client/models/CallSettingsRequest;Lorg/threeten/bp/OffsetDateTime;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public static synthetic fun update$default (Lio/getstream/video/android/core/Call;Ljava/util/Map;Lorg/openapitools/client/models/CallSettingsRequest;Lorg/threeten/bp/OffsetDateTime;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
 	public final fun updateMembers (Ljava/util/List;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+}
+
+public final class io/getstream/video/android/core/CallHealthMonitor {
+	public fun <init> (Lio/getstream/video/android/core/Call;Lkotlinx/coroutines/CoroutineScope;)V
+	public final fun getBadStates ()Ljava/util/List;
+	public final fun getCall ()Lio/getstream/video/android/core/Call;
+	public final fun getCallScope ()Lkotlinx/coroutines/CoroutineScope;
+	public final fun getGoodStates ()Ljava/util/List;
+	public final fun getReconnectInProgress ()Z
+	public final fun getReconnectionAttempts ()I
+	public final fun healthyPeer ()V
+	public final fun monitorInterval (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public final fun monitorPeerConnection ()V
+	public final fun setReconnectInProgress (Z)V
+	public final fun setReconnectionAttempts (I)V
+	public final fun start ()V
+	public final fun stop ()V
+	public final fun unhealthyPeer ()V
 }
 
 public final class io/getstream/video/android/core/CallState {
@@ -412,6 +431,10 @@ public final class io/getstream/video/android/core/RingingState$TimeoutNoAnswer 
 }
 
 public abstract interface class io/getstream/video/android/core/RtcConnectionState {
+}
+
+public final class io/getstream/video/android/core/RtcConnectionState$Connected : io/getstream/video/android/core/RtcConnectionState {
+	public static final field INSTANCE Lio/getstream/video/android/core/RtcConnectionState$Connected;
 }
 
 public final class io/getstream/video/android/core/RtcConnectionState$Disconnected : io/getstream/video/android/core/RtcConnectionState {
