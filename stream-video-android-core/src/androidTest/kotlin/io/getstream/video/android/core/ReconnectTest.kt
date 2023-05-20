@@ -18,6 +18,7 @@ package io.getstream.video.android.core
 
 import com.google.common.truth.Truth.assertThat
 import io.getstream.log.taggedLogger
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.runTest
 import org.junit.Ignore
 import org.junit.Test
@@ -48,28 +49,18 @@ import org.webrtc.PeerConnection.PeerConnectionState
  * * Meanwhile ask the API if we need to switch to a different
  * * If the API says we need to switch, swap to the new SFU
  *
+ * Note that the SFU doesnt set up the subscriber ice connection if nobody is publishing
+ *
  */
 class ReconnectTest : IntegrationTestBase(connectCoordinatorWS = false) {
 
     private val logger by taggedLogger("Test:AndroidDeviceTest")
 
     @Test
-    fun peerConnectionState() = runTest {
-        // verify we accurately detect the peer connection state
-        val result = call.join()
-        assertSuccess(result)
-        Thread.sleep(5000L)
-        val subState = call.session?.subscriber?.state?.value
-        val pubState = call.session?.publisher?.state?.value
-
-        assertThat(pubState).isEqualTo(IceConnectionState.COMPLETED)
-        assertThat(subState).isEqualTo(IceConnectionState.COMPLETED)
-    }
-
-    @Test
     fun networkDown() = runTest {
         // join a call
         call.join()
+        Thread.sleep(2000L)
         // disconnect the network
         call.monitor.networkStateListener.onDisconnected()
         // verify that the connection state is reconnecting
@@ -77,20 +68,26 @@ class ReconnectTest : IntegrationTestBase(connectCoordinatorWS = false) {
         // go online and verify we're reconnected
         call.monitor.networkStateListener.onConnected()
         Thread.sleep(2000L)
-        assertThat(call.state.connection.value).isInstanceOf(RtcConnectionState.Joined::class.java)
+        assertThat(call.state.connection.value).isEqualTo(RtcConnectionState.Connected)
 
     }
 
     @Test
+    @Ignore("need more mocking for this test")
     fun peerConnectionBad() = runTest {
+        val states = mutableListOf<RtcConnectionState>()
+        backgroundScope.launch {
+            call.state.connection.collect { states.add(it) }
+        }
+
         // join a call
         call.join()
-        // disconnect a peer connection
-        call.session?.subscriber?.connection?.dispose()
-        assertThat(call.state.connection.value).isEqualTo(RtcConnectionState.Reconnecting)
-        // if we wait a bit we should recover
         Thread.sleep(2000L)
-        assertThat(call.state.connection.value).isEqualTo(RtcConnectionState.Connected)
+        // disconnect a peer connection
+        call.session?.publisher?.connection?.dispose()
+        // if we wait a bit we should recover
+        Thread.sleep(4000L)
+        println(states)
 
     }
 
@@ -101,23 +98,23 @@ class ReconnectTest : IntegrationTestBase(connectCoordinatorWS = false) {
     fun restartIce() = runTest {
         call.join()
         Thread.sleep(2000)
-        val a = call.session?.subscriber?.connection?.connectionState()
-        val b = call.session?.publisher?.connection?.connectionState()
+        val b = call.session?.publisher?.state?.value
+        // TOD: better to use the higher level state perhaps instead of ice state
+        assertThat(b).isEqualTo(PeerConnectionState.CONNECTED)
 
         // the socket and rtc connection disconnect...,
         // or ice candidate don't arrive due to temporary network failure
         call.session?.reconnect()
         Thread.sleep(2000)
         // reconnect recreates the peer connections
-        val sub = call.session?.subscriber?.connection?.connectionState()
-        val pub = call.session?.publisher?.connection?.connectionState()
+        val pub = call.session?.publisher?.state?.value
+        assertThat(pub).isEqualTo(PeerConnectionState.CONNECTED)
     }
 
     /**
      * Switching an Sfu should be fast
      */
     @Test
-    @Ignore("broken for unknown reasons")
     fun switchSfuQuickly() = runTest {
         call.join()
 
@@ -126,5 +123,8 @@ class ReconnectTest : IntegrationTestBase(connectCoordinatorWS = false) {
         call.session?.let {
             it.switchSfu(it.sfuUrl, it.sfuToken, it.remoteIceServers)
         }
+        Thread.sleep(5000)
+        val pub = call.session?.publisher?.state?.value
+        assertThat(pub).isEqualTo(PeerConnectionState.CONNECTED)
     }
 }

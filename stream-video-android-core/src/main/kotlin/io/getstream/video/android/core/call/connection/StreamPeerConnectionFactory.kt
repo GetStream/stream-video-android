@@ -209,7 +209,10 @@ public class StreamPeerConnectionFactory(private val context: Context) {
             configuration = configuration,
             observer = peerConnection
         )
-        return peerConnection.apply { initialize(connection) }
+        webRtcLogger.d { "type ${type} ${peerConnection} is now monitoring $connection" }
+        peerConnection.initialize(connection)
+
+        return peerConnection
     }
 
     /**

@@ -97,9 +97,11 @@ public sealed interface RtcConnectionState {
     /**
      * We set the state to Joined as soon as the call state is available
      */
-    public data class Joined(val session: RtcSession) : RtcConnectionState
+    public data class Joined(val session: RtcSession) : RtcConnectionState // joined, participant state is available, you can render the call. Video isn't ready yet
 
-    // TODO: do we need a connected state here?
+    /**
+     * True when the peer connections are ready
+     */
     public object Connected : RtcConnectionState // connected to RTC, able to receive and send video
 
     /**

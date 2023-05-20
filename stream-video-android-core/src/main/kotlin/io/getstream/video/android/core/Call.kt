@@ -81,30 +81,35 @@ public class CallHealthMonitor(val call: Call, val callScope: CoroutineScope) {
     var reconnectionAttempts = 0
 
     val badStates = listOf(
-        PeerConnection.IceConnectionState.DISCONNECTED,
-        PeerConnection.IceConnectionState.FAILED,
-        PeerConnection.IceConnectionState.CLOSED
+        PeerConnection.PeerConnectionState.DISCONNECTED,
+        PeerConnection.PeerConnectionState.FAILED,
+        PeerConnection.PeerConnectionState.CLOSED
     )
     val goodStates = listOf(
-        PeerConnection.IceConnectionState.CONNECTED,
-        PeerConnection.IceConnectionState.CHECKING,
-        PeerConnection.IceConnectionState.COMPLETED,
+        PeerConnection.PeerConnectionState.NEW, // New is good, means we're not using it yet
+        PeerConnection.PeerConnectionState.CONNECTED,
+        PeerConnection.PeerConnectionState.CONNECTING,
     )
 
     private suspend fun reconnect() {
         if (reconnectInProgress)  return
         reconnectInProgress = true
         reconnectionAttempts++
-        logger.i { "reconnect, attempt $reconnectionAttempts" }
+
 
         // don't hammer the server
         if (reconnectionAttempts > 1) delay(400L)
 
         val subscriberState = call.session?.subscriber?.state?.value
+        val publisherState = call.session?.publisher?.state?.value
+        val healthyPeerConnections = subscriberState in goodStates && publisherState in goodStates
 
-        if (subscriberState in goodStates) {
+        logger.i { "reconnect attempt $reconnectionAttempts, peers are healthy: $healthyPeerConnections publisher $publisherState subscriber $subscriberState" }
+
+        if (healthyPeerConnections) {
             // don't reconnect if things are healthy
             reconnectionAttempts = 0
+            call.state._connection.value = RtcConnectionState.Connected
         } else {
             call.reconnectOrSwitchSfu()
         }
@@ -121,8 +126,9 @@ public class CallHealthMonitor(val call: Call, val callScope: CoroutineScope) {
         }
 
         override fun onDisconnected() {
-            logger.i { "network disconnected, marking the connection as reconnecting" }
-            if (call.state._connection.value is RtcConnectionState.Joined) {
+            val connectionState = call.state._connection.value
+            logger.i { "network disconnected. connection is $connectionState marking the connection as reconnecting" }
+            if ( connectionState is RtcConnectionState.Joined || connectionState == RtcConnectionState.Connected) {
                 call.state._connection.value = RtcConnectionState.Reconnecting
             }
         }
@@ -146,7 +152,22 @@ public class CallHealthMonitor(val call: Call, val callScope: CoroutineScope) {
                 // failed and closed indicate we should retry connecting to this or another SFU
                 // disconnected is temporary, only if it lasts for a certain duration we should reconnect or switch
                 it.subscriber?.state?.collect {
-                    logger.w { "ice connection state changed to $it" }
+                    logger.w { "subscriber ice connection state changed to $it" }
+                    if (it in badStates) {
+                        unhealthyPeer()
+                    } else if (it in goodStates) {
+                        healthyPeer()
+                    }
+                }
+            }
+        }
+
+        scope.launch {
+            session?.let {
+                // failed and closed indicate we should retry connecting to this or another SFU
+                // disconnected is temporary, only if it lasts for a certain duration we should reconnect or switch
+                it.publisher?.state?.collect {
+                    logger.w { "publisher ice connection state changed to $it" }
                     if (it in badStates) {
                         unhealthyPeer()
                     } else if (it in goodStates) {
@@ -414,7 +435,9 @@ public class Call(
 
     suspend fun reconnectOrSwitchSfu() {
         // mark us as reconnecting
-        if (state._connection.value is RtcConnectionState.Joined) {
+        val connectionState = state._connection.value
+
+        if (connectionState is RtcConnectionState.Joined || connectionState == RtcConnectionState.Connected) {
             state._connection.value = RtcConnectionState.Reconnecting
         }
 

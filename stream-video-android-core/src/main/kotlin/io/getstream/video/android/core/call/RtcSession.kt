@@ -162,7 +162,7 @@ public class RtcSession internal constructor(
 
     internal val lastVideoStreamAdded = MutableStateFlow<MediaStream?>(null)
 
-    internal val _peerConnectionStates = MutableStateFlow<Pair<PeerConnection.IceConnectionState?, PeerConnection.IceConnectionState?>?>(null)
+    internal val _peerConnectionStates = MutableStateFlow<Pair<PeerConnection.PeerConnectionState?, PeerConnection.PeerConnectionState?>?>(null)
 
     internal val sessionId = clientImpl.sessionId
 
@@ -260,10 +260,6 @@ public class RtcSession internal constructor(
     internal var sfuConnectionModule: SfuConnectionModule
 
     init {
-
-        println("AAA sfu token $sfuToken")
-        println("AAA sfu url $sfuUrl")
-
         val dataStore = StreamUserDataStore.instance()
         val user = dataStore.user.value
         val apiKey = dataStore.apiKey.value
@@ -831,7 +827,6 @@ public class RtcSession internal constructor(
                 when (event) {
                     is ICETrickleEvent -> handleIceTrickle(event)
                     is SubscriberOfferEvent -> handleSubscriberOffer(event)
-                    is PublisherAnswerEvent -> TODO()
                     // this dynascale event tells the SDK to change the quality of the video it's uploading
                     is ChangePublishQualityEvent -> updatePublishQuality(event)
 
@@ -967,7 +962,7 @@ public class RtcSession internal constructor(
 
                 val captureResolution = call.camera.resolution.value
 
-                val transceivers = peerConnection.connection.transceivers
+                val transceivers = peerConnection.connection.transceivers.toList()
                 val trackInfos = transceivers.filter {
                     it.direction == RtpTransceiver.RtpTransceiverDirection.SEND_ONLY && it.sender?.track() != null
                 }.map { transceiver ->
