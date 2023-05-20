@@ -32,7 +32,6 @@ import io.getstream.video.android.core.events.SFUHealthCheckEvent
 import io.getstream.video.android.core.events.SubscriberOfferEvent
 import io.getstream.video.android.core.events.TrackPublishedEvent
 import io.getstream.video.android.core.events.TrackUnpublishedEvent
-import io.getstream.video.android.core.internal.network.NetworkStateProvider
 import io.getstream.video.android.core.model.ScreenSharingSession
 import io.getstream.video.android.core.permission.PermissionRequest
 import io.getstream.video.android.core.utils.mapState

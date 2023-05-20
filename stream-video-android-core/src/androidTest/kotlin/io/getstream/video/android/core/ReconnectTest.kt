@@ -22,8 +22,8 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.runTest
 import org.junit.Ignore
 import org.junit.Test
+import org.webrtc.PeerConnection
 import org.webrtc.PeerConnection.IceConnectionState
-import org.webrtc.PeerConnection.PeerConnectionState
 
 /**
  * Connection state shows if we've established a connection with the SFU
@@ -69,7 +69,6 @@ class ReconnectTest : IntegrationTestBase(connectCoordinatorWS = false) {
         call.monitor.networkStateListener.onConnected()
         Thread.sleep(2000L)
         assertThat(call.state.connection.value).isEqualTo(RtcConnectionState.Connected)
-
     }
 
     @Test
@@ -100,7 +99,7 @@ class ReconnectTest : IntegrationTestBase(connectCoordinatorWS = false) {
         Thread.sleep(2000)
         val b = call.session?.publisher?.state?.value
         // TOD: better to use the higher level state perhaps instead of ice state
-        assertThat(b).isEqualTo(PeerConnectionState.CONNECTED)
+        assertThat(b).isEqualTo(PeerConnection.PeerConnectionState.CONNECTED)
 
         // the socket and rtc connection disconnect...,
         // or ice candidate don't arrive due to temporary network failure
@@ -108,7 +107,7 @@ class ReconnectTest : IntegrationTestBase(connectCoordinatorWS = false) {
         Thread.sleep(2000)
         // reconnect recreates the peer connections
         val pub = call.session?.publisher?.state?.value
-        assertThat(pub).isEqualTo(PeerConnectionState.CONNECTED)
+        assertThat(pub).isEqualTo(PeerConnection.PeerConnectionState.CONNECTED)
     }
 
     /**
@@ -120,11 +119,12 @@ class ReconnectTest : IntegrationTestBase(connectCoordinatorWS = false) {
 
         // connect to the new socket
         // do an ice restart
+        Thread.sleep(2000)
         call.session?.let {
             it.switchSfu(it.sfuUrl, it.sfuToken, it.remoteIceServers)
         }
-        Thread.sleep(5000)
+        Thread.sleep(6000)
         val pub = call.session?.publisher?.state?.value
-        assertThat(pub).isEqualTo(PeerConnectionState.CONNECTED)
+        assertThat(pub).isEqualTo(PeerConnection.PeerConnectionState.CONNECTED)
     }
 }
