@@ -92,6 +92,8 @@ public fun CallSingleVideoRenderer(
     isShowingConnectionQualityIndicator: Boolean = true,
     onRender: (View) -> Unit = {}
 ) {
+    val reactions by participant.reactions.collectAsStateWithLifecycle()
+
     val containerModifier = if (isFocused) modifier.border(
         border = if (isScreenSharing) {
             BorderStroke(

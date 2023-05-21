@@ -23,7 +23,6 @@ import kotlinx.coroutines.test.runTest
 import org.junit.Ignore
 import org.junit.Test
 import org.webrtc.PeerConnection
-import org.webrtc.PeerConnection.IceConnectionState
 
 /**
  * Connection state shows if we've established a connection with the SFU
@@ -87,7 +86,6 @@ class ReconnectTest : IntegrationTestBase(connectCoordinatorWS = false) {
         // if we wait a bit we should recover
         Thread.sleep(4000L)
         println(states)
-
     }
 
     /**

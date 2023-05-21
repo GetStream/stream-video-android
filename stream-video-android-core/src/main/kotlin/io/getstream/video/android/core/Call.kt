@@ -96,7 +96,6 @@ public class CallHealthMonitor(val call: Call, val callScope: CoroutineScope) {
         reconnectInProgress = true
         reconnectionAttempts++
 
-
         // don't hammer the server
         if (reconnectionAttempts > 1) delay(400L)
 
@@ -127,7 +126,7 @@ public class CallHealthMonitor(val call: Call, val callScope: CoroutineScope) {
         override fun onDisconnected() {
             val connectionState = call.state._connection.value
             logger.i { "network disconnected. connection is $connectionState marking the connection as reconnecting" }
-            if ( connectionState is RtcConnectionState.Joined || connectionState == RtcConnectionState.Connected) {
+            if (connectionState is RtcConnectionState.Joined || connectionState == RtcConnectionState.Connected) {
                 call.state._connection.value = RtcConnectionState.Reconnecting
             }
         }

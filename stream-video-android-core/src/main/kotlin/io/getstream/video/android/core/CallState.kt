@@ -291,7 +291,7 @@ public class CallState(private val call: Call, private val user: User) {
     val ingress: StateFlow<CallIngressResponse?> = _ingress
 
     private val userToSessionIdMap = participants.mapState { participants ->
-        participants.map { it.user.value.id to it.sessionId }.toMap()
+        participants.associate { it.user.value.id to it.sessionId }
     }
 
     internal val _hasPermissionMap = mutableMapOf<String, StateFlow<Boolean>>()
