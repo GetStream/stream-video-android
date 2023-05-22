@@ -58,6 +58,7 @@ data class CameraDeviceWrapped(
 
 class SpeakerManager(val mediaManager: MediaManagerImpl, val microphoneManager: MicrophoneManager, val initialVolume: Int? = null) {
 
+    private var priorVolume: Int? = null
     private val _volume = MutableStateFlow<Int?>(initialVolume)
     val volume: StateFlow<Int?> = _volume
 
@@ -108,6 +109,19 @@ class SpeakerManager(val mediaManager: MediaManagerImpl, val microphoneManager: 
             it.setStreamVolume(AudioManager.STREAM_VOICE_CALL, level, 0)
         }
     }
+
+    fun pause() {
+        priorVolume = _volume.value
+        setVolume(0)
+    }
+
+    fun resume() {
+        priorVolume?.let {
+            if (it > 0) {
+                setVolume(it)
+            }
+        }
+    }
 }
 
 /**
@@ -144,11 +158,27 @@ class MicrophoneManager(val mediaManager: MediaManagerImpl) {
     private val _devices = MutableStateFlow<List<AudioDevice>>(emptyList())
     val devices: StateFlow<List<AudioDevice>> = _devices
 
+    internal var priorStatus : DeviceStatus? = null
+
     /** Enable the audio, the rtc engine will automatically inform the SFU */
     fun enable() {
         setup()
         _status.value = DeviceStatus.Enabled
         mediaManager.audioTrack.setEnabled(true)
+    }
+
+    fun pause() {
+        // pause the microphone, and when resuming switched back to the previous state
+        priorStatus = _status.value
+        disable()
+    }
+
+    fun resume() {
+        priorStatus?.let {
+            if (it == DeviceStatus.Enabled) {
+                enable()
+            }
+        }
     }
 
     /** Disable the audio track. Audio is still captured, but not send.
@@ -235,6 +265,7 @@ public class CameraManager(
     public val eglBaseContext: EglBase.Context,
     defaultCameraDirection: CameraDirection = CameraDirection.Front
 ) {
+    private var priorStatus: DeviceStatus? = null
     private lateinit var surfaceTextureHelper: SurfaceTextureHelper
     private lateinit var devices: List<CameraDeviceWrapped>
     private var isCapturingVideo: Boolean = false
@@ -275,6 +306,20 @@ public class CameraManager(
         _status.value = DeviceStatus.Enabled
         mediaManager.videoTrack.setEnabled(true)
         startCapture()
+    }
+
+    fun pause() {
+        // pause the camera, and when resuming switched back to the previous state
+        priorStatus = _status.value
+        disable()
+    }
+
+    fun resume() {
+        priorStatus?.let {
+            if (it == DeviceStatus.Enabled) {
+                enable()
+            }
+        }
     }
 
     fun setEnabled(enabled: Boolean) {

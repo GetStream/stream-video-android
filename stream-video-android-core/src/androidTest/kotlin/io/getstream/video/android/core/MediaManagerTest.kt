@@ -34,7 +34,6 @@ class MediaManagerTest : IntegrationTestBase(connectCoordinatorWS = false) {
 
     @Test
     fun camera() = runTest {
-
         val camera = call.mediaManager.camera
         assertThat(camera).isNotNull()
         camera.enable()
@@ -47,8 +46,19 @@ class MediaManagerTest : IntegrationTestBase(connectCoordinatorWS = false) {
     }
 
     @Test
-    fun speaker() = runTest {
+    fun cameraResume() = runTest {
+        val camera = call.mediaManager.camera
+        // test resume
+        camera.enable()
+        assertThat(camera.status.value).isEqualTo(DeviceStatus.Enabled)
+        camera.pause()
+        assertThat(camera.status.value).isEqualTo(DeviceStatus.Disabled)
+        camera.resume()
+        assertThat(camera.status.value).isEqualTo(DeviceStatus.Enabled)
+    }
 
+    @Test
+    fun speaker() = runTest {
         val speaker = call.mediaManager.speaker
 
         assertThat(speaker).isNotNull()
@@ -66,15 +76,35 @@ class MediaManagerTest : IntegrationTestBase(connectCoordinatorWS = false) {
     }
 
     @Test
+    fun speakerResume() = runTest {
+        val speaker = call.mediaManager.speaker
+        // test resume
+        speaker.enableSpeakerPhone()
+        speaker.setVolume(54)
+        speaker.pause()
+        assertThat(speaker.volume.value).isEqualTo(0)
+        speaker.resume()
+        assertThat(speaker.volume.value).isEqualTo(54)
+    }
+
+    @Test
     fun microphone() = runTest {
-
         val microphone = call.mediaManager.microphone
-
         assertThat(microphone).isNotNull()
-
         microphone.enable()
         assertThat(microphone.status.value).isEqualTo(DeviceStatus.Enabled)
         microphone.disable()
         assertThat(microphone.status.value).isEqualTo(DeviceStatus.Disabled)
+    }
+
+    @Test
+    fun microphoneResume() = runTest {
+        val microphone = call.mediaManager.microphone
+        microphone.enable()
+        assertThat(microphone.status.value).isEqualTo(DeviceStatus.Enabled)
+        microphone.pause()
+        assertThat(microphone.status.value).isEqualTo(DeviceStatus.Disabled)
+        microphone.resume()
+        assertThat(microphone.status.value).isEqualTo(DeviceStatus.Enabled)
     }
 }
