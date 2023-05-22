@@ -309,7 +309,7 @@ public class CallState(private val call: Call, private val user: User) {
     public val errors: StateFlow<List<ErrorEvent>> = _errors
 
     fun handleEvent(event: VideoEvent) {
-        logger.d { "Updating call state with event $event" }
+        logger.d { "Updating call state with event ${event::class.java}" }
         when (event) {
             is BlockedUserEvent -> {
                 val newBlockedUsers = _blockedUsers.value.toMutableSet()

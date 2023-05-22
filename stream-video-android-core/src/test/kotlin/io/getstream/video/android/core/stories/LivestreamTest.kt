@@ -16,6 +16,7 @@
 
 package io.getstream.video.android.core.stories
 
+import com.google.common.truth.Truth.assertThat
 import io.getstream.video.android.core.IntegrationTestBase
 import kotlinx.coroutines.test.runTest
 import org.junit.Ignore
@@ -62,11 +63,14 @@ class LivestreamTest : IntegrationTestBase() {
     @Test
     fun `start and stop broadcasting to HLS`() = runTest {
         val call = client.call("livestream", randomUUID())
-        call.create()
+        val createResult = call.create()
+        assertSuccess(createResult)
+
         val result = call.startBroadcasting()
         assertSuccess(result)
         val result2 = call.stopBroadcasting()
         assertSuccess(result2)
+
         // TODO: where is the HLS url?
     }
 
@@ -79,41 +83,27 @@ class LivestreamTest : IntegrationTestBase() {
         val rtmp = call.state.ingress.value?.rtmp
         val url = rtmp?.address + "/" + clientImpl.dataStore.userToken
         println(rtmp?.address)
-        println(clientImpl.dataStore.userToken)
+
+        val token = clientImpl.dataStore.userToken.value
+        val apiKey = clientImpl.dataStore.apiKey.value
+        println("$apiKey/$token")
         // TODO: not implemented on the server
         // Create a publishing token
         // TODO: do we ask the coordinator for it? or generate it locally?
     }
 
-    @Test
-    @Ignore
-    fun `calls should support HLS out`() = runTest {
-        val call = client.call("livestream", "NnXAIvBKE4Hy")
-        val response = call.create()
-        assertSuccess(response)
-
-        val broadcastResponse = call.startBroadcasting()
-        assertSuccess(broadcastResponse)
-
-        broadcastResponse.onSuccess {
-            println(it)
-        }
-    }
 
     @Test
-    @Ignore
     fun `call should expose participant count, time running stats`() = runTest {
         val call = client.call("livestream", randomUUID())
-        // TODO: not implemented on the server
-    }
-
-    @Test
-    @Ignore
-    fun `manually specify the video quality you want to receive`() = runTest {
-        val call = client.call("livestream", randomUUID())
-
-        // TODO: we should know what quality levels are available
-        // API call to request that quality level from the SFU
+        val result = call.create()
+        assertSuccess(result)
+        // counts
+        val count = call.state.participantCounts.value
+        assertThat(count?.anonymous).isEqualTo(0)
+        assertThat(count?.total).isEqualTo(0)
+        // call running time
+        // TODO:
     }
 
     @Test

@@ -9,6 +9,30 @@
 *  Break
 *  Week 6: Docs, docs & sample app. Dynascale, SDP parsing
 *  Week 7: Reconnect, server side issues checklist, compose docs, fast join flow
+*  Week 8: Docs & Stability
+
+### Essentials pre BETA launch
+
+- Testing: run the test app often (Thierry, Caleb & Jared)
+- Android: Docs (Jaewoong)
+- Fix this page: https://staging.getstream.io/video/docs/ (Thierry, could use help)
+- Frontend: a way to host the docs (Lennart)
+- SFU: deploy process (Marcelo & Suchit)
+- SFU: reconnect flow (Marcelo & Suchit)
+- SFU: duplicate participant bug (related to the above)
+- Both: Calling support (Tommaso)
+- Ensure iOS, React, Flutter and Android are consistent (Tommaso)
+- Dashboard: Push & Call Types (Eric & Sacha)
+- Beta announcement email (Thierry) & Decide on limits & Pricing (Tommaso)
+
+### Docs ~3 weeks left
+
+- [ ] Video calling tutorial & Feedback cycle with team
+- [ ] Livestream tutorial & Feedback cycle with team
+- [ ] Audio room tutorial & Feedback cycle with team
+- [X] Low level docs
+- [ ] UI cookbook
+- [ ] UI components
 
 ### TODO
 
@@ -31,6 +55,27 @@
 - [X] Background usage causes the camera to freeze and not recover when in foreground
 - [X] When the app is in background (and PIP is disabled), what should the behaviour be?
 
+### Server issues
+
+#### Livestream
+
+- [ ] Failure(value=NetworkError(message=GetOrCreateCall failed with error: "User 'thierry' with role 'user' is not allowed to perform action CreateCall in scope 'video:livestream'", serverErrorCode=17, statusCode=403, cause=java.lang.Throwable: https://getstream.io/chat/docs/api_errors_response))
+- [ ] hlsPlaylistUrl vs ingress/egress
+- [ ] Livestreaming where do i see when the call started
+
+#### Audio room
+
+- [ ] queryCalls should support Any? for the filter, otherwise you can't search for filters matching null
+- [ ] socket connection hangs when joining as an anon user
+
+#### Regular calls
+
+- [ ] ICE restarts & join flow polish
+- [ ] What about graceful SFU shutdown/ an event to make clients move SFU?
+- [ ] Ringing call support
+- [ ] getCall doesn't support member limits
+- [ ] Events for creating a channel on chat. so you lazy load the chat when the first person opens it
+
 ### App & Compose
 
 - [ ] Telemetry to firebase/crashlytics (with an opt out, or research alternatives)
@@ -43,14 +88,7 @@
 - [ ] Ringing calls + CallService + foreground services/notifications (wait for push and updated endpoints from server)
 - [X] Screensharing doesn't show up
 
-### Docs ~3 weeks left
 
-- [ ] Video calling tutorial & Feedback cycle with team
-- [ ] Livestream tutorial & Feedback cycle with team
-- [ ] Audio room tutorial & Feedback cycle with team
-- [X] Low level docs
-- [ ] UI cookbook
-- [ ] UI components
 
 ### Reconnect
 
@@ -132,16 +170,7 @@
 - [X] Participant.online field is weird. Aren't you always online as a participant?
 - [X] Participant count & Anonymous Participant Count (for livestreams you cant rely on the list). Returned by SFU. Updated by
 - [X] ConnectionQualityInfo is a list, audio levels is a map. Lets standardize
-- [ ] Accept/reject call endpoints
-- [ ] getCall doesn't support member limits
-- [ ] Events for updating users
-- [ ] What about graceful SFU shutdown/ an event to make clients move SFU?
-- [ ] Events for creating a channel on chat. so you lazy load the chat when the first person opens it
-- [ ] List of error codes via openapi
-- [ ] CallMemberUpdatedPermissionEvent. Weird that call and members are included
-- [ ] message=GetOrCreateCall failed with error: "The following users are involved in call create operation, but don't exist: [jaewoong]. Please create the user objects before setting up the call.
-- [ ] review QueryMembersRequest
-- [ ] health check http request on the SFU (no auth, nothing that can give errors, just health) (for the recovery flow). not sure about this one, tbd
+
 
 ### Server side - Call type settings
 
@@ -231,3 +260,4 @@
 - [ ] Video filter example
 - [ ] Build vars to generate tokens for testing
 - [ ] What about codec switching?
+- [ ] Events for updating users
