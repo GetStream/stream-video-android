@@ -307,10 +307,9 @@ public class RtcSession internal constructor(
         }
         errorJob = coroutineScope.launch {
             sfuConnectionModule.sfuSocket.errors.collect() {
+                logger.e(it) { "permanent failure on socket connection" }
                 if (clientImpl.developmentMode) {
                     throw it
-                } else {
-                    logger.e(it) { "permanent failure on socket connection" }
                 }
             }
         }

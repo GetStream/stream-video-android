@@ -93,8 +93,6 @@ internal class DebugInfo(val client: StreamVideoImpl) {
         val availableResolutions = call?.camera?.availableResolutions?.value
         val maxResolution = availableResolutions?.maxBy { it.width * it.height }
 
-        val localSdp = publisher?.localSdp
-        val remoteSdp = publisher?.remoteSdp
         val publisherIce = publisher?.connection?.iceConnectionState()
         val subIce = subscriber?.connection?.iceConnectionState()
 
@@ -116,10 +114,14 @@ internal class DebugInfo(val client: StreamVideoImpl) {
                 logger.i { " - ${it.name}:$s took $t" }
             }
         }
-        publisher?.let {
-            val stats = it.getStats().value
-            logger.i { "Publisher stats. video quality: $stats" }
-        }
+//        publisher?.let {
+//            val stats = it.getStats().value
+//            logger.i { "Publisher stats. video quality: $stats" }
+//        }
+//        subscriber?.let {
+//            val stats = it.getStats().value
+//            logger.i { "Subscriber stats. video quality: $stats" }
+//        }
     }
 
     fun listCodecs() {

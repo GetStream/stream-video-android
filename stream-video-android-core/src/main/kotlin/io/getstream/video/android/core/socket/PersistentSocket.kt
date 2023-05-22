@@ -110,7 +110,6 @@ open class PersistentSocket<T>(
         connected = connectedContinuation
 
         _connectionState.value = SocketState.Connecting
-        println("setting state to connecting")
         // step 1 create the socket
         socket = mockSocket ?: createSocket()
 

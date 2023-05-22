@@ -136,7 +136,7 @@ internal class StreamVideoImpl internal constructor(
     /** session id is generated client side */
     public val sessionId = UUID.randomUUID().toString()
 
-    private var guestUserJob: Deferred<Unit>? = null
+    internal var guestUserJob: Deferred<Unit>? = null
     private lateinit var connectContinuation: Continuation<Result<ConnectedEvent>>
 
     @InternalStreamVideoApi
@@ -397,6 +397,7 @@ internal class StreamVideoImpl internal constructor(
                 throw IllegalStateException("Failed to create guest user")
             }
             response.onSuccess {
+                connectionModule.updateAuthType("jwt")
                 scope.launch {
                     dataStore.updateUser(it.user.toUser())
                     dataStore.updateUserToken(it.accessToken)

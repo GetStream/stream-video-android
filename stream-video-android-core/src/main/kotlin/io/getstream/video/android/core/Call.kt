@@ -329,6 +329,8 @@ public class Call(
         create: Boolean = false,
         createOptions: CreateCallOptions? = null
     ): Result<RtcSession> {
+        // if we are a guest user, make sure we wait for the token before running the join flow
+        clientImpl.guestUserJob?.await()
         // the join flow should retry up to 3 times
         // if the error is not permanent
         // and fail immediately on permanent errors
