@@ -49,7 +49,6 @@ class LivestreamTest : IntegrationTestBase() {
      */
 
     @Test
-    @Ignore
     fun `start recording a call`() = runTest {
         val call = client.call("livestream", randomUUID())
         val createResult = call.create()
@@ -61,7 +60,6 @@ class LivestreamTest : IntegrationTestBase() {
     }
 
     @Test
-    @Ignore
     fun `start and stop broadcasting to HLS`() = runTest {
         val call = client.call("livestream", randomUUID())
         call.create()
@@ -113,12 +111,14 @@ class LivestreamTest : IntegrationTestBase() {
     @Ignore
     fun `manually specify the video quality you want to receive`() = runTest {
         val call = client.call("livestream", randomUUID())
-        // TODO: not implemented on the server
+
+        // TODO: we should know what quality levels are available
+        // API call to request that quality level from the SFU
     }
 
     @Test
     fun `mute the audio of the call you are receiving`() = runTest {
         val call = client.call("livestream", randomUUID())
-        // call.speaker.setVolume(0)
+        call.speaker.setVolume(0)
     }
 }

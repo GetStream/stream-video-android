@@ -13,13 +13,13 @@
 ### TODO
 
 - [ ] Go through all tests & TODOs and update with latest server changes.
-- [ ] Own permissions should be a sealed class
-- [ ] Use the right date time class everywhere
 - [ ] Fine tune the quality on S23 (so it's not at Q). Upload quality, make it easy to change
+- [ ] Use the right date time class everywhere
 - [ ] Add a timeout for waiting on the socket authentication events
 - [ ] permission handling on the intro/preview screen is wrong. it starts out as video enabled
 - [ ] Test the dogfooding app and iterate on things that don't work yet
 - [ ] RED error
+- [ ] Own permissions should be a sealed class
 - [ ] use standard debug, verbose, info, warning and error debug levels on StreamVideoBuilder
 - [ ] Improve our error classes. Right now there are 4 different formats. 
 - [X] Full test coverage for retries + some more logging
@@ -43,7 +43,7 @@
 - [ ] Ringing calls + CallService + foreground services/notifications (wait for push and updated endpoints from server)
 - [X] Screensharing doesn't show up
 
-### Docs ~4 weeks left
+### Docs ~3 weeks left
 
 - [ ] Video calling tutorial & Feedback cycle with team
 - [ ] Livestream tutorial & Feedback cycle with team
