@@ -37,10 +37,11 @@ import io.getstream.video.android.core.model.ScreenSharingSession
  * @param onRender Handler when each of the Video views render their first frame.
  */
 @Composable
-internal fun ScreenSharingCallVideoRenderer(
+public fun ScreenSharingCallVideoRenderer(
     call: Call,
     session: ScreenSharingSession,
     modifier: Modifier = Modifier,
+    isZoomable: Boolean = true,
     onRender: (View) -> Unit = {},
 ) {
     val configuration = LocalConfiguration.current
@@ -55,6 +56,7 @@ internal fun ScreenSharingCallVideoRenderer(
             participants = participants,
             primarySpeaker = screenSharingSession?.participant,
             modifier = modifier,
+            isZoomable = isZoomable,
             onRender = onRender,
         )
     } else {
@@ -64,6 +66,7 @@ internal fun ScreenSharingCallVideoRenderer(
             participants = participants,
             primarySpeaker = screenSharingSession?.participant,
             modifier = modifier,
+            isZoomable = isZoomable,
             onRender = onRender,
         )
     }

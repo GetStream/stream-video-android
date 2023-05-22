@@ -57,6 +57,7 @@ internal fun LandscapeScreenSharingVideoRenderer(
     participants: List<ParticipantState>,
     primarySpeaker: ParticipantState?,
     modifier: Modifier = Modifier,
+    isZoomable: Boolean = true,
     onRender: (View) -> Unit,
 ) {
     val sharingParticipant = session.participant
@@ -76,6 +77,7 @@ internal fun LandscapeScreenSharingVideoRenderer(
                 modifier = Modifier.fillMaxSize(),
                 call = call,
                 session = session,
+                isZoomable = isZoomable,
                 onRender = onRender,
             )
 

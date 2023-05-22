@@ -50,17 +50,23 @@ public fun ScreenShareVideoRenderer(
     modifier: Modifier = Modifier,
     labelPosition: Alignment = Alignment.BottomStart,
     isShowConnectionQualityIndicator: Boolean = true,
+    isZoomable: Boolean = true,
     onRender: (View) -> Unit = {}
 ) {
     val screenShareParticipant = session.participant
     val mediaTrack by session.participant.screenSharingTrack.collectAsState()
 
+    val zoomableModifier = if (isZoomable) {
+        Modifier.zoomable(rememberZoomableState())
+    } else {
+        Modifier
+    }
+
     Box(modifier = modifier) {
         VideoRenderer(
-            modifier = Modifier
+            modifier = zoomableModifier
                 .fillMaxSize()
-                .align(Alignment.Center)
-                .zoomable(rememberZoomableState()),
+                .align(Alignment.Center),
             call = call,
             mediaTrack = mediaTrack,
             onRender = onRender,
