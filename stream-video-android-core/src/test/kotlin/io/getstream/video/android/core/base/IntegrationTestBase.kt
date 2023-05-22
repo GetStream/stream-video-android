@@ -27,6 +27,7 @@ import io.getstream.result.Result
 import io.getstream.video.android.core.call.connection.StreamPeerConnectionFactory
 import io.getstream.video.android.core.dispatchers.DispatcherProvider
 import io.getstream.video.android.core.logging.LoggingLevel
+import io.getstream.video.android.datastore.delegate.StreamUserDataStore
 import io.getstream.video.android.model.User
 import io.mockk.MockKAnnotations
 import io.mockk.impl.annotations.MockK
@@ -71,7 +72,8 @@ class IntegrationTestHelper {
     val tokens = mutableMapOf<String, String>()
     val context: Context
 
-    val expiredToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoidGhpZXJyeUBnZXRzdHJlYW0uaW8iLCJpc3MiOiJwcm9udG8iLCJzdWIiOiJ1c2VyL3RoaWVycnlAZ2V0c3RyZWFtLmlvIiwiaWF0IjoxNjgxMjUxMDg4LCJleHAiOjE2ODEyNjE4OTN9.VinzXBwvT_AGXNBG8QTz9HJFSR6LhqIEtVpIlmY1aEc"
+    val expiredToken =
+        "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoidGhpZXJyeUBnZXRzdHJlYW0uaW8iLCJpc3MiOiJwcm9udG8iLCJzdWIiOiJ1c2VyL3RoaWVycnlAZ2V0c3RyZWFtLmlvIiwiaWF0IjoxNjgxMjUxMDg4LCJleHAiOjE2ODEyNjE4OTN9.VinzXBwvT_AGXNBG8QTz9HJFSR6LhqIEtVpIlmY1aEc"
 
     val fakeSDP = """
         v=0
@@ -145,7 +147,8 @@ open class TestBase {
     lateinit var mockedPCFactory: StreamPeerConnectionFactory
 
     @Before
-    fun setUp() = MockKAnnotations.init(this, relaxUnitFun = true) // turn relaxUnitFun on for all mocks
+    fun setUp() =
+        MockKAnnotations.init(this, relaxUnitFun = true) // turn relaxUnitFun on for all mocks
 
     private val testLogger = StreamTestLogger()
 
@@ -154,6 +157,10 @@ open class TestBase {
             StreamLog.setValidator { priority, _ -> priority > Priority.VERBOSE }
             StreamLog.install(logger = testLogger)
             testLogger.streamLog { "test logger installed" }
+        }
+
+        if (!StreamUserDataStore.isInstalled) {
+            StreamUserDataStore.install(context = context.applicationContext, isEncrypted = false)
         }
     }
 
