@@ -1,18 +1,20 @@
+
+
 # ScreenSharingCallVideoRenderer
 
-The `ScreenSharingCallVideoRenderer` is a component that allows you to display a video of a screen sharing session. It also includes options to change the UI orientation and to enter or exit the full screen mode. This component is designed for use in video conferencing and other similar applications where users are able to share their entire screens or specific windows.
+The `ScreenSharingCallVideoRenderer` is a Composable component that allows you to display a video of a screen sharing session. It also includes options to change the UI orientation and to enter or exit the full-screen mode. This component is designed for use in video conferencing and other similar applications where users are able to share their entire screens or specific windows.
 
 Internally, this component renders a screen sharing session video as a primary screen and observes participants, which are rendered a list of videos.
 
-Let's see how to use the `ScreenShareVideoRenderer`.
+Let's see how to use the `ScreenSharingCallVideoRenderer`.
 
 ## Usage
 
-To use the `ScreenShareVideoRenderer` component in your app, you should observe the screen sharing session from the call state and check whether the session is exist. If a screen sharing session is valid, you can render the screen sharing session and all other participants with `ScreenShareVideoRenderer`. If not, you should render a regular video call with [RegularCallVideoRenderer](../05-participants/02-call-regular-video-renderer.mdx).
+To use the `ScreenSharingCallVideoRenderer` component in your app, you should observe the screen sharing session from the call state and check whether the session exists. If a screen sharing session is valid, you can render the screen sharing session and all other participants with `ScreenSharingCallVideoRenderer` Composable. If not, you should render a regular video call with [RegularCallVideoRenderer](../05-participants/02-call-regular-video-renderer.mdx).
 
 ```kotlin
 // observe a screen sharing session from the call state.
-val screenSharingSession by call.state.screenSharingSession.collectAsStateWithLifecycle()
+val screenSharingSession by call.state.screenSharingSession.collectAsState()
 
 if (screenSharingSession != null) {
     ScreenSharingCallVideoRenderer(
@@ -39,6 +41,19 @@ Using this component, you'll likely see something similar to the following UI:
 
 ![Screen Sharing](../../assets/compose_screensharing_portrait.png)
 
+The `ScreenSharingCallVideoRenderer` Composable supports zoomable functions for the sharing session like the image below:
+
+![Screen Sharing](../../assets/compose_screensharing_zoom.png)
+
+If you use `CallVideoRenderer`, it will render a screen sharing session video if there's a valid screen sharing session. If not, it will render a regular video call.
+
+```kotlin
+CallVideoRenderer(
+    modifier = Modifier.fillMaxSize(),
+    call: call,
+)
+```
+
 Let's see how to handle the UI actions.
 
 ## Handling Actions
@@ -48,8 +63,8 @@ When it comes to handling actions and customizing the behavior of the component,
 - `onCallAction(CallAction)`: Responds to different `CallAction`s. Actions are used to represent different types of interactions that can be performed during the call. In this case, toggling the screen configuration to be full screen or not or the orientation.
 - `onRender(View)`: Used to respond to render events. The View object represents the `VideoView` that holds the screen sharing session.
 
-You can easily override these parameters and customize the behavior as seen in the snippet above.
+You can easily override these parameters and customize the behavior, as seen in the snippet above.
 
 ## Customization
 
-As far as UI customization goes, the component is very specific and doesn't allow much to be changed. It's very simple and if you need to customize the behavior or UI, it's best if you build your own variant, using the state that's provided in our `ViewModel`. You can still customize the `Modifier` parameter to apply custom styling to `ScreenShareContent`.
+As far as UI customization goes, the component is very specific and doesn't allow much to be changed. It's very simple, and if you need to customize the behavior or UI, it's best if you build your own variant using the state that's provided in our `ViewModel`. You can still customize the `Modifier` parameter to apply custom styling to `ScreenShareContent`.
