@@ -36,6 +36,8 @@
 
 ### TODO
 
+- [ ] Video disconnects sometimes. (BufferQueue has not connected producer)
+- [ ] HTTP requests fail in interceptor, which is wrong. (see https://console.firebase.google.com/project/stream-video-9b586/crashlytics/app/android:io.getstream.video.android.dogfooding.debug/issues?state=open&time=last-seven-days&tag=all&sort=eventCount)
 - [ ] Go through all tests & TODOs and update with latest server changes.
 - [ ] Fine tune the quality on S23 (so it's not at Q). Upload quality, make it easy to change
 - [ ] Use the right date time class everywhere
