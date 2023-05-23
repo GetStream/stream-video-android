@@ -64,27 +64,14 @@ internal class DebugInfo(val client: StreamVideoImpl) {
     // android version
     val version = android.os.Build.VERSION.SDK_INT
 
-    // currently running call
-    val call by lazy { client.state.activeCall.value }
-
-    // call session id
-    val sessionId by lazy { call?.sessionId }
-
     // how many times the network dropped
 
     // how often the sockets reconnected
 
     // supported codecs
-
-    // publisher peer connection
-    val subscriber by lazy { call?.session?.subscriber }
-    val publisher by lazy { call?.session?.publisher }
-    val publisherLocalSdp by lazy { publisher?.localSdp }
-    val publisherRemoteSdp by lazy { publisher?.remoteSdp }
-
     // resolution
-    val resolution by lazy { call?.camera?.resolution?.value }
-    val availableResolutions by lazy { call?.camera?.availableResolutions?.value }
+    val resolution by lazy { }
+    val availableResolutions by lazy { }
 
     init {
         if (client.developmentMode) {
@@ -98,21 +85,27 @@ internal class DebugInfo(val client: StreamVideoImpl) {
     }
 
     fun log() {
+        val call = client.state.activeCall.value
+        val sessionId = call?.sessionId
+        val subscriber = call?.session?.subscriber
+        val publisher = call?.session?.publisher
+        val resolution = call?.camera?.resolution?.value
+        val availableResolutions = call?.camera?.availableResolutions?.value
+        val maxResolution = availableResolutions?.maxBy { it.width * it.height }
 
-        val localSdp = publisher?.localSdp
-        val remoteSdp = publisher?.remoteSdp
         val publisherIce = publisher?.connection?.iceConnectionState()
         val subIce = subscriber?.connection?.iceConnectionState()
 
         val videoTrackState = call?.mediaManager?.videoTrack?.state()
-        val coordinatorSocket = client.socketImpl.connectionState.value?.javaClass?.name
+        val coordinatorSocket = client.socketImpl.connectionState.value.javaClass.name
         val sfuSocket =
             call?.session?.sfuConnectionModule?.sfuSocket?.connectionState?.value?.javaClass?.name
 
         // good spot to attach your debugger
 
         logger.i { "Debug info $phoneModel running android $version" }
-        logger.i { "Active call is ${call?.cid}, session id $sessionId capturing video at $resolution" }
+        logger.i { "Active call is ${call?.cid}, session id $sessionId" }
+        logger.i { "video quality: current resolution $resolution max resolution for camera is $maxResolution" }
         logger.i { "Coordinator socket: $coordinatorSocket, SFU socket: $sfuSocket Subscriber: $publisherIce Publisher: $subIce" }
         logger.i { "Performance details" }
         timers.forEach {
@@ -121,6 +114,14 @@ internal class DebugInfo(val client: StreamVideoImpl) {
                 logger.i { " - ${it.name}:$s took $t" }
             }
         }
+//        publisher?.let {
+//            val stats = it.getStats().value
+//            logger.i { "Publisher stats. video quality: $stats" }
+//        }
+//        subscriber?.let {
+//            val stats = it.getStats().value
+//            logger.i { "Subscriber stats. video quality: $stats" }
+//        }
     }
 
     fun listCodecs() {

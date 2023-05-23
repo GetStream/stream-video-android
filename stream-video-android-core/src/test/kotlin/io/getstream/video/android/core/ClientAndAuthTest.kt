@@ -66,15 +66,17 @@ class ClientAndAuthTest : TestBase() {
         // the ID is generated, client side...
         // verify that we get the token
         // API call is getGuestUser or something like that
-        StreamVideoBuilder(
+        val client = StreamVideoBuilder(
             context = context,
             apiKey = apiKey,
             geo = GEO.GlobalEdgeNetwork,
             user = User(
                 id = "guest",
-                type = io.getstream.video.android.model.UserType.Guest
+                type = UserType.Guest
             )
         ).build()
+        val clientImpl = client as StreamVideoImpl
+        clientImpl.guestUserJob?.await()
     }
 
     @Test
@@ -86,7 +88,7 @@ class ClientAndAuthTest : TestBase() {
             geo = GEO.GlobalEdgeNetwork,
             user = User(
                 id = "guest",
-                type = io.getstream.video.android.model.UserType.Guest
+                type = UserType.Guest
             )
         ).build()
         val sub = client.subscribe { event: VideoEvent ->
@@ -104,7 +106,7 @@ class ClientAndAuthTest : TestBase() {
             geo = GEO.GlobalEdgeNetwork,
             user = User(
                 id = "guest",
-                type = io.getstream.video.android.model.UserType.Guest
+                type = UserType.Guest
             )
         ).build()
         // Subscribe for new message events

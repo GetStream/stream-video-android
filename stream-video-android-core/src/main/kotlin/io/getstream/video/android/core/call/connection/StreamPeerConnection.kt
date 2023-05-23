@@ -78,9 +78,9 @@ public class StreamPeerConnection(
     private val typeTag = type.stringify()
 
     // see https://developer.mozilla.org/en-US/docs/Web/API/RTCPeerConnection/iceConnectionState
-    internal val state = MutableStateFlow<PeerConnection.IceConnectionState?>(null)
+    internal val state = MutableStateFlow<PeerConnection.PeerConnectionState?>(null)
 
-    private val logger by taggedLogger("Call:PeerConnection")
+    private val logger by taggedLogger("Call:PeerConnection:$typeTag")
 
     /**
      * The wrapped connection for all the WebRTC communication.
@@ -128,6 +128,8 @@ public class StreamPeerConnection(
     public fun initialize(peerConnection: PeerConnection) {
         logger.d { "[initialize] #sfu; #$typeTag; peerConnection: $peerConnection" }
         this.connection = peerConnection
+
+        this.state.value = this.connection.connectionState()
     }
 
     /**
@@ -384,9 +386,15 @@ public class StreamPeerConnection(
      *
      * @param newState The new state of the [PeerConnection].
      */
+
+    override fun onConnectionChange(newState: PeerConnection.PeerConnectionState) {
+        logger.i { "[onConnectionChange] #sfu; #$typeTag; newState: $newState" }
+        state.value = newState
+    }
+
+    // TODO: maybe better to monitor onConnectionChange for the state
     override fun onIceConnectionChange(newState: PeerConnection.IceConnectionState?) {
         logger.i { "[onIceConnectionChange] #sfu; #$typeTag; newState: $newState" }
-        state.value = newState
         when (newState) {
             PeerConnection.IceConnectionState.CLOSED, PeerConnection.IceConnectionState.FAILED, PeerConnection.IceConnectionState.DISCONNECTED -> {
                 statsJob?.cancel()
@@ -444,10 +452,6 @@ public class StreamPeerConnection(
 
     override fun onIceCandidateError(event: IceCandidateErrorEvent?) {
         logger.e { "[onIceCandidateError] #sfu; #$typeTag; event: ${event?.stringify()}" }
-    }
-
-    override fun onConnectionChange(newState: PeerConnection.PeerConnectionState?) {
-        logger.i { "[onConnectionChange] #sfu; #$typeTag; newState: $newState" }
     }
 
     override fun onSelectedCandidatePairChanged(event: CandidatePairChangeEvent?) {

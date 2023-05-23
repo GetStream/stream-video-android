@@ -16,14 +16,9 @@
 
 package io.getstream.video.android.core.stories
 
-import io.getstream.video.android.core.GEO
 import io.getstream.video.android.core.IntegrationTestBase
-import io.getstream.video.android.core.StreamVideoBuilder
 import io.getstream.video.android.core.model.SortField
-import io.getstream.video.android.model.User
-import io.getstream.video.android.model.UserType
 import kotlinx.coroutines.test.runTest
-import org.junit.Ignore
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
@@ -105,27 +100,5 @@ class AudioRoomTest : IntegrationTestBase() {
     fun `for audio rooms it's common to request permissions`() = runTest {
         val result = call.requestPermissions("screenshare", "send-audio")
         assertSuccess(result)
-    }
-
-    @Test
-    @Ignore
-    fun `publishing audio or video as a listener should raise an error`() = runTest {
-        val audioRoom = client.call("audio_room", randomUUID())
-        audioRoom.create()
-
-        val anonClient = StreamVideoBuilder(
-            context = context,
-            apiKey = apiKey,
-            geo = GEO.GlobalEdgeNetwork,
-            user = User(
-                id = "guest",
-                type = UserType.Guest
-            )
-        ).build()
-        Thread.sleep(1000L)
-
-        val anonCall = anonClient.call("audio_room", audioRoom.id)
-        val resultJoin = anonCall.join(create = false)
-        assertSuccess(resultJoin)
     }
 }

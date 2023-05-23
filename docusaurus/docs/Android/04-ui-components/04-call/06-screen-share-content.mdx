@@ -1,43 +1,58 @@
-# ScreenShareContent
 
-The `ScreenShareContent` is a component that allows you to display a video of a screen sharing session. It also includes options to change the UI orientation and to enter or exit the full screen mode. This component is designed for use in video conferencing and other similar applications where users are able to share their entire screens or specific windows.
 
-Internally, this component is used within our `CallParticipants` and similar components, which render the currently active participants' state, including if anyone is sharing their screen or not. If you want to learn more about these components, read about our [Call Participants](../02-participants/02-call-participants.mdx) component.
+# ScreenSharingCallVideoRenderer
 
-Let's see how to use the `ScreenShareContent`.
+The `ScreenSharingCallVideoRenderer` is a Composable component that allows you to display a video of a screen sharing session. It also includes options to change the UI orientation and to enter or exit the full-screen mode. This component is designed for use in video conferencing and other similar applications where users are able to share their entire screens or specific windows.
+
+Internally, this component renders a screen sharing session video as a primary screen and observes participants, which are rendered a list of videos.
+
+Let's see how to use the `ScreenSharingCallVideoRenderer`.
 
 ## Usage
 
-To use the ScreenShareContent component in your app, simply create a new instance of the component and pass in the required parameters. You can combine it with any custom UI or our other components. For example:
+To use the `ScreenSharingCallVideoRenderer` component in your app, you should observe the screen sharing session from the call state and check whether the session exists. If a screen sharing session is valid, you can render the screen sharing session and all other participants with `ScreenSharingCallVideoRenderer` Composable. If not, you should render a regular video call with [RegularCallVideoRenderer](../05-participants/02-call-regular-video-renderer.mdx).
 
 ```kotlin
-// ... rest of your UI
-ScreenShareContent(
-    call = myCall,
-    screenSharingSession = activeScreenSharingSession,
-    isFullscreen = isFullScreen,
-    modifier = Modifier.fillMaxSize(),
-    onCallAction = { action ->
-        // Handle call action
-    },
-    onRender = { view ->
-        // Handle video render event
-    }
-)
+// observe a screen sharing session from the call state.
+val screenSharingSession by call.state.screenSharingSession.collectAsState()
 
+if (screenSharingSession != null) {
+    ScreenSharingCallVideoRenderer(
+       call = call,
+       screenSharingSession = screenSharingSession!!,
+       modifier = Modifier.fillMaxSize(),
+    )
+} else {
+   // render a regular video call screen
+   RegularCallVideoRenderer(
+       call = call,
+       modifier = modifier,
+       onRender = onRender,
+   )
+}
 ```
 
 There are a few state parameters you're providing here:
 
 - `Call`: Represents the Call in which the screen sharing session is being shown. Usually the Call where the user is active.
-- `ScreenSharingSession`: The session which contains the screen share track and more details about the user.
-- `isFullscreen`: Indicates whether the screen sharing session is currently in full screen mode or not.
+- `ScreenSharingSession`: The session which contains a [ParticipantState](../05-participants/01-call-participant_state.mdx) to provide the screen share track and more details about the user.
 
 Using this component, you'll likely see something similar to the following UI:
 
-![Default ScreenShareContent](https://user-images.githubusercontent.com/17215808/223407102-29e1b5e0-a1c2-4398-96ea-7434c76238a5.jpeg)
+![Screen Sharing](../../assets/compose_screensharing_portrait.png)
 
-You can see the screen share content here, with the desktop being the center of the UI, as well as a couple of icons and actions at the very bottom. Based on if you're in Landscape or Portrait, the UI will update accordingly.
+The `ScreenSharingCallVideoRenderer` Composable supports zoomable functions for the sharing session like the image below:
+
+![Screen Sharing](../../assets/compose_screensharing_zoom.png)
+
+If you use `CallVideoRenderer`, it will render a screen sharing session video if there's a valid screen sharing session. If not, it will render a regular video call.
+
+```kotlin
+CallVideoRenderer(
+    modifier = Modifier.fillMaxSize(),
+    call: call,
+)
+```
 
 Let's see how to handle the UI actions.
 
@@ -48,8 +63,8 @@ When it comes to handling actions and customizing the behavior of the component,
 - `onCallAction(CallAction)`: Responds to different `CallAction`s. Actions are used to represent different types of interactions that can be performed during the call. In this case, toggling the screen configuration to be full screen or not or the orientation.
 - `onRender(View)`: Used to respond to render events. The View object represents the `VideoView` that holds the screen sharing session.
 
-You can easily override these parameters and customize the behavior as seen in the snippet above.
+You can easily override these parameters and customize the behavior, as seen in the snippet above.
 
 ## Customization
 
-As far as UI customization goes, the component is very specific and doesn't allow much to be changed. It's very simple and if you need to customize the behavior or UI, it's best if you build your own variant, using the state that's provided in our `ViewModel`. You can still customize the `Modifier` parameter to apply custom styling to `ScreenShareContent`.
+As far as UI customization goes, the component is very specific and doesn't allow much to be changed. It's very simple, and if you need to customize the behavior or UI, it's best if you build your own variant using the state that's provided in our `ViewModel`. You can still customize the `Modifier` parameter to apply custom styling to `ScreenShareContent`.

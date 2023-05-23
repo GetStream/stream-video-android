@@ -68,13 +68,13 @@ public fun CallAppBar(
     onBackPressed: () -> Unit = {},
     onCallAction: (CallAction) -> Unit = {},
     title: String = stringResource(id = R.string.stream_video_default_app_bar_title),
-    leadingContent: (@Composable () -> Unit)? = {
+    leadingContent: (@Composable RowScope.() -> Unit)? = {
         DefaultCallAppBarLeadingContent(onBackPressed)
     },
     centerContent: (@Composable (RowScope.() -> Unit))? = {
-        DefaultCallAppBarCenterContent(title)
+        DefaultCallAppBarCenterContent(call, title)
     },
-    trailingContent: (@Composable () -> Unit)? = {
+    trailingContent: (@Composable RowScope.() -> Unit)? = {
         DefaultCallAppBarTrailingContent(
             call = call,
             onCallAction = onCallAction
@@ -114,11 +114,11 @@ public fun CallAppBar(
             ),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        leadingContent?.invoke()
+        leadingContent?.invoke(this)
 
         centerContent?.invoke(this)
 
-        trailingContent?.invoke()
+        trailingContent?.invoke(this)
     }
 }
 
@@ -148,7 +148,10 @@ internal fun DefaultCallAppBarLeadingContent(
  * Default center slot, representing the call title.
  */
 @Composable
-internal fun RowScope.DefaultCallAppBarCenterContent(title: String) {
+internal fun RowScope.DefaultCallAppBarCenterContent(call: Call, title: String) {
+
+    val isReconnecting by call.state.isReconnecting.collectAsStateWithLifecycle()
+
     Text(
         modifier = Modifier
             .weight(1f)
@@ -156,7 +159,11 @@ internal fun RowScope.DefaultCallAppBarCenterContent(title: String) {
                 start = VideoTheme.dimens.callAppBarCenterContentSpacingStart,
                 end = VideoTheme.dimens.callAppBarCenterContentSpacingEnd
             ),
-        text = title,
+        text = if (isReconnecting) {
+            stringResource(id = R.string.stream_video_call_reconnecting)
+        } else {
+            title
+        },
         fontSize = VideoTheme.dimens.topAppbarTextSize,
         color = VideoTheme.colors.callDescription,
         maxLines = 1,

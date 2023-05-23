@@ -28,8 +28,11 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.getstream.video.android.compose.ui.components.call.renderer.ParticipantLabel
 import io.getstream.video.android.compose.ui.components.connection.ConnectionQualityIndicator
 import io.getstream.video.android.compose.ui.components.video.VideoRenderer
+import io.getstream.video.android.compose.ui.components.video.VideoScalingType
 import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.model.ScreenSharingSession
+import me.saket.telephoto.zoomable.rememberZoomableState
+import me.saket.telephoto.zoomable.zoomable
 import stream.video.sfu.models.TrackType
 
 /**
@@ -47,20 +50,28 @@ public fun ScreenShareVideoRenderer(
     modifier: Modifier = Modifier,
     labelPosition: Alignment = Alignment.BottomStart,
     isShowConnectionQualityIndicator: Boolean = true,
+    isZoomable: Boolean = true,
     onRender: (View) -> Unit = {}
 ) {
     val screenShareParticipant = session.participant
     val mediaTrack by session.participant.screenSharingTrack.collectAsState()
 
+    val zoomableModifier = if (isZoomable) {
+        Modifier.zoomable(rememberZoomableState())
+    } else {
+        Modifier
+    }
+
     Box(modifier = modifier) {
         VideoRenderer(
-            modifier = Modifier
+            modifier = zoomableModifier
                 .fillMaxSize()
                 .align(Alignment.Center),
             call = call,
             mediaTrack = mediaTrack,
             onRender = onRender,
             trackType = TrackType.TRACK_TYPE_SCREEN_SHARE,
+            videoScalingType = VideoScalingType.SCALE_ASPECT_FIT,
             sessionId = session.participant.sessionId
         )
 

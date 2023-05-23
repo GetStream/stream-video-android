@@ -34,7 +34,6 @@ import io.getstream.video.android.core.events.ChangePublishQualityEvent
 import io.getstream.video.android.core.events.ICETrickleEvent
 import io.getstream.video.android.core.events.JoinCallResponseEvent
 import io.getstream.video.android.core.events.ParticipantJoinedEvent
-import io.getstream.video.android.core.events.PublisherAnswerEvent
 import io.getstream.video.android.core.events.SfuDataEvent
 import io.getstream.video.android.core.events.SubscriberOfferEvent
 import io.getstream.video.android.core.events.TrackPublishedEvent
@@ -162,7 +161,7 @@ public class RtcSession internal constructor(
 
     internal val lastVideoStreamAdded = MutableStateFlow<MediaStream?>(null)
 
-    internal val _peerConnectionStates = MutableStateFlow<Pair<PeerConnection.IceConnectionState?, PeerConnection.IceConnectionState?>?>(null)
+    internal val _peerConnectionStates = MutableStateFlow<Pair<PeerConnection.PeerConnectionState?, PeerConnection.PeerConnectionState?>?>(null)
 
     internal val sessionId = clientImpl.sessionId
 
@@ -260,10 +259,6 @@ public class RtcSession internal constructor(
     internal var sfuConnectionModule: SfuConnectionModule
 
     init {
-
-        println("AAA sfu token $sfuToken")
-        println("AAA sfu url $sfuUrl")
-
         val dataStore = StreamUserDataStore.instance()
         val user = dataStore.user.value
         val apiKey = dataStore.apiKey.value
@@ -312,10 +307,9 @@ public class RtcSession internal constructor(
         }
         errorJob = coroutineScope.launch {
             sfuConnectionModule.sfuSocket.errors.collect() {
+                logger.e(it) { "permanent failure on socket connection" }
                 if (clientImpl.developmentMode) {
                     throw it
-                } else {
-                    logger.e(it) { "permanent failure on socket connection" }
                 }
             }
         }
@@ -684,7 +678,7 @@ public class RtcSession internal constructor(
             encoding.active = enabledRids?.get(encoding.rid ?: "") ?: false
         }
 
-        logger.i { "marking layers active $enabledRids " }
+        logger.i { "video quality: marking layers active $enabledRids " }
 
         transceiver.sender.parameters.encodings.clear()
         transceiver.sender.parameters.encodings.addAll(encodings)
@@ -831,7 +825,6 @@ public class RtcSession internal constructor(
                 when (event) {
                     is ICETrickleEvent -> handleIceTrickle(event)
                     is SubscriberOfferEvent -> handleSubscriberOffer(event)
-                    is PublisherAnswerEvent -> TODO()
                     // this dynascale event tells the SDK to change the quality of the video it's uploading
                     is ChangePublishQualityEvent -> updatePublishQuality(event)
 
@@ -967,7 +960,7 @@ public class RtcSession internal constructor(
 
                 val captureResolution = call.camera.resolution.value
 
-                val transceivers = peerConnection.connection.transceivers
+                val transceivers = peerConnection.connection.transceivers.toList()
                 val trackInfos = transceivers.filter {
                     it.direction == RtpTransceiver.RtpTransceiverDirection.SEND_ONLY && it.sender?.track() != null
                 }.map { transceiver ->

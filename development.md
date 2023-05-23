@@ -305,6 +305,14 @@ What's better seems to depend on internal optimizations in Compose
 - How well does it's diffing algorithm work
 - How well optimized are multiple stateflows & observing them
 
+### Debugging video quality
+
+- If you search for "video quality" in the logs you'll see the selected and max resolution
+- Next if you search for input_fps in the logs, you'll see any reasons the quality is limited by webrtc
+- Call:WebRTC has more data
+- Peer connection stats also have more info
+- Adding a debugger in DebugInfo can also help
+- Also see MediaManager.selectDesiredResolution
 
 ### Docs
 

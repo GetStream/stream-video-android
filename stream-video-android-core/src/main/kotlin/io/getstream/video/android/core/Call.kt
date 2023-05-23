@@ -25,6 +25,7 @@ import io.getstream.result.Result.Failure
 import io.getstream.result.Result.Success
 import io.getstream.video.android.core.call.RtcSession
 import io.getstream.video.android.core.events.VideoEventListener
+import io.getstream.video.android.core.internal.network.NetworkStateProvider
 import io.getstream.video.android.core.model.MuteUsersData
 import io.getstream.video.android.core.model.SortField
 import io.getstream.video.android.core.model.UpdateUserPermissionsData
@@ -62,6 +63,146 @@ import stream.video.sfu.models.TrackType
 import stream.video.sfu.models.VideoDimension
 
 /**
+ * Monitors
+ * - Peer connection states
+ * - Network up/down
+ *
+ * And calls call.reconnectOrSwitchSfu() when needed
+ */
+public class CallHealthMonitor(val call: Call, val callScope: CoroutineScope) {
+    private val logger by taggedLogger("Call:HealthMonitor")
+
+    private val network by lazy { call.clientImpl.connectionModule.networkStateProvider }
+
+    private val supervisorJob = SupervisorJob()
+    private val scope = CoroutineScope(callScope.coroutineContext + supervisorJob)
+
+    var reconnectInProgress: Boolean = false
+    var reconnectionAttempts = 0
+
+    val badStates = listOf(
+        PeerConnection.PeerConnectionState.DISCONNECTED,
+        PeerConnection.PeerConnectionState.FAILED,
+        PeerConnection.PeerConnectionState.CLOSED
+    )
+    val goodStates = listOf(
+        PeerConnection.PeerConnectionState.NEW, // New is good, means we're not using it yet
+        PeerConnection.PeerConnectionState.CONNECTED,
+        PeerConnection.PeerConnectionState.CONNECTING,
+    )
+
+    private suspend fun reconnect() {
+        if (reconnectInProgress) return
+        reconnectInProgress = true
+        reconnectionAttempts++
+
+        // don't hammer the server
+        if (reconnectionAttempts > 1) delay(400L)
+
+        val subscriberState = call.session?.subscriber?.state?.value
+        val publisherState = call.session?.publisher?.state?.value
+        val healthyPeerConnections = subscriberState in goodStates && publisherState in goodStates
+
+        logger.i { "reconnect attempt $reconnectionAttempts, peers are healthy: $healthyPeerConnections publisher $publisherState subscriber $subscriberState" }
+
+        if (healthyPeerConnections) {
+            // don't reconnect if things are healthy
+            reconnectionAttempts = 0
+            call.state._connection.value = RtcConnectionState.Connected
+        } else {
+            call.reconnectOrSwitchSfu()
+        }
+        reconnectInProgress = false
+    }
+
+    internal val networkStateListener = object : NetworkStateProvider.NetworkStateListener {
+        override fun onConnected() {
+            logger.i { "network connected, attempting to reconnect" }
+            scope.launch {
+                reconnect()
+            }
+        }
+
+        override fun onDisconnected() {
+            val connectionState = call.state._connection.value
+            logger.i { "network disconnected. connection is $connectionState marking the connection as reconnecting" }
+            if (connectionState is RtcConnectionState.Joined || connectionState == RtcConnectionState.Connected) {
+                call.state._connection.value = RtcConnectionState.Reconnecting
+            }
+        }
+    }
+
+    fun unhealthyPeer() {
+        scope.launch {
+            reconnect()
+        }
+    }
+
+    fun healthyPeer() {
+        call.state._connection.value = RtcConnectionState.Connected
+        reconnectionAttempts = 0
+    }
+
+    fun monitorPeerConnection() {
+        val session = call.session
+        scope.launch {
+            session?.let {
+                // failed and closed indicate we should retry connecting to this or another SFU
+                // disconnected is temporary, only if it lasts for a certain duration we should reconnect or switch
+                it.subscriber?.state?.collect {
+                    logger.w { "subscriber ice connection state changed to $it" }
+                    if (it in badStates) {
+                        unhealthyPeer()
+                    } else if (it in goodStates) {
+                        healthyPeer()
+                    }
+                }
+            }
+        }
+
+        scope.launch {
+            session?.let {
+                // failed and closed indicate we should retry connecting to this or another SFU
+                // disconnected is temporary, only if it lasts for a certain duration we should reconnect or switch
+                it.publisher?.state?.collect {
+                    logger.w { "publisher ice connection state changed to $it" }
+                    if (it in badStates) {
+                        unhealthyPeer()
+                    } else if (it in goodStates) {
+                        healthyPeer()
+                    }
+                }
+            }
+        }
+    }
+
+    suspend fun monitorInterval() {
+        while (true) {
+            delay(2000L)
+            val subscriberState = call.session?.subscriber?.state?.value
+            // see if we need to reconnect
+            if (subscriberState in badStates) {
+                logger.i { "ice connection state is $subscriberState, attempting to reconnect" }
+                reconnect()
+            }
+            // the check every 2 seconds handles scenarios where the connect goes away and doesn't reconnect
+        }
+    }
+
+    fun start() {
+        network.subscribe(networkStateListener)
+        monitorPeerConnection()
+
+        scope.launch { monitorInterval() }
+    }
+
+    fun stop() {
+        supervisorJob.cancel()
+        network.unsubscribe(networkStateListener)
+    }
+}
+
+/**
  * The call class gives you access to all call level API calls
  *
  * @sample
@@ -86,6 +227,7 @@ public class Call(
     val state = CallState(this, user)
 
     val sessionId by lazy { session?.sessionId }
+    private val network by lazy { clientImpl.connectionModule.networkStateProvider }
 
     /** Camera gives you access to the local camera */
     val camera by lazy { mediaManager.camera }
@@ -97,6 +239,8 @@ public class Call(
 
     private val supervisorJob = SupervisorJob()
     private val scope = CoroutineScope(clientImpl.scope.coroutineContext + supervisorJob)
+
+    val monitor = CallHealthMonitor(this, scope)
 
     /** Session handles all real time communication for video and audio */
     internal var session: RtcSession? = null
@@ -185,6 +329,8 @@ public class Call(
         create: Boolean = false,
         createOptions: CreateCallOptions? = null
     ): Result<RtcSession> {
+        // if we are a guest user, make sure we wait for the token before running the join flow
+        clientImpl.guestUserJob?.await()
         // the join flow should retry up to 3 times
         // if the error is not permanent
         // and fail immediately on permanent errors
@@ -274,25 +420,7 @@ public class Call(
             }
         }
 
-        // TODO: move this
-        scope.launch {
-            session?.let {
-                // failed and closed indicate we should retry connecting to this or another SFU
-                // disconnected is temporary, only if it lasts for a certain duration we should reconnect or switch
-                // TODO: move to session
-
-                val badStates = listOf(
-                    PeerConnection.IceConnectionState.DISCONNECTED,
-                    PeerConnection.IceConnectionState.FAILED,
-                    PeerConnection.IceConnectionState.CLOSED
-                )
-
-                it.subscriber?.state?.filter { it in badStates }?.collect {
-                    logger.w { "ice connection state changed to $it" }
-                    reconnectOrSwitchSfu()
-                }
-            }
-        }
+        monitor.start()
 
         client.state.setActiveCall(this)
 
@@ -302,13 +430,15 @@ public class Call(
     }
 
     suspend fun reconnectOrSwitchSfu() {
-        // TODO: we should run this on repeat until we are connected again
-        // TODO: we should only run one at the time of these
         // mark us as reconnecting
-        if (state._connection.value is RtcConnectionState.Joined) {
+        val connectionState = state._connection.value
+
+        if (connectionState is RtcConnectionState.Joined || connectionState == RtcConnectionState.Connected) {
             state._connection.value = RtcConnectionState.Reconnecting
         }
-        val online = true
+
+        // see if we are online before attempting to reconnect
+        val online = network.isConnected()
 
         if (online) {
             // start by retrying the current connection
@@ -598,9 +728,9 @@ public class Call(
     }
 
     fun cleanup() {
+        monitor.stop()
         session?.cleanup()
         supervisorJob.cancel()
-        // TODO: does anything else need to cleaned up?
     }
 }
 

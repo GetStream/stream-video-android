@@ -82,7 +82,7 @@ public class StreamPeerConnectionFactory(private val context: Context) {
                 .setInjectableLogger({ message, severity, label ->
                     when (severity) {
                         Logging.Severity.LS_VERBOSE -> {
-                            webRtcLogger.v { "[onLogMessage] label: $label, message: $message" }
+                            // webRtcLogger.v { "[onLogMessage] label: $label, message: $message" }
                         }
                         Logging.Severity.LS_INFO -> {
                             webRtcLogger.i { "[onLogMessage] label: $label, message: $message" }
@@ -209,7 +209,10 @@ public class StreamPeerConnectionFactory(private val context: Context) {
             configuration = configuration,
             observer = peerConnection
         )
-        return peerConnection.apply { initialize(connection) }
+        webRtcLogger.d { "type $type $peerConnection is now monitoring $connection" }
+        peerConnection.initialize(connection)
+
+        return peerConnection
     }
 
     /**

@@ -481,7 +481,7 @@ public final class io/getstream/video/android/compose/ui/components/background/C
 }
 
 public final class io/getstream/video/android/compose/ui/components/call/CallAppBarKt {
-	public static final fun CallAppBar (Lio/getstream/video/android/core/Call;Landroidx/compose/ui/Modifier;Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function1;Ljava/lang/String;Lkotlin/jvm/functions/Function2;Lkotlin/jvm/functions/Function3;Lkotlin/jvm/functions/Function2;Landroidx/compose/runtime/Composer;II)V
+	public static final fun CallAppBar (Lio/getstream/video/android/core/Call;Landroidx/compose/ui/Modifier;Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function1;Ljava/lang/String;Lkotlin/jvm/functions/Function3;Lkotlin/jvm/functions/Function3;Lkotlin/jvm/functions/Function3;Landroidx/compose/runtime/Composer;II)V
 }
 
 public final class io/getstream/video/android/compose/ui/components/call/CallContainerKt {
@@ -730,7 +730,11 @@ public final class io/getstream/video/android/compose/ui/components/call/rendere
 }
 
 public final class io/getstream/video/android/compose/ui/components/call/renderer/internal/ScreenShareVideoRendererKt {
-	public static final fun ScreenShareVideoRenderer (Lio/getstream/video/android/core/Call;Lio/getstream/video/android/core/model/ScreenSharingSession;Landroidx/compose/ui/Modifier;Landroidx/compose/ui/Alignment;ZLkotlin/jvm/functions/Function1;Landroidx/compose/runtime/Composer;II)V
+	public static final fun ScreenShareVideoRenderer (Lio/getstream/video/android/core/Call;Lio/getstream/video/android/core/model/ScreenSharingSession;Landroidx/compose/ui/Modifier;Landroidx/compose/ui/Alignment;ZZLkotlin/jvm/functions/Function1;Landroidx/compose/runtime/Composer;II)V
+}
+
+public final class io/getstream/video/android/compose/ui/components/call/renderer/internal/ScreenSharingCallVideoRendererKt {
+	public static final fun ScreenSharingCallVideoRenderer (Lio/getstream/video/android/core/Call;Lio/getstream/video/android/core/model/ScreenSharingSession;Landroidx/compose/ui/Modifier;ZLkotlin/jvm/functions/Function1;Landroidx/compose/runtime/Composer;II)V
 }
 
 public final class io/getstream/video/android/compose/ui/components/call/ringing/ComposableSingletons$RingingCallContentKt {

@@ -141,6 +141,7 @@ public class StreamVideoBuilder @JvmOverloads constructor(
             }
         }
         if (user.type == UserType.Guest) {
+            connectionModule.updateAuthType("anonymous")
             client.setupGuestUser(user)
         } else if (user.type == UserType.Anonymous) {
             connectionModule.updateAuthType("anonymous")

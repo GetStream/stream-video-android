@@ -19,12 +19,11 @@ package io.getstream.video.android.compose.ui.components.call.renderer.internal
 import android.content.res.Configuration.ORIENTATION_PORTRAIT
 import android.view.View
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalConfiguration
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.getstream.video.android.core.Call
-import io.getstream.video.android.core.ParticipantState
 import io.getstream.video.android.core.model.ScreenSharingSession
 
 /**
@@ -34,21 +33,21 @@ import io.getstream.video.android.core.model.ScreenSharingSession
  *
  * @param call The call that contains all the participants state and tracks.
  * @param session The screen sharing session which is active.
- * @param participants List of participants currently in the call.
  * @param modifier Modifier for styling.
  * @param onRender Handler when each of the Video views render their first frame.
  */
 @Composable
-internal fun ScreenSharingCallVideoRenderer(
+public fun ScreenSharingCallVideoRenderer(
     call: Call,
     session: ScreenSharingSession,
-    participants: List<ParticipantState>,
     modifier: Modifier = Modifier,
+    isZoomable: Boolean = true,
     onRender: (View) -> Unit = {},
 ) {
     val configuration = LocalConfiguration.current
     val orientation = configuration.orientation
-    val screenSharingSession by call.state.screenSharingSession.collectAsState(initial = null)
+    val screenSharingSession by call.state.screenSharingSession.collectAsStateWithLifecycle()
+    val participants by call.state.participants.collectAsStateWithLifecycle()
 
     if (orientation == ORIENTATION_PORTRAIT) {
         PortraitScreenSharingVideoRenderer(
@@ -57,6 +56,7 @@ internal fun ScreenSharingCallVideoRenderer(
             participants = participants,
             primarySpeaker = screenSharingSession?.participant,
             modifier = modifier,
+            isZoomable = isZoomable,
             onRender = onRender,
         )
     } else {
@@ -66,6 +66,7 @@ internal fun ScreenSharingCallVideoRenderer(
             participants = participants,
             primarySpeaker = screenSharingSession?.participant,
             modifier = modifier,
+            isZoomable = isZoomable,
             onRender = onRender,
         )
     }

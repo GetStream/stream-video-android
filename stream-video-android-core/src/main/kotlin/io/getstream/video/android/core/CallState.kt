@@ -32,7 +32,6 @@ import io.getstream.video.android.core.events.SFUHealthCheckEvent
 import io.getstream.video.android.core.events.SubscriberOfferEvent
 import io.getstream.video.android.core.events.TrackPublishedEvent
 import io.getstream.video.android.core.events.TrackUnpublishedEvent
-import io.getstream.video.android.core.internal.network.NetworkStateProvider
 import io.getstream.video.android.core.model.ScreenSharingSession
 import io.getstream.video.android.core.permission.PermissionRequest
 import io.getstream.video.android.core.utils.mapState
@@ -97,7 +96,12 @@ public sealed interface RtcConnectionState {
     /**
      * We set the state to Joined as soon as the call state is available
      */
-    public data class Joined(val session: RtcSession) : RtcConnectionState
+    public data class Joined(val session: RtcSession) : RtcConnectionState // joined, participant state is available, you can render the call. Video isn't ready yet
+
+    /**
+     * True when the peer connections are ready
+     */
+    public object Connected : RtcConnectionState // connected to RTC, able to receive and send video
 
     /**
      * Reconnecting is true whenever Rtc isn't available and trying to recover
@@ -127,23 +131,10 @@ public class CallState(private val call: Call, private val user: User) {
     private val logger by taggedLogger("CallState")
 
     internal val _connection = MutableStateFlow<RtcConnectionState>(RtcConnectionState.PreJoin)
-    val connection: StateFlow<RtcConnectionState> = _connection
+    public val connection: StateFlow<RtcConnectionState> = _connection
 
-    private val networkStateListener = object : NetworkStateProvider.NetworkStateListener {
-        override fun onConnected() {
-            // the peer connection will pick this up automatically
-            // maybe we need to speed it up, but lets evaluate and see if its needed
-        }
-
-        override fun onDisconnected() {
-            if (_connection.value is RtcConnectionState.Joined) {
-                _connection.value = RtcConnectionState.Reconnecting
-            }
-        }
-    }
-    init {
-        val network = call.clientImpl.connectionModule.networkStateProvider
-        network.subscribe(networkStateListener)
+    public val isReconnecting: StateFlow<Boolean> = _connection.mapState {
+        it is RtcConnectionState.Reconnecting
     }
 
     private val _participants: MutableStateFlow<SortedMap<String, ParticipantState>> =
@@ -184,21 +175,25 @@ public class CallState(private val call: Call, private val user: User) {
      * * audio only participants by when they joined
      *
      */
-    internal val _pinnedParticipants: MutableStateFlow<Map<String, OffsetDateTime>> = MutableStateFlow(emptyMap())
+    internal val _pinnedParticipants: MutableStateFlow<Map<String, OffsetDateTime>> =
+        MutableStateFlow(emptyMap())
     val pinnedParticipants: StateFlow<Map<String, OffsetDateTime>> = _pinnedParticipants
 
     val scope = CoroutineScope(context = DispatcherProvider.IO)
 
-    public val sortedParticipants = _participants.combine(_pinnedParticipants) { participants, pinned ->
-        participants.values.sortedWith(compareBy(
-            { pinned.containsKey(it.sessionId) },
-            { it.dominantSpeaker.value },
-            { it.screenSharingEnabled.value },
-            { it.lastSpeakingAt.value },
-            { it.videoEnabled.value },
-            { it.joinedAt.value }
-        ))
-    }.stateIn(scope, SharingStarted.WhileSubscribed(), emptyList())
+    public val sortedParticipants =
+        _participants.combine(_pinnedParticipants) { participants, pinned ->
+            participants.values.sortedWith(
+                compareBy(
+                    { pinned.containsKey(it.sessionId) },
+                    { it.dominantSpeaker.value },
+                    { it.screenSharingEnabled.value },
+                    { it.lastSpeakingAt.value },
+                    { it.videoEnabled.value },
+                    { it.joinedAt.value }
+                )
+            )
+        }.stateIn(scope, SharingStarted.WhileSubscribed(), emptyList())
 
     /** Members contains the list of users who are permanently associated with this call. This includes users who are currently not active in the call
      * As an example if you invite "john", "bob" and "jane" to a call and only Jane joins.
@@ -296,7 +291,7 @@ public class CallState(private val call: Call, private val user: User) {
     val ingress: StateFlow<CallIngressResponse?> = _ingress
 
     private val userToSessionIdMap = participants.mapState { participants ->
-        participants.map { it.user.value.id to it.sessionId }.toMap()
+        participants.associate { it.user.value.id to it.sessionId }
     }
 
     internal val _hasPermissionMap = mutableMapOf<String, StateFlow<Boolean>>()
@@ -314,7 +309,7 @@ public class CallState(private val call: Call, private val user: User) {
     public val errors: StateFlow<List<ErrorEvent>> = _errors
 
     fun handleEvent(event: VideoEvent) {
-        logger.d { "Updating call state with event $event" }
+        logger.d { "Updating call state with event ${event::class.java}" }
         when (event) {
             is BlockedUserEvent -> {
                 val newBlockedUsers = _blockedUsers.value.toMutableSet()

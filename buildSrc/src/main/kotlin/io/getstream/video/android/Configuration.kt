@@ -3,7 +3,7 @@ package io.getstream.video.android
 object Configuration {
     const val compileSdk = 33
     const val targetSdk = 33
-    const val minSdk = 21
+    const val minSdk = 24
     const val majorVersion = 0
     const val minorVersion = 0
     const val patchVersion = 1
