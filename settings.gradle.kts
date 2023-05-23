@@ -33,10 +33,3 @@ include(":stream-video-android-datastore")
 include(":stream-video-android-tooling")
 include(":stream-video-android-mock")
 include(":stream-video-android-bom")
-
-// Examples and guide projects
-include(":examples:tutorial:tutorial-starter")
-include(":examples:tutorial:tutorial-final")
-
-include(":examples:chat-with-video:chat-with-video-final")
-include(":examples:chat-with-video:chat-with-video-starter")
