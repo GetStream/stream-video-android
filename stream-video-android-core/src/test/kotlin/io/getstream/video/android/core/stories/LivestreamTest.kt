@@ -19,7 +19,6 @@ package io.getstream.video.android.core.stories
 import com.google.common.truth.Truth.assertThat
 import io.getstream.video.android.core.IntegrationTestBase
 import kotlinx.coroutines.test.runTest
-import org.junit.Ignore
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
@@ -91,7 +90,6 @@ class LivestreamTest : IntegrationTestBase() {
         // Create a publishing token
         // TODO: do we ask the coordinator for it? or generate it locally?
     }
-
 
     @Test
     fun `call should expose participant count, time running stats`() = runTest {

@@ -22,9 +22,7 @@ import io.getstream.result.Error
 import io.getstream.video.android.core.errors.VideoErrorCode
 import io.getstream.video.android.model.User
 import io.getstream.video.android.model.UserType
-import kotlinx.coroutines.async
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.runTest
 import org.junit.Ignore
 import org.junit.Test
@@ -79,7 +77,6 @@ class ClientAndAuthTest : TestBase() {
         ).build()
         val clientImpl = client as StreamVideoImpl
         clientImpl.guestUserJob?.await()
-
     }
 
     @Test

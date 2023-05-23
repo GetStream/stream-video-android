@@ -16,14 +16,9 @@
 
 package io.getstream.video.android.core.stories
 
-import io.getstream.video.android.core.GEO
 import io.getstream.video.android.core.IntegrationTestBase
-import io.getstream.video.android.core.StreamVideoBuilder
 import io.getstream.video.android.core.model.SortField
-import io.getstream.video.android.model.User
-import io.getstream.video.android.model.UserType
 import kotlinx.coroutines.test.runTest
-import org.junit.Ignore
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
@@ -106,5 +101,4 @@ class AudioRoomTest : IntegrationTestBase() {
         val result = call.requestPermissions("screenshare", "send-audio")
         assertSuccess(result)
     }
-
 }
