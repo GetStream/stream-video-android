@@ -26,9 +26,13 @@ val joinResult = call.join(create=true)
 `default` is a call type. There are 4 built-in call types and you can also create your own.
 The call type controls the permissions and which features are enabled.
 
+The second argument is the call id and is optional. It's convenient to specify an ID if the call is associated with an object in your database.
+As an example if you're building a ride sharing app like Uber, you could use the ride id as the call id to easily align with your internal systems.
+
 ### Rendering video
 
-This Jetpack Compose example shows how you can iterate over all participants in a call:
+The call's state is available in [`call.state`](../03-guides/03-call-and-participant-state.mdx) and you'll often work with `call.state.participants`.
+Have a look below for a basic Compose example of how to render the video of all participants.
 
 ```kotlin
 val participants by call.state.participants.collectAsState()
@@ -53,6 +57,31 @@ CallSingleVideoRenderer(
 ```
 
 The fields available on the participants are documented [here](https://github.com/GetStream/stream-video-android/blob/main/docusaurus/docs/Android/02-guides/03-call-and-participant-state.mdx#participant-state).
+
+### Camera & Audio
+
+Most video apps will show buttons to mute/unmute the audio or video and flip the camera.
+The example below shows how to use the camera
+
+```kotlin
+val call = client.call("default", "123")
+val camera = call.camera
+camera.enable()
+camera.disable()
+camera.flip()
+```
+
+And here's how to enable the microphone or control the speaker volume.
+
+```kotlin
+call.microphone.enable()
+call.microphone.disable()
+
+call.speaker.setVolume(100)
+call.speaker.setVolume(0)
+call.speaker.enableSpeakerPhone()
+```
+
 
 ### UI components
 
