@@ -53,5 +53,25 @@ call.microphone.selectedDevice // currently selected camera
 
 ### Speaker Manager
 
+The speaker allows you to enable/disable the speaker phone and set the volume.
 
-TODO:
+```kotlin
+speaker.setVolume(100)
+speaker.setVolume(0)
+
+speaker.enableSpeakerPhone()
+speaker.disableSpeakerPhone()
+```
+
+
+### Pause & Resume
+
+You'll often want to pause and resume the camera and microphone.
+If the device is locked or your receive an incoming call many apps pause the camera.
+The APIs make this easy to do
+
+```kotlin
+// call.speaker, call.camera and call.microphone all support this
+camera.pause()
+camera.resume() // goes back to the prior state. if it was off, nothing changes, if it was on, it resumes
+```
