@@ -1,12 +1,11 @@
-`---
+---
 title: Client & Authentication
 description: How to setup the client and authenticate
 ---
 
 ## Client & Auth
 
-Before you join a call you need to setup the video client.
-This example shows a basic setup:
+Before joining a call, it is necessary to set up the video client. Here's a basic example:
 
 ```kotlin
 val client = StreamVideoBuilder(
@@ -18,16 +17,34 @@ val client = StreamVideoBuilder(
 ).build()
 ```
 
-* The API Key you can find in the dashboard.
+* The API Key can be found in your dashboard.
 * The user can be either authenticated, anonymous or guest.
-* Note that you can store custom data on the user object if needed.
+* Note: You can store custom data on the user object, if required.
 
-Typically, you'll want to initialize the client in your app's `Application` class or a DI module.
+Typically, you'll want to initialize the client in your app's `Application` class or a dependency injection module.
 
 ### Generating a token
 
-* Tokens are generated server side.
-They provide a way to authenticate a user or give access to a specific set of calls.
+* Tokens need to be generated server side. You can use our server side SDKs to quickly add support for this.
+Typically you integrate this into the part of your codebase where you login or register users.
+The tokens provide a way to authenticate a user or give access to a specific set of calls.
+
+* Here's a valid user and token to help you get started on the client side, before integrating with your backend API
+
+export const Highlight = ({children, color}) => (
+  <span
+    style={{
+      backgroundColor: color,
+      borderRadius: '2px',
+      color: '#fff',
+      padding: '0.2rem',
+    }}>
+    {children}
+  </span>
+);
+
+<Highlight color="#25c2a0">Docusaurus green</Highlight> and <Highlight color="#1877F2">Facebook blue</Highlight> are my favorite colors.
+
 
 ### Different types of users
 
@@ -69,7 +86,7 @@ val streamVideo = StreamVideoBuilder(
     user = user,
     token = token,
     tokenProvider = { error ->
-        testData.tokens["thierry"]!!
+        // make an API call here to get a new token from your backend
     },
     loggingLevel = LoggingLevel.INFO,
 ).build()
