@@ -377,26 +377,28 @@ internal class StreamVideoImpl internal constructor(
         }
     }
 
-    /**
-     * @see StreamVideo.deleteDevice
-     */
-    override suspend fun deleteDevice(id: String): Result<Unit> {
-        logger.d { "[deleteDevice] id: $id" }
-
-        // TODO: handle this when we have push on the backend
-        return wrapAPICall {}
+    private fun removeStoredDeivce(device: Device) {
+        logger.d { "[storeDevice] device: device" }
+        scope.launch {
+            val dataStore = StreamUserDataStore.instance()
+            dataStore.updateUserDevices(
+                UserDevices(
+                    dataStore.userDevices.value?.let {
+                        it.devices.filter { it.id != device.id }
+                    } ?: listOf()
+                )
+            )
+        }
     }
 
     /**
-     * @see StreamVideo.removeDevices
+     * @see StreamVideo.deleteDevice
      */
-    fun removeDevices(devices: List<io.getstream.video.android.model.Device>) {
-        scope.launch {
-            val operations = devices.map {
-                async { deleteDevice(it.id) }
-            }
-
-            operations.awaitAll()
+    override suspend fun deleteDevice(device: Device): Result<Unit> {
+        logger.d { "[deleteDevice] device: $device" }
+        return wrapAPICall {
+            connectionModule.devicesApi.deleteDevice(device.id, userId)
+            removeStoredDeivce(device)
         }
     }
 

@@ -89,10 +89,10 @@ public interface StreamVideo {
     /**
      * Remove a device used to receive push notifications.
      *
-     * @param id The ID of the device, previously provided by [createDevice].
+     * @param device The Device, previously provided by [createDevice].
      * @return Result if the operation was successful or not.
      */
-    public suspend fun deleteDevice(id: String): Result<Unit>
+    public suspend fun deleteDevice(device: Device): Result<Unit>
 
     /**
      * Returns a list of all the edges available on the network.
