@@ -55,8 +55,13 @@ private const val CONNECT_TIMEOUT = 30_000L
  * It's main purpose is to
  *
  * - Add awareness to the UI lifecycle. It makes sure we cleanup video state etc when you leave a call
- * - Helpers for picture in picture and fullscreen
- * - Informs the call about what resolution video is displayed at
+ * - Helpers for picture in picture
+ * - Helpers for fullscreen mode
+ *
+ * It also handles some UI state
+ *
+ * - Opening/closing the participant menu
+ *
  */
 public class CallViewModel(public val call: Call) : ViewModel() {
 
