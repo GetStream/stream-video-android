@@ -60,6 +60,12 @@ class LivestreamTest : IntegrationTestBase() {
     }
 
     @Test
+    fun `list recorded calls` () = runTest {
+        val result = call.listRecordings()
+        assertSuccess(result)
+    }
+
+    @Test
     fun `start and stop broadcasting to HLS`() = runTest {
         val call = client.call("livestream", randomUUID())
         val createResult = call.create()
@@ -71,6 +77,7 @@ class LivestreamTest : IntegrationTestBase() {
         assertSuccess(result2)
 
         // TODO: where is the HLS url?
+        // TODO: integrate ingress and egress
     }
 
     @Test
@@ -79,16 +86,14 @@ class LivestreamTest : IntegrationTestBase() {
         val response = call.create()
         assertSuccess(response)
 
-        val rtmp = call.state.ingress.value?.rtmp
-        val url = rtmp?.address + "/" + clientImpl.dataStore.userToken
-        println(rtmp?.address)
-
+        val url = call.state.ingress.value?.rtmp?.address
         val token = clientImpl.dataStore.userToken.value
         val apiKey = clientImpl.dataStore.apiKey.value
-        println("$apiKey/$token")
+        val streamKey = "$apiKey/$token"
         // TODO: not implemented on the server
         // Create a publishing token
-        // TODO: do we ask the coordinator for it? or generate it locally?
+        // TODO: Wrap the CallIngressResponse? to expose the streamKey?
+        // TODO: alternatively call.state.ingress could be a mapped state
     }
 
     @Test
