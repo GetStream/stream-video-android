@@ -60,7 +60,7 @@ class LivestreamTest : IntegrationTestBase() {
     }
 
     @Test
-    fun `list recorded calls` () = runTest {
+    fun `list recorded calls`() = runTest {
         val result = call.listRecordings()
         assertSuccess(result)
     }
