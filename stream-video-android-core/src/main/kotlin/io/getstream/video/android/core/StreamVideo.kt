@@ -17,6 +17,7 @@
 package io.getstream.video.android.core
 
 import android.content.Context
+import io.getstream.android.push.PushDevice
 import io.getstream.log.StreamLog
 import io.getstream.result.Result
 import io.getstream.video.android.core.events.VideoEventListener
@@ -77,14 +78,12 @@ public interface StreamVideo {
     /**
      * Create a device that will be used to receive push notifications.
      *
-     * @param token The Token obtained from the selected push provider.
-     * @param pushProvider The selected push provider.
+     * @param pushDevice The PushDevice obtained from the selected push provider.
      *
      * @return [Result] containing the [Device].
      */
     public suspend fun createDevice(
-        token: String,
-        pushProvider: String,
+        pushDevice: PushDevice,
     ): Result<io.getstream.video.android.model.Device>
 
     /**

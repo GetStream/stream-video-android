@@ -259,10 +259,7 @@ internal class VideoPushDelegate(
                     user = user,
                     apiKey = apiKey,
                 ).build()
-                    .createDevice(
-                        token = pushDevice.token,
-                        pushProvider = pushDevice.pushProvider.key
-                    )
+                    .createDevice(pushDevice)
             }
         }
     }

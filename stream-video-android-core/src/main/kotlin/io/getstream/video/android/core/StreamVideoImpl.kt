@@ -18,6 +18,7 @@ package io.getstream.video.android.core
 
 import android.content.Context
 import androidx.lifecycle.Lifecycle
+import io.getstream.android.push.PushDevice
 import io.getstream.android.push.PushDeviceGenerator
 import io.getstream.log.taggedLogger
 import io.getstream.result.Error
@@ -161,11 +162,8 @@ internal class StreamVideoImpl internal constructor(
     /**
      * @see StreamVideo.createDevice
      */
-    override suspend fun createDevice(
-        token: String,
-        pushProvider: String
-    ): Result<io.getstream.video.android.model.Device> {
-        logger.d { "[createDevice] token: $token, pushProvider: $pushProvider" }
+    override suspend fun createDevice(pushDevice: PushDevice): Result<io.getstream.video.android.model.Device> {
+        logger.d { "[createDevice] pushDevice: $pushDevice" }
         return wrapAPICall {
             // TODO: handle this when backend has it
             error("TODO: not support yet")
@@ -424,10 +422,7 @@ internal class StreamVideoImpl internal constructor(
 
             generator.asyncGeneratePushDevice { generatedDevice ->
                 scope.launch {
-                    createDevice(
-                        token = generatedDevice.token,
-                        pushProvider = generatedDevice.pushProvider.key
-                    )
+                    createDevice(generatedDevice)
                 }
             }
         }
