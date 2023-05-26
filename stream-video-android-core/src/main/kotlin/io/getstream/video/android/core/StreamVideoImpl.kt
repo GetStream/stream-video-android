@@ -371,7 +371,7 @@ internal class StreamVideoImpl internal constructor(
     fun removeDevices(devices: List<io.getstream.video.android.model.Device>) {
         scope.launch {
             val operations = devices.map {
-                async { deleteDevice(it.token) }
+                async { deleteDevice(it.id) }
             }
 
             operations.awaitAll()
