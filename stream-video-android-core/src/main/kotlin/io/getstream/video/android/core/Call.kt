@@ -570,7 +570,7 @@ public class Call(
     }
 
     suspend fun sendCustomEvent(data: Map<String, Any>): Result<SendEventResponse> {
-        return clientImpl.sendCustomEvent(this.type, this.id, "custom", data)
+        return clientImpl.sendCustomEvent(this.type, this.id, data)
     }
 
     /** Permissions */

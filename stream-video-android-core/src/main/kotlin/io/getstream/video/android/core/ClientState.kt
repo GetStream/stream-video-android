@@ -21,6 +21,7 @@ import io.getstream.video.android.model.User
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import org.openapitools.client.models.CallCreatedEvent
+import org.openapitools.client.models.CallRingEvent
 import org.openapitools.client.models.ConnectedEvent
 import org.openapitools.client.models.VideoEvent
 
@@ -83,13 +84,15 @@ class ClientState(client: StreamVideo) {
             // what's the right thing to do here?
             // if it's ringing we add it
 
-            // get or create the call and update it
+            // get or create the call, update is handled by CallState
             val (type, id) = event.callCid.split(":")
             val call = clientImpl.call(type, id)
 
-            if (event.ringing) {
-                _ringingCall.value = call
-            }
+        } else if (event is CallRingEvent) {
+            // get or create the call, update is handled by CallState
+            val (type, id) = event.callCid.split(":")
+            val call = clientImpl.call(type, id)
+
         }
     }
 

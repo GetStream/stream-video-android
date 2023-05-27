@@ -57,6 +57,7 @@ import org.openapitools.client.models.CallRecordingStartedEvent
 import org.openapitools.client.models.CallRecordingStoppedEvent
 import org.openapitools.client.models.CallRejectedEvent
 import org.openapitools.client.models.CallResponse
+import org.openapitools.client.models.CallRingEvent
 import org.openapitools.client.models.CallSettingsResponse
 import org.openapitools.client.models.CallStateResponseFields
 import org.openapitools.client.models.CallUpdatedEvent
@@ -363,7 +364,11 @@ public class CallState(private val call: Call, private val user: User) {
             is CallCreatedEvent -> {
                 updateFromResponse(event.call)
                 getOrCreateMembers(event.members)
-                // TODO: ringing state
+            }
+
+            is CallRingEvent -> {
+                updateFromResponse(event.call)
+                getOrCreateMembers(event.members)
             }
 
             is CallUpdatedEvent -> {
