@@ -87,12 +87,10 @@ class ClientState(client: StreamVideo) {
             // get or create the call, update is handled by CallState
             val (type, id) = event.callCid.split(":")
             val call = clientImpl.call(type, id)
-
         } else if (event is CallRingEvent) {
             // get or create the call, update is handled by CallState
             val (type, id) = event.callCid.split(":")
             val call = clientImpl.call(type, id)
-
         }
     }
 

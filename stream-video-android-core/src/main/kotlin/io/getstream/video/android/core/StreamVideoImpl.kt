@@ -32,7 +32,6 @@ import io.getstream.video.android.core.internal.module.ConnectionModule
 import io.getstream.video.android.core.lifecycle.LifecycleHandler
 import io.getstream.video.android.core.lifecycle.internal.StreamLifecycleObserver
 import io.getstream.video.android.core.logging.LoggingLevel
-import io.getstream.video.android.core.model.CallEventType
 import io.getstream.video.android.core.model.EdgeData
 import io.getstream.video.android.core.model.MuteUsersData
 import io.getstream.video.android.core.model.SortField
