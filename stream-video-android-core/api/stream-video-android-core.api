@@ -4262,14 +4262,16 @@ public final class org/openapitools/client/models/Response {
 }
 
 public final class org/openapitools/client/models/RingSettings {
-	public fun <init> (II)V
-	public final fun component1 ()I
-	public final fun component2 ()I
-	public final fun copy (II)Lorg/openapitools/client/models/RingSettings;
-	public static synthetic fun copy$default (Lorg/openapitools/client/models/RingSettings;IIILjava/lang/Object;)Lorg/openapitools/client/models/RingSettings;
+	public fun <init> ()V
+	public fun <init> (Ljava/lang/Integer;Ljava/lang/Integer;)V
+	public synthetic fun <init> (Ljava/lang/Integer;Ljava/lang/Integer;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Ljava/lang/Integer;
+	public final fun component2 ()Ljava/lang/Integer;
+	public final fun copy (Ljava/lang/Integer;Ljava/lang/Integer;)Lorg/openapitools/client/models/RingSettings;
+	public static synthetic fun copy$default (Lorg/openapitools/client/models/RingSettings;Ljava/lang/Integer;Ljava/lang/Integer;ILjava/lang/Object;)Lorg/openapitools/client/models/RingSettings;
 	public fun equals (Ljava/lang/Object;)Z
-	public final fun getAutoCancelTimeoutMs ()I
-	public final fun getAutoRejectTimeoutMs ()I
+	public final fun getAutoCancelTimeoutMs ()Ljava/lang/Integer;
+	public final fun getAutoRejectTimeoutMs ()Ljava/lang/Integer;
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
 }

@@ -549,7 +549,6 @@ class MediaManagerImpl(
         source = audioSource, trackId = "audioTrack"
     )
 
-
     val camera = CameraManager(this, eglBaseContext)
     val microphone = MicrophoneManager(this)
     val speaker = SpeakerManager(this, microphone)
