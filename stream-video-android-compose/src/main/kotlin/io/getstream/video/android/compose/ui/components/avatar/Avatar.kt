@@ -43,7 +43,6 @@ import com.skydoves.landscapist.animation.crossfade.CrossfadePlugin
 import com.skydoves.landscapist.coil.CoilImage
 import com.skydoves.landscapist.components.rememberImageComponent
 import com.skydoves.landscapist.placeholder.placeholder.PlaceholderPlugin
-import io.getstream.video.android.compose.imageloading.LocalStreamImageLoader
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.ui.common.R
 
@@ -118,7 +117,6 @@ public fun Avatar(
     CoilImage(
         modifier = clickableModifier.clip(shape),
         imageModel = { imageUrl },
-        imageLoader = { LocalStreamImageLoader.current },
         imageOptions = ImageOptions(
             contentDescription = contentDescription,
             contentScale = contentScale,

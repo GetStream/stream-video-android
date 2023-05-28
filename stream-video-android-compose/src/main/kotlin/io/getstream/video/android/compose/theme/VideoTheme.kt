@@ -28,11 +28,8 @@ import androidx.compose.runtime.ReadOnlyComposable
 import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.testTagsAsResourceId
-import io.getstream.video.android.compose.imageloading.LocalStreamImageLoader
-import io.getstream.video.android.compose.imageloading.StreamCoilImageLoaderFactory
 
 /**
  * Local providers for various properties we connect to our components, for styling.
@@ -70,7 +67,6 @@ public fun VideoTheme(
     typography: StreamTypography = StreamTypography.defaultTypography(),
     shapes: StreamShapes = StreamShapes.defaultShapes(),
     rippleTheme: RippleTheme = StreamRippleTheme,
-    imageLoaderFactory: StreamCoilImageLoaderFactory = StreamCoilImageLoaderFactory.defaultFactory(),
     allowUIAutomationTest: Boolean = true,
     content: @Composable () -> Unit,
 ) {
@@ -81,7 +77,6 @@ public fun VideoTheme(
         LocalTypography provides typography,
         LocalShapes provides shapes,
         LocalRippleTheme provides rippleTheme,
-        LocalStreamImageLoader provides imageLoaderFactory.imageLoader(LocalContext.current),
     ) {
         Box(
             modifier = Modifier.semantics {
@@ -102,31 +97,23 @@ public object VideoTheme {
      * Retrieves the current [StreamColors] at the call site's position in the hierarchy.
      */
     public val colors: StreamColors
-        @Composable
-        @ReadOnlyComposable
-        get() = LocalColors.current
+        @Composable @ReadOnlyComposable get() = LocalColors.current
 
     /**
      * Retrieves the current [StreamDimens] at the call site's position in the hierarchy.
      */
     public val dimens: StreamDimens
-        @Composable
-        @ReadOnlyComposable
-        get() = LocalDimens.current
+        @Composable @ReadOnlyComposable get() = LocalDimens.current
 
     /**
      * Retrieves the current [StreamTypography] at the call site's position in the hierarchy.
      */
     public val typography: StreamTypography
-        @Composable
-        @ReadOnlyComposable
-        get() = LocalTypography.current
+        @Composable @ReadOnlyComposable get() = LocalTypography.current
 
     /**
      * Retrieves the current [StreamShapes] at the call site's position in the hierarchy.
      */
     public val shapes: StreamShapes
-        @Composable
-        @ReadOnlyComposable
-        get() = LocalShapes.current
+        @Composable @ReadOnlyComposable get() = LocalShapes.current
 }
