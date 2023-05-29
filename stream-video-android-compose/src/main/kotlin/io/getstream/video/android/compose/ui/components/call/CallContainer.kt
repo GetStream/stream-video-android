@@ -42,7 +42,6 @@ import io.getstream.video.android.core.call.state.CallAction
 import io.getstream.video.android.core.call.state.CallDeviceState
 import io.getstream.video.android.core.call.state.InviteUsersToCall
 import io.getstream.video.android.core.call.state.ToggleMicrophone
-import io.getstream.video.android.core.model.CallType
 import io.getstream.video.android.core.viewmodel.CallViewModel
 import io.getstream.video.android.mock.StreamMockUtils
 import io.getstream.video.android.mock.mockCall
@@ -71,7 +70,7 @@ import io.getstream.video.android.model.User
 public fun CallContainer(
     callViewModel: CallViewModel,
     modifier: Modifier = Modifier,
-    callType: CallType,
+    isVideoType: Boolean = true,
     onBackPressed: () -> Unit = {},
     onCallAction: (CallAction) -> Unit = callViewModel::onCallAction,
     callAppBarContent: @Composable (call: Call) -> Unit = {
@@ -105,7 +104,7 @@ public fun CallContainer(
     ringingCallContent: @Composable (call: Call) -> Unit = {
         RingingCallContent(
             modifier = modifier.testTag("ringing_call_content"),
-            callType = callType,
+            isVideoType = isVideoType,
             callViewModel = callViewModel,
             onBackPressed = onBackPressed,
             onCallAction = onCallAction,
@@ -118,7 +117,7 @@ public fun CallContainer(
     CallContainer(
         call = callViewModel.call,
         callDeviceState = callDeviceState,
-        callType = callType,
+        isVideoType = isVideoType,
         modifier = modifier,
         onBackPressed = onBackPressed,
         onCallAction = onCallAction,
@@ -152,9 +151,9 @@ public fun CallContainer(
 @Composable
 public fun CallContainer(
     call: Call,
-    callType: CallType,
-    callDeviceState: CallDeviceState,
     modifier: Modifier = Modifier,
+    isVideoType: Boolean = true,
+    callDeviceState: CallDeviceState,
     onBackPressed: () -> Unit = {},
     onCallAction: (CallAction) -> Unit = {},
     callAppBarContent: @Composable (call: Call) -> Unit = {
@@ -188,7 +187,7 @@ public fun CallContainer(
         RingingCallContent(
             call = call,
             modifier = modifier.testTag("ringing_call_content"),
-            callType = callType,
+            isVideoType = isVideoType,
             callDeviceState = callDeviceState,
             onBackPressed = onBackPressed,
             onCallAction = onCallAction,
@@ -263,7 +262,7 @@ private fun CallContainerPreview() {
     VideoTheme {
         CallContainer(
             call = mockCall,
-            callType = CallType.VIDEO,
+            isVideoType = true,
             callDeviceState = CallDeviceState()
         )
     }

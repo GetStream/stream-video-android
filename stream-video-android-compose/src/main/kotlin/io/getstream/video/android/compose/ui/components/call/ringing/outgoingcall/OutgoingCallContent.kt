@@ -35,7 +35,6 @@ import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.ParticipantState
 import io.getstream.video.android.core.call.state.CallAction
 import io.getstream.video.android.core.call.state.CallDeviceState
-import io.getstream.video.android.core.model.CallType
 import io.getstream.video.android.core.viewmodel.CallViewModel
 import io.getstream.video.android.mock.StreamMockUtils
 import io.getstream.video.android.mock.mockCall
@@ -45,7 +44,7 @@ import io.getstream.video.android.mock.mockParticipantList
  * Represents the Outgoing Call state and UI, when the user is calling other people.
  *
  * @param callViewModel The [CallViewModel] used to provide state and various handlers in the call.
- * @param callType Represent the call type is a video or an audio.
+ * @param isVideoType Represent the call type is a video or an audio.
  * @param modifier Modifier for styling.
  * @param isShowingHeader Weather or not the app bar will be shown.
  * @param callHeaderContent Content shown for the call header.
@@ -57,7 +56,7 @@ import io.getstream.video.android.mock.mockParticipantList
 @Composable
 public fun OutgoingCallContent(
     callViewModel: CallViewModel,
-    callType: CallType,
+    isVideoType: Boolean,
     modifier: Modifier = Modifier,
     isShowingHeader: Boolean = true,
     callHeaderContent: (@Composable ColumnScope.() -> Unit)? = null,
@@ -74,7 +73,7 @@ public fun OutgoingCallContent(
 
     OutgoingCallContent(
         call = callViewModel.call,
-        callType = callType,
+        isVideoType = isVideoType,
         callDeviceState = callDeviceState,
         modifier = modifier,
         isShowingHeader = isShowingHeader,
@@ -90,7 +89,7 @@ public fun OutgoingCallContent(
  * Represents the Outgoing Call state and UI, when the user is calling other people.
  *
  * @param call The call contains states and will be rendered with participants.
- * @param callType Represent the call type is a video or an audio.
+ * @param isVideoType Represent the call type is a video or an audio.
  * @param modifier Modifier for styling.
  * @param isShowingHeader Weather or not the app bar will be shown.
  * @param callHeaderContent Content shown for the call header.
@@ -102,7 +101,7 @@ public fun OutgoingCallContent(
 @Composable
 public fun OutgoingCallContent(
     call: Call,
-    callType: CallType,
+    isVideoType: Boolean,
     callDeviceState: CallDeviceState,
     modifier: Modifier = Modifier,
     isShowingHeader: Boolean = true,
@@ -120,7 +119,7 @@ public fun OutgoingCallContent(
 
     OutgoingCallContent(
         call = call,
-        callType = callType,
+        isVideoType = isVideoType,
         participants = participants,
         callDeviceState = callDeviceState,
         modifier = modifier,
@@ -137,7 +136,7 @@ public fun OutgoingCallContent(
  * Represents the Outgoing Call state and UI, when the user is calling other people.
  *
  * @param call The call contains states and will be rendered with participants.
- * @param callType Represent the call type is a video or an audio.
+ * @param isVideoType Represent the call type is a video or an audio.
  * @param modifier Modifier for styling.
  * @param participants A list of participants.
  * @param isShowingHeader Weather or not the app bar will be shown.
@@ -150,7 +149,7 @@ public fun OutgoingCallContent(
 @Composable
 public fun OutgoingCallContent(
     call: Call,
-    callType: CallType,
+    isVideoType: Boolean = true,
     participants: List<ParticipantState>,
     callDeviceState: CallDeviceState,
     modifier: Modifier = Modifier,
@@ -168,7 +167,7 @@ public fun OutgoingCallContent(
     CallBackground(
         modifier = modifier,
         participants = participants,
-        callType = callType,
+        isVideoType = isVideoType,
         isIncoming = false
     ) {
 
@@ -181,7 +180,7 @@ public fun OutgoingCallContent(
                 )
             }
 
-            val topPadding = if (participants.size == 1 || callType == CallType.VIDEO) {
+            val topPadding = if (participants.size == 1 || isVideoType) {
                 VideoTheme.dimens.singleAvatarAppbarPadding
             } else {
                 VideoTheme.dimens.avatarAppbarPadding
@@ -192,7 +191,7 @@ public fun OutgoingCallContent(
                     .align(Alignment.CenterHorizontally)
                     .padding(top = topPadding),
                 participants = participants,
-                callType = callType
+                isVideoType = isVideoType
             )
         }
 
@@ -214,7 +213,7 @@ private fun OutgoingCallVideoPreview() {
     VideoTheme {
         OutgoingCallContent(
             call = mockCall,
-            callType = CallType.VIDEO,
+            isVideoType = true,
             participants = mockParticipantList,
             callDeviceState = CallDeviceState(),
             onBackPressed = {}
@@ -229,7 +228,7 @@ private fun OutgoingCallAudioPreview() {
     VideoTheme {
         OutgoingCallContent(
             call = mockCall,
-            callType = CallType.AUDIO,
+            isVideoType = false,
             participants = mockParticipantList,
             callDeviceState = CallDeviceState(),
             onBackPressed = {}

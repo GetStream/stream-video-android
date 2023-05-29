@@ -41,7 +41,6 @@ import io.getstream.video.android.compose.ui.components.participants.internal.In
 import io.getstream.video.android.compose.ui.components.participants.internal.ParticipantAvatars
 import io.getstream.video.android.compose.ui.components.participants.internal.ParticipantInformation
 import io.getstream.video.android.core.model.CallStatus
-import io.getstream.video.android.core.model.CallType
 import io.getstream.video.android.core.model.ScreenSharingSession
 import io.getstream.video.android.mock.mockCall
 import io.getstream.video.android.mock.mockParticipant
@@ -67,7 +66,6 @@ internal class ParticipantsPortraitTest : BaseComposeTest() {
     fun `snapshot ParticipantInformation composable`() {
         snapshotWithDarkMode {
             ParticipantInformation(
-                callType = CallType.VIDEO,
                 callStatus = CallStatus.Incoming,
                 participants = mockParticipantList,
             )

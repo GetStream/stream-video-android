@@ -37,7 +37,6 @@ import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.ParticipantState
 import io.getstream.video.android.core.call.state.CallAction
 import io.getstream.video.android.core.call.state.CallDeviceState
-import io.getstream.video.android.core.model.CallType
 import io.getstream.video.android.core.viewmodel.CallViewModel
 import io.getstream.video.android.mock.StreamMockUtils
 import io.getstream.video.android.mock.mockCall
@@ -47,7 +46,7 @@ import io.getstream.video.android.mock.mockParticipantList
  * Represents the Incoming Call state and UI, when the user receives a call from other people.
  *
  * @param callViewModel The [CallViewModel] used to provide state and various handlers in the call.
- * @param callType Represent the call type is a video or an audio.
+ * @param isVideoType Represent the call type is a video or an audio.
  * @param modifier Modifier for styling.
  * @param isShowingHeader Weather or not the app bar will be shown.
  * @param callHeaderContent Content shown for the call header.
@@ -59,7 +58,7 @@ import io.getstream.video.android.mock.mockParticipantList
 @Composable
 public fun IncomingCallContent(
     callViewModel: CallViewModel,
-    callType: CallType,
+    isVideoType: Boolean,
     modifier: Modifier = Modifier,
     isShowingHeader: Boolean = true,
     callHeaderContent: (@Composable ColumnScope.() -> Unit)? = null,
@@ -76,7 +75,7 @@ public fun IncomingCallContent(
 
     IncomingCallContent(
         call = callViewModel.call,
-        callType = callType,
+        isVideoType = isVideoType,
         callDeviceState = callDeviceState,
         modifier = modifier,
         isShowingHeader = isShowingHeader,
@@ -93,7 +92,7 @@ public fun IncomingCallContent(
  *
  * @param call The call contains states and will be rendered with participants.
  * @param callDeviceState A call device states that contains states for video, audio, and speaker.
- * @param callType Represent the call type is a video or an audio.
+ * @param isVideoType Represent the call type is a video or an audio.
  * @param modifier Modifier for styling.
  * @param isShowingHeader Weather or not the app bar will be shown.
  * @param callHeaderContent Content shown for the call header.
@@ -105,7 +104,7 @@ public fun IncomingCallContent(
 @Composable
 public fun IncomingCallContent(
     call: Call,
-    callType: CallType,
+    isVideoType: Boolean = true,
     callDeviceState: CallDeviceState,
     modifier: Modifier = Modifier,
     isShowingHeader: Boolean = true,
@@ -123,7 +122,7 @@ public fun IncomingCallContent(
 
     IncomingCallContent(
         call = call,
-        callType = callType,
+        isVideoType = isVideoType,
         participants = participants,
         isCameraEnabled = callDeviceState.isCameraEnabled,
         isShowingHeader = isShowingHeader,
@@ -141,7 +140,7 @@ public fun IncomingCallContent(
  * powers the state and handlers.
  *
  * @param call The call contains states and will be rendered with participants.
- * @param callType The type of call, Audio or Video.
+ * @param isVideoType The type of call, Audio or Video.
  * @param participants People participating in the call.
  * @param isCameraEnabled Whether the video should be enabled when entering the call or not.
  * @param modifier Modifier for styling.
@@ -152,7 +151,7 @@ public fun IncomingCallContent(
 @Composable
 public fun IncomingCallContent(
     call: Call,
-    callType: CallType,
+    isVideoType: Boolean = true,
     participants: List<ParticipantState>,
     isCameraEnabled: Boolean,
     modifier: Modifier = Modifier,
@@ -168,7 +167,10 @@ public fun IncomingCallContent(
     onCallAction: (CallAction) -> Unit = {},
 ) {
     CallBackground(
-        modifier = modifier, participants = participants, callType = callType, isIncoming = true
+        modifier = modifier,
+        participants = participants,
+        isVideoType = isVideoType,
+        isIncoming = true
     ) {
         Column {
             if (isShowingHeader) {
@@ -189,7 +191,7 @@ public fun IncomingCallContent(
                 modifier = Modifier
                     .align(Alignment.CenterHorizontally)
                     .padding(top = topPadding),
-                callType = callType,
+                isVideoType = isVideoType,
                 participants = participants,
             )
         }
@@ -198,7 +200,7 @@ public fun IncomingCallContent(
             modifier = Modifier
                 .align(Alignment.BottomCenter)
                 .padding(bottom = VideoTheme.dimens.incomingCallOptionsBottomPadding),
-            isVideoCall = callType == CallType.VIDEO,
+            isVideoCall = isVideoType,
             isCameraEnabled = isCameraEnabled,
             onCallAction = onCallAction
         )
@@ -217,7 +219,7 @@ private fun IncomingCallPreview1() {
             IncomingCallContent(
                 call = mockCall,
                 participants = mockParticipantList.takeLast(1),
-                callType = CallType.VIDEO,
+                isVideoType = true,
                 isCameraEnabled = false,
                 onBackPressed = {}
             ) {}
@@ -237,7 +239,7 @@ private fun IncomingCallPreview2() {
             IncomingCallContent(
                 call = mockCall,
                 participants = mockParticipantList,
-                callType = CallType.VIDEO,
+                isVideoType = true,
                 isCameraEnabled = false,
                 onBackPressed = {}
             ) {}
