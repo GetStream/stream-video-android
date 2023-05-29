@@ -115,6 +115,7 @@ public final class io/getstream/video/android/core/CallState {
 	public final fun getScreenSharingSession ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun getSettings ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun getSortedParticipants ()Lkotlinx/coroutines/flow/StateFlow;
+	public final fun getSpeakingWhileMuted ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun getStartsAt ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun getTeam ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun getTranscribing ()Lkotlinx/coroutines/flow/StateFlow;
