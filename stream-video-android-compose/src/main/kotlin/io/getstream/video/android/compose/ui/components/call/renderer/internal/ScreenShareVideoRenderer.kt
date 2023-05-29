@@ -20,7 +20,6 @@ import android.view.View
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -33,7 +32,6 @@ import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.model.ScreenSharingSession
 import me.saket.telephoto.zoomable.rememberZoomableState
 import me.saket.telephoto.zoomable.zoomable
-import stream.video.sfu.models.TrackType
 
 /**
  * Represents the content of a screen sharing session.
@@ -54,8 +52,7 @@ public fun ScreenShareVideoRenderer(
     onRender: (View) -> Unit = {}
 ) {
     val screenShareParticipant = session.participant
-    val mediaTrack by session.participant.screenSharingTrack.collectAsState()
-    val isMediaEnabled by session.participant.videoEnabled.collectAsState()
+    val screenSharing by screenShareParticipant.screenSharing.collectAsStateWithLifecycle()
 
     val zoomableModifier = if (isZoomable) {
         Modifier.zoomable(rememberZoomableState())
@@ -69,12 +66,9 @@ public fun ScreenShareVideoRenderer(
                 .fillMaxSize()
                 .align(Alignment.Center),
             call = call,
-            mediaTrack = mediaTrack,
-            isMediaEnabled = isMediaEnabled,
+            media = screenSharing,
             onRender = onRender,
-            trackType = TrackType.TRACK_TYPE_SCREEN_SHARE,
             videoScalingType = VideoScalingType.SCALE_ASPECT_FIT,
-            sessionId = session.participant.sessionId
         )
 
         ParticipantLabel(screenShareParticipant, labelPosition)

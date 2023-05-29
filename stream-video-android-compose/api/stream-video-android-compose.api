@@ -884,7 +884,7 @@ public final class io/getstream/video/android/compose/ui/components/video/Compos
 }
 
 public final class io/getstream/video/android/compose/ui/components/video/VideoRendererKt {
-	public static final fun VideoRenderer (Lio/getstream/video/android/core/Call;Lio/getstream/video/android/core/model/MediaTrack;ZLjava/lang/String;Lstream/video/sfu/models/TrackType;Landroidx/compose/ui/Modifier;Lio/getstream/video/android/compose/ui/components/video/VideoScalingType;Lkotlin/jvm/functions/Function3;Lkotlin/jvm/functions/Function1;Landroidx/compose/runtime/Composer;II)V
+	public static final fun VideoRenderer (Lio/getstream/video/android/core/Call;Lio/getstream/video/android/core/ParticipantState$Media;Landroidx/compose/ui/Modifier;Lio/getstream/video/android/compose/ui/components/video/VideoScalingType;Lkotlin/jvm/functions/Function3;Lkotlin/jvm/functions/Function1;Landroidx/compose/runtime/Composer;II)V
 }
 
 public final class io/getstream/video/android/compose/ui/components/video/VideoScalingType : java/lang/Enum {

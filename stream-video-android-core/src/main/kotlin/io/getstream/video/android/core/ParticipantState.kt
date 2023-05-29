@@ -137,6 +137,15 @@ public data class ParticipantState(
         )
     }.asStateFlow(null)
 
+    val screenSharing: StateFlow<ScreenSharing?> =
+        combine(_screenSharingTrack, _screenSharingEnabled) { track, enabled ->
+            ScreenSharing(
+                sessionId = sessionId,
+                videoTrack = track,
+                isVideoEnabled = enabled
+            )
+        }.asStateFlow(null)
+
     suspend fun muteAudio(): Result<MuteUsersResponse> {
         // how do i mute another user?
         return call.muteUser(user.value.id, audio = true, video = false, screenShare = false)
@@ -208,5 +217,16 @@ public data class ParticipantState(
         mediaTrack = audioTrack,
         isMediaEnabled = isAudioEnabled,
         trackType = TrackType.TRACK_TYPE_AUDIO
+    )
+
+    public data class ScreenSharing(
+        public override val sessionId: String,
+        public val videoTrack: VideoTrack?,
+        public val isVideoEnabled: Boolean
+    ) : Media(
+        sessionId = sessionId,
+        mediaTrack = videoTrack,
+        isMediaEnabled = isVideoEnabled,
+        trackType = TrackType.TRACK_TYPE_VIDEO
     )
 }

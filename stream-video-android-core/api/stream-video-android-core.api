@@ -370,6 +370,7 @@ public final class io/getstream/video/android/core/ParticipantState {
 	public final fun getJoinedAt ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun getLastSpeakingAt ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun getReactions ()Lkotlinx/coroutines/flow/StateFlow;
+	public final fun getScreenSharing ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun getScreenSharingEnabled ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun getScreenSharingTrack ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun getSessionId ()Ljava/lang/String;
@@ -413,6 +414,21 @@ public abstract class io/getstream/video/android/core/ParticipantState$Media {
 	public fun getSessionId ()Ljava/lang/String;
 	public final fun getTrackType ()Lstream/video/sfu/models/TrackType;
 	public final fun isMediaEnabled ()Z
+}
+
+public final class io/getstream/video/android/core/ParticipantState$ScreenSharing : io/getstream/video/android/core/ParticipantState$Media {
+	public fun <init> (Ljava/lang/String;Lio/getstream/video/android/core/model/VideoTrack;Z)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Lio/getstream/video/android/core/model/VideoTrack;
+	public final fun component3 ()Z
+	public final fun copy (Ljava/lang/String;Lio/getstream/video/android/core/model/VideoTrack;Z)Lio/getstream/video/android/core/ParticipantState$ScreenSharing;
+	public static synthetic fun copy$default (Lio/getstream/video/android/core/ParticipantState$ScreenSharing;Ljava/lang/String;Lio/getstream/video/android/core/model/VideoTrack;ZILjava/lang/Object;)Lio/getstream/video/android/core/ParticipantState$ScreenSharing;
+	public fun equals (Ljava/lang/Object;)Z
+	public fun getSessionId ()Ljava/lang/String;
+	public final fun getVideoTrack ()Lio/getstream/video/android/core/model/VideoTrack;
+	public fun hashCode ()I
+	public final fun isVideoEnabled ()Z
+	public fun toString ()Ljava/lang/String;
 }
 
 public final class io/getstream/video/android/core/ParticipantState$Video : io/getstream/video/android/core/ParticipantState$Media {

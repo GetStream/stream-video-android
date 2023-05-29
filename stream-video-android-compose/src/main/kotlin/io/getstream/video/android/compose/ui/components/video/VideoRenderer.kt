@@ -49,12 +49,12 @@ import io.getstream.video.android.common.renderer.StreamVideoTextureViewRenderer
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.video.VideoScalingType.Companion.toCommonScalingType
 import io.getstream.video.android.core.Call
+import io.getstream.video.android.core.ParticipantState
 import io.getstream.video.android.core.model.MediaTrack
 import io.getstream.video.android.core.model.VideoTrack
 import io.getstream.video.android.mock.StreamMockUtils
 import io.getstream.video.android.mock.mockCall
 import io.getstream.webrtc.android.ui.VideoTextureViewRenderer
-import stream.video.sfu.models.TrackType
 
 /**
  * Renders a single video track based on the call state.
@@ -66,10 +66,7 @@ import stream.video.sfu.models.TrackType
 @Composable
 public fun VideoRenderer(
     call: Call,
-    mediaTrack: MediaTrack?,
-    isMediaEnabled: Boolean,
-    sessionId: String,
-    trackType: TrackType,
+    media: ParticipantState.Media?,
     modifier: Modifier = Modifier,
     videoScalingType: VideoScalingType = VideoScalingType.SCALE_ASPECT_BALANCED,
     onRenderFailedContent: @Composable (Call) -> Unit = {
@@ -92,20 +89,24 @@ public fun VideoRenderer(
         return
     }
 
-    var view: VideoTextureViewRenderer? by remember { mutableStateOf(null) }
+    if (media?.mediaTrack != null && media.isMediaEnabled) {
+        val mediaTrack = media.mediaTrack
+        val sessionId = media.sessionId
+        val trackType = media.trackType
 
-    DisposableEffect(call, mediaTrack) {
-        // inform the call that we want to render this video track. (this will trigger a subscription to the track)
-        call.setVisibility(sessionId, trackType, true)
+        var view: VideoTextureViewRenderer? by remember { mutableStateOf(null) }
 
-        onDispose {
-            cleanTrack(view, mediaTrack)
-            // inform the call that we no longer want to render this video track
-            call.setVisibility(sessionId, trackType, false)
+        DisposableEffect(call, media) {
+            // inform the call that we want to render this video track. (this will trigger a subscription to the track)
+            call.setVisibility(sessionId, trackType, true)
+
+            onDispose {
+                cleanTrack(view, mediaTrack)
+                // inform the call that we no longer want to render this video track
+                call.setVisibility(sessionId, trackType, false)
+            }
         }
-    }
 
-    if (mediaTrack != null && isMediaEnabled) {
         AndroidView(
             factory = { context ->
                 StreamVideoTextureViewRenderer(context).apply {
@@ -139,7 +140,7 @@ private fun cleanTrack(
 }
 
 private fun setupVideo(
-    mediaTrack: MediaTrack,
+    mediaTrack: MediaTrack?,
     renderer: VideoTextureViewRenderer,
 ) {
     cleanTrack(renderer, mediaTrack)
@@ -194,10 +195,11 @@ private fun VideoRendererPreview() {
     VideoTheme {
         VideoRenderer(
             call = mockCall,
-            mediaTrack = VideoTrack("", org.webrtc.VideoTrack(123)),
-            isMediaEnabled = true,
-            sessionId = "",
-            trackType = TrackType.TRACK_TYPE_VIDEO
+            media = ParticipantState.Video(
+                videoTrack = VideoTrack("", org.webrtc.VideoTrack(123)),
+                isVideoEnabled = true,
+                sessionId = "",
+            )
         )
     }
 }
