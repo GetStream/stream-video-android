@@ -400,20 +400,21 @@ public final class io/getstream/video/android/core/ParticipantState$Audio : io/g
 	public final fun copy (Ljava/lang/String;Lio/getstream/video/android/core/model/AudioTrack;Z)Lio/getstream/video/android/core/ParticipantState$Audio;
 	public static synthetic fun copy$default (Lio/getstream/video/android/core/ParticipantState$Audio;Ljava/lang/String;Lio/getstream/video/android/core/model/AudioTrack;ZILjava/lang/Object;)Lio/getstream/video/android/core/ParticipantState$Audio;
 	public fun equals (Ljava/lang/Object;)Z
-	public final fun getAudioTrack ()Lio/getstream/video/android/core/model/AudioTrack;
+	public fun getEnabled ()Z
 	public fun getSessionId ()Ljava/lang/String;
+	public fun getTrack ()Lio/getstream/video/android/core/model/AudioTrack;
+	public synthetic fun getTrack ()Lio/getstream/video/android/core/model/MediaTrack;
 	public fun hashCode ()I
-	public final fun isAudioEnabled ()Z
 	public fun toString ()Ljava/lang/String;
 }
 
 public abstract class io/getstream/video/android/core/ParticipantState$Media {
 	public synthetic fun <init> (Ljava/lang/String;Lio/getstream/video/android/core/model/MediaTrack;ZLstream/video/sfu/models/TrackType;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public synthetic fun <init> (Ljava/lang/String;Lio/getstream/video/android/core/model/MediaTrack;ZLstream/video/sfu/models/TrackType;Lkotlin/jvm/internal/DefaultConstructorMarker;)V
-	public final fun getMediaTrack ()Lio/getstream/video/android/core/model/MediaTrack;
+	public fun getEnabled ()Z
 	public fun getSessionId ()Ljava/lang/String;
-	public final fun getTrackType ()Lstream/video/sfu/models/TrackType;
-	public final fun isMediaEnabled ()Z
+	public fun getTrack ()Lio/getstream/video/android/core/model/MediaTrack;
+	public final fun getType ()Lstream/video/sfu/models/TrackType;
 }
 
 public final class io/getstream/video/android/core/ParticipantState$ScreenSharing : io/getstream/video/android/core/ParticipantState$Media {
@@ -424,10 +425,11 @@ public final class io/getstream/video/android/core/ParticipantState$ScreenSharin
 	public final fun copy (Ljava/lang/String;Lio/getstream/video/android/core/model/VideoTrack;Z)Lio/getstream/video/android/core/ParticipantState$ScreenSharing;
 	public static synthetic fun copy$default (Lio/getstream/video/android/core/ParticipantState$ScreenSharing;Ljava/lang/String;Lio/getstream/video/android/core/model/VideoTrack;ZILjava/lang/Object;)Lio/getstream/video/android/core/ParticipantState$ScreenSharing;
 	public fun equals (Ljava/lang/Object;)Z
+	public fun getEnabled ()Z
 	public fun getSessionId ()Ljava/lang/String;
-	public final fun getVideoTrack ()Lio/getstream/video/android/core/model/VideoTrack;
+	public synthetic fun getTrack ()Lio/getstream/video/android/core/model/MediaTrack;
+	public fun getTrack ()Lio/getstream/video/android/core/model/VideoTrack;
 	public fun hashCode ()I
-	public final fun isVideoEnabled ()Z
 	public fun toString ()Ljava/lang/String;
 }
 
@@ -439,10 +441,11 @@ public final class io/getstream/video/android/core/ParticipantState$Video : io/g
 	public final fun copy (Ljava/lang/String;Lio/getstream/video/android/core/model/VideoTrack;Z)Lio/getstream/video/android/core/ParticipantState$Video;
 	public static synthetic fun copy$default (Lio/getstream/video/android/core/ParticipantState$Video;Ljava/lang/String;Lio/getstream/video/android/core/model/VideoTrack;ZILjava/lang/Object;)Lio/getstream/video/android/core/ParticipantState$Video;
 	public fun equals (Ljava/lang/Object;)Z
+	public fun getEnabled ()Z
 	public fun getSessionId ()Ljava/lang/String;
-	public final fun getVideoTrack ()Lio/getstream/video/android/core/model/VideoTrack;
+	public synthetic fun getTrack ()Lio/getstream/video/android/core/model/MediaTrack;
+	public fun getTrack ()Lio/getstream/video/android/core/model/VideoTrack;
 	public fun hashCode ()I
-	public final fun isVideoEnabled ()Z
 	public fun toString ()Ljava/lang/String;
 }
 

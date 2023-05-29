@@ -89,10 +89,10 @@ public fun VideoRenderer(
         return
     }
 
-    if (media?.mediaTrack != null && media.isMediaEnabled) {
-        val mediaTrack = media.mediaTrack
+    if (media?.track != null && media.enabled) {
+        val mediaTrack = media.track
         val sessionId = media.sessionId
-        val trackType = media.trackType
+        val trackType = media.type
 
         var view: VideoTextureViewRenderer? by remember { mutableStateOf(null) }
 
@@ -196,8 +196,8 @@ private fun VideoRendererPreview() {
         VideoRenderer(
             call = mockCall,
             media = ParticipantState.Video(
-                videoTrack = VideoTrack("", org.webrtc.VideoTrack(123)),
-                isVideoEnabled = true,
+                track = VideoTrack("", org.webrtc.VideoTrack(123)),
+                enabled = true,
                 sessionId = "",
             )
         )

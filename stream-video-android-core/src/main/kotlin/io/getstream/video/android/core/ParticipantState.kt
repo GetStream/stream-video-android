@@ -124,16 +124,16 @@ public data class ParticipantState(
     val video: StateFlow<Video?> = combine(_videoTrack, _videoEnabled) { track, enabled ->
         Video(
             sessionId = sessionId,
-            videoTrack = track,
-            isVideoEnabled = enabled
+            track = track,
+            enabled = enabled
         )
     }.asStateFlow(null)
 
     val audio: StateFlow<Audio?> = combine(_audioTrack, _audioEnabled) { track, enabled ->
         Audio(
             sessionId = sessionId,
-            audioTrack = track,
-            isAudioEnabled = enabled
+            track = track,
+            enabled = enabled
         )
     }.asStateFlow(null)
 
@@ -141,8 +141,8 @@ public data class ParticipantState(
         combine(_screenSharingTrack, _screenSharingEnabled) { track, enabled ->
             ScreenSharing(
                 sessionId = sessionId,
-                videoTrack = track,
-                isVideoEnabled = enabled
+                track = track,
+                enabled = enabled
             )
         }.asStateFlow(null)
 
@@ -192,41 +192,41 @@ public data class ParticipantState(
 
     public sealed class Media(
         public open val sessionId: String,
-        public val mediaTrack: MediaTrack?,
-        public val isMediaEnabled: Boolean,
-        public val trackType: TrackType = TrackType.TRACK_TYPE_UNSPECIFIED,
+        public open val track: MediaTrack?,
+        public open val enabled: Boolean,
+        public val type: TrackType = TrackType.TRACK_TYPE_UNSPECIFIED,
     )
 
     public data class Video(
         public override val sessionId: String,
-        public val videoTrack: VideoTrack?,
-        public val isVideoEnabled: Boolean
+        public override val track: VideoTrack?,
+        public override val enabled: Boolean
     ) : Media(
         sessionId = sessionId,
-        mediaTrack = videoTrack,
-        isMediaEnabled = isVideoEnabled,
-        trackType = TrackType.TRACK_TYPE_VIDEO
+        track = track,
+        enabled = enabled,
+        type = TrackType.TRACK_TYPE_VIDEO
     )
 
     public data class Audio(
         public override val sessionId: String,
-        public val audioTrack: AudioTrack?,
-        public val isAudioEnabled: Boolean,
+        public override val track: AudioTrack?,
+        public override val enabled: Boolean
     ) : Media(
         sessionId = sessionId,
-        mediaTrack = audioTrack,
-        isMediaEnabled = isAudioEnabled,
-        trackType = TrackType.TRACK_TYPE_AUDIO
+        track = track,
+        enabled = enabled,
+        type = TrackType.TRACK_TYPE_AUDIO
     )
 
     public data class ScreenSharing(
         public override val sessionId: String,
-        public val videoTrack: VideoTrack?,
-        public val isVideoEnabled: Boolean
+        public override val track: VideoTrack?,
+        public override val enabled: Boolean
     ) : Media(
         sessionId = sessionId,
-        mediaTrack = videoTrack,
-        isMediaEnabled = isVideoEnabled,
-        trackType = TrackType.TRACK_TYPE_VIDEO
+        track = track,
+        enabled = enabled,
+        type = TrackType.TRACK_TYPE_VIDEO
     )
 }
