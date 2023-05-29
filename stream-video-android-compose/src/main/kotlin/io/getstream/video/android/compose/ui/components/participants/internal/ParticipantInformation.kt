@@ -47,9 +47,9 @@ import io.getstream.video.android.mock.mockParticipantList
 
 @Composable
 public fun ParticipantInformation(
-    isVideoType: Boolean,
     callStatus: CallStatus,
-    participants: List<ParticipantState>
+    participants: List<ParticipantState>,
+    isVideoType: Boolean = true,
 ) {
     Column(
         modifier = Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally

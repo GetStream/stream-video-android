@@ -63,9 +63,9 @@ public fun RingingCallContent(
     isShowingHeader: Boolean = true,
     callHeaderContent: (@Composable ColumnScope.() -> Unit)? = null,
     callDetailsContent: (
-    @Composable ColumnScope.(
-        participants: List<ParticipantState>, topPadding: Dp
-    ) -> Unit
+        @Composable ColumnScope.(
+            participants: List<ParticipantState>, topPadding: Dp
+        ) -> Unit
     )? = null,
     callControlsContent: (@Composable BoxScope.() -> Unit)? = null,
     onBackPressed: () -> Unit = {},
@@ -115,9 +115,9 @@ public fun RingingCallContent(
     isShowingHeader: Boolean = true,
     callHeaderContent: (@Composable ColumnScope.() -> Unit)? = null,
     callDetailsContent: (
-    @Composable ColumnScope.(
-        participants: List<ParticipantState>, topPadding: Dp
-    ) -> Unit
+        @Composable ColumnScope.(
+            participants: List<ParticipantState>, topPadding: Dp
+        ) -> Unit
     )? = null,
     callControlsContent: (@Composable BoxScope.() -> Unit)? = null,
     onBackPressed: () -> Unit = {},

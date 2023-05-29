@@ -59,7 +59,7 @@ import io.getstream.video.android.ui.common.R
 @Composable
 public fun CallBackground(
     participants: List<ParticipantState>,
-    isVideoType: Boolean,
+    isVideoType: Boolean = true,
     isIncoming: Boolean,
     modifier: Modifier = Modifier,
     content: @Composable BoxScope.() -> Unit

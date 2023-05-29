@@ -42,7 +42,7 @@ import io.getstream.video.android.mock.mockParticipantList
 @Composable
 public fun IncomingCallDetails(
     modifier: Modifier = Modifier,
-    isVideoType: Boolean,
+    isVideoType: Boolean = true,
     participants: List<ParticipantState>
 ) {
     Column(modifier = modifier.fillMaxWidth()) {

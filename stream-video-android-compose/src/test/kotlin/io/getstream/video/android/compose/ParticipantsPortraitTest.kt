@@ -66,7 +66,6 @@ internal class ParticipantsPortraitTest : BaseComposeTest() {
     fun `snapshot ParticipantInformation composable`() {
         snapshotWithDarkMode {
             ParticipantInformation(
-                callType = CallType.VIDEO,
                 callStatus = CallStatus.Incoming,
                 participants = mockParticipantList,
             )

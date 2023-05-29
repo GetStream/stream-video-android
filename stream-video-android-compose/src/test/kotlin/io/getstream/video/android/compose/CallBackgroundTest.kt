@@ -43,7 +43,6 @@ internal class CallBackgroundTest : BaseComposeTest() {
         snapshot {
             CallBackground(
                 participants = mockParticipantList.take(1),
-                callType = CallType.VIDEO,
                 isIncoming = true
             ) {
                 Box(modifier = Modifier.align(Alignment.Center)) {

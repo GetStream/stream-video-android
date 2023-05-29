@@ -61,9 +61,9 @@ public fun OutgoingCallContent(
     isShowingHeader: Boolean = true,
     callHeaderContent: (@Composable ColumnScope.() -> Unit)? = null,
     callDetailsContent: (
-    @Composable ColumnScope.(
-        participants: List<ParticipantState>, topPadding: Dp
-    ) -> Unit
+        @Composable ColumnScope.(
+            participants: List<ParticipantState>, topPadding: Dp
+        ) -> Unit
     )? = null,
     callControlsContent: (@Composable BoxScope.() -> Unit)? = null,
     onBackPressed: () -> Unit = {},
@@ -107,9 +107,9 @@ public fun OutgoingCallContent(
     isShowingHeader: Boolean = true,
     callHeaderContent: (@Composable ColumnScope.() -> Unit)? = null,
     callDetailsContent: (
-    @Composable ColumnScope.(
-        participants: List<ParticipantState>, topPadding: Dp
-    ) -> Unit
+        @Composable ColumnScope.(
+            participants: List<ParticipantState>, topPadding: Dp
+        ) -> Unit
     )? = null,
     callControlsContent: (@Composable BoxScope.() -> Unit)? = null,
     onBackPressed: () -> Unit = {},
@@ -149,16 +149,16 @@ public fun OutgoingCallContent(
 @Composable
 public fun OutgoingCallContent(
     call: Call,
-    isVideoType: Boolean,
+    isVideoType: Boolean = true,
     participants: List<ParticipantState>,
     callDeviceState: CallDeviceState,
     modifier: Modifier = Modifier,
     isShowingHeader: Boolean = true,
     callHeaderContent: (@Composable ColumnScope.() -> Unit)? = null,
     callDetailsContent: (
-    @Composable ColumnScope.(
-        participants: List<ParticipantState>, topPadding: Dp
-    ) -> Unit
+        @Composable ColumnScope.(
+            participants: List<ParticipantState>, topPadding: Dp
+        ) -> Unit
     )? = null,
     callControlsContent: (@Composable BoxScope.() -> Unit)? = null,
     onBackPressed: () -> Unit = {},

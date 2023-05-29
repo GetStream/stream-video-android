@@ -37,7 +37,6 @@ internal class CallContainerPortraitTest : BaseComposeTest() {
         snapshot {
             CallContainer(
                 call = mockCall,
-                callType = CallType.VIDEO,
                 callDeviceState = CallDeviceState()
             )
         }

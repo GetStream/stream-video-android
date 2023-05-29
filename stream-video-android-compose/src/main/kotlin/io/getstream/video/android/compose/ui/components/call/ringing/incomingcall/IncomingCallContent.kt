@@ -63,9 +63,9 @@ public fun IncomingCallContent(
     isShowingHeader: Boolean = true,
     callHeaderContent: (@Composable ColumnScope.() -> Unit)? = null,
     callDetailsContent: (
-    @Composable ColumnScope.(
-        participants: List<ParticipantState>, topPadding: Dp
-    ) -> Unit
+        @Composable ColumnScope.(
+            participants: List<ParticipantState>, topPadding: Dp
+        ) -> Unit
     )? = null,
     callControlsContent: (@Composable BoxScope.() -> Unit)? = null,
     onBackPressed: () -> Unit = {},
@@ -104,15 +104,15 @@ public fun IncomingCallContent(
 @Composable
 public fun IncomingCallContent(
     call: Call,
-    isVideoType: Boolean,
+    isVideoType: Boolean = true,
     callDeviceState: CallDeviceState,
     modifier: Modifier = Modifier,
     isShowingHeader: Boolean = true,
     callHeaderContent: (@Composable ColumnScope.() -> Unit)? = null,
     callDetailsContent: (
-    @Composable ColumnScope.(
-        participants: List<ParticipantState>, topPadding: Dp
-    ) -> Unit
+        @Composable ColumnScope.(
+            participants: List<ParticipantState>, topPadding: Dp
+        ) -> Unit
     )? = null,
     callControlsContent: (@Composable BoxScope.() -> Unit)? = null,
     onBackPressed: () -> Unit = {},
@@ -151,16 +151,16 @@ public fun IncomingCallContent(
 @Composable
 public fun IncomingCallContent(
     call: Call,
-    isVideoType: Boolean,
+    isVideoType: Boolean = true,
     participants: List<ParticipantState>,
     isCameraEnabled: Boolean,
     modifier: Modifier = Modifier,
     isShowingHeader: Boolean = true,
     callHeaderContent: (@Composable ColumnScope.() -> Unit)? = null,
     callDetailsContent: (
-    @Composable ColumnScope.(
-        participants: List<ParticipantState>, topPadding: Dp
-    ) -> Unit
+        @Composable ColumnScope.(
+            participants: List<ParticipantState>, topPadding: Dp
+        ) -> Unit
     )? = null,
     callControlsContent: (@Composable BoxScope.() -> Unit)? = null,
     onBackPressed: () -> Unit = {},
@@ -214,7 +214,7 @@ private fun IncomingCallPreview1() {
     VideoTheme {
         CompositionLocalProvider(
             LocalAvatarPreviewPlaceholder provides
-                    io.getstream.video.android.ui.common.R.drawable.stream_video_call_sample
+                io.getstream.video.android.ui.common.R.drawable.stream_video_call_sample
         ) {
             IncomingCallContent(
                 call = mockCall,
@@ -234,7 +234,7 @@ private fun IncomingCallPreview2() {
     VideoTheme {
         CompositionLocalProvider(
             LocalAvatarPreviewPlaceholder provides
-                    io.getstream.video.android.ui.common.R.drawable.stream_video_call_sample
+                io.getstream.video.android.ui.common.R.drawable.stream_video_call_sample
         ) {
             IncomingCallContent(
                 call = mockCall,
