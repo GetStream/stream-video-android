@@ -873,7 +873,7 @@ public final class io/getstream/video/android/compose/ui/components/participants
 }
 
 public final class io/getstream/video/android/compose/ui/components/participants/internal/ParticipantInformationKt {
-	public static final fun ParticipantInformation (ZLio/getstream/video/android/core/model/CallStatus;Ljava/util/List;Landroidx/compose/runtime/Composer;I)V
+	public static final fun ParticipantInformation (Lio/getstream/video/android/core/model/CallStatus;Ljava/util/List;ZLandroidx/compose/runtime/Composer;II)V
 }
 
 public final class io/getstream/video/android/compose/ui/components/video/ComposableSingletons$VideoRendererKt {
