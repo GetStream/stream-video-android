@@ -208,14 +208,16 @@ public fun CallContent(
  */
 @Composable
 internal fun DefaultPictureInPictureContent(call: Call) {
-    val screenSharingSession by call.state.screenSharingSession.collectAsState(initial = null)
+    val screenSharingSession by call.state.screenSharingSession.collectAsStateWithLifecycle()
     val session = screenSharingSession
-    val mediaTrack = session?.participant?.screenSharingTrack?.collectAsState()
+    val mediaTrack = session?.participant?.screenSharingTrack?.collectAsStateWithLifecycle()
+    val isMediaEnabled = session?.participant?.videoEnabled?.collectAsStateWithLifecycle()
     if (session != null) {
         VideoRenderer(
             modifier = Modifier.aspectRatio(ScreenShareAspectRatio, false),
             call = call,
             mediaTrack = mediaTrack?.value,
+            isMediaEnabled = isMediaEnabled?.value ?: false,
             trackType = TrackType.TRACK_TYPE_SCREEN_SHARE,
             sessionId = session.participant.sessionId
         )

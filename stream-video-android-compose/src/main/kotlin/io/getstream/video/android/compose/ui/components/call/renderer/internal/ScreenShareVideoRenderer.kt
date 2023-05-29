@@ -55,6 +55,7 @@ public fun ScreenShareVideoRenderer(
 ) {
     val screenShareParticipant = session.participant
     val mediaTrack by session.participant.screenSharingTrack.collectAsState()
+    val isMediaEnabled by session.participant.videoEnabled.collectAsState()
 
     val zoomableModifier = if (isZoomable) {
         Modifier.zoomable(rememberZoomableState())
@@ -69,6 +70,7 @@ public fun ScreenShareVideoRenderer(
                 .align(Alignment.Center),
             call = call,
             mediaTrack = mediaTrack,
+            isMediaEnabled = isMediaEnabled,
             onRender = onRender,
             trackType = TrackType.TRACK_TYPE_SCREEN_SHARE,
             videoScalingType = VideoScalingType.SCALE_ASPECT_FIT,

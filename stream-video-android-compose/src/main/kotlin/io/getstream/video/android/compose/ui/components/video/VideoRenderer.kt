@@ -67,11 +67,12 @@ import stream.video.sfu.models.TrackType
 public fun VideoRenderer(
     call: Call,
     mediaTrack: MediaTrack?,
+    isMediaEnabled: Boolean,
     sessionId: String,
     trackType: TrackType,
     modifier: Modifier = Modifier,
     videoScalingType: VideoScalingType = VideoScalingType.SCALE_ASPECT_BALANCED,
-    mediaTrackFallbackContent: @Composable (Call) -> Unit = {
+    onRenderFailedContent: @Composable (Call) -> Unit = {
         DefaultMediaTrackFallbackContent(
             modifier,
             call
@@ -104,7 +105,7 @@ public fun VideoRenderer(
         }
     }
 
-    if (mediaTrack != null) {
+    if (mediaTrack != null && isMediaEnabled) {
         AndroidView(
             factory = { context ->
                 StreamVideoTextureViewRenderer(context).apply {
@@ -124,7 +125,7 @@ public fun VideoRenderer(
             modifier = modifier.testTag("video_renderer"),
         )
     } else {
-        mediaTrackFallbackContent.invoke(call)
+        onRenderFailedContent.invoke(call)
     }
 }
 
@@ -194,6 +195,7 @@ private fun VideoRendererPreview() {
         VideoRenderer(
             call = mockCall,
             mediaTrack = VideoTrack("", org.webrtc.VideoTrack(123)),
+            isMediaEnabled = true,
             sessionId = "",
             trackType = TrackType.TRACK_TYPE_VIDEO
         )

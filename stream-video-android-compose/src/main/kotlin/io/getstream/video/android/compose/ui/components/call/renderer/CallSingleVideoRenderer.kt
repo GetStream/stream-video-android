@@ -163,19 +163,17 @@ public fun ParticipantVideoRenderer(
         return
     }
 
-    if (isVideoEnabled) {
-        VideoRenderer(
-            call = call,
-            mediaTrack = videoTrack,
-            sessionId = participant.sessionId,
-            onRender = onRender,
-            trackType = TrackType.TRACK_TYPE_VIDEO
-        )
-    } else {
-        val user by participant.user.collectAsStateWithLifecycle()
+    val user by participant.user.collectAsStateWithLifecycle()
 
-        UserAvatarBackground(user = user)
-    }
+    VideoRenderer(
+        call = call,
+        mediaTrack = videoTrack,
+        isMediaEnabled = isVideoEnabled,
+        sessionId = participant.sessionId,
+        onRender = onRender,
+        trackType = TrackType.TRACK_TYPE_VIDEO,
+        onRenderFailedContent = { UserAvatarBackground(user = user) }
+    )
 }
 
 @Composable
