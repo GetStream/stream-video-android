@@ -30,7 +30,6 @@ import io.getstream.video.android.compose.ui.components.call.CallContainer
 import io.getstream.video.android.core.StreamVideo
 import io.getstream.video.android.core.call.state.ToggleCamera
 import io.getstream.video.android.core.call.state.ToggleMicrophone
-import io.getstream.video.android.core.model.CallType
 import io.getstream.video.android.core.permission.PermissionManager
 import io.getstream.video.android.core.viewmodel.CallViewModel
 import io.getstream.video.android.core.viewmodel.CallViewModelFactory
@@ -61,7 +60,6 @@ class CallActivity : AppCompatActivity() {
                 CallContainer(
                     modifier = Modifier.background(color = VideoTheme.colors.appBackground),
                     callViewModel = vm,
-                    callType = CallType.VIDEO,
                     onBackPressed = { finish() },
                 )
             }

@@ -1670,19 +1670,6 @@ public final class io/getstream/video/android/core/model/CallStatus$Outgoing : i
 	public static final field INSTANCE Lio/getstream/video/android/core/model/CallStatus$Outgoing;
 }
 
-public final class io/getstream/video/android/core/model/CallType : java/lang/Enum {
-	public static final field AUDIO Lio/getstream/video/android/core/model/CallType;
-	public static final field Companion Lio/getstream/video/android/core/model/CallType$Companion;
-	public static final field VIDEO Lio/getstream/video/android/core/model/CallType;
-	public final fun getType ()Ljava/lang/String;
-	public static fun valueOf (Ljava/lang/String;)Lio/getstream/video/android/core/model/CallType;
-	public static fun values ()[Lio/getstream/video/android/core/model/CallType;
-}
-
-public final class io/getstream/video/android/core/model/CallType$Companion {
-	public final fun fromType (Ljava/lang/String;)Lio/getstream/video/android/core/model/CallType;
-}
-
 public final class io/getstream/video/android/core/model/CallUser : java/io/Serializable {
 	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/util/List;Lio/getstream/video/android/core/model/CallUserState;Ljava/util/Date;Ljava/util/Date;)V
 	public final fun component1 ()Ljava/lang/String;

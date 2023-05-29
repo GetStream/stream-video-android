@@ -41,14 +41,13 @@ import io.getstream.video.android.common.util.buildSmallCallText
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.core.ParticipantState
 import io.getstream.video.android.core.model.CallStatus
-import io.getstream.video.android.core.model.CallType
 import io.getstream.video.android.core.utils.toCallUser
 import io.getstream.video.android.mock.StreamMockUtils
 import io.getstream.video.android.mock.mockParticipantList
 
 @Composable
 public fun ParticipantInformation(
-    callType: CallType,
+    isVideoType: Boolean,
     callStatus: CallStatus,
     participants: List<ParticipantState>
 ) {
@@ -79,12 +78,18 @@ public fun ParticipantInformation(
 
         Spacer(modifier = Modifier.height(VideoTheme.dimens.callStatusParticipantsMargin))
 
+        val callType = if (isVideoType) {
+            "video"
+        } else {
+            "audio"
+        }
+
         Text(
             modifier = Modifier.alpha(VideoTheme.dimens.onCallStatusTextAlpha),
             text = when (callStatus) {
                 CallStatus.Incoming -> stringResource(
                     id = io.getstream.video.android.ui.common.R.string.stream_video_call_status_incoming,
-                    callType.type.capitalize(Locale.current)
+                    callType.capitalize(Locale.current)
                 )
 
                 CallStatus.Outgoing -> stringResource(
@@ -108,7 +113,7 @@ private fun ParticipantInformationPreview() {
     StreamMockUtils.initializeStreamVideo(LocalContext.current)
     VideoTheme {
         ParticipantInformation(
-            callType = CallType.VIDEO,
+            isVideoType = true,
             callStatus = CallStatus.Incoming,
             participants = mockParticipantList
         )

@@ -41,7 +41,6 @@ import com.skydoves.landscapist.transformation.blur.BlurTransformationPlugin
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.avatar.AvatarImagePreview
 import io.getstream.video.android.core.ParticipantState
-import io.getstream.video.android.core.model.CallType
 import io.getstream.video.android.core.model.CallUser
 import io.getstream.video.android.core.utils.toCallUser
 import io.getstream.video.android.mock.StreamMockUtils
@@ -52,7 +51,7 @@ import io.getstream.video.android.ui.common.R
  * Renders a call background that shows either a static image or user images based on the call state.
  *
  * @param participants The list of participants in the call.
- * @param callType The type of call, Audio or Video.
+ * @param isVideoType The type of call, Audio or Video.
  * @param isIncoming If the call is incoming from other users or if we're calling other people.
  * @param modifier Modifier for styling.
  * @param content The content to render on top of the background.
@@ -60,7 +59,7 @@ import io.getstream.video.android.ui.common.R
 @Composable
 public fun CallBackground(
     participants: List<ParticipantState>,
-    callType: CallType,
+    isVideoType: Boolean,
     isIncoming: Boolean,
     modifier: Modifier = Modifier,
     content: @Composable BoxScope.() -> Unit
@@ -71,7 +70,7 @@ public fun CallBackground(
         if (isIncoming) {
             IncomingCallBackground(callUser)
         } else {
-            OutgoingCallBackground(callUser, callType)
+            OutgoingCallBackground(callUser, isVideoType)
         }
 
         content()
@@ -90,8 +89,8 @@ private fun IncomingCallBackground(callUsers: List<CallUser>) {
 }
 
 @Composable
-private fun OutgoingCallBackground(callUsers: List<CallUser>, callType: CallType) {
-    if (callType == CallType.AUDIO) {
+private fun OutgoingCallBackground(callUsers: List<CallUser>, isVideoType: Boolean) {
+    if (!isVideoType) {
         if (callUsers.size == 1) {
             ParticipantImageBackground(callUsers.first().imageUrl)
         } else {
@@ -170,7 +169,7 @@ private fun CallBackgroundPreview() {
     VideoTheme {
         CallBackground(
             participants = mockParticipantList.take(1),
-            callType = CallType.VIDEO,
+            isVideoType = true,
             isIncoming = true
         ) {
             Box(modifier = Modifier.align(Alignment.Center)) {

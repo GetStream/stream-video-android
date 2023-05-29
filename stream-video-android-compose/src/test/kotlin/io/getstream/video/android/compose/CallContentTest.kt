@@ -30,7 +30,6 @@ import io.getstream.video.android.compose.ui.components.call.ringing.outgoingcal
 import io.getstream.video.android.compose.ui.components.call.ringing.outgoingcall.OutgoingCallControls
 import io.getstream.video.android.compose.ui.components.call.ringing.outgoingcall.OutgoingCallDetails
 import io.getstream.video.android.core.call.state.CallDeviceState
-import io.getstream.video.android.core.model.CallType
 import io.getstream.video.android.mock.mockCall
 import io.getstream.video.android.mock.mockParticipantList
 import org.junit.Rule

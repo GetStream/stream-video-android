@@ -29,7 +29,6 @@ import io.getstream.video.android.compose.ui.components.participants.internal.Pa
 import io.getstream.video.android.compose.ui.components.participants.internal.ParticipantInformation
 import io.getstream.video.android.core.ParticipantState
 import io.getstream.video.android.core.model.CallStatus
-import io.getstream.video.android.core.model.CallType
 import io.getstream.video.android.mock.StreamMockUtils
 import io.getstream.video.android.mock.mockParticipantList
 
@@ -37,13 +36,13 @@ import io.getstream.video.android.mock.mockParticipantList
  * A details of an incoming call that displays a list of participant information.
  *
  * @param modifier Modifier for styling.
- * @param callType The type of call, Audio or Video.
+ * @param isVideoType The type of call, Audio or Video.
  * @param participants A list of participants to be displayed.
  */
 @Composable
 public fun IncomingCallDetails(
     modifier: Modifier = Modifier,
-    callType: CallType,
+    isVideoType: Boolean,
     participants: List<ParticipantState>
 ) {
     Column(modifier = modifier.fillMaxWidth()) {
@@ -53,7 +52,7 @@ public fun IncomingCallDetails(
         Spacer(modifier = Modifier.height(VideoTheme.dimens.callParticipantsAvatarsMargin))
 
         ParticipantInformation(
-            callType = callType,
+            isVideoType = isVideoType,
             callStatus = CallStatus.Incoming,
             participants = participants
         )
@@ -66,7 +65,7 @@ private fun IncomingCallDetailsPreview() {
     StreamMockUtils.initializeStreamVideo(LocalContext.current)
     VideoTheme {
         IncomingCallDetails(
-            callType = CallType.VIDEO,
+            isVideoType = true,
             participants = mockParticipantList
         )
     }

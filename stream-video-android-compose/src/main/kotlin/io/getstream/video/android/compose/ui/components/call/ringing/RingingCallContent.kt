@@ -35,7 +35,6 @@ import io.getstream.video.android.core.ParticipantState
 import io.getstream.video.android.core.RingingState
 import io.getstream.video.android.core.call.state.CallAction
 import io.getstream.video.android.core.call.state.CallDeviceState
-import io.getstream.video.android.core.model.CallType
 import io.getstream.video.android.core.viewmodel.CallViewModel
 import io.getstream.video.android.mock.StreamMockUtils
 import io.getstream.video.android.mock.mockCall
@@ -46,7 +45,7 @@ import io.getstream.video.android.mock.mockCall
  * Depending on the call state, we show [CallContent], [IncomingCallContent] or [OutgoingCallContent] respectively.
  *
  * @param callViewModel The [CallViewModel] used to provide state and various handlers in the call.
- * @param callType Represent the call type is a video or an audio.
+ * @param isVideoType Represent the call type is a video or an audio.
  * @param modifier Modifier for styling.
  * @param isShowingHeader Weather or not the app bar will be shown.
  * @param callHeaderContent Content shown for the call header.
@@ -59,14 +58,14 @@ import io.getstream.video.android.mock.mockCall
 @Composable
 public fun RingingCallContent(
     callViewModel: CallViewModel,
-    callType: CallType,
     modifier: Modifier = Modifier,
+    isVideoType: Boolean = true,
     isShowingHeader: Boolean = true,
     callHeaderContent: (@Composable ColumnScope.() -> Unit)? = null,
     callDetailsContent: (
-        @Composable ColumnScope.(
-            participants: List<ParticipantState>, topPadding: Dp
-        ) -> Unit
+    @Composable ColumnScope.(
+        participants: List<ParticipantState>, topPadding: Dp
+    ) -> Unit
     )? = null,
     callControlsContent: (@Composable BoxScope.() -> Unit)? = null,
     onBackPressed: () -> Unit = {},
@@ -77,7 +76,7 @@ public fun RingingCallContent(
 
     RingingCallContent(
         call = callViewModel.call,
-        callType = callType,
+        isVideoType = isVideoType,
         callDeviceState = callDeviceState,
         modifier = modifier,
         isShowingHeader = isShowingHeader,
@@ -97,7 +96,7 @@ public fun RingingCallContent(
  *
  * @param call The call contains states and will be rendered with participants.
  * @param callDeviceState A call device states that contains states for video, audio, and speaker.
- * @param callType Represent the call type is a video or an audio.
+ * @param isVideoType Represent the call type is a video or an audio.
  * @param modifier Modifier for styling.
  * @param isShowingHeader Weather or not the app bar will be shown.
  * @param callHeaderContent Content shown for the call header.
@@ -110,15 +109,15 @@ public fun RingingCallContent(
 @Composable
 public fun RingingCallContent(
     call: Call,
-    callType: CallType,
-    callDeviceState: CallDeviceState,
     modifier: Modifier = Modifier,
+    isVideoType: Boolean = true,
+    callDeviceState: CallDeviceState,
     isShowingHeader: Boolean = true,
     callHeaderContent: (@Composable ColumnScope.() -> Unit)? = null,
     callDetailsContent: (
-        @Composable ColumnScope.(
-            participants: List<ParticipantState>, topPadding: Dp
-        ) -> Unit
+    @Composable ColumnScope.(
+        participants: List<ParticipantState>, topPadding: Dp
+    ) -> Unit
     )? = null,
     callControlsContent: (@Composable BoxScope.() -> Unit)? = null,
     onBackPressed: () -> Unit = {},
@@ -131,7 +130,7 @@ public fun RingingCallContent(
     if (ringingState is RingingState.Incoming && !ringingState.acceptedByMe) {
         IncomingCallContent(
             call = call,
-            callType = callType,
+            isVideoType = isVideoType,
             callDeviceState = callDeviceState,
             modifier = modifier,
             isShowingHeader = isShowingHeader,
@@ -144,7 +143,7 @@ public fun RingingCallContent(
     } else if (ringingState is RingingState.Outgoing && !ringingState.acceptedByCallee) {
         OutgoingCallContent(
             call = call,
-            callType = callType,
+            isVideoType = isVideoType,
             callDeviceState = callDeviceState,
             modifier = modifier,
             isShowingHeader = isShowingHeader,
@@ -167,7 +166,7 @@ private fun RingingCallContentPreview() {
     VideoTheme {
         RingingCallContent(
             call = mockCall,
-            callType = CallType.VIDEO,
+            isVideoType = true,
             callDeviceState = CallDeviceState(),
             onAcceptedCallContent = {},
         )

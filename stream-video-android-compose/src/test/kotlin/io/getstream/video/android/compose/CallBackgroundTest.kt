@@ -26,7 +26,6 @@ import app.cash.paparazzi.Paparazzi
 import io.getstream.video.android.compose.base.BaseComposeTest
 import io.getstream.video.android.compose.ui.components.avatar.Avatar
 import io.getstream.video.android.compose.ui.components.background.CallBackground
-import io.getstream.video.android.core.model.CallType
 import io.getstream.video.android.mock.mockParticipantList
 import io.getstream.video.android.ui.common.R
 import org.junit.Rule
