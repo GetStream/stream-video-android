@@ -21,7 +21,6 @@ import app.cash.paparazzi.Paparazzi
 import io.getstream.video.android.compose.base.BaseComposeTest
 import io.getstream.video.android.compose.ui.components.call.CallContainer
 import io.getstream.video.android.core.call.state.CallDeviceState
-import io.getstream.video.android.core.model.CallType
 import io.getstream.video.android.mock.mockCall
 import org.junit.Rule
 import org.junit.Test
@@ -38,7 +37,6 @@ internal class CallContainerLandscapeTest : BaseComposeTest() {
         snapshot {
             CallContainer(
                 call = mockCall,
-                callType = CallType.VIDEO,
                 callDeviceState = CallDeviceState()
             )
         }

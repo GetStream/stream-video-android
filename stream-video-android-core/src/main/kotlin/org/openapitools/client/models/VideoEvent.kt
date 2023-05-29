@@ -34,11 +34,13 @@ import org.openapitools.client.models.CallMemberAddedEvent
 import org.openapitools.client.models.CallMemberRemovedEvent
 import org.openapitools.client.models.CallMemberUpdatedEvent
 import org.openapitools.client.models.CallMemberUpdatedPermissionEvent
+import org.openapitools.client.models.CallNotificationEvent
 import org.openapitools.client.models.CallReactionEvent
 import org.openapitools.client.models.CallRecordingStartedEvent
 import org.openapitools.client.models.CallRecordingStoppedEvent
 import org.openapitools.client.models.CallRejectedEvent
 import org.openapitools.client.models.CallResponse
+import org.openapitools.client.models.CallRingEvent
 import org.openapitools.client.models.CallSessionEndedEvent
 import org.openapitools.client.models.CallSessionParticipantJoinedEvent
 import org.openapitools.client.models.CallSessionParticipantLeftEvent
@@ -114,12 +116,14 @@ class VideoEventAdapter : JsonAdapter<VideoEvent>() {
             "call.member_removed" -> CallMemberRemovedEvent::class.java
             "call.member_updated" -> CallMemberUpdatedEvent::class.java
             "call.member_updated_permission" -> CallMemberUpdatedPermissionEvent::class.java
+            "call.notification" -> CallNotificationEvent::class.java
             "call.permission_request" -> PermissionRequestEvent::class.java
             "call.permissions_updated" -> UpdatedCallPermissionsEvent::class.java
             "call.reaction_new" -> CallReactionEvent::class.java
             "call.recording_started" -> CallRecordingStartedEvent::class.java
             "call.recording_stopped" -> CallRecordingStoppedEvent::class.java
             "call.rejected" -> CallRejectedEvent::class.java
+            "call.ring" -> CallRingEvent::class.java
             "call.session_ended" -> CallSessionEndedEvent::class.java
             "call.session_participant_joined" -> CallSessionParticipantJoinedEvent::class.java
             "call.session_participant_left" -> CallSessionParticipantLeftEvent::class.java

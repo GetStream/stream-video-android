@@ -38,7 +38,6 @@ import com.squareup.moshi.Json
  * @param callCid
  * @param createdAt
  * @param members the members added to this call
- * @param ringing true when the call was created with ring enabled
  * @param type The type of event: \"call.created\" in this case
  */
 
@@ -57,10 +56,6 @@ data class CallCreatedEvent (
     /* the members added to this call */
     @Json(name = "members")
     val members: kotlin.collections.List<MemberResponse>,
-
-    /* true when the call was created with ring enabled */
-    @Json(name = "ringing")
-    val ringing: kotlin.Boolean,
 
     /* The type of event: \"call.created\" in this case */
     @Json(name = "type")

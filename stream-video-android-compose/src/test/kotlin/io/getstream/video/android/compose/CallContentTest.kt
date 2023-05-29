@@ -30,7 +30,6 @@ import io.getstream.video.android.compose.ui.components.call.ringing.outgoingcal
 import io.getstream.video.android.compose.ui.components.call.ringing.outgoingcall.OutgoingCallControls
 import io.getstream.video.android.compose.ui.components.call.ringing.outgoingcall.OutgoingCallDetails
 import io.getstream.video.android.core.call.state.CallDeviceState
-import io.getstream.video.android.core.model.CallType
 import io.getstream.video.android.mock.mockCall
 import io.getstream.video.android.mock.mockParticipantList
 import org.junit.Rule
@@ -46,20 +45,14 @@ internal class CallContentTest : BaseComposeTest() {
     @Test
     fun `snapshot IncomingCallContentDetails Video composable`() {
         snapshot {
-            IncomingCallDetails(
-                callType = CallType.VIDEO,
-                participants = mockParticipantList
-            )
+            IncomingCallDetails(participants = mockParticipantList)
         }
     }
 
     @Test
     fun `snapshot IncomingCallContentDetails Audio composable`() {
         snapshot {
-            IncomingCallDetails(
-                callType = CallType.AUDIO,
-                participants = mockParticipantList
-            )
+            IncomingCallDetails(participants = mockParticipantList)
         }
     }
 
@@ -80,7 +73,6 @@ internal class CallContentTest : BaseComposeTest() {
             IncomingCallContent(
                 call = mockCall,
                 participants = mockParticipantList.takeLast(1),
-                callType = CallType.VIDEO,
                 isCameraEnabled = false,
                 onBackPressed = {}
             ) {}
@@ -93,7 +85,6 @@ internal class CallContentTest : BaseComposeTest() {
             IncomingCallContent(
                 call = mockCall,
                 participants = mockParticipantList,
-                callType = CallType.VIDEO,
                 isCameraEnabled = false,
                 onBackPressed = {}
             ) {}
@@ -103,20 +94,14 @@ internal class CallContentTest : BaseComposeTest() {
     @Test
     fun `snapshot OutgoingCallDetails Video composable`() {
         snapshot {
-            OutgoingCallDetails(
-                callType = CallType.VIDEO,
-                participants = mockParticipantList
-            )
+            OutgoingCallDetails(participants = mockParticipantList)
         }
     }
 
     @Test
     fun `snapshot OutgoingCallDetails Audio composable`() {
         snapshot {
-            OutgoingCallDetails(
-                callType = CallType.VIDEO,
-                participants = mockParticipantList
-            )
+            OutgoingCallDetails(participants = mockParticipantList)
         }
     }
 
@@ -143,7 +128,6 @@ internal class CallContentTest : BaseComposeTest() {
         snapshot {
             OutgoingCallContent(
                 call = mockCall,
-                callType = CallType.VIDEO,
                 participants = mockParticipantList.take(1),
                 callDeviceState = CallDeviceState(),
                 modifier = Modifier.fillMaxSize(),
@@ -158,7 +142,6 @@ internal class CallContentTest : BaseComposeTest() {
         snapshot {
             OutgoingCallContent(
                 call = mockCall,
-                callType = CallType.VIDEO,
                 participants = mockParticipantList,
                 callDeviceState = CallDeviceState(),
                 onBackPressed = {}

@@ -25,7 +25,6 @@ import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.call.CallContainer
 import io.getstream.video.android.compose.ui.components.call.activecall.DefaultPictureInPictureContent
 import io.getstream.video.android.core.Call
-import io.getstream.video.android.core.model.CallType
 
 public abstract class AbstractComposeCallActivity : AbstractCallActivity() {
 
@@ -38,7 +37,6 @@ public abstract class AbstractComposeCallActivity : AbstractCallActivity() {
             CallContainer(
                 modifier = Modifier.background(color = VideoTheme.colors.appBackground),
                 callViewModel = callViewModel,
-                callType = CallType.VIDEO,
                 onCallAction = { callViewModel.onCallAction(it) },
                 onBackPressed = ::handleBackPressed,
                 pictureInPictureContent = { PictureInPictureContent(call = it) }

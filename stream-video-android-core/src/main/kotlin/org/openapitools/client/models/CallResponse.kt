@@ -24,6 +24,7 @@
 package org.openapitools.client.models
 
 import org.openapitools.client.models.CallIngressResponse
+import org.openapitools.client.models.CallSessionResponse
 import org.openapitools.client.models.CallSettingsResponse
 import org.openapitools.client.models.OwnCapability
 import org.openapitools.client.models.UserResponse
@@ -54,6 +55,7 @@ import com.squareup.moshi.Json
  * @param type The type of call
  * @param updatedAt Date/time of the last update
  * @param endedAt Date/time when the call ended
+ * @param session
  * @param startsAt Date/time when the call will start
  * @param team
  */
@@ -122,6 +124,9 @@ data class CallResponse (
     /* Date/time when the call ended */
     @Json(name = "ended_at")
     val endedAt: org.threeten.bp.OffsetDateTime? = null,
+
+    @Json(name = "session")
+    val session: CallSessionResponse? = null,
 
     /* Date/time when the call will start */
     @Json(name = "starts_at")

@@ -33,8 +33,9 @@ import com.squareup.moshi.Json
 /**
  *
  *
- * @param callCreated
  * @param callLiveStarted
+ * @param callNotification
+ * @param callRing
  * @param enabled
  * @param sessionStarted
  */
@@ -42,11 +43,14 @@ import com.squareup.moshi.Json
 
 data class NotificationSettingsRequest (
 
-    @Json(name = "call_created")
-    val callCreated: EventNotificationSettingsRequest? = null,
-
     @Json(name = "call_live_started")
     val callLiveStarted: EventNotificationSettingsRequest? = null,
+
+    @Json(name = "call_notification")
+    val callNotification: EventNotificationSettingsRequest? = null,
+
+    @Json(name = "call_ring")
+    val callRing: EventNotificationSettingsRequest? = null,
 
     @Json(name = "enabled")
     val enabled: kotlin.Boolean? = null,

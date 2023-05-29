@@ -64,7 +64,6 @@ import io.getstream.video.android.mock.StreamMockUtils
 import io.getstream.video.android.mock.mockCall
 import io.getstream.video.android.mock.mockParticipantList
 import io.getstream.video.android.ui.common.R
-import stream.video.sfu.models.TrackType
 
 /**
  * Renders a single participant with a given call, which contains all the call states.
@@ -148,9 +147,6 @@ public fun ParticipantVideoRenderer(
     participant: ParticipantState,
     onRender: (View) -> Unit = {}
 ) {
-    val videoTrack by participant.videoTrack.collectAsStateWithLifecycle()
-    val isVideoEnabled by participant.videoEnabled.collectAsStateWithLifecycle()
-
     if (LocalInspectionMode.current) {
         Image(
             modifier = Modifier
@@ -163,19 +159,15 @@ public fun ParticipantVideoRenderer(
         return
     }
 
-    if (isVideoEnabled) {
-        VideoRenderer(
-            call = call,
-            mediaTrack = videoTrack,
-            sessionId = participant.sessionId,
-            onRender = onRender,
-            trackType = TrackType.TRACK_TYPE_VIDEO
-        )
-    } else {
-        val user by participant.user.collectAsStateWithLifecycle()
+    val video by participant.video.collectAsStateWithLifecycle()
+    val user by participant.user.collectAsStateWithLifecycle()
 
-        UserAvatarBackground(user = user)
-    }
+    VideoRenderer(
+        call = call,
+        media = video,
+        onRender = onRender,
+        onRenderFailedContent = { UserAvatarBackground(user = user) }
+    )
 }
 
 @Composable

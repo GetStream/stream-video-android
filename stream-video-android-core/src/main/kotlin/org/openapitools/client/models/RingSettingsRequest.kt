@@ -33,7 +33,7 @@ import com.squareup.moshi.Json
  *
  *
  * @param autoCancelTimeoutMs
- * @param autoRejectTimeoutMs
+ * @param incomingCallTimeoutMs
  */
 
 
@@ -42,7 +42,7 @@ data class RingSettingsRequest (
     @Json(name = "auto_cancel_timeout_ms")
     val autoCancelTimeoutMs: kotlin.Int? = null,
 
-    @Json(name = "auto_reject_timeout_ms")
-    val autoRejectTimeoutMs: kotlin.Int? = null
+    @Json(name = "incoming_call_timeout_ms")
+    val incomingCallTimeoutMs: kotlin.Int? = null
 
 )

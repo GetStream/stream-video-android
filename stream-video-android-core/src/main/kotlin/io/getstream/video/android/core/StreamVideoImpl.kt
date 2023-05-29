@@ -32,7 +32,6 @@ import io.getstream.video.android.core.internal.module.ConnectionModule
 import io.getstream.video.android.core.lifecycle.LifecycleHandler
 import io.getstream.video.android.core.lifecycle.internal.StreamLifecycleObserver
 import io.getstream.video.android.core.logging.LoggingLevel
-import io.getstream.video.android.core.model.CallEventType
 import io.getstream.video.android.core.model.EdgeData
 import io.getstream.video.android.core.model.MuteUsersData
 import io.getstream.video.android.core.model.SortField
@@ -643,36 +642,18 @@ internal class StreamVideoImpl internal constructor(
         }
     }
 
-    // callee: SEND Accepted or Rejected
-    internal suspend fun sendEvent(
-        type: String,
-        id: String,
-        eventType: CallEventType
-    ): Result<SendEventResponse> {
-        logger.d { "[sendEvent] callCid: $type:$id, eventType: $eventType" }
-
-        return wrapAPICall {
-            connectionModule.eventsApi.sendEvent(
-                type,
-                id,
-                SendEventRequest(type = eventType.eventType)
-            )
-        }
-    }
-
     internal suspend fun sendCustomEvent(
         type: String,
         id: String,
-        eventType: String,
         dataJson: Map<String, Any>,
     ): Result<SendEventResponse> {
-        logger.d { "[sendCustomEvent] callCid: $type:$id, dataJson: $dataJson, eventType: $eventType" }
+        logger.d { "[sendCustomEvent] callCid: $type:$id, dataJson: $dataJson" }
 
         return wrapAPICall {
             connectionModule.eventsApi.sendEvent(
                 type,
                 id,
-                SendEventRequest(custom = dataJson, type = eventType)
+                SendEventRequest(custom = dataJson)
             )
         }
     }
@@ -881,19 +862,6 @@ internal class StreamVideoImpl internal constructor(
     override fun logOut() {
         val dataStore = StreamUserDataStore.instance()
         scope.launch { dataStore.clear() }
-    }
-
-    suspend fun acceptCall(type: String, id: String) {
-        TODO("Not yet implemented")
-    }
-
-    suspend fun rejectCall(type: String, id: String): Result<SendEventResponse> {
-        logger.d { "[rejectCall] cid: $type:$id" }
-        return sendEvent(type, id, CallEventType.REJECTED)
-    }
-
-    suspend fun cancelCall(type: String, id: String): Result<SendEventResponse> {
-        return sendEvent(type = type, id = id, CallEventType.CANCELLED)
     }
 
     suspend fun handlePushMessage(payload: Map<String, Any>): Result<Unit> =

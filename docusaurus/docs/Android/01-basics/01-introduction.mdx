@@ -6,49 +6,31 @@ slug: /
 
 ## Introduction
 
-The [Stream Video Android SDK](https://github.com/GetStream/stream-video-android) enables you to easily build any type of Video and Audio call experiences in your Android apps, either in Kotlin or Java.
+Welcome to the Stream Video SDK - a comprehensive toolkit designed to help you swiftly implement features such as video calling, audio calling, audio rooms, and livestreaming within your app.
+Our goal is to ensure an optimal developer experience that enables your application to go live within days.
 
-> **Note**: The fastest way to get started with the SDK is by trying the [Android Video Tutorial](01-tutorial.mdx). You'll learn everything about setting up the SDK and starting a video call with other people there.
+Our Kotlin SDK is furnished with user-friendly UI components and versatile Stateflow objects, making your development process seamless.
+Moreover, all calls are routed through Stream's global edge network, thereby ensuring lower latency and higher reliability due to proximity to end users.
 
-The **Basics** section provides an overview of the SDK, explains the basic concepts, and shows you how to get started with building video features.
+If you're new to Stream Video SDK, we recommend starting with the following three tutorials:
 
-The **Client** section contains information about core components you'll use to access the low level APIs, such as the main `StreamVideo` client as well as the underlying `CallClient` which handles user tracks and media devices.
+* ** [Video & Audio Calling Tutorial](../02-tutorials/01-video-calling.mdx) **
+* ** [Audio Room Tutorial](../02-tutorials/02-audio-room.mdx) **
+* ** [Livestream Tutorial](../02-tutorials/03-livestream.mdx) **
 
-The **UI** section describes the ready-to-use Android components provided by the SDK, split between the **Compose Video Components** and  **XML Video Components** sections that showcase building blocks to help you build your application.
+After the tutorials the documentation explains how to use the
 
-There are four major artifacts in the SDK that you can include in your app:
+* Core concepts such as initiating a call, switching the camera view, and more
+* Effective utilization of our UI components
+* Insights on building your own UI with our UI Cookbook
 
-- [Stream Video](https://github.com/GetStream/stream-video-android/tree/main/stream-video-android)
-- [Stream Video Push Provider Firebase](https://github.com/GetStream/stream-video-android/tree/main/stream-video-android-pushprovider-firebase)
-- [Compose Video Components](https://github.com/GetStream/stream-video-android/tree/main/stream-video-android-compose)
-- [XML Video Components](https://github.com/GetStream/stream-video-android/tree/main/stream-video-android-xml)
+It also explains advanced features such as:
 
-// TODO - build XML
+* Picture in picture support
+* Ringing
+* Recording
+* Broadcasting
+* Requesting & Granting permissions
+* Audio & Video Filters
 
-Not all of these artifacts are required to build a fully functional video application, so let's go over what each of these artifacts do.
-
-### Stream Video
-
-The main **Stream Video** artifact is a low-level wrapper around the Stream Video API. It lets you authenticate users, listen to and handle events, perform operations such as creating calls, joining existing calls, inviting people to calls you're a member of, sending events and more. Its entry point for all of these capabilities is the `StreamVideo` class.
-
-It also contains all the basic model objects you'll interact with when using Stream Video, such as `Participant`, `CallMetadata`, or `Call`, various events and more.
-
-### Stream Video Push Provider Firebase
-
-To fully integrate a seamless experience with the Stream Video SDK, when receiving notifications about call invites and calls being started, you need a reliable push provider.
-
-Our Firebase push provider lets you easily integrate services that listen to data notifications and it provides services that show UI your users can use to trigger events like joining or declining calls, as well as keeping the call in the background and observing its state.
-
-### Compose Video Components
-
-Instead of having to build all the UI components for a video chat application yourself, you can utilize our modular Compose Video components that let you customize the look and feel of the UI, while keeping the core functionality baked into the code.
-
-We offer smaller building blocks, as well as fully built screens that you can just plug into your app and use with very little code.
-
-Check out the [Compose Sample app](https://github.com/GetStream/stream-video-android/tree/main/app) to learn more, available in our GitHub repository.
-
-### XML Video Components
-
-Similar to Compose Video components, we provide an XML alternative that lets you do _almost_ everything Compose does in terms of customization and styling. Instead of building everything from scratch, you can rely on our Views to serve you with a beautiful and optimized set of features.
-
-// TODO - XML sample
+If you feel like anything is missing or could be improved, please don't hesitate to [contact us](https://getstream.io/contact/). We're happy to help.

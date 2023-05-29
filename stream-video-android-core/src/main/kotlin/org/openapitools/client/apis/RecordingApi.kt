@@ -27,6 +27,8 @@ import retrofit2.http.Path
 
 
 import org.openapitools.client.models.ListRecordingsResponse
+import org.openapitools.client.models.StartRecordingResponse
+import org.openapitools.client.models.StopRecordingResponse
 
 interface RecordingApi {
     /**
@@ -53,34 +55,36 @@ interface RecordingApi {
      * Start recording
      * Starts recording  Sends events: - call.recording_started  Required permissions: - StopRecording
      * Responses:
+     *  - 201: Successful response
      *  - 400: Bad request
      *  - 429: Too many requests
      *
      * @param type
      * @param id
-     * @return [Unit]
+     * @return [StartRecordingResponse]
      */
     @POST("/video/call/{type}/{id}/start_recording")
     suspend fun startRecording(
         @Path("type") type: String,
         @Path("id") id: String
-    ): Unit
+    ): StartRecordingResponse
 
     /**
      * Stop recording
      * Stops recording  Sends events: - call.recording_stopped  Required permissions: - StopRecording
      * Responses:
+     *  - 201: Successful response
      *  - 400: Bad request
      *  - 429: Too many requests
      *
      * @param type
      * @param id
-     * @return [Unit]
+     * @return [StopRecordingResponse]
      */
     @POST("/video/call/{type}/{id}/stop_recording")
     suspend fun stopRecording(
         @Path("type") type: String,
         @Path("id") id: String
-    ): Unit
+    ): StopRecordingResponse
 
 }

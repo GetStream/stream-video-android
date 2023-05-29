@@ -25,42 +25,47 @@ import retrofit2.http.Path
 
 
 
+import org.openapitools.client.models.StartBroadcastingResponse
+import org.openapitools.client.models.StopBroadcastingResponse
 import org.openapitools.client.models.StopLiveResponse
+import org.openapitools.client.models.StopRecordingResponse
 
 interface LivestreamingApi {
     /**
      * Start broadcasting
-     * Starts broadcasting
+     * Starts broadcasting  Required permissions: - StartBroadcasting
      * Responses:
+     *  - 201: Successful response
      *  - 400: Bad request
      *  - 429: Too many requests
      *
      * @param type
      * @param id
-     * @return [Unit]
+     * @return [StartBroadcastingResponse]
      */
     @POST("/video/call/{type}/{id}/start_broadcasting")
     suspend fun startBroadcasting(
         @Path("type") type: String,
         @Path("id") id: String
-    ): Unit
+    ): StartBroadcastingResponse
 
     /**
      * Stop broadcasting
-     * Stops broadcasting
+     * Stops broadcasting  Required permissions: - StopBroadcasting
      * Responses:
+     *  - 201: Successful response
      *  - 400: Bad request
      *  - 429: Too many requests
      *
      * @param type
      * @param id
-     * @return [Unit]
+     * @return [StopBroadcastingResponse]
      */
     @POST("/video/call/{type}/{id}/stop_broadcasting")
     suspend fun stopBroadcasting(
         @Path("type") type: String,
         @Path("id") id: String
-    ): Unit
+    ): StopBroadcastingResponse
 
     /**
      * Set call as not live
@@ -84,17 +89,18 @@ interface LivestreamingApi {
      * Stop recording
      * Stops recording  Sends events: - call.recording_stopped  Required permissions: - StopRecording
      * Responses:
+     *  - 201: Successful response
      *  - 400: Bad request
      *  - 429: Too many requests
      *
      * @param type
      * @param id
-     * @return [Unit]
+     * @return [StopRecordingResponse]
      */
     @POST("/video/call/{type}/{id}/stop_recording")
     suspend fun stopRecording(
         @Path("type") type: String,
         @Path("id") id: String
-    ): Unit
+    ): StopRecordingResponse
 
 }

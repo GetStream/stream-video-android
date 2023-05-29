@@ -37,7 +37,7 @@ Check the [Releases page](https://github.com/GetStream/stream-video-android/rele
 
 ## Available Artifacts
 
-### Low Level Client
+### Core Client
 To add the low-level Video client library to your app, open your module's build.gradle script and add the following:
 
 ```groovy
@@ -46,18 +46,7 @@ dependencies {
 }
 ```
 
-### Video XML
-To use the XML Video Components in your application, add the following dependency:
-
-```groovy
-dependencies {
-    implementation "io.getstream:stream-video-android-xml:$stream_version"
-}
-```
-
-Adding the XML Video Components library as a dependency will automatically include the client library.
-
-### Compose Video Components
+### Compose Video UI Components
 To use the Compose Video Components instead, add the following dependency:
 
 ```groovy
@@ -72,23 +61,10 @@ Adding the Compose Video Components library as a dependency will automatically i
 
 We ship multiple artifacts to easily integrate Stream Chat with third party push notification providers. See the Push Notification page for more details.
 
-## Versioning
-
-Our Stream Video Android libraries do **not** follow semantic versioning.
-
-We increase the minor version whenever breaking changes are introduced. Patch releases only contain smaller fixes and improvements.
-
-You can keep track of all the changes in the Stream Video Android libraries via the [GitHub releases page](https://github.com/GetStream/stream-video-android/releases), and you can also find the release notes of all past releases in our [CHANGELOG](https://github.com/GetStream/stream-video-android/blob/main/CHANGELOG.md) file. These will always highlight breaking changes.
-
-We also maintain a separate document, [DEPRECATIONS](https://github.com/GetStream/stream-video-android/blob/main/DEPRECATIONS.md), which lists deprecated constructs in the SDK, with their expected time of further deprecations and eventual removal.
-
 ## Snapshot Builds
 
-We publish SNAPSHOT versions of our SDK, which contain the code as of the latest commit on [the develop branch](https://github.com/getStream/stream-video-android/tree/develop).
-
-These builds may contain bugs or breaking changes that will be fixed before the next proper release. However, you can use these builds temporarily to include the latest changes from our SDK in your project before the next release happens.
-
-:::warning Snapshot builds are not stable. Never use them in production. :::
+Snapshot builds contain are published for the **develop** branch.
+Please don't use Snapshot builds in production as they aren't as well tested as our regular releases.
 
 To use snapshot builds, you need to add the Sonatype snapshot repository in your Gradle build configuration (see at the top of this page for where to add this):
 

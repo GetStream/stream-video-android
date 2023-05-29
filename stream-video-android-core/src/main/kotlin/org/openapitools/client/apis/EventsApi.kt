@@ -31,8 +31,8 @@ import org.openapitools.client.models.SendEventResponse
 
 interface EventsApi {
     /**
-     * Send event
-     * Sends event to the call  Sends events: - call.accepted - call.rejected - custom  Required permissions: - SendEvent
+     * Send custom event
+     * Sends custom event to the call  Sends events: - custom  Required permissions: - SendEvent
      * Responses:
      *  - 201: Successful response
      *  - 400: Bad request

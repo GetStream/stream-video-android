@@ -32,15 +32,11 @@ import com.squareup.moshi.Json
 /**
  *
  *
- * @param type
  * @param custom
  */
 
 
 data class SendEventRequest (
-
-    @Json(name = "type")
-    val type: kotlin.String,
 
     @Json(name = "custom")
     val custom: kotlin.collections.Map<kotlin.String, kotlin.Any>? = null

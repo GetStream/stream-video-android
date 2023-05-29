@@ -23,6 +23,7 @@
 
 package org.openapitools.client.models
 
+import org.openapitools.client.models.CallResponse
 import org.openapitools.client.models.UserResponse
 
 
@@ -31,16 +32,20 @@ import org.openapitools.client.models.UserResponse
 import com.squareup.moshi.Json
 
 /**
- * This event is sent by a user accepting an incoming ringing call. Clients receiving this event should dismiss the call screen and move to the call.
+ * This event is sent when a user accepts a notification to join a call.
  *
+ * @param call
  * @param callCid
  * @param createdAt
- * @param type
+ * @param type The type of event: \"call.accepted\" in this case
  * @param user
  */
 
 
 data class CallAcceptedEvent (
+
+    @Json(name = "call")
+    val call: CallResponse,
 
     @Json(name = "call_cid")
     val callCid: kotlin.String,
@@ -48,6 +53,7 @@ data class CallAcceptedEvent (
     @Json(name = "created_at")
     val createdAt: org.threeten.bp.OffsetDateTime,
 
+    /* The type of event: \"call.accepted\" in this case */
     @Json(name = "type")
     val type: kotlin.String = "call.accepted",
 

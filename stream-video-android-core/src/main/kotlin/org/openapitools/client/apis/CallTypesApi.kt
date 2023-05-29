@@ -33,6 +33,7 @@ import org.openapitools.client.models.CreateCallTypeRequest
 import org.openapitools.client.models.CreateCallTypeResponse
 import org.openapitools.client.models.GetCallTypeResponse
 import org.openapitools.client.models.ListCallTypeResponse
+import org.openapitools.client.models.Response
 import org.openapitools.client.models.UpdateCallTypeRequest
 import org.openapitools.client.models.UpdateCallTypeResponse
 
@@ -57,16 +58,17 @@ interface CallTypesApi {
      * Delete Call Type
      *
      * Responses:
+     *  - 200: Successful response
      *  - 400: Bad request
      *  - 429: Too many requests
      *
      * @param name
-     * @return [Unit]
+     * @return [Response]
      */
     @DELETE("/video/calltypes/{name}")
     suspend fun deleteCallType(
         @Path("name") name: String
-    ): Unit
+    ): Response
 
     /**
      * Get Call Type

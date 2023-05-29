@@ -38,7 +38,7 @@ import com.squareup.moshi.Json
  * @param callCid
  * @param createdAt
  * @param members The list of members that were updated
- * @param type The type of event: \"call.member_added\" in this case
+ * @param type The type of event: \"call.member_updated\" in this case
  */
 
 
@@ -57,7 +57,7 @@ data class CallMemberUpdatedEvent (
     @Json(name = "members")
     val members: kotlin.collections.List<MemberResponse>,
 
-    /* The type of event: \"call.member_added\" in this case */
+    /* The type of event: \"call.member_updated\" in this case */
     @Json(name = "type")
     val type: kotlin.String = "call.member_updated"
 

@@ -35,7 +35,8 @@ import com.squareup.moshi.Json
  *
  * @param `data`
  * @param membersLimit
- * @param ring if provided it overrides the default ring setting for this call
+ * @param notify if provided it sends a notification event to the members for this call
+ * @param ring if provided it sends a ring event to the members for this call
  */
 
 
@@ -47,7 +48,11 @@ data class GetOrCreateCallRequest (
     @Json(name = "members_limit")
     val membersLimit: kotlin.Int? = null,
 
-    /* if provided it overrides the default ring setting for this call */
+    /* if provided it sends a notification event to the members for this call */
+    @Json(name = "notify")
+    val notify: kotlin.Boolean? = null,
+
+    /* if provided it sends a ring event to the members for this call */
     @Json(name = "ring")
     val ring: kotlin.Boolean? = null
 

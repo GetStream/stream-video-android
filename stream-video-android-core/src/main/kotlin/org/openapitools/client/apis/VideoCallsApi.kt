@@ -29,6 +29,7 @@ import retrofit2.http.Query
 
 
 
+import org.openapitools.client.models.AcceptCallResponse
 import org.openapitools.client.models.EndCallResponse
 import org.openapitools.client.models.GetCallEdgeServerRequest
 import org.openapitools.client.models.GetCallEdgeServerResponse
@@ -43,6 +44,7 @@ import org.openapitools.client.models.QueryCallsRequest
 import org.openapitools.client.models.QueryCallsResponse
 import org.openapitools.client.models.QueryMembersRequest
 import org.openapitools.client.models.QueryMembersResponse
+import org.openapitools.client.models.RejectCallResponse
 import org.openapitools.client.models.SendReactionRequest
 import org.openapitools.client.models.SendReactionResponse
 import org.openapitools.client.models.StopLiveResponse
@@ -54,6 +56,24 @@ import org.openapitools.client.models.UpdateCallRequest
 import org.openapitools.client.models.UpdateCallResponse
 
 interface VideoCallsApi {
+    /**
+     * Accept Call
+     *   Sends events: - call.accepted  Required permissions: - JoinCall
+     * Responses:
+     *  - 201: Successful response
+     *  - 400: Bad request
+     *  - 429: Too many requests
+     *
+     * @param type
+     * @param id
+     * @return [AcceptCallResponse]
+     */
+    @POST("/video/call/{type}/{id}/accept")
+    suspend fun acceptCall(
+        @Path("type") type: String,
+        @Path("id") id: String
+    ): AcceptCallResponse
+
     /**
      * End call
      *   Sends events: - call.ended  Required permissions: - EndCall
@@ -83,13 +103,19 @@ interface VideoCallsApi {
      * @param type
      * @param id
      * @param connectionId  (optional)
+     * @param membersLimit  (optional)
+     * @param ring  (optional)
+     * @param notify  (optional)
      * @return [GetCallResponse]
      */
     @GET("/video/call/{type}/{id}")
     suspend fun getCall(
         @Path("type") type: String,
         @Path("id") id: String,
-        @Query("connection_id") connectionId: String? = null
+        @Query("connection_id") connectionId: String? = null,
+        @Query("members_limit") membersLimit: Int? = null,
+        @Query("ring") ring: Boolean? = null,
+        @Query("notify") notify: Boolean? = null
     ): GetCallResponse
 
     /**
@@ -128,7 +154,7 @@ interface VideoCallsApi {
 
     /**
      * Get or create a call
-     * Gets or creates a new call  Sends events: - call.created  Required permissions: - CreateCall - ReadCall - UpdateCallSettings
+     * Gets or creates a new call  Sends events: - call.created - call.notification - call.ring  Required permissions: - CreateCall - ReadCall - UpdateCallSettings
      * Responses:
      *  - 201: Successful response
      *  - 400: Bad request
@@ -221,6 +247,24 @@ interface VideoCallsApi {
     suspend fun queryMembers(
         @Body queryMembersRequest: QueryMembersRequest
     ): QueryMembersResponse
+
+    /**
+     * Reject Call
+     *   Sends events: - call.rejected  Required permissions: - JoinCall
+     * Responses:
+     *  - 201: Successful response
+     *  - 400: Bad request
+     *  - 429: Too many requests
+     *
+     * @param type
+     * @param id
+     * @return [RejectCallResponse]
+     */
+    @POST("/video/call/{type}/{id}/reject")
+    suspend fun rejectCall(
+        @Path("type") type: String,
+        @Path("id") id: String
+    ): RejectCallResponse
 
     /**
      * Send reaction to the call

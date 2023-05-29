@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014-2022 Stream.io Inc. All rights reserved.
+ * Copyright (c) 2014-2023 Stream.io Inc. All rights reserved.
  *
  * Licensed under the Stream License;
  * you may not use this file except in compliance with the License.
@@ -14,21 +14,31 @@
  * limitations under the License.
  */
 
-package io.getstream.video.android.core.model
+@file:Suppress(
+    "ArrayInDataClass",
+    "EnumEntryName",
+    "RemoveRedundantQualifierName",
+    "UnusedImport"
+)
 
-public enum class CallType(public val type: String) {
-    VIDEO("video"),
-    AUDIO("audio");
+package org.openapitools.client.models
 
-    public companion object {
-        public fun fromType(type: String): CallType {
-            val values = values().map { it.type to it }
 
-            val callType = values.firstOrNull { (typeName, _) ->
-                typeName == type
-            }
 
-            return callType?.second ?: VIDEO
-        }
-    }
-}
+
+
+import com.squareup.moshi.Json
+
+/**
+ *
+ *
+ * @param duration
+ */
+
+
+data class StartRecordingResponse (
+
+    @Json(name = "duration")
+    val duration: kotlin.String
+
+)

@@ -53,7 +53,6 @@ import io.getstream.video.android.core.call.state.LeaveCall
 import io.getstream.video.android.core.viewmodel.CallViewModel
 import io.getstream.video.android.mock.StreamMockUtils
 import io.getstream.video.android.mock.mockCall
-import stream.video.sfu.models.TrackType
 
 /**
  * Represents the UI in an Active call that shows participants and their video, as well as some
@@ -208,16 +207,15 @@ public fun CallContent(
  */
 @Composable
 internal fun DefaultPictureInPictureContent(call: Call) {
-    val screenSharingSession by call.state.screenSharingSession.collectAsState(initial = null)
+    val screenSharingSession by call.state.screenSharingSession.collectAsStateWithLifecycle()
     val session = screenSharingSession
-    val mediaTrack = session?.participant?.screenSharingTrack?.collectAsState()
+    val video = session?.participant?.video?.collectAsStateWithLifecycle()
+
     if (session != null) {
         VideoRenderer(
             modifier = Modifier.aspectRatio(ScreenShareAspectRatio, false),
             call = call,
-            mediaTrack = mediaTrack?.value,
-            trackType = TrackType.TRACK_TYPE_SCREEN_SHARE,
-            sessionId = session.participant.sessionId
+            media = video?.value
         )
     } else {
         val activeSpeakers by call.state.activeSpeakers.collectAsStateWithLifecycle()
