@@ -18,17 +18,20 @@ package io.getstream.video.android.core
 
 import io.getstream.result.Result
 import io.getstream.video.android.core.model.AudioTrack
+import io.getstream.video.android.core.model.MediaTrack
 import io.getstream.video.android.core.model.VideoTrack
+import io.getstream.video.android.core.utils.asStateFlow
 import io.getstream.video.android.core.utils.mapState
 import io.getstream.video.android.model.User
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.combine
 import org.openapitools.client.models.MuteUsersResponse
 import org.openapitools.client.models.ReactionResponse
 import stream.video.sfu.models.ConnectionQuality
 import stream.video.sfu.models.Participant
 import stream.video.sfu.models.TrackType
-import java.util.*
+import java.util.Date
 
 /**
  * Represents the state of a participant in a call.
@@ -118,6 +121,31 @@ public data class ParticipantState(
     internal val _reactions = MutableStateFlow<List<ReactionResponse>>(emptyList())
     val reactions: StateFlow<List<ReactionResponse>> = _reactions
 
+    val video: StateFlow<Video?> = combine(_videoTrack, _videoEnabled) { track, enabled ->
+        Video(
+            sessionId = sessionId,
+            track = track,
+            enabled = enabled
+        )
+    }.asStateFlow(null)
+
+    val audio: StateFlow<Audio?> = combine(_audioTrack, _audioEnabled) { track, enabled ->
+        Audio(
+            sessionId = sessionId,
+            track = track,
+            enabled = enabled
+        )
+    }.asStateFlow(null)
+
+    val screenSharing: StateFlow<ScreenSharing?> =
+        combine(_screenSharingTrack, _screenSharingEnabled) { track, enabled ->
+            ScreenSharing(
+                sessionId = sessionId,
+                track = track,
+                enabled = enabled
+            )
+        }.asStateFlow(null)
+
     suspend fun muteAudio(): Result<MuteUsersResponse> {
         // how do i mute another user?
         return call.muteUser(user.value.id, audio = true, video = false, screenShare = false)
@@ -150,14 +178,55 @@ public data class ParticipantState(
         _audioLevel.value = participant.audio_level
         _audioEnabled.value = participant.published_tracks.contains(TrackType.TRACK_TYPE_AUDIO)
         _videoEnabled.value = participant.published_tracks.contains(TrackType.TRACK_TYPE_VIDEO)
-        _screenSharingEnabled.value = participant.published_tracks.contains(TrackType.TRACK_TYPE_SCREEN_SHARE)
+        _screenSharingEnabled.value =
+            participant.published_tracks.contains(TrackType.TRACK_TYPE_SCREEN_SHARE)
 
         val currentUser = _user.value
         _user.value = currentUser.copy(
             name = participant.name,
             image = participant.image,
             // custom = participant.custom,
-            role = participant.roles.firstOrNull() ?: ""
+            role = participant.roles.firstOrNull().orEmpty()
         )
     }
+
+    public sealed class Media(
+        public open val sessionId: String,
+        public open val track: MediaTrack?,
+        public open val enabled: Boolean,
+        public val type: TrackType = TrackType.TRACK_TYPE_UNSPECIFIED,
+    )
+
+    public data class Video(
+        public override val sessionId: String,
+        public override val track: VideoTrack?,
+        public override val enabled: Boolean
+    ) : Media(
+        sessionId = sessionId,
+        track = track,
+        enabled = enabled,
+        type = TrackType.TRACK_TYPE_VIDEO
+    )
+
+    public data class Audio(
+        public override val sessionId: String,
+        public override val track: AudioTrack?,
+        public override val enabled: Boolean
+    ) : Media(
+        sessionId = sessionId,
+        track = track,
+        enabled = enabled,
+        type = TrackType.TRACK_TYPE_AUDIO
+    )
+
+    public data class ScreenSharing(
+        public override val sessionId: String,
+        public override val track: VideoTrack?,
+        public override val enabled: Boolean
+    ) : Media(
+        sessionId = sessionId,
+        track = track,
+        enabled = enabled,
+        type = TrackType.TRACK_TYPE_VIDEO
+    )
 }
