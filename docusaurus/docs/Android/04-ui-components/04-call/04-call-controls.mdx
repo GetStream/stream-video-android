@@ -85,14 +85,14 @@ CallControls(
         {
             ToggleCameraAction(
                 modifier = Modifier.size(60.dp),
-                isCameraEnabled = callViewModel.callDeviceState.isCameraEnabled,
+                isCameraEnabled = isCameraEnabled, // or callViewModel.callDeviceState.isCameraEnabled
                 onCallAction = onCallAction
             )
         },
         {
             ToggleMicrophoneAction(
                 modifier = Modifier.size(60.dp),
-                isMicrophoneEnabled = callViewModel.callDeviceState.isMicrophoneEnabled,
+                isMicrophoneEnabled = isMicrophoneEnabled, // or callViewModel.callDeviceState.isMicrophoneEnabled
                 onCallAction = onCallAction
             )
         },
