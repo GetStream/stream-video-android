@@ -15,7 +15,32 @@ This example shows how to render a visual UI indicator that changes based on the
 ```kotlin
 val audioLevel = participant.audioLevel.collectAsState()
 
+@Composable
+fun AudioVolumeIndicator() {
+    val audioViewModel: AudioViewModel = viewModel()
+    val audioVolume by audioViewModel.audioVolume.collectAsState()
+    val totalDots = 5
+    val activeDots = (audioVolume * totalDots).toInt()
 
+    Column {
+        Icon(
+            painter = painterResource(R.drawable.ic_speaker), // Replace with your speaker icon
+            contentDescription = null,
+            modifier = Modifier.size(24.dp)
+        )
+        for (i in 1..totalDots) {
+            Box(
+                modifier = Modifier.size(8.dp),
+                shape = CircleShape
+            ) {
+                Surface(
+                    shape = CircleShape,
+                    color = if (i <= activeDots) MaterialTheme.colors.primary else Color.Gray
+                ) {}
+            }
+        }
+    }
+}
 
 ```
 

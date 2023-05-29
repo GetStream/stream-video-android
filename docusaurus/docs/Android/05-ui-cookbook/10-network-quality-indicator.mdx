@@ -16,6 +16,17 @@ In addition you can also monitor your own connection using `call.state.connectio
 Here's a small compose example to render a connection quality icon for each participant
 
 ```kotlin
+@Composable
+fun NetworkQualityIndicator() {
+    val networkQualityViewModel: NetworkQualityViewModel = viewModel()
+    val networkQuality by networkQualityViewModel.networkQuality.collectAsState()
+
+    val color = lerp(Color.Red, Color.Green, networkQuality)
+
+    Canvas(modifier = Modifier.size(16.dp)) {
+        drawCircle(color)
+    }
+}
 ```
 
 You can easily swap out the standard connection quality indicator with your own.
