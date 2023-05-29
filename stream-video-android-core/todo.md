@@ -9,13 +9,17 @@
 *  Break
 *  Week 6: Docs, docs & sample app. Dynascale, SDP parsing
 *  Week 7: Reconnect, server side issues checklist, compose docs, fast join flow
+*  Break
 *  Week 8: Docs & Stability
 
 ### Essentials pre BETA launch
 
+- Android volume is too low when calling from react
+- Join is called in the preview screen, this is wrong
+- Memory leak on Coil
+- Open deeplinks from video call demo
 - Testing: run the test app often (Thierry, Caleb & Jared)
 - Android: Docs (Jaewoong)
-- Fix this page: https://staging.getstream.io/video/docs/ (Thierry, could use help)
 - Frontend: a way to host the docs (Lennart)
 - SFU: deploy process (Marcelo & Suchit)
 - SFU: reconnect flow (Marcelo & Suchit)
