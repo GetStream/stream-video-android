@@ -211,6 +211,10 @@ public class CallState(private val call: Call, private val user: User) {
     public val screenSharingSession: StateFlow<ScreenSharingSession?> = _screenSharingSession
 
     /** if the call is being recorded */
+    private val _speakingWhileMuted: MutableStateFlow<Boolean> = MutableStateFlow(false)
+    val speakingWhileMuted: StateFlow<Boolean> = _speakingWhileMuted
+
+    /** if the call is being recorded */
     private val _recording: MutableStateFlow<Boolean> = MutableStateFlow(false)
     val recording: StateFlow<Boolean> = _recording
 

@@ -41,7 +41,15 @@ Creating a viewmodel in compose is a bit easier:
 
 ```
 
-Typically we recommend that you build your own viewmodel and use the included callViewModel as inspiration.
+The viewmodel exposes the following fields
+
+| Attribute | Description |
+| --- | --- |
+| `call` | The call object, see call.state for the call state |
+| `client` | The video client |
+| `isInPictureInPicture` | If picture in picture is active |
+
+Typically we recommend that you build your own ViewModel and use the included callViewModel as inspiration.
 
 ### AbstractCallActivity
 
@@ -49,8 +57,11 @@ If you subclass the AbstractCallActivity you get several things out of the box:
 
 * FullScreen support
 * Picture in picture support
+* setShowWhenLocked
 
 This example shows how to use the AbstractCallActivity
 
 ```kotlin
 ```
+
+

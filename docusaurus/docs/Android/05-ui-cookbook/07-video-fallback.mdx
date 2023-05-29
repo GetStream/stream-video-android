@@ -3,6 +3,10 @@ title: Video Fallback
 description: Video Fallback
 ---
 
+ISSUES
+* Fallback method for video provides call. You need the participant (for the avatar, first letter etc. maybe participant and call would be ideal)
+* There is no way to tell our UI to use this fallback, or to swap how video is rendered
+
 In terms of design the video fallback can be quite creative.
 How do you indicate that someone is speaking? How does the background look.
 
@@ -11,3 +15,16 @@ Lets say that someone wants to build a gradient style UI like this:
 
 https://dribbble.com/shots/19416096-Video-Call-Platform
 
+```kotlin
+// render a nice avatar as a fallback
+VideoRenderer(call=call, media=participant.video, fallback={ participant ->
+
+})
+
+```
+
+You can integrate your custom fallback like this:
+
+```kotlin
+// TODO: there is currently no way to do this
+```
