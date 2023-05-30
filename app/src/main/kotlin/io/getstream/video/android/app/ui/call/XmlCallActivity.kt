@@ -16,8 +16,8 @@
 
 package io.getstream.video.android.app.ui.call
 
+import io.getstream.video.android.common.viewmodel.CallViewModelFactory
 import io.getstream.video.android.core.StreamVideo
-import io.getstream.video.android.core.viewmodel.CallViewModelFactory
 import io.getstream.video.android.xml.AbstractXmlCallActivity
 
 class XmlCallActivity : AbstractXmlCallActivity() {

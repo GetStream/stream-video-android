@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package io.getstream.video.android.core.viewmodel
+package io.getstream.video.android.common.viewmodel
 
 public interface CallViewModelFactoryProvider {
 

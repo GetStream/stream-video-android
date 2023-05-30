@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014-2022 Stream.io Inc. All rights reserved.
+ * Copyright (c) 2014-2023 Stream.io Inc. All rights reserved.
  *
  * Licensed under the Stream License;
  * you may not use this file except in compliance with the License.
@@ -14,12 +14,13 @@
  * limitations under the License.
  */
 
-package io.getstream.video.android.core.viewmodel
+package io.getstream.video.android.common.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import io.getstream.log.taggedLogger
 import io.getstream.result.Error
+import io.getstream.video.android.common.util.asStateFlowWhileSubscribed
 import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.DeviceStatus
 import io.getstream.video.android.core.StreamVideo
@@ -33,7 +34,6 @@ import io.getstream.video.android.core.call.state.ToggleCamera
 import io.getstream.video.android.core.call.state.ToggleMicrophone
 import io.getstream.video.android.core.call.state.ToggleSpeakerphone
 import io.getstream.video.android.core.permission.PermissionManager
-import io.getstream.video.android.core.utils.asStateFlowWhileSubscribed
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
@@ -41,8 +41,6 @@ import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withTimeout
 import org.openapitools.client.models.CallSettingsResponse
-
-private const val CONNECT_TIMEOUT = 30_000L
 
 /**
  * The CallViewModel is a light wrapper over
@@ -81,14 +79,14 @@ public class CallViewModel(public val call: Call) : ViewModel() {
     private var permissionManager: PermissionManager? = null
 
     private val isVideoOn: StateFlow<Boolean> =
-        combine(settings, call.mediaManager.camera.status) { settings, status ->
+        combine(settings, call.camera.status) { settings, status ->
             (settings?.video?.enabled == true) &&
                 (status is DeviceStatus.Enabled) &&
                 (permissionManager?.hasCameraPermission?.value == true)
         }.asStateFlowWhileSubscribed(scope = viewModelScope, initialValue = false)
 
     private val isMicrophoneOn: StateFlow<Boolean> =
-        combine(settings, call.mediaManager.microphone.status) { _, status ->
+        combine(settings, call.microphone.status) { _, status ->
             (status is DeviceStatus.Enabled) &&
                 permissionManager?.hasRecordAudioPermission?.value == true
         }.asStateFlowWhileSubscribed(scope = viewModelScope, initialValue = false)
@@ -195,3 +193,5 @@ public class CallViewModel(public val call: Call) : ViewModel() {
         this._isInPictureInPicture.value = inPictureInPictureMode
     }
 }
+
+private const val CONNECT_TIMEOUT = 30_000L

@@ -2331,31 +2331,6 @@ public final class io/getstream/video/android/core/utils/StringUtilsKt {
 	public static final fun initials (Ljava/lang/String;)Ljava/lang/String;
 }
 
-public final class io/getstream/video/android/core/viewmodel/CallViewModel : androidx/lifecycle/ViewModel {
-	public fun <init> (Lio/getstream/video/android/core/Call;)V
-	public final fun dismissCallInfoMenu ()V
-	public final fun getCall ()Lio/getstream/video/android/core/Call;
-	public final fun getCallDeviceState ()Lkotlinx/coroutines/flow/StateFlow;
-	public final fun getClient ()Lio/getstream/video/android/core/StreamVideo;
-	public final fun isInPictureInPicture ()Lkotlinx/coroutines/flow/StateFlow;
-	public final fun isShowingCallInfoMenu ()Lkotlinx/coroutines/flow/StateFlow;
-	public final fun joinCall (Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;)V
-	public static synthetic fun joinCall$default (Lio/getstream/video/android/core/viewmodel/CallViewModel;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)V
-	public final fun onCallAction (Lio/getstream/video/android/core/call/state/CallAction;)V
-	public final fun onPictureInPictureModeChanged (Z)V
-	public final fun setOnLeaveCall (Lkotlin/jvm/functions/Function0;)V
-	public final fun setPermissionManager (Lio/getstream/video/android/core/permission/PermissionManager;)V
-}
-
-public final class io/getstream/video/android/core/viewmodel/CallViewModelFactory : androidx/lifecycle/ViewModelProvider$Factory {
-	public fun <init> (Lio/getstream/video/android/core/Call;)V
-	public fun create (Ljava/lang/Class;)Landroidx/lifecycle/ViewModel;
-}
-
-public abstract interface class io/getstream/video/android/core/viewmodel/CallViewModelFactoryProvider {
-	public abstract fun getCallViewModelFactory ()Lio/getstream/video/android/core/viewmodel/CallViewModelFactory;
-}
-
 public abstract interface class org/openapitools/client/apis/CallTypesApi {
 	public abstract fun createCallType (Lorg/openapitools/client/models/CreateCallTypeRequest;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public abstract fun deleteCallType (Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
