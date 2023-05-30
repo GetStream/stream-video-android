@@ -1,7 +1,7 @@
-public abstract class io/getstream/video/android/common/AbstractCallActivity : androidx/activity/ComponentActivity, io/getstream/video/android/core/permission/PermissionManagerProvider, io/getstream/video/android/core/viewmodel/CallViewModelFactoryProvider {
+public abstract class io/getstream/video/android/common/AbstractCallActivity : androidx/activity/ComponentActivity, io/getstream/video/android/common/viewmodel/CallViewModelFactoryProvider, io/getstream/video/android/core/permission/PermissionManagerProvider {
 	public static final field Companion Lio/getstream/video/android/common/AbstractCallActivity$Companion;
 	public fun <init> ()V
-	public final fun getCallViewModel ()Lio/getstream/video/android/core/viewmodel/CallViewModel;
+	public final fun getCallViewModel ()Lio/getstream/video/android/common/viewmodel/CallViewModel;
 	public fun getPermissionManager ()Lio/getstream/video/android/core/permission/PermissionManager;
 	protected fun handleBackPressed ()V
 	public fun initPermissionManager ()Lio/getstream/video/android/core/permission/PermissionManager;
@@ -77,6 +77,31 @@ public final class io/getstream/video/android/common/viewmodel/CallLobbyViewMode
 	public final fun getLocalVideoTrack ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun isCapturingVideo ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun startCapturingLocalVideo (I)V
+}
+
+public final class io/getstream/video/android/common/viewmodel/CallViewModel : androidx/lifecycle/ViewModel {
+	public fun <init> (Lio/getstream/video/android/core/Call;)V
+	public final fun dismissCallInfoMenu ()V
+	public final fun getCall ()Lio/getstream/video/android/core/Call;
+	public final fun getCallDeviceState ()Lkotlinx/coroutines/flow/StateFlow;
+	public final fun getClient ()Lio/getstream/video/android/core/StreamVideo;
+	public final fun isInPictureInPicture ()Lkotlinx/coroutines/flow/StateFlow;
+	public final fun isShowingCallInfoMenu ()Lkotlinx/coroutines/flow/StateFlow;
+	public final fun joinCall (Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;)V
+	public static synthetic fun joinCall$default (Lio/getstream/video/android/common/viewmodel/CallViewModel;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)V
+	public final fun onCallAction (Lio/getstream/video/android/core/call/state/CallAction;)V
+	public final fun onPictureInPictureModeChanged (Z)V
+	public final fun setOnLeaveCall (Lkotlin/jvm/functions/Function0;)V
+	public final fun setPermissionManager (Lio/getstream/video/android/core/permission/PermissionManager;)V
+}
+
+public final class io/getstream/video/android/common/viewmodel/CallViewModelFactory : androidx/lifecycle/ViewModelProvider$Factory {
+	public fun <init> (Lio/getstream/video/android/core/Call;)V
+	public fun create (Ljava/lang/Class;)Landroidx/lifecycle/ViewModel;
+}
+
+public abstract interface class io/getstream/video/android/common/viewmodel/CallViewModelFactoryProvider {
+	public abstract fun getCallViewModelFactory ()Lio/getstream/video/android/common/viewmodel/CallViewModelFactory;
 }
 
 public final class io/getstream/video/android/ui/common/BuildConfig {
