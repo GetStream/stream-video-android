@@ -31,7 +31,6 @@ import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
-import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.getstream.video.android.common.viewmodel.CallViewModel
 import io.getstream.video.android.compose.theme.VideoTheme

@@ -39,6 +39,7 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import io.getstream.video.android.common.viewmodel.CallViewModel
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.avatar.UserAvatar
 import io.getstream.video.android.compose.ui.components.call.controls.ControlActions
@@ -53,6 +54,71 @@ import io.getstream.video.android.core.model.VideoTrack
 import io.getstream.video.android.mock.StreamMockUtils
 import io.getstream.video.android.model.User
 import io.getstream.video.android.ui.common.R
+
+/**
+ * Represents the UI in a preview call that renders a local video track to pre-display a video
+ * before joining a call.
+ *
+ * @param modifier Modifier for styling.
+ * @param callViewModel The ViewModel required to fetch the call states and render the UI.
+ * @param user A user to display their name and avatar image on the preview.
+ * @param labelPosition The position of the user audio state label.
+ * @param video A participant video to render on the preview renderer.
+ * @param onRenderedContent A video renderer, which renders a local video track before joining a call.
+ * @param onDisabledContent Content is shown that a local camera is disabled. It displays user avatar by default.
+ * @param onCallAction Handler when the user triggers a Call Control Action.
+ * @param lobbyControlsContent Content is shown that allows users to trigger different actions to control a preview call.
+ */
+@Composable
+public fun CallLobby(
+    modifier: Modifier = Modifier,
+    callViewModel: CallViewModel,
+    user: User = StreamVideo.instance().user,
+    labelPosition: Alignment = Alignment.BottomStart,
+    video: ParticipantState.Video = ParticipantState.Video(
+        sessionId = callViewModel.call.sessionId.orEmpty(),
+        track = VideoTrack(
+            streamId = callViewModel.call.sessionId.orEmpty(),
+            video = callViewModel.call.camera.mediaManager.videoTrack
+        ),
+        enabled = callViewModel.callDeviceState.value.isCameraEnabled
+    ),
+    onRenderedContent: @Composable (video: ParticipantState.Video) -> Unit = {
+        OnRenderedContent(call = callViewModel.call, video = it)
+    },
+    onDisabledContent: @Composable () -> Unit = {
+        OnDisabledContent(user = user)
+    },
+    onCallAction: (CallAction) -> Unit = {},
+    lobbyControlsContent: @Composable (call: Call) -> Unit = {
+        val callDeviceState by callViewModel.callDeviceState.collectAsStateWithLifecycle()
+        ControlActions(
+            callDeviceState = callDeviceState,
+            backgroundColor = Color.Transparent,
+            shape = RectangleShape,
+            elevation = 0.dp,
+            actions = buildDefaultLobbyControlActions(
+                callDeviceState = callDeviceState,
+                onCallAction = onCallAction
+            )
+        )
+    },
+) {
+    val callDeviceState by callViewModel.callDeviceState.collectAsStateWithLifecycle()
+
+    CallLobby(
+        modifier = modifier,
+        call = callViewModel.call,
+        user = user,
+        callDeviceState = callDeviceState,
+        labelPosition = labelPosition,
+        video = video,
+        onRenderedContent = onRenderedContent,
+        onDisabledContent = onDisabledContent,
+        onCallAction = onCallAction,
+        lobbyControlsContent = lobbyControlsContent
+    )
+}
 
 /**
  * Represents the UI in a preview call that renders a local video track to pre-display a video
@@ -176,6 +242,5 @@ private fun OnDisabledContent(user: User) {
 private fun CallLobbyPreview() {
     StreamMockUtils.initializeStreamVideo(LocalContext.current)
     VideoTheme {
-
     }
 }

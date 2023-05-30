@@ -28,7 +28,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
-import androidx.compose.ui.unit.dp
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.core.call.state.CallAction
 import io.getstream.video.android.core.call.state.CallDeviceState
