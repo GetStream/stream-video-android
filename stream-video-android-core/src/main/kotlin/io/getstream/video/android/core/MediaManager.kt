@@ -63,8 +63,12 @@ class SpeakerManager(
 ) {
 
     private var priorVolume: Int? = null
-    private val _volume = MutableStateFlow<Int?>(initialVolume)
+    private val _volume = MutableStateFlow(initialVolume)
     val volume: StateFlow<Int?> = _volume
+
+    /** The status of the audio */
+    private val _status = MutableStateFlow<DeviceStatus>(DeviceStatus.NotSelected)
+    val status: StateFlow<DeviceStatus> = _status
 
     val selectedDevice: StateFlow<AudioDevice?> = microphoneManager.selectedDevice
 
@@ -76,11 +80,24 @@ class SpeakerManager(
     internal var selectedBeforeSpeaker: AudioDevice? = null
 
     fun enable() {
+        _status.value = DeviceStatus.Enabled
         setSpeakerPhone(true)
     }
 
     fun disable() {
+        _status.value = DeviceStatus.Disabled
         setSpeakerPhone(false)
+    }
+
+    /**
+     * Enable or disable the speakerphone.
+     */
+    fun setEnabled(enabled: Boolean) {
+        if (enabled) {
+            enable()
+        } else {
+            disable()
+        }
     }
 
     /** enables or disables the speakerphone */

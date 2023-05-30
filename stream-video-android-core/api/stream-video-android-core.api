@@ -544,9 +544,11 @@ public final class io/getstream/video/android/core/SpeakerManager {
 	public final fun getMicrophoneManager ()Lio/getstream/video/android/core/MicrophoneManager;
 	public final fun getSelectedDevice ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun getSpeakerPhoneEnabled ()Lkotlinx/coroutines/flow/StateFlow;
+	public final fun getStatus ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun getVolume ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun pause ()V
 	public final fun resume ()V
+	public final fun setEnabled (Z)V
 	public final fun setSpeakerPhone (Z)V
 	public final fun setVolume (I)V
 }

@@ -26,8 +26,12 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.getstream.video.android.common.viewmodel.CallViewModel
 import io.getstream.video.android.compose.theme.VideoTheme
@@ -51,6 +55,9 @@ import io.getstream.video.android.core.call.state.CallDeviceState
 public fun ControlActions(
     modifier: Modifier = Modifier,
     callViewModel: CallViewModel,
+    backgroundColor: Color = VideoTheme.colors.barsBackground,
+    elevation: Dp = VideoTheme.dimens.callControlsElevation,
+    shape: Shape = VideoTheme.shapes.callControls,
     onCallAction: (CallAction) -> Unit = {},
     actions: List<(@Composable () -> Unit)> = buildDefaultCallControlActions(
         callViewModel = callViewModel,
@@ -62,6 +69,9 @@ public fun ControlActions(
     ControlActions(
         modifier = modifier,
         callDeviceState = callDeviceState,
+        backgroundColor = backgroundColor,
+        elevation = elevation,
+        shape = shape,
         actions = actions,
         onCallAction = onCallAction
     )
@@ -82,6 +92,9 @@ public fun ControlActions(
     callDeviceState: CallDeviceState,
     modifier: Modifier = Modifier,
     onCallAction: (CallAction) -> Unit = {},
+    backgroundColor: Color = VideoTheme.colors.barsBackground,
+    elevation: Dp = VideoTheme.dimens.callControlsElevation,
+    shape: Shape = VideoTheme.shapes.callControls,
     actions: List<(@Composable () -> Unit)> = buildDefaultCallControlActions(
         callDeviceState,
         onCallAction
@@ -103,6 +116,9 @@ public fun ControlActions(
         RegularControlActions(
             modifier = controlsModifier,
             callDeviceState = callDeviceState,
+            backgroundColor = backgroundColor,
+            shape = shape,
+            elevation = elevation,
             onCallAction = onCallAction,
             actions = actions
         )
@@ -110,6 +126,9 @@ public fun ControlActions(
         LandscapeControlActions(
             modifier = controlsModifier,
             callDeviceState = callDeviceState,
+            backgroundColor = backgroundColor,
+            shape = shape,
+            elevation = elevation,
             onCallAction = onCallAction,
             actions = actions
         )

@@ -94,7 +94,7 @@ public final class io/getstream/video/android/common/view/ParticipantItemView : 
 	public final fun isInitialized ()Z
 }
 
-public final class io/getstream/video/android/common/viewmodel/CallViewModel : androidx/lifecycle/ViewModel {
+public class io/getstream/video/android/common/viewmodel/CallViewModel : androidx/lifecycle/ViewModel {
 	public fun <init> (Lio/getstream/video/android/core/Call;)V
 	public final fun dismissCallInfoMenu ()V
 	public final fun getCall ()Lio/getstream/video/android/core/Call;
@@ -105,6 +105,7 @@ public final class io/getstream/video/android/common/viewmodel/CallViewModel : a
 	public final fun joinCall (Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;)V
 	public static synthetic fun joinCall$default (Lio/getstream/video/android/common/viewmodel/CallViewModel;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)V
 	public final fun onCallAction (Lio/getstream/video/android/core/call/state/CallAction;)V
+	protected fun onCleared ()V
 	public final fun onPictureInPictureModeChanged (Z)V
 	public final fun setOnLeaveCall (Lkotlin/jvm/functions/Function0;)V
 	public final fun setPermissionManager (Lio/getstream/video/android/common/permission/PermissionManager;)V

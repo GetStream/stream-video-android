@@ -60,7 +60,7 @@ import org.openapitools.client.models.CallSettingsResponse
  * - Opening/closing the participant menu
  *
  */
-public class CallViewModel(public val call: Call) : ViewModel() {
+public open class CallViewModel(public val call: Call) : ViewModel() {
 
     private val logger by taggedLogger("Call:ViewModel")
 

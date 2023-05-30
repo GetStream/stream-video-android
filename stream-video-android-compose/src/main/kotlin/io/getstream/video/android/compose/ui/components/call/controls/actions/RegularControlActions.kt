@@ -24,7 +24,10 @@ import androidx.compose.material.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.core.call.state.CallAction
@@ -43,6 +46,9 @@ import io.getstream.video.android.core.call.state.CallDeviceState
 public fun RegularControlActions(
     callDeviceState: CallDeviceState,
     modifier: Modifier = Modifier,
+    backgroundColor: Color = VideoTheme.colors.barsBackground,
+    shape: Shape = VideoTheme.shapes.callControls,
+    elevation: Dp = VideoTheme.dimens.callControlsElevation,
     onCallAction: (CallAction) -> Unit = {},
     actions: List<(@Composable () -> Unit)> = buildDefaultCallControlActions(
         callDeviceState,
@@ -51,9 +57,9 @@ public fun RegularControlActions(
 ) {
     Surface(
         modifier = modifier,
-        shape = VideoTheme.shapes.callControls,
-        color = VideoTheme.colors.barsBackground,
-        elevation = 8.dp
+        shape = shape,
+        color = backgroundColor,
+        elevation = elevation
     ) {
         LazyRow(
             verticalAlignment = Alignment.CenterVertically,

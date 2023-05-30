@@ -32,6 +32,9 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.RectangleShape
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
@@ -47,9 +50,25 @@ import io.getstream.video.android.core.StreamVideo
 import io.getstream.video.android.core.call.state.CallAction
 import io.getstream.video.android.core.call.state.CallDeviceState
 import io.getstream.video.android.core.model.VideoTrack
+import io.getstream.video.android.mock.StreamMockUtils
 import io.getstream.video.android.model.User
 import io.getstream.video.android.ui.common.R
 
+/**
+ * Represents the UI in a preview call that renders a local video track to pre-display a video
+ * before joining a call.
+ *
+ * @param modifier Modifier for styling.
+ * @param call The call includes states and will be rendered with participants.
+ * @param user A user to display their name and avatar image on the preview.
+ * @param callDeviceState Media state of the call, for audio and video.
+ * @param labelPosition The position of the user audio state label.
+ * @param video A participant video to render on the preview renderer.
+ * @param onRenderedContent A video renderer, which renders a local video track before joining a call.
+ * @param onDisabledContent Content is shown that a local camera is disabled. It displays user avatar by default.
+ * @param onCallAction Handler when the user triggers a Call Control Action.
+ * @param lobbyControlsContent Content is shown that allows users to trigger different actions to control a preview call.
+ */
 @Composable
 public fun CallLobby(
     modifier: Modifier = Modifier,
@@ -75,6 +94,9 @@ public fun CallLobby(
     lobbyControlsContent: @Composable (call: Call) -> Unit = {
         ControlActions(
             callDeviceState = callDeviceState,
+            backgroundColor = Color.Transparent,
+            shape = RectangleShape,
+            elevation = 0.dp,
             actions = buildDefaultLobbyControlActions(
                 callDeviceState = callDeviceState,
                 onCallAction = onCallAction
@@ -152,6 +174,8 @@ private fun OnDisabledContent(user: User) {
 
 @Composable
 private fun CallLobbyPreview() {
+    StreamMockUtils.initializeStreamVideo(LocalContext.current)
     VideoTheme {
+
     }
 }

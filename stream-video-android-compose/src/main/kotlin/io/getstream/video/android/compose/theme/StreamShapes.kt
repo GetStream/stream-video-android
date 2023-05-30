@@ -20,6 +20,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
+import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.unit.dp
 
@@ -39,6 +40,7 @@ public data class StreamShapes(
     public val dialog: Shape,
     public val callButton: Shape,
     public val callControls: Shape,
+    public val callControlsLandscape: Shape,
     public val callControlsButton: Shape,
     public val participantsInfoMenuButton: Shape,
     public val connectionIndicatorBar: Shape,
@@ -57,6 +59,7 @@ public data class StreamShapes(
             avatar = CircleShape,
             callButton = CircleShape,
             callControls = RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp),
+            callControlsLandscape = RectangleShape,
             callControlsButton = CircleShape,
             participantsInfoMenuButton = RoundedCornerShape(32.dp),
             dialog = RoundedCornerShape(16.dp),
