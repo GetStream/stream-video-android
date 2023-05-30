@@ -81,14 +81,14 @@ public class CallViewModel(public val call: Call) : ViewModel() {
     private val isVideoOn: StateFlow<Boolean> =
         combine(settings, call.camera.status) { settings, status ->
             (settings?.video?.enabled == true) &&
-                    (status is DeviceStatus.Enabled) &&
-                    (permissionManager?.hasCameraPermission?.value == true)
+                (status is DeviceStatus.Enabled) &&
+                (permissionManager?.hasCameraPermission?.value == true)
         }.asStateFlowWhileSubscribed(scope = viewModelScope, initialValue = false)
 
     private val isMicrophoneOn: StateFlow<Boolean> =
         combine(settings, call.microphone.status) { _, status ->
             (status is DeviceStatus.Enabled) &&
-                    permissionManager?.hasRecordAudioPermission?.value == true
+                permissionManager?.hasRecordAudioPermission?.value == true
         }.asStateFlowWhileSubscribed(scope = viewModelScope, initialValue = false)
 
     private val isSpeakerPhoneOn: MutableStateFlow<Boolean> = MutableStateFlow(

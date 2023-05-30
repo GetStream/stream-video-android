@@ -16,8 +16,8 @@
 
 package io.getstream.video.android.dogfooding
 
-import io.getstream.video.android.core.StreamVideo
 import io.getstream.video.android.common.notification.AbstractNotificationActivity
+import io.getstream.video.android.core.StreamVideo
 
 class NotificationActivity : AbstractNotificationActivity() {
 
