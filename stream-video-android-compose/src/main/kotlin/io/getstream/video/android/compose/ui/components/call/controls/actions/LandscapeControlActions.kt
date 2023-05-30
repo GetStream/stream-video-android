@@ -16,31 +16,27 @@
 
 package io.getstream.video.android.compose.ui.components.call.controls.actions
 
-import android.content.res.Configuration
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.dp
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.core.call.state.CallAction
 import io.getstream.video.android.core.call.state.CallDeviceState
 
 /**
- * Represents the set of controls the user can use to change their audio and video device state, or
- * browse other types of settings, leave the call, or implement something custom.
+ * Shows the call controls in a different way when in landscape mode.
  *
- * @param callDeviceState The state of the media devices for the current user.
+ * @param callDeviceState The state of the call media, such as video, audio.
  * @param modifier Modifier for styling.
  * @param actions Actions to show to the user with different controls.
- * @param onCallAction Handler when the user triggers an action.
+ * @param onCallAction Handler when the user triggers various call actions.
  */
 @Composable
-public fun RegularCallControls(
+public fun LandscapeControlActions(
     callDeviceState: CallDeviceState,
     modifier: Modifier = Modifier,
     onCallAction: (CallAction) -> Unit,
@@ -49,29 +45,23 @@ public fun RegularCallControls(
         onCallAction
     ),
 ) {
-    Surface(
+
+    LazyColumn(
         modifier = modifier,
-        shape = VideoTheme.shapes.callControls,
-        color = VideoTheme.colors.barsBackground,
-        elevation = 8.dp
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.SpaceEvenly
     ) {
-        LazyRow(
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.SpaceEvenly
-        ) {
-            items(actions) { action ->
-                action.invoke()
-            }
+        items(actions) { action ->
+            action.invoke()
         }
     }
 }
 
 @Preview
-@Preview(uiMode = Configuration.UI_MODE_NIGHT_YES)
 @Composable
-private fun RegularCallControlsActionsPreview() {
+private fun LandscapeCallControlsPreview() {
     VideoTheme {
-        RegularCallControls(
+        LandscapeControlActions(
             callDeviceState = CallDeviceState(),
             onCallAction = {}
         )

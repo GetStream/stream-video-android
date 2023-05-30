@@ -20,8 +20,8 @@ import app.cash.paparazzi.DeviceConfig
 import app.cash.paparazzi.Paparazzi
 import io.getstream.video.android.compose.base.BaseComposeTest
 import io.getstream.video.android.compose.ui.components.call.CallAppBar
-import io.getstream.video.android.compose.ui.components.call.controls.CallControls
-import io.getstream.video.android.compose.ui.components.call.controls.actions.RegularCallControls
+import io.getstream.video.android.compose.ui.components.call.controls.ControlActions
+import io.getstream.video.android.compose.ui.components.call.controls.actions.RegularControlActions
 import io.getstream.video.android.compose.ui.components.participants.ParticipantIndicatorIcon
 import io.getstream.video.android.core.call.state.CallDeviceState
 import io.getstream.video.android.mock.mockCall
@@ -45,7 +45,7 @@ internal class CallComponentsPortraitTest : BaseComposeTest() {
     @Test
     fun `snapshot RegularCallControls composable`() {
         snapshotWithDarkMode {
-            RegularCallControls(
+            RegularControlActions(
                 callDeviceState = CallDeviceState(),
                 onCallAction = {}
             )
@@ -55,7 +55,7 @@ internal class CallComponentsPortraitTest : BaseComposeTest() {
     @Test
     fun `snapshot CallControls composable`() {
         snapshotWithDarkMode {
-            CallControls(
+            ControlActions(
                 callDeviceState = CallDeviceState(),
                 onCallAction = {}
             )

@@ -54,8 +54,6 @@ import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.rememberPermissionState
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.avatar.UserAvatar
-import io.getstream.video.android.compose.ui.components.call.controls.actions.ToggleCameraAction
-import io.getstream.video.android.compose.ui.components.call.controls.actions.ToggleMicrophoneAction
 import io.getstream.video.android.compose.ui.components.call.lobby.CallLobby
 import io.getstream.video.android.core.StreamVideo
 import io.getstream.video.android.dogfooding.R
@@ -193,29 +191,27 @@ private fun CallLobbyBody(
             callDeviceState = deviceState
         )
 
-        Spacer(modifier = Modifier.height(30.dp))
-
-        Row {
-            ToggleMicrophoneAction(
-                modifier = Modifier.size(48.dp),
-                isMicrophoneEnabled = callDeviceState.isMicrophoneEnabled,
-                onCallAction = {
-                    micPermissionState.launchPermissionRequest()
-                    callLobbyViewModel.enableMicrophone(!callDeviceState.isMicrophoneEnabled)
-                }
-            )
-
-            Spacer(modifier = Modifier.width(22.dp))
-
-            ToggleCameraAction(
-                modifier = Modifier.size(48.dp),
-                isCameraEnabled = callDeviceState.isCameraEnabled,
-                onCallAction = {
-                    cameraPermissionState.launchPermissionRequest()
-                    callLobbyViewModel.enableCamera(!callDeviceState.isCameraEnabled)
-                }
-            )
-        }
+//        Row {
+//            ToggleMicrophoneAction(
+//                modifier = Modifier.size(48.dp),
+//                isMicrophoneEnabled = callDeviceState.isMicrophoneEnabled,
+//                onCallAction = {
+//                    micPermissionState.launchPermissionRequest()
+//                    callLobbyViewModel.enableMicrophone(!callDeviceState.isMicrophoneEnabled)
+//                }
+//            )
+//
+//            Spacer(modifier = Modifier.width(22.dp))
+//
+//            ToggleCameraAction(
+//                modifier = Modifier.size(48.dp),
+//                isCameraEnabled = callDeviceState.isCameraEnabled,
+//                onCallAction = {
+//                    cameraPermissionState.launchPermissionRequest()
+//                    callLobbyViewModel.enableCamera(!callDeviceState.isCameraEnabled)
+//                }
+//            )
+//        }
 
         Spacer(modifier = Modifier.height(50.dp))
 

@@ -19,7 +19,7 @@ private fun CustomUi() {
             contentColor = VideoTheme.colors.appBackground,
             topBar = { CallAppBar(call = call) },
             bottomBar = {
-                CallControls(
+                ControlActions(
                     modifier = ..,
                     callViewModel = callViewModel,
                     onCallAction = { /* Handle call actions here */ }
@@ -47,7 +47,7 @@ If you're using this approach and our default set of components, you can expect 
 If you want to use your own `ViewModel` and use the stateless version of `CallControls`, you can implement it like the example below:
 
 ```kotlin
-CallControls(
+ControlActions(
     callDeviceState = callDeviceState,
     onCallAction = { /* Handle call actions here */ }
 )
@@ -63,7 +63,7 @@ Now that you've seen how to integrate the component and hook it up with the call
 
 ```kotlin
 @Composable
-public fun CallControls(
+public fun ControlActions(
     .., // State and UI
     actions: List<(@Composable () -> Unit)> = buildDefaultCallControlActions(
         callViewModel = callViewModel,
@@ -79,7 +79,7 @@ public fun CallControls(
 If you want to customize the actions and how they're used, you can do something like this:
 
 ```kotlin
-CallControls(
+ControlActions(
     .., // State and modifier
     actions = listOf(
         {

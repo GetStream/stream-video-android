@@ -42,7 +42,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.getstream.video.android.common.viewmodel.CallViewModel
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.call.CallAppBar
-import io.getstream.video.android.compose.ui.components.call.controls.CallControls
+import io.getstream.video.android.compose.ui.components.call.controls.ControlActions
 import io.getstream.video.android.compose.ui.components.call.renderer.CallSingleVideoRenderer
 import io.getstream.video.android.compose.ui.components.call.renderer.CallVideoRenderer
 import io.getstream.video.android.compose.ui.components.call.renderer.internal.ScreenShareAspectRatio
@@ -81,7 +81,7 @@ public fun CallContent(
         )
     },
     callControlsContent: @Composable (call: Call) -> Unit = {
-        CallControls(
+        ControlActions(
             callViewModel = callViewModel,
             onCallAction = onCallAction
         )
@@ -145,7 +145,7 @@ public fun CallContent(
         )
     },
     callControlsContent: @Composable (call: Call) -> Unit = {
-        CallControls(
+        ControlActions(
             callDeviceState = callDeviceState,
             onCallAction = onCallAction
         )

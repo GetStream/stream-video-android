@@ -31,7 +31,7 @@ import io.getstream.video.android.common.viewmodel.CallViewModel
 import io.getstream.video.android.common.viewmodel.CallViewModelFactory
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.call.CallContainer
-import io.getstream.video.android.compose.ui.components.call.controls.CallControls
+import io.getstream.video.android.compose.ui.components.call.controls.ControlActions
 import io.getstream.video.android.compose.ui.components.call.controls.actions.FlipCameraAction
 import io.getstream.video.android.compose.ui.components.call.controls.actions.LeaveCallAction
 import io.getstream.video.android.compose.ui.components.call.controls.actions.ToggleCameraAction
@@ -60,7 +60,7 @@ class CallActivity : ComponentActivity() {
                     callViewModel = vm,
                     onBackPressed = { finish() },
                     callControlsContent = {
-                        CallControls(
+                        ControlActions(
                             callViewModel = vm,
                             actions = listOf(
                                 {

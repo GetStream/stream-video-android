@@ -31,8 +31,8 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.getstream.video.android.common.viewmodel.CallViewModel
 import io.getstream.video.android.compose.theme.VideoTheme
-import io.getstream.video.android.compose.ui.components.call.controls.actions.LandscapeCallControls
-import io.getstream.video.android.compose.ui.components.call.controls.actions.RegularCallControls
+import io.getstream.video.android.compose.ui.components.call.controls.actions.LandscapeControlActions
+import io.getstream.video.android.compose.ui.components.call.controls.actions.RegularControlActions
 import io.getstream.video.android.compose.ui.components.call.controls.actions.buildDefaultCallControlActions
 import io.getstream.video.android.core.call.state.CallAction
 import io.getstream.video.android.core.call.state.CallDeviceState
@@ -48,7 +48,7 @@ import io.getstream.video.android.core.call.state.CallDeviceState
  * @param actions A list of composable call actions that will be arranged in the layout.
  */
 @Composable
-public fun CallControls(
+public fun ControlActions(
     modifier: Modifier = Modifier,
     callViewModel: CallViewModel,
     onCallAction: (CallAction) -> Unit = {},
@@ -59,7 +59,7 @@ public fun CallControls(
 ) {
     val callDeviceState by callViewModel.callDeviceState.collectAsStateWithLifecycle()
 
-    CallControls(
+    ControlActions(
         modifier = modifier,
         callDeviceState = callDeviceState,
         actions = actions,
@@ -78,7 +78,7 @@ public fun CallControls(
  * @param actions A list of composable call actions that will be arranged in the layout.
  */
 @Composable
-public fun CallControls(
+public fun ControlActions(
     callDeviceState: CallDeviceState,
     modifier: Modifier = Modifier,
     onCallAction: (CallAction) -> Unit,
@@ -100,14 +100,14 @@ public fun CallControls(
     }
 
     if (orientation == ORIENTATION_PORTRAIT) {
-        RegularCallControls(
+        RegularControlActions(
             modifier = controlsModifier,
             callDeviceState = callDeviceState,
             onCallAction = onCallAction,
             actions = actions
         )
     } else if (orientation == ORIENTATION_LANDSCAPE) {
-        LandscapeCallControls(
+        LandscapeControlActions(
             modifier = controlsModifier,
             callDeviceState = callDeviceState,
             onCallAction = onCallAction,
@@ -121,13 +121,13 @@ public fun CallControls(
 private fun CallControlsPreview() {
     Column {
         VideoTheme {
-            CallControls(
+            ControlActions(
                 callDeviceState = CallDeviceState(),
                 onCallAction = {}
             )
         }
         VideoTheme(isInDarkMode = true) {
-            CallControls(
+            ControlActions(
                 callDeviceState = CallDeviceState(),
                 onCallAction = {}
             )

@@ -38,7 +38,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.avatar.UserAvatar
-import io.getstream.video.android.compose.ui.components.call.controls.CallControls
+import io.getstream.video.android.compose.ui.components.call.controls.ControlActions
 import io.getstream.video.android.compose.ui.components.call.renderer.ParticipantLabel
 import io.getstream.video.android.compose.ui.components.video.VideoRenderer
 import io.getstream.video.android.core.Call
@@ -72,8 +72,8 @@ public fun CallLobby(
         OnDisabledContent(user = user)
     },
     onCallAction: (CallAction) -> Unit = {},
-    callControlsContent: @Composable (call: Call) -> Unit = {
-        CallControls(
+    lobbyControlsContent: @Composable (call: Call) -> Unit = {
+        ControlActions(
             callDeviceState = callDeviceState,
             onCallAction = onCallAction
         )
@@ -111,9 +111,9 @@ public fun CallLobby(
             )
         }
 
-        Spacer(modifier = Modifier.height(VideoTheme.dimens.lobbyCallActionsPadding))
+        Spacer(modifier = Modifier.height(VideoTheme.dimens.lobbyControlActionsPadding))
 
-        callControlsContent.invoke(call)
+        lobbyControlsContent.invoke(call)
     }
 }
 
