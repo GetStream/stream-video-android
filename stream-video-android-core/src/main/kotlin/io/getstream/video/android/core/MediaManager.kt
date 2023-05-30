@@ -75,11 +75,11 @@ class SpeakerManager(
 
     internal var selectedBeforeSpeaker: AudioDevice? = null
 
-    fun enableSpeakerPhone() {
+    fun enable() {
         setSpeakerPhone(true)
     }
 
-    fun disableSpeakerPhone() {
+    fun disable() {
         setSpeakerPhone(false)
     }
 

@@ -536,8 +536,8 @@ public final class io/getstream/video/android/core/RtcConnectionState$Reconnecti
 public final class io/getstream/video/android/core/SpeakerManager {
 	public fun <init> (Lio/getstream/video/android/core/MediaManagerImpl;Lio/getstream/video/android/core/MicrophoneManager;Ljava/lang/Integer;)V
 	public synthetic fun <init> (Lio/getstream/video/android/core/MediaManagerImpl;Lio/getstream/video/android/core/MicrophoneManager;Ljava/lang/Integer;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
-	public final fun disableSpeakerPhone ()V
-	public final fun enableSpeakerPhone ()V
+	public final fun disable ()V
+	public final fun enable ()V
 	public final fun getDevices ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun getInitialVolume ()Ljava/lang/Integer;
 	public final fun getMediaManager ()Lio/getstream/video/android/core/MediaManagerImpl;

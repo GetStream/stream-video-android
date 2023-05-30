@@ -112,6 +112,7 @@ public final class io/getstream/video/android/common/viewmodel/CallViewModel : a
 
 public final class io/getstream/video/android/common/viewmodel/CallViewModelFactory : androidx/lifecycle/ViewModelProvider$Factory {
 	public fun <init> (Lio/getstream/video/android/core/Call;)V
+	public final fun create ()Lio/getstream/video/android/common/viewmodel/CallViewModel;
 	public fun create (Ljava/lang/Class;)Landroidx/lifecycle/ViewModel;
 }
 

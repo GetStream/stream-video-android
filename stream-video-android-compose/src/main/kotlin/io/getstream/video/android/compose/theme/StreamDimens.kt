@@ -99,6 +99,8 @@ public data class StreamDimens(
     public val screenSharePresenterTooltipPadding: Dp,
     public val screenSharePresenterTooltipIconPadding: Dp,
     public val screenSharePresenterTooltipHeight: Dp,
+    public val lobbyVideoHeight: Dp,
+    public val lobbyCallActionsPadding: Dp,
 ) {
     public companion object {
         /**
@@ -173,7 +175,9 @@ public data class StreamDimens(
             screenSharePresenterPadding = dimensionResource(id = R.dimen.stream_video_screenSharePresenterPadding),
             callControllerBottomPadding = dimensionResource(id = R.dimen.stream_video_callControllerBottomPadding),
             screenSharePresenterTooltipIconPadding = dimensionResource(id = R.dimen.stream_video_screenShareTooltipIconPadding),
-            screenSharePresenterTooltipHeight = dimensionResource(id = R.dimen.stream_video_screenSharePresenterTooltipHeight)
+            screenSharePresenterTooltipHeight = dimensionResource(id = R.dimen.stream_video_screenSharePresenterTooltipHeight),
+            lobbyVideoHeight = dimensionResource(id = R.dimen.stream_video_lobbyVideoHeight),
+            lobbyCallActionsPadding = dimensionResource(id = R.dimen.stream_video_lobbyCallActionsPadding)
         )
     }
 }
