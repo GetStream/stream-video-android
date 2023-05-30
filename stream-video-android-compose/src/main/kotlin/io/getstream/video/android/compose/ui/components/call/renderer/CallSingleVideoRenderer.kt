@@ -174,9 +174,10 @@ public fun ParticipantVideoRenderer(
 internal fun BoxScope.ParticipantLabel(
     participant: ParticipantState,
     labelPosition: Alignment,
-    hasAudio: Boolean = false,
-    isSpeaking: Boolean = false
 ) {
+    val audioEnabled by participant.audioEnabled.collectAsStateWithLifecycle()
+    val speaking by participant.speaking.collectAsStateWithLifecycle()
+
     val userNameOrId by participant.userNameOrId.collectAsStateWithLifecycle()
     val nameLabel = if (participant.isLocal) {
         stringResource(id = R.string.stream_video_myself)
@@ -184,6 +185,21 @@ internal fun BoxScope.ParticipantLabel(
         userNameOrId
     }
 
+    ParticipantLabel(
+        nameLabel = nameLabel,
+        labelPosition = labelPosition,
+        hasAudio = audioEnabled,
+        isSpeaking = speaking
+    )
+}
+
+@Composable
+internal fun BoxScope.ParticipantLabel(
+    nameLabel: String,
+    labelPosition: Alignment,
+    hasAudio: Boolean,
+    isSpeaking: Boolean
+) {
     Row(
         modifier = Modifier
             .align(labelPosition)
@@ -209,12 +225,10 @@ internal fun BoxScope.ParticipantLabel(
             overflow = TextOverflow.Ellipsis
         )
 
-        val audioEnabled by participant.audioEnabled.collectAsStateWithLifecycle(initialValue = hasAudio)
-        val speaking by participant.speaking.collectAsStateWithLifecycle(initialValue = isSpeaking)
         SoundIndicator(
             state = getSoundIndicatorState(
-                hasAudio = audioEnabled,
-                isSpeaking = speaking
+                hasAudio = hasAudio,
+                isSpeaking = isSpeaking
             ),
             modifier = Modifier
                 .align(CenterVertically)

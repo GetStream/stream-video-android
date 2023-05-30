@@ -24,11 +24,14 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.avatar.UserAvatar
 import io.getstream.video.android.compose.ui.components.call.renderer.ParticipantLabel
@@ -38,6 +41,7 @@ import io.getstream.video.android.core.ParticipantState
 import io.getstream.video.android.core.call.state.CallDeviceState
 import io.getstream.video.android.core.model.VideoTrack
 import io.getstream.video.android.model.User
+import io.getstream.video.android.ui.common.R
 
 @Composable
 public fun CallLobby(
@@ -76,10 +80,18 @@ public fun CallLobby(
             onDisabledContent.invoke()
         }
 
+        val userNameOrId by participant.userNameOrId.collectAsStateWithLifecycle()
+        val nameLabel = if (participant.isLocal) {
+            stringResource(id = R.string.stream_video_myself)
+        } else {
+            userNameOrId
+        }
+
         ParticipantLabel(
-            participant = participant,
+            nameLabel = nameLabel,
             labelPosition = labelPosition,
-            hasAudio = callDeviceState.isMicrophoneEnabled
+            hasAudio = callDeviceState.isMicrophoneEnabled,
+            isSpeaking = false
         )
     }
 }
