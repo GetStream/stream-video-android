@@ -37,6 +37,7 @@ import io.getstream.video.android.core.call.state.ToggleSpeakerphone
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withTimeout
@@ -91,15 +92,15 @@ public open class CallViewModel(public val call: Call) : ViewModel() {
                 permissionManager?.hasRecordAudioPermission?.value == true
         }.asStateFlowWhileSubscribed(scope = viewModelScope, initialValue = false)
 
-    private val isSpeakerPhoneOn: MutableStateFlow<Boolean> = MutableStateFlow(
-        false
-    )
+    private val isSpeakerphoneOn: StateFlow<Boolean> = call.speaker.status.map { status ->
+        status is DeviceStatus.Enabled
+    }.asStateFlowWhileSubscribed(scope = viewModelScope, initialValue = false)
 
     public val callDeviceState: StateFlow<CallDeviceState> =
         combine(
             isMicrophoneOn,
             isVideoOn,
-            isSpeakerPhoneOn
+            isSpeakerphoneOn
         ) { isAudioOn, isVideoOn, isSpeakerPhoneOn ->
             CallDeviceState(
                 isMicrophoneEnabled = isAudioOn,
@@ -152,7 +153,7 @@ public open class CallViewModel(public val call: Call) : ViewModel() {
         logger.d { "[onVideoChanged] videoEnabled: $videoEnabled" }
         if (permissionManager?.hasCameraPermission?.value == false) {
             permissionManager?.requestPermission(android.Manifest.permission.CAMERA)
-            logger.w { "[onVideoChanged] the [Manifest.permissions.CAMERA] has to be granted for video to be sent" }
+            logger.d { "[onVideoChanged] the [Manifest.permissions.CAMERA] has to be granted for video to be sent" }
         }
 
         call.camera.setEnabled(videoEnabled)
@@ -162,14 +163,14 @@ public open class CallViewModel(public val call: Call) : ViewModel() {
         logger.d { "[onMicrophoneChanged] microphoneEnabled: $microphoneEnabled" }
         if (permissionManager?.hasRecordAudioPermission?.value == false) {
             permissionManager?.requestPermission(android.Manifest.permission.RECORD_AUDIO)
-            logger.w { "[onMicrophoneChanged] the [Manifest.permissions.RECORD_AUDIO] has to be granted for audio to be sent" }
+            logger.d { "[onMicrophoneChanged] the [Manifest.permissions.RECORD_AUDIO] has to be granted for audio to be sent" }
         }
         call.microphone.setEnabled(microphoneEnabled)
     }
 
     private fun onSpeakerphoneChanged(speakerPhoneEnabled: Boolean) {
         logger.d { "[onSpeakerphoneChanged] speakerPhoneEnabled: $speakerPhoneEnabled" }
-        isSpeakerPhoneOn.value = speakerPhoneEnabled
+        call.speaker.setEnabled(speakerPhoneEnabled)
     }
 
     public fun setPermissionManager(permissionManager: PermissionManager?) {
