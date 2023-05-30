@@ -1,10 +1,10 @@
-public abstract class io/getstream/video/android/common/AbstractCallActivity : androidx/activity/ComponentActivity, io/getstream/video/android/common/viewmodel/CallViewModelFactoryProvider, io/getstream/video/android/core/permission/PermissionManagerProvider {
+public abstract class io/getstream/video/android/common/AbstractCallActivity : androidx/activity/ComponentActivity, io/getstream/video/android/common/permission/PermissionManagerProvider, io/getstream/video/android/common/viewmodel/CallViewModelFactoryProvider {
 	public static final field Companion Lio/getstream/video/android/common/AbstractCallActivity$Companion;
 	public fun <init> ()V
 	public final fun getCallViewModel ()Lio/getstream/video/android/common/viewmodel/CallViewModel;
-	public fun getPermissionManager ()Lio/getstream/video/android/core/permission/PermissionManager;
+	public fun getPermissionManager ()Lio/getstream/video/android/common/permission/PermissionManager;
 	protected fun handleBackPressed ()V
-	public fun initPermissionManager ()Lio/getstream/video/android/core/permission/PermissionManager;
+	public fun initPermissionManager ()Lio/getstream/video/android/common/permission/PermissionManager;
 	public fun onConfigurationChanged (Landroid/content/res/Configuration;)V
 	protected fun onCreate (Landroid/os/Bundle;)V
 	protected fun onStop ()V
@@ -31,6 +31,29 @@ public final class io/getstream/video/android/common/model/Speaking : io/getstre
 
 public final class io/getstream/video/android/common/model/Unmuted : io/getstream/video/android/common/model/SoundState {
 	public static final field INSTANCE Lio/getstream/video/android/common/model/Unmuted;
+}
+
+public abstract class io/getstream/video/android/common/notification/AbstractNotificationActivity : androidx/activity/ComponentActivity {
+	public fun <init> ()V
+	protected abstract fun initializeVideoIfNeeded ()V
+	protected fun onCreate (Landroid/os/Bundle;)V
+}
+
+public abstract interface class io/getstream/video/android/common/permission/PermissionManager {
+	public static final field Companion Lio/getstream/video/android/common/permission/PermissionManager$Companion;
+	public abstract fun checkPermission (Ljava/lang/String;)Z
+	public abstract fun getHasCameraPermission ()Lkotlinx/coroutines/flow/StateFlow;
+	public abstract fun getHasRecordAudioPermission ()Lkotlinx/coroutines/flow/StateFlow;
+	public abstract fun requestPermission (Ljava/lang/String;)Z
+}
+
+public final class io/getstream/video/android/common/permission/PermissionManager$Companion {
+	public final fun create (Landroidx/activity/ComponentActivity;Lkotlin/jvm/functions/Function2;Lkotlin/jvm/functions/Function1;)Lio/getstream/video/android/common/permission/PermissionManager;
+}
+
+public abstract interface class io/getstream/video/android/common/permission/PermissionManagerProvider {
+	public abstract fun getPermissionManager ()Lio/getstream/video/android/common/permission/PermissionManager;
+	public abstract fun initPermissionManager ()Lio/getstream/video/android/common/permission/PermissionManager;
 }
 
 public final class io/getstream/video/android/common/renderer/StreamVideoTextureViewRenderer : io/getstream/webrtc/android/ui/VideoTextureViewRenderer {
@@ -92,7 +115,7 @@ public final class io/getstream/video/android/common/viewmodel/CallViewModel : a
 	public final fun onCallAction (Lio/getstream/video/android/core/call/state/CallAction;)V
 	public final fun onPictureInPictureModeChanged (Z)V
 	public final fun setOnLeaveCall (Lkotlin/jvm/functions/Function0;)V
-	public final fun setPermissionManager (Lio/getstream/video/android/core/permission/PermissionManager;)V
+	public final fun setPermissionManager (Lio/getstream/video/android/common/permission/PermissionManager;)V
 }
 
 public final class io/getstream/video/android/common/viewmodel/CallViewModelFactory : androidx/lifecycle/ViewModelProvider$Factory {

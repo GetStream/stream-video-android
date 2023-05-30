@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package io.getstream.video.android.core.permission
+package io.getstream.video.android.common.permission
 
 public interface PermissionManagerProvider {
 

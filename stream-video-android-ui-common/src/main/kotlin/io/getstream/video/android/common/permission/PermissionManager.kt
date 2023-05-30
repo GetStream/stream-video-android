@@ -1,3 +1,5 @@
+package io.getstream.video.android.common.permission
+
 /*
  * Copyright (c) 2014-2022 Stream.io Inc. All rights reserved.
  *
@@ -13,8 +15,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-package io.getstream.video.android.core.permission
 
 import android.Manifest
 import android.content.pm.PackageManager

@@ -25,6 +25,7 @@ import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.foundation.background
 import androidx.compose.ui.Modifier
+import io.getstream.video.android.common.permission.PermissionManager
 import io.getstream.video.android.common.viewmodel.CallViewModel
 import io.getstream.video.android.common.viewmodel.CallViewModelFactory
 import io.getstream.video.android.compose.theme.VideoTheme
@@ -32,7 +33,6 @@ import io.getstream.video.android.compose.ui.components.call.CallContainer
 import io.getstream.video.android.core.StreamVideo
 import io.getstream.video.android.core.call.state.ToggleCamera
 import io.getstream.video.android.core.call.state.ToggleMicrophone
-import io.getstream.video.android.core.permission.PermissionManager
 import io.getstream.video.android.model.streamCallId
 
 class CallActivity : AppCompatActivity() {

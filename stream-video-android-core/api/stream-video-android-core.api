@@ -1937,29 +1937,6 @@ public final class io/getstream/video/android/core/model/VideoTrack : io/getstre
 	public fun toString ()Ljava/lang/String;
 }
 
-public abstract class io/getstream/video/android/core/notifications/AbstractNotificationActivity : androidx/activity/ComponentActivity {
-	public fun <init> ()V
-	protected abstract fun initializeVideoIfNeeded ()V
-	protected fun onCreate (Landroid/os/Bundle;)V
-}
-
-public abstract interface class io/getstream/video/android/core/permission/PermissionManager {
-	public static final field Companion Lio/getstream/video/android/core/permission/PermissionManager$Companion;
-	public abstract fun checkPermission (Ljava/lang/String;)Z
-	public abstract fun getHasCameraPermission ()Lkotlinx/coroutines/flow/StateFlow;
-	public abstract fun getHasRecordAudioPermission ()Lkotlinx/coroutines/flow/StateFlow;
-	public abstract fun requestPermission (Ljava/lang/String;)Z
-}
-
-public final class io/getstream/video/android/core/permission/PermissionManager$Companion {
-	public final fun create (Landroidx/activity/ComponentActivity;Lkotlin/jvm/functions/Function2;Lkotlin/jvm/functions/Function1;)Lio/getstream/video/android/core/permission/PermissionManager;
-}
-
-public abstract interface class io/getstream/video/android/core/permission/PermissionManagerProvider {
-	public abstract fun getPermissionManager ()Lio/getstream/video/android/core/permission/PermissionManager;
-	public abstract fun initPermissionManager ()Lio/getstream/video/android/core/permission/PermissionManager;
-}
-
 public final class io/getstream/video/android/core/permission/PermissionRequest {
 	public fun <init> (Lio/getstream/video/android/core/Call;Lio/getstream/video/android/model/User;Lorg/threeten/bp/OffsetDateTime;Ljava/util/List;Lorg/threeten/bp/OffsetDateTime;Lorg/threeten/bp/OffsetDateTime;)V
 	public synthetic fun <init> (Lio/getstream/video/android/core/Call;Lio/getstream/video/android/model/User;Lorg/threeten/bp/OffsetDateTime;Ljava/util/List;Lorg/threeten/bp/OffsetDateTime;Lorg/threeten/bp/OffsetDateTime;ILkotlin/jvm/internal/DefaultConstructorMarker;)V

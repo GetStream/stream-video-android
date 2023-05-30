@@ -115,14 +115,12 @@ dependencies {
     api(libs.stream.webrtc.ui)
 
     // androidx
-    implementation(libs.androidx.activity)
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime)
     implementation(libs.androidx.lifecycle.process)
-    implementation(libs.androidx.lifecycle.viewmodel)
 
     // coroutines
-    implementation(libs.kotlinx.coroutines.android)
+    implementation(libs.kotlinx.coroutines.core)
     implementation(libs.kotlinx.serialization.json)
 
     // API & Protobuf
