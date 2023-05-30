@@ -7,9 +7,9 @@ description: How to build a video call similar to Zoom or facebook messenger
 
 This tutorial teaches you how to build your own Zoom/Whatsapp style video calling.
 
-* Calls run on Stream's global edge network for optimal latency.
+* Calls run on Stream's global edge network for optimal latency & reliability.
 * Permissions give you fine grained control over who can do what.
-* Dynascale automatically adjusts the video quality and codecs.
+* Video quality and codecs are automatically determined.
 
 ### Step 1 - Create a new project in android studio
 
@@ -45,8 +45,6 @@ class MainActivity : ComponentActivity() {
             id = "byron",
             name = "Byron",
             image = "https://getstream.io/chat/docs/sdk/avatars/jpg/Byron%20Waelchi.jpg",
-            role = "admin",
-            custom = mapOf("email" to "byron@example.com")
         )
 
         // for a production app we recommend adding the client to your Application class or di module.
@@ -290,9 +288,7 @@ VideoTheme {
 ### Step 7 - PIP
 
 To truly make the experience solid the call should continue running in the background using PIP.
-Also, if you answer a phone call while you're on this call, your audio and video should be muted automatically.
-
-TODO: include docs on PIP setup & service
+We'll implement this by subclassing the **AbstractCallActivity** class and leveraging the **CallViewModel**.
 
 
 ### Other Possibilities

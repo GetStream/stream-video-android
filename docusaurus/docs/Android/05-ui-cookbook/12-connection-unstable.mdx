@@ -16,6 +16,21 @@ In addition you can also monitor your own connection using `call.state.connectio
 Here's a small compose example to render a connection quality icon for each participant
 
 ```kotlin
+@Composable
+fun PoorConnectionAlert(showAlert: MutableState<Boolean>) {
+    if (showAlert.value) {
+        AlertDialog(
+            onDismissRequest = { showAlert.value = false },
+            title = { Text("Poor Connection Alert") },
+            text = { Text("Your network connection isn't good.") },
+            confirmButton = {
+                TextButton(onClick = { showAlert.value = false }) {
+                    Text("OK")
+                }
+            }
+        )
+    }
+}
 ```
 
 You can easily swap out the standard connection quality indicator with your own.
