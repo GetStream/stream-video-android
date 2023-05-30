@@ -219,6 +219,7 @@ public final class io/getstream/video/android/model/UserType$Guest : io/getstrea
 }
 
 public final class io/getstream/video/android/model/mapper/StreamCallCidMapperKt {
+	public static final fun isValidCallId (Ljava/lang/String;)Z
 	public static final fun toTypeAndId (Ljava/lang/String;)Lkotlin/Pair;
 }
 

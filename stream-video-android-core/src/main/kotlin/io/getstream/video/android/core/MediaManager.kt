@@ -283,7 +283,7 @@ public class CameraManager(
     public val status: StateFlow<DeviceStatus> = _status
 
     /** if we're using the front facing or back facing camera */
-    private val _direction = MutableStateFlow<CameraDirection>(defaultCameraDirection)
+    private val _direction = MutableStateFlow(defaultCameraDirection)
     public val direction: StateFlow<CameraDirection> = _direction
 
     private val _selectedDevice = MutableStateFlow<CameraDeviceWrapped?>(null)
@@ -549,9 +549,9 @@ class MediaManagerImpl(
         source = audioSource, trackId = "audioTrack"
     )
 
-    val camera = CameraManager(this, eglBaseContext)
-    val microphone = MicrophoneManager(this)
-    val speaker = SpeakerManager(this, microphone)
+    internal val camera = CameraManager(this, eglBaseContext)
+    internal val microphone = MicrophoneManager(this)
+    internal val speaker = SpeakerManager(this, microphone)
 
     fun setSpeakerphoneEnabled(isEnabled: Boolean) {
         val devices = getAudioDevices()

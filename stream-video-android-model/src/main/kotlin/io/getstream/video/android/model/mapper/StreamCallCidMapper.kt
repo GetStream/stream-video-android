@@ -33,3 +33,7 @@ public fun String.toTypeAndId(): Pair<String, String> {
     return split(":").takeIf { it.size >= CID_SIZE }?.let { it.first() to it.last() }
         ?: error("unexpected StreamCallCid format: $this")
 }
+
+public fun String.isValidCallId(): Boolean {
+    return this.contains(":")
+}

@@ -297,12 +297,9 @@ public final class io/getstream/video/android/core/MediaManagerImpl {
 	public final fun getAudioSource ()Lorg/webrtc/AudioSource;
 	public final fun getAudioTrack ()Lorg/webrtc/AudioTrack;
 	public final fun getCall ()Lio/getstream/video/android/core/Call;
-	public final fun getCamera ()Lio/getstream/video/android/core/CameraManager;
 	public final fun getContext ()Landroid/content/Context;
 	public final fun getEglBaseContext ()Lorg/webrtc/EglBase$Context;
-	public final fun getMicrophone ()Lio/getstream/video/android/core/MicrophoneManager;
 	public final fun getScope ()Lkotlinx/coroutines/CoroutineScope;
-	public final fun getSpeaker ()Lio/getstream/video/android/core/SpeakerManager;
 	public final fun getVideoSource ()Lorg/webrtc/VideoSource;
 	public final fun getVideoTrack ()Lorg/webrtc/VideoTrack;
 	public final fun selectAudioDevice (Lio/getstream/video/android/core/audio/AudioDevice;)V
