@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package io.getstream.video.android.core.notifications
+package io.getstream.video.android.common.notification
 
 import android.os.Bundle
 import androidx.activity.ComponentActivity

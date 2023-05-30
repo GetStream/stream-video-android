@@ -18,6 +18,7 @@ package io.getstream.video.android.common
 
 import android.Manifest
 import android.annotation.SuppressLint
+import android.app.AlertDialog
 import android.app.PictureInPictureParams
 import android.content.Context
 import android.content.Intent
@@ -34,7 +35,8 @@ import android.view.WindowInsetsController
 import android.view.WindowManager
 import androidx.activity.ComponentActivity
 import androidx.activity.viewModels
-import androidx.appcompat.app.AlertDialog
+import io.getstream.video.android.common.permission.PermissionManager
+import io.getstream.video.android.common.permission.PermissionManagerProvider
 import io.getstream.video.android.common.viewmodel.CallViewModel
 import io.getstream.video.android.common.viewmodel.CallViewModelFactory
 import io.getstream.video.android.common.viewmodel.CallViewModelFactoryProvider
@@ -42,8 +44,6 @@ import io.getstream.video.android.core.StreamVideo
 import io.getstream.video.android.core.call.state.ToggleCamera
 import io.getstream.video.android.core.call.state.ToggleMicrophone
 import io.getstream.video.android.core.call.state.ToggleScreenConfiguration
-import io.getstream.video.android.core.permission.PermissionManager
-import io.getstream.video.android.core.permission.PermissionManagerProvider
 import io.getstream.video.android.model.StreamCallId
 import io.getstream.video.android.model.mapper.toTypeAndId
 

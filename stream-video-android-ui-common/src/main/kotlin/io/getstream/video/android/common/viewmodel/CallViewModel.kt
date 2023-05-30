@@ -20,6 +20,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import io.getstream.log.taggedLogger
 import io.getstream.result.Error
+import io.getstream.video.android.common.permission.PermissionManager
 import io.getstream.video.android.common.util.asStateFlowWhileSubscribed
 import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.DeviceStatus
@@ -33,7 +34,6 @@ import io.getstream.video.android.core.call.state.ShowCallParticipantInfo
 import io.getstream.video.android.core.call.state.ToggleCamera
 import io.getstream.video.android.core.call.state.ToggleMicrophone
 import io.getstream.video.android.core.call.state.ToggleSpeakerphone
-import io.getstream.video.android.core.permission.PermissionManager
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
