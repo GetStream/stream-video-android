@@ -16,12 +16,10 @@
 
 package io.getstream.video.android.dogfooding.ui.join
 
-import android.widget.Toast
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -34,7 +32,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.Text
 import androidx.compose.material.TextField
 import androidx.compose.material.TextFieldDefaults
@@ -71,37 +68,26 @@ fun CallJoinScreen(
     navigateUpToLogin: () -> Unit
 ) {
     val uiState by callJoinViewModel.uiState.collectAsState()
-    val isLoading by callJoinViewModel.isLoading.collectAsState()
 
     HandleCallJoinUiState(
         callJoinUiState = uiState,
         navigateToCallLobby = navigateToCallLobby
     )
 
-    Box(modifier = Modifier.fillMaxSize()) {
-        Column(
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(Colors.background),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        CallJoinHeader(navigateUpToLogin = navigateUpToLogin)
+
+        CallJoinBody(
             modifier = Modifier
-                .fillMaxSize()
-                .background(Colors.background),
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            CallJoinHeader(navigateUpToLogin = navigateUpToLogin)
-
-            CallJoinBody(
-                modifier = Modifier
-                    .align(Alignment.CenterHorizontally)
-                    .fillMaxWidth()
-                    .weight(1f),
-                isLoading = isLoading
-            )
-        }
-
-        if (isLoading) {
-            CircularProgressIndicator(
-                modifier = Modifier.align(Alignment.Center),
-                color = VideoTheme.colors.primaryAccent
-            )
-        }
+                .align(Alignment.CenterHorizontally)
+                .fillMaxWidth()
+                .weight(1f)
+        )
     }
 }
 
@@ -140,7 +126,6 @@ private fun CallJoinHeader(
 @Composable
 private fun CallJoinBody(
     modifier: Modifier,
-    isLoading: Boolean,
     callJoinViewModel: CallJoinViewModel = hiltViewModel(),
 ) {
     val user by callJoinViewModel.user.collectAsState()
@@ -188,9 +173,8 @@ private fun CallJoinBody(
                 .height(52.dp)
                 .padding(horizontal = 35.dp)
                 .testTag("start_new_call"),
-            enabled = !isLoading,
             text = stringResource(id = R.string.start_a_new_call),
-            onClick = { callJoinViewModel.handleUiEvent(CallJoinEvent.CreateCall) }
+            onClick = { callJoinViewModel.handleUiEvent(CallJoinEvent.JoinCall()) }
         )
 
         Spacer(modifier = Modifier.height(40.dp))
@@ -241,7 +225,6 @@ private fun CallJoinBody(
                     .padding(horizontal = 16.dp)
                     .fillMaxHeight()
                     .testTag("join_call"),
-                enabled = !isLoading,
                 onClick = {
                     callJoinViewModel.handleUiEvent(CallJoinEvent.JoinCall(callId = callId))
                 },
@@ -256,16 +239,10 @@ private fun HandleCallJoinUiState(
     callJoinUiState: CallJoinUiState,
     navigateToCallLobby: (callId: String) -> Unit,
 ) {
-    val context = LocalContext.current
     LaunchedEffect(key1 = callJoinUiState) {
         when (callJoinUiState) {
-            is CallJoinUiState.JoinCompletedUi -> {
+            is CallJoinUiState.JoinCompleted ->
                 navigateToCallLobby.invoke(callJoinUiState.callId)
-            }
-
-            is CallJoinUiState.JoiningFailed -> {
-                Toast.makeText(context, callJoinUiState.reason, Toast.LENGTH_SHORT).show()
-            }
 
             else -> Unit
         }

@@ -23,7 +23,6 @@ import io.getstream.result.Error
 import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.DeviceStatus
 import io.getstream.video.android.core.StreamVideo
-import io.getstream.video.android.core.StreamVideoImpl
 import io.getstream.video.android.core.call.RtcSession
 import io.getstream.video.android.core.call.state.CallAction
 import io.getstream.video.android.core.call.state.CallDeviceState
@@ -71,7 +70,6 @@ public class CallViewModel(public val call: Call) : ViewModel() {
     private val settings: StateFlow<CallSettingsResponse?> = call.state.settings
 
     public val client: StreamVideo by lazy { StreamVideo.instance() }
-    private val clientImpl by lazy { client as StreamVideoImpl }
 
     /** if we are in picture in picture mode */
     private val _isInPictureInPicture: MutableStateFlow<Boolean> = MutableStateFlow(false)

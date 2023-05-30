@@ -14,12 +14,14 @@
  * limitations under the License.
  */
 
-@file:OptIn(ExperimentalPermissionsApi::class)
+@file:OptIn(ExperimentalPermissionsApi::class, ExperimentalPermissionsApi::class)
 
 package io.getstream.video.android.dogfooding.ui.lobby
 
+import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -30,8 +32,10 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -50,10 +54,12 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.rememberPermissionState
+import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.avatar.UserAvatar
 import io.getstream.video.android.compose.ui.components.call.controls.actions.ToggleCameraAction
 import io.getstream.video.android.compose.ui.components.call.controls.actions.ToggleMicrophoneAction
-import io.getstream.video.android.compose.ui.components.call.renderer.CallSingleVideoRenderer
+import io.getstream.video.android.compose.ui.components.video.VideoRenderer
+import io.getstream.video.android.core.ParticipantState
 import io.getstream.video.android.dogfooding.R
 import io.getstream.video.android.dogfooding.ui.call.CallActivity
 import io.getstream.video.android.dogfooding.ui.theme.Colors
@@ -61,23 +67,35 @@ import io.getstream.video.android.dogfooding.ui.theme.StreamButton
 
 @Composable
 fun CallLobbyScreen(
+    callLobbyViewModel: CallLobbyViewModel = hiltViewModel(),
     navigateUpToLogin: () -> Unit
 ) {
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(Colors.background)
-            .testTag("call_lobby"),
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        CallJoinHeader(navigateUpToLogin = navigateUpToLogin)
+    val isLoading by callLobbyViewModel.isLoading.collectAsState()
 
-        CallLobbyBody(
+    Box(modifier = Modifier.fillMaxSize()) {
+        Column(
             modifier = Modifier
-                .align(Alignment.CenterHorizontally)
-                .fillMaxWidth()
-                .weight(1f),
-        )
+                .fillMaxSize()
+                .background(Colors.background)
+                .testTag("call_lobby"),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            CallJoinHeader(navigateUpToLogin = navigateUpToLogin)
+
+            CallLobbyBody(
+                modifier = Modifier
+                    .align(Alignment.CenterHorizontally)
+                    .fillMaxWidth()
+                    .weight(1f),
+            )
+        }
+
+        if (isLoading) {
+            CircularProgressIndicator(
+                modifier = Modifier.align(Alignment.Center),
+                color = VideoTheme.colors.primaryAccent
+            )
+        }
     }
 }
 
@@ -86,6 +104,10 @@ private fun CallJoinHeader(
     callLobbyViewModel: CallLobbyViewModel = hiltViewModel(),
     navigateUpToLogin: () -> Unit
 ) {
+    val uiState by callLobbyViewModel.uiState.collectAsState()
+
+    HandleCallLobbyUiState(callLobbyUiState = uiState)
+
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -130,7 +152,6 @@ private fun CallLobbyBody(
     callLobbyViewModel: CallLobbyViewModel = hiltViewModel()
 ) {
     val call by remember { mutableStateOf(callLobbyViewModel.call) }
-    val me by call.state.me.collectAsState()
 
     Column(
         modifier = modifier
@@ -158,61 +179,90 @@ private fun CallLobbyBody(
 
         Spacer(modifier = Modifier.height(20.dp))
 
-        if (me != null) {
-            val callDeviceState by callLobbyViewModel.deviceState.collectAsState()
-            val cameraPermissionState = rememberPermissionState(android.Manifest.permission.CAMERA)
-            val micPermissionState =
-                rememberPermissionState(android.Manifest.permission.RECORD_AUDIO)
+        val callDeviceState by callLobbyViewModel.deviceState.collectAsState()
+        val cameraPermissionState = rememberPermissionState(android.Manifest.permission.CAMERA)
+        val micPermissionState =
+            rememberPermissionState(android.Manifest.permission.RECORD_AUDIO)
+        val isCameraEnabled by callLobbyViewModel.isCameraEnabled.collectAsState()
 
-            CallSingleVideoRenderer(
+        if (isCameraEnabled) {
+            VideoRenderer(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(horizontal = 30.dp)
                     .height(280.dp)
                     .clip(RoundedCornerShape(12.dp)),
                 call = call,
-                participant = me!!
+                media = ParticipantState.Video(
+                    sessionId = call.sessionId.orEmpty(),
+                    track = callLobbyViewModel.videoTrack,
+                    enabled = true
+                )
             )
-
-            Spacer(modifier = Modifier.height(30.dp))
-
-            Row {
-                ToggleMicrophoneAction(
-                    modifier = Modifier.size(48.dp),
-                    isMicrophoneEnabled = callDeviceState.isMicrophoneEnabled,
-                    onCallAction = {
-                        micPermissionState.launchPermissionRequest()
-                        callLobbyViewModel.enableMicrophone(!callDeviceState.isMicrophoneEnabled)
-                    }
-                )
-
-                Spacer(modifier = Modifier.width(22.dp))
-
-                ToggleCameraAction(
-                    modifier = Modifier.size(48.dp),
-                    isCameraEnabled = callDeviceState.isCameraEnabled,
-                    onCallAction = {
-                        cameraPermissionState.launchPermissionRequest()
-                        callLobbyViewModel.enableCamera(!callDeviceState.isCameraEnabled)
-                    }
-                )
-            }
-
-            Spacer(modifier = Modifier.height(50.dp))
-
-            val context = LocalContext.current
-            StreamButton(
+        } else {
+            Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(52.dp)
-                    .padding(horizontal = 35.dp)
-                    .testTag("start_call"),
-                text = stringResource(id = R.string.start_call),
-                onClick = {
-                    val intent = CallActivity.getIntent(context, callId = callLobbyViewModel.callId)
-                    context.startActivity(intent)
+                    .height(280.dp)
+            )
+        }
+
+        Spacer(modifier = Modifier.height(30.dp))
+
+        Row {
+            ToggleMicrophoneAction(
+                modifier = Modifier.size(48.dp),
+                isMicrophoneEnabled = callDeviceState.isMicrophoneEnabled,
+                onCallAction = {
+                    micPermissionState.launchPermissionRequest()
+                    callLobbyViewModel.enableMicrophone(!callDeviceState.isMicrophoneEnabled)
                 }
             )
+
+            Spacer(modifier = Modifier.width(22.dp))
+
+            ToggleCameraAction(
+                modifier = Modifier.size(48.dp),
+                isCameraEnabled = callDeviceState.isCameraEnabled,
+                onCallAction = {
+                    cameraPermissionState.launchPermissionRequest()
+                    callLobbyViewModel.enableCamera(!callDeviceState.isCameraEnabled)
+                }
+            )
+        }
+
+        Spacer(modifier = Modifier.height(50.dp))
+
+        StreamButton(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(52.dp)
+                .padding(horizontal = 35.dp)
+                .testTag("start_call"),
+            text = stringResource(id = R.string.start_call),
+            onClick = { callLobbyViewModel.handleUiEvent(CallLobbyEvent.JoinCall) }
+        )
+    }
+}
+
+@Composable
+private fun HandleCallLobbyUiState(
+    callLobbyUiState: CallLobbyUiState,
+    callLobbyViewModel: CallLobbyViewModel = hiltViewModel()
+) {
+    val context = LocalContext.current
+    LaunchedEffect(key1 = callLobbyUiState) {
+        when (callLobbyUiState) {
+            is CallLobbyUiState.JoinCompleted -> {
+                val intent = CallActivity.getIntent(context, callId = callLobbyViewModel.callId)
+                context.startActivity(intent)
+            }
+
+            is CallLobbyUiState.JoinFailed -> {
+                Toast.makeText(context, callLobbyUiState.reason, Toast.LENGTH_SHORT).show()
+            }
+
+            else -> Unit
         }
     }
 }

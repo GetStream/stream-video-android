@@ -20,16 +20,25 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
+import io.getstream.result.Result
 import io.getstream.video.android.core.Call
+import io.getstream.video.android.core.CreateCallOptions
 import io.getstream.video.android.core.DeviceStatus
 import io.getstream.video.android.core.StreamVideo
+import io.getstream.video.android.core.call.RtcSession
 import io.getstream.video.android.core.call.state.CallDeviceState
+import io.getstream.video.android.core.model.VideoTrack
+import io.getstream.video.android.core.utils.mapState
 import io.getstream.video.android.datastore.delegate.StreamUserDataStore
 import io.getstream.video.android.model.StreamCallId
 import io.getstream.video.android.model.User
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.flow.onCompletion
 import kotlinx.coroutines.flow.stateIn
 import javax.inject.Inject
 
@@ -47,6 +56,16 @@ class CallLobbyViewModel @Inject constructor(
         streamVideo.call(type = callId.type, id = callId.id)
     }
 
+    val videoTrack: VideoTrack by lazy {
+        VideoTrack(
+            streamId = call.sessionId.orEmpty(),
+            video = call.camera.mediaManager.videoTrack
+        )
+    }
+
+    val isCameraEnabled: StateFlow<Boolean> =
+        call.camera.status.mapState { it is DeviceStatus.Enabled }
+
     val user: User? = dataStore.user.value
 
     val deviceState: StateFlow<CallDeviceState> =
@@ -57,6 +76,34 @@ class CallLobbyViewModel @Inject constructor(
             )
         }.stateIn(viewModelScope, SharingStarted.Lazily, CallDeviceState())
 
+    private val _isLoading: MutableStateFlow<Boolean> = MutableStateFlow(false)
+    internal val isLoading: StateFlow<Boolean> = _isLoading
+
+    private val event: MutableStateFlow<CallLobbyEvent> = MutableStateFlow(CallLobbyEvent.Nothing)
+    internal val uiState: StateFlow<CallLobbyUiState> = event
+        .flatMapLatest { event ->
+            when (event) {
+                is CallLobbyEvent.JoinCall -> {
+                    _isLoading.value = true
+                    val result = joinCall()
+
+                    if (result.isSuccess) {
+                        flowOf(CallLobbyUiState.JoinCompleted)
+                    } else {
+                        flowOf(CallLobbyUiState.JoinFailed(result.errorOrNull()?.message.orEmpty()))
+                    }
+                }
+
+                else -> flowOf(CallLobbyUiState.Nothing)
+            }
+        }
+        .onCompletion { _isLoading.value = false }
+        .stateIn(viewModelScope, SharingStarted.Lazily, CallLobbyUiState.Nothing)
+
+    fun handleUiEvent(event: CallLobbyEvent) {
+        this.event.value = event
+    }
+
     fun enableCamera(enabled: Boolean) {
         call.camera.setEnabled(enabled)
     }
@@ -65,7 +112,29 @@ class CallLobbyViewModel @Inject constructor(
         call.microphone.setEnabled(enabled)
     }
 
+    private suspend fun joinCall(): Result<RtcSession> {
+        val streamVideo = StreamVideo.instance()
+        return call.join(
+            create = true,
+            createOptions = CreateCallOptions(memberIds = listOf(streamVideo.userId))
+        )
+    }
+
     fun signOut() {
         StreamVideo.instance().logOut()
     }
+}
+
+sealed interface CallLobbyUiState {
+    object Nothing : CallLobbyUiState
+
+    object JoinCompleted : CallLobbyUiState
+
+    data class JoinFailed(val reason: String?) : CallLobbyUiState
+}
+
+sealed interface CallLobbyEvent {
+    object Nothing : CallLobbyEvent
+
+    object JoinCall : CallLobbyEvent
 }
