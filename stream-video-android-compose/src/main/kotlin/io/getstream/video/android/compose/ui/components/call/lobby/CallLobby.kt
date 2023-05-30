@@ -37,6 +37,7 @@ import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.getstream.video.android.common.viewmodel.CallViewModel
@@ -52,6 +53,7 @@ import io.getstream.video.android.core.call.state.CallAction
 import io.getstream.video.android.core.call.state.CallDeviceState
 import io.getstream.video.android.core.model.VideoTrack
 import io.getstream.video.android.mock.StreamMockUtils
+import io.getstream.video.android.mock.mockCall
 import io.getstream.video.android.model.User
 import io.getstream.video.android.ui.common.R
 
@@ -238,9 +240,22 @@ private fun OnDisabledContent(user: User) {
     }
 }
 
+@Preview
 @Composable
 private fun CallLobbyPreview() {
     StreamMockUtils.initializeStreamVideo(LocalContext.current)
     VideoTheme {
+        CallLobby(
+            call = mockCall,
+            callDeviceState = CallDeviceState(),
+            video = ParticipantState.Video(
+                sessionId = mockCall.sessionId.orEmpty(),
+                track = VideoTrack(
+                    streamId = mockCall.sessionId.orEmpty(),
+                    video = org.webrtc.VideoTrack(1000L)
+                ),
+                enabled = true
+            )
+        )
     }
 }
