@@ -24,6 +24,10 @@ public class CallViewModelFactory(
     private val call: Call,
 ) : ViewModelProvider.Factory {
 
+    public fun create(): CallViewModel {
+        return create(CallViewModel::class.java)
+    }
+
     @Suppress("UNCHECKED_CAST")
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
         return CallViewModel(call = call) as T

@@ -26,13 +26,16 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.Dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.getstream.video.android.common.viewmodel.CallViewModel
 import io.getstream.video.android.compose.theme.VideoTheme
-import io.getstream.video.android.compose.ui.components.call.controls.actions.LandscapeCallControls
-import io.getstream.video.android.compose.ui.components.call.controls.actions.RegularCallControls
+import io.getstream.video.android.compose.ui.components.call.controls.actions.LandscapeControlActions
+import io.getstream.video.android.compose.ui.components.call.controls.actions.RegularControlActions
 import io.getstream.video.android.compose.ui.components.call.controls.actions.buildDefaultCallControlActions
 import io.getstream.video.android.core.call.state.CallAction
 import io.getstream.video.android.core.call.state.CallDeviceState
@@ -48,9 +51,12 @@ import io.getstream.video.android.core.call.state.CallDeviceState
  * @param actions A list of composable call actions that will be arranged in the layout.
  */
 @Composable
-public fun CallControls(
+public fun ControlActions(
     modifier: Modifier = Modifier,
     callViewModel: CallViewModel,
+    backgroundColor: Color = VideoTheme.colors.barsBackground,
+    elevation: Dp = VideoTheme.dimens.callControlsElevation,
+    shape: Shape = VideoTheme.shapes.callControls,
     onCallAction: (CallAction) -> Unit = {},
     actions: List<(@Composable () -> Unit)> = buildDefaultCallControlActions(
         callViewModel = callViewModel,
@@ -59,9 +65,12 @@ public fun CallControls(
 ) {
     val callDeviceState by callViewModel.callDeviceState.collectAsStateWithLifecycle()
 
-    CallControls(
+    ControlActions(
         modifier = modifier,
         callDeviceState = callDeviceState,
+        backgroundColor = backgroundColor,
+        elevation = elevation,
+        shape = shape,
         actions = actions,
         onCallAction = onCallAction
     )
@@ -78,10 +87,13 @@ public fun CallControls(
  * @param actions A list of composable call actions that will be arranged in the layout.
  */
 @Composable
-public fun CallControls(
+public fun ControlActions(
     callDeviceState: CallDeviceState,
     modifier: Modifier = Modifier,
-    onCallAction: (CallAction) -> Unit,
+    onCallAction: (CallAction) -> Unit = {},
+    backgroundColor: Color = VideoTheme.colors.barsBackground,
+    elevation: Dp = VideoTheme.dimens.callControlsElevation,
+    shape: Shape = VideoTheme.shapes.callControls,
     actions: List<(@Composable () -> Unit)> = buildDefaultCallControlActions(
         callDeviceState,
         onCallAction
@@ -100,16 +112,22 @@ public fun CallControls(
     }
 
     if (orientation == ORIENTATION_PORTRAIT) {
-        RegularCallControls(
+        RegularControlActions(
             modifier = controlsModifier,
             callDeviceState = callDeviceState,
+            backgroundColor = backgroundColor,
+            shape = shape,
+            elevation = elevation,
             onCallAction = onCallAction,
             actions = actions
         )
     } else if (orientation == ORIENTATION_LANDSCAPE) {
-        LandscapeCallControls(
+        LandscapeControlActions(
             modifier = controlsModifier,
             callDeviceState = callDeviceState,
+            backgroundColor = backgroundColor,
+            shape = shape,
+            elevation = elevation,
             onCallAction = onCallAction,
             actions = actions
         )
@@ -121,13 +139,13 @@ public fun CallControls(
 private fun CallControlsPreview() {
     Column {
         VideoTheme {
-            CallControls(
+            ControlActions(
                 callDeviceState = CallDeviceState(),
                 onCallAction = {}
             )
         }
         VideoTheme(isInDarkMode = true) {
-            CallControls(
+            ControlActions(
                 callDeviceState = CallDeviceState(),
                 onCallAction = {}
             )

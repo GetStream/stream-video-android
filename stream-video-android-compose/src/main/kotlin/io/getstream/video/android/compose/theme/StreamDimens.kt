@@ -65,6 +65,7 @@ public data class StreamDimens(
     public val callControlButtonSize: Dp,
     public val landscapeCallControlButtonSize: Dp,
     public val callControlsSheetHeight: Dp,
+    public val callControlsElevation: Dp,
     public val callParticipantFocusedBorderWidth: Dp,
     public val callParticipantScreenSharingFocusedBorderWidth: Dp,
     public val callParticipantLabelHeight: Dp,
@@ -99,6 +100,8 @@ public data class StreamDimens(
     public val screenSharePresenterTooltipPadding: Dp,
     public val screenSharePresenterTooltipIconPadding: Dp,
     public val screenSharePresenterTooltipHeight: Dp,
+    public val lobbyVideoHeight: Dp,
+    public val lobbyControlActionsPadding: Dp,
 ) {
     public companion object {
         /**
@@ -147,6 +150,7 @@ public data class StreamDimens(
             callParticipantLabelTextPaddingStart = dimensionResource(id = R.dimen.stream_video_callParticipantSoundIndicatorPaddingStart),
             landscapeCallControlButtonSize = dimensionResource(id = R.dimen.stream_video_landscapeCallControlButtonSize),
             callControlsSheetHeight = dimensionResource(id = R.dimen.stream_video_callControlsSheetHeight),
+            callControlsElevation = dimensionResource(id = R.dimen.stream_video_callControlElevation),
             landscapeCallControlsSheetWidth = dimensionResource(id = R.dimen.stream_video_landscapeCallControlsSheetWidth),
             callParticipantInfoMenuAppBarHeight = dimensionResource(id = R.dimen.stream_video_callParticipantInfoMenuAppBarHeight),
             callParticipantInfoMenuOptionsHeight = dimensionResource(id = R.dimen.stream_video_callParticipantInfoMenuOptionsHeight),
@@ -173,7 +177,9 @@ public data class StreamDimens(
             screenSharePresenterPadding = dimensionResource(id = R.dimen.stream_video_screenSharePresenterPadding),
             callControllerBottomPadding = dimensionResource(id = R.dimen.stream_video_callControllerBottomPadding),
             screenSharePresenterTooltipIconPadding = dimensionResource(id = R.dimen.stream_video_screenShareTooltipIconPadding),
-            screenSharePresenterTooltipHeight = dimensionResource(id = R.dimen.stream_video_screenSharePresenterTooltipHeight)
+            screenSharePresenterTooltipHeight = dimensionResource(id = R.dimen.stream_video_screenSharePresenterTooltipHeight),
+            lobbyVideoHeight = dimensionResource(id = R.dimen.stream_video_lobbyVideoHeight),
+            lobbyControlActionsPadding = dimensionResource(id = R.dimen.stream_video_lobbyControlActionsPadding)
         )
     }
 }

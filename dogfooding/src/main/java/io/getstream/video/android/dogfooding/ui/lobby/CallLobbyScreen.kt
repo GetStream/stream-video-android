@@ -31,7 +31,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
@@ -42,7 +41,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
@@ -56,10 +54,11 @@ import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.rememberPermissionState
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.avatar.UserAvatar
-import io.getstream.video.android.compose.ui.components.call.controls.actions.ToggleCameraAction
-import io.getstream.video.android.compose.ui.components.call.controls.actions.ToggleMicrophoneAction
-import io.getstream.video.android.compose.ui.components.video.VideoRenderer
-import io.getstream.video.android.core.ParticipantState
+import io.getstream.video.android.compose.ui.components.call.lobby.CallLobby
+import io.getstream.video.android.core.StreamVideo
+import io.getstream.video.android.core.call.state.ToggleCamera
+import io.getstream.video.android.core.call.state.ToggleMicrophone
+import io.getstream.video.android.core.call.state.ToggleSpeakerphone
 import io.getstream.video.android.dogfooding.R
 import io.getstream.video.android.dogfooding.ui.call.CallActivity
 import io.getstream.video.android.dogfooding.ui.theme.Colors
@@ -183,53 +182,34 @@ private fun CallLobbyBody(
         val cameraPermissionState = rememberPermissionState(android.Manifest.permission.CAMERA)
         val micPermissionState =
             rememberPermissionState(android.Manifest.permission.RECORD_AUDIO)
-        val isCameraEnabled by callLobbyViewModel.isCameraEnabled.collectAsState()
+        val deviceState by callLobbyViewModel.deviceState.collectAsState()
+        val user = StreamVideo.instance().user
 
-        if (isCameraEnabled) {
-            VideoRenderer(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 30.dp)
-                    .height(280.dp)
-                    .clip(RoundedCornerShape(12.dp)),
-                call = call,
-                media = ParticipantState.Video(
-                    sessionId = call.sessionId.orEmpty(),
-                    track = callLobbyViewModel.videoTrack,
-                    enabled = true
-                )
-            )
-        } else {
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(280.dp)
-            )
-        }
+        CallLobby(
+            call = call,
+            user = user,
+            modifier = Modifier.fillMaxWidth(),
+            callDeviceState = deviceState,
+            onCallAction = { action ->
+                when (action) {
+                    is ToggleMicrophone -> {
+                        micPermissionState.launchPermissionRequest()
+                        callLobbyViewModel.enableMicrophone(!callDeviceState.isMicrophoneEnabled)
+                    }
 
-        Spacer(modifier = Modifier.height(30.dp))
+                    is ToggleCamera -> {
+                        cameraPermissionState.launchPermissionRequest()
+                        callLobbyViewModel.enableCamera(!callDeviceState.isCameraEnabled)
+                    }
 
-        Row {
-            ToggleMicrophoneAction(
-                modifier = Modifier.size(48.dp),
-                isMicrophoneEnabled = callDeviceState.isMicrophoneEnabled,
-                onCallAction = {
-                    micPermissionState.launchPermissionRequest()
-                    callLobbyViewModel.enableMicrophone(!callDeviceState.isMicrophoneEnabled)
+                    is ToggleSpeakerphone -> {
+                        callLobbyViewModel.enableSpeakerphone(!callDeviceState.isSpeakerphoneEnabled)
+                    }
+
+                    else -> Unit
                 }
-            )
-
-            Spacer(modifier = Modifier.width(22.dp))
-
-            ToggleCameraAction(
-                modifier = Modifier.size(48.dp),
-                isCameraEnabled = callDeviceState.isCameraEnabled,
-                onCallAction = {
-                    cameraPermissionState.launchPermissionRequest()
-                    callLobbyViewModel.enableCamera(!callDeviceState.isCameraEnabled)
-                }
-            )
-        }
+            }
+        )
 
         Spacer(modifier = Modifier.height(50.dp))
 

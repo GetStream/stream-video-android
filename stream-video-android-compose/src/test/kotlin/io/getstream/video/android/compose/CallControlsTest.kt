@@ -24,7 +24,7 @@ import androidx.compose.ui.unit.dp
 import app.cash.paparazzi.DeviceConfig
 import app.cash.paparazzi.Paparazzi
 import io.getstream.video.android.compose.base.BaseComposeTest
-import io.getstream.video.android.compose.ui.components.call.controls.CallControls
+import io.getstream.video.android.compose.ui.components.call.controls.ControlActions
 import io.getstream.video.android.compose.ui.components.call.controls.actions.AcceptCallAction
 import io.getstream.video.android.compose.ui.components.call.controls.actions.CancelCallAction
 import io.getstream.video.android.compose.ui.components.call.controls.actions.ChatDialogAction
@@ -46,7 +46,7 @@ internal class CallControlsTest : BaseComposeTest() {
     @Test
     fun `snapshot CallControls composable`() {
         snapshotWithDarkMode {
-            CallControls(callDeviceState = CallDeviceState(), onCallAction = {})
+            ControlActions(callDeviceState = CallDeviceState(), onCallAction = {})
         }
     }
 

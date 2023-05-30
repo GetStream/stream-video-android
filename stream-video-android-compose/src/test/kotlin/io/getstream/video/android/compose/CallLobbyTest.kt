@@ -19,24 +19,35 @@ package io.getstream.video.android.compose
 import app.cash.paparazzi.DeviceConfig
 import app.cash.paparazzi.Paparazzi
 import io.getstream.video.android.compose.base.BaseComposeTest
-import io.getstream.video.android.compose.ui.components.call.controls.actions.LandscapeControlActions
+import io.getstream.video.android.compose.ui.components.call.lobby.CallLobby
+import io.getstream.video.android.core.ParticipantState
 import io.getstream.video.android.core.call.state.CallDeviceState
+import io.getstream.video.android.mock.mockCall
 import org.junit.Rule
 import org.junit.Test
+import org.webrtc.VideoTrack
 
-internal class CallComponentsLandscapeTest : BaseComposeTest() {
+internal class CallLobbyTest : BaseComposeTest() {
 
     @get:Rule
-    val paparazziLandscape = Paparazzi(deviceConfig = DeviceConfig.NEXUS_5_LAND)
+    val paparazzi = Paparazzi(deviceConfig = DeviceConfig.PIXEL_4A)
 
-    override fun basePaparazzi(): Paparazzi = paparazziLandscape
+    override fun basePaparazzi(): Paparazzi = paparazzi
 
     @Test
-    fun `snapshot LandscapeCallControls composable`() {
-        snapshot {
-            LandscapeControlActions(
+    fun `snapshot CallLobby composable`() {
+        snapshotWithDarkMode {
+            CallLobby(
+                call = mockCall,
                 callDeviceState = CallDeviceState(),
-                onCallAction = {}
+                video = ParticipantState.Video(
+                    sessionId = mockCall.sessionId.orEmpty(),
+                    track = io.getstream.video.android.core.model.VideoTrack(
+                        streamId = mockCall.sessionId.orEmpty(),
+                        video = VideoTrack(1000L)
+                    ),
+                    enabled = true
+                )
             )
         }
     }

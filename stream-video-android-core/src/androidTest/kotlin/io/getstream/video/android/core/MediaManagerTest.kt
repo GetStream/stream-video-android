@@ -68,9 +68,9 @@ class MediaManagerTest : IntegrationTestBase(connectCoordinatorWS = false) {
         assertThat(speaker.volume.value).isEqualTo(0)
 
         val oldDevice = speaker.selectedDevice.value
-        speaker.enableSpeakerPhone()
+        speaker.enable()
         assertThat(speaker.speakerPhoneEnabled.value).isTrue()
-        speaker.disableSpeakerPhone()
+        speaker.disable()
         assertThat(speaker.speakerPhoneEnabled.value).isFalse()
         assertThat(speaker.selectedDevice.value).isEqualTo(oldDevice)
     }
@@ -79,7 +79,7 @@ class MediaManagerTest : IntegrationTestBase(connectCoordinatorWS = false) {
     fun speakerResume() = runTest {
         val speaker = call.mediaManager.speaker
         // test resume
-        speaker.enableSpeakerPhone()
+        speaker.enable()
         speaker.setVolume(54)
         speaker.pause()
         assertThat(speaker.volume.value).isEqualTo(0)

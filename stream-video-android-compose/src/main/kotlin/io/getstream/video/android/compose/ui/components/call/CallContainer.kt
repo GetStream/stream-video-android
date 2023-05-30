@@ -33,7 +33,7 @@ import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.call.activecall.CallContent
 import io.getstream.video.android.compose.ui.components.call.activecall.DefaultPictureInPictureContent
 import io.getstream.video.android.compose.ui.components.call.activecall.internal.InviteUsersDialog
-import io.getstream.video.android.compose.ui.components.call.controls.CallControls
+import io.getstream.video.android.compose.ui.components.call.controls.ControlActions
 import io.getstream.video.android.compose.ui.components.call.ringing.RingingCallContent
 import io.getstream.video.android.compose.ui.components.call.ringing.incomingcall.IncomingCallContent
 import io.getstream.video.android.compose.ui.components.call.ringing.outgoingcall.OutgoingCallContent
@@ -83,7 +83,7 @@ public fun CallContainer(
         )
     },
     callControlsContent: @Composable (call: Call) -> Unit = {
-        CallControls(
+        ControlActions(
             modifier = Modifier.testTag("call_controls"),
             callViewModel = callViewModel,
             onCallAction = onCallAction,
@@ -165,7 +165,7 @@ public fun CallContainer(
         )
     },
     callControlsContent: @Composable (call: Call) -> Unit = {
-        CallControls(
+        ControlActions(
             modifier = Modifier.testTag("call_controls"),
             callDeviceState = callDeviceState,
             onCallAction = onCallAction

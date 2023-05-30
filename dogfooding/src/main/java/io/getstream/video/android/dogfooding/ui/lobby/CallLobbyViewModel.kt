@@ -27,8 +27,6 @@ import io.getstream.video.android.core.DeviceStatus
 import io.getstream.video.android.core.StreamVideo
 import io.getstream.video.android.core.call.RtcSession
 import io.getstream.video.android.core.call.state.CallDeviceState
-import io.getstream.video.android.core.model.VideoTrack
-import io.getstream.video.android.core.utils.mapState
 import io.getstream.video.android.datastore.delegate.StreamUserDataStore
 import io.getstream.video.android.model.StreamCallId
 import io.getstream.video.android.model.User
@@ -56,23 +54,18 @@ class CallLobbyViewModel @Inject constructor(
         streamVideo.call(type = callId.type, id = callId.id)
     }
 
-    val videoTrack: VideoTrack by lazy {
-        VideoTrack(
-            streamId = call.sessionId.orEmpty(),
-            video = call.camera.mediaManager.videoTrack
-        )
-    }
-
-    val isCameraEnabled: StateFlow<Boolean> =
-        call.camera.status.mapState { it is DeviceStatus.Enabled }
-
     val user: User? = dataStore.user.value
 
     val deviceState: StateFlow<CallDeviceState> =
-        combine(call.camera.status, call.microphone.status) { cameraEnabled, microphoneEnabled ->
+        combine(
+            call.camera.status,
+            call.microphone.status,
+            call.speaker.status
+        ) { cameraEnabled, microphoneEnabled, speakerphoneEnabled ->
             CallDeviceState(
                 isCameraEnabled = cameraEnabled is DeviceStatus.Enabled,
-                isMicrophoneEnabled = microphoneEnabled is DeviceStatus.Enabled
+                isMicrophoneEnabled = microphoneEnabled is DeviceStatus.Enabled,
+                isSpeakerphoneEnabled = speakerphoneEnabled is DeviceStatus.Enabled
             )
         }.stateIn(viewModelScope, SharingStarted.Lazily, CallDeviceState())
 
@@ -110,6 +103,10 @@ class CallLobbyViewModel @Inject constructor(
 
     fun enableMicrophone(enabled: Boolean) {
         call.microphone.setEnabled(enabled)
+    }
+
+    fun enableSpeakerphone(enabled: Boolean) {
+        call.speaker.setEnabled(enabled)
     }
 
     private suspend fun joinCall(): Result<RtcSession> {
