@@ -31,7 +31,7 @@ import org.webrtc.Camera2Enumerator
 import org.webrtc.CameraEnumerator
 import org.webrtc.SurfaceTextureHelper
 import org.webrtc.VideoCapturer
-import org.webrtc.VideoSource
+import org.webrtc.VideoTrack
 
 public class CallLobbyViewModel(
     application: Application,
@@ -58,13 +58,11 @@ public class CallLobbyViewModel(
 
     private val videoCapturer: VideoCapturer? by lazy { buildCameraCapturer() }
 
-    private lateinit var videoSource: VideoSource
-
     private val _isCapturingVideo: MutableStateFlow<Boolean> = MutableStateFlow(false)
     public val isCapturingVideo: StateFlow<Boolean> = _isCapturingVideo
 
-    private val _isCapturingAudio: MutableStateFlow<Boolean> = MutableStateFlow(false)
-    public val isCapturingAudio: StateFlow<Boolean> = _isCapturingVideo
+    private val _localVideoTrack: MutableStateFlow<VideoTrack?> = MutableStateFlow(null)
+    public val localVideoTrack: StateFlow<VideoTrack?> = _localVideoTrack
 
     private fun buildCameraCapturer(): VideoCapturer? {
         val manager = cameraManager ?: return null
@@ -115,7 +113,7 @@ public class CallLobbyViewModel(
         capturer.startCapture(resolution.width, resolution.height, 30)
         _isCapturingVideo.value = true
 
-        videoSource = peerConnectionFactory.makeVideoSource(false)
+        val videoSource = peerConnectionFactory.makeVideoSource(false)
 
         capturer.initialize(surfaceTextureHelper, getApplication(), videoSource.capturerObserver)
     }

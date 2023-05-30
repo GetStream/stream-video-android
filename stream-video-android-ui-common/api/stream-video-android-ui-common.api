@@ -74,7 +74,7 @@ public final class io/getstream/video/android/common/view/ParticipantItemView : 
 public final class io/getstream/video/android/common/viewmodel/CallLobbyViewModel : androidx/lifecycle/AndroidViewModel {
 	public fun <init> (Landroid/app/Application;Lio/getstream/video/android/core/StreamVideo;)V
 	public final fun flipCamera ()V
-	public final fun isCapturingAudio ()Lkotlinx/coroutines/flow/StateFlow;
+	public final fun getLocalVideoTrack ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun isCapturingVideo ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun startCapturingLocalVideo (I)V
 }
