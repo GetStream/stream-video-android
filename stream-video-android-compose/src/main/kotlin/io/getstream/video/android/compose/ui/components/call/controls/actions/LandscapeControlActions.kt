@@ -39,7 +39,7 @@ import io.getstream.video.android.core.call.state.CallDeviceState
 public fun LandscapeControlActions(
     callDeviceState: CallDeviceState,
     modifier: Modifier = Modifier,
-    onCallAction: (CallAction) -> Unit,
+    onCallAction: (CallAction) -> Unit = {},
     actions: List<(@Composable () -> Unit)> = buildDefaultCallControlActions(
         callDeviceState,
         onCallAction

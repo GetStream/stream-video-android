@@ -75,7 +75,10 @@ public fun CallLobby(
     lobbyControlsContent: @Composable (call: Call) -> Unit = {
         ControlActions(
             callDeviceState = callDeviceState,
-            onCallAction = onCallAction
+            actions = buildDefaultLobbyControlActions(
+                callDeviceState = callDeviceState,
+                onCallAction = onCallAction
+            )
         )
     },
 ) {

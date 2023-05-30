@@ -43,7 +43,7 @@ import io.getstream.video.android.core.call.state.CallDeviceState
 public fun RegularControlActions(
     callDeviceState: CallDeviceState,
     modifier: Modifier = Modifier,
-    onCallAction: (CallAction) -> Unit,
+    onCallAction: (CallAction) -> Unit = {},
     actions: List<(@Composable () -> Unit)> = buildDefaultCallControlActions(
         callDeviceState,
         onCallAction

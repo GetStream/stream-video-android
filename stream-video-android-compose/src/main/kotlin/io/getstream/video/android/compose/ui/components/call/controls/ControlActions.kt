@@ -81,7 +81,7 @@ public fun ControlActions(
 public fun ControlActions(
     callDeviceState: CallDeviceState,
     modifier: Modifier = Modifier,
-    onCallAction: (CallAction) -> Unit,
+    onCallAction: (CallAction) -> Unit = {},
     actions: List<(@Composable () -> Unit)> = buildDefaultCallControlActions(
         callDeviceState,
         onCallAction

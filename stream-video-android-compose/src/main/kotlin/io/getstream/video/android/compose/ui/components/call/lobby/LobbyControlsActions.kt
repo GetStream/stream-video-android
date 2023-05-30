@@ -22,7 +22,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalConfiguration
-import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.getstream.video.android.common.viewmodel.CallViewModel
 import io.getstream.video.android.compose.theme.VideoTheme
@@ -74,14 +73,14 @@ public fun buildDefaultLobbyControlActions(
     return listOf(
         {
             ToggleMicrophoneAction(
-                modifier = Modifier.size(48.dp),
+                modifier = modifier,
                 isMicrophoneEnabled = callDeviceState.isMicrophoneEnabled,
                 onCallAction = onCallAction
             )
         },
         {
             ToggleCameraAction(
-                modifier = Modifier.size(48.dp),
+                modifier = modifier,
                 isCameraEnabled = callDeviceState.isCameraEnabled,
                 onCallAction = onCallAction
             )
