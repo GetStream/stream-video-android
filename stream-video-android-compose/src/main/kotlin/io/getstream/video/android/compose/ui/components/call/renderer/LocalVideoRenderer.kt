@@ -80,7 +80,7 @@ public fun LocalVideoContent(
     var videoSize by remember { mutableStateOf(IntSize(0, 0)) }
     var offsetX by remember { mutableStateOf(0f) }
     var offsetY by remember { mutableStateOf(0f) }
-    val offset by animateOffsetAsState(targetValue = Offset(offsetX, offsetY))
+    val offset by animateOffsetAsState(targetValue = Offset(offsetX, offsetY), label = "offsets")
     val density = LocalDensity.current
 
     LaunchedEffect(parentBounds.width) {

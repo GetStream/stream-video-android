@@ -42,7 +42,6 @@ dependencies {
     api(project(":stream-video-android-ui-common"))
 
     // androidx
-    implementation(libs.androidx.material)
     implementation(libs.stream.log.android)
 
     // compose

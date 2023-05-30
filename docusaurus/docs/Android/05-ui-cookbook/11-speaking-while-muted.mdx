@@ -2,3 +2,39 @@
 title: Speaking While Muted
 description: Speaking While Muted
 ---
+
+Issues:
+* No way to add this to the UI
+
+It's a UI best practice to show some visual feedback when the user is speaking while muted.
+You can observe the state for this in `call.state.speakingWhileMuted`
+
+### Speaking While Muted
+
+This example shows how to render an alert when the user is speaking while muted
+
+```kotlin
+fun SpeakingWhileMutedWarning() {
+}
+```
+
+### Integrating into the default UI
+
+If you want to integrate this into the default UI, you update it like this
+
+```kotlin
+val speakingWhileMuted = call.state.speakingWhileMuted.observeAsState()
+
+CallContainer(
+                    modifier = Modifier.background(color = VideoTheme.colors.appBackground),
+                    callViewModel = vm,
+                    onBackPressed = { finish() })
+    {
+    CallHeader()
+    CallContent()
+    ControlActions()
+
+    if (speakingWhileMuted) SpeakingWhileMutedWarning()
+}
+```
+

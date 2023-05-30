@@ -14,18 +14,12 @@
  * limitations under the License.
  */
 
-package io.getstream.video.android.core.viewmodel
+package io.getstream.video.android.common.viewmodel
 
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.ViewModelProvider
-import io.getstream.video.android.core.Call
+public interface CallViewModelFactoryProvider {
 
-public class CallViewModelFactory(
-    private val call: Call,
-) : ViewModelProvider.Factory {
-
-    @Suppress("UNCHECKED_CAST")
-    override fun <T : ViewModel> create(modelClass: Class<T>): T {
-        return CallViewModel(call = call) as T
-    }
+    /**
+     * Allows for a custom implementation of the [CallViewModelFactory].
+     */
+    public fun getCallViewModelFactory(): CallViewModelFactory
 }

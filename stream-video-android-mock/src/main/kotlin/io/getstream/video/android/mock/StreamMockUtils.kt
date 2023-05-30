@@ -76,9 +76,9 @@ public val mockVideoMediaTrack: MediaTrack
 public val mockUsers: List<User>
     inline get() = listOf(
         User(
-            id = "filip_babic",
-            name = "Filip",
-            image = "https://avatars.githubusercontent.com/u/17215808?v=4",
+            id = "thierry",
+            name = "Thierry",
+            image = "https://avatars.githubusercontent.com/u/265409?v=4",
         ),
         User(
             id = "jaewoong",

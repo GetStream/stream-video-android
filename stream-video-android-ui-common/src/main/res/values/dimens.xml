@@ -37,6 +37,7 @@
     <dimen name="stream_video_callAppBarTrailingContentSpacingStart">8dp</dimen>
     <dimen name="stream_video_callAppBarTrailingContentSpacingEnd">8dp</dimen>
     <dimen name="stream_video_callControlButtonSize">50dp</dimen>
+    <dimen name="stream_video_callControlElevation">8dp</dimen>
     <dimen name="stream_video_landscapeCallControlButtonSize">45dp</dimen>
     <dimen name="stream_video_callControlsSheetHeight">96dp</dimen>
     <dimen name="stream_video_landscapeCallControlsSheetWidth">64dp</dimen>
@@ -77,6 +78,8 @@
     <dimen name="stream_video_screenSharePresenterTooltipHeight">35dp</dimen>
     <dimen name="stream_video_screenShareTooltipIconPadding">5dp</dimen>
     <dimen name="stream_video_screenShareButtonSize">40dp</dimen>
+    <dimen name="stream_video_lobbyVideoHeight">280dp</dimen>
+    <dimen name="stream_video_lobbyControlActionsPadding">22dp</dimen>
 
     <dimen name="stream_video_title1TextSize">24sp</dimen>
     <dimen name="stream_video_title1LineHeight">34sp</dimen>

@@ -14,21 +14,22 @@
  * limitations under the License.
  */
 
-package io.getstream.video.android.core.permission
+package io.getstream.video.android.common.viewmodel
 
-public interface PermissionManagerProvider {
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
+import io.getstream.video.android.core.Call
 
-    /**
-     * Used for [PermissionManager] setup and registration with the Activity that it's used in.
-     *
-     * @return The initialized and registered [PermissionManager].
-     */
-    public fun initPermissionManager(): PermissionManager
+public class CallViewModelFactory(
+    private val call: Call,
+) : ViewModelProvider.Factory {
 
-    /**
-     * Allows fetching of the [PermissionManager] instance created by [initPermissionManager].
-     *
-     * @return The initialized [PermissionManager] instance.
-     */
-    public fun getPermissionManager(): PermissionManager
+    public fun create(): CallViewModel {
+        return create(CallViewModel::class.java)
+    }
+
+    @Suppress("UNCHECKED_CAST")
+    override fun <T : ViewModel> create(modelClass: Class<T>): T {
+        return CallViewModel(call = call) as T
+    }
 }

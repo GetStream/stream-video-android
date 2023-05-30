@@ -63,8 +63,12 @@ class SpeakerManager(
 ) {
 
     private var priorVolume: Int? = null
-    private val _volume = MutableStateFlow<Int?>(initialVolume)
+    private val _volume = MutableStateFlow(initialVolume)
     val volume: StateFlow<Int?> = _volume
+
+    /** The status of the audio */
+    private val _status = MutableStateFlow<DeviceStatus>(DeviceStatus.NotSelected)
+    val status: StateFlow<DeviceStatus> = _status
 
     val selectedDevice: StateFlow<AudioDevice?> = microphoneManager.selectedDevice
 
@@ -75,12 +79,25 @@ class SpeakerManager(
 
     internal var selectedBeforeSpeaker: AudioDevice? = null
 
-    fun enableSpeakerPhone() {
+    fun enable() {
+        _status.value = DeviceStatus.Enabled
         setSpeakerPhone(true)
     }
 
-    fun disableSpeakerPhone() {
+    fun disable() {
+        _status.value = DeviceStatus.Disabled
         setSpeakerPhone(false)
+    }
+
+    /**
+     * Enable or disable the speakerphone.
+     */
+    fun setEnabled(enabled: Boolean) {
+        if (enabled) {
+            enable()
+        } else {
+            disable()
+        }
     }
 
     /** enables or disables the speakerphone */
@@ -283,7 +300,7 @@ public class CameraManager(
     public val status: StateFlow<DeviceStatus> = _status
 
     /** if we're using the front facing or back facing camera */
-    private val _direction = MutableStateFlow<CameraDirection>(defaultCameraDirection)
+    private val _direction = MutableStateFlow(defaultCameraDirection)
     public val direction: StateFlow<CameraDirection> = _direction
 
     private val _selectedDevice = MutableStateFlow<CameraDeviceWrapped?>(null)
@@ -549,9 +566,9 @@ class MediaManagerImpl(
         source = audioSource, trackId = "audioTrack"
     )
 
-    val camera = CameraManager(this, eglBaseContext)
-    val microphone = MicrophoneManager(this)
-    val speaker = SpeakerManager(this, microphone)
+    internal val camera = CameraManager(this, eglBaseContext)
+    internal val microphone = MicrophoneManager(this)
+    internal val speaker = SpeakerManager(this, microphone)
 
     fun setSpeakerphoneEnabled(isEnabled: Boolean) {
         val devices = getAudioDevices()

@@ -96,7 +96,7 @@ public fun CallContainer(
         )
     },
     callControlsContent: @Composable (call: Call) -> Unit = {
-        CallControls(
+        ControlActions(
             modifier = Modifier.testTag("call_controls"),
             callViewModel = callViewModel,
             onCallAction = onCallAction,

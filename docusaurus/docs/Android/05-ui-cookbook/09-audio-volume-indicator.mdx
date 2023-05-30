@@ -3,4 +3,24 @@ title: Audio Volume Indicator
 description: Audio Volume Indicator
 ---
 
-Build your own audio volume indicator
+Issues:
+* No way to swap the participant card
+
+The audio indicator gives you a visual feedback when a user is speaking.
+To understand who's speaking we provide call.state.dominantSpeaker and call.state.activeSpeakers.
+On the participant you can observe participant.speaking, participant.dominantSpeaker and participant.audioLevel
+
+This example shows how to render a visual UI indicator that changes based on the audio level
+
+```kotlin
+val audioLevel = participant.audioLevel.collectAsState()
+
+
+
+```
+
+And here's how you can update the participant card to use this UI
+
+```kotlin
+TODO
+```

@@ -18,6 +18,7 @@ package io.getstream.video.android.common
 
 import android.Manifest
 import android.annotation.SuppressLint
+import android.app.AlertDialog
 import android.app.PictureInPictureParams
 import android.content.Context
 import android.content.Intent
@@ -34,17 +35,15 @@ import android.view.WindowInsetsController
 import android.view.WindowManager
 import androidx.activity.ComponentActivity
 import androidx.activity.viewModels
-import androidx.annotation.RequiresApi
-import androidx.appcompat.app.AlertDialog
+import io.getstream.video.android.common.permission.PermissionManager
+import io.getstream.video.android.common.permission.PermissionManagerProvider
+import io.getstream.video.android.common.viewmodel.CallViewModel
+import io.getstream.video.android.common.viewmodel.CallViewModelFactory
+import io.getstream.video.android.common.viewmodel.CallViewModelFactoryProvider
 import io.getstream.video.android.core.StreamVideo
 import io.getstream.video.android.core.call.state.ToggleCamera
 import io.getstream.video.android.core.call.state.ToggleMicrophone
 import io.getstream.video.android.core.call.state.ToggleScreenConfiguration
-import io.getstream.video.android.core.permission.PermissionManager
-import io.getstream.video.android.core.permission.PermissionManagerProvider
-import io.getstream.video.android.core.viewmodel.CallViewModel
-import io.getstream.video.android.core.viewmodel.CallViewModelFactory
-import io.getstream.video.android.core.viewmodel.CallViewModelFactoryProvider
 import io.getstream.video.android.model.StreamCallId
 import io.getstream.video.android.model.mapper.toTypeAndId
 
@@ -187,6 +186,7 @@ public abstract class AbstractCallActivity :
             setShowWhenLocked(true)
             setTurnScreenOn(true)
         } else {
+            @Suppress("DEPRECATION")
             window.addFlags(
                 WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED or
                     WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON
@@ -202,18 +202,13 @@ public abstract class AbstractCallActivity :
      */
     protected open fun handleBackPressed() {
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-            try {
-                enterPictureInPicture()
-            } catch (error: Throwable) {
-                closeCall()
-            }
-        } else {
+        try {
+            enterPictureInPicture()
+        } catch (error: Throwable) {
             closeCall()
         }
     }
 
-    @RequiresApi(Build.VERSION_CODES.N)
     private fun enterPictureInPicture() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
 
@@ -235,6 +230,7 @@ public abstract class AbstractCallActivity :
                 }.build()
             )
         } else {
+            @Suppress("DEPRECATION")
             enterPictureInPictureMode()
         }
     }
@@ -247,20 +243,16 @@ public abstract class AbstractCallActivity :
     override fun onStop() {
         super.onStop()
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-            val isInPiP = isInPictureInPictureMode
+        val isInPiP = isInPictureInPictureMode
 
-            if (isInPiP) {
-                closeCall()
-            }
+        if (isInPiP) {
+            closeCall()
         }
     }
 
     override fun onConfigurationChanged(newConfig: Configuration) {
         super.onConfigurationChanged(newConfig)
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-            callViewModel.onPictureInPictureModeChanged(isInPictureInPictureMode)
-        }
+        callViewModel.onPictureInPictureModeChanged(isInPictureInPictureMode)
     }
 
     public companion object {

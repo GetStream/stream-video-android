@@ -19,7 +19,7 @@ package io.getstream.video.android.compose
 import app.cash.paparazzi.DeviceConfig
 import app.cash.paparazzi.Paparazzi
 import io.getstream.video.android.compose.base.BaseComposeTest
-import io.getstream.video.android.compose.ui.components.call.controls.actions.LandscapeCallControls
+import io.getstream.video.android.compose.ui.components.call.controls.actions.LandscapeControlActions
 import io.getstream.video.android.core.call.state.CallDeviceState
 import org.junit.Rule
 import org.junit.Test
@@ -34,7 +34,7 @@ internal class CallComponentsLandscapeTest : BaseComposeTest() {
     @Test
     fun `snapshot LandscapeCallControls composable`() {
         snapshot {
-            LandscapeCallControls(
+            LandscapeControlActions(
                 callDeviceState = CallDeviceState(),
                 onCallAction = {}
             )
