@@ -16,7 +16,6 @@
 
 package io.getstream.video.android.compose.ui.components.call.renderer.internal
 
-import android.view.View
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
@@ -40,6 +39,9 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.call.renderer.CallSingleVideoRenderer
 import io.getstream.video.android.compose.ui.components.call.renderer.LocalVideoContent
+import io.getstream.video.android.compose.ui.components.call.renderer.RegularVideoRendererStyle
+import io.getstream.video.android.compose.ui.components.call.renderer.VideoRendererStyle
+import io.getstream.video.android.compose.ui.components.call.renderer.copy
 import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.ParticipantState
 import io.getstream.video.android.mock.StreamMockUtils
@@ -50,20 +52,34 @@ import io.getstream.video.android.mock.mockParticipantList
  * Renders call participants based on the number of people in a call, in landscape mode.
  *
  * @param call The state of the call.
- * @param primarySpeaker The primary speaker in the call.
+ * @param dominantSpeaker The primary speaker in the call.
  * @param callParticipants The list of participants in the call.
  * @param modifier Modifier for styling.
  * @param parentSize The size of the parent.
- * @param onRender Handler when the video content renders.
+ * @param style Represents a regular video call render styles.
+ * @param videoRenderer A single video renderer renders each individual participant.
  */
 @Composable
 internal fun BoxScope.LandscapeVideoRenderer(
     call: Call,
-    primarySpeaker: ParticipantState?,
+    dominantSpeaker: ParticipantState?,
     callParticipants: List<ParticipantState>,
     modifier: Modifier,
     parentSize: IntSize,
-    onRender: (View) -> Unit
+    style: VideoRendererStyle = RegularVideoRendererStyle(),
+    videoRenderer: @Composable (
+        modifier: Modifier,
+        call: Call,
+        participant: ParticipantState,
+        style: VideoRendererStyle
+    ) -> Unit = { videoModifier, videoCall, videoParticipant, videoStyle ->
+        CallSingleVideoRenderer(
+            modifier = videoModifier,
+            call = videoCall,
+            participant = videoParticipant,
+            style = videoStyle
+        )
+    },
 ) {
     val remoteParticipants by call.state.remoteParticipants.collectAsStateWithLifecycle()
 
@@ -72,12 +88,13 @@ internal fun BoxScope.LandscapeVideoRenderer(
         1 -> {
             val participant = callParticipants.first()
 
-            CallSingleVideoRenderer(
+            videoRenderer.invoke(
                 modifier = Modifier.fillMaxHeight(),
                 call = call,
                 participant = participant,
-                onRender = onRender,
-                isFocused = primarySpeaker?.sessionId == participant.sessionId,
+                style = style.copy(
+                    isFocused = dominantSpeaker?.sessionId == participant.sessionId
+                )
             )
         }
 
@@ -86,14 +103,15 @@ internal fun BoxScope.LandscapeVideoRenderer(
 
             Row(modifier = modifier) {
                 remoteParticipants.take(callParticipants.size - 1).forEach { participant ->
-                    CallSingleVideoRenderer(
+                    videoRenderer.invoke(
                         modifier = Modifier
                             .fillMaxHeight()
                             .weight(rowItemWeight),
                         call = call,
                         participant = participant,
-                        onRender = onRender,
-                        isFocused = primarySpeaker?.sessionId == participant.sessionId,
+                        style = style.copy(
+                            isFocused = dominantSpeaker?.sessionId == participant.sessionId
+                        )
                     )
                 }
             }
@@ -107,38 +125,43 @@ internal fun BoxScope.LandscapeVideoRenderer(
 
             Column(modifier) {
                 Row(modifier = Modifier.weight(1f)) {
-                    CallSingleVideoRenderer(
+                    videoRenderer.invoke(
                         modifier = Modifier.weight(1f),
                         call = call,
                         participant = firstParticipant,
-                        onRender = onRender,
-                        isFocused = primarySpeaker?.sessionId == firstParticipant.sessionId,
+                        style = style.copy(
+                            isFocused = dominantSpeaker?.sessionId == firstParticipant.sessionId,
+                        )
                     )
 
-                    CallSingleVideoRenderer(
+                    videoRenderer.invoke(
                         modifier = Modifier.weight(1f),
                         call = call,
                         participant = secondParticipant,
-                        onRender = onRender,
-                        isFocused = primarySpeaker?.sessionId == secondParticipant.sessionId,
+                        style = style.copy(
+                            isFocused = dominantSpeaker?.sessionId == secondParticipant.sessionId
+                        )
+
                     )
                 }
 
                 Row(modifier = Modifier.weight(1f)) {
-                    CallSingleVideoRenderer(
+                    videoRenderer.invoke(
                         modifier = Modifier.weight(1f),
                         call = call,
                         participant = thirdParticipant,
-                        onRender = onRender,
-                        isFocused = primarySpeaker?.sessionId == thirdParticipant.sessionId,
+                        style = style.copy(
+                            isFocused = dominantSpeaker?.sessionId == thirdParticipant.sessionId
+                        )
                     )
 
-                    CallSingleVideoRenderer(
+                    videoRenderer.invoke(
                         modifier = Modifier.weight(1f),
                         call = call,
                         participant = fourthParticipant,
-                        onRender = onRender,
-                        isFocused = primarySpeaker?.sessionId == fourthParticipant.sessionId,
+                        style = style.copy(
+                            isFocused = dominantSpeaker?.sessionId == fourthParticipant.sessionId
+                        )
                     )
                 }
             }
@@ -153,46 +176,51 @@ internal fun BoxScope.LandscapeVideoRenderer(
 
             Column(modifier) {
                 Row(modifier = Modifier.weight(1f)) {
-                    CallSingleVideoRenderer(
+                    videoRenderer.invoke(
                         modifier = Modifier.weight(1f),
                         call = call,
                         participant = firstParticipant,
-                        onRender = onRender,
-                        isFocused = primarySpeaker?.sessionId == firstParticipant.sessionId,
+                        style = style.copy(
+                            isFocused = dominantSpeaker?.sessionId == firstParticipant.sessionId
+                        )
                     )
 
-                    CallSingleVideoRenderer(
+                    videoRenderer.invoke(
                         modifier = Modifier.weight(1f),
                         call = call,
                         participant = secondParticipant,
-                        onRender = onRender,
-                        isFocused = primarySpeaker?.sessionId == secondParticipant.sessionId,
+                        style = style.copy(
+                            isFocused = dominantSpeaker?.sessionId == secondParticipant.sessionId
+                        )
                     )
                 }
 
                 Row(modifier = Modifier.weight(1f)) {
-                    CallSingleVideoRenderer(
+                    videoRenderer.invoke(
                         modifier = Modifier.weight(1f),
                         call = call,
                         participant = thirdParticipant,
-                        onRender = onRender,
-                        isFocused = primarySpeaker?.sessionId == thirdParticipant.sessionId,
+                        style = style.copy(
+                            isFocused = dominantSpeaker?.sessionId == thirdParticipant.sessionId
+                        )
                     )
 
-                    CallSingleVideoRenderer(
+                    videoRenderer.invoke(
                         modifier = Modifier.weight(1f),
                         call = call,
                         participant = fourthParticipant,
-                        onRender = onRender,
-                        isFocused = primarySpeaker?.sessionId == fourthParticipant.sessionId,
+                        style = style.copy(
+                            isFocused = dominantSpeaker?.sessionId == fourthParticipant.sessionId
+                        )
                     )
 
-                    CallSingleVideoRenderer(
+                    videoRenderer.invoke(
                         modifier = Modifier.weight(1f),
                         call = call,
                         participant = fifthParticipant,
-                        onRender = onRender,
-                        isFocused = primarySpeaker?.sessionId == fifthParticipant.sessionId,
+                        style = style.copy(
+                            isFocused = dominantSpeaker?.sessionId == fifthParticipant.sessionId
+                        )
                     )
                 }
             }
@@ -208,55 +236,61 @@ internal fun BoxScope.LandscapeVideoRenderer(
 
             Column(modifier) {
                 Row(modifier = Modifier.weight(1f)) {
-                    CallSingleVideoRenderer(
+                    videoRenderer.invoke(
                         modifier = Modifier.weight(1f),
                         call = call,
                         participant = firstParticipant,
-                        onRender = onRender,
-                        isFocused = primarySpeaker?.sessionId == firstParticipant.sessionId,
+                        style = style.copy(
+                            isFocused = dominantSpeaker?.sessionId == firstParticipant.sessionId
+                        )
                     )
 
-                    CallSingleVideoRenderer(
+                    videoRenderer.invoke(
                         modifier = Modifier.weight(1f),
                         call = call,
                         participant = secondParticipant,
-                        onRender = onRender,
-                        isFocused = primarySpeaker?.sessionId == secondParticipant.sessionId,
+                        style = style.copy(
+                            isFocused = dominantSpeaker?.sessionId == secondParticipant.sessionId
+                        )
                     )
 
-                    CallSingleVideoRenderer(
+                    videoRenderer.invoke(
                         modifier = Modifier.weight(1f),
                         call = call,
                         participant = thirdParticipant,
-                        onRender = onRender,
-                        isFocused = primarySpeaker?.sessionId == thirdParticipant.sessionId,
+                        style = style.copy(
+                            isFocused = dominantSpeaker?.sessionId == thirdParticipant.sessionId
+                        )
                     )
                 }
 
                 Row(modifier = Modifier.weight(1f)) {
 
-                    CallSingleVideoRenderer(
+                    videoRenderer.invoke(
                         modifier = Modifier.weight(1f),
                         call = call,
                         participant = fourthParticipant,
-                        onRender = onRender,
-                        isFocused = primarySpeaker?.sessionId == fourthParticipant.sessionId,
+                        style = style.copy(
+                            isFocused = dominantSpeaker?.sessionId == fourthParticipant.sessionId
+                        )
                     )
 
-                    CallSingleVideoRenderer(
+                    videoRenderer.invoke(
                         modifier = Modifier.weight(1f),
                         call = call,
                         participant = fifthParticipant,
-                        onRender = onRender,
-                        isFocused = primarySpeaker?.sessionId == fifthParticipant.sessionId,
+                        style = style.copy(
+                            isFocused = dominantSpeaker?.sessionId == fifthParticipant.sessionId
+                        )
                     )
 
-                    CallSingleVideoRenderer(
+                    videoRenderer.invoke(
                         modifier = Modifier.weight(1f),
                         call = call,
                         participant = sixthParticipant,
-                        onRender = onRender,
-                        isFocused = primarySpeaker?.sessionId == sixthParticipant.sessionId,
+                        style = style.copy(
+                            isFocused = dominantSpeaker?.sessionId == sixthParticipant.sessionId
+                        )
                     )
                 }
             }
@@ -302,11 +336,11 @@ private fun LandscapeParticipantsPreview1() {
         ) {
             LandscapeVideoRenderer(
                 call = mockCall,
-                primarySpeaker = participants[0],
+                dominantSpeaker = participants[0],
                 callParticipants = participants.take(1),
                 modifier = Modifier.fillMaxSize(),
                 parentSize = IntSize(screenWidth, screenHeight)
-            ) {}
+            )
         }
     }
 }
@@ -326,11 +360,11 @@ private fun LandscapeParticipantsPreview2() {
         ) {
             LandscapeVideoRenderer(
                 call = mockCall,
-                primarySpeaker = participants[0],
+                dominantSpeaker = participants[0],
                 callParticipants = participants.take(2),
                 modifier = Modifier.fillMaxSize(),
                 parentSize = IntSize(screenWidth, screenHeight)
-            ) {}
+            )
         }
     }
 }
@@ -350,11 +384,11 @@ private fun LandscapeParticipantsPreview3() {
         ) {
             LandscapeVideoRenderer(
                 call = mockCall,
-                primarySpeaker = participants[0],
+                dominantSpeaker = participants[0],
                 callParticipants = participants.take(3),
                 modifier = Modifier.fillMaxSize(),
                 parentSize = IntSize(screenWidth, screenHeight)
-            ) {}
+            )
         }
     }
 }
@@ -374,11 +408,11 @@ private fun LandscapeParticipantsPreview4() {
         ) {
             LandscapeVideoRenderer(
                 call = mockCall,
-                primarySpeaker = participants[0],
+                dominantSpeaker = participants[0],
                 callParticipants = participants.take(4),
                 modifier = Modifier.fillMaxSize(),
                 parentSize = IntSize(screenWidth, screenHeight)
-            ) {}
+            )
         }
     }
 }
@@ -398,11 +432,11 @@ private fun LandscapeParticipantsPreview5() {
         ) {
             LandscapeVideoRenderer(
                 call = mockCall,
-                primarySpeaker = participants[0],
+                dominantSpeaker = participants[0],
                 callParticipants = participants.take(5),
                 modifier = Modifier.fillMaxSize(),
                 parentSize = IntSize(screenWidth, screenHeight)
-            ) {}
+            )
         }
     }
 }
@@ -422,11 +456,11 @@ private fun LandscapeParticipantsPreview6() {
         ) {
             LandscapeVideoRenderer(
                 call = mockCall,
-                primarySpeaker = participants[0],
+                dominantSpeaker = participants[0],
                 callParticipants = participants.take(6),
                 modifier = Modifier.fillMaxSize(),
                 parentSize = IntSize(screenWidth, screenHeight)
-            ) {}
+            )
         }
     }
 }

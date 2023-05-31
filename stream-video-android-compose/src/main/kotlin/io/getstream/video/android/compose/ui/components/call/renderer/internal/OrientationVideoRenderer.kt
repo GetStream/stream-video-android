@@ -17,7 +17,6 @@
 package io.getstream.video.android.compose.ui.components.call.renderer.internal
 
 import android.content.res.Configuration.ORIENTATION_LANDSCAPE
-import android.view.View
 import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.derivedStateOf
@@ -27,24 +26,42 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.unit.IntSize
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import io.getstream.video.android.compose.ui.components.call.renderer.CallSingleVideoRenderer
+import io.getstream.video.android.compose.ui.components.call.renderer.RegularVideoRendererStyle
+import io.getstream.video.android.compose.ui.components.call.renderer.VideoRendererStyle
 import io.getstream.video.android.core.Call
+import io.getstream.video.android.core.ParticipantState
 
 /**
  * Renders call participants based on the number of people in a call.
  *
  * @param call The state of the call.
- * @param onRender Handler when the video content renders.
  * @param modifier Modifier for styling.
  * @param parentSize The size of the parent.
+ * @param style Represents a regular video call render styles.
+ * @param videoRenderer A single video renderer renders each individual participant.
  */
 @Composable
 internal fun BoxScope.OrientationVideoRenderer(
-    call: Call,
-    onRender: (View) -> Unit,
     modifier: Modifier = Modifier,
-    parentSize: IntSize = IntSize(0, 0)
+    call: Call,
+    parentSize: IntSize = IntSize(0, 0),
+    style: VideoRendererStyle = RegularVideoRendererStyle(),
+    videoRenderer: @Composable (
+        modifier: Modifier,
+        call: Call,
+        participant: ParticipantState,
+        style: VideoRendererStyle
+    ) -> Unit = { videoModifier, videoCall, videoParticipant, videoStyle ->
+        CallSingleVideoRenderer(
+            modifier = videoModifier,
+            call = videoCall,
+            participant = videoParticipant,
+            style = videoStyle
+        )
+    },
 ) {
-    val primarySpeaker by call.state.dominantSpeaker.collectAsStateWithLifecycle()
+    val dominantSpeaker by call.state.dominantSpeaker.collectAsStateWithLifecycle()
     val participants by call.state.participants.collectAsStateWithLifecycle()
     val sortedParticipants by call.state.sortedParticipants.collectAsStateWithLifecycle()
     val callParticipants by remember(participants) {
@@ -62,20 +79,22 @@ internal fun BoxScope.OrientationVideoRenderer(
     if (orientation == ORIENTATION_LANDSCAPE) {
         LandscapeVideoRenderer(
             call = call,
-            primarySpeaker = primarySpeaker,
+            dominantSpeaker = dominantSpeaker,
             callParticipants = callParticipants,
             modifier = modifier,
             parentSize = parentSize,
-            onRender = onRender
+            style = style,
+            videoRenderer = videoRenderer,
         )
     } else {
         PortraitVideoRenderer(
             call = call,
-            primarySpeaker = primarySpeaker,
+            dominantSpeaker = dominantSpeaker,
             callParticipants = callParticipants,
             modifier = modifier,
             parentSize = parentSize,
-            onRender = onRender
+            style = style,
+            videoRenderer = videoRenderer,
         )
     }
 }

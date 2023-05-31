@@ -69,10 +69,11 @@ import io.getstream.video.android.ui.common.R
  */
 @Composable
 public fun LocalVideoContent(
+    modifier: Modifier = Modifier,
     call: Call,
     localParticipant: ParticipantState,
     parentBounds: IntSize,
-    modifier: Modifier = Modifier
+    style: VideoRendererStyle = RegularVideoRendererStyle(isShowingConnectionQualityIndicator = false)
 ) {
     var videoSize by remember { mutableStateOf(IntSize(0, 0)) }
     var offsetX by remember { mutableStateOf(0f) }
@@ -160,7 +161,7 @@ public fun LocalVideoContent(
                     .clip(RoundedCornerShape(16.dp)),
                 call = call,
                 participant = localParticipant,
-                isShowingConnectionQualityIndicator = false
+                style = style
             )
         }
     }

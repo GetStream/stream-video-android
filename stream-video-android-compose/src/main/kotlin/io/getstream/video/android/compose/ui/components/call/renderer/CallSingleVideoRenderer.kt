@@ -47,6 +47,7 @@ import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -72,10 +73,7 @@ import stream.video.sfu.models.ConnectionQuality
  * @param call The call that contains all the participants state and tracks.
  * @param participant Participant to render.
  * @param modifier Modifier for styling.
- * @param labelPosition The position of the user audio state label.
- * @param isFocused If the participant is focused or not.
- * @param isScreenSharing Represents is screen sharing or not.
- * @param isShowingConnectionQualityIndicator Whether displays the connection quality indicator or not.
+ * @param style Represents a regular video call render styles.
  * @param labelContent Content is shown that displays participant's name and device states.
  * @param connectionIndicatorContent Content is shown that indicates the connection quality.
  * @param onRender Handler when the Video renders.
@@ -85,12 +83,9 @@ public fun CallSingleVideoRenderer(
     call: Call,
     participant: ParticipantState,
     modifier: Modifier = Modifier,
-    labelPosition: Alignment = BottomStart,
-    isFocused: Boolean = false,
-    isScreenSharing: Boolean = false,
-    isShowingConnectionQualityIndicator: Boolean = true,
+    style: VideoRendererStyle = RegularVideoRendererStyle(),
     labelContent: @Composable BoxScope.(ParticipantState) -> Unit = {
-        ParticipantLabel(participant, labelPosition)
+        ParticipantLabel(participant, style.labelPosition)
     },
     connectionIndicatorContent: @Composable BoxScope.(ConnectionQuality) -> Unit = {
         ConnectionQualityIndicator(
@@ -100,11 +95,12 @@ public fun CallSingleVideoRenderer(
     },
     onRender: (View) -> Unit = {}
 ) {
+    TextStyle
     val reactions by participant.reactions.collectAsStateWithLifecycle()
     val connectionQuality by participant.connectionQuality.collectAsStateWithLifecycle()
 
-    val containerModifier = if (isFocused) modifier.border(
-        border = if (isScreenSharing) {
+    val containerModifier = if (style.isFocused) modifier.border(
+        border = if (style.isScreenSharing) {
             BorderStroke(
                 VideoTheme.dimens.callParticipantScreenSharingFocusedBorderWidth,
                 VideoTheme.colors.callFocusedBorder
@@ -115,7 +111,7 @@ public fun CallSingleVideoRenderer(
                 VideoTheme.colors.callFocusedBorder
             )
         },
-        shape = if (isScreenSharing) {
+        shape = if (style.isScreenSharing) {
             RoundedCornerShape(VideoTheme.dimens.screenShareParticipantsRadius)
         } else {
             RectangleShape
@@ -124,16 +120,18 @@ public fun CallSingleVideoRenderer(
 
     Box(
         modifier = containerModifier.apply {
-            if (isScreenSharing) {
+            if (style.isScreenSharing) {
                 clip(RoundedCornerShape(VideoTheme.dimens.screenShareParticipantsRadius))
             }
         }
     ) {
         ParticipantVideoRenderer(call = call, participant = participant, onRender = onRender)
 
-        labelContent.invoke(this, participant)
+        if (style.isShowingParticipantLabel) {
+            labelContent.invoke(this, participant)
+        }
 
-        if (isShowingConnectionQualityIndicator) {
+        if (style.isShowingConnectionQualityIndicator) {
             connectionIndicatorContent.invoke(this, connectionQuality)
         }
     }
@@ -251,7 +249,6 @@ private fun CallParticipantPreview() {
         CallSingleVideoRenderer(
             call = mockCall,
             participant = mockParticipantList[1],
-            isFocused = true
         )
     }
 }
