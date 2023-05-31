@@ -51,7 +51,6 @@ import io.getstream.video.android.mock.mockParticipantList
  * @param primarySpeaker The primary speaker in the call.
  * @param callParticipants The list of participants in the call.
  * @param modifier Modifier for styling.
- * @param paddingValues The padding within the parent.
  * @param parentSize The size of the parent.
  * @param onRender Handler when the video content renders.
  */

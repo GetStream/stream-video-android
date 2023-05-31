@@ -23,7 +23,6 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
@@ -72,7 +71,6 @@ import io.getstream.video.android.ui.common.R
  * @param call The call that contains all the participants state and tracks.
  * @param participant Participant to render.
  * @param modifier Modifier for styling.
- * @param paddingValues Padding values should be applied to this modifier.
  * @param labelPosition The position of the user audio state label.
  * @param isFocused If the participant is focused or not.
  * @param isScreenSharing Represents is screen sharing or not.
@@ -84,7 +82,6 @@ public fun CallSingleVideoRenderer(
     call: Call,
     participant: ParticipantState,
     modifier: Modifier = Modifier,
-    paddingValues: PaddingValues = PaddingValues(0.dp),
     labelPosition: Alignment = BottomStart,
     isFocused: Boolean = false,
     isScreenSharing: Boolean = false,
