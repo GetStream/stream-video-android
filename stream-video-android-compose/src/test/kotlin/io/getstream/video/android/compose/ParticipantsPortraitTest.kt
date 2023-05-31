@@ -29,6 +29,7 @@ import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.call.renderer.CallSingleVideoRenderer
 import io.getstream.video.android.compose.ui.components.call.renderer.LocalVideoContent
 import io.getstream.video.android.compose.ui.components.call.renderer.ParticipantVideoRenderer
+import io.getstream.video.android.compose.ui.components.call.renderer.RegularVideoRendererStyle
 import io.getstream.video.android.compose.ui.components.call.renderer.internal.LazyColumnVideoRenderer
 import io.getstream.video.android.compose.ui.components.call.renderer.internal.PortraitScreenSharingVideoRenderer
 import io.getstream.video.android.compose.ui.components.call.renderer.internal.PortraitVideoRenderer
@@ -108,7 +109,7 @@ internal class ParticipantsPortraitTest : BaseComposeTest() {
             CallSingleVideoRenderer(
                 call = mockCall,
                 participant = mockParticipantList[0],
-                isFocused = true
+                style = RegularVideoRendererStyle(isFocused = true)
             )
         }
     }
@@ -119,7 +120,7 @@ internal class ParticipantsPortraitTest : BaseComposeTest() {
             CallSingleVideoRenderer(
                 call = mockCall,
                 participant = mockParticipantList[1],
-                isFocused = true
+                style = RegularVideoRendererStyle(isFocused = true)
             )
         }
     }
@@ -179,7 +180,7 @@ internal class ParticipantsPortraitTest : BaseComposeTest() {
                     callParticipants = participants.take(1),
                     modifier = Modifier.fillMaxSize(),
                     parentSize = IntSize(screenWidth, screenHeight)
-                ) {}
+                )
             }
         }
     }
@@ -201,7 +202,7 @@ internal class ParticipantsPortraitTest : BaseComposeTest() {
                     callParticipants = participants.take(2),
                     modifier = Modifier.fillMaxSize(),
                     parentSize = IntSize(screenWidth, screenHeight)
-                ) {}
+                )
             }
         }
     }
@@ -223,7 +224,7 @@ internal class ParticipantsPortraitTest : BaseComposeTest() {
                     callParticipants = participants.take(3),
                     modifier = Modifier.fillMaxSize(),
                     parentSize = IntSize(screenWidth, screenHeight)
-                ) {}
+                )
             }
         }
     }
@@ -245,7 +246,7 @@ internal class ParticipantsPortraitTest : BaseComposeTest() {
                     callParticipants = participants.take(4),
                     modifier = Modifier.fillMaxSize(),
                     parentSize = IntSize(screenWidth, screenHeight)
-                ) {}
+                )
             }
         }
     }
@@ -267,7 +268,7 @@ internal class ParticipantsPortraitTest : BaseComposeTest() {
                     callParticipants = participants.take(5),
                     modifier = Modifier.fillMaxSize(),
                     parentSize = IntSize(screenWidth, screenHeight)
-                ) {}
+                )
             }
         }
     }
@@ -289,7 +290,7 @@ internal class ParticipantsPortraitTest : BaseComposeTest() {
                     callParticipants = participants.take(6),
                     modifier = Modifier.fillMaxSize(),
                     parentSize = IntSize(screenWidth, screenHeight)
-                ) {}
+                )
             }
         }
     }
@@ -302,8 +303,7 @@ internal class ParticipantsPortraitTest : BaseComposeTest() {
                 session = ScreenSharingSession(participant = mockParticipantList[0]),
                 participants = mockParticipantList,
                 primarySpeaker = mockParticipantList[1],
-                modifier = Modifier.fillMaxSize(),
-                onRender = {}
+                modifier = Modifier.fillMaxSize()
             )
         }
     }
@@ -316,8 +316,7 @@ internal class ParticipantsPortraitTest : BaseComposeTest() {
                 session = ScreenSharingSession(participant = mockParticipantList[0]),
                 participants = mockParticipantList,
                 primarySpeaker = mockParticipantList[0],
-                modifier = Modifier.fillMaxSize(),
-                onRender = {},
+                modifier = Modifier.fillMaxSize()
             )
         }
     }
