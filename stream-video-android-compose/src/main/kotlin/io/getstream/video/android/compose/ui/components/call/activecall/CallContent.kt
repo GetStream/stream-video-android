@@ -46,7 +46,6 @@ import io.getstream.video.android.compose.ui.components.call.CallAppBar
 import io.getstream.video.android.compose.ui.components.call.controls.ControlActions
 import io.getstream.video.android.compose.ui.components.call.renderer.CallSingleVideoRenderer
 import io.getstream.video.android.compose.ui.components.call.renderer.CallVideoRenderer
-import io.getstream.video.android.compose.ui.components.call.renderer.internal.ScreenShareAspectRatio
 import io.getstream.video.android.compose.ui.components.video.VideoRenderer
 import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.call.state.CallAction
@@ -225,10 +224,11 @@ internal fun DefaultPictureInPictureContent(call: Call) {
     val screenSharingSession by call.state.screenSharingSession.collectAsStateWithLifecycle()
     val session = screenSharingSession
     val video = session?.participant?.video?.collectAsStateWithLifecycle()
+    val pictureInPictureAspectRatio: Float = 16f / 9f
 
     if (session != null) {
         VideoRenderer(
-            modifier = Modifier.aspectRatio(ScreenShareAspectRatio, false),
+            modifier = Modifier.aspectRatio(pictureInPictureAspectRatio, false),
             call = call,
             media = video?.value
         )

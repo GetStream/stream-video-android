@@ -82,9 +82,3 @@ public fun ScreenShareVideoRenderer(
         }
     }
 }
-
-/**
- * TODO - we should fetch this info from the BE or something as we can't guess all screen sharing
- * will be in 16:9, it can be 4:3, 1:1 or even ultra-wide aspect.
- */
-internal const val ScreenShareAspectRatio: Float = 16f / 9f
