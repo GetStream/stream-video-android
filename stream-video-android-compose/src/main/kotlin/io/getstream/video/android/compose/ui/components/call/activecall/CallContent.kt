@@ -64,6 +64,7 @@ import io.getstream.video.android.mock.mockCall
  * @param onBackPressed Handler when the user taps on the back button.
  * @param onCallAction Handler when the user triggers a Call Control Action.
  * @param callAppBarContent Content is shown that calls information or additional actions.
+ * @param callVideoContent Content is shown that renders all participants' videos.
  * @param callControlsContent Content is shown that allows users to trigger different actions to control a joined call.
  * @param pictureInPictureContent Content shown when the user enters Picture in Picture mode, if
  * it's been enabled in the app.
@@ -79,6 +80,14 @@ public fun CallContent(
             call = callViewModel.call,
             leadingContent = null,
             onCallAction = onCallAction
+        )
+    },
+    callVideoContent: @Composable RowScope.(call: Call) -> Unit = {
+        CallVideoRenderer(
+            call = callViewModel.call,
+            modifier = Modifier
+                .fillMaxSize()
+                .weight(1f),
         )
     },
     callControlsContent: @Composable (call: Call) -> Unit = {
@@ -111,6 +120,7 @@ public fun CallContent(
         isInPictureInPicture = isInPiPMode,
         onCallAction = onCallAction,
         callAppBarContent = callAppBarContent,
+        callVideoContent = callVideoContent,
         callControlsContent = callControlsContent,
         pictureInPictureContent = pictureInPictureContent
     )
