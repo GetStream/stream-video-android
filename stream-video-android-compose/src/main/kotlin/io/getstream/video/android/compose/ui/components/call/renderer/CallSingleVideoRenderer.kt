@@ -113,7 +113,7 @@ public fun CallSingleVideoRenderer(
     ) else modifier
 
     Box(
-        modifier = containerModifier.padding(paddingValues).apply {
+        modifier = containerModifier.apply {
             if (isScreenSharing) {
                 clip(RoundedCornerShape(VideoTheme.dimens.screenShareParticipantsRadius))
             }

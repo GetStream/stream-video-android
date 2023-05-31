@@ -21,7 +21,6 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.size
@@ -35,7 +34,6 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.IntSize
-import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.call.renderer.CallSingleVideoRenderer
@@ -63,7 +61,6 @@ internal fun BoxScope.PortraitVideoRenderer(
     primarySpeaker: ParticipantState?,
     callParticipants: List<ParticipantState>,
     modifier: Modifier,
-    paddingValues: PaddingValues,
     parentSize: IntSize,
     onRender: (View) -> Unit
 ) {
@@ -83,7 +80,6 @@ internal fun BoxScope.PortraitVideoRenderer(
                 participant = participant,
                 onRender = onRender,
                 isFocused = primarySpeaker?.sessionId == participant.sessionId,
-                paddingValues = paddingValues
             )
         }
 
@@ -96,7 +92,6 @@ internal fun BoxScope.PortraitVideoRenderer(
                 participant = participant,
                 onRender = onRender,
                 isFocused = primarySpeaker?.sessionId == participant.sessionId,
-                paddingValues = paddingValues
             )
         }
 
@@ -119,7 +114,6 @@ internal fun BoxScope.PortraitVideoRenderer(
                     participant = secondParticipant,
                     onRender = onRender,
                     isFocused = primarySpeaker?.sessionId == secondParticipant.sessionId,
-                    paddingValues = paddingValues
                 )
             }
         }
@@ -156,7 +150,6 @@ internal fun BoxScope.PortraitVideoRenderer(
                         participant = thirdParticipant,
                         onRender = onRender,
                         isFocused = primarySpeaker?.sessionId == thirdParticipant.sessionId,
-                        paddingValues = paddingValues
                     )
 
                     CallSingleVideoRenderer(
@@ -165,7 +158,6 @@ internal fun BoxScope.PortraitVideoRenderer(
                         participant = fourthParticipant,
                         onRender = onRender,
                         isFocused = primarySpeaker?.sessionId == fourthParticipant.sessionId,
-                        paddingValues = paddingValues
                     )
                 }
             }
@@ -204,7 +196,6 @@ internal fun BoxScope.PortraitVideoRenderer(
                         participant = thirdParticipant,
                         onRender = onRender,
                         isFocused = primarySpeaker?.sessionId == thirdParticipant.sessionId,
-                        paddingValues = paddingValues
                     )
 
                     CallSingleVideoRenderer(
@@ -213,7 +204,6 @@ internal fun BoxScope.PortraitVideoRenderer(
                         participant = fourthParticipant,
                         onRender = onRender,
                         isFocused = primarySpeaker?.sessionId == fourthParticipant.sessionId,
-                        paddingValues = paddingValues
                     )
 
                     CallSingleVideoRenderer(
@@ -222,7 +212,6 @@ internal fun BoxScope.PortraitVideoRenderer(
                         participant = fifthParticipant,
                         onRender = onRender,
                         isFocused = primarySpeaker?.sessionId == fifthParticipant.sessionId,
-                        paddingValues = paddingValues
                     )
                 }
             }
@@ -260,7 +249,6 @@ internal fun BoxScope.PortraitVideoRenderer(
                         participant = thirdParticipant,
                         onRender = onRender,
                         isFocused = primarySpeaker?.sessionId == thirdParticipant.sessionId,
-                        paddingValues = paddingValues
                     )
                 }
 
@@ -271,7 +259,6 @@ internal fun BoxScope.PortraitVideoRenderer(
                         participant = fourthParticipant,
                         onRender = onRender,
                         isFocused = primarySpeaker?.sessionId == fourthParticipant.sessionId,
-                        paddingValues = paddingValues
                     )
 
                     CallSingleVideoRenderer(
@@ -280,7 +267,6 @@ internal fun BoxScope.PortraitVideoRenderer(
                         participant = fifthParticipant,
                         onRender = onRender,
                         isFocused = primarySpeaker?.sessionId == fifthParticipant.sessionId,
-                        paddingValues = paddingValues
                     )
 
                     CallSingleVideoRenderer(
@@ -289,7 +275,6 @@ internal fun BoxScope.PortraitVideoRenderer(
                         participant = sixthParticipant,
                         onRender = onRender,
                         isFocused = primarySpeaker?.sessionId == sixthParticipant.sessionId,
-                        paddingValues = paddingValues
                     )
                 }
             }
@@ -315,7 +300,6 @@ internal fun BoxScope.PortraitVideoRenderer(
                     )
                     .clip(VideoTheme.shapes.floatingParticipant)
                     .align(Alignment.TopEnd),
-                paddingValues = paddingValues
             )
         }
     }
@@ -339,7 +323,6 @@ private fun PortraitParticipantsPreview1() {
                 primarySpeaker = participants[0],
                 callParticipants = participants.take(1),
                 modifier = Modifier.fillMaxSize(),
-                paddingValues = PaddingValues(0.dp),
                 parentSize = IntSize(screenWidth, screenHeight)
             ) {}
         }
@@ -364,7 +347,6 @@ private fun PortraitParticipantsPreview2() {
                 primarySpeaker = mockParticipantList[0],
                 callParticipants = participants.take(2),
                 modifier = Modifier.fillMaxSize(),
-                paddingValues = PaddingValues(0.dp),
                 parentSize = IntSize(screenWidth, screenHeight)
             ) {}
         }
@@ -389,7 +371,6 @@ private fun PortraitParticipantsPreview3() {
                 primarySpeaker = participants[0],
                 callParticipants = participants.take(3),
                 modifier = Modifier.fillMaxSize(),
-                paddingValues = PaddingValues(0.dp),
                 parentSize = IntSize(screenWidth, screenHeight)
             ) {}
         }
@@ -414,7 +395,6 @@ private fun PortraitParticipantsPreview4() {
                 primarySpeaker = participants[0],
                 callParticipants = participants.take(4),
                 modifier = Modifier.fillMaxSize(),
-                paddingValues = PaddingValues(0.dp),
                 parentSize = IntSize(screenWidth, screenHeight)
             ) {}
         }
@@ -439,7 +419,6 @@ private fun PortraitParticipantsPreview5() {
                 primarySpeaker = participants[0],
                 callParticipants = participants.take(5),
                 modifier = Modifier.fillMaxSize(),
-                paddingValues = PaddingValues(0.dp),
                 parentSize = IntSize(screenWidth, screenHeight)
             ) {}
         }
@@ -464,7 +443,6 @@ private fun PortraitParticipantsPreview6() {
                 primarySpeaker = participants[0],
                 callParticipants = participants.take(6),
                 modifier = Modifier.fillMaxSize(),
-                paddingValues = PaddingValues(0.dp),
                 parentSize = IntSize(screenWidth, screenHeight)
             ) {}
         }

@@ -74,7 +74,6 @@ public fun LocalVideoContent(
     call: Call,
     localParticipant: ParticipantState,
     parentBounds: IntSize,
-    paddingValues: PaddingValues,
     modifier: Modifier = Modifier
 ) {
     var videoSize by remember { mutableStateOf(IntSize(0, 0)) }
@@ -113,6 +112,7 @@ public fun LocalVideoContent(
         return
     }
 
+    val paddings = VideoTheme.dimens.floatingVideoPadding
     if (track != null) {
         Card(
             elevation = 8.dp,
@@ -126,7 +126,7 @@ public fun LocalVideoContent(
                             .coerceAtLeast(
                                 -calculateHorizontalOffsetBounds(
                                     parentBounds = parentBounds,
-                                    paddingValues = paddingValues,
+                                    paddingValues = PaddingValues(paddings),
                                     floatingVideoSize = videoSize,
                                     density = density,
                                     offset = paddingOffset * 2
@@ -141,7 +141,7 @@ public fun LocalVideoContent(
                             .coerceAtMost(
                                 calculateVerticalOffsetBounds(
                                     parentBounds = parentBounds,
-                                    paddingValues = paddingValues,
+                                    paddingValues = PaddingValues(paddings),
                                     floatingVideoSize = videoSize,
                                     density = density,
                                     offset = paddingOffset * 2
@@ -208,7 +208,6 @@ private fun LocalVideoContentPreview() {
             modifier = Modifier.fillMaxSize(),
             localParticipant = mockParticipant,
             parentBounds = IntSize(screenWidth, screenHeight),
-            paddingValues = PaddingValues(0.dp)
         )
     }
 }
