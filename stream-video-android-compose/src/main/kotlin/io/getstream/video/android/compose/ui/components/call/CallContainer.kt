@@ -108,7 +108,7 @@ public fun CallContainer(
             callViewModel = callViewModel,
             onBackPressed = onBackPressed,
             onCallAction = onCallAction,
-            onAcceptedCallContent = { callContent.invoke(it) },
+            onAcceptedContent = { callContent.invoke(it) },
             onRejectedContent = {}
         )
     },

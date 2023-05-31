@@ -53,8 +53,9 @@ import io.getstream.video.android.mock.mockCall
  * @param callControlsContent Content shown for controlling call, such as accepting a call or declining a call.
  * @param onBackPressed Handler when the user taps on the back button.
  * @param onCallAction Handler used when the user interacts with Call UI.
- * @param onAcceptedCallContent A call content is shown when the call state is Accept.
- * @param onRejectedContent A call content is shown when the call is rejected.
+ * @param onAcceptedContent Content is shown when the call is accepted.
+ * @param onRejectedContent Content is shown when the call is rejected.
+ * @param onNoAnswerContent Content is shown when a receiver did not answer on time.
  */
 @Composable
 public fun RingingCallContent(
@@ -71,8 +72,9 @@ public fun RingingCallContent(
     callControlsContent: (@Composable BoxScope.() -> Unit)? = null,
     onBackPressed: () -> Unit = {},
     onCallAction: (CallAction) -> Unit = callViewModel::onCallAction,
-    onAcceptedCallContent: @Composable () -> Unit,
-    onRejectedContent: @Composable () -> Unit,
+    onAcceptedContent: @Composable () -> Unit,
+    onRejectedContent: @Composable () -> Unit = {},
+    onNoAnswerContent: @Composable () -> Unit = {},
 ) {
     val callDeviceState: CallDeviceState by callViewModel.callDeviceState.collectAsStateWithLifecycle()
 
@@ -87,8 +89,9 @@ public fun RingingCallContent(
         callControlsContent = callControlsContent,
         onBackPressed = onBackPressed,
         onCallAction = onCallAction,
-        onAcceptedContent = onAcceptedCallContent,
-        onRejectedContent = onRejectedContent
+        onAcceptedContent = onAcceptedContent,
+        onRejectedContent = onRejectedContent,
+        onNoAnswerContent = onNoAnswerContent
     )
 }
 
@@ -107,8 +110,9 @@ public fun RingingCallContent(
  * @param callControlsContent Content shown for controlling call, such as accepting a call or declining a call.
  * @param onBackPressed Handler when the user taps on the back button.
  * @param onCallAction Handler used when the user interacts with Call UI.
- * @param onAcceptedContent A call content is shown when the call is Accept.
- * @param onRejectedContent A call content is shown when the call is rejected.
+ * @param onAcceptedContent Content is shown when the call is accepted.
+ * @param onRejectedContent Content is shown when the call is rejected.
+ * @param onNoAnswerContent Content is shown when a receiver did not answer on time.
  */
 @Composable
 public fun RingingCallContent(
@@ -127,7 +131,8 @@ public fun RingingCallContent(
     onBackPressed: () -> Unit = {},
     onCallAction: (CallAction) -> Unit = {},
     onAcceptedContent: @Composable () -> Unit,
-    onRejectedContent: @Composable () -> Unit,
+    onRejectedContent: @Composable () -> Unit = {},
+    onNoAnswerContent: @Composable () -> Unit = {},
 ) {
     val ringingStateHolder = call.state.ringingState.collectAsState(initial = RingingState.Idle)
     val ringingState = ringingStateHolder.value
@@ -158,8 +163,11 @@ public fun RingingCallContent(
             onBackPressed = onBackPressed,
             onCallAction = onCallAction
         )
+    } else if (ringingState is RingingState.RejectedByAll) {
+        onRejectedContent.invoke()
+    } else if (ringingState is RingingState.TimeoutNoAnswer) {
+        onNoAnswerContent.invoke()
     } else {
-        // TODO: rejected + fallback
         onAcceptedContent.invoke()
     }
 }
