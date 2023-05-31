@@ -16,7 +16,6 @@
 
 package io.getstream.video.android.compose.ui.components.call.renderer
 
-import android.view.View
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -28,6 +27,7 @@ import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.call.renderer.internal.RegularCallVideoRenderer
 import io.getstream.video.android.compose.ui.components.call.renderer.internal.ScreenSharingCallVideoRenderer
 import io.getstream.video.android.core.Call
+import io.getstream.video.android.core.ParticipantState
 import io.getstream.video.android.mock.StreamMockUtils
 import io.getstream.video.android.mock.mockCall
 
@@ -38,19 +38,32 @@ import io.getstream.video.android.mock.mockCall
  *
  * @param call The call that contains all the participants state and tracks.
  * @param modifier Modifier for styling.
- * @param onRender Handler when each of the Video views render their first frame.
+ * @param style Represents a regular video call render styles.
+ * @param videoRenderer A single video renderer renders each individual participant.
  */
 @Composable
 public fun CallVideoRenderer(
     call: Call,
     modifier: Modifier = Modifier,
-    onRender: (View) -> Unit = {},
+    style: VideoRendererStyle = RegularVideoRendererStyle(),
+    videoRenderer: @Composable (
+        modifier: Modifier,
+        call: Call,
+        participant: ParticipantState,
+        style: VideoRendererStyle
+    ) -> Unit = { videoModifier, videoCall, videoParticipant, videoStyle ->
+        CallSingleVideoRenderer(
+            modifier = videoModifier,
+            call = videoCall,
+            participant = videoParticipant,
+            style = videoStyle
+        )
+    },
 ) {
     if (LocalInspectionMode.current) {
         RegularCallVideoRenderer(
             call = call,
             modifier = modifier,
-            onRender = onRender,
         )
         return
     }
@@ -62,14 +75,20 @@ public fun CallVideoRenderer(
         RegularCallVideoRenderer(
             call = call,
             modifier = modifier,
-            onRender = onRender,
+            style = style,
+            videoRenderer = videoRenderer
         )
     } else {
         ScreenSharingCallVideoRenderer(
             call = call,
             modifier = modifier,
             session = screenSharing,
-            onRender = onRender,
+            style = ScreenSharingVideoRendererStyle().copy(
+                isFocused = style.isFocused,
+                isShowingReactions = style.isShowingReactions,
+                labelPosition = style.labelPosition
+            ),
+            videoRenderer = videoRenderer
         )
     }
 }

@@ -16,7 +16,6 @@
 
 package io.getstream.video.android.compose.ui.components.call.renderer.internal
 
-import android.view.View
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
@@ -39,7 +38,6 @@ import me.saket.telephoto.zoomable.zoomable
  * @param call The call state.
  * @param session The screen sharing session to show.
  * @param modifier Modifier for styling.
- * @param onRender Handler when the video content renders.
  */
 @Composable
 public fun ScreenShareVideoRenderer(
@@ -49,7 +47,6 @@ public fun ScreenShareVideoRenderer(
     labelPosition: Alignment = Alignment.BottomStart,
     isShowConnectionQualityIndicator: Boolean = true,
     isZoomable: Boolean = true,
-    onRender: (View) -> Unit = {}
 ) {
     val screenShareParticipant = session.participant
     val screenSharing by screenShareParticipant.screenSharing.collectAsStateWithLifecycle()
@@ -67,7 +64,6 @@ public fun ScreenShareVideoRenderer(
                 .align(Alignment.Center),
             call = call,
             media = screenSharing,
-            onRender = onRender,
             videoScalingType = VideoScalingType.SCALE_ASPECT_FIT,
         )
 
@@ -82,9 +78,3 @@ public fun ScreenShareVideoRenderer(
         }
     }
 }
-
-/**
- * TODO - we should fetch this info from the BE or something as we can't guess all screen sharing
- * will be in 16:9, it can be 4:3, 1:1 or even ultra-wide aspect.
- */
-internal const val ScreenShareAspectRatio: Float = 16f / 9f

@@ -65,17 +65,15 @@ import io.getstream.video.android.ui.common.R
  * @param localParticipant The participant to render.
  * @param parentBounds Bounds of the parent, used to constrain the component to the parent bounds,
  * when dragging the floating UI around the screen.
- * @param paddingValues The padding to be added to the component. Useful when the parent defines
- * its bounds normally, but expects padding to be applied, similar to what a Scaffold does.
  * @param modifier Modifier for styling.
  */
 @Composable
 public fun LocalVideoContent(
+    modifier: Modifier = Modifier,
     call: Call,
     localParticipant: ParticipantState,
     parentBounds: IntSize,
-    paddingValues: PaddingValues,
-    modifier: Modifier = Modifier
+    style: VideoRendererStyle = RegularVideoRendererStyle(isShowingConnectionQualityIndicator = false)
 ) {
     var videoSize by remember { mutableStateOf(IntSize(0, 0)) }
     var offsetX by remember { mutableStateOf(0f) }
@@ -104,7 +102,7 @@ public fun LocalVideoContent(
             Image(
                 modifier = modifier
                     .fillMaxSize()
-                    .testTag("video_renderer"),
+                    .testTag("local_video_renderer"),
                 painter = painterResource(id = R.drawable.stream_video_call_sample),
                 contentScale = ContentScale.Crop,
                 contentDescription = null
@@ -126,7 +124,7 @@ public fun LocalVideoContent(
                             .coerceAtLeast(
                                 -calculateHorizontalOffsetBounds(
                                     parentBounds = parentBounds,
-                                    paddingValues = paddingValues,
+                                    paddingValues = PaddingValues(0.dp),
                                     floatingVideoSize = videoSize,
                                     density = density,
                                     offset = paddingOffset * 2
@@ -141,7 +139,7 @@ public fun LocalVideoContent(
                             .coerceAtMost(
                                 calculateVerticalOffsetBounds(
                                     parentBounds = parentBounds,
-                                    paddingValues = paddingValues,
+                                    paddingValues = PaddingValues(0.dp),
                                     floatingVideoSize = videoSize,
                                     density = density,
                                     offset = paddingOffset * 2
@@ -163,7 +161,7 @@ public fun LocalVideoContent(
                     .clip(RoundedCornerShape(16.dp)),
                 call = call,
                 participant = localParticipant,
-                isShowingConnectionQualityIndicator = false
+                style = style
             )
         }
     }
@@ -208,7 +206,6 @@ private fun LocalVideoContentPreview() {
             modifier = Modifier.fillMaxSize(),
             localParticipant = mockParticipant,
             parentBounds = IntSize(screenWidth, screenHeight),
-            paddingValues = PaddingValues(0.dp)
         )
     }
 }

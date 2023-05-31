@@ -17,7 +17,6 @@
 package io.getstream.video.android.compose.ui.components.call.renderer.internal
 
 import android.content.res.Configuration
-import android.view.View
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
@@ -34,6 +33,9 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.getstream.video.android.compose.theme.VideoTheme
+import io.getstream.video.android.compose.ui.components.call.renderer.CallSingleVideoRenderer
+import io.getstream.video.android.compose.ui.components.call.renderer.ScreenSharingVideoRendererStyle
+import io.getstream.video.android.compose.ui.components.call.renderer.VideoRendererStyle
 import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.ParticipantState
 import io.getstream.video.android.core.model.ScreenSharingSession
@@ -48,17 +50,31 @@ import io.getstream.video.android.mock.mockParticipantList
  * @param session Screen sharing session to render.
  * @param participants List of participants to render under the screen share track.
  * @param modifier Modifier for styling.
- * @param onRender Handler when the video renders.
+ * @param style Represents a regular video call render styles.
+ * @param videoRenderer A single video renderer renders each individual participant.
  */
 @Composable
 internal fun LandscapeScreenSharingVideoRenderer(
+    modifier: Modifier = Modifier,
     call: Call,
     session: ScreenSharingSession,
     participants: List<ParticipantState>,
-    primarySpeaker: ParticipantState?,
-    modifier: Modifier = Modifier,
+    dominantSpeaker: ParticipantState?,
     isZoomable: Boolean = true,
-    onRender: (View) -> Unit,
+    style: VideoRendererStyle = ScreenSharingVideoRendererStyle(),
+    videoRenderer: @Composable (
+        modifier: Modifier,
+        call: Call,
+        participant: ParticipantState,
+        style: VideoRendererStyle
+    ) -> Unit = { videoModifier, videoCall, videoParticipant, videoStyle ->
+        CallSingleVideoRenderer(
+            modifier = videoModifier,
+            call = videoCall,
+            participant = videoParticipant,
+            style = videoStyle
+        )
+    },
 ) {
     val sharingParticipant = session.participant
     val me by call.state.me.collectAsStateWithLifecycle()
@@ -78,7 +94,6 @@ internal fun LandscapeScreenSharingVideoRenderer(
                 call = call,
                 session = session,
                 isZoomable = isZoomable,
-                onRender = onRender,
             )
 
             if (me?.initialUser?.id != sharingParticipant.initialUser.id) {
@@ -95,7 +110,9 @@ internal fun LandscapeScreenSharingVideoRenderer(
                 .fillMaxHeight(),
             call = call,
             participants = participants,
-            primarySpeaker = primarySpeaker
+            dominantSpeaker = dominantSpeaker,
+            style = style,
+            videoRenderer = videoRenderer
         )
     }
 }
@@ -119,9 +136,8 @@ private fun LandscapeScreenSharingContentPreview() {
                 participant = mockParticipantList[1]
             ),
             participants = mockParticipantList,
-            primarySpeaker = mockParticipantList[1],
+            dominantSpeaker = mockParticipantList[1],
             modifier = Modifier.fillMaxSize(),
-            onRender = {},
         )
     }
 }
@@ -145,9 +161,8 @@ private fun LandscapeScreenSharingMyContentPreview() {
                 participant = mockParticipantList[0]
             ),
             participants = mockParticipantList,
-            primarySpeaker = mockParticipantList[0],
+            dominantSpeaker = mockParticipantList[0],
             modifier = Modifier.fillMaxSize(),
-            onRender = {},
         )
     }
 }

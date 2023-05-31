@@ -14,13 +14,8 @@
 
 ### Essentials pre BETA launch
 
-- Android volume is too low when calling from react
-- Join is called in the preview screen, this is wrong
-- Memory leak on Coil
 - Open deeplinks from video call demo
 - Testing: run the test app often (Thierry, Caleb & Jared)
-- Android: Docs (Jaewoong)
-- Frontend: a way to host the docs (Lennart)
 - SFU: deploy process (Marcelo & Suchit)
 - SFU: reconnect flow (Marcelo & Suchit)
 - SFU: duplicate participant bug (related to the above)
@@ -40,11 +35,13 @@
 
 ### TODO
 
+- [ ] Use the right date time class everywhere
 - [ ] Video disconnects sometimes. (BufferQueue has not connected producer)
+- [ ] Android volume is too low when calling from react
+- [ ] Join is called in the preview screen, this is wrong
 - [ ] HTTP requests fail in interceptor, which is wrong. (see https://console.firebase.google.com/project/stream-video-9b586/crashlytics/app/android:io.getstream.video.android.dogfooding.debug/issues?state=open&time=last-seven-days&tag=all&sort=eventCount)
 - [ ] Go through all tests & TODOs and update with latest server changes.
 - [ ] Fine tune the quality on S23 (so it's not at Q). Upload quality, make it easy to change
-- [ ] Use the right date time class everywhere
 - [ ] Add a timeout for waiting on the socket authentication events
 - [ ] permission handling on the intro/preview screen is wrong. it starts out as video enabled
 - [ ] Test the dogfooding app and iterate on things that don't work yet

@@ -103,10 +103,10 @@ public fun IncomingCallContent(
  */
 @Composable
 public fun IncomingCallContent(
+    modifier: Modifier = Modifier,
     call: Call,
     isVideoType: Boolean = true,
     callDeviceState: CallDeviceState,
-    modifier: Modifier = Modifier,
     isShowingHeader: Boolean = true,
     callHeaderContent: (@Composable ColumnScope.() -> Unit)? = null,
     callDetailsContent: (
@@ -150,11 +150,11 @@ public fun IncomingCallContent(
  */
 @Composable
 public fun IncomingCallContent(
+    modifier: Modifier = Modifier,
     call: Call,
     isVideoType: Boolean = true,
     participants: List<ParticipantState>,
     isCameraEnabled: Boolean,
-    modifier: Modifier = Modifier,
     isShowingHeader: Boolean = true,
     callHeaderContent: (@Composable ColumnScope.() -> Unit)? = null,
     callDetailsContent: (

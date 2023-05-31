@@ -18,12 +18,10 @@ package io.getstream.video.android.compose
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.unit.IntSize
-import androidx.compose.ui.unit.dp
 import app.cash.paparazzi.DeviceConfig
 import app.cash.paparazzi.Paparazzi
 import io.getstream.video.android.compose.base.BaseComposeTest
@@ -31,6 +29,7 @@ import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.call.renderer.CallSingleVideoRenderer
 import io.getstream.video.android.compose.ui.components.call.renderer.LocalVideoContent
 import io.getstream.video.android.compose.ui.components.call.renderer.ParticipantVideoRenderer
+import io.getstream.video.android.compose.ui.components.call.renderer.RegularVideoRendererStyle
 import io.getstream.video.android.compose.ui.components.call.renderer.internal.LazyColumnVideoRenderer
 import io.getstream.video.android.compose.ui.components.call.renderer.internal.PortraitScreenSharingVideoRenderer
 import io.getstream.video.android.compose.ui.components.call.renderer.internal.PortraitVideoRenderer
@@ -110,7 +109,7 @@ internal class ParticipantsPortraitTest : BaseComposeTest() {
             CallSingleVideoRenderer(
                 call = mockCall,
                 participant = mockParticipantList[0],
-                isFocused = true
+                style = RegularVideoRendererStyle(isFocused = true)
             )
         }
     }
@@ -121,7 +120,7 @@ internal class ParticipantsPortraitTest : BaseComposeTest() {
             CallSingleVideoRenderer(
                 call = mockCall,
                 participant = mockParticipantList[1],
-                isFocused = true
+                style = RegularVideoRendererStyle(isFocused = true)
             )
         }
     }
@@ -147,7 +146,6 @@ internal class ParticipantsPortraitTest : BaseComposeTest() {
                 modifier = Modifier.fillMaxSize(),
                 localParticipant = mockParticipant,
                 parentBounds = IntSize(screenWidth, screenHeight),
-                paddingValues = PaddingValues(0.dp)
             )
         }
     }
@@ -178,12 +176,11 @@ internal class ParticipantsPortraitTest : BaseComposeTest() {
             ) {
                 PortraitVideoRenderer(
                     call = mockCall,
-                    primarySpeaker = participants[0],
+                    dominantSpeaker = participants[0],
                     callParticipants = participants.take(1),
                     modifier = Modifier.fillMaxSize(),
-                    paddingValues = PaddingValues(0.dp),
                     parentSize = IntSize(screenWidth, screenHeight)
-                ) {}
+                )
             }
         }
     }
@@ -201,12 +198,11 @@ internal class ParticipantsPortraitTest : BaseComposeTest() {
             ) {
                 PortraitVideoRenderer(
                     call = mockCall,
-                    primarySpeaker = participants[0],
+                    dominantSpeaker = participants[0],
                     callParticipants = participants.take(2),
                     modifier = Modifier.fillMaxSize(),
-                    paddingValues = PaddingValues(0.dp),
                     parentSize = IntSize(screenWidth, screenHeight)
-                ) {}
+                )
             }
         }
     }
@@ -224,12 +220,11 @@ internal class ParticipantsPortraitTest : BaseComposeTest() {
             ) {
                 PortraitVideoRenderer(
                     call = mockCall,
-                    primarySpeaker = participants[0],
+                    dominantSpeaker = participants[0],
                     callParticipants = participants.take(3),
                     modifier = Modifier.fillMaxSize(),
-                    paddingValues = PaddingValues(0.dp),
                     parentSize = IntSize(screenWidth, screenHeight)
-                ) {}
+                )
             }
         }
     }
@@ -247,12 +242,11 @@ internal class ParticipantsPortraitTest : BaseComposeTest() {
             ) {
                 PortraitVideoRenderer(
                     call = mockCall,
-                    primarySpeaker = participants[0],
+                    dominantSpeaker = participants[0],
                     callParticipants = participants.take(4),
                     modifier = Modifier.fillMaxSize(),
-                    paddingValues = PaddingValues(0.dp),
                     parentSize = IntSize(screenWidth, screenHeight)
-                ) {}
+                )
             }
         }
     }
@@ -270,12 +264,11 @@ internal class ParticipantsPortraitTest : BaseComposeTest() {
             ) {
                 PortraitVideoRenderer(
                     call = mockCall,
-                    primarySpeaker = participants[0],
+                    dominantSpeaker = participants[0],
                     callParticipants = participants.take(5),
                     modifier = Modifier.fillMaxSize(),
-                    paddingValues = PaddingValues(0.dp),
                     parentSize = IntSize(screenWidth, screenHeight)
-                ) {}
+                )
             }
         }
     }
@@ -293,12 +286,11 @@ internal class ParticipantsPortraitTest : BaseComposeTest() {
             ) {
                 PortraitVideoRenderer(
                     call = mockCall,
-                    primarySpeaker = participants[0],
+                    dominantSpeaker = participants[0],
                     callParticipants = participants.take(6),
                     modifier = Modifier.fillMaxSize(),
-                    paddingValues = PaddingValues(0.dp),
                     parentSize = IntSize(screenWidth, screenHeight)
-                ) {}
+                )
             }
         }
     }
@@ -310,9 +302,8 @@ internal class ParticipantsPortraitTest : BaseComposeTest() {
                 call = mockCall,
                 session = ScreenSharingSession(participant = mockParticipantList[0]),
                 participants = mockParticipantList,
-                primarySpeaker = mockParticipantList[1],
-                modifier = Modifier.fillMaxSize(),
-                onRender = {}
+                dominantSpeaker = mockParticipantList[1],
+                modifier = Modifier.fillMaxSize()
             )
         }
     }
@@ -324,9 +315,8 @@ internal class ParticipantsPortraitTest : BaseComposeTest() {
                 call = mockCall,
                 session = ScreenSharingSession(participant = mockParticipantList[0]),
                 participants = mockParticipantList,
-                primarySpeaker = mockParticipantList[0],
-                modifier = Modifier.fillMaxSize(),
-                onRender = {},
+                dominantSpeaker = mockParticipantList[0],
+                modifier = Modifier.fillMaxSize()
             )
         }
     }
@@ -337,7 +327,7 @@ internal class ParticipantsPortraitTest : BaseComposeTest() {
             LazyColumnVideoRenderer(
                 call = mockCall,
                 participants = mockParticipantList,
-                primarySpeaker = mockParticipant,
+                dominantSpeaker = mockParticipant,
             )
         }
     }

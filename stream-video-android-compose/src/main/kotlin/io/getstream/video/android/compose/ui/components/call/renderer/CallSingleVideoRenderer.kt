@@ -16,14 +16,12 @@
 
 package io.getstream.video.android.compose.ui.components.call.renderer
 
-import android.view.View
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
@@ -48,6 +46,7 @@ import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -64,6 +63,7 @@ import io.getstream.video.android.mock.StreamMockUtils
 import io.getstream.video.android.mock.mockCall
 import io.getstream.video.android.mock.mockParticipantList
 import io.getstream.video.android.ui.common.R
+import stream.video.sfu.models.ConnectionQuality
 
 /**
  * Renders a single participant with a given call, which contains all the call states.
@@ -72,29 +72,37 @@ import io.getstream.video.android.ui.common.R
  * @param call The call that contains all the participants state and tracks.
  * @param participant Participant to render.
  * @param modifier Modifier for styling.
- * @param paddingValues Padding values should be applied to this modifier.
- * @param labelPosition The position of the user audio state label.
- * @param isFocused If the participant is focused or not.
- * @param isScreenSharing Represents is screen sharing or not.
- * @param isShowingConnectionQualityIndicator Whether displays the connection quality indicator or not.
- * @param onRender Handler when the Video renders.
+ * @param style Represents a regular video call render styles.
+ * @param labelContent Content is shown that displays participant's name and device states.
+ * @param connectionIndicatorContent Content is shown that indicates the connection quality.
+ * @param onRenderFailedContent Content is shown the video track is failed to load or not available.
  */
 @Composable
 public fun CallSingleVideoRenderer(
     call: Call,
     participant: ParticipantState,
     modifier: Modifier = Modifier,
-    paddingValues: PaddingValues = PaddingValues(0.dp),
-    labelPosition: Alignment = BottomStart,
-    isFocused: Boolean = false,
-    isScreenSharing: Boolean = false,
-    isShowingConnectionQualityIndicator: Boolean = true,
-    onRender: (View) -> Unit = {}
+    style: VideoRendererStyle = RegularVideoRendererStyle(),
+    labelContent: @Composable BoxScope.(ParticipantState) -> Unit = {
+        ParticipantLabel(participant, style.labelPosition)
+    },
+    connectionIndicatorContent: @Composable BoxScope.(ConnectionQuality) -> Unit = {
+        ConnectionQualityIndicator(
+            connectionQuality = it,
+            modifier = Modifier.align(BottomEnd)
+        )
+    },
+    onRenderFailedContent: @Composable (Call) -> Unit = {
+        val user by participant.user.collectAsStateWithLifecycle()
+        UserAvatarBackground(user = user)
+    },
 ) {
+    TextStyle
     val reactions by participant.reactions.collectAsStateWithLifecycle()
+    val connectionQuality by participant.connectionQuality.collectAsStateWithLifecycle()
 
-    val containerModifier = if (isFocused) modifier.border(
-        border = if (isScreenSharing) {
+    val containerModifier = if (style.isFocused) modifier.border(
+        border = if (style.isScreenSharing) {
             BorderStroke(
                 VideoTheme.dimens.callParticipantScreenSharingFocusedBorderWidth,
                 VideoTheme.colors.callFocusedBorder
@@ -105,7 +113,7 @@ public fun CallSingleVideoRenderer(
                 VideoTheme.colors.callFocusedBorder
             )
         },
-        shape = if (isScreenSharing) {
+        shape = if (style.isScreenSharing) {
             RoundedCornerShape(VideoTheme.dimens.screenShareParticipantsRadius)
         } else {
             RectangleShape
@@ -113,22 +121,24 @@ public fun CallSingleVideoRenderer(
     ) else modifier
 
     Box(
-        modifier = containerModifier.padding(paddingValues).apply {
-            if (isScreenSharing) {
+        modifier = containerModifier.apply {
+            if (style.isScreenSharing) {
                 clip(RoundedCornerShape(VideoTheme.dimens.screenShareParticipantsRadius))
             }
         }
     ) {
-        ParticipantVideoRenderer(call = call, participant = participant, onRender = onRender)
+        ParticipantVideoRenderer(
+            call = call,
+            participant = participant,
+            onRenderFailedContent = onRenderFailedContent
+        )
 
-        ParticipantLabel(participant, labelPosition)
+        if (style.isShowingParticipantLabel) {
+            labelContent.invoke(this, participant)
+        }
 
-        if (isShowingConnectionQualityIndicator) {
-            val connectionQuality by participant.connectionQuality.collectAsStateWithLifecycle()
-            ConnectionQualityIndicator(
-                connectionQuality = connectionQuality,
-                modifier = Modifier.align(BottomEnd)
-            )
+        if (style.isShowingConnectionQualityIndicator) {
+            connectionIndicatorContent.invoke(this, connectionQuality)
         }
     }
 }
@@ -139,13 +149,16 @@ public fun CallSingleVideoRenderer(
  *
  * @param call The call that contains all the participants state and tracks.
  * @param participant Participant to render.
- * @param onRender Handler when the Video renders.
+ * @param onRenderFailedContent Content is shown the video track is failed to load or not available.
  */
 @Composable
 public fun ParticipantVideoRenderer(
     call: Call,
     participant: ParticipantState,
-    onRender: (View) -> Unit = {}
+    onRenderFailedContent: @Composable (Call) -> Unit = {
+        val user by participant.user.collectAsStateWithLifecycle()
+        UserAvatarBackground(user = user)
+    },
 ) {
     if (LocalInspectionMode.current) {
         Image(
@@ -160,13 +173,11 @@ public fun ParticipantVideoRenderer(
     }
 
     val video by participant.video.collectAsStateWithLifecycle()
-    val user by participant.user.collectAsStateWithLifecycle()
 
     VideoRenderer(
         call = call,
         media = video,
-        onRender = onRender,
-        onRenderFailedContent = { UserAvatarBackground(user = user) }
+        onRenderFailedContent = onRenderFailedContent
     )
 }
 
@@ -245,7 +256,6 @@ private fun CallParticipantPreview() {
         CallSingleVideoRenderer(
             call = mockCall,
             participant = mockParticipantList[1],
-            isFocused = true
         )
     }
 }

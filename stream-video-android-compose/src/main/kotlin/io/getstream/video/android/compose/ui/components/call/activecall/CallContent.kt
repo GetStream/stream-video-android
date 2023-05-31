@@ -21,6 +21,7 @@ import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.calculateEndPadding
 import androidx.compose.foundation.layout.calculateStartPadding
@@ -45,9 +46,11 @@ import io.getstream.video.android.compose.ui.components.call.CallAppBar
 import io.getstream.video.android.compose.ui.components.call.controls.ControlActions
 import io.getstream.video.android.compose.ui.components.call.renderer.CallSingleVideoRenderer
 import io.getstream.video.android.compose.ui.components.call.renderer.CallVideoRenderer
-import io.getstream.video.android.compose.ui.components.call.renderer.internal.ScreenShareAspectRatio
+import io.getstream.video.android.compose.ui.components.call.renderer.RegularVideoRendererStyle
+import io.getstream.video.android.compose.ui.components.call.renderer.VideoRendererStyle
 import io.getstream.video.android.compose.ui.components.video.VideoRenderer
 import io.getstream.video.android.core.Call
+import io.getstream.video.android.core.ParticipantState
 import io.getstream.video.android.core.call.state.CallAction
 import io.getstream.video.android.core.call.state.CallDeviceState
 import io.getstream.video.android.core.call.state.LeaveCall
@@ -63,6 +66,9 @@ import io.getstream.video.android.mock.mockCall
  * @param onBackPressed Handler when the user taps on the back button.
  * @param onCallAction Handler when the user triggers a Call Control Action.
  * @param callAppBarContent Content is shown that calls information or additional actions.
+ * @param style Represents a regular video call render styles.
+ * @param videoRenderer A single video renderer renders each individual participant.
+ * @param callVideoContent Content is shown that renders all participants' videos.
  * @param callControlsContent Content is shown that allows users to trigger different actions to control a joined call.
  * @param pictureInPictureContent Content shown when the user enters Picture in Picture mode, if
  * it's been enabled in the app.
@@ -78,6 +84,30 @@ public fun CallContent(
             call = callViewModel.call,
             leadingContent = null,
             onCallAction = onCallAction
+        )
+    },
+    style: VideoRendererStyle = RegularVideoRendererStyle(),
+    videoRenderer: @Composable (
+        modifier: Modifier,
+        call: Call,
+        participant: ParticipantState,
+        style: VideoRendererStyle
+    ) -> Unit = { videoModifier, videoCall, videoParticipant, videoStyle ->
+        CallSingleVideoRenderer(
+            modifier = videoModifier,
+            call = videoCall,
+            participant = videoParticipant,
+            style = videoStyle
+        )
+    },
+    callVideoContent: @Composable RowScope.(call: Call) -> Unit = {
+        CallVideoRenderer(
+            call = callViewModel.call,
+            modifier = Modifier
+                .fillMaxSize()
+                .weight(1f),
+            style = style,
+            videoRenderer = videoRenderer
         )
     },
     callControlsContent: @Composable (call: Call) -> Unit = {
@@ -110,6 +140,7 @@ public fun CallContent(
         isInPictureInPicture = isInPiPMode,
         onCallAction = onCallAction,
         callAppBarContent = callAppBarContent,
+        callVideoContent = callVideoContent,
         callControlsContent = callControlsContent,
         pictureInPictureContent = pictureInPictureContent
     )
@@ -125,6 +156,9 @@ public fun CallContent(
  * @param isInPictureInPicture If the user has engaged in Picture-In-Picture mode.
  * @param onCallAction Handler when the user triggers a Call Control Action.
  * @param callAppBarContent Content is shown that calls information or additional actions.
+ * @param style Represents a regular video call render styles.
+ * @param videoRenderer A single video renderer renders each individual participant.
+ * @param callVideoContent Content is shown that renders all participants' videos.
  * @param callControlsContent Content is shown that allows users to trigger different actions to control a joined call.
  * @param pictureInPictureContent Content shown when the user enters Picture in Picture mode, if
  * it's been enabled in the app.
@@ -142,6 +176,30 @@ public fun CallContent(
             call = call,
             leadingContent = null,
             onCallAction = onCallAction
+        )
+    },
+    style: VideoRendererStyle = RegularVideoRendererStyle(),
+    videoRenderer: @Composable (
+        modifier: Modifier,
+        call: Call,
+        participant: ParticipantState,
+        style: VideoRendererStyle
+    ) -> Unit = { videoModifier, videoCall, videoParticipant, videoStyle ->
+        CallSingleVideoRenderer(
+            modifier = videoModifier,
+            call = videoCall,
+            participant = videoParticipant,
+            style = videoStyle
+        )
+    },
+    callVideoContent: @Composable RowScope.(call: Call) -> Unit = {
+        CallVideoRenderer(
+            call = call,
+            modifier = Modifier
+                .fillMaxSize()
+                .weight(1f),
+            style = style,
+            videoRenderer = videoRenderer
         )
     },
     callControlsContent: @Composable (call: Call) -> Unit = {
@@ -178,12 +236,7 @@ public fun CallContent(
                         .background(color = VideoTheme.colors.appBackground)
                         .padding(paddings)
                 ) {
-                    CallVideoRenderer(
-                        call = call,
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .weight(1f),
-                    )
+                    callVideoContent.invoke(this, call)
 
                     if (orientation == ORIENTATION_LANDSCAPE) {
                         callControlsContent.invoke(call)
@@ -210,10 +263,11 @@ internal fun DefaultPictureInPictureContent(call: Call) {
     val screenSharingSession by call.state.screenSharingSession.collectAsStateWithLifecycle()
     val session = screenSharingSession
     val video = session?.participant?.video?.collectAsStateWithLifecycle()
+    val pictureInPictureAspectRatio: Float = 16f / 9f
 
     if (session != null) {
         VideoRenderer(
-            modifier = Modifier.aspectRatio(ScreenShareAspectRatio, false),
+            modifier = Modifier.aspectRatio(pictureInPictureAspectRatio, false),
             call = call,
             media = video?.value
         )
@@ -225,13 +279,13 @@ internal fun DefaultPictureInPictureContent(call: Call) {
             CallSingleVideoRenderer(
                 call = call,
                 participant = activeSpeakers.first(),
-                labelPosition = Alignment.BottomStart
+                style = RegularVideoRendererStyle(labelPosition = Alignment.BottomStart)
             )
         } else if (me != null) {
             CallSingleVideoRenderer(
                 call = call,
                 participant = me!!,
-                labelPosition = Alignment.BottomStart
+                style = RegularVideoRendererStyle(labelPosition = Alignment.BottomStart)
             )
         }
     }
