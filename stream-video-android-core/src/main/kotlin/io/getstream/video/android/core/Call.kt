@@ -38,6 +38,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
+import org.openapitools.client.models.AcceptCallResponse
 import org.openapitools.client.models.BlockUserResponse
 import org.openapitools.client.models.CallSettingsRequest
 import org.openapitools.client.models.GetCallResponse
@@ -48,6 +49,7 @@ import org.openapitools.client.models.ListRecordingsResponse
 import org.openapitools.client.models.MemberRequest
 import org.openapitools.client.models.MuteUsersResponse
 import org.openapitools.client.models.QueryMembersResponse
+import org.openapitools.client.models.RejectCallResponse
 import org.openapitools.client.models.SendEventResponse
 import org.openapitools.client.models.SendReactionResponse
 import org.openapitools.client.models.StopLiveResponse
@@ -270,7 +272,9 @@ public class Call(
         settings: CallSettingsRequest? = null,
         startsAt: org.threeten.bp.OffsetDateTime? = null,
         team: String? = null,
-        ring: Boolean = false
+        ring: Boolean = false,
+        notify: Boolean = false
+
     ): Result<GetOrCreateCallResponse> {
 
         val response = if (members != null) {
@@ -282,7 +286,8 @@ public class Call(
                 settingsOverride = settings,
                 startsAt = startsAt,
                 team = team,
-                ring = ring
+                ring = ring,
+                notify = notify
             )
         } else {
             clientImpl.getOrCreateCall(
@@ -293,7 +298,8 @@ public class Call(
                 settingsOverride = settings,
                 startsAt = startsAt,
                 team = team,
-                ring = ring
+                ring = ring,
+                notify = notify
             )
         }
 
@@ -327,7 +333,9 @@ public class Call(
 
     suspend fun join(
         create: Boolean = false,
-        createOptions: CreateCallOptions? = null
+        createOptions: CreateCallOptions? = null,
+        ring: Boolean = false,
+        notify: Boolean = false,
     ): Result<RtcSession> {
         // if we are a guest user, make sure we wait for the token before running the join flow
         clientImpl.guestUserJob?.await()
@@ -340,7 +348,7 @@ public class Call(
         var result: Result<RtcSession>
 
         while (retryCount < 3) {
-            result = _join(create, createOptions)
+            result = _join(create, createOptions, ring, notify)
             if (result is Success) {
                 return result
             }
@@ -365,6 +373,8 @@ public class Call(
     internal suspend fun _join(
         create: Boolean = false,
         createOptions: CreateCallOptions? = null,
+        ring: Boolean = false,
+        notify: Boolean = false,
     ): Result<RtcSession> {
 
         // step 1. call the join endpoint to get a list of SFUs
@@ -383,7 +393,7 @@ public class Call(
                 null
             }
         location = locationResult.value
-        val result = joinRequest(options, location)
+        val result = joinRequest(options, location, ring=ring, notify=notify)
 
         if (result !is Success) {
             return result as Failure
@@ -709,7 +719,8 @@ public class Call(
     }
 
     @VisibleForTesting
-    internal suspend fun joinRequest(create: CreateCallOptions? = null, location: String, currentSfu: String? = null): Result<JoinCallResponse> {
+    internal suspend fun joinRequest(create: CreateCallOptions? = null, location: String, currentSfu: String? = null, ring: Boolean = false,
+                                     notify: Boolean = false): Result<JoinCallResponse> {
         val result = clientImpl.joinCall(
             type, id,
             create = create != null,
@@ -718,7 +729,8 @@ public class Call(
             settingsOverride = create?.settings,
             startsAt = create?.startsAt,
             team = create?.team,
-            ring = create?.ring ?: false,
+            ring = ring,
+            notify = notify,
             location = location
         )
         result.onSuccess {
@@ -732,6 +744,22 @@ public class Call(
         session?.cleanup()
         supervisorJob.cancel()
     }
+
+    suspend fun ring(): Result<GetCallResponse> {
+        return clientImpl.ring(type, id)
+    }
+
+    suspend fun notify(): Result<GetCallResponse> {
+        return clientImpl.notify(type, id)
+    }
+
+    suspend fun accept(): Result<AcceptCallResponse> {
+        return clientImpl.accept(type, id)
+    }
+
+    suspend fun reject(): Result<RejectCallResponse> {
+        return clientImpl.reject(type, id)
+    }
 }
 
 public data class CreateCallOptions(
@@ -741,7 +769,6 @@ public data class CreateCallOptions(
     val settings: CallSettingsRequest? = null,
     val startsAt: org.threeten.bp.OffsetDateTime? = null,
     val team: String? = null,
-    val ring: Boolean = false
 ) {
     fun memberRequestsFromIds(): List<MemberRequest>? {
         return memberIds?.map { MemberRequest(userId = it) } ?: members

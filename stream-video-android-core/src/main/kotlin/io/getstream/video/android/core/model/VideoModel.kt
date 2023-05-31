@@ -95,13 +95,6 @@ internal fun CallResponse.toCallInfo(): CallInfo {
     )
 }
 
-internal fun CallCreatedEvent.toCallDetails(): CallDetails {
-    return CallDetails(
-        members = members.associate { it.userId to it.toCallUser() },
-        memberUserIds = members.map { it.userId },
-        ownCapabilities = call.ownCapabilities
-    )
-}
 
 /**
  * Merges [CallUser] maps to absorb as many non-null and non-empty data from both collections.

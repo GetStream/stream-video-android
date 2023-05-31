@@ -67,6 +67,7 @@ import okhttp3.Callback
 import okhttp3.Request
 import okhttp3.Response
 import okio.IOException
+import org.openapitools.client.models.AcceptCallResponse
 import org.openapitools.client.models.BlockUserRequest
 import org.openapitools.client.models.BlockUserResponse
 import org.openapitools.client.models.CallRequest
@@ -74,8 +75,6 @@ import org.openapitools.client.models.CallSettingsRequest
 import org.openapitools.client.models.ConnectedEvent
 import org.openapitools.client.models.CreateGuestRequest
 import org.openapitools.client.models.CreateGuestResponse
-import org.openapitools.client.models.GetCallEdgeServerRequest
-import org.openapitools.client.models.GetCallEdgeServerResponse
 import org.openapitools.client.models.GetCallResponse
 import org.openapitools.client.models.GetOrCreateCallRequest
 import org.openapitools.client.models.GetOrCreateCallResponse
@@ -89,6 +88,7 @@ import org.openapitools.client.models.QueryCallsRequest
 import org.openapitools.client.models.QueryCallsResponse
 import org.openapitools.client.models.QueryMembersRequest
 import org.openapitools.client.models.QueryMembersResponse
+import org.openapitools.client.models.RejectCallResponse
 import org.openapitools.client.models.RequestPermissionRequest
 import org.openapitools.client.models.SendEventRequest
 import org.openapitools.client.models.SendEventResponse
@@ -500,7 +500,8 @@ internal class StreamVideoImpl internal constructor(
         settingsOverride: CallSettingsRequest? = null,
         startsAt: org.threeten.bp.OffsetDateTime? = null,
         team: String? = null,
-        ring: Boolean
+        ring: Boolean,
+        notify: Boolean,
     ): Result<GetOrCreateCallResponse> {
 
         val members = memberIds?.map {
@@ -517,7 +518,8 @@ internal class StreamVideoImpl internal constructor(
             settingsOverride = settingsOverride,
             startsAt = startsAt,
             team = team,
-            ring = ring
+            ring = ring,
+            notify = notify
         )
     }
 
@@ -529,7 +531,8 @@ internal class StreamVideoImpl internal constructor(
         settingsOverride: CallSettingsRequest? = null,
         startsAt: org.threeten.bp.OffsetDateTime? = null,
         team: String? = null,
-        ring: Boolean
+        ring: Boolean,
+        notify: Boolean
     ): Result<GetOrCreateCallResponse> {
         logger.d { "[getOrCreateCall] type: $type, id: $id, members: $members" }
 
@@ -545,7 +548,8 @@ internal class StreamVideoImpl internal constructor(
                         startsAt = startsAt,
                         team = team,
                     ),
-                    ring = ring
+                    ring = ring,
+                    notify = notify,
                 ),
                 connectionId = connectionModule.coordinatorSocket.connectionId
             )
@@ -581,20 +585,6 @@ internal class StreamVideoImpl internal constructor(
             results
         }
 
-    public suspend fun selectEdgeServer(
-        type: String,
-        id: String,
-        request: GetCallEdgeServerRequest
-    ): Result<GetCallEdgeServerResponse> {
-        return wrapAPICall {
-            connectionModule.videoCallsApi.getCallEdgeServer(
-                type = type,
-                id = id,
-                getCallEdgeServerRequest = request
-            )
-        }
-    }
-
     suspend fun joinCall(
         type: String,
         id: String,
@@ -605,6 +595,7 @@ internal class StreamVideoImpl internal constructor(
         startsAt: org.threeten.bp.OffsetDateTime? = null,
         team: String? = null,
         ring: Boolean = false,
+        notify: Boolean = false,
         location: String
     ): Result<JoinCallResponse> {
 
@@ -618,6 +609,7 @@ internal class StreamVideoImpl internal constructor(
                 team = team
             ),
             ring = ring,
+            notify = notify,
             location = location,
         )
 
@@ -822,7 +814,7 @@ internal class StreamVideoImpl internal constructor(
         sessionId: String
     ): Result<ListRecordingsResponse> {
         return wrapAPICall {
-            val result = connectionModule.recordingApi.listRecordings(type, id, sessionId)
+            val result = connectionModule.recordingApi.listRecordingsTypeIdSession1(type, id, sessionId)
             result
         }
     }
@@ -931,6 +923,31 @@ internal class StreamVideoImpl internal constructor(
             locationHeader?.take(3) ?: "missing-location"
         }
     }
+
+    internal suspend fun accept(type: String, id: String): Result<AcceptCallResponse> {
+        return wrapAPICall {
+            connectionModule.videoCallsApi.acceptCall(type, id)
+        }
+    }
+    internal suspend fun reject(type: String, id: String): Result<RejectCallResponse> {
+        return wrapAPICall {
+            connectionModule.videoCallsApi.rejectCall(type, id)
+        }
+    }
+
+    internal suspend fun notify(type: String, id: String): Result<GetCallResponse> {
+        return wrapAPICall {
+            connectionModule.videoCallsApi.getCall(type, id, notify= true)
+        }
+    }
+    internal suspend fun ring(type: String, id: String): Result<GetCallResponse> {
+        return wrapAPICall {
+            connectionModule.videoCallsApi.getCall(type, id, ring= true)
+        }
+    }
+
+
+
 }
 
 /** Extension function that makes it easy to use on kotlin, but keeps Java usable as well */
