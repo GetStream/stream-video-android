@@ -23,7 +23,6 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
@@ -64,6 +63,7 @@ import io.getstream.video.android.mock.StreamMockUtils
 import io.getstream.video.android.mock.mockCall
 import io.getstream.video.android.mock.mockParticipantList
 import io.getstream.video.android.ui.common.R
+import stream.video.sfu.models.ConnectionQuality
 
 /**
  * Renders a single participant with a given call, which contains all the call states.
@@ -72,11 +72,12 @@ import io.getstream.video.android.ui.common.R
  * @param call The call that contains all the participants state and tracks.
  * @param participant Participant to render.
  * @param modifier Modifier for styling.
- * @param paddingValues Padding values should be applied to this modifier.
  * @param labelPosition The position of the user audio state label.
  * @param isFocused If the participant is focused or not.
  * @param isScreenSharing Represents is screen sharing or not.
  * @param isShowingConnectionQualityIndicator Whether displays the connection quality indicator or not.
+ * @param labelContent Content is shown that displays participant's name and device states.
+ * @param connectionIndicatorContent Content is shown that indicates the connection quality.
  * @param onRender Handler when the Video renders.
  */
 @Composable
@@ -84,14 +85,23 @@ public fun CallSingleVideoRenderer(
     call: Call,
     participant: ParticipantState,
     modifier: Modifier = Modifier,
-    paddingValues: PaddingValues = PaddingValues(0.dp),
     labelPosition: Alignment = BottomStart,
     isFocused: Boolean = false,
     isScreenSharing: Boolean = false,
     isShowingConnectionQualityIndicator: Boolean = true,
+    labelContent: @Composable BoxScope.(ParticipantState) -> Unit = {
+        ParticipantLabel(participant, labelPosition)
+    },
+    connectionIndicatorContent: @Composable BoxScope.(ConnectionQuality) -> Unit = {
+        ConnectionQualityIndicator(
+            connectionQuality = it,
+            modifier = Modifier.align(BottomEnd)
+        )
+    },
     onRender: (View) -> Unit = {}
 ) {
     val reactions by participant.reactions.collectAsStateWithLifecycle()
+    val connectionQuality by participant.connectionQuality.collectAsStateWithLifecycle()
 
     val containerModifier = if (isFocused) modifier.border(
         border = if (isScreenSharing) {
@@ -113,7 +123,7 @@ public fun CallSingleVideoRenderer(
     ) else modifier
 
     Box(
-        modifier = containerModifier.padding(paddingValues).apply {
+        modifier = containerModifier.apply {
             if (isScreenSharing) {
                 clip(RoundedCornerShape(VideoTheme.dimens.screenShareParticipantsRadius))
             }
@@ -121,14 +131,10 @@ public fun CallSingleVideoRenderer(
     ) {
         ParticipantVideoRenderer(call = call, participant = participant, onRender = onRender)
 
-        ParticipantLabel(participant, labelPosition)
+        labelContent.invoke(this, participant)
 
         if (isShowingConnectionQualityIndicator) {
-            val connectionQuality by participant.connectionQuality.collectAsStateWithLifecycle()
-            ConnectionQualityIndicator(
-                connectionQuality = connectionQuality,
-                modifier = Modifier.align(BottomEnd)
-            )
+            connectionIndicatorContent.invoke(this, connectionQuality)
         }
     }
 }
