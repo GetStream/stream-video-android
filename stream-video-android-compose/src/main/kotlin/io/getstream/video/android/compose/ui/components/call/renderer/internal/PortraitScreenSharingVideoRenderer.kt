@@ -58,7 +58,7 @@ internal fun PortraitScreenSharingVideoRenderer(
     call: Call,
     session: ScreenSharingSession,
     participants: List<ParticipantState>,
-    primarySpeaker: ParticipantState?,
+    dominantSpeaker: ParticipantState?,
     isZoomable: Boolean = true,
     style: VideoRendererStyle = ScreenSharingVideoRendererStyle(),
     videoRenderer: @Composable (
@@ -106,7 +106,7 @@ internal fun PortraitScreenSharingVideoRenderer(
         LazyRowVideoRenderer(
             modifier = Modifier.height(VideoTheme.dimens.screenShareParticipantsRowHeight),
             call = call,
-            primarySpeaker = primarySpeaker,
+            dominantSpeaker = dominantSpeaker,
             participants = participants,
             style = style,
             videoRenderer = videoRenderer
@@ -126,7 +126,7 @@ private fun PortraitScreenSharingContentPreview() {
                 participant = mockParticipantList[1]
             ),
             participants = mockParticipantList,
-            primarySpeaker = mockParticipantList[1],
+            dominantSpeaker = mockParticipantList[1],
             modifier = Modifier.fillMaxSize(),
         )
     }
@@ -143,7 +143,7 @@ private fun PortraitScreenSharingMyContentPreview() {
                 participant = mockParticipantList[0]
             ),
             participants = mockParticipantList,
-            primarySpeaker = mockParticipantList[0],
+            dominantSpeaker = mockParticipantList[0],
             modifier = Modifier.fillMaxSize(),
         )
     }

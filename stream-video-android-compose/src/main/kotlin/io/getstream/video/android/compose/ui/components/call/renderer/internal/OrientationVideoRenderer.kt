@@ -61,7 +61,7 @@ internal fun BoxScope.OrientationVideoRenderer(
         )
     },
 ) {
-    val primarySpeaker by call.state.dominantSpeaker.collectAsStateWithLifecycle()
+    val dominantSpeaker by call.state.dominantSpeaker.collectAsStateWithLifecycle()
     val participants by call.state.participants.collectAsStateWithLifecycle()
     val sortedParticipants by call.state.sortedParticipants.collectAsStateWithLifecycle()
     val callParticipants by remember(participants) {
@@ -79,7 +79,7 @@ internal fun BoxScope.OrientationVideoRenderer(
     if (orientation == ORIENTATION_LANDSCAPE) {
         LandscapeVideoRenderer(
             call = call,
-            primarySpeaker = primarySpeaker,
+            dominantSpeaker = dominantSpeaker,
             callParticipants = callParticipants,
             modifier = modifier,
             parentSize = parentSize,
@@ -89,7 +89,7 @@ internal fun BoxScope.OrientationVideoRenderer(
     } else {
         PortraitVideoRenderer(
             call = call,
-            primarySpeaker = primarySpeaker,
+            dominantSpeaker = dominantSpeaker,
             callParticipants = callParticipants,
             modifier = modifier,
             parentSize = parentSize,

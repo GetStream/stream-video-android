@@ -51,7 +51,7 @@ internal fun LazyColumnVideoRenderer(
     modifier: Modifier = Modifier,
     call: Call,
     participants: List<ParticipantState>,
-    primarySpeaker: ParticipantState?,
+    dominantSpeaker: ParticipantState?,
     style: VideoRendererStyle = ScreenSharingVideoRendererStyle(),
     videoRenderer: @Composable (
         modifier: Modifier,
@@ -76,7 +76,7 @@ internal fun LazyColumnVideoRenderer(
                 ListVideoRenderer(
                     call = call,
                     participant = participant,
-                    primarySpeaker = primarySpeaker,
+                    dominantSpeaker = dominantSpeaker,
                     style = style,
                     videoRenderer = videoRenderer,
                 )
@@ -95,7 +95,7 @@ internal fun LazyColumnVideoRenderer(
 private fun ListVideoRenderer(
     call: Call,
     participant: ParticipantState,
-    primarySpeaker: ParticipantState?,
+    dominantSpeaker: ParticipantState?,
     style: VideoRendererStyle = ScreenSharingVideoRendererStyle(),
     videoRenderer: @Composable (
         modifier: Modifier,
@@ -118,7 +118,7 @@ private fun ListVideoRenderer(
         call = call,
         participant = participant,
         style = style.copy(
-            isFocused = participant.sessionId == primarySpeaker?.sessionId
+            isFocused = participant.sessionId == dominantSpeaker?.sessionId
         ),
     )
 }
@@ -131,7 +131,7 @@ private fun ParticipantsColumnPreview() {
         LazyColumnVideoRenderer(
             call = mockCall,
             participants = mockParticipantList,
-            primarySpeaker = mockParticipantList[0]
+            dominantSpeaker = mockParticipantList[0]
         )
     }
 }

@@ -50,7 +50,7 @@ import io.getstream.video.android.mock.mockParticipantList
  * Renders call participants based on the number of people in a call, in portrait mode.
  *
  * @param call The state of the call.
- * @param primarySpeaker The primary speaker in the call.
+ * @param dominantSpeaker The primary speaker in the call.
  * @param callParticipants The list of participants in the call.
  * @param modifier Modifier for styling.
  * @param parentSize The size of the parent.
@@ -60,7 +60,7 @@ import io.getstream.video.android.mock.mockParticipantList
 @Composable
 internal fun BoxScope.PortraitVideoRenderer(
     call: Call,
-    primarySpeaker: ParticipantState?,
+    dominantSpeaker: ParticipantState?,
     callParticipants: List<ParticipantState>,
     modifier: Modifier,
     parentSize: IntSize,
@@ -94,7 +94,7 @@ internal fun BoxScope.PortraitVideoRenderer(
                 call = call,
                 participant = participant,
                 style = style.copy(
-                    isFocused = primarySpeaker?.sessionId == participant.sessionId
+                    isFocused = dominantSpeaker?.sessionId == participant.sessionId
                 )
             )
         }
@@ -107,7 +107,7 @@ internal fun BoxScope.PortraitVideoRenderer(
                 call = call,
                 participant = participant,
                 style = style.copy(
-                    isFocused = primarySpeaker?.sessionId == participant.sessionId
+                    isFocused = dominantSpeaker?.sessionId == participant.sessionId
                 )
             )
         }
@@ -122,7 +122,7 @@ internal fun BoxScope.PortraitVideoRenderer(
                     call = call,
                     participant = firstParticipant,
                     style = style.copy(
-                        isFocused = primarySpeaker?.sessionId == firstParticipant.sessionId
+                        isFocused = dominantSpeaker?.sessionId == firstParticipant.sessionId
                     )
                 )
 
@@ -131,7 +131,7 @@ internal fun BoxScope.PortraitVideoRenderer(
                     call = call,
                     participant = secondParticipant,
                     style = style.copy(
-                        isFocused = primarySpeaker?.sessionId == secondParticipant.sessionId
+                        isFocused = dominantSpeaker?.sessionId == secondParticipant.sessionId
                     )
                 )
             }
@@ -150,7 +150,7 @@ internal fun BoxScope.PortraitVideoRenderer(
                         call = call,
                         participant = firstParticipant,
                         style = style.copy(
-                            isFocused = primarySpeaker?.sessionId == firstParticipant.sessionId
+                            isFocused = dominantSpeaker?.sessionId == firstParticipant.sessionId
                         )
                     )
 
@@ -159,7 +159,7 @@ internal fun BoxScope.PortraitVideoRenderer(
                         call = call,
                         participant = secondParticipant,
                         style = style.copy(
-                            isFocused = primarySpeaker?.sessionId == secondParticipant.sessionId
+                            isFocused = dominantSpeaker?.sessionId == secondParticipant.sessionId
                         )
                     )
                 }
@@ -170,7 +170,7 @@ internal fun BoxScope.PortraitVideoRenderer(
                         call = call,
                         participant = thirdParticipant,
                         style = style.copy(
-                            isFocused = primarySpeaker?.sessionId == thirdParticipant.sessionId
+                            isFocused = dominantSpeaker?.sessionId == thirdParticipant.sessionId
                         )
                     )
 
@@ -179,7 +179,7 @@ internal fun BoxScope.PortraitVideoRenderer(
                         call = call,
                         participant = fourthParticipant,
                         style = style.copy(
-                            isFocused = primarySpeaker?.sessionId == fourthParticipant.sessionId
+                            isFocused = dominantSpeaker?.sessionId == fourthParticipant.sessionId
                         )
                     )
                 }
@@ -200,7 +200,7 @@ internal fun BoxScope.PortraitVideoRenderer(
                         call = call,
                         participant = firstParticipant,
                         style = style.copy(
-                            isFocused = primarySpeaker?.sessionId == firstParticipant.sessionId
+                            isFocused = dominantSpeaker?.sessionId == firstParticipant.sessionId
                         )
                     )
 
@@ -209,7 +209,7 @@ internal fun BoxScope.PortraitVideoRenderer(
                         call = call,
                         participant = secondParticipant,
                         style = style.copy(
-                            isFocused = primarySpeaker?.sessionId == secondParticipant.sessionId
+                            isFocused = dominantSpeaker?.sessionId == secondParticipant.sessionId
                         )
                     )
                 }
@@ -220,7 +220,7 @@ internal fun BoxScope.PortraitVideoRenderer(
                         call = call,
                         participant = thirdParticipant,
                         style = style.copy(
-                            isFocused = primarySpeaker?.sessionId == thirdParticipant.sessionId
+                            isFocused = dominantSpeaker?.sessionId == thirdParticipant.sessionId
                         )
                     )
 
@@ -229,7 +229,7 @@ internal fun BoxScope.PortraitVideoRenderer(
                         call = call,
                         participant = fourthParticipant,
                         style = style.copy(
-                            isFocused = primarySpeaker?.sessionId == fourthParticipant.sessionId
+                            isFocused = dominantSpeaker?.sessionId == fourthParticipant.sessionId
                         )
                     )
 
@@ -238,7 +238,7 @@ internal fun BoxScope.PortraitVideoRenderer(
                         call = call,
                         participant = fifthParticipant,
                         style = style.copy(
-                            isFocused = primarySpeaker?.sessionId == fifthParticipant.sessionId
+                            isFocused = dominantSpeaker?.sessionId == fifthParticipant.sessionId
                         )
                     )
                 }
@@ -260,7 +260,7 @@ internal fun BoxScope.PortraitVideoRenderer(
                         call = call,
                         participant = firstParticipant,
                         style = style.copy(
-                            isFocused = primarySpeaker?.sessionId == firstParticipant.sessionId
+                            isFocused = dominantSpeaker?.sessionId == firstParticipant.sessionId
                         )
                     )
 
@@ -269,7 +269,7 @@ internal fun BoxScope.PortraitVideoRenderer(
                         call = call,
                         participant = secondParticipant,
                         style = style.copy(
-                            isFocused = primarySpeaker?.sessionId == secondParticipant.sessionId
+                            isFocused = dominantSpeaker?.sessionId == secondParticipant.sessionId
                         )
                     )
 
@@ -278,7 +278,7 @@ internal fun BoxScope.PortraitVideoRenderer(
                         call = call,
                         participant = thirdParticipant,
                         style = style.copy(
-                            isFocused = primarySpeaker?.sessionId == thirdParticipant.sessionId
+                            isFocused = dominantSpeaker?.sessionId == thirdParticipant.sessionId
                         )
                     )
                 }
@@ -289,7 +289,7 @@ internal fun BoxScope.PortraitVideoRenderer(
                         call = call,
                         participant = fourthParticipant,
                         style = style.copy(
-                            isFocused = primarySpeaker?.sessionId == fourthParticipant.sessionId
+                            isFocused = dominantSpeaker?.sessionId == fourthParticipant.sessionId
                         )
                     )
 
@@ -298,7 +298,7 @@ internal fun BoxScope.PortraitVideoRenderer(
                         call = call,
                         participant = fifthParticipant,
                         style = style.copy(
-                            isFocused = primarySpeaker?.sessionId == fifthParticipant.sessionId
+                            isFocused = dominantSpeaker?.sessionId == fifthParticipant.sessionId
                         )
                     )
 
@@ -307,7 +307,7 @@ internal fun BoxScope.PortraitVideoRenderer(
                         call = call,
                         participant = sixthParticipant,
                         style = style.copy(
-                            isFocused = primarySpeaker?.sessionId == sixthParticipant.sessionId
+                            isFocused = dominantSpeaker?.sessionId == sixthParticipant.sessionId
                         )
                     )
                 }
@@ -354,7 +354,7 @@ private fun PortraitParticipantsPreview1() {
         ) {
             PortraitVideoRenderer(
                 call = mockCall,
-                primarySpeaker = participants[0],
+                dominantSpeaker = participants[0],
                 callParticipants = participants.take(1),
                 modifier = Modifier.fillMaxSize(),
                 parentSize = IntSize(screenWidth, screenHeight)
@@ -378,7 +378,7 @@ private fun PortraitParticipantsPreview2() {
         ) {
             PortraitVideoRenderer(
                 call = mockCall,
-                primarySpeaker = mockParticipantList[0],
+                dominantSpeaker = mockParticipantList[0],
                 callParticipants = participants.take(2),
                 modifier = Modifier.fillMaxSize(),
                 parentSize = IntSize(screenWidth, screenHeight)
@@ -402,7 +402,7 @@ private fun PortraitParticipantsPreview3() {
         ) {
             PortraitVideoRenderer(
                 call = mockCall,
-                primarySpeaker = participants[0],
+                dominantSpeaker = participants[0],
                 callParticipants = participants.take(3),
                 modifier = Modifier.fillMaxSize(),
                 parentSize = IntSize(screenWidth, screenHeight)
@@ -426,7 +426,7 @@ private fun PortraitParticipantsPreview4() {
         ) {
             PortraitVideoRenderer(
                 call = mockCall,
-                primarySpeaker = participants[0],
+                dominantSpeaker = participants[0],
                 callParticipants = participants.take(4),
                 modifier = Modifier.fillMaxSize(),
                 parentSize = IntSize(screenWidth, screenHeight)
@@ -450,7 +450,7 @@ private fun PortraitParticipantsPreview5() {
         ) {
             PortraitVideoRenderer(
                 call = mockCall,
-                primarySpeaker = participants[0],
+                dominantSpeaker = participants[0],
                 callParticipants = participants.take(5),
                 modifier = Modifier.fillMaxSize(),
                 parentSize = IntSize(screenWidth, screenHeight)
@@ -474,7 +474,7 @@ private fun PortraitParticipantsPreview6() {
         ) {
             PortraitVideoRenderer(
                 call = mockCall,
-                primarySpeaker = participants[0],
+                dominantSpeaker = participants[0],
                 callParticipants = participants.take(6),
                 modifier = Modifier.fillMaxSize(),
                 parentSize = IntSize(screenWidth, screenHeight)

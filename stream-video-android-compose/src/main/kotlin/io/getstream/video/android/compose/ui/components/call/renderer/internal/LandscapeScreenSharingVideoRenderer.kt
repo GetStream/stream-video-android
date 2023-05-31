@@ -59,7 +59,7 @@ internal fun LandscapeScreenSharingVideoRenderer(
     call: Call,
     session: ScreenSharingSession,
     participants: List<ParticipantState>,
-    primarySpeaker: ParticipantState?,
+    dominantSpeaker: ParticipantState?,
     isZoomable: Boolean = true,
     style: VideoRendererStyle = ScreenSharingVideoRendererStyle(),
     videoRenderer: @Composable (
@@ -110,7 +110,7 @@ internal fun LandscapeScreenSharingVideoRenderer(
                 .fillMaxHeight(),
             call = call,
             participants = participants,
-            primarySpeaker = primarySpeaker,
+            dominantSpeaker = dominantSpeaker,
             style = style,
             videoRenderer = videoRenderer
         )
@@ -136,7 +136,7 @@ private fun LandscapeScreenSharingContentPreview() {
                 participant = mockParticipantList[1]
             ),
             participants = mockParticipantList,
-            primarySpeaker = mockParticipantList[1],
+            dominantSpeaker = mockParticipantList[1],
             modifier = Modifier.fillMaxSize(),
         )
     }
@@ -161,7 +161,7 @@ private fun LandscapeScreenSharingMyContentPreview() {
                 participant = mockParticipantList[0]
             ),
             participants = mockParticipantList,
-            primarySpeaker = mockParticipantList[0],
+            dominantSpeaker = mockParticipantList[0],
             modifier = Modifier.fillMaxSize(),
         )
     }
