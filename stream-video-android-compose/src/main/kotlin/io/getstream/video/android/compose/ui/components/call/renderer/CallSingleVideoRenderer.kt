@@ -63,6 +63,7 @@ import io.getstream.video.android.mock.StreamMockUtils
 import io.getstream.video.android.mock.mockCall
 import io.getstream.video.android.mock.mockParticipantList
 import io.getstream.video.android.ui.common.R
+import stream.video.sfu.models.ConnectionQuality
 
 /**
  * Renders a single participant with a given call, which contains all the call states.
@@ -75,6 +76,8 @@ import io.getstream.video.android.ui.common.R
  * @param isFocused If the participant is focused or not.
  * @param isScreenSharing Represents is screen sharing or not.
  * @param isShowingConnectionQualityIndicator Whether displays the connection quality indicator or not.
+ * @param labelContent Content is shown that displays participant's name and device states.
+ * @param connectionIndicatorContent Content is shown that indicates the connection quality.
  * @param onRender Handler when the Video renders.
  */
 @Composable
@@ -86,9 +89,19 @@ public fun CallSingleVideoRenderer(
     isFocused: Boolean = false,
     isScreenSharing: Boolean = false,
     isShowingConnectionQualityIndicator: Boolean = true,
+    labelContent: @Composable BoxScope.(ParticipantState) -> Unit = {
+        ParticipantLabel(participant, labelPosition)
+    },
+    connectionIndicatorContent: @Composable BoxScope.(ConnectionQuality) -> Unit = {
+        ConnectionQualityIndicator(
+            connectionQuality = it,
+            modifier = Modifier.align(BottomEnd)
+        )
+    },
     onRender: (View) -> Unit = {}
 ) {
     val reactions by participant.reactions.collectAsStateWithLifecycle()
+    val connectionQuality by participant.connectionQuality.collectAsStateWithLifecycle()
 
     val containerModifier = if (isFocused) modifier.border(
         border = if (isScreenSharing) {
@@ -118,14 +131,10 @@ public fun CallSingleVideoRenderer(
     ) {
         ParticipantVideoRenderer(call = call, participant = participant, onRender = onRender)
 
-        ParticipantLabel(participant, labelPosition)
+        labelContent.invoke(this, participant)
 
         if (isShowingConnectionQualityIndicator) {
-            val connectionQuality by participant.connectionQuality.collectAsStateWithLifecycle()
-            ConnectionQualityIndicator(
-                connectionQuality = connectionQuality,
-                modifier = Modifier.align(BottomEnd)
-            )
+            connectionIndicatorContent.invoke(this, connectionQuality)
         }
     }
 }
