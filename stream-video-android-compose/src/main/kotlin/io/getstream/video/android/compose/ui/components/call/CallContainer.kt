@@ -108,7 +108,8 @@ public fun CallContainer(
             callViewModel = callViewModel,
             onBackPressed = onBackPressed,
             onCallAction = onCallAction,
-            onAcceptedCallContent = { callContent.invoke(it) }
+            onAcceptedCallContent = { callContent.invoke(it) },
+            onRejectedContent = {}
         )
     },
 ) {
@@ -191,7 +192,8 @@ public fun CallContainer(
             callDeviceState = callDeviceState,
             onBackPressed = onBackPressed,
             onCallAction = onCallAction,
-            onAcceptedCallContent = { callContent.invoke(it) }
+            onAcceptedContent = { callContent.invoke(it) },
+            onRejectedContent = {}
         )
     },
 ) {

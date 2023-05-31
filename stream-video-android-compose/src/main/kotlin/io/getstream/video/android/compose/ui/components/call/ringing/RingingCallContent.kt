@@ -53,7 +53,8 @@ import io.getstream.video.android.mock.mockCall
  * @param callControlsContent Content shown for controlling call, such as accepting a call or declining a call.
  * @param onBackPressed Handler when the user taps on the back button.
  * @param onCallAction Handler used when the user interacts with Call UI.
- * @param onAcceptedCallContent A call content is shown when the call state is Accept.ø
+ * @param onAcceptedCallContent A call content is shown when the call state is Accept.
+ * @param onRejectedContent A call content is shown when the call is rejected.
  */
 @Composable
 public fun RingingCallContent(
@@ -70,7 +71,8 @@ public fun RingingCallContent(
     callControlsContent: (@Composable BoxScope.() -> Unit)? = null,
     onBackPressed: () -> Unit = {},
     onCallAction: (CallAction) -> Unit = callViewModel::onCallAction,
-    onAcceptedCallContent: @Composable () -> Unit
+    onAcceptedCallContent: @Composable () -> Unit,
+    onRejectedContent: @Composable () -> Unit,
 ) {
     val callDeviceState: CallDeviceState by callViewModel.callDeviceState.collectAsStateWithLifecycle()
 
@@ -85,7 +87,8 @@ public fun RingingCallContent(
         callControlsContent = callControlsContent,
         onBackPressed = onBackPressed,
         onCallAction = onCallAction,
-        onAcceptedCallContent = onAcceptedCallContent
+        onAcceptedContent = onAcceptedCallContent,
+        onRejectedContent = onRejectedContent
     )
 }
 
@@ -104,7 +107,8 @@ public fun RingingCallContent(
  * @param callControlsContent Content shown for controlling call, such as accepting a call or declining a call.
  * @param onBackPressed Handler when the user taps on the back button.
  * @param onCallAction Handler used when the user interacts with Call UI.
- * @param onAcceptedCallContent A call content is shown when the call state is Accept.ø
+ * @param onAcceptedContent A call content is shown when the call is Accept.
+ * @param onRejectedContent A call content is shown when the call is rejected.
  */
 @Composable
 public fun RingingCallContent(
@@ -122,7 +126,8 @@ public fun RingingCallContent(
     callControlsContent: (@Composable BoxScope.() -> Unit)? = null,
     onBackPressed: () -> Unit = {},
     onCallAction: (CallAction) -> Unit = {},
-    onAcceptedCallContent: @Composable () -> Unit
+    onAcceptedContent: @Composable () -> Unit,
+    onRejectedContent: @Composable () -> Unit,
 ) {
     val ringingStateHolder = call.state.ringingState.collectAsState(initial = RingingState.Idle)
     val ringingState = ringingStateHolder.value
@@ -155,7 +160,7 @@ public fun RingingCallContent(
         )
     } else {
         // TODO: rejected + fallback
-        onAcceptedCallContent.invoke()
+        onAcceptedContent.invoke()
     }
 }
 
@@ -168,7 +173,8 @@ private fun RingingCallContentPreview() {
             call = mockCall,
             isVideoType = true,
             callDeviceState = CallDeviceState(),
-            onAcceptedCallContent = {},
+            onAcceptedContent = {},
+            onRejectedContent = {}
         )
     }
 }

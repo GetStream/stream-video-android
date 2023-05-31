@@ -21,6 +21,7 @@ import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.calculateEndPadding
 import androidx.compose.foundation.layout.calculateStartPadding
@@ -125,6 +126,7 @@ public fun CallContent(
  * @param isInPictureInPicture If the user has engaged in Picture-In-Picture mode.
  * @param onCallAction Handler when the user triggers a Call Control Action.
  * @param callAppBarContent Content is shown that calls information or additional actions.
+ * @param callVideoContent Content is shown that renders all participants' videos.
  * @param callControlsContent Content is shown that allows users to trigger different actions to control a joined call.
  * @param pictureInPictureContent Content shown when the user enters Picture in Picture mode, if
  * it's been enabled in the app.
@@ -142,6 +144,14 @@ public fun CallContent(
             call = call,
             leadingContent = null,
             onCallAction = onCallAction
+        )
+    },
+    callVideoContent: @Composable RowScope.(call: Call) -> Unit = {
+        CallVideoRenderer(
+            call = call,
+            modifier = Modifier
+                .fillMaxSize()
+                .weight(1f),
         )
     },
     callControlsContent: @Composable (call: Call) -> Unit = {
@@ -178,12 +188,7 @@ public fun CallContent(
                         .background(color = VideoTheme.colors.appBackground)
                         .padding(paddings)
                 ) {
-                    CallVideoRenderer(
-                        call = call,
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .weight(1f),
-                    )
+                    callVideoContent.invoke(this, call)
 
                     if (orientation == ORIENTATION_LANDSCAPE) {
                         callControlsContent.invoke(call)
