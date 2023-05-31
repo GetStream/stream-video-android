@@ -16,7 +16,6 @@
 
 package io.getstream.video.android.compose.ui.components.call.renderer
 
-import android.view.View
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -76,7 +75,7 @@ import stream.video.sfu.models.ConnectionQuality
  * @param style Represents a regular video call render styles.
  * @param labelContent Content is shown that displays participant's name and device states.
  * @param connectionIndicatorContent Content is shown that indicates the connection quality.
- * @param onRender Handler when the Video renders.
+ * @param onRenderFailedContent Content is shown the video track is failed to load or not available.
  */
 @Composable
 public fun CallSingleVideoRenderer(
@@ -93,7 +92,10 @@ public fun CallSingleVideoRenderer(
             modifier = Modifier.align(BottomEnd)
         )
     },
-    onRender: (View) -> Unit = {}
+    onRenderFailedContent: @Composable (Call) -> Unit = {
+        val user by participant.user.collectAsStateWithLifecycle()
+        UserAvatarBackground(user = user)
+    },
 ) {
     TextStyle
     val reactions by participant.reactions.collectAsStateWithLifecycle()
@@ -125,7 +127,11 @@ public fun CallSingleVideoRenderer(
             }
         }
     ) {
-        ParticipantVideoRenderer(call = call, participant = participant, onRender = onRender)
+        ParticipantVideoRenderer(
+            call = call,
+            participant = participant,
+            onRenderFailedContent = onRenderFailedContent
+        )
 
         if (style.isShowingParticipantLabel) {
             labelContent.invoke(this, participant)
@@ -143,13 +149,16 @@ public fun CallSingleVideoRenderer(
  *
  * @param call The call that contains all the participants state and tracks.
  * @param participant Participant to render.
- * @param onRender Handler when the Video renders.
+ * @param onRenderFailedContent Content is shown the video track is failed to load or not available.
  */
 @Composable
 public fun ParticipantVideoRenderer(
     call: Call,
     participant: ParticipantState,
-    onRender: (View) -> Unit = {}
+    onRenderFailedContent: @Composable (Call) -> Unit = {
+        val user by participant.user.collectAsStateWithLifecycle()
+        UserAvatarBackground(user = user)
+    },
 ) {
     if (LocalInspectionMode.current) {
         Image(
@@ -164,13 +173,11 @@ public fun ParticipantVideoRenderer(
     }
 
     val video by participant.video.collectAsStateWithLifecycle()
-    val user by participant.user.collectAsStateWithLifecycle()
 
     VideoRenderer(
         call = call,
         media = video,
-        onRender = onRender,
-        onRenderFailedContent = { UserAvatarBackground(user = user) }
+        onRenderFailedContent = onRenderFailedContent
     )
 }
 
