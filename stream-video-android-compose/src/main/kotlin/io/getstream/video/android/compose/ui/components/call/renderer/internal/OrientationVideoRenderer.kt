@@ -17,7 +17,6 @@
 package io.getstream.video.android.compose.ui.components.call.renderer.internal
 
 import android.content.res.Configuration.ORIENTATION_LANDSCAPE
-import android.view.View
 import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.derivedStateOf
@@ -27,22 +26,35 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.unit.IntSize
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import io.getstream.video.android.compose.ui.components.call.renderer.CallSingleVideoRenderer
 import io.getstream.video.android.core.Call
+import io.getstream.video.android.core.ParticipantState
 
 /**
  * Renders call participants based on the number of people in a call.
  *
  * @param call The state of the call.
- * @param onRender Handler when the video content renders.
  * @param modifier Modifier for styling.
  * @param parentSize The size of the parent.
  */
 @Composable
 internal fun BoxScope.OrientationVideoRenderer(
-    call: Call,
-    onRender: (View) -> Unit,
     modifier: Modifier = Modifier,
-    parentSize: IntSize = IntSize(0, 0)
+    call: Call,
+    parentSize: IntSize = IntSize(0, 0),
+    videoRenderer: @Composable (
+        modifier: Modifier,
+        call: Call,
+        participant: ParticipantState,
+        isFocused: Boolean
+    ) -> Unit = { videoModifier, videoCall, videoParticipant, videoIsFocused ->
+        CallSingleVideoRenderer(
+            modifier = videoModifier,
+            call = videoCall,
+            participant = videoParticipant,
+            isFocused = videoIsFocused,
+        )
+    },
 ) {
     val primarySpeaker by call.state.dominantSpeaker.collectAsStateWithLifecycle()
     val participants by call.state.participants.collectAsStateWithLifecycle()
@@ -66,7 +78,7 @@ internal fun BoxScope.OrientationVideoRenderer(
             callParticipants = callParticipants,
             modifier = modifier,
             parentSize = parentSize,
-            onRender = onRender
+            videoRenderer = videoRenderer,
         )
     } else {
         PortraitVideoRenderer(
@@ -75,7 +87,7 @@ internal fun BoxScope.OrientationVideoRenderer(
             callParticipants = callParticipants,
             modifier = modifier,
             parentSize = parentSize,
-            onRender = onRender
+            videoRenderer = videoRenderer,
         )
     }
 }

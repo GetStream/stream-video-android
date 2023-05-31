@@ -16,7 +16,6 @@
 
 package io.getstream.video.android.compose.ui.components.call.renderer.internal
 
-import android.view.View
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
@@ -32,7 +31,9 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.IntSize
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.getstream.video.android.compose.theme.VideoTheme
+import io.getstream.video.android.compose.ui.components.call.renderer.CallSingleVideoRenderer
 import io.getstream.video.android.core.Call
+import io.getstream.video.android.core.ParticipantState
 import io.getstream.video.android.mock.StreamMockUtils
 import io.getstream.video.android.mock.mockCall
 
@@ -41,13 +42,24 @@ import io.getstream.video.android.mock.mockCall
  *
  * @param call The call that contains all the participants state and tracks.
  * @param modifier Modifier for styling.
- * @param onRender Handler when each of the Video views render their first frame.
  */
 @Composable
 internal fun RegularCallVideoRenderer(
-    call: Call,
     modifier: Modifier = Modifier,
-    onRender: (View) -> Unit = {},
+    call: Call,
+    videoRenderer: @Composable (
+        modifier: Modifier,
+        call: Call,
+        participant: ParticipantState,
+        isFocused: Boolean
+    ) -> Unit = { videoModifier, videoCall, videoParticipant, videoIsFocused ->
+        CallSingleVideoRenderer(
+            modifier = videoModifier,
+            call = videoCall,
+            participant = videoParticipant,
+            isFocused = videoIsFocused,
+        )
+    },
 ) {
     var parentSize: IntSize by remember { mutableStateOf(IntSize(0, 0)) }
 
@@ -62,8 +74,8 @@ internal fun RegularCallVideoRenderer(
                     .fillMaxSize()
                     .onSizeChanged { parentSize = it },
                 call = call,
-                onRender = onRender,
-                parentSize = parentSize
+                parentSize = parentSize,
+                videoRenderer = videoRenderer
             )
         }
     }

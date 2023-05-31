@@ -57,7 +57,7 @@ internal fun PortraitScreenSharingVideoRenderer(
     primarySpeaker: ParticipantState?,
     modifier: Modifier = Modifier,
     isZoomable: Boolean = true,
-    onRender: (View) -> Unit,
+    onRender: (View) -> Unit = {},
 ) {
     val sharingParticipant = session.participant
     val me by call.state.me.collectAsStateWithLifecycle()

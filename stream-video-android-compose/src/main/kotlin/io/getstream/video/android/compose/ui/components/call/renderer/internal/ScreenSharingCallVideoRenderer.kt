@@ -17,7 +17,6 @@
 package io.getstream.video.android.compose.ui.components.call.renderer.internal
 
 import android.content.res.Configuration.ORIENTATION_PORTRAIT
-import android.view.View
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
@@ -42,7 +41,6 @@ public fun ScreenSharingCallVideoRenderer(
     session: ScreenSharingSession,
     modifier: Modifier = Modifier,
     isZoomable: Boolean = true,
-    onRender: (View) -> Unit = {},
 ) {
     val configuration = LocalConfiguration.current
     val orientation = configuration.orientation
@@ -57,7 +55,6 @@ public fun ScreenSharingCallVideoRenderer(
             primarySpeaker = screenSharingSession?.participant,
             modifier = modifier,
             isZoomable = isZoomable,
-            onRender = onRender,
         )
     } else {
         LandscapeScreenSharingVideoRenderer(
@@ -67,7 +64,6 @@ public fun ScreenSharingCallVideoRenderer(
             primarySpeaker = screenSharingSession?.participant,
             modifier = modifier,
             isZoomable = isZoomable,
-            onRender = onRender,
         )
     }
 }

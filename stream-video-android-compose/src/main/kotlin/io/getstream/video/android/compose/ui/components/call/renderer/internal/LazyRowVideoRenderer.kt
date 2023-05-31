@@ -75,17 +75,29 @@ private fun ListVideoRenderer(
     call: Call,
     participant: ParticipantState,
     primarySpeaker: ParticipantState?,
+    videoRenderer: @Composable (
+        modifier: Modifier,
+        call: Call,
+        participant: ParticipantState,
+        isFocused: Boolean
+    ) -> Unit = { videoModifier, videoCall, videoParticipant, videoIsFocused ->
+        CallSingleVideoRenderer(
+            modifier = videoModifier,
+            call = videoCall,
+            participant = videoParticipant,
+            isScreenSharing = true,
+            isFocused = videoIsFocused,
+            isShowingConnectionQualityIndicator = false
+        )
+    },
 ) {
-    CallSingleVideoRenderer(
+    videoRenderer.invoke(
         modifier = Modifier
             .size(VideoTheme.dimens.screenShareParticipantItemSize)
             .clip(RoundedCornerShape(VideoTheme.dimens.screenShareParticipantsRadius)),
         call = call,
         participant = participant,
-        labelPosition = Alignment.BottomStart,
-        isScreenSharing = true,
         isFocused = participant.sessionId == primarySpeaker?.sessionId,
-        isShowingConnectionQualityIndicator = false
     )
 }
 
@@ -95,7 +107,9 @@ private fun ParticipantsRowPreview() {
     StreamMockUtils.initializeStreamVideo(LocalContext.current)
     VideoTheme {
         LazyRowVideoRenderer(
-            call = mockCall, participants = mockParticipantList, primarySpeaker = mockParticipantList[0]
+            call = mockCall,
+            participants = mockParticipantList,
+            primarySpeaker = mockParticipantList[0]
         )
     }
 }
