@@ -38,22 +38,25 @@ import io.getstream.video.android.mock.mockCall
  *
  * @param call The call that contains all the participants state and tracks.
  * @param modifier Modifier for styling.
+ * @param style Represents a regular video call render styles.
+ * @param videoRenderer A single video renderer renders each individual participant.
  */
 @Composable
 public fun CallVideoRenderer(
     call: Call,
     modifier: Modifier = Modifier,
+    style: VideoRendererStyle = RegularVideoRendererStyle(),
     videoRenderer: @Composable (
         modifier: Modifier,
         call: Call,
         participant: ParticipantState,
-        isFocused: Boolean
-    ) -> Unit = { videoModifier, videoCall, videoParticipant, videoIsFocused ->
+        style: VideoRendererStyle
+    ) -> Unit = { videoModifier, videoCall, videoParticipant, videoStyle ->
         CallSingleVideoRenderer(
             modifier = videoModifier,
             call = videoCall,
             participant = videoParticipant,
-            isFocused = videoIsFocused,
+            style = videoStyle
         )
     },
 ) {
@@ -72,6 +75,7 @@ public fun CallVideoRenderer(
         RegularCallVideoRenderer(
             call = call,
             modifier = modifier,
+            style = style,
             videoRenderer = videoRenderer
         )
     } else {
@@ -79,6 +83,12 @@ public fun CallVideoRenderer(
             call = call,
             modifier = modifier,
             session = screenSharing,
+            style = ScreenSharingVideoRendererStyle().copy(
+                isFocused = style.isFocused,
+                isShowingReactions = style.isShowingReactions,
+                labelPosition = style.labelPosition
+            ),
+            videoRenderer = videoRenderer
         )
     }
 }

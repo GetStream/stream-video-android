@@ -161,7 +161,10 @@ public class RtcSession internal constructor(
 
     internal val lastVideoStreamAdded = MutableStateFlow<MediaStream?>(null)
 
-    internal val _peerConnectionStates = MutableStateFlow<Pair<PeerConnection.PeerConnectionState?, PeerConnection.PeerConnectionState?>?>(null)
+    internal val _peerConnectionStates =
+        MutableStateFlow<Pair<PeerConnection.PeerConnectionState?, PeerConnection.PeerConnectionState?>?>(
+            null
+        )
 
     internal val sessionId = clientImpl.sessionId
 
@@ -459,11 +462,12 @@ public class RtcSession internal constructor(
                     val enabled = settings?.video?.cameraDefaultOn == true
                     call.mediaManager.camera.setEnabled(enabled)
                     // check the settings if we should default to front or back facing camera
-                    val defaultDirection = if (settings?.video?.cameraFacing == VideoSettings.CameraFacing.front) {
-                        CameraDirection.Front
-                    } else {
-                        CameraDirection.Back
-                    }
+                    val defaultDirection =
+                        if (settings?.video?.cameraFacing == VideoSettings.CameraFacing.front) {
+                            CameraDirection.Front
+                        } else {
+                            CameraDirection.Back
+                        }
                     // TODO: would be nicer to initialize the camera on the right device to begin with
                     if (defaultDirection != call.mediaManager.camera.direction.value) {
                         call.mediaManager.camera.flip()
@@ -647,7 +651,8 @@ public class RtcSession internal constructor(
             mediaConstraints = MediaConstraints(),
             onNegotiationNeeded = ::onNegotiationNeeded,
             onIceCandidateRequest = ::sendIceCandidate,
-            maxPublishingBitrate = call.state.settings.value?.video?.targetResolution?.bitrate ?: 1_200_000
+            maxPublishingBitrate = call.state.settings.value?.video?.targetResolution?.bitrate
+                ?: 1_200_000
         )
         logger.i { "[createPublisher] #sfu; publisher: $publisher" }
         return publisher
@@ -673,6 +678,9 @@ public class RtcSession internal constructor(
             event.changePublishQuality.video_senders.firstOrNull()?.layers?.associate { it.name to it.active }
         val transceiver = publisher?.videoTransceiver ?: return
         // enable or disable tracks
+
+        if (transceiver.sender.dtmf() == null) return
+
         val encodings = transceiver.sender.parameters.encodings.toList()
         for (encoding in encodings) {
             encoding.active = enabledRids?.get(encoding.rid ?: "") ?: false
@@ -1128,7 +1136,12 @@ public class RtcSession internal constructor(
 
     // sets display track visiblity
     @Synchronized
-    fun updateTrackDimensions(sessionId: String, trackType: TrackType, visible: Boolean, dimensions: VideoDimension = VideoDimension(960, 720)) {
+    fun updateTrackDimensions(
+        sessionId: String,
+        trackType: TrackType,
+        visible: Boolean,
+        dimensions: VideoDimension = VideoDimension(960, 720)
+    ) {
         // The map contains all track dimensions for all participants
         dynascaleLogger.i { "uuu23 $sessionId $trackType $visible $dimensions" }
 
@@ -1136,10 +1149,14 @@ public class RtcSession internal constructor(
         val trackDimensionsMap = trackDimensions.value.toMutableMap()
 
         // next we get or create the dimensions for this participants
-        var participantTrackDimensions = trackDimensionsMap[sessionId]?.toMutableMap() ?: mutableMapOf()
+        var participantTrackDimensions =
+            trackDimensionsMap[sessionId]?.toMutableMap() ?: mutableMapOf()
 
         // last we get the dimensions for this specific track type
-        val oldTrack = participantTrackDimensions[trackType] ?: TrackDimensions(dimensions = dimensions, visible = visible)
+        val oldTrack = participantTrackDimensions[trackType] ?: TrackDimensions(
+            dimensions = dimensions,
+            visible = visible
+        )
         val newTrack = oldTrack.copy(visible = visible, dimensions = dimensions)
         participantTrackDimensions[trackType] = newTrack
 

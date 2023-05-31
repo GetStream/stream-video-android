@@ -22,7 +22,11 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import io.getstream.video.android.compose.ui.components.call.renderer.CallSingleVideoRenderer
+import io.getstream.video.android.compose.ui.components.call.renderer.ScreenSharingVideoRendererStyle
+import io.getstream.video.android.compose.ui.components.call.renderer.VideoRendererStyle
 import io.getstream.video.android.core.Call
+import io.getstream.video.android.core.ParticipantState
 import io.getstream.video.android.core.model.ScreenSharingSession
 
 /**
@@ -33,7 +37,8 @@ import io.getstream.video.android.core.model.ScreenSharingSession
  * @param call The call that contains all the participants state and tracks.
  * @param session The screen sharing session which is active.
  * @param modifier Modifier for styling.
- * @param onRender Handler when each of the Video views render their first frame.
+ * @param style Represents a regular video call render styles.
+ * @param videoRenderer A single video renderer renders each individual participant.
  */
 @Composable
 public fun ScreenSharingCallVideoRenderer(
@@ -41,6 +46,20 @@ public fun ScreenSharingCallVideoRenderer(
     session: ScreenSharingSession,
     modifier: Modifier = Modifier,
     isZoomable: Boolean = true,
+    style: VideoRendererStyle = ScreenSharingVideoRendererStyle(),
+    videoRenderer: @Composable (
+        modifier: Modifier,
+        call: Call,
+        participant: ParticipantState,
+        style: VideoRendererStyle
+    ) -> Unit = { videoModifier, videoCall, videoParticipant, videoStyle ->
+        CallSingleVideoRenderer(
+            modifier = videoModifier,
+            call = videoCall,
+            participant = videoParticipant,
+            style = videoStyle
+        )
+    },
 ) {
     val configuration = LocalConfiguration.current
     val orientation = configuration.orientation
@@ -55,6 +74,8 @@ public fun ScreenSharingCallVideoRenderer(
             primarySpeaker = screenSharingSession?.participant,
             modifier = modifier,
             isZoomable = isZoomable,
+            style = style,
+            videoRenderer = videoRenderer
         )
     } else {
         LandscapeScreenSharingVideoRenderer(
@@ -64,6 +85,8 @@ public fun ScreenSharingCallVideoRenderer(
             primarySpeaker = screenSharingSession?.participant,
             modifier = modifier,
             isZoomable = isZoomable,
+            style = style,
+            videoRenderer = videoRenderer
         )
     }
 }

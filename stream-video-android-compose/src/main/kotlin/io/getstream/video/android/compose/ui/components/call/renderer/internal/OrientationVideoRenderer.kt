@@ -27,6 +27,8 @@ import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.unit.IntSize
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.getstream.video.android.compose.ui.components.call.renderer.CallSingleVideoRenderer
+import io.getstream.video.android.compose.ui.components.call.renderer.RegularVideoRendererStyle
+import io.getstream.video.android.compose.ui.components.call.renderer.VideoRendererStyle
 import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.ParticipantState
 
@@ -36,23 +38,26 @@ import io.getstream.video.android.core.ParticipantState
  * @param call The state of the call.
  * @param modifier Modifier for styling.
  * @param parentSize The size of the parent.
+ * @param style Represents a regular video call render styles.
+ * @param videoRenderer A single video renderer renders each individual participant.
  */
 @Composable
 internal fun BoxScope.OrientationVideoRenderer(
     modifier: Modifier = Modifier,
     call: Call,
     parentSize: IntSize = IntSize(0, 0),
+    style: VideoRendererStyle = RegularVideoRendererStyle(),
     videoRenderer: @Composable (
         modifier: Modifier,
         call: Call,
         participant: ParticipantState,
-        isFocused: Boolean
-    ) -> Unit = { videoModifier, videoCall, videoParticipant, videoIsFocused ->
+        style: VideoRendererStyle
+    ) -> Unit = { videoModifier, videoCall, videoParticipant, videoStyle ->
         CallSingleVideoRenderer(
             modifier = videoModifier,
             call = videoCall,
             participant = videoParticipant,
-            isFocused = videoIsFocused,
+            style = videoStyle
         )
     },
 ) {
@@ -78,6 +83,7 @@ internal fun BoxScope.OrientationVideoRenderer(
             callParticipants = callParticipants,
             modifier = modifier,
             parentSize = parentSize,
+            style = style,
             videoRenderer = videoRenderer,
         )
     } else {
@@ -87,6 +93,7 @@ internal fun BoxScope.OrientationVideoRenderer(
             callParticipants = callParticipants,
             modifier = modifier,
             parentSize = parentSize,
+            style = style,
             videoRenderer = videoRenderer,
         )
     }

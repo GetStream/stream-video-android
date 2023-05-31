@@ -37,6 +37,9 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.call.renderer.CallSingleVideoRenderer
 import io.getstream.video.android.compose.ui.components.call.renderer.LocalVideoContent
+import io.getstream.video.android.compose.ui.components.call.renderer.RegularVideoRendererStyle
+import io.getstream.video.android.compose.ui.components.call.renderer.VideoRendererStyle
+import io.getstream.video.android.compose.ui.components.call.renderer.copy
 import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.ParticipantState
 import io.getstream.video.android.mock.StreamMockUtils
@@ -51,6 +54,8 @@ import io.getstream.video.android.mock.mockParticipantList
  * @param callParticipants The list of participants in the call.
  * @param modifier Modifier for styling.
  * @param parentSize The size of the parent.
+ * @param style Represents a regular video call render styles.
+ * @param videoRenderer A single video renderer renders each individual participant.
  */
 @Composable
 internal fun BoxScope.PortraitVideoRenderer(
@@ -59,17 +64,18 @@ internal fun BoxScope.PortraitVideoRenderer(
     callParticipants: List<ParticipantState>,
     modifier: Modifier,
     parentSize: IntSize,
+    style: VideoRendererStyle = RegularVideoRendererStyle(),
     videoRenderer: @Composable (
         modifier: Modifier,
         call: Call,
         participant: ParticipantState,
-        isFocused: Boolean
-    ) -> Unit = { videoModifier, videoCall, videoParticipant, videoIsFocused ->
+        style: VideoRendererStyle
+    ) -> Unit = { videoModifier, videoCall, videoParticipant, videoStyle ->
         CallSingleVideoRenderer(
             modifier = videoModifier,
             call = videoCall,
             participant = videoParticipant,
-            isFocused = videoIsFocused,
+            style = videoStyle
         )
     },
 ) {
@@ -87,7 +93,9 @@ internal fun BoxScope.PortraitVideoRenderer(
                 modifier = modifier,
                 call = call,
                 participant = participant,
-                isFocused = primarySpeaker?.sessionId == participant.sessionId,
+                style = style.copy(
+                    isFocused = primarySpeaker?.sessionId == participant.sessionId
+                )
             )
         }
 
@@ -98,7 +106,9 @@ internal fun BoxScope.PortraitVideoRenderer(
                 modifier = modifier,
                 call = call,
                 participant = participant,
-                isFocused = primarySpeaker?.sessionId == participant.sessionId,
+                style = style.copy(
+                    isFocused = primarySpeaker?.sessionId == participant.sessionId
+                )
             )
         }
 
@@ -111,14 +121,18 @@ internal fun BoxScope.PortraitVideoRenderer(
                     modifier = Modifier.weight(1f),
                     call = call,
                     participant = firstParticipant,
-                    isFocused = primarySpeaker?.sessionId == firstParticipant.sessionId
+                    style = style.copy(
+                        isFocused = primarySpeaker?.sessionId == firstParticipant.sessionId
+                    )
                 )
 
                 videoRenderer.invoke(
                     modifier = Modifier.weight(1f),
                     call = call,
                     participant = secondParticipant,
-                    isFocused = primarySpeaker?.sessionId == secondParticipant.sessionId,
+                    style = style.copy(
+                        isFocused = primarySpeaker?.sessionId == secondParticipant.sessionId
+                    )
                 )
             }
         }
@@ -135,14 +149,18 @@ internal fun BoxScope.PortraitVideoRenderer(
                         modifier = Modifier.weight(1f),
                         call = call,
                         participant = firstParticipant,
-                        isFocused = primarySpeaker?.sessionId == firstParticipant.sessionId
+                        style = style.copy(
+                            isFocused = primarySpeaker?.sessionId == firstParticipant.sessionId
+                        )
                     )
 
                     videoRenderer.invoke(
                         modifier = Modifier.weight(1f),
                         call = call,
                         participant = secondParticipant,
-                        isFocused = primarySpeaker?.sessionId == secondParticipant.sessionId
+                        style = style.copy(
+                            isFocused = primarySpeaker?.sessionId == secondParticipant.sessionId
+                        )
                     )
                 }
 
@@ -151,14 +169,18 @@ internal fun BoxScope.PortraitVideoRenderer(
                         modifier = Modifier.weight(1f),
                         call = call,
                         participant = thirdParticipant,
-                        isFocused = primarySpeaker?.sessionId == thirdParticipant.sessionId,
+                        style = style.copy(
+                            isFocused = primarySpeaker?.sessionId == thirdParticipant.sessionId
+                        )
                     )
 
                     videoRenderer.invoke(
                         modifier = Modifier.weight(1f),
                         call = call,
                         participant = fourthParticipant,
-                        isFocused = primarySpeaker?.sessionId == fourthParticipant.sessionId,
+                        style = style.copy(
+                            isFocused = primarySpeaker?.sessionId == fourthParticipant.sessionId
+                        )
                     )
                 }
             }
@@ -177,14 +199,18 @@ internal fun BoxScope.PortraitVideoRenderer(
                         modifier = Modifier.weight(1f),
                         call = call,
                         participant = firstParticipant,
-                        isFocused = primarySpeaker?.sessionId == firstParticipant.sessionId
+                        style = style.copy(
+                            isFocused = primarySpeaker?.sessionId == firstParticipant.sessionId
+                        )
                     )
 
                     videoRenderer.invoke(
                         modifier = Modifier.weight(1f),
                         call = call,
                         participant = secondParticipant,
-                        isFocused = primarySpeaker?.sessionId == secondParticipant.sessionId
+                        style = style.copy(
+                            isFocused = primarySpeaker?.sessionId == secondParticipant.sessionId
+                        )
                     )
                 }
 
@@ -193,21 +219,27 @@ internal fun BoxScope.PortraitVideoRenderer(
                         modifier = Modifier.weight(1f),
                         call = call,
                         participant = thirdParticipant,
-                        isFocused = primarySpeaker?.sessionId == thirdParticipant.sessionId,
+                        style = style.copy(
+                            isFocused = primarySpeaker?.sessionId == thirdParticipant.sessionId
+                        )
                     )
 
                     videoRenderer.invoke(
                         modifier = Modifier.weight(1f),
                         call = call,
                         participant = fourthParticipant,
-                        isFocused = primarySpeaker?.sessionId == fourthParticipant.sessionId,
+                        style = style.copy(
+                            isFocused = primarySpeaker?.sessionId == fourthParticipant.sessionId
+                        )
                     )
 
                     videoRenderer.invoke(
                         modifier = Modifier.weight(1f),
                         call = call,
                         participant = fifthParticipant,
-                        isFocused = primarySpeaker?.sessionId == fifthParticipant.sessionId,
+                        style = style.copy(
+                            isFocused = primarySpeaker?.sessionId == fifthParticipant.sessionId
+                        )
                     )
                 }
             }
@@ -227,21 +259,27 @@ internal fun BoxScope.PortraitVideoRenderer(
                         modifier = Modifier.weight(1f),
                         call = call,
                         participant = firstParticipant,
-                        isFocused = primarySpeaker?.sessionId == firstParticipant.sessionId
+                        style = style.copy(
+                            isFocused = primarySpeaker?.sessionId == firstParticipant.sessionId
+                        )
                     )
 
                     videoRenderer.invoke(
                         modifier = Modifier.weight(1f),
                         call = call,
                         participant = secondParticipant,
-                        isFocused = primarySpeaker?.sessionId == secondParticipant.sessionId
+                        style = style.copy(
+                            isFocused = primarySpeaker?.sessionId == secondParticipant.sessionId
+                        )
                     )
 
                     videoRenderer.invoke(
                         modifier = Modifier.weight(1f),
                         call = call,
                         participant = thirdParticipant,
-                        isFocused = primarySpeaker?.sessionId == thirdParticipant.sessionId,
+                        style = style.copy(
+                            isFocused = primarySpeaker?.sessionId == thirdParticipant.sessionId
+                        )
                     )
                 }
 
@@ -250,21 +288,27 @@ internal fun BoxScope.PortraitVideoRenderer(
                         modifier = Modifier.weight(1f),
                         call = call,
                         participant = fourthParticipant,
-                        isFocused = primarySpeaker?.sessionId == fourthParticipant.sessionId,
+                        style = style.copy(
+                            isFocused = primarySpeaker?.sessionId == fourthParticipant.sessionId
+                        )
                     )
 
                     videoRenderer.invoke(
                         modifier = Modifier.weight(1f),
                         call = call,
                         participant = fifthParticipant,
-                        isFocused = primarySpeaker?.sessionId == fifthParticipant.sessionId,
+                        style = style.copy(
+                            isFocused = primarySpeaker?.sessionId == fifthParticipant.sessionId
+                        )
                     )
 
                     videoRenderer.invoke(
                         modifier = Modifier.weight(1f),
                         call = call,
                         participant = sixthParticipant,
-                        isFocused = primarySpeaker?.sessionId == sixthParticipant.sessionId,
+                        style = style.copy(
+                            isFocused = primarySpeaker?.sessionId == sixthParticipant.sessionId
+                        )
                     )
                 }
             }

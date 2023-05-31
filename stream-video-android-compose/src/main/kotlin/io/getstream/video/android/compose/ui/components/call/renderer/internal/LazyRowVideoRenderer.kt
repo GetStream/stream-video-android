@@ -30,6 +30,9 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.call.renderer.CallSingleVideoRenderer
+import io.getstream.video.android.compose.ui.components.call.renderer.ScreenSharingVideoRendererStyle
+import io.getstream.video.android.compose.ui.components.call.renderer.VideoRendererStyle
+import io.getstream.video.android.compose.ui.components.call.renderer.copy
 import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.ParticipantState
 import io.getstream.video.android.mock.StreamMockUtils
@@ -45,10 +48,24 @@ import io.getstream.video.android.mock.mockParticipantList
  */
 @Composable
 internal fun LazyRowVideoRenderer(
+    modifier: Modifier = Modifier,
     call: Call,
     participants: List<ParticipantState>,
     primarySpeaker: ParticipantState?,
-    modifier: Modifier = Modifier
+    style: VideoRendererStyle = ScreenSharingVideoRendererStyle(),
+    videoRenderer: @Composable (
+        modifier: Modifier,
+        call: Call,
+        participant: ParticipantState,
+        style: VideoRendererStyle
+    ) -> Unit = { videoModifier, videoCall, videoParticipant, videoStyle ->
+        CallSingleVideoRenderer(
+            modifier = videoModifier,
+            call = videoCall,
+            participant = videoParticipant,
+            style = videoStyle
+        )
+    },
 ) {
     LazyRow(
         modifier = modifier.padding(horizontal = VideoTheme.dimens.screenShareParticipantsRowPadding),
@@ -57,7 +74,11 @@ internal fun LazyRowVideoRenderer(
         content = {
             items(items = participants, key = { it.sessionId }) { participant ->
                 ListVideoRenderer(
-                    call = call, participant = participant, primarySpeaker = primarySpeaker
+                    call = call,
+                    participant = participant,
+                    primarySpeaker = primarySpeaker,
+                    style = style,
+                    videoRenderer = videoRenderer,
                 )
             }
         }
@@ -75,19 +96,18 @@ private fun ListVideoRenderer(
     call: Call,
     participant: ParticipantState,
     primarySpeaker: ParticipantState?,
+    style: VideoRendererStyle = ScreenSharingVideoRendererStyle(),
     videoRenderer: @Composable (
         modifier: Modifier,
         call: Call,
         participant: ParticipantState,
-        isFocused: Boolean
-    ) -> Unit = { videoModifier, videoCall, videoParticipant, videoIsFocused ->
+        style: VideoRendererStyle
+    ) -> Unit = { videoModifier, videoCall, videoParticipant, videoStyle ->
         CallSingleVideoRenderer(
             modifier = videoModifier,
             call = videoCall,
             participant = videoParticipant,
-            isScreenSharing = true,
-            isFocused = videoIsFocused,
-            isShowingConnectionQualityIndicator = false
+            style = videoStyle
         )
     },
 ) {
@@ -97,7 +117,9 @@ private fun ListVideoRenderer(
             .clip(RoundedCornerShape(VideoTheme.dimens.screenShareParticipantsRadius)),
         call = call,
         participant = participant,
-        isFocused = participant.sessionId == primarySpeaker?.sessionId,
+        style = style.copy(
+            isFocused = participant.sessionId == primarySpeaker?.sessionId
+        ),
     )
 }
 
