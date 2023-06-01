@@ -407,6 +407,13 @@ public final class io/getstream/video/android/compose/ui/components/avatar/Compo
 	public final fun getLambda-1$stream_video_android_compose_release ()Lkotlin/jvm/functions/Function2;
 }
 
+public final class io/getstream/video/android/compose/ui/components/avatar/ComposableSingletons$UserAvatarBackgroundKt {
+	public static final field INSTANCE Lio/getstream/video/android/compose/ui/components/avatar/ComposableSingletons$UserAvatarBackgroundKt;
+	public static field lambda-1 Lkotlin/jvm/functions/Function2;
+	public fun <init> ()V
+	public final fun getLambda-1$stream_video_android_compose_release ()Lkotlin/jvm/functions/Function2;
+}
+
 public final class io/getstream/video/android/compose/ui/components/avatar/ComposableSingletons$UserAvatarKt {
 	public static final field INSTANCE Lio/getstream/video/android/compose/ui/components/avatar/ComposableSingletons$UserAvatarKt;
 	public static field lambda-1 Lkotlin/jvm/functions/Function2;
@@ -635,6 +642,8 @@ public final class io/getstream/video/android/compose/ui/components/call/lobby/L
 
 public final class io/getstream/video/android/compose/ui/components/call/renderer/CallSingleVideoRendererKt {
 	public static final fun CallSingleVideoRenderer (Lio/getstream/video/android/core/Call;Lio/getstream/video/android/core/ParticipantState;Landroidx/compose/ui/Modifier;Lio/getstream/video/android/compose/ui/components/call/renderer/VideoRendererStyle;Lkotlin/jvm/functions/Function4;Lkotlin/jvm/functions/Function4;Lkotlin/jvm/functions/Function3;Landroidx/compose/runtime/Composer;II)V
+	public static final fun ParticipantLabel (Landroidx/compose/foundation/layout/BoxScope;Lio/getstream/video/android/core/ParticipantState;Landroidx/compose/ui/Alignment;Lkotlin/jvm/functions/Function3;Landroidx/compose/runtime/Composer;II)V
+	public static final fun ParticipantLabel (Landroidx/compose/foundation/layout/BoxScope;Ljava/lang/String;Landroidx/compose/ui/Alignment;ZZLkotlin/jvm/functions/Function3;Landroidx/compose/runtime/Composer;II)V
 	public static final fun ParticipantVideoRenderer (Lio/getstream/video/android/core/Call;Lio/getstream/video/android/core/ParticipantState;Lkotlin/jvm/functions/Function3;Landroidx/compose/runtime/Composer;II)V
 }
 
@@ -949,15 +958,15 @@ public final class io/getstream/video/android/compose/ui/components/call/ringing
 	public static final fun OutgoingCallDetails (Landroidx/compose/ui/Modifier;ZLjava/util/List;Landroidx/compose/runtime/Composer;II)V
 }
 
-public final class io/getstream/video/android/compose/ui/components/connection/ComposableSingletons$ConnectionQualityIndicatorKt {
-	public static final field INSTANCE Lio/getstream/video/android/compose/ui/components/connection/ComposableSingletons$ConnectionQualityIndicatorKt;
+public final class io/getstream/video/android/compose/ui/components/connection/ComposableSingletons$NetworkQualityIndicatorKt {
+	public static final field INSTANCE Lio/getstream/video/android/compose/ui/components/connection/ComposableSingletons$NetworkQualityIndicatorKt;
 	public static field lambda-1 Lkotlin/jvm/functions/Function2;
 	public fun <init> ()V
 	public final fun getLambda-1$stream_video_android_compose_release ()Lkotlin/jvm/functions/Function2;
 }
 
-public final class io/getstream/video/android/compose/ui/components/connection/ConnectionQualityIndicatorKt {
-	public static final fun ConnectionQualityIndicator (Lstream/video/sfu/models/ConnectionQuality;Landroidx/compose/ui/Modifier;Landroidx/compose/runtime/Composer;II)V
+public final class io/getstream/video/android/compose/ui/components/connection/NetworkQualityIndicatorKt {
+	public static final fun NetworkQualityIndicator (Lio/getstream/video/android/core/model/NetworkQuality;Landroidx/compose/ui/Modifier;Landroidx/compose/runtime/Composer;II)V
 }
 
 public final class io/getstream/video/android/compose/ui/components/participants/CallParticipantsInfoMenuKt {

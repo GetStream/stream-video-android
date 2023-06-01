@@ -19,6 +19,7 @@ package io.getstream.video.android.core
 import io.getstream.result.Result
 import io.getstream.video.android.core.model.AudioTrack
 import io.getstream.video.android.core.model.MediaTrack
+import io.getstream.video.android.core.model.NetworkQuality
 import io.getstream.video.android.core.model.VideoTrack
 import io.getstream.video.android.core.utils.asStateFlow
 import io.getstream.video.android.core.utils.mapState
@@ -28,7 +29,6 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import org.openapitools.client.models.MuteUsersResponse
 import org.openapitools.client.models.ReactionResponse
-import stream.video.sfu.models.ConnectionQuality
 import stream.video.sfu.models.Participant
 import stream.video.sfu.models.TrackType
 import java.util.Date
@@ -105,9 +105,9 @@ public data class ParticipantState(
     /**
      * The video quality of the participant
      */
-    internal val _connectionQuality: MutableStateFlow<ConnectionQuality> =
-        MutableStateFlow(ConnectionQuality.CONNECTION_QUALITY_UNSPECIFIED)
-    val connectionQuality: StateFlow<ConnectionQuality> = _connectionQuality
+    internal val _networkQuality: MutableStateFlow<NetworkQuality> =
+        MutableStateFlow(NetworkQuality.UnSpecified())
+    val networkQuality: StateFlow<NetworkQuality> = _networkQuality
 
     internal val _dominantSpeaker: MutableStateFlow<Boolean> = MutableStateFlow(false)
     val dominantSpeaker: StateFlow<Boolean> = _dominantSpeaker
@@ -172,7 +172,7 @@ public data class ParticipantState(
         _joinedAt.value = participant.joined_at?.toEpochMilli()?.let { Date(it) }
             ?: Date() // convert instant to date
         trackLookupPrefix = participant.track_lookup_prefix
-        _connectionQuality.value = participant.connection_quality
+        _networkQuality.value = NetworkQuality.fromConnectionQuality(participant.connection_quality)
         _speaking.value = participant.is_speaking
         _dominantSpeaker.value = participant.is_dominant_speaker
         _audioLevel.value = participant.audio_level

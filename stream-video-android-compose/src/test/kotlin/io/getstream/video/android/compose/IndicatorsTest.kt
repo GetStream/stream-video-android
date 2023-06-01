@@ -28,7 +28,7 @@ import io.getstream.video.android.compose.base.BaseComposeTest
 import io.getstream.video.android.compose.ui.components.audio.ActiveSoundLevels
 import io.getstream.video.android.compose.ui.components.audio.SoundIndicator
 import io.getstream.video.android.compose.ui.components.call.renderer.ParticipantLabel
-import io.getstream.video.android.compose.ui.components.connection.ConnectionQualityIndicator
+import io.getstream.video.android.compose.ui.components.connection.NetworkQualityIndicator
 import io.getstream.video.android.mock.mockParticipantList
 import org.junit.Rule
 import org.junit.Test
@@ -63,14 +63,14 @@ internal class IndicatorsTest : BaseComposeTest() {
     fun `snapshot Connection ConnectionQualityIndicator composable`() {
         snapshot {
             Row {
-                ConnectionQualityIndicator(
-                    connectionQuality = ConnectionQuality.CONNECTION_QUALITY_POOR
+                NetworkQualityIndicator(
+                    networkQuality = ConnectionQuality.CONNECTION_QUALITY_POOR
                 )
-                ConnectionQualityIndicator(
-                    connectionQuality = ConnectionQuality.CONNECTION_QUALITY_GOOD
+                NetworkQualityIndicator(
+                    networkQuality = ConnectionQuality.CONNECTION_QUALITY_GOOD
                 )
-                ConnectionQualityIndicator(
-                    connectionQuality = ConnectionQuality.CONNECTION_QUALITY_EXCELLENT
+                NetworkQualityIndicator(
+                    networkQuality = ConnectionQuality.CONNECTION_QUALITY_EXCELLENT
                 )
             }
         }

@@ -17,7 +17,6 @@
 package io.getstream.video.android.core.model
 
 import io.getstream.video.android.core.utils.toCallUser
-import org.openapitools.client.models.CallCreatedEvent
 import org.openapitools.client.models.CallResponse
 import org.openapitools.client.models.MemberResponse
 import org.openapitools.client.models.OwnCapability
@@ -92,14 +91,6 @@ internal fun CallResponse.toCallInfo(): CallInfo {
 //            recordEgress = recordEgress
 //        ),
         custom = custom
-    )
-}
-
-internal fun CallCreatedEvent.toCallDetails(): CallDetails {
-    return CallDetails(
-        members = members.associate { it.userId to it.toCallUser() },
-        memberUserIds = members.map { it.userId },
-        ownCapabilities = call.ownCapabilities
     )
 }
 

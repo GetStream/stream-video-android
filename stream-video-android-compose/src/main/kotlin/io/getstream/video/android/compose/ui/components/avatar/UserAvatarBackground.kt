@@ -25,13 +25,18 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
+import io.getstream.video.android.compose.R
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.background.ParticipantImageBackground
+import io.getstream.video.android.mock.StreamMockUtils
+import io.getstream.video.android.mock.mockUsers
 import io.getstream.video.android.model.User
 
 /**
@@ -85,6 +90,19 @@ public fun UserAvatarBackground(
             initialsAvatarOffset = initialsAvatarOffset,
             previewPlaceholder = previewPlaceholder,
             loadingPlaceholder = loadingPlaceholder
+        )
+    }
+}
+
+@Preview
+@Composable
+private fun UserAvatarBackgroundPreview() {
+    StreamMockUtils.initializeStreamVideo(LocalContext.current)
+    VideoTheme {
+        UserAvatarBackground(
+            user = mockUsers[0],
+            modifier = Modifier.fillMaxSize(),
+            previewPlaceholder = io.getstream.video.android.ui.common.R.drawable.stream_video_call_sample
         )
     }
 }

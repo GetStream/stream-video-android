@@ -31,8 +31,6 @@ import retrofit2.http.Query
 
 import org.openapitools.client.models.AcceptCallResponse
 import org.openapitools.client.models.EndCallResponse
-import org.openapitools.client.models.GetCallEdgeServerRequest
-import org.openapitools.client.models.GetCallEdgeServerResponse
 import org.openapitools.client.models.GetCallResponse
 import org.openapitools.client.models.GetEdgesResponse
 import org.openapitools.client.models.GetOrCreateCallRequest
@@ -117,26 +115,6 @@ interface VideoCallsApi {
         @Query("ring") ring: Boolean? = null,
         @Query("notify") notify: Boolean? = null
     ): GetCallResponse
-
-    /**
-     * Get Call Edge Server
-     * Retrieve the edge server information and credentials for a call.  Required permissions: - JoinCall
-     * Responses:
-     *  - 201: Successful response
-     *  - 400: Bad request
-     *  - 429: Too many requests
-     *
-     * @param type
-     * @param id
-     * @param getCallEdgeServerRequest
-     * @return [GetCallEdgeServerResponse]
-     */
-    @POST("/video/call/{type}/{id}/get_edge_server")
-    suspend fun getCallEdgeServer(
-        @Path("type") type: String,
-        @Path("id") id: String,
-        @Body getCallEdgeServerRequest: GetCallEdgeServerRequest
-    ): GetCallEdgeServerResponse
 
     /**
      * Get Edges

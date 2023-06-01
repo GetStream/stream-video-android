@@ -25,6 +25,7 @@ package org.openapitools.client.models
 
 import org.openapitools.client.models.CallResponse
 import org.openapitools.client.models.MemberResponse
+import org.openapitools.client.models.OwnCapability
 import org.openapitools.client.models.UserResponse
 
 
@@ -39,6 +40,7 @@ import com.squareup.moshi.Json
  * @param call
  * @param duration
  * @param members
+ * @param ownCapabilities
  * @param membership
  */
 
@@ -56,6 +58,9 @@ data class GetCallResponse (
 
     @Json(name = "members")
     val members: kotlin.collections.List<MemberResponse>,
+
+    @Json(name = "own_capabilities")
+    val ownCapabilities: kotlin.collections.List<OwnCapability>,
 
     @Json(name = "membership")
     val membership: MemberResponse? = null

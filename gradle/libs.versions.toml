@@ -3,39 +3,39 @@ androidGradlePlugin = "7.4.2"
 spotless = "6.7.0"
 nexusPlugin = "1.3.0"
 kotlin = "1.8.10"
-kotlinSerialization = "1.5.0"
+kotlinSerialization = "1.5.1"
 kotlinSerializationConverter = "1.0.0"
-kotlinxCoroutines = "1.6.4"
+kotlinxCoroutines = "1.7.1"
 kotlinDokka = "1.8.10"
-jvmTarget = "1.8"
+jvmTarget = "11"
 
-androidxMaterial = "1.8.0"
-androidxAppCompat = "1.5.0"
-androidxCore = "1.9.0"
-androidxAnnotation = "1.5.0"
+androidxMaterial = "1.9.0"
+androidxAppCompat = "1.6.1"
+androidxCore = "1.10.1"
+androidxAnnotation = "1.6.0"
 androidxLifecycle = "2.6.1"
 androidxStartup = "1.1.1"
-androidxActivity = "1.5.1"
+androidxActivity = "1.7.2"
 androidxDataStore = "1.0.0"
 googleService = "4.3.14"
 
-androidxComposeBom = "2023.04.00"
+androidxComposeBom = "2023.05.01"
 androidxComposeCompiler = "1.4.4"
-androidxComposeTracing = "1.0.0-alpha01"
+androidxComposeTracing = "1.0.0-alpha03"
 androidxHiltNavigation = "1.0.0"
 androidxComposeNavigation = "2.5.3"
 
 coil = "2.2.2"
-landscapist = "2.1.9"
+landscapist = "2.2.1"
 accompanist = "0.30.1"
 telephoto = "0.3.0"
 
-wire = "4.4.1"
-okhttp = "4.10.0"
+wire = "4.5.1"
+okhttp = "4.11.0"
 retrofit = "2.9.0"
-moshi = "1.14.0"
+moshi = "1.15.0"
 threetenAbp = "1.4.6"
-tink = "1.7.0"
+tink = "1.9.0"
 
 streamWebRTC = "1.0.2"
 streamResult = "1.1.0"
@@ -43,11 +43,11 @@ streamChat = "6.0.0-beta1"
 streamLog = "1.1.3"
 streamPush = "1.0.2"
 
-androidxTest = "1.4.0"
+androidxTest = "1.5.0"
 androidxTestCore = "1.5.0"
-androidxProfileinstaller = "1.3.0"
-androidxMacroBenchmark = "1.2.0-alpha12"
-androidxUiAutomator = "2.3.0-alpha02"
+androidxProfileinstaller = "1.3.1"
+androidxMacroBenchmark = "1.2.0-alpha13"
+androidxUiAutomator = "2.3.0-alpha03"
 androidxContraintLayout = "2.1.4"
 androidxEspresso = "3.5.1"
 androidxJunit = "1.1.3"
@@ -57,12 +57,12 @@ junit = "4.13.2"
 truth = "1.1.3"
 mockk = "1.13.4"
 kotlinTestJunit = "1.8.20"
-firebaseBom = "31.5.0"
+firebaseBom = "32.1.0"
 firebaseCrashlytics = "2.9.5"
 
-hilt = "2.45"
-desugar = "1.2.2"
-leakCanary = "2.10"
+hilt = "2.46.1"
+desugar = "2.0.3"
+leakCanary = "2.11"
 
 [libraries]
 
@@ -140,7 +140,7 @@ kotlinx-coroutines-core = { group = "org.jetbrains.kotlinx", name = "kotlinx-cor
 kotlinx-coroutines-android = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-android", version.ref = "kotlinxCoroutines" }
 kotlinx-coroutines-test = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-test",  version.ref = "kotlinxCoroutines" }
 kotlinx-serialization-json = { group = "org.jetbrains.kotlinx", name = "kotlinx-serialization-json", version.ref = "kotlinSerialization" }
-kotlinx-serialization-protobuf = { group = "org.jetbrains.kotlinx", name = "kotlinx-serialization-protobuf", version.ref = "kotlinSerializationConverter" }
+kotlinx-serialization-protobuf = { group = "org.jetbrains.kotlinx", name = "kotlinx-serialization-protobuf", version.ref = "kotlinSerialization" }
 kotlinx-serialization-converter = { group = "com.jakewharton.retrofit", name = "retrofit2-kotlinx-serialization-converter", version.ref = "kotlinSerializationConverter" }
 
 androidx-profileinstaller = { group = "androidx.profileinstaller", name = "profileinstaller", version.ref = "androidxProfileinstaller" }

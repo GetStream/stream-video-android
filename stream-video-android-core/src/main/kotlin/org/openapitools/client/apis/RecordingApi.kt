@@ -32,7 +32,25 @@ import org.openapitools.client.models.StopRecordingResponse
 
 interface RecordingApi {
     /**
-     * List recordings
+     * List recordings (type, id)
+     * Lists recordings  Required permissions: - ListRecordings
+     * Responses:
+     *  - 200: Successful response
+     *  - 400: Bad request
+     *  - 429: Too many requests
+     *
+     * @param type
+     * @param id
+     * @return [ListRecordingsResponse]
+     */
+    @GET("/video/call/{type}/{id}/recordings")
+    suspend fun listRecordingsTypeId0(
+        @Path("type") type: String,
+        @Path("id") id: String
+    ): ListRecordingsResponse
+
+    /**
+     * List recordings (type, id, session)
      * Lists recordings  Required permissions: - ListRecordings
      * Responses:
      *  - 200: Successful response
@@ -45,7 +63,7 @@ interface RecordingApi {
      * @return [ListRecordingsResponse]
      */
     @GET("/video/call/{type}/{id}/{session}/recordings")
-    suspend fun listRecordings(
+    suspend fun listRecordingsTypeIdSession1(
         @Path("type") type: String,
         @Path("id") id: String,
         @Path("session") session: String

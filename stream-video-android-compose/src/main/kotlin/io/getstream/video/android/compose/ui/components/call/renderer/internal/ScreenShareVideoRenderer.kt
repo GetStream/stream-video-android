@@ -24,7 +24,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.getstream.video.android.compose.ui.components.call.renderer.ParticipantLabel
-import io.getstream.video.android.compose.ui.components.connection.ConnectionQualityIndicator
+import io.getstream.video.android.compose.ui.components.connection.NetworkQualityIndicator
 import io.getstream.video.android.compose.ui.components.video.VideoRenderer
 import io.getstream.video.android.compose.ui.components.video.VideoScalingType
 import io.getstream.video.android.core.Call
@@ -70,9 +70,9 @@ public fun ScreenShareVideoRenderer(
         ParticipantLabel(screenShareParticipant, labelPosition)
 
         if (isShowConnectionQualityIndicator) {
-            val connectionQuality by screenShareParticipant.connectionQuality.collectAsStateWithLifecycle()
-            ConnectionQualityIndicator(
-                connectionQuality = connectionQuality,
+            val connectionQuality by screenShareParticipant.networkQuality.collectAsStateWithLifecycle()
+            NetworkQualityIndicator(
+                networkQuality = connectionQuality,
                 modifier = Modifier.align(Alignment.BottomEnd)
             )
         }

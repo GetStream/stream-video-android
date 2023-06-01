@@ -23,6 +23,7 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -55,15 +56,15 @@ import io.getstream.video.android.common.model.getSoundIndicatorState
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.audio.SoundIndicator
 import io.getstream.video.android.compose.ui.components.avatar.UserAvatarBackground
-import io.getstream.video.android.compose.ui.components.connection.ConnectionQualityIndicator
+import io.getstream.video.android.compose.ui.components.connection.NetworkQualityIndicator
 import io.getstream.video.android.compose.ui.components.video.VideoRenderer
 import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.ParticipantState
+import io.getstream.video.android.core.model.NetworkQuality
 import io.getstream.video.android.mock.StreamMockUtils
 import io.getstream.video.android.mock.mockCall
 import io.getstream.video.android.mock.mockParticipantList
 import io.getstream.video.android.ui.common.R
-import stream.video.sfu.models.ConnectionQuality
 
 /**
  * Renders a single participant with a given call, which contains all the call states.
@@ -75,7 +76,7 @@ import stream.video.sfu.models.ConnectionQuality
  * @param style Represents a regular video call render styles.
  * @param labelContent Content is shown that displays participant's name and device states.
  * @param connectionIndicatorContent Content is shown that indicates the connection quality.
- * @param onRenderFailedContent Content is shown the video track is failed to load or not available.
+ * @param videoFallbackContent Content is shown the video track is failed to load or not available.
  */
 @Composable
 public fun CallSingleVideoRenderer(
@@ -86,20 +87,20 @@ public fun CallSingleVideoRenderer(
     labelContent: @Composable BoxScope.(ParticipantState) -> Unit = {
         ParticipantLabel(participant, style.labelPosition)
     },
-    connectionIndicatorContent: @Composable BoxScope.(ConnectionQuality) -> Unit = {
-        ConnectionQualityIndicator(
-            connectionQuality = it,
+    connectionIndicatorContent: @Composable BoxScope.(NetworkQuality) -> Unit = {
+        NetworkQualityIndicator(
+            networkQuality = it,
             modifier = Modifier.align(BottomEnd)
         )
     },
-    onRenderFailedContent: @Composable (Call) -> Unit = {
+    videoFallbackContent: @Composable (Call) -> Unit = {
         val user by participant.user.collectAsStateWithLifecycle()
         UserAvatarBackground(user = user)
     },
 ) {
     TextStyle
     val reactions by participant.reactions.collectAsStateWithLifecycle()
-    val connectionQuality by participant.connectionQuality.collectAsStateWithLifecycle()
+    val connectionQuality by participant.networkQuality.collectAsStateWithLifecycle()
 
     val containerModifier = if (style.isFocused) modifier.border(
         border = if (style.isScreenSharing) {
@@ -130,7 +131,7 @@ public fun CallSingleVideoRenderer(
         ParticipantVideoRenderer(
             call = call,
             participant = participant,
-            onRenderFailedContent = onRenderFailedContent
+            videoFallbackContent = videoFallbackContent
         )
 
         if (style.isShowingParticipantLabel) {
@@ -149,13 +150,13 @@ public fun CallSingleVideoRenderer(
  *
  * @param call The call that contains all the participants state and tracks.
  * @param participant Participant to render.
- * @param onRenderFailedContent Content is shown the video track is failed to load or not available.
+ * @param videoFallbackContent Content is shown the video track is failed to load or not available.
  */
 @Composable
 public fun ParticipantVideoRenderer(
     call: Call,
     participant: ParticipantState,
-    onRenderFailedContent: @Composable (Call) -> Unit = {
+    videoFallbackContent: @Composable (Call) -> Unit = {
         val user by participant.user.collectAsStateWithLifecycle()
         UserAvatarBackground(user = user)
     },
@@ -177,14 +178,27 @@ public fun ParticipantVideoRenderer(
     VideoRenderer(
         call = call,
         media = video,
-        onRenderFailedContent = onRenderFailedContent
+        videoFallbackContent = videoFallbackContent
     )
 }
 
 @Composable
-internal fun BoxScope.ParticipantLabel(
+public fun BoxScope.ParticipantLabel(
     participant: ParticipantState,
-    labelPosition: Alignment,
+    labelPosition: Alignment = BottomStart,
+    soundIndicatorContent: @Composable RowScope.() -> Unit = {
+        val audioEnabled by participant.audioEnabled.collectAsStateWithLifecycle()
+        val speaking by participant.speaking.collectAsStateWithLifecycle()
+        SoundIndicator(
+            state = getSoundIndicatorState(
+                hasAudio = audioEnabled,
+                isSpeaking = speaking
+            ),
+            modifier = Modifier
+                .align(CenterVertically)
+                .padding(horizontal = VideoTheme.dimens.callParticipantSoundIndicatorPadding)
+        )
+    }
 ) {
     val audioEnabled by participant.audioEnabled.collectAsStateWithLifecycle()
     val speaking by participant.speaking.collectAsStateWithLifecycle()
@@ -200,16 +214,28 @@ internal fun BoxScope.ParticipantLabel(
         nameLabel = nameLabel,
         labelPosition = labelPosition,
         hasAudio = audioEnabled,
-        isSpeaking = speaking
+        isSpeaking = speaking,
+        soundIndicatorContent = soundIndicatorContent
     )
 }
 
 @Composable
-internal fun BoxScope.ParticipantLabel(
+public fun BoxScope.ParticipantLabel(
     nameLabel: String,
-    labelPosition: Alignment,
-    hasAudio: Boolean,
-    isSpeaking: Boolean
+    labelPosition: Alignment = BottomStart,
+    hasAudio: Boolean = false,
+    isSpeaking: Boolean = false,
+    soundIndicatorContent: @Composable RowScope.() -> Unit = {
+        SoundIndicator(
+            state = getSoundIndicatorState(
+                hasAudio = hasAudio,
+                isSpeaking = isSpeaking
+            ),
+            modifier = Modifier
+                .align(CenterVertically)
+                .padding(horizontal = VideoTheme.dimens.callParticipantSoundIndicatorPadding)
+        )
+    }
 ) {
     Row(
         modifier = Modifier
@@ -236,15 +262,7 @@ internal fun BoxScope.ParticipantLabel(
             overflow = TextOverflow.Ellipsis
         )
 
-        SoundIndicator(
-            state = getSoundIndicatorState(
-                hasAudio = hasAudio,
-                isSpeaking = isSpeaking
-            ),
-            modifier = Modifier
-                .align(CenterVertically)
-                .padding(horizontal = VideoTheme.dimens.callParticipantSoundIndicatorPadding)
-        )
+        soundIndicatorContent.invoke(this)
     }
 }
 

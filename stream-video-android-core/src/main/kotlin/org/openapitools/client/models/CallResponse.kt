@@ -26,7 +26,6 @@ package org.openapitools.client.models
 import org.openapitools.client.models.CallIngressResponse
 import org.openapitools.client.models.CallSessionResponse
 import org.openapitools.client.models.CallSettingsResponse
-import org.openapitools.client.models.OwnCapability
 import org.openapitools.client.models.UserResponse
 
 
@@ -48,7 +47,6 @@ import com.squareup.moshi.Json
  * @param hlsPlaylistUrl
  * @param id Call ID
  * @param ingress
- * @param ownCapabilities The capabilities of the current user
  * @param recording
  * @param settings
  * @param transcribing
@@ -99,10 +97,6 @@ data class CallResponse (
 
     @Json(name = "ingress")
     val ingress: CallIngressResponse,
-
-    /* The capabilities of the current user */
-    @Json(name = "own_capabilities")
-    val ownCapabilities: kotlin.collections.List<OwnCapability>,
 
     @Json(name = "recording")
     val recording: kotlin.Boolean,
