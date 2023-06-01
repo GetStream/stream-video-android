@@ -101,10 +101,16 @@ public data class ParticipantState(
     val joinedAt: StateFlow<OffsetDateTime?> = _joinedAt
 
     /**
-     * The audio level of the participant
+     * The audio level of the participant, single float value
      */
-    internal val _audioLevel: MutableStateFlow<List<Float>> = MutableStateFlow(listOf(0f,0f,0f,0f,0f,0f,0f,0f,0f,0f))
-    val audioLevel: StateFlow<List<Float>> = _audioLevel
+    internal val _audioLevel: MutableStateFlow<Float> = MutableStateFlow(0f)
+    val audioLevel: StateFlow<Float> = _audioLevel
+
+    /**
+     * The last 10 values for the audio level. This list easier to work with for some audio visualizations
+     */
+    internal val _audioLevels: MutableStateFlow<List<Float>> = MutableStateFlow(listOf(0f,0f,0f,0f,0f,0f,0f,0f,0f,0f))
+    val audioLevels: StateFlow<List<Float>> = _audioLevels
 
     /**
      * The video quality of the participant
@@ -172,10 +178,11 @@ public data class ParticipantState(
     }
 
     fun updateAudioLevel(audioLevel: Float) {
-        val currentAudio = _audioLevel.value.toMutableList()
+        val currentAudio = _audioLevels.value.toMutableList()
         currentAudio.removeAt(0)
         currentAudio.add(audioLevel)
-        _audioLevel.value = currentAudio.toList()
+        _audioLevels.value = currentAudio.toList()
+        _audioLevel.value = audioLevel
     }
 
     fun updateFromParticipantInfo(participant: Participant) {

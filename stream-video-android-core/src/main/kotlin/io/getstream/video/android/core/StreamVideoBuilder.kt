@@ -33,6 +33,7 @@ import io.getstream.video.android.model.UserToken
 import io.getstream.video.android.model.UserType
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
+import java.util.UUID
 
 /**
  * The StreamVideoBuilder is used to create a new instance of the StreamVideoClient.
@@ -55,7 +56,7 @@ public class StreamVideoBuilder @JvmOverloads constructor(
     /** Your GEO routing policy, supports geofencing for privacy concerns */
     private val geo: GEO = GEO.GlobalEdgeNetwork,
     /** The user object, can be a regular user, guest user or anonymous */
-    private val user: User,
+    private var user: User,
     /** The token for this user generated using your API secret on your server */
     private val token: UserToken = "",
     /** If a token is expired, the token provider makes a request to your backend for a new token */
@@ -93,6 +94,15 @@ public class StreamVideoBuilder @JvmOverloads constructor(
             throw IllegalArgumentException(
                 "Either a user token or a token provider must be provided"
             )
+        }
+
+        if (user.type == UserType.Authenticated && user.id.isEmpty()) {
+            throw IllegalArgumentException(
+                "Please specify the user id for authenticated users"
+            )
+        } else if (user.type == UserType.Anonymous && user.id.isEmpty()) {
+            val randomId = UUID.randomUUID().toString()
+            user = user.copy(id = "anon-$randomId")
         }
 
         // initializes
