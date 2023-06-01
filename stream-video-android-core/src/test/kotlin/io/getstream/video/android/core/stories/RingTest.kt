@@ -48,7 +48,7 @@ class RingTest : IntegrationTestBase() {
         val ringEvent = CallRingEvent(
             call = call.toResponse(userResponse),
             callCid = call.cid,
-            createdAt= nowUtc,
+            createdAt = nowUtc,
             sessionId = "",
             user = userResponse,
             members = emptyList()
@@ -96,5 +96,4 @@ class RingTest : IntegrationTestBase() {
         // verify that call.state.rejectedBy is updated
         assertThat(call.state.rejectedBy.value).contains("tommaso")
     }
-
 }

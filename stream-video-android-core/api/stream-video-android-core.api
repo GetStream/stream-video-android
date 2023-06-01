@@ -85,6 +85,7 @@ public final class io/getstream/video/android/core/CallHealthMonitor {
 public final class io/getstream/video/android/core/CallState {
 	public fun <init> (Lio/getstream/video/android/core/Call;Lio/getstream/video/android/model/User;)V
 	public final fun clearParticipants ()V
+	public final fun getAcceptedBy ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun getActiveSpeakers ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun getBackstage ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun getBlockedUserIds ()Lkotlinx/coroutines/flow/StateFlow;
@@ -113,6 +114,7 @@ public final class io/getstream/video/android/core/CallState {
 	public final fun getPinnedParticipants ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun getReactions ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun getRecording ()Lkotlinx/coroutines/flow/StateFlow;
+	public final fun getRejectedBy ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun getRemoteParticipants ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun getRingingState ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun getScope ()Lkotlinx/coroutines/CoroutineScope;

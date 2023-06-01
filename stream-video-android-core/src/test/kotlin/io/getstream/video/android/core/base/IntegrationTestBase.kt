@@ -343,8 +343,8 @@ open class IntegrationTestBase(connectCoordinatorWS: Boolean = true) : TestBase(
 // convert a Call object to a CallResponse object
 internal fun Call.toResponse(createdBy: UserResponse): CallResponse {
     val now = OffsetDateTime.now(Clock.systemUTC())
-    val ingress = CallIngressResponse(rtmp= RTMPIngress(address =""))
-    val audioSettings =  AudioSettings(
+    val ingress = CallIngressResponse(rtmp = RTMPIngress(address = ""))
+    val audioSettings = AudioSettings(
         accessRequestEnabled = true,
         micDefaultOn = true,
         opusDtxEnabled = true,
@@ -352,13 +352,14 @@ internal fun Call.toResponse(createdBy: UserResponse): CallResponse {
         speakerDefaultOn = true
     )
     val settings = CallSettingsResponse(
-        audio =audioSettings,
-        backstage= BackstageSettings(enabled = false),
-        broadcasting = BroadcastSettings(enabled = false, hls= HLSSettings(autoOn=false, enabled = false, qualityTracks = listOf("f"))),
+        audio = audioSettings,
+        backstage = BackstageSettings(enabled = false),
+        broadcasting = BroadcastSettings(enabled = false, hls = HLSSettings(autoOn = false, enabled = false, qualityTracks = listOf("f"))),
         geofencing = GeofenceSettings(names = emptyList()),
-        recording = RecordSettings(audioOnly=false, mode= RecordSettings.Mode.available, quality = RecordSettings.Quality._720p
+        recording = RecordSettings(
+            audioOnly = false, mode = RecordSettings.Mode.available, quality = RecordSettings.Quality._720p
         ),
-        ring = RingSettings(autoCancelTimeoutMs=10000, incomingCallTimeoutMs=10000),
+        ring = RingSettings(autoCancelTimeoutMs = 10000, incomingCallTimeoutMs = 10000),
         screensharing = ScreensharingSettings(false, false),
         transcription = TranscriptionSettings("test", TranscriptionSettings.Mode.available),
         video = VideoSettings(false, false, VideoSettings.CameraFacing.front, false, TargetResolution(3000000, 1024, 1280))
