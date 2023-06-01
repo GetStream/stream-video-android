@@ -62,7 +62,7 @@ import io.getstream.webrtc.android.ui.VideoTextureViewRenderer
  * @param call The call state that contains all the tracks and participants.
  * @param media A media contains a video track or an audio track to be rendered.
  * @param modifier Modifier for styling.
- * @param onRenderFailedContent Content is shown the video track is failed to load or not available.
+ * @param videoFallbackContent Content is shown the video track is failed to load or not available.
  * @param onRender Handler when the view is rendered.
  */
 @Composable
@@ -71,7 +71,7 @@ public fun VideoRenderer(
     media: ParticipantState.Media?,
     modifier: Modifier = Modifier,
     videoScalingType: VideoScalingType = VideoScalingType.SCALE_ASPECT_BALANCED,
-    onRenderFailedContent: @Composable (Call) -> Unit = {
+    videoFallbackContent: @Composable (Call) -> Unit = {
         DefaultMediaTrackFallbackContent(
             modifier,
             call
@@ -128,7 +128,7 @@ public fun VideoRenderer(
             modifier = modifier.testTag("video_renderer"),
         )
     } else {
-        onRenderFailedContent.invoke(call)
+        videoFallbackContent.invoke(call)
     }
 }
 

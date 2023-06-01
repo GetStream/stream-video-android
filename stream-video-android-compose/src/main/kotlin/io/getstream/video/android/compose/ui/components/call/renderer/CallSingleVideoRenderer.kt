@@ -75,7 +75,7 @@ import stream.video.sfu.models.ConnectionQuality
  * @param style Represents a regular video call render styles.
  * @param labelContent Content is shown that displays participant's name and device states.
  * @param connectionIndicatorContent Content is shown that indicates the connection quality.
- * @param onRenderFailedContent Content is shown the video track is failed to load or not available.
+ * @param videoFallbackContent Content is shown the video track is failed to load or not available.
  */
 @Composable
 public fun CallSingleVideoRenderer(
@@ -92,7 +92,7 @@ public fun CallSingleVideoRenderer(
             modifier = Modifier.align(BottomEnd)
         )
     },
-    onRenderFailedContent: @Composable (Call) -> Unit = {
+    videoFallbackContent: @Composable (Call) -> Unit = {
         val user by participant.user.collectAsStateWithLifecycle()
         UserAvatarBackground(user = user)
     },
@@ -130,7 +130,7 @@ public fun CallSingleVideoRenderer(
         ParticipantVideoRenderer(
             call = call,
             participant = participant,
-            onRenderFailedContent = onRenderFailedContent
+            videoFallbackContent = videoFallbackContent
         )
 
         if (style.isShowingParticipantLabel) {
@@ -149,13 +149,13 @@ public fun CallSingleVideoRenderer(
  *
  * @param call The call that contains all the participants state and tracks.
  * @param participant Participant to render.
- * @param onRenderFailedContent Content is shown the video track is failed to load or not available.
+ * @param videoFallbackContent Content is shown the video track is failed to load or not available.
  */
 @Composable
 public fun ParticipantVideoRenderer(
     call: Call,
     participant: ParticipantState,
-    onRenderFailedContent: @Composable (Call) -> Unit = {
+    videoFallbackContent: @Composable (Call) -> Unit = {
         val user by participant.user.collectAsStateWithLifecycle()
         UserAvatarBackground(user = user)
     },
@@ -177,7 +177,7 @@ public fun ParticipantVideoRenderer(
     VideoRenderer(
         call = call,
         media = video,
-        onRenderFailedContent = onRenderFailedContent
+        videoFallbackContent = videoFallbackContent
     )
 }
 
