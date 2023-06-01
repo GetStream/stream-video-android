@@ -22,9 +22,25 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
+import androidx.compose.animation.core.RepeatMode
+import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.rememberInfiniteTransition
+import androidx.compose.animation.core.tween
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.State
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.unit.dp
 import io.getstream.video.android.common.permission.PermissionManager
 import io.getstream.video.android.common.viewmodel.CallViewModel
@@ -36,11 +52,21 @@ import io.getstream.video.android.compose.ui.components.call.controls.actions.Fl
 import io.getstream.video.android.compose.ui.components.call.controls.actions.LeaveCallAction
 import io.getstream.video.android.compose.ui.components.call.controls.actions.ToggleCameraAction
 import io.getstream.video.android.compose.ui.components.call.controls.actions.ToggleMicrophoneAction
+import io.getstream.video.android.compose.ui.components.call.renderer.CallSingleVideoRenderer
+import io.getstream.video.android.compose.ui.components.call.renderer.ParticipantLabel
 import io.getstream.video.android.core.StreamVideo
 import io.getstream.video.android.core.call.state.ToggleCamera
 import io.getstream.video.android.core.call.state.ToggleMicrophone
 import io.getstream.video.android.model.StreamCallId
 import io.getstream.video.android.model.streamCallId
+import kotlin.random.Random
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.stateIn
 
 class CallActivity : ComponentActivity() {
 
@@ -59,6 +85,23 @@ class CallActivity : ComponentActivity() {
                     modifier = Modifier.background(color = VideoTheme.colors.appBackground),
                     callViewModel = vm,
                     onBackPressed = { finish() },
+                    videoRenderer = { modifier, call, participant, style ->
+                        CallSingleVideoRenderer(
+                            modifier = modifier,
+                            call = call,
+                            participant = participant,
+                            style = style,
+                            labelContent = {
+                                val fakeAudio by fakeAudioState().collectAsState()
+                                ParticipantLabel(
+                                    participant = participant,
+                                    soundIndicatorContent = {
+                                        AudioVolumeIndicator(fakeAudio)
+                                    }
+                                )
+                            }
+                        )
+                    },
                     callControlsContent = {
                         ControlActions(
                             callViewModel = vm,
@@ -147,6 +190,71 @@ class CallActivity : ComponentActivity() {
                 flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
                 putExtra(EXTRA_CALL_ID, callId)
             }
+        }
+    }
+}
+
+
+fun fakeAudioState(): StateFlow<List<Float>> {
+    val audioFlow = flow {
+        val audioLevels = mutableListOf(0f, 0f, 0f, 0f, 0f)
+        while (true) {
+            val newValue = Random.nextFloat()
+            audioLevels.removeAt(0)
+            audioLevels.add(newValue)
+            emit(audioLevels.toList())
+            delay(300)
+        }
+    }
+    return audioFlow.stateIn(
+        scope = CoroutineScope(Dispatchers.Default),
+        started = SharingStarted.Eagerly,
+        initialValue = listOf(0f, 0f, 0f, 0f, 0f)
+    )
+}
+
+@Composable
+fun AudioVolumeIndicator(audioState: List<Float>) {
+    // based on this fun blogpost: https://proandroiddev.com/jetpack-compose-tutorial-replicating-dribbble-audio-app-part-1-513ac91c02e3
+    val infiniteAnimation = rememberInfiniteTransition()
+    val animations = mutableListOf<State<Float>>()
+
+    repeat(5) {
+        val durationMillis = Random.nextInt(500, 1000)
+        animations += infiniteAnimation.animateFloat(
+            initialValue = 0f,
+            targetValue = 1f,
+            animationSpec = infiniteRepeatable(
+                animation = tween(durationMillis),
+                repeatMode = RepeatMode.Reverse,
+            )
+        )
+    }
+
+    Canvas(modifier = Modifier.width(45.dp).padding(horizontal = 12.dp)) {
+        val canvasCenterY = 0
+        var startOffset = 0f
+        val barWidthFloat = 10f
+        val barMinHeight = 0f
+        val barMaxHeight = 150f
+        val gapWidthFloat = 1f
+
+        repeat(5) { index ->
+            val currentSize = animations[index % animations.size].value
+            var barHeightPercent = audioState[index] + currentSize
+            if (barHeightPercent > 1.0f) {
+                val diff = barHeightPercent - 1.0f
+                barHeightPercent = 1.0f - diff
+            }
+            val barHeight = barMinHeight + (barMaxHeight - barMinHeight) * barHeightPercent
+            drawLine(
+                color = Color(0xFF9CCC65),
+                start = Offset(startOffset, canvasCenterY - barHeight / 2),
+                end = Offset(startOffset, canvasCenterY + barHeight / 2),
+                strokeWidth = barWidthFloat,
+                cap = StrokeCap.Round,
+            )
+            startOffset += barWidthFloat + gapWidthFloat
         }
     }
 }

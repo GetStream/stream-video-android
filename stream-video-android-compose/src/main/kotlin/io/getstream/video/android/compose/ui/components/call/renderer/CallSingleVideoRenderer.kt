@@ -23,6 +23,7 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -182,9 +183,22 @@ public fun ParticipantVideoRenderer(
 }
 
 @Composable
-internal fun BoxScope.ParticipantLabel(
+public fun BoxScope.ParticipantLabel(
     participant: ParticipantState,
-    labelPosition: Alignment,
+    labelPosition: Alignment = BottomStart,
+    soundIndicatorContent: @Composable RowScope.() -> Unit = {
+        val audioEnabled by participant.audioEnabled.collectAsStateWithLifecycle()
+        val speaking by participant.speaking.collectAsStateWithLifecycle()
+        SoundIndicator(
+            state = getSoundIndicatorState(
+                hasAudio = audioEnabled,
+                isSpeaking = speaking
+            ),
+            modifier = Modifier
+                .align(CenterVertically)
+                .padding(horizontal = VideoTheme.dimens.callParticipantSoundIndicatorPadding)
+        )
+    }
 ) {
     val audioEnabled by participant.audioEnabled.collectAsStateWithLifecycle()
     val speaking by participant.speaking.collectAsStateWithLifecycle()
@@ -200,16 +214,28 @@ internal fun BoxScope.ParticipantLabel(
         nameLabel = nameLabel,
         labelPosition = labelPosition,
         hasAudio = audioEnabled,
-        isSpeaking = speaking
+        isSpeaking = speaking,
+        soundIndicatorContent = soundIndicatorContent
     )
 }
 
 @Composable
-internal fun BoxScope.ParticipantLabel(
+public fun BoxScope.ParticipantLabel(
     nameLabel: String,
-    labelPosition: Alignment,
-    hasAudio: Boolean,
-    isSpeaking: Boolean
+    labelPosition: Alignment = BottomStart,
+    hasAudio: Boolean = false,
+    isSpeaking: Boolean = false,
+    soundIndicatorContent: @Composable RowScope.() -> Unit = {
+        SoundIndicator(
+            state = getSoundIndicatorState(
+                hasAudio = hasAudio,
+                isSpeaking = isSpeaking
+            ),
+            modifier = Modifier
+                .align(CenterVertically)
+                .padding(horizontal = VideoTheme.dimens.callParticipantSoundIndicatorPadding)
+        )
+    }
 ) {
     Row(
         modifier = Modifier
@@ -236,15 +262,7 @@ internal fun BoxScope.ParticipantLabel(
             overflow = TextOverflow.Ellipsis
         )
 
-        SoundIndicator(
-            state = getSoundIndicatorState(
-                hasAudio = hasAudio,
-                isSpeaking = isSpeaking
-            ),
-            modifier = Modifier
-                .align(CenterVertically)
-                .padding(horizontal = VideoTheme.dimens.callParticipantSoundIndicatorPadding)
-        )
+        soundIndicatorContent.invoke(this)
     }
 }
 

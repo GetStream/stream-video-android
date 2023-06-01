@@ -3,23 +3,20 @@ title: Audio Volume Indicator
 description: Audio Volume Indicator
 ---
 
-Issues:
-* No way to swap the participant card
-
 The audio indicator gives you a visual feedback when a user is speaking.
 To understand who's speaking we provide call.state.dominantSpeaker and call.state.activeSpeakers.
 On the participant you can observe participant.speaking, participant.dominantSpeaker and participant.audioLevel
 
 This example shows how to render a visual UI indicator that changes based on the audio level.
 
-First let's create some fake audio data for the preview and create the preview
+First, let's create some fake audio data for the preview and create the preview
 
 ```kotlin
 fun fakeAudioState(): StateFlow<List<Float>> {
     val audioFlow = flow {
-        val audioLevels = listOf(0f,0f,0f,0f,0f).toMutableList()
+        val audioLevels = mutableListOf(0f, 0f, 0f, 0f, 0f)
         while (true) {
-            val newValue = RandomKotlin.nextFloat()
+            val newValue = Random.nextFloat()
             audioLevels.removeAt(0)
             audioLevels.add(newValue)
             emit(audioLevels.toList())
@@ -36,27 +33,24 @@ fun fakeAudioState(): StateFlow<List<Float>> {
 @Preview(showBackground = true)
 @Composable
 fun AudioPreview() {
-    val audioLevels = fakeAudioState().collectAsState()
+    val audioLevels by fakeAudioState().collectAsState()
     MyApplicationTheme {
-        //Greeting("Android")
         AudioVolumeIndicator(audioLevels)
     }
 }
 ```
 
-Next here's a little custom audio visualization
-
+Next here's a little custom audio visualization:
 
 ```kotlin
 @Composable
-fun AudioVolumeIndicator(audioState: State<List<Float>>) {
+fun AudioVolumeIndicator(audioState: List<Float>) {
     // based on this fun blogpost: https://proandroiddev.com/jetpack-compose-tutorial-replicating-dribbble-audio-app-part-1-513ac91c02e3
     val infiniteAnimation = rememberInfiniteTransition()
     val animations = mutableListOf<State<Float>>()
-    val audioLevels = audioState.value
 
     repeat(5) {
-        val durationMillis = RandomKotlin.nextInt(500, 1000)
+        val durationMillis = Random.nextInt(500, 1000)
         animations += infiniteAnimation.animateFloat(
             initialValue = 0f,
             targetValue = 1f,
@@ -67,8 +61,7 @@ fun AudioVolumeIndicator(audioState: State<List<Float>>) {
         )
     }
 
-
-    Canvas(modifier = Modifier.fillMaxSize()) {
+    Canvas(modifier = Modifier.width(45.dp).padding(horizontal = 12.dp)) {
         val canvasCenterY = 0
         var startOffset = 0f
         val barWidthFloat = 10f
@@ -78,7 +71,7 @@ fun AudioVolumeIndicator(audioState: State<List<Float>>) {
 
         repeat(5) { index ->
             val currentSize = animations[index % animations.size].value
-            var barHeightPercent = audioLevels[index] + currentSize
+            var barHeightPercent = audioState[index] + currentSize
             if (barHeightPercent > 1.0f) {
                 val diff = barHeightPercent - 1.0f
                 barHeightPercent = 1.0f - diff
@@ -97,11 +90,33 @@ fun AudioVolumeIndicator(audioState: State<List<Float>>) {
 }
 ```
 
-And here's how you can update the participant card to use this UI
+And here's how you can use your custom volume indicator for a single video renderer by implementing `labelContent` composable parameter on `CallSingleVideoRenderer` component like the example below:
 
 ```kotlin
-TODO
+CallContainer(
+    modifier = Modifier.background(color = VideoTheme.colors.appBackground),
+    videoRenderer = { modifier, call, participant, style ->
+        CallSingleVideoRenderer(
+            modifier = modifier,
+            call = call,
+            participant = participant,
+            style = style,
+            labelContent = {
+                val fakeAudio by fakeAudioState().collectAsState()
+                ParticipantLabel(
+                    participant = participant,
+                    soundIndicatorContent = {
+                        AudioVolumeIndicator(fakeAudio)
+                    }
+                )
+            }
+        )
+    },
+  ..
+)
 ```
 
 The end result looks like this:
+
+[Audio Volume Indicator](../assets/cookbook/volume-indicator.png)
 
