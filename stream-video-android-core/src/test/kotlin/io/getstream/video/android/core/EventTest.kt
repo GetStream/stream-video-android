@@ -167,7 +167,7 @@ class EventTest : IntegrationTestBase(connectCoordinatorWS = false) {
         val event = ConnectionQualityChangeEvent(updates = mutableListOf(quality))
         clientImpl.fireEvent(event, call.cid)
 
-        assertThat(call.state.getParticipantBySessionId("thierry")?.connectionQuality?.value).isEqualTo(
+        assertThat(call.state.getParticipantBySessionId("thierry")?.networkQuality?.value).isEqualTo(
             ConnectionQuality.CONNECTION_QUALITY_EXCELLENT
         )
     }

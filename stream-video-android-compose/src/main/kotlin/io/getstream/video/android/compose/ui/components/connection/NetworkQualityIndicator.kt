@@ -30,20 +30,21 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import io.getstream.video.android.compose.theme.VideoTheme
+import io.getstream.video.android.core.model.NetworkQuality
 import stream.video.sfu.models.ConnectionQuality
 
 /**
  * Shows the quality of the user's connection depending on the [ConnectionQuality] level.
  *
- * @param connectionQuality The quality level.
+ * @param networkQuality The quality level.
  * @param modifier Modifier for styling.
  */
 @Composable
-public fun ConnectionQualityIndicator(
-    connectionQuality: ConnectionQuality,
+public fun NetworkQualityIndicator(
+    networkQuality: NetworkQuality,
     modifier: Modifier = Modifier
 ) {
-    val quality = connectionQuality.value
+    val quality = networkQuality.quality
 
     Box(
         modifier = modifier
@@ -65,9 +66,9 @@ public fun ConnectionQualityIndicator(
                     .width(VideoTheme.dimens.connectionIndicatorBarWidth)
                     .fillMaxHeight(0.33f)
                     .background(
-                        color = if (quality > 1) {
+                        color = if (quality > 0.33f) {
                             VideoTheme.colors.connectionQualityBarFilled
-                        } else if (quality == 1) {
+                        } else if (quality == 0.33f) {
                             VideoTheme.colors.errorAccent
                         } else {
                             VideoTheme.colors.connectionQualityBar
@@ -83,7 +84,7 @@ public fun ConnectionQualityIndicator(
                     .width(VideoTheme.dimens.connectionIndicatorBarWidth)
                     .fillMaxHeight(fraction = 0.66f)
                     .background(
-                        color = if (quality >= 2) {
+                        color = if (quality >= 0.66f) {
                             VideoTheme.colors.connectionQualityBarFilled
                         } else {
                             VideoTheme.colors.connectionQualityBar
@@ -99,7 +100,7 @@ public fun ConnectionQualityIndicator(
                     .width(VideoTheme.dimens.connectionIndicatorBarWidth)
                     .fillMaxHeight(fraction = 1f)
                     .background(
-                        color = if (quality >= 3) {
+                        color = if (quality >= 1) {
                             VideoTheme.colors.connectionQualityBarFilled
                         } else {
                             VideoTheme.colors.connectionQualityBar
@@ -116,14 +117,14 @@ public fun ConnectionQualityIndicator(
 private fun ConnectionQualityIndicatorPreview() {
     VideoTheme {
         Row {
-            ConnectionQualityIndicator(
-                connectionQuality = ConnectionQuality.CONNECTION_QUALITY_POOR
+            NetworkQualityIndicator(
+                networkQuality = NetworkQuality.Poor()
             )
-            ConnectionQualityIndicator(
-                connectionQuality = ConnectionQuality.CONNECTION_QUALITY_GOOD
+            NetworkQualityIndicator(
+                networkQuality = NetworkQuality.Good()
             )
-            ConnectionQualityIndicator(
-                connectionQuality = ConnectionQuality.CONNECTION_QUALITY_EXCELLENT
+            NetworkQualityIndicator(
+                networkQuality = NetworkQuality.Excellent()
             )
         }
     }

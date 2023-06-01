@@ -958,15 +958,15 @@ public final class io/getstream/video/android/compose/ui/components/call/ringing
 	public static final fun OutgoingCallDetails (Landroidx/compose/ui/Modifier;ZLjava/util/List;Landroidx/compose/runtime/Composer;II)V
 }
 
-public final class io/getstream/video/android/compose/ui/components/connection/ComposableSingletons$ConnectionQualityIndicatorKt {
-	public static final field INSTANCE Lio/getstream/video/android/compose/ui/components/connection/ComposableSingletons$ConnectionQualityIndicatorKt;
+public final class io/getstream/video/android/compose/ui/components/connection/ComposableSingletons$NetworkQualityIndicatorKt {
+	public static final field INSTANCE Lio/getstream/video/android/compose/ui/components/connection/ComposableSingletons$NetworkQualityIndicatorKt;
 	public static field lambda-1 Lkotlin/jvm/functions/Function2;
 	public fun <init> ()V
 	public final fun getLambda-1$stream_video_android_compose_release ()Lkotlin/jvm/functions/Function2;
 }
 
-public final class io/getstream/video/android/compose/ui/components/connection/ConnectionQualityIndicatorKt {
-	public static final fun ConnectionQualityIndicator (Lstream/video/sfu/models/ConnectionQuality;Landroidx/compose/ui/Modifier;Landroidx/compose/runtime/Composer;II)V
+public final class io/getstream/video/android/compose/ui/components/connection/NetworkQualityIndicatorKt {
+	public static final fun NetworkQualityIndicator (Lio/getstream/video/android/core/model/NetworkQuality;Landroidx/compose/ui/Modifier;Landroidx/compose/runtime/Composer;II)V
 }
 
 public final class io/getstream/video/android/compose/ui/components/participants/CallParticipantsInfoMenuKt {
