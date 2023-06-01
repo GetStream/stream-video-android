@@ -18,9 +18,14 @@ package io.getstream.video.android.core.stories
 
 import com.google.common.truth.Truth.assertThat
 import io.getstream.video.android.core.IntegrationTestBase
+import io.getstream.video.android.core.toResponse
+import io.getstream.video.android.core.utils.toResponse
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.openapitools.client.models.CallAcceptedEvent
+import org.openapitools.client.models.CallRejectedEvent
+import org.openapitools.client.models.CallRingEvent
 import org.robolectric.RobolectricTestRunner
 
 @RunWith(RobolectricTestRunner::class)
@@ -36,36 +41,60 @@ class RingTest : IntegrationTestBase() {
     }
 
     @Test
-    fun `Accepting or rejecting calls should be updated on members`() = runTest {
-        val call = client.call("default", randomUUID())
+    fun `Ringing call event should add a call to the ringing call`() = runTest {
+        client.state._ringingCall.value = null
+        val userResponse = testData.users["tommaso"]!!.toResponse()
+
+        val ringEvent = CallRingEvent(
+            call = call.toResponse(userResponse),
+            callCid = call.cid,
+            createdAt= nowUtc,
+            sessionId = "",
+            user = userResponse,
+            members = emptyList()
+        )
+
+        clientImpl.fireEvent(ringEvent)
+
+        assertThat(client.state.ringingCall.value).isEqualTo(call)
+    }
+
+    @Test
+    fun `Accept a call`() = runTest {
+        val call = client.call("default")
         val createResponse = call.create(memberIds = listOf("tommaso", "thierry"), ring = true)
         assertSuccess(createResponse)
-
-        assertThat(call.state.members.value.size).isEqualTo(2)
-        /*
-        // tommaso accepts
         val userResponse = testData.users["tommaso"]!!.toResponse()
-        clientImpl.fireEvent(
-            CallAcceptedEvent(
-                callCid = call.cid,
-                createdAt = nowUtc,
-                user = userResponse
-            )
-        )
-        val tommaso = call.state.members.value.first { it.user.id == "tommaso" }
-        assertThat(tommaso.acceptedAt).isNotNull()
 
-        // jaewoong rejects
-        val userResponse2 = testData.users["tommaso"]!!.toResponse()
-        clientImpl.fireEvent(
-            CallRejectedEvent(
-                callCid = call.cid,
-                createdAt = nowUtc,
-                user = userResponse2
-            )
+        val callAcceptedEvent = CallAcceptedEvent(
+            call = call.toResponse(userResponse),
+            callCid = call.cid,
+            createdAt = nowUtc,
+            user = userResponse
         )
-        val tommaso2 = call.state.members.value.first { it.user.id == "tommaso" }
-        assertThat(tommaso2.rejectedAt).isNotNull()
-        */
+        clientImpl.fireEvent(callAcceptedEvent)
+
+        // verify that call.state.acceptedBy is updated
+        assertThat(call.state.acceptedBy.value).contains("tommaso")
     }
+
+    @Test
+    fun `Reject a call`() = runTest {
+        val call = client.call("default")
+        val createResponse = call.create(memberIds = listOf("tommaso", "thierry"), ring = true)
+        assertSuccess(createResponse)
+        val userResponse = testData.users["tommaso"]!!.toResponse()
+
+        val rejectEvent = CallRejectedEvent(
+            call = call.toResponse(userResponse),
+            callCid = call.cid,
+            createdAt = nowUtc,
+            user = userResponse
+        )
+        clientImpl.fireEvent(rejectEvent)
+
+        // verify that call.state.rejectedBy is updated
+        assertThat(call.state.rejectedBy.value).contains("tommaso")
+    }
+
 }

@@ -60,7 +60,7 @@ class ClientState(client: StreamVideo) {
     /**
      * Incoming call. True when we receive an event or notification with an incoming call
      */
-    private val _ringingCall: MutableStateFlow<Call?> = MutableStateFlow(null)
+    internal val _ringingCall: MutableStateFlow<Call?> = MutableStateFlow(null)
     public val ringingCall: StateFlow<Call?> = _ringingCall
 
     /**
@@ -91,6 +91,7 @@ class ClientState(client: StreamVideo) {
             // get or create the call, update is handled by CallState
             val (type, id) = event.callCid.split(":")
             val call = clientImpl.call(type, id)
+            _ringingCall.value = call
         }
     }
 

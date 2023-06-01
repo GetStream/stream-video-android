@@ -59,6 +59,7 @@ import org.openapitools.client.models.CallRecordingStoppedEvent
 import org.openapitools.client.models.CallRejectedEvent
 import org.openapitools.client.models.CallResponse
 import org.openapitools.client.models.CallRingEvent
+import org.openapitools.client.models.CallSessionResponse
 import org.openapitools.client.models.CallSettingsResponse
 import org.openapitools.client.models.CallStateResponseFields
 import org.openapitools.client.models.CallUpdatedEvent
@@ -244,7 +245,8 @@ public class CallState(private val call: Call, private val user: User) {
         }
     }
 
-    // TODO: maybe this should just be a list of string, seems more forward compatible
+
+
     private val _ownCapabilities: MutableStateFlow<List<OwnCapability>> =
         MutableStateFlow(emptyList())
     public val ownCapabilities: StateFlow<List<OwnCapability>> = _ownCapabilities
@@ -269,6 +271,14 @@ public class CallState(private val call: Call, private val user: User) {
     /** if transcribing is on or not */
     private val _transcribing: MutableStateFlow<Boolean> = MutableStateFlow(false)
     val transcribing: StateFlow<Boolean> = _transcribing
+
+    private val _acceptedBy: MutableStateFlow<Set<String>> = MutableStateFlow(emptySet())
+    val acceptedBy: StateFlow<Set<String>> = _acceptedBy
+
+    private val _rejectedBy: MutableStateFlow<Set<String>> = MutableStateFlow(emptySet())
+    val rejectedBy: StateFlow<Set<String>> = _rejectedBy
+
+    private val _session = MutableStateFlow<CallSessionResponse?>(null)
 
     /** startsAt */
     private val _startsAt: MutableStateFlow<OffsetDateTime?> = MutableStateFlow(null)
@@ -331,23 +341,15 @@ public class CallState(private val call: Call, private val user: User) {
             }
 
             is CallAcceptedEvent -> {
-                val member = getMember(event.user.id)
-                val newMember = member?.copy(acceptedAt = OffsetDateTime.now(Clock.systemUTC()))
-                val newMembersMap = _members.value.toSortedMap()
-                newMember?.let {
-                    newMembersMap[event.user.id] = it
-                    _members.value = newMembersMap
-                }
+                val newAcceptedBy = _acceptedBy.value.toMutableSet()
+                newAcceptedBy.add(event.user.id)
+                _acceptedBy.value = newAcceptedBy.toSet()
             }
 
             is CallRejectedEvent -> {
-                val member = getMember(event.user.id)
-                val newMember = member?.copy(rejectedAt = OffsetDateTime.now(Clock.systemUTC()))
-                val newMembersMap = _members.value.toSortedMap()
-                newMember?.let {
-                    newMembersMap[event.user.id] = it
-                    _members.value = newMembersMap
-                }
+                val new = _rejectedBy.value.toMutableSet()
+                new.add(event.user.id)
+                _rejectedBy.value = new.toSet()
             }
 
             is CallEndedEvent -> {
@@ -375,6 +377,8 @@ public class CallState(private val call: Call, private val user: User) {
             is CallRingEvent -> {
                 updateFromResponse(event.call)
                 getOrCreateMembers(event.members)
+
+
             }
 
             is CallUpdatedEvent -> {
@@ -652,6 +656,9 @@ public class CallState(private val call: Call, private val user: User) {
         _backstage.value = response.backstage
         _blockedUserIds.value = response.blockedUserIds
         _broadcasting.value = response.broadcasting
+        _session.value = response.session
+        _rejectedBy.value = response.session?.rejectedBy?.keys?.toSet() ?: emptySet()
+        _acceptedBy.value = response.session?.rejectedBy?.keys?.toSet() ?: emptySet()
         _createdAt.value = response.createdAt
         _updatedAt.value = response.updatedAt
         _endedAt.value = response.endedAt
