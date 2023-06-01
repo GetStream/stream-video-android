@@ -937,17 +937,14 @@ internal class StreamVideoImpl internal constructor(
 
     internal suspend fun notify(type: String, id: String): Result<GetCallResponse> {
         return wrapAPICall {
-            connectionModule.videoCallsApi.getCall(type, id, notify= true)
+            connectionModule.videoCallsApi.getCall(type, id, notify = true)
         }
     }
     internal suspend fun ring(type: String, id: String): Result<GetCallResponse> {
         return wrapAPICall {
-            connectionModule.videoCallsApi.getCall(type, id, ring= true)
+            connectionModule.videoCallsApi.getCall(type, id, ring = true)
         }
     }
-
-
-
 }
 
 /** Extension function that makes it easy to use on kotlin, but keeps Java usable as well */

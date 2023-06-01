@@ -7,10 +7,11 @@ public final class io/getstream/video/android/BuildConfig {
 
 public final class io/getstream/video/android/core/Call {
 	public fun <init> (Lio/getstream/video/android/core/StreamVideo;Ljava/lang/String;Ljava/lang/String;Lio/getstream/video/android/model/User;)V
+	public final fun accept (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public final fun blockUser (Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public final fun cleanup ()V
-	public final fun create (Ljava/util/List;Ljava/util/List;Ljava/util/Map;Lorg/openapitools/client/models/CallSettingsRequest;Lorg/threeten/bp/OffsetDateTime;Ljava/lang/String;ZLkotlin/coroutines/Continuation;)Ljava/lang/Object;
-	public static synthetic fun create$default (Lio/getstream/video/android/core/Call;Ljava/util/List;Ljava/util/List;Ljava/util/Map;Lorg/openapitools/client/models/CallSettingsRequest;Lorg/threeten/bp/OffsetDateTime;Ljava/lang/String;ZLkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
+	public final fun create (Ljava/util/List;Ljava/util/List;Ljava/util/Map;Lorg/openapitools/client/models/CallSettingsRequest;Lorg/threeten/bp/OffsetDateTime;Ljava/lang/String;ZZLkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public static synthetic fun create$default (Lio/getstream/video/android/core/Call;Ljava/util/List;Ljava/util/List;Ljava/util/Map;Lorg/openapitools/client/models/CallSettingsRequest;Lorg/threeten/bp/OffsetDateTime;Ljava/lang/String;ZZLkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
 	public final fun end (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public final fun fireEvent (Lorg/openapitools/client/models/VideoEvent;)V
 	public final fun get (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
@@ -28,8 +29,8 @@ public final class io/getstream/video/android/core/Call {
 	public final fun grantPermissions (Ljava/lang/String;Ljava/util/List;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public final fun initRenderer (Lio/getstream/webrtc/android/ui/VideoTextureViewRenderer;Ljava/lang/String;Lstream/video/sfu/models/TrackType;Lkotlin/jvm/functions/Function1;)V
 	public static synthetic fun initRenderer$default (Lio/getstream/video/android/core/Call;Lio/getstream/webrtc/android/ui/VideoTextureViewRenderer;Ljava/lang/String;Lstream/video/sfu/models/TrackType;Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)V
-	public final fun join (ZLio/getstream/video/android/core/CreateCallOptions;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
-	public static synthetic fun join$default (Lio/getstream/video/android/core/Call;ZLio/getstream/video/android/core/CreateCallOptions;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
+	public final fun join (ZLio/getstream/video/android/core/CreateCallOptions;ZZLkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public static synthetic fun join$default (Lio/getstream/video/android/core/Call;ZLio/getstream/video/android/core/CreateCallOptions;ZZLkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
 	public final fun leave ()V
 	public final fun listRecordings (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public final fun muteAllUsers (ZZZLkotlin/coroutines/Continuation;)Ljava/lang/Object;
@@ -38,12 +39,15 @@ public final class io/getstream/video/android/core/Call {
 	public static synthetic fun muteUser$default (Lio/getstream/video/android/core/Call;Ljava/lang/String;ZZZLkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
 	public final fun muteUsers (Ljava/util/List;ZZZLkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public static synthetic fun muteUsers$default (Lio/getstream/video/android/core/Call;Ljava/util/List;ZZZLkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
+	public final fun notify (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public final fun queryMembers (Ljava/util/Map;Ljava/util/List;ILkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public static synthetic fun queryMembers$default (Lio/getstream/video/android/core/Call;Ljava/util/Map;Ljava/util/List;ILkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
 	public final fun reconnectOrSwitchSfu (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public final fun reject (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public final fun removeMembers (Ljava/util/List;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public final fun requestPermissions ([Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public final fun revokePermissions (Ljava/lang/String;Ljava/util/List;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public final fun ring (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public final fun sendCustomEvent (Ljava/util/Map;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public final fun sendReaction (Ljava/lang/String;Ljava/lang/String;Ljava/util/Map;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public static synthetic fun sendReaction$default (Lio/getstream/video/android/core/Call;Ljava/lang/String;Ljava/lang/String;Ljava/util/Map;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
@@ -233,22 +237,20 @@ public final class io/getstream/video/android/core/ConnectionState$Reconnecting 
 
 public final class io/getstream/video/android/core/CreateCallOptions {
 	public fun <init> ()V
-	public fun <init> (Ljava/util/List;Ljava/util/List;Ljava/util/Map;Lorg/openapitools/client/models/CallSettingsRequest;Lorg/threeten/bp/OffsetDateTime;Ljava/lang/String;Z)V
-	public synthetic fun <init> (Ljava/util/List;Ljava/util/List;Ljava/util/Map;Lorg/openapitools/client/models/CallSettingsRequest;Lorg/threeten/bp/OffsetDateTime;Ljava/lang/String;ZILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun <init> (Ljava/util/List;Ljava/util/List;Ljava/util/Map;Lorg/openapitools/client/models/CallSettingsRequest;Lorg/threeten/bp/OffsetDateTime;Ljava/lang/String;)V
+	public synthetic fun <init> (Ljava/util/List;Ljava/util/List;Ljava/util/Map;Lorg/openapitools/client/models/CallSettingsRequest;Lorg/threeten/bp/OffsetDateTime;Ljava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun component1 ()Ljava/util/List;
 	public final fun component2 ()Ljava/util/List;
 	public final fun component3 ()Ljava/util/Map;
 	public final fun component4 ()Lorg/openapitools/client/models/CallSettingsRequest;
 	public final fun component5 ()Lorg/threeten/bp/OffsetDateTime;
 	public final fun component6 ()Ljava/lang/String;
-	public final fun component7 ()Z
-	public final fun copy (Ljava/util/List;Ljava/util/List;Ljava/util/Map;Lorg/openapitools/client/models/CallSettingsRequest;Lorg/threeten/bp/OffsetDateTime;Ljava/lang/String;Z)Lio/getstream/video/android/core/CreateCallOptions;
-	public static synthetic fun copy$default (Lio/getstream/video/android/core/CreateCallOptions;Ljava/util/List;Ljava/util/List;Ljava/util/Map;Lorg/openapitools/client/models/CallSettingsRequest;Lorg/threeten/bp/OffsetDateTime;Ljava/lang/String;ZILjava/lang/Object;)Lio/getstream/video/android/core/CreateCallOptions;
+	public final fun copy (Ljava/util/List;Ljava/util/List;Ljava/util/Map;Lorg/openapitools/client/models/CallSettingsRequest;Lorg/threeten/bp/OffsetDateTime;Ljava/lang/String;)Lio/getstream/video/android/core/CreateCallOptions;
+	public static synthetic fun copy$default (Lio/getstream/video/android/core/CreateCallOptions;Ljava/util/List;Ljava/util/List;Ljava/util/Map;Lorg/openapitools/client/models/CallSettingsRequest;Lorg/threeten/bp/OffsetDateTime;Ljava/lang/String;ILjava/lang/Object;)Lio/getstream/video/android/core/CreateCallOptions;
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getCustom ()Ljava/util/Map;
 	public final fun getMemberIds ()Ljava/util/List;
 	public final fun getMembers ()Ljava/util/List;
-	public final fun getRing ()Z
 	public final fun getSettings ()Lorg/openapitools/client/models/CallSettingsRequest;
 	public final fun getStartsAt ()Lorg/threeten/bp/OffsetDateTime;
 	public final fun getTeam ()Ljava/lang/String;
@@ -2357,7 +2359,8 @@ public abstract interface class org/openapitools/client/apis/PushApi {
 }
 
 public abstract interface class org/openapitools/client/apis/RecordingApi {
-	public abstract fun listRecordings (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public abstract fun listRecordingsTypeId0 (Ljava/lang/String;Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public abstract fun listRecordingsTypeIdSession1 (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public abstract fun startRecording (Ljava/lang/String;Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public abstract fun stopRecording (Ljava/lang/String;Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 }
@@ -2371,7 +2374,6 @@ public abstract interface class org/openapitools/client/apis/VideoCallsApi {
 	public abstract fun acceptCall (Ljava/lang/String;Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public abstract fun endCall (Ljava/lang/String;Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public abstract fun getCall (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/Integer;Ljava/lang/Boolean;Ljava/lang/Boolean;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
-	public abstract fun getCallEdgeServer (Ljava/lang/String;Ljava/lang/String;Lorg/openapitools/client/models/GetCallEdgeServerRequest;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public abstract fun getEdges (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public abstract fun getOrCreateCall (Ljava/lang/String;Ljava/lang/String;Lorg/openapitools/client/models/GetOrCreateCallRequest;Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public abstract fun goLive (Ljava/lang/String;Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
@@ -3086,22 +3088,21 @@ public final class org/openapitools/client/models/CallRequest {
 }
 
 public final class org/openapitools/client/models/CallResponse {
-	public fun <init> (ZLjava/util/List;ZLjava/lang/String;Lorg/threeten/bp/OffsetDateTime;Lorg/openapitools/client/models/UserResponse;Ljava/lang/String;Ljava/util/Map;Ljava/lang/String;Ljava/lang/String;Lorg/openapitools/client/models/CallIngressResponse;Ljava/util/List;ZLorg/openapitools/client/models/CallSettingsResponse;ZLjava/lang/String;Lorg/threeten/bp/OffsetDateTime;Lorg/threeten/bp/OffsetDateTime;Lorg/openapitools/client/models/CallSessionResponse;Lorg/threeten/bp/OffsetDateTime;Ljava/lang/String;)V
-	public synthetic fun <init> (ZLjava/util/List;ZLjava/lang/String;Lorg/threeten/bp/OffsetDateTime;Lorg/openapitools/client/models/UserResponse;Ljava/lang/String;Ljava/util/Map;Ljava/lang/String;Ljava/lang/String;Lorg/openapitools/client/models/CallIngressResponse;Ljava/util/List;ZLorg/openapitools/client/models/CallSettingsResponse;ZLjava/lang/String;Lorg/threeten/bp/OffsetDateTime;Lorg/threeten/bp/OffsetDateTime;Lorg/openapitools/client/models/CallSessionResponse;Lorg/threeten/bp/OffsetDateTime;Ljava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun <init> (ZLjava/util/List;ZLjava/lang/String;Lorg/threeten/bp/OffsetDateTime;Lorg/openapitools/client/models/UserResponse;Ljava/lang/String;Ljava/util/Map;Ljava/lang/String;Ljava/lang/String;Lorg/openapitools/client/models/CallIngressResponse;ZLorg/openapitools/client/models/CallSettingsResponse;ZLjava/lang/String;Lorg/threeten/bp/OffsetDateTime;Lorg/threeten/bp/OffsetDateTime;Lorg/openapitools/client/models/CallSessionResponse;Lorg/threeten/bp/OffsetDateTime;Ljava/lang/String;)V
+	public synthetic fun <init> (ZLjava/util/List;ZLjava/lang/String;Lorg/threeten/bp/OffsetDateTime;Lorg/openapitools/client/models/UserResponse;Ljava/lang/String;Ljava/util/Map;Ljava/lang/String;Ljava/lang/String;Lorg/openapitools/client/models/CallIngressResponse;ZLorg/openapitools/client/models/CallSettingsResponse;ZLjava/lang/String;Lorg/threeten/bp/OffsetDateTime;Lorg/threeten/bp/OffsetDateTime;Lorg/openapitools/client/models/CallSessionResponse;Lorg/threeten/bp/OffsetDateTime;Ljava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun component1 ()Z
 	public final fun component10 ()Ljava/lang/String;
 	public final fun component11 ()Lorg/openapitools/client/models/CallIngressResponse;
-	public final fun component12 ()Ljava/util/List;
-	public final fun component13 ()Z
-	public final fun component14 ()Lorg/openapitools/client/models/CallSettingsResponse;
-	public final fun component15 ()Z
-	public final fun component16 ()Ljava/lang/String;
+	public final fun component12 ()Z
+	public final fun component13 ()Lorg/openapitools/client/models/CallSettingsResponse;
+	public final fun component14 ()Z
+	public final fun component15 ()Ljava/lang/String;
+	public final fun component16 ()Lorg/threeten/bp/OffsetDateTime;
 	public final fun component17 ()Lorg/threeten/bp/OffsetDateTime;
-	public final fun component18 ()Lorg/threeten/bp/OffsetDateTime;
-	public final fun component19 ()Lorg/openapitools/client/models/CallSessionResponse;
+	public final fun component18 ()Lorg/openapitools/client/models/CallSessionResponse;
+	public final fun component19 ()Lorg/threeten/bp/OffsetDateTime;
 	public final fun component2 ()Ljava/util/List;
-	public final fun component20 ()Lorg/threeten/bp/OffsetDateTime;
-	public final fun component21 ()Ljava/lang/String;
+	public final fun component20 ()Ljava/lang/String;
 	public final fun component3 ()Z
 	public final fun component4 ()Ljava/lang/String;
 	public final fun component5 ()Lorg/threeten/bp/OffsetDateTime;
@@ -3109,8 +3110,8 @@ public final class org/openapitools/client/models/CallResponse {
 	public final fun component7 ()Ljava/lang/String;
 	public final fun component8 ()Ljava/util/Map;
 	public final fun component9 ()Ljava/lang/String;
-	public final fun copy (ZLjava/util/List;ZLjava/lang/String;Lorg/threeten/bp/OffsetDateTime;Lorg/openapitools/client/models/UserResponse;Ljava/lang/String;Ljava/util/Map;Ljava/lang/String;Ljava/lang/String;Lorg/openapitools/client/models/CallIngressResponse;Ljava/util/List;ZLorg/openapitools/client/models/CallSettingsResponse;ZLjava/lang/String;Lorg/threeten/bp/OffsetDateTime;Lorg/threeten/bp/OffsetDateTime;Lorg/openapitools/client/models/CallSessionResponse;Lorg/threeten/bp/OffsetDateTime;Ljava/lang/String;)Lorg/openapitools/client/models/CallResponse;
-	public static synthetic fun copy$default (Lorg/openapitools/client/models/CallResponse;ZLjava/util/List;ZLjava/lang/String;Lorg/threeten/bp/OffsetDateTime;Lorg/openapitools/client/models/UserResponse;Ljava/lang/String;Ljava/util/Map;Ljava/lang/String;Ljava/lang/String;Lorg/openapitools/client/models/CallIngressResponse;Ljava/util/List;ZLorg/openapitools/client/models/CallSettingsResponse;ZLjava/lang/String;Lorg/threeten/bp/OffsetDateTime;Lorg/threeten/bp/OffsetDateTime;Lorg/openapitools/client/models/CallSessionResponse;Lorg/threeten/bp/OffsetDateTime;Ljava/lang/String;ILjava/lang/Object;)Lorg/openapitools/client/models/CallResponse;
+	public final fun copy (ZLjava/util/List;ZLjava/lang/String;Lorg/threeten/bp/OffsetDateTime;Lorg/openapitools/client/models/UserResponse;Ljava/lang/String;Ljava/util/Map;Ljava/lang/String;Ljava/lang/String;Lorg/openapitools/client/models/CallIngressResponse;ZLorg/openapitools/client/models/CallSettingsResponse;ZLjava/lang/String;Lorg/threeten/bp/OffsetDateTime;Lorg/threeten/bp/OffsetDateTime;Lorg/openapitools/client/models/CallSessionResponse;Lorg/threeten/bp/OffsetDateTime;Ljava/lang/String;)Lorg/openapitools/client/models/CallResponse;
+	public static synthetic fun copy$default (Lorg/openapitools/client/models/CallResponse;ZLjava/util/List;ZLjava/lang/String;Lorg/threeten/bp/OffsetDateTime;Lorg/openapitools/client/models/UserResponse;Ljava/lang/String;Ljava/util/Map;Ljava/lang/String;Ljava/lang/String;Lorg/openapitools/client/models/CallIngressResponse;ZLorg/openapitools/client/models/CallSettingsResponse;ZLjava/lang/String;Lorg/threeten/bp/OffsetDateTime;Lorg/threeten/bp/OffsetDateTime;Lorg/openapitools/client/models/CallSessionResponse;Lorg/threeten/bp/OffsetDateTime;Ljava/lang/String;ILjava/lang/Object;)Lorg/openapitools/client/models/CallResponse;
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getBackstage ()Z
 	public final fun getBlockedUserIds ()Ljava/util/List;
@@ -3124,7 +3125,6 @@ public final class org/openapitools/client/models/CallResponse {
 	public final fun getHlsPlaylistUrl ()Ljava/lang/String;
 	public final fun getId ()Ljava/lang/String;
 	public final fun getIngress ()Lorg/openapitools/client/models/CallIngressResponse;
-	public final fun getOwnCapabilities ()Ljava/util/List;
 	public final fun getRecording ()Z
 	public final fun getSession ()Lorg/openapitools/client/models/CallSessionResponse;
 	public final fun getSettings ()Lorg/openapitools/client/models/CallSettingsResponse;
@@ -3330,19 +3330,21 @@ public final class org/openapitools/client/models/CallSettingsResponse {
 }
 
 public final class org/openapitools/client/models/CallStateResponseFields {
-	public fun <init> (Ljava/util/List;Lorg/openapitools/client/models/CallResponse;Ljava/util/List;Lorg/openapitools/client/models/MemberResponse;)V
-	public synthetic fun <init> (Ljava/util/List;Lorg/openapitools/client/models/CallResponse;Ljava/util/List;Lorg/openapitools/client/models/MemberResponse;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun <init> (Ljava/util/List;Lorg/openapitools/client/models/CallResponse;Ljava/util/List;Ljava/util/List;Lorg/openapitools/client/models/MemberResponse;)V
+	public synthetic fun <init> (Ljava/util/List;Lorg/openapitools/client/models/CallResponse;Ljava/util/List;Ljava/util/List;Lorg/openapitools/client/models/MemberResponse;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun component1 ()Ljava/util/List;
 	public final fun component2 ()Lorg/openapitools/client/models/CallResponse;
 	public final fun component3 ()Ljava/util/List;
-	public final fun component4 ()Lorg/openapitools/client/models/MemberResponse;
-	public final fun copy (Ljava/util/List;Lorg/openapitools/client/models/CallResponse;Ljava/util/List;Lorg/openapitools/client/models/MemberResponse;)Lorg/openapitools/client/models/CallStateResponseFields;
-	public static synthetic fun copy$default (Lorg/openapitools/client/models/CallStateResponseFields;Ljava/util/List;Lorg/openapitools/client/models/CallResponse;Ljava/util/List;Lorg/openapitools/client/models/MemberResponse;ILjava/lang/Object;)Lorg/openapitools/client/models/CallStateResponseFields;
+	public final fun component4 ()Ljava/util/List;
+	public final fun component5 ()Lorg/openapitools/client/models/MemberResponse;
+	public final fun copy (Ljava/util/List;Lorg/openapitools/client/models/CallResponse;Ljava/util/List;Ljava/util/List;Lorg/openapitools/client/models/MemberResponse;)Lorg/openapitools/client/models/CallStateResponseFields;
+	public static synthetic fun copy$default (Lorg/openapitools/client/models/CallStateResponseFields;Ljava/util/List;Lorg/openapitools/client/models/CallResponse;Ljava/util/List;Ljava/util/List;Lorg/openapitools/client/models/MemberResponse;ILjava/lang/Object;)Lorg/openapitools/client/models/CallStateResponseFields;
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getBlockedUsers ()Ljava/util/List;
 	public final fun getCall ()Lorg/openapitools/client/models/CallResponse;
 	public final fun getMembers ()Ljava/util/List;
 	public final fun getMembership ()Lorg/openapitools/client/models/MemberResponse;
+	public final fun getOwnCapabilities ()Ljava/util/List;
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
 }
@@ -3680,55 +3682,24 @@ public final class org/openapitools/client/models/GeofenceSettingsRequest {
 	public fun toString ()Ljava/lang/String;
 }
 
-public final class org/openapitools/client/models/GetCallEdgeServerRequest {
-	public fun <init> (Ljava/util/Map;)V
-	public final fun component1 ()Ljava/util/Map;
-	public final fun copy (Ljava/util/Map;)Lorg/openapitools/client/models/GetCallEdgeServerRequest;
-	public static synthetic fun copy$default (Lorg/openapitools/client/models/GetCallEdgeServerRequest;Ljava/util/Map;ILjava/lang/Object;)Lorg/openapitools/client/models/GetCallEdgeServerRequest;
-	public fun equals (Ljava/lang/Object;)Z
-	public final fun getLatencyMeasurements ()Ljava/util/Map;
-	public fun hashCode ()I
-	public fun toString ()Ljava/lang/String;
-}
-
-public final class org/openapitools/client/models/GetCallEdgeServerResponse {
-	public fun <init> (Ljava/util/List;Lorg/openapitools/client/models/CallResponse;Lorg/openapitools/client/models/Credentials;Ljava/lang/String;Ljava/util/List;Lorg/openapitools/client/models/MemberResponse;)V
-	public synthetic fun <init> (Ljava/util/List;Lorg/openapitools/client/models/CallResponse;Lorg/openapitools/client/models/Credentials;Ljava/lang/String;Ljava/util/List;Lorg/openapitools/client/models/MemberResponse;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
-	public final fun component1 ()Ljava/util/List;
-	public final fun component2 ()Lorg/openapitools/client/models/CallResponse;
-	public final fun component3 ()Lorg/openapitools/client/models/Credentials;
-	public final fun component4 ()Ljava/lang/String;
-	public final fun component5 ()Ljava/util/List;
-	public final fun component6 ()Lorg/openapitools/client/models/MemberResponse;
-	public final fun copy (Ljava/util/List;Lorg/openapitools/client/models/CallResponse;Lorg/openapitools/client/models/Credentials;Ljava/lang/String;Ljava/util/List;Lorg/openapitools/client/models/MemberResponse;)Lorg/openapitools/client/models/GetCallEdgeServerResponse;
-	public static synthetic fun copy$default (Lorg/openapitools/client/models/GetCallEdgeServerResponse;Ljava/util/List;Lorg/openapitools/client/models/CallResponse;Lorg/openapitools/client/models/Credentials;Ljava/lang/String;Ljava/util/List;Lorg/openapitools/client/models/MemberResponse;ILjava/lang/Object;)Lorg/openapitools/client/models/GetCallEdgeServerResponse;
-	public fun equals (Ljava/lang/Object;)Z
-	public final fun getBlockedUsers ()Ljava/util/List;
-	public final fun getCall ()Lorg/openapitools/client/models/CallResponse;
-	public final fun getCredentials ()Lorg/openapitools/client/models/Credentials;
-	public final fun getDuration ()Ljava/lang/String;
-	public final fun getMembers ()Ljava/util/List;
-	public final fun getMembership ()Lorg/openapitools/client/models/MemberResponse;
-	public fun hashCode ()I
-	public fun toString ()Ljava/lang/String;
-}
-
 public final class org/openapitools/client/models/GetCallResponse {
-	public fun <init> (Ljava/util/List;Lorg/openapitools/client/models/CallResponse;Ljava/lang/String;Ljava/util/List;Lorg/openapitools/client/models/MemberResponse;)V
-	public synthetic fun <init> (Ljava/util/List;Lorg/openapitools/client/models/CallResponse;Ljava/lang/String;Ljava/util/List;Lorg/openapitools/client/models/MemberResponse;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun <init> (Ljava/util/List;Lorg/openapitools/client/models/CallResponse;Ljava/lang/String;Ljava/util/List;Ljava/util/List;Lorg/openapitools/client/models/MemberResponse;)V
+	public synthetic fun <init> (Ljava/util/List;Lorg/openapitools/client/models/CallResponse;Ljava/lang/String;Ljava/util/List;Ljava/util/List;Lorg/openapitools/client/models/MemberResponse;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun component1 ()Ljava/util/List;
 	public final fun component2 ()Lorg/openapitools/client/models/CallResponse;
 	public final fun component3 ()Ljava/lang/String;
 	public final fun component4 ()Ljava/util/List;
-	public final fun component5 ()Lorg/openapitools/client/models/MemberResponse;
-	public final fun copy (Ljava/util/List;Lorg/openapitools/client/models/CallResponse;Ljava/lang/String;Ljava/util/List;Lorg/openapitools/client/models/MemberResponse;)Lorg/openapitools/client/models/GetCallResponse;
-	public static synthetic fun copy$default (Lorg/openapitools/client/models/GetCallResponse;Ljava/util/List;Lorg/openapitools/client/models/CallResponse;Ljava/lang/String;Ljava/util/List;Lorg/openapitools/client/models/MemberResponse;ILjava/lang/Object;)Lorg/openapitools/client/models/GetCallResponse;
+	public final fun component5 ()Ljava/util/List;
+	public final fun component6 ()Lorg/openapitools/client/models/MemberResponse;
+	public final fun copy (Ljava/util/List;Lorg/openapitools/client/models/CallResponse;Ljava/lang/String;Ljava/util/List;Ljava/util/List;Lorg/openapitools/client/models/MemberResponse;)Lorg/openapitools/client/models/GetCallResponse;
+	public static synthetic fun copy$default (Lorg/openapitools/client/models/GetCallResponse;Ljava/util/List;Lorg/openapitools/client/models/CallResponse;Ljava/lang/String;Ljava/util/List;Ljava/util/List;Lorg/openapitools/client/models/MemberResponse;ILjava/lang/Object;)Lorg/openapitools/client/models/GetCallResponse;
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getBlockedUsers ()Ljava/util/List;
 	public final fun getCall ()Lorg/openapitools/client/models/CallResponse;
 	public final fun getDuration ()Ljava/lang/String;
 	public final fun getMembers ()Ljava/util/List;
 	public final fun getMembership ()Lorg/openapitools/client/models/MemberResponse;
+	public final fun getOwnCapabilities ()Ljava/util/List;
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
 }
@@ -3789,16 +3760,17 @@ public final class org/openapitools/client/models/GetOrCreateCallRequest {
 }
 
 public final class org/openapitools/client/models/GetOrCreateCallResponse {
-	public fun <init> (Ljava/util/List;Lorg/openapitools/client/models/CallResponse;ZLjava/lang/String;Ljava/util/List;Lorg/openapitools/client/models/MemberResponse;)V
-	public synthetic fun <init> (Ljava/util/List;Lorg/openapitools/client/models/CallResponse;ZLjava/lang/String;Ljava/util/List;Lorg/openapitools/client/models/MemberResponse;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun <init> (Ljava/util/List;Lorg/openapitools/client/models/CallResponse;ZLjava/lang/String;Ljava/util/List;Ljava/util/List;Lorg/openapitools/client/models/MemberResponse;)V
+	public synthetic fun <init> (Ljava/util/List;Lorg/openapitools/client/models/CallResponse;ZLjava/lang/String;Ljava/util/List;Ljava/util/List;Lorg/openapitools/client/models/MemberResponse;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun component1 ()Ljava/util/List;
 	public final fun component2 ()Lorg/openapitools/client/models/CallResponse;
 	public final fun component3 ()Z
 	public final fun component4 ()Ljava/lang/String;
 	public final fun component5 ()Ljava/util/List;
-	public final fun component6 ()Lorg/openapitools/client/models/MemberResponse;
-	public final fun copy (Ljava/util/List;Lorg/openapitools/client/models/CallResponse;ZLjava/lang/String;Ljava/util/List;Lorg/openapitools/client/models/MemberResponse;)Lorg/openapitools/client/models/GetOrCreateCallResponse;
-	public static synthetic fun copy$default (Lorg/openapitools/client/models/GetOrCreateCallResponse;Ljava/util/List;Lorg/openapitools/client/models/CallResponse;ZLjava/lang/String;Ljava/util/List;Lorg/openapitools/client/models/MemberResponse;ILjava/lang/Object;)Lorg/openapitools/client/models/GetOrCreateCallResponse;
+	public final fun component6 ()Ljava/util/List;
+	public final fun component7 ()Lorg/openapitools/client/models/MemberResponse;
+	public final fun copy (Ljava/util/List;Lorg/openapitools/client/models/CallResponse;ZLjava/lang/String;Ljava/util/List;Ljava/util/List;Lorg/openapitools/client/models/MemberResponse;)Lorg/openapitools/client/models/GetOrCreateCallResponse;
+	public static synthetic fun copy$default (Lorg/openapitools/client/models/GetOrCreateCallResponse;Ljava/util/List;Lorg/openapitools/client/models/CallResponse;ZLjava/lang/String;Ljava/util/List;Ljava/util/List;Lorg/openapitools/client/models/MemberResponse;ILjava/lang/Object;)Lorg/openapitools/client/models/GetOrCreateCallResponse;
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getBlockedUsers ()Ljava/util/List;
 	public final fun getCall ()Lorg/openapitools/client/models/CallResponse;
@@ -3806,6 +3778,7 @@ public final class org/openapitools/client/models/GetOrCreateCallResponse {
 	public final fun getDuration ()Ljava/lang/String;
 	public final fun getMembers ()Ljava/util/List;
 	public final fun getMembership ()Lorg/openapitools/client/models/MemberResponse;
+	public final fun getOwnCapabilities ()Ljava/util/List;
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
 }
@@ -3893,17 +3866,18 @@ public final class org/openapitools/client/models/JoinCallRequest {
 }
 
 public final class org/openapitools/client/models/JoinCallResponse {
-	public fun <init> (Ljava/util/List;Lorg/openapitools/client/models/CallResponse;ZLorg/openapitools/client/models/Credentials;Ljava/lang/String;Ljava/util/List;Lorg/openapitools/client/models/MemberResponse;)V
-	public synthetic fun <init> (Ljava/util/List;Lorg/openapitools/client/models/CallResponse;ZLorg/openapitools/client/models/Credentials;Ljava/lang/String;Ljava/util/List;Lorg/openapitools/client/models/MemberResponse;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun <init> (Ljava/util/List;Lorg/openapitools/client/models/CallResponse;ZLorg/openapitools/client/models/Credentials;Ljava/lang/String;Ljava/util/List;Ljava/util/List;Lorg/openapitools/client/models/MemberResponse;)V
+	public synthetic fun <init> (Ljava/util/List;Lorg/openapitools/client/models/CallResponse;ZLorg/openapitools/client/models/Credentials;Ljava/lang/String;Ljava/util/List;Ljava/util/List;Lorg/openapitools/client/models/MemberResponse;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun component1 ()Ljava/util/List;
 	public final fun component2 ()Lorg/openapitools/client/models/CallResponse;
 	public final fun component3 ()Z
 	public final fun component4 ()Lorg/openapitools/client/models/Credentials;
 	public final fun component5 ()Ljava/lang/String;
 	public final fun component6 ()Ljava/util/List;
-	public final fun component7 ()Lorg/openapitools/client/models/MemberResponse;
-	public final fun copy (Ljava/util/List;Lorg/openapitools/client/models/CallResponse;ZLorg/openapitools/client/models/Credentials;Ljava/lang/String;Ljava/util/List;Lorg/openapitools/client/models/MemberResponse;)Lorg/openapitools/client/models/JoinCallResponse;
-	public static synthetic fun copy$default (Lorg/openapitools/client/models/JoinCallResponse;Ljava/util/List;Lorg/openapitools/client/models/CallResponse;ZLorg/openapitools/client/models/Credentials;Ljava/lang/String;Ljava/util/List;Lorg/openapitools/client/models/MemberResponse;ILjava/lang/Object;)Lorg/openapitools/client/models/JoinCallResponse;
+	public final fun component7 ()Ljava/util/List;
+	public final fun component8 ()Lorg/openapitools/client/models/MemberResponse;
+	public final fun copy (Ljava/util/List;Lorg/openapitools/client/models/CallResponse;ZLorg/openapitools/client/models/Credentials;Ljava/lang/String;Ljava/util/List;Ljava/util/List;Lorg/openapitools/client/models/MemberResponse;)Lorg/openapitools/client/models/JoinCallResponse;
+	public static synthetic fun copy$default (Lorg/openapitools/client/models/JoinCallResponse;Ljava/util/List;Lorg/openapitools/client/models/CallResponse;ZLorg/openapitools/client/models/Credentials;Ljava/lang/String;Ljava/util/List;Ljava/util/List;Lorg/openapitools/client/models/MemberResponse;ILjava/lang/Object;)Lorg/openapitools/client/models/JoinCallResponse;
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getBlockedUsers ()Ljava/util/List;
 	public final fun getCall ()Lorg/openapitools/client/models/CallResponse;
@@ -3912,6 +3886,7 @@ public final class org/openapitools/client/models/JoinCallResponse {
 	public final fun getDuration ()Ljava/lang/String;
 	public final fun getMembers ()Ljava/util/List;
 	public final fun getMembership ()Lorg/openapitools/client/models/MemberResponse;
+	public final fun getOwnCapabilities ()Ljava/util/List;
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
 }
