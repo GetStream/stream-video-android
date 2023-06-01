@@ -7,7 +7,7 @@ kotlinSerialization = "1.5.1"
 kotlinSerializationConverter = "1.0.0"
 kotlinxCoroutines = "1.7.1"
 kotlinDokka = "1.8.10"
-jvmTarget = "1.8"
+jvmTarget = "11"
 
 androidxMaterial = "1.9.0"
 androidxAppCompat = "1.6.1"
