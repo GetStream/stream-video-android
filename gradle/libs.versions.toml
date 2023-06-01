@@ -26,7 +26,7 @@ androidxHiltNavigation = "1.0.0"
 androidxComposeNavigation = "2.5.3"
 
 coil = "2.2.2"
-landscapist = "2.2.1"
+landscapist = "2.1.9"
 accompanist = "0.30.1"
 telephoto = "0.3.0"
 
