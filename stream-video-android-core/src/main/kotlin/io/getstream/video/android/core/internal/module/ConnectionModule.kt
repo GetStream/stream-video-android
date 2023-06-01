@@ -27,9 +27,9 @@ import io.getstream.video.android.core.socket.SfuSocket
 import io.getstream.video.android.model.ApiKey
 import io.getstream.video.android.model.User
 import io.getstream.video.android.model.UserToken
+import java.util.concurrent.TimeUnit
 import kotlinx.coroutines.CoroutineScope
 import okhttp3.HttpUrl
-import okhttp3.HttpUrl.Companion.toHttpUrl
 import okhttp3.Interceptor
 import okhttp3.OkHttpClient
 import okhttp3.Response
@@ -45,7 +45,6 @@ import retrofit2.Retrofit
 import retrofit2.converter.moshi.MoshiConverterFactory
 import retrofit2.converter.scalars.ScalarsConverterFactory
 import retrofit2.converter.wire.WireConverterFactory
-import java.util.concurrent.TimeUnit
 
 /**
  * ConnectionModule provides several helpful attributes
@@ -60,7 +59,7 @@ import java.util.concurrent.TimeUnit
  * createSFUConnectionModule
  */
 internal class ConnectionModule(
-    private val context: Context,
+    context: Context,
     private val scope: CoroutineScope,
     internal val videoDomain: String,
     internal val connectionTimeoutInMs: Long,
@@ -69,40 +68,27 @@ internal class ConnectionModule(
     internal val apiKey: ApiKey,
     internal val userToken: UserToken,
 ) {
-    private var baseUrlInterceptor: BaseUrlInterceptor
-    private var authInterceptor: CoordinatorAuthInterceptor
-    internal var okHttpClient: OkHttpClient
+    private val baseUrlInterceptor: BaseUrlInterceptor = BaseUrlInterceptor(null)
+    private val authInterceptor: CoordinatorAuthInterceptor =
+        CoordinatorAuthInterceptor(apiKey, userToken)
+    internal val okHttpClient: OkHttpClient = buildOkHttpClient()
+
     internal var videoCallsApi: VideoCallsApi
     internal var moderationApi: ModerationApi
     internal var recordingApi: RecordingApi
     internal var livestreamingApi: LivestreamingApi
     internal var defaultApi: DefaultApi
-
     internal var eventsApi: EventsApi
+
     internal var coordinatorSocket: CoordinatorSocket
-    internal var networkStateProvider: NetworkStateProvider
+    internal var networkStateProvider: NetworkStateProvider = NetworkStateProvider(
+        connectivityManager = context
+            .getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+    )
 
     init {
-        // setup the OKHttpClient
-        authInterceptor =
-            CoordinatorAuthInterceptor(apiKey, userToken)
-        baseUrlInterceptor = BaseUrlInterceptor(null)
-
-        okHttpClient = buildOkHttpClient(null)
-
-        networkStateProvider = NetworkStateProvider(
-            connectivityManager = context
-                .getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
-        )
-
         // setup the retrofit clients
         val baseUrl = "https://$videoDomain"
-        val protoRetrofitClient = Retrofit.Builder()
-            .client(okHttpClient)
-            .addConverterFactory(WireConverterFactory.create())
-            .baseUrl(baseUrl)
-            .build()
-
         val retrofitClient = Retrofit.Builder()
             .baseUrl(baseUrl)
             .addConverterFactory(ScalarsConverterFactory.create())
@@ -110,7 +96,7 @@ internal class ConnectionModule(
             .client(okHttpClient)
             .build()
 
-        // setup the 4 retrofit APIs
+        // setup the retrofit services
         videoCallsApi = retrofitClient.create(VideoCallsApi::class.java)
         eventsApi = retrofitClient.create(EventsApi::class.java)
         moderationApi = retrofitClient.create(ModerationApi::class.java)
@@ -123,32 +109,18 @@ internal class ConnectionModule(
     }
 
     /**
-     * Host pattern to be replaced.
-     */
-    private val REPLACEMENT_HOST = "replacement.url"
-
-    /**
-     * Url pattern to be replaced.
-     */
-    internal val REPLACEMENT_URL = "https://$REPLACEMENT_HOST"
-
-    /**
      * Key used to prove authorization to the API.
      */
 
-    private fun buildOkHttpClient(
-        baseUrl: HttpUrl?
-    ): OkHttpClient {
+    private fun buildOkHttpClient(): OkHttpClient {
         // create a new OkHTTP client and set timeouts
-        // TODO: map logging level
-
         return OkHttpClient.Builder()
             .addInterceptor(
                 authInterceptor
             )
             .addInterceptor(
                 HttpLoggingInterceptor().apply {
-                    level = HttpLoggingInterceptor.Level.BASIC
+                    level = loggingLevel.httpLoggingLevel
                 }
             )
             .addInterceptor(
@@ -169,7 +141,7 @@ internal class ConnectionModule(
     /**
      * @return The WebSocket handler that is used to connect to different calls.
      */
-    internal fun createCoordinatorSocket(): CoordinatorSocket {
+    private fun createCoordinatorSocket(): CoordinatorSocket {
         val coordinatorUrl = "wss://$videoDomain/video/connect"
 
         return CoordinatorSocket(
@@ -188,18 +160,18 @@ internal class ConnectionModule(
         sfuToken: String,
         getSubscriberSdp: suspend () -> String,
     ): SfuConnectionModule {
-        val updatedSignalUrl = sfuUrl.removeSuffix(suffix = "/twirp")
-        val baseUrl = updatedSignalUrl.toHttpUrl()
-        val okHttpClient = buildOkHttpClient(baseUrl)
-
+//        val updatedSignalUrl = sfuUrl.removeSuffix(suffix = "/twirp")
+//        val baseUrl = updatedSignalUrl.toHttpUrl()
+//        val okHttpClient = buildOkHttpClient(baseUrl)
         return SfuConnectionModule(
-            sfuUrl,
-            sessionId,
-            sfuToken,
-            apiKey,
-            getSubscriberSdp,
-            scope,
-            networkStateProvider
+            sfuUrl = sfuUrl,
+            sessionId = sessionId,
+            sfuToken = sfuToken,
+            apiKey = apiKey,
+            getSubscriberSdp = getSubscriberSdp,
+            scope = scope,
+            networkStateProvider = networkStateProvider,
+            loggingLevel = loggingLevel
         )
     }
 
@@ -213,6 +185,18 @@ internal class ConnectionModule(
     fun updateAuthType(authType: String) {
         authInterceptor.authType = authType
     }
+
+    internal companion object {
+        /**
+         * Host pattern to be replaced.
+         */
+        private const val REPLACEMENT_HOST = "replacement.url"
+
+        /**
+         * Url pattern to be replaced.
+         */
+        internal const val REPLACEMENT_URL = "https://$REPLACEMENT_HOST"
+    }
 }
 
 /**
@@ -224,23 +208,23 @@ internal class SfuConnectionModule(
     /** the session id, generated when we join/ client side */
     sessionId: String,
     /** A token which gives you access to the sfu */
-    val sfuToken: String,
+    private val sfuToken: String,
     /** A token which gives you access to the sfu */
     val apiKey: String,
     /** Function that gives a fresh SDP */
     getSubscriberSdp: suspend () -> String,
+    private val loggingLevel: LoggingLevel = LoggingLevel.NONE,
     /** The scope to use for the socket */
     scope: CoroutineScope = CoroutineScope(DispatcherProvider.IO),
     /** Network monitoring */
     networkStateProvider: NetworkStateProvider
 ) {
-    internal lateinit var sfuSocket: SfuSocket
-    val updatedSignalUrl = sfuUrl.removeSuffix(suffix = "/twirp")
+    internal var sfuSocket: SfuSocket
+    private val updatedSignalUrl = sfuUrl.removeSuffix(suffix = "/twirp")
 
     private fun buildSfuOkHttpClient(): OkHttpClient {
         val connectionTimeoutInMs = 10000L
         // create a new OkHTTP client and set timeouts
-        // TODO: map logging level
         val authInterceptor =
             CoordinatorAuthInterceptor(apiKey, sfuToken)
         val baseUrlInterceptor = BaseUrlInterceptor(null)
@@ -250,7 +234,7 @@ internal class SfuConnectionModule(
             )
             .addInterceptor(
                 HttpLoggingInterceptor().apply {
-                    level = HttpLoggingInterceptor.Level.BASIC
+                    level = loggingLevel.httpLoggingLevel
                 }
             )
             .addInterceptor(
@@ -266,7 +250,7 @@ internal class SfuConnectionModule(
 
     val okHttpClient = buildSfuOkHttpClient()
 
-    internal val signalRetrofitClient: Retrofit by lazy {
+    private val signalRetrofitClient: Retrofit by lazy {
         Retrofit.Builder()
             .client(okHttpClient)
             .addConverterFactory(WireConverterFactory.create())
@@ -295,8 +279,7 @@ internal class SfuConnectionModule(
 /**
  * Interceptor that changes urls for the coordinator
  */
-internal class BaseUrlInterceptor(var baseUrl: HttpUrl?) : Interceptor {
-    private val REPLACEMENT_HOST = "replacement.url"
+internal class BaseUrlInterceptor(private var baseUrl: HttpUrl?) : Interceptor {
 
     override fun intercept(chain: Interceptor.Chain): Response {
         baseUrl = baseUrl ?: return chain.proceed(chain.request())
@@ -314,6 +297,10 @@ internal class BaseUrlInterceptor(var baseUrl: HttpUrl?) : Interceptor {
             chain.proceed(chain.request())
         }
     }
+
+    private companion object {
+        private const val REPLACEMENT_HOST = "replacement.url"
+    }
 }
 
 /**
@@ -324,14 +311,6 @@ internal class CoordinatorAuthInterceptor(
     var token: String,
     var authType: String = "jwt"
 ) : Interceptor {
-    private val REPLACEMENT_HOST = "replacement.url"
-
-    /**
-     * Query key used to authenticate to the API.
-     */
-    private val API_KEY = "api_key"
-    private val STREAM_AUTH_TYPE = "stream-auth-type"
-    private val HEADER_AUTHORIZATION = "Authorization"
 
     override fun intercept(chain: Interceptor.Chain): Response {
         val original = chain.request()
@@ -351,5 +330,16 @@ internal class CoordinatorAuthInterceptor(
             .build()
 
         return chain.proceed(updated)
+    }
+
+    private companion object {
+        private const val REPLACEMENT_HOST = "replacement.url"
+
+        /**
+         * Query key used to authenticate to the API.
+         */
+        private const val API_KEY = "api_key"
+        private const val STREAM_AUTH_TYPE = "stream-auth-type"
+        private const val HEADER_AUTHORIZATION = "Authorization"
     }
 }
