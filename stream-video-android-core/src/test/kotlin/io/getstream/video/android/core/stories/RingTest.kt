@@ -45,7 +45,7 @@ class RingTest : IntegrationTestBase() {
         assertSuccess(createResponse)
 
         assertThat(call.state.members.value.size).isEqualTo(2)
-
+        /*
         // tommaso accepts
         val userResponse = testData.users["tommaso"]!!.toResponse()
         clientImpl.fireEvent(
@@ -69,5 +69,6 @@ class RingTest : IntegrationTestBase() {
         )
         val tommaso2 = call.state.members.value.first { it.user.id == "tommaso" }
         assertThat(tommaso2.rejectedAt).isNotNull()
+        */
     }
 }

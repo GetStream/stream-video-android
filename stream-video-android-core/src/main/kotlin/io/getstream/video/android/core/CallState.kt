@@ -440,7 +440,7 @@ public class CallState(private val call: Call, private val user: User) {
                 event.levels.forEach { entry ->
                     val participant = getOrCreateParticipant(entry.key, entry.value.userId)
                     participant._speaking.value = entry.value.isSpeaking
-                    participant._audioLevel.value = entry.value.audioLevel
+                    participant.updateAudioLevel(entry.value.audioLevel)
                 }
             }
 
@@ -675,6 +675,8 @@ public class CallState(private val call: Call, private val user: User) {
 
     fun updateFromResponse(response: UpdateCallResponse) {
         updateFromResponse(response.call)
+        _ownCapabilities.value = response.ownCapabilities
+        updateFromResponse(response.members)
     }
 
     fun updateFromResponse(response: GetCallResponse) {
