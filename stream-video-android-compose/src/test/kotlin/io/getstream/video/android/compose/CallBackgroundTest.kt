@@ -39,7 +39,7 @@ internal class CallBackgroundTest : BaseComposeTest() {
     override fun basePaparazzi(): Paparazzi = paparazzi
 
     @Test
-    fun `snapshot CallBackground composable with an initial Avatars`() {
+    fun `snapshot CallBackground composable`() {
         snapshot {
             CallBackground(
                 participants = mockParticipantList.take(1),

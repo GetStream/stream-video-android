@@ -38,6 +38,7 @@ class ClientAndAuthTest : TestBase() {
 
     @Test
     fun regularUser() = runTest {
+        println("hello")
         StreamVideoBuilder(
             context = context,
             apiKey = apiKey,
@@ -45,6 +46,7 @@ class ClientAndAuthTest : TestBase() {
             testData.users["thierry"]!!,
             testData.tokens["thierry"]!!,
         ).build()
+        println("hello 2")
     }
 
     @Test

@@ -27,7 +27,6 @@ import org.openapitools.client.models.ScreensharingSettingsRequest
 import org.robolectric.RobolectricTestRunner
 import org.threeten.bp.Clock
 import org.threeten.bp.OffsetDateTime
-import java.util.Date
 
 @RunWith(RobolectricTestRunner::class)
 class CallStateTest : IntegrationTestBase() {
@@ -99,13 +98,13 @@ class CallStateTest : IntegrationTestBase() {
         )
 
         call.state.updateParticipant(
-            ParticipantState("4", call, User("4")).apply { _lastSpeakingAt.value = Date() }
+            ParticipantState("4", call, User("4")).apply { _lastSpeakingAt.value = nowUtc }
         )
         call.state.updateParticipant(
             ParticipantState("5", call, User("5")).apply { _videoEnabled.value = true }
         )
         call.state.updateParticipant(
-            ParticipantState("6", call, User("6")).apply { _joinedAt.value = Date() }
+            ParticipantState("6", call, User("6")).apply { _joinedAt.value = nowUtc }
         )
 
         call.state.updateParticipant(

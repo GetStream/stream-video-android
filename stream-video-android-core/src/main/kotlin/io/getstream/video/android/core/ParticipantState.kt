@@ -29,9 +29,11 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import org.openapitools.client.models.MuteUsersResponse
 import org.openapitools.client.models.ReactionResponse
+import org.threeten.bp.Instant
+import org.threeten.bp.OffsetDateTime
+import org.threeten.bp.ZoneOffset
 import stream.video.sfu.models.Participant
 import stream.video.sfu.models.TrackType
-import java.util.Date
 
 /**
  * Represents the state of a participant in a call.
@@ -93,14 +95,21 @@ public data class ParticipantState(
     /**
      * When you joined the call
      */
-    internal val _joinedAt: MutableStateFlow<Date?> = MutableStateFlow(null)
-    val joinedAt: StateFlow<Date?> = _joinedAt
+    internal val _joinedAt: MutableStateFlow<OffsetDateTime?> = MutableStateFlow(null)
+    val joinedAt: StateFlow<OffsetDateTime?> = _joinedAt
 
     /**
-     * The audio level of the participant
+     * The audio level of the participant, single float value
      */
-    internal val _audioLevel: MutableStateFlow<Float> = MutableStateFlow(0F)
+    internal val _audioLevel: MutableStateFlow<Float> = MutableStateFlow(0f)
     val audioLevel: StateFlow<Float> = _audioLevel
+
+    /**
+     * The last 10 values for the audio level. This list easier to work with for some audio visualizations
+     */
+    internal val _audioLevels: MutableStateFlow<List<Float>> =
+        MutableStateFlow(listOf(0f, 0f, 0f, 0f, 0f, 0f, 0f, 0f, 0f, 0f))
+    val audioLevels: StateFlow<List<Float>> = _audioLevels
 
     /**
      * The video quality of the participant
@@ -115,8 +124,8 @@ public data class ParticipantState(
     internal val _speaking: MutableStateFlow<Boolean> = MutableStateFlow(false)
     val speaking: StateFlow<Boolean> = _speaking
 
-    internal val _lastSpeakingAt: MutableStateFlow<Date?> = MutableStateFlow(null)
-    val lastSpeakingAt: StateFlow<Date?> = _lastSpeakingAt
+    internal val _lastSpeakingAt: MutableStateFlow<OffsetDateTime?> = MutableStateFlow(null)
+    val lastSpeakingAt: StateFlow<OffsetDateTime?> = _lastSpeakingAt
 
     internal val _reactions = MutableStateFlow<List<ReactionResponse>>(emptyList())
     val reactions: StateFlow<List<ReactionResponse>> = _reactions
@@ -167,15 +176,27 @@ public data class ParticipantState(
         return call.state.unpin(this.sessionId)
     }
 
+    fun updateAudioLevel(audioLevel: Float) {
+        val currentAudio = _audioLevels.value.toMutableList()
+        currentAudio.removeAt(0)
+        currentAudio.add(audioLevel)
+        _audioLevels.value = currentAudio.toList()
+        _audioLevel.value = audioLevel
+    }
+
     fun updateFromParticipantInfo(participant: Participant) {
         sessionId = participant.session_id
-        _joinedAt.value = participant.joined_at?.toEpochMilli()?.let { Date(it) }
-            ?: Date() // convert instant to date
+
+        val joinedAtMilli =
+            participant.joined_at?.toEpochMilli() ?: OffsetDateTime.now().toEpochSecond()
+        val instant = Instant.ofEpochSecond(joinedAtMilli)
+        _joinedAt.value = OffsetDateTime.ofInstant(instant, ZoneOffset.UTC)
+
         trackLookupPrefix = participant.track_lookup_prefix
         _networkQuality.value = NetworkQuality.fromConnectionQuality(participant.connection_quality)
         _speaking.value = participant.is_speaking
         _dominantSpeaker.value = participant.is_dominant_speaker
-        _audioLevel.value = participant.audio_level
+        updateAudioLevel(participant.audio_level)
         _audioEnabled.value = participant.published_tracks.contains(TrackType.TRACK_TYPE_AUDIO)
         _videoEnabled.value = participant.published_tracks.contains(TrackType.TRACK_TYPE_VIDEO)
         _screenSharingEnabled.value =

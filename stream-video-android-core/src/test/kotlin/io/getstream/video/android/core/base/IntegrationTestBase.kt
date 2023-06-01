@@ -44,7 +44,23 @@ import org.junit.Before
 import org.junit.Rule
 import org.junit.rules.TestWatcher
 import org.junit.runner.Description
+import org.openapitools.client.models.AudioSettings
+import org.openapitools.client.models.BackstageSettings
+import org.openapitools.client.models.BroadcastSettings
+import org.openapitools.client.models.CallIngressResponse
+import org.openapitools.client.models.CallResponse
+import org.openapitools.client.models.CallSettingsResponse
+import org.openapitools.client.models.GeofenceSettings
+import org.openapitools.client.models.HLSSettings
+import org.openapitools.client.models.RTMPIngress
+import org.openapitools.client.models.RecordSettings
+import org.openapitools.client.models.RingSettings
+import org.openapitools.client.models.ScreensharingSettings
+import org.openapitools.client.models.TargetResolution
+import org.openapitools.client.models.TranscriptionSettings
+import org.openapitools.client.models.UserResponse
 import org.openapitools.client.models.VideoEvent
+import org.openapitools.client.models.VideoSettings
 import org.threeten.bp.Clock
 import org.threeten.bp.OffsetDateTime
 import java.util.UUID
@@ -322,4 +338,49 @@ open class IntegrationTestBase(connectCoordinatorWS: Boolean = true) : TestBase(
     fun resetTestVars() {
         events = mutableListOf()
     }
+}
+
+// convert a Call object to a CallResponse object
+internal fun Call.toResponse(createdBy: UserResponse): CallResponse {
+    val now = OffsetDateTime.now(Clock.systemUTC())
+    val ingress = CallIngressResponse(rtmp = RTMPIngress(address = ""))
+    val audioSettings = AudioSettings(
+        accessRequestEnabled = true,
+        micDefaultOn = true,
+        opusDtxEnabled = true,
+        redundantCodingEnabled = true,
+        speakerDefaultOn = true
+    )
+    val settings = CallSettingsResponse(
+        audio = audioSettings,
+        backstage = BackstageSettings(enabled = false),
+        broadcasting = BroadcastSettings(enabled = false, hls = HLSSettings(autoOn = false, enabled = false, qualityTracks = listOf("f"))),
+        geofencing = GeofenceSettings(names = emptyList()),
+        recording = RecordSettings(
+            audioOnly = false, mode = RecordSettings.Mode.available, quality = RecordSettings.Quality._720p
+        ),
+        ring = RingSettings(autoCancelTimeoutMs = 10000, incomingCallTimeoutMs = 10000),
+        screensharing = ScreensharingSettings(false, false),
+        transcription = TranscriptionSettings("test", TranscriptionSettings.Mode.available),
+        video = VideoSettings(false, false, VideoSettings.CameraFacing.front, false, TargetResolution(3000000, 1024, 1280))
+    )
+    val response = CallResponse(
+        id = id,
+        type = type,
+        cid = "$type:$id",
+        backstage = false,
+        createdAt = now,
+        custom = emptyMap(),
+        broadcasting = false,
+        recording = false,
+        transcribing = false,
+        hlsPlaylistUrl = "",
+        currentSessionId = "",
+        createdBy = createdBy,
+        blockedUserIds = emptyList(),
+        ingress = ingress,
+        settings = settings,
+        updatedAt = now
+    )
+    return response
 }

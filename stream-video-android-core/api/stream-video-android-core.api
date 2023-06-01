@@ -85,6 +85,7 @@ public final class io/getstream/video/android/core/CallHealthMonitor {
 public final class io/getstream/video/android/core/CallState {
 	public fun <init> (Lio/getstream/video/android/core/Call;Lio/getstream/video/android/model/User;)V
 	public final fun clearParticipants ()V
+	public final fun getAcceptedBy ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun getActiveSpeakers ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun getBackstage ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun getBlockedUserIds ()Lkotlinx/coroutines/flow/StateFlow;
@@ -113,6 +114,7 @@ public final class io/getstream/video/android/core/CallState {
 	public final fun getPinnedParticipants ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun getReactions ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun getRecording ()Lkotlinx/coroutines/flow/StateFlow;
+	public final fun getRejectedBy ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun getRemoteParticipants ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun getRingingState ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun getScope ()Lkotlinx/coroutines/CoroutineScope;
@@ -362,6 +364,7 @@ public final class io/getstream/video/android/core/ParticipantState {
 	public final fun getAudio ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun getAudioEnabled ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun getAudioLevel ()Lkotlinx/coroutines/flow/StateFlow;
+	public final fun getAudioLevels ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun getAudioTrack ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun getCall ()Lio/getstream/video/android/core/Call;
 	public final fun getDominantSpeaker ()Lkotlinx/coroutines/flow/StateFlow;
@@ -389,6 +392,7 @@ public final class io/getstream/video/android/core/ParticipantState {
 	public final fun setSessionId (Ljava/lang/String;)V
 	public fun toString ()Ljava/lang/String;
 	public final fun unpin (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public final fun updateAudioLevel (F)V
 	public final fun updateFromParticipantInfo (Lstream/video/sfu/models/Participant;)V
 }
 
@@ -4808,14 +4812,23 @@ public final class org/openapitools/client/models/UpdateCallRequest {
 }
 
 public final class org/openapitools/client/models/UpdateCallResponse {
-	public fun <init> (Lorg/openapitools/client/models/CallResponse;Ljava/lang/String;)V
-	public final fun component1 ()Lorg/openapitools/client/models/CallResponse;
-	public final fun component2 ()Ljava/lang/String;
-	public final fun copy (Lorg/openapitools/client/models/CallResponse;Ljava/lang/String;)Lorg/openapitools/client/models/UpdateCallResponse;
-	public static synthetic fun copy$default (Lorg/openapitools/client/models/UpdateCallResponse;Lorg/openapitools/client/models/CallResponse;Ljava/lang/String;ILjava/lang/Object;)Lorg/openapitools/client/models/UpdateCallResponse;
+	public fun <init> (Ljava/util/List;Lorg/openapitools/client/models/CallResponse;Ljava/lang/String;Ljava/util/List;Ljava/util/List;Lorg/openapitools/client/models/MemberResponse;)V
+	public synthetic fun <init> (Ljava/util/List;Lorg/openapitools/client/models/CallResponse;Ljava/lang/String;Ljava/util/List;Ljava/util/List;Lorg/openapitools/client/models/MemberResponse;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Ljava/util/List;
+	public final fun component2 ()Lorg/openapitools/client/models/CallResponse;
+	public final fun component3 ()Ljava/lang/String;
+	public final fun component4 ()Ljava/util/List;
+	public final fun component5 ()Ljava/util/List;
+	public final fun component6 ()Lorg/openapitools/client/models/MemberResponse;
+	public final fun copy (Ljava/util/List;Lorg/openapitools/client/models/CallResponse;Ljava/lang/String;Ljava/util/List;Ljava/util/List;Lorg/openapitools/client/models/MemberResponse;)Lorg/openapitools/client/models/UpdateCallResponse;
+	public static synthetic fun copy$default (Lorg/openapitools/client/models/UpdateCallResponse;Ljava/util/List;Lorg/openapitools/client/models/CallResponse;Ljava/lang/String;Ljava/util/List;Ljava/util/List;Lorg/openapitools/client/models/MemberResponse;ILjava/lang/Object;)Lorg/openapitools/client/models/UpdateCallResponse;
 	public fun equals (Ljava/lang/Object;)Z
+	public final fun getBlockedUsers ()Ljava/util/List;
 	public final fun getCall ()Lorg/openapitools/client/models/CallResponse;
 	public final fun getDuration ()Ljava/lang/String;
+	public final fun getMembers ()Ljava/util/List;
+	public final fun getMembership ()Lorg/openapitools/client/models/MemberResponse;
+	public final fun getOwnCapabilities ()Ljava/util/List;
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
 }

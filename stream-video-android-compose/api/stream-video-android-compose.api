@@ -449,7 +449,7 @@ public final class io/getstream/video/android/compose/ui/components/avatar/UserA
 }
 
 public final class io/getstream/video/android/compose/ui/components/background/CallBackgroundKt {
-	public static final fun CallBackground (Ljava/util/List;ZZLandroidx/compose/ui/Modifier;Lkotlin/jvm/functions/Function3;Landroidx/compose/runtime/Composer;II)V
+	public static final fun CallBackground (Landroidx/compose/ui/Modifier;Ljava/util/List;ZZLkotlin/jvm/functions/Function3;Landroidx/compose/runtime/Composer;II)V
 	public static final fun ParticipantImageBackground (Ljava/lang/String;Landroidx/compose/ui/Modifier;ILandroidx/compose/runtime/Composer;II)V
 }
 

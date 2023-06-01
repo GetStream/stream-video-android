@@ -58,7 +58,7 @@ public object OffsetDateTimeSerializer : KSerializer<OffsetDateTime> {
 @Serializable
 public data class User(
     /** ID is required, the rest is optional */
-    val id: String,
+    val id: String = "",
     val role: String = "",
     val type: UserType = UserType.Authenticated,
     val name: String = "",
