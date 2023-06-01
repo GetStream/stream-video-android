@@ -91,7 +91,7 @@ jobs:
           ./gradlew --scan --stacktrace \
               assemble
 
-#      - name: Unit Tests
-#        run: |
-#          ./gradlew --scan --stacktrace \
-#              :stream-video-android-compose:testDebugUnitTest
+      - name: Unit Tests
+        run: |
+          ./gradlew --scan --stacktrace \
+              :stream-video-android-compose:testDebugUnitTest

@@ -18,12 +18,9 @@ package io.getstream.video.android.core.stories
 
 import com.google.common.truth.Truth.assertThat
 import io.getstream.video.android.core.IntegrationTestBase
-import io.getstream.video.android.core.utils.toResponse
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.openapitools.client.models.CallAcceptedEvent
-import org.openapitools.client.models.CallRejectedEvent
 import org.robolectric.RobolectricTestRunner
 
 @RunWith(RobolectricTestRunner::class)

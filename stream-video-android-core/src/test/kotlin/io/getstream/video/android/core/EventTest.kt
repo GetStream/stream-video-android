@@ -27,13 +27,10 @@ import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.openapitools.client.models.BlockedUserEvent
-import org.openapitools.client.models.CallAcceptedEvent
 import org.openapitools.client.models.CallEndedEvent
 import org.openapitools.client.models.CallReactionEvent
 import org.openapitools.client.models.CallRecordingStartedEvent
 import org.openapitools.client.models.CallRecordingStoppedEvent
-import org.openapitools.client.models.CallRejectedEvent
-import org.openapitools.client.models.MemberResponse
 import org.openapitools.client.models.OwnCapability
 import org.openapitools.client.models.PermissionRequestEvent
 import org.openapitools.client.models.ReactionResponse

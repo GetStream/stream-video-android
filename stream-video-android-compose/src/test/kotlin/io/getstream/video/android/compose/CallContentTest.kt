@@ -68,7 +68,7 @@ internal class CallContentTest : BaseComposeTest() {
     }
 
     @Test
-    fun `snapshot IncomingCallContent Video type with one participant composable`() {
+    fun `snapshot IncomingCallContent with one participant composable`() {
         snapshot {
             IncomingCallContent(
                 call = mockCall,
@@ -124,7 +124,7 @@ internal class CallContentTest : BaseComposeTest() {
     }
 
     @Test
-    fun `snapshot OutgoingCallContent Video type with one participant composable`() {
+    fun `snapshot OutgoingCallContent with one participant composable`() {
         snapshot {
             OutgoingCallContent(
                 call = mockCall,
@@ -138,7 +138,7 @@ internal class CallContentTest : BaseComposeTest() {
     }
 
     @Test
-    fun `snapshot OutgoingCallContent Video type with multiple participants composable`() {
+    fun `snapshot OutgoingCallContent with multiple participants composable`() {
         snapshot {
             OutgoingCallContent(
                 call = mockCall,

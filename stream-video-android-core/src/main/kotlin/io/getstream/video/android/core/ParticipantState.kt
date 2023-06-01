@@ -105,7 +105,7 @@ public data class ParticipantState(
     /**
      * The last 10 values for the audio level. This list easier to work with for some audio visualizations
      */
-    internal val _audioLevels: MutableStateFlow<List<Float>> = MutableStateFlow(listOf(0f,0f,0f,0f,0f,0f,0f,0f,0f,0f))
+    internal val _audioLevels: MutableStateFlow<List<Float>> = MutableStateFlow(listOf(0f, 0f, 0f, 0f, 0f, 0f, 0f, 0f, 0f, 0f))
     val audioLevels: StateFlow<List<Float>> = _audioLevels
 
     /**
@@ -185,7 +185,7 @@ public data class ParticipantState(
         sessionId = participant.session_id
 
         // TODO: convert Java Instant to ThreeTenABP OffsetDateTime
-        //_joinedAt.value = participant.joined_at
+        // _joinedAt.value = participant.joined_at
         // OffsetDateTime.ofInstant(Instant.ofEpochMilli(joinedAtMilli), ZoneOffset.UTC)
 
         trackLookupPrefix = participant.track_lookup_prefix
