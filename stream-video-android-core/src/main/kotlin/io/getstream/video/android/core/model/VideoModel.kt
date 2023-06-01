@@ -17,7 +17,6 @@
 package io.getstream.video.android.core.model
 
 import io.getstream.video.android.core.utils.toCallUser
-import org.openapitools.client.models.CallCreatedEvent
 import org.openapitools.client.models.CallResponse
 import org.openapitools.client.models.MemberResponse
 import org.openapitools.client.models.OwnCapability
@@ -94,7 +93,6 @@ internal fun CallResponse.toCallInfo(): CallInfo {
         custom = custom
     )
 }
-
 
 /**
  * Merges [CallUser] maps to absorb as many non-null and non-empty data from both collections.

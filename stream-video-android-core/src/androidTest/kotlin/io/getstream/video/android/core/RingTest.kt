@@ -16,21 +16,12 @@
 
 package io.getstream.video.android.core
 
-import android.app.PendingIntent
-import android.content.Intent
-import android.graphics.BitmapFactory
 import androidx.core.app.NotificationChannelCompat
-import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
-import androidx.core.graphics.drawable.IconCompat
-import com.google.common.truth.Truth.assertThat
 import io.getstream.log.taggedLogger
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.runTest
-import org.junit.Ignore
 import org.junit.Test
 import org.openapitools.client.models.CallRingEvent
-import org.webrtc.PeerConnection
 
 /**
  * call.ring()
@@ -61,7 +52,6 @@ class RingTest : IntegrationTestBase(connectCoordinatorWS = false) {
         val event = waitForNextEvent<CallRingEvent>()
 
         // TODO: push
-
     }
 
     @Test
@@ -74,20 +64,19 @@ class RingTest : IntegrationTestBase(connectCoordinatorWS = false) {
         val event = waitForNextEvent<CallRingEvent>()
 
         // TODO: push
-
     }
 
     @Test
     fun accept() = runTest {
         val call = client.call("default")
-        val response = call.create(listOf("thierry", "tommaso"), ring=true)
+        val response = call.create(listOf("thierry", "tommaso"), ring = true)
         assertSuccess(response)
         val acceptResponse = call.accept()
     }
     @Test
     fun reject() = runTest {
         val call = client.call("default")
-        val response = call.create(listOf("thierry", "tommaso"), ring=true)
+        val response = call.create(listOf("thierry", "tommaso"), ring = true)
         assertSuccess(response)
         val rejectResponse = call.reject()
     }
@@ -154,7 +143,5 @@ class RingTest : IntegrationTestBase(connectCoordinatorWS = false) {
 
 
     //notificationManager.cancel(INCOMING_CALL_NOTIFICATION_ID) */
-
     }
-
 }

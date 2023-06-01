@@ -393,7 +393,7 @@ public class Call(
                 null
             }
         location = locationResult.value
-        val result = joinRequest(options, location, ring=ring, notify=notify)
+        val result = joinRequest(options, location, ring = ring, notify = notify)
 
         if (result !is Success) {
             return result as Failure
@@ -719,8 +719,13 @@ public class Call(
     }
 
     @VisibleForTesting
-    internal suspend fun joinRequest(create: CreateCallOptions? = null, location: String, currentSfu: String? = null, ring: Boolean = false,
-                                     notify: Boolean = false): Result<JoinCallResponse> {
+    internal suspend fun joinRequest(
+        create: CreateCallOptions? = null,
+        location: String,
+        currentSfu: String? = null,
+        ring: Boolean = false,
+        notify: Boolean = false
+    ): Result<JoinCallResponse> {
         val result = clientImpl.joinCall(
             type, id,
             create = create != null,
