@@ -95,10 +95,6 @@ android {
         kotlin.srcDir("build/generated/source/services")
     }
 
-    compileOptions {
-        isCoreLibraryDesugaringEnabled = false
-    }
-
     packagingOptions {
         exclude("META-INF/LICENSE.md")
         exclude("META-INF/LICENSE-notice.md")
