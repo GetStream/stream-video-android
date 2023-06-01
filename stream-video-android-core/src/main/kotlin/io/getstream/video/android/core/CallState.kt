@@ -656,7 +656,6 @@ public class CallState(private val call: Call, private val user: User) {
         _createdBy.value = response.createdBy.toUser()
         _custom.value = response.custom
         _ingress.value = response.ingress
-        _ownCapabilities.value = response.ownCapabilities
         _recording.value = response.recording
         _settings.value = response.settings
         _transcribing.value = response.transcribing
@@ -680,11 +679,13 @@ public class CallState(private val call: Call, private val user: User) {
 
     fun updateFromResponse(response: GetCallResponse) {
         updateFromResponse(response.call)
+        _ownCapabilities.value = response.ownCapabilities
         updateFromResponse(response.members)
     }
 
     fun updateFromResponse(response: JoinCallResponse) {
         updateFromResponse(response.call)
+        _ownCapabilities.value = response.ownCapabilities
         updateFromResponse(response.members)
     }
 
