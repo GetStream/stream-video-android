@@ -146,3 +146,7 @@ cp -r "${CLIENT_ROOT}/" "${PROJECT_ROOT}/stream-video-android-core/src/main/kotl
 # delete all files in the target path of proto to avoid leaving legacy stuff around
 rm -rf ${PROJECT_ROOT}/stream-video-android-core/src/main/proto
 cp -r "${PROTOCOL_ROOT}/protobuf/." "${PROJECT_ROOT}/stream-video-android-core/src/main/proto"
+
+# move to the project root and run spotlessApply to reformat generated codes.
+cd "${PROJECT_ROOT}"
+./gradlew spotlessApply
