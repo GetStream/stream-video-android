@@ -3,27 +3,29 @@ title: Network Quality Indicator
 description: Network Quality Indicator
 ---
 
-Issues:
-* No way to swap the participant card
-
-
-## Connection Quality indicators
+## Network Quality Indicators
 
 It's important to indicate to users when the connection quality isn't good.
-Each participants includes the `connectionQuality` attribute.
-In addition you can also monitor your own connection using `call.state.connection`.
+Each participants (`ParticipantState`) includes the `connectionQuality` attribute.
+In addition you can also monitor your own connection using `call.state.networkQuality`.
 
-Here's a small compose example to render a connection quality icon for each participant
+You can available the `NetworkQualityIndicator` composable component and it is integrated into video render components by default:
+
+![Network Quality Indicator](../assets/cookbook/network-quality-indicator.png)
+
+## Customization
+
+Here's a small compose example to render a custom connection quality icon for each participant:
 
 ```kotlin
 @Composable
-fun NetworkQualityIndicator() {
-    val networkQualityViewModel: NetworkQualityViewModel = viewModel()
-    val networkQuality by networkQualityViewModel.networkQuality.collectAsState()
+fun NetworkQualityIndicator(
+    modifier: Modifier,
+    networkQuality: NetworkQuality
+) {
+    val color = lerp(Color.Red, Color.Green, networkQuality.quality)
 
-    val color = lerp(Color.Red, Color.Green, networkQuality)
-
-    Canvas(modifier = Modifier.size(16.dp)) {
+    Canvas(modifier = modifier.size(16.dp)) {
         drawCircle(color)
     }
 }
@@ -32,5 +34,28 @@ fun NetworkQualityIndicator() {
 You can easily swap out the standard connection quality indicator with your own.
 
 ```kotlin
-// TODO: show updated example here of your updated ParticipantCard (or however we call it)
+CallContainer(
+    modifier = Modifier.background(color = VideoTheme.colors.appBackground),
+    videoRenderer = { modifier, call, participant, style ->
+        CallSingleVideoRenderer(
+            modifier = modifier,
+            call = call,
+            participant = participant,
+            style = style,
+            connectionIndicatorContent = {
+                NetworkQualityIndicator(
+                    modifier = Modifier
+                        .align(Alignment.BottomEnd)
+                        .padding(8.dp),
+                    networkQuality = it
+                )
+            }
+        )
+    },
+ ..
+)
 ```
+
+Now, you will see the custom network quality indicator like the result below:
+
+![Network Quality Indicator](../assets/cookbook/network-quality-indicator-customize.png)

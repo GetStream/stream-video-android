@@ -56,15 +56,15 @@ import io.getstream.video.android.common.model.getSoundIndicatorState
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.audio.SoundIndicator
 import io.getstream.video.android.compose.ui.components.avatar.UserAvatarBackground
-import io.getstream.video.android.compose.ui.components.connection.ConnectionQualityIndicator
+import io.getstream.video.android.compose.ui.components.connection.NetworkQualityIndicator
 import io.getstream.video.android.compose.ui.components.video.VideoRenderer
 import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.ParticipantState
+import io.getstream.video.android.core.model.NetworkQuality
 import io.getstream.video.android.mock.StreamMockUtils
 import io.getstream.video.android.mock.mockCall
 import io.getstream.video.android.mock.mockParticipantList
 import io.getstream.video.android.ui.common.R
-import stream.video.sfu.models.ConnectionQuality
 
 /**
  * Renders a single participant with a given call, which contains all the call states.
@@ -87,9 +87,9 @@ public fun CallSingleVideoRenderer(
     labelContent: @Composable BoxScope.(ParticipantState) -> Unit = {
         ParticipantLabel(participant, style.labelPosition)
     },
-    connectionIndicatorContent: @Composable BoxScope.(ConnectionQuality) -> Unit = {
-        ConnectionQualityIndicator(
-            connectionQuality = it,
+    connectionIndicatorContent: @Composable BoxScope.(NetworkQuality) -> Unit = {
+        NetworkQualityIndicator(
+            networkQuality = it,
             modifier = Modifier.align(BottomEnd)
         )
     },
@@ -100,7 +100,7 @@ public fun CallSingleVideoRenderer(
 ) {
     TextStyle
     val reactions by participant.reactions.collectAsStateWithLifecycle()
-    val connectionQuality by participant.connectionQuality.collectAsStateWithLifecycle()
+    val connectionQuality by participant.networkQuality.collectAsStateWithLifecycle()
 
     val containerModifier = if (style.isFocused) modifier.border(
         border = if (style.isScreenSharing) {

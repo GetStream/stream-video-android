@@ -32,6 +32,7 @@ import io.getstream.video.android.core.events.SFUHealthCheckEvent
 import io.getstream.video.android.core.events.SubscriberOfferEvent
 import io.getstream.video.android.core.events.TrackPublishedEvent
 import io.getstream.video.android.core.events.TrackUnpublishedEvent
+import io.getstream.video.android.core.model.NetworkQuality
 import io.getstream.video.android.core.model.ScreenSharingSession
 import io.getstream.video.android.core.permission.PermissionRequest
 import io.getstream.video.android.core.utils.mapState
@@ -97,7 +98,8 @@ public sealed interface RtcConnectionState {
     /**
      * We set the state to Joined as soon as the call state is available
      */
-    public data class Joined(val session: RtcSession) : RtcConnectionState // joined, participant state is available, you can render the call. Video isn't ready yet
+    public data class Joined(val session: RtcSession) :
+        RtcConnectionState // joined, participant state is available, you can render the call. Video isn't ready yet
 
     /**
      * True when the peer connections are ready
@@ -451,7 +453,8 @@ public class CallState(private val call: Call, private val user: User) {
             is ConnectionQualityChangeEvent -> {
                 event.updates.forEach { entry ->
                     val participant = getOrCreateParticipant(entry.session_id, entry.user_id)
-                    participant._connectionQuality.value = entry.connection_quality
+                    participant._networkQuality.value =
+                        NetworkQuality.fromConnectionQuality(entry.connection_quality)
                 }
             }
 

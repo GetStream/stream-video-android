@@ -364,11 +364,11 @@ public final class io/getstream/video/android/core/ParticipantState {
 	public final fun getAudioLevel ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun getAudioTrack ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun getCall ()Lio/getstream/video/android/core/Call;
-	public final fun getConnectionQuality ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun getDominantSpeaker ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun getInitialUser ()Lio/getstream/video/android/model/User;
 	public final fun getJoinedAt ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun getLastSpeakingAt ()Lkotlinx/coroutines/flow/StateFlow;
+	public final fun getNetworkQuality ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun getReactions ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun getScreenSharing ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun getScreenSharingEnabled ()Lkotlinx/coroutines/flow/StateFlow;
@@ -1811,6 +1811,68 @@ public final class io/getstream/video/android/core/model/MuteUsersData {
 
 public final class io/getstream/video/android/core/model/MuteUsersDataKt {
 	public static final fun toRequest (Lio/getstream/video/android/core/model/MuteUsersData;)Lorg/openapitools/client/models/MuteUsersRequest;
+}
+
+public abstract class io/getstream/video/android/core/model/NetworkQuality {
+	public static final field Companion Lio/getstream/video/android/core/model/NetworkQuality$Companion;
+	public synthetic fun <init> (FLkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun getQuality ()F
+}
+
+public final class io/getstream/video/android/core/model/NetworkQuality$Companion {
+	public final fun fromConnectionQuality (Lstream/video/sfu/models/ConnectionQuality;)Lio/getstream/video/android/core/model/NetworkQuality;
+}
+
+public final class io/getstream/video/android/core/model/NetworkQuality$Excellent : io/getstream/video/android/core/model/NetworkQuality {
+	public fun <init> ()V
+	public fun <init> (F)V
+	public synthetic fun <init> (FILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()F
+	public final fun copy (F)Lio/getstream/video/android/core/model/NetworkQuality$Excellent;
+	public static synthetic fun copy$default (Lio/getstream/video/android/core/model/NetworkQuality$Excellent;FILjava/lang/Object;)Lio/getstream/video/android/core/model/NetworkQuality$Excellent;
+	public fun equals (Ljava/lang/Object;)Z
+	public fun getQuality ()F
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class io/getstream/video/android/core/model/NetworkQuality$Good : io/getstream/video/android/core/model/NetworkQuality {
+	public fun <init> ()V
+	public fun <init> (F)V
+	public synthetic fun <init> (FILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()F
+	public final fun copy (F)Lio/getstream/video/android/core/model/NetworkQuality$Good;
+	public static synthetic fun copy$default (Lio/getstream/video/android/core/model/NetworkQuality$Good;FILjava/lang/Object;)Lio/getstream/video/android/core/model/NetworkQuality$Good;
+	public fun equals (Ljava/lang/Object;)Z
+	public fun getQuality ()F
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class io/getstream/video/android/core/model/NetworkQuality$Poor : io/getstream/video/android/core/model/NetworkQuality {
+	public fun <init> ()V
+	public fun <init> (F)V
+	public synthetic fun <init> (FILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()F
+	public final fun copy (F)Lio/getstream/video/android/core/model/NetworkQuality$Poor;
+	public static synthetic fun copy$default (Lio/getstream/video/android/core/model/NetworkQuality$Poor;FILjava/lang/Object;)Lio/getstream/video/android/core/model/NetworkQuality$Poor;
+	public fun equals (Ljava/lang/Object;)Z
+	public fun getQuality ()F
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class io/getstream/video/android/core/model/NetworkQuality$UnSpecified : io/getstream/video/android/core/model/NetworkQuality {
+	public fun <init> ()V
+	public fun <init> (F)V
+	public synthetic fun <init> (FILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()F
+	public final fun copy (F)Lio/getstream/video/android/core/model/NetworkQuality$UnSpecified;
+	public static synthetic fun copy$default (Lio/getstream/video/android/core/model/NetworkQuality$UnSpecified;FILjava/lang/Object;)Lio/getstream/video/android/core/model/NetworkQuality$UnSpecified;
+	public fun equals (Ljava/lang/Object;)Z
+	public fun getQuality ()F
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
 }
 
 public final class io/getstream/video/android/core/model/QueriedCalls {
