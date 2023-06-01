@@ -35,7 +35,7 @@ import io.getstream.video.android.mock.mockParticipantList
 import org.junit.Rule
 import org.junit.Test
 
-internal class CallContentTests : BaseComposeTest() {
+internal class CallContentTest : BaseComposeTest() {
 
     @get:Rule
     val paparazzi = Paparazzi(deviceConfig = DeviceConfig.PIXEL_4A)

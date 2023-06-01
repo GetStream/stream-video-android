@@ -31,7 +31,7 @@ import io.getstream.video.android.ui.common.R
 import org.junit.Rule
 import org.junit.Test
 
-internal class CallBackgroundTests : BaseComposeTest() {
+internal class CallBackgroundTest : BaseComposeTest() {
 
     @get:Rule
     val paparazzi = Paparazzi(deviceConfig = DeviceConfig.PIXEL_4A)

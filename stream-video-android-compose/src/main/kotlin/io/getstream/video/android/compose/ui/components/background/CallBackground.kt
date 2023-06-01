@@ -58,10 +58,10 @@ import io.getstream.video.android.ui.common.R
  */
 @Composable
 public fun CallBackground(
+    modifier: Modifier = Modifier,
     participants: List<ParticipantState>,
     isVideoType: Boolean = true,
     isIncoming: Boolean,
-    modifier: Modifier = Modifier,
     content: @Composable BoxScope.() -> Unit
 ) {
     val callUser by remember(participants) { derivedStateOf { participants.map { it.toCallUser() } } }
