@@ -563,8 +563,8 @@ public abstract interface class io/getstream/video/android/core/StreamVideo {
 	public static final field Companion Lio/getstream/video/android/core/StreamVideo$Companion;
 	public abstract fun call (Ljava/lang/String;Ljava/lang/String;)Lio/getstream/video/android/core/Call;
 	public abstract fun cleanup ()V
-	public abstract fun createDevice (Ljava/lang/String;Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
-	public abstract fun deleteDevice (Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public abstract fun createDevice (Lio/getstream/android/push/PushDevice;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public abstract fun deleteDevice (Lio/getstream/video/android/model/Device;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public abstract fun getContext ()Landroid/content/Context;
 	public abstract fun getEdges (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public abstract fun getState ()Lio/getstream/video/android/core/ClientState;
