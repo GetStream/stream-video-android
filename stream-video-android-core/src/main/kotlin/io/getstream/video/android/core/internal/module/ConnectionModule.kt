@@ -86,7 +86,6 @@ internal class ConnectionModule(
             .addConverterFactory(MoshiConverterFactory.create(Serializer.moshi))
             .client(okHttpClient)
             .build()
-
     }
     val videoCallsApi: VideoCallsApi by lazy { retrofit.create(VideoCallsApi::class.java) }
     val moderationApi: ModerationApi by lazy { retrofit.create(ModerationApi::class.java) }

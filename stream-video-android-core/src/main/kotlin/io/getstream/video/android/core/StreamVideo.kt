@@ -27,7 +27,6 @@ import io.getstream.video.android.core.model.SortField
 import io.getstream.video.android.model.Device
 import io.getstream.video.android.model.User
 import kotlinx.coroutines.Deferred
-import kotlinx.coroutines.Job
 import org.openapitools.client.models.QueryCallsResponse
 import org.openapitools.client.models.VideoEvent
 
@@ -102,7 +101,6 @@ public interface StreamVideo {
     public suspend fun getEdges(): Result<List<EdgeData>>
 
     public suspend fun connectAsync(): Deferred<Unit>
-
 
     /**
      * Clears the internal user state, removes push notification devices and clears the call state.
