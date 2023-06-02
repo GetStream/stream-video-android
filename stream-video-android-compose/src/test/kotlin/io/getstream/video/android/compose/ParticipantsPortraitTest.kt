@@ -26,8 +26,8 @@ import app.cash.paparazzi.DeviceConfig
 import app.cash.paparazzi.Paparazzi
 import io.getstream.video.android.compose.base.BaseComposeTest
 import io.getstream.video.android.compose.theme.VideoTheme
-import io.getstream.video.android.compose.ui.components.call.renderer.CallSingleVideoRenderer
 import io.getstream.video.android.compose.ui.components.call.renderer.LocalVideoContent
+import io.getstream.video.android.compose.ui.components.call.renderer.ParticipantVideo
 import io.getstream.video.android.compose.ui.components.call.renderer.ParticipantVideoRenderer
 import io.getstream.video.android.compose.ui.components.call.renderer.RegularVideoRendererStyle
 import io.getstream.video.android.compose.ui.components.call.renderer.internal.LazyColumnVideoRenderer
@@ -106,7 +106,7 @@ internal class ParticipantsPortraitTest : BaseComposeTest() {
     @Test
     fun `snapshot CallParticipant a local call composable`() {
         snapshot {
-            CallSingleVideoRenderer(
+            ParticipantVideo(
                 call = mockCall,
                 participant = mockParticipantList[0],
                 style = RegularVideoRendererStyle(isFocused = true)
@@ -117,7 +117,7 @@ internal class ParticipantsPortraitTest : BaseComposeTest() {
     @Test
     fun `snapshot CallParticipant a remote call composable`() {
         snapshot {
-            CallSingleVideoRenderer(
+            ParticipantVideo(
                 call = mockCall,
                 participant = mockParticipantList[1],
                 style = RegularVideoRendererStyle(isFocused = true)

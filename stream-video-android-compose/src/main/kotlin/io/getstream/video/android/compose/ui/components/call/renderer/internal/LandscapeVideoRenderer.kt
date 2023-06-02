@@ -37,8 +37,8 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.IntSize
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.getstream.video.android.compose.theme.VideoTheme
-import io.getstream.video.android.compose.ui.components.call.renderer.CallSingleVideoRenderer
 import io.getstream.video.android.compose.ui.components.call.renderer.LocalVideoContent
+import io.getstream.video.android.compose.ui.components.call.renderer.ParticipantVideo
 import io.getstream.video.android.compose.ui.components.call.renderer.RegularVideoRendererStyle
 import io.getstream.video.android.compose.ui.components.call.renderer.VideoRendererStyle
 import io.getstream.video.android.compose.ui.components.call.renderer.copy
@@ -73,7 +73,7 @@ internal fun BoxScope.LandscapeVideoRenderer(
         participant: ParticipantState,
         style: VideoRendererStyle
     ) -> Unit = { videoModifier, videoCall, videoParticipant, videoStyle ->
-        CallSingleVideoRenderer(
+        ParticipantVideo(
             modifier = videoModifier,
             call = videoCall,
             participant = videoParticipant,

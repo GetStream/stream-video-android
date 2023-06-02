@@ -26,7 +26,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.unit.IntSize
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import io.getstream.video.android.compose.ui.components.call.renderer.CallSingleVideoRenderer
+import io.getstream.video.android.compose.ui.components.call.renderer.ParticipantVideo
 import io.getstream.video.android.compose.ui.components.call.renderer.RegularVideoRendererStyle
 import io.getstream.video.android.compose.ui.components.call.renderer.VideoRendererStyle
 import io.getstream.video.android.core.Call
@@ -53,7 +53,7 @@ internal fun BoxScope.OrientationVideoRenderer(
         participant: ParticipantState,
         style: VideoRendererStyle
     ) -> Unit = { videoModifier, videoCall, videoParticipant, videoStyle ->
-        CallSingleVideoRenderer(
+        ParticipantVideo(
             modifier = videoModifier,
             call = videoCall,
             participant = videoParticipant,

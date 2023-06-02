@@ -52,7 +52,7 @@ public fun CallVideoRenderer(
         participant: ParticipantState,
         style: VideoRendererStyle
     ) -> Unit = { videoModifier, videoCall, videoParticipant, videoStyle ->
-        CallSingleVideoRenderer(
+        ParticipantVideo(
             modifier = videoModifier,
             call = videoCall,
             participant = videoParticipant,

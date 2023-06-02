@@ -34,7 +34,7 @@ import io.getstream.video.android.compose.ui.components.call.activecall.CallCont
 import io.getstream.video.android.compose.ui.components.call.activecall.DefaultPictureInPictureContent
 import io.getstream.video.android.compose.ui.components.call.activecall.internal.InviteUsersDialog
 import io.getstream.video.android.compose.ui.components.call.controls.ControlActions
-import io.getstream.video.android.compose.ui.components.call.renderer.CallSingleVideoRenderer
+import io.getstream.video.android.compose.ui.components.call.renderer.ParticipantVideo
 import io.getstream.video.android.compose.ui.components.call.renderer.RegularVideoRendererStyle
 import io.getstream.video.android.compose.ui.components.call.renderer.VideoRendererStyle
 import io.getstream.video.android.compose.ui.components.call.ringing.RingingCallContent
@@ -101,7 +101,7 @@ public fun CallContainer(
         participant: ParticipantState,
         style: VideoRendererStyle
     ) -> Unit = { videoModifier, videoCall, videoParticipant, videoStyle ->
-        CallSingleVideoRenderer(
+        ParticipantVideo(
             modifier = videoModifier,
             call = videoCall,
             participant = videoParticipant,
@@ -200,7 +200,7 @@ public fun CallContainer(
         participant: ParticipantState,
         style: VideoRendererStyle
     ) -> Unit = { videoModifier, videoCall, videoParticipant, videoStyle ->
-        CallSingleVideoRenderer(
+        ParticipantVideo(
             modifier = videoModifier,
             call = videoCall,
             participant = videoParticipant,
