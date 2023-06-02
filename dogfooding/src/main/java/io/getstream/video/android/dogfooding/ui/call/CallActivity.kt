@@ -60,38 +60,7 @@ class CallActivity : ComponentActivity() {
                     callViewModel = vm,
                     onBackPressed = { finish() },
                     callControlsContent = {
-                        ControlActions(
-                            callViewModel = vm,
-                            actions = listOf(
-                                {
-                                    ToggleCameraAction(
-                                        modifier = Modifier.size(52.dp),
-                                        isCameraEnabled = vm.callDeviceState.value.isCameraEnabled,
-                                        onCallAction = vm::onCallAction
-                                    )
-                                },
-                                {
-                                    ToggleMicrophoneAction(
-                                        modifier = Modifier.size(52.dp),
-                                        isMicrophoneEnabled = vm.callDeviceState.value.isMicrophoneEnabled,
-                                        onCallAction = vm::onCallAction
-                                    )
-                                },
-                                {
-                                    FlipCameraAction(
-                                        modifier = Modifier.size(52.dp),
-                                        onCallAction = vm::onCallAction
-                                    )
-                                },
-                                {
-                                    LeaveCallAction(
-                                        modifier = Modifier.size(52.dp),
-                                        onCallAction = vm::onCallAction
-                                    )
-                                },
-                            ),
-                            onCallAction = vm::onCallAction
-                        )
+
                     }
                 )
             }
