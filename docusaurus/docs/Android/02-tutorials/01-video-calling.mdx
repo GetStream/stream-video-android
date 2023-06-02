@@ -145,7 +145,7 @@ class MainActivity : ComponentActivity() {
                 ) {
                     // render a local video call
                     Column(modifier = Modifier.fillMaxSize()) {
-                        CallSingleVideoRenderer(
+                        ParticipantVideo(
                             modifier = Modifier.weight(1f),
                             call = call,
                             participant = me,
@@ -156,7 +156,7 @@ class MainActivity : ComponentActivity() {
                     val remoteParticipant = participants.firstOrNull()
                         if (remoteParticipant != null) {
                         Column(modifier = Modifier.fillMaxSize()) {
-                            CallSingleVideoRenderer(
+                            ParticipantVideo(
                                 modifier = Modifier.weight(1f),
                                 call = call,
                                 participant = remoteParticipant,

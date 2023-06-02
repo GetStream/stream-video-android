@@ -14,39 +14,38 @@
  * limitations under the License.
  */
 
-package io.getstream.video.android.compose.ui.components.call.renderer.internal
+package io.getstream.video.android.compose.ui.components.call.renderer
 
-import android.content.res.Configuration.ORIENTATION_LANDSCAPE
-import androidx.compose.foundation.layout.BoxScope
+import android.content.res.Configuration.ORIENTATION_PORTRAIT
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalConfiguration
-import androidx.compose.ui.unit.IntSize
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import io.getstream.video.android.compose.ui.components.call.renderer.ParticipantVideo
-import io.getstream.video.android.compose.ui.components.call.renderer.RegularVideoRendererStyle
-import io.getstream.video.android.compose.ui.components.call.renderer.VideoRendererStyle
+import io.getstream.video.android.compose.ui.components.call.renderer.internal.LandscapeScreenSharingVideoRenderer
+import io.getstream.video.android.compose.ui.components.call.renderer.internal.PortraitScreenSharingVideoRenderer
 import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.ParticipantState
+import io.getstream.video.android.core.model.ScreenSharingSession
 
 /**
- * Renders call participants based on the number of people in a call.
+ * Renders all the CallParticipants, based on the number of people in a call and the call state.
+ * Also takes into account if there are any screen sharing sessions active and adjusts the UI
+ * accordingly.
  *
- * @param call The state of the call.
+ * @param call The call that contains all the participants state and tracks.
+ * @param session The screen sharing session which is active.
  * @param modifier Modifier for styling.
- * @param parentSize The size of the parent.
  * @param style Represents a regular video call render styles.
  * @param videoRenderer A single video renderer renders each individual participant.
  */
 @Composable
-internal fun BoxScope.OrientationVideoRenderer(
-    modifier: Modifier = Modifier,
+public fun ParticipantsScreenSharing(
     call: Call,
-    parentSize: IntSize = IntSize(0, 0),
-    style: VideoRendererStyle = RegularVideoRendererStyle(),
+    session: ScreenSharingSession,
+    modifier: Modifier = Modifier,
+    isZoomable: Boolean = true,
+    style: VideoRendererStyle = ScreenSharingVideoRendererStyle(),
     videoRenderer: @Composable (
         modifier: Modifier,
         call: Call,
@@ -61,40 +60,32 @@ internal fun BoxScope.OrientationVideoRenderer(
         )
     },
 ) {
-    val dominantSpeaker by call.state.dominantSpeaker.collectAsStateWithLifecycle()
+    val configuration = LocalConfiguration.current
+    val orientation = configuration.orientation
+    val screenSharingSession by call.state.screenSharingSession.collectAsStateWithLifecycle()
     val participants by call.state.participants.collectAsStateWithLifecycle()
-    val sortedParticipants by call.state.sortedParticipants.collectAsStateWithLifecycle()
-    val callParticipants by remember(participants) {
-        derivedStateOf {
-            if (sortedParticipants.size > 6) {
-                sortedParticipants
-            } else {
-                participants
-            }
-        }
-    }
 
-    val orientation = LocalConfiguration.current.orientation
-
-    if (orientation == ORIENTATION_LANDSCAPE) {
-        LandscapeVideoRenderer(
+    if (orientation == ORIENTATION_PORTRAIT) {
+        PortraitScreenSharingVideoRenderer(
             call = call,
-            dominantSpeaker = dominantSpeaker,
-            callParticipants = callParticipants,
+            session = session,
+            participants = participants,
+            dominantSpeaker = screenSharingSession?.participant,
             modifier = modifier,
-            parentSize = parentSize,
+            isZoomable = isZoomable,
             style = style,
-            videoRenderer = videoRenderer,
+            videoRenderer = videoRenderer
         )
     } else {
-        PortraitVideoRenderer(
+        LandscapeScreenSharingVideoRenderer(
             call = call,
-            dominantSpeaker = dominantSpeaker,
-            callParticipants = callParticipants,
+            session = session,
+            participants = participants,
+            dominantSpeaker = screenSharingSession?.participant,
             modifier = modifier,
-            parentSize = parentSize,
+            isZoomable = isZoomable,
             style = style,
-            videoRenderer = videoRenderer,
+            videoRenderer = videoRenderer
         )
     }
 }

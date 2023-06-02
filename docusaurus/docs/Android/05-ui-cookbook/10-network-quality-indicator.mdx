@@ -37,7 +37,7 @@ You can easily swap out the standard connection quality indicator with your own.
 CallContainer(
     modifier = Modifier.background(color = VideoTheme.colors.appBackground),
     videoRenderer = { modifier, call, participant, style ->
-        CallSingleVideoRenderer(
+        ParticipantVideo(
             modifier = modifier,
             call = call,
             participant = participant,

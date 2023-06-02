@@ -6,7 +6,7 @@ description: Video Fallback
 In terms of design the video fallback can be quite creative.
 How do you indicate that someone is speaking or their video track is unavailable? How does the background look.
 
-`CallSingleVideoRenderer` and `VideoRenderer` support to show an user avatar for the video fallback by default like the image below:
+`ParticipantVideo` and `VideoRenderer` support to show an user avatar for the video fallback by default like the image below:
 
 ![User Avatar Background](../assets/cookbook/user-avatar-background.png)
 
@@ -29,10 +29,10 @@ VideoRenderer(
 )
 ```
 
-If you use `CallSingleVideoRenderer`, which is built with the full participant information on top of the `VideoRenderer`, it will be much easier:
+If you use `ParticipantVideo`, which is built with the full participant information on top of the `VideoRenderer`, it will be much easier:
 
 ```kotlin
-CallSingleVideoRenderer(
+ParticipantVideo(
     call = call,
     participant = participant,
     videoFallbackContent = {
@@ -51,7 +51,7 @@ CallContainer(
     callViewModel = vm,
     onBackPressed = { finish() },
     videoRenderer = { modifier, call, participant, style ->
-        CallSingleVideoRenderer(
+        ParticipantVideo(
             modifier = modifier,
             call = call,
             participant = participant,

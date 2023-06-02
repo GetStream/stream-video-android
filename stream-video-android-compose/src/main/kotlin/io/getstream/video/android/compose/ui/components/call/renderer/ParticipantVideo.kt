@@ -79,7 +79,7 @@ import io.getstream.video.android.ui.common.R
  * @param videoFallbackContent Content is shown the video track is failed to load or not available.
  */
 @Composable
-public fun CallSingleVideoRenderer(
+public fun ParticipantVideo(
     call: Call,
     participant: ParticipantState,
     modifier: Modifier = Modifier,
@@ -271,7 +271,7 @@ public fun BoxScope.ParticipantLabel(
 private fun CallParticipantPreview() {
     StreamMockUtils.initializeStreamVideo(LocalContext.current)
     VideoTheme {
-        CallSingleVideoRenderer(
+        ParticipantVideo(
             call = mockCall,
             participant = mockParticipantList[1],
         )

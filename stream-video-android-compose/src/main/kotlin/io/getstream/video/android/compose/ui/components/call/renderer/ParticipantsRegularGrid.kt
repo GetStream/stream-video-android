@@ -16,25 +16,29 @@
 
 package io.getstream.video.android.compose.ui.components.call.renderer
 
-import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.IntSize
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.getstream.video.android.compose.theme.VideoTheme
-import io.getstream.video.android.compose.ui.components.call.renderer.internal.RegularCallVideoRenderer
-import io.getstream.video.android.compose.ui.components.call.renderer.internal.ScreenSharingCallVideoRenderer
+import io.getstream.video.android.compose.ui.components.call.renderer.internal.OrientationVideoRenderer
 import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.ParticipantState
 import io.getstream.video.android.mock.StreamMockUtils
 import io.getstream.video.android.mock.mockCall
 
 /**
- * Renders all the participants, based on the number of people in a call and the call state.
- * Also takes into account if there are any screen sharing sessions active and adjusts the UI
- * accordingly.
+ * Renders the participants are joining in a call when there are no screen sharing sessions, based on the orientation.
  *
  * @param call The call that contains all the participants state and tracks.
  * @param modifier Modifier for styling.
@@ -42,9 +46,9 @@ import io.getstream.video.android.mock.mockCall
  * @param videoRenderer A single video renderer renders each individual participant.
  */
 @Composable
-public fun CallVideoRenderer(
-    call: Call,
+public fun ParticipantsRegularGrid(
     modifier: Modifier = Modifier,
+    call: Call,
     style: VideoRendererStyle = RegularVideoRendererStyle(),
     videoRenderer: @Composable (
         modifier: Modifier,
@@ -52,7 +56,7 @@ public fun CallVideoRenderer(
         participant: ParticipantState,
         style: VideoRendererStyle
     ) -> Unit = { videoModifier, videoCall, videoParticipant, videoStyle ->
-        CallSingleVideoRenderer(
+        ParticipantVideo(
             modifier = videoModifier,
             call = videoCall,
             participant = videoParticipant,
@@ -60,47 +64,35 @@ public fun CallVideoRenderer(
         )
     },
 ) {
-    if (LocalInspectionMode.current) {
-        RegularCallVideoRenderer(
-            call = call,
-            modifier = modifier,
-        )
-        return
-    }
+    var parentSize: IntSize by remember { mutableStateOf(IntSize(0, 0)) }
 
-    val screenSharingSession = call.state.screenSharingSession.collectAsStateWithLifecycle()
-    val screenSharing = screenSharingSession.value
+    Box(
+        modifier = modifier.background(color = VideoTheme.colors.appBackground)
+    ) {
+        val roomParticipants by call.state.participants.collectAsStateWithLifecycle()
 
-    if (screenSharing == null) {
-        RegularCallVideoRenderer(
-            call = call,
-            modifier = modifier,
-            style = style,
-            videoRenderer = videoRenderer
-        )
-    } else {
-        ScreenSharingCallVideoRenderer(
-            call = call,
-            modifier = modifier,
-            session = screenSharing,
-            style = ScreenSharingVideoRendererStyle().copy(
-                isFocused = style.isFocused,
-                isShowingReactions = style.isShowingReactions,
-                labelPosition = style.labelPosition
-            ),
-            videoRenderer = videoRenderer
-        )
+        if (roomParticipants.isNotEmpty()) {
+            OrientationVideoRenderer(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .onSizeChanged { parentSize = it },
+                call = call,
+                parentSize = parentSize,
+                style = style,
+                videoRenderer = videoRenderer
+            )
+        }
     }
 }
 
 @Preview
 @Composable
-private fun CallVideoRendererPreview() {
+private fun RegularCallVideoRendererPreview() {
     StreamMockUtils.initializeStreamVideo(LocalContext.current)
     VideoTheme {
-        CallVideoRenderer(
+        ParticipantsRegularGrid(
             call = mockCall,
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier.fillMaxSize()
         )
     }
 }
