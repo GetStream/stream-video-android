@@ -314,6 +314,13 @@ What's better seems to depend on internal optimizations in Compose
 - Adding a debugger in DebugInfo can also help
 - Also see MediaManager.selectDesiredResolution
 
+### Speaker/ audio playback
+
+- StreamPeerConnectionFactory calls peerconnection.setAudioDeviceModule
+- AudioSwitch does most of the work
+- MediaManager
+- AudioManagerAdapterImpl
+
 ### Docs
 
 Run this for a local preview of the docs:

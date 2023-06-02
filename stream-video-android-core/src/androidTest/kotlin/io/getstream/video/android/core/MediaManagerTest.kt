@@ -17,6 +17,8 @@
 package io.getstream.video.android.core
 
 import android.Manifest
+import android.media.AudioManager
+import androidx.core.content.getSystemService
 import androidx.test.rule.GrantPermissionRule
 import com.google.common.truth.Truth.assertThat
 import io.getstream.log.taggedLogger
@@ -88,8 +90,19 @@ class MediaManagerTest : IntegrationTestBase(connectCoordinatorWS = false) {
     }
 
     @Test
+    fun experiment() = runTest {
+        val audioManager = call.mediaManager.context.getSystemService<AudioManager>()
+        audioManager?.setMode(AudioManager.MODE_IN_COMMUNICATION)
+
+    }
+
+    @Test
     fun microphone() = runTest {
         val microphone = call.mediaManager.microphone
+
+        val devices = microphone.listDevices()
+        assertThat(devices.value).isNotEmpty()
+
         assertThat(microphone).isNotNull()
         microphone.enable()
         assertThat(microphone.status.value).isEqualTo(DeviceStatus.Enabled)

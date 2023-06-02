@@ -436,7 +436,9 @@ public class RtcSession internal constructor(
 
         // turn of the speaker if needed
         if (settings?.audio?.speakerDefaultOn == false) {
-            call.mediaManager.speaker.setVolume(0)
+            call.speaker.setVolume(0)
+        } else {
+            call.speaker.setSpeakerPhone(true)
         }
 
         // if we are allowed to publish, create a peer connection for it
