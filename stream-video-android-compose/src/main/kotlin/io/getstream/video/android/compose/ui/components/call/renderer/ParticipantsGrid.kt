@@ -25,7 +25,6 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.call.renderer.internal.RegularCallVideoRenderer
-import io.getstream.video.android.compose.ui.components.call.renderer.internal.ScreenSharingCallVideoRenderer
 import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.ParticipantState
 import io.getstream.video.android.mock.StreamMockUtils
@@ -79,7 +78,7 @@ public fun ParticipantsGrid(
             videoRenderer = videoRenderer
         )
     } else {
-        ScreenSharingCallVideoRenderer(
+        ParticipantsScreenSharing(
             call = call,
             modifier = modifier,
             session = screenSharing,

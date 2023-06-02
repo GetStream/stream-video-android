@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package io.getstream.video.android.compose.ui.components.call.renderer.internal
+package io.getstream.video.android.compose.ui.components.call.renderer
 
 import android.content.res.Configuration.ORIENTATION_PORTRAIT
 import androidx.compose.runtime.Composable
@@ -22,9 +22,8 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import io.getstream.video.android.compose.ui.components.call.renderer.ParticipantVideo
-import io.getstream.video.android.compose.ui.components.call.renderer.ScreenSharingVideoRendererStyle
-import io.getstream.video.android.compose.ui.components.call.renderer.VideoRendererStyle
+import io.getstream.video.android.compose.ui.components.call.renderer.internal.LandscapeScreenSharingVideoRenderer
+import io.getstream.video.android.compose.ui.components.call.renderer.internal.PortraitScreenSharingVideoRenderer
 import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.ParticipantState
 import io.getstream.video.android.core.model.ScreenSharingSession
@@ -41,7 +40,7 @@ import io.getstream.video.android.core.model.ScreenSharingSession
  * @param videoRenderer A single video renderer renders each individual participant.
  */
 @Composable
-public fun ScreenSharingCallVideoRenderer(
+public fun ParticipantsScreenSharing(
     call: Call,
     session: ScreenSharingSession,
     modifier: Modifier = Modifier,
