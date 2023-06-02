@@ -46,8 +46,8 @@ private const val MONITOR_START_DELAY = 1000L
 internal class HealthMonitor(private val healthCallback: HealthCallback, private val scope: CoroutineScope) {
 
     private var reconnectInProgress: Boolean = false
-    private lateinit var healthPingJob: Job
-    private lateinit var monitorJob: Job
+    private var healthPingJob: Job? = null
+    private var monitorJob: Job? = null
 
     private var consecutiveFailures = 0
     private var disconnected = false
@@ -78,8 +78,8 @@ internal class HealthMonitor(private val healthCallback: HealthCallback, private
     }
 
     fun stop() {
-        healthPingJob.cancel()
-        monitorJob.cancel()
+        healthPingJob?.cancel()
+        monitorJob?.cancel()
     }
 
     fun ack() {
