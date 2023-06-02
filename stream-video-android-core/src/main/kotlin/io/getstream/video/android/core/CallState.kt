@@ -278,7 +278,7 @@ public class CallState(private val call: Call, private val user: User) {
     private val _rejectedBy: MutableStateFlow<Set<String>> = MutableStateFlow(emptySet())
     val rejectedBy: StateFlow<Set<String>> = _rejectedBy
 
-    private val _session = MutableStateFlow<CallSessionResponse?>(null)
+    internal val _session = MutableStateFlow<CallSessionResponse?>(null)
 
     /** startsAt */
     private val _startsAt: MutableStateFlow<OffsetDateTime?> = MutableStateFlow(null)
@@ -675,6 +675,7 @@ public class CallState(private val call: Call, private val user: User) {
     fun updateFromResponse(response: GetOrCreateCallResponse) {
         val members = response.members
         updateFromResponse(members)
+        _ownCapabilities.value = response.ownCapabilities
         val callResponse = response.call
         updateFromResponse(callResponse)
     }
