@@ -245,8 +245,6 @@ public class CallState(private val call: Call, private val user: User) {
         }
     }
 
-
-
     private val _ownCapabilities: MutableStateFlow<List<OwnCapability>> =
         MutableStateFlow(emptyList())
     public val ownCapabilities: StateFlow<List<OwnCapability>> = _ownCapabilities
@@ -377,8 +375,6 @@ public class CallState(private val call: Call, private val user: User) {
             is CallRingEvent -> {
                 updateFromResponse(event.call)
                 getOrCreateMembers(event.members)
-
-
             }
 
             is CallUpdatedEvent -> {

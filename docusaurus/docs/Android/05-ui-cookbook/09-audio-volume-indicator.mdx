@@ -90,13 +90,13 @@ fun AudioVolumeIndicator(audioState: List<Float>) {
 }
 ```
 
-And here's how you can use your custom volume indicator for a single video renderer by implementing `labelContent` composable parameter on `CallSingleVideoRenderer` component like the example below:
+And here's how you can use your custom volume indicator for a single video renderer by implementing `labelContent` composable parameter on `ParticipantVideo` component like the example below:
 
 ```kotlin
 CallContainer(
     modifier = Modifier.background(color = VideoTheme.colors.appBackground),
     videoRenderer = { modifier, call, participant, style ->
-        CallSingleVideoRenderer(
+        ParticipantVideo(
             modifier = modifier,
             call = call,
             participant = participant,

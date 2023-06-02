@@ -29,7 +29,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import io.getstream.video.android.compose.theme.VideoTheme
-import io.getstream.video.android.compose.ui.components.call.renderer.CallSingleVideoRenderer
+import io.getstream.video.android.compose.ui.components.call.renderer.ParticipantVideo
 import io.getstream.video.android.compose.ui.components.call.renderer.ScreenSharingVideoRendererStyle
 import io.getstream.video.android.compose.ui.components.call.renderer.VideoRendererStyle
 import io.getstream.video.android.compose.ui.components.call.renderer.copy
@@ -59,7 +59,7 @@ internal fun LazyColumnVideoRenderer(
         participant: ParticipantState,
         style: VideoRendererStyle
     ) -> Unit = { videoModifier, videoCall, videoParticipant, videoStyle ->
-        CallSingleVideoRenderer(
+        ParticipantVideo(
             modifier = videoModifier,
             call = videoCall,
             participant = videoParticipant,
@@ -103,7 +103,7 @@ private fun ListVideoRenderer(
         participant: ParticipantState,
         style: VideoRendererStyle
     ) -> Unit = { videoModifier, videoCall, videoParticipant, videoStyle ->
-        CallSingleVideoRenderer(
+        ParticipantVideo(
             modifier = videoModifier,
             call = videoCall,
             participant = videoParticipant,

@@ -44,8 +44,8 @@ import io.getstream.video.android.common.viewmodel.CallViewModel
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.call.CallAppBar
 import io.getstream.video.android.compose.ui.components.call.controls.ControlActions
-import io.getstream.video.android.compose.ui.components.call.renderer.CallSingleVideoRenderer
-import io.getstream.video.android.compose.ui.components.call.renderer.CallVideoRenderer
+import io.getstream.video.android.compose.ui.components.call.renderer.ParticipantVideo
+import io.getstream.video.android.compose.ui.components.call.renderer.ParticipantsGrid
 import io.getstream.video.android.compose.ui.components.call.renderer.RegularVideoRendererStyle
 import io.getstream.video.android.compose.ui.components.call.renderer.VideoRendererStyle
 import io.getstream.video.android.compose.ui.components.video.VideoRenderer
@@ -93,7 +93,7 @@ public fun CallContent(
         participant: ParticipantState,
         style: VideoRendererStyle
     ) -> Unit = { videoModifier, videoCall, videoParticipant, videoStyle ->
-        CallSingleVideoRenderer(
+        ParticipantVideo(
             modifier = videoModifier,
             call = videoCall,
             participant = videoParticipant,
@@ -101,7 +101,7 @@ public fun CallContent(
         )
     },
     callVideoContent: @Composable RowScope.(call: Call) -> Unit = {
-        CallVideoRenderer(
+        ParticipantsGrid(
             call = callViewModel.call,
             modifier = Modifier
                 .fillMaxSize()
@@ -185,7 +185,7 @@ public fun CallContent(
         participant: ParticipantState,
         style: VideoRendererStyle
     ) -> Unit = { videoModifier, videoCall, videoParticipant, videoStyle ->
-        CallSingleVideoRenderer(
+        ParticipantVideo(
             modifier = videoModifier,
             call = videoCall,
             participant = videoParticipant,
@@ -193,7 +193,7 @@ public fun CallContent(
         )
     },
     callVideoContent: @Composable RowScope.(call: Call) -> Unit = {
-        CallVideoRenderer(
+        ParticipantsGrid(
             call = call,
             modifier = Modifier
                 .fillMaxSize()
@@ -276,13 +276,13 @@ internal fun DefaultPictureInPictureContent(call: Call) {
         val me by call.state.me.collectAsStateWithLifecycle()
 
         if (activeSpeakers.isNotEmpty()) {
-            CallSingleVideoRenderer(
+            ParticipantVideo(
                 call = call,
                 participant = activeSpeakers.first(),
                 style = RegularVideoRendererStyle(labelPosition = Alignment.BottomStart)
             )
         } else if (me != null) {
-            CallSingleVideoRenderer(
+            ParticipantVideo(
                 call = call,
                 participant = me!!,
                 style = RegularVideoRendererStyle(labelPosition = Alignment.BottomStart)

@@ -1,30 +1,30 @@
 
 
-# ScreenSharingCallVideoRenderer
+# ParticipantsScreenSharing
 
-The `ScreenSharingCallVideoRenderer` is a Composable component that allows you to display a video of a screen sharing session. It also includes options to change the UI orientation and to enter or exit the full-screen mode. This component is designed for use in video conferencing and other similar applications where users are able to share their entire screens or specific windows.
+The `ParticipantsScreenSharing` is a Composable component that allows you to display a video of a screen sharing session. It also includes options to change the UI orientation and to enter or exit the full-screen mode. This component is designed for use in video conferencing and other similar applications where users are able to share their entire screens or specific windows.
 
 Internally, this component renders a screen sharing session video as a primary screen and observes participants, which are rendered a list of videos.
 
-Let's see how to use the `ScreenSharingCallVideoRenderer`.
+Let's see how to use the `ParticipantsScreenSharing`.
 
 ## Usage
 
-To use the `ScreenSharingCallVideoRenderer` component in your app, you should observe the screen sharing session from the call state and check whether the session exists. If a screen sharing session is valid, you can render the screen sharing session and all other participants with `ScreenSharingCallVideoRenderer` Composable. If not, you should render a regular video call with [RegularCallVideoRenderer](../05-participants/02-call-regular-video-renderer.mdx).
+To use the `ParticipantsScreenSharing` component in your app, you should observe the screen sharing session from the call state and check whether the session exists. If a screen sharing session is valid, you can render the screen sharing session and all other participants with `ParticipantsScreenSharing` Composable. If not, you should render a regular video call with [RegularCallVideoRenderer](../05-participants/02-call-regular-video-renderer.mdx).
 
 ```kotlin
 // observe a screen sharing session from the call state.
 val screenSharingSession by call.state.screenSharingSession.collectAsState()
 
 if (screenSharingSession != null) {
-    ScreenSharingCallVideoRenderer(
+    ParticipantsScreenSharing(
        call = call,
        screenSharingSession = screenSharingSession!!,
        modifier = Modifier.fillMaxSize(),
     )
 } else {
    // render a regular video call screen
-   RegularCallVideoRenderer(
+   ParticipantsRegularGrid(
        call = call,
        modifier = modifier,
        onRender = onRender,
@@ -41,14 +41,14 @@ Using this component, you'll likely see something similar to the following UI:
 
 ![Screen Sharing](../../assets/compose_screensharing_portrait.png)
 
-The `ScreenSharingCallVideoRenderer` Composable supports zoomable functions for the sharing session like the image below:
+The `ParticipantsScreenSharing` Composable supports zoomable functions for the sharing session like the image below:
 
 ![Screen Sharing](../../assets/compose_screensharing_zoom.png)
 
 If you use `CallVideoRenderer`, it will render a screen sharing session video if there's a valid screen sharing session. If not, it will render a regular video call.
 
 ```kotlin
-CallVideoRenderer(
+ParticipantsGrid(
     modifier = Modifier.fillMaxSize(),
     call: call,
 )
