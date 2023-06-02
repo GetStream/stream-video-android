@@ -300,6 +300,7 @@ internal class StreamVideoImpl internal constructor(
         )
 
     init {
+
         scope.launch(Dispatchers.Main.immediate) {
             lifecycleObserver.observe()
         }
@@ -321,7 +322,7 @@ internal class StreamVideoImpl internal constructor(
         }
     }
 
-    suspend fun connectAsync(): Deferred<Unit> {
+    override suspend fun connectAsync(): Deferred<Unit> {
         return scope.async {
             // wait for the guest user setup if we're using guest users
             guestUserJob?.await()

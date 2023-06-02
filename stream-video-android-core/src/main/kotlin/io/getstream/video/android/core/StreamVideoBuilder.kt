@@ -83,9 +83,10 @@ public class StreamVideoBuilder @JvmOverloads constructor(
     /** URL overwrite to allow for testing against a local instance of video */
     var videoDomain: String = "video.stream-io-api.com"
 
+    val scope = CoroutineScope(DispatcherProvider.IO)
+
     public fun build(): StreamVideo {
         val lifecycle = ProcessLifecycleOwner.get().lifecycle
-        val scope = CoroutineScope(DispatcherProvider.IO)
 
         if (apiKey.isBlank()
         ) throw IllegalArgumentException("The API key can not be empty")
@@ -107,6 +108,7 @@ public class StreamVideoBuilder @JvmOverloads constructor(
 
         // initializes
         AndroidThreeTen.init(context)
+
 
         val dataStore = if (!StreamUserDataStore.isInstalled) {
             StreamUserDataStore.install(context)
@@ -133,6 +135,7 @@ public class StreamVideoBuilder @JvmOverloads constructor(
         )
 
         // create the client
+
         val client = StreamVideoImpl(
             context = context,
             _scope = scope,
@@ -144,6 +147,7 @@ public class StreamVideoBuilder @JvmOverloads constructor(
             connectionModule = connectionModule,
             pushDeviceGenerators = pushDeviceGenerators
         )
+
         scope.launch {
             // addDevice for push
             if (enablePush && user.type == UserType.Authenticated) {

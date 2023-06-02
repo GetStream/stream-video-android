@@ -20,9 +20,11 @@ import com.google.common.truth.Truth.assertThat
 import io.getstream.log.taggedLogger
 import io.getstream.result.Error
 import io.getstream.video.android.core.errors.VideoErrorCode
+import io.getstream.video.android.datastore.delegate.StreamUserDataStore
 import io.getstream.video.android.model.User
 import io.getstream.video.android.model.UserType
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.runTest
 import org.junit.Ignore
 import org.junit.Test
@@ -39,19 +41,23 @@ class ClientAndAuthTest : TestBase() {
     @Test
     fun regularUser() = runTest {
         println("hello")
-        StreamVideoBuilder(
+        val builder = StreamVideoBuilder(
             context = context,
             apiKey = apiKey,
             geo = GEO.GlobalEdgeNetwork,
             testData.users["thierry"]!!,
             testData.tokens["thierry"]!!,
-        ).build()
-        println("hello 2")
+        )
+        val client = builder.build()
+        val job = client.connectAsync()
+        val result = job.join()
+        client.cleanup()
+        println("hello 2 $result")
     }
 
     @Test
     fun anonymousUser() = runTest {
-        StreamVideoBuilder(
+        var builder = StreamVideoBuilder(
             context = context,
             apiKey = apiKey,
             geo = GEO.GlobalEdgeNetwork,
@@ -59,7 +65,8 @@ class ClientAndAuthTest : TestBase() {
                 id = "anonymous",
                 type = UserType.Anonymous
             )
-        ).build()
+        )
+        val client = builder.build()
     }
 
     @Test
