@@ -23,19 +23,12 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.size
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
 import io.getstream.video.android.common.permission.PermissionManager
 import io.getstream.video.android.common.viewmodel.CallViewModel
 import io.getstream.video.android.common.viewmodel.CallViewModelFactory
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.call.CallContainer
-import io.getstream.video.android.compose.ui.components.call.controls.ControlActions
-import io.getstream.video.android.compose.ui.components.call.controls.actions.FlipCameraAction
-import io.getstream.video.android.compose.ui.components.call.controls.actions.LeaveCallAction
-import io.getstream.video.android.compose.ui.components.call.controls.actions.ToggleCameraAction
-import io.getstream.video.android.compose.ui.components.call.controls.actions.ToggleMicrophoneAction
 import io.getstream.video.android.core.StreamVideo
 import io.getstream.video.android.core.call.state.ToggleCamera
 import io.getstream.video.android.core.call.state.ToggleMicrophone
@@ -60,7 +53,6 @@ class CallActivity : ComponentActivity() {
                     callViewModel = vm,
                     onBackPressed = { finish() },
                     callControlsContent = {
-
                     }
                 )
             }
