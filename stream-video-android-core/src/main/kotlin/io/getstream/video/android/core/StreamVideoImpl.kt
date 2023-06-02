@@ -18,12 +18,15 @@ package io.getstream.video.android.core
 
 import android.content.Context
 import androidx.lifecycle.Lifecycle
+import io.getstream.android.push.PushDevice
 import io.getstream.android.push.PushDeviceGenerator
+import io.getstream.android.push.PushProvider
 import io.getstream.log.taggedLogger
 import io.getstream.result.Error
 import io.getstream.result.Result
 import io.getstream.result.Result.Failure
 import io.getstream.result.Result.Success
+import io.getstream.result.flatMap
 import io.getstream.video.android.core.call.connection.StreamPeerConnectionFactory
 import io.getstream.video.android.core.errors.VideoErrorCode
 import io.getstream.video.android.core.events.VideoEventListener
@@ -73,6 +76,7 @@ import org.openapitools.client.models.BlockUserResponse
 import org.openapitools.client.models.CallRequest
 import org.openapitools.client.models.CallSettingsRequest
 import org.openapitools.client.models.ConnectedEvent
+import org.openapitools.client.models.CreateDeviceRequest
 import org.openapitools.client.models.CreateGuestRequest
 import org.openapitools.client.models.CreateGuestResponse
 import org.openapitools.client.models.GetCallResponse
@@ -161,16 +165,33 @@ internal class StreamVideoImpl internal constructor(
     /**
      * @see StreamVideo.createDevice
      */
-    override suspend fun createDevice(
-        token: String,
-        pushProvider: String
-    ): Result<io.getstream.video.android.model.Device> {
-        logger.d { "[createDevice] token: $token, pushProvider: $pushProvider" }
-        return wrapAPICall {
-            // TODO: handle this when backend has it
-            error("TODO: not support yet")
+    override suspend fun createDevice(pushDevice: PushDevice): Result<Device> {
+        logger.d { "[createDevice] pushDevice: $pushDevice" }
+        return pushDevice.toCreateDeviceRequest().flatMap { createDeviceRequest ->
+            wrapAPICall {
+                connectionModule.devicesApi.createDevice(createDeviceRequest)
+                Device(
+                    id = pushDevice.token,
+                    pushProvider = pushDevice.pushProvider.key,
+                    pushProviderName = pushDevice.providerName ?: ""
+                ).also(::storeDevice)
+            }
         }
     }
+
+    private fun PushDevice.toCreateDeviceRequest(): Result<CreateDeviceRequest> =
+        when (pushProvider) {
+            PushProvider.FIREBASE -> Success(CreateDeviceRequest.PushProvider.firebase)
+            PushProvider.HUAWEI -> Success(CreateDeviceRequest.PushProvider.huawei)
+            PushProvider.XIAOMI -> Success(CreateDeviceRequest.PushProvider.xiaomi)
+            PushProvider.UNKNOWN -> Failure(Error.GenericError("Unsupported PushProvider"))
+        }.map {
+            CreateDeviceRequest(
+                id = token,
+                pushProvider = it,
+                pushProviderName = providerName
+            )
+        }
 
     /**
      * Ensure that every API call runs on the IO dispatcher and has correct error handling
@@ -346,9 +367,8 @@ internal class StreamVideoImpl internal constructor(
 
     private fun storeDevice(device: Device) {
         logger.d { "[storeDevice] device: device" }
-        val dataStore = StreamUserDataStore.instance()
-
         scope.launch {
+            val dataStore = StreamUserDataStore.instance()
             dataStore.updateUserDevices(
                 UserDevices(
                     dataStore.userDevices.value?.let { it.devices + device } ?: listOf(device)
@@ -357,26 +377,28 @@ internal class StreamVideoImpl internal constructor(
         }
     }
 
-    /**
-     * @see StreamVideo.deleteDevice
-     */
-    override suspend fun deleteDevice(id: String): Result<Unit> {
-        logger.d { "[deleteDevice] id: $id" }
-
-        // TODO: handle this when we have push on the backend
-        return wrapAPICall {}
+    private fun removeStoredDeivce(device: Device) {
+        logger.d { "[storeDevice] device: device" }
+        scope.launch {
+            val dataStore = StreamUserDataStore.instance()
+            dataStore.updateUserDevices(
+                UserDevices(
+                    dataStore.userDevices.value?.let {
+                        it.devices.filter { it.id != device.id }
+                    } ?: listOf()
+                )
+            )
+        }
     }
 
     /**
-     * @see StreamVideo.removeDevices
+     * @see StreamVideo.deleteDevice
      */
-    fun removeDevices(devices: List<io.getstream.video.android.model.Device>) {
-        scope.launch {
-            val operations = devices.map {
-                async { deleteDevice(it.token) }
-            }
-
-            operations.awaitAll()
+    override suspend fun deleteDevice(device: Device): Result<Unit> {
+        logger.d { "[deleteDevice] device: $device" }
+        return wrapAPICall {
+            connectionModule.devicesApi.deleteDevice(device.id, userId)
+            removeStoredDeivce(device)
         }
     }
 
@@ -424,10 +446,7 @@ internal class StreamVideoImpl internal constructor(
 
             generator.asyncGeneratePushDevice { generatedDevice ->
                 scope.launch {
-                    createDevice(
-                        token = generatedDevice.token,
-                        pushProvider = generatedDevice.pushProvider.key
-                    )
+                    createDevice(generatedDevice)
                 }
             }
         }

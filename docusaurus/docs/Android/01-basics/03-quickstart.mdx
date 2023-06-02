@@ -47,7 +47,7 @@ participants.value.forEach {
 As you can see the example above, `participants (ParticipantState)` contains all essential information to render videos, such as audio/video tracks, user information, audio/video enabled, etc. You can simply render the video track with our Compose components like the sample below:
 
 ```kotlin
-CallSingleVideoRenderer(
+ParticipantVideo(
     modifier = Modifier
         .fillMaxSize()
         .clip(RoundedCornerShape(16.dp)),
