@@ -59,3 +59,43 @@ CallContainer(
 Now, you will see the custom network quality indicator like the result below:
 
 ![Network Quality Indicator](../assets/cookbook/network-quality-indicator-customize.png)
+
+## Connection Unstable
+
+In terms of better UX designs, you can display a simple message or snack bar to your users and let them know the network status is unstable.
+
+```kotlin {9-25}
+CallContainer(
+    modifier = Modifier.background(color = VideoTheme.colors.appBackground),
+    videoRenderer = { modifier, call, participant, style ->
+        ParticipantVideo(
+            modifier = modifier,
+            call = call,
+            participant = participant,
+            style = style,
+            connectionIndicatorContent = { networkQuality ->
+                if (networkQuality is NetworkQuality.Poor) {
+                    Snackbar(
+                        modifier = Modifier
+                            .padding(8.dp)
+                            .fillMaxWidth()
+                            .background(VideoTheme.colors.appBackground)
+                            .align(Alignment.BottomStart),
+                    ) {
+                        Text(text = "Please check out your network status!")
+                    }
+                }
+
+                NetworkQualityIndicator(
+                    networkQuality = NetworkQuality.Poor(),
+                    modifier = Modifier.align(Alignment.BottomEnd)
+                )
+            }
+        ),
+        ..,
+)
+```
+
+Now, you will see the custom network quality snack bar like the result below:
+
+![Network Quality Indicator](../assets/cookbook/network_quality_poor.png)
