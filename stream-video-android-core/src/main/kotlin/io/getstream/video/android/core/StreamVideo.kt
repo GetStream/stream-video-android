@@ -17,6 +17,7 @@
 package io.getstream.video.android.core
 
 import android.content.Context
+import io.getstream.android.push.PushDevice
 import io.getstream.log.StreamLog
 import io.getstream.result.Result
 import io.getstream.video.android.core.events.VideoEventListener
@@ -26,7 +27,6 @@ import io.getstream.video.android.core.model.SortField
 import io.getstream.video.android.model.Device
 import io.getstream.video.android.model.User
 import kotlinx.coroutines.Deferred
-import kotlinx.coroutines.Job
 import org.openapitools.client.models.QueryCallsResponse
 import org.openapitools.client.models.VideoEvent
 
@@ -79,23 +79,21 @@ public interface StreamVideo {
     /**
      * Create a device that will be used to receive push notifications.
      *
-     * @param token The Token obtained from the selected push provider.
-     * @param pushProvider The selected push provider.
+     * @param pushDevice The PushDevice obtained from the selected push provider.
      *
      * @return [Result] containing the [Device].
      */
     public suspend fun createDevice(
-        token: String,
-        pushProvider: String,
+        pushDevice: PushDevice,
     ): Result<io.getstream.video.android.model.Device>
 
     /**
      * Remove a device used to receive push notifications.
      *
-     * @param id The ID of the device, previously provided by [createDevice].
+     * @param device The Device, previously provided by [createDevice].
      * @return Result if the operation was successful or not.
      */
-    public suspend fun deleteDevice(id: String): Result<Unit>
+    public suspend fun deleteDevice(device: Device): Result<Unit>
 
     /**
      * Returns a list of all the edges available on the network.
@@ -103,7 +101,6 @@ public interface StreamVideo {
     public suspend fun getEdges(): Result<List<EdgeData>>
 
     public suspend fun connectAsync(): Deferred<Unit>
-
 
     /**
      * Clears the internal user state, removes push notification devices and clears the call state.

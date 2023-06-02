@@ -34,6 +34,7 @@ import okhttp3.OkHttpClient
 import okhttp3.Response
 import okhttp3.logging.HttpLoggingInterceptor
 import org.openapitools.client.apis.DefaultApi
+import org.openapitools.client.apis.DevicesApi
 import org.openapitools.client.apis.EventsApi
 import org.openapitools.client.apis.LivestreamingApi
 import org.openapitools.client.apis.ModerationApi
@@ -68,45 +69,32 @@ internal class ConnectionModule(
     internal val apiKey: ApiKey,
     internal val userToken: UserToken,
 ) {
-    private val baseUrlInterceptor: BaseUrlInterceptor = BaseUrlInterceptor(null)
-    private val authInterceptor: CoordinatorAuthInterceptor =
+    private val authInterceptor: CoordinatorAuthInterceptor by lazy {
         CoordinatorAuthInterceptor(apiKey, userToken)
-    internal val okHttpClient: OkHttpClient = buildOkHttpClient()
-
-    internal var videoCallsApi: VideoCallsApi
-    internal var moderationApi: ModerationApi
-    internal var recordingApi: RecordingApi
-    internal var livestreamingApi: LivestreamingApi
-    internal var defaultApi: DefaultApi
-    internal var eventsApi: EventsApi
-
-    internal var coordinatorSocket: CoordinatorSocket
-    internal var networkStateProvider: NetworkStateProvider = NetworkStateProvider(
-        connectivityManager = context
-            .getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
-    )
-
-    init {
-        // setup the retrofit clients
-        val baseUrl = "https://$videoDomain"
-        val retrofitClient = Retrofit.Builder()
-            .baseUrl(baseUrl)
+    }
+    val okHttpClient: OkHttpClient by lazy { buildOkHttpClient() }
+    val networkStateProvider: NetworkStateProvider by lazy {
+        NetworkStateProvider(
+            connectivityManager = context
+                .getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+        )
+    }
+    private val retrofit: Retrofit by lazy {
+        Retrofit.Builder()
+            .baseUrl("https://$videoDomain")
             .addConverterFactory(ScalarsConverterFactory.create())
             .addConverterFactory(MoshiConverterFactory.create(Serializer.moshi))
             .client(okHttpClient)
             .build()
-
-        // setup the retrofit services
-        videoCallsApi = retrofitClient.create(VideoCallsApi::class.java)
-        eventsApi = retrofitClient.create(EventsApi::class.java)
-        moderationApi = retrofitClient.create(ModerationApi::class.java)
-        recordingApi = retrofitClient.create(RecordingApi::class.java)
-        livestreamingApi = retrofitClient.create(LivestreamingApi::class.java)
-        defaultApi = retrofitClient.create(DefaultApi::class.java)
-
-        // Note that it doesn't connect when you create the socket
-        coordinatorSocket = createCoordinatorSocket()
     }
+    val videoCallsApi: VideoCallsApi by lazy { retrofit.create(VideoCallsApi::class.java) }
+    val moderationApi: ModerationApi by lazy { retrofit.create(ModerationApi::class.java) }
+    val recordingApi: RecordingApi by lazy { retrofit.create(RecordingApi::class.java) }
+    val livestreamingApi: LivestreamingApi by lazy { retrofit.create(LivestreamingApi::class.java) }
+    val defaultApi: DefaultApi by lazy { retrofit.create(DefaultApi::class.java) }
+    val eventsApi: EventsApi by lazy { retrofit.create(EventsApi::class.java) }
+    val devicesApi: DevicesApi by lazy { retrofit.create(DevicesApi::class.java) }
+    val coordinatorSocket: CoordinatorSocket by lazy { createCoordinatorSocket() }
 
     /**
      * Key used to prove authorization to the API.
@@ -115,17 +103,13 @@ internal class ConnectionModule(
     private fun buildOkHttpClient(): OkHttpClient {
         // create a new OkHTTP client and set timeouts
         return OkHttpClient.Builder()
-            .addInterceptor(
-                authInterceptor
-            )
+            .addInterceptor(authInterceptor)
             .addInterceptor(
                 HttpLoggingInterceptor().apply {
                     level = loggingLevel.httpLoggingLevel
                 }
             )
-            .addInterceptor(
-                baseUrlInterceptor
-            )
+            .addInterceptor(BaseUrlInterceptor(null))
             .retryOnConnectionFailure(true)
             .connectTimeout(connectionTimeoutInMs, TimeUnit.MILLISECONDS)
             .writeTimeout(connectionTimeoutInMs, TimeUnit.MILLISECONDS)
@@ -160,9 +144,6 @@ internal class ConnectionModule(
         sfuToken: String,
         getSubscriberSdp: suspend () -> String,
     ): SfuConnectionModule {
-//        val updatedSignalUrl = sfuUrl.removeSuffix(suffix = "/twirp")
-//        val baseUrl = updatedSignalUrl.toHttpUrl()
-//        val okHttpClient = buildOkHttpClient(baseUrl)
         return SfuConnectionModule(
             sfuUrl = sfuUrl,
             sessionId = sessionId,
@@ -225,21 +206,16 @@ internal class SfuConnectionModule(
     private fun buildSfuOkHttpClient(): OkHttpClient {
         val connectionTimeoutInMs = 10000L
         // create a new OkHTTP client and set timeouts
-        val authInterceptor =
-            CoordinatorAuthInterceptor(apiKey, sfuToken)
+        val authInterceptor = CoordinatorAuthInterceptor(apiKey, sfuToken)
         val baseUrlInterceptor = BaseUrlInterceptor(null)
         return OkHttpClient.Builder()
-            .addInterceptor(
-                authInterceptor
-            )
+            .addInterceptor(authInterceptor)
             .addInterceptor(
                 HttpLoggingInterceptor().apply {
                     level = loggingLevel.httpLoggingLevel
                 }
             )
-            .addInterceptor(
-                baseUrlInterceptor
-            )
+            .addInterceptor(baseUrlInterceptor)
             .retryOnConnectionFailure(true)
             .connectTimeout(connectionTimeoutInMs, TimeUnit.MILLISECONDS)
             .writeTimeout(connectionTimeoutInMs, TimeUnit.MILLISECONDS)

@@ -77,7 +77,7 @@ internal class VideoPushDelegate(
     override fun handlePushMessage(payload: Map<String, Any?>): Boolean {
         logger.d { "[handlePushMessage] payload: $payload" }
         return payload.ifValid {
-            val users = payload[KEY_USER_NAMES] as String
+            val callDisplayName = payload[KEY_CALL_DISPLAY_NAME] as String
             val callId = payload[KEY_CALL_CID] as String
             searchIncomingCallPendingIntent(callId)?.let { fullScreenPendingIntent ->
                 searchAcceptCallPendingIntent(callId)?.let { acceptCallPendingIntent ->
@@ -86,7 +86,7 @@ internal class VideoPushDelegate(
                             fullScreenPendingIntent,
                             acceptCallPendingIntent,
                             rejectCallPendingIntent,
-                            users,
+                            callDisplayName,
                         )
                     }
                 } ?: logger.e { "Couldn't find any activity for $ACTION_ACCEPT_CALL" }
@@ -98,12 +98,12 @@ internal class VideoPushDelegate(
         fullScreenPendingIntent: PendingIntent,
         acceptCallPendingIntent: PendingIntent,
         rejectCallPendingIntent: PendingIntent,
-        users: String,
+        callDisplayName: String,
     ) {
         val notification = NotificationCompat.Builder(context, CHANNEL_ID)
 //            .setSmallIcon(androidx.loader.R.drawable.notification_bg)
             .setContentTitle("Incoming call")
-            .setContentText(users)
+            .setContentText(callDisplayName)
             .setOngoing(false)
             .setAutoCancel(true)
             .setContentIntent(fullScreenPendingIntent)
@@ -259,10 +259,7 @@ internal class VideoPushDelegate(
                     user = user,
                     apiKey = apiKey,
                 ).build()
-                    .createDevice(
-                        token = pushDevice.token,
-                        pushProvider = pushDevice.pushProvider.key
-                    )
+                    .createDevice(pushDevice)
             }
         }
     }
@@ -298,7 +295,7 @@ internal class VideoPushDelegate(
         private const val KEY_SENDER = "sender"
         private const val KEY_TYPE = "type"
         private const val KEY_CALL_CID = "call_cid"
-        private const val KEY_USER_NAMES = "user_names"
+        private const val KEY_CALL_DISPLAY_NAME = "call_display_name"
 
         private const val VALUE_STREAM_SENDER = "stream.video"
 
