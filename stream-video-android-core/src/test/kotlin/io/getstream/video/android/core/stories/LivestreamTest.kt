@@ -106,12 +106,8 @@ class LivestreamTest : IntegrationTestBase() {
         assertThat(count?.anonymous).isEqualTo(0)
         assertThat(count?.total).isEqualTo(0)
         // call running time
+        val start = call.state._session.value?.startedAt
         // TODO:
     }
 
-    @Test
-    fun `mute the audio of the call you are receiving`() = runTest {
-        val call = client.call("livestream", randomUUID())
-        call.speaker.setVolume(0)
-    }
 }
