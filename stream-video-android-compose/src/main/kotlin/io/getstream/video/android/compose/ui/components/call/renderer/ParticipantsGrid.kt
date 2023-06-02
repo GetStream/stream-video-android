@@ -42,7 +42,7 @@ import io.getstream.video.android.mock.mockCall
  * @param videoRenderer A single video renderer renders each individual participant.
  */
 @Composable
-public fun CallVideoRenderer(
+public fun ParticipantsGrid(
     call: Call,
     modifier: Modifier = Modifier,
     style: VideoRendererStyle = RegularVideoRendererStyle(),
@@ -98,7 +98,7 @@ public fun CallVideoRenderer(
 private fun CallVideoRendererPreview() {
     StreamMockUtils.initializeStreamVideo(LocalContext.current)
     VideoTheme {
-        CallVideoRenderer(
+        ParticipantsGrid(
             call = mockCall,
             modifier = Modifier.fillMaxWidth()
         )

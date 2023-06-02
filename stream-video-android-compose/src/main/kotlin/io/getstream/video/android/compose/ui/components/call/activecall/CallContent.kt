@@ -44,8 +44,8 @@ import io.getstream.video.android.common.viewmodel.CallViewModel
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.call.CallAppBar
 import io.getstream.video.android.compose.ui.components.call.controls.ControlActions
-import io.getstream.video.android.compose.ui.components.call.renderer.CallVideoRenderer
 import io.getstream.video.android.compose.ui.components.call.renderer.ParticipantVideo
+import io.getstream.video.android.compose.ui.components.call.renderer.ParticipantsGrid
 import io.getstream.video.android.compose.ui.components.call.renderer.RegularVideoRendererStyle
 import io.getstream.video.android.compose.ui.components.call.renderer.VideoRendererStyle
 import io.getstream.video.android.compose.ui.components.video.VideoRenderer
@@ -101,7 +101,7 @@ public fun CallContent(
         )
     },
     callVideoContent: @Composable RowScope.(call: Call) -> Unit = {
-        CallVideoRenderer(
+        ParticipantsGrid(
             call = callViewModel.call,
             modifier = Modifier
                 .fillMaxSize()
@@ -193,7 +193,7 @@ public fun CallContent(
         )
     },
     callVideoContent: @Composable RowScope.(call: Call) -> Unit = {
-        CallVideoRenderer(
+        ParticipantsGrid(
             call = call,
             modifier = Modifier
                 .fillMaxSize()
