@@ -149,6 +149,7 @@ public class RtcSession internal constructor(
     internal var remoteIceServers: List<IceServer>,
 ) {
 
+    private var transceiverInitialized: Boolean = false
     private var errorJob: Job? = null
     private var eventJob: Job? = null
     internal val socket by lazy { sfuConnectionModule.sfuSocket }
@@ -341,12 +342,30 @@ public class RtcSession internal constructor(
         connectRtc()
     }
 
+    fun initializeVideoTransceiver() {
+        if (!transceiverInitialized)  {
+            publisher?.let {
+                it.addVideoTransceiver(
+                    call.mediaManager.videoTrack,
+                    listOf(buildTrackId(TrackType.TRACK_TYPE_VIDEO))
+                )
+                transceiverInitialized = true
+            }
+
+        }
+    }
+
     suspend fun listenToMediaChanges() {
         coroutineScope.launch {
             // update the tracks when the camera or microphone status changes
             call.mediaManager.camera.status.collectLatest {
                 // set the mute /unumute status
                 setMuteState(isEnabled = it == DeviceStatus.Enabled, TrackType.TRACK_TYPE_VIDEO)
+
+                if (it == DeviceStatus.Enabled) {
+                    initializeVideoTransceiver()
+                }
+
             }
         }
         coroutineScope.launch {
@@ -461,16 +480,18 @@ public class RtcSession internal constructor(
                 if (call.mediaManager.camera.status.value == DeviceStatus.NotSelected) {
                     val enabled = settings?.video?.cameraDefaultOn == true
                     call.mediaManager.camera.setEnabled(enabled)
-                    // check the settings if we should default to front or back facing camera
-                    val defaultDirection =
-                        if (settings?.video?.cameraFacing == VideoSettings.CameraFacing.front) {
-                            CameraDirection.Front
-                        } else {
-                            CameraDirection.Back
+                    if (enabled) {
+                        // check the settings if we should default to front or back facing camera
+                        val defaultDirection =
+                            if (settings?.video?.cameraFacing == VideoSettings.CameraFacing.front) {
+                                CameraDirection.Front
+                            } else {
+                                CameraDirection.Back
+                            }
+                        // TODO: would be nicer to initialize the camera on the right device to begin with
+                        if (defaultDirection != call.mediaManager.camera.direction.value) {
+                            call.mediaManager.camera.flip()
                         }
-                    // TODO: would be nicer to initialize the camera on the right device to begin with
-                    if (defaultDirection != call.mediaManager.camera.direction.value) {
-                        call.mediaManager.camera.flip()
                     }
                 }
 
@@ -503,10 +524,10 @@ public class RtcSession internal constructor(
                 )
                 // render it on the surface. but we need to start this before forwarding it to the publisher
                 logger.v { "[createUserTracks] #sfu; videoTrack: ${call.mediaManager.videoTrack.stringify()}" }
-                publisher.addVideoTransceiver(
-                    call.mediaManager.videoTrack,
-                    listOf(buildTrackId(TrackType.TRACK_TYPE_VIDEO))
-                )
+                if (call.mediaManager.camera.status.value == DeviceStatus.Enabled) {
+                    initializeVideoTransceiver()
+                }
+
             }
         }
 
@@ -981,7 +1002,11 @@ public class RtcSession internal constructor(
                         else -> TrackType.TRACK_TYPE_UNSPECIFIED
                     }
 
-                    val layers: List<VideoLayer> = if (trackType != TrackType.TRACK_TYPE_VIDEO) {
+                    if (trackType == TrackType.TRACK_TYPE_VIDEO && captureResolution == null ) {
+                        throw IllegalStateException("video capture needs to be enabled before adding the local track")
+                    }
+
+                    var layers: List<VideoLayer> = if (trackType != TrackType.TRACK_TYPE_VIDEO) {
                         emptyList()
                     } else {
                         // we tell the Sfu which resolutions we're sending
@@ -1002,6 +1027,8 @@ public class RtcSession internal constructor(
                             )
                         }
                     }
+
+
 
                     TrackInfo(
                         track_id = track.id(),
