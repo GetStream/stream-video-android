@@ -24,7 +24,6 @@ import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.getstream.video.android.compose.theme.VideoTheme
-import io.getstream.video.android.compose.ui.components.call.renderer.internal.RegularCallVideoRenderer
 import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.ParticipantState
 import io.getstream.video.android.mock.StreamMockUtils
@@ -60,7 +59,7 @@ public fun ParticipantsGrid(
     },
 ) {
     if (LocalInspectionMode.current) {
-        RegularCallVideoRenderer(
+        ParticipantsRegularGrid(
             call = call,
             modifier = modifier,
         )
@@ -71,7 +70,7 @@ public fun ParticipantsGrid(
     val screenSharing = screenSharingSession.value
 
     if (screenSharing == null) {
-        RegularCallVideoRenderer(
+        ParticipantsRegularGrid(
             call = call,
             modifier = modifier,
             style = style,

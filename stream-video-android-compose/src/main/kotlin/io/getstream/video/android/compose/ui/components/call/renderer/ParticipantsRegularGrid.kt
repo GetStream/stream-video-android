@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package io.getstream.video.android.compose.ui.components.call.renderer.internal
+package io.getstream.video.android.compose.ui.components.call.renderer
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
@@ -31,16 +31,14 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.IntSize
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.getstream.video.android.compose.theme.VideoTheme
-import io.getstream.video.android.compose.ui.components.call.renderer.ParticipantVideo
-import io.getstream.video.android.compose.ui.components.call.renderer.RegularVideoRendererStyle
-import io.getstream.video.android.compose.ui.components.call.renderer.VideoRendererStyle
+import io.getstream.video.android.compose.ui.components.call.renderer.internal.OrientationVideoRenderer
 import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.ParticipantState
 import io.getstream.video.android.mock.StreamMockUtils
 import io.getstream.video.android.mock.mockCall
 
 /**
- * Renders the CallParticipants when there are no screen sharing sessions, based on the orientation.
+ * Renders the participants are joining in a call when there are no screen sharing sessions, based on the orientation.
  *
  * @param call The call that contains all the participants state and tracks.
  * @param modifier Modifier for styling.
@@ -48,7 +46,7 @@ import io.getstream.video.android.mock.mockCall
  * @param videoRenderer A single video renderer renders each individual participant.
  */
 @Composable
-internal fun RegularCallVideoRenderer(
+public fun ParticipantsRegularGrid(
     modifier: Modifier = Modifier,
     call: Call,
     style: VideoRendererStyle = RegularVideoRendererStyle(),
@@ -92,7 +90,7 @@ internal fun RegularCallVideoRenderer(
 private fun RegularCallVideoRendererPreview() {
     StreamMockUtils.initializeStreamVideo(LocalContext.current)
     VideoTheme {
-        RegularCallVideoRenderer(
+        ParticipantsRegularGrid(
             call = mockCall,
             modifier = Modifier.fillMaxSize()
         )
