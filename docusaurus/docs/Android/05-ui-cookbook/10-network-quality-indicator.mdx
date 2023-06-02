@@ -72,7 +72,8 @@ CallContainer(
             participant = participant,
             style = style,
             connectionIndicatorContent = { networkQuality ->
-                if (networkQuality is NetworkQuality.Poor) {
+                val me by call.state.me.collectAsState()
+                if (me?.sessionId == participant.sessionId && networkQuality is NetworkQuality.Poor) {
                     Snackbar(
                         modifier = Modifier
                             .padding(8.dp)
