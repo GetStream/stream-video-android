@@ -35,12 +35,11 @@ public interface AudioHandler {
     public fun stop()
 }
 
-public class AudioSwitchHandler constructor(private val context: Context) :
+public class AudioSwitchHandler constructor(private val context: Context, var audioDeviceChangeListener: AudioDeviceChangeListener? = null) :
     AudioHandler {
 
     private val logger by taggedLogger(TAG)
 
-    private var audioDeviceChangeListener: AudioDeviceChangeListener? = null
     private var onAudioFocusChangeListener: AudioManager.OnAudioFocusChangeListener? = null
     private var preferredDeviceList: List<Class<out AudioDevice>>? = null
 

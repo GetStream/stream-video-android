@@ -316,10 +316,15 @@ What's better seems to depend on internal optimizations in Compose
 
 ### Speaker/ audio playback
 
-- StreamPeerConnectionFactory calls peerconnection.setAudioDeviceModule
+- StreamPeerConnectionFactory calls peerconnection.setAudioDeviceModule (this enables some noise removal if hardware supports it)
+- MediaManager wraps the audio handler
+- AudioHandler starts the audio switch
 - AudioSwitch does most of the work
-- MediaManager
-- AudioManagerAdapterImpl
+- AudioManagerAdapterImpl. not sure
+
+When we have time we should rebuild this with:
+- Stateflow
+- Coroutines
 
 ### Docs
 

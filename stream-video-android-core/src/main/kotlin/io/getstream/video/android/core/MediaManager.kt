@@ -240,14 +240,16 @@ class MicrophoneManager(val mediaManager: MediaManagerImpl) {
         if (setupCompleted) return
 
         audioManager = mediaManager.context.getSystemService<AudioManager>()
-        audioManager?.mode = AudioManager.MODE_IN_COMMUNICATION
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
             audioManager?.allowedCapturePolicy = AudioAttributes.ALLOW_CAPTURE_BY_ALL
         }
-        audioHandler = AudioSwitchHandler(mediaManager.context)
-        val devices = audioHandler.availableAudioDevices
-        _devices.value = devices
+        audioHandler = AudioSwitchHandler(mediaManager.context) { devices, selected ->
+            _devices.value = devices
+            _selectedDevice.value = selected
+        }
+
+        audioHandler.start()
 
         setupCompleted = true
     }
