@@ -35,7 +35,10 @@ public interface AudioHandler {
     public fun stop()
 }
 
-public class AudioSwitchHandler constructor(private val context: Context, var audioDeviceChangeListener: AudioDeviceChangeListener? = null) :
+/**
+ * TODO: this class should be merged into the Microphone Manager
+ */
+public class AudioSwitchHandler constructor(private val context: Context, var audioDeviceChangeListener: AudioDeviceChangeListener) :
     AudioHandler {
 
     private val logger by taggedLogger(TAG)
@@ -61,7 +64,7 @@ public class AudioSwitchHandler constructor(private val context: Context, var au
                         ?: defaultPreferredDeviceList
                 )
                 audioSwitch = switch
-                switch.start(audioDeviceChangeListener ?: defaultAudioDeviceChangeListener)
+                switch.start(audioDeviceChangeListener)
                 switch.activate()
             }
         }
@@ -75,13 +78,6 @@ public class AudioSwitchHandler constructor(private val context: Context, var au
             audioSwitch = null
         }
     }
-
-    public val selectedAudioDevice: AudioDevice?
-        get() = audioSwitch?.selectedAudioDevice
-
-    public val availableAudioDevices: List<AudioDevice>
-        get() = audioSwitch?.availableAudioDevices ?: listOf()
-
     public fun selectDevice(audioDevice: AudioDevice?) {
         logger.i { "[selectDevice] audioDevice: $audioDevice" }
         audioSwitch?.selectDevice(audioDevice)
@@ -92,22 +88,13 @@ public class AudioSwitchHandler constructor(private val context: Context, var au
         private val defaultOnAudioFocusChangeListener by lazy(LazyThreadSafetyMode.NONE) {
             DefaultOnAudioFocusChangeListener()
         }
-        private val defaultAudioDeviceChangeListener by lazy(LazyThreadSafetyMode.NONE) {
-            object : AudioDeviceChangeListener {
-                override fun invoke(
-                    audioDevices: List<AudioDevice>,
-                    selectedAudioDevice: AudioDevice?
-                ) {
-                    StreamLog.i(TAG) { "[onAudioDeviceChange] selectedAudioDevice: $selectedAudioDevice" }
-                }
-            }
-        }
+
         private val defaultPreferredDeviceList by lazy(LazyThreadSafetyMode.NONE) {
             listOf(
                 AudioDevice.BluetoothHeadset::class.java,
                 AudioDevice.WiredHeadset::class.java,
                 AudioDevice.Earpiece::class.java,
-                AudioDevice.Speakerphone::class.java
+                AudioDevice.Speakerphone::class.java,
             )
         }
 
