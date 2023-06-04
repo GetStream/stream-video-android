@@ -486,7 +486,7 @@ public class Call(
 
             // ask if we should switch
             val joinResponse = joinRequest(location = location, currentSfu = session?.sfuUrl)
-            val shouldSwitch = true
+            val shouldSwitch = false
 
             if (shouldSwitch && joinResponse is Success) {
                 // switch to the new SFU
