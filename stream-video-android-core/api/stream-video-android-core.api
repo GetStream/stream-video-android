@@ -296,8 +296,6 @@ public final class io/getstream/video/android/core/GEO$GlobalEdgeNetwork : io/ge
 public final class io/getstream/video/android/core/MediaManagerImpl {
 	public fun <init> (Landroid/content/Context;Lio/getstream/video/android/core/Call;Lkotlinx/coroutines/CoroutineScope;Lorg/webrtc/EglBase$Context;)V
 	public final fun cleanup ()V
-	public final fun getAudioDevices ()Ljava/util/List;
-	public final fun getAudioHandler ()Lio/getstream/video/android/core/audio/AudioSwitchHandler;
 	public final fun getAudioSource ()Lorg/webrtc/AudioSource;
 	public final fun getAudioTrack ()Lorg/webrtc/AudioTrack;
 	public final fun getCall ()Lio/getstream/video/android/core/Call;
@@ -306,8 +304,6 @@ public final class io/getstream/video/android/core/MediaManagerImpl {
 	public final fun getScope ()Lkotlinx/coroutines/CoroutineScope;
 	public final fun getVideoSource ()Lorg/webrtc/VideoSource;
 	public final fun getVideoTrack ()Lorg/webrtc/VideoTrack;
-	public final fun selectAudioDevice (Lio/getstream/video/android/core/audio/AudioDevice;)V
-	public final fun setSpeakerphoneEnabled (Z)V
 }
 
 public final class io/getstream/video/android/core/MemberState {
@@ -720,10 +716,10 @@ public final class io/getstream/video/android/core/audio/AudioSwitch$Companion {
 
 public final class io/getstream/video/android/core/audio/AudioSwitchHandler : io/getstream/video/android/core/audio/AudioHandler {
 	public static final field Companion Lio/getstream/video/android/core/audio/AudioSwitchHandler$Companion;
-	public fun <init> (Landroid/content/Context;)V
-	public final fun getAvailableAudioDevices ()Ljava/util/List;
-	public final fun getSelectedAudioDevice ()Lio/getstream/video/android/core/audio/AudioDevice;
+	public fun <init> (Landroid/content/Context;Lkotlin/jvm/functions/Function2;)V
+	public final fun getAudioDeviceChangeListener ()Lkotlin/jvm/functions/Function2;
 	public final fun selectDevice (Lio/getstream/video/android/core/audio/AudioDevice;)V
+	public final fun setAudioDeviceChangeListener (Lkotlin/jvm/functions/Function2;)V
 	public fun start ()V
 	public fun stop ()V
 }
@@ -753,6 +749,7 @@ public final class io/getstream/video/android/core/call/RtcSession {
 	public final fun handleEvent (Lorg/openapitools/client/models/VideoEvent;)V
 	public final fun handleIceTrickle (Lio/getstream/video/android/core/events/ICETrickleEvent;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public final fun handleSubscriberOffer (Lio/getstream/video/android/core/events/SubscriberOfferEvent;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public final fun initializeVideoTransceiver ()V
 	public final fun listenToMediaChanges (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public final fun mangleSdp (Lorg/webrtc/SessionDescription;)Lorg/webrtc/SessionDescription;
 	public final fun onNegotiationNeeded (Lio/getstream/video/android/core/call/connection/StreamPeerConnection;Lio/getstream/video/android/core/model/StreamPeerType;)V
@@ -1630,29 +1627,6 @@ public final class io/getstream/video/android/core/model/CallRecordingData {
 	public final fun getStart ()J
 	public final fun getUrl ()Ljava/lang/String;
 	public fun hashCode ()I
-	public fun toString ()Ljava/lang/String;
-}
-
-public final class io/getstream/video/android/core/model/CallSettings {
-	public fun <init> ()V
-	public fun <init> (ZZZZ)V
-	public synthetic fun <init> (ZZZZILkotlin/jvm/internal/DefaultConstructorMarker;)V
-	public final fun component1 ()Z
-	public final fun component2 ()Z
-	public final fun component3 ()Z
-	public final fun component4 ()Z
-	public final fun copy (ZZZZ)Lio/getstream/video/android/core/model/CallSettings;
-	public static synthetic fun copy$default (Lio/getstream/video/android/core/model/CallSettings;ZZZZILjava/lang/Object;)Lio/getstream/video/android/core/model/CallSettings;
-	public fun equals (Ljava/lang/Object;)Z
-	public final fun getAutoPublish ()Z
-	public final fun getCameraOn ()Z
-	public final fun getMicrophoneOn ()Z
-	public final fun getSpeakerOn ()Z
-	public fun hashCode ()I
-	public final fun setAutoPublish (Z)V
-	public final fun setCameraOn (Z)V
-	public final fun setMicrophoneOn (Z)V
-	public final fun setSpeakerOn (Z)V
 	public fun toString ()Ljava/lang/String;
 }
 
