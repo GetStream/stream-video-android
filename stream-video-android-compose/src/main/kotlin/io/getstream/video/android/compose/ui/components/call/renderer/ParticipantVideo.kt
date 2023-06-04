@@ -47,7 +47,6 @@ import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -98,11 +97,11 @@ public fun ParticipantVideo(
         UserAvatarBackground(user = user)
     },
 ) {
-    TextStyle
     val reactions by participant.reactions.collectAsStateWithLifecycle()
     val connectionQuality by participant.networkQuality.collectAsStateWithLifecycle()
+    val participants by call.state.participants.collectAsStateWithLifecycle()
 
-    val containerModifier = if (style.isFocused) modifier.border(
+    val containerModifier = if (style.isFocused && participants.size > 1) modifier.border(
         border = if (style.isScreenSharing) {
             BorderStroke(
                 VideoTheme.dimens.callParticipantScreenSharingFocusedBorderWidth,
