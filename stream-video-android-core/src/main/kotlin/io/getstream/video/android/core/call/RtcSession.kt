@@ -343,7 +343,7 @@ public class RtcSession internal constructor(
     }
 
     fun initializeVideoTransceiver() {
-        if (!transceiverInitialized)  {
+        if (!transceiverInitialized) {
             publisher?.let {
                 it.addVideoTransceiver(
                     call.mediaManager.videoTrack,
@@ -351,7 +351,6 @@ public class RtcSession internal constructor(
                 )
                 transceiverInitialized = true
             }
-
         }
     }
 
@@ -365,7 +364,6 @@ public class RtcSession internal constructor(
                 if (it == DeviceStatus.Enabled) {
                     initializeVideoTransceiver()
                 }
-
             }
         }
         coroutineScope.launch {
@@ -529,7 +527,6 @@ public class RtcSession internal constructor(
                 if (call.mediaManager.camera.status.value == DeviceStatus.Enabled) {
                     initializeVideoTransceiver()
                 }
-
             }
         }
 
@@ -1004,7 +1001,7 @@ public class RtcSession internal constructor(
                         else -> TrackType.TRACK_TYPE_UNSPECIFIED
                     }
 
-                    if (trackType == TrackType.TRACK_TYPE_VIDEO && captureResolution == null ) {
+                    if (trackType == TrackType.TRACK_TYPE_VIDEO && captureResolution == null) {
                         throw IllegalStateException("video capture needs to be enabled before adding the local track")
                     }
 
@@ -1029,8 +1026,6 @@ public class RtcSession internal constructor(
                             )
                         }
                     }
-
-
 
                     TrackInfo(
                         track_id = track.id(),
