@@ -129,6 +129,7 @@ public final class io/getstream/video/android/model/User {
 	public final fun getTeams ()Ljava/util/List;
 	public final fun getType ()Lio/getstream/video/android/model/UserType;
 	public final fun getUpdatedAt ()Lorg/threeten/bp/OffsetDateTime;
+	public final fun getUserNameOrId ()Ljava/lang/String;
 	public fun hashCode ()I
 	public final fun isValid ()Z
 	public fun toString ()Ljava/lang/String;

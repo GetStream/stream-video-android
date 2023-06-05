@@ -308,6 +308,7 @@ internal fun BoxScope.LandscapeVideoRenderer(
                 } else {
                     currentLocal!!
                 },
+                style = style.copy(isShowingConnectionQualityIndicator = false),
                 parentBounds = parentSize,
                 modifier = Modifier
                     .size(
