@@ -66,20 +66,24 @@ public final class io/getstream/video/android/core/Call {
 
 public final class io/getstream/video/android/core/CallHealthMonitor {
 	public fun <init> (Lio/getstream/video/android/core/Call;Lkotlinx/coroutines/CoroutineScope;)V
+	public final fun check ()V
 	public final fun getBadStates ()Ljava/util/List;
 	public final fun getCall ()Lio/getstream/video/android/core/Call;
 	public final fun getCallScope ()Lkotlinx/coroutines/CoroutineScope;
+	public final fun getCheckInterval ()J
 	public final fun getGoodStates ()Ljava/util/List;
+	public final fun getLastReconnectAt ()Lorg/threeten/bp/OffsetDateTime;
+	public final fun getReconnectDebounceMs ()J
 	public final fun getReconnectInProgress ()Z
 	public final fun getReconnectionAttempts ()I
-	public final fun healthyPeer ()V
-	public final fun monitorInterval (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public final fun monitorInterval ()V
 	public final fun monitorPeerConnection ()V
+	public final fun reconnect (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public final fun setLastReconnectAt (Lorg/threeten/bp/OffsetDateTime;)V
 	public final fun setReconnectInProgress (Z)V
 	public final fun setReconnectionAttempts (I)V
 	public final fun start ()V
 	public final fun stop ()V
-	public final fun unhealthyPeer ()V
 }
 
 public final class io/getstream/video/android/core/CallState {
@@ -736,7 +740,6 @@ public final class io/getstream/video/android/core/call/RtcSession {
 	public final fun createPublisher ()Lio/getstream/video/android/core/call/connection/StreamPeerConnection;
 	public final fun createSubscriber ()Lio/getstream/video/android/core/call/connection/StreamPeerConnection;
 	public final fun getLocalTrack (Lstream/video/sfu/models/TrackType;)Lio/getstream/video/android/core/model/MediaTrack;
-	public final fun getPublisher ()Lio/getstream/video/android/core/call/connection/StreamPeerConnection;
 	public final fun getPublisherStats ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun getSubscriber ()Lio/getstream/video/android/core/call/connection/StreamPeerConnection;
 	public final fun getSubscriberStats ()Lkotlinx/coroutines/flow/StateFlow;
@@ -757,7 +760,6 @@ public final class io/getstream/video/android/core/call/RtcSession {
 	public final fun sendIceCandidate (Lstream/video/sfu/models/ICETrickle;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public final fun setLocalTrack (Lstream/video/sfu/models/TrackType;Lio/getstream/video/android/core/model/MediaTrack;)V
 	public final fun setMuteState (ZLstream/video/sfu/models/TrackType;)V
-	public final fun setPublisher (Lio/getstream/video/android/core/call/connection/StreamPeerConnection;)V
 	public final fun setPublisher (Lstream/video/sfu/signal/SetPublisherRequest;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public final fun setSubscriber (Lio/getstream/video/android/core/call/connection/StreamPeerConnection;)V
 	public final fun setTrack (Ljava/lang/String;Lstream/video/sfu/models/TrackType;Lio/getstream/video/android/core/model/MediaTrack;)V
