@@ -91,7 +91,7 @@ public class CallHealthMonitor(val call: Call, val callScope: CoroutineScope) {
     var reconnectInProgress: Boolean = false
     var reconnectionAttempts = 0
     val checkInterval = 3000L
-    var lastReconnectAt : OffsetDateTime? = null
+    var lastReconnectAt: OffsetDateTime? = null
     val reconnectDebounceMs = 700L
 
     val badStates = listOf(
@@ -141,7 +141,6 @@ public class CallHealthMonitor(val call: Call, val callScope: CoroutineScope) {
             logger.w { "call health check failed, reconnecting. publisher $publisherState subscriber $subscriberState" }
             scope.launch { reconnect() }
         }
-
     }
 
     /**
@@ -230,8 +229,6 @@ public class CallHealthMonitor(val call: Call, val callScope: CoroutineScope) {
             }
         }
     }
-
-
 }
 
 /**

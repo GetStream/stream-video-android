@@ -113,7 +113,7 @@ public class StreamVideoBuilder @JvmOverloads constructor(
         AndroidThreeTen.init(context)
 
         val dataStore = if (!StreamUserDataStore.isInstalled) {
-            StreamUserDataStore.install(context, scope=scope)
+            StreamUserDataStore.install(context, scope = scope)
         } else {
             StreamUserDataStore.instance()
         }
