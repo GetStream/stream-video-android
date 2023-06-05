@@ -26,6 +26,7 @@ import io.getstream.log.streamLog
 import io.getstream.result.Result
 import io.getstream.video.android.core.call.connection.StreamPeerConnectionFactory
 import io.getstream.video.android.core.dispatchers.DispatcherProvider
+import io.getstream.video.android.core.logging.HttpLoggingLevel
 import io.getstream.video.android.core.logging.LoggingLevel
 import io.getstream.video.android.datastore.delegate.StreamUserDataStore
 import io.getstream.video.android.model.User
@@ -244,7 +245,7 @@ open class IntegrationTestBase(connectCoordinatorWS: Boolean = true) : TestBase(
             geo = GEO.GlobalEdgeNetwork,
             testData.users["thierry"]!!,
             testData.tokens["thierry"]!!,
-            loggingLevel = LoggingLevel.BODY
+            loggingLevel = LoggingLevel(Priority.DEBUG, HttpLoggingLevel.BASIC)
         )
 //        if (BuildConfig.CORE_TEST_LOCAL == "1") {
 //            builder.videoDomain = "localhost"
