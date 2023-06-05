@@ -1245,6 +1245,17 @@ public final class io/getstream/video/android/core/events/TrackUnpublishedEvent 
 	public fun toString ()Ljava/lang/String;
 }
 
+public final class io/getstream/video/android/core/events/UnknownEvent : io/getstream/video/android/core/events/SfuDataEvent {
+	public fun <init> (Ljava/lang/Object;)V
+	public final fun component1 ()Ljava/lang/Object;
+	public final fun copy (Ljava/lang/Object;)Lio/getstream/video/android/core/events/UnknownEvent;
+	public static synthetic fun copy$default (Lio/getstream/video/android/core/events/UnknownEvent;Ljava/lang/Object;ILjava/lang/Object;)Lio/getstream/video/android/core/events/UnknownEvent;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getEvent ()Ljava/lang/Object;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
 public abstract interface class io/getstream/video/android/core/events/VideoEventListener {
 	public abstract fun onEvent (Lorg/openapitools/client/models/VideoEvent;)V
 }
