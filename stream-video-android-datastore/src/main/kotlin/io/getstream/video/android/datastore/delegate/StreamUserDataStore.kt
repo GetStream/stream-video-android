@@ -40,11 +40,11 @@ import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.map
 
-public class StreamUserDataStore constructor(dataStore: DataStore<StreamUserPreferences?>) :
+public class StreamUserDataStore constructor(
+    dataStore: DataStore<StreamUserPreferences?>,
+    private val scope: CoroutineScope
+) :
     DataStore<StreamUserPreferences?> by dataStore {
-
-    @PublishedApi
-    internal val scope: CoroutineScope = CoroutineScope(Dispatchers.IO + SupervisorJob())
 
     public suspend fun updateUserPreferences(streamUserPreferences: StreamUserPreferences) {
         updateData { streamUserPreferences }
@@ -128,7 +128,11 @@ public class StreamUserDataStore constructor(dataStore: DataStore<StreamUserPref
         /**
          * Installs a new [StreamUserDataStore] instance to be used.
          */
-        public fun install(context: Context, isEncrypted: Boolean = true): StreamUserDataStore {
+        public fun install(
+            context: Context,
+            isEncrypted: Boolean = true,
+            scope: CoroutineScope = CoroutineScope(Dispatchers.IO + SupervisorJob())
+        ): StreamUserDataStore {
             synchronized(this) {
                 if (isInstalled) {
                     StreamLog.e("StreamVideo") {
@@ -157,7 +161,7 @@ public class StreamUserDataStore constructor(dataStore: DataStore<StreamUserPref
                     }
                 }
 
-                val userDataStore = StreamUserDataStore(dataStore)
+                val userDataStore = StreamUserDataStore(dataStore, scope)
 
                 internalStreamUserDataStore = userDataStore
                 return userDataStore

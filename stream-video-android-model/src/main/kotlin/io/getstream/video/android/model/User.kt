@@ -75,4 +75,7 @@ public data class User(
     public fun isValid(): Boolean {
         return id.isNotEmpty()
     }
+
+    public val userNameOrId: String
+        inline get() = name.ifEmpty { id }
 }
