@@ -136,9 +136,9 @@ dependencies {
 
     // Stream
     api(libs.stream.result)
-    implementation(libs.stream.log)
     implementation(libs.stream.push)
     implementation(libs.stream.push.delegate)
+    implementation(libs.stream.log.android)
 
     // unit tests
     testImplementation(libs.junit)

@@ -22,7 +22,6 @@ import com.google.firebase.auth.FirebaseAuth
 import dagger.hilt.android.HiltAndroidApp
 import io.getstream.android.push.firebase.FirebasePushDeviceGenerator
 import io.getstream.log.Priority
-import io.getstream.log.android.AndroidStreamLogger
 import io.getstream.video.android.core.StreamVideo
 import io.getstream.video.android.core.StreamVideoBuilder
 import io.getstream.video.android.core.logging.LoggingLevel
@@ -36,7 +35,6 @@ class DogfoodingApp : Application() {
 
     override fun onCreate() {
         super.onCreate()
-        AndroidStreamLogger.installOnDebuggableApp(this, minPriority = Priority.DEBUG)
 //        StreamGlobalExceptionHandler.install(
 //            application = this,
 //            packageName = MainActivity::class.java.name,
@@ -86,7 +84,10 @@ class DogfoodingApp : Application() {
         }
 
         dogfoodingApp.initializeStreamVideo(
-            apiKey = apiKey, user = user, loggingLevel = LoggingLevel.NONE, token = token
+            apiKey = apiKey,
+            user = user,
+            loggingLevel = LoggingLevel(priority = Priority.VERBOSE),
+            token = token
         )
         return true
     }
