@@ -407,7 +407,7 @@ private fun logInToVideo(user: User) {
             API_KEY,
             user = user
         ),
-        loggingLevel = LoggingLevel.BODY // 2
+        loggingLevel = LoggingLevel(priority = Priority.Debug) // 2
     )
 }
 ```

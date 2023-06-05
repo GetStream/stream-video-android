@@ -48,7 +48,7 @@ class DemoVideoApp : Application() {
                 teams = emptyList(), custom = mapOf()
             ),
             token,
-            loggingLevel = LoggingLevel.BODY
+            loggingLevel = LoggingLevel(priority = Priority.VERBOSE)
         ).build()
 
         StreamLog.i(TAG) { "[onCreate] no args" }

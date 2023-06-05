@@ -21,6 +21,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.google.firebase.auth.FirebaseAuth
 import dagger.hilt.android.lifecycle.HiltViewModel
+import io.getstream.log.Priority
 import io.getstream.video.android.core.logging.LoggingLevel
 import io.getstream.video.android.datastore.delegate.StreamUserDataStore
 import io.getstream.video.android.dogfooding.API_KEY
@@ -106,7 +107,7 @@ class LoginViewModel @Inject constructor(
         context.dogfoodingApp.initializeStreamVideo(
             apiKey = API_KEY,
             user = user,
-            loggingLevel = LoggingLevel.BODY,
+            loggingLevel = LoggingLevel(priority = Priority.DEBUG),
             token = token
         )
     }

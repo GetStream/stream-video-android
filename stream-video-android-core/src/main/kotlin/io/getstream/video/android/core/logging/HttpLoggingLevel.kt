@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014-2022 Stream.io Inc. All rights reserved.
+ * Copyright (c) 2014-2023 Stream.io Inc. All rights reserved.
  *
  * Licensed under the Stream License;
  * you may not use this file except in compliance with the License.
@@ -16,15 +16,12 @@
 
 package io.getstream.video.android.core.logging
 
-import io.getstream.log.Priority
+import okhttp3.logging.HttpLoggingInterceptor
 
-/**
- * Represents and wraps the HTTP logging level for our API service.
- *
- * @property priority The priority level of information logged by the Stream Android logger.
- * @property httpLoggingLevel The level of information logged by our HTTP interceptor.
- */
-public data class LoggingLevel @JvmOverloads constructor(
-    public val priority: Priority = Priority.ERROR,
-    public val httpLoggingLevel: HttpLoggingLevel = HttpLoggingLevel.BASIC
-)
+public enum class HttpLoggingLevel(
+    internal val level: HttpLoggingInterceptor.Level
+) {
+    NONE(HttpLoggingInterceptor.Level.NONE),
+    BASIC(HttpLoggingInterceptor.Level.BASIC),
+    BODY(HttpLoggingInterceptor.Level.BODY)
+}

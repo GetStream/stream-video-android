@@ -28,6 +28,7 @@ import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.lifecycleScope
+import io.getstream.log.Priority
 import io.getstream.log.taggedLogger
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.core.StreamVideo
@@ -97,7 +98,7 @@ class DeeplinkingActivity : ComponentActivity() {
                 user = user,
                 token = token,
                 apiKey = apiKey,
-                loggingLevel = LoggingLevel.BODY
+                loggingLevel = LoggingLevel(priority = Priority.VERBOSE)
             )
         }
     }
