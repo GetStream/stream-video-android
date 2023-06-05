@@ -326,6 +326,7 @@ internal fun BoxScope.PortraitVideoRenderer(
                 } else {
                     currentLocal!!
                 },
+                style = style.copy(isShowingConnectionQualityIndicator = false),
                 parentBounds = parentSize,
                 modifier = Modifier
                     .size(
