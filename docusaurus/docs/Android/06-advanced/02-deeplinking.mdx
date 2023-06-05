@@ -46,7 +46,7 @@ class DeeplinkingActivity : AppCompatActivity() {
                 userToken = myUser.token,
                 apiKey = myPreferences.getApiKey()
             ),
-            loggingLevel = LoggingLevel.BODY
+            loggingLevel = LoggingLevel(priority = Priority.Debug)
         )
     }
 

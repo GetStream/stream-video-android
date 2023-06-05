@@ -169,7 +169,7 @@ open class IntegrationTestBase(connectCoordinatorWS: Boolean = true) : TestBase(
             geo = GEO.GlobalEdgeNetwork,
             testData.users["thierry"]!!,
             testData.tokens["thierry"]!!,
-            loggingLevel = LoggingLevel.BODY
+            loggingLevel = LoggingLevel(priority = Priority.VERBOSE)
         )
 //        if (BuildConfig.CORE_TEST_LOCAL == "1") {
 //            builder.videoDomain = "localhost"

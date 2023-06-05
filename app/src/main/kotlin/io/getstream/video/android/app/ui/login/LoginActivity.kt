@@ -34,6 +34,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import io.getstream.log.Priority
 import io.getstream.log.taggedLogger
 import io.getstream.video.android.app.VideoApp
 import io.getstream.video.android.app.ui.components.UserList
@@ -131,7 +132,7 @@ class LoginActivity : AppCompatActivity() {
         videoApp.initializeStreamVideo(
             user = selectedUser,
             apiKey = VideoApp.API_KEY,
-            loggingLevel = LoggingLevel.BODY
+            loggingLevel = LoggingLevel(priority = Priority.VERBOSE)
         )
         startActivity(HomeActivity.getIntent(this))
         finish()
