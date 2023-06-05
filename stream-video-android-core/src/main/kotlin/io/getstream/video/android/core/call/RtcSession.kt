@@ -249,8 +249,7 @@ public class RtcSession internal constructor(
     public var subscriber: StreamPeerConnection? = null
 
     /** publisher for publishing, using 2 peer connections prevents race conditions in the offer/answer cycle */
-    @VisibleForTesting
-    var publisher: StreamPeerConnection? = null
+    internal var publisher: StreamPeerConnection? = null
 
     private val mediaConstraints: MediaConstraints by lazy {
         buildMediaConstraints()
@@ -1108,7 +1107,6 @@ public class RtcSession internal constructor(
         )
     }
 
-    // TODO: handle the .error field on the Response objects
     // reply to when we get an offer from the SFU
     suspend fun sendAnswer(request: SendAnswerRequest): Result<SendAnswerResponse> =
         wrapAPICall {
