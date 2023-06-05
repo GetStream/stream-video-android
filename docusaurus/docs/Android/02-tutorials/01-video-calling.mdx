@@ -16,8 +16,8 @@ This tutorial teaches you how to build your own Zoom/Whatsapp style video callin
 Note that this tutorial was written using Android Studio Flamingo.
 Setup steps can vary slightly across Android Studio versions so if you run into trouble be sure to use the latest version of Android Studio.
 
-1. Create a new project.
-2. Select **empty activity**
+1. Create a new project
+2. Select Phone & Template -> **empty activity**
 3. Name your project **VideoCall**.
 
 ### Step 2 - Install the SDK & Setup the client
@@ -33,7 +33,7 @@ dependencies {
 
 ### Step 3 - Create & Join a call
 
-Open up `MainActivity.kt` and add the following code to the `onCreate` method:
+Open up `MainActivity.kt` and replace the main activity with the following code:
 
 ```kotlin
 class MainActivity : ComponentActivity() {
@@ -58,7 +58,9 @@ class MainActivity : ComponentActivity() {
 
         // join a call, which type is `default` and id is `123`.
         val call = client.call("default", "123")
-        call.join(create = true)
+        val result = call.join(create = true)
+
+        val participants = call.state.participants.collectAsState()
 
         setContent {
             VideoTheme {
@@ -75,99 +77,76 @@ class MainActivity : ComponentActivity() {
 }
 ```
 
-Run the sample app and now join this call via your browser here. Let's keep it open as you go through the tutorial.
-You'll see the participant count increase to 2 in your app. Awesome, but let's add some video
+Run the sample app now and you'll see 1 participant in your call.
+To make this a little more interactive let's join the call from your browser.
+Visit https://getstream.io/video/demos/?id=mycallid and joing the call.
+On your Android emulator you'll see the text update to 2 participants.
+
+Let's keep the browser tab open as you go through the tutorial.
+Awesome, time to add some video.
 
 ### Step 4 - Rendering Video
 
 In this next step we're going to:
 
-1. Use a viewmodel (it nicely cleans up the call after you leave the UI).
-2. Render your local video.
-3. Render the participant's video.
+1. Render your local video.
+2. Render the participant's video.
+3. Use a viewmodel
 
 ```kotlin
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        // create a user.
-        val user = User(
-            id = "byron",
-            name = "Byron",
-            image = "https://getstream.io/chat/docs/sdk/avatars/jpg/Byron%20Waelchi.jpg",
-            role = "admin",
-            custom = mapOf("email" to "byron@example.com")
-        )
-
-        // for a production app we recommend adding the client to your Application class or di module.
-        val client = StreamVideoBuilder(
-             context = context,
-             apiKey = apiKey,
-             geo = GEO.GlobalEdgeNetwork,
-             user = user,
-             token = token,
-        ).build()
-
-        // join a call, which type is `default` and id is `123`.
-        val call = client.call("default", "123")
+        ....
         call.join(create = true)
 
-        // create a view model factory and a view model.
+        // create a view model just below call. join
         val factory = CallViewModelFactory(call = call)
         val vm by viewModels<CallViewModel> { factory }
 
-        // create a permissionManager and set it to the CallViewModel.
-        val permissionManager = PermissionManager.create(
-               activity = this,
-               onPermissionResult = { permission, isGranted ->
-                   when (permission) {
-                       android.Manifest.permission.CAMERA -> vm.onCallAction(ToggleCamera(isGranted))
-                       android.Manifest.permission.RECORD_AUDIO -> vm.onCallAction(
-                           ToggleMicrophone(
-                               isGranted
-                           )
-                       )
-                   }
-               },
-               onShowRequestPermissionRationale = {}
-         ).also { vm.setPermissionManager(it) }
+        ....
 
-        setContent {
-            VideoTheme {
-                val participants by call.state.remoteParticipants.collectAsState()
-                val me by call.state.me.collectAsState()
 
-                // A surface container using the 'background' color from the theme
-                Surface(
-                    modifier = Modifier.fillMaxSize(),
-                    color = VideoTheme.colors.appBackground
-                ) {
-                    // render a local video call
-                    Column(modifier = Modifier.fillMaxSize()) {
-                        ParticipantVideo(
-                            modifier = Modifier.weight(1f),
-                            call = call,
-                            participant = me,
-                        )
-                    }
-
-                    // render a remote video call
-                    val remoteParticipant = participants.firstOrNull()
-                        if (remoteParticipant != null) {
-                        Column(modifier = Modifier.fillMaxSize()) {
-                            ParticipantVideo(
-                                modifier = Modifier.weight(1f),
-                                call = call,
-                                participant = remoteParticipant,
-                            )
-                         }
-                    }
-                }
-            }
         }
     }
 }
+```
+
+And replace the set content
+
+```kotlin
+setContent {
+    VideoTheme {
+        val participants by call.state.remoteParticipants.collectAsState()
+        val me by call.state.me.collectAsState()
+
+        Surface(
+            modifier = Modifier.fillMaxSize(),
+            color = VideoTheme.colors.appBackground
+        ) {
+            // render a local video call
+            Column(modifier = Modifier.fillMaxSize()) {
+                ParticipantVideo(
+                    modifier = Modifier.weight(1f),
+                    call = call,
+                    participant = me,
+                )
+            }
+
+            // render a remote video call
+            val remoteParticipant = participants.firstOrNull()
+                if (remoteParticipant != null) {
+                Column(modifier = Modifier.fillMaxSize()) {
+                    ParticipantVideo(
+                        modifier = Modifier.weight(1f),
+                        call = call,
+                        participant = remoteParticipant,
+                    )
+                 }
+            }
+        }
+    }
 ```
 
 ### Step 5 - A full UI
@@ -181,7 +160,6 @@ setContent {
         CallContainer(
             modifier = Modifier.fillMaxSize(),
             callViewModel = vm,
-            callType = CallType.VIDEO,
             onBackPressed = { finish() },
         )
     }
@@ -217,7 +195,6 @@ VideoTheme(
     CallContainer(
         modifier = Modifier.fillMaxSize(),
         callViewModel = vm,
-        callType = CallType.VIDEO,
         onBackPressed = { finish() },
     )
 }
