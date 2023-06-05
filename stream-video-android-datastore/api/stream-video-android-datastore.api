@@ -7,12 +7,11 @@ public final class io/getstream/video/android/datastore/BuildConfig {
 
 public final class io/getstream/video/android/datastore/delegate/StreamUserDataStore : androidx/datastore/core/DataStore {
 	public static final field Companion Lio/getstream/video/android/datastore/delegate/StreamUserDataStore$Companion;
-	public fun <init> (Landroidx/datastore/core/DataStore;)V
+	public fun <init> (Landroidx/datastore/core/DataStore;Lkotlinx/coroutines/CoroutineScope;)V
 	public final fun cancelJobs ()V
 	public final fun clear (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public final fun getApiKey ()Lkotlinx/coroutines/flow/StateFlow;
 	public fun getData ()Lkotlinx/coroutines/flow/Flow;
-	public final fun getScope ()Lkotlinx/coroutines/CoroutineScope;
 	public final fun getUser ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun getUserDevices ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun getUserToken ()Lkotlinx/coroutines/flow/StateFlow;
@@ -25,8 +24,8 @@ public final class io/getstream/video/android/datastore/delegate/StreamUserDataS
 }
 
 public final class io/getstream/video/android/datastore/delegate/StreamUserDataStore$Companion {
-	public final fun install (Landroid/content/Context;Z)Lio/getstream/video/android/datastore/delegate/StreamUserDataStore;
-	public static synthetic fun install$default (Lio/getstream/video/android/datastore/delegate/StreamUserDataStore$Companion;Landroid/content/Context;ZILjava/lang/Object;)Lio/getstream/video/android/datastore/delegate/StreamUserDataStore;
+	public final fun install (Landroid/content/Context;ZLkotlinx/coroutines/CoroutineScope;)Lio/getstream/video/android/datastore/delegate/StreamUserDataStore;
+	public static synthetic fun install$default (Lio/getstream/video/android/datastore/delegate/StreamUserDataStore$Companion;Landroid/content/Context;ZLkotlinx/coroutines/CoroutineScope;ILjava/lang/Object;)Lio/getstream/video/android/datastore/delegate/StreamUserDataStore;
 	public final fun instance ()Lio/getstream/video/android/datastore/delegate/StreamUserDataStore;
 	public final fun isInstalled ()Z
 	public final fun lazyInstance ()Lkotlin/Lazy;

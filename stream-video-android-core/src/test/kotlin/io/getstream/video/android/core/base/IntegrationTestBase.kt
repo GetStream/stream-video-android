@@ -32,7 +32,9 @@ import io.getstream.video.android.model.User
 import io.mockk.MockKAnnotations
 import io.mockk.impl.annotations.MockK
 import io.mockk.junit4.MockKRule
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.TestCoroutineScheduler
 import kotlinx.coroutines.test.TestDispatcher
@@ -176,7 +178,11 @@ open class TestBase {
         }
 
         if (!StreamUserDataStore.isInstalled) {
-            StreamUserDataStore.install(context = context.applicationContext, isEncrypted = false)
+            StreamUserDataStore.install(
+                context = context.applicationContext,
+                isEncrypted = false,
+                scope = CoroutineScope(DispatcherProvider.IO + SupervisorJob())
+            )
         }
     }
 
@@ -354,15 +360,26 @@ internal fun Call.toResponse(createdBy: UserResponse): CallResponse {
     val settings = CallSettingsResponse(
         audio = audioSettings,
         backstage = BackstageSettings(enabled = false),
-        broadcasting = BroadcastSettings(enabled = false, hls = HLSSettings(autoOn = false, enabled = false, qualityTracks = listOf("f"))),
+        broadcasting = BroadcastSettings(
+            enabled = false,
+            hls = HLSSettings(autoOn = false, enabled = false, qualityTracks = listOf("f"))
+        ),
         geofencing = GeofenceSettings(names = emptyList()),
         recording = RecordSettings(
-            audioOnly = false, mode = RecordSettings.Mode.available, quality = RecordSettings.Quality._720p
+            audioOnly = false,
+            mode = RecordSettings.Mode.available,
+            quality = RecordSettings.Quality._720p
         ),
         ring = RingSettings(autoCancelTimeoutMs = 10000, incomingCallTimeoutMs = 10000),
         screensharing = ScreensharingSettings(false, false),
         transcription = TranscriptionSettings("test", TranscriptionSettings.Mode.available),
-        video = VideoSettings(false, false, VideoSettings.CameraFacing.front, false, TargetResolution(3000000, 1024, 1280))
+        video = VideoSettings(
+            false,
+            false,
+            VideoSettings.CameraFacing.front,
+            false,
+            TargetResolution(3000000, 1024, 1280)
+        )
     )
     val response = CallResponse(
         id = id,
