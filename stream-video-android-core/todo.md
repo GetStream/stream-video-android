@@ -29,6 +29,7 @@
 
 ### TODO ~1 week
 
+- [ ] Error handling could be improved
 - [ ] Speaker phone selection isn't right, should use the preferences of all 4, or only switch when its an earpiece, not switch from bluetooth
 - [ ] Video disconnects sometimes. (BufferQueue has not connected producer)
 - [ ] Reconnect flow can't reconnect the subscriber (SFU related)
