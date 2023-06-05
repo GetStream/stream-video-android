@@ -62,20 +62,6 @@ android {
         }
     }
 
-    buildTypes {
-        release {
-            isMinifyEnabled = true
-            proguardFiles("proguard-android-optimize.txt", "proguard-rules.pro")
-            consumerProguardFiles("consumer-proguard-rules.pro")
-        }
-
-        debug {
-            isMinifyEnabled = true
-            proguardFiles("proguard-android-optimize.txt", "proguard-rules.pro")
-            consumerProguardFiles("consumer-proguard-rules.pro")
-        }
-    }
-
     val envProps: File = rootProject.file(".env.properties")
     if (envProps.exists()) {
         val properties = Properties()
