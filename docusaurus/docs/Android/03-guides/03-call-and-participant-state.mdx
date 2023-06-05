@@ -79,13 +79,12 @@ The following fields are available on the participant
 | Attribute | Description |
 | --- | --- |
 | `user` | The user object for this participant |
-| `videoEnabled` | If video is enabled for this participant |
-| `videoTrack` | The video track for this participant. Note that the track will only be available after you try to render it. The SDK lazy loads the tracks to ensure that large calls work well |
-| `audioEnabled` | If audio is enabled for this participant |
-| `audioTrack` | The audio track. Audio track are available when you join a call |
-| `screenSharingTrack` | The screensharing track |
+| `video` | The video object for this participant |
+| `audio` | The participant's audio object |
+| `screenSharing` | The screensharing object |
 | `joinedAt` | When this participant joined |
-| `audioLevel` | How loudly this user is talking |
+| `audioLevel` | How loudly this user is talking. Float |
+| `audioLevels` | A list of the last 10 audio levels. Convenient for audio visualizations |
 | `speaking` | If the user is speaking |
 | `connectionQuality` | The participant's connection quality |
 | `dominantSpeaker` | If this participant is the dominant speaker or not |

@@ -27,6 +27,7 @@ import io.getstream.video.android.core.CameraDirection
 import io.getstream.video.android.core.DeviceStatus
 import io.getstream.video.android.core.StreamVideo
 import io.getstream.video.android.core.StreamVideoImpl
+import io.getstream.video.android.core.audio.AudioDevice
 import io.getstream.video.android.core.call.connection.StreamPeerConnection
 import io.getstream.video.android.core.call.utils.stringify
 import io.getstream.video.android.core.errors.RtcException
@@ -435,7 +436,9 @@ public class RtcSession internal constructor(
         if (settings?.audio?.speakerDefaultOn == false) {
             call.speaker.setVolume(0)
         } else {
-            call.speaker.setSpeakerPhone(true)
+            if (call.speaker.selectedDevice.value == AudioDevice.Earpiece()) {
+                call.speaker.setSpeakerPhone(true)
+            }
         }
 
         // if we are allowed to publish, create a peer connection for it
@@ -586,10 +589,7 @@ public class RtcSession internal constructor(
     }
 
     /**
-     * TODO: Probably partially move this
-     * - set the camera track enabled
-     * - updateMuteStateRequest
-     *
+     * Marks the given track as enabled or disabled
      */
     fun setMuteState(isEnabled: Boolean, trackType: TrackType) {
         logger.d { "[setMuteState] #sfu; $trackType isEnabled: $isEnabled" }
@@ -607,8 +607,7 @@ public class RtcSession internal constructor(
             )
             updateMuteState(request).onSuccessSuspend {
             }.onError {
-                // TODO: handle error better
-                throw IllegalStateException(it.message)
+                logger.w { "Error updating mute state: ${it.message}" }
             }
         }
     }
@@ -831,8 +830,9 @@ public class RtcSession internal constructor(
                     }
 
                     is Failure -> {
-                        // TODO: this breaks the call, we should handle this better
+                        // since this breaks seeing the video from the other person, force a reconnect
                         dynascaleLogger.e { "[updateParticipantsSubscriptions] #sfu; failed: $result" }
+                        call.monitor.reconnect()
                     }
                 }
             }
@@ -976,8 +976,8 @@ public class RtcSession internal constructor(
 
                 val result = peerConnection.setLocalDescription(data)
                 if (result.isFailure) {
-                    // TODO: better error handling
-                    throw IllegalStateException(result.toString())
+                    // the call health monitor will end up restarting the peer connection and recover from this
+                    logger.w { "[negotiate] #$id; #sfu; #${peerType.stringify()}; setLocalDescription failed: $result" }
                 }
 
                 // the Sfu WS needs to be connected before calling SetPublisherRequest
@@ -1053,8 +1053,9 @@ public class RtcSession internal constructor(
                     // set the remote peer connection, and handle queued ice candidates
                     peerConnection.setRemoteDescription(answerDescription)
                 }.onError {
-                    throw IllegalStateException("[negotiate] #$id; #sfu; #${peerType.stringify()}; failed: $it")
+                    // this error results in my video not showing up, we should restart the call
                     logger.e { "[negotiate] #$id; #sfu; #${peerType.stringify()}; failed: $it" }
+                    coroutineScope.launch { call.monitor.reconnect() }
                 }
             }
         }

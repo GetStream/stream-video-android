@@ -101,6 +101,9 @@ public data class JoinCallResponseEvent(
     val callState: CallState
 ) : SfuDataEvent()
 
+public data class UnknownEvent(val event: Any?) : SfuDataEvent()
+
+
 public data class ErrorEvent(val error: Error?) : SfuDataEvent()
 
 public class SfuSocketError(val error: Error?) : Throwable() {
