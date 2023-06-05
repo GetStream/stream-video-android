@@ -91,7 +91,7 @@ public fun VideoRenderer(
         return
     }
 
-    if (media?.track != null && media.enabled) {
+    if (media?.enabled == true) {
         val mediaTrack = media.track
         val sessionId = media.sessionId
         val trackType = media.type
@@ -109,25 +109,31 @@ public fun VideoRenderer(
             }
         }
 
-        AndroidView(
-            factory = { context ->
-                StreamVideoTextureViewRenderer(context).apply {
-                    call.initRenderer(
-                        videoRenderer = this,
-                        sessionId = sessionId,
-                        trackType = trackType,
-                        onRender = onRender
-                    )
-                    setScalingType(scalingType = videoScalingType.toCommonScalingType())
-                    setupVideo(mediaTrack, this)
+        if (mediaTrack != null) {
+            AndroidView(
+                factory = { context ->
+                    StreamVideoTextureViewRenderer(context).apply {
+                        call.initRenderer(
+                            videoRenderer = this,
+                            sessionId = sessionId,
+                            trackType = trackType,
+                            onRender = onRender
+                        )
+                        setScalingType(scalingType = videoScalingType.toCommonScalingType())
+                        setupVideo(mediaTrack, this)
 
-                    view = this
-                }
-            },
-            update = { v -> setupVideo(mediaTrack, v) },
-            modifier = modifier.testTag("video_renderer"),
-        )
+                        view = this
+                    }
+                },
+                update = { v -> setupVideo(mediaTrack, v) },
+                modifier = modifier.testTag("video_renderer"),
+            )
+        } else {
+            // fallback when the video is available but the track didn't load yet
+            videoFallbackContent.invoke(call)
+        }
     } else {
+        // fallback when no video is available. video.enabled is false
         videoFallbackContent.invoke(call)
     }
 }

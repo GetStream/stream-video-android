@@ -27,6 +27,7 @@ import io.getstream.video.android.core.CameraDirection
 import io.getstream.video.android.core.DeviceStatus
 import io.getstream.video.android.core.StreamVideo
 import io.getstream.video.android.core.StreamVideoImpl
+import io.getstream.video.android.core.audio.AudioDevice
 import io.getstream.video.android.core.call.connection.StreamPeerConnection
 import io.getstream.video.android.core.call.utils.stringify
 import io.getstream.video.android.core.errors.RtcException
@@ -149,6 +150,7 @@ public class RtcSession internal constructor(
     internal var remoteIceServers: List<IceServer>,
 ) {
 
+    private var transceiverInitialized: Boolean = false
     private var errorJob: Job? = null
     private var eventJob: Job? = null
     internal val socket by lazy { sfuConnectionModule.sfuSocket }
@@ -248,8 +250,7 @@ public class RtcSession internal constructor(
     public var subscriber: StreamPeerConnection? = null
 
     /** publisher for publishing, using 2 peer connections prevents race conditions in the offer/answer cycle */
-    @VisibleForTesting
-    var publisher: StreamPeerConnection? = null
+    internal var publisher: StreamPeerConnection? = null
 
     private val mediaConstraints: MediaConstraints by lazy {
         buildMediaConstraints()
@@ -341,12 +342,28 @@ public class RtcSession internal constructor(
         connectRtc()
     }
 
+    fun initializeVideoTransceiver() {
+        if (!transceiverInitialized) {
+            publisher?.let {
+                it.addVideoTransceiver(
+                    call.mediaManager.videoTrack,
+                    listOf(buildTrackId(TrackType.TRACK_TYPE_VIDEO))
+                )
+                transceiverInitialized = true
+            }
+        }
+    }
+
     suspend fun listenToMediaChanges() {
         coroutineScope.launch {
             // update the tracks when the camera or microphone status changes
             call.mediaManager.camera.status.collectLatest {
                 // set the mute /unumute status
                 setMuteState(isEnabled = it == DeviceStatus.Enabled, TrackType.TRACK_TYPE_VIDEO)
+
+                if (it == DeviceStatus.Enabled) {
+                    initializeVideoTransceiver()
+                }
             }
         }
         coroutineScope.launch {
@@ -417,7 +434,11 @@ public class RtcSession internal constructor(
 
         // turn of the speaker if needed
         if (settings?.audio?.speakerDefaultOn == false) {
-            call.mediaManager.speaker.setVolume(0)
+            call.speaker.setVolume(0)
+        } else {
+            if (call.speaker.selectedDevice.value == AudioDevice.Earpiece()) {
+                call.speaker.setSpeakerPhone(true)
+            }
         }
 
         // if we are allowed to publish, create a peer connection for it
@@ -461,16 +482,18 @@ public class RtcSession internal constructor(
                 if (call.mediaManager.camera.status.value == DeviceStatus.NotSelected) {
                     val enabled = settings?.video?.cameraDefaultOn == true
                     call.mediaManager.camera.setEnabled(enabled)
-                    // check the settings if we should default to front or back facing camera
-                    val defaultDirection =
-                        if (settings?.video?.cameraFacing == VideoSettings.CameraFacing.front) {
-                            CameraDirection.Front
-                        } else {
-                            CameraDirection.Back
+                    if (enabled) {
+                        // check the settings if we should default to front or back facing camera
+                        val defaultDirection =
+                            if (settings?.video?.cameraFacing == VideoSettings.CameraFacing.front) {
+                                CameraDirection.Front
+                            } else {
+                                CameraDirection.Back
+                            }
+                        // TODO: would be nicer to initialize the camera on the right device to begin with
+                        if (defaultDirection != call.mediaManager.camera.direction.value) {
+                            call.mediaManager.camera.flip()
                         }
-                    // TODO: would be nicer to initialize the camera on the right device to begin with
-                    if (defaultDirection != call.mediaManager.camera.direction.value) {
-                        call.mediaManager.camera.flip()
                     }
                 }
 
@@ -503,10 +526,9 @@ public class RtcSession internal constructor(
                 )
                 // render it on the surface. but we need to start this before forwarding it to the publisher
                 logger.v { "[createUserTracks] #sfu; videoTrack: ${call.mediaManager.videoTrack.stringify()}" }
-                publisher.addVideoTransceiver(
-                    call.mediaManager.videoTrack,
-                    listOf(buildTrackId(TrackType.TRACK_TYPE_VIDEO))
-                )
+                if (call.mediaManager.camera.status.value == DeviceStatus.Enabled) {
+                    initializeVideoTransceiver()
+                }
             }
         }
 
@@ -567,10 +589,7 @@ public class RtcSession internal constructor(
     }
 
     /**
-     * TODO: Probably partially move this
-     * - set the camera track enabled
-     * - updateMuteStateRequest
-     *
+     * Marks the given track as enabled or disabled
      */
     fun setMuteState(isEnabled: Boolean, trackType: TrackType) {
         logger.d { "[setMuteState] #sfu; $trackType isEnabled: $isEnabled" }
@@ -588,8 +607,7 @@ public class RtcSession internal constructor(
             )
             updateMuteState(request).onSuccessSuspend {
             }.onError {
-                // TODO: handle error better
-                throw IllegalStateException(it.message)
+                logger.w { "Error updating mute state: ${it.message}" }
             }
         }
     }
@@ -812,8 +830,9 @@ public class RtcSession internal constructor(
                     }
 
                     is Failure -> {
-                        // TODO: this breaks the call, we should handle this better
+                        // since this breaks seeing the video from the other person, force a reconnect
                         dynascaleLogger.e { "[updateParticipantsSubscriptions] #sfu; failed: $result" }
+                        call.monitor.reconnect()
                     }
                 }
             }
@@ -957,8 +976,8 @@ public class RtcSession internal constructor(
 
                 val result = peerConnection.setLocalDescription(data)
                 if (result.isFailure) {
-                    // TODO: better error handling
-                    throw IllegalStateException(result.toString())
+                    // the call health monitor will end up restarting the peer connection and recover from this
+                    logger.w { "[negotiate] #$id; #sfu; #${peerType.stringify()}; setLocalDescription failed: $result" }
                 }
 
                 // the Sfu WS needs to be connected before calling SetPublisherRequest
@@ -981,7 +1000,11 @@ public class RtcSession internal constructor(
                         else -> TrackType.TRACK_TYPE_UNSPECIFIED
                     }
 
-                    val layers: List<VideoLayer> = if (trackType != TrackType.TRACK_TYPE_VIDEO) {
+                    if (trackType == TrackType.TRACK_TYPE_VIDEO && captureResolution == null) {
+                        throw IllegalStateException("video capture needs to be enabled before adding the local track")
+                    }
+
+                    var layers: List<VideoLayer> = if (trackType != TrackType.TRACK_TYPE_VIDEO) {
                         emptyList()
                     } else {
                         // we tell the Sfu which resolutions we're sending
@@ -1030,8 +1053,9 @@ public class RtcSession internal constructor(
                     // set the remote peer connection, and handle queued ice candidates
                     peerConnection.setRemoteDescription(answerDescription)
                 }.onError {
-                    throw IllegalStateException("[negotiate] #$id; #sfu; #${peerType.stringify()}; failed: $it")
+                    // this error results in my video not showing up, we should restart the call
                     logger.e { "[negotiate] #$id; #sfu; #${peerType.stringify()}; failed: $it" }
+                    coroutineScope.launch { call.monitor.reconnect() }
                 }
             }
         }
@@ -1084,7 +1108,6 @@ public class RtcSession internal constructor(
         )
     }
 
-    // TODO: handle the .error field on the Response objects
     // reply to when we get an offer from the SFU
     suspend fun sendAnswer(request: SendAnswerRequest): Result<SendAnswerResponse> =
         wrapAPICall {

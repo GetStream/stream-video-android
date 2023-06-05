@@ -44,8 +44,6 @@ public class ParticipantItemView : VideoTextureViewRenderer {
     }
 
     public fun initialize(call: Call, streamId: String, onRender: (View) -> Unit = {}) {
-        // TODO: fix this, init render is on the viewmodel
-        // call.initRenderer(this, streamId, TrackType.TRACK_TYPE_VIDEO, onRender)
         this.isInitialized = true
     }
 }

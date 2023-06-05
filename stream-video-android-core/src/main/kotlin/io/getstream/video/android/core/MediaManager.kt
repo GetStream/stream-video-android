@@ -20,15 +20,12 @@ import android.content.Context
 import android.hardware.camera2.CameraCharacteristics
 import android.hardware.camera2.CameraManager
 import android.media.AudioAttributes
-import android.media.AudioDeviceInfo
 import android.media.AudioManager
 import android.os.Build
 import androidx.core.content.getSystemService
 import io.getstream.log.taggedLogger
 import io.getstream.video.android.core.audio.AudioDevice
-import io.getstream.video.android.core.audio.AudioHandler
 import io.getstream.video.android.core.audio.AudioSwitchHandler
-import io.getstream.video.android.core.model.CallSettings
 import io.getstream.video.android.core.utils.buildAudioConstraints
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -244,9 +241,13 @@ class MicrophoneManager(val mediaManager: MediaManagerImpl) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
             audioManager?.allowedCapturePolicy = AudioAttributes.ALLOW_CAPTURE_BY_ALL
         }
-        audioHandler = AudioSwitchHandler(mediaManager.context)
-        val devices = audioHandler.availableAudioDevices
-        _devices.value = devices
+
+        audioHandler = AudioSwitchHandler(mediaManager.context) { devices, selected ->
+            _devices.value = devices
+            _selectedDevice.value = selected
+        }
+
+        audioHandler.start()
 
         setupCompleted = true
     }
@@ -545,7 +546,6 @@ public class CameraManager(
  * @see AudioSwitch
  * @see BluetoothHeadsetManager
  */
-// TODO: add the call, or the settings object
 class MediaManagerImpl(
     val context: Context,
     val call: Call,
@@ -569,62 +569,6 @@ class MediaManagerImpl(
     internal val camera = CameraManager(this, eglBaseContext)
     internal val microphone = MicrophoneManager(this)
     internal val speaker = SpeakerManager(this, microphone)
-
-    fun setSpeakerphoneEnabled(isEnabled: Boolean) {
-        val devices = getAudioDevices()
-
-        val activeDevice = devices.firstOrNull {
-            if (isEnabled) {
-                it.name.contains("speaker", true)
-            } else {
-                !it.name.contains("speaker", true)
-            }
-        }
-
-        getAudioHandler()?.selectDevice(activeDevice)
-    }
-
-    fun selectAudioDevice(device: AudioDevice) {
-        logger.d { "[selectAudioDevice] #sfu; device: $device" }
-        val handler = getAudioHandler() ?: return
-
-        handler.selectDevice(device)
-    }
-
-    public fun getAudioHandler(): AudioSwitchHandler? {
-        return audioHandler as? AudioSwitchHandler
-    }
-
-    fun getAudioDevices(): List<AudioDevice> {
-        logger.d { "[getAudioDevices] #sfu; no args" }
-        val handler = getAudioHandler() ?: return emptyList()
-
-        return handler.availableAudioDevices
-    }
-
-    internal val audioHandler: AudioHandler by lazy {
-        AudioSwitchHandler(context)
-    }
-
-    internal fun setupAudio(callSettings: CallSettings) {
-        logger.d { "[setupAudio] #sfu; no args" }
-        audioHandler.start()
-        audioManager?.mode = AudioManager.MODE_IN_COMMUNICATION
-
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-            val devices = audioManager?.availableCommunicationDevices ?: return
-            val deviceType = if (callSettings.speakerOn) {
-                AudioDeviceInfo.TYPE_BUILTIN_SPEAKER
-            } else {
-                AudioDeviceInfo.TYPE_BUILTIN_EARPIECE
-            }
-
-            val device = devices.firstOrNull { it.type == deviceType } ?: return
-
-            val isCommunicationDeviceSet = audioManager?.setCommunicationDevice(device)
-            logger.d { "[setupAudio] #sfu; isCommunicationDeviceSet: $isCommunicationDeviceSet" }
-        }
-    }
 
     fun cleanup() {
         videoSource.dispose()

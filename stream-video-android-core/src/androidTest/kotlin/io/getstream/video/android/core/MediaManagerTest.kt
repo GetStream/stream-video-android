@@ -90,6 +90,10 @@ class MediaManagerTest : IntegrationTestBase(connectCoordinatorWS = false) {
     @Test
     fun microphone() = runTest {
         val microphone = call.mediaManager.microphone
+
+        val devices = microphone.listDevices()
+        assertThat(devices.value).isNotEmpty()
+
         assertThat(microphone).isNotNull()
         microphone.enable()
         assertThat(microphone.status.value).isEqualTo(DeviceStatus.Enabled)

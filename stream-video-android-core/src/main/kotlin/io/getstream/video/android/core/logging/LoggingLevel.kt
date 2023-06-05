@@ -16,17 +16,15 @@
 
 package io.getstream.video.android.core.logging
 
-import okhttp3.logging.HttpLoggingInterceptor
+import io.getstream.log.Priority
 
 /**
  * Represents and wraps the HTTP logging level for our API service.
  *
+ * @property priority The priority level of information logged by the Stream Android logger.
  * @property httpLoggingLevel The level of information logged by our HTTP interceptor.
  */
-public enum class LoggingLevel(
-    internal val httpLoggingLevel: HttpLoggingInterceptor.Level
-) {
-    NONE(HttpLoggingInterceptor.Level.NONE),
-    BASIC(HttpLoggingInterceptor.Level.BASIC),
-    BODY(HttpLoggingInterceptor.Level.BODY)
-}
+public data class LoggingLevel @JvmOverloads constructor(
+    public val priority: Priority = Priority.ERROR,
+    public val httpLoggingLevel: HttpLoggingLevel = HttpLoggingLevel.BASIC
+)

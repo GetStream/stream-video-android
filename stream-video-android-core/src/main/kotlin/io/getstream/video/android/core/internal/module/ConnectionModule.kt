@@ -64,7 +64,7 @@ internal class ConnectionModule(
     private val scope: CoroutineScope,
     internal val videoDomain: String,
     internal val connectionTimeoutInMs: Long,
-    internal val loggingLevel: LoggingLevel = LoggingLevel.NONE,
+    internal val loggingLevel: LoggingLevel = LoggingLevel(),
     private val user: User,
     internal val apiKey: ApiKey,
     internal val userToken: UserToken,
@@ -86,7 +86,6 @@ internal class ConnectionModule(
             .addConverterFactory(MoshiConverterFactory.create(Serializer.moshi))
             .client(okHttpClient)
             .build()
-
     }
     val videoCallsApi: VideoCallsApi by lazy { retrofit.create(VideoCallsApi::class.java) }
     val moderationApi: ModerationApi by lazy { retrofit.create(ModerationApi::class.java) }
@@ -107,7 +106,7 @@ internal class ConnectionModule(
             .addInterceptor(authInterceptor)
             .addInterceptor(
                 HttpLoggingInterceptor().apply {
-                    level = loggingLevel.httpLoggingLevel
+                    level = loggingLevel.httpLoggingLevel.level
                 }
             )
             .addInterceptor(BaseUrlInterceptor(null))
@@ -195,7 +194,7 @@ internal class SfuConnectionModule(
     val apiKey: String,
     /** Function that gives a fresh SDP */
     getSubscriberSdp: suspend () -> String,
-    private val loggingLevel: LoggingLevel = LoggingLevel.NONE,
+    private val loggingLevel: LoggingLevel = LoggingLevel(),
     /** The scope to use for the socket */
     scope: CoroutineScope = CoroutineScope(DispatcherProvider.IO),
     /** Network monitoring */
@@ -213,7 +212,7 @@ internal class SfuConnectionModule(
             .addInterceptor(authInterceptor)
             .addInterceptor(
                 HttpLoggingInterceptor().apply {
-                    level = loggingLevel.httpLoggingLevel
+                    level = loggingLevel.httpLoggingLevel.level
                 }
             )
             .addInterceptor(baseUrlInterceptor)

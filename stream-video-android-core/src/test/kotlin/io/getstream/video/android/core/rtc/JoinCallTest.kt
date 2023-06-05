@@ -49,7 +49,6 @@ class JoinCallTest : IntegrationTestBase() {
         // average is calculated using the second and third measurement
         // sorted by average
         // timeout in place, ensure that if 1 of the urls is broken it still works
-        // TODO: ideally if it takes more than 3 seconds, just collect what we have and move on
 
         val urls = mutableListOf(
             "https://sfu-9c0dc03.ovh-lim1.stream-io-video.com/latency_test.png",
@@ -58,7 +57,6 @@ class JoinCallTest : IntegrationTestBase() {
             "http://kibana.us-east.gtstrm.com/" // This url is blocked, and will hang
         )
 
-        // TODO: with timeout doesn't fully work on latency measurements
         // related to java threading and coroutine compatibility
         val results = clientImpl.measureLatency(urls)
         assertThat(results).isNotEmpty()

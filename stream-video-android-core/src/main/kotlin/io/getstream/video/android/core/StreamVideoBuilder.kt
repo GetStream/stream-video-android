@@ -21,6 +21,8 @@ import android.content.Context
 import androidx.lifecycle.ProcessLifecycleOwner
 import com.jakewharton.threetenabp.AndroidThreeTen
 import io.getstream.android.push.PushDeviceGenerator
+import io.getstream.log.StreamLog
+import io.getstream.log.android.AndroidStreamLogger
 import io.getstream.video.android.core.dispatchers.DispatcherProvider
 import io.getstream.video.android.core.filter.AudioFilter
 import io.getstream.video.android.core.filter.VideoFilter
@@ -62,15 +64,13 @@ public class StreamVideoBuilder @JvmOverloads constructor(
     /** If a token is expired, the token provider makes a request to your backend for a new token */
     private val tokenProvider: (suspend (error: Throwable?) -> String)? = null,
     /** Logging level */
-    private val loggingLevel: LoggingLevel = LoggingLevel.BASIC,
-
+    private val loggingLevel: LoggingLevel = LoggingLevel(),
     /** Enable push notifications if you want to receive calls etc */
     private val enablePush: Boolean = false,
     /** Support for different push providers */
     private val pushDeviceGenerators: List<PushDeviceGenerator> = emptyList(),
     /** Overwrite the default notification logic for incoming calls */
     private val ringNotification: ((call: Call) -> Notification?)? = null,
-
     /** Audio filters enable you to add custom effects to your audio before its send to the server */
     private val audioFilters: List<AudioFilter> = emptyList(),
     /** Video filters enable you to change the video before it's send. */
@@ -81,14 +81,16 @@ public class StreamVideoBuilder @JvmOverloads constructor(
     private val context: Context = context.applicationContext
 
     /** URL overwrite to allow for testing against a local instance of video */
-    var videoDomain: String = "video.stream-io-api.com"
+    private var videoDomain: String = "video.stream-io-api.com"
+
+    val scope = CoroutineScope(DispatcherProvider.IO)
 
     public fun build(): StreamVideo {
         val lifecycle = ProcessLifecycleOwner.get().lifecycle
-        val scope = CoroutineScope(DispatcherProvider.IO)
 
-        if (apiKey.isBlank()
-        ) throw IllegalArgumentException("The API key can not be empty")
+        if (apiKey.isBlank()) {
+            throw IllegalArgumentException("The API key can not be empty")
+        }
 
         if (token.isBlank() && tokenProvider == null && user.type == UserType.Authenticated) {
             throw IllegalArgumentException(
@@ -106,10 +108,12 @@ public class StreamVideoBuilder @JvmOverloads constructor(
         }
 
         // initializes
+        StreamLog.install(AndroidStreamLogger())
+        StreamLog.setValidator { priority, _ -> priority.level >= loggingLevel.priority.level }
         AndroidThreeTen.init(context)
 
         val dataStore = if (!StreamUserDataStore.isInstalled) {
-            StreamUserDataStore.install(context)
+            StreamUserDataStore.install(context, scope = scope)
         } else {
             StreamUserDataStore.instance()
         }
@@ -133,6 +137,7 @@ public class StreamVideoBuilder @JvmOverloads constructor(
         )
 
         // create the client
+
         val client = StreamVideoImpl(
             context = context,
             _scope = scope,
@@ -144,6 +149,7 @@ public class StreamVideoBuilder @JvmOverloads constructor(
             connectionModule = connectionModule,
             pushDeviceGenerators = pushDeviceGenerators
         )
+
         scope.launch {
             // addDevice for push
             if (enablePush && user.type == UserType.Authenticated) {

@@ -22,6 +22,7 @@ import io.getstream.video.android.core.events.ConnectionQualityChangeEvent
 import io.getstream.video.android.core.events.DominantSpeakerChangedEvent
 import io.getstream.video.android.core.events.ParticipantJoinedEvent
 import io.getstream.video.android.core.events.ParticipantLeftEvent
+import io.getstream.video.android.core.model.NetworkQuality
 import io.getstream.video.android.core.permission.PermissionRequest
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
@@ -45,50 +46,6 @@ import stream.video.sfu.models.Participant
 
 @RunWith(RobolectricTestRunner::class)
 class EventTest : IntegrationTestBase(connectCoordinatorWS = false) {
-    /**
-     * Every event should update state properly
-     * - Coordinator events
-     * - SFU events
-     *
-     * Also review:
-     * - CallMetadata
-     * - JoinedCall
-     * - CallViewModel
-     * - Compose lib Call.kt object
-     * - StreamVideoStateLauncher
-     * - CallClientImpl
-     *
-     * At the client level
-     * - Ringing call
-     * - Active call
-     *
-     * Call level
-     * - Call Data and settings
-     * - Participants
-     * - Various sorting/filtering on participants
-     * - Call duration
-     * - Own permissions
-     *
-     * Me & Other participants (members)
-     * - Video on/off
-     * - Speaking
-     * - Network
-     *
-     * Ringing calls
-     * - Normal
-     * - Incoming (CallCreatedEvent. Ring=true)
-     * - Outgoing, ring=true, and people didn't join yet (member, not a participant)
-     * - Rejected/Accept event
-     *
-     * Server TODO:
-     * - call id options: not specified, cid, callId, callId as last argument. We should standardize on 1.
-     * - we should document the event, the structure of the data, when it's fired and how the SDK handles it
-     * - some events provide a list with user ids inside, other events a map<userId, thing>
-     * - We should not expose enums like owncapabilities
-     *
-     * Other Server TODO:
-     * - One of the API endpoints returns a list instead of a dict, that's hard to change in the future
-     */
     @Test
     fun `test start and stop recording`() = runTest {
         // start by sending the start recording event
@@ -100,31 +57,6 @@ class EventTest : IntegrationTestBase(connectCoordinatorWS = false) {
             CallRecordingStoppedEvent(callCid = call.cid, nowUtc, "call.recording_stopped")
         clientImpl.fireEvent(stopRecordingEvent)
         assertThat(call.state.recording.value).isFalse()
-    }
-
-    @Test
-    fun `Accepting & rejecting a call`() = runTest {
-        // TODO: update this test
-
-        /*
-        val thierry = testData.users["thierry"]!!
-        val member = MemberResponse(nowUtc, emptyMap(), nowUtc, user = thierry.toUserResponse(), userId = thierry.id, null, "role")
-        call.state.getOrCreateMembers(listOf(member))
-
-        val acceptedEvent = CallAcceptedEvent(
-            callCid = call.cid, nowUtc, "call.accepted", user = thierry.toUserResponse()
-        )
-        clientImpl.fireEvent(acceptedEvent)
-        assertThat(call.state.getMember("thierry")?.acceptedAt).isNotNull()
-
-        val rejectedEvent = CallRejectedEvent(
-            callCid = call.cid, nowUtc, "call.rejected",
-            user = io.getstream.video.android.model.User(
-                id = "thierry"
-            ).toUserResponse()
-        )
-        clientImpl.fireEvent(rejectedEvent)
-        assertThat(call.state.getMember("thierry")?.rejectedAt).isNotNull()*/
     }
 
     @Test
@@ -165,7 +97,7 @@ class EventTest : IntegrationTestBase(connectCoordinatorWS = false) {
         clientImpl.fireEvent(event, call.cid)
 
         assertThat(call.state.getParticipantBySessionId("thierry")?.networkQuality?.value).isEqualTo(
-            ConnectionQuality.CONNECTION_QUALITY_EXCELLENT
+            NetworkQuality.Excellent()
         )
     }
 

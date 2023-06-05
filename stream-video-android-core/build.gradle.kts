@@ -28,7 +28,7 @@ plugins {
 
 rootProject.extra.apply {
     set("PUBLISH_GROUP_ID", Configuration.artifactGroup)
-    set("PUBLISH_ARTIFACT_ID", "stream-video-android")
+    set("PUBLISH_ARTIFACT_ID", "stream-video-android-core")
     set("PUBLISH_VERSION", rootProject.extra.get("rootVersionName"))
 }
 
@@ -59,20 +59,6 @@ android {
         unitTests {
             isIncludeAndroidResources = true
             isReturnDefaultValues = true
-        }
-    }
-
-    buildTypes {
-        release {
-            isMinifyEnabled = true
-            proguardFiles("proguard-android-optimize.txt", "proguard-rules.pro")
-            consumerProguardFiles("consumer-proguard-rules.pro")
-        }
-
-        debug {
-            isMinifyEnabled = true
-            proguardFiles("proguard-android-optimize.txt", "proguard-rules.pro")
-            consumerProguardFiles("consumer-proguard-rules.pro")
         }
     }
 
@@ -136,9 +122,9 @@ dependencies {
 
     // Stream
     api(libs.stream.result)
-    implementation(libs.stream.log)
     implementation(libs.stream.push)
     implementation(libs.stream.push.delegate)
+    implementation(libs.stream.log.android)
 
     // unit tests
     testImplementation(libs.junit)

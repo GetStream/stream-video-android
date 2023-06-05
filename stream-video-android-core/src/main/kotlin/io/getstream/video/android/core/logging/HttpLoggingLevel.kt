@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014-2022 Stream.io Inc. All rights reserved.
+ * Copyright (c) 2014-2023 Stream.io Inc. All rights reserved.
  *
  * Licensed under the Stream License;
  * you may not use this file except in compliance with the License.
@@ -14,11 +14,14 @@
  * limitations under the License.
  */
 
-package io.getstream.video.android.core.model
+package io.getstream.video.android.core.logging
 
-public data class CallSettings(
-    public var autoPublish: Boolean = true,
-    public var microphoneOn: Boolean = false,
-    public var cameraOn: Boolean = true,
-    public var speakerOn: Boolean = false
-)
+import okhttp3.logging.HttpLoggingInterceptor
+
+public enum class HttpLoggingLevel(
+    internal val level: HttpLoggingInterceptor.Level
+) {
+    NONE(HttpLoggingInterceptor.Level.NONE),
+    BASIC(HttpLoggingInterceptor.Level.BASIC),
+    BODY(HttpLoggingInterceptor.Level.BODY)
+}

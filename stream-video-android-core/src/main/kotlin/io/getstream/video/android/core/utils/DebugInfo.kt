@@ -91,7 +91,7 @@ internal class DebugInfo(val client: StreamVideoImpl) {
         val publisher = call?.session?.publisher
         val resolution = call?.camera?.resolution?.value
         val availableResolutions = call?.camera?.availableResolutions?.value
-        val maxResolution = availableResolutions?.maxBy { it.width * it.height }
+        val maxResolution = availableResolutions?.maxByOrNull { it.width * it.height }
 
         val publisherIce = publisher?.connection?.iceConnectionState()
         val subIce = subscriber?.connection?.iceConnectionState()

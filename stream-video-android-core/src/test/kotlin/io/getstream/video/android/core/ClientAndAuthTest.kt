@@ -39,19 +39,23 @@ class ClientAndAuthTest : TestBase() {
     @Test
     fun regularUser() = runTest {
         println("hello")
-        StreamVideoBuilder(
+        val builder = StreamVideoBuilder(
             context = context,
             apiKey = apiKey,
             geo = GEO.GlobalEdgeNetwork,
             testData.users["thierry"]!!,
             testData.tokens["thierry"]!!,
-        ).build()
-        println("hello 2")
+        )
+        val client = builder.build()
+        val job = client.connectAsync()
+        val result = job.join()
+        client.cleanup()
+        println("hello 2 $result")
     }
 
     @Test
     fun anonymousUser() = runTest {
-        StreamVideoBuilder(
+        var builder = StreamVideoBuilder(
             context = context,
             apiKey = apiKey,
             geo = GEO.GlobalEdgeNetwork,
@@ -59,7 +63,8 @@ class ClientAndAuthTest : TestBase() {
                 id = "anonymous",
                 type = UserType.Anonymous
             )
-        ).build()
+        )
+        val client = builder.build()
     }
 
     @Test
