@@ -10,7 +10,7 @@
 *  Week 6: Docs, docs & sample app. Dynascale, SDP parsing
 *  Week 7: Reconnect, server side issues checklist, compose docs, fast join flow
 *  Break
-*  Week 8: Docs & Stability
+*  Week 8: Docs & Stability, Ringing
 *  Week 9: Tutorials & Stability, Ringing & Push
 
 ### Docs ~1-2 weeks left
@@ -22,17 +22,19 @@
 - [ ] UI cookbook
 - [ ] UI components
 
-### TODO
+### TODO ~1 week
 
-- [ ] Reconnect flow doesn't mark itself as reconnected
-- [ ] Audio settings should make speakerphone vs earpiece as a default configurable
 - [ ] Video disconnects sometimes. (BufferQueue has not connected producer)
+- [ ] Reconnect flow can't reconnect the subscriber (SFU related)
+- [ ] Share example with backend team for resolution degradation
 - [ ] HTTP requests fail in interceptor, which is wrong. (see https://console.firebase.google.com/project/stream-video-9b586/crashlytics/app/android:io.getstream.video.android.dogfooding.debug/issues?state=open&time=last-seven-days&tag=all&sort=eventCount)
 - [ ] Go through all tests & TODOs and update with latest server changes.
+- [ ] Audio settings should make speakerphone vs earpiece as a default configurable
 - [ ] Fine tune the quality on S23 (so it's not at Q). Upload quality, make it easy to change
 - [ ] Add a timeout for waiting on the socket authentication events
-- [ ] use standard debug, verbose, info, warning and error debug levels on StreamVideoBuilder
 - [ ] Improve our error classes. Right now there are 4 different formats. 
+- [ ] XML version of VideoRenderer
+- [X] use standard debug, verbose, info, warning and error debug levels on StreamVideoBuilder
 - [X] Android volume is too low when calling from react
 - [X] permission handling on the intro/preview screen is wrong. it starts out as video enabled
 - [X] RED error

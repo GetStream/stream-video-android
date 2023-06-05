@@ -249,8 +249,7 @@ public class RtcSession internal constructor(
     public var subscriber: StreamPeerConnection? = null
 
     /** publisher for publishing, using 2 peer connections prevents race conditions in the offer/answer cycle */
-    @VisibleForTesting
-    var publisher: StreamPeerConnection? = null
+    internal var publisher: StreamPeerConnection? = null
 
     private val mediaConstraints: MediaConstraints by lazy {
         buildMediaConstraints()
