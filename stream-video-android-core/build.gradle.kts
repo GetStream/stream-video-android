@@ -28,7 +28,7 @@ plugins {
 
 rootProject.extra.apply {
     set("PUBLISH_GROUP_ID", Configuration.artifactGroup)
-    set("PUBLISH_ARTIFACT_ID", "stream-video-android")
+    set("PUBLISH_ARTIFACT_ID", "stream-video-android-core")
     set("PUBLISH_VERSION", rootProject.extra.get("rootVersionName"))
 }
 
