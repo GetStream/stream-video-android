@@ -152,22 +152,17 @@ This is convenient if you want to quickly build a production ready calling exper
 
 We're making 3 changes:
 
-A. Extend the abstract call activity
-
-B. Use the CallViewModel
-
-C. Render the UI with the call Container
-
-
-
+A. Extend the abstract call activity & use the call view model
 
 ```kotlin
-class MainActivity : ComponentActivity() {
+// Extend the abstract call activity
+class MainActivity : AbstractCallActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         ....
-        call.join(create = true)
+            call.join(create = true)
+        }
 
         // create a view model just below call. join
         val factory = CallViewModelFactory(call = call)
@@ -180,6 +175,13 @@ class MainActivity : ComponentActivity() {
     }
 }
 ```
+
+B. Render the UI with the call Container
+
+
+
+
+
 
 Stream's video SDK includes UI components that make it simple to launch a video calling experience in hours.
 Now that we've seen how to use the lower level APIs, lets build a fully polished calling experience with the example below:
