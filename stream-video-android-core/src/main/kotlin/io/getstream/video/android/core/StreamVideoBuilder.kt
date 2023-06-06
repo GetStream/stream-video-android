@@ -178,11 +178,3 @@ sealed class GEO {
     /** Run calls over our global edge network, this is the default and right for most applications */
     object GlobalEdgeNetwork : GEO()
 }
-
-sealed class TokenType {
-    /** A user token */
-    object User : TokenType()
-
-    /** A call specific token */
-    object Call : TokenType()
-}

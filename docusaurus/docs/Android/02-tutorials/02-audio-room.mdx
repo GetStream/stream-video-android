@@ -11,8 +11,7 @@ This tutorial will teach you how to build an audio room experience like Twitter 
 * Calls run on Stream's global edge network for optimal latency and scalability
 * There is no cap to how many listeners you can have in a room
 * Listeners can raise their hand, and be invited to speak by the host
-* Chat for the listeners to ask questions
-* Audio tracks are send multiple times for optimal reliability (Opus RED & Opus DTX if you want to geek out)
+* Audio tracks are send multiple times for optimal reliability
 
 Time to get started
 
@@ -23,7 +22,7 @@ Setup steps can vary slightly across Android Studio versions so if you run into 
 
 * Create a new project
 * Select "empty activity"
-* Name your project "VideoCall"
+* Name your project "AudioRoom"
 
 ### Step 2 - Install the SDK & Setup the client
 
@@ -45,27 +44,42 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        // for a production app we recommend adding the client to your Application class
+        // create a user.
+        val user = User(
+            id = "tutorial@getstream.io", // any string
+            name = "Tutorial", // name and image are used in the UI
+            role = "admin" // user roles are important for an audio room
+        )
+
+        // for a production app we recommend adding the client to your Application class or di module.
         val client = StreamVideoBuilder(
-             context = context,
-             apiKey = apiKey,
+             context = applicationContext,
+             apiKey = "hd8szvscpxvd", // demo API key
              geo = GEO.GlobalEdgeNetwork,
-             user,
-             token,
+             user = user,
+             token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoidHV0b3JpYWxAZ2V0c3RyZWFtLmlvIiwiaXNzIjoicHJvbnRvIiwic3ViIjoidXNlci90dXRvcmlhbEBnZXRzdHJlYW0uaW8iLCJpYXQiOjE2ODYwNDAwOTUsImV4cCI6MTY4NjA1MDkwMH0.9m1wNAsn6UZHKu0i4_EWWw-sTBnbgDcV85Nmmbh7FNM",
         ).build()
 
-        // TODO: specify members with different roles
-        val call = client.call("audio-room", "123")
-        call.join(create=true)
+        // join a call, which type is `audio_room` and id is `123`.
+        val call = client.call("audio_room", "123")
+        lifecycleScope.launch {
+            call.join(create = true)
+        }
 
         setContent {
             VideoTheme {
+                val participants = call.state.participants.collectAsState()
+                val connection = call.state.connection.collectAsState()
                 // A surface container using the 'background' color from the theme
                 Surface(
                     modifier = Modifier.fillMaxSize(),
-                    color = MaterialTheme.colorScheme.background
+                    color = VideoTheme.colors.appBackground
                 ) {
-                    Greeting("${call.id} has ${call.state.participants.value.size} participants")
+                    if (connection.value != RealtimeConnection.Connected) {
+                        Text("loading...")
+                    } else {
+                        Text("Call ${call.id} has ${participants.value.size} participants", fontSize = 30.sp,  color = Color.Blue)
+                    }
                 }
             }
         }
@@ -73,8 +87,9 @@ class MainActivity : ComponentActivity() {
 }
 ```
 
-Run the sample app and now join this call via your browser here. Let's keep it open as you go through the tutorial.
-You'll see the participant count increase to 2 in your app.
+By default calls of type "audio_room" start with backstage mode enabled.
+Admins and moderators can join the call. Regular users can only join the call when you go live.
+This gives an opportunity to setup the audio/video etc before inviting people in.
 
 ### Step 4 - Adding audio room UI elements
 
@@ -111,7 +126,25 @@ setContent {
 
 ```
 
-### Step 5 - Keeping Audio running in the background
+### Step 5 - Go live and join from the browser
+
+Run the sample app now and you'll see 1 participant.
+To make this a little more interactive let's join the call from your browser.
+Visit https://getstream.io/video/demos/?id=123&skip-intro=1 and join the call.
+On your Android emulator you'll see the text update to 2 participants.
+Let's keep the browser tab open as you go through the tutorial.
+
+
+
+
+### Step 6 - Background support
+
+For most audio rooms you'll want to keep the audio running while the app is in the background.
+If your app also incorporates video we recommend using picture in picture support.
+As an audio only app the best option is a foreground service with a notification.
+
+
+
 
 ```
 Document how this works

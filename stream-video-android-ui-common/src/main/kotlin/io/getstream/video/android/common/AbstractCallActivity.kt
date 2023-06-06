@@ -49,7 +49,6 @@ import io.getstream.video.android.model.mapper.toTypeAndId
 
 public abstract class AbstractCallActivity :
     ComponentActivity(),
-    CallViewModelFactoryProvider,
     PermissionManagerProvider {
 
     private val streamVideo: StreamVideo by lazy { StreamVideo.instance() }
@@ -91,18 +90,11 @@ public abstract class AbstractCallActivity :
     override fun getPermissionManager(): PermissionManager = initPermissionManager()
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        showWhenLockedAndTurnScreenOn()
         super.onCreate(savedInstanceState)
-        setupUi()
 
         callViewModel.setPermissionManager(getPermissionManager())
-        callViewModel.joinCall()
-    }
 
-    /**
-     * Override to setup ui.
-     */
-    public abstract fun setupUi()
+    }
 
     @SuppressLint("SourceLockedOrientationActivity")
     private fun toggleFullscreen(action: ToggleScreenConfiguration) {

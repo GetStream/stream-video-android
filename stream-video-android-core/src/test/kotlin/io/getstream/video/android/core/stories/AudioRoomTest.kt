@@ -21,6 +21,7 @@ import io.getstream.video.android.core.model.SortField
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.openapitools.client.models.MemberRequest
 import org.robolectric.RobolectricTestRunner
 import org.threeten.bp.Clock
 import org.threeten.bp.OffsetDateTime
@@ -68,6 +69,17 @@ class AudioRoomTest : IntegrationTestBase() {
     @Test
     fun `creating a new call should work`() = runTest {
         val result = client.call("audio_room", randomUUID()).create()
+        assertSuccess(result)
+    }
+
+    @Test
+    fun `add people to an audio room`() = runTest {
+        val result = client.call("audio_room").create(
+            members = listOf(
+                MemberRequest("john", role="admin"),
+                MemberRequest("tommaso", role="mycustomrole")
+            )
+        )
         assertSuccess(result)
     }
 

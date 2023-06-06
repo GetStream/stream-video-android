@@ -56,7 +56,7 @@ class MainActivity : ComponentActivity() {
              apiKey = "hd8szvscpxvd", // demo API key
              geo = GEO.GlobalEdgeNetwork,
              user = user,
-             token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoidHV0b3JpYWxAZ2V0c3RyZWFtLmlvIiwiaXNzIjoicHJvbnRvIiwic3ViIjoidXNlci90dXRvcmlhbEBnZXRzdHJlYW0uaW8iLCJpYXQiOjE2ODYwNDAwOTUsImV4cCI6MTY4NjA1MDkwMH0.9m1wNAsn6UZHKu0i4_EWWw-sTBnbgDcV85Nmmbh7FNM",
+             token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoidHV0b3JpYWxAZ2V0c3RyZWFtLmlvIiwiaXNzIjoicHJvbnRvIiwic3ViIjoidXNlci90dXRvcmlhbEBnZXRzdHJlYW0uaW8iLCJpYXQiOjE2ODYwNTkzNDQsImV4cCI6MTY4NjA3MDE0OX0.F52ZJeDBLbvOE3DdAISOvwd-YVO3q3rg5bTgzNE_P9k",
         ).build()
 
         // join a call, which type is `default` and id is `123`.
@@ -101,14 +101,16 @@ In this next step we're going to:
 1. Render your local video.
 2. Render the participant's video.
 
-And replace the set content
+And replace the setContent code in MainActivity.kt
 
 ```kotlin
 setContent {
     VideoTheme {
-        val participants by call.state.remoteParticipants.collectAsState()
-        val me by call.state.me.collectAsState()
+        val participants = call.state.remoteParticipants.collectAsState()
+        val me = call.state.me.collectAsState()
         val connection = call.state.connection.collectAsState()
+        var parentSize: IntSize by remember { mutableStateOf(IntSize(0, 0)) }
+
 
         Surface(
             modifier = Modifier.fillMaxSize(),
@@ -118,22 +120,32 @@ setContent {
                 Text("loading...")
             }
             // floating video UI for the local video participant
-            FloatingParticipantVideo(call = call, participant = me)
+            me.value?.let {
+                FloatingParticipantVideo(
+                    call = call,
+                    localParticipant = it,
+                    parentBounds = parentSize
+                )
+            }
 
             // basic, video only rendering of the participant
-            val remoteParticipant = participants.firstOrNull()
-                if (remoteParticipant != null) {
+            val remoteParticipant = participants.value.firstOrNull()
+            val remoteVideo = remoteParticipant?.video?.collectAsState()
+            if (remoteParticipant != null) {
                 Column(modifier = Modifier.fillMaxSize()) {
                     VideoRenderer(
                         modifier = Modifier.weight(1f),
                         call = call,
-                        video = participant.video,
+                        video = remoteVideo?.value
                     )
-                 }
+                }
             }
         }
     }
+}
 ```
+
+You'll now see your local video in a floating video element and the video from your browser as well.
 
 ### Step 5 - A full UI
 
