@@ -5,7 +5,7 @@ description: How to build a video call similar to Zoom or facebook messenger
 
 ## TODO:
 
-- [ ] Generate user info and token for usage in this demo
+- [ ] Generate user info and token for usage in this demo (currently hardcoded)
 
 ## Video Call Tutorial
 
@@ -144,15 +144,16 @@ For a production version of calling you'd want a few more UI elements:
 * Quality of their network
 * Layout support for >2 participants
 * Labels for the participant names
+* Call header and controls
 
-Stream ships with some more complete Compose components for this purpose.
-You can customize them with theming, arguments and swapping them with your own components.
+Stream ships with some several Compose components to make this easy.
+You can customize the components with theming, arguments and swapping parts of them.
 This is convenient if you want to quickly build a production ready calling experience for you app.
 (and if you need more flexibility, many customers use the above low level approach to build a UI from scratch)
 
-We're making 3 changes:
+Let's show how to use Stream's UI components to build a full call UI:
 
-A. Extend the abstract call activity & use the call view model
+#### A. Extend the abstract call activity & use the call view model
 
 ```kotlin
 // Extend the abstract call activity
@@ -176,15 +177,12 @@ class MainActivity : AbstractCallActivity() {
 }
 ```
 
-B. Render the UI with the call Container
+Using the viewmodel and abstract call enables picture in picture and full screen support.
+(It's quite easy to look at these classes and implement your own viewmodel or activity)
 
+#### B. Render the UI with the call Container
 
-
-
-
-
-Stream's video SDK includes UI components that make it simple to launch a video calling experience in hours.
-Now that we've seen how to use the lower level APIs, lets build a fully polished calling experience with the example below:
+Next up we want to render a call header, call controls and a more flexible grid layout for participants.
 
 ```kotlin
 setContent {
@@ -207,60 +205,20 @@ It supports reactions, screensharing, active speaker detection, network quality 
 
 ### Step 6 - Customizing the UI
 
-All UI components in the SDK use our pre-defined themes and you can easily customize them in Jetpack Compose. You can customize the theme with the 4 components below:
+You can customize the UI by:
 
-- **StreamColor**: This is used to decided colors of UI components.
-- **StreamDimens**: This is used to decide the size of UI components.
-- **StreamTypography**: This is used to decide the text styles of UI components.
-- **StreamShapes**: This is used to decide the shapes of UI components.
+* Building your own UI components
+* Mixing and matching with Stream's UI Components
+* Theming
 
-In Jetpack Compose, you can simply customize those styles by passing the value into the `VideoTheme` like the example below:
-
-```kotlin
-VideoTheme(
-    colors = if (isSystemInDarkTheme()) {
-        StreamColors.defaultDarkColors().copy(appBackground = Color.Black)
-    } else {
-        StreamColors.defaultColors().copy(appBackground = Color.White)
-    }
-) {
-    CallContainer(
-        modifier = Modifier.fillMaxSize(),
-        callViewModel = vm,
-        onBackPressed = { finish() },
-    )
-}
-```
-
-With the same approaches, you can customize the rest of other styles:
-
-```kotlin
-VideoTheme(
-    colors = StreamColors.defaultColors().copy(appBackground = Color.Black),
-    dimens = StreamDimens.defaultDimens().copy(callAvatarSize = 72.dp),
-    typography = StreamTypography.defaultTypography().copy(title1 = TextStyle()),
-    shapes = StreamShapes.defaultShapes().copy(avatar = CircleShape)
-) {
-  ..
-}
-```
-
-Stream's Video SDK provides fully polished UI components, allowing you to build a video call quickly and customize them. As you've seen before, you can implement a full complete video call screen with `CallContainer` composable in Jetpack Compose. The `CallContainer` composable consists of three major parts below:
-
-- **callAppBarContent**: Content is shown that calls information or additional actions.
-- **callControlsContent**: Content is shown that allows users to trigger different actions to control a joined call.
-- **callContent**: Content shown to be rendered when we're connected to a call successfully.
-
-In the example below, you'll see how to customize each parts of the `CallContainer` composable:
+The example below shows how to swap out the call controls for your own controls:
 
 ```kotlin
 VideoTheme {
     CallContainer(
         modifier = Modifier.fillMaxSize(),
         callViewModel = vm,
-        callType = CallType.VIDEO,
         onBackPressed = { finish() },
-        callAppBarContent = { /** custom call app bar */ },
         callControlsContent = {
             ControlActions(
                 callViewModel = vm,
@@ -289,30 +247,46 @@ VideoTheme {
                 onCallAction = vm::onCallAction
             )
         },
-        callContent = { /** custom call content */ },
     )
 }
 ```
 
-### Step 7 - PIP
+Stream's Video SDK provides fully polished UI components, allowing you to build a video call quickly and customize them. As you've seen before, you can implement a full complete video call screen with `CallContainer` composable in Jetpack Compose. The `CallContainer` composable consists of three major parts below:
 
-To truly make the experience solid the call should continue running in the background using PIP.
-We'll implement this by subclassing the **AbstractCallActivity** class and leveraging the **CallViewModel**.
-
-
-### Other Possibilities
-
-* **Ringing**: If you want to ring the other participants before the docs explain how to do this here:
-* **Push Notifications**:
-* **Reactions**:
-* **Chat Integration**:
+- **callAppBarContent**: Content is shown that calls information or additional actions.
+- **callControlsContent**: Content is shown that allows users to trigger different actions to control a joined call.
+- **callContent**: Content shown to be rendered when we're connected to a call successfully.
 
 
-### Conclusion
+Theming gives you control over the colors and fonts.
 
-And that's all it takes to build a full calling experience with Stream.
 
-Mention that we also have quickstarts for livestream and audio rooms
-Repeat why you should use Stream
-Repeat why this SDK is awesome
+```kotlin
+VideoTheme(
+    colors = StreamColors.defaultColors().copy(appBackground = Color.Black),
+    dimens = StreamDimens.defaultDimens().copy(callAvatarSize = 72.dp),
+    typography = StreamTypography.defaultTypography().copy(title1 = TextStyle()),
+    shapes = StreamShapes.defaultShapes().copy(avatar = CircleShape)
+) {
+  ..
+}
+```
 
+### Recap
+
+Please do let us know if you ran into any issues.
+Our team is also happy to review your UI designs and offer recommendations on how to achieve it with Stream.
+
+To recap what we've learned:
+
+* You setup a call: (val call = client.call("default", "123"))
+* The call type ("default" in the above case) controls which features are enabled and how permissions are setup
+* When you join a call, realtime communication is setup for audio & video calling: (call.join())
+* Stateflow objects in call.state and call.state.participants make it easy to build your own UI
+* VideoRenderer is the low level component that renders video
+
+Calls run on Stream's global edge network of video servers.
+By being closer to your users the latency and reliability of calls are better.
+The SDKs enable you to build in-app video calling, audio rooms and livestreaming in days.
+
+We hope you've enjoyed this tutorial and please do feel free to reach out if you have any suggestions or questions.

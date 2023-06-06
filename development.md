@@ -1,4 +1,12 @@
 
+## Build process
+
+- Snapshots build are created automatically from the "development" branch
+- Configuration.kt has the version number
+- TODO: Updating the testing app?
+- TODO: Release versions deploy process?
+- TODO: Updating the sample app in play store?
+
 ## For Go devs
 
 ```

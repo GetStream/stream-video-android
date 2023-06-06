@@ -63,8 +63,8 @@ import io.getstream.video.android.model.User
  * @param modifier Modifier for styling.
  * @param onBackPressed Handler when the user taps on the back button.
  * @param onCallAction Handler when the user clicks on some of the call controls.
- * @param callAppBarContent Content shown that a call information or an additional actions.
- * @param callControlsContent Content is shown that allows users to trigger different actions to control a joined call.
+ * @param appBarContent Content shown that a call information or an additional actions.
+ * @param controlsContent Content is shown that allows users to trigger different actions to control a joined call.
  * @param pictureInPictureContent Content shown when the user enters Picture in Picture mode, if
  * it's been enabled in the app.
  * @param ringingCallContent Content shown when we're receiving or sending a [Call].
@@ -77,7 +77,7 @@ public fun CallContainer(
     isVideoType: Boolean = true,
     onBackPressed: () -> Unit = {},
     onCallAction: (CallAction) -> Unit = callViewModel::onCallAction,
-    callAppBarContent: @Composable (call: Call) -> Unit = {
+    appBarContent: @Composable (call: Call) -> Unit = {
         CallAppBar(
             modifier = Modifier.testTag("call_appbar"),
             call = callViewModel.call,
@@ -86,7 +86,7 @@ public fun CallContainer(
             onCallAction = onCallAction
         )
     },
-    callControlsContent: @Composable (call: Call) -> Unit = {
+    controlsContent: @Composable (call: Call) -> Unit = {
         ControlActions(
             modifier = Modifier.testTag("call_controls"),
             callViewModel = callViewModel,
@@ -95,7 +95,7 @@ public fun CallContainer(
     },
     pictureInPictureContent: @Composable (call: Call) -> Unit = { DefaultPictureInPictureContent(it) },
     style: VideoRendererStyle = RegularVideoRendererStyle(),
-    videoRenderer: @Composable (
+    participantVideo: @Composable (
         modifier: Modifier,
         call: Call,
         participant: ParticipantState,
@@ -115,10 +115,10 @@ public fun CallContainer(
             callViewModel = callViewModel,
             onBackPressed = onBackPressed,
             onCallAction = onCallAction,
-            callAppBarContent = callAppBarContent,
-            callControlsContent = callControlsContent,
+            callAppBarContent = appBarContent,
+            callControlsContent = controlsContent,
             pictureInPictureContent = pictureInPictureContent,
-            videoRenderer = videoRenderer,
+            participantVideo = participantVideo,
         )
     },
     ringingCallContent: @Composable (call: Call) -> Unit = {
@@ -142,8 +142,8 @@ public fun CallContainer(
         modifier = modifier,
         onBackPressed = onBackPressed,
         onCallAction = onCallAction,
-        callAppBarContent = callAppBarContent,
-        callControlsContent = callControlsContent,
+        callAppBarContent = appBarContent,
+        callControlsContent = controlsContent,
         pictureInPictureContent = pictureInPictureContent,
         ringingCallContent = ringingCallContent,
         callContent = callContent,
@@ -242,7 +242,7 @@ internal fun DefaultCallContent(
     modifier: Modifier = Modifier,
     onBackPressed: () -> Unit = {},
     style: VideoRendererStyle,
-    videoRenderer: @Composable (
+    participantVideo: @Composable (
         modifier: Modifier,
         call: Call,
         participant: ParticipantState,
@@ -262,7 +262,7 @@ internal fun DefaultCallContent(
         callAppBarContent = callAppBarContent,
         callControlsContent = callControlsContent,
         pictureInPictureContent = pictureInPictureContent,
-        videoRenderer = videoRenderer,
+        videoRenderer = participantVideo,
     )
 
     val isShowingParticipantsInfo by callViewModel.isShowingCallInfoMenu.collectAsStateWithLifecycle()
