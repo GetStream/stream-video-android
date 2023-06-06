@@ -22,10 +22,12 @@ import androidx.compose.ui.Alignment
 /**
  * Represents video call render styles.
  *
- * @param isFocused If the participant is focused or not.
- * @param isScreenSharing Represents is screen sharing or not.
- * @param isShowingConnectionQualityIndicator Whether displays the connection quality indicator or not.
- * @param labelPosition The position of the user audio state label.
+ * @param isFocused Represents whether the participant is focused or not.
+ * @param isScreenSharing Represents whether the video renderer is about screen sharing.
+ * @param isShowingReactions Represents whether display reaction comes from the call state.
+ * @param isShowingParticipantLabel Represents whether display the participant label that contains the name and microphone status of a participant.
+ * @param isShowingConnectionQualityIndicator Represents whether displays the connection quality indicator or not.
+ * @param labelPosition The position of the participant label  that contains the name and microphone status of a participant.
  */
 @Stable
 public sealed class VideoRendererStyle(
@@ -37,6 +39,16 @@ public sealed class VideoRendererStyle(
     public open val labelPosition: Alignment,
 )
 
+/**
+ * Represents video call render styles.
+ *
+ * @param isFocused Represents whether the participant is focused or not.
+ * @param isScreenSharing Represents whether the video renderer is about screen sharing.
+ * @param isShowingReactions Represents whether display reaction comes from the call state.
+ * @param isShowingParticipantLabel Represents whether display the participant label that contains the name and microphone status of a participant.
+ * @param isShowingConnectionQualityIndicator Represents whether displays the connection quality indicator or not.
+ * @param labelPosition The position of the participant label  that contains the name and microphone status of a participant.
+ */
 public fun VideoRendererStyle.copy(
     isFocused: Boolean = this.isFocused,
     isScreenSharing: Boolean = this.isScreenSharing,
@@ -67,12 +79,14 @@ public fun VideoRendererStyle.copy(
 }
 
 /**
- * Represents a regular video call render styles.
+ * A regular video renderer style, which displays the reactions, participant label, and connection quality indicator.
  *
- * @param isFocused If the participant is focused or not.
- * @param isScreenSharing Represents is screen sharing or not.
- * @param isShowingConnectionQualityIndicator Whether displays the connection quality indicator or not.
- * @param labelPosition The position of the user audio state label.
+ * @param isFocused Represents whether the participant is focused or not.
+ * @param isScreenSharing Represents whether the video renderer is about screen sharing.
+ * @param isShowingReactions Represents whether display reaction comes from the call state.
+ * @param isShowingParticipantLabel Represents whether display the participant label that contains the name and microphone status of a participant.
+ * @param isShowingConnectionQualityIndicator Represents whether displays the connection quality indicator or not.
+ * @param labelPosition The position of the participant label  that contains the name and microphone status of a participant.
  */
 @Stable
 public data class RegularVideoRendererStyle(
@@ -93,12 +107,14 @@ public data class RegularVideoRendererStyle(
 )
 
 /**
- * Represents a screen sharing video call render styles.
+ * A screen sharing video renderer style, which displays the reactions, and participant label.
  *
- * @param isFocused If the participant is focused or not.
- * @param isScreenSharing Represents is screen sharing or not.
- * @param isShowingConnectionQualityIndicator Whether displays the connection quality indicator or not.
- * @param labelPosition The position of the user audio state label.
+ * @param isFocused Represents whether the participant is focused or not.
+ * @param isScreenSharing Represents whether the video renderer is about screen sharing.
+ * @param isShowingReactions Represents whether display reaction comes from the call state.
+ * @param isShowingParticipantLabel Represents whether display the participant label that contains the name and microphone status of a participant.
+ * @param isShowingConnectionQualityIndicator Represents whether displays the connection quality indicator or not.
+ * @param labelPosition The position of the participant label  that contains the name and microphone status of a participant.
  */
 @Stable
 public data class ScreenSharingVideoRendererStyle(
