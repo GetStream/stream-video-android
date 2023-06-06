@@ -76,8 +76,8 @@ class AudioRoomTest : IntegrationTestBase() {
     fun `add people to an audio room`() = runTest {
         val result = client.call("audio_room").create(
             members = listOf(
-                MemberRequest("john", role="admin"),
-                MemberRequest("tommaso", role="mycustomrole")
+                MemberRequest("john", role = "admin"),
+                MemberRequest("tommaso", role = "mycustomrole")
             )
         )
         assertSuccess(result)

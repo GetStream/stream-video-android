@@ -39,7 +39,6 @@ import io.getstream.video.android.common.permission.PermissionManager
 import io.getstream.video.android.common.permission.PermissionManagerProvider
 import io.getstream.video.android.common.viewmodel.CallViewModel
 import io.getstream.video.android.common.viewmodel.CallViewModelFactory
-import io.getstream.video.android.common.viewmodel.CallViewModelFactoryProvider
 import io.getstream.video.android.core.StreamVideo
 import io.getstream.video.android.core.call.state.ToggleCamera
 import io.getstream.video.android.core.call.state.ToggleMicrophone
@@ -93,7 +92,6 @@ public abstract class AbstractCallActivity :
         super.onCreate(savedInstanceState)
 
         callViewModel.setPermissionManager(getPermissionManager())
-
     }
 
     @SuppressLint("SourceLockedOrientationActivity")

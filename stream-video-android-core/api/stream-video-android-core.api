@@ -630,17 +630,6 @@ public final class io/getstream/video/android/core/StreamVideoConfigDefault : io
 	public fun getJoinOnAcceptedByCallee ()Z
 }
 
-public abstract class io/getstream/video/android/core/TokenType {
-}
-
-public final class io/getstream/video/android/core/TokenType$Call : io/getstream/video/android/core/TokenType {
-	public static final field INSTANCE Lio/getstream/video/android/core/TokenType$Call;
-}
-
-public final class io/getstream/video/android/core/TokenType$User : io/getstream/video/android/core/TokenType {
-	public static final field INSTANCE Lio/getstream/video/android/core/TokenType$User;
-}
-
 public abstract interface class io/getstream/video/android/core/api/SignalServerService {
 	public abstract fun iceTrickle (Lstream/video/sfu/models/ICETrickle;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public abstract fun sendAnswer (Lstream/video/sfu/signal/SendAnswerRequest;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
