@@ -163,6 +163,10 @@ public class StreamVideoBuilder @JvmOverloads constructor(
             connectionModule.updateAuthType("anonymous")
         }
 
+        scope.launch {
+            client.connectAsync()
+        }
+
         // installs Stream Video instance
         StreamVideo.install(client)
 

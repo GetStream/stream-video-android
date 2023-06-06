@@ -3,6 +3,10 @@ title: Video Call Tutorial
 description: How to build a video call similar to Zoom or facebook messenger
 ---
 
+## TODO:
+
+- [ ] Generate user info and token for usage in this demo
+
 ## Video Call Tutorial
 
 This tutorial teaches you how to build your own Zoom/Whatsapp style video calling.
@@ -33,7 +37,7 @@ dependencies {
 
 ### Step 3 - Create & Join a call
 
-Open up `MainActivity.kt` and replace the main activity with the following code:
+Open up `MainActivity.kt` and replace it with:
 
 ```kotlin
 class MainActivity : ComponentActivity() {
@@ -42,34 +46,34 @@ class MainActivity : ComponentActivity() {
 
         // create a user.
         val user = User(
-            id = "byron",
-            name = "Byron",
-            image = "https://getstream.io/chat/docs/sdk/avatars/jpg/Byron%20Waelchi.jpg",
+            id = "tutorial@getstream.io", // any string
+            name = "Tutorial" // name and image are used in the UI
         )
 
         // for a production app we recommend adding the client to your Application class or di module.
         val client = StreamVideoBuilder(
-             context = context,
-             apiKey = apiKey,
+             context = applicationContext,
+             apiKey = "hd8szvscpxvd", // demo API key
              geo = GEO.GlobalEdgeNetwork,
              user = user,
-             token = token,
+             token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoidHV0b3JpYWxAZ2V0c3RyZWFtLmlvIiwiaXNzIjoicHJvbnRvIiwic3ViIjoidXNlci90dXRvcmlhbEBnZXRzdHJlYW0uaW8iLCJpYXQiOjE2ODYwNDAwOTUsImV4cCI6MTY4NjA1MDkwMH0.9m1wNAsn6UZHKu0i4_EWWw-sTBnbgDcV85Nmmbh7FNM",
         ).build()
 
         // join a call, which type is `default` and id is `123`.
         val call = client.call("default", "123")
-        val result = call.join(create = true)
-
-        val participants = call.state.participants.collectAsState()
+        lifecycleScope.launch {
+            call.join(create = true)
+        }
 
         setContent {
             VideoTheme {
+                val participants = call.state.participants.collectAsState()
                 // A surface container using the 'background' color from the theme
                 Surface(
                     modifier = Modifier.fillMaxSize(),
                     color = VideoTheme.colors.appBackground
                 ) {
-                    Greeting("${call.id} has ${call.state.participants.value.size} participants")
+                    Text("Call ${call.id} has ${participants.value.size} participants", fontSize = 30.sp,  color = Color.Blue)
                 }
             }
         }

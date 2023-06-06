@@ -37,6 +37,7 @@ import com.squareup.moshi.Json
  * @param create if true the call will be created if it doesn't exist
  * @param `data`
  * @param membersLimit
+ * @param migratingFrom If the participant is migrating from another SFU, then this is the ID of the previous SFU
  * @param notify
  * @param ring if true and the call is created, the notification will include ring=true
  */
@@ -56,6 +57,10 @@ data class JoinCallRequest (
 
     @Json(name = "members_limit")
     val membersLimit: kotlin.Int? = null,
+
+    /* If the participant is migrating from another SFU, then this is the ID of the previous SFU */
+    @Json(name = "migrating_from")
+    val migratingFrom: kotlin.String? = null,
 
     @Json(name = "notify")
     val notify: kotlin.Boolean? = null,

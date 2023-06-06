@@ -65,6 +65,7 @@ import org.openapitools.client.models.CallStateResponseFields
 import org.openapitools.client.models.CallUpdatedEvent
 import org.openapitools.client.models.ConnectedEvent
 import org.openapitools.client.models.CustomVideoEvent
+import org.openapitools.client.models.EgressResponse
 import org.openapitools.client.models.GetCallResponse
 import org.openapitools.client.models.GetOrCreateCallResponse
 import org.openapitools.client.models.HealthCheckEvent
@@ -260,6 +261,9 @@ public class CallState(private val call: Call, private val user: User) {
 
     /** if we are in backstage mode or not */
     val backstage: StateFlow<Boolean> = _backstage
+
+    private val _egress: MutableStateFlow<EgressResponse?> = MutableStateFlow(null)
+    val egress: StateFlow<EgressResponse?> = _egress
 
     private val _broadcasting: MutableStateFlow<Boolean> = MutableStateFlow(false)
 
@@ -651,7 +655,8 @@ public class CallState(private val call: Call, private val user: User) {
     fun updateFromResponse(response: CallResponse) {
         _backstage.value = response.backstage
         _blockedUserIds.value = response.blockedUserIds
-        _broadcasting.value = response.broadcasting
+        _egress.value = response.egress
+        _broadcasting.value = response.egress.broadcasting
         _session.value = response.session
         _rejectedBy.value = response.session?.rejectedBy?.keys?.toSet() ?: emptySet()
         _acceptedBy.value = response.session?.rejectedBy?.keys?.toSet() ?: emptySet()
