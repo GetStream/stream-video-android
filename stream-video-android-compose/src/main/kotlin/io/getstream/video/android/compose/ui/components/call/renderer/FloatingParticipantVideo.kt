@@ -23,6 +23,7 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Card
 import androidx.compose.runtime.Composable
@@ -62,16 +63,21 @@ import io.getstream.video.android.ui.common.R
  * Represents a floating item used to feature a participant video, usually the local participant.
  *
  * @param call The call containing state.
- * @param localParticipant The participant to render.
+ * @param participant The participant to render.
  * @param parentBounds Bounds of the parent, used to constrain the component to the parent bounds,
  * when dragging the floating UI around the screen.
  * @param modifier Modifier for styling.
  */
 @Composable
 public fun FloatingParticipantVideo(
-    modifier: Modifier = Modifier,
+    modifier: Modifier = Modifier
+        .size(
+            height = VideoTheme.dimens.floatingVideoHeight,
+            width = VideoTheme.dimens.floatingVideoWidth
+        )
+        .clip(VideoTheme.shapes.floatingParticipant),
     call: Call,
-    localParticipant: ParticipantState,
+    participant: ParticipantState,
     parentBounds: IntSize,
     style: VideoRendererStyle = RegularVideoRendererStyle(isShowingConnectionQualityIndicator = false)
 ) {
@@ -88,7 +94,7 @@ public fun FloatingParticipantVideo(
 
     val paddingOffset = density.run { VideoTheme.dimens.floatingVideoPadding.toPx() }
 
-    val track by localParticipant.videoTrack.collectAsStateWithLifecycle()
+    val track by participant.videoTrack.collectAsStateWithLifecycle()
 
     if (LocalInspectionMode.current) {
         Card(
@@ -160,7 +166,7 @@ public fun FloatingParticipantVideo(
                     .fillMaxSize()
                     .clip(RoundedCornerShape(16.dp)),
                 call = call,
-                participant = localParticipant,
+                participant = participant,
                 style = style
             )
         }
@@ -204,7 +210,7 @@ private fun LocalVideoContentPreview() {
         FloatingParticipantVideo(
             call = mockCall,
             modifier = Modifier.fillMaxSize(),
-            localParticipant = mockParticipant,
+            participant = mockParticipant,
             parentBounds = IntSize(screenWidth, screenHeight),
         )
     }

@@ -113,7 +113,7 @@ setContent {
 
 
         Surface(
-            modifier = Modifier.fillMaxSize(),
+            modifier = Modifier.fillMaxSize().onSizeChanged { parentSize = it },
             color = VideoTheme.colors.appBackground
         ) {
             if (connection.value != RealtimeConnection.Connected) {

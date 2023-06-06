@@ -144,7 +144,7 @@ internal class ParticipantsPortraitTest : BaseComposeTest() {
             FloatingParticipantVideo(
                 call = mockCall,
                 modifier = Modifier.fillMaxSize(),
-                localParticipant = mockParticipant,
+                participant = mockParticipant,
                 parentBounds = IntSize(screenWidth, screenHeight),
             )
         }

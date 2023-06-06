@@ -303,7 +303,7 @@ internal fun BoxScope.LandscapeVideoRenderer(
         if (currentLocal != null || LocalInspectionMode.current) {
             FloatingParticipantVideo(
                 call = call,
-                localParticipant = if (LocalInspectionMode.current) {
+                participant = if (LocalInspectionMode.current) {
                     callParticipants.first()
                 } else {
                     currentLocal!!
