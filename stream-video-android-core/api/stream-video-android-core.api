@@ -454,6 +454,51 @@ public final class io/getstream/video/android/core/ParticipantState$Video : io/g
 	public fun toString ()Ljava/lang/String;
 }
 
+public abstract interface class io/getstream/video/android/core/RealtimeConnection {
+}
+
+public final class io/getstream/video/android/core/RealtimeConnection$Connected : io/getstream/video/android/core/RealtimeConnection {
+	public static final field INSTANCE Lio/getstream/video/android/core/RealtimeConnection$Connected;
+}
+
+public final class io/getstream/video/android/core/RealtimeConnection$Disconnected : io/getstream/video/android/core/RealtimeConnection {
+	public static final field INSTANCE Lio/getstream/video/android/core/RealtimeConnection$Disconnected;
+}
+
+public final class io/getstream/video/android/core/RealtimeConnection$Failed : io/getstream/video/android/core/RealtimeConnection {
+	public fun <init> (Ljava/lang/Object;)V
+	public final fun component1 ()Ljava/lang/Object;
+	public final fun copy (Ljava/lang/Object;)Lio/getstream/video/android/core/RealtimeConnection$Failed;
+	public static synthetic fun copy$default (Lio/getstream/video/android/core/RealtimeConnection$Failed;Ljava/lang/Object;ILjava/lang/Object;)Lio/getstream/video/android/core/RealtimeConnection$Failed;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getError ()Ljava/lang/Object;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class io/getstream/video/android/core/RealtimeConnection$InProgress : io/getstream/video/android/core/RealtimeConnection {
+	public static final field INSTANCE Lio/getstream/video/android/core/RealtimeConnection$InProgress;
+}
+
+public final class io/getstream/video/android/core/RealtimeConnection$Joined : io/getstream/video/android/core/RealtimeConnection {
+	public fun <init> (Lio/getstream/video/android/core/call/RtcSession;)V
+	public final fun component1 ()Lio/getstream/video/android/core/call/RtcSession;
+	public final fun copy (Lio/getstream/video/android/core/call/RtcSession;)Lio/getstream/video/android/core/RealtimeConnection$Joined;
+	public static synthetic fun copy$default (Lio/getstream/video/android/core/RealtimeConnection$Joined;Lio/getstream/video/android/core/call/RtcSession;ILjava/lang/Object;)Lio/getstream/video/android/core/RealtimeConnection$Joined;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getSession ()Lio/getstream/video/android/core/call/RtcSession;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class io/getstream/video/android/core/RealtimeConnection$PreJoin : io/getstream/video/android/core/RealtimeConnection {
+	public static final field INSTANCE Lio/getstream/video/android/core/RealtimeConnection$PreJoin;
+}
+
+public final class io/getstream/video/android/core/RealtimeConnection$Reconnecting : io/getstream/video/android/core/RealtimeConnection {
+	public static final field INSTANCE Lio/getstream/video/android/core/RealtimeConnection$Reconnecting;
+}
+
 public abstract interface class io/getstream/video/android/core/RingingState {
 }
 
@@ -493,51 +538,6 @@ public final class io/getstream/video/android/core/RingingState$RejectedByAll : 
 
 public final class io/getstream/video/android/core/RingingState$TimeoutNoAnswer : io/getstream/video/android/core/RingingState {
 	public static final field INSTANCE Lio/getstream/video/android/core/RingingState$TimeoutNoAnswer;
-}
-
-public abstract interface class io/getstream/video/android/core/RtcConnectionState {
-}
-
-public final class io/getstream/video/android/core/RtcConnectionState$Connected : io/getstream/video/android/core/RtcConnectionState {
-	public static final field INSTANCE Lio/getstream/video/android/core/RtcConnectionState$Connected;
-}
-
-public final class io/getstream/video/android/core/RtcConnectionState$Disconnected : io/getstream/video/android/core/RtcConnectionState {
-	public static final field INSTANCE Lio/getstream/video/android/core/RtcConnectionState$Disconnected;
-}
-
-public final class io/getstream/video/android/core/RtcConnectionState$Failed : io/getstream/video/android/core/RtcConnectionState {
-	public fun <init> (Ljava/lang/Object;)V
-	public final fun component1 ()Ljava/lang/Object;
-	public final fun copy (Ljava/lang/Object;)Lio/getstream/video/android/core/RtcConnectionState$Failed;
-	public static synthetic fun copy$default (Lio/getstream/video/android/core/RtcConnectionState$Failed;Ljava/lang/Object;ILjava/lang/Object;)Lio/getstream/video/android/core/RtcConnectionState$Failed;
-	public fun equals (Ljava/lang/Object;)Z
-	public final fun getError ()Ljava/lang/Object;
-	public fun hashCode ()I
-	public fun toString ()Ljava/lang/String;
-}
-
-public final class io/getstream/video/android/core/RtcConnectionState$InProgress : io/getstream/video/android/core/RtcConnectionState {
-	public static final field INSTANCE Lio/getstream/video/android/core/RtcConnectionState$InProgress;
-}
-
-public final class io/getstream/video/android/core/RtcConnectionState$Joined : io/getstream/video/android/core/RtcConnectionState {
-	public fun <init> (Lio/getstream/video/android/core/call/RtcSession;)V
-	public final fun component1 ()Lio/getstream/video/android/core/call/RtcSession;
-	public final fun copy (Lio/getstream/video/android/core/call/RtcSession;)Lio/getstream/video/android/core/RtcConnectionState$Joined;
-	public static synthetic fun copy$default (Lio/getstream/video/android/core/RtcConnectionState$Joined;Lio/getstream/video/android/core/call/RtcSession;ILjava/lang/Object;)Lio/getstream/video/android/core/RtcConnectionState$Joined;
-	public fun equals (Ljava/lang/Object;)Z
-	public final fun getSession ()Lio/getstream/video/android/core/call/RtcSession;
-	public fun hashCode ()I
-	public fun toString ()Ljava/lang/String;
-}
-
-public final class io/getstream/video/android/core/RtcConnectionState$PreJoin : io/getstream/video/android/core/RtcConnectionState {
-	public static final field INSTANCE Lio/getstream/video/android/core/RtcConnectionState$PreJoin;
-}
-
-public final class io/getstream/video/android/core/RtcConnectionState$Reconnecting : io/getstream/video/android/core/RtcConnectionState {
-	public static final field INSTANCE Lio/getstream/video/android/core/RtcConnectionState$Reconnecting;
 }
 
 public final class io/getstream/video/android/core/SpeakerManager {
