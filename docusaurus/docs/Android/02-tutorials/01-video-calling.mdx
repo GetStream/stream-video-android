@@ -68,12 +68,17 @@ class MainActivity : ComponentActivity() {
         setContent {
             VideoTheme {
                 val participants = call.state.participants.collectAsState()
+                val connection = call.state.connection.collectAsState()
                 // A surface container using the 'background' color from the theme
                 Surface(
                     modifier = Modifier.fillMaxSize(),
                     color = VideoTheme.colors.appBackground
                 ) {
-                    Text("Call ${call.id} has ${participants.value.size} participants", fontSize = 30.sp,  color = Color.Blue)
+                    if (connection.value != RealtimeConnection.Connected) {
+                        Text("loading...")
+                    } else {
+                        Text("Call ${call.id} has ${participants.value.size} participants", fontSize = 30.sp,  color = Color.Blue)
+                    }
                 }
             }
         }
@@ -81,13 +86,13 @@ class MainActivity : ComponentActivity() {
 }
 ```
 
-Run the sample app now and you'll see 1 participant in your call.
+Run the sample app now and you'll see 1 participant.
 To make this a little more interactive let's join the call from your browser.
-Visit https://getstream.io/video/demos/?id=mycallid and joing the call.
+Visit https://getstream.io/video/demos/?id=123&skip-intro=1 and join the call.
 On your Android emulator you'll see the text update to 2 participants.
-
 Let's keep the browser tab open as you go through the tutorial.
-Awesome, time to add some video.
+
+Awesome, time to actually render some video for these participants.
 
 ### Step 4 - Rendering Video
 
@@ -95,7 +100,66 @@ In this next step we're going to:
 
 1. Render your local video.
 2. Render the participant's video.
-3. Use a viewmodel
+
+And replace the set content
+
+```kotlin
+setContent {
+    VideoTheme {
+        val participants by call.state.remoteParticipants.collectAsState()
+        val me by call.state.me.collectAsState()
+        val connection = call.state.connection.collectAsState()
+
+        Surface(
+            modifier = Modifier.fillMaxSize(),
+            color = VideoTheme.colors.appBackground
+        ) {
+            if (connection.value != RealtimeConnection.Connected) {
+                Text("loading...")
+            }
+            // floating video UI for the local video participant
+            FloatingParticipantVideo(call = call, participant = me)
+
+            // basic, video only rendering of the participant
+            val remoteParticipant = participants.firstOrNull()
+                if (remoteParticipant != null) {
+                Column(modifier = Modifier.fillMaxSize()) {
+                    VideoRenderer(
+                        modifier = Modifier.weight(1f),
+                        call = call,
+                        video = participant.video,
+                    )
+                 }
+            }
+        }
+    }
+```
+
+### Step 5 - A full UI
+
+The above example showed how to use the call state object and compose to build a basic video UI.
+For a production version of calling you'd want a few more UI elements:
+
+* Indicators of when someone is speaking
+* Quality of their network
+* Layout support for >2 participants
+* Labels for the participant names
+
+Stream ships with some more complete Compose components for this purpose.
+You can customize them with theming, arguments and swapping them with your own components.
+This is convenient if you want to quickly build a production ready calling experience for you app.
+(and if you need more flexibility, many customers use the above low level approach to build a UI from scratch)
+
+We're making 3 changes:
+
+A. Extend the abstract call activity
+
+B. Use the CallViewModel
+
+C. Render the UI with the call Container
+
+
+
 
 ```kotlin
 class MainActivity : ComponentActivity() {
@@ -116,44 +180,6 @@ class MainActivity : ComponentActivity() {
     }
 }
 ```
-
-And replace the set content
-
-```kotlin
-setContent {
-    VideoTheme {
-        val participants by call.state.remoteParticipants.collectAsState()
-        val me by call.state.me.collectAsState()
-
-        Surface(
-            modifier = Modifier.fillMaxSize(),
-            color = VideoTheme.colors.appBackground
-        ) {
-            // render a local video call
-            Column(modifier = Modifier.fillMaxSize()) {
-                ParticipantVideo(
-                    modifier = Modifier.weight(1f),
-                    call = call,
-                    participant = me,
-                )
-            }
-
-            // render a remote video call
-            val remoteParticipant = participants.firstOrNull()
-                if (remoteParticipant != null) {
-                Column(modifier = Modifier.fillMaxSize()) {
-                    ParticipantVideo(
-                        modifier = Modifier.weight(1f),
-                        call = call,
-                        participant = remoteParticipant,
-                    )
-                 }
-            }
-        }
-    }
-```
-
-### Step 5 - A full UI
 
 Stream's video SDK includes UI components that make it simple to launch a video calling experience in hours.
 Now that we've seen how to use the lower level APIs, lets build a fully polished calling experience with the example below:

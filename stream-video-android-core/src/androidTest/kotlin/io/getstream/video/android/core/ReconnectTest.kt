@@ -63,17 +63,17 @@ class ReconnectTest : IntegrationTestBase(connectCoordinatorWS = false) {
         // disconnect the network
         call.monitor.networkStateListener.onDisconnected()
         // verify that the connection state is reconnecting
-        assertThat(call.state.connection.value).isEqualTo(RtcConnectionState.Reconnecting)
+        assertThat(call.state.connection.value).isEqualTo(RealtimeConnection.Reconnecting)
         // go online and verify we're reconnected
         call.monitor.networkStateListener.onConnected()
         Thread.sleep(2000L)
-        assertThat(call.state.connection.value).isEqualTo(RtcConnectionState.Connected)
+        assertThat(call.state.connection.value).isEqualTo(RealtimeConnection.Connected)
     }
 
     @Test
     @Ignore("need more mocking for this test")
     fun peerConnectionBad() = runTest {
-        val states = mutableListOf<RtcConnectionState>()
+        val states = mutableListOf<RealtimeConnection>()
         backgroundScope.launch {
             call.state.connection.collect { states.add(it) }
         }

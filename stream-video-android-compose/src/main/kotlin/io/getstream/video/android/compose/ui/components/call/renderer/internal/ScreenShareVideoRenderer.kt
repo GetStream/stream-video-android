@@ -63,7 +63,7 @@ public fun ScreenShareVideoRenderer(
                 .fillMaxSize()
                 .align(Alignment.Center),
             call = call,
-            media = screenSharing,
+            video = screenSharing,
             videoScalingType = VideoScalingType.SCALE_ASPECT_FIT,
         )
 

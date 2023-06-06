@@ -37,7 +37,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.IntSize
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.getstream.video.android.compose.theme.VideoTheme
-import io.getstream.video.android.compose.ui.components.call.renderer.LocalVideoContent
+import io.getstream.video.android.compose.ui.components.call.renderer.FloatingParticipantVideo
 import io.getstream.video.android.compose.ui.components.call.renderer.ParticipantVideo
 import io.getstream.video.android.compose.ui.components.call.renderer.RegularVideoRendererStyle
 import io.getstream.video.android.compose.ui.components.call.renderer.VideoRendererStyle
@@ -301,7 +301,7 @@ internal fun BoxScope.LandscapeVideoRenderer(
         val currentLocal by call.state.me.collectAsStateWithLifecycle()
 
         if (currentLocal != null || LocalInspectionMode.current) {
-            LocalVideoContent(
+            FloatingParticipantVideo(
                 call = call,
                 localParticipant = if (LocalInspectionMode.current) {
                     callParticipants.first()

@@ -60,7 +60,7 @@ import io.getstream.webrtc.android.ui.VideoTextureViewRenderer
  * Renders a single video track based on the call state.
  *
  * @param call The call state that contains all the tracks and participants.
- * @param media A media contains a video track or an audio track to be rendered.
+ * @param video A media contains a video track or an audio track to be rendered.
  * @param modifier Modifier for styling.
  * @param videoFallbackContent Content is shown the video track is failed to load or not available.
  * @param onRender Handler when the view is rendered.
@@ -68,7 +68,7 @@ import io.getstream.webrtc.android.ui.VideoTextureViewRenderer
 @Composable
 public fun VideoRenderer(
     call: Call,
-    media: ParticipantState.Media?,
+    video: ParticipantState.Media?,
     modifier: Modifier = Modifier,
     videoScalingType: VideoScalingType = VideoScalingType.SCALE_ASPECT_BALANCED,
     videoFallbackContent: @Composable (Call) -> Unit = {
@@ -91,14 +91,14 @@ public fun VideoRenderer(
         return
     }
 
-    if (media?.enabled == true) {
-        val mediaTrack = media.track
-        val sessionId = media.sessionId
-        val trackType = media.type
+    if (video?.enabled == true) {
+        val mediaTrack = video.track
+        val sessionId = video.sessionId
+        val trackType = video.type
 
         var view: VideoTextureViewRenderer? by remember { mutableStateOf(null) }
 
-        DisposableEffect(call, media) {
+        DisposableEffect(call, video) {
             // inform the call that we want to render this video track. (this will trigger a subscription to the track)
             call.setVisibility(sessionId, trackType, true)
 
@@ -203,7 +203,7 @@ private fun VideoRendererPreview() {
     VideoTheme {
         VideoRenderer(
             call = mockCall,
-            media = ParticipantState.Video(
+            video = ParticipantState.Video(
                 track = VideoTrack("", org.webrtc.VideoTrack(123)),
                 enabled = true,
                 sessionId = "",

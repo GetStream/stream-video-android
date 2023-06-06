@@ -68,7 +68,7 @@ import io.getstream.video.android.ui.common.R
  * @param modifier Modifier for styling.
  */
 @Composable
-public fun LocalVideoContent(
+public fun FloatingParticipantVideo(
     modifier: Modifier = Modifier,
     call: Call,
     localParticipant: ParticipantState,
@@ -201,7 +201,7 @@ private fun LocalVideoContentPreview() {
     val screenHeight = configuration.screenHeightDp
 
     VideoTheme {
-        LocalVideoContent(
+        FloatingParticipantVideo(
             call = mockCall,
             modifier = Modifier.fillMaxSize(),
             localParticipant = mockParticipant,
