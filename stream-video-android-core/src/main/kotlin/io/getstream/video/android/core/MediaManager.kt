@@ -27,9 +27,11 @@ import io.getstream.log.taggedLogger
 import io.getstream.video.android.core.audio.AudioDevice
 import io.getstream.video.android.core.audio.AudioSwitchHandler
 import io.getstream.video.android.core.utils.buildAudioConstraints
+import io.getstream.video.android.core.utils.mapState
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.runBlocking
 import okhttp3.internal.toImmutableList
 import org.openapitools.client.models.VideoSettings
@@ -66,6 +68,9 @@ class SpeakerManager(
     /** The status of the audio */
     private val _status = MutableStateFlow<DeviceStatus>(DeviceStatus.NotSelected)
     val status: StateFlow<DeviceStatus> = _status
+
+    /** Represents whether the speakerphone is enabled */
+    public val isEnabled: StateFlow<Boolean> = _status.mapState { it is DeviceStatus.Enabled }
 
     val selectedDevice: StateFlow<AudioDevice?> = microphoneManager.selectedDevice
 
@@ -169,6 +174,9 @@ class MicrophoneManager(val mediaManager: MediaManagerImpl) {
     /** The status of the audio */
     private val _status = MutableStateFlow<DeviceStatus>(DeviceStatus.NotSelected)
     val status: StateFlow<DeviceStatus> = _status
+
+    /** Represents whether the audio is enabled */
+    public val isEnabled: StateFlow<Boolean> = _status.mapState { it is DeviceStatus.Enabled }
 
     private val _selectedDevice = MutableStateFlow<AudioDevice?>(null)
     val selectedDevice: StateFlow<AudioDevice?> = _selectedDevice
@@ -299,6 +307,9 @@ public class CameraManager(
     /** The status of the camera. enabled or disabled */
     private val _status = MutableStateFlow<DeviceStatus>(DeviceStatus.NotSelected)
     public val status: StateFlow<DeviceStatus> = _status
+
+    /** Represents whether the camera is enabled */
+    public val isEnabled: StateFlow<Boolean> = _status.mapState { it is DeviceStatus.Enabled }
 
     /** if we're using the front facing or back facing camera */
     private val _direction = MutableStateFlow(defaultCameraDirection)

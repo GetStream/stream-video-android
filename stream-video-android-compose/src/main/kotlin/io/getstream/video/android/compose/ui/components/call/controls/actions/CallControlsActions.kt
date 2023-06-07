@@ -23,39 +23,21 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import io.getstream.video.android.common.viewmodel.CallViewModel
 import io.getstream.video.android.compose.theme.VideoTheme
+import io.getstream.video.android.core.Call
+import io.getstream.video.android.core.DeviceStatus
 import io.getstream.video.android.core.call.state.CallAction
-import io.getstream.video.android.core.call.state.CallDeviceState
+import io.getstream.video.android.core.utils.mapState
 
 /**
- * Builds the default set of Call Control actions based on the [CallDeviceState].
+ * Builds the default set of Call Control actions based on the call devices.
  *
+ * @param call The call that contains all the participants state and tracks.
  * @return [List] of call control actions that the user can trigger.
  */
 @Composable
 public fun buildDefaultCallControlActions(
-    callViewModel: CallViewModel,
-    onCallAction: (CallAction) -> Unit
-): List<@Composable () -> Unit> {
-
-    val callDeviceState by callViewModel.callDeviceState.collectAsStateWithLifecycle()
-
-    return buildDefaultCallControlActions(
-        callDeviceState = callDeviceState,
-        onCallAction = onCallAction
-    )
-}
-
-/**
- * Builds the default set of Call Control actions based on the [callDeviceState].
- *
- * @param callDeviceState Information of whether microphone, speaker and camera are on or off.
- * @return [List] of call control actions that the user can trigger.
- */
-@Composable
-public fun buildDefaultCallControlActions(
-    callDeviceState: CallDeviceState,
+    call: Call,
     onCallAction: (CallAction) -> Unit
 ): List<@Composable () -> Unit> {
 
@@ -67,18 +49,21 @@ public fun buildDefaultCallControlActions(
         Modifier.size(VideoTheme.dimens.landscapeCallControlButtonSize)
     }
 
+    val isCameraEnabled by call.camera.isEnabled.collectAsStateWithLifecycle()
+    val isMicrophoneEnabled by call.microphone.isEnabled.collectAsStateWithLifecycle()
+
     return listOf(
         {
             ToggleCameraAction(
                 modifier = modifier,
-                isCameraEnabled = callDeviceState.isCameraEnabled,
+                isCameraEnabled = isCameraEnabled,
                 onCallAction = onCallAction
             )
         },
         {
             ToggleMicrophoneAction(
                 modifier = modifier,
-                isMicrophoneEnabled = callDeviceState.isMicrophoneEnabled,
+                isMicrophoneEnabled = isMicrophoneEnabled,
                 onCallAction = onCallAction
             )
         },

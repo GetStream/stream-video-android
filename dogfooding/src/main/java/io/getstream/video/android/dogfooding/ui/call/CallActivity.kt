@@ -24,6 +24,8 @@ import androidx.activity.compose.setContent
 import androidx.activity.viewModels
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.size
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import io.getstream.video.android.common.permission.PermissionManager
@@ -59,40 +61,6 @@ class CallActivity : ComponentActivity() {
                     modifier = Modifier.background(color = VideoTheme.colors.appBackground),
                     callViewModel = vm,
                     onBackPressed = { finish() },
-                    controlsContent = {
-                        ControlActions(
-                            callViewModel = vm,
-                            actions = listOf(
-                                {
-                                    ToggleCameraAction(
-                                        modifier = Modifier.size(52.dp),
-                                        isCameraEnabled = vm.callDeviceState.value.isCameraEnabled,
-                                        onCallAction = vm::onCallAction
-                                    )
-                                },
-                                {
-                                    ToggleMicrophoneAction(
-                                        modifier = Modifier.size(52.dp),
-                                        isMicrophoneEnabled = vm.callDeviceState.value.isMicrophoneEnabled,
-                                        onCallAction = vm::onCallAction
-                                    )
-                                },
-                                {
-                                    FlipCameraAction(
-                                        modifier = Modifier.size(52.dp),
-                                        onCallAction = vm::onCallAction
-                                    )
-                                },
-                                {
-                                    LeaveCallAction(
-                                        modifier = Modifier.size(52.dp),
-                                        onCallAction = vm::onCallAction
-                                    )
-                                },
-                            ),
-                            onCallAction = vm::onCallAction
-                        )
-                    }
                 )
             }
         }

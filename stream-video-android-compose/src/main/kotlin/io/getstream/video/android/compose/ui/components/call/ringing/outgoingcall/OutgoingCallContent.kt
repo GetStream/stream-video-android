@@ -28,62 +28,17 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import io.getstream.video.android.common.viewmodel.CallViewModel
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.background.CallBackground
 import io.getstream.video.android.compose.ui.components.call.CallAppBar
 import io.getstream.video.android.core.Call
+import io.getstream.video.android.core.DeviceStatus
 import io.getstream.video.android.core.ParticipantState
 import io.getstream.video.android.core.call.state.CallAction
-import io.getstream.video.android.core.call.state.CallDeviceState
+import io.getstream.video.android.core.utils.mapState
 import io.getstream.video.android.mock.StreamMockUtils
 import io.getstream.video.android.mock.mockCall
 import io.getstream.video.android.mock.mockParticipantList
-
-/**
- * Represents the Outgoing Call state and UI, when the user is calling other people.
- *
- * @param callViewModel The [CallViewModel] used to provide state and various handlers in the call.
- * @param isVideoType Represent the call type is a video or an audio.
- * @param modifier Modifier for styling.
- * @param isShowingHeader Weather or not the app bar will be shown.
- * @param callHeaderContent Content shown for the call header.
- * @param callDetailsContent Content shown for call details, such as call participant information.
- * @param callControlsContent Content shown for controlling call, such as accepting a call or declining a call.
- * @param onBackPressed Handler when the user taps on the back button.
- * @param onCallAction Handler used when the user interacts with Call UI.
- */
-@Composable
-public fun OutgoingCallContent(
-    callViewModel: CallViewModel,
-    isVideoType: Boolean,
-    modifier: Modifier = Modifier,
-    isShowingHeader: Boolean = true,
-    callHeaderContent: (@Composable ColumnScope.() -> Unit)? = null,
-    callDetailsContent: (
-        @Composable ColumnScope.(
-            participants: List<ParticipantState>, topPadding: Dp
-        ) -> Unit
-    )? = null,
-    callControlsContent: (@Composable BoxScope.() -> Unit)? = null,
-    onBackPressed: () -> Unit = {},
-    onCallAction: (CallAction) -> Unit = callViewModel::onCallAction,
-) {
-    val callDeviceState: CallDeviceState by callViewModel.callDeviceState.collectAsStateWithLifecycle()
-
-    OutgoingCallContent(
-        call = callViewModel.call,
-        isVideoType = isVideoType,
-        callDeviceState = callDeviceState,
-        modifier = modifier,
-        isShowingHeader = isShowingHeader,
-        callHeaderContent = callHeaderContent,
-        callDetailsContent = callDetailsContent,
-        callControlsContent = callControlsContent,
-        onBackPressed = onBackPressed,
-        onCallAction = onCallAction
-    )
-}
 
 /**
  * Represents the Outgoing Call state and UI, when the user is calling other people.
@@ -103,13 +58,12 @@ public fun OutgoingCallContent(
     modifier: Modifier = Modifier,
     call: Call,
     isVideoType: Boolean,
-    callDeviceState: CallDeviceState,
     isShowingHeader: Boolean = true,
     callHeaderContent: (@Composable ColumnScope.() -> Unit)? = null,
     callDetailsContent: (
-        @Composable ColumnScope.(
-            participants: List<ParticipantState>, topPadding: Dp
-        ) -> Unit
+    @Composable ColumnScope.(
+        participants: List<ParticipantState>, topPadding: Dp
+    ) -> Unit
     )? = null,
     callControlsContent: (@Composable BoxScope.() -> Unit)? = null,
     onBackPressed: () -> Unit = {},
@@ -121,7 +75,6 @@ public fun OutgoingCallContent(
         call = call,
         isVideoType = isVideoType,
         participants = participants,
-        callDeviceState = callDeviceState,
         modifier = modifier,
         isShowingHeader = isShowingHeader,
         callHeaderContent = callHeaderContent,
@@ -152,18 +105,20 @@ public fun OutgoingCallContent(
     call: Call,
     isVideoType: Boolean = true,
     participants: List<ParticipantState>,
-    callDeviceState: CallDeviceState,
     isShowingHeader: Boolean = true,
     callHeaderContent: (@Composable ColumnScope.() -> Unit)? = null,
     callDetailsContent: (
-        @Composable ColumnScope.(
-            participants: List<ParticipantState>, topPadding: Dp
-        ) -> Unit
+    @Composable ColumnScope.(
+        participants: List<ParticipantState>, topPadding: Dp
+    ) -> Unit
     )? = null,
     callControlsContent: (@Composable BoxScope.() -> Unit)? = null,
     onBackPressed: () -> Unit = {},
     onCallAction: (CallAction) -> Unit = {},
 ) {
+    val isCameraEnabled by call.camera.isEnabled.collectAsStateWithLifecycle()
+    val isMicrophoneEnabled by call.microphone.isEnabled.collectAsStateWithLifecycle()
+
     CallBackground(
         modifier = modifier,
         participants = participants,
@@ -199,8 +154,8 @@ public fun OutgoingCallContent(
             modifier = Modifier
                 .align(Alignment.BottomCenter)
                 .padding(bottom = VideoTheme.dimens.outgoingCallOptionsBottomPadding),
-            isCameraEnabled = callDeviceState.isCameraEnabled,
-            isMicrophoneEnabled = callDeviceState.isMicrophoneEnabled,
+            isCameraEnabled = isCameraEnabled,
+            isMicrophoneEnabled = isMicrophoneEnabled,
             onCallAction = onCallAction
         )
     }
@@ -215,7 +170,6 @@ private fun OutgoingCallVideoPreview() {
             call = mockCall,
             isVideoType = true,
             participants = mockParticipantList,
-            callDeviceState = CallDeviceState(),
             onBackPressed = {}
         ) {}
     }
@@ -230,7 +184,6 @@ private fun OutgoingCallAudioPreview() {
             call = mockCall,
             isVideoType = false,
             participants = mockParticipantList,
-            callDeviceState = CallDeviceState(),
             onBackPressed = {}
         ) {}
     }

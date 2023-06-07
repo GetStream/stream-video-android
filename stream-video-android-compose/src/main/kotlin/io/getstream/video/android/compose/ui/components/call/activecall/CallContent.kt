@@ -112,14 +112,12 @@ public fun CallContent(
     },
     callControlsContent: @Composable (call: Call) -> Unit = {
         ControlActions(
-            callViewModel = callViewModel,
+            call = callViewModel.call,
             onCallAction = onCallAction
         )
     },
     pictureInPictureContent: @Composable (Call) -> Unit = { DefaultPictureInPictureContent(it) }
 ) {
-    val callDeviceState by callViewModel.callDeviceState.collectAsState(initial = CallDeviceState())
-
     val isInPiPMode by callViewModel.isInPictureInPicture.collectAsStateWithLifecycle()
     val isShowingCallInfo by callViewModel.isShowingCallInfoMenu.collectAsStateWithLifecycle()
 
@@ -136,7 +134,6 @@ public fun CallContent(
     CallContent(
         modifier = modifier,
         call = callViewModel.call,
-        callDeviceState = callDeviceState,
         isInPictureInPicture = isInPiPMode,
         onCallAction = onCallAction,
         callAppBarContent = callAppBarContent,
@@ -152,7 +149,6 @@ public fun CallContent(
  *
  * @param call The call includes states and will be rendered with participants.
  * @param modifier Modifier for styling.
- * @param callDeviceState Media state of the call, for audio and video.
  * @param isInPictureInPicture If the user has engaged in Picture-In-Picture mode.
  * @param onCallAction Handler when the user triggers a Call Control Action.
  * @param callAppBarContent Content is shown that calls information or additional actions.
@@ -167,7 +163,6 @@ public fun CallContent(
 public fun CallContent(
     call: Call,
     modifier: Modifier = Modifier,
-    callDeviceState: CallDeviceState,
     isShowingOverlayCallAppBar: Boolean = true,
     isInPictureInPicture: Boolean = false,
     onCallAction: (CallAction) -> Unit = {},
@@ -204,7 +199,7 @@ public fun CallContent(
     },
     callControlsContent: @Composable (call: Call) -> Unit = {
         ControlActions(
-            callDeviceState = callDeviceState,
+            call = call,
             onCallAction = onCallAction
         )
     },
@@ -296,9 +291,6 @@ internal fun DefaultPictureInPictureContent(call: Call) {
 private fun CallContentPreview() {
     StreamMockUtils.initializeStreamVideo(LocalContext.current)
     VideoTheme {
-        CallContent(
-            call = mockCall,
-            callDeviceState = CallDeviceState()
-        )
+        CallContent(call = mockCall)
     }
 }
