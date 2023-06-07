@@ -599,11 +599,16 @@ public class Call(
     }
 
     suspend fun goLive(): Result<GoLiveResponse> {
-        return clientImpl.goLive(type, id)
+        val result = clientImpl.goLive(type, id)
+        result.onSuccess { state.updateFromResponse(it) }
+
+        return result
     }
 
     suspend fun stopLive(): Result<StopLiveResponse> {
-        return clientImpl.stopLive(type, id)
+        val result = clientImpl.stopLive(type, id)
+        result.onSuccess { state.updateFromResponse(it) }
+        return result
     }
 
     suspend fun sendCustomEvent(data: Map<String, Any>): Result<SendEventResponse> {
