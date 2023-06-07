@@ -39,6 +39,7 @@ import io.getstream.video.android.common.permission.PermissionManager
 import io.getstream.video.android.common.permission.PermissionManagerProvider
 import io.getstream.video.android.common.viewmodel.CallViewModel
 import io.getstream.video.android.common.viewmodel.CallViewModelFactory
+import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.StreamVideo
 import io.getstream.video.android.core.call.state.ToggleCamera
 import io.getstream.video.android.core.call.state.ToggleMicrophone
@@ -50,48 +51,12 @@ public abstract class AbstractCallActivity :
     ComponentActivity(),
     PermissionManagerProvider {
 
-    private val streamVideo: StreamVideo by lazy { StreamVideo.instance() }
-    private val factory by lazy { callViewModelFactory() }
-    public val callViewModel: CallViewModel by viewModels { factory }
-
-    /**
-     * Provides the default ViewModel factory.
-     */
-    private fun callViewModelFactory(): CallViewModelFactory {
-        val (type, id) = intent.getStringExtra(EXTRA_CID)?.toTypeAndId()
-            ?: throw IllegalArgumentException("You must pass correct channel id.")
-
-        return CallViewModelFactory(
-            call = streamVideo.call(type = type, id = id)
-        )
-    }
-
-    /**
-     * Provides the default [PermissionManager] implementation.
-     */
-    override fun initPermissionManager(): PermissionManager {
-        return PermissionManager.create(
-            activity = this,
-            onPermissionResult = { permission, isGranted ->
-                when (permission) {
-                    Manifest.permission.CAMERA -> callViewModel.onCallAction(ToggleCamera(isGranted))
-                    Manifest.permission.RECORD_AUDIO -> callViewModel.onCallAction(
-                        ToggleMicrophone(isGranted)
-                    )
-                }
-            },
-            onShowRequestPermissionRationale = {
-                showPermissionsDialog()
-            }
-        )
-    }
-
-    override fun getPermissionManager(): PermissionManager = initPermissionManager()
+    abstract public fun getCall(): Call
+    abstract public fun pipChanged(isInPip: Boolean)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        callViewModel.setPermissionManager(getPermissionManager())
     }
 
     @SuppressLint("SourceLockedOrientationActivity")
@@ -160,17 +125,6 @@ public abstract class AbstractCallActivity :
         )
     }
 
-    private fun showPermissionsDialog() {
-        AlertDialog.Builder(this).setTitle("Permissions required to launch the app")
-            .setMessage("Open settings to allow camera and microphone permissions.")
-            .setPositiveButton("Launch settings") { dialog, _ ->
-                startSettings()
-                dialog.dismiss()
-            }.setNegativeButton("Cancel") { dialog, _ ->
-                dialog.dismiss()
-            }.create().show()
-    }
-
     private fun showWhenLockedAndTurnScreenOn() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O_MR1) {
             setShowWhenLocked(true)
@@ -195,7 +149,7 @@ public abstract class AbstractCallActivity :
         try {
             enterPictureInPicture()
         } catch (error: Throwable) {
-            closeCall()
+            getCall().leave()
         }
     }
 
@@ -203,7 +157,7 @@ public abstract class AbstractCallActivity :
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
 
             val currentOrientation = resources.configuration.orientation
-            val screenSharing = callViewModel.call.state.screenSharingSession.value
+            val screenSharing = getCall().state.screenSharingSession.value
 
             val aspect =
                 if (currentOrientation == ActivityInfo.SCREEN_ORIENTATION_PORTRAIT && screenSharing == null) {
@@ -225,24 +179,14 @@ public abstract class AbstractCallActivity :
         }
     }
 
-    private fun closeCall() {
-        callViewModel.call.leave()
-        finish()
-    }
-
     override fun onStop() {
         super.onStop()
-
-        val isInPiP = isInPictureInPictureMode
-
-        if (isInPiP) {
-            closeCall()
-        }
     }
+
 
     override fun onConfigurationChanged(newConfig: Configuration) {
         super.onConfigurationChanged(newConfig)
-        callViewModel.onPictureInPictureModeChanged(isInPictureInPictureMode)
+        pipChanged(isInPictureInPictureMode)
     }
 
     public companion object {
