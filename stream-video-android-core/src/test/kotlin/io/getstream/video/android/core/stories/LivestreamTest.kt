@@ -21,7 +21,6 @@ import io.getstream.video.android.core.IntegrationTestBase
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.flow
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.runTest
 import org.junit.Ignore
 import org.junit.Test
@@ -85,7 +84,6 @@ class LivestreamTest : IntegrationTestBase() {
 
         val result2 = call.stopBroadcasting()
         assertSuccess(result2)
-
     }
 
     @Test
@@ -166,6 +164,5 @@ class LivestreamTest : IntegrationTestBase() {
         println("b")
 
         Thread.sleep(20000)
-
     }
 }
