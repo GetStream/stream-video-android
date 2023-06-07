@@ -67,26 +67,6 @@ public open class CallViewModel(public val call: Call) : ViewModel() {
     private val _isShowingCallInfoMenu = MutableStateFlow(false)
     public val isShowingCallInfoMenu: StateFlow<Boolean> = _isShowingCallInfoMenu
 
-    private var permissionManager: PermissionManager? = null
-
-    private var onLeaveCall: (() -> Unit)? = null
-
-    public fun joinCall(
-        onSuccess: (RtcSession) -> Unit = {},
-        onFailure: (Error) -> Unit = {}
-    ) {
-        viewModelScope.launch {
-            withTimeout(CONNECT_TIMEOUT) {
-                val result = call.join()
-                result.onSuccess {
-                    onSuccess.invoke(it)
-                }.onError {
-                    onFailure.invoke(it)
-                }
-            }
-        }
-    }
-
     override fun onCleared() {
         super.onCleared()
         dismissCallInfoMenu()
@@ -94,56 +74,9 @@ public open class CallViewModel(public val call: Call) : ViewModel() {
         call.leave()
     }
 
-    public fun onCallAction(callAction: CallAction) {
-        when (callAction) {
-            is ToggleCamera -> onVideoChanged(callAction.isEnabled)
-            is ToggleMicrophone -> onMicrophoneChanged(callAction.isEnabled)
-            is ToggleSpeakerphone -> onSpeakerphoneChanged(callAction.isEnabled)
-            is FlipCamera -> call.camera.flip()
-            is LeaveCall -> onLeaveCall()
-            is ShowCallParticipantInfo -> _isShowingCallInfoMenu.value = true
-
-            else -> Unit
-        }
+    public fun openCallInfoMenu() {
+        _isShowingCallInfoMenu.value = true
     }
-
-    private fun onVideoChanged(videoEnabled: Boolean) {
-        logger.d { "[onVideoChanged] videoEnabled: $videoEnabled" }
-        if (permissionManager?.hasCameraPermission?.value == false) {
-            permissionManager?.requestPermission(android.Manifest.permission.CAMERA)
-            logger.d { "[onVideoChanged] the [Manifest.permissions.CAMERA] has to be granted for video to be sent" }
-        }
-
-        call.camera.setEnabled(videoEnabled)
-    }
-
-    private fun onMicrophoneChanged(microphoneEnabled: Boolean) {
-        logger.d { "[onMicrophoneChanged] microphoneEnabled: $microphoneEnabled" }
-        if (permissionManager?.hasRecordAudioPermission?.value == false) {
-            permissionManager?.requestPermission(android.Manifest.permission.RECORD_AUDIO)
-            logger.d { "[onMicrophoneChanged] the [Manifest.permissions.RECORD_AUDIO] has to be granted for audio to be sent" }
-        }
-        call.microphone.setEnabled(microphoneEnabled)
-    }
-
-    private fun onSpeakerphoneChanged(speakerPhoneEnabled: Boolean) {
-        logger.d { "[onSpeakerphoneChanged] speakerPhoneEnabled: $speakerPhoneEnabled" }
-        call.speaker.setEnabled(speakerPhoneEnabled)
-    }
-
-    public fun setPermissionManager(permissionManager: PermissionManager?) {
-        this.permissionManager = permissionManager
-    }
-
-    private fun onLeaveCall() {
-        call.leave()
-        onLeaveCall?.invoke()
-    }
-
-    public fun setOnLeaveCall(onLeaveCall: () -> Unit) {
-        this.onLeaveCall = onLeaveCall
-    }
-
     public fun dismissCallInfoMenu() {
         this._isShowingCallInfoMenu.value = false
     }

@@ -47,9 +47,11 @@ import io.getstream.video.android.core.call.state.ToggleScreenConfiguration
 import io.getstream.video.android.model.StreamCallId
 import io.getstream.video.android.model.mapper.toTypeAndId
 
+/**
+ * Add support for fullscreen mode and PIP to your activity
+ */
 public abstract class AbstractCallActivity :
-    ComponentActivity(),
-    PermissionManagerProvider {
+    ComponentActivity() {
 
     abstract public fun getCall(): Call
     abstract public fun pipChanged(isInPip: Boolean)
