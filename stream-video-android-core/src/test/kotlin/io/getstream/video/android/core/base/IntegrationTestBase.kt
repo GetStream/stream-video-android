@@ -53,6 +53,7 @@ import org.openapitools.client.models.BroadcastSettings
 import org.openapitools.client.models.CallIngressResponse
 import org.openapitools.client.models.CallResponse
 import org.openapitools.client.models.CallSettingsResponse
+import org.openapitools.client.models.EgressResponse
 import org.openapitools.client.models.GeofenceSettings
 import org.openapitools.client.models.HLSSettings
 import org.openapitools.client.models.RTMPIngress
@@ -389,15 +390,14 @@ internal fun Call.toResponse(createdBy: UserResponse): CallResponse {
         backstage = false,
         createdAt = now,
         custom = emptyMap(),
-        broadcasting = false,
         recording = false,
         transcribing = false,
-        hlsPlaylistUrl = "",
         currentSessionId = "",
         createdBy = createdBy,
         blockedUserIds = emptyList(),
         ingress = ingress,
         settings = settings,
+        egress = EgressResponse(false, emptyList(), null),
         updatedAt = now
     )
     return response

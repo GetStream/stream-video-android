@@ -3,6 +3,7 @@ syntax = "proto3";
 package stream.video.sfu.event;
 
 import "video/sfu/models/models.proto";
+import "video/sfu/signal_rpc/signal.proto";
 
 option go_package = "github.com/GetStream/protocol/protobuf/video/sfu/event";
 option java_multiple_files = true;
@@ -12,21 +13,59 @@ option csharp_namespace = "Stream.Video.v1.Sfu";
 // SFUEvent is a message that is sent from the SFU to the client.
 message SfuEvent {
   oneof event_payload {
+    // SubscriberOffer sends the SDP offer for establishing the
+    // subscriber PeerConnection.
     SubscriberOffer subscriber_offer = 1;
+    // PublisherAnswer sends the SDP answer to the offer sent by
+    // the client for establishing the Publisher PeerConnection.
     PublisherAnswer publisher_answer = 2;
+    // ConnectionQualityChanged is sent to inform the connection
+    // quality of the participants in the call. It does not have
+    // to contain the full list of call participants in it.
     ConnectionQualityChanged connection_quality_changed = 3;
+    // AudioLevelChanged is sent for change in audio levels of
+    // the participants.
     AudioLevelChanged audio_level_changed = 4;
+    // ICETrickle contains the ICE candidate required to establish
+    // the ICE transport: part of establishing the PeerConnection
+    // and also for ICE restarts.
     models.ICETrickle ice_trickle = 5;
+    // ChangePublishQuality advises the publisher to switch on/off
+    // various qualities of their video stream based on the subscription.
+    // This is done to save the bandwidth and the CPU of the publisher.
     ChangePublishQuality change_publish_quality = 6;
+    // ParticipantJoined notifies the client that a new participant
+    // has joined the call. This is not sent for anonymous users.
     ParticipantJoined participant_joined = 10;
+    // ParticipantLeft notifies the client that a call participant
+    // has left the call. This is not sent for anonymous users.
     ParticipantLeft participant_left = 11;
+    // DominantSpeakerChanged notifies the client about the current
+    // dominant speaker. This is required for certain use cases like
+    // the spotlight view.
     DominantSpeakerChanged dominant_speaker_changed = 12;
+    // JoinResponse acknowledges a participant successfully joining
+    // the call. This is sent in response to the JoinRequest.
     JoinResponse join_response = 13;
+    // HealthCheckResponse is sent in response to the HealthCheckRequest.
+    // It contains the participant count in the call.
     HealthCheckResponse health_check_response = 14;
+    // TrackPublished is sent when a new track (like audio, video, screenshare)
+    // is published by a participant in the call. It is also sent on mute/unmute.
     TrackPublished track_published = 16;
+    // TrackUnpublished is sent when a track (like audio, video, screenshare)
+    // is no longer published. It is sent on muting a track or when the participant
+    // is leaving the call.
     TrackUnpublished track_unpublished = 17;
+    // Error is used to communicate any error related to the participant. The
+    // error code and the message explain what went wrong. Whether the participant
+    // can retry is also indicated.
     Error error = 18;
+    // CallGrantsUpdated tells what tracks a participant is allowed to publish.
     CallGrantsUpdated call_grants_updated = 19;
+    // GoAway tells the client to migrate away from the SFU it is connected to.
+    // The reason field indicates why this message was sent.
+    GoAway go_away = 20;
   }
 }
 
@@ -91,6 +130,13 @@ message JoinRequest {
   models.ClientDetails client_details = 4;
   // TODO: we should know if this is going to be
   // - publishing and subscribing, or just subscribing for future routing
+  Migration migration = 5;
+}
+
+message Migration {
+  string from_sfu_id = 1;
+  repeated models.TrackInfo announced_tracks = 2;
+  repeated signal.TrackSubscriptionDetails subscriptions = 3;
 }
 
 message JoinResponse {
@@ -213,4 +259,10 @@ message ChangePublishQuality {
 message CallGrantsUpdated {
   models.CallGrants current_grants = 1;
   string message = 2;
+}
+
+// Go away is sent by the SFU to the client to signal to migrate away from the SFU.
+// The evict reason may specify why the user is being evicted.
+message GoAway {
+  models.GoAwayReason reason = 1;
 }

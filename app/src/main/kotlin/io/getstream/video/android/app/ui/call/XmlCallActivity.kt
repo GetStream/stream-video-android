@@ -16,15 +16,6 @@
 
 package io.getstream.video.android.app.ui.call
 
-import io.getstream.video.android.common.viewmodel.CallViewModelFactory
-import io.getstream.video.android.core.StreamVideo
-import io.getstream.video.android.xml.AbstractXmlCallActivity
+import io.getstream.video.android.common.AbstractCallActivity
 
-class XmlCallActivity : AbstractXmlCallActivity() {
-
-    override fun getCallViewModelFactory(): CallViewModelFactory {
-        return CallViewModelFactory(
-            call = StreamVideo.instance().call("default", "replaceme")
-        )
-    }
-}
+class XmlCallActivity : AbstractCallActivity()

@@ -26,7 +26,7 @@ import app.cash.paparazzi.DeviceConfig
 import app.cash.paparazzi.Paparazzi
 import io.getstream.video.android.compose.base.BaseComposeTest
 import io.getstream.video.android.compose.theme.VideoTheme
-import io.getstream.video.android.compose.ui.components.call.renderer.LocalVideoContent
+import io.getstream.video.android.compose.ui.components.call.renderer.FloatingParticipantVideo
 import io.getstream.video.android.compose.ui.components.call.renderer.ParticipantVideo
 import io.getstream.video.android.compose.ui.components.call.renderer.ParticipantVideoRenderer
 import io.getstream.video.android.compose.ui.components.call.renderer.RegularVideoRendererStyle
@@ -141,10 +141,10 @@ internal class ParticipantsPortraitTest : BaseComposeTest() {
             val configuration = LocalConfiguration.current
             val screenWidth = configuration.screenWidthDp
             val screenHeight = configuration.screenHeightDp
-            LocalVideoContent(
+            FloatingParticipantVideo(
                 call = mockCall,
                 modifier = Modifier.fillMaxSize(),
-                localParticipant = mockParticipant,
+                participant = mockParticipant,
                 parentBounds = IntSize(screenWidth, screenHeight),
             )
         }

@@ -26,6 +26,7 @@ package org.openapitools.client.models
 import org.openapitools.client.models.CallIngressResponse
 import org.openapitools.client.models.CallSessionResponse
 import org.openapitools.client.models.CallSettingsResponse
+import org.openapitools.client.models.EgressResponse
 import org.openapitools.client.models.UserResponse
 
 
@@ -38,13 +39,12 @@ import com.squareup.moshi.Json
  *
  * @param backstage
  * @param blockedUserIds
- * @param broadcasting
  * @param cid The unique identifier for a call (<type>:<id>)
  * @param createdAt Date/time of creation
  * @param createdBy
  * @param currentSessionId
  * @param custom Custom data for this object
- * @param hlsPlaylistUrl
+ * @param egress
  * @param id Call ID
  * @param ingress
  * @param recording
@@ -67,9 +67,6 @@ data class CallResponse (
     @Json(name = "blocked_user_ids")
     val blockedUserIds: kotlin.collections.List<kotlin.String>,
 
-    @Json(name = "broadcasting")
-    val broadcasting: kotlin.Boolean,
-
     /* The unique identifier for a call (<type>:<id>) */
     @Json(name = "cid")
     val cid: kotlin.String,
@@ -88,8 +85,8 @@ data class CallResponse (
     @Json(name = "custom")
     val custom: kotlin.collections.Map<kotlin.String, kotlin.Any>,
 
-    @Json(name = "hls_playlist_url")
-    val hlsPlaylistUrl: kotlin.String,
+    @Json(name = "egress")
+    val egress: EgressResponse,
 
     /* Call ID */
     @Json(name = "id")

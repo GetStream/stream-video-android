@@ -220,7 +220,7 @@ private fun OnRenderedContent(
             .fillMaxSize()
             .testTag("on_rendered_content"),
         call = call,
-        media = video
+        video = video
     )
 }
 

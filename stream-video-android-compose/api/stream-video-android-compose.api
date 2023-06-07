@@ -357,14 +357,6 @@ public final class io/getstream/video/android/compose/theme/VideoThemeKt {
 	public static final fun VideoTheme (ZLio/getstream/video/android/compose/theme/StreamColors;Lio/getstream/video/android/compose/theme/StreamDimens;Lio/getstream/video/android/compose/theme/StreamTypography;Lio/getstream/video/android/compose/theme/StreamShapes;Landroidx/compose/material/ripple/RippleTheme;ZLkotlin/jvm/functions/Function2;Landroidx/compose/runtime/Composer;II)V
 }
 
-public abstract class io/getstream/video/android/compose/ui/AbstractComposeCallActivity : io/getstream/video/android/common/AbstractCallActivity {
-	public static final field $stable I
-	public fun <init> ()V
-	protected fun PictureInPictureContent (Lio/getstream/video/android/core/Call;Landroidx/compose/runtime/Composer;I)V
-	protected fun buildContent ()Lkotlin/jvm/functions/Function2;
-	public fun setupUi ()V
-}
-
 public final class io/getstream/video/android/compose/ui/components/audio/ComposableSingletons$SoundIndicatorKt {
 	public static final field INSTANCE Lio/getstream/video/android/compose/ui/components/audio/ComposableSingletons$SoundIndicatorKt;
 	public static field lambda-1 Lkotlin/jvm/functions/Function2;
@@ -680,8 +672,8 @@ public final class io/getstream/video/android/compose/ui/components/call/rendere
 	public final fun getLambda-1$stream_video_android_compose_release ()Lkotlin/jvm/functions/Function6;
 }
 
-public final class io/getstream/video/android/compose/ui/components/call/renderer/LocalVideoRendererKt {
-	public static final fun LocalVideoContent-6kBzY3M (Landroidx/compose/ui/Modifier;Lio/getstream/video/android/core/Call;Lio/getstream/video/android/core/ParticipantState;JLio/getstream/video/android/compose/ui/components/call/renderer/VideoRendererStyle;Landroidx/compose/runtime/Composer;II)V
+public final class io/getstream/video/android/compose/ui/components/call/renderer/FloatingParticipantVideoKt {
+	public static final fun FloatingParticipantVideo-6kBzY3M (Landroidx/compose/ui/Modifier;Lio/getstream/video/android/core/Call;Lio/getstream/video/android/core/ParticipantState;JLio/getstream/video/android/compose/ui/components/call/renderer/VideoRendererStyle;Landroidx/compose/runtime/Composer;II)V
 }
 
 public final class io/getstream/video/android/compose/ui/components/call/renderer/ParticipantVideoKt {

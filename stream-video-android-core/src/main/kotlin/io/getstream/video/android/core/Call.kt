@@ -133,9 +133,9 @@ public class CallHealthMonitor(val call: Call, val callScope: CoroutineScope) {
             // don't reconnect if things are healthy
             reconnectionAttempts = 0
             lastReconnectAt = null
-            if (call.state._connection.value != RtcConnectionState.Connected) {
+            if (call.state._connection.value != RealtimeConnection.Connected) {
                 logger.i { "call health check passed, marking connection as healthy" }
-                call.state._connection.value = RtcConnectionState.Connected
+                call.state._connection.value = RealtimeConnection.Connected
             }
         } else {
             logger.w { "call health check failed, reconnecting. publisher $publisherState subscriber $subscriberState" }
@@ -187,8 +187,8 @@ public class CallHealthMonitor(val call: Call, val callScope: CoroutineScope) {
         override fun onDisconnected() {
             val connectionState = call.state._connection.value
             logger.i { "network disconnected. connection is $connectionState marking the connection as reconnecting" }
-            if (connectionState is RtcConnectionState.Joined || connectionState == RtcConnectionState.Connected) {
-                call.state._connection.value = RtcConnectionState.Reconnecting
+            if (connectionState is RealtimeConnection.Joined || connectionState == RealtimeConnection.Connected) {
+                call.state._connection.value = RealtimeConnection.Reconnecting
             }
         }
     }
@@ -369,7 +369,7 @@ public class Call(
         // the join flow should retry up to 3 times
         // if the error is not permanent
         // and fail immediately on permanent errors
-        state._connection.value = RtcConnectionState.InProgress
+        state._connection.value = RealtimeConnection.InProgress
         var retryCount = 0
 
         var result: Result<RtcSession>
@@ -382,7 +382,7 @@ public class Call(
             if (result is Failure) {
                 logger.w { "Join failed with error $result" }
                 if (isPermanentError(result.value)) {
-                    state._connection.value = RtcConnectionState.Failed(result.value)
+                    state._connection.value = RealtimeConnection.Failed(result.value)
                     return result
                 } else {
                     retryCount += 1
@@ -440,7 +440,7 @@ public class Call(
         )
 
         session?.let {
-            state._connection.value = RtcConnectionState.Joined(it)
+            state._connection.value = RealtimeConnection.Joined(it)
         }
 
         timer.split("rtc session init")
@@ -470,8 +470,8 @@ public class Call(
         // mark us as reconnecting
         val connectionState = state._connection.value
 
-        if (connectionState is RtcConnectionState.Joined || connectionState == RtcConnectionState.Connected) {
-            state._connection.value = RtcConnectionState.Reconnecting
+        if (connectionState is RealtimeConnection.Joined || connectionState == RealtimeConnection.Connected) {
+            state._connection.value = RealtimeConnection.Reconnecting
         }
 
         // see if we are online before attempting to reconnect
@@ -496,7 +496,7 @@ public class Call(
 
     /** Leave the call, but don't end it for other users */
     fun leave() {
-        state._connection.value = RtcConnectionState.Disconnected
+        state._connection.value = RealtimeConnection.Disconnected
         cleanup()
     }
 

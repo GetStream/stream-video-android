@@ -269,7 +269,7 @@ internal fun DefaultPictureInPictureContent(call: Call) {
         VideoRenderer(
             modifier = Modifier.aspectRatio(pictureInPictureAspectRatio, false),
             call = call,
-            media = video?.value
+            video = video?.value
         )
     } else {
         val activeSpeakers by call.state.activeSpeakers.collectAsStateWithLifecycle()

@@ -65,6 +65,7 @@ import org.openapitools.client.models.CallStateResponseFields
 import org.openapitools.client.models.CallUpdatedEvent
 import org.openapitools.client.models.ConnectedEvent
 import org.openapitools.client.models.CustomVideoEvent
+import org.openapitools.client.models.EgressResponse
 import org.openapitools.client.models.GetCallResponse
 import org.openapitools.client.models.GetOrCreateCallResponse
 import org.openapitools.client.models.HealthCheckEvent
@@ -85,27 +86,27 @@ import stream.video.sfu.models.ParticipantCount
 import stream.video.sfu.models.TrackType
 import java.util.SortedMap
 
-public sealed interface RtcConnectionState {
+public sealed interface RealtimeConnection {
     /**
      * We start out in the PreJoin state. This is before call.join is called
      */
-    public object PreJoin : RtcConnectionState
+    public object PreJoin : RealtimeConnection
 
     /**
      * Join is in progress
      */
-    public object InProgress : RtcConnectionState
+    public object InProgress : RealtimeConnection
 
     /**
      * We set the state to Joined as soon as the call state is available
      */
     public data class Joined(val session: RtcSession) :
-        RtcConnectionState // joined, participant state is available, you can render the call. Video isn't ready yet
+        RealtimeConnection // joined, participant state is available, you can render the call. Video isn't ready yet
 
     /**
      * True when the peer connections are ready
      */
-    public object Connected : RtcConnectionState // connected to RTC, able to receive and send video
+    public object Connected : RealtimeConnection // connected to RTC, able to receive and send video
 
     /**
      * Reconnecting is true whenever Rtc isn't available and trying to recover
@@ -113,9 +114,9 @@ public sealed interface RtcConnectionState {
      * If the publisher peer connection breaks we'll reconnect
      * Also if the network provider from the OS says that internet is down we'll set it to reconnecting
      */
-    public object Reconnecting : RtcConnectionState // reconnecting to recover from temporary issues
-    public data class Failed(val error: Any) : RtcConnectionState // permanent failure
-    public object Disconnected : RtcConnectionState // normal disconnect by the app
+    public object Reconnecting : RealtimeConnection // reconnecting to recover from temporary issues
+    public data class Failed(val error: Any) : RealtimeConnection // permanent failure
+    public object Disconnected : RealtimeConnection // normal disconnect by the app
 }
 
 /**
@@ -134,11 +135,11 @@ public class CallState(private val call: Call, private val user: User) {
 
     private val logger by taggedLogger("CallState")
 
-    internal val _connection = MutableStateFlow<RtcConnectionState>(RtcConnectionState.PreJoin)
-    public val connection: StateFlow<RtcConnectionState> = _connection
+    internal val _connection = MutableStateFlow<RealtimeConnection>(RealtimeConnection.PreJoin)
+    public val connection: StateFlow<RealtimeConnection> = _connection
 
     public val isReconnecting: StateFlow<Boolean> = _connection.mapState {
-        it is RtcConnectionState.Reconnecting
+        it is RealtimeConnection.Reconnecting
     }
 
     private val _participants: MutableStateFlow<SortedMap<String, ParticipantState>> =
@@ -260,6 +261,9 @@ public class CallState(private val call: Call, private val user: User) {
 
     /** if we are in backstage mode or not */
     val backstage: StateFlow<Boolean> = _backstage
+
+    private val _egress: MutableStateFlow<EgressResponse?> = MutableStateFlow(null)
+    val egress: StateFlow<EgressResponse?> = _egress
 
     private val _broadcasting: MutableStateFlow<Boolean> = MutableStateFlow(false)
 
@@ -651,7 +655,8 @@ public class CallState(private val call: Call, private val user: User) {
     fun updateFromResponse(response: CallResponse) {
         _backstage.value = response.backstage
         _blockedUserIds.value = response.blockedUserIds
-        _broadcasting.value = response.broadcasting
+        _egress.value = response.egress
+        _broadcasting.value = response.egress.broadcasting
         _session.value = response.session
         _rejectedBy.value = response.session?.rejectedBy?.keys?.toSet() ?: emptySet()
         _acceptedBy.value = response.session?.rejectedBy?.keys?.toSet() ?: emptySet()

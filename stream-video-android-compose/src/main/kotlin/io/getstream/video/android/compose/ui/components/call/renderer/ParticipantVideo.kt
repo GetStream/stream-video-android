@@ -176,7 +176,7 @@ public fun ParticipantVideoRenderer(
 
     VideoRenderer(
         call = call,
-        media = video,
+        video = video,
         videoFallbackContent = videoFallbackContent
     )
 }

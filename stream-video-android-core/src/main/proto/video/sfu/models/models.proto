@@ -125,7 +125,6 @@ message TrackInfo {
   bool red = 9;
 }
 
-
 // todo remove this
 message Call {
   // the call type
@@ -151,6 +150,8 @@ enum ErrorCode {
   ERROR_CODE_PUBLISH_TRACK_VIDEO_LAYER_NOT_FOUND = 103;
 
   ERROR_CODE_PARTICIPANT_NOT_FOUND = 200;
+  ERROR_CODE_PARTICIPANT_MIGRATING_OUT = 201;
+  ERROR_CODE_PARTICIPANT_MIGRATION_FAILED = 202;
 
   ERROR_CODE_CALL_NOT_FOUND = 300;
 
@@ -160,6 +161,8 @@ enum ErrorCode {
   ERROR_CODE_TOO_MANY_REQUESTS = 429;
 
   ERROR_CODE_INTERNAL_SERVER_ERROR = 500;
+
+  ERROR_CODE_SFU_SHUTTING_DOWN = 600;
 }
 
 message Error {
@@ -231,4 +234,10 @@ message CallGrants {
   bool can_publish_audio = 1;
   bool can_publish_video = 2;
   bool can_screenshare = 3;
+}
+
+enum GoAwayReason {
+  GO_AWAY_REASON_UNSPECIFIED = 0;
+  GO_AWAY_REASON_SHUTTING_DOWN = 1;
+  GO_AWAY_REASON_REBALANCE = 2;
 }

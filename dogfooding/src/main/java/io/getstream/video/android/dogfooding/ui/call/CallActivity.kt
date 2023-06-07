@@ -59,7 +59,7 @@ class CallActivity : ComponentActivity() {
                     modifier = Modifier.background(color = VideoTheme.colors.appBackground),
                     callViewModel = vm,
                     onBackPressed = { finish() },
-                    callControlsContent = {
+                    controlsContent = {
                         ControlActions(
                             callViewModel = vm,
                             actions = listOf(
