@@ -70,12 +70,7 @@ import io.getstream.video.android.ui.common.R
  */
 @Composable
 public fun FloatingParticipantVideo(
-    modifier: Modifier = Modifier
-        .size(
-            height = VideoTheme.dimens.floatingVideoHeight,
-            width = VideoTheme.dimens.floatingVideoWidth
-        )
-        .clip(VideoTheme.shapes.floatingParticipant),
+    modifier: Modifier = Modifier,
     call: Call,
     participant: ParticipantState,
     parentBounds: IntSize,
@@ -102,7 +97,12 @@ public fun FloatingParticipantVideo(
             modifier = Modifier
                 .then(modifier)
                 .padding(VideoTheme.dimens.floatingVideoPadding)
-                .onGloballyPositioned { videoSize = it.size },
+                .onGloballyPositioned { videoSize = it.size }
+                .size(
+                    height = VideoTheme.dimens.floatingVideoHeight,
+                    width = VideoTheme.dimens.floatingVideoWidth
+                )
+                .clip(VideoTheme.shapes.floatingParticipant),
             shape = RoundedCornerShape(16.dp)
         ) {
             Image(

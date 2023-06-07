@@ -36,8 +36,8 @@ private fun CustomUi() {
 
 In this example, you're doing the following:
 
-1. You observe the required state using the `CallViewModel`. You can build the `ViewModel` yourself, or use any of our predefined `Activity` constructs that hold `CallDeviceState` and pass it to the `ControlActions`.
-2. Once you have the state ready, you build the UI. We omitted modifiers here, as you can arrange the components in any way possible, such as the `CallAppBar` and `ControlActions` taking up a fixed size space, while the `CallVideoRenderer` fills the rest of the parent. `CallVideoRenderer` will take the responsibility of representing the main part of the call.
+1. You observe the required state using the `Call`, which contains a bunch of device's states.
+2. Once you have the `Call` instance ready, you build the UI. We omitted modifiers here, as you can arrange the components in any way possible, such as the `CallAppBar` and `ControlActions` taking up a fixed size space, while the `ParticipantsGrid` fills the rest of the parent. `ParticipantsGrid` will take the responsibility of representing the main part of the call.
 3. Finally, you add the `ControlActions`. You can customize how these look and which options they represent, but we'll talk about that later.
 
 If you're using this approach and our default set of components, you can expect a UI that's similar to our default implementation:
