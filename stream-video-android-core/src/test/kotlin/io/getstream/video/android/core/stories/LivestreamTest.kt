@@ -73,11 +73,12 @@ class LivestreamTest : IntegrationTestBase() {
 
         val result = call.startBroadcasting()
         assertSuccess(result)
+
+        assertThat(call.state.egress.value?.hls).isNotNull()
+
         val result2 = call.stopBroadcasting()
         assertSuccess(result2)
 
-        // TODO: where is the HLS url?
-        // TODO: integrate ingress and egress
     }
 
     @Test

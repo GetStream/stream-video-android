@@ -49,63 +49,152 @@ You can call call.goLive() to start your livestream.
 Let's open MainActivity.kt and replace it with:
 
 ```kotlin
-val call = client.call("livestream", "id-here")
-call.join()
-call.camera.enable()
-call.camera.flip() // if you want to flip the camera
+class MainActivity : ComponentActivity() {
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
 
-call.goLive()
+        // create a user.
+        val user = User(
+            id = "tutorial@getstream.io", // any string
+            name = "Tutorial" // name and image are used in the UI
+        )
+
+        // for a production app we recommend adding the client to your Application class or di module.
+        val client = StreamVideoBuilder(
+            context = applicationContext,
+            apiKey = "hd8szvscpxvd", // demo API key
+            geo = GEO.GlobalEdgeNetwork,
+            user = user,
+            token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoidHV0b3JpYWxAZ2V0c3RyZWFtLmlvIiwiaXNzIjoicHJvbnRvIiwic3ViIjoidXNlci90dXRvcmlhbEBnZXRzdHJlYW0uaW8iLCJpYXQiOjE2ODYxNDQzOTcsImV4cCI6MTY4NjE1NTIwMn0.YbtfsCFNcg63X_M4fPaWoBP2n82YYXadLeWAfR4Aorc",
+        ).build()
+
+        // join a call, which type is `default` and id is `123`.
+        val call = client.call("livestream", "333")
+        lifecycleScope.launch {
+            // enable the camera and microphone
+            call.camera.enable()
+            call.microphone.enable()
+
+            // join the call
+            val result = call.join(create = true)
+            result.onError {
+                Toast.makeText(applicationContext, "uh oh $it", Toast.LENGTH_SHORT).show()
+            }
+        }
+
+
+        setContent {
+            VideoTheme {
+                val participantCount = call.state.participantCounts.collectAsState().value?.total
+                val connection by call.state.connection.collectAsState()
+                val backstage by call.state.backstage.collectAsState()
+                val me by call.state.me.collectAsState()
+                val video = me?.video?.collectAsState()
+
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .background(VideoTheme.colors.appBackground),
+                ) {
+                    Column() {
+
+
+                        VideoRenderer(call = call, video = video?.value)
+
+                        Button(onClick = {
+                            lifecycleScope.launch {
+                                if (backstage) call.goLive() else call.stopLive()
+                            }
+                        }) {
+                            Text(text = if (backstage) "Go Live" else "Stop Broadcast")
+                        }
+                    }
+                    if (connection != RealtimeConnection.Connected) {
+                        Text("loading...$connection")
+                    }
+
+                    Text("Livestream has $participantCount participants")
+
+                    Text("Live for 1:23")
+                }
+            }
+        }
+    }
+}
 
 ```
 
 Now when you press live your video will be transmitted. You can confirm it by visiting
-and connecting on this webpage. TODO
+and connecting on this webpage.
 
 ### Step 3A - Viewing a livestream (Webrtc)
 
 The client setup for someone watching the call is quite similar.
 You can join as an anonymous, guest or regular user.
 
+You still join the call (but you won't be allowed to publish video)
 
+```kotlin
+// anonymous user
+val client = StreamVideoBuilder(
+    context = applicationContext,
+    apiKey = "hd8szvscpxvd", // demo API key
+    geo = GEO.GlobalEdgeNetwork,
+    user = User(
+       type = UserType.Anonymous
+   ),
+).build()
 
+// mute volume by default
+call.speaker.setVolume(0)
+```
+
+Here's the update MainActivity for viewing a call
 
 ```kotlin
 ```
-
-```kotlin
-val call = client.call("livestream", "id-here")
-call.join()
-
-setContent {
-    VideoTheme {
-        Livestream(call)
-    }
-}
-```
-
-- Muting the audio output of the livestream
 
 ### Step 3B - Viewing a livestream (HLS)
 
 Alternatively you can use HLS to view the running call. This means the latency will be higher (typically an extra 10 seconds).
 The benefit is that HLS buffers better for viewers.
 
-### Step 4 - Recording a call
+```kotlin
+call.startBroadcast()
+```
 
-The last piece of the puzzle is recording your livestream.
+The HLS url can be found in the call state
 
-### Other notes
+```kotlin
+call.state.egress.value?.hls
+```
 
-- Anonymous users
-- Picture in picture
-- Reactions
-- Recording options
-- Broadcasting & HLS player
-- Maybe remove RTMP in and out
-- Participant count, how long it's running
-- HLS webplayer on web
+### Advanced Features
 
-### Conclusion
+There are several advanced features that you can add to your livestreaming experience.
 
-That's it! You've built a low latency livestreaming experience using Stream's video SDKs.
+** RTMP in and out ** we're in the final stages of testing, support will be added soon
+** Recording ** The call recording functionality allows you to record the call with various options and layouts
+** Reactions ** Enable you to make your livestream more interactive
+** Picture in picture ** So you watch the stream while navigating away from the app
 
+### Recap
+
+It was fun to see just how quickly you can build low latency livestreaming.
+Please do let us know if you ran into any issues.
+Our team is also happy to review your UI designs and offer recommendations on how to achieve it with Stream.
+
+To recap what we've learned:
+
+* Webrtc is optimal for latency, HLS is slower but buffers better for users with poor connections
+* You setup a call: (val call = client.call("livestream", "222"))
+* The call type "livestream" controls which features are enabled and how permissions are setup
+* The livestream by default enables "backstage" mode, and only allows admins to join before the call goes live
+* When you join a call, realtime communication is setup for audio & video calling: (call.join())
+* Stateflow objects in call.state and call.state.participants make it easy to build your own UI
+
+Calls run on Stream's global edge network of video servers.
+Being closer to your users improves the latency and reliability of calls.
+The SDKs enable you to build livestreaming, audio rooms and video calling in days.
+
+We hope you've enjoyed this tutorial and please do feel free to reach out if you have any suggestions or questions.

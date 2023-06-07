@@ -60,7 +60,6 @@ class ClientAndAuthTest : TestBase() {
             apiKey = apiKey,
             geo = GEO.GlobalEdgeNetwork,
             user = User(
-                id = "anonymous",
                 type = UserType.Anonymous
             )
         )
