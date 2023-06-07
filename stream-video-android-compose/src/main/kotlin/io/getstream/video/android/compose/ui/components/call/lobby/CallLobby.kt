@@ -35,6 +35,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
@@ -43,6 +44,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.avatar.UserAvatar
 import io.getstream.video.android.compose.ui.components.call.controls.ControlActions
+import io.getstream.video.android.compose.ui.components.call.controls.actions.DefaultOnCallActionHandler
 import io.getstream.video.android.compose.ui.components.call.renderer.ParticipantLabel
 import io.getstream.video.android.compose.ui.components.video.VideoRenderer
 import io.getstream.video.android.core.Call
@@ -75,13 +77,25 @@ public fun CallLobby(
     call: Call,
     user: User = StreamVideo.instance().user,
     labelPosition: Alignment = Alignment.BottomStart,
-    isCameraEnabled: Boolean = call.camera.isEnabled.value,
-    isMicrophoneEnabled: Boolean = call.microphone.isEnabled.value,
+    isCameraEnabled: Boolean = if (LocalInspectionMode.current) {
+        true
+    } else {
+        call.camera.isEnabled.value
+    },
+    isMicrophoneEnabled: Boolean = if (LocalInspectionMode.current) {
+        true
+    } else {
+        call.microphone.isEnabled.value
+    },
     video: ParticipantState.Video = ParticipantState.Video(
         sessionId = call.sessionId.orEmpty(),
         track = VideoTrack(
             streamId = call.sessionId.orEmpty(),
-            video = call.camera.mediaManager.videoTrack
+            video = if (LocalInspectionMode.current) {
+                org.webrtc.VideoTrack(1000L)
+            } else {
+                call.camera.mediaManager.videoTrack
+            }
         ),
         enabled = isCameraEnabled
     ),
@@ -91,7 +105,7 @@ public fun CallLobby(
     onDisabledContent: @Composable () -> Unit = {
         OnDisabledContent(user = user)
     },
-    onCallAction: (CallAction) -> Unit = {},
+    onCallAction: (CallAction) -> Unit = { DefaultOnCallActionHandler.onCallAction(call, it) },
     lobbyControlsContent: @Composable (call: Call) -> Unit = {
         ControlActions(
             call = call,

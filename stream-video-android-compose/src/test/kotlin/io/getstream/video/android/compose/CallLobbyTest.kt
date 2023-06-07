@@ -16,15 +16,15 @@
 
 package io.getstream.video.android.compose
 
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.ui.Modifier
 import app.cash.paparazzi.DeviceConfig
 import app.cash.paparazzi.Paparazzi
 import io.getstream.video.android.compose.base.BaseComposeTest
 import io.getstream.video.android.compose.ui.components.call.lobby.CallLobby
-import io.getstream.video.android.core.ParticipantState
 import io.getstream.video.android.mock.mockCall
 import org.junit.Rule
 import org.junit.Test
-import org.webrtc.VideoTrack
 
 internal class CallLobbyTest : BaseComposeTest() {
 
@@ -37,15 +37,8 @@ internal class CallLobbyTest : BaseComposeTest() {
     fun `snapshot CallLobby composable`() {
         snapshot {
             CallLobby(
-                call = mockCall,
-                video = ParticipantState.Video(
-                    sessionId = mockCall.sessionId.orEmpty(),
-                    track = io.getstream.video.android.core.model.VideoTrack(
-                        streamId = mockCall.sessionId.orEmpty(),
-                        video = VideoTrack(1000L)
-                    ),
-                    enabled = true
-                )
+                modifier = Modifier.fillMaxWidth(),
+                call = mockCall
             )
         }
     }

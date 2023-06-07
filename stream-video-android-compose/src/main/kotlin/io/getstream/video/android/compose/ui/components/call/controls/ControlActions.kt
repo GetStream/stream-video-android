@@ -32,6 +32,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import io.getstream.video.android.compose.theme.VideoTheme
+import io.getstream.video.android.compose.ui.components.call.controls.actions.DefaultOnCallActionHandler
 import io.getstream.video.android.compose.ui.components.call.controls.actions.LandscapeControlActions
 import io.getstream.video.android.compose.ui.components.call.controls.actions.RegularControlActions
 import io.getstream.video.android.compose.ui.components.call.controls.actions.buildDefaultCallControlActions
@@ -54,7 +55,7 @@ import io.getstream.video.android.mock.mockCall
 public fun ControlActions(
     call: Call,
     modifier: Modifier = Modifier,
-    onCallAction: (CallAction) -> Unit = {},
+    onCallAction: (CallAction) -> Unit = { DefaultOnCallActionHandler.onCallAction(call, it) },
     backgroundColor: Color = VideoTheme.colors.barsBackground,
     elevation: Dp = VideoTheme.dimens.callControlsElevation,
     shape: Shape = VideoTheme.shapes.callControls,

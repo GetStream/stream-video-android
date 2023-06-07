@@ -585,6 +585,12 @@ public final class io/getstream/video/android/compose/ui/components/call/control
 	public final fun getLambda-1$stream_video_android_compose_release ()Lkotlin/jvm/functions/Function2;
 }
 
+public final class io/getstream/video/android/compose/ui/components/call/controls/actions/DefaultOnCallActionHandler {
+	public static final field $stable I
+	public static final field INSTANCE Lio/getstream/video/android/compose/ui/components/call/controls/actions/DefaultOnCallActionHandler;
+	public final fun onCallAction (Lio/getstream/video/android/core/Call;Lio/getstream/video/android/core/call/state/CallAction;)V
+}
+
 public final class io/getstream/video/android/compose/ui/components/call/controls/actions/FlipCameraActionKt {
 	public static final fun FlipCameraAction (Landroidx/compose/ui/Modifier;ZLkotlin/jvm/functions/Function1;Landroidx/compose/runtime/Composer;II)V
 }

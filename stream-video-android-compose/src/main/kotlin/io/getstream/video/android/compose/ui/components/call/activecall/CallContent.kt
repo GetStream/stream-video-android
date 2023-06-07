@@ -43,6 +43,7 @@ import io.getstream.video.android.common.viewmodel.CallViewModel
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.call.CallAppBar
 import io.getstream.video.android.compose.ui.components.call.controls.ControlActions
+import io.getstream.video.android.compose.ui.components.call.controls.actions.DefaultOnCallActionHandler
 import io.getstream.video.android.compose.ui.components.call.renderer.ParticipantVideo
 import io.getstream.video.android.compose.ui.components.call.renderer.ParticipantsGrid
 import io.getstream.video.android.compose.ui.components.call.renderer.RegularVideoRendererStyle
@@ -163,7 +164,7 @@ public fun CallContent(
     modifier: Modifier = Modifier,
     isShowingOverlayCallAppBar: Boolean = true,
     isInPictureInPicture: Boolean = false,
-    onCallAction: (CallAction) -> Unit = {},
+    onCallAction: (CallAction) -> Unit = { DefaultOnCallActionHandler.onCallAction(call, it) },
     callAppBarContent: @Composable (call: Call) -> Unit = {
         CallAppBar(
             call = call,

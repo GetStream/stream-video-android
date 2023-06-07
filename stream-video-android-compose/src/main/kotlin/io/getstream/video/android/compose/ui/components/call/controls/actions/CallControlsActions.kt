@@ -29,6 +29,9 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.call.state.CallAction
+import io.getstream.video.android.core.call.state.ToggleCamera
+import io.getstream.video.android.core.call.state.ToggleMicrophone
+import io.getstream.video.android.core.call.state.ToggleSpeakerphone
 
 /**
  * Builds the default set of Call Control actions based on the call devices.
@@ -89,4 +92,16 @@ public fun buildDefaultCallControlActions(
             )
         }
     )
+}
+
+public object DefaultOnCallActionHandler {
+
+    public fun onCallAction(call: Call, callAction: CallAction) {
+        when (callAction) {
+            is ToggleCamera -> call.camera.setEnabled(callAction.isEnabled)
+            is ToggleMicrophone -> call.microphone.setEnabled(callAction.isEnabled)
+            is ToggleSpeakerphone -> call.speaker.setEnabled(callAction.isEnabled)
+            else -> Unit
+        }
+    }
 }

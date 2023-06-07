@@ -49,7 +49,7 @@ public fun LandscapeControlActions(
     backgroundColor: Color = VideoTheme.colors.barsBackground,
     shape: Shape = VideoTheme.shapes.callControlsLandscape,
     elevation: Dp = VideoTheme.dimens.callControlsElevation,
-    onCallAction: (CallAction) -> Unit = {},
+    onCallAction: (CallAction) -> Unit = { DefaultOnCallActionHandler.onCallAction(call, it) },
     actions: List<(@Composable () -> Unit)> = buildDefaultCallControlActions(
         call,
         onCallAction

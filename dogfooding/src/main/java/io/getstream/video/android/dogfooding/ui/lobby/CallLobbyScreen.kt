@@ -190,6 +190,8 @@ private fun CallLobbyBody(
             call = call,
             user = user,
             modifier = Modifier.fillMaxWidth(),
+            isCameraEnabled = isCameraEnabled,
+            isMicrophoneEnabled = isMicrophoneEnabled,
             onCallAction = { action ->
                 when (action) {
                     is ToggleMicrophone -> {
