@@ -634,6 +634,13 @@ public final class io/getstream/video/android/compose/ui/components/call/lobby/L
 	public static final fun buildDefaultLobbyControlActions (Lio/getstream/video/android/core/Call;Lkotlin/jvm/functions/Function1;Landroidx/compose/runtime/Composer;I)Ljava/util/List;
 }
 
+public final class io/getstream/video/android/compose/ui/components/call/renderer/ComposableSingletons$FloatingParticipantVideoKt {
+	public static final field INSTANCE Lio/getstream/video/android/compose/ui/components/call/renderer/ComposableSingletons$FloatingParticipantVideoKt;
+	public static field lambda-1 Lkotlin/jvm/functions/Function2;
+	public fun <init> ()V
+	public final fun getLambda-1$stream_video_android_compose_release ()Lkotlin/jvm/functions/Function2;
+}
+
 public final class io/getstream/video/android/compose/ui/components/call/renderer/ComposableSingletons$ParticipantVideoKt {
 	public static final field INSTANCE Lio/getstream/video/android/compose/ui/components/call/renderer/ComposableSingletons$ParticipantVideoKt;
 	public static field lambda-1 Lkotlin/jvm/functions/Function4;
@@ -675,7 +682,7 @@ public final class io/getstream/video/android/compose/ui/components/call/rendere
 }
 
 public final class io/getstream/video/android/compose/ui/components/call/renderer/FloatingParticipantVideoKt {
-	public static final fun FloatingParticipantVideo-6kBzY3M (Landroidx/compose/ui/Modifier;Lio/getstream/video/android/core/Call;Lio/getstream/video/android/core/ParticipantState;JLio/getstream/video/android/compose/ui/components/call/renderer/VideoRendererStyle;Landroidx/compose/runtime/Composer;II)V
+	public static final fun FloatingParticipantVideo-5smBDpc (Landroidx/compose/foundation/layout/BoxScope;Landroidx/compose/ui/Modifier;Lio/getstream/video/android/core/Call;Lio/getstream/video/android/core/ParticipantState;JLandroidx/compose/ui/Alignment;Lio/getstream/video/android/compose/ui/components/call/renderer/VideoRendererStyle;Landroidx/compose/runtime/Composer;II)V
 }
 
 public final class io/getstream/video/android/compose/ui/components/call/renderer/ParticipantVideoKt {
