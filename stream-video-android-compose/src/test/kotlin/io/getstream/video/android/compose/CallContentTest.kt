@@ -29,7 +29,6 @@ import io.getstream.video.android.compose.ui.components.call.ringing.incomingcal
 import io.getstream.video.android.compose.ui.components.call.ringing.outgoingcall.OutgoingCallContent
 import io.getstream.video.android.compose.ui.components.call.ringing.outgoingcall.OutgoingCallControls
 import io.getstream.video.android.compose.ui.components.call.ringing.outgoingcall.OutgoingCallDetails
-import io.getstream.video.android.core.call.state.CallDeviceState
 import io.getstream.video.android.mock.mockCall
 import io.getstream.video.android.mock.mockParticipantList
 import org.junit.Rule
@@ -129,7 +128,6 @@ internal class CallContentTest : BaseComposeTest() {
             OutgoingCallContent(
                 call = mockCall,
                 participants = mockParticipantList.take(1),
-                callDeviceState = CallDeviceState(),
                 modifier = Modifier.fillMaxSize(),
                 onBackPressed = {},
                 onCallAction = {}
@@ -143,7 +141,6 @@ internal class CallContentTest : BaseComposeTest() {
             OutgoingCallContent(
                 call = mockCall,
                 participants = mockParticipantList,
-                callDeviceState = CallDeviceState(),
                 onBackPressed = {}
             ) {}
         }
@@ -152,10 +149,7 @@ internal class CallContentTest : BaseComposeTest() {
     @Test
     fun `snapshot CallContent with multiple participants composable`() {
         snapshot {
-            CallContent(
-                call = mockCall,
-                callDeviceState = CallDeviceState()
-            )
+            CallContent(call = mockCall)
         }
     }
 }

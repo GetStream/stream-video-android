@@ -18,7 +18,7 @@ package io.getstream.video.android.xml.binding
 
 import androidx.lifecycle.LifecycleOwner
 import io.getstream.video.android.common.viewmodel.CallViewModel
-import io.getstream.video.android.core.call.state.CallDeviceState
+import io.getstream.video.android.xml.state.CallDeviceState
 import io.getstream.video.android.xml.utils.extensions.getFirstViewInstance
 import io.getstream.video.android.xml.widget.call.CallView
 import io.getstream.video.android.xml.widget.control.CallControlItem

@@ -191,6 +191,7 @@ public final class io/getstream/video/android/core/CameraManager {
 	public final fun getResolution ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun getSelectedDevice ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun getStatus ()Lkotlinx/coroutines/flow/StateFlow;
+	public final fun isEnabled ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun listDevices ()Ljava/util/List;
 	public final fun pause ()V
 	public final fun resume ()V
@@ -346,6 +347,7 @@ public final class io/getstream/video/android/core/MicrophoneManager {
 	public final fun getMediaManager ()Lio/getstream/video/android/core/MediaManagerImpl;
 	public final fun getSelectedDevice ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun getStatus ()Lkotlinx/coroutines/flow/StateFlow;
+	public final fun isEnabled ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun listDevices ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun pause ()V
 	public final fun resume ()V
@@ -553,6 +555,7 @@ public final class io/getstream/video/android/core/SpeakerManager {
 	public final fun getSpeakerPhoneEnabled ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun getStatus ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun getVolume ()Lkotlinx/coroutines/flow/StateFlow;
+	public final fun isEnabled ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun pause ()V
 	public final fun resume ()V
 	public final fun setEnabled (Z)V
@@ -832,23 +835,6 @@ public final class io/getstream/video/android/core/call/state/AcceptCall : io/ge
 }
 
 public abstract interface class io/getstream/video/android/core/call/state/CallAction {
-}
-
-public final class io/getstream/video/android/core/call/state/CallDeviceState {
-	public fun <init> ()V
-	public fun <init> (ZZZ)V
-	public synthetic fun <init> (ZZZILkotlin/jvm/internal/DefaultConstructorMarker;)V
-	public final fun component1 ()Z
-	public final fun component2 ()Z
-	public final fun component3 ()Z
-	public final fun copy (ZZZ)Lio/getstream/video/android/core/call/state/CallDeviceState;
-	public static synthetic fun copy$default (Lio/getstream/video/android/core/call/state/CallDeviceState;ZZZILjava/lang/Object;)Lio/getstream/video/android/core/call/state/CallDeviceState;
-	public fun equals (Ljava/lang/Object;)Z
-	public fun hashCode ()I
-	public final fun isCameraEnabled ()Z
-	public final fun isMicrophoneEnabled ()Z
-	public final fun isSpeakerphoneEnabled ()Z
-	public fun toString ()Ljava/lang/String;
 }
 
 public final class io/getstream/video/android/core/call/state/CancelCall : io/getstream/video/android/core/call/state/CallAction {

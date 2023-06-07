@@ -97,7 +97,6 @@ public class io/getstream/video/android/common/viewmodel/CallViewModel : android
 	public fun <init> (Lio/getstream/video/android/core/Call;)V
 	public final fun dismissCallInfoMenu ()V
 	public final fun getCall ()Lio/getstream/video/android/core/Call;
-	public final fun getCallDeviceState ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun getClient ()Lio/getstream/video/android/core/StreamVideo;
 	public final fun isInPictureInPicture ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun isShowingCallInfoMenu ()Lkotlinx/coroutines/flow/StateFlow;

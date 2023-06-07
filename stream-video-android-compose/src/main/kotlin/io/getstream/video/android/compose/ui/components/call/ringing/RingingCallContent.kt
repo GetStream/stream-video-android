@@ -25,75 +25,17 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import io.getstream.video.android.common.viewmodel.CallViewModel
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.call.activecall.CallContent
+import io.getstream.video.android.compose.ui.components.call.controls.actions.DefaultOnCallActionHandler
 import io.getstream.video.android.compose.ui.components.call.ringing.incomingcall.IncomingCallContent
 import io.getstream.video.android.compose.ui.components.call.ringing.outgoingcall.OutgoingCallContent
 import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.ParticipantState
 import io.getstream.video.android.core.RingingState
 import io.getstream.video.android.core.call.state.CallAction
-import io.getstream.video.android.core.call.state.CallDeviceState
 import io.getstream.video.android.mock.StreamMockUtils
 import io.getstream.video.android.mock.mockCall
-
-/**
- * Represents different outgoing/incoming call content based on the call state provided from the [callViewModel].
- *
- * Depending on the call state, we show [CallContent], [IncomingCallContent] or [OutgoingCallContent] respectively.
- *
- * @param callViewModel The [CallViewModel] used to provide state and various handlers in the call.
- * @param isVideoType Represent the call type is a video or an audio.
- * @param modifier Modifier for styling.
- * @param isShowingHeader Weather or not the app bar will be shown.
- * @param callHeaderContent Content shown for the call header.
- * @param callDetailsContent Content shown for call details, such as call participant information.
- * @param callControlsContent Content shown for controlling call, such as accepting a call or declining a call.
- * @param onBackPressed Handler when the user taps on the back button.
- * @param onCallAction Handler used when the user interacts with Call UI.
- * @param onAcceptedContent Content is shown when the call is accepted.
- * @param onRejectedContent Content is shown when the call is rejected.
- * @param onNoAnswerContent Content is shown when a receiver did not answer on time.
- */
-@Composable
-public fun RingingCallContent(
-    callViewModel: CallViewModel,
-    modifier: Modifier = Modifier,
-    isVideoType: Boolean = true,
-    isShowingHeader: Boolean = true,
-    callHeaderContent: (@Composable ColumnScope.() -> Unit)? = null,
-    callDetailsContent: (
-        @Composable ColumnScope.(
-            participants: List<ParticipantState>, topPadding: Dp
-        ) -> Unit
-    )? = null,
-    callControlsContent: (@Composable BoxScope.() -> Unit)? = null,
-    onBackPressed: () -> Unit = {},
-    onCallAction: (CallAction) -> Unit = callViewModel::onCallAction,
-    onAcceptedContent: @Composable () -> Unit,
-    onRejectedContent: @Composable () -> Unit = {},
-    onNoAnswerContent: @Composable () -> Unit = {},
-) {
-    val callDeviceState: CallDeviceState by callViewModel.callDeviceState.collectAsStateWithLifecycle()
-
-    RingingCallContent(
-        call = callViewModel.call,
-        isVideoType = isVideoType,
-        callDeviceState = callDeviceState,
-        modifier = modifier,
-        isShowingHeader = isShowingHeader,
-        callHeaderContent = callHeaderContent,
-        callDetailsContent = callDetailsContent,
-        callControlsContent = callControlsContent,
-        onBackPressed = onBackPressed,
-        onCallAction = onCallAction,
-        onAcceptedContent = onAcceptedContent,
-        onRejectedContent = onRejectedContent,
-        onNoAnswerContent = onNoAnswerContent
-    )
-}
 
 /**
  * Represents different outgoing/incoming call content based on the call state provided from the [call].
@@ -101,7 +43,6 @@ public fun RingingCallContent(
  * Depending on the call state, we show [CallContent], [IncomingCallContent] or [OutgoingCallContent] respectively.
  *
  * @param call The call contains states and will be rendered with participants.
- * @param callDeviceState A call device states that contains states for video, audio, and speaker.
  * @param isVideoType Represent the call type is a video or an audio.
  * @param modifier Modifier for styling.
  * @param isShowingHeader Weather or not the app bar will be shown.
@@ -119,7 +60,6 @@ public fun RingingCallContent(
     call: Call,
     modifier: Modifier = Modifier,
     isVideoType: Boolean = true,
-    callDeviceState: CallDeviceState,
     isShowingHeader: Boolean = true,
     callHeaderContent: (@Composable ColumnScope.() -> Unit)? = null,
     callDetailsContent: (
@@ -129,7 +69,7 @@ public fun RingingCallContent(
     )? = null,
     callControlsContent: (@Composable BoxScope.() -> Unit)? = null,
     onBackPressed: () -> Unit = {},
-    onCallAction: (CallAction) -> Unit = {},
+    onCallAction: (CallAction) -> Unit = { DefaultOnCallActionHandler.onCallAction(call, it) },
     onAcceptedContent: @Composable () -> Unit,
     onRejectedContent: @Composable () -> Unit = {},
     onNoAnswerContent: @Composable () -> Unit = {},
@@ -141,7 +81,6 @@ public fun RingingCallContent(
         IncomingCallContent(
             call = call,
             isVideoType = isVideoType,
-            callDeviceState = callDeviceState,
             modifier = modifier,
             isShowingHeader = isShowingHeader,
             callHeaderContent = callHeaderContent,
@@ -154,7 +93,6 @@ public fun RingingCallContent(
         OutgoingCallContent(
             call = call,
             isVideoType = isVideoType,
-            callDeviceState = callDeviceState,
             modifier = modifier,
             isShowingHeader = isShowingHeader,
             callHeaderContent = callHeaderContent,
@@ -180,7 +118,6 @@ private fun RingingCallContentPreview() {
         RingingCallContent(
             call = mockCall,
             isVideoType = true,
-            callDeviceState = CallDeviceState(),
             onAcceptedContent = {},
             onRejectedContent = {}
         )

@@ -178,32 +178,34 @@ private fun CallLobbyBody(
 
         Spacer(modifier = Modifier.height(20.dp))
 
-        val callDeviceState by callLobbyViewModel.deviceState.collectAsState()
         val cameraPermissionState = rememberPermissionState(android.Manifest.permission.CAMERA)
         val micPermissionState =
             rememberPermissionState(android.Manifest.permission.RECORD_AUDIO)
-        val deviceState by callLobbyViewModel.deviceState.collectAsState()
+        val isCameraEnabled by callLobbyViewModel.isCameraEnabled.collectAsState()
+        val isMicrophoneEnabled by callLobbyViewModel.isMicrophoneEnabled.collectAsState()
+        val isSpeakerphoneEnabled by callLobbyViewModel.isSpeakerphoneEnabled.collectAsState()
         val user = StreamVideo.instance().user
 
         CallLobby(
             call = call,
             user = user,
             modifier = Modifier.fillMaxWidth(),
-            callDeviceState = deviceState,
+            isCameraEnabled = isCameraEnabled,
+            isMicrophoneEnabled = isMicrophoneEnabled,
             onCallAction = { action ->
                 when (action) {
                     is ToggleMicrophone -> {
                         micPermissionState.launchPermissionRequest()
-                        callLobbyViewModel.enableMicrophone(!callDeviceState.isMicrophoneEnabled)
+                        callLobbyViewModel.enableMicrophone(!isMicrophoneEnabled)
                     }
 
                     is ToggleCamera -> {
                         cameraPermissionState.launchPermissionRequest()
-                        callLobbyViewModel.enableCamera(!callDeviceState.isCameraEnabled)
+                        callLobbyViewModel.enableCamera(!isCameraEnabled)
                     }
 
                     is ToggleSpeakerphone -> {
-                        callLobbyViewModel.enableSpeakerphone(!callDeviceState.isSpeakerphoneEnabled)
+                        callLobbyViewModel.enableSpeakerphone(!isSpeakerphoneEnabled)
                     }
 
                     else -> Unit

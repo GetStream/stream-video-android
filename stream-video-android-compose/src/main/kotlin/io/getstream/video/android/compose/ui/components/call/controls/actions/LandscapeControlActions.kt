@@ -25,30 +25,33 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import io.getstream.video.android.compose.theme.VideoTheme
+import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.call.state.CallAction
-import io.getstream.video.android.core.call.state.CallDeviceState
+import io.getstream.video.android.mock.StreamMockUtils
+import io.getstream.video.android.mock.mockCall
 
 /**
  * Shows the call controls in a different way when in landscape mode.
  *
- * @param callDeviceState The state of the call media, such as video, audio.
+ * @param call The call that contains all the participants state and tracks.
  * @param modifier Modifier for styling.
  * @param actions Actions to show to the user with different controls.
  * @param onCallAction Handler when the user triggers various call actions.
  */
 @Composable
 public fun LandscapeControlActions(
-    callDeviceState: CallDeviceState,
+    call: Call,
     modifier: Modifier = Modifier,
     backgroundColor: Color = VideoTheme.colors.barsBackground,
     shape: Shape = VideoTheme.shapes.callControlsLandscape,
     elevation: Dp = VideoTheme.dimens.callControlsElevation,
-    onCallAction: (CallAction) -> Unit = {},
+    onCallAction: (CallAction) -> Unit = { DefaultOnCallActionHandler.onCallAction(call, it) },
     actions: List<(@Composable () -> Unit)> = buildDefaultCallControlActions(
-        callDeviceState,
+        call,
         onCallAction
     ),
 ) {
@@ -73,9 +76,10 @@ public fun LandscapeControlActions(
 @Preview
 @Composable
 private fun LandscapeCallControlsPreview() {
+    StreamMockUtils.initializeStreamVideo(LocalContext.current)
     VideoTheme {
         LandscapeControlActions(
-            callDeviceState = CallDeviceState(),
+            call = mockCall,
             onCallAction = {}
         )
     }

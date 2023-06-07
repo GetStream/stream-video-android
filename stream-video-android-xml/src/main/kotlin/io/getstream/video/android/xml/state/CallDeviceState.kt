@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package io.getstream.video.android.core.call.state
+package io.getstream.video.android.xml.state
 
 public data class CallDeviceState(
     val isMicrophoneEnabled: Boolean = false,

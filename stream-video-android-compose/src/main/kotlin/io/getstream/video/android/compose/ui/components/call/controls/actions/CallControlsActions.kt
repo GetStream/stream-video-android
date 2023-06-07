@@ -20,42 +20,28 @@ import android.content.res.Configuration
 import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import io.getstream.video.android.common.viewmodel.CallViewModel
 import io.getstream.video.android.compose.theme.VideoTheme
+import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.call.state.CallAction
-import io.getstream.video.android.core.call.state.CallDeviceState
+import io.getstream.video.android.core.call.state.ToggleCamera
+import io.getstream.video.android.core.call.state.ToggleMicrophone
+import io.getstream.video.android.core.call.state.ToggleSpeakerphone
 
 /**
- * Builds the default set of Call Control actions based on the [CallDeviceState].
+ * Builds the default set of Call Control actions based on the call devices.
  *
+ * @param call The call that contains all the participants state and tracks.
  * @return [List] of call control actions that the user can trigger.
  */
 @Composable
 public fun buildDefaultCallControlActions(
-    callViewModel: CallViewModel,
-    onCallAction: (CallAction) -> Unit
-): List<@Composable () -> Unit> {
-
-    val callDeviceState by callViewModel.callDeviceState.collectAsStateWithLifecycle()
-
-    return buildDefaultCallControlActions(
-        callDeviceState = callDeviceState,
-        onCallAction = onCallAction
-    )
-}
-
-/**
- * Builds the default set of Call Control actions based on the [callDeviceState].
- *
- * @param callDeviceState Information of whether microphone, speaker and camera are on or off.
- * @return [List] of call control actions that the user can trigger.
- */
-@Composable
-public fun buildDefaultCallControlActions(
-    callDeviceState: CallDeviceState,
+    call: Call,
     onCallAction: (CallAction) -> Unit
 ): List<@Composable () -> Unit> {
 
@@ -67,18 +53,29 @@ public fun buildDefaultCallControlActions(
         Modifier.size(VideoTheme.dimens.landscapeCallControlButtonSize)
     }
 
+    val isCameraEnabled by if (LocalInspectionMode.current) {
+        remember { mutableStateOf(true) }
+    } else {
+        call.camera.isEnabled.collectAsStateWithLifecycle()
+    }
+    val isMicrophoneEnabled by if (LocalInspectionMode.current) {
+        remember { mutableStateOf(true) }
+    } else {
+        call.microphone.isEnabled.collectAsStateWithLifecycle()
+    }
+
     return listOf(
         {
             ToggleCameraAction(
                 modifier = modifier,
-                isCameraEnabled = callDeviceState.isCameraEnabled,
+                isCameraEnabled = isCameraEnabled,
                 onCallAction = onCallAction
             )
         },
         {
             ToggleMicrophoneAction(
                 modifier = modifier,
-                isMicrophoneEnabled = callDeviceState.isMicrophoneEnabled,
+                isMicrophoneEnabled = isMicrophoneEnabled,
                 onCallAction = onCallAction
             )
         },
@@ -95,4 +92,16 @@ public fun buildDefaultCallControlActions(
             )
         }
     )
+}
+
+public object DefaultOnCallActionHandler {
+
+    public fun onCallAction(call: Call, callAction: CallAction) {
+        when (callAction) {
+            is ToggleCamera -> call.camera.setEnabled(callAction.isEnabled)
+            is ToggleMicrophone -> call.microphone.setEnabled(callAction.isEnabled)
+            is ToggleSpeakerphone -> call.speaker.setEnabled(callAction.isEnabled)
+            else -> Unit
+        }
+    }
 }

@@ -34,6 +34,7 @@ import io.getstream.video.android.compose.ui.components.call.activecall.CallCont
 import io.getstream.video.android.compose.ui.components.call.activecall.DefaultPictureInPictureContent
 import io.getstream.video.android.compose.ui.components.call.activecall.internal.InviteUsersDialog
 import io.getstream.video.android.compose.ui.components.call.controls.ControlActions
+import io.getstream.video.android.compose.ui.components.call.controls.actions.DefaultOnCallActionHandler
 import io.getstream.video.android.compose.ui.components.call.renderer.ParticipantVideo
 import io.getstream.video.android.compose.ui.components.call.renderer.RegularVideoRendererStyle
 import io.getstream.video.android.compose.ui.components.call.renderer.VideoRendererStyle
@@ -44,7 +45,6 @@ import io.getstream.video.android.compose.ui.components.participants.CallPartici
 import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.ParticipantState
 import io.getstream.video.android.core.call.state.CallAction
-import io.getstream.video.android.core.call.state.CallDeviceState
 import io.getstream.video.android.core.call.state.InviteUsersToCall
 import io.getstream.video.android.core.call.state.ToggleMicrophone
 import io.getstream.video.android.mock.StreamMockUtils
@@ -89,7 +89,7 @@ public fun CallContainer(
     controlsContent: @Composable (call: Call) -> Unit = {
         ControlActions(
             modifier = Modifier.testTag("call_controls"),
-            callViewModel = callViewModel,
+            call = callViewModel.call,
             onCallAction = onCallAction,
         )
     },
@@ -125,7 +125,7 @@ public fun CallContainer(
         RingingCallContent(
             modifier = modifier.testTag("ringing_call_content"),
             isVideoType = isVideoType,
-            callViewModel = callViewModel,
+            call = callViewModel.call,
             onBackPressed = onBackPressed,
             onCallAction = onCallAction,
             onAcceptedContent = { callContent.invoke(it) },
@@ -133,11 +133,9 @@ public fun CallContainer(
         )
     },
 ) {
-    val callDeviceState by callViewModel.callDeviceState.collectAsStateWithLifecycle()
 
     CallContainer(
         call = callViewModel.call,
-        callDeviceState = callDeviceState,
         isVideoType = isVideoType,
         modifier = modifier,
         onBackPressed = onBackPressed,
@@ -174,9 +172,8 @@ public fun CallContainer(
     call: Call,
     modifier: Modifier = Modifier,
     isVideoType: Boolean = true,
-    callDeviceState: CallDeviceState,
     onBackPressed: () -> Unit = {},
-    onCallAction: (CallAction) -> Unit = {},
+    onCallAction: (CallAction) -> Unit = { DefaultOnCallActionHandler.onCallAction(call, it) },
     callAppBarContent: @Composable (call: Call) -> Unit = {
         CallAppBar(
             modifier = Modifier.testTag("call_appbar"),
@@ -188,7 +185,7 @@ public fun CallContainer(
     callControlsContent: @Composable (call: Call) -> Unit = {
         ControlActions(
             modifier = Modifier.testTag("call_controls"),
-            callDeviceState = callDeviceState,
+            call = call,
             onCallAction = onCallAction
         )
     },
@@ -212,7 +209,6 @@ public fun CallContainer(
             call = call,
             style = style,
             modifier = modifier.testTag("call_content"),
-            callDeviceState = callDeviceState,
             onCallAction = onCallAction,
             callAppBarContent = callAppBarContent,
             callControlsContent = callControlsContent,
@@ -225,7 +221,6 @@ public fun CallContainer(
             call = call,
             modifier = modifier.testTag("ringing_call_content"),
             isVideoType = isVideoType,
-            callDeviceState = callDeviceState,
             onBackPressed = onBackPressed,
             onCallAction = onCallAction,
             onAcceptedContent = { callContent.invoke(it) },
@@ -310,7 +305,6 @@ private fun CallContainerPreview() {
         CallContainer(
             call = mockCall,
             isVideoType = true,
-            callDeviceState = CallDeviceState()
         )
     }
 }
