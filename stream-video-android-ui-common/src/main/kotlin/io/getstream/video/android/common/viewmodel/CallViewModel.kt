@@ -21,13 +21,10 @@ import androidx.lifecycle.viewModelScope
 import io.getstream.log.taggedLogger
 import io.getstream.result.Error
 import io.getstream.video.android.common.permission.PermissionManager
-import io.getstream.video.android.common.util.asStateFlowWhileSubscribed
 import io.getstream.video.android.core.Call
-import io.getstream.video.android.core.DeviceStatus
 import io.getstream.video.android.core.StreamVideo
 import io.getstream.video.android.core.call.RtcSession
 import io.getstream.video.android.core.call.state.CallAction
-import io.getstream.video.android.core.call.state.CallDeviceState
 import io.getstream.video.android.core.call.state.FlipCamera
 import io.getstream.video.android.core.call.state.LeaveCall
 import io.getstream.video.android.core.call.state.ShowCallParticipantInfo
@@ -36,12 +33,8 @@ import io.getstream.video.android.core.call.state.ToggleMicrophone
 import io.getstream.video.android.core.call.state.ToggleSpeakerphone
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withTimeout
-import org.openapitools.client.models.CallSettingsResponse
 
 /**
  * The CallViewModel is a light wrapper over
@@ -65,9 +58,6 @@ public open class CallViewModel(public val call: Call) : ViewModel() {
 
     private val logger by taggedLogger("Call:ViewModel")
 
-    // shortcut to the call settings
-    private val settings: StateFlow<CallSettingsResponse?> = call.state.settings
-
     public val client: StreamVideo by lazy { StreamVideo.instance() }
 
     /** if we are in picture in picture mode */
@@ -78,38 +68,6 @@ public open class CallViewModel(public val call: Call) : ViewModel() {
     public val isShowingCallInfoMenu: StateFlow<Boolean> = _isShowingCallInfoMenu
 
     private var permissionManager: PermissionManager? = null
-
-    private val isVideoOn: StateFlow<Boolean> =
-        combine(settings, call.camera.status) { settings, status ->
-            (settings?.video?.enabled == true) &&
-                (status is DeviceStatus.Enabled) &&
-                (permissionManager?.hasCameraPermission?.value == true)
-        }.asStateFlowWhileSubscribed(scope = viewModelScope, initialValue = false)
-
-    private val isMicrophoneOn: StateFlow<Boolean> =
-        combine(settings, call.microphone.status) { _, status ->
-            (status is DeviceStatus.Enabled) &&
-                permissionManager?.hasRecordAudioPermission?.value == true
-        }.asStateFlowWhileSubscribed(scope = viewModelScope, initialValue = false)
-
-    private val isSpeakerphoneOn: StateFlow<Boolean> = call.speaker.status.map { status ->
-        status is DeviceStatus.Enabled
-    }.asStateFlowWhileSubscribed(scope = viewModelScope, initialValue = false)
-
-    public val callDeviceState: StateFlow<CallDeviceState> =
-        combine(
-            isMicrophoneOn,
-            isVideoOn,
-            isSpeakerphoneOn
-        ) { isAudioOn, isVideoOn, isSpeakerPhoneOn ->
-            CallDeviceState(
-                isMicrophoneEnabled = isAudioOn,
-                isSpeakerphoneEnabled = isSpeakerPhoneOn,
-                isCameraEnabled = isVideoOn
-            )
-        }.onEach {
-            logger.d { "[callMediaState] callMediaState: $it" }
-        }.asStateFlowWhileSubscribed(scope = viewModelScope, initialValue = CallDeviceState())
 
     private var onLeaveCall: (() -> Unit)? = null
 
