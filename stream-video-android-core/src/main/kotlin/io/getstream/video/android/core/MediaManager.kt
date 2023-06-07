@@ -31,7 +31,6 @@ import io.getstream.video.android.core.utils.mapState
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.runBlocking
 import okhttp3.internal.toImmutableList
 import org.openapitools.client.models.VideoSettings

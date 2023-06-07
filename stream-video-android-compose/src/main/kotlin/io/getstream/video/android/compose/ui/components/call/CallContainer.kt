@@ -44,7 +44,6 @@ import io.getstream.video.android.compose.ui.components.participants.CallPartici
 import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.ParticipantState
 import io.getstream.video.android.core.call.state.CallAction
-import io.getstream.video.android.core.call.state.CallDeviceState
 import io.getstream.video.android.core.call.state.InviteUsersToCall
 import io.getstream.video.android.core.call.state.ToggleMicrophone
 import io.getstream.video.android.mock.StreamMockUtils

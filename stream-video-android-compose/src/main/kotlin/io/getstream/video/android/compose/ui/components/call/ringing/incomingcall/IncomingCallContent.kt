@@ -23,23 +23,22 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import io.getstream.video.android.common.viewmodel.CallViewModel
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.avatar.LocalAvatarPreviewPlaceholder
 import io.getstream.video.android.compose.ui.components.background.CallBackground
 import io.getstream.video.android.compose.ui.components.call.CallAppBar
 import io.getstream.video.android.core.Call
-import io.getstream.video.android.core.DeviceStatus
 import io.getstream.video.android.core.ParticipantState
 import io.getstream.video.android.core.call.state.CallAction
-import io.getstream.video.android.core.call.state.CallDeviceState
-import io.getstream.video.android.core.utils.mapState
 import io.getstream.video.android.mock.StreamMockUtils
 import io.getstream.video.android.mock.mockCall
 import io.getstream.video.android.mock.mockParticipantList
@@ -65,16 +64,20 @@ public fun IncomingCallContent(
     isShowingHeader: Boolean = true,
     callHeaderContent: (@Composable ColumnScope.() -> Unit)? = null,
     callDetailsContent: (
-    @Composable ColumnScope.(
-        participants: List<ParticipantState>, topPadding: Dp
-    ) -> Unit
+        @Composable ColumnScope.(
+            participants: List<ParticipantState>, topPadding: Dp
+        ) -> Unit
     )? = null,
     callControlsContent: (@Composable BoxScope.() -> Unit)? = null,
     onBackPressed: () -> Unit = {},
     onCallAction: (CallAction) -> Unit = {},
 ) {
     val participants: List<ParticipantState> by call.state.participants.collectAsStateWithLifecycle()
-    val isCameraEnabled by call.camera.isEnabled.collectAsStateWithLifecycle()
+    val isCameraEnabled by if (LocalInspectionMode.current) {
+        remember { mutableStateOf(true) }
+    } else {
+        call.camera.isEnabled.collectAsStateWithLifecycle()
+    }
 
     IncomingCallContent(
         call = call,
@@ -114,9 +117,9 @@ public fun IncomingCallContent(
     isShowingHeader: Boolean = true,
     callHeaderContent: (@Composable ColumnScope.() -> Unit)? = null,
     callDetailsContent: (
-    @Composable ColumnScope.(
-        participants: List<ParticipantState>, topPadding: Dp
-    ) -> Unit
+        @Composable ColumnScope.(
+            participants: List<ParticipantState>, topPadding: Dp
+        ) -> Unit
     )? = null,
     callControlsContent: (@Composable BoxScope.() -> Unit)? = null,
     onBackPressed: () -> Unit = {},
@@ -170,7 +173,7 @@ private fun IncomingCallPreview1() {
     VideoTheme {
         CompositionLocalProvider(
             LocalAvatarPreviewPlaceholder provides
-                    io.getstream.video.android.ui.common.R.drawable.stream_video_call_sample
+                io.getstream.video.android.ui.common.R.drawable.stream_video_call_sample
         ) {
             IncomingCallContent(
                 call = mockCall,
@@ -190,7 +193,7 @@ private fun IncomingCallPreview2() {
     VideoTheme {
         CompositionLocalProvider(
             LocalAvatarPreviewPlaceholder provides
-                    io.getstream.video.android.ui.common.R.drawable.stream_video_call_sample
+                io.getstream.video.android.ui.common.R.drawable.stream_video_call_sample
         ) {
             IncomingCallContent(
                 call = mockCall,

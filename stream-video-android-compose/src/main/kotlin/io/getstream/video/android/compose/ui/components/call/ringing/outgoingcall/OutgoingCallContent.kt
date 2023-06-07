@@ -22,9 +22,12 @@ import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -32,10 +35,8 @@ import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.background.CallBackground
 import io.getstream.video.android.compose.ui.components.call.CallAppBar
 import io.getstream.video.android.core.Call
-import io.getstream.video.android.core.DeviceStatus
 import io.getstream.video.android.core.ParticipantState
 import io.getstream.video.android.core.call.state.CallAction
-import io.getstream.video.android.core.utils.mapState
 import io.getstream.video.android.mock.StreamMockUtils
 import io.getstream.video.android.mock.mockCall
 import io.getstream.video.android.mock.mockParticipantList
@@ -61,9 +62,9 @@ public fun OutgoingCallContent(
     isShowingHeader: Boolean = true,
     callHeaderContent: (@Composable ColumnScope.() -> Unit)? = null,
     callDetailsContent: (
-    @Composable ColumnScope.(
-        participants: List<ParticipantState>, topPadding: Dp
-    ) -> Unit
+        @Composable ColumnScope.(
+            participants: List<ParticipantState>, topPadding: Dp
+        ) -> Unit
     )? = null,
     callControlsContent: (@Composable BoxScope.() -> Unit)? = null,
     onBackPressed: () -> Unit = {},
@@ -108,16 +109,24 @@ public fun OutgoingCallContent(
     isShowingHeader: Boolean = true,
     callHeaderContent: (@Composable ColumnScope.() -> Unit)? = null,
     callDetailsContent: (
-    @Composable ColumnScope.(
-        participants: List<ParticipantState>, topPadding: Dp
-    ) -> Unit
+        @Composable ColumnScope.(
+            participants: List<ParticipantState>, topPadding: Dp
+        ) -> Unit
     )? = null,
     callControlsContent: (@Composable BoxScope.() -> Unit)? = null,
     onBackPressed: () -> Unit = {},
     onCallAction: (CallAction) -> Unit = {},
 ) {
-    val isCameraEnabled by call.camera.isEnabled.collectAsStateWithLifecycle()
-    val isMicrophoneEnabled by call.microphone.isEnabled.collectAsStateWithLifecycle()
+    val isCameraEnabled by if (LocalInspectionMode.current) {
+        remember { mutableStateOf(true) }
+    } else {
+        call.camera.isEnabled.collectAsStateWithLifecycle()
+    }
+    val isMicrophoneEnabled by if (LocalInspectionMode.current) {
+        remember { mutableStateOf(true) }
+    } else {
+        call.microphone.isEnabled.collectAsStateWithLifecycle()
+    }
 
     CallBackground(
         modifier = modifier,

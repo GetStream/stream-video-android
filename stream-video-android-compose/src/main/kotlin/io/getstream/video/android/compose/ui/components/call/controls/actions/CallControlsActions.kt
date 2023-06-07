@@ -20,14 +20,15 @@ import android.content.res.Configuration
 import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.core.Call
-import io.getstream.video.android.core.DeviceStatus
 import io.getstream.video.android.core.call.state.CallAction
-import io.getstream.video.android.core.utils.mapState
 
 /**
  * Builds the default set of Call Control actions based on the call devices.
@@ -49,8 +50,16 @@ public fun buildDefaultCallControlActions(
         Modifier.size(VideoTheme.dimens.landscapeCallControlButtonSize)
     }
 
-    val isCameraEnabled by call.camera.isEnabled.collectAsStateWithLifecycle()
-    val isMicrophoneEnabled by call.microphone.isEnabled.collectAsStateWithLifecycle()
+    val isCameraEnabled by if (LocalInspectionMode.current) {
+        remember { mutableStateOf(true) }
+    } else {
+        call.camera.isEnabled.collectAsStateWithLifecycle()
+    }
+    val isMicrophoneEnabled by if (LocalInspectionMode.current) {
+        remember { mutableStateOf(true) }
+    } else {
+        call.microphone.isEnabled.collectAsStateWithLifecycle()
+    }
 
     return listOf(
         {

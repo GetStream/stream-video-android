@@ -20,17 +20,18 @@ import android.content.res.Configuration
 import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import io.getstream.video.android.common.viewmodel.CallViewModel
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.call.controls.actions.ToggleCameraAction
 import io.getstream.video.android.compose.ui.components.call.controls.actions.ToggleMicrophoneAction
 import io.getstream.video.android.compose.ui.components.call.controls.actions.ToggleSpeakerphoneAction
 import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.call.state.CallAction
-import io.getstream.video.android.core.call.state.CallDeviceState
 
 /**
  * Builds the default set of Lobby Control actions based on the call device states.
@@ -52,7 +53,11 @@ public fun buildDefaultLobbyControlActions(
         Modifier.size(VideoTheme.dimens.landscapeCallControlButtonSize)
     }
 
-    val isCameraEnabled by call.camera.isEnabled.collectAsStateWithLifecycle()
+    val isCameraEnabled by if (LocalInspectionMode.current) {
+        remember { mutableStateOf(true) }
+    } else {
+        call.camera.isEnabled.collectAsStateWithLifecycle()
+    }
     val isMicrophoneEnabled by call.microphone.isEnabled.collectAsStateWithLifecycle()
     val isSpeakerphoneEnabled by call.speaker.isEnabled.collectAsStateWithLifecycle()
 
