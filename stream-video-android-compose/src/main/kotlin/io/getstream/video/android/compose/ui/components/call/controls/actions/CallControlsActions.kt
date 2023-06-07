@@ -69,12 +69,6 @@ public fun buildDefaultCallControlActions(
 
     return listOf(
         {
-            ChatDialogAction(
-                modifier = modifier,
-                onCallAction = onCallAction
-            )
-        },
-        {
             ToggleCameraAction(
                 modifier = modifier,
                 isCameraEnabled = callDeviceState.isCameraEnabled,
