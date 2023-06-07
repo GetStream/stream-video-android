@@ -16,18 +16,6 @@
 
 package io.getstream.video.android.app.ui.call
 
-import io.getstream.video.android.common.viewmodel.CallViewModelFactory
-import io.getstream.video.android.compose.ui.AbstractComposeCallActivity
-import io.getstream.video.android.core.StreamVideo
+import io.getstream.video.android.common.AbstractCallActivity
 
-class CallActivity : AbstractComposeCallActivity() {
-
-    /**
-     * Provides a custom factory for the ViewModel, that provides fake users for invites.
-     */
-    override fun getCallViewModelFactory(): CallViewModelFactory {
-        return CallViewModelFactory(
-            call = StreamVideo.instance().call("default", "replaceme")
-        )
-    }
-}
+class CallActivity : AbstractCallActivity()
