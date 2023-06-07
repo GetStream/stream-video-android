@@ -32,7 +32,7 @@ import io.getstream.video.android.compose.ui.components.call.controls.actions.Fl
 import io.getstream.video.android.compose.ui.components.call.controls.actions.LeaveCallAction
 import io.getstream.video.android.compose.ui.components.call.controls.actions.ToggleCameraAction
 import io.getstream.video.android.compose.ui.components.call.controls.actions.ToggleMicrophoneAction
-import io.getstream.video.android.core.call.state.CallDeviceState
+import io.getstream.video.android.mock.mockCall
 import org.junit.Rule
 import org.junit.Test
 
@@ -46,7 +46,7 @@ internal class CallControlsTest : BaseComposeTest() {
     @Test
     fun `snapshot CallControls composable`() {
         snapshotWithDarkMode {
-            ControlActions(callDeviceState = CallDeviceState(), onCallAction = {})
+            ControlActions(call = mockCall, onCallAction = {})
         }
     }
 

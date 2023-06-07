@@ -21,7 +21,6 @@ import app.cash.paparazzi.Paparazzi
 import io.getstream.video.android.compose.base.BaseComposeTest
 import io.getstream.video.android.compose.ui.components.call.lobby.CallLobby
 import io.getstream.video.android.core.ParticipantState
-import io.getstream.video.android.core.call.state.CallDeviceState
 import io.getstream.video.android.mock.mockCall
 import org.junit.Rule
 import org.junit.Test
@@ -36,10 +35,9 @@ internal class CallLobbyTest : BaseComposeTest() {
 
     @Test
     fun `snapshot CallLobby composable`() {
-        snapshotWithDarkMode {
+        snapshot {
             CallLobby(
                 call = mockCall,
-                callDeviceState = CallDeviceState(),
                 video = ParticipantState.Video(
                     sessionId = mockCall.sessionId.orEmpty(),
                     track = io.getstream.video.android.core.model.VideoTrack(

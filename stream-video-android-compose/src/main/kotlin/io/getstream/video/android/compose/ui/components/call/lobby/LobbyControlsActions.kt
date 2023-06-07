@@ -58,8 +58,16 @@ public fun buildDefaultLobbyControlActions(
     } else {
         call.camera.isEnabled.collectAsStateWithLifecycle()
     }
-    val isMicrophoneEnabled by call.microphone.isEnabled.collectAsStateWithLifecycle()
-    val isSpeakerphoneEnabled by call.speaker.isEnabled.collectAsStateWithLifecycle()
+    val isMicrophoneEnabled by if (LocalInspectionMode.current) {
+        remember { mutableStateOf(true) }
+    } else {
+        call.microphone.isEnabled.collectAsStateWithLifecycle()
+    }
+    val isSpeakerphoneEnabled by if (LocalInspectionMode.current) {
+        remember { mutableStateOf(true) }
+    } else {
+        call.speaker.isEnabled.collectAsStateWithLifecycle()
+    }
 
     return listOf(
         {

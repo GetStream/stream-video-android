@@ -49,7 +49,6 @@ import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.ParticipantState
 import io.getstream.video.android.core.StreamVideo
 import io.getstream.video.android.core.call.state.CallAction
-import io.getstream.video.android.core.call.state.CallDeviceState
 import io.getstream.video.android.core.model.VideoTrack
 import io.getstream.video.android.mock.StreamMockUtils
 import io.getstream.video.android.mock.mockCall
@@ -63,7 +62,6 @@ import io.getstream.video.android.ui.common.R
  * @param modifier Modifier for styling.
  * @param call The call includes states and will be rendered with participants.
  * @param user A user to display their name and avatar image on the preview.
- * @param callDeviceState Media state of the call, for audio and video.
  * @param labelPosition The position of the user audio state label.
  * @param video A participant video to render on the preview renderer.
  * @param onRenderedContent A video renderer, which renders a local video track before joining a call.
@@ -76,15 +74,16 @@ public fun CallLobby(
     modifier: Modifier = Modifier,
     call: Call,
     user: User = StreamVideo.instance().user,
-    callDeviceState: CallDeviceState,
     labelPosition: Alignment = Alignment.BottomStart,
+    isCameraEnabled: Boolean = call.camera.isEnabled.value,
+    isMicrophoneEnabled: Boolean = call.microphone.isEnabled.value,
     video: ParticipantState.Video = ParticipantState.Video(
         sessionId = call.sessionId.orEmpty(),
         track = VideoTrack(
             streamId = call.sessionId.orEmpty(),
             video = call.camera.mediaManager.videoTrack
         ),
-        enabled = callDeviceState.isCameraEnabled
+        enabled = isCameraEnabled
     ),
     onRenderedContent: @Composable (video: ParticipantState.Video) -> Unit = {
         OnRenderedContent(call = call, video = it)
@@ -117,7 +116,7 @@ public fun CallLobby(
                 .clip(RoundedCornerShape(12.dp))
                 .background(VideoTheme.colors.callLobbyBackground)
         ) {
-            if (callDeviceState.isCameraEnabled) {
+            if (isCameraEnabled) {
                 onRenderedContent.invoke(video)
             } else {
                 onDisabledContent.invoke()
@@ -133,7 +132,7 @@ public fun CallLobby(
             ParticipantLabel(
                 nameLabel = nameLabel,
                 labelPosition = labelPosition,
-                hasAudio = callDeviceState.isMicrophoneEnabled,
+                hasAudio = isMicrophoneEnabled,
                 isSpeaking = false
             )
         }
@@ -181,7 +180,6 @@ private fun CallLobbyPreview() {
     VideoTheme {
         CallLobby(
             call = mockCall,
-            callDeviceState = CallDeviceState(),
             video = ParticipantState.Video(
                 sessionId = mockCall.sessionId.orEmpty(),
                 track = VideoTrack(
