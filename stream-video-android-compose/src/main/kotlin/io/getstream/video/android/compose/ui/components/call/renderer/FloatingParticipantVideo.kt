@@ -19,6 +19,8 @@ package io.getstream.video.android.compose.ui.components.call.renderer
 import androidx.compose.animation.core.animateOffsetAsState
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.gestures.detectDragGestures
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.offset
@@ -32,6 +34,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
@@ -69,11 +72,12 @@ import io.getstream.video.android.ui.common.R
  * @param modifier Modifier for styling.
  */
 @Composable
-public fun FloatingParticipantVideo(
+public fun BoxScope.FloatingParticipantVideo(
     modifier: Modifier = Modifier,
     call: Call,
     participant: ParticipantState,
     parentBounds: IntSize,
+    alignment: Alignment = Alignment.TopEnd,
     style: VideoRendererStyle = RegularVideoRendererStyle(isShowingConnectionQualityIndicator = false)
 ) {
     var videoSize by remember { mutableStateOf(IntSize(0, 0)) }
@@ -106,7 +110,7 @@ public fun FloatingParticipantVideo(
             shape = RoundedCornerShape(16.dp)
         ) {
             Image(
-                modifier = modifier
+                modifier = Modifier
                     .fillMaxSize()
                     .testTag("local_video_renderer"),
                 painter = painterResource(id = R.drawable.stream_video_call_sample),
@@ -121,6 +125,11 @@ public fun FloatingParticipantVideo(
         Card(
             elevation = 8.dp,
             modifier = Modifier
+                .align(alignment)
+                .size(
+                    height = VideoTheme.dimens.floatingVideoHeight,
+                    width = VideoTheme.dimens.floatingVideoWidth
+                )
                 .offset { IntOffset(offset.x.toInt(), offset.y.toInt()) }
                 .pointerInput(parentBounds) {
                     detectDragGestures { change, dragAmount ->
@@ -159,12 +168,12 @@ public fun FloatingParticipantVideo(
                 .then(modifier)
                 .padding(VideoTheme.dimens.floatingVideoPadding)
                 .onGloballyPositioned { videoSize = it.size },
-            shape = RoundedCornerShape(16.dp)
+            shape = VideoTheme.shapes.floatingParticipant
         ) {
             ParticipantVideo(
                 modifier = Modifier
                     .fillMaxSize()
-                    .clip(RoundedCornerShape(16.dp)),
+                    .clip(VideoTheme.shapes.floatingParticipant),
                 call = call,
                 participant = participant,
                 style = style
@@ -207,11 +216,13 @@ private fun LocalVideoContentPreview() {
     val screenHeight = configuration.screenHeightDp
 
     VideoTheme {
-        FloatingParticipantVideo(
-            call = mockCall,
-            modifier = Modifier.fillMaxSize(),
-            participant = mockParticipant,
-            parentBounds = IntSize(screenWidth, screenHeight),
-        )
+        Box {
+            FloatingParticipantVideo(
+                call = mockCall,
+                modifier = Modifier.fillMaxSize(),
+                participant = mockParticipant,
+                parentBounds = IntSize(screenWidth, screenHeight),
+            )
+        }
     }
 }

@@ -26,9 +26,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalInspectionMode
@@ -310,13 +308,6 @@ internal fun BoxScope.LandscapeVideoRenderer(
                 },
                 style = style.copy(isShowingConnectionQualityIndicator = false),
                 parentBounds = parentSize,
-                modifier = Modifier
-                    .size(
-                        height = VideoTheme.dimens.floatingVideoHeight,
-                        width = VideoTheme.dimens.floatingVideoWidth
-                    )
-                    .clip(VideoTheme.shapes.floatingParticipant)
-                    .align(Alignment.TopEnd),
             )
         }
     }
