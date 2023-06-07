@@ -3,8 +3,8 @@
 
 - Snapshots build are created automatically from the "development" branch
 - Configuration.kt has the version number
-- TODO: Updating the testing app?
-- TODO: Release versions deploy process?
+- You can upload a new testing app here: https://console.firebase.google.com/project/stream-video-9b586/appdistribution/app/android:io.getstream.video.android.dogfooding/releases
+- Release versions are created when you create a new release tag on github
 - TODO: Updating the sample app in play store?
 
 ## For Go devs

@@ -38,6 +38,8 @@
 - [ ] Test coverage
 - [ ] Testing on more devices
 - [ ] Audio & Video filters
+- [ ] SDK development guide for all teams
+- [ ] Android SDK development.md cleanup
 
 ### 0.4 milestone
 

@@ -19,15 +19,34 @@ In this tutorial we'll quickly build a low-latency livestreaming experience simi
 
 Time to get started, if you have any questions or feedback be sure to let us know via the feedback button.
 
-### Step 1 - Install
+### Step 1 - Create a new project in android studio
 
+Note that this tutorial was written using Android Studio Flamingo.
+Setup steps can vary slightly across Android Studio versions so if you run into trouble be sure to use the latest version of Android Studio.
 
-### Step 2A - Publish from your phone
+1. Create a new project
+2. Select Phone & Template -> **empty activity**
+3. Name your project **Livestream**.
+
+### Step 2 - Install the SDK & Setup the client
+
+**Add the compose SDK** to your app's `build.gradle` file found in app/build.gradle
+If you're new to android note that there are 2 build.gradle files, you want to open the one in the app folder.
+
+```groovy
+dependencies {
+    implementation "io.getstream:stream-video-android-compose:$stream_version"
+}
+```
+
+### Step 3 - Publish from your phone
 
 The following code shows how to publish from your phone's camera to the call.
 Livestreams by default will start in the backstage mode.
 The call works, you can join with your fellow call hosts, but participants aren't allowed to join yet.
 You can call call.goLive() to start your livestream.
+
+Let's open MainActivity.kt and replace it with:
 
 ```kotlin
 val call = client.call("livestream", "id-here")
@@ -39,18 +58,16 @@ call.goLive()
 
 ```
 
-### Step 2B - Publish from RTMPs
-
-Alternatively you can publish from RTMPs
-
-TODO: example
-
-```kotlin
-```
+Now when you press live your video will be transmitted. You can confirm it by visiting
+and connecting on this webpage. TODO
 
 ### Step 3A - Viewing a livestream (Webrtc)
 
-The client setup for someone watching the call is slightly different.
+The client setup for someone watching the call is quite similar.
+You can join as an anonymous, guest or regular user.
+
+
+
 
 ```kotlin
 ```
@@ -66,10 +83,6 @@ setContent {
 }
 ```
 
-- Participant count?
-- Show how long the stream has been running
-- Link to docs on the chat integration
-- Manually changing the displayed quality
 - Muting the audio output of the livestream
 
 ### Step 3B - Viewing a livestream (HLS)
