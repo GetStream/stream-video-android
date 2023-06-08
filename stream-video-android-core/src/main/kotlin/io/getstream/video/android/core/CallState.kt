@@ -68,6 +68,7 @@ import org.openapitools.client.models.CustomVideoEvent
 import org.openapitools.client.models.EgressResponse
 import org.openapitools.client.models.GetCallResponse
 import org.openapitools.client.models.GetOrCreateCallResponse
+import org.openapitools.client.models.GoLiveResponse
 import org.openapitools.client.models.HealthCheckEvent
 import org.openapitools.client.models.JoinCallResponse
 import org.openapitools.client.models.MemberResponse
@@ -75,6 +76,7 @@ import org.openapitools.client.models.OwnCapability
 import org.openapitools.client.models.PermissionRequestEvent
 import org.openapitools.client.models.QueryMembersResponse
 import org.openapitools.client.models.ReactionResponse
+import org.openapitools.client.models.StopLiveResponse
 import org.openapitools.client.models.UnblockedUserEvent
 import org.openapitools.client.models.UpdateCallResponse
 import org.openapitools.client.models.UpdatedCallPermissionsEvent
@@ -281,6 +283,7 @@ public class CallState(private val call: Call, private val user: User) {
     val rejectedBy: StateFlow<Set<String>> = _rejectedBy
 
     internal val _session = MutableStateFlow<CallSessionResponse?>(null)
+    val session: StateFlow<CallSessionResponse?> = _session
 
     /** startsAt */
     private val _startsAt: MutableStateFlow<OffsetDateTime?> = MutableStateFlow(null)
@@ -726,6 +729,14 @@ public class CallState(private val call: Call, private val user: User) {
         val pins = _pinnedParticipants.value.toMutableMap()
         pins.remove(sessionId)
         _pinnedParticipants.value = pins
+    }
+
+    fun updateFromResponse(result: StopLiveResponse) {
+        updateFromResponse(result.call)
+    }
+
+    fun updateFromResponse(result: GoLiveResponse) {
+        updateFromResponse(result.call)
     }
 }
 

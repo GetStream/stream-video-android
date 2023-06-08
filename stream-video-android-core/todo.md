@@ -13,27 +13,51 @@
 *  Week 8: Docs & Stability, Ringing
 *  Week 9: Tutorials & Stability, Ringing & Push
 
-### Tutorials ~1 week left
 
-- [ ] Deeplink support to video demo app on web
-- [ ] React component to load API key, user and token for video demo flow
+### 0.1 milestone
+
 - [ ] Video calling tutorial & Feedback cycle with team
 - [ ] Livestream tutorial & Feedback cycle with team
 - [ ] Audio room tutorial & Feedback cycle with team
+- [ ] React component to load API key, user and token for video demo flow in the tutorials
+- [ ] Video disconnects sometimes. (BufferQueue has not connected producer)
+- [ ] Reconnect flow can't reconnect the subscriber (SFU doesn't support restarts on the subscriber peer connection yet)
+- [ ] Graceful SFU shutdown (switch between SFUs)
+- [ ] Ring support & Docs (Jc)
+- [ ] Publish 0.1 on Maven
+
+### 0.2 milestone
+
+- [ ] Deeplink support for video call demo & dogfooding app (skip auth for the video demo, keep it for dogfooding)
+- [ ] Chat Integration
+- [ ] XML version of VideoRenderer
+- [ ] Reactions
+
+### 0.3 milestone
+
+- [ ] Test coverage
+- [ ] Testing on more devices
+- [ ] Audio & Video filters
+- [ ] SDK development guide for all teams
+- [ ] Android SDK development.md cleanup
+
+### 0.4 milestone
+
+- [ ] Analytics integration
+- [ ] Screensharing
+
+
+
 
 ### Docs ~1 week left
 
-- [ ] UI cookbook
-- [ ] UI components
+- [X] UI cookbook
+- [X] UI components
 - [X] Low level docs
 
 ### TODO ~1 week
 
 - [ ] Error handling could be improved
-- [ ] Speaker phone selection isn't right, should use the preferences of all 4, or only switch when its an earpiece, not switch from bluetooth
-- [ ] Video disconnects sometimes. (BufferQueue has not connected producer)
-- [ ] Reconnect flow can't reconnect the subscriber (SFU related)
-- [ ] Graceful SFU shutdown
 - [ ] Share example with backend team for resolution degradation
 - [ ] HTTP requests fail in interceptor, which is wrong. (see https://console.firebase.google.com/project/stream-video-9b586/crashlytics/app/android:io.getstream.video.android.dogfooding.debug/issues?state=open&time=last-seven-days&tag=all&sort=eventCount)
 - [ ] Go through all tests & TODOs and update with latest server changes.
@@ -42,6 +66,7 @@
 - [ ] Add a timeout for waiting on the socket authentication events
 - [ ] Improve our error classes. Right now there are 4 different formats. 
 - [ ] XML version of VideoRenderer
+- [X] Speaker phone selection isn't right, should use the preferences of all 4, or only switch when its an earpiece, not switch from bluetooth
 - [X] use standard debug, verbose, info, warning and error debug levels on StreamVideoBuilder
 - [X] Android volume is too low when calling from react
 - [X] permission handling on the intro/preview screen is wrong. it starts out as video enabled
@@ -62,7 +87,7 @@
 #### Livestream
 
 - [ ] Failure(value=NetworkError(message=GetOrCreateCall failed with error: "User 'thierry' with role 'user' is not allowed to perform action CreateCall in scope 'video:livestream'", serverErrorCode=17, statusCode=403, cause=java.lang.Throwable: https://getstream.io/chat/docs/api_errors_response))
-- [ ] hlsPlaylistUrl vs ingress/egress
+- [X] hlsPlaylistUrl vs ingress/egress
 - [ ] Livestreaming where do i see when the call started
 
 #### Audio room
@@ -80,9 +105,8 @@
 
 ### App & Compose
 
-- [ ] Deeplink support for video call demo & dogfooding app
-- [ ] Telemetry to firebase/crashlytics (with an opt out, or research alternatives)
-- [ ] Preview components (CallLobbyContent + CallLobbyViewModel)
+- [X] Telemetry to firebase/crashlytics (with an opt out, or research alternatives)
+- [ ] Call Preview components (CallLobbyContent + CallLobbyViewModel)
 - [ ] Reactions don't show up
 - [ ] Chat integration (we need an event from the server though)
 - [ ] PIP
