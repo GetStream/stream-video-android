@@ -30,7 +30,6 @@ The SDK consists of several artifacts, based on the depth of customization and m
 
 * `stream-video-android-core`: Represents the core functionality of the SDK, such as establishing communication with the main API, creating and joining `Call`s, looking up `User`s and receiving various events.
 * `stream-video-android-compose`: The Jetpack Compose Components artifact that contains all out-of-the-box screens as well as smaller building blocks that let you implement rich UI features based on the `stream-video-android-core` SDK state.
-* `stream-video-android-xml`: The XML Components artifact that contains all out-of-the-box screens as well as smaller building blocks that let you implement rich UI features based on the `stream-video-android-core` SDK state.
 
 ## 🛠️ Installation & Getting Started 🚀
 
@@ -45,6 +44,7 @@ We have several different sample apps and example kits you can use to explore ou
 Our Jetpack Compose implementation comes with its own [example app](https://github.com/GetStream/stream-video-android/tree/main/app) where you can explore our Video SDK using the Compose Components.
 
 To run the sample app, clone this repository:
+
 ````shell
 git clone git@github.com:GetStream/stream-video-android.git
 ````
@@ -86,14 +86,31 @@ Our Video SDK ships with a plethora of cool and modern features. Here are just s
 * Background call support
 * Picture-In-Picture mode support
 * Enabling and disabling audio and video when in calls
-* Flipping camera in calls
+* Flipping, Enabling and disabling camera in calls
 * Enabling and disabling speakerphone in calls
-* Seeing all call participants
+* Rendering all call participants
 * Push notification providers support
 * Automatic Incoming/Outgoing call prompts based on state changes
 * Call configuration customization (timeouts, automatic rejections, showing prompts...)
-* Deep linking support
 * Variable video quality streaming
 * Call recording
 * Screen sharing display
 * Portrait and landscape UI configuration support
+
+## License
+
+```
+Copyright (c) 2014-2023 Stream.io Inc. All rights reserved.
+
+Licensed under the Stream License;
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+   https://github.com/GetStream/stream-video-android/blob/main/LICENSE
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+```
