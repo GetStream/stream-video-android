@@ -63,6 +63,7 @@ import io.getstream.video.android.model.User
  * @param modifier Modifier for styling.
  * @param onBackPressed Handler when the user taps on the back button.
  * @param onCallAction Handler when the user clicks on some of the call controls.
+ * @param permissions Android permissions that should be required to render a video call properly.
  * @param appBarContent Content shown that a call information or an additional actions.
  * @param controlsContent Content is shown that allows users to trigger different actions to control a joined call.
  * @param pictureInPictureContent Content shown when the user enters Picture in Picture mode, if
@@ -78,6 +79,10 @@ public fun CallContainer(
     isVideoType: Boolean = true,
     onBackPressed: () -> Unit = {},
     onCallAction: (CallAction) -> Unit = { DefaultOnCallActionHandler.onCallAction(call, it) },
+    permissions: List<String> = listOf(
+        android.Manifest.permission.CAMERA,
+        android.Manifest.permission.RECORD_AUDIO
+    ),
     appBarContent: @Composable (call: Call) -> Unit = {
         CallAppBar(
             modifier = Modifier.testTag("call_appbar"),
@@ -114,6 +119,7 @@ public fun CallContainer(
             modifier = modifier.testTag("call_content"),
             style = style,
             call = call,
+            permissions = permissions,
             callViewModel = callViewModel,
             onBackPressed = onBackPressed,
             onCallAction = onCallAction,
@@ -140,6 +146,7 @@ public fun CallContainer(
         call = call,
         isVideoType = isVideoType,
         modifier = modifier,
+        permissions = permissions,
         onBackPressed = onBackPressed,
         onCallAction = onCallAction,
         callAppBarContent = appBarContent,
@@ -162,6 +169,7 @@ public fun CallContainer(
  * @param modifier Modifier for styling.
  * @param onBackPressed Handler when the user taps on the back button.
  * @param onCallAction Handler when the user clicks on some of the call controls.
+ * @param permissions Android permissions that should be required to render a video call properly.
  * @param callAppBarContent Content is shown that calls information or additional actions.
  * @param callControlsContent Content is shown that allows users to trigger different actions to control a joined call.
  * @param pictureInPictureContent Content shown when the user enters Picture in Picture mode, if
@@ -176,6 +184,10 @@ public fun CallContainer(
     isVideoType: Boolean = true,
     onBackPressed: () -> Unit = {},
     onCallAction: (CallAction) -> Unit = { DefaultOnCallActionHandler.onCallAction(call, it) },
+    permissions: List<String> = listOf(
+        android.Manifest.permission.CAMERA,
+        android.Manifest.permission.RECORD_AUDIO
+    ),
     callAppBarContent: @Composable (call: Call) -> Unit = {
         CallAppBar(
             modifier = Modifier.testTag("call_appbar"),
@@ -211,6 +223,7 @@ public fun CallContainer(
             call = call,
             style = style,
             modifier = modifier.testTag("call_content"),
+            permissions = permissions,
             onCallAction = onCallAction,
             callAppBarContent = callAppBarContent,
             callControlsContent = callControlsContent,
@@ -246,6 +259,10 @@ internal fun DefaultCallContent(
         participant: ParticipantState,
         style: VideoRendererStyle
     ) -> Unit,
+    permissions: List<String> = listOf(
+        android.Manifest.permission.CAMERA,
+        android.Manifest.permission.RECORD_AUDIO
+    ),
     onCallAction: (CallAction) -> Unit = { DefaultOnCallActionHandler.onCallAction(call, it) },
     callAppBarContent: @Composable (call: Call) -> Unit,
     callControlsContent: @Composable (call: Call) -> Unit,
@@ -255,6 +272,7 @@ internal fun DefaultCallContent(
         modifier = modifier,
         style = style,
         call = call,
+        permissions = permissions,
         callViewModel = callViewModel,
         onBackPressed = onBackPressed,
         onCallAction = onCallAction,
