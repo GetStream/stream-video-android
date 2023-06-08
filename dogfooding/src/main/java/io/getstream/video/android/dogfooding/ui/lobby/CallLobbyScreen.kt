@@ -109,6 +109,11 @@ private fun CallJoinHeader(
 
     HandleCallLobbyUiState(callLobbyUiState = uiState)
 
+    LaunchedEffect(key1 = Unit) {
+        callLobbyViewModel.call.camera.setEnabled(true)
+        callLobbyViewModel.call.microphone.setEnabled(true)
+    }
+
     Row(
         modifier = Modifier
             .fillMaxWidth()
