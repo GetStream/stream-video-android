@@ -50,6 +50,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.lifecycleScope
 import io.getstream.log.taggedLogger
+import io.getstream.video.android.common.AbstractCallActivity
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.avatar.Avatar
 import io.getstream.video.android.core.utils.initials
@@ -170,7 +171,7 @@ class HomeActivity : AppCompatActivity() {
     }
 
     private fun startCallActivity() {
-        val intent = CallActivity.getIntent(
+        val intent = AbstractCallActivity.createIntent<CallActivity>(
             this@HomeActivity,
             callIdState.value
         )
