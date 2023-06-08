@@ -23,7 +23,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
-internal data class Timer(val name: String, val start: Long) {
+internal data class Timer(val name: String, val start: Long=System.currentTimeMillis()) {
     var end: Long = 0
     var duration: Long = 0
     var splits: List<Pair<String, Long>> = mutableListOf<Pair<String, Long>>()

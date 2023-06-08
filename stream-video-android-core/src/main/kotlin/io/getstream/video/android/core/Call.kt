@@ -33,7 +33,9 @@ import io.getstream.video.android.core.model.toIceServer
 import io.getstream.video.android.model.User
 import io.getstream.webrtc.android.ui.VideoTextureViewRenderer
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.async
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.first
@@ -248,7 +250,8 @@ public class Call(
     val id: String,
     val user: User,
 ) {
-    private lateinit var location: String
+
+
     internal val clientImpl = client as StreamVideoImpl
     private val logger by taggedLogger("Call")
 
@@ -397,6 +400,8 @@ public class Call(
         return true
     }
 
+
+
     internal suspend fun _join(
         create: Boolean = false,
         createOptions: CreateCallOptions? = null,
@@ -407,7 +412,7 @@ public class Call(
         // step 1. call the join endpoint to get a list of SFUs
         val timer = clientImpl.debugInfo.trackTime("call.join")
 
-        val locationResult = clientImpl.selectLocation()
+        val locationResult = clientImpl.getCachedLocation()
         if (locationResult !is Success) {
             return locationResult as Failure
         }
@@ -419,8 +424,7 @@ public class Call(
             } else {
                 null
             }
-        location = locationResult.value
-        val result = joinRequest(options, location, ring = ring, notify = notify)
+        val result = joinRequest(options, locationResult.value, ring = ring, notify = notify)
 
         if (result !is Success) {
             return result as Failure
@@ -497,6 +501,7 @@ public class Call(
     /** Leave the call, but don't end it for other users */
     fun leave() {
         state._connection.value = RealtimeConnection.Disconnected
+        client.state.removeActiveCall()
         cleanup()
     }
 

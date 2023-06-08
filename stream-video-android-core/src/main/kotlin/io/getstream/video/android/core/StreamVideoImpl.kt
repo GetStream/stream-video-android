@@ -56,11 +56,11 @@ import io.getstream.video.android.model.mapper.toTypeAndId
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.NonCancellable.cancel
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.cancel
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.withContext
@@ -69,7 +69,6 @@ import kotlinx.serialization.json.Json
 import okhttp3.Callback
 import okhttp3.Request
 import okhttp3.Response
-import okio.IOException
 import org.openapitools.client.models.AcceptCallResponse
 import org.openapitools.client.models.BlockUserRequest
 import org.openapitools.client.models.BlockUserResponse
@@ -127,6 +126,8 @@ internal class StreamVideoImpl internal constructor(
     internal val tokenProvider: (suspend (error: Throwable?) -> String)?,
     internal val dataStore: StreamUserDataStore,
 ) : StreamVideo {
+
+    private var locationJob: Deferred<Result<String>>? = null
 
     /** the state for the client, includes the current user */
     override val state = ClientState(this)
@@ -341,6 +342,39 @@ internal class StreamVideoImpl internal constructor(
                 }
             }
         }
+    }
+
+    var location: String? = null
+
+    internal suspend fun getCachedLocation(): Result<String> {
+        val job = loadLocationAsync()
+        job.join()
+        location?.let {
+            return Success(it)
+        }
+        return selectLocation()
+    }
+
+    internal fun loadLocationAsync(): Deferred<Result<String>> {
+        if (locationJob != null) return locationJob as Deferred<Result<String>>
+        locationJob = scope.async {
+            selectLocation()
+        }
+        return locationJob as Deferred<Result<String>>
+    }
+
+    internal suspend fun selectLocation(): Result<String> {
+        val attempts = 3
+        var lastResult: Result<String>? = null
+        while (attempts<3) {
+            lastResult = _selectLocation()
+            if (lastResult is Success) {
+                location = lastResult.value
+                return lastResult
+            }
+            delay(100L)
+        }
+        return lastResult ?: Failure(Error.GenericError("Failed to select location"))
     }
 
     override suspend fun connectAsync(): Deferred<Unit> {
@@ -915,7 +949,7 @@ internal class StreamVideoImpl internal constructor(
         }
     }
 
-    suspend fun selectLocation(): Result<String> {
+    suspend fun _selectLocation(): Result<String> {
         return wrapAPICall {
             val url = "https://hint.stream-io-video.com/"
             val request: Request = Request.Builder()
