@@ -28,6 +28,8 @@ import io.getstream.video.android.core.filter.AudioFilter
 import io.getstream.video.android.core.filter.VideoFilter
 import io.getstream.video.android.core.internal.module.ConnectionModule
 import io.getstream.video.android.core.logging.LoggingLevel
+import io.getstream.video.android.core.notifications.NotificationConfig
+import io.getstream.video.android.core.notifications.internal.StreamNotificationManager
 import io.getstream.video.android.datastore.delegate.StreamUserDataStore
 import io.getstream.video.android.model.ApiKey
 import io.getstream.video.android.model.User
@@ -139,6 +141,13 @@ public class StreamVideoBuilder @JvmOverloads constructor(
             userToken = token
         )
 
+        val streamNotificationManager = StreamNotificationManager.install(
+            context,
+            scope,
+            NotificationConfig(pushDeviceGenerators),
+            connectionModule.devicesApi,
+            dataStore,
+        )
         // create the client
 
         val client = StreamVideoImpl(
@@ -150,7 +159,7 @@ public class StreamVideoBuilder @JvmOverloads constructor(
             loggingLevel = loggingLevel,
             lifecycle = lifecycle,
             connectionModule = connectionModule,
-            pushDeviceGenerators = pushDeviceGenerators
+            streamNotificationManager = streamNotificationManager,
         )
 
         scope.launch {

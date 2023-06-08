@@ -107,8 +107,6 @@ public interface StreamVideo {
      */
     public fun logOut()
 
-    public suspend fun registerPushDevice()
-
     public companion object {
         /**
          * Represents if [StreamVideo] is already installed or not.

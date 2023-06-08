@@ -40,6 +40,7 @@ import io.getstream.video.android.core.model.MuteUsersData
 import io.getstream.video.android.core.model.SortField
 import io.getstream.video.android.core.model.UpdateUserPermissionsData
 import io.getstream.video.android.core.model.toRequest
+import io.getstream.video.android.core.notifications.internal.StreamNotificationManager
 import io.getstream.video.android.core.socket.ErrorResponse
 import io.getstream.video.android.core.socket.SocketState
 import io.getstream.video.android.core.utils.DebugInfo
@@ -64,7 +65,6 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.withContext
-import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.Json
 import okhttp3.Callback
 import okhttp3.Request
@@ -75,7 +75,6 @@ import org.openapitools.client.models.BlockUserResponse
 import org.openapitools.client.models.CallRequest
 import org.openapitools.client.models.CallSettingsRequest
 import org.openapitools.client.models.ConnectedEvent
-import org.openapitools.client.models.CreateDeviceRequest
 import org.openapitools.client.models.CreateGuestRequest
 import org.openapitools.client.models.CreateGuestResponse
 import org.openapitools.client.models.GetCallResponse
@@ -122,9 +121,9 @@ internal class StreamVideoImpl internal constructor(
     private val lifecycle: Lifecycle,
     private val loggingLevel: LoggingLevel,
     internal val connectionModule: ConnectionModule,
-    internal val pushDeviceGenerators: List<PushDeviceGenerator>,
     internal val tokenProvider: (suspend (error: Throwable?) -> String)?,
     internal val dataStore: StreamUserDataStore,
+    internal val streamNotificationManager: StreamNotificationManager,
 ) : StreamVideo {
 
     private var locationJob: Deferred<Result<String>>? = null
@@ -167,32 +166,8 @@ internal class StreamVideoImpl internal constructor(
      * @see StreamVideo.createDevice
      */
     override suspend fun createDevice(pushDevice: PushDevice): Result<Device> {
-        logger.d { "[createDevice] pushDevice: $pushDevice" }
-        return pushDevice.toCreateDeviceRequest().flatMap { createDeviceRequest ->
-            wrapAPICall {
-                connectionModule.devicesApi.createDevice(createDeviceRequest)
-                Device(
-                    id = pushDevice.token,
-                    pushProvider = pushDevice.pushProvider.key,
-                    pushProviderName = pushDevice.providerName ?: ""
-                ).also(::storeDevice)
-            }
-        }
+        return streamNotificationManager.createDevice(pushDevice)
     }
-
-    private fun PushDevice.toCreateDeviceRequest(): Result<CreateDeviceRequest> =
-        when (pushProvider) {
-            PushProvider.FIREBASE -> Success(CreateDeviceRequest.PushProvider.firebase)
-            PushProvider.HUAWEI -> Success(CreateDeviceRequest.PushProvider.huawei)
-            PushProvider.XIAOMI -> Success(CreateDeviceRequest.PushProvider.xiaomi)
-            PushProvider.UNKNOWN -> Failure(Error.GenericError("Unsupported PushProvider"))
-        }.map {
-            CreateDeviceRequest(
-                id = token,
-                pushProvider = it,
-                pushProviderName = providerName
-            )
-        }
 
     /**
      * Ensure that every API call runs on the IO dispatcher and has correct error handling
@@ -406,31 +381,11 @@ internal class StreamVideoImpl internal constructor(
         }
     }
 
-    private fun storeDevice(device: Device) {
-        logger.d { "[storeDevice] device: device" }
-        scope.launch {
-            dataStore.updateUserDevice(device)
-        }
-    }
-
-    private fun removeStoredDeivce(device: Device) {
-        logger.d { "[storeDevice] device: device" }
-        scope.launch {
-            dataStore.userDevice.value
-                .takeIf { it == device }
-                ?.let { dataStore.updateUserDevice(null) }
-        }
-    }
-
     /**
      * @see StreamVideo.deleteDevice
      */
     override suspend fun deleteDevice(device: Device): Result<Unit> {
-        logger.d { "[deleteDevice] device: $device" }
-        return wrapAPICall {
-            connectionModule.devicesApi.deleteDevice(device.id, userId)
-            removeStoredDeivce(device)
-        }
+        return streamNotificationManager.deleteDevice(device)
     }
 
     fun setupGuestUser(user: User) {
@@ -467,20 +422,8 @@ internal class StreamVideoImpl internal constructor(
         }
     }
 
-    override suspend fun registerPushDevice() {
-        // first get a push device generator that works for this device
-        val generator = pushDeviceGenerators.firstOrNull { it.isValidForThisDevice(context) }
-
-        // if we found one, register it at the server
-        if (generator != null) {
-            generator.onPushDeviceGeneratorSelected()
-
-            generator.asyncGeneratePushDevice { generatedDevice ->
-                scope.launch {
-                    createDevice(generatedDevice)
-                }
-            }
-        }
+    internal suspend fun registerPushDevice() {
+        streamNotificationManager.registerPushDevice()
     }
 
     /**
