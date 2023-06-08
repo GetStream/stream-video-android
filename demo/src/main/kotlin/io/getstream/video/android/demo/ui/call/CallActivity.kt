@@ -48,6 +48,7 @@ class CallActivity : AbstractCallActivity() {
             VideoTheme {
                 CallContainer(
                     modifier = Modifier.background(color = VideoTheme.colors.appBackground),
+                    call = call,
                     callViewModel = vm,
                     onBackPressed = { finish() },
                 )
