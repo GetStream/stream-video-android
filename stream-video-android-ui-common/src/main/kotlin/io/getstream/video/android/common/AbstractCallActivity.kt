@@ -16,9 +16,7 @@
 
 package io.getstream.video.android.common
 
-import android.Manifest
 import android.annotation.SuppressLint
-import android.app.AlertDialog
 import android.app.PictureInPictureParams
 import android.content.Context
 import android.content.Intent
@@ -26,7 +24,6 @@ import android.content.pm.ActivityInfo
 import android.content.res.Configuration
 import android.net.Uri
 import android.os.Build
-import android.os.Bundle
 import android.provider.Settings
 import android.util.Rational
 import android.view.View
@@ -34,32 +31,20 @@ import android.view.WindowInsets
 import android.view.WindowInsetsController
 import android.view.WindowManager
 import androidx.activity.ComponentActivity
-import androidx.activity.viewModels
-import io.getstream.video.android.common.permission.PermissionManager
-import io.getstream.video.android.common.permission.PermissionManagerProvider
-import io.getstream.video.android.common.viewmodel.CallViewModel
-import io.getstream.video.android.common.viewmodel.CallViewModelFactory
 import io.getstream.video.android.core.Call
-import io.getstream.video.android.core.StreamVideo
-import io.getstream.video.android.core.call.state.ToggleCamera
-import io.getstream.video.android.core.call.state.ToggleMicrophone
 import io.getstream.video.android.core.call.state.ToggleScreenConfiguration
 import io.getstream.video.android.model.StreamCallId
-import io.getstream.video.android.model.mapper.toTypeAndId
 
 /**
  * Add support for fullscreen mode and PIP to your activity
  */
-public abstract class AbstractCallActivity :
-    ComponentActivity() {
+public abstract class AbstractCallActivity : ComponentActivity() {
 
-    abstract public fun getCall(): Call
-    abstract public fun pipChanged(isInPip: Boolean)
+    public abstract fun getCall(): Call
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
+    public abstract fun pipChanged(isInPip: Boolean)
 
-    }
+    public abstract fun closeCall()
 
     @SuppressLint("SourceLockedOrientationActivity")
     private fun toggleFullscreen(action: ToggleScreenConfiguration) {
@@ -183,8 +168,13 @@ public abstract class AbstractCallActivity :
 
     override fun onStop() {
         super.onStop()
-    }
 
+        val isInPiP = isInPictureInPictureMode
+
+        if (isInPiP) {
+            closeCall()
+        }
+    }
 
     override fun onConfigurationChanged(newConfig: Configuration) {
         super.onConfigurationChanged(newConfig)
@@ -192,8 +182,7 @@ public abstract class AbstractCallActivity :
     }
 
     public companion object {
-        @PublishedApi
-        internal const val EXTRA_CID: String = "EXTRA_CID"
+        public const val EXTRA_CID: String = "EXTRA_CID"
 
         @JvmStatic
         public inline fun <reified T : AbstractCallActivity> createIntent(

@@ -17,24 +17,8 @@
 package io.getstream.video.android.common.viewmodel
 
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
-import io.getstream.log.taggedLogger
-import io.getstream.result.Error
-import io.getstream.video.android.common.permission.PermissionManager
-import io.getstream.video.android.core.Call
-import io.getstream.video.android.core.StreamVideo
-import io.getstream.video.android.core.call.RtcSession
-import io.getstream.video.android.core.call.state.CallAction
-import io.getstream.video.android.core.call.state.FlipCamera
-import io.getstream.video.android.core.call.state.LeaveCall
-import io.getstream.video.android.core.call.state.ShowCallParticipantInfo
-import io.getstream.video.android.core.call.state.ToggleCamera
-import io.getstream.video.android.core.call.state.ToggleMicrophone
-import io.getstream.video.android.core.call.state.ToggleSpeakerphone
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withTimeout
 
 /**
  * The CallViewModel is a light wrapper over
@@ -54,11 +38,7 @@ import kotlinx.coroutines.withTimeout
  * - Opening/closing the participant menu
  *
  */
-public open class CallViewModel(public val call: Call) : ViewModel() {
-
-    private val logger by taggedLogger("Call:ViewModel")
-
-    public val client: StreamVideo by lazy { StreamVideo.instance() }
+public open class CallViewModel : ViewModel() {
 
     /** if we are in picture in picture mode */
     private val _isInPictureInPicture: MutableStateFlow<Boolean> = MutableStateFlow(false)
@@ -70,13 +50,12 @@ public open class CallViewModel(public val call: Call) : ViewModel() {
     override fun onCleared() {
         super.onCleared()
         dismissCallInfoMenu()
-        // properly clean up
-        call.leave()
     }
 
     public fun openCallInfoMenu() {
         _isShowingCallInfoMenu.value = true
     }
+
     public fun dismissCallInfoMenu() {
         this._isShowingCallInfoMenu.value = false
     }
@@ -85,5 +64,3 @@ public open class CallViewModel(public val call: Call) : ViewModel() {
         this._isInPictureInPicture.value = inPictureInPictureMode
     }
 }
-
-private const val CONNECT_TIMEOUT = 30_000L

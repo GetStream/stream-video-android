@@ -17,5 +17,23 @@
 package io.getstream.video.android.app.ui.call
 
 import io.getstream.video.android.common.AbstractCallActivity
+import io.getstream.video.android.core.Call
+import io.getstream.video.android.core.StreamVideo
+import io.getstream.video.android.model.StreamCallId
 
-class XmlCallActivity : AbstractCallActivity()
+class XmlCallActivity : AbstractCallActivity() {
+
+    override fun getCall(): Call {
+        val streamVideo = StreamVideo.instance()
+        val cid = intent.getParcelableExtra<StreamCallId>(EXTRA_CID)
+            ?: throw IllegalArgumentException("call type and id is invalid!")
+        return streamVideo.call(cid.type, cid.id)
+    }
+
+    override fun closeCall() {
+        getCall().leave()
+    }
+
+    override fun pipChanged(isInPip: Boolean) {
+    }
+}
