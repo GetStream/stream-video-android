@@ -19,14 +19,11 @@ package io.getstream.video.android.core
 import android.content.Context
 import androidx.lifecycle.Lifecycle
 import io.getstream.android.push.PushDevice
-import io.getstream.android.push.PushDeviceGenerator
-import io.getstream.android.push.PushProvider
 import io.getstream.log.taggedLogger
 import io.getstream.result.Error
 import io.getstream.result.Result
 import io.getstream.result.Result.Failure
 import io.getstream.result.Result.Success
-import io.getstream.result.flatMap
 import io.getstream.video.android.core.call.connection.StreamPeerConnectionFactory
 import io.getstream.video.android.core.errors.VideoErrorCode
 import io.getstream.video.android.core.events.VideoEventListener
@@ -40,6 +37,7 @@ import io.getstream.video.android.core.model.MuteUsersData
 import io.getstream.video.android.core.model.SortField
 import io.getstream.video.android.core.model.UpdateUserPermissionsData
 import io.getstream.video.android.core.model.toRequest
+import io.getstream.video.android.core.notifications.NotificationHandler
 import io.getstream.video.android.core.notifications.internal.StreamNotificationManager
 import io.getstream.video.android.core.socket.ErrorResponse
 import io.getstream.video.android.core.socket.SocketState
@@ -51,6 +49,7 @@ import io.getstream.video.android.core.utils.toEdge
 import io.getstream.video.android.core.utils.toUser
 import io.getstream.video.android.datastore.delegate.StreamUserDataStore
 import io.getstream.video.android.model.Device
+import io.getstream.video.android.model.StreamCallId
 import io.getstream.video.android.model.User
 import io.getstream.video.android.model.UserDevices
 import io.getstream.video.android.model.mapper.toTypeAndId
@@ -124,7 +123,8 @@ internal class StreamVideoImpl internal constructor(
     internal val tokenProvider: (suspend (error: Throwable?) -> String)?,
     internal val dataStore: StreamUserDataStore,
     internal val streamNotificationManager: StreamNotificationManager,
-) : StreamVideo {
+) : StreamVideo,
+    NotificationHandler by streamNotificationManager {
 
     private var locationJob: Deferred<Result<String>>? = null
 
@@ -132,6 +132,7 @@ internal class StreamVideoImpl internal constructor(
     override val state = ClientState(this)
 
     internal val scope = CoroutineScope(_scope.coroutineContext + SupervisorJob())
+
     /** if true we fail fast on errors instead of logging them */
     var developmentMode = true
     val debugInfo = DebugInfo(this)

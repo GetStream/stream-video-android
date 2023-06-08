@@ -18,8 +18,9 @@ import io.getstream.result.Error
 import io.getstream.result.Result
 import io.getstream.result.flatMapSuspend
 import io.getstream.video.android.core.StreamVideo
-import io.getstream.video.android.core.notifications.NoOpNotificationPermissionHandler
+import io.getstream.video.android.core.notifications.DefaultNotificationHandler
 import io.getstream.video.android.core.notifications.NotificationConfig
+import io.getstream.video.android.core.notifications.NotificationHandler
 import io.getstream.video.android.datastore.delegate.StreamUserDataStore
 import io.getstream.video.android.model.Device
 import kotlinx.coroutines.CoroutineScope
@@ -34,7 +35,7 @@ internal class StreamNotificationManager private constructor(
     private val devicesApi: DevicesApi,
     private val dataStore: StreamUserDataStore,
     private val notificationPermissionManager: NotificationPermissionManager,
-){
+) : NotificationHandler by notificationConfig.notificationHandler {
 
     suspend fun registerPushDevice() {
         logger.d { "[registerPushDevice] no args" }
@@ -157,7 +158,7 @@ internal class StreamNotificationManager private constructor(
                     internalStreamNotificationManager = StreamNotificationManager(
                         applicationContext,
                         scope,
-                        notificationConfig,
+                        notificationConfig.overrideDefault(applicationContext as Application),
                         devicesApi,
                         streamUserDataStore,
                         notificationPermissionManager,
@@ -165,6 +166,20 @@ internal class StreamNotificationManager private constructor(
                 }
                 return internalStreamNotificationManager
             }
+        }
+
+        private fun NotificationConfig.overrideDefault(application: Application): NotificationConfig {
+            val notificationPermissionHandler = notificationPermissionHandler
+                .takeUnless { it == NoOpNotificationPermissionHandler }
+                ?: DefaultNotificationPermissionHandler
+                    .createDefaultNotificationPermissionHandler(application)
+            val notificationHandler = notificationHandler
+                .takeUnless { it == NoOpNotificationHandler }
+                ?: DefaultNotificationHandler(application)
+            return copy(
+                notificationPermissionHandler = notificationPermissionHandler,
+                notificationHandler = notificationHandler,
+            )
         }
     }
 }

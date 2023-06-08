@@ -24,6 +24,7 @@ import io.getstream.video.android.core.events.VideoEventListener
 import io.getstream.video.android.core.model.EdgeData
 import io.getstream.video.android.core.model.QueriedCalls
 import io.getstream.video.android.core.model.SortField
+import io.getstream.video.android.core.notifications.NotificationHandler
 import io.getstream.video.android.model.Device
 import io.getstream.video.android.model.User
 import kotlinx.coroutines.Deferred
@@ -33,7 +34,7 @@ import org.openapitools.client.models.VideoEvent
 /**
  * The main interface to control the Video calls. [StreamVideoImpl] implements this interface.
  */
-public interface StreamVideo {
+public interface StreamVideo : NotificationHandler {
 
     /**
      * Represents the default call config when starting a call.
