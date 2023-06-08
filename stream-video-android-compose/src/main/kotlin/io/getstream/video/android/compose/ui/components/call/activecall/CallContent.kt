@@ -52,7 +52,6 @@ import io.getstream.video.android.compose.ui.components.video.VideoRenderer
 import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.ParticipantState
 import io.getstream.video.android.core.call.state.CallAction
-import io.getstream.video.android.core.call.state.LeaveCall
 import io.getstream.video.android.mock.StreamMockUtils
 import io.getstream.video.android.mock.mockCall
 
@@ -74,13 +73,14 @@ import io.getstream.video.android.mock.mockCall
  */
 @Composable
 public fun CallContent(
+    call: Call,
     callViewModel: CallViewModel,
     modifier: Modifier = Modifier,
-    onBackPressed: () -> Unit = { callViewModel.onCallAction(LeaveCall) },
-    onCallAction: (CallAction) -> Unit = callViewModel::onCallAction,
+    onBackPressed: () -> Unit = {},
+    onCallAction: (CallAction) -> Unit = { DefaultOnCallActionHandler.onCallAction(call, it) },
     callAppBarContent: @Composable (call: Call) -> Unit = {
         CallAppBar(
-            call = callViewModel.call,
+            call = call,
             leadingContent = null,
             onCallAction = onCallAction
         )
@@ -101,7 +101,7 @@ public fun CallContent(
     },
     callVideoContent: @Composable RowScope.(call: Call) -> Unit = {
         ParticipantsGrid(
-            call = callViewModel.call,
+            call = call,
             modifier = Modifier
                 .fillMaxSize()
                 .weight(1f),
@@ -111,7 +111,7 @@ public fun CallContent(
     },
     callControlsContent: @Composable (call: Call) -> Unit = {
         ControlActions(
-            call = callViewModel.call,
+            call = call,
             onCallAction = onCallAction
         )
     },
@@ -132,7 +132,7 @@ public fun CallContent(
 
     CallContent(
         modifier = modifier,
-        call = callViewModel.call,
+        call = call,
         isInPictureInPicture = isInPiPMode,
         onCallAction = onCallAction,
         callAppBarContent = callAppBarContent,

@@ -16,49 +16,39 @@
 
 package io.getstream.video.android.demo.ui.call
 
-import android.content.Context
-import android.content.Intent
 import android.os.Bundle
-import android.widget.Toast
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
-import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.foundation.background
 import androidx.compose.ui.Modifier
-import io.getstream.video.android.common.permission.PermissionManager
+import androidx.lifecycle.lifecycleScope
+import io.getstream.video.android.common.AbstractCallActivity
 import io.getstream.video.android.common.viewmodel.CallViewModel
 import io.getstream.video.android.common.viewmodel.CallViewModelFactory
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.call.CallContainer
+import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.StreamVideo
-import io.getstream.video.android.core.call.state.ToggleCamera
-import io.getstream.video.android.core.call.state.ToggleMicrophone
-import io.getstream.video.android.model.streamCallId
+import io.getstream.video.android.model.StreamCallId
+import kotlinx.coroutines.launch
 
-class CallActivity : AppCompatActivity() {
+class CallActivity : AbstractCallActivity() {
 
-    private val factory by lazy { callViewModelFactory() }
+    private val factory by lazy { CallViewModelFactory() }
     private val vm by viewModels<CallViewModel> { factory }
-
-    // private val permissionsManager = setupPermissionManager()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        vm.joinCall {
-            Toast.makeText(
-                this,
-                "failed to join call (${vm.call.cid}): $it", Toast.LENGTH_SHORT
-            ).show()
-            finish()
+        lifecycleScope.launch {
+            createCall().join(create = true)
         }
-
-        vm.setOnLeaveCall { finish() }
 
         setContent {
             VideoTheme {
                 CallContainer(
                     modifier = Modifier.background(color = VideoTheme.colors.appBackground),
+                    call = call,
                     callViewModel = vm,
                     onBackPressed = { finish() },
                 )
@@ -66,67 +56,17 @@ class CallActivity : AppCompatActivity() {
         }
     }
 
-    /**
-     * Provides the default ViewModel factory.
-     */
-    private fun callViewModelFactory(): CallViewModelFactory {
-        val callId = intent.streamCallId(EXTRA_CALL_ID)
-            ?: throw IllegalArgumentException("You must pass correct channel id.")
-
-        return CallViewModelFactory(
-            call = StreamVideo.instance().call(type = callId.type, id = callId.id)
-        )
+    override fun createCall(): Call {
+        val streamVideo = StreamVideo.instance()
+        val cid = intent.getParcelableExtra<StreamCallId>(EXTRA_CID)
+            ?: throw IllegalArgumentException("call type and id is invalid!")
+        return streamVideo.call(cid.type, cid.id)
     }
 
-    private fun initPermissionManager(): PermissionManager {
-        return PermissionManager.create(
-            activity = this,
-            onPermissionResult = { permission, isGranted ->
-                when (permission) {
-                    android.Manifest.permission.CAMERA -> vm.onCallAction(ToggleCamera(isGranted))
-                    android.Manifest.permission.RECORD_AUDIO -> vm.onCallAction(
-                        ToggleMicrophone(
-                            isGranted
-                        )
-                    )
-                }
-            },
-            onShowRequestPermissionRationale = {}
-        )
+    override fun closeCall() {
+        createCall().leave()
     }
 
-    companion object {
-        internal const val EXTRA_CALL_ID = "EXTRA_CALL_ID"
-
-        fun getIntent(
-            context: Context,
-            cid: io.getstream.video.android.model.StreamCallId
-        ): Intent {
-            return Intent(context, CallActivity::class.java).apply {
-                flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
-                putExtra(EXTRA_CALL_ID, cid)
-            }
-        }
+    override fun pipChanged(isInPip: Boolean) {
     }
-
-//    fun setupPermissionManager(): StreamPermissionManagerImpl {
-//        return StreamPermissionManagerImpl(
-//            fragmentActivity = this,
-//            onPermissionResult = { permission, isGranted ->
-//                when (permission) {
-// //                    Manifest.permission.CAMERA -> callViewModel.onCallAction(ToggleCamera(isGranted))
-// //                    Manifest.permission.RECORD_AUDIO -> callViewModel.onCallAction(
-// //                        ToggleMicrophone(
-// //                            isGranted
-// //                        )
-// //                    )
-//                }
-//            },
-//            onShowSettings = {
-//                //
-//            })
-//    }
-    /**
-     * Provides a custom factory for the ViewModel, that provides fake users for invites.
-     */
 }

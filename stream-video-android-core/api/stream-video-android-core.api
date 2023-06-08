@@ -124,6 +124,7 @@ public final class io/getstream/video/android/core/CallState {
 	public final fun getRingingState ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun getScope ()Lkotlinx/coroutines/CoroutineScope;
 	public final fun getScreenSharingSession ()Lkotlinx/coroutines/flow/StateFlow;
+	public final fun getSession ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun getSettings ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun getSortedParticipants ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun getSpeakingWhileMuted ()Lkotlinx/coroutines/flow/StateFlow;
@@ -140,8 +141,10 @@ public final class io/getstream/video/android/core/CallState {
 	public final fun updateFromResponse (Lorg/openapitools/client/models/CallStateResponseFields;)V
 	public final fun updateFromResponse (Lorg/openapitools/client/models/GetCallResponse;)V
 	public final fun updateFromResponse (Lorg/openapitools/client/models/GetOrCreateCallResponse;)V
+	public final fun updateFromResponse (Lorg/openapitools/client/models/GoLiveResponse;)V
 	public final fun updateFromResponse (Lorg/openapitools/client/models/JoinCallResponse;)V
 	public final fun updateFromResponse (Lorg/openapitools/client/models/QueryMembersResponse;)V
+	public final fun updateFromResponse (Lorg/openapitools/client/models/StopLiveResponse;)V
 	public final fun updateFromResponse (Lorg/openapitools/client/models/UpdateCallResponse;)V
 	public final fun updateParticipant (Lio/getstream/video/android/core/ParticipantState;)V
 	public final fun upsertParticipants (Ljava/util/List;)V

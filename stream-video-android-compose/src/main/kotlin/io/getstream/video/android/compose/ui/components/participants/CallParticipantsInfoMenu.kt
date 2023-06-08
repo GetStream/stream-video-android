@@ -49,7 +49,6 @@ import io.getstream.video.android.model.User
  * @param participants The list of active participants.
  * @param modifier Modifier for styling.
  * @param onDismiss Handler when the user dismisses the UI through various actions.
- * @param onInfoMenuAction Handler when one of the menu actions is triggered.
  */
 @Composable
 public fun CallParticipantsInfoMenu(

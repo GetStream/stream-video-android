@@ -17,24 +17,9 @@
 package io.getstream.video.android.common.viewmodel
 
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
-import io.getstream.log.taggedLogger
-import io.getstream.result.Error
-import io.getstream.video.android.common.permission.PermissionManager
-import io.getstream.video.android.core.Call
-import io.getstream.video.android.core.StreamVideo
-import io.getstream.video.android.core.call.RtcSession
-import io.getstream.video.android.core.call.state.CallAction
-import io.getstream.video.android.core.call.state.FlipCamera
-import io.getstream.video.android.core.call.state.LeaveCall
-import io.getstream.video.android.core.call.state.ShowCallParticipantInfo
-import io.getstream.video.android.core.call.state.ToggleCamera
-import io.getstream.video.android.core.call.state.ToggleMicrophone
-import io.getstream.video.android.core.call.state.ToggleSpeakerphone
+import io.getstream.video.android.model.User
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withTimeout
 
 /**
  * The CallViewModel is a light wrapper over
@@ -54,11 +39,7 @@ import kotlinx.coroutines.withTimeout
  * - Opening/closing the participant menu
  *
  */
-public open class CallViewModel(public val call: Call) : ViewModel() {
-
-    private val logger by taggedLogger("Call:ViewModel")
-
-    public val client: StreamVideo by lazy { StreamVideo.instance() }
+public open class CallViewModel() : ViewModel() {
 
     /** if we are in picture in picture mode */
     private val _isInPictureInPicture: MutableStateFlow<Boolean> = MutableStateFlow(false)
@@ -67,90 +48,23 @@ public open class CallViewModel(public val call: Call) : ViewModel() {
     private val _isShowingCallInfoMenu = MutableStateFlow(false)
     public val isShowingCallInfoMenu: StateFlow<Boolean> = _isShowingCallInfoMenu
 
-    private var permissionManager: PermissionManager? = null
-
-    private var onLeaveCall: (() -> Unit)? = null
-
-    public fun joinCall(
-        onSuccess: (RtcSession) -> Unit = {},
-        onFailure: (Error) -> Unit = {}
-    ) {
-        viewModelScope.launch {
-            withTimeout(CONNECT_TIMEOUT) {
-                val result = call.join()
-                result.onSuccess {
-                    onSuccess.invoke(it)
-                }.onError {
-                    onFailure.invoke(it)
-                }
-            }
-        }
-    }
-
-    override fun onCleared() {
-        super.onCleared()
-        dismissCallInfoMenu()
-        // properly clean up
-        call.leave()
-    }
-
-    public fun onCallAction(callAction: CallAction) {
-        when (callAction) {
-            is ToggleCamera -> onVideoChanged(callAction.isEnabled)
-            is ToggleMicrophone -> onMicrophoneChanged(callAction.isEnabled)
-            is ToggleSpeakerphone -> onSpeakerphoneChanged(callAction.isEnabled)
-            is FlipCamera -> call.camera.flip()
-            is LeaveCall -> onLeaveCall()
-            is ShowCallParticipantInfo -> _isShowingCallInfoMenu.value = true
-
-            else -> Unit
-        }
-    }
-
-    private fun onVideoChanged(videoEnabled: Boolean) {
-        logger.d { "[onVideoChanged] videoEnabled: $videoEnabled" }
-        if (permissionManager?.hasCameraPermission?.value == false) {
-            permissionManager?.requestPermission(android.Manifest.permission.CAMERA)
-            logger.d { "[onVideoChanged] the [Manifest.permissions.CAMERA] has to be granted for video to be sent" }
-        }
-
-        call.camera.setEnabled(videoEnabled)
-    }
-
-    private fun onMicrophoneChanged(microphoneEnabled: Boolean) {
-        logger.d { "[onMicrophoneChanged] microphoneEnabled: $microphoneEnabled" }
-        if (permissionManager?.hasRecordAudioPermission?.value == false) {
-            permissionManager?.requestPermission(android.Manifest.permission.RECORD_AUDIO)
-            logger.d { "[onMicrophoneChanged] the [Manifest.permissions.RECORD_AUDIO] has to be granted for audio to be sent" }
-        }
-        call.microphone.setEnabled(microphoneEnabled)
-    }
-
-    private fun onSpeakerphoneChanged(speakerPhoneEnabled: Boolean) {
-        logger.d { "[onSpeakerphoneChanged] speakerPhoneEnabled: $speakerPhoneEnabled" }
-        call.speaker.setEnabled(speakerPhoneEnabled)
-    }
-
-    public fun setPermissionManager(permissionManager: PermissionManager?) {
-        this.permissionManager = permissionManager
-    }
-
-    private fun onLeaveCall() {
-        call.leave()
-        onLeaveCall?.invoke()
-    }
-
-    public fun setOnLeaveCall(onLeaveCall: () -> Unit) {
-        this.onLeaveCall = onLeaveCall
+    public fun openCallInfoMenu() {
+        _isShowingCallInfoMenu.value = true
     }
 
     public fun dismissCallInfoMenu() {
         this._isShowingCallInfoMenu.value = false
     }
 
+    public fun onInviteUsers(users: List<User>) {
+    }
+
     public fun onPictureInPictureModeChanged(inPictureInPictureMode: Boolean) {
         this._isInPictureInPicture.value = inPictureInPictureMode
     }
-}
 
-private const val CONNECT_TIMEOUT = 30_000L
+    override fun onCleared() {
+        super.onCleared()
+        dismissCallInfoMenu()
+    }
+}
