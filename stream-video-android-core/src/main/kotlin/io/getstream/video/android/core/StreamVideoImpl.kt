@@ -409,26 +409,16 @@ internal class StreamVideoImpl internal constructor(
     private fun storeDevice(device: Device) {
         logger.d { "[storeDevice] device: device" }
         scope.launch {
-            val dataStore = StreamUserDataStore.instance()
-            dataStore.updateUserDevices(
-                UserDevices(
-                    dataStore.userDevices.value?.let { it.devices + device } ?: listOf(device)
-                )
-            )
+            dataStore.updateUserDevice(device)
         }
     }
 
     private fun removeStoredDeivce(device: Device) {
         logger.d { "[storeDevice] device: device" }
         scope.launch {
-            val dataStore = StreamUserDataStore.instance()
-            dataStore.updateUserDevices(
-                UserDevices(
-                    dataStore.userDevices.value?.let {
-                        it.devices.filter { it.id != device.id }
-                    } ?: listOf()
-                )
-            )
+            dataStore.userDevice.value
+                .takeIf { it == device }
+                ?.let { dataStore.updateUserDevice(null) }
         }
     }
 

@@ -17,8 +17,8 @@
 package io.getstream.video.android.datastore.model
 
 import io.getstream.video.android.model.ApiKey
+import io.getstream.video.android.model.Device
 import io.getstream.video.android.model.User
-import io.getstream.video.android.model.UserDevices
 import io.getstream.video.android.model.UserToken
 import kotlinx.serialization.Serializable
 
@@ -27,5 +27,5 @@ public data class StreamUserPreferences(
     public val user: User? = null,
     public val apiKey: ApiKey = "",
     public val userToken: UserToken = "",
-    public val userDevices: UserDevices = UserDevices(),
+    public val userDevice: Device? = null,
 )
