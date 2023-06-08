@@ -16,56 +16,58 @@
 
 package io.getstream.video.android.dogfooding.ui.call
 
-import android.content.Context
-import android.content.Intent
 import android.os.Bundle
-import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
 import androidx.compose.foundation.background
 import androidx.compose.ui.Modifier
-import io.getstream.video.android.common.permission.PermissionManager
+import androidx.lifecycle.lifecycleScope
+import io.getstream.video.android.common.AbstractCallActivity
 import io.getstream.video.android.common.viewmodel.CallViewModel
 import io.getstream.video.android.common.viewmodel.CallViewModelFactory
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.call.CallContainer
+import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.StreamVideo
+import io.getstream.video.android.core.call.state.LeaveCall
 import io.getstream.video.android.core.call.state.ToggleCamera
 import io.getstream.video.android.core.call.state.ToggleMicrophone
+import io.getstream.video.android.core.call.state.ToggleSpeakerphone
 import io.getstream.video.android.model.StreamCallId
-import io.getstream.video.android.model.streamCallId
+import kotlinx.coroutines.launch
 
-class CallActivity : ComponentActivity() {
+class CallActivity : AbstractCallActivity() {
 
-    private val factory by lazy { callViewModelFactory() }
+    // step 1 (optional) - create a call view model
+    private val factory by lazy { CallViewModelFactory() }
     private val vm by viewModels<CallViewModel> { factory }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        vm.setPermissionManager(getPermissionManager())
-        vm.setOnLeaveCall { finish() }
+        // step 2 - join a call
+        lifecycleScope.launch { call.join(create = true) }
 
+        // step 3 - build a call screen
         setContent {
             VideoTheme {
                 CallContainer(
                     modifier = Modifier.background(color = VideoTheme.colors.appBackground),
-                    callViewModel = vm,
-                    onBackPressed = { finish() },
+                    call = call,
+                    callViewModel = vm, // optional
+                    onBackPressed = { handleBackPressed() },
+                    onCallAction = { callAction ->
+                        when (callAction) {
+                            is ToggleCamera -> call.camera.setEnabled(callAction.isEnabled)
+                            is ToggleMicrophone -> call.microphone.setEnabled(callAction.isEnabled)
+                            is ToggleSpeakerphone -> call.speaker.setEnabled(callAction.isEnabled)
+                            is LeaveCall -> finish()
+                            else -> Unit
+                        }
+                    }
                 )
             }
         }
-    }
-
-    val call by lazy {
-        val (type, id) =
-            intent.streamCallId(EXTRA_CALL_ID)
-                ?: throw IllegalArgumentException("You must pass correct channel id.")
-        StreamVideo.instance().call(type = type, id = id)
-    }
-
-    private fun callViewModelFactory(): CallViewModelFactory {
-        return CallViewModelFactory(call = call)
     }
 
     override fun onPause() {
@@ -78,34 +80,20 @@ class CallActivity : ComponentActivity() {
         call.camera.resume()
     }
 
-    private fun getPermissionManager(): PermissionManager {
-        return PermissionManager.create(
-            activity = this,
-            onPermissionResult = { permission, isGranted ->
-                when (permission) {
-                    android.Manifest.permission.CAMERA -> vm.onCallAction(ToggleCamera(isGranted))
-                    android.Manifest.permission.RECORD_AUDIO -> vm.onCallAction(
-                        ToggleMicrophone(
-                            isGranted
-                        )
-                    )
-                }
-            },
-            onShowRequestPermissionRationale = {}
-        )
+    override fun onDestroy() {
+        super.onDestroy()
+        call.leave()
     }
 
-    companion object {
-        internal const val EXTRA_CALL_ID = "EXTRA_CALL_ID"
+    override fun pipChanged(isInPip: Boolean) {
+        super.pipChanged(isInPip)
+        vm.onPictureInPictureModeChanged(isInPip)
+    }
 
-        fun getIntent(
-            context: Context,
-            callId: StreamCallId
-        ): Intent {
-            return Intent(context, CallActivity::class.java).apply {
-                flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
-                putExtra(EXTRA_CALL_ID, callId)
-            }
-        }
+    override fun createCall(): Call {
+        val streamVideo = StreamVideo.instance()
+        val cid = intent.getParcelableExtra<StreamCallId>(EXTRA_CID)
+            ?: throw IllegalArgumentException("call type and id is invalid!")
+        return streamVideo.call(cid.type, cid.id)
     }
 }

@@ -141,12 +141,14 @@ internal class ParticipantsPortraitTest : BaseComposeTest() {
             val configuration = LocalConfiguration.current
             val screenWidth = configuration.screenWidthDp
             val screenHeight = configuration.screenHeightDp
-            FloatingParticipantVideo(
-                call = mockCall,
-                modifier = Modifier.fillMaxSize(),
-                participant = mockParticipant,
-                parentBounds = IntSize(screenWidth, screenHeight),
-            )
+            Box {
+                FloatingParticipantVideo(
+                    call = mockCall,
+                    modifier = Modifier.fillMaxSize(),
+                    participant = mockParticipant,
+                    parentBounds = IntSize(screenWidth, screenHeight),
+                )
+            }
         }
     }
 

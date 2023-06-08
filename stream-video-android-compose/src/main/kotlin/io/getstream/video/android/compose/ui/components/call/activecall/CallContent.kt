@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+@file:OptIn(ExperimentalPermissionsApi::class)
+
 package io.getstream.video.android.compose.ui.components.call.activecall
 
 import android.content.res.Configuration.ORIENTATION_LANDSCAPE
@@ -29,16 +31,20 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.Scaffold
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.coerceAtLeast
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.google.accompanist.permissions.ExperimentalPermissionsApi
+import com.google.accompanist.permissions.rememberMultiplePermissionsState
 import io.getstream.video.android.common.viewmodel.CallViewModel
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.call.CallAppBar
@@ -52,7 +58,6 @@ import io.getstream.video.android.compose.ui.components.video.VideoRenderer
 import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.ParticipantState
 import io.getstream.video.android.core.call.state.CallAction
-import io.getstream.video.android.core.call.state.LeaveCall
 import io.getstream.video.android.mock.StreamMockUtils
 import io.getstream.video.android.mock.mockCall
 
@@ -64,6 +69,7 @@ import io.getstream.video.android.mock.mockCall
  * @param modifier Modifier for styling.
  * @param onBackPressed Handler when the user taps on the back button.
  * @param onCallAction Handler when the user triggers a Call Control Action.
+ * @param permissions Android permissions that should be required to render a video call properly.
  * @param callAppBarContent Content is shown that calls information or additional actions.
  * @param style Represents a regular video call render styles.
  * @param videoRenderer A single video renderer renders each individual participant.
@@ -74,13 +80,18 @@ import io.getstream.video.android.mock.mockCall
  */
 @Composable
 public fun CallContent(
+    call: Call,
     callViewModel: CallViewModel,
     modifier: Modifier = Modifier,
-    onBackPressed: () -> Unit = { callViewModel.onCallAction(LeaveCall) },
-    onCallAction: (CallAction) -> Unit = callViewModel::onCallAction,
+    onBackPressed: () -> Unit = {},
+    onCallAction: (CallAction) -> Unit = { DefaultOnCallActionHandler.onCallAction(call, it) },
+    permissions: List<String> = listOf(
+        android.Manifest.permission.CAMERA,
+        android.Manifest.permission.RECORD_AUDIO
+    ),
     callAppBarContent: @Composable (call: Call) -> Unit = {
         CallAppBar(
-            call = callViewModel.call,
+            call = call,
             leadingContent = null,
             onCallAction = onCallAction
         )
@@ -101,7 +112,7 @@ public fun CallContent(
     },
     callVideoContent: @Composable RowScope.(call: Call) -> Unit = {
         ParticipantsGrid(
-            call = callViewModel.call,
+            call = call,
             modifier = Modifier
                 .fillMaxSize()
                 .weight(1f),
@@ -111,7 +122,7 @@ public fun CallContent(
     },
     callControlsContent: @Composable (call: Call) -> Unit = {
         ControlActions(
-            call = callViewModel.call,
+            call = call,
             onCallAction = onCallAction
         )
     },
@@ -132,8 +143,9 @@ public fun CallContent(
 
     CallContent(
         modifier = modifier,
-        call = callViewModel.call,
+        call = call,
         isInPictureInPicture = isInPiPMode,
+        permissions = permissions,
         onCallAction = onCallAction,
         callAppBarContent = callAppBarContent,
         callVideoContent = callVideoContent,
@@ -149,6 +161,7 @@ public fun CallContent(
  * @param call The call includes states and will be rendered with participants.
  * @param modifier Modifier for styling.
  * @param isInPictureInPicture If the user has engaged in Picture-In-Picture mode.
+ * @param permissions Android permissions that should be required to render a video call properly.*
  * @param onCallAction Handler when the user triggers a Call Control Action.
  * @param callAppBarContent Content is shown that calls information or additional actions.
  * @param style Represents a regular video call render styles.
@@ -164,6 +177,10 @@ public fun CallContent(
     modifier: Modifier = Modifier,
     isShowingOverlayCallAppBar: Boolean = true,
     isInPictureInPicture: Boolean = false,
+    permissions: List<String> = listOf(
+        android.Manifest.permission.CAMERA,
+        android.Manifest.permission.RECORD_AUDIO
+    ),
     onCallAction: (CallAction) -> Unit = { DefaultOnCallActionHandler.onCallAction(call, it) },
     callAppBarContent: @Composable (call: Call) -> Unit = {
         CallAppBar(
@@ -205,6 +222,8 @@ public fun CallContent(
     pictureInPictureContent: @Composable (Call) -> Unit = { DefaultPictureInPictureContent(it) }
 ) {
     val orientation = LocalConfiguration.current.orientation
+
+    DefaultPermissionHandler(call = call, permissions = permissions)
 
     if (!isInPictureInPicture) {
         Scaffold(
@@ -282,6 +301,30 @@ internal fun DefaultPictureInPictureContent(call: Call) {
                 style = RegularVideoRendererStyle(labelPosition = Alignment.BottomStart)
             )
         }
+    }
+}
+
+@Composable
+private fun DefaultPermissionHandler(
+    call: Call,
+    permissions: List<String> = listOf(
+        android.Manifest.permission.CAMERA,
+        android.Manifest.permission.RECORD_AUDIO
+    ),
+) {
+    if (LocalInspectionMode.current) return
+
+    val multiplePermissionsState = rememberMultiplePermissionsState(permissions = permissions) {
+        if (it[android.Manifest.permission.CAMERA] == true) {
+            call.camera.setEnabled(true)
+        }
+        if (it[android.Manifest.permission.RECORD_AUDIO] == true) {
+            call.microphone.setEnabled(true)
+        }
+    }
+
+    LaunchedEffect(key1 = multiplePermissionsState) {
+        multiplePermissionsState.launchMultiplePermissionRequest()
     }
 }
 

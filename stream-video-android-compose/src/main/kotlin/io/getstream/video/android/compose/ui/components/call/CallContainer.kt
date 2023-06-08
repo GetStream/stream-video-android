@@ -63,6 +63,7 @@ import io.getstream.video.android.model.User
  * @param modifier Modifier for styling.
  * @param onBackPressed Handler when the user taps on the back button.
  * @param onCallAction Handler when the user clicks on some of the call controls.
+ * @param permissions Android permissions that should be required to render a video call properly.
  * @param appBarContent Content shown that a call information or an additional actions.
  * @param controlsContent Content is shown that allows users to trigger different actions to control a joined call.
  * @param pictureInPictureContent Content shown when the user enters Picture in Picture mode, if
@@ -72,15 +73,20 @@ import io.getstream.video.android.model.User
  */
 @Composable
 public fun CallContainer(
+    call: Call,
     callViewModel: CallViewModel,
     modifier: Modifier = Modifier,
     isVideoType: Boolean = true,
     onBackPressed: () -> Unit = {},
-    onCallAction: (CallAction) -> Unit = callViewModel::onCallAction,
+    onCallAction: (CallAction) -> Unit = { DefaultOnCallActionHandler.onCallAction(call, it) },
+    permissions: List<String> = listOf(
+        android.Manifest.permission.CAMERA,
+        android.Manifest.permission.RECORD_AUDIO
+    ),
     appBarContent: @Composable (call: Call) -> Unit = {
         CallAppBar(
             modifier = Modifier.testTag("call_appbar"),
-            call = callViewModel.call,
+            call = call,
             leadingContent = null,
             onBackPressed = onBackPressed,
             onCallAction = onCallAction
@@ -89,7 +95,7 @@ public fun CallContainer(
     controlsContent: @Composable (call: Call) -> Unit = {
         ControlActions(
             modifier = Modifier.testTag("call_controls"),
-            call = callViewModel.call,
+            call = call,
             onCallAction = onCallAction,
         )
     },
@@ -112,6 +118,8 @@ public fun CallContainer(
         DefaultCallContent(
             modifier = modifier.testTag("call_content"),
             style = style,
+            call = call,
+            permissions = permissions,
             callViewModel = callViewModel,
             onBackPressed = onBackPressed,
             onCallAction = onCallAction,
@@ -125,7 +133,7 @@ public fun CallContainer(
         RingingCallContent(
             modifier = modifier.testTag("ringing_call_content"),
             isVideoType = isVideoType,
-            call = callViewModel.call,
+            call = call,
             onBackPressed = onBackPressed,
             onCallAction = onCallAction,
             onAcceptedContent = { callContent.invoke(it) },
@@ -135,9 +143,10 @@ public fun CallContainer(
 ) {
 
     CallContainer(
-        call = callViewModel.call,
+        call = call,
         isVideoType = isVideoType,
         modifier = modifier,
+        permissions = permissions,
         onBackPressed = onBackPressed,
         onCallAction = onCallAction,
         callAppBarContent = appBarContent,
@@ -160,6 +169,7 @@ public fun CallContainer(
  * @param modifier Modifier for styling.
  * @param onBackPressed Handler when the user taps on the back button.
  * @param onCallAction Handler when the user clicks on some of the call controls.
+ * @param permissions Android permissions that should be required to render a video call properly.
  * @param callAppBarContent Content is shown that calls information or additional actions.
  * @param callControlsContent Content is shown that allows users to trigger different actions to control a joined call.
  * @param pictureInPictureContent Content shown when the user enters Picture in Picture mode, if
@@ -174,6 +184,10 @@ public fun CallContainer(
     isVideoType: Boolean = true,
     onBackPressed: () -> Unit = {},
     onCallAction: (CallAction) -> Unit = { DefaultOnCallActionHandler.onCallAction(call, it) },
+    permissions: List<String> = listOf(
+        android.Manifest.permission.CAMERA,
+        android.Manifest.permission.RECORD_AUDIO
+    ),
     callAppBarContent: @Composable (call: Call) -> Unit = {
         CallAppBar(
             modifier = Modifier.testTag("call_appbar"),
@@ -209,6 +223,7 @@ public fun CallContainer(
             call = call,
             style = style,
             modifier = modifier.testTag("call_content"),
+            permissions = permissions,
             onCallAction = onCallAction,
             callAppBarContent = callAppBarContent,
             callControlsContent = callControlsContent,
@@ -233,6 +248,7 @@ public fun CallContainer(
 
 @Composable
 internal fun DefaultCallContent(
+    call: Call,
     callViewModel: CallViewModel,
     modifier: Modifier = Modifier,
     onBackPressed: () -> Unit = {},
@@ -243,7 +259,11 @@ internal fun DefaultCallContent(
         participant: ParticipantState,
         style: VideoRendererStyle
     ) -> Unit,
-    onCallAction: (CallAction) -> Unit = callViewModel::onCallAction,
+    permissions: List<String> = listOf(
+        android.Manifest.permission.CAMERA,
+        android.Manifest.permission.RECORD_AUDIO
+    ),
+    onCallAction: (CallAction) -> Unit = { DefaultOnCallActionHandler.onCallAction(call, it) },
     callAppBarContent: @Composable (call: Call) -> Unit,
     callControlsContent: @Composable (call: Call) -> Unit,
     pictureInPictureContent: @Composable (call: Call) -> Unit = { DefaultPictureInPictureContent(it) }
@@ -251,6 +271,8 @@ internal fun DefaultCallContent(
     CallContent(
         modifier = modifier,
         style = style,
+        call = call,
+        permissions = permissions,
         callViewModel = callViewModel,
         onBackPressed = onBackPressed,
         onCallAction = onCallAction,
@@ -261,7 +283,7 @@ internal fun DefaultCallContent(
     )
 
     val isShowingParticipantsInfo by callViewModel.isShowingCallInfoMenu.collectAsStateWithLifecycle()
-    val participantsState by callViewModel.call.state.participants.collectAsStateWithLifecycle()
+    val participantsState by call.state.participants.collectAsStateWithLifecycle()
     var usersToInvite by remember { mutableStateOf(emptyList<User>()) }
 
     if (isShowingParticipantsInfo && participantsState.isNotEmpty()) {
@@ -289,9 +311,9 @@ internal fun DefaultCallContent(
         InviteUsersDialog(
             users = usersToInvite,
             onDismiss = { usersToInvite = emptyList() },
-            onInviteUsers = {
+            onInviteUsers = { users ->
                 usersToInvite = emptyList()
-                callViewModel.onCallAction(InviteUsersToCall(it))
+                callViewModel.onInviteUsers(users)
             }
         )
     }

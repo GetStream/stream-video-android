@@ -18,6 +18,7 @@
 
 package io.getstream.video.android.dogfooding.ui.lobby
 
+import android.content.Intent
 import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -52,6 +53,7 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.rememberPermissionState
+import io.getstream.video.android.common.AbstractCallActivity
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.avatar.UserAvatar
 import io.getstream.video.android.compose.ui.components.call.lobby.CallLobby
@@ -106,6 +108,11 @@ private fun CallJoinHeader(
     val uiState by callLobbyViewModel.uiState.collectAsState()
 
     HandleCallLobbyUiState(callLobbyUiState = uiState)
+
+    LaunchedEffect(key1 = Unit) {
+        callLobbyViewModel.call.camera.setEnabled(true)
+        callLobbyViewModel.call.microphone.setEnabled(true)
+    }
 
     Row(
         modifier = Modifier
@@ -236,7 +243,12 @@ private fun HandleCallLobbyUiState(
     LaunchedEffect(key1 = callLobbyUiState) {
         when (callLobbyUiState) {
             is CallLobbyUiState.JoinCompleted -> {
-                val intent = CallActivity.getIntent(context, callId = callLobbyViewModel.callId)
+                val intent = AbstractCallActivity.createIntent<CallActivity>(
+                    context,
+                    callId = callLobbyViewModel.callId
+                ).apply {
+                    flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+                }
                 context.startActivity(intent)
             }
 

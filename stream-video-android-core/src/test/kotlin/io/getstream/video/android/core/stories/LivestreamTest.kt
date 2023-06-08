@@ -18,10 +18,16 @@ package io.getstream.video.android.core.stories
 
 import com.google.common.truth.Truth.assertThat
 import io.getstream.video.android.core.IntegrationTestBase
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.test.runTest
+import org.junit.Ignore
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
+import org.threeten.bp.OffsetDateTime
+import org.threeten.bp.temporal.ChronoUnit
 
 @RunWith(RobolectricTestRunner::class)
 class LivestreamTest : IntegrationTestBase() {
@@ -78,7 +84,6 @@ class LivestreamTest : IntegrationTestBase() {
 
         val result2 = call.stopBroadcasting()
         assertSuccess(result2)
-
     }
 
     @Test
@@ -98,7 +103,7 @@ class LivestreamTest : IntegrationTestBase() {
     }
 
     @Test
-    fun `call should expose participant count, time running stats`() = runTest {
+    fun `call should expose participant count`() = runTest {
         val call = client.call("livestream", randomUUID())
         val result = call.create()
         assertSuccess(result)
@@ -106,8 +111,58 @@ class LivestreamTest : IntegrationTestBase() {
         val count = call.state.participantCounts.value
         assertThat(count?.anonymous).isEqualTo(0)
         assertThat(count?.total).isEqualTo(0)
+
+        call.join()
+
+        val newCount = call.state.participantCounts.value
+        assertThat(newCount?.anonymous).isEqualTo(1)
+        assertThat(newCount?.total).isEqualTo(1)
+    }
+
+    @Test
+    @Ignore
+    fun `call should return time running`() = runTest {
+        val call = client.call("livestream", randomUUID())
+        assertSuccess(call.create())
+        val goLiveResponse = call.goLive()
+        assertSuccess(goLiveResponse)
+
         // call running time
-        val start = call.state._session.value?.startedAt
-        // TODO:
+//        goLiveResponse.onSuccess {
+//            assertThat(it.call.session).isNotNull()
+//        }
+
+        val start = call.state.session.value?.startedAt ?: OffsetDateTime.now()
+        assertThat(start).isNotNull()
+
+        val test = flow {
+            emit(1)
+            emit(2)
+        }
+
+        val timeSince = flow<Long?> {
+            while (true) {
+                delay(1000)
+                val now = OffsetDateTime.now()
+                if (start == null) {
+                    emit(null)
+                } else {
+                    val difference = ChronoUnit.SECONDS.between(start?.toInstant(), now.toInstant())
+                    emit(difference)
+                }
+                if (call.state.session.value?.endedAt != null) {
+                    break
+                }
+            }
+        }
+
+        println("a")
+        timeSince.collect {
+            println("its $it")
+        }
+
+        println("b")
+
+        Thread.sleep(20000)
     }
 }

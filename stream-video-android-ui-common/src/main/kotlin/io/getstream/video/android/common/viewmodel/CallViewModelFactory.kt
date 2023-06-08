@@ -18,11 +18,8 @@ package io.getstream.video.android.common.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
-import io.getstream.video.android.core.Call
 
-public class CallViewModelFactory(
-    private val call: Call,
-) : ViewModelProvider.Factory {
+public class CallViewModelFactory() : ViewModelProvider.Factory {
 
     public fun create(): CallViewModel {
         return create(CallViewModel::class.java)
@@ -30,6 +27,6 @@ public class CallViewModelFactory(
 
     @Suppress("UNCHECKED_CAST")
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
-        return CallViewModel(call = call) as T
+        return CallViewModel() as T
     }
 }

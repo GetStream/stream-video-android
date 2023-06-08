@@ -16,9 +16,7 @@
 
 package io.getstream.video.android.common
 
-import android.Manifest
 import android.annotation.SuppressLint
-import android.app.AlertDialog
 import android.app.PictureInPictureParams
 import android.content.Context
 import android.content.Intent
@@ -26,7 +24,6 @@ import android.content.pm.ActivityInfo
 import android.content.res.Configuration
 import android.net.Uri
 import android.os.Build
-import android.os.Bundle
 import android.provider.Settings
 import android.util.Rational
 import android.view.View
@@ -34,65 +31,24 @@ import android.view.WindowInsets
 import android.view.WindowInsetsController
 import android.view.WindowManager
 import androidx.activity.ComponentActivity
-import androidx.activity.viewModels
-import io.getstream.video.android.common.permission.PermissionManager
-import io.getstream.video.android.common.permission.PermissionManagerProvider
-import io.getstream.video.android.common.viewmodel.CallViewModel
-import io.getstream.video.android.common.viewmodel.CallViewModelFactory
-import io.getstream.video.android.core.StreamVideo
-import io.getstream.video.android.core.call.state.ToggleCamera
-import io.getstream.video.android.core.call.state.ToggleMicrophone
+import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.call.state.ToggleScreenConfiguration
 import io.getstream.video.android.model.StreamCallId
-import io.getstream.video.android.model.mapper.toTypeAndId
 
-public abstract class AbstractCallActivity :
-    ComponentActivity(),
-    PermissionManagerProvider {
+/**
+ * Add support for fullscreen mode and PIP to your activity
+ */
+public abstract class AbstractCallActivity : ComponentActivity() {
 
-    private val streamVideo: StreamVideo by lazy { StreamVideo.instance() }
-    private val factory by lazy { callViewModelFactory() }
-    public val callViewModel: CallViewModel by viewModels { factory }
+    public val call: Call by lazy(LazyThreadSafetyMode.NONE) { createCall() }
 
-    /**
-     * Provides the default ViewModel factory.
-     */
-    private fun callViewModelFactory(): CallViewModelFactory {
-        val (type, id) = intent.getStringExtra(EXTRA_CID)?.toTypeAndId()
-            ?: throw IllegalArgumentException("You must pass correct channel id.")
+    public abstract fun createCall(): Call
 
-        return CallViewModelFactory(
-            call = streamVideo.call(type = type, id = id)
-        )
+    public open fun closeCall() {
+        createCall().leave()
     }
 
-    /**
-     * Provides the default [PermissionManager] implementation.
-     */
-    override fun initPermissionManager(): PermissionManager {
-        return PermissionManager.create(
-            activity = this,
-            onPermissionResult = { permission, isGranted ->
-                when (permission) {
-                    Manifest.permission.CAMERA -> callViewModel.onCallAction(ToggleCamera(isGranted))
-                    Manifest.permission.RECORD_AUDIO -> callViewModel.onCallAction(
-                        ToggleMicrophone(isGranted)
-                    )
-                }
-            },
-            onShowRequestPermissionRationale = {
-                showPermissionsDialog()
-            }
-        )
-    }
-
-    override fun getPermissionManager(): PermissionManager = initPermissionManager()
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-
-        callViewModel.setPermissionManager(getPermissionManager())
-    }
+    public open fun pipChanged(isInPip: Boolean): Unit = Unit
 
     @SuppressLint("SourceLockedOrientationActivity")
     private fun toggleFullscreen(action: ToggleScreenConfiguration) {
@@ -160,17 +116,6 @@ public abstract class AbstractCallActivity :
         )
     }
 
-    private fun showPermissionsDialog() {
-        AlertDialog.Builder(this).setTitle("Permissions required to launch the app")
-            .setMessage("Open settings to allow camera and microphone permissions.")
-            .setPositiveButton("Launch settings") { dialog, _ ->
-                startSettings()
-                dialog.dismiss()
-            }.setNegativeButton("Cancel") { dialog, _ ->
-                dialog.dismiss()
-            }.create().show()
-    }
-
     private fun showWhenLockedAndTurnScreenOn() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O_MR1) {
             setShowWhenLocked(true)
@@ -191,11 +136,10 @@ public abstract class AbstractCallActivity :
      * the feature.
      */
     protected open fun handleBackPressed() {
-
         try {
             enterPictureInPicture()
         } catch (error: Throwable) {
-            closeCall()
+            createCall().leave()
         }
     }
 
@@ -203,7 +147,7 @@ public abstract class AbstractCallActivity :
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
 
             val currentOrientation = resources.configuration.orientation
-            val screenSharing = callViewModel.call.state.screenSharingSession.value
+            val screenSharing = createCall().state.screenSharingSession.value
 
             val aspect =
                 if (currentOrientation == ActivityInfo.SCREEN_ORIENTATION_PORTRAIT && screenSharing == null) {
@@ -225,11 +169,6 @@ public abstract class AbstractCallActivity :
         }
     }
 
-    private fun closeCall() {
-        callViewModel.call.leave()
-        finish()
-    }
-
     override fun onStop() {
         super.onStop()
 
@@ -240,14 +179,19 @@ public abstract class AbstractCallActivity :
         }
     }
 
+    override fun onDestroy() {
+        super.onDestroy()
+
+        closeCall()
+    }
+
     override fun onConfigurationChanged(newConfig: Configuration) {
         super.onConfigurationChanged(newConfig)
-        callViewModel.onPictureInPictureModeChanged(isInPictureInPictureMode)
+        pipChanged(isInPictureInPictureMode)
     }
 
     public companion object {
-        @PublishedApi
-        internal const val EXTRA_CID: String = "EXTRA_CID"
+        public const val EXTRA_CID: String = "EXTRA_CID"
 
         @JvmStatic
         public inline fun <reified T : AbstractCallActivity> createIntent(
