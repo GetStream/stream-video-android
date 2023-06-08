@@ -130,6 +130,7 @@ stream-log-android = { group = "io.getstream", name = "stream-log-android", vers
 stream-push = { group = "io.getstream", name = "stream-android-push", version.ref = "streamPush" }
 stream-push-delegate = { group = "io.getstream", name = "stream-android-push-delegate", version.ref = "streamPush" }
 stream-push-firebase = { group = "io.getstream", name = "stream-android-push-firebase", version.ref = "streamPush" }
+stream-push-permissions = { group = "io.getstream", name = "stream-android-push-permissions", version.ref = "streamPush" }
 
 stream-chat-compose = { group = "io.getstream", name = "stream-chat-android-compose", version.ref = "streamChat" }
 stream-chat-offline = { group = "io.getstream", name = "stream-chat-android-offline", version.ref = "streamChat" }

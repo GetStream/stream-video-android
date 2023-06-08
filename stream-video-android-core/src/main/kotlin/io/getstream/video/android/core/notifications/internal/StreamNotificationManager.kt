@@ -1,15 +1,24 @@
 package io.getstream.video.android.core.notifications.internal
 
 import android.annotation.SuppressLint
+import android.app.Application
 import android.content.Context
 import io.getstream.android.push.PushDevice
 import io.getstream.android.push.PushProvider
+import io.getstream.android.push.permissions.DefaultNotificationPermissionHandler
+import io.getstream.android.push.permissions.NotificationPermissionManager
+import io.getstream.android.push.permissions.NotificationPermissionStatus
+import io.getstream.android.push.permissions.NotificationPermissionStatus.DENIED
+import io.getstream.android.push.permissions.NotificationPermissionStatus.GRANTED
+import io.getstream.android.push.permissions.NotificationPermissionStatus.RATIONALE_NEEDED
+import io.getstream.android.push.permissions.NotificationPermissionStatus.REQUESTED
 import io.getstream.log.TaggedLogger
 import io.getstream.log.taggedLogger
 import io.getstream.result.Error
 import io.getstream.result.Result
 import io.getstream.result.flatMapSuspend
 import io.getstream.video.android.core.StreamVideo
+import io.getstream.video.android.core.notifications.NoOpNotificationPermissionHandler
 import io.getstream.video.android.core.notifications.NotificationConfig
 import io.getstream.video.android.datastore.delegate.StreamUserDataStore
 import io.getstream.video.android.model.Device
@@ -24,22 +33,22 @@ internal class StreamNotificationManager private constructor(
     private val notificationConfig: NotificationConfig,
     private val devicesApi: DevicesApi,
     private val dataStore: StreamUserDataStore,
+    private val notificationPermissionManager: NotificationPermissionManager,
 ){
 
     suspend fun registerPushDevice() {
         logger.d { "[registerPushDevice] no args" }
         // first get a push device generator that works for this device
-        val generator = notificationConfig.pushDeviceGenerators.firstOrNull { it.isValidForThisDevice(context) }
-
-        // if we found one, register it at the server
-        if (generator != null) {
-            generator.onPushDeviceGeneratorSelected()
-
-            generator.asyncGeneratePushDevice { generatedDevice ->
-                logger.d { "[registerPushDevice] pushDevice gnerated: $generatedDevice" }
-                scope.launch { createDevice(generatedDevice) }
+        notificationConfig.pushDeviceGenerators
+            .firstOrNull { it.isValidForThisDevice(context) }
+            ?.let { generator ->
+                generator.onPushDeviceGeneratorSelected()
+                generator.asyncGeneratePushDevice { generatedDevice ->
+                    logger.d { "[registerPushDevice] pushDevice gnerated: $generatedDevice" }
+                    scope.launch { createDevice(generatedDevice) }
+                }
+                notificationPermissionManager.start()
             }
-        }
     }
 
     suspend fun createDevice(pushDevice: PushDevice): Result<Device> {
@@ -123,12 +132,35 @@ internal class StreamNotificationManager private constructor(
                                 "tried to install a new one."
                     }
                 } else {
+                    val applicationContext = context.applicationContext
+                    val nph =
+                        notificationConfig.notificationPermissionHandler
+                            .takeUnless { it == NoOpNotificationPermissionHandler }
+                            ?: DefaultNotificationPermissionHandler
+                                .createDefaultNotificationPermissionHandler(
+                                    applicationContext as Application,
+                                )
+                    val onPermissionStatus: (NotificationPermissionStatus) -> Unit = {
+                        when (it) {
+                            REQUESTED -> nph.onPermissionRequested()
+                            GRANTED -> nph.onPermissionGranted()
+                            DENIED -> nph.onPermissionDenied()
+                            RATIONALE_NEEDED -> nph.onPermissionRationale()
+                        }
+                    }
+                    val notificationPermissionManager =
+                        NotificationPermissionManager.createNotificationPermissionsManager(
+                            applicationContext as Application,
+                            notificationConfig.requestPermissionOnAppLaunch,
+                            onPermissionStatus = onPermissionStatus,
+                        )
                     internalStreamNotificationManager = StreamNotificationManager(
-                        context.applicationContext,
+                        applicationContext,
                         scope,
                         notificationConfig,
                         devicesApi,
                         streamUserDataStore,
+                        notificationPermissionManager,
                     )
                 }
                 return internalStreamNotificationManager

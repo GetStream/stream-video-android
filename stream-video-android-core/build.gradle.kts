@@ -125,6 +125,7 @@ dependencies {
     api(libs.stream.log.android)
     implementation(libs.stream.push)
     implementation(libs.stream.push.delegate)
+    implementation(libs.stream.push.permissions)
 
     // unit tests
     testImplementation(libs.junit)
