@@ -23,7 +23,7 @@ import io.getstream.video.android.model.StreamCallId
 
 class CallActivity : AbstractCallActivity() {
 
-    override fun getCall(): Call {
+    override fun createCall(): Call {
         val streamVideo = StreamVideo.instance()
         val cid = intent.getParcelableExtra<StreamCallId>(EXTRA_CID)
             ?: throw IllegalArgumentException("call type and id is invalid!")
@@ -31,7 +31,7 @@ class CallActivity : AbstractCallActivity() {
     }
 
     override fun closeCall() {
-        getCall().leave()
+        createCall().leave()
     }
 
     override fun pipChanged(isInPip: Boolean) {

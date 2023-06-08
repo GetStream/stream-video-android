@@ -40,11 +40,15 @@ import io.getstream.video.android.model.StreamCallId
  */
 public abstract class AbstractCallActivity : ComponentActivity() {
 
-    public abstract fun getCall(): Call
+    public val call: Call by lazy(LazyThreadSafetyMode.NONE) { createCall() }
 
-    public abstract fun pipChanged(isInPip: Boolean)
+    public abstract fun createCall(): Call
 
-    public abstract fun closeCall()
+    public open fun closeCall() {
+        createCall().leave()
+    }
+
+    public open fun pipChanged(isInPip: Boolean): Unit = Unit
 
     @SuppressLint("SourceLockedOrientationActivity")
     private fun toggleFullscreen(action: ToggleScreenConfiguration) {
@@ -132,11 +136,10 @@ public abstract class AbstractCallActivity : ComponentActivity() {
      * the feature.
      */
     protected open fun handleBackPressed() {
-
         try {
             enterPictureInPicture()
         } catch (error: Throwable) {
-            getCall().leave()
+            createCall().leave()
         }
     }
 
@@ -144,7 +147,7 @@ public abstract class AbstractCallActivity : ComponentActivity() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
 
             val currentOrientation = resources.configuration.orientation
-            val screenSharing = getCall().state.screenSharingSession.value
+            val screenSharing = createCall().state.screenSharingSession.value
 
             val aspect =
                 if (currentOrientation == ActivityInfo.SCREEN_ORIENTATION_PORTRAIT && screenSharing == null) {
@@ -174,6 +177,12 @@ public abstract class AbstractCallActivity : ComponentActivity() {
         if (isInPiP) {
             closeCall()
         }
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+
+        closeCall()
     }
 
     override fun onConfigurationChanged(newConfig: Configuration) {

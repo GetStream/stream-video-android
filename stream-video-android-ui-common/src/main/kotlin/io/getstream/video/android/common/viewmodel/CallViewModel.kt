@@ -17,6 +17,7 @@
 package io.getstream.video.android.common.viewmodel
 
 import androidx.lifecycle.ViewModel
+import io.getstream.video.android.model.User
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 
@@ -38,7 +39,7 @@ import kotlinx.coroutines.flow.StateFlow
  * - Opening/closing the participant menu
  *
  */
-public open class CallViewModel : ViewModel() {
+public open class CallViewModel() : ViewModel() {
 
     /** if we are in picture in picture mode */
     private val _isInPictureInPicture: MutableStateFlow<Boolean> = MutableStateFlow(false)
@@ -46,11 +47,6 @@ public open class CallViewModel : ViewModel() {
 
     private val _isShowingCallInfoMenu = MutableStateFlow(false)
     public val isShowingCallInfoMenu: StateFlow<Boolean> = _isShowingCallInfoMenu
-
-    override fun onCleared() {
-        super.onCleared()
-        dismissCallInfoMenu()
-    }
 
     public fun openCallInfoMenu() {
         _isShowingCallInfoMenu.value = true
@@ -60,7 +56,15 @@ public open class CallViewModel : ViewModel() {
         this._isShowingCallInfoMenu.value = false
     }
 
+    public fun onInviteUsers(users: List<User>) {
+    }
+
     public fun onPictureInPictureModeChanged(inPictureInPictureMode: Boolean) {
         this._isInPictureInPicture.value = inPictureInPictureMode
+    }
+
+    override fun onCleared() {
+        super.onCleared()
+        dismissCallInfoMenu()
     }
 }

@@ -30,6 +30,7 @@ import androidx.compose.ui.Modifier
 import androidx.lifecycle.lifecycleScope
 import io.getstream.log.Priority
 import io.getstream.log.taggedLogger
+import io.getstream.video.android.common.AbstractCallActivity
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.core.StreamVideo
 import io.getstream.video.android.core.logging.LoggingLevel
@@ -77,7 +78,10 @@ class DeeplinkingActivity : ComponentActivity() {
             val call = streamVideo.call(type = callId.type, id = callId.id)
             val result = call.join()
             result.onSuccess {
-                val intent = CallActivity.getIntent(this@DeeplinkingActivity, callId = callId)
+                val intent = AbstractCallActivity.createIntent<CallActivity>(
+                    this@DeeplinkingActivity,
+                    callId = callId
+                )
                 startActivity(intent)
             }.onError {
                 Toast.makeText(this@DeeplinkingActivity, it.message, Toast.LENGTH_SHORT).show()
