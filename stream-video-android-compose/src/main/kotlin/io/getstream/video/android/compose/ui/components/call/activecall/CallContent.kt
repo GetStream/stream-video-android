@@ -33,10 +33,13 @@ import androidx.compose.material.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.coerceAtLeast
@@ -222,7 +225,7 @@ public fun CallContent(
 ) {
     val orientation = LocalConfiguration.current.orientation
 
-    DefaultPermissionHandler(permissions = permissions)
+    DefaultPermissionHandler(call = call, permissions = permissions)
 
     if (!isInPictureInPicture) {
         Scaffold(
@@ -305,12 +308,22 @@ internal fun DefaultPictureInPictureContent(call: Call) {
 
 @Composable
 private fun DefaultPermissionHandler(
+    call: Call,
     permissions: List<String> = listOf(
         android.Manifest.permission.CAMERA,
         android.Manifest.permission.RECORD_AUDIO
     ),
 ) {
-    val multiplePermissionsState = rememberMultiplePermissionsState(permissions = permissions)
+    if (LocalInspectionMode.current) return
+
+    val multiplePermissionsState = rememberMultiplePermissionsState(permissions = permissions) {
+        if (it[android.Manifest.permission.CAMERA] == true) {
+            call.camera.setEnabled(true)
+        }
+        if (it[android.Manifest.permission.RECORD_AUDIO] == true) {
+            call.microphone.setEnabled(true)
+        }
+    }
 
     LaunchedEffect(key1 = multiplePermissionsState) {
         multiplePermissionsState.launchMultiplePermissionRequest()

@@ -134,8 +134,6 @@ public fun CallLobby(
     DefaultPermissionHandler(
         call = call,
         permissions = permissions,
-        isCameraEnabled = isCameraEnabled,
-        isMicrophoneEnabled = isMicrophoneEnabled
     )
 
     Column(modifier = modifier) {
@@ -177,19 +175,24 @@ public fun CallLobby(
 @Composable
 private fun DefaultPermissionHandler(
     call: Call,
-    isCameraEnabled: Boolean,
-    isMicrophoneEnabled: Boolean,
     permissions: List<String> = listOf(
         android.Manifest.permission.CAMERA,
         android.Manifest.permission.RECORD_AUDIO
     ),
 ) {
-    val multiplePermissionsState = rememberMultiplePermissionsState(permissions = permissions)
+    if (LocalInspectionMode.current) return
+
+    val multiplePermissionsState = rememberMultiplePermissionsState(permissions = permissions) {
+        if (it[android.Manifest.permission.CAMERA] == true) {
+            call.camera.setEnabled(true)
+        }
+        if (it[android.Manifest.permission.RECORD_AUDIO] == true) {
+            call.microphone.setEnabled(true)
+        }
+    }
 
     LaunchedEffect(key1 = multiplePermissionsState) {
         multiplePermissionsState.launchMultiplePermissionRequest()
-        call.camera.setEnabled(isCameraEnabled)
-        call.microphone.setEnabled(isMicrophoneEnabled)
     }
 }
 
