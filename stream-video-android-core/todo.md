@@ -46,7 +46,14 @@
 - [ ] Analytics integration
 - [ ] Screensharing
 
+### Server wishlist (june 8th)
 
+- Query calls should support Map<String, Any?> instead of Any (not nullable)
+- Do we have a permission level for people who created the call? IE i should be able to broadcast my own call
+- call.wentLiveAt or similar isn't available
+- goLive should support "notify" flag
+- getCall should return members and allow pagination on them
+- call type should have a setting if "speaker" or "earpiece" should be the default. for an audio call earpiece makes sense. for an audio_room speaker is a better default
 
 
 ### Docs ~1 week left
@@ -86,7 +93,7 @@
 
 #### Livestream
 
-- [ ] Failure(value=NetworkError(message=GetOrCreateCall failed with error: "User 'thierry' with role 'user' is not allowed to perform action CreateCall in scope 'video:livestream'", serverErrorCode=17, statusCode=403, cause=java.lang.Throwable: https://getstream.io/chat/docs/api_errors_response))
+- [X] Failure(value=NetworkError(message=GetOrCreateCall failed with error: "User 'thierry' with role 'user' is not allowed to perform action CreateCall in scope 'video:livestream'", serverErrorCode=17, statusCode=403, cause=java.lang.Throwable: https://getstream.io/chat/docs/api_errors_response))
 - [X] hlsPlaylistUrl vs ingress/egress
 - [ ] Livestreaming where do i see when the call started
 
