@@ -78,9 +78,9 @@ class MainActivity : ComponentActivity() {
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     if (connection.value != RealtimeConnection.Connected) {
-                        Text("loading...", style=VideoTheme.typography.body)
+                        Text("loading...", fontSize = 30.sp)
                     } else {
-                        Text("Call ${call.id} has ${participants.value.size} participants", style=VideoTheme.typography.body)
+                        Text("Call ${call.id} has ${participants.value.size} participants", fontSize = 30.sp)
                     }
                 }
             }
@@ -109,39 +109,44 @@ And replace the setContent code in MainActivity.kt
 ```kotlin
 setContent {
     VideoTheme {
-        val participants = call.state.remoteParticipants.collectAsState()
-        val me = call.state.me.collectAsState()
-        val connection = call.state.connection.collectAsState()
+        val participants by call.state.remoteParticipants.collectAsState()
+        val me by call.state.me.collectAsState()
+        val connection by call.state.connection.collectAsState()
         var parentSize: IntSize by remember { mutableStateOf(IntSize(0, 0)) }
 
-
-        Surface(
-            modifier = Modifier.fillMaxSize().onSizeChanged { parentSize = it },
-            color = VideoTheme.colors.appBackground
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(VideoTheme.colors.appBackground),
         ) {
-            if (connection.value != RealtimeConnection.Connected) {
-                Text("loading...")
-            }
-            // floating video UI for the local video participant
-            me.value?.let {
-                FloatingParticipantVideo(
-                    call = call,
-                    participant = it,
-                    parentBounds = parentSize
-                )
+            if (connection != RealtimeConnection.Connected) {
+                Text("loading...", fontSize = 30.sp)
             }
 
             // basic, video only rendering of the participant
-            val remoteParticipant = participants.value.firstOrNull()
-            val remoteVideo = remoteParticipant?.video?.collectAsState()
+            val remoteParticipant = participants.firstOrNull()
             if (remoteParticipant != null) {
-                Column(modifier = Modifier.fillMaxSize()) {
-                    VideoRenderer(
+                Column(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .onSizeChanged { parentSize = it }) {
+
+                    ParticipantVideo(
                         modifier = Modifier.weight(1f),
                         call = call,
-                        video = remoteVideo?.value
+                        participant = remoteParticipant,
                     )
                 }
+            }
+
+            // floating video UI for the local video participant
+            if (me != null) {
+                FloatingParticipantVideo(
+                    modifier = Modifier.align(Alignment.TopEnd),
+                    call = call,
+                    participant = me!!,
+                    parentBounds = parentSize
+                )
             }
         }
     }
