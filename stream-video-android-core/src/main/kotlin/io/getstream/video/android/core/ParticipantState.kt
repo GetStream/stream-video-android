@@ -211,9 +211,9 @@ public data class ParticipantState(
         )
     }
 
-    public fun consumeReaction(id: String) {
+    public fun consumeReaction(reaction: Reaction) {
         val newReactions = _reactions.value.toMutableList()
-        newReactions.firstOrNull { it.id == id }?.isConsumed = true
+        newReactions.remove(reaction)
         _reactions.value = newReactions
     }
 
