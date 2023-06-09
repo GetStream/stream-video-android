@@ -40,7 +40,7 @@ import io.getstream.video.android.ui.common.R
 public fun AcceptCallAction(
     modifier: Modifier = Modifier,
     enabled: Boolean = true,
-    onCallAction: (CallAction) -> Unit,
+    onCallAction: (AcceptCall) -> Unit,
 ) {
     IconButton(
         modifier = modifier.background(

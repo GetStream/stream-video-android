@@ -40,7 +40,7 @@ import io.getstream.video.android.ui.common.R
 public fun CancelCallAction(
     modifier: Modifier = Modifier,
     enabled: Boolean = true,
-    onCallAction: (CallAction) -> Unit,
+    onCallAction: (DeclineCall) -> Unit,
 ) {
     IconButton(
         modifier = modifier.background(
