@@ -29,6 +29,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.call.state.CallAction
+import io.getstream.video.android.core.call.state.FlipCamera
 import io.getstream.video.android.core.call.state.ToggleCamera
 import io.getstream.video.android.core.call.state.ToggleMicrophone
 import io.getstream.video.android.core.call.state.ToggleSpeakerphone
@@ -101,6 +102,7 @@ public object DefaultOnCallActionHandler {
             is ToggleCamera -> call.camera.setEnabled(callAction.isEnabled)
             is ToggleMicrophone -> call.microphone.setEnabled(callAction.isEnabled)
             is ToggleSpeakerphone -> call.speaker.setEnabled(callAction.isEnabled)
+            is FlipCamera -> call.camera.flip()
             else -> Unit
         }
     }

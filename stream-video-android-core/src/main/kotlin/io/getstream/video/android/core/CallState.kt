@@ -33,6 +33,7 @@ import io.getstream.video.android.core.events.SubscriberOfferEvent
 import io.getstream.video.android.core.events.TrackPublishedEvent
 import io.getstream.video.android.core.events.TrackUnpublishedEvent
 import io.getstream.video.android.core.model.NetworkQuality
+import io.getstream.video.android.core.model.Reaction
 import io.getstream.video.android.core.model.ScreenSharingSession
 import io.getstream.video.android.core.permission.PermissionRequest
 import io.getstream.video.android.core.utils.mapState
@@ -87,6 +88,7 @@ import stream.video.sfu.models.Participant
 import stream.video.sfu.models.ParticipantCount
 import stream.video.sfu.models.TrackType
 import java.util.SortedMap
+import java.util.UUID
 
 public sealed interface RealtimeConnection {
     /**
@@ -431,7 +433,12 @@ public class CallState(private val call: Call, private val user: User) {
                     val participant = getParticipantBySessionId(sessionId)
                     participant?.let {
                         val newReactions = participant._reactions.value.toMutableList()
-                        newReactions.add(event.reaction)
+                        val reaction = Reaction(
+                            id = UUID.randomUUID().toString(),
+                            response = event.reaction,
+                            createdAt = System.currentTimeMillis(),
+                        )
+                        newReactions.add(reaction)
                         participant._reactions.value = newReactions
                     }
                 }

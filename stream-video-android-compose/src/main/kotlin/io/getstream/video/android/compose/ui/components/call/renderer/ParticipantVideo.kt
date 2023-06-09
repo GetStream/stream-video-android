@@ -16,6 +16,7 @@
 
 package io.getstream.video.android.compose.ui.components.call.renderer
 
+import android.util.Log
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -32,7 +33,10 @@ import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Alignment.Companion.BottomEnd
 import androidx.compose.ui.Alignment.Companion.BottomStart
@@ -97,9 +101,23 @@ public fun ParticipantVideo(
         UserAvatarBackground(user = user)
     },
 ) {
-    val reactions by participant.reactions.collectAsStateWithLifecycle()
     val connectionQuality by participant.networkQuality.collectAsStateWithLifecycle()
     val participants by call.state.participants.collectAsStateWithLifecycle()
+    val reactions by participant.reactions.collectAsStateWithLifecycle()
+    val validReactions by remember(reactions) {
+        derivedStateOf {
+            reactions.filter {
+                !it.isConsumed && it.createdAt + 10000 > System.currentTimeMillis()
+            }
+        }
+    }
+
+    LaunchedEffect(key1 = validReactions) {
+        Log.e("Test", "validReactions: $validReactions")
+        validReactions.forEach {
+            participant.consumeReaction(it.id)
+        }
+    }
 
     val containerModifier = if (style.isFocused && participants.size > 1) modifier.border(
         border = if (style.isScreenSharing) {
