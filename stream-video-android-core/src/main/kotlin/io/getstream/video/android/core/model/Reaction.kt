@@ -24,3 +24,10 @@ public data class Reaction(
     val createdAt: Long,
     var isConsumed: Boolean = false
 )
+
+public sealed interface ReactionState {
+
+    public object Nothing : ReactionState
+
+    public object Running : ReactionState
+}

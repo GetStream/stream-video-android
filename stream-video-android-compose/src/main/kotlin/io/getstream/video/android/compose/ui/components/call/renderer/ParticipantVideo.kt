@@ -72,6 +72,7 @@ import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.ParticipantState
 import io.getstream.video.android.core.model.NetworkQuality
 import io.getstream.video.android.core.model.Reaction
+import io.getstream.video.android.core.model.ReactionState
 import io.getstream.video.android.mock.StreamMockUtils
 import io.getstream.video.android.mock.mockCall
 import io.getstream.video.android.mock.mockParticipantList
@@ -89,6 +90,7 @@ import kotlinx.coroutines.delay
  * @param labelContent Content is shown that displays participant's name and device states.
  * @param connectionIndicatorContent Content is shown that indicates the connection quality.
  * @param videoFallbackContent Content is shown the video track is failed to load or not available.
+ * @param reactionContent Content is shown for the reaction.
  */
 @Composable
 public fun ParticipantVideo(
@@ -293,19 +295,30 @@ private fun BoxScope.DefaultReaction(
     style: VideoRendererStyle
 ) {
     val reactions by participant.reactions.collectAsStateWithLifecycle()
-    val reaction = reactions.lastOrNull {
-        !it.isConsumed && it.createdAt + 3000 > System.currentTimeMillis()
-    }
+    val reaction = reactions.lastOrNull { it.createdAt + 3000 > System.currentTimeMillis() }
     var currentReaction: Reaction? by remember { mutableStateOf(null) }
+    var reactionState: ReactionState by remember { mutableStateOf(ReactionState.Nothing) }
 
     LaunchedEffect(key1 = reaction) {
-        currentReaction?.let { participant.consumeReaction(it) }
-        currentReaction = reaction
+        if (reactionState == ReactionState.Nothing) {
+            currentReaction?.let { participant.consumeReaction(it) }
+            currentReaction = reaction
 
-        if (reaction != null) {
-            delay(style.reactionDuration * 2 - 50L)
-            participant.consumeReaction(reaction)
-            currentReaction = null
+            // deliberately execute this instead of animation finish listener to remove animation on the screen.
+            if (reaction != null) {
+                reactionState = ReactionState.Running
+                delay(style.reactionDuration * 2 - 50L)
+                participant.consumeReaction(reaction)
+                currentReaction = null
+                reactionState = ReactionState.Nothing
+            }
+        } else {
+            if (currentReaction != null) {
+                participant.consumeReaction(currentReaction!!)
+                reactionState = ReactionState.Nothing
+                currentReaction = null
+                delay(style.reactionDuration * 2 - 50L)
+            }
         }
     }
 

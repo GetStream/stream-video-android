@@ -144,7 +144,7 @@ public data class ScreenSharingVideoRendererStyle(
     override val isShowingParticipantLabel: Boolean = true,
     override val isShowingConnectionQualityIndicator: Boolean = false,
     override val labelPosition: Alignment = Alignment.BottomStart,
-    override val reactionDuration: Int = 750,
+    override val reactionDuration: Int = 1000,
     override val reactionPosition: Alignment = Alignment.Center
 
 ) : VideoRendererStyle(
