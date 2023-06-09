@@ -41,7 +41,7 @@ import io.getstream.video.android.ui.common.R
 public fun LeaveCallAction(
     modifier: Modifier = Modifier,
     enabled: Boolean = true,
-    onCallAction: (CallAction) -> Unit
+    onCallAction: (LeaveCall) -> Unit
 ) {
     CallControlActionBackground(
         modifier = modifier,

@@ -19,6 +19,8 @@ package io.getstream.video.android.dogfooding
 import android.app.Application
 import android.content.Context
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.crashlytics.ktx.crashlytics
+import com.google.firebase.ktx.Firebase
 import dagger.hilt.android.HiltAndroidApp
 import io.getstream.android.push.firebase.FirebasePushDeviceGenerator
 import io.getstream.log.Priority
@@ -29,17 +31,21 @@ import io.getstream.video.android.datastore.delegate.StreamUserDataStore
 import io.getstream.video.android.dogfooding.token.StreamVideoNetwork
 import io.getstream.video.android.model.ApiKey
 import io.getstream.video.android.model.User
+import io.getstream.video.android.tooling.handler.StreamGlobalExceptionHandler
 
 @HiltAndroidApp
 class DogfoodingApp : Application() {
 
     override fun onCreate() {
         super.onCreate()
-//        StreamGlobalExceptionHandler.install(
-//            application = this,
-//            packageName = MainActivity::class.java.name,
-//            exceptionHandler = { stackTrace -> Firebase.crashlytics.log(stackTrace) }
-//        )
+
+        if (!BuildConfig.DEBUG) {
+            StreamGlobalExceptionHandler.install(
+                application = this,
+                packageName = MainActivity::class.java.name,
+                exceptionHandler = { stackTrace -> Firebase.crashlytics.log(stackTrace) }
+            )
+        }
     }
 
     /** Sets up and returns the [StreamVideo] required to connect to the API. */

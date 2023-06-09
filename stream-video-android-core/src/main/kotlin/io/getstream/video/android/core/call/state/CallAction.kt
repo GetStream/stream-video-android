@@ -83,6 +83,11 @@ public object LeaveCall : CallAction
 public object ChatDialog : CallAction
 
 /**
+ * Action to show a reaction popup.
+ */
+public object Reaction : CallAction
+
+/**
  * Action to invite other users to a call.
  */
 public data class InviteUsersToCall(

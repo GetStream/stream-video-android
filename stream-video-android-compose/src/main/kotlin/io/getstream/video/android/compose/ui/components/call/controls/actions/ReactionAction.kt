@@ -21,56 +21,40 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material.Icon
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.core.call.state.CallAction
-import io.getstream.video.android.core.call.state.ToggleSpeakerphone
+import io.getstream.video.android.core.call.state.Reaction
 import io.getstream.video.android.ui.common.R
 
 /**
- * A call action button represents toggling a speakerphone.
+ * A call action button represents reaction actions.
  *
  * @param modifier Optional Modifier for this action button.
- * @param isSpeakerphoneEnabled Represent is speaker enabled.
  * @param enabled Whether or not this action button will handle input events.
  * @param onCallAction A [CallAction] event that will be fired.
  */
 @Composable
-public fun ToggleSpeakerphoneAction(
+public fun ReactionAction(
     modifier: Modifier = Modifier,
-    isSpeakerphoneEnabled: Boolean,
     enabled: Boolean = true,
-    onCallAction: (ToggleSpeakerphone) -> Unit
+    onCallAction: (Reaction) -> Unit
 ) {
-    val cameraIcon = painterResource(
-        id = if (isSpeakerphoneEnabled) {
-            R.drawable.stream_video_ic_speaker_on
-        } else {
-            R.drawable.stream_video_ic_speaker_off
-        }
-    )
-
     CallControlActionBackground(
         modifier = modifier,
-        isEnabled = isSpeakerphoneEnabled
+        isEnabled = true,
+        enabledColor = VideoTheme.colors.errorAccent
     ) {
         Icon(
             modifier = Modifier
-                .padding(13.dp)
-                .clickable(enabled = enabled) {
-                    onCallAction(
-                        ToggleSpeakerphone(isSpeakerphoneEnabled.not())
-                    )
-                },
-            tint = if (isSpeakerphoneEnabled) {
-                VideoTheme.colors.callActionIconEnabled
-            } else {
-                VideoTheme.colors.callActionIconDisabled
-            },
-            painter = cameraIcon,
-            contentDescription = stringResource(R.string.stream_video_call_controls_toggle_speakerphone)
+                .padding(12.dp)
+                .clickable(enabled = enabled) { onCallAction(Reaction) },
+            tint = Color.White,
+            painter = painterResource(id = R.drawable.stream_video_ic_reaction),
+            contentDescription = stringResource(R.string.stream_video_call_controls_reaction)
         )
     }
 }

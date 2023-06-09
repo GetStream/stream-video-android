@@ -42,7 +42,7 @@ public fun ToggleCameraAction(
     modifier: Modifier = Modifier,
     isCameraEnabled: Boolean,
     enabled: Boolean = true,
-    onCallAction: (CallAction) -> Unit
+    onCallAction: (ToggleCamera) -> Unit
 ) {
     val cameraIcon = painterResource(
         id = if (isCameraEnabled) {

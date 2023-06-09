@@ -16,9 +16,9 @@
 
 package io.getstream.video.android.dogfooding
 
+import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
-import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.background
@@ -35,8 +35,11 @@ import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.core.StreamVideo
 import io.getstream.video.android.core.logging.LoggingLevel
 import io.getstream.video.android.datastore.delegate.StreamUserDataStore
+import io.getstream.video.android.dogfooding.token.StreamVideoNetwork
 import io.getstream.video.android.dogfooding.ui.call.CallActivity
 import io.getstream.video.android.model.StreamCallId
+import io.getstream.video.android.model.User
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 
 class DeeplinkingActivity : ComponentActivity() {
@@ -64,46 +67,51 @@ class DeeplinkingActivity : ComponentActivity() {
 
         val data: Uri = intent?.data ?: return
         val callId = data.toString().split("/").lastOrNull() ?: return
+
         logger.d { "Action: ${intent?.action}" }
         logger.d { "Data: ${intent?.data}" }
 
-        logIn()
         joinCall(callId)
     }
 
     private fun joinCall(cid: String) {
-        lifecycleScope.launch {
-            val streamVideo = StreamVideo.instance()
-            val callId = StreamCallId.fromCallCid(cid)
-            val call = streamVideo.call(type = callId.type, id = callId.id)
-            val result = call.join()
-            result.onSuccess {
-                val intent = AbstractCallActivity.createIntent<CallActivity>(
-                    this@DeeplinkingActivity,
-                    callId = callId
-                )
-                startActivity(intent)
-            }.onError {
-                Toast.makeText(this@DeeplinkingActivity, it.message, Toast.LENGTH_SHORT).show()
-            }
-            finish()
-        }
-    }
-
-    private fun logIn() {
         val dataStore = StreamUserDataStore.install(this)
-        val user = dataStore.user.value
-        val apiKey = dataStore.apiKey.value
-        val token = dataStore.userToken.value
 
-        if (user != null) {
-            logger.d { "[logIn] selectedUser: $user" }
-            dogfoodingApp.initializeStreamVideo(
-                user = user,
-                token = token,
-                apiKey = apiKey,
-                loggingLevel = LoggingLevel(priority = Priority.VERBOSE)
-            )
+        lifecycleScope.launch {
+            val data = dataStore.data
+            data.collectLatest { preferences ->
+                val streamVideo: StreamVideo = if (preferences != null) {
+                    dogfoodingApp.initializeStreamVideo(
+                        user = preferences.user!!,
+                        token = preferences.userToken,
+                        apiKey = preferences.apiKey,
+                        loggingLevel = LoggingLevel(priority = Priority.VERBOSE)
+                    )
+                } else {
+                    val guest = User(id = "guest", name = "Guest", role = "guest")
+                    val result = StreamVideoNetwork.tokenService.fetchToken(
+                        userId = guest.id,
+                        apiKey = BuildConfig.DOGFOODING_API_KEY
+                    )
+                    dogfoodingApp.initializeStreamVideo(
+                        user = guest,
+                        token = result.token,
+                        apiKey = BuildConfig.DOGFOODING_API_KEY,
+                        loggingLevel = LoggingLevel(priority = Priority.VERBOSE)
+                    )
+                }
+
+                if (StreamVideo.isInstalled) {
+                    val callId = StreamCallId(type = "default", id = cid)
+                    val intent = AbstractCallActivity.createIntent<CallActivity>(
+                        context = this@DeeplinkingActivity, callId = callId
+                    ).apply {
+                        flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+                    }
+                    startActivity(intent)
+                    finish()
+                }
+            }
         }
     }
 }
