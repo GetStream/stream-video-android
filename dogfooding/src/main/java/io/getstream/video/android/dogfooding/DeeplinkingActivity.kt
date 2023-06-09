@@ -32,10 +32,13 @@ import io.getstream.log.Priority
 import io.getstream.log.taggedLogger
 import io.getstream.video.android.common.AbstractCallActivity
 import io.getstream.video.android.compose.theme.VideoTheme
+import io.getstream.video.android.core.StreamVideo
 import io.getstream.video.android.core.logging.LoggingLevel
 import io.getstream.video.android.datastore.delegate.StreamUserDataStore
+import io.getstream.video.android.dogfooding.token.StreamVideoNetwork
 import io.getstream.video.android.dogfooding.ui.call.CallActivity
 import io.getstream.video.android.model.StreamCallId
+import io.getstream.video.android.model.User
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 
@@ -68,37 +71,47 @@ class DeeplinkingActivity : ComponentActivity() {
         logger.d { "Action: ${intent?.action}" }
         logger.d { "Data: ${intent?.data}" }
 
-        initializeStreamVideo()
-
         joinCall(callId)
     }
 
-    private fun initializeStreamVideo() {
+    private fun joinCall(cid: String) {
         val dataStore = StreamUserDataStore.install(this)
 
         lifecycleScope.launch {
             val data = dataStore.data
             data.collectLatest { preferences ->
-                if (preferences != null) {
+                val streamVideo: StreamVideo = if (preferences != null) {
                     dogfoodingApp.initializeStreamVideo(
                         user = preferences.user!!,
                         token = preferences.userToken,
                         apiKey = preferences.apiKey,
                         loggingLevel = LoggingLevel(priority = Priority.VERBOSE)
                     )
+                } else {
+                    val guest = User(id = "guest", name = "Guest", role = "guest")
+                    val result = StreamVideoNetwork.tokenService.fetchToken(
+                        userId = guest.id,
+                        apiKey = BuildConfig.DOGFOODING_API_KEY
+                    )
+                    dogfoodingApp.initializeStreamVideo(
+                        user = guest,
+                        token = result.token,
+                        apiKey = BuildConfig.DOGFOODING_API_KEY,
+                        loggingLevel = LoggingLevel(priority = Priority.VERBOSE)
+                    )
+                }
+
+                if (StreamVideo.isInstalled) {
+                    val callId = StreamCallId(type = "default", id = cid)
+                    val intent = AbstractCallActivity.createIntent<CallActivity>(
+                        context = this@DeeplinkingActivity, callId = callId
+                    ).apply {
+                        flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+                    }
+                    startActivity(intent)
+                    finish()
                 }
             }
         }
-    }
-
-    private fun joinCall(cid: String) {
-        val callId = StreamCallId(type = "default", id = cid)
-        val intent = AbstractCallActivity.createIntent<CallActivity>(
-            context = this, callId = callId
-        ).apply {
-            flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
-        }
-        startActivity(intent)
-        finish()
     }
 }
