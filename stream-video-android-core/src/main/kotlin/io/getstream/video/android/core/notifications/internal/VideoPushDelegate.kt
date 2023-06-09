@@ -47,12 +47,15 @@ internal class VideoPushDelegate(
         get() = if (StreamVideo.isInstalled) {
             StreamVideo.instance()
         } else {
-            userDataStore.user.value?.let {
-                StreamVideoBuilder(
-                    context = context,
-                    user = it,
-                    apiKey = userDataStore.apiKey.value,
-                ).build().also { StreamVideo.unInstall() }
+            userDataStore.user.value?.let { user ->
+                userDataStore.userToken.value?.let { userToken ->
+                    StreamVideoBuilder(
+                        context = context,
+                        user = user,
+                        token = userToken,
+                        apiKey = userDataStore.apiKey.value,
+                    ).build().also { StreamVideo.unInstall() }
+                }
             }
 
         }
@@ -64,13 +67,33 @@ internal class VideoPushDelegate(
      * @return true if the payload was handled properly.
      */
     override fun handlePushMessage(payload: Map<String, Any?>): Boolean {
+        println("JcLog: handlePushMessage($payload)")
         logger.d { "[handlePushMessage] payload: $payload" }
         return payload.ifValid {
-            val callDisplayName = payload[KEY_CALL_DISPLAY_NAME] as String
+            println("JcLog: Is valid payload")
+
             val callId = (payload[KEY_CALL_CID] as String).toTypeAndId()
                 .let { StreamCallId(it.first, it.second) }
-            streamVideo?.onRiningCall(callId, callDisplayName)
+            when (payload[KEY_TYPE]) {
+                KEY_TYPE_RING -> handleRingType(callId, payload)
+                KEY_TYPE_NOTIFICATION -> handleNotificationType(callId, payload)
+                KEY_TYPE_LIVE_STARTED -> handleLiveStartedType(callId, payload)
+            }
         }
+    }
+
+    private fun handleRingType(callId: StreamCallId, payload: Map<String, Any?>) {
+        val callDisplayName = payload[KEY_CALL_DISPLAY_NAME] as String
+        println("JcLog: calling streamVideo: $streamVideo")
+        streamVideo?.onRiningCall(callId, callDisplayName)
+    }
+
+    private fun handleNotificationType(callId: StreamCallId, payload: Map<String, Any?>) {
+        streamVideo?.onNotification(callId)
+    }
+
+    private fun handleLiveStartedType(callId: StreamCallId, payload: Map<String, Any?>) {
+        streamVideo?.onLivestream(callId)
     }
 
     /**
@@ -98,8 +121,45 @@ internal class VideoPushDelegate(
         return isValid
     }
 
-    private fun Map<String, Any?>.isValid(): Boolean = isFromStreamServer() && isValidIncomingCall()
+    /**
+     * Verify if the map contains all keys/values for a notification.
+     */
+    private fun Map<String, Any?>.isValid(): Boolean =
+        isFromStreamServer() &&
+                containsCallId() &&
+                containsKnownType()
 
+    /**
+     * Verify if the map contains a CallId.
+     */
+    private fun Map<String, Any?>.containsCallId(): Boolean =
+        !(this[KEY_CALL_CID] as? String).isNullOrBlank()
+
+    /**
+     * Verify if the map contains a known type.
+     */
+    private fun Map<String, Any?>.containsKnownType(): Boolean = when(this[KEY_TYPE]) {
+        KEY_TYPE_RING -> isValidRingType()
+        KEY_TYPE_NOTIFICATION -> isValidNotificationType()
+        KEY_TYPE_LIVE_STARTED -> isValidLiveStarted()
+        else -> false
+    }
+
+    /**
+     * Verify if the map contains all keys/values for a Ring Type.
+     */
+    private fun Map<String, Any?>.isValidRingType(): Boolean =
+        !(this[KEY_CALL_DISPLAY_NAME] as? String).isNullOrBlank()
+
+    /**
+     * Verify if the map contains all keys/values for a Notification Type.
+     */
+    private fun Map<String, Any?>.isValidNotificationType(): Boolean = true
+
+    /**
+     * Verify if the map contains all keys/values for a Live Started Type.
+     */
+    private fun Map<String, Any?>.isValidLiveStarted(): Boolean = true
     /**
      * Verify if the map contains key/value from Stream Server.
      */
@@ -115,6 +175,9 @@ internal class VideoPushDelegate(
     private companion object {
         private const val KEY_SENDER = "sender"
         private const val KEY_TYPE = "type"
+        private const val KEY_TYPE_RING = "call.ring"
+        private const val KEY_TYPE_NOTIFICATION = "call.notification"
+        private const val KEY_TYPE_LIVE_STARTED = "call.live_started"
         private const val KEY_CALL_CID = "call_cid"
         private const val KEY_CALL_DISPLAY_NAME = "call_display_name"
         private const val VALUE_STREAM_SENDER = "stream.video"
