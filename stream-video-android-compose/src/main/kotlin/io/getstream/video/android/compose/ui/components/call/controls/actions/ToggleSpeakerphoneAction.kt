@@ -42,7 +42,7 @@ public fun ToggleSpeakerphoneAction(
     modifier: Modifier = Modifier,
     isSpeakerphoneEnabled: Boolean,
     enabled: Boolean = true,
-    onCallAction: (CallAction) -> Unit
+    onCallAction: (ToggleSpeakerphone) -> Unit
 ) {
     val cameraIcon = painterResource(
         id = if (isSpeakerphoneEnabled) {

@@ -42,7 +42,7 @@ public fun ToggleMicrophoneAction(
     modifier: Modifier = Modifier,
     isMicrophoneEnabled: Boolean,
     enabled: Boolean = true,
-    onCallAction: (CallAction) -> Unit
+    onCallAction: (ToggleMicrophone) -> Unit
 ) {
     val microphoneIcon =
         painterResource(

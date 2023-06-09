@@ -40,7 +40,7 @@ import io.getstream.video.android.ui.common.R
 public fun ChatDialogAction(
     modifier: Modifier = Modifier,
     enabled: Boolean = true,
-    onCallAction: (CallAction) -> Unit
+    onCallAction: (ChatDialog) -> Unit
 ) {
     CallControlActionBackground(
         modifier = modifier,
