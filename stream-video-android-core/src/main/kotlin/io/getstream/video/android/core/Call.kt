@@ -250,7 +250,7 @@ public class Call(
     val id: String,
     val user: User,
 ) {
-
+    internal var location: String? = null
 
     internal val clientImpl = client as StreamVideoImpl
     private val logger by taggedLogger("Call")
@@ -416,6 +416,7 @@ public class Call(
         if (locationResult !is Success) {
             return locationResult as Failure
         }
+        location = locationResult.value
         timer.split("location found")
 
         val options = createOptions
@@ -486,15 +487,18 @@ public class Call(
             session?.reconnect()
 
             // ask if we should switch
-            val joinResponse = joinRequest(location = location, currentSfu = session?.sfuUrl)
-            val shouldSwitch = false
+            location?.let {
+                val joinResponse = joinRequest(location = it, currentSfu = session?.sfuUrl)
+                val shouldSwitch = false
 
-            if (shouldSwitch && joinResponse is Success) {
-                // switch to the new SFU
-                val cred = joinResponse.value.credentials
-                val iceServers = cred.iceServers.map { it.toIceServer() }
-                session?.switchSfu(cred.server.url, cred.token, iceServers)
+                if (shouldSwitch && joinResponse is Success) {
+                    // switch to the new SFU
+                    val cred = joinResponse.value.credentials
+                    val iceServers = cred.iceServers.map { it.toIceServer() }
+                    session?.switchSfu(cred.server.url, cred.token, iceServers)
+                }
             }
+
         }
     }
 

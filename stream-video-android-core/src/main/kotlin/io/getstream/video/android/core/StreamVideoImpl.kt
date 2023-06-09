@@ -364,17 +364,22 @@ internal class StreamVideoImpl internal constructor(
     }
 
     internal suspend fun selectLocation(): Result<String> {
-        val attempts = 3
+        var attempts = 0
         var lastResult: Result<String>? = null
         while (attempts<3) {
+            attempts += 1
             lastResult = _selectLocation()
             if (lastResult is Success) {
                 location = lastResult.value
                 return lastResult
             }
             delay(100L)
+            if (attempts == 3) {
+                return lastResult
+            }
         }
-        return lastResult ?: Failure(Error.GenericError("Failed to select location"))
+
+        return Failure(Error.GenericError("failed to select location"))
     }
 
     override suspend fun connectAsync(): Deferred<Unit> {

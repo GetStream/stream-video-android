@@ -15,7 +15,8 @@ class CallSwitchingTest : IntegrationTestBase(connectCoordinatorWS = false) {
     @Test
     fun switch() = runTest {
 
-
+        val location = clientImpl.getCachedLocation()
+        println("location: $location")
         val numberOfCalls = 10
         // create 3 calls
         val calls = (0 until numberOfCalls).map {
@@ -26,7 +27,7 @@ class CallSwitchingTest : IntegrationTestBase(connectCoordinatorWS = false) {
         }
 
         // loop over the calls, join them and leave
-        val t = Timer("switch")
+        val t = Timer("switch to location ${location}")
         (0 until numberOfCalls).map {
             val call = client.call("audio_room", "switch-test-$it")
             val result = call.join()
