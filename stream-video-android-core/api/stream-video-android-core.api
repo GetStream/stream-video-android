@@ -879,6 +879,10 @@ public final class io/getstream/video/android/core/call/state/LeaveCall : io/get
 	public static final field INSTANCE Lio/getstream/video/android/core/call/state/LeaveCall;
 }
 
+public final class io/getstream/video/android/core/call/state/Reaction : io/getstream/video/android/core/call/state/CallAction {
+	public static final field INSTANCE Lio/getstream/video/android/core/call/state/Reaction;
+}
+
 public final class io/getstream/video/android/core/call/state/SelectAudioDevice : io/getstream/video/android/core/call/state/CallAction {
 	public fun <init> (Lio/getstream/video/android/core/audio/AudioDevice;)V
 	public final fun component1 ()Lio/getstream/video/android/core/audio/AudioDevice;

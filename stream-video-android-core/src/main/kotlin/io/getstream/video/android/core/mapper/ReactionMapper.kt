@@ -34,7 +34,7 @@ public fun interface ReactionMapper {
                     ":hate:" -> "\uD83D\uDC4E"
                     ":smile:" -> "\uD83D\uDE04"
                     ":heart:" -> "❤️"
-                    else -> ""
+                    else -> emojiCode
                 }
             }
         }

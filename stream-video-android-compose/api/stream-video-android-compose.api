@@ -606,6 +606,10 @@ public final class io/getstream/video/android/compose/ui/components/call/control
 	public static final fun LeaveCallAction (Landroidx/compose/ui/Modifier;ZLkotlin/jvm/functions/Function1;Landroidx/compose/runtime/Composer;II)V
 }
 
+public final class io/getstream/video/android/compose/ui/components/call/controls/actions/ReactionActionKt {
+	public static final fun ReactionAction (Landroidx/compose/ui/Modifier;ZLkotlin/jvm/functions/Function1;Landroidx/compose/runtime/Composer;II)V
+}
+
 public final class io/getstream/video/android/compose/ui/components/call/controls/actions/RegularControlActionsKt {
 	public static final fun RegularControlActions-Gdeddnk (Lio/getstream/video/android/core/Call;Landroidx/compose/ui/Modifier;JLandroidx/compose/ui/graphics/Shape;FLkotlin/jvm/functions/Function1;Ljava/util/List;Landroidx/compose/runtime/Composer;II)V
 }
