@@ -27,7 +27,9 @@ import androidx.compose.ui.Alignment
  * @param isShowingReactions Represents whether display reaction comes from the call state.
  * @param isShowingParticipantLabel Represents whether display the participant label that contains the name and microphone status of a participant.
  * @param isShowingConnectionQualityIndicator Represents whether displays the connection quality indicator or not.
- * @param labelPosition The position of the participant label  that contains the name and microphone status of a participant.
+ * @param labelPosition The position of the participant label that contains the name and microphone status of a participant.
+ * @param reactionDuration The duration of the reaction animation.
+ * @param reactionPosition The position of the reaction.
  */
 @Stable
 public sealed class VideoRendererStyle(
@@ -37,6 +39,8 @@ public sealed class VideoRendererStyle(
     public open val isShowingParticipantLabel: Boolean,
     public open val isShowingConnectionQualityIndicator: Boolean,
     public open val labelPosition: Alignment,
+    public open val reactionDuration: Int,
+    public open val reactionPosition: Alignment
 )
 
 /**
@@ -47,7 +51,9 @@ public sealed class VideoRendererStyle(
  * @param isShowingReactions Represents whether display reaction comes from the call state.
  * @param isShowingParticipantLabel Represents whether display the participant label that contains the name and microphone status of a participant.
  * @param isShowingConnectionQualityIndicator Represents whether displays the connection quality indicator or not.
- * @param labelPosition The position of the participant label  that contains the name and microphone status of a participant.
+ * @param labelPosition The position of the participant label that contains the name and microphone status of a participant.
+ * @param reactionDuration The duration of the reaction animation.
+ * @param reactionPosition The position of the reaction.
  */
 public fun VideoRendererStyle.copy(
     isFocused: Boolean = this.isFocused,
@@ -56,6 +62,8 @@ public fun VideoRendererStyle.copy(
     isShowingParticipantLabel: Boolean = this.isShowingParticipantLabel,
     isShowingConnectionQualityIndicator: Boolean = this.isShowingConnectionQualityIndicator,
     labelPosition: Alignment = this.labelPosition,
+    reactionDuration: Int = this.reactionDuration,
+    reactionPosition: Alignment = this.reactionPosition
 ): VideoRendererStyle {
     return if (this is RegularVideoRendererStyle) {
         RegularVideoRendererStyle(
@@ -64,7 +72,9 @@ public fun VideoRendererStyle.copy(
             isShowingReactions = isShowingReactions,
             isShowingParticipantLabel = isShowingParticipantLabel,
             isShowingConnectionQualityIndicator = isShowingConnectionQualityIndicator,
-            labelPosition = labelPosition
+            labelPosition = labelPosition,
+            reactionDuration = reactionDuration,
+            reactionPosition = reactionPosition
         )
     } else {
         ScreenSharingVideoRendererStyle(
@@ -73,7 +83,9 @@ public fun VideoRendererStyle.copy(
             isShowingReactions = isShowingReactions,
             isShowingParticipantLabel = isShowingParticipantLabel,
             isShowingConnectionQualityIndicator = isShowingConnectionQualityIndicator,
-            labelPosition = labelPosition
+            labelPosition = labelPosition,
+            reactionDuration = reactionDuration,
+            reactionPosition = reactionPosition
         )
     }
 }
@@ -86,7 +98,9 @@ public fun VideoRendererStyle.copy(
  * @param isShowingReactions Represents whether display reaction comes from the call state.
  * @param isShowingParticipantLabel Represents whether display the participant label that contains the name and microphone status of a participant.
  * @param isShowingConnectionQualityIndicator Represents whether displays the connection quality indicator or not.
- * @param labelPosition The position of the participant label  that contains the name and microphone status of a participant.
+ * @param labelPosition The position of the participant label that contains the name and microphone status of a participant.
+ * @param reactionDuration The duration of the reaction animation.
+ * @param reactionPosition The position of the reaction.
  */
 @Stable
 public data class RegularVideoRendererStyle(
@@ -95,7 +109,9 @@ public data class RegularVideoRendererStyle(
     override val isShowingReactions: Boolean = true,
     override val isShowingParticipantLabel: Boolean = true,
     override val isShowingConnectionQualityIndicator: Boolean = true,
-    override val labelPosition: Alignment = Alignment.BottomStart
+    override val labelPosition: Alignment = Alignment.BottomStart,
+    override val reactionDuration: Int = 650,
+    override val reactionPosition: Alignment = Alignment.Center
 
 ) : VideoRendererStyle(
     isFocused,
@@ -103,7 +119,9 @@ public data class RegularVideoRendererStyle(
     isShowingReactions,
     isShowingParticipantLabel,
     isShowingConnectionQualityIndicator,
-    labelPosition
+    labelPosition,
+    reactionDuration,
+    reactionPosition
 )
 
 /**
@@ -114,7 +132,9 @@ public data class RegularVideoRendererStyle(
  * @param isShowingReactions Represents whether display reaction comes from the call state.
  * @param isShowingParticipantLabel Represents whether display the participant label that contains the name and microphone status of a participant.
  * @param isShowingConnectionQualityIndicator Represents whether displays the connection quality indicator or not.
- * @param labelPosition The position of the participant label  that contains the name and microphone status of a participant.
+ * @param labelPosition The position of the participant label that contains the name and microphone status of a participant.
+ * @param reactionDuration The duration of the reaction animation.
+ * @param reactionPosition The position of the reaction.
  */
 @Stable
 public data class ScreenSharingVideoRendererStyle(
@@ -123,7 +143,9 @@ public data class ScreenSharingVideoRendererStyle(
     override val isShowingReactions: Boolean = true,
     override val isShowingParticipantLabel: Boolean = true,
     override val isShowingConnectionQualityIndicator: Boolean = false,
-    override val labelPosition: Alignment = Alignment.BottomStart
+    override val labelPosition: Alignment = Alignment.BottomStart,
+    override val reactionDuration: Int = 1000,
+    override val reactionPosition: Alignment = Alignment.Center
 
 ) : VideoRendererStyle(
     isFocused,
@@ -131,5 +153,7 @@ public data class ScreenSharingVideoRendererStyle(
     isShowingReactions,
     isShowingParticipantLabel,
     isShowingConnectionQualityIndicator,
-    labelPosition
+    labelPosition,
+    reactionDuration,
+    reactionPosition
 )

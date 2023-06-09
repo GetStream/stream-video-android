@@ -16,6 +16,11 @@
 
 package io.getstream.video.android.compose.ui.components.call.renderer
 
+import androidx.compose.animation.core.LinearOutSlowInEasing
+import androidx.compose.animation.core.RepeatMode
+import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.animation.core.repeatable
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -32,7 +37,11 @@ import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Alignment.Companion.BottomEnd
 import androidx.compose.ui.Alignment.Companion.BottomStart
@@ -49,7 +58,9 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.getstream.video.android.common.model.getSoundIndicatorState
 import io.getstream.video.android.compose.theme.VideoTheme
@@ -60,10 +71,13 @@ import io.getstream.video.android.compose.ui.components.video.VideoRenderer
 import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.ParticipantState
 import io.getstream.video.android.core.model.NetworkQuality
+import io.getstream.video.android.core.model.Reaction
+import io.getstream.video.android.core.model.ReactionState
 import io.getstream.video.android.mock.StreamMockUtils
 import io.getstream.video.android.mock.mockCall
 import io.getstream.video.android.mock.mockParticipantList
 import io.getstream.video.android.ui.common.R
+import kotlinx.coroutines.delay
 
 /**
  * Renders a single participant with a given call, which contains all the call states.
@@ -76,6 +90,7 @@ import io.getstream.video.android.ui.common.R
  * @param labelContent Content is shown that displays participant's name and device states.
  * @param connectionIndicatorContent Content is shown that indicates the connection quality.
  * @param videoFallbackContent Content is shown the video track is failed to load or not available.
+ * @param reactionContent Content is shown for the reaction.
  */
 @Composable
 public fun ParticipantVideo(
@@ -96,8 +111,13 @@ public fun ParticipantVideo(
         val user by participant.user.collectAsStateWithLifecycle()
         UserAvatarBackground(user = user)
     },
+    reactionContent: @Composable BoxScope.(ParticipantState) -> Unit = {
+        DefaultReaction(
+            participant = participant,
+            style = style
+        )
+    }
 ) {
-    val reactions by participant.reactions.collectAsStateWithLifecycle()
     val connectionQuality by participant.networkQuality.collectAsStateWithLifecycle()
     val participants by call.state.participants.collectAsStateWithLifecycle()
 
@@ -139,6 +159,10 @@ public fun ParticipantVideo(
 
         if (style.isShowingConnectionQualityIndicator) {
             connectionIndicatorContent.invoke(this, connectionQuality)
+        }
+
+        if (style.isShowingReactions) {
+            reactionContent.invoke(this, participant)
         }
     }
 }
@@ -262,6 +286,68 @@ public fun BoxScope.ParticipantLabel(
         )
 
         soundIndicatorContent.invoke(this)
+    }
+}
+
+@Composable
+private fun BoxScope.DefaultReaction(
+    participant: ParticipantState,
+    style: VideoRendererStyle
+) {
+    val reactions by participant.reactions.collectAsStateWithLifecycle()
+    val reaction = reactions.lastOrNull { it.createdAt + 3000 > System.currentTimeMillis() }
+    var currentReaction: Reaction? by remember { mutableStateOf(null) }
+    var reactionState: ReactionState by remember { mutableStateOf(ReactionState.Nothing) }
+
+    LaunchedEffect(key1 = reaction) {
+        if (reactionState == ReactionState.Nothing) {
+            currentReaction?.let { participant.consumeReaction(it) }
+            currentReaction = reaction
+
+            // deliberately execute this instead of animation finish listener to remove animation on the screen.
+            if (reaction != null) {
+                reactionState = ReactionState.Running
+                delay(style.reactionDuration * 2 - 50L)
+                participant.consumeReaction(reaction)
+                currentReaction = null
+                reactionState = ReactionState.Nothing
+            }
+        } else {
+            if (currentReaction != null) {
+                participant.consumeReaction(currentReaction!!)
+                reactionState = ReactionState.Nothing
+                currentReaction = null
+                delay(style.reactionDuration * 2 - 50L)
+            }
+        }
+    }
+
+    val size: Dp by animateDpAsState(
+        targetValue = if (currentReaction != null) {
+            VideoTheme.dimens.reactionSize
+        } else {
+            0.dp
+        },
+        animationSpec = repeatable(
+            iterations = 2,
+            animation = tween(
+                durationMillis = style.reactionDuration,
+                easing = LinearOutSlowInEasing
+            ),
+            repeatMode = RepeatMode.Reverse
+        ),
+        label = "reaction"
+    )
+
+    val emojiCode = currentReaction?.response?.emojiCode
+    if (currentReaction != null && emojiCode != null) {
+        val emojiMapper = VideoTheme.reactionMapper
+        val emojiText = emojiMapper.map(emojiCode)
+        Text(
+            text = emojiText,
+            modifier = Modifier.align(style.reactionPosition),
+            fontSize = size.value.sp
+        )
     }
 }
 

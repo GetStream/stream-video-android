@@ -40,7 +40,7 @@ import io.getstream.video.android.ui.common.R
 public fun FlipCameraAction(
     modifier: Modifier = Modifier,
     enabled: Boolean = true,
-    onCallAction: (CallAction) -> Unit
+    onCallAction: (FlipCamera) -> Unit
 ) {
     CallControlActionBackground(
         modifier = modifier,
