@@ -1506,6 +1506,15 @@ public final class io/getstream/video/android/core/logging/LoggingLevel {
 	public fun toString ()Ljava/lang/String;
 }
 
+public abstract interface class io/getstream/video/android/core/mapper/ReactionMapper {
+	public static final field Companion Lio/getstream/video/android/core/mapper/ReactionMapper$Companion;
+	public abstract fun map (Ljava/lang/String;)Ljava/lang/String;
+}
+
+public final class io/getstream/video/android/core/mapper/ReactionMapper$Companion {
+	public final fun defaultReactionMapper ()Lio/getstream/video/android/core/mapper/ReactionMapper;
+}
+
 public final class io/getstream/video/android/core/model/AudioTrack : io/getstream/video/android/core/model/MediaTrack {
 	public fun <init> (Ljava/lang/String;Lorg/webrtc/AudioTrack;)V
 	public final fun component1 ()Ljava/lang/String;
@@ -1911,6 +1920,17 @@ public final class io/getstream/video/android/core/model/ReactionData {
 	public final fun getUser ()Lio/getstream/video/android/model/User;
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
+}
+
+public abstract interface class io/getstream/video/android/core/model/ReactionState {
+}
+
+public final class io/getstream/video/android/core/model/ReactionState$Nothing : io/getstream/video/android/core/model/ReactionState {
+	public static final field INSTANCE Lio/getstream/video/android/core/model/ReactionState$Nothing;
+}
+
+public final class io/getstream/video/android/core/model/ReactionState$Running : io/getstream/video/android/core/model/ReactionState {
+	public static final field INSTANCE Lio/getstream/video/android/core/model/ReactionState$Running;
 }
 
 public final class io/getstream/video/android/core/model/ScreenSharingSession {

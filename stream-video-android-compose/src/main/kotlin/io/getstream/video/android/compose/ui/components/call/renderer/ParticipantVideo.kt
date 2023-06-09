@@ -339,9 +339,12 @@ private fun BoxScope.DefaultReaction(
         label = "reaction"
     )
 
-    if (currentReaction != null) {
+    val emojiCode = currentReaction?.response?.emojiCode
+    if (currentReaction != null && emojiCode != null) {
+        val emojiMapper = VideoTheme.reactionMapper
+        val emojiText = emojiMapper.map(emojiCode)
         Text(
-            text = currentReaction!!.response.emojiCode ?: "",
+            text = emojiText,
             modifier = Modifier.align(style.reactionPosition),
             fontSize = size.value.sp
         )

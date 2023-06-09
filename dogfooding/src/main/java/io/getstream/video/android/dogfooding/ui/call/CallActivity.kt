@@ -71,7 +71,7 @@ class CallActivity : AbstractCallActivity() {
                                             lifecycleScope.launch {
                                                 val result = call.sendReaction(
                                                     "default",
-                                                    "\uD83D\uDE00",
+                                                    ":firework:",
                                                     null
                                                 )
                                                 result.onSuccess {
