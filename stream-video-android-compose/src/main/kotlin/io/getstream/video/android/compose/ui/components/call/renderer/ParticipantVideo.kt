@@ -16,6 +16,7 @@
 
 package io.getstream.video.android.compose.ui.components.call.renderer
 
+import androidx.compose.animation.core.LinearOutSlowInEasing
 import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.repeatable
@@ -44,7 +45,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Alignment.Companion.BottomEnd
 import androidx.compose.ui.Alignment.Companion.BottomStart
-import androidx.compose.ui.Alignment.Companion.Center
 import androidx.compose.ui.Alignment.Companion.CenterVertically
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -109,14 +109,15 @@ public fun ParticipantVideo(
         val user by participant.user.collectAsStateWithLifecycle()
         UserAvatarBackground(user = user)
     },
+    reactionContent: @Composable BoxScope.(ParticipantState) -> Unit = {
+        DefaultReaction(
+            participant = participant,
+            style = style
+        )
+    }
 ) {
     val connectionQuality by participant.networkQuality.collectAsStateWithLifecycle()
     val participants by call.state.participants.collectAsStateWithLifecycle()
-    val reactions by participant.reactions.collectAsStateWithLifecycle()
-    val reaction = reactions.lastOrNull {
-        !it.isConsumed && it.createdAt + 3000 > System.currentTimeMillis()
-    }
-    var currentReaction: Reaction? by remember { mutableStateOf(null) }
 
     val containerModifier = if (style.isFocused && participants.size > 1) modifier.border(
         border = if (style.isScreenSharing) {
@@ -158,33 +159,8 @@ public fun ParticipantVideo(
             connectionIndicatorContent.invoke(this, connectionQuality)
         }
 
-        LaunchedEffect(key1 = reaction) {
-            currentReaction?.let { participant.consumeReaction(it) }
-            currentReaction = reaction
-
-            if (reaction != null) {
-                delay(1100)
-                participant.consumeReaction(reaction)
-                currentReaction = null
-            }
-        }
-
-        val size: Dp by animateDpAsState(
-            if (currentReaction != null) 45.dp else 0.dp,
-            animationSpec = repeatable(
-                iterations = 2,
-                animation = tween(durationMillis = 600),
-                repeatMode = RepeatMode.Reverse
-            ),
-            label = "reaction"
-        )
-
-        if (currentReaction != null) {
-            Text(
-                text = currentReaction!!.response.emojiCode ?: "",
-                modifier = Modifier.align(Center),
-                fontSize = size.value.sp
-            )
+        if (style.isShowingReactions) {
+            reactionContent.invoke(this, participant)
         }
     }
 }
@@ -308,6 +284,54 @@ public fun BoxScope.ParticipantLabel(
         )
 
         soundIndicatorContent.invoke(this)
+    }
+}
+
+@Composable
+private fun BoxScope.DefaultReaction(
+    participant: ParticipantState,
+    style: VideoRendererStyle
+) {
+    val reactions by participant.reactions.collectAsStateWithLifecycle()
+    val reaction = reactions.lastOrNull {
+        !it.isConsumed && it.createdAt + 3000 > System.currentTimeMillis()
+    }
+    var currentReaction: Reaction? by remember { mutableStateOf(null) }
+
+    LaunchedEffect(key1 = reaction) {
+        currentReaction?.let { participant.consumeReaction(it) }
+        currentReaction = reaction
+
+        if (reaction != null) {
+            delay(style.reactionDuration * 2 - 50L)
+            participant.consumeReaction(reaction)
+            currentReaction = null
+        }
+    }
+
+    val size: Dp by animateDpAsState(
+        targetValue = if (currentReaction != null) {
+            VideoTheme.dimens.reactionSize
+        } else {
+            0.dp
+        },
+        animationSpec = repeatable(
+            iterations = 2,
+            animation = tween(
+                durationMillis = style.reactionDuration,
+                easing = LinearOutSlowInEasing
+            ),
+            repeatMode = RepeatMode.Reverse
+        ),
+        label = "reaction"
+    )
+
+    if (currentReaction != null) {
+        Text(
+            text = currentReaction!!.response.emojiCode ?: "",
+            modifier = Modifier.align(style.reactionPosition),
+            fontSize = size.value.sp
+        )
     }
 }
 

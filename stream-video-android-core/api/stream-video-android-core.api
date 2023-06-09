@@ -364,7 +364,7 @@ public final class io/getstream/video/android/core/ParticipantState {
 	public final fun component1 ()Ljava/lang/String;
 	public final fun component2 ()Lio/getstream/video/android/core/Call;
 	public final fun component3 ()Lio/getstream/video/android/model/User;
-	public final fun consumeReaction (Ljava/lang/String;)V
+	public final fun consumeReaction (Lio/getstream/video/android/core/model/Reaction;)V
 	public final fun copy (Ljava/lang/String;Lio/getstream/video/android/core/Call;Lio/getstream/video/android/model/User;Ljava/lang/String;)Lio/getstream/video/android/core/ParticipantState;
 	public static synthetic fun copy$default (Lio/getstream/video/android/core/ParticipantState;Ljava/lang/String;Lio/getstream/video/android/core/Call;Lio/getstream/video/android/model/User;Ljava/lang/String;ILjava/lang/Object;)Lio/getstream/video/android/core/ParticipantState;
 	public fun equals (Ljava/lang/Object;)Z
@@ -1887,7 +1887,7 @@ public final class io/getstream/video/android/core/model/Reaction {
 	public final fun copy (Ljava/lang/String;Lorg/openapitools/client/models/ReactionResponse;JZ)Lio/getstream/video/android/core/model/Reaction;
 	public static synthetic fun copy$default (Lio/getstream/video/android/core/model/Reaction;Ljava/lang/String;Lorg/openapitools/client/models/ReactionResponse;JZILjava/lang/Object;)Lio/getstream/video/android/core/model/Reaction;
 	public fun equals (Ljava/lang/Object;)Z
-	public final fun getDate ()J
+	public final fun getCreatedAt ()J
 	public final fun getId ()Ljava/lang/String;
 	public final fun getResponse ()Lorg/openapitools/client/models/ReactionResponse;
 	public fun hashCode ()I
