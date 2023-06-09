@@ -24,6 +24,7 @@
     <string name="stream_video_call_controls_cancel_call">Cancel call</string>
     <string name="stream_video_call_controls_accept_call">Accept call</string>
     <string name="stream_video_call_controls_chat_dialog">Chat Dialog</string>
+    <string name="stream_video_call_controls_reaction">Reaction</string>
     <string name="stream_video_call_controls_flip_camera">Flip camera</string>
     <string name="stream_video_call_controls_toggle_microphone">Toggle microphone</string>
     <string name="stream_video_call_controls_toggle_camera">Toggle camera</string>

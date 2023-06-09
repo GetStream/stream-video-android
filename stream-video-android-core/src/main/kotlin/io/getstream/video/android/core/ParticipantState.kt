@@ -20,6 +20,7 @@ import io.getstream.result.Result
 import io.getstream.video.android.core.model.AudioTrack
 import io.getstream.video.android.core.model.MediaTrack
 import io.getstream.video.android.core.model.NetworkQuality
+import io.getstream.video.android.core.model.Reaction
 import io.getstream.video.android.core.model.VideoTrack
 import io.getstream.video.android.core.utils.asStateFlow
 import io.getstream.video.android.core.utils.mapState
@@ -28,7 +29,6 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import org.openapitools.client.models.MuteUsersResponse
-import org.openapitools.client.models.ReactionResponse
 import org.threeten.bp.Instant
 import org.threeten.bp.OffsetDateTime
 import org.threeten.bp.ZoneOffset
@@ -127,8 +127,8 @@ public data class ParticipantState(
     internal val _lastSpeakingAt: MutableStateFlow<OffsetDateTime?> = MutableStateFlow(null)
     val lastSpeakingAt: StateFlow<OffsetDateTime?> = _lastSpeakingAt
 
-    internal val _reactions = MutableStateFlow<List<ReactionResponse>>(emptyList())
-    val reactions: StateFlow<List<ReactionResponse>> = _reactions
+    internal val _reactions = MutableStateFlow<List<Reaction>>(emptyList())
+    val reactions: StateFlow<List<Reaction>> = _reactions
 
     val video: StateFlow<Video?> = combine(_videoTrack, _videoEnabled) { track, enabled ->
         Video(
@@ -209,6 +209,12 @@ public data class ParticipantState(
             // custom = participant.custom,
             role = participant.roles.firstOrNull().orEmpty()
         )
+    }
+
+    public fun consumeReaction(reaction: Reaction) {
+        val newReactions = _reactions.value.toMutableList()
+        newReactions.remove(reaction)
+        _reactions.value = newReactions
     }
 
     public sealed class Media(

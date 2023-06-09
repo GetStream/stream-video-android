@@ -17,22 +17,26 @@
 package io.getstream.video.android.dogfooding.ui.call
 
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.size
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
 import androidx.lifecycle.lifecycleScope
 import io.getstream.video.android.common.AbstractCallActivity
 import io.getstream.video.android.common.viewmodel.CallViewModel
 import io.getstream.video.android.common.viewmodel.CallViewModelFactory
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.call.CallContainer
+import io.getstream.video.android.compose.ui.components.call.controls.ControlActions
+import io.getstream.video.android.compose.ui.components.call.controls.actions.FlipCameraAction
+import io.getstream.video.android.compose.ui.components.call.controls.actions.LeaveCallAction
+import io.getstream.video.android.compose.ui.components.call.controls.actions.ToggleCameraAction
+import io.getstream.video.android.compose.ui.components.call.controls.actions.ToggleMicrophoneAction
 import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.StreamVideo
-import io.getstream.video.android.core.call.state.LeaveCall
-import io.getstream.video.android.core.call.state.ToggleCamera
-import io.getstream.video.android.core.call.state.ToggleMicrophone
-import io.getstream.video.android.core.call.state.ToggleSpeakerphone
 import io.getstream.video.android.model.StreamCallId
 import kotlinx.coroutines.launch
 
@@ -54,16 +58,56 @@ class CallActivity : AbstractCallActivity() {
                 CallContainer(
                     modifier = Modifier.background(color = VideoTheme.colors.appBackground),
                     call = call,
-                    callViewModel = vm, // optional
                     onBackPressed = { handleBackPressed() },
-                    onCallAction = { callAction ->
-                        when (callAction) {
-                            is ToggleCamera -> call.camera.setEnabled(callAction.isEnabled)
-                            is ToggleMicrophone -> call.microphone.setEnabled(callAction.isEnabled)
-                            is ToggleSpeakerphone -> call.speaker.setEnabled(callAction.isEnabled)
-                            is LeaveCall -> finish()
-                            else -> Unit
-                        }
+                    callControlsContent = {
+                        ControlActions(
+                            call = call,
+                            actions = listOf(
+                                {
+                                    ToggleCameraAction(
+                                        modifier = Modifier.size(52.dp),
+                                        isCameraEnabled = true,
+                                        onCallAction = {
+                                            lifecycleScope.launch {
+                                                val result = call.sendReaction(
+                                                    "default",
+                                                    ":firework:",
+                                                    null
+                                                )
+                                                result.onSuccess {
+                                                    Log.e("Test", "success: $it")
+                                                }.onError {
+                                                    Log.e("Test", "error: $it")
+                                                }
+                                            }
+                                        }
+                                    )
+                                },
+                                {
+                                    ToggleMicrophoneAction(
+                                        modifier = Modifier.size(52.dp),
+                                        isMicrophoneEnabled = true,
+                                        onCallAction = {
+                                            call.microphone.setEnabled(it.isEnabled)
+                                        }
+                                    )
+                                },
+                                {
+                                    FlipCameraAction(
+                                        modifier = Modifier.size(52.dp),
+                                        onCallAction = {
+                                            call.camera.flip()
+                                        }
+                                    )
+                                },
+                                {
+                                    LeaveCallAction(
+                                        modifier = Modifier.size(52.dp),
+                                        onCallAction = {}
+                                    )
+                                },
+                            ),
+                        )
                     }
                 )
             }
