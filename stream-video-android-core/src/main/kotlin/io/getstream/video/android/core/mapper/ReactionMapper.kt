@@ -33,6 +33,7 @@ public fun interface ReactionMapper {
                     ":like:" -> "\uD83D\uDC4D"
                     ":hate:" -> "\uD83D\uDC4E"
                     ":smile:" -> "\uD83D\uDE04"
+                    ":heart:" -> "❤️"
                     else -> ""
                 }
             }
