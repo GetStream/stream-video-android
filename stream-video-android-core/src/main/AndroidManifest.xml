@@ -58,5 +58,6 @@
                 <action android:name="io.getstream.video.android.action.REJECT_CALL" />
             </intent-filter>
         </receiver>
+        <activity android:name=".core.notifications.internal.DismissNotificationActivity" />
     </application>
 </manifest>
