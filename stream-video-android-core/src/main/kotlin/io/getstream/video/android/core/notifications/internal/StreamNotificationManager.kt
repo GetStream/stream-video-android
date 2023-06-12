@@ -1,3 +1,19 @@
+/*
+ * Copyright (c) 2014-2023 Stream.io Inc. All rights reserved.
+ *
+ * Licensed under the Stream License;
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    https://github.com/GetStream/stream-video-android/blob/main/LICENSE
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package io.getstream.video.android.core.notifications.internal
 
 import android.annotation.SuppressLint
@@ -5,7 +21,6 @@ import android.app.Application
 import android.content.Context
 import io.getstream.android.push.PushDevice
 import io.getstream.android.push.PushProvider
-import io.getstream.android.push.permissions.DefaultNotificationPermissionHandler
 import io.getstream.android.push.permissions.NotificationPermissionManager
 import io.getstream.android.push.permissions.NotificationPermissionStatus
 import io.getstream.android.push.permissions.NotificationPermissionStatus.DENIED
@@ -114,7 +129,6 @@ internal class StreamNotificationManager private constructor(
             )
         }
 
-
     internal companion object {
         private val logger: TaggedLogger by taggedLogger("StreamVideo:Notifications")
         @SuppressLint("StaticFieldLeak")
@@ -130,7 +144,7 @@ internal class StreamNotificationManager private constructor(
                 if (Companion::internalStreamNotificationManager.isInitialized) {
                     logger.e {
                         "The $internalStreamNotificationManager is already installed but you've " +
-                                "tried to install a new one."
+                            "tried to install a new one."
                     }
                 } else {
                     val applicationContext = context.applicationContext as Application

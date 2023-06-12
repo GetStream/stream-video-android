@@ -21,7 +21,6 @@ import io.getstream.android.push.PushDevice
 import io.getstream.android.push.delegate.PushDelegate
 import io.getstream.android.push.delegate.PushDelegateProvider
 import io.getstream.log.StreamLog
-import io.getstream.video.android.R
 import io.getstream.video.android.core.StreamVideo
 import io.getstream.video.android.core.StreamVideoBuilder
 import io.getstream.video.android.core.dispatchers.DispatcherProvider
@@ -57,7 +56,6 @@ internal class VideoPushDelegate(
                     ).build().also { StreamVideo.unInstall() }
                 }
             }
-
         }
 
     /**
@@ -126,8 +124,8 @@ internal class VideoPushDelegate(
      */
     private fun Map<String, Any?>.isValid(): Boolean =
         isFromStreamServer() &&
-                containsCallId() &&
-                containsKnownType()
+            containsCallId() &&
+            containsKnownType()
 
     /**
      * Verify if the map contains a CallId.
@@ -138,7 +136,7 @@ internal class VideoPushDelegate(
     /**
      * Verify if the map contains a known type.
      */
-    private fun Map<String, Any?>.containsKnownType(): Boolean = when(this[KEY_TYPE]) {
+    private fun Map<String, Any?>.containsKnownType(): Boolean = when (this[KEY_TYPE]) {
         KEY_TYPE_RING -> isValidRingType()
         KEY_TYPE_NOTIFICATION -> isValidNotificationType()
         KEY_TYPE_LIVE_STARTED -> isValidLiveStarted()

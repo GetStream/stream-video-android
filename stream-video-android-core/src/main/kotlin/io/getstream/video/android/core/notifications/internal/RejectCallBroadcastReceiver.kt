@@ -67,20 +67,18 @@ internal class RejectCallBroadcastReceiver : BroadcastReceiver() {
                     ).build().also { StreamVideo.unInstall() }
                 }
             }!!
-
         }
         if (context != null && intent?.action == ACTION_REJECT_CALL) {
             val callCid = intent.streamCallId(INTENT_EXTRA_CALL_CID)!!
 
-
-                CoroutineScope(Dispatchers.IO).launch {
-                    when (val rejectResult = streamVideo.call(callCid.type, callCid.id).reject()) {
-                        is Result.Success -> logger.d { "[onReceive] rejectCall, Success: $rejectResult" }
-                        is Result.Failure -> logger.d { "[onReceive] rejectCall, Failure: $rejectResult" }
-                    }
+            CoroutineScope(Dispatchers.IO).launch {
+                when (val rejectResult = streamVideo.call(callCid.type, callCid.id).reject()) {
+                    is Result.Success -> logger.d { "[onReceive] rejectCall, Success: $rejectResult" }
+                    is Result.Failure -> logger.d { "[onReceive] rejectCall, Failure: $rejectResult" }
                 }
-                val notificationId = intent.getIntExtra(INTENT_EXTRA_NOTIFICATION_ID, 0)
-                NotificationManagerCompat.from(context).cancel(notificationId)
             }
+            val notificationId = intent.getIntExtra(INTENT_EXTRA_NOTIFICATION_ID, 0)
+            NotificationManagerCompat.from(context).cancel(notificationId)
         }
+    }
 }
