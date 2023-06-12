@@ -43,7 +43,7 @@ streamWebRTC = "1.0.2"
 streamResult = "1.1.0"
 streamChat = "6.0.0-beta1"
 streamLog = "1.1.3"
-streamPush = "1.1.0"
+streamPush = "1.1.1"
 
 androidxTest = "1.5.0"
 androidxTestCore = "1.5.0"
