@@ -28,7 +28,7 @@ After running your project, you'll see the result below:
 
 ![Call Lobby](../assets/cookbook/call-lobby.png)
 
-## Control Actions
+### Control Actions
 
 Similar to `CallContainer`, and `CallLobby` supports these main action handlers with the `onCallAction` lambda:
 
@@ -83,7 +83,7 @@ Then you'll see the result below:
 
 ![Call Lobby for control actions](../assets/cookbook/call-lobby-actions.png)
 
-## Permission Requests
+### Permission Requests
 
 The call lobby needs to get permission to access the camera and microphone. `CallLobby` implements the permission request by default, so you don't need to do anything to request permission from your side. If you implement the `CallLobby` composable, it will ask you to grant camera and microphone permission like the image below:
 
@@ -93,12 +93,15 @@ You can also customize what permission you want to ask by passing a list of perm
 
 ```kotlin
 CallLobby(
-    permissions = listOf(
-        android.Manifest.permission.CAMERA,
-        android.Manifest.permission.RECORD_AUDIO,
-        ..
-  ),
-  ..
+    permissions: VideoPermissionsState = rememberCallPermissionsState(
+        call = call,
+        permissions = listOf(
+            android.Manifest.permission.CAMERA,
+            android.Manifest.permission.RECORD_AUDIO,
+            ..
+      ),
+    ),
+    ..
 )
 ```
 
@@ -106,12 +109,15 @@ If you don't want to let `CallLobby` request permissions and want to handle them
 
 ```kotlin
 CallLobby(
-    permissions = emptyListOf(),
+    permissions: VideoPermissionsState = rememberCallPermissionsState(
+            call = call,
+            permissions = listOf()
+    ),
     ..
 )
 ```
 
-## Preview For Disabled Camera
+### Preview For Disabled Camera
 
 The `CallLobby` component already provides you to display a user avatar when the camera doesn't have permission or is disabled.
 
@@ -140,7 +146,7 @@ After building the project, you'll see the result below:
 
 ![Call Lobby Camera Disabled](../assets/cookbook/call-lobby-camera-disabled-custom.png)
 
-## Customization
+### Customization
 
 The `CallLobby` component has more options when it comes to customization. It exposes the following parameters that let you change its UI:
 
@@ -154,7 +160,7 @@ public fun CallLobby(
     isCameraEnabled: Boolean,
     isMicrophoneEnabled: Boolean,
     video: ParticipantState.Video,
-    permissions: List<String>,
+    permissions: VideoPermissionsState,
     onRenderedContent: @Composable (video: ParticipantState.Video) -> Unit,
     onDisabledContent: @Composable () -> Unit,
     onCallAction: (CallAction) -> Unit,
