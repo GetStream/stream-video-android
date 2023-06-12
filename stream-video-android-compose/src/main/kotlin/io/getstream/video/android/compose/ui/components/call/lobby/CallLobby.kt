@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-@file:OptIn(ExperimentalPermissionsApi::class)
-
 package io.getstream.video.android.compose.ui.components.call.lobby
 
 import androidx.compose.foundation.background
@@ -44,8 +42,8 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.google.accompanist.permissions.ExperimentalPermissionsApi
-import com.google.accompanist.permissions.rememberMultiplePermissionsState
+import io.getstream.video.android.compose.permission.VideoPermissionsState
+import io.getstream.video.android.compose.permission.rememberCallPermissionsState
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.avatar.UserAvatar
 import io.getstream.video.android.compose.ui.components.call.controls.ControlActions
@@ -105,10 +103,7 @@ public fun CallLobby(
         ),
         enabled = isCameraEnabled
     ),
-    permissions: List<String> = listOf(
-        android.Manifest.permission.CAMERA,
-        android.Manifest.permission.RECORD_AUDIO
-    ),
+    permissions: VideoPermissionsState = rememberCallPermissionsState(call = call),
     onRenderedContent: @Composable (video: ParticipantState.Video) -> Unit = {
         OnRenderedContent(call = call, video = it)
     },
@@ -131,10 +126,7 @@ public fun CallLobby(
 ) {
     val participant = remember(user) { ParticipantState(initialUser = user, call = call) }
 
-    DefaultPermissionHandler(
-        call = call,
-        permissions = permissions,
-    )
+    DefaultPermissionHandler(videoPermission = permissions)
 
     Column(modifier = modifier) {
         Box(
@@ -174,25 +166,10 @@ public fun CallLobby(
 
 @Composable
 private fun DefaultPermissionHandler(
-    call: Call,
-    permissions: List<String> = listOf(
-        android.Manifest.permission.CAMERA,
-        android.Manifest.permission.RECORD_AUDIO
-    ),
+    videoPermission: VideoPermissionsState,
 ) {
-    if (LocalInspectionMode.current) return
-
-    val multiplePermissionsState = rememberMultiplePermissionsState(permissions = permissions) {
-        if (it[android.Manifest.permission.CAMERA] == true) {
-            call.camera.setEnabled(true)
-        }
-        if (it[android.Manifest.permission.RECORD_AUDIO] == true) {
-            call.microphone.setEnabled(true)
-        }
-    }
-
-    LaunchedEffect(key1 = multiplePermissionsState) {
-        multiplePermissionsState.launchMultiplePermissionRequest()
+    LaunchedEffect(key1 = videoPermission) {
+        videoPermission.launchPermissionRequest()
     }
 }
 
