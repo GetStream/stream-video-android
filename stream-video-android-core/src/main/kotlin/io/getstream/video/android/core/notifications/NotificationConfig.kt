@@ -5,7 +5,7 @@ import io.getstream.android.push.permissions.NotificationPermissionHandler
 import io.getstream.video.android.core.notifications.internal.NoOpNotificationHandler
 import io.getstream.video.android.core.notifications.internal.NoOpNotificationPermissionHandler
 
-data class NotificationConfig(
+public data class NotificationConfig(
     val pushDeviceGenerators: List<PushDeviceGenerator> = emptyList(),
     val notificationPermissionHandler: NotificationPermissionHandler = NoOpNotificationPermissionHandler,
     val requestPermissionOnAppLaunch: () -> Boolean = { true },

@@ -67,10 +67,7 @@ public class StreamVideoBuilder @JvmOverloads constructor(
     private val tokenProvider: (suspend (error: Throwable?) -> String)? = null,
     /** Logging level */
     private val loggingLevel: LoggingLevel = LoggingLevel(),
-    /** Enable push notifications if you want to receive calls etc */
-    private val enablePush: Boolean = false,
-    /** Support for different push providers */
-    private val pushDeviceGenerators: List<PushDeviceGenerator> = emptyList(),
+    private val notificationConfig: NotificationConfig = NotificationConfig(),
     /** Overwrite the default notification logic for incoming calls */
     private val ringNotification: ((call: Call) -> Notification?)? = null,
     /** Audio filters enable you to add custom effects to your audio before its send to the server */
@@ -144,7 +141,7 @@ public class StreamVideoBuilder @JvmOverloads constructor(
         val streamNotificationManager = StreamNotificationManager.install(
             context,
             scope,
-            NotificationConfig(pushDeviceGenerators),
+            notificationConfig,
             connectionModule.devicesApi,
             dataStore,
         )
@@ -163,8 +160,7 @@ public class StreamVideoBuilder @JvmOverloads constructor(
         )
 
         scope.launch {
-            // addDevice for push
-            if (enablePush && user.type == UserType.Authenticated) {
+            if (user.type == UserType.Authenticated) {
                 client.registerPushDevice()
             }
         }
