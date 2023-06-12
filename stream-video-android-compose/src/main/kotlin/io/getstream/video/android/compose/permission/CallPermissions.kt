@@ -17,6 +17,7 @@
 package io.getstream.video.android.compose.permission
 
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.platform.LocalInspectionMode
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.rememberMultiplePermissionsState
 import io.getstream.video.android.core.Call
@@ -38,6 +39,8 @@ public fun rememberCallPermissionsState(
         }
     }
 ): VideoPermissionsState {
+    if (LocalInspectionMode.current) return fakeVideoPermissionsState
+
     val permissionState = rememberMultiplePermissionsState(permissions, onPermissionsResult)
     return object : VideoPermissionsState {
         override val allPermissionsGranted: Boolean

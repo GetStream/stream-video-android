@@ -44,3 +44,9 @@ public interface VideoPermissionsState {
      */
     public fun launchPermissionRequest(): Unit
 }
+
+internal val fakeVideoPermissionsState = object : VideoPermissionsState {
+    override val allPermissionsGranted: Boolean = false
+    override val shouldShowRationale: Boolean = false
+    override fun launchPermissionRequest() = Unit
+}

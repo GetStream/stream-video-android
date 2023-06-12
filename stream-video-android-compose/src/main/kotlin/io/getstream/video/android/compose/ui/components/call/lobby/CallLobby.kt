@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-@file:OptIn(ExperimentalPermissionsApi::class)
-
 package io.getstream.video.android.compose.ui.components.call.lobby
 
 import androidx.compose.foundation.background
@@ -44,7 +42,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import io.getstream.video.android.compose.permission.VideoPermissionsState
 import io.getstream.video.android.compose.permission.rememberCallPermissionsState
 import io.getstream.video.android.compose.theme.VideoTheme
@@ -171,8 +168,6 @@ public fun CallLobby(
 private fun DefaultPermissionHandler(
     videoPermission: VideoPermissionsState,
 ) {
-    if (LocalInspectionMode.current) return
-
     LaunchedEffect(key1 = videoPermission) {
         videoPermission.launchPermissionRequest()
     }
