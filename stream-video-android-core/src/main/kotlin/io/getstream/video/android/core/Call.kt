@@ -33,9 +33,7 @@ import io.getstream.video.android.core.model.toIceServer
 import io.getstream.video.android.model.User
 import io.getstream.webrtc.android.ui.VideoTextureViewRenderer
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.SupervisorJob
-import kotlinx.coroutines.async
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.first
@@ -400,8 +398,6 @@ public class Call(
         return true
     }
 
-
-
     internal suspend fun _join(
         create: Boolean = false,
         createOptions: CreateCallOptions? = null,
@@ -498,7 +494,6 @@ public class Call(
                     session?.switchSfu(cred.server.url, cred.token, iceServers)
                 }
             }
-
         }
     }
 
