@@ -3,10 +3,6 @@ title: Video Call Tutorial
 description: How to build a video call similar to Zoom or facebook messenger
 ---
 
-## TODO:
-
-- [ ] Generate user info and token for usage in this demo (currently hardcoded)
-
 ## Video Call Tutorial
 
 This tutorial teaches you how to build your own Zoom/Whatsapp style video calling.
@@ -31,11 +27,11 @@ If you're new to android note that there are 2 build.gradle files, you want to o
 
 ```groovy
 dependencies {
-    implementation "io.getstream:stream-video-android-compose:$stream_version"
+    implementation "io.getstream:stream-video-android-compose:0.0.14-SNAPSHOT"
 }
 ```
 
-(We also have a core SDK for video that excludes compose if you use XML layouts)
+(We also have a core SDK for video that excludes compose if you prefer XML layouts)
 
 ### Step 3 - Create & Join a call
 
@@ -49,7 +45,8 @@ class MainActivity : ComponentActivity() {
         // create a user.
         val user = User(
             id = "tutorial@getstream.io", // any string
-            name = "Tutorial" // name and image are used in the UI
+            name = "Tutorial", // name and image are used in the UI
+            role = "admin"
         )
 
         // for a production app we recommend adding the client to your Application class or di module.
@@ -69,18 +66,17 @@ class MainActivity : ComponentActivity() {
 
         setContent {
             VideoTheme {
-                val participants = call.state.participants.collectAsState()
-                val connection = call.state.connection.collectAsState()
-                // A surface container using the 'background' color from the theme
-                Column(
-                    modifier = Modifier.fillMaxSize(),
-                    verticalArrangement = Arrangement.Center,
-                    horizontalAlignment = Alignment.CenterHorizontally
+                val participants by call.state.participants.collectAsState()
+                val connection by call.state.connection.collectAsState()
+
+                Box(
+                    contentAlignment = Alignment.Center,
+                    modifier = Modifier.fillMaxSize()
                 ) {
-                    if (connection.value != RealtimeConnection.Connected) {
-                        Text("loading...", style=VideoTheme.typography.body)
+                    if (connection != RealtimeConnection.Connected) {
+                        Text("loading...", fontSize = 30.sp)
                     } else {
-                        Text("Call ${call.id} has ${participants.value.size} participants", style=VideoTheme.typography.body)
+                        Text("Call ${call.id} has ${participants.size} participants", fontSize = 30.sp)
                     }
                 }
             }
@@ -89,7 +85,44 @@ class MainActivity : ComponentActivity() {
 }
 ```
 
-Run the sample app now and you'll see 1 participant.
+Run the sample app now and you'll see 1 participant (yourself).
+Let's review what we did in the above code.
+
+**User** setup. First we create a user object.
+You typically sync these users via a server side integration from your own backend.
+Alternatively you can also use guest or anonymous users.
+The user's role allows you to configure permissions in the video call.
+
+```kotlin
+val user = User(
+    id = "tutorial@getstream.io", // any string
+    name = "Tutorial", // name and image are used in the UI
+    role = "admin"
+)
+```
+
+Next we setup the video SDK and join the call.
+
+```kotlin
+val call = client.call("default", "123")
+lifecycleScope.launch {
+    call.join(create = true)
+}
+```
+
+As soon as you use "call.join" the connection for video & audio is setup.
+
+Last the UI looks up the stateflow objects in call.state.
+You'll find all relevant state for the call in `call.state` and `call.state.participants`.
+The docs on [Call state and Participant state](../03-guides/03-call-and-participant-state.mdx) explains this in further detail.
+
+```kotlin
+val participants by call.state.participants.collectAsState()
+val connection by call.state.connection.collectAsState()
+```
+
+### Step 4 - Joining from the web
+
 To make this a little more interactive let's join the call from your browser.
 Visit https://getstream.io/video/demos/?id=123&skip-intro=1 and join the call.
 On your Android emulator you'll see the text update to 2 participants.
@@ -97,7 +130,7 @@ Let's keep the browser tab open as you go through the tutorial.
 
 Awesome, time to actually render some video for these participants.
 
-### Step 4 - Rendering Video
+### Step 5 - Rendering Video
 
 In this next step we're going to:
 
@@ -108,49 +141,57 @@ And replace the setContent code in MainActivity.kt
 
 ```kotlin
 setContent {
-    VideoTheme {
-        val participants = call.state.remoteParticipants.collectAsState()
-        val me = call.state.me.collectAsState()
-        val connection = call.state.connection.collectAsState()
-        var parentSize: IntSize by remember { mutableStateOf(IntSize(0, 0)) }
+     VideoTheme {
+         val remoteParticipants by call.state.remoteParticipants.collectAsState()
+         val remoteParticipant = remoteParticipants.firstOrNull()
+         val me by call.state.me.collectAsState()
+         val connection by call.state.connection.collectAsState()
+         var parentSize: IntSize by remember { mutableStateOf(IntSize(0, 0)) }
 
+         Box(
+             contentAlignment = Alignment.Center,
+             modifier = Modifier.fillMaxSize()
+         ) {
+             if (connection != RealtimeConnection.Connected) {
+                 Text("loading...", fontSize = 30.sp)
+             } else if (remoteParticipant == null) {
+                 Text("Join call ${call.id} in your browser", fontSize = 30.sp)
+             }
 
-        Surface(
-            modifier = Modifier.fillMaxSize().onSizeChanged { parentSize = it },
-            color = VideoTheme.colors.appBackground
-        ) {
-            if (connection.value != RealtimeConnection.Connected) {
-                Text("loading...")
-            }
-            // floating video UI for the local video participant
-            me.value?.let {
-                FloatingParticipantVideo(
-                    call = call,
-                    participant = it,
-                    parentBounds = parentSize
-                )
-            }
+             if (remoteParticipant != null) {
+                 Column(
+                     modifier = Modifier
+                         .fillMaxSize()
+                         .onSizeChanged { parentSize = it }) {
 
-            // basic, video only rendering of the participant
-            val remoteParticipant = participants.value.firstOrNull()
-            val remoteVideo = remoteParticipant?.video?.collectAsState()
-            if (remoteParticipant != null) {
-                Column(modifier = Modifier.fillMaxSize()) {
-                    VideoRenderer(
-                        modifier = Modifier.weight(1f),
-                        call = call,
-                        video = remoteVideo?.value
-                    )
-                }
-            }
-        }
-    }
+                     ParticipantVideo(
+                         modifier = Modifier.weight(1f),
+                         call = call,
+                         participant = remoteParticipant,
+                     )
+                 }
+             }
+
+             // floating video UI for the local video participant
+             if (me != null) {
+                 FloatingParticipantVideo(
+                     modifier = Modifier.align(Alignment.TopEnd),
+                     call = call,
+                     participant = me!!,
+                     parentBounds = parentSize
+                 )
+             }
+         }
+     }
 }
 ```
 
 You'll now see your local video in a floating video element and the video from your browser as well.
+The end result should look like this:
 
-### Step 5 - A full UI
+TODO: Image
+
+### Step 6 - A full UI
 
 The above example showed how to use the call state object and compose to build a basic video UI.
 For a production version of calling you'd want a few more UI elements:
@@ -209,7 +250,7 @@ The result will be:
 When you now run your app you'll see a more polished video UI.
 It supports reactions, screensharing, active speaker detection, network quality indicators etc.
 
-### Step 6 - Customizing the UI
+### Step 7 - Customizing the UI
 
 You can customize the UI by:
 

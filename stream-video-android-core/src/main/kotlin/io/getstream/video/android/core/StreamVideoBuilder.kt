@@ -163,8 +163,14 @@ public class StreamVideoBuilder @JvmOverloads constructor(
             connectionModule.updateAuthType("anonymous")
         }
 
+        // establish a ws connection with the coordinator
         scope.launch {
             client.connectAsync()
+        }
+
+        // see which location is best to connect to
+        scope.launch {
+            client.loadLocationAsync()
         }
 
         // installs Stream Video instance

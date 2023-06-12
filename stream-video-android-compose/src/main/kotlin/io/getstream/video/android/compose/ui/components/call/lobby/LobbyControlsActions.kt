@@ -29,7 +29,6 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.call.controls.actions.ToggleCameraAction
 import io.getstream.video.android.compose.ui.components.call.controls.actions.ToggleMicrophoneAction
-import io.getstream.video.android.compose.ui.components.call.controls.actions.ToggleSpeakerphoneAction
 import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.call.state.CallAction
 
@@ -63,11 +62,6 @@ public fun buildDefaultLobbyControlActions(
     } else {
         call.microphone.isEnabled.collectAsStateWithLifecycle()
     }
-    val isSpeakerphoneEnabled by if (LocalInspectionMode.current) {
-        remember { mutableStateOf(true) }
-    } else {
-        call.speaker.isEnabled.collectAsStateWithLifecycle()
-    }
 
     return listOf(
         {
@@ -84,12 +78,5 @@ public fun buildDefaultLobbyControlActions(
                 onCallAction = onCallAction
             )
         },
-        {
-            ToggleSpeakerphoneAction(
-                modifier = modifier,
-                isSpeakerphoneEnabled = isSpeakerphoneEnabled,
-                onCallAction = onCallAction
-            )
-        }
     )
 }

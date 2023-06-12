@@ -31,13 +31,13 @@ If you're new to android note that there are 2 build.gradle files, you want to o
 
 ```groovy
 dependencies {
-    implementation "io.getstream:stream-video-android-compose:$stream_version"
+    implementation "io.getstream:stream-video-android-compose:0.0.14-SNAPSHOT"
 }
 ```
 
 ### Step 3 - Create & Join a call
 
-Open up `MainActivity.kt` and add the following code to the onCreate method
+Open up `MainActivity.kt` and replace the MainActivity class with the following code:
 
 ```kotlin
 class MainActivity : ComponentActivity() {
@@ -72,30 +72,53 @@ class MainActivity : ComponentActivity() {
                     "description" to "Talk about how easy compose makes it to reuse and combine UI"
                 )
             ))
-            result.onError { throw IllegalStateException("$it") }
         }
 
         setContent {
             VideoTheme {
-                val custom = call.state.custom.collectAsState().value
+                val custom by call.state.custom.collectAsState()
                 val title = custom["title"]
                 val description = custom["description"]
-                val participants = call.state.remoteParticipants.collectAsState()
-                val connection = call.state.connection.collectAsState()
+                val participants by call.state.participants.collectAsState()
+                val connection by call.state.connection.collectAsState()
 
-                Column() {
-                    if (connection.value != RealtimeConnection.Connected) {
-                        Text("loading...")
+                Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.padding(16.dp)) {
+                    if (connection != RealtimeConnection.Connected) {
+                        Text("loading", fontSize = 30.sp)
+                    } else {
+                        Text("$title", fontSize = 30.sp)
+                        Text("$description", fontSize = 20.sp, modifier = Modifier.padding(16.dp))
+                        Text("${participants.size} participants", fontSize = 20.sp)
                     }
-                    Text("Room: $title - ${participants.value.size} - id ${call.id}")
-                    Text("$description")
-
                 }
             }
         }
     }
 }
 ```
+
+Run the app you will see a room with 1 participant (yourself).
+Let's review the example above and go over the details.
+After the user and client are created, we setup a call like this:
+
+```kotlin
+val call = client.call("audio_room", "444")
+lifecycleScope.launch {
+    val result = call.join(create = true, createOptions = CreateCallOptions(
+        members = listOf(
+            MemberRequest(userId = "tommaso", role="moderator", custom = emptyMap()),
+            MemberRequest(userId = "thierry", role="moderator", custom = emptyMap())
+        ), custom = mapOf(
+            "title" to "Compose Trends",
+            "description" to "Talk about how easy compose makes it to reuse and combine UI"
+        )
+    ))
+}
+```
+
+This example shows how to create and join a call with one API call.
+It creates a call of type "audio_room", id "444" and makes the user ids "tommaso" and "thierry" moderators of the call.
+In addition to that it also stores the title and description of the room in the custom data of the call object.
 
 By default calls of type "audio_room" start with backstage mode enabled.
 Admins and moderators can join the call. Regular users can only join the call when you go live.
@@ -124,31 +147,35 @@ fun ParticipantAvatar(participant : ParticipantState?) {
 }
 ```
 
-Next we'll create a little audio room UI
-
+We'll combine the ParticipantAvatar and DominantSpeaker into the UI for an audio room:
 
 ```kotlin
 setContent {
     VideoTheme {
-        val custom = call.state.custom.collectAsState().value
+        val connection by call.state.connection.collectAsState()
+        val custom by call.state.custom.collectAsState()
         val title = custom["title"]
         val description = custom["description"]
-        val participants = call.state.participants.collectAsState().value
-        val dominantSpeaker = call.state.dominantSpeaker.collectAsState().value
-        val otherParticipants = call.state.sortedParticipants.collectAsState().value.filter { it != dominantSpeaker }
+        val participants by call.state.participants.collectAsState()
+        val dominantSpeaker by call.state.dominantSpeaker.collectAsState()
+        val sortedParticipants by call.state.sortedParticipants.collectAsState()
+        val otherParticipants = sortedParticipants.filter { it != dominantSpeaker }
         val audioLevel = dominantSpeaker?.audioLevel?.collectAsState()?.value ?: 0f
-        val backstage = call.state.backstage.collectAsState().value
+        val backstage by call.state.backstage.collectAsState()
 
-        val color1 = Color.Blue.copy(alpha = 0.2f+ audioLevel * 0.8f)
-        val color2 = Color.Red.copy(alpha = 0.2f+ audioLevel * 0.8f)
+        val color1 = Color.LightGray.copy(alpha = 0.2f+ audioLevel * 0.8f)
+        val color2 = Color.White.copy(alpha = 0.2f+ audioLevel * 0.8f)
 
-        Column(
-            modifier = Modifier
-                .background(Brush.linearGradient(listOf(color1, color2)))
-                .fillMaxSize(),
-        ) {
-            Text("Room: ${title} - ${participants.size} - id ${call.id}")
-            Text("${description}")
+        Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.background(Brush.linearGradient(listOf(color1, color2)))
+            .fillMaxSize()) {
+            if (connection != RealtimeConnection.Connected) {
+                Text("loading", fontSize = 30.sp)
+            } else {
+                Text("$title", fontSize = 30.sp)
+                Text("$description", fontSize = 20.sp, modifier = Modifier.padding(16.dp))
+                Text("${participants.size} participants", fontSize = 20.sp)
+            }
+
             DominantSpeaker(dominantSpeaker)
             LazyVerticalGrid(
                 columns = GridCells.Adaptive(minSize = 128.dp)
@@ -166,7 +193,6 @@ setContent {
                 Text(text = if (backstage)"Go Live" else "End")
             }
         }
-
     }
 }
 ```

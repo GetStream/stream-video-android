@@ -29,6 +29,8 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.getstream.video.android.common.viewmodel.CallViewModel
+import io.getstream.video.android.compose.permission.VideoPermissionsState
+import io.getstream.video.android.compose.permission.rememberCallPermissionsState
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.call.activecall.CallContent
 import io.getstream.video.android.compose.ui.components.call.activecall.DefaultPictureInPictureContent
@@ -79,10 +81,7 @@ public fun CallContainer(
     isVideoType: Boolean = true,
     onBackPressed: () -> Unit = {},
     onCallAction: (CallAction) -> Unit = { DefaultOnCallActionHandler.onCallAction(call, it) },
-    permissions: List<String> = listOf(
-        android.Manifest.permission.CAMERA,
-        android.Manifest.permission.RECORD_AUDIO
-    ),
+    permissions: VideoPermissionsState = rememberCallPermissionsState(call = call),
     appBarContent: @Composable (call: Call) -> Unit = {
         CallAppBar(
             modifier = Modifier.testTag("call_appbar"),
@@ -184,10 +183,7 @@ public fun CallContainer(
     isVideoType: Boolean = true,
     onBackPressed: () -> Unit = {},
     onCallAction: (CallAction) -> Unit = { DefaultOnCallActionHandler.onCallAction(call, it) },
-    permissions: List<String> = listOf(
-        android.Manifest.permission.CAMERA,
-        android.Manifest.permission.RECORD_AUDIO
-    ),
+    permissions: VideoPermissionsState = rememberCallPermissionsState(call = call),
     callAppBarContent: @Composable (call: Call) -> Unit = {
         CallAppBar(
             modifier = Modifier.testTag("call_appbar"),
@@ -259,10 +255,7 @@ internal fun DefaultCallContent(
         participant: ParticipantState,
         style: VideoRendererStyle
     ) -> Unit,
-    permissions: List<String> = listOf(
-        android.Manifest.permission.CAMERA,
-        android.Manifest.permission.RECORD_AUDIO
-    ),
+    permissions: VideoPermissionsState = rememberCallPermissionsState(call = call),
     onCallAction: (CallAction) -> Unit = { DefaultOnCallActionHandler.onCallAction(call, it) },
     callAppBarContent: @Composable (call: Call) -> Unit,
     callControlsContent: @Composable (call: Call) -> Unit,

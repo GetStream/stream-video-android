@@ -32,6 +32,7 @@
 - [ ] Chat Integration
 - [ ] XML version of VideoRenderer
 - [ ] Reactions
+- [ ] Fix tests
 
 ### 0.3 milestone
 
