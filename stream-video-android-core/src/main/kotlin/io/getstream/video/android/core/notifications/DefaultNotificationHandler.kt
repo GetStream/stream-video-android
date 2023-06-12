@@ -10,7 +10,9 @@ import android.content.pm.ResolveInfo
 import android.os.Build
 import androidx.core.app.NotificationChannelCompat
 import androidx.core.app.NotificationCompat
+import androidx.core.app.NotificationCompat.CallStyle
 import androidx.core.app.NotificationManagerCompat
+import androidx.core.app.Person
 import io.getstream.log.TaggedLogger
 import io.getstream.log.taggedLogger
 import io.getstream.video.android.R
@@ -204,20 +206,41 @@ open public class DefaultNotificationHandler(
             .setFullScreenIntent(fullScreenPendingIntent, true)
             .setPriority(NotificationCompat.PRIORITY_HIGH)
             .setCategory(NotificationCompat.CATEGORY_CALL)
-            .addAction(
+            .addCallActions(acceptCallPendingIntent, rejectCallPendingIntent, callDisplayName)
+            .build()
+        notificationManager.notify(INCOMING_CALL_NOTIFICATION_ID, notification)
+    }
+    private fun NotificationCompat.Builder.addCallActions(
+        acceptCallPendingIntent: PendingIntent,
+        rejectCallPendingIntent: PendingIntent,
+        callDisplayName: String
+    ): NotificationCompat.Builder = apply {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            setStyle(
+                CallStyle.forIncomingCall(
+                    Person.Builder()
+                        .setName(callDisplayName)
+                        .build(),
+                    rejectCallPendingIntent,
+                    acceptCallPendingIntent,
+                )
+            )
+        } else {
+            addAction(
                 NotificationCompat.Action.Builder(
                     null,
                     context.getString(R.string.stream_video_call_notification_action_accept),
                     acceptCallPendingIntent,
                 ).build()
-            ).addAction(
+            )
+            addAction(
                 NotificationCompat.Action.Builder(
                     null,
                     context.getString(R.string.stream_video_call_notification_action_reject),
                     rejectCallPendingIntent
                 ).build()
-            ).build()
-        notificationManager.notify(INCOMING_CALL_NOTIFICATION_ID, notification)
+            )
+        }
     }
 
     open fun getChannelId(): String = CHANNEL_ID
@@ -238,3 +261,5 @@ open public class DefaultNotificationHandler(
         }
     }
 }
+
+
