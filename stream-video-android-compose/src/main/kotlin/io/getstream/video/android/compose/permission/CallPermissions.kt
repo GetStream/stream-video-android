@@ -17,7 +17,6 @@
 package io.getstream.video.android.compose.permission
 
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.Stable
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.rememberMultiplePermissionsState
 import io.getstream.video.android.core.Call
@@ -50,31 +49,4 @@ public fun rememberCallPermissionsState(
             permissionState.launchMultiplePermissionRequest()
         }
     }
-}
-
-@Stable
-public interface VideoPermissionsState {
-
-    /**
-     * When `true`, the user has granted all [permissions].
-     */
-    public val allPermissionsGranted: Boolean
-
-    /**
-     * When `true`, the user should be presented with a rationale.
-     */
-    public val shouldShowRationale: Boolean
-
-    /**
-     * Request the [permissions] to the user.
-     *
-     * This should always be triggered from non-composable scope, for example, from a side-effect
-     * or a non-composable callback. Otherwise, this will result in an IllegalStateException.
-     *
-     * This triggers a system dialog that asks the user to grant or revoke the permission.
-     * Note that this dialog might not appear on the screen if the user doesn't want to be asked
-     * again or has denied the permission multiple times.
-     * This behavior varies depending on the Android level API.
-     */
-    public fun launchPermissionRequest(): Unit
 }
