@@ -55,7 +55,6 @@ class CallLobbyViewModel @Inject constructor(
 
     val isCameraEnabled: StateFlow<Boolean> = call.camera.isEnabled
     val isMicrophoneEnabled: StateFlow<Boolean> = call.microphone.isEnabled
-    val isSpeakerphoneEnabled: StateFlow<Boolean> = call.speaker.isEnabled
 
     private val _isLoading: MutableStateFlow<Boolean> = MutableStateFlow(false)
     internal val isLoading: StateFlow<Boolean> = _isLoading
@@ -91,10 +90,6 @@ class CallLobbyViewModel @Inject constructor(
 
     fun enableMicrophone(enabled: Boolean) {
         call.microphone.setEnabled(enabled)
-    }
-
-    fun enableSpeakerphone(enabled: Boolean) {
-        call.speaker.setEnabled(enabled)
     }
 
     private suspend fun joinCall(): Result<RtcSession> {
