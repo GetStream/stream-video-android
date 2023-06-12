@@ -366,7 +366,7 @@ internal class StreamVideoImpl internal constructor(
     internal suspend fun selectLocation(): Result<String> {
         var attempts = 0
         var lastResult: Result<String>? = null
-        while (attempts<3) {
+        while (attempts < 3) {
             attempts += 1
             lastResult = _selectLocation()
             if (lastResult is Success) {
