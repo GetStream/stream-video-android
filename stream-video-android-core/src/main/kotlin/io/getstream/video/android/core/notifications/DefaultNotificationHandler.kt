@@ -18,9 +18,9 @@ import io.getstream.video.android.core.notifications.NotificationHandler.Compani
 import io.getstream.video.android.core.notifications.NotificationHandler.Companion.ACTION_INCOMING_CALL
 import io.getstream.video.android.core.notifications.NotificationHandler.Companion.ACTION_REJECT_CALL
 import io.getstream.video.android.core.notifications.NotificationHandler.Companion.INCOMING_CALL_NOTIFICATION_ID
+import io.getstream.video.android.core.notifications.NotificationHandler.Companion.INTENT_EXTRA_CALL_CID
+import io.getstream.video.android.core.notifications.NotificationHandler.Companion.INTENT_EXTRA_NOTIFICATION_ID
 import io.getstream.video.android.core.notifications.internal.DismissNotificationActivity
-import io.getstream.video.android.core.utils.INTENT_EXTRA_CALL_CID
-import io.getstream.video.android.core.utils.INTENT_EXTRA_NOTIFICATION_ID
 import io.getstream.video.android.model.StreamCallId
 
 open public class DefaultNotificationHandler(
