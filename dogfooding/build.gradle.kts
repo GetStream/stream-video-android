@@ -156,7 +156,6 @@ dependencies {
     implementation(libs.androidx.compose.material.iconsExtended)
     implementation(libs.androidx.hilt.navigation)
     implementation(libs.landscapist.coil)
-    implementation(libs.accompanist.permission)
 
     // hilt
     implementation(libs.hilt.android)
