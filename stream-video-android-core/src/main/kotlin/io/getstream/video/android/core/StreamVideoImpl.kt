@@ -42,7 +42,6 @@ import io.getstream.video.android.core.notifications.internal.StreamNotification
 import io.getstream.video.android.core.socket.ErrorResponse
 import io.getstream.video.android.core.socket.SocketState
 import io.getstream.video.android.core.utils.DebugInfo
-import io.getstream.video.android.core.utils.INTENT_EXTRA_CALL_CID
 import io.getstream.video.android.core.utils.LatencyResult
 import io.getstream.video.android.core.utils.getLatencyMeasurementsOKHttp
 import io.getstream.video.android.core.utils.toEdge
@@ -849,32 +848,6 @@ internal class StreamVideoImpl internal constructor(
         val dataStore = StreamUserDataStore.instance()
         scope.launch { dataStore.clear() }
     }
-
-    suspend fun handlePushMessage(payload: Map<String, Any>): Result<Unit> =
-        withContext(scope.coroutineContext) {
-            val callCid = payload[INTENT_EXTRA_CALL_CID] as? String
-                ?: return@withContext Failure(Error.GenericError("Missing Call CID!"))
-
-            val (type, id) = callCid.toTypeAndId()
-
-            when (val result = getCall(type, id)) {
-                is Success -> {
-                    val callMetadata = result.value
-
-//                    val event = CallCreatedEvent(
-//                        callCid = callMetadata.cid,
-//                        ringing = true,
-//                        users = callMetadata.users,
-//                        callInfo = callMetadata.toInfo(),
-//                        callDetails = callMetadata.callDetails
-//                    )
-
-                    Success(Unit)
-                }
-
-                is Failure -> result
-            }
-        }
 
     override fun call(type: String, id: String): Call {
         val idOrRandom = id.ifEmpty { UUID.randomUUID().toString() }
