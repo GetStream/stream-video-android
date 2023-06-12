@@ -1,0 +1,62 @@
+/*
+ * Copyright (c) 2014-2023 Stream.io Inc. All rights reserved.
+ *
+ * Licensed under the Stream License;
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    https://github.com/GetStream/stream-video-android/blob/main/LICENSE
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package io.getstream.video.android.compose.permission
+
+import androidx.compose.runtime.Composable
+import io.getstream.video.android.core.Call
+
+@Composable
+public fun rememberCameraPermissionsState(
+    call: Call,
+    onPermissionsResult: (Boolean) -> Unit = { isGranted ->
+        if (isGranted) {
+            call.camera.setEnabled(true)
+        }
+    }
+): VideoPermissionsState {
+    return rememberCallPermissionsState(
+        call = call,
+        permissions = listOf(
+            android.Manifest.permission.CAMERA
+        ),
+        onPermissionsResult = {
+            val isGranted = it[android.Manifest.permission.CAMERA] == true
+            onPermissionsResult.invoke(isGranted)
+        }
+    )
+}
+
+@Composable
+public fun rememberMicrophonePermissionsState(
+    call: Call,
+    onPermissionsResult: (Boolean) -> Unit = { isGranted ->
+        if (isGranted) {
+            call.microphone.setEnabled(true)
+        }
+    }
+): VideoPermissionsState {
+    return rememberCallPermissionsState(
+        call = call,
+        permissions = listOf(
+            android.Manifest.permission.RECORD_AUDIO
+        ),
+        onPermissionsResult = {
+            val isGranted = it[android.Manifest.permission.RECORD_AUDIO] == true
+            onPermissionsResult.invoke(isGranted)
+        }
+    )
+}

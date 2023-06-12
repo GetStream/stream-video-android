@@ -5,8 +5,13 @@ public final class io/getstream/video/android/compose/BuildConfig {
 	public fun <init> ()V
 }
 
-public final class io/getstream/video/android/compose/permission/VideoPermissionKt {
+public final class io/getstream/video/android/compose/permission/CallPermissionsKt {
 	public static final fun rememberCallPermissionsState (Lio/getstream/video/android/core/Call;Ljava/util/List;Lkotlin/jvm/functions/Function1;Landroidx/compose/runtime/Composer;II)Lio/getstream/video/android/compose/permission/VideoPermissionsState;
+}
+
+public final class io/getstream/video/android/compose/permission/SinglePermissionKt {
+	public static final fun rememberCameraPermissionsState (Lio/getstream/video/android/core/Call;Lkotlin/jvm/functions/Function1;Landroidx/compose/runtime/Composer;II)Lio/getstream/video/android/compose/permission/VideoPermissionsState;
+	public static final fun rememberMicrophonePermissionsState (Lio/getstream/video/android/core/Call;Lkotlin/jvm/functions/Function1;Landroidx/compose/runtime/Composer;II)Lio/getstream/video/android/compose/permission/VideoPermissionsState;
 }
 
 public abstract interface class io/getstream/video/android/compose/permission/VideoPermissionsState {
