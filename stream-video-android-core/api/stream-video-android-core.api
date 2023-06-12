@@ -567,7 +567,7 @@ public final class io/getstream/video/android/core/SpeakerManager {
 	public final fun setVolume (I)V
 }
 
-public abstract interface class io/getstream/video/android/core/StreamVideo {
+public abstract interface class io/getstream/video/android/core/StreamVideo : io/getstream/video/android/core/notifications/NotificationHandler {
 	public static final field Companion Lio/getstream/video/android/core/StreamVideo$Companion;
 	public abstract fun call (Ljava/lang/String;Ljava/lang/String;)Lio/getstream/video/android/core/Call;
 	public abstract fun cleanup ()V
@@ -581,7 +581,6 @@ public abstract interface class io/getstream/video/android/core/StreamVideo {
 	public abstract fun getUserId ()Ljava/lang/String;
 	public abstract fun logOut ()V
 	public abstract fun queryCalls (Ljava/util/Map;Ljava/util/List;IZLkotlin/coroutines/Continuation;)Ljava/lang/Object;
-	public abstract fun registerPushDevice (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public abstract fun subscribe (Lio/getstream/video/android/core/events/VideoEventListener;)Lio/getstream/video/android/core/EventSubscription;
 	public abstract fun subscribeFor ([Ljava/lang/Class;Lio/getstream/video/android/core/events/VideoEventListener;)Lio/getstream/video/android/core/EventSubscription;
 }
@@ -604,13 +603,12 @@ public final class io/getstream/video/android/core/StreamVideoBuilder {
 	public fun <init> (Landroid/content/Context;Ljava/lang/String;Lio/getstream/video/android/core/GEO;Lio/getstream/video/android/model/User;Ljava/lang/String;)V
 	public fun <init> (Landroid/content/Context;Ljava/lang/String;Lio/getstream/video/android/core/GEO;Lio/getstream/video/android/model/User;Ljava/lang/String;Lkotlin/jvm/functions/Function2;)V
 	public fun <init> (Landroid/content/Context;Ljava/lang/String;Lio/getstream/video/android/core/GEO;Lio/getstream/video/android/model/User;Ljava/lang/String;Lkotlin/jvm/functions/Function2;Lio/getstream/video/android/core/logging/LoggingLevel;)V
-	public fun <init> (Landroid/content/Context;Ljava/lang/String;Lio/getstream/video/android/core/GEO;Lio/getstream/video/android/model/User;Ljava/lang/String;Lkotlin/jvm/functions/Function2;Lio/getstream/video/android/core/logging/LoggingLevel;Z)V
-	public fun <init> (Landroid/content/Context;Ljava/lang/String;Lio/getstream/video/android/core/GEO;Lio/getstream/video/android/model/User;Ljava/lang/String;Lkotlin/jvm/functions/Function2;Lio/getstream/video/android/core/logging/LoggingLevel;ZLjava/util/List;)V
-	public fun <init> (Landroid/content/Context;Ljava/lang/String;Lio/getstream/video/android/core/GEO;Lio/getstream/video/android/model/User;Ljava/lang/String;Lkotlin/jvm/functions/Function2;Lio/getstream/video/android/core/logging/LoggingLevel;ZLjava/util/List;Lkotlin/jvm/functions/Function1;)V
-	public fun <init> (Landroid/content/Context;Ljava/lang/String;Lio/getstream/video/android/core/GEO;Lio/getstream/video/android/model/User;Ljava/lang/String;Lkotlin/jvm/functions/Function2;Lio/getstream/video/android/core/logging/LoggingLevel;ZLjava/util/List;Lkotlin/jvm/functions/Function1;Ljava/util/List;)V
-	public fun <init> (Landroid/content/Context;Ljava/lang/String;Lio/getstream/video/android/core/GEO;Lio/getstream/video/android/model/User;Ljava/lang/String;Lkotlin/jvm/functions/Function2;Lio/getstream/video/android/core/logging/LoggingLevel;ZLjava/util/List;Lkotlin/jvm/functions/Function1;Ljava/util/List;Ljava/util/List;)V
-	public fun <init> (Landroid/content/Context;Ljava/lang/String;Lio/getstream/video/android/core/GEO;Lio/getstream/video/android/model/User;Ljava/lang/String;Lkotlin/jvm/functions/Function2;Lio/getstream/video/android/core/logging/LoggingLevel;ZLjava/util/List;Lkotlin/jvm/functions/Function1;Ljava/util/List;Ljava/util/List;J)V
-	public synthetic fun <init> (Landroid/content/Context;Ljava/lang/String;Lio/getstream/video/android/core/GEO;Lio/getstream/video/android/model/User;Ljava/lang/String;Lkotlin/jvm/functions/Function2;Lio/getstream/video/android/core/logging/LoggingLevel;ZLjava/util/List;Lkotlin/jvm/functions/Function1;Ljava/util/List;Ljava/util/List;JILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun <init> (Landroid/content/Context;Ljava/lang/String;Lio/getstream/video/android/core/GEO;Lio/getstream/video/android/model/User;Ljava/lang/String;Lkotlin/jvm/functions/Function2;Lio/getstream/video/android/core/logging/LoggingLevel;Lio/getstream/video/android/core/notifications/NotificationConfig;)V
+	public fun <init> (Landroid/content/Context;Ljava/lang/String;Lio/getstream/video/android/core/GEO;Lio/getstream/video/android/model/User;Ljava/lang/String;Lkotlin/jvm/functions/Function2;Lio/getstream/video/android/core/logging/LoggingLevel;Lio/getstream/video/android/core/notifications/NotificationConfig;Lkotlin/jvm/functions/Function1;)V
+	public fun <init> (Landroid/content/Context;Ljava/lang/String;Lio/getstream/video/android/core/GEO;Lio/getstream/video/android/model/User;Ljava/lang/String;Lkotlin/jvm/functions/Function2;Lio/getstream/video/android/core/logging/LoggingLevel;Lio/getstream/video/android/core/notifications/NotificationConfig;Lkotlin/jvm/functions/Function1;Ljava/util/List;)V
+	public fun <init> (Landroid/content/Context;Ljava/lang/String;Lio/getstream/video/android/core/GEO;Lio/getstream/video/android/model/User;Ljava/lang/String;Lkotlin/jvm/functions/Function2;Lio/getstream/video/android/core/logging/LoggingLevel;Lio/getstream/video/android/core/notifications/NotificationConfig;Lkotlin/jvm/functions/Function1;Ljava/util/List;Ljava/util/List;)V
+	public fun <init> (Landroid/content/Context;Ljava/lang/String;Lio/getstream/video/android/core/GEO;Lio/getstream/video/android/model/User;Ljava/lang/String;Lkotlin/jvm/functions/Function2;Lio/getstream/video/android/core/logging/LoggingLevel;Lio/getstream/video/android/core/notifications/NotificationConfig;Lkotlin/jvm/functions/Function1;Ljava/util/List;Ljava/util/List;J)V
+	public synthetic fun <init> (Landroid/content/Context;Ljava/lang/String;Lio/getstream/video/android/core/GEO;Lio/getstream/video/android/model/User;Ljava/lang/String;Lkotlin/jvm/functions/Function2;Lio/getstream/video/android/core/logging/LoggingLevel;Lio/getstream/video/android/core/notifications/NotificationConfig;Lkotlin/jvm/functions/Function1;Ljava/util/List;Ljava/util/List;JILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public fun <init> (Landroid/content/Context;Ljava/lang/String;Lio/getstream/video/android/model/User;)V
 	public final fun build ()Lio/getstream/video/android/core/StreamVideo;
 	public final fun getEncryptToken ()Z
@@ -2037,6 +2035,64 @@ public final class io/getstream/video/android/core/model/VideoTrack : io/getstre
 	public fun toString ()Ljava/lang/String;
 }
 
+public class io/getstream/video/android/core/notifications/DefaultNotificationHandler : io/getstream/android/push/permissions/NotificationPermissionHandler, io/getstream/video/android/core/notifications/NotificationHandler {
+	public static final field Companion Lio/getstream/video/android/core/notifications/DefaultNotificationHandler$Companion;
+	public fun <init> (Landroid/app/Application;Lio/getstream/android/push/permissions/NotificationPermissionHandler;)V
+	public synthetic fun <init> (Landroid/app/Application;Lio/getstream/android/push/permissions/NotificationPermissionHandler;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun getChannelDescription ()Ljava/lang/String;
+	public fun getChannelId ()Ljava/lang/String;
+	public fun getChannelName ()Ljava/lang/String;
+	public fun onLivestream (Lio/getstream/video/android/model/StreamCallId;)V
+	public fun onNotification (Lio/getstream/video/android/model/StreamCallId;)V
+	public fun onPermissionDenied ()V
+	public fun onPermissionGranted ()V
+	public fun onPermissionRationale ()V
+	public fun onPermissionRequested ()V
+	public fun onRiningCall (Lio/getstream/video/android/model/StreamCallId;Ljava/lang/String;)V
+}
+
+public final class io/getstream/video/android/core/notifications/DefaultNotificationHandler$Companion {
+}
+
+public final class io/getstream/video/android/core/notifications/NotificationConfig {
+	public fun <init> ()V
+	public fun <init> (Ljava/util/List;Lkotlin/jvm/functions/Function0;Lio/getstream/video/android/core/notifications/NotificationHandler;)V
+	public synthetic fun <init> (Ljava/util/List;Lkotlin/jvm/functions/Function0;Lio/getstream/video/android/core/notifications/NotificationHandler;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Ljava/util/List;
+	public final fun component2 ()Lkotlin/jvm/functions/Function0;
+	public final fun component3 ()Lio/getstream/video/android/core/notifications/NotificationHandler;
+	public final fun copy (Ljava/util/List;Lkotlin/jvm/functions/Function0;Lio/getstream/video/android/core/notifications/NotificationHandler;)Lio/getstream/video/android/core/notifications/NotificationConfig;
+	public static synthetic fun copy$default (Lio/getstream/video/android/core/notifications/NotificationConfig;Ljava/util/List;Lkotlin/jvm/functions/Function0;Lio/getstream/video/android/core/notifications/NotificationHandler;ILjava/lang/Object;)Lio/getstream/video/android/core/notifications/NotificationConfig;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getNotificationHandler ()Lio/getstream/video/android/core/notifications/NotificationHandler;
+	public final fun getPushDeviceGenerators ()Ljava/util/List;
+	public final fun getRequestPermissionOnAppLaunch ()Lkotlin/jvm/functions/Function0;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public abstract interface class io/getstream/video/android/core/notifications/NotificationHandler : io/getstream/android/push/permissions/NotificationPermissionHandler {
+	public static final field ACTION_ACCEPT_CALL Ljava/lang/String;
+	public static final field ACTION_INCOMING_CALL Ljava/lang/String;
+	public static final field ACTION_REJECT_CALL Ljava/lang/String;
+	public static final field Companion Lio/getstream/video/android/core/notifications/NotificationHandler$Companion;
+	public static final field INCOMING_CALL_NOTIFICATION_ID I
+	public static final field INTENT_EXTRA_CALL_CID Ljava/lang/String;
+	public static final field INTENT_EXTRA_NOTIFICATION_ID Ljava/lang/String;
+	public abstract fun onLivestream (Lio/getstream/video/android/model/StreamCallId;)V
+	public abstract fun onNotification (Lio/getstream/video/android/model/StreamCallId;)V
+	public abstract fun onRiningCall (Lio/getstream/video/android/model/StreamCallId;Ljava/lang/String;)V
+}
+
+public final class io/getstream/video/android/core/notifications/NotificationHandler$Companion {
+	public static final field ACTION_ACCEPT_CALL Ljava/lang/String;
+	public static final field ACTION_INCOMING_CALL Ljava/lang/String;
+	public static final field ACTION_REJECT_CALL Ljava/lang/String;
+	public static final field INCOMING_CALL_NOTIFICATION_ID I
+	public static final field INTENT_EXTRA_CALL_CID Ljava/lang/String;
+	public static final field INTENT_EXTRA_NOTIFICATION_ID Ljava/lang/String;
+}
+
 public final class io/getstream/video/android/core/permission/PermissionRequest {
 	public fun <init> (Lio/getstream/video/android/core/Call;Lio/getstream/video/android/model/User;Lorg/threeten/bp/OffsetDateTime;Ljava/util/List;Lorg/threeten/bp/OffsetDateTime;Lorg/threeten/bp/OffsetDateTime;)V
 	public synthetic fun <init> (Lio/getstream/video/android/core/Call;Lio/getstream/video/android/model/User;Lorg/threeten/bp/OffsetDateTime;Ljava/util/List;Lorg/threeten/bp/OffsetDateTime;Lorg/threeten/bp/OffsetDateTime;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
@@ -2286,11 +2342,6 @@ public final class io/getstream/video/android/core/utils/AndroidUtilsKt {
 public final class io/getstream/video/android/core/utils/CallClientUtilsKt {
 	public static final fun mangleSdpUtil (Lorg/webrtc/SessionDescription;ZZZ)Lorg/webrtc/SessionDescription;
 	public static synthetic fun mangleSdpUtil$default (Lorg/webrtc/SessionDescription;ZZZILjava/lang/Object;)Lorg/webrtc/SessionDescription;
-}
-
-public final class io/getstream/video/android/core/utils/ConstantsKt {
-	public static final field INTENT_EXTRA_CALL_CID Ljava/lang/String;
-	public static final field INTENT_EXTRA_NOTIFICATION_ID Ljava/lang/String;
 }
 
 public final class io/getstream/video/android/core/utils/DomainUtilsKt {
