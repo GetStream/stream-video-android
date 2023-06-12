@@ -1,10 +1,10 @@
 package io.getstream.video.android.core.notifications
 
 import android.annotation.SuppressLint
+import android.app.Application
 import android.app.NotificationManager
 import android.app.PendingIntent
 import android.content.ComponentName
-import android.content.Context
 import android.content.Intent
 import android.content.pm.ResolveInfo
 import android.os.Build
@@ -13,6 +13,8 @@ import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationCompat.CallStyle
 import androidx.core.app.NotificationManagerCompat
 import androidx.core.app.Person
+import io.getstream.android.push.permissions.DefaultNotificationPermissionHandler
+import io.getstream.android.push.permissions.NotificationPermissionHandler
 import io.getstream.log.TaggedLogger
 import io.getstream.log.taggedLogger
 import io.getstream.video.android.R
@@ -26,12 +28,16 @@ import io.getstream.video.android.core.notifications.internal.DismissNotificatio
 import io.getstream.video.android.model.StreamCallId
 
 open public class DefaultNotificationHandler(
-    private val context: Context,
-) : NotificationHandler {
+    private val application: Application,
+    private val notificationPermissionHandler: NotificationPermissionHandler =
+        DefaultNotificationPermissionHandler
+            .createDefaultNotificationPermissionHandler(application)
+) : NotificationHandler,
+    NotificationPermissionHandler by notificationPermissionHandler {
 
     private val logger: TaggedLogger by taggedLogger("Video:DefaultNotificationHandler")
     private val notificationManager: NotificationManagerCompat by lazy {
-        NotificationManagerCompat.from(context).also {
+        NotificationManagerCompat.from(application).also {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                 it.createNotificationChannel(
                     NotificationChannelCompat
@@ -104,7 +110,7 @@ open public class DefaultNotificationHandler(
         baseIntent: Intent,
         callId: StreamCallId,
     ): PendingIntent? =
-        searchResolveInfo { context.packageManager.queryBroadcastReceivers(baseIntent, 0) }?.let {
+        searchResolveInfo { application.packageManager.queryBroadcastReceivers(baseIntent, 0) }?.let {
             getBroadcastForIntent(baseIntent, it, callId)
         }
 
@@ -112,13 +118,13 @@ open public class DefaultNotificationHandler(
         baseIntent: Intent,
         callId: StreamCallId,
     ): PendingIntent? =
-        searchResolveInfo { context.packageManager.queryIntentActivities(baseIntent, 0) }?.let {
+        searchResolveInfo { application.packageManager.queryIntentActivities(baseIntent, 0) }?.let {
             getActivityForIntent(baseIntent, it, callId)
         }
 
     private fun searchResolveInfo(availableComponents: () -> List<ResolveInfo>): ResolveInfo? =
         availableComponents()
-            .filter { it.activityInfo.packageName == context.packageName }
+            .filter { it.activityInfo.packageName == application.packageName }
             .maxByOrNull { it.priority }
 
     /**
@@ -136,9 +142,9 @@ open public class DefaultNotificationHandler(
         flags: Int = PENDING_INTENT_FLAG,
     ): PendingIntent {
         val dismissIntent = DismissNotificationActivity
-            .createIntent(context, INCOMING_CALL_NOTIFICATION_ID)
+            .createIntent(application, INCOMING_CALL_NOTIFICATION_ID)
         return PendingIntent.getActivities(
-            context,
+            application,
             0,
             arrayOf(buildComponentIntent(baseIntent, resolveInfo, callId), dismissIntent),
             flags
@@ -160,7 +166,7 @@ open public class DefaultNotificationHandler(
         flags: Int = PENDING_INTENT_FLAG,
     ): PendingIntent {
         return PendingIntent.getBroadcast(
-            context, 0,
+            application, 0,
             buildComponentIntent(baseIntent, resolveInfo, callId),
             flags
         )
@@ -196,7 +202,7 @@ open public class DefaultNotificationHandler(
         callDisplayName: String,
     ) {
         println("JcLog: [showIncomingCallNotification]")
-        val notification = NotificationCompat.Builder(context, getChannelId())
+        val notification = NotificationCompat.Builder(application, getChannelId())
             .setSmallIcon(android.R.drawable.presence_video_online)
             .setContentTitle("Incoming call")
             .setContentText(callDisplayName)
@@ -229,14 +235,14 @@ open public class DefaultNotificationHandler(
             addAction(
                 NotificationCompat.Action.Builder(
                     null,
-                    context.getString(R.string.stream_video_call_notification_action_accept),
+                    application.getString(R.string.stream_video_call_notification_action_accept),
                     acceptCallPendingIntent,
                 ).build()
             )
             addAction(
                 NotificationCompat.Action.Builder(
                     null,
-                    context.getString(R.string.stream_video_call_notification_action_reject),
+                    application.getString(R.string.stream_video_call_notification_action_reject),
                     rejectCallPendingIntent
                 ).build()
             )
