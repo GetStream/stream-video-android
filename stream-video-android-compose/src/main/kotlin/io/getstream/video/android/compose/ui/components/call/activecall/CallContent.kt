@@ -44,8 +44,9 @@ import androidx.compose.ui.unit.coerceAtLeast
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
-import com.google.accompanist.permissions.rememberMultiplePermissionsState
 import io.getstream.video.android.common.viewmodel.CallViewModel
+import io.getstream.video.android.compose.permission.VideoPermissionsState
+import io.getstream.video.android.compose.permission.rememberCallPermissionsState
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.call.CallAppBar
 import io.getstream.video.android.compose.ui.components.call.controls.ControlActions
@@ -85,10 +86,7 @@ public fun CallContent(
     modifier: Modifier = Modifier,
     onBackPressed: () -> Unit = {},
     onCallAction: (CallAction) -> Unit = { DefaultOnCallActionHandler.onCallAction(call, it) },
-    permissions: List<String> = listOf(
-        android.Manifest.permission.CAMERA,
-        android.Manifest.permission.RECORD_AUDIO
-    ),
+    permissions: VideoPermissionsState = rememberCallPermissionsState(call = call),
     callAppBarContent: @Composable (call: Call) -> Unit = {
         CallAppBar(
             call = call,
@@ -177,10 +175,7 @@ public fun CallContent(
     modifier: Modifier = Modifier,
     isShowingOverlayCallAppBar: Boolean = true,
     isInPictureInPicture: Boolean = false,
-    permissions: List<String> = listOf(
-        android.Manifest.permission.CAMERA,
-        android.Manifest.permission.RECORD_AUDIO
-    ),
+    permissions: VideoPermissionsState = rememberCallPermissionsState(call = call),
     onCallAction: (CallAction) -> Unit = { DefaultOnCallActionHandler.onCallAction(call, it) },
     callAppBarContent: @Composable (call: Call) -> Unit = {
         CallAppBar(
@@ -223,7 +218,7 @@ public fun CallContent(
 ) {
     val orientation = LocalConfiguration.current.orientation
 
-    DefaultPermissionHandler(call = call, permissions = permissions)
+    DefaultPermissionHandler(videoPermission = permissions)
 
     if (!isInPictureInPicture) {
         Scaffold(
@@ -306,25 +301,12 @@ internal fun DefaultPictureInPictureContent(call: Call) {
 
 @Composable
 private fun DefaultPermissionHandler(
-    call: Call,
-    permissions: List<String> = listOf(
-        android.Manifest.permission.CAMERA,
-        android.Manifest.permission.RECORD_AUDIO
-    ),
+    videoPermission: VideoPermissionsState,
 ) {
     if (LocalInspectionMode.current) return
 
-    val multiplePermissionsState = rememberMultiplePermissionsState(permissions = permissions) {
-        if (it[android.Manifest.permission.CAMERA] == true) {
-            call.camera.setEnabled(true)
-        }
-        if (it[android.Manifest.permission.RECORD_AUDIO] == true) {
-            call.microphone.setEnabled(true)
-        }
-    }
-
-    LaunchedEffect(key1 = multiplePermissionsState) {
-        multiplePermissionsState.launchMultiplePermissionRequest()
+    LaunchedEffect(key1 = videoPermission) {
+        videoPermission.launchPermissionRequest()
     }
 }
 
