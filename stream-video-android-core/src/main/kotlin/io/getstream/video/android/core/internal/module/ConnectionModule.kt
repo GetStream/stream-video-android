@@ -28,7 +28,6 @@ import io.getstream.video.android.model.ApiKey
 import io.getstream.video.android.model.User
 import io.getstream.video.android.model.UserToken
 import kotlinx.coroutines.CoroutineScope
-import okhttp3.HttpUrl
 import okhttp3.Interceptor
 import okhttp3.OkHttpClient
 import okhttp3.Response
@@ -166,7 +165,6 @@ internal class ConnectionModule(
     fun updateAuthType(authType: String) {
         authInterceptor.authType = authType
     }
-
 }
 
 /**
