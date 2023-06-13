@@ -82,11 +82,8 @@ public data class ParticipantState(
     internal val _screenSharingTrack = MutableStateFlow<VideoTrack?>(null)
     val screenSharingTrack: StateFlow<VideoTrack?> = _screenSharingTrack
 
-    /**
-     * The user, automatically updates when we receive user events
-     */
-    internal val _user: MutableStateFlow<User> =
-        MutableStateFlow(initialUser)
+    /** The user, automatically updates when we receive user events. */
+    internal val _user: MutableStateFlow<User> = MutableStateFlow(initialUser)
     val user: StateFlow<User> = _user
 
     // Could also be a property on the user
