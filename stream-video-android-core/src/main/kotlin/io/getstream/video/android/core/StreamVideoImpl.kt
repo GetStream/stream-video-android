@@ -336,9 +336,9 @@ internal class StreamVideoImpl internal constructor(
         scope.launch {
             connectionModule.coordinatorSocket.errors.collect {
                 if (developmentMode) {
-                    throw it
+                    logger.e(it) { "failure on socket connection" }
                 } else {
-                    logger.e(it) { "permanent failure on socket connection" }
+                    logger.e(it) { "failure on socket connection" }
                 }
             }
         }
@@ -391,15 +391,15 @@ internal class StreamVideoImpl internal constructor(
                 socketImpl.connect()
                 timer.finish()
             } catch (e: ErrorResponse) {
-                if (e.code == VideoErrorCode.TOKEN_EXPIRED.code) {
+                if (e.code == VideoErrorCode.TOKEN_EXPIRED.code && tokenProvider != null) {
                     // refresh the the token
-                    if (tokenProvider != null) {
-                        val newToken = tokenProvider.invoke(e)
-                        dataStore.updateUserToken(newToken)
-                        connectionModule.updateToken(newToken)
-                    }
+                    println("CAUGHT an error")
+                    val newToken = tokenProvider.invoke(e)
+                    dataStore.updateUserToken(newToken)
+                    connectionModule.updateToken(newToken)
                     // quickly reconnect with the new token
                     socketImpl.reconnect(0)
+
                 } else {
                     throw e
                 }

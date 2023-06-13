@@ -181,6 +181,14 @@ open class TestBase {
             testLogger.streamLog { "test logger installed" }
         }
 
+        if (!StreamUserDataStore.isInstalled) {
+            StreamUserDataStore.install(
+                context = context.applicationContext,
+                isEncrypted = false,
+                scope = CoroutineScope(DispatcherProvider.IO)
+            )
+        }
+
 
     }
 

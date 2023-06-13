@@ -234,6 +234,7 @@ open class PersistentSocket<T>(
             if (text.isNotEmpty() && processedEvent == null) {
                 val errorAdapter: JsonAdapter<SocketError> =
                     Serializer.moshi.adapter(SocketError::class.java)
+
                 val parsedError = errorAdapter.fromJson(text)
 
                 parsedError?.let {
@@ -267,7 +268,6 @@ open class PersistentSocket<T>(
                     val errorEvent = message as ErrorEvent
                     handleError(SfuSocketError(errorEvent.error))
                 }
-                println("received message $message")
                 // TODO: This logic is specific to the SfuSocket, move it
                 healthMonitor.ack()
                 events.emit(message)
