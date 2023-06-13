@@ -93,7 +93,7 @@ internal fun PortraitScreenSharingVideoRenderer(
                 isZoomable = isZoomable
             )
 
-            if (me?.initialUser?.id != sharingParticipant.initialUser.id) {
+            if (me?.sessionId != sharingParticipant.sessionId) {
                 ScreenShareTooltip(
                     modifier = Modifier.align(Alignment.TopStart),
                     sharingParticipant = sharingParticipant

@@ -1,6 +1,6 @@
 # ParticipantVideo
 
-The `ParticipantVideo` component is used to render a participant in a call. It renders the participant video if their track is not `null` and is correctly published, or a user avatar if there is no video to be shown.
+The `ParticipantVideo` component is used to render a participant based on [ParticipantState](../../03-guides/03-call-and-participant-state.mdx) in a call. It renders the participant video if their track is not `null` and is correctly published, or a user avatar if there is no video to be shown.
 
 The component also renders the user label, which includes the user's name and call status, such as mute state. Additionally, if the user is focused, the component renders a border to indicate that the participant is the primary speaker.
 
@@ -13,8 +13,8 @@ To use the `ParticipantVideo` component, embed it anywhere in your custom UI and
 ```kotlin
 @Composable
 fun CustomCallScreen(call: Call) {
-    val dominantSpeaker by call.state.dominantSpeaker.collectAsStateWithLifecycle()
-    val participants by call.state.participants.collectAsStateWithLifecycle()
+    val dominantSpeaker by call.state.dominantSpeaker.collectAsState()
+    val participants by call.state.participants.collectAsState()
 
     Column {
         participants.forEach { participant ->
