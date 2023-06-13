@@ -21,7 +21,7 @@ androidxActivity = "1.7.2"
 androidxDataStore = "1.0.0"
 googleService = "4.3.14"
 
-androidxComposeBom = "2023.05.01"
+androidxComposeBom = "2023.06.00"
 androidxComposeCompiler = "1.4.4"
 androidxComposeTracing = "1.0.0-alpha03"
 androidxHiltNavigation = "1.0.0"
