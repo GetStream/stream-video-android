@@ -187,7 +187,6 @@ internal class StreamNotificationManager private constructor(
                     ?: DefaultNotificationHandler(application)
                 this.copy(notificationHandler = notificationHandler)
             } ?: this
-
         }
     }
 }

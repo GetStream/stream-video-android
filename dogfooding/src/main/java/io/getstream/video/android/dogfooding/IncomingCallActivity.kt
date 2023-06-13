@@ -27,7 +27,6 @@ import io.getstream.video.android.common.AbstractCallActivity
 import io.getstream.video.android.common.viewmodel.CallViewModel
 import io.getstream.video.android.common.viewmodel.CallViewModelFactory
 import io.getstream.video.android.compose.theme.VideoTheme
-import io.getstream.video.android.compose.ui.components.call.CallContainer
 import io.getstream.video.android.compose.ui.components.call.activecall.CallContent
 import io.getstream.video.android.compose.ui.components.call.ringing.RingingCallContent
 import io.getstream.video.android.core.Call
