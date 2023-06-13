@@ -21,7 +21,7 @@ private fun CustomUi() {
             bottomBar = {
                 ControlActions(
                     modifier = ..,
-                    callViewModel = callViewModel,
+                    call = call,
                     onCallAction = { /* Handle call actions here */ }
                 )
             }
@@ -44,15 +44,6 @@ If you're using this approach and our default set of components, you can expect 
 
 ![Compose CallContainer](../../assets/compose_call_container.png)
 
-If you want to use your own `ViewModel` and use the stateless version of `ControlActions`, you can implement it like the example below:
-
-```kotlin
-ControlActions(
-    callDeviceState = callDeviceState,
-    onCallAction = { /* Handle call actions here */ }
-)
-```
-
 By default `ControlActions` component covers both portrait and landscape orientation. This means that the actions you pass in will be rendered either in a `Row` of items, horizontally placed, when in portrait, or a `Column`, when in landscape. If you use [CallContent](03-call-content.mdx), `ControlActions` will be configured the layout automatically by observing the configuration changes.
 
 Now that you've seen how to integrate the component and hook it up with the call and state, let's explore customizing the action handlers.
@@ -66,7 +57,7 @@ Now that you've seen how to integrate the component and hook it up with the call
 public fun ControlActions(
     .., // State and UI
     actions: List<(@Composable () -> Unit)> = buildDefaultCallControlActions(
-        callViewModel = callViewModel,
+        call = call,
         onCallAction = onCallAction
     ),
     onCallAction: (CallAction) -> Unit
@@ -85,14 +76,14 @@ ControlActions(
         {
             ToggleCameraAction(
                 modifier = Modifier.size(60.dp),
-                isCameraEnabled = isCameraEnabled, // or callViewModel.callDeviceState.isCameraEnabled
+                isCameraEnabled = isCameraEnabled,
                 onCallAction = onCallAction
             )
         },
         {
             ToggleMicrophoneAction(
                 modifier = Modifier.size(60.dp),
-                isMicrophoneEnabled = isMicrophoneEnabled, // or callViewModel.callDeviceState.isMicrophoneEnabled
+                isMicrophoneEnabled = isMicrophoneEnabled,
                 onCallAction = onCallAction
             )
         },
@@ -102,7 +93,9 @@ ControlActions(
         is ToggleCamera -> // toggle the camera
         is ToggleMicrophone -> toggle the microphone
          ...
-        else -> callViewModel.onCallAction(action)
+        else -> {
+          // handle other control actions
+        }
       }
     }
 )
@@ -110,7 +103,7 @@ ControlActions(
 
 1. By creating a custom list of Composable, which consist of call control action buttons, you define which actions you want. You could do something like removing the video/camera controls and building an audio-only use case, replacing the flip camera action with a settings wheel for more user input or even adding a Chat icon to support custom Chat UI.
 2. Within `ControlActions`, you can override the `onCallAction` parameter to provide a custom handler when the user taps on any of the rendered buttons.
-3. You can list out any logic here for any of your custom actions, as well as the default ones that we provide. Finally, if you don't want to handle _some_ of the actions, you can simply call `callViewModel.onCallAction(action)` and it'll provide the default behavior of our SDK, such as flipping a camera or muting audio or video.
+3. You can list out any logic here for any of your custom actions, as well as the default ones that we provide.
 
 ![Compose CallContainer](../../assets/compose_call_controls.png)
 
