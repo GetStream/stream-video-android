@@ -20,6 +20,8 @@ import android.os.Bundle
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
 import androidx.compose.foundation.background
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.lifecycleScope
 import io.getstream.video.android.common.AbstractCallActivity
@@ -28,6 +30,7 @@ import io.getstream.video.android.common.viewmodel.CallViewModelFactory
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.call.CallContainer
 import io.getstream.video.android.core.Call
+import io.getstream.video.android.core.ParticipantState
 import io.getstream.video.android.core.StreamVideo
 import io.getstream.video.android.core.call.state.LeaveCall
 import io.getstream.video.android.core.call.state.ToggleCamera
@@ -50,6 +53,11 @@ class CallActivity : AbstractCallActivity() {
 
         // step 3 - build a call screen
         setContent {
+
+            val participants: List<ParticipantState> by call.state.participants.collectAsState()
+            participants.forEach { participantState ->
+            }
+
             VideoTheme {
                 CallContainer(
                     modifier = Modifier.background(color = VideoTheme.colors.appBackground),

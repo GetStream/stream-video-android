@@ -11,7 +11,7 @@ jvmTarget = "11"
 
 androidxMaterial = "1.9.0"
 androidxAppCompat = "1.6.1"
-androidxCore = "1.10.1"
+androidxCore = "1.9.0"
 androidxAnnotation = "1.6.0"
 androidxLifecycle = "2.6.1"
 androidxStartup = "1.1.1"

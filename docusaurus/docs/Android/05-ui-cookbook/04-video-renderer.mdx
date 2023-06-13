@@ -11,6 +11,8 @@ The video renderer is the most essential UI component in a video call screen, wh
 - **isShowingParticipantLabel**: Represents whether display the participant label that contains the name and microphone status of a participant.
 - **isShowingConnectionQualityIndicator**: Represents whether displays the connection quality indicator.
 - **labelPosition**: The position of the participant label  that contains the name and microphone status of a participant.
+- **reactionDuration**: The duration of the reaction animation.
+- **reactionPosition**: The position of the reaction.
 
 You can create an instance of the `VideoRendererStyle` with the two different styles, which have different default value.
 
@@ -22,7 +24,11 @@ For example, if you want to change the position of the participant label to the 
 ```kotlin
 CallContainer(
   style = RegularVideoRendererStyle(
-      labelPosition = Alignment.TopStart
+      isShowingParticipantLabel = true,
+      labelPosition = Alignment.TopStart,
+      isShowingConnectionQualityIndicator = true,
+      reactionDuration = 500,
+      reactionPosition = Alignment.Center
   ),
   ..
 )
