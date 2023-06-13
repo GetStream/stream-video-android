@@ -94,3 +94,7 @@ jobs:
       - name: Unit Tests
         run: |
           ./gradlew testDebugUnitTest
+
+      - name: Android Tests
+        run: |
+          ./gradlew connectedAndroidTest
