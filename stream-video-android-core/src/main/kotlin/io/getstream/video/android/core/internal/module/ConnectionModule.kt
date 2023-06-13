@@ -45,6 +45,7 @@ import retrofit2.Retrofit
 import retrofit2.converter.moshi.MoshiConverterFactory
 import retrofit2.converter.scalars.ScalarsConverterFactory
 import retrofit2.converter.wire.WireConverterFactory
+import java.io.IOException
 import java.util.concurrent.TimeUnit
 
 /**
@@ -109,7 +110,6 @@ internal class ConnectionModule(
                     level = loggingLevel.httpLoggingLevel.level
                 }
             )
-            .addInterceptor(BaseUrlInterceptor(null))
             .retryOnConnectionFailure(true)
             .connectTimeout(connectionTimeoutInMs, TimeUnit.MILLISECONDS)
             .writeTimeout(connectionTimeoutInMs, TimeUnit.MILLISECONDS)
@@ -167,17 +167,6 @@ internal class ConnectionModule(
         authInterceptor.authType = authType
     }
 
-    internal companion object {
-        /**
-         * Host pattern to be replaced.
-         */
-        private const val REPLACEMENT_HOST = "replacement.url"
-
-        /**
-         * Url pattern to be replaced.
-         */
-        internal const val REPLACEMENT_URL = "https://$REPLACEMENT_HOST"
-    }
 }
 
 /**
@@ -207,7 +196,6 @@ internal class SfuConnectionModule(
         val connectionTimeoutInMs = 10000L
         // create a new OkHTTP client and set timeouts
         val authInterceptor = CoordinatorAuthInterceptor(apiKey, sfuToken)
-        val baseUrlInterceptor = BaseUrlInterceptor(null)
         return OkHttpClient.Builder()
             .addInterceptor(authInterceptor)
             .addInterceptor(
@@ -215,7 +203,6 @@ internal class SfuConnectionModule(
                     level = loggingLevel.httpLoggingLevel.level
                 }
             )
-            .addInterceptor(baseUrlInterceptor)
             .retryOnConnectionFailure(true)
             .connectTimeout(connectionTimeoutInMs, TimeUnit.MILLISECONDS)
             .writeTimeout(connectionTimeoutInMs, TimeUnit.MILLISECONDS)
@@ -253,33 +240,6 @@ internal class SfuConnectionModule(
 }
 
 /**
- * Interceptor that changes urls for the coordinator
- */
-internal class BaseUrlInterceptor(private var baseUrl: HttpUrl?) : Interceptor {
-
-    override fun intercept(chain: Interceptor.Chain): Response {
-        baseUrl = baseUrl ?: return chain.proceed(chain.request())
-        val host = baseUrl?.host!!
-        val original = chain.request()
-        return if (original.url.host == REPLACEMENT_HOST) {
-            val updatedBaseUrl = original.url.newBuilder()
-                .host(host)
-                .build()
-            val updated = original.newBuilder()
-                .url(updatedBaseUrl)
-                .build()
-            chain.proceed(updated)
-        } else {
-            chain.proceed(chain.request())
-        }
-    }
-
-    private companion object {
-        private const val REPLACEMENT_HOST = "replacement.url"
-    }
-}
-
-/**
  * CoordinatorAuthInterceptor adds the token authentication to the API calls
  */
 internal class CoordinatorAuthInterceptor(
@@ -288,6 +248,7 @@ internal class CoordinatorAuthInterceptor(
     var authType: String = "jwt"
 ) : Interceptor {
 
+    @Throws(IOException::class)
     override fun intercept(chain: Interceptor.Chain): Response {
         val original = chain.request()
 
@@ -309,8 +270,6 @@ internal class CoordinatorAuthInterceptor(
     }
 
     private companion object {
-        private const val REPLACEMENT_HOST = "replacement.url"
-
         /**
          * Query key used to authenticate to the API.
          */
