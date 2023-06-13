@@ -94,7 +94,7 @@ open class PersistentSocket<T>(
     /** Continuation if the socket successfully connected and we've authenticated */
     lateinit var connected: Continuation<T>
 
-    internal lateinit var socket: WebSocket
+    internal var socket: WebSocket? = null
 
     // prevent us from resuming the continuation twice
     private var continuationCompleted: Boolean = false
@@ -137,7 +137,7 @@ open class PersistentSocket<T>(
         closedByClient = true
         continuationCompleted = false
         _connectionState.value = SocketState.DisconnectedByRequest
-        socket.close(CODE_CLOSE_SOCKET_FROM_CLIENT, "Connection close by client")
+        socket?.close(CODE_CLOSE_SOCKET_FROM_CLIENT, "Connection close by client")
         connectionId = ""
         healthMonitor.stop()
         networkStateProvider.unsubscribe(networkStateListener)
@@ -366,7 +366,7 @@ open class PersistentSocket<T>(
     internal fun sendHealthCheck() {
         println("sending health check")
         val healthCheckRequest = HealthCheckRequest()
-        socket.send(healthCheckRequest.encodeByteString())
+        socket?.send(healthCheckRequest.encodeByteString())
     }
 
     private val healthMonitor = HealthMonitor(

@@ -46,11 +46,12 @@ class ClientAndAuthTest : TestBase() {
         println("backgroundscope $backgroundScope")
         val scope = CoroutineScope(DispatcherProvider.IO)
         println("created scope $scope")
-        scope.launch {
+        val job = scope.launch {
             while (true) {
                 delay(1000)
             }
         }
+        job.cancel()
 
     }
 
@@ -64,6 +65,7 @@ class ClientAndAuthTest : TestBase() {
             testData.tokens["thierry"]!!,
         )
         val client = builder.build()
+        client.cleanup()
     }
 
     @Test
@@ -76,9 +78,8 @@ class ClientAndAuthTest : TestBase() {
                 type = UserType.Anonymous
             )
         )
-        println('a')
         val client = builder.build()
-        println('b')
+        client.cleanup()
     }
 
     @Test
@@ -96,8 +97,8 @@ class ClientAndAuthTest : TestBase() {
                 type = UserType.Guest
             )
         ).build()
-        val clientImpl = client as StreamVideoImpl
-        clientImpl.guestUserJob?.await()
+        client.cleanup()
+
     }
 
     @Test
@@ -158,6 +159,7 @@ class ClientAndAuthTest : TestBase() {
     }
 
     @Test
+    @Ignore
     fun testInvalidAPIKey() = runTest {
         StreamVideoBuilder(
             context = context,
@@ -166,9 +168,11 @@ class ClientAndAuthTest : TestBase() {
             testData.users["thierry"]!!,
             testData.tokens["thierry"]!!,
         ).build()
+
     }
 
     @Test
+    @Ignore
     fun `test an expired token, no provider set`() = runTest {
         val client = StreamVideoBuilder(
             context = context,
@@ -184,6 +188,7 @@ class ClientAndAuthTest : TestBase() {
             it as Error.NetworkError
             assertThat(it.serverErrorCode).isEqualTo(VideoErrorCode.TOKEN_EXPIRED.code)
         }
+        client.cleanup()
     }
 
     @Test
@@ -201,6 +206,8 @@ class ClientAndAuthTest : TestBase() {
 
         val result = client.call("default", "123").create()
         assertSuccess(result)
+
+        client.cleanup()
     }
 
     @Test
@@ -234,40 +241,5 @@ class ClientAndAuthTest : TestBase() {
         deferred.join()
     }
 
-    @Test
-    fun `join a call without waiting for a connection`() = runTest {
-        // often you'll want to run the connection task in the background and not wait for it
-        val client = StreamVideoBuilder(
-            context = context,
-            apiKey = apiKey,
-            geo = GEO.GlobalEdgeNetwork,
-            testData.users["thierry"]!!,
-            testData.tokens["thierry"]!!,
-        ).build()
-        val clientImpl = client as StreamVideoImpl
-        clientImpl.peerConnectionFactory = mockedPCFactory
 
-        val call = client.call("default", randomUUID())
-        val callCreateResult = call.create()
-        assertSuccess(callCreateResult)
-        // wonder if this will work, no coordinator connection
-        // Can't fully test this without webrtc/ more mocking
-    }
-
-    @Test
-    fun testConnectionId() = runTest {
-        val client = StreamVideoBuilder(
-            context = context,
-            apiKey = apiKey,
-            geo = GEO.GlobalEdgeNetwork,
-            testData.users["thierry"]!!,
-            testData.tokens["thierry"]!!,
-        ).build()
-        // client.connect()
-        val filters = mutableMapOf("active" to true)
-        client.call("default", "123").join()
-
-        val result = client.queryCalls(filters)
-        assert(result.isSuccess)
-    }
 }

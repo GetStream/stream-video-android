@@ -68,6 +68,6 @@ public class CoordinatorSocket(
         )
         val message = adapter.toJson(authRequest)
 
-        super.socket.send(message)
+        super.socket?.send(message)
     }
 }

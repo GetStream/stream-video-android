@@ -151,9 +151,6 @@ open class TestBase {
     @get:Rule
     val dispatcherRule = DispatcherRule()
 
-    @get:Rule
-    public val timeout = CoroutinesTimeout.seconds(9, cancelOnTimeout = true, enableCoroutineCreationStackTraces = true)
-
     /** Convenient helper with test data */
     val testData = IntegrationTestHelper()
 

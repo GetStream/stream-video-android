@@ -163,9 +163,11 @@ public class StreamVideoBuilder @JvmOverloads constructor(
             connectionModule.updateAuthType("anonymous")
         }
 
-        // establish a ws connection with the coordinator
-        scope.launch {
-            client.connectAsync()
+        // establish a ws connection with the coordinator (we don't support this for anonymous users)
+        if (user.type != UserType.Anonymous) {
+            scope.launch {
+                client.connectAsync()
+            }
         }
 
         // see which location is best to connect to

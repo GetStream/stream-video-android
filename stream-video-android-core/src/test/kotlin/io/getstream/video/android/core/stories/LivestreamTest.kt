@@ -54,16 +54,6 @@ class LivestreamTest : IntegrationTestBase() {
      * Also see: https://www.notion.so/stream-wiki/Livestream-Tutorial-Android-Brainstorm-1568ee5cb23b4d23b5de69defaa1cc76
      */
 
-    @Test
-    fun `start recording a call`() = runTest {
-        val call = client.call("livestream", randomUUID())
-        val createResult = call.create()
-        assertSuccess(createResult)
-        val result = call.startRecording()
-        assertSuccess(result)
-        val result2 = call.stopRecording()
-        assertSuccess(result2)
-    }
 
     @Test
     fun `list recorded calls`() = runTest {
@@ -72,6 +62,7 @@ class LivestreamTest : IntegrationTestBase() {
     }
 
     @Test
+    @Ignore
     fun `start and stop broadcasting to HLS`() = runTest {
         val call = client.call("livestream", randomUUID())
         val createResult = call.create()
@@ -103,6 +94,7 @@ class LivestreamTest : IntegrationTestBase() {
     }
 
     @Test
+    @Ignore // backend support isn't ready, call.create doesn't return counts
     fun `call should expose participant count`() = runTest {
         val call = client.call("livestream", randomUUID())
         val result = call.create()

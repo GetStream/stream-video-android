@@ -16,14 +16,17 @@
 
 ### 0.1 milestone
 
+- [ ] Tests should run (currently some coroutine issues)
+- [ ] Tests should run on CI
 - [ ] Video calling tutorial & Feedback cycle with team
-- [ ] Livestream tutorial & Feedback cycle with team
 - [ ] Audio room tutorial & Feedback cycle with team
+- [ ] Livestream tutorial & Feedback cycle with team
 - [ ] React component to load API key, user and token for video demo flow in the tutorials
 - [ ] Video disconnects sometimes. (BufferQueue has not connected producer)
 - [ ] Reconnect flow can't reconnect the subscriber (SFU doesn't support restarts on the subscriber peer connection yet)
 - [ ] Graceful SFU shutdown (switch between SFUs)
 - [ ] Ring support & Docs (Jc)
+- [ ] Testing session with team cross platform
 - [ ] Publish 0.1 on Maven
 
 ### 0.2 milestone
