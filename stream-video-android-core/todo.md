@@ -16,10 +16,10 @@
 
 ### 0.1 milestone
 
-- [ ] Tests should run (currently some coroutine issues)
+- [X] Tests should run (currently some coroutine issues)
 - [ ] Bluetooth gives a permissions error on AndroidDeviceTest
-- [ ] Tests should have a normal delay on the health check (right now it skips delays)
-- [ ] Tests. Token expiration is broken. Hard to debug due to broken stack traces
+- [X] Tests should have a normal delay on the health check (right now it skips delays)
+- [X] Tests. Token expiration is broken. Hard to debug due to broken stack traces
 - [ ] Tests should run on CI
 - [ ] Video calling tutorial & Feedback cycle with team
 - [ ] Audio room tutorial & Feedback cycle with team
