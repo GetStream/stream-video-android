@@ -149,7 +149,7 @@ public fun CallContainer(
         onBackPressed = onBackPressed,
         onCallAction = onCallAction,
         callAppBarContent = appBarContent,
-        callControlsContent = controlsContent,
+        controlsContent = controlsContent,
         pictureInPictureContent = pictureInPictureContent,
         ringingCallContent = ringingCallContent,
         callContent = callContent,
@@ -170,7 +170,7 @@ public fun CallContainer(
  * @param onCallAction Handler when the user clicks on some of the call controls.
  * @param permissions Android permissions that should be required to render a video call properly.
  * @param callAppBarContent Content is shown that calls information or additional actions.
- * @param callControlsContent Content is shown that allows users to trigger different actions to control a joined call.
+ * @param controlsContent Content is shown that allows users to trigger different actions to control a joined call.
  * @param pictureInPictureContent Content shown when the user enters Picture in Picture mode, if
  * it's been enabled in the app.
  * @param ringingCallContent Content shown when we're receiving or sending a [Call].
@@ -192,7 +192,7 @@ public fun CallContainer(
             onCallAction = onCallAction
         )
     },
-    callControlsContent: @Composable (call: Call) -> Unit = {
+    controlsContent: @Composable (call: Call) -> Unit = {
         ControlActions(
             modifier = Modifier.testTag("call_controls"),
             call = call,
@@ -222,7 +222,7 @@ public fun CallContainer(
             permissions = permissions,
             onCallAction = onCallAction,
             callAppBarContent = callAppBarContent,
-            callControlsContent = callControlsContent,
+            callControlsContent = controlsContent,
             pictureInPictureContent = pictureInPictureContent,
             videoRenderer = videoRenderer,
         )
