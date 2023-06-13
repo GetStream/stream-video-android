@@ -49,7 +49,7 @@ internal class StreamNotificationManager private constructor(
     private val notificationConfig: NotificationConfig,
     private val devicesApi: DevicesApi,
     private val dataStore: StreamUserDataStore,
-    private val notificationPermissionManager: NotificationPermissionManager,
+    private val notificationPermissionManager: NotificationPermissionManager?,
 ) : NotificationHandler by notificationConfig.notificationHandler {
 
     suspend fun registerPushDevice() {
@@ -63,7 +63,7 @@ internal class StreamNotificationManager private constructor(
                     logger.d { "[registerPushDevice] pushDevice gnerated: $generatedDevice" }
                     scope.launch { createDevice(generatedDevice) }
                 }
-                notificationPermissionManager.start()
+                notificationPermissionManager?.start()
             }
     }
 
@@ -147,9 +147,9 @@ internal class StreamNotificationManager private constructor(
                             "tried to install a new one."
                     }
                 } else {
-                    val applicationContext = context.applicationContext as Application
+                    val application = context.applicationContext as? Application
                     val updatedNotificationConfig =
-                        notificationConfig.overrideDefault(applicationContext)
+                        notificationConfig.overrideDefault(application)
                     val onPermissionStatus: (NotificationPermissionStatus) -> Unit = { nps ->
                         with(updatedNotificationConfig.notificationHandler) {
                             when (nps) {
@@ -160,14 +160,15 @@ internal class StreamNotificationManager private constructor(
                             }
                         }
                     }
-                    val notificationPermissionManager =
+                    val notificationPermissionManager = application?.let {
                         NotificationPermissionManager.createNotificationPermissionsManager(
-                            applicationContext,
+                            it,
                             notificationConfig.requestPermissionOnAppLaunch,
                             onPermissionStatus = onPermissionStatus,
                         )
+                    }
                     internalStreamNotificationManager = StreamNotificationManager(
-                        applicationContext,
+                        context,
                         scope,
                         updatedNotificationConfig,
                         devicesApi,
@@ -179,13 +180,14 @@ internal class StreamNotificationManager private constructor(
             }
         }
 
-        private fun NotificationConfig.overrideDefault(application: Application): NotificationConfig {
-            val notificationHandler = notificationHandler
-                .takeUnless { it == NoOpNotificationHandler }
-                ?: DefaultNotificationHandler(application)
-            return copy(
-                notificationHandler = notificationHandler,
-            )
+        private fun NotificationConfig.overrideDefault(application: Application?): NotificationConfig {
+            return application?.let {
+                val notificationHandler = notificationHandler
+                    .takeUnless { it == NoOpNotificationHandler }
+                    ?: DefaultNotificationHandler(application)
+                this.copy(notificationHandler = notificationHandler)
+            } ?: this
+
         }
     }
 }
