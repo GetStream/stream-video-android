@@ -27,7 +27,7 @@ import io.getstream.video.android.ui.common.R
  * in our composable hierarchy.
  */
 public val LocalAvatarPreviewPlaceholder: ProvidableCompositionLocal<Int> =
-    staticCompositionLocalOf { R.drawable.stream_video_ic_preview_avatar }
+    staticCompositionLocalOf { R.drawable.stream_video_call_sample }
 
 /**
  * Local containing the preferred loading placeholder for providing the same instance

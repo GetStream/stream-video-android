@@ -65,6 +65,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.getstream.video.android.common.model.getSoundIndicatorState
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.audio.SoundIndicator
+import io.getstream.video.android.compose.ui.components.avatar.LocalAvatarPreviewProvider
 import io.getstream.video.android.compose.ui.components.avatar.UserAvatarBackground
 import io.getstream.video.android.compose.ui.components.connection.NetworkQualityIndicator
 import io.getstream.video.android.compose.ui.components.video.VideoRenderer
@@ -189,7 +190,9 @@ public fun ParticipantVideoRenderer(
             modifier = Modifier
                 .fillMaxSize()
                 .testTag("participant_video_renderer"),
-            painter = painterResource(id = R.drawable.stream_video_call_sample),
+            painter = painterResource(
+                id = LocalAvatarPreviewProvider.getLocalAvatarPreviewPlaceholder()
+            ),
             contentScale = ContentScale.Crop,
             contentDescription = null
         )
