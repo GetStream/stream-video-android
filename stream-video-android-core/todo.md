@@ -12,7 +12,7 @@
 *  Break
 *  Week 8: Docs & Stability, Ringing
 *  Week 9: Tutorials & Stability, Ringing & Push
-
+*  Week 10: Prep 0.1 release
 
 ### 0.1 milestone
 

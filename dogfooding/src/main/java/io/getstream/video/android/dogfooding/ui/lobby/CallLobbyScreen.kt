@@ -189,8 +189,8 @@ private fun CallLobbyBody(
             isMicrophoneEnabled = isMicrophoneEnabled,
             onCallAction = { action ->
                 when (action) {
-                    is ToggleMicrophone -> callLobbyViewModel.enableMicrophone(!isMicrophoneEnabled)
                     is ToggleCamera -> callLobbyViewModel.enableCamera(!isCameraEnabled)
+                    is ToggleMicrophone -> callLobbyViewModel.enableMicrophone(!isMicrophoneEnabled)
                     else -> Unit
                 }
             }

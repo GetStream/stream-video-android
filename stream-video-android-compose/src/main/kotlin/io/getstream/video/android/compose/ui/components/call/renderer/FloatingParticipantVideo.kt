@@ -55,12 +55,12 @@ import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.getstream.video.android.compose.theme.VideoTheme
+import io.getstream.video.android.compose.ui.components.avatar.LocalAvatarPreviewProvider
 import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.ParticipantState
 import io.getstream.video.android.mock.StreamMockUtils
 import io.getstream.video.android.mock.mockCall
 import io.getstream.video.android.mock.mockParticipant
-import io.getstream.video.android.ui.common.R
 
 /**
  * Represents a floating item used to feature a participant video, usually the local participant.
@@ -113,7 +113,9 @@ public fun BoxScope.FloatingParticipantVideo(
                 modifier = Modifier
                     .fillMaxSize()
                     .testTag("local_video_renderer"),
-                painter = painterResource(id = R.drawable.stream_video_call_sample),
+                painter = painterResource(
+                    id = LocalAvatarPreviewProvider.getLocalAvatarPreviewPlaceholder()
+                ),
                 contentScale = ContentScale.Crop,
                 contentDescription = null
             )

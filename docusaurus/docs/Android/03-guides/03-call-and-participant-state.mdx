@@ -61,17 +61,25 @@ The following fields are available on the call
 
 ### Participant State
 
-Participant state is the most common state you'll be interacting with.
-Here's how you iterate over the participants:
+The `ParticipantsState` is the most essential component used to render a participant in a call. It contains all of the information to render a participant, such as audio & video renderers, availabilities of audio & video, the screen sharing session, reactions, and etc. Here's how you iterate over the participants:
 
 ```kotlin
 // all participants
-call.state.participants.forEach {
-  ..
+val participants: StateFlow<List<ParticipantState>> = call.state.participants
+coroutineScope.launch {
+    participants.collectLatest { participants ->
+        // ..
+    }
+}
+
+// all participants in Jetpack Compose
+val participants: List<ParticipantState> by call.state.participants.collectAsState()
+participants.forEach { participantState ->
+    // ..
 }
 
 // you
-val me = call.state.me
+val me: StateFlow<ParticipantState?> = call.state.me
 ```
 
 The following fields are available on the participant

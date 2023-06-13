@@ -31,6 +31,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
+import io.getstream.video.android.compose.R
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.mock.StreamMockUtils
 import io.getstream.video.android.mock.mockParticipantList
@@ -111,7 +112,10 @@ private fun UserAvatarPreview() {
     StreamMockUtils.initializeStreamVideo(LocalContext.current)
     VideoTheme {
         UserAvatar(
-            user = mockParticipantList[0].initialUser, modifier = Modifier.size(82.dp)
+            user = mockParticipantList[0].initialUser,
+            modifier = Modifier.size(82.dp),
+            isShowingOnlineIndicator = true,
+            previewPlaceholder = io.getstream.video.android.ui.common.R.drawable.stream_video_call_sample
         )
     }
 }

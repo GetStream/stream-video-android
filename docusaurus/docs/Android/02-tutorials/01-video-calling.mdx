@@ -42,14 +42,14 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        // create a user.
+        // step1 - create a user.
         val user = User(
             id = "tutorial@getstream.io", // any string
             name = "Tutorial", // name and image are used in the UI
             role = "admin"
         )
 
-        // for a production app we recommend adding the client to your Application class or di module.
+        // step2 - initialize StreamVideo. For a production app we recommend adding the client to your Application class or di module.
         val client = StreamVideoBuilder(
              context = applicationContext,
              apiKey = "hd8szvscpxvd", // demo API key
@@ -58,13 +58,14 @@ class MainActivity : ComponentActivity() {
              token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoidHV0b3JpYWxAZ2V0c3RyZWFtLmlvIiwiaXNzIjoicHJvbnRvIiwic3ViIjoidXNlci90dXRvcmlhbEBnZXRzdHJlYW0uaW8iLCJpYXQiOjE2ODYxMjM5NzUsImV4cCI6MTY4NjEzNDc4MH0.HzfOiuj64waDs4naN6SsNZpusb8N6R7drMfx7bsxpok",
         ).build()
 
-        // join a call, which type is `default` and id is `123`.
+        // step3 - join a call, which type is `default` and id is `123`.
         val call = client.call("default", "123")
         lifecycleScope.launch {
             call.join(create = true)
         }
 
         setContent {
+            // step4 - observe call participants inside VideoTheme
             VideoTheme {
                 val participants by call.state.participants.collectAsState()
                 val connection by call.state.connection.collectAsState()
@@ -110,9 +111,9 @@ lifecycleScope.launch {
 }
 ```
 
-As soon as you use "call.join" the connection for video & audio is setup.
+As soon as you use `call.join` the connection for video & audio is setup.
 
-Last the UI looks up the stateflow objects in call.state.
+Last the UI looks up the stateflow objects in `call.state`.
 You'll find all relevant state for the call in `call.state` and `call.state.participants`.
 The docs on [Call state and Participant state](../03-guides/03-call-and-participant-state.mdx) explains this in further detail.
 
@@ -124,7 +125,7 @@ val connection by call.state.connection.collectAsState()
 ### Step 4 - Joining from the web
 
 To make this a little more interactive let's join the call from your browser.
-Visit https://getstream.io/video/demos/?id=123&skip-intro=1 and join the call.
+Visit [Stream Video Demo](https://getstream.io/video/demos/?id=123&skip-intro=1) and join the call.
 On your Android emulator you'll see the text update to 2 participants.
 Let's keep the browser tab open as you go through the tutorial.
 
@@ -137,59 +138,68 @@ In this next step we're going to:
 1. Render your local video.
 2. Render the participant's video.
 
-And replace the setContent code in MainActivity.kt
+And replace the `setContent` code with the example below in the `MainActivity.kt` file:
 
 ```kotlin
 setContent {
-     VideoTheme {
-         val remoteParticipants by call.state.remoteParticipants.collectAsState()
-         val remoteParticipant = remoteParticipants.firstOrNull()
-         val me by call.state.me.collectAsState()
-         val connection by call.state.connection.collectAsState()
-         var parentSize: IntSize by remember { mutableStateOf(IntSize(0, 0)) }
+    VideoTheme {
+        val remoteParticipants by call.state.remoteParticipants.collectAsState()
+        val remoteParticipant = remoteParticipants.firstOrNull()
+        val me by call.state.me.collectAsState()
+        val connection by call.state.connection.collectAsState()
+        var parentSize: IntSize by remember { mutableStateOf(IntSize(0, 0)) }
 
-         Box(
-             contentAlignment = Alignment.Center,
-             modifier = Modifier.fillMaxSize()
-         ) {
-             if (connection != RealtimeConnection.Connected) {
-                 Text("loading...", fontSize = 30.sp)
-             } else if (remoteParticipant == null) {
-                 Text("Join call ${call.id} in your browser", fontSize = 30.sp)
-             }
+        Box(
+            contentAlignment = Alignment.Center,
+            modifier = Modifier
+                .fillMaxSize()
+                .background(VideoTheme.colors.appBackground)
+                .onSizeChanged { parentSize = it }
+        ) {
+            if (remoteParticipant != null) {
+                Column(modifier = Modifier.fillMaxSize()) {
+                    ParticipantVideo(
+                        modifier = Modifier.weight(1f),
+                        call = call,
+                        participant = remoteParticipant,
+                    )
+                }
+            } else {
+                if (connection != RealtimeConnection.Connected) {
+                    Text(
+                        text = "loading...",
+                        fontSize = 30.sp,
+                        color = VideoTheme.colors.textHighEmphasis
+                    )
+                } else {
+                    Text(
+                        modifier = Modifier.padding(30.dp),
+                        text = "Join call ${call.id} in your browser",
+                        fontSize = 30.sp,
+                        color = VideoTheme.colors.textHighEmphasis,
+                        textAlign = TextAlign.Center
+                    )
+                }
+            }
 
-             if (remoteParticipant != null) {
-                 Column(
-                     modifier = Modifier
-                         .fillMaxSize()
-                         .onSizeChanged { parentSize = it }) {
-
-                     ParticipantVideo(
-                         modifier = Modifier.weight(1f),
-                         call = call,
-                         participant = remoteParticipant,
-                     )
-                 }
-             }
-
-             // floating video UI for the local video participant
-             if (me != null) {
-                 FloatingParticipantVideo(
-                     modifier = Modifier.align(Alignment.TopEnd),
-                     call = call,
-                     participant = me!!,
-                     parentBounds = parentSize
-                 )
-             }
-         }
-     }
+            // floating video UI for the local video participant
+            if (me != null) {
+                FloatingParticipantVideo(
+                    modifier = Modifier.align(Alignment.TopEnd),
+                    call = call,
+                    participant = me!!,
+                    parentBounds = parentSize
+                )
+            }
+        }
+    }
 }
 ```
 
 You'll now see your local video in a floating video element and the video from your browser as well.
 The end result should look like this:
 
-TODO: Image
+![Video Tutorial](../assets/portrait-video-two.png)
 
 ### Step 6 - A full UI
 
@@ -262,38 +272,41 @@ The example below shows how to swap out the call controls for your own controls:
 
 ```kotlin
 VideoTheme {
+    val isCameraEnabled by call.camera.isEnabled.collectAsState()
+    val isMicrophoneEnabled by call.microphone.isEnabled.collectAsState()
+
     CallContainer(
         modifier = Modifier.fillMaxSize(),
+        call = call,
         callViewModel = vm,
         onBackPressed = { finish() },
-        callControlsContent = {
+        controlsContent = {
             ControlActions(
-                callViewModel = vm,
+                call = call,
                 actions = listOf(
                     {
                         ToggleCameraAction(
                             modifier = Modifier.size(52.dp),
-                            isCameraEnabled = isCameraEnabled, // or vm.callDeviceState.value.isCameraEnabled
-                            onCallAction =  { .. } // or vm::onCallAction
+                            isCameraEnabled = isCameraEnabled,
+                            onCallAction = { call.camera.setEnabled(!it.isEnabled) }
                         )
                     },
                     {
                         ToggleMicrophoneAction(
                             modifier = Modifier.size(52.dp),
                             isMicrophoneEnabled = isMicrophoneEnabled,
-                            onCallAction = { .. }
+                            onCallAction = { call.microphone.setEnabled(!it.isEnabled) }
                         )
                     },
                     {
                         FlipCameraAction(
                             modifier = Modifier.size(52.dp),
-                            onCallAction = { .. }
+                            onCallAction = { call.camera.flip() }
                         )
                     },
                 ),
-                onCallAction = vm::onCallAction
             )
-        },
+        }
     )
 }
 ```
@@ -304,9 +317,7 @@ Stream's Video SDK provides fully polished UI components, allowing you to build 
 - **callControlsContent**: Content is shown that allows users to trigger different actions to control a joined call.
 - **callContent**: Content shown to be rendered when we're connected to a call successfully.
 
-
 Theming gives you control over the colors and fonts.
-
 
 ```kotlin
 VideoTheme(
