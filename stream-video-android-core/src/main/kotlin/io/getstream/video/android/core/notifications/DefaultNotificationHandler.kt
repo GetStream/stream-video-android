@@ -69,7 +69,7 @@ public open class DefaultNotificationHandler(
         }
     }
 
-    override fun onRiningCall(callId: StreamCallId, callDisplayName: String) {
+    override fun onRingingCall(callId: StreamCallId, callDisplayName: String) {
         searchIncomingCallPendingIntent(callId)?.let { fullScreenPendingIntent ->
             searchAcceptCallPendingIntent(callId)?.let { acceptCallPendingIntent ->
                 searchRejectCallPendingIntent(callId)?.let { rejectCallPendingIntent ->

@@ -2048,7 +2048,7 @@ public class io/getstream/video/android/core/notifications/DefaultNotificationHa
 	public fun onPermissionGranted ()V
 	public fun onPermissionRationale ()V
 	public fun onPermissionRequested ()V
-	public fun onRiningCall (Lio/getstream/video/android/model/StreamCallId;Ljava/lang/String;)V
+	public fun onRingingCall (Lio/getstream/video/android/model/StreamCallId;Ljava/lang/String;)V
 }
 
 public final class io/getstream/video/android/core/notifications/DefaultNotificationHandler$Companion {
@@ -2081,7 +2081,7 @@ public abstract interface class io/getstream/video/android/core/notifications/No
 	public static final field INTENT_EXTRA_NOTIFICATION_ID Ljava/lang/String;
 	public abstract fun onLivestream (Lio/getstream/video/android/model/StreamCallId;)V
 	public abstract fun onNotification (Lio/getstream/video/android/model/StreamCallId;)V
-	public abstract fun onRiningCall (Lio/getstream/video/android/model/StreamCallId;Ljava/lang/String;)V
+	public abstract fun onRingingCall (Lio/getstream/video/android/model/StreamCallId;Ljava/lang/String;)V
 }
 
 public final class io/getstream/video/android/core/notifications/NotificationHandler$Companion {

@@ -20,7 +20,7 @@ import io.getstream.android.push.permissions.NotificationPermissionHandler
 import io.getstream.video.android.model.StreamCallId
 
 public interface NotificationHandler : NotificationPermissionHandler {
-    fun onRiningCall(callId: StreamCallId, callDisplayName: String)
+    fun onRingingCall(callId: StreamCallId, callDisplayName: String)
     fun onNotification(callId: StreamCallId)
     fun onLivestream(callId: StreamCallId)
 

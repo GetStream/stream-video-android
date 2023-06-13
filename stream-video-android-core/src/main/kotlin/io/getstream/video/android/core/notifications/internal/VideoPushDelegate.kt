@@ -83,7 +83,7 @@ internal class VideoPushDelegate(
     private fun handleRingType(callId: StreamCallId, payload: Map<String, Any?>) {
         val callDisplayName = payload[KEY_CALL_DISPLAY_NAME] as String
         println("JcLog: calling streamVideo: $streamVideo")
-        streamVideo?.onRiningCall(callId, callDisplayName)
+        streamVideo?.onRingingCall(callId, callDisplayName)
     }
 
     private fun handleNotificationType(callId: StreamCallId, payload: Map<String, Any?>) {
