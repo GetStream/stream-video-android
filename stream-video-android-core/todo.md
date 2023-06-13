@@ -18,6 +18,7 @@
 
 - [ ] Tests should run (currently some coroutine issues)
 - [ ] Tests should run on CI
+- [ ] Tests should have a normal delay on the health check (right now it skips delays)
 - [ ] Video calling tutorial & Feedback cycle with team
 - [ ] Audio room tutorial & Feedback cycle with team
 - [ ] Livestream tutorial & Feedback cycle with team

@@ -400,6 +400,8 @@ internal class StreamVideoImpl internal constructor(
                     }
                     // quickly reconnect with the new token
                     socketImpl.reconnect(0)
+                } else {
+                    throw e
                 }
             }
         }

@@ -204,7 +204,7 @@ class ClientAndAuthTest : TestBase() {
             }
         ).build()
 
-        val result = client.call("default", "123").create()
+        val result = client.call("default").create()
         assertSuccess(result)
 
         client.cleanup()
