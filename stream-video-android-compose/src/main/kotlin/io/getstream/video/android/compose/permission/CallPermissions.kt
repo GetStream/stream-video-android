@@ -16,6 +16,7 @@
 
 package io.getstream.video.android.compose.permission
 
+import android.os.Build
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalInspectionMode
@@ -27,10 +28,14 @@ import io.getstream.video.android.core.Call
 @Composable
 public fun rememberCallPermissionsState(
     call: Call,
-    permissions: List<String> = listOf(
+    permissions: List<String> = mutableListOf(
         android.Manifest.permission.CAMERA,
-        android.Manifest.permission.RECORD_AUDIO
-    ),
+        android.Manifest.permission.RECORD_AUDIO,
+    ).apply {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            add(android.Manifest.permission.BLUETOOTH_CONNECT)
+        }
+    },
     onPermissionsResult: (Map<String, Boolean>) -> Unit = {
         if (it[android.Manifest.permission.CAMERA] == true) {
             call.camera.setEnabled(true)
