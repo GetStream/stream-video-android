@@ -45,27 +45,28 @@ If you want to facilitate an audio or video call, you should grant the following
 You can requests those permissions by yourself at the right moment, but you can also request permissions with Stream APIs like the example below:
 
 ```kotlin
-val permissionManager = PermissionManager.create(
-    activity = this,
-    onPermissionResult = { permission, isGranted ->
-        when (permission) {
-            android.Manifest.permission.CAMERA -> { isGranted -> // toggle your camera }
-            android.Manifest.permission.RECORD_AUDIO -> { isGranted -> // toggle your microphone }
-        }
-    },
-    onShowRequestPermissionRationale = { // show a message when the user selected don't allow permissions }
-)
+val permissionState = rememberCallPermissionsState(call = call)
+
+Button(onClick = { permissionState.launchPermissionRequest() }) {
+    Text(text = "Request permissions")
+}
+
+// or you can request permissions when display the screen.microphone
+LaunchedEffect(Unit) {
+    permissionState.launchPermissionRequest()
+}
 ```
 
-If you use `CallViewModel` with UI components, you can simply set it to the `CallViewModel` like the example below:
+You can also simply request a single permission for a camera and microphone like the example below:
 
 ```kotlin
-// create a CallViewModel.
-val factory = CallViewModelFactory(call = streamVideo.call(type = type, id = id))
-val vm by viewModels<CallViewModel> { factory }
+// request a camera permission
+val cameraPermissionState = rememberCameraPermissionsState(call = call)
+cameraPermissionState.launchPermissionRequest()
 
-// set your permissionManager.
-vm.setPermissionManager(permissionManager)
+// request a microphone permission
+val microphonePermissionState = rememberMicrophonePermissionsState(call = call)
+microphonePermissionState.launchPermissionRequest()
 ```
 
 ### Moderation Capabilities
