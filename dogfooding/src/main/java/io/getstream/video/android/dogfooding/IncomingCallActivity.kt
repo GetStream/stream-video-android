@@ -20,6 +20,7 @@ import android.os.Bundle
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.lifecycleScope
 import io.getstream.video.android.common.AbstractCallActivity
@@ -27,8 +28,11 @@ import io.getstream.video.android.common.viewmodel.CallViewModel
 import io.getstream.video.android.common.viewmodel.CallViewModelFactory
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.call.CallContainer
+import io.getstream.video.android.compose.ui.components.call.activecall.CallContent
+import io.getstream.video.android.compose.ui.components.call.ringing.RingingCallContent
 import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.StreamVideo
+import io.getstream.video.android.core.call.state.CallAction
 import io.getstream.video.android.core.call.state.LeaveCall
 import io.getstream.video.android.core.call.state.ToggleCamera
 import io.getstream.video.android.core.call.state.ToggleMicrophone
@@ -55,20 +59,28 @@ class IncomingCallActivity : AbstractCallActivity() {
         // step 3 - build a call screen
         setContent {
             VideoTheme {
-                CallContainer(
+                val onCallAction: (CallAction) -> Unit = { callAction ->
+                    when (callAction) {
+                        is ToggleCamera -> call.camera.setEnabled(callAction.isEnabled)
+                        is ToggleMicrophone -> call.microphone.setEnabled(callAction.isEnabled)
+                        is ToggleSpeakerphone -> call.speaker.setEnabled(callAction.isEnabled)
+                        is LeaveCall -> finish()
+                        else -> Unit
+                    }
+                }
+                RingingCallContent(
                     modifier = Modifier.background(color = VideoTheme.colors.appBackground),
                     call = call,
-                    callViewModel = vm, // optional
                     onBackPressed = { handleBackPressed() },
-                    onCallAction = { callAction ->
-                        when (callAction) {
-                            is ToggleCamera -> call.camera.setEnabled(callAction.isEnabled)
-                            is ToggleMicrophone -> call.microphone.setEnabled(callAction.isEnabled)
-                            is ToggleSpeakerphone -> call.speaker.setEnabled(callAction.isEnabled)
-                            is LeaveCall -> finish()
-                            else -> Unit
-                        }
-                    }
+                    onAcceptedContent = {
+                        CallContent(
+                            modifier = Modifier.fillMaxSize(),
+                            call = call,
+                            callViewModel = vm,
+                            onCallAction = onCallAction
+                        )
+                    },
+                    onCallAction = onCallAction
                 )
             }
         }
