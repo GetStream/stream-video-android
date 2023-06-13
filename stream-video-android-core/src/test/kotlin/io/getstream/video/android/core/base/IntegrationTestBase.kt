@@ -36,6 +36,7 @@ import io.mockk.junit4.MockKRule
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.debug.junit4.CoroutinesTimeout
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.TestCoroutineScheduler
 import kotlinx.coroutines.test.TestDispatcher
@@ -76,6 +77,7 @@ class DispatcherRule(
     val testDispatcher: TestDispatcher = UnconfinedTestDispatcher(TestCoroutineScheduler()),
 ) : TestWatcher() {
     override fun starting(description: Description) {
+        println("setting up test dispatcher $testDispatcher")
         Dispatchers.setMain(testDispatcher)
         DispatcherProvider.set(testDispatcher, testDispatcher)
     }
@@ -149,6 +151,9 @@ open class TestBase {
     @get:Rule
     val dispatcherRule = DispatcherRule()
 
+    @get:Rule
+    public val timeout = CoroutinesTimeout.seconds(9, cancelOnTimeout = true, enableCoroutineCreationStackTraces = true)
+
     /** Convenient helper with test data */
     val testData = IntegrationTestHelper()
 
@@ -179,13 +184,7 @@ open class TestBase {
             testLogger.streamLog { "test logger installed" }
         }
 
-        if (!StreamUserDataStore.isInstalled) {
-            StreamUserDataStore.install(
-                context = context.applicationContext,
-                isEncrypted = false,
-                scope = CoroutineScope(DispatcherProvider.IO + SupervisorJob())
-            )
-        }
+
     }
 
     fun setLogLevel(newPriority: Priority) {

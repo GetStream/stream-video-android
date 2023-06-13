@@ -19,10 +19,14 @@ package io.getstream.video.android.core
 import com.google.common.truth.Truth.assertThat
 import io.getstream.log.taggedLogger
 import io.getstream.result.Error
+import io.getstream.video.android.core.dispatchers.DispatcherProvider
 import io.getstream.video.android.core.errors.VideoErrorCode
 import io.getstream.video.android.model.User
 import io.getstream.video.android.model.UserType
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.debug.DebugProbes
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.runTest
 import org.junit.Ignore
 import org.junit.Test
@@ -37,8 +41,21 @@ class ClientAndAuthTest : TestBase() {
     private val logger by taggedLogger("Test:ClientAndAuthTest")
 
     @Test
+    fun trythis() = runTest {
+        // this hangs:
+        println("backgroundscope $backgroundScope")
+        val scope = CoroutineScope(DispatcherProvider.IO)
+        println("created scope $scope")
+        scope.launch {
+            while (true) {
+                delay(1000)
+            }
+        }
+
+    }
+
+    @Test
     fun regularUser() = runTest {
-        println("hello")
         val builder = StreamVideoBuilder(
             context = context,
             apiKey = apiKey,
@@ -47,10 +64,6 @@ class ClientAndAuthTest : TestBase() {
             testData.tokens["thierry"]!!,
         )
         val client = builder.build()
-        val job = client.connectAsync()
-        val result = job.join()
-        client.cleanup()
-        println("hello 2 $result")
     }
 
     @Test
@@ -63,7 +76,9 @@ class ClientAndAuthTest : TestBase() {
                 type = UserType.Anonymous
             )
         )
+        println('a')
         val client = builder.build()
+        println('b')
     }
 
     @Test

@@ -75,12 +75,12 @@ internal class DebugInfo(val client: StreamVideoImpl) {
 
     init {
         if (client.developmentMode) {
-            scope.launch {
-                while (true) {
-                    delay(20000)
-                    log()
-                }
-            }
+//            scope.launch {
+//                while (true) {
+//                    delay(20000)
+//                    log()
+//                }
+//            }
         }
     }
 

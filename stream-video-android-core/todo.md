@@ -49,6 +49,7 @@
 
 ### Server wishlist (june 8th)
 
+- Reactions should have an id fields and a createdAt
 - Query calls should support Map<String, Any?> instead of Any (not nullable)
 - Do we have a permission level for people who created the call? IE i should be able to broadcast my own call
 - call.wentLiveAt or similar isn't available
