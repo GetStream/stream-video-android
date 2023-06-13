@@ -2,8 +2,8 @@
 
 The `RingingCallContent` lets you easily build UI when you're calling or ringing other people in an app. It's used to show more information about the participants you're calling, as well as give you the option to cancel the call before anyone accepts. We provide two versions of the `RingingCallContent`:
 
-* **Bound**: This version binds itself to a `CallViewModel` and loads all the required data. It also connects the action handlers for audio, video and cancelling a call.
-* **Stateless**: This is a stateless version of the `RingingCallContent`, which doesn't depend on a `ViewModel` and instead depends on pure state from external sources to render its UI.
+* **Bound**: This version binds itself to the internal states a `Call`, such as camera and current participants.
+* **Stateless**: This is a stateless version of the `RingingCallContent`, which doesn't depend on the internal states of `Call` and instead depends on pure state from external sources to render its UI.
 
 > **Note**: If you want to learn more about our component types, make sure to read through our [Compose Components Overview](../01-overview.mdx).
 
@@ -13,7 +13,7 @@ Let's see how to show the `RingingCallContent` UI.
 
 ## Usage
 
-To use the **bound** `OutgoingCallContent`, add it to your UI within `setContent()`:
+To use the **bound** `RingingCallContent`, add it to your UI within `setContent()`:
 
 ```kotlin
 override fun onCreate(savedInstanceState: Bundle?) {
@@ -21,8 +21,8 @@ override fun onCreate(savedInstanceState: Bundle?) {
     setContent {
         VideoTheme {
             RingingCallContent(
-                callViewModel = callViewModel,
-                callType = CallType.Video,
+                call = call,
+                isVideoType = true,
                 onBackPressed = { cancelCall() },
                 onCallAction = { action -> handleAction(action) },
                 onAcceptedCallContent = { showCallScreen() }
@@ -44,11 +44,9 @@ private fun showCallScreen() {
 }
 ```
 
-This is a very basic example, which cancels the call when the user presses the back button. Additionally, you pass in the `CallViewModel`, as explained above, to bind all the state and event handling to our SDK internals.
+This is a very basic example, which cancels the call when the user presses the back button. Additionally, you pass in the `Call`, as explained above, to bind all the state and event handling to our SDK internals.
 
-Alternatively, you could've used the stateless component variant that takes in a `CallType`, a list of `Participant`s and whether the video is enabled instead of the `CallViewModel`. You could get this information through custom logic, but you could also read it from our `CallViewModel` and apply transformations before rendering it on the UI.
-
-Both components will show an incoming or outgoing call screen in different states depending on the number of participants and their information, such as if they have an avatar.
+`RingingCallContent` component will show an incoming or outgoing call screen in different states depending on the number of participants and their information, such as if they have an avatar.
 
 | One to one (Incoming)                                        | Group (Incoming)                                             | One to one (Outgoing)                                        | Group (Outgoing)                                             |
 | ------------------------------------------------------------ | ------------------------------------------------------------ | ------------------------------------------------------------ | ------------------------------------------------------------ |
@@ -58,23 +56,23 @@ Let's see how to override the action handlers.
 
 ## Accept Calls
 
-If an incoming or outgoing call is accepted, you should show a call content or navigate to a call screen. `RingingCallContent` requires `onAcceptedCallContent` as a parameter, and it will be called when the call is accepted by observing the call states under the hood.
+If an incoming or outgoing call is accepted, you should show a call content or navigate to a call screen. `RingingCallContent` requires `onAcceptedContent` as a parameter, and it will be called when the call is accepted by observing the call states under the hood.
 
 ```kotlin
 RingingCallContent(
    ..
-   onAcceptedCallContent = {
+   onAcceptedContent = {
         // navigate to a call screen
     }
 )
 ```
 
-You can also compose [CallContent](03-call-content.mdx) inside the `onAcceptedCallContent` block and shows a call screen like the example below:
+You can also compose [CallContent](03-call-content.mdx) inside the `onAcceptedContent` block and shows a call screen like the example below:
 
 ```kotlin
 RingingCallContent(
    ..
-   onAcceptedCallContent = {
+   onAcceptedContent = {
         CallContent(
             modifier = Modifier.fillMaxSize(),
             callViewModel = callViewModel
@@ -108,10 +106,10 @@ override fun onCreate(savedInstanceState: Bundle?) {
     setContent {
         VideoTheme {
             RingingCallContent(
-              callViewModel = callViewModel,
+              call = call,
               onBackPressed = { cancelCall() },
               onCallAction = { action -> handleAction(action) },
-              onAcceptedCallContent = { .. }
+              onAcceptedContent = { .. }
             )
         }
     }
@@ -139,29 +137,29 @@ You can implement an incoming and outgoing call screen, respectively depending o
 
 ```kotlin
 IncomingCallContent(
-    callViewModel = callViewModel,
-    callType = CallType.Video
+    call = call,
+    isVideoType = true
 )
 
 OutgoingCallContent(
-    callViewModel = callViewModel,
-    callType = CallType.Video
+    call = call,
+    isVideoType = true
 )
 ```
 
-You can also implement a stateless version of the `IncomingCallContent` and `OutgoingCallContent`, which doesn't depend on a `ViewModel` and instead depends on pure state from external sources to render its UI.
+You can also implement a stateless version of the `IncomingCallContent` and `OutgoingCallContent`, which doesn't depend on internal states of the Call and instead depends on pure state from external sources to render its UI.
 
 ```kotlin
 IncomingCallContent(
     call = call,
-    callType = CallType.Video
+    isVideoType = true,
     participants = participants,
     isCameraEnabled = enabled,
 )
 
 OutgoingCallContent(
     call = call,
-    callType = CallType.Video
+    isVideoType = true,
     participants = participants,
     isCameraEnabled = enabled,
 )
