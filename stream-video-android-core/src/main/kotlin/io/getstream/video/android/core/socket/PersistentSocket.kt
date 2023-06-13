@@ -118,7 +118,10 @@ open class PersistentSocket<T>(
             authenticate()
 
             // step 3 monitor for health every 30 seconds
-            healthMonitor.start()
+
+            if (!DispatcherProvider.inTest) {
+                healthMonitor.start()
+            }
 
             // also monitor if we are offline/online
             networkStateProvider.subscribe(networkStateListener)
