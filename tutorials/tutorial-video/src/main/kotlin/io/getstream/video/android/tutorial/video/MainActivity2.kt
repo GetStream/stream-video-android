@@ -70,11 +70,11 @@ class MainActivity2 : ComponentActivity() {
         }
 
         setContent {
-            // step4 - apply VideTheme
-            VideoTheme {
+            // step4 - request permissions.
+            LaunchCallPermissions(call = call)
 
-                // step5 - request permissions.
-                LaunchCallPermissions(call = call)
+            // step5 - apply VideTheme
+            VideoTheme {
 
                 // step6 - render videos
                 CallContainer(

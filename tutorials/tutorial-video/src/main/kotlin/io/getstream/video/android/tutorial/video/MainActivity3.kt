@@ -83,11 +83,11 @@ class MainActivity3 : AbstractCallActivity() {
         }
 
         setContent {
-            // step5 - apply VideTheme
-            VideoTheme {
+            // step5 - request permissions.
+            LaunchCallPermissions(call = call)
 
-                // step6 - request permissions.
-                LaunchCallPermissions(call = call)
+            // step6 - apply VideTheme
+            VideoTheme {
 
                 // step7 - render videos
                 CallContainer(

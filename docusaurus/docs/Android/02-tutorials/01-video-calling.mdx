@@ -22,16 +22,26 @@ Setup steps can vary slightly across Android Studio versions so if you run into 
 
 ### Step 2 - Install the SDK & Setup the client
 
-**Add the video compose SDK** to your app's `build.gradle` file found in app/build.gradle
-If you're new to android note that there are 2 build.gradle files, you want to open the one in the app folder.
+**Add the Video Compose SDK** and [Jetpack Compose](https://developer.android.com/jetpack/compose) dependencies to your app's `build.gradle.kts` file found in `app/build.gradle`.
+If you're new to android, note that there are 2 `build.gradle.kts` files, you want to open the one in the app folder.
 
 ```groovy
 dependencies {
-    implementation "io.getstream:stream-video-android-compose:0.0.14-SNAPSHOT"
+    // Stream Video Compose SDK
+    implementation("io.getstream:stream-video-android-compose:0.0.14-SNAPSHOT")
+
+    // Jetpack Compose
+    implementation(platform("androidx.compose:compose-bom:2023.06.00"))
+    implementation("androidx.activity:activity-compose:1.7.2")
+    implementation("androidx.compose.ui:ui")
+    implementation("androidx.compose.ui:ui-tooling")
+    implementation("androidx.compose.runtime:runtime")
+    implementation("androidx.compose.foundation:foundation")
+    implementation("com.google.android.material:material")
 }
 ```
 
-(We also have a core SDK for video that excludes compose if you prefer XML layouts)
+We also have a core SDK for video that excludes compose if you prefer XML layouts.
 
 ### Step 3 - Create & Join a call
 
@@ -313,43 +323,62 @@ You can customize the UI by:
 The example below shows how to swap out the call controls for your own controls:
 
 ```kotlin
-VideoTheme {
-    val isCameraEnabled by call.camera.isEnabled.collectAsState()
-    val isMicrophoneEnabled by call.microphone.isEnabled.collectAsState()
+private val onCallAction: (CallAction) -> Unit = { callAction ->
+    when (callAction) {
+        is FlipCamera -> call.camera.flip()
+        is ToggleCamera -> call.camera.setEnabled(callAction.isEnabled)
+        is ToggleMicrophone -> call.microphone.setEnabled(callAction.isEnabled)
+        is LeaveCall -> finish()
+        else -> Unit
+    }
+}
 
-    CallContainer(
-        modifier = Modifier.fillMaxSize(),
-        call = call,
-        callViewModel = vm,
-        onBackPressed = { finish() },
-        controlsContent = {
-            ControlActions(
+override fun onCreate(savedInstanceState: Bundle?) {
+    super.onCreate(savedInstanceState)
+
+    lifecycleScope.launch { call.join(create = true) }
+
+    setContent {
+        VideoTheme {
+            val isCameraEnabled by call.camera.isEnabled.collectAsState()
+            val isMicrophoneEnabled by call.microphone.isEnabled.collectAsState()
+
+            CallContainer(
+                modifier = Modifier.background(color = VideoTheme.colors.appBackground),
                 call = call,
-                actions = listOf(
-                    {
-                        ToggleCameraAction(
-                            modifier = Modifier.size(52.dp),
-                            isCameraEnabled = isCameraEnabled,
-                            onCallAction = { call.camera.setEnabled(!it.isEnabled) }
-                        )
-                    },
-                    {
-                        ToggleMicrophoneAction(
-                            modifier = Modifier.size(52.dp),
-                            isMicrophoneEnabled = isMicrophoneEnabled,
-                            onCallAction = { call.microphone.setEnabled(!it.isEnabled) }
-                        )
-                    },
-                    {
-                        FlipCameraAction(
-                            modifier = Modifier.size(52.dp),
-                            onCallAction = { call.camera.flip() }
-                        )
-                    },
-                ),
+                callViewModel = vm, // optional
+                onBackPressed = { handleBackPressed() },
+                controlsContent = {
+                    ControlActions(
+                        call = call,
+                        actions = listOf(
+                            {
+                                ToggleCameraAction(
+                                    modifier = Modifier.size(52.dp),
+                                    isCameraEnabled = isCameraEnabled,
+                                    onCallAction = onCallAction
+                                )
+                            },
+                            {
+                                ToggleMicrophoneAction(
+                                    modifier = Modifier.size(52.dp),
+                                    isMicrophoneEnabled = isMicrophoneEnabled,
+                                    onCallAction = onCallAction
+                                )
+                            },
+                            {
+                                FlipCameraAction(
+                                    modifier = Modifier.size(52.dp),
+                                    onCallAction = { call.camera.flip() }
+                                )
+                            },
+                        ),
+                        onCallAction = onCallAction
+                    )
+                }
             )
         }
-    )
+    }
 }
 ```
 
