@@ -65,6 +65,7 @@ import org.webrtc.PeerConnection
 import org.webrtc.RendererCommon
 import stream.video.sfu.models.TrackType
 import stream.video.sfu.models.VideoDimension
+import java.io.InterruptedIOException
 
 /**
  * Monitors
@@ -90,7 +91,7 @@ public class CallHealthMonitor(val call: Call, val callScope: CoroutineScope) {
     // ensures we don't attempt to reconnect, if we attempted to reconnect less than 700ms ago
     var reconnectInProgress: Boolean = false
     var reconnectionAttempts = 0
-    val checkInterval = 3000L
+    val checkInterval = 5000L
     var lastReconnectAt: OffsetDateTime? = null
     val reconnectDebounceMs = 700L
 
@@ -149,6 +150,9 @@ public class CallHealthMonitor(val call: Call, val callScope: CoroutineScope) {
      */
     suspend fun reconnect() {
         if (reconnectInProgress) return
+
+        logger.i { "attempted to reconnect, but reconnects are disabled at the moment" }
+        return
 
         reconnectInProgress = true
         reconnectionAttempts++

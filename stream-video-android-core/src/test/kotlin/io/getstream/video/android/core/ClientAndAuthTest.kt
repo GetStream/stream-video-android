@@ -21,37 +21,35 @@ import io.getstream.log.taggedLogger
 import io.getstream.result.Error
 import io.getstream.video.android.core.dispatchers.DispatcherProvider
 import io.getstream.video.android.core.errors.VideoErrorCode
+import io.getstream.video.android.core.internal.module.CoordinatorAuthInterceptor
 import io.getstream.video.android.model.User
 import io.getstream.video.android.model.UserType
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.runTest
+import okhttp3.Interceptor
+import okhttp3.OkHttpClient
+import okhttp3.Request
+import okhttp3.Response
+import okhttp3.logging.HttpLoggingInterceptor
 import org.junit.Ignore
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.openapitools.client.models.ConnectedEvent
 import org.openapitools.client.models.VideoEvent
 import org.robolectric.RobolectricTestRunner
+import java.io.IOException
+import java.io.InterruptedIOException
+import java.util.concurrent.TimeUnit
 
 @RunWith(RobolectricTestRunner::class)
 class ClientAndAuthTest : TestBase() {
 
     private val logger by taggedLogger("Test:ClientAndAuthTest")
 
-    @Test
-    fun trythis() = runTest {
-        // this hangs:
-        println("backgroundscope $backgroundScope")
-        val scope = CoroutineScope(DispatcherProvider.IO)
-        println("created scope $scope")
-        val job = scope.launch {
-            while (true) {
-                delay(1000)
-            }
-        }
-        job.cancel()
-    }
+
+
 
     @Test
     fun regularUser() = runTest {

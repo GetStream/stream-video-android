@@ -16,6 +16,10 @@
 
 ### 0.1 milestone
 
+- [ ] Disable reconnect
+- [ ] Crash on interceptor
+- [ ] Bluetooth issue (turning of bluetooth on device doesn't switch from headset to speaker phone)
+- [ ] Camera shuts off
 - [ ] Bluetooth gives a permissions error on AndroidDeviceTest
 - [ ] Tests should run on CI (and we need to speed it up a bit)
 - [ ] Video calling tutorial & Feedback cycle with team
