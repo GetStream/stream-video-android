@@ -15,20 +15,20 @@ You can either specify your own or use the default.
 ```kotlin
 // default
 CallContainer(
-    picture: {DefaultPictureInPictureContent(it)}
+    pictureInPictureContent: @Composable (call: Call) -> Unit = { .. },
 )
 ```
 
 Here's a tiny custom PIP content example
 
-```
+```kotlin
 CallContainer(
-    picture: { call ->
-        val otherParticipant = call.state.sortedParticipants.collectAsState()
+    pictureInPictureContent: { call ->
+        val otherParticipant by call.state.sortedParticipants.collectAsState()
 
         VideoRenderer(
             modifier = Modifier.aspectRatio(ScreenShareAspectRatio, false),
-            video = otherParticipant.value.video,
+            video = otherParticipant.video,
         )
     }
 )
@@ -39,13 +39,12 @@ CallContainer(
 If you use or extend our `AbstractCallActivity` the following changes are already handled for you.
 The guide below is only applicable when you're writing your own activity.
 
-First start by enabling support for PIP in your AndroidManifest
+First, start by enabling support for PIP in your `AndroidManifest.xml`:
 
-```
+```xml
 <activity android:name="VideoActivity"
     android:supportsPictureInPicture="true"
-    android:configChanges=
-        "screenSize|smallestScreenSize|screenLayout|orientation"
+    android:configChanges="screenSize|smallestScreenSize|screenLayout|orientation"
     ...
 ```
 
@@ -55,80 +54,121 @@ Handling PIP in your activity is a little verbose. The first step is to enable P
 the back button is pressed or the configuration changes.
 
 ```kotlin
+// when back is pressed you try to enter PIP mode
+protected open fun handleBackPressed() {
 
-    // when back is pressed you try to enter PIP mode
-    protected open fun handleBackPressed() {
-
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-            try {
-                enterPictureInPicture()
-            } catch (error: Throwable) {
-                closeCall()
-            }
-        } else {
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+        try {
+            enterPictureInPicture()
+        } catch (error: Throwable) {
             closeCall()
         }
+    } else {
+        closeCall()
     }
+}
 
-    // start PIP
-    override fun onConfigurationChanged(newConfig: Configuration) {
-        super.onConfigurationChanged(newConfig)
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-            callViewModel.onPictureInPictureModeChanged(isInPictureInPictureMode)
-        }
+// start PIP
+override fun onConfigurationChanged(newConfig: Configuration) {
+    super.onConfigurationChanged(newConfig)
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+        callViewModel.onPictureInPictureModeChanged(isInPictureInPictureMode)
     }
-
+}
 ```
 
-Here's how to enter the PIP mode as called above
+Here's how to enter the PIP mode as called above:
 
 ```kotlin
-    @RequiresApi(Build.VERSION_CODES.N)
-    private fun enterPictureInPicture() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+@RequiresApi(Build.VERSION_CODES.N)
+private fun enterPictureInPicture() {
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
 
-            val currentOrientation = resources.configuration.orientation
-            val screenSharing = callViewModel.call.state.screenSharingSession.value
+        val currentOrientation = resources.configuration.orientation
+        val screenSharing = callViewModel.call.state.screenSharingSession.value
 
-            val aspect =
-                if (currentOrientation == ActivityInfo.SCREEN_ORIENTATION_PORTRAIT && screenSharing == null) {
-                    Rational(9, 16)
-                } else {
-                    Rational(16, 9)
+        val aspect =
+            if (currentOrientation == ActivityInfo.SCREEN_ORIENTATION_PORTRAIT && screenSharing == null) {
+                Rational(9, 16)
+            } else {
+                Rational(16, 9)
+            }
+
+        enterPictureInPictureMode(
+            PictureInPictureParams.Builder().setAspectRatio(aspect).apply {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                    this.setAutoEnterEnabled(true)
                 }
-
-            enterPictureInPictureMode(
-                PictureInPictureParams.Builder().setAspectRatio(aspect).apply {
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-                        this.setAutoEnterEnabled(true)
-                    }
-                }.build()
-            )
-        } else {
-            enterPictureInPictureMode()
-        }
+            }.build()
+        )
+    } else {
+        enterPictureInPictureMode()
     }
+}
 ```
 
 And when the activity stops you need to stop the PIP
 
-```
-    override fun onStop() {
-        super.onStop()
+```kotlin
+override fun onStop() {
+    super.onStop()
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-            val isInPiP = isInPictureInPictureMode
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+        val isInPiP = isInPictureInPictureMode
 
-            if (isInPiP) {
-                closeCall()
-            }
+        if (isInPiP) {
+            closeCall()
         }
     }
+}
 ```
 
-The viewmodel knows if you're in PIP mode or not and automatically renders the right UI:
+### Handle PIP With CallViewModel
+
+If you use `CallViewModel` and `CallContainer`, you can simply deal PIP mode with them.
+
+First thing first, you should extend `AbstractCallActivity` to your activity.
 
 ```
-val isInPiPMode by callViewModel.isInPictureInPicture.collectAsStateWithLifecycle()
+class VideoActivity : AbstractCallActivity() {
+  ..
+}
 ```
 
+Next, you should create a `CallViewModel` and pass it to the `CallContainer`:
+
+```kotlin
+private val factory by lazy { CallViewModelFactory() }
+private val vm by viewModels<CallViewModel> { factory }
+
+override fun onCreate(savedInstanceState: Bundle?) {
+    super.onCreate(savedInstanceState)
+
+    setContent {
+        VideoTheme {
+            CallContainer(
+                modifier = Modifier.fillMaxSize(),
+                call = call,
+                callViewModel = vm,
+                onBackPressed = { handleBackPressed() }, // you should use `handleBackPressed` for the `onBackPressed`
+                ..
+            )
+        }
+    }
+}
+```
+
+Note that you must call the `handleBackPressed()` method inside the `onBackPressed` parameter.
+
+Lastly, override `pipChanged` method like the code below:
+
+```kotlin
+override fun pipChanged(isInPip: Boolean) {
+    super.pipChanged(isInPip)
+    vm.onPictureInPictureModeChanged(isInPip)
+}
+```
+
+After running the code above and pressing the back button, you'll see the call will be still alive in the background like the one below:
+
+![PIP mode](../assets/pip-mode.png)

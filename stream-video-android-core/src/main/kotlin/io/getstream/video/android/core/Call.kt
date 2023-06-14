@@ -501,6 +501,8 @@ public class Call(
     fun leave() {
         state._connection.value = RealtimeConnection.Disconnected
         client.state.removeActiveCall()
+        camera.disable()
+        microphone.disable()
         cleanup()
     }
 
@@ -580,7 +582,10 @@ public class Call(
                             sessionId,
                             trackType,
                             true,
-                            VideoDimension(videoRenderer.measuredWidth, videoRenderer.measuredHeight)
+                            VideoDimension(
+                                videoRenderer.measuredWidth,
+                                videoRenderer.measuredHeight
+                            )
                         )
                     }
                     onRender(videoRenderer)
@@ -594,7 +599,10 @@ public class Call(
                             sessionId,
                             trackType,
                             true,
-                            VideoDimension(videoRenderer.measuredWidth, videoRenderer.measuredHeight)
+                            VideoDimension(
+                                videoRenderer.measuredWidth,
+                                videoRenderer.measuredHeight
+                            )
                         )
                     }
                 }

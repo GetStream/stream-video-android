@@ -18,6 +18,7 @@ package io.getstream.video.android.compose.permission
 
 import android.os.Build
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalInspectionMode
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
@@ -70,4 +71,17 @@ public fun rememberCallPermissionsState(
             }
         }
     }
+}
+
+/**
+ * Lunch call permissions about:
+ *
+ * - android.Manifest.permission.CAMERA
+ * - android.Manifest.permission.RECORD_AUDIO
+ * - android.Manifest.permission.BLUETOOTH_CONNECT (Android 31 or higher)
+ */
+@Composable
+public fun LaunchCallPermissions(call: Call) {
+    val callPermissionsState = rememberCallPermissionsState(call = call)
+    LaunchedEffect(key1 = call) { callPermissionsState.launchPermissionRequest() }
 }
