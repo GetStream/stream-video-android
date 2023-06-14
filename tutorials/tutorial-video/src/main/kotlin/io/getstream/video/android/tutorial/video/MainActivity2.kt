@@ -24,6 +24,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.lifecycleScope
+import io.getstream.video.android.compose.permission.LaunchCallPermissions
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.call.CallContainer
 import io.getstream.video.android.core.GEO
@@ -65,7 +66,11 @@ class MainActivity2 : ComponentActivity() {
         setContent {
             // step4 - apply VideTheme
             VideoTheme {
-                // step5 - render videos
+
+                // step5 - request permissions.
+                LaunchCallPermissions(call = call)
+
+                // step6 - render videos
                 CallContainer(
                     modifier = Modifier.fillMaxSize(),
                     call = call,

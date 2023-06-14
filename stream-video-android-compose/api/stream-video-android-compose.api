@@ -6,6 +6,7 @@ public final class io/getstream/video/android/compose/BuildConfig {
 }
 
 public final class io/getstream/video/android/compose/permission/CallPermissionsKt {
+	public static final fun LaunchCallPermissions (Lio/getstream/video/android/core/Call;Landroidx/compose/runtime/Composer;I)V
 	public static final fun rememberCallPermissionsState (Lio/getstream/video/android/core/Call;Ljava/util/List;Lkotlin/jvm/functions/Function1;Landroidx/compose/runtime/Composer;II)Lio/getstream/video/android/compose/permission/VideoPermissionsState;
 }
 

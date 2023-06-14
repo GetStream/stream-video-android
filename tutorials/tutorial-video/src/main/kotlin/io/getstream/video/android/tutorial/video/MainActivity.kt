@@ -25,7 +25,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.Text
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -39,7 +38,7 @@ import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.lifecycleScope
-import io.getstream.video.android.compose.permission.rememberCallPermissionsState
+import io.getstream.video.android.compose.permission.LaunchCallPermissions
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.call.renderer.FloatingParticipantVideo
 import io.getstream.video.android.compose.ui.components.call.renderer.ParticipantVideo
@@ -91,8 +90,7 @@ class MainActivity : ComponentActivity() {
                 var parentSize: IntSize by remember { mutableStateOf(IntSize(0, 0)) }
 
                 // step6 - request permissions.
-                val callPermissionsState = rememberCallPermissionsState(call = call)
-                LaunchedEffect(key1 = Unit) { callPermissionsState.launchPermissionRequest() }
+                LaunchCallPermissions(call = call)
 
                 // step7 - render a local and remote videos.
                 Box(
