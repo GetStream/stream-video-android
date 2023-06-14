@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package io.getstream.video.android.compose.ui.components.audio
+package io.getstream.video.android.compose.ui.components.indicator
 
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.infiniteRepeatable

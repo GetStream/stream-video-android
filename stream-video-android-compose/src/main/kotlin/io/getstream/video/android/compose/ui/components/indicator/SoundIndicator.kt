@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package io.getstream.video.android.compose.ui.components.audio
+package io.getstream.video.android.compose.ui.components.indicator
 
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
