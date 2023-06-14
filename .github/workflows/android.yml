@@ -97,7 +97,8 @@ jobs:
               :stream-video-android-compose:testDebugUnitTest \
               :stream-video-android-core:testDebugUnitTest
 
-      - name: Android Tests
-        run: |
-          ./gradlew --scan --stacktrace \
-              :stream-video-android-core:connectedAndroidTest
+#      Enable this after merging android manged devices.
+#      - name: Android Tests
+#        run: |
+#          ./gradlew --scan --stacktrace \
+#              :stream-video-android-core:connectedAndroidTest
