@@ -16,6 +16,7 @@
 
 package io.getstream.video.android.compose.ui.components.audio
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.lazy.grid.GridCells
@@ -44,7 +45,7 @@ public fun AudioRoom(
     val participants by call.state.participants.collectAsStateWithLifecycle()
 
     AudioRoom(
-        modifier = modifier,
+        modifier = modifier.background(VideoTheme.colors.appBackground),
         participants = participants,
         style = style,
         gridCellCount = gridCellCount
@@ -61,7 +62,7 @@ public fun AudioRoom(
     LazyVerticalGrid(
         modifier = modifier,
         columns = GridCells.Fixed(gridCellCount),
-        contentPadding = PaddingValues(horizontal = 16.dp, vertical = 22.dp)
+        contentPadding = PaddingValues(horizontal = 14.dp, vertical = 22.dp)
     ) {
         items(items = participants, key = { it.sessionId }) { participant ->
             ParticipantAudio(

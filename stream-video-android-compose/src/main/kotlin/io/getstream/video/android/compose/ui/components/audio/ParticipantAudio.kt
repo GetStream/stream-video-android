@@ -16,6 +16,7 @@
 
 package io.getstream.video.android.compose.ui.components.audio
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -29,13 +30,15 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material.Icon
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
@@ -47,6 +50,7 @@ import io.getstream.video.android.compose.ui.components.avatar.UserAvatar
 import io.getstream.video.android.core.ParticipantState
 import io.getstream.video.android.mock.StreamMockUtils
 import io.getstream.video.android.mock.mockParticipant
+import io.getstream.video.android.ui.common.R
 
 @Composable
 public fun ParticipantAudio(
@@ -54,11 +58,13 @@ public fun ParticipantAudio(
     modifier: Modifier = Modifier,
     style: AudioRendererStyle = RegularAudioRendererStyle(),
     microphoneIndicatorContent: @Composable BoxScope.(ParticipantState) -> Unit = {
+        DefaultMicrophoneIndicator(style.microphoneLabelPosition)
     }
 ) {
     val user by participant.user.collectAsStateWithLifecycle()
     val nameOrId by participant.userNameOrId.collectAsStateWithLifecycle()
     val isSpeaking by participant.speaking.collectAsStateWithLifecycle()
+    val audioEnabled by participant.audioEnabled.collectAsStateWithLifecycle()
 
     Column(
         modifier = modifier,
@@ -66,13 +72,12 @@ public fun ParticipantAudio(
         verticalArrangement = Arrangement.Center
     ) {
 
-        Box(modifier = Modifier.size(65.dp)) {
+        Box(modifier = Modifier.size(82.dp)) {
             UserAvatar(
                 user = user,
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(4.dp)
-                    .shadow(4.dp),
             )
 
             if (isSpeaking && style.isShowingSpeakingBorder) {
@@ -80,10 +85,15 @@ public fun ParticipantAudio(
                     modifier = Modifier
                         .fillMaxSize()
                         .border(style.speakingBorder, CircleShape)
-
                 )
-            } else if (style.isShowingMicrophoneAvailability) {
-                microphoneIndicatorContent.invoke(this, participant)
+            } else if (style.isShowingMicrophoneAvailability && !audioEnabled) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(4.dp)
+                ) {
+                    microphoneIndicatorContent.invoke(this, participant)
+                }
             }
         }
 
@@ -92,7 +102,7 @@ public fun ParticipantAudio(
         Text(
             modifier = Modifier.fillMaxWidth(),
             text = nameOrId,
-            fontSize = 12.sp,
+            fontSize = 14.sp,
             color = VideoTheme.colors.textHighEmphasis,
             textAlign = TextAlign.Center,
             overflow = TextOverflow.Ellipsis,
@@ -106,7 +116,7 @@ public fun ParticipantAudio(
             Text(
                 modifier = Modifier.fillMaxWidth(),
                 text = user.role,
-                fontSize = 9.sp,
+                fontSize = 11.sp,
                 color = VideoTheme.colors.textLowEmphasis,
                 textAlign = TextAlign.Center,
                 overflow = TextOverflow.Ellipsis,
@@ -116,13 +126,35 @@ public fun ParticipantAudio(
     }
 }
 
+@Composable
+private fun BoxScope.DefaultMicrophoneIndicator(
+    alignment: Alignment
+) {
+    Box(
+        modifier = Modifier
+            .clip(CircleShape)
+            .background(VideoTheme.colors.appBackground)
+            .size(20.dp)
+            .align(alignment)
+    ) {
+        Icon(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(5.dp),
+            painter = painterResource(id = R.drawable.stream_video_ic_mic_off),
+            tint = VideoTheme.colors.errorAccent,
+            contentDescription = null
+        )
+    }
+}
+
 @Preview
 @Composable
 private fun ParticipantAudioPreview() {
     StreamMockUtils.initializeStreamVideo(LocalContext.current)
     VideoTheme {
         ParticipantAudio(
-            modifier = Modifier.size(100.dp),
+            modifier = Modifier.size(150.dp),
             participant = mockParticipant,
             style = RegularAudioRendererStyle(isShowingSpeakingBorder = true)
         )

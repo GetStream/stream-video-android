@@ -19,6 +19,7 @@ package io.getstream.video.android.tutorial.video
 import android.os.Bundle
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
@@ -29,14 +30,11 @@ import io.getstream.video.android.common.viewmodel.CallViewModel
 import io.getstream.video.android.common.viewmodel.CallViewModelFactory
 import io.getstream.video.android.compose.permission.LaunchCallPermissions
 import io.getstream.video.android.compose.theme.VideoTheme
+import io.getstream.video.android.compose.ui.components.audio.AudioRoom
 import io.getstream.video.android.compose.ui.components.call.CallContainer
 import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.GEO
 import io.getstream.video.android.core.StreamVideoBuilder
-import io.getstream.video.android.core.call.state.FlipCamera
-import io.getstream.video.android.core.call.state.LeaveCall
-import io.getstream.video.android.core.call.state.ToggleCamera
-import io.getstream.video.android.core.call.state.ToggleMicrophone
 import io.getstream.video.android.model.User
 import kotlinx.coroutines.launch
 
@@ -90,20 +88,11 @@ class MainActivity3 : AbstractCallActivity() {
             VideoTheme {
 
                 // step7 - render videos
-                CallContainer(
-                    modifier = Modifier.fillMaxSize(),
-                    call = call,
-                    callViewModel = vm,
-                    onBackPressed = { handleBackPressed() },
-                    onCallAction = { callAction ->
-                        when (callAction) {
-                            is FlipCamera -> call.camera.flip()
-                            is ToggleCamera -> call.camera.setEnabled(callAction.isEnabled)
-                            is ToggleMicrophone -> call.microphone.setEnabled(callAction.isEnabled)
-                            is LeaveCall -> finish()
-                            else -> Unit
-                        }
-                    }
+                AudioRoom(
+                    modifier = Modifier.fillMaxSize().clickable {
+                        call.microphone.disable()
+                    },
+                    call = call
                 )
             }
         }

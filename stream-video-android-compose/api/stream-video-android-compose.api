@@ -380,7 +380,7 @@ public final class io/getstream/video/android/compose/theme/VideoThemeKt {
 public abstract class io/getstream/video/android/compose/ui/components/audio/AudioRendererStyle {
 	public static final field $stable I
 	public synthetic fun <init> (ZLandroidx/compose/foundation/BorderStroke;ZLandroidx/compose/ui/Alignment;ZLkotlin/jvm/internal/DefaultConstructorMarker;)V
-	public fun getMicrophoneAvailabilityLabel ()Landroidx/compose/ui/Alignment;
+	public fun getMicrophoneLabelPosition ()Landroidx/compose/ui/Alignment;
 	public fun getSpeakingBorder ()Landroidx/compose/foundation/BorderStroke;
 	public fun isShowingMicrophoneAvailability ()Z
 	public fun isShowingRoleBadge ()Z
@@ -406,11 +406,9 @@ public final class io/getstream/video/android/compose/ui/components/audio/Compos
 
 public final class io/getstream/video/android/compose/ui/components/audio/ComposableSingletons$ParticipantAudioKt {
 	public static final field INSTANCE Lio/getstream/video/android/compose/ui/components/audio/ComposableSingletons$ParticipantAudioKt;
-	public static field lambda-1 Lkotlin/jvm/functions/Function4;
-	public static field lambda-2 Lkotlin/jvm/functions/Function2;
+	public static field lambda-1 Lkotlin/jvm/functions/Function2;
 	public fun <init> ()V
-	public final fun getLambda-1$stream_video_android_compose_release ()Lkotlin/jvm/functions/Function4;
-	public final fun getLambda-2$stream_video_android_compose_release ()Lkotlin/jvm/functions/Function2;
+	public final fun getLambda-1$stream_video_android_compose_release ()Lkotlin/jvm/functions/Function2;
 }
 
 public final class io/getstream/video/android/compose/ui/components/audio/ParticipantAudioKt {
@@ -430,7 +428,7 @@ public final class io/getstream/video/android/compose/ui/components/audio/Regula
 	public final fun copy (ZLandroidx/compose/foundation/BorderStroke;ZLandroidx/compose/ui/Alignment;Z)Lio/getstream/video/android/compose/ui/components/audio/RegularAudioRendererStyle;
 	public static synthetic fun copy$default (Lio/getstream/video/android/compose/ui/components/audio/RegularAudioRendererStyle;ZLandroidx/compose/foundation/BorderStroke;ZLandroidx/compose/ui/Alignment;ZILjava/lang/Object;)Lio/getstream/video/android/compose/ui/components/audio/RegularAudioRendererStyle;
 	public fun equals (Ljava/lang/Object;)Z
-	public fun getMicrophoneAvailabilityLabel ()Landroidx/compose/ui/Alignment;
+	public fun getMicrophoneLabelPosition ()Landroidx/compose/ui/Alignment;
 	public fun getSpeakingBorder ()Landroidx/compose/foundation/BorderStroke;
 	public fun hashCode ()I
 	public fun isShowingMicrophoneAvailability ()Z
