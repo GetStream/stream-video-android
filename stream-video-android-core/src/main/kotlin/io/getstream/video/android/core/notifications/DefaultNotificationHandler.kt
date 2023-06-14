@@ -37,6 +37,7 @@ import io.getstream.video.android.R
 import io.getstream.video.android.core.notifications.NotificationHandler.Companion.ACTION_ACCEPT_CALL
 import io.getstream.video.android.core.notifications.NotificationHandler.Companion.ACTION_INCOMING_CALL
 import io.getstream.video.android.core.notifications.NotificationHandler.Companion.ACTION_LIVESTREAM
+import io.getstream.video.android.core.notifications.NotificationHandler.Companion.ACTION_NOTIFICATION
 import io.getstream.video.android.core.notifications.NotificationHandler.Companion.ACTION_REJECT_CALL
 import io.getstream.video.android.core.notifications.NotificationHandler.Companion.INCOMING_CALL_NOTIFICATION_ID
 import io.getstream.video.android.core.notifications.NotificationHandler.Companion.INTENT_EXTRA_CALL_CID
@@ -85,8 +86,16 @@ public open class DefaultNotificationHandler(
         } ?: logger.e { "Couldn't find any activity for $ACTION_INCOMING_CALL" }
     }
 
-    override fun onNotification(callId: StreamCallId) {
-        TODO("Not yet implemented")
+    override fun onNotification(callId: StreamCallId, callDisplayName: String) {
+        val notificationId = callId.hashCode()
+        searchNotificationCallPendingIntent(callId, notificationId)
+            ?.let { notificationPendingIntent ->
+                showNotificationCallNotification(
+                    notificationPendingIntent,
+                    callDisplayName,
+                    notificationId,
+                )
+            } ?: logger.e { "Couldn't find any activity for $ACTION_NOTIFICATION" }
     }
 
     override fun onLivestream(callId: StreamCallId, callDisplayName: String) {
@@ -110,6 +119,17 @@ public open class DefaultNotificationHandler(
         notificationId: Int = INCOMING_CALL_NOTIFICATION_ID,
     ): PendingIntent? =
         searchActivityPendingIntent(Intent(ACTION_INCOMING_CALL), callId, notificationId)
+
+    /**
+     * Search for an activity that can receive livestream calls from Stream Server.
+     *
+     * @param callId The call id from the incoming call.
+     */
+    private fun searchNotificationCallPendingIntent(
+        callId: StreamCallId,
+        notificationId: Int,
+    ): PendingIntent? =
+        searchActivityPendingIntent(Intent(ACTION_NOTIFICATION), callId, notificationId)
 
     /**
      * Search for an activity that can receive livestream calls from Stream Server.
@@ -232,6 +252,18 @@ public open class DefaultNotificationHandler(
             )
             putExtra(INTENT_EXTRA_CALL_CID, callId)
             putExtra(INTENT_EXTRA_NOTIFICATION_ID, INCOMING_CALL_NOTIFICATION_ID)
+        }
+    }
+
+    private fun showNotificationCallNotification(
+        notificationPendingIntent: PendingIntent,
+        callDisplayName: String,
+        notificationId: Int,
+    ) {
+        showNotification(notificationId) {
+            setContentTitle("Incoming call")
+            setContentText("$callDisplayName is calling you.")
+            setContentIntent(notificationPendingIntent)
         }
     }
 

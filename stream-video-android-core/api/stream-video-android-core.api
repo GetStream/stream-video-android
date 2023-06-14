@@ -2043,7 +2043,7 @@ public class io/getstream/video/android/core/notifications/DefaultNotificationHa
 	public fun getChannelId ()Ljava/lang/String;
 	public fun getChannelName ()Ljava/lang/String;
 	public fun onLivestream (Lio/getstream/video/android/model/StreamCallId;Ljava/lang/String;)V
-	public fun onNotification (Lio/getstream/video/android/model/StreamCallId;)V
+	public fun onNotification (Lio/getstream/video/android/model/StreamCallId;Ljava/lang/String;)V
 	public fun onPermissionDenied ()V
 	public fun onPermissionGranted ()V
 	public fun onPermissionRationale ()V
@@ -2075,13 +2075,14 @@ public abstract interface class io/getstream/video/android/core/notifications/No
 	public static final field ACTION_ACCEPT_CALL Ljava/lang/String;
 	public static final field ACTION_INCOMING_CALL Ljava/lang/String;
 	public static final field ACTION_LIVESTREAM Ljava/lang/String;
+	public static final field ACTION_NOTIFICATION Ljava/lang/String;
 	public static final field ACTION_REJECT_CALL Ljava/lang/String;
 	public static final field Companion Lio/getstream/video/android/core/notifications/NotificationHandler$Companion;
 	public static final field INCOMING_CALL_NOTIFICATION_ID I
 	public static final field INTENT_EXTRA_CALL_CID Ljava/lang/String;
 	public static final field INTENT_EXTRA_NOTIFICATION_ID Ljava/lang/String;
 	public abstract fun onLivestream (Lio/getstream/video/android/model/StreamCallId;Ljava/lang/String;)V
-	public abstract fun onNotification (Lio/getstream/video/android/model/StreamCallId;)V
+	public abstract fun onNotification (Lio/getstream/video/android/model/StreamCallId;Ljava/lang/String;)V
 	public abstract fun onRingingCall (Lio/getstream/video/android/model/StreamCallId;Ljava/lang/String;)V
 }
 
@@ -2089,6 +2090,7 @@ public final class io/getstream/video/android/core/notifications/NotificationHan
 	public static final field ACTION_ACCEPT_CALL Ljava/lang/String;
 	public static final field ACTION_INCOMING_CALL Ljava/lang/String;
 	public static final field ACTION_LIVESTREAM Ljava/lang/String;
+	public static final field ACTION_NOTIFICATION Ljava/lang/String;
 	public static final field ACTION_REJECT_CALL Ljava/lang/String;
 	public static final field INCOMING_CALL_NOTIFICATION_ID I
 	public static final field INTENT_EXTRA_CALL_CID Ljava/lang/String;

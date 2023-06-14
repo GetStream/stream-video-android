@@ -87,7 +87,8 @@ internal class VideoPushDelegate(
     }
 
     private fun handleNotificationType(callId: StreamCallId, payload: Map<String, Any?>) {
-        streamVideo?.onNotification(callId)
+        val callDisplayName = payload[KEY_CALL_DISPLAY_NAME] as String
+        streamVideo?.onNotification(callId, callDisplayName)
     }
 
     private fun handleLiveStartedType(callId: StreamCallId, payload: Map<String, Any?>) {
@@ -153,7 +154,8 @@ internal class VideoPushDelegate(
     /**
      * Verify if the map contains all keys/values for a Notification Type.
      */
-    private fun Map<String, Any?>.isValidNotificationType(): Boolean = true
+    private fun Map<String, Any?>.isValidNotificationType(): Boolean =
+        !(this[KEY_CALL_DISPLAY_NAME] as? String).isNullOrBlank()
 
     /**
      * Verify if the map contains all keys/values for a Live Started Type.
