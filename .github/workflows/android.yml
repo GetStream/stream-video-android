@@ -93,8 +93,11 @@ jobs:
 
       - name: Unit Tests
         run: |
-          ./gradlew testDebugUnitTest
+          ./gradlew --scan --stacktrace \
+              :stream-video-android-compose:testDebugUnitTest \
+              :stream-video-android-core:testDebugUnitTest
 
       - name: Android Tests
         run: |
-          ./gradlew connectedAndroidTest
+          ./gradlew --scan --stacktrace \
+              :stream-video-android-core:connectedAndroidTest
