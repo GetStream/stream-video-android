@@ -40,6 +40,14 @@ import io.getstream.video.android.core.call.state.ToggleMicrophone
 import io.getstream.video.android.model.User
 import kotlinx.coroutines.launch
 
+/**
+ * This tutorial demonstrates how to implement a video call screen with supporting PIP mode
+ * by using higher-level APIs, such as [AbstractCallActivity], and [CallContainer].
+ *
+ * You can customize [CallContainer] and build your own call screen to your taste.
+ *
+ * You will be able to build your call screen following the steps below.
+ */
 class MainActivity3 : AbstractCallActivity() {
 
     override fun createCall(): Call {

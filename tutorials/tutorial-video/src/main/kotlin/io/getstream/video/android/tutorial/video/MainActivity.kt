@@ -49,8 +49,11 @@ import io.getstream.video.android.model.User
 import kotlinx.coroutines.launch
 
 /**
- * This tutorial demonstrates how to implement a video call screen by using low-level APIs.
+ * This tutorial demonstrates how to implement a video call screen by using low-level APIs, such as
+ * [ParticipantVideo] and [FloatingParticipantVideo]. You can build your own call screen with theses
+ * components.
  *
+ * You will be able to build your call screen following the steps below.
  */
 class MainActivity : ComponentActivity() {
 
