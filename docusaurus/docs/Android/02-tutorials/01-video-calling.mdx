@@ -3,25 +3,29 @@ title: Video Call Tutorial
 description: How to build a video call similar to Zoom or facebook messenger
 ---
 
-This tutorial teaches you how to build your own Zoom/Whatsapp style video calling.
+import { TokenSnippet } from '../../../shared/_tokenSnippet.jsx';
+
+This tutorial teaches you how to build Zoom/Whatsapp style video calling for your app.
 
 * Calls run on Stream's global edge network for optimal latency & reliability.
 * Permissions give you fine grained control over who can do what.
-* Video quality and codecs are automatically determined.
+* Video quality and codecs are automatically optimized.
 
-### Step 1 - Create a new project in android studio
+<TokenSnippet sampleApp='meeting' />
 
-This tutorial was written using Android Studio Flamingo.
-Setup steps can vary slightly across Android Studio versions so if you run into trouble be sure to use the latest version of Android Studio.
+### Step 1 - Create a new project in Android Studio
 
 1. Create a new project
 2. Select Phone & Template -> **empty activity**
 3. Name your project **VideoCall**.
 
+Note that setup steps can vary slightly across Android Studio versions.
+If you run into trouble be sure to use the latest version of Android Studio (Flamingo or higher).
+
 ### Step 2 - Install the SDK & Setup the client
 
 **Add the Video Compose SDK** and [Jetpack Compose](https://developer.android.com/jetpack/compose) dependencies to your app's `build.gradle.kts` file found in `app/build.gradle`.
-If you're new to android, note that there are 2 `build.gradle.kts` files, you want to open the one in the app folder.
+If you're new to android, note that there are 2 `build.gradle` files, you want to open the `build.gradle` in the app folder.
 
 ```groovy
 dependencies {
@@ -39,7 +43,9 @@ dependencies {
 }
 ```
 
-We also have a core SDK for video that excludes compose if you prefer XML layouts.
+There are 2 versions of Stream's SDK. "io.getstream:stream-video-android-compose" that includes the video SDK + compose UI components.
+And "io.getstream:stream-video-android-core" that only includes the video SDK.
+For this tutorial we'll use the compose UI components.
 
 ### Step 3 - Create & Join a call
 
