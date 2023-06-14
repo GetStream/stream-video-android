@@ -34,6 +34,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
@@ -57,6 +58,7 @@ public fun ParticipantAudio(
 ) {
     val user by participant.user.collectAsStateWithLifecycle()
     val nameOrId by participant.userNameOrId.collectAsStateWithLifecycle()
+    val isSpeaking by participant.speaking.collectAsStateWithLifecycle()
 
     Column(
         modifier = modifier,
@@ -69,10 +71,11 @@ public fun ParticipantAudio(
                 user = user,
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(4.dp),
+                    .padding(4.dp)
+                    .shadow(4.dp),
             )
 
-            if (style.isSpeaking) {
+            if (isSpeaking && style.isShowingSpeakingBorder) {
                 Box(
                     modifier = Modifier
                         .fillMaxSize()
@@ -121,7 +124,7 @@ private fun ParticipantAudioPreview() {
         ParticipantAudio(
             modifier = Modifier.size(100.dp),
             participant = mockParticipant,
-            style = RegularAudioRendererStyle(isSpeaking = true)
+            style = RegularAudioRendererStyle(isShowingSpeakingBorder = true)
         )
     }
 }

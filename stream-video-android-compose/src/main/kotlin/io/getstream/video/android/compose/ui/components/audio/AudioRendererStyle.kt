@@ -25,7 +25,7 @@ import androidx.compose.ui.unit.dp
 /**
  * Represents audio room render styles.
  *
- * @param isSpeaking Represents whether the participant is speaking or not.
+ * @param isShowingSpeakingBorder Represents whether the participant is speaking or not.
  * @param speakingBorder The shape will be displayed when a participant is speaking.
  * @param isShowingMicrophoneAvailability Represents whether displays the microphone availability indicator or not.
  * @param microphoneAvailabilityLabel The position of the microphone availability indicator.
@@ -33,7 +33,7 @@ import androidx.compose.ui.unit.dp
  */
 @Stable
 public sealed class AudioRendererStyle(
-    public open val isSpeaking: Boolean,
+    public open val isShowingSpeakingBorder: Boolean,
     public open val speakingBorder: BorderStroke,
     public open val isShowingMicrophoneAvailability: Boolean,
     public open val microphoneAvailabilityLabel: Alignment,
@@ -43,21 +43,21 @@ public sealed class AudioRendererStyle(
 /**
  * Represents audio room render styles.
  *
- * @param isSpeaking Represents whether the participant is speaking or not.
+ * @param isShowingSpeakingBorder Represents whether the participant is speaking or not.
  * @param speakingBorder The shape will be displayed when a participant is speaking.
  * @param isShowingMicrophoneAvailability Represents whether displays the microphone availability indicator or not.
  * @param microphoneAvailabilityLabel The position of the microphone availability indicator.
  * @param isShowingRoleBadge Represents whether the displays the role badge or not.
  */
 public fun AudioRendererStyle.copy(
-    isSpeaking: Boolean = this.isSpeaking,
+    isShowingSpeakingBorder: Boolean = this.isShowingSpeakingBorder,
     speakingBorder: BorderStroke = this.speakingBorder,
     isShowingMicrophoneAvailability: Boolean = this.isShowingMicrophoneAvailability,
     microphoneAvailabilityLabel: Alignment = this.microphoneAvailabilityLabel,
     isShowingRoleBadge: Boolean = this.isShowingRoleBadge
 ): AudioRendererStyle {
     return RegularAudioRendererStyle(
-        isSpeaking = isSpeaking,
+        isShowingSpeakingBorder = isShowingSpeakingBorder,
         speakingBorder = speakingBorder,
         isShowingMicrophoneAvailability = isShowingMicrophoneAvailability,
         microphoneAvailabilityLabel = microphoneAvailabilityLabel,
@@ -68,7 +68,7 @@ public fun AudioRendererStyle.copy(
 /**
  * Represents a regular audio room render styles.
  *
- * @param isSpeaking Represents whether the participant is speaking or not.
+ * @param isShowingSpeakingBorder Represents whether the participant is speaking or not.
  * @param speakingBorder The shape will be displayed when a participant is speaking.
  * @param isShowingMicrophoneAvailability Represents whether displays the microphone availability indicator or not.
  * @param microphoneAvailabilityLabel The position of the microphone availability indicator.
@@ -76,13 +76,13 @@ public fun AudioRendererStyle.copy(
  */
 @Stable
 public data class RegularAudioRendererStyle(
-    override val isSpeaking: Boolean = false,
+    override val isShowingSpeakingBorder: Boolean = true,
     override val speakingBorder: BorderStroke = BorderStroke(2.dp, Color(0xFF005FFF)),
     override val isShowingMicrophoneAvailability: Boolean = true,
     override val microphoneAvailabilityLabel: Alignment = Alignment.BottomEnd,
     override val isShowingRoleBadge: Boolean = true
 ) : AudioRendererStyle(
-    isSpeaking = isSpeaking,
+    isShowingSpeakingBorder = isShowingSpeakingBorder,
     speakingBorder = speakingBorder,
     isShowingMicrophoneAvailability = isShowingMicrophoneAvailability,
     microphoneAvailabilityLabel = microphoneAvailabilityLabel,

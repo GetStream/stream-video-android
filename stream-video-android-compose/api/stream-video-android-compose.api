@@ -384,7 +384,7 @@ public abstract class io/getstream/video/android/compose/ui/components/audio/Aud
 	public fun getSpeakingBorder ()Landroidx/compose/foundation/BorderStroke;
 	public fun isShowingMicrophoneAvailability ()Z
 	public fun isShowingRoleBadge ()Z
-	public fun isSpeaking ()Z
+	public fun isShowingSpeakingBorder ()Z
 }
 
 public final class io/getstream/video/android/compose/ui/components/audio/AudioRendererStyleKt {
@@ -393,7 +393,15 @@ public final class io/getstream/video/android/compose/ui/components/audio/AudioR
 }
 
 public final class io/getstream/video/android/compose/ui/components/audio/AudioRoomKt {
-	public static final fun AudioRoom (Lio/getstream/video/android/core/Call;Landroidx/compose/runtime/Composer;I)V
+	public static final fun AudioRoom (Landroidx/compose/ui/Modifier;Lio/getstream/video/android/core/Call;Lio/getstream/video/android/compose/ui/components/audio/AudioRendererStyle;ILandroidx/compose/runtime/Composer;II)V
+	public static final fun AudioRoom (Landroidx/compose/ui/Modifier;Ljava/util/List;Lio/getstream/video/android/compose/ui/components/audio/AudioRendererStyle;ILandroidx/compose/runtime/Composer;II)V
+}
+
+public final class io/getstream/video/android/compose/ui/components/audio/ComposableSingletons$AudioRoomKt {
+	public static final field INSTANCE Lio/getstream/video/android/compose/ui/components/audio/ComposableSingletons$AudioRoomKt;
+	public static field lambda-1 Lkotlin/jvm/functions/Function2;
+	public fun <init> ()V
+	public final fun getLambda-1$stream_video_android_compose_release ()Lkotlin/jvm/functions/Function2;
 }
 
 public final class io/getstream/video/android/compose/ui/components/audio/ComposableSingletons$ParticipantAudioKt {
@@ -427,7 +435,7 @@ public final class io/getstream/video/android/compose/ui/components/audio/Regula
 	public fun hashCode ()I
 	public fun isShowingMicrophoneAvailability ()Z
 	public fun isShowingRoleBadge ()Z
-	public fun isSpeaking ()Z
+	public fun isShowingSpeakingBorder ()Z
 	public fun toString ()Ljava/lang/String;
 }
 
