@@ -65,11 +65,16 @@ class MainActivity : ComponentActivity() {
         }
 
         setContent {
-            // step4 - observe call participants inside VideoTheme
+            // step4 - request Android runtime permissions.
+            LaunchCallPermissions(call = call)
+
+            // step5 - apply VideTheme
             VideoTheme {
+                // step6 - define required properties.
                 val participants by call.state.participants.collectAsState()
                 val connection by call.state.connection.collectAsState()
 
+                // step7 - render texts that display connection status.
                 Box(
                     contentAlignment = Alignment.Center,
                     modifier = Modifier.fillMaxSize()
@@ -102,12 +107,21 @@ val user = User(
 )
 ```
 
-Next we setup the video SDK and join the call.
+Next, we setup the video SDK and join the call.
 
 ```kotlin
 val call = client.call("default", "123")
 lifecycleScope.launch {
     call.join(create = true)
+}
+```
+
+Next, you should request [Android runtime permissions](https://source.android.com/docs/core/permissions/runtime_perms) that should be required to access physical devices (camera, microphone, and Bluetooth).
+You can easily request permissions like the code below:
+
+```kotlin
+setContent {
+    LaunchCallPermissions(call = call)
 }
 ```
 
@@ -234,7 +248,7 @@ class MainActivity : AbstractCallActivity() {
 }
 ```
 
-Using the viewmodel and abstract call enables picture in picture and full screen support.
+Using the `CallViewModel` and `AbstractCallActivity` enables picture in picture and full screen support.
 (It's quite easy to look at these classes and implement your own viewmodel or activity)
 
 #### B. Render the UI with the call Container
@@ -242,14 +256,42 @@ Using the viewmodel and abstract call enables picture in picture and full screen
 Next up we want to render a call header, call controls and a more flexible grid layout for participants.
 
 ```kotlin
-setContent {
-    VideoTheme {
-        CallContainer(
-            modifier = Modifier.fillMaxSize(),
-            callViewModel = vm,
-            onBackPressed = { finish() },
-        )
+private val factory by lazy { CallViewModelFactory() }
+private val vm by viewModels<CallViewModel> { factory }
+
+override fun onCreate(savedInstanceState: Bundle?) {
+    super.onCreate(savedInstanceState)
+
+    setContent {
+        VideoTheme {
+            CallContainer(
+                modifier = Modifier.fillMaxSize(),
+                call = call,
+                callViewModel = vm,
+                onBackPressed = { handleBackPressed() },
+            )
+        }
     }
+}
+```
+
+#### C. Allow the picture in picture mode
+
+Next, you should allow the picture in picture mode on your `AndroidManifest.XML` file:
+
+```xml
+<activity android:name="VideoActivity"
+    android:supportsPictureInPicture="true"
+    android:configChanges="screenSize|smallestScreenSize|screenLayout|orientation"
+    ...
+```
+
+And finally, override `pipChanged` method inside your activity:
+
+```kotlin
+override fun pipChanged(isInPip: Boolean) {
+    super.pipChanged(isInPip)
+    vm.onPictureInPictureModeChanged(isInPip)
 }
 ```
 

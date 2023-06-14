@@ -85,7 +85,7 @@ class MainActivity : ComponentActivity() {
         setContent {
             // step4 - apply VideTheme
             VideoTheme {
-                // step5 -  define required properties.
+                // step5 - define required properties.
                 val remoteParticipants by call.state.remoteParticipants.collectAsState()
                 val remoteParticipant = remoteParticipants.firstOrNull()
                 val me by call.state.me.collectAsState()
