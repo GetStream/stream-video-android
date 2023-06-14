@@ -24,7 +24,6 @@ import io.getstream.video.android.core.errors.VideoErrorCode
 import io.getstream.video.android.model.User
 import io.getstream.video.android.model.UserType
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.debug.DebugProbes
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.runTest
@@ -52,7 +51,6 @@ class ClientAndAuthTest : TestBase() {
             }
         }
         job.cancel()
-
     }
 
     @Test
@@ -98,7 +96,6 @@ class ClientAndAuthTest : TestBase() {
             )
         ).build()
         client.cleanup()
-
     }
 
     @Test
@@ -168,7 +165,6 @@ class ClientAndAuthTest : TestBase() {
             testData.users["thierry"]!!,
             testData.tokens["thierry"]!!,
         ).build()
-
     }
 
     @Test
@@ -240,6 +236,4 @@ class ClientAndAuthTest : TestBase() {
         val deferred = clientImpl.connectAsync()
         deferred.join()
     }
-
-
 }

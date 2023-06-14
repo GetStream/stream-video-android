@@ -54,7 +54,6 @@ class LivestreamTest : IntegrationTestBase() {
      * Also see: https://www.notion.so/stream-wiki/Livestream-Tutorial-Android-Brainstorm-1568ee5cb23b4d23b5de69defaa1cc76
      */
 
-
     @Test
     fun `list recorded calls`() = runTest {
         val result = call.listRecordings()

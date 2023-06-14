@@ -399,7 +399,6 @@ internal class StreamVideoImpl internal constructor(
                     connectionModule.updateToken(newToken)
                     // quickly reconnect with the new token
                     socketImpl.reconnect(0)
-
                 } else {
                     throw e
                 }

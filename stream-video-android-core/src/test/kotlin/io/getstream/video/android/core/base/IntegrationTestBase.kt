@@ -35,8 +35,6 @@ import io.mockk.impl.annotations.MockK
 import io.mockk.junit4.MockKRule
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.SupervisorJob
-import kotlinx.coroutines.debug.junit4.CoroutinesTimeout
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.TestCoroutineScheduler
 import kotlinx.coroutines.test.TestDispatcher
@@ -188,8 +186,6 @@ open class TestBase {
                 scope = CoroutineScope(DispatcherProvider.IO)
             )
         }
-
-
     }
 
     fun setLogLevel(newPriority: Priority) {
