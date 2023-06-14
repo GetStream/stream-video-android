@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014-2022 Stream.io Inc. All rights reserved.
+ * Copyright (c) 2014-2023 Stream.io Inc. All rights reserved.
  *
  * Licensed under the Stream License;
  * you may not use this file except in compliance with the License.
@@ -14,12 +14,13 @@
  * limitations under the License.
  */
 
-package io.getstream.video.android.core.utils
+package io.getstream.video.android.core.notifications
 
-import io.getstream.video.android.core.internal.InternalStreamVideoApi
+import io.getstream.android.push.PushDeviceGenerator
+import io.getstream.video.android.core.notifications.internal.NoOpNotificationHandler
 
-@InternalStreamVideoApi
-public const val INTENT_EXTRA_CALL_CID: String = "call_cid"
-
-@InternalStreamVideoApi
-public const val INTENT_EXTRA_NOTIFICATION_ID: String = "notification_id"
+public data class NotificationConfig(
+    val pushDeviceGenerators: List<PushDeviceGenerator> = emptyList(),
+    val requestPermissionOnAppLaunch: () -> Boolean = { true },
+    val notificationHandler: NotificationHandler = NoOpNotificationHandler,
+)

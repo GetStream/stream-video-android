@@ -19,14 +19,11 @@ package io.getstream.video.android.core
 import android.content.Context
 import androidx.lifecycle.Lifecycle
 import io.getstream.android.push.PushDevice
-import io.getstream.android.push.PushDeviceGenerator
-import io.getstream.android.push.PushProvider
 import io.getstream.log.taggedLogger
 import io.getstream.result.Error
 import io.getstream.result.Result
 import io.getstream.result.Result.Failure
 import io.getstream.result.Result.Success
-import io.getstream.result.flatMap
 import io.getstream.video.android.core.call.connection.StreamPeerConnectionFactory
 import io.getstream.video.android.core.errors.VideoErrorCode
 import io.getstream.video.android.core.events.VideoEventListener
@@ -40,10 +37,11 @@ import io.getstream.video.android.core.model.MuteUsersData
 import io.getstream.video.android.core.model.SortField
 import io.getstream.video.android.core.model.UpdateUserPermissionsData
 import io.getstream.video.android.core.model.toRequest
+import io.getstream.video.android.core.notifications.NotificationHandler
+import io.getstream.video.android.core.notifications.internal.StreamNotificationManager
 import io.getstream.video.android.core.socket.ErrorResponse
 import io.getstream.video.android.core.socket.SocketState
 import io.getstream.video.android.core.utils.DebugInfo
-import io.getstream.video.android.core.utils.INTENT_EXTRA_CALL_CID
 import io.getstream.video.android.core.utils.LatencyResult
 import io.getstream.video.android.core.utils.getLatencyMeasurementsOKHttp
 import io.getstream.video.android.core.utils.toEdge
@@ -51,8 +49,6 @@ import io.getstream.video.android.core.utils.toUser
 import io.getstream.video.android.datastore.delegate.StreamUserDataStore
 import io.getstream.video.android.model.Device
 import io.getstream.video.android.model.User
-import io.getstream.video.android.model.UserDevices
-import io.getstream.video.android.model.mapper.toTypeAndId
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.Dispatchers
@@ -64,7 +60,6 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.withContext
-import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.Json
 import okhttp3.Callback
 import okhttp3.Request
@@ -75,7 +70,6 @@ import org.openapitools.client.models.BlockUserResponse
 import org.openapitools.client.models.CallRequest
 import org.openapitools.client.models.CallSettingsRequest
 import org.openapitools.client.models.ConnectedEvent
-import org.openapitools.client.models.CreateDeviceRequest
 import org.openapitools.client.models.CreateGuestRequest
 import org.openapitools.client.models.CreateGuestResponse
 import org.openapitools.client.models.GetCallResponse
@@ -122,10 +116,11 @@ internal class StreamVideoImpl internal constructor(
     private val lifecycle: Lifecycle,
     private val loggingLevel: LoggingLevel,
     internal val connectionModule: ConnectionModule,
-    internal val pushDeviceGenerators: List<PushDeviceGenerator>,
     internal val tokenProvider: (suspend (error: Throwable?) -> String)?,
     internal val dataStore: StreamUserDataStore,
-) : StreamVideo {
+    internal val streamNotificationManager: StreamNotificationManager,
+) : StreamVideo,
+    NotificationHandler by streamNotificationManager {
 
     private var locationJob: Deferred<Result<String>>? = null
 
@@ -133,6 +128,7 @@ internal class StreamVideoImpl internal constructor(
     override val state = ClientState(this)
 
     internal val scope = CoroutineScope(_scope.coroutineContext + SupervisorJob())
+
     /** if true we fail fast on errors instead of logging them */
     var developmentMode = true
     val debugInfo = DebugInfo(this)
@@ -167,32 +163,8 @@ internal class StreamVideoImpl internal constructor(
      * @see StreamVideo.createDevice
      */
     override suspend fun createDevice(pushDevice: PushDevice): Result<Device> {
-        logger.d { "[createDevice] pushDevice: $pushDevice" }
-        return pushDevice.toCreateDeviceRequest().flatMap { createDeviceRequest ->
-            wrapAPICall {
-                connectionModule.devicesApi.createDevice(createDeviceRequest)
-                Device(
-                    id = pushDevice.token,
-                    pushProvider = pushDevice.pushProvider.key,
-                    pushProviderName = pushDevice.providerName ?: ""
-                ).also(::storeDevice)
-            }
-        }
+        return streamNotificationManager.createDevice(pushDevice)
     }
-
-    private fun PushDevice.toCreateDeviceRequest(): Result<CreateDeviceRequest> =
-        when (pushProvider) {
-            PushProvider.FIREBASE -> Success(CreateDeviceRequest.PushProvider.firebase)
-            PushProvider.HUAWEI -> Success(CreateDeviceRequest.PushProvider.huawei)
-            PushProvider.XIAOMI -> Success(CreateDeviceRequest.PushProvider.xiaomi)
-            PushProvider.UNKNOWN -> Failure(Error.GenericError("Unsupported PushProvider"))
-        }.map {
-            CreateDeviceRequest(
-                id = token,
-                pushProvider = it,
-                pushProviderName = providerName
-            )
-        }
 
     /**
      * Ensure that every API call runs on the IO dispatcher and has correct error handling
@@ -406,41 +378,11 @@ internal class StreamVideoImpl internal constructor(
         }
     }
 
-    private fun storeDevice(device: Device) {
-        logger.d { "[storeDevice] device: device" }
-        scope.launch {
-            val dataStore = StreamUserDataStore.instance()
-            dataStore.updateUserDevices(
-                UserDevices(
-                    dataStore.userDevices.value?.let { it.devices + device } ?: listOf(device)
-                )
-            )
-        }
-    }
-
-    private fun removeStoredDeivce(device: Device) {
-        logger.d { "[storeDevice] device: device" }
-        scope.launch {
-            val dataStore = StreamUserDataStore.instance()
-            dataStore.updateUserDevices(
-                UserDevices(
-                    dataStore.userDevices.value?.let {
-                        it.devices.filter { it.id != device.id }
-                    } ?: listOf()
-                )
-            )
-        }
-    }
-
     /**
      * @see StreamVideo.deleteDevice
      */
     override suspend fun deleteDevice(device: Device): Result<Unit> {
-        logger.d { "[deleteDevice] device: $device" }
-        return wrapAPICall {
-            connectionModule.devicesApi.deleteDevice(device.id, userId)
-            removeStoredDeivce(device)
-        }
+        return streamNotificationManager.deleteDevice(device)
     }
 
     fun setupGuestUser(user: User) {
@@ -477,20 +419,8 @@ internal class StreamVideoImpl internal constructor(
         }
     }
 
-    override suspend fun registerPushDevice() {
-        // first get a push device generator that works for this device
-        val generator = pushDeviceGenerators.firstOrNull { it.isValidForThisDevice(context) }
-
-        // if we found one, register it at the server
-        if (generator != null) {
-            generator.onPushDeviceGeneratorSelected()
-
-            generator.asyncGeneratePushDevice { generatedDevice ->
-                scope.launch {
-                    createDevice(generatedDevice)
-                }
-            }
-        }
+    internal suspend fun registerPushDevice() {
+        streamNotificationManager.registerPushDevice()
     }
 
     /**
@@ -915,32 +845,6 @@ internal class StreamVideoImpl internal constructor(
         val dataStore = StreamUserDataStore.instance()
         scope.launch { dataStore.clear() }
     }
-
-    suspend fun handlePushMessage(payload: Map<String, Any>): Result<Unit> =
-        withContext(scope.coroutineContext) {
-            val callCid = payload[INTENT_EXTRA_CALL_CID] as? String
-                ?: return@withContext Failure(Error.GenericError("Missing Call CID!"))
-
-            val (type, id) = callCid.toTypeAndId()
-
-            when (val result = getCall(type, id)) {
-                is Success -> {
-                    val callMetadata = result.value
-
-//                    val event = CallCreatedEvent(
-//                        callCid = callMetadata.cid,
-//                        ringing = true,
-//                        users = callMetadata.users,
-//                        callInfo = callMetadata.toInfo(),
-//                        callDetails = callMetadata.callDetails
-//                    )
-
-                    Success(Unit)
-                }
-
-                is Failure -> result
-            }
-        }
 
     override fun call(type: String, id: String): Call {
         val idOrRandom = id.ifEmpty { UUID.randomUUID().toString() }

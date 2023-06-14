@@ -27,6 +27,7 @@ import io.getstream.log.Priority
 import io.getstream.video.android.core.StreamVideo
 import io.getstream.video.android.core.StreamVideoBuilder
 import io.getstream.video.android.core.logging.LoggingLevel
+import io.getstream.video.android.core.notifications.NotificationConfig
 import io.getstream.video.android.datastore.delegate.StreamUserDataStore
 import io.getstream.video.android.dogfooding.token.StreamVideoNetwork
 import io.getstream.video.android.model.ApiKey
@@ -61,7 +62,9 @@ class DogfoodingApp : Application() {
             token = token,
             apiKey = apiKey,
             loggingLevel = loggingLevel,
-            pushDeviceGenerators = listOf(FirebasePushDeviceGenerator()),
+            notificationConfig = NotificationConfig(
+                pushDeviceGenerators = listOf(FirebasePushDeviceGenerator(providerName = "firebase"))
+            ),
             tokenProvider = {
                 val email = user.custom["email"]
                 val response = StreamVideoNetwork.tokenService.fetchToken(
