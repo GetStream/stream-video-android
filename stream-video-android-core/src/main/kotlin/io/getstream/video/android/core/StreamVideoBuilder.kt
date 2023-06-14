@@ -20,7 +20,6 @@ import android.app.Notification
 import android.content.Context
 import androidx.lifecycle.ProcessLifecycleOwner
 import com.jakewharton.threetenabp.AndroidThreeTen
-import io.getstream.android.push.PushDeviceGenerator
 import io.getstream.log.StreamLog
 import io.getstream.log.android.AndroidStreamLogger
 import io.getstream.video.android.core.dispatchers.DispatcherProvider
@@ -28,6 +27,8 @@ import io.getstream.video.android.core.filter.AudioFilter
 import io.getstream.video.android.core.filter.VideoFilter
 import io.getstream.video.android.core.internal.module.ConnectionModule
 import io.getstream.video.android.core.logging.LoggingLevel
+import io.getstream.video.android.core.notifications.NotificationConfig
+import io.getstream.video.android.core.notifications.internal.StreamNotificationManager
 import io.getstream.video.android.datastore.delegate.StreamUserDataStore
 import io.getstream.video.android.model.ApiKey
 import io.getstream.video.android.model.User
@@ -65,10 +66,7 @@ public class StreamVideoBuilder @JvmOverloads constructor(
     private val tokenProvider: (suspend (error: Throwable?) -> String)? = null,
     /** Logging level */
     private val loggingLevel: LoggingLevel = LoggingLevel(),
-    /** Enable push notifications if you want to receive calls etc */
-    private val enablePush: Boolean = false,
-    /** Support for different push providers */
-    private val pushDeviceGenerators: List<PushDeviceGenerator> = emptyList(),
+    private val notificationConfig: NotificationConfig = NotificationConfig(),
     /** Overwrite the default notification logic for incoming calls */
     private val ringNotification: ((call: Call) -> Notification?)? = null,
     /** Audio filters enable you to add custom effects to your audio before its send to the server */
@@ -139,6 +137,13 @@ public class StreamVideoBuilder @JvmOverloads constructor(
             userToken = token
         )
 
+        val streamNotificationManager = StreamNotificationManager.install(
+            context,
+            scope,
+            notificationConfig,
+            connectionModule.devicesApi,
+            dataStore,
+        )
         // create the client
 
         val client = StreamVideoImpl(
@@ -150,12 +155,11 @@ public class StreamVideoBuilder @JvmOverloads constructor(
             loggingLevel = loggingLevel,
             lifecycle = lifecycle,
             connectionModule = connectionModule,
-            pushDeviceGenerators = pushDeviceGenerators
+            streamNotificationManager = streamNotificationManager,
         )
 
         scope.launch {
-            // addDevice for push
-            if (enablePush && user.type == UserType.Authenticated) {
+            if (user.type == UserType.Authenticated) {
                 client.registerPushDevice()
             }
         }

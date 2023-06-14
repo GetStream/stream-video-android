@@ -19,8 +19,19 @@ package io.getstream.video.android.core.notifications.internal
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
+import androidx.core.app.NotificationManagerCompat
 import io.getstream.log.taggedLogger
-import io.getstream.video.android.core.notifications.internal.RejectCallBroadcastReceiver.Companion.ACTION_REJECT_CALL
+import io.getstream.result.Result
+import io.getstream.video.android.core.StreamVideo
+import io.getstream.video.android.core.StreamVideoBuilder
+import io.getstream.video.android.core.notifications.NotificationHandler.Companion.ACTION_REJECT_CALL
+import io.getstream.video.android.core.notifications.NotificationHandler.Companion.INTENT_EXTRA_CALL_CID
+import io.getstream.video.android.core.notifications.NotificationHandler.Companion.INTENT_EXTRA_NOTIFICATION_ID
+import io.getstream.video.android.datastore.delegate.StreamUserDataStore
+import io.getstream.video.android.model.streamCallId
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 
 /**
  * Used to process any pending intents that feature the [ACTION_REJECT_CALL] action. By consuming this
@@ -40,43 +51,34 @@ internal class RejectCallBroadcastReceiver : BroadcastReceiver() {
      */
     override fun onReceive(context: Context?, intent: Intent?) {
         logger.d { "[onReceive] context: $context, intent: $intent" }
+        val userDataStore: StreamUserDataStore by lazy {
+            StreamUserDataStore.install(context!!)
+        }
+        val streamVideo: StreamVideo = if (StreamVideo.isInstalled) {
+            StreamVideo.instance()
+        } else {
+            userDataStore.user.value?.let { user ->
+                userDataStore.userToken.value?.let { userToken ->
+                    StreamVideoBuilder(
+                        context = context!!,
+                        user = user,
+                        token = userToken,
+                        apiKey = userDataStore.apiKey.value,
+                    ).build().also { StreamVideo.unInstall() }
+                }
+            }!!
+        }
+        if (context != null && intent?.action == ACTION_REJECT_CALL) {
+            val callCid = intent.streamCallId(INTENT_EXTRA_CALL_CID)!!
 
-//        if (context != null && intent?.action == ACTION_REJECT_CALL) {
-//            val callCid = intent.getStringExtra(INTENT_EXTRA_CALL_CID)
-//
-//            if (callCid.isNullOrBlank()) {
-//                return
-//            }
-//            val (type, id) = callCid.split(":")
-//            val preferences = UserPreferencesManager.initialize(context)
-//
-//            val user = preferences.getUserCredentials()
-//            val apiKey = preferences.getApiKey()
-//
-//            if (user != null && apiKey.isNotBlank()) {
-//                val streamVideo = StreamVideoBuilder(
-//                    context,
-//                    apiKey = apiKey,
-//                    user = user,
-//                    geo = GEO.GlobalEdgeNetwork
-//                ).build()
-//
-//                CoroutineScope(Dispatchers.IO).launch {
-//                    when (val rejectResult = streamVideo.rejectCall(type, id)) {
-//                        is Success -> logger.d { "[onReceive] rejectCall, Success: $rejectResult" }
-//                        is Failure -> logger.d { "[onReceive] rejectCall, Failure: $rejectResult" }
-//                    }
-//                }
-//                val notificationId = intent.getIntExtra(INTENT_EXTRA_NOTIFICATION_ID, 0)
-//                NotificationManagerCompat.from(context).cancel(notificationId)
-//            }
-//        }
-    }
-
-    private companion object {
-        /**
-         * Represents the action used to reject a call.
-         */
-        private const val ACTION_REJECT_CALL = "io.getstream.video.android.action.REJECT_CALL"
+            CoroutineScope(Dispatchers.IO).launch {
+                when (val rejectResult = streamVideo.call(callCid.type, callCid.id).reject()) {
+                    is Result.Success -> logger.d { "[onReceive] rejectCall, Success: $rejectResult" }
+                    is Result.Failure -> logger.d { "[onReceive] rejectCall, Failure: $rejectResult" }
+                }
+            }
+            val notificationId = intent.getIntExtra(INTENT_EXTRA_NOTIFICATION_ID, 0)
+            NotificationManagerCompat.from(context).cancel(notificationId)
+        }
     }
 }
