@@ -65,11 +65,8 @@ internal class VideoPushDelegate(
      * @return true if the payload was handled properly.
      */
     override fun handlePushMessage(payload: Map<String, Any?>): Boolean {
-        println("JcLog: handlePushMessage($payload)")
         logger.d { "[handlePushMessage] payload: $payload" }
         return payload.ifValid {
-            println("JcLog: Is valid payload")
-
             val callId = (payload[KEY_CALL_CID] as String).toTypeAndId()
                 .let { StreamCallId(it.first, it.second) }
             when (payload[KEY_TYPE]) {
@@ -82,7 +79,6 @@ internal class VideoPushDelegate(
 
     private fun handleRingType(callId: StreamCallId, payload: Map<String, Any?>) {
         val callDisplayName = payload[KEY_CALL_DISPLAY_NAME] as String
-        println("JcLog: calling streamVideo: $streamVideo")
         streamVideo?.onRingingCall(callId, callDisplayName)
     }
 
