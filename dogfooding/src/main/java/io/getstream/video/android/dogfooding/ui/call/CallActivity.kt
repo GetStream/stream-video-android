@@ -96,7 +96,7 @@ class CallActivity : AbstractCallActivity() {
         vm.onPictureInPictureModeChanged(isInPip)
     }
 
-    override fun createCall(): Call {
+    override fun provideCall(): Call {
         val streamVideo = StreamVideo.instance()
         val cid = intent.getParcelableExtra<StreamCallId>(EXTRA_CID)
             ?: throw IllegalArgumentException("call type and id is invalid!")

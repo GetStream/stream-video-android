@@ -9,6 +9,7 @@ import { TokenSnippet } from '../../../shared/_tokenSnippet.jsx';
 * video renderer fallback isn't great
 * css styling on the images
 * join button
+* does PIP add too much complexity (yes, remove it)
 
 This tutorial teaches you how to build Zoom/Whatsapp style video calling for your app.
 
@@ -294,83 +295,41 @@ For a production version of calling you'd want a few more UI elements:
 * Labels for the participant names
 * Call header and controls
 
-Stream ships with some several Compose components to make this easy.
+Stream ships with several Compose components to make this easy.
 You can customize the components with theming, arguments and swapping parts of them.
 This is convenient if you want to quickly build a production ready calling experience for you app.
 (and if you need more flexibility, many customers use the above low level approach to build a UI from scratch)
 
-Let's show how to use Stream's UI components to build a full call UI:
+#### A. Render the UI with the call Container
 
-#### A. Extend the abstract call activity & use the call view model
+To render a full calling UI we'll leverage the CallContainer component.
+This includes sensible defaults for a call header, video grid and call controls.
+
+Open `MainActivity.kt` and setup the viewmodel at the top of the activity:
 
 ```kotlin
-// Extend the abstract call activity
-class MainActivity : AbstractCallActivity() {
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
 
-        ...
+class MainActivity : ComponentActivity() {
 
-        }
-    }
+    private val factory by lazy { CallViewModelFactory() }
+    private val vm by viewModels<CallViewModel> { factory }
+
+    ....
+
 }
 ```
 
-Using the `CallViewModel` and `AbstractCallActivity` enables picture in picture and full screen support.
-(It's quite easy to look at these classes and implement your own viewmodel or activity)
-
-#### B. Render the UI with the call Container
-
-Next up we want to render a call header, call controls and a more flexible grid layout for participants.
+Next in the same file, update the code inside of VideoTheme to use the CallContainer.
+The code will be a lot smaller than before since all UI logic is handled in the CallContainer
 
 ```kotlin
-private val factory by lazy { CallViewModelFactory() }
-private val vm by viewModels<CallViewModel> { factory }
-
-override fun onCreate(savedInstanceState: Bundle?) {
-    super.onCreate(savedInstanceState)
-
-    setContent {
-        VideoTheme {
-            CallContainer(
-                modifier = Modifier.fillMaxSize(),
-                call = call,
-                callViewModel = vm,
-                onBackPressed = { handleBackPressed() },
-            )
-        }
-    }
-}
-```
-
-#### C. Allow the picture in picture mode
-
-Next open up `AndroidManifest.XML` and replace the MainActivity activity definition
-
-```xml
-<activity
-    android:name=".MainActivity"
-    android:exported="true"
-    android:label="@string/app_name"
-    android:supportsPictureInPicture="true"
-    android:configChanges="screenSize|smallestScreenSize|screenLayout|orientation"
-    android:theme="@style/Theme.MyApplication">
-    <intent-filter>
-        <action android:name="android.intent.action.MAIN" />
-
-        <category android:name="android.intent.category.LAUNCHER" />
-    </intent-filter>
-</activity>
-```
-
-The android:supportsPictureInPicture and android:configChanges enable PIP support.
-
-And finally, override `pipChanged` method inside your activity:
-
-```kotlin
-override fun pipChanged(isInPip: Boolean) {
-    super.pipChanged(isInPip)
-    vm.onPictureInPictureModeChanged(isInPip)
+VideoTheme {
+    CallContainer(
+        modifier = Modifier.fillMaxSize(),
+        call = call,
+        callViewModel = vm,
+        onBackPressed = { handleBackPressed() },
+    )
 }
 ```
 

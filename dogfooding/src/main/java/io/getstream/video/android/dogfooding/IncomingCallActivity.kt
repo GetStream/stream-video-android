@@ -105,7 +105,7 @@ class IncomingCallActivity : AbstractCallActivity() {
         vm.onPictureInPictureModeChanged(isInPip)
     }
 
-    override fun createCall(): Call {
+    override fun provideCall(): Call {
         val callId = intent.streamCallId(NotificationHandler.INTENT_EXTRA_CALL_CID)!!
         return StreamVideo.instance().call(callId.type, callId.id)
     }

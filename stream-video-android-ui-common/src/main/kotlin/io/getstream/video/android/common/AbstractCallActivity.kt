@@ -40,7 +40,9 @@ import io.getstream.video.android.model.StreamCallId
  */
 public abstract class AbstractCallActivity : ComponentActivity() {
 
-    public abstract fun getCall(): Call
+    public val call: Call by lazy(LazyThreadSafetyMode.NONE) { provideCall() }
+
+    public abstract fun provideCall(): Call
 
     public open fun pipChanged(isInPip: Boolean): Unit = Unit
 
@@ -133,7 +135,7 @@ public abstract class AbstractCallActivity : ComponentActivity() {
         try {
             enterPictureInPicture()
         } catch (error: Throwable) {
-            getCall().leave()
+            call.leave()
         }
     }
 
@@ -141,7 +143,7 @@ public abstract class AbstractCallActivity : ComponentActivity() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
 
             val currentOrientation = resources.configuration.orientation
-            val screenSharing = getCall().state.screenSharingSession.value
+            val screenSharing = call.state.screenSharingSession.value
 
             val aspect =
                 if (currentOrientation == ActivityInfo.SCREEN_ORIENTATION_PORTRAIT && screenSharing == null) {
@@ -169,14 +171,14 @@ public abstract class AbstractCallActivity : ComponentActivity() {
         val isInPiP = isInPictureInPictureMode
 
         if (isInPiP) {
-            getCall().leave()
+            call.leave()
         }
     }
 
     override fun onDestroy() {
         super.onDestroy()
 
-        getCall().leave()
+        call.leave()
     }
 
     override fun onConfigurationChanged(newConfig: Configuration) {
