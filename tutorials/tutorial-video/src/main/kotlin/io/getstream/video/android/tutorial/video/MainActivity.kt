@@ -49,7 +49,7 @@ import io.getstream.video.android.model.User
 import kotlinx.coroutines.launch
 
 /**
- * This tutorial demonstrates to implement a video call screen by using low-level APIs.
+ * This tutorial demonstrates how to implement a video call screen by using low-level APIs.
  *
  */
 class MainActivity : ComponentActivity() {
