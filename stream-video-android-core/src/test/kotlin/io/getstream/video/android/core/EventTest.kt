@@ -264,7 +264,7 @@ class EventTest : IntegrationTestBase(connectCoordinatorWS = false) {
         clientImpl.fireEvent(reactionEvent)
         // reactions are sometimes shown on the given participant's UI
         val participant = call.state.getParticipantBySessionId("thierry")
-        assertThat(participant!!.reactions.value.map { it.type }).contains("like")
+        assertThat(participant!!.reactions.value.map { it.response.type }).contains("like")
 
         // other times they will be show on the main call UI
         assertThat(call.state.reactions.value.map { it.type }).contains("like")

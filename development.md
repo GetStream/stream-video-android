@@ -333,6 +333,21 @@ When we have time we should rebuild this with:
 - Stateflow
 - Coroutines
 
+### Coroutines & Tests
+
+There are 2 common ways how you can get your tests that use coroutines to hang forever
+
+Scenario 1 - Tests block:
+- Never use Dispatchers.Main/IO directly. Always use DispatcherProvider.IO/Main
+- Solution: Replace Dispatchers.Main with DispatcherProvider.Main
+
+Scenario 2 - Tests block:
+- Inside of runTest the coroutine dispatcher waits for all coroutines to finish
+- The video client creates 3 health monitors. The healthmonitors run continously (while(true))
+- So if you create a client without calling client.cleanup() inside of a test
+- Your tests will wait endlessly for the health monitors to finish
+- Solutions: Call client.cleanup() at the end of your test. See ClientAndAuthTest
+
 ### Docs
 
 Run this for a local preview of the docs:

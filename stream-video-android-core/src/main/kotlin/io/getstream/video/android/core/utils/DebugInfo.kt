@@ -20,8 +20,6 @@ import io.getstream.log.taggedLogger
 import io.getstream.video.android.core.StreamVideoImpl
 import io.getstream.video.android.core.dispatchers.DispatcherProvider
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
 
 internal data class Timer(val name: String, val start: Long = System.currentTimeMillis()) {
     var end: Long = 0
@@ -75,12 +73,12 @@ internal class DebugInfo(val client: StreamVideoImpl) {
 
     init {
         if (client.developmentMode) {
-            scope.launch {
-                while (true) {
-                    delay(20000)
-                    log()
-                }
-            }
+//            scope.launch {
+//                while (true) {
+//                    delay(20000)
+//                    log()
+//                }
+//            }
         }
     }
 

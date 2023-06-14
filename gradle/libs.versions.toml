@@ -6,6 +6,8 @@ kotlin = "1.8.10"
 kotlinSerialization = "1.5.1"
 kotlinSerializationConverter = "1.0.0"
 kotlinxCoroutines = "1.7.1"
+kotlinxCoroutinesDebug = "1.7.1"
+
 kotlinDokka = "1.8.10"
 jvmTarget = "11"
 
@@ -137,6 +139,7 @@ stream-chat-ui-utils = { group = "io.getstream", name = "stream-chat-android-ui-
 kotlin-test-junit = { group = "org.jetbrains.kotlin", name = "kotlin-test-junit",  version.ref = "kotlinTestJunit" }
 
 kotlinx-coroutines-core = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-core", version.ref = "kotlinxCoroutines" }
+kotlinx-coroutines-debug = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-debug", version.ref = "kotlinxCoroutinesDebug" }
 kotlinx-coroutines-android = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-android", version.ref = "kotlinxCoroutines" }
 kotlinx-coroutines-test = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-test",  version.ref = "kotlinxCoroutines" }
 kotlinx-serialization-json = { group = "org.jetbrains.kotlinx", name = "kotlinx-serialization-json", version.ref = "kotlinSerialization" }

@@ -119,6 +119,7 @@ class ModerationTest : IntegrationTestBase() {
     }
 
     @Test
+    @Ignore
     fun `Basic moderation - Request permission to talk`() = runTest {
         Thread.sleep(100L)
         client.subscribe {

@@ -135,6 +135,7 @@ dependencies {
     testImplementation(libs.androidx.test.junit)
     testImplementation(libs.kotlinx.coroutines.test)
     testImplementation(libs.kotlin.test.junit)
+    testImplementation(libs.kotlinx.coroutines.debug)
 
     // instrument tests
     androidTestImplementation(libs.stream.log.android)

@@ -94,7 +94,7 @@ open class PersistentSocket<T>(
     /** Continuation if the socket successfully connected and we've authenticated */
     lateinit var connected: Continuation<T>
 
-    internal lateinit var socket: WebSocket
+    internal var socket: WebSocket? = null
 
     // prevent us from resuming the continuation twice
     private var continuationCompleted: Boolean = false
@@ -118,7 +118,10 @@ open class PersistentSocket<T>(
             authenticate()
 
             // step 3 monitor for health every 30 seconds
-            healthMonitor.start()
+
+            if (!DispatcherProvider.inTest) {
+                healthMonitor.start()
+            }
 
             // also monitor if we are offline/online
             networkStateProvider.subscribe(networkStateListener)
@@ -137,7 +140,7 @@ open class PersistentSocket<T>(
         closedByClient = true
         continuationCompleted = false
         _connectionState.value = SocketState.DisconnectedByRequest
-        socket.close(CODE_CLOSE_SOCKET_FROM_CLIENT, "Connection close by client")
+        socket?.close(CODE_CLOSE_SOCKET_FROM_CLIENT, "Connection close by client")
         connectionId = ""
         healthMonitor.stop()
         networkStateProvider.unsubscribe(networkStateListener)
@@ -231,6 +234,7 @@ open class PersistentSocket<T>(
             if (text.isNotEmpty() && processedEvent == null) {
                 val errorAdapter: JsonAdapter<SocketError> =
                     Serializer.moshi.adapter(SocketError::class.java)
+
                 val parsedError = errorAdapter.fromJson(text)
 
                 parsedError?.let {
@@ -264,7 +268,6 @@ open class PersistentSocket<T>(
                     val errorEvent = message as ErrorEvent
                     handleError(SfuSocketError(errorEvent.error))
                 }
-                println("received message $message")
                 // TODO: This logic is specific to the SfuSocket, move it
                 healthMonitor.ack()
                 events.emit(message)
@@ -366,7 +369,7 @@ open class PersistentSocket<T>(
     internal fun sendHealthCheck() {
         println("sending health check")
         val healthCheckRequest = HealthCheckRequest()
-        socket.send(healthCheckRequest.encodeByteString())
+        socket?.send(healthCheckRequest.encodeByteString())
     }
 
     private val healthMonitor = HealthMonitor(

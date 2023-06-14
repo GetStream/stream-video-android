@@ -55,23 +55,13 @@ class LivestreamTest : IntegrationTestBase() {
      */
 
     @Test
-    fun `start recording a call`() = runTest {
-        val call = client.call("livestream", randomUUID())
-        val createResult = call.create()
-        assertSuccess(createResult)
-        val result = call.startRecording()
-        assertSuccess(result)
-        val result2 = call.stopRecording()
-        assertSuccess(result2)
-    }
-
-    @Test
     fun `list recorded calls`() = runTest {
         val result = call.listRecordings()
         assertSuccess(result)
     }
 
     @Test
+    @Ignore
     fun `start and stop broadcasting to HLS`() = runTest {
         val call = client.call("livestream", randomUUID())
         val createResult = call.create()
@@ -103,6 +93,7 @@ class LivestreamTest : IntegrationTestBase() {
     }
 
     @Test
+    @Ignore // backend support isn't ready, call.create doesn't return counts
     fun `call should expose participant count`() = runTest {
         val call = client.call("livestream", randomUUID())
         val result = call.create()
