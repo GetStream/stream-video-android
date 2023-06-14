@@ -345,14 +345,25 @@ override fun onCreate(savedInstanceState: Bundle?) {
 
 #### C. Allow the picture in picture mode
 
-Next, you should allow the picture in picture mode on your `AndroidManifest.XML` file:
+Next open up `AndroidManifest.XML` and replace the MainActivity activity definition
 
 ```xml
-<activity android:name="VideoActivity"
+<activity
+    android:name=".MainActivity"
+    android:exported="true"
+    android:label="@string/app_name"
     android:supportsPictureInPicture="true"
     android:configChanges="screenSize|smallestScreenSize|screenLayout|orientation"
-    ...
+    android:theme="@style/Theme.MyApplication">
+    <intent-filter>
+        <action android:name="android.intent.action.MAIN" />
+
+        <category android:name="android.intent.category.LAUNCHER" />
+    </intent-filter>
+</activity>
 ```
+
+The android:supportsPictureInPicture and android:configChanges enable PIP support.
 
 And finally, override `pipChanged` method inside your activity:
 

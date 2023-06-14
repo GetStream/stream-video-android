@@ -50,7 +50,7 @@ import kotlinx.coroutines.launch
  */
 class MainActivity3 : AbstractCallActivity() {
 
-    override fun createCall(): Call {
+    override fun getCall(): Call {
         // step1 - create a user.
         val user = User(
             id = "tutorial@getstream.io", // any string
