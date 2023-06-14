@@ -48,7 +48,7 @@ For this tutorial we'll use the compose UI components.
 
 ### Step 3 - Create & Join a call
 
-Open up `MainActivity.kt` and replace it with:
+Open up `MainActivity.kt` and replace the MainActivity class with:
 
 ```kotlin
 class MainActivity : ComponentActivity() {
@@ -57,6 +57,7 @@ class MainActivity : ComponentActivity() {
 
         val userId = "REPLACE_WITH_USER_ID"
         val userToken = "REPLACE_WITH_TOKEN"
+        val callId = "REPLACE_WITH_CALL_ID"
 
         // step1 - create a user.
         val user = User(
@@ -75,7 +76,7 @@ class MainActivity : ComponentActivity() {
         ).build()
 
         // step3 - join a call, which type is `default` and id is `123`.
-        val call = client.call("default", "123")
+        val call = client.call("default", callId)
         lifecycleScope.launch {
             call.join(create = true)
         }
@@ -108,7 +109,7 @@ To run this sample we need a valid user token. The user token is typically gener
 So when the user logs in for your app you return the user token that gives them access to video calling.
 To make this tutorial easier to follow we'll generate a user token for you.
 
-Please update REPLACE_WITH_USER_ID and REPLACE_WITH_TOKEN with the actual values shown below:
+Please update REPLACE_WITH_USER_ID, REPLACE_WITH_TOKEN and REPLACE_WITH_CALL_ID with the actual values shown below:
 
 <TokenSnippet sampleApp='meeting' />
 
