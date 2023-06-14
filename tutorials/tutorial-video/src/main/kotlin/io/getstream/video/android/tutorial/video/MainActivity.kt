@@ -49,6 +49,10 @@ import io.getstream.video.android.core.StreamVideoBuilder
 import io.getstream.video.android.model.User
 import kotlinx.coroutines.launch
 
+/**
+ * This tutorial demonstrates to implement a video call screen by using low-level APIs.
+ *
+ */
 class MainActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -90,6 +94,7 @@ class MainActivity : ComponentActivity() {
                 val callPermissionsState = rememberCallPermissionsState(call = call)
                 LaunchedEffect(key1 = Unit) { callPermissionsState.launchPermissionRequest() }
 
+                // step7 - render a local and remote videos.
                 Box(
                     contentAlignment = Alignment.Center,
                     modifier = Modifier
