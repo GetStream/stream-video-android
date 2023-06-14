@@ -377,6 +377,55 @@ public final class io/getstream/video/android/compose/theme/VideoThemeKt {
 	public static final fun VideoTheme (ZLio/getstream/video/android/compose/theme/StreamColors;Lio/getstream/video/android/compose/theme/StreamDimens;Lio/getstream/video/android/compose/theme/StreamTypography;Lio/getstream/video/android/compose/theme/StreamShapes;Landroidx/compose/material/ripple/RippleTheme;Lio/getstream/video/android/core/mapper/ReactionMapper;ZLkotlin/jvm/functions/Function2;Landroidx/compose/runtime/Composer;II)V
 }
 
+public abstract class io/getstream/video/android/compose/ui/components/audio/AudioRendererStyle {
+	public static final field $stable I
+	public synthetic fun <init> (ZZLandroidx/compose/ui/Alignment;ZLkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun getMicrophoneAvailabilityLabel ()Landroidx/compose/ui/Alignment;
+	public fun isShowingMicrophoneAvailability ()Z
+	public fun isShowingRoleBadge ()Z
+	public fun isSpeaking ()Z
+}
+
+public final class io/getstream/video/android/compose/ui/components/audio/AudioRendererStyleKt {
+	public static final fun copy (Lio/getstream/video/android/compose/ui/components/audio/AudioRendererStyle;ZZLandroidx/compose/ui/Alignment;Z)Lio/getstream/video/android/compose/ui/components/audio/AudioRendererStyle;
+	public static synthetic fun copy$default (Lio/getstream/video/android/compose/ui/components/audio/AudioRendererStyle;ZZLandroidx/compose/ui/Alignment;ZILjava/lang/Object;)Lio/getstream/video/android/compose/ui/components/audio/AudioRendererStyle;
+}
+
+public final class io/getstream/video/android/compose/ui/components/audio/AudioRoomKt {
+	public static final fun AudioRoom (Lio/getstream/video/android/core/Call;Landroidx/compose/runtime/Composer;I)V
+}
+
+public final class io/getstream/video/android/compose/ui/components/audio/ComposableSingletons$ParticipantAudioKt {
+	public static final field INSTANCE Lio/getstream/video/android/compose/ui/components/audio/ComposableSingletons$ParticipantAudioKt;
+	public static field lambda-1 Lkotlin/jvm/functions/Function4;
+	public fun <init> ()V
+	public final fun getLambda-1$stream_video_android_compose_release ()Lkotlin/jvm/functions/Function4;
+}
+
+public final class io/getstream/video/android/compose/ui/components/audio/ParticipantAudioKt {
+	public static final fun ParticipantAudio (Lio/getstream/video/android/core/Call;Lio/getstream/video/android/core/ParticipantState;Landroidx/compose/ui/Modifier;Lio/getstream/video/android/compose/ui/components/audio/AudioRendererStyle;Lkotlin/jvm/functions/Function4;Landroidx/compose/runtime/Composer;II)V
+}
+
+public final class io/getstream/video/android/compose/ui/components/audio/RegularAudioRendererStyle : io/getstream/video/android/compose/ui/components/audio/AudioRendererStyle {
+	public static final field $stable I
+	public fun <init> ()V
+	public fun <init> (ZZLandroidx/compose/ui/Alignment;Z)V
+	public synthetic fun <init> (ZZLandroidx/compose/ui/Alignment;ZILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Z
+	public final fun component2 ()Z
+	public final fun component3 ()Landroidx/compose/ui/Alignment;
+	public final fun component4 ()Z
+	public final fun copy (ZZLandroidx/compose/ui/Alignment;Z)Lio/getstream/video/android/compose/ui/components/audio/RegularAudioRendererStyle;
+	public static synthetic fun copy$default (Lio/getstream/video/android/compose/ui/components/audio/RegularAudioRendererStyle;ZZLandroidx/compose/ui/Alignment;ZILjava/lang/Object;)Lio/getstream/video/android/compose/ui/components/audio/RegularAudioRendererStyle;
+	public fun equals (Ljava/lang/Object;)Z
+	public fun getMicrophoneAvailabilityLabel ()Landroidx/compose/ui/Alignment;
+	public fun hashCode ()I
+	public fun isShowingMicrophoneAvailability ()Z
+	public fun isShowingRoleBadge ()Z
+	public fun isSpeaking ()Z
+	public fun toString ()Ljava/lang/String;
+}
+
 public final class io/getstream/video/android/compose/ui/components/avatar/AvatarKt {
 	public static final fun Avatar-br9S7oA (Landroidx/compose/ui/Modifier;Ljava/lang/String;Ljava/lang/String;Landroidx/compose/ui/graphics/Shape;Landroidx/compose/ui/text/TextStyle;Landroidx/compose/ui/layout/ContentScale;Ljava/lang/String;JILjava/lang/Integer;JLkotlin/jvm/functions/Function0;Landroidx/compose/runtime/Composer;III)V
 }
