@@ -6,10 +6,14 @@ description: How to build a video call similar to Zoom or facebook messenger
 import { TokenSnippet } from '../../../shared/_tokenSnippet.jsx';
 
 
-* video renderer fallback isn't great
-* css styling on the images
-* join button
-* does PIP add too much complexity (yes, remove it)
+Video Calling tutorial issues June 14th:
+
+* video Renderer fallback is ugly (Jaewoong)
+* standalone join button (Jeroen)
+* Step 7: OnCallAction adds complexity that isn't needed.
+* Step 6 or 7: We don't explain well which UI components are available (Jaewoong to check my notes below)
+* Step 7: CallContainer, we should drop the "call" prefix in the arguments. IE callContainer.callAppBarContent -> callContainer.appBarContent
+* review sessions with teams (Thierry)
 
 This tutorial teaches you how to build Zoom/Whatsapp style video calling for your app.
 
@@ -161,7 +165,7 @@ The documentation on [Call state and Participant state](../03-guides/03-call-and
 
 To make this a little more interactive let's join the call from your browser.
 
-TODO: BUTTTON HERE
+<TokenSnippet sampleApp='meeting' displayStyle='join' />
 
 On your Android emulator you'll see the text update to 2 participants.
 Let's keep the browser tab open as you go through the tutorial.
@@ -284,7 +288,7 @@ FloatingParticipantVideo(
 )
 ```
 
-### Step 6 - A full UI
+### Step 6 - A Full Video Calling UI
 
 The above example showed how to use the call state object and compose to build a basic video UI.
 For a production version of calling you'd want a few more UI elements:
@@ -299,8 +303,6 @@ Stream ships with several Compose components to make this easy.
 You can customize the components with theming, arguments and swapping parts of them.
 This is convenient if you want to quickly build a production ready calling experience for you app.
 (and if you need more flexibility, many customers use the above low level approach to build a UI from scratch)
-
-#### A. Render the UI with the call Container
 
 To render a full calling UI we'll leverage the CallContainer component.
 This includes sensible defaults for a call header, video grid and call controls.
@@ -339,6 +341,16 @@ The result will be:
 
 When you now run your app you'll see a more polished video UI.
 It supports reactions, screensharing, active speaker detection, network quality indicators etc.
+The most commonly used UI components are:
+
+* VideoRenderer: For rendering video and automatically requesting video tracks when needed
+* ParticipantVideo: The participant's video + some UI elements for network quality, reactions, speaking etc
+* ParticipantsGrid: A grid of participant video elements
+* FloatingParticipantVideo: A draggable version of the participant video. Typically used for your own video
+* ControlActions: Buttons for controlling your call
+* RingingCallContent: UI for displaying an incoming call
+
+The full list of [UI components](../04-ui-components/01-overview.mdx) is available in the docs.
 
 ### Step 7 - Customizing the UI
 
@@ -351,15 +363,6 @@ You can customize the UI by:
 The example below shows how to swap out the call controls for your own controls:
 
 ```kotlin
-private val onCallAction: (CallAction) -> Unit = { callAction ->
-    when (callAction) {
-        is FlipCamera -> call.camera.flip()
-        is ToggleCamera -> call.camera.setEnabled(callAction.isEnabled)
-        is ToggleMicrophone -> call.microphone.setEnabled(callAction.isEnabled)
-        is LeaveCall -> finish()
-        else -> Unit
-    }
-}
 
 override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
