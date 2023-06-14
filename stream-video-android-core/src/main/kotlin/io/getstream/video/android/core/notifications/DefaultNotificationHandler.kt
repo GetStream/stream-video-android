@@ -36,6 +36,7 @@ import io.getstream.log.taggedLogger
 import io.getstream.video.android.R
 import io.getstream.video.android.core.notifications.NotificationHandler.Companion.ACTION_ACCEPT_CALL
 import io.getstream.video.android.core.notifications.NotificationHandler.Companion.ACTION_INCOMING_CALL
+import io.getstream.video.android.core.notifications.NotificationHandler.Companion.ACTION_LIVESTREAM
 import io.getstream.video.android.core.notifications.NotificationHandler.Companion.ACTION_REJECT_CALL
 import io.getstream.video.android.core.notifications.NotificationHandler.Companion.INCOMING_CALL_NOTIFICATION_ID
 import io.getstream.video.android.core.notifications.NotificationHandler.Companion.INTENT_EXTRA_CALL_CID
@@ -88,8 +89,15 @@ public open class DefaultNotificationHandler(
         TODO("Not yet implemented")
     }
 
-    override fun onLivestream(callId: StreamCallId) {
-        TODO("Not yet implemented")
+    override fun onLivestream(callId: StreamCallId, callDisplayName: String) {
+        val notificationId = callId.hashCode()
+        searchLivestreamCallPendingIntent(callId, notificationId)?.let { livestreamPendingIntent ->
+            showLivestreamCallNotification(
+                livestreamPendingIntent,
+                callDisplayName,
+                notificationId,
+            )
+        } ?: logger.e { "Couldn't find any activity for $ACTION_LIVESTREAM" }
     }
 
     /**
@@ -98,8 +106,21 @@ public open class DefaultNotificationHandler(
      * @param callId The call id from the incoming call.
      */
     private fun searchIncomingCallPendingIntent(
-        callId: StreamCallId
-    ): PendingIntent? = searchActivityPendingIntent(Intent(ACTION_INCOMING_CALL), callId)
+        callId: StreamCallId,
+        notificationId: Int = INCOMING_CALL_NOTIFICATION_ID,
+    ): PendingIntent? =
+        searchActivityPendingIntent(Intent(ACTION_INCOMING_CALL), callId, notificationId)
+
+    /**
+     * Search for an activity that can receive livestream calls from Stream Server.
+     *
+     * @param callId The call id from the incoming call.
+     */
+    private fun searchLivestreamCallPendingIntent(
+        callId: StreamCallId,
+        notificationId: Int,
+    ): PendingIntent? =
+        searchActivityPendingIntent(Intent(ACTION_LIVESTREAM), callId, notificationId)
 
     /**
      * Search for an activity that can accept call from Stream Server.
@@ -109,7 +130,9 @@ public open class DefaultNotificationHandler(
      */
     private fun searchAcceptCallPendingIntent(
         callId: StreamCallId,
-    ): PendingIntent? = searchActivityPendingIntent(Intent(ACTION_ACCEPT_CALL), callId)
+        notificationId: Int = INCOMING_CALL_NOTIFICATION_ID,
+    ): PendingIntent? =
+        searchActivityPendingIntent(Intent(ACTION_ACCEPT_CALL), callId, notificationId)
 
     /**
      * Searches for a broadcast receiver that can consume the [ACTION_REJECT_CALL] intent to reject
@@ -133,9 +156,10 @@ public open class DefaultNotificationHandler(
     private fun searchActivityPendingIntent(
         baseIntent: Intent,
         callId: StreamCallId,
+        notificationId: Int,
     ): PendingIntent? =
         searchResolveInfo { application.packageManager.queryIntentActivities(baseIntent, 0) }?.let {
-            getActivityForIntent(baseIntent, it, callId)
+            getActivityForIntent(baseIntent, it, callId, notificationId)
         }
 
     private fun searchResolveInfo(availableComponents: () -> List<ResolveInfo>): ResolveInfo? =
@@ -155,10 +179,11 @@ public open class DefaultNotificationHandler(
         baseIntent: Intent,
         resolveInfo: ResolveInfo,
         callId: StreamCallId,
+        notificationId: Int,
         flags: Int = PENDING_INTENT_FLAG,
     ): PendingIntent {
         val dismissIntent = DismissNotificationActivity
-            .createIntent(application, INCOMING_CALL_NOTIFICATION_ID)
+            .createIntent(application, notificationId)
         return PendingIntent.getActivities(
             application,
             0,
@@ -210,27 +235,45 @@ public open class DefaultNotificationHandler(
         }
     }
 
-    @SuppressLint("MissingPermission")
+    private fun showLivestreamCallNotification(
+        livestreamPendingIntent: PendingIntent,
+        callDisplayName: String,
+        notificationId: Int,
+    ) {
+        showNotification(notificationId) {
+            setContentTitle("Livestream")
+            setContentText("$callDisplayName is live now")
+            setContentIntent(livestreamPendingIntent)
+        }
+    }
+
     private fun showIncomingCallNotification(
         fullScreenPendingIntent: PendingIntent,
         acceptCallPendingIntent: PendingIntent,
         rejectCallPendingIntent: PendingIntent,
         callDisplayName: String,
+        notificationId: Int = INCOMING_CALL_NOTIFICATION_ID,
     ) {
-        println("JcLog: [showIncomingCallNotification]")
+        showNotification(notificationId) {
+            priority = NotificationCompat.PRIORITY_HIGH
+            setContentTitle("Incoming call")
+            setContentText(callDisplayName)
+            setOngoing(false)
+            setContentIntent(fullScreenPendingIntent)
+            setFullScreenIntent(fullScreenPendingIntent, true)
+            setCategory(NotificationCompat.CATEGORY_CALL)
+            addCallActions(acceptCallPendingIntent, rejectCallPendingIntent, callDisplayName)
+        }
+    }
+
+    @SuppressLint("MissingPermission")
+    private fun showNotification(notificationId: Int, builder: NotificationCompat.Builder.() -> Unit) {
         val notification = NotificationCompat.Builder(application, getChannelId())
             .setSmallIcon(android.R.drawable.presence_video_online)
-            .setContentTitle("Incoming call")
-            .setContentText(callDisplayName)
-            .setOngoing(false)
             .setAutoCancel(true)
-            .setContentIntent(fullScreenPendingIntent)
-            .setFullScreenIntent(fullScreenPendingIntent, true)
-            .setPriority(NotificationCompat.PRIORITY_HIGH)
-            .setCategory(NotificationCompat.CATEGORY_CALL)
-            .addCallActions(acceptCallPendingIntent, rejectCallPendingIntent, callDisplayName)
+            .apply(builder)
             .build()
-        notificationManager.notify(INCOMING_CALL_NOTIFICATION_ID, notification)
+        notificationManager.notify(notificationId, notification)
     }
     private fun NotificationCompat.Builder.addCallActions(
         acceptCallPendingIntent: PendingIntent,

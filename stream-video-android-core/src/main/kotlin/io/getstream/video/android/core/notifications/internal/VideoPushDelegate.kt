@@ -91,7 +91,8 @@ internal class VideoPushDelegate(
     }
 
     private fun handleLiveStartedType(callId: StreamCallId, payload: Map<String, Any?>) {
-        streamVideo?.onLivestream(callId)
+        val callDisplayName = payload[KEY_CALL_DISPLAY_NAME] as String
+        streamVideo?.onLivestream(callId, callDisplayName)
     }
 
     /**
@@ -157,7 +158,8 @@ internal class VideoPushDelegate(
     /**
      * Verify if the map contains all keys/values for a Live Started Type.
      */
-    private fun Map<String, Any?>.isValidLiveStarted(): Boolean = true
+    private fun Map<String, Any?>.isValidLiveStarted(): Boolean =
+        !(this[KEY_CALL_DISPLAY_NAME] as? String).isNullOrBlank()
     /**
      * Verify if the map contains key/value from Stream Server.
      */
