@@ -21,6 +21,9 @@ import androidx.annotation.RequiresApi
 import androidx.compose.runtime.Composable
 import io.getstream.video.android.core.Call
 
+/**
+ * Remember [VideoPermissionsState] about the camera permission.
+ */
 @Composable
 public fun rememberCameraPermissionState(
     call: Call,
@@ -42,6 +45,9 @@ public fun rememberCameraPermissionState(
     )
 }
 
+/**
+ * Remember [VideoPermissionsState] about the microphone permission.
+ */
 @Composable
 public fun rememberMicrophonePermissionState(
     call: Call,
@@ -63,6 +69,9 @@ public fun rememberMicrophonePermissionState(
     )
 }
 
+/**
+ * Remember [VideoPermissionsState] about the bluetooth permission.
+ */
 @Composable
 @RequiresApi(Build.VERSION_CODES.S)
 public fun rememberBluetoothPermissionState(

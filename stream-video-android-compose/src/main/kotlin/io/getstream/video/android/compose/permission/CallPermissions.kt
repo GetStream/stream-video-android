@@ -24,6 +24,15 @@ import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.rememberMultiplePermissionsState
 import io.getstream.video.android.core.Call
 
+/**
+ * Remember call related Android permissions below:
+ *
+ * - android.Manifest.permission.CAMERA
+ * - android.Manifest.permission.RECORD_AUDIO
+ * - android.Manifest.permission.BLUETOOTH_CONNECT (Android 31 or higher)
+ *
+ * You can request those permissions by invoking `launchPermissionRequest()` method.
+ */
 @OptIn(ExperimentalPermissionsApi::class)
 @Composable
 public fun rememberCallPermissionsState(
@@ -45,6 +54,7 @@ public fun rememberCallPermissionsState(
         }
     }
 ): VideoPermissionsState {
+
     if (LocalInspectionMode.current) return fakeVideoPermissionsState
 
     val permissionState = rememberMultiplePermissionsState(permissions, onPermissionsResult)
