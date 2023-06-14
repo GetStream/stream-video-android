@@ -16,14 +16,20 @@
 
 ### 0.1 milestone
 
+- [X] Tests should run (currently some coroutine issues)
+- [ ] Bluetooth gives a permissions error on AndroidDeviceTest
+- [X] Tests should have a normal delay on the health check (right now it skips delays)
+- [X] Tests. Token expiration is broken. Hard to debug due to broken stack traces
+- [ ] Tests should run on CI
 - [ ] Video calling tutorial & Feedback cycle with team
-- [ ] Livestream tutorial & Feedback cycle with team
 - [ ] Audio room tutorial & Feedback cycle with team
+- [ ] Livestream tutorial & Feedback cycle with team
 - [ ] React component to load API key, user and token for video demo flow in the tutorials
 - [ ] Video disconnects sometimes. (BufferQueue has not connected producer)
 - [ ] Reconnect flow can't reconnect the subscriber (SFU doesn't support restarts on the subscriber peer connection yet)
 - [ ] Graceful SFU shutdown (switch between SFUs)
 - [ ] Ring support & Docs (Jc)
+- [ ] Testing session with team cross platform
 - [ ] Publish 0.1 on Maven
 
 ### 0.2 milestone
@@ -49,6 +55,7 @@
 
 ### Server wishlist (june 8th)
 
+- Reactions should have an id fields and a createdAt
 - Query calls should support Map<String, Any?> instead of Any (not nullable)
 - Do we have a permission level for people who created the call? IE i should be able to broadcast my own call
 - call.wentLiveAt or similar isn't available

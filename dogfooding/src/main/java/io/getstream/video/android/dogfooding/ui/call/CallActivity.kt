@@ -29,10 +29,10 @@ import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.call.CallContainer
 import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.StreamVideo
+import io.getstream.video.android.core.call.state.FlipCamera
 import io.getstream.video.android.core.call.state.LeaveCall
 import io.getstream.video.android.core.call.state.ToggleCamera
 import io.getstream.video.android.core.call.state.ToggleMicrophone
-import io.getstream.video.android.core.call.state.ToggleSpeakerphone
 import io.getstream.video.android.model.StreamCallId
 import kotlinx.coroutines.launch
 
@@ -58,9 +58,9 @@ class CallActivity : AbstractCallActivity() {
                     onBackPressed = { handleBackPressed() },
                     onCallAction = { callAction ->
                         when (callAction) {
+                            is FlipCamera -> call.camera.flip()
                             is ToggleCamera -> call.camera.setEnabled(callAction.isEnabled)
                             is ToggleMicrophone -> call.microphone.setEnabled(callAction.isEnabled)
-                            is ToggleSpeakerphone -> call.speaker.setEnabled(callAction.isEnabled)
                             is LeaveCall -> finish()
                             else -> Unit
                         }

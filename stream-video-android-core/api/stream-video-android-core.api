@@ -613,7 +613,9 @@ public final class io/getstream/video/android/core/StreamVideoBuilder {
 	public synthetic fun <init> (Landroid/content/Context;Ljava/lang/String;Lio/getstream/video/android/core/GEO;Lio/getstream/video/android/model/User;Ljava/lang/String;Lkotlin/jvm/functions/Function2;Lio/getstream/video/android/core/logging/LoggingLevel;ZLjava/util/List;Lkotlin/jvm/functions/Function1;Ljava/util/List;Ljava/util/List;JILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public fun <init> (Landroid/content/Context;Ljava/lang/String;Lio/getstream/video/android/model/User;)V
 	public final fun build ()Lio/getstream/video/android/core/StreamVideo;
+	public final fun getEncryptToken ()Z
 	public final fun getScope ()Lkotlinx/coroutines/CoroutineScope;
+	public final fun setEncryptToken (Z)V
 }
 
 public abstract interface class io/getstream/video/android/core/StreamVideoConfig {
@@ -949,9 +951,11 @@ public final class io/getstream/video/android/core/dispatchers/DispatcherProvide
 	public final fun getDefault ()Lkotlinx/coroutines/CoroutineDispatcher;
 	public final fun getIO ()Lkotlinx/coroutines/CoroutineDispatcher;
 	public final fun getImmediate ()Lkotlinx/coroutines/CoroutineDispatcher;
+	public final fun getInTest ()Z
 	public final fun getMain ()Lkotlinx/coroutines/CoroutineDispatcher;
 	public final fun reset ()V
 	public final fun set (Lkotlinx/coroutines/CoroutineDispatcher;Lkotlinx/coroutines/CoroutineDispatcher;)V
+	public final fun setInTest (Z)V
 }
 
 public final class io/getstream/video/android/core/errors/CameraException : java/lang/Exception {

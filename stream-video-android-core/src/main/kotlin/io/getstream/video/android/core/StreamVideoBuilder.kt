@@ -83,6 +83,9 @@ public class StreamVideoBuilder @JvmOverloads constructor(
     /** URL overwrite to allow for testing against a local instance of video */
     private var videoDomain: String = "video.stream-io-api.com"
 
+    /** if our data store should encrypt the api key, user token etc */
+    var encryptToken: Boolean = true
+
     val scope = CoroutineScope(DispatcherProvider.IO)
 
     public fun build(): StreamVideo {
@@ -113,7 +116,7 @@ public class StreamVideoBuilder @JvmOverloads constructor(
         AndroidThreeTen.init(context)
 
         val dataStore = if (!StreamUserDataStore.isInstalled) {
-            StreamUserDataStore.install(context, scope = scope)
+            StreamUserDataStore.install(context, scope = scope, isEncrypted = encryptToken)
         } else {
             StreamUserDataStore.instance()
         }
@@ -163,9 +166,11 @@ public class StreamVideoBuilder @JvmOverloads constructor(
             connectionModule.updateAuthType("anonymous")
         }
 
-        // establish a ws connection with the coordinator
-        scope.launch {
-            client.connectAsync()
+        // establish a ws connection with the coordinator (we don't support this for anonymous users)
+        if (user.type != UserType.Anonymous) {
+            scope.launch {
+                client.connectAsync()
+            }
         }
 
         // see which location is best to connect to

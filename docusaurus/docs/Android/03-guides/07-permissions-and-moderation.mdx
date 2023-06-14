@@ -61,11 +61,11 @@ You can also simply request a single permission for a camera and microphone like
 
 ```kotlin
 // request a camera permission
-val cameraPermissionState = rememberCameraPermissionsState(call = call)
+val cameraPermissionState = rememberCameraPermissionState(call = call)
 cameraPermissionState.launchPermissionRequest()
 
 // request a microphone permission
-val microphonePermissionState = rememberMicrophonePermissionsState(call = call)
+val microphonePermissionState = rememberMicrophonePermissionState(call = call)
 microphonePermissionState.launchPermissionRequest()
 ```
 

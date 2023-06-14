@@ -18,6 +18,10 @@ package io.getstream.video.android.compose.permission
 
 import androidx.compose.runtime.Stable
 
+/**
+ * Permission state interface that allows you to request Android permissions or check if those
+ * permissions are granted or not.
+ */
 @Stable
 public interface VideoPermissionsState {
 

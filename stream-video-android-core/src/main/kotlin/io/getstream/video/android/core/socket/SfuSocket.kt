@@ -56,7 +56,7 @@ public class SfuSocket(
                 token = token,
                 subscriber_sdp = getSubscriberSdp()
             )
-            socket.send(SfuRequest(join_request = request).encodeByteString())
+            socket?.send(SfuRequest(join_request = request).encodeByteString())
         }
     }
 }

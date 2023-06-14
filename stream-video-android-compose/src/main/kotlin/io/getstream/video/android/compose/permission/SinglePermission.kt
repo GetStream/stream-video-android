@@ -16,11 +16,16 @@
 
 package io.getstream.video.android.compose.permission
 
+import android.os.Build
+import androidx.annotation.RequiresApi
 import androidx.compose.runtime.Composable
 import io.getstream.video.android.core.Call
 
+/**
+ * Remember [VideoPermissionsState] about the camera permission.
+ */
 @Composable
-public fun rememberCameraPermissionsState(
+public fun rememberCameraPermissionState(
     call: Call,
     onPermissionsResult: (Boolean) -> Unit = { isGranted ->
         if (isGranted) {
@@ -40,8 +45,11 @@ public fun rememberCameraPermissionsState(
     )
 }
 
+/**
+ * Remember [VideoPermissionsState] about the microphone permission.
+ */
 @Composable
-public fun rememberMicrophonePermissionsState(
+public fun rememberMicrophonePermissionState(
     call: Call,
     onPermissionsResult: (Boolean) -> Unit = { isGranted ->
         if (isGranted) {
@@ -56,6 +64,25 @@ public fun rememberMicrophonePermissionsState(
         ),
         onPermissionsResult = {
             val isGranted = it[android.Manifest.permission.RECORD_AUDIO] == true
+            onPermissionsResult.invoke(isGranted)
+        }
+    )
+}
+
+/**
+ * Remember [VideoPermissionsState] about the bluetooth permission.
+ */
+@Composable
+@RequiresApi(Build.VERSION_CODES.S)
+public fun rememberBluetoothPermissionState(
+    call: Call,
+    onPermissionsResult: (Boolean) -> Unit
+): VideoPermissionsState {
+    return rememberCallPermissionsState(
+        call = call,
+        permissions = listOf(android.Manifest.permission.BLUETOOTH_CONNECT),
+        onPermissionsResult = {
+            val isGranted = it[android.Manifest.permission.BLUETOOTH_CONNECT] == true
             onPermissionsResult.invoke(isGranted)
         }
     )

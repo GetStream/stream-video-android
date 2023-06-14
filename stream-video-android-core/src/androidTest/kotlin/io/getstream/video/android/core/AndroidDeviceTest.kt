@@ -61,7 +61,9 @@ class AndroidDeviceTest : IntegrationTestBase(connectCoordinatorWS = false) {
 
     @get:Rule
     var mRuntimePermissionRule = GrantPermissionRule
-        .grant(Manifest.permission.BLUETOOTH_CONNECT)
+        .grant(
+            Manifest.permission.BLUETOOTH_CONNECT,
+        )
 
     @Test
     fun camera() = runTest {

@@ -61,12 +61,15 @@ public object DispatcherProvider {
     public var Default: CoroutineDispatcher = Dispatchers.Default
         internal set
 
+    var inTest = false
+
     /**
      * Overrides the main (UI thread) and IO dispatcher. For testing purposes only.
      */
     public fun set(mainDispatcher: CoroutineDispatcher, ioDispatcher: CoroutineDispatcher) {
         Main = mainDispatcher
         IO = ioDispatcher
+        inTest = true
     }
 
     /**
@@ -75,5 +78,6 @@ public object DispatcherProvider {
     public fun reset() {
         Main = Dispatchers.Main
         IO = Dispatchers.IO
+        inTest = false
     }
 }
