@@ -33,3 +33,6 @@ include(":stream-video-android-datastore")
 include(":stream-video-android-tooling")
 include(":stream-video-android-mock")
 include(":stream-video-android-bom")
+
+// Tutorials
+include(":tutorials:tutorial-video")
