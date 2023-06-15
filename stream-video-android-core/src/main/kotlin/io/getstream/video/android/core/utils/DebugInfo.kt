@@ -179,7 +179,8 @@ internal class DebugInfo(val client: StreamVideoImpl) {
             } else if (type=="track") {
                 "$type:${stat.members["kind"]}"
             } else if (type=="outbound-rtp") {
-                "$type:${stat.members["kind"]}:${stat.members["rid"]}"
+                val rid = stat.members["rid"] ?: "missing"
+                "$type:${stat.members["kind"]}:$rid"
             } else {
                 type
             }
@@ -192,7 +193,10 @@ internal class DebugInfo(val client: StreamVideoImpl) {
             }
         }
 
-        logger.i { "stat123 $statGroups" }
+        statGroups.forEach {
+            logger.i { "stat123 $${it.key}:${it.value}" }
+        }
+
 
     }
 
