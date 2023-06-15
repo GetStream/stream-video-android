@@ -68,11 +68,11 @@ import io.getstream.video.android.mock.mockCall
  * @param onBackPressed Handler when the user taps on the back button.
  * @param onCallAction Handler when the user triggers a Call Control Action.
  * @param permissions Android permissions that should be required to render a video call properly.
- * @param callAppBarContent Content is shown that calls information or additional actions.
+ * @param appBarContent Content is shown that calls information or additional actions.
  * @param style Represents a regular video call render styles.
  * @param videoRenderer A single video renderer renders each individual participant.
- * @param callVideoContent Content is shown that renders all participants' videos.
- * @param callControlsContent Content is shown that allows users to trigger different actions to control a joined call.
+ * @param videoContent Content is shown that renders all participants' videos.
+ * @param controlsContent Content is shown that allows users to trigger different actions to control a joined call.
  * @param pictureInPictureContent Content shown when the user enters Picture in Picture mode, if
  * it's been enabled in the app.
  */
@@ -84,7 +84,7 @@ public fun CallContent(
     onBackPressed: () -> Unit = {},
     onCallAction: (CallAction) -> Unit = { DefaultOnCallActionHandler.onCallAction(call, it) },
     permissions: VideoPermissionsState = rememberCallPermissionsState(call = call),
-    callAppBarContent: @Composable (call: Call) -> Unit = {
+    appBarContent: @Composable (call: Call) -> Unit = {
         CallAppBar(
             call = call,
             leadingContent = null,
@@ -105,7 +105,7 @@ public fun CallContent(
             style = videoStyle
         )
     },
-    callVideoContent: @Composable RowScope.(call: Call) -> Unit = {
+    videoContent: @Composable RowScope.(call: Call) -> Unit = {
         ParticipantsGrid(
             call = call,
             modifier = Modifier
@@ -115,7 +115,7 @@ public fun CallContent(
             videoRenderer = videoRenderer
         )
     },
-    callControlsContent: @Composable (call: Call) -> Unit = {
+    controlsContent: @Composable (call: Call) -> Unit = {
         ControlActions(
             call = call,
             onCallAction = onCallAction
@@ -142,9 +142,9 @@ public fun CallContent(
         isInPictureInPicture = isInPiPMode,
         permissions = permissions,
         onCallAction = onCallAction,
-        callAppBarContent = callAppBarContent,
-        callVideoContent = callVideoContent,
-        callControlsContent = callControlsContent,
+        appBarContent = appBarContent,
+        videoContent = videoContent,
+        controlsContent = controlsContent,
         pictureInPictureContent = pictureInPictureContent
     )
 }
@@ -158,11 +158,11 @@ public fun CallContent(
  * @param isInPictureInPicture If the user has engaged in Picture-In-Picture mode.
  * @param permissions Android permissions that should be required to render a video call properly.*
  * @param onCallAction Handler when the user triggers a Call Control Action.
- * @param callAppBarContent Content is shown that calls information or additional actions.
+ * @param appBarContent Content is shown that calls information or additional actions.
  * @param style Represents a regular video call render styles.
  * @param videoRenderer A single video renderer renders each individual participant.
- * @param callVideoContent Content is shown that renders all participants' videos.
- * @param callControlsContent Content is shown that allows users to trigger different actions to control a joined call.
+ * @param videoContent Content is shown that renders all participants' videos.
+ * @param controlsContent Content is shown that allows users to trigger different actions to control a joined call.
  * @param pictureInPictureContent Content shown when the user enters Picture in Picture mode, if
  * it's been enabled in the app.
  */
@@ -174,7 +174,7 @@ public fun CallContent(
     isInPictureInPicture: Boolean = false,
     permissions: VideoPermissionsState = rememberCallPermissionsState(call = call),
     onCallAction: (CallAction) -> Unit = { DefaultOnCallActionHandler.onCallAction(call, it) },
-    callAppBarContent: @Composable (call: Call) -> Unit = {
+    appBarContent: @Composable (call: Call) -> Unit = {
         CallAppBar(
             call = call,
             leadingContent = null,
@@ -195,7 +195,7 @@ public fun CallContent(
             style = videoStyle
         )
     },
-    callVideoContent: @Composable RowScope.(call: Call) -> Unit = {
+    videoContent: @Composable RowScope.(call: Call) -> Unit = {
         ParticipantsGrid(
             call = call,
             modifier = Modifier
@@ -205,7 +205,7 @@ public fun CallContent(
             videoRenderer = videoRenderer
         )
     },
-    callControlsContent: @Composable (call: Call) -> Unit = {
+    controlsContent: @Composable (call: Call) -> Unit = {
         ControlActions(
             call = call,
             onCallAction = onCallAction
@@ -224,7 +224,7 @@ public fun CallContent(
             topBar = { },
             bottomBar = {
                 if (orientation != ORIENTATION_LANDSCAPE) {
-                    callControlsContent.invoke(call)
+                    controlsContent.invoke(call)
                 }
             },
             content = {
@@ -241,15 +241,15 @@ public fun CallContent(
                         .background(color = VideoTheme.colors.appBackground)
                         .padding(paddings)
                 ) {
-                    callVideoContent.invoke(this, call)
+                    videoContent.invoke(this, call)
 
                     if (orientation == ORIENTATION_LANDSCAPE) {
-                        callControlsContent.invoke(call)
+                        controlsContent.invoke(call)
                     }
                 }
 
                 if (isShowingOverlayCallAppBar) {
-                    callAppBarContent.invoke(call)
+                    appBarContent.invoke(call)
                 }
             }
         )

@@ -86,7 +86,7 @@ More specifically, the `CallContainer` exposes the following Slots:
 @Composable
 public fun CallContainer(
     ...
-    callAppBarContent: @Composable () -> Unit = {
+    appBarContent: @Composable () -> Unit = {
         CallAppBar(
             modifier = Modifier.testTag("call_appbar"),
             call = callViewModel.call,
@@ -95,7 +95,7 @@ public fun CallContainer(
             onCallAction = onCallAction
         )
     },
-    callControlsContent: @Composable (call: Call) -> Unit = {
+    controlsContent: @Composable (call: Call) -> Unit = {
         ControlActions(
             modifier = Modifier.testTag("call_controls"),
             call = call,
@@ -109,8 +109,8 @@ public fun CallContainer(
             callViewModel = callViewModel,
             onBackPressed = onBackPressed,
             onCallAction = onCallAction,
-            callAppBarContent = callAppBarContent,
-            callControlsContent = callControlsContent,
+            appBarContent = appBarContent,
+            controlsContent = controlsContent,
             pictureInPictureContent = pictureInPictureContent
         )
     },
@@ -127,8 +127,8 @@ public fun CallContainer(
 )
 ```
 
-* **callAppBarContent**: Represents the content that handle a back button and shows the call information, such as the status, the number of participants.
-* **callControlsContent**: Represents the content that features various controls and actions in a call, such as audio and video handles and leaving a call.
+* **appBarContent**: Represents the content that handle a back button and shows the call information, such as the status, the number of participants.
+* **controlsContent**: Represents the content that features various controls and actions in a call, such as audio and video handles and leaving a call.
 * **pictureInPictureContent**: Represents the content that will be shown in Picture-In-Picture mode.
 * **ringingCallContent**: Represents the incoming/outgoing content shown respectively when the active user is being ringed or ringing other users.
 * **callContent**: Represents the active call content, when the user fully joins and connects to a call.
