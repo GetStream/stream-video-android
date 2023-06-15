@@ -48,9 +48,9 @@ import io.getstream.video.android.mock.mockParticipantList
  * @param isVideoType Represent the call type is a video or an audio.
  * @param modifier Modifier for styling.
  * @param isShowingHeader Weather or not the app bar will be shown.
- * @param callHeaderContent Content shown for the call header.
- * @param callDetailsContent Content shown for call details, such as call participant information.
- * @param callControlsContent Content shown for controlling call, such as accepting a call or declining a call.
+ * @param headerContent Content shown for the call header.
+ * @param detailsContent Content shown for call details, such as call participant information.
+ * @param controlsContent Content shown for controlling call, such as accepting a call or declining a call.
  * @param onBackPressed Handler when the user taps on the back button.
  * @param onCallAction Handler used when the user interacts with Call UI.
  */
@@ -60,13 +60,13 @@ public fun OutgoingCallContent(
     call: Call,
     isVideoType: Boolean,
     isShowingHeader: Boolean = true,
-    callHeaderContent: (@Composable ColumnScope.() -> Unit)? = null,
-    callDetailsContent: (
+    headerContent: (@Composable ColumnScope.() -> Unit)? = null,
+    detailsContent: (
         @Composable ColumnScope.(
             participants: List<ParticipantState>, topPadding: Dp
         ) -> Unit
     )? = null,
-    callControlsContent: (@Composable BoxScope.() -> Unit)? = null,
+    controlsContent: (@Composable BoxScope.() -> Unit)? = null,
     onBackPressed: () -> Unit = {},
     onCallAction: (CallAction) -> Unit = {},
 ) {
@@ -78,9 +78,9 @@ public fun OutgoingCallContent(
         participants = participants,
         modifier = modifier,
         isShowingHeader = isShowingHeader,
-        callHeaderContent = callHeaderContent,
-        callDetailsContent = callDetailsContent,
-        callControlsContent = callControlsContent,
+        headerContent = headerContent,
+        detailsContent = detailsContent,
+        controlsContent = controlsContent,
         onBackPressed = onBackPressed,
         onCallAction = onCallAction
     )
@@ -94,9 +94,9 @@ public fun OutgoingCallContent(
  * @param modifier Modifier for styling.
  * @param participants A list of participants.
  * @param isShowingHeader Weather or not the app bar will be shown.
- * @param callHeaderContent Content shown for the call header.
- * @param callDetailsContent Content shown for call details, such as call participant information.
- * @param callControlsContent Content shown for controlling call, such as accepting a call or declining a call.
+ * @param headerContent Content shown for the call header.
+ * @param detailsContent Content shown for call details, such as call participant information.
+ * @param controlsContent Content shown for controlling call, such as accepting a call or declining a call.
  * @param onBackPressed Handler when the user taps on the back button.
  * @param onCallAction Handler used when the user interacts with Call UI.
  */
@@ -107,13 +107,13 @@ public fun OutgoingCallContent(
     isVideoType: Boolean = true,
     participants: List<ParticipantState>,
     isShowingHeader: Boolean = true,
-    callHeaderContent: (@Composable ColumnScope.() -> Unit)? = null,
-    callDetailsContent: (
+    headerContent: (@Composable ColumnScope.() -> Unit)? = null,
+    detailsContent: (
         @Composable ColumnScope.(
             participants: List<ParticipantState>, topPadding: Dp
         ) -> Unit
     )? = null,
-    callControlsContent: (@Composable BoxScope.() -> Unit)? = null,
+    controlsContent: (@Composable BoxScope.() -> Unit)? = null,
     onBackPressed: () -> Unit = {},
     onCallAction: (CallAction) -> Unit = {},
 ) {
@@ -137,7 +137,7 @@ public fun OutgoingCallContent(
 
         Column {
             if (isShowingHeader) {
-                callHeaderContent?.invoke(this) ?: CallAppBar(
+                headerContent?.invoke(this) ?: CallAppBar(
                     call = call,
                     onBackPressed = onBackPressed,
                     onCallAction = onCallAction
@@ -150,7 +150,7 @@ public fun OutgoingCallContent(
                 VideoTheme.dimens.avatarAppbarPadding
             }
 
-            callDetailsContent?.invoke(this, participants, topPadding) ?: OutgoingCallDetails(
+            detailsContent?.invoke(this, participants, topPadding) ?: OutgoingCallDetails(
                 modifier = Modifier
                     .align(Alignment.CenterHorizontally)
                     .padding(top = topPadding),
@@ -159,7 +159,7 @@ public fun OutgoingCallContent(
             )
         }
 
-        callControlsContent?.invoke(this) ?: OutgoingCallControls(
+        controlsContent?.invoke(this) ?: OutgoingCallControls(
             modifier = Modifier
                 .align(Alignment.BottomCenter)
                 .padding(bottom = VideoTheme.dimens.outgoingCallOptionsBottomPadding),

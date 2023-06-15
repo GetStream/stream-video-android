@@ -122,8 +122,8 @@ public fun CallContainer(
             callViewModel = callViewModel,
             onBackPressed = onBackPressed,
             onCallAction = onCallAction,
-            callAppBarContent = appBarContent,
-            callControlsContent = controlsContent,
+            appBarContent = appBarContent,
+            controlsContent = controlsContent,
             pictureInPictureContent = pictureInPictureContent,
             participantVideo = participantVideo,
         )
@@ -148,7 +148,7 @@ public fun CallContainer(
         permissions = permissions,
         onBackPressed = onBackPressed,
         onCallAction = onCallAction,
-        callAppBarContent = appBarContent,
+        appBarContent = appBarContent,
         controlsContent = controlsContent,
         pictureInPictureContent = pictureInPictureContent,
         ringingCallContent = ringingCallContent,
@@ -169,7 +169,7 @@ public fun CallContainer(
  * @param onBackPressed Handler when the user taps on the back button.
  * @param onCallAction Handler when the user clicks on some of the call controls.
  * @param permissions Android permissions that should be required to render a video call properly.
- * @param callAppBarContent Content is shown that calls information or additional actions.
+ * @param appBarContent Content is shown that calls information or additional actions.
  * @param controlsContent Content is shown that allows users to trigger different actions to control a joined call.
  * @param pictureInPictureContent Content shown when the user enters Picture in Picture mode, if
  * it's been enabled in the app.
@@ -184,7 +184,7 @@ public fun CallContainer(
     onBackPressed: () -> Unit = {},
     onCallAction: (CallAction) -> Unit = { DefaultOnCallActionHandler.onCallAction(call, it) },
     permissions: VideoPermissionsState = rememberCallPermissionsState(call = call),
-    callAppBarContent: @Composable (call: Call) -> Unit = {
+    appBarContent: @Composable (call: Call) -> Unit = {
         CallAppBar(
             modifier = Modifier.testTag("call_appbar"),
             call = call,
@@ -221,8 +221,8 @@ public fun CallContainer(
             modifier = modifier.testTag("call_content"),
             permissions = permissions,
             onCallAction = onCallAction,
-            callAppBarContent = callAppBarContent,
-            callControlsContent = controlsContent,
+            appBarContent = appBarContent,
+            controlsContent = controlsContent,
             pictureInPictureContent = pictureInPictureContent,
             videoRenderer = videoRenderer,
         )
@@ -257,8 +257,8 @@ internal fun DefaultCallContent(
     ) -> Unit,
     permissions: VideoPermissionsState = rememberCallPermissionsState(call = call),
     onCallAction: (CallAction) -> Unit = { DefaultOnCallActionHandler.onCallAction(call, it) },
-    callAppBarContent: @Composable (call: Call) -> Unit,
-    callControlsContent: @Composable (call: Call) -> Unit,
+    appBarContent: @Composable (call: Call) -> Unit,
+    controlsContent: @Composable (call: Call) -> Unit,
     pictureInPictureContent: @Composable (call: Call) -> Unit = { DefaultPictureInPictureContent(it) }
 ) {
     CallContent(
@@ -269,8 +269,8 @@ internal fun DefaultCallContent(
         callViewModel = callViewModel,
         onBackPressed = onBackPressed,
         onCallAction = onCallAction,
-        callAppBarContent = callAppBarContent,
-        callControlsContent = callControlsContent,
+        appBarContent = appBarContent,
+        controlsContent = controlsContent,
         pictureInPictureContent = pictureInPictureContent,
         videoRenderer = participantVideo,
     )

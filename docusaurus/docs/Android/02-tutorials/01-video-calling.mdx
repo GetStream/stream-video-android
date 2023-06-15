@@ -52,13 +52,16 @@ dependencies {
 }
 ```
 
-There are 2 versions of Stream's SDK. "io.getstream:stream-video-android-compose" that includes the video SDK + compose UI components.
-And "io.getstream:stream-video-android-core" that only includes the video SDK.
-For this tutorial we'll use the compose UI components.
+There are 2 versions of Stream's SDK.
+
+- **Video Compose SDK**: `io.getstream:stream-video-android-compose` dependency that includes the video core SDK + compose UI components.
+- **Video Core SDK**: `io.getstream:stream-video-android-core` that only includes the core parts of the video SDK.
+
+For this tutorial, we'll use the compose UI components.
 
 ### Step 3 - Create & Join a call
 
-Open up `MainActivity.kt` and replace the MainActivity class with:
+Open up `MainActivity.kt` and replace the **MainActivity** class with:
 
 ```kotlin
 class MainActivity : ComponentActivity() {
@@ -94,11 +97,11 @@ class MainActivity : ComponentActivity() {
         setContent {
             // step4 - apply VideoTheme
             VideoTheme {
-                // step6 - define required properties.
+                // step5 - define required properties.
                 val participants by call.state.participants.collectAsState()
                 val connection by call.state.connection.collectAsState()
 
-                // step7 - render texts that display connection status.
+                // step6 - render texts that display connection status.
                 Box(
                     contentAlignment = Alignment.Center,
                     modifier = Modifier.fillMaxSize()
@@ -119,7 +122,7 @@ To run this sample we need a valid user token. The user token is typically gener
 So when the user logs in for your app you return the user token that gives them access to video calling.
 To make this tutorial easier to follow we'll generate a user token for you.
 
-Please update REPLACE_WITH_USER_ID, REPLACE_WITH_TOKEN and REPLACE_WITH_CALL_ID with the actual values shown below:
+Please update **REPLACE_WITH_USER_ID**, **REPLACE_WITH_TOKEN** and **REPLACE_WITH_CALL_ID** with the actual values shown below:
 
 <TokenSnippet sampleApp='meeting' />
 
@@ -304,7 +307,7 @@ You can customize the components with theming, arguments and swapping parts of t
 This is convenient if you want to quickly build a production ready calling experience for you app.
 (and if you need more flexibility, many customers use the above low level approach to build a UI from scratch)
 
-To render a full calling UI we'll leverage the CallContainer component.
+To render a full calling UI we'll leverage the `CallContainer` component.
 This includes sensible defaults for a call header, video grid and call controls.
 
 Open `MainActivity.kt` and setup the viewmodel at the top of the activity:
@@ -321,8 +324,8 @@ class MainActivity : ComponentActivity() {
 }
 ```
 
-Next in the same file, update the code inside of VideoTheme to use the CallContainer.
-The code will be a lot smaller than before since all UI logic is handled in the CallContainer
+Next in the same file, update the code inside of `VideoTheme` to use the `CallContainer`.
+The code will be a lot smaller than before since all UI logic is handled in the `CallContainer`:
 
 ```kotlin
 VideoTheme {
@@ -330,7 +333,7 @@ VideoTheme {
         modifier = Modifier.fillMaxSize(),
         call = call,
         callViewModel = vm,
-        onBackPressed = { handleBackPressed() },
+        onBackPressed = { onBackPressed() },
     )
 }
 ```
@@ -343,27 +346,26 @@ When you now run your app you'll see a more polished video UI.
 It supports reactions, screensharing, active speaker detection, network quality indicators etc.
 The most commonly used UI components are:
 
-* VideoRenderer: For rendering video and automatically requesting video tracks when needed
-* ParticipantVideo: The participant's video + some UI elements for network quality, reactions, speaking etc
-* ParticipantsGrid: A grid of participant video elements
-* FloatingParticipantVideo: A draggable version of the participant video. Typically used for your own video
-* ControlActions: Buttons for controlling your call
-* RingingCallContent: UI for displaying an incoming call
+- **[VideoRenderer](../04-ui-components/02-video-renderer.mdx)**: For rendering video and automatically requesting video tracks when needed.
+- **[ParticipantVideo](../04-ui-components/05-participants/01-participant-video.mdx)**: The participant's video + some UI elements for network quality, reactions, speaking etc.
+- **[ParticipantsGrid](../04-ui-components/05-participants/02-participants-grid.mdx)**: A grid of participant video elements.
+- **[FloatingParticipantVideo](../04-ui-components/05-participants/03-floating-participant-video.mdx)**: A draggable version of the participant video. Typically used for your own video.
+- **[ControlActions](../05-ui-cookbook/02-control-actions.mdx)**: Buttons for controlling your call.
+- **[RingingCallContent](../04-ui-components/04-call/02-ringing-call.mdx)**: UI for displaying incoming and outgoing calls.
 
-The full list of [UI components](../04-ui-components/01-overview.mdx) is available in the docs.
+The full list of **[UI components](../04-ui-components/01-overview.mdx)** is available in the docs.
 
 ### Step 7 - Customizing the UI
 
 You can customize the UI by:
 
-* Building your own UI components (the most flexibility, build anything)
-* Mixing and matching with Stream's UI Components (speeds up how quickly you can build common video UIs)
-* Theming (basic customization of colors, fonts etc)
+* Building your own UI components (the most flexibility, build anything).
+* Mixing and matching with Stream's UI Components (speeds up how quickly you can build common video UIs).
+* Theming (basic customization of colors, fonts etc).
 
 The example below shows how to swap out the call controls for your own controls:
 
 ```kotlin
-
 override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
 
@@ -378,7 +380,7 @@ override fun onCreate(savedInstanceState: Bundle?) {
                 modifier = Modifier.background(color = VideoTheme.colors.appBackground),
                 call = call,
                 callViewModel = vm, // optional
-                onBackPressed = { handleBackPressed() },
+                onBackPressed = { onBackPressed() },
                 controlsContent = {
                     ControlActions(
                         call = call,
@@ -387,14 +389,14 @@ override fun onCreate(savedInstanceState: Bundle?) {
                                 ToggleCameraAction(
                                     modifier = Modifier.size(52.dp),
                                     isCameraEnabled = isCameraEnabled,
-                                    onCallAction = onCallAction
+                                    onCallAction = { call.camera.setEnabled(callAction.isEnabled) }
                                 )
                             },
                             {
                                 ToggleMicrophoneAction(
                                     modifier = Modifier.size(52.dp),
                                     isMicrophoneEnabled = isMicrophoneEnabled,
-                                    onCallAction = onCallAction
+                                    onCallAction = { call.microphone.setEnabled(callAction.isEnabled) }
                                 )
                             },
                             {
@@ -403,8 +405,7 @@ override fun onCreate(savedInstanceState: Bundle?) {
                                     onCallAction = { call.camera.flip() }
                                 )
                             },
-                        ),
-                        onCallAction = onCallAction
+                        )
                     )
                 }
             )
@@ -415,8 +416,8 @@ override fun onCreate(savedInstanceState: Bundle?) {
 
 Stream's Video SDK provides fully polished UI components, allowing you to build a video call quickly and customize them. As you've seen before, you can implement a full complete video call screen with `CallContainer` composable in Jetpack Compose. The `CallContainer` composable consists of three major parts below:
 
-- **callAppBarContent**: Content is shown that calls information or additional actions.
-- **callControlsContent**: Content is shown that allows users to trigger different actions to control a joined call.
+- **appBarContent**: Content is shown that calls information or additional actions.
+- **controlsContent**: Content is shown that allows users to trigger different actions to control a joined call.
 - **callContent**: Content shown to be rendered when we're connected to a call successfully.
 
 Theming gives you control over the colors and fonts.
