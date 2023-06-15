@@ -204,7 +204,6 @@ setContent {
     VideoTheme {
         val remoteParticipants by call.state.remoteParticipants.collectAsState()
         val remoteParticipant = remoteParticipants.firstOrNull()
-        val remoteVideo = remoteParticipant?.video?.collectAsState()
         val me by call.state.me.collectAsState()
         val connection by call.state.connection.collectAsState()
         var parentSize: IntSize by remember { mutableStateOf(IntSize(0, 0)) }
@@ -217,6 +216,8 @@ setContent {
                 .onSizeChanged { parentSize = it }
         ) {
             if (remoteParticipant != null) {
+                val remoteVideo by remoteParticipant.video.collectAsState()
+
                 Column(modifier = Modifier.fillMaxSize()) {
                     VideoRenderer(
                         modifier = Modifier.weight(1f),
@@ -243,11 +244,11 @@ setContent {
             }
 
             // floating video UI for the local video participant
-            me?.let {
+            me?.let { localVideo ->
                 FloatingParticipantVideo(
                     modifier = Modifier.align(Alignment.TopEnd),
                     call = call,
-                    participant = it,
+                    participant = localVideo,
                     parentBounds = parentSize
                 )
             }

@@ -21,9 +21,8 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
@@ -182,14 +181,13 @@ private fun DefaultMediaTrackFallbackContent(
             contentDescription = null
         )
 
-        Spacer(modifier = Modifier.height(12.dp))
-
         Text(
+            modifier = Modifier.padding(30.dp),
             text = stringResource(
                 id = io.getstream.video.android.ui.common.R.string.stream_video_call_rendering_failed,
                 call.sessionId.orEmpty()
             ),
-            color = VideoTheme.colors.textLowEmphasis,
+            color = VideoTheme.colors.textHighEmphasis,
             textAlign = TextAlign.Center,
             fontSize = 14.sp
         )
