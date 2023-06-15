@@ -44,6 +44,7 @@ Our Video SDK ships with a plethora of cool and modern features. Here are just s
 
 ### 0.2 milestone
 
+- [ ] Livestream tutorial
 - [ ] Deeplink support for video call demo & dogfooding app (skip auth for the video demo, keep it for dogfooding)
 - [ ] Chat Integration
 - [ ] XML version of VideoRenderer
