@@ -48,7 +48,7 @@ Now, you can replace the default control actions with your own actions buttons l
 ```kotlin
 CallContainer(
     modifier = Modifier.background(color = VideoTheme.colors.appBackground),
-    callControlsContent = {
+    controlsContent = {
         ControlActions(
             callViewModel = vm,
             actions = actions
@@ -63,9 +63,9 @@ With the same approach, you can also change the control actions for `CallContent
 ```kotlin
 // replace default call actions for CallContent
 CallContent(
-    callControlsContent = {
+    controlsContent = {
         ControlActions(
-            callViewModel = vm, // or callDeviceState
+            call = call,
             actions = actions
         )
     },
@@ -76,7 +76,7 @@ CallContent(
 CallLobby(
     lobbyControlsContent = {
         ControlActions(
-            callViewModel = vm, // or callDeviceState
+            call = call,
             actions = actions
         )
     },
@@ -135,7 +135,7 @@ Next, you can replace the default control actions with your own composable funct
 ```kotlin
 CallContainer(
     modifier = Modifier.background(color = VideoTheme.colors.appBackground),
-    callControlsContent = { MyControlActions() },
+    controlsContent = { MyControlActions() },
     ..
 )
 ```
@@ -146,12 +146,12 @@ Now, you will see the result below:
 
 ### Removing the control actions
 
-If you want to remove the control actions and render video within full-size, you can just pass an empty lambda to the `callControlsContent` parameter like the sample below:
+If you want to remove the control actions and render video within full-size, you can just pass an empty lambda to the `controlsContent` parameter like the sample below:
 
 ```kotlin
 CallContainer(
     modifier = Modifier.background(color = VideoTheme.colors.appBackground),
-    callControlsContent = { },
+    controlsContent = { },
     ..
 )
 ```

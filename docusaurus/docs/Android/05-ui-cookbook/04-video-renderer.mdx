@@ -77,8 +77,7 @@ CallContainer(
         CallContent(
             modifier = Modifier.fillMaxSize(),
             call = call,
-            callDeviceState = callDeviceState,
-            callVideoContent = {
+            videoContent = {
                 val participants by call.state.participants.collectAsState()
 
                 LazyVerticalGrid(columns = GridCells.Fixed(2)) {

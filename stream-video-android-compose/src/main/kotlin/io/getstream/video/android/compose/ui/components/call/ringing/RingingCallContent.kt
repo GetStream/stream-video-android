@@ -20,7 +20,6 @@ import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
@@ -46,9 +45,9 @@ import io.getstream.video.android.mock.mockCall
  * @param isVideoType Represent the call type is a video or an audio.
  * @param modifier Modifier for styling.
  * @param isShowingHeader Weather or not the app bar will be shown.
- * @param callHeaderContent Content shown for the call header.
- * @param callDetailsContent Content shown for call details, such as call participant information.
- * @param callControlsContent Content shown for controlling call, such as accepting a call or declining a call.
+ * @param headerContent Content shown for the call header.
+ * @param detailsContent Content shown for call details, such as call participant information.
+ * @param controlsContent Content shown for controlling call, such as accepting a call or declining a call.
  * @param onBackPressed Handler when the user taps on the back button.
  * @param onCallAction Handler used when the user interacts with Call UI.
  * @param onAcceptedContent Content is shown when the call is accepted.
@@ -61,13 +60,13 @@ public fun RingingCallContent(
     modifier: Modifier = Modifier,
     isVideoType: Boolean = true,
     isShowingHeader: Boolean = true,
-    callHeaderContent: (@Composable ColumnScope.() -> Unit)? = null,
-    callDetailsContent: (
+    headerContent: (@Composable ColumnScope.() -> Unit)? = null,
+    detailsContent: (
         @Composable ColumnScope.(
             participants: List<ParticipantState>, topPadding: Dp
         ) -> Unit
     )? = null,
-    callControlsContent: (@Composable BoxScope.() -> Unit)? = null,
+    controlsContent: (@Composable BoxScope.() -> Unit)? = null,
     onBackPressed: () -> Unit = {},
     onCallAction: (CallAction) -> Unit = { DefaultOnCallActionHandler.onCallAction(call, it) },
     onAcceptedContent: @Composable () -> Unit,
@@ -83,9 +82,9 @@ public fun RingingCallContent(
             isVideoType = isVideoType,
             modifier = modifier,
             isShowingHeader = isShowingHeader,
-            callHeaderContent = callHeaderContent,
-            callDetailsContent = callDetailsContent,
-            callControlsContent = callControlsContent,
+            headerContent = headerContent,
+            detailsContent = detailsContent,
+            controlsContent = controlsContent,
             onBackPressed = onBackPressed,
             onCallAction = onCallAction
         )
@@ -95,9 +94,9 @@ public fun RingingCallContent(
             isVideoType = isVideoType,
             modifier = modifier,
             isShowingHeader = isShowingHeader,
-            callHeaderContent = callHeaderContent,
-            callDetailsContent = callDetailsContent,
-            callControlsContent = callControlsContent,
+            headerContent = headerContent,
+            detailsContent = detailsContent,
+            controlsContent = controlsContent,
             onBackPressed = onBackPressed,
             onCallAction = onCallAction
         )
