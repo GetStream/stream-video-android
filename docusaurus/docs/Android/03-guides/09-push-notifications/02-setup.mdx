@@ -57,6 +57,7 @@ If you want, you can also customize how the push notifications work.
 You can customize push notifications in the following ways:
 * Declaring `IntentFilter`: Lets you customize activities that will be invoked when the Push Notification is handled by the SDK
 * `NotificationHandler`: Lets you fully customize how notifications are shown and dismissed
+* Extending our default `NotificationHandler`: Lets you partially customize the behavior or Push Notification received, but reusing some part of our default implementation.
 
 ### Declaring `IntentFilter` in your Android Manifest
 
@@ -224,6 +225,31 @@ new StreamVideoBuilder(
 ```
 </TabItem>
 </Tabs>
+
+### Extending our default `NotificationHandler`
+Stream Video SDK use a default implementation of `NotificationHandler` that search into the application manifest for activities that declare the previous `IntentFilter` we detailed on a previous section.
+By now, we support three different types of push notifications and may be the case that is interesting to maintain the default behavior of the notifications but modify one of the types.
+If it is your use-case you can extend the open class `DefaultNotificationHandler` and override the behavior of the desired type of notifications.
+
+```kotlin
+class MyNotificationHandler(application: Application) : DefaultNotificationHandler(application) {
+
+    // Override this method if you want a custom behavior for Ringing call notifications
+    override fun onRingingCall(callId: StreamCallId, callDisplayName: String) {
+        [...]
+    }
+
+    // Override this method if you want a custom behavior for default notifications
+    override fun onNotification(callId: StreamCallId, callDisplayName: String) {
+        [...]
+    }
+
+    // Override this method if you want a custom behavior for Live Call notifications
+    override fun onLiveCall(callId: StreamCallId, callDisplayName: String) {
+        [...]
+    }
+}
+```
 
 ## Handling Push Notification Permissions
 Starting on Android API level 33, all apps need to [request permissions](https://developer.android.com/develop/ui/views/notifications/notification-permission) to be able to post notifications to the user.
