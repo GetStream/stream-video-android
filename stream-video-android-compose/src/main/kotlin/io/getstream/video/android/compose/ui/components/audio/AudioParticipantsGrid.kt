@@ -32,6 +32,15 @@ import io.getstream.video.android.core.ParticipantState
 import io.getstream.video.android.mock.StreamMockUtils
 import io.getstream.video.android.mock.mockParticipantList
 
+/**
+ * Renders all the participants to construct a audio room, based on the number of people in a call and the call state.
+ *
+ * @param modifier Modifier for styling.
+ * @param participants A list of participant to construct the grid.
+ * @param style Represents a regular audio call render styles.
+ * @param gridCellCount The column size of the lazy grid.
+ * @param audioRenderer A single audio renderer renders each individual participant.
+ */
 @Composable
 public fun AudioParticipantsGrid(
     modifier: Modifier = Modifier,

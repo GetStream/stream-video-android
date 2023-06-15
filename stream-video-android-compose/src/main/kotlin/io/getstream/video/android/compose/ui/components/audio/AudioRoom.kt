@@ -49,6 +49,19 @@ import io.getstream.video.android.core.call.state.CallAction
 import io.getstream.video.android.mock.StreamMockUtils
 import io.getstream.video.android.mock.mockCall
 
+/**
+ * Represents audio room content based on the call state provided from the [call].
+
+ * @param call The call that contains all the participants state and tracks.
+ * @param modifier Modifier for styling.
+ * @param onCallAction Handler when the user clicks on some of the call controls.
+ * @param permissions Android permissions that should be required to render a audio call properly.
+ * @param appBarContent Content shown that a call information or an additional actions.
+ * @param controlsContent Content is shown that allows users to trigger different actions to control a joined call.
+ * @param audioRenderer A single audio renderer renders each individual participant.
+ * @param audioContent A single audio renderer renders each individual participant.
+ * @param audioContent Content is shown by rendering audio when we're connected to a call successfully.
+ */
 @Composable
 public fun AudioRoom(
     modifier: Modifier = Modifier,
