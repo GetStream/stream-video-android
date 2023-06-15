@@ -47,7 +47,7 @@ internal class VideoPushDelegate(
             StreamVideo.instance()
         } else {
             userDataStore.user.value?.let { user ->
-                userDataStore.userToken.value?.let { userToken ->
+                userDataStore.userToken.value.let { userToken ->
                     StreamVideoBuilder(
                         context = context,
                         user = user,
@@ -89,7 +89,7 @@ internal class VideoPushDelegate(
 
     private fun handleLiveStartedType(callId: StreamCallId, payload: Map<String, Any?>) {
         val callDisplayName = payload[KEY_CALL_DISPLAY_NAME] as String
-        streamVideo?.onLivestream(callId, callDisplayName)
+        streamVideo?.onLiveCall(callId, callDisplayName)
     }
 
     /**

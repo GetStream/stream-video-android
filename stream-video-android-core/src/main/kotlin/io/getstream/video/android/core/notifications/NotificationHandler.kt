@@ -22,11 +22,11 @@ import io.getstream.video.android.model.StreamCallId
 public interface NotificationHandler : NotificationPermissionHandler {
     fun onRingingCall(callId: StreamCallId, callDisplayName: String)
     fun onNotification(callId: StreamCallId, callDisplayName: String)
-    fun onLivestream(callId: StreamCallId, callDisplayName: String)
+    fun onLiveCall(callId: StreamCallId, callDisplayName: String)
 
     companion object {
         const val ACTION_NOTIFICATION = "io.getstream.video.android.action.NOTIFICATION"
-        const val ACTION_LIVESTREAM = "io.getstream.video.android.action.LIVESTREAM"
+        const val ACTION_LIVE_CALL = "io.getstream.video.android.action.LIVE_CALL"
         const val ACTION_INCOMING_CALL = "io.getstream.video.android.action.INCOMING_CALL"
         const val ACTION_ACCEPT_CALL = "io.getstream.video.android.action.ACCEPT_CALL"
         const val ACTION_REJECT_CALL = "io.getstream.video.android.action.REJECT_CALL"
