@@ -42,6 +42,7 @@ import io.getstream.video.android.compose.permission.LaunchCallPermissions
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.call.renderer.FloatingParticipantVideo
 import io.getstream.video.android.compose.ui.components.call.renderer.ParticipantVideo
+import io.getstream.video.android.compose.ui.components.video.VideoRenderer
 import io.getstream.video.android.core.GEO
 import io.getstream.video.android.core.RealtimeConnection
 import io.getstream.video.android.core.StreamVideoBuilder
@@ -60,9 +61,13 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+        val userId = "REPLACE_WITH_USER_ID"
+        val userToken = "REPLACE_WITH_TOKEN"
+        val callId = "REPLACE_WITH_CALL_ID"
+
         // step1 - create a user.
         val user = User(
-            id = "tutorial@getstream.io", // any string
+            id = userId, // any string
             name = "Tutorial", // name and image are used in the UI
             role = "admin"
         )
@@ -73,11 +78,11 @@ class MainActivity : ComponentActivity() {
             apiKey = "hd8szvscpxvd", // demo API key
             geo = GEO.GlobalEdgeNetwork,
             user = user,
-            token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoidHV0b3JpYWxAZ2V0c3RyZWFtLmlvIiwiaXNzIjoicHJvbnRvIiwic3ViIjoidXNlci90dXRvcmlhbEBnZXRzdHJlYW0uaW8iLCJpYXQiOjE2ODY3MDU0MTUsImV4cCI6MTY4NzMxMDIyMH0.YSCQasQnTsM2GFHct_KqW8DYgi88mBerDrB3uQgT3nU",
+            token = userToken,
         ).build()
 
         // step3 - join a call, which type is `default` and id is `123`.
-        val call = client.call("default", "123")
+        val call = client.call(type = "default", id = callId)
         lifecycleScope.launch {
             call.join(create = true)
         }
@@ -104,11 +109,13 @@ class MainActivity : ComponentActivity() {
                         .onSizeChanged { parentSize = it }
                 ) {
                     if (remoteParticipant != null) {
+                        val remoteVideo by remoteParticipant.video.collectAsState()
+
                         Column(modifier = Modifier.fillMaxSize()) {
-                            ParticipantVideo(
+                            VideoRenderer(
                                 modifier = Modifier.weight(1f),
                                 call = call,
-                                participant = remoteParticipant,
+                                video = remoteVideo
                             )
                         }
                     } else {
