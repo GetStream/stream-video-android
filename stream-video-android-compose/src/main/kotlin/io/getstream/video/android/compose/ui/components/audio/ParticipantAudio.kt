@@ -73,12 +73,12 @@ public fun ParticipantAudio(
         verticalArrangement = Arrangement.Center
     ) {
 
-        Box(modifier = Modifier.size(82.dp)) {
+        Box(modifier = Modifier.size(VideoTheme.dimens.audioAvatarSize)) {
             UserAvatar(
                 user = user,
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(4.dp)
+                    .padding(VideoTheme.dimens.audioAvatarPadding)
             )
 
             if (isSpeaking && style.isShowingSpeakingBorder) {
@@ -91,7 +91,7 @@ public fun ParticipantAudio(
                 Box(
                     modifier = Modifier
                         .fillMaxSize()
-                        .padding(4.dp)
+                        .padding(VideoTheme.dimens.audioAvatarPadding)
                 ) {
                     microphoneIndicatorContent.invoke(this, participant)
                 }
@@ -136,13 +136,13 @@ private fun BoxScope.DefaultMicrophoneIndicator(
         modifier = Modifier
             .clip(CircleShape)
             .background(VideoTheme.colors.appBackground)
-            .size(20.dp)
+            .size(VideoTheme.dimens.audioMicSize)
             .align(alignment)
     ) {
         Icon(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(5.dp),
+                .padding(VideoTheme.dimens.audioMicPadding),
             painter = painterResource(id = R.drawable.stream_video_ic_mic_off),
             tint = VideoTheme.colors.errorAccent,
             contentDescription = null

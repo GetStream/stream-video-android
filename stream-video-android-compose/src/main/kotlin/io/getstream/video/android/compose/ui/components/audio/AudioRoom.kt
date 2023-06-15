@@ -80,7 +80,7 @@ public fun AudioParticipantsGrid(
         AudioParticipantsGrid(
             modifier = modifier
                 .fillMaxSize()
-                .padding(top = 24.dp),
+                .padding(top = VideoTheme.dimens.audioContentTopPadding),
             participants = participants,
             style = style,
             gridCellCount = gridCellCount,
