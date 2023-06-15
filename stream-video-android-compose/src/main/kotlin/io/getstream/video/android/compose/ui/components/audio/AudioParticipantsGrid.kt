@@ -16,6 +16,7 @@
 
 package io.getstream.video.android.compose.ui.components.audio
 
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.lazy.grid.GridCells
@@ -50,7 +51,8 @@ public fun AudioParticipantsGrid(
     LazyVerticalGrid(
         modifier = modifier,
         columns = GridCells.Fixed(gridCellCount),
-        contentPadding = PaddingValues(horizontal = 14.dp, vertical = 22.dp)
+        contentPadding = PaddingValues(horizontal = 14.dp, vertical = 30.dp),
+        verticalArrangement = Arrangement.spacedBy(22.dp)
     ) {
         items(items = participants, key = { it.sessionId }) { participant ->
             audioRenderer.invoke(participant, style)

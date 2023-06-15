@@ -203,7 +203,6 @@ public data class ParticipantState(
         _user.value = currentUser.copy(
             name = participant.name,
             image = participant.image,
-            // custom = participant.custom,
             role = participant.roles.firstOrNull().orEmpty()
         )
     }

@@ -23,6 +23,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -53,6 +54,16 @@ import io.getstream.video.android.mock.StreamMockUtils
 import io.getstream.video.android.mock.mockParticipant
 import io.getstream.video.android.ui.common.R
 
+/**
+ * Renders a single participant with a given call, which displays an avatar of the participant.
+ * Also displays participant information with a label and connection quality indicator.
+ *
+ * @param participant Participant to render.
+ * @param modifier Modifier for styling.
+ * @param style Represents a regular video call render styles.
+ * @param microphoneIndicatorContent Content is shown that displays participant's microphone states.
+ * @param roleBadgeContent Content is shown that displays in front of the role label.
+ */
 @Composable
 public fun ParticipantAudio(
     participant: ParticipantState,
@@ -60,7 +71,8 @@ public fun ParticipantAudio(
     style: AudioRendererStyle = RegularAudioRendererStyle(),
     microphoneIndicatorContent: @Composable BoxScope.(ParticipantState) -> Unit = {
         DefaultMicrophoneIndicator(style.microphoneLabelPosition)
-    }
+    },
+    roleBadgeContent: @Composable RowScope.(ParticipantState) -> Unit = {}
 ) {
     val user by participant.user.collectAsStateWithLifecycle()
     val nameOrId by participant.userNameOrId.collectAsStateWithLifecycle()
@@ -111,8 +123,12 @@ public fun ParticipantAudio(
             maxLines = 1,
         )
 
-        Row(modifier = Modifier.fillMaxWidth()) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
             if (style.isShowingRoleBadge) {
+                roleBadgeContent.invoke(this, participant)
             }
 
             Text(
