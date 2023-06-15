@@ -16,6 +16,7 @@
 
 ### 0.1 milestone
 
+- [ ] Cleanup the readme and add a nice graphic. Make the repo public after that
 - [ ] Video disconnects sometimes. (BufferQueue has not connected producer and Stop capture: Nulling session)
 - [ ] Bluetooth gives a permissions error on AndroidDeviceTest. We shouldn't require BLUETOOTH_CONNECT by default
 - [ ] Crash on interceptor (broken stack trace, check logs)
@@ -54,6 +55,7 @@
 - [X] Low level docs
 
 ### TODO ~1 week
+
 
 - [ ] Error handling could be improved
 - [ ] Share example with backend team for resolution degradation

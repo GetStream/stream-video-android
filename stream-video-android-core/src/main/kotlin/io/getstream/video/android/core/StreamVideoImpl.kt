@@ -150,6 +150,7 @@ internal class StreamVideoImpl internal constructor(
     val socketImpl = connectionModule.coordinatorSocket
 
     override fun cleanup() {
+        debugInfo.stop()
         // stop all running coroutines
         scope.cancel()
         // stop the socket
@@ -314,6 +315,8 @@ internal class StreamVideoImpl internal constructor(
                 }
             }
         }
+
+        debugInfo.start()
     }
 
     var location: String? = null

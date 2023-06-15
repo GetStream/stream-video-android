@@ -20,6 +20,11 @@ import io.getstream.log.taggedLogger
 import io.getstream.video.android.core.StreamVideoImpl
 import io.getstream.video.android.core.dispatchers.DispatcherProvider
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
+import org.webrtc.RTCStats
+import org.webrtc.RTCStatsReport
 
 internal data class Timer(val name: String, val start: Long = System.currentTimeMillis()) {
     var end: Long = 0
@@ -48,6 +53,7 @@ internal data class Timer(val name: String, val start: Long = System.currentTime
  * Handy helper gathering all relevant debug information
  */
 internal class DebugInfo(val client: StreamVideoImpl) {
+    private var job: Job? = null
     val scope = CoroutineScope(DispatcherProvider.IO)
 
     private val logger by taggedLogger("DebugInfo")
@@ -71,15 +77,19 @@ internal class DebugInfo(val client: StreamVideoImpl) {
     val resolution by lazy { }
     val availableResolutions by lazy { }
 
-    init {
+    fun start() {
         if (client.developmentMode) {
-//            scope.launch {
-//                while (true) {
-//                    delay(20000)
-//                    log()
-//                }
-//            }
+            job = scope.launch {
+                while (true) {
+                    delay(20000)
+                    log()
+                }
+            }
         }
+    }
+
+    fun stop() {
+        job?.cancel()
     }
 
     fun log() {
@@ -112,14 +122,88 @@ internal class DebugInfo(val client: StreamVideoImpl) {
                 logger.i { " - ${it.name}:$s took $t" }
             }
         }
-//        publisher?.let {
-//            val stats = it.getStats().value
-//            logger.i { "Publisher stats. video quality: $stats" }
-//        }
-//        subscriber?.let {
-//            val stats = it.getStats().value
-//            logger.i { "Subscriber stats. video quality: $stats" }
-//        }
+        /*
+        Stats wishlist
+        - selected sfu
+        - max resolution & fps capture
+        - incoming, rendering at resolution vs receiving resolution
+        - jitter & latency
+        - fir, pli, nack etc
+        - video limit reasons
+        - selected resolution
+        - TCP instead of UDP
+         */
+        localStats()
+        publisher?.let {
+            val stats = it.getStats().value
+            processPubStats(stats)
+            logger.i { "Publisher stats. video quality: $stats" }
+        }
+        subscriber?.let {
+            val stats = it.getStats().value
+            processSubStats(stats)
+            logger.i { "Subscriber stats. video quality: $stats" }
+        }
+    }
+
+    fun localStats() {
+        val call = client.state.activeCall.value
+        val resolution = call?.camera?.resolution?.value
+        val availableResolutions = call?.camera?.availableResolutions?.value
+        val maxResolution = availableResolutions?.maxByOrNull { it.width * it.height }
+
+        val displayingAt = call?.session?.trackDimensions?.value
+
+        val sfu = call?.session?.sfuUrl
+
+        logger.i { "stat123 with $sfu ${resolution}, ${maxResolution}, displaying external video at ${displayingAt}" }
+
+    }
+
+
+    fun processStats(stats: RTCStatsReport?) {
+        if (stats == null) return
+
+        val skipTypes = listOf("codec", "certificate", "data-channel")
+
+        val statGroups = mutableMapOf<String, MutableList<RTCStats>>()
+
+        for (entry in stats.statsMap) {
+            val stat = entry.value
+
+            val type = stat.type
+            if (type in skipTypes) continue
+
+            val statGroup = if (type=="inbound-rtp") {
+                "$type:${stat.members["kind"]}"
+            } else if (type=="track") {
+                "$type:${stat.members["kind"]}"
+            } else if (type=="outbound-rtp") {
+                "$type:${stat.members["kind"]}:${stat.members["rid"]}"
+            } else {
+                type
+            }
+
+            if (statGroup != null ) {
+                if (statGroup !in statGroups) {
+                    statGroups[statGroup] = mutableListOf()
+                }
+                statGroups[statGroup]?.add(stat)
+            }
+        }
+
+        logger.i { "stat123 $statGroups" }
+
+    }
+
+    fun processPubStats(stats: RTCStatsReport?) {
+        processStats(stats)
+
+    }
+
+    fun processSubStats(stats: RTCStatsReport?) {
+        processStats(stats)
+
     }
 
     fun listCodecs() {
