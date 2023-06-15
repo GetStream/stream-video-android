@@ -49,9 +49,14 @@ import kotlinx.coroutines.launch
 class MainActivity3 : AbstractCallActivity() {
 
     override fun provideCall(): Call {
+
+        val userId = "REPLACE_WITH_USER_ID"
+        val userToken = "REPLACE_WITH_TOKEN"
+        val callId = "REPLACE_WITH_CALL_ID"
+
         // step1 - create a user.
         val user = User(
-            id = "tutorial@getstream.io", // any string
+            id = userId, // any string
             name = "Tutorial", // name and image are used in the UI
             role = "admin"
         )
@@ -62,10 +67,10 @@ class MainActivity3 : AbstractCallActivity() {
             apiKey = "hd8szvscpxvd", // demo API key
             geo = GEO.GlobalEdgeNetwork,
             user = user,
-            token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoidHV0b3JpYWxAZ2V0c3RyZWFtLmlvIiwiaXNzIjoicHJvbnRvIiwic3ViIjoidXNlci90dXRvcmlhbEBnZXRzdHJlYW0uaW8iLCJpYXQiOjE2ODY3MDU0MTUsImV4cCI6MTY4NzMxMDIyMH0.YSCQasQnTsM2GFHct_KqW8DYgi88mBerDrB3uQgT3nU",
+            token = userToken,
         ).build()
 
-        return client.call("default", "123")
+        return client.call(type = "default", id = callId)
     }
 
     // step3 - create a CallViewModel.
