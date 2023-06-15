@@ -16,7 +16,6 @@
 
 package io.getstream.video.android.compose.ui.components.audio
 
-import android.content.res.Configuration
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -24,16 +23,17 @@ import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.calculateEndPadding
 import androidx.compose.foundation.layout.calculateStartPadding
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.platform.LocalLayoutDirection
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.coerceAtLeast
 import androidx.compose.ui.unit.dp
@@ -42,9 +42,7 @@ import io.getstream.video.android.compose.permission.VideoPermissionsState
 import io.getstream.video.android.compose.permission.rememberMicrophonePermissionState
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.call.CallAppBar
-import io.getstream.video.android.compose.ui.components.call.controls.ControlActions
 import io.getstream.video.android.compose.ui.components.call.controls.actions.DefaultOnCallActionHandler
-import io.getstream.video.android.compose.ui.components.call.controls.actions.buildDefaultAudioControlActions
 import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.ParticipantState
 import io.getstream.video.android.core.call.state.CallAction
@@ -79,7 +77,8 @@ public fun AudioRoom(
     audioContent: @Composable RowScope.(call: Call) -> Unit = {
         val participants by call.state.participants.collectAsStateWithLifecycle()
         AudioParticipantsGrid(
-            modifier = modifier
+            modifier = Modifier
+                .testTag("audio_content")
                 .fillMaxSize()
                 .padding(top = VideoTheme.dimens.audioContentTopPadding),
             participants = participants,
@@ -89,25 +88,22 @@ public fun AudioRoom(
         )
     },
     controlsContent: @Composable (call: Call) -> Unit = {
-        ControlActions(
-            call = call,
-            actions = buildDefaultAudioControlActions(call = call, onCallAction = onCallAction)
+        AudioControlActions(
+            modifier = Modifier
+                .testTag("audio_controls_content")
+                .fillMaxWidth()
+                .padding(start = 22.dp, end = 22.dp, bottom = 30.dp),
+            call = call
         )
     },
 ) {
-    val orientation = LocalConfiguration.current.orientation
-
     DefaultPermissionHandler(videoPermission = permissions)
 
     Scaffold(
         modifier = modifier,
         contentColor = VideoTheme.colors.appBackground,
         topBar = { },
-        bottomBar = {
-            if (orientation != Configuration.ORIENTATION_LANDSCAPE) {
-                controlsContent.invoke(call)
-            }
-        },
+        bottomBar = { controlsContent.invoke(call) },
         content = {
             val paddings = PaddingValues(
                 top = it.calculateTopPadding(),
@@ -123,10 +119,6 @@ public fun AudioRoom(
                     .padding(paddings)
             ) {
                 audioContent.invoke(this, call)
-
-                if (orientation == Configuration.ORIENTATION_LANDSCAPE) {
-                    controlsContent.invoke(call)
-                }
             }
 
             if (isShowingOverlayAppBar) {

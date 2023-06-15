@@ -22,6 +22,7 @@ import androidx.compose.material.IconButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import io.getstream.video.android.compose.theme.VideoTheme
@@ -40,12 +41,13 @@ import io.getstream.video.android.ui.common.R
 public fun AcceptCallAction(
     modifier: Modifier = Modifier,
     enabled: Boolean = true,
+    shape: Shape = VideoTheme.shapes.callButton,
     onCallAction: (AcceptCall) -> Unit,
 ) {
     IconButton(
         modifier = modifier.background(
             color = VideoTheme.colors.infoAccent,
-            shape = VideoTheme.shapes.callButton
+            shape = shape
         ),
         enabled = enabled,
         onClick = { onCallAction(AcceptCall) },

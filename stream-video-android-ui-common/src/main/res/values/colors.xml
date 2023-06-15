@@ -45,6 +45,7 @@
     <color name="stream_video_action_icon_enabled">#FFFFFF</color>
     <color name="stream_video_action_icon_disabled">#000000</color>
     <color name="stream_video_lobby_background">#4C525C</color>
+    <color name="stream_video_audio_leave">#FFFFFF</color>
 
     <!-- Default Dark colors -->
     <color name="stream_video_text_high_emphasis_dark">#FFFFFF</color>
@@ -67,6 +68,7 @@
     <color name="stream_video_action_icon_enabled_dark">#000000</color>
     <color name="stream_video_action_icon_disabled_dark">#FFFFFF</color>
     <color name="stream_video_lobby_background_dark">#4C525C</color>
+    <color name="stream_video_audio_leave_dark">#FFFFFF</color>
 
     <!-- Avatar gradient colors -->
     <color name="stream_video_avatar_gradient_orange">#FF8A65</color>

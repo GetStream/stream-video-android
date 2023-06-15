@@ -21,6 +21,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material.Icon
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
@@ -42,6 +44,11 @@ public fun ToggleMicrophoneAction(
     modifier: Modifier = Modifier,
     isMicrophoneEnabled: Boolean,
     enabled: Boolean = true,
+    shape: Shape = VideoTheme.shapes.callControlsButton,
+    enabledColor: Color = VideoTheme.colors.callActionIconEnabledBackground,
+    disabledColor: Color = VideoTheme.colors.callActionIconDisabledBackground,
+    enabledIconTint: Color = VideoTheme.colors.callActionIconEnabled,
+    disabledIconTint: Color = VideoTheme.colors.callActionIconDisabled,
     onCallAction: (ToggleMicrophone) -> Unit
 ) {
     val microphoneIcon =
@@ -55,7 +62,10 @@ public fun ToggleMicrophoneAction(
 
     CallControlActionBackground(
         modifier = modifier,
-        isEnabled = isMicrophoneEnabled
+        isEnabled = isMicrophoneEnabled,
+        shape = shape,
+        enabledColor = enabledColor,
+        disabledColor = disabledColor,
     ) {
         Icon(
             modifier = Modifier
@@ -66,12 +76,12 @@ public fun ToggleMicrophoneAction(
                     )
                 },
             tint = if (isMicrophoneEnabled) {
-                VideoTheme.colors.callActionIconEnabled
+                enabledIconTint
             } else {
-                VideoTheme.colors.callActionIconDisabled
+                disabledIconTint
             },
             painter = microphoneIcon,
-            contentDescription = stringResource(R.string.stream_video_call_controls_toggle_camera)
+            contentDescription = stringResource(R.string.stream_video_call_controls_toggle_microphone)
         )
     }
 }
