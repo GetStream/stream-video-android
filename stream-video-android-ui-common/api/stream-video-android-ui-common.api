@@ -2,14 +2,13 @@ public abstract class io/getstream/video/android/common/AbstractCallActivity : a
 	public static final field Companion Lio/getstream/video/android/common/AbstractCallActivity$Companion;
 	public static final field EXTRA_CID Ljava/lang/String;
 	public fun <init> ()V
-	public fun closeCall ()V
-	public abstract fun createCall ()Lio/getstream/video/android/core/Call;
 	public final fun getCall ()Lio/getstream/video/android/core/Call;
 	protected fun handleBackPressed ()V
 	public fun onConfigurationChanged (Landroid/content/res/Configuration;)V
 	protected fun onDestroy ()V
 	protected fun onStop ()V
 	public fun pipChanged (Z)V
+	public abstract fun provideCall ()Lio/getstream/video/android/core/Call;
 }
 
 public final class io/getstream/video/android/common/AbstractCallActivity$Companion {

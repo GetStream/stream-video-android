@@ -19,13 +19,10 @@ package io.getstream.video.android.core
 import com.google.common.truth.Truth.assertThat
 import io.getstream.log.taggedLogger
 import io.getstream.result.Error
-import io.getstream.video.android.core.dispatchers.DispatcherProvider
 import io.getstream.video.android.core.errors.VideoErrorCode
 import io.getstream.video.android.model.User
 import io.getstream.video.android.model.UserType
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.runTest
 import org.junit.Ignore
 import org.junit.Test
@@ -38,20 +35,6 @@ import org.robolectric.RobolectricTestRunner
 class ClientAndAuthTest : TestBase() {
 
     private val logger by taggedLogger("Test:ClientAndAuthTest")
-
-    @Test
-    fun trythis() = runTest {
-        // this hangs:
-        println("backgroundscope $backgroundScope")
-        val scope = CoroutineScope(DispatcherProvider.IO)
-        println("created scope $scope")
-        val job = scope.launch {
-            while (true) {
-                delay(1000)
-            }
-        }
-        job.cancel()
-    }
 
     @Test
     fun regularUser() = runTest {

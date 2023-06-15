@@ -21,8 +21,8 @@ import androidx.activity.ComponentActivity
 import androidx.core.app.NotificationManagerCompat
 import androidx.lifecycle.lifecycleScope
 import io.getstream.video.android.core.StreamVideo
-import io.getstream.video.android.core.utils.INTENT_EXTRA_CALL_CID
-import io.getstream.video.android.core.utils.INTENT_EXTRA_NOTIFICATION_ID
+import io.getstream.video.android.core.notifications.NotificationHandler.Companion.INTENT_EXTRA_CALL_CID
+import io.getstream.video.android.core.notifications.NotificationHandler.Companion.INTENT_EXTRA_NOTIFICATION_ID
 import io.getstream.video.android.model.StreamCallId
 import io.getstream.video.android.model.streamCallId
 import kotlinx.coroutines.launch
