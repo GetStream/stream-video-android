@@ -65,7 +65,6 @@ import org.webrtc.PeerConnection
 import org.webrtc.RendererCommon
 import stream.video.sfu.models.TrackType
 import stream.video.sfu.models.VideoDimension
-import java.io.InterruptedIOException
 
 /**
  * Monitors

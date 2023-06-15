@@ -76,8 +76,7 @@ class AndroidDeviceTest : IntegrationTestBase(connectCoordinatorWS = false) {
             Manifest.permission.BLUETOOTH_CONNECT,
         )
 
-    internal class InterceptorTest(
-    ) : Interceptor {
+    internal class InterceptorTest() : Interceptor {
 
         @Throws(IOException::class)
         override fun intercept(chain: Interceptor.Chain): Response {
@@ -91,20 +90,17 @@ class AndroidDeviceTest : IntegrationTestBase(connectCoordinatorWS = false) {
         }
     }
 
-    internal class InterceptorBreaks(
-    ) : Interceptor {
+    internal class InterceptorBreaks() : Interceptor {
 
         @Throws(IOException::class)
         override fun intercept(chain: Interceptor.Chain): Response {
             val original = chain.request()
-
 
             throw InterruptedIOException()
 
             return chain.proceed(original)
         }
     }
-
 
     @Test
     fun trythis() = runTest {
@@ -125,7 +121,6 @@ class AndroidDeviceTest : IntegrationTestBase(connectCoordinatorWS = false) {
             .method("HEAD", null)
             .build()
         val call = ok.newCall(request)
-
 
         val retro = Retrofit.Builder()
             .client(ok)
