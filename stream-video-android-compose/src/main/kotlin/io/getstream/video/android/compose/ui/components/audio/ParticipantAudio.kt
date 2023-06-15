@@ -39,6 +39,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
@@ -103,6 +104,7 @@ public fun ParticipantAudio(
             modifier = Modifier.fillMaxWidth(),
             text = nameOrId,
             fontSize = 14.sp,
+            fontWeight = FontWeight.Bold,
             color = VideoTheme.colors.textHighEmphasis,
             textAlign = TextAlign.Center,
             overflow = TextOverflow.Ellipsis,
@@ -117,7 +119,7 @@ public fun ParticipantAudio(
                 modifier = Modifier.fillMaxWidth(),
                 text = user.role,
                 fontSize = 11.sp,
-                color = VideoTheme.colors.textLowEmphasis,
+                color = VideoTheme.colors.textHighEmphasis,
                 textAlign = TextAlign.Center,
                 overflow = TextOverflow.Ellipsis,
                 maxLines = 1,
