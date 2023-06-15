@@ -377,6 +377,10 @@ public final class io/getstream/video/android/compose/theme/VideoThemeKt {
 	public static final fun VideoTheme (ZLio/getstream/video/android/compose/theme/StreamColors;Lio/getstream/video/android/compose/theme/StreamDimens;Lio/getstream/video/android/compose/theme/StreamTypography;Lio/getstream/video/android/compose/theme/StreamShapes;Landroidx/compose/material/ripple/RippleTheme;Lio/getstream/video/android/core/mapper/ReactionMapper;ZLkotlin/jvm/functions/Function2;Landroidx/compose/runtime/Composer;II)V
 }
 
+public final class io/getstream/video/android/compose/ui/components/audio/AudioParticipantsGridKt {
+	public static final fun AudioParticipantsGrid (Landroidx/compose/ui/Modifier;Ljava/util/List;Lio/getstream/video/android/compose/ui/components/audio/AudioRendererStyle;ILkotlin/jvm/functions/Function4;Landroidx/compose/runtime/Composer;II)V
+}
+
 public abstract class io/getstream/video/android/compose/ui/components/audio/AudioRendererStyle {
 	public static final field $stable I
 	public synthetic fun <init> (ZLandroidx/compose/foundation/BorderStroke;ZLandroidx/compose/ui/Alignment;ZLkotlin/jvm/internal/DefaultConstructorMarker;)V
@@ -393,15 +397,25 @@ public final class io/getstream/video/android/compose/ui/components/audio/AudioR
 }
 
 public final class io/getstream/video/android/compose/ui/components/audio/AudioRoomKt {
-	public static final fun AudioRoom (Landroidx/compose/ui/Modifier;Lio/getstream/video/android/core/Call;Lio/getstream/video/android/compose/ui/components/audio/AudioRendererStyle;ILandroidx/compose/runtime/Composer;II)V
-	public static final fun AudioRoom (Landroidx/compose/ui/Modifier;Ljava/util/List;Lio/getstream/video/android/compose/ui/components/audio/AudioRendererStyle;ILandroidx/compose/runtime/Composer;II)V
+	public static final fun AudioParticipantsGrid (Landroidx/compose/ui/Modifier;Lio/getstream/video/android/core/Call;IZLio/getstream/video/android/compose/permission/VideoPermissionsState;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function3;Lio/getstream/video/android/compose/ui/components/audio/AudioRendererStyle;Lkotlin/jvm/functions/Function4;Lkotlin/jvm/functions/Function4;Lkotlin/jvm/functions/Function3;Landroidx/compose/runtime/Composer;III)V
+}
+
+public final class io/getstream/video/android/compose/ui/components/audio/ComposableSingletons$AudioParticipantsGridKt {
+	public static final field INSTANCE Lio/getstream/video/android/compose/ui/components/audio/ComposableSingletons$AudioParticipantsGridKt;
+	public static field lambda-1 Lkotlin/jvm/functions/Function4;
+	public fun <init> ()V
+	public final fun getLambda-1$stream_video_android_compose_release ()Lkotlin/jvm/functions/Function4;
 }
 
 public final class io/getstream/video/android/compose/ui/components/audio/ComposableSingletons$AudioRoomKt {
 	public static final field INSTANCE Lio/getstream/video/android/compose/ui/components/audio/ComposableSingletons$AudioRoomKt;
-	public static field lambda-1 Lkotlin/jvm/functions/Function2;
+	public static field lambda-1 Lkotlin/jvm/functions/Function4;
+	public static field lambda-2 Lkotlin/jvm/functions/Function2;
+	public static field lambda-3 Lkotlin/jvm/functions/Function2;
 	public fun <init> ()V
-	public final fun getLambda-1$stream_video_android_compose_release ()Lkotlin/jvm/functions/Function2;
+	public final fun getLambda-1$stream_video_android_compose_release ()Lkotlin/jvm/functions/Function4;
+	public final fun getLambda-2$stream_video_android_compose_release ()Lkotlin/jvm/functions/Function2;
+	public final fun getLambda-3$stream_video_android_compose_release ()Lkotlin/jvm/functions/Function2;
 }
 
 public final class io/getstream/video/android/compose/ui/components/audio/ComposableSingletons$ParticipantAudioKt {

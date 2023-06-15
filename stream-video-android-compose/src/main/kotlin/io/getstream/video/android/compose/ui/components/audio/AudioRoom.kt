@@ -16,60 +16,133 @@
 
 package io.getstream.video.android.compose.ui.components.audio
 
+import android.content.res.Configuration
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.RowScope
+import androidx.compose.foundation.layout.calculateEndPadding
+import androidx.compose.foundation.layout.calculateStartPadding
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.lazy.grid.GridCells
-import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
-import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material.Scaffold
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalInspectionMode
+import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.coerceAtLeast
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import io.getstream.video.android.compose.permission.VideoPermissionsState
+import io.getstream.video.android.compose.permission.rememberMicrophonePermissionState
 import io.getstream.video.android.compose.theme.VideoTheme
+import io.getstream.video.android.compose.ui.components.call.CallAppBar
+import io.getstream.video.android.compose.ui.components.call.controls.ControlActions
+import io.getstream.video.android.compose.ui.components.call.controls.actions.DefaultOnCallActionHandler
 import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.ParticipantState
+import io.getstream.video.android.core.call.state.CallAction
 import io.getstream.video.android.mock.StreamMockUtils
 import io.getstream.video.android.mock.mockParticipantList
 
 @Composable
-public fun AudioRoom(
+public fun AudioParticipantsGrid(
     modifier: Modifier = Modifier,
     call: Call,
+    gridCellCount: Int = 4,
+    isShowingOverlayAppBar: Boolean = true,
+    permissions: VideoPermissionsState = rememberMicrophonePermissionState(call = call),
+    onCallAction: (CallAction) -> Unit = { DefaultOnCallActionHandler.onCallAction(call, it) },
+    appBarContent: @Composable (call: Call) -> Unit = {
+        CallAppBar(
+            call = call,
+            leadingContent = null,
+            onCallAction = onCallAction
+        )
+    },
     style: AudioRendererStyle = RegularAudioRendererStyle(),
-    gridCellCount: Int = 4
+    audioRenderer: @Composable (
+        participant: ParticipantState,
+        style: AudioRendererStyle
+    ) -> Unit = { audioParticipant, audioStyle ->
+        ParticipantAudio(
+            participant = audioParticipant,
+            style = audioStyle
+        )
+    },
+    audioContent: @Composable RowScope.(call: Call) -> Unit = {
+        val participants by call.state.participants.collectAsStateWithLifecycle()
+        AudioParticipantsGrid(
+            modifier = modifier
+                .fillMaxSize()
+                .padding(top = 24.dp),
+            participants = participants,
+            style = style,
+            gridCellCount = gridCellCount,
+            audioRenderer = audioRenderer
+        )
+    },
+    controlsContent: @Composable (call: Call) -> Unit = {
+        ControlActions(
+            call = call,
+            onCallAction = onCallAction
+        )
+    },
 ) {
-    val participants by call.state.participants.collectAsStateWithLifecycle()
+    val orientation = LocalConfiguration.current.orientation
 
-    AudioRoom(
-        modifier = modifier.background(VideoTheme.colors.appBackground),
-        participants = participants,
-        style = style,
-        gridCellCount = gridCellCount
+    DefaultPermissionHandler(videoPermission = permissions)
+
+    Scaffold(
+        modifier = modifier,
+        contentColor = VideoTheme.colors.appBackground,
+        topBar = { },
+        bottomBar = {
+            if (orientation != Configuration.ORIENTATION_LANDSCAPE) {
+                controlsContent.invoke(call)
+            }
+        },
+        content = {
+            val paddings = PaddingValues(
+                top = it.calculateTopPadding(),
+                start = it.calculateStartPadding(layoutDirection = LocalLayoutDirection.current),
+                end = it.calculateEndPadding(layoutDirection = LocalLayoutDirection.current),
+                bottom = (it.calculateBottomPadding() - VideoTheme.dimens.callControllerBottomPadding)
+                    .coerceAtLeast(0.dp)
+            )
+
+            Row(
+                modifier = modifier
+                    .background(color = VideoTheme.colors.appBackground)
+                    .padding(paddings)
+            ) {
+                audioContent.invoke(this, call)
+
+                if (orientation == Configuration.ORIENTATION_LANDSCAPE) {
+                    controlsContent.invoke(call)
+                }
+            }
+
+            if (isShowingOverlayAppBar) {
+                appBarContent.invoke(call)
+            }
+        }
     )
 }
 
 @Composable
-public fun AudioRoom(
-    modifier: Modifier = Modifier,
-    participants: List<ParticipantState>,
-    style: AudioRendererStyle = RegularAudioRendererStyle(),
-    gridCellCount: Int = 4
+private fun DefaultPermissionHandler(
+    videoPermission: VideoPermissionsState,
 ) {
-    LazyVerticalGrid(
-        modifier = modifier,
-        columns = GridCells.Fixed(gridCellCount),
-        contentPadding = PaddingValues(horizontal = 14.dp, vertical = 22.dp)
-    ) {
-        items(items = participants, key = { it.sessionId }) { participant ->
-            ParticipantAudio(
-                participant = participant,
-                style = style
-            )
-        }
+    if (LocalInspectionMode.current) return
+
+    LaunchedEffect(key1 = videoPermission) {
+        videoPermission.launchPermissionRequest()
     }
 }
 
@@ -78,7 +151,7 @@ public fun AudioRoom(
 private fun AudioRoomPreview() {
     StreamMockUtils.initializeStreamVideo(LocalContext.current)
     VideoTheme {
-        AudioRoom(
+        AudioParticipantsGrid(
             modifier = Modifier.fillMaxSize(),
             participants = mockParticipantList
         )

@@ -21,8 +21,6 @@ import androidx.activity.compose.setContent
 import androidx.activity.viewModels
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.lifecycleScope
 import io.getstream.video.android.common.AbstractCallActivity
@@ -30,7 +28,7 @@ import io.getstream.video.android.common.viewmodel.CallViewModel
 import io.getstream.video.android.common.viewmodel.CallViewModelFactory
 import io.getstream.video.android.compose.permission.LaunchCallPermissions
 import io.getstream.video.android.compose.theme.VideoTheme
-import io.getstream.video.android.compose.ui.components.audio.AudioRoom
+import io.getstream.video.android.compose.ui.components.audio.AudioParticipantsGrid
 import io.getstream.video.android.compose.ui.components.call.CallContainer
 import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.GEO
@@ -93,7 +91,7 @@ class MainActivity3 : AbstractCallActivity() {
             VideoTheme {
 
                 // step7 - render videos
-                AudioRoom(
+                AudioParticipantsGrid(
                     modifier = Modifier.fillMaxSize().clickable {
                         call.microphone.disable()
                     },
