@@ -623,6 +623,10 @@ public final class io/getstream/video/android/compose/ui/components/call/control
 	public static final fun AcceptCallAction (Landroidx/compose/ui/Modifier;ZLkotlin/jvm/functions/Function1;Landroidx/compose/runtime/Composer;II)V
 }
 
+public final class io/getstream/video/android/compose/ui/components/call/controls/actions/AudioControlsActionsKt {
+	public static final fun buildDefaultAudioControlActions (Lio/getstream/video/android/core/Call;Lkotlin/jvm/functions/Function1;Landroidx/compose/runtime/Composer;I)Ljava/util/List;
+}
+
 public final class io/getstream/video/android/compose/ui/components/call/controls/actions/CallControlActionBackgroundKt {
 	public static final fun CallControlActionBackground-t6yy7ic (Landroidx/compose/ui/Modifier;ZJJLkotlin/jvm/functions/Function2;Landroidx/compose/runtime/Composer;II)V
 }

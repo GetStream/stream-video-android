@@ -44,6 +44,7 @@ import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.call.CallAppBar
 import io.getstream.video.android.compose.ui.components.call.controls.ControlActions
 import io.getstream.video.android.compose.ui.components.call.controls.actions.DefaultOnCallActionHandler
+import io.getstream.video.android.compose.ui.components.call.controls.actions.buildDefaultAudioControlActions
 import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.ParticipantState
 import io.getstream.video.android.core.call.state.CallAction
@@ -90,7 +91,7 @@ public fun AudioParticipantsGrid(
     controlsContent: @Composable (call: Call) -> Unit = {
         ControlActions(
             call = call,
-            onCallAction = onCallAction
+            actions = buildDefaultAudioControlActions(call = call, onCallAction = onCallAction)
         )
     },
 ) {
