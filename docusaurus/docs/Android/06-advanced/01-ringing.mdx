@@ -35,24 +35,20 @@ val accepted = call.state.acceptedBy.value // list of user ids who accepted
 val rejected = call.state.rejectedBy.value // list of user ids who rejected
 ```
 
-
 ### Push Setup
 
-TODO: Describe how to setup push
+3 types of push notifications are triggered:
 
+* call.ring
+* call.notification
+* call.live_started
 
-### Customizing the notification
+You can learn more about how to setup [push notifications in the docs](../03-guides/09-push-notifications/01-overview.mdx).
+The docs also explain how to customize the notifications.
 
-TODO: Docs on how to change the notification that's shown for either a normal notify or a call
+### Incoming Calls
 
+The compose SDK provides built-in components to render an incoming call.
 
-### Accept & Reject buttons
-
-TODO: document how to setup the accept/reject buttons in a notification to point to your app
-
-
-### Related links
-
-* Build your own incoming call UI in the cookbook
-* Customizing the incoming call UI
-
+* [UI Component docs for incoming calls](../04-ui-components/04-call/02-ringing-call.mdx)
+* UI Cookbook how to build [your own incoming call UI](../05-ui-cookbook/05-incoming-and-outgoing-call.mdx)
