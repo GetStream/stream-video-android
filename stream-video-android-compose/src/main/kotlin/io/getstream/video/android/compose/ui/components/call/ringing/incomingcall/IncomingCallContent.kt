@@ -50,9 +50,9 @@ import io.getstream.video.android.mock.mockParticipantList
  * @param isVideoType Represent the call type is a video or an audio.
  * @param modifier Modifier for styling.
  * @param isShowingHeader Weather or not the app bar will be shown.
- * @param callHeaderContent Content shown for the call header.
- * @param callDetailsContent Content shown for call details, such as call participant information.
- * @param callControlsContent Content shown for controlling call, such as accepting a call or declining a call.
+ * @param headerContent Content shown for the call header.
+ * @param detailsContent Content shown for call details, such as call participant information.
+ * @param controlsContent Content shown for controlling call, such as accepting a call or declining a call.
  * @param onBackPressed Handler when the user taps on the back button.
  * @param onCallAction Handler used when the user interacts with Call UI.
  */
@@ -62,13 +62,13 @@ public fun IncomingCallContent(
     call: Call,
     isVideoType: Boolean = true,
     isShowingHeader: Boolean = true,
-    callHeaderContent: (@Composable ColumnScope.() -> Unit)? = null,
-    callDetailsContent: (
+    headerContent: (@Composable ColumnScope.() -> Unit)? = null,
+    detailsContent: (
         @Composable ColumnScope.(
             participants: List<ParticipantState>, topPadding: Dp
         ) -> Unit
     )? = null,
-    callControlsContent: (@Composable BoxScope.() -> Unit)? = null,
+    controlsContent: (@Composable BoxScope.() -> Unit)? = null,
     onBackPressed: () -> Unit = {},
     onCallAction: (CallAction) -> Unit = {},
 ) {
@@ -86,9 +86,9 @@ public fun IncomingCallContent(
         isCameraEnabled = isCameraEnabled,
         isShowingHeader = isShowingHeader,
         modifier = modifier,
-        callHeaderContent = callHeaderContent,
-        callDetailsContent = callDetailsContent,
-        callControlsContent = callControlsContent,
+        headerContent = headerContent,
+        detailsContent = detailsContent,
+        controlsContent = controlsContent,
         onBackPressed = onBackPressed,
         onCallAction = onCallAction
     )
@@ -115,13 +115,13 @@ public fun IncomingCallContent(
     participants: List<ParticipantState>,
     isCameraEnabled: Boolean,
     isShowingHeader: Boolean = true,
-    callHeaderContent: (@Composable ColumnScope.() -> Unit)? = null,
-    callDetailsContent: (
+    headerContent: (@Composable ColumnScope.() -> Unit)? = null,
+    detailsContent: (
         @Composable ColumnScope.(
             participants: List<ParticipantState>, topPadding: Dp
         ) -> Unit
     )? = null,
-    callControlsContent: (@Composable BoxScope.() -> Unit)? = null,
+    controlsContent: (@Composable BoxScope.() -> Unit)? = null,
     onBackPressed: () -> Unit = {},
     onCallAction: (CallAction) -> Unit = {},
 ) {
@@ -133,7 +133,7 @@ public fun IncomingCallContent(
     ) {
         Column {
             if (isShowingHeader) {
-                callHeaderContent?.invoke(this) ?: CallAppBar(
+                headerContent?.invoke(this) ?: CallAppBar(
                     call = call,
                     onBackPressed = onBackPressed,
                     onCallAction = onCallAction
@@ -146,7 +146,7 @@ public fun IncomingCallContent(
                 VideoTheme.dimens.avatarAppbarPadding
             }
 
-            callDetailsContent?.invoke(this, participants, topPadding) ?: IncomingCallDetails(
+            detailsContent?.invoke(this, participants, topPadding) ?: IncomingCallDetails(
                 modifier = Modifier
                     .align(Alignment.CenterHorizontally)
                     .padding(top = topPadding),
@@ -155,7 +155,7 @@ public fun IncomingCallContent(
             )
         }
 
-        callControlsContent?.invoke(this) ?: IncomingCallControls(
+        controlsContent?.invoke(this) ?: IncomingCallControls(
             modifier = Modifier
                 .align(Alignment.BottomCenter)
                 .padding(bottom = VideoTheme.dimens.incomingCallOptionsBottomPadding),
