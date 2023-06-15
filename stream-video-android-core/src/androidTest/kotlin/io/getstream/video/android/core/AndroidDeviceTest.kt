@@ -20,6 +20,7 @@ import android.Manifest
 import androidx.test.rule.GrantPermissionRule
 import com.google.common.truth.Truth.assertThat
 import io.getstream.log.taggedLogger
+import io.getstream.video.android.core.api.SignalServerService
 import io.getstream.video.android.core.events.ChangePublishQualityEvent
 import io.getstream.video.android.core.events.JoinCallResponseEvent
 import io.getstream.video.android.core.events.ParticipantJoinedEvent
@@ -27,6 +28,10 @@ import io.getstream.video.android.core.utils.buildAudioConstraints
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.withTimeout
+import okhttp3.Interceptor
+import okhttp3.OkHttpClient
+import okhttp3.Request
+import okhttp3.Response
 import org.junit.Rule
 import org.junit.Test
 import org.webrtc.DefaultVideoDecoderFactory
@@ -35,12 +40,18 @@ import org.webrtc.MediaStreamTrack
 import org.webrtc.PeerConnection
 import org.webrtc.RTCStats
 import org.webrtc.VideoCodecInfo
+import retrofit2.Retrofit
+import retrofit2.converter.wire.WireConverterFactory
 import stream.video.sfu.event.ChangePublishQuality
 import stream.video.sfu.event.VideoLayerSetting
 import stream.video.sfu.event.VideoMediaRequest
 import stream.video.sfu.event.VideoSender
 import stream.video.sfu.models.Participant
 import stream.video.sfu.models.TrackType
+import stream.video.sfu.signal.UpdateMuteStatesRequest
+import java.io.IOException
+import java.io.InterruptedIOException
+import java.util.concurrent.TimeUnit
 
 /**
  * Things to test in a real android environment
@@ -64,6 +75,61 @@ class AndroidDeviceTest : IntegrationTestBase(connectCoordinatorWS = false) {
         .grant(
             Manifest.permission.BLUETOOTH_CONNECT,
         )
+
+    internal class InterceptorTest() : Interceptor {
+
+        @Throws(IOException::class)
+        override fun intercept(chain: Interceptor.Chain): Response {
+            val original = chain.request()
+
+            val updated = original.newBuilder()
+                .url(original.url)
+                .build()
+
+            return chain.proceed(updated)
+        }
+    }
+
+    internal class InterceptorBreaks() : Interceptor {
+
+        @Throws(IOException::class)
+        override fun intercept(chain: Interceptor.Chain): Response {
+            val original = chain.request()
+
+            throw InterruptedIOException()
+
+            return chain.proceed(original)
+        }
+    }
+
+    @Test
+    fun trythis() = runTest {
+        // this hangs:
+        val connectionTimeoutInMs = 10000L
+        val ok = OkHttpClient.Builder()
+            .addInterceptor(InterceptorTest())
+            .addInterceptor(InterceptorBreaks())
+            .retryOnConnectionFailure(true)
+            .connectTimeout(connectionTimeoutInMs, TimeUnit.MILLISECONDS)
+            .writeTimeout(connectionTimeoutInMs, TimeUnit.MILLISECONDS)
+            .readTimeout(connectionTimeoutInMs, TimeUnit.MILLISECONDS)
+            .callTimeout(connectionTimeoutInMs, TimeUnit.MILLISECONDS)
+            .build()
+        val url = "https://hint.stream-io-video.com/"
+        val request: Request = Request.Builder()
+            .url(url)
+            .method("HEAD", null)
+            .build()
+        val call = ok.newCall(request)
+
+        val retro = Retrofit.Builder()
+            .client(ok)
+            .addConverterFactory(WireConverterFactory.create())
+            .baseUrl(url)
+            .build()
+        val service = retro.create(SignalServerService::class.java)
+        val result = service.updateMuteStates(UpdateMuteStatesRequest("123", emptyList()))
+    }
 
     @Test
     fun camera() = runTest {

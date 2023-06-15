@@ -57,10 +57,15 @@
             android:exported="false" />
 
         <activity
-            android:name=".NotificationActivity"
-            android:exported="false">
-            <intent-filter android:priority="-1">
+            android:name=".IncomingCallActivity"
+            android:exported="false"
+            android:showOnLockScreen="true"
+            android:showWhenLocked="true"
+            >
+            <intent-filter android:priority="1">
                 <action android:name="io.getstream.video.android.action.INCOMING_CALL" />
+                <action android:name="io.getstream.video.android.action.NOTIFICATION" />
+                <action android:name="io.getstream.video.android.action.LIVESTREAM" />
                 <action android:name="io.getstream.video.android.action.ACCEPT_CALL" />
             </intent-filter>
         </activity>

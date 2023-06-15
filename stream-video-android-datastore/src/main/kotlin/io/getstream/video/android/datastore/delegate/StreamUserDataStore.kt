@@ -30,8 +30,8 @@ import io.getstream.video.android.datastore.model.StreamUserPreferences
 import io.getstream.video.android.datastore.serializer.UserSerializer
 import io.getstream.video.android.datastore.serializer.encrypted
 import io.getstream.video.android.model.ApiKey
+import io.getstream.video.android.model.Device
 import io.getstream.video.android.model.User
-import io.getstream.video.android.model.UserDevices
 import io.getstream.video.android.model.UserToken
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -68,9 +68,9 @@ public class StreamUserDataStore constructor(
         }
     }
 
-    public suspend fun updateUserDevices(userDevices: UserDevices) {
+    public suspend fun updateUserDevice(userDevice: Device?) {
         updateData { preferences ->
-            (preferences ?: StreamUserPreferences()).copy(userDevices = userDevices)
+            (preferences ?: StreamUserPreferences()).copy(userDevice = userDevice)
         }
     }
 
@@ -88,9 +88,9 @@ public class StreamUserDataStore constructor(
     public val userToken: StateFlow<UserToken> =
         data.map { it?.userToken.orEmpty() }.asStateFlow("", scope)
 
-    public val userDevices: StateFlow<UserDevices?> =
-        data.map { it?.userDevices ?: UserDevices() }
-            .asStateFlow(UserDevices(), scope)
+    public val userDevice: StateFlow<Device?> =
+        data.map { it?.userDevice }
+            .asStateFlow(null, scope)
 
     public companion object {
         /**

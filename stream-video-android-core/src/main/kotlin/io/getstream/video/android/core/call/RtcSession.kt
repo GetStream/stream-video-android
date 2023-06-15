@@ -69,6 +69,7 @@ import kotlinx.coroutines.withContext
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
+import okio.IOException
 import org.openapitools.client.models.OwnCapability
 import org.openapitools.client.models.VideoEvent
 import org.openapitools.client.models.VideoSettings
@@ -1092,6 +1093,14 @@ public class RtcSession internal constructor(
                 Failure(
                     io.getstream.result.Error.ThrowableError(
                         e.message ?: "RtcException",
+                        e
+                    )
+                )
+            } catch (e: IOException) {
+                // TODO: understand the error conditions here
+                Failure(
+                    io.getstream.result.Error.ThrowableError(
+                        e.message ?: "IOException",
                         e
                     )
                 )

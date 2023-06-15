@@ -14,57 +14,72 @@
  * limitations under the License.
  */
 
-package io.getstream.video.android.dogfooding.ui.call
+package io.getstream.video.android.dogfooding
 
 import android.os.Bundle
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.lifecycleScope
 import io.getstream.video.android.common.AbstractCallActivity
 import io.getstream.video.android.common.viewmodel.CallViewModel
 import io.getstream.video.android.common.viewmodel.CallViewModelFactory
 import io.getstream.video.android.compose.theme.VideoTheme
-import io.getstream.video.android.compose.ui.components.call.CallContainer
+import io.getstream.video.android.compose.ui.components.call.activecall.CallContent
+import io.getstream.video.android.compose.ui.components.call.ringing.RingingCallContent
 import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.StreamVideo
-import io.getstream.video.android.core.call.state.FlipCamera
+import io.getstream.video.android.core.call.state.CallAction
 import io.getstream.video.android.core.call.state.LeaveCall
 import io.getstream.video.android.core.call.state.ToggleCamera
 import io.getstream.video.android.core.call.state.ToggleMicrophone
-import io.getstream.video.android.model.StreamCallId
+import io.getstream.video.android.core.call.state.ToggleSpeakerphone
+import io.getstream.video.android.core.notifications.NotificationHandler
+import io.getstream.video.android.model.streamCallId
 import kotlinx.coroutines.launch
 
-class CallActivity : AbstractCallActivity() {
+class IncomingCallActivity : AbstractCallActivity() {
 
-    // step 1 (optional) - create a call view model
     private val factory by lazy { CallViewModelFactory() }
     private val vm by viewModels<CallViewModel> { factory }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        // step 2 - join a call
-        lifecycleScope.launch { call.join(create = true) }
+        lifecycleScope.launch {
+            if (NotificationHandler.ACTION_ACCEPT_CALL == intent.action) {
+                call.accept()
+                call.join()
+            }
+        }
 
         // step 3 - build a call screen
         setContent {
             VideoTheme {
-                CallContainer(
+                val onCallAction: (CallAction) -> Unit = { callAction ->
+                    when (callAction) {
+                        is ToggleCamera -> call.camera.setEnabled(callAction.isEnabled)
+                        is ToggleMicrophone -> call.microphone.setEnabled(callAction.isEnabled)
+                        is ToggleSpeakerphone -> call.speaker.setEnabled(callAction.isEnabled)
+                        is LeaveCall -> finish()
+                        else -> Unit
+                    }
+                }
+                RingingCallContent(
                     modifier = Modifier.background(color = VideoTheme.colors.appBackground),
                     call = call,
-                    callViewModel = vm, // optional
                     onBackPressed = { handleBackPressed() },
-                    onCallAction = { callAction ->
-                        when (callAction) {
-                            is FlipCamera -> call.camera.flip()
-                            is ToggleCamera -> call.camera.setEnabled(callAction.isEnabled)
-                            is ToggleMicrophone -> call.microphone.setEnabled(callAction.isEnabled)
-                            is LeaveCall -> finish()
-                            else -> Unit
-                        }
-                    }
+                    onAcceptedContent = {
+                        CallContent(
+                            modifier = Modifier.fillMaxSize(),
+                            call = call,
+                            callViewModel = vm,
+                            onCallAction = onCallAction
+                        )
+                    },
+                    onCallAction = onCallAction
                 )
             }
         }
@@ -72,18 +87,12 @@ class CallActivity : AbstractCallActivity() {
 
     override fun onPause() {
         super.onPause()
-
-        if (!vm.isInPictureInPicture.value) {
-            call.camera.pause()
-        }
+        call.camera.pause()
     }
 
     override fun onResume() {
         super.onResume()
-
-        if (!vm.isInPictureInPicture.value) {
-            call.camera.resume()
-        }
+        call.camera.resume()
     }
 
     override fun onDestroy() {
@@ -97,9 +106,7 @@ class CallActivity : AbstractCallActivity() {
     }
 
     override fun provideCall(): Call {
-        val streamVideo = StreamVideo.instance()
-        val cid = intent.getParcelableExtra<StreamCallId>(EXTRA_CID)
-            ?: throw IllegalArgumentException("call type and id is invalid!")
-        return streamVideo.call(cid.type, cid.id)
+        val callId = intent.streamCallId(NotificationHandler.INTENT_EXTRA_CALL_CID)!!
+        return StreamVideo.instance().call(callId.type, callId.id)
     }
 }

@@ -16,11 +16,12 @@
 
 ### 0.1 milestone
 
-- [X] Tests should run (currently some coroutine issues)
+- [ ] Disable reconnect
+- [ ] Crash on interceptor
+- [ ] Bluetooth issue (turning of bluetooth on device doesn't switch from headset to speaker phone)
+- [ ] Camera shuts off
 - [ ] Bluetooth gives a permissions error on AndroidDeviceTest
-- [X] Tests should have a normal delay on the health check (right now it skips delays)
-- [X] Tests. Token expiration is broken. Hard to debug due to broken stack traces
-- [ ] Tests should run on CI
+- [ ] Tests should run on CI (and we need to speed it up a bit)
 - [ ] Video calling tutorial & Feedback cycle with team
 - [ ] Audio room tutorial & Feedback cycle with team
 - [ ] Livestream tutorial & Feedback cycle with team
@@ -31,27 +32,11 @@
 - [ ] Ring support & Docs (Jc)
 - [ ] Testing session with team cross platform
 - [ ] Publish 0.1 on Maven
+- [X] Tests should run (currently some coroutine issues)
+- [X] Tests should have a normal delay on the health check (right now it skips delays)
+- [X] Tests. Token expiration is broken. Hard to debug due to broken stack traces
 
-### 0.2 milestone
 
-- [ ] Deeplink support for video call demo & dogfooding app (skip auth for the video demo, keep it for dogfooding)
-- [ ] Chat Integration
-- [ ] XML version of VideoRenderer
-- [ ] Reactions
-- [ ] Fix tests
-
-### 0.3 milestone
-
-- [ ] Test coverage
-- [ ] Testing on more devices
-- [ ] Audio & Video filters
-- [ ] SDK development guide for all teams
-- [ ] Android SDK development.md cleanup
-
-### 0.4 milestone
-
-- [ ] Analytics integration
-- [ ] Screensharing
 
 ### Server wishlist (june 8th)
 
