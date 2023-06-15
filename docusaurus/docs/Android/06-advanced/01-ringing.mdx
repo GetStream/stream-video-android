@@ -1,8 +1,7 @@
 ---
-title: Ringing & Push
+title: Ringing
 description: How to ring the call and notify all members
 ---
-
 
 ## Ring & Notify
 
@@ -20,7 +19,7 @@ call.create(ring=true, notify=false)
 call.join(ring=true, notify=false)
 ```
 
-Users who receive the incoming call can either accept or reject it
+Users who receive the incoming call can either accept or reject it.
 
 ```kotlin
 call.accept()
@@ -43,7 +42,7 @@ val rejected = call.state.rejectedBy.value // list of user ids who rejected
 * call.notification
 * call.live_started
 
-You can learn more about how to setup [push notifications in the docs](../03-guides/09-push-notifications/01-overview.mdx).
+You can learn more about how to setup [push notifications in the docs](./02-push-notifications/01-overview.mdx).
 The docs also explain how to customize the notifications.
 
 ### Incoming Calls

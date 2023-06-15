@@ -57,6 +57,7 @@ If you want, you can also customize how the push notifications work.
 You can customize push notifications in the following ways:
 * Declaring `IntentFilter`: Lets you customize activities that will be invoked when the Push Notification is handled by the SDK
 * `NotificationHandler`: Lets you fully customize how notifications are shown and dismissed
+* Extending our default `NotificationHandler`: Lets you partially customize the behavior or Push Notification received, but reusing some part of our default implementation.
 
 ### Declaring `IntentFilter` in your Android Manifest
 
@@ -65,8 +66,8 @@ You only need to create the `Activity`/`Activities` will be called when the Push
 The different actions we provide are:
 
 * `io.getstream.video.android.action.INCOMING_CALL`: Action used to process an incoming call. The `activity` that handles this action should show options to accept/reject the call. You can use our [RigningCallContent](../../04-ui-components/04-call/02-ringing-call.mdx) component to build your screen. This screen can be shown when the device is locked, by adding some arguments on the manifest.
-* `io.getstream.video.android.action.ACCEPT_CALL`: Action used to accept an incoming call. The `activity` that handles this action should accept the call and show the call screen. You can use our [CallContantent](../../04-ui-components/04-call/02-call-content.mdx) component to build your screen.
-* `io.getstream.video.android.action.LIVE_CALL`: Action used to go into a live call. The `activity` that handles this action should show the live call screen. You can use our [CallContantent](../../04-ui-components/04-call/02-call-content.mdx) component to build your screen.
+* `io.getstream.video.android.action.ACCEPT_CALL`: Action used to accept an incoming call. The `activity` that handles this action should accept the call and show the call screen. You can use our [CallContent](../../04-ui-components/04-call/03-call-content.mdx) component to build your screen.
+* `io.getstream.video.android.action.LIVE_CALL`: Action used to go into a live call. The `activity` that handles this action should show the live call screen. You can use our [CallContent](../../04-ui-components/04-call/03-call-content.mdx) component to build your screen.
 
 These actions need to be included on the `AndroidManifest` while you declare your activities:
 ``` xml {4,6-7,9-11,14,17-19,22,25-27}
@@ -224,6 +225,31 @@ new StreamVideoBuilder(
 ```
 </TabItem>
 </Tabs>
+
+### Extending our default `NotificationHandler`
+Stream Video SDK use a default implementation of `NotificationHandler` that search into the application manifest for activities that declare the previous `IntentFilter` we detailed on a previous section.
+By now, we support three different types of push notifications and may be the case that is interesting to maintain the default behavior of the notifications but modify one of the types.
+If it is your use-case you can extend the open class `DefaultNotificationHandler` and override the behavior of the desired type of notifications.
+
+```kotlin
+class MyNotificationHandler(application: Application) : DefaultNotificationHandler(application) {
+
+    // Override this method if you want a custom behavior for Ringing call notifications
+    override fun onRingingCall(callId: StreamCallId, callDisplayName: String) {
+        [...]
+    }
+
+    // Override this method if you want a custom behavior for default notifications
+    override fun onNotification(callId: StreamCallId, callDisplayName: String) {
+        [...]
+    }
+
+    // Override this method if you want a custom behavior for Live Call notifications
+    override fun onLiveCall(callId: StreamCallId, callDisplayName: String) {
+        [...]
+    }
+}
+```
 
 ## Handling Push Notification Permissions
 Starting on Android API level 33, all apps need to [request permissions](https://developer.android.com/develop/ui/views/notifications/notification-permission) to be able to post notifications to the user.
