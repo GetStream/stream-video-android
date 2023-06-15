@@ -222,7 +222,7 @@ public fun CallContainer(
             permissions = permissions,
             onCallAction = onCallAction,
             appBarContent = appBarContent,
-            callControlsContent = controlsContent,
+            controlsContent = controlsContent,
             pictureInPictureContent = pictureInPictureContent,
             videoRenderer = videoRenderer,
         )

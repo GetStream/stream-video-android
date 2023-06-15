@@ -144,7 +144,7 @@ public fun CallContent(
         onCallAction = onCallAction,
         appBarContent = appBarContent,
         videoContent = videoContent,
-        callControlsContent = controlsContent,
+        controlsContent = controlsContent,
         pictureInPictureContent = pictureInPictureContent
     )
 }
@@ -162,7 +162,7 @@ public fun CallContent(
  * @param style Represents a regular video call render styles.
  * @param videoRenderer A single video renderer renders each individual participant.
  * @param videoContent Content is shown that renders all participants' videos.
- * @param callControlsContent Content is shown that allows users to trigger different actions to control a joined call.
+ * @param controlsContent Content is shown that allows users to trigger different actions to control a joined call.
  * @param pictureInPictureContent Content shown when the user enters Picture in Picture mode, if
  * it's been enabled in the app.
  */
@@ -205,7 +205,7 @@ public fun CallContent(
             videoRenderer = videoRenderer
         )
     },
-    callControlsContent: @Composable (call: Call) -> Unit = {
+    controlsContent: @Composable (call: Call) -> Unit = {
         ControlActions(
             call = call,
             onCallAction = onCallAction
@@ -224,7 +224,7 @@ public fun CallContent(
             topBar = { },
             bottomBar = {
                 if (orientation != ORIENTATION_LANDSCAPE) {
-                    callControlsContent.invoke(call)
+                    controlsContent.invoke(call)
                 }
             },
             content = {
@@ -244,7 +244,7 @@ public fun CallContent(
                     videoContent.invoke(this, call)
 
                     if (orientation == ORIENTATION_LANDSCAPE) {
-                        callControlsContent.invoke(call)
+                        controlsContent.invoke(call)
                     }
                 }
 
