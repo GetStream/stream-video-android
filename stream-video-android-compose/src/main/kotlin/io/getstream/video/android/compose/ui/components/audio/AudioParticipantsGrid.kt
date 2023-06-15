@@ -17,13 +17,19 @@
 package io.getstream.video.android.compose.ui.components.audio
 
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.core.ParticipantState
+import io.getstream.video.android.mock.StreamMockUtils
+import io.getstream.video.android.mock.mockParticipantList
 
 @Composable
 public fun AudioParticipantsGrid(
@@ -49,5 +55,17 @@ public fun AudioParticipantsGrid(
         items(items = participants, key = { it.sessionId }) { participant ->
             audioRenderer.invoke(participant, style)
         }
+    }
+}
+
+@Preview
+@Composable
+private fun AudioParticipantsGridPreview() {
+    StreamMockUtils.initializeStreamVideo(LocalContext.current)
+    VideoTheme {
+        AudioParticipantsGrid(
+            modifier = Modifier.fillMaxSize(),
+            participants = mockParticipantList
+        )
     }
 }

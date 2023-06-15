@@ -49,10 +49,10 @@ import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.ParticipantState
 import io.getstream.video.android.core.call.state.CallAction
 import io.getstream.video.android.mock.StreamMockUtils
-import io.getstream.video.android.mock.mockParticipantList
+import io.getstream.video.android.mock.mockCall
 
 @Composable
-public fun AudioParticipantsGrid(
+public fun AudioRoom(
     modifier: Modifier = Modifier,
     call: Call,
     gridCellCount: Int = 4,
@@ -152,9 +152,9 @@ private fun DefaultPermissionHandler(
 private fun AudioRoomPreview() {
     StreamMockUtils.initializeStreamVideo(LocalContext.current)
     VideoTheme {
-        AudioParticipantsGrid(
+        AudioRoom(
             modifier = Modifier.fillMaxSize(),
-            participants = mockParticipantList
+            call = mockCall
         )
     }
 }

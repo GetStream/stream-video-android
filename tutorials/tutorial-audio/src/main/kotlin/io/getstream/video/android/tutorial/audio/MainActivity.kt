@@ -19,10 +19,15 @@ package io.getstream.video.android.tutorial.audio
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.material.Text
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.ui.unit.sp
 import androidx.lifecycle.lifecycleScope
 import io.getstream.video.android.compose.theme.VideoTheme
-import io.getstream.video.android.compose.ui.components.audio.AudioParticipantsGrid
+import io.getstream.video.android.compose.ui.components.audio.AudioRoom
 import io.getstream.video.android.core.GEO
+import io.getstream.video.android.core.RealtimeConnection
 import io.getstream.video.android.core.StreamVideoBuilder
 import io.getstream.video.android.model.User
 import kotlinx.coroutines.launch
@@ -32,7 +37,8 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
 
         val userId = "Bastila_Shan"
-        val userToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoiQmFzdGlsYV9TaGFuIiwiaXNzIjoicHJvbnRvIiwic3ViIjoidXNlci9CYXN0aWxhX1NoYW4iLCJpYXQiOjE2ODY4MDExMjMsImV4cCI6MTY4NzQwNTkyOH0.ON-9v7waSQTvFwi8isblwYhM48VH7SznoZIBhlzf-f4"
+        val userToken =
+            "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoiQmFzdGlsYV9TaGFuIiwiaXNzIjoicHJvbnRvIiwic3ViIjoidXNlci9CYXN0aWxhX1NoYW4iLCJpYXQiOjE2ODY4MDExMjMsImV4cCI6MTY4NzQwNTkyOH0.ON-9v7waSQTvFwi8isblwYhM48VH7SznoZIBhlzf-f4"
         val callId = "1egoN4tKm4w2"
 
         // step1 - create a user.
@@ -60,8 +66,18 @@ class MainActivity : ComponentActivity() {
         setContent {
             // step4 - apply VideoTheme
             VideoTheme {
+                val connect by call.state.connection.collectAsState()
 
-                AudioParticipantsGrid(call = call)
+                // step5 - render AudioRoom
+                if (connect == RealtimeConnection.Connected) {
+                    AudioRoom(call = call)
+                } else {
+                    Text(
+                        text = "loading...",
+                        fontSize = 30.sp,
+                        color = VideoTheme.colors.textHighEmphasis
+                    )
+                }
             }
         }
     }
