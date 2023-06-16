@@ -43,6 +43,7 @@ dependencies {
 
     // androidx
     implementation(libs.stream.log.android)
+    implementation(libs.androidx.core.ktx)
 
     // compose
     implementation(libs.androidx.activity.compose)

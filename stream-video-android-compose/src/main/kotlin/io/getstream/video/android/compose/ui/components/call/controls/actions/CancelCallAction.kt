@@ -22,6 +22,7 @@ import androidx.compose.material.IconButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import io.getstream.video.android.compose.theme.VideoTheme
@@ -41,11 +42,12 @@ public fun CancelCallAction(
     modifier: Modifier = Modifier,
     enabled: Boolean = true,
     onCallAction: (DeclineCall) -> Unit,
+    shape: Shape = VideoTheme.shapes.callButton,
 ) {
     IconButton(
         modifier = modifier.background(
             color = VideoTheme.colors.errorAccent,
-            shape = VideoTheme.shapes.callButton
+            shape = shape
         ),
         enabled = enabled,
         onClick = { onCallAction(DeclineCall) },

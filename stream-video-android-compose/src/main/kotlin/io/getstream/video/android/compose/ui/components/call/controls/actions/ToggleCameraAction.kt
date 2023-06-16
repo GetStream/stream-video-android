@@ -21,6 +21,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material.Icon
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
@@ -42,6 +44,11 @@ public fun ToggleCameraAction(
     modifier: Modifier = Modifier,
     isCameraEnabled: Boolean,
     enabled: Boolean = true,
+    shape: Shape = VideoTheme.shapes.callControlsButton,
+    enabledColor: Color = VideoTheme.colors.callActionIconEnabledBackground,
+    disabledColor: Color = VideoTheme.colors.callActionIconDisabledBackground,
+    enabledIconTint: Color = VideoTheme.colors.callActionIconEnabled,
+    disabledIconTint: Color = VideoTheme.colors.callActionIconDisabled,
     onCallAction: (ToggleCamera) -> Unit
 ) {
     val cameraIcon = painterResource(
@@ -54,7 +61,10 @@ public fun ToggleCameraAction(
 
     CallControlActionBackground(
         modifier = modifier,
-        isEnabled = isCameraEnabled
+        isEnabled = isCameraEnabled,
+        shape = shape,
+        enabledColor = enabledColor,
+        disabledColor = disabledColor,
     ) {
         Icon(
             modifier = Modifier
@@ -65,9 +75,9 @@ public fun ToggleCameraAction(
                     )
                 },
             tint = if (isCameraEnabled) {
-                VideoTheme.colors.callActionIconEnabled
+                enabledIconTint
             } else {
-                VideoTheme.colors.callActionIconDisabled
+                disabledIconTint
             },
             painter = cameraIcon,
             contentDescription = stringResource(R.string.stream_video_call_controls_toggle_camera)

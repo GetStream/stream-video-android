@@ -103,6 +103,13 @@ public data class StreamDimens(
     public val lobbyVideoHeight: Dp,
     public val lobbyControlActionsPadding: Dp,
     public val reactionSize: Dp,
+    public val audioContentTopPadding: Dp,
+    public val audioAvatarSize: Dp,
+    public val audioAvatarPadding: Dp,
+    public val audioRoomMicSize: Dp,
+    public val audioRoomMicPadding: Dp,
+    public val audioRoomAvatarPortraitPadding: Dp,
+    public val audioRoomAvatarLandscapePadding: Dp,
 ) {
     public companion object {
         /**
@@ -181,7 +188,14 @@ public data class StreamDimens(
             screenSharePresenterTooltipHeight = dimensionResource(id = R.dimen.stream_video_screenSharePresenterTooltipHeight),
             lobbyVideoHeight = dimensionResource(id = R.dimen.stream_video_lobbyVideoHeight),
             lobbyControlActionsPadding = dimensionResource(id = R.dimen.stream_video_lobbyControlActionsPadding),
-            reactionSize = dimensionResource(id = R.dimen.stream_video_reactionSize)
+            reactionSize = dimensionResource(id = R.dimen.stream_video_reactionSize),
+            audioContentTopPadding = dimensionResource(id = R.dimen.stream_video_audioContentTopPadding),
+            audioAvatarSize = dimensionResource(id = R.dimen.stream_video_audioAvatarSize),
+            audioAvatarPadding = dimensionResource(id = R.dimen.stream_video_audioAvatarPadding),
+            audioRoomMicSize = dimensionResource(id = R.dimen.stream_video_audioMicSize),
+            audioRoomMicPadding = dimensionResource(id = R.dimen.stream_video_audioMicPadding),
+            audioRoomAvatarPortraitPadding = dimensionResource(id = R.dimen.stream_video_audioRoomAvatarPortraitPadding),
+            audioRoomAvatarLandscapePadding = dimensionResource(id = R.dimen.stream_video_audioRoomAvatarLandscapePadding),
         )
     }
 }

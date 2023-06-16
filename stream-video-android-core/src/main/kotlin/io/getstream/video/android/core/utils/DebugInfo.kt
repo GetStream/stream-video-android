@@ -156,10 +156,8 @@ internal class DebugInfo(val client: StreamVideoImpl) {
 
         val sfu = call?.session?.sfuUrl
 
-        logger.i { "stat123 with $sfu ${resolution}, ${maxResolution}, displaying external video at ${displayingAt}" }
-
+        logger.i { "stat123 with $sfu $resolution, $maxResolution, displaying external video at $displayingAt" }
     }
-
 
     fun processStats(stats: RTCStatsReport?) {
         if (stats == null) return
@@ -174,18 +172,18 @@ internal class DebugInfo(val client: StreamVideoImpl) {
             val type = stat.type
             if (type in skipTypes) continue
 
-            val statGroup = if (type=="inbound-rtp") {
+            val statGroup = if (type == "inbound-rtp") {
                 "$type:${stat.members["kind"]}"
-            } else if (type=="track") {
+            } else if (type == "track") {
                 "$type:${stat.members["kind"]}"
-            } else if (type=="outbound-rtp") {
+            } else if (type == "outbound-rtp") {
                 val rid = stat.members["rid"] ?: "missing"
                 "$type:${stat.members["kind"]}:$rid"
             } else {
                 type
             }
 
-            if (statGroup != null ) {
+            if (statGroup != null) {
                 if (statGroup !in statGroups) {
                     statGroups[statGroup] = mutableListOf()
                 }
@@ -196,18 +194,14 @@ internal class DebugInfo(val client: StreamVideoImpl) {
         statGroups.forEach {
             logger.i { "stat123 $${it.key}:${it.value}" }
         }
-
-
     }
 
     fun processPubStats(stats: RTCStatsReport?) {
         processStats(stats)
-
     }
 
     fun processSubStats(stats: RTCStatsReport?) {
         processStats(stats)
-
     }
 
     fun listCodecs() {

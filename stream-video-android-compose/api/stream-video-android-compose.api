@@ -11,6 +11,8 @@ public final class io/getstream/video/android/compose/permission/CallPermissions
 }
 
 public final class io/getstream/video/android/compose/permission/SinglePermissionKt {
+	public static final fun LaunchCameraPermissions (Lio/getstream/video/android/core/Call;Landroidx/compose/runtime/Composer;I)V
+	public static final fun LaunchMicrophonePermissions (Lio/getstream/video/android/core/Call;Landroidx/compose/runtime/Composer;I)V
 	public static final fun rememberBluetoothPermissionState (Lio/getstream/video/android/core/Call;Lkotlin/jvm/functions/Function1;Landroidx/compose/runtime/Composer;I)Lio/getstream/video/android/compose/permission/VideoPermissionsState;
 	public static final fun rememberCameraPermissionState (Lio/getstream/video/android/core/Call;Lkotlin/jvm/functions/Function1;Landroidx/compose/runtime/Composer;II)Lio/getstream/video/android/compose/permission/VideoPermissionsState;
 	public static final fun rememberMicrophonePermissionState (Lio/getstream/video/android/core/Call;Lkotlin/jvm/functions/Function1;Landroidx/compose/runtime/Composer;II)Lio/getstream/video/android/compose/permission/VideoPermissionsState;
@@ -55,7 +57,7 @@ public abstract interface class io/getstream/video/android/compose/state/ui/part
 public final class io/getstream/video/android/compose/theme/StreamColors {
 	public static final field $stable I
 	public static final field Companion Lio/getstream/video/android/compose/theme/StreamColors$Companion;
-	public synthetic fun <init> (JJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJLkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public synthetic fun <init> (JJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJLkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun component1-0d7_KjU ()J
 	public final fun component10-0d7_KjU ()J
 	public final fun component11-0d7_KjU ()J
@@ -83,16 +85,20 @@ public final class io/getstream/video/android/compose/theme/StreamColors {
 	public final fun component31-0d7_KjU ()J
 	public final fun component32-0d7_KjU ()J
 	public final fun component33-0d7_KjU ()J
+	public final fun component34-0d7_KjU ()J
+	public final fun component35-0d7_KjU ()J
 	public final fun component4-0d7_KjU ()J
 	public final fun component5-0d7_KjU ()J
 	public final fun component6-0d7_KjU ()J
 	public final fun component7-0d7_KjU ()J
 	public final fun component8-0d7_KjU ()J
 	public final fun component9-0d7_KjU ()J
-	public final fun copy-ky7mje0 (JJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJ)Lio/getstream/video/android/compose/theme/StreamColors;
-	public static synthetic fun copy-ky7mje0$default (Lio/getstream/video/android/compose/theme/StreamColors;JJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJIILjava/lang/Object;)Lio/getstream/video/android/compose/theme/StreamColors;
+	public final fun copy-IWRRXjM (JJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJ)Lio/getstream/video/android/compose/theme/StreamColors;
+	public static synthetic fun copy-IWRRXjM$default (Lio/getstream/video/android/compose/theme/StreamColors;JJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJIILjava/lang/Object;)Lio/getstream/video/android/compose/theme/StreamColors;
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getAppBackground-0d7_KjU ()J
+	public final fun getAudioActionColor-0d7_KjU ()J
+	public final fun getAudioLeaveButton-0d7_KjU ()J
 	public final fun getAvatarInitials-0d7_KjU ()J
 	public final fun getBarsBackground-0d7_KjU ()J
 	public final fun getBorders-0d7_KjU ()J
@@ -137,7 +143,7 @@ public final class io/getstream/video/android/compose/theme/StreamColors$Compani
 public final class io/getstream/video/android/compose/theme/StreamDimens {
 	public static final field $stable I
 	public static final field Companion Lio/getstream/video/android/compose/theme/StreamDimens$Companion;
-	public synthetic fun <init> (FFFFFFFFFFFJJJJFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFLkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public synthetic fun <init> (FFFFFFFFFFFJJJJFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFLkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun component1-D9Ej5fM ()F
 	public final fun component10-D9Ej5fM ()F
 	public final fun component11-D9Ej5fM ()F
@@ -206,14 +212,28 @@ public final class io/getstream/video/android/compose/theme/StreamDimens {
 	public final fun component69-D9Ej5fM ()F
 	public final fun component7-D9Ej5fM ()F
 	public final fun component70-D9Ej5fM ()F
+	public final fun component71-D9Ej5fM ()F
+	public final fun component72-D9Ej5fM ()F
+	public final fun component73-D9Ej5fM ()F
+	public final fun component74-D9Ej5fM ()F
+	public final fun component75-D9Ej5fM ()F
+	public final fun component76-D9Ej5fM ()F
+	public final fun component77-D9Ej5fM ()F
 	public final fun component8-D9Ej5fM ()F
 	public final fun component9-D9Ej5fM ()F
-	public final fun copy-VAxZqhI (FFFFFFFFFFFJJJJFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF)Lio/getstream/video/android/compose/theme/StreamDimens;
-	public static synthetic fun copy-VAxZqhI$default (Lio/getstream/video/android/compose/theme/StreamDimens;FFFFFFFFFFFJJJJFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFIIILjava/lang/Object;)Lio/getstream/video/android/compose/theme/StreamDimens;
+	public final fun copy--cADvb4 (FFFFFFFFFFFJJJJFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF)Lio/getstream/video/android/compose/theme/StreamDimens;
+	public static synthetic fun copy--cADvb4$default (Lio/getstream/video/android/compose/theme/StreamDimens;FFFFFFFFFFFJJJJFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFIIILjava/lang/Object;)Lio/getstream/video/android/compose/theme/StreamDimens;
 	public fun equals (Ljava/lang/Object;)Z
+	public final fun getAudioAvatarPadding-D9Ej5fM ()F
+	public final fun getAudioAvatarSize-D9Ej5fM ()F
+	public final fun getAudioContentTopPadding-D9Ej5fM ()F
 	public final fun getAudioLevelIndicatorBarMaxHeight-D9Ej5fM ()F
 	public final fun getAudioLevelIndicatorBarSeparatorWidth-D9Ej5fM ()F
 	public final fun getAudioLevelIndicatorBarWidth-D9Ej5fM ()F
+	public final fun getAudioRoomAvatarLandscapePadding-D9Ej5fM ()F
+	public final fun getAudioRoomAvatarPortraitPadding-D9Ej5fM ()F
+	public final fun getAudioRoomMicPadding-D9Ej5fM ()F
+	public final fun getAudioRoomMicSize-D9Ej5fM ()F
 	public final fun getAudioStatusSize-D9Ej5fM ()F
 	public final fun getAvatarAppbarPadding-D9Ej5fM ()F
 	public final fun getButtonToggleOffAlpha ()F
@@ -377,26 +397,104 @@ public final class io/getstream/video/android/compose/theme/VideoThemeKt {
 	public static final fun VideoTheme (ZLio/getstream/video/android/compose/theme/StreamColors;Lio/getstream/video/android/compose/theme/StreamDimens;Lio/getstream/video/android/compose/theme/StreamTypography;Lio/getstream/video/android/compose/theme/StreamShapes;Landroidx/compose/material/ripple/RippleTheme;Lio/getstream/video/android/core/mapper/ReactionMapper;ZLkotlin/jvm/functions/Function2;Landroidx/compose/runtime/Composer;II)V
 }
 
-public final class io/getstream/video/android/compose/ui/components/audio/ComposableSingletons$SoundIndicatorKt {
-	public static final field INSTANCE Lio/getstream/video/android/compose/ui/components/audio/ComposableSingletons$SoundIndicatorKt;
+public final class io/getstream/video/android/compose/ui/components/audio/AudioAppBarKt {
+	public static final fun AudioAppBar (Landroidx/compose/ui/Modifier;Ljava/lang/String;Landroidx/compose/runtime/Composer;II)V
+}
+
+public final class io/getstream/video/android/compose/ui/components/audio/AudioControlActionsKt {
+	public static final fun AudioControlActions (Lio/getstream/video/android/core/Call;Landroidx/compose/ui/Modifier;Lkotlin/jvm/functions/Function0;Landroidx/compose/runtime/Composer;II)V
+}
+
+public final class io/getstream/video/android/compose/ui/components/audio/AudioParticipantsGridKt {
+	public static final fun AudioParticipantsGrid (Landroidx/compose/ui/Modifier;Ljava/util/List;Lio/getstream/video/android/compose/ui/components/audio/AudioRendererStyle;Lkotlin/jvm/functions/Function4;Landroidx/compose/runtime/Composer;II)V
+}
+
+public abstract class io/getstream/video/android/compose/ui/components/audio/AudioRendererStyle {
+	public static final field $stable I
+	public synthetic fun <init> (ZLandroidx/compose/foundation/BorderStroke;ZLandroidx/compose/ui/Alignment;ZLkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun getMicrophoneLabelPosition ()Landroidx/compose/ui/Alignment;
+	public fun getSpeakingBorder ()Landroidx/compose/foundation/BorderStroke;
+	public fun isShowingMicrophoneAvailability ()Z
+	public fun isShowingRoleBadge ()Z
+	public fun isShowingSpeakingBorder ()Z
+}
+
+public final class io/getstream/video/android/compose/ui/components/audio/AudioRendererStyleKt {
+	public static final fun copy (Lio/getstream/video/android/compose/ui/components/audio/AudioRendererStyle;ZLandroidx/compose/foundation/BorderStroke;ZLandroidx/compose/ui/Alignment;Z)Lio/getstream/video/android/compose/ui/components/audio/AudioRendererStyle;
+	public static synthetic fun copy$default (Lio/getstream/video/android/compose/ui/components/audio/AudioRendererStyle;ZLandroidx/compose/foundation/BorderStroke;ZLandroidx/compose/ui/Alignment;ZILjava/lang/Object;)Lio/getstream/video/android/compose/ui/components/audio/AudioRendererStyle;
+}
+
+public final class io/getstream/video/android/compose/ui/components/audio/AudioRoomKt {
+	public static final fun AudioRoom (Landroidx/compose/ui/Modifier;Lio/getstream/video/android/core/Call;ZLio/getstream/video/android/compose/permission/VideoPermissionsState;Ljava/lang/String;Lkotlin/jvm/functions/Function3;Lio/getstream/video/android/compose/ui/components/audio/AudioRendererStyle;Lkotlin/jvm/functions/Function4;Lkotlin/jvm/functions/Function4;Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function3;Landroidx/compose/runtime/Composer;III)V
+}
+
+public final class io/getstream/video/android/compose/ui/components/audio/ComposableSingletons$AudioAppBarKt {
+	public static final field INSTANCE Lio/getstream/video/android/compose/ui/components/audio/ComposableSingletons$AudioAppBarKt;
 	public static field lambda-1 Lkotlin/jvm/functions/Function2;
 	public fun <init> ()V
 	public final fun getLambda-1$stream_video_android_compose_release ()Lkotlin/jvm/functions/Function2;
 }
 
-public final class io/getstream/video/android/compose/ui/components/audio/ComposableSingletons$SoundLevelsKt {
-	public static final field INSTANCE Lio/getstream/video/android/compose/ui/components/audio/ComposableSingletons$SoundLevelsKt;
-	public static field lambda-1 Lkotlin/jvm/functions/Function2;
+public final class io/getstream/video/android/compose/ui/components/audio/ComposableSingletons$AudioControlActionsKt {
+	public static final field INSTANCE Lio/getstream/video/android/compose/ui/components/audio/ComposableSingletons$AudioControlActionsKt;
+	public static field lambda-1 Lkotlin/jvm/functions/Function3;
+	public static field lambda-2 Lkotlin/jvm/functions/Function2;
 	public fun <init> ()V
-	public final fun getLambda-1$stream_video_android_compose_release ()Lkotlin/jvm/functions/Function2;
+	public final fun getLambda-1$stream_video_android_compose_release ()Lkotlin/jvm/functions/Function3;
+	public final fun getLambda-2$stream_video_android_compose_release ()Lkotlin/jvm/functions/Function2;
 }
 
-public final class io/getstream/video/android/compose/ui/components/audio/SoundIndicatorKt {
-	public static final fun SoundIndicator (Lio/getstream/video/android/common/model/SoundState;Landroidx/compose/ui/Modifier;Landroidx/compose/runtime/Composer;II)V
+public final class io/getstream/video/android/compose/ui/components/audio/ComposableSingletons$AudioParticipantsGridKt {
+	public static final field INSTANCE Lio/getstream/video/android/compose/ui/components/audio/ComposableSingletons$AudioParticipantsGridKt;
+	public static field lambda-1 Lkotlin/jvm/functions/Function4;
+	public static field lambda-2 Lkotlin/jvm/functions/Function2;
+	public fun <init> ()V
+	public final fun getLambda-1$stream_video_android_compose_release ()Lkotlin/jvm/functions/Function4;
+	public final fun getLambda-2$stream_video_android_compose_release ()Lkotlin/jvm/functions/Function2;
 }
 
-public final class io/getstream/video/android/compose/ui/components/audio/SoundLevelsKt {
-	public static final fun ActiveSoundLevels (Landroidx/compose/ui/Modifier;Landroidx/compose/runtime/Composer;II)V
+public final class io/getstream/video/android/compose/ui/components/audio/ComposableSingletons$AudioRoomKt {
+	public static final field INSTANCE Lio/getstream/video/android/compose/ui/components/audio/ComposableSingletons$AudioRoomKt;
+	public static field lambda-1 Lkotlin/jvm/functions/Function4;
+	public static field lambda-2 Lkotlin/jvm/functions/Function2;
+	public fun <init> ()V
+	public final fun getLambda-1$stream_video_android_compose_release ()Lkotlin/jvm/functions/Function4;
+	public final fun getLambda-2$stream_video_android_compose_release ()Lkotlin/jvm/functions/Function2;
+}
+
+public final class io/getstream/video/android/compose/ui/components/audio/ComposableSingletons$ParticipantAudioKt {
+	public static final field INSTANCE Lio/getstream/video/android/compose/ui/components/audio/ComposableSingletons$ParticipantAudioKt;
+	public static field lambda-1 Lkotlin/jvm/functions/Function4;
+	public static field lambda-2 Lkotlin/jvm/functions/Function2;
+	public fun <init> ()V
+	public final fun getLambda-1$stream_video_android_compose_release ()Lkotlin/jvm/functions/Function4;
+	public final fun getLambda-2$stream_video_android_compose_release ()Lkotlin/jvm/functions/Function2;
+}
+
+public final class io/getstream/video/android/compose/ui/components/audio/ParticipantAudioKt {
+	public static final fun ParticipantAudio (Lio/getstream/video/android/core/ParticipantState;Landroidx/compose/ui/Modifier;Lio/getstream/video/android/compose/ui/components/audio/AudioRendererStyle;Lkotlin/jvm/functions/Function4;Lkotlin/jvm/functions/Function4;Landroidx/compose/runtime/Composer;II)V
+}
+
+public final class io/getstream/video/android/compose/ui/components/audio/RegularAudioRendererStyle : io/getstream/video/android/compose/ui/components/audio/AudioRendererStyle {
+	public static final field $stable I
+	public fun <init> ()V
+	public fun <init> (ZLandroidx/compose/foundation/BorderStroke;ZLandroidx/compose/ui/Alignment;Z)V
+	public synthetic fun <init> (ZLandroidx/compose/foundation/BorderStroke;ZLandroidx/compose/ui/Alignment;ZILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Z
+	public final fun component2 ()Landroidx/compose/foundation/BorderStroke;
+	public final fun component3 ()Z
+	public final fun component4 ()Landroidx/compose/ui/Alignment;
+	public final fun component5 ()Z
+	public final fun copy (ZLandroidx/compose/foundation/BorderStroke;ZLandroidx/compose/ui/Alignment;Z)Lio/getstream/video/android/compose/ui/components/audio/RegularAudioRendererStyle;
+	public static synthetic fun copy$default (Lio/getstream/video/android/compose/ui/components/audio/RegularAudioRendererStyle;ZLandroidx/compose/foundation/BorderStroke;ZLandroidx/compose/ui/Alignment;ZILjava/lang/Object;)Lio/getstream/video/android/compose/ui/components/audio/RegularAudioRendererStyle;
+	public fun equals (Ljava/lang/Object;)Z
+	public fun getMicrophoneLabelPosition ()Landroidx/compose/ui/Alignment;
+	public fun getSpeakingBorder ()Landroidx/compose/foundation/BorderStroke;
+	public fun hashCode ()I
+	public fun isShowingMicrophoneAvailability ()Z
+	public fun isShowingRoleBadge ()Z
+	public fun isShowingSpeakingBorder ()Z
+	public fun toString ()Ljava/lang/String;
 }
 
 public final class io/getstream/video/android/compose/ui/components/avatar/AvatarKt {
@@ -558,11 +656,15 @@ public final class io/getstream/video/android/compose/ui/components/call/control
 }
 
 public final class io/getstream/video/android/compose/ui/components/call/controls/actions/AcceptCallActionKt {
-	public static final fun AcceptCallAction (Landroidx/compose/ui/Modifier;ZLkotlin/jvm/functions/Function1;Landroidx/compose/runtime/Composer;II)V
+	public static final fun AcceptCallAction (Landroidx/compose/ui/Modifier;ZLandroidx/compose/ui/graphics/Shape;Lkotlin/jvm/functions/Function1;Landroidx/compose/runtime/Composer;II)V
+}
+
+public final class io/getstream/video/android/compose/ui/components/call/controls/actions/AudioControlsActionsKt {
+	public static final fun buildDefaultAudioControlActions (Lio/getstream/video/android/core/Call;Lkotlin/jvm/functions/Function1;Landroidx/compose/runtime/Composer;I)Ljava/util/List;
 }
 
 public final class io/getstream/video/android/compose/ui/components/call/controls/actions/CallControlActionBackgroundKt {
-	public static final fun CallControlActionBackground-t6yy7ic (Landroidx/compose/ui/Modifier;ZJJLkotlin/jvm/functions/Function2;Landroidx/compose/runtime/Composer;II)V
+	public static final fun CallControlActionBackground-Y0xEhic (Landroidx/compose/ui/Modifier;ZJJLandroidx/compose/ui/graphics/Shape;Lkotlin/jvm/functions/Function2;Landroidx/compose/runtime/Composer;II)V
 }
 
 public final class io/getstream/video/android/compose/ui/components/call/controls/actions/CallControlsActionsKt {
@@ -570,11 +672,11 @@ public final class io/getstream/video/android/compose/ui/components/call/control
 }
 
 public final class io/getstream/video/android/compose/ui/components/call/controls/actions/CancelCallActionKt {
-	public static final fun CancelCallAction (Landroidx/compose/ui/Modifier;ZLkotlin/jvm/functions/Function1;Landroidx/compose/runtime/Composer;II)V
+	public static final fun CancelCallAction (Landroidx/compose/ui/Modifier;ZLkotlin/jvm/functions/Function1;Landroidx/compose/ui/graphics/Shape;Landroidx/compose/runtime/Composer;II)V
 }
 
 public final class io/getstream/video/android/compose/ui/components/call/controls/actions/ChatDialogActionKt {
-	public static final fun ChatDialogAction (Landroidx/compose/ui/Modifier;ZLkotlin/jvm/functions/Function1;Landroidx/compose/runtime/Composer;II)V
+	public static final fun ChatDialogAction-jB83MbM (Landroidx/compose/ui/Modifier;ZLandroidx/compose/ui/graphics/Shape;JJLkotlin/jvm/functions/Function1;Landroidx/compose/runtime/Composer;II)V
 }
 
 public final class io/getstream/video/android/compose/ui/components/call/controls/actions/ComposableSingletons$AcceptCallActionKt {
@@ -612,7 +714,7 @@ public final class io/getstream/video/android/compose/ui/components/call/control
 }
 
 public final class io/getstream/video/android/compose/ui/components/call/controls/actions/FlipCameraActionKt {
-	public static final fun FlipCameraAction (Landroidx/compose/ui/Modifier;ZLkotlin/jvm/functions/Function1;Landroidx/compose/runtime/Composer;II)V
+	public static final fun FlipCameraAction-jB83MbM (Landroidx/compose/ui/Modifier;ZLandroidx/compose/ui/graphics/Shape;JJLkotlin/jvm/functions/Function1;Landroidx/compose/runtime/Composer;II)V
 }
 
 public final class io/getstream/video/android/compose/ui/components/call/controls/actions/LandscapeControlActionsKt {
@@ -632,15 +734,15 @@ public final class io/getstream/video/android/compose/ui/components/call/control
 }
 
 public final class io/getstream/video/android/compose/ui/components/call/controls/actions/ToggleCameraActionKt {
-	public static final fun ToggleCameraAction (Landroidx/compose/ui/Modifier;ZZLkotlin/jvm/functions/Function1;Landroidx/compose/runtime/Composer;II)V
+	public static final fun ToggleCameraAction-md9il-k (Landroidx/compose/ui/Modifier;ZZLandroidx/compose/ui/graphics/Shape;JJJJLkotlin/jvm/functions/Function1;Landroidx/compose/runtime/Composer;II)V
 }
 
 public final class io/getstream/video/android/compose/ui/components/call/controls/actions/ToggleMicrophoneActionKt {
-	public static final fun ToggleMicrophoneAction (Landroidx/compose/ui/Modifier;ZZLkotlin/jvm/functions/Function1;Landroidx/compose/runtime/Composer;II)V
+	public static final fun ToggleMicrophoneAction-md9il-k (Landroidx/compose/ui/Modifier;ZZLandroidx/compose/ui/graphics/Shape;JJJJLkotlin/jvm/functions/Function1;Landroidx/compose/runtime/Composer;II)V
 }
 
 public final class io/getstream/video/android/compose/ui/components/call/controls/actions/ToggleSpeakerphoneActionKt {
-	public static final fun ToggleSpeakerphoneAction (Landroidx/compose/ui/Modifier;ZZLkotlin/jvm/functions/Function1;Landroidx/compose/runtime/Composer;II)V
+	public static final fun ToggleSpeakerphoneAction-md9il-k (Landroidx/compose/ui/Modifier;ZZLandroidx/compose/ui/graphics/Shape;JJJJLkotlin/jvm/functions/Function1;Landroidx/compose/runtime/Composer;II)V
 }
 
 public final class io/getstream/video/android/compose/ui/components/call/lobby/CallLobbyKt {
@@ -999,6 +1101,28 @@ public final class io/getstream/video/android/compose/ui/components/connection/C
 
 public final class io/getstream/video/android/compose/ui/components/connection/NetworkQualityIndicatorKt {
 	public static final fun NetworkQualityIndicator (Lio/getstream/video/android/core/model/NetworkQuality;Landroidx/compose/ui/Modifier;Landroidx/compose/runtime/Composer;II)V
+}
+
+public final class io/getstream/video/android/compose/ui/components/indicator/ComposableSingletons$SoundIndicatorKt {
+	public static final field INSTANCE Lio/getstream/video/android/compose/ui/components/indicator/ComposableSingletons$SoundIndicatorKt;
+	public static field lambda-1 Lkotlin/jvm/functions/Function2;
+	public fun <init> ()V
+	public final fun getLambda-1$stream_video_android_compose_release ()Lkotlin/jvm/functions/Function2;
+}
+
+public final class io/getstream/video/android/compose/ui/components/indicator/ComposableSingletons$SoundLevelsKt {
+	public static final field INSTANCE Lio/getstream/video/android/compose/ui/components/indicator/ComposableSingletons$SoundLevelsKt;
+	public static field lambda-1 Lkotlin/jvm/functions/Function2;
+	public fun <init> ()V
+	public final fun getLambda-1$stream_video_android_compose_release ()Lkotlin/jvm/functions/Function2;
+}
+
+public final class io/getstream/video/android/compose/ui/components/indicator/SoundIndicatorKt {
+	public static final fun SoundIndicator (Lio/getstream/video/android/common/model/SoundState;Landroidx/compose/ui/Modifier;Landroidx/compose/runtime/Composer;II)V
+}
+
+public final class io/getstream/video/android/compose/ui/components/indicator/SoundLevelsKt {
+	public static final fun ActiveSoundLevels (Landroidx/compose/ui/Modifier;Landroidx/compose/runtime/Composer;II)V
 }
 
 public final class io/getstream/video/android/compose/ui/components/participants/CallParticipantsInfoMenuKt {
