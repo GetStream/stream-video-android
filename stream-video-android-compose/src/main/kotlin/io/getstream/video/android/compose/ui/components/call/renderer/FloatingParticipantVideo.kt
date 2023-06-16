@@ -100,6 +100,7 @@ public fun BoxScope.FloatingParticipantVideo(
             elevation = 8.dp,
             modifier = Modifier
                 .then(modifier)
+                .align(alignment)
                 .padding(VideoTheme.dimens.floatingVideoPadding)
                 .onGloballyPositioned { videoSize = it.size }
                 .size(

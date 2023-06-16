@@ -20,6 +20,7 @@ import androidx.compose.material.Card
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Shape
 import io.getstream.video.android.compose.theme.VideoTheme
 
 @Composable
@@ -28,11 +29,12 @@ public fun CallControlActionBackground(
     isEnabled: Boolean,
     enabledColor: Color = VideoTheme.colors.callActionIconEnabledBackground,
     disabledColor: Color = VideoTheme.colors.callActionIconDisabledBackground,
+    shape: Shape = VideoTheme.shapes.callControlsButton,
     content: @Composable () -> Unit
 ) {
     Card(
         modifier = modifier,
-        shape = VideoTheme.shapes.callControlsButton,
+        shape = shape,
         backgroundColor = if (isEnabled) {
             enabledColor
         } else {

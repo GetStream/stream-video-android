@@ -170,7 +170,7 @@ public fun CallContent(
 public fun CallContent(
     call: Call,
     modifier: Modifier = Modifier,
-    isShowingOverlayCallAppBar: Boolean = true,
+    isShowingOverlayAppBar: Boolean = true,
     isInPictureInPicture: Boolean = false,
     permissions: VideoPermissionsState = rememberCallPermissionsState(call = call),
     onCallAction: (CallAction) -> Unit = { DefaultOnCallActionHandler.onCallAction(call, it) },
@@ -248,7 +248,7 @@ public fun CallContent(
                     }
                 }
 
-                if (isShowingOverlayCallAppBar) {
+                if (isShowingOverlayAppBar) {
                     appBarContent.invoke(call)
                 }
             }

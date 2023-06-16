@@ -25,10 +25,10 @@ import io.getstream.video.android.common.model.Muted
 import io.getstream.video.android.common.model.Speaking
 import io.getstream.video.android.common.model.Unmuted
 import io.getstream.video.android.compose.base.BaseComposeTest
-import io.getstream.video.android.compose.ui.components.audio.ActiveSoundLevels
-import io.getstream.video.android.compose.ui.components.audio.SoundIndicator
 import io.getstream.video.android.compose.ui.components.call.renderer.ParticipantLabel
 import io.getstream.video.android.compose.ui.components.connection.NetworkQualityIndicator
+import io.getstream.video.android.compose.ui.components.indicator.ActiveSoundLevels
+import io.getstream.video.android.compose.ui.components.indicator.SoundIndicator
 import io.getstream.video.android.core.model.NetworkQuality
 import io.getstream.video.android.mock.mockParticipantList
 import org.junit.Rule
