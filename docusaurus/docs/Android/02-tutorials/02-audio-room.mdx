@@ -261,12 +261,13 @@ setContent {
                 }
             }
 
-            Button(onClick = {
-                lifecycleScope.launch {
-                    if (backstage) call.goLive() else call.stopLive()
-                }
-            }) {
-                Text(text = if (backstage)"Go Live" else "End")
+            Button(
+                onClick = {
+                    lifecycleScope.launch {
+                        if (backstage) call.goLive() else call.stopLive()
+                    }
+                }) {
+                Text(text = if (backstage) "Go Live" else "End")
             }
         }
     }
@@ -341,14 +342,14 @@ After running those example above, you'll see the result below:
 
 ### Other built-in features
 
-There are a few more exciting features that you can use to build audio rooms
+There are a few more exciting features that you can use to build audio rooms:
 
-** Query Calls **: You can query calls to easily show upcoming calls, calls that recently finished etc.
-** Reactions & Custom events **: Reactions and custom events are supported.
-** Recording & Broadcasting **: You can record your calls
-** Chat **: Stream's chat SDKs are fully featured and you can integrate them in the call
-** Moderation **: Moderation capabilities are built-in to the product
-** Transcriptions **: Transcriptions aren't available yet, but they are due to launch soon
+- ** Query Calls **: You can query calls to easily show upcoming calls, calls that recently finished etc.
+- ** Reactions & Custom events **: Reactions and custom events are supported.
+- ** Recording & Broadcasting **: You can record your calls
+- ** Chat **: Stream's chat SDKs are fully featured and you can integrate them in the call
+- ** Moderation **: Moderation capabilities are built-in to the product
+- ** Transcriptions **: Transcriptions aren't available yet, but they are due to launch soon
 
 ### Recap
 
