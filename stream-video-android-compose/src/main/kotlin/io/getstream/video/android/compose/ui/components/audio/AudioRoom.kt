@@ -17,11 +17,8 @@
 package io.getstream.video.android.compose.ui.components.audio
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.RowScope
-import androidx.compose.foundation.layout.calculateEndPadding
-import androidx.compose.foundation.layout.calculateStartPadding
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -32,20 +29,16 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalInspectionMode
-import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.coerceAtLeast
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.getstream.video.android.compose.permission.VideoPermissionsState
 import io.getstream.video.android.compose.permission.rememberMicrophonePermissionState
 import io.getstream.video.android.compose.theme.VideoTheme
-import io.getstream.video.android.compose.ui.components.call.CallAppBar
-import io.getstream.video.android.compose.ui.components.call.controls.actions.DefaultOnCallActionHandler
 import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.ParticipantState
-import io.getstream.video.android.core.call.state.CallAction
 import io.getstream.video.android.mock.StreamMockUtils
 import io.getstream.video.android.mock.mockCall
 
@@ -54,12 +47,12 @@ import io.getstream.video.android.mock.mockCall
 
  * @param call The call that contains all the participants state and tracks.
  * @param modifier Modifier for styling.
- * @param onCallAction Handler when the user clicks on some of the call controls.
  * @param permissions Android permissions that should be required to render a audio call properly.
+ * @param title A title that will be shown on the app bar.
  * @param appBarContent Content shown that a call information or an additional actions.
  * @param controlsContent Content is shown that allows users to trigger different actions to control a joined call.
  * @param audioRenderer A single audio renderer renders each individual participant.
- * @param audioContent A single audio renderer renders each individual participant.
+ * @param onLeaveRoom A lambda that will be invoked when the leave quietly button was clicked.
  * @param audioContent Content is shown by rendering audio when we're connected to a call successfully.
  */
 @Composable
@@ -67,14 +60,13 @@ public fun AudioRoom(
     modifier: Modifier = Modifier,
     call: Call,
     gridCellCount: Int = 4,
-    isShowingOverlayAppBar: Boolean = true,
+    isShowingAppBar: Boolean = true,
     permissions: VideoPermissionsState = rememberMicrophonePermissionState(call = call),
-    onCallAction: (CallAction) -> Unit = { DefaultOnCallActionHandler.onCallAction(call, it) },
+    title: String = stringResource(id = io.getstream.video.android.ui.common.R.string.stream_video_audio_room_title),
     appBarContent: @Composable (call: Call) -> Unit = {
-        CallAppBar(
-            call = call,
-            leadingContent = null,
-            onCallAction = onCallAction
+        AudioAppBar(
+            modifier = Modifier.fillMaxWidth(),
+            title = title,
         )
     },
     style: AudioRendererStyle = RegularAudioRendererStyle(),
@@ -87,55 +79,50 @@ public fun AudioRoom(
             style = audioStyle
         )
     },
-    audioContent: @Composable RowScope.(call: Call) -> Unit = {
+    audioContent: @Composable BoxScope.(call: Call) -> Unit = {
         val participants by call.state.participants.collectAsStateWithLifecycle()
         AudioParticipantsGrid(
             modifier = Modifier
                 .testTag("audio_content")
-                .fillMaxSize()
-                .padding(top = VideoTheme.dimens.audioContentTopPadding),
+                .fillMaxSize(),
             participants = participants,
             style = style,
             gridCellCount = gridCellCount,
             audioRenderer = audioRenderer
         )
     },
+    onLeaveRoom: (() -> Unit)? = null,
     controlsContent: @Composable (call: Call) -> Unit = {
         AudioControlActions(
             modifier = Modifier
                 .testTag("audio_controls_content")
-                .fillMaxWidth()
-                .padding(start = 22.dp, end = 22.dp, bottom = 30.dp),
-            call = call
+                .fillMaxWidth(),
+            call = call,
+            onLeaveRoom = onLeaveRoom
         )
     },
 ) {
     DefaultPermissionHandler(videoPermission = permissions)
 
     Scaffold(
-        modifier = modifier,
+        modifier = modifier
+            .background(VideoTheme.colors.appBackground)
+            .padding(32.dp),
         contentColor = VideoTheme.colors.appBackground,
-        topBar = { },
+        backgroundColor = VideoTheme.colors.appBackground,
+        topBar = {
+            if (isShowingAppBar) {
+                appBarContent.invoke(call)
+            }
+        },
         bottomBar = { controlsContent.invoke(call) },
-        content = {
-            val paddings = PaddingValues(
-                top = it.calculateTopPadding(),
-                start = it.calculateStartPadding(layoutDirection = LocalLayoutDirection.current),
-                end = it.calculateEndPadding(layoutDirection = LocalLayoutDirection.current),
-                bottom = (it.calculateBottomPadding() - VideoTheme.dimens.callControllerBottomPadding)
-                    .coerceAtLeast(0.dp)
-            )
-
-            Row(
-                modifier = modifier
+        content = { paddings ->
+            Box(
+                modifier = Modifier
                     .background(color = VideoTheme.colors.appBackground)
                     .padding(paddings)
             ) {
                 audioContent.invoke(this, call)
-            }
-
-            if (isShowingOverlayAppBar) {
-                appBarContent.invoke(call)
             }
         }
     )

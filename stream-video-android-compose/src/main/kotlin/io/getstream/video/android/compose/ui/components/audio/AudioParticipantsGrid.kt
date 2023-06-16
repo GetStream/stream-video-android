@@ -60,7 +60,7 @@ public fun AudioParticipantsGrid(
     LazyVerticalGrid(
         modifier = modifier,
         columns = GridCells.Fixed(gridCellCount),
-        contentPadding = PaddingValues(horizontal = 14.dp, vertical = 30.dp),
+        contentPadding = PaddingValues(vertical = 32.dp),
         verticalArrangement = Arrangement.spacedBy(22.dp)
     ) {
         items(items = participants, key = { it.sessionId }) { participant ->
