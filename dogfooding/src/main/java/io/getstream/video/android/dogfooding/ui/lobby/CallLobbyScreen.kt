@@ -55,6 +55,7 @@ import io.getstream.video.android.compose.ui.components.avatar.UserAvatar
 import io.getstream.video.android.compose.ui.components.call.lobby.CallLobby
 import io.getstream.video.android.core.call.state.ToggleCamera
 import io.getstream.video.android.core.call.state.ToggleMicrophone
+import io.getstream.video.android.dogfooding.BuildConfig
 import io.getstream.video.android.dogfooding.R
 import io.getstream.video.android.dogfooding.ui.call.CallActivity
 import io.getstream.video.android.dogfooding.ui.theme.Colors
@@ -104,8 +105,13 @@ private fun CallJoinHeader(
     HandleCallLobbyUiState(callLobbyUiState = uiState)
 
     LaunchedEffect(key1 = Unit) {
-        callLobbyViewModel.call.camera.setEnabled(true)
-        callLobbyViewModel.call.microphone.setEnabled(true)
+        if (BuildConfig.BENCHMARK) {
+            callLobbyViewModel.call.camera.disable()
+            callLobbyViewModel.call.microphone.disable()
+        } else {
+            callLobbyViewModel.call.camera.enable()
+            callLobbyViewModel.call.microphone.enable()
+        }
     }
 
     Row(
