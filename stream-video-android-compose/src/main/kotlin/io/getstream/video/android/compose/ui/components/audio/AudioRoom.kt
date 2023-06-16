@@ -16,6 +16,7 @@
 
 package io.getstream.video.android.compose.ui.components.audio
 
+import android.content.res.Configuration
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
@@ -140,6 +141,7 @@ private fun DefaultPermissionHandler(
 }
 
 @Preview
+@Preview(uiMode = Configuration.UI_MODE_NIGHT_YES)
 @Composable
 private fun AudioRoomPreview() {
     StreamMockUtils.initializeStreamVideo(LocalContext.current)

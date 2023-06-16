@@ -20,7 +20,7 @@ import androidx.activity.ComponentActivity
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -29,10 +29,13 @@ import androidx.compose.material.ButtonDefaults
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
@@ -59,7 +62,11 @@ public fun AudioControlActions(
     modifier: Modifier = Modifier,
     onLeaveRoom: (() -> Unit)? = null
 ) {
-    val isMicrophoneEnabled by call.microphone.isEnabled.collectAsStateWithLifecycle()
+    val isMicrophoneEnabled by if (LocalInspectionMode.current) {
+        remember { mutableStateOf(true) }
+    } else {
+        call.microphone.isEnabled.collectAsStateWithLifecycle()
+    }
     val activity = LocalContext.current as? ComponentActivity
 
     Box(modifier = modifier) {
@@ -112,7 +119,7 @@ private fun AudioControlActionsPreview() {
     StreamMockUtils.initializeStreamVideo(LocalContext.current)
     VideoTheme {
         AudioControlActions(
-            modifier = Modifier.fillMaxSize(),
+            modifier = Modifier.fillMaxWidth(),
             call = mockCall
         )
     }
