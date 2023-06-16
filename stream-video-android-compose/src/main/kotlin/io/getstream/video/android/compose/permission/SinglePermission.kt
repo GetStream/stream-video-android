@@ -19,6 +19,7 @@ package io.getstream.video.android.compose.permission
 import android.os.Build
 import androidx.annotation.RequiresApi
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import io.getstream.video.android.core.Call
 
 /**
@@ -46,6 +47,17 @@ public fun rememberCameraPermissionState(
 }
 
 /**
+ * Lunch call permissions about:
+ *
+ * - android.Manifest.permission.CAMERA
+ */
+@Composable
+public fun LaunchCameraPermissions(call: Call) {
+    val callPermissionsState = rememberCameraPermissionState(call = call)
+    LaunchedEffect(key1 = call) { callPermissionsState.launchPermissionRequest() }
+}
+
+/**
  * Remember [VideoPermissionsState] about the microphone permission.
  */
 @Composable
@@ -67,6 +79,17 @@ public fun rememberMicrophonePermissionState(
             onPermissionsResult.invoke(isGranted)
         }
     )
+}
+
+/**
+ * Lunch call permissions about:
+ *
+ * - android.Manifest.permission.RECORD_AUDIO
+ */
+@Composable
+public fun LaunchMicrophonePermissions(call: Call) {
+    val callPermissionsState = rememberMicrophonePermissionState(call = call)
+    LaunchedEffect(key1 = call) { callPermissionsState.launchPermissionRequest() }
 }
 
 /**
