@@ -9,16 +9,18 @@
 </p>
 
 This is the official Android SDK for Stream Video.
-You can leverage this SDK to build in-app video calling, audio rooms, audio calls or livestreaming.
-The best place to get started is the tutorials:
 
-* Video & Audio Calling Tutorial
-* Audio Rooms Tutorial
-* Livestreaming Tutorial
+## What is Stream?
 
-Stream provides UI components and StateFlow objects that make it easy to build video calling for your app.
-All calls run on Stream's network of edge servers around the world.
-The edge network ensures optimal latency and reliability for calls.
+Stream allows developers to rapidly deploy scalable feeds, chat messaging and video with an industry leading 99.999% uptime SLA guarantee.
+
+With Stream's video components, you can use their SDK to build in-app video calling, audio rooms, audio calls, or live streaming. The best place to get started is with their tutorials:
+
+- Video & Audio Calling Tutorial
+- Audio Rooms Tutorial
+- Livestreaming Tutorial
+
+Stream provides UI components and state handling that make it easy to build video calling for your app. All calls run on Stream's network of edge servers around the world, ensuring optimal latency and reliability.
 
 ## 👩‍💻 Free for Makers 👨‍💻
 
