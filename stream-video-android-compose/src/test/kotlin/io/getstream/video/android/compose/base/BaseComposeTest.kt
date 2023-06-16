@@ -65,9 +65,16 @@ internal abstract class BaseComposeTest {
 
     fun snapshotWithDarkModeRow(composable: @Composable () -> Unit) {
         basePaparazzi().snapshot {
-            Row {
-                VideoTheme(isInDarkMode = true) { composable.invoke() }
-                VideoTheme(isInDarkMode = false) { composable.invoke() }
+            StreamMockUtils.initializeStreamVideo(LocalContext.current)
+            CompositionLocalProvider(
+                LocalInspectionMode provides true,
+                LocalAvatarPreviewPlaceholder provides
+                    io.getstream.video.android.ui.common.R.drawable.stream_video_call_sample
+            ) {
+                Row {
+                    VideoTheme(isInDarkMode = true) { composable.invoke() }
+                    VideoTheme(isInDarkMode = false) { composable.invoke() }
+                }
             }
         }
     }

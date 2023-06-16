@@ -17,7 +17,6 @@
 package io.getstream.video.android.compose
 
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.ui.Modifier
 import app.cash.paparazzi.DeviceConfig
 import app.cash.paparazzi.Paparazzi
@@ -34,7 +33,7 @@ import org.junit.Test
 internal class AudioRoomTest : BaseComposeTest() {
 
     @get:Rule
-    val paparazzi = Paparazzi(deviceConfig = DeviceConfig.PIXEL_4A)
+    val paparazzi = Paparazzi(deviceConfig = DeviceConfig.NEXUS_5_LAND)
 
     override fun basePaparazzi(): Paparazzi = paparazzi
 
@@ -47,8 +46,8 @@ internal class AudioRoomTest : BaseComposeTest() {
 
     @Test
     fun `snapshot AudioControlActions composable`() {
-        snapshotWithDarkMode {
-            AudioControlActions(call = mockCall, modifier = Modifier.fillMaxWidth())
+        snapshot {
+            AudioControlActions(call = mockCall, modifier = Modifier.fillMaxSize())
         }
     }
 
