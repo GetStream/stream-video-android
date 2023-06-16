@@ -32,6 +32,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -60,7 +61,6 @@ import io.getstream.video.android.mock.mockCall
 public fun AudioRoom(
     modifier: Modifier = Modifier,
     call: Call,
-    gridCellCount: Int = 4,
     isShowingAppBar: Boolean = true,
     permissions: VideoPermissionsState = rememberMicrophonePermissionState(call = call),
     title: String = stringResource(id = io.getstream.video.android.ui.common.R.string.stream_video_audio_room_title),
@@ -88,7 +88,6 @@ public fun AudioRoom(
                 .fillMaxSize(),
             participants = participants,
             style = style,
-            gridCellCount = gridCellCount,
             audioRenderer = audioRenderer
         )
     },
@@ -142,6 +141,7 @@ private fun DefaultPermissionHandler(
 
 @Preview
 @Preview(uiMode = Configuration.UI_MODE_NIGHT_YES)
+@Preview(device = Devices.AUTOMOTIVE_1024p, widthDp = 1440, heightDp = 720)
 @Composable
 private fun AudioRoomPreview() {
     StreamMockUtils.initializeStreamVideo(LocalContext.current)

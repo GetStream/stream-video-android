@@ -152,13 +152,13 @@ private fun BoxScope.DefaultMicrophoneIndicator(
         modifier = Modifier
             .clip(CircleShape)
             .background(VideoTheme.colors.appBackground)
-            .size(VideoTheme.dimens.audioMicSize)
+            .size(VideoTheme.dimens.audioRoomMicSize)
             .align(alignment)
     ) {
         Icon(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(VideoTheme.dimens.audioMicPadding),
+                .padding(VideoTheme.dimens.audioRoomMicPadding),
             painter = painterResource(id = R.drawable.stream_video_ic_mic_off),
             tint = VideoTheme.colors.errorAccent,
             contentDescription = null

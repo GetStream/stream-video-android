@@ -16,6 +16,7 @@
 
 package io.getstream.video.android.compose.ui.components.audio
 
+import android.content.res.Configuration
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
@@ -24,7 +25,9 @@ import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import io.getstream.video.android.compose.theme.VideoTheme
@@ -38,7 +41,6 @@ import io.getstream.video.android.mock.mockParticipantList
  * @param modifier Modifier for styling.
  * @param participants A list of participant to construct the grid.
  * @param style Represents a regular audio call render styles.
- * @param gridCellCount The column size of the lazy grid.
  * @param audioRenderer A single audio renderer renders each individual participant.
  */
 @Composable
@@ -46,7 +48,6 @@ public fun AudioParticipantsGrid(
     modifier: Modifier = Modifier,
     participants: List<ParticipantState>,
     style: AudioRendererStyle = RegularAudioRendererStyle(),
-    gridCellCount: Int = 4,
     audioRenderer: @Composable (
         participant: ParticipantState,
         style: AudioRendererStyle
@@ -57,11 +58,18 @@ public fun AudioParticipantsGrid(
         )
     },
 ) {
+    val orientation = LocalConfiguration.current.orientation
+
     LazyVerticalGrid(
         modifier = modifier,
-        columns = GridCells.Fixed(gridCellCount),
+        columns = GridCells.Adaptive(VideoTheme.dimens.audioAvatarSize),
         contentPadding = PaddingValues(vertical = 32.dp),
-        verticalArrangement = Arrangement.spacedBy(22.dp)
+        verticalArrangement = Arrangement.spacedBy(VideoTheme.dimens.audioRoomAvatarLandscapePadding),
+        horizontalArrangement = if (orientation == Configuration.ORIENTATION_LANDSCAPE) {
+            Arrangement.spacedBy(VideoTheme.dimens.audioRoomAvatarLandscapePadding)
+        } else {
+            Arrangement.spacedBy(0.dp)
+        }
     ) {
         items(items = participants, key = { it.sessionId }) { participant ->
             audioRenderer.invoke(participant, style)
@@ -70,6 +78,7 @@ public fun AudioParticipantsGrid(
 }
 
 @Preview
+@Preview(device = Devices.AUTOMOTIVE_1024p, widthDp = 1440, heightDp = 720)
 @Composable
 private fun AudioParticipantsGridPreview() {
     StreamMockUtils.initializeStreamVideo(LocalContext.current)

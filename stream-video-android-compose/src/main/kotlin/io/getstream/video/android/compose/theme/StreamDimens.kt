@@ -106,8 +106,10 @@ public data class StreamDimens(
     public val audioContentTopPadding: Dp,
     public val audioAvatarSize: Dp,
     public val audioAvatarPadding: Dp,
-    public val audioMicSize: Dp,
-    public val audioMicPadding: Dp,
+    public val audioRoomMicSize: Dp,
+    public val audioRoomMicPadding: Dp,
+    public val audioRoomAvatarPortraitPadding: Dp,
+    public val audioRoomAvatarLandscapePadding: Dp,
 ) {
     public companion object {
         /**
@@ -190,8 +192,10 @@ public data class StreamDimens(
             audioContentTopPadding = dimensionResource(id = R.dimen.stream_video_audioContentTopPadding),
             audioAvatarSize = dimensionResource(id = R.dimen.stream_video_audioAvatarSize),
             audioAvatarPadding = dimensionResource(id = R.dimen.stream_video_audioAvatarPadding),
-            audioMicSize = dimensionResource(id = R.dimen.stream_video_audioMicSize),
-            audioMicPadding = dimensionResource(id = R.dimen.stream_video_audioMicPadding),
+            audioRoomMicSize = dimensionResource(id = R.dimen.stream_video_audioMicSize),
+            audioRoomMicPadding = dimensionResource(id = R.dimen.stream_video_audioMicPadding),
+            audioRoomAvatarPortraitPadding = dimensionResource(id = R.dimen.stream_video_audioRoomAvatarPortraitPadding),
+            audioRoomAvatarLandscapePadding = dimensionResource(id = R.dimen.stream_video_audioRoomAvatarLandscapePadding),
         )
     }
 }

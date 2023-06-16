@@ -86,6 +86,8 @@
     <dimen name="stream_video_audioAvatarPadding">4dp</dimen>
     <dimen name="stream_video_audioMicSize">20dp</dimen>
     <dimen name="stream_video_audioMicPadding">5dp</dimen>
+    <dimen name="stream_video_audioRoomAvatarPortraitPadding">22dp</dimen>
+    <dimen name="stream_video_audioRoomAvatarLandscapePadding">40dp</dimen>
 
     <dimen name="stream_video_title1TextSize">24sp</dimen>
     <dimen name="stream_video_title1LineHeight">34sp</dimen>
