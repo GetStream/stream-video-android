@@ -70,7 +70,10 @@ class MainActivity : ComponentActivity() {
 
                 // step5 - render AudioRoom
                 if (connect == RealtimeConnection.Connected) {
-                    AudioRoom(call = call)
+                    AudioRoom(
+                        call = call,
+                        title = "Audio Room Number 05"
+                    )
                 } else {
                     Text(
                         text = "loading...",
