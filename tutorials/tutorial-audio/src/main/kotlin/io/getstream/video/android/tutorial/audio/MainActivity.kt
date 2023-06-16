@@ -19,10 +19,13 @@ package io.getstream.video.android.tutorial.audio
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.compose.material.Text
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.ui.unit.sp
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
 import androidx.lifecycle.lifecycleScope
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.audio.AudioRoom
@@ -75,11 +78,12 @@ class MainActivity : ComponentActivity() {
                         title = "Audio Room Number 05"
                     )
                 } else {
-                    Text(
-                        text = "loading...",
-                        fontSize = 30.sp,
-                        color = VideoTheme.colors.textHighEmphasis
-                    )
+                    Box(modifier = Modifier.fillMaxSize()) {
+                        CircularProgressIndicator(
+                            modifier = Modifier.align(Alignment.Center),
+                            color = VideoTheme.colors.primaryAccent
+                        )
+                    }
                 }
             }
         }
