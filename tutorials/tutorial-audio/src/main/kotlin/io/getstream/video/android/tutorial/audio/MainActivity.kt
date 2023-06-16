@@ -61,7 +61,7 @@ class MainActivity : ComponentActivity() {
         ).build()
 
         // step3 - join a call, which type is `default` and id is `123`.
-        val call = client.call("default", callId)
+        val call = client.call("audio_room", callId)
         lifecycleScope.launch {
             call.join(create = true)
         }

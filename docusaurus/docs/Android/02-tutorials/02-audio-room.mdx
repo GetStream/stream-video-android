@@ -3,8 +3,6 @@ title: Audio Room Tutorial
 description: How to build an audio room using Stream's video SDKs
 ---
 
-## Audio Room Tutorial
-
 This tutorial will teach you how to build an audio room experience like Twitter Spaces or Clubhouse.
 
 * Backstage mode. You can start the call with your co-hosts and chat a bit before going live
@@ -20,48 +18,72 @@ Time to get started
 Note that this tutorial was written using Android Studio Flamingo.
 Setup steps can vary slightly across Android Studio versions so if you run into trouble be sure to use the latest version of Android Studio.
 
-* Create a new project
-* Select "empty activity"
-* Name your project "AudioRoom"
+1. Create a new project
+2. Select Phone & Template -> **Empty Activity**
+3. Name your project **AudioRoom**.
+
+Note that setup steps can vary slightly across Android Studio versions.
+If you run into trouble be sure to use the latest version of Android Studio (Flamingo or higher).
 
 ### Step 2 - Install the SDK & Setup the client
 
-** Add the compose SDK ** to your app's build.gradle file found in app/build.gradle
-If you're new to android note that there are 2 build.gradle files, you want to open the one in the app folder.
+**Add the Video Compose SDK** and [Jetpack Compose](https://developer.android.com/jetpack/compose) dependencies to your app's `build.gradle.kts` file found in `app/build.gradle`.
+If you're new to android, note that there are 2 `build.gradle` files, you want to open the `build.gradle` in the app folder.
 
 ```groovy
 dependencies {
-    implementation "io.getstream:stream-video-android-compose:0.0.14-SNAPSHOT"
+    // Stream Video Compose SDK
+    implementation("io.getstream:stream-video-android-compose:0.0.15-SNAPSHOT")
+
+    // Jetpack Compose
+    implementation(platform("androidx.compose:compose-bom:2023.06.00"))
+    implementation("androidx.activity:activity-compose:1.7.2")
+    implementation("androidx.compose.ui:ui")
+    implementation("androidx.compose.ui:ui-tooling")
+    implementation("androidx.compose.runtime:runtime")
+    implementation("androidx.compose.foundation:foundation")
+    implementation("com.google.android.material:material")
 }
 ```
 
+There are 2 versions of Stream's SDK.
+
+- **Video Compose SDK**: `io.getstream:stream-video-android-compose` dependency that includes the video core SDK + compose UI components.
+- **Video Core SDK**: `io.getstream:stream-video-android-core` that only includes the core parts of the video SDK.
+
+For this tutorial, we'll use the compose UI components.
+
 ### Step 3 - Create & Join a call
 
-Open up `MainActivity.kt` and replace the MainActivity class with the following code:
+Open up `MainActivity.kt` and replace the **MainActivity** class with the following code:
 
 ```kotlin
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        // create a user.
+        val userId = "REPLACE_WITH_USER_ID"
+        val userToken = "REPLACE_WITH_TOKEN"
+        val callId = "REPLACE_WITH_CALL_ID"
+
+        // step1 - create a user.
         val user = User(
-            id = "tutorial@getstream.io", // any string
+            id = userId, // any string
             name = "Tutorial", // name and image are used in the UI
             role = "admin"
         )
 
-        // for a production app we recommend adding the client to your Application class or di module.
+        // step2 - initialize StreamVideo. For a production app we recommend adding the client to your Application class or di module.
         val client = StreamVideoBuilder(
-            context = applicationContext,
-            apiKey = "hd8szvscpxvd", // demo API key
-            geo = GEO.GlobalEdgeNetwork,
-            user = user,
-            token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoidHV0b3JpYWxAZ2V0c3RyZWFtLmlvIiwiaXNzIjoicHJvbnRvIiwic3ViIjoidXNlci90dXRvcmlhbEBnZXRzdHJlYW0uaW8iLCJpYXQiOjE2ODYyMTcwMzgsImV4cCI6MTY4NjIyNzg0M30.ufQrfKUUBA_ikSWlOFfjOVlyWeWfI3hTBABN14bBV_g",
+             context = applicationContext,
+             apiKey = "hd8szvscpxvd", // demo API key
+             geo = GEO.GlobalEdgeNetwork,
+             user = user,
+             token = userToken,
         ).build()
 
-        // join a call, which type is `default` and id is `123`.
-        val call = client.call("audio_room", "444")
+        // step3 - join a call, which type is `audio_room` and id is `123`.
+        val call = client.call("audio_room", callId)
         lifecycleScope.launch {
             val result = call.join(create = true, createOptions = CreateCallOptions(
                 members = listOf(
@@ -75,13 +97,16 @@ class MainActivity : ComponentActivity() {
         }
 
         setContent {
+            // step4 - apply VideoTheme
             VideoTheme {
+                // step5 - define required properties.
                 val custom by call.state.custom.collectAsState()
                 val title = custom["title"]
                 val description = custom["description"]
                 val participants by call.state.participants.collectAsState()
                 val connection by call.state.connection.collectAsState()
 
+                // step6 - render texts that display connection status.
                 Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.padding(16.dp)) {
                     if (connection != RealtimeConnection.Connected) {
                         Text("loading", fontSize = 30.sp)
@@ -97,12 +122,34 @@ class MainActivity : ComponentActivity() {
 }
 ```
 
-Run the app you will see a room with 1 participant (yourself).
+To run this sample we need a valid user token. The user token is typically generated by your server side API.
+So when the user logs in for your app you return the user token that gives them access to video calling.
+To make this tutorial easier to follow we'll generate a user token for you.
+
+Please update **REPLACE_WITH_USER_ID**, **REPLACE_WITH_TOKEN** and **REPLACE_WITH_CALL_ID** with the actual values shown below:
+
+<TokenSnippet sampleApp='meeting' />
+
+Now when you run the sample app it will connect successfully and you will see a room with 1 participant (yourself).
 Let's review the example above and go over the details.
+
+**User** setup. First we create a user object.
+You typically sync these users via a server side integration from your own backend.
+Alternatively, you can also use guest or anonymous users.
+The user's role allows you to configure permissions in the video call.
+
+```kotlin
+val user = User(
+    id = userId, // any string
+    name = "Tutorial", // name and image are used in the UI
+    role = "admin"
+)
+```
+
 After the user and client are created, we setup a call like this:
 
 ```kotlin
-val call = client.call("audio_room", "444")
+val call = client.call("audio_room", callId)
 lifecycleScope.launch {
     val result = call.join(create = true, createOptions = CreateCallOptions(
         members = listOf(
@@ -117,40 +164,62 @@ lifecycleScope.launch {
 ```
 
 This example shows how to create and join a call with one API call.
-It creates a call of type "audio_room", id "444" and makes the user ids "tommaso" and "thierry" moderators of the call.
+It creates a call of type `audio_room`, id `callId` and makes the user ids "tommaso" and "thierry" moderators of the call.
 In addition to that it also stores the title and description of the room in the custom data of the call object.
 
-By default calls of type "audio_room" start with backstage mode enabled.
+By default calls of type `audio_room` start with backstage mode enabled.
 Admins and moderators can join the call. Regular users can only join the call when you go live.
 This gives an opportunity to setup the audio/video etc before inviting people in.
 
 ### Step 4 - Adding audio room UI elements
 
-In this next step we'll add:
+In this next step we're going to:
 
-* A list of participants
-* An indicator for who's speaking
+1. Request Android Runtime permissions (audio)
+2. Create a list of participants
+3. An indicator for who's speaking
+
+#### A. Requesting Android Runtime Permissions
+
+To capture the microphone output we need to request [Android runtime permissions](https://source.android.com/docs/core/permissions/runtime_perms).
+In `MainActivity.kt` just below setContent add the line `LaunchMicrophonePermissions(call = call)`
+
+```kotlin
+setContent {
+    LaunchMicrophonePermissions(call = call)
+    ...
+}
+```
+
+The launch call permissions will request permissions when you open the call.
+Review the [permissions docs](../05-ui-cookbook/08-permissions-request.mdx) to learn more about how you can easily request permissions.
+
+#### B. Create a list of participants
 
 Let's create a component for the active speaker and the list of participants.
 
 ```kotlin
 @Composable
-fun DominantSpeaker(participant : ParticipantState?) {
-    val user = participant?.user?.collectAsState()?.value
-    Text("${user?.name} - ${user?.role}")
+fun DominantSpeaker(participant : ParticipantState) {
+    val user by participant.user.collectAsState()
+    Text("${user.name} - ${user.role}")
 }
 
 @Composable
-fun ParticipantAvatar(participant : ParticipantState?) {
-    val user = participant?.user?.collectAsState()?.value
-    Text("${user?.name} - ${user?.role}")
+fun ParticipantAvatar(participant : ParticipantState) {
+    val user by participant.user.collectAsState()
+    Text("${user.name} - ${user.role}")
 }
 ```
 
-We'll combine the ParticipantAvatar and DominantSpeaker into the UI for an audio room:
+#### B. An indicator for who's speaking
+
+We'll combine the `ParticipantAvatar` and `DominantSpeaker` into the UI for an audio room:
 
 ```kotlin
 setContent {
+    LaunchMicrophonePermissions(call = call)
+
     VideoTheme {
         val connection by call.state.connection.collectAsState()
         val custom by call.state.custom.collectAsState()
@@ -166,8 +235,10 @@ setContent {
         val color1 = Color.LightGray.copy(alpha = 0.2f+ audioLevel * 0.8f)
         val color2 = Color.White.copy(alpha = 0.2f+ audioLevel * 0.8f)
 
-        Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.background(Brush.linearGradient(listOf(color1, color2)))
-            .fillMaxSize()) {
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            modifier = Modifier.background(Brush.linearGradient(listOf(color1, color2))).fillMaxSize()
+        ) {
             if (connection != RealtimeConnection.Connected) {
                 Text("loading", fontSize = 30.sp)
             } else {
@@ -176,7 +247,8 @@ setContent {
                 Text("${participants.size} participants", fontSize = 20.sp)
             }
 
-            DominantSpeaker(dominantSpeaker)
+            dominantSpeaker?.let { DominantSpeaker(it) }
+
             LazyVerticalGrid(
                 columns = GridCells.Adaptive(minSize = 128.dp)
             ) {
@@ -185,6 +257,7 @@ setContent {
                     ParticipantAvatar(participant)
                 }
             }
+
             Button(onClick = {
                 lifecycleScope.launch {
                     if (backstage) call.goLive() else call.stopLive()
@@ -197,46 +270,82 @@ setContent {
 }
 ```
 
-See how speaking changes the audioLevel and updates the background.
+See how speaking changes the `audioLevel` and updates the background.
 
 Run the sample app now and you'll see 1 participant.
 Click the go live button to allow participants to join.
 
+### Step 5 - Joining from the web
+
 To make this a little more interactive let's join the call from your browser.
-Visit https://getstream.io/video/demos/?id=444&skip-intro=1 and join the call.
+
+<TokenSnippet sampleApp='meeting' displayStyle='join' />
+
 On your Android emulator you'll see the text update to 2 participants.
+Let's keep the browser tab open as you go through the tutorial.
 
-### Step 5 - Adding audio room UI elements
+### Step 6 - A AudioRoom UI
 
-In the last step the UI for DominantSpeaker and ParticipantAvatar was a bit limited.
-Let's improve the design here.
+Stream provides some components that allow you to implement an audio room screen.
+Replace the code snippets inside `setContent` with the example below:
 
+```kotlin
+setContent {
+    // step4 - apply VideoTheme
+    VideoTheme {
+        val connect by call.state.connection.collectAsState()
 
-TODO
+        // step5 - render AudioRoom
+        if (connect == RealtimeConnection.Connected) {
+            AudioRoom(
+                call = call,
+                title = "Audio Room Number 05"
+            )
+        } else {
+            Box(modifier = Modifier.fillMaxSize()) {
+                CircularProgressIndicator(
+                    modifier = Modifier.align(Alignment.Center),
+                    color = VideoTheme.colors.primaryAccent
+                )
+            }
+        }
+    }
+}
+```
 
-### Step 6 - Requesting permission to speak
+`AudioRoom` basically consists of three parts of elements, the app bar, participants grid, and control actions:
+
+- **AudioAppBar**: Represents the default AppBar that shows the title of the audio room.
+- **AudioParticipantsGrid**: Renders all the participants to construct a audio room, based on the number of people in a call and the call state.
+- **AudioControlActions**: Represents the set of controls the user can use to change their audio and video device state, or browse other types of settings, leave the call, or implement something custom.
+
+### Step 7 - Requesting permission to speak
 
 Requesting permission to speak is easy.
 
 ```kotlin
 val response = call.requestPermissions("send-audio")
 // and next the admin will call
-val requests = call.state.permissionRequests.value
+val requests by call.state.permissionRequests
 request.forEach {
     it.grant() // or it.reject()
 }
 ```
 
+After running those example above, you'll see the result below:
+
+![Audio Room](../assets/audio-room.png)
+
 ### Other built-in features
 
 There are a few more exciting features that you can use to build audio rooms
 
-** Query Calls ** You can query calls to easily show upcoming calls, calls that recently finished etc.
-** Reactions & Custom events ** Reactions and custom events are supported.
-** Recording & Broadcasting ** You can record your calls
-** Chat ** Stream's chat SDKs are fully featured and you can integrate them in the call
-** Moderation ** Moderation capabilities are built-in to the product
-** Transcriptions ** Transcriptions aren't available yet, but they are due to launch soon
+** Query Calls **: You can query calls to easily show upcoming calls, calls that recently finished etc.
+** Reactions & Custom events **: Reactions and custom events are supported.
+** Recording & Broadcasting **: You can record your calls
+** Chat **: Stream's chat SDKs are fully featured and you can integrate them in the call
+** Moderation **: Moderation capabilities are built-in to the product
+** Transcriptions **: Transcriptions aren't available yet, but they are due to launch soon
 
 ### Recap
 
