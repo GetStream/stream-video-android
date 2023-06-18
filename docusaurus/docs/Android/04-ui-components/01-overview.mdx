@@ -3,54 +3,55 @@ title: Overview
 description: Overview of the UI components
 ---
 
-# Overview
+Stream SDK aims to make it as easy as possible to build your own video calling, audio rooms, and live streams.
+We support a low-level client, guides on building your own UI, and several pre-built UI components.
+If you quickly want to add calling to your app, you can do that just in an hour with these UI components.
 
-This library aims to make it as easy as possible to build your own video calling, audio rooms and livestreams.
-We support a low level client, guides on building your own UI and several pre-build UI components.
-If you quickly want to add calling to your app you can do that in just hours with these UI components.
+### Rendering a Single Video
 
-### Rendering a single video
+You can render a single video with the very basic renderer like the code below:
 
-If you only want to render a participant's video:
-
-```
-ParticipantVideoRenderer(
+```kotlin
+VideoRenderer(
     call = call,
     participant = participant,
 )
 ```
 
+The [VideoRenderer](02-video-renderer.mdx) is the primary low-level component that is widely used in Stream SDK and renders purely a single video without any other UI components.
+
 You will see the basic live video rendering:
 
-![Compose CallContainer](../assets/compose_single_video.png)
+![Compose Video Renderer](../assets/compose_single_video.png)
 
-### Participant Card
+### Participant Video
 
 If you want to render a participant's video together with:
 
-* A label/name for the participant
-* Network quality indicator
-* Mute/unmute indicator
-* Fallback for when video is muted
-* Speaking indicator
+- A label/name for the participant
+- Network quality indicator
+- Mute/unmute indicator
+- Fallback for when video is muted
+- Speaking indicator
+- Reactions
 
 Use this component:
 
-```
+```kotlin
 ParticipantVideo(
     call = call,
     participant = participant,
-    labelPosition = Alignment.BottomStart
+    style = RegularVideoRendererStyle()
 )
 ```
 
 You will see the result below:
 
-![Compose CallContainer](../assets/compose_single_participant.png)
+![Compose Video Participant](../assets/compose_single_participant.png)
 
 ### Video Call UI
 
-We also support the full UI component, which consists of:
+We also support the full UI component called [CallContainer](04-call/01-call-container.mdx), which consists of:
 
 - **AppBar**: Content is shown that calls information or additional actions.
 - **Video**: A call video that renders the full participants of the call.
@@ -60,45 +61,48 @@ The following example renders a full video calling interface:
 
 ```Kotlin
 VideoTheme {
-    CallContent(
+    CallContainer(
         modifier = modifier,
-        callViewModel = callViewModel,
+        call = call,
         onBackPressed = onBackPressed,
         onCallAction = onCallAction,
-        controlsContent = controlsContent,
-        pictureInPictureContent = pictureInPictureContent
     )
 }
 ```
 
 You will see the result below:
 
-![Compose CallContainer](../assets/compose_call_content.png)
+![Compose CallContainer](../assets/compose_call_container.png)
 
 ### Ringing (incoming/outgoing calls)
 
-You can implement incoming/outgoing respectively screens depending on the call state with `RingingCallContent` composable:
+You can implement incoming/outgoing respectively screens depending on the call state with [RingingCallContent](04-call/02-ringing-call.mdx)` composable:
 
 ```Kotlin
 VideoTheme {
     RingingCallContent(
-        callViewModel = callViewModel,
-        callType = CallType.VIDEO,
-        onAcceptedCallContent = {
+        call = call,
+        isVideoType = true,
+        onAcceptedContent = {
             // do something when a call is accepted
         },
+        onRejectedContent = {
+            // do something when a call is rejected
+        }
     )
 }
 ```
 
-## UI Component Customization
+You will see the result below:
 
-The UI components are highly customizable.
+| One to one (Incoming)                                        | Group (Incoming)                                             | One to one (Outgoing)                                        | Group (Outgoing)                                             |
+| ------------------------------------------------------------ | ------------------------------------------------------------ | ------------------------------------------------------------ | ------------------------------------------------------------ |
+| ![OneToOneIncoming](../assets/incoming_call_one_to_one.png) | ![GroupIncoming](../assets/incoming_call_group.png) | ![OneToOneOutgoing](../assets/outgoing_call_one_to_one.png) | ![GroupOutgoing](../assets/outgoing_call_group.png)
 
-* You can change the theme
-* You can swap components with your own variations
-* Or you can build UI components from scratch
+### UI Component Customization
 
+Stream SDK provides highly customizable UI components and you can adjust each style or implement your own UI for each part of the components. This list describes what you can do with Stream SDK's UI components:
 
-
-
+- Theming the entire UI components with [VideoTheme](03-video-theme.mdx).
+- Swapping each part of UI components with your own variations.
+- You can also build your UI components from scratch with our low-level UI component, such as The [VideoRenderer](02-video-renderer.mdx).

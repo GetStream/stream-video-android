@@ -40,7 +40,6 @@ import io.getstream.video.android.compose.ui.components.call.controls.actions.De
 import io.getstream.video.android.compose.ui.components.call.renderer.ParticipantVideo
 import io.getstream.video.android.compose.ui.components.call.renderer.RegularVideoRendererStyle
 import io.getstream.video.android.compose.ui.components.call.renderer.VideoRendererStyle
-import io.getstream.video.android.compose.ui.components.call.ringing.RingingCallContent
 import io.getstream.video.android.compose.ui.components.call.ringing.incomingcall.IncomingCallContent
 import io.getstream.video.android.compose.ui.components.call.ringing.outgoingcall.OutgoingCallContent
 import io.getstream.video.android.compose.ui.components.participants.CallParticipantsInfoMenu
@@ -70,7 +69,6 @@ import io.getstream.video.android.model.User
  * @param controlsContent Content is shown that allows users to trigger different actions to control a joined call.
  * @param pictureInPictureContent Content shown when the user enters Picture in Picture mode, if
  * it's been enabled in the app.
- * @param ringingCallContent Content shown when we're receiving or sending a [Call].
  * @param callContent Content is shown by rendering video/audio when we're connected to a call successfully.
  */
 @Composable
@@ -128,17 +126,6 @@ public fun CallContainer(
             participantVideo = participantVideo,
         )
     },
-    ringingCallContent: @Composable (call: Call) -> Unit = {
-        RingingCallContent(
-            modifier = modifier.testTag("ringing_call_content"),
-            isVideoType = isVideoType,
-            call = call,
-            onBackPressed = onBackPressed,
-            onCallAction = onCallAction,
-            onAcceptedContent = { callContent.invoke(it) },
-            onRejectedContent = {}
-        )
-    },
 ) {
 
     CallContainer(
@@ -151,7 +138,6 @@ public fun CallContainer(
         appBarContent = appBarContent,
         controlsContent = controlsContent,
         pictureInPictureContent = pictureInPictureContent,
-        ringingCallContent = ringingCallContent,
         callContent = callContent,
     )
 }
@@ -173,7 +159,6 @@ public fun CallContainer(
  * @param controlsContent Content is shown that allows users to trigger different actions to control a joined call.
  * @param pictureInPictureContent Content shown when the user enters Picture in Picture mode, if
  * it's been enabled in the app.
- * @param ringingCallContent Content shown when we're receiving or sending a [Call].
  * @param callContent Content is shown by rendering video/audio when we're connected to a call successfully.
  */
 @Composable
@@ -227,19 +212,8 @@ public fun CallContainer(
             videoRenderer = videoRenderer,
         )
     },
-    ringingCallContent: @Composable (call: Call) -> Unit = {
-        RingingCallContent(
-            call = call,
-            modifier = modifier.testTag("ringing_call_content"),
-            isVideoType = isVideoType,
-            onBackPressed = onBackPressed,
-            onCallAction = onCallAction,
-            onAcceptedContent = { callContent.invoke(it) },
-            onRejectedContent = {}
-        )
-    },
 ) {
-    ringingCallContent.invoke(call)
+    callContent.invoke(call)
 }
 
 @Composable
