@@ -64,12 +64,15 @@ import io.getstream.video.android.mock.mockParticipant
 
 /**
  * Represents a floating item used to feature a participant video, usually the local participant.
+ * This component must be used inside [Box].
  *
+ * @param modifier Modifier for styling.
  * @param call The call containing state.
  * @param participant The participant to render.
  * @param parentBounds Bounds of the parent, used to constrain the component to the parent bounds,
  * when dragging the floating UI around the screen.
- * @param modifier Modifier for styling.
+ * @param alignment Determines where the floating participant video will be placed.
+ * @param style Represents a regular video call render styles.
  */
 @Composable
 public fun BoxScope.FloatingParticipantVideo(
