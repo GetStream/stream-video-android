@@ -85,11 +85,6 @@ class IncomingCallActivity : AbstractCallActivity() {
         }
     }
 
-    override fun onPause() {
-        super.onPause()
-        call.camera.pause()
-    }
-
     override fun pipChanged(isInPip: Boolean) {
         super.pipChanged(isInPip)
         vm.onPictureInPictureModeChanged(isInPip)
