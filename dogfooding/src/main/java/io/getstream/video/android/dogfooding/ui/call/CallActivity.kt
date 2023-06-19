@@ -70,22 +70,6 @@ class CallActivity : AbstractCallActivity() {
         }
     }
 
-    override fun onPause() {
-        super.onPause()
-
-        if (!vm.isInPictureInPicture.value) {
-            call.camera.pause()
-        }
-    }
-
-    override fun onResume() {
-        super.onResume()
-
-        if (!vm.isInPictureInPicture.value) {
-            call.camera.resume()
-        }
-    }
-
     override fun onDestroy() {
         super.onDestroy()
         call.leave()

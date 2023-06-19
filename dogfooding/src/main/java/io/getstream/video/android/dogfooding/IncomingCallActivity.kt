@@ -90,16 +90,6 @@ class IncomingCallActivity : AbstractCallActivity() {
         call.camera.pause()
     }
 
-    override fun onResume() {
-        super.onResume()
-        call.camera.resume()
-    }
-
-    override fun onDestroy() {
-        super.onDestroy()
-        call.leave()
-    }
-
     override fun pipChanged(isInPip: Boolean) {
         super.pipChanged(isInPip)
         vm.onPictureInPictureModeChanged(isInPip)

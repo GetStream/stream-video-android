@@ -39,7 +39,7 @@ import kotlinx.coroutines.flow.StateFlow
  * - Opening/closing the participant menu
  *
  */
-public open class CallViewModel() : ViewModel() {
+public open class CallViewModel : ViewModel() {
 
     /** if we are in picture in picture mode */
     private val _isInPictureInPicture: MutableStateFlow<Boolean> = MutableStateFlow(false)
