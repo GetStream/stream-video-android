@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package io.getstream.video.android.common.model
+package io.getstream.video.android.model
 
 public sealed class SoundState
 

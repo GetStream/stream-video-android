@@ -114,11 +114,6 @@ class MainActivity3 : AbstractCallActivity() {
         }
     }
 
-    override fun onDestroy() {
-        super.onDestroy()
-        call.leave()
-    }
-
     override fun pipChanged(isInPip: Boolean) {
         super.pipChanged(isInPip)
         vm.onPictureInPictureModeChanged(isInPip)
