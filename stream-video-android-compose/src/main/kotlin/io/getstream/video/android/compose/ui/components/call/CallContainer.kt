@@ -69,6 +69,8 @@ import io.getstream.video.android.model.User
  * @param controlsContent Content is shown that allows users to trigger different actions to control a joined call.
  * @param pictureInPictureContent Content shown when the user enters Picture in Picture mode, if
  * it's been enabled in the app.
+ * @param style Represents a regular video call render styles.
+ * @param videoRenderer A single video renderer renders each individual participant.
  * @param callContent Content is shown by rendering video/audio when we're connected to a call successfully.
  */
 @Composable
@@ -76,7 +78,6 @@ public fun CallContainer(
     call: Call,
     callViewModel: CallViewModel,
     modifier: Modifier = Modifier,
-    isVideoType: Boolean = true,
     onBackPressed: () -> Unit = {},
     onCallAction: (CallAction) -> Unit = { DefaultOnCallActionHandler.onCallAction(call, it) },
     permissions: VideoPermissionsState = rememberCallPermissionsState(call = call),
@@ -98,6 +99,19 @@ public fun CallContainer(
     },
     pictureInPictureContent: @Composable (call: Call) -> Unit = { DefaultPictureInPictureContent(it) },
     style: VideoRendererStyle = RegularVideoRendererStyle(),
+    videoRenderer: @Composable (
+        modifier: Modifier,
+        call: Call,
+        participant: ParticipantState,
+        style: VideoRendererStyle
+    ) -> Unit = { videoModifier, videoCall, videoParticipant, videoStyle ->
+        ParticipantVideo(
+            modifier = videoModifier,
+            call = videoCall,
+            participant = videoParticipant,
+            style = videoStyle
+        )
+    },
     participantVideo: @Composable (
         modifier: Modifier,
         call: Call,
@@ -127,10 +141,8 @@ public fun CallContainer(
         )
     },
 ) {
-
     CallContainer(
         call = call,
-        isVideoType = isVideoType,
         modifier = modifier,
         permissions = permissions,
         onBackPressed = onBackPressed,
@@ -138,6 +150,8 @@ public fun CallContainer(
         appBarContent = appBarContent,
         controlsContent = controlsContent,
         pictureInPictureContent = pictureInPictureContent,
+        videoRenderer = videoRenderer,
+        style = style,
         callContent = callContent,
     )
 }
@@ -159,13 +173,14 @@ public fun CallContainer(
  * @param controlsContent Content is shown that allows users to trigger different actions to control a joined call.
  * @param pictureInPictureContent Content shown when the user enters Picture in Picture mode, if
  * it's been enabled in the app.
+ * @param style Represents a regular video call render styles.
+ * @param videoRenderer A single video renderer renders each individual participant.
  * @param callContent Content is shown by rendering video/audio when we're connected to a call successfully.
  */
 @Composable
 public fun CallContainer(
     call: Call,
     modifier: Modifier = Modifier,
-    isVideoType: Boolean = true,
     onBackPressed: () -> Unit = {},
     onCallAction: (CallAction) -> Unit = { DefaultOnCallActionHandler.onCallAction(call, it) },
     permissions: VideoPermissionsState = rememberCallPermissionsState(call = call),
@@ -291,9 +306,6 @@ internal fun DefaultCallContent(
 private fun CallContainerPreview() {
     StreamMockUtils.initializeStreamVideo(LocalContext.current)
     VideoTheme {
-        CallContainer(
-            call = mockCall,
-            isVideoType = true,
-        )
+        CallContainer(call = mockCall)
     }
 }

@@ -25,7 +25,7 @@ override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
     setContent {
         VideoTheme {
-            CallContainer(callViewModel = callViewModel)
+            CallContainer(call = call)
         }
     }
 }
@@ -49,8 +49,7 @@ setContent {
     ) {
         CallContainer(
             modifier = Modifier.fillMaxSize(),
-            callViewModel = vm,
-            callType = CallType.VIDEO,
+            call = call,
             onBackPressed = { finish() },
         )
     }
