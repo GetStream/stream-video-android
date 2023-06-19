@@ -18,17 +18,14 @@ package io.getstream.video.android.dogfooding
 
 import android.app.Application
 import android.content.Context
-import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.crashlytics.ktx.crashlytics
 import com.google.firebase.ktx.Firebase
 import dagger.hilt.android.HiltAndroidApp
 import io.getstream.android.push.firebase.FirebasePushDeviceGenerator
-import io.getstream.log.Priority
 import io.getstream.video.android.core.StreamVideo
 import io.getstream.video.android.core.StreamVideoBuilder
 import io.getstream.video.android.core.logging.LoggingLevel
 import io.getstream.video.android.core.notifications.NotificationConfig
-import io.getstream.video.android.datastore.delegate.StreamUserDataStore
 import io.getstream.video.android.dogfooding.token.StreamVideoNetwork
 import io.getstream.video.android.model.ApiKey
 import io.getstream.video.android.model.User
@@ -74,31 +71,6 @@ class DogfoodingApp : Application() {
                 response.token
             }
         ).build()
-    }
-
-    fun logOut() {
-        FirebaseAuth.getInstance().signOut()
-        StreamVideo.instance().logOut()
-        StreamVideo.unInstall()
-    }
-
-    fun initializeFromCredentials(): Boolean {
-        val dataStore = StreamUserDataStore.install(this)
-        val user = dataStore.user.value
-        val apiKey = dataStore.apiKey.value
-        val token = dataStore.userToken.value
-
-        if (user == null || apiKey.isBlank()) {
-            return false
-        }
-
-        dogfoodingApp.initializeStreamVideo(
-            apiKey = apiKey,
-            user = user,
-            loggingLevel = LoggingLevel(priority = Priority.VERBOSE),
-            token = token
-        )
-        return true
     }
 }
 
