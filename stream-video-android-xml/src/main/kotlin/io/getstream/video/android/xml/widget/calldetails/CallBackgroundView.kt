@@ -21,7 +21,6 @@ import android.graphics.drawable.Drawable
 import android.util.AttributeSet
 import androidx.appcompat.widget.AppCompatImageView
 import io.getstream.video.android.core.model.CallUser
-import io.getstream.video.android.ui.common.R
 import io.getstream.video.android.xml.utils.extensions.load
 
 /**
@@ -66,6 +65,9 @@ public class CallBackgroundView @JvmOverloads constructor(
      */
     private fun loadImage(participants: List<CallUser>) {
         val firstParticipant = participants.first()
-        load(firstParticipant.imageUrl, R.drawable.stream_video_bg_call)
+        load(
+            firstParticipant.imageUrl,
+            io.getstream.video.android.xml.R.drawable.stream_video_bg_call
+        )
     }
 }

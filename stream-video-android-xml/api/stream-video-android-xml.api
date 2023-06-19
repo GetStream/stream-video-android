@@ -57,6 +57,26 @@ public final class io/getstream/video/android/xml/binding/ScreenShareViewBinding
 	public static final fun bindView (Lio/getstream/video/android/xml/widget/screenshare/ScreenShareView;Lio/getstream/video/android/common/viewmodel/CallViewModel;Landroidx/lifecycle/LifecycleOwner;)V
 }
 
+public final class io/getstream/video/android/xml/databinding/StreamVideoActivityCallBinding : androidx/viewbinding/ViewBinding {
+	public final field floatingParticipantView Lio/getstream/video/android/common/view/ParticipantItemView;
+	public final field participantContent Lio/getstream/video/android/common/view/ParticipantContentView;
+	public final field toolbar Landroidx/appcompat/widget/Toolbar;
+	public static fun bind (Landroid/view/View;)Lio/getstream/video/android/xml/databinding/StreamVideoActivityCallBinding;
+	public synthetic fun getRoot ()Landroid/view/View;
+	public fun getRoot ()Landroidx/constraintlayout/widget/ConstraintLayout;
+	public static fun inflate (Landroid/view/LayoutInflater;)Lio/getstream/video/android/xml/databinding/StreamVideoActivityCallBinding;
+	public static fun inflate (Landroid/view/LayoutInflater;Landroid/view/ViewGroup;Z)Lio/getstream/video/android/xml/databinding/StreamVideoActivityCallBinding;
+}
+
+public final class io/getstream/video/android/xml/databinding/StreamVideoItemParticipantBinding : androidx/viewbinding/ViewBinding {
+	public final field participantView Lorg/webrtc/SurfaceViewRenderer;
+	public static fun bind (Landroid/view/View;)Lio/getstream/video/android/xml/databinding/StreamVideoItemParticipantBinding;
+	public synthetic fun getRoot ()Landroid/view/View;
+	public fun getRoot ()Lorg/webrtc/SurfaceViewRenderer;
+	public static fun inflate (Landroid/view/LayoutInflater;)Lio/getstream/video/android/xml/databinding/StreamVideoItemParticipantBinding;
+	public static fun inflate (Landroid/view/LayoutInflater;Landroid/view/ViewGroup;Z)Lio/getstream/video/android/xml/databinding/StreamVideoItemParticipantBinding;
+}
+
 public final class io/getstream/video/android/xml/databinding/StreamVideoViewCallAppBarBinding : androidx/viewbinding/ViewBinding {
 	public final field callAppBarCenterContent Landroid/widget/FrameLayout;
 	public final field callAppBarLeadingContent Landroid/widget/FrameLayout;

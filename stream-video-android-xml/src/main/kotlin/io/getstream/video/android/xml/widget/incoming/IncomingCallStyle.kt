@@ -73,7 +73,7 @@ public data class IncomingCallStyle(
             ).use {
                 val callBackground = it.getDrawable(
                     R.styleable.IncomingCallView_streamVideoIncomingCallScreenBackground
-                ) ?: context.getDrawableCompat(RCommon.drawable.stream_video_bg_call)!!
+                ) ?: context.getDrawableCompat(R.drawable.stream_video_bg_call)!!
 
                 val acceptCallIcon = it.getDrawable(
                     R.styleable.IncomingCallView_streamVideoIncomingCallAcceptCallIcon

@@ -62,7 +62,6 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import io.getstream.video.android.common.model.getSoundIndicatorState
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.avatar.LocalAvatarPreviewProvider
 import io.getstream.video.android.compose.ui.components.avatar.UserAvatarBackground
@@ -77,6 +76,7 @@ import io.getstream.video.android.core.model.ReactionState
 import io.getstream.video.android.mock.StreamMockUtils
 import io.getstream.video.android.mock.mockCall
 import io.getstream.video.android.mock.mockParticipantList
+import io.getstream.video.android.model.getSoundIndicatorState
 import io.getstream.video.android.ui.common.R
 import kotlinx.coroutines.delay
 
