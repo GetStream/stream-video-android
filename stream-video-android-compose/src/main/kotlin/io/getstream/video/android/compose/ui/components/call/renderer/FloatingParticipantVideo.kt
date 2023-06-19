@@ -81,7 +81,17 @@ public fun BoxScope.FloatingParticipantVideo(
     participant: ParticipantState,
     parentBounds: IntSize,
     alignment: Alignment = Alignment.TopEnd,
-    style: VideoRendererStyle = RegularVideoRendererStyle(isShowingConnectionQualityIndicator = false)
+    style: VideoRendererStyle = RegularVideoRendererStyle(isShowingConnectionQualityIndicator = false),
+    videoRenderer: @Composable (ParticipantState) -> Unit = {
+        ParticipantVideo(
+            modifier = Modifier
+                .fillMaxSize()
+                .clip(VideoTheme.shapes.floatingParticipant),
+            call = call,
+            participant = participant,
+            style = style
+        )
+    }
 ) {
     var videoSize by remember { mutableStateOf(IntSize(0, 0)) }
     var offsetX by remember { mutableStateOf(0f) }
@@ -176,14 +186,7 @@ public fun BoxScope.FloatingParticipantVideo(
                 .onGloballyPositioned { videoSize = it.size },
             shape = VideoTheme.shapes.floatingParticipant
         ) {
-            ParticipantVideo(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .clip(VideoTheme.shapes.floatingParticipant),
-                call = call,
-                participant = participant,
-                style = style
-            )
+            videoRenderer.invoke(participant)
         }
     }
 }
