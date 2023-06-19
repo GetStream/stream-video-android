@@ -265,15 +265,14 @@ internal fun DefaultCallContent(
     )
 
     val isShowingParticipantsInfo by callViewModel.isShowingCallInfoMenu.collectAsStateWithLifecycle()
-    val participantsState by call.state.participants.collectAsStateWithLifecycle()
     var usersToInvite by remember { mutableStateOf(emptyList<User>()) }
 
-    if (isShowingParticipantsInfo && participantsState.isNotEmpty()) {
+    if (isShowingParticipantsInfo) {
         CallParticipantsInfoMenu(
+            call = call,
             modifier = Modifier
                 .fillMaxSize()
                 .background(VideoTheme.colors.appBackground),
-            participants = participantsState,
             onDismiss = { callViewModel.dismissCallInfoMenu() },
         ) { action ->
             when (action) {

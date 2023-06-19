@@ -23,42 +23,46 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.getstream.video.android.compose.state.ui.internal.CallParticipantInfoMode
 import io.getstream.video.android.compose.state.ui.internal.ParticipantListMode
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.participants.internal.CallParticipantsList
 import io.getstream.video.android.compose.ui.components.participants.internal.InviteUserList
-import io.getstream.video.android.core.ParticipantState
+import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.call.state.CallAction
 import io.getstream.video.android.core.call.state.InviteUsersToCall
 import io.getstream.video.android.core.call.state.ToggleMicrophone
+import io.getstream.video.android.mock.StreamMockUtils
+import io.getstream.video.android.mock.mockCall
 import io.getstream.video.android.model.User
 
 /**
  * Represents a menu that shows information on the current call participants, while allowing the user
  * to trigger the Invite Users flow as well as trigger actions on any participants in a call.
  *
- * @param participants The list of active participants.
+ * @param call The call that contains all the participants state and tracks.
  * @param modifier Modifier for styling.
  * @param onDismiss Handler when the user dismisses the UI through various actions.
  */
 @Composable
 public fun CallParticipantsInfoMenu(
-    participants: List<ParticipantState>,
+    call: Call,
     modifier: Modifier = Modifier,
     onDismiss: () -> Unit = {},
     onCallAction: (CallAction) -> Unit = {},
 ) {
-    val me by remember(participants) { derivedStateOf { participants.first { it.isLocal } } }
-    val isLocalAudioEnabled by me.audioEnabled.collectAsStateWithLifecycle()
+    val me by call.state.me.collectAsStateWithLifecycle()
+    val participants by call.state.participants.collectAsStateWithLifecycle()
+    val audioEnabled = me?.audioEnabled?.collectAsStateWithLifecycle()
 
     var infoStateMode by remember { mutableStateOf<CallParticipantInfoMode>(ParticipantListMode) }
     var selectedUsers: List<User> = remember { mutableStateListOf() }
@@ -87,7 +91,7 @@ public fun CallParticipantsInfoMenu(
                 CallParticipantsList(
                     modifier = listModifier,
                     participants = participants,
-                    isLocalAudioEnabled = isLocalAudioEnabled,
+                    isLocalAudioEnabled = audioEnabled?.value ?: false,
                     onUserOptionsSelected = { },
                     onInviteUser = { onCallAction.invoke(InviteUsersToCall(selectedUsers)) },
                     onMute = { enabled -> onCallAction.invoke(ToggleMicrophone(enabled)) },
@@ -108,5 +112,16 @@ public fun CallParticipantsInfoMenu(
                 )
             }
         }
+    }
+}
+
+@Preview
+@Composable
+private fun CallParticipantsInfoMenuPreview() {
+    StreamMockUtils.initializeStreamVideo(LocalContext.current)
+    VideoTheme {
+        CallParticipantsInfoMenu(
+            call = mockCall
+        )
     }
 }
