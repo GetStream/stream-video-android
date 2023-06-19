@@ -26,11 +26,11 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import io.getstream.video.android.common.model.Muted
-import io.getstream.video.android.common.model.SoundState
-import io.getstream.video.android.common.model.Speaking
-import io.getstream.video.android.common.model.Unmuted
 import io.getstream.video.android.compose.theme.VideoTheme
+import io.getstream.video.android.model.Muted
+import io.getstream.video.android.model.SoundState
+import io.getstream.video.android.model.Speaking
+import io.getstream.video.android.model.Unmuted
 import io.getstream.video.android.ui.common.R
 
 /**

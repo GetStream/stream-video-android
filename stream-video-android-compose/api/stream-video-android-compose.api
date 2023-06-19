@@ -1120,7 +1120,7 @@ public final class io/getstream/video/android/compose/ui/components/indicator/Co
 }
 
 public final class io/getstream/video/android/compose/ui/components/indicator/SoundIndicatorKt {
-	public static final fun SoundIndicator (Lio/getstream/video/android/common/model/SoundState;Landroidx/compose/ui/Modifier;Landroidx/compose/runtime/Composer;II)V
+	public static final fun SoundIndicator (Lio/getstream/video/android/model/SoundState;Landroidx/compose/ui/Modifier;Landroidx/compose/runtime/Composer;II)V
 }
 
 public final class io/getstream/video/android/compose/ui/components/indicator/SoundLevelsKt {
