@@ -71,7 +71,7 @@ fun CallJoinScreen(
 
     HandleCallJoinUiState(
         callJoinUiState = uiState,
-        navigateToCallLobby = navigateToCallLobby
+        navigateToCallLobby = navigateToCallLobby,
     )
 
     Column(
@@ -80,13 +80,17 @@ fun CallJoinScreen(
             .background(Colors.background),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        CallJoinHeader(navigateUpToLogin = navigateUpToLogin)
+        CallJoinHeader(
+            navigateUpToLogin = navigateUpToLogin,
+            callJoinViewModel = callJoinViewModel
+        )
 
         CallJoinBody(
             modifier = Modifier
                 .align(Alignment.CenterHorizontally)
                 .fillMaxWidth()
-                .weight(1f)
+                .weight(1f),
+            callJoinViewModel = callJoinViewModel
         )
     }
 }
