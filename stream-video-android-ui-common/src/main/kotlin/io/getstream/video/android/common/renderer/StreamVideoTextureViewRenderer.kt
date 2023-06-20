@@ -19,13 +19,18 @@ package io.getstream.video.android.common.renderer
 import android.content.Context
 import android.graphics.SurfaceTexture
 import io.getstream.log.taggedLogger
-import io.getstream.webrtc.android.ui.VideoTextureViewRenderer
+import io.getstream.video.android.core.VideoTextureViewRenderer
 
 public class StreamVideoTextureViewRenderer(
     context: Context,
 ) : VideoTextureViewRenderer(context) {
 
     private val logger by taggedLogger()
+
+    override fun onAttachedToWindow() {
+        super.onAttachedToWindow()
+        logger.d { "onAttachedToWindow" }
+    }
 
     override fun onSurfaceTextureDestroyed(surfaceTexture: SurfaceTexture): Boolean {
         logger.d { "onSurfaceTextureDestroyed: $surfaceTexture" }

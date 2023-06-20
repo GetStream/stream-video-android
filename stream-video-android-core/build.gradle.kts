@@ -93,8 +93,7 @@ dependencies {
     implementation(project(":stream-video-android-datastore"))
 
     // webrtc
-    api(libs.stream.webrtc)
-    api(libs.stream.webrtc.ui)
+    api("io.github.webrtc-sdk:android:104.5112.10")
 
     // androidx
     implementation(libs.androidx.core.ktx)

@@ -53,7 +53,7 @@ import io.getstream.video.android.core.model.MediaTrack
 import io.getstream.video.android.core.model.VideoTrack
 import io.getstream.video.android.mock.StreamMockUtils
 import io.getstream.video.android.mock.mockCall
-import io.getstream.webrtc.android.ui.VideoTextureViewRenderer
+import io.getstream.video.android.core.VideoTextureViewRenderer
 
 /**
  * Renders a single video track based on the call state.
