@@ -2,6 +2,8 @@ public abstract class io/getstream/video/android/common/AbstractCallActivity : a
 	public static final field Companion Lio/getstream/video/android/common/AbstractCallActivity$Companion;
 	public static final field EXTRA_CID Ljava/lang/String;
 	public fun <init> ()V
+	public final fun enterPictureInPicture ()V
+	public final fun exitFullscreen ()V
 	public final fun getCall ()Lio/getstream/video/android/core/Call;
 	protected fun handleBackPressed ()V
 	public fun onConfigurationChanged (Landroid/content/res/Configuration;)V
@@ -9,28 +11,12 @@ public abstract class io/getstream/video/android/common/AbstractCallActivity : a
 	protected fun onStop ()V
 	public fun pipChanged (Z)V
 	public abstract fun provideCall ()Lio/getstream/video/android/core/Call;
+	public final fun setFullscreen ()V
+	public final fun showWhenLockedAndTurnScreenOn ()V
+	public final fun toggleFullscreen (Lio/getstream/video/android/core/call/state/ToggleScreenConfiguration;)V
 }
 
 public final class io/getstream/video/android/common/AbstractCallActivity$Companion {
-}
-
-public final class io/getstream/video/android/common/model/Muted : io/getstream/video/android/common/model/SoundState {
-	public static final field INSTANCE Lio/getstream/video/android/common/model/Muted;
-}
-
-public abstract class io/getstream/video/android/common/model/SoundState {
-}
-
-public final class io/getstream/video/android/common/model/SoundStateKt {
-	public static final fun getSoundIndicatorState (ZZ)Lio/getstream/video/android/common/model/SoundState;
-}
-
-public final class io/getstream/video/android/common/model/Speaking : io/getstream/video/android/common/model/SoundState {
-	public static final field INSTANCE Lio/getstream/video/android/common/model/Speaking;
-}
-
-public final class io/getstream/video/android/common/model/Unmuted : io/getstream/video/android/common/model/SoundState {
-	public static final field INSTANCE Lio/getstream/video/android/common/model/Unmuted;
 }
 
 public abstract class io/getstream/video/android/common/notification/AbstractNotificationActivity : androidx/activity/ComponentActivity {
@@ -122,17 +108,6 @@ public final class io/getstream/video/android/ui/common/BuildConfig {
 	public fun <init> ()V
 }
 
-public final class io/getstream/video/android/ui/common/databinding/StreamVideoActivityCallBinding : androidx/viewbinding/ViewBinding {
-	public final field floatingParticipantView Lio/getstream/video/android/common/view/ParticipantItemView;
-	public final field participantContent Lio/getstream/video/android/common/view/ParticipantContentView;
-	public final field toolbar Landroidx/appcompat/widget/Toolbar;
-	public static fun bind (Landroid/view/View;)Lio/getstream/video/android/ui/common/databinding/StreamVideoActivityCallBinding;
-	public synthetic fun getRoot ()Landroid/view/View;
-	public fun getRoot ()Landroidx/constraintlayout/widget/ConstraintLayout;
-	public static fun inflate (Landroid/view/LayoutInflater;)Lio/getstream/video/android/ui/common/databinding/StreamVideoActivityCallBinding;
-	public static fun inflate (Landroid/view/LayoutInflater;Landroid/view/ViewGroup;Z)Lio/getstream/video/android/ui/common/databinding/StreamVideoActivityCallBinding;
-}
-
 public final class io/getstream/video/android/ui/common/databinding/StreamVideoContentParticipantBinding : androidx/viewbinding/ViewBinding {
 	public final field firstParticipant Lio/getstream/video/android/common/view/ParticipantItemView;
 	public final field firstParticipantRow Landroid/widget/LinearLayout;
@@ -145,14 +120,5 @@ public final class io/getstream/video/android/ui/common/databinding/StreamVideoC
 	public fun getRoot ()Landroidx/constraintlayout/widget/ConstraintLayout;
 	public static fun inflate (Landroid/view/LayoutInflater;)Lio/getstream/video/android/ui/common/databinding/StreamVideoContentParticipantBinding;
 	public static fun inflate (Landroid/view/LayoutInflater;Landroid/view/ViewGroup;Z)Lio/getstream/video/android/ui/common/databinding/StreamVideoContentParticipantBinding;
-}
-
-public final class io/getstream/video/android/ui/common/databinding/StreamVideoItemParticipantBinding : androidx/viewbinding/ViewBinding {
-	public final field participantView Lorg/webrtc/SurfaceViewRenderer;
-	public static fun bind (Landroid/view/View;)Lio/getstream/video/android/ui/common/databinding/StreamVideoItemParticipantBinding;
-	public synthetic fun getRoot ()Landroid/view/View;
-	public fun getRoot ()Lorg/webrtc/SurfaceViewRenderer;
-	public static fun inflate (Landroid/view/LayoutInflater;)Lio/getstream/video/android/ui/common/databinding/StreamVideoItemParticipantBinding;
-	public static fun inflate (Landroid/view/LayoutInflater;Landroid/view/ViewGroup;Z)Lio/getstream/video/android/ui/common/databinding/StreamVideoItemParticipantBinding;
 }
 

@@ -49,7 +49,7 @@ import io.getstream.video.android.mock.mockParticipantList
  * @param session Screen sharing session to render.
  * @param participants List of participants to render under the screen share track.
  * @param modifier Modifier for styling.
- * @param style Represents a regular video call render styles.
+ * @param style Defined properties for styling a single video call track.
  * @param videoRenderer A single video renderer renders each individual participant.
  */
 @Composable

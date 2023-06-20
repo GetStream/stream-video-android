@@ -54,7 +54,7 @@ import io.getstream.video.android.mock.mockParticipantList
  * @param callParticipants The list of participants in the call.
  * @param modifier Modifier for styling.
  * @param parentSize The size of the parent.
- * @param style Represents a regular video call render styles.
+ * @param style Defined properties for styling a single video call track.
  * @param videoRenderer A single video renderer renders each individual participant.
  */
 @Composable

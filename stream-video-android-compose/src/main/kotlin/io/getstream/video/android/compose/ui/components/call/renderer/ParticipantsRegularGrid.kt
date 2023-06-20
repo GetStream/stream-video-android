@@ -42,7 +42,7 @@ import io.getstream.video.android.mock.mockCall
  *
  * @param call The call that contains all the participants state and tracks.
  * @param modifier Modifier for styling.
- * @param style Represents a regular video call render styles.
+ * @param style Defined properties for styling a single video call track.
  * @param videoRenderer A single video renderer renders each individual participant.
  */
 @Composable

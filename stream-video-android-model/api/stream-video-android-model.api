@@ -38,6 +38,10 @@ public final class io/getstream/video/android/model/Device$Companion {
 	public final fun serializer ()Lkotlinx/serialization/KSerializer;
 }
 
+public final class io/getstream/video/android/model/Muted : io/getstream/video/android/model/SoundState {
+	public static final field INSTANCE Lio/getstream/video/android/model/Muted;
+}
+
 public final class io/getstream/video/android/model/OffsetDateTimeSerializer : kotlinx/serialization/KSerializer {
 	public static final field INSTANCE Lio/getstream/video/android/model/OffsetDateTimeSerializer;
 	public synthetic fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Ljava/lang/Object;
@@ -45,6 +49,17 @@ public final class io/getstream/video/android/model/OffsetDateTimeSerializer : k
 	public fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
 	public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
 	public fun serialize (Lkotlinx/serialization/encoding/Encoder;Lorg/threeten/bp/OffsetDateTime;)V
+}
+
+public abstract class io/getstream/video/android/model/SoundState {
+}
+
+public final class io/getstream/video/android/model/SoundStateKt {
+	public static final fun getSoundIndicatorState (ZZ)Lio/getstream/video/android/model/SoundState;
+}
+
+public final class io/getstream/video/android/model/Speaking : io/getstream/video/android/model/SoundState {
+	public static final field INSTANCE Lio/getstream/video/android/model/Speaking;
 }
 
 public final class io/getstream/video/android/model/StreamCallId : android/os/Parcelable {
@@ -98,6 +113,10 @@ public final class io/getstream/video/android/model/StreamCallId$Creator : andro
 
 public final class io/getstream/video/android/model/StreamCallIdKt {
 	public static final fun streamCallId (Landroid/content/Intent;Ljava/lang/String;)Lio/getstream/video/android/model/StreamCallId;
+}
+
+public final class io/getstream/video/android/model/Unmuted : io/getstream/video/android/model/SoundState {
+	public static final field INSTANCE Lio/getstream/video/android/model/Unmuted;
 }
 
 public final class io/getstream/video/android/model/User {

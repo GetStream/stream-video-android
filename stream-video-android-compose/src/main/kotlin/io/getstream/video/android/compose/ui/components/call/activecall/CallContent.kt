@@ -42,6 +42,7 @@ import androidx.compose.ui.unit.coerceAtLeast
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.getstream.video.android.common.viewmodel.CallViewModel
+import io.getstream.video.android.compose.lifecycle.CallMediaLifecycle
 import io.getstream.video.android.compose.permission.VideoPermissionsState
 import io.getstream.video.android.compose.permission.rememberCallPermissionsState
 import io.getstream.video.android.compose.theme.VideoTheme
@@ -69,7 +70,7 @@ import io.getstream.video.android.mock.mockCall
  * @param onCallAction Handler when the user triggers a Call Control Action.
  * @param permissions Android permissions that should be required to render a video call properly.
  * @param appBarContent Content is shown that calls information or additional actions.
- * @param style Represents a regular video call render styles.
+ * @param style Defined properties for styling a single video call track.
  * @param videoRenderer A single video renderer renders each individual participant.
  * @param videoContent Content is shown that renders all participants' videos.
  * @param controlsContent Content is shown that allows users to trigger different actions to control a joined call.
@@ -159,7 +160,7 @@ public fun CallContent(
  * @param permissions Android permissions that should be required to render a video call properly.*
  * @param onCallAction Handler when the user triggers a Call Control Action.
  * @param appBarContent Content is shown that calls information or additional actions.
- * @param style Represents a regular video call render styles.
+ * @param style Defined properties for styling a single video call track.
  * @param videoRenderer A single video renderer renders each individual participant.
  * @param videoContent Content is shown that renders all participants' videos.
  * @param controlsContent Content is shown that allows users to trigger different actions to control a joined call.
@@ -170,7 +171,7 @@ public fun CallContent(
 public fun CallContent(
     call: Call,
     modifier: Modifier = Modifier,
-    isShowingOverlayCallAppBar: Boolean = true,
+    isShowingOverlayAppBar: Boolean = true,
     isInPictureInPicture: Boolean = false,
     permissions: VideoPermissionsState = rememberCallPermissionsState(call = call),
     onCallAction: (CallAction) -> Unit = { DefaultOnCallActionHandler.onCallAction(call, it) },
@@ -217,6 +218,8 @@ public fun CallContent(
 
     DefaultPermissionHandler(videoPermission = permissions)
 
+    CallMediaLifecycle(call = call, isInPictureInPicture = isInPictureInPicture)
+
     if (!isInPictureInPicture) {
         Scaffold(
             modifier = modifier,
@@ -248,7 +251,7 @@ public fun CallContent(
                     }
                 }
 
-                if (isShowingOverlayCallAppBar) {
+                if (isShowingOverlayAppBar) {
                     appBarContent.invoke(call)
                 }
             }

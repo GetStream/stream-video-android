@@ -71,7 +71,7 @@ public data class OutgoingCallStyle(
             ).use {
                 val outgoingScreenBackground = it.getDrawable(
                     R.styleable.OutgoingCallView_streamVideoOutgoingCallScreenBackground
-                ) ?: context.getDrawableCompat(RCommon.drawable.stream_video_bg_call)!!
+                ) ?: context.getDrawableCompat(R.drawable.stream_video_bg_call)!!
 
                 val cancelCallIcon = it.getDrawable(
                     R.styleable.OutgoingCallView_streamVideoOutgoingCallCancelCallIcon

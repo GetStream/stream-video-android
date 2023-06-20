@@ -3,22 +3,24 @@
 // TODO - image for the SDK
 
 <p align="center">
-    <a href="https://github.com/GetStream/stream-video-android/actions"><img src="https://github.com/GetStream/stream-video-android/workflows/App%20Distribute%20CI/badge.svg" /></a>
+  <a href="https://github.com/GetStream/stream-video-android/actions"><img src="https://github.com/GetStream/stream-video-android/workflows/App%20Distribute%20CI/badge.svg" /></a>
   <a href="https://android-arsenal.com/api?level=21"><img alt="API" src="https://img.shields.io/badge/API-21%2B-brightgreen.svg?style=flat"/></a>
-  <a href="https://github.com/GetStream/stream-video-android/releases"><img src="https://img.shields.io/github/v/release/GetStream/stream-video-android" /></a>
+  <a href="https://search.maven.org/search?q=stream-video-android"><img src="https://img.shields.io/maven-central/v/io.getstream/stream-video-android-core.svg?label=Maven%20Central" /></a>
 </p>
 
 This is the official Android SDK for Stream Video.
-You can leverage this SDK to build in-app video calling, audio rooms, audio calls or livestreaming.
-The best place to get started is the tutorials:
 
-* Video & Audio Calling Tutorial
-* Audio Rooms Tutorial
-* Livestreaming Tutorial
+## What is Stream?
 
-Stream provides UI components and StateFlow objects that make it easy to build video calling for your app.
-All calls run on Stream's network of edge servers around the world.
-The edge network ensures optimal latency and reliability for calls.
+Stream allows developers to rapidly deploy scalable feeds, chat messaging and video with an industry leading 99.999% uptime SLA guarantee.
+
+With Stream's video components, you can use their SDK to build in-app video calling, audio rooms, audio calls, or live streaming. The best place to get started is with their tutorials:
+
+- Video & Audio Calling Tutorial
+- Audio Rooms Tutorial
+- Livestreaming Tutorial
+
+Stream provides UI components and state handling that make it easy to build video calling for your app. All calls run on Stream's network of edge servers around the world, ensuring optimal latency and reliability.
 
 ## 👩‍💻 Free for Makers 👨‍💻
 

@@ -42,23 +42,29 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.SavedStateHandle
 import io.getstream.video.android.common.AbstractCallActivity
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.avatar.UserAvatar
 import io.getstream.video.android.compose.ui.components.call.lobby.CallLobby
 import io.getstream.video.android.core.call.state.ToggleCamera
 import io.getstream.video.android.core.call.state.ToggleMicrophone
+import io.getstream.video.android.datastore.delegate.StreamUserDataStore
+import io.getstream.video.android.dogfooding.BuildConfig
 import io.getstream.video.android.dogfooding.R
 import io.getstream.video.android.dogfooding.ui.call.CallActivity
 import io.getstream.video.android.dogfooding.ui.theme.Colors
 import io.getstream.video.android.dogfooding.ui.theme.StreamButton
+import io.getstream.video.android.mock.StreamMockUtils
 
 @Composable
 fun CallLobbyScreen(
@@ -75,13 +81,17 @@ fun CallLobbyScreen(
                 .testTag("call_lobby"),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            CallJoinHeader(navigateUpToLogin = navigateUpToLogin)
+            CallLobbyHeader(
+                navigateUpToLogin = navigateUpToLogin,
+                callLobbyViewModel = callLobbyViewModel
+            )
 
             CallLobbyBody(
                 modifier = Modifier
                     .align(Alignment.CenterHorizontally)
                     .fillMaxWidth()
                     .weight(1f),
+                callLobbyViewModel = callLobbyViewModel,
             )
         }
 
@@ -95,17 +105,26 @@ fun CallLobbyScreen(
 }
 
 @Composable
-private fun CallJoinHeader(
+private fun CallLobbyHeader(
     callLobbyViewModel: CallLobbyViewModel = hiltViewModel(),
     navigateUpToLogin: () -> Unit
 ) {
     val uiState by callLobbyViewModel.uiState.collectAsState()
 
-    HandleCallLobbyUiState(callLobbyUiState = uiState)
+    HandleCallLobbyUiState(
+        callLobbyUiState = uiState,
+        callLobbyViewModel = callLobbyViewModel
+    )
 
+    val localInspectionMode = LocalInspectionMode.current
     LaunchedEffect(key1 = Unit) {
-        callLobbyViewModel.call.camera.setEnabled(true)
-        callLobbyViewModel.call.microphone.setEnabled(true)
+        if (BuildConfig.BENCHMARK) {
+            callLobbyViewModel.call.camera.disable()
+            callLobbyViewModel.call.microphone.disable()
+        } else if (!localInspectionMode) {
+            callLobbyViewModel.call.camera.enable()
+            callLobbyViewModel.call.microphone.enable()
+        }
     }
 
     Row(
@@ -179,8 +198,16 @@ private fun CallLobbyBody(
 
         Spacer(modifier = Modifier.height(20.dp))
 
-        val isCameraEnabled by callLobbyViewModel.isCameraEnabled.collectAsState()
-        val isMicrophoneEnabled by callLobbyViewModel.isMicrophoneEnabled.collectAsState()
+        val isCameraEnabled: Boolean by if (LocalInspectionMode.current) {
+            remember { mutableStateOf(true) }
+        } else {
+            call.camera.isEnabled.collectAsState()
+        }
+        val isMicrophoneEnabled by if (LocalInspectionMode.current) {
+            remember { mutableStateOf(true) }
+        } else {
+            call.microphone.isEnabled.collectAsState()
+        }
 
         CallLobby(
             call = call,
@@ -234,5 +261,21 @@ private fun HandleCallLobbyUiState(
 
             else -> Unit
         }
+    }
+}
+
+@Preview
+@Composable
+private fun CallLobbyScreenPreview() {
+    StreamMockUtils.initializeStreamVideo(LocalContext.current)
+    VideoTheme {
+        CallLobbyScreen(
+            callLobbyViewModel = CallLobbyViewModel(
+                savedStateHandle = SavedStateHandle(
+                    mapOf("cid" to "default:123")
+                ),
+                dataStore = StreamUserDataStore.instance()
+            )
+        ) {}
     }
 }

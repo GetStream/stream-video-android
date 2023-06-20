@@ -128,10 +128,12 @@ dependencies {
     implementation("com.google.firebase:firebase-auth")
     implementation("com.firebaseui:firebase-ui-auth:7.2.0")
 
+    // Stream Video SDK
     implementation(project(":stream-video-android-compose"))
     implementation(project(":stream-video-android-xml"))
     implementation(project(":stream-video-android-tooling"))
     implementation(project(":stream-video-android-datastore"))
+    compileOnly(project(":stream-video-android-mock"))
 
     implementation(libs.stream.push.firebase)
     implementation(libs.stream.log.android)

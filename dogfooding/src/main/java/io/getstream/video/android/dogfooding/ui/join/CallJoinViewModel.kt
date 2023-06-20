@@ -18,6 +18,7 @@ package io.getstream.video.android.dogfooding.ui.join
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.google.firebase.auth.FirebaseAuth
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.StreamVideo
@@ -72,7 +73,9 @@ class CallJoinViewModel @Inject constructor(
     }
 
     fun signOut() {
+        FirebaseAuth.getInstance().signOut()
         StreamVideo.instance().logOut()
+        StreamVideo.unInstall()
     }
 }
 

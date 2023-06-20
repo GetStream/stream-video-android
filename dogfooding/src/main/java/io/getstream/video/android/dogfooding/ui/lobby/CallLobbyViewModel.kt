@@ -19,6 +19,7 @@ package io.getstream.video.android.dogfooding.ui.lobby
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.google.firebase.auth.FirebaseAuth
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.getstream.result.Result
 import io.getstream.video.android.core.Call
@@ -52,9 +53,6 @@ class CallLobbyViewModel @Inject constructor(
     }
 
     val user: User? = dataStore.user.value
-
-    val isCameraEnabled: StateFlow<Boolean> = call.camera.isEnabled
-    val isMicrophoneEnabled: StateFlow<Boolean> = call.microphone.isEnabled
 
     private val _isLoading: MutableStateFlow<Boolean> = MutableStateFlow(false)
     internal val isLoading: StateFlow<Boolean> = _isLoading
@@ -101,7 +99,9 @@ class CallLobbyViewModel @Inject constructor(
     }
 
     fun signOut() {
+        FirebaseAuth.getInstance().signOut()
         StreamVideo.instance().logOut()
+        StreamVideo.unInstall()
     }
 }
 

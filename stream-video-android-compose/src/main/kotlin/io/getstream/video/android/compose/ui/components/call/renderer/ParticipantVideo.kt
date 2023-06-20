@@ -62,12 +62,11 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import io.getstream.video.android.common.model.getSoundIndicatorState
 import io.getstream.video.android.compose.theme.VideoTheme
-import io.getstream.video.android.compose.ui.components.audio.SoundIndicator
 import io.getstream.video.android.compose.ui.components.avatar.LocalAvatarPreviewProvider
 import io.getstream.video.android.compose.ui.components.avatar.UserAvatarBackground
 import io.getstream.video.android.compose.ui.components.connection.NetworkQualityIndicator
+import io.getstream.video.android.compose.ui.components.indicator.SoundIndicator
 import io.getstream.video.android.compose.ui.components.video.VideoRenderer
 import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.ParticipantState
@@ -77,6 +76,7 @@ import io.getstream.video.android.core.model.ReactionState
 import io.getstream.video.android.mock.StreamMockUtils
 import io.getstream.video.android.mock.mockCall
 import io.getstream.video.android.mock.mockParticipantList
+import io.getstream.video.android.model.getSoundIndicatorState
 import io.getstream.video.android.ui.common.R
 import kotlinx.coroutines.delay
 
@@ -87,7 +87,7 @@ import kotlinx.coroutines.delay
  * @param call The call that contains all the participants state and tracks.
  * @param participant Participant to render.
  * @param modifier Modifier for styling.
- * @param style Represents a regular video call render styles.
+ * @param style Defined properties for styling a single video call track.
  * @param labelContent Content is shown that displays participant's name and device states.
  * @param connectionIndicatorContent Content is shown that indicates the connection quality.
  * @param videoFallbackContent Content is shown the video track is failed to load or not available.
@@ -388,6 +388,6 @@ private fun ParticipantVideoPreview() {
         ParticipantVideoRenderer(
             call = mockCall,
             participant = mockParticipantList[1],
-        ) {}
+        )
     }
 }

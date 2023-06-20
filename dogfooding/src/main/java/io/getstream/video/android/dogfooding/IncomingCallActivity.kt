@@ -48,6 +48,9 @@ class IncomingCallActivity : AbstractCallActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+        // release the lock and turn on screen.
+        showWhenLockedAndTurnScreenOn()
+
         lifecycleScope.launch {
             if (NotificationHandler.ACTION_ACCEPT_CALL == intent.action) {
                 call.accept()
@@ -55,7 +58,6 @@ class IncomingCallActivity : AbstractCallActivity() {
             }
         }
 
-        // step 3 - build a call screen
         setContent {
             VideoTheme {
                 val onCallAction: (CallAction) -> Unit = { callAction ->
@@ -83,21 +85,6 @@ class IncomingCallActivity : AbstractCallActivity() {
                 )
             }
         }
-    }
-
-    override fun onPause() {
-        super.onPause()
-        call.camera.pause()
-    }
-
-    override fun onResume() {
-        super.onResume()
-        call.camera.resume()
-    }
-
-    override fun onDestroy() {
-        super.onDestroy()
-        call.leave()
     }
 
     override fun pipChanged(isInPip: Boolean) {

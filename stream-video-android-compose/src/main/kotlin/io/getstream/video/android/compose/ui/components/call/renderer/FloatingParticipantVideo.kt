@@ -64,12 +64,15 @@ import io.getstream.video.android.mock.mockParticipant
 
 /**
  * Represents a floating item used to feature a participant video, usually the local participant.
+ * This component must be used inside [Box].
  *
+ * @param modifier Modifier for styling.
  * @param call The call containing state.
  * @param participant The participant to render.
  * @param parentBounds Bounds of the parent, used to constrain the component to the parent bounds,
  * when dragging the floating UI around the screen.
- * @param modifier Modifier for styling.
+ * @param alignment Determines where the floating participant video will be placed.
+ * @param style Defined properties for styling a single video call track.
  */
 @Composable
 public fun BoxScope.FloatingParticipantVideo(
@@ -78,7 +81,17 @@ public fun BoxScope.FloatingParticipantVideo(
     participant: ParticipantState,
     parentBounds: IntSize,
     alignment: Alignment = Alignment.TopEnd,
-    style: VideoRendererStyle = RegularVideoRendererStyle(isShowingConnectionQualityIndicator = false)
+    style: VideoRendererStyle = RegularVideoRendererStyle(isShowingConnectionQualityIndicator = false),
+    videoRenderer: @Composable (ParticipantState) -> Unit = {
+        ParticipantVideo(
+            modifier = Modifier
+                .fillMaxSize()
+                .clip(VideoTheme.shapes.floatingParticipant),
+            call = call,
+            participant = participant,
+            style = style
+        )
+    }
 ) {
     var videoSize by remember { mutableStateOf(IntSize(0, 0)) }
     var offsetX by remember { mutableStateOf(0f) }
@@ -100,6 +113,7 @@ public fun BoxScope.FloatingParticipantVideo(
             elevation = 8.dp,
             modifier = Modifier
                 .then(modifier)
+                .align(alignment)
                 .padding(VideoTheme.dimens.floatingVideoPadding)
                 .onGloballyPositioned { videoSize = it.size }
                 .size(
@@ -172,14 +186,7 @@ public fun BoxScope.FloatingParticipantVideo(
                 .onGloballyPositioned { videoSize = it.size },
             shape = VideoTheme.shapes.floatingParticipant
         ) {
-            ParticipantVideo(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .clip(VideoTheme.shapes.floatingParticipant),
-                call = call,
-                participant = participant,
-                style = style
-            )
+            videoRenderer.invoke(participant)
         }
     }
 }

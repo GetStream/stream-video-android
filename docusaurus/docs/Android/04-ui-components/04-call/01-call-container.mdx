@@ -1,15 +1,15 @@
 # CallContainer
 
-The easiest way to set up a screen that renders a video call, incoming, outgoing and active call screens which contain the current participants video feeds and the call controls is to use the `CallContainer`.
+The easiest way to set up a screen that renders a video call, which contain the current participants video feeds and the call controls is to use the `CallContainer`.
 
 `CallContainer` sets up the following functionality by connecting multiple components:
 
 * [**`CallAppBar`**](05-call-app-bar.mdx): Displays a call information or an additional actions, such as the number of participants,
-* [**`ControlActions`**](04-call-controls.mdx): Allows a user to trigger different actions to control a joining call, such as enabling a camera/audio and flipping a camera.
 * [**`CallContent`**](03-call-content.mdx): Content is shown by rendering video/audio when we're connected to a call successfully.
-* [**`RingingCall`**](02-ringing-call.mdx): When the user calls other people or is called by another person, it shows other participants' avatars and controls for switching audio/video and canceling the call.
+* [**`ControlActions`**](04-call-controls.mdx): Allows a user to trigger different actions to control a joining call, such as enabling a camera/audio and flipping a camera.
+* [**`pictureInPictureContent`**](../../06-advanced/03-enable-picture-in-picture.mdx): Content shown when the user enters Picture in Picture mode, if it's been enabled in the app.
 
-This section will cover components at the highest top of the hierarchy, enabling you to implement a Video Call app quickly.
+This section will cover components at the highest top of the hierarchy, enabling you to implement a video call app quickly.
 These components abstract the logic needed to write a functioning video call experience, which makes them less open to customization.
 
 ## Usage
@@ -19,12 +19,15 @@ These components abstract the logic needed to write a functioning video call exp
 ```kotlin
 override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
+
     setContent {
         VideoTheme {
+
+            // .. join a call here //
+
             CallContainer(
                 modifier = Modifier.fillMaxSize(),
-                callViewModel = callViewModel,
-                callType = CallType.VIDEO,
+                call = call,
                 onBackPressed = { finish() },
             )
         }
@@ -33,10 +36,10 @@ override fun onCreate(savedInstanceState: Bundle?) {
 ```
 
 :::note
-Please ensure that you were already initialized StreamVideo with the `StreamVideoBuilder(..).build()` method before using the `CallViewModel`.
+Please ensure that you were already initialized StreamVideo with the `StreamVideoBuilder(..).build()` method before using the call related components, such as `CallContainer` and `CallViewModel`.
 :::
 
-Using this UI component and our `CallViewModel`, will show the following UI based on call states.
+You will see the result below with `CallContainer`:
 
 ![Compose CallContainer](../../assets/compose_call_container.png)
 
@@ -58,8 +61,6 @@ override fun onCreate(savedInstanceState: Bundle?) {
         VideoTheme {
             CallContainer(
                 modifier = Modifier.fillMaxSize(),
-                callViewModel = callViewModel,
-                callType = CallType.VIDEO,
                 onCallAction = {
                     // TODO - handle call actions
                 },
@@ -72,9 +73,9 @@ override fun onCreate(savedInstanceState: Bundle?) {
 }
 ```
 
-You can also pass the actions to the [CallViewModel](../05-view-model.mdx) to handle the default actions we define in our UI, but you can handle any custom actions here, if you've built some custom UI.
+You can also pass the actions to the [CallViewModel](../05-view-model.mdx) to enable picture in picture mode. For more information, check out the [Picture and Picture](../../06-advanced/03-enable-picture-in-picture.mdx).
 
-When it comes to custom UI, the `CallContainer` exposes some Slot APIs for you to consume.
+When it comes to custom UI, the `CallContainer` exposes some slot APIs for you to consume.
 
 ## Customization
 
@@ -102,7 +103,21 @@ public fun CallContainer(
             onCallAction = onCallAction,
         )
     },
-    pictureInPictureContent: @Composable (Call) -> Unit = { DefaultPictureInPictureContent(it) }, // 2
+    videoRenderer: @Composable (
+        modifier: Modifier,
+        call: Call,
+        participant: ParticipantState,
+        style: VideoRendererStyle
+    ) -> Unit = { videoModifier, videoCall, videoParticipant, videoStyle ->
+        ParticipantVideo(
+            modifier = videoModifier,
+            call = videoCall,
+            participant = videoParticipant,
+            style = videoStyle
+        )
+    },
+    pictureInPictureContent: @Composable (Call) -> Unit = { DefaultPictureInPictureContent(it) },
+    style: VideoRendererStyle = RegularVideoRendererStyle(),
     callContent: @Composable (call: Call) -> Unit = {
         DefaultCallContent(
             modifier = modifier.testTag("call_content"),
@@ -114,23 +129,14 @@ public fun CallContainer(
             pictureInPictureContent = pictureInPictureContent
         )
     },
-    ringingCallContent: @Composable (call: Call) -> Unit = {
-        RingingCallContent(
-            modifier = modifier.testTag("ringing_call_content"),
-            callType = callType,
-            callViewModel = callViewModel,
-            onBackPressed = onBackPressed,
-            onCallAction = onCallAction,
-            onAcceptedCallContent = { callContent.invoke(it) }
-        )
-    },
 )
 ```
 
-* **appBarContent**: Represents the content that handle a back button and shows the call information, such as the status, the number of participants.
-* **controlsContent**: Represents the content that features various controls and actions in a call, such as audio and video handles and leaving a call.
-* **pictureInPictureContent**: Represents the content that will be shown in Picture-In-Picture mode.
-* **ringingCallContent**: Represents the incoming/outgoing content shown respectively when the active user is being ringed or ringing other users.
-* **callContent**: Represents the active call content, when the user fully joins and connects to a call.
+- **[appBarContent](05-call-app-bar.mdx)**: Represents the content that handle a back button and shows the call information, such as the status, the number of participants.
+- **[controlsContent](04-call-controls.mdx)**: Represents the content that features various controls and actions in a call, such as audio and video handles and leaving a call.
+- **[videoRenderer](../02-video-renderer.mdx)**: A single video renderer renders each individual participant.
+- **[style](../02-video-renderer.mdx)**: Defined properties for styling a single video call track.
+- **[pictureInPictureContent](../../06-advanced/03-enable-picture-in-picture.mdx)**: Represents the content that will be shown in Picture-In-Picture mode.
+- **[callContent](03-call-content.mdx)**: Represents the active call content, when the user fully joins and connects to a call.
 
 Using any of these slots, you can fully replace the content that's shown in different states and you can build these components to be rendered differently, as the state updates.

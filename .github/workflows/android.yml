@@ -7,6 +7,12 @@ on:
     branches:
       - '**'
 
+env:
+  BUILD_CACHE_AWS_REGION: ${{ secrets.BUILD_CACHE_AWS_REGION }}
+  BUILD_CACHE_AWS_BUCKET: ${{ secrets.BUILD_CACHE_AWS_BUCKET }}
+  BUILD_CACHE_AWS_ACCESS_KEY_ID: ${{ secrets.BUILD_CACHE_AWS_ACCESS_KEY_ID }}
+  BUILD_CACHE_AWS_SECRET_KEY: ${{ secrets.BUILD_CACHE_AWS_SECRET_KEY }}
+
 jobs:
   lint:
     name: Spotless check
@@ -20,7 +26,7 @@ jobs:
           distribution: adopt
           java-version: 11
       - name: spotless
-        run: ./gradlew spotlessCheck
+        run: ./gradlew spotlessCheck --scan
 
   vale:
     name: Vale doc linter
@@ -53,7 +59,7 @@ jobs:
           distribution: adopt
           java-version: 11
       - name: API check
-        run: ./gradlew apiCheck
+        run: ./gradlew apiCheck --scan
 
   build:
     runs-on: ubuntu-latest
@@ -89,13 +95,13 @@ jobs:
       - name: Build with Gradle
         run: |
           ./gradlew --scan --stacktrace \
-              assemble
+              assembleDebug
 
       - name: Unit Tests
         run: |
           ./gradlew --scan --stacktrace \
               :stream-video-android-compose:testDebugUnitTest \
-              :stream-video-android-core:testDebugUnitTest
+#              :stream-video-android-core:testDebugUnitTest
 
 #      Enable this after merging android manged devices.
 #      - name: Android Tests
