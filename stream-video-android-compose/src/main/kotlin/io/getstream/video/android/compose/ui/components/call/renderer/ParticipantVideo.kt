@@ -388,6 +388,6 @@ private fun ParticipantVideoPreview() {
         ParticipantVideoRenderer(
             call = mockCall,
             participant = mockParticipantList[1],
-        ) {}
+        )
     }
 }

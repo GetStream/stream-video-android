@@ -66,12 +66,16 @@ This library provide mocked instances below:
 For example, you can build a preview Composable about `ParticipantVideo` like the example below:
 
 ```kotlin
-StreamMockUtils.initializeStreamVideo(LocalContext.current)
-VideoTheme {
-    ParticipantVideo(
-        call = mockCall,
-        participant = mockParticipant,
-    ) {}
+@Preview
+@Composable
+private fun ParticipantVideoPreview() {
+    StreamMockUtils.initializeStreamVideo(LocalContext.current)
+    VideoTheme {
+        ParticipantVideoRenderer(
+            call = mockCall,
+            participant = mockParticipant,
+        )
+    }
 }
 ```
 
