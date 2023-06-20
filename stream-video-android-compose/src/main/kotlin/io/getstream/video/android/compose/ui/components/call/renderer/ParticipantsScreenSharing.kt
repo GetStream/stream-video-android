@@ -36,6 +36,7 @@ import io.getstream.video.android.core.model.ScreenSharingSession
  * @param call The call that contains all the participants state and tracks.
  * @param session The screen sharing session which is active.
  * @param modifier Modifier for styling.
+ * @param isZoomable Decide to this screensharing video renderer is zoomable or not.
  * @param style Defined properties for styling a single video call track.
  * @param videoRenderer A single video renderer renders each individual participant.
  */

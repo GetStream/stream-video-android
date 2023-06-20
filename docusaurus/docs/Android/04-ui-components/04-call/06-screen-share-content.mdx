@@ -14,12 +14,12 @@ To use the `ParticipantsScreenSharing` component in your app, you should observe
 
 ```kotlin
 // observe a screen sharing session from the call state.
-val screenSharingSession by call.state.screenSharingSession.collectAsState()
+val session by call.state.screenSharingSession.collectAsState()
 
-if (screenSharingSession != null) {
+if (session != null) {
     ParticipantsScreenSharing(
        call = call,
-       screenSharingSession = screenSharingSession!!,
+       session = session!!,
        modifier = Modifier.fillMaxSize(),
     )
 } else {
@@ -35,7 +35,7 @@ if (screenSharingSession != null) {
 There are a few state parameters you're providing here:
 
 - `Call`: Represents the Call in which the screen sharing session is being shown. Usually the Call where the user is active.
-- `ScreenSharingSession`: The session which contains a [ParticipantState](../05-participants/01-call-participant_state.mdx) to provide the screen share track and more details about the user.
+- `session`: The session which contains a [ParticipantState](../05-participants/01-call-participant_state.mdx) to provide the screen share track and more details about the user.
 
 Using this component, you'll likely see something similar to the following UI:
 
@@ -54,17 +54,15 @@ ParticipantsGrid(
 )
 ```
 
-Let's see how to handle the UI actions.
-
-## Handling Actions
-
-When it comes to handling actions and customizing the behavior of the component, `ScreenShareContent` exposes the following:
-
-- `onCallAction(CallAction)`: Responds to different `CallAction`s. Actions are used to represent different types of interactions that can be performed during the call. In this case, toggling the screen configuration to be full screen or not or the orientation.
-- `onRender(View)`: Used to respond to render events. The View object represents the `VideoView` that holds the screen sharing session.
-
-You can easily override these parameters and customize the behavior, as seen in the snippet above.
+Let's see how to customize this component.
 
 ## Customization
 
-As far as UI customization goes, the component is very specific and doesn't allow much to be changed. It's very simple, and if you need to customize the behavior or UI, it's best if you build your own variant using the state that's provided in our `ViewModel`. You can still customize the `Modifier` parameter to apply custom styling to `ScreenShareContent`.
+This is a very simple component so it doesn't have replaceable slots, but it still offers ways to customize its appearance.
+
+- `modifier`: Modifier for styling.
+- `isZoomable`: Decide to this screensharing video renderer is zoomable or not.
+- `style`: Defined properties for styling a single video call track.
+- `videoRenderer`: A single video renderer renders each individual participant.
+
+If you're looking for guides on how to override and customize this UI, we have various [UI Cookbook](../../05-ui-cookbook/01-overview.mdx) recipes for you and we cover a portion of customization within the [Video Android SDK Tutorial](../../02-tutorials/01-video-calling.mdx).
