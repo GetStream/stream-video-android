@@ -22,9 +22,7 @@ import android.content.Context
 import android.content.Intent
 import android.content.pm.ActivityInfo
 import android.content.res.Configuration
-import android.net.Uri
 import android.os.Build
-import android.provider.Settings
 import android.util.Rational
 import android.view.View
 import android.view.WindowInsets
@@ -47,7 +45,7 @@ public abstract class AbstractCallActivity : ComponentActivity() {
     public open fun pipChanged(isInPip: Boolean): Unit = Unit
 
     @SuppressLint("SourceLockedOrientationActivity")
-    private fun toggleFullscreen(action: ToggleScreenConfiguration) {
+    public fun toggleFullscreen(action: ToggleScreenConfiguration) {
         if (action.isFullscreen) {
             setFullscreen()
         } else if (action.isLandscape) {
@@ -59,7 +57,7 @@ public abstract class AbstractCallActivity : ComponentActivity() {
         }
     }
 
-    private fun setFullscreen() {
+    public fun setFullscreen() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
             window.attributes.layoutInDisplayCutoutMode =
                 WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES
@@ -86,7 +84,7 @@ public abstract class AbstractCallActivity : ComponentActivity() {
         requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE
     }
 
-    private fun exitFullscreen() {
+    public fun exitFullscreen() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
             window.attributes.layoutInDisplayCutoutMode =
                 WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_DEFAULT
@@ -103,16 +101,7 @@ public abstract class AbstractCallActivity : ComponentActivity() {
         }
     }
 
-    private fun startSettings() {
-        startActivity(
-            Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
-                val uri = Uri.fromParts("package", packageName, null)
-                data = uri
-            }
-        )
-    }
-
-    private fun showWhenLockedAndTurnScreenOn() {
+    public fun showWhenLockedAndTurnScreenOn() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O_MR1) {
             setShowWhenLocked(true)
             setTurnScreenOn(true)
@@ -139,7 +128,7 @@ public abstract class AbstractCallActivity : ComponentActivity() {
         }
     }
 
-    private fun enterPictureInPicture() {
+    public fun enterPictureInPicture() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
 
             val currentOrientation = resources.configuration.orientation
