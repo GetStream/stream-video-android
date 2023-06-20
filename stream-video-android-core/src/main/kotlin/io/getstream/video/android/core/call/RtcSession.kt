@@ -30,6 +30,7 @@ import io.getstream.video.android.core.StreamVideoImpl
 import io.getstream.video.android.core.audio.AudioDevice
 import io.getstream.video.android.core.call.connection.StreamPeerConnection
 import io.getstream.video.android.core.call.utils.stringify
+import io.getstream.video.android.core.dispatchers.DispatcherProvider
 import io.getstream.video.android.core.errors.RtcException
 import io.getstream.video.android.core.events.ChangePublishQualityEvent
 import io.getstream.video.android.core.events.ICETrickleEvent
@@ -629,7 +630,7 @@ public class RtcSession internal constructor(
                 )
                 val result = updateMuteState(request)
                 emit(result.getOrThrow())
-            }.flowOn(coroutineScope.coroutineContext).retryWhen { cause, attempt ->
+            }.flowOn(DispatcherProvider.IO).retryWhen { cause, attempt ->
                 val sameValue = new == muteState.value
                 val sameSfu = currentSfu == sfuUrl
                 val isPermanent = isPermanentError(cause)
@@ -739,7 +740,7 @@ public class RtcSession internal constructor(
             encoding.active = enabledRids?.get(encoding.rid ?: "") ?: false
         }
 
-        logger.i { "video quality: marking layers active $enabledRids " }
+        dynascaleLogger.i { "video quality: marking layers active $enabledRids " }
 
         transceiver.sender.parameters.encodings.clear()
         transceiver.sender.parameters.encodings.addAll(encodings)
@@ -874,7 +875,7 @@ public class RtcSession internal constructor(
                 dynascaleLogger.i { "[updateParticipantsSubscriptions] $useDefaults #sfu; $sessionId subscribing to : $sessionsIds" }
                 val result = updateSubscriptions(request)
                 emit(result.getOrThrow())
-            }.flowOn(coroutineScope.coroutineContext).retryWhen { cause, attempt ->
+            }.flowOn(DispatcherProvider.IO).retryWhen { cause, attempt ->
                 val sameValue = new == subscriptions.value
                 val sameSfu = currentSfu == sfuUrl
                 val isPermanent = isPermanentError(cause)

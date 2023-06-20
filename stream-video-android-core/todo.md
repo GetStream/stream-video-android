@@ -16,17 +16,18 @@
 
 ### 0.1 milestone
 
+- [ ] Audio settings should make speakerphone vs earpiece as a default configurable
 - [ ] Video disconnects sometimes. (BufferQueue has not connected producer and Stop capture: Nulling session)
-- [ ] Handle error conditions in RtcSession
 - [ ] Bluetooth gives a permissions error on AndroidDeviceTest. We shouldn't require BLUETOOTH_CONNECT by default
-- [ ] Bluetooth issue (turning off or on bluetooth device doesn't switch from headset to speaker phone. also broken in whatsapp)
 - [ ] Tests should run on CI (and we need to speed it up a bit)
+- [ ] Review updatePublishQuality
+- [ ] Testing session with team cross platform
+- [ ] Publish 0.1 on Maven
 - [~] Video calling tutorial & Feedback cycle with team
 - [~] Audio room tutorial & Feedback cycle with team
 - [~] Reconnect flow can't reconnect the subscriber (SFU doesn't support restarts on the subscriber peer connection yet)
 - [~] Graceful SFU shutdown (switch between SFUs)
-- [ ] Testing session with team cross platform
-- [ ] Publish 0.1 on Maven
+- [X] Handle retry error conditions in RtcSession
 - [X] Cleanup the readme and add a nice graphic. Make the repo public after that
 - [X] Crash on interceptor (broken stack trace, check logs)
 - [X] Ring support & Docs (Jc)
@@ -58,15 +59,15 @@
 ### TODO ~1 week
 
 
-- [ ] Error handling could be improved
+- [X] Error handling could be improved
 - [ ] Share example with backend team for resolution degradation
-- [ ] HTTP requests fail in interceptor, which is wrong. (see https://console.firebase.google.com/project/stream-video-9b586/crashlytics/app/android:io.getstream.video.android.dogfooding.debug/issues?state=open&time=last-seven-days&tag=all&sort=eventCount)
+- [X] HTTP requests fail in interceptor, which is wrong. (see https://console.firebase.google.com/project/stream-video-9b586/crashlytics/app/android:io.getstream.video.android.dogfooding.debug/issues?state=open&time=last-seven-days&tag=all&sort=eventCount)
 - [ ] Go through all tests & TODOs and update with latest server changes.
-- [ ] Audio settings should make speakerphone vs earpiece as a default configurable
 - [ ] Fine tune the quality on S23 (so it's not at Q). Upload quality, make it easy to change
 - [ ] Add a timeout for waiting on the socket authentication events
 - [ ] Improve our error classes. Right now there are 4 different formats. 
 - [ ] XML version of VideoRenderer
+- [ ] Bluetooth issue (turning off or on bluetooth device doesn't switch from headset to speaker phone. also broken in whatsapp)
 - [X] Speaker phone selection isn't right, should use the preferences of all 4, or only switch when its an earpiece, not switch from bluetooth
 - [X] use standard debug, verbose, info, warning and error debug levels on StreamVideoBuilder
 - [X] Android volume is too low when calling from react
