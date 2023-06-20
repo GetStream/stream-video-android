@@ -1,13 +1,10 @@
 # CallContent
 
-The `CallContent` lets you easily build UI when inside a call. It handles the state and actions of enabling and disabling audio/video, speakerphone or video, as well as information about the call participants. Similar to [RingingCallContent](02-ringing-call.mdx), the `CallContent` provides two variants:
-
-* **Bound**: This version binds itself to a `CallViewModel` and loads all the required data. It also connects the action handlers for video, audio, speakerphone, participants and more.
-* **Stateless**: This is a stateless version of the `CallContent`, which doesn't depend on a `ViewModel` and instead depends on pure state from external sources to render its UI.
+The `CallContent` lets you easily build UI when inside a call. It handles the state and actions of enabling and disabling audio/video, speakerphone or video, as well as information about the call participants.
 
 > **Note**: If you want to learn more about our component types, make sure to read through our [Compose Components Overview](../01-overview.mdx).
 
-Based on the state, the `CallContent` provides a list or grid of participants, with their avatars and names, or a video if they're publishing, with more information for each participant, like their connection quality and audio levels.
+Based on the call state, the `CallContent` provides a list or grid of participants, with their avatars and names, or a video if they're publishing, with more information for each participant, like their connection quality and audio levels.
 
 Let's see how to show the `CallContent` UI.
 
@@ -20,7 +17,7 @@ override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
     setContent {
         VideoTheme {
-            CallContent(viewModel = callViewModel) // here
+            CallContent(call = call) // here
         }
     }
 }
@@ -71,7 +68,7 @@ override fun onCreate(savedInstanceState: Bundle?) {
     setContent {
         VideoTheme {
             CallContent( 
-              callViewModel = callViewModel,
+              call = call,
               // here
               onBackPressed = { ... }, 
               onCallAction = { ... }
