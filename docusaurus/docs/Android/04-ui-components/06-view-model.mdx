@@ -12,7 +12,7 @@ The call viewModel is a light wrapper around states of the PIP mode.
 In the example below you see how to create a call view model in an activity:
 
 ```kotlin
-// create viewmodel
+// create a CallViewModel
 val factory by lazy { CallViewModelFactory() }
 val vm by viewModels<CallViewModel> { factory }
 ```
@@ -46,7 +46,7 @@ The ViewModel exposes the following fields:
 | --- | --- |
 | `isInPictureInPicture` | If picture in picture is active |
 
-Typically we recommend that you build your own ViewModel and use the included `callViewModel` as inspiration.
+Typically, we recommend that you build your own ViewModel and use the included `callViewModel` as inspiration.
 
 ### AbstractCallActivity
 
@@ -64,25 +64,9 @@ class MainActivity : AbstractCallActivity() {
     // ensure that you override this method.
     override fun provideCall(): Call {
 
-        val userId = "REPLACE_WITH_USER_ID"
-        val userToken = "REPLACE_WITH_TOKEN"
-        val callId = "REPLACE_WITH_CALL_ID"
-
-        val user = User(
-            id = userId, // any string
-            name = "Tutorial", // name and image are used in the UI
-            role = "admin"
-        )
-
-        val client = StreamVideoBuilder(
-            context = applicationContext,
-            apiKey = "hd8szvscpxvd", // demo API key
-            geo = GEO.GlobalEdgeNetwork,
-            user = user,
-            token = userToken,
-        ).build()
-
-        return client.call(type = "default", id = callId)
+        // you must initialize `StreamVideo` somewhere before using this `instance()` method.
+        val streamVideo = StreamVideo.instance()
+        return streamVideo.call(type = "default", id = callId)
     }
 
     // create a CallViewModel.
@@ -98,12 +82,7 @@ class MainActivity : AbstractCallActivity() {
         }
 
         setContent {
-            // request permissions.
-            LaunchCallPermissions(call = call)
-
-            // apply VideTheme
             VideoTheme {
-
                 // render videos
                 CallContainer(
                     modifier = Modifier.fillMaxSize(),
@@ -124,6 +103,7 @@ class MainActivity : AbstractCallActivity() {
         }
     }
 
+    // ensure that you override this method.
     override fun pipChanged(isInPip: Boolean) {
         super.pipChanged(isInPip)
         vm.onPictureInPictureModeChanged(isInPip)
@@ -143,6 +123,6 @@ The following methods on the call activity are available:
 | `toggleFullscreen` | Toggle the fullscreen mode |
 | `setFullscreen` | Enable fullscreen |
 | `exitFullscreen` | Exit fullscreen |
-| `showWhenLockedAndTurnScreenOn` |  |
+| `showWhenLockedAndTurnScreenOn` | Release a screen lock and turn on the display |
 
 
