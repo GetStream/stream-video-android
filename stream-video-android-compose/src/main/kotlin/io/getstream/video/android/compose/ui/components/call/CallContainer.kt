@@ -69,7 +69,7 @@ import io.getstream.video.android.model.User
  * @param controlsContent Content is shown that allows users to trigger different actions to control a joined call.
  * @param pictureInPictureContent Content shown when the user enters Picture in Picture mode, if
  * it's been enabled in the app.
- * @param style Represents a regular video call render styles.
+ * @param style Defined properties for styling a single video call track.
  * @param videoRenderer A single video renderer renders each individual participant.
  * @param callContent Content is shown by rendering video/audio when we're connected to a call successfully.
  */
@@ -173,7 +173,7 @@ public fun CallContainer(
  * @param controlsContent Content is shown that allows users to trigger different actions to control a joined call.
  * @param pictureInPictureContent Content shown when the user enters Picture in Picture mode, if
  * it's been enabled in the app.
- * @param style Represents a regular video call render styles.
+ * @param style Defined properties for styling a single video call track.
  * @param videoRenderer A single video renderer renders each individual participant.
  * @param callContent Content is shown by rendering video/audio when we're connected to a call successfully.
  */

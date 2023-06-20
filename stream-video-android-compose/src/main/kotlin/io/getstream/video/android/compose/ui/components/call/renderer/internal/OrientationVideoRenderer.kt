@@ -38,7 +38,7 @@ import io.getstream.video.android.core.ParticipantState
  * @param call The state of the call.
  * @param modifier Modifier for styling.
  * @param parentSize The size of the parent.
- * @param style Represents a regular video call render styles.
+ * @param style Defined properties for styling a single video call track.
  * @param videoRenderer A single video renderer renders each individual participant.
  */
 @Composable

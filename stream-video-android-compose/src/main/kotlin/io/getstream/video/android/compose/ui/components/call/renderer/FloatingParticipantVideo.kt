@@ -72,7 +72,7 @@ import io.getstream.video.android.mock.mockParticipant
  * @param parentBounds Bounds of the parent, used to constrain the component to the parent bounds,
  * when dragging the floating UI around the screen.
  * @param alignment Determines where the floating participant video will be placed.
- * @param style Represents a regular video call render styles.
+ * @param style Defined properties for styling a single video call track.
  */
 @Composable
 public fun BoxScope.FloatingParticipantVideo(
