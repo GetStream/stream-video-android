@@ -70,7 +70,7 @@ import io.getstream.video.android.mock.mockCall
  * @param onCallAction Handler when the user triggers a Call Control Action.
  * @param permissions Android permissions that should be required to render a video call properly.
  * @param appBarContent Content is shown that calls information or additional actions.
- * @param style Represents a regular video call render styles.
+ * @param style Defined properties for styling a single video call track.
  * @param videoRenderer A single video renderer renders each individual participant.
  * @param videoContent Content is shown that renders all participants' videos.
  * @param controlsContent Content is shown that allows users to trigger different actions to control a joined call.
@@ -160,7 +160,7 @@ public fun CallContent(
  * @param permissions Android permissions that should be required to render a video call properly.*
  * @param onCallAction Handler when the user triggers a Call Control Action.
  * @param appBarContent Content is shown that calls information or additional actions.
- * @param style Represents a regular video call render styles.
+ * @param style Defined properties for styling a single video call track.
  * @param videoRenderer A single video renderer renders each individual participant.
  * @param videoContent Content is shown that renders all participants' videos.
  * @param controlsContent Content is shown that allows users to trigger different actions to control a joined call.

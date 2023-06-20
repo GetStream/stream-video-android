@@ -46,6 +46,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
@@ -60,6 +61,8 @@ import io.getstream.video.android.datastore.delegate.StreamUserDataStore
 import io.getstream.video.android.dogfooding.R
 import io.getstream.video.android.dogfooding.ui.theme.Colors
 import io.getstream.video.android.dogfooding.ui.theme.StreamButton
+import io.getstream.video.android.mock.StreamMockUtils
+import io.getstream.video.android.mock.mockUsers
 
 @Composable
 fun CallJoinScreen(
@@ -71,7 +74,7 @@ fun CallJoinScreen(
 
     HandleCallJoinUiState(
         callJoinUiState = uiState,
-        navigateToCallLobby = navigateToCallLobby
+        navigateToCallLobby = navigateToCallLobby,
     )
 
     Column(
@@ -80,13 +83,17 @@ fun CallJoinScreen(
             .background(Colors.background),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        CallJoinHeader(navigateUpToLogin = navigateUpToLogin)
+        CallJoinHeader(
+            navigateUpToLogin = navigateUpToLogin,
+            callJoinViewModel = callJoinViewModel
+        )
 
         CallJoinBody(
             modifier = Modifier
                 .align(Alignment.CenterHorizontally)
                 .fillMaxWidth()
-                .weight(1f)
+                .weight(1f),
+            callJoinViewModel = callJoinViewModel
         )
     }
 }
@@ -128,7 +135,11 @@ private fun CallJoinBody(
     modifier: Modifier,
     callJoinViewModel: CallJoinViewModel = hiltViewModel(),
 ) {
-    val user by callJoinViewModel.user.collectAsState()
+    val user by if (LocalInspectionMode.current) {
+        remember { mutableStateOf(mockUsers[0]) }
+    } else {
+        callJoinViewModel.user.collectAsState()
+    }
 
     Column(
         modifier = modifier
@@ -252,11 +263,10 @@ private fun HandleCallJoinUiState(
 @Preview
 @Composable
 private fun CallJoinScreenPreview() {
+    StreamMockUtils.initializeStreamVideo(LocalContext.current)
     VideoTheme {
-        val context = LocalContext.current
-        val dataStore = StreamUserDataStore.install(context)
         CallJoinScreen(
-            callJoinViewModel = CallJoinViewModel(dataStore),
+            callJoinViewModel = CallJoinViewModel(StreamUserDataStore.instance()),
             navigateToCallLobby = {},
             navigateUpToLogin = {}
         )

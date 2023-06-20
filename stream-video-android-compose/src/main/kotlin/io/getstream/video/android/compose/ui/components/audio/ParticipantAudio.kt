@@ -60,7 +60,7 @@ import io.getstream.video.android.ui.common.R
  *
  * @param participant Participant to render.
  * @param modifier Modifier for styling.
- * @param style Represents a regular video call render styles.
+ * @param style Defined properties for styling a single video call track.
  * @param microphoneIndicatorContent Content is shown that displays participant's microphone states.
  * @param roleBadgeContent Content is shown that displays in front of the role label.
  */

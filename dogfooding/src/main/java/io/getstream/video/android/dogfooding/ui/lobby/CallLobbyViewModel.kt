@@ -54,9 +54,6 @@ class CallLobbyViewModel @Inject constructor(
 
     val user: User? = dataStore.user.value
 
-    val isCameraEnabled: StateFlow<Boolean> = call.camera.isEnabled
-    val isMicrophoneEnabled: StateFlow<Boolean> = call.microphone.isEnabled
-
     private val _isLoading: MutableStateFlow<Boolean> = MutableStateFlow(false)
     internal val isLoading: StateFlow<Boolean> = _isLoading
 
