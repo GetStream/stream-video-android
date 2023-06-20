@@ -301,7 +301,7 @@ public class RtcSession internal constructor(
         coroutineScope.launch {
             // call update participant subscriptions debounced
             trackDimensionsDebounced.collect {
-                updateVideoSubscriptions()
+                setVideoSubscriptions()
             }
         }
     }
@@ -545,7 +545,7 @@ public class RtcSession internal constructor(
         listenToMediaChanges()
 
         // subscribe to the tracks of other participants
-        updateVideoSubscriptions(true)
+        setVideoSubscriptions(true)
         return
     }
 
@@ -779,6 +779,8 @@ public class RtcSession internal constructor(
 //        }
     }
 
+    val defaultVideoDimension = VideoDimension(1080, 2340)
+
     /**
      * This is called when you are look at a different set of participants
      * or at a different size
@@ -796,7 +798,7 @@ public class RtcSession internal constructor(
                 val track = TrackSubscriptionDetails(
                     user_id = participant.user.value.id,
                     track_type = TrackType.TRACK_TYPE_VIDEO,
-                    dimension = VideoDimension(960, 720),
+                    dimension = defaultVideoDimension,
                     session_id = participant.sessionId
                 )
                 tracks.add(track)
@@ -805,7 +807,7 @@ public class RtcSession internal constructor(
                 val track = TrackSubscriptionDetails(
                     user_id = participant.user.value.id,
                     track_type = TrackType.TRACK_TYPE_SCREEN_SHARE,
-                    dimension = VideoDimension(960, 720),
+                    dimension = defaultVideoDimension,
                     session_id = participant.sessionId
                 )
                 tracks.add(track)
@@ -849,7 +851,7 @@ public class RtcSession internal constructor(
      * -- error isn't permanent, SFU didn't change, the mute/publish state didn't change
      * -- we cap at 30 retries to prevent endless loops
      */
-    private fun updateVideoSubscriptions(useDefaults: Boolean = false) {
+    private fun setVideoSubscriptions(useDefaults: Boolean = false) {
         // default is to subscribe to the top 5 sorted participants
         val tracks = if (useDefaults) {
             defaultTracks()
@@ -863,29 +865,34 @@ public class RtcSession internal constructor(
         val currentSfu = sfuUrl
 
         subscriptionSyncJob?.cancel()
-        // start a new job
-        // this code is a bit more complicated due to the retry behaviour
-        subscriptionSyncJob = coroutineScope.launch {
-            flow {
-                val request = UpdateSubscriptionsRequest(
-                    session_id = sessionId,
-                    tracks = subscriptions.value
-                )
-                val sessionsIds = tracks.map { it.track_type to it.session_id }
-                dynascaleLogger.i { "[updateParticipantsSubscriptions] $useDefaults #sfu; $sessionId subscribing to : $sessionsIds" }
-                val result = updateSubscriptions(request)
-                emit(result.getOrThrow())
-            }.flowOn(DispatcherProvider.IO).retryWhen { cause, attempt ->
-                val sameValue = new == subscriptions.value
-                val sameSfu = currentSfu == sfuUrl
-                val isPermanent = isPermanentError(cause)
-                val willRetry = !isPermanent && sameValue && sameSfu && attempt < 30
-                val delayInMs = if (attempt <= 1) 100L else if (attempt <= 3) 300L else 2500L
-                logger.w { "updating subscriptions failed with error $cause, retry attempt: $attempt. will retry $willRetry in $delayInMs ms" }
-                delay(delayInMs)
-                willRetry
-            }.collect()
+
+        if (new.isNotEmpty()) {
+            // start a new job
+            // this code is a bit more complicated due to the retry behaviour
+            subscriptionSyncJob = coroutineScope.launch {
+                flow {
+                    val request = UpdateSubscriptionsRequest(
+                        session_id = sessionId,
+                        tracks = subscriptions.value
+                    )
+                    println("request $request")
+                    val sessionToDimension = tracks.map { it.session_id to it.dimension }
+                    dynascaleLogger.i { "[setVideoSubscriptions] $useDefaults #sfu; $sessionId subscribing to : $sessionToDimension" }
+                    val result = updateSubscriptions(request)
+                    emit(result.getOrThrow())
+                }.flowOn(DispatcherProvider.IO).retryWhen { cause, attempt ->
+                    val sameValue = new == subscriptions.value
+                    val sameSfu = currentSfu == sfuUrl
+                    val isPermanent = isPermanentError(cause)
+                    val willRetry = !isPermanent && sameValue && sameSfu && attempt < 30
+                    val delayInMs = if (attempt <= 1) 100L else if (attempt <= 3) 300L else 2500L
+                    logger.w { "updating subscriptions failed with error $cause, retry attempt: $attempt. will retry $willRetry in $delayInMs ms" }
+                    delay(delayInMs)
+                    willRetry
+                }.collect()
+            }
         }
+
 
     }
 
@@ -1221,10 +1228,10 @@ public class RtcSession internal constructor(
         sessionId: String,
         trackType: TrackType,
         visible: Boolean,
-        dimensions: VideoDimension = VideoDimension(960, 720)
+        dimensions: VideoDimension = defaultVideoDimension
     ) {
         // The map contains all track dimensions for all participants
-        dynascaleLogger.i { "uuu23 $sessionId $trackType $visible $dimensions" }
+        dynascaleLogger.d { "updating dimensions $sessionId $visible $dimensions" }
 
         // first we make a copy of the dimensions
         val trackDimensionsMap = trackDimensions.value.toMutableMap()
@@ -1244,7 +1251,6 @@ public class RtcSession internal constructor(
         trackDimensionsMap[sessionId] = participantTrackDimensions
 
         // Updates are debounced
-        dynascaleLogger.i { "updateTrackDimensions $trackDimensionsMap" }
         trackDimensions.value = trackDimensionsMap
     }
 
