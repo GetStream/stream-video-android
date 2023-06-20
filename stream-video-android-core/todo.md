@@ -16,17 +16,18 @@
 
 ### 0.1 milestone
 
-- [ ] Cleanup the readme and add a nice graphic. Make the repo public after that
 - [ ] Video disconnects sometimes. (BufferQueue has not connected producer and Stop capture: Nulling session)
+- [ ] Handle error conditions in RtcSession
 - [ ] Bluetooth gives a permissions error on AndroidDeviceTest. We shouldn't require BLUETOOTH_CONNECT by default
 - [ ] Bluetooth issue (turning off or on bluetooth device doesn't switch from headset to speaker phone. also broken in whatsapp)
 - [ ] Tests should run on CI (and we need to speed it up a bit)
-- [ ] Video calling tutorial & Feedback cycle with team
-- [ ] Audio room tutorial & Feedback cycle with team
-- [ ] Reconnect flow can't reconnect the subscriber (SFU doesn't support restarts on the subscriber peer connection yet)
-- [ ] Graceful SFU shutdown (switch between SFUs)
+- [~] Video calling tutorial & Feedback cycle with team
+- [~] Audio room tutorial & Feedback cycle with team
+- [~] Reconnect flow can't reconnect the subscriber (SFU doesn't support restarts on the subscriber peer connection yet)
+- [~] Graceful SFU shutdown (switch between SFUs)
 - [ ] Testing session with team cross platform
 - [ ] Publish 0.1 on Maven
+- [X] Cleanup the readme and add a nice graphic. Make the repo public after that
 - [X] Crash on interceptor (broken stack trace, check logs)
 - [X] Ring support & Docs (Jc)
 - [X] React component to load API key, user and token for video demo flow in the tutorials

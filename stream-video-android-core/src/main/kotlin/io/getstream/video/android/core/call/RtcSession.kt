@@ -59,14 +59,18 @@ import io.getstream.video.android.datastore.delegate.StreamUserDataStore
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.flowOn
+import kotlinx.coroutines.flow.retryWhen
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import okio.IOException
@@ -151,12 +155,14 @@ public class RtcSession internal constructor(
     internal var remoteIceServers: List<IceServer>,
 ) {
 
+    private var subscriptionSyncJob: Job? = null
+    private var muteStateSyncJob: Job? = null
+
     private var transceiverInitialized: Boolean = false
     private var errorJob: Job? = null
     private var eventJob: Job? = null
     internal val socket by lazy { sfuConnectionModule.sfuSocket }
 
-    private var lastTracks: List<TrackSubscriptionDetails>? = null
     private val context = client.context
     private val logger by taggedLogger("Call:RtcSession")
     private val dynascaleLogger by taggedLogger("Call:RtcSession:Dynascale")
@@ -294,7 +300,7 @@ public class RtcSession internal constructor(
         coroutineScope.launch {
             // call update participant subscriptions debounced
             trackDimensionsDebounced.collect {
-                updateParticipantSubscriptions()
+                updateVideoSubscriptions()
             }
         }
     }
@@ -538,7 +544,7 @@ public class RtcSession internal constructor(
         listenToMediaChanges()
 
         // subscribe to the tracks of other participants
-        updateParticipantSubscriptions(true)
+        updateVideoSubscriptions(true)
         return
     }
 
@@ -589,28 +595,56 @@ public class RtcSession internal constructor(
         sfuConnectionModule.sfuSocket.cleanup()
     }
 
+    internal val muteState = MutableStateFlow(mapOf(TrackType.TRACK_TYPE_AUDIO to false, TrackType.TRACK_TYPE_VIDEO to false, TrackType.TRACK_TYPE_SCREEN_SHARE to false, ))
+
     /**
-     * Marks the given track as enabled or disabled
+     * Informs the SFU that you're publishing a given track (publishing vs muted)
+     * - when switching SFU we should repeat this info
+     * - http calls failing here breaks the call. it should retry as long as the
+     * -- error isn't permanent, SFU didn't change, the mute/publish state didn't change
+     * -- we cap at 30 retries to prevent endless loops
      */
     fun setMuteState(isEnabled: Boolean, trackType: TrackType) {
-        logger.d { "[setMuteState] #sfu; $trackType isEnabled: $isEnabled" }
+        logger.d { "[setPublishState] #sfu; $trackType isEnabled: $isEnabled" }
 
-        coroutineScope.launch {
+        // update the local copy
+        val copy = muteState.value.toMutableMap()
+        copy[trackType] = isEnabled
+        val new = copy.toMap()
+        muteState.value = new
 
-            val request = UpdateMuteStatesRequest(
-                session_id = sessionId,
-                mute_states = listOf(
-                    TrackMuteState(
-                        track_type = trackType,
-                        muted = !isEnabled
-                    )
-                ),
-            )
-            updateMuteState(request).onSuccessSuspend {
-            }.onError {
-                logger.w { "Error updating mute state: ${it.message}" }
-            }
+        val currentSfu = sfuUrl
+        // prevent running multiple of these at the same time
+        // if there's already a job active. cancel it
+        muteStateSyncJob?.cancel()
+        // start a new job
+        // this code is a bit more complicated due to the retry behaviour
+        muteStateSyncJob = coroutineScope.launch {
+            flow {
+                val request = UpdateMuteStatesRequest(
+                    session_id = sessionId,
+                    mute_states = copy.map {
+                        TrackMuteState(track_type=it.key, muted=!it.value)
+                    }
+                )
+                val result = updateMuteState(request)
+                emit(result.getOrThrow())
+            }.flowOn(coroutineScope.coroutineContext).retryWhen { cause, attempt ->
+                val sameValue = new == muteState.value
+                val sameSfu = currentSfu == sfuUrl
+                val isPermanent = isPermanentError(cause)
+                val willRetry = !isPermanent && sameValue && sameSfu && attempt < 30
+                val delayInMs = if (attempt <= 1) 100L else if (attempt <= 3) 300L else 2500L
+                logger.w { "updating mute state failed with error $cause, retry attempt: $attempt. will retry $willRetry in $delayInMs ms" }
+                delay(delayInMs)
+                willRetry
+            }.collect()
         }
+
+    }
+
+    private fun isPermanentError(cause: Throwable): Boolean {
+        return false
     }
 
     @VisibleForTesting
@@ -800,7 +834,21 @@ public class RtcSession internal constructor(
         return tracks
     }
 
-    private fun updateParticipantSubscriptions(useDefaults: Boolean = false) {
+    internal val subscriptions: MutableStateFlow<List<TrackSubscriptionDetails>> = MutableStateFlow(
+        emptyList()
+    )
+
+    /**
+     * Tells the SFU which video tracks we want to subscribe to
+     * - it sends the resolutions we're displaying the video at so the SFU can decide which track to send
+     * - when switching SFU we should repeat this info
+     * - http calls failing here breaks the call. (since you won't receive the video)
+     * - we should retry continously until it works and after it continues to fail, raise an error that shuts down the call
+     * - we retry when:
+     * -- error isn't permanent, SFU didn't change, the mute/publish state didn't change
+     * -- we cap at 30 retries to prevent endless loops
+     */
+    private fun updateVideoSubscriptions(useDefaults: Boolean = false) {
         // default is to subscribe to the top 5 sorted participants
         val tracks = if (useDefaults) {
             defaultTracks()
@@ -809,35 +857,35 @@ public class RtcSession internal constructor(
             visibleTracks()
         }
 
-        val request = UpdateSubscriptionsRequest(
-            session_id = sessionId,
-            tracks = tracks
-        )
-        val sessionsIds = tracks.map { it.track_type to it.session_id }
-        dynascaleLogger.i { "[updateParticipantsSubscriptions] $useDefaults #sfu; $sessionId subscribing to : $sessionsIds" }
+        val new = tracks.toList()
+        subscriptions.value = new
+        val currentSfu = sfuUrl
 
-        // can be empty if you're alone in a call
-        if (tracks.isNotEmpty()) {
-            // skip if nothing changed
-            if (lastTracks == tracks) {
-                dynascaleLogger.i { "[updateParticipantsSubscriptions] #sfu; tracks are the same, not updating" }
-                return
-            }
-            coroutineScope.launch {
-                when (val result = updateSubscriptions(request)) {
-                    is Success -> {
-                        dynascaleLogger.v { "[updateParticipantsSubscriptions] #sfu; succeed" }
-                        lastTracks = tracks
-                    }
-
-                    is Failure -> {
-                        // since this breaks seeing the video from the other person, force a reconnect
-                        dynascaleLogger.e { "[updateParticipantsSubscriptions] #sfu; failed: $result" }
-                        call.monitor.reconnect()
-                    }
-                }
-            }
+        subscriptionSyncJob?.cancel()
+        // start a new job
+        // this code is a bit more complicated due to the retry behaviour
+        subscriptionSyncJob = coroutineScope.launch {
+            flow {
+                val request = UpdateSubscriptionsRequest(
+                    session_id = sessionId,
+                    tracks = subscriptions.value
+                )
+                val sessionsIds = tracks.map { it.track_type to it.session_id }
+                dynascaleLogger.i { "[updateParticipantsSubscriptions] $useDefaults #sfu; $sessionId subscribing to : $sessionsIds" }
+                val result = updateSubscriptions(request)
+                emit(result.getOrThrow())
+            }.flowOn(coroutineScope.coroutineContext).retryWhen { cause, attempt ->
+                val sameValue = new == subscriptions.value
+                val sameSfu = currentSfu == sfuUrl
+                val isPermanent = isPermanentError(cause)
+                val willRetry = !isPermanent && sameValue && sameSfu && attempt < 30
+                val delayInMs = if (attempt <= 1) 100L else if (attempt <= 3) 300L else 2500L
+                logger.w { "updating subscriptions failed with error $cause, retry attempt: $attempt. will retry $willRetry in $delayInMs ms" }
+                delay(delayInMs)
+                willRetry
+            }.collect()
         }
+
     }
 
     fun handleEvent(event: VideoEvent) {
