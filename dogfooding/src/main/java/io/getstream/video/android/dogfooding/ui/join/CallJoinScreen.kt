@@ -60,6 +60,7 @@ import io.getstream.video.android.datastore.delegate.StreamUserDataStore
 import io.getstream.video.android.dogfooding.R
 import io.getstream.video.android.dogfooding.ui.theme.Colors
 import io.getstream.video.android.dogfooding.ui.theme.StreamButton
+import io.getstream.video.android.mock.StreamMockUtils
 
 @Composable
 fun CallJoinScreen(
@@ -147,6 +148,7 @@ private fun CallJoinBody(
             UserAvatar(
                 modifier = Modifier.size(100.dp),
                 user = user!!,
+                previewPlaceholder = io.getstream.video.android.ui.common.R.drawable.stream_video_call_sample
             )
 
             Spacer(modifier = Modifier.height(25.dp))
@@ -256,11 +258,10 @@ private fun HandleCallJoinUiState(
 @Preview
 @Composable
 private fun CallJoinScreenPreview() {
+    StreamMockUtils.initializeStreamVideo(LocalContext.current)
     VideoTheme {
-        val context = LocalContext.current
-        val dataStore = StreamUserDataStore.install(context)
         CallJoinScreen(
-            callJoinViewModel = CallJoinViewModel(dataStore),
+            callJoinViewModel = CallJoinViewModel(StreamUserDataStore.instance()),
             navigateToCallLobby = {},
             navigateUpToLogin = {}
         )
