@@ -17,16 +17,16 @@
 ### 0.1 milestone
 
 - [ ] Audio volume was too low (probably a bug related to speakerphone vs earpiece)
-- [ ] Video disconnects sometimes. (BufferQueue has not connected producer and Stop capture: Nulling session)
-- [ ] Bluetooth gives a permissions error on AndroidDeviceTest. We shouldn't require BLUETOOTH_CONNECT by default
-- [ ] Tests should run on CI (and we need to speed it up a bit)
-- [ ] Review updatePublishQuality
-- [ ] Testing session with team cross platform
+- [ ] Video disconnects sometimes. (BufferQueue has not connected producer and Stop capture: Nulling session. Could be related to the peer connection breaking)
+- [ ] Tests should run on CI (and we need to speed it up a bit) (Jaewoong)
+- [ ] Review updatePublishQuality. Verify layer enable/disable works (Jaewoong)
+- [ ] Testing session with team cross platform (Thierry)
 - [ ] Publish 0.1 on Maven
 - [~] Video calling tutorial & Feedback cycle with team
 - [~] Audio room tutorial & Feedback cycle with team
 - [~] Reconnect flow can't reconnect the subscriber (SFU doesn't support restarts on the subscriber peer connection yet)
 - [~] Graceful SFU shutdown (switch between SFUs)
+- [X] Bluetooth gives a permissions error on AndroidDeviceTest. We shouldn't require BLUETOOTH_CONNECT by default
 - [X] Retry: Default coordinator/sfu retry policy needs work
 - [X] Retry: onNegotiationNeeded
 - [X] updateParticipantSubscriptions is called twice with the same resolution. Default resolution is wrong
