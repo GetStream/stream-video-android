@@ -61,6 +61,8 @@ Video roadmap and changelog is available [here](https://github.com/GetStream/pro
 
 ### 0.2 milestone
 
+- [ ] bug: screensharing is broken. android doesn’t receive/render (not sure) the screenshare. video shows up as the gray avatar (Thierry)
+- [ ] bug: screenshare is not removed after it stops when a participant leaves the call (Thierry) (probably just dont update the state when the participant leaves)
 - [ ] Livestream tutorial
 - [ ] Deeplink support for video call demo & dogfooding app (skip auth for the video demo, keep it for dogfooding)
 - [ ] Chat Integration
