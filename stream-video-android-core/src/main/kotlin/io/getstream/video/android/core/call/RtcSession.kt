@@ -596,7 +596,7 @@ public class RtcSession internal constructor(
         sfuConnectionModule.sfuSocket.cleanup()
     }
 
-    internal val muteState = MutableStateFlow(mapOf(TrackType.TRACK_TYPE_AUDIO to false, TrackType.TRACK_TYPE_VIDEO to false, TrackType.TRACK_TYPE_SCREEN_SHARE to false, ))
+    internal val muteState = MutableStateFlow(mapOf(TrackType.TRACK_TYPE_AUDIO to false, TrackType.TRACK_TYPE_VIDEO to false, TrackType.TRACK_TYPE_SCREEN_SHARE to false,))
 
     /**
      * Informs the SFU that you're publishing a given track (publishing vs muted)
@@ -625,7 +625,7 @@ public class RtcSession internal constructor(
                 val request = UpdateMuteStatesRequest(
                     session_id = sessionId,
                     mute_states = copy.map {
-                        TrackMuteState(track_type=it.key, muted=!it.value)
+                        TrackMuteState(track_type = it.key, muted = !it.value)
                     }
                 )
                 val result = updateMuteState(request)
@@ -641,7 +641,6 @@ public class RtcSession internal constructor(
                 willRetry
             }.collect()
         }
-
     }
 
     private fun isPermanentError(cause: Throwable): Boolean {
@@ -892,8 +891,6 @@ public class RtcSession internal constructor(
                 }.collect()
             }
         }
-
-
     }
 
     fun handleEvent(event: VideoEvent) {
