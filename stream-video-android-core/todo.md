@@ -21,6 +21,8 @@
 - [ ] Tests should run on CI (and we need to speed it up a bit) (Jaewoong)
 - [ ] Review updatePublishQuality. Verify layer enable/disable works (Jaewoong)
 - [ ] Testing session with team cross platform (Thierry)
+- [ ] bug: screensharing is broken. android doesn’t receive/render (not sure) the screenshare. video shows up as the gray avatar (Thierry)
+- [ ] bug: screenshare is not removed after it stops when a participant leaves the call (Thierry) (probably just dont update the state when the participant leaves)
 - [ ] Publish 0.1 on Maven
 - [~] Video calling tutorial & Feedback cycle with team
 - [~] Audio room tutorial & Feedback cycle with team
