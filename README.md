@@ -75,7 +75,7 @@ Video roadmap and changelog is available [here](https://github.com/GetStream/pro
 - [ ] Test coverage
 - [ ] Testing on more devices
 - [ ] Speaking while muted stateflow
-- [ ] Audio & Video filters
+- [ ] Cleanup the retry behaviour in the RtcSession (see the TODO)
 - [ ] Android SDK development.md cleanup
 - [X] SDK development guide for all teams
 
@@ -85,4 +85,5 @@ Video roadmap and changelog is available [here](https://github.com/GetStream/pro
 - [ ] Screensharing from mobile
 - [ ] Tap to focus
 - [ ] Camera controls
+- [ ] Audio & Video filters
 - [ ] Picture of the video stream at highest resolution
