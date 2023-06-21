@@ -1028,7 +1028,6 @@ public class RtcSession internal constructor(
                 val sendAnswerResult = sendAnswer(sendAnswerRequest)
                 logger.v { "[handleSubscriberOffer] #sfu; #subscriber; sendAnswerResult: $sendAnswerResult" }
                 emit(sendAnswerResult.getOrThrow())
-
             }.flowOn(DispatcherProvider.IO).retryWhen { cause, attempt ->
                 val sameValue = answerSdp == subscriberSdpAnswer.value
                 val sameSfu = currentSfu == sfuUrl
@@ -1043,7 +1042,6 @@ public class RtcSession internal constructor(
                 coroutineScope.launch { call.monitor.reconnect() }
             }.collect()
         }
-
     }
 
     internal val publisherSdpOffer = MutableStateFlow<SessionDescription?>(null)
