@@ -69,6 +69,7 @@ import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOn
+import kotlinx.coroutines.flow.retry
 import kotlinx.coroutines.flow.retryWhen
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -157,6 +158,7 @@ public class RtcSession internal constructor(
     internal var remoteIceServers: List<IceServer>,
 ) {
 
+    private var syncSubscriberAnswer: Job? = null
     private var syncPublisherJob: Job? = null
     private var subscriptionSyncJob: Job? = null
     private var muteStateSyncJob: Job? = null
@@ -940,15 +942,18 @@ public class RtcSession internal constructor(
      */
     private fun sendIceCandidate(candidate: IceCandidate, peerType: StreamPeerType) {
         coroutineScope.launch {
-            logger.d { "[sendIceCandidate] #sfu; #${peerType.stringify()}; candidate: $candidate" }
-            val iceTrickle = ICETrickle(
-                peer_type = peerType.toPeerType(),
-                ice_candidate = Json.encodeToString(candidate),
-                session_id = sessionId
-            )
-            logger.v { "[sendIceCandidate] #sfu; #${peerType.stringify()}; iceTrickle: $iceTrickle" }
-            val result = sendIceCandidate(iceTrickle)
-            logger.v { "[sendIceCandidate] #sfu; #${peerType.stringify()}; completed: $result" }
+            flow {
+                logger.d { "[sendIceCandidate] #sfu; #${peerType.stringify()}; candidate: $candidate" }
+                val iceTrickle = ICETrickle(
+                    peer_type = peerType.toPeerType(),
+                    ice_candidate = Json.encodeToString(candidate),
+                    session_id = sessionId
+                )
+                logger.v { "[sendIceCandidate] #sfu; #${peerType.stringify()}; iceTrickle: $iceTrickle" }
+                val result = sendIceCandidate(iceTrickle)
+                logger.v { "[sendIceCandidate] #sfu; #${peerType.stringify()}; completed: $result" }
+                emit(result.getOrThrow())
+            }.retry(3).catch { logger.w { "sending ice candidate failed" } }.collect()
         }
     }
 
@@ -967,6 +972,8 @@ public class RtcSession internal constructor(
         logger.v { "[handleTrickle] #sfu; #${event.peerType.stringify()}; result: $result" }
     }
 
+    internal val subscriberSdpAnswer = MutableStateFlow<SessionDescription?>(null)
+
     @VisibleForTesting
     /**
      * This is called when the SFU sends us an offer
@@ -979,29 +986,64 @@ public class RtcSession internal constructor(
         logger.d { "[handleSubscriberOffer] #sfu; #subscriber; event: $offerEvent" }
         val subscriber = subscriber ?: return
 
+        // step 1 - receive the offer and set it to the remote
         val offerDescription = SessionDescription(
             SessionDescription.Type.OFFER, offerEvent.sdp
         )
         subscriber.setRemoteDescription(offerDescription)
+
+        // step 2 - create the answer
         val answerResult = subscriber.createAnswer()
         if (answerResult !is Success) {
             logger.w { "[handleSubscriberOffer] #sfu; #subscriber; rejected (createAnswer failed): $answerResult" }
             return
         }
         val answerSdp = mangleSdp(answerResult.value)
-
         logger.v { "[handleSubscriberOffer] #sfu; #subscriber; answerSdp: ${answerSdp.description}" }
+
+        // step 3 - set local description
         val setAnswerResult = subscriber.setLocalDescription(answerSdp)
         if (setAnswerResult !is Success) {
             logger.w { "[handleSubscriberOffer] #sfu; #subscriber; rejected (setAnswer failed): $setAnswerResult" }
             return
         }
-        logger.v { "[handleSubscriberOffer] #sfu; #subscriber; setAnswerResult: $setAnswerResult" }
-        val sendAnswerRequest = SendAnswerRequest(
-            PeerType.PEER_TYPE_SUBSCRIBER, answerSdp.description, sessionId
-        )
-        val sendAnswerResult = sendAnswer(sendAnswerRequest)
-        logger.v { "[handleSubscriberOffer] #sfu; #subscriber; sendAnswerResult: $sendAnswerResult" }
+        subscriberSdpAnswer.value = answerSdp
+        // TODO: we could handle SFU changes by having a coroutine job per SFU and just cancel it when it switches
+        // TODO: retry behaviour could be cleaned up into 3 different extension functions for better readability
+        // see: https://www.notion.so/stream-wiki/Video-Development-Guide-fef3ece1c643455889f2c0fdba74a89d
+        val currentSfu = sfuUrl
+
+        // prevent running multiple of these at the same time
+        // if there's already a job active. cancel it
+        syncSubscriberAnswer?.cancel()
+        // start a new job
+        // this code is a bit more complicated due to the retry behaviour
+        syncSubscriberAnswer = coroutineScope.launch {
+            flow {
+                // step 4 - send the answer
+                logger.v { "[handleSubscriberOffer] #sfu; #subscriber; setAnswerResult: $setAnswerResult" }
+                val sendAnswerRequest = SendAnswerRequest(
+                    PeerType.PEER_TYPE_SUBSCRIBER, answerSdp.description, sessionId
+                )
+                val sendAnswerResult = sendAnswer(sendAnswerRequest)
+                logger.v { "[handleSubscriberOffer] #sfu; #subscriber; sendAnswerResult: $sendAnswerResult" }
+                emit(sendAnswerResult.getOrThrow())
+
+            }.flowOn(DispatcherProvider.IO).retryWhen { cause, attempt ->
+                val sameValue = answerSdp == subscriberSdpAnswer.value
+                val sameSfu = currentSfu == sfuUrl
+                val isPermanent = isPermanentError(cause)
+                val willRetry = !isPermanent && sameValue && sameSfu && attempt <= 3
+                val delayInMs = if (attempt <= 1) 10L else if (attempt <= 2) 30L else 100L
+                logger.w { "sendAnswer failed $cause, retry attempt: $attempt. will retry $willRetry in $delayInMs ms" }
+                delay(delayInMs)
+                willRetry
+            }.catch {
+                logger.e { "setPublisher failed after 3 retries, asking the call monitor to do an ice restart" }
+                coroutineScope.launch { call.monitor.reconnect() }
+            }.collect()
+        }
+
     }
 
     internal val publisherSdpOffer = MutableStateFlow<SessionDescription?>(null)
