@@ -125,17 +125,8 @@ public fun CallContent(
     pictureInPictureContent: @Composable (Call) -> Unit = { DefaultPictureInPictureContent(it) }
 ) {
     val isInPiPMode by callViewModel.isInPictureInPicture.collectAsStateWithLifecycle()
-    val isShowingCallInfo by callViewModel.isShowingCallInfoMenu.collectAsStateWithLifecycle()
 
-    val backAction = {
-        if (isShowingCallInfo) {
-            callViewModel.dismissCallInfoMenu()
-        } else {
-            onBackPressed()
-        }
-    }
-
-    BackHandler { backAction() }
+    BackHandler { onBackPressed.invoke() }
 
     CallContent(
         modifier = modifier,

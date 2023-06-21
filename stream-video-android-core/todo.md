@@ -16,18 +16,22 @@
 
 ### 0.1 milestone
 
-- [ ] updateParticipantSubscriptions is called twice with the same resolution. Default resolution is wrong
 - [ ] Audio volume was too low (probably a bug related to speakerphone vs earpiece)
-- [ ] Video disconnects sometimes. (BufferQueue has not connected producer and Stop capture: Nulling session)
-- [ ] Bluetooth gives a permissions error on AndroidDeviceTest. We shouldn't require BLUETOOTH_CONNECT by default
-- [ ] Tests should run on CI (and we need to speed it up a bit)
-- [ ] Review updatePublishQuality
-- [ ] Testing session with team cross platform
+- [ ] Video disconnects sometimes. (BufferQueue has not connected producer and Stop capture: Nulling session. Could be related to the peer connection breaking)
+- [ ] Tests should run on CI (and we need to speed it up a bit) (Jaewoong)
+- [ ] Review updatePublishQuality. Verify layer enable/disable works (Jaewoong)
+- [ ] Testing session with team cross platform (Thierry)
+- [ ] bug: screensharing is broken. android doesn’t receive/render (not sure) the screenshare. video shows up as the gray avatar (Thierry)
+- [ ] bug: screenshare is not removed after it stops when a participant leaves the call (Thierry) (probably just dont update the state when the participant leaves)
 - [ ] Publish 0.1 on Maven
 - [~] Video calling tutorial & Feedback cycle with team
 - [~] Audio room tutorial & Feedback cycle with team
 - [~] Reconnect flow can't reconnect the subscriber (SFU doesn't support restarts on the subscriber peer connection yet)
 - [~] Graceful SFU shutdown (switch between SFUs)
+- [X] Bluetooth gives a permissions error on AndroidDeviceTest. We shouldn't require BLUETOOTH_CONNECT by default
+- [X] Retry: Default coordinator/sfu retry policy needs work
+- [X] Retry: onNegotiationNeeded
+- [X] updateParticipantSubscriptions is called twice with the same resolution. Default resolution is wrong
 - [X] Handle retry error conditions in RtcSession
 - [X] Cleanup the readme and add a nice graphic. Make the repo public after that
 - [X] Crash on interceptor (broken stack trace, check logs)

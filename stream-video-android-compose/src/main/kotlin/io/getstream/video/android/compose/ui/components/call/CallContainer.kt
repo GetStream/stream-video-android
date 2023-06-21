@@ -16,25 +16,19 @@
 
 package io.getstream.video.android.compose.ui.components.call
 
-import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.getstream.video.android.common.viewmodel.CallViewModel
 import io.getstream.video.android.compose.permission.VideoPermissionsState
 import io.getstream.video.android.compose.permission.rememberCallPermissionsState
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.call.activecall.CallContent
 import io.getstream.video.android.compose.ui.components.call.activecall.DefaultPictureInPictureContent
-import io.getstream.video.android.compose.ui.components.call.activecall.internal.InviteUsersDialog
 import io.getstream.video.android.compose.ui.components.call.controls.ControlActions
 import io.getstream.video.android.compose.ui.components.call.controls.actions.DefaultOnCallActionHandler
 import io.getstream.video.android.compose.ui.components.call.renderer.ParticipantVideo
@@ -42,15 +36,11 @@ import io.getstream.video.android.compose.ui.components.call.renderer.RegularVid
 import io.getstream.video.android.compose.ui.components.call.renderer.VideoRendererStyle
 import io.getstream.video.android.compose.ui.components.call.ringing.incomingcall.IncomingCallContent
 import io.getstream.video.android.compose.ui.components.call.ringing.outgoingcall.OutgoingCallContent
-import io.getstream.video.android.compose.ui.components.participants.CallParticipantsInfoMenu
 import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.ParticipantState
 import io.getstream.video.android.core.call.state.CallAction
-import io.getstream.video.android.core.call.state.InviteUsersToCall
-import io.getstream.video.android.core.call.state.ToggleMicrophone
 import io.getstream.video.android.mock.StreamMockUtils
 import io.getstream.video.android.mock.mockCall
-import io.getstream.video.android.model.User
 
 /**
  * Represents different call content based on the call state provided from the [callViewModel].
@@ -263,41 +253,6 @@ internal fun DefaultCallContent(
         pictureInPictureContent = pictureInPictureContent,
         videoRenderer = participantVideo,
     )
-
-    val isShowingParticipantsInfo by callViewModel.isShowingCallInfoMenu.collectAsStateWithLifecycle()
-    var usersToInvite by remember { mutableStateOf(emptyList<User>()) }
-
-    if (isShowingParticipantsInfo) {
-        CallParticipantsInfoMenu(
-            call = call,
-            modifier = Modifier
-                .fillMaxSize()
-                .background(VideoTheme.colors.appBackground),
-            onDismiss = { callViewModel.dismissCallInfoMenu() },
-        ) { action ->
-            when (action) {
-                is InviteUsersToCall -> {
-                    usersToInvite = action.users
-                    callViewModel.dismissCallInfoMenu()
-                }
-
-                is ToggleMicrophone -> onCallAction(action)
-
-                else -> Unit
-            }
-        }
-    }
-
-    if (usersToInvite.isNotEmpty()) {
-        InviteUsersDialog(
-            users = usersToInvite,
-            onDismiss = { usersToInvite = emptyList() },
-            onInviteUsers = { users ->
-                usersToInvite = emptyList()
-                callViewModel.onInviteUsers(users)
-            }
-        )
-    }
 }
 
 @Preview

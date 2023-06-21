@@ -30,5 +30,5 @@
     <string name="start_call">Start Call</string>
     <string name="call_id_number">Call ID Number</string>
     <string name="stream_video">Stream Video</string>
-    <string name="call_lobby_description">Dogfood never tasted this good</string>
+    <string name="call_lobby_description">Try out a video call in this demo powered by Stream\'s video SDK</string>
 </resources>
