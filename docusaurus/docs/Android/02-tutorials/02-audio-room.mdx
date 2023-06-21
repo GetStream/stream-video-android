@@ -90,8 +90,8 @@ class MainActivity : ComponentActivity() {
         lifecycleScope.launch {
             val result = call.join(create = true, createOptions = CreateCallOptions(
                 members = listOf(
-                    MemberRequest(userId = "tommaso", role="moderator", custom = emptyMap()),
-                    MemberRequest(userId = "thierry", role="moderator", custom = emptyMap())
+                    MemberRequest(userId = "jack", role="moderator", custom = emptyMap()),
+                    MemberRequest(userId = "sophia", role="moderator", custom = emptyMap())
                 ), custom = mapOf(
                     "title" to "Compose Trends",
                     "description" to "Talk about how easy compose makes it to reuse and combine UI"
@@ -195,7 +195,7 @@ Now when you run the sample app it will connect successfully and you will see a 
 
 
 This example shows how to create and join a call with one API call.
-It creates a call of type `audio_room`, id `callId` and makes the user ids "tommaso" and "thierry" moderators of the call.
+It creates a call of type `audio_room`, id `callId` and makes the user ids "jack" and "sophia" moderators of the call.
 In addition to that it also stores the title and description of the room in the custom data of the call object.
 
 By default calls of type `audio_room` start with backstage mode enabled.
