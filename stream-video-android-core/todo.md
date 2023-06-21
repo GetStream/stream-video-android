@@ -12,21 +12,24 @@
 *  Break
 *  Week 8: Docs & Stability, Ringing
 *  Week 9: Tutorials & Stability, Ringing & Push
-*  Week 10: Prep 0.1 release
+*  Week 10 & 11: Prep 0.1 release
 
 ### 0.1 milestone
 
-- [ ] Cleanup the readme and add a nice graphic. Make the repo public after that
+- [ ] updateParticipantSubscriptions is called twice with the same resolution. Default resolution is wrong
+- [ ] Audio volume was too low (probably a bug related to speakerphone vs earpiece)
 - [ ] Video disconnects sometimes. (BufferQueue has not connected producer and Stop capture: Nulling session)
 - [ ] Bluetooth gives a permissions error on AndroidDeviceTest. We shouldn't require BLUETOOTH_CONNECT by default
-- [ ] Bluetooth issue (turning off or on bluetooth device doesn't switch from headset to speaker phone. also broken in whatsapp)
 - [ ] Tests should run on CI (and we need to speed it up a bit)
-- [ ] Video calling tutorial & Feedback cycle with team
-- [ ] Audio room tutorial & Feedback cycle with team
-- [ ] Reconnect flow can't reconnect the subscriber (SFU doesn't support restarts on the subscriber peer connection yet)
-- [ ] Graceful SFU shutdown (switch between SFUs)
+- [ ] Review updatePublishQuality
 - [ ] Testing session with team cross platform
 - [ ] Publish 0.1 on Maven
+- [~] Video calling tutorial & Feedback cycle with team
+- [~] Audio room tutorial & Feedback cycle with team
+- [~] Reconnect flow can't reconnect the subscriber (SFU doesn't support restarts on the subscriber peer connection yet)
+- [~] Graceful SFU shutdown (switch between SFUs)
+- [X] Handle retry error conditions in RtcSession
+- [X] Cleanup the readme and add a nice graphic. Make the repo public after that
 - [X] Crash on interceptor (broken stack trace, check logs)
 - [X] Ring support & Docs (Jc)
 - [X] React component to load API key, user and token for video demo flow in the tutorials
@@ -57,15 +60,15 @@
 ### TODO ~1 week
 
 
-- [ ] Error handling could be improved
 - [ ] Share example with backend team for resolution degradation
-- [ ] HTTP requests fail in interceptor, which is wrong. (see https://console.firebase.google.com/project/stream-video-9b586/crashlytics/app/android:io.getstream.video.android.dogfooding.debug/issues?state=open&time=last-seven-days&tag=all&sort=eventCount)
 - [ ] Go through all tests & TODOs and update with latest server changes.
-- [ ] Audio settings should make speakerphone vs earpiece as a default configurable
 - [ ] Fine tune the quality on S23 (so it's not at Q). Upload quality, make it easy to change
 - [ ] Add a timeout for waiting on the socket authentication events
 - [ ] Improve our error classes. Right now there are 4 different formats. 
 - [ ] XML version of VideoRenderer
+- [ ] Bluetooth issue (turning off or on bluetooth device doesn't switch from headset to speaker phone. also broken in whatsapp)
+- [X] Error handling could be improved
+- [X] HTTP requests fail in interceptor, which is wrong. (see https://console.firebase.google.com/project/stream-video-9b586/crashlytics/app/android:io.getstream.video.android.dogfooding.debug/issues?state=open&time=last-seven-days&tag=all&sort=eventCount)
 - [X] Speaker phone selection isn't right, should use the preferences of all 4, or only switch when its an earpiece, not switch from bluetooth
 - [X] use standard debug, verbose, info, warning and error debug levels on StreamVideoBuilder
 - [X] Android volume is too low when calling from react
@@ -97,8 +100,7 @@
 
 #### Regular calls
 
-- [ ] ICE restarts & join flow polish
-- [ ] What about graceful SFU shutdown/ an event to make clients move SFU?
+- [X] ICE restarts & join flow polish
 - [X] Ringing call support
 - [ ] getCall doesn't support member limits
 - [ ] Events for creating a channel on chat. so you lazy load the chat when the first person opens it
@@ -107,7 +109,7 @@
 
 - [X] Telemetry to firebase/crashlytics (with an opt out, or research alternatives)
 - [ ] Call Preview components (CallLobbyContent + CallLobbyViewModel)
-- [ ] Reactions don't show up
+- [X] Reactions don't show up
 - [ ] Chat integration (we need an event from the server though)
 - [ ] PIP
 - [ ] When state._connection.value = RtcConnectionState.Reconnecting we should show a little transparent. “Reconnecting” UI element
@@ -275,15 +277,4 @@
 - [X] Opus DTX
 - [X] Muting other users/ Moderation
 - [X] Token provider
-
-### Out of scope for initial release
-
-- [ ] Screensharing (from mobile, display should work)
-- [ ] Talking while muted notification
-- [ ] If you answer a phone call while you're on this call, your audio and video should be muted automatically.]
-- [ ] State for: Speaking while muted, Network issue (your own connection)
-- [ ] Audio filter example
-- [ ] Video filter example
-- [ ] Build vars to generate tokens for testing
-- [ ] What about codec switching?
-- [ ] Events for updating users
+=

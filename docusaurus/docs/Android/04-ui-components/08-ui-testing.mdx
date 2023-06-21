@@ -3,4 +3,104 @@ title: UI Testing
 description: How to test Stream Video SDK's UI components with Paparazzi.
 ---
 
-TODO: document the UI testing
+Writing UI tests is important to verify your UI layouts are going well. For example, you can take snapshots and compared them to your previous screens and keep tracking the differences.
+
+In these docs, you'll learn how to write snapshot testing with [Paparazzi](https://cashapp.github.io/paparazzi/) and Stream Video's mock library.
+
+## Set Up
+
+First, you should import our library called `stream-video-android-mock` that allows you to get some mock instances of them and write your preview or test codes for Stream Video UI components easily.
+
+[![Maven Central](https://img.shields.io/maven-central/v/io.getstream/stream-video-android-mock.svg?label=Maven%20Central)](https://search.maven.org/search?q=stream-video-android)
+
+Next, add the dependency below below to your module's `build.gradle` file:
+
+```groovy
+dependencies {
+    implementation "io.getstream:stream-video-android-mock:$stream_version"
+}
+```
+
+Now, let's see how to write simple snapshot tests about Stream Video UI components.
+
+```kotlin
+class ScreenTests {
+
+    @get:Rule
+    val paparazzi = Paparazzi(deviceConfig = DeviceConfig.PIXEL_4A)
+
+    fun snapshot(
+        name: String? = null,
+        isInDarkMode: Boolean = false,
+        composable: @Composable () -> Unit
+    ) {
+        paparazzi.snapshot(name = name) {
+            StreamMockUtils.initializeStreamVideo(LocalContext.current)
+            CompositionLocalProvider(
+                LocalInspectionMode provides true,
+                LocalAvatarPreviewPlaceholder provides
+                        io.getstream.video.android.ui.common.R.drawable.stream_video_call_sample
+            ) {
+                VideoTheme(isInDarkMode) { composable.invoke() }
+            }
+        }
+    }
+
+    @Test
+    fun `snapshot CallContent component`() {
+        snapshot(name = "CallContent") {
+            CallContent(call = mockCall)
+        }
+    }
+
+    @Test
+    fun `snapshot CallLobby component`() {
+        snapshot(name = "CallLobby") {
+            CallLobby(
+                modifier = Modifier.fillMaxWidth(),
+                call = mockCall
+            )
+        }
+    }
+}
+```
+
+Let's break the code down one by one.
+
+First, you should initialize Stream Video SDK with the `initializeStreamVideo()` method. You can learn more about our mock library on [UI Previews](07-ui-previews.mdx).
+
+```kotlin
+StreamMockUtils.initializeStreamVideo(LocalContext.current)
+```
+
+Next, you should enable `LocalInspectionMode` with the `CompositionLocalProvider` and allow Stream UI components to be rendered for the test environment.
+
+```kotlin
+CompositionLocalProvider(
+    LocalInspectionMode provides true,
+    LocalAvatarPreviewPlaceholder provides
+            io.getstream.video.android.ui.common.R.drawable.stream_video_call_sample
+) {
+  ..
+```
+
+Finally, snapshot Stream Video components or your own Composable functions that contains Stream Video components like the example below:
+
+```kotlin
+@Test
+fun `snapshot CallContent component`() {
+    snapshot(name = "CallContent") {
+        CallContent(call = mockCall)
+    }
+}
+```
+
+After running the command below, you'll see generated snapshots:
+
+```bash
+./gradlew recordPaparazziDebug
+```
+
+The snapshot images will be like so:
+
+![Snapshot Images](../assets/portrait-video-five.png)

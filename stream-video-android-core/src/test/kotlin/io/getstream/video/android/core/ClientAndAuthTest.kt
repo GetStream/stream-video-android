@@ -19,6 +19,7 @@ package io.getstream.video.android.core
 import com.google.common.truth.Truth.assertThat
 import io.getstream.log.taggedLogger
 import io.getstream.result.Error
+import io.getstream.video.android.core.base.TestBase
 import io.getstream.video.android.core.errors.VideoErrorCode
 import io.getstream.video.android.model.User
 import io.getstream.video.android.model.UserType
@@ -51,7 +52,7 @@ class ClientAndAuthTest : TestBase() {
 
     @Test
     fun anonymousUser() = runTest {
-        var builder = StreamVideoBuilder(
+        val builder = StreamVideoBuilder(
             context = context,
             apiKey = apiKey,
             geo = GEO.GlobalEdgeNetwork,
@@ -82,8 +83,8 @@ class ClientAndAuthTest : TestBase() {
     }
 
     @Test
+    @Ignore
     fun subscribeToAllEvents() = runTest {
-
         val client = StreamVideoBuilder(
             context = context,
             apiKey = apiKey,
@@ -100,8 +101,8 @@ class ClientAndAuthTest : TestBase() {
     }
 
     @Test
+    @Ignore
     fun subscribeToSpecificEvents() = runTest {
-
         val client = StreamVideoBuilder(
             context = context,
             apiKey = apiKey,

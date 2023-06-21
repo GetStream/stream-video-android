@@ -17,8 +17,8 @@
 package io.getstream.video.android.core.stories
 
 import com.google.common.truth.Truth.assertThat
-import io.getstream.video.android.core.IntegrationTestBase
-import io.getstream.video.android.core.toResponse
+import io.getstream.video.android.core.base.IntegrationTestBase
+import io.getstream.video.android.core.base.toResponse
 import io.getstream.video.android.core.utils.toResponse
 import kotlinx.coroutines.test.runTest
 import org.junit.Test

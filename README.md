@@ -74,6 +74,7 @@ Video roadmap and changelog is available [here](https://github.com/GetStream/pro
 - [ ] Dynascale 2.0 (codecs, f resolution switches, resolution webrtc handling)
 - [ ] Test coverage
 - [ ] Testing on more devices
+- [ ] Speaking while muted stateflow
 - [ ] Audio & Video filters
 - [ ] Android SDK development.md cleanup
 - [X] SDK development guide for all teams

@@ -11,7 +11,7 @@ So we provide a useful library called `stream-video-android-mock` that allows yo
 
 You'll be able to build your own preview Composable functions like so:
 
-| Dogfooding (Call Join)                                        | Dogfooding (Call Lobby)                                     | Dogfooding (Call)                                        |
+| Dogfooding (Call Join)                                       | Dogfooding (Call Lobby)                                     | Dogfooding (Call)                                        |
 | ------------------------------------------------------------ | ------------------------------------------------------------ | ------------------------------------------------------------ |
 | ![Dogfooding](../assets/preview-dogfooding-01.png) | ![Dogfooding](../assets/preview-dogfooding-02.png) | ![Dogfooding](../assets/preview-dogfooding-03.png) |
 
@@ -66,12 +66,16 @@ This library provide mocked instances below:
 For example, you can build a preview Composable about `ParticipantVideo` like the example below:
 
 ```kotlin
-StreamMockUtils.initializeStreamVideo(LocalContext.current)
-VideoTheme {
-    ParticipantVideo(
-        call = mockCall,
-        participant = mockParticipant,
-    ) {}
+@Preview
+@Composable
+private fun ParticipantVideoPreview() {
+    StreamMockUtils.initializeStreamVideo(LocalContext.current)
+    VideoTheme {
+        ParticipantVideoRenderer(
+            call = mockCall,
+            participant = mockParticipant,
+        )
+    }
 }
 ```
 

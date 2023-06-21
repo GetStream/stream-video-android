@@ -16,8 +16,6 @@
 
 package io.getstream.video.android.core
 
-import android.Manifest
-import androidx.test.rule.GrantPermissionRule
 import com.google.common.truth.Truth.assertThat
 import io.getstream.log.taggedLogger
 import io.getstream.video.android.core.api.SignalServerService
@@ -32,7 +30,6 @@ import okhttp3.Interceptor
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.Response
-import org.junit.Rule
 import org.junit.Test
 import org.webrtc.DefaultVideoDecoderFactory
 import org.webrtc.DefaultVideoEncoderFactory
@@ -70,13 +67,7 @@ class AndroidDeviceTest : IntegrationTestBase(connectCoordinatorWS = false) {
 
     private val logger by taggedLogger("Test:AndroidDeviceTest")
 
-    @get:Rule
-    var mRuntimePermissionRule = GrantPermissionRule
-        .grant(
-            Manifest.permission.BLUETOOTH_CONNECT,
-        )
-
-    internal class InterceptorTest() : Interceptor {
+    internal class InterceptorTest : Interceptor {
 
         @Throws(IOException::class)
         override fun intercept(chain: Interceptor.Chain): Response {
@@ -90,7 +81,7 @@ class AndroidDeviceTest : IntegrationTestBase(connectCoordinatorWS = false) {
         }
     }
 
-    internal class InterceptorBreaks() : Interceptor {
+    internal class InterceptorBreaks : Interceptor {
 
         @Throws(IOException::class)
         override fun intercept(chain: Interceptor.Chain): Response {
@@ -368,7 +359,10 @@ class AndroidDeviceTest : IntegrationTestBase(connectCoordinatorWS = false) {
         delay(500)
 
         // fake a participant joining
-        val joinEvent = ParticipantJoinedEvent(callCid = call.cid, participant = Participant(session_id = "fake", user_id = "fake"))
+        val joinEvent = ParticipantJoinedEvent(
+            callCid = call.cid,
+            participant = Participant(session_id = "fake", user_id = "fake")
+        )
         clientImpl.fireEvent(joinEvent, call.cid)
         assertThat(call.state.participants.value.size).isEqualTo(2)
         assertThat(call.state.remoteParticipants.value.size).isEqualTo(1)
@@ -398,7 +392,14 @@ class AndroidDeviceTest : IntegrationTestBase(connectCoordinatorWS = false) {
             VideoLayerSetting(name = "h", active = true),
             VideoLayerSetting(name = "q", active = false)
         )
-        val quality = ChangePublishQuality(video_senders = listOf(VideoSender(media_request = mediaRequest, layers = layers)))
+        val quality = ChangePublishQuality(
+            video_senders = listOf(
+                VideoSender(
+                    media_request = mediaRequest,
+                    layers = layers
+                )
+            )
+        )
         val event = ChangePublishQualityEvent(changePublishQuality = quality)
         call.session?.updatePublishQuality(event)
     }
