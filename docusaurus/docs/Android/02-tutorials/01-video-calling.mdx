@@ -382,14 +382,14 @@ override fun onCreate(savedInstanceState: Bundle?) {
                                 ToggleCameraAction(
                                     modifier = Modifier.size(52.dp),
                                     isCameraEnabled = isCameraEnabled,
-                                    onCallAction = { call.camera.setEnabled(callAction.isEnabled) }
+                                    onCallAction = { call.camera.setEnabled(it.isEnabled) }
                                 )
                             },
                             {
                                 ToggleMicrophoneAction(
                                     modifier = Modifier.size(52.dp),
                                     isMicrophoneEnabled = isMicrophoneEnabled,
-                                    onCallAction = { call.microphone.setEnabled(callAction.isEnabled) }
+                                    onCallAction = { call.microphone.setEnabled(it.isEnabled) }
                                 )
                             },
                             {
