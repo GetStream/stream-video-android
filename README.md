@@ -1,6 +1,6 @@
 # Official Android SDK for [Stream Video](https://getstream.io/video/docs/)
 
-// TODO - image for the SDK
+<img src=".readme-assets/Github-Graphic-Android.jpg" alt="Stream Video for Android Header image" style="box-shadow: 0 3px 10px rgb(0 0 0 / 0.2); border-radius: 1rem" />
 
 <p align="center">
   <a href="https://github.com/GetStream/stream-video-android/actions"><img src="https://github.com/GetStream/stream-video-android/workflows/App%20Distribute%20CI/badge.svg" /></a>
