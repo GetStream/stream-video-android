@@ -1,5 +1,5 @@
 ---
-title: Video Call Tutorial
+title: How to Build an Android Video Calling App
 description: How to build a video call similar to Zoom or facebook messenger
 ---
 
@@ -10,6 +10,7 @@ This tutorial teaches you how to build Zoom/Whatsapp style video calling for you
 * Calls run on Stream's global edge network for optimal latency & reliability.
 * Permissions give you fine grained control over who can do what.
 * Video quality and codecs are automatically optimized.
+* Powered by Stream's [Video Calling API](https://getstream.io/video/)
 
 ### Step 1 - Create a new project in Android Studio
 
@@ -428,10 +429,10 @@ VideoTheme(
 
 ### Recap
 
-Please do let us know if you ran into any issues.
+Please do let us know if you ran into any issues while building an video calling app with Kotlin.
 Our team is also happy to review your UI designs and offer recommendations on how to achieve it with Stream.
 
-To recap what we've learned:
+To recap what we've learned about android video calling:
 
 * You setup a call: (val call = client.call("default", "123"))
 * The call type ("default" in the above case) controls which features are enabled and how permissions are setup
@@ -439,8 +440,8 @@ To recap what we've learned:
 * Stateflow objects in call.state and call.state.participants make it easy to build your own UI
 * VideoRenderer is the low level component that renders video
 
-Calls run on Stream's global edge network of video servers.
+We've used Stream's [Video Calling API](https://getstream.io/video/), which means calls run on a global edge network of video servers.
 By being closer to your users the latency and reliability of calls are better.
-The SDKs enable you to build in-app video calling, audio rooms and livestreaming in days.
+The kotlin SDK enables you to build in-app video calling, audio rooms and livestreaming in days.
 
 We hope you've enjoyed this tutorial and please do feel free to reach out if you have any suggestions or questions.
