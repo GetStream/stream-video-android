@@ -16,7 +16,8 @@
 
 ### 0.1 milestone
 
-- [ ] updateParticipantSubscriptions is called twice with the same resolution. Default resolution is wrong
+- [ ] Retry: Default coordinator/sfu retry policy needs work
+- [ ] Retry: onNegotiationNeeded
 - [ ] Audio volume was too low (probably a bug related to speakerphone vs earpiece)
 - [ ] Video disconnects sometimes. (BufferQueue has not connected producer and Stop capture: Nulling session)
 - [ ] Bluetooth gives a permissions error on AndroidDeviceTest. We shouldn't require BLUETOOTH_CONNECT by default
@@ -28,6 +29,7 @@
 - [~] Audio room tutorial & Feedback cycle with team
 - [~] Reconnect flow can't reconnect the subscriber (SFU doesn't support restarts on the subscriber peer connection yet)
 - [~] Graceful SFU shutdown (switch between SFUs)
+- [X] updateParticipantSubscriptions is called twice with the same resolution. Default resolution is wrong
 - [X] Handle retry error conditions in RtcSession
 - [X] Cleanup the readme and add a nice graphic. Make the repo public after that
 - [X] Crash on interceptor (broken stack trace, check logs)

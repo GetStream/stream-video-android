@@ -21,7 +21,6 @@ import io.getstream.log.taggedLogger
 import io.getstream.result.Result
 import io.getstream.result.Result.Failure
 import io.getstream.result.Result.Success
-import io.getstream.result.onSuccessSuspend
 import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.CameraDirection
 import io.getstream.video.android.core.DeviceStatus
@@ -63,6 +62,7 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.debounce
@@ -92,6 +92,7 @@ import stream.video.sfu.models.TrackInfo
 import stream.video.sfu.models.TrackType
 import stream.video.sfu.models.VideoDimension
 import stream.video.sfu.models.VideoLayer
+import stream.video.sfu.models.VideoQuality
 import stream.video.sfu.signal.ICETrickleResponse
 import stream.video.sfu.signal.SendAnswerRequest
 import stream.video.sfu.signal.SendAnswerResponse
@@ -156,6 +157,7 @@ public class RtcSession internal constructor(
     internal var remoteIceServers: List<IceServer>,
 ) {
 
+    private var syncPublisherJob: Job? = null
     private var subscriptionSyncJob: Job? = null
     private var muteStateSyncJob: Job? = null
 
@@ -1002,6 +1004,8 @@ public class RtcSession internal constructor(
         logger.v { "[handleSubscriberOffer] #sfu; #subscriber; sendAnswerResult: $sendAnswerResult" }
     }
 
+    internal val publisherSdpOffer = MutableStateFlow<SessionDescription?>(null)
+
     /**
      * https://developer.mozilla.org/en-US/docs/Web/API/RTCPeerConnection/negotiationneeded_event
      *
@@ -1015,6 +1019,11 @@ public class RtcSession internal constructor(
      * - Enables video simulcast
      * - calls setPublisher
      * - sets setRemoteDescription
+     *
+     * Retry behaviour is to retry 3 times quickly as long as
+     * - the sfu didn't change
+     * - the sdp didn't change
+     * If that fails ask the call monitor to do an ice restart
      */
     @VisibleForTesting
     fun onNegotiationNeeded(
@@ -1024,95 +1033,131 @@ public class RtcSession internal constructor(
         val id = Random.nextInt().absoluteValue
         logger.d { "[negotiate] #$id; #sfu; #${peerType.stringify()}; peerConnection: $peerConnection" }
         coroutineScope.launch {
-            peerConnection.createOffer().onSuccessSuspend { originalSDP ->
-                val data = mangleSdp(originalSDP)
-                logger.v { "[negotiate] #$id; #sfu; #${peerType.stringify()}; offerSdp: $data" }
+            // step 1 - create a local offer
+            val offerResult = peerConnection.createOffer()
+            if (offerResult !is Success) {
+                logger.w { "[negotiate] #$id; #sfu; #${peerType.stringify()}; rejected (createOffer failed): $offerResult" }
+                return@launch
+            }
+            val mangledSdp = mangleSdp(offerResult.value)
 
-                val result = peerConnection.setLocalDescription(data)
-                if (result.isFailure) {
-                    // the call health monitor will end up restarting the peer connection and recover from this
-                    logger.w { "[negotiate] #$id; #sfu; #${peerType.stringify()}; setLocalDescription failed: $result" }
-                }
+            // step 2 -  set the local description
+            val result = peerConnection.setLocalDescription(mangledSdp)
+            if (result.isFailure) {
+                // the call health monitor will end up restarting the peer connection and recover from this
+                logger.w { "[negotiate] #$id; #sfu; #${peerType.stringify()}; setLocalDescription failed: $result" }
+                return@launch
+            }
 
-                // the Sfu WS needs to be connected before calling SetPublisherRequest
-                if (joinEventResponse.value == null) {
-                    throw IllegalStateException("SFU WS isn't connected")
-                }
+            // the Sfu WS needs to be connected before calling SetPublisherRequest
+            if (joinEventResponse.value == null) {
+                logger.e { "[negotiate] #$id; #sfu; #${peerType.stringify()}; SFU WS isn't connected" }
+                return@launch
+            }
 
-                val captureResolution = call.camera.resolution.value
+            // step 3 - create the list of tracks
+            val tracks = getPublisherTracks()
+            val currentSfu = sfuUrl
 
-                val transceivers = peerConnection.connection.transceivers.toList()
-                val trackInfos = transceivers.filter {
-                    it.direction == RtpTransceiver.RtpTransceiverDirection.SEND_ONLY && it.sender?.track() != null
-                }.map { transceiver ->
-                    val track = transceiver.sender.track()!!
+            publisherSdpOffer.value = mangledSdp
 
-                    val trackType = when (track.kind()) {
-                        "audio" -> TrackType.TRACK_TYPE_AUDIO
-                        "screen" -> TrackType.TRACK_TYPE_SCREEN_SHARE
-                        "video" -> TrackType.TRACK_TYPE_VIDEO
-                        else -> TrackType.TRACK_TYPE_UNSPECIFIED
-                    }
-
-                    if (trackType == TrackType.TRACK_TYPE_VIDEO && captureResolution == null) {
-                        throw IllegalStateException("video capture needs to be enabled before adding the local track")
-                    }
-
-                    var layers: List<VideoLayer> = if (trackType != TrackType.TRACK_TYPE_VIDEO) {
-                        emptyList()
-                    } else {
-                        // we tell the Sfu which resolutions we're sending
-                        transceiver.sender.parameters.encodings.map {
-                            val scaleDownFactor = mapOf("q" to 4, "h" to 2, "f" to 1)
-                            val scale = scaleDownFactor[it.rid]
-                            val width = captureResolution?.width?.div(scale!!) ?: 0
-                            val height = scale?.let { it1 -> captureResolution?.height?.div(it1) }
-                                ?: 0
-                            VideoLayer(
-                                rid = it.rid ?: "",
-                                video_dimension = VideoDimension(
-                                    width = width,
-                                    height = height,
-                                ),
-                                bitrate = it.maxBitrateBps ?: 0,
-                                fps = captureResolution?.framerate?.max ?: 0
-                            )
-                        }
-                    }
-
-                    TrackInfo(
-                        track_id = track.id(),
-                        track_type = trackType,
-                        layers = layers
+            // prevent running multiple of these at the same time
+            // if there's already a job active. cancel it
+            syncPublisherJob?.cancel()
+            // start a new job
+            // this code is a bit more complicated due to the retry behaviour
+            syncPublisherJob = coroutineScope.launch {
+                flow {
+                    // step 4 - send the tracks and SDP
+                    val request = SetPublisherRequest(
+                        sdp = mangledSdp.description,
+                        session_id = sessionId,
+                        tracks = tracks
                     )
-                }
-
-                val request = SetPublisherRequest(
-                    sdp = data.description,
-                    session_id = sessionId,
-                    tracks = trackInfos
-                )
-                val setPublisherResult = setPublisher(request)
-
-                setPublisherResult.onSuccessSuspend {
-                    if (it.error != null) {
-                        throw IllegalStateException(it.error.toString())
-                    }
-                    logger.v { "[negotiate] #$id; #sfu; #${peerType.stringify()}; answerSdp: $it" }
-
-                    val answerDescription = SessionDescription(
-                        SessionDescription.Type.ANSWER, it.sdp
+                    val result = setPublisher(request)
+                    // step 5 - set the remote description
+                    peerConnection.setRemoteDescription(
+                        SessionDescription(
+                            SessionDescription.Type.ANSWER, result.getOrThrow().sdp
+                        )
                     )
-
-                    // set the remote peer connection, and handle queued ice candidates
-                    peerConnection.setRemoteDescription(answerDescription)
-                }.onError {
-                    // this error results in my video not showing up, we should restart the call
-                    logger.e { "[negotiate] #$id; #sfu; #${peerType.stringify()}; failed: $it" }
+                    emit(result.getOrThrow())
+                }.flowOn(DispatcherProvider.IO).retryWhen { cause, attempt ->
+                    val sameValue = mangledSdp == publisherSdpOffer.value
+                    val sameSfu = currentSfu == sfuUrl
+                    val isPermanent = isPermanentError(cause)
+                    val willRetry = !isPermanent && sameValue && sameSfu && attempt <= 3
+                    val delayInMs = if (attempt <= 1) 10L else if (attempt <= 2) 30L else 100L
+                    logger.w { "onNegotationNeeded setPublisher failed $cause, retry attempt: $attempt. will retry $willRetry in $delayInMs ms" }
+                    delay(delayInMs)
+                    willRetry
+                }.catch {
+                    logger.e { "setPublisher failed after 3 retries, asking the call monitor to do an ice restart" }
                     coroutineScope.launch { call.monitor.reconnect() }
-                }
+                }.collect()
             }
         }
+    }
+
+    private fun getPublisherTracks(): List<TrackInfo> {
+        val captureResolution = call.camera.resolution.value
+
+        val transceivers = publisher?.connection?.transceivers?.toList() ?: emptyList()
+        val tracks = transceivers.filter {
+            it.direction == RtpTransceiver.RtpTransceiverDirection.SEND_ONLY && it.sender?.track() != null
+        }.map { transceiver ->
+            val track = transceiver.sender.track()!!
+
+            val trackType = when (track.kind()) {
+                "audio" -> TrackType.TRACK_TYPE_AUDIO
+                "screen" -> TrackType.TRACK_TYPE_SCREEN_SHARE
+                "video" -> TrackType.TRACK_TYPE_VIDEO
+                else -> TrackType.TRACK_TYPE_UNSPECIFIED
+            }
+
+            if (trackType == TrackType.TRACK_TYPE_VIDEO && captureResolution == null) {
+                throw IllegalStateException("video capture needs to be enabled before adding the local track")
+            }
+
+            var layers: List<VideoLayer> = if (trackType != TrackType.TRACK_TYPE_VIDEO) {
+                emptyList()
+            } else {
+                // we tell the Sfu which resolutions we're sending
+                transceiver.sender.parameters.encodings.map {
+                    val scaleBy = it.scaleResolutionDownBy ?: 1.0
+                    val width = captureResolution?.width?.div(scaleBy) ?: 0
+                    val height = captureResolution?.height?.div(scaleBy) ?: 0
+                    val quality = when (it.rid) {
+                        "f" -> {
+                            VideoQuality.VIDEO_QUALITY_HIGH
+                        }
+                        "h" -> {
+                            VideoQuality.VIDEO_QUALITY_MID
+                        }
+                        else -> {
+                            VideoQuality.VIDEO_QUALITY_LOW_UNSPECIFIED
+                        }
+                    }
+                    VideoLayer(
+                        rid = it.rid ?: "",
+                        video_dimension = VideoDimension(
+                            width = width.toInt(),
+                            height = height.toInt(),
+                        ),
+                        bitrate = it.maxBitrateBps ?: 0,
+                        fps = captureResolution?.framerate?.max ?: 0,
+                        quality = quality
+                    )
+                }
+            }
+
+            TrackInfo(
+                track_id = track.id(),
+                track_type = trackType,
+                layers = layers
+            )
+        }
+        return tracks
     }
 
     /**
