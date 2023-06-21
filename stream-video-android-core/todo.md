@@ -21,13 +21,11 @@
 - [ ] Tests should run on CI (and we need to speed it up a bit) (Jaewoong)
 - [ ] Review updatePublishQuality. Verify layer enable/disable works (Jaewoong)
 - [ ] Testing session with team cross platform (Thierry)
-- [ ] bug: screensharing is broken. android doesn’t receive/render (not sure) the screenshare. video shows up as the gray avatar (Thierry)
-- [ ] bug: screenshare is not removed after it stops when a participant leaves the call (Thierry) (probably just dont update the state when the participant leaves)
 - [ ] Publish 0.1 on Maven
-- [~] Video calling tutorial & Feedback cycle with team
 - [~] Audio room tutorial & Feedback cycle with team
 - [~] Reconnect flow can't reconnect the subscriber (SFU doesn't support restarts on the subscriber peer connection yet)
 - [~] Graceful SFU shutdown (switch between SFUs)
+- [X] Video calling tutorial & Feedback cycle with team
 - [X] Bluetooth gives a permissions error on AndroidDeviceTest. We shouldn't require BLUETOOTH_CONNECT by default
 - [X] Retry: Default coordinator/sfu retry policy needs work
 - [X] Retry: onNegotiationNeeded
