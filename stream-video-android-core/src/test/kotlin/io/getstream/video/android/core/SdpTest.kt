@@ -17,6 +17,7 @@
 package io.getstream.video.android.core
 
 import com.google.common.truth.Truth.assertThat
+import io.getstream.video.android.core.base.TestBase
 import io.getstream.video.android.core.utils.MinimalSdpParser
 import io.getstream.video.android.core.utils.mangleSdpUtil
 import kotlinx.coroutines.test.runTest
@@ -184,7 +185,7 @@ class SdpTest : TestBase() {
 
     /**
      * For DTX
-*             updatedSdp = initialOffer.sdp.replacingOccurrences(
+     *             updatedSdp = initialOffer.sdp.replacingOccurrences(
      of: "useinbandfec=1",
      with: "useinbandfec=1;usedtx=1"
      )

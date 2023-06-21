@@ -18,7 +18,7 @@ package io.getstream.video.android.core.rtc
 
 import com.google.common.truth.Truth
 import io.getstream.video.android.core.ConnectionState
-import io.getstream.video.android.core.IntegrationTestBase
+import io.getstream.video.android.core.base.IntegrationTestBase
 import io.getstream.video.android.core.events.ICETrickleEvent
 import io.getstream.video.android.core.events.SFUConnectedEvent
 import io.getstream.video.android.core.events.SubscriberOfferEvent

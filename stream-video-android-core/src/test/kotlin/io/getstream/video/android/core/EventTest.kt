@@ -17,6 +17,7 @@
 package io.getstream.video.android.core
 
 import com.google.common.truth.Truth.assertThat
+import io.getstream.video.android.core.base.IntegrationTestBase
 import io.getstream.video.android.core.events.AudioLevelChangedEvent
 import io.getstream.video.android.core.events.ConnectionQualityChangeEvent
 import io.getstream.video.android.core.events.DominantSpeakerChangedEvent
@@ -183,7 +184,8 @@ class EventTest : IntegrationTestBase(connectCoordinatorWS = false) {
     @Test
     fun `Participants join and leave`() = runTest {
         val call = client.call("default", randomUUID())
-        val participant = Participant(user_id = "thierry", is_speaking = true, session_id = "thierry")
+        val participant =
+            Participant(user_id = "thierry", is_speaking = true, session_id = "thierry")
         val joinEvent = ParticipantJoinedEvent(participant = participant, callCid = call.cid)
         clientImpl.fireEvent(joinEvent, call.cid)
         assertThat(call.state.getParticipantBySessionId("thierry")!!.speaking.value).isTrue()

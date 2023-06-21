@@ -17,6 +17,7 @@
 package io.getstream.video.android.core
 
 import com.google.common.truth.Truth.assertThat
+import io.getstream.video.android.core.base.IntegrationTestBase
 import io.getstream.video.android.model.User
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
@@ -48,7 +49,12 @@ class CallStateTest : IntegrationTestBase() {
             custom = custom,
             members = listOf(MemberRequest("tommaso", mutableMapOf("color" to "green"))),
             // block screensharing completely for this call
-            settings = CallSettingsRequest(screensharing = ScreensharingSettingsRequest(accessRequestEnabled = false, enabled = false))
+            settings = CallSettingsRequest(
+                screensharing = ScreensharingSettingsRequest(
+                    accessRequestEnabled = false,
+                    enabled = false
+                )
+            )
         )
         assertSuccess(response)
 
@@ -77,11 +83,15 @@ class CallStateTest : IntegrationTestBase() {
     @Test
     fun `Joining a call should populate the state`() = runTest {
         val call = client.call("default", randomUUID())
-        val response = call.joinRequest(create = CreateCallOptions(custom = mapOf("color" to "green")), location = "AMS")
+        val response = call.joinRequest(
+            create = CreateCallOptions(custom = mapOf("color" to "green")),
+            location = "AMS"
+        )
         assertSuccess(response)
         assertThat(call.state.settings.value).isNotNull()
         assertThat(call.state.custom.value["color"]).isEqualTo("green")
     }
+
     /**
      * * anyone who is pinned
      * * dominant speaker

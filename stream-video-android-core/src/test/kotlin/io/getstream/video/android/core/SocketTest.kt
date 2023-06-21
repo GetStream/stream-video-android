@@ -19,6 +19,7 @@ package io.getstream.video.android.core
 import android.content.Context
 import android.net.ConnectivityManager
 import com.google.common.truth.Truth.assertThat
+import io.getstream.video.android.core.base.TestBase
 import io.getstream.video.android.core.dispatchers.DispatcherProvider
 import io.getstream.video.android.core.internal.network.NetworkStateProvider
 import io.getstream.video.android.core.socket.CoordinatorSocket
@@ -134,7 +135,14 @@ class CoordinatorSocketTest : SocketTestBase() {
 
     @Test
     fun `coordinator - connect the socket`() = runTest {
-        val socket = CoordinatorSocket(coordinatorUrl, testData.users["thierry"]!!, testData.tokens["thierry"]!!, scope, buildOkHttp(), networkStateProvider)
+        val socket = CoordinatorSocket(
+            coordinatorUrl,
+            testData.users["thierry"]!!,
+            testData.tokens["thierry"]!!,
+            scope,
+            buildOkHttp(),
+            networkStateProvider
+        )
         socket.connect()
 
         assertThat(socket.connectionState.value).isInstanceOf(Connected::class.java)
@@ -145,7 +153,14 @@ class CoordinatorSocketTest : SocketTestBase() {
 
     @Test
     fun `coordinator - an expired socket should be refreshed using the token provider`() = runTest {
-        val socket = CoordinatorSocket(coordinatorUrl, testData.users["thierry"]!!, testData.expiredToken, scope, buildOkHttp(), networkStateProvider)
+        val socket = CoordinatorSocket(
+            coordinatorUrl,
+            testData.users["thierry"]!!,
+            testData.expiredToken,
+            scope,
+            buildOkHttp(),
+            networkStateProvider
+        )
         // token refresh should be handled at the StreamVideoImpl level
         try {
             socket.connect()
@@ -156,7 +171,14 @@ class CoordinatorSocketTest : SocketTestBase() {
 
     @Test
     fun `coordinator - a permanent error shouldn't be retried`() = runTest {
-        val socket = CoordinatorSocket(coordinatorUrl, testData.users["thierry"]!!, "invalid token", scope, buildOkHttp(), networkStateProvider)
+        val socket = CoordinatorSocket(
+            coordinatorUrl,
+            testData.users["thierry"]!!,
+            "invalid token",
+            scope,
+            buildOkHttp(),
+            networkStateProvider
+        )
         try {
             socket.connect()
         } catch (e: Throwable) {
@@ -169,7 +191,14 @@ class CoordinatorSocketTest : SocketTestBase() {
     @Test
     fun `coordinator - a temporary error should be retried`() = runTest {
         // mock the actual socket connection
-        val socket = CoordinatorSocket(coordinatorUrl, testData.users["thierry"]!!, testData.tokens["thierry"]!!, scope, buildOkHttp(), networkStateProvider)
+        val socket = CoordinatorSocket(
+            coordinatorUrl,
+            testData.users["thierry"]!!,
+            testData.tokens["thierry"]!!,
+            scope,
+            buildOkHttp(),
+            networkStateProvider
+        )
         socket.mockSocket = mockedWebSocket
         socket.reconnectTimeout = 0
         val job1 = scope.launch { socket.connect() }
@@ -190,7 +219,14 @@ class CoordinatorSocketTest : SocketTestBase() {
     @Test
     fun `going offline should temporarily disconnect`() = runTest {
         // mock the actual socket connection
-        val socket = CoordinatorSocket(coordinatorUrl, testData.users["thierry"]!!, testData.tokens["thierry"]!!, scope, buildOkHttp(), networkStateProvider)
+        val socket = CoordinatorSocket(
+            coordinatorUrl,
+            testData.users["thierry"]!!,
+            testData.tokens["thierry"]!!,
+            scope,
+            buildOkHttp(),
+            networkStateProvider
+        )
         socket.mockSocket = mockedWebSocket
         socket.reconnectTimeout = 0
         val job = scope.launch { socket.connect() }
