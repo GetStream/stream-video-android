@@ -16,7 +16,7 @@
 
 package io.getstream.video.android.core.stories
 
-import io.getstream.video.android.core.IntegrationTestBase
+import io.getstream.video.android.core.base.IntegrationTestBase
 import io.getstream.video.android.core.model.SortField
 import kotlinx.coroutines.test.runTest
 import org.junit.Test

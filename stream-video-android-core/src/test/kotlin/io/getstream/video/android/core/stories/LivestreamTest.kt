@@ -17,9 +17,8 @@
 package io.getstream.video.android.core.stories
 
 import com.google.common.truth.Truth.assertThat
-import io.getstream.video.android.core.IntegrationTestBase
+import io.getstream.video.android.core.base.IntegrationTestBase
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.test.runTest
 import org.junit.Ignore
