@@ -316,18 +316,18 @@ To make this a little more interactive let's join the call from your browser.
 On your Android emulator you'll see the text update to 2 participants.
 Let's keep the browser tab open as you go through the tutorial.
 
-### Step 6 - A AudioRoom UI
+### Step 6 - AudioRoom UI
 
 Stream provides some components that allow you to implement an audio room screen.
 Replace the code snippets inside `setContent` with the example below:
 
 ```kotlin
 setContent {
-    // step4 - apply VideoTheme
+    // apply VideoTheme
     VideoTheme {
         val connect by call.state.connection.collectAsState()
 
-        // step5 - render AudioRoom
+        // render AudioRoom
         if (connect == RealtimeConnection.Connected) {
             AudioRoom(
                 call = call,
