@@ -82,13 +82,8 @@ public final class io/getstream/video/android/common/view/ParticipantItemView : 
 
 public class io/getstream/video/android/common/viewmodel/CallViewModel : androidx/lifecycle/ViewModel {
 	public fun <init> ()V
-	public final fun dismissCallInfoMenu ()V
 	public final fun isInPictureInPicture ()Lkotlinx/coroutines/flow/StateFlow;
-	public final fun isShowingCallInfoMenu ()Lkotlinx/coroutines/flow/StateFlow;
-	protected fun onCleared ()V
-	public final fun onInviteUsers (Ljava/util/List;)V
 	public final fun onPictureInPictureModeChanged (Z)V
-	public final fun openCallInfoMenu ()V
 }
 
 public final class io/getstream/video/android/common/viewmodel/CallViewModelFactory : androidx/lifecycle/ViewModelProvider$Factory {

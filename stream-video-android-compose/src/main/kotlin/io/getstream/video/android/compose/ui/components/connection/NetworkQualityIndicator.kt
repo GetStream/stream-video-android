@@ -68,10 +68,8 @@ public fun NetworkQualityIndicator(
                     .background(
                         color = if (quality > 0.33f) {
                             VideoTheme.colors.connectionQualityBarFilled
-                        } else if (quality == 0.33f) {
-                            VideoTheme.colors.errorAccent
                         } else {
-                            VideoTheme.colors.connectionQualityBar
+                            VideoTheme.colors.errorAccent
                         },
                         shape = VideoTheme.shapes.connectionIndicatorBar
                     )

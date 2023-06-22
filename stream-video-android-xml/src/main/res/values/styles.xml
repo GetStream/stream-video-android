@@ -35,7 +35,7 @@
 
     <style name="Stream.CallControls" parent="Stream">
         <item name="streamVideoCallControlsBackgroundColor">@color/stream_video_bars_background</item>
-        <item name="streamVideoCallControlsButtonSize">@dimen/stream_video_callControlButtonSize</item>
+        <item name="streamVideoCallControlsButtonSize">@dimen/stream_video_controlActionsButtonSize</item>
     </style>
 
     <style name="Stream.CallDetails" parent="Stream">

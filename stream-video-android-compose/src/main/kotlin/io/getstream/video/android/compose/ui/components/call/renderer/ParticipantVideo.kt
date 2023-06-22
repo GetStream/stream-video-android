@@ -76,7 +76,6 @@ import io.getstream.video.android.core.model.ReactionState
 import io.getstream.video.android.mock.StreamMockUtils
 import io.getstream.video.android.mock.mockCall
 import io.getstream.video.android.mock.mockParticipantList
-import io.getstream.video.android.model.getSoundIndicatorState
 import io.getstream.video.android.ui.common.R
 import kotlinx.coroutines.delay
 
@@ -125,12 +124,12 @@ public fun ParticipantVideo(
     val containerModifier = if (style.isFocused && participants.size > 1) modifier.border(
         border = if (style.isScreenSharing) {
             BorderStroke(
-                VideoTheme.dimens.callParticipantScreenSharingFocusedBorderWidth,
+                VideoTheme.dimens.participantScreenSharingFocusedBorderWidth,
                 VideoTheme.colors.callFocusedBorder
             )
         } else {
             BorderStroke(
-                VideoTheme.dimens.callParticipantFocusedBorderWidth,
+                VideoTheme.dimens.participantFocusedBorderWidth,
                 VideoTheme.colors.callFocusedBorder
             )
         },
@@ -215,14 +214,14 @@ public fun BoxScope.ParticipantLabel(
     soundIndicatorContent: @Composable RowScope.() -> Unit = {
         val audioEnabled by participant.audioEnabled.collectAsStateWithLifecycle()
         val speaking by participant.speaking.collectAsStateWithLifecycle()
+        val audioLevels by participant.audioLevels.collectAsStateWithLifecycle()
         SoundIndicator(
-            state = getSoundIndicatorState(
-                hasAudio = audioEnabled,
-                isSpeaking = speaking
-            ),
+            isSpeaking = speaking,
+            isAudioEnabled = audioEnabled,
+            audioLevels = audioLevels,
             modifier = Modifier
                 .align(CenterVertically)
-                .padding(horizontal = VideoTheme.dimens.callParticipantSoundIndicatorPadding)
+                .padding(horizontal = VideoTheme.dimens.participantSoundIndicatorPadding)
         )
     }
 ) {
@@ -251,23 +250,23 @@ public fun BoxScope.ParticipantLabel(
     labelPosition: Alignment = BottomStart,
     hasAudio: Boolean = false,
     isSpeaking: Boolean = false,
+    audioLevels: List<Float> = emptyList(),
     soundIndicatorContent: @Composable RowScope.() -> Unit = {
         SoundIndicator(
-            state = getSoundIndicatorState(
-                hasAudio = hasAudio,
-                isSpeaking = isSpeaking
-            ),
+            isSpeaking = isSpeaking,
+            isAudioEnabled = hasAudio,
+            audioLevels = audioLevels,
             modifier = Modifier
                 .align(CenterVertically)
-                .padding(horizontal = VideoTheme.dimens.callParticipantSoundIndicatorPadding)
+                .padding(horizontal = VideoTheme.dimens.participantSoundIndicatorPadding)
         )
     }
 ) {
     Row(
         modifier = Modifier
             .align(labelPosition)
-            .padding(VideoTheme.dimens.callParticipantLabelPadding)
-            .height(VideoTheme.dimens.callParticipantLabelHeight)
+            .padding(VideoTheme.dimens.participantLabelPadding)
+            .height(VideoTheme.dimens.participantLabelHeight)
             .wrapContentWidth()
             .clip(RoundedCornerShape(8.dp))
             .background(
@@ -278,8 +277,8 @@ public fun BoxScope.ParticipantLabel(
     ) {
         Text(
             modifier = Modifier
-                .widthIn(max = VideoTheme.dimens.callParticipantLabelTextMaxWidth)
-                .padding(start = VideoTheme.dimens.callParticipantLabelTextPaddingStart)
+                .widthIn(max = VideoTheme.dimens.participantLabelTextMaxWidth)
+                .padding(start = VideoTheme.dimens.participantLabelTextPaddingStart)
                 .align(CenterVertically),
             text = nameLabel,
             style = VideoTheme.typography.body,

@@ -48,7 +48,8 @@ public fun LandscapeControlActions(
     modifier: Modifier = Modifier,
     backgroundColor: Color = VideoTheme.colors.barsBackground,
     shape: Shape = VideoTheme.shapes.callControlsLandscape,
-    elevation: Dp = VideoTheme.dimens.callControlsElevation,
+    elevation: Dp = VideoTheme.dimens.controlActionsElevation,
+    spaceBy: Dp? = null,
     onCallAction: (CallAction) -> Unit = { DefaultOnCallActionHandler.onCallAction(call, it) },
     actions: List<(@Composable () -> Unit)> = buildDefaultCallControlActions(
         call,
@@ -64,7 +65,11 @@ public fun LandscapeControlActions(
         LazyColumn(
             modifier = modifier,
             horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.SpaceEvenly
+            verticalArrangement = if (spaceBy != null) {
+                Arrangement.spacedBy(space = spaceBy, alignment = Alignment.CenterVertically)
+            } else {
+                Arrangement.SpaceEvenly
+            }
         ) {
             items(actions) { action ->
                 action.invoke()

@@ -89,7 +89,7 @@ public fun CallAppBar(
     }
 
     val endPadding = if (orientation == ORIENTATION_LANDSCAPE) {
-        VideoTheme.dimens.callControlsSheetHeight
+        VideoTheme.dimens.controlActionsHeight
     } else {
         VideoTheme.dimens.callAppBarPadding
     }

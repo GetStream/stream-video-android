@@ -233,7 +233,7 @@ private fun CallJoinBody(
 
             StreamButton(
                 modifier = Modifier
-                    .padding(horizontal = 16.dp)
+                    .padding(start = 16.dp)
                     .fillMaxHeight()
                     .testTag("join_call"),
                 onClick = {

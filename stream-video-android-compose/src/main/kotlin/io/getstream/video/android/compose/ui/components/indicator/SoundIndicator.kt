@@ -22,52 +22,46 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.material.Icon
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.dp
 import io.getstream.video.android.compose.theme.VideoTheme
-import io.getstream.video.android.model.Muted
-import io.getstream.video.android.model.SoundState
-import io.getstream.video.android.model.Speaking
-import io.getstream.video.android.model.Unmuted
 import io.getstream.video.android.ui.common.R
 
 /**
  * Used to indicate the sound state of a given participant. Either shows a mute icon or the sound
  * levels.
  *
- * @param state The state of the user audio.
  * @param modifier Modifier for styling.
+ * @param isSpeaking Represents is user speaking or not.
+ * @param isAudioEnabled Represents is audio enabled or not.
+ * @param audioLevels Indicates the audio levels that will be drawn. This list must contains thee float values (0 ~ 1f).
  */
 @Composable
 public fun SoundIndicator(
-    state: SoundState,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    isSpeaking: Boolean,
+    isAudioEnabled: Boolean,
+    audioLevels: List<Float>,
 ) {
-    when (state) {
-        Speaking -> ActiveSoundLevels(modifier)
-        Unmuted -> {
-            Icon(
-                modifier = modifier
-                    .size(VideoTheme.dimens.audioStatusSize)
-                    .padding(end = 4.dp),
-                painter = painterResource(id = R.drawable.stream_video_ic_mic_on),
-                tint = Color.White,
-                contentDescription = null
-            )
-        }
-
-        else -> {
-            Icon(
-                modifier = modifier
-                    .size(VideoTheme.dimens.audioStatusSize)
-                    .padding(end = 4.dp),
-                painter = painterResource(id = R.drawable.stream_video_ic_mic_off),
-                tint = VideoTheme.colors.errorAccent,
-                contentDescription = null
-            )
-        }
+    if (isSpeaking && isAudioEnabled) {
+        AudioVolumeIndicator(
+            modifier = modifier.padding(end = VideoTheme.dimens.audioLevelIndicatorBarPadding),
+            audioLevels = audioLevels
+        )
+    } else if (isAudioEnabled) {
+        AudioVolumeIndicator(
+            modifier = modifier.padding(end = VideoTheme.dimens.audioLevelIndicatorBarPadding),
+            audioLevels = listOf(0f, 0f, 0f)
+        )
+    } else {
+        Icon(
+            modifier = modifier
+                .size(VideoTheme.dimens.microphoneIndicatorSize)
+                .padding(end = VideoTheme.dimens.microphoneIndicatorPadding),
+            painter = painterResource(id = R.drawable.stream_video_ic_mic_off),
+            tint = VideoTheme.colors.errorAccent,
+            contentDescription = null
+        )
     }
 }
 
@@ -76,9 +70,16 @@ public fun SoundIndicator(
 private fun SoundIndicatorPreview() {
     VideoTheme {
         Row {
-            SoundIndicator(state = Speaking)
-            SoundIndicator(state = Unmuted)
-            SoundIndicator(state = Muted)
+            SoundIndicator(
+                isSpeaking = true,
+                isAudioEnabled = true,
+                audioLevels = listOf(0.7f, 0.5f, 0.9f)
+            )
+            SoundIndicator(
+                isSpeaking = false,
+                isAudioEnabled = false,
+                audioLevels = listOf(0.7f, 0.5f, 0.9f)
+            )
         }
     }
 }

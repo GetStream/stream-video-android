@@ -1,6 +1,6 @@
 # Official Android SDK for [Stream Video](https://getstream.io/video/docs/)
 
-// TODO - image for the SDK
+<img src=".readme-assets/Github-Graphic-Android.jpg" alt="Stream Video for Android Header image" style="box-shadow: 0 3px 10px rgb(0 0 0 / 0.2); border-radius: 1rem" />
 
 <p align="center">
   <a href="https://github.com/GetStream/stream-video-android/actions"><img src="https://github.com/GetStream/stream-video-android/workflows/App%20Distribute%20CI/badge.svg" /></a>
@@ -61,6 +61,8 @@ Video roadmap and changelog is available [here](https://github.com/GetStream/pro
 
 ### 0.2 milestone
 
+- [ ] bug: screensharing is broken. android doesn’t receive/render (not sure) the screenshare. video shows up as the gray avatar (Thierry)
+- [ ] bug: screenshare is not removed after it stops when a participant leaves the call (Thierry) (probably just dont update the state when the participant leaves)
 - [ ] Livestream tutorial
 - [ ] Deeplink support for video call demo & dogfooding app (skip auth for the video demo, keep it for dogfooding)
 - [ ] Chat Integration
@@ -75,7 +77,7 @@ Video roadmap and changelog is available [here](https://github.com/GetStream/pro
 - [ ] Test coverage
 - [ ] Testing on more devices
 - [ ] Speaking while muted stateflow
-- [ ] Audio & Video filters
+- [ ] Cleanup the retry behaviour in the RtcSession (see the TODO)
 - [ ] Android SDK development.md cleanup
 - [X] SDK development guide for all teams
 
@@ -85,4 +87,5 @@ Video roadmap and changelog is available [here](https://github.com/GetStream/pro
 - [ ] Screensharing from mobile
 - [ ] Tap to focus
 - [ ] Camera controls
+- [ ] Audio & Video filters
 - [ ] Picture of the video stream at highest resolution
