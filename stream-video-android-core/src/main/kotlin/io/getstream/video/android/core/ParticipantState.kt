@@ -174,9 +174,7 @@ public data class ParticipantState(
 
     fun updateAudioLevel(audioLevel: Float) {
         val currentAudio = _audioLevels.value.toMutableList()
-        if (currentAudio.size == 3) {
-            currentAudio.removeAt(0)
-        }
+        currentAudio.removeAt(0)
         currentAudio.add(audioLevel)
         _audioLevels.value = currentAudio.toList()
         _audioLevel.value = audioLevel

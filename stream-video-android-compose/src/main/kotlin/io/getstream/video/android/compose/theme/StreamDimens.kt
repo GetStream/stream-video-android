@@ -177,7 +177,7 @@ public data class StreamDimens(
             audioLevelIndicatorBarWidth = dimensionResource(id = R.dimen.stream_video_audioLevelIndicatorBarWidth),
             audioLevelIndicatorBarSeparatorWidth = dimensionResource(id = R.dimen.stream_video_audioLevelIndicatorBarSeparatorWidth),
             microphoneIndicatorSize = dimensionResource(id = R.dimen.stream_video_microphoneIndicatorSize),
-            microphoneIndicatorPadding = dimensionResource(id = R.dimen.stream_video_microphoneIndicatorSize),
+            microphoneIndicatorPadding = dimensionResource(id = R.dimen.stream_video_microphoneIndicatorPadding),
             audioLevelIndicatorBarPadding = dimensionResource(id = R.dimen.stream_video_audioLevelIndicatorBarPadding),
             screenShareParticipantItemSize = dimensionResource(id = R.dimen.stream_video_screenShareParticipantItemSize),
             screenShareParticipantsRowHeight = dimensionResource(id = R.dimen.stream_video_screenShareParticipantsListHeight),

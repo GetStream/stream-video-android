@@ -24,7 +24,6 @@ import app.cash.paparazzi.Paparazzi
 import io.getstream.video.android.compose.base.BaseComposeTest
 import io.getstream.video.android.compose.ui.components.call.renderer.ParticipantLabel
 import io.getstream.video.android.compose.ui.components.connection.NetworkQualityIndicator
-import io.getstream.video.android.compose.ui.components.indicator.AudioVolumeIndicator
 import io.getstream.video.android.compose.ui.components.indicator.SoundIndicator
 import io.getstream.video.android.core.model.NetworkQuality
 import io.getstream.video.android.mock.mockParticipantList
