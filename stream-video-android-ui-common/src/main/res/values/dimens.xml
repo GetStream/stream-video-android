@@ -80,6 +80,7 @@
     <dimen name="stream_video_screenShareButtonSize">40dp</dimen>
     <dimen name="stream_video_lobbyVideoHeight">280dp</dimen>
     <dimen name="stream_video_lobbyControlActionsPadding">12dp</dimen>
+    <dimen name="stream_video_lobbyControlActionsItemSpaceBy">32dp</dimen>
     <dimen name="stream_video_reactionSize">45dp</dimen>
     <dimen name="stream_video_audioContentTopPadding">44dp</dimen>
     <dimen name="stream_video_audioAvatarSize">84dp</dimen>
