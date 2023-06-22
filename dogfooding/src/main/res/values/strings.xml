@@ -22,10 +22,12 @@
     <string name="sign_in_description">Please sign in with your Google \nStream account.</string>
     <string name="sign_in_google">Google Sign In</string>
     <string name="sign_in_email">Sign In with Email</string>
-    <string name="sign_in_contact">Having problems logging in, contact us.</string>
+    <string name="sign_in_contact">Having problems logging in, </string>
+    <string name="sign_in_contact_us">contact us.</string>
     <string name="sign_out">Sign out</string>
     <string name="join_description">Start or join a meeting by \nentering the call ID.</string>
-    <string name="join_call">Join a Call</string>
+    <string name="join_call">Join Call</string>
+    <string name="join_call_description">You are about to join a call. %d more people are in the call.</string>
     <string name="start_a_new_call">Start a New Call</string>
     <string name="start_call">Start Call</string>
     <string name="call_id_number">Call ID Number</string>

@@ -30,6 +30,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
@@ -40,6 +41,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalInspectionMode
@@ -190,6 +192,7 @@ private fun CallLobbyBody(
         Spacer(modifier = Modifier.height(4.dp))
 
         Text(
+            modifier = Modifier.padding(horizontal = 30.dp),
             text = stringResource(id = R.string.call_lobby_description),
             color = Colors.description,
             textAlign = TextAlign.Center,
@@ -223,15 +226,37 @@ private fun CallLobbyBody(
             }
         )
 
-        Spacer(modifier = Modifier.height(50.dp))
+        LobbyDescription(callLobbyViewModel = callLobbyViewModel)
+    }
+}
+
+@Composable
+private fun LobbyDescription(
+    callLobbyViewModel: CallLobbyViewModel
+) {
+    val participants by callLobbyViewModel.call.state.participants.collectAsState()
+
+    Column(
+        modifier = Modifier
+            .padding(horizontal = 35.dp)
+            .background(
+                color = VideoTheme.colors.callLobbyBackground,
+                shape = RoundedCornerShape(16.dp)
+            )
+    ) {
+        Text(
+            modifier = Modifier.padding(start = 32.dp, end = 32.dp, top = 12.dp, bottom = 8.dp),
+            text = stringResource(id = R.string.join_call_description, participants.size),
+            color = Color.White
+        )
 
         StreamButton(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(52.dp)
-                .padding(horizontal = 35.dp)
+                .padding(start = 16.dp, end = 16.dp, top = 8.dp, bottom = 12.dp)
+                .clip(RoundedCornerShape(12.dp))
                 .testTag("start_call"),
-            text = stringResource(id = R.string.start_call),
+            text = stringResource(id = R.string.join_call),
             onClick = { callLobbyViewModel.handleUiEvent(CallLobbyEvent.JoinCall) }
         )
     }

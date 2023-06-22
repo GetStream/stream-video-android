@@ -120,7 +120,8 @@ public fun CallLobby(
             actions = buildDefaultLobbyControlActions(
                 call = call,
                 onCallAction = onCallAction
-            )
+            ),
+            spaceBy = VideoTheme.dimens.lobbyControlActionsItemSpaceBy
         )
     },
 ) {
