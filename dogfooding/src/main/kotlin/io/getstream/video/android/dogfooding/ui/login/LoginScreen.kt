@@ -16,6 +16,8 @@
 
 package io.getstream.video.android.dogfooding.ui.login
 
+import android.content.Intent
+import android.net.Uri
 import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -55,12 +57,15 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
+import androidx.core.content.ContextCompat.startActivity
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.firebase.ui.auth.AuthUI
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.dogfooding.BuildConfig
 import io.getstream.video.android.dogfooding.R
 import io.getstream.video.android.dogfooding.ui.theme.Colors
+import io.getstream.video.android.dogfooding.ui.theme.LinkText
+import io.getstream.video.android.dogfooding.ui.theme.LinkTextData
 import io.getstream.video.android.dogfooding.ui.theme.StreamButton
 
 @Composable
@@ -144,6 +149,25 @@ private fun LoginContent(
             )
 
             Spacer(modifier = Modifier.height(47.dp))
+
+            val context = LocalContext.current
+            LinkText(
+                linkTextData = listOf(
+                    LinkTextData(text = stringResource(id = R.string.sign_in_contact)),
+                    LinkTextData(
+                        text = stringResource(
+                            id = R.string.sign_in_contact_us
+                        ),
+                        tag = "contact us",
+                        annotation = "https://getstream.io/video/docs/",
+                        onClick = {
+                            val intent = Intent(Intent.ACTION_VIEW)
+                            intent.data = Uri.parse(it.item)
+                            startActivity(context, intent, null)
+                        }
+                    ),
+                )
+            )
 
             Text(
                 text = stringResource(id = R.string.sign_in_contact),
