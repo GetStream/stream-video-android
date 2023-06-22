@@ -186,12 +186,12 @@ public data class CallViewStyle(
 
                 val callControlsHeight = it.getDimension(
                     R.styleable.CallView_streamVideoCallViewCallControlsHeight,
-                    context.getDimension(RCommon.dimen.stream_video_callControlsSheetHeight).toFloat()
+                    context.getDimension(RCommon.dimen.stream_video_controlActionsHeight).toFloat()
                 ).toInt()
 
                 val callControlsWidthLandscape = it.getDimension(
                     R.styleable.CallView_streamVideoCallViewCallControlsWidthLandscape,
-                    context.getDimension(RCommon.dimen.stream_video_landscapeCallControlsSheetWidth).toFloat()
+                    context.getDimension(RCommon.dimen.stream_video_landscapeControlActionsWidth).toFloat()
                 ).toInt()
 
                 val shouldShowGridUsersAsListLandscape = it.getBoolean(

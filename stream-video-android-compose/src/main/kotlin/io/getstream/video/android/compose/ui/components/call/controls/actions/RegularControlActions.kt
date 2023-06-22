@@ -50,7 +50,8 @@ public fun RegularControlActions(
     modifier: Modifier = Modifier,
     backgroundColor: Color = VideoTheme.colors.barsBackground,
     shape: Shape = VideoTheme.shapes.callControls,
-    elevation: Dp = VideoTheme.dimens.callControlsElevation,
+    elevation: Dp = VideoTheme.dimens.controlActionsElevation,
+    spaceBy: Dp? = null,
     onCallAction: (CallAction) -> Unit = { DefaultOnCallActionHandler.onCallAction(call, it) },
     actions: List<(@Composable () -> Unit)> = buildDefaultCallControlActions(
         call,
@@ -65,7 +66,11 @@ public fun RegularControlActions(
     ) {
         LazyRow(
             verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.SpaceEvenly
+            horizontalArrangement = if (spaceBy != null) {
+                Arrangement.spacedBy(space = spaceBy, alignment = Alignment.CenterHorizontally)
+            } else {
+                Arrangement.SpaceEvenly
+            }
         ) {
             items(actions) { action ->
                 action.invoke()

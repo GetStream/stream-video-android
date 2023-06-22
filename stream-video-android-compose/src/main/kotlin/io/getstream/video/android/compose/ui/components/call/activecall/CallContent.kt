@@ -226,7 +226,7 @@ public fun CallContent(
                     top = it.calculateTopPadding(),
                     start = it.calculateStartPadding(layoutDirection = LocalLayoutDirection.current),
                     end = it.calculateEndPadding(layoutDirection = LocalLayoutDirection.current),
-                    bottom = (it.calculateBottomPadding() - VideoTheme.dimens.callControllerBottomPadding)
+                    bottom = (it.calculateBottomPadding() - VideoTheme.dimens.controlActionsBottomPadding)
                         .coerceAtLeast(0.dp)
                 )
 

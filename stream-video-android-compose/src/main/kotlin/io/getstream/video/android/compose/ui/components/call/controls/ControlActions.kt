@@ -57,8 +57,9 @@ public fun ControlActions(
     modifier: Modifier = Modifier,
     onCallAction: (CallAction) -> Unit = { DefaultOnCallActionHandler.onCallAction(call, it) },
     backgroundColor: Color = VideoTheme.colors.barsBackground,
-    elevation: Dp = VideoTheme.dimens.callControlsElevation,
+    elevation: Dp = VideoTheme.dimens.controlActionsElevation,
     shape: Shape = VideoTheme.shapes.callControls,
+    spaceBy: Dp? = null,
     actions: List<(@Composable () -> Unit)> = buildDefaultCallControlActions(
         call = call, onCallAction
     ),
@@ -68,11 +69,11 @@ public fun ControlActions(
     val controlsModifier = if (orientation == ORIENTATION_LANDSCAPE) {
         modifier
             .fillMaxHeight()
-            .width(VideoTheme.dimens.landscapeCallControlsSheetWidth)
+            .width(VideoTheme.dimens.landscapeControlActionsWidth)
     } else {
         modifier
             .fillMaxWidth()
-            .height(VideoTheme.dimens.callControlsSheetHeight)
+            .height(VideoTheme.dimens.controlActionsHeight)
     }
 
     if (orientation == ORIENTATION_PORTRAIT) {
@@ -82,6 +83,7 @@ public fun ControlActions(
             backgroundColor = backgroundColor,
             shape = shape,
             elevation = elevation,
+            spaceBy = spaceBy,
             onCallAction = onCallAction,
             actions = actions
         )
@@ -92,6 +94,7 @@ public fun ControlActions(
             backgroundColor = backgroundColor,
             shape = shape,
             elevation = elevation,
+            spaceBy = spaceBy,
             onCallAction = onCallAction,
             actions = actions
         )
