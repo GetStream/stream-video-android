@@ -58,7 +58,7 @@ internal fun CallParticipantsInfoActions(
     ) {
         Button(
             modifier = Modifier
-                .height(VideoTheme.dimens.callParticipantsInfoMenuOptionsButtonHeight)
+                .height(VideoTheme.dimens.participantsInfoMenuOptionsButtonHeight)
                 .weight(1f)
                 .padding(start = 16.dp, end = 8.dp),
             colors = ButtonDefaults.buttonColors(backgroundColor = VideoTheme.colors.primaryAccent),
@@ -76,7 +76,7 @@ internal fun CallParticipantsInfoActions(
         OutlinedButton(
             modifier = Modifier
                 .weight(1f)
-                .height(VideoTheme.dimens.callParticipantsInfoMenuOptionsButtonHeight)
+                .height(VideoTheme.dimens.participantsInfoMenuOptionsButtonHeight)
                 .padding(start = 8.dp, end = 16.dp),
             colors = ButtonDefaults.buttonColors(backgroundColor = VideoTheme.colors.appBackground),
             border = BorderStroke(1.dp, VideoTheme.colors.textLowEmphasis),

@@ -255,26 +255,15 @@ public final class io/getstream/video/android/compose/theme/StreamDimens {
 	public final fun getCallAppBarTrailingContentSpacingEnd-D9Ej5fM ()F
 	public final fun getCallAppBarTrailingContentSpacingStart-D9Ej5fM ()F
 	public final fun getCallAvatarSize-D9Ej5fM ()F
-	public final fun getCallControlButtonSize-D9Ej5fM ()F
-	public final fun getCallControllerBottomPadding-D9Ej5fM ()F
-	public final fun getCallControlsElevation-D9Ej5fM ()F
-	public final fun getCallControlsSheetHeight-D9Ej5fM ()F
-	public final fun getCallParticipantFocusedBorderWidth-D9Ej5fM ()F
-	public final fun getCallParticipantInfoMenuAppBarHeight-D9Ej5fM ()F
-	public final fun getCallParticipantInfoMenuOptionsHeight-D9Ej5fM ()F
-	public final fun getCallParticipantLabelHeight-D9Ej5fM ()F
-	public final fun getCallParticipantLabelPadding-D9Ej5fM ()F
-	public final fun getCallParticipantLabelTextMaxWidth-D9Ej5fM ()F
-	public final fun getCallParticipantLabelTextPaddingStart-D9Ej5fM ()F
-	public final fun getCallParticipantScreenSharingFocusedBorderWidth-D9Ej5fM ()F
-	public final fun getCallParticipantSoundIndicatorPadding-D9Ej5fM ()F
 	public final fun getCallParticipantsAvatarsMargin-D9Ej5fM ()F
-	public final fun getCallParticipantsInfoAvatarSize-D9Ej5fM ()F
-	public final fun getCallParticipantsInfoMenuOptionsButtonHeight-D9Ej5fM ()F
 	public final fun getCallStatusParticipantsMargin-D9Ej5fM ()F
 	public final fun getConnectionIndicatorBarMaxHeight-D9Ej5fM ()F
 	public final fun getConnectionIndicatorBarSeparatorWidth-D9Ej5fM ()F
 	public final fun getConnectionIndicatorBarWidth-D9Ej5fM ()F
+	public final fun getControlActionsBottomPadding-D9Ej5fM ()F
+	public final fun getControlActionsButtonSize-D9Ej5fM ()F
+	public final fun getControlActionsElevation-D9Ej5fM ()F
+	public final fun getControlActionsHeight-D9Ej5fM ()F
 	public final fun getDirectCallUserNameTextSize-XSAIIZE ()J
 	public final fun getFloatingVideoHeight-D9Ej5fM ()F
 	public final fun getFloatingVideoPadding-D9Ej5fM ()F
@@ -282,8 +271,8 @@ public final class io/getstream/video/android/compose/theme/StreamDimens {
 	public final fun getGroupCallUserNameTextSize-XSAIIZE ()J
 	public final fun getHeaderElevation-D9Ej5fM ()F
 	public final fun getIncomingCallOptionsBottomPadding-D9Ej5fM ()F
-	public final fun getLandscapeCallControlButtonSize-D9Ej5fM ()F
-	public final fun getLandscapeCallControlsSheetWidth-D9Ej5fM ()F
+	public final fun getLandscapeControlActionsButtonSize-D9Ej5fM ()F
+	public final fun getLandscapeControlActionsWidth-D9Ej5fM ()F
 	public final fun getLandscapeTopAppBarHeight-D9Ej5fM ()F
 	public final fun getLargeButtonSize-D9Ej5fM ()F
 	public final fun getLobbyControlActionsItemSpaceBy-D9Ej5fM ()F
@@ -295,6 +284,17 @@ public final class io/getstream/video/android/compose/theme/StreamDimens {
 	public final fun getOnCallStatusTextAlpha ()F
 	public final fun getOnCallStatusTextSize-XSAIIZE ()J
 	public final fun getOutgoingCallOptionsBottomPadding-D9Ej5fM ()F
+	public final fun getParticipantFocusedBorderWidth-D9Ej5fM ()F
+	public final fun getParticipantInfoMenuAppBarHeight-D9Ej5fM ()F
+	public final fun getParticipantInfoMenuOptionsHeight-D9Ej5fM ()F
+	public final fun getParticipantLabelHeight-D9Ej5fM ()F
+	public final fun getParticipantLabelPadding-D9Ej5fM ()F
+	public final fun getParticipantLabelTextMaxWidth-D9Ej5fM ()F
+	public final fun getParticipantLabelTextPaddingStart-D9Ej5fM ()F
+	public final fun getParticipantScreenSharingFocusedBorderWidth-D9Ej5fM ()F
+	public final fun getParticipantSoundIndicatorPadding-D9Ej5fM ()F
+	public final fun getParticipantsInfoAvatarSize-D9Ej5fM ()F
+	public final fun getParticipantsInfoMenuOptionsButtonHeight-D9Ej5fM ()F
 	public final fun getParticipantsTextPadding-D9Ej5fM ()F
 	public final fun getReactionSize-D9Ej5fM ()F
 	public final fun getScreenShareParticipantItemSize-D9Ej5fM ()F
