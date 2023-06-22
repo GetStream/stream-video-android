@@ -555,7 +555,7 @@ public final class io/getstream/video/android/compose/ui/components/avatar/Onlin
 }
 
 public final class io/getstream/video/android/compose/ui/components/avatar/UserAvatarBackgroundKt {
-	public static final fun UserAvatarBackground-v29w5dM (Lio/getstream/video/android/model/User;Landroidx/compose/ui/Modifier;Landroidx/compose/ui/graphics/Shape;FLandroidx/compose/ui/text/TextStyle;Landroidx/compose/ui/layout/ContentScale;Ljava/lang/String;JJIILjava/lang/Integer;Landroidx/compose/runtime/Composer;III)V
+	public static final fun UserAvatarBackground-1fnCaGY (Lio/getstream/video/android/model/User;Landroidx/compose/ui/Modifier;Landroidx/compose/ui/graphics/Shape;FFLandroidx/compose/ui/text/TextStyle;Landroidx/compose/ui/layout/ContentScale;Ljava/lang/String;JJIILjava/lang/Integer;Landroidx/compose/runtime/Composer;III)V
 }
 
 public final class io/getstream/video/android/compose/ui/components/avatar/UserAvatarKt {

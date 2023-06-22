@@ -20,9 +20,11 @@ import androidx.annotation.DrawableRes
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
@@ -32,7 +34,6 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
-import io.getstream.video.android.compose.R
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.background.ParticipantImageBackground
 import io.getstream.video.android.mock.StreamMockUtils
@@ -46,6 +47,7 @@ import io.getstream.video.android.model.User
  * @param modifier Modifier for styling.
  * @param shape The shape of the avatar.
  * @param avatarSize The size to decide avatar image.
+ * @param avatarShadowElevation The shadow elevation for the avatar image.
  * @param textStyle The [TextStyle] that will be used for the initials.
  * @param contentScale The scale option used for the content.
  * @param contentDescription The content description of the avatar.
@@ -61,6 +63,7 @@ public fun UserAvatarBackground(
     modifier: Modifier = Modifier,
     shape: Shape = VideoTheme.shapes.avatar,
     avatarSize: Dp = 72.dp,
+    avatarShadowElevation: Dp = 12.dp,
     textStyle: TextStyle = VideoTheme.typography.title3Bold,
     contentScale: ContentScale = ContentScale.Crop,
     contentDescription: String? = null,
@@ -80,7 +83,8 @@ public fun UserAvatarBackground(
         UserAvatar(
             modifier = Modifier
                 .size(avatarSize)
-                .align(Alignment.Center),
+                .align(Alignment.Center)
+                .shadow(elevation = avatarShadowElevation, shape = CircleShape),
             user = user,
             shape = shape,
             textStyle = textStyle,
