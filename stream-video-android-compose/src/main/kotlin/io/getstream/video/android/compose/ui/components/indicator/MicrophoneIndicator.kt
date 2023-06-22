@@ -22,36 +22,31 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.material.Icon
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.ui.common.R
 
 /**
- * Used to indicate the sound state of a given participant. Either shows a mute icon or the sound
- * levels.
+ * Used to indicate the microphone state of a given participant.
  *
  * @param modifier Modifier for styling.
- * @param isSpeaking Represents is user speaking or not.
- * @param isAudioEnabled Represents is audio enabled or not.
- * @param audioLevels Indicates the audio levels that will be drawn. This list must contains thee float values (0 ~ 1f).
+ * @param isMicrophoneEnabled Represents is audio enabled or not.
  */
 @Composable
-public fun SoundIndicator(
+public fun MicrophoneIndicator(
     modifier: Modifier = Modifier,
-    isSpeaking: Boolean,
-    isAudioEnabled: Boolean,
-    audioLevels: List<Float>,
+    isMicrophoneEnabled: Boolean,
 ) {
-    if (isSpeaking && isAudioEnabled) {
-        AudioVolumeIndicator(
-            modifier = modifier.padding(end = VideoTheme.dimens.audioLevelIndicatorBarPadding),
-            audioLevels = audioLevels
-        )
-    } else if (isAudioEnabled) {
-        AudioVolumeIndicator(
-            modifier = modifier.padding(end = VideoTheme.dimens.audioLevelIndicatorBarPadding),
-            audioLevels = listOf(0f, 0f, 0f)
+    if (isMicrophoneEnabled) {
+        Icon(
+            modifier = modifier
+                .size(VideoTheme.dimens.microphoneIndicatorSize)
+                .padding(end = VideoTheme.dimens.microphoneIndicatorPadding),
+            painter = painterResource(id = R.drawable.stream_video_ic_mic_on),
+            tint = Color.White,
+            contentDescription = "microphone enabled"
         )
     } else {
         Icon(
@@ -60,7 +55,7 @@ public fun SoundIndicator(
                 .padding(end = VideoTheme.dimens.microphoneIndicatorPadding),
             painter = painterResource(id = R.drawable.stream_video_ic_mic_off),
             tint = VideoTheme.colors.errorAccent,
-            contentDescription = null
+            contentDescription = "microphone disabled"
         )
     }
 }
@@ -70,16 +65,8 @@ public fun SoundIndicator(
 private fun SoundIndicatorPreview() {
     VideoTheme {
         Row {
-            SoundIndicator(
-                isSpeaking = true,
-                isAudioEnabled = true,
-                audioLevels = listOf(0.7f, 0.5f, 0.9f)
-            )
-            SoundIndicator(
-                isSpeaking = false,
-                isAudioEnabled = false,
-                audioLevels = listOf(0.7f, 0.5f, 0.9f)
-            )
+            MicrophoneIndicator(isMicrophoneEnabled = true)
+            MicrophoneIndicator(isMicrophoneEnabled = false)
         }
     }
 }
