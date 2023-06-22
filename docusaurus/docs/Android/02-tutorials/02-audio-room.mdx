@@ -14,13 +14,13 @@ The end result will look like the image on the right and support the following f
 * Listeners can raise their hand, and be invited to speak by the host
 * Audio tracks are send multiple times for optimal reliability
 
-TODO: Image here
+![Audio Room](../assets/audio-room.png)
 
 Time to get started building an audio-room for your app.
 
 ### Step 1 - Create a new project in Android Studio
 
-Note that this tutorial was written using Android Studio Flamingo.
+This tutorial was written using Android Studio Flamingo.
 Setup steps can vary slightly across Android Studio versions.
 If you run into trouble be sure to use the latest version of Android Studio.
 
@@ -90,13 +90,14 @@ class MainActivity : ComponentActivity() {
         lifecycleScope.launch {
             val result = call.join(create = true, createOptions = CreateCallOptions(
                 members = listOf(
-                    MemberRequest(userId = "jack", role="moderator", custom = emptyMap()),
-                    MemberRequest(userId = "sophia", role="moderator", custom = emptyMap())
+                    MemberRequest(userId = "tommaso", role="moderator", custom = emptyMap()),
+                    MemberRequest(userId = "thierry", role="moderator", custom = emptyMap())
                 ), custom = mapOf(
                     "title" to "Compose Trends",
                     "description" to "Talk about how easy compose makes it to reuse and combine UI"
                 )
             ))
+            result.getOrThrow()
         }
 
         setContent {
@@ -193,15 +194,6 @@ setContent {
 
 Now when you run the sample app it will connect successfully and you will see a room with 1 participant (yourself).
 
-
-This example shows how to create and join a call with one API call.
-It creates a call of type `audio_room`, id `callId` and makes the user ids "jack" and "sophia" moderators of the call.
-In addition to that it also stores the title and description of the room in the custom data of the call object.
-
-By default calls of type `audio_room` start with backstage mode enabled.
-Admins and moderators can join the call. Regular users can only join the call when you go live.
-This gives an opportunity to setup the audio/video etc before inviting people in.
-
 ### Step 4 - Adding audio room UI elements
 
 In this next step we're going to:
@@ -230,11 +222,6 @@ Review the [permissions docs](../05-ui-cookbook/08-permissions-request.mdx) to l
 Let's create a component for the active speaker and the list of participants.
 
 ```kotlin
-@Composable
-fun DominantSpeaker(participant : ParticipantState) {
-    val user by participant.user.collectAsState()
-    Text("${user.name} - ${user.role}")
-}
 
 @Composable
 fun ParticipantAvatar(participant : ParticipantState) {
@@ -245,7 +232,7 @@ fun ParticipantAvatar(participant : ParticipantState) {
 
 #### B. An indicator for who's speaking
 
-We'll combine the `ParticipantAvatar` and `DominantSpeaker` into the UI for an audio room:
+We'll use the basic `ParticipantAvatar` to build an audio room
 
 ```kotlin
 setContent {
@@ -278,7 +265,9 @@ setContent {
                 Text("${participants.size} participants", fontSize = 20.sp)
             }
 
-            dominantSpeaker?.let { DominantSpeaker(it) }
+            dominantSpeaker?.let {
+                Text("${it.user.value.name} is speaking")
+            }
 
             LazyVerticalGrid(
                 columns = GridCells.Adaptive(minSize = 128.dp)
@@ -318,42 +307,116 @@ Let's keep the browser tab open as you go through the tutorial.
 
 ### Step 6 - AudioRoom UI
 
-Stream provides some components that allow you to implement an audio room screen.
-Replace the code snippets inside `setContent` with the example below:
+We can improve the UI for the audio room participants.
+The [participantState docs](../03-guides/03-call-and-participant-state.mdx) exposes all the state objects we need for the name, avatar, audio levels, speaking etc.
+Open `MainActivity.kt` and replace the ParticipantAvatar with the following:
 
 ```kotlin
-setContent {
-    // apply VideoTheme
-    VideoTheme {
-        val connect by call.state.connection.collectAsState()
+@Composable
+public fun ParticipantAvatar(
+    participant: ParticipantState,
+    modifier: Modifier = Modifier
+) {
+    val user by participant.user.collectAsState()
+    val nameOrId by participant.userNameOrId.collectAsState()
+    val isSpeaking by participant.speaking.collectAsState()
+    val audioEnabled by participant.audioEnabled.collectAsState()
 
-        // render AudioRoom
-        if (connect == RealtimeConnection.Connected) {
-            AudioRoom(
-                call = call,
-                title = "Audio Room Number 05"
+    Column(
+        modifier = modifier,
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
+    ) {
+
+        Box(modifier = Modifier.size(VideoTheme.dimens.audioAvatarSize)) {
+            UserAvatar(
+                user = user,
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(VideoTheme.dimens.audioAvatarPadding)
             )
-        } else {
-            Box(modifier = Modifier.fillMaxSize()) {
-                CircularProgressIndicator(
-                    modifier = Modifier.align(Alignment.Center),
-                    color = VideoTheme.colors.primaryAccent
+
+            if (isSpeaking) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .border(style.speakingBorder, CircleShape)
                 )
+            } else if (!audioEnabled) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(VideoTheme.dimens.audioAvatarPadding)
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .clip(CircleShape)
+                            .background(VideoTheme.colors.appBackground)
+                            .size(VideoTheme.dimens.audioRoomMicSize)
+                    ) {
+                        Icon(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .padding(VideoTheme.dimens.audioRoomMicPadding),
+                            painter = painterResource(id = io.getstream.video.android.ui.common.R.drawable.stream_video_ic_mic_off),
+                            tint = VideoTheme.colors.errorAccent,
+                            contentDescription = null
+                        )
+                    }
+                }
             }
+        }
+
+        Spacer(modifier = Modifier.height(8.dp))
+
+        Text(
+            modifier = Modifier.fillMaxWidth(),
+            text = nameOrId,
+            fontSize = 14.sp,
+            fontWeight = FontWeight.Bold,
+            color = VideoTheme.colors.textHighEmphasis,
+            textAlign = TextAlign.Center,
+            overflow = TextOverflow.Ellipsis,
+            maxLines = 1,
+        )
+
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            TODO: ROLE
+
+            Text(
+                modifier = Modifier.fillMaxWidth(),
+                text = user.role,
+                fontSize = 11.sp,
+                color = VideoTheme.colors.textHighEmphasis,
+                textAlign = TextAlign.Center,
+                overflow = TextOverflow.Ellipsis,
+                maxLines = 1,
+            )
         }
     }
 }
 ```
 
-`AudioRoom` basically consists of three parts of elements, the app bar, participants grid, and control actions:
+In the above example we use the following state flow objects:
 
-- **AudioAppBar**: Represents the default AppBar that shows the title of the audio room.
-- **AudioParticipantsGrid**: Renders all the participants to construct a audio room, based on the number of people in a call and the call state.
-- **AudioControlActions**: Represents the set of controls the user can use to change their audio and video device state, or browse other types of settings, leave the call, or implement something custom.
+```kotlin
+val user by participant.user.collectAsState()
+val nameOrId by participant.userNameOrId.collectAsState()
+val isSpeaking by participant.speaking.collectAsState()
+val audioEnabled by participant.audioEnabled.collectAsState()
+```
+
+The [ParticipantState docs](../03-guides/03-call-and-participant-state.mdx) include all the other attributes that are also available.
+For audio rooms `participant.audioLevel` and `participant.audioLevels` can be convenient.
+
 
 ### Step 7 - Requesting permission to speak
 
-Requesting permission to speak is easy.
+The permission system makes it easy to request permission to join a room, enable audio, enable video, screenshare etc.
+Requesting permission to speak is shown in the example below.
 
 ```kotlin
 val response = call.requestPermissions("send-audio")
@@ -364,16 +427,15 @@ request.forEach {
 }
 ```
 
-After running those example above, you'll see the result below:
-
-![Audio Room](../assets/audio-room.png)
+Showing the UI for requesting and granting permissions is left as an exercise for the reader.
 
 ### Other built-in features
 
 There are a few more exciting features that you can use to build audio rooms:
 
-- ** Query Calls **: You can query calls to easily show upcoming calls, calls that recently finished etc.
-- ** Reactions & Custom events **: Reactions and custom events are supported.
+- ** Query Calls **: You can query calls to easily show upcoming calls, calls that recently finished etc
+- ** Call Previews **: Before you join the call you can observe the participants and show a preview
+- ** Reactions & Custom events **: Reactions and custom events are supported
 - ** Recording & Broadcasting **: You can record your calls
 - ** Chat **: Stream's chat SDKs are fully featured and you can integrate them in the call
 - ** Moderation **: Moderation capabilities are built-in to the product

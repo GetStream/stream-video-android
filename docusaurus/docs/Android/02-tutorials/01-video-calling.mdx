@@ -84,7 +84,8 @@ class MainActivity : ComponentActivity() {
         // step3 - join a call, which type is `default` and id is `123`.
         val call = client.call("default", callId)
         lifecycleScope.launch {
-            call.join(create = true)
+            val result = call.join(create = true)
+            result.getOrThrow()
         }
 
         setContent {
@@ -141,7 +142,8 @@ Next, we setup the video SDK and join the call.
 ```kotlin
 val call = client.call("default", callId)
 lifecycleScope.launch {
-    call.join(create = true)
+    val result = call.join(create = true)
+    result.getOrThrow()
 }
 ```
 
@@ -363,7 +365,10 @@ The example below shows how to swap out the call controls for your own controls:
 override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
 
-    lifecycleScope.launch { call.join(create = true) }
+    lifecycleScope.launch {
+        val result = call.join(create = true)
+        result.getOrThrow()
+    }
 
     setContent {
         VideoTheme {
