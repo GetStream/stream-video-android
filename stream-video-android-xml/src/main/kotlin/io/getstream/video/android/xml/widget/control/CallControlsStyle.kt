@@ -56,12 +56,12 @@ public data class CallControlsStyle(
 
                 val callControlButtonSize = it.getDimensionPixelSize(
                     R.styleable.CallControlsView_streamVideoCallControlsButtonSize,
-                    context.getDimension(RCommon.dimen.stream_video_callControlButtonSize)
+                    context.getDimension(RCommon.dimen.stream_video_controlActionsButtonSize)
                 )
 
                 val callControlButtonSizeLandscape = it.getDimensionPixelSize(
                     R.styleable.CallControlsView_streamVideoCallControlsButtonSizeLandscape,
-                    context.getDimension(RCommon.dimen.stream_video_landscapeCallControlButtonSize)
+                    context.getDimension(RCommon.dimen.stream_video_landscapeControlActionsButtonSize)
                 )
 
                 val callControlsBackground = it.getDrawable(

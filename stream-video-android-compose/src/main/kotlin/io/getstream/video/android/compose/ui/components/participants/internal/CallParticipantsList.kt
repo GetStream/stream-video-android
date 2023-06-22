@@ -122,7 +122,7 @@ private fun CallParticipantInfoItem(
 
         val user by participant.user.collectAsStateWithLifecycle()
         UserAvatar(
-            modifier = Modifier.size(VideoTheme.dimens.callParticipantsInfoAvatarSize),
+            modifier = Modifier.size(VideoTheme.dimens.participantsInfoAvatarSize),
             user = user,
             isShowingOnlineIndicator = true
         )

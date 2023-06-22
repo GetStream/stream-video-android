@@ -49,6 +49,7 @@ import io.getstream.video.android.compose.ui.components.avatar.UserAvatar
 import io.getstream.video.android.compose.ui.components.call.controls.ControlActions
 import io.getstream.video.android.compose.ui.components.call.controls.actions.DefaultOnCallActionHandler
 import io.getstream.video.android.compose.ui.components.call.renderer.ParticipantLabel
+import io.getstream.video.android.compose.ui.components.indicator.MicrophoneIndicator
 import io.getstream.video.android.compose.ui.components.video.VideoRenderer
 import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.ParticipantState
@@ -155,6 +156,14 @@ public fun CallLobby(
                 nameLabel = nameLabel,
                 labelPosition = labelPosition,
                 hasAudio = isMicrophoneEnabled,
+                soundIndicatorContent = {
+                    MicrophoneIndicator(
+                        modifier = Modifier
+                            .align(Alignment.CenterVertically)
+                            .padding(horizontal = VideoTheme.dimens.participantSoundIndicatorPadding),
+                        isMicrophoneEnabled = isMicrophoneEnabled
+                    )
+                },
                 isSpeaking = false
             )
         }

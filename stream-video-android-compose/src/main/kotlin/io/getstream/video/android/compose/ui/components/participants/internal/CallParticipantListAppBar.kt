@@ -53,7 +53,7 @@ internal fun CallParticipantListAppBar(
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .height(VideoTheme.dimens.callParticipantInfoMenuAppBarHeight)
+            .height(VideoTheme.dimens.participantInfoMenuAppBarHeight)
             .background(VideoTheme.colors.barsBackground)
             .padding(VideoTheme.dimens.callAppBarPadding),
         verticalAlignment = Alignment.CenterVertically

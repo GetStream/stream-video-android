@@ -45,9 +45,9 @@ public fun buildDefaultAudioControlActions(
     val orientation = LocalConfiguration.current.orientation
 
     val modifier = if (orientation == Configuration.ORIENTATION_PORTRAIT) {
-        Modifier.size(VideoTheme.dimens.callControlButtonSize)
+        Modifier.size(VideoTheme.dimens.controlActionsButtonSize)
     } else {
-        Modifier.size(VideoTheme.dimens.landscapeCallControlButtonSize)
+        Modifier.size(VideoTheme.dimens.landscapeControlActionsButtonSize)
     }
 
     val isMicrophoneEnabled by if (LocalInspectionMode.current) {

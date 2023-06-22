@@ -50,7 +50,7 @@ public fun RegularControlActions(
     modifier: Modifier = Modifier,
     backgroundColor: Color = VideoTheme.colors.barsBackground,
     shape: Shape = VideoTheme.shapes.callControls,
-    elevation: Dp = VideoTheme.dimens.callControlsElevation,
+    elevation: Dp = VideoTheme.dimens.controlActionsElevation,
     spaceBy: Dp? = null,
     onCallAction: (CallAction) -> Unit = { DefaultOnCallActionHandler.onCallAction(call, it) },
     actions: List<(@Composable () -> Unit)> = buildDefaultCallControlActions(
