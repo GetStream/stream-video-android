@@ -24,13 +24,10 @@ import app.cash.paparazzi.Paparazzi
 import io.getstream.video.android.compose.base.BaseComposeTest
 import io.getstream.video.android.compose.ui.components.call.renderer.ParticipantLabel
 import io.getstream.video.android.compose.ui.components.connection.NetworkQualityIndicator
-import io.getstream.video.android.compose.ui.components.indicator.ActiveSoundLevels
+import io.getstream.video.android.compose.ui.components.indicator.AudioVolumeIndicator
 import io.getstream.video.android.compose.ui.components.indicator.SoundIndicator
 import io.getstream.video.android.core.model.NetworkQuality
 import io.getstream.video.android.mock.mockParticipantList
-import io.getstream.video.android.model.Muted
-import io.getstream.video.android.model.Speaking
-import io.getstream.video.android.model.Unmuted
 import org.junit.Rule
 import org.junit.Test
 
@@ -45,17 +42,17 @@ internal class IndicatorsTest : BaseComposeTest() {
     fun `snapshot SoundIndicator composable`() {
         snapshot {
             Row {
-                SoundIndicator(state = Speaking)
-                SoundIndicator(state = Unmuted)
-                SoundIndicator(state = Muted)
+                SoundIndicator(
+                    isSpeaking = true,
+                    isAudioEnabled = true,
+                    audioLevels = listOf(0.7f, 0.5f, 0.9f)
+                )
+                SoundIndicator(
+                    isSpeaking = true,
+                    isAudioEnabled = false,
+                    audioLevels = listOf(0.7f, 0.5f, 0.9f)
+                )
             }
-        }
-    }
-
-    @Test
-    fun `snapshot ActiveSoundLevels composable`() {
-        snapshot {
-            ActiveSoundLevels()
         }
     }
 
