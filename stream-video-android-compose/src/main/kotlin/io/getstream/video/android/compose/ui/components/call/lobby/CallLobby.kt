@@ -160,7 +160,7 @@ public fun CallLobby(
                     MicrophoneIndicator(
                         modifier = Modifier
                             .align(Alignment.CenterVertically)
-                            .padding(horizontal = VideoTheme.dimens.callParticipantSoundIndicatorPadding),
+                            .padding(horizontal = VideoTheme.dimens.participantSoundIndicatorPadding),
                         isMicrophoneEnabled = isMicrophoneEnabled
                     )
                 },

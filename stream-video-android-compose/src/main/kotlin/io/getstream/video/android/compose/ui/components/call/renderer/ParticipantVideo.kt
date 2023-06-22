@@ -124,12 +124,12 @@ public fun ParticipantVideo(
     val containerModifier = if (style.isFocused && participants.size > 1) modifier.border(
         border = if (style.isScreenSharing) {
             BorderStroke(
-                VideoTheme.dimens.callParticipantScreenSharingFocusedBorderWidth,
+                VideoTheme.dimens.participantScreenSharingFocusedBorderWidth,
                 VideoTheme.colors.callFocusedBorder
             )
         } else {
             BorderStroke(
-                VideoTheme.dimens.callParticipantFocusedBorderWidth,
+                VideoTheme.dimens.participantFocusedBorderWidth,
                 VideoTheme.colors.callFocusedBorder
             )
         },
@@ -221,7 +221,7 @@ public fun BoxScope.ParticipantLabel(
             audioLevels = audioLevels,
             modifier = Modifier
                 .align(CenterVertically)
-                .padding(horizontal = VideoTheme.dimens.callParticipantSoundIndicatorPadding)
+                .padding(horizontal = VideoTheme.dimens.participantSoundIndicatorPadding)
         )
     }
 ) {
@@ -258,15 +258,15 @@ public fun BoxScope.ParticipantLabel(
             audioLevels = audioLevels,
             modifier = Modifier
                 .align(CenterVertically)
-                .padding(horizontal = VideoTheme.dimens.callParticipantSoundIndicatorPadding)
+                .padding(horizontal = VideoTheme.dimens.participantSoundIndicatorPadding)
         )
     }
 ) {
     Row(
         modifier = Modifier
             .align(labelPosition)
-            .padding(VideoTheme.dimens.callParticipantLabelPadding)
-            .height(VideoTheme.dimens.callParticipantLabelHeight)
+            .padding(VideoTheme.dimens.participantLabelPadding)
+            .height(VideoTheme.dimens.participantLabelHeight)
             .wrapContentWidth()
             .clip(RoundedCornerShape(8.dp))
             .background(
@@ -277,8 +277,8 @@ public fun BoxScope.ParticipantLabel(
     ) {
         Text(
             modifier = Modifier
-                .widthIn(max = VideoTheme.dimens.callParticipantLabelTextMaxWidth)
-                .padding(start = VideoTheme.dimens.callParticipantLabelTextPaddingStart)
+                .widthIn(max = VideoTheme.dimens.participantLabelTextMaxWidth)
+                .padding(start = VideoTheme.dimens.participantLabelTextPaddingStart)
                 .align(CenterVertically),
             text = nameLabel,
             style = VideoTheme.typography.body,
