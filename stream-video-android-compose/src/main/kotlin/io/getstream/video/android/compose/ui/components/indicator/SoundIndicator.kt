@@ -51,7 +51,7 @@ public fun SoundIndicator(
     } else if (isAudioEnabled) {
         AudioVolumeIndicator(
             modifier = modifier.padding(end = VideoTheme.dimens.audioLevelIndicatorBarPadding),
-            audioLevels = listOf(0f, 0f, 0f)
+            audioLevels = listOf(0f, 0f, 0f, 0f, 0f)
         )
     } else {
         Icon(
@@ -73,12 +73,12 @@ private fun SoundIndicatorPreview() {
             SoundIndicator(
                 isSpeaking = true,
                 isAudioEnabled = true,
-                audioLevels = listOf(0.7f, 0.5f, 0.9f)
+                audioLevels = listOf(0.7f, 0f, 0.5f, 0f, 0.9f)
             )
             SoundIndicator(
                 isSpeaking = false,
                 isAudioEnabled = false,
-                audioLevels = listOf(0.7f, 0.5f, 0.9f)
+                audioLevels = listOf(0.7f, 0f, 0.5f, 0f, 0.9f)
             )
         }
     }

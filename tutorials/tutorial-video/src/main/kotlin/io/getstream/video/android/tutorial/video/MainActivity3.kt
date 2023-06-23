@@ -27,7 +27,6 @@ import androidx.lifecycle.lifecycleScope
 import io.getstream.video.android.common.AbstractCallActivity
 import io.getstream.video.android.common.viewmodel.CallViewModel
 import io.getstream.video.android.common.viewmodel.CallViewModelFactory
-import io.getstream.video.android.compose.permission.LaunchCallPermissions
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.call.CallContainer
 import io.getstream.video.android.core.Call
@@ -88,13 +87,10 @@ class MainActivity3 : AbstractCallActivity() {
         }
 
         setContent {
-            // step5 - request permissions.
-            LaunchCallPermissions(call = call)
-
-            // step6 - apply VideTheme
+            // step5 - apply VideTheme
             VideoTheme {
 
-                // step7 - render videos
+                // step6 - render videos
                 CallContainer(
                     modifier = Modifier.fillMaxSize(),
                     call = call,

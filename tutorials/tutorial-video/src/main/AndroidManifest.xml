@@ -14,8 +14,7 @@
      See the License for the specific language governing permissions and
      limitations under the License.
 -->
-<manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
     <uses-permission android:name="android.permission.INTERNET" />
 
@@ -27,15 +26,14 @@
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
-        android:theme="@style/Theme.TutorialVideo"
-        tools:targetApi="31">
-        
+        android:theme="@style/Theme.TutorialVideo">
+
         <activity
-            android:name=".MainActivity"
+            android:name=".MainActivity3"
+            android:theme="@style/Theme.TutorialVideo"
             android:configChanges="screenSize|smallestScreenSize|screenLayout|orientation"
             android:exported="true"
-            android:supportsPictureInPicture="true"
-            android:theme="@style/Theme.TutorialVideo">
+            android:supportsPictureInPicture="true" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -43,8 +41,17 @@
             </intent-filter>
         </activity>
 
-        <activity android:name=".MainActivity3" />
-        <activity android:name=".MainActivity2" />
+        <activity
+            android:name=".MainActivity2"
+            android:configChanges="screenSize|smallestScreenSize|screenLayout|orientation"
+            android:exported="true"
+            android:supportsPictureInPicture="true" />
+
+        <activity
+            android:name=".MainActivity"
+            android:configChanges="screenSize|smallestScreenSize|screenLayout|orientation"
+            android:exported="true"
+            android:supportsPictureInPicture="true" />
     </application>
 
 </manifest>

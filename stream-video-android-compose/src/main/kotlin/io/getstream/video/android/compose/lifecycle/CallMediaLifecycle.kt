@@ -62,7 +62,7 @@ public fun CallMediaLifecycle(
         LaunchedEffect(latestLifecycleEvent) {
             delay(pipEnteringDuration)
             if (isInPictureInPicture) {
-                call.camera.disable()
+                call.camera.pause()
             }
         }
     }
@@ -71,7 +71,7 @@ public fun CallMediaLifecycle(
         LaunchedEffect(latestLifecycleEvent) {
             delay(pipEnteringDuration)
             if (isInPictureInPicture) {
-                call.camera.enable()
+                call.camera.resume()
             }
         }
     }

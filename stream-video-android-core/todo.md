@@ -20,7 +20,7 @@
 - [ ] Video disconnects sometimes. (BufferQueue has not connected producer and Stop capture: Nulling session. Could be related to the peer connection breaking)
 - [ ] Tests should run on CI (and we need to speed it up a bit) (Jaewoong)
 - [ ] Review updatePublishQuality. Verify layer enable/disable works (Jaewoong)
-- [ ] Testing session with team cross platform (Thierry)
+- [ ] Testing session with team cross platform (Jared/ Thierry)
 - [ ] Publish 0.1 on Maven
 - [~] Audio room tutorial & Feedback cycle with team
 - [~] Reconnect flow can't reconnect the subscriber (SFU doesn't support restarts on the subscriber peer connection yet)
