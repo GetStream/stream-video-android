@@ -41,10 +41,10 @@ public fun rememberCallPermissionsState(
         android.Manifest.permission.RECORD_AUDIO,
     ),
     onPermissionsResult: (Map<String, Boolean>) -> Unit = {
-        if (it[android.Manifest.permission.CAMERA] == true) {
+        if (it[android.Manifest.permission.CAMERA] == true && call.camera.isEnabled.value) {
             call.camera.setEnabled(true)
         }
-        if (it[android.Manifest.permission.RECORD_AUDIO] == true) {
+        if (it[android.Manifest.permission.RECORD_AUDIO] == true && call.microphone.isEnabled.value) {
             call.microphone.setEnabled(true)
         }
     }

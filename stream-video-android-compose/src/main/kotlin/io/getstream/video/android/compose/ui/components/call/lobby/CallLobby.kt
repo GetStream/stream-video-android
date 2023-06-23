@@ -42,6 +42,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import io.getstream.video.android.compose.lifecycle.CallMediaLifecycle
 import io.getstream.video.android.compose.permission.VideoPermissionsState
 import io.getstream.video.android.compose.permission.rememberCallPermissionsState
 import io.getstream.video.android.compose.theme.VideoTheme
@@ -129,6 +130,8 @@ public fun CallLobby(
     val participant = remember(user) { ParticipantState(initialUser = user, call = call) }
 
     DefaultPermissionHandler(videoPermission = permissions)
+
+    CallMediaLifecycle(call = call, isInPictureInPicture = true)
 
     Column(modifier = modifier) {
         Box(

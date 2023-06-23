@@ -38,7 +38,7 @@ import io.getstream.video.android.model.StreamCallId
  */
 public abstract class AbstractCallActivity : ComponentActivity() {
 
-    public val call: Call by lazy(LazyThreadSafetyMode.NONE) { provideCall() }
+    public val call: Call by lazy { provideCall() }
 
     public abstract fun provideCall(): Call
 

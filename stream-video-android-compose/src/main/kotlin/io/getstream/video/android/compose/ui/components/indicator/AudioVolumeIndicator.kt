@@ -54,14 +54,14 @@ public fun AudioVolumeIndicator(
     val activatedColor = VideoTheme.colors.activatedVolumeIndicator
     val deActivatedColor = VideoTheme.colors.deActivatedVolumeIndicator
 
-    if (audioLevels.size < 3) {
-        throw IllegalArgumentException("audioLevels list must include three audio float (0 ~ 1f) values.")
+    if (audioLevels.size < 5) {
+        throw IllegalArgumentException("audioLevels list must include five audio float (0 ~ 1f) values.")
     }
 
     val infiniteAnimation = rememberInfiniteTransition("AudioVolumeIndicator")
     val animations = mutableListOf<State<Float>>()
 
-    repeat(3) {
+    repeat(5) {
         val durationMillis = Random.nextInt(500, 1000)
         animations += infiniteAnimation.animateFloat(
             initialValue = 0f,
@@ -81,30 +81,32 @@ public fun AudioVolumeIndicator(
         verticalAlignment = Alignment.Bottom,
         horizontalArrangement = Arrangement.spacedBy(VideoTheme.dimens.audioLevelIndicatorBarSeparatorWidth)
     ) {
-        repeat(3) { index ->
-            val audioLevel = audioLevels[index]
-            val currentSize = animations[index % animations.size].value
-            var barHeightPercent = audioLevel + currentSize
-            if (barHeightPercent > 1.0f) {
-                val diff = barHeightPercent - 1.0f
-                barHeightPercent = 1.0f - diff
-            }
+        repeat(5) { index ->
+            if (index % 2 == 0) {
+                val audioLevel = audioLevels[index]
+                val currentSize = animations[index % animations.size].value
+                var barHeightPercent = audioLevel + currentSize
+                if (barHeightPercent > 1.0f) {
+                    val diff = barHeightPercent - 1.0f
+                    barHeightPercent = 1.0f - diff
+                }
 
-            Spacer(
-                modifier = Modifier
-                    .width(VideoTheme.dimens.audioLevelIndicatorBarWidth)
-                    .fillMaxHeight(
-                        if (audioLevel == 0f) {
-                            0.23f
-                        } else {
-                            barHeightPercent
-                        }
-                    )
-                    .background(
-                        color = if (audioLevel == 0f) deActivatedColor else activatedColor,
-                        shape = RoundedCornerShape(16.dp)
-                    )
-            )
+                Spacer(
+                    modifier = Modifier
+                        .width(VideoTheme.dimens.audioLevelIndicatorBarWidth)
+                        .fillMaxHeight(
+                            if (audioLevel == 0f) {
+                                0.23f
+                            } else {
+                                barHeightPercent
+                            }
+                        )
+                        .background(
+                            color = if (audioLevel == 0f) deActivatedColor else activatedColor,
+                            shape = RoundedCornerShape(16.dp)
+                        )
+                )
+            }
         }
     }
 }
@@ -114,8 +116,8 @@ public fun AudioVolumeIndicator(
 private fun ActiveSoundLevelsPreview() {
     VideoTheme {
         Column {
-            AudioVolumeIndicator(audioLevels = listOf(0.86f, 0.4f, 0.72f))
-            AudioVolumeIndicator(audioLevels = listOf(0f, 0f, 0f))
+            AudioVolumeIndicator(audioLevels = listOf(0.86f, 0f, 0.4f, 0f, 0.72f))
+            AudioVolumeIndicator(audioLevels = listOf(0f, 0f, 0f, 0f, 0f))
         }
     }
 }
