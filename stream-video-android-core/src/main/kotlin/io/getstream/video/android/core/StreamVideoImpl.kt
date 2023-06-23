@@ -340,7 +340,7 @@ internal class StreamVideoImpl internal constructor(
 
     internal suspend fun selectLocation(): Result<String> {
         var attempts = 0
-        var lastResult: Result<String>? = null
+        var lastResult: Result<String>?
         while (attempts < 3) {
             attempts += 1
             lastResult = _selectLocation()
@@ -807,7 +807,8 @@ internal class StreamVideoImpl internal constructor(
         sessionId: String
     ): Result<ListRecordingsResponse> {
         return wrapAPICall {
-            val result = connectionModule.recordingApi.listRecordingsTypeIdSession1(type, id, sessionId)
+            val result =
+                connectionModule.recordingApi.listRecordingsTypeIdSession1(type, id, sessionId)
             result
         }
     }
@@ -870,11 +871,12 @@ internal class StreamVideoImpl internal constructor(
                 .method("HEAD", null)
                 .build()
             val call = connectionModule.okHttpClient.newCall(request)
-            val response = suspendCancellableCoroutine<Response> { continuation ->
+            val response = suspendCancellableCoroutine { continuation ->
                 call.enqueue(object : Callback {
                     override fun onFailure(call: okhttp3.Call, e: java.io.IOException) {
                         continuation.resumeWithException(e)
                     }
+
                     override fun onResponse(call: okhttp3.Call, response: Response) {
                         continuation.resume(response) {
                             call.cancel()
@@ -896,6 +898,7 @@ internal class StreamVideoImpl internal constructor(
             connectionModule.videoCallsApi.acceptCall(type, id)
         }
     }
+
     internal suspend fun reject(type: String, id: String): Result<RejectCallResponse> {
         return wrapAPICall {
             connectionModule.videoCallsApi.rejectCall(type, id)
@@ -907,6 +910,7 @@ internal class StreamVideoImpl internal constructor(
             connectionModule.videoCallsApi.getCall(type, id, notify = true)
         }
     }
+
     internal suspend fun ring(type: String, id: String): Result<GetCallResponse> {
         return wrapAPICall {
             connectionModule.videoCallsApi.getCall(type, id, ring = true)

@@ -64,7 +64,7 @@ public data class StreamCallId constructor(
          */
         public fun fromCallCid(cid: String): StreamCallId {
             val (type, id) = cid.toTypeAndId()
-            return StreamCallId(type, id)
+            return StreamCallId(type = type.trim(), id = id.trim())
         }
     }
 }

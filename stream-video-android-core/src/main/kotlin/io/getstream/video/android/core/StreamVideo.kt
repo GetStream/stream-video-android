@@ -46,9 +46,7 @@ public interface StreamVideo : NotificationHandler {
     val state: ClientState
 
     /**
-     * Create a call with the given type and id
-     *
-     *
+     * Create a call with the given type and id.
      */
     public fun call(type: String, id: String = ""): Call
 
@@ -57,6 +55,7 @@ public interface StreamVideo : NotificationHandler {
      *
      * @param queryCallsData Request with the data describing the calls. Contains the filters
      * as well as pagination logic to be used when querying.
+     *
      * @return [Result] containing the [QueriedCalls].
      */
     public suspend fun queryCalls(
