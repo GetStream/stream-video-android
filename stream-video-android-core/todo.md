@@ -16,6 +16,7 @@
 
 ### 0.1 milestone
 
+- [ ] StreamVideoBuilder should raise an error if another client is still active. Call.join should raise an error if you already joined
 - [ ] Audio volume was too low (probably a bug related to speakerphone vs earpiece)
 - [ ] Video disconnects sometimes. (BufferQueue has not connected producer and Stop capture: Nulling session. Could be related to the peer connection breaking)
 - [ ] Tests should run on CI (and we need to speed it up a bit) (Jaewoong)

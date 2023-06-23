@@ -384,6 +384,7 @@ public class Call(
                 return result
             }
             if (result is Failure) {
+                session = null
                 logger.w { "Join failed with error $result" }
                 if (isPermanentError(result.value)) {
                     state._connection.value = RealtimeConnection.Failed(result.value)
@@ -407,6 +408,9 @@ public class Call(
         ring: Boolean = false,
         notify: Boolean = false,
     ): Result<RtcSession> {
+        if (session != null) {
+            throw IllegalStateException("Call $cid has already been joined. Please use call.leave before joining it again")
+        }
 
         // step 1. call the join endpoint to get a list of SFUs
         val timer = clientImpl.debugInfo.trackTime("call.join")
@@ -795,6 +799,7 @@ public class Call(
         monitor.stop()
         session?.cleanup()
         supervisorJob.cancel()
+        session = null
     }
 
     suspend fun ring(): Result<GetCallResponse> {

@@ -81,12 +81,19 @@ public class StreamVideoBuilder @JvmOverloads constructor(
     private val context: Context = context.applicationContext
 
     /** URL overwrite to allow for testing against a local instance of video */
-    private var videoDomain: String = "video.stream-io-api.com"
+    internal var videoDomain: String = "video.stream-io-api.com"
+    /** Verify that only 1 version of the video client exists, prevents integration mistakes */
+    internal var ensureSingleInstance: Boolean = true
 
     val scope = CoroutineScope(DispatcherProvider.IO)
 
     public fun build(): StreamVideo {
         val lifecycle = ProcessLifecycleOwner.get().lifecycle
+
+        val existingInstance = StreamVideo.instanceOrNull()
+        if (existingInstance != null && ensureSingleInstance) {
+            throw IllegalArgumentException("Creating 2 instance of the video client will cause bugs with call.state. Before creating a new client, please remove the old one. You can remove the old client using StreamVideo.removeClient()")
+        }
 
         if (apiKey.isBlank()) {
             throw IllegalArgumentException("The API key can not be empty")

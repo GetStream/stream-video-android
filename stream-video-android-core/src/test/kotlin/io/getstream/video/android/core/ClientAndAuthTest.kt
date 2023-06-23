@@ -204,6 +204,19 @@ class ClientAndAuthTest : TestBase() {
     }
 
     @Test
+    fun `two clients is not allowed`() = runTest {
+        val builder = StreamVideoBuilder(
+            context = context,
+            apiKey = apiKey,
+            geo = GEO.GlobalEdgeNetwork,
+            testData.users["thierry"]!!,
+            testData.tokens["thierry"]!!,
+        )
+        val client = builder.build()
+        val client2 = builder.build()
+    }
+
+    @Test
     @Ignore
     fun testWaitingForConnection() = runTest {
         // often you'll want to run the connection task in the background and not wait for it
