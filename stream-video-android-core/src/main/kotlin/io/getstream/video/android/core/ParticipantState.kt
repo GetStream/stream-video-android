@@ -104,7 +104,8 @@ public data class ParticipantState(
     /**
      * The last 5 values for the audio level. This list easier to work with for some audio visualizations
      */
-    internal val _audioLevels: MutableStateFlow<List<Float>> = MutableStateFlow(listOf(0f, 0f, 0f, 0f, 0f))
+    internal val _audioLevels: MutableStateFlow<List<Float>> =
+        MutableStateFlow(listOf(0f, 0f, 0f, 0f, 0f))
     val audioLevels: StateFlow<List<Float>> = _audioLevels
 
     /**
@@ -176,6 +177,10 @@ public data class ParticipantState(
         val currentAudio = _audioLevels.value.toMutableList()
         currentAudio.removeAt(0)
         currentAudio.add(audioLevel)
+        if (currentAudio[0] == 0f && currentAudio[2] == 0f) {
+            currentAudio[0] = audioLevel
+            currentAudio[2] = audioLevel
+        }
         _audioLevels.value = currentAudio.toList()
         _audioLevel.value = audioLevel
     }
