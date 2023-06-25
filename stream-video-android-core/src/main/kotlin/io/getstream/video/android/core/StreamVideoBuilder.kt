@@ -22,6 +22,7 @@ import androidx.lifecycle.ProcessLifecycleOwner
 import com.jakewharton.threetenabp.AndroidThreeTen
 import io.getstream.log.StreamLog
 import io.getstream.log.android.AndroidStreamLogger
+import io.getstream.log.streamLog
 import io.getstream.video.android.core.dispatchers.DispatcherProvider
 import io.getstream.video.android.core.filter.AudioFilter
 import io.getstream.video.android.core.filter.VideoFilter
@@ -39,18 +40,19 @@ import kotlinx.coroutines.launch
 import java.util.UUID
 
 /**
- * The StreamVideoBuilder is used to create a new instance of the StreamVideoClient.
+ * The [StreamVideoBuilder] is used to create a new instance of the [StreamVideo] client. This is the
+ * most essential class to connect to the Stream server and initialize everything you need to implement audio/video calls.
  *
- * @sample
+ * ```kotlin
  * val client = StreamVideoBuilder(
  *      context = context,
  *      apiKey = apiKey,
  *      geo = GEO.GlobalEdgeNetwork,
- *      user,
- *      token,
+ *      user = user,
+ *      token = token,
  *      loggingLevel = LoggingLevel.BODY
  *  )
- *
+ *```
  */
 public class StreamVideoBuilder @JvmOverloads constructor(
     context: Context,
@@ -179,13 +181,19 @@ public class StreamVideoBuilder @JvmOverloads constructor(
         // establish a ws connection with the coordinator (we don't support this for anonymous users)
         if (user.type != UserType.Anonymous) {
             scope.launch {
-                client.connectAsync()
+                val result = client.connectAsync().await()
+                result.onSuccess {
+                    streamLog { "connection succeed! (duration: ${result.getOrNull()})" }
+                }.onError {
+                    streamLog { it.message }
+                }
             }
         }
 
         // see which location is best to connect to
         scope.launch {
-            client.loadLocationAsync()
+            val location = client.loadLocationAsync().await()
+            streamLog { "location initialized: ${location.getOrNull()}" }
         }
 
         // installs Stream Video instance
