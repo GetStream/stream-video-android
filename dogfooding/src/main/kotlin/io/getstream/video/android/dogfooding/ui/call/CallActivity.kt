@@ -60,6 +60,6 @@ class CallActivity : AbstractCallActivity() {
         val streamVideo = StreamVideo.instance()
         val cid = intent.getParcelableExtra<StreamCallId>(EXTRA_CID)
             ?: throw IllegalArgumentException("call type and id is invalid!")
-        return streamVideo.call(cid.type, cid.id)
+        return streamVideo.call(type = cid.type, id = cid.id)
     }
 }

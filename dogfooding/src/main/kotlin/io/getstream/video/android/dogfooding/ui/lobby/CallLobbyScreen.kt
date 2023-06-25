@@ -272,7 +272,7 @@ private fun HandleCallLobbyUiState(
         when (callLobbyUiState) {
             is CallLobbyUiState.JoinCompleted -> {
                 val intent = AbstractCallActivity.createIntent<CallActivity>(
-                    context,
+                    context = context,
                     callId = callLobbyViewModel.callId
                 ).apply {
                     flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK

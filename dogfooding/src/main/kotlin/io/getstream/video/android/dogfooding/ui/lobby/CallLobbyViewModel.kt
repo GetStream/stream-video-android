@@ -21,11 +21,8 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.google.firebase.auth.FirebaseAuth
 import dagger.hilt.android.lifecycle.HiltViewModel
-import io.getstream.result.Result
 import io.getstream.video.android.core.Call
-import io.getstream.video.android.core.CreateCallOptions
 import io.getstream.video.android.core.StreamVideo
-import io.getstream.video.android.core.call.RtcSession
 import io.getstream.video.android.datastore.delegate.StreamUserDataStore
 import io.getstream.video.android.model.StreamCallId
 import io.getstream.video.android.model.User
@@ -61,16 +58,7 @@ class CallLobbyViewModel @Inject constructor(
     internal val uiState: StateFlow<CallLobbyUiState> = event
         .flatMapLatest { event ->
             when (event) {
-                is CallLobbyEvent.JoinCall -> {
-                    _isLoading.value = true
-                    val result = joinCall()
-
-                    if (result.isSuccess) {
-                        flowOf(CallLobbyUiState.JoinCompleted)
-                    } else {
-                        flowOf(CallLobbyUiState.JoinFailed(result.errorOrNull()?.message.orEmpty()))
-                    }
-                }
+                is CallLobbyEvent.JoinCall -> flowOf(CallLobbyUiState.JoinCompleted)
 
                 else -> flowOf(CallLobbyUiState.Nothing)
             }
@@ -88,14 +76,6 @@ class CallLobbyViewModel @Inject constructor(
 
     fun enableMicrophone(enabled: Boolean) {
         call.microphone.setEnabled(enabled)
-    }
-
-    private suspend fun joinCall(): Result<RtcSession> {
-        val streamVideo = StreamVideo.instance()
-        return call.join(
-            create = true,
-            createOptions = CreateCallOptions(memberIds = listOf(streamVideo.userId))
-        )
     }
 
     fun signOut() {
