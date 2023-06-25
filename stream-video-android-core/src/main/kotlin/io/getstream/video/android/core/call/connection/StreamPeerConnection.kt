@@ -309,6 +309,8 @@ public class StreamPeerConnection(
             "f", true, 1.0
         ).apply {
             maxBitrateBps = maxBitRate
+//            networkPriority = 3
+//            bitratePriority = 4.0
         }
 
         val encodings = listOf(quarterQuality, halfQuality, fullQuality)

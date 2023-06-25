@@ -73,6 +73,8 @@ Video roadmap and changelog is available [here](https://github.com/GetStream/pro
 
 ### 0.3 milestone
 
+- [ ] H264 workaround on S23
+- [ ] Bluetooth reliability
 - [ ] Dynascale 2.0 (codecs, f resolution switches, resolution webrtc handling)
 - [ ] Test coverage
 - [ ] Testing on more devices
