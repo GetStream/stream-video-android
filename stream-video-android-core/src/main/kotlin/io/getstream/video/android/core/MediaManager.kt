@@ -229,6 +229,7 @@ class MicrophoneManager(val mediaManager: MediaManagerImpl) {
      */
     fun select(device: AudioDevice?) {
         audioHandler.selectDevice(device)
+
         _selectedDevice.value = device
     }
 
