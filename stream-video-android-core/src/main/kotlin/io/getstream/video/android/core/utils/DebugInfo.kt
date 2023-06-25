@@ -18,7 +18,6 @@ package io.getstream.video.android.core.utils
 
 import android.os.Build
 import io.getstream.log.taggedLogger
-import io.getstream.video.android.BuildConfig
 import io.getstream.video.android.core.StreamVideoImpl
 import io.getstream.video.android.core.dispatchers.DispatcherProvider
 import kotlinx.coroutines.CoroutineScope

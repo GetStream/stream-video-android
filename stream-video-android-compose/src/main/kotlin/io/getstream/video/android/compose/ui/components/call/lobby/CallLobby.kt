@@ -16,6 +16,7 @@
 
 package io.getstream.video.android.compose.ui.components.call.lobby
 
+import android.view.View
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -76,6 +77,7 @@ import io.getstream.video.android.ui.common.R
  * @param onDisabledContent Content is shown that a local camera is disabled. It displays user avatar by default.
  * @param onCallAction Handler when the user triggers a Call Control Action.
  * @param lobbyControlsContent Content is shown that allows users to trigger different actions to control a preview call.
+ * @param onRendered An interface that will be invoked when the video is rendered.
  */
 @Composable
 public fun CallLobby(
@@ -106,8 +108,9 @@ public fun CallLobby(
         enabled = isCameraEnabled
     ),
     permissions: VideoPermissionsState = rememberCallPermissionsState(call = call),
+    onRendered: (View) -> Unit = {},
     onRenderedContent: @Composable (video: ParticipantState.Video) -> Unit = {
-        OnRenderedContent(call = call, video = it)
+        OnRenderedContent(call = call, video = it, onRendered = onRendered)
     },
     onDisabledContent: @Composable () -> Unit = {
         OnDisabledContent(user = user)
@@ -190,13 +193,15 @@ private fun DefaultPermissionHandler(
 private fun OnRenderedContent(
     call: Call,
     video: ParticipantState.Video,
+    onRendered: (View) -> Unit = {},
 ) {
     VideoRenderer(
         modifier = Modifier
             .fillMaxSize()
             .testTag("on_rendered_content"),
         call = call,
-        video = video
+        video = video,
+        onRendered = onRendered
     )
 }
 
