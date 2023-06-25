@@ -62,7 +62,7 @@ import io.getstream.webrtc.android.ui.VideoTextureViewRenderer
  * @param video A media contains a video track or an audio track to be rendered.
  * @param modifier Modifier for styling.
  * @param videoFallbackContent Content is shown the video track is failed to load or not available.
- * @param onRender Handler when the view is rendered.
+ * @param onRendered An interface that will be invoked when the video is rendered.
  */
 @Composable
 public fun VideoRenderer(
@@ -76,7 +76,7 @@ public fun VideoRenderer(
             call
         )
     },
-    onRender: (View) -> Unit = {},
+    onRendered: (View) -> Unit = {},
 ) {
     if (LocalInspectionMode.current) {
         Image(
@@ -116,7 +116,7 @@ public fun VideoRenderer(
                             videoRenderer = this,
                             sessionId = sessionId,
                             trackType = trackType,
-                            onRender = onRender
+                            onRendered = onRendered
                         )
                         setScalingType(scalingType = videoScalingType.toCommonScalingType())
                         setupVideo(mediaTrack, this)

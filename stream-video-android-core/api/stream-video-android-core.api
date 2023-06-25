@@ -586,11 +586,11 @@ public abstract interface class io/getstream/video/android/core/StreamVideo : io
 }
 
 public final class io/getstream/video/android/core/StreamVideo$Companion {
-	public final fun install (Lio/getstream/video/android/core/StreamVideo;)V
 	public final fun instance ()Lio/getstream/video/android/core/StreamVideo;
+	public final fun instanceOrNull ()Lio/getstream/video/android/core/StreamVideo;
 	public final fun isInstalled ()Z
 	public final fun lazyInstance ()Lkotlin/Lazy;
-	public final fun unInstall ()V
+	public final fun removeClient ()V
 }
 
 public final class io/getstream/video/android/core/StreamVideo$DefaultImpls {

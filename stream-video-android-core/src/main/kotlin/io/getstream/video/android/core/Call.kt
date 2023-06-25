@@ -574,7 +574,7 @@ public class Call(
         videoRenderer: VideoTextureViewRenderer,
         sessionId: String,
         trackType: TrackType,
-        onRender: (View) -> Unit = {}
+        onRendered: (View) -> Unit = {}
     ) {
         logger.d { "[initRenderer] #sfu; sessionId: $sessionId" }
 
@@ -595,7 +595,7 @@ public class Call(
                             )
                         )
                     }
-                    onRender(videoRenderer)
+                    onRendered(videoRenderer)
                 }
 
                 override fun onFrameResolutionChanged(p0: Int, p1: Int, p2: Int) {
