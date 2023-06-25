@@ -77,13 +77,13 @@ public class StreamVideoBuilder @JvmOverloads constructor(
     private var encryptPreferences: Boolean = true,
     /** Connection timeout in seconds */
     private val connectionTimeoutInMs: Long = 10000,
+    /** Verify that only 1 version of the video client exists, prevents integration mistakes */
+    private var ensureSingleInstance: Boolean = true
 ) {
     private val context: Context = context.applicationContext
 
     /** URL overwrite to allow for testing against a local instance of video */
     internal var videoDomain: String = "video.stream-io-api.com"
-    /** Verify that only 1 version of the video client exists, prevents integration mistakes */
-    internal var ensureSingleInstance: Boolean = true
 
     val scope = CoroutineScope(DispatcherProvider.IO)
 
