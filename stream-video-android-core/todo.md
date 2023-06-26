@@ -20,7 +20,7 @@
 - [ ] Audio volume was too low (probably a bug related to speakerphone vs earpiece)
 - [X] android.hardware.camera2.CameraAccessException: CAMERA_DISCONNECTED (2): checkPidStatus:1940: The camera device has been disconnected
 - [ ] Video disconnects sometimes. (BufferQueue has not connected producer and Stop capture: Nulling session. Could be related to the peer connection breaking)
-- [ ] Tests should run on CI (and we need to speed it up a bit) (Jaewoong)
+- [X] Tests should run on CI (and we need to speed it up a bit) (Jaewoong)
 - [ ] Review updatePublishQuality. Verify layer enable/disable works (Jaewoong)
 - [ ] Testing session with team cross platform (Jared/ Thierry)
 - [ ] Publish 0.1 on Maven
