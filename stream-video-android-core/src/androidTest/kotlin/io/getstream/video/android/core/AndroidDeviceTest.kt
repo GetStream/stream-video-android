@@ -145,11 +145,18 @@ class AndroidDeviceTest : IntegrationTestBase(connectCoordinatorWS = false) {
     fun cleanupCall() = runTest {
         val call = newClient.call("default", UUID.randomUUID().toString())
         // join a call
-        call.join(create = true)
+        val result = call.join(create = true)
         // create a turbine connection state
         val connectionState = call.state.connection.testIn(backgroundScope)
         // asset that the connection state is connected
-        assertThat(connectionState.awaitItem()).isEqualTo(RealtimeConnection.Connected)
+        val connectionStateItem = connectionState.awaitItem()
+        assertThat(connectionStateItem).isAnyOf(
+            RealtimeConnection.Connected,
+            RealtimeConnection.Joined(result.getOrThrow())
+        )
+        if (connectionStateItem is RealtimeConnection.Joined) {
+            connectionState.awaitItem()
+        }
         // leave and cleanup the joining call
         call.leave()
         // cleanup the media manager
@@ -167,11 +174,18 @@ class AndroidDeviceTest : IntegrationTestBase(connectCoordinatorWS = false) {
     fun cleanupClient() = runTest {
         val call = newClient.call("default", UUID.randomUUID().toString())
         // join a call
-        call.join(create = true)
+        val result = call.join(create = true)
         // create a turbine connection state
         val connectionState = call.state.connection.testIn(backgroundScope)
         // asset that the connection state is connected
-        assertThat(connectionState.awaitItem()).isEqualTo(RealtimeConnection.Connected)
+        val connectionStateItem = connectionState.awaitItem()
+        assertThat(connectionStateItem).isAnyOf(
+            RealtimeConnection.Connected,
+            RealtimeConnection.Joined(result.getOrThrow())
+        )
+        if (connectionStateItem is RealtimeConnection.Joined) {
+            connectionState.awaitItem()
+        }
         // leave and cleanup the joining call
         call.leave()
         call.cleanup()
@@ -244,7 +258,14 @@ class AndroidDeviceTest : IntegrationTestBase(connectCoordinatorWS = false) {
         // create a turbine connection state
         val connectionState = call.state.connection.testIn(backgroundScope)
         // asset that the connection state is connected
-        assertThat(connectionState.awaitItem()).isEqualTo(RealtimeConnection.Connected)
+        val connectionStateItem = connectionState.awaitItem()
+        assertThat(connectionStateItem).isAnyOf(
+            RealtimeConnection.Connected,
+            RealtimeConnection.Joined(result.getOrThrow())
+        )
+        if (connectionStateItem is RealtimeConnection.Joined) {
+            connectionState.awaitItem()
+        }
 
         val participantsCounts = call.state.participantCounts.testIn(backgroundScope)
         assertThat(participantsCounts.awaitItem()?.total).isEqualTo(1)
@@ -269,6 +290,18 @@ class AndroidDeviceTest : IntegrationTestBase(connectCoordinatorWS = false) {
         val call = client.call("default", UUID.randomUUID().toString())
         val result = call.join(create = true)
         assertSuccess(result)
+
+        // create a turbine connection state
+        val connectionState = call.state.connection.testIn(backgroundScope)
+        // asset that the connection state is connected
+        val connectionStateItem = connectionState.awaitItem()
+        assertThat(connectionStateItem).isAnyOf(
+            RealtimeConnection.Connected,
+            RealtimeConnection.Joined(result.getOrThrow())
+        )
+        if (connectionStateItem is RealtimeConnection.Joined) {
+            connectionState.awaitItem()
+        }
 
         // verify the video track is present and working
         val videoWrapper = call.state.me.value?.videoTrack?.value
@@ -342,6 +375,18 @@ class AndroidDeviceTest : IntegrationTestBase(connectCoordinatorWS = false) {
         val result = call.join(create = true)
         assertSuccess(result)
 
+        // create a turbine connection state
+        val connectionState = call.state.connection.testIn(backgroundScope)
+        // asset that the connection state is connected
+        val connectionStateItem = connectionState.awaitItem()
+        assertThat(connectionStateItem).isAnyOf(
+            RealtimeConnection.Connected,
+            RealtimeConnection.Joined(result.getOrThrow())
+        )
+        if (connectionStateItem is RealtimeConnection.Joined) {
+            connectionState.awaitItem()
+        }
+
         val publisher = call.session?.publisher?.state?.testIn(backgroundScope)
 
         // assert ice connection state flows
@@ -407,7 +452,14 @@ class AndroidDeviceTest : IntegrationTestBase(connectCoordinatorWS = false) {
         // create a turbine connection state
         val connectionState = call.state.connection.testIn(backgroundScope)
         // asset that the connection state is connected
-        assertThat(connectionState.awaitItem()).isEqualTo(RealtimeConnection.Connected)
+        val connectionStateItem = connectionState.awaitItem()
+        assertThat(connectionStateItem).isAnyOf(
+            RealtimeConnection.Connected,
+            RealtimeConnection.Joined(result.getOrThrow())
+        )
+        if (connectionStateItem is RealtimeConnection.Joined) {
+            connectionState.awaitItem()
+        }
 
         // leave and clean up a call
         call.leave()
@@ -426,7 +478,14 @@ class AndroidDeviceTest : IntegrationTestBase(connectCoordinatorWS = false) {
         // create a turbine connection state
         val connectionState = call.state.connection.testIn(backgroundScope)
         // asset that the connection state is connected
-        assertThat(connectionState.awaitItem()).isEqualTo(RealtimeConnection.Connected)
+        val connectionStateItem = connectionState.awaitItem()
+        assertThat(connectionStateItem).isAnyOf(
+            RealtimeConnection.Connected,
+            RealtimeConnection.Joined(result.getOrThrow())
+        )
+        if (connectionStateItem is RealtimeConnection.Joined) {
+            connectionState.awaitItem()
+        }
 
         // end call
         val endResult = call.end()
@@ -445,7 +504,18 @@ class AndroidDeviceTest : IntegrationTestBase(connectCoordinatorWS = false) {
         // based on the call settings
         val joinResult = call.join(create = true)
         assertSuccess(joinResult)
-        delay(500)
+
+        // create a turbine connection state
+        val connectionState = call.state.connection.testIn(backgroundScope)
+        // asset that the connection state is connected
+        val connectionStateItem = connectionState.awaitItem()
+        assertThat(connectionStateItem).isAnyOf(
+            RealtimeConnection.Connected,
+            RealtimeConnection.Joined(joinResult.getOrThrow())
+        )
+        if (connectionStateItem is RealtimeConnection.Joined) {
+            connectionState.awaitItem()
+        }
 
         // fake a participant joining
         val joinEvent = ParticipantJoinedEvent(
