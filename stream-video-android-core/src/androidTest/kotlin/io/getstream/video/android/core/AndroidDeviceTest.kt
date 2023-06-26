@@ -16,6 +16,7 @@
 
 package io.getstream.video.android.core
 
+import app.cash.turbine.testIn
 import com.google.common.truth.Truth.assertThat
 import io.getstream.log.taggedLogger
 import io.getstream.video.android.core.api.SignalServerService
@@ -144,18 +145,21 @@ class AndroidDeviceTest : IntegrationTestBase(connectCoordinatorWS = false) {
 
     @Test
     fun cleanupClient() = runTest {
-        val newClient = StreamVideoBuilder(
-            context = context,
-            apiKey = apiKey,
-            geo = GEO.GlobalEdgeNetwork,
-            testData.users["thierry"]!!,
-            testData.tokens["thierry"]!!,
-            ensureSingleInstance = false
-        ).build()
-        val call = newClient.call("default", randomUUID())
-        call.join()
-        // destroy and cleanup the client
-        newClient.cleanup()
+        val streamVideo = StreamVideo.instance()
+        val call = streamVideo.call("default", randomUUID())
+        // join a call
+        call.join(create = true)
+        // create a turbine connection state
+        val connectionState = call.state.connection.testIn(backgroundScope)
+        // asset that the connection state is connected
+        assertThat(connectionState.awaitItem()).isEqualTo(RealtimeConnection.Connected)
+        // destroy and cleanup the call and client
+        call.leave()
+        call.cleanup()
+        streamVideo.cleanup()
+        // await until disconnect a call
+        assertThat(connectionState.awaitItem()).isEqualTo(RealtimeConnection.Disconnected)
+        // assert the sessions was cleared properly
         assertNull(call.session)
     }
 
