@@ -24,6 +24,7 @@ import kotlinx.coroutines.test.runTest
 import org.junit.Ignore
 import org.junit.Test
 import org.webrtc.PeerConnection
+import java.util.UUID
 
 /**
  * Connection state shows if we've established a connection with the SFU
@@ -58,7 +59,7 @@ class ReconnectTest : IntegrationTestBase(connectCoordinatorWS = false) {
 
     @Test
     fun networkDown() = runTest {
-        val call = StreamVideo.instance().call("default", randomUUID())
+        val call = StreamVideo.instance().call("default", UUID.randomUUID().toString())
         // join a call
         call.join(create = true)
         // create a turbine connection state
@@ -103,7 +104,7 @@ class ReconnectTest : IntegrationTestBase(connectCoordinatorWS = false) {
      */
     @Test
     fun restartIce() = runTest {
-        val call = StreamVideo.instance().call("default", randomUUID())
+        val call = StreamVideo.instance().call("default", UUID.randomUUID().toString())
         // join a call
         call.join(create = true)
         // create a turbine of the publisher state
@@ -137,7 +138,7 @@ class ReconnectTest : IntegrationTestBase(connectCoordinatorWS = false) {
      */
     @Test
     fun switchSfuQuickly() = runTest {
-        val call = StreamVideo.instance().call("default", randomUUID())
+        val call = StreamVideo.instance().call("default", UUID.randomUUID().toString())
         // join a call
         call.join(create = true)
         // create a turbine connection state

@@ -49,6 +49,7 @@ import stream.video.sfu.models.TrackType
 import stream.video.sfu.signal.UpdateMuteStatesRequest
 import java.io.IOException
 import java.io.InterruptedIOException
+import java.util.UUID
 import java.util.concurrent.TimeUnit
 import kotlin.test.assertNull
 
@@ -68,6 +69,15 @@ import kotlin.test.assertNull
 class AndroidDeviceTest : IntegrationTestBase(connectCoordinatorWS = false) {
 
     private val logger by taggedLogger("Test:AndroidDeviceTest")
+
+    private val newClient: StreamVideo = StreamVideoBuilder(
+        context = context,
+        apiKey = apiKey,
+        geo = GEO.GlobalEdgeNetwork,
+        testData.users["thierry"]!!,
+        testData.tokens["thierry"]!!,
+        ensureSingleInstance = false
+    ).build()
 
     internal class InterceptorTest : Interceptor {
 
@@ -145,8 +155,7 @@ class AndroidDeviceTest : IntegrationTestBase(connectCoordinatorWS = false) {
 
     @Test
     fun cleanupClient() = runTest {
-        val streamVideo = StreamVideo.instance()
-        val call = streamVideo.call("default", randomUUID())
+        val call = newClient.call("default", UUID.randomUUID().toString())
         // join a call
         call.join(create = true)
         // create a turbine connection state
@@ -154,9 +163,7 @@ class AndroidDeviceTest : IntegrationTestBase(connectCoordinatorWS = false) {
         // asset that the connection state is connected
         assertThat(connectionState.awaitItem()).isEqualTo(RealtimeConnection.Connected)
         // destroy and cleanup the call and client
-        call.leave()
-        call.cleanup()
-        streamVideo.cleanup()
+        newClient.cleanup()
         // await until disconnect a call
         assertThat(connectionState.awaitItem()).isEqualTo(RealtimeConnection.Disconnected)
         // assert the sessions was cleared properly
