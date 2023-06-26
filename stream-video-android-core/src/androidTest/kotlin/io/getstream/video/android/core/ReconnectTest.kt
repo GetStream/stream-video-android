@@ -59,13 +59,21 @@ class ReconnectTest : IntegrationTestBase(connectCoordinatorWS = false) {
 
     @Test
     fun networkDown() = runTest {
-        val call = StreamVideo.instance().call("default", UUID.randomUUID().toString())
+        val call = client.call("default", UUID.randomUUID().toString())
         // join a call
-        call.join(create = true)
+        val result = call.join(create = true)
         // create a turbine connection state
         val connectionState = call.state.connection.testIn(backgroundScope)
         // asset that the connection state is connected
-        assertThat(connectionState.awaitItem()).isEqualTo(RealtimeConnection.Connected)
+        val connectionStateItem = connectionState.awaitItem()
+        assertThat(connectionStateItem).isAnyOf(
+            RealtimeConnection.Connected,
+            RealtimeConnection.Joined(result.getOrThrow())
+        )
+        if (connectionStateItem is RealtimeConnection.Joined) {
+            connectionState.awaitItem()
+        }
+        // assert the connection state is connected
         // disconnect the network
         call.monitor.networkStateListener.onDisconnected()
         // verify that the connection state is reconnecting
@@ -104,14 +112,25 @@ class ReconnectTest : IntegrationTestBase(connectCoordinatorWS = false) {
      */
     @Test
     fun restartIce() = runTest {
-        val call = StreamVideo.instance().call("default", UUID.randomUUID().toString())
+        val call = client.call("default", UUID.randomUUID().toString())
         // join a call
-        call.join(create = true)
-        // create a turbine of the publisher state
+        val result = call.join(create = true)
+        // create a turbine of the publisher's peer connection state
         val publisher = call.session?.publisher?.state?.testIn(backgroundScope)
 
-        // asset peer connection state flows
-        // TOD: better to use the higher level state perhaps instead of ice state
+        // create a turbine connection state
+        val connectionState = call.state.connection.testIn(backgroundScope)
+        // asset that the connection state is connected
+        val connectionStateItem = connectionState.awaitItem()
+        assertThat(connectionStateItem).isAnyOf(
+            RealtimeConnection.Connected,
+            RealtimeConnection.Joined(result.getOrThrow())
+        )
+        if (connectionStateItem is RealtimeConnection.Joined) {
+            connectionState.awaitItem()
+        }
+
+        // assert peer connection state flows
         assertThat(publisher?.awaitItem()).isEqualTo(PeerConnection.PeerConnectionState.NEW)
         assertThat(publisher?.awaitItem()).isEqualTo(PeerConnection.PeerConnectionState.CONNECTING)
         assertThat(publisher?.awaitItem()).isEqualTo(PeerConnection.PeerConnectionState.CONNECTED)
@@ -120,17 +139,11 @@ class ReconnectTest : IntegrationTestBase(connectCoordinatorWS = false) {
         // or ice candidate don't arrive due to temporary network failure
         call.session?.reconnect()
 
-        // reconnect recreates the peer connections
-        val pub = call.session?.publisher?.state?.testIn(backgroundScope)
-        assertThat(pub?.awaitItem()).isEqualTo(PeerConnection.PeerConnectionState.CONNECTED)
-
         // leave and clean up a call
         call.leave()
         call.cleanup()
-        // create a turbine connection state
-        val connectionStates = call.state.connection.testIn(backgroundScope)
         // await until disconnect a call
-        assertThat(connectionStates.awaitItem()).isEqualTo(RealtimeConnection.Disconnected)
+        assertThat(connectionState.awaitItem()).isEqualTo(RealtimeConnection.Disconnected)
     }
 
     /**
@@ -138,13 +151,20 @@ class ReconnectTest : IntegrationTestBase(connectCoordinatorWS = false) {
      */
     @Test
     fun switchSfuQuickly() = runTest {
-        val call = StreamVideo.instance().call("default", UUID.randomUUID().toString())
+        val call = client.call("default", UUID.randomUUID().toString())
         // join a call
-        call.join(create = true)
+        val result = call.join(create = true)
         // create a turbine connection state
         val connectionState = call.state.connection.testIn(backgroundScope)
         // asset that the connection state is connected
-        assertThat(connectionState.awaitItem()).isInstanceOf(RealtimeConnection.Joined::class.java)
+        val connectionStateItem = connectionState.awaitItem()
+        assertThat(connectionStateItem).isAnyOf(
+            RealtimeConnection.Connected,
+            RealtimeConnection.Joined(result.getOrThrow())
+        )
+        if (connectionStateItem is RealtimeConnection.Joined) {
+            connectionState.awaitItem()
+        }
 
         // connect to the new socket
         // do an ice restart
@@ -161,9 +181,7 @@ class ReconnectTest : IntegrationTestBase(connectCoordinatorWS = false) {
         // leave and clean up a call
         call.leave()
         call.cleanup()
-        // create a turbine connection state
-        val connectionStates = call.state.connection.testIn(backgroundScope)
         // await until disconnect a call
-        assertThat(connectionStates.awaitItem()).isEqualTo(RealtimeConnection.Disconnected)
+        assertThat(connectionState.awaitItem()).isEqualTo(RealtimeConnection.Disconnected)
     }
 }

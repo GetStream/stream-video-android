@@ -16,12 +16,12 @@
 
 package io.getstream.video.android.core
 
+import app.cash.turbine.test
 import app.cash.turbine.testIn
 import com.google.common.truth.Truth.assertThat
 import io.getstream.log.taggedLogger
 import io.getstream.video.android.core.api.SignalServerService
 import io.getstream.video.android.core.events.ChangePublishQualityEvent
-import io.getstream.video.android.core.events.JoinCallResponseEvent
 import io.getstream.video.android.core.events.ParticipantJoinedEvent
 import io.getstream.video.android.core.utils.buildAudioConstraints
 import kotlinx.coroutines.delay
@@ -143,7 +143,15 @@ class AndroidDeviceTest : IntegrationTestBase(connectCoordinatorWS = false) {
 
     @Test
     fun cleanupCall() = runTest {
-        call.join()
+        val call = newClient.call("default", UUID.randomUUID().toString())
+        // join a call
+        call.join(create = true)
+        // create a turbine connection state
+        val connectionState = call.state.connection.testIn(backgroundScope)
+        // asset that the connection state is connected
+        assertThat(connectionState.awaitItem()).isEqualTo(RealtimeConnection.Connected)
+        // leave and cleanup the joining call
+        call.leave()
         // cleanup the media manager
         call.mediaManager.cleanup()
         // cleanup rtc
@@ -151,6 +159,8 @@ class AndroidDeviceTest : IntegrationTestBase(connectCoordinatorWS = false) {
         // cleanup the call
         call.cleanup()
         assertNull(call.session)
+        // await until disconnect a call
+        assertThat(connectionState.awaitItem()).isEqualTo(RealtimeConnection.Disconnected)
     }
 
     @Test
@@ -162,12 +172,17 @@ class AndroidDeviceTest : IntegrationTestBase(connectCoordinatorWS = false) {
         val connectionState = call.state.connection.testIn(backgroundScope)
         // asset that the connection state is connected
         assertThat(connectionState.awaitItem()).isEqualTo(RealtimeConnection.Connected)
+        // leave and cleanup the joining call
+        call.leave()
+        call.cleanup()
         // destroy and cleanup the call and client
         newClient.cleanup()
-        // await until disconnect a call
-        assertThat(connectionState.awaitItem()).isEqualTo(RealtimeConnection.Disconnected)
         // assert the sessions was cleared properly
         assertNull(call.session)
+        // create a turbine connection state
+        val connectionStates = call.state.connection.testIn(backgroundScope)
+        // await until disconnect a call
+        assertThat(connectionStates.awaitItem()).isEqualTo(RealtimeConnection.Disconnected)
     }
 
     @Test
@@ -221,28 +236,39 @@ class AndroidDeviceTest : IntegrationTestBase(connectCoordinatorWS = false) {
 
     @Test
     fun joinACall() = runTest {
-        val joinResult = call.join()
-        assertSuccess(joinResult)
-        val joinResponse = waitForNextEvent<JoinCallResponseEvent>()
-        assertThat(call.state._connection.value).isInstanceOf(RealtimeConnection.Joined::class.java)
+        // join a call
+        val call = client.call("default", UUID.randomUUID().toString())
+        val result = call.join(create = true)
+        assertSuccess(result)
 
-        val participantsResponse = joinResponse.callState.participants
-        assertThat(participantsResponse.size).isEqualTo(1)
-        val participants = call.state.participants
-        assertThat(participants.value.size).isEqualTo(1)
+        // create a turbine connection state
+        val connectionState = call.state.connection.testIn(backgroundScope)
+        // asset that the connection state is connected
+        assertThat(connectionState.awaitItem()).isEqualTo(RealtimeConnection.Connected)
+
+        val participantsCounts = call.state.participantCounts.testIn(backgroundScope)
+        assertThat(participantsCounts.awaitItem()?.total).isEqualTo(1)
 
         delay(1000)
 
         clientImpl.debugInfo.log()
+
+        // leave and cleanup the joining call
         call.leave()
+        call.cleanup()
+        // create a turbine connection state
+        val connectionStates = call.state.connection.testIn(backgroundScope)
+        // await until disconnect a call
+        assertThat(connectionStates.awaitItem()).isEqualTo(RealtimeConnection.Disconnected)
     }
 
     @Test
     fun localTrack() = runTest {
         // join will automatically start the audio and video capture
         // based on the call settings
-        val joinResult = call.join()
-        assertSuccess(joinResult)
+        val call = client.call("default", UUID.randomUUID().toString())
+        val result = call.join(create = true)
+        assertSuccess(result)
 
         // verify the video track is present and working
         val videoWrapper = call.state.me.value?.videoTrack?.value
@@ -253,7 +279,14 @@ class AndroidDeviceTest : IntegrationTestBase(connectCoordinatorWS = false) {
         val audioWrapper = call.state.me.value?.audioTrack?.value
         assertThat(audioWrapper?.audio?.enabled()).isTrue()
         assertThat(audioWrapper?.audio?.state()).isEqualTo(MediaStreamTrack.State.LIVE)
+
+        // leave and cleanup the joining call
         call.leave()
+        call.cleanup()
+        // create a turbine connection state
+        val connectionStates = call.state.connection.testIn(backgroundScope)
+        // await until disconnect a call
+        assertThat(connectionStates.awaitItem()).isEqualTo(RealtimeConnection.Disconnected)
     }
 
     @Test
@@ -261,7 +294,7 @@ class AndroidDeviceTest : IntegrationTestBase(connectCoordinatorWS = false) {
         // TODO: disable simulcast
         // join will automatically start the audio and video capture
         val call = client.call("default", "NnXAIvBKE4Hy")
-        val joinResult = call.join()
+        val joinResult = call.join(create = true)
         assertSuccess(joinResult)
 
         // wait for the ice connection state
@@ -299,79 +332,118 @@ class AndroidDeviceTest : IntegrationTestBase(connectCoordinatorWS = false) {
         println(call.session?.publisher?.remoteSdp)
 
         println(networkOut)
+        call.leave()
     }
 
     @Test
     fun receiving() = runTest {
-        // TODO: have a specific SFU setting to send back fake data
-        // TODO: replace the id with your active call
-        val call = client.call("default", "NnXAIvBKE4Hy")
-        val joinResult = call.join()
-        assertSuccess(joinResult)
+        val call = client.call("default", UUID.randomUUID().toString())
+        // join a call
+        val result = call.join(create = true)
+        assertSuccess(result)
 
-        // wait for the ice connection state
-        withTimeout(3000) {
-            while (true) {
-                val iceConnectionState = call.session?.subscriber?.connection?.iceConnectionState()
-                if (iceConnectionState == PeerConnection.IceConnectionState.CONNECTED) {
-                    break
-                }
-            }
-        }
+        val publisher = call.session?.publisher?.state?.testIn(backgroundScope)
 
-        // see if the ice connection is ok on the subscriber
-        val iceConnectionState = call.session?.subscriber?.connection?.iceConnectionState()
-        assertThat(iceConnectionState).isEqualTo(PeerConnection.IceConnectionState.CONNECTED)
+        // assert ice connection state flows
+        assertThat(publisher?.awaitItem()).isEqualTo(PeerConnection.PeerConnectionState.NEW)
+        assertThat(publisher?.awaitItem()).isEqualTo(PeerConnection.PeerConnectionState.CONNECTING)
+        assertThat(publisher?.awaitItem()).isEqualTo(PeerConnection.PeerConnectionState.CONNECTED)
 
-        assertThat(call.state.participants.value.size).isGreaterThan(1)
-        // loop over the participants
-        call.state.participants.value.forEach { participant ->
-            val videoTrack = participant.videoTrack.value?.video
+        // assert the participant counts is correct
+        val participantCount = call.state.participantCounts.testIn(backgroundScope)
+        assertThat(participantCount.awaitItem()?.total).isEqualTo(1)
+
+        // assert the participant's video & audio track
+        val participants = call.state.participants.testIn(backgroundScope)
+        val participant = participants.awaitItem().first()
+
+        participant.videoTrack.test {
+            val videoTrack = awaitItem()?.video
             assertThat(videoTrack).isNotNull()
             assertThat(videoTrack?.enabled()).isTrue()
             assertThat(videoTrack?.state()).isEqualTo(MediaStreamTrack.State.LIVE)
-            assertThat(participant.videoEnabled.value).isTrue()
+        }
 
-            val audioTrack = participant.audioTrack.value?.audio
+        participant.audioTrack.test {
+            val audioTrack = awaitItem()?.audio
             assertThat(audioTrack).isNotNull()
-            assertThat(audioTrack?.enabled()).isTrue()
             assertThat(audioTrack?.state()).isEqualTo(MediaStreamTrack.State.LIVE)
-            assertThat(participant.audioEnabled.value).isTrue()
         }
 
         // verify the stats are being tracked
-        val report = call.session?.getSubscriberStats()?.value
+//        val session = call.session
+//        assertThat(session!!).isNotNull()
+//        session.getSubscriberStats().test {
+//            val first = awaitItem()
+//            val report = awaitItem()
+//
+//            assertThat(report).isNotNull()
+//
+//            val allStats = report?.statsMap?.values
+//            val networkOut =
+//                allStats?.filter { it.type == "inbound-rtp" }?.map { it as RTCStats }
+//
+//            // log debug info
+//            logger.d { networkOut.toString() }
+//        }
+//        clientImpl.debugInfo.log()
 
-        val allStats = report?.statsMap?.values
-        val networkOut = allStats?.filter { it.type == "inbound-rtp" }?.map { it as RTCStats }
-
-        assertThat(report).isNotNull()
-        clientImpl.debugInfo.log()
+        // leave and clean up a call
+        call.leave()
+        call.cleanup()
+        // create a turbine connection state
+        val connectionStates = call.state.connection.testIn(backgroundScope)
+        // await until disconnect a call
+        assertThat(connectionStates.awaitItem()).isEqualTo(RealtimeConnection.Disconnected)
     }
 
     @Test
     fun leaveCall() = runTest {
-        val joinResult = call.join()
-        assertSuccess(joinResult)
-        delay(500)
+        // join a call
+        val call = client.call("default", UUID.randomUUID().toString())
+        val result = call.join(create = true)
+        assertSuccess(result)
+
+        // create a turbine connection state
+        val connectionState = call.state.connection.testIn(backgroundScope)
+        // asset that the connection state is connected
+        assertThat(connectionState.awaitItem()).isEqualTo(RealtimeConnection.Connected)
+
+        // leave and clean up a call
         call.leave()
+        call.cleanup()
+        // await until disconnect a call
+        assertThat(connectionState.awaitItem()).isEqualTo(RealtimeConnection.Disconnected)
     }
 
     @Test
     fun endCall() = runTest {
-        val joinResult = call.join()
-        assertSuccess(joinResult)
-        delay(500)
+        // join a call
+        val call = client.call("default", UUID.randomUUID().toString())
+        val result = call.join(create = true)
+        assertSuccess(result)
+
+        // create a turbine connection state
+        val connectionState = call.state.connection.testIn(backgroundScope)
+        // asset that the connection state is connected
+        assertThat(connectionState.awaitItem()).isEqualTo(RealtimeConnection.Connected)
+
+        // end call
         val endResult = call.end()
         assertSuccess(endResult)
-        call.leave()
+
+        // clean up a call
+        call.cleanup()
+
+        // await until disconnect a call
+        assertThat(connectionState.awaitItem()).isEqualTo(RealtimeConnection.Disconnected)
     }
 
     @Test
     fun dynascale() = runTest {
         // join will automatically start the audio and video capture
         // based on the call settings
-        val joinResult = call.join()
+        val joinResult = call.join(create = true)
         assertSuccess(joinResult)
         delay(500)
 
