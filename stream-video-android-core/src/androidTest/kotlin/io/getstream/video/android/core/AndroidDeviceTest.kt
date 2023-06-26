@@ -93,7 +93,7 @@ class AndroidDeviceTest : IntegrationTestBase(connectCoordinatorWS = false) {
         }
     }
 
-    @Test
+    @Test(expected = InterruptedIOException::class)
     fun trythis() = runTest {
         // this hangs:
         val connectionTimeoutInMs = 10000L
@@ -149,6 +149,7 @@ class AndroidDeviceTest : IntegrationTestBase(connectCoordinatorWS = false) {
             geo = GEO.GlobalEdgeNetwork,
             testData.users["thierry"]!!,
             testData.tokens["thierry"]!!,
+            ensureSingleInstance = false
         ).build()
         val call = newClient.call("default", randomUUID())
         val result = call.join()
@@ -219,6 +220,7 @@ class AndroidDeviceTest : IntegrationTestBase(connectCoordinatorWS = false) {
 
         Thread.sleep(2000)
         clientImpl.debugInfo.log()
+        call.leave()
     }
 
     @Test
@@ -237,6 +239,7 @@ class AndroidDeviceTest : IntegrationTestBase(connectCoordinatorWS = false) {
         val audioWrapper = call.state.me.value?.audioTrack?.value
         assertThat(audioWrapper?.audio?.enabled()).isTrue()
         assertThat(audioWrapper?.audio?.state()).isEqualTo(MediaStreamTrack.State.LIVE)
+        call.leave()
     }
 
     @Test
@@ -348,6 +351,7 @@ class AndroidDeviceTest : IntegrationTestBase(connectCoordinatorWS = false) {
         delay(500)
         val endResult = call.end()
         assertSuccess(endResult)
+        call.leave()
     }
 
     @Test
@@ -402,5 +406,6 @@ class AndroidDeviceTest : IntegrationTestBase(connectCoordinatorWS = false) {
         )
         val event = ChangePublishQualityEvent(changePublishQuality = quality)
         call.session?.updatePublishQuality(event)
+        call.leave()
     }
 }
