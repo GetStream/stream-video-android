@@ -49,6 +49,7 @@ import stream.video.sfu.signal.UpdateMuteStatesRequest
 import java.io.IOException
 import java.io.InterruptedIOException
 import java.util.concurrent.TimeUnit
+import kotlin.test.assertNull
 
 /**
  * Things to test in a real android environment
@@ -124,7 +125,6 @@ class AndroidDeviceTest : IntegrationTestBase(connectCoordinatorWS = false) {
 
     @Test
     fun camera() = runTest {
-
         val camera = call.mediaManager.camera
         assertThat(camera).isNotNull()
         camera.startCapture()
@@ -132,13 +132,14 @@ class AndroidDeviceTest : IntegrationTestBase(connectCoordinatorWS = false) {
 
     @Test
     fun cleanupCall() = runTest {
-        val result = call.join()
+        call.join()
         // cleanup the media manager
         call.mediaManager.cleanup()
         // cleanup rtc
         call.session?.cleanup()
         // cleanup the call
         call.cleanup()
+        assertNull(call.session)
     }
 
     @Test
@@ -152,9 +153,10 @@ class AndroidDeviceTest : IntegrationTestBase(connectCoordinatorWS = false) {
             ensureSingleInstance = false
         ).build()
         val call = newClient.call("default", randomUUID())
-        val result = call.join()
+        call.join()
         // destroy and cleanup the client
         newClient.cleanup()
+        assertNull(call.session)
     }
 
     @Test
@@ -218,7 +220,8 @@ class AndroidDeviceTest : IntegrationTestBase(connectCoordinatorWS = false) {
         val participants = call.state.participants
         assertThat(participants.value.size).isEqualTo(1)
 
-        Thread.sleep(2000)
+        delay(1000)
+
         clientImpl.debugInfo.log()
         call.leave()
     }
@@ -261,8 +264,8 @@ class AndroidDeviceTest : IntegrationTestBase(connectCoordinatorWS = false) {
         }
 
         // verify we have running tracks
-        assertThat(call.mediaManager.videoTrack.enabled())
-        assertThat(call.mediaManager.audioTrack.enabled())
+        assertThat(call.mediaManager.videoTrack.enabled()).isTrue()
+        assertThat(call.mediaManager.audioTrack.enabled()).isTrue()
         assertThat(call.mediaManager.videoTrack.state()).isEqualTo(MediaStreamTrack.State.LIVE)
 
         // check that the transceiver is setup
@@ -270,7 +273,7 @@ class AndroidDeviceTest : IntegrationTestBase(connectCoordinatorWS = false) {
 
         // see if we're sending data
 
-        Thread.sleep(20000)
+        delay(1000)
         val report = call.session?.getPublisherStats()?.value
         assertThat(report).isNotNull()
 
@@ -328,7 +331,6 @@ class AndroidDeviceTest : IntegrationTestBase(connectCoordinatorWS = false) {
         // verify the stats are being tracked
         val report = call.session?.getSubscriberStats()?.value
 
-        Thread.sleep(20000)
         val allStats = report?.statsMap?.values
         val networkOut = allStats?.filter { it.type == "inbound-rtp" }?.map { it as RTCStats }
 

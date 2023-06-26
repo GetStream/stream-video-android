@@ -534,8 +534,12 @@ public class CameraManager(
 
     fun cleanup() {
         stopCapture()
-        videoCapturer.dispose()
-        surfaceTextureHelper.dispose()
+        if (::videoCapturer.isInitialized) {
+            videoCapturer.dispose()
+        }
+        if (::surfaceTextureHelper.isInitialized) {
+            surfaceTextureHelper.dispose()
+        }
         setupCompleted = false
     }
 }
