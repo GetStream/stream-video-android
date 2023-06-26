@@ -99,9 +99,8 @@ jobs:
 
       - name: Unit Tests
         run: |
-          ./gradlew --scan --stacktrace \
-              :stream-video-android-compose:testDebugUnitTest \
-#              :stream-video-android-core:testDebugUnitTest
+          :stream-video-android-compose:testDebugUnitTest
+          :stream-video-android-core:testDebugUnitTest
 
 #      Enable this after merging android manged devices.
 #      - name: Android Tests
