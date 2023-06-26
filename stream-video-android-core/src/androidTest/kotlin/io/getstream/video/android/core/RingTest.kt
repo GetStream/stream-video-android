@@ -73,6 +73,7 @@ class RingTest : IntegrationTestBase(connectCoordinatorWS = false) {
         assertSuccess(response)
         val acceptResponse = call.accept()
     }
+
     @Test
     fun reject() = runTest {
         val call = client.call("default")
