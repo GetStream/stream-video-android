@@ -229,6 +229,7 @@ class MicrophoneManager(val mediaManager: MediaManagerImpl) {
      */
     fun select(device: AudioDevice?) {
         audioHandler.selectDevice(device)
+
         _selectedDevice.value = device
     }
 
@@ -533,8 +534,12 @@ public class CameraManager(
 
     fun cleanup() {
         stopCapture()
-        videoCapturer.dispose()
-        surfaceTextureHelper.dispose()
+        if (::videoCapturer.isInitialized) {
+            videoCapturer.dispose()
+        }
+        if (::surfaceTextureHelper.isInitialized) {
+            surfaceTextureHelper.dispose()
+        }
         setupCompleted = false
     }
 }

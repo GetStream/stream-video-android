@@ -16,6 +16,7 @@
 
 package io.getstream.video.android.core.utils
 
+import android.os.Build
 import io.getstream.log.taggedLogger
 import io.getstream.video.android.core.StreamVideoImpl
 import io.getstream.video.android.core.dispatchers.DispatcherProvider
@@ -29,8 +30,8 @@ import org.webrtc.RTCStatsReport
 internal data class Timer(val name: String, val start: Long = System.currentTimeMillis()) {
     var end: Long = 0
     var duration: Long = 0
-    var splits: List<Pair<String, Long>> = mutableListOf<Pair<String, Long>>()
-    var durations: List<Pair<String, Long>> = mutableListOf<Pair<String, Long>>()
+    var splits: List<Pair<String, Long>> = mutableListOf()
+    var durations: List<Pair<String, Long>> = mutableListOf()
 
     fun split(s: String) {
         val now = System.currentTimeMillis()
@@ -63,10 +64,10 @@ internal class DebugInfo(val client: StreamVideoImpl) {
     // last 20 events
 
     // phone type
-    val phoneModel = android.os.Build.MODEL
+    val phoneModel = Build.MODEL
 
     // android version
-    val version = android.os.Build.VERSION.SDK_INT
+    val version = Build.VERSION.SDK_INT
 
     // how many times the network dropped
 
@@ -132,6 +133,12 @@ internal class DebugInfo(val client: StreamVideoImpl) {
         - video limit reasons
         - selected resolution
         - TCP instead of UDP
+
+        TODO:
+        - thermal profiles: https://proandroiddev.com/thermal-in-android-26cc202e9d3b
+        - webrtc get FPS levels (actually it's in the logs, but the format is clunky)
+        - match participant and track id..
+
          */
         localStats()
         publisher?.let {
@@ -157,6 +164,16 @@ internal class DebugInfo(val client: StreamVideoImpl) {
         val sfu = call?.session?.sfuUrl
 
         logger.i { "stat123 with $sfu $resolution, $maxResolution, displaying external video at $displayingAt" }
+    }
+
+    fun deviceInfo() {
+        val sdk = "android"
+        // TODO: How do we get this? val version = Configuration.versionName
+        val osVersion = Build.VERSION.RELEASE ?: ""
+
+        val vendor = Build.MANUFACTURER ?: ""
+        val model = Build.MODEL ?: ""
+        val deviceModel = ("$vendor $model").trim()
     }
 
     fun processStats(stats: RTCStatsReport?) {

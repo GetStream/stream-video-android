@@ -40,18 +40,18 @@ class CallSwitchingTest : IntegrationTestBase(connectCoordinatorWS = false) {
         }
 
         // loop over the calls, join them and leave
-        val t = Timer("switch to location $location")
+        val timer = Timer("switch to location $location")
         (0 until numberOfCalls).map {
             val call = client.call("audio_room", "switch-test-$it")
             val result = call.join()
             assertSuccess(result)
             assertSuccess(result)
-            t.split("iteration $it")
+            timer.split("iteration $it")
             call.leave()
         }
-        t.finish()
+        timer.finish()
 
-        t?.let {
+        timer.let {
             logger.i { "${it.name} took ${it.duration}" }
             it.durations.forEach { (s, t) ->
                 logger.i { " - ${it.name}:$s took $t" }

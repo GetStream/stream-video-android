@@ -64,7 +64,7 @@ internal class RejectCallBroadcastReceiver : BroadcastReceiver() {
                         user = user,
                         token = userToken,
                         apiKey = userDataStore.apiKey.value,
-                    ).build().also { StreamVideo.unInstall() }
+                    ).build().also { StreamVideo.removeClient() }
                 }
             }!!
         }

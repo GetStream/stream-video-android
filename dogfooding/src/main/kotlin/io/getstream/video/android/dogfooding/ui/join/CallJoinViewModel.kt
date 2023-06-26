@@ -75,7 +75,7 @@ class CallJoinViewModel @Inject constructor(
     fun signOut() {
         FirebaseAuth.getInstance().signOut()
         StreamVideo.instance().logOut()
-        StreamVideo.unInstall()
+        StreamVideo.removeClient()
     }
 }
 

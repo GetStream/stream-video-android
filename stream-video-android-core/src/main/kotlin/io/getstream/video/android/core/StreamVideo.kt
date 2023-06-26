@@ -100,7 +100,7 @@ public interface StreamVideo : NotificationHandler {
      */
     public suspend fun getEdges(): Result<List<EdgeData>>
 
-    public suspend fun connectAsync(): Deferred<Unit>
+    public suspend fun connectAsync(): Deferred<Result<Long>>
 
     /**
      * Clears the internal user state, removes push notification devices and clears the call state.
@@ -133,6 +133,10 @@ public interface StreamVideo : NotificationHandler {
                 )
         }
 
+        public fun instanceOrNull(): StreamVideo? {
+            return internalStreamVideo
+        }
+
         /**
          * Returns an installed [StreamVideo] instance lazy or throw an exception if its not installed.
          */
@@ -143,7 +147,7 @@ public interface StreamVideo : NotificationHandler {
         /**
          * Installs a new [StreamVideo] instance to be used.
          */
-        public fun install(streamVideo: StreamVideo) {
+        internal fun install(streamVideo: StreamVideo) {
             synchronized(this) {
                 if (isInstalled) {
                     StreamLog.e("StreamVideo") {
@@ -158,7 +162,8 @@ public interface StreamVideo : NotificationHandler {
         /**
          * Uninstall a previous [StreamVideo] instance.
          */
-        public fun unInstall() {
+        public fun removeClient() {
+            internalStreamVideo?.cleanup()
             internalStreamVideo = null
         }
     }

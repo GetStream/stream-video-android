@@ -81,6 +81,7 @@ public class AudioSwitchHandler constructor(private val context: Context, var au
     public fun selectDevice(audioDevice: AudioDevice?) {
         logger.i { "[selectDevice] audioDevice: $audioDevice" }
         audioSwitch?.selectDevice(audioDevice)
+        audioSwitch?.activate()
     }
 
     public companion object {
