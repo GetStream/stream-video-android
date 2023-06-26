@@ -24,6 +24,11 @@ import io.getstream.video.android.core.api.SignalServerService
 import io.getstream.video.android.core.events.ChangePublishQualityEvent
 import io.getstream.video.android.core.events.ParticipantJoinedEvent
 import io.getstream.video.android.core.utils.buildAudioConstraints
+import java.io.IOException
+import java.io.InterruptedIOException
+import java.util.UUID
+import java.util.concurrent.TimeUnit
+import kotlin.test.assertNull
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.withTimeout
@@ -47,11 +52,6 @@ import stream.video.sfu.event.VideoSender
 import stream.video.sfu.models.Participant
 import stream.video.sfu.models.TrackType
 import stream.video.sfu.signal.UpdateMuteStatesRequest
-import java.io.IOException
-import java.io.InterruptedIOException
-import java.util.UUID
-import java.util.concurrent.TimeUnit
-import kotlin.test.assertNull
 
 /**
  * Things to test in a real android environment
@@ -304,14 +304,15 @@ class AndroidDeviceTest : IntegrationTestBase(connectCoordinatorWS = false) {
         }
 
         // verify the video track is present and working
-        val videoWrapper = call.state.me.value?.videoTrack?.value
-        assertThat(videoWrapper?.video?.enabled()).isTrue()
-        assertThat(videoWrapper?.video?.state()).isEqualTo(MediaStreamTrack.State.LIVE)
+        val videoTrack = call.state.me.value?.videoTrack?.testIn(backgroundScope)
+        val video = videoTrack?.awaitItem()?.video
+        assertThat(video?.enabled()).isTrue()
+        assertThat(video?.state()).isEqualTo(MediaStreamTrack.State.LIVE)
 
-        // verify the audio track is present and working
-        val audioWrapper = call.state.me.value?.audioTrack?.value
-        assertThat(audioWrapper?.audio?.enabled()).isTrue()
-        assertThat(audioWrapper?.audio?.state()).isEqualTo(MediaStreamTrack.State.LIVE)
+        val audioTrack = call.state.me.value?.audioTrack?.testIn(backgroundScope)
+        val audio = audioTrack?.awaitItem()?.audio
+        assertThat(audio?.enabled()).isTrue()
+        assertThat(audio?.state()).isEqualTo(MediaStreamTrack.State.LIVE)
 
         // leave and cleanup the joining call
         call.leave()
