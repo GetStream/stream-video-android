@@ -332,9 +332,7 @@ internal class StreamVideoImpl internal constructor(
 
     internal fun loadLocationAsync(): Deferred<Result<String>> {
         if (locationJob != null) return locationJob as Deferred<Result<String>>
-        locationJob = scope.async {
-            selectLocation()
-        }
+        locationJob = scope.async { selectLocation() }
         return locationJob as Deferred<Result<String>>
     }
 
@@ -357,7 +355,7 @@ internal class StreamVideoImpl internal constructor(
         return Failure(Error.GenericError("failed to select location"))
     }
 
-    override suspend fun connectAsync(): Deferred<Unit> {
+    override suspend fun connectAsync(): Deferred<Result<Long>> {
         return scope.async {
             // wait for the guest user setup if we're using guest users
             guestUserJob?.await()
@@ -365,15 +363,15 @@ internal class StreamVideoImpl internal constructor(
                 val timer = debugInfo.trackTime("coordinator connect")
                 socketImpl.connect()
                 timer.finish()
+                Success(timer.duration)
             } catch (e: ErrorResponse) {
                 if (e.code == VideoErrorCode.TOKEN_EXPIRED.code && tokenProvider != null) {
-                    // refresh the the token
-                    println("CAUGHT an error")
                     val newToken = tokenProvider.invoke(e)
                     dataStore.updateUserToken(newToken)
                     connectionModule.updateToken(newToken)
                     // quickly reconnect with the new token
                     socketImpl.reconnect(0)
+                    Failure(Error.GenericError("initialize error. trying to reconnect."))
                 } else {
                     throw e
                 }

@@ -45,6 +45,7 @@ class ClientAndAuthTest : TestBase() {
             geo = GEO.GlobalEdgeNetwork,
             testData.users["thierry"]!!,
             testData.tokens["thierry"]!!,
+            ensureSingleInstance = false
         )
         val client = builder.build()
         client.cleanup()
@@ -58,7 +59,8 @@ class ClientAndAuthTest : TestBase() {
             geo = GEO.GlobalEdgeNetwork,
             user = User(
                 type = UserType.Anonymous
-            )
+            ),
+            ensureSingleInstance = false
         )
         val client = builder.build()
         client.cleanup()
@@ -77,7 +79,8 @@ class ClientAndAuthTest : TestBase() {
             user = User(
                 id = "guest",
                 type = UserType.Guest
-            )
+            ),
+            ensureSingleInstance = false
         ).build()
         client.cleanup()
     }
@@ -173,6 +176,7 @@ class ClientAndAuthTest : TestBase() {
 
     @Test
     fun `test an expired token, with token provider set`() = runTest {
+        StreamVideo.removeClient()
         val client = StreamVideoBuilder(
             context = context,
             apiKey = apiKey,
@@ -203,7 +207,7 @@ class ClientAndAuthTest : TestBase() {
 //        }
     }
 
-    @Test
+    @Test(expected = IllegalArgumentException::class)
     fun `two clients is not allowed`() = runTest {
         val builder = StreamVideoBuilder(
             context = context,
