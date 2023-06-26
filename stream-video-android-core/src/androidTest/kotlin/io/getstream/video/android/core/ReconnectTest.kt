@@ -62,8 +62,8 @@ class ReconnectTest : IntegrationTestBase(connectCoordinatorWS = false) {
         call.join()
         // create a turbine connection state
         val connectionState = call.state.connection.testIn(backgroundScope)
-        // consume joined state
-        val joined = connectionState.awaitItem()
+        // asset that the connection state is connected
+        assertThat(connectionState.awaitItem()).isEqualTo(RealtimeConnection.Connected)
         // disconnect the network
         call.monitor.networkStateListener.onDisconnected()
         // verify that the connection state is reconnecting
@@ -97,19 +97,24 @@ class ReconnectTest : IntegrationTestBase(connectCoordinatorWS = false) {
      */
     @Test
     fun restartIce() = runTest {
+        // join a call
         call.join()
-        Thread.sleep(2000)
-        val b = call.session?.publisher?.state?.value
+        // create a turbine of the publisher state
+        val connectionState = call.session?.publisher?.state?.testIn(backgroundScope)
+
+        // asset peer connection state flows
         // TOD: better to use the higher level state perhaps instead of ice state
-        assertThat(b).isEqualTo(PeerConnection.PeerConnectionState.CONNECTED)
+        assertThat(connectionState?.awaitItem()).isEqualTo(PeerConnection.PeerConnectionState.NEW)
+        assertThat(connectionState?.awaitItem()).isEqualTo(PeerConnection.PeerConnectionState.CONNECTING)
+        assertThat(connectionState?.awaitItem()).isEqualTo(PeerConnection.PeerConnectionState.CONNECTED)
 
         // the socket and rtc connection disconnect...,
         // or ice candidate don't arrive due to temporary network failure
         call.session?.reconnect()
-        Thread.sleep(2000)
+
         // reconnect recreates the peer connections
-        val pub = call.session?.publisher?.state?.value
-        assertThat(pub).isEqualTo(PeerConnection.PeerConnectionState.CONNECTED)
+        val pub = call.session?.publisher?.state?.testIn(backgroundScope)
+        assertThat(pub?.awaitItem()).isEqualTo(PeerConnection.PeerConnectionState.CONNECTED)
     }
 
     /**
