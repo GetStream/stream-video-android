@@ -53,33 +53,36 @@ import java.util.UUID
  *      loggingLevel = LoggingLevel.BODY
  *  )
  *```
+ *
+ * @property context Android [Context] to be used for initializing Android resources.
+ * @property apiKey Your Stream API Key, you can find it in the dashboard.
+ * @property geo Your GEO routing policy, supports geofencing for privacy concerns.
+ * @property user The user object, can be a regular user, guest user or anonymous.
+ * @property token The token for this user generated using your API secret on your server.
+ * @property tokenProvider If a token is expired, the token provider makes a request to your backend for a new token.
+ * @property loggingLevel Represents and wraps the HTTP logging level for our API service.
+ * @property notificationConfig The configurations for handling push notification.
+ * @property ringNotification Overwrite the default notification logic for incoming calls.
+ * @property audioFilters Audio filters enable you to add custom effects to your audio before its send to the server.
+ * @property videoFilters Video filters enable you to change the video before it's send.
+ * @property encryptPreferences If our data store should encrypt the api key, user token etc.
+ * @property connectionTimeoutInMs Connection timeout in seconds.
+ * @property ensureSingleInstance Verify that only 1 version of the video client exists, prevents integration mistakes.
  */
 public class StreamVideoBuilder @JvmOverloads constructor(
     context: Context,
-    /** Your Stream API Key, you can find it in the dashboard */
     private val apiKey: ApiKey,
-    /** Your GEO routing policy, supports geofencing for privacy concerns */
     private val geo: GEO = GEO.GlobalEdgeNetwork,
-    /** The user object, can be a regular user, guest user or anonymous */
     private var user: User,
-    /** The token for this user generated using your API secret on your server */
     private val token: UserToken = "",
-    /** If a token is expired, the token provider makes a request to your backend for a new token */
     private val tokenProvider: (suspend (error: Throwable?) -> String)? = null,
-    /** Logging level */
     private val loggingLevel: LoggingLevel = LoggingLevel(),
     private val notificationConfig: NotificationConfig = NotificationConfig(),
-    /** Overwrite the default notification logic for incoming calls */
     private val ringNotification: ((call: Call) -> Notification?)? = null,
-    /** Audio filters enable you to add custom effects to your audio before its send to the server */
     private val audioFilters: List<AudioFilter> = emptyList(),
-    /** Video filters enable you to change the video before it's send. */
     private val videoFilters: List<VideoFilter> = emptyList(),
-    /** if our data store should encrypt the api key, user token etc */
     private var encryptPreferences: Boolean = true,
-    /** Connection timeout in seconds */
     private val connectionTimeoutInMs: Long = 10000,
-    /** Verify that only 1 version of the video client exists, prevents integration mistakes */
     private var ensureSingleInstance: Boolean = true
 ) {
     private val context: Context = context.applicationContext
@@ -116,11 +119,14 @@ public class StreamVideoBuilder @JvmOverloads constructor(
             user = user.copy(id = "anon-$randomId")
         }
 
-        // initializes
+        /** initialize Stream internal loggers. */
         StreamLog.install(AndroidStreamLogger())
         StreamLog.setValidator { priority, _ -> priority.level >= loggingLevel.priority.level }
+
+        /** android JSR-310 backport backport. */
         AndroidThreeTen.init(context)
 
+        /** install the [StreamUserDataStore] to persist user information with encryption. */
         val dataStore = if (!StreamUserDataStore.isInstalled) {
             StreamUserDataStore.install(context, scope = scope, isEncrypted = encryptPreferences)
         } else {
@@ -133,7 +139,7 @@ public class StreamVideoBuilder @JvmOverloads constructor(
             dataStore.updateUserToken(token)
         }
 
-        // This connection module class exposes the connections to the various retrofit APIs
+        // This connection module class exposes the connections to the various retrofit APIs.
         val connectionModule = ConnectionModule(
             context = context,
             scope = scope,
@@ -145,15 +151,16 @@ public class StreamVideoBuilder @JvmOverloads constructor(
             userToken = token
         )
 
+        // install the StreamNotificationManager to configure push notifications.
         val streamNotificationManager = StreamNotificationManager.install(
-            context,
-            scope,
-            notificationConfig,
-            connectionModule.devicesApi,
-            dataStore,
+            context = context,
+            scope = scope,
+            notificationConfig = notificationConfig,
+            devicesApi = connectionModule.devicesApi,
+            streamUserDataStore = dataStore,
         )
-        // create the client
 
+        // create the client
         val client = StreamVideoImpl(
             context = context,
             _scope = scope,
