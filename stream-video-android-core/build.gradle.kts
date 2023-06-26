@@ -148,5 +148,6 @@ dependencies {
     androidTestImplementation(libs.androidx.test.junit)
     androidTestImplementation(libs.kotlinx.coroutines.test)
     androidTestImplementation(libs.kotlin.test.junit)
+    androidTestImplementation(libs.turbine)
     androidTestImplementation("androidx.test:rules:1.5.0")
 }

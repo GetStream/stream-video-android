@@ -38,6 +38,7 @@ retrofit = "2.9.0"
 moshi = "1.15.0"
 threetenAbp = "1.4.6"
 tink = "1.9.0"
+turbine = "0.13.0"
 
 streamWebRTC = "1.0.2"
 streamResult = "1.1.0"
@@ -121,6 +122,7 @@ moshi-kotlin = { group = "com.squareup.moshi", name = "moshi-kotlin", version.re
 moshi-adapters = { group = "com.squareup.moshi", name = "moshi-adapters", version.ref = "moshi" }
 threentenabp2 = { group = "com.jakewharton.threetenabp", name = "threetenabp", version.ref = "threetenAbp" }
 tink = { group = "com.google.crypto.tink", name = "tink-android", version.ref = "tink" }
+turbine = { group = "app.cash.turbine", name = "turbine", version.ref = "turbine" }
 
 stream-webrtc = { group = "io.getstream", name = "stream-webrtc-android", version.ref = "streamWebRTC" }
 stream-webrtc-ui = { group = "io.getstream", name = "stream-webrtc-android-ui", version.ref = "streamWebRTC" }

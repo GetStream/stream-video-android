@@ -16,6 +16,7 @@
 
 package io.getstream.video.android.core
 
+import app.cash.turbine.testIn
 import com.google.common.truth.Truth.assertThat
 import io.getstream.log.taggedLogger
 import kotlinx.coroutines.launch
@@ -59,15 +60,18 @@ class ReconnectTest : IntegrationTestBase(connectCoordinatorWS = false) {
     fun networkDown() = runTest {
         // join a call
         call.join()
-        Thread.sleep(2000L)
+        // create a turbine connection state
+        val connectionState = call.state.connection.testIn(backgroundScope)
+        // consume joined state
+        val joined = connectionState.awaitItem()
         // disconnect the network
         call.monitor.networkStateListener.onDisconnected()
         // verify that the connection state is reconnecting
-        assertThat(call.state.connection.value).isEqualTo(RealtimeConnection.Reconnecting)
+        assertThat(connectionState.awaitItem()).isEqualTo(RealtimeConnection.Reconnecting)
         // go online and verify we're reconnected
         call.monitor.networkStateListener.onConnected()
-        Thread.sleep(2000L)
-        assertThat(call.state.connection.value).isEqualTo(RealtimeConnection.Connected)
+        // asset that the connection state is connected
+        assertThat(connectionState.awaitItem()).isEqualTo(RealtimeConnection.Connected)
     }
 
     @Test
