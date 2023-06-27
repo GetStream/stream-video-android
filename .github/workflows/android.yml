@@ -135,9 +135,12 @@ jobs:
         uses: actions/checkout@v3
 
       - name: set up JDK
-        uses: actions/setup-java@v1
+        uses: actions/setup-java@v3
         with:
           java-version: 11
+
+      - name: Setup Gradle
+        uses: gradle/gradle-build-action@v2
 
       - name: Cache Gradle and wrapper
         uses: actions/cache@v3
@@ -149,8 +152,10 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-gradle-
 
+      # Cleans managed device if previously settle and space currently is not available
+      - name: Clean Managed Devices
+        run: ./gradlew cleanManagedDevices --unused-only
+
       - name: Run instrumented tests with GMD
-        run: ./gradlew cleanManagedDevices --unused-only &&
-          ./gradlew pixel6api31DebugAndroidTest -Dorg.gradle.workers.max=4
-          -Pandroid.testoptions.manageddevices.emulator.gpu="swiftshader_indirect" -Pandroid.experimental.testOptions.managedDevices.emulator.showKernelLogging=true -Pandroid.experimental.testOptions.managedDevices.setupTimeoutMinutes=60
+        run: ./gradlew pixel2api31DebugAndroidTest -Dorg.gradle.workers.max=4 -Pandroid.testoptions.manageddevices.emulator.gpu="swiftshader_indirect" -Pandroid.experimental.testOptions.managedDevices.emulator.showKernelLogging=true -Pandroid.experimental.testOptions.managedDevices.setupTimeoutMinutes=60
 
