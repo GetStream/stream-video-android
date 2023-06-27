@@ -104,7 +104,6 @@ jobs:
 
   androidTest-GMD:
     name: Android Test with GMD
-    needs: build
     runs-on: macOS-latest
     timeout-minutes: 55
 
