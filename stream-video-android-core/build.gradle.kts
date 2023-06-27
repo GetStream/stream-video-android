@@ -60,6 +60,19 @@ android {
             isIncludeAndroidResources = true
             isReturnDefaultValues = true
         }
+
+        managedDevices {
+            devices {
+                maybeCreate<com.android.build.api.dsl.ManagedVirtualDevice>("pixel6api31").apply {
+                    // Use device profiles you typically see in Android Studio.
+                    device = "Pixel 6"
+                    // Use only API levels 27 and higher.
+                    apiLevel = 31
+                    // To include Google services, use "google".
+                    systemImageSource = "aosp"
+                }
+            }
+        }
     }
 
     val envProps: File = rootProject.file(".env.properties")

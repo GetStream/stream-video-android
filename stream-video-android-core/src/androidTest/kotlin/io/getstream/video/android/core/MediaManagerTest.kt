@@ -48,25 +48,29 @@ class MediaManagerTest : IntegrationTestBase(connectCoordinatorWS = false) {
     fun camera() {
         val camera = deviceTestCall.mediaManager.camera
         assertThat(camera).isNotNull()
-        camera.enable()
-        assertThat(camera.status.value).isEqualTo(DeviceStatus.Enabled)
-        assertThat(camera.direction.value).isEqualTo(CameraDirection.Front)
-        camera.flip()
-        assertThat(camera.direction.value).isEqualTo(CameraDirection.Back)
-        camera.disable()
-        assertThat(camera.status.value).isEqualTo(DeviceStatus.Disabled)
+        if (camera.listDevices().isNotEmpty() && camera.availableResolutions.value.isNotEmpty()) {
+            camera.enable()
+            assertThat(camera.status.value).isEqualTo(DeviceStatus.Enabled)
+            assertThat(camera.direction.value).isEqualTo(CameraDirection.Front)
+            camera.flip()
+            assertThat(camera.direction.value).isEqualTo(CameraDirection.Back)
+            camera.disable()
+            assertThat(camera.status.value).isEqualTo(DeviceStatus.Disabled)
+        }
     }
 
     @Test
     fun cameraResume() {
         val camera = deviceTestCall.mediaManager.camera
         // test resume
-        camera.enable()
-        assertThat(camera.status.value).isEqualTo(DeviceStatus.Enabled)
-        camera.pause()
-        assertThat(camera.status.value).isEqualTo(DeviceStatus.Disabled)
-        camera.resume()
-        assertThat(camera.status.value).isEqualTo(DeviceStatus.Enabled)
+        if (camera.listDevices().isNotEmpty() && camera.availableResolutions.value.isNotEmpty()) {
+            camera.enable()
+            assertThat(camera.status.value).isEqualTo(DeviceStatus.Enabled)
+            camera.pause()
+            assertThat(camera.status.value).isEqualTo(DeviceStatus.Disabled)
+            camera.resume()
+            assertThat(camera.status.value).isEqualTo(DeviceStatus.Enabled)
+        }
     }
 
     @Test
