@@ -103,12 +103,14 @@ jobs:
           ./gradlew :stream-video-android-core:testDebugUnitTest --scan --stacktrace          
 
   androidTest-GMD:
+    name: Android Test with GMD
     needs: build
     runs-on: macOS-latest
     timeout-minutes: 55
 
     steps:
-      - uses: actions/checkout@v3
+      - name: Checkout
+        uses: actions/checkout@v3
 
       - name: set up JDK
         uses: actions/setup-java@v1
