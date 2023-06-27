@@ -134,9 +134,10 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
 
-      - name: set up JDK
+      - name: Set up JDK
         uses: actions/setup-java@v3.5.1
         with:
+          distribution: adopt
           java-version: 11
 
       - name: Setup Gradle
