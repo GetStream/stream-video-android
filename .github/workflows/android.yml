@@ -97,14 +97,35 @@ jobs:
           ./gradlew --scan --stacktrace \
               assembleDebug
 
-      - name: Unit Tests
+      - name: Run unit tests
         run: |
           ./gradlew :stream-video-android-compose:testDebugUnitTest --scan --stacktrace
-          ./gradlew :stream-video-android-core:testDebugUnitTest --scan --stacktrace
-          ./gradlew pixel6api31DebugAndroidTest -Pandroid.testoptions.manageddevices.emulator.gpu=swiftshader_indirect
+          ./gradlew :stream-video-android-core:testDebugUnitTest --scan --stacktrace          
 
-#      Enable this after merging android manged devices.
-#      - name: Android Tests
-#        run: |
-#          ./gradlew --scan --stacktrace \
-#              :stream-video-android-core:connectedAndroidTest
+  androidTest-GMD:
+    needs: build
+    runs-on: macOS-latest
+    timeout-minutes: 55
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: set up JDK
+        uses: actions/setup-java@v1
+        with:
+          java-version: 11
+
+      - name: Cache Gradle and wrapper
+        uses: actions/cache@v3
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*') }}
+          restore-keys: |
+            ${{ runner.os }}-gradle-
+
+      - name: Run instrumented tests with GMD
+        run: ./gradlew cleanManagedDevices --unused-only &&
+          ./gradlew pixel6api31DebugAndroidTest -Dorg.gradle.workers.max=1
+          -Pandroid.testoptions.manageddevices.emulator.gpu="swiftshader_indirect" -Pandroid.experimental.testOptions.managedDevices.emulator.showKernelLogging=true
