@@ -60,6 +60,16 @@ android {
             isIncludeAndroidResources = true
             isReturnDefaultValues = true
         }
+
+        managedDevices {
+            devices {
+                maybeCreate<com.android.build.api.dsl.ManagedVirtualDevice>("pixel2api31").apply {
+                    device = "Pixel 2"
+                    apiLevel = 31
+                    systemImageSource = "aosp"
+                }
+            }
+        }
     }
 
     val envProps: File = rootProject.file(".env.properties")

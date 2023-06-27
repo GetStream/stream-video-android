@@ -385,26 +385,28 @@ public class CameraManager(
                 CameraDirection.Front -> CameraDirection.Back
                 CameraDirection.Back -> CameraDirection.Front
             }
-            val device = devices.first { it.direction == newDirection }
-            select(device.id, false)
+            val device = devices.firstOrNull { it.direction == newDirection }
+            device?.let { select(it.id, false) }
 
             videoCapturer.switchCamera(null)
         }
     }
 
     fun select(deviceId: String, startCapture: Boolean = false) {
-        val selectedDevice = devices.first { it.id == deviceId }
-        _direction.value = selectedDevice.direction ?: CameraDirection.Back
-        _selectedDevice.value = selectedDevice
-        _availableResolutions.value =
-            selectedDevice.supportedFormats?.toImmutableList() ?: emptyList()
-        _resolution.value = selectDesiredResolution(
-            selectedDevice.supportedFormats,
-            mediaManager.call.state.settings.value?.video
-        )
+        val selectedDevice = devices.firstOrNull { it.id == deviceId }
+        if (selectedDevice != null) {
+            _direction.value = selectedDevice.direction ?: CameraDirection.Back
+            _selectedDevice.value = selectedDevice
+            _availableResolutions.value =
+                selectedDevice.supportedFormats?.toImmutableList() ?: emptyList()
+            _resolution.value = selectDesiredResolution(
+                selectedDevice.supportedFormats,
+                mediaManager.call.state.settings.value?.video
+            )
 
-        if (startCapture) {
-            startCapture()
+            if (startCapture) {
+                startCapture()
+            }
         }
     }
 
@@ -462,20 +464,22 @@ public class CameraManager(
         enumerator = Camera2Enumerator(mediaManager.context)
         devices = sortDevices()
         val devicesMatchingDirection = devices.filter { it.direction == _direction.value }
-        val selectedDevice = devicesMatchingDirection.first()
-        _selectedDevice.value = selectedDevice
-        _resolution.value = selectDesiredResolution(
-            selectedDevice.supportedFormats,
-            mediaManager.call.state.settings.value?.video
-        )
-        _availableResolutions.value =
-            selectedDevice.supportedFormats?.toImmutableList() ?: emptyList()
+        val selectedDevice = devicesMatchingDirection.firstOrNull()
+        if (selectedDevice != null) {
+            _selectedDevice.value = selectedDevice
+            _resolution.value = selectDesiredResolution(
+                selectedDevice.supportedFormats,
+                mediaManager.call.state.settings.value?.video
+            )
+            _availableResolutions.value =
+                selectedDevice.supportedFormats?.toImmutableList() ?: emptyList()
 
-        surfaceTextureHelper = SurfaceTextureHelper.create(
-            "CaptureThread", eglBaseContext
-        )
+            surfaceTextureHelper = SurfaceTextureHelper.create(
+                "CaptureThread", eglBaseContext
+            )
 
-        setupCompleted = true
+            setupCompleted = true
+        }
     }
 
     /**

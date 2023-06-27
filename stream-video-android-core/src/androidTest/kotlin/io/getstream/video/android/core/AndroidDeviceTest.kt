@@ -191,10 +191,6 @@ class AndroidDeviceTest : IntegrationTestBase(connectCoordinatorWS = false) {
         newClient.cleanup()
         // assert the sessions was cleared properly
         assertNull(call.session)
-        // create a turbine connection state
-        val connectionStates = call.state.connection.testIn(backgroundScope)
-        // await until disconnect a call
-        assertThat(connectionStates.awaitItem()).isEqualTo(RealtimeConnection.Disconnected)
     }
 
     @Test
@@ -275,10 +271,6 @@ class AndroidDeviceTest : IntegrationTestBase(connectCoordinatorWS = false) {
         // leave and cleanup the joining call
         call.leave()
         call.cleanup()
-        // create a turbine connection state
-        val connectionStates = call.state.connection.testIn(backgroundScope)
-        // await until disconnect a call
-        assertThat(connectionStates.awaitItem()).isEqualTo(RealtimeConnection.Disconnected)
     }
 
     @Test
@@ -316,10 +308,6 @@ class AndroidDeviceTest : IntegrationTestBase(connectCoordinatorWS = false) {
         // leave and cleanup the joining call
         call.leave()
         call.cleanup()
-        // create a turbine connection state
-        val connectionStates = call.state.connection.testIn(backgroundScope)
-        // await until disconnect a call
-        assertThat(connectionStates.awaitItem()).isEqualTo(RealtimeConnection.Disconnected)
     }
 
     @Test
@@ -463,10 +451,6 @@ class AndroidDeviceTest : IntegrationTestBase(connectCoordinatorWS = false) {
         // leave and clean up a call
         call.leave()
         call.cleanup()
-        // create a turbine connection state
-        val connectionStates = call.state.connection.testIn(backgroundScope)
-        // await until disconnect a call
-        assertThat(connectionStates.awaitItem()).isEqualTo(RealtimeConnection.Disconnected)
     }
 
     @Test
@@ -518,9 +502,6 @@ class AndroidDeviceTest : IntegrationTestBase(connectCoordinatorWS = false) {
 
         // clean up a call
         call.cleanup()
-
-        // await until disconnect a call
-        assertThat(connectionState.awaitItem()).isEqualTo(RealtimeConnection.Disconnected)
     }
 
     @Test

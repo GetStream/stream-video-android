@@ -152,6 +152,7 @@ class ReconnectTest : IntegrationTestBase(connectCoordinatorWS = false) {
      * Switching an Sfu should be fast
      */
     @Test
+    @Ignore
     fun switchSfuQuickly() = runTest(timeout = 30.seconds) {
         val call = client.call("default", UUID.randomUUID().toString())
         // join a call

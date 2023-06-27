@@ -97,13 +97,58 @@ jobs:
           ./gradlew --scan --stacktrace \
               assembleDebug
 
-      - name: Unit Tests
+  unitTest:
+    name: Unit Tests
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: set up JDK
+        uses: actions/setup-java@v1
+        with:
+          java-version: 11
+
+      - name: Cache Gradle and wrapper
+        uses: actions/cache@v3
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*') }}
+          restore-keys: |
+            ${{ runner.os }}-gradle-
+
+      - name: Run unit tests
         run: |
           ./gradlew :stream-video-android-compose:testDebugUnitTest --scan --stacktrace
           ./gradlew :stream-video-android-core:testDebugUnitTest --scan --stacktrace
 
-#      Enable this after merging android manged devices.
-#      - name: Android Tests
-#        run: |
-#          ./gradlew --scan --stacktrace \
-#              :stream-video-android-core:connectedAndroidTest
+  androidTest-GMD:
+    name: Android Test with GMD
+    if: ${{ false }}  # disable for now
+    runs-on: macOS-latest
+    timeout-minutes: 55
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'zulu'
+          java-version: 17
+
+      # Sets gradle up
+      - name: Setup Gradle
+        uses: gradle/gradle-build-action@v2
+
+      # Cleans managed device if previously settle and space currently is not available
+      - name: Clean Managed Devices
+        run: ./gradlew cleanManagedDevices --unused-only
+
+      - name: Run instrumented tests with GMD
+        run: ./gradlew pixel2api31DebugAndroidTest -Dorg.gradle.workers.max=1 -Pandroid.testoptions.manageddevices.emulator.gpu="swiftshader_indirect" -Pandroid.experimental.testOptions.managedDevices.emulator.showKernelLogging=true -Pandroid.experimental.testOptions.managedDevices.setupTimeoutMinutes=60
+

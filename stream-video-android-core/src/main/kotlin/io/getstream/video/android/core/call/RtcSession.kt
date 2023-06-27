@@ -24,7 +24,6 @@ import io.getstream.result.Result.Success
 import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.CameraDirection
 import io.getstream.video.android.core.DeviceStatus
-import io.getstream.video.android.core.RealtimeConnection
 import io.getstream.video.android.core.StreamVideo
 import io.getstream.video.android.core.StreamVideoImpl
 import io.getstream.video.android.core.audio.AudioDevice
@@ -343,12 +342,6 @@ public class RtcSession internal constructor(
         // ice restart
         subscriber?.connection?.restartIce()
         publisher?.connection?.restartIce()
-
-        delay(5_000L)
-
-        if (call.state.isReconnecting.value || call.state.connection.value is RealtimeConnection.Failed) {
-            reconnect()
-        }
     }
 
     suspend fun connect() {
