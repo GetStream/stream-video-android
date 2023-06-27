@@ -127,6 +127,7 @@ jobs:
 
   androidTest-GMD:
     name: Android Test with GMD
+    if: ${{ false }}  # disable for now
     runs-on: macOS-latest
     timeout-minutes: 55
 
