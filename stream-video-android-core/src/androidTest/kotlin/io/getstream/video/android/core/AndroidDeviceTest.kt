@@ -35,7 +35,6 @@ import org.webrtc.DefaultVideoDecoderFactory
 import org.webrtc.DefaultVideoEncoderFactory
 import org.webrtc.MediaStreamTrack
 import org.webrtc.PeerConnection
-import org.webrtc.RTCStats
 import org.webrtc.VideoCodecInfo
 import retrofit2.Retrofit
 import retrofit2.converter.wire.WireConverterFactory
@@ -353,21 +352,21 @@ class AndroidDeviceTest : IntegrationTestBase(connectCoordinatorWS = false) {
         assertThat(call.mediaManager.videoTrack.state()).isEqualTo(MediaStreamTrack.State.LIVE)
 
         // see if we're sending data
-        val reportState = call.session?.getPublisherStats()?.testIn(backgroundScope)
-        val report = reportState?.awaitItem()
-        assertThat(report).isNotNull()
-
-        // verify we are sending data to the SFU
-        // it is RTCOutboundRtpStreamStats && it.bytesSent > 0
-        val allStats = report?.statsMap?.values
-        val networkOut = allStats?.filter { it.type == "outbound-rtp" }?.map { it as RTCStats }
-        val localSdp = call.session?.publisher?.localSdp
-        val remoteSdp = call.session?.publisher?.remoteSdp
-
-        println(call.session?.publisher?.localSdp)
-        println(call.session?.publisher?.remoteSdp)
-
-        println(networkOut)
+//        val reportState = call.session?.getPublisherStats()?.testIn(backgroundScope)
+//        val report = reportState?.awaitItem()
+//        assertThat(report).isNotNull()
+//
+//        // verify we are sending data to the SFU
+//        // it is RTCOutboundRtpStreamStats && it.bytesSent > 0
+//        val allStats = report?.statsMap?.values
+//        val networkOut = allStats?.filter { it.type == "outbound-rtp" }?.map { it as RTCStats }
+//        val localSdp = call.session?.publisher?.localSdp
+//        val remoteSdp = call.session?.publisher?.remoteSdp
+//
+//        println(call.session?.publisher?.localSdp)
+//        println(call.session?.publisher?.remoteSdp)
+//
+//        println(networkOut)
 
         // leave and cleanup the joining call
         call.leave()

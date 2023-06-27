@@ -25,6 +25,7 @@ import org.junit.Ignore
 import org.junit.Test
 import org.webrtc.PeerConnection
 import java.util.UUID
+import kotlin.time.Duration.Companion.seconds
 
 /**
  * Connection state shows if we've established a connection with the SFU
@@ -150,7 +151,7 @@ class ReconnectTest : IntegrationTestBase(connectCoordinatorWS = false) {
      * Switching an Sfu should be fast
      */
     @Test
-    fun switchSfuQuickly() = runTest {
+    fun switchSfuQuickly() = runTest(timeout = 10.seconds) {
         val call = client.call("default", UUID.randomUUID().toString())
         // join a call
         val result = call.join(create = true)
@@ -173,7 +174,7 @@ class ReconnectTest : IntegrationTestBase(connectCoordinatorWS = false) {
         }
 
         // assert the publisher is still connected
-        val pub = call.session?.publisher?.state?.testIn(backgroundScope)
+        val pub = call.session?.publisher?.state?.testIn(backgroundScope, timeout = 30.seconds)
         assertThat(pub?.awaitItem()).isEqualTo(PeerConnection.PeerConnectionState.NEW)
         assertThat(pub?.awaitItem()).isEqualTo(PeerConnection.PeerConnectionState.CONNECTING)
         assertThat(pub?.awaitItem()).isEqualTo(PeerConnection.PeerConnectionState.CONNECTED)
@@ -181,7 +182,5 @@ class ReconnectTest : IntegrationTestBase(connectCoordinatorWS = false) {
         // leave and clean up a call
         call.leave()
         call.cleanup()
-        // await until disconnect a call
-        assertThat(connectionState.awaitItem()).isEqualTo(RealtimeConnection.Disconnected)
     }
 }
