@@ -101,6 +101,7 @@ jobs:
         run: |
           ./gradlew :stream-video-android-compose:testDebugUnitTest --scan --stacktrace
           ./gradlew :stream-video-android-core:testDebugUnitTest --scan --stacktrace
+          ./gradlew pixel6api31DebugAndroidTest -Pandroid.testoptions.manageddevices.emulator.gpu=swiftshader_indirect
 
 #      Enable this after merging android manged devices.
 #      - name: Android Tests
