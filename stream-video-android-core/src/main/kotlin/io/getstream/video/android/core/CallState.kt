@@ -500,6 +500,12 @@ public class CallState(private val call: Call, private val user: User) {
 
             is ParticipantLeftEvent -> {
                 removeParticipant(event.participant.session_id)
+
+                // clean up - stop screen-sharing session if it was still running
+                val current = _screenSharingSession.value
+                if (current?.participant?.sessionId == event.participant.session_id) {
+                    _screenSharingSession.value = null
+                }
             }
 
             is SubscriberOfferEvent -> {

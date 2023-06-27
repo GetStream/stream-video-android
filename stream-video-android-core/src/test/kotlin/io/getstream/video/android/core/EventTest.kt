@@ -23,6 +23,7 @@ import io.getstream.video.android.core.events.ConnectionQualityChangeEvent
 import io.getstream.video.android.core.events.DominantSpeakerChangedEvent
 import io.getstream.video.android.core.events.ParticipantJoinedEvent
 import io.getstream.video.android.core.events.ParticipantLeftEvent
+import io.getstream.video.android.core.events.TrackPublishedEvent
 import io.getstream.video.android.core.model.NetworkQuality
 import io.getstream.video.android.core.permission.PermissionRequest
 import kotlinx.coroutines.test.runTest
@@ -44,6 +45,7 @@ import org.threeten.bp.OffsetDateTime
 import stream.video.sfu.event.ConnectionQualityInfo
 import stream.video.sfu.models.ConnectionQuality
 import stream.video.sfu.models.Participant
+import stream.video.sfu.models.TrackType
 
 @RunWith(RobolectricTestRunner::class)
 class EventTest : IntegrationTestBase(connectCoordinatorWS = false) {
@@ -270,6 +272,34 @@ class EventTest : IntegrationTestBase(connectCoordinatorWS = false) {
 
         // other times they will be show on the main call UI
         assertThat(call.state.reactions.value.map { it.type }).contains("like")
+    }
+
+    @Test
+    fun `test screenshare stops when participant disconnects`() = runTest {
+        // create a call
+        val sessionId = randomUUID()
+        val call = client.call("default", sessionId)
+        val participant =
+            Participant(user_id = "thierry", is_speaking = true, session_id = sessionId)
+
+        // participant joins
+        val joinEvent = ParticipantJoinedEvent(participant = participant, callCid = call.cid)
+        clientImpl.fireEvent(joinEvent, call.cid)
+
+        // participant shares screens
+        val screenShareEvent = TrackPublishedEvent(
+            userId = "thierry",
+            sessionId = sessionId,
+            trackType = TrackType.TRACK_TYPE_SCREEN_SHARE
+        )
+        clientImpl.fireEvent(screenShareEvent, call.cid)
+
+        // participant leaves
+        val leaveEvent = ParticipantLeftEvent(participant, callCid = call.cid)
+        clientImpl.fireEvent(leaveEvent, call.cid)
+
+        // verify that the screen-sharing session is null
+        assertThat(call.state.screenSharingSession.value).isNull()
     }
 }
 
