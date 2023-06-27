@@ -97,10 +97,33 @@ jobs:
           ./gradlew --scan --stacktrace \
               assembleDebug
 
+  unitTest:
+    name: Unit Tests
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: set up JDK
+        uses: actions/setup-java@v1
+        with:
+          java-version: 11
+
+      - name: Cache Gradle and wrapper
+        uses: actions/cache@v3
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*') }}
+          restore-keys: |
+            ${{ runner.os }}-gradle-
+
       - name: Run unit tests
         run: |
           ./gradlew :stream-video-android-compose:testDebugUnitTest --scan --stacktrace
-          ./gradlew :stream-video-android-core:testDebugUnitTest --scan --stacktrace          
+          ./gradlew :stream-video-android-core:testDebugUnitTest --scan --stacktrace
 
   androidTest-GMD:
     name: Android Test with GMD
