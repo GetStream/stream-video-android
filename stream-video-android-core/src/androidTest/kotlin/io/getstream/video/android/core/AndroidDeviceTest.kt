@@ -26,7 +26,6 @@ import io.getstream.video.android.core.events.ParticipantJoinedEvent
 import io.getstream.video.android.core.utils.buildAudioConstraints
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.test.runTest
-import kotlinx.coroutines.withTimeout
 import okhttp3.Interceptor
 import okhttp3.OkHttpClient
 import okhttp3.Request
@@ -327,31 +326,35 @@ class AndroidDeviceTest : IntegrationTestBase(connectCoordinatorWS = false) {
         // TODO: disable simulcast
         // join will automatically start the audio and video capture
         val call = client.call("default", "NnXAIvBKE4Hy")
-        val joinResult = call.join(create = true)
-        assertSuccess(joinResult)
+        val result = call.join(create = true)
+        assertSuccess(result)
 
-        // wait for the ice connection state
-        withTimeout(3000) {
-            while (true) {
-                val iceConnectionState = call.session?.publisher?.connection?.iceConnectionState()
-                if (iceConnectionState == PeerConnection.IceConnectionState.CONNECTED) {
-                    break
-                }
-            }
+        // create a turbine connection state
+        val connectionState = call.state.connection.testIn(backgroundScope)
+        // asset that the connection state is connected
+        val connectionStateItem = connectionState.awaitItem()
+        assertThat(connectionStateItem).isAnyOf(
+            RealtimeConnection.Connected,
+            RealtimeConnection.Joined(result.getOrThrow())
+        )
+        if (connectionStateItem is RealtimeConnection.Joined) {
+            connectionState.awaitItem()
         }
 
+        val iceState = call.session?.publisher?.iceState?.testIn(backgroundScope)
+        assertThat(iceState?.awaitItem()).isEqualTo(PeerConnection.IceConnectionState.NEW)
+        assertThat(iceState?.awaitItem()).isEqualTo(PeerConnection.IceConnectionState.CHECKING)
+        assertThat(iceState?.awaitItem()).isEqualTo(PeerConnection.IceConnectionState.CONNECTED)
+
         // verify we have running tracks
+        call.mediaManager.audioTrack.setEnabled(true)
         assertThat(call.mediaManager.videoTrack.enabled()).isTrue()
         assertThat(call.mediaManager.audioTrack.enabled()).isTrue()
         assertThat(call.mediaManager.videoTrack.state()).isEqualTo(MediaStreamTrack.State.LIVE)
 
-        // check that the transceiver is setup
-        assertThat(call.session?.publisher?.videoTransceiver).isNotNull()
-
         // see if we're sending data
-
-        delay(1000)
-        val report = call.session?.getPublisherStats()?.value
+        val reportState = call.session?.getPublisherStats()?.testIn(backgroundScope)
+        val report = reportState?.awaitItem()
         assertThat(report).isNotNull()
 
         // verify we are sending data to the SFU
@@ -365,7 +368,13 @@ class AndroidDeviceTest : IntegrationTestBase(connectCoordinatorWS = false) {
         println(call.session?.publisher?.remoteSdp)
 
         println(networkOut)
+
+        // leave and cleanup the joining call
         call.leave()
+        // create a turbine connection state
+        val connectionStates = call.state.connection.testIn(backgroundScope)
+        // await until disconnect a call
+        assertThat(connectionStates.awaitItem()).isEqualTo(RealtimeConnection.Disconnected)
     }
 
     @Test
