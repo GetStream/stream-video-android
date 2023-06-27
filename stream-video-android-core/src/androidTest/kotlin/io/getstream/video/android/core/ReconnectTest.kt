@@ -174,7 +174,7 @@ class ReconnectTest : IntegrationTestBase(connectCoordinatorWS = false) {
         }
 
         // assert the publisher is still connected
-        val pub = call.session?.publisher?.state?.testIn(backgroundScope, timeout = 30.seconds)
+        val pub = call.session?.publisher?.state?.testIn(backgroundScope, timeout = 10.seconds)
         assertThat(pub?.awaitItem()).isEqualTo(PeerConnection.PeerConnectionState.NEW)
         assertThat(pub?.awaitItem()).isEqualTo(PeerConnection.PeerConnectionState.CONNECTING)
         assertThat(pub?.awaitItem()).isEqualTo(PeerConnection.PeerConnectionState.CONNECTED)
