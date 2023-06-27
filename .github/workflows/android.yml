@@ -152,5 +152,5 @@ jobs:
       - name: Run instrumented tests with GMD
         run: ./gradlew cleanManagedDevices --unused-only &&
           ./gradlew pixel6api31DebugAndroidTest -Dorg.gradle.workers.max=4
-          -Pandroid.testoptions.manageddevices.emulator.gpu="swiftshader_indirect" -Pandroid.experimental.testOptions.managedDevices.emulator.showKernelLogging=true -Pandroid.experimental.testOptions.managedDevices.setupTimeoutMinutes=20
+          -Pandroid.testoptions.manageddevices.emulator.gpu="swiftshader_indirect" -Pandroid.experimental.testOptions.managedDevices.emulator.showKernelLogging=true -Pandroid.experimental.testOptions.managedDevices.setupTimeoutMinutes=60
 
