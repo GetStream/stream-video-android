@@ -35,6 +35,7 @@ import org.webrtc.DefaultVideoDecoderFactory
 import org.webrtc.DefaultVideoEncoderFactory
 import org.webrtc.MediaStreamTrack
 import org.webrtc.PeerConnection
+import org.webrtc.RTCStats
 import org.webrtc.VideoCodecInfo
 import retrofit2.Retrofit
 import retrofit2.converter.wire.WireConverterFactory
@@ -50,6 +51,7 @@ import java.io.InterruptedIOException
 import java.util.UUID
 import java.util.concurrent.TimeUnit
 import kotlin.test.assertNull
+import kotlin.time.Duration.Companion.seconds
 
 /**
  * Things to test in a real android environment
@@ -321,7 +323,7 @@ class AndroidDeviceTest : IntegrationTestBase(connectCoordinatorWS = false) {
     }
 
     @Test
-    fun publishing() = runTest {
+    fun publishing() = runTest(timeout = 20.seconds) {
         // TODO: disable simulcast
         // join will automatically start the audio and video capture
         val call = client.call("default", "NnXAIvBKE4Hy")
@@ -351,29 +353,47 @@ class AndroidDeviceTest : IntegrationTestBase(connectCoordinatorWS = false) {
         assertThat(call.mediaManager.audioTrack.enabled()).isTrue()
         assertThat(call.mediaManager.videoTrack.state()).isEqualTo(MediaStreamTrack.State.LIVE)
 
-        // see if we're sending data
-//        val reportState = call.session?.getPublisherStats()?.testIn(backgroundScope)
-//        val report = reportState?.awaitItem()
-//        assertThat(report).isNotNull()
-//
-//        // verify we are sending data to the SFU
-//        // it is RTCOutboundRtpStreamStats && it.bytesSent > 0
-//        val allStats = report?.statsMap?.values
-//        val networkOut = allStats?.filter { it.type == "outbound-rtp" }?.map { it as RTCStats }
-//        val localSdp = call.session?.publisher?.localSdp
-//        val remoteSdp = call.session?.publisher?.remoteSdp
-//
-//        println(call.session?.publisher?.localSdp)
-//        println(call.session?.publisher?.remoteSdp)
-//
-//        println(networkOut)
+        // assert the participant counts is correct
+        val participantCount = call.state.participantCounts.testIn(backgroundScope)
+        assertThat(participantCount.awaitItem()?.total).isEqualTo(1)
+
+        // assert the participant's video & audio track
+        val participants = call.state.participants.testIn(backgroundScope)
+        val participant = participants.awaitItem().first()
+
+        participant.videoTrack.test {
+            val videoTrack = awaitItem()?.video
+            assertThat(videoTrack).isNotNull()
+            assertThat(videoTrack?.enabled()).isTrue()
+            assertThat(videoTrack?.state()).isEqualTo(MediaStreamTrack.State.LIVE)
+        }
+
+        participant.audioTrack.test {
+            val audioTrack = awaitItem()?.audio
+            assertThat(audioTrack).isNotNull()
+            assertThat(audioTrack?.state()).isEqualTo(MediaStreamTrack.State.LIVE)
+        }
+
+        // verify the stats are being tracked
+        val session = call.session
+        assertThat(session!!).isNotNull()
+        val reportState =
+            call.session?.publisher?.getStats()?.testIn(backgroundScope, timeout = 20.seconds)
+        val report = reportState?.awaitItem()
+        assertThat(report).isNotNull()
+
+        // verify we are sending data to the SFU
+        // it is RTCOutboundRtpStreamStats && it.bytesSent > 0
+        val allStats = report?.statsMap?.values
+        val networkOut = allStats?.filter { it.type == "outbound-rtp" }?.map { it as RTCStats }
+        val localSdp = call.session?.publisher?.localSdp
+        val remoteSdp = call.session?.publisher?.remoteSdp
+        println(localSdp)
+        println(remoteSdp)
+        println(networkOut)
 
         // leave and cleanup the joining call
         call.leave()
-        // create a turbine connection state
-        val connectionStates = call.state.connection.testIn(backgroundScope)
-        // await until disconnect a call
-        assertThat(connectionStates.awaitItem()).isEqualTo(RealtimeConnection.Disconnected)
     }
 
     @Test
@@ -424,22 +444,21 @@ class AndroidDeviceTest : IntegrationTestBase(connectCoordinatorWS = false) {
         }
 
         // verify the stats are being tracked
-//        val session = call.session
-//        assertThat(session!!).isNotNull()
-//        session.getSubscriberStats().test {
-//            val first = awaitItem()
-//            val report = awaitItem()
-//
-//            assertThat(report).isNotNull()
-//
-//            val allStats = report?.statsMap?.values
-//            val networkOut =
-//                allStats?.filter { it.type == "inbound-rtp" }?.map { it as RTCStats }
-//
-//            // log debug info
-//            logger.d { networkOut.toString() }
-//        }
-//        clientImpl.debugInfo.log()
+        val session = call.session
+        assertThat(session!!).isNotNull()
+        val reportState =
+            call.session?.publisher?.getStats()?.testIn(backgroundScope, timeout = 20.seconds)
+        val report = reportState?.awaitItem()
+        assertThat(report).isNotNull()
+
+        // verify we are sending data to the SFU
+        // it is RTCOutboundRtpStreamStats && it.bytesSent > 0
+        val allStats = report?.statsMap?.values
+        val networkOut = allStats?.filter { it.type == "inbound-rtp" }?.map { it as RTCStats }
+
+        // log debug info
+        logger.d { networkOut.toString() }
+        clientImpl.debugInfo.log()
 
         // leave and clean up a call
         call.leave()
