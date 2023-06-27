@@ -118,17 +118,6 @@ private fun CallLobbyHeader(
         callLobbyViewModel = callLobbyViewModel
     )
 
-    val localInspectionMode = LocalInspectionMode.current
-    LaunchedEffect(key1 = Unit) {
-        if (BuildConfig.BENCHMARK) {
-            callLobbyViewModel.call.camera.disable()
-            callLobbyViewModel.call.microphone.disable()
-        } else if (!localInspectionMode) {
-            callLobbyViewModel.call.camera.enable()
-            callLobbyViewModel.call.microphone.enable()
-        }
-    }
-
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -201,6 +190,7 @@ private fun CallLobbyBody(
 
         Spacer(modifier = Modifier.height(20.dp))
 
+        val localInspectionMode = LocalInspectionMode.current
         val isCameraEnabled: Boolean by if (LocalInspectionMode.current) {
             remember { mutableStateOf(true) }
         } else {
@@ -222,6 +212,15 @@ private fun CallLobbyBody(
                     is ToggleCamera -> callLobbyViewModel.enableCamera(!isCameraEnabled)
                     is ToggleMicrophone -> callLobbyViewModel.enableMicrophone(!isMicrophoneEnabled)
                     else -> Unit
+                }
+            },
+            onRendered = {
+                if (BuildConfig.BENCHMARK) {
+                    callLobbyViewModel.call.camera.disable()
+                    callLobbyViewModel.call.microphone.disable()
+                } else if (!localInspectionMode) {
+                    callLobbyViewModel.call.camera.enable()
+                    callLobbyViewModel.call.microphone.enable()
                 }
             }
         )

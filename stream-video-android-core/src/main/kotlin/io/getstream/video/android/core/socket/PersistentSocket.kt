@@ -105,7 +105,7 @@ open class PersistentSocket<T>(
     /**
      * Connect the socket, authenticate, start the healthmonitor and see if the network is online
      */
-    suspend fun connect() = suspendCoroutine<T> { connectedContinuation ->
+    suspend fun connect() = suspendCoroutine { connectedContinuation ->
         logger.i { "[connect]" }
         connected = connectedContinuation
 

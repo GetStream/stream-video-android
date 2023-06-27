@@ -301,7 +301,7 @@ public class Call(
         members: List<MemberRequest>? = null,
         custom: Map<String, Any>? = null,
         settings: CallSettingsRequest? = null,
-        startsAt: org.threeten.bp.OffsetDateTime? = null,
+        startsAt: OffsetDateTime? = null,
         team: String? = null,
         ring: Boolean = false,
         notify: Boolean = false
@@ -347,7 +347,7 @@ public class Call(
     suspend fun update(
         custom: Map<String, Any>? = null,
         settingsOverride: CallSettingsRequest? = null,
-        startsAt: org.threeten.bp.OffsetDateTime? = null,
+        startsAt: OffsetDateTime? = null,
     ): Result<UpdateCallResponse> {
 
         val request = UpdateCallRequest(
@@ -574,7 +574,7 @@ public class Call(
         videoRenderer: VideoTextureViewRenderer,
         sessionId: String,
         trackType: TrackType,
-        onRender: (View) -> Unit = {}
+        onRendered: (View) -> Unit = {}
     ) {
         logger.d { "[initRenderer] #sfu; sessionId: $sessionId" }
 
@@ -595,7 +595,7 @@ public class Call(
                             )
                         )
                     }
-                    onRender(videoRenderer)
+                    onRendered(videoRenderer)
                 }
 
                 override fun onFrameResolutionChanged(p0: Int, p1: Int, p2: Int) {
@@ -824,7 +824,7 @@ public data class CreateCallOptions(
     val members: List<MemberRequest>? = null,
     val custom: Map<String, Any>? = null,
     val settings: CallSettingsRequest? = null,
-    val startsAt: org.threeten.bp.OffsetDateTime? = null,
+    val startsAt: OffsetDateTime? = null,
     val team: String? = null,
 ) {
     fun memberRequestsFromIds(): List<MemberRequest>? {

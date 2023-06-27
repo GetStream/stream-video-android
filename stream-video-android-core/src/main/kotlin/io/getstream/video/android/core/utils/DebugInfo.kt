@@ -18,7 +18,6 @@ package io.getstream.video.android.core.utils
 
 import android.os.Build
 import io.getstream.log.taggedLogger
-import io.getstream.video.android.BuildConfig
 import io.getstream.video.android.core.StreamVideoImpl
 import io.getstream.video.android.core.dispatchers.DispatcherProvider
 import kotlinx.coroutines.CoroutineScope
@@ -31,8 +30,8 @@ import org.webrtc.RTCStatsReport
 internal data class Timer(val name: String, val start: Long = System.currentTimeMillis()) {
     var end: Long = 0
     var duration: Long = 0
-    var splits: List<Pair<String, Long>> = mutableListOf<Pair<String, Long>>()
-    var durations: List<Pair<String, Long>> = mutableListOf<Pair<String, Long>>()
+    var splits: List<Pair<String, Long>> = mutableListOf()
+    var durations: List<Pair<String, Long>> = mutableListOf()
 
     fun split(s: String) {
         val now = System.currentTimeMillis()
@@ -65,10 +64,10 @@ internal class DebugInfo(val client: StreamVideoImpl) {
     // last 20 events
 
     // phone type
-    val phoneModel = android.os.Build.MODEL
+    val phoneModel = Build.MODEL
 
     // android version
-    val version = android.os.Build.VERSION.SDK_INT
+    val version = Build.VERSION.SDK_INT
 
     // how many times the network dropped
 
