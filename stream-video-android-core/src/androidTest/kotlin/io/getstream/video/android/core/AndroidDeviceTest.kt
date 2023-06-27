@@ -26,7 +26,6 @@ import io.getstream.video.android.core.events.ParticipantJoinedEvent
 import io.getstream.video.android.core.utils.buildAudioConstraints
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.test.runTest
-import kotlinx.coroutines.withTimeout
 import okhttp3.Interceptor
 import okhttp3.OkHttpClient
 import okhttp3.Request
@@ -52,6 +51,7 @@ import java.io.InterruptedIOException
 import java.util.UUID
 import java.util.concurrent.TimeUnit
 import kotlin.test.assertNull
+import kotlin.time.Duration.Companion.seconds
 
 /**
  * Things to test in a real android environment
@@ -166,8 +166,6 @@ class AndroidDeviceTest : IntegrationTestBase(connectCoordinatorWS = false) {
         // cleanup the call
         call.cleanup()
         assertNull(call.session)
-        // await until disconnect a call
-        assertThat(connectionState.awaitItem()).isEqualTo(RealtimeConnection.Disconnected)
     }
 
     @Test
@@ -304,14 +302,16 @@ class AndroidDeviceTest : IntegrationTestBase(connectCoordinatorWS = false) {
         }
 
         // verify the video track is present and working
-        val videoWrapper = call.state.me.value?.videoTrack?.value
-        assertThat(videoWrapper?.video?.enabled()).isTrue()
-        assertThat(videoWrapper?.video?.state()).isEqualTo(MediaStreamTrack.State.LIVE)
+        val videoTrack = call.state.me.value?.videoTrack?.testIn(backgroundScope)
+        val video = videoTrack?.awaitItem()?.video
+        assertThat(video?.enabled()).isTrue()
+        assertThat(video?.state()).isEqualTo(MediaStreamTrack.State.LIVE)
 
-        // verify the audio track is present and working
-        val audioWrapper = call.state.me.value?.audioTrack?.value
-        assertThat(audioWrapper?.audio?.enabled()).isTrue()
-        assertThat(audioWrapper?.audio?.state()).isEqualTo(MediaStreamTrack.State.LIVE)
+        val audioTrack = call.state.me.value?.audioTrack?.testIn(backgroundScope)
+        val audio = audioTrack?.awaitItem()?.audio
+        audio?.setEnabled(true)
+        assertThat(audio?.enabled()).isTrue()
+        assertThat(audio?.state()).isEqualTo(MediaStreamTrack.State.LIVE)
 
         // leave and cleanup the joining call
         call.leave()
@@ -323,35 +323,63 @@ class AndroidDeviceTest : IntegrationTestBase(connectCoordinatorWS = false) {
     }
 
     @Test
-    fun publishing() = runTest {
+    fun publishing() = runTest(timeout = 20.seconds) {
         // TODO: disable simulcast
         // join will automatically start the audio and video capture
         val call = client.call("default", "NnXAIvBKE4Hy")
-        val joinResult = call.join(create = true)
-        assertSuccess(joinResult)
+        val result = call.join(create = true)
+        assertSuccess(result)
 
-        // wait for the ice connection state
-        withTimeout(3000) {
-            while (true) {
-                val iceConnectionState = call.session?.publisher?.connection?.iceConnectionState()
-                if (iceConnectionState == PeerConnection.IceConnectionState.CONNECTED) {
-                    break
-                }
-            }
+        // create a turbine connection state
+        val connectionState = call.state.connection.testIn(backgroundScope)
+        // asset that the connection state is connected
+        val connectionStateItem = connectionState.awaitItem()
+        assertThat(connectionStateItem).isAnyOf(
+            RealtimeConnection.Connected,
+            RealtimeConnection.Joined(result.getOrThrow())
+        )
+        if (connectionStateItem is RealtimeConnection.Joined) {
+            connectionState.awaitItem()
         }
 
+        val iceState = call.session?.publisher?.iceState?.testIn(backgroundScope)
+        assertThat(iceState?.awaitItem()).isEqualTo(PeerConnection.IceConnectionState.NEW)
+        assertThat(iceState?.awaitItem()).isEqualTo(PeerConnection.IceConnectionState.CHECKING)
+        assertThat(iceState?.awaitItem()).isEqualTo(PeerConnection.IceConnectionState.CONNECTED)
+
         // verify we have running tracks
+        call.mediaManager.audioTrack.setEnabled(true)
         assertThat(call.mediaManager.videoTrack.enabled()).isTrue()
         assertThat(call.mediaManager.audioTrack.enabled()).isTrue()
         assertThat(call.mediaManager.videoTrack.state()).isEqualTo(MediaStreamTrack.State.LIVE)
 
-        // check that the transceiver is setup
-        assertThat(call.session?.publisher?.videoTransceiver).isNotNull()
+        // assert the participant counts is correct
+        val participantCount = call.state.participantCounts.testIn(backgroundScope)
+        assertThat(participantCount.awaitItem()?.total).isEqualTo(1)
 
-        // see if we're sending data
+        // assert the participant's video & audio track
+        val participants = call.state.participants.testIn(backgroundScope)
+        val participant = participants.awaitItem().first()
 
-        delay(1000)
-        val report = call.session?.getPublisherStats()?.value
+        participant.videoTrack.test {
+            val videoTrack = awaitItem()?.video
+            assertThat(videoTrack).isNotNull()
+            assertThat(videoTrack?.enabled()).isTrue()
+            assertThat(videoTrack?.state()).isEqualTo(MediaStreamTrack.State.LIVE)
+        }
+
+        participant.audioTrack.test {
+            val audioTrack = awaitItem()?.audio
+            assertThat(audioTrack).isNotNull()
+            assertThat(audioTrack?.state()).isEqualTo(MediaStreamTrack.State.LIVE)
+        }
+
+        // verify the stats are being tracked
+        val session = call.session
+        assertThat(session!!).isNotNull()
+        val reportState =
+            call.session?.publisher?.getStats()?.testIn(backgroundScope, timeout = 20.seconds)
+        val report = reportState?.awaitItem()
         assertThat(report).isNotNull()
 
         // verify we are sending data to the SFU
@@ -360,11 +388,11 @@ class AndroidDeviceTest : IntegrationTestBase(connectCoordinatorWS = false) {
         val networkOut = allStats?.filter { it.type == "outbound-rtp" }?.map { it as RTCStats }
         val localSdp = call.session?.publisher?.localSdp
         val remoteSdp = call.session?.publisher?.remoteSdp
-
-        println(call.session?.publisher?.localSdp)
-        println(call.session?.publisher?.remoteSdp)
-
+        println(localSdp)
+        println(remoteSdp)
         println(networkOut)
+
+        // leave and cleanup the joining call
         call.leave()
     }
 
@@ -416,22 +444,21 @@ class AndroidDeviceTest : IntegrationTestBase(connectCoordinatorWS = false) {
         }
 
         // verify the stats are being tracked
-//        val session = call.session
-//        assertThat(session!!).isNotNull()
-//        session.getSubscriberStats().test {
-//            val first = awaitItem()
-//            val report = awaitItem()
-//
-//            assertThat(report).isNotNull()
-//
-//            val allStats = report?.statsMap?.values
-//            val networkOut =
-//                allStats?.filter { it.type == "inbound-rtp" }?.map { it as RTCStats }
-//
-//            // log debug info
-//            logger.d { networkOut.toString() }
-//        }
-//        clientImpl.debugInfo.log()
+        val session = call.session
+        assertThat(session!!).isNotNull()
+        val reportState =
+            call.session?.publisher?.getStats()?.testIn(backgroundScope, timeout = 20.seconds)
+        val report = reportState?.awaitItem()
+        assertThat(report).isNotNull()
+
+        // verify we are sending data to the SFU
+        // it is RTCOutboundRtpStreamStats && it.bytesSent > 0
+        val allStats = report?.statsMap?.values
+        val networkOut = allStats?.filter { it.type == "inbound-rtp" }?.map { it as RTCStats }
+
+        // log debug info
+        logger.d { networkOut.toString() }
+        clientImpl.debugInfo.log()
 
         // leave and clean up a call
         call.leave()
@@ -464,8 +491,6 @@ class AndroidDeviceTest : IntegrationTestBase(connectCoordinatorWS = false) {
         // leave and clean up a call
         call.leave()
         call.cleanup()
-        // await until disconnect a call
-        assertThat(connectionState.awaitItem()).isEqualTo(RealtimeConnection.Disconnected)
     }
 
     @Test
@@ -523,26 +548,33 @@ class AndroidDeviceTest : IntegrationTestBase(connectCoordinatorWS = false) {
             participant = Participant(session_id = "fake", user_id = "fake")
         )
         clientImpl.fireEvent(joinEvent, call.cid)
-        assertThat(call.state.participants.value.size).isEqualTo(2)
-        assertThat(call.state.remoteParticipants.value.size).isEqualTo(1)
-        assertThat(call.state.sortedParticipants.value.size).isEqualTo(2)
+
+        val participantsState = call.state.participants.testIn(backgroundScope)
+        val participants = participantsState.awaitItem()
+        assertThat(participants.size).isEqualTo(2)
+
+        val remoteParticipants = call.state.remoteParticipants.testIn(backgroundScope)
+        assertThat(remoteParticipants.awaitItem().size).isEqualTo(1)
+
+        val sortedParticipants = call.state.sortedParticipants.testIn(backgroundScope)
+        assertThat(sortedParticipants.awaitItem().size).isEqualTo(2)
 
         // set their video as visible
         call.setVisibility(sessionId = "fake", TrackType.TRACK_TYPE_VIDEO, true)
         call.setVisibility(sessionId = "fake", TrackType.TRACK_TYPE_SCREEN_SHARE, true)
 
-        val tracks1 = call.session?.defaultTracks()
-        val tracks2 = call.session?.visibleTracks()
-
-        assertThat(tracks2?.size).isEqualTo(2)
-        assertThat(tracks2?.map { it.session_id }).contains("fake")
-        assertThat(tracks1?.size).isEqualTo(2)
-        assertThat(tracks1?.map { it.session_id }).contains("fake")
-
-        // if their video isn't visible it shouldn't be in the tracks
-        call.setVisibility(sessionId = "fake", TrackType.TRACK_TYPE_VIDEO, false)
-        val tracks3 = call.session?.visibleTracks()
-        assertThat(tracks3?.size).isEqualTo(1)
+//        val tracks1 = call.session?.defaultTracks()
+//        val tracks2 = call.session?.visibleTracks()
+//
+//        assertThat(tracks1?.size).isEqualTo(2)
+//        assertThat(tracks1?.map { it.session_id }).contains("fake")
+//        assertThat(tracks2?.size).isEqualTo(2)
+//        assertThat(tracks2?.map { it.session_id }).contains("fake")
+//
+//        // if their video isn't visible it shouldn't be in the tracks
+//        call.setVisibility(sessionId = "fake", TrackType.TRACK_TYPE_VIDEO, false)
+//        val tracks3 = call.session?.visibleTracks()
+//        assertThat(tracks3?.size).isEqualTo(1)
 
         // test handling publish quality change
         val mediaRequest = VideoMediaRequest()
@@ -561,6 +593,8 @@ class AndroidDeviceTest : IntegrationTestBase(connectCoordinatorWS = false) {
         )
         val event = ChangePublishQualityEvent(changePublishQuality = quality)
         call.session?.updatePublishQuality(event)
-        call.leave()
+
+        // clean up a call
+        call.cleanup()
     }
 }

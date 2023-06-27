@@ -244,7 +244,7 @@ class MicrophoneManager(val mediaManager: MediaManagerImpl) {
     internal fun setup() {
         if (setupCompleted) return
 
-        audioManager = mediaManager.context.getSystemService<AudioManager>()
+        audioManager = mediaManager.context.getSystemService()
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
             audioManager?.allowedCapturePolicy = AudioAttributes.ALLOW_CAPTURE_BY_ALL

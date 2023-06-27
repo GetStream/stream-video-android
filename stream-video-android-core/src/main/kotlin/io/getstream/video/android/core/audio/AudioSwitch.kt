@@ -126,6 +126,7 @@ public class AudioSwitch internal constructor(
                 enumerateDevices()
                 state = STARTED
             }
+
             else -> {
             }
         }
@@ -143,9 +144,11 @@ public class AudioSwitch internal constructor(
                 deactivate()
                 closeListeners()
             }
+
             STARTED -> {
                 closeListeners()
             }
+
             STOPPED -> {
             }
         }
@@ -169,8 +172,9 @@ public class AudioSwitch internal constructor(
                 selectedDevice?.let { activate(it) }
                 state = ACTIVATED
             }
+
             ACTIVATED -> selectedDevice?.let { activate(it) }
-            STOPPED -> throw IllegalStateException()
+            STOPPED -> logger.e { "Audio already is stopped" }
         }
     }
 
@@ -188,6 +192,7 @@ public class AudioSwitch internal constructor(
                 audioManager.restoreAudioState()
                 state = STARTED
             }
+
             STARTED, STOPPED -> {
             }
         }
@@ -217,10 +222,12 @@ public class AudioSwitch internal constructor(
                 audioManager.enableSpeakerphone(false)
                 bluetoothHeadsetManager?.activate()
             }
+
             is Earpiece, is WiredHeadset -> {
                 audioManager.enableSpeakerphone(false)
                 bluetoothHeadsetManager?.deactivate()
             }
+
             is Speakerphone -> {
                 audioManager.enableSpeakerphone(true)
                 bluetoothHeadsetManager?.deactivate()
@@ -300,6 +307,7 @@ public class AudioSwitch internal constructor(
                         mutableAudioDevices.add(it)
                     }
                 }
+
                 WiredHeadset::class.java -> {
                     logger.v {
                         "[addAvailableAudioDevices] #WiredHeadset; wiredHeadsetAvailable: $wiredHeadsetAvailable"
@@ -308,6 +316,7 @@ public class AudioSwitch internal constructor(
                         mutableAudioDevices.add(WiredHeadset())
                     }
                 }
+
                 Earpiece::class.java -> {
                     val hasEarpiece = audioManager.hasEarpiece()
                     logger.v {
@@ -318,6 +327,7 @@ public class AudioSwitch internal constructor(
                         mutableAudioDevices.add(Earpiece())
                     }
                 }
+
                 Speakerphone::class.java -> {
                     val hasSpeakerphone = audioManager.hasSpeakerphone()
                     logger.v { "[addAvailableAudioDevices] #Speakerphone; hasSpeakerphone: $hasSpeakerphone" }
