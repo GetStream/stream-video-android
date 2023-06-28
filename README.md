@@ -11,7 +11,11 @@
 This is the official Android SDK for Stream Video, a service for building video call, audio room, and live streaming applications. This library includes both a low-level video SDK and a set of reusable UI components. 
 Most users start with the Compose UI components, and fall back to the lower level API when they want to customize things.
 
-## What is Stream?
+<a href="https://getstream.io?utm_source=Github&utm_medium=Github_Repo_Content_Ad&utm_content=Developer&utm_campaign=Github_Android_Video_SDK&utm_term=DevRelOss">
+<img src="https://user-images.githubusercontent.com/24237865/138428440-b92e5fb7-89f8-41aa-96b1-71a5486c5849.png" align="right" width="12%"/>
+</a>
+
+## 🛥 What is Stream?
 
 Stream allows developers to rapidly deploy scalable feeds, chat messaging and video with an industry leading 99.999% uptime SLA guarantee.
 
@@ -56,7 +60,7 @@ Here are some of the features we support:
 * Call recording
 * Broadcasting to HLS
 
-## Roadmap
+## 🗺️ Roadmap
 
 Video roadmap and changelog is available [here](https://github.com/GetStream/protocol/discussions/127). 
 
