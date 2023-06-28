@@ -16,20 +16,18 @@
 
 package io.getstream.video.android.dogfooding
 
+import android.os.Build
 import android.os.Bundle
+import android.view.WindowManager
+import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.activity.viewModels
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.lifecycleScope
-import io.getstream.video.android.common.AbstractCallActivity
-import io.getstream.video.android.common.viewmodel.CallViewModel
-import io.getstream.video.android.common.viewmodel.CallViewModelFactory
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.call.activecall.CallContent
 import io.getstream.video.android.compose.ui.components.call.ringing.RingingCallContent
-import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.StreamVideo
 import io.getstream.video.android.core.call.state.CallAction
 import io.getstream.video.android.core.call.state.LeaveCall
@@ -40,16 +38,16 @@ import io.getstream.video.android.core.notifications.NotificationHandler
 import io.getstream.video.android.model.streamCallId
 import kotlinx.coroutines.launch
 
-class IncomingCallActivity : AbstractCallActivity() {
-
-    private val factory by lazy { CallViewModelFactory() }
-    private val vm by viewModels<CallViewModel> { factory }
+class IncomingCallActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         // release the lock and turn on screen.
         showWhenLockedAndTurnScreenOn()
+
+        val callId = intent.streamCallId(NotificationHandler.INTENT_EXTRA_CALL_CID)!!
+        val call = StreamVideo.instance().call(callId.type, callId.id)
 
         lifecycleScope.launch {
             if (NotificationHandler.ACTION_ACCEPT_CALL == intent.action) {
@@ -72,12 +70,11 @@ class IncomingCallActivity : AbstractCallActivity() {
                 RingingCallContent(
                     modifier = Modifier.background(color = VideoTheme.colors.appBackground),
                     call = call,
-                    onBackPressed = { handleBackPressed() },
+                    onBackPressed = { finish() },
                     onAcceptedContent = {
                         CallContent(
                             modifier = Modifier.fillMaxSize(),
                             call = call,
-                            callViewModel = vm,
                             onCallAction = onCallAction
                         )
                     },
@@ -87,13 +84,16 @@ class IncomingCallActivity : AbstractCallActivity() {
         }
     }
 
-    override fun pipChanged(isInPip: Boolean) {
-        super.pipChanged(isInPip)
-        vm.onPictureInPictureModeChanged(isInPip)
-    }
-
-    override fun provideCall(): Call {
-        val callId = intent.streamCallId(NotificationHandler.INTENT_EXTRA_CALL_CID)!!
-        return StreamVideo.instance().call(callId.type, callId.id)
+    private fun showWhenLockedAndTurnScreenOn() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O_MR1) {
+            setShowWhenLocked(true)
+            setTurnScreenOn(true)
+        } else {
+            @Suppress("DEPRECATION")
+            window.addFlags(
+                WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED or
+                    WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON
+            )
+        }
     }
 }

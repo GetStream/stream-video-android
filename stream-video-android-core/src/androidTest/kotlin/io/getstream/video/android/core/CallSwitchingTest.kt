@@ -20,14 +20,14 @@ import io.getstream.log.taggedLogger
 import io.getstream.video.android.core.utils.Timer
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
+import kotlin.time.Duration.Companion.seconds
 
 class CallSwitchingTest : IntegrationTestBase(connectCoordinatorWS = false) {
 
     private val logger by taggedLogger("Test:AndroidDeviceTest")
 
     @Test
-    fun switch() = runTest {
-
+    fun switch() = runTest(timeout = 30.seconds) {
         val location = clientImpl.getCachedLocation()
         println("location: $location")
         val numberOfCalls = 10

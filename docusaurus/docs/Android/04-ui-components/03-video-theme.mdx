@@ -25,7 +25,7 @@ override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
     setContent {
         VideoTheme {
-            CallContainer(call = call)
+            CallContent(call = call)
         }
     }
 }
@@ -47,7 +47,7 @@ setContent {
             callControlsButton = RoundedCornerShape(8.dp)
         )
     ) {
-        CallContainer(
+        CallContent(
             modifier = Modifier.fillMaxSize(),
             call = call,
             onBackPressed = { finish() },
@@ -58,7 +58,7 @@ setContent {
 
 The sample above will show:
 
-![Compose CallContainer With Custom Themes](../assets/compose_video_theme_custom.png)
+![Compose CallContent With Custom Themes](../assets/compose_video_theme_custom.png)
 
 Each UI component can be customized by giving preferred values to the `VideoTheme`, and the `VideoTheme` contains various themes below:
 

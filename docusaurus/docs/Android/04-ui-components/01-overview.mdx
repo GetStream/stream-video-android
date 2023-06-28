@@ -51,7 +51,7 @@ You will see the result below:
 
 ### Video Call UI
 
-We also support the full UI component called [CallContainer](04-call/01-call-container.mdx), which consists of:
+We also support the full UI component called [CallContent](04-call/01-call-content.mdx), which consists of:
 
 - **AppBar**: Content is shown that calls information or additional actions.
 - **Video**: A call video that renders the full participants of the call.
@@ -61,7 +61,7 @@ The following example renders a full video calling interface:
 
 ```Kotlin
 VideoTheme {
-    CallContainer(
+    CallContent(
         modifier = modifier,
         call = call,
         onBackPressed = onBackPressed,
@@ -76,7 +76,7 @@ You will see the result below:
 
 ### Ringing (incoming/outgoing calls)
 
-You can implement incoming/outgoing respectively screens depending on the call state with [RingingCallContent](04-call/02-ringing-call.mdx)` composable:
+You can implement incoming/outgoing respectively screens depending on the call state with [RingingCallContent](04-call/04-ringing-call.mdx)` composable:
 
 ```Kotlin
 VideoTheme {

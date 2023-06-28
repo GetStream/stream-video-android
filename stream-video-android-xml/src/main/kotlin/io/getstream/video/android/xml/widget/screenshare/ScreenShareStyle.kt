@@ -54,7 +54,7 @@ public data class ScreenShareStyle(
                 attrs,
                 R.styleable.ScreenShareView,
                 R.attr.streamVideoScreenShareStyle,
-                R.style.Stream_ScreenShare
+                R.style.StreamVideo_ScreenShare
             ).use {
 
                 val fullscreenIcon =

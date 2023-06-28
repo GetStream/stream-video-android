@@ -17,7 +17,7 @@
 package io.getstream.video.android.xml.binding
 
 import androidx.lifecycle.LifecycleOwner
-import io.getstream.video.android.common.viewmodel.CallViewModel
+import io.getstream.video.android.xml.viewmodel.CallViewModel
 import io.getstream.video.android.xml.widget.participant.CallParticipantView
 
 /**

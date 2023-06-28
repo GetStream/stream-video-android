@@ -17,7 +17,6 @@
 package io.getstream.video.android.xml.binding
 
 import androidx.lifecycle.LifecycleOwner
-import io.getstream.video.android.common.viewmodel.CallViewModel
 import io.getstream.video.android.core.call.state.FlipCamera
 import io.getstream.video.android.core.call.state.LeaveCall
 import io.getstream.video.android.core.call.state.ToggleCamera
@@ -25,6 +24,7 @@ import io.getstream.video.android.core.call.state.ToggleMicrophone
 import io.getstream.video.android.core.call.state.ToggleSpeakerphone
 import io.getstream.video.android.xml.R
 import io.getstream.video.android.xml.state.CallDeviceState
+import io.getstream.video.android.xml.viewmodel.CallViewModel
 import io.getstream.video.android.xml.widget.control.CallControlItem
 import io.getstream.video.android.xml.widget.control.CallControlsView
 import io.getstream.video.android.ui.common.R as RCommon
