@@ -6,7 +6,7 @@ public final class io/getstream/video/android/compose/BuildConfig {
 }
 
 public final class io/getstream/video/android/compose/lifecycle/CallMediaLifecycleKt {
-	public static final fun CallMediaLifecycle (Lio/getstream/video/android/core/Call;ZJLandroidx/compose/runtime/Composer;II)V
+	public static final fun CallMediaLifecycle (Lio/getstream/video/android/core/Call;ZZJLandroidx/compose/runtime/Composer;II)V
 }
 
 public final class io/getstream/video/android/compose/permission/CallPermissionsKt {

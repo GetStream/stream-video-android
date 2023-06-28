@@ -133,7 +133,11 @@ public fun CallContent(
 
     DefaultPermissionHandler(videoPermission = permissions)
 
-    CallMediaLifecycle(call = call, isInPictureInPicture = isInPictureInPicture)
+    CallMediaLifecycle(
+        call = call,
+        isInPictureInPicture = isInPictureInPicture,
+        enableInPictureInPicture = enableInPictureInPicture
+    )
 
     BackHandler {
         if (enableInPictureInPicture) {
