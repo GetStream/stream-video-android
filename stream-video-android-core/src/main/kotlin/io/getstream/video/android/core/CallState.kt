@@ -84,7 +84,6 @@ import org.openapitools.client.models.UpdatedCallPermissionsEvent
 import org.openapitools.client.models.VideoEvent
 import org.threeten.bp.Clock
 import org.threeten.bp.OffsetDateTime
-import org.webrtc.CameraEnumerationAndroid
 import stream.video.sfu.models.Participant
 import stream.video.sfu.models.ParticipantCount
 import stream.video.sfu.models.TrackType
@@ -123,7 +122,6 @@ public sealed interface RealtimeConnection {
     public data class Failed(val error: Any) : RealtimeConnection // permanent failure
     public object Disconnected : RealtimeConnection // normal disconnect by the app
 }
-
 
 /**
  * The CallState class keeps all state for a call

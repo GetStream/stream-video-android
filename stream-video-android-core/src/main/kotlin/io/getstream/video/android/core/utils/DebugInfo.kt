@@ -24,8 +24,6 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import org.webrtc.RTCStats
-import org.webrtc.RTCStatsReport
 
 internal data class Timer(val name: String, val start: Long = System.currentTimeMillis()) {
     var end: Long = 0
@@ -140,10 +138,7 @@ internal class DebugInfo(val client: StreamVideoImpl) {
         - match participant and track id..
 
          */
-
     }
-
-
 
     fun listCodecs() {
         // see https://developer.android.com/reference/kotlin/android/media/MediaCodecInfo
