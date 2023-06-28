@@ -18,7 +18,7 @@ package io.getstream.video.android.xml.binding
 
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.lifecycleScope
-import io.getstream.video.android.common.viewmodel.CallViewModel
+import io.getstream.video.android.xml.viewmodel.CallViewModel
 import io.getstream.video.android.xml.widget.appbar.CallAppBarView
 import io.getstream.video.android.xml.widget.call.CallView
 

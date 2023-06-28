@@ -320,15 +320,14 @@ class MainActivity : ComponentActivity() {
 }
 ```
 
-Next in the same file, update the code inside of `VideoTheme` to use the `CallContainer`.
-The code will be a lot smaller than before since all UI logic is handled in the `CallContainer`:
+Next in the same file, update the code inside of `VideoTheme` to use the `CallContent`.
+The code will be a lot smaller than before since all UI logic is handled in the `CallContent`:
 
 ```kotlin
 VideoTheme {
     CallContainer(
         modifier = Modifier.fillMaxSize(),
         call = call,
-        callViewModel = vm,
         onBackPressed = { onBackPressed() },
     )
 }
