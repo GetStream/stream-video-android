@@ -44,8 +44,10 @@ class CallActivity : ComponentActivity() {
         setContent {
             CallScreen(
                 call = call,
-                onBackPressed = { finish() },
-                onLeaveCall = { finish() }
+                onLeaveCall = {
+                    call.leave()
+                    finish()
+                }
             )
         }
     }
