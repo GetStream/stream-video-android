@@ -34,10 +34,10 @@ Now, you can implement your preview composable like the example below:
 ```kotlin
 @Preview
 @Composable
-private fun CallContainerPreview() {
+private fun CallContentPreview() {
     StreamMockUtils.initializeStreamVideo(LocalContext.current)
     VideoTheme {
-        CallContainer(
+        CallContent(
             modifier = Modifier.background(color = VideoTheme.colors.appBackground),
             call = mockCall,
         )
@@ -47,7 +47,7 @@ private fun CallContainerPreview() {
 
 After adding the above example to your project, you'll see the preview results on your Android Studio like the images below:
 
-![Preview fro CallContainer](../assets/preview-call-container.png)
+![Preview fro CallContent](../assets/preview-call-container.png)
 
 You should follow the steps below to make working well for your preview Composable functions.
 

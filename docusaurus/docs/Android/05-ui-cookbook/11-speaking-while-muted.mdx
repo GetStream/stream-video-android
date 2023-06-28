@@ -25,16 +25,8 @@ If you want to integrate this into the default UI, you update it like this
 ```kotlin
 val speakingWhileMuted = call.state.speakingWhileMuted.observeAsState()
 
-CallContainer(
-                    modifier = Modifier.background(color = VideoTheme.colors.appBackground),
-                    callViewModel = vm,
-                    onBackPressed = { finish() })
-    {
-    CallHeader()
-    CallContent()
-    ControlActions()
-
-    if (speakingWhileMuted) SpeakingWhileMutedWarning()
-}
+CallContent(
+ ..
+)
 ```
 

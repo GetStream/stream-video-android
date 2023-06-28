@@ -40,7 +40,7 @@ public data class PictureInPictureStyle(
                 attrs,
                 R.styleable.PictureInPictureView,
                 R.attr.streamVideoPictureInPictureCallParticipantViewStyle,
-                R.style.Stream_PictureInPicture
+                R.style.StreamVideo_PictureInPicture
             ).use {
 
                 val callParticipantStyle = it.getResourceId(

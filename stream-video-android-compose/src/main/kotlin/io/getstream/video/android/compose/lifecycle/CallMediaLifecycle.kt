@@ -23,9 +23,11 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
+import io.getstream.video.android.compose.pip.enterPictureInPicture
 import io.getstream.video.android.core.Call
 import kotlinx.coroutines.delay
 
@@ -44,8 +46,10 @@ import kotlinx.coroutines.delay
 public fun CallMediaLifecycle(
     call: Call,
     isInPictureInPicture: Boolean,
+    enableInPictureInPicture: Boolean = false,
     pipEnteringDuration: Long = 100
 ) {
+    val context = LocalContext.current
     val lifecycle = LocalLifecycleOwner.current.lifecycle
     var latestLifecycleEvent by remember { mutableStateOf(Lifecycle.Event.ON_ANY) }
     DisposableEffect(lifecycle) {
@@ -63,6 +67,8 @@ public fun CallMediaLifecycle(
             delay(pipEnteringDuration)
             if (isInPictureInPicture) {
                 call.camera.pause()
+            } else if (enableInPictureInPicture) {
+                enterPictureInPicture(context = context, call = call)
             }
         }
     }

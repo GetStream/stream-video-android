@@ -43,12 +43,11 @@ ParticipantVideo(
 
 ### Customization
 
-If you want to custom the video fallback from higher-level of components, such as `CallContainer` or `CallContent`, you can achieve it easily by implementing `videoRenderer` composable parameter like the example below:
+If you want to custom the video fallback from higher-level of components, such as `CallContent`, you can achieve it easily by implementing `videoRenderer` composable parameter like the example below:
 
 ```kotlin {5-15}
-CallContainer(
+CallContent(
     modifier = Modifier.background(color = VideoTheme.colors.appBackground),
-    callViewModel = vm,
     onBackPressed = { finish() },
     videoRenderer = { modifier, call, participant, style ->
         ParticipantVideo(

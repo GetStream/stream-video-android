@@ -80,22 +80,6 @@ public final class io/getstream/video/android/common/view/ParticipantItemView : 
 	public final fun isInitialized ()Z
 }
 
-public class io/getstream/video/android/common/viewmodel/CallViewModel : androidx/lifecycle/ViewModel {
-	public fun <init> ()V
-	public final fun isInPictureInPicture ()Lkotlinx/coroutines/flow/StateFlow;
-	public final fun onPictureInPictureModeChanged (Z)V
-}
-
-public final class io/getstream/video/android/common/viewmodel/CallViewModelFactory : androidx/lifecycle/ViewModelProvider$Factory {
-	public fun <init> ()V
-	public final fun create ()Lio/getstream/video/android/common/viewmodel/CallViewModel;
-	public fun create (Ljava/lang/Class;)Landroidx/lifecycle/ViewModel;
-}
-
-public abstract interface class io/getstream/video/android/common/viewmodel/CallViewModelFactoryProvider {
-	public abstract fun getCallViewModelFactory ()Lio/getstream/video/android/common/viewmodel/CallViewModelFactory;
-}
-
 public final class io/getstream/video/android/ui/common/BuildConfig {
 	public static final field BUILD_TYPE Ljava/lang/String;
 	public static final field DEBUG Z

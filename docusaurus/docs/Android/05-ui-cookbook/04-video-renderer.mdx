@@ -19,10 +19,10 @@ You can create an instance of the `VideoRendererStyle` with the two different st
 - **RegularVideoRendererStyle**: A regular video renderer style, which displays the reactions, participant label, and connection quality indicator.
 - **ScreenSharingVideoRendererStyle**: A screen sharing video renderer style, which displays the reactions, and participant label.
 
-For example, if you want to change the position of the participant label to the top-start, you can simply change the `labelPosition` property in the `CallContainer`, `CallContent`, `ParticipantsGrid`, or `ParticipantVideo`.
+For example, if you want to change the position of the participant label to the top-start, you can simply change the `labelPosition` property in the `CallContent`, `ParticipantsGrid`, or `ParticipantVideo`.
 
 ```kotlin
-CallContainer(
+CallContent(
   style = RegularVideoRendererStyle(
       isShowingParticipantLabel = true,
       labelPosition = Alignment.TopStart,
@@ -40,10 +40,10 @@ Then you will see the result below:
 
 ### Customization
 
-You can also fully customize the video renderer by implementing your own composable function. Let's say you want to implement a round-shaped video like [Around](https://twitter.com/toheartrising/status/1402505178616504321). In this case, you can achieve it by implementing the `videoRenderer` parameter with the `CallContainer`, `CallContent`, or `ParticipantsGrid` components.
+You can also fully customize the video renderer by implementing your own composable function. Let's say you want to implement a round-shaped video like [Around](https://twitter.com/toheartrising/status/1402505178616504321). In this case, you can achieve it by implementing the `videoRenderer` parameter with the `CallContent`, or `ParticipantsGrid` components.
 
 ```kotlin
-CallContainer(
+CallContent(
     modifier = Modifier.background(color = VideoTheme.colors.appBackground),
     videoRenderer = { modifier, call, participant, style ->
         Box(modifier = modifier) {
@@ -71,7 +71,7 @@ Then you will see the result below:
 If you want to build your own lazy list or grid with the `ParticipantVideo` component, you can achieve it very simply like the sample below:
 
 ```kotlin
-CallContainer(
+CallContent(
     modifier = Modifier.background(color = VideoTheme.colors.appBackground),
     callContent = {
         CallContent(

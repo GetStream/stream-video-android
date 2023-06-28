@@ -32,7 +32,7 @@ fun NetworkQualityIndicator(
 You can easily swap out the standard connection quality indicator with your own.
 
 ```kotlin
-CallContainer(
+CallContent(
     modifier = Modifier.background(color = VideoTheme.colors.appBackground),
     videoRenderer = { modifier, call, participant, style ->
         ParticipantVideo(
@@ -63,7 +63,7 @@ Now, you will see the custom network quality indicator like the result below:
 In terms of better UX designs, you can display a simple message or snack bar to your users and let them know the network status is unstable.
 
 ```kotlin {9-26}
-CallContainer(
+CallContent(
     modifier = Modifier.background(color = VideoTheme.colors.appBackground),
     videoRenderer = { modifier, call, participant, style ->
         ParticipantVideo(

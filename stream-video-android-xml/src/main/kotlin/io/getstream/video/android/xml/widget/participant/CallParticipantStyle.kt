@@ -74,7 +74,7 @@ public data class CallParticipantStyle(
         ): CallParticipantStyle {
             val viewStyleAttr =
                 if (styleAttrs == 0) R.attr.streamVideoCallParticipantViewStyle else styleAttrs
-            val viewStyleRes = if (styleRes == 0) R.style.Stream_CallParticipant else styleRes
+            val viewStyleRes = if (styleRes == 0) R.style.StreamVideo_CallParticipant else styleRes
 
             context.obtainStyledAttributes(
                 attrs,

@@ -51,7 +51,7 @@ public data class CallControlsStyle(
                 attrs,
                 R.styleable.CallControlsView,
                 R.attr.streamVideoCallControlsViewStyle,
-                R.style.Stream_CallControls
+                R.style.StreamVideo_CallControls
             ).use {
 
                 val callControlButtonSize = it.getDimensionPixelSize(

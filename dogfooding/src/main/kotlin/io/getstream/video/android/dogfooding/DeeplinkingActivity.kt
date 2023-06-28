@@ -30,7 +30,6 @@ import androidx.compose.ui.Modifier
 import androidx.lifecycle.lifecycleScope
 import io.getstream.log.Priority
 import io.getstream.log.taggedLogger
-import io.getstream.video.android.common.AbstractCallActivity
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.core.StreamVideo
 import io.getstream.video.android.core.logging.LoggingLevel
@@ -103,7 +102,7 @@ class DeeplinkingActivity : ComponentActivity() {
 
                 if (StreamVideo.isInstalled) {
                     val callId = StreamCallId(type = "default", id = cid)
-                    val intent = AbstractCallActivity.createIntent<CallActivity>(
+                    val intent = CallActivity.createIntent(
                         context = this@DeeplinkingActivity, callId = callId
                     ).apply {
                         flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
