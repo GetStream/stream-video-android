@@ -7,10 +7,10 @@ Stream's UI components provide a participant label, which displays participants'
 
 ![Participant Label](../assets/cookbook/participant-label.png)
 
-You can simply change the styles of the participant label by giving `RegularVideoRendererStyle` or `ScreenSharingVideoRendererStyle` to UI components, such as `CallContainer`, `CallContent`, `ParticipantsGrid`, and `ParticipantVideo`.
+You can simply change the styles of the participant label by giving `RegularVideoRendererStyle` or `ScreenSharingVideoRendererStyle` to UI components, such as `CallContent`, `ParticipantsGrid`, and `ParticipantVideo`.
 
 ```kotlin
-CallContainer( // CallContent or ParticipantsGrid
+CallContent( // or ParticipantsGrid
   style = RegularVideoRendererStyle(
       isShowingParticipantLabel = true,
       labelPosition = Alignment.TopStart
@@ -28,7 +28,7 @@ If you build the above styles, you will see the result below:
 You can customize the participant label by implementing your own label composable function to the `ParticipantVideo` like the sample below:
 
 ```kotlin
-CallContainer(
+CallContent(
     modifier = Modifier.background(color = VideoTheme.colors.appBackground),
     videoRenderer = { modifier, call, participant, style ->
         ParticipantVideo(

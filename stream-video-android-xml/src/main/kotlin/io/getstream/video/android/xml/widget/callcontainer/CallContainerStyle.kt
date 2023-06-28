@@ -45,7 +45,7 @@ public data class CallContainerStyle(
                 attrs,
                 R.styleable.CallContainerView,
                 R.attr.streamVideoCallContainerStyle,
-                R.style.Stream_CallContainer
+                R.style.StreamVideo_CallContainer
             ).use {
 
                 val appBarHeight = it.getDimension(

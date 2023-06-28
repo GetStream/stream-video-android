@@ -16,26 +16,26 @@
 
 package io.getstream.video.android.dogfooding.ui.call
 
+import android.content.Context
+import android.content.Intent
 import android.os.Bundle
+import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.activity.viewModels
 import androidx.lifecycle.lifecycleScope
-import io.getstream.video.android.common.AbstractCallActivity
-import io.getstream.video.android.common.viewmodel.CallViewModel
-import io.getstream.video.android.common.viewmodel.CallViewModelFactory
-import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.StreamVideo
 import io.getstream.video.android.model.StreamCallId
 import kotlinx.coroutines.launch
 
-class CallActivity : AbstractCallActivity() {
-
-    // step 1 (optional) - create a call view model
-    private val factory by lazy { CallViewModelFactory() }
-    private val vm by viewModels<CallViewModel> { factory }
+class CallActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        // step 1 - get the StreamVideo instance and create a call
+        val streamVideo = StreamVideo.instance()
+        val cid = intent.getParcelableExtra<StreamCallId>(EXTRA_CID)
+            ?: throw IllegalArgumentException("call type and id is invalid!")
+        val call = streamVideo.call(type = cid.type, id = cid.id)
 
         // step 2 - join a call
         lifecycleScope.launch { call.join(create = true) }
@@ -44,22 +44,23 @@ class CallActivity : AbstractCallActivity() {
         setContent {
             CallScreen(
                 call = call,
-                callViewModel = vm,
-                onBackPressed = { handleBackPressed() },
+                onBackPressed = { finish() },
                 onLeaveCall = { finish() }
             )
         }
     }
 
-    override fun pipChanged(isInPip: Boolean) {
-        super.pipChanged(isInPip)
-        vm.onPictureInPictureModeChanged(isInPip)
-    }
+    companion object {
+        const val EXTRA_CID: String = "EXTRA_CID"
 
-    override fun provideCall(): Call {
-        val streamVideo = StreamVideo.instance()
-        val cid = intent.getParcelableExtra<StreamCallId>(EXTRA_CID)
-            ?: throw IllegalArgumentException("call type and id is invalid!")
-        return streamVideo.call(type = cid.type, id = cid.id)
+        @JvmStatic
+        fun createIntent(
+            context: Context,
+            callId: StreamCallId,
+        ): Intent {
+            return Intent(context, CallActivity::class.java).apply {
+                putExtra(EXTRA_CID, callId)
+            }
+        }
     }
 }

@@ -18,17 +18,12 @@ package io.getstream.video.android.tutorial.video
 
 import android.os.Bundle
 import androidx.activity.compose.setContent
-import androidx.activity.viewModels
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.lifecycleScope
 import io.getstream.video.android.common.AbstractCallActivity
-import io.getstream.video.android.common.viewmodel.CallViewModel
-import io.getstream.video.android.common.viewmodel.CallViewModelFactory
 import io.getstream.video.android.compose.theme.VideoTheme
-import io.getstream.video.android.compose.ui.components.call.CallContainer
+import io.getstream.video.android.compose.ui.components.call.activecall.CallContent
 import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.GEO
 import io.getstream.video.android.core.StreamVideoBuilder
@@ -41,9 +36,9 @@ import kotlinx.coroutines.launch
 
 /**
  * This tutorial demonstrates how to implement a video call screen with supporting PIP mode
- * by using higher-level APIs, such as [AbstractCallActivity], and [CallContainer].
+ * by using higher-level APIs, such as [AbstractCallActivity], and [CallContent].
  *
- * You can customize [CallContainer] and build your own call screen to your taste.
+ * You can customize [CallContent] and build your own call screen to your taste.
  *
  * You will be able to build your call screen following the steps below.
  */
@@ -74,10 +69,6 @@ class MainActivity3 : AbstractCallActivity() {
         return client.call(type = "default", id = callId)
     }
 
-    // step3 - create a CallViewModel.
-    private val factory by lazy { CallViewModelFactory() }
-    private val vm by viewModels<CallViewModel> { factory }
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -91,10 +82,9 @@ class MainActivity3 : AbstractCallActivity() {
             VideoTheme {
 
                 // step6 - render videos
-                CallContainer(
+                CallContent(
                     modifier = Modifier.fillMaxSize(),
                     call = call,
-                    callViewModel = vm,
                     onBackPressed = { handleBackPressed() },
                     onCallAction = { callAction ->
                         when (callAction) {
@@ -112,6 +102,5 @@ class MainActivity3 : AbstractCallActivity() {
 
     override fun pipChanged(isInPip: Boolean) {
         super.pipChanged(isInPip)
-        vm.onPictureInPictureModeChanged(isInPip)
     }
 }

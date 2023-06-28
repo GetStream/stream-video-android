@@ -82,7 +82,7 @@ public data class CallAppBarStyle(
                 attrs,
                 R.styleable.CallAppBar,
                 R.attr.streamVideoCallAppBarStyle,
-                R.style.Stream_CallAppBar
+                R.style.StreamVideo_CallAppBar
             ).use {
 
                 val backgroundColour = it.getColor(

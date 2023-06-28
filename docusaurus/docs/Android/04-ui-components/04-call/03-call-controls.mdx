@@ -42,7 +42,7 @@ In this example, you're doing the following:
 
 If you're using this approach and our default set of components, you can expect a UI that's similar to our default implementation:
 
-![Compose CallContainer](../../assets/compose_call_container.png)
+![Compose CallContent](../../assets/compose_call_container.png)
 
 By default `ControlActions` component covers both portrait and landscape orientation. This means that the actions you pass in will be rendered either in a `Row` of items, horizontally placed, when in portrait, or a `Column`, when in landscape. If you use [CallContent](03-call-content.mdx), `ControlActions` will be configured the layout automatically by observing the configuration changes.
 
@@ -105,7 +105,7 @@ ControlActions(
 2. Within `ControlActions`, you can override the `onCallAction` parameter to provide a custom handler when the user taps on any of the rendered buttons.
 3. You can list out any logic here for any of your custom actions, as well as the default ones that we provide.
 
-![Compose CallContainer](../../assets/compose_call_controls.png)
+![Compose Controls](../../assets/compose_call_controls.png)
 
 There are a couple of our predefined call control actions:
 
@@ -117,7 +117,7 @@ There are a couple of our predefined call control actions:
 - `CancelCallAction`: Represents canceling a call. You can usually use on in the ringing call screen.
 - `ChatDialogAction`: Used to display a chat dialog in the video call. You can use this when you need to integrate chat features in the video call.
 
-![Compose CallContainer](../../assets/compose_call_controls_actions.png)
+![Compose ControlActions](../../assets/compose_call_controls_actions.png)
 
 You can create your own control action button and put it into the `actions` parameter and align them like the below:
 
@@ -155,7 +155,7 @@ This is a very simple component so it doesn't have replaceable slots, but it sti
 
 In our [Video Android Tutorial](../../02-tutorials/01-video-calling.mdx), we showcased how to build custom `ControlActions` to remove a chat call action button and only feature camera and audio buttons. The result ended up looking something like this:
 
-![Compose CallContainer](../../assets/compose_call_controls_custom.png)
+![Compose Control Actions](../../assets/compose_call_controls_custom.png)
 
 This allows you to visually change the component, while only changing the actions that are rendered, which is quite useful.
 

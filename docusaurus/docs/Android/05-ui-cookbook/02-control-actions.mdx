@@ -3,8 +3,8 @@ title: Control Actions
 description: A guide on how to add/remove or replace call controls
 ---
 
-[Control Actions](../04-ui-components/04-call/04-call-controls.mdx) represents the set of controls the user can use to change their audio and video device state, or browse other types of settings, leave the call, or implement something custom.
-Stream UI components, such as [CallContainer](../04-ui-components/04-call/01-call-container.mdx), [CallContent](../04-ui-components/04-call/03-call-content.mdx), and [CallLobby](06-lobby-preview.mdx) provide default control actions like the below:
+[Control Actions](../04-ui-components/04-call/03-call-controls.mdx) represents the set of controls the user can use to change their audio and video device state, or browse other types of settings, leave the call, or implement something custom.
+Stream UI components, such as [CallContent](../04-ui-components/04-call/01-call-content.mdx), [CallContent](../04-ui-components/04-call/03-call-content.mdx), and [CallLobby](06-lobby-preview.mdx) provide default control actions like the below:
 
 ![Call Controls](../assets/cookbook/replacing-call-controls.png)
 
@@ -46,11 +46,11 @@ val actions = listOf(
 Now, you can replace the default control actions with your own actions buttons like the sample below:
 
 ```kotlin
-CallContainer(
+CallContent(
     modifier = Modifier.background(color = VideoTheme.colors.appBackground),
     controlsContent = {
         ControlActions(
-            callViewModel = vm,
+            call = call,
             actions = actions
         )
     },
@@ -109,7 +109,7 @@ fun MyControlActions() {
                 .weight(1f)
                 .background(VideoTheme.colors.primaryAccent, CircleShape)
                 .padding(10.dp)
-                .clickable { vm.onCallAction(ToggleCamera(false)) },
+                .clickable { /** toggle camera */ },
             painter = painterResource(id = R.drawable.ic_video),
             tint = Color.White,
             contentDescription = null
@@ -121,7 +121,7 @@ fun MyControlActions() {
                 .weight(1f)
                 .background(VideoTheme.colors.errorAccent, CircleShape)
                 .padding(10.dp)
-                .clickable { vm.onCallAction(LeaveCall) },
+                .clickable { /** leave a call */ },
             painter = painterResource(id = R.drawable.ic_call_end),
             tint = Color.White,
             contentDescription = null
@@ -133,7 +133,7 @@ fun MyControlActions() {
 Next, you can replace the default control actions with your own composable function.
 
 ```kotlin
-CallContainer(
+CallContent(
     modifier = Modifier.background(color = VideoTheme.colors.appBackground),
     controlsContent = { MyControlActions() },
     ..
@@ -149,7 +149,7 @@ Now, you will see the result below:
 If you want to remove the control actions and render video within full-size, you can just pass an empty lambda to the `controlsContent` parameter like the sample below:
 
 ```kotlin
-CallContainer(
+CallContent(
     modifier = Modifier.background(color = VideoTheme.colors.appBackground),
     controlsContent = { },
     ..
