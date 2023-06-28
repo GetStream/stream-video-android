@@ -39,6 +39,7 @@ import org.webrtc.Camera2Enumerator
 import org.webrtc.CameraEnumerationAndroid
 import org.webrtc.EglBase
 import org.webrtc.SurfaceTextureHelper
+import java.util.UUID
 
 sealed class DeviceStatus {
     object NotSelected : DeviceStatus()
@@ -576,13 +577,15 @@ class MediaManagerImpl(
 
     // source & tracks
     val videoSource = call.clientImpl.peerConnectionFactory.makeVideoSource(false)
+    // for track ids we emulate the browser behaviour of random UUIDs, doing something different would be confusing
     val videoTrack = call.clientImpl.peerConnectionFactory.makeVideoTrack(
-        source = videoSource, trackId = "${call.sessionId}:video"
+        source = videoSource, trackId = UUID.randomUUID().toString()
     )
 
     val audioSource = call.clientImpl.peerConnectionFactory.makeAudioSource(buildAudioConstraints())
+    // for track ids we emulate the browser behaviour of random UUIDs, doing something different would be confusing
     val audioTrack = call.clientImpl.peerConnectionFactory.makeAudioTrack(
-        source = audioSource, trackId = "${call.sessionId}:audio"
+        source = audioSource, trackId = UUID.randomUUID().toString()
     )
 
     internal val camera = CameraManager(this, eglBaseContext)

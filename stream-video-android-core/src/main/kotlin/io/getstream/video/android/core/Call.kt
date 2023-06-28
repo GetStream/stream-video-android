@@ -262,7 +262,7 @@ public class Call(
     /** The call state contains all state such as the participant list, reactions etc */
     val state = CallState(this, user)
 
-    val sessionId by lazy { session?.sessionId }
+    val sessionId by lazy { clientImpl.sessionId }
     private val network by lazy { clientImpl.connectionModule.networkStateProvider }
 
     /** Camera gives you access to the local camera */
