@@ -59,6 +59,7 @@ class DogfoodingApp : Application() {
             token = token,
             apiKey = apiKey,
             loggingLevel = loggingLevel,
+            ensureSingleInstance = false,
             notificationConfig = NotificationConfig(
                 pushDeviceGenerators = listOf(FirebasePushDeviceGenerator(providerName = "firebase"))
             ),
