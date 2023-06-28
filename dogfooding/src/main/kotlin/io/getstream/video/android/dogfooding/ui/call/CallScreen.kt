@@ -34,7 +34,6 @@ import io.getstream.video.android.mock.mockCall
 @Composable
 fun CallScreen(
     call: Call,
-    onBackPressed: () -> Unit = {},
     onLeaveCall: () -> Unit = {}
 ) {
     VideoTheme {
@@ -42,7 +41,7 @@ fun CallScreen(
             modifier = Modifier.background(color = VideoTheme.colors.appBackground),
             call = call,
             enableInPictureInPicture = true,
-            onBackPressed = { onBackPressed.invoke() },
+            onBackPressed = { onLeaveCall.invoke() },
             onCallAction = { callAction ->
                 when (callAction) {
                     is FlipCamera -> call.camera.flip()
