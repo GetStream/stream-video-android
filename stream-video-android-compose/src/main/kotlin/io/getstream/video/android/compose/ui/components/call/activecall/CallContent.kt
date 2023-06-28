@@ -129,10 +129,9 @@ public fun CallContent(
 ) {
     val context = LocalContext.current
     val orientation = LocalConfiguration.current.orientation
+    val isInPictureInPicture = context.isInPictureInPictureMode
 
     DefaultPermissionHandler(videoPermission = permissions)
-
-    val isInPictureInPicture = context.isInPictureInPictureMode
 
     CallMediaLifecycle(call = call, isInPictureInPicture = isInPictureInPicture)
 

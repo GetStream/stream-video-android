@@ -109,7 +109,7 @@ fun MyControlActions() {
                 .weight(1f)
                 .background(VideoTheme.colors.primaryAccent, CircleShape)
                 .padding(10.dp)
-                .clickable { vm.onCallAction(ToggleCamera(false)) },
+                .clickable { /** toggle camera */ },
             painter = painterResource(id = R.drawable.ic_video),
             tint = Color.White,
             contentDescription = null
@@ -121,7 +121,7 @@ fun MyControlActions() {
                 .weight(1f)
                 .background(VideoTheme.colors.errorAccent, CircleShape)
                 .padding(10.dp)
-                .clickable { vm.onCallAction(LeaveCall) },
+                .clickable { /** leave a call */ },
             painter = painterResource(id = R.drawable.ic_call_end),
             tint = Color.White,
             contentDescription = null
