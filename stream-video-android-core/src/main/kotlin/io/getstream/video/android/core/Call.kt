@@ -16,6 +16,7 @@
 
 package io.getstream.video.android.core
 
+import android.os.Build
 import android.view.View
 import androidx.annotation.VisibleForTesting
 import io.getstream.log.taggedLogger
@@ -482,6 +483,8 @@ public class Call(
                     val stats = it.getStats().value
                     state.stats.updateFromRTCStats(stats, isPublisher = false)
                 }
+                updateLocalStats()
+
             }
         }
 
@@ -491,6 +494,39 @@ public class Call(
 
         return Success(value = session!!)
     }
+
+
+    fun updateLocalStats() {
+        val resolution = camera?.resolution?.value
+        val availableResolutions = camera?.availableResolutions?.value
+        val maxResolution = availableResolutions?.maxByOrNull { it.width * it.height }
+
+        val displayingAt = session?.trackDimensions?.value
+
+        val sfu = session?.sfuUrl
+
+        val sdk = "android"
+        // TODO: How do we get this? val version = Configuration.versionName
+        val osVersion = Build.VERSION.RELEASE ?: ""
+
+        val vendor = Build.MANUFACTURER ?: ""
+        val model = Build.MODEL ?: ""
+        val deviceModel = ("$vendor $model").trim()
+
+        val local = LocalStats(
+            resolution = resolution,
+            availableResolutions = availableResolutions,
+            maxResolution = maxResolution,
+            sfu = sfu ?: "",
+            os = osVersion,
+            sdkVersion = "0.1",
+            deviceModel = deviceModel,
+        )
+        state.stats._local.value = local
+
+
+    }
+
 
     suspend fun reconnectOrSwitchSfu() {
         // mark us as reconnecting

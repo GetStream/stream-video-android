@@ -16,6 +16,7 @@
 
 package io.getstream.video.android.core
 
+import android.os.Build
 import io.getstream.log.taggedLogger
 import io.getstream.video.android.core.call.RtcSession
 import io.getstream.video.android.core.dispatchers.DispatcherProvider
@@ -84,6 +85,7 @@ import org.openapitools.client.models.UpdatedCallPermissionsEvent
 import org.openapitools.client.models.VideoEvent
 import org.threeten.bp.Clock
 import org.threeten.bp.OffsetDateTime
+import org.webrtc.CameraEnumerationAndroid
 import org.webrtc.RTCStats
 import org.webrtc.RTCStatsReport
 import stream.video.sfu.models.Participant
@@ -139,24 +141,33 @@ public class PeerConnectionStats() {
     val bitrateKbps: StateFlow<Float> = _bitrateKbps
 }
 
+public data class LocalStats(
+    val resolution: CameraEnumerationAndroid.CaptureFormat?,
+    val availableResolutions: List<CameraEnumerationAndroid.CaptureFormat>?,
+    val maxResolution: CameraEnumerationAndroid.CaptureFormat?,
+    val sfu: String,
+    val os: String,
+    val sdkVersion: String,
+    val deviceModel: String,
+)
 
 
 
-public class CallStats() {
+
+public class CallStats(val call: Call) {
     private val logger by taggedLogger("CallStats")
 
     val publisher = PeerConnectionStats()
     val subscriber = PeerConnectionStats()
-
-    // TODO:
-    // - participant states (actual resolution, desired resolution)
-    // - device level stats
+    val _local = MutableStateFlow<LocalStats?>(null)
+    val local : StateFlow<LocalStats?> = _local
 
     fun updateFromRTCStats(stats: RTCStatsReport?, isPublisher: Boolean = true) {
         if (stats == null) return
         // also see https://github.com/GetStream/stream-video-js/blob/main/packages/client/src/stats/state-store-stats-reporter.ts
 
         val skipTypes = listOf("codec", "certificate", "data-channel")
+        val trackToParticipant = call.session?.trackIdToParticipant?.value ?: emptyMap()
 
         val statGroups = mutableMapOf<String, MutableList<RTCStats>>()
 
@@ -198,8 +209,17 @@ public class CallStats() {
                 val jitter = it.members["jitter"] as Double
                 subscriber._jitterInMs.value = (jitter * 1000).toInt()
             }
-            statGroups["track:video"]?.firstOrNull()?.let {
+            statGroups["track:video"]?.forEach {
+                // trackIdentifier":"d6ed2d56-86fd-4da0-b2ed-0b6332ea4292",
+                // TODO: how to map to a participant?
+                val trackId = it.members["trackIdentifier"]
+                val participantId = trackToParticipant[trackId]
                 val freezeInSeconds = it.members["totalFreezesDuration"]
+                val frameWidth = it.members["frameWidth"]
+                val frameHeight = it.members["frameHeight"]
+                val received = it.members["framesReceived"]
+                val duration = it.members["totalFramesDuration"]
+
             }
         }
 
@@ -207,7 +227,6 @@ public class CallStats() {
         statGroups.forEach {
             logger.i { "statgroup ${it.key}:${it.value}" }
         }
-
 
     }
 
@@ -236,7 +255,7 @@ public class CallState(private val call: Call, private val user: User) {
         it is RealtimeConnection.Reconnecting
     }
 
-    val stats = CallStats()
+    val stats = CallStats(call)
 
     private val _participants: MutableStateFlow<SortedMap<String, ParticipantState>> =
         MutableStateFlow(emptyMap<String, ParticipantState>().toSortedMap())

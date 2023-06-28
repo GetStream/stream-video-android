@@ -158,6 +158,7 @@ public class RtcSession internal constructor(
     internal var remoteIceServers: List<IceServer>,
 ) {
 
+    internal val trackIdToParticipant: MutableStateFlow<Map<String, String>> = MutableStateFlow(emptyMap())
     private var syncSubscriberAnswer: Job? = null
     private var syncPublisherJob: Job? = null
     private var subscriptionSyncJob: Job? = null
@@ -217,6 +218,7 @@ public class RtcSession internal constructor(
             tracks[sessionId] = mutableMapOf()
         }
         tracks[sessionId]?.set(type, track)
+
 
         when (type) {
             TrackType.TRACK_TYPE_VIDEO -> {
@@ -424,6 +426,10 @@ public class RtcSession internal constructor(
                 streamId = mediaStream.id,
                 audio = track
             )
+            val current = trackIdToParticipant.value.toMutableMap()
+            current[track.id()] = sessionId
+            trackIdToParticipant.value = current
+
             setTrack(sessionId, trackType, audioTrack)
         }
 
@@ -433,6 +439,10 @@ public class RtcSession internal constructor(
                 streamId = mediaStream.id,
                 video = track
             )
+            val current = trackIdToParticipant.value.toMutableMap()
+            current[track.id()] = sessionId
+            trackIdToParticipant.value = current
+
             setTrack(sessionId, trackType, videoTrack)
         }
         if (sessionId != this.sessionId && mediaStream.videoTracks.isNotEmpty()) {

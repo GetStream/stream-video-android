@@ -16,17 +16,16 @@
 
 ### 0.1 milestone
 
-- [X] StreamVideoBuilder should raise an error if another client is still active. Call.join should raise an error if you already joined
+- [ ] Video disconnects sometimes and camera can crash (BufferQueue has not connected producer and Stop capture: Nulling session. Could be related to the peer connection breaking)
 - [ ] Audio volume was too low (probably a bug related to speakerphone vs earpiece)
-- [X] android.hardware.camera2.CameraAccessException: CAMERA_DISCONNECTED (2): checkPidStatus:1940: The camera device has been disconnected
-- [ ] Video disconnects sometimes. (BufferQueue has not connected producer and Stop capture: Nulling session. Could be related to the peer connection breaking)
-- [X] Tests should run on CI (and we need to speed it up a bit) (Jaewoong)
-- [ ] Review updatePublishQuality. Verify layer enable/disable works (Jaewoong)
 - [ ] Testing session with team cross platform (Jared/ Thierry)
 - [ ] Publish 0.1 on Maven
 - [~] Audio room tutorial & Feedback cycle with team
 - [~] Reconnect flow can't reconnect the subscriber (SFU doesn't support restarts on the subscriber peer connection yet)
 - [~] Graceful SFU shutdown (switch between SFUs)
+- [X] android.hardware.camera2.CameraAccessException: CAMERA_DISCONNECTED (2): checkPidStatus:1940: The camera device has been disconnected
+- [X] Tests should run on CI (and we need to speed it up a bit) (Jaewoong)
+- [X] StreamVideoBuilder should raise an error if another client is still active. Call.join should raise an error if you already joined
 - [X] Audio volume was too low (probably a bug related to speakerphone vs earpiece)
 - [X] Video calling tutorial & Feedback cycle with team
 - [X] Bluetooth gives a permissions error on AndroidDeviceTest. We shouldn't require BLUETOOTH_CONNECT by default

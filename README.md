@@ -80,8 +80,10 @@ Video roadmap and changelog is available [here](https://github.com/GetStream/pro
 
 ### 0.3.0 milestone
 
+- [ ] Setting to default to speakerphone or earpiece
+- [ ] Button to switch speakerphone/earpiece
 - [ ] Livestream tutorial (depends on RTMP support)
-- [ ] H264 workaround on S23 (see https://github.com/livekit/client-sdk-android/blob/main/livekit-android-sdk/src/main/java/io/livekit/android/webrtc/SimulcastVideoEncoderFactoryWrapper.kt#L34 and
+- [ ] H264 workaround on Samsung 23 (see https://github.com/livekit/client-sdk-android/blob/main/livekit-android-sdk/src/main/java/io/livekit/android/webrtc/SimulcastVideoEncoderFactoryWrapper.kt#L34 and
 - https://github.com/react-native-webrtc/react-native-webrtc/issues/983#issuecomment-975624906)
 - [ ] Bluetooth reliability
 - [ ] Dynascale 2.0 (codecs, f resolution switches, resolution webrtc handling)
@@ -101,6 +103,7 @@ Video roadmap and changelog is available [here](https://github.com/GetStream/pro
 - [ ] Camera controls
 - [ ] Audio & Video filters
 - [ ] Picture of the video stream at highest resolution
+- [ ] Review foreground service vs backend for some things like screensharing etc
 
 ## 💼 We are hiring!
 

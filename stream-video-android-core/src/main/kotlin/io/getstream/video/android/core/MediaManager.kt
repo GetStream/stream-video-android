@@ -577,12 +577,12 @@ class MediaManagerImpl(
     // source & tracks
     val videoSource = call.clientImpl.peerConnectionFactory.makeVideoSource(false)
     val videoTrack = call.clientImpl.peerConnectionFactory.makeVideoTrack(
-        source = videoSource, trackId = "videoTrack"
+        source = videoSource, trackId = "${call.sessionId}:video"
     )
 
     val audioSource = call.clientImpl.peerConnectionFactory.makeAudioSource(buildAudioConstraints())
     val audioTrack = call.clientImpl.peerConnectionFactory.makeAudioTrack(
-        source = audioSource, trackId = "audioTrack"
+        source = audioSource, trackId = "${call.sessionId}:audio"
     )
 
     internal val camera = CameraManager(this, eglBaseContext)
