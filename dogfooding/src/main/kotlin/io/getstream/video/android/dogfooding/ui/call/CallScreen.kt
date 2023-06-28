@@ -21,9 +21,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
-import io.getstream.video.android.common.viewmodel.CallViewModel
 import io.getstream.video.android.compose.theme.VideoTheme
-import io.getstream.video.android.compose.ui.components.call.CallContainer
+import io.getstream.video.android.compose.ui.components.call.activecall.CallContent
 import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.call.state.FlipCamera
 import io.getstream.video.android.core.call.state.LeaveCall
@@ -35,15 +34,14 @@ import io.getstream.video.android.mock.mockCall
 @Composable
 fun CallScreen(
     call: Call,
-    callViewModel: CallViewModel,
     onBackPressed: () -> Unit = {},
     onLeaveCall: () -> Unit = {}
 ) {
     VideoTheme {
-        CallContainer(
+        CallContent(
             modifier = Modifier.background(color = VideoTheme.colors.appBackground),
             call = call,
-            callViewModel = callViewModel, // optional
+            enableInPictureInPicture = true,
             onBackPressed = { onBackPressed.invoke() },
             onCallAction = { callAction ->
                 when (callAction) {
@@ -63,6 +61,6 @@ fun CallScreen(
 private fun CallScreenPreview() {
     StreamMockUtils.initializeStreamVideo(LocalContext.current)
     VideoTheme {
-        CallScreen(call = mockCall, callViewModel = CallViewModel())
+        CallScreen(call = mockCall)
     }
 }

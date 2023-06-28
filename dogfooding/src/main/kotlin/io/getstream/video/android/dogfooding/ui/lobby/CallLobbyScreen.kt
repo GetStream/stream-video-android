@@ -54,7 +54,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.SavedStateHandle
-import io.getstream.video.android.common.AbstractCallActivity
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.avatar.UserAvatar
 import io.getstream.video.android.compose.ui.components.call.lobby.CallLobby
@@ -270,7 +269,7 @@ private fun HandleCallLobbyUiState(
     LaunchedEffect(key1 = callLobbyUiState) {
         when (callLobbyUiState) {
             is CallLobbyUiState.JoinCompleted -> {
-                val intent = AbstractCallActivity.createIntent<CallActivity>(
+                val intent = CallActivity.createIntent(
                     context = context,
                     callId = callLobbyViewModel.callId
                 ).apply {

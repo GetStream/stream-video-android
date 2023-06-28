@@ -42,8 +42,6 @@ import androidx.compose.ui.unit.coerceAtLeast
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.getstream.log.StreamLog
-import io.getstream.log.StreamLogger
-import io.getstream.log.streamLog
 import io.getstream.video.android.compose.lifecycle.CallMediaLifecycle
 import io.getstream.video.android.compose.permission.VideoPermissionsState
 import io.getstream.video.android.compose.permission.rememberCallPermissionsState

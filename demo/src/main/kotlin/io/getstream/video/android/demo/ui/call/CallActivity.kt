@@ -18,24 +18,18 @@ package io.getstream.video.android.demo.ui.call
 
 import android.os.Bundle
 import androidx.activity.compose.setContent
-import androidx.activity.viewModels
 import androidx.compose.foundation.background
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.lifecycleScope
 import io.getstream.video.android.common.AbstractCallActivity
-import io.getstream.video.android.common.viewmodel.CallViewModel
-import io.getstream.video.android.common.viewmodel.CallViewModelFactory
 import io.getstream.video.android.compose.theme.VideoTheme
-import io.getstream.video.android.compose.ui.components.call.CallContainer
+import io.getstream.video.android.compose.ui.components.call.activecall.CallContent
 import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.StreamVideo
 import io.getstream.video.android.model.StreamCallId
 import kotlinx.coroutines.launch
 
 class CallActivity : AbstractCallActivity() {
-
-    private val factory by lazy { CallViewModelFactory() }
-    private val vm by viewModels<CallViewModel> { factory }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -46,10 +40,9 @@ class CallActivity : AbstractCallActivity() {
 
         setContent {
             VideoTheme {
-                CallContainer(
+                CallContent(
                     modifier = Modifier.background(color = VideoTheme.colors.appBackground),
                     call = call,
-                    callViewModel = vm,
                     onBackPressed = { finish() },
                 )
             }

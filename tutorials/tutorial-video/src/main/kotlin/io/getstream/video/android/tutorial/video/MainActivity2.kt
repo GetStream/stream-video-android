@@ -20,12 +20,10 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.lifecycleScope
 import io.getstream.video.android.compose.theme.VideoTheme
-import io.getstream.video.android.compose.ui.components.call.CallContainer
+import io.getstream.video.android.compose.ui.components.call.activecall.CallContent
 import io.getstream.video.android.core.GEO
 import io.getstream.video.android.core.StreamVideoBuilder
 import io.getstream.video.android.core.call.state.FlipCamera
@@ -77,7 +75,7 @@ class MainActivity2 : ComponentActivity() {
             VideoTheme {
 
                 // step5 - render videos
-                CallContainer(
+                CallContent(
                     modifier = Modifier.fillMaxSize(),
                     call = call,
                     onCallAction = { callAction ->

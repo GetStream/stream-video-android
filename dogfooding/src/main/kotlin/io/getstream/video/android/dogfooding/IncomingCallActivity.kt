@@ -77,7 +77,6 @@ class IncomingCallActivity : AbstractCallActivity() {
                         CallContent(
                             modifier = Modifier.fillMaxSize(),
                             call = call,
-                            callViewModel = vm,
                             onCallAction = onCallAction
                         )
                     },
