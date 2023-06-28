@@ -17,14 +17,13 @@
 package io.getstream.video.android.tutorial.video
 
 import android.os.Bundle
+import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.lifecycleScope
-import io.getstream.video.android.common.AbstractCallActivity
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.call.activecall.CallContent
-import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.GEO
 import io.getstream.video.android.core.StreamVideoBuilder
 import io.getstream.video.android.core.call.state.FlipCamera
@@ -36,15 +35,16 @@ import kotlinx.coroutines.launch
 
 /**
  * This tutorial demonstrates how to implement a video call screen with supporting PIP mode
- * by using higher-level APIs, such as [AbstractCallActivity], and [CallContent].
+ * by using higher-level APIs, such as [CallContent].
  *
  * You can customize [CallContent] and build your own call screen to your taste.
  *
  * You will be able to build your call screen following the steps below.
  */
-class MainActivity3 : AbstractCallActivity() {
+class MainActivity3 : ComponentActivity() {
 
-    override fun provideCall(): Call {
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
 
         val userId = "REPLACE_WITH_USER_ID"
         val userToken = "REPLACE_WITH_TOKEN"
@@ -66,11 +66,7 @@ class MainActivity3 : AbstractCallActivity() {
             token = userToken,
         ).build()
 
-        return client.call(type = "default", id = callId)
-    }
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
+        val call = client.call(type = "default", id = callId)
 
         // step4 - join a call, which type is `default` and id is `123`.
         lifecycleScope.launch {
@@ -85,7 +81,8 @@ class MainActivity3 : AbstractCallActivity() {
                 CallContent(
                     modifier = Modifier.fillMaxSize(),
                     call = call,
-                    onBackPressed = { handleBackPressed() },
+                    enableInPictureInPicture = true,
+                    onBackPressed = { finish() },
                     onCallAction = { callAction ->
                         when (callAction) {
                             is FlipCamera -> call.camera.flip()
@@ -98,9 +95,5 @@ class MainActivity3 : AbstractCallActivity() {
                 )
             }
         }
-    }
-
-    override fun pipChanged(isInPip: Boolean) {
-        super.pipChanged(isInPip)
     }
 }
