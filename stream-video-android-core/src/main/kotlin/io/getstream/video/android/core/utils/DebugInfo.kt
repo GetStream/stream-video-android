@@ -141,16 +141,7 @@ internal class DebugInfo(val client: StreamVideoImpl) {
 
          */
         localStats()
-        publisher?.let {
-            val stats = it.getStats().value
-            processPubStats(stats)
-            logger.i { "Publisher stats. video quality: $stats" }
-        }
-        subscriber?.let {
-            val stats = it.getStats().value
-            processSubStats(stats)
-            logger.i { "Subscriber stats. video quality: $stats" }
-        }
+
     }
 
     fun localStats() {
@@ -176,50 +167,6 @@ internal class DebugInfo(val client: StreamVideoImpl) {
         val deviceModel = ("$vendor $model").trim()
     }
 
-    fun processStats(stats: RTCStatsReport?) {
-        if (stats == null) return
-
-        val skipTypes = listOf("codec", "certificate", "data-channel")
-
-        val statGroups = mutableMapOf<String, MutableList<RTCStats>>()
-
-        for (entry in stats.statsMap) {
-            val stat = entry.value
-
-            val type = stat.type
-            if (type in skipTypes) continue
-
-            val statGroup = if (type == "inbound-rtp") {
-                "$type:${stat.members["kind"]}"
-            } else if (type == "track") {
-                "$type:${stat.members["kind"]}"
-            } else if (type == "outbound-rtp") {
-                val rid = stat.members["rid"] ?: "missing"
-                "$type:${stat.members["kind"]}:$rid"
-            } else {
-                type
-            }
-
-            if (statGroup != null) {
-                if (statGroup !in statGroups) {
-                    statGroups[statGroup] = mutableListOf()
-                }
-                statGroups[statGroup]?.add(stat)
-            }
-        }
-
-        statGroups.forEach {
-            logger.i { "stat123 $${it.key}:${it.value}" }
-        }
-    }
-
-    fun processPubStats(stats: RTCStatsReport?) {
-        processStats(stats)
-    }
-
-    fun processSubStats(stats: RTCStatsReport?) {
-        processStats(stats)
-    }
 
     fun listCodecs() {
         // see https://developer.android.com/reference/kotlin/android/media/MediaCodecInfo

@@ -84,6 +84,8 @@ import org.openapitools.client.models.UpdatedCallPermissionsEvent
 import org.openapitools.client.models.VideoEvent
 import org.threeten.bp.Clock
 import org.threeten.bp.OffsetDateTime
+import org.webrtc.RTCStats
+import org.webrtc.RTCStatsReport
 import stream.video.sfu.models.Participant
 import stream.video.sfu.models.ParticipantCount
 import stream.video.sfu.models.TrackType
@@ -123,6 +125,76 @@ public sealed interface RealtimeConnection {
     public object Disconnected : RealtimeConnection // normal disconnect by the app
 }
 
+public class PeerConnectionStats() {
+    internal val _resolution: MutableStateFlow<String> = MutableStateFlow("")
+    val resolution: StateFlow<String> = _resolution
+
+    internal val _qualityDropReason: MutableStateFlow<String> = MutableStateFlow("")
+    val qualityDropReason: StateFlow<String> = _qualityDropReason
+
+    internal val _jitterInMs: MutableStateFlow<Int> = MutableStateFlow(0)
+    val jitterInMs: StateFlow<Int> = _jitterInMs
+
+    internal val _bitrateKbps: MutableStateFlow<Float> = MutableStateFlow(0F)
+    val bitrateKbps: StateFlow<Float> = _bitrateKbps
+}
+
+
+
+
+public class CallStats() {
+    private val logger by taggedLogger("CallStats")
+
+    val publisher = PeerConnectionStats()
+    val subscriber = PeerConnectionStats()
+
+    // TODO:
+    // - participant states (actual resolution, desired resolution)
+    // - device level stats
+
+    fun updateFromRTCStats(stats: RTCStatsReport?, isPublisher: Boolean = true) {
+        if (stats == null) return
+        // also see https://github.com/GetStream/stream-video-js/blob/main/packages/client/src/stats/state-store-stats-reporter.ts
+
+        val skipTypes = listOf("codec", "certificate", "data-channel")
+
+        val statGroups = mutableMapOf<String, MutableList<RTCStats>>()
+
+        for (entry in stats.statsMap) {
+            val stat = entry.value
+
+            val type = stat.type
+            if (type in skipTypes) continue
+
+            val statGroup = if (type == "inbound-rtp") {
+                "$type:${stat.members["kind"]}"
+            } else if (type == "track") {
+                "$type:${stat.members["kind"]}"
+            } else if (type == "outbound-rtp") {
+                val rid = stat.members["rid"] ?: "missing"
+                "$type:${stat.members["kind"]}:$rid"
+            } else {
+                type
+            }
+
+            if (statGroup != null) {
+                if (statGroup !in statGroups) {
+                    statGroups[statGroup] = mutableListOf()
+                }
+                statGroups[statGroup]?.add(stat)
+            }
+        }
+
+
+        statGroups.forEach {
+            logger.i { "stat123 $${it.key}:${it.value}" }
+        }
+
+
+    }
+
+}
+
 /**
  * The CallState class keeps all state for a call
  * It's available on every call object
@@ -145,6 +217,8 @@ public class CallState(private val call: Call, private val user: User) {
     public val isReconnecting: StateFlow<Boolean> = _connection.mapState {
         it is RealtimeConnection.Reconnecting
     }
+
+    val stats = CallStats()
 
     private val _participants: MutableStateFlow<SortedMap<String, ParticipantState>> =
         MutableStateFlow(emptyMap<String, ParticipantState>().toSortedMap())

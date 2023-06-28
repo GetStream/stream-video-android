@@ -33,6 +33,7 @@ import io.getstream.video.android.core.model.toIceServer
 import io.getstream.video.android.model.User
 import io.getstream.webrtc.android.ui.VideoTextureViewRenderer
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.filter
@@ -251,6 +252,7 @@ public class Call(
     val id: String,
     val user: User,
 ) {
+    private var statsGatheringJob: Job? = null
     internal var location: String? = null
 
     internal val clientImpl = client as StreamVideoImpl
@@ -466,6 +468,22 @@ public class Call(
         }
 
         monitor.start()
+
+        val statsGatheringInterval = 5000L
+
+        statsGatheringJob = scope.launch {
+            while (true) {
+                delay(statsGatheringInterval)
+                session?.publisher?.let {
+                    val stats = it.getStats().value
+                    state.stats.updateFromRTCStats(stats, isPublisher = true)
+                }
+                session?.subscriber?.let {
+                    val stats = it.getStats().value
+                    state.stats.updateFromRTCStats(stats, isPublisher = false)
+                }
+            }
+        }
 
         client.state.setActiveCall(this)
 
@@ -799,6 +817,7 @@ public class Call(
         monitor.stop()
         session?.cleanup()
         supervisorJob.cancel()
+        statsGatheringJob?.cancel()
         session = null
     }
 
