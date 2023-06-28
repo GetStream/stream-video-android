@@ -4,11 +4,12 @@
 
 <p align="center">
   <a href="https://github.com/GetStream/stream-video-android/actions"><img src="https://github.com/GetStream/stream-video-android/workflows/App%20Distribute%20CI/badge.svg" /></a>
-  <a href="https://android-arsenal.com/api?level=21"><img alt="API" src="https://img.shields.io/badge/API-21%2B-brightgreen.svg?style=flat"/></a>
+  <a href="https://android-arsenal.com/api?level=24"><img alt="API" src="https://img.shields.io/badge/API-24%2B-brightgreen.svg?style=flat"/></a>
   <a href="https://search.maven.org/search?q=stream-video-android"><img src="https://img.shields.io/maven-central/v/io.getstream/stream-video-android-core.svg?label=Maven%20Central" /></a>
 </p>
 
-This is the official Android SDK for Stream Video.
+This is the official Android SDK for Stream Video, a service for building video call, audio room, and live streaming applications. This library includes both a low-level video SDK and a set of reusable UI components. 
+Most users start with the Compose UI components, and fall back to the lower level API when they want to customize things.
 
 ## What is Stream?
 
@@ -59,7 +60,7 @@ Here are some of the features we support:
 
 Video roadmap and changelog is available [here](https://github.com/GetStream/protocol/discussions/127). 
 
-### 0.2 milestone
+### 0.2.0 milestone
 
 - [ ] bug: screensharing is broken. android doesn’t receive/render (not sure) the screenshare. video shows up as the gray avatar (Thierry)
 - [ ] bug: screenshare is not removed after it stops when a participant leaves the call (Thierry) (probably just dont update the state when the participant leaves)
@@ -71,7 +72,7 @@ Video roadmap and changelog is available [here](https://github.com/GetStream/pro
 - [ ] Automatically handle pagination and sorting on > 6 participants 
 - [X] Reactions
 
-### 0.3 milestone
+### 0.3.0 milestone
 
 - [ ] H264 workaround on S23 (see https://github.com/livekit/client-sdk-android/blob/main/livekit-android-sdk/src/main/java/io/livekit/android/webrtc/SimulcastVideoEncoderFactoryWrapper.kt#L34 and
 - https://github.com/react-native-webrtc/react-native-webrtc/issues/983#issuecomment-975624906)
@@ -84,7 +85,7 @@ Video roadmap and changelog is available [here](https://github.com/GetStream/pro
 - [ ] Android SDK development.md cleanup
 - [X] SDK development guide for all teams
 
-### 0.4 milestone
+### 0.4.0 milestone
 
 - [ ] Analytics integration
 - [ ] Screensharing from mobile
@@ -92,3 +93,27 @@ Video roadmap and changelog is available [here](https://github.com/GetStream/pro
 - [ ] Camera controls
 - [ ] Audio & Video filters
 - [ ] Picture of the video stream at highest resolution
+
+## 💼 We are hiring!
+
+We've recently closed a [\$38 million Series B funding round](https://techcrunch.com/2021/03/04/stream-raises-38m-as-its-chat-and-activity-feed-apis-power-communications-for-1b-users/) and we keep actively growing.
+Our APIs are used by more than a billion end-users, and you'll have a chance to make a huge impact on the product within a team of the strongest engineers all over the world.
+Check out our current openings and apply via [Stream's website](https://getstream.io/team/#jobs).
+
+## License
+
+```
+Copyright (c) 2014-2023 Stream.io Inc. All rights reserved.
+
+Licensed under the Stream License;
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+   https://github.com/GetStream/stream-video-android/blob/main/LICENSE
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+```
