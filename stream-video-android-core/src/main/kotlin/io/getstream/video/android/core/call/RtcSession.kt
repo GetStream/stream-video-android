@@ -309,6 +309,10 @@ public class RtcSession internal constructor(
                 setVideoSubscriptions()
             }
         }
+
+        clientImpl.peerConnectionFactory.setAudioSampleCallback { it ->
+            call.processAudioSample(it)
+        }
     }
 
     private fun listenToSocket() {
