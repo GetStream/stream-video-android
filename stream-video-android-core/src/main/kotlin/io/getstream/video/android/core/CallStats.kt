@@ -1,3 +1,19 @@
+/*
+ * Copyright (c) 2014-2023 Stream.io Inc. All rights reserved.
+ *
+ * Licensed under the Stream License;
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    https://github.com/GetStream/stream-video-android/blob/main/LICENSE
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package io.getstream.video.android.core
 
 import android.os.Build
@@ -8,9 +24,6 @@ import org.webrtc.CameraEnumerationAndroid
 import org.webrtc.RTCStats
 import org.webrtc.RTCStatsReport
 import stream.video.sfu.models.TrackType
-
-
-
 
 public class PeerConnectionStats() {
     internal val _resolution: MutableStateFlow<String> = MutableStateFlow("")
@@ -36,14 +49,13 @@ public data class LocalStats(
     val deviceModel: String,
 )
 
-
 public class CallStats(val call: Call) {
     private val logger by taggedLogger("CallStats")
 
     val publisher = PeerConnectionStats()
     val subscriber = PeerConnectionStats()
     val _local = MutableStateFlow<LocalStats?>(null)
-    val local : StateFlow<LocalStats?> = _local
+    val local: StateFlow<LocalStats?> = _local
 
     fun updateFromRTCStats(stats: RTCStatsReport?, isPublisher: Boolean = true) {
         if (stats == null) return
@@ -87,7 +99,6 @@ public class CallStats(val call: Call) {
                 val deviceLatency = it.members["totalPacketSendDelay"] as? Double
                 // fir pli nack are also interesting
                 publisher._qualityDropReason.value = qualityLimit ?: ""
-
             }
 
             statGroups["inbound-rtp:video"]?.firstOrNull()?.let {
@@ -108,17 +119,14 @@ public class CallStats(val call: Call) {
                 val duration = it.members["totalFramesDuration"] as? Long
 
                 if (participantId != null) {
-                    logger.i { "receiving video for ${participantId} at $frameWidth: ${it.members["frameWidth"]} and rendering it at ${visibleAt?.dimensions?.width} visible: ${visibleAt?.visible}" }
+                    logger.i { "receiving video for $participantId at $frameWidth: ${it.members["frameWidth"]} and rendering it at ${visibleAt?.dimensions?.width} visible: ${visibleAt?.visible}" }
                 }
-
-
             }
         }
 
         statGroups.forEach {
             logger.i { "statgroup ${it.key}:${it.value}" }
         }
-
     }
 
     fun updateLocalStats() {
@@ -146,8 +154,5 @@ public class CallStats(val call: Call) {
             deviceModel = deviceModel,
         )
         _local.value = local
-
-
     }
-
 }

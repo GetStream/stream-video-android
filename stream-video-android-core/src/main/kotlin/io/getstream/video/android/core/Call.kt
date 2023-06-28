@@ -16,7 +16,6 @@
 
 package io.getstream.video.android.core
 
-import android.os.Build
 import android.view.View
 import androidx.annotation.VisibleForTesting
 import io.getstream.log.taggedLogger
@@ -489,7 +488,6 @@ public class Call(
                 }
 
                 state.stats.updateLocalStats()
-
             }
         }
 
@@ -499,10 +497,6 @@ public class Call(
 
         return Success(value = session!!)
     }
-
-
-
-
 
     suspend fun reconnectOrSwitchSfu() {
         // mark us as reconnecting

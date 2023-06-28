@@ -129,6 +129,7 @@ public final class io/getstream/video/android/core/CallState {
 	public final fun getSortedParticipants ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun getSpeakingWhileMuted ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun getStartsAt ()Lkotlinx/coroutines/flow/StateFlow;
+	public final fun getStats ()Lio/getstream/video/android/core/CallStats;
 	public final fun getTeam ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun getTranscribing ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun getUpdatedAt ()Lkotlinx/coroutines/flow/StateFlow;
@@ -148,6 +149,18 @@ public final class io/getstream/video/android/core/CallState {
 	public final fun updateFromResponse (Lorg/openapitools/client/models/UpdateCallResponse;)V
 	public final fun updateParticipant (Lio/getstream/video/android/core/ParticipantState;)V
 	public final fun upsertParticipants (Ljava/util/List;)V
+}
+
+public final class io/getstream/video/android/core/CallStats {
+	public fun <init> (Lio/getstream/video/android/core/Call;)V
+	public final fun getCall ()Lio/getstream/video/android/core/Call;
+	public final fun getLocal ()Lkotlinx/coroutines/flow/StateFlow;
+	public final fun getPublisher ()Lio/getstream/video/android/core/PeerConnectionStats;
+	public final fun getSubscriber ()Lio/getstream/video/android/core/PeerConnectionStats;
+	public final fun get_local ()Lkotlinx/coroutines/flow/MutableStateFlow;
+	public final fun updateFromRTCStats (Lorg/webrtc/RTCStatsReport;Z)V
+	public static synthetic fun updateFromRTCStats$default (Lio/getstream/video/android/core/CallStats;Lorg/webrtc/RTCStatsReport;ZILjava/lang/Object;)V
+	public final fun updateLocalStats ()V
 }
 
 public final class io/getstream/video/android/core/CameraDeviceWrapped {
@@ -300,6 +313,29 @@ public abstract class io/getstream/video/android/core/GEO {
 
 public final class io/getstream/video/android/core/GEO$GlobalEdgeNetwork : io/getstream/video/android/core/GEO {
 	public static final field INSTANCE Lio/getstream/video/android/core/GEO$GlobalEdgeNetwork;
+}
+
+public final class io/getstream/video/android/core/LocalStats {
+	public fun <init> (Lorg/webrtc/CameraEnumerationAndroid$CaptureFormat;Ljava/util/List;Lorg/webrtc/CameraEnumerationAndroid$CaptureFormat;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V
+	public final fun component1 ()Lorg/webrtc/CameraEnumerationAndroid$CaptureFormat;
+	public final fun component2 ()Ljava/util/List;
+	public final fun component3 ()Lorg/webrtc/CameraEnumerationAndroid$CaptureFormat;
+	public final fun component4 ()Ljava/lang/String;
+	public final fun component5 ()Ljava/lang/String;
+	public final fun component6 ()Ljava/lang/String;
+	public final fun component7 ()Ljava/lang/String;
+	public final fun copy (Lorg/webrtc/CameraEnumerationAndroid$CaptureFormat;Ljava/util/List;Lorg/webrtc/CameraEnumerationAndroid$CaptureFormat;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)Lio/getstream/video/android/core/LocalStats;
+	public static synthetic fun copy$default (Lio/getstream/video/android/core/LocalStats;Lorg/webrtc/CameraEnumerationAndroid$CaptureFormat;Ljava/util/List;Lorg/webrtc/CameraEnumerationAndroid$CaptureFormat;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)Lio/getstream/video/android/core/LocalStats;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getAvailableResolutions ()Ljava/util/List;
+	public final fun getDeviceModel ()Ljava/lang/String;
+	public final fun getMaxResolution ()Lorg/webrtc/CameraEnumerationAndroid$CaptureFormat;
+	public final fun getOs ()Ljava/lang/String;
+	public final fun getResolution ()Lorg/webrtc/CameraEnumerationAndroid$CaptureFormat;
+	public final fun getSdkVersion ()Ljava/lang/String;
+	public final fun getSfu ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
 }
 
 public final class io/getstream/video/android/core/MediaManagerImpl {
@@ -458,6 +494,14 @@ public final class io/getstream/video/android/core/ParticipantState$Video : io/g
 	public fun getTrack ()Lio/getstream/video/android/core/model/VideoTrack;
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
+}
+
+public final class io/getstream/video/android/core/PeerConnectionStats {
+	public fun <init> ()V
+	public final fun getBitrateKbps ()Lkotlinx/coroutines/flow/StateFlow;
+	public final fun getJitterInMs ()Lkotlinx/coroutines/flow/StateFlow;
+	public final fun getQualityDropReason ()Lkotlinx/coroutines/flow/StateFlow;
+	public final fun getResolution ()Lkotlinx/coroutines/flow/StateFlow;
 }
 
 public abstract interface class io/getstream/video/android/core/RealtimeConnection {

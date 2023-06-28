@@ -219,7 +219,6 @@ public class RtcSession internal constructor(
         }
         tracks[sessionId]?.set(type, track)
 
-
         when (type) {
             TrackType.TRACK_TYPE_VIDEO -> {
                 call.state.getParticipantBySessionId(sessionId)?._videoTrack?.value =
