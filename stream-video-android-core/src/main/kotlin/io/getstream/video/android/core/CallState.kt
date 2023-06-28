@@ -183,11 +183,29 @@ public class CallStats() {
                 }
                 statGroups[statGroup]?.add(stat)
             }
+
+            statGroups["outbound-rtp:video:f"]?.firstOrNull()?.let {
+                val qualityLimit = it.members["qualityLimitationReason"]
+                val width = it.members["frameWidth"]
+                val height = it.members["frameHeight"]
+                val fps = it.members["framesPerSecond"]
+                val deviceLatency = it.members["totalPacketSendDelay"]
+                // fir pli nack are also interesting
+
+            }
+
+            statGroups["inbound-rtp:video"]?.firstOrNull()?.let {
+                val jitter = it.members["jitter"] as Double
+                subscriber._jitterInMs.value = (jitter * 1000).toInt()
+            }
+            statGroups["track:video"]?.firstOrNull()?.let {
+                val freezeInSeconds = it.members["totalFreezesDuration"]
+            }
         }
 
 
         statGroups.forEach {
-            logger.i { "stat123 $${it.key}:${it.value}" }
+            logger.i { "statgroup ${it.key}:${it.value}" }
         }
 
 
