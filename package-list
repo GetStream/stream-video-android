@@ -69,7 +69,6 @@ io.getstream.video.android.common.permission
 io.getstream.video.android.common.renderer
 io.getstream.video.android.common.util
 io.getstream.video.android.common.view
-io.getstream.video.android.common.viewmodel
 module:stream-video-android-xml
 io.getstream.video.android.xml
 io.getstream.video.android.xml.binding
@@ -78,6 +77,7 @@ io.getstream.video.android.xml.imageloading
 io.getstream.video.android.xml.initializer
 io.getstream.video.android.xml.state
 io.getstream.video.android.xml.utils
+io.getstream.video.android.xml.viewmodel
 io.getstream.video.android.xml.widget.appbar
 io.getstream.video.android.xml.widget.avatar
 io.getstream.video.android.xml.widget.call
