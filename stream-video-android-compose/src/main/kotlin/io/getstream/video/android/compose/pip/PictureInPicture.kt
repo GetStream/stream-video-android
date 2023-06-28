@@ -51,9 +51,9 @@ internal fun enterPictureInPicture(context: Context, call: Call) {
                 }
             }
 
-            context.findActivity().enterPictureInPictureMode(params.build())
+            context.findActivity()?.enterPictureInPictureMode(params.build())
         } else {
-            context.findActivity().enterPictureInPictureMode()
+            context.findActivity()?.enterPictureInPictureMode()
         }
     }
 }
@@ -61,14 +61,14 @@ internal fun enterPictureInPicture(context: Context, call: Call) {
 internal val Context.isInPictureInPictureMode: Boolean
     get() {
         val currentActivity = findActivity()
-        return currentActivity.isInPictureInPictureMode
+        return currentActivity?.isInPictureInPictureMode == true
     }
 
-internal fun Context.findActivity(): Activity {
+internal fun Context.findActivity(): Activity? {
     var context = this
     while (context is ContextWrapper) {
         if (context is Activity) return context
         context = context.baseContext
     }
-    throw IllegalStateException("Activity not found. Unknown error.")
+    return null
 }
