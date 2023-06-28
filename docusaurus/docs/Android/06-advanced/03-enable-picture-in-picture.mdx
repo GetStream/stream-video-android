@@ -9,20 +9,21 @@ Picture in picture (PIP) keeps the call running and visible while you navigate t
 
 ### PIP UI
 
-The `CallContainer` UI component allows you to specify the PIP layout.
-You can either specify your own or use the default.
+The `CallContent` UI component allows you to specify the PIP layout.
 
 ```kotlin
 // default
-CallContainer(
-    pictureInPictureContent: @Composable (call: Call) -> Unit = { .. },
+CallContent(
+    call = call,
+    enableInPictureInPicture = true
 )
 ```
 
-Here's a tiny custom PIP content example
+You can either specify your own or use the default. Here's a tiny custom PIP content example:
 
 ```kotlin
-CallContainer(
+CallContent(
+    call = call,
     pictureInPictureContent: { call ->
         val otherParticipant by call.state.sortedParticipants.collectAsState()
 
@@ -146,10 +147,9 @@ override fun onCreate(savedInstanceState: Bundle?) {
 
     setContent {
         VideoTheme {
-            CallContainer(
+            CallContent(
                 modifier = Modifier.fillMaxSize(),
                 call = call,
-                callViewModel = vm,
                 onBackPressed = { handleBackPressed() }, // you should use `handleBackPressed` for the `onBackPressed`
                 ..
             )

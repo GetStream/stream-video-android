@@ -125,18 +125,9 @@ Using this approach you'd get the following UI:
 
 It was very simple to customize, while still having the same behavior.
 
-If you use `CallContainer` or [CallContent](03-call-content.mdx), you can simply customize them by passing your custom `CallAppBar`:
+If you use [CallContent](03-call-content.mdx), you can simply customize them by passing your custom `CallAppBar`:
 
 ```kotlin
-CallContainer(
-    appBarContent = { call ->
-        CallAppBar(
-            call = call,
-            ..
-        )
-    }
-)
-
 CallContent(
     appBarContent = { call ->
         CallAppBar(

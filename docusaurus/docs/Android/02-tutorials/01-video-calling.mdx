@@ -303,29 +303,15 @@ You can customize the components with theming, arguments and swapping parts of t
 This is convenient if you want to quickly build a production ready calling experience for you app.
 (and if you need more flexibility, many customers use the above low level approach to build a UI from scratch)
 
-To render a full calling UI we'll leverage the `CallContainer` component.
-This includes sensible defaults for a call header, video grid and call controls.
+To render a full calling UI we'll leverage the `CallContent` component.
+This includes sensible defaults for a call header, video grid, call controls, picture-in-picture, and everything that you need to build a video call screen.
 
-Open `MainActivity.kt` and setup the viewmodel at the top of the activity:
-
-```kotlin
-
-class MainActivity : ComponentActivity() {
-
-    private val factory by lazy { CallViewModelFactory() }
-    private val vm by viewModels<CallViewModel> { factory }
-
-    ....
-
-}
-```
-
-Next in the same file, update the code inside of `VideoTheme` to use the `CallContent`.
+Open `MainActivity.kt`, and update the code inside of `VideoTheme` to use the `CallContent`.
 The code will be a lot smaller than before since all UI logic is handled in the `CallContent`:
 
 ```kotlin
 VideoTheme {
-    CallContainer(
+    CallContent(
         modifier = Modifier.fillMaxSize(),
         call = call,
         onBackPressed = { onBackPressed() },
@@ -335,7 +321,7 @@ VideoTheme {
 
 The result will be:
 
-![Compose CallContainer](../assets/compose_call_container.png)
+![Compose Content](../assets/compose_call_container.png)
 
 When you now run your app you'll see a more polished video UI.
 It supports reactions, screensharing, active speaker detection, network quality indicators etc.
@@ -346,7 +332,7 @@ The most commonly used UI components are:
 - **[ParticipantsGrid](../04-ui-components/05-participants/02-participants-grid.mdx)**: A grid of participant video elements.
 - **[FloatingParticipantVideo](../04-ui-components/05-participants/03-floating-participant-video.mdx)**: A draggable version of the participant video. Typically used for your own video.
 - **[ControlActions](../05-ui-cookbook/02-control-actions.mdx)**: A set of buttons for controlling your call, such as changing audio and video states.
-- **[RingingCallContent](../04-ui-components/04-call/02-ringing-call.mdx)**: UI for displaying incoming and outgoing calls.
+- **[RingingCallContent](../04-ui-components/04-call/04-ringing-call.mdx)**: UI for displaying incoming and outgoing calls.
 
 The full list of **[UI components](../04-ui-components/01-overview.mdx)** is available in the docs.
 
@@ -374,10 +360,9 @@ override fun onCreate(savedInstanceState: Bundle?) {
             val isCameraEnabled by call.camera.isEnabled.collectAsState()
             val isMicrophoneEnabled by call.microphone.isEnabled.collectAsState()
 
-            CallContainer(
+            CallContent(
                 modifier = Modifier.background(color = VideoTheme.colors.appBackground),
                 call = call,
-                callViewModel = vm, // optional
                 onBackPressed = { onBackPressed() },
                 controlsContent = {
                     ControlActions(
@@ -412,7 +397,7 @@ override fun onCreate(savedInstanceState: Bundle?) {
 }
 ```
 
-Stream's Video SDK provides fully polished UI components, allowing you to build a video call quickly and customize them. As you've seen before, you can implement a full complete video call screen with `CallContainer` composable in Jetpack Compose. The `CallContainer` composable consists of three major parts below:
+Stream's Video SDK provides fully polished UI components, allowing you to build a video call quickly and customize them. As you've seen before, you can implement a full complete video call screen with `CallContent` composable in Jetpack Compose. The `CallContent` composable consists of three major parts below:
 
 - **appBarContent**: Content is shown that calls information or additional actions.
 - **controlsContent**: Content is shown that allows users to trigger different actions to control a joined call.

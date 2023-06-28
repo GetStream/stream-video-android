@@ -67,7 +67,7 @@ public data class OutgoingCallStyle(
                 attrs,
                 R.styleable.OutgoingCallView,
                 R.attr.streamVideoOutgoingViewStyle,
-                R.style.Stream_OutgoingCall
+                R.style.StreamVideo_OutgoingCall
             ).use {
                 val outgoingScreenBackground = it.getDrawable(
                     R.styleable.OutgoingCallView_streamVideoOutgoingCallScreenBackground

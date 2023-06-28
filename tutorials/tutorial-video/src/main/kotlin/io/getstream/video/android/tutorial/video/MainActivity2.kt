@@ -34,8 +34,8 @@ import io.getstream.video.android.model.User
 import kotlinx.coroutines.launch
 
 /**
- * This tutorial demonstrates how to implement a video call screen by using higher-level APIs, such as [CallContainer].
- * You can customize [CallContainer] and build your own call screen to your taste.
+ * This tutorial demonstrates how to implement a video call screen by using higher-level APIs, such as [CallContent].
+ * You can customize [CallContent] and build your own call screen to your taste.
  *
  * You will be able to build your call screen following the steps below.
  */

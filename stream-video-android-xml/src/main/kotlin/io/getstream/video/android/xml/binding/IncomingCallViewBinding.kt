@@ -17,8 +17,8 @@
 package io.getstream.video.android.xml.binding
 
 import androidx.lifecycle.LifecycleOwner
-import io.getstream.video.android.xml.viewmodel.CallViewModel
 import io.getstream.video.android.core.model.CallStatus
+import io.getstream.video.android.xml.viewmodel.CallViewModel
 import io.getstream.video.android.xml.widget.incoming.IncomingCallView
 
 /**

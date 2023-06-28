@@ -36,9 +36,9 @@ import kotlinx.coroutines.launch
 
 /**
  * This tutorial demonstrates how to implement a video call screen with supporting PIP mode
- * by using higher-level APIs, such as [AbstractCallActivity], and [CallContainer].
+ * by using higher-level APIs, such as [AbstractCallActivity], and [CallContent].
  *
- * You can customize [CallContainer] and build your own call screen to your taste.
+ * You can customize [CallContent] and build your own call screen to your taste.
  *
  * You will be able to build your call screen following the steps below.
  */
