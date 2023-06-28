@@ -65,9 +65,10 @@ public fun CallMediaLifecycle(
     if (latestLifecycleEvent == Lifecycle.Event.ON_PAUSE) {
         LaunchedEffect(latestLifecycleEvent) {
             delay(pipEnteringDuration)
-            if (isInPictureInPicture) {
+            if (!isInPictureInPicture && !enableInPictureInPicture) {
                 call.camera.pause()
-            } else if (enableInPictureInPicture) {
+                call.microphone.pause()
+            } else if (!isInPictureInPicture) {
                 enterPictureInPicture(context = context, call = call)
             }
         }
@@ -76,8 +77,9 @@ public fun CallMediaLifecycle(
     if (latestLifecycleEvent == Lifecycle.Event.ON_RESUME) {
         LaunchedEffect(latestLifecycleEvent) {
             delay(pipEnteringDuration)
-            if (isInPictureInPicture) {
+            if (!isInPictureInPicture && !enableInPictureInPicture) {
                 call.camera.resume()
+                call.microphone.resume()
             }
         }
     }
