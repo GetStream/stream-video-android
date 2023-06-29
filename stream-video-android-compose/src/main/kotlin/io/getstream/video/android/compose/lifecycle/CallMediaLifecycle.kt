@@ -28,6 +28,7 @@ import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import io.getstream.video.android.compose.pip.enterPictureInPicture
+import io.getstream.video.android.compose.pip.isInPictureInPictureMode
 import io.getstream.video.android.core.Call
 import kotlinx.coroutines.delay
 
@@ -39,13 +40,11 @@ import kotlinx.coroutines.delay
  * - camera will be enabled if the lifecycle is onResumed, and not on the PIP mode.
  *
  * @param call The call includes states and will be rendered with participants.
- * @param isInPictureInPicture Whether the user has engaged in Picture-In-Picture mode.
  * @param pipEnteringDuration The duration requires to be engaged in Picture-In-Picture mode.
  */
 @Composable
 public fun CallMediaLifecycle(
     call: Call,
-    isInPictureInPicture: Boolean,
     enableInPictureInPicture: Boolean = false,
     pipEnteringDuration: Long = 100
 ) {
@@ -65,9 +64,11 @@ public fun CallMediaLifecycle(
     if (latestLifecycleEvent == Lifecycle.Event.ON_PAUSE) {
         LaunchedEffect(latestLifecycleEvent) {
             delay(pipEnteringDuration)
-            if (isInPictureInPicture) {
-                call.camera.pause()
-            } else if (enableInPictureInPicture) {
+            val isInPictureInPicture = context.isInPictureInPictureMode
+            if (!isInPictureInPicture && !enableInPictureInPicture) {
+                call.camera.pause(fromUser = false)
+                call.microphone.pause(fromUser = false)
+            } else if (!isInPictureInPicture) {
                 enterPictureInPicture(context = context, call = call)
             }
         }
@@ -76,8 +77,10 @@ public fun CallMediaLifecycle(
     if (latestLifecycleEvent == Lifecycle.Event.ON_RESUME) {
         LaunchedEffect(latestLifecycleEvent) {
             delay(pipEnteringDuration)
-            if (isInPictureInPicture) {
-                call.camera.resume()
+            val isInPictureInPicture = context.isInPictureInPictureMode
+            if (!isInPictureInPicture && !enableInPictureInPicture) {
+                call.camera.resume(fromUser = false)
+                call.microphone.resume(fromUser = false)
             }
         }
     }

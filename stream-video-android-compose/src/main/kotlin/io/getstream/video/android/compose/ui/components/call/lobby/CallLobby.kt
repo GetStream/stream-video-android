@@ -96,9 +96,9 @@ public fun CallLobby(
         call.microphone.isEnabled.value
     },
     video: ParticipantState.Video = ParticipantState.Video(
-        sessionId = call.sessionId.orEmpty(),
+        sessionId = call.sessionId,
         track = VideoTrack(
-            streamId = call.sessionId.orEmpty(),
+            streamId = call.sessionId,
             video = if (LocalInspectionMode.current) {
                 org.webrtc.VideoTrack(1000L)
             } else {
@@ -134,7 +134,7 @@ public fun CallLobby(
 
     DefaultPermissionHandler(videoPermission = permissions)
 
-    CallMediaLifecycle(call = call, isInPictureInPicture = true)
+    CallMediaLifecycle(call = call, pipEnteringDuration = 0)
 
     Column(modifier = modifier) {
         Box(
