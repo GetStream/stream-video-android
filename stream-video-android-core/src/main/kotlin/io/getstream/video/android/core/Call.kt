@@ -387,7 +387,7 @@ public class Call(
             }
             if (result is Failure) {
                 session = null
-                logger.w { "Join failed with error $result" }
+                logger.e { "Join failed with error $result" }
                 if (isPermanentError(result.value)) {
                     state._connection.value = RealtimeConnection.Failed(result.value)
                     return result
