@@ -135,7 +135,6 @@ public fun CallContent(
 
     CallMediaLifecycle(
         call = call,
-        isInPictureInPicture = isInPictureInPicture,
         enableInPictureInPicture = enableInPictureInPicture
     )
 

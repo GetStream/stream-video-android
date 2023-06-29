@@ -40,7 +40,7 @@ fun CallScreen(
         CallContent(
             modifier = Modifier.background(color = VideoTheme.colors.appBackground),
             call = call,
-            enableInPictureInPicture = true,
+            enableInPictureInPicture = false,
             onBackPressed = { onLeaveCall.invoke() },
             onCallAction = { callAction ->
                 when (callAction) {
