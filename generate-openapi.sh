@@ -86,7 +86,7 @@ else
   docker run --rm \
     -v "${GENERATED_CODE_ROOT}:/local" \
     ghcr.io/getstream/openapi-generator:master generate \
-    -i https://raw.githubusercontent.com/GetStream/protocol/main/openapi/video-openapi.yaml \
+    -i https://raw.githubusercontent.com/GetStream/protocol/main/openapi/video-openapi-clientside.yaml \
     --additional-properties=library=jvm-retrofit2,useCoroutines,dateLibrary=threetenbp \
     -g kotlin \
     -o /local
@@ -100,7 +100,6 @@ INFRASTRUCTURE_ROOT="$CLIENT_ROOT/infrastructure"
 
 rm -rf "$CLIENT_ROOT/auth"
 rm "$INFRASTRUCTURE_ROOT/ApiClient.kt" "$INFRASTRUCTURE_ROOT/ResponseExt.kt"
-rm "$APIS_ROOT/UsersApi.kt"
 
 API_REQUEST_REGEX="@(?:POST|DELETE|GET|PUT|PATCH)\(\"(.*?)\""
 RETROFIT_IMPORTS_REGEX="(Body)|^[[:space:]]*@([^()]*)\("
