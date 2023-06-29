@@ -36,17 +36,17 @@ import kotlinx.coroutines.delay
  * Register a call media lifecycle that controls camera and microphone depending on lifecycles.
  * The default behavior is like so:
  *
- * - camera will be disabled if the lifecycle is onPaused, and not on the PIP mode.
- * - camera will be enabled if the lifecycle is onResumed, and not on the PIP mode.
+ * - camera/microphone will be disabled if the lifecycle is onPaused, and not on the PIP mode.
+ * - camera/microphone will be enabled if the lifecycle is onResumed, and not on the PIP mode.
  *
  * @param call The call includes states and will be rendered with participants.
  * @param pipEnteringDuration The duration requires to be engaged in Picture-In-Picture mode.
  */
 @Composable
-public fun CallMediaLifecycle(
+public fun MediaPiPLifecycle(
     call: Call,
     enableInPictureInPicture: Boolean = false,
-    pipEnteringDuration: Long = 100
+    pipEnteringDuration: Long = 250
 ) {
     val context = LocalContext.current
     val lifecycle = LocalLifecycleOwner.current.lifecycle
