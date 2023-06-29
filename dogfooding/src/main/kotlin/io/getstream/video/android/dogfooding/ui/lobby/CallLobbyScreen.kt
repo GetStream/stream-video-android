@@ -17,6 +17,7 @@
 package io.getstream.video.android.dogfooding.ui.lobby
 
 import android.content.Intent
+import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -66,6 +67,7 @@ import io.getstream.video.android.dogfooding.ui.call.CallActivity
 import io.getstream.video.android.dogfooding.ui.theme.Colors
 import io.getstream.video.android.dogfooding.ui.theme.StreamButton
 import io.getstream.video.android.mock.StreamMockUtils
+import kotlinx.coroutines.delay
 
 @Composable
 fun CallLobbyScreen(
@@ -201,6 +203,18 @@ private fun CallLobbyBody(
             call.microphone.isEnabled.collectAsState()
         }
 
+        // turn on camera and microphone by default
+        LaunchedEffect(key1 = Unit) {
+            delay(300)
+            if (BuildConfig.BENCHMARK) {
+                callLobbyViewModel.call.camera.disable()
+                callLobbyViewModel.call.microphone.disable()
+            } else if (!localInspectionMode) {
+                callLobbyViewModel.call.camera.enable()
+                callLobbyViewModel.call.microphone.enable()
+            }
+        }
+
         CallLobby(
             call = call,
             modifier = Modifier.fillMaxWidth(),
@@ -211,15 +225,6 @@ private fun CallLobbyBody(
                     is ToggleCamera -> callLobbyViewModel.enableCamera(!isCameraEnabled)
                     is ToggleMicrophone -> callLobbyViewModel.enableMicrophone(!isMicrophoneEnabled)
                     else -> Unit
-                }
-            },
-            onRendered = {
-                if (BuildConfig.BENCHMARK) {
-                    callLobbyViewModel.call.camera.disable()
-                    callLobbyViewModel.call.microphone.disable()
-                } else if (!localInspectionMode) {
-                    callLobbyViewModel.call.camera.enable()
-                    callLobbyViewModel.call.microphone.enable()
                 }
             }
         )
