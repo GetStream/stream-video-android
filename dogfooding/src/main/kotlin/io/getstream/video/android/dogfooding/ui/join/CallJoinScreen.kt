@@ -75,6 +75,7 @@ fun CallJoinScreen(
     HandleCallJoinUiState(
         callJoinUiState = uiState,
         navigateToCallLobby = navigateToCallLobby,
+        navigateUpToLogin = navigateUpToLogin
     )
 
     Column(
@@ -249,12 +250,14 @@ private fun CallJoinBody(
 private fun HandleCallJoinUiState(
     callJoinUiState: CallJoinUiState,
     navigateToCallLobby: (callId: String) -> Unit,
+    navigateUpToLogin: () -> Unit
 ) {
     LaunchedEffect(key1 = callJoinUiState) {
         when (callJoinUiState) {
             is CallJoinUiState.JoinCompleted ->
                 navigateToCallLobby.invoke(callJoinUiState.callId)
-
+            is CallJoinUiState.GoBackToLogin ->
+                navigateUpToLogin.invoke()
             else -> Unit
         }
     }
