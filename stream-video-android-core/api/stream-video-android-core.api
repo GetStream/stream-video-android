@@ -399,7 +399,7 @@ public final class io/getstream/video/android/core/MicrophoneManager {
 	public static synthetic fun pause$default (Lio/getstream/video/android/core/MicrophoneManager;ZILjava/lang/Object;)V
 	public final fun resume (Z)V
 	public static synthetic fun resume$default (Lio/getstream/video/android/core/MicrophoneManager;ZILjava/lang/Object;)V
-	public final fun select (Lio/getstream/video/android/core/audio/AudioDevice;)V
+	public final fun select (Lcom/twilio/audioswitch/AudioDevice;)V
 	public final fun setEnabled (ZZ)V
 	public static synthetic fun setEnabled$default (Lio/getstream/video/android/core/MicrophoneManager;ZZILjava/lang/Object;)V
 }
@@ -702,79 +702,16 @@ public abstract interface class io/getstream/video/android/core/api/SignalServer
 	public abstract fun updateSubscriptions (Lstream/video/sfu/signal/UpdateSubscriptionsRequest;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 }
 
-public abstract class io/getstream/video/android/core/audio/AudioDevice {
-	public abstract fun getName ()Ljava/lang/String;
-}
-
-public final class io/getstream/video/android/core/audio/AudioDevice$BluetoothHeadset : io/getstream/video/android/core/audio/AudioDevice {
-	public fun <init> ()V
-	public final fun component1 ()Ljava/lang/String;
-	public final fun copy (Ljava/lang/String;)Lio/getstream/video/android/core/audio/AudioDevice$BluetoothHeadset;
-	public static synthetic fun copy$default (Lio/getstream/video/android/core/audio/AudioDevice$BluetoothHeadset;Ljava/lang/String;ILjava/lang/Object;)Lio/getstream/video/android/core/audio/AudioDevice$BluetoothHeadset;
-	public fun equals (Ljava/lang/Object;)Z
-	public fun getName ()Ljava/lang/String;
-	public fun hashCode ()I
-	public fun toString ()Ljava/lang/String;
-}
-
-public final class io/getstream/video/android/core/audio/AudioDevice$Earpiece : io/getstream/video/android/core/audio/AudioDevice {
-	public fun <init> ()V
-	public final fun component1 ()Ljava/lang/String;
-	public final fun copy (Ljava/lang/String;)Lio/getstream/video/android/core/audio/AudioDevice$Earpiece;
-	public static synthetic fun copy$default (Lio/getstream/video/android/core/audio/AudioDevice$Earpiece;Ljava/lang/String;ILjava/lang/Object;)Lio/getstream/video/android/core/audio/AudioDevice$Earpiece;
-	public fun equals (Ljava/lang/Object;)Z
-	public fun getName ()Ljava/lang/String;
-	public fun hashCode ()I
-	public fun toString ()Ljava/lang/String;
-}
-
-public final class io/getstream/video/android/core/audio/AudioDevice$Speakerphone : io/getstream/video/android/core/audio/AudioDevice {
-	public fun <init> ()V
-	public final fun component1 ()Ljava/lang/String;
-	public final fun copy (Ljava/lang/String;)Lio/getstream/video/android/core/audio/AudioDevice$Speakerphone;
-	public static synthetic fun copy$default (Lio/getstream/video/android/core/audio/AudioDevice$Speakerphone;Ljava/lang/String;ILjava/lang/Object;)Lio/getstream/video/android/core/audio/AudioDevice$Speakerphone;
-	public fun equals (Ljava/lang/Object;)Z
-	public fun getName ()Ljava/lang/String;
-	public fun hashCode ()I
-	public fun toString ()Ljava/lang/String;
-}
-
-public final class io/getstream/video/android/core/audio/AudioDevice$WiredHeadset : io/getstream/video/android/core/audio/AudioDevice {
-	public fun <init> ()V
-	public final fun component1 ()Ljava/lang/String;
-	public final fun copy (Ljava/lang/String;)Lio/getstream/video/android/core/audio/AudioDevice$WiredHeadset;
-	public static synthetic fun copy$default (Lio/getstream/video/android/core/audio/AudioDevice$WiredHeadset;Ljava/lang/String;ILjava/lang/Object;)Lio/getstream/video/android/core/audio/AudioDevice$WiredHeadset;
-	public fun equals (Ljava/lang/Object;)Z
-	public fun getName ()Ljava/lang/String;
-	public fun hashCode ()I
-	public fun toString ()Ljava/lang/String;
-}
-
 public abstract interface class io/getstream/video/android/core/audio/AudioHandler {
 	public abstract fun start ()V
 	public abstract fun stop ()V
-}
-
-public final class io/getstream/video/android/core/audio/AudioSwitch {
-	public static final field Companion Lio/getstream/video/android/core/audio/AudioSwitch$Companion;
-	public static final field VERSION Ljava/lang/String;
-	public final fun activate ()V
-	public final fun deactivate ()V
-	public final fun getAvailableAudioDevices ()Ljava/util/List;
-	public final fun getSelectedAudioDevice ()Lio/getstream/video/android/core/audio/AudioDevice;
-	public final fun selectDevice (Lio/getstream/video/android/core/audio/AudioDevice;)V
-	public final fun start (Lkotlin/jvm/functions/Function2;)V
-	public final fun stop ()V
-}
-
-public final class io/getstream/video/android/core/audio/AudioSwitch$Companion {
 }
 
 public final class io/getstream/video/android/core/audio/AudioSwitchHandler : io/getstream/video/android/core/audio/AudioHandler {
 	public static final field Companion Lio/getstream/video/android/core/audio/AudioSwitchHandler$Companion;
 	public fun <init> (Landroid/content/Context;Lkotlin/jvm/functions/Function2;)V
 	public final fun getAudioDeviceChangeListener ()Lkotlin/jvm/functions/Function2;
-	public final fun selectDevice (Lio/getstream/video/android/core/audio/AudioDevice;)V
+	public final fun selectDevice (Lcom/twilio/audioswitch/AudioDevice;)V
 	public final fun setAudioDeviceChangeListener (Lkotlin/jvm/functions/Function2;)V
 	public fun start ()V
 	public fun stop ()V
@@ -935,12 +872,12 @@ public final class io/getstream/video/android/core/call/state/Reaction : io/gets
 }
 
 public final class io/getstream/video/android/core/call/state/SelectAudioDevice : io/getstream/video/android/core/call/state/CallAction {
-	public fun <init> (Lio/getstream/video/android/core/audio/AudioDevice;)V
-	public final fun component1 ()Lio/getstream/video/android/core/audio/AudioDevice;
-	public final fun copy (Lio/getstream/video/android/core/audio/AudioDevice;)Lio/getstream/video/android/core/call/state/SelectAudioDevice;
-	public static synthetic fun copy$default (Lio/getstream/video/android/core/call/state/SelectAudioDevice;Lio/getstream/video/android/core/audio/AudioDevice;ILjava/lang/Object;)Lio/getstream/video/android/core/call/state/SelectAudioDevice;
+	public fun <init> (Lcom/twilio/audioswitch/AudioDevice;)V
+	public final fun component1 ()Lcom/twilio/audioswitch/AudioDevice;
+	public final fun copy (Lcom/twilio/audioswitch/AudioDevice;)Lio/getstream/video/android/core/call/state/SelectAudioDevice;
+	public static synthetic fun copy$default (Lio/getstream/video/android/core/call/state/SelectAudioDevice;Lcom/twilio/audioswitch/AudioDevice;ILjava/lang/Object;)Lio/getstream/video/android/core/call/state/SelectAudioDevice;
 	public fun equals (Ljava/lang/Object;)Z
-	public final fun getAudioDevice ()Lio/getstream/video/android/core/audio/AudioDevice;
+	public final fun getAudioDevice ()Lcom/twilio/audioswitch/AudioDevice;
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
 }

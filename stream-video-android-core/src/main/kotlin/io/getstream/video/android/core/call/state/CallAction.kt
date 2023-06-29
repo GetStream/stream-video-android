@@ -16,7 +16,7 @@
 
 package io.getstream.video.android.core.call.state
 
-import io.getstream.video.android.core.audio.AudioDevice
+import com.twilio.audioswitch.AudioDevice
 import io.getstream.video.android.model.User
 
 /**

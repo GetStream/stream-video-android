@@ -17,6 +17,7 @@
 package io.getstream.video.android.core.call
 
 import androidx.annotation.VisibleForTesting
+import com.twilio.audioswitch.AudioDevice
 import io.getstream.log.taggedLogger
 import io.getstream.result.Result
 import io.getstream.result.Result.Failure
@@ -26,7 +27,6 @@ import io.getstream.video.android.core.CameraDirection
 import io.getstream.video.android.core.DeviceStatus
 import io.getstream.video.android.core.StreamVideo
 import io.getstream.video.android.core.StreamVideoImpl
-import io.getstream.video.android.core.audio.AudioDevice
 import io.getstream.video.android.core.call.connection.StreamPeerConnection
 import io.getstream.video.android.core.call.utils.stringify
 import io.getstream.video.android.core.dispatchers.DispatcherProvider
@@ -457,7 +457,7 @@ public class RtcSession internal constructor(
         if (settings?.audio?.speakerDefaultOn == false) {
             call.speaker.setVolume(0)
         } else {
-            if (call.speaker.selectedDevice.value == AudioDevice.Earpiece()) {
+            if (call.speaker.selectedDevice.value is AudioDevice.Earpiece) {
                 call.speaker.setSpeakerPhone(true)
             }
         }
