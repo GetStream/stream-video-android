@@ -16,6 +16,8 @@
 
 package io.getstream.video.android.compose.lifecycle
 
+import android.os.Handler
+import android.os.Looper
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
@@ -27,6 +29,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
+import io.getstream.log.StreamLog
 import io.getstream.video.android.compose.pip.enterPictureInPicture
 import io.getstream.video.android.compose.pip.isInPictureInPictureMode
 import io.getstream.video.android.core.Call
@@ -69,7 +72,15 @@ public fun MediaPiPLifecycle(
                 call.camera.pause(fromUser = false)
                 call.microphone.pause(fromUser = false)
             } else if (!isInPictureInPicture) {
-                enterPictureInPicture(context = context, call = call)
+                // TODO: There's not way to onUserLeaveHint in Compose for now.
+                // https://developer.android.com/reference/android/app/Activity#onUserLeaveHint()
+                try {
+                    Handler(Looper.getMainLooper()).post {
+                        enterPictureInPicture(context = context, call = call)
+                    }
+                } catch (e: Exception) {
+                    StreamLog.d("MediaPiPLifecycle") { e.stackTraceToString() }
+                }
             }
         }
     }
