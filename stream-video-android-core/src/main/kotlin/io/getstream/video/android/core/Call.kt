@@ -24,6 +24,7 @@ import io.getstream.result.Result
 import io.getstream.result.Result.Failure
 import io.getstream.result.Result.Success
 import io.getstream.video.android.core.call.RtcSession
+import io.getstream.video.android.core.call.utils.DecibelThresholdDetection
 import io.getstream.video.android.core.events.VideoEventListener
 import io.getstream.video.android.core.internal.network.NetworkStateProvider
 import io.getstream.video.android.core.model.MuteUsersData
@@ -64,6 +65,7 @@ import org.threeten.bp.OffsetDateTime
 import org.threeten.bp.temporal.ChronoUnit
 import org.webrtc.PeerConnection
 import org.webrtc.RendererCommon
+import org.webrtc.audio.JavaAudioDeviceModule.AudioSamples
 import stream.video.sfu.models.TrackType
 import stream.video.sfu.models.VideoDimension
 
@@ -276,6 +278,12 @@ public class Call(
     private val scope = CoroutineScope(clientImpl.scope.coroutineContext + supervisorJob)
 
     val monitor = CallHealthMonitor(this, scope)
+
+    private val decibelThresholdDetection = DecibelThresholdDetection(thresholdCrossedCallback = {
+        if (!microphone.isEnabled.value) {
+            state.markSpeakingAsMuted()
+        }
+    })
 
     /** Session handles all real time communication for video and audio */
     internal var session: RtcSession? = null
@@ -841,6 +849,13 @@ public class Call(
 
     suspend fun reject(): Result<RejectCallResponse> {
         return clientImpl.reject(type, id)
+    }
+
+    fun processAudioSample(audioSample: AudioSamples) {
+        // do not unncessarily process the audio sample if we are not muted
+        if (!microphone.isEnabled.value) {
+            decibelThresholdDetection.processSoundInput(audioSample.data)
+        }
     }
 }
 
