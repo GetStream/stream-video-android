@@ -37,6 +37,7 @@ import org.webrtc.SoftwareVideoEncoderFactory
 import org.webrtc.VideoSource
 import org.webrtc.VideoTrack
 import org.webrtc.audio.JavaAudioDeviceModule
+import org.webrtc.audio.JavaAudioDeviceModule.AudioSamples
 
 /**
  * Builds a factory that provides [PeerConnection]s when requested.
@@ -47,6 +48,17 @@ public class StreamPeerConnectionFactory(private val context: Context) {
 
     private val webRtcLogger by taggedLogger("Call:WebRTC")
     private val audioLogger by taggedLogger("Call:AudioTrackCallback")
+
+    private var audioSampleCallback: ((AudioSamples) -> Unit)? = null
+
+    /**
+     * Set to get callbacks when audio input from microphone is received.
+     * This can be example used to detect whether a person is speaking
+     * while muted.
+     */
+    public fun setAudioSampleCallback(callback: (AudioSamples) -> Unit) {
+        audioSampleCallback = callback
+    }
 
     /**
      * Represents the EGL rendering context.
@@ -164,6 +176,9 @@ public class StreamPeerConnectionFactory(private val context: Context) {
                                 audioLogger.d { "[onWebRtcAudioTrackStop] no args" }
                             }
                         })
+                    .setSamplesReadyCallback {
+                        audioSampleCallback?.invoke(it)
+                    }
                     .createAudioDeviceModule().also {
                         it.setMicrophoneMute(false)
                         it.setSpeakerMute(false)
