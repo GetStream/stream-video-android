@@ -40,6 +40,7 @@ public final class io/getstream/video/android/core/Call {
 	public final fun muteUsers (Ljava/util/List;ZZZLkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public static synthetic fun muteUsers$default (Lio/getstream/video/android/core/Call;Ljava/util/List;ZZZLkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
 	public final fun notify (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public final fun processAudioSample (Lorg/webrtc/audio/JavaAudioDeviceModule$AudioSamples;)V
 	public final fun queryMembers (Ljava/util/Map;Ljava/util/List;ILkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public static synthetic fun queryMembers$default (Lio/getstream/video/android/core/Call;Ljava/util/Map;Ljava/util/List;ILkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
 	public final fun reconnectOrSwitchSfu (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
@@ -136,6 +137,7 @@ public final class io/getstream/video/android/core/CallState {
 	public final fun handleEvent (Lorg/openapitools/client/models/VideoEvent;)V
 	public final fun hasPermission (Ljava/lang/String;)Lkotlinx/coroutines/flow/StateFlow;
 	public final fun isReconnecting ()Lkotlinx/coroutines/flow/StateFlow;
+	public final fun markSpeakingAsMuted ()V
 	public final fun pin (Ljava/lang/String;)V
 	public final fun unpin (Ljava/lang/String;)V
 	public final fun updateFromResponse (Lorg/openapitools/client/models/CallResponse;)V
@@ -815,6 +817,7 @@ public final class io/getstream/video/android/core/call/connection/StreamPeerCon
 	public static synthetic fun makePeerConnection$default (Lio/getstream/video/android/core/call/connection/StreamPeerConnectionFactory;Lkotlinx/coroutines/CoroutineScope;Lorg/webrtc/PeerConnection$RTCConfiguration;Lio/getstream/video/android/core/model/StreamPeerType;Lorg/webrtc/MediaConstraints;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function2;Lkotlin/jvm/functions/Function2;IILjava/lang/Object;)Lio/getstream/video/android/core/call/connection/StreamPeerConnection;
 	public final fun makeVideoSource (Z)Lorg/webrtc/VideoSource;
 	public final fun makeVideoTrack (Lorg/webrtc/VideoSource;Ljava/lang/String;)Lorg/webrtc/VideoTrack;
+	public final fun setAudioSampleCallback (Lkotlin/jvm/functions/Function1;)V
 }
 
 public final class io/getstream/video/android/core/call/signal/socket/RTCEventMapper {

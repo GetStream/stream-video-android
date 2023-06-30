@@ -40,11 +40,14 @@ import io.getstream.video.android.core.utils.mapState
 import io.getstream.video.android.core.utils.toUser
 import io.getstream.video.android.model.User
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.launch
 import org.openapitools.client.models.BlockedUserEvent
 import org.openapitools.client.models.CallAcceptedEvent
 import org.openapitools.client.models.CallCreatedEvent
@@ -334,6 +337,8 @@ public class CallState(private val call: Call, private val user: User) {
         MutableStateFlow(emptyList())
     public val errors: StateFlow<List<ErrorEvent>> = _errors
 
+    private var speakingWhileMutedResetJob: Job? = null
+
     fun handleEvent(event: VideoEvent) {
         logger.d { "Updating call state with event ${event::class.java}" }
         when (event) {
@@ -565,6 +570,15 @@ public class CallState(private val call: Call, private val user: User) {
             getOrCreateParticipant(it)
         }
         upsertParticipants(participantStates)
+    }
+
+    fun markSpeakingAsMuted() {
+        _speakingWhileMuted.value = true
+        speakingWhileMutedResetJob?.cancel()
+        speakingWhileMutedResetJob = scope.launch {
+            delay(2000)
+            _speakingWhileMuted.value = false
+        }
     }
 
     private fun removeParticipant(sessionId: String) {
