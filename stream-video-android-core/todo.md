@@ -14,9 +14,8 @@
 *  Week 9: Tutorials & Stability, Ringing & Push
 *  Week 10 & 11: Prep 0.1 release
 
-### 0.1 milestone
+### 0.1.0 milestone
 
-- [ ] Video disconnects sometimes and camera can crash (BufferQueue has not connected producer and Stop capture: Nulling session. Could be related to the peer connection breaking. For now, it seems to the ICE restarts issue. We're waiting for the backend supports.)
 - [ ] Audio volume was too low (probably a bug related to speakerphone vs earpiece)
 - [ ] Testing session with team cross platform (Jared/ Thierry)
 - [ ] Publish 0.1 on Maven

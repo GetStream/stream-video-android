@@ -66,6 +66,7 @@ Video roadmap and changelog is available [here](https://github.com/GetStream/pro
 
 ### 0.2.0 milestone
 
+- [ ] Local Video disconnects sometimes (ICE restarts issue for the publisher. we're waiting for the backend support)
 - [ ] Deeplink support for video call demo & dogfooding app (skip auth for the video demo, keep it for dogfooding)
 - [ ] Chat Integration
 - [ ] XML version of VideoRenderer
