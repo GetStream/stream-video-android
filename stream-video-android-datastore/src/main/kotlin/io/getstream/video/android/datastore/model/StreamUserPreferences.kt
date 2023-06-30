@@ -16,12 +16,21 @@
 
 package io.getstream.video.android.datastore.model
 
+import io.getstream.video.android.datastore.delegate.StreamUserDataStore
 import io.getstream.video.android.model.ApiKey
 import io.getstream.video.android.model.Device
 import io.getstream.video.android.model.User
 import io.getstream.video.android.model.UserToken
 import kotlinx.serialization.Serializable
 
+/**
+ * Stream login user data that is used to be stored in [StreamUserDataStore].
+ *
+ * @property user [User] information that is used to build a `StreamVideo` instance for logging in.
+ * @property apiKey [ApiKey] information that is used to build a `StreamVideo` instance for logging in.
+ * @property userToken [UserToken] information that is used to build a `StreamVideo` instance for logging in.
+ * @property userDevice [Device] information that is used to be get push notifications from the Stream server.
+ */
 @Serializable
 public data class StreamUserPreferences(
     public val user: User? = null,
