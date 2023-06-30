@@ -146,6 +146,8 @@ public class CallState(private val call: Call, private val user: User) {
         it is RealtimeConnection.Reconnecting
     }
 
+    val stats = CallStats(call)
+
     private val _participants: MutableStateFlow<SortedMap<String, ParticipantState>> =
         MutableStateFlow(emptyMap<String, ParticipantState>().toSortedMap())
 

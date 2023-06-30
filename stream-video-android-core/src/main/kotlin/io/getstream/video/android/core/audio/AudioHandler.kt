@@ -20,6 +20,9 @@ import android.content.Context
 import android.media.AudioManager
 import android.os.Handler
 import android.os.Looper
+import com.twilio.audioswitch.AudioDevice
+import com.twilio.audioswitch.AudioDeviceChangeListener
+import com.twilio.audioswitch.AudioSwitch
 import io.getstream.log.StreamLog
 import io.getstream.log.taggedLogger
 
@@ -63,6 +66,9 @@ public class AudioSwitchHandler constructor(private val context: Context, var au
                     preferredDeviceList = preferredDeviceList
                         ?: defaultPreferredDeviceList
                 )
+                // TODO: AudioSwitch logging is disabled by default and it doesn't allow
+                // to specify a custom logger. At some point we may need to fork the library
+                // and add custom logger support.
                 audioSwitch = switch
                 switch.start(audioDeviceChangeListener)
                 switch.activate()

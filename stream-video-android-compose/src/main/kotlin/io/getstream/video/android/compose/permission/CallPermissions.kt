@@ -18,8 +18,10 @@ package io.getstream.video.android.compose.permission
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalInspectionMode
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.rememberMultiplePermissionsState
 import io.getstream.video.android.core.Call
@@ -40,19 +42,26 @@ public fun rememberCallPermissionsState(
         android.Manifest.permission.CAMERA,
         android.Manifest.permission.RECORD_AUDIO,
     ),
-    onPermissionsResult: (Map<String, Boolean>) -> Unit = {
-        if (it[android.Manifest.permission.CAMERA] == true) {
-            call.camera.setEnabled(true)
-        }
-        if (it[android.Manifest.permission.RECORD_AUDIO] == true) {
-            call.microphone.setEnabled(true)
-        }
-    }
+    onPermissionsResult: ((Map<String, Boolean>) -> Unit)? = null
 ): VideoPermissionsState {
 
     if (LocalInspectionMode.current) return fakeVideoPermissionsState
 
-    val permissionState = rememberMultiplePermissionsState(permissions, onPermissionsResult)
+    val isCameraEnabled by call.camera.isEnabled.collectAsStateWithLifecycle()
+    val isMicrophoneEnabled by call.microphone.isEnabled.collectAsStateWithLifecycle()
+
+    val permissionState = rememberMultiplePermissionsState(permissions) {
+        if (onPermissionsResult != null) {
+            onPermissionsResult.invoke(it)
+        } else {
+            if (it[android.Manifest.permission.CAMERA] == true && isCameraEnabled) {
+                call.camera.setEnabled(true)
+            }
+            if (it[android.Manifest.permission.RECORD_AUDIO] == true && isMicrophoneEnabled) {
+                call.microphone.setEnabled(true)
+            }
+        }
+    }
     return remember(call, permissions) {
         object : VideoPermissionsState {
             override val allPermissionsGranted: Boolean

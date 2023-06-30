@@ -33,6 +33,7 @@ import io.getstream.video.android.core.model.toIceServer
 import io.getstream.video.android.model.User
 import io.getstream.webrtc.android.ui.VideoTextureViewRenderer
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.filter
@@ -251,6 +252,7 @@ public class Call(
     val id: String,
     val user: User,
 ) {
+    private var statsGatheringJob: Job? = null
     internal var location: String? = null
 
     internal val clientImpl = client as StreamVideoImpl
@@ -259,7 +261,7 @@ public class Call(
     /** The call state contains all state such as the participant list, reactions etc */
     val state = CallState(this, user)
 
-    val sessionId by lazy { session?.sessionId }
+    val sessionId by lazy { clientImpl.sessionId }
     private val network by lazy { clientImpl.connectionModule.networkStateProvider }
 
     /** Camera gives you access to the local camera */
@@ -385,7 +387,7 @@ public class Call(
             }
             if (result is Failure) {
                 session = null
-                logger.w { "Join failed with error $result" }
+                logger.e { "Join failed with error $result" }
                 if (isPermanentError(result.value)) {
                     state._connection.value = RealtimeConnection.Failed(result.value)
                     return result
@@ -466,6 +468,28 @@ public class Call(
         }
 
         monitor.start()
+
+        val statsGatheringInterval = 5000L
+
+        statsGatheringJob = scope.launch {
+            // wait a bit before we capture stats
+            delay(statsGatheringInterval)
+
+            while (true) {
+                delay(statsGatheringInterval)
+
+                session?.publisher?.let {
+                    val stats = it.getStats().value
+                    state.stats.updateFromRTCStats(stats, isPublisher = true)
+                }
+                session?.subscriber?.let {
+                    val stats = it.getStats().value
+                    state.stats.updateFromRTCStats(stats, isPublisher = false)
+                }
+
+                state.stats.updateLocalStats()
+            }
+        }
 
         client.state.setActiveCall(this)
 
@@ -799,6 +823,7 @@ public class Call(
         monitor.stop()
         session?.cleanup()
         supervisorJob.cancel()
+        statsGatheringJob?.cancel()
         session = null
     }
 

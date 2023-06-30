@@ -42,7 +42,8 @@ import androidx.compose.ui.unit.coerceAtLeast
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.getstream.log.StreamLog
-import io.getstream.video.android.compose.lifecycle.CallMediaLifecycle
+import io.getstream.video.android.compose.lifecycle.CallLifecycle
+import io.getstream.video.android.compose.lifecycle.MediaPiPLifecycle
 import io.getstream.video.android.compose.permission.VideoPermissionsState
 import io.getstream.video.android.compose.permission.rememberCallPermissionsState
 import io.getstream.video.android.compose.pip.enterPictureInPicture
@@ -133,9 +134,13 @@ public fun CallContent(
 
     DefaultPermissionHandler(videoPermission = permissions)
 
-    CallMediaLifecycle(
+    MediaPiPLifecycle(
         call = call,
-        isInPictureInPicture = isInPictureInPicture,
+        enableInPictureInPicture = enableInPictureInPicture
+    )
+
+    CallLifecycle(
+        call = call,
         enableInPictureInPicture = enableInPictureInPicture
     )
 

@@ -97,7 +97,9 @@ class MainActivity : ComponentActivity() {
                     "description" to "Talk about how easy compose makes it to reuse and combine UI"
                 )
             ))
-            result.getOrThrow()
+            result.onError {
+                Toast.makeText(this, it.message, Toast.LENGTH_SHORT).show()
+            }
         }
 
         setContent {
@@ -199,13 +201,14 @@ Now when you run the sample app it will connect successfully and you will see a 
 In this next step we're going to:
 
 1. Request Android Runtime permissions (audio)
+2. Mute and Unmute microphone toggle button
 2. Create a list of participants
 3. An indicator for who's speaking
 
 #### A. Requesting Android Runtime Permissions
 
 To capture the microphone output we need to request [Android runtime permissions](https://source.android.com/docs/core/permissions/runtime_perms).
-In `MainActivity.kt` just below setContent add the line `LaunchMicrophonePermissions(call = call)`
+In `MainActivity.kt` just below `setContent` add the line `LaunchMicrophonePermissions(call = call)`
 
 ```kotlin
 setContent {
@@ -217,7 +220,23 @@ setContent {
 The launch call permissions will request permissions when you open the call.
 Review the [permissions docs](../05-ui-cookbook/08-permissions-request.mdx) to learn more about how you can easily request permissions.
 
-#### B. Create a list of participants
+#### B. Add a toggle button to mute/unmute microphone
+
+Next, let's create a toggle button to mute and unmute a microphone.
+
+You can simply connect the state of a microphone toggle button with the call's device manager with using `ToggleMicrophoneAction` and `call.microphone`:
+
+```kotlin
+val isMicrophoneEnabled by call.microphone.isEnabled.collectAsState()
+
+ToggleMicrophoneAction(
+    modifier = Modifier.size(52.dp),
+    isMicrophoneEnabled = isMicrophoneEnabled,
+    onCallAction = { call.microphone.setEnabled(it.isEnabled) }
+)
+```
+
+#### C. Create a list of participants
 
 Let's create a component for the active speaker and the list of participants.
 
@@ -230,9 +249,9 @@ fun ParticipantAvatar(participant : ParticipantState) {
 }
 ```
 
-#### B. An indicator for who's speaking
+#### D. An indicator for who's speaking
 
-We'll use the basic `ParticipantAvatar` to build an audio room
+We'll use the basic `ParticipantAvatar` to build an audio room:
 
 ```kotlin
 setContent {
@@ -277,6 +296,13 @@ setContent {
                     ParticipantAvatar(participant)
                 }
             }
+
+            val isMicrophoneEnabled by call.microphone.isEnabled.collectAsState()
+            ToggleMicrophoneAction(
+                modifier = Modifier.size(52.dp),
+                isMicrophoneEnabled = isMicrophoneEnabled,
+                onCallAction = { call.microphone.setEnabled(it.isEnabled) }
+            )
 
             Button(
                 onClick = {

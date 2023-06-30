@@ -66,37 +66,44 @@ Video roadmap and changelog is available [here](https://github.com/GetStream/pro
 
 ### 0.2.0 milestone
 
-- [ ] bug: screensharing is broken. android doesn’t receive/render (not sure) the screenshare. video shows up as the gray avatar (Thierry)
-- [ ] bug: screenshare is not removed after it stops when a participant leaves the call (Thierry) (probably just dont update the state when the participant leaves)
-- [ ] Livestream tutorial
 - [ ] Deeplink support for video call demo & dogfooding app (skip auth for the video demo, keep it for dogfooding)
 - [ ] Chat Integration
 - [ ] XML version of VideoRenderer
 - [ ] Call Analytics stateflow
 - [ ] Automatically handle pagination and sorting on > 6 participants 
+- [ ] Make it easy to test ringing support
+- [ ] publish app on play store
+- [ ] report version number of SDK on all API calls
+- [ ] bug: screensharing is broken. android doesn’t receive/render (not sure) the screenshare. video shows up as the gray avatar
 - [X] Reactions
+- [X] bug: screenshare is not removed after it stops when a participant leaves the call (Thierry) (probably just dont update the state when the participant leaves)
 
 ### 0.3.0 milestone
 
-- [ ] H264 workaround on S23 (see https://github.com/livekit/client-sdk-android/blob/main/livekit-android-sdk/src/main/java/io/livekit/android/webrtc/SimulcastVideoEncoderFactoryWrapper.kt#L34 and
+- [ ] Setting to default to speakerphone or earpiece
+- [ ] Button to switch speakerphone/earpiece
+- [ ] Livestream tutorial (depends on RTMP support)
+- [ ] H264 workaround on Samsung 23 (see https://github.com/livekit/client-sdk-android/blob/main/livekit-android-sdk/src/main/java/io/livekit/android/webrtc/SimulcastVideoEncoderFactoryWrapper.kt#L34 and
 - https://github.com/react-native-webrtc/react-native-webrtc/issues/983#issuecomment-975624906)
 - [ ] Bluetooth reliability
 - [ ] Dynascale 2.0 (codecs, f resolution switches, resolution webrtc handling)
 - [ ] Test coverage
 - [ ] Testing on more devices
 - [ ] Speaking while muted stateflow
-- [ ] Cleanup the retry behaviour in the RtcSession (see the TODO)
-- [ ] Android SDK development.md cleanup
+- [X] Cleanup the retry behaviour in the RtcSession
+- [ ] Android SDK development.md cleanup (Daniel)
 - [X] SDK development guide for all teams
 
 ### 0.4.0 milestone
 
+- [ ] Pagination on query members & query channels
 - [ ] Analytics integration
 - [ ] Screensharing from mobile
 - [ ] Tap to focus
 - [ ] Camera controls
 - [ ] Audio & Video filters
 - [ ] Picture of the video stream at highest resolution
+- [ ] Review foreground service vs backend for some things like screensharing etc
 
 ## 💼 We are hiring!
 

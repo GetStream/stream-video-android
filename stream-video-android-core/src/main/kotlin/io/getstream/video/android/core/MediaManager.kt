@@ -23,8 +23,8 @@ import android.media.AudioAttributes
 import android.media.AudioManager
 import android.os.Build
 import androidx.core.content.getSystemService
+import com.twilio.audioswitch.AudioDevice
 import io.getstream.log.taggedLogger
-import io.getstream.video.android.core.audio.AudioDevice
 import io.getstream.video.android.core.audio.AudioSwitchHandler
 import io.getstream.video.android.core.utils.buildAudioConstraints
 import io.getstream.video.android.core.utils.mapState
@@ -39,6 +39,7 @@ import org.webrtc.Camera2Enumerator
 import org.webrtc.CameraEnumerationAndroid
 import org.webrtc.EglBase
 import org.webrtc.SurfaceTextureHelper
+import java.util.UUID
 
 sealed class DeviceStatus {
     object NotSelected : DeviceStatus()
@@ -80,24 +81,28 @@ class SpeakerManager(
 
     internal var selectedBeforeSpeaker: AudioDevice? = null
 
-    fun enable() {
-        _status.value = DeviceStatus.Enabled
+    fun enable(fromUser: Boolean = true) {
+        if (fromUser) {
+            _status.value = DeviceStatus.Enabled
+        }
         setSpeakerPhone(true)
     }
 
-    fun disable() {
-        _status.value = DeviceStatus.Disabled
+    fun disable(fromUser: Boolean = true) {
+        if (fromUser) {
+            _status.value = DeviceStatus.Disabled
+        }
         setSpeakerPhone(false)
     }
 
     /**
      * Enable or disable the speakerphone.
      */
-    fun setEnabled(enabled: Boolean) {
+    fun setEnabled(enabled: Boolean, fromUser: Boolean = true) {
         if (enabled) {
-            enable()
+            enable(fromUser = fromUser)
         } else {
-            disable()
+            disable(fromUser = fromUser)
         }
     }
 
@@ -186,41 +191,45 @@ class MicrophoneManager(val mediaManager: MediaManagerImpl) {
     internal var priorStatus: DeviceStatus? = null
 
     /** Enable the audio, the rtc engine will automatically inform the SFU */
-    fun enable() {
+    fun enable(fromUser: Boolean = true) {
         setup()
-        _status.value = DeviceStatus.Enabled
+        if (fromUser) {
+            _status.value = DeviceStatus.Enabled
+        }
         mediaManager.audioTrack.setEnabled(true)
     }
 
-    fun pause() {
+    fun pause(fromUser: Boolean = true) {
         // pause the microphone, and when resuming switched back to the previous state
         priorStatus = _status.value
-        disable()
+        disable(fromUser = fromUser)
     }
 
-    fun resume() {
+    fun resume(fromUser: Boolean = true) {
         priorStatus?.let {
             if (it == DeviceStatus.Enabled) {
-                enable()
+                enable(fromUser = fromUser)
             }
         }
     }
 
     /** Disable the audio track. Audio is still captured, but not send.
      * This allows for the "you are muted" toast to indicate you are talking while muted */
-    fun disable() {
-        _status.value = DeviceStatus.Disabled
+    fun disable(fromUser: Boolean = true) {
+        if (fromUser) {
+            _status.value = DeviceStatus.Disabled
+        }
         mediaManager.audioTrack.setEnabled(false)
     }
 
     /**
      * Enable or disable the microphone
      */
-    fun setEnabled(enabled: Boolean) {
+    fun setEnabled(enabled: Boolean, fromUser: Boolean = true) {
         if (enabled) {
-            enable()
+            enable(fromUser = fromUser)
         } else {
-            disable()
+            disable(fromUser = fromUser)
         }
     }
 
@@ -331,44 +340,48 @@ public class CameraManager(
         return devices
     }
 
-    fun enable() {
+    fun enable(fromUser: Boolean = true) {
         setup()
         // 1. update our local state
         // 2. update the track enabled status
         // 3. Rtc listens and sends the update mute state request
-        _status.value = DeviceStatus.Enabled
+        if (fromUser) {
+            _status.value = DeviceStatus.Enabled
+        }
         mediaManager.videoTrack.setEnabled(true)
         startCapture()
     }
 
-    fun pause() {
+    fun pause(fromUser: Boolean = true) {
         // pause the camera, and when resuming switched back to the previous state
         priorStatus = _status.value
-        disable()
+        disable(fromUser = fromUser)
     }
 
-    fun resume() {
+    fun resume(fromUser: Boolean = true) {
         priorStatus?.let {
             if (it == DeviceStatus.Enabled) {
-                enable()
+                enable(fromUser = fromUser)
             }
         }
     }
 
-    fun setEnabled(enabled: Boolean) {
+    fun setEnabled(enabled: Boolean, fromUser: Boolean = true) {
         if (enabled) {
-            enable()
+            enable(fromUser = fromUser)
         } else {
-            disable()
+            disable(fromUser = fromUser)
         }
     }
 
-    fun disable() {
+    fun disable(fromUser: Boolean = true) {
         if (isCapturingVideo) {
             // 1. update our local state
             // 2. update the track enabled status
             // 3. Rtc listens and sends the update mute state request
-            _status.value = DeviceStatus.Disabled
+            if (fromUser) {
+                _status.value = DeviceStatus.Disabled
+            }
             mediaManager.videoTrack.setEnabled(false)
             videoCapturer.stopCapture()
             isCapturingVideo = false
@@ -576,13 +589,17 @@ class MediaManagerImpl(
 
     // source & tracks
     val videoSource = call.clientImpl.peerConnectionFactory.makeVideoSource(false)
+
+    // for track ids we emulate the browser behaviour of random UUIDs, doing something different would be confusing
     val videoTrack = call.clientImpl.peerConnectionFactory.makeVideoTrack(
-        source = videoSource, trackId = "videoTrack"
+        source = videoSource, trackId = UUID.randomUUID().toString()
     )
 
     val audioSource = call.clientImpl.peerConnectionFactory.makeAudioSource(buildAudioConstraints())
+
+    // for track ids we emulate the browser behaviour of random UUIDs, doing something different would be confusing
     val audioTrack = call.clientImpl.peerConnectionFactory.makeAudioTrack(
-        source = audioSource, trackId = "audioTrack"
+        source = audioSource, trackId = UUID.randomUUID().toString()
     )
 
     internal val camera = CameraManager(this, eglBaseContext)
