@@ -93,9 +93,9 @@
     } else {
         call.microphone.isEnabled.value
     }<span class="token punctuation">, </span></span><span class="parameter ">video<span class="token operator">: </span><a href="../../stream-video-android-core/io.getstream.video.android.core/-participant-state/-video/index.html">ParticipantState.Video</a><span class="token operator"> = </span>ParticipantState.Video(
-        sessionId = call.sessionId.orEmpty(),
+        sessionId = call.sessionId,
         track = VideoTrack(
-            streamId = call.sessionId.orEmpty(),
+            streamId = call.sessionId,
             video = if (LocalInspectionMode.current) {
                 org.webrtc.VideoTrack(1000L)
             } else {
