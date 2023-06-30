@@ -31,6 +31,7 @@ coil = "2.2.2"
 landscapist = "2.1.9"
 accompanist = "0.30.1"
 telephoto = "0.3.0"
+audioswitch = "1.1.8"
 
 wire = "4.5.1"
 okhttp = "4.11.0"
@@ -110,6 +111,8 @@ landscapist-transformation = { group = "com.github.skydoves", name = "landscapis
 accompanist-permission = { group = "com.google.accompanist", name = "accompanist-permissions", version.ref = "accompanist" }
 
 telephoto = { group = "me.saket.telephoto", name = "zoomable", version.ref = "telephoto"  }
+
+audioswitch = { group = "com.twilio", name = "audioswitch", version.ref = "audioswitch"}
 
 wire-runtime = { group = "com.squareup.wire", name = "wire-runtime", version.ref = "wire" }
 retrofit = { group = "com.squareup.retrofit2", name = "retrofit", version.ref = "retrofit" }

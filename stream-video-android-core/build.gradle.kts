@@ -106,6 +106,8 @@ dependencies {
     api(libs.stream.webrtc)
     api(libs.stream.webrtc.ui)
 
+    implementation(libs.audioswitch)
+
     // androidx
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime)
