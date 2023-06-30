@@ -16,7 +16,6 @@
 
 package io.getstream.video.android.core.call.utils
 
-import androidx.annotation.WorkerThread
 import kotlin.math.log10
 import kotlin.math.pow
 
@@ -43,7 +42,6 @@ internal class DecibelThresholdDetection(
      * Forward the input audio data from the microphone to this function.
      * Only 16bit PCM audio format is accepted.
      */
-    @WorkerThread
     fun processSoundInput(pcmByteArray: ByteArray) {
         val decibels = calculateAverageDecibelPower(pcmByteArray)
         if (!decibels.isInfinite()) {
@@ -105,8 +103,7 @@ internal class DecibelThresholdDetection(
                 sumOfDecibels += it
             }
 
-            val averageValue = sumOfDecibels / decibelSamples.size.toDouble()
-            return averageValue
+            return sumOfDecibels / decibelSamples.size.toDouble()
         } else {
             return 0.toDouble()
         }
