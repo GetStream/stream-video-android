@@ -75,7 +75,8 @@ Video roadmap and changelog is available [here](https://github.com/GetStream/pro
 - [ ] Make it easy to test ringing support
 - [ ] publish app on play store
 - [ ] report version number of SDK on all API calls
-- [ ] bug: screensharing is broken. android doesn’t receive/render (not sure) the screenshare. video shows up as the gray avatar
+- [ ] Bug: java.net.UnknownHostException: Unable to resolve host "hint.stream-io-video.com" isn't throw but instead logged as INFO
+- [ ] Bug: screensharing is broken. android doesn’t receive/render (not sure) the screenshare. video shows up as the gray avatar
 - [X] Reactions
 - [X] bug: screenshare is not removed after it stops when a participant leaves the call (Thierry) (probably just dont update the state when the participant leaves)
 
