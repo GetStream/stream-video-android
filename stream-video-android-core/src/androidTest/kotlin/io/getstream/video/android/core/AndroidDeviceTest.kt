@@ -31,6 +31,7 @@ import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.Response
 import org.junit.Test
+import org.openapitools.client.models.MemberRequest
 import org.webrtc.DefaultVideoDecoderFactory
 import org.webrtc.DefaultVideoEncoderFactory
 import org.webrtc.MediaStreamTrack
@@ -191,6 +192,28 @@ class AndroidDeviceTest : IntegrationTestBase(connectCoordinatorWS = false) {
         newClient.cleanup()
         // assert the sessions was cleared properly
         assertNull(call.session)
+    }
+
+    @Test
+    fun ParticipantRole() = runTest {
+        val call = client.call("default", randomUUID())
+
+        val result = call.create(members = listOf(
+            MemberRequest(userId = "thierry", role = "host"),
+        ), custom = mapOf("color" to "red"))
+        assert(result.isSuccess)
+
+        assertThat(call.state.members.value.first().role).isEqualTo("host")
+        assertThat(call.state.custom.value["color"]).isEqualTo("red")
+        assertThat(call.state.members.value).hasSize(1)
+
+        val join = call.join()
+        assert(join.isSuccess)
+
+        val participant = call.state.participants.value.first()
+        assertThat(participant.user.value.id).isEqualTo("thierry")
+        assertThat(participant.user.value.role).isEqualTo("user")
+        assertThat(participant.roles.value).contains("host")
     }
 
     @Test
