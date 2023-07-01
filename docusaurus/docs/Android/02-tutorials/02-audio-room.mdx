@@ -102,7 +102,17 @@ class MainActivity : ComponentActivity() {
         }
 
         setContent {
-            Text("nothing here just yet")
+            VideoTheme {
+                val connection by call.state.connection.collectAsState()
+
+                Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.padding(16.dp)) {
+                    if (connection != RealtimeConnection.Connected) {
+                        Text("loading", fontSize = 30.sp)
+                    } else {
+                        Text("ready to render an audio room", fontSize = 30.sp)
+                    }
+                }
+            }
         }
     }
 }
@@ -165,50 +175,146 @@ Please update **REPLACE_WITH_USER_ID**, **REPLACE_WITH_TOKEN** and **REPLACE_WIT
 
 <TokenSnippet sampleApp='audio-rooms' />
 
-With valid credentials in place, we want to actually render the first parts of our audio-room.
-Open up `MainActivity.kt` and replace the setContent function with the following:
+With valid credentials in place, we can join the call.
+When you run the app you'll see the following:
+
+![Audio Room](../assets/audio-room-2.png)
+
+
+### Step 4 - Audio Room & Description
+
+Now that we've successfully connected to the audio room let's setup a basic UI and description.
+Replace the code in setContent with the following
 
 ```kotlin
-
 setContent {
-    // step4 - apply VideoTheme
-    VideoTheme {
-        // step5 - define required properties.
-        val custom by call.state.custom.collectAsState()
-        val title = custom["title"]
-        val description = custom["description"]
-        val participants by call.state.participants.collectAsState()
-        val connection by call.state.connection.collectAsState()
 
-        // step6 - render texts that display connection status.
-        Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.padding(16.dp)) {
+    VideoTheme {
+        val connection by call.state.connection.collectAsState()
+        val dominantSpeaker by call.state.dominantSpeaker.collectAsState()
+        val audioLevel = dominantSpeaker?.audioLevel?.collectAsState()
+
+        val color1 = Color.White.copy(alpha = 0.2f+ (audioLevel?.value ?: 0f) * 0.8f)
+        val color2 = Color.White.copy(alpha = 0.2f+ (audioLevel?.value ?: 0f) * 0.8f)
+
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Top,
+            modifier = Modifier
+                .background(Brush.linearGradient(listOf(color1, color2)))
+                .fillMaxSize()
+                .fillMaxHeight()
+                .padding(16.dp)
+        ) {
+
             if (connection != RealtimeConnection.Connected) {
                 Text("loading", fontSize = 30.sp)
             } else {
-                Text("$title", fontSize = 30.sp)
-                Text("$description", fontSize = 20.sp, modifier = Modifier.padding(16.dp))
-                Text("${participants.size} participants", fontSize = 20.sp)
+                AudioRoom(call = call)
             }
         }
     }
 }
-
 ```
 
-Now when you run the sample app it will connect successfully and you will see a room with 1 participant (yourself) as shown below:
+You'll see that the AudioRoom composable hasn't been implemented yet. In `MainActivity` add the following Audio Room composable:
 
-![Audio Room](../assets/audio-room-2.png)
+```kotlin
+@Composable
+public fun AudioRoom(
+    call: Call,
+){
+    val custom by call.state.custom.collectAsState()
+    val title = custom["title"] as? String
+    val description = custom["description"] as? String
+    val participants by call.state.participants.collectAsState()
+    val dominantSpeaker by call.state.dominantSpeaker.collectAsState()
+    val sortedParticipants by call.state.sortedParticipants.collectAsState()
 
-### Step 4 - Adding audio room UI elements
+    val backstage by call.state.backstage.collectAsState()
+    val isMicrophoneEnabled by call.microphone.isEnabled.collectAsState()
 
-In this next step we're going to:
+    Description(title, description, participants)
 
-1. Request Android Runtime permissions (audio)
-2. Mute and Unmute microphone toggle button
-2. Create a list of participants
-3. An indicator for who's speaking
+    dominantSpeaker?.let {
+        Text("${it.user.value.name} is speaking")
+    }
 
-#### A. Requesting Android Runtime Permissions
+    Column(
+        modifier = Modifier
+            .fillMaxHeight()
+            .padding(0.dp, 32.dp, 0.dp, 0.dp)
+    ) {
+        Participants(
+            modifier = Modifier.weight(4f),
+            sortedParticipants = sortedParticipants
+        )
+        Controls(modifier= Modifier
+            .weight(1f)
+            .fillMaxWidth()
+            .padding(16.dp), call=call,
+            isMicrophoneEnabled = isMicrophoneEnabled,
+            backstage=backstage,
+            enableMicrophone = {
+                call.microphone.setEnabled(!isMicrophoneEnabled)
+            })
+
+
+    }
+}
+```
+
+The audio room is pretty basic. It needs a "Controls", "Participants" and "Description" composable to work.
+Let's add those next.
+
+```kotlin
+
+@Composable
+public fun Description(
+    title: String?,
+    description: String?,
+    participants: List<ParticipantState>
+){
+    Text("$title", fontSize = 30.sp)
+    Text("$description", fontSize = 20.sp, modifier = Modifier.padding(16.dp))
+    Text("${participants.size} participants", fontSize = 20.sp)
+}
+
+@Composable
+public fun Participants(
+    modifier: Modifier = Modifier,
+    sortedParticipants: List<ParticipantState>
+){
+    Text("coming soon", fontSize = 30.sp)
+}
+
+@Composable
+public fun Controls(
+    modifier: Modifier = Modifier,
+    call: Call,
+    backstage: Boolean = false,
+    isMicrophoneEnabled: Boolean = false,
+    enableMicrophone: (Boolean) -> Unit = {}
+){
+    Text("controls", fontSize = 30.sp)
+}
+```
+
+That's it for the basics. Now when you run your app you'll see the following UI:
+
+The approach is the same for all components. We take the state found in `call.state` and `call.state.participants` and use it to power our UI.
+The [participantState docs](../03-guides/03-call-and-participant-state.mdx) exposes all the state objects we need for the name, avatar, audio levels, speaking etc.
+
+To make this a little more interactive let's join the audio room from your browser.
+
+<TokenSnippet sampleApp='audio-rooms' displayStyle='join' />
+
+On your Android emulator you'll see the text update to 2 participants.
+
+
+### Step 5 - Audio Room Controls & Permission
+
+Any app that records the microphone needs to ask the user for permission. We'll do this now.
 
 To capture the microphone output we need to request [Android runtime permissions](https://source.android.com/docs/core/permissions/runtime_perms).
 In `MainActivity.kt` just below `setContent` add the line `LaunchMicrophonePermissions(call = call)`
@@ -223,122 +329,66 @@ setContent {
 The launch call permissions will request permissions when you open the call.
 Review the [permissions docs](../05-ui-cookbook/08-permissions-request.mdx) to learn more about how you can easily request permissions.
 
-#### B. Add a toggle button to mute/unmute microphone
-
-Next, let's create a toggle button to mute and unmute a microphone.
-
-You can simply connect the state of a microphone toggle button with the call's device manager with using `ToggleMicrophoneAction` and `call.microphone`:
+Now let's have a look at the `Controls` composable. Replace the `Controls` composable with the following:
 
 ```kotlin
-val isMicrophoneEnabled by call.microphone.isEnabled.collectAsState()
-
-ToggleMicrophoneAction(
-    modifier = Modifier.size(52.dp),
-    isMicrophoneEnabled = isMicrophoneEnabled,
-    onCallAction = { call.microphone.setEnabled(it.isEnabled) }
-)
-```
-
-#### C. Create a list of participants
-
-Let's create a component for the active speaker and the list of participants.
-
-```kotlin
-
 @Composable
-fun ParticipantAvatar(participant : ParticipantState) {
-    val user by participant.user.collectAsState()
-    Text("${user.name} - ${user.role}")
-}
-```
+public fun Controls(
+    modifier: Modifier = Modifier,
+    call: Call,
+    backstage: Boolean = false,
+    isMicrophoneEnabled: Boolean = false,
+    enableMicrophone: (Boolean) -> Unit = {}
+){
+    val scope = rememberCoroutineScope()
+    Row(
+        modifier = modifier,
+        horizontalArrangement = Arrangement.SpaceEvenly,
 
-#### D. An indicator for who's speaking
-
-We'll use the basic `ParticipantAvatar` to build an audio room:
-
-```kotlin
-setContent {
-    LaunchMicrophonePermissions(call = call)
-
-    VideoTheme {
-        val connection by call.state.connection.collectAsState()
-        val custom by call.state.custom.collectAsState()
-        val title = custom["title"]
-        val description = custom["description"]
-        val participants by call.state.participants.collectAsState()
-        val dominantSpeaker by call.state.dominantSpeaker.collectAsState()
-        val sortedParticipants by call.state.sortedParticipants.collectAsState()
-        val otherParticipants = sortedParticipants.filter { it != dominantSpeaker }
-        val audioLevel = dominantSpeaker?.audioLevel?.collectAsState()?.value ?: 0f
-        val backstage by call.state.backstage.collectAsState()
-
-        val color1 = Color.LightGray.copy(alpha = 0.2f+ audioLevel * 0.8f)
-        val color2 = Color.White.copy(alpha = 0.2f+ audioLevel * 0.8f)
-
-        Column(
-            horizontalAlignment = Alignment.CenterHorizontally,
-            modifier = Modifier.background(Brush.linearGradient(listOf(color1, color2))).fillMaxSize()
         ) {
-            if (connection != RealtimeConnection.Connected) {
-                Text("loading", fontSize = 30.sp)
-            } else {
-                Text("$title", fontSize = 30.sp)
-                Text("$description", fontSize = 20.sp, modifier = Modifier.padding(16.dp))
-                Text("${participants.size} participants", fontSize = 20.sp)
-            }
+        ToggleMicrophoneAction(
+            modifier = Modifier.size(52.dp),
+            isMicrophoneEnabled = isMicrophoneEnabled,
+            onCallAction = { enableMicrophone(it.isEnabled) }
+        )
 
-            dominantSpeaker?.let {
-                Text("${it.user.value.name} is speaking")
-            }
-
-            LazyVerticalGrid(
-                columns = GridCells.Adaptive(minSize = 128.dp)
-            ) {
-                items(otherParticipants.size) { index ->
-                    val participant = otherParticipants[index]
-                    ParticipantAvatar(participant)
+        Button(
+            onClick = {
+                scope.launch {
+                    if (backstage) call.goLive() else call.stopLive()
                 }
-            }
-
-            val isMicrophoneEnabled by call.microphone.isEnabled.collectAsState()
-            ToggleMicrophoneAction(
-                modifier = Modifier.size(52.dp),
-                isMicrophoneEnabled = isMicrophoneEnabled,
-                onCallAction = { call.microphone.setEnabled(it.isEnabled) }
-            )
-
-            Button(
-                onClick = {
-                    lifecycleScope.launch {
-                        if (backstage) call.goLive() else call.stopLive()
-                    }
-                }) {
-                Text(text = if (backstage) "Go Live" else "End")
-            }
+            }) {
+            Text(text = if (backstage) "Go Live" else "End")
         }
     }
 }
 ```
 
-See how speaking changes the `audioLevel` and updates the background.
+Now when you run the app you'll see a button to disable/enable the microphone and to start or end the broadcast.
 
-Run the sample app now and you'll see 1 participant.
-Click the go live button to allow participants to join.
+### Step 6 - Participants UI
 
-### Step 5 - Joining from the web
+Time to build a pretty UI for the participants. Replace the `Participants` composable with the following:
 
-To make this a little more interactive let's join the call from your browser.
+```kotlin
+@Composable
+public fun Participants(
+    modifier: Modifier = Modifier,
+    sortedParticipants: List<ParticipantState>
+){
+    LazyVerticalGrid(
+        modifier = modifier,
+        columns = GridCells.Adaptive(minSize = 128.dp)
+    ) {
+        items(sortedParticipants.size) { index ->
+            val participant = sortedParticipants[index]
+            ParticipantAvatar(participant)
+        }
+    }
+}
+```
 
-<TokenSnippet sampleApp='audio-rooms' displayStyle='join' />
-
-On your Android emulator you'll see the text update to 2 participants.
-Let's keep the browser tab open as you go through the tutorial.
-
-### Step 6 - AudioRoom UI
-
-We can improve the UI for the audio room participants.
-The [participantState docs](../03-guides/03-call-and-participant-state.mdx) exposes all the state objects we need for the name, avatar, audio levels, speaking etc.
-Open `MainActivity.kt` and replace the ParticipantAvatar with the following:
+Now we'll add a pretty ParticipantsAvatar composable
 
 ```kotlin
 @Composable
@@ -369,7 +419,7 @@ public fun ParticipantAvatar(
                 Box(
                     modifier = Modifier
                         .fillMaxSize()
-                        .border(style.speakingBorder, CircleShape)
+                        .border(BorderStroke(2.dp, Color.Gray), CircleShape)
                 )
             } else if (!audioEnabled) {
                 Box(
@@ -413,7 +463,6 @@ public fun ParticipantAvatar(
             modifier = Modifier.fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            TODO: ROLE
 
             Text(
                 modifier = Modifier.fillMaxWidth(),
@@ -429,6 +478,11 @@ public fun ParticipantAvatar(
 }
 ```
 
+Now when you run the app you'll see a pretty UI for the participants.
+
+TODO Screenshot
+
+
 In the above example we use the following state flow objects:
 
 ```kotlin
@@ -441,27 +495,11 @@ val audioEnabled by participant.audioEnabled.collectAsState()
 The [ParticipantState docs](../03-guides/03-call-and-participant-state.mdx) include all the other attributes that are also available.
 For audio rooms `participant.audioLevel` and `participant.audioLevels` can be convenient.
 
-
-### Step 7 - Requesting permission to speak
-
-The permission system makes it easy to request permission to join a room, enable audio, enable video, screenshare etc.
-Requesting permission to speak is shown in the example below.
-
-```kotlin
-val response = call.requestPermissions("send-audio")
-// and next the admin will call
-val requests by call.state.permissionRequests
-request.forEach {
-    it.grant() // or it.reject()
-}
-```
-
-Showing the UI for requesting and granting permissions is left as an exercise for the reader.
-
 ### Other built-in features
 
 There are a few more exciting features that you can use to build audio rooms:
 
+- ** Requesting Permissions **: Participants can ask the host for permission to speak, share video etc
 - ** Query Calls **: You can query calls to easily show upcoming calls, calls that recently finished etc
 - ** Call Previews **: Before you join the call you can observe it and show a preview. IE John, Sarah and 3 others are on this call.
 - ** Reactions & Custom events **: Reactions and custom events are supported
