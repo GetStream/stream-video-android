@@ -32,13 +32,12 @@ import com.squareup.moshi.Json
 /**
  *
  *
- * @param duration Duration of the request in human-readable format
+ * @param duration
  */
 
 
 data class Response (
 
-    /* Duration of the request in human-readable format */
     @Json(name = "duration")
     val duration: kotlin.String
 

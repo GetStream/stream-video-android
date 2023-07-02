@@ -23,6 +23,7 @@
 
 package org.openapitools.client.models
 
+import org.openapitools.client.models.APIError
 import org.openapitools.client.models.BlockedUserEvent
 import org.openapitools.client.models.CallAcceptedEvent
 import org.openapitools.client.models.CallBroadcastingStartedEvent
@@ -47,6 +48,7 @@ import org.openapitools.client.models.CallSessionParticipantLeftEvent
 import org.openapitools.client.models.CallSessionStartedEvent
 import org.openapitools.client.models.CallUpdatedEvent
 import org.openapitools.client.models.ConnectedEvent
+import org.openapitools.client.models.ConnectionErrorEvent
 import org.openapitools.client.models.CustomVideoEvent
 import org.openapitools.client.models.HealthCheckEvent
 import org.openapitools.client.models.MemberResponse
@@ -130,6 +132,7 @@ class VideoEventAdapter : JsonAdapter<VideoEvent>() {
             "call.session_started" -> CallSessionStartedEvent::class.java
             "call.unblocked_user" -> UnblockedUserEvent::class.java
             "call.updated" -> CallUpdatedEvent::class.java
+            "connection.error" -> ConnectionErrorEvent::class.java
             "connection.ok" -> ConnectedEvent::class.java
             "custom" -> CustomVideoEvent::class.java
             "health.check" -> HealthCheckEvent::class.java

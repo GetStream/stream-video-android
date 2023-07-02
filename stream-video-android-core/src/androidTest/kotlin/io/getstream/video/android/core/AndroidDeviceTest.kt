@@ -198,9 +198,12 @@ class AndroidDeviceTest : IntegrationTestBase(connectCoordinatorWS = false) {
     fun ParticipantRole() = runTest {
         val call = client.call("default", randomUUID())
 
-        val result = call.create(members = listOf(
-            MemberRequest(userId = "thierry", role = "host"),
-        ), custom = mapOf("color" to "red"))
+        val result = call.create(
+            members = listOf(
+                MemberRequest(userId = "thierry", role = "host"),
+            ),
+            custom = mapOf("color" to "red")
+        )
         assert(result.isSuccess)
 
         assertThat(call.state.members.value.first().role).isEqualTo("host")

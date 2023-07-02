@@ -156,7 +156,7 @@ public class StreamVideoBuilder @JvmOverloads constructor(
             context = context,
             scope = scope,
             notificationConfig = notificationConfig,
-            devicesApi = connectionModule.devicesApi,
+            api = connectionModule.api,
             streamUserDataStore = dataStore,
         )
 

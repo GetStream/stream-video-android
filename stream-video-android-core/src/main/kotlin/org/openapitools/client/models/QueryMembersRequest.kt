@@ -33,9 +33,9 @@ import com.squareup.moshi.Json
 /**
  *
  *
+ * @param id
  * @param type
  * @param filterConditions
- * @param id
  * @param limit
  * @param next
  * @param prev
@@ -45,14 +45,14 @@ import com.squareup.moshi.Json
 
 data class QueryMembersRequest (
 
+    @Json(name = "id")
+    val id: kotlin.String,
+
     @Json(name = "type")
     val type: kotlin.String,
 
     @Json(name = "filter_conditions")
     val filterConditions: kotlin.collections.Map<kotlin.String, kotlin.Any>? = null,
-
-    @Json(name = "id")
-    val id: kotlin.String? = null,
 
     @Json(name = "limit")
     val limit: kotlin.Int? = null,

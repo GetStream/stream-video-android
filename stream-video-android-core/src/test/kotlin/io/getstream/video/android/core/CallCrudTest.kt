@@ -99,9 +99,12 @@ public class CallCrudTest : IntegrationTestBase() {
     fun `Create a call with different member roles`() = runTest {
         val call = client.call("default", randomUUID())
 
-        val result = call.create(members = listOf(
-            MemberRequest(userId = "thierry", role = "host"),
-        ), custom = mapOf("color" to "red"))
+        val result = call.create(
+            members = listOf(
+                MemberRequest(userId = "thierry", role = "host"),
+            ),
+            custom = mapOf("color" to "red")
+        )
         assert(result.isSuccess)
 
         assertThat(call.state.members.value.first().role).isEqualTo("host")
