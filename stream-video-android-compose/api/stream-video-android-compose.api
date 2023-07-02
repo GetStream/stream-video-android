@@ -405,6 +405,7 @@ public final class io/getstream/video/android/compose/theme/VideoTheme {
 	public final fun getColors (Landroidx/compose/runtime/Composer;I)Lio/getstream/video/android/compose/theme/StreamColors;
 	public final fun getDimens (Landroidx/compose/runtime/Composer;I)Lio/getstream/video/android/compose/theme/StreamDimens;
 	public final fun getReactionMapper (Landroidx/compose/runtime/Composer;I)Lio/getstream/video/android/core/mapper/ReactionMapper;
+	public final fun getRippleTheme (Landroidx/compose/runtime/Composer;I)Landroidx/compose/material/ripple/RippleTheme;
 	public final fun getShapes (Landroidx/compose/runtime/Composer;I)Lio/getstream/video/android/compose/theme/StreamShapes;
 	public final fun getTypography (Landroidx/compose/runtime/Composer;I)Lio/getstream/video/android/compose/theme/StreamTypography;
 }

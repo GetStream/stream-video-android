@@ -105,7 +105,6 @@ public class AudioSwitchHandler constructor(private val context: Context, val pr
             DefaultOnAudioFocusChangeListener()
         }
 
-
         private class DefaultOnAudioFocusChangeListener : AudioManager.OnAudioFocusChangeListener {
             override fun onAudioFocusChange(focusChange: Int) {
                 val typeOfChange: String = when (focusChange) {
