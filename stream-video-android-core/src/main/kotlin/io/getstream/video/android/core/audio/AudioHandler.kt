@@ -46,8 +46,6 @@ public class AudioSwitchHandler constructor(private val context: Context, val pr
 
     private val logger by taggedLogger(TAG)
 
-    private var onAudioFocusChangeListener: AudioManager.OnAudioFocusChangeListener? = null
-
     private var audioSwitch: AudioSwitch? = null
 
     // AudioSwitch is not threadsafe, so all calls should be done on the main thread.
@@ -74,8 +72,7 @@ public class AudioSwitchHandler constructor(private val context: Context, val pr
             handler.post {
                 val switch = AudioSwitch(
                     context = context,
-                    audioFocusChangeListener = onAudioFocusChangeListener
-                        ?: defaultOnAudioFocusChangeListener,
+                    audioFocusChangeListener = onAudioFocusChangeListener,
                     preferredDeviceList = devices
                 )
                 // TODO: AudioSwitch logging is disabled by default and it doesn't allow
@@ -104,7 +101,7 @@ public class AudioSwitchHandler constructor(private val context: Context, val pr
 
     public companion object {
         private const val TAG = "AudioSwitchHandler"
-        private val defaultOnAudioFocusChangeListener by lazy(LazyThreadSafetyMode.NONE) {
+        private val onAudioFocusChangeListener by lazy(LazyThreadSafetyMode.NONE) {
             DefaultOnAudioFocusChangeListener()
         }
 
