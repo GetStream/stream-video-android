@@ -61,6 +61,8 @@ class SpeakerManager(
     val initialVolume: Int? = null
 ) {
 
+    private val logger by taggedLogger("Media:SpeakerManager")
+
     private var priorVolume: Int? = null
     private val _volume = MutableStateFlow(initialVolume)
     val volume: StateFlow<Int?> = _volume
@@ -99,6 +101,8 @@ class SpeakerManager(
      * Enable or disable the speakerphone.
      */
     fun setEnabled(enabled: Boolean, fromUser: Boolean = true) {
+        logger.i { "setEnabled $enabled" }
+        // TODO: what is fromUser?
         if (enabled) {
             enable(fromUser = fromUser)
         } else {
@@ -240,6 +244,7 @@ class MicrophoneManager(
      * Select a specific device
      */
     fun select(device: AudioDevice?) {
+        logger.i { "selecting device $device" }
         audioHandler.selectDevice(device)
 
         _selectedDevice.value = device
@@ -263,6 +268,7 @@ class MicrophoneManager(
         }
 
         audioHandler = AudioSwitchHandler(mediaManager.context, preferSpeakerphone) { devices, selected ->
+            logger.i { "audio devices. selected $selected, available devices are $devices" }
             _devices.value = devices
             _selectedDevice.value = selected
         }
