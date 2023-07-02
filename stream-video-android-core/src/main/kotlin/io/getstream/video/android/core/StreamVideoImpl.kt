@@ -210,7 +210,7 @@ internal class StreamVideoImpl internal constructor(
     ): Result<UpdateCallResponse> {
         logger.d { "[updateCall] type: $type, id: $id, request: $request" }
         return wrapAPICall {
-            connectionModule.videoCallsApi.updateCall(
+            connectionModule.api.updateCall(
                 type = type,
                 id = id,
                 updateCallRequest = request
@@ -393,8 +393,6 @@ internal class StreamVideoImpl internal constructor(
                     id = user.id,
                     image = user.image,
                     name = user.name,
-                    role = user.role,
-                    teams = user.teams,
                     custom = user.custom,
                 )
             )
@@ -414,7 +412,7 @@ internal class StreamVideoImpl internal constructor(
 
     suspend fun createGuestUser(userRequest: UserRequest): Result<CreateGuestResponse> {
         return wrapAPICall {
-            connectionModule.defaultApi.createGuest(
+            connectionModule.api.createGuest(
                 createGuestRequest = CreateGuestRequest(userRequest)
             )
         }
@@ -474,7 +472,7 @@ internal class StreamVideoImpl internal constructor(
 
     internal suspend fun getCall(type: String, id: String): Result<GetCallResponse> {
         return wrapAPICall {
-            connectionModule.videoCallsApi.getCall(
+            connectionModule.api.getCall(
                 type,
                 id,
                 connectionId = connectionModule.coordinatorSocket.connectionId
@@ -528,7 +526,7 @@ internal class StreamVideoImpl internal constructor(
         logger.d { "[getOrCreateCall] type: $type, id: $id, members: $members" }
 
         return wrapAPICall {
-            connectionModule.videoCallsApi.getOrCreateCall(
+            connectionModule.api.getOrCreateCall(
                 type = type,
                 id = id,
                 getOrCreateCallRequest = GetOrCreateCallRequest(
@@ -605,7 +603,7 @@ internal class StreamVideoImpl internal constructor(
         )
 
         val result = wrapAPICall {
-            connectionModule.videoCallsApi.joinCall(
+            connectionModule.api.joinCall(
                 type,
                 id,
                 joinCallRequest,
@@ -621,7 +619,7 @@ internal class StreamVideoImpl internal constructor(
         request: UpdateCallMembersRequest
     ): Result<UpdateCallMembersResponse> {
         return wrapAPICall {
-            connectionModule.videoCallsApi.updateCallMembers(type, id, request)
+            connectionModule.api.updateCallMembers(type, id, request)
         }
     }
 
@@ -633,7 +631,7 @@ internal class StreamVideoImpl internal constructor(
         logger.d { "[sendCustomEvent] callCid: $type:$id, dataJson: $dataJson" }
 
         return wrapAPICall {
-            connectionModule.eventsApi.sendEvent(
+            connectionModule.api.sendEvent(
                 type,
                 id,
                 SendEventRequest(custom = dataJson)
@@ -651,7 +649,7 @@ internal class StreamVideoImpl internal constructor(
     ): Result<QueryMembersResponse> {
 
         return wrapAPICall {
-            connectionModule.videoCallsApi.queryMembers(
+            connectionModule.api.queryMembers(
                 QueryMembersRequest(
                     type = type, id = id,
                     filterConditions = filter,
@@ -666,7 +664,7 @@ internal class StreamVideoImpl internal constructor(
         logger.d { "[blockUser] callCid: $type:$id, userId: $userId" }
 
         return wrapAPICall {
-            connectionModule.moderationApi.blockUser(
+            connectionModule.api.blockUser(
                 type,
                 id,
                 BlockUserRequest(userId)
@@ -678,7 +676,7 @@ internal class StreamVideoImpl internal constructor(
         logger.d { "[unblockUser] callCid: $type:$id, userId: $userId" }
 
         return wrapAPICall {
-            connectionModule.videoCallsApi.unblockUser(
+            connectionModule.api.unblockUser(
                 type,
                 id,
                 UnblockUserRequest(userId)
@@ -687,18 +685,18 @@ internal class StreamVideoImpl internal constructor(
     }
 
     suspend fun endCall(type: String, id: String): Result<Unit> {
-        return wrapAPICall { connectionModule.videoCallsApi.endCall(type, id) }
+        return wrapAPICall { connectionModule.api.endCall(type, id) }
     }
 
     suspend fun goLive(type: String, id: String): Result<GoLiveResponse> {
         logger.d { "[goLive] callCid: $type:$id" }
 
-        return wrapAPICall { connectionModule.videoCallsApi.goLive(type, id) }
+        return wrapAPICall { connectionModule.api.goLive(type, id) }
     }
 
     suspend fun stopLive(type: String, id: String): Result<StopLiveResponse> {
 
-        return wrapAPICall { connectionModule.videoCallsApi.stopLive(type, id) }
+        return wrapAPICall { connectionModule.api.stopLive(type, id) }
     }
 
     suspend fun muteUsers(
@@ -709,7 +707,7 @@ internal class StreamVideoImpl internal constructor(
 
         val request = muteUsersData.toRequest()
         return wrapAPICall {
-            connectionModule.moderationApi.muteUsers(type, id, request)
+            connectionModule.api.muteUsers(type, id, request)
         }
     }
 
@@ -731,7 +729,7 @@ internal class StreamVideoImpl internal constructor(
         )
         val connectionId = connectionModule.coordinatorSocket.connectionId
         val result = wrapAPICall {
-            connectionModule.videoCallsApi.queryCalls(request, connectionId)
+            connectionModule.api.queryCalls(request, connectionId)
         }
         if (result.isSuccess) {
             // update state for these calls
@@ -754,7 +752,7 @@ internal class StreamVideoImpl internal constructor(
         logger.d { "[requestPermissions] callCid: $type:$id, permissions: $permissions" }
 
         return wrapAPICall {
-            connectionModule.moderationApi.requestPermission(
+            connectionModule.api.requestPermission(
                 type,
                 id,
                 RequestPermissionRequest(permissions)
@@ -765,23 +763,23 @@ internal class StreamVideoImpl internal constructor(
     suspend fun startBroadcasting(type: String, id: String): Result<Unit> {
         logger.d { "[startBroadcasting] callCid: $type $id" }
 
-        return wrapAPICall { connectionModule.livestreamingApi.startBroadcasting(type, id) }
+        return wrapAPICall { connectionModule.api.startBroadcasting(type, id) }
     }
 
     suspend fun stopBroadcasting(type: String, id: String): Result<Unit> {
 
-        return wrapAPICall { connectionModule.livestreamingApi.stopBroadcasting(type, id) }
+        return wrapAPICall { connectionModule.api.stopBroadcasting(type, id) }
     }
 
     suspend fun startRecording(type: String, id: String): Result<Unit> {
 
-        return wrapAPICall { connectionModule.recordingApi.startRecording(type, id) }
+        return wrapAPICall { connectionModule.api.startRecording(type, id) }
     }
 
     suspend fun stopRecording(type: String, id: String): Result<Unit> {
 
         return wrapAPICall {
-            connectionModule.recordingApi.stopRecording(type, id)
+            connectionModule.api.stopRecording(type, id)
         }
     }
 
@@ -791,7 +789,7 @@ internal class StreamVideoImpl internal constructor(
         updateUserPermissionsData: UpdateUserPermissionsData
     ): Result<UpdateUserPermissionsResponse> {
         return wrapAPICall {
-            connectionModule.moderationApi.updateUserPermissions(
+            connectionModule.api.updateUserPermissions(
                 type,
                 id,
                 updateUserPermissionsData.toRequest()
@@ -806,7 +804,7 @@ internal class StreamVideoImpl internal constructor(
     ): Result<ListRecordingsResponse> {
         return wrapAPICall {
             val result =
-                connectionModule.recordingApi.listRecordingsTypeIdSession1(type, id, sessionId)
+                connectionModule.api.listRecordingsTypeIdSession1(type, id, sessionId)
             result
         }
     }
@@ -823,7 +821,7 @@ internal class StreamVideoImpl internal constructor(
         logger.d { "[sendVideoReaction] callCid: $type:$id, sendReactionData: $request" }
 
         return wrapAPICall {
-            connectionModule.videoCallsApi.sendVideoReaction(callType, id, request)
+            connectionModule.api.sendVideoReaction(callType, id, request)
         }
     }
 
@@ -834,7 +832,7 @@ internal class StreamVideoImpl internal constructor(
         logger.d { "[getEdges] no params" }
 
         return wrapAPICall {
-            val result = connectionModule.videoCallsApi.getEdges()
+            val result = connectionModule.api.getEdges()
 
             result.edges.map { it.toEdge() }
         }
@@ -893,25 +891,25 @@ internal class StreamVideoImpl internal constructor(
 
     internal suspend fun accept(type: String, id: String): Result<AcceptCallResponse> {
         return wrapAPICall {
-            connectionModule.videoCallsApi.acceptCall(type, id)
+            connectionModule.api.acceptCall(type, id)
         }
     }
 
     internal suspend fun reject(type: String, id: String): Result<RejectCallResponse> {
         return wrapAPICall {
-            connectionModule.videoCallsApi.rejectCall(type, id)
+            connectionModule.api.rejectCall(type, id)
         }
     }
 
     internal suspend fun notify(type: String, id: String): Result<GetCallResponse> {
         return wrapAPICall {
-            connectionModule.videoCallsApi.getCall(type, id, notify = true)
+            connectionModule.api.getCall(type, id, notify = true)
         }
     }
 
     internal suspend fun ring(type: String, id: String): Result<GetCallResponse> {
         return wrapAPICall {
-            connectionModule.videoCallsApi.getCall(type, id, ring = true)
+            connectionModule.api.getCall(type, id, ring = true)
         }
     }
 }

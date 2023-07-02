@@ -25,7 +25,6 @@ package org.openapitools.client.models
 
 import org.openapitools.client.models.CallSettingsRequest
 import org.openapitools.client.models.MemberRequest
-import org.openapitools.client.models.UserRequest
 
 
 
@@ -35,8 +34,6 @@ import com.squareup.moshi.Json
 /**
  *
  *
- * @param createdBy
- * @param createdById
  * @param custom
  * @param members
  * @param settingsOverride
@@ -46,12 +43,6 @@ import com.squareup.moshi.Json
 
 
 data class CallRequest (
-
-    @Json(name = "created_by")
-    val createdBy: UserRequest? = null,
-
-    @Json(name = "created_by_id")
-    val createdById: kotlin.String? = null,
 
     @Json(name = "custom")
     val custom: kotlin.collections.Map<kotlin.String, kotlin.Any>? = null,

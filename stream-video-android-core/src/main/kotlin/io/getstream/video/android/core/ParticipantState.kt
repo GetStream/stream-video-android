@@ -186,8 +186,7 @@ public data class ParticipantState(
     }
 
     internal val _roles = MutableStateFlow<List<String>>(emptyList())
-    val roles :  StateFlow<List<String>> = _roles
-
+    val roles: StateFlow<List<String>> = _roles
 
     fun updateFromParticipantInfo(participant: Participant) {
         sessionId = participant.session_id

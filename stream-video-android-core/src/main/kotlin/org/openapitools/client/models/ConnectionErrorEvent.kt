@@ -23,7 +23,7 @@
 
 package org.openapitools.client.models
 
-import org.openapitools.client.models.EventNotificationSettings
+import org.openapitools.client.models.APIError
 
 
 
@@ -31,31 +31,33 @@ import org.openapitools.client.models.EventNotificationSettings
 import com.squareup.moshi.Json
 
 /**
+ * This event is sent when the WS connection fails
  *
- *
- * @param callLiveStarted
- * @param callNotification
- * @param callRing
- * @param enabled
- * @param sessionStarted
+ * @param connectionId
+ * @param createdAt
+ * @param error
+ * @param type The type of event: \"connection.ok\" in this case
  */
 
 
-data class NotificationSettings (
+data class ConnectionErrorEvent (
 
-    @Json(name = "call_live_started")
-    val callLiveStarted: EventNotificationSettings,
+    @Json(name = "connection_id")
+    val connectionId: kotlin.String,
 
-    @Json(name = "call_notification")
-    val callNotification: EventNotificationSettings,
+    @Json(name = "created_at")
+    val createdAt: org.threeten.bp.OffsetDateTime,
 
-    @Json(name = "call_ring")
-    val callRing: EventNotificationSettings,
+    @Json(name = "error")
+    val error: APIError?,
 
-    @Json(name = "enabled")
-    val enabled: kotlin.Boolean,
+    /* The type of event: \"connection.ok\" in this case */
+    @Json(name = "type")
+    val type: kotlin.String = "connection.error"
 
-    @Json(name = "session_started")
-    val sessionStarted: EventNotificationSettings
+) : VideoEvent(), WSClientEvent{
 
-)
+    override fun getEventType(): String {
+        return type
+    }
+}

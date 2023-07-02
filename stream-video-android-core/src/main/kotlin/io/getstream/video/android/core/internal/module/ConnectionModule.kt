@@ -33,12 +33,6 @@ import okhttp3.OkHttpClient
 import okhttp3.Response
 import okhttp3.logging.HttpLoggingInterceptor
 import org.openapitools.client.apis.DefaultApi
-import org.openapitools.client.apis.DevicesApi
-import org.openapitools.client.apis.EventsApi
-import org.openapitools.client.apis.LivestreamingApi
-import org.openapitools.client.apis.ModerationApi
-import org.openapitools.client.apis.RecordingApi
-import org.openapitools.client.apis.VideoCallsApi
 import org.openapitools.client.infrastructure.Serializer
 import retrofit2.Retrofit
 import retrofit2.converter.moshi.MoshiConverterFactory
@@ -87,13 +81,7 @@ internal class ConnectionModule(
             .client(okHttpClient)
             .build()
     }
-    val videoCallsApi: VideoCallsApi by lazy { retrofit.create(VideoCallsApi::class.java) }
-    val moderationApi: ModerationApi by lazy { retrofit.create(ModerationApi::class.java) }
-    val recordingApi: RecordingApi by lazy { retrofit.create(RecordingApi::class.java) }
-    val livestreamingApi: LivestreamingApi by lazy { retrofit.create(LivestreamingApi::class.java) }
-    val defaultApi: DefaultApi by lazy { retrofit.create(DefaultApi::class.java) }
-    val eventsApi: EventsApi by lazy { retrofit.create(EventsApi::class.java) }
-    val devicesApi: DevicesApi by lazy { retrofit.create(DevicesApi::class.java) }
+    val api: DefaultApi by lazy { retrofit.create(DefaultApi::class.java) }
     val coordinatorSocket: CoordinatorSocket by lazy { createCoordinatorSocket() }
 
     /**
