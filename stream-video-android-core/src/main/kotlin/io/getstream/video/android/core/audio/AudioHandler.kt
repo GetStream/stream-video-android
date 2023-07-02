@@ -59,8 +59,8 @@ public class AudioSwitchHandler constructor(private val context: Context, val pr
             handler.removeCallbacksAndMessages(null)
 
             val devices = mutableListOf(
-                AudioDevice.BluetoothHeadset::class.java,
                 AudioDevice.WiredHeadset::class.java,
+                AudioDevice.BluetoothHeadset::class.java,
             )
 
             if (preferSpeakerphone) {
@@ -103,7 +103,7 @@ public class AudioSwitchHandler constructor(private val context: Context, val pr
     }
 
     public companion object {
-        private const val TAG = "Call:AudioSwitchHandler"
+        private const val TAG = "AudioSwitchHandler"
         private val defaultOnAudioFocusChangeListener by lazy(LazyThreadSafetyMode.NONE) {
             DefaultOnAudioFocusChangeListener()
         }
