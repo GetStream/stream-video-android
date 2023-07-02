@@ -41,13 +41,12 @@ public interface AudioHandler {
 /**
  * TODO: this class should be merged into the Microphone Manager
  */
-public class AudioSwitchHandler constructor(private val context: Context, var audioDeviceChangeListener: AudioDeviceChangeListener) :
+public class AudioSwitchHandler constructor(private val context: Context, val preferSpeakerphone: Boolean, var audioDeviceChangeListener: AudioDeviceChangeListener) :
     AudioHandler {
 
     private val logger by taggedLogger(TAG)
 
     private var onAudioFocusChangeListener: AudioManager.OnAudioFocusChangeListener? = null
-    private var preferredDeviceList: List<Class<out AudioDevice>>? = null
 
     private var audioSwitch: AudioSwitch? = null
 
@@ -58,13 +57,26 @@ public class AudioSwitchHandler constructor(private val context: Context, var au
         logger.d { "[start] audioSwitch: $audioSwitch" }
         if (audioSwitch == null) {
             handler.removeCallbacksAndMessages(null)
+
+            val devices = mutableListOf(
+                AudioDevice.BluetoothHeadset::class.java,
+                AudioDevice.WiredHeadset::class.java,
+            )
+
+            if (preferSpeakerphone) {
+                devices.add(AudioDevice.Speakerphone::class.java)
+                devices.add(AudioDevice.Earpiece::class.java)
+            } else {
+                devices.add(AudioDevice.Earpiece::class.java)
+                devices.add(AudioDevice.Speakerphone::class.java)
+            }
+
             handler.post {
                 val switch = AudioSwitch(
                     context = context,
                     audioFocusChangeListener = onAudioFocusChangeListener
                         ?: defaultOnAudioFocusChangeListener,
-                    preferredDeviceList = preferredDeviceList
-                        ?: defaultPreferredDeviceList
+                    preferredDeviceList = devices
                 )
                 // TODO: AudioSwitch logging is disabled by default and it doesn't allow
                 // to specify a custom logger. At some point we may need to fork the library
@@ -96,14 +108,6 @@ public class AudioSwitchHandler constructor(private val context: Context, var au
             DefaultOnAudioFocusChangeListener()
         }
 
-        private val defaultPreferredDeviceList by lazy(LazyThreadSafetyMode.NONE) {
-            listOf(
-                AudioDevice.BluetoothHeadset::class.java,
-                AudioDevice.WiredHeadset::class.java,
-                AudioDevice.Earpiece::class.java,
-                AudioDevice.Speakerphone::class.java,
-            )
-        }
 
         private class DefaultOnAudioFocusChangeListener : AudioManager.OnAudioFocusChangeListener {
             override fun onAudioFocusChange(focusChange: Int) {
