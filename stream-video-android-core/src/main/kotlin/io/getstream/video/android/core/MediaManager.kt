@@ -169,7 +169,10 @@ class SpeakerManager(
  * microphone.selectedDevice // the selected device
  * microphone.speakerPhoneEnabled // the status of the speaker. true/false
  */
-class MicrophoneManager(val mediaManager: MediaManagerImpl) {
+class MicrophoneManager(
+    val mediaManager: MediaManagerImpl,
+    val preferSpeakerphone: Boolean
+) {
     private lateinit var audioHandler: AudioSwitchHandler
     internal var audioManager: AudioManager? = null
 
@@ -259,7 +262,7 @@ class MicrophoneManager(val mediaManager: MediaManagerImpl) {
             audioManager?.allowedCapturePolicy = AudioAttributes.ALLOW_CAPTURE_BY_ALL
         }
 
-        audioHandler = AudioSwitchHandler(mediaManager.context) { devices, selected ->
+        audioHandler = AudioSwitchHandler(mediaManager.context, preferSpeakerphone) { devices, selected ->
             _devices.value = devices
             _selectedDevice.value = selected
         }
@@ -584,9 +587,6 @@ class MediaManagerImpl(
     val scope: CoroutineScope,
     val eglBaseContext: EglBase.Context
 ) {
-    private val logger by taggedLogger("Call:MediaManagerImpl")
-    private var audioManager = context.getSystemService<AudioManager>()
-
     // source & tracks
     val videoSource = call.clientImpl.peerConnectionFactory.makeVideoSource(false)
 
@@ -602,8 +602,11 @@ class MediaManagerImpl(
         source = audioSource, trackId = UUID.randomUUID().toString()
     )
 
+    // TODO: this should be a setting on the call type
+    val preferSpeakerphone by lazy {true}
+
     internal val camera = CameraManager(this, eglBaseContext)
-    internal val microphone = MicrophoneManager(this)
+    internal val microphone = MicrophoneManager(this, preferSpeakerphone)
     internal val speaker = SpeakerManager(this, microphone)
 
     fun cleanup() {

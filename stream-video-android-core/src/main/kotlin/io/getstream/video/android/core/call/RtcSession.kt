@@ -460,10 +460,6 @@ public class RtcSession internal constructor(
         // turn of the speaker if needed
         if (settings?.audio?.speakerDefaultOn == false) {
             call.speaker.setVolume(0)
-        } else {
-            if (call.speaker.selectedDevice.value is AudioDevice.Earpiece) {
-                call.speaker.setSpeakerPhone(true)
-            }
         }
 
         // if we are allowed to publish, create a peer connection for it
