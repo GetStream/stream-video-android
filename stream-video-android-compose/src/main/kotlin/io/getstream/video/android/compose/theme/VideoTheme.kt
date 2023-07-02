@@ -61,6 +61,7 @@ private val LocalReactionMapper = compositionLocalOf<ReactionMapper> {
  * @param typography The set of typography styles we provide, wrapped in [StreamTypography].
  * @param shapes The set of shapes we provide, wrapped in [StreamShapes].
  * @param rippleTheme Defines the appearance for ripples.
+ * @param reactionMapper Defines a mapper of the emoji code from the reaction events.
  * @param content The content shown within the theme wrapper.
  */
 @Composable
@@ -122,6 +123,12 @@ public object VideoTheme {
      */
     public val shapes: StreamShapes
         @Composable @ReadOnlyComposable get() = LocalShapes.current
+
+    /**
+     * Retrieves the current [RippleTheme] at the call site's position in the hierarchy.
+     */
+    public val rippleTheme: RippleTheme
+        @Composable @ReadOnlyComposable get() = LocalRippleTheme.current
 
     /**
      * Retrieves the current [ReactionMapper] at the call site's position in the hierarchy.
