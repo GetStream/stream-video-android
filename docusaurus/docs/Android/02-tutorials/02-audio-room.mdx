@@ -196,7 +196,6 @@ Replace the code in `setContent` with the following sample:
 setContent {
     VideoTheme {
         val connection by call.state.connection.collectAsState()
-        val connection by call.state.connection.collectAsState()
         val activeSpeakers by call.state.activeSpeakers.collectAsState()
         val audioLevel = activeSpeakers.firstOrNull()?.audioLevel?.collectAsState()
 
