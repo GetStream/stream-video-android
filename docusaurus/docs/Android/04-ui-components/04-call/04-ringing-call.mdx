@@ -2,15 +2,15 @@
 
 The `RingingCallContent` lets you easily build UI when you're calling or ringing other people in an app. It's used to show more information about the participants you're calling, as well as give you the option to cancel the call before anyone accepts.
 
-> **Note**: If you want to learn more about our component types, make sure to read through our [Compose Components Overview](../01-overview.mdx).
-
 Based on the call's ringing state and a call type, the `RingingCallContent` provides a list of participants, with their avatars and names, or a background with the avatar of the person you're calling, if it's a 1:1 conversation.
 
 Let's see how to show the `RingingCallContent` UI.
 
+> **Note**: If you want to learn more about our component types, make sure to read through our [Compose Components Overview](../01-overview.mdx).
+
 ## Usage
 
-To use the **bound** `RingingCallContent`, add it to your UI within `setContent()`:
+To use the **bound** `RingingCallContent`, add it to your UI within `VideoTheme`:
 
 ```kotlin
 override fun onCreate(savedInstanceState: Bundle?) {
@@ -18,26 +18,30 @@ override fun onCreate(savedInstanceState: Bundle?) {
     setContent {
         VideoTheme {
             RingingCallContent(
+                modifier = Modifier.background(color = VideoTheme.colors.appBackground),
                 call = call,
-                isVideoType = true,
-                onBackPressed = { cancelCall() },
-                onCallAction = { action -> handleAction(action) },
-                onAcceptedCallContent = { showCallScreen() }
+                onBackPressed = { finish() },
+                onAcceptedContent = {
+                    CallContent(
+                        modifier = Modifier.fillMaxSize(),
+                        call = call,
+                        onCallAction = onCallAction
+                    )
+                },
+                onCallAction = onCallAction
             )
         }
     }
 }
 
-private fun cancelCall() {
-    // TODO - cancel call
-}
-
-private fun handleAction(action: CallAction) {
-    // TODO - handle CallAction
-}
-
-private fun showCallScreen() {
-    // TODO - show call screen
+val onCallAction: (CallAction) -> Unit = { callAction ->
+    when (callAction) {
+        is ToggleCamera -> call.camera.setEnabled(callAction.isEnabled)
+        is ToggleMicrophone -> call.microphone.setEnabled(callAction.isEnabled)
+        is ToggleSpeakerphone -> call.speaker.setEnabled(callAction.isEnabled)
+        is LeaveCall -> finish()
+        else -> Unit
+    }
 }
 ```
 
