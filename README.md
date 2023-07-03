@@ -66,16 +66,17 @@ Video roadmap and changelog is available [here](https://github.com/GetStream/pro
 
 ### 0.2.0 milestone
 
-- [ ] Local Video disconnects sometimes (ICE restarts issue for the publisher. we're waiting for the backend support)
-- [ ] Deeplink support for video call demo & dogfooding app (skip auth for the video demo, keep it for dogfooding)
-- [ ] Chat Integration
-- [ ] XML version of VideoRenderer
-- [ ] Call Analytics stateflow
-- [ ] Automatically handle pagination and sorting on > 6 participants 
-- [ ] Make it easy to test ringing support
-- [ ] publish app on play store
-- [ ] report version number of SDK on all API calls
-- [ ] Bug: java.net.UnknownHostException: Unable to resolve host "hint.stream-io-video.com" isn't throw but instead logged as INFO
+- [ ] Deeplink support for video call demo & dogfooding app (skip auth for the video demo, keep it for dogfooding) (Daniel)
+- [ ] Chat Integration (Jaewoong)
+- [ ] XML version of VideoRenderer (Jaewoong)
+- [ ] Local Video disconnects sometimes (ICE restarts issue for the publisher. we're waiting for the backend support) (Thierry)
+- [ ] Call Analytics stateflow (Thierry)
+- [ ] Automatically handle pagination and sorting on > 6 participants
+- [ ] Ringing: Make it easy to test
+- [ ] Ringing: Make a list of what needs to be configurable
+- [ ] Publish app on play store
+- [ ] Report version number of SDK on all API calls (Daniel)
+- [ ] Bug: java.net.UnknownHostException: Unable to resolve host "hint.stream-io-video.com" isn't throw but instead logged as INFO (Daniel)
 - [ ] Bug: screensharing is broken. android doesn’t receive/render (not sure) the screenshare. video shows up as the gray avatar
 - [X] Reactions
 - [X] bug: screenshare is not removed after it stops when a participant leaves the call (Thierry) (probably just dont update the state when the participant leaves)
@@ -92,8 +93,9 @@ Video roadmap and changelog is available [here](https://github.com/GetStream/pro
 - [ ] Test coverage
 - [ ] Testing on more devices
 - [ ] Speaking while muted stateflow
-- [X] Cleanup the retry behaviour in the RtcSession
 - [ ] Android SDK development.md cleanup (Daniel)
+- [ ] Logging is too verbose (rtc is very noisy), clean it up to focus on the essential for info and higher
+- [X] Cleanup the retry behaviour in the RtcSession
 - [X] SDK development guide for all teams
 
 ### 0.4.0 milestone

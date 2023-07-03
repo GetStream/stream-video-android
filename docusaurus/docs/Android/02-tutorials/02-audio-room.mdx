@@ -196,7 +196,6 @@ Replace the code in `setContent` with the following sample:
 setContent {
     VideoTheme {
         val connection by call.state.connection.collectAsState()
-        val connection by call.state.connection.collectAsState()
         val activeSpeakers by call.state.activeSpeakers.collectAsState()
         val audioLevel = activeSpeakers.firstOrNull()?.audioLevel?.collectAsState()
 
@@ -311,12 +310,6 @@ That's it for the basics. Now when you run your app, you'll see the following UI
 The approach is the same for all components. We take the states of the call by observing `call.state` properties, such as `call.state.participants` and use it to power our UI.
 The [ParticipantState docs](../03-guides/03-call-and-participant-state.mdx) exposes all the state objects we need for the name, avatar, audio levels, speaking, etc.
 
-To make this a little more interactive, let's join the audio room from your browser.
-
-<TokenSnippet sampleApp='audio-rooms' displayStyle='join' />
-
-On your Android device, you'll see the text update to 2 participants.
-
 ### Step 5 - Audio Room Controls & Permission
 
 Any app that records the microphone needs to ask the user for permission. We'll do this now.
@@ -370,6 +363,20 @@ public fun Controls(
 ```
 
 Now when you run the app, you'll see a button to disable/enable the microphone and to start or end the broadcast.
+
+To make this a little more interactive, let's join the audio room from your browser.
+
+<TokenSnippet sampleApp='audio-rooms' displayStyle='join' />
+
+At first you won't be allowed to join the room since it's not live yet.
+By default the audio_room call type has backstage mode enabled. This makes it easy to try out your room and talk to your co-hosts before going live.
+You can enable/disable the usage of backstage mode in the dashboard.
+
+Let's go live and join the call:
+
+* Click go live on Android
+* On web join the room
+* You'll see the participant count increase to 2
 
 ### Step 6 - Participants UI
 
