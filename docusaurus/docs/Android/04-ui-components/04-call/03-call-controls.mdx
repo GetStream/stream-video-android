@@ -83,14 +83,14 @@ ControlActions(
             ToggleCameraAction(
                 modifier = Modifier.size(60.dp),
                 isCameraEnabled = isCameraEnabled,
-                onCallAction = { call.camera.setEnabled(!it.isEnabled) }
+                onCallAction = { call.camera.setEnabled(it.isEnabled) }
             )
         },
         {
             ToggleMicrophoneAction(
                 modifier = Modifier.size(60.dp),
                 isMicrophoneEnabled = isMicrophoneEnabled,
-                onCallAction = { call.microphone.setEnabled(!it.isEnabled) }
+                onCallAction = { call.microphone.setEnabled(it.isEnabled) }
             )
         },
     )
