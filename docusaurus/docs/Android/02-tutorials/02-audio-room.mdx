@@ -191,8 +191,9 @@ setContent {
 
     VideoTheme {
         val connection by call.state.connection.collectAsState()
-        val dominantSpeaker by call.state.dominantSpeaker.collectAsState()
-        val audioLevel = dominantSpeaker?.audioLevel?.collectAsState()
+        val connection by call.state.connection.collectAsState()
+        val activeSpeakers by call.state.activeSpeakers.collectAsState()
+        val audioLevel = activeSpeakers.firstOrNull()?.audioLevel?.collectAsState()
 
         val color1 = Color.White.copy(alpha = 0.2f+ (audioLevel?.value ?: 0f) * 0.8f)
         val color2 = Color.White.copy(alpha = 0.2f+ (audioLevel?.value ?: 0f) * 0.8f)
@@ -217,7 +218,7 @@ setContent {
 }
 ```
 
-You'll see that the AudioRoom composable hasn't been implemented yet. In `MainActivity` add the following Audio Room composable:
+You'll see that the **AudioRoom** composable hasn't been implemented yet. In `MainActivity` add the following `AudioRoom` composable:
 
 ```kotlin
 @Composable
@@ -228,7 +229,8 @@ public fun AudioRoom(
     val title = custom["title"] as? String
     val description = custom["description"] as? String
     val participants by call.state.participants.collectAsState()
-    val dominantSpeaker by call.state.dominantSpeaker.collectAsState()
+    val activeSpeakers by call.state.activeSpeakers.collectAsState()
+    val activeSpeaker = activeSpeakers.firstOrNull()
     val sortedParticipants by call.state.sortedParticipants.collectAsState()
 
     val backstage by call.state.backstage.collectAsState()
@@ -236,7 +238,7 @@ public fun AudioRoom(
 
     Description(title, description, participants)
 
-    dominantSpeaker?.let {
+    activeSpeaker?.let {
         Text("${it.user.value.name} is speaking")
     }
 
@@ -249,17 +251,15 @@ public fun AudioRoom(
             modifier = Modifier.weight(4f),
             sortedParticipants = sortedParticipants
         )
-        Controls(modifier= Modifier
-            .weight(1f)
-            .fillMaxWidth()
-            .padding(16.dp), call=call,
+        Controls(
+            modifier = Modifier
+                .weight(1f)
+                .fillMaxWidth()
+                .padding(16.dp), call = call,
             isMicrophoneEnabled = isMicrophoneEnabled,
-            backstage=backstage,
-            enableMicrophone = {
-                call.microphone.setEnabled(!isMicrophoneEnabled)
-            })
-
-
+            backstage = backstage,
+            enableMicrophone = { call.microphone.setEnabled(!it) }
+        )
     }
 }
 ```
@@ -268,7 +268,6 @@ The audio room is pretty basic. It needs a "Controls", "Participants" and "Descr
 Let's add those next.
 
 ```kotlin
-
 @Composable
 public fun Description(
     title: String?,
@@ -305,7 +304,7 @@ That's it for the basics. Now when you run your app you'll see the following UI:
 ![Audio Room](../assets/audio-room-3.png)
 
 The approach is the same for all components. We take the state found in `call.state` and `call.state.participants` and use it to power our UI.
-The [participantState docs](../03-guides/03-call-and-participant-state.mdx) exposes all the state objects we need for the name, avatar, audio levels, speaking etc.
+The [ParticipantState docs](../03-guides/03-call-and-participant-state.mdx) exposes all the state objects we need for the name, avatar, audio levels, speaking etc.
 
 To make this a little more interactive let's join the audio room from your browser.
 
@@ -345,9 +344,8 @@ public fun Controls(
     val scope = rememberCoroutineScope()
     Row(
         modifier = modifier,
-        horizontalArrangement = Arrangement.SpaceEvenly,
-
-        ) {
+        horizontalArrangement = Arrangement.SpaceEvenly
+    ) {
         ToggleMicrophoneAction(
             modifier = Modifier.size(52.dp),
             isMicrophoneEnabled = isMicrophoneEnabled,
@@ -359,7 +357,8 @@ public fun Controls(
                 scope.launch {
                     if (backstage) call.goLive() else call.stopLive()
                 }
-            }) {
+            }
+        ) {
             Text(text = if (backstage) "Go Live" else "End")
         }
     }
@@ -382,15 +381,14 @@ public fun Participants(
         modifier = modifier,
         columns = GridCells.Adaptive(minSize = 128.dp)
     ) {
-        items(sortedParticipants.size) { index ->
-            val participant = sortedParticipants[index]
+        items(items = sortedParticipants, key = { it.sessionId }) { participant ->
             ParticipantAvatar(participant)
         }
     }
 }
 ```
 
-Now we'll add a pretty ParticipantsAvatar composable
+Now we'll add a pretty **ParticipantsAvatar** composable:
 
 ```kotlin
 @Composable

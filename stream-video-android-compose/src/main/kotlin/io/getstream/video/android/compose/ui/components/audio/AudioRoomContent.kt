@@ -58,7 +58,7 @@ import io.getstream.video.android.mock.mockCall
  * @param audioContent Content is shown by rendering audio when we're connected to a call successfully.
  */
 @Composable
-public fun AudioRoom(
+public fun AudioRoomContent(
     modifier: Modifier = Modifier,
     call: Call,
     isShowingAppBar: Boolean = true,
@@ -146,7 +146,7 @@ private fun DefaultPermissionHandler(
 private fun AudioRoomPreview() {
     StreamMockUtils.initializeStreamVideo(LocalContext.current)
     VideoTheme {
-        AudioRoom(
+        AudioRoomContent(
             modifier = Modifier.fillMaxSize(),
             call = mockCall
         )
