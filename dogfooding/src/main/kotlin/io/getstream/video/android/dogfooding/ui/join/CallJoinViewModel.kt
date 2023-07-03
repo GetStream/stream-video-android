@@ -32,6 +32,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.launch
 import java.util.UUID
 import javax.inject.Inject
 
@@ -39,13 +40,15 @@ import javax.inject.Inject
 class CallJoinViewModel @Inject constructor(
     dataStore: StreamUserDataStore,
 ) : ViewModel() {
-
     val user: StateFlow<User?> = dataStore.user
 
     private val event: MutableStateFlow<CallJoinEvent> = MutableStateFlow(CallJoinEvent.Nothing)
     internal val uiState: StateFlow<CallJoinUiState> = event
         .flatMapLatest { event ->
             when (event) {
+                is CallJoinEvent.GoBackToLogin -> {
+                    flowOf(CallJoinUiState.GoBackToLogin)
+                }
                 is CallJoinEvent.JoinCall -> {
                     val call = joinCall(event.callId)
                     flowOf(CallJoinUiState.JoinCompleted(callId = call.cid))
@@ -56,6 +59,17 @@ class CallJoinViewModel @Inject constructor(
             }
         }
         .stateIn(viewModelScope, SharingStarted.Lazily, CallJoinUiState.Nothing)
+
+    init {
+        viewModelScope.launch {
+            // We need to check whether the StreamVideo instance is initialised and go back to Login
+            // if not. In the current implementation we only initialise after Login and if the
+            // Android process is restored then the Login is skipped Stream Video is not initialised.
+            if (!StreamVideo.isInstalled) {
+                event.value = CallJoinEvent.GoBackToLogin
+            }
+        }
+    }
 
     fun handleUiEvent(event: CallJoinEvent) {
         this.event.value = event
@@ -75,7 +89,7 @@ class CallJoinViewModel @Inject constructor(
     fun signOut() {
         FirebaseAuth.getInstance().signOut()
         StreamVideo.instance().logOut()
-        StreamVideo.unInstall()
+        StreamVideo.removeClient()
     }
 }
 
@@ -83,6 +97,8 @@ sealed interface CallJoinUiState {
     object Nothing : CallJoinUiState
 
     data class JoinCompleted(val callId: String) : CallJoinUiState
+
+    object GoBackToLogin : CallJoinUiState
 }
 
 sealed interface CallJoinEvent {
@@ -91,4 +107,6 @@ sealed interface CallJoinEvent {
     data class JoinCall(val callId: String? = null) : CallJoinEvent
 
     data class JoinCompleted(val callId: String) : CallJoinEvent
+
+    object GoBackToLogin : CallJoinEvent
 }

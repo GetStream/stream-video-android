@@ -60,6 +60,16 @@ android {
             isIncludeAndroidResources = true
             isReturnDefaultValues = true
         }
+
+        managedDevices {
+            devices {
+                maybeCreate<com.android.build.api.dsl.ManagedVirtualDevice>("pixel2api31").apply {
+                    device = "Pixel 2"
+                    apiLevel = 31
+                    systemImageSource = "aosp"
+                }
+            }
+        }
     }
 
     val envProps: File = rootProject.file(".env.properties")
@@ -95,6 +105,8 @@ dependencies {
     // webrtc
     api(libs.stream.webrtc)
     api(libs.stream.webrtc.ui)
+
+    implementation(libs.audioswitch)
 
     // androidx
     implementation(libs.androidx.core.ktx)
@@ -148,5 +160,6 @@ dependencies {
     androidTestImplementation(libs.androidx.test.junit)
     androidTestImplementation(libs.kotlinx.coroutines.test)
     androidTestImplementation(libs.kotlin.test.junit)
+    androidTestImplementation(libs.turbine)
     androidTestImplementation("androidx.test:rules:1.5.0")
 }

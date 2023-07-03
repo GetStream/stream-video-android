@@ -40,11 +40,14 @@ import io.getstream.video.android.core.utils.mapState
 import io.getstream.video.android.core.utils.toUser
 import io.getstream.video.android.model.User
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.launch
 import org.openapitools.client.models.BlockedUserEvent
 import org.openapitools.client.models.CallAcceptedEvent
 import org.openapitools.client.models.CallCreatedEvent
@@ -146,6 +149,8 @@ public class CallState(private val call: Call, private val user: User) {
         it is RealtimeConnection.Reconnecting
     }
 
+    val stats = CallStats(call)
+
     private val _participants: MutableStateFlow<SortedMap<String, ParticipantState>> =
         MutableStateFlow(emptyMap<String, ParticipantState>().toSortedMap())
 
@@ -170,8 +175,7 @@ public class CallState(private val call: Call, private val user: User) {
         _participants.mapState { it.filterKeys { key -> key != call.clientImpl.sessionId }.values.toList() }
 
     /** the dominant speaker */
-    private val _dominantSpeaker: MutableStateFlow<ParticipantState?> =
-        MutableStateFlow(null)
+    private val _dominantSpeaker: MutableStateFlow<ParticipantState?> = MutableStateFlow(null)
     public val dominantSpeaker: StateFlow<ParticipantState?> = _dominantSpeaker
 
     /**
@@ -331,6 +335,8 @@ public class CallState(private val call: Call, private val user: User) {
     private val _errors: MutableStateFlow<List<ErrorEvent>> =
         MutableStateFlow(emptyList())
     public val errors: StateFlow<List<ErrorEvent>> = _errors
+
+    private var speakingWhileMutedResetJob: Job? = null
 
     fun handleEvent(event: VideoEvent) {
         logger.d { "Updating call state with event ${event::class.java}" }
@@ -500,6 +506,12 @@ public class CallState(private val call: Call, private val user: User) {
 
             is ParticipantLeftEvent -> {
                 removeParticipant(event.participant.session_id)
+
+                // clean up - stop screen-sharing session if it was still running
+                val current = _screenSharingSession.value
+                if (current?.participant?.sessionId == event.participant.session_id) {
+                    _screenSharingSession.value = null
+                }
             }
 
             is SubscriberOfferEvent -> {
@@ -557,6 +569,15 @@ public class CallState(private val call: Call, private val user: User) {
             getOrCreateParticipant(it)
         }
         upsertParticipants(participantStates)
+    }
+
+    fun markSpeakingAsMuted() {
+        _speakingWhileMuted.value = true
+        speakingWhileMutedResetJob?.cancel()
+        speakingWhileMutedResetJob = scope.launch {
+            delay(2000)
+            _speakingWhileMuted.value = false
+        }
     }
 
     private fun removeParticipant(sessionId: String) {

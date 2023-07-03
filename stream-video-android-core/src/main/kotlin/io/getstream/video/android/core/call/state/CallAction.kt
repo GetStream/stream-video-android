@@ -16,7 +16,7 @@
 
 package io.getstream.video.android.core.call.state
 
-import io.getstream.video.android.core.audio.AudioDevice
+import com.twilio.audioswitch.AudioDevice
 import io.getstream.video.android.model.User
 
 /**
@@ -111,9 +111,10 @@ public data class ToggleScreenConfiguration(
 public object ShowCallParticipantInfo : CallAction
 
 /**
- * Custom action used to handle any custom behavior with the given [data], such as opening chat,
+ * Custom action used to handle any custom behavior with the given [data] and [tag], such as opening chat,
  * inviting people, sharing the screen and more.
  */
 public open class CustomAction(
-    val data: Map<Any, Any> = emptyMap()
+    val data: Map<Any, Any> = emptyMap(),
+    val tag: String
 ) : CallAction

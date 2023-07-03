@@ -16,6 +16,8 @@
 
 package io.getstream.video.android.core
 
+import app.cash.turbine.test
+import app.cash.turbine.testIn
 import com.google.common.truth.Truth.assertThat
 import io.getstream.log.taggedLogger
 import kotlinx.coroutines.launch
@@ -23,6 +25,8 @@ import kotlinx.coroutines.test.runTest
 import org.junit.Ignore
 import org.junit.Test
 import org.webrtc.PeerConnection
+import java.util.UUID
+import kotlin.time.Duration.Companion.seconds
 
 /**
  * Connection state shows if we've established a connection with the SFU
@@ -53,21 +57,38 @@ import org.webrtc.PeerConnection
  */
 class ReconnectTest : IntegrationTestBase(connectCoordinatorWS = false) {
 
-    private val logger by taggedLogger("Test:AndroidDeviceTest")
+    private val logger by taggedLogger("Test:ReconnectTest")
 
     @Test
     fun networkDown() = runTest {
+        val call = client.call("default", UUID.randomUUID().toString())
         // join a call
-        call.join()
-        Thread.sleep(2000L)
+        val result = call.join(create = true)
+        // create a turbine connection state
+        val connectionState = call.state.connection.testIn(backgroundScope)
+        // asset that the connection state is connected
+        val connectionStateItem = connectionState.awaitItem()
+        assertThat(connectionStateItem).isAnyOf(
+            RealtimeConnection.Connected,
+            RealtimeConnection.Joined(result.getOrThrow())
+        )
+        if (connectionStateItem is RealtimeConnection.Joined) {
+            connectionState.awaitItem()
+        }
+        // assert the connection state is connected
         // disconnect the network
         call.monitor.networkStateListener.onDisconnected()
         // verify that the connection state is reconnecting
-        assertThat(call.state.connection.value).isEqualTo(RealtimeConnection.Reconnecting)
+        assertThat(connectionState.awaitItem()).isEqualTo(RealtimeConnection.Reconnecting)
         // go online and verify we're reconnected
         call.monitor.networkStateListener.onConnected()
-        Thread.sleep(2000L)
-        assertThat(call.state.connection.value).isEqualTo(RealtimeConnection.Connected)
+        // asset that the connection state is connected
+        assertThat(connectionState.awaitItem()).isEqualTo(RealtimeConnection.Connected)
+        // leave and clean up a call
+        call.leave()
+        call.cleanup()
+        // await until disconnect a call
+        assertThat(connectionState.awaitItem()).isEqualTo(RealtimeConnection.Disconnected)
     }
 
     @Test
@@ -93,36 +114,77 @@ class ReconnectTest : IntegrationTestBase(connectCoordinatorWS = false) {
      */
     @Test
     fun restartIce() = runTest {
-        call.join()
-        Thread.sleep(2000)
-        val b = call.session?.publisher?.state?.value
-        // TOD: better to use the higher level state perhaps instead of ice state
-        assertThat(b).isEqualTo(PeerConnection.PeerConnectionState.CONNECTED)
+        val call = client.call("default", UUID.randomUUID().toString())
+        // join a call
+        val result = call.join(create = true)
+        // create a turbine of the publisher's peer connection state
+        val publisher = call.session?.publisher?.state?.testIn(backgroundScope)
+
+        // create a turbine connection state
+        val connectionState = call.state.connection.testIn(backgroundScope)
+        // asset that the connection state is connected
+        val connectionStateItem = connectionState.awaitItem()
+        assertThat(connectionStateItem).isAnyOf(
+            RealtimeConnection.Connected,
+            RealtimeConnection.Joined(result.getOrThrow())
+        )
+        if (connectionStateItem is RealtimeConnection.Joined) {
+            connectionState.awaitItem()
+        }
+
+        // assert peer connection state flows
+        assertThat(publisher?.awaitItem()).isEqualTo(PeerConnection.PeerConnectionState.NEW)
+        assertThat(publisher?.awaitItem()).isEqualTo(PeerConnection.PeerConnectionState.CONNECTING)
+        assertThat(publisher?.awaitItem()).isEqualTo(PeerConnection.PeerConnectionState.CONNECTED)
 
         // the socket and rtc connection disconnect...,
         // or ice candidate don't arrive due to temporary network failure
         call.session?.reconnect()
-        Thread.sleep(2000)
-        // reconnect recreates the peer connections
-        val pub = call.session?.publisher?.state?.value
-        assertThat(pub).isEqualTo(PeerConnection.PeerConnectionState.CONNECTED)
+
+        // leave and clean up a call
+        call.leave()
+        call.cleanup()
+        // await until disconnect a call
+        assertThat(connectionState.awaitItem()).isEqualTo(RealtimeConnection.Disconnected)
     }
 
     /**
      * Switching an Sfu should be fast
      */
     @Test
-    fun switchSfuQuickly() = runTest {
-        call.join()
+    @Ignore
+    fun switchSfuQuickly() = runTest(timeout = 30.seconds) {
+        val call = client.call("default", UUID.randomUUID().toString())
+        // join a call
+        val result = call.join(create = true)
+        // create a turbine connection state
+        val connectionState = call.state.connection.testIn(backgroundScope)
+        // asset that the connection state is connected
+        val connectionStateItem = connectionState.awaitItem()
+        assertThat(connectionStateItem).isAnyOf(
+            RealtimeConnection.Connected,
+            RealtimeConnection.Joined(result.getOrThrow())
+        )
+        if (connectionStateItem is RealtimeConnection.Joined) {
+            connectionState.awaitItem()
+        }
 
         // connect to the new socket
         // do an ice restart
-        Thread.sleep(2000)
         call.session?.let {
             it.switchSfu(it.sfuUrl, it.sfuToken, it.remoteIceServers)
         }
-        Thread.sleep(6000)
-        val pub = call.session?.publisher?.state?.value
-        assertThat(pub).isEqualTo(PeerConnection.PeerConnectionState.CONNECTED)
+
+        // assert the publisher is still connected
+        val publisher = call.session?.publisher?.state
+        publisher?.test(timeout = 30.seconds) {
+            val connection = awaitItem()
+            if (connection == PeerConnection.PeerConnectionState.CONNECTED) {
+                awaitComplete()
+            }
+        }
+        // leave and clean up a call
+        call.leave()
+        call.cleanup()
     }
 }

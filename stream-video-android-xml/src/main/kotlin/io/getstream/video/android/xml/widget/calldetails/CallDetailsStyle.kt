@@ -66,7 +66,7 @@ public data class CallDetailsStyle(
                 attrs,
                 R.styleable.CallDetailsView,
                 R.attr.streamVideoCallDetailsViewStyle,
-                R.style.Stream_CallDetails
+                R.style.StreamVideo_CallDetails
             ).use {
                 val callAvatarSize = it.getDimensionPixelSize(
                     R.styleable.CallDetailsView_streamVideoCallDetailsAvatarSize,

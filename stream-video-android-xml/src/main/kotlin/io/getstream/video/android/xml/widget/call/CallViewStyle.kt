@@ -93,7 +93,7 @@ public data class CallViewStyle(
                 attrs,
                 R.styleable.CallView,
                 R.attr.streamVideoCallViewStyle,
-                R.style.Stream_CallView
+                R.style.StreamVideo_CallView
             ).use {
 
                 val gridCallParticipantStyle = it.getResourceId(

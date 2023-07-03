@@ -24,6 +24,7 @@ import io.getstream.result.Result
 import io.getstream.result.Result.Failure
 import io.getstream.result.Result.Success
 import io.getstream.video.android.core.call.RtcSession
+import io.getstream.video.android.core.call.utils.DecibelThresholdDetection
 import io.getstream.video.android.core.events.VideoEventListener
 import io.getstream.video.android.core.internal.network.NetworkStateProvider
 import io.getstream.video.android.core.model.MuteUsersData
@@ -33,6 +34,7 @@ import io.getstream.video.android.core.model.toIceServer
 import io.getstream.video.android.model.User
 import io.getstream.webrtc.android.ui.VideoTextureViewRenderer
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.filter
@@ -63,6 +65,7 @@ import org.threeten.bp.OffsetDateTime
 import org.threeten.bp.temporal.ChronoUnit
 import org.webrtc.PeerConnection
 import org.webrtc.RendererCommon
+import org.webrtc.audio.JavaAudioDeviceModule.AudioSamples
 import stream.video.sfu.models.TrackType
 import stream.video.sfu.models.VideoDimension
 
@@ -251,6 +254,7 @@ public class Call(
     val id: String,
     val user: User,
 ) {
+    private var statsGatheringJob: Job? = null
     internal var location: String? = null
 
     internal val clientImpl = client as StreamVideoImpl
@@ -259,7 +263,7 @@ public class Call(
     /** The call state contains all state such as the participant list, reactions etc */
     val state = CallState(this, user)
 
-    val sessionId by lazy { session?.sessionId }
+    val sessionId by lazy { clientImpl.sessionId }
     private val network by lazy { clientImpl.connectionModule.networkStateProvider }
 
     /** Camera gives you access to the local camera */
@@ -274,6 +278,12 @@ public class Call(
     private val scope = CoroutineScope(clientImpl.scope.coroutineContext + supervisorJob)
 
     val monitor = CallHealthMonitor(this, scope)
+
+    private val decibelThresholdDetection = DecibelThresholdDetection(thresholdCrossedCallback = {
+        if (!microphone.isEnabled.value) {
+            state.markSpeakingAsMuted()
+        }
+    })
 
     /** Session handles all real time communication for video and audio */
     internal var session: RtcSession? = null
@@ -301,7 +311,7 @@ public class Call(
         members: List<MemberRequest>? = null,
         custom: Map<String, Any>? = null,
         settings: CallSettingsRequest? = null,
-        startsAt: org.threeten.bp.OffsetDateTime? = null,
+        startsAt: OffsetDateTime? = null,
         team: String? = null,
         ring: Boolean = false,
         notify: Boolean = false
@@ -347,7 +357,7 @@ public class Call(
     suspend fun update(
         custom: Map<String, Any>? = null,
         settingsOverride: CallSettingsRequest? = null,
-        startsAt: org.threeten.bp.OffsetDateTime? = null,
+        startsAt: OffsetDateTime? = null,
     ): Result<UpdateCallResponse> {
 
         val request = UpdateCallRequest(
@@ -384,7 +394,8 @@ public class Call(
                 return result
             }
             if (result is Failure) {
-                logger.w { "Join failed with error $result" }
+                session = null
+                logger.e { "Join failed with error $result" }
                 if (isPermanentError(result.value)) {
                     state._connection.value = RealtimeConnection.Failed(result.value)
                     return result
@@ -407,6 +418,9 @@ public class Call(
         ring: Boolean = false,
         notify: Boolean = false,
     ): Result<RtcSession> {
+        if (session != null) {
+            throw IllegalStateException("Call $cid has already been joined. Please use call.leave before joining it again")
+        }
 
         // step 1. call the join endpoint to get a list of SFUs
         val timer = clientImpl.debugInfo.trackTime("call.join")
@@ -462,6 +476,28 @@ public class Call(
         }
 
         monitor.start()
+
+        val statsGatheringInterval = 5000L
+
+        statsGatheringJob = scope.launch {
+            // wait a bit before we capture stats
+            delay(statsGatheringInterval)
+
+            while (true) {
+                delay(statsGatheringInterval)
+
+                session?.publisher?.let {
+                    val stats = it.getStats().value
+                    state.stats.updateFromRTCStats(stats, isPublisher = true)
+                }
+                session?.subscriber?.let {
+                    val stats = it.getStats().value
+                    state.stats.updateFromRTCStats(stats, isPublisher = false)
+                }
+
+                state.stats.updateLocalStats()
+            }
+        }
 
         client.state.setActiveCall(this)
 
@@ -570,7 +606,7 @@ public class Call(
         videoRenderer: VideoTextureViewRenderer,
         sessionId: String,
         trackType: TrackType,
-        onRender: (View) -> Unit = {}
+        onRendered: (View) -> Unit = {}
     ) {
         logger.d { "[initRenderer] #sfu; sessionId: $sessionId" }
 
@@ -591,7 +627,7 @@ public class Call(
                             )
                         )
                     }
-                    onRender(videoRenderer)
+                    onRendered(videoRenderer)
                 }
 
                 override fun onFrameResolutionChanged(p0: Int, p1: Int, p2: Int) {
@@ -795,6 +831,8 @@ public class Call(
         monitor.stop()
         session?.cleanup()
         supervisorJob.cancel()
+        statsGatheringJob?.cancel()
+        session = null
     }
 
     suspend fun ring(): Result<GetCallResponse> {
@@ -812,6 +850,13 @@ public class Call(
     suspend fun reject(): Result<RejectCallResponse> {
         return clientImpl.reject(type, id)
     }
+
+    fun processAudioSample(audioSample: AudioSamples) {
+        // do not unncessarily process the audio sample if we are not muted
+        if (!microphone.isEnabled.value) {
+            decibelThresholdDetection.processSoundInput(audioSample.data)
+        }
+    }
 }
 
 public data class CreateCallOptions(
@@ -819,7 +864,7 @@ public data class CreateCallOptions(
     val members: List<MemberRequest>? = null,
     val custom: Map<String, Any>? = null,
     val settings: CallSettingsRequest? = null,
-    val startsAt: org.threeten.bp.OffsetDateTime? = null,
+    val startsAt: OffsetDateTime? = null,
     val team: String? = null,
 ) {
     fun memberRequestsFromIds(): List<MemberRequest>? {

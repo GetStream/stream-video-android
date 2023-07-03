@@ -18,7 +18,6 @@ HSPLio/getstream/video/android/datastore/delegate/StreamUserDataStore;->updateDa
 PLio/getstream/video/android/datastore/delegate/StreamUserDataStore;->updateData(Lkotlin/jvm/functions/Function2;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 HSPLio/getstream/video/android/datastore/delegate/StreamUserDataStore;->updateUser(Lio/getstream/video/android/model/User;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 PLio/getstream/video/android/datastore/delegate/StreamUserDataStore;->updateUser(Lio/getstream/video/android/model/User;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
-PLio/getstream/video/android/datastore/delegate/StreamUserDataStore;->updateUserDevice(Lio/getstream/video/android/model/Device;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 HSPLio/getstream/video/android/datastore/delegate/StreamUserDataStore;->updateUserToken(Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 PLio/getstream/video/android/datastore/delegate/StreamUserDataStore;->updateUserToken(Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 Lio/getstream/video/android/datastore/delegate/StreamUserDataStore$Companion;
@@ -115,11 +114,6 @@ HSPLio/getstream/video/android/datastore/delegate/StreamUserDataStore$updateUser
 PLio/getstream/video/android/datastore/delegate/StreamUserDataStore$updateUser$2;->invoke(Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object;
 HSPLio/getstream/video/android/datastore/delegate/StreamUserDataStore$updateUser$2;->invokeSuspend(Ljava/lang/Object;)Ljava/lang/Object;
 PLio/getstream/video/android/datastore/delegate/StreamUserDataStore$updateUser$2;->invokeSuspend(Ljava/lang/Object;)Ljava/lang/Object;
-PLio/getstream/video/android/datastore/delegate/StreamUserDataStore$updateUserDevice$2;-><init>(Lio/getstream/video/android/model/Device;Lkotlin/coroutines/Continuation;)V
-PLio/getstream/video/android/datastore/delegate/StreamUserDataStore$updateUserDevice$2;->create(Ljava/lang/Object;Lkotlin/coroutines/Continuation;)Lkotlin/coroutines/Continuation;
-PLio/getstream/video/android/datastore/delegate/StreamUserDataStore$updateUserDevice$2;->invoke(Lio/getstream/video/android/datastore/model/StreamUserPreferences;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
-PLio/getstream/video/android/datastore/delegate/StreamUserDataStore$updateUserDevice$2;->invoke(Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object;
-PLio/getstream/video/android/datastore/delegate/StreamUserDataStore$updateUserDevice$2;->invokeSuspend(Ljava/lang/Object;)Ljava/lang/Object;
 Lio/getstream/video/android/datastore/delegate/StreamUserDataStore$updateUserToken$2;
 HSPLio/getstream/video/android/datastore/delegate/StreamUserDataStore$updateUserToken$2;-><init>(Ljava/lang/String;Lkotlin/coroutines/Continuation;)V
 PLio/getstream/video/android/datastore/delegate/StreamUserDataStore$updateUserToken$2;-><init>(Ljava/lang/String;Lkotlin/coroutines/Continuation;)V

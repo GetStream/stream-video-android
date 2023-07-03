@@ -40,14 +40,14 @@ import io.getstream.video.android.datastore.delegate.StreamUserDataStore
 import io.getstream.video.android.model.Device
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
-import org.openapitools.client.apis.DevicesApi
+import org.openapitools.client.apis.DefaultApi
 import org.openapitools.client.models.CreateDeviceRequest
 
 internal class StreamNotificationManager private constructor(
     private val context: Context,
     private val scope: CoroutineScope,
     private val notificationConfig: NotificationConfig,
-    private val devicesApi: DevicesApi,
+    private val api: DefaultApi,
     private val dataStore: StreamUserDataStore,
     private val notificationPermissionManager: NotificationPermissionManager?,
 ) : NotificationHandler by notificationConfig.notificationHandler {
@@ -75,7 +75,7 @@ internal class StreamNotificationManager private constructor(
             ?.toCreateDeviceRequest()
             ?.flatMapSuspend { createDeviceRequest ->
                 try {
-                    devicesApi.createDevice(createDeviceRequest)
+                    api.createDevice(createDeviceRequest)
                     dataStore.updateUserDevice(pushDevice.toDevice())
                     Result.Success(newDevice)
                 } catch (e: Exception) {
@@ -101,7 +101,7 @@ internal class StreamNotificationManager private constructor(
         logger.d { "[deleteDevice] device: $device" }
         val userId = dataStore.user.value?.id
         return try {
-            devicesApi.deleteDevice(device.id, userId)
+            api.deleteDevice(device.id, userId)
             removeStoredDeivce(device)
             Result.Success(Unit)
         } catch (e: Exception) {
@@ -137,7 +137,7 @@ internal class StreamNotificationManager private constructor(
             context: Context,
             scope: CoroutineScope,
             notificationConfig: NotificationConfig,
-            devicesApi: DevicesApi,
+            api: DefaultApi,
             streamUserDataStore: StreamUserDataStore,
         ): StreamNotificationManager {
             synchronized(this) {
@@ -171,7 +171,7 @@ internal class StreamNotificationManager private constructor(
                         context,
                         scope,
                         updatedNotificationConfig,
-                        devicesApi,
+                        api,
                         streamUserDataStore,
                         notificationPermissionManager,
                     )

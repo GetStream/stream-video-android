@@ -23,8 +23,8 @@ import android.media.AudioAttributes
 import android.media.AudioManager
 import android.os.Build
 import androidx.core.content.getSystemService
+import com.twilio.audioswitch.AudioDevice
 import io.getstream.log.taggedLogger
-import io.getstream.video.android.core.audio.AudioDevice
 import io.getstream.video.android.core.audio.AudioSwitchHandler
 import io.getstream.video.android.core.utils.buildAudioConstraints
 import io.getstream.video.android.core.utils.mapState
@@ -39,6 +39,7 @@ import org.webrtc.Camera2Enumerator
 import org.webrtc.CameraEnumerationAndroid
 import org.webrtc.EglBase
 import org.webrtc.SurfaceTextureHelper
+import java.util.UUID
 
 sealed class DeviceStatus {
     object NotSelected : DeviceStatus()
@@ -60,6 +61,8 @@ class SpeakerManager(
     val initialVolume: Int? = null
 ) {
 
+    private val logger by taggedLogger("Media:SpeakerManager")
+
     private var priorVolume: Int? = null
     private val _volume = MutableStateFlow(initialVolume)
     val volume: StateFlow<Int?> = _volume
@@ -80,24 +83,30 @@ class SpeakerManager(
 
     internal var selectedBeforeSpeaker: AudioDevice? = null
 
-    fun enable() {
-        _status.value = DeviceStatus.Enabled
+    fun enable(fromUser: Boolean = true) {
+        if (fromUser) {
+            _status.value = DeviceStatus.Enabled
+        }
         setSpeakerPhone(true)
     }
 
-    fun disable() {
-        _status.value = DeviceStatus.Disabled
+    fun disable(fromUser: Boolean = true) {
+        if (fromUser) {
+            _status.value = DeviceStatus.Disabled
+        }
         setSpeakerPhone(false)
     }
 
     /**
      * Enable or disable the speakerphone.
      */
-    fun setEnabled(enabled: Boolean) {
+    fun setEnabled(enabled: Boolean, fromUser: Boolean = true) {
+        logger.i { "setEnabled $enabled" }
+        // TODO: what is fromUser?
         if (enabled) {
-            enable()
+            enable(fromUser = fromUser)
         } else {
-            disable()
+            disable(fromUser = fromUser)
         }
     }
 
@@ -164,7 +173,10 @@ class SpeakerManager(
  * microphone.selectedDevice // the selected device
  * microphone.speakerPhoneEnabled // the status of the speaker. true/false
  */
-class MicrophoneManager(val mediaManager: MediaManagerImpl) {
+class MicrophoneManager(
+    val mediaManager: MediaManagerImpl,
+    val preferSpeakerphone: Boolean
+) {
     private lateinit var audioHandler: AudioSwitchHandler
     internal var audioManager: AudioManager? = null
 
@@ -186,41 +198,45 @@ class MicrophoneManager(val mediaManager: MediaManagerImpl) {
     internal var priorStatus: DeviceStatus? = null
 
     /** Enable the audio, the rtc engine will automatically inform the SFU */
-    fun enable() {
+    fun enable(fromUser: Boolean = true) {
         setup()
-        _status.value = DeviceStatus.Enabled
+        if (fromUser) {
+            _status.value = DeviceStatus.Enabled
+        }
         mediaManager.audioTrack.setEnabled(true)
     }
 
-    fun pause() {
+    fun pause(fromUser: Boolean = true) {
         // pause the microphone, and when resuming switched back to the previous state
         priorStatus = _status.value
-        disable()
+        disable(fromUser = fromUser)
     }
 
-    fun resume() {
+    fun resume(fromUser: Boolean = true) {
         priorStatus?.let {
             if (it == DeviceStatus.Enabled) {
-                enable()
+                enable(fromUser = fromUser)
             }
         }
     }
 
     /** Disable the audio track. Audio is still captured, but not send.
      * This allows for the "you are muted" toast to indicate you are talking while muted */
-    fun disable() {
-        _status.value = DeviceStatus.Disabled
+    fun disable(fromUser: Boolean = true) {
+        if (fromUser) {
+            _status.value = DeviceStatus.Disabled
+        }
         mediaManager.audioTrack.setEnabled(false)
     }
 
     /**
      * Enable or disable the microphone
      */
-    fun setEnabled(enabled: Boolean) {
+    fun setEnabled(enabled: Boolean, fromUser: Boolean = true) {
         if (enabled) {
-            enable()
+            enable(fromUser = fromUser)
         } else {
-            disable()
+            disable(fromUser = fromUser)
         }
     }
 
@@ -228,7 +244,9 @@ class MicrophoneManager(val mediaManager: MediaManagerImpl) {
      * Select a specific device
      */
     fun select(device: AudioDevice?) {
+        logger.i { "selecting device $device" }
         audioHandler.selectDevice(device)
+
         _selectedDevice.value = device
     }
 
@@ -243,13 +261,14 @@ class MicrophoneManager(val mediaManager: MediaManagerImpl) {
     internal fun setup() {
         if (setupCompleted) return
 
-        audioManager = mediaManager.context.getSystemService<AudioManager>()
+        audioManager = mediaManager.context.getSystemService()
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
             audioManager?.allowedCapturePolicy = AudioAttributes.ALLOW_CAPTURE_BY_ALL
         }
 
-        audioHandler = AudioSwitchHandler(mediaManager.context) { devices, selected ->
+        audioHandler = AudioSwitchHandler(mediaManager.context, preferSpeakerphone) { devices, selected ->
+            logger.i { "audio devices. selected $selected, available devices are $devices" }
             _devices.value = devices
             _selectedDevice.value = selected
         }
@@ -330,44 +349,48 @@ public class CameraManager(
         return devices
     }
 
-    fun enable() {
+    fun enable(fromUser: Boolean = true) {
         setup()
         // 1. update our local state
         // 2. update the track enabled status
         // 3. Rtc listens and sends the update mute state request
-        _status.value = DeviceStatus.Enabled
+        if (fromUser) {
+            _status.value = DeviceStatus.Enabled
+        }
         mediaManager.videoTrack.setEnabled(true)
         startCapture()
     }
 
-    fun pause() {
+    fun pause(fromUser: Boolean = true) {
         // pause the camera, and when resuming switched back to the previous state
         priorStatus = _status.value
-        disable()
+        disable(fromUser = fromUser)
     }
 
-    fun resume() {
+    fun resume(fromUser: Boolean = true) {
         priorStatus?.let {
             if (it == DeviceStatus.Enabled) {
-                enable()
+                enable(fromUser = fromUser)
             }
         }
     }
 
-    fun setEnabled(enabled: Boolean) {
+    fun setEnabled(enabled: Boolean, fromUser: Boolean = true) {
         if (enabled) {
-            enable()
+            enable(fromUser = fromUser)
         } else {
-            disable()
+            disable(fromUser = fromUser)
         }
     }
 
-    fun disable() {
+    fun disable(fromUser: Boolean = true) {
         if (isCapturingVideo) {
             // 1. update our local state
             // 2. update the track enabled status
             // 3. Rtc listens and sends the update mute state request
-            _status.value = DeviceStatus.Disabled
+            if (fromUser) {
+                _status.value = DeviceStatus.Disabled
+            }
             mediaManager.videoTrack.setEnabled(false)
             videoCapturer.stopCapture()
             isCapturingVideo = false
@@ -384,26 +407,28 @@ public class CameraManager(
                 CameraDirection.Front -> CameraDirection.Back
                 CameraDirection.Back -> CameraDirection.Front
             }
-            val device = devices.first { it.direction == newDirection }
-            select(device.id, false)
+            val device = devices.firstOrNull { it.direction == newDirection }
+            device?.let { select(it.id, false) }
 
             videoCapturer.switchCamera(null)
         }
     }
 
     fun select(deviceId: String, startCapture: Boolean = false) {
-        val selectedDevice = devices.first { it.id == deviceId }
-        _direction.value = selectedDevice.direction ?: CameraDirection.Back
-        _selectedDevice.value = selectedDevice
-        _availableResolutions.value =
-            selectedDevice.supportedFormats?.toImmutableList() ?: emptyList()
-        _resolution.value = selectDesiredResolution(
-            selectedDevice.supportedFormats,
-            mediaManager.call.state.settings.value?.video
-        )
+        val selectedDevice = devices.firstOrNull { it.id == deviceId }
+        if (selectedDevice != null) {
+            _direction.value = selectedDevice.direction ?: CameraDirection.Back
+            _selectedDevice.value = selectedDevice
+            _availableResolutions.value =
+                selectedDevice.supportedFormats?.toImmutableList() ?: emptyList()
+            _resolution.value = selectDesiredResolution(
+                selectedDevice.supportedFormats,
+                mediaManager.call.state.settings.value?.video
+            )
 
-        if (startCapture) {
-            startCapture()
+            if (startCapture) {
+                startCapture()
+            }
         }
     }
 
@@ -461,20 +486,22 @@ public class CameraManager(
         enumerator = Camera2Enumerator(mediaManager.context)
         devices = sortDevices()
         val devicesMatchingDirection = devices.filter { it.direction == _direction.value }
-        val selectedDevice = devicesMatchingDirection.first()
-        _selectedDevice.value = selectedDevice
-        _resolution.value = selectDesiredResolution(
-            selectedDevice.supportedFormats,
-            mediaManager.call.state.settings.value?.video
-        )
-        _availableResolutions.value =
-            selectedDevice.supportedFormats?.toImmutableList() ?: emptyList()
+        val selectedDevice = devicesMatchingDirection.firstOrNull()
+        if (selectedDevice != null) {
+            _selectedDevice.value = selectedDevice
+            _resolution.value = selectDesiredResolution(
+                selectedDevice.supportedFormats,
+                mediaManager.call.state.settings.value?.video
+            )
+            _availableResolutions.value =
+                selectedDevice.supportedFormats?.toImmutableList() ?: emptyList()
 
-        surfaceTextureHelper = SurfaceTextureHelper.create(
-            "CaptureThread", eglBaseContext
-        )
+            surfaceTextureHelper = SurfaceTextureHelper.create(
+                "CaptureThread", eglBaseContext
+            )
 
-        setupCompleted = true
+            setupCompleted = true
+        }
     }
 
     /**
@@ -533,8 +560,12 @@ public class CameraManager(
 
     fun cleanup() {
         stopCapture()
-        videoCapturer.dispose()
-        surfaceTextureHelper.dispose()
+        if (::videoCapturer.isInitialized) {
+            videoCapturer.dispose()
+        }
+        if (::surfaceTextureHelper.isInitialized) {
+            surfaceTextureHelper.dispose()
+        }
         setupCompleted = false
     }
 }
@@ -562,22 +593,26 @@ class MediaManagerImpl(
     val scope: CoroutineScope,
     val eglBaseContext: EglBase.Context
 ) {
-    private val logger by taggedLogger("Call:MediaManagerImpl")
-    private var audioManager = context.getSystemService<AudioManager>()
-
     // source & tracks
     val videoSource = call.clientImpl.peerConnectionFactory.makeVideoSource(false)
+
+    // for track ids we emulate the browser behaviour of random UUIDs, doing something different would be confusing
     val videoTrack = call.clientImpl.peerConnectionFactory.makeVideoTrack(
-        source = videoSource, trackId = "videoTrack"
+        source = videoSource, trackId = UUID.randomUUID().toString()
     )
 
     val audioSource = call.clientImpl.peerConnectionFactory.makeAudioSource(buildAudioConstraints())
+
+    // for track ids we emulate the browser behaviour of random UUIDs, doing something different would be confusing
     val audioTrack = call.clientImpl.peerConnectionFactory.makeAudioTrack(
-        source = audioSource, trackId = "audioTrack"
+        source = audioSource, trackId = UUID.randomUUID().toString()
     )
 
+    // TODO: this should be a setting on the call type
+    val preferSpeakerphone by lazy { true }
+
     internal val camera = CameraManager(this, eglBaseContext)
-    internal val microphone = MicrophoneManager(this)
+    internal val microphone = MicrophoneManager(this, preferSpeakerphone)
     internal val speaker = SpeakerManager(this, microphone)
 
     fun cleanup() {

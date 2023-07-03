@@ -102,9 +102,10 @@ public data class ParticipantState(
     val audioLevel: StateFlow<Float> = _audioLevel
 
     /**
-     * The last 3 values for the audio level. This list easier to work with for some audio visualizations
+     * The last 5 values for the audio level. This list easier to work with for some audio visualizations
      */
-    internal val _audioLevels: MutableStateFlow<List<Float>> = MutableStateFlow(listOf(0f, 0f, 0f))
+    internal val _audioLevels: MutableStateFlow<List<Float>> =
+        MutableStateFlow(listOf(0f, 0f, 0f, 0f, 0f))
     val audioLevels: StateFlow<List<Float>> = _audioLevels
 
     /**
@@ -176,9 +177,15 @@ public data class ParticipantState(
         val currentAudio = _audioLevels.value.toMutableList()
         currentAudio.removeAt(0)
         currentAudio.add(audioLevel)
+        if (currentAudio[0] == 0f && currentAudio[2] == 0f) {
+            currentAudio[0] = audioLevel
+            currentAudio[2] = audioLevel
+        }
         _audioLevels.value = currentAudio.toList()
-        _audioLevel.value = audioLevel
     }
+
+    internal val _roles = MutableStateFlow<List<String>>(emptyList())
+    val roles: StateFlow<List<String>> = _roles
 
     fun updateFromParticipantInfo(participant: Participant) {
         sessionId = participant.session_id
@@ -197,6 +204,7 @@ public data class ParticipantState(
         _videoEnabled.value = participant.published_tracks.contains(TrackType.TRACK_TYPE_VIDEO)
         _screenSharingEnabled.value =
             participant.published_tracks.contains(TrackType.TRACK_TYPE_SCREEN_SHARE)
+        _roles.value = participant.roles
 
         val currentUser = _user.value
         _user.value = currentUser.copy(

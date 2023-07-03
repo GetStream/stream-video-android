@@ -20,6 +20,9 @@ import android.content.Context
 import android.media.AudioManager
 import android.os.Handler
 import android.os.Looper
+import com.twilio.audioswitch.AudioDevice
+import com.twilio.audioswitch.AudioDeviceChangeListener
+import com.twilio.audioswitch.AudioSwitch
 import io.getstream.log.StreamLog
 import io.getstream.log.taggedLogger
 
@@ -38,13 +41,10 @@ public interface AudioHandler {
 /**
  * TODO: this class should be merged into the Microphone Manager
  */
-public class AudioSwitchHandler constructor(private val context: Context, var audioDeviceChangeListener: AudioDeviceChangeListener) :
+public class AudioSwitchHandler constructor(private val context: Context, val preferSpeakerphone: Boolean, var audioDeviceChangeListener: AudioDeviceChangeListener) :
     AudioHandler {
 
     private val logger by taggedLogger(TAG)
-
-    private var onAudioFocusChangeListener: AudioManager.OnAudioFocusChangeListener? = null
-    private var preferredDeviceList: List<Class<out AudioDevice>>? = null
 
     private var audioSwitch: AudioSwitch? = null
 
@@ -55,14 +55,29 @@ public class AudioSwitchHandler constructor(private val context: Context, var au
         logger.d { "[start] audioSwitch: $audioSwitch" }
         if (audioSwitch == null) {
             handler.removeCallbacksAndMessages(null)
+
+            val devices = mutableListOf(
+                AudioDevice.WiredHeadset::class.java,
+                AudioDevice.BluetoothHeadset::class.java,
+            )
+
+            if (preferSpeakerphone) {
+                devices.add(AudioDevice.Speakerphone::class.java)
+                devices.add(AudioDevice.Earpiece::class.java)
+            } else {
+                devices.add(AudioDevice.Earpiece::class.java)
+                devices.add(AudioDevice.Speakerphone::class.java)
+            }
+
             handler.post {
                 val switch = AudioSwitch(
                     context = context,
-                    audioFocusChangeListener = onAudioFocusChangeListener
-                        ?: defaultOnAudioFocusChangeListener,
-                    preferredDeviceList = preferredDeviceList
-                        ?: defaultPreferredDeviceList
+                    audioFocusChangeListener = onAudioFocusChangeListener,
+                    preferredDeviceList = devices
                 )
+                // TODO: AudioSwitch logging is disabled by default and it doesn't allow
+                // to specify a custom logger. At some point we may need to fork the library
+                // and add custom logger support.
                 audioSwitch = switch
                 switch.start(audioDeviceChangeListener)
                 switch.activate()
@@ -81,21 +96,13 @@ public class AudioSwitchHandler constructor(private val context: Context, var au
     public fun selectDevice(audioDevice: AudioDevice?) {
         logger.i { "[selectDevice] audioDevice: $audioDevice" }
         audioSwitch?.selectDevice(audioDevice)
+        audioSwitch?.activate()
     }
 
     public companion object {
-        private const val TAG = "Call:AudioSwitchHandler"
-        private val defaultOnAudioFocusChangeListener by lazy(LazyThreadSafetyMode.NONE) {
+        private const val TAG = "AudioSwitchHandler"
+        private val onAudioFocusChangeListener by lazy(LazyThreadSafetyMode.NONE) {
             DefaultOnAudioFocusChangeListener()
-        }
-
-        private val defaultPreferredDeviceList by lazy(LazyThreadSafetyMode.NONE) {
-            listOf(
-                AudioDevice.BluetoothHeadset::class.java,
-                AudioDevice.WiredHeadset::class.java,
-                AudioDevice.Earpiece::class.java,
-                AudioDevice.Speakerphone::class.java,
-            )
         }
 
         private class DefaultOnAudioFocusChangeListener : AudioManager.OnAudioFocusChangeListener {

@@ -3,9 +3,10 @@ title: Call Types
 description: How Call Types control features and permissions
 ---
 
-### Call Types
+import CallTypesPage from "../../../shared/video/_call-types.md";
 
 When you create a call like this
+
 ```kotlin
 val call = client.call("default", "123")
 ```
@@ -14,18 +15,4 @@ You create a call of the type `default` with id `123`.
 
 There are 4 built-in call types and you can also create your own.
 
-### Default call types
-
-* `development`: Everything is allowed, no permission checks. Great for development, bad for production usage.
-* `default`: Good defaults for 1 on 1 or group calls. This will work for most video calling apps.
-* `audio_room`: Default for audio rooms. Calls start out in backstage mode by default and you can go live when you want.
-* `livestream`: Default for livestreams.
-
-### Features & Settings
-
-The following features and settings are controlled by the call types
-
-TODO
-
-
-https://www.notion.so/stream-wiki/Call-Types-9741753a0d77428fb4ff51dc1328314e
+<CallTypesPage />

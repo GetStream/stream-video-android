@@ -54,7 +54,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.SavedStateHandle
-import io.getstream.video.android.common.AbstractCallActivity
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.avatar.UserAvatar
 import io.getstream.video.android.compose.ui.components.call.lobby.CallLobby
@@ -67,6 +66,7 @@ import io.getstream.video.android.dogfooding.ui.call.CallActivity
 import io.getstream.video.android.dogfooding.ui.theme.Colors
 import io.getstream.video.android.dogfooding.ui.theme.StreamButton
 import io.getstream.video.android.mock.StreamMockUtils
+import kotlinx.coroutines.delay
 
 @Composable
 fun CallLobbyScreen(
@@ -117,17 +117,6 @@ private fun CallLobbyHeader(
         callLobbyUiState = uiState,
         callLobbyViewModel = callLobbyViewModel
     )
-
-    val localInspectionMode = LocalInspectionMode.current
-    LaunchedEffect(key1 = Unit) {
-        if (BuildConfig.BENCHMARK) {
-            callLobbyViewModel.call.camera.disable()
-            callLobbyViewModel.call.microphone.disable()
-        } else if (!localInspectionMode) {
-            callLobbyViewModel.call.camera.enable()
-            callLobbyViewModel.call.microphone.enable()
-        }
-    }
 
     Row(
         modifier = Modifier
@@ -201,6 +190,7 @@ private fun CallLobbyBody(
 
         Spacer(modifier = Modifier.height(20.dp))
 
+        val localInspectionMode = LocalInspectionMode.current
         val isCameraEnabled: Boolean by if (LocalInspectionMode.current) {
             remember { mutableStateOf(true) }
         } else {
@@ -210,6 +200,18 @@ private fun CallLobbyBody(
             remember { mutableStateOf(true) }
         } else {
             call.microphone.isEnabled.collectAsState()
+        }
+
+        // turn on camera and microphone by default
+        LaunchedEffect(key1 = Unit) {
+            delay(300)
+            if (BuildConfig.BENCHMARK) {
+                callLobbyViewModel.call.camera.disable()
+                callLobbyViewModel.call.microphone.disable()
+            } else if (!localInspectionMode) {
+                callLobbyViewModel.call.camera.enable()
+                callLobbyViewModel.call.microphone.enable()
+            }
         }
 
         CallLobby(
@@ -271,8 +273,8 @@ private fun HandleCallLobbyUiState(
     LaunchedEffect(key1 = callLobbyUiState) {
         when (callLobbyUiState) {
             is CallLobbyUiState.JoinCompleted -> {
-                val intent = AbstractCallActivity.createIntent<CallActivity>(
-                    context,
+                val intent = CallActivity.createIntent(
+                    context = context,
                     callId = callLobbyViewModel.callId
                 ).apply {
                     flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK

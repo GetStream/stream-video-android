@@ -24,40 +24,17 @@ import io.getstream.log.StreamLog
 import io.getstream.log.android.AndroidStreamLogger
 import io.getstream.log.streamLog
 import io.getstream.result.Result
-import io.getstream.video.android.core.dispatchers.DispatcherProvider
 import io.getstream.video.android.core.logging.LoggingLevel
 import io.getstream.video.android.model.User
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
-import kotlinx.coroutines.test.TestCoroutineScheduler
-import kotlinx.coroutines.test.TestDispatcher
-import kotlinx.coroutines.test.UnconfinedTestDispatcher
-import kotlinx.coroutines.test.resetMain
-import kotlinx.coroutines.test.setMain
 import kotlinx.coroutines.withTimeout
 import org.junit.Before
 import org.junit.Rule
-import org.junit.rules.TestWatcher
-import org.junit.runner.Description
 import org.openapitools.client.models.VideoEvent
 import java.util.UUID
 import kotlin.coroutines.Continuation
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
-
-class DispatcherRule(
-    val testDispatcher: TestDispatcher = UnconfinedTestDispatcher(TestCoroutineScheduler()),
-) : TestWatcher() {
-    override fun starting(description: Description) {
-        Dispatchers.setMain(testDispatcher)
-        DispatcherProvider.set(testDispatcher, testDispatcher)
-    }
-
-    override fun finished(description: Description) {
-        Dispatchers.resetMain()
-        DispatcherProvider.reset()
-    }
-}
 
 class IntegrationTestHelper {
 

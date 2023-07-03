@@ -19,6 +19,7 @@ package io.getstream.video.android.core
 import com.google.common.truth.Truth.assertThat
 import io.getstream.video.android.core.base.IntegrationTestBase
 import io.getstream.video.android.model.User
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -28,6 +29,8 @@ import org.openapitools.client.models.ScreensharingSettingsRequest
 import org.robolectric.RobolectricTestRunner
 import org.threeten.bp.Clock
 import org.threeten.bp.OffsetDateTime
+import kotlin.test.assertFalse
+import kotlin.test.assertTrue
 
 @RunWith(RobolectricTestRunner::class)
 class CallStateTest : IntegrationTestBase() {
@@ -146,5 +149,16 @@ class CallStateTest : IntegrationTestBase() {
                 assertThat(call.state.settings.value).isNotNull()
             }
         }
+    }
+
+    @Test
+    fun `Setting the speaking while muted flag will reset itself after delay`() = runTest {
+        // we can make multiple calls, this should have no impact on the reset logic or duration
+        call.state.markSpeakingAsMuted()
+        call.state.markSpeakingAsMuted()
+        call.state.markSpeakingAsMuted()
+        assertTrue(call.state.speakingWhileMuted.value)
+        delay(2500)
+        assertFalse(call.state.speakingWhileMuted.value)
     }
 }

@@ -16,6 +16,7 @@
 
 package io.getstream.video.android.core.utils
 
+import android.os.Build
 import io.getstream.log.taggedLogger
 import io.getstream.video.android.core.StreamVideoImpl
 import io.getstream.video.android.core.dispatchers.DispatcherProvider
@@ -23,14 +24,12 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import org.webrtc.RTCStats
-import org.webrtc.RTCStatsReport
 
 internal data class Timer(val name: String, val start: Long = System.currentTimeMillis()) {
     var end: Long = 0
     var duration: Long = 0
-    var splits: List<Pair<String, Long>> = mutableListOf<Pair<String, Long>>()
-    var durations: List<Pair<String, Long>> = mutableListOf<Pair<String, Long>>()
+    var splits: List<Pair<String, Long>> = mutableListOf()
+    var durations: List<Pair<String, Long>> = mutableListOf()
 
     fun split(s: String) {
         val now = System.currentTimeMillis()
@@ -63,10 +62,10 @@ internal class DebugInfo(val client: StreamVideoImpl) {
     // last 20 events
 
     // phone type
-    val phoneModel = android.os.Build.MODEL
+    val phoneModel = Build.MODEL
 
     // android version
-    val version = android.os.Build.VERSION.SDK_INT
+    val version = Build.VERSION.SDK_INT
 
     // how many times the network dropped
 
@@ -132,76 +131,13 @@ internal class DebugInfo(val client: StreamVideoImpl) {
         - video limit reasons
         - selected resolution
         - TCP instead of UDP
+
+        TODO:
+        - thermal profiles: https://proandroiddev.com/thermal-in-android-26cc202e9d3b
+        - webrtc get FPS levels (actually it's in the logs, but the format is clunky)
+        - match participant and track id..
+
          */
-        localStats()
-        publisher?.let {
-            val stats = it.getStats().value
-            processPubStats(stats)
-            logger.i { "Publisher stats. video quality: $stats" }
-        }
-        subscriber?.let {
-            val stats = it.getStats().value
-            processSubStats(stats)
-            logger.i { "Subscriber stats. video quality: $stats" }
-        }
-    }
-
-    fun localStats() {
-        val call = client.state.activeCall.value
-        val resolution = call?.camera?.resolution?.value
-        val availableResolutions = call?.camera?.availableResolutions?.value
-        val maxResolution = availableResolutions?.maxByOrNull { it.width * it.height }
-
-        val displayingAt = call?.session?.trackDimensions?.value
-
-        val sfu = call?.session?.sfuUrl
-
-        logger.i { "stat123 with $sfu $resolution, $maxResolution, displaying external video at $displayingAt" }
-    }
-
-    fun processStats(stats: RTCStatsReport?) {
-        if (stats == null) return
-
-        val skipTypes = listOf("codec", "certificate", "data-channel")
-
-        val statGroups = mutableMapOf<String, MutableList<RTCStats>>()
-
-        for (entry in stats.statsMap) {
-            val stat = entry.value
-
-            val type = stat.type
-            if (type in skipTypes) continue
-
-            val statGroup = if (type == "inbound-rtp") {
-                "$type:${stat.members["kind"]}"
-            } else if (type == "track") {
-                "$type:${stat.members["kind"]}"
-            } else if (type == "outbound-rtp") {
-                val rid = stat.members["rid"] ?: "missing"
-                "$type:${stat.members["kind"]}:$rid"
-            } else {
-                type
-            }
-
-            if (statGroup != null) {
-                if (statGroup !in statGroups) {
-                    statGroups[statGroup] = mutableListOf()
-                }
-                statGroups[statGroup]?.add(stat)
-            }
-        }
-
-        statGroups.forEach {
-            logger.i { "stat123 $${it.key}:${it.value}" }
-        }
-    }
-
-    fun processPubStats(stats: RTCStatsReport?) {
-        processStats(stats)
-    }
-
-    fun processSubStats(stats: RTCStatsReport?) {
-        processStats(stats)
     }
 
     fun listCodecs() {

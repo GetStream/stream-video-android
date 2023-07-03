@@ -16,6 +16,7 @@
 
 package io.getstream.video.android.compose.ui.components.call.lobby
 
+import android.view.View
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -42,6 +43,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import io.getstream.video.android.compose.lifecycle.MediaPiPLifecycle
 import io.getstream.video.android.compose.permission.VideoPermissionsState
 import io.getstream.video.android.compose.permission.rememberCallPermissionsState
 import io.getstream.video.android.compose.theme.VideoTheme
@@ -75,6 +77,7 @@ import io.getstream.video.android.ui.common.R
  * @param onDisabledContent Content is shown that a local camera is disabled. It displays user avatar by default.
  * @param onCallAction Handler when the user triggers a Call Control Action.
  * @param lobbyControlsContent Content is shown that allows users to trigger different actions to control a preview call.
+ * @param onRendered An interface that will be invoked when the video is rendered.
  */
 @Composable
 public fun CallLobby(
@@ -93,9 +96,9 @@ public fun CallLobby(
         call.microphone.isEnabled.value
     },
     video: ParticipantState.Video = ParticipantState.Video(
-        sessionId = call.sessionId.orEmpty(),
+        sessionId = call.sessionId,
         track = VideoTrack(
-            streamId = call.sessionId.orEmpty(),
+            streamId = call.sessionId,
             video = if (LocalInspectionMode.current) {
                 org.webrtc.VideoTrack(1000L)
             } else {
@@ -105,8 +108,9 @@ public fun CallLobby(
         enabled = isCameraEnabled
     ),
     permissions: VideoPermissionsState = rememberCallPermissionsState(call = call),
+    onRendered: (View) -> Unit = {},
     onRenderedContent: @Composable (video: ParticipantState.Video) -> Unit = {
-        OnRenderedContent(call = call, video = it)
+        OnRenderedContent(call = call, video = it, onRendered = onRendered)
     },
     onDisabledContent: @Composable () -> Unit = {
         OnDisabledContent(user = user)
@@ -129,6 +133,8 @@ public fun CallLobby(
     val participant = remember(user) { ParticipantState(initialUser = user, call = call) }
 
     DefaultPermissionHandler(videoPermission = permissions)
+
+    MediaPiPLifecycle(call = call, pipEnteringDuration = 0)
 
     Column(modifier = modifier) {
         Box(
@@ -187,13 +193,15 @@ private fun DefaultPermissionHandler(
 private fun OnRenderedContent(
     call: Call,
     video: ParticipantState.Video,
+    onRendered: (View) -> Unit = {},
 ) {
     VideoRenderer(
         modifier = Modifier
             .fillMaxSize()
             .testTag("on_rendered_content"),
         call = call,
-        video = video
+        video = video,
+        onRendered = onRendered
     )
 }
 
@@ -221,9 +229,9 @@ private fun CallLobbyPreview() {
         CallLobby(
             call = mockCall,
             video = ParticipantState.Video(
-                sessionId = mockCall.sessionId.orEmpty(),
+                sessionId = mockCall.sessionId,
                 track = VideoTrack(
-                    streamId = mockCall.sessionId.orEmpty(),
+                    streamId = mockCall.sessionId,
                     video = org.webrtc.VideoTrack(1000L)
                 ),
                 enabled = true

@@ -123,7 +123,7 @@ Typically for development you want to fail fast and loud. For production you wan
 ### RTC offer/answer cycle
 
 * sessionId is created locally as a random UUID
-* create the peer connections
+* create two peer connections (publisher and subscriber)
 * capture audio and video (if we're not doing so already, in many apps it should already be on for the preview screen)
 * execute the join request
 * add the audio/video tracks which triggers onNegotiationNeeded
@@ -206,18 +206,6 @@ With the second approach everything is easy to understand and customize.
 * The UI should show an incoming call interface
 * Clicking accept or reject fires triggers the accept/reject API endpoints
 * Call members have an accepted_at, rejected_at field
-
-Ringing state on a call has the following options
-
-```kotlin
-sealed class RingingState() {
-    object Incoming : RingingState()
-    object Outgoing : RingingState()
-    object Active : RingingState()
-    object RejectedByAll : RingingState()
-    object TimeoutNoAnswer : RingingState()
-}
-```
 
 ### Media Manager
 

@@ -69,7 +69,7 @@ public data class IncomingCallStyle(
                 attrs,
                 R.styleable.IncomingCallView,
                 R.attr.streamVideoIncomingViewStyle,
-                R.style.Stream_IncomingCall
+                R.style.StreamVideo_IncomingCall
             ).use {
                 val callBackground = it.getDrawable(
                     R.styleable.IncomingCallView_streamVideoIncomingCallScreenBackground

@@ -20,13 +20,10 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.lifecycleScope
-import io.getstream.video.android.compose.permission.LaunchCallPermissions
 import io.getstream.video.android.compose.theme.VideoTheme
-import io.getstream.video.android.compose.ui.components.call.CallContainer
+import io.getstream.video.android.compose.ui.components.call.activecall.CallContent
 import io.getstream.video.android.core.GEO
 import io.getstream.video.android.core.StreamVideoBuilder
 import io.getstream.video.android.core.call.state.FlipCamera
@@ -37,8 +34,8 @@ import io.getstream.video.android.model.User
 import kotlinx.coroutines.launch
 
 /**
- * This tutorial demonstrates how to implement a video call screen by using higher-level APIs, such as [CallContainer].
- * You can customize [CallContainer] and build your own call screen to your taste.
+ * This tutorial demonstrates how to implement a video call screen by using higher-level APIs, such as [CallContent].
+ * You can customize [CallContent] and build your own call screen to your taste.
  *
  * You will be able to build your call screen following the steps below.
  */
@@ -74,14 +71,11 @@ class MainActivity2 : ComponentActivity() {
         }
 
         setContent {
-            // step4 - request permissions.
-            LaunchCallPermissions(call = call)
-
-            // step5 - apply VideTheme
+            // step4 - apply VideTheme
             VideoTheme {
 
-                // step6 - render videos
-                CallContainer(
+                // step5 - render videos
+                CallContent(
                     modifier = Modifier.fillMaxSize(),
                     call = call,
                     onCallAction = { callAction ->
