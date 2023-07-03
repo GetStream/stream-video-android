@@ -19,19 +19,9 @@ To use the `ParticipantVideo` component, embed it anywhere in your custom UI and
 ```kotlin
 @Composable
 fun CustomCallScreen(call: Call) {
-    val dominantSpeaker by call.state.dominantSpeaker.collectAsState()
     val participants by call.state.participants.collectAsState()
 
     Column {
-        ParticipantVideo(
-            modifier = Modifier.padding(16.dp),
-            call = call,
-            participant = dominantSpeaker,
-            style = RegularVideoRendererStyle()
-        )
-
-        Spacer(modifier = Modifier.height(20.dp)
-
         participants.forEach { participant ->
             ParticipantVideo(
                 modifier = Modifier.padding(16.dp),
