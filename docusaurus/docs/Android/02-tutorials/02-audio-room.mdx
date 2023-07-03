@@ -36,7 +36,7 @@ If you're new to android, note that there are 2 `build.gradle` files, you want t
 ```groovy
 dependencies {
     // Stream Video Compose SDK
-    implementation("io.getstream:stream-video-android-compose:0.0.18")
+    implementation("io.getstream:stream-video-android-compose:0.0.19")
 
     // Jetpack Compose (optional/ android studio typically adds them when you create a new project)
     implementation(platform("androidx.compose:compose-bom:2023.06.00"))
@@ -72,8 +72,7 @@ class MainActivity : ComponentActivity() {
         // step1 - create a user.
         val user = User(
             id = userId, // any string
-            name = "Tutorial", // name and image are used in the UI
-            role = "admin"
+            name = "Tutorial" // name and image are used in the UI
         )
 
         // step2 - initialize StreamVideo. For a production app we recommend adding the client to your Application class or di module.
@@ -126,13 +125,11 @@ Let's review the example above and go over the details.
 **Create a user**. First we create a user object.
 You typically sync your users via a server side integration from your own backend.
 Alternatively, you can also use guest or anonymous users.
-The user's role allows you to configure permissions in the video call.
 
 ```kotlin
 val user = User(
     id = userId, // any string
-    name = "Tutorial", // name and image are used in the UI
-    role = "admin"
+    name = "Tutorial" // name and image are used in the UI
 )
 ```
 
@@ -222,6 +219,9 @@ setContent {
 }
 ```
 
+All state for a call is available in `call.state`. In the example above we're observing the connection state and the active speakers.
+The [ParticipantState docs](../03-guides/03-call-and-participant-state.mdx) explain the available stateflow objects.
+
 You'll see that the **AudioRoom** composable hasn't been implemented yet. In `MainActivity`, add the following `AudioRoom` composable:
 
 ```kotlin
@@ -268,7 +268,9 @@ public fun AudioRoom(
 }
 ```
 
-The audio room is pretty basic. It needs a **Controls**, **Participants**, and **Description** composable functions to work.
+The code above observes the participants, active speakers and backstage stateflow objects in `call.state`.
+
+We still need to implement a **Controls**, **Participants**, and **Description** composable.
 Let's add those next.
 
 ```kotlin
