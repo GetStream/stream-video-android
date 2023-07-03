@@ -229,9 +229,9 @@ private fun CallLobbyPreview() {
         CallLobby(
             call = mockCall,
             video = ParticipantState.Video(
-                sessionId = mockCall.sessionId.orEmpty(),
+                sessionId = mockCall.sessionId,
                 track = VideoTrack(
-                    streamId = mockCall.sessionId.orEmpty(),
+                    streamId = mockCall.sessionId,
                     video = org.webrtc.VideoTrack(1000L)
                 ),
                 enabled = true

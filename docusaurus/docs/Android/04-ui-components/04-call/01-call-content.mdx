@@ -1,6 +1,18 @@
 # CallContent
 
-The `CallContent` lets you easily build UIs when inside a call. It handles the state and actions of enabling and disabling audio/video, speakerphone or video, as well as information about the call participants.
+The `CallContent` is the highest-level UI component that allows you to build your own call screen with full UI elements. So you don't need to take care much about each feature that you need to build a video call screen with this component.
+
+Basically what you can do with the `CallContent` is:
+
+- A full call screen with multiple UI elements, such as the app bar, participants grid, and control action buttons.
+- Supports orientation changes for landscape orientation.
+- [Handles the state and actions](03-call-controls.mdx) of enabling and disabling camera, microphone, and speakerphone.
+- Renders [Screensharing](06-screen-share-content.mdx).
+- Handles [Android permissions](../../05-ui-cookbook/08-permission-requests.mdx) related to the camera and microphone.
+- Manages media lifecycles (pause/resume the camera and microphone).
+- Supports [picture-in-picture](../../06-advanced/03-enable-picture-in-picture.mdx) easily.
+- Display participant information, such as audio levels, name, microphone states, and reactions.
+- [Styling a video renderer](../../05-ui-cookbook/04-video-renderer.mdx).
 
 Based on the call state, the `CallContent` provides a list or grid of participants, with their avatars and names, or a video if they're publishing, with more information for each participant, like their connection quality and audio levels.
 
@@ -8,9 +20,9 @@ Let's see how to show the `CallContent` UI.
 
 > **Note**: If you want to learn more about our component types, make sure to read through our [Compose Components Overview](../01-overview.mdx).
 
-## Usage
+## Build a Call Screen With CallContent
 
-To use the **bound** `CallContent`, add it to your UI within `setContent()`:
+To use the **bound** `CallContent`, add it to your UI within `VideoTheme`:
 
 ```kotlin
 override fun onCreate(savedInstanceState: Bundle?) {
@@ -44,7 +56,7 @@ This component is very rich, so you might want to customize how the actions are 
 
 ## Handling Actions
 
-Similar to `RingingCallContent`, the `CallContent` supports these main action handlers:
+`CallContent` supports these main action handlers:
 
 ```kotlin
 @Composable
@@ -56,23 +68,17 @@ public fun CallContent(
 ```
 
 * `onBackPressed`: Handler when the user taps on the back button. Used by default to handle picture in picture mode and different menus that can be shown based on other user actions.
-* `onCallAction`: Handler when the user triggers any of the available actions around audio, video, speakerphone, participants and more.
+* `onCallAction`: Handler when the user triggers any of the available actions around audio, video, speakerphone, participants and more. The events come from the [Control Actions](03-call-controls.mdx) by default.
 
 These can be easily customized when calling the UI component in your code:
 
 ```kotlin
-override fun onCreate(savedInstanceState: Bundle?) {
-    super.onCreate(savedInstanceState)
-    setContent {
-        VideoTheme {
-            CallContent( 
-              call = call,
-              // here
-              onBackPressed = { ... }, 
-              onCallAction = { ... }
-            ) 
-        }
-    }
+VideoTheme {
+    CallContent(
+      call = call,
+      onBackPressed = { .. },
+      onCallAction = { .. }
+    )
 }
 ```
 
@@ -82,27 +88,26 @@ Next, once you have the behavior down, you can explore customizing the UI of the
 
 ## Customization
 
-The `CallContent` component has more options when it comes to customization. It exposes the following parameters that let you change its UI:
+The following parameters are available on the `CallContent`:
 
-```kotlin
-@Composable
-public fun CallContent(
-    modifier: Modifier = Modifier,
-    appBarContent: @Composable (Call) -> Unit = { .. },
-    controlsContent: @Composable (Call) -> Unit = { .. },
-    isInPictureInPicture: Boolean = ..,
-    pictureInPictureContent: @Composable (Call) -> Unit = { .. },
-    style: VideoRendererStyle = RegularVideoRendererStyle(),
-    permissions: VideoPermissionsState = rememberCallPermissionsState(call = call),
-)
 ```
+| Attribute | Description |
+| --- | --- |
+| `call` | The call includes states and will be rendered with participants. |
+| `modifier` | The standard Jetpack Compose modifier used to style things like the component size, background, shape and similar. |
+| `onBackPressed` | Handler when the user taps on the back button. |
+| `permissions` | Android permissions that should be required to render a video call properly. |
+| `onCallAction` | Handler when the user triggers a Call Control Action. |
+| `appBarContent` | Content is shown that calls information or additional actions. |
+| `style` | Defined properties for styling a single video call track. |
+| `videoRenderer` | A single video renderer renders each individual participant. |
+| `videoContent` | Content is shown that renders all participants' videos. |
+| `controlsContent` | Content is shown that allows users to trigger different actions to control a joined call. |
+| `enableInPictureInPicture` | If the user has engaged in Picture-In-Picture mode. |
+| `pictureInPictureContent` | Content shown when the user enters Picture in Picture mode, if it's been enabled in the app. |
 
-* `modifier`: The standard Jetpack Compose modifier used to style things like the component size, background, shape and similar.
-* `appBarContent`: Used to render the AppBar within the Call. This AppBar used to display the connection state of the call, display a back button, and participants details button.
-* `controlsContent`: Used to render the controls within the Call. These allow the user to tinker with audio, video, speakerphone, video orientation and more. You can use this slot to change which controls are shown to the user based on things like user permissions or the type of calls you're running.
-* `isInPictureInPicture`:  If the user has engaged in Picture-In-Picture mode. If you want to learn more about setting up the PIP mode, check out the [Enable Picture-in-Picture](../../06-advanced/03-enable-picture-in-picture.mdx).
-* `pictureInPictureContent`: Used when the user enters PiP mode. This piece of content is shown within the PiP container and the slot allows you to customize what the user sees when they're in the background.
-* `style`: Defined properties for styling a single video call track. If you want to learn more about styling each individual video renderer, check out the [Video Renderer](../02-video-renderer.mdx).
-* `permissions`: Android permissions that should be required to render a video call properly.
+:::note
+You can find out the parameters details in the [CallContent docs](https://getstream.github.io/stream-video-android/stream-video-android-compose/io.getstream.video.android.compose.ui.components.call.activecall/-call-content.html).
+:::
 
 If you're looking for guides on how to override and customize this UI, we have various [UI Cookbook](../../05-ui-cookbook/01-overview.mdx) recipes for you and we cover a portion of customization within the [Video Android SDK Tutorial](../../02-tutorials/01-video-calling.mdx).
