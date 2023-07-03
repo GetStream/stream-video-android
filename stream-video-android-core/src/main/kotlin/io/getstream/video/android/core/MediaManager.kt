@@ -609,7 +609,7 @@ class MediaManagerImpl(
     )
 
     // TODO: this should be a setting on the call type
-    val preferSpeakerphone by lazy {true}
+    val preferSpeakerphone by lazy { true }
 
     internal val camera = CameraManager(this, eglBaseContext)
     internal val microphone = MicrophoneManager(this, preferSpeakerphone)

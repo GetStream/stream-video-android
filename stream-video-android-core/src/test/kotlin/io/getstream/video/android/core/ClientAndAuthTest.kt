@@ -43,8 +43,8 @@ class ClientAndAuthTest : TestBase() {
             context = context,
             apiKey = apiKey,
             geo = GEO.GlobalEdgeNetwork,
-            testData.users["thierry"]!!,
-            testData.tokens["thierry"]!!,
+            user = testData.users["thierry"]!!,
+            token = testData.tokens["thierry"]!!,
             ensureSingleInstance = false
         )
         val client = builder.build()

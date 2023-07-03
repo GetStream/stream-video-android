@@ -3,8 +3,6 @@ title: Client & Authentication
 description: How to setup the client and authenticate
 ---
 
-## Client & Auth
-
 Before joining a call, it is necessary to set up the video client. Here's a basic example:
 
 ```kotlin
@@ -83,7 +81,7 @@ Once you invoke the `build()` method of `StreamVideoBuilder`, you can get the sa
 val streamVideo = StreamVideo.instance()
 ```
 
-If you don't need to use the `StreamVideo` instance anymore, you can uninstall by calling `StreamVideo.uninstall()`
+If you don't need to use the `StreamVideo` instance anymore, you can uninstall by calling `StreamVideo.removeClient()`
 
 The full list of supported options is:
 

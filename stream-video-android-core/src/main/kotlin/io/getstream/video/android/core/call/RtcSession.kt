@@ -17,7 +17,6 @@
 package io.getstream.video.android.core.call
 
 import androidx.annotation.VisibleForTesting
-import com.twilio.audioswitch.AudioDevice
 import io.getstream.log.taggedLogger
 import io.getstream.result.Result
 import io.getstream.result.Result.Failure

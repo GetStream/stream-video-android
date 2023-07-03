@@ -82,6 +82,27 @@ participants.forEach { participantState ->
 val me: StateFlow<ParticipantState?> = call.state.me
 ```
 
+In Jetpack Compose, you can observe the `ParticipantsState` and render videos like the example below:
+
+```kotlin
+// all participants
+val participants by call.state.participants.collectAsState()
+
+LazyColumn {
+    items(items = participants, key = { it.sessionId }) { participant ->
+        ParticipantVideo(call = call, participant = participant)
+    }
+}
+
+// you
+val me by call.state.me.collectAsState()
+
+ParticipantVideo(
+    call = call,
+    participant = me
+)
+```
+
 The following fields are available on the participant
 
 | Attribute | Description |
