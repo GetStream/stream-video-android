@@ -26,12 +26,13 @@ import io.getstream.video.android.datastore.delegate.StreamUserDataStore
 import io.getstream.video.android.model.User
 import io.getstream.video.android.model.mapper.isValidCallId
 import io.getstream.video.android.model.mapper.toTypeAndId
-import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
-import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.shareIn
 import kotlinx.coroutines.launch
 import java.util.UUID
 import javax.inject.Inject
@@ -42,13 +43,14 @@ class CallJoinViewModel @Inject constructor(
 ) : ViewModel() {
     val user: StateFlow<User?> = dataStore.user
 
-    private val event: MutableStateFlow<CallJoinEvent> = MutableStateFlow(CallJoinEvent.Nothing)
-    internal val uiState: StateFlow<CallJoinUiState> = event
+    private val event: MutableSharedFlow<CallJoinEvent> = MutableSharedFlow()
+    internal val uiState: SharedFlow<CallJoinUiState> = event
         .flatMapLatest { event ->
             when (event) {
                 is CallJoinEvent.GoBackToLogin -> {
                     flowOf(CallJoinUiState.GoBackToLogin)
                 }
+
                 is CallJoinEvent.JoinCall -> {
                     val call = joinCall(event.callId)
                     flowOf(CallJoinUiState.JoinCompleted(callId = call.cid))
@@ -58,7 +60,7 @@ class CallJoinViewModel @Inject constructor(
                 else -> flowOf(CallJoinUiState.Nothing)
             }
         }
-        .stateIn(viewModelScope, SharingStarted.Lazily, CallJoinUiState.Nothing)
+        .shareIn(viewModelScope, SharingStarted.Lazily, 0)
 
     init {
         viewModelScope.launch {
@@ -66,13 +68,13 @@ class CallJoinViewModel @Inject constructor(
             // if not. In the current implementation we only initialise after Login and if the
             // Android process is restored then the Login is skipped Stream Video is not initialised.
             if (!StreamVideo.isInstalled) {
-                event.value = CallJoinEvent.GoBackToLogin
+                event.emit(CallJoinEvent.GoBackToLogin)
             }
         }
     }
 
     fun handleUiEvent(event: CallJoinEvent) {
-        this.event.value = event
+        viewModelScope.launch { this@CallJoinViewModel.event.emit(event) }
     }
 
     private fun joinCall(callId: String? = null): Call {

@@ -32,15 +32,15 @@ import io.getstream.video.android.dogfooding.token.TokenResponse
 import io.getstream.video.android.model.User
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.flowOn
-import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.shareIn
 import kotlinx.coroutines.launch
 import java.util.UUID
 import javax.inject.Inject
@@ -50,8 +50,8 @@ class LoginViewModel @Inject constructor(
     private val dataStore: StreamUserDataStore
 ) : ViewModel() {
 
-    private val event: MutableStateFlow<LoginEvent> = MutableStateFlow(LoginEvent.Nothing)
-    internal val uiState: StateFlow<LoginUiState> = event
+    private val event: MutableSharedFlow<LoginEvent> = MutableSharedFlow()
+    internal val uiState: SharedFlow<LoginUiState> = event
         .flatMapLatest { event ->
             when (event) {
                 is LoginEvent.Loading -> flowOf(LoginUiState.Loading)
@@ -59,10 +59,10 @@ class LoginViewModel @Inject constructor(
                 is LoginEvent.SignInInSuccess -> signInInSuccess(event.email)
                 else -> flowOf(LoginUiState.Nothing)
             }
-        }.stateIn(viewModelScope, SharingStarted.Lazily, LoginUiState.Nothing)
+        }.shareIn(viewModelScope, SharingStarted.Lazily, 0)
 
     fun handleUiEvent(event: LoginEvent) {
-        this.event.value = event
+        viewModelScope.launch { this@LoginViewModel.event.emit(event) }
     }
 
     private fun signInInSuccess(email: String) = flow<LoginUiState> {
