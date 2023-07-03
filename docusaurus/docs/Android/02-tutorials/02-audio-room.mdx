@@ -520,10 +520,10 @@ Our team is also happy to review your UI designs and offer recommendations on ho
 To recap what we've learned:
 
 * You setup a call: (val call = client.call("audio_room", "222"))
-* The call type "audio_room" controls which features are enabled and how permissions are setup
+* The call type "audio_room" controls, which features are enabled and how permissions are setup
 * The audio_room by default enables "backstage" mode, and only allows admins to join before the call goes live
 * When you join a call, realtime communication is setup for audio & video calling: (call.join())
-* Stateflow objects in call.state and call.state.participants make it easy to build your own UI
+* Stateflow objects in `call.state` and `call.state.participants` make it easy to build your own UI
 
 Calls run on Stream's global edge network of video servers.
 Being closer to your users improves the latency and reliability of calls.
@@ -531,4 +531,4 @@ For audio rooms we use Opus RED and Opus DTX for optimal audio quality.
 
 The SDKs enable you to build audio rooms, video calling and livestreaming in days.
 
-We hope you've enjoyed this tutorial and please do feel free to reach out if you have any suggestions or questions.
+We hope you've enjoyed this tutorial, and please do feel free to reach out if you have any suggestions or questions.
