@@ -322,7 +322,7 @@ On your Android device, you'll see the text update to 2 participants.
 Any app that records the microphone needs to ask the user for permission. We'll do this now.
 
 To capture the microphone output, we need to request [Android runtime permissions](https://source.android.com/docs/core/permissions/runtime_perms).
-In `MainActivity.kt` just below `setContent` add the line `LaunchMicrophonePermissions(call = call)`
+In `MainActivity.kt` just below `setContent` add the line `LaunchMicrophonePermissions(call = call)`:
 
 ```kotlin
 setContent {
@@ -332,7 +332,7 @@ setContent {
 ```
 
 The launch call permissions will request permissions when you enter the app.
-Review the [permissions docs](../05-ui-cookbook/08-permissions-request.mdx) to learn more about how you can easily request permissions.
+Review the [permissions docs](../05-ui-cookbook/08-permission-requests.mdx) to learn more about how you can easily request permissions.
 
 Now let's have a look at the `Controls` composable. Replace the `Controls` composable with the following:
 
