@@ -29,6 +29,7 @@ import androidx.compose.ui.Modifier
 import androidx.lifecycle.lifecycleScope
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.audio.AudioRoom
+import io.getstream.video.android.compose.ui.components.audio.AudioRoomContent
 import io.getstream.video.android.core.GEO
 import io.getstream.video.android.core.RealtimeConnection
 import io.getstream.video.android.core.StreamVideoBuilder
@@ -73,7 +74,7 @@ class MainActivity : ComponentActivity() {
 
                 // step5 - render AudioRoom
                 if (connect == RealtimeConnection.Connected) {
-                    AudioRoom(
+                    AudioRoomContent(
                         call = call,
                         title = "Audio Room Number 05"
                     )
