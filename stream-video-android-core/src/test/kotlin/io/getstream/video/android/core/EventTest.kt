@@ -64,6 +64,9 @@ class EventTest : IntegrationTestBase(connectCoordinatorWS = false) {
 
     @Test
     fun `Audio level changes`() = runTest {
+        // ensure the participant exists
+        call.state.getOrCreateParticipant("thierry", "thierry", updateFlow = true)
+
         val levels = mutableMapOf(
             "thierry" to io.getstream.video.android.model.UserAudioLevel(
                 "thierry",
@@ -75,6 +78,7 @@ class EventTest : IntegrationTestBase(connectCoordinatorWS = false) {
         clientImpl.fireEvent(event, call.cid)
 
         // ensure we update call data and capabilities
+        assertThat(call.state.activeSpeakers.value.map { it.initialUser.id }).containsExactly("thierry")
     }
 
     @Test
