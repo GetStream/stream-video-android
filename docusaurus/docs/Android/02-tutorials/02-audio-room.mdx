@@ -152,14 +152,19 @@ val user = User(
 ```kotlin
 val call = client.call("audio_room", callId)
 lifecycleScope.launch {
-    val result = call.join(create = true, createOptions = CreateCallOptions(
-        members = listOf(
-            MemberRequest(userId = "sophia", role="host", custom = emptyMap())
-        ), custom = mapOf(
-            "title" to "Compose Trends",
-            "description" to "Talk about how easy compose makes it to reuse and combine UI"
+    val result = call.join(
+        create = true, createOptions = CreateCallOptions(
+            members = listOf(
+                MemberRequest(userId = "sophia", role = "host", custom = emptyMap())
+            ), custom = mapOf(
+                "title" to "Compose Trends",
+                "description" to "Talk about how easy compose makes it to reuse and combine UI"
+            )
         )
-    ))
+    )
+    result.onError {
+        Toast.makeText(applicationContext, it.message, Toast.LENGTH_LONG).show()
+    }
 }
 ```
 
