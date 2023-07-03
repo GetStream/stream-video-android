@@ -89,7 +89,7 @@ class MainActivity : ComponentActivity() {
         lifecycleScope.launch {
             val result = call.join(create = true, createOptions = CreateCallOptions(
                 members = listOf(
-                    MemberRequest(userId = "sophia", role="host", custom = emptyMap())
+                    MemberRequest(userId = userId, role="host", custom = emptyMap())
                 ), custom = mapOf(
                     "title" to "Compose Trends",
                     "description" to "Talk about how easy compose makes it to reuse and combine UI"
@@ -153,7 +153,7 @@ lifecycleScope.launch {
     val result = call.join(
         create = true, createOptions = CreateCallOptions(
             members = listOf(
-                MemberRequest(userId = "sophia", role = "host", custom = emptyMap())
+                MemberRequest(userId = userId, role = "host", custom = emptyMap())
             ), custom = mapOf(
                 "title" to "Compose Trends",
                 "description" to "Talk about how easy compose makes it to reuse and combine UI"
@@ -167,7 +167,7 @@ lifecycleScope.launch {
 ```
 
 * This joins and creates a call with the type: "audio_room" and the specified callId.
-* The user with id sophia is granted the "host" role. You can create custom roles and grant them permissions to fit your app.
+* You add yourself as a member with the "host" role. You can create custom roles and grant them permissions to fit your app.
 * The `title` and `description` custom fields are set on the call object.
 * Shows an error toast if you fail to join an audio room.
 
