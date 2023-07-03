@@ -96,6 +96,12 @@ public data class ParticipantState(
     val joinedAt: StateFlow<OffsetDateTime?> = _joinedAt
 
     /**
+     * The audio level of the participant, single float value
+     */
+    internal val _audioLevel: MutableStateFlow<Float> = MutableStateFlow(0f)
+    val audioLevel: StateFlow<Float> = _audioLevel
+
+    /**
      * The last 5 values for the audio level. This list easier to work with for some audio visualizations
      */
     internal val _audioLevels: MutableStateFlow<List<Float>> =
