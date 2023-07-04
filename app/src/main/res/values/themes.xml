@@ -16,11 +16,7 @@
 -->
 <resources xmlns:tools="http://schemas.android.com/tools">
     <!-- Base application theme. -->
-    <style name="Theme.StreamVideoAndroid" parent="Theme.MaterialComponents.Light.NoActionBar">
-        <item name="streamVideoTheme">@style/StreamTheme</item>
-    </style>
-
-    <style name="StreamTheme" parent="@style/StreamVideoTheme">
-        <!-- Customize Stream Video theme here. -->
+    <style name="StreamVideoAndroid" parent="Theme.MaterialComponents.Light.NoActionBar">
+        <item name="android:statusBarColor">@color/stream_video_primary_accent</item>
     </style>
 </resources>
