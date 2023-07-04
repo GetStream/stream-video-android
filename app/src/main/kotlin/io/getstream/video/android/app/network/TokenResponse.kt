@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014-2022 Stream.io Inc. All rights reserved.
+ * Copyright (c) 2014-2023 Stream.io Inc. All rights reserved.
  *
  * Licensed under the Stream License;
  * you may not use this file except in compliance with the License.
@@ -14,11 +14,9 @@
  * limitations under the License.
  */
 
-package io.getstream.video.android.app.user
+package io.getstream.video.android.app.network
 
-import io.getstream.video.android.model.User
+import kotlinx.serialization.Serializable
 
-data class AppUser(
-    val user: User,
-    val isSelected: Boolean
-)
+@Serializable
+data class TokenResponse(val userId: String, val token: String)
