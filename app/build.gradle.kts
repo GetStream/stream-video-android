@@ -22,6 +22,7 @@ import java.util.*
 plugins {
     id("io.getstream.android.application.compose")
     id("io.getstream.spotless")
+    id(libs.plugins.kotlin.serialization.get().pluginId)
 }
 
 android {
@@ -67,10 +68,8 @@ android {
 }
 
 dependencies {
+    // Stream Video SDK
     implementation(project(":stream-video-android-compose"))
-    implementation(project(":stream-video-android-xml"))
-    implementation(project(":stream-video-android-tooling"))
-    implementation(project(":stream-video-android-datastore"))
 
     // androidx
     implementation(libs.androidx.material)
@@ -84,7 +83,12 @@ dependencies {
     implementation(libs.androidx.compose.runtime)
     implementation(libs.androidx.compose.foundation)
     implementation(libs.androidx.compose.material)
-    implementation(libs.androidx.compose.material.iconsExtended)
+
+    // network
+    implementation(libs.retrofit)
+    implementation(libs.kotlinx.coroutines.android)
+    implementation(libs.kotlinx.serialization.json)
+    implementation(libs.kotlinx.serialization.converter)
 
     // stream logger
     implementation(libs.stream.log.android)

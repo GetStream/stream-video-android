@@ -18,64 +18,43 @@ package io.getstream.video.android.app
 
 import android.app.Application
 import android.content.Context
-import io.getstream.log.Priority
-import io.getstream.log.StreamLog
-import io.getstream.log.android.AndroidStreamLogger
-import io.getstream.video.android.app.ui.login.LoginActivity
+import io.getstream.video.android.app.network.StreamVideoNetwork
 import io.getstream.video.android.core.StreamVideo
 import io.getstream.video.android.core.StreamVideoBuilder
 import io.getstream.video.android.core.logging.LoggingLevel
+import io.getstream.video.android.model.ApiKey
 import io.getstream.video.android.model.User
-import io.getstream.video.android.tooling.handler.StreamGlobalExceptionHandler
 
 class VideoApp : Application() {
 
-    lateinit var streamVideo: StreamVideo
-        private set
-
-    override fun onCreate() {
-        super.onCreate()
-        AndroidStreamLogger.installOnDebuggableApp(this, minPriority = Priority.DEBUG)
-        StreamGlobalExceptionHandler.install(
-            application = this,
-            packageName = LoginActivity::class.java.name
-        )
-        StreamLog.i(TAG) { "[onCreate] no args" }
-//        UserPreferencesManager.initialize(this)
-    }
-
-    /**
-     * Sets up and returns the [streamVideo] required to connect to the API.
-     */
+    /** Sets up and returns the [StreamVideo] required to connect to the API. */
     fun initializeStreamVideo(
         user: User,
-        apiKey: String,
-        loggingLevel: LoggingLevel,
+        apiKey: ApiKey,
+        loggingLevel: LoggingLevel
     ): StreamVideo {
-        StreamLog.d(TAG) { "[initializeStreamCalls] loggingLevel: $loggingLevel" }
-
         return StreamVideoBuilder(
             context = this,
             user = user,
             apiKey = apiKey,
-//            androidInputs = setOf(
-//                CallServiceInput.from(CallService::class),
-//                CallActivityInput.from(CallActivity::class),
-//                // CallActivityInput.from(XmlCallActivity::class),
-//            ),
-            loggingLevel = loggingLevel
-        ).build().also {
-            streamVideo = it
-            StreamLog.v(TAG) { "[initializeStreamCalls] completed" }
-        }
+            loggingLevel = loggingLevel,
+            ensureSingleInstance = false,
+            tokenProvider = {
+                val email = user.custom["email"]
+                val response = StreamVideoNetwork.tokenService.fetchToken(
+                    userId = email,
+                    apiKey = API_KEY
+                )
+                response.token
+            }
+        ).build()
     }
 
     fun logOut() {
-        streamVideo.logOut()
+        StreamVideo.instance().logOut()
     }
 
     companion object {
-        private const val TAG = "Call:App"
         const val API_KEY = BuildConfig.SAMPLE_STREAM_VIDEO_API_KEY
     }
 }
