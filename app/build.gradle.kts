@@ -70,6 +70,7 @@ android {
 dependencies {
     // Stream Video SDK
     implementation(project(":stream-video-android-compose"))
+    compileOnly(project(":stream-video-android-mock"))
 
     // androidx
     implementation(libs.androidx.material)
@@ -89,15 +90,4 @@ dependencies {
     implementation(libs.kotlinx.coroutines.android)
     implementation(libs.kotlinx.serialization.json)
     implementation(libs.kotlinx.serialization.converter)
-
-    // stream logger
-    implementation(libs.stream.log.android)
-
-    // memory detection
-    debugImplementation(libs.leakCanary)
-
-    // unit test
-    testImplementation(libs.junit)
-    androidTestImplementation(libs.androidx.test.junit)
-    androidTestImplementation(libs.androidx.espresso.core)
 }

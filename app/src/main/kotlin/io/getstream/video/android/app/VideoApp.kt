@@ -18,7 +18,6 @@ package io.getstream.video.android.app
 
 import android.app.Application
 import android.content.Context
-import io.getstream.video.android.app.network.StreamVideoNetwork
 import io.getstream.video.android.core.StreamVideo
 import io.getstream.video.android.core.StreamVideoBuilder
 import io.getstream.video.android.core.logging.LoggingLevel
@@ -31,27 +30,17 @@ class VideoApp : Application() {
     fun initializeStreamVideo(
         user: User,
         apiKey: ApiKey,
+        token: String,
         loggingLevel: LoggingLevel
     ): StreamVideo {
         return StreamVideoBuilder(
             context = this,
             user = user,
             apiKey = apiKey,
+            token = token,
             loggingLevel = loggingLevel,
             ensureSingleInstance = false,
-            tokenProvider = {
-                val email = user.custom["email"]
-                val response = StreamVideoNetwork.tokenService.fetchToken(
-                    userId = email,
-                    apiKey = API_KEY
-                )
-                response.token
-            }
         ).build()
-    }
-
-    fun logOut() {
-        StreamVideo.instance().logOut()
     }
 
     companion object {
