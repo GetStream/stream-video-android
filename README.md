@@ -8,8 +8,8 @@
   <a href="https://search.maven.org/search?q=stream-video-android"><img src="https://img.shields.io/maven-central/v/io.getstream/stream-video-android-core.svg?label=Maven%20Central" /></a>
 </p>
 
-This is the official Android SDK for Stream Video, a service for building video call, audio room, and live streaming applications. This library includes both a low-level video SDK and a set of reusable UI components. 
-Most users start with the Compose UI components, and fall back to the lower level API when they want to customize things.
+This is the official Android SDK for [Stream Video](https://getstream.io/video?utm_source=Github&utm_medium=Github_Repo_Content_Ad&utm_content=Developer&utm_campaign=Github_Android_Video_SDK&utm_term=DevRelOss), a service for building video calls, audio rooms, and live-streaming applications. This library includes both a low-level video SDK and a set of reusable UI components.
+Most users start with the Compose UI components and fall back to the lower-level API when they want to customize things.
 
 <a href="https://getstream.io?utm_source=Github&utm_medium=Github_Repo_Content_Ad&utm_content=Developer&utm_campaign=Github_Android_Video_SDK&utm_term=DevRelOss">
 <img src="https://user-images.githubusercontent.com/24237865/138428440-b92e5fb7-89f8-41aa-96b1-71a5486c5849.png" align="right" width="12%"/>
@@ -29,9 +29,8 @@ Stream provides UI components and state handling that make it easy to build vide
 
 ## 👩‍💻 Free for Makers 👨‍💻
 
-Stream is free for most side and hobby projects.
-To qualify, your project/company needs to have < 5 team members and < $10k in monthly revenue.
-Makers get $100 in monthly credit for video for free.
+Stream is free for most side and hobby projects. To qualify, your project/company needs to have < 5 team members and < $10k in monthly revenue. Makers get $100 in monthly credit for video for free.
+For more details, check out the [Maker Account](https://getstream.io/maker-account?utm_source=Github&utm_medium=Github_Repo_Content_Ad&utm_content=Developer&utm_campaign=Github_Android_Video_SDK&utm_term=DevRelOss).
 
 ## 💡Supported Features💡
 
