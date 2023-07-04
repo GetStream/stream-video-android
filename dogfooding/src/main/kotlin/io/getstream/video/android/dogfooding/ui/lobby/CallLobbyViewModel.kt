@@ -26,13 +26,16 @@ import io.getstream.video.android.core.StreamVideo
 import io.getstream.video.android.datastore.delegate.StreamUserDataStore
 import io.getstream.video.android.model.StreamCallId
 import io.getstream.video.android.model.User
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.onCompletion
-import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.shareIn
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
@@ -54,8 +57,8 @@ class CallLobbyViewModel @Inject constructor(
     private val _isLoading: MutableStateFlow<Boolean> = MutableStateFlow(false)
     internal val isLoading: StateFlow<Boolean> = _isLoading
 
-    private val event: MutableStateFlow<CallLobbyEvent> = MutableStateFlow(CallLobbyEvent.Nothing)
-    internal val uiState: StateFlow<CallLobbyUiState> = event
+    private val event: MutableSharedFlow<CallLobbyEvent> = MutableSharedFlow()
+    internal val uiState: SharedFlow<CallLobbyUiState> = event
         .flatMapLatest { event ->
             when (event) {
                 is CallLobbyEvent.JoinCall -> flowOf(CallLobbyUiState.JoinCompleted)
@@ -64,10 +67,10 @@ class CallLobbyViewModel @Inject constructor(
             }
         }
         .onCompletion { _isLoading.value = false }
-        .stateIn(viewModelScope, SharingStarted.Lazily, CallLobbyUiState.Nothing)
+        .shareIn(viewModelScope, SharingStarted.Lazily, 0)
 
     fun handleUiEvent(event: CallLobbyEvent) {
-        this.event.value = event
+        viewModelScope.launch { this@CallLobbyViewModel.event.emit(event) }
     }
 
     fun enableCamera(enabled: Boolean) {
