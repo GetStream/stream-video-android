@@ -73,7 +73,7 @@ fun LoginScreen(
     loginViewModel: LoginViewModel = hiltViewModel(),
     navigateToCallJoin: () -> Unit
 ) {
-    val uiState by loginViewModel.uiState.collectAsState()
+    val uiState by loginViewModel.uiState.collectAsState(initial = LoginUiState.Nothing)
     val isLoading by remember(uiState) { mutableStateOf(uiState !is LoginUiState.Nothing) }
     var isShowingEmailLoginDialog by remember { mutableStateOf(false) }
 

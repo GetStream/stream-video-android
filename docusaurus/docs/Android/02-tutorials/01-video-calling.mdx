@@ -15,7 +15,7 @@ This tutorial teaches you how to build Zoom/Whatsapp style video calling for you
 ### Step 1 - Create a new project in Android Studio
 
 1. Create a new project
-2. Select Phone & Template -> **Empty Activity**
+2. Select Phone & Tablet -> **Empty Activity**
 3. Name your project **VideoCall**.
 
 Note that setup steps can vary slightly across Android Studio versions.
@@ -29,7 +29,7 @@ If you're new to android, note that there are 2 `build.gradle` files, you want t
 ```groovy
 dependencies {
     // Stream Video Compose SDK
-    implementation("io.getstream:stream-video-android-compose:0.0.18")
+    implementation("io.getstream:stream-video-android-compose:0.0.19")
 
     // Optionally add Jetpack Compose if Android studio didn't automatically include them
     implementation(platform("androidx.compose:compose-bom:2023.06.00"))
@@ -51,6 +51,10 @@ For this tutorial, we'll use the compose UI components.
 
 ### Step 3 - Create & Join a call
 
+To keep this tutorial short and easy to understand we'll place all code in `MainActivity.kt`.
+For a production app you'd want to initialize the client in your Application class or DI module.
+You'd also want to use a viewmodel.
+
 Open up `MainActivity.kt` and replace the **MainActivity** class with:
 
 ```kotlin
@@ -65,8 +69,7 @@ class MainActivity : ComponentActivity() {
         // step1 - create a user.
         val user = User(
             id = userId, // any string
-            name = "Tutorial", // name and image are used in the UI
-            role = "admin"
+            name = "Tutorial" // name and image are used in the UI
         )
 
         // step2 - initialize StreamVideo. For a production app we recommend adding the client to your Application class or di module.
@@ -126,13 +129,11 @@ Let's review what we did in the above code.
 **Create a user**. First we create a user object.
 You typically sync these users via a server side integration from your own backend.
 Alternatively, you can also use guest or anonymous users.
-The user's role allows you to configure permissions in the video call.
 
 ```kotlin
 val user = User(
     id = userId, // any string
-    name = "Tutorial", // name and image are used in the UI
-    role = "admin"
+    name = "Tutorial" // name and image are used in the UI
 )
 ```
 

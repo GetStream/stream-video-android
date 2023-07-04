@@ -111,7 +111,7 @@ private fun CallLobbyHeader(
     callLobbyViewModel: CallLobbyViewModel = hiltViewModel(),
     navigateUpToLogin: () -> Unit
 ) {
-    val uiState by callLobbyViewModel.uiState.collectAsState()
+    val uiState by callLobbyViewModel.uiState.collectAsState(initial = CallLobbyUiState.Nothing)
 
     HandleCallLobbyUiState(
         callLobbyUiState = uiState,

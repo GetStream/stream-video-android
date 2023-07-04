@@ -12,7 +12,7 @@ The end result will look like the image below and support the following features
 * Calls run on Stream's global edge network for optimal latency and scalability.
 * There is no cap to how many listeners you can have in a room.
 * Listeners can raise their hand, and be invited to speak by the host.
-* Audio tracks are send multiple times for optimal reliability.
+* Audio tracks are sent multiple times for optimal reliability.
 
 ![Audio Room](../assets/audio-room.png)
 
@@ -25,7 +25,7 @@ Setup steps can vary slightly across Android Studio versions.
 If you run into trouble, make sure to use the latest version of Android Studio.
 
 1. Create a new project
-2. Select Phone & Template -> **Empty Activity**
+2. Select Phone & Tablet -> **Empty Activity**
 3. Name your project **AudioRoom**.
 
 ### Step 2 - Install the SDK & Setup the client
@@ -36,7 +36,7 @@ If you're new to android, note that there are 2 `build.gradle` files, you want t
 ```groovy
 dependencies {
     // Stream Video Compose SDK
-    implementation("io.getstream:stream-video-android-compose:0.0.18")
+    implementation("io.getstream:stream-video-android-compose:0.0.19")
 
     // Jetpack Compose (optional/ android studio typically adds them when you create a new project)
     implementation(platform("androidx.compose:compose-bom:2023.06.00"))
@@ -72,8 +72,7 @@ class MainActivity : ComponentActivity() {
         // step1 - create a user.
         val user = User(
             id = userId, // any string
-            name = "Tutorial", // name and image are used in the UI
-            role = "admin"
+            name = "Tutorial" // name and image are used in the UI
         )
 
         // step2 - initialize StreamVideo. For a production app we recommend adding the client to your Application class or di module.
@@ -90,7 +89,7 @@ class MainActivity : ComponentActivity() {
         lifecycleScope.launch {
             val result = call.join(create = true, createOptions = CreateCallOptions(
                 members = listOf(
-                    MemberRequest(userId = "sophia", role="host", custom = emptyMap())
+                    MemberRequest(userId = userId, role="host", custom = emptyMap())
                 ), custom = mapOf(
                     "title" to "Compose Trends",
                     "description" to "Talk about how easy compose makes it to reuse and combine UI"
@@ -126,13 +125,11 @@ Let's review the example above and go over the details.
 **Create a user**. First we create a user object.
 You typically sync your users via a server side integration from your own backend.
 Alternatively, you can also use guest or anonymous users.
-The user's role allows you to configure permissions in the video call.
 
 ```kotlin
 val user = User(
     id = userId, // any string
-    name = "Tutorial", // name and image are used in the UI
-    role = "admin"
+    name = "Tutorial" // name and image are used in the UI
 )
 ```
 
@@ -156,7 +153,7 @@ lifecycleScope.launch {
     val result = call.join(
         create = true, createOptions = CreateCallOptions(
             members = listOf(
-                MemberRequest(userId = "sophia", role = "host", custom = emptyMap())
+                MemberRequest(userId = userId, role = "host", custom = emptyMap())
             ), custom = mapOf(
                 "title" to "Compose Trends",
                 "description" to "Talk about how easy compose makes it to reuse and combine UI"
@@ -170,7 +167,7 @@ lifecycleScope.launch {
 ```
 
 * This joins and creates a call with the type: "audio_room" and the specified callId.
-* The user with id sophia is granted the "host" role. You can create custom roles and grant them permissions to fit your app.
+* You add yourself as a member with the "host" role. You can create custom roles and grant them permissions to fit your app.
 * The `title` and `description` custom fields are set on the call object.
 * Shows an error toast if you fail to join an audio room.
 
@@ -195,7 +192,6 @@ Replace the code in `setContent` with the following sample:
 ```kotlin
 setContent {
     VideoTheme {
-        val connection by call.state.connection.collectAsState()
         val connection by call.state.connection.collectAsState()
         val activeSpeakers by call.state.activeSpeakers.collectAsState()
         val audioLevel = activeSpeakers.firstOrNull()?.audioLevel?.collectAsState()
@@ -222,6 +218,9 @@ setContent {
     }
 }
 ```
+
+All state for a call is available in `call.state`. In the example above we're observing the connection state and the active speakers.
+The [ParticipantState docs](../03-guides/03-call-and-participant-state.mdx) explain the available stateflow objects.
 
 You'll see that the **AudioRoom** composable hasn't been implemented yet. In `MainActivity`, add the following `AudioRoom` composable:
 
@@ -269,7 +268,9 @@ public fun AudioRoom(
 }
 ```
 
-The audio room is pretty basic. It needs a **Controls**, **Participants**, and **Description** composable functions to work.
+The code above observes the participants, active speakers and backstage stateflow objects in `call.state`.
+
+We still need to implement a **Controls**, **Participants**, and **Description** composable.
 Let's add those next.
 
 ```kotlin
@@ -310,12 +311,6 @@ That's it for the basics. Now when you run your app, you'll see the following UI
 
 The approach is the same for all components. We take the states of the call by observing `call.state` properties, such as `call.state.participants` and use it to power our UI.
 The [ParticipantState docs](../03-guides/03-call-and-participant-state.mdx) exposes all the state objects we need for the name, avatar, audio levels, speaking, etc.
-
-To make this a little more interactive, let's join the audio room from your browser.
-
-<TokenSnippet sampleApp='audio-rooms' displayStyle='join' />
-
-On your Android device, you'll see the text update to 2 participants.
 
 ### Step 5 - Audio Room Controls & Permission
 
@@ -370,6 +365,20 @@ public fun Controls(
 ```
 
 Now when you run the app, you'll see a button to disable/enable the microphone and to start or end the broadcast.
+
+To make this a little more interactive, let's join the audio room from your browser.
+
+<TokenSnippet sampleApp='audio-rooms' displayStyle='join' />
+
+At first you won't be allowed to join the room since it's not live yet.
+By default the audio_room call type has backstage mode enabled. This makes it easy to try out your room and talk to your co-hosts before going live.
+You can enable/disable the usage of backstage mode in the dashboard.
+
+Let's go live and join the call:
+
+* Click go live on Android
+* On web join the room
+* You'll see the participant count increase to 2
 
 ### Step 6 - Participants UI
 
