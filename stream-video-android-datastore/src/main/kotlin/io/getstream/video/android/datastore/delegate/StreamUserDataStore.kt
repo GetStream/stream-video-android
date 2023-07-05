@@ -40,54 +40,91 @@ import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.map
 
+/**
+ * A DataStore managers to persist Stream user login data safely, consistently, and transactionally.
+ *
+ * @param dataStore A [DataStore] that contains data type of [StreamUserPreferences].
+ * @property scope A coroutine scope that launches all tasks for DataStore.
+ */
 public class StreamUserDataStore constructor(
     dataStore: DataStore<StreamUserPreferences?>,
     private val scope: CoroutineScope
 ) :
     DataStore<StreamUserPreferences?> by dataStore {
 
+    /**
+     * Update user preferences with the give [StreamUserPreferences].
+     *
+     * @param streamUserPreferences A new [StreamUserPreferences] to replace previous persisted data.
+     */
     public suspend fun updateUserPreferences(streamUserPreferences: StreamUserPreferences) {
         updateData { streamUserPreferences }
     }
 
+    /**
+     * Update [User] information that is used to build a `StreamVideo` instance for logging in.
+     *
+     * @param user A user instance to be used logged in.
+     */
     public suspend fun updateUser(user: User?) {
         updateData { preferences ->
             (preferences ?: StreamUserPreferences()).copy(user = user)
         }
     }
 
+    /**
+     * Update [ApiKey] information that is used to build a `StreamVideo` instance for logging in.
+     *
+     * @param apiKey An API key instance to be used logged in.
+     */
     public suspend fun updateApiKey(apiKey: ApiKey) {
         updateData { preferences ->
             (preferences ?: StreamUserPreferences()).copy(apiKey = apiKey)
         }
     }
 
+    /**
+     * Update [UserToken] information that is used to build a `StreamVideo` instance for logging in.
+     *
+     * @param userToken An user token instance to be used logged in.
+     */
     public suspend fun updateUserToken(userToken: UserToken) {
         updateData { preferences ->
             (preferences ?: StreamUserPreferences()).copy(userToken = userToken)
         }
     }
 
+    /**
+     * Update [Device] information that is used to be get push notifications from the Stream server.
+     *
+     * @param userDevice A user device used to be get push notifications from the Stream server.
+     */
     public suspend fun updateUserDevice(userDevice: Device?) {
         updateData { preferences ->
             (preferences ?: StreamUserPreferences()).copy(userDevice = userDevice)
         }
     }
 
+    /** Cancel all running jobs. */
     public fun cancelJobs() {
         scope.cancel()
     }
 
+    /** Clear the persisted all user data. */
     public suspend fun clear(): StreamUserPreferences? = updateData { null }
 
+    /** A state that contains a persisted [User] data. */
     public val user: StateFlow<User?> = data.map { it?.user }.asStateFlow(null, scope)
 
+    /** A state that contains a persisted [ApiKey] data. */
     public val apiKey: StateFlow<ApiKey> =
         data.map { it?.apiKey.orEmpty() }.asStateFlow("", scope)
 
+    /** A state that contains a persisted [UserToken] data. */
     public val userToken: StateFlow<UserToken> =
         data.map { it?.userToken.orEmpty() }.asStateFlow("", scope)
 
+    /** A state that contains a persisted [Device] data. */
     public val userDevice: StateFlow<Device?> =
         data.map { it?.userDevice }
             .asStateFlow(null, scope)
