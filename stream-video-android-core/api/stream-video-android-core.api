@@ -726,10 +726,6 @@ public final class io/getstream/video/android/core/audio/AudioSwitchHandler : io
 public final class io/getstream/video/android/core/audio/AudioSwitchHandler$Companion {
 }
 
-public abstract interface class io/getstream/video/android/core/audio/PermissionsCheckStrategy {
-	public abstract fun hasPermissions ()Z
-}
-
 public final class io/getstream/video/android/core/call/RtcSession {
 	public final fun cleanup ()V
 	public final fun connect (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;

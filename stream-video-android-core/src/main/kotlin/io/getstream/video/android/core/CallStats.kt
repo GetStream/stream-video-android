@@ -25,7 +25,7 @@ import org.webrtc.RTCStats
 import org.webrtc.RTCStatsReport
 import stream.video.sfu.models.TrackType
 
-public class PeerConnectionStats() {
+public class PeerConnectionStats {
     internal val _resolution: MutableStateFlow<String> = MutableStateFlow("")
     val resolution: StateFlow<String> = _resolution
 
