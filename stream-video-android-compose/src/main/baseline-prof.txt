@@ -465,6 +465,7 @@ PLio/getstream/video/android/compose/ui/components/call/renderer/ParticipantVide
 PLio/getstream/video/android/compose/ui/components/call/renderer/ParticipantVideoKt;->ParticipantLabel$lambda$5(Landroidx/compose/runtime/State;)Z
 PLio/getstream/video/android/compose/ui/components/call/renderer/ParticipantVideoKt;->ParticipantLabel$lambda$6(Landroidx/compose/runtime/State;)Z
 HPLio/getstream/video/android/compose/ui/components/call/renderer/ParticipantVideoKt;->ParticipantLabel(Landroidx/compose/foundation/layout/BoxScope;Ljava/lang/String;Landroidx/compose/ui/Alignment;ZZLjava/util/List;Lkotlin/jvm/functions/Function3;Landroidx/compose/runtime/Composer;II)V
+PLio/getstream/video/android/compose/ui/components/call/renderer/ParticipantVideoKt;->ParticipantVideo$lambda$1(Landroidx/compose/runtime/State;)Ljava/util/List;
 PLio/getstream/video/android/compose/ui/components/call/renderer/ParticipantVideoKt$DefaultReaction$1;->create(Ljava/lang/Object;Lkotlin/coroutines/Continuation;)Lkotlin/coroutines/Continuation;
 PLio/getstream/video/android/compose/ui/components/call/renderer/ParticipantVideoKt$DefaultReaction$1;->invokeSuspend(Ljava/lang/Object;)Ljava/lang/Object;
 PLio/getstream/video/android/compose/ui/components/call/renderer/ParticipantVideoKt$ParticipantLabel$1;->invoke$lambda$0(Landroidx/compose/runtime/State;)Z
@@ -505,6 +506,7 @@ PLio/getstream/video/android/compose/ui/components/call/renderer/RegularVideoRen
 PLio/getstream/video/android/compose/ui/components/call/renderer/RegularVideoRendererStyle;->isShowingReactions()Z
 PLio/getstream/video/android/compose/ui/components/call/renderer/VideoRendererStyle;-><clinit>()V
 PLio/getstream/video/android/compose/ui/components/call/renderer/VideoRendererStyle;-><init>(ZZZZZLandroidx/compose/ui/Alignment;ILandroidx/compose/ui/Alignment;)V
+HPLio/getstream/video/android/compose/ui/components/call/renderer/VideoRendererStyle;-><init>(ZZZZZLandroidx/compose/ui/Alignment;ILandroidx/compose/ui/Alignment;)V
 PLio/getstream/video/android/compose/ui/components/call/renderer/VideoRendererStyle;-><init>(ZZZZZLandroidx/compose/ui/Alignment;ILandroidx/compose/ui/Alignment;Lkotlin/jvm/internal/DefaultConstructorMarker;)V
 PLio/getstream/video/android/compose/ui/components/call/renderer/VideoRendererStyleKt;->copy$default(Lio/getstream/video/android/compose/ui/components/call/renderer/VideoRendererStyle;ZZZZZLandroidx/compose/ui/Alignment;ILandroidx/compose/ui/Alignment;ILjava/lang/Object;)Lio/getstream/video/android/compose/ui/components/call/renderer/VideoRendererStyle;
 PLio/getstream/video/android/compose/ui/components/call/renderer/VideoRendererStyleKt;->copy(Lio/getstream/video/android/compose/ui/components/call/renderer/VideoRendererStyle;ZZZZZLandroidx/compose/ui/Alignment;ILandroidx/compose/ui/Alignment;)Lio/getstream/video/android/compose/ui/components/call/renderer/VideoRendererStyle;
@@ -513,6 +515,8 @@ PLio/getstream/video/android/compose/ui/components/call/renderer/internal/Orient
 PLio/getstream/video/android/compose/ui/components/call/renderer/internal/OrientationVideoRendererKt;->OrientationVideoRenderer_gq8v52I$lambda$4(Landroidx/compose/runtime/State;)Ljava/util/List;
 PLio/getstream/video/android/compose/ui/components/call/renderer/internal/OrientationVideoRendererKt;->access$OrientationVideoRenderer_gq8v52I$lambda$1(Landroidx/compose/runtime/State;)Ljava/util/List;
 PLio/getstream/video/android/compose/ui/components/call/renderer/internal/OrientationVideoRendererKt;->access$OrientationVideoRenderer_gq8v52I$lambda$2(Landroidx/compose/runtime/State;)Ljava/util/List;
+PLio/getstream/video/android/compose/ui/components/call/renderer/internal/OrientationVideoRendererKt$OrientationVideoRenderer$1;->invoke(Landroidx/compose/runtime/Composer;I)V
+PLio/getstream/video/android/compose/ui/components/call/renderer/internal/OrientationVideoRendererKt$OrientationVideoRenderer$1;->invoke(Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object;
 PLio/getstream/video/android/compose/ui/components/call/renderer/internal/OrientationVideoRendererKt$OrientationVideoRenderer$callParticipants$2$1;-><init>(Landroidx/compose/runtime/State;Landroidx/compose/runtime/State;)V
 PLio/getstream/video/android/compose/ui/components/call/renderer/internal/OrientationVideoRendererKt$OrientationVideoRenderer$callParticipants$2$1;->invoke()Ljava/lang/Object;
 PLio/getstream/video/android/compose/ui/components/call/renderer/internal/OrientationVideoRendererKt$OrientationVideoRenderer$callParticipants$2$1;->invoke()Ljava/util/List;

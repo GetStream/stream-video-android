@@ -21,9 +21,11 @@ import io.getstream.log.taggedLogger
 import io.getstream.result.Error
 import io.getstream.video.android.core.base.IntegrationTestBase
 import io.getstream.video.android.core.model.SortField
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.openapitools.client.models.MemberRequest
 import org.robolectric.RobolectricTestRunner
 
 @RunWith(RobolectricTestRunner::class)
@@ -91,6 +93,24 @@ public class CallCrudTest : IntegrationTestBase() {
 
         assertThat(call.state.custom.value["color"]).isEqualTo("red")
         assertThat(call.state.members.value).hasSize(2)
+    }
+
+    @Test
+    fun `Create a call with different member roles`() = runTest {
+        val call = client.call("default", randomUUID())
+
+        val result = call.create(
+            members = listOf(
+                MemberRequest(userId = "thierry", role = "host"),
+            ),
+            custom = mapOf("color" to "red")
+        )
+        assert(result.isSuccess)
+
+        assertThat(call.state.members.value.first().role).isEqualTo("host")
+
+        assertThat(call.state.custom.value["color"]).isEqualTo("red")
+        assertThat(call.state.members.value).hasSize(1)
     }
 
     @Test

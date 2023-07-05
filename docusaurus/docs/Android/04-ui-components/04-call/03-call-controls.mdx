@@ -4,15 +4,22 @@ The `ControlActions` component lets you display any number of controls on the UI
 
 On top of these actions, you can provide a custom set of actions through the API.
 
+What you can do with the `ControlActions` are:
+
+- Toggling your audio/microphone/camera
+- Flipping your camera
+- Leaving/canceling/declining a call
+- And more with customized call actions
+
 Let's see how to use it.
 
-## Usage
+## Build With Control Actions
 
-To use `ControlActions`, you can simply call it in combination with any custom UI or our other components:
+The `ControlActions` component is very independent, so you can simply use it everywhere you need it and you want to control the actions. This example shows how to build a simple version of the `CallContent` component using `ControlActions` inside the `Scaffold`:
 
 ```kotlin
 @Composable
-private fun CustomUi() {
+private fun MyCallContent() {
     VideoTheme {
         Scaffold(
             modifier = modifier,
@@ -20,7 +27,7 @@ private fun CustomUi() {
             topBar = { CallAppBar(call = call) },
             bottomBar = {
                 ControlActions(
-                    modifier = ..,
+                    modifier = Modifier.fillMaxSize(),
                     call = call,
                     onCallAction = { /* Handle call actions here */ }
                 )
@@ -34,17 +41,13 @@ private fun CustomUi() {
 }
 ```
 
-In this example, you're doing the following:
-
-1. You observe the required state using the `Call`, which contains a bunch of device's states.
-2. Once you have the `Call` instance ready, you build the UI. We omitted modifiers here, as you can arrange the components in any way possible, such as the `CallAppBar` and `ControlActions` taking up a fixed size space, while the `ParticipantsGrid` fills the rest of the parent. `ParticipantsGrid` will take the responsibility of representing the main part of the call.
-3. Finally, you add the `ControlActions`. You can customize how these look and which options they represent, but we'll talk about that later.
-
-If you're using this approach and our default set of components, you can expect a UI that's similar to our default implementation:
+After running the code, you'll see the result below:
 
 ![Compose CallContent](../../assets/compose_call_container.png)
 
-By default `ControlActions` component covers both portrait and landscape orientation. This means that the actions you pass in will be rendered either in a `Row` of items, horizontally placed, when in portrait, or a `Column`, when in landscape. If you use [CallContent](03-call-content.mdx), `ControlActions` will be configured the layout automatically by observing the configuration changes.
+Inside the `onCallAction` lambda, you'll be able to receive our pre-defined call actions, such as `ToggleCamera`, `FlipCamera`, and `LeaveCall`. For more details, see the [CallAction docs](https://getstream.github.io/stream-video-android/stream-video-android-core/io.getstream.video.android.core.call.state/-call-action/index.html).
+
+The `ControlActions` component also covers both portrait and landscape orientation. This means that the actions you pass in will be rendered either in a `Row` of items, horizontally placed, when in portrait, or a `Column`, when in the landscape.  If you use [CallContent](03-call-content.mdx), `ControlActions` will be configured the layout automatically by observing the configuration changes.
 
 Now that you've seen how to integrate the component and hook it up with the call and state, let's explore customizing the action handlers.
 
@@ -70,34 +73,27 @@ public fun ControlActions(
 If you want to customize the actions and how they're used, you can do something like this:
 
 ```kotlin
+val isCameraEnabled by call.camera.isEnabled.collectAsState()
+val isMicrophoneEnabled by call.microphone.isEnabled.collectAsState()
+
 ControlActions(
-    .., // State and modifier
+    call = call,
     actions = listOf(
         {
             ToggleCameraAction(
                 modifier = Modifier.size(60.dp),
                 isCameraEnabled = isCameraEnabled,
-                onCallAction = onCallAction
+                onCallAction = { call.camera.setEnabled(it.isEnabled) }
             )
         },
         {
             ToggleMicrophoneAction(
                 modifier = Modifier.size(60.dp),
                 isMicrophoneEnabled = isMicrophoneEnabled,
-                onCallAction = onCallAction
+                onCallAction = { call.microphone.setEnabled(it.isEnabled) }
             )
         },
-    ),
-    onCallAction = { action ->
-      when (action) {
-        is ToggleCamera -> // toggle the camera
-        is ToggleMicrophone -> toggle the microphone
-         ...
-        else -> {
-          // handle other control actions
-        }
-      }
-    }
+    )
 )
 ```
 
@@ -116,6 +112,7 @@ There are a couple of our predefined call control actions:
 - `AcceptCallAction`: Represents accepting a call. You can usually use on in the ringing call screen.
 - `CancelCallAction`: Represents canceling a call. You can usually use on in the ringing call screen.
 - `ChatDialogAction`: Used to display a chat dialog in the video call. You can use this when you need to integrate chat features in the video call.
+- 'CustomAction': Custom action used to handle any custom behavior with the given `data` and `tag`.
 
 ![Compose ControlActions](../../assets/compose_call_controls_actions.png)
 
@@ -153,9 +150,8 @@ This is a very simple component so it doesn't have replaceable slots, but it sti
 * `modifier`: Allows you to customize the size, position, elevation, background and much more of the component. Using this in pair with `VideoTheme` and our [theming guide](../03-video-theme.mdx), you're able to customize the shape of the call controls as well as colors padding and more.
 * `actions`: As previously mentioned, by changing the `actions`, you don't only change the possible behavior, but also the appearance. You can use our own predefined action buttons or add your own Composable and tweak orders.
 
-In our [Video Android Tutorial](../../02-tutorials/01-video-calling.mdx), we showcased how to build custom `ControlActions` to remove a chat call action button and only feature camera and audio buttons. The result ended up looking something like this:
+In our [Video Android Tutorial](../../02-tutorials/01-video-calling.mdx), we showcased how to build custom `ControlActions` to remove a leave call action button and only feature camera and audio buttons. The result ended up looking something like this:
 
 ![Compose Control Actions](../../assets/compose_call_controls_custom.png)
 
 This allows you to visually change the component, while only changing the actions that are rendered, which is quite useful.
-

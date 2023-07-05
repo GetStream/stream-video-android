@@ -167,16 +167,15 @@ public class CallState(private val call: Call, private val user: User) {
     }
 
     /** participants who are currently speaking */
-    public val activeSpeakers: StateFlow<List<ParticipantState>> =
-        _participants.mapState { it.values.filter { participant -> participant.speaking.value } }
+    private val _activeSpeakers: MutableStateFlow<List<ParticipantState>> = MutableStateFlow(emptyList())
+    public val activeSpeakers: StateFlow<List<ParticipantState>> = _activeSpeakers
 
     /** participants other than yourself */
     public val remoteParticipants: StateFlow<List<ParticipantState>> =
         _participants.mapState { it.filterKeys { key -> key != call.clientImpl.sessionId }.values.toList() }
 
     /** the dominant speaker */
-    private val _dominantSpeaker: MutableStateFlow<ParticipantState?> =
-        MutableStateFlow(null)
+    private val _dominantSpeaker: MutableStateFlow<ParticipantState?> = MutableStateFlow(null)
     public val dominantSpeaker: StateFlow<ParticipantState?> = _dominantSpeaker
 
     /**
@@ -465,6 +464,10 @@ public class CallState(private val call: Call, private val user: User) {
                     participant._speaking.value = entry.value.isSpeaking
                     participant.updateAudioLevel(entry.value.audioLevel)
                 }
+
+                _activeSpeakers.value = participants.value
+                    .filter { it.speaking.value }
+                    .sortedByDescending { it.audioLevel.value }
             }
 
             is DominantSpeakerChangedEvent -> {

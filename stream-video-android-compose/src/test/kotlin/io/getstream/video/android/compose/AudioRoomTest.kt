@@ -24,7 +24,7 @@ import io.getstream.video.android.compose.base.BaseComposeTest
 import io.getstream.video.android.compose.ui.components.audio.AudioAppBar
 import io.getstream.video.android.compose.ui.components.audio.AudioControlActions
 import io.getstream.video.android.compose.ui.components.audio.AudioParticipantsGrid
-import io.getstream.video.android.compose.ui.components.audio.AudioRoom
+import io.getstream.video.android.compose.ui.components.audio.AudioRoomContent
 import io.getstream.video.android.mock.mockCall
 import io.getstream.video.android.mock.mockParticipantList
 import org.junit.Rule
@@ -64,7 +64,7 @@ internal class AudioRoomTest : BaseComposeTest() {
     @Test
     fun `snapshot AudioRoom composable`() {
         snapshot {
-            AudioRoom(
+            AudioRoomContent(
                 modifier = Modifier.fillMaxSize(),
                 call = mockCall
             )
@@ -74,7 +74,7 @@ internal class AudioRoomTest : BaseComposeTest() {
     @Test
     fun `snapshot AudioRoom DarkMode composable`() {
         snapshot(isInDarkMode = true) {
-            AudioRoom(
+            AudioRoomContent(
                 modifier = Modifier.fillMaxSize(),
                 call = mockCall
             )

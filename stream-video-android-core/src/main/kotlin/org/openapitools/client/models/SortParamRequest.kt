@@ -32,16 +32,18 @@ import com.squareup.moshi.Json
 /**
  *
  *
- * @param direction
- * @param `field`
+ * @param direction Direction of sorting, -1 for descending, 1 for ascending
+ * @param `field` Name of field to sort by
  */
 
 
 data class SortParamRequest (
 
+    /* Direction of sorting, -1 for descending, 1 for ascending */
     @Json(name = "direction")
     val direction: kotlin.Int? = null,
 
+    /* Name of field to sort by */
     @Json(name = "field")
     val `field`: kotlin.String? = null
 

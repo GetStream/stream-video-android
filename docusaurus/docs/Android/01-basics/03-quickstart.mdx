@@ -15,8 +15,8 @@ val client = StreamVideoBuilder(
      context = context,
      apiKey = apiKey,
      geo = GEO.GlobalEdgeNetwork,
-     user,
-     token,
+     user = user,
+     token = token,
 ).build()
 
 val call = client.call("default", "123")

@@ -4,34 +4,39 @@ description: A guide on how to add/remove or replace call controls
 ---
 
 [Control Actions](../04-ui-components/04-call/03-call-controls.mdx) represents the set of controls the user can use to change their audio and video device state, or browse other types of settings, leave the call, or implement something custom.
-Stream UI components, such as [CallContent](../04-ui-components/04-call/01-call-content.mdx), [CallContent](../04-ui-components/04-call/03-call-content.mdx), and [CallLobby](06-lobby-preview.mdx) provide default control actions like the below:
+Stream UI components, such as [CallContent](../04-ui-components/04-call/01-call-content.mdx), and [CallLobby](06-lobby-preview.mdx) provide default control actions like the below:
 
 ![Call Controls](../assets/cookbook/replacing-call-controls.png)
 
 ### Customization
 
-You can simply custom the control actions by building your own list of actions like the below:
+You can simply custom the control actions buttons by building your own list of action buttons like the example below:
 
 ```kotlin
+// observe the current devices states
+val isCameraEnabled by call.camera.isEnabled.collectAsState()
+val isMicrophoneEnabled by call.microphone.isEnabled.collectAsState()
+
+// create your own control action buttons
 val actions = listOf(
     {
         ToggleCameraAction(
             modifier = Modifier.size(52.dp),
             isCameraEnabled = isCameraEnabled,
-            onCallAction = { .. }
+            onCallAction = { call.camera.setEnabled(it.isEnabled) }
         )
     },
     {
         ToggleMicrophoneAction(
             modifier = Modifier.size(52.dp),
             isMicrophoneEnabled = isMicrophoneEnabled,
-            onCallAction = { .. }
+            onCallAction = { call.microphone.setEnabled(it.isEnabled)  }
         )
     },
     {
         FlipCameraAction(
             modifier = Modifier.size(52.dp),
-            onCallAction = { .. }
+            onCallAction = { call.camera.flip() }
         )
     },
     {
@@ -42,6 +47,10 @@ val actions = listOf(
     },
 )
 ```
+
+:::note
+We provide some pre-built control action buttons, such as `ToggleCameraAction`, and `ToggleMicrophoneAction`. For more details, check out the [Control Actions](../04-ui-components/04-call/03-call-controls.mdx) page.
+:::
 
 Now, you can replace the default control actions with your own actions buttons like the sample below:
 
@@ -88,7 +97,7 @@ If you build with your project with the custom control actions above, you will s
 
 ![Compose Call Controls](../assets/compose_call_controls_custom.png)
 
-### Replacing the control actions
+### Replacing the Control Actions
 
 This example shows how to build your own call controls by implementing your own composable:
 

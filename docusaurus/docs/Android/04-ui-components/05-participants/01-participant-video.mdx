@@ -4,16 +4,21 @@ The `ParticipantVideo` component is used to render a participant based on [Parti
 
 The component also renders the user label, which includes the user's name and call status, such as mute state. Additionally, if the user is focused, the component renders a border to indicate that the participant is the primary speaker.
 
+What you can do with the `ParticipantVideo` are:
+
+- Render a audio/video track of the given `ParticipantState`.
+- Displays participant's information, such as name, audio level, microphone status, network connectivity quality, reactions, and more.
+- Displays a border on the participant who is currently speaking.
+
 Let's see how to use it.
 
-## Usage
+## Build a Custom Call Screen With ParticipantVideo
 
 To use the `ParticipantVideo` component, embed it anywhere in your custom UI and pass in the necessary parameters:
 
 ```kotlin
 @Composable
 fun CustomCallScreen(call: Call) {
-    val dominantSpeaker by call.state.dominantSpeaker.collectAsState()
     val participants by call.state.participants.collectAsState()
 
     Column {
@@ -64,9 +69,9 @@ public fun ParticipantVideo(
 - `modifier`: Used to apply styling to the component, such as extra borders, background, elevation, size or shape and more.
 - `style`: Allows you to customize pre-built components, such as the label, the connection indicator, reactions, and everything that is built top on the video renderer.
 - `labelContent`: Content is shown that displays participant's name and device states. For more details, check out [Participant Label](../../05-ui-cookbook/03-participant-label.mdx) to customize the participant's label.
-- 'connectionIndicatorContent': Content is shown that indicates the connection quality. For more details, check out [Network Quality Indicator](../../05-ui-cookbook/10-network-quality-indicator.mdx) to customize the network quality indicator.
-- 'videoFallbackContent': Content is shown the video track is failed to load or not available. For more details, check out [Video Fallback](../../05-ui-cookbook/07-video-fallback.mdx) to customize the network quality indicator.
-- 'reactionContent': Content is shown for the reaction.
+- `connectionIndicatorContent`: Content is shown that indicates the connection quality. For more details, check out [Network Quality Indicator](../../05-ui-cookbook/10-network-quality-indicator.mdx) to customize the network quality indicator.
+- `videoFallbackContent`: Content is shown the video track is failed to load or not available. For more details, check out [Video Fallback](../../05-ui-cookbook/07-video-fallback.mdx) to customize the network quality indicator.
+- `reactionContent`: Content is shown for the reaction.
 
 Use this to further customize the look and feel of participant video items in your UI. By using those custom styles above, you can build many different types of video renderers by your taste:
 

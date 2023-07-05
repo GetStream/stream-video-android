@@ -70,7 +70,7 @@ fun CallJoinScreen(
     navigateToCallLobby: (callId: String) -> Unit,
     navigateUpToLogin: () -> Unit
 ) {
-    val uiState by callJoinViewModel.uiState.collectAsState()
+    val uiState by callJoinViewModel.uiState.collectAsState(CallJoinUiState.Nothing)
 
     HandleCallJoinUiState(
         callJoinUiState = uiState,

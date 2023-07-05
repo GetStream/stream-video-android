@@ -125,7 +125,7 @@ public fun CallContent(
             onCallAction = onCallAction
         )
     },
-    enableInPictureInPicture: Boolean = false,
+    enableInPictureInPicture: Boolean = true,
     pictureInPictureContent: @Composable (Call) -> Unit = { DefaultPictureInPictureContent(it) }
 ) {
     val context = LocalContext.current

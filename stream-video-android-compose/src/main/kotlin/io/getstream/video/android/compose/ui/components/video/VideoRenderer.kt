@@ -185,7 +185,7 @@ private fun DefaultMediaTrackFallbackContent(
             modifier = Modifier.padding(30.dp),
             text = stringResource(
                 id = io.getstream.video.android.ui.common.R.string.stream_video_call_rendering_failed,
-                call.sessionId.orEmpty()
+                call.sessionId
             ),
             color = VideoTheme.colors.textHighEmphasis,
             textAlign = TextAlign.Center,

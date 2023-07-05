@@ -36,8 +36,6 @@ import com.squareup.moshi.Json
  * @param custom
  * @param image
  * @param name Optional name of user
- * @param role
- * @param teams
  */
 
 
@@ -55,12 +53,6 @@ data class UserRequest (
 
     /* Optional name of user */
     @Json(name = "name")
-    val name: kotlin.String? = null,
-
-    @Json(name = "role")
-    val role: kotlin.String? = null,
-
-    @Json(name = "teams")
-    val teams: kotlin.collections.List<kotlin.String>? = null
+    val name: kotlin.String? = null
 
 )
