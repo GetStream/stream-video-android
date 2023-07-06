@@ -15,11 +15,11 @@ val client = StreamVideoBuilder(
 ).build()
 ```
 
-* The API Key can be found in your dashboard.
-* The user can be either authenticated, anonymous or guest.
+* The **API Key** can be found in your Stream dashboard.
+* The **User** can be either authenticated, anonymous or guest.
 * Note: You can store custom data on the user object, if required.
 
-Typically, you'll want to initialize the client in your app's `Application` class or a dependency injection module.
+Typically, you'll want to initialize the client in your app's `Application` class or dedicated dependency injection module.
 
 ### Generating a token
 
@@ -81,7 +81,31 @@ Once you invoke the `build()` method of `StreamVideoBuilder`, you can get the sa
 val streamVideo = StreamVideo.instance()
 ```
 
-If you don't need to use the `StreamVideo` instance anymore, you can uninstall by calling `StreamVideo.removeClient()`
+If you don't need to use the user information, you can clear the by calling `logout()` method like so:
+
+```kotlin
+val streamVideo = StreamVideo.instance()
+streamVideo.logout()
+```
+
+Lastly, if you don't need to use the `StreamVideo` instance anymore, you can uninstall by calling `removeClient()` method:
+
+```kotlin
+StreamVideo.removeClient()
+```
+
+### Logging Stream SDK
+
+Stream SDK provides you to trace log messages and debug what's going on and what problems you're facing. By setting the logging level on `StreamVideoBuilder`, you can filter the log messages depending on the priority:
+
+```kotlin
+val streamVideo = StreamVideoBuilder(
+  loggingLevel = LoggingLevel(priority = Priority.DEBUG),
+  ..
+)
+```
+
+We provide the following 6 different logging levels: Verbose, Debug, Info, Warn, Error, and Assert. The default logging level is Error.
 
 The full list of supported options is:
 
@@ -95,6 +119,8 @@ The full list of supported options is:
 | `loggingLevel` | The logging level. Recommend to set it to debug while in development | LoggingLevel.BASIC |
 | `enablePush` | If push notifications should be enabled | false |
 | `pushDeviceGenerators` | Support firebase and other push providers | false |
+| `encryptPreferences` | If our data store should encrypt the api key, user token etc. | true |
+| `ensureSingleInstance` | Verify that only 1 version of the video client exists, prevents integration mistakes. | true |
 | `ringNotification` | A function to create your own notification when there's an incoming "ringing" call | null |
 | `audioFilters` | Run audio through a filter before sending it | - |
 | `videoFilters` | Run video through a filter before sending it | - |
