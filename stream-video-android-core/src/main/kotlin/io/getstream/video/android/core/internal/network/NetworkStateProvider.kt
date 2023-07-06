@@ -20,7 +20,6 @@ import android.net.ConnectivityManager
 import android.net.Network
 import android.net.NetworkCapabilities
 import android.net.NetworkRequest
-import android.os.Build
 import java.util.concurrent.atomic.AtomicBoolean
 
 /**
@@ -78,18 +77,14 @@ public class NetworkStateProvider(private val connectivityManager: ConnectivityM
      * @return If the device is connected or not.
      */
     public fun isConnected(): Boolean {
-        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            runCatching {
-                connectivityManager.run {
-                    getNetworkCapabilities(activeNetwork)?.run {
-                        hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET) &&
-                            hasCapability(NetworkCapabilities.NET_CAPABILITY_VALIDATED)
-                    }
+        return runCatching {
+            connectivityManager.run {
+                getNetworkCapabilities(activeNetwork)?.run {
+                    hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET) &&
+                        hasCapability(NetworkCapabilities.NET_CAPABILITY_VALIDATED)
                 }
-            }.getOrNull() ?: false
-        } else {
-            connectivityManager.activeNetworkInfo?.isConnected ?: false
-        }
+            }
+        }.getOrNull() ?: false
     }
 
     /**

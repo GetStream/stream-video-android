@@ -18,6 +18,7 @@ package io.getstream.video.android.core
 
 import android.content.Context
 import android.net.ConnectivityManager
+import app.cash.turbine.testIn
 import com.google.common.truth.Truth.assertThat
 import io.getstream.video.android.core.base.TestBase
 import io.getstream.video.android.core.dispatchers.DispatcherProvider
@@ -108,7 +109,7 @@ open class SocketTestBase : TestBase() {
 
         runBlocking {
             val job = launch {
-                socket.events.collect() {
+                socket.events.collect {
                     events.add(it)
                 }
             }
@@ -145,10 +146,11 @@ class CoordinatorSocketTest : SocketTestBase() {
         )
         socket.connect()
 
-        assertThat(socket.connectionState.value).isInstanceOf(Connected::class.java)
-        assertThat(socket.connectionId).isNotEmpty()
+        val connectionState = socket.connectionState.testIn(backgroundScope)
+        val connectionStateItem = connectionState.awaitItem()
 
-        val (events, errors) = collectEvents(socket)
+        assertThat(connectionStateItem).isInstanceOf(Connected::class.java)
+        assertThat(socket.connectionId).isNotEmpty()
     }
 
     @Test
@@ -184,8 +186,12 @@ class CoordinatorSocketTest : SocketTestBase() {
         } catch (e: Throwable) {
             // ignore
         }
+
+        val connectionState = socket.connectionState.testIn(backgroundScope)
+        val connectionStateItem = connectionState.awaitItem()
+
         assertThat(socket.reconnectionAttempts).isEqualTo(0)
-        assertThat(socket.connectionState.value).isInstanceOf(SocketState.DisconnectedPermanently::class.java)
+        assertThat(connectionStateItem).isInstanceOf(SocketState.DisconnectedPermanently::class.java)
     }
 
     @Test
@@ -329,7 +335,11 @@ class SfuSocketTest : SocketTestBase() {
         } catch (e: Throwable) {
             // ignore
         }
+
+        val connectionState = socket.connectionState.testIn(backgroundScope)
+        val connectionStateItem = connectionState.awaitItem()
+
         assertThat(socket.reconnectionAttempts).isEqualTo(0)
-        assertThat(socket.connectionState.value).isInstanceOf(SocketState.DisconnectedPermanently::class.java)
+        assertThat(connectionStateItem).isInstanceOf(SocketState.DisconnectedPermanently::class.java)
     }
 }

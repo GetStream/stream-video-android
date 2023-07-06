@@ -2,3 +2,81 @@
 title: DataStore
 description: Persisting DataStore with the stream-video-android-datastore library.
 ---
+
+Stream SDK uses [DataStore](https://developer.android.com/jetpack/androidx/releases/datastore) to manage user login data safely, consistently, and transactionally. It's used internally by Stream's Core SDK, so you don't need to manage it manually. But if you want to access, trace, or use user login data easily, you can use our **datastore** library.
+
+### Usage
+
+<img src="https://img.shields.io/maven-central/v/io.getstream/stream-video-android-datastore.svg?label=Maven%20Central" width="140"/>
+
+To use this library, add the dependency below below to your module's `build.gradle` file:
+
+```groovy
+dependencies {
+    implementation "io.getstream:stream-video-android-datastore:$stream_version"
+}
+```
+
+Now, it's ready to use the datastore.
+
+If you initialized `StreamVideo` with the `StreamVideoBuilder` class, the `StreamUserDataStore`, which contains user information will be installed automatically,
+So you can get the instance of the `StreamUserDataStore` like the example below:
+
+```kotlin
+val datastore = StreamUserDataStore.instance()
+```
+
+### Observe DataStore
+
+Now, you can observe the user, API key, token, and devices as [StateFlow](https://developer.android.com/kotlin/flow/stateflow-and-sharedflow) like the example below:
+
+```kotlin
+val datastore = StreamUserDataStore.instance()
+val user: StateFlow<User?> = dataStore.user
+val apiKey: StateFlow<ApiKey> = dataStore.apiKey
+val userToken: StateFlow<UserToken> = dataStore.userToken
+val userDevice: StateFlow<Device?> = dataStore.userDevice
+```
+
+For example, if you want to handle the initialized user data, you can use it in your ViewModel like the sample below:
+
+```kotlin
+viewModelScope.launch {
+    dataStore.user.collectLatest { user ->
+        if (user != null && user.isValid()) {
+            // do something
+        }
+    }
+}
+```
+
+### Update
+
+You can also update the datastore just in case with the methods below:
+
+```kotlin
+datastore.updateUser(user: User?)
+datastore.updateApiKey(apiKey: ApiKey)
+datastore.updateUserToken(userToken: UserToken)
+datastore.updateUserDevice(userDevice: Device?)
+```
+
+You can also clear the DataStore with `clear()` method. This method is invoked automatically when you call `StreamVideo.logout()` method, so in most cases, you don't need to call this method.
+
+:::caution
+Please keep in mind that, DataStore is used by Stream SDK internally, so we don't recommend you update the data in most cases. SDK may work differently than you expected.
+:::
+
+### Encryption
+
+All data stored in `StreamVideoBuilder` are encrypted by default with [Tink](https://github.com/google/tink). But in some reasons, you may not want to use the encryption. In this case, you can disable encryption when you initialize the `StreamVideo` instance like the sample below:
+
+```kotlin {4}
+val client = StreamVideoBuilder(
+     context = context,
+     apiKey = apiKey,
+     encryptPreferences = false, // here
+     user = user,
+     token = token,
+).build()
+```

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014-2022 Stream.io Inc. All rights reserved.
+ * Copyright (c) 2014-2023 Stream.io Inc. All rights reserved.
  *
  * Licensed under the Stream License;
  * you may not use this file except in compliance with the License.
@@ -14,8 +14,9 @@
  * limitations under the License.
  */
 
-package io.getstream.video.android.core.audio
+package io.getstream.video.android.app.network
 
-public interface PermissionsCheckStrategy {
-    public fun hasPermissions(): Boolean
-}
+import kotlinx.serialization.Serializable
+
+@Serializable
+data class TokenResponse(val userId: String, val token: String)
