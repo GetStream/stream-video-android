@@ -132,6 +132,12 @@ class CallStateTest : IntegrationTestBase() {
 
         val sorted = call.state.sortedParticipants.value.map { it.sessionId }
         assertThat(sorted).isInOrder()
+
+        call.state.updateParticipant(
+            ParticipantState("2", call, User("2")).apply { _dominantSpeaker.value = false }
+        )
+        val sorted2 = call.state.sortedParticipants.value.map { it.sessionId }
+        assertThat(sorted2).isInOrder()
     }
 
     @Test

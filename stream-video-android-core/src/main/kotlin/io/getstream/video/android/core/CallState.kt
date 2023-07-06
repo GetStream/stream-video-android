@@ -46,6 +46,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import org.openapitools.client.models.BlockedUserEvent
@@ -207,6 +208,35 @@ public class CallState(private val call: Call, private val user: User) {
                 )
             )
         }.stateIn(scope, SharingStarted.WhileSubscribed(), emptyList())
+
+    public val sorted2 = flow {
+        val participants = participants.value
+        val pinned = _pinnedParticipants.value
+        var lastParticipants : List<ParticipantState>? = null
+
+        // TODO: debounce by 10ms so we don't move the video around too much
+        //
+        call.subscribe {
+            participants.sortedWith(
+                compareBy(
+                    { pinned.containsKey(it.sessionId) },
+                    { it.dominantSpeaker.value },
+                    { it.screenSharingEnabled.value },
+                    { it.lastSpeakingAt.value },
+                    { it.videoEnabled.value },
+                    { it.joinedAt.value }
+                )
+            )
+
+            scope.launch {
+                if (lastParticipants != participants) {
+                    emit(participants)
+                }
+                lastParticipants = participants
+            }
+        }
+    }
+
 
     /** Members contains the list of users who are permanently associated with this call. This includes users who are currently not active in the call
      * As an example if you invite "john", "bob" and "jane" to a call and only Jane joins.
