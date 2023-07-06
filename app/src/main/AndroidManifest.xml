@@ -48,6 +48,25 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
+        <activity
+            android:name=".DeeplinkingActivity"
+            android:exported="true"
+            android:launchMode="singleTask">
+            <tools:validation testUrl="https://stream-video-demo.vercel.app/?id=civil-ff49b5e0" />
+            <intent-filter
+                android:autoVerify="true"
+                android:label="@string/filter_call_link">
+
+                <action android:name="android.intent.action.VIEW" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+
+                <data android:scheme="https" />
+                <data android:host="stream-video-demo.vercel.app" />
+            </intent-filter>
+        </activity>
     </application>
 
 </manifest>

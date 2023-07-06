@@ -27,6 +27,7 @@ import io.getstream.video.android.app.videoApp
 import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.call.RtcSession
 import io.getstream.video.android.core.logging.LoggingLevel
+import io.getstream.video.android.model.StreamCallId
 import io.getstream.video.android.model.User
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -40,7 +41,7 @@ class MainViewModel : ViewModel() {
     private val _result: MutableStateFlow<Result<RtcSession>?> = MutableStateFlow(null)
     val result: StateFlow<Result<RtcSession>?> = _result
 
-    fun joinCall(context: Context, user: User) {
+    fun joinCall(context: Context, user: User, callId: StreamCallId?) {
         viewModelScope.launch {
             val response = StreamVideoNetwork.tokenService.fetchToken(
                 userId = user.id,
@@ -55,7 +56,8 @@ class MainViewModel : ViewModel() {
                 loggingLevel = LoggingLevel(priority = Priority.DEBUG)
             )
 
-            val call = streamVideo.call(type = "default", id = "1egoN4tKm4w2")
+            val cid = callId ?: StreamCallId(type = "default", id = "1egoN4tKm4w2")
+            val call = streamVideo.call(type = cid.type, id = cid.id)
             val result = call.join(create = true)
             _result.value = result
 
