@@ -3,18 +3,16 @@ title: Reactions & Custom Events
 description: How reactions and custom events work
 ---
 
-## Reactions
-
-It's easy to add reactions to your call.
+You can send reactions to your call very easily like the code below:
 
 ```kotlin
-val response = call.sendReaction("fireworks")
+val response = call.sendReaction(type = "default", emoji = ":raise-hand:")
 ```
 
-You can also add custom data to the reaction or specify a specific emoji
+You can also add custom data to the reaction or specify a specific emoji.
 
 ```kotlin
-val response = call.sendReaction(type = "raise-hand", emoji = "", custom = mapOf("mycustomfield" to "hello"))
+val response = call.sendReaction(type = "default", emoji = ":raise-hand:", custom = mapOf("mycustomfield" to "hello"))
 ```
 
 ### Custom Events
@@ -25,3 +23,7 @@ This is basically just a realtime layer that you can broadcast your own events t
 ```kotlin
 val response = call.sendCustomEvent(mapOf("type" to "draw", "x" to 10, "y" to 20))
 ```
+
+### Customization
+
+If you want to learn more about customizing the reaction emojis on a call, check out the [UI Cookbook - Reactions](../05-ui-cookbook/14-reactions.mdx).
