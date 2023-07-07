@@ -17,7 +17,11 @@
 package io.getstream.video.android.dogfooding.ui.call
 
 import androidx.compose.foundation.background
+import androidx.compose.material.Snackbar
+import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
@@ -36,6 +40,8 @@ fun CallScreen(
     call: Call,
     onLeaveCall: () -> Unit = {}
 ) {
+    val speakingWhileMuted by call.state.speakingWhileMuted.collectAsState()
+
     VideoTheme {
         CallContent(
             modifier = Modifier.background(color = VideoTheme.colors.appBackground),
@@ -52,6 +58,12 @@ fun CallScreen(
                 }
             }
         )
+
+        if (speakingWhileMuted) {
+            Snackbar {
+                Text(text = "You're talking while muting the microphone!")
+            }
+        }
     }
 }
 
