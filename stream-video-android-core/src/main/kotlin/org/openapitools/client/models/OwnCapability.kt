@@ -27,7 +27,12 @@ package org.openapitools.client.models
 
 
 
+import com.squareup.moshi.FromJson
 import com.squareup.moshi.Json
+import com.squareup.moshi.JsonAdapter
+import com.squareup.moshi.JsonReader
+import com.squareup.moshi.JsonWriter
+import com.squareup.moshi.ToJson
 
 /**
  * All possibility of string to use
@@ -35,105 +40,73 @@ import com.squareup.moshi.Json
  * Values: blockUsers,createCall,createReaction,endCall,joinBackstage,joinCall,joinEndedCall,muteUsers,readCall,removeCallMember,screenshare,sendAudio,sendVideo,startBroadcastCall,startRecordCall,startTranscriptionCall,stopBroadcastCall,stopRecordCall,stopTranscriptionCall,updateCall,updateCallMember,updateCallPermissions,updateCallSettings
  */
 
-enum class OwnCapability(val value: kotlin.String) {
-
-    @Json(name = "block-users")
-    blockUsers("block-users"),
-
-    @Json(name = "create-call")
-    createCall("create-call"),
-
-    @Json(name = "create-reaction")
-    createReaction("create-reaction"),
-
-    @Json(name = "end-call")
-    endCall("end-call"),
-
-    @Json(name = "join-backstage")
-    joinBackstage("join-backstage"),
-
-    @Json(name = "join-call")
-    joinCall("join-call"),
-
-    @Json(name = "join-ended-call")
-    joinEndedCall("join-ended-call"),
-
-    @Json(name = "mute-users")
-    muteUsers("mute-users"),
-
-    @Json(name = "read-call")
-    readCall("read-call"),
-
-    @Json(name = "remove-call-member")
-    removeCallMember("remove-call-member"),
-
-    @Json(name = "screenshare")
-    screenshare("screenshare"),
-
-    @Json(name = "send-audio")
-    sendAudio("send-audio"),
-
-    @Json(name = "send-video")
-    sendVideo("send-video"),
-
-    @Json(name = "start-broadcast-call")
-    startBroadcastCall("start-broadcast-call"),
-
-    @Json(name = "start-record-call")
-    startRecordCall("start-record-call"),
-
-    @Json(name = "start-transcription-call")
-    startTranscriptionCall("start-transcription-call"),
-
-    @Json(name = "stop-broadcast-call")
-    stopBroadcastCall("stop-broadcast-call"),
-
-    @Json(name = "stop-record-call")
-    stopRecordCall("stop-record-call"),
-
-    @Json(name = "stop-transcription-call")
-    stopTranscriptionCall("stop-transcription-call"),
-
-    @Json(name = "update-call")
-    updateCall("update-call"),
-
-    @Json(name = "update-call-member")
-    updateCallMember("update-call-member"),
-
-    @Json(name = "update-call-permissions")
-    updateCallPermissions("update-call-permissions"),
-
-    @Json(name = "update-call-settings")
-    updateCallSettings("update-call-settings"),
-
-    /**
-    * This case is used when decoding an unknown value.
-    */
-    unknown("unknown");
-
-    /**
-     * Override toString() to avoid using the enum variable name as the value, and instead use
-     * the actual value defined in the API spec file.
-     *
-     * This solves a problem when the variable name and its value are different, and ensures that
-     * the client sends the correct enum values to the server always.
-     */
+sealed class OwnCapability(val value: kotlin.String) {
     override fun toString(): String = value
 
     companion object {
-        /**
-         * Converts the provided [data] to a [String] on success, null otherwise.
-         */
-        fun encode(data: kotlin.Any?): kotlin.String? = if (data is OwnCapability) "$data" else null
+        fun fromString(s: kotlin.String): OwnCapability = when (s) {
+            "block-users" -> BlockUsers
+            "create-call" -> CreateCall
+            "create-reaction" -> CreateReaction
+            "end-call" -> EndCall
+            "join-backstage" -> JoinBackstage
+            "join-call" -> JoinCall
+            "join-ended-call" -> JoinEndedCall
+            "mute-users" -> MuteUsers
+            "read-call" -> ReadCall
+            "remove-call-member" -> RemoveCallMember
+            "screenshare" -> Screenshare
+            "send-audio" -> SendAudio
+            "send-video" -> SendVideo
+            "start-broadcast-call" -> StartBroadcastCall
+            "start-record-call" -> StartRecordCall
+            "start-transcription-call" -> StartTranscriptionCall
+            "stop-broadcast-call" -> StopBroadcastCall
+            "stop-record-call" -> StopRecordCall
+            "stop-transcription-call" -> StopTranscriptionCall
+            "update-call" -> UpdateCall
+            "update-call-member" -> UpdateCallMember
+            "update-call-permissions" -> UpdateCallPermissions
+            "update-call-settings" -> UpdateCallSettings
+            else -> Unknown(s)
+        }
+    }
 
-        /**
-         * Returns a valid [OwnCapability] for [data], unknown otherwise.
-         */
-        fun decode(data: kotlin.Any?): OwnCapability? = data?.let {
-          val normalizedData = "$it".lowercase()
-          values().firstOrNull { value ->
-            it == value || normalizedData == "$value".lowercase()
-          }?: unknown
+    object BlockUsers : OwnCapability("block-users")
+    object CreateCall : OwnCapability("create-call")
+    object CreateReaction : OwnCapability("create-reaction")
+    object EndCall : OwnCapability("end-call")
+    object JoinBackstage : OwnCapability("join-backstage")
+    object JoinCall : OwnCapability("join-call")
+    object JoinEndedCall : OwnCapability("join-ended-call")
+    object MuteUsers : OwnCapability("mute-users")
+    object ReadCall : OwnCapability("read-call")
+    object RemoveCallMember : OwnCapability("remove-call-member")
+    object Screenshare : OwnCapability("screenshare")
+    object SendAudio : OwnCapability("send-audio")
+    object SendVideo : OwnCapability("send-video")
+    object StartBroadcastCall : OwnCapability("start-broadcast-call")
+    object StartRecordCall : OwnCapability("start-record-call")
+    object StartTranscriptionCall : OwnCapability("start-transcription-call")
+    object StopBroadcastCall : OwnCapability("stop-broadcast-call")
+    object StopRecordCall : OwnCapability("stop-record-call")
+    object StopTranscriptionCall : OwnCapability("stop-transcription-call")
+    object UpdateCall : OwnCapability("update-call")
+    object UpdateCallMember : OwnCapability("update-call-member")
+    object UpdateCallPermissions : OwnCapability("update-call-permissions")
+    object UpdateCallSettings : OwnCapability("update-call-settings")
+    data class Unknown(val unknownValue: kotlin.String) : OwnCapability(unknownValue)
+
+    class OwnCapabilityAdapter : JsonAdapter<OwnCapability>() {
+        @FromJson
+        override fun fromJson(reader: JsonReader): OwnCapability? {
+            val s = reader.nextString() ?: return null
+            return fromString(s)
+        }
+
+        @ToJson
+        override fun toJson(writer: JsonWriter, value: OwnCapability?) {
+            writer.value(value?.value)
         }
     }
 }

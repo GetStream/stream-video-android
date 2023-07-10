@@ -27,7 +27,13 @@ package org.openapitools.client.models
 
 
 
+import com.squareup.moshi.FromJson
 import com.squareup.moshi.Json
+import com.squareup.moshi.JsonAdapter
+import com.squareup.moshi.JsonReader
+import com.squareup.moshi.JsonWriter
+import com.squareup.moshi.ToJson
+import org.openapitools.client.infrastructure.Serializer
 
 /**
  * This event is sent when call recording has started
@@ -50,7 +56,7 @@ data class CallRecordingStartedEvent (
     @Json(name = "type")
     val type: kotlin.String = "call.recording_started"
 
-) : VideoEvent(), WSCallEvent{
+) : VideoEvent(), WSCallEvent {
 
     override fun getCallCID(): String {
         return callCid

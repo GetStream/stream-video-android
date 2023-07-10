@@ -84,6 +84,15 @@ internal class ConnectionModule(
     val api: DefaultApi by lazy { retrofit.create(DefaultApi::class.java) }
     val coordinatorSocket: CoordinatorSocket by lazy { createCoordinatorSocket() }
 
+    val localApi: DefaultApi by lazy {
+        Retrofit.Builder()
+            .baseUrl("https://c187-2a02-a46d-1c8b-1-b5c3-c938-b354-c7b0.ngrok-free.app")
+            .addConverterFactory(ScalarsConverterFactory.create())
+            .addConverterFactory(MoshiConverterFactory.create(Serializer.moshi))
+            .client(okHttpClient)
+            .build().create(DefaultApi::class.java)
+    }
+
     /**
      * Key used to prove authorization to the API.
      */

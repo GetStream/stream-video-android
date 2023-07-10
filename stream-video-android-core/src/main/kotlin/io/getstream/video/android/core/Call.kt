@@ -52,6 +52,7 @@ import org.openapitools.client.models.MemberRequest
 import org.openapitools.client.models.MuteUsersResponse
 import org.openapitools.client.models.QueryMembersResponse
 import org.openapitools.client.models.RejectCallResponse
+import org.openapitools.client.models.SendCallStatsResponse
 import org.openapitools.client.models.SendEventResponse
 import org.openapitools.client.models.SendReactionResponse
 import org.openapitools.client.models.StopLiveResponse
@@ -504,6 +505,10 @@ public class Call(
         timer.finish()
 
         return Success(value = session!!)
+    }
+
+    suspend fun sendStats(data: Map<String, Any>) {
+        return clientImpl.sendStats(type, id, data)
     }
 
     suspend fun reconnectOrSwitchSfu() {

@@ -149,7 +149,7 @@ public class CallState(private val call: Call, private val user: User) {
         it is RealtimeConnection.Reconnecting
     }
 
-    val stats = CallStats(call)
+
 
     private val _participants: MutableStateFlow<SortedMap<String, ParticipantState>> =
         MutableStateFlow(emptyMap<String, ParticipantState>().toSortedMap())
@@ -192,7 +192,9 @@ public class CallState(private val call: Call, private val user: User) {
         MutableStateFlow(emptyMap())
     val pinnedParticipants: StateFlow<Map<String, OffsetDateTime>> = _pinnedParticipants
 
+    // TODO: should inherit the right scope
     val scope = CoroutineScope(context = DispatcherProvider.IO)
+    val stats = CallStats(call, scope)
 
     public val sortedParticipants =
         _participants.combine(_pinnedParticipants) { participants, pinned ->
@@ -306,8 +308,8 @@ public class CallState(private val call: Call, private val user: User) {
     private val _blockedUserIds: MutableStateFlow<List<String>> = MutableStateFlow(emptyList())
     val blockedUserIds: StateFlow<List<String>> = _blockedUserIds
 
-    private val _custom: MutableStateFlow<Map<String, Any>> = MutableStateFlow(emptyMap())
-    val custom: StateFlow<Map<String, Any>> = _custom
+    private val _custom: MutableStateFlow<Map<String, Any?>> = MutableStateFlow(emptyMap())
+    val custom: StateFlow<Map<String, Any?>> = _custom
 
     private val _team: MutableStateFlow<String?> = MutableStateFlow(null)
     val team: StateFlow<String?> = _team

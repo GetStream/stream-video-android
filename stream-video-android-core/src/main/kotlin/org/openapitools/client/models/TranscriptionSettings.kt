@@ -27,7 +27,13 @@ package org.openapitools.client.models
 
 
 
+import com.squareup.moshi.FromJson
 import com.squareup.moshi.Json
+import com.squareup.moshi.JsonAdapter
+import com.squareup.moshi.JsonReader
+import com.squareup.moshi.JsonWriter
+import com.squareup.moshi.ToJson
+import org.openapitools.client.infrastructure.Serializer
 
 /**
  *
@@ -54,10 +60,38 @@ data class TranscriptionSettings (
      *
      * Values: available,disabled,autoOn
      */
-    enum class Mode(val value: kotlin.String) {
-        @Json(name = "available") available("available"),
-        @Json(name = "disabled") disabled("disabled"),
-        @Json(name = "auto-on") autoOn("auto-on");
+
+    sealed class Mode(val value: kotlin.String) {
+        override fun toString(): String = value
+
+        companion object {
+            fun fromString(s: kotlin.String): Mode = when (s) {
+                "available" -> Available
+                "disabled" -> Disabled
+                "auto-on" -> AutoOn
+                else -> Unknown(s)
+            }
+        }
+
+        object Available : Mode("available")
+        object Disabled : Mode("disabled")
+        object AutoOn : Mode("auto-on")
+        data class Unknown(val unknownValue: kotlin.String) : Mode(unknownValue)
+
+        class ModeAdapter : JsonAdapter<Mode>() {
+            @FromJson
+            override fun fromJson(reader: JsonReader): Mode? {
+                val s = reader.nextString() ?: return null
+                return fromString(s)
+            }
+
+            @ToJson
+            override fun toJson(writer: JsonWriter, value: Mode?) {
+                writer.value(value?.value)
+            }
+        }
     }
+
+
 
 }
