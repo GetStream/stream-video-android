@@ -463,7 +463,7 @@ public class RtcSession internal constructor(
 
         // if we are allowed to publish, create a peer connection for it
         val canPublish =
-            call.state.ownCapabilities.value.any { it == OwnCapability.sendAudio || it == OwnCapability.sendVideo }
+            call.state.ownCapabilities.value.any { it == OwnCapability.SendAudio || it == OwnCapability.SendVideo }
 
         if (canPublish) {
             publisher = createPublisher()
@@ -472,7 +472,7 @@ public class RtcSession internal constructor(
             // enable the publisher if you receive the send audio or send video capability
             coroutineScope.launch {
                 call.state.ownCapabilities.collect {
-                    if (it.any { it == OwnCapability.sendAudio || it == OwnCapability.sendVideo }) {
+                    if (it.any { it == OwnCapability.SendAudio || it == OwnCapability.SendVideo }) {
                         publisher = createPublisher()
                         timer.split("createPublisher")
                     }
@@ -505,7 +505,7 @@ public class RtcSession internal constructor(
                     if (enabled) {
                         // check the settings if we should default to front or back facing camera
                         val defaultDirection =
-                            if (settings?.video?.cameraFacing == VideoSettings.CameraFacing.front) {
+                            if (settings?.video?.cameraFacing == VideoSettings.CameraFacing.Front) {
                                 CameraDirection.Front
                             } else {
                                 CameraDirection.Back

@@ -59,7 +59,7 @@ public data class CallInfo(
     val createdAt: Date?,
     val updatedAt: Date?,
 //    val callEgress: CallEgress,
-    val custom: Map<String, Any>
+    val custom: Map<String, Any?>
 ) : Serializable
 
 public data class CallDetails(

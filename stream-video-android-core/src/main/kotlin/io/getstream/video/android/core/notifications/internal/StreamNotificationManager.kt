@@ -117,9 +117,9 @@ internal class StreamNotificationManager private constructor(
         )
     private fun PushDevice.toCreateDeviceRequest(): Result<CreateDeviceRequest> =
         when (pushProvider) {
-            PushProvider.FIREBASE -> Result.Success(CreateDeviceRequest.PushProvider.firebase)
-            PushProvider.HUAWEI -> Result.Success(CreateDeviceRequest.PushProvider.huawei)
-            PushProvider.XIAOMI -> Result.Success(CreateDeviceRequest.PushProvider.xiaomi)
+            PushProvider.FIREBASE -> Result.Success(CreateDeviceRequest.PushProvider.Firebase)
+            PushProvider.HUAWEI -> Result.Success(CreateDeviceRequest.PushProvider.Huawei)
+            PushProvider.XIAOMI -> Result.Success(CreateDeviceRequest.PushProvider.Xiaomi)
             PushProvider.UNKNOWN -> Result.Failure(Error.GenericError("Unsupported PushProvider"))
         }.map {
             CreateDeviceRequest(

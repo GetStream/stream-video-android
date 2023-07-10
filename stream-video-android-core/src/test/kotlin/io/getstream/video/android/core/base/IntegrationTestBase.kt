@@ -195,7 +195,8 @@ internal fun Call.toResponse(createdBy: UserResponse): CallResponse {
         micDefaultOn = true,
         opusDtxEnabled = true,
         redundantCodingEnabled = true,
-        speakerDefaultOn = true
+        speakerDefaultOn = true,
+        defaultDevice = AudioSettings.DefaultDevice.Speaker
     )
     val settings = CallSettingsResponse(
         audio = audioSettings,
@@ -207,16 +208,16 @@ internal fun Call.toResponse(createdBy: UserResponse): CallResponse {
         geofencing = GeofenceSettings(names = emptyList()),
         recording = RecordSettings(
             audioOnly = false,
-            mode = RecordSettings.Mode.available,
-            quality = RecordSettings.Quality._720p
+            mode = RecordSettings.Mode.Available,
+            quality = RecordSettings.Quality.`720p`
         ),
         ring = RingSettings(autoCancelTimeoutMs = 10000, incomingCallTimeoutMs = 10000),
         screensharing = ScreensharingSettings(false, false),
-        transcription = TranscriptionSettings("test", TranscriptionSettings.Mode.available),
+        transcription = TranscriptionSettings("test", TranscriptionSettings.Mode.Available),
         video = VideoSettings(
             false,
             false,
-            VideoSettings.CameraFacing.front,
+            VideoSettings.CameraFacing.Front,
             false,
             TargetResolution(3000000, 1024, 1280)
         )

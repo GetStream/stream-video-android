@@ -28,7 +28,13 @@ import org.openapitools.client.models.TargetResolution
 
 
 
+import com.squareup.moshi.FromJson
 import com.squareup.moshi.Json
+import com.squareup.moshi.JsonAdapter
+import com.squareup.moshi.JsonReader
+import com.squareup.moshi.JsonWriter
+import com.squareup.moshi.ToJson
+import org.openapitools.client.infrastructure.Serializer
 
 /**
  *
@@ -67,10 +73,38 @@ data class VideoSettings (
      *
      * Values: front,back,`external`
      */
-    enum class CameraFacing(val value: kotlin.String) {
-        @Json(name = "front") front("front"),
-        @Json(name = "back") back("back"),
-        @Json(name = "external") `external`("external");
+
+    sealed class CameraFacing(val value: kotlin.String) {
+        override fun toString(): String = value
+
+        companion object {
+            fun fromString(s: kotlin.String): CameraFacing = when (s) {
+                "front" -> Front
+                "back" -> Back
+                "external" -> External
+                else -> Unknown(s)
+            }
+        }
+
+        object Front : CameraFacing("front")
+        object Back : CameraFacing("back")
+        object External : CameraFacing("external")
+        data class Unknown(val unknownValue: kotlin.String) : CameraFacing(unknownValue)
+
+        class CameraFacingAdapter : JsonAdapter<CameraFacing>() {
+            @FromJson
+            override fun fromJson(reader: JsonReader): CameraFacing? {
+                val s = reader.nextString() ?: return null
+                return fromString(s)
+            }
+
+            @ToJson
+            override fun toJson(writer: JsonWriter, value: CameraFacing?) {
+                writer.value(value?.value)
+            }
+        }
     }
+
+
 
 }

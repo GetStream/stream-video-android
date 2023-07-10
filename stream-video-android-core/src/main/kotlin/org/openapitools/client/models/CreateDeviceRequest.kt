@@ -28,7 +28,13 @@ import org.openapitools.client.models.UserRequest
 
 
 
+import com.squareup.moshi.FromJson
 import com.squareup.moshi.Json
+import com.squareup.moshi.JsonAdapter
+import com.squareup.moshi.JsonReader
+import com.squareup.moshi.JsonWriter
+import com.squareup.moshi.ToJson
+import org.openapitools.client.infrastructure.Serializer
 
 /**
  *
@@ -71,11 +77,40 @@ data class CreateDeviceRequest (
      *
      * Values: firebase,apn,huawei,xiaomi
      */
-    enum class PushProvider(val value: kotlin.String) {
-        @Json(name = "firebase") firebase("firebase"),
-        @Json(name = "apn") apn("apn"),
-        @Json(name = "huawei") huawei("huawei"),
-        @Json(name = "xiaomi") xiaomi("xiaomi");
+
+    sealed class PushProvider(val value: kotlin.String) {
+        override fun toString(): String = value
+
+        companion object {
+            fun fromString(s: kotlin.String): PushProvider = when (s) {
+                "firebase" -> Firebase
+                "apn" -> Apn
+                "huawei" -> Huawei
+                "xiaomi" -> Xiaomi
+                else -> Unknown(s)
+            }
+        }
+
+        object Firebase : PushProvider("firebase")
+        object Apn : PushProvider("apn")
+        object Huawei : PushProvider("huawei")
+        object Xiaomi : PushProvider("xiaomi")
+        data class Unknown(val unknownValue: kotlin.String) : PushProvider(unknownValue)
+
+        class PushProviderAdapter : JsonAdapter<PushProvider>() {
+            @FromJson
+            override fun fromJson(reader: JsonReader): PushProvider? {
+                val s = reader.nextString() ?: return null
+                return fromString(s)
+            }
+
+            @ToJson
+            override fun toJson(writer: JsonWriter, value: PushProvider?) {
+                writer.value(value?.value)
+            }
+        }
     }
+
+
 
 }

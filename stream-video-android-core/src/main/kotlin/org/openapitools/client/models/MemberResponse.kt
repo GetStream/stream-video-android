@@ -28,7 +28,13 @@ import org.openapitools.client.models.UserResponse
 
 
 
+import com.squareup.moshi.FromJson
 import com.squareup.moshi.Json
+import com.squareup.moshi.JsonAdapter
+import com.squareup.moshi.JsonReader
+import com.squareup.moshi.JsonWriter
+import com.squareup.moshi.ToJson
+import org.openapitools.client.infrastructure.Serializer
 
 /**
  *
@@ -51,7 +57,7 @@ data class MemberResponse (
 
     /* Custom member response data */
     @Json(name = "custom")
-    val custom: kotlin.collections.Map<kotlin.String, kotlin.Any>,
+    val custom: kotlin.collections.Map<kotlin.String, kotlin.Any?>,
 
     /* Date/time of the last update */
     @Json(name = "updated_at")
