@@ -76,7 +76,7 @@ Video roadmap and changelog is available [here](https://github.com/GetStream/pro
 - [ ] support settings.audio.default_device (Daniel or Jc)
 - [X] Deeplink support for video call demo & dogfooding app (skip auth for the video demo, keep it for dogfooding) (Jaewoong)
 - [ ] Chat Integration (Jaewoong)
-- [ ] XML version of VideoRenderer (Jaewoong)
+- [X] XML version of VideoRenderer (Jaewoong)
 - [ ] Local Video disconnects sometimes (ICE restarts issue for the publisher. we're waiting for the backend support) (Thierry)
 - [ ] Call Analytics stateflow (Thierry)
 - [ ] sortedParticipants stateflow doesn't update accurately (Thierry)
