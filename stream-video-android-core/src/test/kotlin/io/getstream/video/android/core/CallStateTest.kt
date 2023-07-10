@@ -18,6 +18,7 @@ package io.getstream.video.android.core
 
 import com.google.common.truth.Truth.assertThat
 import io.getstream.video.android.core.base.IntegrationTestBase
+import io.getstream.video.android.core.events.DominantSpeakerChangedEvent
 import io.getstream.video.android.model.User
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.test.runTest
@@ -106,6 +107,9 @@ class CallStateTest : IntegrationTestBase() {
     @Test
     fun `Participants should be sorted`() = runTest {
         val call = client.call("default", randomUUID())
+        val sorted1 = call.state.sortedParticipants.value
+        assertThat(sorted1).isEmpty()
+
         call.state._pinnedParticipants.value = mutableMapOf(
             "1" to OffsetDateTime.now(Clock.systemUTC())
         )
@@ -130,14 +134,14 @@ class CallStateTest : IntegrationTestBase() {
             ParticipantState("3", call, User("3")).apply { _screenSharingEnabled.value = true }
         )
 
-        val sorted = call.state.sortedParticipants.value.map { it.sessionId }
-        assertThat(sorted).isInOrder()
+        println("emitSorted hope its called")
 
-        call.state.updateParticipant(
-            ParticipantState("2", call, User("2")).apply { _dominantSpeaker.value = false }
-        )
         val sorted2 = call.state.sortedParticipants.value.map { it.sessionId }
-        assertThat(sorted2).isInOrder()
+        assertThat(sorted2).isEqualTo(listOf("1", "2", "3", "4", "5", "6"))
+
+        clientImpl.fireEvent(DominantSpeakerChangedEvent("3", "3"), call.cid)
+        val sorted3 = call.state.sortedParticipants.value.map { it.sessionId }
+        assertThat(sorted3).isEqualTo(listOf("1", "3", "2", "4", "5", "6"))
     }
 
     @Test
