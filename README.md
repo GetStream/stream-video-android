@@ -19,13 +19,17 @@ Most users start with the Compose UI components and fall back to the lower-level
 
 Stream allows developers to rapidly deploy scalable feeds, chat messaging and video with an industry leading 99.999% uptime SLA guarantee.
 
+Stream provides UI components and state handling that make it easy to build video calling for your app. All calls run on Stream's network of edge servers around the world, ensuring optimal latency and reliability.
+
+## 📕 Tutorials
+
 With Stream's video components, you can use their SDK to build in-app video calling, audio rooms, audio calls, or live streaming. The best place to get started is with their tutorials:
 
-- Video & Audio Calling Tutorial
-- Audio Rooms Tutorial
-- Livestreaming Tutorial
+- **[Video & Audio Calling Tutorial](https://getstream.io/video/docs/android/tutorials/video-calling/)**
+- **[Audio Rooms Tutorial](https://getstream.io/video/docs/android/tutorials/audio-room/)**
+- **[Livestreaming Tutorial](https://getstream.io/video/docs/android/tutorials/livestream/)**
 
-Stream provides UI components and state handling that make it easy to build video calling for your app. All calls run on Stream's network of edge servers around the world, ensuring optimal latency and reliability.
+If you're interested in customizing the UI components for the Video SDK, check out the **[UI Cookbook](https://getstream.io/video/docs/android/ui-cookbook/overview/)**.
 
 ## 📱 Previews
 
