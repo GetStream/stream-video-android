@@ -168,7 +168,7 @@ public class CallParticipantView : CallCardView, VideoRenderer {
      *
      * @param user The [User] whose video we are viewing.
      */
-    private fun setUserData(user: io.getstream.video.android.model.User) {
+    private fun setUserData(user: User) {
         binding.participantAvatar.setData(user)
         binding.participantLabel.text = user.name.ifBlank { user.id }
     }

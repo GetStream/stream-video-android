@@ -61,6 +61,7 @@ import io.getstream.webrtc.android.ui.VideoTextureViewRenderer
  * @param call The call state that contains all the tracks and participants.
  * @param video A media contains a video track or an audio track to be rendered.
  * @param modifier Modifier for styling.
+ * @param videoScalingType Setup the video scale type of this renderer.
  * @param videoFallbackContent Content is shown the video track is failed to load or not available.
  * @param onRendered An interface that will be invoked when the video is rendered.
  */

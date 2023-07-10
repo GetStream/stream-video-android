@@ -28,6 +28,9 @@ import io.getstream.video.android.core.model.VideoTrack
 import io.getstream.video.android.model.StreamCallId
 import io.getstream.webrtc.android.ui.VideoTextureViewRenderer
 
+/**
+ * Renders a single video track based on the call state.
+ */
 public class VideoRendererView : VideoTextureViewRenderer {
 
     private var cid: StreamCallId? = null
@@ -45,14 +48,23 @@ public class VideoRendererView : VideoTextureViewRenderer {
      */
     private val video: ParticipantState.Media? = null
 
+    /**
+     * An interface that will be invoked when the video is rendered.
+     */
     public fun onRendered(onRendered: (View) -> Unit) {
         this.onRendered = onRendered
     }
 
+    /**
+     * Setup the video scale type of this renderer.
+     */
     public fun setVideoScalingType(videoScalingType: VideoScalingType) {
         this.videoScalingType = videoScalingType
     }
 
+    /**
+     * Set the video track with [ParticipantState.Media] for the given [streamCallId].
+     */
     public fun setVideo(streamCallId: StreamCallId, video: ParticipantState.Media?) {
         if (video == null || !video.enabled) return
 
