@@ -106,7 +106,8 @@ Video roadmap and changelog is available [here](https://github.com/GetStream/pro
 - [ ] Dynascale 2.0 (codecs, f resolution switches, resolution webrtc handling)
 - [ ] Test coverage
 - [ ] Testing on more devices
-- [ ] Speaking while muted stateflow (Daniel)
+- [X] Speaking while muted stateflow (Daniel)
+- [ ] local version of audioLevel(s) for lower latency audio visualizations(Daniel)
 - [ ] Android SDK development.md cleanup (Daniel)
 - [ ] Logging is too verbose (rtc is very noisy), clean it up to focus on the essential for info and higher
 - [X] Bluetooth reliability
