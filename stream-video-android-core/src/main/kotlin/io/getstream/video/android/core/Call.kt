@@ -343,6 +343,21 @@ public class Call(
         return clientImpl.sendStats(type, id, data)
     }
 
+    suspend fun switchSfu(forceSwitch: Boolean = false) {
+        location?.let {
+            val joinResponse = joinRequest(location = it, currentSfu = session?.sfuUrl)
+            val shouldSwitch = false
+
+            if ((shouldSwitch || forceSwitch) && joinResponse is Success) {
+                // switch to the new SFU
+                val cred = joinResponse.value.credentials
+                val iceServers = cred.iceServers.map { it.toIceServer() }
+                session?.switchSfu(cred.server.url, cred.token, iceServers)
+            }
+        }
+
+    }
+
     suspend fun reconnectOrSwitchSfu() {
         // mark us as reconnecting
         val connectionState = state._connection.value
@@ -359,17 +374,7 @@ public class Call(
             session?.reconnect()
 
             // ask if we should switch
-            location?.let {
-                val joinResponse = joinRequest(location = it, currentSfu = session?.sfuUrl)
-                val shouldSwitch = false
-
-                if (shouldSwitch && joinResponse is Success) {
-                    // switch to the new SFU
-                    val cred = joinResponse.value.credentials
-                    val iceServers = cred.iceServers.map { it.toIceServer() }
-                    session?.switchSfu(cred.server.url, cred.token, iceServers)
-                }
-            }
+            switchSfu()
         }
     }
 
@@ -692,6 +697,24 @@ public class Call(
         // do not unncessarily process the audio sample if we are not muted
         if (!microphone.isEnabled.value) {
             decibelThresholdDetection.processSoundInput(audioSample.data)
+        }
+    }
+
+    val debug = Debug(this)
+
+    class Debug(val call: Call) {
+        public fun restartSubscriberIce() {
+            call.session?.subscriber?.connection?.restartIce()
+        }
+
+        public fun restartPublisherIce() {
+            call.session?.publisher?.connection?.restartIce()
+        }
+
+        public fun switchSfu() {
+            call.scope.launch {
+                call.switchSfu(true)
+            }
         }
     }
 }
