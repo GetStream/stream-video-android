@@ -110,6 +110,8 @@ class LoginViewModel @Inject constructor(
             loggingLevel = LoggingLevel(priority = Priority.DEBUG),
             token = token
         )
+
+        context.dogfoodingApp.initializeStreamChat(user = user)
     }
 }
 

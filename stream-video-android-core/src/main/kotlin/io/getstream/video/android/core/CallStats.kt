@@ -140,8 +140,6 @@ public class CallStats(val call: Call, val callScope: CoroutineScope) {
             toMap["data"] = stats.statsMap
             call.sendStats(toMap)
         }
-
-
     }
 
     fun updateLocalStats() {

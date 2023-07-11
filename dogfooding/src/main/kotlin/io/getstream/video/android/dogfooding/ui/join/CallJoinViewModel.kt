@@ -20,6 +20,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.google.firebase.auth.FirebaseAuth
 import dagger.hilt.android.lifecycle.HiltViewModel
+import io.getstream.chat.android.client.ChatClient
 import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.StreamVideo
 import io.getstream.video.android.datastore.delegate.StreamUserDataStore
@@ -92,6 +93,7 @@ class CallJoinViewModel @Inject constructor(
         FirebaseAuth.getInstance().signOut()
         StreamVideo.instance().logOut()
         StreamVideo.removeClient()
+        ChatClient.instance().disconnect(true).enqueue()
     }
 }
 

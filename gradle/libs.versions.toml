@@ -43,7 +43,7 @@ turbine = "0.13.0"
 
 streamWebRTC = "1.0.2"
 streamResult = "1.1.0"
-streamChat = "5.17.6"
+streamChat = "6.0.0-beta1"
 streamLog = "1.1.4"
 streamPush = "1.1.1"
 

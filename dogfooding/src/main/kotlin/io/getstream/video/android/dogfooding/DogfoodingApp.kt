@@ -22,6 +22,12 @@ import com.google.firebase.crashlytics.ktx.crashlytics
 import com.google.firebase.ktx.Firebase
 import dagger.hilt.android.HiltAndroidApp
 import io.getstream.android.push.firebase.FirebasePushDeviceGenerator
+import io.getstream.chat.android.client.ChatClient
+import io.getstream.chat.android.client.logger.ChatLogLevel
+import io.getstream.chat.android.client.models.UploadAttachmentsNetworkType
+import io.getstream.chat.android.offline.plugin.factory.StreamOfflinePluginFactory
+import io.getstream.chat.android.state.plugin.config.StatePluginConfig
+import io.getstream.chat.android.state.plugin.factory.StreamStatePluginFactory
 import io.getstream.video.android.core.StreamVideo
 import io.getstream.video.android.core.StreamVideoBuilder
 import io.getstream.video.android.core.logging.LoggingLevel
@@ -72,6 +78,37 @@ class DogfoodingApp : Application() {
                 response.token
             }
         ).build()
+    }
+
+    fun initializeStreamChat(
+        user: User,
+    ) {
+        val offlinePlugin = StreamOfflinePluginFactory(this) // 1
+        val statePluginFactory = StreamStatePluginFactory( // 2
+            config = StatePluginConfig(
+                backgroundSyncEnabled = true,
+                userPresence = true,
+            ),
+            appContext = this
+        )
+
+        val logLevel = if (BuildConfig.DEBUG) ChatLogLevel.ALL else ChatLogLevel.NOTHING
+        val chatClient = ChatClient.Builder("tp8sef43xcpc", this)
+            .withPlugins(offlinePlugin, statePluginFactory)
+            .logLevel(logLevel)
+            .uploadAttachmentsNetworkType(UploadAttachmentsNetworkType.NOT_ROAMING)
+            .build()
+
+        val userLogin = io.getstream.chat.android.client.models.User(
+            id = user.id,
+            name = user.name,
+            image = user.image
+        )
+
+        chatClient.connectUser(
+            user = userLogin,
+            token = userLogin.extraData["chatToken"] as String
+        ).enqueue()
     }
 }
 
