@@ -23,6 +23,7 @@ import com.jakewharton.threetenabp.AndroidThreeTen
 import io.getstream.log.StreamLog
 import io.getstream.log.android.AndroidStreamLogger
 import io.getstream.log.streamLog
+import io.getstream.video.android.BuildConfig
 import io.getstream.video.android.core.dispatchers.DispatcherProvider
 import io.getstream.video.android.core.filter.AudioFilter
 import io.getstream.video.android.core.filter.VideoFilter
@@ -92,6 +93,8 @@ public class StreamVideoBuilder @JvmOverloads constructor(
 
     val scope = CoroutineScope(DispatcherProvider.IO)
 
+
+
     public fun build(): StreamVideo {
         val lifecycle = ProcessLifecycleOwner.get().lifecycle
 
@@ -108,6 +111,10 @@ public class StreamVideoBuilder @JvmOverloads constructor(
             throw IllegalArgumentException(
                 "Either a user token or a token provider must be provided"
             )
+        }
+
+        if (BuildConfig.CORE_VIDEO_DOMAIN.isNotEmpty()) {
+            videoDomain = BuildConfig.CORE_VIDEO_DOMAIN
         }
 
         if (user.type == UserType.Authenticated && user.id.isEmpty()) {

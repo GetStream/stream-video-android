@@ -12,7 +12,7 @@
 cp env.properties.sample .env.properties
 ```
 
-Edit the file and set CORE_TEST_LOCAL = 1 to run against your local infra.
+Edit the file and set CORE_VIDEO_DOMAIN = localhost to run against your local infra.
 
 ## Build vars
 
