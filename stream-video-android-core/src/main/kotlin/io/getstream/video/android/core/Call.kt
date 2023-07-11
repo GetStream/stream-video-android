@@ -258,6 +258,8 @@ public class Call(
     private var statsGatheringJob: Job? = null
     internal var location: String? = null
 
+    private var subscriptions = mutableSetOf<EventSubscription>()
+
     internal val clientImpl = client as StreamVideoImpl
     private val logger by taggedLogger("Call")
 
@@ -692,7 +694,7 @@ public class Call(
         return clientImpl.stopBroadcasting(type, id)
     }
 
-    private var subscriptions = mutableSetOf<EventSubscription>()
+
 
     public fun subscribeFor(
         vararg eventTypes: Class<out VideoEvent>,

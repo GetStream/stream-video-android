@@ -41,11 +41,15 @@ import io.getstream.video.android.core.utils.toUser
 import io.getstream.video.android.model.User
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.channelFlow
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
@@ -197,6 +201,67 @@ public class CallState(private val call: Call, private val user: User) {
     val scope = CoroutineScope(context = DispatcherProvider.IO)
     val stats = CallStats(call, scope)
 
+
+    internal val sortedParticipantsFlow = channelFlow {
+        // uses a channel flow to handle concurrency and 3 things updating: https://kotlinlang.org/api/kotlinx.coroutines/kotlinx-coroutines-core/kotlinx.coroutines.flow/channel-flow.html
+
+        fun emitSorted() {
+            println("emitSorted")
+            val participants = participants.value
+            val pinned = _pinnedParticipants.value
+            var lastParticipants : List<ParticipantState>? = null
+            val sorted = participants.sortedWith(
+                compareBy(
+                    { pinned.containsKey(it.sessionId) },
+                    { it.dominantSpeaker.value },
+                    { it.screenSharingEnabled.value },
+                    { it.lastSpeakingAt.value },
+                    { it.videoEnabled.value },
+                    { it.joinedAt.value }
+                )
+            ).reversed()
+
+            scope.launch {
+                if (lastParticipants != sorted) {
+                    println("emitting ${sorted.map { it.sessionId } } - ${_participants.value.size} ")
+                    send(sorted)
+                    lastParticipants = sorted
+                }
+
+            }
+        }
+
+        scope.launch {
+            println("in the scope")
+            _participants.collect {
+                println("emitSorted participants changed ${it.size} ")
+                emitSorted()
+            }
+        }
+        // Since participant state exposes it's own stateflows this is a little harder to do than usual
+        // we need to listen to the events and update the flow when it changes
+
+        // emit the sorted list
+        emitSorted()
+        println("emitSorted pre listening")
+
+        call.subscribe {
+            println("emitSorted video event receieved")
+            emitSorted()
+        }
+        println("emitSorted - listen start for participants")
+
+        scope.launch {
+            _pinnedParticipants.collect {
+                println("emitSorted pinned changed")
+                emitSorted()
+            }
+        }
+
+        println("emitSorted listening")
+        awaitClose {}
+    }
+
     /**
      * Sorted participants based on
      * - Pinned
@@ -206,45 +271,7 @@ public class CallState(private val call: Call, private val user: User) {
      * - Video enabled
      * - Call joined at
      */
-    public val sortedParticipants = flow {
-        fun emitSorted() {
-            println("emitSorted")
-            val participants = participants.value
-            val pinned = _pinnedParticipants.value
-            var lastParticipants : List<ParticipantState>? = null
-            participants.sortedWith(
-                compareBy(
-                    { pinned.containsKey(it.sessionId) },
-                    { it.dominantSpeaker.value },
-                    { it.screenSharingEnabled.value },
-                    { it.lastSpeakingAt.value },
-                    { it.videoEnabled.value },
-                    { it.joinedAt.value }
-                )
-            )
-
-            scope.launch {
-                if (lastParticipants != participants) {
-                    emit(participants)
-                }
-                lastParticipants = participants
-            }
-        }
-        // Since participant state exposes it's own stateflows this is a little harder to do than usual
-        // we need to listen to the events and update the flow when it changes
-        call.subscribe {
-            println("emitSorted video event receieved")
-            emitSorted()
-        }
-        println("emitSorted listening")
-        // emit the sorted list
-        emitSorted()
-
-
-
-
-    }.stateIn(scope, SharingStarted.Eagerly, emptyList())
-
+    val sortedParticipants = sortedParticipantsFlow.debounce(50).stateIn(scope, SharingStarted.Eagerly, emptyList())
 
     /** Members contains the list of users who are permanently associated with this call. This includes users who are currently not active in the call
      * As an example if you invite "john", "bob" and "jane" to a call and only Jane joins.
@@ -512,7 +539,9 @@ public class CallState(private val call: Call, private val user: User) {
                 val lastDominantSpeaker = dominantSpeaker.value
                 val lastDominantSpeakerId = lastDominantSpeaker?.sessionId
                 if (lastDominantSpeakerId != event.sessionId) {
-                    _dominantSpeaker.value = getOrCreateParticipant(event.sessionId, event.userId)
+                    val newSpeaker = getOrCreateParticipant(event.sessionId, event.userId)
+                    newSpeaker._dominantSpeaker.value = true
+                    _dominantSpeaker.value = newSpeaker
                     lastDominantSpeaker?._dominantSpeaker?.value = false
                 }
             }
@@ -547,7 +576,6 @@ public class CallState(private val call: Call, private val user: User) {
             }
 
             is ParticipantJoinedEvent -> {
-                println("ParticipantJoinedEvent")
                 getOrCreateParticipant(event.participant)
             }
 

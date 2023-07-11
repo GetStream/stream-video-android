@@ -134,12 +134,18 @@ class CallStateTest : IntegrationTestBase() {
             ParticipantState("3", call, User("3")).apply { _screenSharingEnabled.value = true }
         )
 
-        println("emitSorted hope its called")
+        val participants = call.state.participants.value
+        println("emitSorted participants size is ${participants.size}")
+        assertThat(participants.size).isEqualTo(6)
+        delay(60)
 
         val sorted2 = call.state.sortedParticipants.value.map { it.sessionId }
         assertThat(sorted2).isEqualTo(listOf("1", "2", "3", "4", "5", "6"))
 
         clientImpl.fireEvent(DominantSpeakerChangedEvent("3", "3"), call.cid)
+        assertThat(call.state.getParticipantBySessionId("3")?.dominantSpeaker?.value).isTrue()
+        delay(60)
+
         val sorted3 = call.state.sortedParticipants.value.map { it.sessionId }
         assertThat(sorted3).isEqualTo(listOf("1", "3", "2", "4", "5", "6"))
     }
