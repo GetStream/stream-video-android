@@ -344,8 +344,16 @@ public class RtcSession internal constructor(
 
     suspend fun reconnect() {
         // ice restart
-        subscriber?.connection?.restartIce()
-        publisher?.connection?.restartIce()
+        subscriber?.let {
+            if (!it.isHealthy()) {
+                it.connection.restartIce()
+            }
+        }
+        publisher?.let {
+            if (!it.isHealthy()) {
+                it.connection.restartIce()
+            }
+        }
     }
 
     suspend fun connect() {
