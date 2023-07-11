@@ -52,6 +52,7 @@ public final class io/getstream/video/android/core/Call {
 	public final fun sendCustomEvent (Ljava/util/Map;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public final fun sendReaction (Ljava/lang/String;Ljava/lang/String;Ljava/util/Map;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public static synthetic fun sendReaction$default (Lio/getstream/video/android/core/Call;Ljava/lang/String;Ljava/lang/String;Ljava/util/Map;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
+	public final fun sendStats (Ljava/util/Map;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public final fun setVisibility (Ljava/lang/String;Lstream/video/sfu/models/TrackType;Z)V
 	public final fun startBroadcasting (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public final fun startRecording (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
@@ -88,7 +89,7 @@ public final class io/getstream/video/android/core/CallHealthMonitor {
 }
 
 public final class io/getstream/video/android/core/CallState {
-	public fun <init> (Lio/getstream/video/android/core/Call;Lio/getstream/video/android/model/User;)V
+	public fun <init> (Lio/getstream/video/android/core/Call;Lio/getstream/video/android/model/User;Lkotlinx/coroutines/CoroutineScope;)V
 	public final fun clearParticipants ()V
 	public final fun getAcceptedBy ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun getActiveSpeakers ()Lkotlinx/coroutines/flow/StateFlow;
@@ -123,7 +124,6 @@ public final class io/getstream/video/android/core/CallState {
 	public final fun getRejectedBy ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun getRemoteParticipants ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun getRingingState ()Lkotlinx/coroutines/flow/StateFlow;
-	public final fun getScope ()Lkotlinx/coroutines/CoroutineScope;
 	public final fun getScreenSharingSession ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun getSession ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun getSettings ()Lkotlinx/coroutines/flow/StateFlow;
@@ -154,8 +154,9 @@ public final class io/getstream/video/android/core/CallState {
 }
 
 public final class io/getstream/video/android/core/CallStats {
-	public fun <init> (Lio/getstream/video/android/core/Call;)V
+	public fun <init> (Lio/getstream/video/android/core/Call;Lkotlinx/coroutines/CoroutineScope;)V
 	public final fun getCall ()Lio/getstream/video/android/core/Call;
+	public final fun getCallScope ()Lkotlinx/coroutines/CoroutineScope;
 	public final fun getLocal ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun getPublisher ()Lio/getstream/video/android/core/PeerConnectionStats;
 	public final fun getSubscriber ()Lio/getstream/video/android/core/PeerConnectionStats;
@@ -2444,6 +2445,7 @@ public abstract interface class org/openapitools/client/apis/DefaultApi {
 	public abstract fun queryMembers (Lorg/openapitools/client/models/QueryMembersRequest;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public abstract fun rejectCall (Ljava/lang/String;Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public abstract fun requestPermission (Ljava/lang/String;Ljava/lang/String;Lorg/openapitools/client/models/RequestPermissionRequest;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public abstract fun sendCallStats (Ljava/lang/String;Ljava/lang/String;Lorg/openapitools/client/models/SendCallStatsRequest;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public abstract fun sendEvent (Ljava/lang/String;Ljava/lang/String;Lorg/openapitools/client/models/SendEventRequest;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public abstract fun sendVideoReaction (Ljava/lang/String;Ljava/lang/String;Lorg/openapitools/client/models/SendReactionRequest;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public abstract fun startBroadcasting (Ljava/lang/String;Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
@@ -2593,16 +2595,18 @@ public final class org/openapitools/client/models/AcceptCallResponse {
 }
 
 public final class org/openapitools/client/models/AudioSettings {
-	public fun <init> (ZZZZZ)V
+	public fun <init> (ZLorg/openapitools/client/models/AudioSettings$DefaultDevice;ZZZZ)V
 	public final fun component1 ()Z
-	public final fun component2 ()Z
+	public final fun component2 ()Lorg/openapitools/client/models/AudioSettings$DefaultDevice;
 	public final fun component3 ()Z
 	public final fun component4 ()Z
 	public final fun component5 ()Z
-	public final fun copy (ZZZZZ)Lorg/openapitools/client/models/AudioSettings;
-	public static synthetic fun copy$default (Lorg/openapitools/client/models/AudioSettings;ZZZZZILjava/lang/Object;)Lorg/openapitools/client/models/AudioSettings;
+	public final fun component6 ()Z
+	public final fun copy (ZLorg/openapitools/client/models/AudioSettings$DefaultDevice;ZZZZ)Lorg/openapitools/client/models/AudioSettings;
+	public static synthetic fun copy$default (Lorg/openapitools/client/models/AudioSettings;ZLorg/openapitools/client/models/AudioSettings$DefaultDevice;ZZZZILjava/lang/Object;)Lorg/openapitools/client/models/AudioSettings;
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getAccessRequestEnabled ()Z
+	public final fun getDefaultDevice ()Lorg/openapitools/client/models/AudioSettings$DefaultDevice;
 	public final fun getMicDefaultOn ()Z
 	public final fun getOpusDtxEnabled ()Z
 	public final fun getRedundantCodingEnabled ()Z
@@ -2611,23 +2615,100 @@ public final class org/openapitools/client/models/AudioSettings {
 	public fun toString ()Ljava/lang/String;
 }
 
-public final class org/openapitools/client/models/AudioSettingsRequest {
+public abstract class org/openapitools/client/models/AudioSettings$DefaultDevice {
+	public static final field Companion Lorg/openapitools/client/models/AudioSettings$DefaultDevice$Companion;
+	public synthetic fun <init> (Ljava/lang/String;Lkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun getValue ()Ljava/lang/String;
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class org/openapitools/client/models/AudioSettings$DefaultDevice$Companion {
+	public final fun fromString (Ljava/lang/String;)Lorg/openapitools/client/models/AudioSettings$DefaultDevice;
+}
+
+public final class org/openapitools/client/models/AudioSettings$DefaultDevice$DefaultDeviceAdapter : com/squareup/moshi/JsonAdapter {
 	public fun <init> ()V
-	public fun <init> (Ljava/lang/Boolean;Ljava/lang/Boolean;Ljava/lang/Boolean;Ljava/lang/Boolean;Ljava/lang/Boolean;)V
-	public synthetic fun <init> (Ljava/lang/Boolean;Ljava/lang/Boolean;Ljava/lang/Boolean;Ljava/lang/Boolean;Ljava/lang/Boolean;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
-	public final fun component1 ()Ljava/lang/Boolean;
+	public synthetic fun fromJson (Lcom/squareup/moshi/JsonReader;)Ljava/lang/Object;
+	public fun fromJson (Lcom/squareup/moshi/JsonReader;)Lorg/openapitools/client/models/AudioSettings$DefaultDevice;
+	public synthetic fun toJson (Lcom/squareup/moshi/JsonWriter;Ljava/lang/Object;)V
+	public fun toJson (Lcom/squareup/moshi/JsonWriter;Lorg/openapitools/client/models/AudioSettings$DefaultDevice;)V
+}
+
+public final class org/openapitools/client/models/AudioSettings$DefaultDevice$Earpiece : org/openapitools/client/models/AudioSettings$DefaultDevice {
+	public static final field INSTANCE Lorg/openapitools/client/models/AudioSettings$DefaultDevice$Earpiece;
+}
+
+public final class org/openapitools/client/models/AudioSettings$DefaultDevice$Speaker : org/openapitools/client/models/AudioSettings$DefaultDevice {
+	public static final field INSTANCE Lorg/openapitools/client/models/AudioSettings$DefaultDevice$Speaker;
+}
+
+public final class org/openapitools/client/models/AudioSettings$DefaultDevice$Unknown : org/openapitools/client/models/AudioSettings$DefaultDevice {
+	public fun <init> (Ljava/lang/String;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun copy (Ljava/lang/String;)Lorg/openapitools/client/models/AudioSettings$DefaultDevice$Unknown;
+	public static synthetic fun copy$default (Lorg/openapitools/client/models/AudioSettings$DefaultDevice$Unknown;Ljava/lang/String;ILjava/lang/Object;)Lorg/openapitools/client/models/AudioSettings$DefaultDevice$Unknown;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getUnknownValue ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class org/openapitools/client/models/AudioSettingsRequest {
+	public fun <init> (Lorg/openapitools/client/models/AudioSettingsRequest$DefaultDevice;Ljava/lang/Boolean;Ljava/lang/Boolean;Ljava/lang/Boolean;Ljava/lang/Boolean;Ljava/lang/Boolean;)V
+	public synthetic fun <init> (Lorg/openapitools/client/models/AudioSettingsRequest$DefaultDevice;Ljava/lang/Boolean;Ljava/lang/Boolean;Ljava/lang/Boolean;Ljava/lang/Boolean;Ljava/lang/Boolean;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Lorg/openapitools/client/models/AudioSettingsRequest$DefaultDevice;
 	public final fun component2 ()Ljava/lang/Boolean;
 	public final fun component3 ()Ljava/lang/Boolean;
 	public final fun component4 ()Ljava/lang/Boolean;
 	public final fun component5 ()Ljava/lang/Boolean;
-	public final fun copy (Ljava/lang/Boolean;Ljava/lang/Boolean;Ljava/lang/Boolean;Ljava/lang/Boolean;Ljava/lang/Boolean;)Lorg/openapitools/client/models/AudioSettingsRequest;
-	public static synthetic fun copy$default (Lorg/openapitools/client/models/AudioSettingsRequest;Ljava/lang/Boolean;Ljava/lang/Boolean;Ljava/lang/Boolean;Ljava/lang/Boolean;Ljava/lang/Boolean;ILjava/lang/Object;)Lorg/openapitools/client/models/AudioSettingsRequest;
+	public final fun component6 ()Ljava/lang/Boolean;
+	public final fun copy (Lorg/openapitools/client/models/AudioSettingsRequest$DefaultDevice;Ljava/lang/Boolean;Ljava/lang/Boolean;Ljava/lang/Boolean;Ljava/lang/Boolean;Ljava/lang/Boolean;)Lorg/openapitools/client/models/AudioSettingsRequest;
+	public static synthetic fun copy$default (Lorg/openapitools/client/models/AudioSettingsRequest;Lorg/openapitools/client/models/AudioSettingsRequest$DefaultDevice;Ljava/lang/Boolean;Ljava/lang/Boolean;Ljava/lang/Boolean;Ljava/lang/Boolean;Ljava/lang/Boolean;ILjava/lang/Object;)Lorg/openapitools/client/models/AudioSettingsRequest;
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getAccessRequestEnabled ()Ljava/lang/Boolean;
+	public final fun getDefaultDevice ()Lorg/openapitools/client/models/AudioSettingsRequest$DefaultDevice;
 	public final fun getMicDefaultOn ()Ljava/lang/Boolean;
 	public final fun getOpusDtxEnabled ()Ljava/lang/Boolean;
 	public final fun getRedundantCodingEnabled ()Ljava/lang/Boolean;
 	public final fun getSpeakerDefaultOn ()Ljava/lang/Boolean;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public abstract class org/openapitools/client/models/AudioSettingsRequest$DefaultDevice {
+	public static final field Companion Lorg/openapitools/client/models/AudioSettingsRequest$DefaultDevice$Companion;
+	public synthetic fun <init> (Ljava/lang/String;Lkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun getValue ()Ljava/lang/String;
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class org/openapitools/client/models/AudioSettingsRequest$DefaultDevice$Companion {
+	public final fun fromString (Ljava/lang/String;)Lorg/openapitools/client/models/AudioSettingsRequest$DefaultDevice;
+}
+
+public final class org/openapitools/client/models/AudioSettingsRequest$DefaultDevice$DefaultDeviceAdapter : com/squareup/moshi/JsonAdapter {
+	public fun <init> ()V
+	public synthetic fun fromJson (Lcom/squareup/moshi/JsonReader;)Ljava/lang/Object;
+	public fun fromJson (Lcom/squareup/moshi/JsonReader;)Lorg/openapitools/client/models/AudioSettingsRequest$DefaultDevice;
+	public synthetic fun toJson (Lcom/squareup/moshi/JsonWriter;Ljava/lang/Object;)V
+	public fun toJson (Lcom/squareup/moshi/JsonWriter;Lorg/openapitools/client/models/AudioSettingsRequest$DefaultDevice;)V
+}
+
+public final class org/openapitools/client/models/AudioSettingsRequest$DefaultDevice$Earpiece : org/openapitools/client/models/AudioSettingsRequest$DefaultDevice {
+	public static final field INSTANCE Lorg/openapitools/client/models/AudioSettingsRequest$DefaultDevice$Earpiece;
+}
+
+public final class org/openapitools/client/models/AudioSettingsRequest$DefaultDevice$Speaker : org/openapitools/client/models/AudioSettingsRequest$DefaultDevice {
+	public static final field INSTANCE Lorg/openapitools/client/models/AudioSettingsRequest$DefaultDevice$Speaker;
+}
+
+public final class org/openapitools/client/models/AudioSettingsRequest$DefaultDevice$Unknown : org/openapitools/client/models/AudioSettingsRequest$DefaultDevice {
+	public fun <init> (Ljava/lang/String;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun copy (Ljava/lang/String;)Lorg/openapitools/client/models/AudioSettingsRequest$DefaultDevice$Unknown;
+	public static synthetic fun copy$default (Lorg/openapitools/client/models/AudioSettingsRequest$DefaultDevice$Unknown;Ljava/lang/String;ILjava/lang/Object;)Lorg/openapitools/client/models/AudioSettingsRequest$DefaultDevice$Unknown;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getUnknownValue ()Ljava/lang/String;
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
 }
@@ -3452,14 +3533,50 @@ public final class org/openapitools/client/models/CreateDeviceRequest {
 	public fun toString ()Ljava/lang/String;
 }
 
-public final class org/openapitools/client/models/CreateDeviceRequest$PushProvider : java/lang/Enum {
-	public static final field apn Lorg/openapitools/client/models/CreateDeviceRequest$PushProvider;
-	public static final field firebase Lorg/openapitools/client/models/CreateDeviceRequest$PushProvider;
-	public static final field huawei Lorg/openapitools/client/models/CreateDeviceRequest$PushProvider;
-	public static final field xiaomi Lorg/openapitools/client/models/CreateDeviceRequest$PushProvider;
+public abstract class org/openapitools/client/models/CreateDeviceRequest$PushProvider {
+	public static final field Companion Lorg/openapitools/client/models/CreateDeviceRequest$PushProvider$Companion;
+	public synthetic fun <init> (Ljava/lang/String;Lkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun getValue ()Ljava/lang/String;
-	public static fun valueOf (Ljava/lang/String;)Lorg/openapitools/client/models/CreateDeviceRequest$PushProvider;
-	public static fun values ()[Lorg/openapitools/client/models/CreateDeviceRequest$PushProvider;
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class org/openapitools/client/models/CreateDeviceRequest$PushProvider$Apn : org/openapitools/client/models/CreateDeviceRequest$PushProvider {
+	public static final field INSTANCE Lorg/openapitools/client/models/CreateDeviceRequest$PushProvider$Apn;
+}
+
+public final class org/openapitools/client/models/CreateDeviceRequest$PushProvider$Companion {
+	public final fun fromString (Ljava/lang/String;)Lorg/openapitools/client/models/CreateDeviceRequest$PushProvider;
+}
+
+public final class org/openapitools/client/models/CreateDeviceRequest$PushProvider$Firebase : org/openapitools/client/models/CreateDeviceRequest$PushProvider {
+	public static final field INSTANCE Lorg/openapitools/client/models/CreateDeviceRequest$PushProvider$Firebase;
+}
+
+public final class org/openapitools/client/models/CreateDeviceRequest$PushProvider$Huawei : org/openapitools/client/models/CreateDeviceRequest$PushProvider {
+	public static final field INSTANCE Lorg/openapitools/client/models/CreateDeviceRequest$PushProvider$Huawei;
+}
+
+public final class org/openapitools/client/models/CreateDeviceRequest$PushProvider$PushProviderAdapter : com/squareup/moshi/JsonAdapter {
+	public fun <init> ()V
+	public synthetic fun fromJson (Lcom/squareup/moshi/JsonReader;)Ljava/lang/Object;
+	public fun fromJson (Lcom/squareup/moshi/JsonReader;)Lorg/openapitools/client/models/CreateDeviceRequest$PushProvider;
+	public synthetic fun toJson (Lcom/squareup/moshi/JsonWriter;Ljava/lang/Object;)V
+	public fun toJson (Lcom/squareup/moshi/JsonWriter;Lorg/openapitools/client/models/CreateDeviceRequest$PushProvider;)V
+}
+
+public final class org/openapitools/client/models/CreateDeviceRequest$PushProvider$Unknown : org/openapitools/client/models/CreateDeviceRequest$PushProvider {
+	public fun <init> (Ljava/lang/String;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun copy (Ljava/lang/String;)Lorg/openapitools/client/models/CreateDeviceRequest$PushProvider$Unknown;
+	public static synthetic fun copy$default (Lorg/openapitools/client/models/CreateDeviceRequest$PushProvider$Unknown;Ljava/lang/String;ILjava/lang/Object;)Lorg/openapitools/client/models/CreateDeviceRequest$PushProvider$Unknown;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getUnknownValue ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class org/openapitools/client/models/CreateDeviceRequest$PushProvider$Xiaomi : org/openapitools/client/models/CreateDeviceRequest$PushProvider {
+	public static final field INSTANCE Lorg/openapitools/client/models/CreateDeviceRequest$PushProvider$Xiaomi;
 }
 
 public final class org/openapitools/client/models/CreateGuestRequest {
@@ -3941,41 +4058,126 @@ public final class org/openapitools/client/models/MuteUsersResponse {
 	public fun toString ()Ljava/lang/String;
 }
 
-public final class org/openapitools/client/models/OwnCapability : java/lang/Enum {
+public abstract class org/openapitools/client/models/OwnCapability {
 	public static final field Companion Lorg/openapitools/client/models/OwnCapability$Companion;
-	public static final field blockUsers Lorg/openapitools/client/models/OwnCapability;
-	public static final field createCall Lorg/openapitools/client/models/OwnCapability;
-	public static final field createReaction Lorg/openapitools/client/models/OwnCapability;
-	public static final field endCall Lorg/openapitools/client/models/OwnCapability;
-	public static final field joinBackstage Lorg/openapitools/client/models/OwnCapability;
-	public static final field joinCall Lorg/openapitools/client/models/OwnCapability;
-	public static final field joinEndedCall Lorg/openapitools/client/models/OwnCapability;
-	public static final field muteUsers Lorg/openapitools/client/models/OwnCapability;
-	public static final field readCall Lorg/openapitools/client/models/OwnCapability;
-	public static final field removeCallMember Lorg/openapitools/client/models/OwnCapability;
-	public static final field screenshare Lorg/openapitools/client/models/OwnCapability;
-	public static final field sendAudio Lorg/openapitools/client/models/OwnCapability;
-	public static final field sendVideo Lorg/openapitools/client/models/OwnCapability;
-	public static final field startBroadcastCall Lorg/openapitools/client/models/OwnCapability;
-	public static final field startRecordCall Lorg/openapitools/client/models/OwnCapability;
-	public static final field startTranscriptionCall Lorg/openapitools/client/models/OwnCapability;
-	public static final field stopBroadcastCall Lorg/openapitools/client/models/OwnCapability;
-	public static final field stopRecordCall Lorg/openapitools/client/models/OwnCapability;
-	public static final field stopTranscriptionCall Lorg/openapitools/client/models/OwnCapability;
-	public static final field unknown Lorg/openapitools/client/models/OwnCapability;
-	public static final field updateCall Lorg/openapitools/client/models/OwnCapability;
-	public static final field updateCallMember Lorg/openapitools/client/models/OwnCapability;
-	public static final field updateCallPermissions Lorg/openapitools/client/models/OwnCapability;
-	public static final field updateCallSettings Lorg/openapitools/client/models/OwnCapability;
+	public synthetic fun <init> (Ljava/lang/String;Lkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun getValue ()Ljava/lang/String;
 	public fun toString ()Ljava/lang/String;
-	public static fun valueOf (Ljava/lang/String;)Lorg/openapitools/client/models/OwnCapability;
-	public static fun values ()[Lorg/openapitools/client/models/OwnCapability;
+}
+
+public final class org/openapitools/client/models/OwnCapability$BlockUsers : org/openapitools/client/models/OwnCapability {
+	public static final field INSTANCE Lorg/openapitools/client/models/OwnCapability$BlockUsers;
 }
 
 public final class org/openapitools/client/models/OwnCapability$Companion {
-	public final fun decode (Ljava/lang/Object;)Lorg/openapitools/client/models/OwnCapability;
-	public final fun encode (Ljava/lang/Object;)Ljava/lang/String;
+	public final fun fromString (Ljava/lang/String;)Lorg/openapitools/client/models/OwnCapability;
+}
+
+public final class org/openapitools/client/models/OwnCapability$CreateCall : org/openapitools/client/models/OwnCapability {
+	public static final field INSTANCE Lorg/openapitools/client/models/OwnCapability$CreateCall;
+}
+
+public final class org/openapitools/client/models/OwnCapability$CreateReaction : org/openapitools/client/models/OwnCapability {
+	public static final field INSTANCE Lorg/openapitools/client/models/OwnCapability$CreateReaction;
+}
+
+public final class org/openapitools/client/models/OwnCapability$EndCall : org/openapitools/client/models/OwnCapability {
+	public static final field INSTANCE Lorg/openapitools/client/models/OwnCapability$EndCall;
+}
+
+public final class org/openapitools/client/models/OwnCapability$JoinBackstage : org/openapitools/client/models/OwnCapability {
+	public static final field INSTANCE Lorg/openapitools/client/models/OwnCapability$JoinBackstage;
+}
+
+public final class org/openapitools/client/models/OwnCapability$JoinCall : org/openapitools/client/models/OwnCapability {
+	public static final field INSTANCE Lorg/openapitools/client/models/OwnCapability$JoinCall;
+}
+
+public final class org/openapitools/client/models/OwnCapability$JoinEndedCall : org/openapitools/client/models/OwnCapability {
+	public static final field INSTANCE Lorg/openapitools/client/models/OwnCapability$JoinEndedCall;
+}
+
+public final class org/openapitools/client/models/OwnCapability$MuteUsers : org/openapitools/client/models/OwnCapability {
+	public static final field INSTANCE Lorg/openapitools/client/models/OwnCapability$MuteUsers;
+}
+
+public final class org/openapitools/client/models/OwnCapability$OwnCapabilityAdapter : com/squareup/moshi/JsonAdapter {
+	public fun <init> ()V
+	public synthetic fun fromJson (Lcom/squareup/moshi/JsonReader;)Ljava/lang/Object;
+	public fun fromJson (Lcom/squareup/moshi/JsonReader;)Lorg/openapitools/client/models/OwnCapability;
+	public synthetic fun toJson (Lcom/squareup/moshi/JsonWriter;Ljava/lang/Object;)V
+	public fun toJson (Lcom/squareup/moshi/JsonWriter;Lorg/openapitools/client/models/OwnCapability;)V
+}
+
+public final class org/openapitools/client/models/OwnCapability$ReadCall : org/openapitools/client/models/OwnCapability {
+	public static final field INSTANCE Lorg/openapitools/client/models/OwnCapability$ReadCall;
+}
+
+public final class org/openapitools/client/models/OwnCapability$RemoveCallMember : org/openapitools/client/models/OwnCapability {
+	public static final field INSTANCE Lorg/openapitools/client/models/OwnCapability$RemoveCallMember;
+}
+
+public final class org/openapitools/client/models/OwnCapability$Screenshare : org/openapitools/client/models/OwnCapability {
+	public static final field INSTANCE Lorg/openapitools/client/models/OwnCapability$Screenshare;
+}
+
+public final class org/openapitools/client/models/OwnCapability$SendAudio : org/openapitools/client/models/OwnCapability {
+	public static final field INSTANCE Lorg/openapitools/client/models/OwnCapability$SendAudio;
+}
+
+public final class org/openapitools/client/models/OwnCapability$SendVideo : org/openapitools/client/models/OwnCapability {
+	public static final field INSTANCE Lorg/openapitools/client/models/OwnCapability$SendVideo;
+}
+
+public final class org/openapitools/client/models/OwnCapability$StartBroadcastCall : org/openapitools/client/models/OwnCapability {
+	public static final field INSTANCE Lorg/openapitools/client/models/OwnCapability$StartBroadcastCall;
+}
+
+public final class org/openapitools/client/models/OwnCapability$StartRecordCall : org/openapitools/client/models/OwnCapability {
+	public static final field INSTANCE Lorg/openapitools/client/models/OwnCapability$StartRecordCall;
+}
+
+public final class org/openapitools/client/models/OwnCapability$StartTranscriptionCall : org/openapitools/client/models/OwnCapability {
+	public static final field INSTANCE Lorg/openapitools/client/models/OwnCapability$StartTranscriptionCall;
+}
+
+public final class org/openapitools/client/models/OwnCapability$StopBroadcastCall : org/openapitools/client/models/OwnCapability {
+	public static final field INSTANCE Lorg/openapitools/client/models/OwnCapability$StopBroadcastCall;
+}
+
+public final class org/openapitools/client/models/OwnCapability$StopRecordCall : org/openapitools/client/models/OwnCapability {
+	public static final field INSTANCE Lorg/openapitools/client/models/OwnCapability$StopRecordCall;
+}
+
+public final class org/openapitools/client/models/OwnCapability$StopTranscriptionCall : org/openapitools/client/models/OwnCapability {
+	public static final field INSTANCE Lorg/openapitools/client/models/OwnCapability$StopTranscriptionCall;
+}
+
+public final class org/openapitools/client/models/OwnCapability$Unknown : org/openapitools/client/models/OwnCapability {
+	public fun <init> (Ljava/lang/String;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun copy (Ljava/lang/String;)Lorg/openapitools/client/models/OwnCapability$Unknown;
+	public static synthetic fun copy$default (Lorg/openapitools/client/models/OwnCapability$Unknown;Ljava/lang/String;ILjava/lang/Object;)Lorg/openapitools/client/models/OwnCapability$Unknown;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getUnknownValue ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class org/openapitools/client/models/OwnCapability$UpdateCall : org/openapitools/client/models/OwnCapability {
+	public static final field INSTANCE Lorg/openapitools/client/models/OwnCapability$UpdateCall;
+}
+
+public final class org/openapitools/client/models/OwnCapability$UpdateCallMember : org/openapitools/client/models/OwnCapability {
+	public static final field INSTANCE Lorg/openapitools/client/models/OwnCapability$UpdateCallMember;
+}
+
+public final class org/openapitools/client/models/OwnCapability$UpdateCallPermissions : org/openapitools/client/models/OwnCapability {
+	public static final field INSTANCE Lorg/openapitools/client/models/OwnCapability$UpdateCallPermissions;
+}
+
+public final class org/openapitools/client/models/OwnCapability$UpdateCallSettings : org/openapitools/client/models/OwnCapability {
+	public static final field INSTANCE Lorg/openapitools/client/models/OwnCapability$UpdateCallSettings;
 }
 
 public final class org/openapitools/client/models/OwnUserResponse {
@@ -4157,25 +4359,100 @@ public final class org/openapitools/client/models/RecordSettings {
 	public fun toString ()Ljava/lang/String;
 }
 
-public final class org/openapitools/client/models/RecordSettings$Mode : java/lang/Enum {
-	public static final field autoOn Lorg/openapitools/client/models/RecordSettings$Mode;
-	public static final field available Lorg/openapitools/client/models/RecordSettings$Mode;
-	public static final field disabled Lorg/openapitools/client/models/RecordSettings$Mode;
+public abstract class org/openapitools/client/models/RecordSettings$Mode {
+	public static final field Companion Lorg/openapitools/client/models/RecordSettings$Mode$Companion;
+	public synthetic fun <init> (Ljava/lang/String;Lkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun getValue ()Ljava/lang/String;
-	public static fun valueOf (Ljava/lang/String;)Lorg/openapitools/client/models/RecordSettings$Mode;
-	public static fun values ()[Lorg/openapitools/client/models/RecordSettings$Mode;
+	public fun toString ()Ljava/lang/String;
 }
 
-public final class org/openapitools/client/models/RecordSettings$Quality : java/lang/Enum {
-	public static final field _1080p Lorg/openapitools/client/models/RecordSettings$Quality;
-	public static final field _1440p Lorg/openapitools/client/models/RecordSettings$Quality;
-	public static final field _360p Lorg/openapitools/client/models/RecordSettings$Quality;
-	public static final field _480p Lorg/openapitools/client/models/RecordSettings$Quality;
-	public static final field _720p Lorg/openapitools/client/models/RecordSettings$Quality;
-	public static final field audioOnly Lorg/openapitools/client/models/RecordSettings$Quality;
+public final class org/openapitools/client/models/RecordSettings$Mode$AutoOn : org/openapitools/client/models/RecordSettings$Mode {
+	public static final field INSTANCE Lorg/openapitools/client/models/RecordSettings$Mode$AutoOn;
+}
+
+public final class org/openapitools/client/models/RecordSettings$Mode$Available : org/openapitools/client/models/RecordSettings$Mode {
+	public static final field INSTANCE Lorg/openapitools/client/models/RecordSettings$Mode$Available;
+}
+
+public final class org/openapitools/client/models/RecordSettings$Mode$Companion {
+	public final fun fromString (Ljava/lang/String;)Lorg/openapitools/client/models/RecordSettings$Mode;
+}
+
+public final class org/openapitools/client/models/RecordSettings$Mode$Disabled : org/openapitools/client/models/RecordSettings$Mode {
+	public static final field INSTANCE Lorg/openapitools/client/models/RecordSettings$Mode$Disabled;
+}
+
+public final class org/openapitools/client/models/RecordSettings$Mode$ModeAdapter : com/squareup/moshi/JsonAdapter {
+	public fun <init> ()V
+	public synthetic fun fromJson (Lcom/squareup/moshi/JsonReader;)Ljava/lang/Object;
+	public fun fromJson (Lcom/squareup/moshi/JsonReader;)Lorg/openapitools/client/models/RecordSettings$Mode;
+	public synthetic fun toJson (Lcom/squareup/moshi/JsonWriter;Ljava/lang/Object;)V
+	public fun toJson (Lcom/squareup/moshi/JsonWriter;Lorg/openapitools/client/models/RecordSettings$Mode;)V
+}
+
+public final class org/openapitools/client/models/RecordSettings$Mode$Unknown : org/openapitools/client/models/RecordSettings$Mode {
+	public fun <init> (Ljava/lang/String;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun copy (Ljava/lang/String;)Lorg/openapitools/client/models/RecordSettings$Mode$Unknown;
+	public static synthetic fun copy$default (Lorg/openapitools/client/models/RecordSettings$Mode$Unknown;Ljava/lang/String;ILjava/lang/Object;)Lorg/openapitools/client/models/RecordSettings$Mode$Unknown;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getUnknownValue ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public abstract class org/openapitools/client/models/RecordSettings$Quality {
+	public static final field Companion Lorg/openapitools/client/models/RecordSettings$Quality$Companion;
+	public synthetic fun <init> (Ljava/lang/String;Lkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun getValue ()Ljava/lang/String;
-	public static fun valueOf (Ljava/lang/String;)Lorg/openapitools/client/models/RecordSettings$Quality;
-	public static fun values ()[Lorg/openapitools/client/models/RecordSettings$Quality;
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class org/openapitools/client/models/RecordSettings$Quality$1080p : org/openapitools/client/models/RecordSettings$Quality {
+	public static final field INSTANCE Lorg/openapitools/client/models/RecordSettings$Quality$1080p;
+}
+
+public final class org/openapitools/client/models/RecordSettings$Quality$1440p : org/openapitools/client/models/RecordSettings$Quality {
+	public static final field INSTANCE Lorg/openapitools/client/models/RecordSettings$Quality$1440p;
+}
+
+public final class org/openapitools/client/models/RecordSettings$Quality$360p : org/openapitools/client/models/RecordSettings$Quality {
+	public static final field INSTANCE Lorg/openapitools/client/models/RecordSettings$Quality$360p;
+}
+
+public final class org/openapitools/client/models/RecordSettings$Quality$480p : org/openapitools/client/models/RecordSettings$Quality {
+	public static final field INSTANCE Lorg/openapitools/client/models/RecordSettings$Quality$480p;
+}
+
+public final class org/openapitools/client/models/RecordSettings$Quality$720p : org/openapitools/client/models/RecordSettings$Quality {
+	public static final field INSTANCE Lorg/openapitools/client/models/RecordSettings$Quality$720p;
+}
+
+public final class org/openapitools/client/models/RecordSettings$Quality$AudioOnly : org/openapitools/client/models/RecordSettings$Quality {
+	public static final field INSTANCE Lorg/openapitools/client/models/RecordSettings$Quality$AudioOnly;
+}
+
+public final class org/openapitools/client/models/RecordSettings$Quality$Companion {
+	public final fun fromString (Ljava/lang/String;)Lorg/openapitools/client/models/RecordSettings$Quality;
+}
+
+public final class org/openapitools/client/models/RecordSettings$Quality$QualityAdapter : com/squareup/moshi/JsonAdapter {
+	public fun <init> ()V
+	public synthetic fun fromJson (Lcom/squareup/moshi/JsonReader;)Ljava/lang/Object;
+	public fun fromJson (Lcom/squareup/moshi/JsonReader;)Lorg/openapitools/client/models/RecordSettings$Quality;
+	public synthetic fun toJson (Lcom/squareup/moshi/JsonWriter;Ljava/lang/Object;)V
+	public fun toJson (Lcom/squareup/moshi/JsonWriter;Lorg/openapitools/client/models/RecordSettings$Quality;)V
+}
+
+public final class org/openapitools/client/models/RecordSettings$Quality$Unknown : org/openapitools/client/models/RecordSettings$Quality {
+	public fun <init> (Ljava/lang/String;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun copy (Ljava/lang/String;)Lorg/openapitools/client/models/RecordSettings$Quality$Unknown;
+	public static synthetic fun copy$default (Lorg/openapitools/client/models/RecordSettings$Quality$Unknown;Ljava/lang/String;ILjava/lang/Object;)Lorg/openapitools/client/models/RecordSettings$Quality$Unknown;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getUnknownValue ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
 }
 
 public final class org/openapitools/client/models/RecordSettingsRequest {
@@ -4195,25 +4472,100 @@ public final class org/openapitools/client/models/RecordSettingsRequest {
 	public fun toString ()Ljava/lang/String;
 }
 
-public final class org/openapitools/client/models/RecordSettingsRequest$Mode : java/lang/Enum {
-	public static final field autoOn Lorg/openapitools/client/models/RecordSettingsRequest$Mode;
-	public static final field available Lorg/openapitools/client/models/RecordSettingsRequest$Mode;
-	public static final field disabled Lorg/openapitools/client/models/RecordSettingsRequest$Mode;
+public abstract class org/openapitools/client/models/RecordSettingsRequest$Mode {
+	public static final field Companion Lorg/openapitools/client/models/RecordSettingsRequest$Mode$Companion;
+	public synthetic fun <init> (Ljava/lang/String;Lkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun getValue ()Ljava/lang/String;
-	public static fun valueOf (Ljava/lang/String;)Lorg/openapitools/client/models/RecordSettingsRequest$Mode;
-	public static fun values ()[Lorg/openapitools/client/models/RecordSettingsRequest$Mode;
+	public fun toString ()Ljava/lang/String;
 }
 
-public final class org/openapitools/client/models/RecordSettingsRequest$Quality : java/lang/Enum {
-	public static final field _1080p Lorg/openapitools/client/models/RecordSettingsRequest$Quality;
-	public static final field _1440p Lorg/openapitools/client/models/RecordSettingsRequest$Quality;
-	public static final field _360p Lorg/openapitools/client/models/RecordSettingsRequest$Quality;
-	public static final field _480p Lorg/openapitools/client/models/RecordSettingsRequest$Quality;
-	public static final field _720p Lorg/openapitools/client/models/RecordSettingsRequest$Quality;
-	public static final field audioOnly Lorg/openapitools/client/models/RecordSettingsRequest$Quality;
+public final class org/openapitools/client/models/RecordSettingsRequest$Mode$AutoOn : org/openapitools/client/models/RecordSettingsRequest$Mode {
+	public static final field INSTANCE Lorg/openapitools/client/models/RecordSettingsRequest$Mode$AutoOn;
+}
+
+public final class org/openapitools/client/models/RecordSettingsRequest$Mode$Available : org/openapitools/client/models/RecordSettingsRequest$Mode {
+	public static final field INSTANCE Lorg/openapitools/client/models/RecordSettingsRequest$Mode$Available;
+}
+
+public final class org/openapitools/client/models/RecordSettingsRequest$Mode$Companion {
+	public final fun fromString (Ljava/lang/String;)Lorg/openapitools/client/models/RecordSettingsRequest$Mode;
+}
+
+public final class org/openapitools/client/models/RecordSettingsRequest$Mode$Disabled : org/openapitools/client/models/RecordSettingsRequest$Mode {
+	public static final field INSTANCE Lorg/openapitools/client/models/RecordSettingsRequest$Mode$Disabled;
+}
+
+public final class org/openapitools/client/models/RecordSettingsRequest$Mode$ModeAdapter : com/squareup/moshi/JsonAdapter {
+	public fun <init> ()V
+	public synthetic fun fromJson (Lcom/squareup/moshi/JsonReader;)Ljava/lang/Object;
+	public fun fromJson (Lcom/squareup/moshi/JsonReader;)Lorg/openapitools/client/models/RecordSettingsRequest$Mode;
+	public synthetic fun toJson (Lcom/squareup/moshi/JsonWriter;Ljava/lang/Object;)V
+	public fun toJson (Lcom/squareup/moshi/JsonWriter;Lorg/openapitools/client/models/RecordSettingsRequest$Mode;)V
+}
+
+public final class org/openapitools/client/models/RecordSettingsRequest$Mode$Unknown : org/openapitools/client/models/RecordSettingsRequest$Mode {
+	public fun <init> (Ljava/lang/String;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun copy (Ljava/lang/String;)Lorg/openapitools/client/models/RecordSettingsRequest$Mode$Unknown;
+	public static synthetic fun copy$default (Lorg/openapitools/client/models/RecordSettingsRequest$Mode$Unknown;Ljava/lang/String;ILjava/lang/Object;)Lorg/openapitools/client/models/RecordSettingsRequest$Mode$Unknown;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getUnknownValue ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public abstract class org/openapitools/client/models/RecordSettingsRequest$Quality {
+	public static final field Companion Lorg/openapitools/client/models/RecordSettingsRequest$Quality$Companion;
+	public synthetic fun <init> (Ljava/lang/String;Lkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun getValue ()Ljava/lang/String;
-	public static fun valueOf (Ljava/lang/String;)Lorg/openapitools/client/models/RecordSettingsRequest$Quality;
-	public static fun values ()[Lorg/openapitools/client/models/RecordSettingsRequest$Quality;
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class org/openapitools/client/models/RecordSettingsRequest$Quality$1080p : org/openapitools/client/models/RecordSettingsRequest$Quality {
+	public static final field INSTANCE Lorg/openapitools/client/models/RecordSettingsRequest$Quality$1080p;
+}
+
+public final class org/openapitools/client/models/RecordSettingsRequest$Quality$1440p : org/openapitools/client/models/RecordSettingsRequest$Quality {
+	public static final field INSTANCE Lorg/openapitools/client/models/RecordSettingsRequest$Quality$1440p;
+}
+
+public final class org/openapitools/client/models/RecordSettingsRequest$Quality$360p : org/openapitools/client/models/RecordSettingsRequest$Quality {
+	public static final field INSTANCE Lorg/openapitools/client/models/RecordSettingsRequest$Quality$360p;
+}
+
+public final class org/openapitools/client/models/RecordSettingsRequest$Quality$480p : org/openapitools/client/models/RecordSettingsRequest$Quality {
+	public static final field INSTANCE Lorg/openapitools/client/models/RecordSettingsRequest$Quality$480p;
+}
+
+public final class org/openapitools/client/models/RecordSettingsRequest$Quality$720p : org/openapitools/client/models/RecordSettingsRequest$Quality {
+	public static final field INSTANCE Lorg/openapitools/client/models/RecordSettingsRequest$Quality$720p;
+}
+
+public final class org/openapitools/client/models/RecordSettingsRequest$Quality$AudioOnly : org/openapitools/client/models/RecordSettingsRequest$Quality {
+	public static final field INSTANCE Lorg/openapitools/client/models/RecordSettingsRequest$Quality$AudioOnly;
+}
+
+public final class org/openapitools/client/models/RecordSettingsRequest$Quality$Companion {
+	public final fun fromString (Ljava/lang/String;)Lorg/openapitools/client/models/RecordSettingsRequest$Quality;
+}
+
+public final class org/openapitools/client/models/RecordSettingsRequest$Quality$QualityAdapter : com/squareup/moshi/JsonAdapter {
+	public fun <init> ()V
+	public synthetic fun fromJson (Lcom/squareup/moshi/JsonReader;)Ljava/lang/Object;
+	public fun fromJson (Lcom/squareup/moshi/JsonReader;)Lorg/openapitools/client/models/RecordSettingsRequest$Quality;
+	public synthetic fun toJson (Lcom/squareup/moshi/JsonWriter;Ljava/lang/Object;)V
+	public fun toJson (Lcom/squareup/moshi/JsonWriter;Lorg/openapitools/client/models/RecordSettingsRequest$Quality;)V
+}
+
+public final class org/openapitools/client/models/RecordSettingsRequest$Quality$Unknown : org/openapitools/client/models/RecordSettingsRequest$Quality {
+	public fun <init> (Ljava/lang/String;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun copy (Ljava/lang/String;)Lorg/openapitools/client/models/RecordSettingsRequest$Quality$Unknown;
+	public static synthetic fun copy$default (Lorg/openapitools/client/models/RecordSettingsRequest$Quality$Unknown;Ljava/lang/String;ILjava/lang/Object;)Lorg/openapitools/client/models/RecordSettingsRequest$Quality$Unknown;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getUnknownValue ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
 }
 
 public final class org/openapitools/client/models/RejectCallResponse {
@@ -4327,6 +4679,28 @@ public final class org/openapitools/client/models/ScreensharingSettingsRequest {
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getAccessRequestEnabled ()Ljava/lang/Boolean;
 	public final fun getEnabled ()Ljava/lang/Boolean;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class org/openapitools/client/models/SendCallStatsRequest {
+	public fun <init> (Ljava/util/Map;)V
+	public final fun component1 ()Ljava/util/Map;
+	public final fun copy (Ljava/util/Map;)Lorg/openapitools/client/models/SendCallStatsRequest;
+	public static synthetic fun copy$default (Lorg/openapitools/client/models/SendCallStatsRequest;Ljava/util/Map;ILjava/lang/Object;)Lorg/openapitools/client/models/SendCallStatsRequest;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getData ()Ljava/util/Map;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class org/openapitools/client/models/SendCallStatsResponse {
+	public fun <init> (Ljava/lang/String;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun copy (Ljava/lang/String;)Lorg/openapitools/client/models/SendCallStatsResponse;
+	public static synthetic fun copy$default (Lorg/openapitools/client/models/SendCallStatsResponse;Ljava/lang/String;ILjava/lang/Object;)Lorg/openapitools/client/models/SendCallStatsResponse;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getDuration ()Ljava/lang/String;
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
 }
@@ -4525,13 +4899,46 @@ public final class org/openapitools/client/models/TranscriptionSettings {
 	public fun toString ()Ljava/lang/String;
 }
 
-public final class org/openapitools/client/models/TranscriptionSettings$Mode : java/lang/Enum {
-	public static final field autoOn Lorg/openapitools/client/models/TranscriptionSettings$Mode;
-	public static final field available Lorg/openapitools/client/models/TranscriptionSettings$Mode;
-	public static final field disabled Lorg/openapitools/client/models/TranscriptionSettings$Mode;
+public abstract class org/openapitools/client/models/TranscriptionSettings$Mode {
+	public static final field Companion Lorg/openapitools/client/models/TranscriptionSettings$Mode$Companion;
+	public synthetic fun <init> (Ljava/lang/String;Lkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun getValue ()Ljava/lang/String;
-	public static fun valueOf (Ljava/lang/String;)Lorg/openapitools/client/models/TranscriptionSettings$Mode;
-	public static fun values ()[Lorg/openapitools/client/models/TranscriptionSettings$Mode;
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class org/openapitools/client/models/TranscriptionSettings$Mode$AutoOn : org/openapitools/client/models/TranscriptionSettings$Mode {
+	public static final field INSTANCE Lorg/openapitools/client/models/TranscriptionSettings$Mode$AutoOn;
+}
+
+public final class org/openapitools/client/models/TranscriptionSettings$Mode$Available : org/openapitools/client/models/TranscriptionSettings$Mode {
+	public static final field INSTANCE Lorg/openapitools/client/models/TranscriptionSettings$Mode$Available;
+}
+
+public final class org/openapitools/client/models/TranscriptionSettings$Mode$Companion {
+	public final fun fromString (Ljava/lang/String;)Lorg/openapitools/client/models/TranscriptionSettings$Mode;
+}
+
+public final class org/openapitools/client/models/TranscriptionSettings$Mode$Disabled : org/openapitools/client/models/TranscriptionSettings$Mode {
+	public static final field INSTANCE Lorg/openapitools/client/models/TranscriptionSettings$Mode$Disabled;
+}
+
+public final class org/openapitools/client/models/TranscriptionSettings$Mode$ModeAdapter : com/squareup/moshi/JsonAdapter {
+	public fun <init> ()V
+	public synthetic fun fromJson (Lcom/squareup/moshi/JsonReader;)Ljava/lang/Object;
+	public fun fromJson (Lcom/squareup/moshi/JsonReader;)Lorg/openapitools/client/models/TranscriptionSettings$Mode;
+	public synthetic fun toJson (Lcom/squareup/moshi/JsonWriter;Ljava/lang/Object;)V
+	public fun toJson (Lcom/squareup/moshi/JsonWriter;Lorg/openapitools/client/models/TranscriptionSettings$Mode;)V
+}
+
+public final class org/openapitools/client/models/TranscriptionSettings$Mode$Unknown : org/openapitools/client/models/TranscriptionSettings$Mode {
+	public fun <init> (Ljava/lang/String;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun copy (Ljava/lang/String;)Lorg/openapitools/client/models/TranscriptionSettings$Mode$Unknown;
+	public static synthetic fun copy$default (Lorg/openapitools/client/models/TranscriptionSettings$Mode$Unknown;Ljava/lang/String;ILjava/lang/Object;)Lorg/openapitools/client/models/TranscriptionSettings$Mode$Unknown;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getUnknownValue ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
 }
 
 public final class org/openapitools/client/models/TranscriptionSettingsRequest {
@@ -4549,13 +4956,46 @@ public final class org/openapitools/client/models/TranscriptionSettingsRequest {
 	public fun toString ()Ljava/lang/String;
 }
 
-public final class org/openapitools/client/models/TranscriptionSettingsRequest$Mode : java/lang/Enum {
-	public static final field autoOn Lorg/openapitools/client/models/TranscriptionSettingsRequest$Mode;
-	public static final field available Lorg/openapitools/client/models/TranscriptionSettingsRequest$Mode;
-	public static final field disabled Lorg/openapitools/client/models/TranscriptionSettingsRequest$Mode;
+public abstract class org/openapitools/client/models/TranscriptionSettingsRequest$Mode {
+	public static final field Companion Lorg/openapitools/client/models/TranscriptionSettingsRequest$Mode$Companion;
+	public synthetic fun <init> (Ljava/lang/String;Lkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun getValue ()Ljava/lang/String;
-	public static fun valueOf (Ljava/lang/String;)Lorg/openapitools/client/models/TranscriptionSettingsRequest$Mode;
-	public static fun values ()[Lorg/openapitools/client/models/TranscriptionSettingsRequest$Mode;
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class org/openapitools/client/models/TranscriptionSettingsRequest$Mode$AutoOn : org/openapitools/client/models/TranscriptionSettingsRequest$Mode {
+	public static final field INSTANCE Lorg/openapitools/client/models/TranscriptionSettingsRequest$Mode$AutoOn;
+}
+
+public final class org/openapitools/client/models/TranscriptionSettingsRequest$Mode$Available : org/openapitools/client/models/TranscriptionSettingsRequest$Mode {
+	public static final field INSTANCE Lorg/openapitools/client/models/TranscriptionSettingsRequest$Mode$Available;
+}
+
+public final class org/openapitools/client/models/TranscriptionSettingsRequest$Mode$Companion {
+	public final fun fromString (Ljava/lang/String;)Lorg/openapitools/client/models/TranscriptionSettingsRequest$Mode;
+}
+
+public final class org/openapitools/client/models/TranscriptionSettingsRequest$Mode$Disabled : org/openapitools/client/models/TranscriptionSettingsRequest$Mode {
+	public static final field INSTANCE Lorg/openapitools/client/models/TranscriptionSettingsRequest$Mode$Disabled;
+}
+
+public final class org/openapitools/client/models/TranscriptionSettingsRequest$Mode$ModeAdapter : com/squareup/moshi/JsonAdapter {
+	public fun <init> ()V
+	public synthetic fun fromJson (Lcom/squareup/moshi/JsonReader;)Ljava/lang/Object;
+	public fun fromJson (Lcom/squareup/moshi/JsonReader;)Lorg/openapitools/client/models/TranscriptionSettingsRequest$Mode;
+	public synthetic fun toJson (Lcom/squareup/moshi/JsonWriter;Ljava/lang/Object;)V
+	public fun toJson (Lcom/squareup/moshi/JsonWriter;Lorg/openapitools/client/models/TranscriptionSettingsRequest$Mode;)V
+}
+
+public final class org/openapitools/client/models/TranscriptionSettingsRequest$Mode$Unknown : org/openapitools/client/models/TranscriptionSettingsRequest$Mode {
+	public fun <init> (Ljava/lang/String;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun copy (Ljava/lang/String;)Lorg/openapitools/client/models/TranscriptionSettingsRequest$Mode$Unknown;
+	public static synthetic fun copy$default (Lorg/openapitools/client/models/TranscriptionSettingsRequest$Mode$Unknown;Ljava/lang/String;ILjava/lang/Object;)Lorg/openapitools/client/models/TranscriptionSettingsRequest$Mode$Unknown;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getUnknownValue ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
 }
 
 public final class org/openapitools/client/models/UnblockUserRequest {
@@ -4794,13 +5234,46 @@ public final class org/openapitools/client/models/VideoSettings {
 	public fun toString ()Ljava/lang/String;
 }
 
-public final class org/openapitools/client/models/VideoSettings$CameraFacing : java/lang/Enum {
-	public static final field back Lorg/openapitools/client/models/VideoSettings$CameraFacing;
-	public static final field external Lorg/openapitools/client/models/VideoSettings$CameraFacing;
-	public static final field front Lorg/openapitools/client/models/VideoSettings$CameraFacing;
+public abstract class org/openapitools/client/models/VideoSettings$CameraFacing {
+	public static final field Companion Lorg/openapitools/client/models/VideoSettings$CameraFacing$Companion;
+	public synthetic fun <init> (Ljava/lang/String;Lkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun getValue ()Ljava/lang/String;
-	public static fun valueOf (Ljava/lang/String;)Lorg/openapitools/client/models/VideoSettings$CameraFacing;
-	public static fun values ()[Lorg/openapitools/client/models/VideoSettings$CameraFacing;
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class org/openapitools/client/models/VideoSettings$CameraFacing$Back : org/openapitools/client/models/VideoSettings$CameraFacing {
+	public static final field INSTANCE Lorg/openapitools/client/models/VideoSettings$CameraFacing$Back;
+}
+
+public final class org/openapitools/client/models/VideoSettings$CameraFacing$CameraFacingAdapter : com/squareup/moshi/JsonAdapter {
+	public fun <init> ()V
+	public synthetic fun fromJson (Lcom/squareup/moshi/JsonReader;)Ljava/lang/Object;
+	public fun fromJson (Lcom/squareup/moshi/JsonReader;)Lorg/openapitools/client/models/VideoSettings$CameraFacing;
+	public synthetic fun toJson (Lcom/squareup/moshi/JsonWriter;Ljava/lang/Object;)V
+	public fun toJson (Lcom/squareup/moshi/JsonWriter;Lorg/openapitools/client/models/VideoSettings$CameraFacing;)V
+}
+
+public final class org/openapitools/client/models/VideoSettings$CameraFacing$Companion {
+	public final fun fromString (Ljava/lang/String;)Lorg/openapitools/client/models/VideoSettings$CameraFacing;
+}
+
+public final class org/openapitools/client/models/VideoSettings$CameraFacing$External : org/openapitools/client/models/VideoSettings$CameraFacing {
+	public static final field INSTANCE Lorg/openapitools/client/models/VideoSettings$CameraFacing$External;
+}
+
+public final class org/openapitools/client/models/VideoSettings$CameraFacing$Front : org/openapitools/client/models/VideoSettings$CameraFacing {
+	public static final field INSTANCE Lorg/openapitools/client/models/VideoSettings$CameraFacing$Front;
+}
+
+public final class org/openapitools/client/models/VideoSettings$CameraFacing$Unknown : org/openapitools/client/models/VideoSettings$CameraFacing {
+	public fun <init> (Ljava/lang/String;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun copy (Ljava/lang/String;)Lorg/openapitools/client/models/VideoSettings$CameraFacing$Unknown;
+	public static synthetic fun copy$default (Lorg/openapitools/client/models/VideoSettings$CameraFacing$Unknown;Ljava/lang/String;ILjava/lang/Object;)Lorg/openapitools/client/models/VideoSettings$CameraFacing$Unknown;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getUnknownValue ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
 }
 
 public final class org/openapitools/client/models/VideoSettingsRequest {
@@ -4824,13 +5297,46 @@ public final class org/openapitools/client/models/VideoSettingsRequest {
 	public fun toString ()Ljava/lang/String;
 }
 
-public final class org/openapitools/client/models/VideoSettingsRequest$CameraFacing : java/lang/Enum {
-	public static final field back Lorg/openapitools/client/models/VideoSettingsRequest$CameraFacing;
-	public static final field external Lorg/openapitools/client/models/VideoSettingsRequest$CameraFacing;
-	public static final field front Lorg/openapitools/client/models/VideoSettingsRequest$CameraFacing;
+public abstract class org/openapitools/client/models/VideoSettingsRequest$CameraFacing {
+	public static final field Companion Lorg/openapitools/client/models/VideoSettingsRequest$CameraFacing$Companion;
+	public synthetic fun <init> (Ljava/lang/String;Lkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun getValue ()Ljava/lang/String;
-	public static fun valueOf (Ljava/lang/String;)Lorg/openapitools/client/models/VideoSettingsRequest$CameraFacing;
-	public static fun values ()[Lorg/openapitools/client/models/VideoSettingsRequest$CameraFacing;
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class org/openapitools/client/models/VideoSettingsRequest$CameraFacing$Back : org/openapitools/client/models/VideoSettingsRequest$CameraFacing {
+	public static final field INSTANCE Lorg/openapitools/client/models/VideoSettingsRequest$CameraFacing$Back;
+}
+
+public final class org/openapitools/client/models/VideoSettingsRequest$CameraFacing$CameraFacingAdapter : com/squareup/moshi/JsonAdapter {
+	public fun <init> ()V
+	public synthetic fun fromJson (Lcom/squareup/moshi/JsonReader;)Ljava/lang/Object;
+	public fun fromJson (Lcom/squareup/moshi/JsonReader;)Lorg/openapitools/client/models/VideoSettingsRequest$CameraFacing;
+	public synthetic fun toJson (Lcom/squareup/moshi/JsonWriter;Ljava/lang/Object;)V
+	public fun toJson (Lcom/squareup/moshi/JsonWriter;Lorg/openapitools/client/models/VideoSettingsRequest$CameraFacing;)V
+}
+
+public final class org/openapitools/client/models/VideoSettingsRequest$CameraFacing$Companion {
+	public final fun fromString (Ljava/lang/String;)Lorg/openapitools/client/models/VideoSettingsRequest$CameraFacing;
+}
+
+public final class org/openapitools/client/models/VideoSettingsRequest$CameraFacing$External : org/openapitools/client/models/VideoSettingsRequest$CameraFacing {
+	public static final field INSTANCE Lorg/openapitools/client/models/VideoSettingsRequest$CameraFacing$External;
+}
+
+public final class org/openapitools/client/models/VideoSettingsRequest$CameraFacing$Front : org/openapitools/client/models/VideoSettingsRequest$CameraFacing {
+	public static final field INSTANCE Lorg/openapitools/client/models/VideoSettingsRequest$CameraFacing$Front;
+}
+
+public final class org/openapitools/client/models/VideoSettingsRequest$CameraFacing$Unknown : org/openapitools/client/models/VideoSettingsRequest$CameraFacing {
+	public fun <init> (Ljava/lang/String;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun copy (Ljava/lang/String;)Lorg/openapitools/client/models/VideoSettingsRequest$CameraFacing$Unknown;
+	public static synthetic fun copy$default (Lorg/openapitools/client/models/VideoSettingsRequest$CameraFacing$Unknown;Ljava/lang/String;ILjava/lang/Object;)Lorg/openapitools/client/models/VideoSettingsRequest$CameraFacing$Unknown;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getUnknownValue ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
 }
 
 public final class org/openapitools/client/models/WSAuthMessageRequest {

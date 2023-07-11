@@ -279,8 +279,6 @@ public class Call(
     /** The cid is type:id */
     val cid = "$type:$id"
 
-
-
     val monitor = CallHealthMonitor(this, scope)
 
     private val decibelThresholdDetection = DecibelThresholdDetection(thresholdCrossedCallback = {
@@ -694,8 +692,6 @@ public class Call(
     suspend fun stopBroadcasting(): Result<Any> {
         return clientImpl.stopBroadcasting(type, id)
     }
-
-
 
     public fun subscribeFor(
         vararg eventTypes: Class<out VideoEvent>,

@@ -18,7 +18,6 @@ package io.getstream.video.android.core
 
 import io.getstream.log.taggedLogger
 import io.getstream.video.android.core.call.RtcSession
-import io.getstream.video.android.core.dispatchers.DispatcherProvider
 import io.getstream.video.android.core.events.AudioLevelChangedEvent
 import io.getstream.video.android.core.events.ChangePublishQualityEvent
 import io.getstream.video.android.core.events.ConnectionQualityChangeEvent
@@ -151,8 +150,6 @@ public class CallState(private val call: Call, private val user: User, internal 
         it is RealtimeConnection.Reconnecting
     }
 
-
-
     private val _participants: MutableStateFlow<SortedMap<String, ParticipantState>> =
         MutableStateFlow(emptyMap<String, ParticipantState>().toSortedMap())
 
@@ -202,7 +199,7 @@ public class CallState(private val call: Call, private val user: User, internal 
         fun emitSorted() {
             val participants = participants.value
             val pinned = _pinnedParticipants.value
-            var lastParticipants : List<ParticipantState>? = null
+            var lastParticipants: List<ParticipantState>? = null
             val sorted = participants.sortedWith(
                 compareBy(
                     { pinned.containsKey(it.sessionId) },
@@ -219,7 +216,6 @@ public class CallState(private val call: Call, private val user: User, internal 
                     send(sorted)
                     lastParticipants = sorted
                 }
-
             }
         }
 

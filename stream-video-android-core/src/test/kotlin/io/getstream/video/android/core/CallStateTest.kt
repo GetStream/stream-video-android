@@ -22,7 +22,6 @@ import io.getstream.video.android.core.events.DominantSpeakerChangedEvent
 import io.getstream.video.android.model.User
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
