@@ -47,10 +47,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.channelFlow
-import kotlinx.coroutines.flow.collect
-import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.debounce
-import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import org.openapitools.client.models.BlockedUserEvent
@@ -143,7 +140,7 @@ public sealed interface RealtimeConnection {
  *
  *
  */
-public class CallState(private val call: Call, private val user: User) {
+public class CallState(private val call: Call, private val user: User, internal val scope: CoroutineScope) {
 
     private val logger by taggedLogger("CallState")
 
@@ -197,16 +194,12 @@ public class CallState(private val call: Call, private val user: User) {
         MutableStateFlow(emptyMap())
     val pinnedParticipants: StateFlow<Map<String, OffsetDateTime>> = _pinnedParticipants
 
-    // TODO: should inherit the right scope
-    val scope = CoroutineScope(context = DispatcherProvider.IO)
     val stats = CallStats(call, scope)
-
 
     internal val sortedParticipantsFlow = channelFlow {
         // uses a channel flow to handle concurrency and 3 things updating: https://kotlinlang.org/api/kotlinx.coroutines/kotlinx-coroutines-core/kotlinx.coroutines.flow/channel-flow.html
 
         fun emitSorted() {
-            println("emitSorted")
             val participants = participants.value
             val pinned = _pinnedParticipants.value
             var lastParticipants : List<ParticipantState>? = null
@@ -223,7 +216,6 @@ public class CallState(private val call: Call, private val user: User) {
 
             scope.launch {
                 if (lastParticipants != sorted) {
-                    println("emitting ${sorted.map { it.sessionId } } - ${_participants.value.size} ")
                     send(sorted)
                     lastParticipants = sorted
                 }
@@ -232,9 +224,7 @@ public class CallState(private val call: Call, private val user: User) {
         }
 
         scope.launch {
-            println("in the scope")
             _participants.collect {
-                println("emitSorted participants changed ${it.size} ")
                 emitSorted()
             }
         }
@@ -243,22 +233,18 @@ public class CallState(private val call: Call, private val user: User) {
 
         // emit the sorted list
         emitSorted()
-        println("emitSorted pre listening")
 
+        // TODO: could optimize performance by subscribing only to relevant events
         call.subscribe {
-            println("emitSorted video event receieved")
             emitSorted()
         }
-        println("emitSorted - listen start for participants")
 
         scope.launch {
             _pinnedParticipants.collect {
-                println("emitSorted pinned changed")
                 emitSorted()
             }
         }
 
-        println("emitSorted listening")
         awaitClose {}
     }
 
@@ -270,8 +256,10 @@ public class CallState(private val call: Call, private val user: User) {
      * - Last speaking at
      * - Video enabled
      * - Call joined at
+     *
+     * Debounced 100ms to avoid rapid changes
      */
-    val sortedParticipants = sortedParticipantsFlow.debounce(50).stateIn(scope, SharingStarted.Eagerly, emptyList())
+    val sortedParticipants = sortedParticipantsFlow.debounce(100).stateIn(scope, SharingStarted.WhileSubscribed(10000L), emptyList())
 
     /** Members contains the list of users who are permanently associated with this call. This includes users who are currently not active in the call
      * As an example if you invite "john", "bob" and "jane" to a call and only Jane joins.

@@ -52,7 +52,6 @@ import org.openapitools.client.models.MemberRequest
 import org.openapitools.client.models.MuteUsersResponse
 import org.openapitools.client.models.QueryMembersResponse
 import org.openapitools.client.models.RejectCallResponse
-import org.openapitools.client.models.SendCallStatsResponse
 import org.openapitools.client.models.SendEventResponse
 import org.openapitools.client.models.SendReactionResponse
 import org.openapitools.client.models.StopLiveResponse
@@ -263,8 +262,11 @@ public class Call(
     internal val clientImpl = client as StreamVideoImpl
     private val logger by taggedLogger("Call")
 
+    private val supervisorJob = SupervisorJob()
+    private val scope = CoroutineScope(clientImpl.scope.coroutineContext + supervisorJob)
+
     /** The call state contains all state such as the participant list, reactions etc */
-    val state = CallState(this, user)
+    val state = CallState(this, user, scope)
 
     val sessionId by lazy { clientImpl.sessionId }
     private val network by lazy { clientImpl.connectionModule.networkStateProvider }
@@ -277,8 +279,7 @@ public class Call(
     /** The cid is type:id */
     val cid = "$type:$id"
 
-    private val supervisorJob = SupervisorJob()
-    private val scope = CoroutineScope(clientImpl.scope.coroutineContext + supervisorJob)
+
 
     val monitor = CallHealthMonitor(this, scope)
 

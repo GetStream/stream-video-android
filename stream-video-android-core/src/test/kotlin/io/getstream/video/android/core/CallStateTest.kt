@@ -21,6 +21,9 @@ import io.getstream.video.android.core.base.IntegrationTestBase
 import io.getstream.video.android.core.events.DominantSpeakerChangedEvent
 import io.getstream.video.android.model.User
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.debounce
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -107,7 +110,10 @@ class CallStateTest : IntegrationTestBase() {
     @Test
     fun `Participants should be sorted`() = runTest {
         val call = client.call("default", randomUUID())
-        val sorted1 = call.state.sortedParticipants.value
+
+        val sortedParticipants = call.state.sortedParticipantsFlow.stateIn(backgroundScope, SharingStarted.Eagerly, emptyList())
+
+        val sorted1 = sortedParticipants.value
         assertThat(sorted1).isEmpty()
 
         call.state._pinnedParticipants.value = mutableMapOf(
@@ -139,14 +145,14 @@ class CallStateTest : IntegrationTestBase() {
         assertThat(participants.size).isEqualTo(6)
         delay(60)
 
-        val sorted2 = call.state.sortedParticipants.value.map { it.sessionId }
+        val sorted2 = sortedParticipants.value.map { it.sessionId }
         assertThat(sorted2).isEqualTo(listOf("1", "2", "3", "4", "5", "6"))
 
         clientImpl.fireEvent(DominantSpeakerChangedEvent("3", "3"), call.cid)
         assertThat(call.state.getParticipantBySessionId("3")?.dominantSpeaker?.value).isTrue()
         delay(60)
 
-        val sorted3 = call.state.sortedParticipants.value.map { it.sessionId }
+        val sorted3 = sortedParticipants.value.map { it.sessionId }
         assertThat(sorted3).isEqualTo(listOf("1", "3", "2", "4", "5", "6"))
     }
 
