@@ -93,8 +93,6 @@ public class StreamVideoBuilder @JvmOverloads constructor(
 
     val scope = CoroutineScope(DispatcherProvider.IO)
 
-
-
     public fun build(): StreamVideo {
         val lifecycle = ProcessLifecycleOwner.get().lifecycle
 
