@@ -350,6 +350,7 @@ public class Call(
             if ((shouldSwitch || forceSwitch) && joinResponse is Success) {
                 // switch to the new SFU
                 val cred = joinResponse.value.credentials
+                logger.i { "Switching SFU from ${session?.sfuUrl} to ${cred.server.url}" }
                 val iceServers = cred.iceServers.map { it.toIceServer() }
                 session?.switchSfu(cred.server.url, cred.token, iceServers)
             }
