@@ -177,7 +177,7 @@ private fun SettingMenu(
                     Text(
                         modifier = Modifier.padding(start = 20.dp),
                         text = "Reactions",
-                        color = Color.White
+                        color = VideoTheme.colors.textHighEmphasis
                     )
                 }
 
@@ -199,7 +199,7 @@ private fun SettingMenu(
                     Text(
                         modifier = Modifier.padding(start = 20.dp),
                         text = "Restart Subscriber Ice",
-                        color = Color.Black
+                        color = VideoTheme.colors.textHighEmphasis
                     )
                 }
 
@@ -221,7 +221,7 @@ private fun SettingMenu(
                     Text(
                         modifier = Modifier.padding(start = 20.dp),
                         text = "Restart Publisher Ice",
-                        color = Color.Black
+                        color = VideoTheme.colors.textHighEmphasis
                     )
                 }
 
@@ -243,7 +243,7 @@ private fun SettingMenu(
                     Text(
                         modifier = Modifier.padding(start = 20.dp),
                         text = "Switch sfu",
-                        color = Color.Black
+                        color = VideoTheme.colors.textHighEmphasis
                     )
                 }
             }
