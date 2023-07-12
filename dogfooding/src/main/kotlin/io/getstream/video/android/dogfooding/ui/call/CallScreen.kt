@@ -186,9 +186,8 @@ private fun SettingMenu(
                 Row(
                     modifier = Modifier.clickable {
                         call.debug.restartSubscriberIce()
-                        call.debug.restartPublisherIce()
                         onDismissed.invoke()
-                        Toast.makeText(context, "Restart Ice", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(context, "Restart Subscriber Ice", Toast.LENGTH_SHORT).show()
                     }
                 ) {
                     Icon(
@@ -199,8 +198,30 @@ private fun SettingMenu(
 
                     Text(
                         modifier = Modifier.padding(start = 20.dp),
-                        text = "Restart Ice",
-                        color = Color.White
+                        text = "Restart Subscriber Ice",
+                        color = Color.Black
+                    )
+                }
+
+                Spacer(modifier = Modifier.height(12.dp))
+
+                Row(
+                    modifier = Modifier.clickable {
+                        call.debug.restartPublisherIce()
+                        onDismissed.invoke()
+                        Toast.makeText(context, "Restart Publisher Ice", Toast.LENGTH_SHORT).show()
+                    }
+                ) {
+                    Icon(
+                        painter = painterResource(id = io.getstream.video.android.ui.common.R.drawable.stream_video_ic_fullscreen_exit),
+                        tint = VideoTheme.colors.textHighEmphasis,
+                        contentDescription = null
+                    )
+
+                    Text(
+                        modifier = Modifier.padding(start = 20.dp),
+                        text = "Restart Publisher Ice",
+                        color = Color.Black
                     )
                 }
 
@@ -222,7 +243,7 @@ private fun SettingMenu(
                     Text(
                         modifier = Modifier.padding(start = 20.dp),
                         text = "Switch sfu",
-                        color = Color.White
+                        color = Color.Black
                     )
                 }
             }
