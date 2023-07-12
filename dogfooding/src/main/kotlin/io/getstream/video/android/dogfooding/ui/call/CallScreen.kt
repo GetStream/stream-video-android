@@ -17,6 +17,7 @@
 package io.getstream.video.android.dogfooding.ui.call
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.size
 import androidx.compose.material.Snackbar
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
@@ -27,11 +28,13 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.call.activecall.CallContent
+import io.getstream.video.android.compose.ui.components.call.controls.ControlActions
+import io.getstream.video.android.compose.ui.components.call.controls.actions.CancelCallAction
+import io.getstream.video.android.compose.ui.components.call.controls.actions.FlipCameraAction
+import io.getstream.video.android.compose.ui.components.call.controls.actions.SettingsAction
+import io.getstream.video.android.compose.ui.components.call.controls.actions.ToggleCameraAction
+import io.getstream.video.android.compose.ui.components.call.controls.actions.ToggleMicrophoneAction
 import io.getstream.video.android.core.Call
-import io.getstream.video.android.core.call.state.FlipCamera
-import io.getstream.video.android.core.call.state.LeaveCall
-import io.getstream.video.android.core.call.state.ToggleCamera
-import io.getstream.video.android.core.call.state.ToggleMicrophone
 import io.getstream.video.android.mock.StreamMockUtils
 import io.getstream.video.android.mock.mockCall
 
@@ -40,6 +43,8 @@ fun CallScreen(
     call: Call,
     onLeaveCall: () -> Unit = {}
 ) {
+    val isCameraEnabled by call.camera.isEnabled.collectAsState()
+    val isMicrophoneEnabled by call.microphone.isEnabled.collectAsState()
     val speakingWhileMuted by call.state.speakingWhileMuted.collectAsState()
 
     VideoTheme {
@@ -48,15 +53,45 @@ fun CallScreen(
             call = call,
             enableInPictureInPicture = true,
             onBackPressed = { onLeaveCall.invoke() },
-            onCallAction = { callAction ->
-                when (callAction) {
-                    is FlipCamera -> call.camera.flip()
-                    is ToggleCamera -> call.camera.setEnabled(callAction.isEnabled)
-                    is ToggleMicrophone -> call.microphone.setEnabled(callAction.isEnabled)
-                    is LeaveCall -> onLeaveCall.invoke()
-                    else -> Unit
-                }
-            }
+            controlsContent = {
+                ControlActions(
+                    call = call,
+                    actions = listOf(
+                        {
+                            SettingsAction(
+                                modifier = Modifier.size(VideoTheme.dimens.controlActionsButtonSize),
+                                onCallAction = { }
+                            )
+                        },
+                        {
+                            ToggleCameraAction(
+                                modifier = Modifier.size(VideoTheme.dimens.controlActionsButtonSize),
+                                isCameraEnabled = isCameraEnabled,
+                                onCallAction = { call.camera.setEnabled(it.isEnabled) }
+                            )
+                        },
+                        {
+                            ToggleMicrophoneAction(
+                                modifier = Modifier.size(VideoTheme.dimens.controlActionsButtonSize),
+                                isMicrophoneEnabled = isMicrophoneEnabled,
+                                onCallAction = { call.microphone.setEnabled(it.isEnabled) }
+                            )
+                        },
+                        {
+                            FlipCameraAction(
+                                modifier = Modifier.size(VideoTheme.dimens.controlActionsButtonSize),
+                                onCallAction = { call.camera.flip() }
+                            )
+                        },
+                        {
+                            CancelCallAction(
+                                modifier = Modifier.size(VideoTheme.dimens.controlActionsButtonSize),
+                                onCallAction = { onLeaveCall.invoke() }
+                            )
+                        },
+                    )
+                )
+            },
         )
 
         if (speakingWhileMuted) {
