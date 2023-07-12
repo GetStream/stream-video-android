@@ -142,6 +142,8 @@ private fun SettingMenu(
 ) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
+    val reactions =
+        listOf(":fireworks:", ":hello:", ":raise-hand:", ":like:", ":hate:", ":smile:", ":heart:")
 
     Popup(
         alignment = Alignment.BottomStart,
@@ -160,7 +162,8 @@ private fun SettingMenu(
                 Row(
                     modifier = Modifier.clickable {
                         scope.launch {
-                            call.sendReaction(type = "default", emoji = ":raise-hand:")
+                            val shuffled = reactions.shuffled()
+                            call.sendReaction(type = "default", emoji = shuffled.first())
                             onDismissed.invoke()
                         }
                     }
