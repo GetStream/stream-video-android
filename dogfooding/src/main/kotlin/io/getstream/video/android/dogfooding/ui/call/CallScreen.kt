@@ -35,6 +35,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -56,6 +57,7 @@ import io.getstream.video.android.compose.ui.components.call.controls.actions.To
 import io.getstream.video.android.core.Call
 import io.getstream.video.android.mock.StreamMockUtils
 import io.getstream.video.android.mock.mockCall
+import kotlinx.coroutines.launch
 
 @Composable
 fun CallScreen(
@@ -139,6 +141,7 @@ private fun SettingMenu(
     onDismissed: () -> Unit
 ) {
     val context = LocalContext.current
+    val scope = rememberCoroutineScope()
 
     Popup(
         alignment = Alignment.BottomStart,
@@ -154,6 +157,29 @@ private fun SettingMenu(
                     .background(VideoTheme.colors.appBackground)
                     .padding(12.dp)
             ) {
+                Row(
+                    modifier = Modifier.clickable {
+                        scope.launch {
+                            call.sendReaction(type = "default", emoji = ":raise-hand:")
+                            onDismissed.invoke()
+                        }
+                    }
+                ) {
+                    Icon(
+                        painter = painterResource(id = io.getstream.video.android.ui.common.R.drawable.stream_video_ic_reaction),
+                        tint = VideoTheme.colors.textHighEmphasis,
+                        contentDescription = null
+                    )
+
+                    Text(
+                        modifier = Modifier.padding(start = 20.dp),
+                        text = "Reactions",
+                        color = Color.White
+                    )
+                }
+
+                Spacer(modifier = Modifier.height(12.dp))
+
                 Row(
                     modifier = Modifier.clickable {
                         call.debug.restartSubscriberIce()
