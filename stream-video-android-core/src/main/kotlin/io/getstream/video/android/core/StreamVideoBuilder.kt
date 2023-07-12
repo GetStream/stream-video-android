@@ -23,7 +23,6 @@ import com.jakewharton.threetenabp.AndroidThreeTen
 import io.getstream.log.StreamLog
 import io.getstream.log.android.AndroidStreamLogger
 import io.getstream.log.streamLog
-import io.getstream.video.android.BuildConfig
 import io.getstream.video.android.core.dispatchers.DispatcherProvider
 import io.getstream.video.android.core.filter.AudioFilter
 import io.getstream.video.android.core.filter.VideoFilter
@@ -69,6 +68,7 @@ import java.util.UUID
  * @property encryptPreferences If our data store should encrypt the api key, user token etc.
  * @property connectionTimeoutInMs Connection timeout in seconds.
  * @property ensureSingleInstance Verify that only 1 version of the video client exists, prevents integration mistakes.
+ * @property videoDomain URL overwrite to allow for testing against a local instance of video.
  */
 public class StreamVideoBuilder @JvmOverloads constructor(
     context: Context,
@@ -84,12 +84,10 @@ public class StreamVideoBuilder @JvmOverloads constructor(
     private val videoFilters: List<VideoFilter> = emptyList(),
     private var encryptPreferences: Boolean = true,
     private val connectionTimeoutInMs: Long = 10000,
-    private var ensureSingleInstance: Boolean = true
+    private var ensureSingleInstance: Boolean = true,
+    private val videoDomain: String = "video.stream-io-api.com"
 ) {
     private val context: Context = context.applicationContext
-
-    /** URL overwrite to allow for testing against a local instance of video */
-    internal var videoDomain: String = "video.stream-io-api.com"
 
     val scope = CoroutineScope(DispatcherProvider.IO)
 
@@ -109,10 +107,6 @@ public class StreamVideoBuilder @JvmOverloads constructor(
             throw IllegalArgumentException(
                 "Either a user token or a token provider must be provided"
             )
-        }
-
-        if (BuildConfig.CORE_VIDEO_DOMAIN.isNotEmpty()) {
-            videoDomain = BuildConfig.CORE_VIDEO_DOMAIN
         }
 
         if (user.type == UserType.Authenticated && user.id.isEmpty()) {

@@ -26,6 +26,7 @@ import io.getstream.result.Result.Success
 import io.getstream.video.android.core.call.RtcSession
 import io.getstream.video.android.core.call.utils.DecibelThresholdDetection
 import io.getstream.video.android.core.events.VideoEventListener
+import io.getstream.video.android.core.internal.InternalStreamVideoApi
 import io.getstream.video.android.core.model.MuteUsersData
 import io.getstream.video.android.core.model.SortField
 import io.getstream.video.android.core.model.UpdateUserPermissionsData
@@ -695,9 +696,12 @@ public class Call(
         }
     }
 
-    val debug = Debug(this)
+    @InternalStreamVideoApi
+    public val debug = Debug(this)
 
-    class Debug(val call: Call) {
+    @InternalStreamVideoApi
+    public class Debug(val call: Call) {
+
         public fun restartSubscriberIce() {
             call.session?.subscriber?.connection?.restartIce()
         }
