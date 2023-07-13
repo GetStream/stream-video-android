@@ -88,7 +88,7 @@ Video roadmap and changelog is available [here](https://github.com/GetStream/pro
 - [ ] Ringing: Sounds for incoming, outgoing, call timed out. Sound for someone joining a call (Disabled by default). Docs on how to change them
 - [ ] Publish app on play store
 - [ ] Buttons to simulate ice restart and SFU switching (Jaewoong)
-- [ ] Report version number of SDK on all API calls (Daniel)
+- [x] Report version number of SDK on all API calls (Daniel)
 - [ ] Bug: java.net.UnknownHostException: Unable to resolve host "hint.stream-io-video.com" isn't throw but instead logged as INFO (Daniel)
 - [ ] Bug: screensharing is broken. android doesn’t receive/render (not sure) the screenshare. video shows up as the gray avatar
 - [X] Deeplink support for video call demo & dogfooding app (skip auth for the video demo, keep it for dogfooding) (Jaewoong)
