@@ -68,6 +68,7 @@ import java.util.UUID
  * @property encryptPreferences If our data store should encrypt the api key, user token etc.
  * @property connectionTimeoutInMs Connection timeout in seconds.
  * @property ensureSingleInstance Verify that only 1 version of the video client exists, prevents integration mistakes.
+ * @property videoDomain URL overwrite to allow for testing against a local instance of video.
  */
 public class StreamVideoBuilder @JvmOverloads constructor(
     context: Context,
@@ -83,12 +84,10 @@ public class StreamVideoBuilder @JvmOverloads constructor(
     private val videoFilters: List<VideoFilter> = emptyList(),
     private var encryptPreferences: Boolean = true,
     private val connectionTimeoutInMs: Long = 10000,
-    private var ensureSingleInstance: Boolean = true
+    private var ensureSingleInstance: Boolean = true,
+    private val videoDomain: String = "video.stream-io-api.com"
 ) {
     private val context: Context = context.applicationContext
-
-    /** URL overwrite to allow for testing against a local instance of video */
-    internal var videoDomain: String = "video.stream-io-api.com"
 
     val scope = CoroutineScope(DispatcherProvider.IO)
 

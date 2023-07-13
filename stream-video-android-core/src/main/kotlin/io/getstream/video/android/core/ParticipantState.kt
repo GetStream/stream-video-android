@@ -198,7 +198,7 @@ public data class ParticipantState(
         trackLookupPrefix = participant.track_lookup_prefix
         _networkQuality.value = NetworkQuality.fromConnectionQuality(participant.connection_quality)
         _speaking.value = participant.is_speaking
-        _dominantSpeaker.value = participant.is_dominant_speaker
+        // _dominantSpeaker.value = participant.is_dominant_speaker. we ignore this and only handle the event
         updateAudioLevel(participant.audio_level)
         _audioEnabled.value = participant.published_tracks.contains(TrackType.TRACK_TYPE_AUDIO)
         _videoEnabled.value = participant.published_tracks.contains(TrackType.TRACK_TYPE_VIDEO)

@@ -78,27 +78,27 @@ Video roadmap and changelog is available [here](https://github.com/GetStream/pro
 ### 0.2.0 milestone
 
 - [ ] support settings.audio.default_device (Daniel or Jc)
-- [X] Deeplink support for video call demo & dogfooding app (skip auth for the video demo, keep it for dogfooding) (Jaewoong)
 - [ ] Chat Integration (Jaewoong)
-- [X] XML version of VideoRenderer (Jaewoong)
 - [ ] Local Video disconnects sometimes (ICE restarts issue for the publisher. we're waiting for the backend support) (Thierry)
 - [ ] Call Analytics stateflow (Thierry)
-- [ ] sortedParticipants stateflow doesn't update accurately (Thierry)
-- [ ] Automatically handle pagination and sorting on > 6 participants (Daniel)
+- [ ] Automatically handle pagination and sorting on > 6 participants in the sample app (Daniel)
 - [ ] Bug: Sample app has a bug where we don't subscribe to call changes, we need to use call.get in the preview screen so we know the number of participants (Daniel)
 - [ ] Ringing: Make it easy to test
 - [ ] Ringing: Make a list of what needs to be configurable
 - [ ] Ringing: Sounds for incoming, outgoing, call timed out. Sound for someone joining a call (Disabled by default). Docs on how to change them
 - [ ] Publish app on play store
+- [ ] Buttons to simulate ice restart and SFU switching (Jaewoong)
 - [ ] Report version number of SDK on all API calls (Daniel)
 - [ ] Bug: java.net.UnknownHostException: Unable to resolve host "hint.stream-io-video.com" isn't throw but instead logged as INFO (Daniel)
 - [ ] Bug: screensharing is broken. android doesn’t receive/render (not sure) the screenshare. video shows up as the gray avatar
+- [X] Deeplink support for video call demo & dogfooding app (skip auth for the video demo, keep it for dogfooding) (Jaewoong)
+- [X] XML version of VideoRenderer (Jaewoong)
+- [X] sortedParticipants stateflow doesn't update accurately (Thierry)
 - [X] Reactions
 - [X] Bug: screenshare is not removed after it stops when a participant leaves the call (Thierry) (probably just dont update the state when the participant leaves)
 
 ### 0.3.0 milestone
 
-- [ ] Setting to default to speakerphone or earpiece
 - [ ] Button to switch speakerphone/earpiece
 - [ ] Livestream tutorial (depends on RTMP support)
 - [ ] H264 workaround on Samsung 23 (see https://github.com/livekit/client-sdk-android/blob/main/livekit-android-sdk/src/main/java/io/livekit/android/webrtc/SimulcastVideoEncoderFactoryWrapper.kt#L34 and
@@ -106,7 +106,8 @@ Video roadmap and changelog is available [here](https://github.com/GetStream/pro
 - [ ] Dynascale 2.0 (codecs, f resolution switches, resolution webrtc handling)
 - [ ] Test coverage
 - [ ] Testing on more devices
-- [ ] Speaking while muted stateflow
+- [X] Speaking while muted stateflow (Daniel)
+- [ ] local version of audioLevel(s) for lower latency audio visualizations(Daniel)
 - [ ] Android SDK development.md cleanup (Daniel)
 - [ ] Logging is too verbose (rtc is very noisy), clean it up to focus on the essential for info and higher
 - [X] Bluetooth reliability

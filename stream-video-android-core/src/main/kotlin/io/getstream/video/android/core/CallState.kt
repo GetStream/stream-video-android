@@ -18,7 +18,6 @@ package io.getstream.video.android.core
 
 import io.getstream.log.taggedLogger
 import io.getstream.video.android.core.call.RtcSession
-import io.getstream.video.android.core.dispatchers.DispatcherProvider
 import io.getstream.video.android.core.events.AudioLevelChangedEvent
 import io.getstream.video.android.core.events.ChangePublishQualityEvent
 import io.getstream.video.android.core.events.ConnectionQualityChangeEvent
@@ -41,11 +40,13 @@ import io.getstream.video.android.core.utils.toUser
 import io.getstream.video.android.model.User
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.channelFlow
+import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import org.openapitools.client.models.BlockedUserEvent
@@ -138,7 +139,7 @@ public sealed interface RealtimeConnection {
  *
  *
  */
-public class CallState(private val call: Call, private val user: User) {
+public class CallState(private val call: Call, private val user: User, internal val scope: CoroutineScope) {
 
     private val logger by taggedLogger("CallState")
 
@@ -190,13 +191,16 @@ public class CallState(private val call: Call, private val user: User) {
         MutableStateFlow(emptyMap())
     val pinnedParticipants: StateFlow<Map<String, OffsetDateTime>> = _pinnedParticipants
 
-    // TODO: should inherit the right scope
-    val scope = CoroutineScope(context = DispatcherProvider.IO)
     val stats = CallStats(call, scope)
 
-    public val sortedParticipants =
-        _participants.combine(_pinnedParticipants) { participants, pinned ->
-            participants.values.sortedWith(
+    internal val sortedParticipantsFlow = channelFlow {
+        // uses a channel flow to handle concurrency and 3 things updating: https://kotlinlang.org/api/kotlinx.coroutines/kotlinx-coroutines-core/kotlinx.coroutines.flow/channel-flow.html
+
+        fun emitSorted() {
+            val participants = participants.value
+            val pinned = _pinnedParticipants.value
+            var lastParticipants: List<ParticipantState>? = null
+            val sorted = participants.sortedWith(
                 compareBy(
                     { pinned.containsKey(it.sessionId) },
                     { it.dominantSpeaker.value },
@@ -205,8 +209,53 @@ public class CallState(private val call: Call, private val user: User) {
                     { it.videoEnabled.value },
                     { it.joinedAt.value }
                 )
-            )
-        }.stateIn(scope, SharingStarted.WhileSubscribed(), emptyList())
+            ).reversed()
+
+            scope.launch {
+                if (lastParticipants != sorted) {
+                    send(sorted)
+                    lastParticipants = sorted
+                }
+            }
+        }
+
+        scope.launch {
+            _participants.collect {
+                emitSorted()
+            }
+        }
+        // Since participant state exposes it's own stateflows this is a little harder to do than usual
+        // we need to listen to the events and update the flow when it changes
+
+        // emit the sorted list
+        emitSorted()
+
+        // TODO: could optimize performance by subscribing only to relevant events
+        call.subscribe {
+            emitSorted()
+        }
+
+        scope.launch {
+            _pinnedParticipants.collect {
+                emitSorted()
+            }
+        }
+
+        awaitClose {}
+    }
+
+    /**
+     * Sorted participants based on
+     * - Pinned
+     * - Dominant Speaker
+     * - Screensharing
+     * - Last speaking at
+     * - Video enabled
+     * - Call joined at
+     *
+     * Debounced 100ms to avoid rapid changes
+     */
+    val sortedParticipants = sortedParticipantsFlow.debounce(100).stateIn(scope, SharingStarted.WhileSubscribed(10000L), emptyList())
 
     /** Members contains the list of users who are permanently associated with this call. This includes users who are currently not active in the call
      * As an example if you invite "john", "bob" and "jane" to a call and only Jane joins.
@@ -471,7 +520,14 @@ public class CallState(private val call: Call, private val user: User) {
             }
 
             is DominantSpeakerChangedEvent -> {
-                _dominantSpeaker.value = getOrCreateParticipant(event.sessionId, event.userId)
+                val lastDominantSpeaker = dominantSpeaker.value
+                val lastDominantSpeakerId = lastDominantSpeaker?.sessionId
+                if (lastDominantSpeakerId != event.sessionId) {
+                    val newSpeaker = getOrCreateParticipant(event.sessionId, event.userId)
+                    newSpeaker._dominantSpeaker.value = true
+                    _dominantSpeaker.value = newSpeaker
+                    lastDominantSpeaker?._dominantSpeaker?.value = false
+                }
             }
 
             is ConnectionQualityChangeEvent -> {
@@ -504,7 +560,6 @@ public class CallState(private val call: Call, private val user: User) {
             }
 
             is ParticipantJoinedEvent -> {
-                println("ParticipantJoinedEvent")
                 getOrCreateParticipant(event.participant)
             }
 
