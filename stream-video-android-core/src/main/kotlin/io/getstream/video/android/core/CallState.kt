@@ -623,6 +623,7 @@ public class CallState(private val call: Call, private val user: User, internal 
             }
 
             is CallSessionStartedEvent -> {
+                println("hi123 CallSessionStartedEvent ${event.call.session}")
                 event.call.session?.let { session ->
                     _session.value = session
                 }

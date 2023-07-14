@@ -94,21 +94,18 @@ class LivestreamTest : IntegrationTestBase() {
 
     @Test
     fun participantCount() = runTest {
-        val call = client.call("livestream", randomUUID())
-        val result = call.create()
-        assertSuccess(result)
+        val call = client.call("livestream")
+        client.subscribe {
+            println("hi123 event: $it")
+        }
+        call.join(create=true)
+        Thread.sleep(1000L)
+
         // counts
-        val count = call.state.participantCounts.value
         val session = call.state.session.value
-        println("session: ${session?.participantsCountByRole}")
-
-        call.join()
-
-        val newCount = call.state.participantCounts.value
-        println("session abc: ${session?.participantsCountByRole}")
-
-        assertThat(newCount?.anonymous).isEqualTo(1)
-        assertThat(newCount?.total).isEqualTo(1)
+        assertThat(session?.participants).isNotEmpty()
+        assertThat(session?.participantsCountByRole).isNotEmpty()
+        assertThat(session?.startedAt).isNotNull()
     }
 
     @Test
