@@ -14,21 +14,18 @@
  * limitations under the License.
  */
 
-package io.getstream.video.android.core.stories
+package io.getstream.video.android.core
 
 import com.google.common.truth.Truth.assertThat
-import io.getstream.video.android.core.base.IntegrationTestBase
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.test.runTest
 import org.junit.Ignore
 import org.junit.Test
-import org.junit.runner.RunWith
-import org.robolectric.RobolectricTestRunner
 import org.threeten.bp.OffsetDateTime
 import org.threeten.bp.temporal.ChronoUnit
 
-@RunWith(RobolectricTestRunner::class)
+
 class LivestreamTest : IntegrationTestBase() {
     /**
      * This test covers the most commonly used endpoints for a livestream
@@ -54,14 +51,14 @@ class LivestreamTest : IntegrationTestBase() {
      */
 
     @Test
-    fun `list recorded calls`() = runTest {
+    fun listRecordings() = runTest {
         val result = call.listRecordings()
         assertSuccess(result)
     }
 
     @Test
     @Ignore
-    fun `start and stop broadcasting to HLS`() = runTest {
+    fun hls() = runTest {
         val call = client.call("livestream", randomUUID())
         val createResult = call.create()
         assertSuccess(createResult)
@@ -76,7 +73,7 @@ class LivestreamTest : IntegrationTestBase() {
     }
 
     @Test
-    fun `calls should support RTMP in`() = runTest {
+    fun RTMPin() = runTest {
         val call = client.call("default", "NnXAIvBKE4Hy")
         val response = call.create()
         assertSuccess(response)
@@ -85,6 +82,10 @@ class LivestreamTest : IntegrationTestBase() {
         val token = clientImpl.dataStore.userToken.value
         val apiKey = clientImpl.dataStore.apiKey.value
         val streamKey = "$apiKey/$token"
+
+        val overwriteUrl = "rtmps://video-ingress-frankfurt-vi1.stream-io-video.com:443/${call.type}/${call.id}"
+        println("rtmpin url: $overwriteUrl")
+        println("rtmpin streamkey: $streamKey")
         // TODO: not implemented on the server
         // Create a publishing token
         // TODO: Wrap the CallIngressResponse? to expose the streamKey?
@@ -92,26 +93,27 @@ class LivestreamTest : IntegrationTestBase() {
     }
 
     @Test
-    @Ignore // backend support isn't ready, call.create doesn't return counts
-    fun `call should expose participant count`() = runTest {
+    fun participantCount() = runTest {
         val call = client.call("livestream", randomUUID())
         val result = call.create()
         assertSuccess(result)
         // counts
         val count = call.state.participantCounts.value
-        assertThat(count?.anonymous).isEqualTo(0)
-        assertThat(count?.total).isEqualTo(0)
+        val session = call.state.session.value
+        println("session: ${session?.participantsCountByRole}")
 
         call.join()
 
         val newCount = call.state.participantCounts.value
+        println("session abc: ${session?.participantsCountByRole}")
+
         assertThat(newCount?.anonymous).isEqualTo(1)
         assertThat(newCount?.total).isEqualTo(1)
     }
 
     @Test
     @Ignore
-    fun `call should return time running`() = runTest {
+    fun timeRunning() = runTest {
         val call = client.call("livestream", randomUUID())
         assertSuccess(call.create())
         val goLiveResponse = call.goLive()

@@ -8,18 +8,32 @@ description: How to build a livestream experience using Stream's video SDKs
 This tutorial isn't ready yet
 :::
 
+## TODO:
+
+- call.get, create, update, join should all return viewer/participant counts
+- expose how long the call is running (session.startedAt is missing, session is null)
+- RTMP in ratio has some problems
+- a way to mark a video as the primary/pinned video. if you have multiple hosts, how do you select the primary video?
+- integrate the real token
+- consider using core SDK instead of compose sdk for this tutorial
+
+
 ## Livestream Tutorial
 
-In this tutorial we'll quickly build a low-latency livestreaming experience similar to Twitch.
+In this tutorial we'll quickly build a low-latency livestreaming experience.
+The stream is broadcasted using Stream's edge network of servers around the world.
+We'll cover the following topics:
 
-* We'll use ultra low latency streaming in this tutorial. Alternatively you can also broadcast to HLS
-* The livestream will run on Stream's Edge network of servers around the world
-* This architecture allows you to scale to millions of viewers
-* To publish the livestream you can use either RTMPs (which is supported by OBS and pretty much all streaming software) or you can publish from your phone
+* Ultra low latency streaming
+* Multiple streams & co-hosts
+* RTMP in and Webrtc input
+* Exporting to HLS
+* Reactions, custom events and chat
+* Recording & Transcriptions
 
-Time to get started, if you have any questions or feedback be sure to let us know via the feedback button.
+Let's get started, if you have any questions or feedback be sure to let us know via the feedback button.
 
-### Step 1 - Create a new project in android studio
+### Step 1 - Create a new project in Android Studio
 
 Note that this tutorial was written using Android Studio Flamingo.
 Setup steps can vary slightly across Android Studio versions so if you run into trouble be sure to use the latest version of Android Studio.
@@ -39,13 +53,11 @@ dependencies {
 }
 ```
 
+TODO: maybe the core SDK makes more sense here
+
 ### Step 3 - Publish from your phone
 
 The following code shows how to publish from your phone's camera to the call.
-Livestreams by default will start in the backstage mode.
-The call works, you can join with your fellow call hosts, but participants aren't allowed to join yet.
-You can call call.goLive() to start your livestream.
-
 Let's open MainActivity.kt and replace it with:
 
 ```kotlin
@@ -124,15 +136,18 @@ class MainActivity : ComponentActivity() {
 
 ```
 
+<TokenSnippet sampleApp='livestream' />
+
 Now when you press live your video will be transmitted. You can confirm it by visiting
 and connecting on this webpage.
+
+By default livestreams will start in the backstage mode. During the backstage mode only the host and co-hosts can join.
+This is convenient for testing your camera setup etc. When you want to go live simply use call.goLive().
+When the call is live regular users can join.
 
 ### Step 3A - Viewing a livestream (Webrtc)
 
 The client setup for someone watching the call is quite similar.
-You can join as an anonymous, guest or regular user.
-
-You still join the call (but you won't be allowed to publish video)
 
 ```kotlin
 // anonymous user
