@@ -18,6 +18,7 @@ package io.getstream.video.android.core
 
 import android.os.Build
 import io.getstream.log.taggedLogger
+import io.getstream.video.android.BuildConfig
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -150,8 +151,7 @@ public class CallStats(val call: Call, val callScope: CoroutineScope) {
 
         val sfu = call.session?.sfuUrl
 
-        val sdk = "android"
-        // TODO: How do we get this? val version = Configuration.versionName
+        val version = BuildConfig.STREAM_VIDEO_VERSION
         val osVersion = Build.VERSION.RELEASE ?: ""
 
         val vendor = Build.MANUFACTURER ?: ""
@@ -164,7 +164,7 @@ public class CallStats(val call: Call, val callScope: CoroutineScope) {
             maxResolution = maxResolution,
             sfu = sfu ?: "",
             os = osVersion,
-            sdkVersion = "0.1",
+            sdkVersion = version,
             deviceModel = deviceModel,
         )
         _local.value = local

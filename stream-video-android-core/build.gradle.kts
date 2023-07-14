@@ -53,6 +53,7 @@ android {
         minSdk = Configuration.minSdk
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles("consumer-proguard-rules.pro")
+        buildConfigField("String", "STREAM_VIDEO_VERSION", "\"${Configuration.versionName}\"")
     }
 
     testOptions {

@@ -190,6 +190,9 @@ internal class StreamVideoImpl internal constructor(
                         Success(apiCall())
                     } catch (e: HttpException) {
                         parseError(e)
+                    } catch (e: Throwable) {
+                        // rethrow exception (will be handled by outer-catch)
+                        throw e
                     }
 
                     // set the token, repeat API call
@@ -197,6 +200,9 @@ internal class StreamVideoImpl internal constructor(
                 } else {
                     failure
                 }
+            } catch (e: Throwable) {
+                // Other issues. For example UnknownHostException.
+                Failure(Error.ThrowableError(e.message ?: "", e))
             }
         }
     }
