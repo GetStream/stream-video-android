@@ -236,7 +236,7 @@ private fun CallLobbyBody(
 private fun LobbyDescription(
     callLobbyViewModel: CallLobbyViewModel
 ) {
-    val participants by callLobbyViewModel.call.state.participants.collectAsState()
+    val session by callLobbyViewModel.call.state.session.collectAsState()
 
     Column(
         modifier = Modifier
@@ -248,7 +248,7 @@ private fun LobbyDescription(
     ) {
         Text(
             modifier = Modifier.padding(start = 32.dp, end = 32.dp, top = 12.dp, bottom = 8.dp),
-            text = stringResource(id = R.string.join_call_description, participants.size),
+            text = stringResource(id = R.string.join_call_description, session?.participants?.size ?: 0),
             color = Color.White
         )
 

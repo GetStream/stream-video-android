@@ -74,7 +74,9 @@ fun LoginScreen(
     navigateToCallJoin: () -> Unit
 ) {
     val uiState by loginViewModel.uiState.collectAsState(initial = LoginUiState.Nothing)
-    val isLoading by remember(uiState) { mutableStateOf(uiState !is LoginUiState.Nothing) }
+    val isLoading by remember(uiState) {
+        mutableStateOf(uiState !is LoginUiState.Nothing && uiState !is LoginUiState.SignInFailure)
+    }
     var isShowingEmailLoginDialog by remember { mutableStateOf(false) }
 
     HandleLoginUiStates(loginUiState = uiState, navigateToCallJoin = navigateToCallJoin)
@@ -287,6 +289,10 @@ private fun HandleLoginUiStates(
                 )
 
                 navigateToCallJoin.invoke()
+            }
+
+            is LoginUiState.SignInFailure -> {
+                Toast.makeText(context, "Login failed! (${loginUiState.errorMessage})", Toast.LENGTH_SHORT).show()
             }
 
             else -> Unit
