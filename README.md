@@ -79,8 +79,10 @@ Video roadmap and changelog is available [here](https://github.com/GetStream/pro
 
 - [ ] Chat Integration (Jaewoong)
 - [ ] Call Analytics stateflow (Thierry)
+- [ ] Automatically handle pagination and sorting on > 6 participants in the sample app (Daniel)
+- [X] Bug: Sample app has a bug where we don't subscribe to call changes, we need to use call.get in the preview screen so we know the number of participants (Daniel)
+- [ ] Ringing: Make it easy to test
 - [ ] Example Button to switch speakerphone/earpiece
-- [ ] Automatically handle pagination and sorting on > 6 participants in the sample app. See Sorted participants (Daniel)
 - [ ] Ringing: Make a list of what needs to be configurable
 - [ ] Ringing: Sounds for incoming, outgoing, call timed out. Sound for someone joining a call (Disabled by default). Docs on how to change them
 - [ ] Publish app on play store

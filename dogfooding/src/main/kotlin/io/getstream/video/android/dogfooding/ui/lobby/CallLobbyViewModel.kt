@@ -49,7 +49,12 @@ class CallLobbyViewModel @Inject constructor(
 
     val call: Call by lazy {
         val streamVideo = StreamVideo.instance()
-        streamVideo.call(type = callId.type, id = callId.id)
+        val call = streamVideo.call(type = callId.type, id = callId.id)
+        // start listening to the call events to get the participant count
+        viewModelScope.launch {
+            call.get()
+        }
+        call
     }
 
     val user: User? = dataStore.user.value
