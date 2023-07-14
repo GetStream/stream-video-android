@@ -31,8 +31,10 @@ import io.getstream.video.android.core.utils.mapState
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import okhttp3.internal.toImmutableList
+import org.openapitools.client.models.AudioSettings
 import org.openapitools.client.models.VideoSettings
 import org.webrtc.Camera2Capturer
 import org.webrtc.Camera2Enumerator
@@ -608,12 +610,24 @@ class MediaManagerImpl(
         source = audioSource, trackId = UUID.randomUUID().toString()
     )
 
-    // TODO: this should be a setting on the call type
-    val preferSpeakerphone by lazy { true }
-
     internal val camera = CameraManager(this, eglBaseContext)
-    internal val microphone = MicrophoneManager(this, preferSpeakerphone)
+    internal val microphone = MicrophoneManager(this, preferSpeakerphone = true)
     internal val speaker = SpeakerManager(this, microphone)
+
+    init {
+        // listen to audio configuration changes
+        scope.launch {
+            call.state.settings.collect { settingsResponse ->
+                settingsResponse?.let {
+                    // The default is Speaker - so we only switch if Earpiece is set in Settings
+                    if (it.audio.defaultDevice == AudioSettings.DefaultDevice.Earpiece
+                        && !speaker.speakerPhoneEnabled.value) {
+                        speaker.setSpeakerPhone(false)
+                    }
+                }
+            }
+        }
+    }
 
     fun cleanup() {
         videoSource.dispose()
