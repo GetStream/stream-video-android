@@ -6,6 +6,8 @@ on:
       - 'docusaurus/**'
       - '.github/workflows/docusaurus.yml'
 
+  workflow_dispatch:
+
 jobs:
   push_docusaurus:
     name: Publish docs
