@@ -86,8 +86,9 @@ Video roadmap and changelog is available [here](https://github.com/GetStream/pro
 - [ ] Ringing: Make a list of what needs to be configurable
 - [ ] Ringing: Sounds for incoming, outgoing, call timed out. Sound for someone joining a call (Disabled by default). Docs on how to change them
 - [ ] Publish app on play store
-- [ ] Bug: java.net.UnknownHostException: Unable to resolve host "hint.stream-io-video.com" isn't throw but instead logged as INFO (Daniel)
-- [ ] Bug: screensharing is broken. android doesn’t receive/render (not sure) the screenshare. video shows up as the gray avatar
+- [ ] Buttons to simulate ice restart and SFU switching (Jaewoong)
+- [X] Report version number of SDK on all API calls (Daniel)
+- [X] Bug: java.net.UnknownHostException: Unable to resolve host "hint.stream-io-video.com" isn't throw but instead logged as INFO (Daniel)
 - [X] Bug: Call.join will throw an exception if error is other than HttpException
 - [ ] Bug: Screensharing on Firefox has some issues when rendering on android (Daniel)
 - [X] Report version number of SDK on all API calls (Daniel)

@@ -18,6 +18,7 @@ package io.getstream.video.android.core.socket
 
 import com.squareup.moshi.JsonAdapter
 import io.getstream.log.taggedLogger
+import io.getstream.video.android.core.StreamVideo
 import io.getstream.video.android.core.call.signal.socket.RTCEventMapper
 import io.getstream.video.android.core.dispatchers.DispatcherProvider
 import io.getstream.video.android.core.events.ErrorEvent
@@ -201,6 +202,7 @@ open class PersistentSocket<T>(
             .url(url)
             .addHeader("Connection", "Upgrade")
             .addHeader("Upgrade", "websocket")
+            .addHeader("X-Stream-Client", StreamVideo.buildSdkTrackingHeaders())
             .build()
 
         return httpClient.newWebSocket(request, this)
