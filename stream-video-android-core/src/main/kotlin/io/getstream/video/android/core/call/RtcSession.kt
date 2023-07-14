@@ -849,29 +849,15 @@ public class RtcSession internal constructor(
         val tracks = participants.map { participant ->
             val trackDisplay = trackDisplayResolution[participant.sessionId] ?: emptyMap()
 
-            val tracks = mutableListOf<TrackSubscriptionDetails>()
-            val entries = trackDisplay.entries.filter { it.value.visible }
-            entries.forEach { entry ->
-                dynascaleLogger.i { "[visibleTracks] $sessionId subscribing ${participant.sessionId} to : ${entry.key}" }
-                if (participant.videoEnabled.value) {
-                    tracks.add(TrackSubscriptionDetails(
-                        user_id = participant.user.value.id,
-                        track_type = entry.key,
-                        dimension = entry.value.dimensions,
-                        session_id = participant.sessionId
-                    ))
-                }
-
-                if (participant.screenSharingEnabled.value) {
-                    tracks.add(TrackSubscriptionDetails(
-                        user_id = participant.user.value.id,
-                        track_type = TrackType.TRACK_TYPE_SCREEN_SHARE,
-                        dimension = entry.value.dimensions,
-                        session_id = participant.sessionId
-                    ))
-                }
+            trackDisplay.entries.filter { it.value.visible }.map { display ->
+                dynascaleLogger.i { "[visibleTracks] $sessionId subscribing ${participant.sessionId} to : ${display.key}" }
+                TrackSubscriptionDetails(
+                    user_id = participant.user.value.id,
+                    track_type = display.key,
+                    dimension = display.value.dimensions,
+                    session_id = participant.sessionId
+                )
             }
-            tracks
         }.flatten()
         return tracks
     }
