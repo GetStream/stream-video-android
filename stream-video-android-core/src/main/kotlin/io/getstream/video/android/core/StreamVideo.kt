@@ -17,9 +17,11 @@
 package io.getstream.video.android.core
 
 import android.content.Context
+import android.os.Build
 import io.getstream.android.push.PushDevice
 import io.getstream.log.StreamLog
 import io.getstream.result.Result
+import io.getstream.video.android.BuildConfig
 import io.getstream.video.android.core.events.VideoEventListener
 import io.getstream.video.android.core.model.EdgeData
 import io.getstream.video.android.core.model.QueriedCalls
@@ -157,6 +159,27 @@ public interface StreamVideo : NotificationHandler {
                 }
                 internalStreamVideo = streamVideo
             }
+        }
+
+        /**
+         * Builds a detailed header of information we track around the SDK, Android OS, API Level, device name and
+         * vendor and more.
+         *
+         * @return String formatted header that contains all the information.
+         */
+        internal fun buildSdkTrackingHeaders(): String {
+            val clientInformation = "stream-video-android-${BuildConfig.STREAM_VIDEO_VERSION}"
+
+            val buildModel = Build.MODEL
+            val deviceManufacturer = Build.MANUFACTURER
+            val apiLevel = Build.VERSION.SDK_INT
+            val osName = "Android ${Build.VERSION.RELEASE}"
+
+            return clientInformation +
+                    "|os=$osName" +
+                    "|api_version=$apiLevel" +
+                    "|device_vendor=$deviceManufacturer" +
+                    "|device_model=$buildModel"
         }
 
         /**
