@@ -25,7 +25,6 @@ import org.junit.Test
 import org.threeten.bp.OffsetDateTime
 import org.threeten.bp.temporal.ChronoUnit
 
-
 class LivestreamTest : IntegrationTestBase() {
     /**
      * This test covers the most commonly used endpoints for a livestream
@@ -78,18 +77,9 @@ class LivestreamTest : IntegrationTestBase() {
         val response = call.create()
         assertSuccess(response)
 
-        val url = call.state.ingress.value?.rtmp?.address
-        val token = clientImpl.dataStore.userToken.value
-        val apiKey = clientImpl.dataStore.apiKey.value
-        val streamKey = "$apiKey/$token"
-
-        val overwriteUrl = "rtmps://video-ingress-frankfurt-vi1.stream-io-video.com:443/${call.type}/${call.id}"
-        println("rtmpin url: $overwriteUrl")
-        println("rtmpin streamkey: $streamKey")
-        // TODO: not implemented on the server
-        // Create a publishing token
-        // TODO: Wrap the CallIngressResponse? to expose the streamKey?
-        // TODO: alternatively call.state.ingress could be a mapped state
+        val rtmp = call.state.ingress.value?.rtmp
+        println("rtmp address: ${rtmp?.address}")
+        println("rtmp streamKey: ${rtmp?.streamKey}")
     }
 
     @Test
@@ -98,14 +88,15 @@ class LivestreamTest : IntegrationTestBase() {
         client.subscribe {
             println("hi123 event: $it")
         }
-        call.join(create=true)
+        call.join(create = true)
         Thread.sleep(1000L)
 
         // counts
         val session = call.state.session.value
         assertThat(session?.participants).isNotEmpty()
-        assertThat(session?.participantsCountByRole).isNotEmpty()
         assertThat(session?.startedAt).isNotNull()
+
+        assertThat(session?.participantsCountByRole).isNotEmpty()
     }
 
     @Test

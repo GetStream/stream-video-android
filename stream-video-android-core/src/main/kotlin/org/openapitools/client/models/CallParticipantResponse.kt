@@ -40,7 +40,9 @@ import org.openapitools.client.infrastructure.Serializer
  *
  *
  * @param joinedAt
+ * @param role
  * @param user
+ * @param userSessionId
  */
 
 
@@ -49,7 +51,13 @@ data class CallParticipantResponse (
     @Json(name = "joined_at")
     val joinedAt: org.threeten.bp.OffsetDateTime,
 
+    @Json(name = "role")
+    val role: kotlin.String,
+
     @Json(name = "user")
-    val user: UserResponse
+    val user: UserResponse,
+
+    @Json(name = "user_session_id")
+    val userSessionId: kotlin.String
 
 )

@@ -31,7 +31,9 @@ import io.getstream.video.android.core.events.SFUHealthCheckEvent
 import io.getstream.video.android.core.events.SubscriberOfferEvent
 import io.getstream.video.android.core.events.TrackPublishedEvent
 import io.getstream.video.android.core.events.TrackUnpublishedEvent
+import io.getstream.video.android.core.model.Ingress
 import io.getstream.video.android.core.model.NetworkQuality
+import io.getstream.video.android.core.model.RTMP
 import io.getstream.video.android.core.model.Reaction
 import io.getstream.video.android.core.model.ScreenSharingSession
 import io.getstream.video.android.core.permission.PermissionRequest
@@ -324,6 +326,8 @@ public class CallState(private val call: Call, private val user: User, internal 
 
     /** if we are in backstage mode or not */
     val backstage: StateFlow<Boolean> = _backstage
+    /** the opposite of backstage, if we are live or not */
+    val live: StateFlow<Boolean> = _backstage.mapState { !it }
 
     private val _egress: MutableStateFlow<EgressResponse?> = MutableStateFlow(null)
     val egress: StateFlow<EgressResponse?> = _egress
@@ -371,7 +375,14 @@ public class CallState(private val call: Call, private val user: User, internal 
     val createdBy: StateFlow<User?> = _createdBy
 
     private val _ingress: MutableStateFlow<CallIngressResponse?> = MutableStateFlow(null)
-    val ingress: StateFlow<CallIngressResponse?> = _ingress
+    val ingress: StateFlow<Ingress?> = _ingress.mapState {
+        val token = call.clientImpl.dataStore.userToken.value
+        val apiKey = call.clientImpl.dataStore.apiKey.value
+        val streamKey = "$apiKey/$token"
+        // TODO: use the address when the server is updated
+        val overwriteUrl = "rtmps://video-ingress-frankfurt-vi1.stream-io-video.com:443/${call.type}/${call.id}"
+        Ingress(rtmp = RTMP(address = overwriteUrl ?: "", streamKey = streamKey))
+    }
 
     private val userToSessionIdMap = participants.mapState { participants ->
         participants.associate { it.user.value.id to it.sessionId }
@@ -392,6 +403,8 @@ public class CallState(private val call: Call, private val user: User, internal 
     public val errors: StateFlow<List<ErrorEvent>> = _errors
 
     private var speakingWhileMutedResetJob: Job? = null
+
+
 
     fun handleEvent(event: VideoEvent) {
         logger.d { "Updating call state with event ${event::class.java}" }
@@ -623,7 +636,6 @@ public class CallState(private val call: Call, private val user: User, internal 
             }
 
             is CallSessionStartedEvent -> {
-                println("hi123 CallSessionStartedEvent ${event.call.session}")
                 event.call.session?.let { session ->
                     _session.value = session
                 }
@@ -633,10 +645,11 @@ public class CallState(private val call: Call, private val user: User, internal 
                 _session.value = event.call.session
             }
 
+
             is CallSessionParticipantLeftEvent -> {
                 _session.value?.let { callSessionResponse ->
                     val newList = callSessionResponse.participants.toMutableList()
-                    newList.removeIf { it.user.id == event.user.id }
+                    newList.removeIf { it.userSessionId == event.userSessionId }
                     _session.value = callSessionResponse.copy(
                         participants = newList.toImmutableList()
                     )
@@ -646,7 +659,7 @@ public class CallState(private val call: Call, private val user: User, internal 
             is CallSessionParticipantJoinedEvent -> {
                 _session.value?.let { callSessionResponse ->
                     val newList = callSessionResponse.participants.toMutableList()
-                    val participant = CallParticipantResponse(user = event.user, joinedAt = event.createdAt)
+                    val participant = CallParticipantResponse(user = event.user, joinedAt = event.createdAt, role="user", userSessionId = event.userSessionId
                     val index = newList.indexOfFirst { user.id == event.user.id }
                     if (index == -1) {
                         newList.add(participant)

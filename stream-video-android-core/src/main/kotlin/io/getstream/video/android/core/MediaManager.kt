@@ -620,8 +620,9 @@ class MediaManagerImpl(
             call.state.settings.collect { settingsResponse ->
                 settingsResponse?.let {
                     // The default is Speaker - so we only switch if Earpiece is set in Settings
-                    if (it.audio.defaultDevice == AudioSettings.DefaultDevice.Earpiece
-                        && !speaker.speakerPhoneEnabled.value) {
+                    if (it.audio.defaultDevice == AudioSettings.DefaultDevice.Earpiece &&
+                        !speaker.speakerPhoneEnabled.value
+                    ) {
                         speaker.setSpeakerPhone(false)
                     }
                 }

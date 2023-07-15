@@ -176,10 +176,10 @@ public interface StreamVideo : NotificationHandler {
             val osName = "Android ${Build.VERSION.RELEASE}"
 
             return clientInformation +
-                    "|os=$osName" +
-                    "|api_version=$apiLevel" +
-                    "|device_vendor=$deviceManufacturer" +
-                    "|device_model=$buildModel"
+                "|os=$osName" +
+                "|api_version=$apiLevel" +
+                "|device_vendor=$deviceManufacturer" +
+                "|device_model=$buildModel"
         }
 
         /**
