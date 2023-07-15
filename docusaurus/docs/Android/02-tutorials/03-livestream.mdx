@@ -10,20 +10,27 @@ import { TokenSnippet } from '../../../shared/_tokenSnippet.jsx';
 This tutorial isn't ready yet
 :::
 
-## TODO:
+## TODO tutorial:
 
+- split the first part of the tutorial
+- add .live as the opposite of backstage
+- expose ingress urls nicely
+- request permissions
+
+## TODO server:
+
+- a way to mark a video as the primary/pinned video. if you have multiple hosts, how do you select the primary video?
 - the session should have a field with the total participant count (since thats what you want to show most of the time). ideally SFU ParticipantCount and session data should follow the same structure
 - session data isn't 100% correct. after 1 user joins it returns this in the CallSessionStartedEvent participantsCountByRole={}, rejectedBy={}, endedAt=null, startedAt=null
 - CallSessionParticipantJoinedEvent and CallSessionStartedEvent are send in the wrong order
 - CallParticipantResponse lacks a session id, so you can't easily add or remove from that list based on the events
 - RTMP in ratio has some problems
-- a way to mark a video as the primary/pinned video. if you have multiple hosts, how do you select the primary video?
-- For a livestream the most important one is call.state.???
+
 
 ## Livestream Tutorial
 
-In this tutorial we'll quickly build a low-latency livestreaming experience.
-The stream is broadcasted using Stream's edge network of servers around the world.
+In this tutorial we'll quickly build a low-latency in-app livestreaming experience.
+The livestream is broadcasted using Stream's edge network of servers around the world.
 We'll cover the following topics:
 
 * Ultra low latency streaming
@@ -46,12 +53,12 @@ Setup steps can vary slightly across Android Studio versions so if you run into 
 
 ### Step 2 - Install the SDK & Setup the client
 
-**Add the compose SDK** to your app's `build.gradle` file found in app/build.gradle
+**Add the video SDK** to your app's `build.gradle` file found in app/build.gradle
 If you're new to android note that there are 2 build.gradle files, you want to open the one in the app folder.
 
 ```groovy
 dependencies {
-    implementation "io.getstream:stream-video-android-core:$stream_version"
+    implementation "io.getstream:stream-video-android-compose:$stream_version"
 }
 ```
 
@@ -100,44 +107,56 @@ class MainActivity : ComponentActivity() {
 
 
         setContent {
+        // TODO: maybe split this step
             VideoTheme {
-                val participantCount = call.state.participantCounts.collectAsState().value?.total
-                val connection by call.state.connection.collectAsState()
-                val backstage by call.state.backstage.collectAsState()
-                val me by call.state.me.collectAsState()
-                val video = me?.video?.collectAsState()
-
-                Box(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .background(VideoTheme.colors.appBackground),
-                ) {
-                    Column() {
-
-
-                        VideoRenderer(call = call, video = video?.value)
-
-                        Button(onClick = {
-                            lifecycleScope.launch {
-                                if (backstage) call.goLive() else call.stopLive()
-                            }
-                        }) {
-                            Text(text = if (backstage) "Go Live" else "Stop Broadcast")
-                        }
-                    }
-                    if (connection != RealtimeConnection.Connected) {
-                        Text("loading...$connection")
-                    }
-
-                    Text("Livestream has $participantCount participants")
-
-                    Text("Live for 1:23")
-                }
+                Text("Todo render video")
             }
         }
     }
 }
 
+```
+
+TODO: Review what we did here
+
+### Step 4 - Render the video
+
+```kotlin
+
+VideoTheme {
+    val participantCount = call.state.participantCounts.collectAsState().value?.total
+    val connection by call.state.connection.collectAsState()
+    val backstage by call.state.backstage.collectAsState()
+    val me by call.state.me.collectAsState()
+    val video = me?.video?.collectAsState()
+
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(VideoTheme.colors.appBackground),
+    ) {
+        Column() {
+
+
+            VideoRenderer(call = call, video = video?.value)
+
+            Button(onClick = {
+                lifecycleScope.launch {
+                    if (backstage) call.goLive() else call.stopLive()
+                }
+            }) {
+                Text(text = if (backstage) "Go Live" else "Stop Broadcast")
+            }
+        }
+        if (connection != RealtimeConnection.Connected) {
+            Text("loading...$connection")
+        }
+
+        Text("Livestream has $participantCount participants")
+
+        Text("Live for 1:23")
+    }
+}
 ```
 
 Before running the app please update **REPLACE_WITH_USER_ID**, **REPLACE_WITH_TOKEN** and **REPLACE_WITH_CALL_ID** with the actual values shown below:
