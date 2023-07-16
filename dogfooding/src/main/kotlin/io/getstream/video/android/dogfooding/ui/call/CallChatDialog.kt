@@ -36,10 +36,8 @@ internal fun CallChatDialog(
         modifier = Modifier.fillMaxWidth(),
         sheetState = rememberModalBottomSheetState(initialValue = ModalBottomSheetValue.HalfExpanded),
         sheetContent = {
-
         },
         content = {
-
         }
     )
 }

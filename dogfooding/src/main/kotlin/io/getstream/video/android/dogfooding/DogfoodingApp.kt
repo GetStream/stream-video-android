@@ -93,21 +93,22 @@ class DogfoodingApp : Application() {
         )
 
         val logLevel = if (BuildConfig.DEBUG) ChatLogLevel.ALL else ChatLogLevel.NOTHING
-        val chatClient = ChatClient.Builder("tp8sef43xcpc", this)
+        val chatClient = ChatClient.Builder("kqucevfhngu4", this)
             .withPlugins(offlinePlugin, statePluginFactory)
             .logLevel(logLevel)
             .uploadAttachmentsNetworkType(UploadAttachmentsNetworkType.NOT_ROAMING)
             .build()
 
-        val userLogin = io.getstream.chat.android.client.models.User(
+        val token = chatClient.devToken(user.id)
+        val chatUser = io.getstream.chat.android.client.models.User(
             id = user.id,
             name = user.name,
             image = user.image
         )
 
         chatClient.connectUser(
-            user = userLogin,
-            token = userLogin.extraData["chatToken"] as String
+            user = chatUser,
+            token = token
         ).enqueue()
     }
 }
