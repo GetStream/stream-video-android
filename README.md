@@ -85,8 +85,8 @@ Video roadmap and changelog is available [here](https://github.com/GetStream/pro
 - [ ] Ringing: Make a list of what needs to be configurable
 - [ ] Ringing: Sounds for incoming, outgoing, call timed out. Sound for someone joining a call (Disabled by default). Docs on how to change them
 - [ ] Publish app on play store
-- [ ] Buttons to simulate ice restart and SFU switching (Jaewoong)
 - [ ] Bug: Screensharing on Firefox has some issues when rendering on android (Daniel)
+- [X] Buttons to simulate ice restart and SFU switching (Jaewoong)
 - [X] Bug: java.net.UnknownHostException: Unable to resolve host "hint.stream-io-video.com" isn't throw but instead logged as INFO (Daniel)
 - [X] Bug: Call.join will throw an exception if error is other than HttpException
 - [X] Report version number of SDK on all API calls (Daniel)
