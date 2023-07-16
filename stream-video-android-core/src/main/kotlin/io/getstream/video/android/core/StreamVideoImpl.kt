@@ -87,7 +87,6 @@ import org.openapitools.client.models.QueryMembersRequest
 import org.openapitools.client.models.QueryMembersResponse
 import org.openapitools.client.models.RejectCallResponse
 import org.openapitools.client.models.RequestPermissionRequest
-import org.openapitools.client.models.SendCallStatsRequest
 import org.openapitools.client.models.SendEventRequest
 import org.openapitools.client.models.SendEventResponse
 import org.openapitools.client.models.SendReactionRequest
@@ -821,11 +820,12 @@ internal class StreamVideoImpl internal constructor(
         id: String,
         data: Map<String, Any>
     ) {
-        val request = SendCallStatsRequest(data)
+//        TODO: Change with new APIs
+//        val request = SendCallStatsRequest(data)
 
         try {
             wrapAPICall {
-                connectionModule.localApi.sendCallStats(callType, id, request)
+//                connectionModule.localApi.sendCallStats(callType, id, request)
             }
         } catch (e: Exception) {
             logger.i { "Error sending stats $e" }
