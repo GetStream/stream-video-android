@@ -44,6 +44,7 @@ import org.openapitools.client.infrastructure.Serializer
  * @param sessionId Call session ID
  * @param type The type of event: \"call.session_participant_left\" in this case
  * @param user
+ * @param userSessionId The user session ID of the user that left the call session
  */
 
 
@@ -64,7 +65,11 @@ data class CallSessionParticipantLeftEvent (
     val type: kotlin.String = "call.session_participant_left",
 
     @Json(name = "user")
-    val user: UserResponse
+    val user: UserResponse,
+
+    /* The user session ID of the user that left the call session */
+    @Json(name = "user_session_id")
+    val userSessionId: kotlin.String
 
 ) : VideoEvent(), WSCallEvent {
 

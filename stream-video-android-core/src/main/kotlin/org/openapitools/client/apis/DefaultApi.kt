@@ -56,8 +56,6 @@ import org.openapitools.client.models.RejectCallResponse
 import org.openapitools.client.models.RequestPermissionRequest
 import org.openapitools.client.models.RequestPermissionResponse
 import org.openapitools.client.models.Response
-import org.openapitools.client.models.SendCallStatsRequest
-import org.openapitools.client.models.SendCallStatsResponse
 import org.openapitools.client.models.SendEventRequest
 import org.openapitools.client.models.SendEventResponse
 import org.openapitools.client.models.SendReactionRequest
@@ -433,26 +431,6 @@ interface DefaultApi {
         @Path("id") id: String,
         @Body requestPermissionRequest: RequestPermissionRequest
     ): RequestPermissionResponse
-
-    /**
-     * Send Call Stats
-     *
-     * Responses:
-     *  - 201: Successful response
-     *  - 400: Bad request
-     *  - 429: Too many requests
-     *
-     * @param type
-     * @param id
-     * @param sendCallStatsRequest
-     * @return [SendCallStatsResponse]
-     */
-    @POST("/video/call/{type}/{id}/stats")
-    suspend fun sendCallStats(
-        @Path("type") type: String,
-        @Path("id") id: String,
-        @Body sendCallStatsRequest: SendCallStatsRequest
-    ): SendCallStatsResponse
 
     /**
      * Send custom event

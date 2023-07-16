@@ -19,9 +19,12 @@ package io.getstream.video.android.dogfooding.ui.call
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
+import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.lifecycle.lifecycleScope
+import io.getstream.result.Result
 import io.getstream.video.android.core.StreamVideo
 import io.getstream.video.android.model.StreamCallId
 import kotlinx.coroutines.launch
@@ -38,7 +41,20 @@ class CallActivity : ComponentActivity() {
         val call = streamVideo.call(type = cid.type, id = cid.id)
 
         // step 2 - join a call
-        lifecycleScope.launch { call.join(create = true) }
+        lifecycleScope.launch {
+            val result = call.join(create = true)
+
+            // Unable to join. Device is offline or other usually connection issue.
+            if (result is Result.Failure) {
+                Log.e("CallActivity", "Call.join failed ${result.value}")
+                Toast.makeText(
+                    this@CallActivity,
+                    "Failed to join call (${result.value.message})",
+                    Toast.LENGTH_SHORT
+                ).show()
+                finish()
+            }
+        }
 
         // step 3 - build a call screen
         setContent {

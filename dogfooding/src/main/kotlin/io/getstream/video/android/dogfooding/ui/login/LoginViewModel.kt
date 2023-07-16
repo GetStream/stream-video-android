@@ -17,6 +17,7 @@
 package io.getstream.video.android.dogfooding.ui.login
 
 import android.content.Context
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.google.firebase.auth.FirebaseAuth
@@ -66,11 +67,17 @@ class LoginViewModel @Inject constructor(
     }
 
     private fun signInInSuccess(email: String) = flow<LoginUiState> {
-        val response = StreamVideoNetwork.tokenService.fetchToken(
-            userId = email,
-            apiKey = API_KEY
-        )
-        emit(LoginUiState.SignInComplete(response))
+
+        try {
+            val response = StreamVideoNetwork.tokenService.fetchToken(
+                userId = email,
+                apiKey = API_KEY
+            )
+            emit(LoginUiState.SignInComplete(response))
+        } catch (exception: Throwable) {
+            emit(LoginUiState.SignInFailure(exception.message ?: "General error"))
+            Log.e("LoginViewModel", "Failed to fetch token - cause: $exception")
+        }
     }.flowOn(Dispatchers.IO)
 
     init {
@@ -123,6 +130,8 @@ sealed interface LoginUiState {
     object GoogleSignIn : LoginUiState
 
     data class SignInComplete(val tokenResponse: TokenResponse) : LoginUiState
+
+    data class SignInFailure(val errorMessage: String) : LoginUiState
 }
 
 sealed interface LoginEvent {

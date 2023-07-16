@@ -14,37 +14,8 @@
  * limitations under the License.
  */
 
-@file:Suppress(
-    "ArrayInDataClass",
-    "EnumEntryName",
-    "RemoveRedundantQualifierName",
-    "UnusedImport"
-)
+package io.getstream.video.android.core.model
 
-package org.openapitools.client.models
+data class Ingress(var rtmp: RTMP)
 
-
-
-
-
-import com.squareup.moshi.FromJson
-import com.squareup.moshi.Json
-import com.squareup.moshi.JsonAdapter
-import com.squareup.moshi.JsonReader
-import com.squareup.moshi.JsonWriter
-import com.squareup.moshi.ToJson
-import org.openapitools.client.infrastructure.Serializer
-
-/**
- *
- *
- * @param `data`
- */
-
-
-data class SendCallStatsRequest (
-
-    @Json(name = "data")
-    val `data`: kotlin.collections.Map<kotlin.String, kotlin.Any?>
-
-)
+data class RTMP(var address: String, var streamKey: String)

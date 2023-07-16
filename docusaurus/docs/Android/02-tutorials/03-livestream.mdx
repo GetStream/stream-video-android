@@ -3,23 +3,50 @@ title: Livestream Tutorial
 description: How to build a livestream experience using Stream's video SDKs
 ---
 
+import { TokenSnippet } from '../../../shared/_tokenSnippet.jsx';
+
 :::danger
 
 This tutorial isn't ready yet
 :::
 
+## Notes other SDKs
+
+- add .live as the opposite of backstage
+- expose ingress urls nicely (ingress.rtmp.address, ingress.rtmp.streamKey)
+
+## TODO tutorial:
+
+- split the first part of the tutorial
+
+- request permissions
+
+## TODO server:
+
+- a way to mark a video as the primary/pinned video. if you have multiple hosts, how do you select the primary video?
+- the session should have a field with the total participant count (since thats what you want to show most of the time). ideally SFU ParticipantCount and session data should follow the same structure
+- session data isn't 100% correct. after 1 user joins it returns this in the CallSessionStartedEvent participantsCountByRole={}, rejectedBy={}, endedAt=null, startedAt=null
+- CallSessionParticipantJoinedEvent and CallSessionStartedEvent are send in the wrong order
+- CallParticipantResponse lacks a session id, so you can't easily add or remove from that list based on the events
+- RTMP in ratio has some problems
+
+
 ## Livestream Tutorial
 
-In this tutorial we'll quickly build a low-latency livestreaming experience similar to Twitch.
+In this tutorial we'll quickly build a low-latency in-app livestreaming experience.
+The livestream is broadcasted using Stream's edge network of servers around the world.
+We'll cover the following topics:
 
-* We'll use ultra low latency streaming in this tutorial. Alternatively you can also broadcast to HLS
-* The livestream will run on Stream's Edge network of servers around the world
-* This architecture allows you to scale to millions of viewers
-* To publish the livestream you can use either RTMPs (which is supported by OBS and pretty much all streaming software) or you can publish from your phone
+* Ultra low latency streaming
+* Multiple streams & co-hosts
+* RTMP in and Webrtc input
+* Exporting to HLS
+* Reactions, custom events and chat
+* Recording & Transcriptions
 
-Time to get started, if you have any questions or feedback be sure to let us know via the feedback button.
+Let's get started, if you have any questions or feedback be sure to let us know via the feedback button.
 
-### Step 1 - Create a new project in android studio
+### Step 1 - Create a new project in Android Studio
 
 Note that this tutorial was written using Android Studio Flamingo.
 Setup steps can vary slightly across Android Studio versions so if you run into trouble be sure to use the latest version of Android Studio.
@@ -30,7 +57,7 @@ Setup steps can vary slightly across Android Studio versions so if you run into 
 
 ### Step 2 - Install the SDK & Setup the client
 
-**Add the compose SDK** to your app's `build.gradle` file found in app/build.gradle
+**Add the video SDK** to your app's `build.gradle` file found in app/build.gradle
 If you're new to android note that there are 2 build.gradle files, you want to open the one in the app folder.
 
 ```groovy
@@ -42,10 +69,6 @@ dependencies {
 ### Step 3 - Publish from your phone
 
 The following code shows how to publish from your phone's camera to the call.
-Livestreams by default will start in the backstage mode.
-The call works, you can join with your fellow call hosts, but participants aren't allowed to join yet.
-You can call call.goLive() to start your livestream.
-
 Let's open MainActivity.kt and replace it with:
 
 ```kotlin
@@ -53,9 +76,13 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+        val userToken = "REPLACE_WITH_TOKEN"
+        val userId = "REPLACE_WITH_USER_ID"
+        val callId = "REPLACE_WITH_CALL_ID"
+
         // create a user.
         val user = User(
-            id = "tutorial@getstream.io", // any string
+            id = userId, // any string
             name = "Tutorial" // name and image are used in the UI
         )
 
@@ -65,11 +92,11 @@ class MainActivity : ComponentActivity() {
             apiKey = "hd8szvscpxvd", // demo API key
             geo = GEO.GlobalEdgeNetwork,
             user = user,
-            token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoidHV0b3JpYWxAZ2V0c3RyZWFtLmlvIiwiaXNzIjoicHJvbnRvIiwic3ViIjoidXNlci90dXRvcmlhbEBnZXRzdHJlYW0uaW8iLCJpYXQiOjE2ODYxNDQzOTcsImV4cCI6MTY4NjE1NTIwMn0.YbtfsCFNcg63X_M4fPaWoBP2n82YYXadLeWAfR4Aorc",
+            token = userToken,
         ).build()
 
-        // join a call, which type is `default` and id is `123`.
-        val call = client.call("livestream", "333")
+        // join a call, which type is `default`
+        val call = client.call("livestream", callId)
         lifecycleScope.launch {
             // enable the camera and microphone
             call.camera.enable()
@@ -84,39 +111,9 @@ class MainActivity : ComponentActivity() {
 
 
         setContent {
+        // TODO: maybe split this step
             VideoTheme {
-                val participantCount = call.state.participantCounts.collectAsState().value?.total
-                val connection by call.state.connection.collectAsState()
-                val backstage by call.state.backstage.collectAsState()
-                val me by call.state.me.collectAsState()
-                val video = me?.video?.collectAsState()
-
-                Box(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .background(VideoTheme.colors.appBackground),
-                ) {
-                    Column() {
-
-
-                        VideoRenderer(call = call, video = video?.value)
-
-                        Button(onClick = {
-                            lifecycleScope.launch {
-                                if (backstage) call.goLive() else call.stopLive()
-                            }
-                        }) {
-                            Text(text = if (backstage) "Go Live" else "Stop Broadcast")
-                        }
-                    }
-                    if (connection != RealtimeConnection.Connected) {
-                        Text("loading...$connection")
-                    }
-
-                    Text("Livestream has $participantCount participants")
-
-                    Text("Live for 1:23")
-                }
+                Text("Todo render video")
             }
         }
     }
@@ -124,15 +121,83 @@ class MainActivity : ComponentActivity() {
 
 ```
 
-Now when you press live your video will be transmitted. You can confirm it by visiting
-and connecting on this webpage.
+TODO: Review what we did here
 
-### Step 3A - Viewing a livestream (Webrtc)
+### Step 4 - Render the video
+
+```kotlin
+
+VideoTheme {
+    val participantCount = call.state.participantCounts.collectAsState().value?.total
+    val connection by call.state.connection.collectAsState()
+    val backstage by call.state.backstage.collectAsState()
+    val me by call.state.me.collectAsState()
+    val video = me?.video?.collectAsState()
+
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(VideoTheme.colors.appBackground),
+    ) {
+        Column() {
+
+
+            VideoRenderer(call = call, video = video?.value)
+
+            Button(onClick = {
+                lifecycleScope.launch {
+                    if (backstage) call.goLive() else call.stopLive()
+                }
+            }) {
+                Text(text = if (backstage) "Go Live" else "Stop Broadcast")
+            }
+        }
+        if (connection != RealtimeConnection.Connected) {
+            Text("loading...$connection")
+        }
+
+        Text("Livestream has $participantCount participants")
+
+        Text("Live for 1:23")
+    }
+}
+```
+
+Before running the app please update **REPLACE_WITH_USER_ID**, **REPLACE_WITH_TOKEN** and **REPLACE_WITH_CALL_ID** with the actual values shown below:
+
+<TokenSnippet sampleApp='livestream' displayStyle='credentials' />
+
+With the updated token in place, run the app. You should see a screen like this:
+
+TODO: Image
+
+Now when you press live your video will be transmitted. You can confirm it by joining online here.
+
+<TokenSnippet sampleApp='livestream' displayStyle='join' />
+
+By default livestreams will start in the backstage mode. During the backstage mode only the host and co-hosts can join.
+This is convenient for testing your camera setup etc. When you want to go live simply use call.goLive().
+When the call is live regular users can join.
+
+
+### Step 4 - (Optional) Publishing RTMP using OBS
+
+The example above showed how to publish your phone's camera to the livestream. Almost all livestream software and hardware supports RTMPS.
+So let's see how to publish using RTMPs. Feel free to skip this step if you don't need to use RTMPs.
+
+A. Console log the URL & Stream Key println(call.state.ingress.rtmp)
+
+B. Open OBS and go to settings -> stream
+- Select "custom" service
+- Server: equal to the server URL from the console log
+- Stream key: equal to the stream key from the console log
+
+Press start streaming. The RTMP stream will now show up in your call.
+Now that we've learned to publish using webrtc or RTMP let's talk about viewing the livestream.
+
+### Step 5 - Viewing a livestream (Webrtc)
 
 The client setup for someone watching the call is quite similar.
-You can join as an anonymous, guest or regular user.
-
-You still join the call (but you won't be allowed to publish video)
 
 ```kotlin
 // anonymous user
@@ -154,44 +219,51 @@ Here's the update MainActivity for viewing a call
 ```kotlin
 ```
 
-### Step 3B - Viewing a livestream (HLS)
+### Step 6 - (Optional) Viewing a livestream with HLS
 
-Alternatively you can use HLS to view the running call. This means the latency will be higher (typically an extra 10 seconds).
-The benefit is that HLS buffers better for viewers.
+Another way to view a livestream is using HLS. HLS tends to have a 10 to 20 seconds delay, while the above webrtc approach only has a 100-200ms delay typically.
+The benefit that HLS has is that it buffers better under poor network conditions.
+So for apps where you expect your users to have poor network, and where a 10 second delay is ok, HLS can be a better option.
+
+Let's show how to broadcast your call to HLS.
 
 ```kotlin
 call.startBroadcast()
 ```
 
-The HLS url can be found in the call state
+After starting the broadcast the HLS url can be found in the call state
 
 ```kotlin
 call.state.egress.value?.hls
 ```
 
-### Advanced Features
+You can view the HLS video feed using any open source HLS capable video player.
 
-There are several advanced features that you can add to your livestreaming experience.
+### 7 - Advanced Features
 
-** RTMP in and out ** we're in the final stages of testing, support will be added soon
-** Recording ** The call recording functionality allows you to record the call with various options and layouts
-** Reactions ** Enable you to make your livestream more interactive
-** Picture in picture ** So you watch the stream while navigating away from the app
+There are several advanced features that can improve the livestreaming experience:
+
+* ** Co-hosts ** You can add members to your livestream with elevated permissions. So you can have co-hosts, moderators etc.
+* ** Custom events ** You can use custom events on the call to share any additional data. Think about showing the score for a game, or any other realtime use case.
+* ** Reactions & Chat ** Users can react to the livestream, and you can add chat. This makes for a more engaging experience.
+* ** Notifications ** You can notify users via push notifications when the livestream starts
+* ** Recording ** The call recording functionality allows you to record the call with various options and layouts
 
 ### Recap
 
-It was fun to see just how quickly you can build low latency livestreaming.
+It was fun to see just how quickly you can build in-app low latency livestreaming.
 Please do let us know if you ran into any issues.
 Our team is also happy to review your UI designs and offer recommendations on how to achieve it with Stream.
 
 To recap what we've learned:
 
 * Webrtc is optimal for latency, HLS is slower but buffers better for users with poor connections
-* You setup a call: (val call = client.call("livestream", "222"))
+* You setup a call: (val call = client.call("livestream", callId))
 * The call type "livestream" controls which features are enabled and how permissions are setup
-* The livestream by default enables "backstage" mode, and only allows admins to join before the call goes live
-* When you join a call, realtime communication is setup for audio & video calling: (call.join())
+* The livestream by default enables "backstage" mode. This allows you and your co-hosts to setup your mic and camera before allowing people in
+* When you join a call, realtime communication is setup for audio & video: (call.join())
 * Stateflow objects in call.state and call.state.participants make it easy to build your own UI
+* For a livestream the most important one is call.state.???
 
 Calls run on Stream's global edge network of video servers.
 Being closer to your users improves the latency and reliability of calls.
