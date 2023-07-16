@@ -404,8 +404,6 @@ public class CallState(private val call: Call, private val user: User, internal 
 
     private var speakingWhileMutedResetJob: Job? = null
 
-
-
     fun handleEvent(event: VideoEvent) {
         logger.d { "Updating call state with event ${event::class.java}" }
         when (event) {
@@ -645,7 +643,6 @@ public class CallState(private val call: Call, private val user: User, internal 
                 _session.value = event.call.session
             }
 
-
             is CallSessionParticipantLeftEvent -> {
                 _session.value?.let { callSessionResponse ->
                     val newList = callSessionResponse.participants.toMutableList()
@@ -659,7 +656,7 @@ public class CallState(private val call: Call, private val user: User, internal 
             is CallSessionParticipantJoinedEvent -> {
                 _session.value?.let { callSessionResponse ->
                     val newList = callSessionResponse.participants.toMutableList()
-                    val participant = CallParticipantResponse(user = event.user, joinedAt = event.createdAt, role="user", userSessionId = event.userSessionId
+                    val participant = CallParticipantResponse(user = event.user, joinedAt = event.createdAt, role = "user", userSessionId = event.userSessionId)
                     val index = newList.indexOfFirst { user.id == event.user.id }
                     if (index == -1) {
                         newList.add(participant)
