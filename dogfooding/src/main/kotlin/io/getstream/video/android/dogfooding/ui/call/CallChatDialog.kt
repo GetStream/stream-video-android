@@ -14,9 +14,17 @@
  * limitations under the License.
  */
 
+@file:OptIn(ExperimentalMaterialApi::class)
+
 package io.getstream.video.android.dogfooding.ui.call
 
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.material.ExperimentalMaterialApi
+import androidx.compose.material.ModalBottomSheetLayout
+import androidx.compose.material.ModalBottomSheetValue
+import androidx.compose.material.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
 import io.getstream.video.android.core.Call
 
 @Composable
@@ -24,4 +32,14 @@ internal fun CallChatDialog(
     call: Call,
     onDismissed: () -> Unit
 ) {
+    ModalBottomSheetLayout(
+        modifier = Modifier.fillMaxWidth(),
+        sheetState = rememberModalBottomSheetState(initialValue = ModalBottomSheetValue.HalfExpanded),
+        sheetContent = {
+
+        },
+        content = {
+
+        }
+    )
 }
