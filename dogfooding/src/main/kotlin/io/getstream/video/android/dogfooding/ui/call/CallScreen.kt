@@ -14,17 +14,23 @@
  * limitations under the License.
  */
 
+@file:OptIn(ExperimentalMaterialApi::class)
+
 package io.getstream.video.android.dogfooding.ui.call
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.size
+import androidx.compose.material.ExperimentalMaterialApi
+import androidx.compose.material.ModalBottomSheetValue
 import androidx.compose.material.Snackbar
 import androidx.compose.material.Text
+import androidx.compose.material.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -41,6 +47,7 @@ import io.getstream.video.android.compose.ui.components.call.controls.actions.To
 import io.getstream.video.android.core.Call
 import io.getstream.video.android.mock.StreamMockUtils
 import io.getstream.video.android.mock.mockCall
+import kotlinx.coroutines.launch
 
 @Composable
 fun CallScreen(
@@ -51,59 +58,67 @@ fun CallScreen(
     val isMicrophoneEnabled by call.microphone.isEnabled.collectAsState()
     val speakingWhileMuted by call.state.speakingWhileMuted.collectAsState()
     var isShowingSettingMenu by remember { mutableStateOf(false) }
-    var isShowingChatDialog by remember { mutableStateOf(false) }
+
+    val state = rememberModalBottomSheetState(ModalBottomSheetValue.Hidden)
+    val scope = rememberCoroutineScope()
 
     VideoTheme {
-        CallContent(
-            modifier = Modifier.background(color = VideoTheme.colors.appBackground),
-            call = call,
-            enableInPictureInPicture = true,
-            onBackPressed = { onLeaveCall.invoke() },
-            controlsContent = {
-                ControlActions(
+        CallChatDialog(
+            state = state,
+            content = {
+                CallContent(
+                    modifier = Modifier.background(color = VideoTheme.colors.appBackground),
                     call = call,
-                    actions = listOf(
-                        {
-                            SettingsAction(
-                                modifier = Modifier.size(VideoTheme.dimens.controlActionsButtonSize),
-                                onCallAction = { isShowingSettingMenu = true }
-                            )
-                        },
-                        {
-                            ChatDialogAction(
-                                modifier = Modifier.size(VideoTheme.dimens.controlActionsButtonSize),
-                                onCallAction = { isShowingChatDialog = true }
-                            )
-                        },
-                        {
-                            ToggleCameraAction(
-                                modifier = Modifier.size(VideoTheme.dimens.controlActionsButtonSize),
-                                isCameraEnabled = isCameraEnabled,
-                                onCallAction = { call.camera.setEnabled(it.isEnabled) }
-                            )
-                        },
-                        {
-                            ToggleMicrophoneAction(
-                                modifier = Modifier.size(VideoTheme.dimens.controlActionsButtonSize),
-                                isMicrophoneEnabled = isMicrophoneEnabled,
-                                onCallAction = { call.microphone.setEnabled(it.isEnabled) }
-                            )
-                        },
-                        {
-                            FlipCameraAction(
-                                modifier = Modifier.size(VideoTheme.dimens.controlActionsButtonSize),
-                                onCallAction = { call.camera.flip() }
-                            )
-                        },
-                        {
-                            CancelCallAction(
-                                modifier = Modifier.size(VideoTheme.dimens.controlActionsButtonSize),
-                                onCallAction = { onLeaveCall.invoke() }
-                            )
-                        },
-                    )
+                    enableInPictureInPicture = true,
+                    onBackPressed = { onLeaveCall.invoke() },
+                    controlsContent = {
+                        ControlActions(
+                            call = call,
+                            actions = listOf(
+                                {
+                                    SettingsAction(
+                                        modifier = Modifier.size(VideoTheme.dimens.controlActionsButtonSize),
+                                        onCallAction = { isShowingSettingMenu = true }
+                                    )
+                                },
+                                {
+                                    ChatDialogAction(
+                                        modifier = Modifier.size(VideoTheme.dimens.controlActionsButtonSize),
+                                        onCallAction = { scope.launch { state.show() } }
+                                    )
+                                },
+                                {
+                                    ToggleCameraAction(
+                                        modifier = Modifier.size(VideoTheme.dimens.controlActionsButtonSize),
+                                        isCameraEnabled = isCameraEnabled,
+                                        onCallAction = { call.camera.setEnabled(it.isEnabled) }
+                                    )
+                                },
+                                {
+                                    ToggleMicrophoneAction(
+                                        modifier = Modifier.size(VideoTheme.dimens.controlActionsButtonSize),
+                                        isMicrophoneEnabled = isMicrophoneEnabled,
+                                        onCallAction = { call.microphone.setEnabled(it.isEnabled) }
+                                    )
+                                },
+                                {
+                                    FlipCameraAction(
+                                        modifier = Modifier.size(VideoTheme.dimens.controlActionsButtonSize),
+                                        onCallAction = { call.camera.flip() }
+                                    )
+                                },
+                                {
+                                    CancelCallAction(
+                                        modifier = Modifier.size(VideoTheme.dimens.controlActionsButtonSize),
+                                        onCallAction = { onLeaveCall.invoke() }
+                                    )
+                                },
+                            ),
+                        )
+                    }
                 )
             },
+            onDismissed = { scope.launch { state.hide() } }
         )
 
         if (speakingWhileMuted) {
@@ -113,12 +128,6 @@ fun CallScreen(
         if (isShowingSettingMenu) {
             CallSettingsMenu(call = call) {
                 isShowingSettingMenu = false
-            }
-        }
-
-        if (isShowingChatDialog) {
-            CallChatDialog(call = call) {
-                isShowingChatDialog = false
             }
         }
     }

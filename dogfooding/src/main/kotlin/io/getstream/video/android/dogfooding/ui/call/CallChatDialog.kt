@@ -18,26 +18,35 @@
 
 package io.getstream.video.android.dogfooding.ui.call
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.ModalBottomSheetLayout
-import androidx.compose.material.ModalBottomSheetValue
-import androidx.compose.material.rememberModalBottomSheetState
+import androidx.compose.material.ModalBottomSheetState
+import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import io.getstream.video.android.core.Call
+import androidx.compose.ui.unit.dp
 
 @Composable
 internal fun CallChatDialog(
-    call: Call,
+    state: ModalBottomSheetState,
+    content: @Composable () -> Unit,
     onDismissed: () -> Unit
 ) {
     ModalBottomSheetLayout(
         modifier = Modifier.fillMaxWidth(),
-        sheetState = rememberModalBottomSheetState(initialValue = ModalBottomSheetValue.HalfExpanded),
+        sheetState = state,
         sheetContent = {
+            Text(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(400.dp)
+                    .clickable { onDismissed.invoke() },
+                text = "qwdqwdqwdqwd"
+            )
         },
-        content = {
-        }
+        content = content
     )
 }
