@@ -23,10 +23,14 @@ import android.util.Log
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.lifecycle.lifecycleScope
 import io.getstream.chat.android.client.ChatClient
 import io.getstream.chat.android.client.api.models.querysort.QuerySortByField
 import io.getstream.chat.android.client.models.Filters
+import io.getstream.chat.android.client.models.User
 import io.getstream.chat.android.client.utils.onSuccessSuspend
 import io.getstream.chat.android.state.extensions.globalState
 import io.getstream.result.Result
@@ -59,23 +63,6 @@ class CallActivity : ComponentActivity() {
                 ).show()
                 finish()
             }
-
-            // step 3 (optional) - chat integration
-            val user = ChatClient.instance().globalState.user
-            val channel = ChatClient.instance().channel("messaging", cid.id)
-            channel.queryMembers(
-                offset = 0,
-                limit = 10,
-                filter = Filters.neutral(),
-                sort = QuerySortByField()
-            ).await().onSuccessSuspend { members ->
-                Log.e("Test", "memebers: $members")
-                if (members.isNotEmpty()) {
-                    channel.addMembers(listOf(user.value?.id.orEmpty()))
-                } else {
-                    channel.create(listOf(user.value?.id.orEmpty()), emptyMap())
-                }
-            }
         }
 
         // step 3 - build a call screen
@@ -87,6 +74,26 @@ class CallActivity : ComponentActivity() {
                     finish()
                 }
             )
+
+            // step 4 (optional) - chat integration
+            val user: User? by ChatClient.instance().globalState.user.collectAsState(null)
+            LaunchedEffect(key1 = user) {
+                if (user != null) {
+                    val channel = ChatClient.instance().channel("messaging", cid.id)
+                    channel.queryMembers(
+                        offset = 0,
+                        limit = 10,
+                        filter = Filters.neutral(),
+                        sort = QuerySortByField()
+                    ).await().onSuccessSuspend { members ->
+                        if (members.isNotEmpty()) {
+                            channel.addMembers(listOf(user!!.id)).await()
+                        } else {
+                            channel.create(listOf(user!!.id), emptyMap()).await()
+                        }
+                    }
+                }
+            }
         }
     }
 

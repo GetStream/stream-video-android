@@ -24,10 +24,10 @@
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
-        android:usesCleartextTraffic="true"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Dogfooding"
+        android:usesCleartextTraffic="true"
         tools:targetApi="31">
 
         <profileable
@@ -50,7 +50,8 @@
             android:configChanges="screenSize|smallestScreenSize|screenLayout|orientation"
             android:exported="true"
             android:hardwareAccelerated="true"
-            android:supportsPictureInPicture="true" />
+            android:supportsPictureInPicture="true"
+            android:windowSoftInputMode="adjustResize" />
 
         <service
             android:name=".ui.call.CallService"
@@ -61,8 +62,7 @@
             android:name=".IncomingCallActivity"
             android:exported="false"
             android:showOnLockScreen="true"
-            android:showWhenLocked="true"
-            >
+            android:showWhenLocked="true">
             <intent-filter android:priority="1">
                 <action android:name="io.getstream.video.android.action.INCOMING_CALL" />
                 <action android:name="io.getstream.video.android.action.NOTIFICATION" />

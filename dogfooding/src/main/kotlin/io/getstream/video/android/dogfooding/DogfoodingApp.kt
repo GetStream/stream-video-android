@@ -97,9 +97,10 @@ class DogfoodingApp : Application() {
             .logLevel(logLevel)
             .build()
 
-        val token = chatClient.devToken(user.id)
+        val userId = user.name.replace(" ", "").trim().lowercase()
+        val token = chatClient.devToken(userId)
         val chatUser = io.getstream.chat.android.client.models.User(
-            id = user.id,
+            id = userId,
             name = user.name,
             image = user.image
         )
