@@ -78,7 +78,6 @@ Video roadmap and changelog is available [here](https://github.com/GetStream/pro
 ### 0.2.0 milestone
 
 - [ ] Call Analytics stateflow (Thierry)
-- [ ] Automatically handle pagination and sorting on > 6 participants in the sample app (Daniel)
 - [ ] Ringing: Make it easy to test
 - [ ] Example Button to switch speakerphone/earpiece
 - [ ] Ringing: Make a list of what needs to be configurable
@@ -86,6 +85,7 @@ Video roadmap and changelog is available [here](https://github.com/GetStream/pro
 - [ ] Publish app on play store
 - [ ] Bug: Screensharing on Firefox has some issues when rendering on android (Daniel)
 - [X] Chat Integration (Jaewoong)
+- [X] Automatically handle pagination and sorting on > 6 participants in the sample app (Daniel)
 - [X] Buttons to simulate ice restart and SFU switching (Jaewoong)
 - [X] Bug: java.net.UnknownHostException: Unable to resolve host "hint.stream-io-video.com" isn't throw but instead logged as INFO (Daniel)
 - [X] Bug: Call.join will throw an exception if error is other than HttpException

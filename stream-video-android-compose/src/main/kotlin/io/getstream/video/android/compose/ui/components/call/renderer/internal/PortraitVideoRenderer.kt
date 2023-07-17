@@ -19,15 +19,19 @@ package io.getstream.video.android.compose.ui.components.call.renderer.internal
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.IntSize
@@ -243,7 +247,7 @@ internal fun BoxScope.PortraitVideoRenderer(
             }
         }
 
-        else -> {
+        6 -> {
             val firstParticipant = callParticipants[0]
             val secondParticipant = callParticipants[1]
             val thirdParticipant = callParticipants[2]
@@ -309,6 +313,33 @@ internal fun BoxScope.PortraitVideoRenderer(
                         )
                     )
                 }
+            }
+        }
+
+        else -> {
+            BoxWithConstraints(modifier = Modifier.fillMaxSize()) {
+
+                LazyVerticalGrid(
+                    modifier = Modifier.fillMaxSize(),
+                    columns = GridCells.Fixed(2),
+                    content = {
+                        items(callParticipants.size) { key ->
+                            // make 3 items exactly fit available height
+                            val itemHeight = with(LocalDensity.current) {
+                                (constraints.maxHeight / 3).toDp()
+                            }
+                            val participant = callParticipants[key]
+                            videoRenderer.invoke(
+                                modifier = modifier.height(itemHeight),
+                                call = call,
+                                participant = participant,
+                                style = style.copy(
+                                    isFocused = dominantSpeaker?.sessionId == participant.sessionId
+                                )
+                            )
+                        }
+                    }
+                )
             }
         }
     }
@@ -468,6 +499,30 @@ private fun PortraitParticipantsPreview6() {
                 call = mockCall,
                 dominantSpeaker = participants[0],
                 callParticipants = participants.take(6),
+                modifier = Modifier.fillMaxSize(),
+                parentSize = IntSize(screenWidth, screenHeight)
+            )
+        }
+    }
+}
+
+@Preview
+@Composable
+private fun PortraitParticipantsPreview7() {
+    StreamMockUtils.initializeStreamVideo(LocalContext.current)
+    VideoTheme {
+        val configuration = LocalConfiguration.current
+        val screenWidth = configuration.screenWidthDp
+        val screenHeight = configuration.screenHeightDp
+        val participants = mockParticipantList
+
+        Box(
+            modifier = Modifier.background(color = VideoTheme.colors.appBackground)
+        ) {
+            PortraitVideoRenderer(
+                call = mockCall,
+                dominantSpeaker = participants[0],
+                callParticipants = participants.take(7),
                 modifier = Modifier.fillMaxSize(),
                 parentSize = IntSize(screenWidth, screenHeight)
             )
