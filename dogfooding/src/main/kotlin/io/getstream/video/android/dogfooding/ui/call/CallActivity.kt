@@ -23,7 +23,16 @@ import android.util.Log
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.lifecycle.lifecycleScope
+import io.getstream.chat.android.client.ChatClient
+import io.getstream.chat.android.client.api.models.querysort.QuerySortByField
+import io.getstream.chat.android.client.models.Filters
+import io.getstream.chat.android.client.models.User
+import io.getstream.chat.android.client.utils.onSuccessSuspend
+import io.getstream.chat.android.state.extensions.globalState
 import io.getstream.result.Result
 import io.getstream.video.android.core.StreamVideo
 import io.getstream.video.android.model.StreamCallId
@@ -65,6 +74,26 @@ class CallActivity : ComponentActivity() {
                     finish()
                 }
             )
+
+            // step 4 (optional) - chat integration
+            val user: User? by ChatClient.instance().globalState.user.collectAsState(null)
+            LaunchedEffect(key1 = user) {
+                if (user != null) {
+                    val channel = ChatClient.instance().channel("messaging", cid.id)
+                    channel.queryMembers(
+                        offset = 0,
+                        limit = 10,
+                        filter = Filters.neutral(),
+                        sort = QuerySortByField()
+                    ).await().onSuccessSuspend { members ->
+                        if (members.isNotEmpty()) {
+                            channel.addMembers(listOf(user!!.id)).await()
+                        } else {
+                            channel.create(listOf(user!!.id), emptyMap()).await()
+                        }
+                    }
+                }
+            }
         }
     }
 

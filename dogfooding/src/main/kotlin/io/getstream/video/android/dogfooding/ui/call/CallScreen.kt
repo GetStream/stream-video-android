@@ -14,22 +14,17 @@
  * limitations under the License.
  */
 
+@file:OptIn(ExperimentalMaterialApi::class)
+
 package io.getstream.video.android.dogfooding.ui.call
 
-import android.widget.Toast
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.Card
-import androidx.compose.material.Icon
+import androidx.compose.material.ExperimentalMaterialApi
+import androidx.compose.material.ModalBottomSheetValue
 import androidx.compose.material.Snackbar
 import androidx.compose.material.Text
+import androidx.compose.material.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -37,18 +32,14 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.IntOffset
-import androidx.compose.ui.unit.dp
-import androidx.compose.ui.window.Popup
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.call.activecall.CallContent
 import io.getstream.video.android.compose.ui.components.call.controls.ControlActions
 import io.getstream.video.android.compose.ui.components.call.controls.actions.CancelCallAction
+import io.getstream.video.android.compose.ui.components.call.controls.actions.ChatDialogAction
 import io.getstream.video.android.compose.ui.components.call.controls.actions.FlipCameraAction
 import io.getstream.video.android.compose.ui.components.call.controls.actions.SettingsAction
 import io.getstream.video.android.compose.ui.components.call.controls.actions.ToggleCameraAction
@@ -68,51 +59,73 @@ fun CallScreen(
     val speakingWhileMuted by call.state.speakingWhileMuted.collectAsState()
     var isShowingSettingMenu by remember { mutableStateOf(false) }
 
+    val chatState = rememberModalBottomSheetState(ModalBottomSheetValue.Hidden)
+    val scope = rememberCoroutineScope()
+
     VideoTheme {
-        CallContent(
-            modifier = Modifier.background(color = VideoTheme.colors.appBackground),
+        CallChatDialog(
+            state = chatState,
             call = call,
-            enableInPictureInPicture = true,
-            onBackPressed = { onLeaveCall.invoke() },
-            controlsContent = {
-                ControlActions(
+            content = {
+                CallContent(
+                    modifier = Modifier.background(color = VideoTheme.colors.appBackground),
                     call = call,
-                    actions = listOf(
-                        {
-                            SettingsAction(
-                                modifier = Modifier.size(VideoTheme.dimens.controlActionsButtonSize),
-                                onCallAction = { isShowingSettingMenu = true }
-                            )
-                        },
-                        {
-                            ToggleCameraAction(
-                                modifier = Modifier.size(VideoTheme.dimens.controlActionsButtonSize),
-                                isCameraEnabled = isCameraEnabled,
-                                onCallAction = { call.camera.setEnabled(it.isEnabled) }
-                            )
-                        },
-                        {
-                            ToggleMicrophoneAction(
-                                modifier = Modifier.size(VideoTheme.dimens.controlActionsButtonSize),
-                                isMicrophoneEnabled = isMicrophoneEnabled,
-                                onCallAction = { call.microphone.setEnabled(it.isEnabled) }
-                            )
-                        },
-                        {
-                            FlipCameraAction(
-                                modifier = Modifier.size(VideoTheme.dimens.controlActionsButtonSize),
-                                onCallAction = { call.camera.flip() }
-                            )
-                        },
-                        {
-                            CancelCallAction(
-                                modifier = Modifier.size(VideoTheme.dimens.controlActionsButtonSize),
-                                onCallAction = { onLeaveCall.invoke() }
-                            )
-                        },
-                    )
+                    enableInPictureInPicture = true,
+                    onBackPressed = {
+                        if (chatState.currentValue == ModalBottomSheetValue.HalfExpanded) {
+                            scope.launch { chatState.hide() }
+                        } else {
+                            onLeaveCall.invoke()
+                        }
+                    },
+                    controlsContent = {
+                        ControlActions(
+                            call = call,
+                            actions = listOf(
+                                {
+                                    SettingsAction(
+                                        modifier = Modifier.size(VideoTheme.dimens.controlActionsButtonSize),
+                                        onCallAction = { isShowingSettingMenu = true }
+                                    )
+                                },
+                                {
+                                    ChatDialogAction(
+                                        modifier = Modifier.size(VideoTheme.dimens.controlActionsButtonSize),
+                                        onCallAction = { scope.launch { chatState.show() } }
+                                    )
+                                },
+                                {
+                                    ToggleCameraAction(
+                                        modifier = Modifier.size(VideoTheme.dimens.controlActionsButtonSize),
+                                        isCameraEnabled = isCameraEnabled,
+                                        onCallAction = { call.camera.setEnabled(it.isEnabled) }
+                                    )
+                                },
+                                {
+                                    ToggleMicrophoneAction(
+                                        modifier = Modifier.size(VideoTheme.dimens.controlActionsButtonSize),
+                                        isMicrophoneEnabled = isMicrophoneEnabled,
+                                        onCallAction = { call.microphone.setEnabled(it.isEnabled) }
+                                    )
+                                },
+                                {
+                                    FlipCameraAction(
+                                        modifier = Modifier.size(VideoTheme.dimens.controlActionsButtonSize),
+                                        onCallAction = { call.camera.flip() }
+                                    )
+                                },
+                                {
+                                    CancelCallAction(
+                                        modifier = Modifier.size(VideoTheme.dimens.controlActionsButtonSize),
+                                        onCallAction = { onLeaveCall.invoke() }
+                                    )
+                                },
+                            ),
+                        )
+                    }
                 )
             },
+            onDismissed = { scope.launch { chatState.hide() } }
         )
 
         if (speakingWhileMuted) {
@@ -120,7 +133,7 @@ fun CallScreen(
         }
 
         if (isShowingSettingMenu) {
-            SettingMenu(call = call) {
+            CallSettingsMenu(call = call) {
                 isShowingSettingMenu = false
             }
         }
@@ -131,122 +144,6 @@ fun CallScreen(
 private fun SpeakingWhileMuted() {
     Snackbar {
         Text(text = "You're talking while muting the microphone!")
-    }
-}
-
-@Composable
-private fun SettingMenu(
-    call: Call,
-    onDismissed: () -> Unit
-) {
-    val context = LocalContext.current
-    val scope = rememberCoroutineScope()
-    val reactions =
-        listOf(":fireworks:", ":hello:", ":raise-hand:", ":like:", ":hate:", ":smile:", ":heart:")
-
-    Popup(
-        alignment = Alignment.BottomStart,
-        offset = IntOffset(30, -200),
-        onDismissRequest = { onDismissed.invoke() }
-    ) {
-        Card(
-            shape = RoundedCornerShape(12.dp),
-            elevation = 6.dp
-        ) {
-            Column(
-                modifier = Modifier
-                    .background(VideoTheme.colors.appBackground)
-                    .padding(12.dp)
-            ) {
-                Row(
-                    modifier = Modifier.clickable {
-                        scope.launch {
-                            val shuffled = reactions.shuffled()
-                            call.sendReaction(type = "default", emoji = shuffled.first())
-                            onDismissed.invoke()
-                        }
-                    }
-                ) {
-                    Icon(
-                        painter = painterResource(id = io.getstream.video.android.ui.common.R.drawable.stream_video_ic_reaction),
-                        tint = VideoTheme.colors.textHighEmphasis,
-                        contentDescription = null
-                    )
-
-                    Text(
-                        modifier = Modifier.padding(start = 20.dp),
-                        text = "Reactions",
-                        color = VideoTheme.colors.textHighEmphasis
-                    )
-                }
-
-                Spacer(modifier = Modifier.height(12.dp))
-
-                Row(
-                    modifier = Modifier.clickable {
-                        call.debug.restartSubscriberIce()
-                        onDismissed.invoke()
-                        Toast.makeText(context, "Restart Subscriber Ice", Toast.LENGTH_SHORT).show()
-                    }
-                ) {
-                    Icon(
-                        painter = painterResource(id = io.getstream.video.android.ui.common.R.drawable.stream_video_ic_fullscreen_exit),
-                        tint = VideoTheme.colors.textHighEmphasis,
-                        contentDescription = null
-                    )
-
-                    Text(
-                        modifier = Modifier.padding(start = 20.dp),
-                        text = "Restart Subscriber Ice",
-                        color = VideoTheme.colors.textHighEmphasis
-                    )
-                }
-
-                Spacer(modifier = Modifier.height(12.dp))
-
-                Row(
-                    modifier = Modifier.clickable {
-                        call.debug.restartPublisherIce()
-                        onDismissed.invoke()
-                        Toast.makeText(context, "Restart Publisher Ice", Toast.LENGTH_SHORT).show()
-                    }
-                ) {
-                    Icon(
-                        painter = painterResource(id = io.getstream.video.android.ui.common.R.drawable.stream_video_ic_fullscreen_exit),
-                        tint = VideoTheme.colors.textHighEmphasis,
-                        contentDescription = null
-                    )
-
-                    Text(
-                        modifier = Modifier.padding(start = 20.dp),
-                        text = "Restart Publisher Ice",
-                        color = VideoTheme.colors.textHighEmphasis
-                    )
-                }
-
-                Spacer(modifier = Modifier.height(12.dp))
-
-                Row(
-                    modifier = Modifier.clickable {
-                        call.debug.switchSfu()
-                        onDismissed.invoke()
-                        Toast.makeText(context, "Switch sfu", Toast.LENGTH_SHORT).show()
-                    }
-                ) {
-                    Icon(
-                        painter = painterResource(id = io.getstream.video.android.ui.common.R.drawable.stream_video_ic_fullscreen),
-                        tint = VideoTheme.colors.textHighEmphasis,
-                        contentDescription = null
-                    )
-
-                    Text(
-                        modifier = Modifier.padding(start = 20.dp),
-                        text = "Switch sfu",
-                        color = VideoTheme.colors.textHighEmphasis
-                    )
-                }
-            }
-        }
     }
 }
 
