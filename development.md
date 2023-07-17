@@ -6,14 +6,6 @@
 - Release versions are created when you create a new release tag on github
 - TODO: Updating the sample app in play store?
 
-## For Go devs
-
-```
-cp env.properties.sample .env.properties
-```
-
-Edit the file and set `CORE_VIDEO_DOMAIN = localhost` to run against your local infra.
-
 ## Build vars
 
 You can copy environment variables like this:
