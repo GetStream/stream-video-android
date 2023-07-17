@@ -97,7 +97,7 @@ class DogfoodingApp : Application() {
             .logLevel(logLevel)
             .build()
 
-        val userId = user.name.replace(" ", "").trim().lowercase()
+        val userId = user.name.replace(" ", "").trim().lowercase().ifEmpty { "streamuser" }
         val token = chatClient.devToken(userId)
         val chatUser = io.getstream.chat.android.client.models.User(
             id = userId,

@@ -91,7 +91,7 @@ internal fun CallChatDialog(
                     topBar = {
                         Box(
                             modifier = Modifier
-                                .fillMaxSize()
+                                .fillMaxWidth()
                                 .padding(top = 32.dp)
                         ) {
                             Icon(
