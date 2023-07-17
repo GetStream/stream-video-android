@@ -1,7 +1,9 @@
 public final class io/getstream/video/android/BuildConfig {
 	public static final field BUILD_TYPE Ljava/lang/String;
+	public static final field CORE_VIDEO_DOMAIN Ljava/lang/String;
 	public static final field DEBUG Z
 	public static final field LIBRARY_PACKAGE_NAME Ljava/lang/String;
+	public static final field STREAM_VIDEO_VERSION Ljava/lang/String;
 	public fun <init> ()V
 }
 
@@ -17,6 +19,7 @@ public final class io/getstream/video/android/core/Call {
 	public final fun get (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public final fun getCamera ()Lio/getstream/video/android/core/CameraManager;
 	public final fun getCid ()Ljava/lang/String;
+	public final fun getDebug ()Lio/getstream/video/android/core/Call$Debug;
 	public final fun getId ()Ljava/lang/String;
 	public final fun getMicrophone ()Lio/getstream/video/android/core/MicrophoneManager;
 	public final fun getMonitor ()Lio/getstream/video/android/core/CallHealthMonitor;
@@ -61,9 +64,19 @@ public final class io/getstream/video/android/core/Call {
 	public final fun stopRecording (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public final fun subscribe (Lio/getstream/video/android/core/events/VideoEventListener;)Lio/getstream/video/android/core/EventSubscription;
 	public final fun subscribeFor ([Ljava/lang/Class;Lio/getstream/video/android/core/events/VideoEventListener;)Lio/getstream/video/android/core/EventSubscription;
+	public final fun switchSfu (ZLkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public static synthetic fun switchSfu$default (Lio/getstream/video/android/core/Call;ZLkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
 	public final fun update (Ljava/util/Map;Lorg/openapitools/client/models/CallSettingsRequest;Lorg/threeten/bp/OffsetDateTime;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public static synthetic fun update$default (Lio/getstream/video/android/core/Call;Ljava/util/Map;Lorg/openapitools/client/models/CallSettingsRequest;Lorg/threeten/bp/OffsetDateTime;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
 	public final fun updateMembers (Ljava/util/List;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+}
+
+public final class io/getstream/video/android/core/Call$Debug {
+	public fun <init> (Lio/getstream/video/android/core/Call;)V
+	public final fun getCall ()Lio/getstream/video/android/core/Call;
+	public final fun restartPublisherIce ()V
+	public final fun restartSubscriberIce ()V
+	public final fun switchSfu ()V
 }
 
 public final class io/getstream/video/android/core/CallHealthMonitor {
@@ -108,6 +121,7 @@ public final class io/getstream/video/android/core/CallState {
 	public final fun getEndedByUser ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun getErrors ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun getIngress ()Lkotlinx/coroutines/flow/StateFlow;
+	public final fun getLive ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun getMe ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun getMember (Ljava/lang/String;)Lio/getstream/video/android/core/MemberState;
 	public final fun getMembers ()Lkotlinx/coroutines/flow/StateFlow;
@@ -354,7 +368,6 @@ public final class io/getstream/video/android/core/MediaManagerImpl {
 	public final fun getCall ()Lio/getstream/video/android/core/Call;
 	public final fun getContext ()Landroid/content/Context;
 	public final fun getEglBaseContext ()Lorg/webrtc/EglBase$Context;
-	public final fun getPreferSpeakerphone ()Z
 	public final fun getScope ()Lkotlinx/coroutines/CoroutineScope;
 	public final fun getVideoSource ()Lorg/webrtc/VideoSource;
 	public final fun getVideoTrack ()Lorg/webrtc/VideoTrack;
@@ -673,7 +686,8 @@ public final class io/getstream/video/android/core/StreamVideoBuilder {
 	public fun <init> (Landroid/content/Context;Ljava/lang/String;Lio/getstream/video/android/core/GEO;Lio/getstream/video/android/model/User;Ljava/lang/String;Lkotlin/jvm/functions/Function2;Lio/getstream/video/android/core/logging/LoggingLevel;Lio/getstream/video/android/core/notifications/NotificationConfig;Lkotlin/jvm/functions/Function1;Ljava/util/List;Ljava/util/List;Z)V
 	public fun <init> (Landroid/content/Context;Ljava/lang/String;Lio/getstream/video/android/core/GEO;Lio/getstream/video/android/model/User;Ljava/lang/String;Lkotlin/jvm/functions/Function2;Lio/getstream/video/android/core/logging/LoggingLevel;Lio/getstream/video/android/core/notifications/NotificationConfig;Lkotlin/jvm/functions/Function1;Ljava/util/List;Ljava/util/List;ZJ)V
 	public fun <init> (Landroid/content/Context;Ljava/lang/String;Lio/getstream/video/android/core/GEO;Lio/getstream/video/android/model/User;Ljava/lang/String;Lkotlin/jvm/functions/Function2;Lio/getstream/video/android/core/logging/LoggingLevel;Lio/getstream/video/android/core/notifications/NotificationConfig;Lkotlin/jvm/functions/Function1;Ljava/util/List;Ljava/util/List;ZJZ)V
-	public synthetic fun <init> (Landroid/content/Context;Ljava/lang/String;Lio/getstream/video/android/core/GEO;Lio/getstream/video/android/model/User;Ljava/lang/String;Lkotlin/jvm/functions/Function2;Lio/getstream/video/android/core/logging/LoggingLevel;Lio/getstream/video/android/core/notifications/NotificationConfig;Lkotlin/jvm/functions/Function1;Ljava/util/List;Ljava/util/List;ZJZILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun <init> (Landroid/content/Context;Ljava/lang/String;Lio/getstream/video/android/core/GEO;Lio/getstream/video/android/model/User;Ljava/lang/String;Lkotlin/jvm/functions/Function2;Lio/getstream/video/android/core/logging/LoggingLevel;Lio/getstream/video/android/core/notifications/NotificationConfig;Lkotlin/jvm/functions/Function1;Ljava/util/List;Ljava/util/List;ZJZLjava/lang/String;)V
+	public synthetic fun <init> (Landroid/content/Context;Ljava/lang/String;Lio/getstream/video/android/core/GEO;Lio/getstream/video/android/model/User;Ljava/lang/String;Lkotlin/jvm/functions/Function2;Lio/getstream/video/android/core/logging/LoggingLevel;Lio/getstream/video/android/core/notifications/NotificationConfig;Lkotlin/jvm/functions/Function1;Ljava/util/List;Ljava/util/List;ZJZLjava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public fun <init> (Landroid/content/Context;Ljava/lang/String;Lio/getstream/video/android/model/User;)V
 	public final fun build ()Lio/getstream/video/android/core/StreamVideo;
 	public final fun getScope ()Lkotlinx/coroutines/CoroutineScope;
@@ -784,9 +798,11 @@ public final class io/getstream/video/android/core/call/connection/StreamPeerCon
 	public final fun createOffer (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public final fun getAudioTransceiver ()Lorg/webrtc/RtpTransceiver;
 	public final fun getConnection ()Lorg/webrtc/PeerConnection;
+	public final fun getGoodStates ()Ljava/util/List;
 	public final fun getStats ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun getVideoTransceiver ()Lorg/webrtc/RtpTransceiver;
 	public final fun initialize (Lorg/webrtc/PeerConnection;)V
+	public final fun isHealthy ()Z
 	public fun onAddStream (Lorg/webrtc/MediaStream;)V
 	public fun onAddTrack (Lorg/webrtc/RtpReceiver;[Lorg/webrtc/MediaStream;)V
 	public fun onConnectionChange (Lorg/webrtc/PeerConnection$PeerConnectionState;)V
@@ -884,6 +900,10 @@ public final class io/getstream/video/android/core/call/state/SelectAudioDevice 
 	public final fun getAudioDevice ()Lcom/twilio/audioswitch/AudioDevice;
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
+}
+
+public final class io/getstream/video/android/core/call/state/Settings : io/getstream/video/android/core/call/state/CallAction {
+	public static final field INSTANCE Lio/getstream/video/android/core/call/state/Settings;
 }
 
 public final class io/getstream/video/android/core/call/state/ShowCallParticipantInfo : io/getstream/video/android/core/call/state/CallAction {
@@ -1773,6 +1793,18 @@ public final class io/getstream/video/android/core/model/IceServer : java/io/Ser
 	public fun toString ()Ljava/lang/String;
 }
 
+public final class io/getstream/video/android/core/model/Ingress {
+	public fun <init> (Lio/getstream/video/android/core/model/RTMP;)V
+	public final fun component1 ()Lio/getstream/video/android/core/model/RTMP;
+	public final fun copy (Lio/getstream/video/android/core/model/RTMP;)Lio/getstream/video/android/core/model/Ingress;
+	public static synthetic fun copy$default (Lio/getstream/video/android/core/model/Ingress;Lio/getstream/video/android/core/model/RTMP;ILjava/lang/Object;)Lio/getstream/video/android/core/model/Ingress;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getRtmp ()Lio/getstream/video/android/core/model/RTMP;
+	public fun hashCode ()I
+	public final fun setRtmp (Lio/getstream/video/android/core/model/RTMP;)V
+	public fun toString ()Ljava/lang/String;
+}
+
 public abstract class io/getstream/video/android/core/model/MediaTrack {
 	public synthetic fun <init> (Ljava/lang/String;Lkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun asAudioTrack ()Lio/getstream/video/android/core/model/AudioTrack;
@@ -1881,6 +1913,21 @@ public final class io/getstream/video/android/core/model/QueriedCalls {
 	public final fun getNext ()Ljava/lang/String;
 	public final fun getPrev ()Ljava/lang/String;
 	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class io/getstream/video/android/core/model/RTMP {
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Ljava/lang/String;
+	public final fun copy (Ljava/lang/String;Ljava/lang/String;)Lio/getstream/video/android/core/model/RTMP;
+	public static synthetic fun copy$default (Lio/getstream/video/android/core/model/RTMP;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)Lio/getstream/video/android/core/model/RTMP;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getAddress ()Ljava/lang/String;
+	public final fun getStreamKey ()Ljava/lang/String;
+	public fun hashCode ()I
+	public final fun setAddress (Ljava/lang/String;)V
+	public final fun setStreamKey (Ljava/lang/String;)V
 	public fun toString ()Ljava/lang/String;
 }
 
@@ -2445,7 +2492,6 @@ public abstract interface class org/openapitools/client/apis/DefaultApi {
 	public abstract fun queryMembers (Lorg/openapitools/client/models/QueryMembersRequest;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public abstract fun rejectCall (Ljava/lang/String;Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public abstract fun requestPermission (Ljava/lang/String;Ljava/lang/String;Lorg/openapitools/client/models/RequestPermissionRequest;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
-	public abstract fun sendCallStats (Ljava/lang/String;Ljava/lang/String;Lorg/openapitools/client/models/SendCallStatsRequest;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public abstract fun sendEvent (Ljava/lang/String;Ljava/lang/String;Lorg/openapitools/client/models/SendEventRequest;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public abstract fun sendVideoReaction (Ljava/lang/String;Ljava/lang/String;Lorg/openapitools/client/models/SendReactionRequest;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public abstract fun startBroadcasting (Ljava/lang/String;Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
@@ -3044,14 +3090,18 @@ public final class org/openapitools/client/models/CallNotificationEvent : org/op
 }
 
 public final class org/openapitools/client/models/CallParticipantResponse {
-	public fun <init> (Lorg/threeten/bp/OffsetDateTime;Lorg/openapitools/client/models/UserResponse;)V
+	public fun <init> (Lorg/threeten/bp/OffsetDateTime;Ljava/lang/String;Lorg/openapitools/client/models/UserResponse;Ljava/lang/String;)V
 	public final fun component1 ()Lorg/threeten/bp/OffsetDateTime;
-	public final fun component2 ()Lorg/openapitools/client/models/UserResponse;
-	public final fun copy (Lorg/threeten/bp/OffsetDateTime;Lorg/openapitools/client/models/UserResponse;)Lorg/openapitools/client/models/CallParticipantResponse;
-	public static synthetic fun copy$default (Lorg/openapitools/client/models/CallParticipantResponse;Lorg/threeten/bp/OffsetDateTime;Lorg/openapitools/client/models/UserResponse;ILjava/lang/Object;)Lorg/openapitools/client/models/CallParticipantResponse;
+	public final fun component2 ()Ljava/lang/String;
+	public final fun component3 ()Lorg/openapitools/client/models/UserResponse;
+	public final fun component4 ()Ljava/lang/String;
+	public final fun copy (Lorg/threeten/bp/OffsetDateTime;Ljava/lang/String;Lorg/openapitools/client/models/UserResponse;Ljava/lang/String;)Lorg/openapitools/client/models/CallParticipantResponse;
+	public static synthetic fun copy$default (Lorg/openapitools/client/models/CallParticipantResponse;Lorg/threeten/bp/OffsetDateTime;Ljava/lang/String;Lorg/openapitools/client/models/UserResponse;Ljava/lang/String;ILjava/lang/Object;)Lorg/openapitools/client/models/CallParticipantResponse;
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getJoinedAt ()Lorg/threeten/bp/OffsetDateTime;
+	public final fun getRole ()Ljava/lang/String;
 	public final fun getUser ()Lorg/openapitools/client/models/UserResponse;
+	public final fun getUserSessionId ()Ljava/lang/String;
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
 }
@@ -3269,15 +3319,16 @@ public final class org/openapitools/client/models/CallSessionEndedEvent : org/op
 }
 
 public final class org/openapitools/client/models/CallSessionParticipantJoinedEvent : org/openapitools/client/models/VideoEvent, org/openapitools/client/models/WSCallEvent {
-	public fun <init> (Ljava/lang/String;Lorg/threeten/bp/OffsetDateTime;Ljava/lang/String;Ljava/lang/String;Lorg/openapitools/client/models/UserResponse;)V
-	public synthetic fun <init> (Ljava/lang/String;Lorg/threeten/bp/OffsetDateTime;Ljava/lang/String;Ljava/lang/String;Lorg/openapitools/client/models/UserResponse;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun <init> (Ljava/lang/String;Lorg/threeten/bp/OffsetDateTime;Ljava/lang/String;Ljava/lang/String;Lorg/openapitools/client/models/UserResponse;Ljava/lang/String;)V
+	public synthetic fun <init> (Ljava/lang/String;Lorg/threeten/bp/OffsetDateTime;Ljava/lang/String;Ljava/lang/String;Lorg/openapitools/client/models/UserResponse;Ljava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun component1 ()Ljava/lang/String;
 	public final fun component2 ()Lorg/threeten/bp/OffsetDateTime;
 	public final fun component3 ()Ljava/lang/String;
 	public final fun component4 ()Ljava/lang/String;
 	public final fun component5 ()Lorg/openapitools/client/models/UserResponse;
-	public final fun copy (Ljava/lang/String;Lorg/threeten/bp/OffsetDateTime;Ljava/lang/String;Ljava/lang/String;Lorg/openapitools/client/models/UserResponse;)Lorg/openapitools/client/models/CallSessionParticipantJoinedEvent;
-	public static synthetic fun copy$default (Lorg/openapitools/client/models/CallSessionParticipantJoinedEvent;Ljava/lang/String;Lorg/threeten/bp/OffsetDateTime;Ljava/lang/String;Ljava/lang/String;Lorg/openapitools/client/models/UserResponse;ILjava/lang/Object;)Lorg/openapitools/client/models/CallSessionParticipantJoinedEvent;
+	public final fun component6 ()Ljava/lang/String;
+	public final fun copy (Ljava/lang/String;Lorg/threeten/bp/OffsetDateTime;Ljava/lang/String;Ljava/lang/String;Lorg/openapitools/client/models/UserResponse;Ljava/lang/String;)Lorg/openapitools/client/models/CallSessionParticipantJoinedEvent;
+	public static synthetic fun copy$default (Lorg/openapitools/client/models/CallSessionParticipantJoinedEvent;Ljava/lang/String;Lorg/threeten/bp/OffsetDateTime;Ljava/lang/String;Ljava/lang/String;Lorg/openapitools/client/models/UserResponse;Ljava/lang/String;ILjava/lang/Object;)Lorg/openapitools/client/models/CallSessionParticipantJoinedEvent;
 	public fun equals (Ljava/lang/Object;)Z
 	public fun getCallCID ()Ljava/lang/String;
 	public final fun getCallCid ()Ljava/lang/String;
@@ -3286,20 +3337,22 @@ public final class org/openapitools/client/models/CallSessionParticipantJoinedEv
 	public final fun getSessionId ()Ljava/lang/String;
 	public final fun getType ()Ljava/lang/String;
 	public final fun getUser ()Lorg/openapitools/client/models/UserResponse;
+	public final fun getUserSessionId ()Ljava/lang/String;
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
 }
 
 public final class org/openapitools/client/models/CallSessionParticipantLeftEvent : org/openapitools/client/models/VideoEvent, org/openapitools/client/models/WSCallEvent {
-	public fun <init> (Ljava/lang/String;Lorg/threeten/bp/OffsetDateTime;Ljava/lang/String;Ljava/lang/String;Lorg/openapitools/client/models/UserResponse;)V
-	public synthetic fun <init> (Ljava/lang/String;Lorg/threeten/bp/OffsetDateTime;Ljava/lang/String;Ljava/lang/String;Lorg/openapitools/client/models/UserResponse;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun <init> (Ljava/lang/String;Lorg/threeten/bp/OffsetDateTime;Ljava/lang/String;Ljava/lang/String;Lorg/openapitools/client/models/UserResponse;Ljava/lang/String;)V
+	public synthetic fun <init> (Ljava/lang/String;Lorg/threeten/bp/OffsetDateTime;Ljava/lang/String;Ljava/lang/String;Lorg/openapitools/client/models/UserResponse;Ljava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun component1 ()Ljava/lang/String;
 	public final fun component2 ()Lorg/threeten/bp/OffsetDateTime;
 	public final fun component3 ()Ljava/lang/String;
 	public final fun component4 ()Ljava/lang/String;
 	public final fun component5 ()Lorg/openapitools/client/models/UserResponse;
-	public final fun copy (Ljava/lang/String;Lorg/threeten/bp/OffsetDateTime;Ljava/lang/String;Ljava/lang/String;Lorg/openapitools/client/models/UserResponse;)Lorg/openapitools/client/models/CallSessionParticipantLeftEvent;
-	public static synthetic fun copy$default (Lorg/openapitools/client/models/CallSessionParticipantLeftEvent;Ljava/lang/String;Lorg/threeten/bp/OffsetDateTime;Ljava/lang/String;Ljava/lang/String;Lorg/openapitools/client/models/UserResponse;ILjava/lang/Object;)Lorg/openapitools/client/models/CallSessionParticipantLeftEvent;
+	public final fun component6 ()Ljava/lang/String;
+	public final fun copy (Ljava/lang/String;Lorg/threeten/bp/OffsetDateTime;Ljava/lang/String;Ljava/lang/String;Lorg/openapitools/client/models/UserResponse;Ljava/lang/String;)Lorg/openapitools/client/models/CallSessionParticipantLeftEvent;
+	public static synthetic fun copy$default (Lorg/openapitools/client/models/CallSessionParticipantLeftEvent;Ljava/lang/String;Lorg/threeten/bp/OffsetDateTime;Ljava/lang/String;Ljava/lang/String;Lorg/openapitools/client/models/UserResponse;Ljava/lang/String;ILjava/lang/Object;)Lorg/openapitools/client/models/CallSessionParticipantLeftEvent;
 	public fun equals (Ljava/lang/Object;)Z
 	public fun getCallCID ()Ljava/lang/String;
 	public final fun getCallCid ()Ljava/lang/String;
@@ -3308,6 +3361,7 @@ public final class org/openapitools/client/models/CallSessionParticipantLeftEven
 	public final fun getSessionId ()Ljava/lang/String;
 	public final fun getType ()Ljava/lang/String;
 	public final fun getUser ()Lorg/openapitools/client/models/UserResponse;
+	public final fun getUserSessionId ()Ljava/lang/String;
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
 }
@@ -4679,28 +4733,6 @@ public final class org/openapitools/client/models/ScreensharingSettingsRequest {
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getAccessRequestEnabled ()Ljava/lang/Boolean;
 	public final fun getEnabled ()Ljava/lang/Boolean;
-	public fun hashCode ()I
-	public fun toString ()Ljava/lang/String;
-}
-
-public final class org/openapitools/client/models/SendCallStatsRequest {
-	public fun <init> (Ljava/util/Map;)V
-	public final fun component1 ()Ljava/util/Map;
-	public final fun copy (Ljava/util/Map;)Lorg/openapitools/client/models/SendCallStatsRequest;
-	public static synthetic fun copy$default (Lorg/openapitools/client/models/SendCallStatsRequest;Ljava/util/Map;ILjava/lang/Object;)Lorg/openapitools/client/models/SendCallStatsRequest;
-	public fun equals (Ljava/lang/Object;)Z
-	public final fun getData ()Ljava/util/Map;
-	public fun hashCode ()I
-	public fun toString ()Ljava/lang/String;
-}
-
-public final class org/openapitools/client/models/SendCallStatsResponse {
-	public fun <init> (Ljava/lang/String;)V
-	public final fun component1 ()Ljava/lang/String;
-	public final fun copy (Ljava/lang/String;)Lorg/openapitools/client/models/SendCallStatsResponse;
-	public static synthetic fun copy$default (Lorg/openapitools/client/models/SendCallStatsResponse;Ljava/lang/String;ILjava/lang/Object;)Lorg/openapitools/client/models/SendCallStatsResponse;
-	public fun equals (Ljava/lang/Object;)Z
-	public final fun getDuration ()Ljava/lang/String;
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
 }

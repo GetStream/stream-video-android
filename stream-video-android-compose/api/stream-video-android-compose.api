@@ -719,6 +719,10 @@ public final class io/getstream/video/android/compose/ui/components/call/control
 	public static final fun RegularControlActions-Z_s7CdY (Lio/getstream/video/android/core/Call;Landroidx/compose/ui/Modifier;JLandroidx/compose/ui/graphics/Shape;FLandroidx/compose/ui/unit/Dp;Lkotlin/jvm/functions/Function1;Ljava/util/List;Landroidx/compose/runtime/Composer;II)V
 }
 
+public final class io/getstream/video/android/compose/ui/components/call/controls/actions/SettingsActionKt {
+	public static final fun SettingsAction-jB83MbM (Landroidx/compose/ui/Modifier;ZLandroidx/compose/ui/graphics/Shape;JJLkotlin/jvm/functions/Function1;Landroidx/compose/runtime/Composer;II)V
+}
+
 public final class io/getstream/video/android/compose/ui/components/call/controls/actions/ToggleCameraActionKt {
 	public static final fun ToggleCameraAction-md9il-k (Landroidx/compose/ui/Modifier;ZZLandroidx/compose/ui/graphics/Shape;JJJJLkotlin/jvm/functions/Function1;Landroidx/compose/runtime/Composer;II)V
 }
