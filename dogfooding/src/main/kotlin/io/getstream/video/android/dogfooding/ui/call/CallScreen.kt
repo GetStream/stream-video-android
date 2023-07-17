@@ -59,18 +59,25 @@ fun CallScreen(
     val speakingWhileMuted by call.state.speakingWhileMuted.collectAsState()
     var isShowingSettingMenu by remember { mutableStateOf(false) }
 
-    val state = rememberModalBottomSheetState(ModalBottomSheetValue.Hidden)
+    val chatState = rememberModalBottomSheetState(ModalBottomSheetValue.Hidden)
     val scope = rememberCoroutineScope()
 
     VideoTheme {
         CallChatDialog(
-            state = state,
+            state = chatState,
+            call = call,
             content = {
                 CallContent(
                     modifier = Modifier.background(color = VideoTheme.colors.appBackground),
                     call = call,
                     enableInPictureInPicture = true,
-                    onBackPressed = { onLeaveCall.invoke() },
+                    onBackPressed = {
+                        if (chatState.currentValue == ModalBottomSheetValue.HalfExpanded) {
+                            scope.launch { chatState.hide() }
+                        } else {
+                            onLeaveCall.invoke()
+                        }
+                    },
                     controlsContent = {
                         ControlActions(
                             call = call,
@@ -84,7 +91,7 @@ fun CallScreen(
                                 {
                                     ChatDialogAction(
                                         modifier = Modifier.size(VideoTheme.dimens.controlActionsButtonSize),
-                                        onCallAction = { scope.launch { state.show() } }
+                                        onCallAction = { scope.launch { chatState.show() } }
                                     )
                                 },
                                 {
@@ -118,7 +125,7 @@ fun CallScreen(
                     }
                 )
             },
-            onDismissed = { scope.launch { state.hide() } }
+            onDismissed = { scope.launch { chatState.hide() } }
         )
 
         if (speakingWhileMuted) {

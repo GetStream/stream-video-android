@@ -18,34 +18,55 @@
 
 package io.getstream.video.android.dogfooding.ui.call
 
-import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.ModalBottomSheetLayout
 import androidx.compose.material.ModalBottomSheetState
-import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
+import io.getstream.chat.android.compose.ui.messages.list.MessageList
+import io.getstream.chat.android.compose.ui.theme.ChatTheme
+import io.getstream.chat.android.compose.viewmodel.messages.MessageListViewModel
+import io.getstream.chat.android.compose.viewmodel.messages.MessagesViewModelFactory
+import io.getstream.video.android.core.Call
 
 @Composable
 internal fun CallChatDialog(
+    call: Call,
     state: ModalBottomSheetState,
     content: @Composable () -> Unit,
     onDismissed: () -> Unit
 ) {
+    val context = LocalContext.current
+    val factory by lazy {
+        MessagesViewModelFactory(
+            context = context,
+            channelId = "messaging:${call.id}",
+        )
+    }
+    val vm: MessageListViewModel by lazy { factory.create(MessageListViewModel::class.java) }
+
     ModalBottomSheetLayout(
         modifier = Modifier.fillMaxWidth(),
         sheetState = state,
         sheetContent = {
-            Text(
+            Box(
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(400.dp)
-                    .clickable { onDismissed.invoke() },
-                text = "qwdqwdqwdqwd"
-            )
+            ) {
+                ChatTheme {
+                    MessageList(
+                        modifier = Modifier.fillMaxSize(),
+                        viewModel = vm
+                    )
+                }
+            }
         },
         content = content
     )

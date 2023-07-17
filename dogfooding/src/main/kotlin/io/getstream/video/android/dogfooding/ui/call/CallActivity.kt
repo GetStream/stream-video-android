@@ -24,6 +24,11 @@ import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.lifecycle.lifecycleScope
+import io.getstream.chat.android.client.ChatClient
+import io.getstream.chat.android.client.api.models.querysort.QuerySortByField
+import io.getstream.chat.android.client.models.Filters
+import io.getstream.chat.android.client.utils.onSuccessSuspend
+import io.getstream.chat.android.state.extensions.globalState
 import io.getstream.result.Result
 import io.getstream.video.android.core.StreamVideo
 import io.getstream.video.android.model.StreamCallId
@@ -53,6 +58,22 @@ class CallActivity : ComponentActivity() {
                     Toast.LENGTH_SHORT
                 ).show()
                 finish()
+            }
+
+            // step 3 (optional) - chat integration
+            val user = ChatClient.instance().globalState.user
+            val channel = ChatClient.instance().channel("messaging", cid.id)
+            channel.queryMembers(
+                offset = 0,
+                limit = 10,
+                filter = Filters.neutral(),
+                sort = QuerySortByField()
+            ).await().onSuccessSuspend { members ->
+                if (members.isNotEmpty()) {
+                    channel.addMembers(listOf(user.value?.id.orEmpty()))
+                } else {
+                    channel.create(listOf(user.value?.id.orEmpty()), emptyMap())
+                }
             }
         }
 
