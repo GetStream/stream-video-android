@@ -257,6 +257,6 @@ public data class ParticipantState(
         sessionId = sessionId,
         track = track,
         enabled = enabled,
-        type = TrackType.TRACK_TYPE_VIDEO
+        type = TrackType.TRACK_TYPE_SCREEN_SHARE
     )
 }
