@@ -24,7 +24,6 @@ import dagger.hilt.android.HiltAndroidApp
 import io.getstream.android.push.firebase.FirebasePushDeviceGenerator
 import io.getstream.chat.android.client.ChatClient
 import io.getstream.chat.android.client.logger.ChatLogLevel
-import io.getstream.chat.android.client.models.UploadAttachmentsNetworkType
 import io.getstream.chat.android.offline.plugin.factory.StreamOfflinePluginFactory
 import io.getstream.chat.android.state.plugin.config.StatePluginConfig
 import io.getstream.chat.android.state.plugin.factory.StreamStatePluginFactory
@@ -96,7 +95,6 @@ class DogfoodingApp : Application() {
         val chatClient = ChatClient.Builder("kqucevfhngu4", this)
             .withPlugins(offlinePlugin, statePluginFactory)
             .logLevel(logLevel)
-            .uploadAttachmentsNetworkType(UploadAttachmentsNetworkType.NOT_ROAMING)
             .build()
 
         val token = chatClient.devToken(user.id)

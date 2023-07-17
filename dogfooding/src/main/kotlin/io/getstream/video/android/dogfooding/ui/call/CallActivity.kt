@@ -69,6 +69,7 @@ class CallActivity : ComponentActivity() {
                 filter = Filters.neutral(),
                 sort = QuerySortByField()
             ).await().onSuccessSuspend { members ->
+                Log.e("Test", "memebers: $members")
                 if (members.isNotEmpty()) {
                     channel.addMembers(listOf(user.value?.id.orEmpty()))
                 } else {
