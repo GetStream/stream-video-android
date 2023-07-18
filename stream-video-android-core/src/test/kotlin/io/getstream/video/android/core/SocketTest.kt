@@ -247,6 +247,46 @@ class CoordinatorSocketTest : SocketTestBase() {
         // TODO: this could be easier to test
         // assertThat(socket.connectionState.value).isInstanceOf(SocketState.Connecting::class.java)
     }
+
+    @Test
+    fun `wrong formatted VideoEventType is ignored`() = runTest {
+        // mock the actual socket connection
+        val socket = CoordinatorSocket(
+            coordinatorUrl,
+            testData.users["thierry"]!!,
+            testData.tokens["thierry"]!!,
+            // make sure to use the TestScope because the exceptions will be swallowed by regular CoroutineScope
+            scope = this,
+            buildOkHttp(),
+            networkStateProvider
+        )
+
+        // create a VideoEvent type that resembles a real one, but doesn't contain the necessary fields
+        val testJson = "{\"type\":\"health.check\"}"
+        socket.onMessage(mockedWebSocket, testJson)
+        // no exception is thrown
+    }
+
+    @Test
+    fun `wrong formatted error in VideoEventType is ignored`() = runTest {
+        // mock the actual socket connection
+        val socket = CoordinatorSocket(
+            coordinatorUrl,
+            testData.users["thierry"]!!,
+            testData.tokens["thierry"]!!,
+            // make sure to use the TestScope because the exceptions will be swallowed by regular CoroutineScope
+            scope = this,
+            buildOkHttp(),
+            networkStateProvider
+        )
+        socket.connect()
+
+        // create a socket message that doesn't even have the error message (so it's neither
+        // a valid VideoEventType nor it is a valid Error)
+        val testJson = "{\"someRandomField\":\"randomValue\"}"
+        socket.onMessage(mockedWebSocket, testJson)
+        // no exception is thrown
+    }
 }
 
 @RunWith(RobolectricTestRunner::class)
