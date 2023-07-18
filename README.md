@@ -80,11 +80,11 @@ Video roadmap and changelog is available [here](https://github.com/GetStream/pro
 - [ ] Call Analytics stateflow (Thierry)
 - [ ] Automatically handle pagination and sorting on > 6 participants in the sample app (Daniel)
 - [ ] Ringing: Make it easy to test
-- [ ] Example Button to switch speakerphone/earpiece
 - [ ] Ringing: Make a list of what needs to be configurable
 - [ ] Ringing: Sounds for incoming, outgoing, call timed out. Sound for someone joining a call (Disabled by default). Docs on how to change them
 - [ ] Publish app on play store
 - [ ] Bug: Screensharing on Firefox has some issues when rendering on android (Daniel)
+- [X] Example Button to switch speakerphone/earpiece (Jaewoong)
 - [X] Chat Integration (Jaewoong)
 - [X] Buttons to simulate ice restart and SFU switching (Jaewoong)
 - [X] Bug: java.net.UnknownHostException: Unable to resolve host "hint.stream-io-video.com" isn't throw but instead logged as INFO (Daniel)
