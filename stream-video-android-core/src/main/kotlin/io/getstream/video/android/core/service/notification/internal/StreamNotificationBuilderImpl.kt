@@ -25,7 +25,7 @@ import android.os.Build
 import androidx.annotation.RequiresApi
 import androidx.core.app.NotificationCompat
 import io.getstream.log.taggedLogger
-import io.getstream.video.android.R
+import io.getstream.video.android.core.R
 import io.getstream.video.android.core.ConnectionState
 import io.getstream.video.android.core.StreamVideo
 import io.getstream.video.android.core.service.notification.IdentifiedNotification

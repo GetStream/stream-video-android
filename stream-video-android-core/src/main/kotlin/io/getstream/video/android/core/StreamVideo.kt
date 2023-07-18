@@ -21,7 +21,7 @@ import android.os.Build
 import io.getstream.android.push.PushDevice
 import io.getstream.log.StreamLog
 import io.getstream.result.Result
-import io.getstream.video.android.BuildConfig
+import io.getstream.video.android.core.BuildConfig
 import io.getstream.video.android.core.events.VideoEventListener
 import io.getstream.video.android.core.model.EdgeData
 import io.getstream.video.android.core.model.QueriedCalls
