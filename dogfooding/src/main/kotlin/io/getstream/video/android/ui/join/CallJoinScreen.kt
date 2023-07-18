@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package io.getstream.video.android.dogfooding.ui.join
+package io.getstream.video.android.ui.join
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
@@ -58,9 +58,9 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.avatar.UserAvatar
 import io.getstream.video.android.datastore.delegate.StreamUserDataStore
-import io.getstream.video.android.dogfooding.R
-import io.getstream.video.android.dogfooding.ui.theme.Colors
-import io.getstream.video.android.dogfooding.ui.theme.StreamButton
+import io.getstream.video.android.R
+import io.getstream.video.android.ui.theme.Colors
+import io.getstream.video.android.ui.theme.StreamButton
 import io.getstream.video.android.mock.StreamMockUtils
 import io.getstream.video.android.mock.mockUsers
 

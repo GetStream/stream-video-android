@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-package io.getstream.video.android.dogfooding
+package io.getstream.video.android
 
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import dagger.hilt.android.AndroidEntryPoint
 import io.getstream.video.android.compose.theme.VideoTheme
-import io.getstream.video.android.dogfooding.ui.DogfoodingNavHost
+import io.getstream.video.android.ui.DogfoodingNavHost
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {

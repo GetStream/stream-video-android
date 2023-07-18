@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package io.getstream.video.android.dogfooding.ui.lobby
+package io.getstream.video.android.ui.lobby
 
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel

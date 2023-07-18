@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package io.getstream.video.android.dogfooding.ui.theme
+package io.getstream.video.android.ui.theme
 
 import androidx.compose.foundation.text.ClickableText
 import androidx.compose.runtime.Composable

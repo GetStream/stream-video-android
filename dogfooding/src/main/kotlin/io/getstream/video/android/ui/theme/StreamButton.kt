@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package io.getstream.video.android.dogfooding.ui.theme
+package io.getstream.video.android.ui.theme
 
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Button
@@ -27,7 +27,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import io.getstream.video.android.compose.theme.VideoTheme
-import io.getstream.video.android.dogfooding.ui.theme.Colors.description
+import io.getstream.video.android.ui.theme.Colors.description
 
 @Composable
 fun StreamButton(

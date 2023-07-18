@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package io.getstream.video.android.dogfooding
+package io.getstream.video.android
 
 import android.app.Application
 import android.content.Context
@@ -31,7 +31,8 @@ import io.getstream.video.android.core.StreamVideo
 import io.getstream.video.android.core.StreamVideoBuilder
 import io.getstream.video.android.core.logging.LoggingLevel
 import io.getstream.video.android.core.notifications.NotificationConfig
-import io.getstream.video.android.dogfooding.token.StreamVideoNetwork
+import io.getstream.video.android.BuildConfig
+import io.getstream.video.android.token.StreamVideoNetwork
 import io.getstream.video.android.model.ApiKey
 import io.getstream.video.android.model.User
 import io.getstream.video.android.tooling.handler.StreamGlobalExceptionHandler

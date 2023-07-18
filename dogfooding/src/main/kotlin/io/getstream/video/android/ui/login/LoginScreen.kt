@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package io.getstream.video.android.dogfooding.ui.login
+package io.getstream.video.android.ui.login
 
 import android.content.Intent
 import android.net.Uri
@@ -61,12 +61,12 @@ import androidx.core.content.ContextCompat.startActivity
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.firebase.ui.auth.AuthUI
 import io.getstream.video.android.compose.theme.VideoTheme
-import io.getstream.video.android.dogfooding.BuildConfig
-import io.getstream.video.android.dogfooding.R
-import io.getstream.video.android.dogfooding.ui.theme.Colors
-import io.getstream.video.android.dogfooding.ui.theme.LinkText
-import io.getstream.video.android.dogfooding.ui.theme.LinkTextData
-import io.getstream.video.android.dogfooding.ui.theme.StreamButton
+import io.getstream.video.android.BuildConfig
+import io.getstream.video.android.R
+import io.getstream.video.android.ui.theme.Colors
+import io.getstream.video.android.ui.theme.LinkText
+import io.getstream.video.android.ui.theme.LinkTextData
+import io.getstream.video.android.ui.theme.StreamButton
 
 @Composable
 fun LoginScreen(

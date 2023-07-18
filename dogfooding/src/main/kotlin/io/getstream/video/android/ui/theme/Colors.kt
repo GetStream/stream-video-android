@@ -14,23 +14,12 @@
  * limitations under the License.
  */
 
-package io.getstream.video.android.dogfooding.di
+package io.getstream.video.android.ui.theme
 
-import android.content.Context
-import dagger.Provides
-import dagger.hilt.InstallIn
-import dagger.hilt.android.qualifiers.ApplicationContext
-import dagger.hilt.components.SingletonComponent
-import io.getstream.video.android.datastore.delegate.StreamUserDataStore
-import javax.inject.Singleton
+import androidx.compose.ui.graphics.Color
 
-@dagger.Module
-@InstallIn(SingletonComponent::class)
-object AppModule {
-
-    @Provides
-    @Singleton
-    fun provideUserDataStore(@ApplicationContext context: Context): StreamUserDataStore {
-        return StreamUserDataStore.install(context)
-    }
+object Colors {
+    val background: Color = Color(0xFF2C2C2E)
+    val secondBackground: Color = Color(0xFF1C1E22)
+    val description: Color = Color(0xFF979797)
 }

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package io.getstream.video.android.dogfooding.ui.join
+package io.getstream.video.android.ui.join
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope

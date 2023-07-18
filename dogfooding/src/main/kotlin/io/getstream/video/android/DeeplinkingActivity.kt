@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package io.getstream.video.android.dogfooding
+package io.getstream.video.android
 
 import android.content.Intent
 import android.net.Uri
@@ -34,8 +34,8 @@ import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.core.StreamVideo
 import io.getstream.video.android.core.logging.LoggingLevel
 import io.getstream.video.android.datastore.delegate.StreamUserDataStore
-import io.getstream.video.android.dogfooding.token.StreamVideoNetwork
-import io.getstream.video.android.dogfooding.ui.call.CallActivity
+import io.getstream.video.android.token.StreamVideoNetwork
+import io.getstream.video.android.ui.call.CallActivity
 import io.getstream.video.android.model.StreamCallId
 import io.getstream.video.android.model.User
 import kotlinx.coroutines.flow.collectLatest

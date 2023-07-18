@@ -16,7 +16,7 @@
 
 @file:OptIn(ExperimentalMaterialApi::class)
 
-package io.getstream.video.android.dogfooding.ui.call
+package io.getstream.video.android.ui.call
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package io.getstream.video.android.dogfooding.token
+package io.getstream.video.android.token
 
 import kotlinx.serialization.Serializable
 

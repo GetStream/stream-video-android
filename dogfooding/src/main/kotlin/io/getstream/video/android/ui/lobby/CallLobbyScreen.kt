@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package io.getstream.video.android.dogfooding.ui.lobby
+package io.getstream.video.android.ui.lobby
 
 import android.content.Intent
 import android.widget.Toast
@@ -60,11 +60,11 @@ import io.getstream.video.android.compose.ui.components.call.lobby.CallLobby
 import io.getstream.video.android.core.call.state.ToggleCamera
 import io.getstream.video.android.core.call.state.ToggleMicrophone
 import io.getstream.video.android.datastore.delegate.StreamUserDataStore
-import io.getstream.video.android.dogfooding.BuildConfig
-import io.getstream.video.android.dogfooding.R
-import io.getstream.video.android.dogfooding.ui.call.CallActivity
-import io.getstream.video.android.dogfooding.ui.theme.Colors
-import io.getstream.video.android.dogfooding.ui.theme.StreamButton
+import io.getstream.video.android.BuildConfig
+import io.getstream.video.android.R
+import io.getstream.video.android.ui.call.CallActivity
+import io.getstream.video.android.ui.theme.Colors
+import io.getstream.video.android.ui.theme.StreamButton
 import io.getstream.video.android.mock.StreamMockUtils
 import kotlinx.coroutines.delay
 

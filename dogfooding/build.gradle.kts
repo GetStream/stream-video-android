@@ -31,11 +31,12 @@ plugins {
 }
 
 android {
-    namespace = "io.getstream.video.android.dogfooding"
+    namespace = "io.getstream.video.android"
     compileSdk = Configuration.compileSdk
 
     defaultConfig {
-        applicationId = "io.getstream.video.android.dogfooding"
+        applicationId = "io.getstream.video.android"
+        applicationIdSuffix = ".dogfooding"
         minSdk = Configuration.minSdk
         targetSdk = Configuration.targetSdk
         versionCode = 1

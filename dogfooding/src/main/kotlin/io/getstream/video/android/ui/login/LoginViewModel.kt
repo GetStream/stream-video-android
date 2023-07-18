@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package io.getstream.video.android.dogfooding.ui.login
+package io.getstream.video.android.ui.login
 
 import android.content.Context
 import android.util.Log
@@ -25,11 +25,11 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import io.getstream.log.Priority
 import io.getstream.video.android.core.logging.LoggingLevel
 import io.getstream.video.android.datastore.delegate.StreamUserDataStore
-import io.getstream.video.android.dogfooding.API_KEY
-import io.getstream.video.android.dogfooding.BuildConfig
-import io.getstream.video.android.dogfooding.dogfoodingApp
-import io.getstream.video.android.dogfooding.token.StreamVideoNetwork
-import io.getstream.video.android.dogfooding.token.TokenResponse
+import io.getstream.video.android.API_KEY
+import io.getstream.video.android.BuildConfig
+import io.getstream.video.android.dogfoodingApp
+import io.getstream.video.android.token.StreamVideoNetwork
+import io.getstream.video.android.token.TokenResponse
 import io.getstream.video.android.model.User
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay

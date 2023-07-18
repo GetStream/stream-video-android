@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package io.getstream.video.android.dogfooding.ui
+package io.getstream.video.android.ui
 
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
@@ -25,9 +25,9 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
-import io.getstream.video.android.dogfooding.ui.join.CallJoinScreen
-import io.getstream.video.android.dogfooding.ui.lobby.CallLobbyScreen
-import io.getstream.video.android.dogfooding.ui.login.LoginScreen
+import io.getstream.video.android.ui.join.CallJoinScreen
+import io.getstream.video.android.ui.lobby.CallLobbyScreen
+import io.getstream.video.android.ui.login.LoginScreen
 
 @Composable
 fun DogfoodingNavHost(
