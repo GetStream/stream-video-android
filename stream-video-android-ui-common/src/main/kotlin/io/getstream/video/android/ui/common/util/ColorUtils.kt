@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package io.getstream.video.android.common.util
+package io.getstream.video.android.ui.common.util
 
 import android.graphics.Color
 import kotlin.math.roundToInt

@@ -22,7 +22,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.sp
-import io.getstream.video.android.common.util.getFloatResource
+import io.getstream.video.android.ui.common.util.getFloatResource
 
 @Composable
 internal fun textSizeResource(@DimenRes id: Int): TextUnit {

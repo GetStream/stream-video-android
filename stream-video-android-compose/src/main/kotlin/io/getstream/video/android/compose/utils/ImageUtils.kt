@@ -21,7 +21,7 @@ import androidx.compose.runtime.ReadOnlyComposable
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
-import io.getstream.video.android.common.util.adjustColorBrightness
+import io.getstream.video.android.ui.common.util.adjustColorBrightness
 import io.getstream.video.android.ui.common.R
 import kotlin.math.abs
 

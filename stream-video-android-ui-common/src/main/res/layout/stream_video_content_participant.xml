@@ -30,7 +30,7 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent">
 
-        <io.getstream.video.android.common.view.ParticipantItemView
+        <io.getstream.video.android.ui.common.view.ParticipantItemView
             android:id="@+id/firstParticipant"
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
@@ -38,7 +38,7 @@
             android:translationZ="4dp"
             android:visibility="gone" />
 
-        <io.getstream.video.android.common.view.ParticipantItemView
+        <io.getstream.video.android.ui.common.view.ParticipantItemView
             android:id="@+id/secondParticipant"
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
@@ -57,7 +57,7 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/firstParticipantRow">
 
-        <io.getstream.video.android.common.view.ParticipantItemView
+        <io.getstream.video.android.ui.common.view.ParticipantItemView
             android:id="@+id/thirdParticipant"
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
@@ -65,7 +65,7 @@
             android:translationZ="4dp"
             android:visibility="gone" />
 
-        <io.getstream.video.android.common.view.ParticipantItemView
+        <io.getstream.video.android.ui.common.view.ParticipantItemView
             android:id="@+id/fourthParticipant"
             android:layout_width="wrap_content"
             android:layout_height="match_parent"

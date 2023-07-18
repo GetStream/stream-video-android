@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package io.getstream.video.android.common.renderer
+package io.getstream.video.android.ui.common.renderer
 
 import android.content.Context
 import android.graphics.SurfaceTexture

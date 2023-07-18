@@ -44,7 +44,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
 import io.getstream.log.StreamLog
-import io.getstream.video.android.common.renderer.StreamVideoTextureViewRenderer
+import io.getstream.video.android.ui.common.renderer.StreamVideoTextureViewRenderer
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.video.VideoScalingType.Companion.toCommonScalingType
 import io.getstream.video.android.core.Call

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package io.getstream.video.android.common.util
+package io.getstream.video.android.ui.common.util
 
 import android.content.Context
 import io.getstream.video.android.core.internal.InternalStreamVideoApi

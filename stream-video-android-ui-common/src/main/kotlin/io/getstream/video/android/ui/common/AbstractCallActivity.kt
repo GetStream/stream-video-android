@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package io.getstream.video.android.common
+package io.getstream.video.android.ui.common
 
 import android.annotation.SuppressLint
 import android.app.PictureInPictureParams
