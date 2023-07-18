@@ -62,7 +62,7 @@ internal fun CallChatDialog(
     val context = LocalContext.current
     val factory = MessagesViewModelFactory(
         context = context,
-        channelId = "messaging:${call.id}",
+        channelId = "videocall:${call.id}",
     )
 
     var messageListViewModel by remember { mutableStateOf<MessageListViewModel?>(null) }
