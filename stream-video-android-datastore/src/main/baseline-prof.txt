@@ -10,8 +10,8 @@ HSPLio/getstream/video/android/datastore/delegate/StreamUserDataStore;->getData(
 PLio/getstream/video/android/datastore/delegate/StreamUserDataStore;->getData()Lkotlinx/coroutines/flow/Flow;
 HSPLio/getstream/video/android/datastore/delegate/StreamUserDataStore;->getUser()Lkotlinx/coroutines/flow/StateFlow;
 PLio/getstream/video/android/datastore/delegate/StreamUserDataStore;->getUser()Lkotlinx/coroutines/flow/StateFlow;
-HSPLio/getstream/video/android/datastore/delegate/StreamUserDataStore;->getUserDevice()Lkotlinx/coroutines/flow/StateFlow;
 PLio/getstream/video/android/datastore/delegate/StreamUserDataStore;->getUserDevice()Lkotlinx/coroutines/flow/StateFlow;
+PLio/getstream/video/android/datastore/delegate/StreamUserDataStore;->getUserToken()Lkotlinx/coroutines/flow/StateFlow;
 HSPLio/getstream/video/android/datastore/delegate/StreamUserDataStore;->updateApiKey(Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 PLio/getstream/video/android/datastore/delegate/StreamUserDataStore;->updateApiKey(Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 HSPLio/getstream/video/android/datastore/delegate/StreamUserDataStore;->updateData(Lkotlin/jvm/functions/Function2;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
@@ -150,7 +150,7 @@ PLio/getstream/video/android/datastore/model/StreamUserPreferences;->getUserDevi
 HSPLio/getstream/video/android/datastore/model/StreamUserPreferences;->getUserToken()Ljava/lang/String;
 PLio/getstream/video/android/datastore/model/StreamUserPreferences;->getUserToken()Ljava/lang/String;
 HSPLio/getstream/video/android/datastore/model/StreamUserPreferences;->hashCode()I
-HPLio/getstream/video/android/datastore/model/StreamUserPreferences;->hashCode()I
+PLio/getstream/video/android/datastore/model/StreamUserPreferences;->hashCode()I
 HSPLio/getstream/video/android/datastore/model/StreamUserPreferences;->write$Self(Lio/getstream/video/android/datastore/model/StreamUserPreferences;Lkotlinx/serialization/encoding/CompositeEncoder;Lkotlinx/serialization/descriptors/SerialDescriptor;)V
 PLio/getstream/video/android/datastore/model/StreamUserPreferences;->write$Self(Lio/getstream/video/android/datastore/model/StreamUserPreferences;Lkotlinx/serialization/encoding/CompositeEncoder;Lkotlinx/serialization/descriptors/SerialDescriptor;)V
 Lio/getstream/video/android/datastore/model/StreamUserPreferences$$serializer;
