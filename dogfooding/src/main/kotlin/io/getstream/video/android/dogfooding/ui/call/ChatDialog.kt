@@ -53,7 +53,7 @@ import io.getstream.chat.android.compose.viewmodel.messages.MessagesViewModelFac
 import io.getstream.video.android.core.Call
 
 @Composable
-internal fun CallChatDialog(
+internal fun ChatDialog(
     call: Call,
     state: ModalBottomSheetState,
     content: @Composable () -> Unit,

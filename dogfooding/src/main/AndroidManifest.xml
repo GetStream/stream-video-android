@@ -53,11 +53,6 @@
             android:supportsPictureInPicture="true"
             android:windowSoftInputMode="adjustResize" />
 
-        <service
-            android:name=".ui.call.CallService"
-            android:enabled="true"
-            android:exported="false" />
-
         <activity
             android:name=".IncomingCallActivity"
             android:exported="false"

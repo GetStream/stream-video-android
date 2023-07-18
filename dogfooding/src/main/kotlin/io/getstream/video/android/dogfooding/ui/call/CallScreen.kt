@@ -58,12 +58,13 @@ fun CallScreen(
     val isMicrophoneEnabled by call.microphone.isEnabled.collectAsState()
     val speakingWhileMuted by call.state.speakingWhileMuted.collectAsState()
     var isShowingSettingMenu by remember { mutableStateOf(false) }
+    var isShowingAvailableDeviceMenu by remember { mutableStateOf(false) }
 
     val chatState = rememberModalBottomSheetState(ModalBottomSheetValue.Hidden)
     val scope = rememberCoroutineScope()
 
     VideoTheme {
-        CallChatDialog(
+        ChatDialog(
             state = chatState,
             call = call,
             content = {
@@ -133,9 +134,18 @@ fun CallScreen(
         }
 
         if (isShowingSettingMenu) {
-            CallSettingsMenu(call = call) {
-                isShowingSettingMenu = false
-            }
+            SettingsMenu(
+                call = call,
+                onDisplayAvailableDevice = { isShowingAvailableDeviceMenu = true },
+                onDismissed = { isShowingSettingMenu = false }
+            )
+        }
+
+        if (isShowingAvailableDeviceMenu) {
+            AvailableDeviceMenu(
+                call = call,
+                onDismissed = { isShowingAvailableDeviceMenu = false }
+            )
         }
     }
 }
