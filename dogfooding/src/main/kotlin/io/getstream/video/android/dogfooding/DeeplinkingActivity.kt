@@ -79,7 +79,11 @@ class DeeplinkingActivity : ComponentActivity() {
         lifecycleScope.launch {
             val data = dataStore.data
             data.collectLatest { preferences ->
-                val streamVideo: StreamVideo = if (preferences != null) {
+                if (preferences != null) {
+                    dogfoodingApp.initializeStreamChat(
+                        user = preferences.user!!,
+                        token = preferences.userToken
+                    )
                     dogfoodingApp.initializeStreamVideo(
                         user = preferences.user!!,
                         token = preferences.userToken,
