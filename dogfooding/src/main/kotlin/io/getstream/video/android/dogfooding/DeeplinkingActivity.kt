@@ -92,7 +92,7 @@ class DeeplinkingActivity : ComponentActivity() {
                         userId = guest.id,
                         apiKey = BuildConfig.DOGFOODING_API_KEY
                     )
-                    dogfoodingApp.initializeStreamChat(user = guest)
+                    dogfoodingApp.initializeStreamChat(user = guest, token = result.token)
                     dogfoodingApp.initializeStreamVideo(
                         user = guest,
                         token = result.token,

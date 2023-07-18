@@ -81,6 +81,7 @@ class DogfoodingApp : Application() {
 
     fun initializeStreamChat(
         user: User,
+        token: String,
     ) {
         val offlinePlugin = StreamOfflinePluginFactory(this) // 1
         val statePluginFactory = StreamStatePluginFactory( // 2
@@ -92,15 +93,13 @@ class DogfoodingApp : Application() {
         )
 
         val logLevel = if (BuildConfig.DEBUG) ChatLogLevel.ALL else ChatLogLevel.NOTHING
-        val chatClient = ChatClient.Builder("kqucevfhngu4", this)
+        val chatClient = ChatClient.Builder(API_KEY, this)
             .withPlugins(offlinePlugin, statePluginFactory)
             .logLevel(logLevel)
             .build()
 
-        val userId = user.name.replace(" ", "").trim().lowercase().ifEmpty { "streamuser" }
-        val token = chatClient.devToken(userId)
         val chatUser = io.getstream.chat.android.client.models.User(
-            id = userId,
+            id = user.id,
             name = user.name,
             image = user.image
         )

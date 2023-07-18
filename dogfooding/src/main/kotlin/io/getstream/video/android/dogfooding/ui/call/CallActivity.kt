@@ -79,7 +79,7 @@ class CallActivity : ComponentActivity() {
             val user: User? by ChatClient.instance().globalState.user.collectAsState(null)
             LaunchedEffect(key1 = user) {
                 if (user != null) {
-                    val channel = ChatClient.instance().channel("messaging", cid.id)
+                    val channel = ChatClient.instance().channel("videocall", cid.id)
                     channel.queryMembers(
                         offset = 0,
                         limit = 10,

@@ -57,7 +57,7 @@ class LoginViewModel @Inject constructor(
             when (event) {
                 is LoginEvent.Loading -> flowOf(LoginUiState.Loading)
                 is LoginEvent.GoogleSignIn -> flowOf(LoginUiState.GoogleSignIn)
-                is LoginEvent.SignInInSuccess -> signInInSuccess(event.email)
+                is LoginEvent.SignInInSuccess -> signInInSuccess(event.userId)
                 else -> flowOf(LoginUiState.Nothing)
             }
         }.shareIn(viewModelScope, SharingStarted.Lazily, 0)
@@ -66,7 +66,7 @@ class LoginViewModel @Inject constructor(
         viewModelScope.launch { this@LoginViewModel.event.emit(event) }
     }
 
-    private fun signInInSuccess(email: String) = flow<LoginUiState> {
+    private fun signInInSuccess(email: String) = flow {
 
         try {
             val response = StreamVideoNetwork.tokenService.fetchToken(
@@ -90,7 +90,7 @@ class LoginViewModel @Inject constructor(
                 if (user != null && user.isValid() && !BuildConfig.BENCHMARK) {
                     handleUiEvent(LoginEvent.Loading)
                     delay(10)
-                    handleUiEvent(LoginEvent.SignInInSuccess(email = user.id))
+                    handleUiEvent(LoginEvent.SignInInSuccess(userId = user.id))
                 }
             }
         }
@@ -104,7 +104,7 @@ class LoginViewModel @Inject constructor(
         val userId = tokenResponse.userId
         val token = tokenResponse.token
         val user = User(
-            id = authUser?.email ?: userId,
+            id = userId,
             name = authUser?.displayName ?: "",
             image = authUser?.photoUrl?.toString() ?: "",
             role = "admin",
@@ -118,7 +118,7 @@ class LoginViewModel @Inject constructor(
             token = token
         )
 
-        context.dogfoodingApp.initializeStreamChat(user = user)
+        context.dogfoodingApp.initializeStreamChat(user = user, token = token)
     }
 }
 
@@ -141,5 +141,5 @@ sealed interface LoginEvent {
 
     data class GoogleSignIn(val id: String = UUID.randomUUID().toString()) : LoginEvent
 
-    data class SignInInSuccess(val email: String) : LoginEvent
+    data class SignInInSuccess(val userId: String) : LoginEvent
 }

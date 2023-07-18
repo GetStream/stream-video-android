@@ -240,7 +240,13 @@ private fun EmailLoginDialog(
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(horizontal = 16.dp),
-                        onClick = { loginViewModel.handleUiEvent(LoginEvent.SignInInSuccess(email)) },
+                        onClick = {
+                            val userId = email
+                                .replace(" ", "")
+                                .replace(".", "")
+                                .replace("@", "")
+                            loginViewModel.handleUiEvent(LoginEvent.SignInInSuccess(userId))
+                        },
                         text = "Log in"
                     )
                 }
@@ -258,7 +264,11 @@ private fun HandleLoginUiStates(
     val context = LocalContext.current
     val signInLauncher = rememberRegisterForActivityResult(
         onSignInSuccess = { email ->
-            loginViewModel.handleUiEvent(LoginEvent.SignInInSuccess(email = email))
+            val userId = email
+                .replace(" ", "")
+                .replace(".", "")
+                .replace("@", "")
+            loginViewModel.handleUiEvent(LoginEvent.SignInInSuccess(userId = userId))
         },
         onSignInFailed = {
             Toast.makeText(context, "Verification failed!", Toast.LENGTH_SHORT).show()
@@ -292,7 +302,11 @@ private fun HandleLoginUiStates(
             }
 
             is LoginUiState.SignInFailure -> {
-                Toast.makeText(context, "Login failed! (${loginUiState.errorMessage})", Toast.LENGTH_SHORT).show()
+                Toast.makeText(
+                    context,
+                    "Login failed! (${loginUiState.errorMessage})",
+                    Toast.LENGTH_SHORT
+                ).show()
             }
 
             else -> Unit
