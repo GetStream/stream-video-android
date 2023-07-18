@@ -36,7 +36,6 @@ android {
 
     defaultConfig {
         applicationId = "io.getstream.video.android"
-        applicationIdSuffix = ".dogfooding"
         minSdk = Configuration.minSdk
         targetSdk = Configuration.targetSdk
         versionCode = 1
@@ -103,6 +102,17 @@ android {
             matchingFallbacks += listOf("release")
             isDebuggable = false
             buildConfigField("Boolean", "BENCHMARK", "true")
+        }
+    }
+
+    flavorDimensions("environment")
+    productFlavors {
+        create("dogfooding") {
+            dimension = "environment"
+            applicationIdSuffix = ".dogfooding"
+        }
+        create("production") {
+            dimension = "environment"
         }
     }
 
