@@ -55,14 +55,14 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import io.getstream.video.android.R
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.avatar.UserAvatar
 import io.getstream.video.android.datastore.delegate.StreamUserDataStore
-import io.getstream.video.android.R
-import io.getstream.video.android.ui.theme.Colors
-import io.getstream.video.android.ui.theme.StreamButton
 import io.getstream.video.android.mock.StreamMockUtils
 import io.getstream.video.android.mock.mockUsers
+import io.getstream.video.android.ui.theme.Colors
+import io.getstream.video.android.ui.theme.StreamButton
 
 @Composable
 fun CallJoinScreen(

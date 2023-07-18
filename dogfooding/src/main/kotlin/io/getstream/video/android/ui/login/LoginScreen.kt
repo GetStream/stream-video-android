@@ -60,9 +60,9 @@ import androidx.compose.ui.window.Dialog
 import androidx.core.content.ContextCompat.startActivity
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.firebase.ui.auth.AuthUI
-import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.BuildConfig
 import io.getstream.video.android.R
+import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.ui.theme.Colors
 import io.getstream.video.android.ui.theme.LinkText
 import io.getstream.video.android.ui.theme.LinkTextData

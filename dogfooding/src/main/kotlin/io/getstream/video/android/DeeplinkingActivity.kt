@@ -34,10 +34,10 @@ import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.core.StreamVideo
 import io.getstream.video.android.core.logging.LoggingLevel
 import io.getstream.video.android.datastore.delegate.StreamUserDataStore
-import io.getstream.video.android.token.StreamVideoNetwork
-import io.getstream.video.android.ui.call.CallActivity
 import io.getstream.video.android.model.StreamCallId
 import io.getstream.video.android.model.User
+import io.getstream.video.android.token.StreamVideoNetwork
+import io.getstream.video.android.ui.call.CallActivity
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 

@@ -31,9 +31,9 @@ import io.getstream.video.android.core.StreamVideo
 import io.getstream.video.android.core.StreamVideoBuilder
 import io.getstream.video.android.core.logging.LoggingLevel
 import io.getstream.video.android.core.notifications.NotificationConfig
-import io.getstream.video.android.token.StreamVideoNetwork
 import io.getstream.video.android.model.ApiKey
 import io.getstream.video.android.model.User
+import io.getstream.video.android.token.StreamVideoNetwork
 import io.getstream.video.android.tooling.handler.StreamGlobalExceptionHandler
 
 @HiltAndroidApp

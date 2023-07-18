@@ -23,14 +23,14 @@ import androidx.lifecycle.viewModelScope
 import com.google.firebase.auth.FirebaseAuth
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.getstream.log.Priority
-import io.getstream.video.android.core.logging.LoggingLevel
-import io.getstream.video.android.datastore.delegate.StreamUserDataStore
 import io.getstream.video.android.API_KEY
 import io.getstream.video.android.BuildConfig
 import io.getstream.video.android.app
+import io.getstream.video.android.core.logging.LoggingLevel
+import io.getstream.video.android.datastore.delegate.StreamUserDataStore
+import io.getstream.video.android.model.User
 import io.getstream.video.android.token.StreamVideoNetwork
 import io.getstream.video.android.token.TokenResponse
-import io.getstream.video.android.model.User
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableSharedFlow

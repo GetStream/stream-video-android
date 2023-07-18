@@ -22,8 +22,8 @@ import android.content.Context
 import android.content.Intent
 import android.os.IBinder
 import io.getstream.log.taggedLogger
-import io.getstream.video.android.core.R
 import io.getstream.video.android.core.ConnectionState
+import io.getstream.video.android.core.R
 import io.getstream.video.android.core.StreamVideo
 import io.getstream.video.android.core.dispatchers.DispatcherProvider
 import io.getstream.video.android.core.service.notification.StreamNotificationBuilder

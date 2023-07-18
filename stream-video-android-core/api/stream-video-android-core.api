@@ -1,4 +1,4 @@
-public final class io/getstream/video/android/BuildConfig {
+public final class io/getstream/video/android/core/BuildConfig {
 	public static final field BUILD_TYPE Ljava/lang/String;
 	public static final field DEBUG Z
 	public static final field LIBRARY_PACKAGE_NAME Ljava/lang/String;
