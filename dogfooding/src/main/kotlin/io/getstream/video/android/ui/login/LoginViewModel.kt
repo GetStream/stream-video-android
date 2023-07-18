@@ -27,7 +27,7 @@ import io.getstream.video.android.core.logging.LoggingLevel
 import io.getstream.video.android.datastore.delegate.StreamUserDataStore
 import io.getstream.video.android.API_KEY
 import io.getstream.video.android.BuildConfig
-import io.getstream.video.android.dogfoodingApp
+import io.getstream.video.android.app
 import io.getstream.video.android.token.StreamVideoNetwork
 import io.getstream.video.android.token.TokenResponse
 import io.getstream.video.android.model.User
@@ -111,14 +111,14 @@ class LoginViewModel @Inject constructor(
             custom = mapOf("email" to userId)
         )
 
-        context.dogfoodingApp.initializeStreamVideo(
+        context.app.initializeStreamVideo(
             apiKey = API_KEY,
             user = user,
             loggingLevel = LoggingLevel(priority = Priority.DEBUG),
             token = token
         )
 
-        context.dogfoodingApp.initializeStreamChat(user = user, token = token)
+        context.app.initializeStreamChat(user = user, token = token)
     }
 }
 

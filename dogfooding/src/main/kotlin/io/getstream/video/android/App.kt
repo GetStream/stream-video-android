@@ -31,14 +31,13 @@ import io.getstream.video.android.core.StreamVideo
 import io.getstream.video.android.core.StreamVideoBuilder
 import io.getstream.video.android.core.logging.LoggingLevel
 import io.getstream.video.android.core.notifications.NotificationConfig
-import io.getstream.video.android.BuildConfig
 import io.getstream.video.android.token.StreamVideoNetwork
 import io.getstream.video.android.model.ApiKey
 import io.getstream.video.android.model.User
 import io.getstream.video.android.tooling.handler.StreamGlobalExceptionHandler
 
 @HiltAndroidApp
-class DogfoodingApp : Application() {
+class App : Application() {
 
     override fun onCreate() {
         super.onCreate()
@@ -114,4 +113,4 @@ class DogfoodingApp : Application() {
 
 const val API_KEY = BuildConfig.DOGFOODING_API_KEY
 
-val Context.dogfoodingApp get() = applicationContext as DogfoodingApp
+val Context.app get() = applicationContext as App

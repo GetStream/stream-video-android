@@ -21,7 +21,7 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import dagger.hilt.android.AndroidEntryPoint
 import io.getstream.video.android.compose.theme.VideoTheme
-import io.getstream.video.android.ui.DogfoodingNavHost
+import io.getstream.video.android.ui.AppNavHost
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
@@ -30,7 +30,7 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
 
         setContent {
-            VideoTheme { DogfoodingNavHost() }
+            VideoTheme { AppNavHost() }
         }
     }
 }

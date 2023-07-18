@@ -80,11 +80,11 @@ class DeeplinkingActivity : ComponentActivity() {
             val data = dataStore.data
             data.collectLatest { preferences ->
                 if (preferences != null) {
-                    dogfoodingApp.initializeStreamChat(
+                    app.initializeStreamChat(
                         user = preferences.user!!,
                         token = preferences.userToken
                     )
-                    dogfoodingApp.initializeStreamVideo(
+                    app.initializeStreamVideo(
                         user = preferences.user!!,
                         token = preferences.userToken,
                         apiKey = preferences.apiKey,
@@ -96,8 +96,8 @@ class DeeplinkingActivity : ComponentActivity() {
                         userId = guest.id,
                         apiKey = BuildConfig.DOGFOODING_API_KEY
                     )
-                    dogfoodingApp.initializeStreamChat(user = guest, token = result.token)
-                    dogfoodingApp.initializeStreamVideo(
+                    app.initializeStreamChat(user = guest, token = result.token)
+                    app.initializeStreamVideo(
                         user = guest,
                         token = result.token,
                         apiKey = BuildConfig.DOGFOODING_API_KEY,

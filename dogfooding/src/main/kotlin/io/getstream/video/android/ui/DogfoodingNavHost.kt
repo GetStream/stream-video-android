@@ -30,45 +30,45 @@ import io.getstream.video.android.ui.lobby.CallLobbyScreen
 import io.getstream.video.android.ui.login.LoginScreen
 
 @Composable
-fun DogfoodingNavHost(
+fun AppNavHost(
     modifier: Modifier = Modifier,
     navController: NavHostController = rememberNavController(),
-    startDestination: String = DogfoodingScreens.Login.destination
+    startDestination: String = AppScreens.Login.destination
 ) {
     NavHost(
         modifier = modifier.fillMaxSize(),
         navController = navController,
         startDestination = startDestination
     ) {
-        composable(DogfoodingScreens.Login.destination) {
+        composable(AppScreens.Login.destination) {
             LoginScreen(
                 navigateToCallJoin = {
-                    navController.navigate(DogfoodingScreens.CallJoin.destination) {
-                        popUpTo(DogfoodingScreens.Login.destination) { inclusive = true }
+                    navController.navigate(AppScreens.CallJoin.destination) {
+                        popUpTo(AppScreens.Login.destination) { inclusive = true }
                     }
                 }
             )
         }
-        composable(DogfoodingScreens.CallJoin.destination) {
+        composable(AppScreens.CallJoin.destination) {
             CallJoinScreen(
                 navigateToCallLobby = { cid ->
-                    navController.navigate("${DogfoodingScreens.CallLobby.destination}/$cid")
+                    navController.navigate("${AppScreens.CallLobby.destination}/$cid")
                 },
                 navigateUpToLogin = {
-                    navController.navigate(DogfoodingScreens.Login.destination) {
-                        popUpTo(DogfoodingScreens.CallJoin.destination) { inclusive = true }
+                    navController.navigate(AppScreens.Login.destination) {
+                        popUpTo(AppScreens.CallJoin.destination) { inclusive = true }
                     }
                 }
             )
         }
         composable(
-            "${DogfoodingScreens.CallLobby.destination}/{cid}",
+            "${AppScreens.CallLobby.destination}/{cid}",
             arguments = listOf(navArgument("cid") { type = NavType.StringType })
         ) {
             CallLobbyScreen(
                 navigateUpToLogin = {
-                    navController.navigate(DogfoodingScreens.Login.destination) {
-                        popUpTo(DogfoodingScreens.CallJoin.destination) { inclusive = true }
+                    navController.navigate(AppScreens.Login.destination) {
+                        popUpTo(AppScreens.CallJoin.destination) { inclusive = true }
                     }
                 }
             )
@@ -76,7 +76,7 @@ fun DogfoodingNavHost(
     }
 }
 
-enum class DogfoodingScreens(val destination: String) {
+enum class AppScreens(val destination: String) {
     Login("login"),
     CallJoin("call_join"),
     CallLobby("call_preview");
