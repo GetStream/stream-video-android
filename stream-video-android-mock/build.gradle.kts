@@ -30,6 +30,7 @@ rootProject.extra.apply {
 apply(from ="${rootDir}/scripts/publish-module.gradle")
 
 android {
+    namespace = "io.getstream.video.android.mock"
     compileSdk = Configuration.compileSdk
 
     defaultConfig {
