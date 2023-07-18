@@ -323,7 +323,10 @@ internal fun BoxScope.PortraitVideoRenderer(
                     modifier = Modifier.fillMaxSize(),
                     columns = GridCells.Fixed(2),
                     content = {
-                        items(callParticipants.size) { key ->
+                        items(
+                            count = callParticipants.size,
+                            key = { callParticipants[it].sessionId }
+                        ) { key ->
                             // make 3 items exactly fit available height
                             val itemHeight = with(LocalDensity.current) {
                                 (constraints.maxHeight / 3).toDp()
