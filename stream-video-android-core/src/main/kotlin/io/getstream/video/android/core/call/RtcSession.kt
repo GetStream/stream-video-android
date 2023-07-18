@@ -582,12 +582,13 @@ public class RtcSession internal constructor(
         userId: String,
         sessionId: String,
         trackType: TrackType,
-        isEnabled: Boolean
+        videoEnabled: Boolean,
+        audioEnabled: Boolean
     ) {
-        logger.d { "[updateMuteState] #sfu; userId: $userId, sessionId: $sessionId, isEnabled: $isEnabled" }
+        logger.d { "[updateMuteState] #sfu; userId: $userId, sessionId: $sessionId, videoEnabled: $videoEnabled, audioEnabled: $audioEnabled" }
         val track = getTrack(sessionId, trackType)
-        track?.enableVideo(isEnabled)
-        track?.enableAudio(isEnabled)
+        track?.enableVideo(videoEnabled)
+        track?.enableAudio(audioEnabled)
     }
 
     fun cleanup() {
@@ -936,11 +937,23 @@ public class RtcSession internal constructor(
                     is ChangePublishQualityEvent -> updatePublishQuality(event)
 
                     is TrackPublishedEvent -> {
-                        updatePublishState(event.userId, event.sessionId, event.trackType, true)
+                        updatePublishState(
+                            userId = event.userId,
+                            sessionId = event.sessionId,
+                            trackType = event.trackType,
+                            videoEnabled = call.camera.isEnabled.value,
+                            audioEnabled = call.microphone.isEnabled.value
+                        )
                     }
 
                     is TrackUnpublishedEvent -> {
-                        updatePublishState(event.userId, event.sessionId, event.trackType, false)
+                        updatePublishState(
+                            userId = event.userId,
+                            sessionId = event.sessionId,
+                            trackType = event.trackType,
+                            videoEnabled = false,
+                            audioEnabled = false
+                        )
                     }
 
                     is ParticipantJoinedEvent -> {
