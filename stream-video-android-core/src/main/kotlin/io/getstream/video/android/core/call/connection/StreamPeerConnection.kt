@@ -73,7 +73,7 @@ public class StreamPeerConnection(
     private val maxBitRate: Int,
 ) : PeerConnection.Observer {
 
-    val goodStates = listOf(
+    private val goodStates = listOf(
         PeerConnection.PeerConnectionState.NEW, // New is good, means we're not using it yet
         PeerConnection.PeerConnectionState.CONNECTED,
         PeerConnection.PeerConnectionState.CONNECTING,

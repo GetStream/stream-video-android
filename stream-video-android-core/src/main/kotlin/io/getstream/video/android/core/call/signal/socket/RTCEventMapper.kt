@@ -47,6 +47,7 @@ public object RTCEventMapper {
             event.connection_quality_changed != null -> with(event.connection_quality_changed) {
                 ConnectionQualityChangeEvent(updates = connection_quality_updates)
             }
+
             event.audio_level_changed != null -> AudioLevelChangedEvent(
                 event.audio_level_changed.audio_levels.associate {
                     it.session_id to UserAudioLevel(
@@ -56,6 +57,7 @@ public object RTCEventMapper {
                     )
                 }
             )
+
             event.change_publish_quality != null -> ChangePublishQualityEvent(event.change_publish_quality)
 
             event.track_published != null -> with(event.track_published) {
@@ -77,21 +79,32 @@ public object RTCEventMapper {
             event.participant_joined != null -> with(event.participant_joined) {
                 ParticipantJoinedEvent(participant!!, call_cid)
             }
+
             event.participant_left != null -> with(event.participant_left) {
                 ParticipantLeftEvent(participant!!, call_cid)
             }
-            event.dominant_speaker_changed != null -> DominantSpeakerChangedEvent(event.dominant_speaker_changed.user_id, event.dominant_speaker_changed.session_id)
+
+            event.dominant_speaker_changed != null -> DominantSpeakerChangedEvent(
+                event.dominant_speaker_changed.user_id,
+                event.dominant_speaker_changed.session_id
+            )
+
             event.health_check_response != null -> SFUHealthCheckEvent
             event.join_response != null -> with(event.join_response) {
                 JoinCallResponseEvent(call_state!!)
             }
+
             event.ice_trickle != null -> with(event.ice_trickle) {
                 ICETrickleEvent(ice_candidate, peer_type)
             }
+
             event.publisher_answer != null -> PublisherAnswerEvent(sdp = event.publisher_answer.sdp)
             event.error != null -> ErrorEvent(event.error.error)
 
-            event.call_grants_updated != null -> CallGrantsUpdatedEvent(event.call_grants_updated.current_grants, event.call_grants_updated.message)
+            event.call_grants_updated != null -> CallGrantsUpdatedEvent(
+                event.call_grants_updated.current_grants,
+                event.call_grants_updated.message
+            )
 
             else -> {
                 logger.w { "Unknown event: $event" }

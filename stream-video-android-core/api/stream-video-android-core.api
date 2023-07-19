@@ -815,7 +815,6 @@ public final class io/getstream/video/android/core/call/RtcSession {
 	public final fun connect (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public final fun createPublisher ()Lio/getstream/video/android/core/call/connection/StreamPeerConnection;
 	public final fun createSubscriber ()Lio/getstream/video/android/core/call/connection/StreamPeerConnection;
-	public final fun getDefaultVideoDimension ()Lstream/video/sfu/models/VideoDimension;
 	public final fun getLocalTrack (Lstream/video/sfu/models/TrackType;)Lio/getstream/video/android/core/model/MediaTrack;
 	public final fun getPublisherStats ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun getSubscriber ()Lio/getstream/video/android/core/call/connection/StreamPeerConnection;
@@ -867,7 +866,6 @@ public final class io/getstream/video/android/core/call/connection/StreamPeerCon
 	public final fun createOffer (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public final fun getAudioTransceiver ()Lorg/webrtc/RtpTransceiver;
 	public final fun getConnection ()Lorg/webrtc/PeerConnection;
-	public final fun getGoodStates ()Ljava/util/List;
 	public final fun getStats ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun getVideoTransceiver ()Lorg/webrtc/RtpTransceiver;
 	public final fun initialize (Lorg/webrtc/PeerConnection;)V
