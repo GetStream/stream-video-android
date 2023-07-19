@@ -19,7 +19,9 @@
 package io.getstream.video.android.dogfooding.ui.call
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.size
+import androidx.compose.material.Badge
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.ModalBottomSheetValue
 import androidx.compose.material.Snackbar
@@ -32,8 +34,10 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.call.activecall.CallContent
@@ -59,6 +63,7 @@ fun CallScreen(
     val speakingWhileMuted by call.state.speakingWhileMuted.collectAsState()
     var isShowingSettingMenu by remember { mutableStateOf(false) }
     var isShowingAvailableDeviceMenu by remember { mutableStateOf(false) }
+    var unreadCount by remember { mutableStateOf(0) }
 
     val chatState = rememberModalBottomSheetState(ModalBottomSheetValue.Hidden)
     val scope = rememberCoroutineScope()
@@ -90,10 +95,26 @@ fun CallScreen(
                                     )
                                 },
                                 {
-                                    ChatDialogAction(
-                                        modifier = Modifier.size(VideoTheme.dimens.controlActionsButtonSize),
-                                        onCallAction = { scope.launch { chatState.show() } }
-                                    )
+                                    Box(modifier = Modifier.size(VideoTheme.dimens.controlActionsButtonSize)) {
+                                        ChatDialogAction(
+                                            modifier = Modifier.size(VideoTheme.dimens.controlActionsButtonSize),
+                                            onCallAction = { scope.launch { chatState.show() } }
+                                        )
+
+                                        if (unreadCount > 0) {
+                                            Badge(
+                                                modifier = Modifier.align(Alignment.TopEnd),
+                                                backgroundColor = VideoTheme.colors.errorAccent,
+                                                contentColor = VideoTheme.colors.errorAccent,
+                                            ) {
+                                                Text(
+                                                    text = unreadCount.toString(),
+                                                    color = VideoTheme.colors.textHighEmphasis,
+                                                    fontWeight = FontWeight.Bold
+                                                )
+                                            }
+                                        }
+                                    }
                                 },
                                 {
                                     ToggleCameraAction(
@@ -126,6 +147,7 @@ fun CallScreen(
                     }
                 )
             },
+            updateUnreadCount = { unreadCount = it },
             onDismissed = { scope.launch { chatState.hide() } }
         )
 
