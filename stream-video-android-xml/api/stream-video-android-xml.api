@@ -58,8 +58,8 @@ public final class io/getstream/video/android/xml/binding/ScreenShareViewBinding
 }
 
 public final class io/getstream/video/android/xml/databinding/StreamVideoActivityCallBinding : androidx/viewbinding/ViewBinding {
-	public final field floatingParticipantView Lio/getstream/video/android/common/view/ParticipantItemView;
-	public final field participantContent Lio/getstream/video/android/common/view/ParticipantContentView;
+	public final field floatingParticipantView Lio/getstream/video/android/ui/common/view/ParticipantItemView;
+	public final field participantContent Lio/getstream/video/android/ui/common/view/ParticipantContentView;
 	public final field toolbar Landroidx/appcompat/widget/Toolbar;
 	public static fun bind (Landroid/view/View;)Lio/getstream/video/android/xml/databinding/StreamVideoActivityCallBinding;
 	public synthetic fun getRoot ()Landroid/view/View;

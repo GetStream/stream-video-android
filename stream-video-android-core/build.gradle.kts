@@ -47,6 +47,7 @@ wire {
 generateRPCServices {}
 
 android {
+    namespace = "io.getstream.video.android.core"
     compileSdk = Configuration.compileSdk
 
     defaultConfig {

@@ -27,7 +27,7 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
-    <io.getstream.video.android.common.view.ParticipantContentView
+    <io.getstream.video.android.ui.common.view.ParticipantContentView
         android:id="@+id/participantContent"
         android:layout_width="0dp"
         android:layout_height="0dp"
@@ -36,7 +36,7 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/toolbar" />
 
-    <io.getstream.video.android.common.view.ParticipantItemView
+    <io.getstream.video.android.ui.common.view.ParticipantItemView
         android:id="@+id/floatingParticipantView"
         android:layout_width="125dp"
         android:layout_height="150dp"

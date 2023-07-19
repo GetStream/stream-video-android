@@ -18,7 +18,6 @@ package io.getstream.video.android.core
 
 import android.os.Build
 import io.getstream.log.taggedLogger
-import io.getstream.video.android.BuildConfig
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.MutableStateFlow

@@ -20,7 +20,7 @@
     <uses-permission android:name="android.permission.INTERNET" />
 
     <application
-        android:name=".DogfoodingApp"
+        android:name="io.getstream.video.android.App"
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
@@ -35,7 +35,7 @@
             tools:targetApi="29" />
 
         <activity
-            android:name=".MainActivity"
+            android:name="io.getstream.video.android.MainActivity"
             android:exported="true"
             android:theme="@style/Dogfooding">
             <intent-filter>
@@ -46,7 +46,7 @@
         </activity>
 
         <activity
-            android:name=".ui.call.CallActivity"
+            android:name="io.getstream.video.android.ui.call.CallActivity"
             android:configChanges="screenSize|smallestScreenSize|screenLayout|orientation"
             android:exported="true"
             android:hardwareAccelerated="true"
@@ -54,7 +54,7 @@
             android:windowSoftInputMode="adjustResize" />
 
         <activity
-            android:name=".IncomingCallActivity"
+            android:name="io.getstream.video.android.IncomingCallActivity"
             android:exported="false"
             android:showOnLockScreen="true"
             android:supportsPictureInPicture="true"

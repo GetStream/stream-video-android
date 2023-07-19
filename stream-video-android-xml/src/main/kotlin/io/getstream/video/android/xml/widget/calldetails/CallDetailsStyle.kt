@@ -20,7 +20,7 @@ import android.content.Context
 import android.graphics.Typeface
 import android.util.AttributeSet
 import androidx.annotation.Px
-import io.getstream.video.android.common.util.getFloatResource
+import io.getstream.video.android.ui.common.util.getFloatResource
 import io.getstream.video.android.xml.R
 import io.getstream.video.android.xml.font.TextStyle
 import io.getstream.video.android.xml.utils.extensions.dpToPx
