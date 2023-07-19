@@ -43,8 +43,9 @@ import io.getstream.video.android.ui.common.R
 import kotlinx.coroutines.launch
 
 @Composable
-internal fun CallSettingsMenu(
+internal fun SettingsMenu(
     call: Call,
+    onDisplayAvailableDevice: () -> Unit,
     onDismissed: () -> Unit
 ) {
     val context = LocalContext.current
@@ -150,6 +151,27 @@ internal fun CallSettingsMenu(
                     Text(
                         modifier = Modifier.padding(start = 20.dp),
                         text = "Switch sfu",
+                        color = VideoTheme.colors.textHighEmphasis
+                    )
+                }
+
+                Spacer(modifier = Modifier.height(12.dp))
+
+                Row(
+                    modifier = Modifier.clickable {
+                        onDismissed.invoke()
+                        onDisplayAvailableDevice.invoke()
+                    }
+                ) {
+                    Icon(
+                        painter = painterResource(id = R.drawable.stream_video_ic_mic_on),
+                        tint = VideoTheme.colors.textHighEmphasis,
+                        contentDescription = null
+                    )
+
+                    Text(
+                        modifier = Modifier.padding(start = 20.dp),
+                        text = "Switch Microphone",
                         color = VideoTheme.colors.textHighEmphasis
                     )
                 }
