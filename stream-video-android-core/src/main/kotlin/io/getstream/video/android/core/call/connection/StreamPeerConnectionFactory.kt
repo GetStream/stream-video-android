@@ -96,18 +96,23 @@ public class StreamPeerConnectionFactory(private val context: Context) {
                         Logging.Severity.LS_VERBOSE -> {
                             // webRtcLogger.v { "[onLogMessage] label: $label, message: $message" }
                         }
+
                         Logging.Severity.LS_INFO -> {
                             webRtcLogger.i { "[onLogMessage] label: $label, message: $message" }
                         }
+
                         Logging.Severity.LS_WARNING -> {
                             webRtcLogger.w { "[onLogMessage] label: $label, message: $message" }
                         }
+
                         Logging.Severity.LS_ERROR -> {
                             webRtcLogger.e { "[onLogMessage] label: $label, message: $message" }
                         }
+
                         Logging.Severity.LS_NONE -> {
                             webRtcLogger.d { "[onLogMessage] label: $label, message: $message" }
                         }
+
                         else -> {}
                     }
                 }, Logging.Severity.LS_VERBOSE)

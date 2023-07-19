@@ -157,7 +157,8 @@ public class RtcSession internal constructor(
     internal var remoteIceServers: List<IceServer>,
 ) {
 
-    internal val trackIdToParticipant: MutableStateFlow<Map<String, String>> = MutableStateFlow(emptyMap())
+    internal val trackIdToParticipant: MutableStateFlow<Map<String, String>> =
+        MutableStateFlow(emptyMap())
     private var syncSubscriberAnswer: Job? = null
     private var syncPublisherJob: Job? = null
     private var subscriptionSyncJob: Job? = null
@@ -805,7 +806,7 @@ public class RtcSession internal constructor(
 //        }
     }
 
-    val defaultVideoDimension = VideoDimension(1080, 2340)
+    private val defaultVideoDimension = VideoDimension(1080, 2340)
 
     /**
      * This is called when you are look at a different set of participants
