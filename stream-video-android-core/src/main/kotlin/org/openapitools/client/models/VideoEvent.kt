@@ -36,6 +36,7 @@ import org.openapitools.client.models.CallMemberRemovedEvent
 import org.openapitools.client.models.CallMemberUpdatedEvent
 import org.openapitools.client.models.CallMemberUpdatedPermissionEvent
 import org.openapitools.client.models.CallNotificationEvent
+import org.openapitools.client.models.CallParticipantResponse
 import org.openapitools.client.models.CallReactionEvent
 import org.openapitools.client.models.CallRecordingStartedEvent
 import org.openapitools.client.models.CallRecordingStoppedEvent

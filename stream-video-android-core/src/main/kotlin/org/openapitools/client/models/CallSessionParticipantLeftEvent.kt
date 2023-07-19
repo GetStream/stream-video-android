@@ -23,7 +23,7 @@
 
 package org.openapitools.client.models
 
-import org.openapitools.client.models.UserResponse
+import org.openapitools.client.models.CallParticipantResponse
 
 
 
@@ -41,10 +41,9 @@ import org.openapitools.client.infrastructure.Serializer
  *
  * @param callCid
  * @param createdAt
+ * @param participant
  * @param sessionId Call session ID
  * @param type The type of event: \"call.session_participant_left\" in this case
- * @param user
- * @param userSessionId The user session ID of the user that left the call session
  */
 
 
@@ -56,20 +55,16 @@ data class CallSessionParticipantLeftEvent (
     @Json(name = "created_at")
     val createdAt: org.threeten.bp.OffsetDateTime,
 
+    @Json(name = "participant")
+    val participant: CallParticipantResponse,
+
     /* Call session ID */
     @Json(name = "session_id")
     val sessionId: kotlin.String,
 
     /* The type of event: \"call.session_participant_left\" in this case */
     @Json(name = "type")
-    val type: kotlin.String = "call.session_participant_left",
-
-    @Json(name = "user")
-    val user: UserResponse,
-
-    /* The user session ID of the user that left the call session */
-    @Json(name = "user_session_id")
-    val userSessionId: kotlin.String
+    val type: kotlin.String = "call.session_participant_left"
 
 ) : VideoEvent(), WSCallEvent {
 

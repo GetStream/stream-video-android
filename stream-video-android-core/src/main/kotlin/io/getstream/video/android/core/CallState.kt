@@ -646,7 +646,7 @@ public class CallState(private val call: Call, private val user: User, internal 
             is CallSessionParticipantLeftEvent -> {
                 _session.value?.let { callSessionResponse ->
                     val newList = callSessionResponse.participants.toMutableList()
-                    newList.removeIf { it.userSessionId == event.userSessionId }
+                    newList.removeIf { it.userSessionId == event.participant.userSessionId }
                     _session.value = callSessionResponse.copy(
                         participants = newList.toImmutableList()
                     )
@@ -656,8 +656,8 @@ public class CallState(private val call: Call, private val user: User, internal 
             is CallSessionParticipantJoinedEvent -> {
                 _session.value?.let { callSessionResponse ->
                     val newList = callSessionResponse.participants.toMutableList()
-                    val participant = CallParticipantResponse(user = event.user, joinedAt = event.createdAt, role = "user", userSessionId = event.userSessionId)
-                    val index = newList.indexOfFirst { user.id == event.user.id }
+                    val participant = CallParticipantResponse(user = event.participant.user, joinedAt = event.createdAt, role = "user", userSessionId = event.participant.userSessionId)
+                    val index = newList.indexOfFirst { user.id == event.participant.user.id }
                     if (index == -1) {
                         newList.add(participant)
                     } else {

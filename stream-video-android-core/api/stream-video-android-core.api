@@ -2906,6 +2906,21 @@ public final class org/openapitools/client/models/BroadcastSettings {
 	public fun toString ()Ljava/lang/String;
 }
 
+public final class org/openapitools/client/models/BroadcastSettingsRequest {
+	public fun <init> ()V
+	public fun <init> (Ljava/lang/Boolean;Lorg/openapitools/client/models/HLSSettingsRequest;)V
+	public synthetic fun <init> (Ljava/lang/Boolean;Lorg/openapitools/client/models/HLSSettingsRequest;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Ljava/lang/Boolean;
+	public final fun component2 ()Lorg/openapitools/client/models/HLSSettingsRequest;
+	public final fun copy (Ljava/lang/Boolean;Lorg/openapitools/client/models/HLSSettingsRequest;)Lorg/openapitools/client/models/BroadcastSettingsRequest;
+	public static synthetic fun copy$default (Lorg/openapitools/client/models/BroadcastSettingsRequest;Ljava/lang/Boolean;Lorg/openapitools/client/models/HLSSettingsRequest;ILjava/lang/Object;)Lorg/openapitools/client/models/BroadcastSettingsRequest;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getEnabled ()Ljava/lang/Boolean;
+	public final fun getHls ()Lorg/openapitools/client/models/HLSSettingsRequest;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
 public final class org/openapitools/client/models/CallAcceptedEvent : org/openapitools/client/models/VideoEvent, org/openapitools/client/models/WSCallEvent {
 	public fun <init> (Lorg/openapitools/client/models/CallResponse;Ljava/lang/String;Lorg/threeten/bp/OffsetDateTime;Ljava/lang/String;Lorg/openapitools/client/models/UserResponse;)V
 	public synthetic fun <init> (Lorg/openapitools/client/models/CallResponse;Ljava/lang/String;Lorg/threeten/bp/OffsetDateTime;Ljava/lang/String;Lorg/openapitools/client/models/UserResponse;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
@@ -3385,49 +3400,45 @@ public final class org/openapitools/client/models/CallSessionEndedEvent : org/op
 }
 
 public final class org/openapitools/client/models/CallSessionParticipantJoinedEvent : org/openapitools/client/models/VideoEvent, org/openapitools/client/models/WSCallEvent {
-	public fun <init> (Ljava/lang/String;Lorg/threeten/bp/OffsetDateTime;Ljava/lang/String;Ljava/lang/String;Lorg/openapitools/client/models/UserResponse;Ljava/lang/String;)V
-	public synthetic fun <init> (Ljava/lang/String;Lorg/threeten/bp/OffsetDateTime;Ljava/lang/String;Ljava/lang/String;Lorg/openapitools/client/models/UserResponse;Ljava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun <init> (Ljava/lang/String;Lorg/threeten/bp/OffsetDateTime;Lorg/openapitools/client/models/CallParticipantResponse;Ljava/lang/String;Ljava/lang/String;)V
+	public synthetic fun <init> (Ljava/lang/String;Lorg/threeten/bp/OffsetDateTime;Lorg/openapitools/client/models/CallParticipantResponse;Ljava/lang/String;Ljava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun component1 ()Ljava/lang/String;
 	public final fun component2 ()Lorg/threeten/bp/OffsetDateTime;
-	public final fun component3 ()Ljava/lang/String;
+	public final fun component3 ()Lorg/openapitools/client/models/CallParticipantResponse;
 	public final fun component4 ()Ljava/lang/String;
-	public final fun component5 ()Lorg/openapitools/client/models/UserResponse;
-	public final fun component6 ()Ljava/lang/String;
-	public final fun copy (Ljava/lang/String;Lorg/threeten/bp/OffsetDateTime;Ljava/lang/String;Ljava/lang/String;Lorg/openapitools/client/models/UserResponse;Ljava/lang/String;)Lorg/openapitools/client/models/CallSessionParticipantJoinedEvent;
-	public static synthetic fun copy$default (Lorg/openapitools/client/models/CallSessionParticipantJoinedEvent;Ljava/lang/String;Lorg/threeten/bp/OffsetDateTime;Ljava/lang/String;Ljava/lang/String;Lorg/openapitools/client/models/UserResponse;Ljava/lang/String;ILjava/lang/Object;)Lorg/openapitools/client/models/CallSessionParticipantJoinedEvent;
+	public final fun component5 ()Ljava/lang/String;
+	public final fun copy (Ljava/lang/String;Lorg/threeten/bp/OffsetDateTime;Lorg/openapitools/client/models/CallParticipantResponse;Ljava/lang/String;Ljava/lang/String;)Lorg/openapitools/client/models/CallSessionParticipantJoinedEvent;
+	public static synthetic fun copy$default (Lorg/openapitools/client/models/CallSessionParticipantJoinedEvent;Ljava/lang/String;Lorg/threeten/bp/OffsetDateTime;Lorg/openapitools/client/models/CallParticipantResponse;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)Lorg/openapitools/client/models/CallSessionParticipantJoinedEvent;
 	public fun equals (Ljava/lang/Object;)Z
 	public fun getCallCID ()Ljava/lang/String;
 	public final fun getCallCid ()Ljava/lang/String;
 	public final fun getCreatedAt ()Lorg/threeten/bp/OffsetDateTime;
 	public fun getEventType ()Ljava/lang/String;
+	public final fun getParticipant ()Lorg/openapitools/client/models/CallParticipantResponse;
 	public final fun getSessionId ()Ljava/lang/String;
 	public final fun getType ()Ljava/lang/String;
-	public final fun getUser ()Lorg/openapitools/client/models/UserResponse;
-	public final fun getUserSessionId ()Ljava/lang/String;
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
 }
 
 public final class org/openapitools/client/models/CallSessionParticipantLeftEvent : org/openapitools/client/models/VideoEvent, org/openapitools/client/models/WSCallEvent {
-	public fun <init> (Ljava/lang/String;Lorg/threeten/bp/OffsetDateTime;Ljava/lang/String;Ljava/lang/String;Lorg/openapitools/client/models/UserResponse;Ljava/lang/String;)V
-	public synthetic fun <init> (Ljava/lang/String;Lorg/threeten/bp/OffsetDateTime;Ljava/lang/String;Ljava/lang/String;Lorg/openapitools/client/models/UserResponse;Ljava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun <init> (Ljava/lang/String;Lorg/threeten/bp/OffsetDateTime;Lorg/openapitools/client/models/CallParticipantResponse;Ljava/lang/String;Ljava/lang/String;)V
+	public synthetic fun <init> (Ljava/lang/String;Lorg/threeten/bp/OffsetDateTime;Lorg/openapitools/client/models/CallParticipantResponse;Ljava/lang/String;Ljava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun component1 ()Ljava/lang/String;
 	public final fun component2 ()Lorg/threeten/bp/OffsetDateTime;
-	public final fun component3 ()Ljava/lang/String;
+	public final fun component3 ()Lorg/openapitools/client/models/CallParticipantResponse;
 	public final fun component4 ()Ljava/lang/String;
-	public final fun component5 ()Lorg/openapitools/client/models/UserResponse;
-	public final fun component6 ()Ljava/lang/String;
-	public final fun copy (Ljava/lang/String;Lorg/threeten/bp/OffsetDateTime;Ljava/lang/String;Ljava/lang/String;Lorg/openapitools/client/models/UserResponse;Ljava/lang/String;)Lorg/openapitools/client/models/CallSessionParticipantLeftEvent;
-	public static synthetic fun copy$default (Lorg/openapitools/client/models/CallSessionParticipantLeftEvent;Ljava/lang/String;Lorg/threeten/bp/OffsetDateTime;Ljava/lang/String;Ljava/lang/String;Lorg/openapitools/client/models/UserResponse;Ljava/lang/String;ILjava/lang/Object;)Lorg/openapitools/client/models/CallSessionParticipantLeftEvent;
+	public final fun component5 ()Ljava/lang/String;
+	public final fun copy (Ljava/lang/String;Lorg/threeten/bp/OffsetDateTime;Lorg/openapitools/client/models/CallParticipantResponse;Ljava/lang/String;Ljava/lang/String;)Lorg/openapitools/client/models/CallSessionParticipantLeftEvent;
+	public static synthetic fun copy$default (Lorg/openapitools/client/models/CallSessionParticipantLeftEvent;Ljava/lang/String;Lorg/threeten/bp/OffsetDateTime;Lorg/openapitools/client/models/CallParticipantResponse;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)Lorg/openapitools/client/models/CallSessionParticipantLeftEvent;
 	public fun equals (Ljava/lang/Object;)Z
 	public fun getCallCID ()Ljava/lang/String;
 	public final fun getCallCid ()Ljava/lang/String;
 	public final fun getCreatedAt ()Lorg/threeten/bp/OffsetDateTime;
 	public fun getEventType ()Ljava/lang/String;
+	public final fun getParticipant ()Lorg/openapitools/client/models/CallParticipantResponse;
 	public final fun getSessionId ()Ljava/lang/String;
 	public final fun getType ()Ljava/lang/String;
-	public final fun getUser ()Lorg/openapitools/client/models/UserResponse;
-	public final fun getUserSessionId ()Ljava/lang/String;
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
 }
@@ -3480,21 +3491,23 @@ public final class org/openapitools/client/models/CallSessionStartedEvent : org/
 
 public final class org/openapitools/client/models/CallSettingsRequest {
 	public fun <init> ()V
-	public fun <init> (Lorg/openapitools/client/models/AudioSettingsRequest;Lorg/openapitools/client/models/BackstageSettingsRequest;Lorg/openapitools/client/models/GeofenceSettingsRequest;Lorg/openapitools/client/models/RecordSettingsRequest;Lorg/openapitools/client/models/RingSettingsRequest;Lorg/openapitools/client/models/ScreensharingSettingsRequest;Lorg/openapitools/client/models/TranscriptionSettingsRequest;Lorg/openapitools/client/models/VideoSettingsRequest;)V
-	public synthetic fun <init> (Lorg/openapitools/client/models/AudioSettingsRequest;Lorg/openapitools/client/models/BackstageSettingsRequest;Lorg/openapitools/client/models/GeofenceSettingsRequest;Lorg/openapitools/client/models/RecordSettingsRequest;Lorg/openapitools/client/models/RingSettingsRequest;Lorg/openapitools/client/models/ScreensharingSettingsRequest;Lorg/openapitools/client/models/TranscriptionSettingsRequest;Lorg/openapitools/client/models/VideoSettingsRequest;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun <init> (Lorg/openapitools/client/models/AudioSettingsRequest;Lorg/openapitools/client/models/BackstageSettingsRequest;Lorg/openapitools/client/models/BroadcastSettingsRequest;Lorg/openapitools/client/models/GeofenceSettingsRequest;Lorg/openapitools/client/models/RecordSettingsRequest;Lorg/openapitools/client/models/RingSettingsRequest;Lorg/openapitools/client/models/ScreensharingSettingsRequest;Lorg/openapitools/client/models/TranscriptionSettingsRequest;Lorg/openapitools/client/models/VideoSettingsRequest;)V
+	public synthetic fun <init> (Lorg/openapitools/client/models/AudioSettingsRequest;Lorg/openapitools/client/models/BackstageSettingsRequest;Lorg/openapitools/client/models/BroadcastSettingsRequest;Lorg/openapitools/client/models/GeofenceSettingsRequest;Lorg/openapitools/client/models/RecordSettingsRequest;Lorg/openapitools/client/models/RingSettingsRequest;Lorg/openapitools/client/models/ScreensharingSettingsRequest;Lorg/openapitools/client/models/TranscriptionSettingsRequest;Lorg/openapitools/client/models/VideoSettingsRequest;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun component1 ()Lorg/openapitools/client/models/AudioSettingsRequest;
 	public final fun component2 ()Lorg/openapitools/client/models/BackstageSettingsRequest;
-	public final fun component3 ()Lorg/openapitools/client/models/GeofenceSettingsRequest;
-	public final fun component4 ()Lorg/openapitools/client/models/RecordSettingsRequest;
-	public final fun component5 ()Lorg/openapitools/client/models/RingSettingsRequest;
-	public final fun component6 ()Lorg/openapitools/client/models/ScreensharingSettingsRequest;
-	public final fun component7 ()Lorg/openapitools/client/models/TranscriptionSettingsRequest;
-	public final fun component8 ()Lorg/openapitools/client/models/VideoSettingsRequest;
-	public final fun copy (Lorg/openapitools/client/models/AudioSettingsRequest;Lorg/openapitools/client/models/BackstageSettingsRequest;Lorg/openapitools/client/models/GeofenceSettingsRequest;Lorg/openapitools/client/models/RecordSettingsRequest;Lorg/openapitools/client/models/RingSettingsRequest;Lorg/openapitools/client/models/ScreensharingSettingsRequest;Lorg/openapitools/client/models/TranscriptionSettingsRequest;Lorg/openapitools/client/models/VideoSettingsRequest;)Lorg/openapitools/client/models/CallSettingsRequest;
-	public static synthetic fun copy$default (Lorg/openapitools/client/models/CallSettingsRequest;Lorg/openapitools/client/models/AudioSettingsRequest;Lorg/openapitools/client/models/BackstageSettingsRequest;Lorg/openapitools/client/models/GeofenceSettingsRequest;Lorg/openapitools/client/models/RecordSettingsRequest;Lorg/openapitools/client/models/RingSettingsRequest;Lorg/openapitools/client/models/ScreensharingSettingsRequest;Lorg/openapitools/client/models/TranscriptionSettingsRequest;Lorg/openapitools/client/models/VideoSettingsRequest;ILjava/lang/Object;)Lorg/openapitools/client/models/CallSettingsRequest;
+	public final fun component3 ()Lorg/openapitools/client/models/BroadcastSettingsRequest;
+	public final fun component4 ()Lorg/openapitools/client/models/GeofenceSettingsRequest;
+	public final fun component5 ()Lorg/openapitools/client/models/RecordSettingsRequest;
+	public final fun component6 ()Lorg/openapitools/client/models/RingSettingsRequest;
+	public final fun component7 ()Lorg/openapitools/client/models/ScreensharingSettingsRequest;
+	public final fun component8 ()Lorg/openapitools/client/models/TranscriptionSettingsRequest;
+	public final fun component9 ()Lorg/openapitools/client/models/VideoSettingsRequest;
+	public final fun copy (Lorg/openapitools/client/models/AudioSettingsRequest;Lorg/openapitools/client/models/BackstageSettingsRequest;Lorg/openapitools/client/models/BroadcastSettingsRequest;Lorg/openapitools/client/models/GeofenceSettingsRequest;Lorg/openapitools/client/models/RecordSettingsRequest;Lorg/openapitools/client/models/RingSettingsRequest;Lorg/openapitools/client/models/ScreensharingSettingsRequest;Lorg/openapitools/client/models/TranscriptionSettingsRequest;Lorg/openapitools/client/models/VideoSettingsRequest;)Lorg/openapitools/client/models/CallSettingsRequest;
+	public static synthetic fun copy$default (Lorg/openapitools/client/models/CallSettingsRequest;Lorg/openapitools/client/models/AudioSettingsRequest;Lorg/openapitools/client/models/BackstageSettingsRequest;Lorg/openapitools/client/models/BroadcastSettingsRequest;Lorg/openapitools/client/models/GeofenceSettingsRequest;Lorg/openapitools/client/models/RecordSettingsRequest;Lorg/openapitools/client/models/RingSettingsRequest;Lorg/openapitools/client/models/ScreensharingSettingsRequest;Lorg/openapitools/client/models/TranscriptionSettingsRequest;Lorg/openapitools/client/models/VideoSettingsRequest;ILjava/lang/Object;)Lorg/openapitools/client/models/CallSettingsRequest;
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getAudio ()Lorg/openapitools/client/models/AudioSettingsRequest;
 	public final fun getBackstage ()Lorg/openapitools/client/models/BackstageSettingsRequest;
+	public final fun getBroadcasting ()Lorg/openapitools/client/models/BroadcastSettingsRequest;
 	public final fun getGeofencing ()Lorg/openapitools/client/models/GeofenceSettingsRequest;
 	public final fun getRecording ()Lorg/openapitools/client/models/RecordSettingsRequest;
 	public final fun getRing ()Lorg/openapitools/client/models/RingSettingsRequest;
@@ -3993,6 +4006,23 @@ public final class org/openapitools/client/models/HLSSettings {
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getAutoOn ()Z
 	public final fun getEnabled ()Z
+	public final fun getQualityTracks ()Ljava/util/List;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class org/openapitools/client/models/HLSSettingsRequest {
+	public fun <init> ()V
+	public fun <init> (Ljava/lang/Boolean;Ljava/lang/Boolean;Ljava/util/List;)V
+	public synthetic fun <init> (Ljava/lang/Boolean;Ljava/lang/Boolean;Ljava/util/List;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Ljava/lang/Boolean;
+	public final fun component2 ()Ljava/lang/Boolean;
+	public final fun component3 ()Ljava/util/List;
+	public final fun copy (Ljava/lang/Boolean;Ljava/lang/Boolean;Ljava/util/List;)Lorg/openapitools/client/models/HLSSettingsRequest;
+	public static synthetic fun copy$default (Lorg/openapitools/client/models/HLSSettingsRequest;Ljava/lang/Boolean;Ljava/lang/Boolean;Ljava/util/List;ILjava/lang/Object;)Lorg/openapitools/client/models/HLSSettingsRequest;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getAutoOn ()Ljava/lang/Boolean;
+	public final fun getEnabled ()Ljava/lang/Boolean;
 	public final fun getQualityTracks ()Ljava/util/List;
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
