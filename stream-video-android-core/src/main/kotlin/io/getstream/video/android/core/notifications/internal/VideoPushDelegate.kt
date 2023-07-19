@@ -39,6 +39,7 @@ internal class VideoPushDelegate(
     context: Context
 ) : PushDelegate(context) {
     private val logger = StreamLog.getLogger("VideoPushDelegate")
+    private val DEFAULT_CALL_TEXT = "Unknown caller"
     private val userDataStore: StreamUserDataStore by lazy {
         StreamUserDataStore.install(context)
     }
@@ -78,17 +79,17 @@ internal class VideoPushDelegate(
     }
 
     private fun handleRingType(callId: StreamCallId, payload: Map<String, Any?>) {
-        val callDisplayName = payload[KEY_CALL_DISPLAY_NAME] as String
+        val callDisplayName = (payload[KEY_CREATED_BY_DISPLAY_NAME] as String).ifEmpty { DEFAULT_CALL_TEXT }
         streamVideo?.onRingingCall(callId, callDisplayName)
     }
 
     private fun handleNotificationType(callId: StreamCallId, payload: Map<String, Any?>) {
-        val callDisplayName = payload[KEY_CALL_DISPLAY_NAME] as String
+        val callDisplayName = (payload[KEY_CREATED_BY_DISPLAY_NAME] as String).ifEmpty { DEFAULT_CALL_TEXT }
         streamVideo?.onNotification(callId, callDisplayName)
     }
 
     private fun handleLiveStartedType(callId: StreamCallId, payload: Map<String, Any?>) {
-        val callDisplayName = payload[KEY_CALL_DISPLAY_NAME] as String
+        val callDisplayName = (payload[KEY_CREATED_BY_DISPLAY_NAME] as String).ifEmpty { DEFAULT_CALL_TEXT }
         streamVideo?.onLiveCall(callId, callDisplayName)
     }
 
@@ -145,19 +146,25 @@ internal class VideoPushDelegate(
      * Verify if the map contains all keys/values for a Ring Type.
      */
     private fun Map<String, Any?>.isValidRingType(): Boolean =
-        !(this[KEY_CALL_DISPLAY_NAME] as? String).isNullOrBlank()
+        // TODO: KEY_CALL_DISPLAY_NAME can be empty. Are there any other important key/values?
+        // !(this[KEY_CALL_DISPLAY_NAME] as? String).isNullOrBlank()
+        true
 
     /**
      * Verify if the map contains all keys/values for a Notification Type.
      */
     private fun Map<String, Any?>.isValidNotificationType(): Boolean =
-        !(this[KEY_CALL_DISPLAY_NAME] as? String).isNullOrBlank()
+        // TODO: KEY_CALL_DISPLAY_NAME can be empty. Are there any other important key/values?
+        // !(this[KEY_CALL_DISPLAY_NAME] as? String).isNullOrBlank()
+        true
 
     /**
      * Verify if the map contains all keys/values for a Live Started Type.
      */
     private fun Map<String, Any?>.isValidLiveStarted(): Boolean =
-        !(this[KEY_CALL_DISPLAY_NAME] as? String).isNullOrBlank()
+        // TODO: KEY_CALL_DISPLAY_NAME can be empty. Are there any other important key/values?
+        // !(this[KEY_CALL_DISPLAY_NAME] as? String).isNullOrBlank()
+        true
     /**
      * Verify if the map contains key/value from Stream Server.
      */
@@ -178,6 +185,7 @@ internal class VideoPushDelegate(
         private const val KEY_TYPE_LIVE_STARTED = "call.live_started"
         private const val KEY_CALL_CID = "call_cid"
         private const val KEY_CALL_DISPLAY_NAME = "call_display_name"
+        private const val KEY_CREATED_BY_DISPLAY_NAME = "created_by_display_name"
         private const val VALUE_STREAM_SENDER = "stream.video"
     }
 }
