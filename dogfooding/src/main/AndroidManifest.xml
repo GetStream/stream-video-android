@@ -57,6 +57,7 @@
             android:name=".IncomingCallActivity"
             android:exported="false"
             android:showOnLockScreen="true"
+            android:supportsPictureInPicture="true"
             android:showWhenLocked="true">
             <intent-filter android:priority="1">
                 <action android:name="io.getstream.video.android.action.INCOMING_CALL" />

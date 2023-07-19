@@ -50,7 +50,10 @@ class IncomingCallActivity : ComponentActivity() {
         val call = StreamVideo.instance().call(callId.type, callId.id)
 
         lifecycleScope.launch {
-            if (NotificationHandler.ACTION_ACCEPT_CALL == intent.action) {
+
+            // We also check if savedInstanceState is null to prevent duplicate calls when activity
+            // is recreated (e.g. when entering PiP mode)
+            if (NotificationHandler.ACTION_ACCEPT_CALL == intent.action && savedInstanceState == null) {
                 call.accept()
                 call.join()
             }
