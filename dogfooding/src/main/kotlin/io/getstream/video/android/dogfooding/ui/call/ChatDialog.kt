@@ -50,6 +50,7 @@ import io.getstream.chat.android.compose.ui.util.rememberMessageListState
 import io.getstream.chat.android.compose.viewmodel.messages.MessageComposerViewModel
 import io.getstream.chat.android.compose.viewmodel.messages.MessageListViewModel
 import io.getstream.chat.android.compose.viewmodel.messages.MessagesViewModelFactory
+import io.getstream.chat.android.ui.common.state.messages.list.MessageItemState
 import io.getstream.video.android.core.Call
 
 @Composable
@@ -57,6 +58,7 @@ internal fun ChatDialog(
     call: Call,
     state: ModalBottomSheetState,
     content: @Composable () -> Unit,
+    updateUnreadCount: (Int) -> Unit,
     onDismissed: () -> Unit
 ) {
     val context = LocalContext.current
@@ -66,6 +68,10 @@ internal fun ChatDialog(
     )
 
     var messageListViewModel by remember { mutableStateOf<MessageListViewModel?>(null) }
+    val unreadMessageCounts: Int? =
+        messageListViewModel?.currentMessagesState?.messageItems?.filterIsInstance<MessageItemState>()
+            ?.filter { !it.isMessageRead }?.size
+
     LaunchedEffect(key1 = call) {
         messageListViewModel = factory.create(MessageListViewModel::class.java)
     }
@@ -73,6 +79,10 @@ internal fun ChatDialog(
     var composerViewModel by remember { mutableStateOf<MessageComposerViewModel?>(null) }
     LaunchedEffect(key1 = call) {
         composerViewModel = factory.create(MessageComposerViewModel::class.java)
+    }
+
+    LaunchedEffect(key1 = unreadMessageCounts) {
+        updateUnreadCount.invoke(unreadMessageCounts ?: 0)
     }
 
     ChatTheme {
