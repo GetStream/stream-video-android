@@ -77,10 +77,6 @@ Video roadmap and changelog is available [here](https://github.com/GetStream/pro
 
 ### 0.2.0 milestone
 
-- [ ] Call Analytics stateflow (Thierry)
-- [ ] Ringing: Make it easy to test
-- [ ] Ringing: Make a list of what needs to be configurable
-- [ ] Ringing: Sounds for incoming, outgoing, call timed out. Sound for someone joining a call (Disabled by default). Docs on how to change them
 - [ ] Publish app on play store
 - [ ] Bug: Screensharing on Firefox has some issues when rendering on android (Daniel)
 - [X] Example Button to switch speakerphone/earpiece (Jaewoong)
@@ -104,8 +100,11 @@ Video roadmap and changelog is available [here](https://github.com/GetStream/pro
 ### 0.3.0 milestone
 
 - [ ] Ringing: Make it easy to test
-- [ ] Pagination on query members & query channels
-- [ ] Audio & Video filters (Daniel)
+- [ ] Ringing: Make a list of what needs to be configurable
+- [ ] Ringing: Sounds for incoming, outgoing, call timed out. Sound for someone joining a call (Disabled by default). Docs on how to change them
+- [ ] Call Analytics stateflow (Thierry)
+- [ ] Pagination on query members & query channel endpoints (Daniel)
+- [ ] Audio & Video filters. Support  (Daniel)
 - [ ] Livestream tutorial (depends on RTMP support)
 - [ ] H264 workaround on Samsung 23 (see https://github.com/livekit/client-sdk-android/blob/main/livekit-android-sdk/src/main/java/io/livekit/android/webrtc/SimulcastVideoEncoderFactoryWrapper.kt#L34 and
 - https://github.com/react-native-webrtc/react-native-webrtc/issues/983#issuecomment-975624906)
