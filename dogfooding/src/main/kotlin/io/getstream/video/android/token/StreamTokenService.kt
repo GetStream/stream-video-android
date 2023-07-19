@@ -38,7 +38,7 @@ object StreamVideoNetwork {
     private val contentType = "application/json".toMediaType()
     private val retrofit =
         Retrofit.Builder()
-            .baseUrl("https://stream-video-demo.vercel.app/")
+            .baseUrl("https://stream-calls-dogfood.vercel.app/")
             .addConverterFactory(Json.asConverterFactory(contentType))
             .build()
 

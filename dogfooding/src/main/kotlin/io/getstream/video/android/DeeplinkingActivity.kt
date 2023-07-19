@@ -65,10 +65,11 @@ class DeeplinkingActivity : ComponentActivity() {
         }
 
         val data: Uri = intent?.data ?: return
-        val callId = data.toString().split("/").lastOrNull() ?: return
+        val callId = data.toString().split("id=").lastOrNull() ?: return
 
         logger.d { "Action: ${intent?.action}" }
         logger.d { "Data: ${intent?.data}" }
+        logger.d { "callId: $callId" }
 
         joinCall(callId)
     }

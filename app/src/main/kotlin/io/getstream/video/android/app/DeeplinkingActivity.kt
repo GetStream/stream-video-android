@@ -60,6 +60,7 @@ class DeeplinkingActivity : ComponentActivity() {
 
         logger.d { "Action: ${intent?.action}" }
         logger.d { "Data: ${intent?.data}" }
+        logger.d { "callId: $callId" }
 
         joinCall(callId)
     }
