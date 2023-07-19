@@ -220,7 +220,12 @@ open class PersistentSocket<T>(
             // parse the message
             val jsonAdapter: JsonAdapter<VideoEvent> =
                 Serializer.moshi.adapter(VideoEvent::class.java)
-            var processedEvent = jsonAdapter.fromJson(text)
+            val processedEvent = try {
+                jsonAdapter.fromJson(text)
+            } catch (e: Throwable) {
+                logger.w { "[onMessage] VideoEvent parsing error ${e.message}" }
+                null
+            }
 
             // TODO: This logic is specific to the Coordinator socket, move it
             if (processedEvent is ConnectedEvent) {
@@ -237,11 +242,15 @@ open class PersistentSocket<T>(
                 val errorAdapter: JsonAdapter<SocketError> =
                     Serializer.moshi.adapter(SocketError::class.java)
 
-                val parsedError = errorAdapter.fromJson(text)
-
-                parsedError?.let {
-                    logger.w { "[onMessage] socketErrorEvent: $parsedError.error" }
-                    handleError(it.error)
+                try {
+                    val parsedError = errorAdapter.fromJson(text)
+                    parsedError?.let {
+                        logger.w { "[onMessage] socketErrorEvent: ${parsedError.error}" }
+                        handleError(it.error)
+                    }
+                } catch (e: Throwable) {
+                    logger.w { "[onMessage] socketErrorEvent parsing error: ${e.message}" }
+                    handleError(e)
                 }
             } else {
                 logger.d { "parsed event $processedEvent" }
