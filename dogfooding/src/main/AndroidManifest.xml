@@ -71,7 +71,7 @@
             android:name=".DeeplinkingActivity"
             android:exported="true"
             android:launchMode="singleTask">
-            <tools:validation testUrl="https://stream-calls-dogfood.vercel.app" />
+            <tools:validation testUrl="https://stream-video-demo.vercel.app" />
             <intent-filter
                 android:autoVerify="true"
                 android:label="@string/filter_call_link">
@@ -82,7 +82,7 @@
                 <category android:name="android.intent.category.BROWSABLE" />
 
                 <data android:scheme="https" />
-                <data android:host="stream-calls-dogfood.vercel.app" />
+                <data android:host="stream-video-demo.vercel.app" />
             </intent-filter>
         </activity>
     </application>
