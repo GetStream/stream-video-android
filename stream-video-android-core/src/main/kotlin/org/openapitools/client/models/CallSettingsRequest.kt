@@ -25,6 +25,7 @@ package org.openapitools.client.models
 
 import org.openapitools.client.models.AudioSettingsRequest
 import org.openapitools.client.models.BackstageSettingsRequest
+import org.openapitools.client.models.BroadcastSettingsRequest
 import org.openapitools.client.models.GeofenceSettingsRequest
 import org.openapitools.client.models.RecordSettingsRequest
 import org.openapitools.client.models.RingSettingsRequest
@@ -48,6 +49,7 @@ import org.openapitools.client.infrastructure.Serializer
  *
  * @param audio
  * @param backstage
+ * @param broadcasting
  * @param geofencing
  * @param recording
  * @param ring
@@ -64,6 +66,9 @@ data class CallSettingsRequest (
 
     @Json(name = "backstage")
     val backstage: BackstageSettingsRequest? = null,
+
+    @Json(name = "broadcasting")
+    val broadcasting: BroadcastSettingsRequest? = null,
 
     @Json(name = "geofencing")
     val geofencing: GeofenceSettingsRequest? = null,

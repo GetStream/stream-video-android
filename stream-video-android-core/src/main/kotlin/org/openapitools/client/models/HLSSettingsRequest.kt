@@ -23,7 +23,6 @@
 
 package org.openapitools.client.models
 
-import org.openapitools.client.models.CallParticipantResponse
 
 
 
@@ -37,42 +36,23 @@ import com.squareup.moshi.ToJson
 import org.openapitools.client.infrastructure.Serializer
 
 /**
- * This event is sent when a participant joins a call session
  *
- * @param callCid
- * @param createdAt
- * @param participant
- * @param sessionId Call session ID
- * @param type The type of event: \"call.session_participant_joined\" in this case
+ *
+ * @param autoOn
+ * @param enabled
+ * @param qualityTracks
  */
 
 
-data class CallSessionParticipantJoinedEvent (
+data class HLSSettingsRequest (
 
-    @Json(name = "call_cid")
-    val callCid: kotlin.String,
+    @Json(name = "auto_on")
+    val autoOn: kotlin.Boolean? = null,
 
-    @Json(name = "created_at")
-    val createdAt: org.threeten.bp.OffsetDateTime,
+    @Json(name = "enabled")
+    val enabled: kotlin.Boolean? = null,
 
-    @Json(name = "participant")
-    val participant: CallParticipantResponse,
+    @Json(name = "quality_tracks")
+    val qualityTracks: kotlin.collections.List<kotlin.String>? = null
 
-    /* Call session ID */
-    @Json(name = "session_id")
-    val sessionId: kotlin.String,
-
-    /* The type of event: \"call.session_participant_joined\" in this case */
-    @Json(name = "type")
-    val type: kotlin.String = "call.session_participant_joined"
-
-) : VideoEvent(), WSCallEvent {
-
-    override fun getCallCID(): String {
-        return callCid
-    }
-
-    override fun getEventType(): String {
-        return type
-    }
-}
+)
