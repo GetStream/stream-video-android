@@ -27,6 +27,7 @@ import io.getstream.video.android.core.StreamVideo
 import io.getstream.video.android.datastore.delegate.StreamUserDataStore
 import io.getstream.video.android.model.StreamCallId
 import io.getstream.video.android.model.User
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
@@ -34,6 +35,7 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onCompletion
 import kotlinx.coroutines.flow.shareIn
 import kotlinx.coroutines.launch
@@ -59,6 +61,7 @@ class CallLobbyViewModel @Inject constructor(
     }
 
     val user: User? = dataStore.user.value
+    val isLoggedOut = dataStore.user.map { it == null }
 
     private val _isLoading: MutableStateFlow<Boolean> = MutableStateFlow(false)
     internal val isLoading: StateFlow<Boolean> = _isLoading
@@ -88,10 +91,13 @@ class CallLobbyViewModel @Inject constructor(
     }
 
     fun signOut() {
-        FirebaseAuth.getInstance().signOut()
-        StreamVideo.instance().logOut()
-        StreamVideo.removeClient()
-        ChatClient.instance().disconnect(true).enqueue()
+        viewModelScope.launch {
+            FirebaseAuth.getInstance().signOut()
+            StreamVideo.instance().logOut()
+            ChatClient.instance().disconnect(true).enqueue()
+            delay(200)
+            StreamVideo.removeClient()
+        }
     }
 }
 

@@ -71,6 +71,7 @@ fun CallJoinScreen(
     navigateUpToLogin: () -> Unit
 ) {
     val uiState by callJoinViewModel.uiState.collectAsState(CallJoinUiState.Nothing)
+    val isLoggedOut by callJoinViewModel.isLoggedOut.collectAsState(initial = false)
 
     HandleCallJoinUiState(
         callJoinUiState = uiState,
@@ -84,10 +85,7 @@ fun CallJoinScreen(
             .background(Colors.background),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        CallJoinHeader(
-            navigateUpToLogin = navigateUpToLogin,
-            callJoinViewModel = callJoinViewModel
-        )
+        CallJoinHeader(callJoinViewModel = callJoinViewModel)
 
         CallJoinBody(
             modifier = Modifier
@@ -97,12 +95,17 @@ fun CallJoinScreen(
             callJoinViewModel = callJoinViewModel
         )
     }
+
+    LaunchedEffect(key1 = isLoggedOut) {
+        if (isLoggedOut) {
+            navigateUpToLogin.invoke()
+        }
+    }
 }
 
 @Composable
 private fun CallJoinHeader(
-    callJoinViewModel: CallJoinViewModel = hiltViewModel(),
-    navigateUpToLogin: () -> Unit
+    callJoinViewModel: CallJoinViewModel = hiltViewModel()
 ) {
     val user by callJoinViewModel.user.collectAsState()
 
@@ -123,10 +126,7 @@ private fun CallJoinHeader(
         StreamButton(
             modifier = Modifier.width(125.dp),
             text = stringResource(id = R.string.sign_out),
-            onClick = {
-                callJoinViewModel.signOut()
-                navigateUpToLogin.invoke()
-            }
+            onClick = { callJoinViewModel.signOut() }
         )
     }
 }
@@ -256,8 +256,10 @@ private fun HandleCallJoinUiState(
         when (callJoinUiState) {
             is CallJoinUiState.JoinCompleted ->
                 navigateToCallLobby.invoke(callJoinUiState.callId)
+
             is CallJoinUiState.GoBackToLogin ->
                 navigateUpToLogin.invoke()
+
             else -> Unit
         }
     }

@@ -17,12 +17,12 @@
 package io.getstream.video.android.ui.login
 
 import android.content.Context
-import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.google.firebase.auth.FirebaseAuth
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.getstream.log.Priority
+import io.getstream.log.streamLog
 import io.getstream.video.android.API_KEY
 import io.getstream.video.android.BuildConfig
 import io.getstream.video.android.app
@@ -76,7 +76,7 @@ class LoginViewModel @Inject constructor(
             emit(LoginUiState.SignInComplete(response))
         } catch (exception: Throwable) {
             emit(LoginUiState.SignInFailure(exception.message ?: "General error"))
-            Log.e("LoginViewModel", "Failed to fetch token - cause: $exception")
+            streamLog { "Failed to fetch token - cause: $exception" }
         }
     }.flowOn(Dispatchers.IO)
 
