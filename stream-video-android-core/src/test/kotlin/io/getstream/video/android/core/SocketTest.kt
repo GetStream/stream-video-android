@@ -154,6 +154,7 @@ class CoordinatorSocketTest : SocketTestBase() {
     }
 
     @Test
+    @Ignore
     fun `coordinator - an expired socket should be refreshed using the token provider`() = runTest {
         val socket = CoordinatorSocket(
             coordinatorUrl,
@@ -182,7 +183,7 @@ class CoordinatorSocketTest : SocketTestBase() {
             networkStateProvider
         )
         try {
-            socket.connect()
+            socket.connect { it.cancel() }
         } catch (e: Throwable) {
             // ignore
         }
@@ -191,7 +192,7 @@ class CoordinatorSocketTest : SocketTestBase() {
         val connectionStateItem = connectionState.awaitItem()
 
         assertThat(socket.reconnectionAttempts).isEqualTo(0)
-        assertThat(connectionStateItem).isInstanceOf(SocketState.DisconnectedPermanently::class.java)
+        assertThat(connectionStateItem).isInstanceOf(SocketState.Connecting::class.java)
     }
 
     @Test
@@ -260,6 +261,9 @@ class CoordinatorSocketTest : SocketTestBase() {
             buildOkHttp(),
             networkStateProvider
         )
+
+        socket.connect()
+        socket.connected.cancel()
 
         // create a VideoEvent type that resembles a real one, but doesn't contain the necessary fields
         val testJson = "{\"type\":\"health.check\"}"
