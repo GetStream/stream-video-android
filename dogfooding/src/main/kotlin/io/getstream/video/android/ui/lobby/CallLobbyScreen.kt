@@ -112,6 +112,7 @@ private fun CallLobbyHeader(
     navigateUpToLogin: () -> Unit
 ) {
     val uiState by callLobbyViewModel.uiState.collectAsState(initial = CallLobbyUiState.Nothing)
+    val isLoggedOut by callLobbyViewModel.isLoggedOut.collectAsState(initial = false)
 
     HandleCallLobbyUiState(
         callLobbyUiState = uiState,
@@ -148,11 +149,14 @@ private fun CallLobbyHeader(
         StreamButton(
             modifier = Modifier.width(125.dp),
             text = stringResource(id = R.string.sign_out),
-            onClick = {
-                callLobbyViewModel.signOut()
-                navigateUpToLogin.invoke()
-            }
+            onClick = { callLobbyViewModel.signOut() }
         )
+    }
+
+    LaunchedEffect(key1 = isLoggedOut) {
+        if (isLoggedOut) {
+            navigateUpToLogin.invoke()
+        }
     }
 }
 
@@ -248,7 +252,10 @@ private fun LobbyDescription(
     ) {
         Text(
             modifier = Modifier.padding(start = 32.dp, end = 32.dp, top = 12.dp, bottom = 8.dp),
-            text = stringResource(id = R.string.join_call_description, session?.participants?.size ?: 0),
+            text = stringResource(
+                id = R.string.join_call_description,
+                session?.participants?.size ?: 0
+            ),
             color = Color.White
         )
 

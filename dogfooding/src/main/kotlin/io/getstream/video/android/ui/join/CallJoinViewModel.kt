@@ -27,12 +27,14 @@ import io.getstream.video.android.datastore.delegate.StreamUserDataStore
 import io.getstream.video.android.model.User
 import io.getstream.video.android.model.mapper.isValidCallId
 import io.getstream.video.android.model.mapper.toTypeAndId
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.shareIn
 import kotlinx.coroutines.launch
 import java.util.UUID
@@ -43,6 +45,7 @@ class CallJoinViewModel @Inject constructor(
     dataStore: StreamUserDataStore,
 ) : ViewModel() {
     val user: StateFlow<User?> = dataStore.user
+    val isLoggedOut = dataStore.user.map { it == null }
 
     private val event: MutableSharedFlow<CallJoinEvent> = MutableSharedFlow()
     internal val uiState: SharedFlow<CallJoinUiState> = event
@@ -90,10 +93,13 @@ class CallJoinViewModel @Inject constructor(
     }
 
     fun signOut() {
-        FirebaseAuth.getInstance().signOut()
-        StreamVideo.instance().logOut()
-        StreamVideo.removeClient()
-        ChatClient.instance().disconnect(true).enqueue()
+        viewModelScope.launch {
+            FirebaseAuth.getInstance().signOut()
+            StreamVideo.instance().logOut()
+            ChatClient.instance().disconnect(true).enqueue()
+            delay(200)
+            StreamVideo.removeClient()
+        }
     }
 }
 
