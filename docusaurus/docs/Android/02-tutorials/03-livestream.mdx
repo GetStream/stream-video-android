@@ -12,8 +12,9 @@ This tutorial isn't ready yet
 
 ## Notes other SDKs
 
-- add .live as the opposite of backstage
+- add .live as the opposite of .backstage
 - expose ingress urls nicely (ingress.rtmp.address, ingress.rtmp.streamKey)
+- expose duration based on session.liveSince
 
 ## TODO tutorial:
 
@@ -48,7 +49,7 @@ Let's get started, if you have any questions or feedback be sure to let us know 
 
 ### Step 1 - Create a new project in Android Studio
 
-Note that this tutorial was written using Android Studio Flamingo.
+This tutorial was written using Android Studio Flamingo.
 Setup steps can vary slightly across Android Studio versions so if you run into trouble be sure to use the latest version of Android Studio.
 
 1. Create a new project
@@ -66,10 +67,13 @@ dependencies {
 }
 ```
 
+This tutorial uses the compose version of the SDK. Stream also provides a core library without compose.
+
 ### Step 3 - Publish from your phone
 
+
 The following code shows how to publish from your phone's camera to the call.
-Let's open MainActivity.kt and replace it with:
+Let's open MainActivity.kt and replace the MainActivity class with the following code:
 
 ```kotlin
 class MainActivity : ComponentActivity() {
@@ -98,7 +102,7 @@ class MainActivity : ComponentActivity() {
         // join a call, which type is `default`
         val call = client.call("livestream", callId)
         lifecycleScope.launch {
-            // enable the camera and microphone
+
             call.camera.enable()
             call.microphone.enable()
 
@@ -109,17 +113,19 @@ class MainActivity : ComponentActivity() {
             }
         }
 
-
         setContent {
-        // TODO: maybe split this step
+            // enable the camera and microphone
+            LaunchCallPermissions(call = call)
             VideoTheme {
-                Text("Todo render video")
+                Text("TODO: render video")
             }
         }
     }
 }
 
 ```
+
+Let's review the above steps.
 
 TODO: Review what we did here
 
@@ -133,32 +139,42 @@ VideoTheme {
     val backstage by call.state.backstage.collectAsState()
     val me by call.state.me.collectAsState()
     val video = me?.video?.collectAsState()
+    val session by call.state.session.collectAsState()
 
     Box(
         modifier = Modifier
             .fillMaxSize()
             .background(VideoTheme.colors.appBackground),
     ) {
-        Column() {
+        VideoRenderer(call = call, video = video?.value, videoFallbackContent = {
+
+        })
+
+        Column(
+            verticalArrangement = Arrangement.Bottom,
+            horizontalAlignment = Alignment.CenterHorizontally,
+            modifier = Modifier.fillMaxWidth().fillMaxHeight().padding(32.dp)
+
+        ) {
 
 
-            VideoRenderer(call = call, video = video?.value)
+            if (connection == RealtimeConnection.Connected) {
+                if (!backstage) {
+                    Text("Livestream has $participantCount participants")
 
-            Button(onClick = {
-                lifecycleScope.launch {
-                    if (backstage) call.goLive() else call.stopLive()
+                    Text("Live for 1:23")
                 }
-            }) {
-                Text(text = if (backstage) "Go Live" else "Stop Broadcast")
+
+                Button(onClick = {
+                    lifecycleScope.launch {
+                        if (backstage) call.goLive() else call.stopLive()
+                    }
+                }) {
+                    Text(text = if (backstage) "Go Live" else "Stop Broadcast")
+                }
             }
         }
-        if (connection != RealtimeConnection.Connected) {
-            Text("loading...$connection")
-        }
 
-        Text("Livestream has $participantCount participants")
-
-        Text("Live for 1:23")
     }
 }
 ```
