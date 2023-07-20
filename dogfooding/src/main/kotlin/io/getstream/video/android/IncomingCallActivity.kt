@@ -66,14 +66,20 @@ class IncomingCallActivity : ComponentActivity() {
                         is ToggleCamera -> call.camera.setEnabled(callAction.isEnabled)
                         is ToggleMicrophone -> call.microphone.setEnabled(callAction.isEnabled)
                         is ToggleSpeakerphone -> call.speaker.setEnabled(callAction.isEnabled)
-                        is LeaveCall -> finish()
+                        is LeaveCall -> {
+                            call.leave()
+                            finish()
+                        }
                         else -> Unit
                     }
                 }
                 RingingCallContent(
                     modifier = Modifier.background(color = VideoTheme.colors.appBackground),
                     call = call,
-                    onBackPressed = { finish() },
+                    onBackPressed = {
+                        call.leave()
+                        finish()
+                    },
                     onAcceptedContent = {
                         CallContent(
                             modifier = Modifier.fillMaxSize(),
