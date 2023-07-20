@@ -37,6 +37,7 @@ import io.getstream.video.android.core.call.state.ToggleMicrophone
 import io.getstream.video.android.core.call.state.ToggleSpeakerphone
 import io.getstream.video.android.core.notifications.NotificationHandler
 import io.getstream.video.android.model.streamCallId
+import io.getstream.video.android.util.StreamVideoInitHelper
 import kotlinx.coroutines.launch
 
 class IncomingCallActivity : ComponentActivity() {
@@ -53,9 +54,11 @@ class IncomingCallActivity : ComponentActivity() {
             .cancel(NotificationHandler.INCOMING_CALL_NOTIFICATION_ID)
 
         val callId = intent.streamCallId(NotificationHandler.INTENT_EXTRA_CALL_CID)!!
-        val call = StreamVideo.instance().call(callId.type, callId.id)
 
         lifecycleScope.launch {
+
+            StreamVideoInitHelper.init(this@IncomingCallActivity)
+            val call = StreamVideo.instance().call(callId.type, callId.id)
 
             // We also check if savedInstanceState is null to prevent duplicate calls when activity
             // is recreated (e.g. when entering PiP mode)
@@ -63,39 +66,39 @@ class IncomingCallActivity : ComponentActivity() {
                 call.accept()
                 call.join()
             }
-        }
 
-        setContent {
-            VideoTheme {
-                val onCallAction: (CallAction) -> Unit = { callAction ->
-                    when (callAction) {
-                        is ToggleCamera -> call.camera.setEnabled(callAction.isEnabled)
-                        is ToggleMicrophone -> call.microphone.setEnabled(callAction.isEnabled)
-                        is ToggleSpeakerphone -> call.speaker.setEnabled(callAction.isEnabled)
-                        is LeaveCall -> {
+            setContent {
+                VideoTheme {
+                    val onCallAction: (CallAction) -> Unit = { callAction ->
+                        when (callAction) {
+                            is ToggleCamera -> call.camera.setEnabled(callAction.isEnabled)
+                            is ToggleMicrophone -> call.microphone.setEnabled(callAction.isEnabled)
+                            is ToggleSpeakerphone -> call.speaker.setEnabled(callAction.isEnabled)
+                            is LeaveCall -> {
+                                call.leave()
+                                finish()
+                            }
+
+                            else -> Unit
+                        }
+                    }
+                    RingingCallContent(
+                        modifier = Modifier.background(color = VideoTheme.colors.appBackground),
+                        call = call,
+                        onBackPressed = {
                             call.leave()
                             finish()
-                        }
-
-                        else -> Unit
-                    }
+                        },
+                        onAcceptedContent = {
+                            CallContent(
+                                modifier = Modifier.fillMaxSize(),
+                                call = call,
+                                onCallAction = onCallAction
+                            )
+                        },
+                        onCallAction = onCallAction
+                    )
                 }
-                RingingCallContent(
-                    modifier = Modifier.background(color = VideoTheme.colors.appBackground),
-                    call = call,
-                    onBackPressed = {
-                        call.leave()
-                        finish()
-                    },
-                    onAcceptedContent = {
-                        CallContent(
-                            modifier = Modifier.fillMaxSize(),
-                            call = call,
-                            onCallAction = onCallAction
-                        )
-                    },
-                    onCallAction = onCallAction
-                )
             }
         }
     }
