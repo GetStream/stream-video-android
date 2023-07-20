@@ -45,6 +45,7 @@ import kotlinx.coroutines.launch
 @Composable
 internal fun SettingsMenu(
     call: Call,
+    showDebugOptions: Boolean,
     onDisplayAvailableDevice: () -> Unit,
     onDismissed: () -> Unit
 ) {
@@ -91,68 +92,70 @@ internal fun SettingsMenu(
 
                 Spacer(modifier = Modifier.height(12.dp))
 
-                Row(
-                    modifier = Modifier.clickable {
-                        call.debug.restartSubscriberIce()
-                        onDismissed.invoke()
-                        Toast.makeText(context, "Restart Subscriber Ice", Toast.LENGTH_SHORT).show()
+                if (showDebugOptions) {
+                    Row(
+                        modifier = Modifier.clickable {
+                            call.debug.restartSubscriberIce()
+                            onDismissed.invoke()
+                            Toast.makeText(context, "Restart Subscriber Ice", Toast.LENGTH_SHORT).show()
+                        }
+                    ) {
+                        Icon(
+                            painter = painterResource(id = R.drawable.stream_video_ic_fullscreen_exit),
+                            tint = VideoTheme.colors.textHighEmphasis,
+                            contentDescription = null
+                        )
+
+                        Text(
+                            modifier = Modifier.padding(start = 20.dp),
+                            text = "Restart Subscriber Ice",
+                            color = VideoTheme.colors.textHighEmphasis
+                        )
                     }
-                ) {
-                    Icon(
-                        painter = painterResource(id = R.drawable.stream_video_ic_fullscreen_exit),
-                        tint = VideoTheme.colors.textHighEmphasis,
-                        contentDescription = null
-                    )
 
-                    Text(
-                        modifier = Modifier.padding(start = 20.dp),
-                        text = "Restart Subscriber Ice",
-                        color = VideoTheme.colors.textHighEmphasis
-                    )
-                }
+                    Spacer(modifier = Modifier.height(12.dp))
 
-                Spacer(modifier = Modifier.height(12.dp))
+                    Row(
+                        modifier = Modifier.clickable {
+                            call.debug.restartPublisherIce()
+                            onDismissed.invoke()
+                            Toast.makeText(context, "Restart Publisher Ice", Toast.LENGTH_SHORT).show()
+                        }
+                    ) {
+                        Icon(
+                            painter = painterResource(id = R.drawable.stream_video_ic_fullscreen_exit),
+                            tint = VideoTheme.colors.textHighEmphasis,
+                            contentDescription = null
+                        )
 
-                Row(
-                    modifier = Modifier.clickable {
-                        call.debug.restartPublisherIce()
-                        onDismissed.invoke()
-                        Toast.makeText(context, "Restart Publisher Ice", Toast.LENGTH_SHORT).show()
+                        Text(
+                            modifier = Modifier.padding(start = 20.dp),
+                            text = "Restart Publisher Ice",
+                            color = VideoTheme.colors.textHighEmphasis
+                        )
                     }
-                ) {
-                    Icon(
-                        painter = painterResource(id = R.drawable.stream_video_ic_fullscreen_exit),
-                        tint = VideoTheme.colors.textHighEmphasis,
-                        contentDescription = null
-                    )
 
-                    Text(
-                        modifier = Modifier.padding(start = 20.dp),
-                        text = "Restart Publisher Ice",
-                        color = VideoTheme.colors.textHighEmphasis
-                    )
-                }
+                    Spacer(modifier = Modifier.height(12.dp))
 
-                Spacer(modifier = Modifier.height(12.dp))
+                    Row(
+                        modifier = Modifier.clickable {
+                            call.debug.switchSfu()
+                            onDismissed.invoke()
+                            Toast.makeText(context, "Switch sfu", Toast.LENGTH_SHORT).show()
+                        }
+                    ) {
+                        Icon(
+                            painter = painterResource(id = R.drawable.stream_video_ic_fullscreen),
+                            tint = VideoTheme.colors.textHighEmphasis,
+                            contentDescription = null
+                        )
 
-                Row(
-                    modifier = Modifier.clickable {
-                        call.debug.switchSfu()
-                        onDismissed.invoke()
-                        Toast.makeText(context, "Switch sfu", Toast.LENGTH_SHORT).show()
+                        Text(
+                            modifier = Modifier.padding(start = 20.dp),
+                            text = "Switch sfu",
+                            color = VideoTheme.colors.textHighEmphasis
+                        )
                     }
-                ) {
-                    Icon(
-                        painter = painterResource(id = R.drawable.stream_video_ic_fullscreen),
-                        tint = VideoTheme.colors.textHighEmphasis,
-                        contentDescription = null
-                    )
-
-                    Text(
-                        modifier = Modifier.padding(start = 20.dp),
-                        text = "Switch sfu",
-                        color = VideoTheme.colors.textHighEmphasis
-                    )
                 }
 
                 Spacer(modifier = Modifier.height(12.dp))
