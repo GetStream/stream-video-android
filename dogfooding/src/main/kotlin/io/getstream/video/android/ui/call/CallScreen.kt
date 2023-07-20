@@ -56,6 +56,7 @@ import kotlinx.coroutines.launch
 @Composable
 fun CallScreen(
     call: Call,
+    showDebugOptions: Boolean = false,
     onLeaveCall: () -> Unit = {}
 ) {
     val isCameraEnabled by call.camera.isEnabled.collectAsState()
@@ -158,6 +159,7 @@ fun CallScreen(
         if (isShowingSettingMenu) {
             SettingsMenu(
                 call = call,
+                showDebugOptions = showDebugOptions,
                 onDisplayAvailableDevice = { isShowingAvailableDeviceMenu = true },
                 onDismissed = { isShowingSettingMenu = false }
             )
