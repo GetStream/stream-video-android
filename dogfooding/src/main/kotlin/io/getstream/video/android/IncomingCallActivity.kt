@@ -24,7 +24,6 @@ import androidx.activity.compose.setContent
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.ui.Modifier
-import androidx.core.app.NotificationManagerCompat
 import androidx.lifecycle.lifecycleScope
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.call.activecall.CallContent
@@ -48,10 +47,6 @@ class IncomingCallActivity : ComponentActivity() {
         // release the lock, turn on screen, and keep the device awake.
         showWhenLockedAndTurnScreenOn()
         window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
-
-        // TODO: Should we also add a cancel function to the NotificationHandler interface?
-        NotificationManagerCompat.from(application)
-            .cancel(NotificationHandler.INCOMING_CALL_NOTIFICATION_ID)
 
         val callId = intent.streamCallId(NotificationHandler.INTENT_EXTRA_CALL_CID)!!
 

@@ -1,0 +1,32 @@
+name: Docusaurus
+
+on:
+  push:
+    paths:
+      - 'docusaurus/**'
+      - '.github/workflows/docusaurus.yml'
+
+  workflow_dispatch:
+
+jobs:
+  push_docusaurus:
+    name: Publish docs
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v3.1.0
+
+      - name: Setup Node 18
+        uses: actions/setup-node@v3.1.0
+        with:
+          node-version: 18
+
+      - name: Push docs
+        uses: GetStream/push-stream-chat-docusaurus-action@main
+        with:
+          target-branch: ${{ github.ref == 'refs/heads/main' && 'main' || 'staging' }}
+          cli-target-branch: ${{ github.ref == 'refs/heads/main' && 'production' || 'staging' }}
+          destination-repository-name: 'stream-video-docusaurus'
+          source-directory: 'docusaurus'
+        env:
+          DOCUSAURUS_GH_TOKEN: ${{ secrets.DOCUSAURUS_GH_TOKEN }}
