@@ -127,7 +127,7 @@ class ModerationTest : IntegrationTestBase() {
         }
         val ownCapabilities = call.state.ownCapabilities.value
         // TODO: maybe not use strings for the permissions
-        assertThat(ownCapabilities).contains(OwnCapability.decode("send-audio"))
+        assertThat(ownCapabilities).contains(OwnCapability.SendAudio)
         val hasPermission = call.state.hasPermission("send-audio").value
         assertThat(hasPermission).isTrue()
 

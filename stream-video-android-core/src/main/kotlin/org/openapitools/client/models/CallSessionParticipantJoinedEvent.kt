@@ -23,21 +23,27 @@
 
 package org.openapitools.client.models
 
-import org.openapitools.client.models.UserResponse
+import org.openapitools.client.models.CallParticipantResponse
 
 
 
 
+import com.squareup.moshi.FromJson
 import com.squareup.moshi.Json
+import com.squareup.moshi.JsonAdapter
+import com.squareup.moshi.JsonReader
+import com.squareup.moshi.JsonWriter
+import com.squareup.moshi.ToJson
+import org.openapitools.client.infrastructure.Serializer
 
 /**
  * This event is sent when a participant joins a call session
  *
  * @param callCid
  * @param createdAt
+ * @param participant
  * @param sessionId Call session ID
  * @param type The type of event: \"call.session_participant_joined\" in this case
- * @param user
  */
 
 
@@ -49,18 +55,18 @@ data class CallSessionParticipantJoinedEvent (
     @Json(name = "created_at")
     val createdAt: org.threeten.bp.OffsetDateTime,
 
+    @Json(name = "participant")
+    val participant: CallParticipantResponse,
+
     /* Call session ID */
     @Json(name = "session_id")
     val sessionId: kotlin.String,
 
     /* The type of event: \"call.session_participant_joined\" in this case */
     @Json(name = "type")
-    val type: kotlin.String = "call.session_participant_joined",
+    val type: kotlin.String = "call.session_participant_joined"
 
-    @Json(name = "user")
-    val user: UserResponse
-
-) : VideoEvent(), WSCallEvent{
+) : VideoEvent(), WSCallEvent {
 
     override fun getCallCID(): String {
         return callCid

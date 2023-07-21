@@ -157,7 +157,8 @@ public class RtcSession internal constructor(
     internal var remoteIceServers: List<IceServer>,
 ) {
 
-    internal val trackIdToParticipant: MutableStateFlow<Map<String, String>> = MutableStateFlow(emptyMap())
+    internal val trackIdToParticipant: MutableStateFlow<Map<String, String>> =
+        MutableStateFlow(emptyMap())
     private var syncSubscriberAnswer: Job? = null
     private var syncPublisherJob: Job? = null
     private var subscriptionSyncJob: Job? = null
@@ -344,8 +345,16 @@ public class RtcSession internal constructor(
 
     suspend fun reconnect() {
         // ice restart
-        subscriber?.connection?.restartIce()
-        publisher?.connection?.restartIce()
+        subscriber?.let {
+            if (!it.isHealthy()) {
+                it.connection.restartIce()
+            }
+        }
+        publisher?.let {
+            if (!it.isHealthy()) {
+                it.connection.restartIce()
+            }
+        }
     }
 
     suspend fun connect() {
@@ -463,7 +472,7 @@ public class RtcSession internal constructor(
 
         // if we are allowed to publish, create a peer connection for it
         val canPublish =
-            call.state.ownCapabilities.value.any { it == OwnCapability.sendAudio || it == OwnCapability.sendVideo }
+            call.state.ownCapabilities.value.any { it == OwnCapability.SendAudio || it == OwnCapability.SendVideo }
 
         if (canPublish) {
             publisher = createPublisher()
@@ -472,7 +481,7 @@ public class RtcSession internal constructor(
             // enable the publisher if you receive the send audio or send video capability
             coroutineScope.launch {
                 call.state.ownCapabilities.collect {
-                    if (it.any { it == OwnCapability.sendAudio || it == OwnCapability.sendVideo }) {
+                    if (it.any { it == OwnCapability.SendAudio || it == OwnCapability.SendVideo }) {
                         publisher = createPublisher()
                         timer.split("createPublisher")
                     }
@@ -505,7 +514,7 @@ public class RtcSession internal constructor(
                     if (enabled) {
                         // check the settings if we should default to front or back facing camera
                         val defaultDirection =
-                            if (settings?.video?.cameraFacing == VideoSettings.CameraFacing.front) {
+                            if (settings?.video?.cameraFacing == VideoSettings.CameraFacing.Front) {
                                 CameraDirection.Front
                             } else {
                                 CameraDirection.Back
@@ -574,12 +583,13 @@ public class RtcSession internal constructor(
         userId: String,
         sessionId: String,
         trackType: TrackType,
-        isEnabled: Boolean
+        videoEnabled: Boolean,
+        audioEnabled: Boolean
     ) {
-        logger.d { "[updateMuteState] #sfu; userId: $userId, sessionId: $sessionId, isEnabled: $isEnabled" }
+        logger.d { "[updateMuteState] #sfu; userId: $userId, sessionId: $sessionId, videoEnabled: $videoEnabled, audioEnabled: $audioEnabled" }
         val track = getTrack(sessionId, trackType)
-        track?.enableVideo(isEnabled)
-        track?.enableAudio(isEnabled)
+        track?.enableVideo(videoEnabled)
+        track?.enableAudio(audioEnabled)
     }
 
     fun cleanup() {
@@ -796,7 +806,7 @@ public class RtcSession internal constructor(
 //        }
     }
 
-    val defaultVideoDimension = VideoDimension(1080, 2340)
+    private val defaultVideoDimension = VideoDimension(1080, 2340)
 
     /**
      * This is called when you are look at a different set of participants
@@ -928,11 +938,23 @@ public class RtcSession internal constructor(
                     is ChangePublishQualityEvent -> updatePublishQuality(event)
 
                     is TrackPublishedEvent -> {
-                        updatePublishState(event.userId, event.sessionId, event.trackType, true)
+                        updatePublishState(
+                            userId = event.userId,
+                            sessionId = event.sessionId,
+                            trackType = event.trackType,
+                            videoEnabled = call.camera.isEnabled.value,
+                            audioEnabled = call.microphone.isEnabled.value
+                        )
                     }
 
                     is TrackUnpublishedEvent -> {
-                        updatePublishState(event.userId, event.sessionId, event.trackType, false)
+                        updatePublishState(
+                            userId = event.userId,
+                            sessionId = event.sessionId,
+                            trackType = event.trackType,
+                            videoEnabled = false,
+                            audioEnabled = false
+                        )
                     }
 
                     is ParticipantJoinedEvent -> {

@@ -32,7 +32,7 @@ private const val SAMPLING_TIME_MS = 600
  * @param thresholdCrossedCallback - invoked when the threshold is met
  */
 internal class DecibelThresholdDetection(
-    val thresholdInDecibels: Int = 45,
+    private val thresholdInDecibels: Int = 45,
     val thresholdCrossedCallback: () -> Unit
 ) {
 
@@ -65,7 +65,8 @@ internal class DecibelThresholdDetection(
         var totalSquaredAmplitude = 0.0
 
         for (i in pcmData.indices step 2) {
-            val sample = ((pcmData[i + 1].toInt() shl 8) or (pcmData[i].toInt() and 0xFF)).toDouble()
+            val sample =
+                ((pcmData[i + 1].toInt() shl 8) or (pcmData[i].toInt() and 0xFF)).toDouble()
             val amplitude = sample / referenceAmplitude
             totalSquaredAmplitude += amplitude.pow(2)
         }

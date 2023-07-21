@@ -47,12 +47,14 @@ wire {
 generateRPCServices {}
 
 android {
+    namespace = "io.getstream.video.android.core"
     compileSdk = Configuration.compileSdk
 
     defaultConfig {
         minSdk = Configuration.minSdk
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles("consumer-proguard-rules.pro")
+        buildConfigField("String", "STREAM_VIDEO_VERSION", "\"${Configuration.versionName}\"")
     }
 
     testOptions {
@@ -143,6 +145,8 @@ dependencies {
     testImplementation(libs.junit)
     testImplementation(libs.truth)
     testImplementation(libs.mockk)
+
+    testImplementation(libs.turbine)
     testImplementation(libs.robolectric)
     testImplementation(libs.androidx.test.core)
     testImplementation(libs.androidx.test.junit)

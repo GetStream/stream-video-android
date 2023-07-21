@@ -31,11 +31,11 @@ plugins {
 }
 
 android {
-    namespace = "io.getstream.video.android.dogfooding"
+    namespace = "io.getstream.video.android"
     compileSdk = Configuration.compileSdk
 
     defaultConfig {
-        applicationId = "io.getstream.video.android.dogfooding"
+        applicationId = "io.getstream.video.android"
         minSdk = Configuration.minSdk
         targetSdk = Configuration.targetSdk
         versionCode = 1
@@ -105,6 +105,17 @@ android {
         }
     }
 
+    flavorDimensions("environment")
+    productFlavors {
+        create("dogfooding") {
+            dimension = "environment"
+            applicationIdSuffix = ".dogfooding"
+        }
+        create("production") {
+            dimension = "environment"
+        }
+    }
+
     val envProps: File = rootProject.file(".env.properties")
     if (envProps.exists()) {
         val properties = Properties()
@@ -134,6 +145,12 @@ dependencies {
     implementation(project(":stream-video-android-tooling"))
     implementation(project(":stream-video-android-datastore"))
     compileOnly(project(":stream-video-android-mock"))
+
+    // Stream Chat SDK
+    implementation(libs.stream.chat.compose)
+    implementation(libs.stream.chat.offline)
+    implementation(libs.stream.chat.state)
+    implementation(libs.stream.chat.ui.utils)
 
     implementation(libs.stream.push.firebase)
     implementation(libs.stream.log.android)

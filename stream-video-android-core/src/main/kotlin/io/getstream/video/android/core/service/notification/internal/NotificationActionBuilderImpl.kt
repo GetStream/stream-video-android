@@ -21,7 +21,7 @@ import android.content.Context
 import android.content.Intent
 import android.os.Build
 import androidx.core.app.NotificationCompat
-import io.getstream.video.android.R
+import io.getstream.video.android.core.R
 import io.getstream.video.android.core.service.notification.NotificationAction
 import io.getstream.video.android.model.StreamCallId
 

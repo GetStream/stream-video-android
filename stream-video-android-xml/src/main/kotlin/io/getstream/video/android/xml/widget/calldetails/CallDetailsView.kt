@@ -21,10 +21,10 @@ import android.util.AttributeSet
 import android.view.View
 import android.widget.ImageView
 import androidx.constraintlayout.widget.ConstraintLayout
-import io.getstream.video.android.common.util.buildLargeCallText
-import io.getstream.video.android.common.util.buildSmallCallText
 import io.getstream.video.android.core.model.CallStatus
 import io.getstream.video.android.core.model.CallUser
+import io.getstream.video.android.ui.common.util.buildLargeCallText
+import io.getstream.video.android.ui.common.util.buildSmallCallText
 import io.getstream.video.android.xml.databinding.StreamVideoViewCallDetailsBinding
 import io.getstream.video.android.xml.font.setTextStyle
 import io.getstream.video.android.xml.utils.extensions.createStreamThemeWrapper

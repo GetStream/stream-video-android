@@ -23,16 +23,20 @@ import android.media.AudioAttributes
 import android.media.AudioManager
 import android.os.Build
 import androidx.core.content.getSystemService
-import com.twilio.audioswitch.AudioDevice
 import io.getstream.log.taggedLogger
 import io.getstream.video.android.core.audio.AudioSwitchHandler
+import io.getstream.video.android.core.audio.StreamAudioDevice
+import io.getstream.video.android.core.audio.StreamAudioDevice.Companion.fromAudio
+import io.getstream.video.android.core.audio.StreamAudioDevice.Companion.toAudioDevice
 import io.getstream.video.android.core.utils.buildAudioConstraints
 import io.getstream.video.android.core.utils.mapState
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import okhttp3.internal.toImmutableList
+import org.openapitools.client.models.AudioSettings
 import org.openapitools.client.models.VideoSettings
 import org.webrtc.Camera2Capturer
 import org.webrtc.Camera2Enumerator
@@ -74,14 +78,14 @@ class SpeakerManager(
     /** Represents whether the speakerphone is enabled */
     public val isEnabled: StateFlow<Boolean> = _status.mapState { it is DeviceStatus.Enabled }
 
-    val selectedDevice: StateFlow<AudioDevice?> = microphoneManager.selectedDevice
+    val selectedDevice: StateFlow<StreamAudioDevice?> = microphoneManager.selectedDevice
 
-    val devices: StateFlow<List<AudioDevice>> = microphoneManager.devices
+    val devices: StateFlow<List<StreamAudioDevice>> = microphoneManager.devices
 
     private val _speakerPhoneEnabled = MutableStateFlow(false)
     val speakerPhoneEnabled: StateFlow<Boolean> = _speakerPhoneEnabled
 
-    internal var selectedBeforeSpeaker: AudioDevice? = null
+    internal var selectedBeforeSpeaker: StreamAudioDevice? = null
 
     fun enable(fromUser: Boolean = true) {
         if (fromUser) {
@@ -115,7 +119,7 @@ class SpeakerManager(
         microphoneManager.setup()
         val devices = devices.value
         if (enable) {
-            val speaker = devices.filterIsInstance<AudioDevice.Speakerphone>().firstOrNull()
+            val speaker = devices.filterIsInstance<StreamAudioDevice.Speakerphone>().firstOrNull()
             selectedBeforeSpeaker = selectedDevice.value
             _speakerPhoneEnabled.value = true
             microphoneManager.select(speaker)
@@ -123,7 +127,8 @@ class SpeakerManager(
             _speakerPhoneEnabled.value = false
             // swap back to the old one
             val fallback =
-                selectedBeforeSpeaker ?: devices.firstOrNull { it !is AudioDevice.Speakerphone }
+                selectedBeforeSpeaker
+                    ?: devices.firstOrNull { it !is StreamAudioDevice.Speakerphone }
             microphoneManager.select(fallback)
         }
     }
@@ -189,11 +194,11 @@ class MicrophoneManager(
     /** Represents whether the audio is enabled */
     public val isEnabled: StateFlow<Boolean> = _status.mapState { it is DeviceStatus.Enabled }
 
-    private val _selectedDevice = MutableStateFlow<AudioDevice?>(null)
-    val selectedDevice: StateFlow<AudioDevice?> = _selectedDevice
+    private val _selectedDevice = MutableStateFlow<StreamAudioDevice?>(null)
+    val selectedDevice: StateFlow<StreamAudioDevice?> = _selectedDevice
 
-    private val _devices = MutableStateFlow<List<AudioDevice>>(emptyList())
-    val devices: StateFlow<List<AudioDevice>> = _devices
+    private val _devices = MutableStateFlow<List<StreamAudioDevice>>(emptyList())
+    val devices: StateFlow<List<StreamAudioDevice>> = _devices
 
     internal var priorStatus: DeviceStatus? = null
 
@@ -243,9 +248,9 @@ class MicrophoneManager(
     /**
      * Select a specific device
      */
-    fun select(device: AudioDevice?) {
+    fun select(device: StreamAudioDevice?) {
         logger.i { "selecting device $device" }
-        audioHandler.selectDevice(device)
+        audioHandler.selectDevice(device?.toAudioDevice())
 
         _selectedDevice.value = device
     }
@@ -253,7 +258,7 @@ class MicrophoneManager(
     /**
      * List the devices, returns a stateflow with audio devices
      */
-    fun listDevices(): StateFlow<List<AudioDevice>> {
+    fun listDevices(): StateFlow<List<StreamAudioDevice>> {
         setup()
         return devices
     }
@@ -267,11 +272,12 @@ class MicrophoneManager(
             audioManager?.allowedCapturePolicy = AudioAttributes.ALLOW_CAPTURE_BY_ALL
         }
 
-        audioHandler = AudioSwitchHandler(mediaManager.context, preferSpeakerphone) { devices, selected ->
-            logger.i { "audio devices. selected $selected, available devices are $devices" }
-            _devices.value = devices
-            _selectedDevice.value = selected
-        }
+        audioHandler =
+            AudioSwitchHandler(mediaManager.context, preferSpeakerphone) { devices, selected ->
+                logger.i { "audio devices. selected $selected, available devices are $devices" }
+                _devices.value = devices.map { it.fromAudio() }
+                _selectedDevice.value = selected?.fromAudio()
+            }
 
         audioHandler.start()
 
@@ -608,12 +614,25 @@ class MediaManagerImpl(
         source = audioSource, trackId = UUID.randomUUID().toString()
     )
 
-    // TODO: this should be a setting on the call type
-    val preferSpeakerphone by lazy { true }
-
     internal val camera = CameraManager(this, eglBaseContext)
-    internal val microphone = MicrophoneManager(this, preferSpeakerphone)
+    internal val microphone = MicrophoneManager(this, preferSpeakerphone = true)
     internal val speaker = SpeakerManager(this, microphone)
+
+    init {
+        // listen to audio configuration changes
+        scope.launch {
+            call.state.settings.collect { settingsResponse ->
+                settingsResponse?.let {
+                    // The default is Speaker - so we only switch if Earpiece is set in Settings
+                    if (it.audio.defaultDevice == AudioSettings.DefaultDevice.Earpiece &&
+                        !speaker.speakerPhoneEnabled.value
+                    ) {
+                        speaker.setSpeakerPhone(false)
+                    }
+                }
+            }
+        }
+    }
 
     fun cleanup() {
         videoSource.dispose()

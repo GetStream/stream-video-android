@@ -44,7 +44,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
 import io.getstream.log.StreamLog
-import io.getstream.video.android.common.renderer.StreamVideoTextureViewRenderer
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.video.VideoScalingType.Companion.toCommonScalingType
 import io.getstream.video.android.core.Call
@@ -53,6 +52,7 @@ import io.getstream.video.android.core.model.MediaTrack
 import io.getstream.video.android.core.model.VideoTrack
 import io.getstream.video.android.mock.StreamMockUtils
 import io.getstream.video.android.mock.mockCall
+import io.getstream.video.android.ui.common.renderer.StreamVideoTextureViewRenderer
 import io.getstream.webrtc.android.ui.VideoTextureViewRenderer
 
 /**
@@ -61,6 +61,7 @@ import io.getstream.webrtc.android.ui.VideoTextureViewRenderer
  * @param call The call state that contains all the tracks and participants.
  * @param video A media contains a video track or an audio track to be rendered.
  * @param modifier Modifier for styling.
+ * @param videoScalingType Setup the video scale type of this renderer.
  * @param videoFallbackContent Content is shown the video track is failed to load or not available.
  * @param onRendered An interface that will be invoked when the video is rendered.
  */

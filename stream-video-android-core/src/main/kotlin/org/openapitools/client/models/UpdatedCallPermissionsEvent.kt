@@ -29,7 +29,13 @@ import org.openapitools.client.models.UserResponse
 
 
 
+import com.squareup.moshi.FromJson
 import com.squareup.moshi.Json
+import com.squareup.moshi.JsonAdapter
+import com.squareup.moshi.JsonReader
+import com.squareup.moshi.JsonWriter
+import com.squareup.moshi.ToJson
+import org.openapitools.client.infrastructure.Serializer
 
 /**
  * This event is sent to notify about permission changes for a user, clients receiving this event should update their UI accordingly
@@ -61,7 +67,7 @@ data class UpdatedCallPermissionsEvent (
     @Json(name = "user")
     val user: UserResponse
 
-) : VideoEvent(), WSCallEvent{
+) : VideoEvent(), WSCallEvent {
 
     override fun getCallCID(): String {
         return callCid

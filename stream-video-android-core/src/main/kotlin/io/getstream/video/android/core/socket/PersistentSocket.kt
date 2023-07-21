@@ -18,6 +18,7 @@ package io.getstream.video.android.core.socket
 
 import com.squareup.moshi.JsonAdapter
 import io.getstream.log.taggedLogger
+import io.getstream.video.android.core.StreamVideo
 import io.getstream.video.android.core.call.signal.socket.RTCEventMapper
 import io.getstream.video.android.core.dispatchers.DispatcherProvider
 import io.getstream.video.android.core.events.ErrorEvent
@@ -25,12 +26,14 @@ import io.getstream.video.android.core.events.JoinCallResponseEvent
 import io.getstream.video.android.core.events.SfuSocketError
 import io.getstream.video.android.core.internal.network.NetworkStateProvider
 import io.getstream.video.android.core.socket.internal.HealthMonitor
+import kotlinx.coroutines.CancellableContinuation
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.suspendCancellableCoroutine
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.Response
@@ -46,10 +49,8 @@ import java.io.IOException
 import java.io.InterruptedIOException
 import java.net.SocketTimeoutException
 import java.net.UnknownHostException
-import kotlin.coroutines.Continuation
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
-import kotlin.coroutines.suspendCoroutine
 
 /**
  * PersistentSocket architecture
@@ -60,7 +61,7 @@ import kotlin.coroutines.suspendCoroutine
  * - Flow to avoid concurrency related bugs
  * - Ability to wait till the socket is connected (important to prevent race conditions)
  */
-open class PersistentSocket<T>(
+public open class PersistentSocket<T>(
     /** The URL to connect to */
     private val url: String,
     /** Inject your http client */
@@ -92,7 +93,7 @@ open class PersistentSocket<T>(
     var connectionId: String = ""
 
     /** Continuation if the socket successfully connected and we've authenticated */
-    lateinit var connected: Continuation<T>
+    lateinit var connected: CancellableContinuation<T>
 
     internal var socket: WebSocket? = null
 
@@ -105,28 +106,32 @@ open class PersistentSocket<T>(
     /**
      * Connect the socket, authenticate, start the healthmonitor and see if the network is online
      */
-    suspend fun connect() = suspendCoroutine { connectedContinuation ->
-        logger.i { "[connect]" }
-        connected = connectedContinuation
+    suspend fun connect(invocation: (CancellableContinuation<T>) -> Unit = {}) =
+        suspendCancellableCoroutine { connectedContinuation ->
+            logger.i { "[connect]" }
+            connected = connectedContinuation
 
-        _connectionState.value = SocketState.Connecting
-        // step 1 create the socket
-        socket = mockSocket ?: createSocket()
+            _connectionState.value = SocketState.Connecting
+            // step 1 create the socket
+            socket = mockSocket ?: createSocket()
 
-        scope.launch {
-            // step 2 authenticate the user/call etc
-            authenticate()
+            scope.launch {
+                // step 2 authenticate the user/call etc
+                authenticate()
 
-            // step 3 monitor for health every 30 seconds
+                // step 3 monitor for health every 30 seconds
 
-            if (!DispatcherProvider.inTest) {
-                healthMonitor.start()
+                if (!DispatcherProvider.inTest) {
+                    healthMonitor.start()
+                }
+
+                // also monitor if we are offline/online
+                networkStateProvider.subscribe(networkStateListener)
+
+                // run the invocation
+                invocation.invoke(connectedContinuation)
             }
-
-            // also monitor if we are offline/online
-            networkStateProvider.subscribe(networkStateListener)
         }
-    }
 
     fun cleanup() {
         disconnect()
@@ -201,6 +206,7 @@ open class PersistentSocket<T>(
             .url(url)
             .addHeader("Connection", "Upgrade")
             .addHeader("Upgrade", "websocket")
+            .addHeader("X-Stream-Client", StreamVideo.buildSdkTrackingHeaders())
             .build()
 
         return httpClient.newWebSocket(request, this)
@@ -218,7 +224,12 @@ open class PersistentSocket<T>(
             // parse the message
             val jsonAdapter: JsonAdapter<VideoEvent> =
                 Serializer.moshi.adapter(VideoEvent::class.java)
-            var processedEvent = jsonAdapter.fromJson(text)
+            val processedEvent = try {
+                jsonAdapter.fromJson(text)
+            } catch (e: Throwable) {
+                logger.w { "[onMessage] VideoEvent parsing error ${e.message}" }
+                null
+            }
 
             // TODO: This logic is specific to the Coordinator socket, move it
             if (processedEvent is ConnectedEvent) {
@@ -235,11 +246,15 @@ open class PersistentSocket<T>(
                 val errorAdapter: JsonAdapter<SocketError> =
                     Serializer.moshi.adapter(SocketError::class.java)
 
-                val parsedError = errorAdapter.fromJson(text)
-
-                parsedError?.let {
-                    logger.w { "[onMessage] socketErrorEvent: $parsedError.error" }
-                    handleError(it.error)
+                try {
+                    val parsedError = errorAdapter.fromJson(text)
+                    parsedError?.let {
+                        logger.w { "[onMessage] socketErrorEvent: ${parsedError.error}" }
+                        handleError(it.error)
+                    }
+                } catch (e: Throwable) {
+                    logger.w { "[onMessage] socketErrorEvent parsing error: ${e.message}" }
+                    handleError(e)
                 }
             } else {
                 logger.d { "parsed event $processedEvent" }

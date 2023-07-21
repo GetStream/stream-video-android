@@ -33,7 +33,7 @@ import io.getstream.android.push.permissions.DefaultNotificationPermissionHandle
 import io.getstream.android.push.permissions.NotificationPermissionHandler
 import io.getstream.log.TaggedLogger
 import io.getstream.log.taggedLogger
-import io.getstream.video.android.R
+import io.getstream.video.android.core.R
 import io.getstream.video.android.core.notifications.NotificationHandler.Companion.ACTION_ACCEPT_CALL
 import io.getstream.video.android.core.notifications.NotificationHandler.Companion.ACTION_INCOMING_CALL
 import io.getstream.video.android.core.notifications.NotificationHandler.Companion.ACTION_LIVE_CALL

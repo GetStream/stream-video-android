@@ -20,7 +20,7 @@ import android.content.Context
 import android.graphics.drawable.Drawable
 import android.util.AttributeSet
 import androidx.annotation.ColorInt
-import io.getstream.video.android.common.util.getFloatResource
+import io.getstream.video.android.ui.common.util.getFloatResource
 import io.getstream.video.android.xml.R
 import io.getstream.video.android.xml.utils.extensions.getColorCompat
 import io.getstream.video.android.xml.utils.extensions.use

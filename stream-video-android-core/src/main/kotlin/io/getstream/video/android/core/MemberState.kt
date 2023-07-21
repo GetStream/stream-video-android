@@ -20,7 +20,7 @@ import io.getstream.video.android.model.User
 
 public data class MemberState(
     val user: User,
-    val custom: Map<String, Any>,
+    val custom: Map<String, Any?>,
     val role: String?,
     val createdAt: org.threeten.bp.OffsetDateTime,
     val updatedAt: org.threeten.bp.OffsetDateTime,

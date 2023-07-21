@@ -28,6 +28,7 @@ import io.getstream.video.android.datastore.delegate.StreamUserDataStore
 import io.getstream.video.android.model.StreamCallId
 import io.getstream.video.android.model.mapper.toTypeAndId
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.launch
 
 /**
@@ -39,24 +40,10 @@ internal class VideoPushDelegate(
     context: Context
 ) : PushDelegate(context) {
     private val logger = StreamLog.getLogger("VideoPushDelegate")
+    private val DEFAULT_CALL_TEXT = "Unknown caller"
     private val userDataStore: StreamUserDataStore by lazy {
         StreamUserDataStore.install(context)
     }
-    private val streamVideo: StreamVideo?
-        get() = if (StreamVideo.isInstalled) {
-            StreamVideo.instance()
-        } else {
-            userDataStore.user.value?.let { user ->
-                userDataStore.userToken.value.let { userToken ->
-                    StreamVideoBuilder(
-                        context = context,
-                        user = user,
-                        token = userToken,
-                        apiKey = userDataStore.apiKey.value,
-                    ).build().also { StreamVideo.removeClient() }
-                }
-            }
-        }
 
     /**
      * Handle a push message.
@@ -69,27 +56,29 @@ internal class VideoPushDelegate(
         return payload.ifValid {
             val callId = (payload[KEY_CALL_CID] as String).toTypeAndId()
                 .let { StreamCallId(it.first, it.second) }
-            when (payload[KEY_TYPE]) {
-                KEY_TYPE_RING -> handleRingType(callId, payload)
-                KEY_TYPE_NOTIFICATION -> handleNotificationType(callId, payload)
-                KEY_TYPE_LIVE_STARTED -> handleLiveStartedType(callId, payload)
+            CoroutineScope(DispatcherProvider.IO).launch {
+                when (payload[KEY_TYPE]) {
+                    KEY_TYPE_RING -> handleRingType(callId, payload)
+                    KEY_TYPE_NOTIFICATION -> handleNotificationType(callId, payload)
+                    KEY_TYPE_LIVE_STARTED -> handleLiveStartedType(callId, payload)
+                }
             }
         }
     }
 
-    private fun handleRingType(callId: StreamCallId, payload: Map<String, Any?>) {
-        val callDisplayName = payload[KEY_CALL_DISPLAY_NAME] as String
-        streamVideo?.onRingingCall(callId, callDisplayName)
+    private suspend fun handleRingType(callId: StreamCallId, payload: Map<String, Any?>) {
+        val callDisplayName = (payload[KEY_CREATED_BY_DISPLAY_NAME] as String).ifEmpty { DEFAULT_CALL_TEXT }
+        getStreamVideo()?.onRingingCall(callId, callDisplayName)
     }
 
-    private fun handleNotificationType(callId: StreamCallId, payload: Map<String, Any?>) {
-        val callDisplayName = payload[KEY_CALL_DISPLAY_NAME] as String
-        streamVideo?.onNotification(callId, callDisplayName)
+    private suspend fun handleNotificationType(callId: StreamCallId, payload: Map<String, Any?>) {
+        val callDisplayName = (payload[KEY_CREATED_BY_DISPLAY_NAME] as String).ifEmpty { DEFAULT_CALL_TEXT }
+        getStreamVideo()?.onNotification(callId, callDisplayName)
     }
 
-    private fun handleLiveStartedType(callId: StreamCallId, payload: Map<String, Any?>) {
-        val callDisplayName = payload[KEY_CALL_DISPLAY_NAME] as String
-        streamVideo?.onLiveCall(callId, callDisplayName)
+    private suspend fun handleLiveStartedType(callId: StreamCallId, payload: Map<String, Any?>) {
+        val callDisplayName = (payload[KEY_CREATED_BY_DISPLAY_NAME] as String).ifEmpty { DEFAULT_CALL_TEXT }
+        getStreamVideo()?.onLiveCall(callId, callDisplayName)
     }
 
     /**
@@ -100,7 +89,22 @@ internal class VideoPushDelegate(
     override fun registerPushDevice(pushDevice: PushDevice) {
         logger.d { "[registerPushDevice] pushDevice: $pushDevice" }
         CoroutineScope(DispatcherProvider.IO).launch {
-            streamVideo?.createDevice(pushDevice)
+            getStreamVideo()?.createDevice(pushDevice)
+        }
+    }
+
+    private suspend fun getStreamVideo(): StreamVideo? = if (StreamVideo.isInstalled) {
+        StreamVideo.instance()
+    } else {
+        userDataStore.user.firstOrNull()?.let { user ->
+            userDataStore.userToken.firstOrNull()?.let { userToken ->
+                StreamVideoBuilder(
+                    context = context,
+                    user = user,
+                    token = userToken,
+                    apiKey = userDataStore.apiKey.value,
+                ).build().also { StreamVideo.removeClient() }
+            }
         }
     }
 
@@ -145,19 +149,25 @@ internal class VideoPushDelegate(
      * Verify if the map contains all keys/values for a Ring Type.
      */
     private fun Map<String, Any?>.isValidRingType(): Boolean =
-        !(this[KEY_CALL_DISPLAY_NAME] as? String).isNullOrBlank()
+        // TODO: KEY_CALL_DISPLAY_NAME can be empty. Are there any other important key/values?
+        // !(this[KEY_CALL_DISPLAY_NAME] as? String).isNullOrBlank()
+        true
 
     /**
      * Verify if the map contains all keys/values for a Notification Type.
      */
     private fun Map<String, Any?>.isValidNotificationType(): Boolean =
-        !(this[KEY_CALL_DISPLAY_NAME] as? String).isNullOrBlank()
+        // TODO: KEY_CALL_DISPLAY_NAME can be empty. Are there any other important key/values?
+        // !(this[KEY_CALL_DISPLAY_NAME] as? String).isNullOrBlank()
+        true
 
     /**
      * Verify if the map contains all keys/values for a Live Started Type.
      */
     private fun Map<String, Any?>.isValidLiveStarted(): Boolean =
-        !(this[KEY_CALL_DISPLAY_NAME] as? String).isNullOrBlank()
+        // TODO: KEY_CALL_DISPLAY_NAME can be empty. Are there any other important key/values?
+        // !(this[KEY_CALL_DISPLAY_NAME] as? String).isNullOrBlank()
+        true
     /**
      * Verify if the map contains key/value from Stream Server.
      */
@@ -178,6 +188,7 @@ internal class VideoPushDelegate(
         private const val KEY_TYPE_LIVE_STARTED = "call.live_started"
         private const val KEY_CALL_CID = "call_cid"
         private const val KEY_CALL_DISPLAY_NAME = "call_display_name"
+        private const val KEY_CREATED_BY_DISPLAY_NAME = "created_by_display_name"
         private const val VALUE_STREAM_SENDER = "stream.video"
     }
 }

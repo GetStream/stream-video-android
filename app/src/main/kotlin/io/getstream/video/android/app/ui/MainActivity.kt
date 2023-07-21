@@ -16,6 +16,8 @@
 
 package io.getstream.video.android.app.ui
 
+import android.content.Context
+import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -33,6 +35,7 @@ import io.getstream.result.Result
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.call.RtcSession
+import io.getstream.video.android.model.StreamCallId
 import io.getstream.video.android.model.User
 
 class MainActivity : ComponentActivity() {
@@ -50,7 +53,8 @@ class MainActivity : ComponentActivity() {
         )
 
         // step 2 - join a call
-        vm.joinCall(context = this, user = user)
+        val callId = intent.getParcelableExtra<StreamCallId>(EXTRA_CID)
+        vm.joinCall(context = this, user = user, callId = callId)
 
         // step 3 - build a call screen
         setContent {
@@ -59,6 +63,20 @@ class MainActivity : ComponentActivity() {
 
             MainScreen(call, result) {
                 finish()
+            }
+        }
+    }
+
+    companion object {
+        const val EXTRA_CID: String = "EXTRA_CID"
+
+        @JvmStatic
+        fun createIntent(
+            context: Context,
+            callId: StreamCallId,
+        ): Intent {
+            return Intent(context, MainActivity::class.java).apply {
+                putExtra(EXTRA_CID, callId)
             }
         }
     }

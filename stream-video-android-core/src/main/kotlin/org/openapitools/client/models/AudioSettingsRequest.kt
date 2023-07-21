@@ -27,11 +27,18 @@ package org.openapitools.client.models
 
 
 
+import com.squareup.moshi.FromJson
 import com.squareup.moshi.Json
+import com.squareup.moshi.JsonAdapter
+import com.squareup.moshi.JsonReader
+import com.squareup.moshi.JsonWriter
+import com.squareup.moshi.ToJson
+import org.openapitools.client.infrastructure.Serializer
 
 /**
  *
  *
+ * @param defaultDevice
  * @param accessRequestEnabled
  * @param micDefaultOn
  * @param opusDtxEnabled
@@ -41,6 +48,9 @@ import com.squareup.moshi.Json
 
 
 data class AudioSettingsRequest (
+
+    @Json(name = "default_device")
+    val defaultDevice: AudioSettingsRequest.DefaultDevice,
 
     @Json(name = "access_request_enabled")
     val accessRequestEnabled: kotlin.Boolean? = null,
@@ -58,3 +68,44 @@ data class AudioSettingsRequest (
     val speakerDefaultOn: kotlin.Boolean? = null
 
 )
+
+{
+
+    /**
+     *
+     *
+     * Values: speaker,earpiece
+     */
+
+    sealed class DefaultDevice(val value: kotlin.String) {
+        override fun toString(): String = value
+
+        companion object {
+            fun fromString(s: kotlin.String): DefaultDevice = when (s) {
+                "speaker" -> Speaker
+                "earpiece" -> Earpiece
+                else -> Unknown(s)
+            }
+        }
+
+        object Speaker : DefaultDevice("speaker")
+        object Earpiece : DefaultDevice("earpiece")
+        data class Unknown(val unknownValue: kotlin.String) : DefaultDevice(unknownValue)
+
+        class DefaultDeviceAdapter : JsonAdapter<DefaultDevice>() {
+            @FromJson
+            override fun fromJson(reader: JsonReader): DefaultDevice? {
+                val s = reader.nextString() ?: return null
+                return fromString(s)
+            }
+
+            @ToJson
+            override fun toJson(writer: JsonWriter, value: DefaultDevice?) {
+                writer.value(value?.value)
+            }
+        }
+    }
+
+
+
+}

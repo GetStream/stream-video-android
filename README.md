@@ -19,13 +19,17 @@ Most users start with the Compose UI components and fall back to the lower-level
 
 Stream allows developers to rapidly deploy scalable feeds, chat messaging and video with an industry leading 99.999% uptime SLA guarantee.
 
+Stream provides UI components and state handling that make it easy to build video calling for your app. All calls run on Stream's network of edge servers around the world, ensuring optimal latency and reliability.
+
+## 📕 Tutorials
+
 With Stream's video components, you can use their SDK to build in-app video calling, audio rooms, audio calls, or live streaming. The best place to get started is with their tutorials:
 
-- Video & Audio Calling Tutorial
-- Audio Rooms Tutorial
-- Livestreaming Tutorial
+- **[Video & Audio Calling Tutorial](https://getstream.io/video/docs/android/tutorials/video-calling/)**
+- **[Audio Rooms Tutorial](https://getstream.io/video/docs/android/tutorials/audio-room/)**
+- **[Livestreaming Tutorial](https://getstream.io/video/docs/android/tutorials/livestream/)**
 
-Stream provides UI components and state handling that make it easy to build video calling for your app. All calls run on Stream's network of edge servers around the world, ensuring optimal latency and reliability.
+If you're interested in customizing the UI components for the Video SDK, check out the **[UI Cookbook](https://getstream.io/video/docs/android/ui-cookbook/overview/)**.
 
 ## 📱 Previews
 
@@ -73,46 +77,53 @@ Video roadmap and changelog is available [here](https://github.com/GetStream/pro
 
 ### 0.2.0 milestone
 
-- [ ] Deeplink support for video call demo & dogfooding app (skip auth for the video demo, keep it for dogfooding) (Daniel)
-- [ ] Chat Integration (Jaewoong)
-- [ ] XML version of VideoRenderer (Jaewoong)
-- [ ] Local Video disconnects sometimes (ICE restarts issue for the publisher. we're waiting for the backend support) (Thierry)
-- [ ] Call Analytics stateflow (Thierry)
-- [ ] Automatically handle pagination and sorting on > 6 participants
-- [ ] Ringing: Make it easy to test
-- [ ] Ringing: Make a list of what needs to be configurable
 - [ ] Publish app on play store
-- [ ] Report version number of SDK on all API calls (Daniel)
-- [ ] Bug: java.net.UnknownHostException: Unable to resolve host "hint.stream-io-video.com" isn't throw but instead logged as INFO (Daniel)
-- [ ] Bug: screensharing is broken. android doesn’t receive/render (not sure) the screenshare. video shows up as the gray avatar
+- [ ] Bug: Screensharing on Firefox has some issues when rendering on android (Daniel)
+- [X] Example Button to switch speakerphone/earpiece (Jaewoong)
+- [X] Chat Integration (Jaewoong)
+- [X] Automatically handle pagination and sorting on > 6 participants in the sample app (Daniel)
+- [X] Buttons to simulate ice restart and SFU switching (Jaewoong)
+- [X] Bug: java.net.UnknownHostException: Unable to resolve host "hint.stream-io-video.com" isn't throw but instead logged as INFO (Daniel)
+- [X] Bug: Call.join will throw an exception if error is other than HttpException
+- [X] Report version number of SDK on all API calls (Daniel)
+- [X] Bug: screensharing is broken. android doesn’t receive/render (not sure) the screenshare. video shows up as the gray avatar
+- [X] support settings.audio.default_device (Daniel)
+- [X] Bug: Sample app has a bug where we don't subscribe to call changes, we need to use call.get in the preview screen so we know the number of participants (Daniel)
+- [X] Buttons to simulate ice restart and SFU switching (Jaewoong)
+- [X] Local Video disconnects sometimes (ICE restarts issue for the publisher. we're waiting for the backend support) (Thierry)
+- [X] Deeplink support for video call demo & dogfooding app (skip auth for the video demo, keep it for dogfooding) (Jaewoong)
+- [X] XML version of VideoRenderer (Jaewoong)
+- [X] sortedParticipants stateflow doesn't update accurately (Thierry)
 - [X] Reactions
-- [X] bug: screenshare is not removed after it stops when a participant leaves the call (Thierry) (probably just dont update the state when the participant leaves)
+- [X] Bug: screenshare is not removed after it stops when a participant leaves the call (Thierry) (probably just dont update the state when the participant leaves)
 
 ### 0.3.0 milestone
 
-- [ ] Setting to default to speakerphone or earpiece
-- [ ] Button to switch speakerphone/earpiece
+- [ ] Ringing: Make it easy to test
+- [ ] Ringing: Make a list of what needs to be configurable
+- [ ] Ringing: Sounds for incoming, outgoing, call timed out. Sound for someone joining a call (Disabled by default). Docs on how to change them
+- [ ] Call Analytics stateflow (Thierry)
+- [ ] Pagination on query members & query channel endpoints (Daniel)
+- [ ] Audio & Video filters. Support  (Daniel)
 - [ ] Livestream tutorial (depends on RTMP support)
 - [ ] H264 workaround on Samsung 23 (see https://github.com/livekit/client-sdk-android/blob/main/livekit-android-sdk/src/main/java/io/livekit/android/webrtc/SimulcastVideoEncoderFactoryWrapper.kt#L34 and
 - https://github.com/react-native-webrtc/react-native-webrtc/issues/983#issuecomment-975624906)
-- [ ] Bluetooth reliability
 - [ ] Dynascale 2.0 (codecs, f resolution switches, resolution webrtc handling)
 - [ ] Test coverage
 - [ ] Testing on more devices
-- [ ] Speaking while muted stateflow
+- [ ] local version of audioLevel(s) for lower latency audio visualizations(Daniel)
 - [ ] Android SDK development.md cleanup (Daniel)
 - [ ] Logging is too verbose (rtc is very noisy), clean it up to focus on the essential for info and higher
+- [X] Speaking while muted stateflow (Daniel)
+- [X] Bluetooth reliability
 - [X] Cleanup the retry behaviour in the RtcSession
 - [X] SDK development guide for all teams
 
 ### 0.4.0 milestone
 
-- [ ] Pagination on query members & query channels
-- [ ] Analytics integration
 - [ ] Screensharing from mobile
 - [ ] Tap to focus
 - [ ] Camera controls
-- [ ] Audio & Video filters
 - [ ] Picture of the video stream at highest resolution
 - [ ] Review foreground service vs backend for some things like screensharing etc
 

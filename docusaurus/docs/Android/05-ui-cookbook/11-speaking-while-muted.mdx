@@ -3,30 +3,25 @@ title: Speaking While Muted
 description: Speaking While Muted
 ---
 
-Issues:
-* No way to add this to the UI
-
 It's a UI best practice to show some visual feedback when the user is speaking while muted.
-You can observe the state for this in `call.state.speakingWhileMuted`
+You can observe the state for this in `call.state.speakingWhileMuted`.
 
-### Speaking While Muted
+### Custom Snackbar
 
-This example shows how to render an alert when the user is speaking while muted
+This example shows how to render a snackbar when the user is speaking while muted:
 
 ```kotlin
-fun SpeakingWhileMutedWarning() {
+fun SpeakingWhileMutedWarning(call: Call) {
+    val speakingWhileMuted by call.state.speakingWhileMuted.collectAsState()
+
+    if (speakingWhileMuted) {
+        Snackbar {
+            Text(text = "You're talking while muting the microphone!")
+        }
+    }
 }
 ```
 
-### Integrating into the default UI
+After building the code above, you'll see the snackbar like the result below:
 
-If you want to integrate this into the default UI, you update it like this
-
-```kotlin
-val speakingWhileMuted = call.state.speakingWhileMuted.observeAsState()
-
-CallContent(
- ..
-)
-```
-
+![Reactions](../assets/cookbook/speaking-while-muted-call.png)

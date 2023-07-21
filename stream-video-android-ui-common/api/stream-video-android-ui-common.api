@@ -1,5 +1,5 @@
-public abstract class io/getstream/video/android/common/AbstractCallActivity : androidx/activity/ComponentActivity {
-	public static final field Companion Lio/getstream/video/android/common/AbstractCallActivity$Companion;
+public abstract class io/getstream/video/android/ui/common/AbstractCallActivity : androidx/activity/ComponentActivity {
+	public static final field Companion Lio/getstream/video/android/ui/common/AbstractCallActivity$Companion;
 	public static final field EXTRA_CID Ljava/lang/String;
 	public fun <init> ()V
 	public final fun enterPictureInPicture ()V
@@ -16,68 +16,7 @@ public abstract class io/getstream/video/android/common/AbstractCallActivity : a
 	public final fun toggleFullscreen (Lio/getstream/video/android/core/call/state/ToggleScreenConfiguration;)V
 }
 
-public final class io/getstream/video/android/common/AbstractCallActivity$Companion {
-}
-
-public abstract class io/getstream/video/android/common/notification/AbstractNotificationActivity : androidx/activity/ComponentActivity {
-	public fun <init> ()V
-	protected abstract fun initializeVideoIfNeeded ()V
-	protected fun onCreate (Landroid/os/Bundle;)V
-}
-
-public abstract interface class io/getstream/video/android/common/permission/PermissionManager {
-	public static final field Companion Lio/getstream/video/android/common/permission/PermissionManager$Companion;
-	public abstract fun checkPermission (Ljava/lang/String;)Z
-	public abstract fun getHasCameraPermission ()Lkotlinx/coroutines/flow/StateFlow;
-	public abstract fun getHasRecordAudioPermission ()Lkotlinx/coroutines/flow/StateFlow;
-	public abstract fun requestPermission (Ljava/lang/String;)Z
-}
-
-public final class io/getstream/video/android/common/permission/PermissionManager$Companion {
-	public final fun create (Landroidx/activity/ComponentActivity;Lkotlin/jvm/functions/Function2;Lkotlin/jvm/functions/Function1;)Lio/getstream/video/android/common/permission/PermissionManager;
-}
-
-public abstract interface class io/getstream/video/android/common/permission/PermissionManagerProvider {
-	public abstract fun getPermissionManager ()Lio/getstream/video/android/common/permission/PermissionManager;
-	public abstract fun initPermissionManager ()Lio/getstream/video/android/common/permission/PermissionManager;
-}
-
-public final class io/getstream/video/android/common/renderer/StreamVideoTextureViewRenderer : io/getstream/webrtc/android/ui/VideoTextureViewRenderer {
-	public fun <init> (Landroid/content/Context;)V
-	public fun onSurfaceTextureDestroyed (Landroid/graphics/SurfaceTexture;)Z
-}
-
-public final class io/getstream/video/android/common/util/ColorUtilsKt {
-	public static final fun adjustColorBrightness (IF)I
-}
-
-public final class io/getstream/video/android/common/util/ParticipantsTextKt {
-	public static final fun buildLargeCallText (Landroid/content/Context;Ljava/util/List;)Ljava/lang/String;
-	public static final fun buildSmallCallText (Landroid/content/Context;Ljava/util/List;I)Ljava/lang/String;
-	public static synthetic fun buildSmallCallText$default (Landroid/content/Context;Ljava/util/List;IILjava/lang/Object;)Ljava/lang/String;
-}
-
-public final class io/getstream/video/android/common/util/ResourcesKt {
-	public static final fun getFloatResource (Landroid/content/Context;I)F
-}
-
-public final class io/getstream/video/android/common/view/ParticipantContentView : android/widget/LinearLayout {
-	public fun <init> (Landroid/content/Context;)V
-	public fun <init> (Landroid/content/Context;Landroid/util/AttributeSet;)V
-	public fun <init> (Landroid/content/Context;Landroid/util/AttributeSet;I)V
-	public fun <init> (Landroid/content/Context;Landroid/util/AttributeSet;II)V
-	public final fun init (Landroid/content/Context;)V
-	public final fun renderParticipants (Lio/getstream/video/android/core/Call;Ljava/util/List;)V
-}
-
-public final class io/getstream/video/android/common/view/ParticipantItemView : io/getstream/webrtc/android/ui/VideoTextureViewRenderer {
-	public fun <init> (Landroid/content/Context;)V
-	public fun <init> (Landroid/content/Context;Landroid/util/AttributeSet;)V
-	public final fun bindTrack (Lorg/webrtc/VideoTrack;)V
-	public final fun cleanUp ()V
-	public final fun initialize (Lio/getstream/video/android/core/Call;Ljava/lang/String;Lkotlin/jvm/functions/Function1;)V
-	public static synthetic fun initialize$default (Lio/getstream/video/android/common/view/ParticipantItemView;Lio/getstream/video/android/core/Call;Ljava/lang/String;Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)V
-	public final fun isInitialized ()Z
+public final class io/getstream/video/android/ui/common/AbstractCallActivity$Companion {
 }
 
 public final class io/getstream/video/android/ui/common/BuildConfig {
@@ -88,16 +27,77 @@ public final class io/getstream/video/android/ui/common/BuildConfig {
 }
 
 public final class io/getstream/video/android/ui/common/databinding/StreamVideoContentParticipantBinding : androidx/viewbinding/ViewBinding {
-	public final field firstParticipant Lio/getstream/video/android/common/view/ParticipantItemView;
+	public final field firstParticipant Lio/getstream/video/android/ui/common/view/ParticipantItemView;
 	public final field firstParticipantRow Landroid/widget/LinearLayout;
-	public final field fourthParticipant Lio/getstream/video/android/common/view/ParticipantItemView;
-	public final field secondParticipant Lio/getstream/video/android/common/view/ParticipantItemView;
+	public final field fourthParticipant Lio/getstream/video/android/ui/common/view/ParticipantItemView;
+	public final field secondParticipant Lio/getstream/video/android/ui/common/view/ParticipantItemView;
 	public final field secondParticipantRow Landroid/widget/LinearLayout;
-	public final field thirdParticipant Lio/getstream/video/android/common/view/ParticipantItemView;
+	public final field thirdParticipant Lio/getstream/video/android/ui/common/view/ParticipantItemView;
 	public static fun bind (Landroid/view/View;)Lio/getstream/video/android/ui/common/databinding/StreamVideoContentParticipantBinding;
 	public synthetic fun getRoot ()Landroid/view/View;
 	public fun getRoot ()Landroidx/constraintlayout/widget/ConstraintLayout;
 	public static fun inflate (Landroid/view/LayoutInflater;)Lio/getstream/video/android/ui/common/databinding/StreamVideoContentParticipantBinding;
 	public static fun inflate (Landroid/view/LayoutInflater;Landroid/view/ViewGroup;Z)Lio/getstream/video/android/ui/common/databinding/StreamVideoContentParticipantBinding;
+}
+
+public abstract class io/getstream/video/android/ui/common/notification/AbstractNotificationActivity : androidx/activity/ComponentActivity {
+	public fun <init> ()V
+	protected abstract fun initializeVideoIfNeeded ()V
+	protected fun onCreate (Landroid/os/Bundle;)V
+}
+
+public abstract interface class io/getstream/video/android/ui/common/permission/PermissionManager {
+	public static final field Companion Lio/getstream/video/android/ui/common/permission/PermissionManager$Companion;
+	public abstract fun checkPermission (Ljava/lang/String;)Z
+	public abstract fun getHasCameraPermission ()Lkotlinx/coroutines/flow/StateFlow;
+	public abstract fun getHasRecordAudioPermission ()Lkotlinx/coroutines/flow/StateFlow;
+	public abstract fun requestPermission (Ljava/lang/String;)Z
+}
+
+public final class io/getstream/video/android/ui/common/permission/PermissionManager$Companion {
+	public final fun create (Landroidx/activity/ComponentActivity;Lkotlin/jvm/functions/Function2;Lkotlin/jvm/functions/Function1;)Lio/getstream/video/android/ui/common/permission/PermissionManager;
+}
+
+public abstract interface class io/getstream/video/android/ui/common/permission/PermissionManagerProvider {
+	public abstract fun getPermissionManager ()Lio/getstream/video/android/ui/common/permission/PermissionManager;
+	public abstract fun initPermissionManager ()Lio/getstream/video/android/ui/common/permission/PermissionManager;
+}
+
+public final class io/getstream/video/android/ui/common/renderer/StreamVideoTextureViewRenderer : io/getstream/webrtc/android/ui/VideoTextureViewRenderer {
+	public fun <init> (Landroid/content/Context;)V
+	public fun onSurfaceTextureDestroyed (Landroid/graphics/SurfaceTexture;)Z
+}
+
+public final class io/getstream/video/android/ui/common/util/ColorUtilsKt {
+	public static final fun adjustColorBrightness (IF)I
+}
+
+public final class io/getstream/video/android/ui/common/util/ParticipantsTextKt {
+	public static final fun buildLargeCallText (Landroid/content/Context;Ljava/util/List;)Ljava/lang/String;
+	public static final fun buildSmallCallText (Landroid/content/Context;Ljava/util/List;I)Ljava/lang/String;
+	public static synthetic fun buildSmallCallText$default (Landroid/content/Context;Ljava/util/List;IILjava/lang/Object;)Ljava/lang/String;
+}
+
+public final class io/getstream/video/android/ui/common/util/ResourcesKt {
+	public static final fun getFloatResource (Landroid/content/Context;I)F
+}
+
+public final class io/getstream/video/android/ui/common/view/ParticipantContentView : android/widget/LinearLayout {
+	public fun <init> (Landroid/content/Context;)V
+	public fun <init> (Landroid/content/Context;Landroid/util/AttributeSet;)V
+	public fun <init> (Landroid/content/Context;Landroid/util/AttributeSet;I)V
+	public fun <init> (Landroid/content/Context;Landroid/util/AttributeSet;II)V
+	public final fun init (Landroid/content/Context;)V
+	public final fun renderParticipants (Lio/getstream/video/android/core/Call;Ljava/util/List;)V
+}
+
+public final class io/getstream/video/android/ui/common/view/ParticipantItemView : io/getstream/webrtc/android/ui/VideoTextureViewRenderer {
+	public fun <init> (Landroid/content/Context;)V
+	public fun <init> (Landroid/content/Context;Landroid/util/AttributeSet;)V
+	public final fun bindTrack (Lorg/webrtc/VideoTrack;)V
+	public final fun cleanUp ()V
+	public final fun initialize (Lio/getstream/video/android/core/Call;Ljava/lang/String;Lkotlin/jvm/functions/Function1;)V
+	public static synthetic fun initialize$default (Lio/getstream/video/android/ui/common/view/ParticipantItemView;Lio/getstream/video/android/core/Call;Ljava/lang/String;Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)V
+	public final fun isInitialized ()Z
 }
 

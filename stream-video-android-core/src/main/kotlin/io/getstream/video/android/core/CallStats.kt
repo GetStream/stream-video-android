@@ -18,14 +18,17 @@ package io.getstream.video.android.core
 
 import android.os.Build
 import io.getstream.log.taggedLogger
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.launch
 import org.webrtc.CameraEnumerationAndroid
 import org.webrtc.RTCStats
 import org.webrtc.RTCStatsReport
 import stream.video.sfu.models.TrackType
 
-public class PeerConnectionStats() {
+public class PeerConnectionStats {
     internal val _resolution: MutableStateFlow<String> = MutableStateFlow("")
     val resolution: StateFlow<String> = _resolution
 
@@ -49,8 +52,12 @@ public data class LocalStats(
     val deviceModel: String,
 )
 
-public class CallStats(val call: Call) {
+public class CallStats(val call: Call, val callScope: CoroutineScope) {
     private val logger by taggedLogger("CallStats")
+
+    private val supervisorJob = SupervisorJob()
+    private val scope = CoroutineScope(callScope.coroutineContext + supervisorJob)
+    // TODO: cleanup the scope
 
     val publisher = PeerConnectionStats()
     val subscriber = PeerConnectionStats()
@@ -127,17 +134,23 @@ public class CallStats(val call: Call) {
         statGroups.forEach {
             logger.i { "statgroup ${it.key}:${it.value}" }
         }
+
+        scope.launch {
+            val toMap = mutableMapOf<String, Any>()
+            toMap["data"] = stats.statsMap
+            call.sendStats(toMap)
+        }
     }
 
     fun updateLocalStats() {
+        val displayingAt = call.session?.trackDimensions?.value ?: emptyMap()
         val resolution = call.camera?.resolution?.value
         val availableResolutions = call.camera?.availableResolutions?.value
         val maxResolution = availableResolutions?.maxByOrNull { it.width * it.height }
 
         val sfu = call.session?.sfuUrl
 
-        val sdk = "android"
-        // TODO: How do we get this? val version = Configuration.versionName
+        val version = BuildConfig.STREAM_VIDEO_VERSION
         val osVersion = Build.VERSION.RELEASE ?: ""
 
         val vendor = Build.MANUFACTURER ?: ""
@@ -150,9 +163,17 @@ public class CallStats(val call: Call) {
             maxResolution = maxResolution,
             sfu = sfu ?: "",
             os = osVersion,
-            sdkVersion = "0.1",
+            sdkVersion = version,
             deviceModel = deviceModel,
         )
         _local.value = local
+
+        scope.launch {
+            val toMap = mutableMapOf<String, Any>()
+            toMap["availableResolutions"] = availableResolutions as Any
+            toMap["maxResolution"] = maxResolution as Any
+            toMap["displayingAt"] = displayingAt
+            call.sendStats(toMap)
+        }
     }
 }

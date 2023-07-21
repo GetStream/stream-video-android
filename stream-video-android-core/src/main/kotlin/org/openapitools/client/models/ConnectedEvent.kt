@@ -28,7 +28,13 @@ import org.openapitools.client.models.OwnUserResponse
 
 
 
+import com.squareup.moshi.FromJson
 import com.squareup.moshi.Json
+import com.squareup.moshi.JsonAdapter
+import com.squareup.moshi.JsonReader
+import com.squareup.moshi.JsonWriter
+import com.squareup.moshi.ToJson
+import org.openapitools.client.infrastructure.Serializer
 
 /**
  * This event is sent when the WS connection is established and authenticated, this event contains the full user object as it is stored on the server
@@ -56,7 +62,7 @@ data class ConnectedEvent (
     @Json(name = "type")
     val type: kotlin.String = "connection.ok"
 
-) : VideoEvent(), WSClientEvent{
+) : VideoEvent(), WSClientEvent {
 
     override fun getEventType(): String {
         return type

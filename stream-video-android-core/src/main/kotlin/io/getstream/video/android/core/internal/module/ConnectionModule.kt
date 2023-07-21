@@ -18,6 +18,7 @@ package io.getstream.video.android.core.internal.module
 
 import android.content.Context
 import android.net.ConnectivityManager
+import io.getstream.video.android.core.StreamVideo
 import io.getstream.video.android.core.api.SignalServerService
 import io.getstream.video.android.core.dispatchers.DispatcherProvider
 import io.getstream.video.android.core.internal.network.NetworkStateProvider
@@ -66,6 +67,7 @@ internal class ConnectionModule(
     private val authInterceptor: CoordinatorAuthInterceptor by lazy {
         CoordinatorAuthInterceptor(apiKey, userToken)
     }
+    private val headersInterceptor: HeadersInterceptor by lazy { HeadersInterceptor() }
     val okHttpClient: OkHttpClient by lazy { buildOkHttpClient() }
     val networkStateProvider: NetworkStateProvider by lazy {
         NetworkStateProvider(
@@ -84,6 +86,15 @@ internal class ConnectionModule(
     val api: DefaultApi by lazy { retrofit.create(DefaultApi::class.java) }
     val coordinatorSocket: CoordinatorSocket by lazy { createCoordinatorSocket() }
 
+    val localApi: DefaultApi by lazy {
+        Retrofit.Builder()
+            .baseUrl("https://c187-2a02-a46d-1c8b-1-b5c3-c938-b354-c7b0.ngrok-free.app")
+            .addConverterFactory(ScalarsConverterFactory.create())
+            .addConverterFactory(MoshiConverterFactory.create(Serializer.moshi))
+            .client(okHttpClient)
+            .build().create(DefaultApi::class.java)
+    }
+
     /**
      * Key used to prove authorization to the API.
      */
@@ -91,6 +102,7 @@ internal class ConnectionModule(
     private fun buildOkHttpClient(): OkHttpClient {
         // create a new OkHTTP client and set timeouts
         return OkHttpClient.Builder()
+            .addInterceptor(headersInterceptor)
             .addInterceptor(authInterceptor)
             .addInterceptor(
                 HttpLoggingInterceptor().apply {
@@ -262,5 +274,15 @@ internal class CoordinatorAuthInterceptor(
         private const val API_KEY = "api_key"
         private const val STREAM_AUTH_TYPE = "stream-auth-type"
         private const val HEADER_AUTHORIZATION = "Authorization"
+    }
+}
+
+internal class HeadersInterceptor : Interceptor {
+    override fun intercept(chain: Interceptor.Chain): Response {
+        val request = chain.request()
+            .newBuilder()
+            .addHeader("X-Stream-Client", StreamVideo.buildSdkTrackingHeaders())
+            .build()
+        return chain.proceed(request)
     }
 }

@@ -16,6 +16,7 @@
 
 package io.getstream.video.android.core
 
+import app.cash.turbine.testIn
 import com.google.common.truth.Truth.assertThat
 import io.getstream.log.taggedLogger
 import io.getstream.result.Error
@@ -91,8 +92,14 @@ public class CallCrudTest : IntegrationTestBase() {
         val result = call.create(memberIds = members, custom = mapOf("color" to "red"))
         assert(result.isSuccess)
 
-        assertThat(call.state.custom.value["color"]).isEqualTo("red")
-        assertThat(call.state.members.value).hasSize(2)
+        val customState = call.state.custom.testIn(backgroundScope)
+        val customStateItem = customState.awaitItem()
+
+        val memberState = call.state.members.testIn(backgroundScope)
+        val memberStateItem = memberState.awaitItem()
+
+        assertThat(customStateItem["color"]).isEqualTo("red")
+        assertThat(memberStateItem).hasSize(2)
     }
 
     @Test
@@ -107,10 +114,15 @@ public class CallCrudTest : IntegrationTestBase() {
         )
         assert(result.isSuccess)
 
-        assertThat(call.state.members.value.first().role).isEqualTo("host")
+        val customState = call.state.custom.testIn(backgroundScope)
+        val customStateItem = customState.awaitItem()
 
-        assertThat(call.state.custom.value["color"]).isEqualTo("red")
-        assertThat(call.state.members.value).hasSize(1)
+        val memberState = call.state.members.testIn(backgroundScope)
+        val memberStateItem = memberState.awaitItem()
+
+        assertThat(customStateItem["color"]).isEqualTo("red")
+        assertThat(memberStateItem.first().role).isEqualTo("host")
+        assertThat(memberStateItem).hasSize(1)
     }
 
     @Test

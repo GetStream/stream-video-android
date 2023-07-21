@@ -16,10 +16,14 @@
 
 package io.getstream.video.android.core
 
+import app.cash.turbine.testIn
 import com.google.common.truth.Truth.assertThat
 import io.getstream.video.android.core.base.IntegrationTestBase
+import io.getstream.video.android.core.events.DominantSpeakerChangedEvent
 import io.getstream.video.android.model.User
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -106,6 +110,12 @@ class CallStateTest : IntegrationTestBase() {
     @Test
     fun `Participants should be sorted`() = runTest {
         val call = client.call("default", randomUUID())
+
+        val sortedParticipants = call.state.sortedParticipantsFlow.stateIn(backgroundScope, SharingStarted.Eagerly, emptyList())
+
+        val sorted1 = sortedParticipants.value
+        assertThat(sorted1).isEmpty()
+
         call.state._pinnedParticipants.value = mutableMapOf(
             "1" to OffsetDateTime.now(Clock.systemUTC())
         )
@@ -130,8 +140,20 @@ class CallStateTest : IntegrationTestBase() {
             ParticipantState("3", call, User("3")).apply { _screenSharingEnabled.value = true }
         )
 
-        val sorted = call.state.sortedParticipants.value.map { it.sessionId }
-        assertThat(sorted).isInOrder()
+        val participants = call.state.participants.value
+        println("emitSorted participants size is ${participants.size}")
+        assertThat(participants.size).isEqualTo(6)
+        delay(60)
+
+        val sorted2 = sortedParticipants.value.map { it.sessionId }
+        assertThat(sorted2).isEqualTo(listOf("1", "2", "3", "4", "5", "6"))
+
+        clientImpl.fireEvent(DominantSpeakerChangedEvent("3", "3"), call.cid)
+        assertThat(call.state.getParticipantBySessionId("3")?.dominantSpeaker?.value).isTrue()
+        delay(60)
+
+        val sorted3 = sortedParticipants.value.map { it.sessionId }
+        assertThat(sorted3).isEqualTo(listOf("1", "3", "2", "4", "5", "6"))
     }
 
     @Test
@@ -154,11 +176,12 @@ class CallStateTest : IntegrationTestBase() {
     @Test
     fun `Setting the speaking while muted flag will reset itself after delay`() = runTest {
         // we can make multiple calls, this should have no impact on the reset logic or duration
+        val speakingWhileMuted = call.state.speakingWhileMuted.testIn(backgroundScope)
         call.state.markSpeakingAsMuted()
         call.state.markSpeakingAsMuted()
         call.state.markSpeakingAsMuted()
-        assertTrue(call.state.speakingWhileMuted.value)
-        delay(2500)
-        assertFalse(call.state.speakingWhileMuted.value)
+        assertTrue(speakingWhileMuted.expectMostRecentItem())
+        // The flag should automatically reset to false 2 seconds
+        assertFalse(speakingWhileMuted.awaitItem())
     }
 }

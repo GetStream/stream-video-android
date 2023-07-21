@@ -18,7 +18,6 @@ package io.getstream.video.android.core
 
 import io.getstream.log.taggedLogger
 import io.getstream.video.android.core.call.RtcSession
-import io.getstream.video.android.core.dispatchers.DispatcherProvider
 import io.getstream.video.android.core.events.AudioLevelChangedEvent
 import io.getstream.video.android.core.events.ChangePublishQualityEvent
 import io.getstream.video.android.core.events.ConnectionQualityChangeEvent
@@ -32,7 +31,9 @@ import io.getstream.video.android.core.events.SFUHealthCheckEvent
 import io.getstream.video.android.core.events.SubscriberOfferEvent
 import io.getstream.video.android.core.events.TrackPublishedEvent
 import io.getstream.video.android.core.events.TrackUnpublishedEvent
+import io.getstream.video.android.core.model.Ingress
 import io.getstream.video.android.core.model.NetworkQuality
+import io.getstream.video.android.core.model.RTMP
 import io.getstream.video.android.core.model.Reaction
 import io.getstream.video.android.core.model.ScreenSharingSession
 import io.getstream.video.android.core.permission.PermissionRequest
@@ -41,13 +42,16 @@ import io.getstream.video.android.core.utils.toUser
 import io.getstream.video.android.model.User
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.channelFlow
+import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import okhttp3.internal.toImmutableList
 import org.openapitools.client.models.BlockedUserEvent
 import org.openapitools.client.models.CallAcceptedEvent
 import org.openapitools.client.models.CallCreatedEvent
@@ -57,13 +61,18 @@ import org.openapitools.client.models.CallMemberAddedEvent
 import org.openapitools.client.models.CallMemberRemovedEvent
 import org.openapitools.client.models.CallMemberUpdatedEvent
 import org.openapitools.client.models.CallMemberUpdatedPermissionEvent
+import org.openapitools.client.models.CallParticipantResponse
 import org.openapitools.client.models.CallReactionEvent
 import org.openapitools.client.models.CallRecordingStartedEvent
 import org.openapitools.client.models.CallRecordingStoppedEvent
 import org.openapitools.client.models.CallRejectedEvent
 import org.openapitools.client.models.CallResponse
 import org.openapitools.client.models.CallRingEvent
+import org.openapitools.client.models.CallSessionEndedEvent
+import org.openapitools.client.models.CallSessionParticipantJoinedEvent
+import org.openapitools.client.models.CallSessionParticipantLeftEvent
 import org.openapitools.client.models.CallSessionResponse
+import org.openapitools.client.models.CallSessionStartedEvent
 import org.openapitools.client.models.CallSettingsResponse
 import org.openapitools.client.models.CallStateResponseFields
 import org.openapitools.client.models.CallUpdatedEvent
@@ -138,7 +147,7 @@ public sealed interface RealtimeConnection {
  *
  *
  */
-public class CallState(private val call: Call, private val user: User) {
+public class CallState(private val call: Call, private val user: User, internal val scope: CoroutineScope) {
 
     private val logger by taggedLogger("CallState")
 
@@ -148,8 +157,6 @@ public class CallState(private val call: Call, private val user: User) {
     public val isReconnecting: StateFlow<Boolean> = _connection.mapState {
         it is RealtimeConnection.Reconnecting
     }
-
-    val stats = CallStats(call)
 
     private val _participants: MutableStateFlow<SortedMap<String, ParticipantState>> =
         MutableStateFlow(emptyMap<String, ParticipantState>().toSortedMap())
@@ -192,11 +199,16 @@ public class CallState(private val call: Call, private val user: User) {
         MutableStateFlow(emptyMap())
     val pinnedParticipants: StateFlow<Map<String, OffsetDateTime>> = _pinnedParticipants
 
-    val scope = CoroutineScope(context = DispatcherProvider.IO)
+    val stats = CallStats(call, scope)
 
-    public val sortedParticipants =
-        _participants.combine(_pinnedParticipants) { participants, pinned ->
-            participants.values.sortedWith(
+    internal val sortedParticipantsFlow = channelFlow {
+        // uses a channel flow to handle concurrency and 3 things updating: https://kotlinlang.org/api/kotlinx.coroutines/kotlinx-coroutines-core/kotlinx.coroutines.flow/channel-flow.html
+
+        fun emitSorted() {
+            val participants = participants.value
+            val pinned = _pinnedParticipants.value
+            var lastParticipants: List<ParticipantState>? = null
+            val sorted = participants.sortedWith(
                 compareBy(
                     { pinned.containsKey(it.sessionId) },
                     { it.dominantSpeaker.value },
@@ -205,8 +217,53 @@ public class CallState(private val call: Call, private val user: User) {
                     { it.videoEnabled.value },
                     { it.joinedAt.value }
                 )
-            )
-        }.stateIn(scope, SharingStarted.WhileSubscribed(), emptyList())
+            ).reversed()
+
+            scope.launch {
+                if (lastParticipants != sorted) {
+                    send(sorted)
+                    lastParticipants = sorted
+                }
+            }
+        }
+
+        scope.launch {
+            _participants.collect {
+                emitSorted()
+            }
+        }
+        // Since participant state exposes it's own stateflows this is a little harder to do than usual
+        // we need to listen to the events and update the flow when it changes
+
+        // emit the sorted list
+        emitSorted()
+
+        // TODO: could optimize performance by subscribing only to relevant events
+        call.subscribe {
+            emitSorted()
+        }
+
+        scope.launch {
+            _pinnedParticipants.collect {
+                emitSorted()
+            }
+        }
+
+        awaitClose {}
+    }
+
+    /**
+     * Sorted participants based on
+     * - Pinned
+     * - Dominant Speaker
+     * - Screensharing
+     * - Last speaking at
+     * - Video enabled
+     * - Call joined at
+     *
+     * Debounced 100ms to avoid rapid changes
+     */
+    val sortedParticipants = sortedParticipantsFlow.debounce(100).stateIn(scope, SharingStarted.WhileSubscribed(10000L), emptyList())
 
     /** Members contains the list of users who are permanently associated with this call. This includes users who are currently not active in the call
      * As an example if you invite "john", "bob" and "jane" to a call and only Jane joins.
@@ -269,6 +326,8 @@ public class CallState(private val call: Call, private val user: User) {
 
     /** if we are in backstage mode or not */
     val backstage: StateFlow<Boolean> = _backstage
+    /** the opposite of backstage, if we are live or not */
+    val live: StateFlow<Boolean> = _backstage.mapState { !it }
 
     private val _egress: MutableStateFlow<EgressResponse?> = MutableStateFlow(null)
     val egress: StateFlow<EgressResponse?> = _egress
@@ -306,8 +365,8 @@ public class CallState(private val call: Call, private val user: User) {
     private val _blockedUserIds: MutableStateFlow<List<String>> = MutableStateFlow(emptyList())
     val blockedUserIds: StateFlow<List<String>> = _blockedUserIds
 
-    private val _custom: MutableStateFlow<Map<String, Any>> = MutableStateFlow(emptyMap())
-    val custom: StateFlow<Map<String, Any>> = _custom
+    private val _custom: MutableStateFlow<Map<String, Any?>> = MutableStateFlow(emptyMap())
+    val custom: StateFlow<Map<String, Any?>> = _custom
 
     private val _team: MutableStateFlow<String?> = MutableStateFlow(null)
     val team: StateFlow<String?> = _team
@@ -316,7 +375,14 @@ public class CallState(private val call: Call, private val user: User) {
     val createdBy: StateFlow<User?> = _createdBy
 
     private val _ingress: MutableStateFlow<CallIngressResponse?> = MutableStateFlow(null)
-    val ingress: StateFlow<CallIngressResponse?> = _ingress
+    val ingress: StateFlow<Ingress?> = _ingress.mapState {
+        val token = call.clientImpl.dataStore.userToken.value
+        val apiKey = call.clientImpl.dataStore.apiKey.value
+        val streamKey = "$apiKey/$token"
+        // TODO: use the address when the server is updated
+        val overwriteUrl = "rtmps://video-ingress-frankfurt-vi1.stream-io-video.com:443/${call.type}/${call.id}"
+        Ingress(rtmp = RTMP(address = overwriteUrl ?: "", streamKey = streamKey))
+    }
 
     private val userToSessionIdMap = participants.mapState { participants ->
         participants.associate { it.user.value.id to it.sessionId }
@@ -471,7 +537,14 @@ public class CallState(private val call: Call, private val user: User) {
             }
 
             is DominantSpeakerChangedEvent -> {
-                _dominantSpeaker.value = getOrCreateParticipant(event.sessionId, event.userId)
+                val lastDominantSpeaker = dominantSpeaker.value
+                val lastDominantSpeakerId = lastDominantSpeaker?.sessionId
+                if (lastDominantSpeakerId != event.sessionId) {
+                    val newSpeaker = getOrCreateParticipant(event.sessionId, event.userId)
+                    newSpeaker._dominantSpeaker.value = true
+                    _dominantSpeaker.value = newSpeaker
+                    lastDominantSpeaker?._dominantSpeaker?.value = false
+                }
             }
 
             is ConnectionQualityChangeEvent -> {
@@ -504,7 +577,6 @@ public class CallState(private val call: Call, private val user: User) {
             }
 
             is ParticipantJoinedEvent -> {
-                println("ParticipantJoinedEvent")
                 getOrCreateParticipant(event.participant)
             }
 
@@ -559,6 +631,42 @@ public class CallState(private val call: Call, private val user: User) {
 
             is ConnectedEvent -> {
                 // handled by socket
+            }
+
+            is CallSessionStartedEvent -> {
+                event.call.session?.let { session ->
+                    _session.value = session
+                }
+            }
+
+            is CallSessionEndedEvent -> {
+                _session.value = event.call.session
+            }
+
+            is CallSessionParticipantLeftEvent -> {
+                _session.value?.let { callSessionResponse ->
+                    val newList = callSessionResponse.participants.toMutableList()
+                    newList.removeIf { it.userSessionId == event.participant.userSessionId }
+                    _session.value = callSessionResponse.copy(
+                        participants = newList.toImmutableList()
+                    )
+                }
+            }
+
+            is CallSessionParticipantJoinedEvent -> {
+                _session.value?.let { callSessionResponse ->
+                    val newList = callSessionResponse.participants.toMutableList()
+                    val participant = CallParticipantResponse(user = event.participant.user, joinedAt = event.createdAt, role = "user", userSessionId = event.participant.userSessionId)
+                    val index = newList.indexOfFirst { user.id == event.participant.user.id }
+                    if (index == -1) {
+                        newList.add(participant)
+                    } else {
+                        newList[index] = participant
+                    }
+                    _session.value = callSessionResponse.copy(
+                        participants = newList.toImmutableList()
+                    )
+                }
             }
         }
     }

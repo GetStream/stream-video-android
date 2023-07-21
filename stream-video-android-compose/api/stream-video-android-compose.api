@@ -719,6 +719,10 @@ public final class io/getstream/video/android/compose/ui/components/call/control
 	public static final fun RegularControlActions-Z_s7CdY (Lio/getstream/video/android/core/Call;Landroidx/compose/ui/Modifier;JLandroidx/compose/ui/graphics/Shape;FLandroidx/compose/ui/unit/Dp;Lkotlin/jvm/functions/Function1;Ljava/util/List;Landroidx/compose/runtime/Composer;II)V
 }
 
+public final class io/getstream/video/android/compose/ui/components/call/controls/actions/SettingsActionKt {
+	public static final fun SettingsAction-jB83MbM (Landroidx/compose/ui/Modifier;ZLandroidx/compose/ui/graphics/Shape;JJLkotlin/jvm/functions/Function1;Landroidx/compose/runtime/Composer;II)V
+}
+
 public final class io/getstream/video/android/compose/ui/components/call/controls/actions/ToggleCameraActionKt {
 	public static final fun ToggleCameraAction-md9il-k (Landroidx/compose/ui/Modifier;ZZLandroidx/compose/ui/graphics/Shape;JJJJLkotlin/jvm/functions/Function1;Landroidx/compose/runtime/Composer;II)V
 }
@@ -908,6 +912,7 @@ public final class io/getstream/video/android/compose/ui/components/call/rendere
 	public static field lambda-5 Lkotlin/jvm/functions/Function2;
 	public static field lambda-6 Lkotlin/jvm/functions/Function2;
 	public static field lambda-7 Lkotlin/jvm/functions/Function2;
+	public static field lambda-8 Lkotlin/jvm/functions/Function2;
 	public fun <init> ()V
 	public final fun getLambda-1$stream_video_android_compose_release ()Lkotlin/jvm/functions/Function6;
 	public final fun getLambda-2$stream_video_android_compose_release ()Lkotlin/jvm/functions/Function2;
@@ -916,6 +921,7 @@ public final class io/getstream/video/android/compose/ui/components/call/rendere
 	public final fun getLambda-5$stream_video_android_compose_release ()Lkotlin/jvm/functions/Function2;
 	public final fun getLambda-6$stream_video_android_compose_release ()Lkotlin/jvm/functions/Function2;
 	public final fun getLambda-7$stream_video_android_compose_release ()Lkotlin/jvm/functions/Function2;
+	public final fun getLambda-8$stream_video_android_compose_release ()Lkotlin/jvm/functions/Function2;
 }
 
 public final class io/getstream/video/android/compose/ui/components/call/renderer/internal/ComposableSingletons$LazyColumnVideoRendererKt {
@@ -967,6 +973,7 @@ public final class io/getstream/video/android/compose/ui/components/call/rendere
 	public static field lambda-5 Lkotlin/jvm/functions/Function2;
 	public static field lambda-6 Lkotlin/jvm/functions/Function2;
 	public static field lambda-7 Lkotlin/jvm/functions/Function2;
+	public static field lambda-8 Lkotlin/jvm/functions/Function2;
 	public fun <init> ()V
 	public final fun getLambda-1$stream_video_android_compose_release ()Lkotlin/jvm/functions/Function6;
 	public final fun getLambda-2$stream_video_android_compose_release ()Lkotlin/jvm/functions/Function2;
@@ -975,6 +982,7 @@ public final class io/getstream/video/android/compose/ui/components/call/rendere
 	public final fun getLambda-5$stream_video_android_compose_release ()Lkotlin/jvm/functions/Function2;
 	public final fun getLambda-6$stream_video_android_compose_release ()Lkotlin/jvm/functions/Function2;
 	public final fun getLambda-7$stream_video_android_compose_release ()Lkotlin/jvm/functions/Function2;
+	public final fun getLambda-8$stream_video_android_compose_release ()Lkotlin/jvm/functions/Function2;
 }
 
 public final class io/getstream/video/android/compose/ui/components/call/renderer/internal/ScreenShareVideoRendererKt {
@@ -1207,6 +1215,15 @@ public final class io/getstream/video/android/compose/ui/components/video/Compos
 
 public final class io/getstream/video/android/compose/ui/components/video/VideoRendererKt {
 	public static final fun VideoRenderer (Lio/getstream/video/android/core/Call;Lio/getstream/video/android/core/ParticipantState$Media;Landroidx/compose/ui/Modifier;Lio/getstream/video/android/compose/ui/components/video/VideoScalingType;Lkotlin/jvm/functions/Function3;Lkotlin/jvm/functions/Function1;Landroidx/compose/runtime/Composer;II)V
+}
+
+public final class io/getstream/video/android/compose/ui/components/video/VideoRendererView : io/getstream/webrtc/android/ui/VideoTextureViewRenderer {
+	public static final field $stable I
+	public fun <init> (Landroid/content/Context;)V
+	public fun <init> (Landroid/content/Context;Landroid/util/AttributeSet;)V
+	public final fun onRendered (Lkotlin/jvm/functions/Function1;)V
+	public final fun setVideo (Lio/getstream/video/android/model/StreamCallId;Lio/getstream/video/android/core/ParticipantState$Media;)V
+	public final fun setVideoScalingType (Lio/getstream/video/android/compose/ui/components/video/VideoScalingType;)V
 }
 
 public final class io/getstream/video/android/compose/ui/components/video/VideoScalingType : java/lang/Enum {

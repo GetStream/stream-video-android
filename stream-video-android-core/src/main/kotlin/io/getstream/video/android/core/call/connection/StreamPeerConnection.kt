@@ -73,6 +73,12 @@ public class StreamPeerConnection(
     private val maxBitRate: Int,
 ) : PeerConnection.Observer {
 
+    private val goodStates = listOf(
+        PeerConnection.PeerConnectionState.NEW, // New is good, means we're not using it yet
+        PeerConnection.PeerConnectionState.CONNECTED,
+        PeerConnection.PeerConnectionState.CONNECTING,
+    )
+
     internal var localSdp: SessionDescription? = null
     internal var remoteSdp: SessionDescription? = null
     private val typeTag = type.stringify()
@@ -105,6 +111,10 @@ public class StreamPeerConnection(
      * Used to manage the stats observation lifecycle.
      */
     private var statsJob: Job? = null
+
+    fun isHealthy(): Boolean {
+        return state.value in goodStates
+    }
 
     /**
      * Used to pool together and store [IceCandidate]s before consuming them.

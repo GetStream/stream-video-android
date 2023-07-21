@@ -41,7 +41,11 @@ public interface AudioHandler {
 /**
  * TODO: this class should be merged into the Microphone Manager
  */
-public class AudioSwitchHandler constructor(private val context: Context, val preferSpeakerphone: Boolean, var audioDeviceChangeListener: AudioDeviceChangeListener) :
+public class AudioSwitchHandler constructor(
+    private val context: Context,
+    val preferSpeakerphone: Boolean,
+    var audioDeviceChangeListener: AudioDeviceChangeListener
+) :
     AudioHandler {
 
     private val logger by taggedLogger(TAG)
@@ -93,6 +97,7 @@ public class AudioSwitchHandler constructor(private val context: Context, val pr
             audioSwitch = null
         }
     }
+
     public fun selectDevice(audioDevice: AudioDevice?) {
         logger.i { "[selectDevice] audioDevice: $audioDevice" }
         audioSwitch?.selectDevice(audioDevice)

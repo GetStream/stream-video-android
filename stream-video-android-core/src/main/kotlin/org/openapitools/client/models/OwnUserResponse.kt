@@ -28,7 +28,13 @@ import org.openapitools.client.models.Device
 
 
 
+import com.squareup.moshi.FromJson
 import com.squareup.moshi.Json
+import com.squareup.moshi.JsonAdapter
+import com.squareup.moshi.JsonReader
+import com.squareup.moshi.JsonWriter
+import com.squareup.moshi.ToJson
+import org.openapitools.client.infrastructure.Serializer
 
 /**
  *
@@ -52,7 +58,7 @@ data class OwnUserResponse (
     val createdAt: org.threeten.bp.OffsetDateTime,
 
     @Json(name = "custom")
-    val custom: kotlin.collections.Map<kotlin.String, kotlin.Any>,
+    val custom: kotlin.collections.Map<kotlin.String, kotlin.Any?>,
 
     @Json(name = "devices")
     val devices: kotlin.collections.List<Device>,

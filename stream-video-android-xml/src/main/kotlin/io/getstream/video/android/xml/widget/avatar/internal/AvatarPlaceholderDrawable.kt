@@ -26,8 +26,8 @@ import android.graphics.Shader
 import android.graphics.Typeface
 import android.graphics.drawable.Drawable
 import androidx.annotation.Px
-import io.getstream.video.android.common.util.adjustColorBrightness
 import io.getstream.video.android.ui.common.R
+import io.getstream.video.android.ui.common.util.adjustColorBrightness
 import io.getstream.video.android.xml.font.TextStyle
 import io.getstream.video.android.xml.utils.extensions.getIntArray
 import kotlin.math.abs

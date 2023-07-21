@@ -16,7 +16,7 @@
 -->
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    package="io.getstream.video.android">
+    >
 
     <uses-feature android:name="android.hardware.camera" />
     <uses-feature android:name="android.hardware.camera.autofocus" />
@@ -52,12 +52,12 @@
         </provider>
 
         <receiver
-            android:name=".core.notifications.internal.RejectCallBroadcastReceiver"
+            android:name=".notifications.internal.RejectCallBroadcastReceiver"
             android:exported="false">
             <intent-filter android:priority="-1">
                 <action android:name="io.getstream.video.android.action.REJECT_CALL" />
             </intent-filter>
         </receiver>
-        <activity android:name=".core.notifications.internal.DismissNotificationActivity" />
+        <activity android:name=".notifications.internal.DismissNotificationActivity" />
     </application>
 </manifest>

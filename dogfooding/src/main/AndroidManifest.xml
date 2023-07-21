@@ -20,13 +20,14 @@
     <uses-permission android:name="android.permission.INTERNET" />
 
     <application
-        android:name=".DogfoodingApp"
+        android:name="io.getstream.video.android.App"
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Dogfooding"
+        android:usesCleartextTraffic="true"
         tools:targetApi="31">
 
         <profileable
@@ -34,7 +35,7 @@
             tools:targetApi="29" />
 
         <activity
-            android:name=".MainActivity"
+            android:name="io.getstream.video.android.MainActivity"
             android:exported="true"
             android:theme="@style/Dogfooding">
             <intent-filter>
@@ -45,23 +46,19 @@
         </activity>
 
         <activity
-            android:name=".ui.call.CallActivity"
+            android:name="io.getstream.video.android.ui.call.CallActivity"
             android:configChanges="screenSize|smallestScreenSize|screenLayout|orientation"
             android:exported="true"
             android:hardwareAccelerated="true"
-            android:supportsPictureInPicture="true" />
-
-        <service
-            android:name=".ui.call.CallService"
-            android:enabled="true"
-            android:exported="false" />
+            android:supportsPictureInPicture="true"
+            android:windowSoftInputMode="adjustResize" />
 
         <activity
-            android:name=".IncomingCallActivity"
+            android:name="io.getstream.video.android.IncomingCallActivity"
             android:exported="false"
             android:showOnLockScreen="true"
-            android:showWhenLocked="true"
-            >
+            android:supportsPictureInPicture="true"
+            android:showWhenLocked="true">
             <intent-filter android:priority="1">
                 <action android:name="io.getstream.video.android.action.INCOMING_CALL" />
                 <action android:name="io.getstream.video.android.action.NOTIFICATION" />
@@ -74,7 +71,7 @@
             android:name=".DeeplinkingActivity"
             android:exported="true"
             android:launchMode="singleTask">
-            <tools:validation testUrl="https://stream-calls-dogfood.vercel.app" />
+            <tools:validation testUrl="https://stream-video-demo.vercel.app" />
             <intent-filter
                 android:autoVerify="true"
                 android:label="@string/filter_call_link">
@@ -85,7 +82,7 @@
                 <category android:name="android.intent.category.BROWSABLE" />
 
                 <data android:scheme="https" />
-                <data android:host="stream-calls-dogfood.vercel.app" />
+                <data android:host="stream-video-demo.vercel.app" />
             </intent-filter>
         </activity>
     </application>
