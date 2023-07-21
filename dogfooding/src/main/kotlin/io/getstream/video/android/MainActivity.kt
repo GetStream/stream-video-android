@@ -22,12 +22,22 @@ import androidx.activity.compose.setContent
 import dagger.hilt.android.AndroidEntryPoint
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.ui.AppNavHost
+import io.getstream.video.android.util.InstallReferrer
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        // Try to read the Google Play install referrer value. We use it to deliver
+        // the Call ID from the QR code link.
+        @Suppress("KotlinConstantConditions")
+        if (BuildConfig.FLAVOR == "production") {
+            InstallReferrer(this).extractInstallReferrer { callId: String ->
+                startActivity(DeeplinkingActivity.createIntent(this, callId))
+            }
+        }
 
         setContent {
             VideoTheme { AppNavHost() }

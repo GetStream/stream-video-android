@@ -16,6 +16,7 @@
 
 package io.getstream.video.android
 
+import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
@@ -81,6 +82,19 @@ class DeeplinkingActivity : ComponentActivity() {
                 }
                 startActivity(intent)
                 finish()
+            }
+        }
+    }
+
+    companion object {
+
+        @JvmStatic
+        fun createIntent(
+            context: Context,
+            callId: String,
+        ): Intent {
+            return Intent(context, DeeplinkingActivity::class.java).apply {
+                data = Uri.Builder().appendQueryParameter("id", callId).build()
             }
         }
     }
