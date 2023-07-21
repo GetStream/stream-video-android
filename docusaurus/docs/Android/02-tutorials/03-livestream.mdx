@@ -7,30 +7,8 @@ import { TokenSnippet } from '../../../shared/_tokenSnippet.jsx';
 
 :::danger
 
-This tutorial isn't ready yet
+This tutorial is almost ready, but not quite finished yet
 :::
-
-## Notes other SDKs
-
-- add .live as the opposite of .backstage
-- expose ingress urls nicely (ingress.rtmp.address, ingress.rtmp.streamKey)
-- expose duration based on session.liveSince
-
-## TODO tutorial:
-
-- split the first part of the tutorial
-
-- request permissions
-
-## TODO server:
-
-- a way to mark a video as the primary/pinned video. if you have multiple hosts, how do you select the primary video?
-- the session should have a field with the total participant count (since thats what you want to show most of the time). ideally SFU ParticipantCount and session data should follow the same structure
-- session data isn't 100% correct. after 1 user joins it returns this in the CallSessionStartedEvent participantsCountByRole={}, rejectedBy={}, endedAt=null, startedAt=null
-- CallSessionParticipantJoinedEvent and CallSessionStartedEvent are send in the wrong order
-- CallParticipantResponse lacks a session id, so you can't easily add or remove from that list based on the events
-- RTMP in ratio has some problems
-
 
 ## Livestream Tutorial
 
@@ -69,10 +47,9 @@ dependencies {
 
 This tutorial uses the compose version of the SDK. Stream also provides a core library without compose.
 
-### Step 3 - Publish from your phone
+### Step 3 - Broadcast a livestream from your phone
 
-
-The following code shows how to publish from your phone's camera to the call.
+The following code shows how to publish from your phone's camera.
 Let's open MainActivity.kt and replace the MainActivity class with the following code:
 
 ```kotlin
@@ -125,11 +102,70 @@ class MainActivity : ComponentActivity() {
 
 ```
 
-Let's review the above steps.
+You'll notice that these first 3 lines need their values replaced.
 
-TODO: Review what we did here
+```kotlin
+val userToken = "REPLACE_WITH_TOKEN"
+val userId = "REPLACE_WITH_USER_ID"
+val callId = "REPLACE_WITH_CALL_ID"
+```
+
+Replace them now with the values shown below:
+
+<TokenSnippet sampleApp='livestream' displayStyle='credentials' />
+
+In the next step we setup the user:
+
+```kotlin
+val user = User(
+    id = userId, // any string
+    name = "Tutorial" // name and image are used in the UI
+)
+```
+
+If you don't have an authenticated user you can also use a guest or anonymous user. TODO DOCS
+For most apps it's convenient to match your own system of users to grant and remove permissions.
+
+Next we create the client:
+
+```kotlin
+val client = StreamVideoBuilder(
+    context = applicationContext,
+    apiKey = "hd8szvscpxvd", // demo API key
+    geo = GEO.GlobalEdgeNetwork,
+    user = user,
+    token = userToken,
+).build()
+```
+
+You'll see the userToken variable. Your backend typically generates the user token on signup or login.
+
+In the next step we create and join the call. The call object is used for video calls, audio rooms and livestreaming.
+
+```kotlin
+val call = client.call("livestream", callId)
+lifecycleScope.launch {
+
+    call.camera.enable()
+    call.microphone.enable()
+
+    // join the call
+    val result = call.join(create = true)
+    result.onError {
+        Toast.makeText(applicationContext, "uh oh $it", Toast.LENGTH_SHORT).show()
+    }
+}
+```
+
+call.join(create = true) is the simplest example.
+It's also possible to configure settings on the call or add co-hosts. TODO: Docs
 
 ### Step 4 - Render the video
+
+In this step we're going to build a UI for showing your local video with a button to start the livestream.
+This example uses compose, but you could also use our XML VideoRenderer.
+
+In `MainActivity.kt` replace the `VideoTheme` with the following code.
 
 ```kotlin
 
@@ -156,8 +192,6 @@ VideoTheme {
             modifier = Modifier.fillMaxWidth().fillMaxHeight().padding(32.dp)
 
         ) {
-
-
             if (connection == RealtimeConnection.Connected) {
                 if (!backstage) {
                     Text("Livestream has $participantCount participants")
@@ -179,22 +213,27 @@ VideoTheme {
 }
 ```
 
-Before running the app please update **REPLACE_WITH_USER_ID**, **REPLACE_WITH_TOKEN** and **REPLACE_WITH_CALL_ID** with the actual values shown below:
-
-<TokenSnippet sampleApp='livestream' displayStyle='credentials' />
-
-With the updated token in place, run the app. You should see a screen like this:
+If you now run your app you should see an interface like this:
 
 TODO: Image
 
-Now when you press live your video will be transmitted. You can confirm it by joining online here.
+When you press "go live" your video will be transmitted.
+Press go live in the android app and click the link below to watch it in your browser.
 
 <TokenSnippet sampleApp='livestream' displayStyle='join' />
 
-By default livestreams will start in the backstage mode. During the backstage mode only the host and co-hosts can join.
-This is convenient for testing your camera setup etc. When you want to go live simply use call.goLive().
-When the call is live regular users can join.
+Let's take a moment to review the compose code above. Call.state exposes all the stateflow objects you need.
+The most important ones are:
 
+```
+call.state
+call.state.participants
+```
+
+The [participant state docs](../03-guides/03-call-and-participant-state.mdx) show all the available data.
+
+The compose layout is vanilla compose other than VideoRenderer.
+VideoRenderer renders the video and a fallback. You can use it for both rendering the local video and remote video.
 
 ### Step 4 - (Optional) Publishing RTMP using OBS
 
