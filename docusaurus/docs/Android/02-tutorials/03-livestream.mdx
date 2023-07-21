@@ -237,7 +237,8 @@ VideoRenderer renders the video and a fallback. You can use it for both renderin
 
 ### Step 4 - (Optional) Publishing RTMP using OBS
 
-The example above showed how to publish your phone's camera to the livestream. Almost all livestream software and hardware supports RTMPS.
+The example above showed how to publish your phone's camera to the livestream.
+Almost all livestream software and hardware supports RTMPs.
 So let's see how to publish using RTMPs. Feel free to skip this step if you don't need to use RTMPs.
 
 A. Console log the URL & Stream Key println(call.state.ingress.rtmp)
@@ -252,21 +253,24 @@ Now that we've learned to publish using webrtc or RTMP let's talk about viewing 
 
 ### Step 5 - Viewing a livestream (Webrtc)
 
-The client setup for someone watching the call is quite similar.
+Watching a livestream is basically a simplified version of the code we wrote in `MainActivity.kt`
+
+* You don't need to request permissions or enable the camera
+*
+
+To change the example above and just watch a livestream:
 
 ```kotlin
-// anonymous user
-val client = StreamVideoBuilder(
-    context = applicationContext,
-    apiKey = "hd8szvscpxvd", // demo API key
-    geo = GEO.GlobalEdgeNetwork,
-    user = User(
-       type = UserType.Anonymous
-   ),
-).build()
+// remove this
+call.camera.enable()
+call.microphone.enable()
+// and this
+LaunchCallPermissions(call = call)
+// on the UI side remove the button to go live
 
-// mute volume by default
-call.speaker.setVolume(0)
+// and update this to use the remote video
+val me by call.state.me.collectAsState()
+val video = me?.video?.collectAsState()
 ```
 
 Here's the update MainActivity for viewing a call

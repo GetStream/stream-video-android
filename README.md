@@ -95,37 +95,39 @@ Video roadmap and changelog is available [here](https://github.com/GetStream/pro
 - [X] sortedParticipants stateflow doesn't update accurately (Thierry)
 - [X] Reactions
 - [X] Bug: screenshare is not removed after it stops when a participant leaves the call (Thierry) (probably just dont update the state when the participant leaves)
-
-### 0.3.0 milestone
-
-- [ ] Bug: Screensharing on Firefox has some issues when rendering on android (Daniel)
-- [ ] Ringing: Make it easy to test
-- [ ] Ringing: Make a list of what needs to be configurable
-- [ ] Ringing: Sounds for incoming, outgoing, call timed out. Sound for someone joining a call (Disabled by default). Docs on how to change them
-- [ ] Call Analytics stateflow (Thierry)
-- [ ] Pagination on query members & query channel endpoints (Daniel)
-- [ ] Audio & Video filters. Support  (Daniel)
-- [ ] Livestream tutorial (depends on RTMP support)
-- [ ] H264 workaround on Samsung 23 (see https://github.com/livekit/client-sdk-android/blob/main/livekit-android-sdk/src/main/java/io/livekit/android/webrtc/SimulcastVideoEncoderFactoryWrapper.kt#L34 and
-- https://github.com/react-native-webrtc/react-native-webrtc/issues/983#issuecomment-975624906)
-- [ ] Dynascale 2.0 (codecs, f resolution switches, resolution webrtc handling)
-- [ ] Test coverage
-- [ ] Testing on more devices
-- [ ] local version of audioLevel(s) for lower latency audio visualizations(Daniel)
-- [ ] Android SDK development.md cleanup (Daniel)
-- [ ] Logging is too verbose (rtc is very noisy), clean it up to focus on the essential for info and higher
 - [X] Speaking while muted stateflow (Daniel)
 - [X] Bluetooth reliability
 - [X] Cleanup the retry behaviour in the RtcSession
 - [X] SDK development guide for all teams
 
+### 0.3.0 milestone
+
+- [ ] Complete integration with the video demo flow
+- [ ] Finish usability testing with design team on chat integration (Jaewoong)
+- [ ] Ringing: Finish it, make testing easy and write docs for common changes (Daniel)
+- [ ] Enable ice restarts for publisher and subscriber
+- [ ] Livestream tutorial (depends on RTMP support) (Thierry)
+- [ ] Bug: Screensharing on Firefox has some issues when rendering on android (Daniel)
+- [ ] Call Analytics stateflow (Thierry)
+- [ ] Pagination on query members & query channel endpoints (Daniel)
+- [ ] Test coverage
+- [ ] Testing on more devices
+- [ ] local version of audioLevel(s) for lower latency audio visualizations(Daniel)
+- [ ] Android SDK development.md cleanup (Daniel)
+- [ ] Logging is too verbose (rtc is very noisy), clean it up to focus on the essential for info and higher
+
 ### 0.4.0 milestone
 
+- [ ] Upgrade to more recent versions of webrtc
 - [ ] Screensharing from mobile
 - [ ] Tap to focus
 - [ ] Camera controls
 - [ ] Picture of the video stream at highest resolution
 - [ ] Review foreground service vs backend for some things like screensharing etc
+- [ ] Audio & Video filters. Support  (Daniel)
+- [ ] H264 workaround on Samsung 23 (see https://github.com/livekit/client-sdk-android/blob/main/livekit-android-sdk/src/main/java/io/livekit/android/webrtc/SimulcastVideoEncoderFactoryWrapper.kt#L34 and
+- https://github.com/react-native-webrtc/react-native-webrtc/issues/983#issuecomment-975624906)
+- [ ] Dynascale 2.0 (codecs, f resolution switches, resolution webrtc handling)
 
 ## 💼 We are hiring!
 
