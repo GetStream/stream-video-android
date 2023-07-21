@@ -77,8 +77,7 @@ Video roadmap and changelog is available [here](https://github.com/GetStream/pro
 
 ### 0.2.0 milestone
 
-- [ ] Publish app on play store
-- [ ] Bug: Screensharing on Firefox has some issues when rendering on android (Daniel)
+- [X] Publish app on play store
 - [X] Example Button to switch speakerphone/earpiece (Jaewoong)
 - [X] Chat Integration (Jaewoong)
 - [X] Automatically handle pagination and sorting on > 6 participants in the sample app (Daniel)
@@ -99,6 +98,7 @@ Video roadmap and changelog is available [here](https://github.com/GetStream/pro
 
 ### 0.3.0 milestone
 
+- [ ] Bug: Screensharing on Firefox has some issues when rendering on android (Daniel)
 - [ ] Ringing: Make it easy to test
 - [ ] Ringing: Make a list of what needs to be configurable
 - [ ] Ringing: Sounds for incoming, outgoing, call timed out. Sound for someone joining a call (Disabled by default). Docs on how to change them

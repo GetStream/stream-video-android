@@ -28,17 +28,12 @@ import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.lifecycleScope
-import io.getstream.log.Priority
 import io.getstream.log.taggedLogger
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.core.StreamVideo
-import io.getstream.video.android.core.logging.LoggingLevel
-import io.getstream.video.android.datastore.delegate.StreamUserDataStore
 import io.getstream.video.android.model.StreamCallId
-import io.getstream.video.android.model.User
-import io.getstream.video.android.token.StreamVideoNetwork
 import io.getstream.video.android.ui.call.CallActivity
-import kotlinx.coroutines.flow.collectLatest
+import io.getstream.video.android.util.StreamVideoInitHelper
 import kotlinx.coroutines.launch
 
 class DeeplinkingActivity : ComponentActivity() {
@@ -74,47 +69,18 @@ class DeeplinkingActivity : ComponentActivity() {
     }
 
     private fun joinCall(cid: String) {
-        val dataStore = StreamUserDataStore.install(this)
 
         lifecycleScope.launch {
-            val data = dataStore.data
-            data.collectLatest { preferences ->
-                if (preferences != null) {
-                    app.initializeStreamChat(
-                        user = preferences.user!!,
-                        token = preferences.userToken
-                    )
-                    app.initializeStreamVideo(
-                        user = preferences.user!!,
-                        token = preferences.userToken,
-                        apiKey = preferences.apiKey,
-                        loggingLevel = LoggingLevel(priority = Priority.VERBOSE)
-                    )
-                } else {
-                    val guest = User(id = "guest", name = "Guest", role = "guest")
-                    val result = StreamVideoNetwork.tokenService.fetchToken(
-                        userId = guest.id,
-                        apiKey = BuildConfig.DOGFOODING_API_KEY
-                    )
-                    app.initializeStreamChat(user = guest, token = result.token)
-                    app.initializeStreamVideo(
-                        user = guest,
-                        token = result.token,
-                        apiKey = BuildConfig.DOGFOODING_API_KEY,
-                        loggingLevel = LoggingLevel(priority = Priority.VERBOSE)
-                    )
+            StreamVideoInitHelper.init(this@DeeplinkingActivity)
+            if (StreamVideo.isInstalled) {
+                val callId = StreamCallId(type = "default", id = cid)
+                val intent = CallActivity.createIntent(
+                    context = this@DeeplinkingActivity, callId = callId
+                ).apply {
+                    flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
                 }
-
-                if (StreamVideo.isInstalled) {
-                    val callId = StreamCallId(type = "default", id = cid)
-                    val intent = CallActivity.createIntent(
-                        context = this@DeeplinkingActivity, callId = callId
-                    ).apply {
-                        flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
-                    }
-                    startActivity(intent)
-                    finish()
-                }
+                startActivity(intent)
+                finish()
             }
         }
     }
