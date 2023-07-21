@@ -32,10 +32,20 @@ internal class DismissNotificationActivity : Activity() {
 
     companion object {
         private const val KEY_NOTIFICATION_ID = "KEY_NOTIFICATION_ID"
-        fun createIntent(context: Context, notificationId: Int): Intent =
+
+        /**
+         * @param baseIntentAction - Important - the action must be set. We are creating multiple
+         * dismiss intents (accept, reject, ...) and the system will "think" the Pending intents
+         * we create in [DefaultNotificationHandler.getActivityForIntent] are identical. This can
+         * lead to a reused intent with a wrong action.
+         * See documentation of [PendingIntent.getActivities] - the last intent in the list is the key.
+         *
+         */
+        fun createIntent(context: Context, notificationId: Int, baseIntentAction: String): Intent =
             Intent(context, DismissNotificationActivity::class.java)
                 .apply {
                     putExtra(KEY_NOTIFICATION_ID, notificationId)
+                    action = baseIntentAction
                 }
     }
 }
