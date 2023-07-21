@@ -44,11 +44,13 @@ class IncomingCallActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        // release the lock and turn on screen.
+        // release the lock, turn on screen, and keep the device awake.
         showWhenLockedAndTurnScreenOn()
+        window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
 
         // TODO: Should we also add a cancel function to the NotificationHandler interface?
-        NotificationManagerCompat.from(application).cancel(NotificationHandler.INCOMING_CALL_NOTIFICATION_ID)
+        NotificationManagerCompat.from(application)
+            .cancel(NotificationHandler.INCOMING_CALL_NOTIFICATION_ID)
 
         val callId = intent.streamCallId(NotificationHandler.INTENT_EXTRA_CALL_CID)!!
         val call = StreamVideo.instance().call(callId.type, callId.id)
@@ -74,6 +76,7 @@ class IncomingCallActivity : ComponentActivity() {
                             call.leave()
                             finish()
                         }
+
                         else -> Unit
                     }
                 }
