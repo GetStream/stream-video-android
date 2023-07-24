@@ -16,7 +16,6 @@
 
 package io.getstream.video.android.benchmark
 
-import androidx.benchmark.macro.ExperimentalStableBaselineProfilesApi
 import androidx.benchmark.macro.junit4.BaselineProfileRule
 import androidx.test.uiautomator.By
 import androidx.test.uiautomator.BySelector
@@ -26,14 +25,13 @@ import androidx.test.uiautomator.Until
 import org.junit.Rule
 import org.junit.Test
 
-@ExperimentalStableBaselineProfilesApi
 internal class BaselineProfileGenerator {
     @get:Rule
     internal val baselineProfileRule = BaselineProfileRule()
 
     @Test
     fun startup() =
-        baselineProfileRule.collectStableBaselineProfile(
+        baselineProfileRule.collectBaselineProfile(
             packageName = packageName,
             stableIterations = 2,
             maxIterations = 8,
