@@ -18,7 +18,6 @@ package io.getstream.video.android.core
 
 import io.getstream.log.taggedLogger
 import io.getstream.video.android.core.call.RtcSession
-import io.getstream.video.android.core.dispatchers.DispatcherProvider
 import io.getstream.video.android.core.events.AudioLevelChangedEvent
 import io.getstream.video.android.core.events.ChangePublishQualityEvent
 import io.getstream.video.android.core.events.ConnectionQualityChangeEvent
@@ -42,7 +41,6 @@ import io.getstream.video.android.core.utils.mapState
 import io.getstream.video.android.core.utils.toUser
 import io.getstream.video.android.model.User
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.delay
@@ -378,7 +376,7 @@ public class CallState(private val call: Call, private val user: User, internal 
     val createdBy: StateFlow<User?> = _createdBy
 
     private val _ingress: MutableStateFlow<CallIngressResponse?> = MutableStateFlow(null)
-    val ingress: StateFlow<Ingress?> = _ingress.mapState(initialValue = null, scope = CoroutineScope(Dispatchers.IO)) {
+    val ingress: StateFlow<Ingress?> = _ingress.mapState(initialValue = null, scope = scope) {
         val token = call.clientImpl.dataStore.userToken.firstOrNull()
         val apiKey = call.clientImpl.dataStore.apiKey.firstOrNull()
         val streamKey = "$apiKey/$token"

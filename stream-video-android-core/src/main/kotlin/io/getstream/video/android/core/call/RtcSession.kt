@@ -286,7 +286,6 @@ public class RtcSession internal constructor(
             }
         }
 
-
         // step 1 setup the peer connections
         subscriber = createSubscriber()
 
