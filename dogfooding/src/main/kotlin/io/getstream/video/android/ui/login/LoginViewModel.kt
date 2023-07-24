@@ -86,9 +86,9 @@ class LoginViewModel @Inject constructor(
 
     fun sigInInIfValidUserExist() {
         viewModelScope.launch {
+            handleUiEvent(LoginEvent.Loading)
             dataStore.user.collectLatest { user ->
                 if (user != null && user.isValid() && !BuildConfig.BENCHMARK) {
-                    handleUiEvent(LoginEvent.Loading)
                     delay(10)
                     handleUiEvent(LoginEvent.SignInInSuccess(userId = user.id))
                 }
