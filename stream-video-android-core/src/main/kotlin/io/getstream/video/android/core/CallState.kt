@@ -49,6 +49,7 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.channelFlow
 import kotlinx.coroutines.flow.debounce
+import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import okhttp3.internal.toImmutableList
@@ -375,9 +376,9 @@ public class CallState(private val call: Call, private val user: User, internal 
     val createdBy: StateFlow<User?> = _createdBy
 
     private val _ingress: MutableStateFlow<CallIngressResponse?> = MutableStateFlow(null)
-    val ingress: StateFlow<Ingress?> = _ingress.mapState {
-        val token = call.clientImpl.dataStore.userToken.value
-        val apiKey = call.clientImpl.dataStore.apiKey.value
+    val ingress: StateFlow<Ingress?> = _ingress.mapState(initialValue = null, scope = scope) {
+        val token = call.clientImpl.dataStore.userToken.firstOrNull()
+        val apiKey = call.clientImpl.dataStore.apiKey.firstOrNull()
         val streamKey = "$apiKey/$token"
         // TODO: use the address when the server is updated
         val overwriteUrl = "rtmps://video-ingress-frankfurt-vi1.stream-io-video.com:443/${call.type}/${call.id}"

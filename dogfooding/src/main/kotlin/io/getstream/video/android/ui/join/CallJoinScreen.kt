@@ -107,7 +107,7 @@ fun CallJoinScreen(
 private fun CallJoinHeader(
     callJoinViewModel: CallJoinViewModel = hiltViewModel()
 ) {
-    val user by callJoinViewModel.user.collectAsState()
+    val user by callJoinViewModel.user.collectAsState(initial = null)
 
     Row(
         modifier = Modifier
@@ -139,7 +139,7 @@ private fun CallJoinBody(
     val user by if (LocalInspectionMode.current) {
         remember { mutableStateOf(mockUsers[0]) }
     } else {
-        callJoinViewModel.user.collectAsState()
+        callJoinViewModel.user.collectAsState(initial = null)
     }
 
     Column(
