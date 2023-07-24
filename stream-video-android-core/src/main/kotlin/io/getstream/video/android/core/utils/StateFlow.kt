@@ -16,13 +16,10 @@
 
 package io.getstream.video.android.core.utils
 
-import io.getstream.video.android.core.dispatchers.DispatcherProvider
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.InternalCoroutinesApi
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.FlowCollector
-import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
@@ -61,16 +58,5 @@ fun <T1, T2, R> combineStates(flow: StateFlow<T1>, flow2: StateFlow<T2>, transfo
     return DerivedStateFlow(
         getValue = { transform(flow.value, flow2.value) },
         flow = combine(flow, flow2) { a, b -> transform(a, b) }
-    )
-}
-@JvmSynthetic
-internal fun <T> Flow<T>.asStateFlow(
-    initialValue: T,
-    scope: CoroutineScope = CoroutineScope(context = DispatcherProvider.IO),
-): StateFlow<T> {
-    return stateIn(
-        scope = scope,
-        started = SharingStarted.Eagerly,
-        initialValue = initialValue,
     )
 }
