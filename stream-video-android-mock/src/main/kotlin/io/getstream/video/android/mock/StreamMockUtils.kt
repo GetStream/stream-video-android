@@ -18,12 +18,14 @@ package io.getstream.video.android.mock
 
 import android.content.Context
 import io.getstream.video.android.core.Call
+import io.getstream.video.android.core.MemberState
 import io.getstream.video.android.core.ParticipantState
 import io.getstream.video.android.core.StreamVideo
 import io.getstream.video.android.core.StreamVideoBuilder
 import io.getstream.video.android.core.model.MediaTrack
 import io.getstream.video.android.datastore.delegate.StreamUserDataStore
 import io.getstream.video.android.model.User
+import org.threeten.bp.OffsetDateTime
 import org.webrtc.VideoTrack
 import java.util.UUID
 
@@ -135,6 +137,34 @@ public val mockParticipantList: List<ParticipantState>
         return participants
     }
 
+/** Mock a new list of [ParticipantState]. */
+public val mockMemberStateList: List<MemberState>
+    inline get() {
+        val participants = arrayListOf<MemberState>()
+        mockCall.state.clearParticipants()
+        mockUsers.forEach { user ->
+            val sessionId = if (user == mockUsers.first()) {
+                mockCall.sessionId ?: UUID.randomUUID().toString()
+            } else {
+                UUID.randomUUID().toString()
+            }
+            participants.add(
+                MemberState(
+                    user = user,
+                    createdAt = OffsetDateTime.now(),
+                    updatedAt = OffsetDateTime.now(),
+                    custom = emptyMap(),
+                    role = "admin"
+                )
+            )
+        }
+        return participants
+    }
+
 /** Mock a new [ParticipantState]. */
 public val mockParticipant: ParticipantState
     inline get() = mockParticipantList[0]
+
+/** Mock a new [MemberState]. */
+public val mockMember: MemberState
+    inline get() = mockMemberStateList[0]

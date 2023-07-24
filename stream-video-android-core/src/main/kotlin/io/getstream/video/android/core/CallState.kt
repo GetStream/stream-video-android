@@ -98,6 +98,7 @@ import org.openapitools.client.models.UpdatedCallPermissionsEvent
 import org.openapitools.client.models.VideoEvent
 import org.threeten.bp.Clock
 import org.threeten.bp.OffsetDateTime
+import stream.video.sfu.models.CallState
 import stream.video.sfu.models.Participant
 import stream.video.sfu.models.ParticipantCount
 import stream.video.sfu.models.TrackType
@@ -149,7 +150,12 @@ public sealed interface RealtimeConnection {
  *
  *
  */
-public class CallState(private val call: Call, private val user: User, internal val scope: CoroutineScope) {
+public class CallState(
+    private val client: StreamVideo,
+    private val call: Call,
+    private val user: User,
+    internal val scope: CoroutineScope
+) {
 
     private val logger by taggedLogger("CallState")
 
@@ -294,8 +300,8 @@ public class CallState(private val call: Call, private val user: User, internal 
     val blockedUsers: StateFlow<Set<String>> = _blockedUsers
 
     /** Specific to ringing calls, additional state about incoming, outgoing calls */
-    private val _ringingState: MutableStateFlow<RingingState?> = MutableStateFlow(null)
-    public val ringingState: StateFlow<RingingState?> = _ringingState
+    private val _ringingState: MutableStateFlow<RingingState> = MutableStateFlow(RingingState.Idle)
+    public val ringingState: StateFlow<RingingState> = _ringingState
 
     /** The settings for the call */
     private val _settings: MutableStateFlow<CallSettingsResponse?> = MutableStateFlow(null)
@@ -426,12 +432,14 @@ public class CallState(private val call: Call, private val user: User, internal 
                 val newAcceptedBy = _acceptedBy.value.toMutableSet()
                 newAcceptedBy.add(event.user.id)
                 _acceptedBy.value = newAcceptedBy.toSet()
+                updateRingingState()
             }
 
             is CallRejectedEvent -> {
                 val new = _rejectedBy.value.toMutableSet()
                 new.add(event.user.id)
                 _rejectedBy.value = new.toSet()
+                updateRingingState()
             }
 
             is CallEndedEvent -> {
@@ -674,6 +682,41 @@ public class CallState(private val call: Call, private val user: User, internal 
         }
     }
 
+    private fun updateRingingState() {
+
+        val outgoingMembersCount = _members.value.filter { it.value.user.id != client.userId }.size
+        val rejectedBy = rejectedBy.value
+
+        // no members yet, state probably not yet fully set
+        val state: RingingState = if (_members.value.isEmpty()) {
+            RingingState.Idle
+        } else if (rejectedBy.isNotEmpty() && _acceptedBy.value.isEmpty() && rejectedBy.size >= outgoingMembersCount) {
+            // Call was rejected. Listener should leave the call with call.leave()
+            RingingState.RejectedByAll
+        } else if (_createdBy.value?.id != client.userId) {
+            // Member list is not empty, it's not rejected - it's an incoming call
+            val acceptedByMe = _acceptedBy.value.findLast { it == client.userId }
+            // If it's already accepted by me then we are in an Active call
+            if (acceptedByMe != null) {
+                RingingState.Active
+            } else {
+                RingingState.Incoming
+            }
+        } else if (_createdBy.value?.id == client.userId) {
+            // Member list is not empty, it's not reject and created by us - it's an outgoing call
+            if (_acceptedBy.value.isNotEmpty()) {
+                RingingState.Active
+            } else {
+                RingingState.Outgoing
+            }
+        } else {
+            RingingState.Idle
+        }
+
+        logger.d { "Updating ringing state ${_ringingState.value} -> $state" }
+       _ringingState.value = state
+    }
+
     private fun updateFromJoinResponse(event: JoinCallResponseEvent) {
         // update the participant count
         val count = event.callState.participant_count
@@ -782,6 +825,8 @@ public class CallState(private val call: Call, private val user: User, internal 
             }
         }
         _members.value = memberMap
+
+        updateRingingState()
     }
 
     fun getParticipantBySessionId(sessionId: String): ParticipantState? {
@@ -805,7 +850,7 @@ public class CallState(private val call: Call, private val user: User, internal 
         _broadcasting.value = response.egress.broadcasting
         _session.value = response.session
         _rejectedBy.value = response.session?.rejectedBy?.keys?.toSet() ?: emptySet()
-        _acceptedBy.value = response.session?.rejectedBy?.keys?.toSet() ?: emptySet()
+        _acceptedBy.value = response.session?.acceptedBy?.keys?.toSet() ?: emptySet()
         _createdAt.value = response.createdAt
         _updatedAt.value = response.updatedAt
         _endedAt.value = response.endedAt
@@ -817,6 +862,8 @@ public class CallState(private val call: Call, private val user: User, internal 
         _settings.value = response.settings
         _transcribing.value = response.transcribing
         _team.value = response.team
+
+        updateRingingState()
     }
 
     fun updateFromResponse(response: GetOrCreateCallResponse) {

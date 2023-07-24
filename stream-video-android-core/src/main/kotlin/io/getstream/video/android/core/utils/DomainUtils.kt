@@ -16,6 +16,7 @@
 
 package io.getstream.video.android.core.utils
 
+import io.getstream.video.android.core.MemberState
 import io.getstream.video.android.core.ParticipantState
 import io.getstream.video.android.core.internal.InternalStreamVideoApi
 import io.getstream.video.android.core.model.CallData
@@ -61,6 +62,21 @@ public fun ParticipantState.toCallUser(): CallUser {
         imageUrl = initialUser.image,
         teams = initialUser.teams,
         role = initialUser.role,
+        state = null,
+        createdAt = null,
+        updatedAt = null,
+    )
+}
+
+@JvmSynthetic
+@InternalStreamVideoApi
+public fun MemberState.toCallUser(): CallUser {
+    return CallUser(
+        id = user.id,
+        name = user.name,
+        imageUrl = user.image,
+        teams = user.teams,
+        role = user.role,
         state = null,
         createdAt = null,
         updatedAt = null,

@@ -40,10 +40,12 @@ import com.skydoves.landscapist.components.rememberImageComponent
 import com.skydoves.landscapist.transformation.blur.BlurTransformationPlugin
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.avatar.AvatarImagePreview
+import io.getstream.video.android.core.MemberState
 import io.getstream.video.android.core.ParticipantState
 import io.getstream.video.android.core.model.CallUser
 import io.getstream.video.android.core.utils.toCallUser
 import io.getstream.video.android.mock.StreamMockUtils
+import io.getstream.video.android.mock.mockMemberStateList
 import io.getstream.video.android.mock.mockParticipantList
 import io.getstream.video.android.ui.common.R
 
@@ -59,7 +61,7 @@ import io.getstream.video.android.ui.common.R
 @Composable
 public fun CallBackground(
     modifier: Modifier = Modifier,
-    participants: List<ParticipantState>,
+    participants: List<MemberState>,
     isVideoType: Boolean = true,
     isIncoming: Boolean,
     content: @Composable BoxScope.() -> Unit
@@ -168,7 +170,7 @@ private fun CallBackgroundPreview() {
     StreamMockUtils.initializeStreamVideo(LocalContext.current)
     VideoTheme {
         CallBackground(
-            participants = mockParticipantList.take(1),
+            participants = mockMemberStateList.take(1),
             isVideoType = true,
             isIncoming = true
         ) {
