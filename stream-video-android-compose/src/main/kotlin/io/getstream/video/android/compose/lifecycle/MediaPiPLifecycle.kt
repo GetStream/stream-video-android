@@ -66,7 +66,22 @@ public fun MediaPiPLifecycle(
 
     if (latestLifecycleEvent == Lifecycle.Event.ON_PAUSE) {
         LaunchedEffect(latestLifecycleEvent) {
-
+            delay(pipEnteringDuration)
+            val isInPictureInPicture = context.isInPictureInPictureMode
+            if (!isInPictureInPicture && !enableInPictureInPicture) {
+                call.camera.pause(fromUser = false)
+                call.microphone.pause(fromUser = false)
+            } else if (!isInPictureInPicture) {
+                // TODO: There's not way to onUserLeaveHint in Compose for now.
+                // https://developer.android.com/reference/android/app/Activity#onUserLeaveHint()
+                try {
+                    Handler(Looper.getMainLooper()).post {
+                        enterPictureInPicture(context = context, call = call)
+                    }
+                } catch (e: Exception) {
+                    StreamLog.d("MediaPiPLifecycle") { e.stackTraceToString() }
+                }
+            }
         }
     }
 

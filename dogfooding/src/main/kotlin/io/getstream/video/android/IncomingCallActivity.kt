@@ -23,24 +23,12 @@ import android.view.WindowManager
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.ui.Modifier
 import androidx.lifecycle.lifecycleScope
 import io.getstream.result.Result
-import io.getstream.video.android.compose.theme.VideoTheme
-import io.getstream.video.android.compose.ui.components.call.activecall.CallContent
-import io.getstream.video.android.compose.ui.components.call.ringing.RingingCallContent
 import io.getstream.video.android.core.StreamVideo
-import io.getstream.video.android.core.call.state.AcceptCall
-import io.getstream.video.android.core.call.state.CallAction
-import io.getstream.video.android.core.call.state.DeclineCall
-import io.getstream.video.android.core.call.state.LeaveCall
-import io.getstream.video.android.core.call.state.ToggleCamera
-import io.getstream.video.android.core.call.state.ToggleMicrophone
-import io.getstream.video.android.core.call.state.ToggleSpeakerphone
 import io.getstream.video.android.core.notifications.NotificationHandler
 import io.getstream.video.android.model.streamCallId
+import io.getstream.video.android.ui.call.CallContentScreen
 import io.getstream.video.android.util.StreamVideoInitHelper
 import kotlinx.coroutines.launch
 
@@ -60,12 +48,13 @@ class IncomingCallActivity : ComponentActivity() {
             StreamVideoInitHelper.init(this@IncomingCallActivity)
             val call = StreamVideo.instance().call(callId.type, callId.id)
 
-            // update the call state.
+            // This is an incoming call, the application could have been started from fresh
+            // from the notification. Get the current state of the call.
+            // TODO: Move to SDK? (invoke when push is received)
             val result = call.get()
 
             if (result is Result.Failure) {
                 // Failed to recover the current state of the call
-                // TODO: Automaticly call this in the SDK?
                 Log.e("IncomingCallActivity", "Call.join failed ${result.value}")
                 Toast.makeText(
                     this@IncomingCallActivity,
@@ -83,53 +72,31 @@ class IncomingCallActivity : ComponentActivity() {
             }
 
             setContent {
-                VideoTheme {
-                    val onCallAction: (CallAction) -> Unit = { callAction ->
-                        when (callAction) {
-                            is ToggleCamera -> call.camera.setEnabled(callAction.isEnabled)
-                            is ToggleMicrophone -> call.microphone.setEnabled(callAction.isEnabled)
-                            is ToggleSpeakerphone -> call.speaker.setEnabled(callAction.isEnabled)
-                            is LeaveCall -> {
-                                call.leave()
-                                finish()
-                            }
-                            is DeclineCall -> {
-                                lifecycleScope.launch {
-                                    call.reject()
-                                    finish()
-                                }
-                            }
-                            is AcceptCall -> {
-                                lifecycleScope.launch {
-                                    call.accept()
-                                    call.join()
-                                }
-                            }
-
-                            else -> Unit
+                CallContentScreen(
+                    call = call,
+                    onLeaveCall = {
+                        call.leave()
+                        finish()
+                    },
+                    onDeclineCall = {
+                        lifecycleScope.launch {
+                            call.reject()
+                            finish()
+                        }
+                    },
+                    onAcceptCall = {
+                        lifecycleScope.launch {
+                            call.accept()
+                            call.join()
+                        }
+                    },
+                    onRejecteCall = {
+                        lifecycleScope.launch {
+                            call.leave()
+                            finish()
                         }
                     }
-                    RingingCallContent(
-                        modifier = Modifier.background(color = VideoTheme.colors.appBackground),
-                        call = call,
-                        onBackPressed = {
-                            call.leave()
-                            finish()
-                        },
-                        onAcceptedContent = {
-                            CallContent(
-                                modifier = Modifier.fillMaxSize(),
-                                call = call,
-                                onCallAction = onCallAction
-                            )
-                        },
-                        onRejectedContent = {
-                            call.leave()
-                            finish()
-                        },
-                        onCallAction = onCallAction
-                    )
-                }
+                )
             }
         }
     }

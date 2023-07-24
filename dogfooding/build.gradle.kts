@@ -158,6 +158,7 @@ dependencies {
     implementation(libs.androidx.material)
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime)
+    implementation(libs.androidx.lifecycle.runtime.compose)
 
     implementation(libs.retrofit)
     implementation(libs.kotlinx.coroutines.android)
