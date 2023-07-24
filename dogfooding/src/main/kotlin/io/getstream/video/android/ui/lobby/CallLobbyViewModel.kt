@@ -28,11 +28,13 @@ import io.getstream.video.android.datastore.delegate.StreamUserDataStore
 import io.getstream.video.android.model.StreamCallId
 import io.getstream.video.android.model.User
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
@@ -60,7 +62,7 @@ class CallLobbyViewModel @Inject constructor(
         call
     }
 
-    val user: User? = dataStore.user.value
+    val user: Flow<User?> = dataStore.user
     val isLoggedOut = dataStore.user.map { it == null }
 
     private val _isLoading: MutableStateFlow<Boolean> = MutableStateFlow(false)

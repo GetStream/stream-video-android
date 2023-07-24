@@ -25,7 +25,6 @@ import com.google.crypto.tink.KeyTemplates
 import com.google.crypto.tink.aead.AeadConfig
 import com.google.crypto.tink.integration.android.AndroidKeysetManager
 import io.getstream.log.StreamLog
-import io.getstream.video.android.datastore.flow.asStateFlow
 import io.getstream.video.android.datastore.model.StreamUserPreferences
 import io.getstream.video.android.datastore.serializer.UserSerializer
 import io.getstream.video.android.datastore.serializer.encrypted
@@ -37,6 +36,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.map
 
@@ -114,20 +114,19 @@ public class StreamUserDataStore constructor(
     public suspend fun clear(): StreamUserPreferences? = updateData { null }
 
     /** A state that contains a persisted [User] data. */
-    public val user: StateFlow<User?> = data.map { it?.user }.asStateFlow(null, scope)
+    public val user: Flow<User?> = data.map { it?.user }
 
     /** A state that contains a persisted [ApiKey] data. */
-    public val apiKey: StateFlow<ApiKey> =
-        data.map { it?.apiKey.orEmpty() }.asStateFlow("", scope)
+    public val apiKey: Flow<ApiKey> =
+        data.map { it?.apiKey.orEmpty() }
 
     /** A state that contains a persisted [UserToken] data. */
-    public val userToken: StateFlow<UserToken> =
-        data.map { it?.userToken.orEmpty() }.asStateFlow("", scope)
+    public val userToken: Flow<UserToken> =
+        data.map { it?.userToken.orEmpty() }
 
     /** A state that contains a persisted [Device] data. */
-    public val userDevice: StateFlow<Device?> =
+    public val userDevice: Flow<Device?> =
         data.map { it?.userDevice }
-            .asStateFlow(null, scope)
 
     public companion object {
         /**
