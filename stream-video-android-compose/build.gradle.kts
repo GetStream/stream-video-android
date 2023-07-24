@@ -55,6 +55,7 @@ dependencies {
     implementation(libs.androidx.compose.material.iconsExtended)
     implementation(libs.androidx.lifecycle.runtime.compose)
     implementation(libs.accompanist.permission)
+    implementation(libs.compose.stable.marker)
 
     // image loading
     implementation(libs.landscapist.coil)
