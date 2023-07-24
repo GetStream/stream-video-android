@@ -16,4 +16,4 @@
 
 package io.getstream.video.android.benchmark
 
-internal const val packageName = "io.getstream.video.android.dogfooding"
+internal const val packageName = "io.getstream.video.android"
