@@ -7,14 +7,13 @@ public final class io/getstream/video/android/datastore/BuildConfig {
 
 public final class io/getstream/video/android/datastore/delegate/StreamUserDataStore : androidx/datastore/core/DataStore {
 	public static final field Companion Lio/getstream/video/android/datastore/delegate/StreamUserDataStore$Companion;
-	public fun <init> (Landroidx/datastore/core/DataStore;Lkotlinx/coroutines/CoroutineScope;)V
-	public final fun cancelJobs ()V
+	public fun <init> (Landroidx/datastore/core/DataStore;)V
 	public final fun clear (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
-	public final fun getApiKey ()Lkotlinx/coroutines/flow/StateFlow;
+	public final fun getApiKey ()Lkotlinx/coroutines/flow/Flow;
 	public fun getData ()Lkotlinx/coroutines/flow/Flow;
-	public final fun getUser ()Lkotlinx/coroutines/flow/StateFlow;
-	public final fun getUserDevice ()Lkotlinx/coroutines/flow/StateFlow;
-	public final fun getUserToken ()Lkotlinx/coroutines/flow/StateFlow;
+	public final fun getUser ()Lkotlinx/coroutines/flow/Flow;
+	public final fun getUserDevice ()Lkotlinx/coroutines/flow/Flow;
+	public final fun getUserToken ()Lkotlinx/coroutines/flow/Flow;
 	public final fun updateApiKey (Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public fun updateData (Lkotlin/jvm/functions/Function2;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public final fun updateUser (Lio/getstream/video/android/model/User;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
@@ -30,11 +29,6 @@ public final class io/getstream/video/android/datastore/delegate/StreamUserDataS
 	public final fun isInstalled ()Z
 	public final fun lazyInstance ()Lkotlin/Lazy;
 	public final fun unInstall ()V
-}
-
-public final class io/getstream/video/android/datastore/flow/StateFlowKt {
-	public static final synthetic fun asStateFlow (Lkotlinx/coroutines/flow/Flow;Ljava/lang/Object;Lkotlinx/coroutines/CoroutineScope;)Lkotlinx/coroutines/flow/StateFlow;
-	public static synthetic fun asStateFlow$default (Lkotlinx/coroutines/flow/Flow;Ljava/lang/Object;Lkotlinx/coroutines/CoroutineScope;ILjava/lang/Object;)Lkotlinx/coroutines/flow/StateFlow;
 }
 
 public final class io/getstream/video/android/datastore/model/StreamUserPreferences {

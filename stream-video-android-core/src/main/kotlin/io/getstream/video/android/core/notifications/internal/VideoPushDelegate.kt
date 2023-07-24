@@ -17,7 +17,6 @@
 package io.getstream.video.android.core.notifications.internal
 
 import android.content.Context
-import android.util.Log
 import io.getstream.android.push.PushDevice
 import io.getstream.android.push.delegate.PushDelegate
 import io.getstream.android.push.delegate.PushDelegateProvider

@@ -67,7 +67,6 @@ import io.getstream.video.android.ui.call.CallActivity
 import io.getstream.video.android.ui.theme.Colors
 import io.getstream.video.android.ui.theme.StreamButton
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.firstOrNull
 
 @Composable
 fun CallLobbyScreen(

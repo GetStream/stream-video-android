@@ -35,9 +35,7 @@ import io.getstream.video.android.model.UserToken
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
-import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.map
 
 /**
@@ -48,7 +46,6 @@ import kotlinx.coroutines.flow.map
  */
 public class StreamUserDataStore constructor(
     dataStore: DataStore<StreamUserPreferences?>,
-    private val scope: CoroutineScope
 ) :
     DataStore<StreamUserPreferences?> by dataStore {
 
@@ -103,11 +100,6 @@ public class StreamUserDataStore constructor(
         updateData { preferences ->
             (preferences ?: StreamUserPreferences()).copy(userDevice = userDevice)
         }
-    }
-
-    /** Cancel all running jobs. */
-    public fun cancelJobs() {
-        scope.cancel()
     }
 
     /** Clear the persisted all user data. */
@@ -197,7 +189,7 @@ public class StreamUserDataStore constructor(
                     }
                 }
 
-                val userDataStore = StreamUserDataStore(dataStore, scope)
+                val userDataStore = StreamUserDataStore(dataStore)
 
                 internalStreamUserDataStore = userDataStore
                 return userDataStore
