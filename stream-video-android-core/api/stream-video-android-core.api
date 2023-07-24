@@ -2414,6 +2414,13 @@ public final class io/getstream/video/android/core/utils/CallClientUtilsKt {
 	public static synthetic fun mangleSdpUtil$default (Lorg/webrtc/SessionDescription;ZZZILjava/lang/Object;)Lorg/webrtc/SessionDescription;
 }
 
+public final class io/getstream/video/android/core/utils/DerivedStateFlow : kotlinx/coroutines/flow/StateFlow {
+	public fun <init> (Lkotlin/jvm/functions/Function0;Lkotlinx/coroutines/flow/Flow;)V
+	public fun collect (Lkotlinx/coroutines/flow/FlowCollector;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public fun getReplayCache ()Ljava/util/List;
+	public fun getValue ()Ljava/lang/Object;
+}
+
 public final class io/getstream/video/android/core/utils/DomainUtilsKt {
 	public static final synthetic fun toCallUser (Lio/getstream/video/android/core/ParticipantState;)Lio/getstream/video/android/core/model/CallUser;
 }
@@ -2490,9 +2497,8 @@ public final class io/getstream/video/android/core/utils/RtpMapAttribute {
 }
 
 public final class io/getstream/video/android/core/utils/StateFlowKt {
-	public static final fun mapState (Lkotlinx/coroutines/flow/StateFlow;Lkotlinx/coroutines/CoroutineScope;Ljava/lang/Object;Lkotlin/jvm/functions/Function2;)Lkotlinx/coroutines/flow/StateFlow;
-	public static final fun mapState (Lkotlinx/coroutines/flow/StateFlow;Lkotlinx/coroutines/CoroutineScope;Lkotlin/jvm/functions/Function1;)Lkotlinx/coroutines/flow/StateFlow;
-	public static synthetic fun mapState$default (Lkotlinx/coroutines/flow/StateFlow;Lkotlinx/coroutines/CoroutineScope;Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)Lkotlinx/coroutines/flow/StateFlow;
+	public static final fun combineStates (Lkotlinx/coroutines/flow/StateFlow;Lkotlinx/coroutines/flow/StateFlow;Lkotlin/jvm/functions/Function2;)Lkotlinx/coroutines/flow/StateFlow;
+	public static final fun mapState (Lkotlinx/coroutines/flow/StateFlow;Lkotlin/jvm/functions/Function1;)Lkotlinx/coroutines/flow/StateFlow;
 }
 
 public final class io/getstream/video/android/core/utils/StringUtilsKt {
