@@ -19,13 +19,6 @@ public abstract class io/getstream/video/android/ui/common/AbstractCallActivity 
 public final class io/getstream/video/android/ui/common/AbstractCallActivity$Companion {
 }
 
-public final class io/getstream/video/android/ui/common/BuildConfig {
-	public static final field BUILD_TYPE Ljava/lang/String;
-	public static final field DEBUG Z
-	public static final field LIBRARY_PACKAGE_NAME Ljava/lang/String;
-	public fun <init> ()V
-}
-
 public final class io/getstream/video/android/ui/common/databinding/StreamVideoContentParticipantBinding : androidx/viewbinding/ViewBinding {
 	public final field firstParticipant Lio/getstream/video/android/ui/common/view/ParticipantItemView;
 	public final field firstParticipantRow Landroid/widget/LinearLayout;
