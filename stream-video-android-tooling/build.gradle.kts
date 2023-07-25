@@ -36,6 +36,10 @@ android {
         minSdk = Configuration.minSdk
     }
 
+    buildFeatures {
+        buildConfig = false
+    }
+
     resourcePrefix = "stream_video_tooling"
 }
 

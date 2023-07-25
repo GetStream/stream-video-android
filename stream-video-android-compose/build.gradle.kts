@@ -36,6 +36,10 @@ android {
     defaultConfig {
         minSdk = Configuration.minSdk
     }
+
+    buildFeatures {
+        buildConfig = false
+    }
 }
 
 dependencies {

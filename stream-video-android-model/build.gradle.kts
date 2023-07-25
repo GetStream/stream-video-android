@@ -35,6 +35,10 @@ android {
     namespace = "io.getstream.video.android.model"
     compileSdk = Configuration.compileSdk
 
+    buildFeatures {
+        buildConfig = false
+    }
+
     defaultConfig {
         minSdk = Configuration.minSdk
     }

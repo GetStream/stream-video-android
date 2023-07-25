@@ -57,6 +57,10 @@ android {
         buildConfigField("String", "STREAM_VIDEO_VERSION", "\"${Configuration.versionName}\"")
     }
 
+    buildFeatures {
+        buildConfig = true
+    }
+
     testOptions {
         unitTests {
             isIncludeAndroidResources = true
