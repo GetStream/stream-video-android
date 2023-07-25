@@ -58,7 +58,7 @@ import io.getstream.video.android.mock.mockMemberStateList
 public fun OutgoingCallContent(
     modifier: Modifier = Modifier,
     call: Call,
-    isVideoType: Boolean = true,
+    isVideoType: Boolean,
     isShowingHeader: Boolean = true,
     headerContent: (@Composable ColumnScope.() -> Unit)? = null,
     detailsContent: (
