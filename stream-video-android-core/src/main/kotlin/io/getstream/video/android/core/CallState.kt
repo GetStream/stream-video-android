@@ -687,9 +687,9 @@ public class CallState(
         val outgoingMembersCount = _members.value.filter { it.value.user.id != client.userId }.size
         val rejectedBy = rejectedBy.value
 
-        // no members yet, state probably not yet fully set
+        // no members - call is empty, we can join
         val state: RingingState = if (_members.value.isEmpty()) {
-            RingingState.Idle
+            RingingState.Active
         } else if (rejectedBy.isNotEmpty() && _acceptedBy.value.isEmpty() && rejectedBy.size >= outgoingMembersCount) {
             // Call was rejected. Listener should leave the call with call.leave()
             RingingState.RejectedByAll
@@ -713,7 +713,7 @@ public class CallState(
             RingingState.Idle
         }
 
-        logger.d { "Updating ringing state ${_ringingState.value} -> $state" }
+        logger.d { "Updating ringing state ${_ringingState.value::class.java.simpleName} -> ${state::class.java.simpleName}" }
        _ringingState.value = state
     }
 
