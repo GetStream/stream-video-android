@@ -70,8 +70,7 @@ public open class TestBase {
         if (!StreamUserDataStore.isInstalled) {
             StreamUserDataStore.install(
                 context = context.applicationContext,
-                isEncrypted = false,
-                scope = CoroutineScope(DispatcherProvider.IO)
+                isEncrypted = false
             )
         }
     }
