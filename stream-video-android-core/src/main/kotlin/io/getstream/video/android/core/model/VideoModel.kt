@@ -16,6 +16,7 @@
 
 package io.getstream.video.android.core.model
 
+import androidx.compose.runtime.Stable
 import io.getstream.video.android.core.utils.toCallUser
 import org.openapitools.client.models.CallResponse
 import org.openapitools.client.models.MemberResponse
@@ -23,6 +24,7 @@ import org.openapitools.client.models.OwnCapability
 import java.io.Serializable
 import java.util.Date
 
+@Stable
 public data class CallUser(
     val id: String,
     val name: String,
@@ -34,6 +36,7 @@ public data class CallUser(
     val updatedAt: Date?
 ) : Serializable
 
+@Stable
 public data class CallUserState(
     val trackIdPrefix: String,
     val online: Boolean,
@@ -41,6 +44,7 @@ public data class CallUserState(
     val video: Boolean
 )
 
+@Stable
 public data class CallMember(
     val callCid: String,
     val role: String,
@@ -49,6 +53,7 @@ public data class CallMember(
     val updatedAt: Date?
 ) : Serializable
 
+@Stable
 public data class CallInfo(
     val cid: String,
     val type: String,
@@ -62,12 +67,14 @@ public data class CallInfo(
     val custom: Map<String, Any?>
 ) : Serializable
 
+@Stable
 public data class CallDetails(
     val memberUserIds: List<String>,
     val members: Map<String, CallUser>,
     val ownCapabilities: List<OwnCapability>
 ) : Serializable
 
+@Stable
 public data class CallEgress(
     val broadcastEgress: String,
     val recordEgress: String
@@ -113,6 +120,7 @@ public infix fun Map<String, CallUser>.merge(that: CallUser): Map<String, CallUs
         true -> this.map { (userId, user) ->
             userId to user.merge(that)
         }.toMap()
+
         else -> this.toMutableMap().also {
             it[that.id] = that
         }
@@ -142,6 +150,7 @@ public infix fun CallUserState?.merge(that: CallUserState?): CallUserState? = wh
     this != null && that != null -> that.copy(
         trackIdPrefix = that.trackIdPrefix.ifEmpty { this.trackIdPrefix },
     )
+
     this == null -> that
     else -> this
 }

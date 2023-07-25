@@ -16,11 +16,14 @@
 
 package io.getstream.video.android.core.model
 
+import androidx.compose.runtime.Stable
+
 /**
  * Represents the type of events we can send around calls.
  *
  * @param eventType The type required by the BE.
  */
+@Stable
 public enum class CallEventType(
     public val eventType: String
 ) {

@@ -16,8 +16,17 @@
 
 package io.getstream.video.android.core.model
 
+import androidx.compose.runtime.Stable
+
+@Stable
 public sealed interface CallStatus {
+
+    @Stable
     public object Incoming : CallStatus
+
+    @Stable
     public object Outgoing : CallStatus
+
+    @Stable
     public data class Calling(public val duration: String) : CallStatus
 }

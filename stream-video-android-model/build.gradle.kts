@@ -45,7 +45,7 @@ dependencies {
     api(libs.threentenabp2)
 
     // stable marker annotations
-    implementation(libs.compose.stable.marker)
+    compileOnly(libs.compose.stable.marker)
 
     implementation(libs.kotlinx.serialization.json)
 }

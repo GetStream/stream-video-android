@@ -16,11 +16,13 @@
 
 package io.getstream.video.android.compose.state.ui.participants
 
+import androidx.compose.runtime.Stable
 import io.getstream.video.android.model.User
 
 /**
  * Actions which can be taken in the participants info UI in a call.
  */
+@Stable
 public sealed interface ParticipantInfoAction
 
 /**
@@ -28,6 +30,7 @@ public sealed interface ParticipantInfoAction
  *
  * @param isEnabled If the microphone is enabled or not.
  */
+@Stable
 public data class ChangeMuteState(
     val isEnabled: Boolean
 ) : ParticipantInfoAction
@@ -37,4 +40,5 @@ public data class ChangeMuteState(
  *
  * @param users The users to invite.
  */
+@Stable
 public data class InviteUsers(val users: List<User>) : ParticipantInfoAction
