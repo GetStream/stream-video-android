@@ -2229,46 +2229,6 @@ public final class io/getstream/video/android/core/permission/PermissionRequest 
 	public fun toString ()Ljava/lang/String;
 }
 
-public abstract class io/getstream/video/android/core/service/AbstractStreamCallService : android/app/Service {
-	public fun <init> ()V
-	protected fun createNotificationBuilder (Landroid/content/Context;)Lio/getstream/video/android/core/service/notification/StreamNotificationBuilder;
-	protected fun createVibroManager (Landroid/content/Context;)Lio/getstream/video/android/core/service/vibro/StreamVibroManager;
-	public fun onBind (Landroid/content/Intent;)Landroid/os/IBinder;
-	public fun onCreate ()V
-	public fun onDestroy ()V
-}
-
-public final class io/getstream/video/android/core/service/notification/IdentifiedNotification {
-	public fun <init> (ILandroid/app/Notification;)V
-	public final fun component1 ()I
-	public final fun component2 ()Landroid/app/Notification;
-	public final fun copy (ILandroid/app/Notification;)Lio/getstream/video/android/core/service/notification/IdentifiedNotification;
-	public static synthetic fun copy$default (Lio/getstream/video/android/core/service/notification/IdentifiedNotification;ILandroid/app/Notification;ILjava/lang/Object;)Lio/getstream/video/android/core/service/notification/IdentifiedNotification;
-	public fun equals (Ljava/lang/Object;)Z
-	public final fun getId ()I
-	public final fun getValue ()Landroid/app/Notification;
-	public fun hashCode ()I
-	public fun toString ()Ljava/lang/String;
-}
-
-public abstract class io/getstream/video/android/core/service/notification/NotificationAction {
-}
-
-public abstract interface class io/getstream/video/android/core/service/notification/StreamNotificationBuilder {
-	public abstract fun build (Ljava/lang/String;Lio/getstream/video/android/core/ConnectionState;)Lio/getstream/video/android/core/service/notification/IdentifiedNotification;
-}
-
-public abstract interface class io/getstream/video/android/core/service/vibro/StreamVibroManager {
-	public abstract fun cancel ()V
-	public abstract fun vibrateIncoming ()V
-}
-
-public final class io/getstream/video/android/core/service/vibro/StreamVibroManagerImpl : io/getstream/video/android/core/service/vibro/StreamVibroManager {
-	public fun <init> (Landroid/content/Context;)V
-	public fun cancel ()V
-	public fun vibrateIncoming ()V
-}
-
 public final class io/getstream/video/android/core/socket/CoordinatorSocket : io/getstream/video/android/core/socket/PersistentSocket {
 	public fun <init> (Ljava/lang/String;Lio/getstream/video/android/model/User;Ljava/lang/String;Lkotlinx/coroutines/CoroutineScope;Lokhttp3/OkHttpClient;Lio/getstream/video/android/core/internal/network/NetworkStateProvider;)V
 	public synthetic fun <init> (Ljava/lang/String;Lio/getstream/video/android/model/User;Ljava/lang/String;Lkotlinx/coroutines/CoroutineScope;Lokhttp3/OkHttpClient;Lio/getstream/video/android/core/internal/network/NetworkStateProvider;ILkotlin/jvm/internal/DefaultConstructorMarker;)V

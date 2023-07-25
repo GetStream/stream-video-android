@@ -39,6 +39,7 @@ import io.getstream.video.android.core.notifications.NotificationHandler
 import io.getstream.video.android.datastore.delegate.StreamUserDataStore
 import io.getstream.video.android.model.Device
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.launch
 import org.openapitools.client.apis.DefaultApi
 import org.openapitools.client.models.CreateDeviceRequest
@@ -71,7 +72,7 @@ internal class StreamNotificationManager private constructor(
         logger.d { "[createDevice] pushDevice: $pushDevice" }
         val newDevice = pushDevice.toDevice()
         return pushDevice
-            .takeUnless { newDevice == dataStore.userDevice.value }
+            .takeUnless { newDevice == dataStore.userDevice.firstOrNull() }
             ?.toCreateDeviceRequest()
             ?.flatMapSuspend { createDeviceRequest ->
                 try {
@@ -88,7 +89,7 @@ internal class StreamNotificationManager private constructor(
     private fun removeStoredDeivce(device: Device) {
         logger.d { "[storeDevice] device: device" }
         scope.launch {
-            dataStore.userDevice.value
+            dataStore.userDevice.firstOrNull()
                 .takeIf { it == device }
                 ?.let { dataStore.updateUserDevice(null) }
         }
@@ -99,7 +100,7 @@ internal class StreamNotificationManager private constructor(
      */
     suspend fun deleteDevice(device: Device): Result<Unit> {
         logger.d { "[deleteDevice] device: $device" }
-        val userId = dataStore.user.value?.id
+        val userId = dataStore.user.firstOrNull()?.id
         return try {
             api.deleteDevice(device.id, userId)
             removeStoredDeivce(device)

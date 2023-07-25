@@ -28,10 +28,10 @@ import io.getstream.video.android.model.User
 import io.getstream.video.android.model.mapper.isValidCallId
 import io.getstream.video.android.model.mapper.toTypeAndId
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
@@ -44,7 +44,7 @@ import javax.inject.Inject
 class CallJoinViewModel @Inject constructor(
     dataStore: StreamUserDataStore,
 ) : ViewModel() {
-    val user: StateFlow<User?> = dataStore.user
+    val user: Flow<User?> = dataStore.user
     val isLoggedOut = dataStore.user.map { it == null }
 
     private val event: MutableSharedFlow<CallJoinEvent> = MutableSharedFlow()
