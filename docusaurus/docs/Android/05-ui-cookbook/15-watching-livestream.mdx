@@ -1,0 +1,58 @@
+---
+title: Watching a livestream
+description: How to watch a livestream on android with Kotlin
+---
+
+The example below shows how to render the UI for watching a livestream on Android.
+When building a livestreaming UI there are a few things to keep in mind:
+
+* UI for when the video isn't loaded yet
+* A message to show when the livestream didn't start yet
+* What to show when the livestream stopped
+* How to indicate when there are connection problems
+* Muting the volume
+* Number of participants
+* Duration of the call
+
+Here's an example UI for watching a livestream.
+
+```kotlin
+VideoTheme {
+    val participantCount by call.state.participantCounts.collectAsState()
+    val connection by call.state.connection.collectAsState()
+    val backstage by call.state.backstage.collectAsState()
+    val session by call.state.session.collectAsState()
+
+    // you can have multiple video participants for co-hosts etc, but in this case we only have 1
+    val participant = call.state.videoParticipants.collectAsState().value.first()
+
+
+    val connectionQuality = participant.connectionQuality.collectAsState()
+    val video = participant?.video?.collectAsState()
+
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(VideoTheme.colors.appBackground),
+    ) {
+        VideoRenderer(call = call, video = video?.value, videoFallbackContent = {
+
+        })
+
+        Column(
+            verticalArrangement = Arrangement.Bottom,
+            horizontalAlignment = Alignment.CenterHorizontally,
+            modifier = Modifier.fillMaxWidth().fillMaxHeight().padding(32.dp)
+
+        ) {
+            if (connection == RealtimeConnection.Connected) {
+                if (!backstage) {
+                    Text("Livestream has $participantCount participants")
+
+                    Text("Live for 1:23")
+                }
+            }
+        }
+
+    }
+```
