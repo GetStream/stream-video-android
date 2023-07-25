@@ -26,7 +26,7 @@ androidxComposeCompiler = "1.4.4"
 androidxComposeTracing = "1.0.0-alpha03"
 androidxHiltNavigation = "1.0.0"
 androidxComposeNavigation = "2.5.3"
-composeStableMarker = "1.0.1-SNAPSHOT"
+composeStableMarker = "1.0.0"
 
 coil = "2.2.2"
 landscapist = "2.1.9"
