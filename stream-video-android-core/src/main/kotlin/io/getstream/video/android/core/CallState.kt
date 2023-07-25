@@ -49,6 +49,7 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.channelFlow
 import kotlinx.coroutines.flow.debounce
+import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import okhttp3.internal.toImmutableList
@@ -298,6 +299,21 @@ public class CallState(private val call: Call, private val user: User, internal 
     /** The settings for the call */
     private val _settings: MutableStateFlow<CallSettingsResponse?> = MutableStateFlow(null)
     public val settings: StateFlow<CallSettingsResponse?> = _settings
+
+    private val _durationInMs = flow {
+        while (true) {
+            delay(1000)
+            val started = _session.value?.startedAt
+            val ended = _session.value?.endedAt ?: OffsetDateTime.now()
+            val difference = if (started == null) null else {
+                ended.toInstant().toEpochMilli() - started.toInstant()?.toEpochMilli()!!
+            }
+            emit(difference)
+        }
+    }
+
+    /** how many MS the call has been running, null if the call didn't start yet */
+    public val durationInMs: StateFlow<Long?> = _durationInMs.stateIn(scope, SharingStarted.WhileSubscribed(10000L), null)
 
     /** Check if you have permissions to do things like share your audio, video, screen etc */
     public fun hasPermission(permission: String): StateFlow<Boolean> {
