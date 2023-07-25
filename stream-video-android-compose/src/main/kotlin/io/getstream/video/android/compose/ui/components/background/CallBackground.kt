@@ -41,12 +41,10 @@ import com.skydoves.landscapist.transformation.blur.BlurTransformationPlugin
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.avatar.AvatarImagePreview
 import io.getstream.video.android.core.MemberState
-import io.getstream.video.android.core.ParticipantState
 import io.getstream.video.android.core.model.CallUser
 import io.getstream.video.android.core.utils.toCallUser
 import io.getstream.video.android.mock.StreamMockUtils
 import io.getstream.video.android.mock.mockMemberStateList
-import io.getstream.video.android.mock.mockParticipantList
 import io.getstream.video.android.ui.common.R
 
 /**

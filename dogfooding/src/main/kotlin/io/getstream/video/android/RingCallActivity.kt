@@ -41,7 +41,6 @@ import io.getstream.video.android.core.call.state.ToggleMicrophone
 import io.getstream.video.android.core.call.state.ToggleSpeakerphone
 import io.getstream.video.android.model.mapper.isValidCallId
 import io.getstream.video.android.model.mapper.toTypeAndId
-import io.getstream.video.android.ui.call.CallActivity
 import io.getstream.video.android.util.StreamVideoInitHelper
 import kotlinx.coroutines.launch
 import java.util.UUID
@@ -53,25 +52,26 @@ class RingCallActivity : ComponentActivity() {
 
         lifecycleScope.launch {
 
+            // Init StreamVideo if it's not already initialised
             StreamVideoInitHelper.init(this@RingCallActivity)
 
-            val callId: String? = intent.getStringExtra(EXTRA_CID)
+            // Create Call ID if it wasn't supplied by Intent
+            val callId: String = intent.getStringExtra(EXTRA_CID)
+                ?: "default:${UUID.randomUUID()}"
 
-            // create Call ID
-            //val streamVideo = StreamVideo.instance()
-            val newCallId = callId ?: "default:${UUID.randomUUID()}"
-            val (type, id) = if (newCallId.isValidCallId()) {
-                newCallId.toTypeAndId()
+            val (type, id) = if (callId.isValidCallId()) {
+                callId.toTypeAndId()
             } else {
-                "default" to newCallId
+                "default" to callId
             }
 
-            // create call object
+            // Create call object
             val call = StreamVideo.instance().call(type, id)
 
+            // Get list of members
             val members: List<String> = intent.getStringArrayExtra(EXTRA_MEMBERS_ARRAY)?.asList() ?: emptyList()
 
-            // ring
+            // Ring the members
             val result = call.create(ring = true, memberIds = members)
 
             if (result is Result.Failure) {
@@ -114,21 +114,6 @@ class RingCallActivity : ComponentActivity() {
                         }
                     }
 
-                    fun joinCall() {
-                        lifecycleScope.launch {
-                            val joinResult = call.join()
-                            if (joinResult is Result.Failure) {
-                                Log.e("RingCallActivity", "Call.join failed ${joinResult.value}")
-                                Toast.makeText(
-                                    this@RingCallActivity,
-                                    "Failed get call status (${joinResult.value.message})",
-                                    Toast.LENGTH_SHORT
-                                ).show()
-                                finish()
-                            }
-                        }
-                    }
-
                     RingingCallContent(
                         modifier = Modifier.background(color = VideoTheme.colors.appBackground),
                         call = call,
@@ -137,10 +122,6 @@ class RingCallActivity : ComponentActivity() {
                             finish()
                         },
                         onAcceptedContent = {
-                            // this is a ring call, so we need to join it
-                            // TODO: wait for result
-                            joinCall()
-
                             CallContent(
                                 modifier = Modifier.fillMaxSize(),
                                 call = call,

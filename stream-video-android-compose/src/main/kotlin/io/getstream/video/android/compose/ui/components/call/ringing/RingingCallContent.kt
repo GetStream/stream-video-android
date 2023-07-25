@@ -19,6 +19,7 @@ package io.getstream.video.android.compose.ui.components.call.ringing
 import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
@@ -35,7 +36,6 @@ import io.getstream.video.android.core.RingingState
 import io.getstream.video.android.core.call.state.CallAction
 import io.getstream.video.android.mock.StreamMockUtils
 import io.getstream.video.android.mock.mockCall
-import androidx.compose.runtime.getValue
 
 /**
  * Represents different outgoing/incoming call content based on the call state provided from the [call].
@@ -77,7 +77,8 @@ public fun RingingCallContent(
     val ringingState by call.state.ringingState.collectAsStateWithLifecycle()
 
     when (ringingState) {
-        RingingState.Incoming -> {
+        is RingingState.Incoming -> {
+
             IncomingCallContent(
                 call = call,
                 isVideoType = isVideoType,
@@ -90,7 +91,8 @@ public fun RingingCallContent(
                 onCallAction = onCallAction
             )
         }
-        RingingState.Outgoing -> {
+
+        is RingingState.Outgoing -> {
             OutgoingCallContent(
                 call = call,
                 isVideoType = isVideoType,
@@ -103,15 +105,19 @@ public fun RingingCallContent(
                 onCallAction = onCallAction
             )
         }
+
         RingingState.RejectedByAll -> {
             onRejectedContent.invoke()
         }
+
         RingingState.TimeoutNoAnswer -> {
             onNoAnswerContent.invoke()
         }
+
         RingingState.Active -> {
             onAcceptedContent.invoke()
         }
+
         RingingState.Idle -> {
             // Call state is not ready yet? Show loading?
         }
@@ -127,7 +133,7 @@ private fun RingingCallContentPreview() {
             call = mockCall,
             isVideoType = true,
             onAcceptedContent = {},
-            onRejectedContent = {}
+            onRejectedContent = {},
         )
     }
 }

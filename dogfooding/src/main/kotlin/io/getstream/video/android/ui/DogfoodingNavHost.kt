@@ -83,11 +83,13 @@ fun AppNavHost(
             val context = LocalContext.current
             DebugCallScreen(
                 navigateToRingCall = { callId, members ->
-                    context.startActivity(RingCallActivity.createIntent(
-                        context,
-                        members = members.split(","),
-                        callId = callId
-                    ))
+                    context.startActivity(
+                        RingCallActivity.createIntent(
+                            context,
+                            members = members.split(","),
+                            callId = callId
+                        )
+                    )
                 }
             )
         }

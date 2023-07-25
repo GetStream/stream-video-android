@@ -60,7 +60,9 @@ class IncomingCallActivity : ComponentActivity() {
             StreamVideoInitHelper.init(this@IncomingCallActivity)
             val call = StreamVideo.instance().call(callId.type, callId.id)
 
-            // update the call state.
+            // Update the call state. This activity could have been started from a push notification.
+            // Doing a call.get() will also internally update the Call state object with the latest
+            // state from the backend.
             val result = call.get()
 
             if (result is Result.Failure) {

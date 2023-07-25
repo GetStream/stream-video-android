@@ -33,7 +33,6 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.ButtonDefaults
-import androidx.compose.material.OutlinedButton
 import androidx.compose.material.Text
 import androidx.compose.material.TextButton
 import androidx.compose.material.TextField
@@ -137,7 +136,7 @@ private fun CallJoinHeader(
 
         TextButton(
             colors = ButtonDefaults.textButtonColors(contentColor = Color.White),
-            content = { Text(text = "Ring test")},
+            content = { Text(text = "Ring test") },
             onClick = { onRingTestClicked.invoke() }
         )
 

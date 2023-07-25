@@ -98,7 +98,6 @@ import org.openapitools.client.models.UpdatedCallPermissionsEvent
 import org.openapitools.client.models.VideoEvent
 import org.threeten.bp.Clock
 import org.threeten.bp.OffsetDateTime
-import stream.video.sfu.models.CallState
 import stream.video.sfu.models.Participant
 import stream.video.sfu.models.ParticipantCount
 import stream.video.sfu.models.TrackType
@@ -412,6 +411,7 @@ public class CallState(
     public val errors: StateFlow<List<ErrorEvent>> = _errors
 
     private var speakingWhileMutedResetJob: Job? = null
+    private var autoJoiningCall: Job? = null
 
     fun handleEvent(event: VideoEvent) {
         logger.d { "Updating call state with event ${event::class.java}" }
@@ -433,6 +433,21 @@ public class CallState(
                 newAcceptedBy.add(event.user.id)
                 _acceptedBy.value = newAcceptedBy.toSet()
                 updateRingingState()
+
+                // auto-join the call if it's an outgoing call and someone has accepted
+                // do not auto-join if it's already accepted by us
+                val callRingState = _ringingState.value
+                if (callRingState is RingingState.Outgoing &&
+                    callRingState.acceptedByCallee &&
+                    _acceptedBy.value.findLast { it == client.userId } == null &&
+                    autoJoiningCall == null
+                ) {
+                    autoJoiningCall = scope.launch {
+                        // errors are handled inside the join function
+                        call.join()
+                        autoJoiningCall = null
+                    }
+                }
             }
 
             is CallRejectedEvent -> {
@@ -678,43 +693,55 @@ public class CallState(
                         participants = newList.toImmutableList()
                     )
                 }
+                updateRingingState()
             }
         }
     }
 
     private fun updateRingingState() {
-
+        // this is only true when we are in the session (we have accepted/joined the call)
+        val userIsParticipant = _session.value?.participants?.find { it.user.id == client.userId } != null
         val outgoingMembersCount = _members.value.filter { it.value.user.id != client.userId }.size
-        val rejectedBy = rejectedBy.value
+        val rejectedBy = _rejectedBy.value
+        val acceptedBy = _acceptedBy.value
+        val createdBy = _createdBy.value
+        val members = _members.value
+        val acceptedByMe = _acceptedBy.value.findLast { it == client.userId }
 
         // no members - call is empty, we can join
-        val state: RingingState = if (_members.value.isEmpty()) {
+        val state: RingingState = if (members.isEmpty()) {
             RingingState.Active
-        } else if (rejectedBy.isNotEmpty() && _acceptedBy.value.isEmpty() && rejectedBy.size >= outgoingMembersCount) {
+        } else if (rejectedBy.isNotEmpty() && acceptedBy.isEmpty() && rejectedBy.size >= outgoingMembersCount) {
             // Call was rejected. Listener should leave the call with call.leave()
             RingingState.RejectedByAll
-        } else if (_createdBy.value?.id != client.userId) {
+        } else if (createdBy?.id != client.userId) {
             // Member list is not empty, it's not rejected - it's an incoming call
-            val acceptedByMe = _acceptedBy.value.findLast { it == client.userId }
             // If it's already accepted by me then we are in an Active call
-            if (acceptedByMe != null) {
+            if (userIsParticipant) {
                 RingingState.Active
             } else {
-                RingingState.Incoming
+                RingingState.Incoming(acceptedByMe = acceptedByMe != null)
             }
-        } else if (_createdBy.value?.id == client.userId) {
-            // Member list is not empty, it's not reject and created by us - it's an outgoing call
-            if (_acceptedBy.value.isNotEmpty()) {
-                RingingState.Active
+        } else if (createdBy.id == client.userId) {
+            // The call is created by us
+            if (acceptedBy.isEmpty()) {
+                // no one accepted the call
+                RingingState.Outgoing(acceptedByCallee = false)
+            } else if (!userIsParticipant) {
+                // someone already accepted the call, but it's not us (client needs to do call.join)
+                RingingState.Outgoing(acceptedByCallee = true)
             } else {
-                RingingState.Outgoing
+                // call is accepted and we are already in the call
+                RingingState.Active
             }
         } else {
             RingingState.Idle
         }
 
-        logger.d { "Updating ringing state ${_ringingState.value::class.java.simpleName} -> ${state::class.java.simpleName}" }
-       _ringingState.value = state
+        if (_ringingState.value != state) {
+            logger.d { "Updating ringing state ${_ringingState.value} -> $state" }
+        }
+        _ringingState.value = state
     }
 
     private fun updateFromJoinResponse(event: JoinCallResponseEvent) {
