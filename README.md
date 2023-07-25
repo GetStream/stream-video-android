@@ -119,15 +119,25 @@ Video roadmap and changelog is available [here](https://github.com/GetStream/pro
 ### 0.4.0 milestone
 
 - [ ] Upgrade to more recent versions of webrtc
-- [ ] Screensharing from mobile
 - [ ] Tap to focus
-- [ ] Camera controls
 - [ ] Picture of the video stream at highest resolution
 - [ ] Review foreground service vs backend for some things like screensharing etc
 - [ ] Audio & Video filters. Support  (Daniel)
 - [ ] H264 workaround on Samsung 23 (see https://github.com/livekit/client-sdk-android/blob/main/livekit-android-sdk/src/main/java/io/livekit/android/webrtc/SimulcastVideoEncoderFactoryWrapper.kt#L34 and
 - https://github.com/react-native-webrtc/react-native-webrtc/issues/983#issuecomment-975624906)
-- [ ] Dynascale 2.0 (codecs, f resolution switches, resolution webrtc handling)
+- [ ] Dynascale 2.0
+
+### 0.5.0 milestone
+
+- [ ] Screensharing from mobile
+- [ ] Camera controls
+
+### Dynascale 2.0
+
+- currently we support selecting which of the 3 layers you want to send: f, h and q. in addition we should support:
+- changing the resolution of the f track
+- changing the codec that's used from VP8 to h264 or vice versa
+- detecting when webrtc changes the resolution of the f track, and notifying the server about it (if needed)
 
 ## 💼 We are hiring!
 
