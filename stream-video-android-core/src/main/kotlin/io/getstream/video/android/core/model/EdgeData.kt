@@ -16,6 +16,8 @@
 
 package io.getstream.video.android.core.model
 
+import androidx.compose.runtime.Stable
+
 /**
  * Represents the information about an Edge center in our network.
  *
@@ -24,6 +26,7 @@ package io.getstream.video.android.core.model
  * @param latitude The latitude of the server location.
  * @param longitude The longitude of the server location.
  */
+@Stable
 public data class EdgeData(
     val id: String,
     val latencyTestUrl: String,

@@ -149,9 +149,11 @@ dependencies {
     implementation(libs.moshi)
     implementation(libs.moshi.kotlin)
     implementation(libs.moshi.adapters)
-    //implementation(libs.desugar)
 
     api(libs.threentenabp2)
+
+    // stable marker annotations
+    compileOnly(libs.compose.stable.marker)
 
     // Stream
     api(libs.stream.result)

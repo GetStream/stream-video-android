@@ -48,5 +48,8 @@ android {
 dependencies {
     api(libs.threentenabp2)
 
+    // stable marker annotations
+    compileOnly(libs.compose.stable.marker)
+
     implementation(libs.kotlinx.serialization.json)
 }

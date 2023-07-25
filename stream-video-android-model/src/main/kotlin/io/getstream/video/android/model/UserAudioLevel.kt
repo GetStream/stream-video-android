@@ -16,9 +16,12 @@
 
 package io.getstream.video.android.model
 
+import androidx.compose.runtime.Stable
+
 /**
  * Represents the audio level and if a user is speaking.
  */
+@Stable
 public data class UserAudioLevel(
     val userId: String,
     val isSpeaking: Boolean,

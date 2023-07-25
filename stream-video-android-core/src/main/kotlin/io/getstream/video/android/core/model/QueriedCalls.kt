@@ -16,6 +16,9 @@
 
 package io.getstream.video.android.core.model
 
+import androidx.compose.runtime.Stable
+
+@Stable
 public data class QueriedCalls(
     public val calls: List<CallData>,
     public val next: String?,
