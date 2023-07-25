@@ -19,6 +19,7 @@ package io.getstream.video.android.model
 import android.content.Intent
 import android.os.Build
 import android.os.Parcelable
+import androidx.compose.runtime.Stable
 import io.getstream.video.android.model.mapper.toTypeAndId
 import kotlinx.parcelize.Parcelize
 import kotlinx.serialization.Serializable
@@ -31,6 +32,7 @@ import kotlinx.serialization.Serializable
  * @param cid A cid, which consists of the [type] and [id]. For instance, `default:123`
  * @param isValid Represents is the [cid] is valid or not.
  */
+@Stable
 @Parcelize
 @Serializable
 public data class StreamCallId constructor(

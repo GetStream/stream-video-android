@@ -16,8 +16,10 @@
 
 package io.getstream.video.android.core.model
 
+import androidx.compose.runtime.Stable
 import org.openapitools.client.models.ReactionResponse
 
+@Stable
 public data class Reaction(
     val id: String,
     val response: ReactionResponse,
@@ -25,9 +27,12 @@ public data class Reaction(
     var isConsumed: Boolean = false
 )
 
+@Stable
 public sealed interface ReactionState {
 
+    @Stable
     public object Nothing : ReactionState
 
+    @Stable
     public object Running : ReactionState
 }
