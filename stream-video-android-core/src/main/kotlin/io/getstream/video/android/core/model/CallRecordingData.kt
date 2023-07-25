@@ -16,6 +16,8 @@
 
 package io.getstream.video.android.core.model
 
+import androidx.compose.runtime.Stable
+
 /**
  * Represents a single call recording with its metadata.
  *
@@ -24,6 +26,7 @@ package io.getstream.video.android.core.model
  * @param start The start time in epoch.
  * @param end The end time in epoch.
  */
+@Stable
 public data class CallRecordingData(
     val fileName: String,
     val url: String,
