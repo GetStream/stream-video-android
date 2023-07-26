@@ -98,6 +98,7 @@ class IncomingCallActivity : ComponentActivity() {
                             is DeclineCall -> {
                                 lifecycleScope.launch {
                                     call.reject()
+                                    call.leave()
                                     finish()
                                 }
                             }

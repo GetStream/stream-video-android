@@ -440,6 +440,7 @@ public class CallState(
                 if (callRingState is RingingState.Outgoing &&
                     callRingState.acceptedByCallee &&
                     _acceptedBy.value.findLast { it == client.userId } == null &&
+                    client.state.activeCall.value == null &&
                     autoJoiningCall == null
                 ) {
                     autoJoiningCall = scope.launch {
@@ -460,6 +461,9 @@ public class CallState(
             is CallEndedEvent -> {
                 _endedAt.value = OffsetDateTime.now(Clock.systemUTC())
                 _endedByUser.value = event.user?.toUser()
+
+                // leave the call
+                call.leave()
             }
 
             is CallMemberUpdatedEvent -> {

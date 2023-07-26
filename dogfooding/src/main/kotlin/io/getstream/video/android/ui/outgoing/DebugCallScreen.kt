@@ -134,7 +134,7 @@ fun DebugCallScreen(
 
 @Preview
 @Composable
-private fun CallLobbyScreenPreview() {
+private fun DebugCallScreenPreview() {
     StreamMockUtils.initializeStreamVideo(LocalContext.current)
     VideoTheme {
         DebugCallScreen(

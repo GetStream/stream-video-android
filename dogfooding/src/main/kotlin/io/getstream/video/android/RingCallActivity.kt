@@ -34,6 +34,7 @@ import io.getstream.video.android.compose.ui.components.call.ringing.RingingCall
 import io.getstream.video.android.core.StreamVideo
 import io.getstream.video.android.core.call.state.AcceptCall
 import io.getstream.video.android.core.call.state.CallAction
+import io.getstream.video.android.core.call.state.CancelCall
 import io.getstream.video.android.core.call.state.DeclineCall
 import io.getstream.video.android.core.call.state.LeaveCall
 import io.getstream.video.android.core.call.state.ToggleCamera
@@ -71,8 +72,11 @@ class RingCallActivity : ComponentActivity() {
             // Get list of members
             val members: List<String> = intent.getStringArrayExtra(EXTRA_MEMBERS_ARRAY)?.asList() ?: emptyList()
 
+            // You must add yourself as member too
+            val membersWithMe = members.toMutableList().apply { add(call.user.id) }
+
             // Ring the members
-            val result = call.create(ring = true, memberIds = members)
+            val result = call.create(ring = true, memberIds = membersWithMe)
 
             if (result is Result.Failure) {
                 // Failed to recover the current state of the call
@@ -98,8 +102,12 @@ class RingCallActivity : ComponentActivity() {
                                 finish()
                             }
                             is DeclineCall -> {
+                                // Not needed. this activity is only used for outgoing calls.
+                            }
+                            is CancelCall -> {
                                 lifecycleScope.launch {
-                                    call.reject()
+                                    val test = call.reject()
+                                    call.leave()
                                     finish()
                                 }
                             }

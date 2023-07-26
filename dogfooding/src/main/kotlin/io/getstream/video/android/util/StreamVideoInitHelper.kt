@@ -47,6 +47,7 @@ object StreamVideoInitHelper {
 
         if (isInitialising) {
             Log.d("StreamVideoInitHelper", "[initStreamVideo] StreamVideo is already initialising")
+            return
         }
 
         isInitialising = true
