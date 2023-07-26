@@ -31,7 +31,7 @@ Setup steps can vary slightly across Android Studio versions so if you run into 
 
 ### Step 2 - Install the SDK & Setup the client
 
-**Add the video SDK** to your app's `build.gradle` file found in app/build.gradle
+**Add the video SDK** to your app's `build.gradle` file found in app/build.gradle.
 If you're new to android note that there are 2 build.gradle files, you want to open the one in the app folder.
 
 ```groovy
@@ -44,8 +44,8 @@ This tutorial uses the compose version of the video SDK. Stream also provides a 
 
 ### Step 3 - Broadcast a livestream from your phone
 
-The following code shows how to publish video from your phone's camera.
-Let's open `MainActivity.kt` and replace the MainActivity class with the following code:
+The following code shows how to publish from your phone's camera.
+Let's open `MainActivity.kt` and replace the `MainActivity` class with the following code:
 
 ```kotlin
 class MainActivity : ComponentActivity() {
@@ -86,15 +86,15 @@ class MainActivity : ComponentActivity() {
         }
 
         setContent {
-            // enable the camera and microphone
+            // request the Android runtime permissions for the camera and microphone
             LaunchCallPermissions(call = call)
+
             VideoTheme {
                 Text("TODO: render video")
             }
         }
     }
 }
-
 ```
 
 You'll notice that these first 3 lines need their values replaced.
@@ -133,7 +133,7 @@ val client = StreamVideoBuilder(
 ).build()
 ```
 
-You'll see the userToken variable. Your backend typically generates the user token on signup or login.
+You'll see the `userToken` variable. Your backend typically generates the user token on signup or login.
 
 The most important step to review is how we create the call.
 Stream uses the same call object for livestreaming, audio rooms and video calling.
@@ -173,55 +173,88 @@ This example uses Compose, but you could also use our XML VideoRenderer.
 In `MainActivity.kt` replace the `VideoTheme` with the following code.
 
 ```kotlin
-
 VideoTheme {
-    val participantCount = call.state.participantCounts.collectAsState().value?.total
-    val connection by call.state.connection.collectAsState()
+    val participantCount by call.state.participantCounts.collectAsState()
+    val total = participantCount?.total
     val backstage by call.state.backstage.collectAsState()
     val me by call.state.me.collectAsState()
     val video = me?.video?.collectAsState()
     val session by call.state.session.collectAsState()
     val durationInMs by call.state.durationInMs.collectAsState()
 
-    Box(
+    Scaffold(
         modifier = Modifier
             .fillMaxSize()
-            .background(VideoTheme.colors.appBackground),
-    ) {
-        VideoRenderer(call = call, video = video?.value, videoFallbackContent = {
-
-        })
-
-        Column(
-            verticalArrangement = Arrangement.Bottom,
-            horizontalAlignment = Alignment.CenterHorizontally,
-            modifier = Modifier.fillMaxWidth().fillMaxHeight().padding(32.dp)
-
-        ) {
+            .background(VideoTheme.colors.appBackground)
+            .padding(6.dp),
+        contentColor = VideoTheme.colors.appBackground,
+        backgroundColor = VideoTheme.colors.appBackground,
+        topBar = {
             if (connection == RealtimeConnection.Connected) {
                 if (!backstage) {
-                    Text("Livestream has $participantCount participants")
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(6.dp)
+                    ) {
+                        Text(
+                            modifier = Modifier
+                                .align(Alignment.CenterEnd)
+                                .background(
+                                    color = VideoTheme.colors.primaryAccent,
+                                    shape = RoundedCornerShape(6.dp)
+                                )
+                                .padding(horizontal = 12.dp, vertical = 4.dp),
+                            text = "Live $total",
+                            color = VideoTheme.colors.textHighEmphasis
+                        )
 
-                    Text("Live for 1:23")
+                        Text(
+                            modifier = Modifier.align(Alignment.Center),
+                            text = "Live for 1:23",
+                            color = VideoTheme.colors.textHighEmphasis
+                        )
+                    }
                 }
-
-                Button(onClick = {
+            }
+        },
+        bottomBar = {
+            Button(
+                colors = ButtonDefaults.buttonColors(
+                    backgroundColor = VideoTheme.colors.primaryAccent,
+                    contentColor = VideoTheme.colors.primaryAccent
+                ),
+                onClick = {
                     lifecycleScope.launch {
                         if (backstage) call.goLive() else call.stopLive()
                     }
-                }) {
-                    Text(text = if (backstage) "Go Live" else "Stop Broadcast")
                 }
+            ) {
+                Text(
+                    text = if (backstage) "Go Live" else "Stop Broadcast",
+                    color = Color.White
+                )
             }
         }
-
+    ) {
+        VideoRenderer(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(it)
+                .clip(RoundedCornerShape(6.dp)),
+            call = call,
+            video = video,
+            videoFallbackContent = {
+                Text(text = "Video rendering failed")
+            }
+        )
     }
 }
 ```
 
 If you now run your app you should see an interface like this:
 
-TODO: Image
+![Livestream](../assets/tutorial-livestream.png)
 
 Stream uses a technology called SFU cascading to replicate your livestream over different SFUs around the world.
 This makes it possible to reach a large audience in realtime.
@@ -231,6 +264,7 @@ Now let's press "go live" in the android app and click the link below to watch t
 <TokenSnippet sampleApp='livestream' displayStyle='join' />
 
 Let's take a moment to review the Compose code above. Call.state exposes all the stateflow objects you need.
+
 The most important ones are:
 
 ```
@@ -240,7 +274,7 @@ call.state.participants
 
 The [participant state docs](../03-guides/03-call-and-participant-state.mdx) show all the available data.
 
-The livestream layout is standard Compose other than VideoRenderer.
+The livestream layout is standard Compose other than [VideoRenderer](../04-ui-components/02-video-renderer.mdx).
 VideoRenderer renders the video and a fallback. You can use it for rendering the local and remote video.
 
 ### Step 4 - (Optional) Publishing RTMP using OBS
@@ -305,11 +339,11 @@ There are several advanced features that can improve the livestreaming experienc
 
 TODO: docs links
 
-* ** Co-hosts ** You can add members to your livestream with elevated permissions. So you can have co-hosts, moderators etc.
-* ** Custom events ** You can use custom events on the call to share any additional data. Think about showing the score for a game, or any other realtime use case.
-* ** Reactions & Chat ** Users can react to the livestream, and you can add chat. This makes for a more engaging experience.
-* ** Notifications ** You can notify users via push notifications when the livestream starts
-* ** Recording ** The call recording functionality allows you to record the call with various options and layouts
+* ** [Co-hosts](../03-guides/02-joining-creating-calls.mdx) ** You can add members to your livestream with elevated permissions. So you can have co-hosts, moderators etc.
+* ** [Custom events](../03-guides/08-reactions-and-custom-events.mdx) ** You can use custom events on the call to share any additional data. Think about showing the score for a game, or any other realtime use case.
+* ** [Reactions & Chat](../03-guides/08-reactions-and-custom-events.mdx) ** Users can react to the livestream, and you can add chat. This makes for a more engaging experience.
+* ** [Notifications](../06-advanced/01-ringing.mdx) ** You can notify users via push notifications when the livestream starts
+* ** [Recording](../06-advanced/06-recording.mdx) ** The call recording functionality allows you to record the call with various options and layouts
 
 ### Recap
 

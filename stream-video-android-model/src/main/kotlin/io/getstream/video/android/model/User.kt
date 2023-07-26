@@ -18,6 +18,7 @@
 
 package io.getstream.video.android.model
 
+import androidx.compose.runtime.Stable
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.Serializable
@@ -55,6 +56,7 @@ public object OffsetDateTimeSerializer : KSerializer<OffsetDateTime> {
     }
 }
 
+@Stable
 @Serializable
 public data class User(
     /** ID is required, the rest is optional */

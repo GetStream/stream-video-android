@@ -37,18 +37,18 @@ import androidx.compose.ui.text.intl.Locale
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import io.getstream.video.android.compose.theme.VideoTheme
-import io.getstream.video.android.core.ParticipantState
+import io.getstream.video.android.core.MemberState
 import io.getstream.video.android.core.model.CallStatus
 import io.getstream.video.android.core.utils.toCallUser
 import io.getstream.video.android.mock.StreamMockUtils
-import io.getstream.video.android.mock.mockParticipantList
+import io.getstream.video.android.mock.mockMemberStateList
 import io.getstream.video.android.ui.common.util.buildLargeCallText
 import io.getstream.video.android.ui.common.util.buildSmallCallText
 
 @Composable
 public fun ParticipantInformation(
     callStatus: CallStatus,
-    participants: List<ParticipantState>,
+    participants: List<MemberState>,
     isVideoType: Boolean = true,
 ) {
     Column(
@@ -115,7 +115,7 @@ private fun ParticipantInformationPreview() {
         ParticipantInformation(
             isVideoType = true,
             callStatus = CallStatus.Incoming,
-            participants = mockParticipantList
+            participants = mockMemberStateList
         )
     }
 }

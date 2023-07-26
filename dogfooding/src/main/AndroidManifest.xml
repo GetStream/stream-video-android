@@ -85,5 +85,13 @@
                 <data android:host="stream-video-demo.vercel.app" />
             </intent-filter>
         </activity>
+
+        <activity
+            android:name="io.getstream.video.android.RingCallActivity"
+            android:configChanges="screenSize|smallestScreenSize|screenLayout|orientation"
+            android:exported="true"
+            android:hardwareAccelerated="true"
+            android:supportsPictureInPicture="true"
+            android:windowSoftInputMode="adjustResize" />
     </application>
 </manifest>

@@ -30,6 +30,8 @@ import kotlinx.coroutines.flow.first
 
 object StreamVideoInitHelper {
 
+    private var isInitialising = false
+
     /**
      * This function will initialise [StreamVideo] if we are logged in or do nothing if not.
      * Set [useGuestAsFallback] to true if you want to use a guest fallback if the user is not
@@ -42,6 +44,13 @@ object StreamVideoInitHelper {
             Log.w("StreamVideoInitHelper", "[initStreamVideo] StreamVideo is already initialised.")
             return
         }
+
+        if (isInitialising) {
+            Log.d("StreamVideoInitHelper", "[initStreamVideo] StreamVideo is already initialising")
+            return
+        }
+
+        isInitialising = true
         val dataStore = StreamUserDataStore.install(context)
         val preferences = dataStore.data.first()
         if (preferences != null) {
@@ -70,5 +79,6 @@ object StreamVideoInitHelper {
                 loggingLevel = LoggingLevel(priority = Priority.VERBOSE)
             )
         }
+        isInitialising = false
     }
 }

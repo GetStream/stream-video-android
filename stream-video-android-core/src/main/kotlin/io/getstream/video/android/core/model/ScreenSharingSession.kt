@@ -16,6 +16,7 @@
 
 package io.getstream.video.android.core.model
 
+import androidx.compose.runtime.Stable
 import io.getstream.video.android.core.ParticipantState
 
 /**
@@ -23,6 +24,7 @@ import io.getstream.video.android.core.ParticipantState
  *
  * @param participant The person that's sharing the screen.
  */
+@Stable
 public data class ScreenSharingSession(
     public val participant: ParticipantState
 )

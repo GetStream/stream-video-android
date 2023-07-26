@@ -53,6 +53,7 @@ import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import okhttp3.internal.toImmutableList
 import org.openapitools.client.models.BlockedUserEvent
 import org.openapitools.client.models.CallAcceptedEvent
@@ -149,7 +150,12 @@ public sealed interface RealtimeConnection {
  *
  *
  */
-public class CallState(private val call: Call, private val user: User, internal val scope: CoroutineScope) {
+public class CallState(
+    private val client: StreamVideo,
+    private val call: Call,
+    private val user: User,
+    internal val scope: CoroutineScope
+) {
 
     private val logger by taggedLogger("CallState")
 
@@ -294,8 +300,8 @@ public class CallState(private val call: Call, private val user: User, internal 
     val blockedUsers: StateFlow<Set<String>> = _blockedUsers
 
     /** Specific to ringing calls, additional state about incoming, outgoing calls */
-    private val _ringingState: MutableStateFlow<RingingState?> = MutableStateFlow(null)
-    public val ringingState: StateFlow<RingingState?> = _ringingState
+    private val _ringingState: MutableStateFlow<RingingState> = MutableStateFlow(RingingState.Idle)
+    public val ringingState: StateFlow<RingingState> = _ringingState
 
     /** The settings for the call */
     private val _settings: MutableStateFlow<CallSettingsResponse?> = MutableStateFlow(null)
@@ -392,9 +398,10 @@ public class CallState(private val call: Call, private val user: User, internal 
     val createdBy: StateFlow<User?> = _createdBy
 
     private val _ingress: MutableStateFlow<CallIngressResponse?> = MutableStateFlow(null)
-    val ingress: StateFlow<Ingress?> = _ingress.mapState(initialValue = null, scope = scope) {
-        val token = call.clientImpl.dataStore.userToken.firstOrNull()
-        val apiKey = call.clientImpl.dataStore.apiKey.firstOrNull()
+    val ingress: StateFlow<Ingress?> = _ingress.mapState {
+        // TODO: Remove runBlocking and use standard Flow instead for mapping or use other approach
+        val token = runBlocking { call.clientImpl.dataStore.userToken.firstOrNull() }
+        val apiKey = runBlocking { call.clientImpl.dataStore.apiKey.firstOrNull() }
         val streamKey = "$apiKey/$token"
         // TODO: use the address when the server is updated
         val overwriteUrl = "rtmps://video-ingress-frankfurt-vi1.stream-io-video.com:443/${call.type}/${call.id}"
@@ -420,6 +427,7 @@ public class CallState(private val call: Call, private val user: User, internal 
     public val errors: StateFlow<List<ErrorEvent>> = _errors
 
     private var speakingWhileMutedResetJob: Job? = null
+    private var autoJoiningCall: Job? = null
 
     fun handleEvent(event: VideoEvent) {
         logger.d { "Updating call state with event ${event::class.java}" }
@@ -440,17 +448,38 @@ public class CallState(private val call: Call, private val user: User, internal 
                 val newAcceptedBy = _acceptedBy.value.toMutableSet()
                 newAcceptedBy.add(event.user.id)
                 _acceptedBy.value = newAcceptedBy.toSet()
+                updateRingingState()
+
+                // auto-join the call if it's an outgoing call and someone has accepted
+                // do not auto-join if it's already accepted by us
+                val callRingState = _ringingState.value
+                if (callRingState is RingingState.Outgoing &&
+                    callRingState.acceptedByCallee &&
+                    _acceptedBy.value.findLast { it == client.userId } == null &&
+                    client.state.activeCall.value == null &&
+                    autoJoiningCall == null
+                ) {
+                    autoJoiningCall = scope.launch {
+                        // errors are handled inside the join function
+                        call.join()
+                        autoJoiningCall = null
+                    }
+                }
             }
 
             is CallRejectedEvent -> {
                 val new = _rejectedBy.value.toMutableSet()
                 new.add(event.user.id)
                 _rejectedBy.value = new.toSet()
+                updateRingingState()
             }
 
             is CallEndedEvent -> {
                 _endedAt.value = OffsetDateTime.now(Clock.systemUTC())
                 _endedByUser.value = event.user?.toUser()
+
+                // leave the call
+                call.leave()
             }
 
             is CallMemberUpdatedEvent -> {
@@ -684,8 +713,55 @@ public class CallState(private val call: Call, private val user: User, internal 
                         participants = newList.toImmutableList()
                     )
                 }
+                updateRingingState()
             }
         }
+    }
+
+    private fun updateRingingState() {
+        // this is only true when we are in the session (we have accepted/joined the call)
+        val userIsParticipant = _session.value?.participants?.find { it.user.id == client.userId } != null
+        val outgoingMembersCount = _members.value.filter { it.value.user.id != client.userId }.size
+        val rejectedBy = _rejectedBy.value
+        val acceptedBy = _acceptedBy.value
+        val createdBy = _createdBy.value
+        val members = _members.value
+        val acceptedByMe = _acceptedBy.value.findLast { it == client.userId }
+
+        // no members - call is empty, we can join
+        val state: RingingState = if (members.isEmpty()) {
+            RingingState.Active
+        } else if (rejectedBy.isNotEmpty() && acceptedBy.isEmpty() && rejectedBy.size >= outgoingMembersCount) {
+            // Call was rejected. Listener should leave the call with call.leave()
+            RingingState.RejectedByAll
+        } else if (createdBy?.id != client.userId) {
+            // Member list is not empty, it's not rejected - it's an incoming call
+            // If it's already accepted by me then we are in an Active call
+            if (userIsParticipant) {
+                RingingState.Active
+            } else {
+                RingingState.Incoming(acceptedByMe = acceptedByMe != null)
+            }
+        } else if (createdBy.id == client.userId) {
+            // The call is created by us
+            if (acceptedBy.isEmpty()) {
+                // no one accepted the call
+                RingingState.Outgoing(acceptedByCallee = false)
+            } else if (!userIsParticipant) {
+                // someone already accepted the call, but it's not us (client needs to do call.join)
+                RingingState.Outgoing(acceptedByCallee = true)
+            } else {
+                // call is accepted and we are already in the call
+                RingingState.Active
+            }
+        } else {
+            RingingState.Idle
+        }
+
+        if (_ringingState.value != state) {
+            logger.d { "Updating ringing state ${_ringingState.value} -> $state" }
+        }
+        _ringingState.value = state
     }
 
     private fun updateFromJoinResponse(event: JoinCallResponseEvent) {
@@ -796,6 +872,8 @@ public class CallState(private val call: Call, private val user: User, internal 
             }
         }
         _members.value = memberMap
+
+        updateRingingState()
     }
 
     fun getParticipantBySessionId(sessionId: String): ParticipantState? {
@@ -819,7 +897,7 @@ public class CallState(private val call: Call, private val user: User, internal 
         _broadcasting.value = response.egress.broadcasting
         _session.value = response.session
         _rejectedBy.value = response.session?.rejectedBy?.keys?.toSet() ?: emptySet()
-        _acceptedBy.value = response.session?.rejectedBy?.keys?.toSet() ?: emptySet()
+        _acceptedBy.value = response.session?.acceptedBy?.keys?.toSet() ?: emptySet()
         _createdAt.value = response.createdAt
         _updatedAt.value = response.updatedAt
         _endedAt.value = response.endedAt
@@ -831,6 +909,8 @@ public class CallState(private val call: Call, private val user: User, internal 
         _settings.value = response.settings
         _transcribing.value = response.transcribing
         _team.value = response.team
+
+        updateRingingState()
     }
 
     fun updateFromResponse(response: GetOrCreateCallResponse) {

@@ -1,11 +1,3 @@
-public final class io/getstream/video/android/core/BuildConfig {
-	public static final field BUILD_TYPE Ljava/lang/String;
-	public static final field DEBUG Z
-	public static final field LIBRARY_PACKAGE_NAME Ljava/lang/String;
-	public static final field STREAM_VIDEO_VERSION Ljava/lang/String;
-	public fun <init> ()V
-}
-
 public final class io/getstream/video/android/core/Call {
 	public fun <init> (Lio/getstream/video/android/core/StreamVideo;Ljava/lang/String;Ljava/lang/String;Lio/getstream/video/android/model/User;)V
 	public final fun accept (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
@@ -18,7 +10,6 @@ public final class io/getstream/video/android/core/Call {
 	public final fun get (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public final fun getCamera ()Lio/getstream/video/android/core/CameraManager;
 	public final fun getCid ()Ljava/lang/String;
-	public final fun getDebug ()Lio/getstream/video/android/core/Call$Debug;
 	public final fun getId ()Ljava/lang/String;
 	public final fun getMicrophone ()Lio/getstream/video/android/core/MicrophoneManager;
 	public final fun getMonitor ()Lio/getstream/video/android/core/CallHealthMonitor;
@@ -70,14 +61,6 @@ public final class io/getstream/video/android/core/Call {
 	public final fun updateMembers (Ljava/util/List;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 }
 
-public final class io/getstream/video/android/core/Call$Debug {
-	public fun <init> (Lio/getstream/video/android/core/Call;)V
-	public final fun getCall ()Lio/getstream/video/android/core/Call;
-	public final fun restartPublisherIce ()V
-	public final fun restartSubscriberIce ()V
-	public final fun switchSfu ()V
-}
-
 public final class io/getstream/video/android/core/CallHealthMonitor {
 	public fun <init> (Lio/getstream/video/android/core/Call;Lkotlinx/coroutines/CoroutineScope;)V
 	public final fun check ()V
@@ -101,7 +84,7 @@ public final class io/getstream/video/android/core/CallHealthMonitor {
 }
 
 public final class io/getstream/video/android/core/CallState {
-	public fun <init> (Lio/getstream/video/android/core/Call;Lio/getstream/video/android/model/User;Lkotlinx/coroutines/CoroutineScope;)V
+	public fun <init> (Lio/getstream/video/android/core/StreamVideo;Lio/getstream/video/android/core/Call;Lio/getstream/video/android/model/User;Lkotlinx/coroutines/CoroutineScope;)V
 	public final fun clearParticipants ()V
 	public final fun getAcceptedBy ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun getActiveSpeakers ()Lkotlinx/coroutines/flow/StateFlow;
@@ -601,13 +584,7 @@ public final class io/getstream/video/android/core/RingingState$Incoming : io/ge
 
 public final class io/getstream/video/android/core/RingingState$Outgoing : io/getstream/video/android/core/RingingState {
 	public fun <init> (Z)V
-	public final fun component1 ()Z
-	public final fun copy (Z)Lio/getstream/video/android/core/RingingState$Outgoing;
-	public static synthetic fun copy$default (Lio/getstream/video/android/core/RingingState$Outgoing;ZILjava/lang/Object;)Lio/getstream/video/android/core/RingingState$Outgoing;
-	public fun equals (Ljava/lang/Object;)Z
 	public final fun getAcceptedByCallee ()Z
-	public fun hashCode ()I
-	public fun toString ()Ljava/lang/String;
 }
 
 public final class io/getstream/video/android/core/RingingState$RejectedByAll : io/getstream/video/android/core/RingingState {
@@ -2414,8 +2391,14 @@ public final class io/getstream/video/android/core/utils/CallClientUtilsKt {
 	public static synthetic fun mangleSdpUtil$default (Lorg/webrtc/SessionDescription;ZZZILjava/lang/Object;)Lorg/webrtc/SessionDescription;
 }
 
+public final class io/getstream/video/android/core/utils/DerivedStateFlow : kotlinx/coroutines/flow/StateFlow {
+	public fun <init> (Lkotlin/jvm/functions/Function0;Lkotlinx/coroutines/flow/Flow;)V
+	public fun collect (Lkotlinx/coroutines/flow/FlowCollector;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public fun getReplayCache ()Ljava/util/List;
+	public fun getValue ()Ljava/lang/Object;
+}
+
 public final class io/getstream/video/android/core/utils/DomainUtilsKt {
-	public static final synthetic fun toCallUser (Lio/getstream/video/android/core/ParticipantState;)Lio/getstream/video/android/core/model/CallUser;
 }
 
 public final class io/getstream/video/android/core/utils/LatencyResult {
@@ -2442,7 +2425,6 @@ public final class io/getstream/video/android/core/utils/LatencyUtilsKt {
 }
 
 public final class io/getstream/video/android/core/utils/ListUtilsKt {
-	public static final fun updateValue (Ljava/util/List;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;)Ljava/util/List;
 }
 
 public final class io/getstream/video/android/core/utils/MediaStream {
@@ -2490,9 +2472,8 @@ public final class io/getstream/video/android/core/utils/RtpMapAttribute {
 }
 
 public final class io/getstream/video/android/core/utils/StateFlowKt {
-	public static final fun mapState (Lkotlinx/coroutines/flow/StateFlow;Lkotlinx/coroutines/CoroutineScope;Ljava/lang/Object;Lkotlin/jvm/functions/Function2;)Lkotlinx/coroutines/flow/StateFlow;
-	public static final fun mapState (Lkotlinx/coroutines/flow/StateFlow;Lkotlinx/coroutines/CoroutineScope;Lkotlin/jvm/functions/Function1;)Lkotlinx/coroutines/flow/StateFlow;
-	public static synthetic fun mapState$default (Lkotlinx/coroutines/flow/StateFlow;Lkotlinx/coroutines/CoroutineScope;Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)Lkotlinx/coroutines/flow/StateFlow;
+	public static final fun combineStates (Lkotlinx/coroutines/flow/StateFlow;Lkotlinx/coroutines/flow/StateFlow;Lkotlin/jvm/functions/Function2;)Lkotlinx/coroutines/flow/StateFlow;
+	public static final fun mapState (Lkotlinx/coroutines/flow/StateFlow;Lkotlin/jvm/functions/Function1;)Lkotlinx/coroutines/flow/StateFlow;
 }
 
 public final class io/getstream/video/android/core/utils/StringUtilsKt {

@@ -36,8 +36,8 @@ public sealed interface ConnectionState {
 
 public sealed interface RingingState {
     public object Idle : RingingState
-    public data class Incoming(public val acceptedByMe: Boolean) : RingingState
-    public data class Outgoing(public val acceptedByCallee: Boolean) : RingingState
+    public data class Incoming(val acceptedByMe: Boolean) : RingingState
+    public class Outgoing(val acceptedByCallee: Boolean) : RingingState
     public object Active : RingingState
     public object RejectedByAll : RingingState
     public object TimeoutNoAnswer : RingingState

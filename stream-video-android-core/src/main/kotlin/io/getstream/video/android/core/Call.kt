@@ -62,6 +62,7 @@ import org.openapitools.client.models.UpdateCallResponse
 import org.openapitools.client.models.UpdateUserPermissionsResponse
 import org.openapitools.client.models.VideoEvent
 import org.threeten.bp.OffsetDateTime
+import org.webrtc.EglBase
 import org.webrtc.RendererCommon
 import org.webrtc.audio.JavaAudioDeviceModule.AudioSamples
 import stream.video.sfu.models.TrackType
@@ -96,7 +97,7 @@ public class Call(
     private val scope = CoroutineScope(clientImpl.scope.coroutineContext + supervisorJob)
 
     /** The call state contains all state such as the participant list, reactions etc */
-    val state = CallState(this, user, scope)
+    val state = CallState(client, this, user, scope)
 
     val sessionId by lazy { clientImpl.sessionId }
     private val network by lazy { clientImpl.connectionModule.networkStateProvider }
@@ -124,8 +125,13 @@ public class Call(
             clientImpl.context,
             this,
             scope,
-            clientImpl.peerConnectionFactory.eglBase.eglBaseContext
+            eglBaseContextProvider.invoke()
         )
+    }
+
+    /** For testing purposes - EglBase and EglBaseContext can't be mocked **/
+    internal var eglBaseContextProvider: () -> EglBase.Context = {
+        clientImpl.peerConnectionFactory.eglBase.eglBaseContext
     }
 
     /** Basic crud operations */
@@ -453,7 +459,7 @@ public class Call(
 
         // Note this comes from peerConnectionFactory.eglBase
         videoRenderer.init(
-            clientImpl.peerConnectionFactory.eglBase.eglBaseContext,
+            eglBaseContextProvider.invoke(),
             object : RendererCommon.RendererEvents {
                 override fun onFirstFrameRendered() {
                     logger.d { "[initRenderer.onFirstFrameRendered] #sfu; sessionId: $sessionId" }
