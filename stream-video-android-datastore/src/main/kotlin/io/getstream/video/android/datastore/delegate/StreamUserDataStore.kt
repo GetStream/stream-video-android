@@ -32,9 +32,6 @@ import io.getstream.video.android.model.ApiKey
 import io.getstream.video.android.model.Device
 import io.getstream.video.android.model.User
 import io.getstream.video.android.model.UserToken
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 
@@ -42,7 +39,6 @@ import kotlinx.coroutines.flow.map
  * A DataStore managers to persist Stream user login data safely, consistently, and transactionally.
  *
  * @param dataStore A [DataStore] that contains data type of [StreamUserPreferences].
- * @property scope A coroutine scope that launches all tasks for DataStore.
  */
 public class StreamUserDataStore constructor(
     dataStore: DataStore<StreamUserPreferences?>,
@@ -159,7 +155,6 @@ public class StreamUserDataStore constructor(
         public fun install(
             context: Context,
             isEncrypted: Boolean = true,
-            scope: CoroutineScope = CoroutineScope(Dispatchers.IO + SupervisorJob())
         ): StreamUserDataStore {
             synchronized(this) {
                 if (isInstalled) {

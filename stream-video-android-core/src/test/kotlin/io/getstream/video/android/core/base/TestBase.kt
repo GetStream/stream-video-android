@@ -21,12 +21,10 @@ import io.getstream.log.StreamLog
 import io.getstream.log.streamLog
 import io.getstream.result.Result
 import io.getstream.video.android.core.call.connection.StreamPeerConnectionFactory
-import io.getstream.video.android.core.dispatchers.DispatcherProvider
 import io.getstream.video.android.datastore.delegate.StreamUserDataStore
 import io.mockk.MockKAnnotations
 import io.mockk.impl.annotations.MockK
 import io.mockk.junit4.MockKRule
-import kotlinx.coroutines.CoroutineScope
 import org.junit.Before
 import org.junit.Rule
 import org.threeten.bp.Clock
@@ -70,8 +68,7 @@ public open class TestBase {
         if (!StreamUserDataStore.isInstalled) {
             StreamUserDataStore.install(
                 context = context.applicationContext,
-                isEncrypted = false,
-                scope = CoroutineScope(DispatcherProvider.IO)
+                isEncrypted = false
             )
         }
     }
