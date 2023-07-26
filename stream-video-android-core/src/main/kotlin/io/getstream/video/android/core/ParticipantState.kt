@@ -23,12 +23,11 @@ import io.getstream.video.android.core.model.MediaTrack
 import io.getstream.video.android.core.model.NetworkQuality
 import io.getstream.video.android.core.model.Reaction
 import io.getstream.video.android.core.model.VideoTrack
-import io.getstream.video.android.core.utils.asStateFlow
+import io.getstream.video.android.core.utils.combineStates
 import io.getstream.video.android.core.utils.mapState
 import io.getstream.video.android.model.User
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.combine
 import org.openapitools.client.models.MuteUsersResponse
 import org.threeten.bp.Instant
 import org.threeten.bp.OffsetDateTime
@@ -128,30 +127,30 @@ public data class ParticipantState(
     internal val _reactions = MutableStateFlow<List<Reaction>>(emptyList())
     val reactions: StateFlow<List<Reaction>> = _reactions
 
-    val video: StateFlow<Video?> = combine(_videoTrack, _videoEnabled) { track, enabled ->
+    val video: StateFlow<Video?> = combineStates(_videoTrack, _videoEnabled) { track, enabled ->
         Video(
             sessionId = sessionId,
             track = track,
             enabled = enabled
         )
-    }.asStateFlow(null)
+    }
 
-    val audio: StateFlow<Audio?> = combine(_audioTrack, _audioEnabled) { track, enabled ->
+    val audio: StateFlow<Audio?> = combineStates(_audioTrack, _audioEnabled) { track, enabled ->
         Audio(
             sessionId = sessionId,
             track = track,
             enabled = enabled
         )
-    }.asStateFlow(null)
+    }
 
     val screenSharing: StateFlow<ScreenSharing?> =
-        combine(_screenSharingTrack, _screenSharingEnabled) { track, enabled ->
+        combineStates(_screenSharingTrack, _screenSharingEnabled) { track, enabled ->
             ScreenSharing(
                 sessionId = sessionId,
                 track = track,
                 enabled = enabled
             )
-        }.asStateFlow(null)
+        }
 
     suspend fun muteAudio(): Result<MuteUsersResponse> {
         // how do i mute another user?

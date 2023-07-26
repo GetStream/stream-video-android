@@ -52,6 +52,7 @@ import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import okhttp3.internal.toImmutableList
 import org.openapitools.client.models.BlockedUserEvent
 import org.openapitools.client.models.CallAcceptedEvent
@@ -376,9 +377,10 @@ public class CallState(private val call: Call, private val user: User, internal 
     val createdBy: StateFlow<User?> = _createdBy
 
     private val _ingress: MutableStateFlow<CallIngressResponse?> = MutableStateFlow(null)
-    val ingress: StateFlow<Ingress?> = _ingress.mapState(initialValue = null, scope = scope) {
-        val token = call.clientImpl.dataStore.userToken.firstOrNull()
-        val apiKey = call.clientImpl.dataStore.apiKey.firstOrNull()
+    val ingress: StateFlow<Ingress?> = _ingress.mapState {
+        // TODO: Remove runBlocking and use standard Flow instead for mapping or use other approach
+        val token = runBlocking { call.clientImpl.dataStore.userToken.firstOrNull() }
+        val apiKey = runBlocking { call.clientImpl.dataStore.apiKey.firstOrNull() }
         val streamKey = "$apiKey/$token"
         // TODO: use the address when the server is updated
         val overwriteUrl = "rtmps://video-ingress-frankfurt-vi1.stream-io-video.com:443/${call.type}/${call.id}"
