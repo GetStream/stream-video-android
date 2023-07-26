@@ -84,7 +84,7 @@ public final class io/getstream/video/android/core/CallHealthMonitor {
 }
 
 public final class io/getstream/video/android/core/CallState {
-	public fun <init> (Lio/getstream/video/android/core/Call;Lio/getstream/video/android/model/User;Lkotlinx/coroutines/CoroutineScope;)V
+	public fun <init> (Lio/getstream/video/android/core/StreamVideo;Lio/getstream/video/android/core/Call;Lio/getstream/video/android/model/User;Lkotlinx/coroutines/CoroutineScope;)V
 	public final fun clearParticipants ()V
 	public final fun getAcceptedBy ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun getActiveSpeakers ()Lkotlinx/coroutines/flow/StateFlow;
@@ -584,13 +584,7 @@ public final class io/getstream/video/android/core/RingingState$Incoming : io/ge
 
 public final class io/getstream/video/android/core/RingingState$Outgoing : io/getstream/video/android/core/RingingState {
 	public fun <init> (Z)V
-	public final fun component1 ()Z
-	public final fun copy (Z)Lio/getstream/video/android/core/RingingState$Outgoing;
-	public static synthetic fun copy$default (Lio/getstream/video/android/core/RingingState$Outgoing;ZILjava/lang/Object;)Lio/getstream/video/android/core/RingingState$Outgoing;
-	public fun equals (Ljava/lang/Object;)Z
 	public final fun getAcceptedByCallee ()Z
-	public fun hashCode ()I
-	public fun toString ()Ljava/lang/String;
 }
 
 public final class io/getstream/video/android/core/RingingState$RejectedByAll : io/getstream/video/android/core/RingingState {

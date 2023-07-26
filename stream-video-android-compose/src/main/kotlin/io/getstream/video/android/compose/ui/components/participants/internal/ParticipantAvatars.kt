@@ -31,13 +31,13 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.avatar.UserAvatar
-import io.getstream.video.android.core.ParticipantState
+import io.getstream.video.android.core.MemberState
 import io.getstream.video.android.mock.StreamMockUtils
-import io.getstream.video.android.mock.mockParticipantList
+import io.getstream.video.android.mock.mockMemberStateList
 
 @Composable
 public fun ParticipantAvatars(
-    participants: List<ParticipantState>
+    participants: List<MemberState>
 ) {
     Box(
         modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center
@@ -48,7 +48,7 @@ public fun ParticipantAvatars(
 
                 UserAvatar(
                     modifier = Modifier.size(VideoTheme.dimens.singleAvatarSize),
-                    user = participant.initialUser
+                    user = participant.user
                 )
             } else {
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
@@ -56,7 +56,7 @@ public fun ParticipantAvatars(
                         items(participants.take(2)) { participant ->
                             UserAvatar(
                                 modifier = Modifier.size(VideoTheme.dimens.callAvatarSize),
-                                user = participant.initialUser
+                                user = participant.user
                             )
                         }
                     }
@@ -64,7 +64,7 @@ public fun ParticipantAvatars(
                     if (participants.size >= 3) {
                         UserAvatar(
                             modifier = Modifier.size(VideoTheme.dimens.callAvatarSize),
-                            user = participants[2].initialUser
+                            user = participants[2].user
                         )
                     }
                 }
@@ -79,7 +79,7 @@ private fun ParticipantAvatarsPreview() {
     StreamMockUtils.initializeStreamVideo(LocalContext.current)
     VideoTheme {
         ParticipantAvatars(
-            participants = mockParticipantList
+            participants = mockMemberStateList
         )
     }
 }

@@ -27,7 +27,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.core.call.state.CallAction
-import io.getstream.video.android.core.call.state.CancelCall
+import io.getstream.video.android.core.call.state.DeclineCall
 import io.getstream.video.android.ui.common.R
 
 /**
@@ -38,10 +38,10 @@ import io.getstream.video.android.ui.common.R
  * @param onCallAction A [CallAction] event that will be fired.
  */
 @Composable
-public fun CancelCallAction(
+public fun DeclineCallAction(
     modifier: Modifier = Modifier,
     enabled: Boolean = true,
-    onCallAction: (CancelCall) -> Unit,
+    onCallAction: (DeclineCall) -> Unit,
     shape: Shape = VideoTheme.shapes.callButton,
 ) {
     IconButton(
@@ -50,7 +50,7 @@ public fun CancelCallAction(
             shape = shape
         ),
         enabled = enabled,
-        onClick = { onCallAction(CancelCall) },
+        onClick = { onCallAction(DeclineCall) },
         content = {
             Icon(
                 painter = painterResource(id = R.drawable.stream_video_ic_call_end),

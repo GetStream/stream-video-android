@@ -16,10 +16,10 @@
 
 package io.getstream.video.android
 
-import android.os.Build
+import android.content.Context
+import android.content.Intent
 import android.os.Bundle
 import android.util.Log
-import android.view.WindowManager
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -34,54 +34,60 @@ import io.getstream.video.android.compose.ui.components.call.ringing.RingingCall
 import io.getstream.video.android.core.StreamVideo
 import io.getstream.video.android.core.call.state.AcceptCall
 import io.getstream.video.android.core.call.state.CallAction
+import io.getstream.video.android.core.call.state.CancelCall
 import io.getstream.video.android.core.call.state.DeclineCall
 import io.getstream.video.android.core.call.state.LeaveCall
 import io.getstream.video.android.core.call.state.ToggleCamera
 import io.getstream.video.android.core.call.state.ToggleMicrophone
 import io.getstream.video.android.core.call.state.ToggleSpeakerphone
-import io.getstream.video.android.core.notifications.NotificationHandler
-import io.getstream.video.android.model.streamCallId
+import io.getstream.video.android.model.mapper.isValidCallId
+import io.getstream.video.android.model.mapper.toTypeAndId
 import io.getstream.video.android.util.StreamVideoInitHelper
 import kotlinx.coroutines.launch
+import java.util.UUID
 
-class IncomingCallActivity : ComponentActivity() {
+class RingCallActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        // release the lock, turn on screen, and keep the device awake.
-        showWhenLockedAndTurnScreenOn()
-        window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
-
-        val callId = intent.streamCallId(NotificationHandler.INTENT_EXTRA_CALL_CID)!!
-
         lifecycleScope.launch {
 
-            StreamVideoInitHelper.init(this@IncomingCallActivity)
-            val call = StreamVideo.instance().call(callId.type, callId.id)
+            // Init StreamVideo if it's not already initialised
+            StreamVideoInitHelper.init(this@RingCallActivity)
 
-            // Update the call state. This activity could have been started from a push notification.
-            // Doing a call.get() will also internally update the Call state object with the latest
-            // state from the backend.
-            val result = call.get()
+            // Create Call ID if it wasn't supplied by Intent
+            val callId: String = intent.getStringExtra(EXTRA_CID)
+                ?: "default:${UUID.randomUUID()}"
+
+            val (type, id) = if (callId.isValidCallId()) {
+                callId.toTypeAndId()
+            } else {
+                "default" to callId
+            }
+
+            // Create call object
+            val call = StreamVideo.instance().call(type, id)
+
+            // Get list of members
+            val members: List<String> = intent.getStringArrayExtra(EXTRA_MEMBERS_ARRAY)?.asList() ?: emptyList()
+
+            // You must add yourself as member too
+            val membersWithMe = members.toMutableList().apply { add(call.user.id) }
+
+            // Ring the members
+            val result = call.create(ring = true, memberIds = membersWithMe)
 
             if (result is Result.Failure) {
                 // Failed to recover the current state of the call
                 // TODO: Automaticly call this in the SDK?
-                Log.e("IncomingCallActivity", "Call.join failed ${result.value}")
+                Log.e("RingCallActivity", "Call.create failed ${result.value}")
                 Toast.makeText(
-                    this@IncomingCallActivity,
+                    this@RingCallActivity,
                     "Failed get call status (${result.value.message})",
                     Toast.LENGTH_SHORT
                 ).show()
                 finish()
-            }
-
-            // We also check if savedInstanceState is null to prevent duplicate calls when activity
-            // is recreated (e.g. when entering PiP mode)
-            if (NotificationHandler.ACTION_ACCEPT_CALL == intent.action && savedInstanceState == null) {
-                call.accept()
-                call.join()
             }
 
             setContent {
@@ -96,8 +102,11 @@ class IncomingCallActivity : ComponentActivity() {
                                 finish()
                             }
                             is DeclineCall -> {
+                                // Not needed. this activity is only used for outgoing calls.
+                            }
+                            is CancelCall -> {
                                 lifecycleScope.launch {
-                                    call.reject()
+                                    val test = call.reject()
                                     call.leave()
                                     finish()
                                 }
@@ -112,6 +121,7 @@ class IncomingCallActivity : ComponentActivity() {
                             else -> Unit
                         }
                     }
+
                     RingingCallContent(
                         modifier = Modifier.background(color = VideoTheme.colors.appBackground),
                         call = call,
@@ -137,16 +147,20 @@ class IncomingCallActivity : ComponentActivity() {
         }
     }
 
-    private fun showWhenLockedAndTurnScreenOn() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O_MR1) {
-            setShowWhenLocked(true)
-            setTurnScreenOn(true)
-        } else {
-            @Suppress("DEPRECATION")
-            window.addFlags(
-                WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED or
-                    WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON
-            )
+    companion object {
+        const val EXTRA_CID: String = "EXTRA_CID"
+        const val EXTRA_MEMBERS_ARRAY: String = "EXTRA_MEMBERS_ARRAY"
+
+        @JvmStatic
+        fun createIntent(
+            context: Context,
+            callId: String? = null,
+            members: List<String>,
+        ): Intent {
+            return Intent(context, RingCallActivity::class.java).apply {
+                putExtra(EXTRA_CID, callId)
+                putExtra(EXTRA_MEMBERS_ARRAY, members.toTypedArray())
+            }
         }
     }
 }
