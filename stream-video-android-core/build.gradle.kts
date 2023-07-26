@@ -46,6 +46,21 @@ wire {
 
 generateRPCServices {}
 
+apiValidation {
+    /**
+     * Classes (fully qualified) that are excluded from public API dumps even if they
+     * contain public API.
+     */
+    ignoredClasses.add("io.getstream.video.android.core.BuildConfig")
+
+    /**
+     * Set of annotations that exclude API from being public.
+     * Typically, it is all kinds of `@InternalApi` annotations that mark
+     * effectively private API that cannot be actually private for technical reasons.
+     */
+    nonPublicMarkers.add("io.getstream.video.android.core.internal.InternalStreamVideoApi")
+}
+
 android {
     namespace = "io.getstream.video.android.core"
     compileSdk = Configuration.compileSdk
@@ -130,9 +145,11 @@ dependencies {
     implementation(libs.moshi)
     implementation(libs.moshi.kotlin)
     implementation(libs.moshi.adapters)
-    //implementation(libs.desugar)
 
     api(libs.threentenabp2)
+
+    // stable marker annotations
+    compileOnly(libs.compose.stable.marker)
 
     // Stream
     api(libs.stream.result)

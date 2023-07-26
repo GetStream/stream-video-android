@@ -16,6 +16,7 @@
 
 package io.getstream.video.android.core
 
+import androidx.compose.runtime.Stable
 import io.getstream.result.Result
 import io.getstream.video.android.core.model.AudioTrack
 import io.getstream.video.android.core.model.MediaTrack
@@ -219,6 +220,7 @@ public data class ParticipantState(
         _reactions.value = newReactions
     }
 
+    @Stable
     public sealed class Media(
         public open val sessionId: String,
         public open val track: MediaTrack?,
@@ -226,6 +228,7 @@ public data class ParticipantState(
         public val type: TrackType = TrackType.TRACK_TYPE_UNSPECIFIED,
     )
 
+    @Stable
     public data class Video(
         public override val sessionId: String,
         public override val track: VideoTrack?,
@@ -237,6 +240,7 @@ public data class ParticipantState(
         type = TrackType.TRACK_TYPE_VIDEO
     )
 
+    @Stable
     public data class Audio(
         public override val sessionId: String,
         public override val track: AudioTrack?,
@@ -248,6 +252,7 @@ public data class ParticipantState(
         type = TrackType.TRACK_TYPE_AUDIO
     )
 
+    @Stable
     public data class ScreenSharing(
         public override val sessionId: String,
         public override val track: VideoTrack?,

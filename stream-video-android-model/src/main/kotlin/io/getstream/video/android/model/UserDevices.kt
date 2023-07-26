@@ -16,6 +16,9 @@
 
 package io.getstream.video.android.model
 
+import androidx.compose.runtime.Stable
+
+@Stable
 @kotlinx.serialization.Serializable
 public data class UserDevices(
     val devices: List<Device> = emptyList()

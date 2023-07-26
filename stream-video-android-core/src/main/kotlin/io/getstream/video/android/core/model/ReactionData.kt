@@ -16,6 +16,7 @@
 
 package io.getstream.video.android.core.model
 
+import androidx.compose.runtime.Stable
 import io.getstream.video.android.model.User
 
 /**
@@ -26,6 +27,7 @@ import io.getstream.video.android.model.User
  * @param emoji Code of the emoji, if it exists.
  * @param custom Custom extra data to enrich the reaction.
  */
+@Stable
 public data class ReactionData(
     public val type: String,
     public val user: User,

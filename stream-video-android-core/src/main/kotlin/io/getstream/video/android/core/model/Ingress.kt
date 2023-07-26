@@ -16,6 +16,10 @@
 
 package io.getstream.video.android.core.model
 
+import androidx.compose.runtime.Stable
+
+@Stable
 data class Ingress(var rtmp: RTMP)
 
+@Stable
 data class RTMP(var address: String, var streamKey: String)

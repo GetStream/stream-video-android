@@ -16,6 +16,7 @@
 
 package io.getstream.video.android.core.model
 
+import androidx.compose.runtime.Stable
 import org.openapitools.client.models.MuteUsersRequest
 
 /**
@@ -27,6 +28,7 @@ import org.openapitools.client.models.MuteUsersRequest
  * @param video If the video should be muted.
  * @param users List of users to apply the mute change to.
  */
+@Stable
 public data class MuteUsersData(
     public val users: List<String>? = null,
     public val muteAllUsers: Boolean? = null,

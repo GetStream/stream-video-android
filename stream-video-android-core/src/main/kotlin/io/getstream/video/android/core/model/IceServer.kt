@@ -16,9 +16,11 @@
 
 package io.getstream.video.android.core.model
 
+import androidx.compose.runtime.Stable
 import org.openapitools.client.models.ICEServer
 import java.io.Serializable
 
+@Stable
 public data class IceServer(
     val urls: List<String>,
     val username: String,
