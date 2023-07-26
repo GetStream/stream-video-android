@@ -28,7 +28,6 @@ import androidx.compose.ui.res.stringResource
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.core.call.state.CallAction
 import io.getstream.video.android.core.call.state.CancelCall
-import io.getstream.video.android.core.call.state.DeclineCall
 import io.getstream.video.android.ui.common.R
 
 /**
