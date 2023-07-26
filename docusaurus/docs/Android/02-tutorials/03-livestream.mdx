@@ -36,7 +36,7 @@ Setup steps can vary slightly across Android Studio versions so if you run into 
 
 ### Step 2 - Install the SDK & Setup the client
 
-**Add the video SDK** to your app's `build.gradle` file found in app/build.gradle
+**Add the video SDK** to your app's `build.gradle` file found in app/build.gradle.
 If you're new to android note that there are 2 build.gradle files, you want to open the one in the app folder.
 
 ```groovy
@@ -50,7 +50,7 @@ This tutorial uses the compose version of the SDK. Stream also provides a core l
 ### Step 3 - Broadcast a livestream from your phone
 
 The following code shows how to publish from your phone's camera.
-Let's open MainActivity.kt and replace the MainActivity class with the following code:
+Let's open `MainActivity.kt` and replace the `MainActivity` class with the following code:
 
 ```kotlin
 class MainActivity : ComponentActivity() {
@@ -91,15 +91,15 @@ class MainActivity : ComponentActivity() {
         }
 
         setContent {
-            // enable the camera and microphone
+            // request the Android runtime permissions for the camera and microphone
             LaunchCallPermissions(call = call)
+
             VideoTheme {
                 Text("TODO: render video")
             }
         }
     }
 }
-
 ```
 
 You'll notice that these first 3 lines need their values replaced.
@@ -138,7 +138,7 @@ val client = StreamVideoBuilder(
 ).build()
 ```
 
-You'll see the userToken variable. Your backend typically generates the user token on signup or login.
+You'll see the `userToken` variable. Your backend typically generates the user token on signup or login.
 
 In the next step we create and join the call. The call object is used for video calls, audio rooms and livestreaming.
 
@@ -157,7 +157,7 @@ lifecycleScope.launch {
 }
 ```
 
-call.join(create = true) is the simplest example.
+`call.join(create = true)` is the simplest example.
 It's also possible to configure settings on the call or add co-hosts. TODO: Docs
 
 ### Step 4 - Render the video
@@ -168,61 +168,94 @@ This example uses compose, but you could also use our XML VideoRenderer.
 In `MainActivity.kt` replace the `VideoTheme` with the following code.
 
 ```kotlin
-
 VideoTheme {
-    val participantCount = call.state.participantCounts.collectAsState().value?.total
-    val connection by call.state.connection.collectAsState()
+    val participantCount by call.state.participantCounts.collectAsState()
+    val total = participantCount?.total
     val backstage by call.state.backstage.collectAsState()
     val me by call.state.me.collectAsState()
-    val video = me?.video?.collectAsState()
-    val session by call.state.session.collectAsState()
+    val video = me?.video?.collectAsState()?.value
+    val connection by call.state.connection.collectAsState()
 
-    Box(
+    Scaffold(
         modifier = Modifier
             .fillMaxSize()
-            .background(VideoTheme.colors.appBackground),
-    ) {
-        VideoRenderer(call = call, video = video?.value, videoFallbackContent = {
-
-        })
-
-        Column(
-            verticalArrangement = Arrangement.Bottom,
-            horizontalAlignment = Alignment.CenterHorizontally,
-            modifier = Modifier.fillMaxWidth().fillMaxHeight().padding(32.dp)
-
-        ) {
+            .background(VideoTheme.colors.appBackground)
+            .padding(6.dp),
+        contentColor = VideoTheme.colors.appBackground,
+        backgroundColor = VideoTheme.colors.appBackground,
+        topBar = {
             if (connection == RealtimeConnection.Connected) {
                 if (!backstage) {
-                    Text("Livestream has $participantCount participants")
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(6.dp)
+                    ) {
+                        Text(
+                            modifier = Modifier
+                                .align(Alignment.CenterEnd)
+                                .background(
+                                    color = VideoTheme.colors.primaryAccent,
+                                    shape = RoundedCornerShape(6.dp)
+                                )
+                                .padding(horizontal = 12.dp, vertical = 4.dp),
+                            text = "Live $total",
+                            color = VideoTheme.colors.textHighEmphasis
+                        )
 
-                    Text("Live for 1:23")
+                        Text(
+                            modifier = Modifier.align(Alignment.Center),
+                            text = "Live for 1:23",
+                            color = VideoTheme.colors.textHighEmphasis
+                        )
+                    }
                 }
-
-                Button(onClick = {
+            }
+        },
+        bottomBar = {
+            Button(
+                colors = ButtonDefaults.buttonColors(
+                    backgroundColor = VideoTheme.colors.primaryAccent,
+                    contentColor = VideoTheme.colors.primaryAccent
+                ),
+                onClick = {
                     lifecycleScope.launch {
                         if (backstage) call.goLive() else call.stopLive()
                     }
-                }) {
-                    Text(text = if (backstage) "Go Live" else "Stop Broadcast")
                 }
+            ) {
+                Text(
+                    text = if (backstage) "Go Live" else "Stop Broadcast",
+                    color = Color.White
+                )
             }
         }
-
+    ) {
+        VideoRenderer(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(it)
+                .clip(RoundedCornerShape(6.dp)),
+            call = call,
+            video = video,
+            videoFallbackContent = {
+                Text(text = "Video rendering failed")
+            }
+        )
     }
 }
 ```
 
 If you now run your app you should see an interface like this:
 
-TODO: Image
+![Livestream](../assets/tutorial-livestream.png)
 
-When you press "go live" your video will be transmitted.
+When you press **go live** your video will be transmitted.
 Press go live in the android app and click the link below to watch it in your browser.
 
 <TokenSnippet sampleApp='livestream' displayStyle='join' />
 
-Let's take a moment to review the compose code above. Call.state exposes all the stateflow objects you need.
+Let's take a moment to review the compose code above `Call.state` exposes all the stateflow objects you need.
 The most important ones are:
 
 ```
@@ -232,8 +265,8 @@ call.state.participants
 
 The [participant state docs](../03-guides/03-call-and-participant-state.mdx) show all the available data.
 
-The compose layout is vanilla compose other than VideoRenderer.
-VideoRenderer renders the video and a fallback. You can use it for both rendering the local video and remote video.
+The compose layout is vanilla compose other than **[VideoRenderer](../04-ui-components/02-video-renderer.mdx)**.
+`VideoRenderer` renders the video and a fallback. You can use it for both rendering the local video and remote video.
 
 ### Step 4 - (Optional) Publishing RTMP using OBS
 
@@ -264,6 +297,7 @@ To change the example above and just watch a livestream:
 // remove this
 call.camera.enable()
 call.microphone.enable()
+
 // and this
 LaunchCallPermissions(call = call)
 // on the UI side remove the button to go live
