@@ -17,13 +17,9 @@
 package io.getstream.video.android.core
 
 import com.google.common.truth.Truth.assertThat
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.test.runTest
 import org.junit.Ignore
 import org.junit.Test
-import org.threeten.bp.OffsetDateTime
-import org.threeten.bp.temporal.ChronoUnit
 
 class LivestreamTest : IntegrationTestBase() {
     /**
@@ -110,6 +106,5 @@ class LivestreamTest : IntegrationTestBase() {
         val duration = call.state.durationInMs.value
         println("duration: $duration")
         call.leave()
-
     }
 }
