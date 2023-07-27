@@ -13,7 +13,7 @@ We'll cover the following topics:
 
 * Ultra low latency streaming
 * Multiple streams & co-hosts
-* RTMP in and Webrtc input
+* RTMP in and WebRTC input
 * Exporting to HLS
 * Reactions, custom events and chat
 * Recording & Transcriptions
@@ -297,9 +297,9 @@ B. Open OBS and go to settings -> stream
 - Stream key: equal to the stream key from the log
 
 Press start streaming in OBS. The RTMP stream will now show up in your call just like a regular video participant.
-Now that we've learned to publish using WebRtc or RTMP let's talk about watching the livestream.
+Now that we've learned to publish using WebRTC or RTMP let's talk about watching the livestream.
 
-### Step 5 - Viewing a livestream (Webrtc)
+### Step 5 - Viewing a livestream (WebRTC)
 
 Watching a livestream is even easier than broadcasting.
 
@@ -313,7 +313,7 @@ The [docs on building a UI for watching a livestream](../05-ui-cookbook/15-watch
 
 ### Step 6 - (Optional) Viewing a livestream with HLS
 
-Another way to watch a livestream is using HLS. HLS tends to have a 10 to 20 seconds delay, while the above WebRtc approach is realtime.
+Another way to watch a livestream is using HLS. HLS tends to have a 10 to 20 seconds delay, while the above WebRTC approach is realtime.
 The benefit that HLS offers is better buffering under poor network conditions.
 So HLS can be a good option when:
 
@@ -353,7 +353,7 @@ Our team is also happy to review your UI designs and offer recommendations on ho
 
 To recap what we've learned:
 
-* Webrtc is optimal for latency, HLS is slower but buffers better for users with poor connections
+* WebRTC is optimal for latency, HLS is slower but buffers better for users with poor connections
 * You setup a call: (val call = client.call("livestream", callId))
 * The call type "livestream" controls which features are enabled and how permissions are setup
 * The livestream by default enables "backstage" mode. This allows you and your co-hosts to setup your mic and camera before allowing people in
