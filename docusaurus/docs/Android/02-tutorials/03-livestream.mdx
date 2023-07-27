@@ -170,11 +170,13 @@ In `MainActivity.kt` replace the `VideoTheme` with the following code.
 ```kotlin
 VideoTheme {
     val participantCount by call.state.participantCounts.collectAsState()
+    val connection by call.state.connection.collectAsState()
     val total = participantCount?.total
     val backstage by call.state.backstage.collectAsState()
     val me by call.state.me.collectAsState()
     val video = me?.video?.collectAsState()?.value
-    val connection by call.state.connection.collectAsState()
+    val session by call.state.session.collectAsState()
+    val durationInMs by call.state.durationInMs.collectAsState()
 
     Scaffold(
         modifier = Modifier
