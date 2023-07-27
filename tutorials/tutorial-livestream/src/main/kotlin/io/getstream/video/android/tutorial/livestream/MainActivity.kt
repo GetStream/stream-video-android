@@ -17,18 +17,30 @@
 package io.getstream.video.android.tutorial.livestream
 
 import android.os.Bundle
+import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.material.CircularProgressIndicator
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.Button
+import androidx.compose.material.ButtonDefaults
+import androidx.compose.material.Scaffold
+import androidx.compose.material.Text
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.unit.dp
 import androidx.lifecycle.lifecycleScope
+import io.getstream.video.android.compose.permission.LaunchCallPermissions
 import io.getstream.video.android.compose.theme.VideoTheme
-import io.getstream.video.android.compose.ui.components.audio.AudioRoomContent
+import io.getstream.video.android.compose.ui.components.video.VideoRenderer
 import io.getstream.video.android.core.GEO
 import io.getstream.video.android.core.RealtimeConnection
 import io.getstream.video.android.core.StreamVideoBuilder
@@ -39,10 +51,10 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        val userId = "Bastila_Shan"
+        val userId = "Jarael"
         val userToken =
-            "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoiQmFzdGlsYV9TaGFuIiwiaXNzIjoicHJvbnRvIiwic3ViIjoidXNlci9CYXN0aWxhX1NoYW4iLCJpYXQiOjE2ODY4MDExMjMsImV4cCI6MTY4NzQwNTkyOH0.ON-9v7waSQTvFwi8isblwYhM48VH7SznoZIBhlzf-f4"
-        val callId = "1egoN4tKm4w2"
+            "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoiSmFyYWVsIiwiaXNzIjoicHJvbnRvIiwic3ViIjoidXNlci9KYXJhZWwiLCJpYXQiOjE2OTA0MzA5NjEsImV4cCI6MTY5MTAzNTc2Nn0.c1AD55FcGEse4nTJAghlTNObINV8jMVGfzLYyI_rgr0"
+        val callId = "HSIQU8Hxs59q"
 
         // step1 - create a user.
         val user = User(
@@ -61,29 +73,95 @@ class MainActivity : ComponentActivity() {
         ).build()
 
         // step3 - join a call, which type is `default` and id is `123`.
-        val call = client.call("audio_room", callId)
+        val call = client.call("livestream", callId)
         lifecycleScope.launch {
-            call.join(create = true)
+            // join the call
+            val result = call.join(create = true)
+            result.onError {
+                Toast.makeText(applicationContext, "uh oh $it", Toast.LENGTH_SHORT).show()
+            }
         }
 
         setContent {
+            // request the Android runtime permissions for the camera and microphone
+            LaunchCallPermissions(call = call)
+
             // step4 - apply VideoTheme
             VideoTheme {
-                val connect by call.state.connection.collectAsState()
+                val participantCount by call.state.participantCounts.collectAsState()
+                val connection by call.state.connection.collectAsState()
+                val total = participantCount?.total
+                val backstage by call.state.backstage.collectAsState()
+                val me by call.state.me.collectAsState()
+                val video = me?.video?.collectAsState()?.value
+                val session by call.state.session.collectAsState()
 
-                // step5 - render AudioRoom
-                if (connect == RealtimeConnection.Connected) {
-                    AudioRoomContent(
-                        call = call,
-                        title = "Audio Room Number 05"
-                    )
-                } else {
-                    Box(modifier = Modifier.fillMaxSize()) {
-                        CircularProgressIndicator(
-                            modifier = Modifier.align(Alignment.Center),
-                            color = VideoTheme.colors.primaryAccent
-                        )
+                Scaffold(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .background(VideoTheme.colors.appBackground)
+                        .padding(6.dp),
+                    contentColor = VideoTheme.colors.appBackground,
+                    backgroundColor = VideoTheme.colors.appBackground,
+                    topBar = {
+                        if (connection == RealtimeConnection.Connected) {
+                            if (!backstage) {
+                                Box(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(6.dp)
+                                ) {
+                                    Text(
+                                        modifier = Modifier
+                                            .align(Alignment.CenterEnd)
+                                            .background(
+                                                color = VideoTheme.colors.primaryAccent,
+                                                shape = RoundedCornerShape(6.dp)
+                                            )
+                                            .padding(horizontal = 12.dp, vertical = 4.dp),
+                                        text = "Live $total",
+                                        color = VideoTheme.colors.textHighEmphasis
+                                    )
+
+                                    Text(
+                                        modifier = Modifier.align(Alignment.Center),
+                                        text = "Live for 1:23",
+                                        color = VideoTheme.colors.textHighEmphasis
+                                    )
+                                }
+                            }
+                        }
+                    },
+                    bottomBar = {
+                        Button(
+                            colors = ButtonDefaults.buttonColors(
+                                backgroundColor = VideoTheme.colors.primaryAccent,
+                                contentColor = VideoTheme.colors.primaryAccent
+                            ),
+                            onClick = {
+                                lifecycleScope.launch {
+                                    if (backstage) call.goLive() else call.stopLive()
+                                }
+                            }
+                        ) {
+                            Text(
+                                text = if (backstage) "Go Live" else "Stop Broadcast",
+                                color = Color.White
+                            )
+                        }
                     }
+                ) {
+                    VideoRenderer(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(it)
+                            .clip(RoundedCornerShape(6.dp)),
+                        call = call,
+                        video = video,
+                        videoFallbackContent = {
+                            Text(text = "Video rendering failed")
+                        }
+                    )
                 }
             }
         }
