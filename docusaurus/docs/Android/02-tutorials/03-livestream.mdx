@@ -79,10 +79,6 @@ class MainActivity : ComponentActivity() {
         // join a call, which type is `default`
         val call = client.call("livestream", callId)
         lifecycleScope.launch {
-
-            call.camera.enable()
-            call.microphone.enable()
-
             // join the call
             val result = call.join(create = true)
             result.onError {
@@ -145,10 +141,6 @@ In the next step we create and join the call. The call object is used for video 
 ```kotlin
 val call = client.call("livestream", callId)
 lifecycleScope.launch {
-
-    call.camera.enable()
-    call.microphone.enable()
-
     // join the call
     val result = call.join(create = true)
     result.onError {
