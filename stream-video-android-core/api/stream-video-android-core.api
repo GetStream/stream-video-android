@@ -229,6 +229,7 @@ public final class io/getstream/video/android/core/ClientState {
 	public final fun getUser ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun handleEvent (Lorg/openapitools/client/models/VideoEvent;)V
 	public final fun removeActiveCall ()V
+	public final fun removeRingingCall ()V
 	public final fun setActiveCall (Lio/getstream/video/android/core/Call;)V
 }
 

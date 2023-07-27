@@ -387,6 +387,7 @@ public class Call(
     fun leave() {
         state._connection.value = RealtimeConnection.Disconnected
         client.state.removeActiveCall()
+        client.state.removeRingingCall()
         camera.disable()
         microphone.disable()
         cleanup()
