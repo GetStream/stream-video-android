@@ -18,15 +18,12 @@ package io.getstream.video.android.core
 
 import com.google.common.truth.Truth.assertThat
 import io.getstream.video.android.core.base.IntegrationTestBase
-import io.getstream.video.android.core.dispatchers.DispatcherProvider
 import io.getstream.video.android.core.events.DominantSpeakerChangedEvent
 import io.getstream.video.android.model.User
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.stateIn
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.advanceTimeBy
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
@@ -37,7 +34,6 @@ import org.openapitools.client.models.ScreensharingSettingsRequest
 import org.robolectric.RobolectricTestRunner
 import org.threeten.bp.Clock
 import org.threeten.bp.OffsetDateTime
-import kotlin.test.Ignore
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
@@ -179,10 +175,11 @@ class CallStateTest : IntegrationTestBase() {
     }
 
     @Test
-    @Ignore("advanceTimeBy doesn't work here?")
     fun `Setting the speaking while muted flag will reset itself after delay`() = runTest {
         // we can make multiple calls, this should have no impact on the reset logic or duration
         val speakingWhileMuted = call.state.speakingWhileMuted
+        call.state.markSpeakingAsMuted()
+        call.state.markSpeakingAsMuted()
         call.state.markSpeakingAsMuted()
 
         assertTrue(call.state.speakingWhileMuted.first())
