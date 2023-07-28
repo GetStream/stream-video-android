@@ -53,6 +53,7 @@ import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import okhttp3.internal.toImmutableList
@@ -187,7 +188,8 @@ public class CallState(
     }
 
     /** participants who are currently speaking */
-    private val _activeSpeakers: MutableStateFlow<List<ParticipantState>> = MutableStateFlow(emptyList())
+    private val _activeSpeakers: MutableStateFlow<List<ParticipantState>> =
+        MutableStateFlow(emptyList())
     public val activeSpeakers: StateFlow<List<ParticipantState>> = _activeSpeakers
 
     /** participants other than yourself */
@@ -276,7 +278,8 @@ public class CallState(
      *
      * Debounced 100ms to avoid rapid changes
      */
-    val sortedParticipants = sortedParticipantsFlow.debounce(100).stateIn(scope, SharingStarted.WhileSubscribed(10000L), emptyList())
+    val sortedParticipants = sortedParticipantsFlow.debounce(100)
+        .stateIn(scope, SharingStarted.WhileSubscribed(10000L), emptyList())
 
     /** Members contains the list of users who are permanently associated with this call. This includes users who are currently not active in the call
      * As an example if you invite "john", "bob" and "jane" to a call and only Jane joins.
@@ -313,7 +316,7 @@ public class CallState(
     public val settings: StateFlow<CallSettingsResponse?> = _settings
 
     private val _durationInMs = flow {
-        while (true) {
+        while (scope.isActive) {
             delay(1000)
             val started = _session.value?.startedAt
             val ended = _session.value?.endedAt ?: OffsetDateTime.now()
@@ -325,7 +328,8 @@ public class CallState(
     }
 
     /** how many MS the call has been running, null if the call didn't start yet */
-    public val durationInMs: StateFlow<Long?> = _durationInMs.stateIn(scope, SharingStarted.WhileSubscribed(10000L), null)
+    public val durationInMs: StateFlow<Long?> =
+        _durationInMs.stateIn(scope, SharingStarted.WhileSubscribed(10000L), null)
 
     /** Check if you have permissions to do things like share your audio, video, screen etc */
     public fun hasPermission(permission: String): StateFlow<Boolean> {
@@ -354,6 +358,7 @@ public class CallState(
 
     /** if we are in backstage mode or not */
     val backstage: StateFlow<Boolean> = _backstage
+
     /** the opposite of backstage, if we are live or not */
     val live: StateFlow<Boolean> = _backstage.mapState { !it }
 
@@ -409,7 +414,8 @@ public class CallState(
         val apiKey = runBlocking { call.clientImpl.dataStore.apiKey.firstOrNull() }
         val streamKey = "$apiKey/$token"
         // TODO: use the address when the server is updated
-        val overwriteUrl = "rtmps://video-ingress-frankfurt-vi1.stream-io-video.com:443/${call.type}/${call.id}"
+        val overwriteUrl =
+            "rtmps://video-ingress-frankfurt-vi1.stream-io-video.com:443/${call.type}/${call.id}"
         Ingress(rtmp = RTMP(address = overwriteUrl ?: "", streamKey = streamKey))
     }
 
@@ -707,7 +713,12 @@ public class CallState(
             is CallSessionParticipantJoinedEvent -> {
                 _session.value?.let { callSessionResponse ->
                     val newList = callSessionResponse.participants.toMutableList()
-                    val participant = CallParticipantResponse(user = event.participant.user, joinedAt = event.createdAt, role = "user", userSessionId = event.participant.userSessionId)
+                    val participant = CallParticipantResponse(
+                        user = event.participant.user,
+                        joinedAt = event.createdAt,
+                        role = "user",
+                        userSessionId = event.participant.userSessionId
+                    )
                     val index = newList.indexOfFirst { user.id == event.participant.user.id }
                     if (index == -1) {
                         newList.add(participant)
@@ -725,7 +736,8 @@ public class CallState(
 
     private fun updateRingingState() {
         // this is only true when we are in the session (we have accepted/joined the call)
-        val userIsParticipant = _session.value?.participants?.find { it.user.id == client.userId } != null
+        val userIsParticipant =
+            _session.value?.participants?.find { it.user.id == client.userId } != null
         val outgoingMembersCount = _members.value.filter { it.value.user.id != client.userId }.size
         val rejectedBy = _rejectedBy.value
         val acceptedBy = _acceptedBy.value

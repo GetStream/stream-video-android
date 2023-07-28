@@ -17,13 +17,9 @@
 package io.getstream.video.android.core
 
 import com.google.common.truth.Truth.assertThat
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.test.runTest
 import org.junit.Ignore
 import org.junit.Test
-import org.threeten.bp.OffsetDateTime
-import org.threeten.bp.temporal.ChronoUnit
 
 class LivestreamTest : IntegrationTestBase() {
     /**
@@ -100,49 +96,15 @@ class LivestreamTest : IntegrationTestBase() {
     }
 
     @Test
-    @Ignore
     fun timeRunning() = runTest {
-        val call = client.call("livestream", randomUUID())
+        println("starting")
+        val call = client.call("livestream")
         assertSuccess(call.create())
         val goLiveResponse = call.goLive()
         assertSuccess(goLiveResponse)
 
-        // call running time
-//        goLiveResponse.onSuccess {
-//            assertThat(it.call.session).isNotNull()
-//        }
-
-        val start = call.state.session.value?.startedAt ?: OffsetDateTime.now()
-        assertThat(start).isNotNull()
-
-        val test = flow {
-            emit(1)
-            emit(2)
-        }
-
-        val timeSince = flow<Long?> {
-            while (true) {
-                delay(1000)
-                val now = OffsetDateTime.now()
-                if (start == null) {
-                    emit(null)
-                } else {
-                    val difference = ChronoUnit.SECONDS.between(start?.toInstant(), now.toInstant())
-                    emit(difference)
-                }
-                if (call.state.session.value?.endedAt != null) {
-                    break
-                }
-            }
-        }
-
-        println("a")
-        timeSince.collect {
-            println("its $it")
-        }
-
-        println("b")
-
-        Thread.sleep(20000)
+        val duration = call.state.durationInMs.value
+        println("duration: $duration")
+        call.leave()
     }
 }
