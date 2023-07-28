@@ -69,8 +69,8 @@ class RingTest : IntegrationTestBase() {
         val call = client.call("default", randomUUID())
         call.create(memberIds = listOf("tommaso", "thierry"), ring = true)
 
-        // We are in outgoing state
-        assertThat(call.state.ringingState.value).isInstanceOf(RingingState.Outgoing::class.java)
+        // We are in idle state
+        assertThat(call.state.ringingState.value).isInstanceOf(RingingState.Idle::class.java)
 
         // We wait until cancel time passes
         val cancelTime = call.state.settings.value?.ring?.autoCancelTimeoutMs?.toLong() ?: 0

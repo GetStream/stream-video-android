@@ -605,6 +605,7 @@ public class CallState(
             is JoinCallResponseEvent -> {
                 // time to update call state based on the join response
                 updateFromJoinResponse(event)
+                updateRingingState()
             }
 
             is ParticipantJoinedEvent -> {
@@ -713,6 +714,7 @@ public class CallState(
         val members = _members.value
         val acceptedByMe = _acceptedBy.value.findLast { it == client.userId }
         val hasActiveCall = client.state.activeCall.value != null
+        val hasRingingCall = client.state.ringingCall.value != null
 
         // no members - call is empty, we can join
         val state: RingingState = if (hasActiveCall) {
@@ -720,7 +722,7 @@ public class CallState(
         } else if (rejectedBy.isNotEmpty() && acceptedBy.isEmpty() && rejectedBy.size >= outgoingMembersCount) {
             // Call was rejected. Listener should leave the call with call.leave()
             RingingState.RejectedByAll
-        } else if (createdBy?.id != client.userId) {
+        } else if (hasRingingCall && createdBy?.id != client.userId) {
             // Member list is not empty, it's not rejected - it's an incoming call
             // If it's already accepted by me then we are in an Active call
             if (userIsParticipant) {
@@ -728,7 +730,7 @@ public class CallState(
             } else {
                 RingingState.Incoming(acceptedByMe = acceptedByMe != null)
             }
-        } else if (createdBy.id == client.userId) {
+        } else if (hasRingingCall && createdBy?.id == client.userId) {
             // The call is created by us
             if (acceptedBy.isEmpty()) {
                 // no one accepted the call
@@ -748,7 +750,7 @@ public class CallState(
             logger.d { "Updating ringing state ${_ringingState.value} -> $state" }
 
             // handle the auto-cancel for outgoing ringing calls
-            if (state is RingingState.Outgoing) {
+            if (state is RingingState.Outgoing && !state.acceptedByCallee) {
                 startRingingTimer()
             } else {
                 ringingTimerJob?.cancel()

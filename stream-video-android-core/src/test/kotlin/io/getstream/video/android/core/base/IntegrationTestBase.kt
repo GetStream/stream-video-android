@@ -93,7 +93,6 @@ open class IntegrationTestBase(val connectCoordinatorWS: Boolean = true) : TestB
             testData.tokens["thierry"]!!,
             loggingLevel = LoggingLevel(Priority.DEBUG, HttpLoggingLevel.BASIC)
         )
-        // builder.scope = TestScope(dispatcherRule.testDispatcher)
 //        if (BuildConfig.CORE_TEST_LOCAL == "1") {
 //            builder.videoDomain = "localhost"
 //        }
