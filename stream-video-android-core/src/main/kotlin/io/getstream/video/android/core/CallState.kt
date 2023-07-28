@@ -25,6 +25,7 @@ import io.getstream.video.android.core.events.DominantSpeakerChangedEvent
 import io.getstream.video.android.core.events.ErrorEvent
 import io.getstream.video.android.core.events.ICETrickleEvent
 import io.getstream.video.android.core.events.JoinCallResponseEvent
+import io.getstream.video.android.core.events.ParticipantCount
 import io.getstream.video.android.core.events.ParticipantJoinedEvent
 import io.getstream.video.android.core.events.ParticipantLeftEvent
 import io.getstream.video.android.core.events.SFUHealthCheckEvent
@@ -49,8 +50,8 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.channelFlow
 import kotlinx.coroutines.flow.debounce
-import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.firstOrNull
+import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
@@ -98,9 +99,10 @@ import org.openapitools.client.models.UpdateCallResponse
 import org.openapitools.client.models.UpdatedCallPermissionsEvent
 import org.openapitools.client.models.VideoEvent
 import org.threeten.bp.Clock
+import org.threeten.bp.Instant
 import org.threeten.bp.OffsetDateTime
+import org.threeten.bp.ZoneOffset
 import stream.video.sfu.models.Participant
-import stream.video.sfu.models.ParticipantCount
 import stream.video.sfu.models.TrackType
 import java.util.SortedMap
 import java.util.UUID
@@ -172,6 +174,9 @@ public class CallState(
     /** Participants returns a list of participant state object. @see [ParticipantState] */
     public val participants: StateFlow<List<ParticipantState>> =
         _participants.mapState { it.values.toList() }
+
+    private val _startedAt: MutableStateFlow<OffsetDateTime?> = MutableStateFlow(null)
+    public val startedAt: StateFlow<OffsetDateTime?> = _startedAt
 
     private val _participantCounts: MutableStateFlow<ParticipantCount?> = MutableStateFlow(null)
     val participantCounts: StateFlow<ParticipantCount?> = _participantCounts
@@ -609,8 +614,8 @@ public class CallState(
                 _errors.value = errors.value + event
             }
 
-            SFUHealthCheckEvent -> {
-                // we don't do anything with this
+            is SFUHealthCheckEvent -> {
+                call.state._participantCounts.value = event.participantCount
             }
 
             is ICETrickleEvent -> {
@@ -766,9 +771,10 @@ public class CallState(
 
     private fun updateFromJoinResponse(event: JoinCallResponseEvent) {
         // update the participant count
-        val count = event.callState.participant_count
-        _participantCounts.value = count
+        _participantCounts.value = event.participantCount
 
+        val instant = Instant.ofEpochSecond(event.callState.started_at?.epochSecond!!, 0)
+        _startedAt.value = OffsetDateTime.ofInstant(instant, ZoneOffset.UTC)
         // creates the participants
         val participantStates = event.callState.participants.map {
             getOrCreateParticipant(it)

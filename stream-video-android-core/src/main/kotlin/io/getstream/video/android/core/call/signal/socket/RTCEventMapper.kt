@@ -25,6 +25,7 @@ import io.getstream.video.android.core.events.DominantSpeakerChangedEvent
 import io.getstream.video.android.core.events.ErrorEvent
 import io.getstream.video.android.core.events.ICETrickleEvent
 import io.getstream.video.android.core.events.JoinCallResponseEvent
+import io.getstream.video.android.core.events.ParticipantCount
 import io.getstream.video.android.core.events.ParticipantJoinedEvent
 import io.getstream.video.android.core.events.ParticipantLeftEvent
 import io.getstream.video.android.core.events.PublisherAnswerEvent
@@ -89,9 +90,19 @@ public object RTCEventMapper {
                 event.dominant_speaker_changed.session_id
             )
 
-            event.health_check_response != null -> SFUHealthCheckEvent
-            event.join_response != null -> with(event.join_response) {
-                JoinCallResponseEvent(call_state!!)
+            event.health_check_response != null -> SFUHealthCheckEvent(
+                ParticipantCount(
+                    event.health_check_response.participant_count?.total ?: 0,
+                    event.health_check_response.participant_count?.anonymous ?: 0
+                )
+            )
+
+            event.join_response != null -> {
+                val counts = ParticipantCount(
+                    event.join_response.call_state?.participant_count?.total ?: 0,
+                    event.join_response.call_state?.participant_count?.anonymous ?: 0
+                )
+                JoinCallResponseEvent(event.join_response.call_state!!, counts)
             }
 
             event.ice_trickle != null -> with(event.ice_trickle) {
