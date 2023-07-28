@@ -21,8 +21,6 @@ import io.getstream.video.android.core.RingingState
 import io.getstream.video.android.core.base.IntegrationTestBase
 import io.getstream.video.android.core.base.toResponse
 import io.getstream.video.android.core.utils.toResponse
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.advanceTimeBy
 import kotlinx.coroutines.test.runTest
 import org.junit.Ignore
@@ -69,20 +67,18 @@ class RingTest : IntegrationTestBase() {
         client.state._ringingCall.value = null
 
         val call = client.call("default", randomUUID())
-        call.create(ring = true)
+        call.create(memberIds = listOf("tommaso", "thierry"), ring = true)
 
         // We are in outgoing state
         assertThat(call.state.ringingState.value).isInstanceOf(RingingState.Outgoing::class.java)
 
         // We wait until cancel time passes
         val cancelTime = call.state.settings.value?.ring?.autoCancelTimeoutMs?.toLong() ?: 0
-        advanceTimeBy(cancelTime + 50)
+        advanceTimeBy(cancelTime + 500)
 
         // This is needed because we need to wait for call.reject() internally to finish
         // Is there a way we could wait for the suspend function?
-        runBlocking {
-            delay(500)
-        }
+        waitForNextEvent<CallRejectedEvent>()
 
         // We verify that the call doesn't ring anymore and the state is back to Idle
         assertThat(client.state.ringingCall.value).isNull()

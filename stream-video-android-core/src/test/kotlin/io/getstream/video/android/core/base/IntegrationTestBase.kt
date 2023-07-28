@@ -29,7 +29,9 @@ import io.getstream.video.android.core.logging.LoggingLevel
 import io.mockk.MockKAnnotations
 import io.mockk.mockk
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.withContext
 import kotlinx.coroutines.withTimeout
 import org.junit.Before
 import org.openapitools.client.models.AudioSettings
@@ -165,24 +167,28 @@ open class IntegrationTestBase(val connectCoordinatorWS: Boolean = true) : TestB
      * TODO: add a timeout
      */
     suspend inline fun <reified T : VideoEvent> waitForNextEvent(): T =
-        withTimeout(10000) {
-            suspendCoroutine { continuation ->
-                var finished = false
+        // This is needed because some of our unit tests are doing real API calls and we need
+        // to wait the real time, not just the virtual dispatcher time.
+        withContext(Dispatchers.Default.limitedParallelism(1)) {
+            withTimeout(10000) {
+                suspendCoroutine { continuation ->
+                    var finished = false
 
-                // check historical events
-                val matchingEvents = events.filterIsInstance<T>()
-                if (matchingEvents.isNotEmpty()) {
-                    continuation.resume(matchingEvents[0])
-                    finished = true
-                }
+                    // check historical events
+                    val matchingEvents = events.filterIsInstance<T>()
+                    if (matchingEvents.isNotEmpty()) {
+                        continuation.resume(matchingEvents[0])
+                        finished = true
+                    }
 
-                client.subscribe {
+                    client.subscribe {
 
-                    if (!finished) {
-                        // listen to the latest events
-                        if (it is T) {
-                            continuation.resume(it)
-                            finished = true
+                        if (!finished) {
+                            // listen to the latest events
+                            if (it is T) {
+                                continuation.resume(it)
+                                finished = true
+                            }
                         }
                     }
                 }
