@@ -39,10 +39,9 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        val userId = "Bastila_Shan"
-        val userToken =
-            "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoiQmFzdGlsYV9TaGFuIiwiaXNzIjoicHJvbnRvIiwic3ViIjoidXNlci9CYXN0aWxhX1NoYW4iLCJpYXQiOjE2ODY4MDExMjMsImV4cCI6MTY4NzQwNTkyOH0.ON-9v7waSQTvFwi8isblwYhM48VH7SznoZIBhlzf-f4"
-        val callId = "1egoN4tKm4w2"
+        val userToken = "REPLACE_WITH_TOKEN"
+        val userId = "REPLACE_WITH_USER_ID"
+        val callId = "REPLACE_WITH_CALL_ID"
 
         // step1 - create a user.
         val user = User(
