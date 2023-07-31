@@ -327,17 +327,17 @@ public class CallState(
             val started = _session.value?.startedAt
             val ended = _session.value?.endedAt ?: OffsetDateTime.now()
             val difference = if (started == null) null else {
-                ended.toInstant().toEpochMilli() - started.toInstant()?.toEpochMilli()!!
+                ended.toInstant().toEpochMilli() - started.toInstant().toEpochMilli()
             }
             emit(difference)
         }
     }
 
-    /** how many MS the call has been running, null if the call didn't start yet */
+    /** how long the call has been running, null if the call didn't start yet */
     public val duration: StateFlow<kotlin.time.Duration?> =
         _durationInMs.transform { emit((it ?: 0L).toDuration(DurationUnit.MILLISECONDS)) }.stateIn(scope, SharingStarted.WhileSubscribed(10000L), null)
 
-    /** how many MS the call has been running, null if the call didn't start yet */
+    /** how many milliseconds the call has been running, null if the call didn't start yet */
     public val durationInMs: StateFlow<Long?> =
         _durationInMs.stateIn(scope, SharingStarted.WhileSubscribed(10000L), null)
 
@@ -372,7 +372,7 @@ public class CallState(
     /** the opposite of backstage, if we are live or not */
     val live: StateFlow<Boolean> = _backstage.mapState { !it }
 
-    /** how many MS the call has been running, null if the call didn't start yet */
+    /** how many milliseconds the call has been running, null if the call didn't start yet */
     public val liveDurationInMs: StateFlow<Long?> =
         _durationInMs
             .map {
