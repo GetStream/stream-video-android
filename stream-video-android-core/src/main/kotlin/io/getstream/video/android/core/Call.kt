@@ -390,6 +390,7 @@ public class Call(
         state._connection.value = RealtimeConnection.Disconnected
         client.state.removeActiveCall()
         client.state.removeRingingCall()
+        (client as StreamVideoImpl).onCallCleanUp(this)
         camera.disable()
         microphone.disable()
         cleanup()
