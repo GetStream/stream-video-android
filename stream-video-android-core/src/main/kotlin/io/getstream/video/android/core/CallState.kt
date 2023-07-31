@@ -439,6 +439,7 @@ public class CallState(
 
     private var speakingWhileMutedResetJob: Job? = null
     private var autoJoiningCall: Job? = null
+    private var ringingTimerJob: Job? = null
 
     fun handleEvent(event: VideoEvent) {
         logger.d { "Updating call state with event ${event::class.java}" }
@@ -744,9 +745,10 @@ public class CallState(
         val createdBy = _createdBy.value
         val members = _members.value
         val acceptedByMe = _acceptedBy.value.findLast { it == client.userId }
+        val hasActiveCall = client.state.activeCall.value != null
 
         // no members - call is empty, we can join
-        val state: RingingState = if (members.isEmpty()) {
+        val state: RingingState = if (hasActiveCall) {
             RingingState.Active
         } else if (rejectedBy.isNotEmpty() && acceptedBy.isEmpty() && rejectedBy.size >= outgoingMembersCount) {
             // Call was rejected. Listener should leave the call with call.leave()
@@ -777,6 +779,16 @@ public class CallState(
 
         if (_ringingState.value != state) {
             logger.d { "Updating ringing state ${_ringingState.value} -> $state" }
+
+            // handle the auto-cancel for outgoing ringing calls
+            if (state is RingingState.Outgoing) {
+                startRingingTimer()
+            } else {
+                ringingTimerJob?.cancel()
+                ringingTimerJob = null
+            }
+
+            // stop the call ringing timer if it's running
         }
         _ringingState.value = state
     }
@@ -800,6 +812,26 @@ public class CallState(
         speakingWhileMutedResetJob = scope.launch {
             delay(2000)
             _speakingWhileMuted.value = false
+        }
+    }
+
+    private fun startRingingTimer() {
+        ringingTimerJob?.cancel()
+        ringingTimerJob = scope.launch {
+
+            val autoCancelTimeout = settings.value?.ring?.autoCancelTimeoutMs
+
+            if (autoCancelTimeout != null && autoCancelTimeout > 0) {
+                delay(autoCancelTimeout.toLong())
+
+                // double check that we are still in Outgoing call state and call is not active
+                if (_ringingState.value is RingingState.Outgoing && client.state.activeCall.value == null) {
+                    call.reject()
+                    call.leave()
+                }
+            } else {
+                logger.w { "[startRingingTimer] No autoCancelTimeoutMs set - call ring with no timeout" }
+            }
         }
     }
 
