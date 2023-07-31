@@ -19,9 +19,14 @@ package io.getstream.video.android.tutorial.livestream.ui
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.Icon
 import androidx.compose.material.Text
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Person
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
@@ -43,13 +48,25 @@ fun LiveLabel(
             color = Color.White
         )
 
-        Text(
-            modifier = Modifier
-                .background(Color(0xFF1C1E22))
-                .padding(vertical = 3.dp, horizontal = 12.dp),
-            text = liveCount.toString(),
-            color = Color.White
-        )
+        Row(
+            modifier = Modifier.background(Color(0xFF1C1E22)),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Icon(
+                modifier = Modifier
+                    .padding(horizontal = 6.dp)
+                    .size(22.dp),
+                imageVector = Icons.Default.Person,
+                tint = Color.White,
+                contentDescription = null
+            )
+
+            Text(
+                modifier = Modifier.padding(end = 12.dp, top = 3.dp, bottom = 3.dp),
+                text = liveCount.toString(),
+                color = Color.White
+            )
+        }
     }
 }
 

@@ -125,7 +125,11 @@ class MainActivity : ComponentActivity() {
                         }
                     },
                     bottomBar = {
-                        LiveButton(modifier = Modifier.padding(9.dp), isBackstage = backstage) {
+                        LiveButton(
+                            modifier = Modifier.padding(9.dp),
+                            call = call,
+                            isBackstage = backstage
+                        ) {
                             lifecycleScope.launch {
                                 if (backstage) call.goLive() else call.stopLive()
                             }

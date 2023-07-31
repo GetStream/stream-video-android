@@ -16,7 +16,12 @@
 
 package io.getstream.video.android.tutorial.livestream.ui
 
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Button
 import androidx.compose.material.ButtonDefaults
 import androidx.compose.material.Icon
@@ -25,56 +30,87 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import io.getstream.video.android.compose.theme.VideoTheme
+import io.getstream.video.android.compose.ui.components.call.controls.actions.ToggleCameraAction
+import io.getstream.video.android.compose.ui.components.call.controls.actions.ToggleMicrophoneAction
+import io.getstream.video.android.core.Call
 
 @Composable
 fun LiveButton(
     modifier: Modifier,
+    call: Call,
     isBackstage: Boolean,
     onClick: () -> Unit
 ) {
-    Button(
-        modifier = modifier,
-        colors = ButtonDefaults.buttonColors(
-            backgroundColor = Color(0xFF1C1E22),
-            contentColor = Color(0xFF1C1E22)
-        ),
-        onClick = onClick
-    ) {
-        Icon(
-            modifier = Modifier.padding(vertical = 3.dp, horizontal = 6.dp),
-            imageVector = if (isBackstage) {
-                Icons.Default.PlayArrow
+    Box(modifier = Modifier.fillMaxWidth()) {
+        Button(
+            modifier = modifier,
+            colors = if (isBackstage) {
+                ButtonDefaults.buttonColors(
+                    backgroundColor = VideoTheme.colors.primaryAccent,
+                    contentColor = VideoTheme.colors.primaryAccent
+                )
             } else {
-                Icons.Default.Close
+                ButtonDefaults.buttonColors(
+                    backgroundColor = VideoTheme.colors.errorAccent,
+                    contentColor = VideoTheme.colors.errorAccent
+                )
             },
-            tint = Color.White,
-            contentDescription = null
-        )
+            onClick = onClick
+        ) {
+            Icon(
+                modifier = Modifier.padding(vertical = 3.dp, horizontal = 6.dp),
+                imageVector = if (isBackstage) {
+                    Icons.Default.PlayArrow
+                } else {
+                    Icons.Default.Close
+                },
+                tint = Color.White,
+                contentDescription = null
+            )
 
-        Text(
-            modifier = Modifier.padding(end = 6.dp),
-            text = if (isBackstage) "Go Live" else "Stop Broadcast",
-            fontWeight = FontWeight.Bold,
-            fontSize = 16.sp,
-            color = Color.White
-        )
-    }
-}
+            Text(
+                modifier = Modifier.padding(end = 6.dp),
+                text = if (isBackstage) "Go Live" else "Stop Broadcast",
+                fontWeight = FontWeight.Bold,
+                fontSize = 16.sp,
+                color = Color.White
+            )
+        }
 
-@Preview
-@Composable
-private fun LiveButtonPreview() {
-    VideoTheme {
-        LiveButton(
-            modifier = Modifier,
-            isBackstage = true,
-        ) {}
+        val isCameraEnabled by call.camera.isEnabled.collectAsState()
+        val isMicrophoneEnabled by call.microphone.isEnabled.collectAsState()
+
+        Row(modifier = Modifier.align(Alignment.CenterEnd)) {
+            ToggleCameraAction(
+                modifier = Modifier.size(45.dp),
+                isCameraEnabled = isCameraEnabled,
+                enabledColor = VideoTheme.colors.callActionIconEnabledBackground,
+                disabledColor = VideoTheme.colors.callActionIconEnabledBackground,
+                disabledIconTint = VideoTheme.colors.errorAccent,
+                shape = RoundedCornerShape(8.dp),
+                onCallAction = { callAction -> call.camera.setEnabled(callAction.isEnabled) }
+            )
+
+            ToggleMicrophoneAction(
+                modifier = Modifier
+                    .padding(horizontal = 12.dp)
+                    .size(45.dp),
+                isMicrophoneEnabled = isMicrophoneEnabled,
+                enabledColor = VideoTheme.colors.callActionIconEnabledBackground,
+                disabledColor = VideoTheme.colors.callActionIconEnabledBackground,
+                disabledIconTint = VideoTheme.colors.errorAccent,
+                shape = RoundedCornerShape(8.dp),
+                onCallAction = { callAction -> call.microphone.setEnabled(callAction.isEnabled) }
+            )
+        }
     }
 }
