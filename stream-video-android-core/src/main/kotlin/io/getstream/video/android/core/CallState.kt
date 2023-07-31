@@ -52,6 +52,7 @@ import kotlinx.coroutines.flow.channelFlow
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
@@ -361,6 +362,18 @@ public class CallState(
 
     /** the opposite of backstage, if we are live or not */
     val live: StateFlow<Boolean> = _backstage.mapState { !it }
+
+    /** how many MS the call has been running, null if the call didn't start yet */
+    public val liveDurationInMs: StateFlow<Long?> =
+        _durationInMs
+            .map {
+                if (live.value) {
+                    it
+                } else {
+                    null
+                }
+            }
+            .stateIn(scope, SharingStarted.WhileSubscribed(10000L), null)
 
     private val _egress: MutableStateFlow<EgressResponse?> = MutableStateFlow(null)
     val egress: StateFlow<EgressResponse?> = _egress

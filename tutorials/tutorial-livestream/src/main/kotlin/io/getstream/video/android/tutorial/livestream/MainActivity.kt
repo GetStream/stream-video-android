@@ -94,7 +94,7 @@ class MainActivity : ComponentActivity() {
                 val backstage by call.state.backstage.collectAsState()
                 val me by call.state.me.collectAsState()
                 val video = me?.video?.collectAsState()?.value
-                val session by call.state.session.collectAsState()
+                val sessionTime by call.state.liveDurationInMs.collectAsState()
 
                 Scaffold(
                     modifier = Modifier
@@ -119,7 +119,7 @@ class MainActivity : ComponentActivity() {
 
                                 TimeLabel(
                                     modifier = Modifier.align(Alignment.Center),
-                                    sessionTime = 10000
+                                    sessionTime = sessionTime ?: 0
                                 )
                             }
                         }
