@@ -85,14 +85,14 @@ class LivestreamTest : IntegrationTestBase() {
             println("hi123 event: $it")
         }
         call.join(create = true)
+        print("debugging: call cid is:  " + call.cid)
         Thread.sleep(1000L)
 
-        // counts
-        val session = call.state.session.value
-        assertThat(session?.participants).isNotEmpty()
-        assertThat(session?.startedAt).isNotNull()
-
-        assertThat(session?.participantsCountByRole).isNotEmpty()
+        // counts and startedAt
+        assertThat(call.state.participants.value).isNotEmpty()
+        assertThat(call.state.startedAt).isNotNull()
+        assertThat(call.state.participantCounts.value?.total).isEqualTo(1)
+        assertThat(call.state.participantCounts.value?.anonymous).isEqualTo(0)
     }
 
     @Test

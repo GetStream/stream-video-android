@@ -104,16 +104,16 @@ Video roadmap and changelog is available [here](https://github.com/GetStream/pro
 
 - [ ] Complete integration with the video demo flow
 - [ ] Finish usability testing with design team on chat integration (Jaewoong)
-- [ ] Ringing: Finish it, make testing easy and write docs for common changes (Daniel)
-- [ ] Enable ice restarts for publisher and subscriber
-- [ ] Livestream tutorial (depends on RTMP support) (Thierry)
+- [X] Ringing: Finish it, make testing easy and write docs for common changes (Daniel)
 - [ ] Bug: Screensharing on Firefox has some issues when rendering on android (Daniel)
-- [ ] Call Analytics stateflow (Thierry)
-- [ ] Pagination on query members & query channel endpoints (Daniel)
-- [ ] Test coverage
-- [ ] Testing on more devices
+- [ ] Pagination on query members & query call endpoints (Daniel)
 - [ ] local version of audioLevel(s) for lower latency audio visualizations(Daniel)
 - [ ] Android SDK development.md cleanup (Daniel)
+- [ ] Livestream tutorial (depends on RTMP support) (Thierry)
+- [ ] Call Analytics stateflow (Thierry)
+- [ ] Enable ice restarts for publisher and subscriber
+- [ ] Test coverage
+- [ ] Testing on more devices
 - [ ] Logging is too verbose (rtc is very noisy), clean it up to focus on the essential for info and higher
 
 ### 0.4.0 milestone

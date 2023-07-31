@@ -25,6 +25,7 @@ import io.getstream.video.android.core.events.DominantSpeakerChangedEvent
 import io.getstream.video.android.core.events.ErrorEvent
 import io.getstream.video.android.core.events.ICETrickleEvent
 import io.getstream.video.android.core.events.JoinCallResponseEvent
+import io.getstream.video.android.core.events.ParticipantCount
 import io.getstream.video.android.core.events.ParticipantJoinedEvent
 import io.getstream.video.android.core.events.ParticipantLeftEvent
 import io.getstream.video.android.core.events.SFUHealthCheckEvent
@@ -43,6 +44,7 @@ import io.getstream.video.android.model.User
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.channels.awaitClose
+import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -51,6 +53,7 @@ import kotlinx.coroutines.flow.channelFlow
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.transform
 import kotlinx.coroutines.isActive
@@ -101,12 +104,15 @@ import org.openapitools.client.models.UpdatedCallPermissionsEvent
 import org.openapitools.client.models.VideoEvent
 import org.threeten.bp.Clock
 import org.threeten.bp.Duration
+import org.threeten.bp.Instant
 import org.threeten.bp.OffsetDateTime
+import org.threeten.bp.ZoneOffset
 import stream.video.sfu.models.Participant
-import stream.video.sfu.models.ParticipantCount
 import stream.video.sfu.models.TrackType
 import java.util.SortedMap
 import java.util.UUID
+import kotlin.time.DurationUnit
+import kotlin.time.toDuration
 
 public sealed interface RealtimeConnection {
     /**
@@ -175,6 +181,9 @@ public class CallState(
     /** Participants returns a list of participant state object. @see [ParticipantState] */
     public val participants: StateFlow<List<ParticipantState>> =
         _participants.mapState { it.values.toList() }
+
+    private val _startedAt: MutableStateFlow<OffsetDateTime?> = MutableStateFlow(null)
+    public val startedAt: StateFlow<OffsetDateTime?> = _startedAt
 
     private val _participantCounts: MutableStateFlow<ParticipantCount?> = MutableStateFlow(null)
     val participantCounts: StateFlow<ParticipantCount?> = _participantCounts
@@ -313,7 +322,7 @@ public class CallState(
     public val settings: StateFlow<CallSettingsResponse?> = _settings
 
     private val _durationInMs = flow {
-        while (scope.isActive) {
+        while (currentCoroutineContext().isActive) {
             delay(1000)
             val started = _session.value?.startedAt
             val ended = _session.value?.endedAt ?: OffsetDateTime.now()
@@ -325,9 +334,8 @@ public class CallState(
     }
 
     /** how many MS the call has been running, null if the call didn't start yet */
-    public val duration: StateFlow<Duration?> =
-        _durationInMs.transform { emit(Duration(it ?: 0L, 0)) }.stateIn(scope, SharingStarted.WhileSubscribed(10000L), null)
-
+    public val duration: StateFlow<kotlin.time.Duration?> =
+        _durationInMs.transform { emit((it ?: 0L).toDuration(DurationUnit.MILLISECONDS)) }.stateIn(scope, SharingStarted.WhileSubscribed(10000L), null)
 
     /** how many MS the call has been running, null if the call didn't start yet */
     public val durationInMs: StateFlow<Long?> =
@@ -363,6 +371,18 @@ public class CallState(
 
     /** the opposite of backstage, if we are live or not */
     val live: StateFlow<Boolean> = _backstage.mapState { !it }
+
+    /** how many MS the call has been running, null if the call didn't start yet */
+    public val liveDurationInMs: StateFlow<Long?> =
+        _durationInMs
+            .map {
+                if (live.value) {
+                    it
+                } else {
+                    null
+                }
+            }
+            .stateIn(scope, SharingStarted.WhileSubscribed(10000L), null)
 
     private val _egress: MutableStateFlow<EgressResponse?> = MutableStateFlow(null)
     val egress: StateFlow<EgressResponse?> = _egress
@@ -441,6 +461,7 @@ public class CallState(
 
     private var speakingWhileMutedResetJob: Job? = null
     private var autoJoiningCall: Job? = null
+    private var ringingTimerJob: Job? = null
 
     fun handleEvent(event: VideoEvent) {
         logger.d { "Updating call state with event ${event::class.java}" }
@@ -622,8 +643,8 @@ public class CallState(
                 _errors.value = errors.value + event
             }
 
-            SFUHealthCheckEvent -> {
-                // we don't do anything with this
+            is SFUHealthCheckEvent -> {
+                call.state._participantCounts.value = event.participantCount
             }
 
             is ICETrickleEvent -> {
@@ -633,6 +654,7 @@ public class CallState(
             is JoinCallResponseEvent -> {
                 // time to update call state based on the join response
                 updateFromJoinResponse(event)
+                updateRingingState()
             }
 
             is ParticipantJoinedEvent -> {
@@ -746,14 +768,16 @@ public class CallState(
         val createdBy = _createdBy.value
         val members = _members.value
         val acceptedByMe = _acceptedBy.value.findLast { it == client.userId }
+        val hasActiveCall = client.state.activeCall.value != null
+        val hasRingingCall = client.state.ringingCall.value != null
 
         // no members - call is empty, we can join
-        val state: RingingState = if (members.isEmpty()) {
+        val state: RingingState = if (hasActiveCall) {
             RingingState.Active
         } else if (rejectedBy.isNotEmpty() && acceptedBy.isEmpty() && rejectedBy.size >= outgoingMembersCount) {
             // Call was rejected. Listener should leave the call with call.leave()
             RingingState.RejectedByAll
-        } else if (createdBy?.id != client.userId) {
+        } else if (hasRingingCall && createdBy?.id != client.userId) {
             // Member list is not empty, it's not rejected - it's an incoming call
             // If it's already accepted by me then we are in an Active call
             if (userIsParticipant) {
@@ -761,7 +785,7 @@ public class CallState(
             } else {
                 RingingState.Incoming(acceptedByMe = acceptedByMe != null)
             }
-        } else if (createdBy.id == client.userId) {
+        } else if (hasRingingCall && createdBy?.id == client.userId) {
             // The call is created by us
             if (acceptedBy.isEmpty()) {
                 // no one accepted the call
@@ -779,15 +803,26 @@ public class CallState(
 
         if (_ringingState.value != state) {
             logger.d { "Updating ringing state ${_ringingState.value} -> $state" }
+
+            // handle the auto-cancel for outgoing ringing calls
+            if (state is RingingState.Outgoing && !state.acceptedByCallee) {
+                startRingingTimer()
+            } else {
+                ringingTimerJob?.cancel()
+                ringingTimerJob = null
+            }
+
+            // stop the call ringing timer if it's running
         }
         _ringingState.value = state
     }
 
     private fun updateFromJoinResponse(event: JoinCallResponseEvent) {
         // update the participant count
-        val count = event.callState.participant_count
-        _participantCounts.value = count
+        _participantCounts.value = event.participantCount
 
+        val instant = Instant.ofEpochSecond(event.callState.started_at?.epochSecond!!, 0)
+        _startedAt.value = OffsetDateTime.ofInstant(instant, ZoneOffset.UTC)
         // creates the participants
         val participantStates = event.callState.participants.map {
             getOrCreateParticipant(it)
@@ -801,6 +836,26 @@ public class CallState(
         speakingWhileMutedResetJob = scope.launch {
             delay(2000)
             _speakingWhileMuted.value = false
+        }
+    }
+
+    private fun startRingingTimer() {
+        ringingTimerJob?.cancel()
+        ringingTimerJob = scope.launch {
+
+            val autoCancelTimeout = settings.value?.ring?.autoCancelTimeoutMs
+
+            if (autoCancelTimeout != null && autoCancelTimeout > 0) {
+                delay(autoCancelTimeout.toLong())
+
+                // double check that we are still in Outgoing call state and call is not active
+                if (_ringingState.value is RingingState.Outgoing && client.state.activeCall.value == null) {
+                    call.reject()
+                    call.leave()
+                }
+            } else {
+                logger.w { "[startRingingTimer] No autoCancelTimeoutMs set - call ring with no timeout" }
+            }
         }
     }
 

@@ -5,8 +5,6 @@ description: How to build a livestream experience using Stream's video SDKs
 
 import { TokenSnippet } from '../../../shared/_tokenSnippet.jsx';
 
-## Livestream Tutorial
-
 In this tutorial we'll quickly build a low-latency in-app livestreaming experience.
 The livestream is broadcasted using Stream's edge network of servers around the world.
 We'll cover the following topics:
@@ -65,7 +63,7 @@ class MainActivity : ComponentActivity() {
         // for a production app we recommend adding the client to your Application class or di module.
         val client = StreamVideoBuilder(
             context = applicationContext,
-            apiKey = "hd8szvscpxvd", // demo API key
+            apiKey = "mmhfdzb5evj2", // demo API key
             geo = GEO.GlobalEdgeNetwork,
             user = user,
             token = userToken,
@@ -122,7 +120,7 @@ Next we create the client:
 ```kotlin
 val client = StreamVideoBuilder(
     context = applicationContext,
-    apiKey = "hd8szvscpxvd", // demo API key
+    apiKey = "mmhfdzb5evj2", // demo API key
     geo = GEO.GlobalEdgeNetwork,
     user = user,
     token = userToken,
@@ -302,7 +300,7 @@ Compared to the current code in in `MainActivity.kt` you:
 * Don't render the local video, but instead render the remote video
 * Typically include some small UI elements like viewer count, a button to mute etc
 
-The [docs on building a UI for watching a livestream](../05-ui-cookbook/15-watching-livestream.mdx)) explain this in more detail.
+The [docs on building a UI for watching a livestream](../05-ui-cookbook/15-watching-livestream.mdx) explain this in more detail.
 
 ### Step 6 - (Optional) Viewing a livestream with HLS
 

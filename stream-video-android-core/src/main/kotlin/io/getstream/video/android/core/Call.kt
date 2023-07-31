@@ -62,7 +62,6 @@ import org.openapitools.client.models.UpdateCallResponse
 import org.openapitools.client.models.UpdateUserPermissionsResponse
 import org.openapitools.client.models.VideoEvent
 import org.threeten.bp.OffsetDateTime
-import org.webrtc.EglBase
 import org.webrtc.RendererCommon
 import org.webrtc.audio.JavaAudioDeviceModule.AudioSamples
 import stream.video.sfu.models.TrackType
@@ -121,17 +120,16 @@ public class Call(
     /** Session handles all real time communication for video and audio */
     internal var session: RtcSession? = null
     internal val mediaManager by lazy {
-        MediaManagerImpl(
-            clientImpl.context,
-            this,
-            scope,
-            eglBaseContextProvider.invoke()
-        )
-    }
-
-    /** For testing purposes - EglBase and EglBaseContext can't be mocked **/
-    internal var eglBaseContextProvider: () -> EglBase.Context = {
-        clientImpl.peerConnectionFactory.eglBase.eglBaseContext
+        if (testInstanceProvider.mediaManagerCreator != null) {
+            testInstanceProvider.mediaManagerCreator!!.invoke()
+        } else {
+            MediaManagerImpl(
+                clientImpl.context,
+                this,
+                scope,
+                clientImpl.peerConnectionFactory.eglBase.eglBaseContext
+            )
+        }
     }
 
     /** Basic crud operations */
@@ -286,14 +284,18 @@ public class Call(
         val iceServers = result.value.credentials.iceServers.map { it.toIceServer() }
         timer.split("join request completed")
 
-        session = RtcSession(
-            client = client,
-            call = this,
-            sfuUrl = sfuUrl,
-            sfuToken = sfuToken,
-            connectionModule = (client as StreamVideoImpl).connectionModule,
-            remoteIceServers = iceServers,
-        )
+        session = if (testInstanceProvider.rtcSessionCreator != null) {
+            testInstanceProvider.rtcSessionCreator!!.invoke()
+        } else {
+            RtcSession(
+                client = client,
+                call = this,
+                sfuUrl = sfuUrl,
+                sfuToken = sfuToken,
+                connectionModule = (client as StreamVideoImpl).connectionModule,
+                remoteIceServers = iceServers,
+            )
+        }
 
         session?.let {
             state._connection.value = RealtimeConnection.Joined(it)
@@ -387,6 +389,7 @@ public class Call(
     fun leave() {
         state._connection.value = RealtimeConnection.Disconnected
         client.state.removeActiveCall()
+        client.state.removeRingingCall()
         camera.disable()
         microphone.disable()
         cleanup()
@@ -459,7 +462,7 @@ public class Call(
 
         // Note this comes from peerConnectionFactory.eglBase
         videoRenderer.init(
-            eglBaseContextProvider.invoke(),
+            clientImpl.peerConnectionFactory.eglBase.eglBaseContext,
             object : RendererCommon.RendererEvents {
                 override fun onFirstFrameRendered() {
                     logger.d { "[initRenderer.onFirstFrameRendered] #sfu; sessionId: $sessionId" }
@@ -721,6 +724,16 @@ public class Call(
             call.scope.launch {
                 call.switchSfu(true)
             }
+        }
+    }
+
+    companion object {
+
+        internal var testInstanceProvider = TestInstanceProvider()
+
+        internal class TestInstanceProvider {
+            var mediaManagerCreator: (() -> MediaManagerImpl)? = null
+            var rtcSessionCreator: (() -> RtcSession)? = null
         }
     }
 }

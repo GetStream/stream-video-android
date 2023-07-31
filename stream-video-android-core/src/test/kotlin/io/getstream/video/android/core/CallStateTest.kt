@@ -16,14 +16,15 @@
 
 package io.getstream.video.android.core
 
-import app.cash.turbine.testIn
 import com.google.common.truth.Truth.assertThat
 import io.getstream.video.android.core.base.IntegrationTestBase
 import io.getstream.video.android.core.events.DominantSpeakerChangedEvent
 import io.getstream.video.android.model.User
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.test.advanceTimeBy
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -176,12 +177,15 @@ class CallStateTest : IntegrationTestBase() {
     @Test
     fun `Setting the speaking while muted flag will reset itself after delay`() = runTest {
         // we can make multiple calls, this should have no impact on the reset logic or duration
-        val speakingWhileMuted = call.state.speakingWhileMuted.testIn(backgroundScope)
+        val speakingWhileMuted = call.state.speakingWhileMuted
         call.state.markSpeakingAsMuted()
         call.state.markSpeakingAsMuted()
         call.state.markSpeakingAsMuted()
-        assertTrue(speakingWhileMuted.expectMostRecentItem())
+
+        assertTrue(call.state.speakingWhileMuted.first())
         // The flag should automatically reset to false 2 seconds
-        assertFalse(speakingWhileMuted.awaitItem())
+        advanceTimeBy(3000)
+
+        assertFalse(call.state.speakingWhileMuted.first())
     }
 }
