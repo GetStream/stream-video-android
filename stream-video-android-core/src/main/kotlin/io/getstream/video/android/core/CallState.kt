@@ -52,6 +52,7 @@ import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.transform
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
@@ -99,6 +100,7 @@ import org.openapitools.client.models.UpdateCallResponse
 import org.openapitools.client.models.UpdatedCallPermissionsEvent
 import org.openapitools.client.models.VideoEvent
 import org.threeten.bp.Clock
+import org.threeten.bp.Duration
 import org.threeten.bp.OffsetDateTime
 import stream.video.sfu.models.Participant
 import stream.video.sfu.models.ParticipantCount
@@ -321,6 +323,11 @@ public class CallState(
             emit(difference)
         }
     }
+
+    /** how many MS the call has been running, null if the call didn't start yet */
+    public val duration: StateFlow<Duration?> =
+        _durationInMs.transform { emit(Duration(it ?: 0L, 0)) }.stateIn(scope, SharingStarted.WhileSubscribed(10000L), null)
+
 
     /** how many MS the call has been running, null if the call didn't start yet */
     public val durationInMs: StateFlow<Long?> =
