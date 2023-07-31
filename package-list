@@ -43,9 +43,6 @@ io.getstream.video.android.core.mapper
 io.getstream.video.android.core.model
 io.getstream.video.android.core.notifications
 io.getstream.video.android.core.permission
-io.getstream.video.android.core.service
-io.getstream.video.android.core.service.notification
-io.getstream.video.android.core.service.vibro
 io.getstream.video.android.core.socket
 io.getstream.video.android.core.utils
 org.openapitools.client.apis
