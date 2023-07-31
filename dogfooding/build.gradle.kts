@@ -183,6 +183,9 @@ dependencies {
     // firebase
     implementation(libs.firebase.crashlytics)
 
+    // Play Install Referrer library - used to extract the meeting link from demo flow after install
+    implementation(libs.play.install.referrer)
+
     // memory detection
     debugImplementation(libs.leakCanary)
 }

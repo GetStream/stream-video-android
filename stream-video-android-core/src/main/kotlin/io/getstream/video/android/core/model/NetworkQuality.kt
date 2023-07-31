@@ -16,25 +16,31 @@
 
 package io.getstream.video.android.core.model
 
+import androidx.compose.runtime.Stable
 import stream.video.sfu.models.ConnectionQuality
 
 /**
  * Represents the network connection quality of a video call.
  */
+@Stable
 public sealed class NetworkQuality(public open val quality: Float) {
 
+    @Stable
     public data class UnSpecified(
         public override val quality: Float = 0f
     ) : NetworkQuality(quality)
 
+    @Stable
     public data class Poor(
         public override val quality: Float = 0.33f
     ) : NetworkQuality(quality)
 
+    @Stable
     public data class Good(
         public override val quality: Float = 0.66f
     ) : NetworkQuality(quality)
 
+    @Stable
     public data class Excellent(
         public override val quality: Float = 1.0f
     ) : NetworkQuality(quality)

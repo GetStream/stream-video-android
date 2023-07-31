@@ -28,10 +28,10 @@ import androidx.compose.ui.unit.dp
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.participants.internal.ParticipantAvatars
 import io.getstream.video.android.compose.ui.components.participants.internal.ParticipantInformation
-import io.getstream.video.android.core.ParticipantState
+import io.getstream.video.android.core.MemberState
 import io.getstream.video.android.core.model.CallStatus
 import io.getstream.video.android.mock.StreamMockUtils
-import io.getstream.video.android.mock.mockParticipantList
+import io.getstream.video.android.mock.mockMemberStateList
 
 /**
  * A details of an outgoing call that displays a list of participant information.
@@ -43,7 +43,7 @@ import io.getstream.video.android.mock.mockParticipantList
 public fun OutgoingCallDetails(
     modifier: Modifier = Modifier,
     isVideoType: Boolean = true,
-    participants: List<ParticipantState>
+    participants: List<MemberState>
 ) {
     Column(modifier = modifier.fillMaxWidth()) {
         if (!isVideoType) {
@@ -67,7 +67,7 @@ private fun OutgoingCallDetailsPreview() {
     VideoTheme {
         OutgoingCallDetails(
             isVideoType = false,
-            participants = mockParticipantList,
+            participants = mockMemberStateList,
         )
     }
 }

@@ -66,6 +66,7 @@ import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.retry
@@ -277,10 +278,12 @@ public class RtcSession internal constructor(
 
     init {
         val dataStore = StreamUserDataStore.instance()
-        val user = dataStore.user.value
-        val apiKey = dataStore.apiKey.value
-        if (apiKey.isBlank() || user?.id.isNullOrBlank()) {
-            throw IllegalArgumentException("The API key, user ID and token cannot be empty!")
+        coroutineScope.launch {
+            val user = dataStore.user.firstOrNull()
+            val apiKey = dataStore.apiKey.first()
+            if (apiKey.isBlank() || user?.id.isNullOrBlank()) {
+                throw IllegalArgumentException("The API key, user ID and token cannot be empty!")
+            }
         }
 
         // step 1 setup the peer connections

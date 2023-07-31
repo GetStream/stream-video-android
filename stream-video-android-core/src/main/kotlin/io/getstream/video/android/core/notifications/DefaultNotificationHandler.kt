@@ -202,8 +202,11 @@ public open class DefaultNotificationHandler(
         notificationId: Int,
         flags: Int = PENDING_INTENT_FLAG,
     ): PendingIntent {
+        val baseIntentAction =
+            requireNotNull(baseIntent.action) { logger.e { "Developer error. Intent action must be set" } }
         val dismissIntent = DismissNotificationActivity
-            .createIntent(application, notificationId)
+            .createIntent(application, notificationId, baseIntentAction)
+
         return PendingIntent.getActivities(
             application,
             0,

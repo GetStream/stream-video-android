@@ -16,18 +16,18 @@
 
 package io.getstream.video.android.core
 
+import androidx.compose.runtime.Stable
 import io.getstream.result.Result
 import io.getstream.video.android.core.model.AudioTrack
 import io.getstream.video.android.core.model.MediaTrack
 import io.getstream.video.android.core.model.NetworkQuality
 import io.getstream.video.android.core.model.Reaction
 import io.getstream.video.android.core.model.VideoTrack
-import io.getstream.video.android.core.utils.asStateFlow
+import io.getstream.video.android.core.utils.combineStates
 import io.getstream.video.android.core.utils.mapState
 import io.getstream.video.android.model.User
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.combine
 import org.openapitools.client.models.MuteUsersResponse
 import org.threeten.bp.Instant
 import org.threeten.bp.OffsetDateTime
@@ -127,30 +127,30 @@ public data class ParticipantState(
     internal val _reactions = MutableStateFlow<List<Reaction>>(emptyList())
     val reactions: StateFlow<List<Reaction>> = _reactions
 
-    val video: StateFlow<Video?> = combine(_videoTrack, _videoEnabled) { track, enabled ->
+    val video: StateFlow<Video?> = combineStates(_videoTrack, _videoEnabled) { track, enabled ->
         Video(
             sessionId = sessionId,
             track = track,
             enabled = enabled
         )
-    }.asStateFlow(null)
+    }
 
-    val audio: StateFlow<Audio?> = combine(_audioTrack, _audioEnabled) { track, enabled ->
+    val audio: StateFlow<Audio?> = combineStates(_audioTrack, _audioEnabled) { track, enabled ->
         Audio(
             sessionId = sessionId,
             track = track,
             enabled = enabled
         )
-    }.asStateFlow(null)
+    }
 
     val screenSharing: StateFlow<ScreenSharing?> =
-        combine(_screenSharingTrack, _screenSharingEnabled) { track, enabled ->
+        combineStates(_screenSharingTrack, _screenSharingEnabled) { track, enabled ->
             ScreenSharing(
                 sessionId = sessionId,
                 track = track,
                 enabled = enabled
             )
-        }.asStateFlow(null)
+        }
 
     suspend fun muteAudio(): Result<MuteUsersResponse> {
         // how do i mute another user?
@@ -220,6 +220,7 @@ public data class ParticipantState(
         _reactions.value = newReactions
     }
 
+    @Stable
     public sealed class Media(
         public open val sessionId: String,
         public open val track: MediaTrack?,
@@ -227,6 +228,7 @@ public data class ParticipantState(
         public val type: TrackType = TrackType.TRACK_TYPE_UNSPECIFIED,
     )
 
+    @Stable
     public data class Video(
         public override val sessionId: String,
         public override val track: VideoTrack?,
@@ -238,6 +240,7 @@ public data class ParticipantState(
         type = TrackType.TRACK_TYPE_VIDEO
     )
 
+    @Stable
     public data class Audio(
         public override val sessionId: String,
         public override val track: AudioTrack?,
@@ -249,6 +252,7 @@ public data class ParticipantState(
         type = TrackType.TRACK_TYPE_AUDIO
     )
 
+    @Stable
     public data class ScreenSharing(
         public override val sessionId: String,
         public override val track: VideoTrack?,

@@ -16,8 +16,10 @@
 
 package io.getstream.video.android.core.model
 
+import androidx.compose.runtime.Stable
 import org.webrtc.IceCandidate as RtcIceCandidate
 
+@Stable
 @kotlinx.serialization.Serializable
 public data class IceCandidate(
     internal val sdpMid: String,

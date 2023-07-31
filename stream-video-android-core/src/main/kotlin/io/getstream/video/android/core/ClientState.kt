@@ -36,8 +36,8 @@ public sealed interface ConnectionState {
 
 public sealed interface RingingState {
     public object Idle : RingingState
-    public data class Incoming(public val acceptedByMe: Boolean) : RingingState
-    public data class Outgoing(public val acceptedByCallee: Boolean) : RingingState
+    public data class Incoming(val acceptedByMe: Boolean) : RingingState
+    public class Outgoing(val acceptedByCallee: Boolean) : RingingState
     public object Active : RingingState
     public object RejectedByAll : RingingState
     public object TimeoutNoAnswer : RingingState
@@ -96,16 +96,22 @@ class ClientState(client: StreamVideo) {
     }
 
     fun setActiveCall(call: Call) {
+        removeRingingCall()
         this._activeCall.value = call
     }
 
     fun removeActiveCall() {
         this._activeCall.value = null
+        removeRingingCall()
     }
 
     fun addRingingCall(call: Call) {
         // TODO: behaviour if you are already in a call
         _ringingCall.value = call
+    }
+
+    fun removeRingingCall() {
+        _ringingCall.value = null
     }
 }
 

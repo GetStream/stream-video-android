@@ -31,6 +31,8 @@ import io.getstream.video.android.datastore.delegate.StreamUserDataStore
 import io.getstream.video.android.model.streamCallId
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.launch
 
 /**
@@ -54,24 +56,27 @@ internal class RejectCallBroadcastReceiver : BroadcastReceiver() {
         val userDataStore: StreamUserDataStore by lazy {
             StreamUserDataStore.install(context!!)
         }
-        val streamVideo: StreamVideo = if (StreamVideo.isInstalled) {
-            StreamVideo.instance()
-        } else {
-            userDataStore.user.value?.let { user ->
-                userDataStore.userToken.value?.let { userToken ->
-                    StreamVideoBuilder(
-                        context = context!!,
-                        user = user,
-                        token = userToken,
-                        apiKey = userDataStore.apiKey.value,
-                    ).build().also { StreamVideo.removeClient() }
-                }
-            }!!
-        }
         if (context != null && intent?.action == ACTION_REJECT_CALL) {
             val callCid = intent.streamCallId(INTENT_EXTRA_CALL_CID)!!
 
             CoroutineScope(Dispatchers.IO).launch {
+                // TODO: Running asynchronous code in a BroadcastReceiver isn't safe,
+                // we should use wake locks.
+                val streamVideo: StreamVideo = if (StreamVideo.isInstalled) {
+                    StreamVideo.instance()
+                } else {
+                    userDataStore.user.firstOrNull()?.let { user ->
+                        userDataStore.userToken.firstOrNull()?.let { userToken ->
+                            StreamVideoBuilder(
+                                context = context,
+                                user = user,
+                                token = userToken,
+                                apiKey = userDataStore.apiKey.first(),
+                            ).build().also { StreamVideo.removeClient() }
+                        }
+                    }!!
+                }
+
                 when (val rejectResult = streamVideo.call(callCid.type, callCid.id).reject()) {
                     is Result.Success -> logger.d { "[onReceive] rejectCall, Success: $rejectResult" }
                     is Result.Failure -> logger.d { "[onReceive] rejectCall, Failure: $rejectResult" }

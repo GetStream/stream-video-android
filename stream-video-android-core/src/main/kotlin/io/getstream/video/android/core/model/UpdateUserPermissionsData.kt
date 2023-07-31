@@ -16,6 +16,7 @@
 
 package io.getstream.video.android.core.model
 
+import androidx.compose.runtime.Stable
 import org.openapitools.client.models.UpdateUserPermissionsRequest
 
 /**
@@ -25,6 +26,7 @@ import org.openapitools.client.models.UpdateUserPermissionsRequest
  * @param grantedPermissions Permissions which the user should be granted.
  * @param revokedPermissions Permissions which we should revoke for the user.
  */
+@Stable
 public data class UpdateUserPermissionsData(
     public val userId: String,
     public val grantedPermissions: List<String>? = null,

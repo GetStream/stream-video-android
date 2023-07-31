@@ -42,6 +42,7 @@ import io.getstream.video.android.compose.ui.components.participants.internal.Pa
 import io.getstream.video.android.core.model.CallStatus
 import io.getstream.video.android.core.model.ScreenSharingSession
 import io.getstream.video.android.mock.mockCall
+import io.getstream.video.android.mock.mockMemberStateList
 import io.getstream.video.android.mock.mockParticipant
 import io.getstream.video.android.mock.mockParticipantList
 import org.junit.Rule
@@ -57,7 +58,7 @@ internal class ParticipantsPortraitTest : BaseComposeTest() {
     @Test
     fun `snapshot ParticipantAvatars composable`() {
         snapshotWithDarkMode {
-            ParticipantAvatars(participants = mockParticipantList)
+            ParticipantAvatars(participants = mockMemberStateList)
         }
     }
 
@@ -66,7 +67,7 @@ internal class ParticipantsPortraitTest : BaseComposeTest() {
         snapshotWithDarkMode {
             ParticipantInformation(
                 callStatus = CallStatus.Incoming,
-                participants = mockParticipantList,
+                participants = mockMemberStateList,
             )
         }
     }

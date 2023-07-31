@@ -149,7 +149,13 @@ internal class StreamVideoImpl internal constructor(
 
     val socketImpl = connectionModule.coordinatorSocket
 
+    fun onCallCleanUp(call: Call) {
+        calls.remove(call.cid)
+    }
+
     override fun cleanup() {
+        // remove all cached calls
+        calls.clear()
         debugInfo.stop()
         // stop all running coroutines
         scope.cancel()

@@ -15,6 +15,8 @@ public final class io/getstream/video/android/mock/StreamMockUtils {
 
 public final class io/getstream/video/android/mock/StreamMockUtilsKt {
 	public static final fun getMockCall ()Lio/getstream/video/android/core/Call;
+	public static final fun getMockMember ()Lio/getstream/video/android/core/MemberState;
+	public static final fun getMockMemberStateList ()Ljava/util/List;
 	public static final fun getMockParticipant ()Lio/getstream/video/android/core/ParticipantState;
 	public static final fun getMockParticipantList ()Ljava/util/List;
 	public static final fun getMockUsers ()Ljava/util/List;

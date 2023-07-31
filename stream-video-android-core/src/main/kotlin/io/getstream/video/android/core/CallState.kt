@@ -25,6 +25,7 @@ import io.getstream.video.android.core.events.DominantSpeakerChangedEvent
 import io.getstream.video.android.core.events.ErrorEvent
 import io.getstream.video.android.core.events.ICETrickleEvent
 import io.getstream.video.android.core.events.JoinCallResponseEvent
+import io.getstream.video.android.core.events.ParticipantCount
 import io.getstream.video.android.core.events.ParticipantJoinedEvent
 import io.getstream.video.android.core.events.ParticipantLeftEvent
 import io.getstream.video.android.core.events.SFUHealthCheckEvent
@@ -43,14 +44,21 @@ import io.getstream.video.android.model.User
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.channels.awaitClose
+import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.channelFlow
 import kotlinx.coroutines.flow.debounce
+import kotlinx.coroutines.flow.firstOrNull
+import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.transform
+import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import okhttp3.internal.toImmutableList
 import org.openapitools.client.models.BlockedUserEvent
 import org.openapitools.client.models.CallAcceptedEvent
@@ -95,12 +103,16 @@ import org.openapitools.client.models.UpdateCallResponse
 import org.openapitools.client.models.UpdatedCallPermissionsEvent
 import org.openapitools.client.models.VideoEvent
 import org.threeten.bp.Clock
+import org.threeten.bp.Duration
+import org.threeten.bp.Instant
 import org.threeten.bp.OffsetDateTime
+import org.threeten.bp.ZoneOffset
 import stream.video.sfu.models.Participant
-import stream.video.sfu.models.ParticipantCount
 import stream.video.sfu.models.TrackType
 import java.util.SortedMap
 import java.util.UUID
+import kotlin.time.DurationUnit
+import kotlin.time.toDuration
 
 public sealed interface RealtimeConnection {
     /**
@@ -147,7 +159,12 @@ public sealed interface RealtimeConnection {
  *
  *
  */
-public class CallState(private val call: Call, private val user: User, internal val scope: CoroutineScope) {
+public class CallState(
+    private val client: StreamVideo,
+    private val call: Call,
+    private val user: User,
+    internal val scope: CoroutineScope
+) {
 
     private val logger by taggedLogger("CallState")
 
@@ -165,6 +182,9 @@ public class CallState(private val call: Call, private val user: User, internal 
     public val participants: StateFlow<List<ParticipantState>> =
         _participants.mapState { it.values.toList() }
 
+    private val _startedAt: MutableStateFlow<OffsetDateTime?> = MutableStateFlow(null)
+    public val startedAt: StateFlow<OffsetDateTime?> = _startedAt
+
     private val _participantCounts: MutableStateFlow<ParticipantCount?> = MutableStateFlow(null)
     val participantCounts: StateFlow<ParticipantCount?> = _participantCounts
 
@@ -174,7 +194,8 @@ public class CallState(private val call: Call, private val user: User, internal 
     }
 
     /** participants who are currently speaking */
-    private val _activeSpeakers: MutableStateFlow<List<ParticipantState>> = MutableStateFlow(emptyList())
+    private val _activeSpeakers: MutableStateFlow<List<ParticipantState>> =
+        MutableStateFlow(emptyList())
     public val activeSpeakers: StateFlow<List<ParticipantState>> = _activeSpeakers
 
     /** participants other than yourself */
@@ -263,7 +284,8 @@ public class CallState(private val call: Call, private val user: User, internal 
      *
      * Debounced 100ms to avoid rapid changes
      */
-    val sortedParticipants = sortedParticipantsFlow.debounce(100).stateIn(scope, SharingStarted.WhileSubscribed(10000L), emptyList())
+    val sortedParticipants = sortedParticipantsFlow.debounce(100)
+        .stateIn(scope, SharingStarted.WhileSubscribed(10000L), emptyList())
 
     /** Members contains the list of users who are permanently associated with this call. This includes users who are currently not active in the call
      * As an example if you invite "john", "bob" and "jane" to a call and only Jane joins.
@@ -292,12 +314,32 @@ public class CallState(private val call: Call, private val user: User, internal 
     val blockedUsers: StateFlow<Set<String>> = _blockedUsers
 
     /** Specific to ringing calls, additional state about incoming, outgoing calls */
-    private val _ringingState: MutableStateFlow<RingingState?> = MutableStateFlow(null)
-    public val ringingState: StateFlow<RingingState?> = _ringingState
+    private val _ringingState: MutableStateFlow<RingingState> = MutableStateFlow(RingingState.Idle)
+    public val ringingState: StateFlow<RingingState> = _ringingState
 
     /** The settings for the call */
     private val _settings: MutableStateFlow<CallSettingsResponse?> = MutableStateFlow(null)
     public val settings: StateFlow<CallSettingsResponse?> = _settings
+
+    private val _durationInMs = flow {
+        while (currentCoroutineContext().isActive) {
+            delay(1000)
+            val started = _session.value?.startedAt
+            val ended = _session.value?.endedAt ?: OffsetDateTime.now()
+            val difference = if (started == null) null else {
+                ended.toInstant().toEpochMilli() - started.toInstant().toEpochMilli()
+            }
+            emit(difference)
+        }
+    }
+
+    /** how long the call has been running, null if the call didn't start yet */
+    public val duration: StateFlow<kotlin.time.Duration?> =
+        _durationInMs.transform { emit((it ?: 0L).toDuration(DurationUnit.MILLISECONDS)) }.stateIn(scope, SharingStarted.WhileSubscribed(10000L), null)
+
+    /** how many milliseconds the call has been running, null if the call didn't start yet */
+    public val durationInMs: StateFlow<Long?> =
+        _durationInMs.stateIn(scope, SharingStarted.WhileSubscribed(10000L), null)
 
     /** Check if you have permissions to do things like share your audio, video, screen etc */
     public fun hasPermission(permission: String): StateFlow<Boolean> {
@@ -326,8 +368,21 @@ public class CallState(private val call: Call, private val user: User, internal 
 
     /** if we are in backstage mode or not */
     val backstage: StateFlow<Boolean> = _backstage
+
     /** the opposite of backstage, if we are live or not */
     val live: StateFlow<Boolean> = _backstage.mapState { !it }
+
+    /** how many milliseconds the call has been running, null if the call didn't start yet */
+    public val liveDurationInMs: StateFlow<Long?> =
+        _durationInMs
+            .map {
+                if (live.value) {
+                    it
+                } else {
+                    null
+                }
+            }
+            .stateIn(scope, SharingStarted.WhileSubscribed(10000L), null)
 
     private val _egress: MutableStateFlow<EgressResponse?> = MutableStateFlow(null)
     val egress: StateFlow<EgressResponse?> = _egress
@@ -376,11 +431,13 @@ public class CallState(private val call: Call, private val user: User, internal 
 
     private val _ingress: MutableStateFlow<CallIngressResponse?> = MutableStateFlow(null)
     val ingress: StateFlow<Ingress?> = _ingress.mapState {
-        val token = call.clientImpl.dataStore.userToken.value
-        val apiKey = call.clientImpl.dataStore.apiKey.value
+        // TODO: Remove runBlocking and use standard Flow instead for mapping or use other approach
+        val token = runBlocking { call.clientImpl.dataStore.userToken.firstOrNull() }
+        val apiKey = runBlocking { call.clientImpl.dataStore.apiKey.firstOrNull() }
         val streamKey = "$apiKey/$token"
         // TODO: use the address when the server is updated
-        val overwriteUrl = "rtmps://video-ingress-frankfurt-vi1.stream-io-video.com:443/${call.type}/${call.id}"
+        val overwriteUrl =
+            "rtmps://video-ingress-frankfurt-vi1.stream-io-video.com:443/${call.type}/${call.id}"
         Ingress(rtmp = RTMP(address = overwriteUrl ?: "", streamKey = streamKey))
     }
 
@@ -403,6 +460,8 @@ public class CallState(private val call: Call, private val user: User, internal 
     public val errors: StateFlow<List<ErrorEvent>> = _errors
 
     private var speakingWhileMutedResetJob: Job? = null
+    private var autoJoiningCall: Job? = null
+    private var ringingTimerJob: Job? = null
 
     fun handleEvent(event: VideoEvent) {
         logger.d { "Updating call state with event ${event::class.java}" }
@@ -423,17 +482,38 @@ public class CallState(private val call: Call, private val user: User, internal 
                 val newAcceptedBy = _acceptedBy.value.toMutableSet()
                 newAcceptedBy.add(event.user.id)
                 _acceptedBy.value = newAcceptedBy.toSet()
+                updateRingingState()
+
+                // auto-join the call if it's an outgoing call and someone has accepted
+                // do not auto-join if it's already accepted by us
+                val callRingState = _ringingState.value
+                if (callRingState is RingingState.Outgoing &&
+                    callRingState.acceptedByCallee &&
+                    _acceptedBy.value.findLast { it == client.userId } == null &&
+                    client.state.activeCall.value == null &&
+                    autoJoiningCall == null
+                ) {
+                    autoJoiningCall = scope.launch {
+                        // errors are handled inside the join function
+                        call.join()
+                        autoJoiningCall = null
+                    }
+                }
             }
 
             is CallRejectedEvent -> {
                 val new = _rejectedBy.value.toMutableSet()
                 new.add(event.user.id)
                 _rejectedBy.value = new.toSet()
+                updateRingingState()
             }
 
             is CallEndedEvent -> {
                 _endedAt.value = OffsetDateTime.now(Clock.systemUTC())
                 _endedByUser.value = event.user?.toUser()
+
+                // leave the call
+                call.leave()
             }
 
             is CallMemberUpdatedEvent -> {
@@ -563,8 +643,8 @@ public class CallState(private val call: Call, private val user: User, internal 
                 _errors.value = errors.value + event
             }
 
-            SFUHealthCheckEvent -> {
-                // we don't do anything with this
+            is SFUHealthCheckEvent -> {
+                call.state._participantCounts.value = event.participantCount
             }
 
             is ICETrickleEvent -> {
@@ -574,6 +654,7 @@ public class CallState(private val call: Call, private val user: User, internal 
             is JoinCallResponseEvent -> {
                 // time to update call state based on the join response
                 updateFromJoinResponse(event)
+                updateRingingState()
             }
 
             is ParticipantJoinedEvent -> {
@@ -656,7 +737,12 @@ public class CallState(private val call: Call, private val user: User, internal 
             is CallSessionParticipantJoinedEvent -> {
                 _session.value?.let { callSessionResponse ->
                     val newList = callSessionResponse.participants.toMutableList()
-                    val participant = CallParticipantResponse(user = event.participant.user, joinedAt = event.createdAt, role = "user", userSessionId = event.participant.userSessionId)
+                    val participant = CallParticipantResponse(
+                        user = event.participant.user,
+                        joinedAt = event.createdAt,
+                        role = "user",
+                        userSessionId = event.participant.userSessionId
+                    )
                     val index = newList.indexOfFirst { user.id == event.participant.user.id }
                     if (index == -1) {
                         newList.add(participant)
@@ -667,15 +753,76 @@ public class CallState(private val call: Call, private val user: User, internal 
                         participants = newList.toImmutableList()
                     )
                 }
+                updateRingingState()
             }
         }
     }
 
+    private fun updateRingingState() {
+        // this is only true when we are in the session (we have accepted/joined the call)
+        val userIsParticipant =
+            _session.value?.participants?.find { it.user.id == client.userId } != null
+        val outgoingMembersCount = _members.value.filter { it.value.user.id != client.userId }.size
+        val rejectedBy = _rejectedBy.value
+        val acceptedBy = _acceptedBy.value
+        val createdBy = _createdBy.value
+        val members = _members.value
+        val acceptedByMe = _acceptedBy.value.findLast { it == client.userId }
+        val hasActiveCall = client.state.activeCall.value != null
+        val hasRingingCall = client.state.ringingCall.value != null
+
+        // no members - call is empty, we can join
+        val state: RingingState = if (hasActiveCall) {
+            RingingState.Active
+        } else if (rejectedBy.isNotEmpty() && acceptedBy.isEmpty() && rejectedBy.size >= outgoingMembersCount) {
+            // Call was rejected. Listener should leave the call with call.leave()
+            RingingState.RejectedByAll
+        } else if (hasRingingCall && createdBy?.id != client.userId) {
+            // Member list is not empty, it's not rejected - it's an incoming call
+            // If it's already accepted by me then we are in an Active call
+            if (userIsParticipant) {
+                RingingState.Active
+            } else {
+                RingingState.Incoming(acceptedByMe = acceptedByMe != null)
+            }
+        } else if (hasRingingCall && createdBy?.id == client.userId) {
+            // The call is created by us
+            if (acceptedBy.isEmpty()) {
+                // no one accepted the call
+                RingingState.Outgoing(acceptedByCallee = false)
+            } else if (!userIsParticipant) {
+                // someone already accepted the call, but it's not us (client needs to do call.join)
+                RingingState.Outgoing(acceptedByCallee = true)
+            } else {
+                // call is accepted and we are already in the call
+                RingingState.Active
+            }
+        } else {
+            RingingState.Idle
+        }
+
+        if (_ringingState.value != state) {
+            logger.d { "Updating ringing state ${_ringingState.value} -> $state" }
+
+            // handle the auto-cancel for outgoing ringing calls
+            if (state is RingingState.Outgoing && !state.acceptedByCallee) {
+                startRingingTimer()
+            } else {
+                ringingTimerJob?.cancel()
+                ringingTimerJob = null
+            }
+
+            // stop the call ringing timer if it's running
+        }
+        _ringingState.value = state
+    }
+
     private fun updateFromJoinResponse(event: JoinCallResponseEvent) {
         // update the participant count
-        val count = event.callState.participant_count
-        _participantCounts.value = count
+        _participantCounts.value = event.participantCount
 
+        val instant = Instant.ofEpochSecond(event.callState.started_at?.epochSecond!!, 0)
+        _startedAt.value = OffsetDateTime.ofInstant(instant, ZoneOffset.UTC)
         // creates the participants
         val participantStates = event.callState.participants.map {
             getOrCreateParticipant(it)
@@ -689,6 +836,26 @@ public class CallState(private val call: Call, private val user: User, internal 
         speakingWhileMutedResetJob = scope.launch {
             delay(2000)
             _speakingWhileMuted.value = false
+        }
+    }
+
+    private fun startRingingTimer() {
+        ringingTimerJob?.cancel()
+        ringingTimerJob = scope.launch {
+
+            val autoCancelTimeout = settings.value?.ring?.autoCancelTimeoutMs
+
+            if (autoCancelTimeout != null && autoCancelTimeout > 0) {
+                delay(autoCancelTimeout.toLong())
+
+                // double check that we are still in Outgoing call state and call is not active
+                if (_ringingState.value is RingingState.Outgoing && client.state.activeCall.value == null) {
+                    call.reject()
+                    call.leave()
+                }
+            } else {
+                logger.w { "[startRingingTimer] No autoCancelTimeoutMs set - call ring with no timeout" }
+            }
         }
     }
 
@@ -779,6 +946,8 @@ public class CallState(private val call: Call, private val user: User, internal 
             }
         }
         _members.value = memberMap
+
+        updateRingingState()
     }
 
     fun getParticipantBySessionId(sessionId: String): ParticipantState? {
@@ -802,7 +971,7 @@ public class CallState(private val call: Call, private val user: User, internal 
         _broadcasting.value = response.egress.broadcasting
         _session.value = response.session
         _rejectedBy.value = response.session?.rejectedBy?.keys?.toSet() ?: emptySet()
-        _acceptedBy.value = response.session?.rejectedBy?.keys?.toSet() ?: emptySet()
+        _acceptedBy.value = response.session?.acceptedBy?.keys?.toSet() ?: emptySet()
         _createdAt.value = response.createdAt
         _updatedAt.value = response.updatedAt
         _endedAt.value = response.endedAt
@@ -814,6 +983,8 @@ public class CallState(private val call: Call, private val user: User, internal 
         _settings.value = response.settings
         _transcribing.value = response.transcribing
         _team.value = response.team
+
+        updateRingingState()
     }
 
     fun updateFromResponse(response: GetOrCreateCallResponse) {

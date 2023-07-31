@@ -74,7 +74,9 @@ public class StreamVideoBuilder @JvmOverloads constructor(
     context: Context,
     private val apiKey: ApiKey,
     private val geo: GEO = GEO.GlobalEdgeNetwork,
-    private var user: User,
+    private var user: User = User(
+        type = UserType.Anonymous
+    ),
     private val token: UserToken = "",
     private val tokenProvider: (suspend (error: Throwable?) -> String)? = null,
     private val loggingLevel: LoggingLevel = LoggingLevel(),
@@ -127,7 +129,7 @@ public class StreamVideoBuilder @JvmOverloads constructor(
 
         /** install the [StreamUserDataStore] to persist user information with encryption. */
         val dataStore = if (!StreamUserDataStore.isInstalled) {
-            StreamUserDataStore.install(context, scope = scope, isEncrypted = encryptPreferences)
+            StreamUserDataStore.install(context, isEncrypted = encryptPreferences)
         } else {
             StreamUserDataStore.instance()
         }

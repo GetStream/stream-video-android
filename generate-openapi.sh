@@ -51,7 +51,8 @@ done
 for FILE in "$APIS_ROOT"/*.kt; do
   echo "Processing ${FILE}"
 
-  grep -iE "$API_REQUEST_REGEX" "$FILE" | while read -r line; do
+  grep -iE "${API_REQUEST_REGEX}" "$FILE" | while read -r line; do
+    # adds the /video prefix to the URI
     UPDATED_REQUEST=$(sed 's/("/("\/video\//g' <<<$line)
     ESCAPED_LINE=$(printf '%s\n' "$line" | sed -e 's/[\/&]/\\&/g')
     ESCAPED_REQUEST=$(printf '%s\n' "$UPDATED_REQUEST" | sed -e 's/[\/&]/\\&/g')

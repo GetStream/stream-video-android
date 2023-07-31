@@ -32,7 +32,9 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material.ButtonDefaults
 import androidx.compose.material.Text
+import androidx.compose.material.TextButton
 import androidx.compose.material.TextField
 import androidx.compose.material.TextFieldDefaults
 import androidx.compose.runtime.Composable
@@ -55,6 +57,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import io.getstream.video.android.BuildConfig
 import io.getstream.video.android.R
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.avatar.UserAvatar
@@ -68,7 +71,8 @@ import io.getstream.video.android.ui.theme.StreamButton
 fun CallJoinScreen(
     callJoinViewModel: CallJoinViewModel = hiltViewModel(),
     navigateToCallLobby: (callId: String) -> Unit,
-    navigateUpToLogin: () -> Unit
+    navigateUpToLogin: () -> Unit,
+    navigateToRingTest: () -> Unit,
 ) {
     val uiState by callJoinViewModel.uiState.collectAsState(CallJoinUiState.Nothing)
     val isLoggedOut by callJoinViewModel.isLoggedOut.collectAsState(initial = false)
@@ -85,7 +89,10 @@ fun CallJoinScreen(
             .background(Colors.background),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        CallJoinHeader(callJoinViewModel = callJoinViewModel)
+        CallJoinHeader(
+            callJoinViewModel = callJoinViewModel,
+            onRingTestClicked = navigateToRingTest
+        )
 
         CallJoinBody(
             modifier = Modifier
@@ -105,9 +112,10 @@ fun CallJoinScreen(
 
 @Composable
 private fun CallJoinHeader(
-    callJoinViewModel: CallJoinViewModel = hiltViewModel()
+    callJoinViewModel: CallJoinViewModel = hiltViewModel(),
+    onRingTestClicked: () -> Unit
 ) {
-    val user by callJoinViewModel.user.collectAsState()
+    val user by callJoinViewModel.user.collectAsState(initial = null)
 
     Row(
         modifier = Modifier
@@ -115,12 +123,21 @@ private fun CallJoinHeader(
             .padding(24.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Text(
-            modifier = Modifier.weight(1f),
-            color = Color.White,
-            text = user?.name?.ifBlank { user?.id }?.ifBlank { user!!.custom["email"] }.orEmpty(),
-            maxLines = 1,
-            fontSize = 16.sp
+
+        if (BuildConfig.DEBUG) {
+            Text(
+                modifier = Modifier.weight(1f),
+                color = Color.White,
+                text = user?.name?.ifBlank { user?.id }?.ifBlank { user!!.custom["email"] }.orEmpty(),
+                maxLines = 1,
+                fontSize = 16.sp
+            )
+        }
+
+        TextButton(
+            colors = ButtonDefaults.textButtonColors(contentColor = Color.White),
+            content = { Text(text = "Ring test") },
+            onClick = { onRingTestClicked.invoke() }
         )
 
         StreamButton(
@@ -139,7 +156,7 @@ private fun CallJoinBody(
     val user by if (LocalInspectionMode.current) {
         remember { mutableStateOf(mockUsers[0]) }
     } else {
-        callJoinViewModel.user.collectAsState()
+        callJoinViewModel.user.collectAsState(initial = null)
     }
 
     Column(
@@ -273,7 +290,8 @@ private fun CallJoinScreenPreview() {
         CallJoinScreen(
             callJoinViewModel = CallJoinViewModel(StreamUserDataStore.instance()),
             navigateToCallLobby = {},
-            navigateUpToLogin = {}
+            navigateUpToLogin = {},
+            navigateToRingTest = {}
         )
     }
 }

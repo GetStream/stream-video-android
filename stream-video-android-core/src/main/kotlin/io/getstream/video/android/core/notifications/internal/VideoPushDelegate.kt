@@ -28,6 +28,7 @@ import io.getstream.video.android.datastore.delegate.StreamUserDataStore
 import io.getstream.video.android.model.StreamCallId
 import io.getstream.video.android.model.mapper.toTypeAndId
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.launch
 
@@ -102,7 +103,7 @@ internal class VideoPushDelegate(
                     context = context,
                     user = user,
                     token = userToken,
-                    apiKey = userDataStore.apiKey.value,
+                    apiKey = userDataStore.apiKey.first(),
                 ).build().also { StreamVideo.removeClient() }
             }
         }

@@ -113,6 +113,7 @@ private fun CallLobbyHeader(
 ) {
     val uiState by callLobbyViewModel.uiState.collectAsState(initial = CallLobbyUiState.Nothing)
     val isLoggedOut by callLobbyViewModel.isLoggedOut.collectAsState(initial = false)
+    val user = callLobbyViewModel.user.collectAsState(initial = null)
 
     HandleCallLobbyUiState(
         callLobbyUiState = uiState,
@@ -125,11 +126,11 @@ private fun CallLobbyHeader(
             .padding(24.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        val user = callLobbyViewModel.user
-        if (user != null) {
+        val userValue = user.value
+        if (userValue != null) {
             UserAvatar(
                 modifier = Modifier.size(32.dp),
-                user = user,
+                user = userValue,
             )
 
             Spacer(modifier = Modifier.width(4.dp))
@@ -138,7 +139,7 @@ private fun CallLobbyHeader(
         Text(
             modifier = Modifier.weight(1f),
             color = Color.White,
-            text = callLobbyViewModel.user?.id.orEmpty(),
+            text = userValue?.id.orEmpty(),
             overflow = TextOverflow.Ellipsis,
             maxLines = 1,
             fontSize = 16.sp

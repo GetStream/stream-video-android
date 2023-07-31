@@ -25,7 +25,6 @@ import com.google.crypto.tink.KeyTemplates
 import com.google.crypto.tink.aead.AeadConfig
 import com.google.crypto.tink.integration.android.AndroidKeysetManager
 import io.getstream.log.StreamLog
-import io.getstream.video.android.datastore.flow.asStateFlow
 import io.getstream.video.android.datastore.model.StreamUserPreferences
 import io.getstream.video.android.datastore.serializer.UserSerializer
 import io.getstream.video.android.datastore.serializer.encrypted
@@ -33,22 +32,16 @@ import io.getstream.video.android.model.ApiKey
 import io.getstream.video.android.model.Device
 import io.getstream.video.android.model.User
 import io.getstream.video.android.model.UserToken
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.SupervisorJob
-import kotlinx.coroutines.cancel
-import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 
 /**
  * A DataStore managers to persist Stream user login data safely, consistently, and transactionally.
  *
  * @param dataStore A [DataStore] that contains data type of [StreamUserPreferences].
- * @property scope A coroutine scope that launches all tasks for DataStore.
  */
 public class StreamUserDataStore constructor(
     dataStore: DataStore<StreamUserPreferences?>,
-    private val scope: CoroutineScope
 ) :
     DataStore<StreamUserPreferences?> by dataStore {
 
@@ -105,29 +98,23 @@ public class StreamUserDataStore constructor(
         }
     }
 
-    /** Cancel all running jobs. */
-    public fun cancelJobs() {
-        scope.cancel()
-    }
-
     /** Clear the persisted all user data. */
     public suspend fun clear(): StreamUserPreferences? = updateData { null }
 
     /** A state that contains a persisted [User] data. */
-    public val user: StateFlow<User?> = data.map { it?.user }.asStateFlow(null, scope)
+    public val user: Flow<User?> = data.map { it?.user }
 
     /** A state that contains a persisted [ApiKey] data. */
-    public val apiKey: StateFlow<ApiKey> =
-        data.map { it?.apiKey.orEmpty() }.asStateFlow("", scope)
+    public val apiKey: Flow<ApiKey> =
+        data.map { it?.apiKey.orEmpty() }
 
     /** A state that contains a persisted [UserToken] data. */
-    public val userToken: StateFlow<UserToken> =
-        data.map { it?.userToken.orEmpty() }.asStateFlow("", scope)
+    public val userToken: Flow<UserToken> =
+        data.map { it?.userToken.orEmpty() }
 
     /** A state that contains a persisted [Device] data. */
-    public val userDevice: StateFlow<Device?> =
+    public val userDevice: Flow<Device?> =
         data.map { it?.userDevice }
-            .asStateFlow(null, scope)
 
     public companion object {
         /**
@@ -168,7 +155,6 @@ public class StreamUserDataStore constructor(
         public fun install(
             context: Context,
             isEncrypted: Boolean = true,
-            scope: CoroutineScope = CoroutineScope(Dispatchers.IO + SupervisorJob())
         ): StreamUserDataStore {
             synchronized(this) {
                 if (isInstalled) {
@@ -198,7 +184,7 @@ public class StreamUserDataStore constructor(
                     }
                 }
 
-                val userDataStore = StreamUserDataStore(dataStore, scope)
+                val userDataStore = StreamUserDataStore(dataStore)
 
                 internalStreamUserDataStore = userDataStore
                 return userDataStore
