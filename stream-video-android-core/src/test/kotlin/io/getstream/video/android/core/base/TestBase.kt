@@ -53,12 +53,9 @@ public open class TestBase {
     lateinit var mockedPCFactory: StreamPeerConnectionFactory
 
     @Before
-    fun setUp() =
+    fun setUp() {
         MockKAnnotations.init(this, relaxUnitFun = true) // turn relaxUnitFun on for all mocks
 
-    private val testLogger = StreamTestLogger()
-
-    init {
         if (!StreamLog.isInstalled) {
             StreamLog.setValidator { priority, _ -> priority > Priority.VERBOSE }
             StreamLog.install(logger = testLogger)
@@ -72,6 +69,8 @@ public open class TestBase {
             )
         }
     }
+
+    private val testLogger = StreamTestLogger()
 
     fun setLogLevel(newPriority: Priority) {
         StreamLog.setValidator { priority, _ -> priority > newPriority }

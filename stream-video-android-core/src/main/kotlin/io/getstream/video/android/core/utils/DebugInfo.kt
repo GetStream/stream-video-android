@@ -77,7 +77,7 @@ internal class DebugInfo(val client: StreamVideoImpl) {
     val availableResolutions by lazy { }
 
     fun start() {
-        if (client.developmentMode) {
+        if (client.developmentMode && !DispatcherProvider.inTest) {
             job = scope.launch {
                 while (true) {
                     delay(20000)
