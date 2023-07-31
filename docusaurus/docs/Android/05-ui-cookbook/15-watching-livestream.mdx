@@ -3,10 +3,10 @@ title: Watching a livestream
 description: How to watch a livestream on android with Kotlin
 ---
 
-This cookbook tutorial walks you through how to render the UI for watching a livestream on Android.
+This cookbook tutorial walks you through how to build an advanced UIs for watching a livestream on Android.
 
 :::note
-This cookbook tutorial will skip how to join a livestream call. If you didn't learn about the [Livestream Tutorial](../02-tutorials/03-livestream.mdx), we highly recommend you to read about the tutorial first.
+n this cookbook tutorial, we will assume that you already know how to join a livestream call. If you haven't familiarized yourself with the [Livestream Tutorial](../02-tutorials/03-livestream.mdx) yet, we highly recommend doing so before proceeding with this cookbook.
 :::
 
 When you build a livestreaming UI, there are a few things to keep in mind:
@@ -27,9 +27,9 @@ In this cookbook tutorial, you'll learn how to build the result below at the end
 
 ### Rendering Livestreaming
 
-First thing first, you need to render a livestreaming video, which is the most important part in the screen.
+First and foremost, rendering the livestreaming video is the key feature and the most crucial part of the screen.
 
-You can simply render your livestreaming video like the sample below:
+To accomplish this, you can easily render your livestreaming video using the following simple sample code:
 
 ```kotlin
 val userToken = "REPLACE_WITH_TOKEN"
@@ -91,9 +91,9 @@ If you run the above example, you'll see the very basic video streaming screen b
 
 ### Implement Live Participants Label
 
-Now you need to build labels that indicates the count of participants of your livestreaming, and streaming time.
+Now you need to build labels that display the count of participants in your livestreaming session and indicate the streaming time.
 
-You can simply implement the live label like so:
+You can easily implement the live label using the following approach:
 
 ```kotlin
 @Composable
@@ -133,13 +133,13 @@ fun LiveLabel(
 }
 ```
 
-If you build a preview for `LiveLabel` Composable, you'll see the result below:
+Upon building a preview for the `LiveLabel` Composable, you will observe the following result:
 
 ![LiveLabel](../assets/cookbook/livestream-live-label.png)
 
 ### Implement Live Time Label
 
-Next, you need to implement the live time label, which indicates the time duration once your start live streaming.
+Next, you need to implement the live time label, which will display the duration of the livestream once it starts.
 
 You can simply implement the live time label like so:
 
@@ -239,7 +239,7 @@ VideoTheme {
 }
 ```
 
-As you can see above example, you can see some of state declaration from the call state:
+As demonstrated in the example above, you can observe several state declarations representing the call state.:
 
 - `participantCount`: A model that contains information about participant counts.
 - `connection`: Indicates the connection state of a call.
@@ -250,7 +250,7 @@ As you can see above example, you can see some of state declaration from the cal
 
 ### Implement Live Button
 
-Now let's build a live button that allows you to start/stop broadcast your call, and controls your physical device, such as camera and microphone.
+Let's proceed with building a live button that enables you to start/stop broadcasting your call and control your physical device, including the camera and microphone.
 
 You can implement the live button like so:
 
@@ -353,8 +353,10 @@ Scaffold(
  }
 ```
 
-After building your project, you'll see the final result below:
+Once you've completed building your project, you'll witness the final result as depicted below:
 
 ![LiveStream Backstage](../assets/cookbook/livestream-backstage.png)
 
-You can broadcast your stream by clicking the **Go Live** button.
+By simply clicking the **Go Live** button, you can begin broadcasting your stream.
+
+In this cookbook tutorial, you have learned how to create an advanced live streaming screen. If you wish to refer to the code, feel free to explore the [GitHub Repository](https://github.com/GetStream/stream-video-android/tree/develop/tutorials/tutorial-livestream).
