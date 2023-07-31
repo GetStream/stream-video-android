@@ -95,10 +95,18 @@ public data class DominantSpeakerChangedEvent(
     val sessionId: String,
 ) : SfuDataEvent()
 
-public object SFUHealthCheckEvent : SfuDataEvent()
+public data class ParticipantCount(
+    val total: Int,
+    val anonymous: Int,
+)
+
+public data class SFUHealthCheckEvent(
+    val participantCount: ParticipantCount
+) : SfuDataEvent()
 
 public data class JoinCallResponseEvent(
-    val callState: CallState
+    val callState: CallState,
+    val participantCount: ParticipantCount
 ) : SfuDataEvent()
 
 public data class UnknownEvent(val event: Any?) : SfuDataEvent()

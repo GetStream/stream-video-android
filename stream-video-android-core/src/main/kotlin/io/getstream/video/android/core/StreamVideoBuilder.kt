@@ -74,7 +74,9 @@ public class StreamVideoBuilder @JvmOverloads constructor(
     context: Context,
     private val apiKey: ApiKey,
     private val geo: GEO = GEO.GlobalEdgeNetwork,
-    private var user: User,
+    private var user: User = User(
+        type = UserType.Anonymous
+    ),
     private val token: UserToken = "",
     private val tokenProvider: (suspend (error: Throwable?) -> String)? = null,
     private val loggingLevel: LoggingLevel = LoggingLevel(),
