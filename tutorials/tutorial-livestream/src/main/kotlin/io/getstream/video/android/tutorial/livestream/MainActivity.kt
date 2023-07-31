@@ -26,8 +26,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.Button
-import androidx.compose.material.ButtonDefaults
 import androidx.compose.material.Scaffold
 import androidx.compose.material.Text
 import androidx.compose.runtime.collectAsState
@@ -45,16 +43,19 @@ import io.getstream.video.android.core.GEO
 import io.getstream.video.android.core.RealtimeConnection
 import io.getstream.video.android.core.StreamVideoBuilder
 import io.getstream.video.android.model.User
+import io.getstream.video.android.tutorial.livestream.ui.LiveButton
+import io.getstream.video.android.tutorial.livestream.ui.LiveLabel
+import io.getstream.video.android.tutorial.livestream.ui.TimeLabel
 import kotlinx.coroutines.launch
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        val userId = "Jarael"
+        val userId = "Biggs_Darklighter"
         val userToken =
-            "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoiSmFyYWVsIiwiaXNzIjoicHJvbnRvIiwic3ViIjoidXNlci9KYXJhZWwiLCJpYXQiOjE2OTA0MzA5NjEsImV4cCI6MTY5MTAzNTc2Nn0.c1AD55FcGEse4nTJAghlTNObINV8jMVGfzLYyI_rgr0"
-        val callId = "HSIQU8Hxs59q"
+            "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoiQmlnZ3NfRGFya2xpZ2h0ZXIiLCJpc3MiOiJwcm9udG8iLCJzdWIiOiJ1c2VyL0JpZ2dzX0RhcmtsaWdodGVyIiwiaWF0IjoxNjkwNzU5MDI5LCJleHAiOjE2OTEzNjM4MzR9.HRTa18DYVHnDlS3hMCDouQsEfpYDOiqESMlWe-7-NPI"
+        val callId = "yVb6Pi7GgTiJ"
 
         // step1 - create a user.
         val user = User(
@@ -66,7 +67,7 @@ class MainActivity : ComponentActivity() {
         // step2 - initialize StreamVideo. For a production app we recommend adding the client to your Application class or di module.
         val client = StreamVideoBuilder(
             context = applicationContext,
-            apiKey = "hd8szvscpxvd", // demo API key
+            apiKey = "mmhfdzb5evj2", // demo API key
             geo = GEO.GlobalEdgeNetwork,
             user = user,
             token = userToken,
@@ -90,7 +91,6 @@ class MainActivity : ComponentActivity() {
             VideoTheme {
                 val participantCount by call.state.participantCounts.collectAsState()
                 val connection by call.state.connection.collectAsState()
-                val total = participantCount?.total
                 val backstage by call.state.backstage.collectAsState()
                 val me by call.state.me.collectAsState()
                 val video = me?.video?.collectAsState()?.value
@@ -99,55 +99,36 @@ class MainActivity : ComponentActivity() {
                 Scaffold(
                     modifier = Modifier
                         .fillMaxSize()
-                        .background(VideoTheme.colors.appBackground)
+                        .background(Color(0xFF272A30))
                         .padding(6.dp),
-                    contentColor = VideoTheme.colors.appBackground,
-                    backgroundColor = VideoTheme.colors.appBackground,
+                    contentColor = Color(0xFF272A30),
+                    backgroundColor = Color(0xFF272A30),
                     topBar = {
                         if (connection == RealtimeConnection.Connected) {
-                            if (!backstage) {
-                                Box(
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .padding(6.dp)
-                                ) {
-                                    Text(
-                                        modifier = Modifier
-                                            .align(Alignment.CenterEnd)
-                                            .background(
-                                                color = VideoTheme.colors.primaryAccent,
-                                                shape = RoundedCornerShape(6.dp)
-                                            )
-                                            .padding(horizontal = 12.dp, vertical = 4.dp),
-                                        text = "Live $total",
-                                        color = VideoTheme.colors.textHighEmphasis
-                                    )
-
-                                    Text(
-                                        modifier = Modifier.align(Alignment.Center),
-                                        text = "Live for 1:23",
-                                        color = VideoTheme.colors.textHighEmphasis
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(6.dp)
+                            ) {
+                                if (!backstage) {
+                                    LiveLabel(
+                                        modifier = Modifier.align(Alignment.CenterStart),
+                                        liveCount = participantCount?.total ?: 0
                                     )
                                 }
+
+                                TimeLabel(
+                                    modifier = Modifier.align(Alignment.Center),
+                                    sessionTime = 10000
+                                )
                             }
                         }
                     },
                     bottomBar = {
-                        Button(
-                            colors = ButtonDefaults.buttonColors(
-                                backgroundColor = VideoTheme.colors.primaryAccent,
-                                contentColor = VideoTheme.colors.primaryAccent
-                            ),
-                            onClick = {
-                                lifecycleScope.launch {
-                                    if (backstage) call.goLive() else call.stopLive()
-                                }
+                        LiveButton(modifier = Modifier.padding(9.dp), isBackstage = backstage) {
+                            lifecycleScope.launch {
+                                if (backstage) call.goLive() else call.stopLive()
                             }
-                        ) {
-                            Text(
-                                text = if (backstage) "Go Live" else "Stop Broadcast",
-                                color = Color.White
-                            )
                         }
                     }
                 ) {
