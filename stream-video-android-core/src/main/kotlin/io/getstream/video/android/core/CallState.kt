@@ -44,6 +44,7 @@ import io.getstream.video.android.model.User
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.channels.awaitClose
+import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -317,7 +318,7 @@ public class CallState(
     public val settings: StateFlow<CallSettingsResponse?> = _settings
 
     private val _durationInMs = flow {
-        while (scope.isActive) {
+        while (currentCoroutineContext().isActive) {
             delay(1000)
             val started = _session.value?.startedAt
             val ended = _session.value?.endedAt ?: OffsetDateTime.now()
