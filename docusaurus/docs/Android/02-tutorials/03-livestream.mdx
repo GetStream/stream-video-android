@@ -20,8 +20,8 @@ Let's get started, if you have any questions or feedback be sure to let us know 
 
 ### Step 1 - Create a new project in Android Studio
 
-This tutorial was written using Android Studio Flamingo.
-Setup steps can vary slightly across Android Studio versions so if you run into trouble be sure to use the latest version of Android Studio.
+Note that this tutorial was written using Android Studio Giraffe. Setup steps can vary slightly across Android Studio versions.
+We recommend using Android Studio Giraffe or newer.
 
 1. Create a new project
 2. Select Phone & Template -> **empty activity**
@@ -29,12 +29,14 @@ Setup steps can vary slightly across Android Studio versions so if you run into 
 
 ### Step 2 - Install the SDK & Setup the client
 
-**Add the video SDK** to your app's `build.gradle` file found in app/build.gradle.
+**Add the video SDK** to your app's `build.gradle.kts` file found in `app/build.gradle.kts`.
 If you're new to android note that there are 2 build.gradle files, you want to open the one in the app folder.
 
-```groovy
+```kotlin
 dependencies {
-    implementation "io.getstream:stream-video-android-compose:$stream_version"
+    implementation("io.getstream:stream-video-android-compose:0.2.0")
+
+    ...
 }
 ```
 
@@ -63,7 +65,7 @@ class MainActivity : ComponentActivity() {
         // for a production app we recommend adding the client to your Application class or di module.
         val client = StreamVideoBuilder(
             context = applicationContext,
-            apiKey = "mmhfdzb5evj2", // demo API key
+            apiKey = "hd8szvscpxvd", // demo API key
             geo = GEO.GlobalEdgeNetwork,
             user = user,
             token = userToken,
@@ -103,7 +105,10 @@ Replace them now with the values shown below:
 
 <TokenSnippet sampleApp='livestream' displayStyle='credentials' />
 
-In the next step we setup the user:
+When you run the app now you'll see a text message saying: "TODO: render video".
+Before we get around to rendering the video let's review the code above.
+
+In the first step we setup the user:
 
 ```kotlin
 val user = User(
@@ -146,16 +151,15 @@ lifecycleScope.launch {
 
 First call object is created by specifying the call type: "livestream" and the callId.
 The "livestream" call type is just a set a defaults that typically works well for a livestream.
-You can edit the features, permissions and settings in the dashboard. You can also create new call types as needed.
-
-Next call.camera.enable and microphone.enable start capturing the local audio and video.
+You can edit the features, permissions and settings in the dashboard.
+The dashboard also allows you to create new call types as needed.
 
 Lastly, call.join(create = true) creates the call object on our servers and joins it.
 The moment you use call.join() the realtime transport for audio and video is started.
 
 Note that you can also add members to a call and assign them different roles. (See the [call creation docs](../03-guides/02-joining-creating-calls.mdx))
 
-### Step 4 - Render the video
+### Step 4 - Rendering the video
 
 In this step we're going to build a UI for showing your local video with a button to start the livestream.
 This example uses Compose, but you could also use our XML VideoRenderer.
@@ -265,7 +269,7 @@ call.state.participants
 
 The [participant state docs](../03-guides/03-call-and-participant-state.mdx) show all the available data.
 
-The livestream layout is standard Compose other than [VideoRenderer](../04-ui-components/02-video-renderer.mdx).
+The livestream layout is built using standard Compose. The [VideoRenderer](../04-ui-components/02-video-renderer.mdx) component is provided by Stream.
 VideoRenderer renders the video and a fallback. You can use it for rendering the local and remote video.
 
 ### Step 4 - (Optional) Publishing RTMP using OBS
