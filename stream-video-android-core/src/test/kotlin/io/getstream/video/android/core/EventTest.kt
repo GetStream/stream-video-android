@@ -26,7 +26,6 @@ import io.getstream.video.android.core.events.ParticipantLeftEvent
 import io.getstream.video.android.core.events.TrackPublishedEvent
 import io.getstream.video.android.core.model.NetworkQuality
 import io.getstream.video.android.core.permission.PermissionRequest
-import io.mockk.mockk
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -180,9 +179,6 @@ class EventTest : IntegrationTestBase(connectCoordinatorWS = false) {
             "call.ended",
             user = testData.users["thierry"]!!.toUserResponse()
         )
-        // needs to be mocked because call.leave will also access the MediaManagerImpl
-        // and this requires an EglBase / EglContext instance which can't be mocked.
-        call.eglBaseContextProvider = { mockk(relaxed = true) }
 
         clientImpl.fireEvent(event)
 
