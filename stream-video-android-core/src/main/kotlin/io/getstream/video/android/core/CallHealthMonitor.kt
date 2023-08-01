@@ -111,8 +111,9 @@ public class CallHealthMonitor(val call: Call, val callScope: CoroutineScope) {
     suspend fun reconnect() {
         if (reconnectInProgress) return
 
-        logger.i { "attempted to reconnect, but reconnects are disabled at the moment" }
-        return
+        logger.i { "attempting to reconnect" }
+
+
 
         reconnectInProgress = true
         reconnectionAttempts++
@@ -127,11 +128,16 @@ public class CallHealthMonitor(val call: Call, val callScope: CoroutineScope) {
 
         logger.i { "reconnect called, reconnect attempt: $reconnectionAttempts, time since last reconnect $timeDifference" }
 
+
+
+
         // ensure we don't run the reconnect too often
         if (timeDifference < reconnectDebounceMs) {
             logger.d { "reconnect skip" }
         } else {
             lastReconnectAt = now
+
+
 
             call.reconnectOrSwitchSfu()
         }

@@ -377,11 +377,12 @@ public class Call(
         val online = network.isConnected()
 
         if (online) {
-            // start by retrying the current connection
+            // start by restarting ice connections
             session?.reconnect()
 
-            // ask if we should switch
-            switchSfu()
+            // ask the coordinator if we should switch
+            // TODO: disabled since switching SFUs isn't 100% stable yet server side
+            //switchSfu()
         }
     }
 
