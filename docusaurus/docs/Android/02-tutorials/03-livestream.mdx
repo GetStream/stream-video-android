@@ -230,12 +230,12 @@ VideoTheme {
                 ),
                 onClick = {
                     lifecycleScope.launch {
-                        if (backstage) call.goLive() else call.stopLive()
+                        if (backstage) call.goLive() else call.end()
                     }
                 }
             ) {
                 Text(
-                    text = if (backstage) "Go Live" else "Stop Broadcast",
+                    text = if (backstage) "Go Live" else "End Livestream",
                     color = Color.White
                 )
             }
@@ -286,8 +286,8 @@ If you want to learn more about building an advanced UIs for watching a livestre
 ### Step 4 - (Optional) Publishing RTMP using OBS
 
 The example above showed how to publish your phone's camera to the livestream.
-Almost all livestream software and hardware supports RTMPs.
-So let's see how to publish using RTMPs. Feel free to skip this step if you don't need to use RTMPs.
+Almost all livestream software and hardware supports RTMPS.
+[OBS](https://obsproject.com/) is one of the most popular livestreaming software packages and we'll use it to explain how to import RTMPS.
 
 A. Log the URL & Stream Key
 
