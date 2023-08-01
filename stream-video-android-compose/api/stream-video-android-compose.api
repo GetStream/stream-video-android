@@ -811,8 +811,8 @@ public final class io/getstream/video/android/compose/ui/components/call/rendere
 }
 
 public final class io/getstream/video/android/compose/ui/components/call/renderer/ParticipantVideoKt {
-	public static final fun ParticipantLabel (Landroidx/compose/foundation/layout/BoxScope;Lio/getstream/video/android/core/ParticipantState;Landroidx/compose/ui/Alignment;Lkotlin/jvm/functions/Function3;Landroidx/compose/runtime/Composer;II)V
-	public static final fun ParticipantLabel (Landroidx/compose/foundation/layout/BoxScope;Ljava/lang/String;Landroidx/compose/ui/Alignment;ZZLjava/util/List;Lkotlin/jvm/functions/Function3;Landroidx/compose/runtime/Composer;II)V
+	public static final fun ParticipantLabel (Landroidx/compose/foundation/layout/BoxScope;Lio/getstream/video/android/core/Call;Lio/getstream/video/android/core/ParticipantState;Landroidx/compose/ui/Alignment;Lkotlin/jvm/functions/Function3;Landroidx/compose/runtime/Composer;II)V
+	public static final fun ParticipantLabel (Landroidx/compose/foundation/layout/BoxScope;Ljava/lang/String;Landroidx/compose/ui/Alignment;ZZFLkotlin/jvm/functions/Function3;Landroidx/compose/runtime/Composer;II)V
 	public static final fun ParticipantVideo (Lio/getstream/video/android/core/Call;Lio/getstream/video/android/core/ParticipantState;Landroidx/compose/ui/Modifier;Lio/getstream/video/android/compose/ui/components/call/renderer/VideoRendererStyle;Lkotlin/jvm/functions/Function4;Lkotlin/jvm/functions/Function4;Lkotlin/jvm/functions/Function3;Lkotlin/jvm/functions/Function4;Landroidx/compose/runtime/Composer;II)V
 	public static final fun ParticipantVideoRenderer (Lio/getstream/video/android/core/Call;Lio/getstream/video/android/core/ParticipantState;Lkotlin/jvm/functions/Function3;Landroidx/compose/runtime/Composer;II)V
 }
@@ -1107,7 +1107,7 @@ public final class io/getstream/video/android/compose/ui/components/connection/N
 }
 
 public final class io/getstream/video/android/compose/ui/components/indicator/AudioVolumeIndicatorKt {
-	public static final fun AudioVolumeIndicator (Landroidx/compose/ui/Modifier;Ljava/util/List;Landroidx/compose/runtime/Composer;II)V
+	public static final fun AudioVolumeIndicator (Landroidx/compose/ui/Modifier;FLandroidx/compose/runtime/Composer;II)V
 }
 
 public final class io/getstream/video/android/compose/ui/components/indicator/ComposableSingletons$AudioVolumeIndicatorKt {
@@ -1136,7 +1136,7 @@ public final class io/getstream/video/android/compose/ui/components/indicator/Mi
 }
 
 public final class io/getstream/video/android/compose/ui/components/indicator/SoundIndicatorKt {
-	public static final fun SoundIndicator (Landroidx/compose/ui/Modifier;ZZLjava/util/List;Landroidx/compose/runtime/Composer;II)V
+	public static final fun SoundIndicator (Landroidx/compose/ui/Modifier;ZZFLandroidx/compose/runtime/Composer;II)V
 }
 
 public final class io/getstream/video/android/compose/ui/components/participants/CallParticipantsInfoMenuKt {

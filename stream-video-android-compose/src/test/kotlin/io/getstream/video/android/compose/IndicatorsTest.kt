@@ -26,6 +26,7 @@ import io.getstream.video.android.compose.ui.components.call.renderer.Participan
 import io.getstream.video.android.compose.ui.components.connection.NetworkQualityIndicator
 import io.getstream.video.android.compose.ui.components.indicator.SoundIndicator
 import io.getstream.video.android.core.model.NetworkQuality
+import io.getstream.video.android.mock.mockCall
 import io.getstream.video.android.mock.mockParticipantList
 import org.junit.Rule
 import org.junit.Test
@@ -44,12 +45,12 @@ internal class IndicatorsTest : BaseComposeTest() {
                 SoundIndicator(
                     isSpeaking = true,
                     isAudioEnabled = true,
-                    audioLevels = listOf(0.7f, 0f, 0.5f, 0f, 0.9f),
+                    audioLevel = 0f,
                 )
                 SoundIndicator(
                     isSpeaking = true,
                     isAudioEnabled = false,
-                    audioLevels = listOf(0.7f, 0f, 0.5f, 0f, 0.9f),
+                    audioLevel = 0f,
                 )
             }
         }
@@ -77,6 +78,7 @@ internal class IndicatorsTest : BaseComposeTest() {
         snapshot {
             Box {
                 ParticipantLabel(
+                    call = mockCall,
                     participant = mockParticipantList[1],
                     Alignment.BottomStart,
                 )

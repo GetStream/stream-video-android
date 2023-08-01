@@ -106,7 +106,7 @@ Video roadmap and changelog is available [here](https://github.com/GetStream/pro
 - [ ] Finish usability testing with design team on chat integration (Jaewoong)
 - [ ] Bug: Screensharing on Firefox has some issues when rendering on android (Daniel)
 - [ ] Pagination on query members & query call endpoints (Daniel)
-- [ ] local version of audioLevel(s) for lower latency audio visualizations(Daniel)
+- [X] local version of audioLevel(s) for lower latency audio visualizations(Daniel)
 - [ ] Android SDK development.md cleanup (Daniel)
 - [ ] Livestream tutorial (depends on RTMP support) (Thierry)
 - [ ] Call Analytics stateflow (Thierry)
