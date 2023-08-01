@@ -69,13 +69,13 @@ object StreamVideoInitHelper {
             val guest = User(id = "guest", name = "Guest", role = "guest")
             val result = StreamVideoNetwork.tokenService.fetchToken(
                 userId = guest.id,
-                apiKey = BuildConfig.DOGFOODING_API_KEY
+                apiKey = BuildConfig.API_KEY
             )
             app.initializeStreamChat(user = guest, token = result.token)
             app.initializeStreamVideo(
                 user = guest,
                 token = result.token,
-                apiKey = BuildConfig.DOGFOODING_API_KEY,
+                apiKey = BuildConfig.API_KEY,
                 loggingLevel = LoggingLevel(priority = Priority.VERBOSE)
             )
         }
