@@ -382,7 +382,7 @@ public class Call(
 
             // ask the coordinator if we should switch
             // TODO: disabled since switching SFUs isn't 100% stable yet server side
-            //switchSfu()
+            // switchSfu()
         }
     }
 
