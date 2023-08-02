@@ -37,7 +37,8 @@
         <activity
             android:name="io.getstream.video.android.MainActivity"
             android:exported="true"
-            android:theme="@style/Dogfooding">
+            android:theme="@style/Dogfooding"
+            android:windowSoftInputMode="adjustResize">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -57,8 +58,8 @@
             android:name="io.getstream.video.android.IncomingCallActivity"
             android:exported="false"
             android:showOnLockScreen="true"
-            android:supportsPictureInPicture="true"
-            android:showWhenLocked="true">
+            android:showWhenLocked="true"
+            android:supportsPictureInPicture="true">
             <intent-filter android:priority="1">
                 <action android:name="io.getstream.video.android.action.INCOMING_CALL" />
                 <action android:name="io.getstream.video.android.action.NOTIFICATION" />
