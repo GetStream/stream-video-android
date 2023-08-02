@@ -103,12 +103,14 @@ import org.openapitools.client.models.UpdateCallResponse
 import org.openapitools.client.models.UpdatedCallPermissionsEvent
 import org.openapitools.client.models.VideoEvent
 import org.threeten.bp.Clock
-import org.threeten.bp.Duration
 import org.threeten.bp.Instant
 import org.threeten.bp.OffsetDateTime
 import org.threeten.bp.ZoneOffset
 import stream.video.sfu.models.Participant
 import stream.video.sfu.models.TrackType
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 import java.util.SortedMap
 import java.util.UUID
 import kotlin.time.DurationUnit
@@ -335,11 +337,23 @@ public class CallState(
 
     /** how long the call has been running, null if the call didn't start yet */
     public val duration: StateFlow<kotlin.time.Duration?> =
-        _durationInMs.transform { emit((it ?: 0L).toDuration(DurationUnit.MILLISECONDS)) }.stateIn(scope, SharingStarted.WhileSubscribed(10000L), null)
+        _durationInMs.transform { emit((it ?: 0L).toDuration(DurationUnit.MILLISECONDS)) }
+            .stateIn(scope, SharingStarted.WhileSubscribed(10000L), null)
 
     /** how many milliseconds the call has been running, null if the call didn't start yet */
     public val durationInMs: StateFlow<Long?> =
         _durationInMs.stateIn(scope, SharingStarted.WhileSubscribed(10000L), null)
+
+    /** how many milliseconds the call has been running in the simple date format. */
+    public val durationInDateFormat: StateFlow<String?> = durationInMs.mapState { durationInMs ->
+        if (durationInMs == null) {
+            null
+        } else {
+            val date = Date(durationInMs ?: 0)
+            val dateFormat = SimpleDateFormat("HH:MM:SS", Locale.US)
+            dateFormat.format(date)
+        }
+    }
 
     /** Check if you have permissions to do things like share your audio, video, screen etc */
     public fun hasPermission(permission: String): StateFlow<Boolean> {
