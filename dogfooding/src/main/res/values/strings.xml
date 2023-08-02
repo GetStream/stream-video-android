@@ -22,7 +22,7 @@
     <string name="sign_in_description">Please sign in with your Google \nStream account.</string>
     <string name="sign_in_google">Google Sign In</string>
     <string name="sign_in_email">Sign In with Email</string>
-    <string name="sign_in_contact">Having problems logging in, </string>
+    <string name="sign_in_contact">Having problems logging in,&#160;</string>
     <string name="sign_in_contact_us">contact us.</string>
     <string name="sign_out">Sign out</string>
     <string name="join_description">Start or join a meeting by \nentering the call ID.</string>
