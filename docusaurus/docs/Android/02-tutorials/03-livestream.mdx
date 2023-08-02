@@ -183,12 +183,12 @@ VideoTheme {
     val backstage by call.state.backstage.collectAsState()
     val me by call.state.me.collectAsState()
     val video = me?.video?.collectAsState()?.value
-    val durationInDateFormat by call.state.durationInDateFormat.collectAsState()
+    val durationInMs by call.state.durationInMs.collectAsState()
 
     Scaffold(
         modifier = Modifier
-            .background(VideoTheme.colors.appBackground)
             .fillMaxSize()
+            .background(VideoTheme.colors.appBackground)
             .padding(6.dp),
         contentColor = VideoTheme.colors.appBackground,
         backgroundColor = VideoTheme.colors.appBackground, // Use containerColor in material3
@@ -197,7 +197,6 @@ VideoTheme {
                 if (!backstage) {
                     Box(
                         modifier = Modifier
-                            .background(VideoTheme.colors.appBackground)
                             .fillMaxWidth()
                             .padding(6.dp)
                     ) {
@@ -215,7 +214,7 @@ VideoTheme {
 
                         Text(
                             modifier = Modifier.align(Alignment.Center),
-                            text = "Live for ${durationInDateFormat ?: 0}",
+                            text = "Live for 1:23",
                             color = VideoTheme.colors.textHighEmphasis
                         )
                     }
