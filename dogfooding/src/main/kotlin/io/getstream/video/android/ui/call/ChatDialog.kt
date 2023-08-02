@@ -35,7 +35,6 @@ import io.getstream.chat.android.compose.ui.messages.MessagesScreen
 import io.getstream.chat.android.compose.ui.theme.ChatTheme
 import io.getstream.chat.android.compose.viewmodel.messages.MessageListViewModel
 import io.getstream.chat.android.compose.viewmodel.messages.MessagesViewModelFactory
-import io.getstream.chat.android.ui.common.state.messages.list.MessageItemState
 import io.getstream.video.android.core.Call
 
 @Composable
@@ -53,12 +52,10 @@ internal fun ChatDialog(
     )
 
     val listViewModel = viewModel(MessageListViewModel::class.java, factory = viewModelFactory)
-    val unreadMessageCounts: Int =
-        listViewModel.currentMessagesState.messageItems.filterIsInstance<MessageItemState>()
-            .filter { !it.isMessageRead }.size
+    val unreadCount: Int = listViewModel.currentMessagesState.unreadCount
 
-    LaunchedEffect(key1 = unreadMessageCounts) {
-        updateUnreadCount.invoke(unreadMessageCounts)
+    LaunchedEffect(key1 = unreadCount) {
+        updateUnreadCount.invoke(unreadCount)
     }
 
     ChatTheme {
