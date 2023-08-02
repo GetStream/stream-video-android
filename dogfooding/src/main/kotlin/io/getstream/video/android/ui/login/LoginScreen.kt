@@ -121,34 +121,37 @@ private fun LoginContent(
                 fontSize = 38.sp
             )
 
-            Spacer(modifier = Modifier.height(17.dp))
+            if (BuildConfig.FLAVOR != "production") {
 
-            Text(
-                text = stringResource(id = R.string.sign_in_description),
-                color = Colors.description,
-                textAlign = TextAlign.Center,
-                fontSize = 18.sp,
-            )
+                Spacer(modifier = Modifier.height(17.dp))
 
-            Spacer(modifier = Modifier.height(50.dp))
+                Text(
+                    text = stringResource(id = R.string.sign_in_description),
+                    color = Colors.description,
+                    textAlign = TextAlign.Center,
+                    fontSize = 18.sp,
+                )
 
-            StreamButton(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 55.dp),
-                enabled = !isLoading,
-                text = stringResource(id = R.string.sign_in_google),
-                onClick = { loginViewModel.handleUiEvent(LoginEvent.GoogleSignIn()) }
-            )
+                Spacer(modifier = Modifier.height(50.dp))
 
-            StreamButton(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 55.dp),
-                enabled = !isLoading,
-                text = stringResource(id = R.string.sign_in_email),
-                onClick = { showEmailLoginDialog.invoke() }
-            )
+                StreamButton(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 55.dp),
+                    enabled = !isLoading,
+                    text = stringResource(id = R.string.sign_in_google),
+                    onClick = { loginViewModel.handleUiEvent(LoginEvent.GoogleSignIn()) }
+                )
+
+                StreamButton(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 55.dp),
+                    enabled = !isLoading,
+                    text = stringResource(id = R.string.sign_in_email),
+                    onClick = { showEmailLoginDialog.invoke() }
+                )
+            }
 
             Spacer(modifier = Modifier.height(47.dp))
 
@@ -169,13 +172,6 @@ private fun LoginContent(
                         }
                     ),
                 )
-            )
-
-            Text(
-                text = stringResource(id = R.string.sign_in_contact),
-                color = Colors.description,
-                textAlign = TextAlign.Center,
-                fontSize = 18.sp,
             )
 
             if (BuildConfig.BENCHMARK) {

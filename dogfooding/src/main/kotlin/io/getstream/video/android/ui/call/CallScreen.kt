@@ -65,8 +65,10 @@ fun CallScreen(
     var isShowingSettingMenu by remember { mutableStateOf(false) }
     var isShowingAvailableDeviceMenu by remember { mutableStateOf(false) }
     var unreadCount by remember { mutableStateOf(0) }
-
-    val chatState = rememberModalBottomSheetState(ModalBottomSheetValue.Hidden)
+    val chatState = rememberModalBottomSheetState(
+        initialValue = ModalBottomSheetValue.Hidden,
+        skipHalfExpanded = true
+    )
     val scope = rememberCoroutineScope()
 
     VideoTheme {
@@ -79,7 +81,7 @@ fun CallScreen(
                     call = call,
                     enableInPictureInPicture = true,
                     onBackPressed = {
-                        if (chatState.currentValue == ModalBottomSheetValue.HalfExpanded) {
+                        if (chatState.currentValue == ModalBottomSheetValue.Expanded) {
                             scope.launch { chatState.hide() }
                         } else {
                             onLeaveCall.invoke()
