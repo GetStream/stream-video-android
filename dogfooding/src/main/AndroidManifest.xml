@@ -37,7 +37,8 @@
         <activity
             android:name="io.getstream.video.android.MainActivity"
             android:exported="true"
-            android:theme="@style/Dogfooding">
+            android:theme="@style/Dogfooding"
+            android:windowSoftInputMode="adjustResize">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -57,8 +58,8 @@
             android:name="io.getstream.video.android.IncomingCallActivity"
             android:exported="false"
             android:showOnLockScreen="true"
-            android:supportsPictureInPicture="true"
-            android:showWhenLocked="true">
+            android:showWhenLocked="true"
+            android:supportsPictureInPicture="true">
             <intent-filter android:priority="1">
                 <action android:name="io.getstream.video.android.action.INCOMING_CALL" />
                 <action android:name="io.getstream.video.android.action.NOTIFICATION" />
@@ -71,7 +72,6 @@
             android:name=".DeeplinkingActivity"
             android:exported="true"
             android:launchMode="singleTask">
-            <tools:validation testUrl="https://stream-video-demo.vercel.app" />
             <intent-filter
                 android:autoVerify="true"
                 android:label="@string/filter_call_link">
@@ -82,7 +82,8 @@
                 <category android:name="android.intent.category.BROWSABLE" />
 
                 <data android:scheme="https" />
-                <data android:host="stream-video-demo.vercel.app" />
+                <data android:host="@string/deeplinking_host" />
+                <data android:pathPrefix="@string/deeplinking_path_prefix" />
             </intent-filter>
         </activity>
 
