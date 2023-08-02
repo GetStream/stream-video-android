@@ -1,5 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!--
+<?xml version="1.0" encoding="utf-8"?><!--
      Copyright (c) 2023 Stream.io Inc. All rights reserved.
 
      Licensed under the Stream License;
@@ -33,4 +32,8 @@
     <string name="call_id_number">Call ID Number</string>
     <string name="stream_video">Stream Video</string>
     <string name="call_lobby_description">Try out a video call in this demo powered by Stream\'s video SDK</string>
+    <plurals name="chat_typing">
+        <item quantity="one">%s is typing</item>
+        <item quantity="other">%s and %d more are typing</item>
+    </plurals>
 </resources>

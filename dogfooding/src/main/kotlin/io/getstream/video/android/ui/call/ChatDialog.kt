@@ -20,7 +20,9 @@ package io.getstream.video.android.ui.call
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -32,6 +34,7 @@ import androidx.compose.material.Icon
 import androidx.compose.material.ModalBottomSheetLayout
 import androidx.compose.material.ModalBottomSheetState
 import androidx.compose.material.Scaffold
+import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -42,7 +45,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import io.getstream.chat.android.compose.ui.components.TypingIndicator
 import io.getstream.chat.android.compose.ui.messages.composer.MessageComposer
 import io.getstream.chat.android.compose.ui.messages.list.MessageList
 import io.getstream.chat.android.compose.ui.theme.ChatTheme
@@ -51,6 +56,8 @@ import io.getstream.chat.android.compose.viewmodel.messages.MessageComposerViewM
 import io.getstream.chat.android.compose.viewmodel.messages.MessageListViewModel
 import io.getstream.chat.android.compose.viewmodel.messages.MessagesViewModelFactory
 import io.getstream.chat.android.ui.common.state.messages.list.MessageItemState
+import io.getstream.video.android.R
+import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.core.Call
 
 @Composable
@@ -67,14 +74,11 @@ internal fun ChatDialog(
         channelId = "videocall:${call.id}",
     )
 
-    var messageListViewModel by remember { mutableStateOf<MessageListViewModel?>(null) }
-    val unreadMessageCounts: Int? =
-        messageListViewModel?.currentMessagesState?.messageItems?.filterIsInstance<MessageItemState>()
-            ?.filter { !it.isMessageRead }?.size
-
-    LaunchedEffect(key1 = call) {
-        messageListViewModel = factory.create(MessageListViewModel::class.java)
-    }
+    val messageListViewModel = remember(call) { factory.create(MessageListViewModel::class.java) }
+    val unreadMessageCounts: Int =
+        messageListViewModel.currentMessagesState.messageItems.filterIsInstance<MessageItemState>()
+            .filter { !it.isMessageRead }.size
+    val typingUsers = messageListViewModel.typingUsers
 
     var composerViewModel by remember { mutableStateOf<MessageComposerViewModel?>(null) }
     LaunchedEffect(key1 = call) {
@@ -82,7 +86,7 @@ internal fun ChatDialog(
     }
 
     LaunchedEffect(key1 = unreadMessageCounts) {
-        updateUnreadCount.invoke(unreadMessageCounts ?: 0)
+        updateUnreadCount.invoke(unreadMessageCounts)
     }
 
     ChatTheme {
@@ -104,6 +108,31 @@ internal fun ChatDialog(
                                 .fillMaxWidth()
                                 .padding(top = 32.dp)
                         ) {
+                            if (typingUsers.isNotEmpty()) {
+                                Row(
+                                    modifier = Modifier.align(Alignment.Center),
+                                    horizontalArrangement = Arrangement.spacedBy(6.dp),
+                                    verticalAlignment = Alignment.CenterVertically,
+                                ) {
+                                    val typingUsersText =
+                                        LocalContext.current.resources.getQuantityString(
+                                            R.plurals.chat_typing,
+                                            typingUsers.size,
+                                            typingUsers.first().name,
+                                            typingUsers.size - 1
+                                        )
+
+                                    TypingIndicator()
+
+                                    Text(
+                                        text = typingUsersText,
+                                        color = VideoTheme.colors.textHighEmphasis,
+                                        maxLines = 1,
+                                        overflow = TextOverflow.Ellipsis,
+                                    )
+                                }
+                            }
+
                             Icon(
                                 modifier = Modifier
                                     .align(Alignment.TopEnd)
@@ -124,24 +153,22 @@ internal fun ChatDialog(
                                 viewModel = composerViewModel!!,
                                 onCommandsClick = { composerViewModel!!.toggleCommandsVisibility() },
                                 onCancelAction = {
-                                    messageListViewModel?.dismissAllMessageActions()
+                                    messageListViewModel.dismissAllMessageActions()
                                     composerViewModel!!.dismissMessageActions()
                                 }
                             )
                         }
                     }
                 ) {
-                    if (messageListViewModel != null) {
-                        val currentState = messageListViewModel!!.currentMessagesState
-                        MessageList(
-                            modifier = Modifier
-                                .fillMaxSize()
-                                .background(ChatTheme.colors.appBackground)
-                                .padding(it),
-                            viewModel = messageListViewModel!!,
-                            messagesLazyListState = rememberMessageListState(parentMessageId = currentState.parentMessageId),
-                        )
-                    }
+                    val currentState = messageListViewModel.currentMessagesState
+                    MessageList(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .background(ChatTheme.colors.appBackground)
+                            .padding(it),
+                        viewModel = messageListViewModel,
+                        messagesLazyListState = rememberMessageListState(parentMessageId = currentState.parentMessageId),
+                    )
                 }
             },
             content = content
