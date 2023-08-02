@@ -33,6 +33,7 @@ import io.getstream.video.android.datastore.delegate.StreamUserDataStore
 import io.getstream.video.android.model.User
 import io.getstream.video.android.token.StreamVideoNetwork
 import io.getstream.video.android.token.TokenResponse
+import io.getstream.video.android.util.UserIdGenerator
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -94,6 +95,13 @@ class LoginViewModel @Inject constructor(
                 if (user.isValid() && !BuildConfig.BENCHMARK) {
                     delay(10)
                     handleUiEvent(LoginEvent.SignInInSuccess(userId = user.id))
+                }
+            } else {
+                // Production apps have an automatic guest login. Logging the user out
+                // will just re-login automatically with a new random user ID.
+                if (BuildConfig.FLAVOR == "production") {
+                    handleUiEvent(LoginEvent.Loading)
+                    handleUiEvent(LoginEvent.SignInInSuccess(UserIdGenerator.generateRandomString()))
                 }
             }
         }

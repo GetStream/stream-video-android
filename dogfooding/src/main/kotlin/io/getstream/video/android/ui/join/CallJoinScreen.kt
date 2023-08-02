@@ -29,7 +29,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.ButtonDefaults
@@ -141,7 +141,7 @@ private fun CallJoinHeader(
         )
 
         StreamButton(
-            modifier = Modifier.width(125.dp),
+            modifier = Modifier.widthIn(125.dp),
             text = stringResource(id = R.string.sign_out),
             onClick = { callJoinViewModel.signOut() }
         )
