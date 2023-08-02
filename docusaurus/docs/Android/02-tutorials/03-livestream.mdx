@@ -178,26 +178,26 @@ In `MainActivity.kt` replace the `VideoTheme` with the following code:
 ```kotlin
 VideoTheme {
     val participantCount by call.state.participantCounts.collectAsState()
-    val connection by call.state.connection.collectAsState()
     val total = participantCount?.total
+    val connection by call.state.connection.collectAsState()
     val backstage by call.state.backstage.collectAsState()
     val me by call.state.me.collectAsState()
     val video = me?.video?.collectAsState()?.value
-    val session by call.state.session.collectAsState()
-    val durationInMs by call.state.durationInMs.collectAsState()
+    val durationInDateFormat by call.state.durationInDateFormat.collectAsState()
 
     Scaffold(
         modifier = Modifier
-            .fillMaxSize()
             .background(VideoTheme.colors.appBackground)
+            .fillMaxSize()
             .padding(6.dp),
         contentColor = VideoTheme.colors.appBackground,
-
+        backgroundColor = VideoTheme.colors.appBackground, // Use containerColor in material3
         topBar = {
             if (connection == RealtimeConnection.Connected) {
                 if (!backstage) {
                     Box(
                         modifier = Modifier
+                            .background(VideoTheme.colors.appBackground)
                             .fillMaxWidth()
                             .padding(6.dp)
                     ) {
@@ -215,7 +215,7 @@ VideoTheme {
 
                         Text(
                             modifier = Modifier.align(Alignment.Center),
-                            text = "Live for 1:23",
+                            text = "Live for ${durationInDateFormat ?: 0}",
                             color = VideoTheme.colors.textHighEmphasis
                         )
                     }
@@ -225,17 +225,17 @@ VideoTheme {
         bottomBar = {
             Button(
                 colors = ButtonDefaults.buttonColors(
-                    backgroundColor = VideoTheme.colors.primaryAccent,
-                    contentColor = VideoTheme.colors.primaryAccent
+                    contentColor = VideoTheme.colors.primaryAccent,
+                    backgroundColor = VideoTheme.colors.primaryAccent // Use containerColor in material3
                 ),
                 onClick = {
                     lifecycleScope.launch {
-                        if (backstage) call.goLive() else call.end()
+                        if (backstage) call.goLive() else call.stopLive()
                     }
                 }
             ) {
                 Text(
-                    text = if (backstage) "Go Live" else "End Livestream",
+                    text = if (backstage) "Go Live" else "Stop Broadcast",
                     color = Color.White
                 )
             }
