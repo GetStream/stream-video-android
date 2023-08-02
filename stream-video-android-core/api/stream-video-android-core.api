@@ -645,7 +645,7 @@ public abstract interface class io/getstream/video/android/core/StreamVideo : io
 	public abstract fun getUser ()Lio/getstream/video/android/model/User;
 	public abstract fun getUserId ()Ljava/lang/String;
 	public abstract fun logOut ()V
-	public abstract fun queryCalls (Ljava/util/Map;Ljava/util/List;IZLkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public abstract fun queryCalls (Ljava/util/Map;Ljava/util/List;ILjava/lang/String;Ljava/lang/String;ZLkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public abstract fun subscribe (Lio/getstream/video/android/core/events/VideoEventListener;)Lio/getstream/video/android/core/EventSubscription;
 	public abstract fun subscribeFor ([Ljava/lang/Class;Lio/getstream/video/android/core/events/VideoEventListener;)Lio/getstream/video/android/core/EventSubscription;
 }
@@ -660,7 +660,7 @@ public final class io/getstream/video/android/core/StreamVideo$Companion {
 
 public final class io/getstream/video/android/core/StreamVideo$DefaultImpls {
 	public static synthetic fun call$default (Lio/getstream/video/android/core/StreamVideo;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)Lio/getstream/video/android/core/Call;
-	public static synthetic fun queryCalls$default (Lio/getstream/video/android/core/StreamVideo;Ljava/util/Map;Ljava/util/List;IZLkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
+	public static synthetic fun queryCalls$default (Lio/getstream/video/android/core/StreamVideo;Ljava/util/Map;Ljava/util/List;ILjava/lang/String;Ljava/lang/String;ZLkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
 }
 
 public final class io/getstream/video/android/core/StreamVideoBuilder {

@@ -17,6 +17,7 @@
 package io.getstream.video.android.core
 
 import com.google.common.truth.Truth.assertThat
+import io.getstream.result.Result
 import io.getstream.video.android.core.base.IntegrationTestBase
 import io.getstream.video.android.core.events.DominantSpeakerChangedEvent
 import io.getstream.video.android.model.User
@@ -34,7 +35,11 @@ import org.openapitools.client.models.ScreensharingSettingsRequest
 import org.robolectric.RobolectricTestRunner
 import org.threeten.bp.Clock
 import org.threeten.bp.OffsetDateTime
+import kotlin.test.Ignore
+import kotlin.test.assertEquals
 import kotlin.test.assertFalse
+import kotlin.test.assertNotNull
+import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
 @RunWith(RobolectricTestRunner::class)
@@ -176,6 +181,58 @@ class CallStateTest : IntegrationTestBase() {
                 assertThat(call.state.settings.value).isNotNull()
             }
         }
+    }
+
+    @Test
+    fun `Query calls pagination works`() = runTest {
+        // get first page with one result
+        val queryResult = client.queryCalls(emptyMap(), limit = 1)
+        assertSuccess(queryResult)
+
+        val successResponsePage1 = queryResult as Result.Success
+        // verify the response has no previous page and a next page
+        assertNotNull(successResponsePage1.value.next)
+        assertNull(successResponsePage1.value.prev)
+
+        // request next page
+        val queryResultPage2 = client.queryCalls(
+            emptyMap(),
+            prev = successResponsePage1.value.prev,
+            next = successResponsePage1.value.next,
+            limit = 1
+        )
+        assertSuccess(queryResultPage2)
+
+        val successResultPage2 = queryResultPage2 as Result.Success
+        // verify the response points to previous page and has a next page
+        assertEquals(queryResult.value.next, successResultPage2.value.prev)
+        assertNotNull(successResultPage2.value.next)
+    }
+
+    @Ignore("Backend returns 0 members on second page - need to investigate")
+    @Test fun `Query members pagination works`() = runTest {
+        val call = client.call("default", randomUUID())
+        // create call
+        val createResponse = call.create(memberIds = listOf("thierry", "tommaso"))
+        assertSuccess(createResponse)
+
+        // get first page with one result
+        val queryResult1 = client.queryMembers(type = call.type, id = call.id, limit = 1)
+        assertSuccess(queryResult1)
+        assertEquals(queryResult1.getOrThrow().members.size, 1)
+        assertEquals(queryResult1.getOrThrow().members[0].userId, "thierry")
+
+        // get second page with one result
+        val queryResult2 = client.queryMembers(
+            type = call.type,
+            id = call.id,
+            next = queryResult1.getOrThrow().next,
+            limit = 1,
+        )
+
+        assertSuccess(queryResult2)
+        assertEquals(queryResult2.getOrThrow().members.size, 1)
+        assertEquals(queryResult2.getOrThrow().members[0].userId, "tommaso")
     }
 
     @Test
