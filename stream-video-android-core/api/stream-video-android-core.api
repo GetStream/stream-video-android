@@ -103,6 +103,7 @@ public final class io/getstream/video/android/core/CallState {
 	public final fun getCustom ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun getDominantSpeaker ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun getDuration ()Lkotlinx/coroutines/flow/StateFlow;
+	public final fun getDurationInDateFormat ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun getDurationInMs ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun getEgress ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun getEndedAt ()Lkotlinx/coroutines/flow/StateFlow;
