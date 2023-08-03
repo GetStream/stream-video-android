@@ -119,7 +119,6 @@ Video roadmap and changelog is available [here](https://github.com/GetStream/pro
 ### 0.4.0 milestone
 
 - [ ] Upgrade to more recent versions of webrtc
-- [ ] Tap to focus
 - [ ] Picture of the video stream at highest resolution
 - [ ] Review foreground service vs backend for some things like screensharing etc
 - [ ] Audio & Video filters. Support  (Daniel)
@@ -132,6 +131,7 @@ Video roadmap and changelog is available [here](https://github.com/GetStream/pro
 - [ ] Enable SFU switching
 - [ ] Screensharing from mobile
 - [ ] Camera controls
+- [ ] Tap to focus
 
 ### Dynascale 2.0
 

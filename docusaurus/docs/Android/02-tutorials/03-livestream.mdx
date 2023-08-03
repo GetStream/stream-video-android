@@ -178,12 +178,11 @@ In `MainActivity.kt` replace the `VideoTheme` with the following code:
 ```kotlin
 VideoTheme {
     val participantCount by call.state.participantCounts.collectAsState()
-    val connection by call.state.connection.collectAsState()
     val total = participantCount?.total
+    val connection by call.state.connection.collectAsState()
     val backstage by call.state.backstage.collectAsState()
     val me by call.state.me.collectAsState()
     val video = me?.video?.collectAsState()?.value
-    val session by call.state.session.collectAsState()
     val durationInMs by call.state.durationInMs.collectAsState()
 
     Scaffold(
@@ -192,7 +191,8 @@ VideoTheme {
             .background(VideoTheme.colors.appBackground)
             .padding(6.dp),
         contentColor = VideoTheme.colors.appBackground,
-
+        // Use containerColor in material3
+        backgroundColor = VideoTheme.colors.appBackground,
         topBar = {
             if (connection == RealtimeConnection.Connected) {
                 if (!backstage) {
@@ -225,8 +225,9 @@ VideoTheme {
         bottomBar = {
             Button(
                 colors = ButtonDefaults.buttonColors(
-                    backgroundColor = VideoTheme.colors.primaryAccent,
-                    contentColor = VideoTheme.colors.primaryAccent
+                    contentColor = VideoTheme.colors.primaryAccent,
+                    // Use containerColor in material3
+                    backgroundColor = VideoTheme.colors.primaryAccent
                 ),
                 onClick = {
                     lifecycleScope.launch {
@@ -286,8 +287,8 @@ If you want to learn more about building an advanced UIs for watching a livestre
 ### Step 4 - (Optional) Publishing RTMP using OBS
 
 The example above showed how to publish your phone's camera to the livestream.
-Almost all livestream software and hardware supports RTMPs.
-So let's see how to publish using RTMPs. Feel free to skip this step if you don't need to use RTMPs.
+Almost all livestream software and hardware supports RTMPS.
+[OBS](https://obsproject.com/) is one of the most popular livestreaming software packages and we'll use it to explain how to import RTMPS.
 
 A. Log the URL & Stream Key
 
