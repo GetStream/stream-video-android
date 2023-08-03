@@ -211,6 +211,7 @@ public data class ParticipantState(
             name = participant.name,
             image = participant.image,
             role = participant.roles.firstOrNull().orEmpty(),
+            custom = participant.custom ?: emptyMap<>()
         )
     }
 
