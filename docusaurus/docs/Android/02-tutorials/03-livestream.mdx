@@ -191,7 +191,8 @@ VideoTheme {
             .background(VideoTheme.colors.appBackground)
             .padding(6.dp),
         contentColor = VideoTheme.colors.appBackground,
-        backgroundColor = VideoTheme.colors.appBackground, // Use containerColor in material3
+        // Use containerColor in material3
+        backgroundColor = VideoTheme.colors.appBackground,
         topBar = {
             if (connection == RealtimeConnection.Connected) {
                 if (!backstage) {
@@ -225,7 +226,8 @@ VideoTheme {
             Button(
                 colors = ButtonDefaults.buttonColors(
                     contentColor = VideoTheme.colors.primaryAccent,
-                    backgroundColor = VideoTheme.colors.primaryAccent // Use containerColor in material3
+                    // Use containerColor in material3
+                    backgroundColor = VideoTheme.colors.primaryAccent
                 ),
                 onClick = {
                     lifecycleScope.launch {
