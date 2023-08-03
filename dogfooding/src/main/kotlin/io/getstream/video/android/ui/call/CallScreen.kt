@@ -28,6 +28,7 @@ import androidx.compose.material.Snackbar
 import androidx.compose.material.Text
 import androidx.compose.material.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -39,6 +40,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
+import io.getstream.video.android.compose.permission.VideoPermissionsState
+import io.getstream.video.android.compose.permission.rememberCallPermissionsState
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.call.activecall.CallContent
 import io.getstream.video.android.compose.ui.components.call.controls.ControlActions
@@ -59,6 +62,7 @@ fun CallScreen(
     showDebugOptions: Boolean = false,
     onLeaveCall: () -> Unit = {},
 ) {
+    val permissions = rememberCallPermissionsState(call = call)
     val isCameraEnabled by call.camera.isEnabled.collectAsState()
     val isMicrophoneEnabled by call.microphone.isEnabled.collectAsState()
     val speakingWhileMuted by call.state.speakingWhileMuted.collectAsState()
@@ -70,6 +74,8 @@ fun CallScreen(
         skipHalfExpanded = true,
     )
     val scope = rememberCoroutineScope()
+
+    DefaultPermissionHandler(videoPermission = permissions)
 
     VideoTheme {
         ChatDialog(
@@ -189,6 +195,15 @@ fun CallScreen(
                 onDismissed = { isShowingAvailableDeviceMenu = false },
             )
         }
+    }
+}
+
+@Composable
+private fun DefaultPermissionHandler(
+    videoPermission: VideoPermissionsState,
+) {
+    LaunchedEffect(key1 = videoPermission) {
+        videoPermission.launchPermissionRequest()
     }
 }
 
