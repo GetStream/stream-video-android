@@ -69,7 +69,7 @@ class MainActivity : ComponentActivity() {
         val user = User(
             id = userId, // any string
             name = "Tutorial", // name and image are used in the UI
-            role = "admin"
+            role = "admin",
         )
 
         // step2 - initialize StreamVideo. For a production app we recommend adding the client to your Application class or di module.
@@ -106,7 +106,7 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier
                         .fillMaxSize()
                         .background(VideoTheme.colors.appBackground)
-                        .onSizeChanged { parentSize = it }
+                        .onSizeChanged { parentSize = it },
                 ) {
                     if (remoteParticipant != null) {
                         val remoteVideo by remoteParticipant.video.collectAsState()
@@ -115,7 +115,7 @@ class MainActivity : ComponentActivity() {
                             VideoRenderer(
                                 modifier = Modifier.weight(1f),
                                 call = call,
-                                video = remoteVideo
+                                video = remoteVideo,
                             )
                         }
                     } else {
@@ -123,7 +123,7 @@ class MainActivity : ComponentActivity() {
                             Text(
                                 text = "loading...",
                                 fontSize = 30.sp,
-                                color = VideoTheme.colors.textHighEmphasis
+                                color = VideoTheme.colors.textHighEmphasis,
                             )
                         } else {
                             Text(
@@ -131,7 +131,7 @@ class MainActivity : ComponentActivity() {
                                 text = "Join call ${call.id} in your browser",
                                 fontSize = 30.sp,
                                 color = VideoTheme.colors.textHighEmphasis,
-                                textAlign = TextAlign.Center
+                                textAlign = TextAlign.Center,
                             )
                         }
                     }
@@ -142,7 +142,7 @@ class MainActivity : ComponentActivity() {
                             modifier = Modifier.align(Alignment.TopEnd),
                             call = call,
                             participant = me!!,
-                            parentBounds = parentSize
+                            parentBounds = parentSize,
                         )
                     }
                 }

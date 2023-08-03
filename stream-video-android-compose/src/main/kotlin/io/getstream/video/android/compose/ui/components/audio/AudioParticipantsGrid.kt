@@ -50,11 +50,11 @@ public fun AudioParticipantsGrid(
     style: AudioRendererStyle = RegularAudioRendererStyle(),
     audioRenderer: @Composable (
         participant: ParticipantState,
-        style: AudioRendererStyle
+        style: AudioRendererStyle,
     ) -> Unit = { audioParticipant, audioStyle ->
         ParticipantAudio(
             participant = audioParticipant,
-            style = audioStyle
+            style = audioStyle,
         )
     },
 ) {
@@ -64,12 +64,14 @@ public fun AudioParticipantsGrid(
         modifier = modifier,
         columns = GridCells.Adaptive(VideoTheme.dimens.audioAvatarSize),
         contentPadding = PaddingValues(vertical = 32.dp),
-        verticalArrangement = Arrangement.spacedBy(VideoTheme.dimens.audioRoomAvatarLandscapePadding),
+        verticalArrangement = Arrangement.spacedBy(
+            VideoTheme.dimens.audioRoomAvatarLandscapePadding,
+        ),
         horizontalArrangement = if (orientation == Configuration.ORIENTATION_LANDSCAPE) {
             Arrangement.spacedBy(VideoTheme.dimens.audioRoomAvatarLandscapePadding)
         } else {
             Arrangement.spacedBy(0.dp)
-        }
+        },
     ) {
         items(items = participants, key = { it.sessionId }) { participant ->
             audioRenderer.invoke(participant, style)
@@ -85,7 +87,7 @@ private fun AudioParticipantsGridPreview() {
     VideoTheme {
         AudioParticipantsGrid(
             modifier = Modifier.fillMaxSize(),
-            participants = mockParticipantList
+            participants = mockParticipantList,
         )
     }
 }

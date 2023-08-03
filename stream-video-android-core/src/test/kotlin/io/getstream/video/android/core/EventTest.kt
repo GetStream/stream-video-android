@@ -71,14 +71,16 @@ class EventTest : IntegrationTestBase(connectCoordinatorWS = false) {
             "thierry" to io.getstream.video.android.model.UserAudioLevel(
                 "thierry",
                 true,
-                10F
-            )
+                10F,
+            ),
         )
         val event = AudioLevelChangedEvent(levels = levels)
         clientImpl.fireEvent(event, call.cid)
 
         // ensure we update call data and capabilities
-        assertThat(call.state.activeSpeakers.value.map { it.initialUser.id }).containsExactly("thierry")
+        assertThat(
+            call.state.activeSpeakers.value.map { it.initialUser.id },
+        ).containsExactly("thierry")
     }
 
     @Test
@@ -98,13 +100,16 @@ class EventTest : IntegrationTestBase(connectCoordinatorWS = false) {
         // send the event
         val quality = ConnectionQualityInfo(
             session_id = "thierry",
-            user_id = "thierry", connection_quality = ConnectionQuality.CONNECTION_QUALITY_EXCELLENT
+            user_id = "thierry",
+            connection_quality = ConnectionQuality.CONNECTION_QUALITY_EXCELLENT,
         )
         val event = ConnectionQualityChangeEvent(updates = mutableListOf(quality))
         clientImpl.fireEvent(event, call.cid)
 
-        assertThat(call.state.getParticipantBySessionId("thierry")?.networkQuality?.value).isEqualTo(
-            NetworkQuality.Excellent()
+        assertThat(
+            call.state.getParticipantBySessionId("thierry")?.networkQuality?.value,
+        ).isEqualTo(
+            NetworkQuality.Excellent(),
         )
     }
 
@@ -146,14 +151,13 @@ class EventTest : IntegrationTestBase(connectCoordinatorWS = false) {
 
     @Test
     fun `Call permissions updated`() {
-
         val permissions = mutableListOf<String>("screenshare")
         val requestEvent = PermissionRequestEvent(
             call.cid,
             nowUtc,
             permissions,
             "call.permission_request",
-            testData.users["thierry"]!!.toUserResponse()
+            testData.users["thierry"]!!.toUserResponse(),
         )
         clientImpl.fireEvent(requestEvent)
         val capability = OwnCapability.Screenshare
@@ -163,7 +167,7 @@ class EventTest : IntegrationTestBase(connectCoordinatorWS = false) {
             nowUtc,
             ownCapabilities,
             "call.permissions_updated",
-            testData.users["thierry"]!!.toUserResponse()
+            testData.users["thierry"]!!.toUserResponse(),
         )
         clientImpl.fireEvent(permissionsUpdated, call.cid)
 
@@ -177,7 +181,7 @@ class EventTest : IntegrationTestBase(connectCoordinatorWS = false) {
             callCid = call.cid,
             nowUtc,
             "call.ended",
-            user = testData.users["thierry"]!!.toUserResponse()
+            user = testData.users["thierry"]!!.toUserResponse(),
         )
 
         clientImpl.fireEvent(event)
@@ -203,12 +207,11 @@ class EventTest : IntegrationTestBase(connectCoordinatorWS = false) {
 
     @Test
     fun `Block and unblock a user`() = runTest {
-
         val blockEvent = BlockedUserEvent(
             callCid = call.cid,
             createdAt = nowUtc,
             type = "call.blocked_user",
-            user = testData.users["thierry"]!!.toUserResponse()
+            user = testData.users["thierry"]!!.toUserResponse(),
         )
         clientImpl.fireEvent(blockEvent)
         assertThat(call.state.blockedUsers.value).contains("thierry")
@@ -217,7 +220,7 @@ class EventTest : IntegrationTestBase(connectCoordinatorWS = false) {
             callCid = call.cid,
             createdAt = nowUtc,
             type = "call.blocked_user",
-            user = testData.users["thierry"]!!.toUserResponse()
+            user = testData.users["thierry"]!!.toUserResponse(),
         )
         clientImpl.fireEvent(unBlockEvent)
         assertThat(call.state.blockedUsers.value).doesNotContain("thierry")
@@ -230,15 +233,15 @@ class EventTest : IntegrationTestBase(connectCoordinatorWS = false) {
             createdAt = nowUtc,
             type = "call.permission_request",
             permissions = mutableListOf("screenshare"),
-            user = testData.users["thierry"]!!.toUserResponse()
+            user = testData.users["thierry"]!!.toUserResponse(),
         )
         val permissionRequest = PermissionRequest(
             call,
-            permissionRequestEvent
+            permissionRequestEvent,
         )
         clientImpl.fireEvent(permissionRequestEvent)
         assertThat(call.state.permissionRequests.value).contains(
-            permissionRequest
+            permissionRequest,
         )
     }
 
@@ -264,7 +267,7 @@ class EventTest : IntegrationTestBase(connectCoordinatorWS = false) {
             reaction = ReactionResponse(
                 type = "like",
                 user = testData.users["thierry"]!!.toUserResponse(),
-                custom = mutableMapOf("fruit" to "apple")
+                custom = mutableMapOf("fruit" to "apple"),
             ),
         )
         // ensure the participant is setup
@@ -295,7 +298,7 @@ class EventTest : IntegrationTestBase(connectCoordinatorWS = false) {
         val screenShareEvent = TrackPublishedEvent(
             userId = "thierry",
             sessionId = sessionId,
-            trackType = TrackType.TRACK_TYPE_SCREEN_SHARE
+            trackType = TrackType.TRACK_TYPE_SCREEN_SHARE,
         )
         clientImpl.fireEvent(screenShareEvent, call.cid)
 

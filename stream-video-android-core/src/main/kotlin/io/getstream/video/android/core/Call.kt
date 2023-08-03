@@ -127,7 +127,7 @@ public class Call(
                 clientImpl.context,
                 this,
                 scope,
-                clientImpl.peerConnectionFactory.eglBase.eglBaseContext
+                clientImpl.peerConnectionFactory.eglBase.eglBaseContext,
             )
         }
     }
@@ -150,10 +150,9 @@ public class Call(
         startsAt: OffsetDateTime? = null,
         team: String? = null,
         ring: Boolean = false,
-        notify: Boolean = false
+        notify: Boolean = false,
 
     ): Result<GetOrCreateCallResponse> {
-
         val response = if (members != null) {
             clientImpl.getOrCreateCallFullMembers(
                 type = type,
@@ -164,7 +163,7 @@ public class Call(
                 startsAt = startsAt,
                 team = team,
                 ring = ring,
-                notify = notify
+                notify = notify,
             )
         } else {
             clientImpl.getOrCreateCall(
@@ -176,7 +175,7 @@ public class Call(
                 startsAt = startsAt,
                 team = team,
                 ring = ring,
-                notify = notify
+                notify = notify,
             )
         }
 
@@ -195,11 +194,10 @@ public class Call(
         settingsOverride: CallSettingsRequest? = null,
         startsAt: OffsetDateTime? = null,
     ): Result<UpdateCallResponse> {
-
         val request = UpdateCallRequest(
             custom = custom,
             settingsOverride = settingsOverride,
-            startsAt = startsAt
+            startsAt = startsAt,
         )
         val response = clientImpl.updateCall(type, id, request)
         response.onSuccess {
@@ -255,7 +253,9 @@ public class Call(
         notify: Boolean = false,
     ): Result<RtcSession> {
         if (session != null) {
-            throw IllegalStateException("Call $cid has already been joined. Please use call.leave before joining it again")
+            throw IllegalStateException(
+                "Call $cid has already been joined. Please use call.leave before joining it again",
+            )
         }
 
         // step 1. call the join endpoint to get a list of SFUs
@@ -409,7 +409,7 @@ public class Call(
     suspend fun sendReaction(
         type: String,
         emoji: String? = null,
-        custom: Map<String, Any>? = null
+        custom: Map<String, Any>? = null,
     ): Result<SendReactionResponse> {
         return clientImpl.sendReaction(this.type, id, type, emoji, custom)
     }
@@ -417,21 +417,21 @@ public class Call(
     suspend fun queryMembers(
         filter: Map<String, Any>,
         sort: List<SortField> = mutableListOf(SortField.Desc("created_at")),
-        limit: Int = 100
+        limit: Int = 100,
     ): Result<QueryMembersResponse> {
         return clientImpl.queryMembers(
             type = type,
             id = id,
             filter = filter,
             sort = sort,
-            limit = limit
+            limit = limit,
         ).onSuccess { state.updateFromResponse(it) }
     }
 
     suspend fun muteAllUsers(
         audio: Boolean = true,
         video: Boolean = false,
-        screenShare: Boolean = false
+        screenShare: Boolean = false,
     ): Result<MuteUsersResponse> {
         val request = MuteUsersData(
             muteAllUsers = true,
@@ -458,7 +458,7 @@ public class Call(
         videoRenderer: VideoTextureViewRenderer,
         sessionId: String,
         trackType: TrackType,
-        onRendered: (View) -> Unit = {}
+        onRendered: (View) -> Unit = {},
     ) {
         logger.d { "[initRenderer] #sfu; sessionId: $sessionId" }
 
@@ -475,8 +475,8 @@ public class Call(
                             true,
                             VideoDimension(
                                 videoRenderer.measuredWidth,
-                                videoRenderer.measuredHeight
-                            )
+                                videoRenderer.measuredHeight,
+                            ),
                         )
                     }
                     onRendered(videoRenderer)
@@ -492,12 +492,12 @@ public class Call(
                             true,
                             VideoDimension(
                                 videoRenderer.measuredWidth,
-                                videoRenderer.measuredHeight
-                            )
+                                videoRenderer.measuredHeight,
+                            ),
                         )
                     }
                 }
-            }
+            },
         )
     }
 
@@ -552,7 +552,7 @@ public class Call(
     }
 
     public fun subscribe(
-        listener: VideoEventListener<VideoEvent>
+        listener: VideoEventListener<VideoEvent>,
     ): EventSubscription {
         val sub = EventSubscription(listener)
         subscriptions.add(sub)
@@ -572,22 +572,22 @@ public class Call(
 
     public suspend fun grantPermissions(
         userId: String,
-        permissions: List<String>
+        permissions: List<String>,
     ): Result<UpdateUserPermissionsResponse> {
         val request = UpdateUserPermissionsData(
             userId = userId,
-            grantedPermissions = permissions
+            grantedPermissions = permissions,
         )
         return clientImpl.updateUserPermissions(type, id, request)
     }
 
     public suspend fun revokePermissions(
         userId: String,
-        permissions: List<String>
+        permissions: List<String>,
     ): Result<UpdateUserPermissionsResponse> {
         val request = UpdateUserPermissionsData(
             userId = userId,
-            revokedPermissions = permissions
+            revokedPermissions = permissions,
         )
         return clientImpl.updateUserPermissions(type, id, request)
     }
@@ -623,7 +623,7 @@ public class Call(
         userId: String,
         audio: Boolean = true,
         video: Boolean = false,
-        screenShare: Boolean = false
+        screenShare: Boolean = false,
     ): Result<MuteUsersResponse> {
         val request = MuteUsersData(
             users = listOf(userId),
@@ -639,7 +639,7 @@ public class Call(
         userIds: List<String>,
         audio: Boolean = true,
         video: Boolean = false,
-        screenShare: Boolean = false
+        screenShare: Boolean = false,
     ): Result<MuteUsersResponse> {
         val request = MuteUsersData(
             users = userIds,
@@ -657,7 +657,7 @@ public class Call(
         location: String,
         currentSfu: String? = null,
         ring: Boolean = false,
-        notify: Boolean = false
+        notify: Boolean = false,
     ): Result<JoinCallResponse> {
         val result = clientImpl.joinCall(
             type, id,
@@ -669,7 +669,7 @@ public class Call(
             team = create?.team,
             ring = ring,
             notify = notify,
-            location = location
+            location = location,
         )
         result.onSuccess {
             state.updateFromResponse(it)

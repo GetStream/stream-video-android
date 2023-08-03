@@ -54,9 +54,8 @@ public data class ScreenShareStyle(
                 attrs,
                 R.styleable.ScreenShareView,
                 R.attr.streamVideoScreenShareStyle,
-                R.style.StreamVideo_ScreenShare
+                R.style.StreamVideo_ScreenShare,
             ).use {
-
                 val fullscreenIcon =
                     it.getDrawable(R.styleable.ScreenShareView_streamVideoScreenShareFullscreenIcon)
                         ?: context.getDrawableCompat(RCommon.drawable.stream_video_ic_fullscreen)!!
@@ -75,12 +74,12 @@ public data class ScreenShareStyle(
 
                 val controlButtonBackgroundTint = it.getColor(
                     R.styleable.ScreenShareView_streamVideoScreenShareControlsBackgroundTint,
-                    context.getColorCompat(RCommon.color.stream_video_bars_background)
+                    context.getColorCompat(RCommon.color.stream_video_bars_background),
                 )
 
                 val controlButtonIconTint = it.getColor(
                     R.styleable.ScreenShareView_streamVideoScreenShareControlsIconTint,
-                    context.getColorCompat(R.color.stream_video_black)
+                    context.getColorCompat(R.color.stream_video_black),
                 )
 
                 return ScreenShareStyle(
@@ -89,7 +88,7 @@ public data class ScreenShareStyle(
                     portraitIcon = portraitIcon,
                     landscapeIcon = landscapeIcon,
                     controlButtonBackgroundTint = controlButtonBackgroundTint,
-                    controlButtonIconTint = controlButtonIconTint
+                    controlButtonIconTint = controlButtonIconTint,
                 ).let(TransformStyle.screenShareStyleTransformer::transform)
             }
         }

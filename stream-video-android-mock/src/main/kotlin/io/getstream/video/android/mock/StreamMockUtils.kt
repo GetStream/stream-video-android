@@ -43,7 +43,7 @@ public object StreamMockUtils {
                 context = context.applicationContext,
                 apiKey = "stream-api-key",
                 user = mockUsers.first(),
-                token = "user-token"
+                token = "user-token",
             ).build()
         }
     }
@@ -51,7 +51,10 @@ public object StreamMockUtils {
 
 /** Mock a [Call] that contains a mock user. */
 public val mockCall: Call = Call(
-    client = StreamMockUtils.streamVideo, type = "default", id = "123", user = mockUsers[0]
+    client = StreamMockUtils.streamVideo,
+    type = "default",
+    id = "123",
+    user = mockUsers[0],
 ).apply {
     val participants = mockUsers.take(2).map { user ->
         val sessionId = if (user == mockUsers.first()) {
@@ -62,7 +65,7 @@ public val mockCall: Call = Call(
         ParticipantState(
             initialUser = user,
             sessionId = sessionId,
-            call = this
+            call = this,
         )
     }
     state.upsertParticipants(participants)
@@ -71,7 +74,8 @@ public val mockCall: Call = Call(
 /** Mock a new [MediaTrack]. */
 public val mockVideoMediaTrack: MediaTrack
     inline get() = io.getstream.video.android.core.model.VideoTrack(
-        UUID.randomUUID().toString(), VideoTrack(123)
+        UUID.randomUUID().toString(),
+        VideoTrack(123),
     )
 
 /** Mock a list of [User]. */
@@ -81,37 +85,37 @@ public val mockUsers: List<User>
             id = "thierry",
             name = "Thierry",
             image = "https://avatars.githubusercontent.com/u/265409?v=4",
-            role = "admin"
+            role = "admin",
         ),
         User(
             id = "jaewoong",
             name = "Jaewoong Eum",
             image = "https://ca.slack-edge.com/T02RM6X6B-U02HU1XR9LM-626fb91c334e-128",
-            role = "admin"
+            role = "admin",
         ),
         User(
             id = "toma_zdravkovic",
             name = "Toma Zdravkovic",
             image = "https://upload.wikimedia.org/wikipedia/commons/d/da/Toma_Zdravkovi%C4%87.jpg",
-            role = "admin"
+            role = "admin",
         ),
         User(
             id = "tyrone_bailey",
             name = "Tyrone Bailey",
             image = "https://getstream.io/chat/docs/sdk/avatars/jpg/Tyrone%20Bailey.jpg",
-            role = "admin"
+            role = "admin",
         ),
         User(
             id = "willard",
             name = "Willard Hessel",
             image = "https://getstream.io/chat/docs/sdk/avatars/jpg/Willard%20Hessel.jpg",
-            role = "admin"
+            role = "admin",
         ),
         User(
             id = "blanche",
             name = "Blanche Schoen",
             image = "https://getstream.io/chat/docs/sdk/avatars/jpg/Blanche%20Schoen.jpg",
-            role = "admin"
+            role = "admin",
         ),
     )
 
@@ -130,8 +134,8 @@ public val mockParticipantList: List<ParticipantState>
                 ParticipantState(
                     initialUser = user,
                     sessionId = sessionId,
-                    call = mockCall
-                ).also { mockCall.state.updateParticipant(it) }
+                    call = mockCall,
+                ).also { mockCall.state.updateParticipant(it) },
             )
         }
         return participants
@@ -154,8 +158,8 @@ public val mockMemberStateList: List<MemberState>
                     createdAt = OffsetDateTime.now(),
                     updatedAt = OffsetDateTime.now(),
                     custom = emptyMap(),
-                    role = "admin"
-                )
+                    role = "admin",
+                ),
             )
         }
         return participants

@@ -43,13 +43,13 @@ internal class CallBackgroundTest : BaseComposeTest() {
         snapshot {
             CallBackground(
                 participants = mockMemberStateList.take(1),
-                isIncoming = true
+                isIncoming = true,
             ) {
                 Box(modifier = Modifier.align(Alignment.Center)) {
                     Avatar(
                         modifier = Modifier.size(72.dp),
                         initials = null,
-                        previewPlaceholder = R.drawable.stream_video_call_sample
+                        previewPlaceholder = R.drawable.stream_video_call_sample,
                     )
                 }
             }

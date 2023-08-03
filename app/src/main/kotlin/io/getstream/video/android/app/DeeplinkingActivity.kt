@@ -45,11 +45,11 @@ class DeeplinkingActivity : ComponentActivity() {
                 Box(
                     modifier = Modifier
                         .fillMaxSize()
-                        .background(VideoTheme.colors.appBackground)
+                        .background(VideoTheme.colors.appBackground),
                 ) {
                     CircularProgressIndicator(
                         modifier = Modifier.align(Alignment.Center),
-                        color = VideoTheme.colors.primaryAccent
+                        color = VideoTheme.colors.primaryAccent,
                     )
                 }
             }
@@ -67,7 +67,8 @@ class DeeplinkingActivity : ComponentActivity() {
     private fun joinCall(cid: String) {
         val callId = StreamCallId(type = "default", id = cid)
         val intent = MainActivity.createIntent(
-            context = this@DeeplinkingActivity, callId = callId
+            context = this@DeeplinkingActivity,
+            callId = callId,
         ).apply {
             flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
         }

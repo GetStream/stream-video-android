@@ -33,7 +33,7 @@ private const val SAMPLING_TIME_MS = 600
  */
 internal class DecibelThresholdDetection(
     private val thresholdInDecibels: Int = 45,
-    val thresholdCrossedCallback: () -> Unit
+    val thresholdCrossedCallback: () -> Unit,
 ) {
 
     private val decibelSamples = LinkedHashMap<Long, Double>()

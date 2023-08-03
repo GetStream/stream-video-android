@@ -45,7 +45,7 @@ class MainViewModel : ViewModel() {
         viewModelScope.launch {
             val response = StreamVideoNetwork.tokenService.fetchToken(
                 userId = user.id,
-                apiKey = VideoApp.API_KEY
+                apiKey = VideoApp.API_KEY,
             )
             val token = response.token
 
@@ -53,7 +53,7 @@ class MainViewModel : ViewModel() {
                 user = user,
                 apiKey = VideoApp.API_KEY,
                 token = token,
-                loggingLevel = LoggingLevel(priority = Priority.DEBUG)
+                loggingLevel = LoggingLevel(priority = Priority.DEBUG),
             )
 
             val cid = callId ?: StreamCallId(type = "default", id = "1egoN4tKm4w2")

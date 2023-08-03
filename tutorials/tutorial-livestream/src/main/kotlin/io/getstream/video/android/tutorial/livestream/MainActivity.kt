@@ -61,7 +61,7 @@ class MainActivity : ComponentActivity() {
         val user = User(
             id = userId, // any string
             name = "Tutorial", // name and image are used in the UI
-            role = "admin"
+            role = "admin",
         )
 
         // step2 - initialize StreamVideo. For a production app we recommend adding the client to your Application class or di module.
@@ -108,18 +108,18 @@ class MainActivity : ComponentActivity() {
                             Box(
                                 modifier = Modifier
                                     .fillMaxWidth()
-                                    .padding(6.dp)
+                                    .padding(6.dp),
                             ) {
                                 if (!backstage) {
                                     LiveLabel(
                                         modifier = Modifier.align(Alignment.CenterStart),
-                                        liveCount = participantCount?.total ?: 0
+                                        liveCount = participantCount?.total ?: 0,
                                     )
                                 }
 
                                 TimeLabel(
                                     modifier = Modifier.align(Alignment.Center),
-                                    sessionTime = sessionTime ?: 0
+                                    sessionTime = sessionTime ?: 0,
                                 )
                             }
                         }
@@ -128,13 +128,13 @@ class MainActivity : ComponentActivity() {
                         LiveButton(
                             modifier = Modifier.padding(9.dp),
                             call = call,
-                            isBackstage = backstage
+                            isBackstage = backstage,
                         ) {
                             lifecycleScope.launch {
                                 if (backstage) call.goLive() else call.stopLive()
                             }
                         }
-                    }
+                    },
                 ) {
                     VideoRenderer(
                         modifier = Modifier
@@ -145,7 +145,7 @@ class MainActivity : ComponentActivity() {
                         video = video,
                         videoFallbackContent = {
                             Text(text = "Video rendering failed")
-                        }
+                        },
                     )
                 }
             }

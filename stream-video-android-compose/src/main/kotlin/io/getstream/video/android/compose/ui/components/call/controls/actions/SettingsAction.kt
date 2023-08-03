@@ -45,7 +45,7 @@ public fun SettingsAction(
     shape: Shape = VideoTheme.shapes.callControlsButton,
     enabledColor: Color = VideoTheme.colors.callActionIconEnabledBackground,
     disabledColor: Color = VideoTheme.colors.callActionIconDisabledBackground,
-    onCallAction: (Settings) -> Unit
+    onCallAction: (Settings) -> Unit,
 ) {
     CallControlActionBackground(
         modifier = modifier,
@@ -60,7 +60,7 @@ public fun SettingsAction(
                 .clickable(enabled = enabled) { onCallAction(Settings) },
             tint = VideoTheme.colors.callActionIconEnabled,
             painter = painterResource(id = R.drawable.stream_video_ic_options),
-            contentDescription = stringResource(R.string.stream_video_call_controls_settings)
+            contentDescription = stringResource(R.string.stream_video_call_controls_settings),
         )
     }
 }

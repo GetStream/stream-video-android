@@ -28,28 +28,28 @@ public sealed interface CallAction
  * Action to toggle if the speakerphone is on or off.
  */
 public data class ToggleSpeakerphone(
-    val isEnabled: Boolean
+    val isEnabled: Boolean,
 ) : CallAction
 
 /**
  * Action to select an audio device for playback.
  */
 public data class SelectAudioDevice(
-    val audioDevice: AudioDevice
+    val audioDevice: AudioDevice,
 ) : CallAction
 
 /**
  * Action to toggle if the camera is on or off.
  */
 public data class ToggleCamera(
-    val isEnabled: Boolean
+    val isEnabled: Boolean,
 ) : CallAction
 
 /**
  * Action to toggle if the microphone is on or off.
  */
 public data class ToggleMicrophone(
-    val isEnabled: Boolean
+    val isEnabled: Boolean,
 ) : CallAction
 
 /**
@@ -96,7 +96,7 @@ public object Reaction : CallAction
  * Action to invite other users to a call.
  */
 public data class InviteUsersToCall(
-    val users: List<User>
+    val users: List<User>,
 ) : CallAction
 
 /**
@@ -107,7 +107,7 @@ public data class InviteUsersToCall(
  */
 public data class ToggleScreenConfiguration(
     val isFullscreen: Boolean,
-    val isLandscape: Boolean
+    val isLandscape: Boolean,
 ) : CallAction
 
 /**
@@ -121,5 +121,5 @@ public object ShowCallParticipantInfo : CallAction
  */
 public open class CustomAction(
     val data: Map<Any, Any> = emptyMap(),
-    val tag: String
+    val tag: String,
 ) : CallAction

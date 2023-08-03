@@ -147,7 +147,7 @@ fun mangleSdpUtil(
     sdp: SessionDescription,
     enableRed: Boolean = true,
     enableDtx: Boolean = true,
-    enableVp8: Boolean = true
+    enableVp8: Boolean = true,
 ): SessionDescription {
     // we don't touch the answer (for now)
     if (sdp.type == SessionDescription.Type.ANSWER) {
@@ -173,7 +173,7 @@ internal fun buildRemoteIceServers(iceServers: List<IceServer>): List<PeerConnec
 @JvmSynthetic
 internal fun buildConnectionConfiguration(
     iceServers: List<PeerConnection.IceServer>,
-    sdpSemantics: PeerConnection.SdpSemantics = PeerConnection.SdpSemantics.UNIFIED_PLAN
+    sdpSemantics: PeerConnection.SdpSemantics = PeerConnection.SdpSemantics.UNIFIED_PLAN,
 ): PeerConnection.RTCConfiguration {
     return PeerConnection.RTCConfiguration(emptyList()).apply {
         this.sdpSemantics = sdpSemantics
@@ -187,8 +187,8 @@ internal fun buildMediaConstraints(): MediaConstraints {
         mandatory.addAll(
             listOf(
                 MediaConstraints.KeyValuePair("OfferToReceiveAudio", "true"),
-                MediaConstraints.KeyValuePair("OfferToReceiveVideo", "true")
-            )
+                MediaConstraints.KeyValuePair("OfferToReceiveVideo", "true"),
+            ),
         )
     }
 }
@@ -199,23 +199,23 @@ internal fun buildAudioConstraints(): MediaConstraints {
     val items = listOf(
         MediaConstraints.KeyValuePair(
             "googEchoCancellation",
-            true.toString()
+            true.toString(),
         ),
         MediaConstraints.KeyValuePair(
             "googAutoGainControl",
-            true.toString()
+            true.toString(),
         ),
         MediaConstraints.KeyValuePair(
             "googHighpassFilter",
-            true.toString()
+            true.toString(),
         ),
         MediaConstraints.KeyValuePair(
             "googNoiseSuppression",
-            true.toString()
+            true.toString(),
         ),
         MediaConstraints.KeyValuePair(
             "googTypingNoiseDetection",
-            true.toString()
+            true.toString(),
         ),
     )
 

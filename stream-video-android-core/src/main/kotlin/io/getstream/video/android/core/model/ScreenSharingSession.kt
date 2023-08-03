@@ -26,5 +26,5 @@ import io.getstream.video.android.core.ParticipantState
  */
 @Stable
 public data class ScreenSharingSession(
-    public val participant: ParticipantState
+    public val participant: ParticipantState,
 )

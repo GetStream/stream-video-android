@@ -73,13 +73,13 @@ internal fun BoxScope.LandscapeVideoRenderer(
         modifier: Modifier,
         call: Call,
         participant: ParticipantState,
-        style: VideoRendererStyle
+        style: VideoRendererStyle,
     ) -> Unit = { videoModifier, videoCall, videoParticipant, videoStyle ->
         ParticipantVideo(
             modifier = videoModifier,
             call = videoCall,
             participant = videoParticipant,
-            style = videoStyle
+            style = videoStyle,
         )
     },
 ) {
@@ -95,8 +95,8 @@ internal fun BoxScope.LandscapeVideoRenderer(
                 call = call,
                 participant = participant,
                 style = style.copy(
-                    isFocused = dominantSpeaker?.sessionId == participant.sessionId
-                )
+                    isFocused = dominantSpeaker?.sessionId == participant.sessionId,
+                ),
             )
         }
 
@@ -112,8 +112,8 @@ internal fun BoxScope.LandscapeVideoRenderer(
                         call = call,
                         participant = participant,
                         style = style.copy(
-                            isFocused = dominantSpeaker?.sessionId == participant.sessionId
-                        )
+                            isFocused = dominantSpeaker?.sessionId == participant.sessionId,
+                        ),
                     )
                 }
             }
@@ -133,7 +133,7 @@ internal fun BoxScope.LandscapeVideoRenderer(
                         participant = firstParticipant,
                         style = style.copy(
                             isFocused = dominantSpeaker?.sessionId == firstParticipant.sessionId,
-                        )
+                        ),
                     )
 
                     videoRenderer.invoke(
@@ -141,8 +141,8 @@ internal fun BoxScope.LandscapeVideoRenderer(
                         call = call,
                         participant = secondParticipant,
                         style = style.copy(
-                            isFocused = dominantSpeaker?.sessionId == secondParticipant.sessionId
-                        )
+                            isFocused = dominantSpeaker?.sessionId == secondParticipant.sessionId,
+                        ),
 
                     )
                 }
@@ -153,8 +153,8 @@ internal fun BoxScope.LandscapeVideoRenderer(
                         call = call,
                         participant = thirdParticipant,
                         style = style.copy(
-                            isFocused = dominantSpeaker?.sessionId == thirdParticipant.sessionId
-                        )
+                            isFocused = dominantSpeaker?.sessionId == thirdParticipant.sessionId,
+                        ),
                     )
 
                     videoRenderer.invoke(
@@ -162,8 +162,8 @@ internal fun BoxScope.LandscapeVideoRenderer(
                         call = call,
                         participant = fourthParticipant,
                         style = style.copy(
-                            isFocused = dominantSpeaker?.sessionId == fourthParticipant.sessionId
-                        )
+                            isFocused = dominantSpeaker?.sessionId == fourthParticipant.sessionId,
+                        ),
                     )
                 }
             }
@@ -183,8 +183,8 @@ internal fun BoxScope.LandscapeVideoRenderer(
                         call = call,
                         participant = firstParticipant,
                         style = style.copy(
-                            isFocused = dominantSpeaker?.sessionId == firstParticipant.sessionId
-                        )
+                            isFocused = dominantSpeaker?.sessionId == firstParticipant.sessionId,
+                        ),
                     )
 
                     videoRenderer.invoke(
@@ -192,8 +192,8 @@ internal fun BoxScope.LandscapeVideoRenderer(
                         call = call,
                         participant = secondParticipant,
                         style = style.copy(
-                            isFocused = dominantSpeaker?.sessionId == secondParticipant.sessionId
-                        )
+                            isFocused = dominantSpeaker?.sessionId == secondParticipant.sessionId,
+                        ),
                     )
                 }
 
@@ -203,8 +203,8 @@ internal fun BoxScope.LandscapeVideoRenderer(
                         call = call,
                         participant = thirdParticipant,
                         style = style.copy(
-                            isFocused = dominantSpeaker?.sessionId == thirdParticipant.sessionId
-                        )
+                            isFocused = dominantSpeaker?.sessionId == thirdParticipant.sessionId,
+                        ),
                     )
 
                     videoRenderer.invoke(
@@ -212,8 +212,8 @@ internal fun BoxScope.LandscapeVideoRenderer(
                         call = call,
                         participant = fourthParticipant,
                         style = style.copy(
-                            isFocused = dominantSpeaker?.sessionId == fourthParticipant.sessionId
-                        )
+                            isFocused = dominantSpeaker?.sessionId == fourthParticipant.sessionId,
+                        ),
                     )
 
                     videoRenderer.invoke(
@@ -221,8 +221,8 @@ internal fun BoxScope.LandscapeVideoRenderer(
                         call = call,
                         participant = fifthParticipant,
                         style = style.copy(
-                            isFocused = dominantSpeaker?.sessionId == fifthParticipant.sessionId
-                        )
+                            isFocused = dominantSpeaker?.sessionId == fifthParticipant.sessionId,
+                        ),
                     )
                 }
             }
@@ -243,8 +243,8 @@ internal fun BoxScope.LandscapeVideoRenderer(
                         call = call,
                         participant = firstParticipant,
                         style = style.copy(
-                            isFocused = dominantSpeaker?.sessionId == firstParticipant.sessionId
-                        )
+                            isFocused = dominantSpeaker?.sessionId == firstParticipant.sessionId,
+                        ),
                     )
 
                     videoRenderer.invoke(
@@ -252,8 +252,8 @@ internal fun BoxScope.LandscapeVideoRenderer(
                         call = call,
                         participant = secondParticipant,
                         style = style.copy(
-                            isFocused = dominantSpeaker?.sessionId == secondParticipant.sessionId
-                        )
+                            isFocused = dominantSpeaker?.sessionId == secondParticipant.sessionId,
+                        ),
                     )
 
                     videoRenderer.invoke(
@@ -261,20 +261,19 @@ internal fun BoxScope.LandscapeVideoRenderer(
                         call = call,
                         participant = thirdParticipant,
                         style = style.copy(
-                            isFocused = dominantSpeaker?.sessionId == thirdParticipant.sessionId
-                        )
+                            isFocused = dominantSpeaker?.sessionId == thirdParticipant.sessionId,
+                        ),
                     )
                 }
 
                 Row(modifier = Modifier.weight(1f)) {
-
                     videoRenderer.invoke(
                         modifier = Modifier.weight(1f),
                         call = call,
                         participant = fourthParticipant,
                         style = style.copy(
-                            isFocused = dominantSpeaker?.sessionId == fourthParticipant.sessionId
-                        )
+                            isFocused = dominantSpeaker?.sessionId == fourthParticipant.sessionId,
+                        ),
                     )
 
                     videoRenderer.invoke(
@@ -282,8 +281,8 @@ internal fun BoxScope.LandscapeVideoRenderer(
                         call = call,
                         participant = fifthParticipant,
                         style = style.copy(
-                            isFocused = dominantSpeaker?.sessionId == fifthParticipant.sessionId
-                        )
+                            isFocused = dominantSpeaker?.sessionId == fifthParticipant.sessionId,
+                        ),
                     )
 
                     videoRenderer.invoke(
@@ -291,8 +290,8 @@ internal fun BoxScope.LandscapeVideoRenderer(
                         call = call,
                         participant = sixthParticipant,
                         style = style.copy(
-                            isFocused = dominantSpeaker?.sessionId == sixthParticipant.sessionId
-                        )
+                            isFocused = dominantSpeaker?.sessionId == sixthParticipant.sessionId,
+                        ),
                     )
                 }
             }
@@ -300,14 +299,13 @@ internal fun BoxScope.LandscapeVideoRenderer(
 
         else -> {
             BoxWithConstraints(modifier = Modifier.fillMaxHeight()) {
-
                 LazyVerticalGrid(
                     modifier = Modifier.fillMaxSize(),
                     columns = GridCells.Fixed(3),
                     content = {
                         items(
                             count = callParticipants.size,
-                            key = { callParticipants[it].sessionId }
+                            key = { callParticipants[it].sessionId },
                         ) { key ->
                             // make 2 items exactly fit available height
                             val itemHeight = with(LocalDensity.current) {
@@ -319,11 +317,11 @@ internal fun BoxScope.LandscapeVideoRenderer(
                                 call = call,
                                 participant = participant,
                                 style = style.copy(
-                                    isFocused = dominantSpeaker?.sessionId == participant.sessionId
-                                )
+                                    isFocused = dominantSpeaker?.sessionId == participant.sessionId,
+                                ),
                             )
                         }
-                    }
+                    },
                 )
             }
         }
@@ -358,14 +356,14 @@ private fun LandscapeParticipantsPreview1() {
         val participants = mockParticipantList
 
         Box(
-            modifier = Modifier.background(color = VideoTheme.colors.appBackground)
+            modifier = Modifier.background(color = VideoTheme.colors.appBackground),
         ) {
             LandscapeVideoRenderer(
                 call = mockCall,
                 dominantSpeaker = participants[0],
                 callParticipants = participants.take(1),
                 modifier = Modifier.fillMaxSize(),
-                parentSize = IntSize(screenWidth, screenHeight)
+                parentSize = IntSize(screenWidth, screenHeight),
             )
         }
     }
@@ -382,14 +380,14 @@ private fun LandscapeParticipantsPreview2() {
         val participants = mockParticipantList
 
         Box(
-            modifier = Modifier.background(color = VideoTheme.colors.appBackground)
+            modifier = Modifier.background(color = VideoTheme.colors.appBackground),
         ) {
             LandscapeVideoRenderer(
                 call = mockCall,
                 dominantSpeaker = participants[0],
                 callParticipants = participants.take(2),
                 modifier = Modifier.fillMaxSize(),
-                parentSize = IntSize(screenWidth, screenHeight)
+                parentSize = IntSize(screenWidth, screenHeight),
             )
         }
     }
@@ -406,14 +404,14 @@ private fun LandscapeParticipantsPreview3() {
         val participants = mockParticipantList
 
         Box(
-            modifier = Modifier.background(color = VideoTheme.colors.appBackground)
+            modifier = Modifier.background(color = VideoTheme.colors.appBackground),
         ) {
             LandscapeVideoRenderer(
                 call = mockCall,
                 dominantSpeaker = participants[0],
                 callParticipants = participants.take(3),
                 modifier = Modifier.fillMaxSize(),
-                parentSize = IntSize(screenWidth, screenHeight)
+                parentSize = IntSize(screenWidth, screenHeight),
             )
         }
     }
@@ -430,14 +428,14 @@ private fun LandscapeParticipantsPreview4() {
         val participants = mockParticipantList
 
         Box(
-            modifier = Modifier.background(color = VideoTheme.colors.appBackground)
+            modifier = Modifier.background(color = VideoTheme.colors.appBackground),
         ) {
             LandscapeVideoRenderer(
                 call = mockCall,
                 dominantSpeaker = participants[0],
                 callParticipants = participants.take(4),
                 modifier = Modifier.fillMaxSize(),
-                parentSize = IntSize(screenWidth, screenHeight)
+                parentSize = IntSize(screenWidth, screenHeight),
             )
         }
     }
@@ -454,14 +452,14 @@ private fun LandscapeParticipantsPreview5() {
         val participants = mockParticipantList
 
         Box(
-            modifier = Modifier.background(color = VideoTheme.colors.appBackground)
+            modifier = Modifier.background(color = VideoTheme.colors.appBackground),
         ) {
             LandscapeVideoRenderer(
                 call = mockCall,
                 dominantSpeaker = participants[0],
                 callParticipants = participants.take(5),
                 modifier = Modifier.fillMaxSize(),
-                parentSize = IntSize(screenWidth, screenHeight)
+                parentSize = IntSize(screenWidth, screenHeight),
             )
         }
     }
@@ -478,14 +476,14 @@ private fun LandscapeParticipantsPreview6() {
         val participants = mockParticipantList
 
         Box(
-            modifier = Modifier.background(color = VideoTheme.colors.appBackground)
+            modifier = Modifier.background(color = VideoTheme.colors.appBackground),
         ) {
             LandscapeVideoRenderer(
                 call = mockCall,
                 dominantSpeaker = participants[0],
                 callParticipants = participants.take(6),
                 modifier = Modifier.fillMaxSize(),
-                parentSize = IntSize(screenWidth, screenHeight)
+                parentSize = IntSize(screenWidth, screenHeight),
             )
         }
     }
@@ -502,14 +500,14 @@ private fun LandscapeParticipantsPreview7() {
         val participants = mockParticipantList
 
         Box(
-            modifier = Modifier.background(color = VideoTheme.colors.appBackground)
+            modifier = Modifier.background(color = VideoTheme.colors.appBackground),
         ) {
             LandscapeVideoRenderer(
                 call = mockCall,
                 dominantSpeaker = participants[0],
                 callParticipants = participants.take(7),
                 modifier = Modifier.fillMaxSize(),
-                parentSize = IntSize(screenWidth, screenHeight)
+                parentSize = IntSize(screenWidth, screenHeight),
             )
         }
     }

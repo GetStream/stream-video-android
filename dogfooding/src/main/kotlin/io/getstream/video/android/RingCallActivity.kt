@@ -52,7 +52,6 @@ class RingCallActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
 
         lifecycleScope.launch {
-
             // Init StreamVideo if it's not already initialised
             StreamVideoInitHelper.init(this@RingCallActivity)
 
@@ -85,7 +84,7 @@ class RingCallActivity : ComponentActivity() {
                 Toast.makeText(
                     this@RingCallActivity,
                     "Failed get call status (${result.value.message})",
-                    Toast.LENGTH_SHORT
+                    Toast.LENGTH_SHORT,
                 ).show()
                 finish()
             }
@@ -133,14 +132,14 @@ class RingCallActivity : ComponentActivity() {
                             CallContent(
                                 modifier = Modifier.fillMaxSize(),
                                 call = call,
-                                onCallAction = onCallAction
+                                onCallAction = onCallAction,
                             )
                         },
                         onRejectedContent = {
                             call.leave()
                             finish()
                         },
-                        onCallAction = onCallAction
+                        onCallAction = onCallAction,
                     )
                 }
             }

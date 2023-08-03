@@ -103,9 +103,9 @@ public fun CallLobby(
                 org.webrtc.VideoTrack(1000L)
             } else {
                 call.camera.mediaManager.videoTrack
-            }
+            },
         ),
-        enabled = isCameraEnabled
+        enabled = isCameraEnabled,
     ),
     permissions: VideoPermissionsState = rememberCallPermissionsState(call = call),
     onRendered: (View) -> Unit = {},
@@ -124,9 +124,9 @@ public fun CallLobby(
             elevation = 0.dp,
             actions = buildDefaultLobbyControlActions(
                 call = call,
-                onCallAction = onCallAction
+                onCallAction = onCallAction,
             ),
-            spaceBy = VideoTheme.dimens.lobbyControlActionsItemSpaceBy
+            spaceBy = VideoTheme.dimens.lobbyControlActionsItemSpaceBy,
         )
     },
 ) {
@@ -143,7 +143,7 @@ public fun CallLobby(
                 .height(VideoTheme.dimens.lobbyVideoHeight)
                 .padding(horizontal = 30.dp)
                 .clip(RoundedCornerShape(12.dp))
-                .background(VideoTheme.colors.callLobbyBackground)
+                .background(VideoTheme.colors.callLobbyBackground),
         ) {
             if (isCameraEnabled) {
                 onRenderedContent.invoke(video)
@@ -166,11 +166,13 @@ public fun CallLobby(
                     MicrophoneIndicator(
                         modifier = Modifier
                             .align(Alignment.CenterVertically)
-                            .padding(horizontal = VideoTheme.dimens.participantSoundIndicatorPadding),
-                        isMicrophoneEnabled = isMicrophoneEnabled
+                            .padding(
+                                horizontal = VideoTheme.dimens.participantSoundIndicatorPadding,
+                            ),
+                        isMicrophoneEnabled = isMicrophoneEnabled,
                     )
                 },
-                isSpeaking = false
+                isSpeaking = false,
             )
         }
 
@@ -201,7 +203,7 @@ private fun OnRenderedContent(
             .testTag("on_rendered_content"),
         call = call,
         video = video,
-        onRendered = onRendered
+        onRendered = onRendered,
     )
 }
 
@@ -210,13 +212,13 @@ private fun OnDisabledContent(user: User) {
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .testTag("on_disabled_content")
+            .testTag("on_disabled_content"),
     ) {
         UserAvatar(
             modifier = Modifier
                 .size(VideoTheme.dimens.callAvatarSize)
                 .align(Alignment.Center),
-            user = user
+            user = user,
         )
     }
 }
@@ -232,10 +234,10 @@ private fun CallLobbyPreview() {
                 sessionId = mockCall.sessionId,
                 track = VideoTrack(
                     streamId = mockCall.sessionId,
-                    video = org.webrtc.VideoTrack(1000L)
+                    video = org.webrtc.VideoTrack(1000L),
                 ),
-                enabled = true
-            )
+                enabled = true,
+            ),
         )
     }
 }

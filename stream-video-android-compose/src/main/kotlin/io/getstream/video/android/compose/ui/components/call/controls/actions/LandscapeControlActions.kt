@@ -53,14 +53,14 @@ public fun LandscapeControlActions(
     onCallAction: (CallAction) -> Unit = { DefaultOnCallActionHandler.onCallAction(call, it) },
     actions: List<(@Composable () -> Unit)> = buildDefaultCallControlActions(
         call,
-        onCallAction
+        onCallAction,
     ),
 ) {
     Surface(
         modifier = modifier,
         shape = shape,
         color = backgroundColor,
-        elevation = elevation
+        elevation = elevation,
     ) {
         LazyColumn(
             modifier = modifier,
@@ -69,7 +69,7 @@ public fun LandscapeControlActions(
                 Arrangement.spacedBy(space = spaceBy, alignment = Alignment.CenterVertically)
             } else {
                 Arrangement.SpaceEvenly
-            }
+            },
         ) {
             items(actions) { action ->
                 action.invoke()
@@ -85,7 +85,7 @@ private fun LandscapeCallControlsPreview() {
     VideoTheme {
         LandscapeControlActions(
             call = mockCall,
-            onCallAction = {}
+            onCallAction = {},
         )
     }
 }

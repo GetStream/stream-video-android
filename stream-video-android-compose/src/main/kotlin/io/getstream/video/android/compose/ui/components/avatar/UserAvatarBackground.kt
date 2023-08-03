@@ -77,7 +77,7 @@ public fun UserAvatarBackground(
         ParticipantImageBackground(
             modifier = Modifier.fillMaxSize(),
             userImage = user.image,
-            blurRadius = blurRadius
+            blurRadius = blurRadius,
         )
 
         UserAvatar(
@@ -93,7 +93,7 @@ public fun UserAvatarBackground(
             requestSize = requestSize,
             initialsAvatarOffset = initialsAvatarOffset,
             previewPlaceholder = previewPlaceholder,
-            loadingPlaceholder = loadingPlaceholder
+            loadingPlaceholder = loadingPlaceholder,
         )
     }
 }
@@ -106,7 +106,7 @@ private fun UserAvatarBackgroundPreview() {
         UserAvatarBackground(
             user = mockUsers[0],
             modifier = Modifier.fillMaxSize(),
-            previewPlaceholder = io.getstream.video.android.ui.common.R.drawable.stream_video_call_sample
+            previewPlaceholder = io.getstream.video.android.ui.common.R.drawable.stream_video_call_sample,
         )
     }
 }

@@ -46,6 +46,7 @@ public class DispatcherRule(
         // has a reference to the dispatcher - so we need to keep using it. In future we
         // need to refactor this to recreate the SDK instance for each test (or only reuse it
         // for specific integration tests).
-        private val sharedTestDispatcher: TestDispatcher = UnconfinedTestDispatcher(TestCoroutineScheduler())
+        private val sharedTestDispatcher: TestDispatcher =
+            UnconfinedTestDispatcher(TestCoroutineScheduler())
     }
 }

@@ -43,7 +43,7 @@ public data class StreamCallId constructor(
         id.isNotEmpty() -> id
         else -> error("[StreamCallId] invalid arguments; type=$type, id=$id")
     },
-    public val isValid: Boolean = type.isNotEmpty() || id.isNotEmpty()
+    public val isValid: Boolean = type.isNotEmpty() || id.isNotEmpty(),
 ) : Parcelable {
 
     public companion object {
@@ -78,5 +78,8 @@ public data class StreamCallId constructor(
  */
 public fun Intent.streamCallId(key: String): StreamCallId? = when {
     Build.VERSION.SDK_INT >= 33 -> getParcelableExtra(key, StreamCallId::class.java)
-    else -> @Suppress("DEPRECATION") getParcelableExtra(key) as? StreamCallId
+    else ->
+        @Suppress("DEPRECATION")
+        getParcelableExtra(key)
+            as? StreamCallId
 }

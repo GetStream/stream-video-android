@@ -49,14 +49,14 @@ public fun ToggleCameraAction(
     disabledColor: Color = VideoTheme.colors.callActionIconDisabledBackground,
     enabledIconTint: Color = VideoTheme.colors.callActionIconEnabled,
     disabledIconTint: Color = VideoTheme.colors.callActionIconDisabled,
-    onCallAction: (ToggleCamera) -> Unit
+    onCallAction: (ToggleCamera) -> Unit,
 ) {
     val cameraIcon = painterResource(
         id = if (isCameraEnabled) {
             R.drawable.stream_video_ic_videocam_on
         } else {
             R.drawable.stream_video_ic_videocam_off
-        }
+        },
     )
 
     CallControlActionBackground(
@@ -71,7 +71,7 @@ public fun ToggleCameraAction(
                 .padding(13.dp)
                 .clickable(enabled = enabled) {
                     onCallAction(
-                        ToggleCamera(isCameraEnabled.not())
+                        ToggleCamera(isCameraEnabled.not()),
                     )
                 },
             tint = if (isCameraEnabled) {
@@ -80,7 +80,7 @@ public fun ToggleCameraAction(
                 disabledIconTint
             },
             painter = cameraIcon,
-            contentDescription = stringResource(R.string.stream_video_call_controls_toggle_camera)
+            contentDescription = stringResource(R.string.stream_video_call_controls_toggle_camera),
         )
     }
 }

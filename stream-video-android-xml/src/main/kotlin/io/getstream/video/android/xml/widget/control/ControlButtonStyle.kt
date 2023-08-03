@@ -47,7 +47,7 @@ public data class ControlButtonStyle(
     @ColorInt val backgroundTint: Int,
     public val enabled: Boolean,
     public val backgroundEnabledAlpha: Float,
-    public val backgroundDisabledAlpha: Float
+    public val backgroundDisabledAlpha: Float,
 ) {
 
     internal companion object {
@@ -56,36 +56,35 @@ public data class ControlButtonStyle(
                 attrs,
                 R.styleable.ControlButton,
                 0,
-                0
+                0,
             ).use {
-
                 val icon = it.getDrawable(R.styleable.ControlButton_android_src)
 
                 val iconTint = it.getColor(
                     R.styleable.ControlButton_android_tint,
-                    context.getColorCompat(R.color.stream_video_black)
+                    context.getColorCompat(R.color.stream_video_black),
                 )
 
                 val background = it.getDrawable(R.styleable.ControlButton_android_background)
 
                 val backgroundTint = it.getColor(
                     R.styleable.ControlButton_android_backgroundTint,
-                    context.getColorCompat(RCommon.color.stream_video_app_background)
+                    context.getColorCompat(RCommon.color.stream_video_app_background),
                 )
 
                 val enabled = it.getBoolean(
                     R.styleable.ControlButton_android_enabled,
-                    true
+                    true,
                 )
 
                 val backgroundEnabledAlpha = it.getFloat(
                     R.styleable.ControlButton_streamVideoControlButtonBackgroundEnabledAlpha,
-                    context.getFloatResource(RCommon.dimen.stream_video_buttonToggleOnAlpha)
+                    context.getFloatResource(RCommon.dimen.stream_video_buttonToggleOnAlpha),
                 )
 
                 val backgroundDisabledAlpha = it.getFloat(
                     R.styleable.ControlButton_streamVideoControlButtonBackgroundDisabledAlpha,
-                    context.getFloatResource(RCommon.dimen.stream_video_buttonToggleOffAlpha)
+                    context.getFloatResource(RCommon.dimen.stream_video_buttonToggleOffAlpha),
                 )
 
                 return ControlButtonStyle(
@@ -95,7 +94,7 @@ public data class ControlButtonStyle(
                     backgroundTint = backgroundTint,
                     enabled = enabled,
                     backgroundEnabledAlpha = backgroundEnabledAlpha,
-                    backgroundDisabledAlpha = backgroundDisabledAlpha
+                    backgroundDisabledAlpha = backgroundDisabledAlpha,
                 ).let(TransformStyle.controlButtonStyleTransformer::transform)
             }
         }

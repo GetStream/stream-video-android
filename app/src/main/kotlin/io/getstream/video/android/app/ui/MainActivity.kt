@@ -49,7 +49,7 @@ class MainActivity : ComponentActivity() {
         val user = User(
             id = "jaewoong",
             name = "Jaewoong",
-            role = "admin"
+            role = "admin",
         )
 
         // step 2 - join a call
@@ -86,7 +86,7 @@ class MainActivity : ComponentActivity() {
 private fun MainScreen(
     call: Call?,
     result: Result<RtcSession>?,
-    onLeaveCall: () -> Unit
+    onLeaveCall: () -> Unit,
 ) {
     VideoTheme {
         if (call != null) {
@@ -95,7 +95,7 @@ private fun MainScreen(
                 onLeaveCall = {
                     call.leave()
                     onLeaveCall.invoke()
-                }
+                },
             )
         } else if (result is Result.Failure) {
             Text(text = result.value.message)
@@ -103,7 +103,7 @@ private fun MainScreen(
             Box(modifier = Modifier.fillMaxSize()) {
                 CircularProgressIndicator(
                     modifier = Modifier.align(Alignment.Center),
-                    color = VideoTheme.colors.primaryAccent
+                    color = VideoTheme.colors.primaryAccent,
                 )
             }
         }

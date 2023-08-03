@@ -27,7 +27,7 @@ import kotlin.coroutines.suspendCoroutine
 
 @JvmSynthetic
 internal suspend inline fun createValue(
-    crossinline call: (SdpObserver) -> Unit
+    crossinline call: (SdpObserver) -> Unit,
 ): Result<SessionDescription> = suspendCoroutine {
     val observer = object : SdpObserver {
 
@@ -44,8 +44,8 @@ internal suspend inline fun createValue(
 
         override fun onCreateFailure(message: String?) = it.resume(
             Failure(
-                Error.GenericError(message ?: "Couldn't create a SDP message.")
-            )
+                Error.GenericError(message ?: "Couldn't create a SDP message."),
+            ),
         )
 
         /**
@@ -60,7 +60,7 @@ internal suspend inline fun createValue(
 
 @JvmSynthetic
 internal suspend inline fun setValue(
-    crossinline call: (SdpObserver) -> Unit
+    crossinline call: (SdpObserver) -> Unit,
 ): Result<Unit> = suspendCoroutine {
     val observer = object : SdpObserver {
         /**
@@ -75,8 +75,8 @@ internal suspend inline fun setValue(
         override fun onSetSuccess() = it.resume(Success(Unit))
         override fun onSetFailure(message: String?) = it.resume(
             Failure(
-                Error.GenericError(message ?: "Couldn't create a SDP message.")
-            )
+                Error.GenericError(message ?: "Couldn't create a SDP message."),
+            ),
         )
     }
 

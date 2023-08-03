@@ -41,12 +41,12 @@ import io.getstream.video.android.ui.common.R
 public fun LeaveCallAction(
     modifier: Modifier = Modifier,
     enabled: Boolean = true,
-    onCallAction: (LeaveCall) -> Unit
+    onCallAction: (LeaveCall) -> Unit,
 ) {
     CallControlActionBackground(
         modifier = modifier,
         isEnabled = true,
-        enabledColor = VideoTheme.colors.errorAccent
+        enabledColor = VideoTheme.colors.errorAccent,
     ) {
         Icon(
             modifier = Modifier
@@ -54,7 +54,7 @@ public fun LeaveCallAction(
                 .clickable(enabled = enabled) { onCallAction(LeaveCall) },
             tint = Color.White,
             painter = painterResource(id = R.drawable.stream_video_ic_call_end),
-            contentDescription = stringResource(R.string.stream_video_call_controls_leave_call)
+            contentDescription = stringResource(R.string.stream_video_call_controls_leave_call),
         )
     }
 }

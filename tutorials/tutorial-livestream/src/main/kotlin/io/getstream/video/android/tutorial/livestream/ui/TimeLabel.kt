@@ -42,7 +42,7 @@ import java.util.Locale
 @Composable
 fun TimeLabel(
     modifier: Modifier = Modifier,
-    sessionTime: Long
+    sessionTime: Long,
 ) {
     val time by remember(sessionTime) {
         val date = Date(sessionTime)
@@ -53,7 +53,7 @@ fun TimeLabel(
     Row(
         modifier = modifier
             .background(Color(0xFF1C1E22), RoundedCornerShape(6.dp)),
-        verticalAlignment = Alignment.CenterVertically
+        verticalAlignment = Alignment.CenterVertically,
     ) {
         Icon(
             modifier = Modifier
@@ -61,13 +61,13 @@ fun TimeLabel(
                 .padding(start = 12.dp),
             imageVector = Icons.Default.CheckCircle,
             tint = VideoTheme.colors.infoAccent,
-            contentDescription = null
+            contentDescription = null,
         )
 
         Text(
             modifier = Modifier.padding(horizontal = 12.dp),
             text = time,
-            color = Color.White
+            color = Color.White,
         )
     }
 }
@@ -78,7 +78,7 @@ private fun TimeLabelPreview() {
     VideoTheme {
         TimeLabel(
             modifier = Modifier,
-            sessionTime = 12000
+            sessionTime = 12000,
         )
     }
 }

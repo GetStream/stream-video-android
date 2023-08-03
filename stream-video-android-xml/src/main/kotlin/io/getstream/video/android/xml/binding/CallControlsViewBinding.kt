@@ -46,7 +46,10 @@ import io.getstream.video.android.ui.common.R as RCommon
 public fun CallControlsView.bindView(
     viewModel: CallViewModel,
     lifecycleOwner: LifecycleOwner,
-    fetchCallMediaState: (CallDeviceState, Boolean) -> List<CallControlItem> = { mediaState, isScreenSharingActive ->
+    fetchCallMediaState: (
+        CallDeviceState,
+        Boolean,
+    ) -> List<CallControlItem> = { mediaState, isScreenSharingActive ->
         defaultControlList(mediaState, isScreenSharingActive)
     },
     // onCallAction: (CallAction) -> Unit = viewModel::onCallAction,
@@ -72,7 +75,7 @@ internal fun defaultControlList(callDeviceState: CallDeviceState, isScreenSharin
             },
             iconTint = R.color.stream_video_black,
             backgroundTint = R.color.stream_video_white,
-            action = ToggleSpeakerphone(!callDeviceState.isSpeakerphoneEnabled)
+            action = ToggleSpeakerphone(!callDeviceState.isSpeakerphoneEnabled),
         ),
         CallControlItem(
             icon = if (callDeviceState.isCameraEnabled) {
@@ -82,7 +85,7 @@ internal fun defaultControlList(callDeviceState: CallDeviceState, isScreenSharin
             },
             iconTint = R.color.stream_video_black,
             backgroundTint = R.color.stream_video_white,
-            action = ToggleCamera(!callDeviceState.isCameraEnabled)
+            action = ToggleCamera(!callDeviceState.isCameraEnabled),
         ),
         CallControlItem(
             icon = if (callDeviceState.isMicrophoneEnabled) {
@@ -92,20 +95,20 @@ internal fun defaultControlList(callDeviceState: CallDeviceState, isScreenSharin
             },
             iconTint = R.color.stream_video_black,
             backgroundTint = R.color.stream_video_white,
-            action = ToggleMicrophone(!callDeviceState.isMicrophoneEnabled)
+            action = ToggleMicrophone(!callDeviceState.isMicrophoneEnabled),
         ),
         CallControlItem(
             icon = RCommon.drawable.stream_video_ic_camera_flip,
             iconTint = R.color.stream_video_black,
             backgroundTint = if (!isScreenSharingActive) R.color.stream_video_white else RCommon.color.stream_video_disabled,
             action = FlipCamera,
-            enabled = !isScreenSharingActive
+            enabled = !isScreenSharingActive,
         ),
         CallControlItem(
             icon = RCommon.drawable.stream_video_ic_call_end,
             iconTint = R.color.stream_video_white,
             backgroundTint = RCommon.color.stream_video_error_accent,
-            action = LeaveCall
+            action = LeaveCall,
         ),
     )
 }

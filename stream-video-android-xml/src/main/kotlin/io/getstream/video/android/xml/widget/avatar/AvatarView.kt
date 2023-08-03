@@ -55,7 +55,7 @@ public class AvatarView : ShapeableImageView {
     public constructor(context: Context, attrs: AttributeSet?, defStyleAttr: Int) : super(
         context.createStreamThemeWrapper(),
         attrs,
-        defStyleAttr
+        defStyleAttr,
     ) {
         init(context, attrs)
     }
@@ -71,8 +71,8 @@ public class AvatarView : ShapeableImageView {
             placeholderDrawable = AvatarPlaceholderDrawable(
                 context = context,
                 initials = user.name.ifEmpty { user.id }.initials(),
-                initialsTextStyle = avatarStyle.avatarInitialsTextStyle
-            )
+                initialsTextStyle = avatarStyle.avatarInitialsTextStyle,
+            ),
         )
     }
 
@@ -87,8 +87,8 @@ public class AvatarView : ShapeableImageView {
             placeholderDrawable = AvatarPlaceholderDrawable(
                 context = context,
                 initials = user.name.ifEmpty { user.id }.initials(),
-                initialsTextStyle = avatarStyle.avatarInitialsTextStyle
-            )
+                initialsTextStyle = avatarStyle.avatarInitialsTextStyle,
+            ),
         )
     }
 
@@ -101,7 +101,7 @@ public class AvatarView : ShapeableImageView {
         background = AvatarPlaceholderDrawable(
             context = context,
             initials = text,
-            initialsTextStyle = avatarStyle.avatarInitialsTextStyle
+            initialsTextStyle = avatarStyle.avatarInitialsTextStyle,
         )
     }
 
@@ -165,7 +165,7 @@ public class AvatarView : ShapeableImageView {
                     height.toFloat() - borderOffset,
                     avatarStyle.borderRadius,
                     avatarStyle.borderRadius,
-                    borderPaint
+                    borderPaint,
                 )
             }
             else -> {
@@ -173,7 +173,7 @@ public class AvatarView : ShapeableImageView {
                     width / 2f,
                     height / 2f,
                     width / 2f - borderOffset,
-                    borderPaint
+                    borderPaint,
                 )
             }
         }

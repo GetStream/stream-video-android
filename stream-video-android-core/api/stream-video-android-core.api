@@ -2452,7 +2452,7 @@ public final class io/getstream/video/android/core/utils/LatencyResult {
 	public fun toString ()Ljava/lang/String;
 }
 
-public final class io/getstream/video/android/core/utils/LatencyUtilsKt {
+public final class io/getstream/video/android/core/utils/LatencyResultKt {
 	public static final fun getLatencyMeasurements (Ljava/lang/String;)Lio/getstream/video/android/core/utils/LatencyResult;
 	public static final fun getLatencyMeasurementsOKHttp (Ljava/lang/String;)Lio/getstream/video/android/core/utils/LatencyResult;
 }

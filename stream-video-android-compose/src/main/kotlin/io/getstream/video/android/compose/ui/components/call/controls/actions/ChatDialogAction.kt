@@ -45,7 +45,7 @@ public fun ChatDialogAction(
     shape: Shape = VideoTheme.shapes.callControlsButton,
     enabledColor: Color = VideoTheme.colors.callActionIconEnabledBackground,
     disabledColor: Color = VideoTheme.colors.callActionIconDisabledBackground,
-    onCallAction: (ChatDialog) -> Unit
+    onCallAction: (ChatDialog) -> Unit,
 ) {
     CallControlActionBackground(
         modifier = modifier,
@@ -60,7 +60,7 @@ public fun ChatDialogAction(
                 .clickable(enabled = enabled) { onCallAction(ChatDialog) },
             tint = VideoTheme.colors.callActionIconEnabled,
             painter = painterResource(id = R.drawable.stream_video_ic_message),
-            contentDescription = stringResource(R.string.stream_video_call_controls_chat_dialog)
+            contentDescription = stringResource(R.string.stream_video_call_controls_chat_dialog),
         )
     }
 }

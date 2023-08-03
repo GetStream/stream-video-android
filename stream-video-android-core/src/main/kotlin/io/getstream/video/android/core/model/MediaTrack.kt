@@ -20,7 +20,7 @@ import androidx.compose.runtime.Stable
 
 @Stable
 public sealed class MediaTrack(
-    public open val streamId: String
+    public open val streamId: String,
 ) {
     public fun asVideoTrack(): VideoTrack? {
         return this as? VideoTrack
@@ -42,11 +42,11 @@ public sealed class MediaTrack(
 @Stable
 public data class VideoTrack(
     public override val streamId: String,
-    public val video: org.webrtc.VideoTrack
+    public val video: org.webrtc.VideoTrack,
 ) : MediaTrack(streamId)
 
 @Stable
 public data class AudioTrack(
     public override val streamId: String,
-    public val audio: org.webrtc.AudioTrack
+    public val audio: org.webrtc.AudioTrack,
 ) : MediaTrack(streamId)

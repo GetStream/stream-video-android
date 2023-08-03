@@ -44,7 +44,7 @@ public class PictureInPictureView : CallCardView, VideoRenderer {
     public constructor(context: Context, attrs: AttributeSet?, defStyleAttr: Int) : super(
         context.createStreamThemeWrapper(),
         attrs,
-        defStyleAttr
+        defStyleAttr,
     ) {
         init(context, attrs)
     }
@@ -76,7 +76,7 @@ public class PictureInPictureView : CallCardView, VideoRenderer {
             context = context,
             attrs = null,
             defStyleAttr = R.attr.streamVideoPictureInPictureCallParticipantViewStyle,
-            defStyleRes = style.callParticipantStyle
+            defStyleRes = style.callParticipantStyle,
         ).apply {
             layoutParams = LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT)
             rendererInitializer?.let { setRendererInitializer(it) }

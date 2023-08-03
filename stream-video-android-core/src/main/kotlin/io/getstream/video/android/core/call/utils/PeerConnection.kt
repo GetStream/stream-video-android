@@ -39,7 +39,7 @@ internal suspend fun PeerConnection.addRtcIceCandidate(iceCandidate: IceCandidat
                 override fun onAddFailure(error: String?) {
                     cont.resume(Failure(Error.GenericError(message = error ?: "")))
                 }
-            }
+            },
         )
     }
 }

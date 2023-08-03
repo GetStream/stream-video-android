@@ -40,7 +40,7 @@ public sealed class VideoRendererStyle(
     public open val isShowingConnectionQualityIndicator: Boolean,
     public open val labelPosition: Alignment,
     public open val reactionDuration: Int,
-    public open val reactionPosition: Alignment
+    public open val reactionPosition: Alignment,
 )
 
 /**
@@ -63,7 +63,7 @@ public fun VideoRendererStyle.copy(
     isShowingConnectionQualityIndicator: Boolean = this.isShowingConnectionQualityIndicator,
     labelPosition: Alignment = this.labelPosition,
     reactionDuration: Int = this.reactionDuration,
-    reactionPosition: Alignment = this.reactionPosition
+    reactionPosition: Alignment = this.reactionPosition,
 ): VideoRendererStyle {
     return if (this is RegularVideoRendererStyle) {
         RegularVideoRendererStyle(
@@ -74,7 +74,7 @@ public fun VideoRendererStyle.copy(
             isShowingConnectionQualityIndicator = isShowingConnectionQualityIndicator,
             labelPosition = labelPosition,
             reactionDuration = reactionDuration,
-            reactionPosition = reactionPosition
+            reactionPosition = reactionPosition,
         )
     } else {
         ScreenSharingVideoRendererStyle(
@@ -85,7 +85,7 @@ public fun VideoRendererStyle.copy(
             isShowingConnectionQualityIndicator = isShowingConnectionQualityIndicator,
             labelPosition = labelPosition,
             reactionDuration = reactionDuration,
-            reactionPosition = reactionPosition
+            reactionPosition = reactionPosition,
         )
     }
 }
@@ -111,7 +111,7 @@ public data class RegularVideoRendererStyle(
     override val isShowingConnectionQualityIndicator: Boolean = true,
     override val labelPosition: Alignment = Alignment.BottomStart,
     override val reactionDuration: Int = 650,
-    override val reactionPosition: Alignment = Alignment.Center
+    override val reactionPosition: Alignment = Alignment.Center,
 
 ) : VideoRendererStyle(
     isFocused,
@@ -121,7 +121,7 @@ public data class RegularVideoRendererStyle(
     isShowingConnectionQualityIndicator,
     labelPosition,
     reactionDuration,
-    reactionPosition
+    reactionPosition,
 )
 
 /**
@@ -145,7 +145,7 @@ public data class ScreenSharingVideoRendererStyle(
     override val isShowingConnectionQualityIndicator: Boolean = false,
     override val labelPosition: Alignment = Alignment.BottomStart,
     override val reactionDuration: Int = 1000,
-    override val reactionPosition: Alignment = Alignment.Center
+    override val reactionPosition: Alignment = Alignment.Center,
 
 ) : VideoRendererStyle(
     isFocused,
@@ -155,5 +155,5 @@ public data class ScreenSharingVideoRendererStyle(
     isShowingConnectionQualityIndicator,
     labelPosition,
     reactionDuration,
-    reactionPosition
+    reactionPosition,
 )

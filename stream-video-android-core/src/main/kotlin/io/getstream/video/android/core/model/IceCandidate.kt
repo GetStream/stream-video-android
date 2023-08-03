@@ -25,17 +25,22 @@ public data class IceCandidate(
     internal val sdpMid: String,
     internal val sdpMLineIndex: Int,
     internal val candidate: String,
-    internal val usernameFragment: String?
+    internal val usernameFragment: String?,
 )
 
 internal fun RtcIceCandidate.toDomainCandidate(): IceCandidate {
     return IceCandidate(
-        sdpMid, sdpMLineIndex, sdp, ""
+        sdpMid,
+        sdpMLineIndex,
+        sdp,
+        "",
     )
 }
 
 internal fun IceCandidate.toRtcCandidate(): RtcIceCandidate {
     return org.webrtc.IceCandidate(
-        sdpMid, sdpMLineIndex, candidate
+        sdpMid,
+        sdpMLineIndex,
+        candidate,
     )
 }

@@ -32,7 +32,8 @@ internal enum class EventType(val type: String) {
     BLOCKED_USER("call.blocked_user"),
     UNBLOCKED_USER("call.unblocked_user"),
     CUSTOM("custom"),
-    UNKNOWN("unknown");
+    UNKNOWN("unknown"),
+    ;
 
     companion object {
         fun from(value: String): EventType {

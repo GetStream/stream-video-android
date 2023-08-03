@@ -45,7 +45,7 @@ public fun FlipCameraAction(
     shape: Shape = VideoTheme.shapes.callControlsButton,
     enabledColor: Color = VideoTheme.colors.callActionIconEnabledBackground,
     disabledColor: Color = VideoTheme.colors.callActionIconDisabledBackground,
-    onCallAction: (FlipCamera) -> Unit
+    onCallAction: (FlipCamera) -> Unit,
 ) {
     CallControlActionBackground(
         modifier = modifier,
@@ -60,7 +60,7 @@ public fun FlipCameraAction(
                 .clickable(enabled = enabled) { onCallAction(FlipCamera) },
             tint = VideoTheme.colors.callActionIconEnabled,
             painter = painterResource(id = R.drawable.stream_video_ic_camera_flip),
-            contentDescription = stringResource(R.string.stream_video_call_controls_flip_camera)
+            contentDescription = stringResource(R.string.stream_video_call_controls_flip_camera),
         )
     }
 }

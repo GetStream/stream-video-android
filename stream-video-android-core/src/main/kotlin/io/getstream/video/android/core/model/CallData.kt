@@ -24,5 +24,5 @@ public data class CallData(
     public val blockedUsers: List<User>,
     public val call: CallInfo,
     public val members: List<CallUser>,
-    public val ownMembership: CallUser?
+    public val ownMembership: CallUser?,
 )

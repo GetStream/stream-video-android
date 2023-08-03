@@ -53,11 +53,11 @@ internal fun InviteUserList(
     users: List<User>,
     onUserSelected: (User) -> Unit,
     onUserUnSelected: (User) -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
 ) {
     LazyColumn(
         modifier = modifier,
-        verticalArrangement = Arrangement.spacedBy(8.dp)
+        verticalArrangement = Arrangement.spacedBy(8.dp),
     ) {
         items(users) { user ->
             InviteUserItem(
@@ -94,14 +94,14 @@ internal fun InviteUserItem(
                 }
             },
         verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.Start
+        horizontalArrangement = Arrangement.Start,
     ) {
         Spacer(modifier = Modifier.width(8.dp))
 
         UserAvatar(
             modifier = Modifier.size(VideoTheme.dimens.participantsInfoAvatarSize),
             user = user,
-            isShowingOnlineIndicator = true
+            isShowingOnlineIndicator = true,
         )
 
         Spacer(modifier = Modifier.width(8.dp))
@@ -116,7 +116,7 @@ internal fun InviteUserItem(
             modifier = Modifier.weight(1f),
             text = userName,
             style = VideoTheme.typography.bodyBold,
-            color = VideoTheme.colors.textHighEmphasis
+            color = VideoTheme.colors.textHighEmphasis,
         )
 
         Spacer(modifier = Modifier.width(8.dp))
@@ -141,7 +141,7 @@ private fun InviteUserListPreview() {
         InviteUserList(
             mockParticipantList.map { it.initialUser },
             onUserSelected = {},
-            onUserUnSelected = {}
+            onUserUnSelected = {},
         )
     }
 }

@@ -47,7 +47,7 @@ internal fun SettingsMenu(
     call: Call,
     showDebugOptions: Boolean,
     onDisplayAvailableDevice: () -> Unit,
-    onDismissed: () -> Unit
+    onDismissed: () -> Unit,
 ) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
@@ -57,16 +57,16 @@ internal fun SettingsMenu(
     Popup(
         alignment = Alignment.BottomStart,
         offset = IntOffset(30, -200),
-        onDismissRequest = { onDismissed.invoke() }
+        onDismissRequest = { onDismissed.invoke() },
     ) {
         Card(
             shape = RoundedCornerShape(12.dp),
-            elevation = 6.dp
+            elevation = 6.dp,
         ) {
             Column(
                 modifier = Modifier
                     .background(VideoTheme.colors.appBackground)
-                    .padding(12.dp)
+                    .padding(12.dp),
             ) {
                 Row(
                     modifier = Modifier.clickable {
@@ -75,18 +75,18 @@ internal fun SettingsMenu(
                             call.sendReaction(type = "default", emoji = shuffled.first())
                             onDismissed.invoke()
                         }
-                    }
+                    },
                 ) {
                     Icon(
                         painter = painterResource(id = R.drawable.stream_video_ic_reaction),
                         tint = VideoTheme.colors.textHighEmphasis,
-                        contentDescription = null
+                        contentDescription = null,
                     )
 
                     Text(
                         modifier = Modifier.padding(start = 20.dp),
                         text = "Reactions",
-                        color = VideoTheme.colors.textHighEmphasis
+                        color = VideoTheme.colors.textHighEmphasis,
                     )
                 }
 
@@ -97,19 +97,25 @@ internal fun SettingsMenu(
                         modifier = Modifier.clickable {
                             call.debug.restartSubscriberIce()
                             onDismissed.invoke()
-                            Toast.makeText(context, "Restart Subscriber Ice", Toast.LENGTH_SHORT).show()
-                        }
+                            Toast.makeText(
+                                context,
+                                "Restart Subscriber Ice",
+                                Toast.LENGTH_SHORT,
+                            ).show()
+                        },
                     ) {
                         Icon(
-                            painter = painterResource(id = R.drawable.stream_video_ic_fullscreen_exit),
+                            painter = painterResource(
+                                id = R.drawable.stream_video_ic_fullscreen_exit,
+                            ),
                             tint = VideoTheme.colors.textHighEmphasis,
-                            contentDescription = null
+                            contentDescription = null,
                         )
 
                         Text(
                             modifier = Modifier.padding(start = 20.dp),
                             text = "Restart Subscriber Ice",
-                            color = VideoTheme.colors.textHighEmphasis
+                            color = VideoTheme.colors.textHighEmphasis,
                         )
                     }
 
@@ -119,19 +125,25 @@ internal fun SettingsMenu(
                         modifier = Modifier.clickable {
                             call.debug.restartPublisherIce()
                             onDismissed.invoke()
-                            Toast.makeText(context, "Restart Publisher Ice", Toast.LENGTH_SHORT).show()
-                        }
+                            Toast.makeText(
+                                context,
+                                "Restart Publisher Ice",
+                                Toast.LENGTH_SHORT,
+                            ).show()
+                        },
                     ) {
                         Icon(
-                            painter = painterResource(id = R.drawable.stream_video_ic_fullscreen_exit),
+                            painter = painterResource(
+                                id = R.drawable.stream_video_ic_fullscreen_exit,
+                            ),
                             tint = VideoTheme.colors.textHighEmphasis,
-                            contentDescription = null
+                            contentDescription = null,
                         )
 
                         Text(
                             modifier = Modifier.padding(start = 20.dp),
                             text = "Restart Publisher Ice",
-                            color = VideoTheme.colors.textHighEmphasis
+                            color = VideoTheme.colors.textHighEmphasis,
                         )
                     }
 
@@ -142,18 +154,18 @@ internal fun SettingsMenu(
                             call.debug.switchSfu()
                             onDismissed.invoke()
                             Toast.makeText(context, "Switch sfu", Toast.LENGTH_SHORT).show()
-                        }
+                        },
                     ) {
                         Icon(
                             painter = painterResource(id = R.drawable.stream_video_ic_fullscreen),
                             tint = VideoTheme.colors.textHighEmphasis,
-                            contentDescription = null
+                            contentDescription = null,
                         )
 
                         Text(
                             modifier = Modifier.padding(start = 20.dp),
                             text = "Switch sfu",
-                            color = VideoTheme.colors.textHighEmphasis
+                            color = VideoTheme.colors.textHighEmphasis,
                         )
                     }
                 }
@@ -164,18 +176,18 @@ internal fun SettingsMenu(
                     modifier = Modifier.clickable {
                         onDismissed.invoke()
                         onDisplayAvailableDevice.invoke()
-                    }
+                    },
                 ) {
                     Icon(
                         painter = painterResource(id = R.drawable.stream_video_ic_mic_on),
                         tint = VideoTheme.colors.textHighEmphasis,
-                        contentDescription = null
+                        contentDescription = null,
                     )
 
                     Text(
                         modifier = Modifier.padding(start = 20.dp),
                         text = "Switch Microphone",
-                        color = VideoTheme.colors.textHighEmphasis
+                        color = VideoTheme.colors.textHighEmphasis,
                     )
                 }
             }

@@ -36,12 +36,12 @@ import io.getstream.video.android.ui.outgoing.DebugCallScreen
 fun AppNavHost(
     modifier: Modifier = Modifier,
     navController: NavHostController = rememberNavController(),
-    startDestination: String = AppScreens.Login.destination
+    startDestination: String = AppScreens.Login.destination,
 ) {
     NavHost(
         modifier = modifier.fillMaxSize(),
         navController = navController,
-        startDestination = startDestination
+        startDestination = startDestination,
     ) {
         composable(AppScreens.Login.destination) {
             LoginScreen(
@@ -49,7 +49,7 @@ fun AppNavHost(
                     navController.navigate(AppScreens.CallJoin.destination) {
                         popUpTo(AppScreens.Login.destination) { inclusive = true }
                     }
-                }
+                },
             )
         }
         composable(AppScreens.CallJoin.destination) {
@@ -64,19 +64,19 @@ fun AppNavHost(
                 },
                 navigateToRingTest = {
                     navController.navigate(AppScreens.DebugCall.destination)
-                }
+                },
             )
         }
         composable(
             "${AppScreens.CallLobby.destination}/{cid}",
-            arguments = listOf(navArgument("cid") { type = NavType.StringType })
+            arguments = listOf(navArgument("cid") { type = NavType.StringType }),
         ) {
             CallLobbyScreen(
                 navigateUpToLogin = {
                     navController.navigate(AppScreens.Login.destination) {
                         popUpTo(AppScreens.CallJoin.destination) { inclusive = true }
                     }
-                }
+                },
             )
         }
         composable(AppScreens.DebugCall.destination) {
@@ -87,10 +87,10 @@ fun AppNavHost(
                         RingCallActivity.createIntent(
                             context,
                             members = members.split(","),
-                            callId = callId
-                        )
+                            callId = callId,
+                        ),
                     )
-                }
+                },
             )
         }
     }
@@ -100,5 +100,5 @@ enum class AppScreens(val destination: String) {
     Login("login"),
     CallJoin("call_join"),
     CallLobby("call_preview"),
-    DebugCall("debug_call")
+    DebugCall("debug_call"),
 }

@@ -52,7 +52,7 @@ class MainActivity2 : ComponentActivity() {
         val user = User(
             id = userId, // any string
             name = "Tutorial", // name and image are used in the UI
-            role = "admin"
+            role = "admin",
         )
 
         // step2 - initialize StreamVideo. For a production app we recommend adding the client to your Application class or di module.
@@ -73,7 +73,6 @@ class MainActivity2 : ComponentActivity() {
         setContent {
             // step4 - apply VideTheme
             VideoTheme {
-
                 // step5 - render videos
                 CallContent(
                     modifier = Modifier.fillMaxSize(),
@@ -86,7 +85,7 @@ class MainActivity2 : ComponentActivity() {
                             is LeaveCall -> finish()
                             else -> Unit
                         }
-                    }
+                    },
                 )
             }
         }
