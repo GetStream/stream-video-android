@@ -271,10 +271,21 @@ Let's take a moment to review the Compose code above. `Call.state` exposes all t
 
 The most important ones are:
 
+* connection
+* backstage
+* duration
+* participantCounts
+
 ```
 call.state
 call.state.participants
 ```
+
+TODO: verify we load this user info
+* participant.user.name
+* participant.user.image?
+* participant.user.custom
+* participant.video (in case more users can share video)
 
 The [participant state docs](../03-guides/03-call-and-participant-state.mdx) show all the available data.
 
