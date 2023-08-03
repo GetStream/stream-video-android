@@ -23,8 +23,8 @@ public final class io/getstream/video/android/datastore/delegate/StreamUserDataS
 }
 
 public final class io/getstream/video/android/datastore/delegate/StreamUserDataStore$Companion {
-	public final fun install (Landroid/content/Context;ZLkotlinx/coroutines/CoroutineScope;)Lio/getstream/video/android/datastore/delegate/StreamUserDataStore;
-	public static synthetic fun install$default (Lio/getstream/video/android/datastore/delegate/StreamUserDataStore$Companion;Landroid/content/Context;ZLkotlinx/coroutines/CoroutineScope;ILjava/lang/Object;)Lio/getstream/video/android/datastore/delegate/StreamUserDataStore;
+	public final fun install (Landroid/content/Context;Z)Lio/getstream/video/android/datastore/delegate/StreamUserDataStore;
+	public static synthetic fun install$default (Lio/getstream/video/android/datastore/delegate/StreamUserDataStore$Companion;Landroid/content/Context;ZILjava/lang/Object;)Lio/getstream/video/android/datastore/delegate/StreamUserDataStore;
 	public final fun instance ()Lio/getstream/video/android/datastore/delegate/StreamUserDataStore;
 	public final fun isInstalled ()Z
 	public final fun lazyInstance ()Lkotlin/Lazy;

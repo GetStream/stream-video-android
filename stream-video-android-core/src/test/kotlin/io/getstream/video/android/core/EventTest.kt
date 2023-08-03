@@ -179,6 +179,7 @@ class EventTest : IntegrationTestBase(connectCoordinatorWS = false) {
             "call.ended",
             user = testData.users["thierry"]!!.toUserResponse()
         )
+
         clientImpl.fireEvent(event)
 
         // TODO: server. you want to know when the call ended and by who.

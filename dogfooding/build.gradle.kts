@@ -15,6 +15,8 @@
  */
 @file:Suppress("UnstableApiUsage")
 
+import com.android.build.api.variant.BuildConfigField
+import com.android.build.api.variant.ResValue
 import io.getstream.video.android.Configuration
 import java.io.FileInputStream
 import java.util.*
@@ -116,21 +118,50 @@ android {
         }
     }
 
-    val envProps: File = rootProject.file(".env.properties")
-    if (envProps.exists()) {
-        val properties = Properties()
-        properties.load(FileInputStream(envProps))
-        buildTypes.forEach { buildType ->
-            properties
-                .filterKeys { "$it".startsWith("DOGFOODING") }
-                .forEach {
-                buildType.buildConfigField("String", "${it.key}", "\"${it.value}\"")
-            }
-        }
+    buildFeatures {
+        resValues = true
+        buildConfig = true
     }
 
     lint {
         baseline = file("lint-baseline.xml")
+    }
+}
+
+androidComponents {
+    val envProps: File = rootProject.file(".env.properties")
+    if (envProps.exists()) {
+        val properties = Properties()
+        properties.load(FileInputStream(envProps))
+
+        onVariants { applicationVariant ->
+            applicationVariant.flavorName?.let { flavor ->
+                val keyPrefix = if (flavor == "dogfooding") "DOGFOODING" else "PRODUCTION"
+                val buildConfigKeyPrefix = "${keyPrefix}_BUILD_CONFIG_"
+                val resConfigKeyPrefix = "${keyPrefix}_RES_CONFIG_"
+                val appProperties = properties.filterKeys { "$it".startsWith(keyPrefix) }
+                appProperties
+                    .filterKeys { "$it".startsWith(buildConfigKeyPrefix) }
+                    .forEach {
+                        val key: String = it.key.toString().replace(buildConfigKeyPrefix, "")
+                        applicationVariant.buildConfigFields.put(
+                            key,
+                            BuildConfigField("String", "\"${it.value}\"", null),
+                        )
+                    }
+                appProperties
+                    .filterKeys { "$it".startsWith(resConfigKeyPrefix) }
+                    .forEach {
+                        val key: String = it.key.toString()
+                            .replace(resConfigKeyPrefix, "")
+                            .toLowerCase()
+                        applicationVariant.resValues.put(
+                            applicationVariant.makeResValueKey("string", key),
+                            ResValue("${it.value}"),
+                        )
+                    }
+            }
+        }
     }
 }
 

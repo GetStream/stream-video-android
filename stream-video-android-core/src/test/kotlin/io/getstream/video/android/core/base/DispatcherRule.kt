@@ -27,7 +27,7 @@ import org.junit.rules.TestWatcher
 import org.junit.runner.Description
 
 public class DispatcherRule(
-    public val testDispatcher: TestDispatcher = UnconfinedTestDispatcher(TestCoroutineScheduler()),
+    public val testDispatcher: TestDispatcher = sharedTestDispatcher,
 ) : TestWatcher() {
     override fun starting(description: Description) {
         println("setting up test dispatcher $testDispatcher")
@@ -38,5 +38,14 @@ public class DispatcherRule(
     override fun finished(description: Description) {
         Dispatchers.resetMain()
         DispatcherProvider.reset()
+    }
+
+    companion object {
+        // The correct way is to not reuse the test dispatcher between tests, but in our
+        // case we have a shared/cached StreamVideoImpl in IntegrationTestBase which
+        // has a reference to the dispatcher - so we need to keep using it. In future we
+        // need to refactor this to recreate the SDK instance for each test (or only reuse it
+        // for specific integration tests).
+        private val sharedTestDispatcher: TestDispatcher = UnconfinedTestDispatcher(TestCoroutineScheduler())
     }
 }

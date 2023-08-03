@@ -96,7 +96,7 @@ public class Call(
     private val scope = CoroutineScope(clientImpl.scope.coroutineContext + supervisorJob)
 
     /** The call state contains all state such as the participant list, reactions etc */
-    val state = CallState(this, user, scope)
+    val state = CallState(client, this, user, scope)
 
     val sessionId by lazy { clientImpl.sessionId }
     private val network by lazy { clientImpl.connectionModule.networkStateProvider }
@@ -120,12 +120,16 @@ public class Call(
     /** Session handles all real time communication for video and audio */
     internal var session: RtcSession? = null
     internal val mediaManager by lazy {
-        MediaManagerImpl(
-            clientImpl.context,
-            this,
-            scope,
-            clientImpl.peerConnectionFactory.eglBase.eglBaseContext
-        )
+        if (testInstanceProvider.mediaManagerCreator != null) {
+            testInstanceProvider.mediaManagerCreator!!.invoke()
+        } else {
+            MediaManagerImpl(
+                clientImpl.context,
+                this,
+                scope,
+                clientImpl.peerConnectionFactory.eglBase.eglBaseContext
+            )
+        }
     }
 
     /** Basic crud operations */
@@ -280,14 +284,18 @@ public class Call(
         val iceServers = result.value.credentials.iceServers.map { it.toIceServer() }
         timer.split("join request completed")
 
-        session = RtcSession(
-            client = client,
-            call = this,
-            sfuUrl = sfuUrl,
-            sfuToken = sfuToken,
-            connectionModule = (client as StreamVideoImpl).connectionModule,
-            remoteIceServers = iceServers,
-        )
+        session = if (testInstanceProvider.rtcSessionCreator != null) {
+            testInstanceProvider.rtcSessionCreator!!.invoke()
+        } else {
+            RtcSession(
+                client = client,
+                call = this,
+                sfuUrl = sfuUrl,
+                sfuToken = sfuToken,
+                connectionModule = (client as StreamVideoImpl).connectionModule,
+                remoteIceServers = iceServers,
+            )
+        }
 
         session?.let {
             state._connection.value = RealtimeConnection.Joined(it)
@@ -381,6 +389,8 @@ public class Call(
     fun leave() {
         state._connection.value = RealtimeConnection.Disconnected
         client.state.removeActiveCall()
+        client.state.removeRingingCall()
+        (client as StreamVideoImpl).onCallCleanUp(this)
         camera.disable()
         microphone.disable()
         cleanup()
@@ -715,6 +725,16 @@ public class Call(
             call.scope.launch {
                 call.switchSfu(true)
             }
+        }
+    }
+
+    companion object {
+
+        internal var testInstanceProvider = TestInstanceProvider()
+
+        internal class TestInstanceProvider {
+            var mediaManagerCreator: (() -> MediaManagerImpl)? = null
+            var rtcSessionCreator: (() -> RtcSession)? = null
         }
     }
 }

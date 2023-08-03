@@ -18,18 +18,23 @@ package io.getstream.video.android
 
 import android.os.Build
 import android.os.Bundle
+import android.util.Log
 import android.view.WindowManager
+import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.lifecycleScope
+import io.getstream.result.Result
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.call.activecall.CallContent
 import io.getstream.video.android.compose.ui.components.call.ringing.RingingCallContent
 import io.getstream.video.android.core.StreamVideo
+import io.getstream.video.android.core.call.state.AcceptCall
 import io.getstream.video.android.core.call.state.CallAction
+import io.getstream.video.android.core.call.state.DeclineCall
 import io.getstream.video.android.core.call.state.LeaveCall
 import io.getstream.video.android.core.call.state.ToggleCamera
 import io.getstream.video.android.core.call.state.ToggleMicrophone
@@ -55,6 +60,23 @@ class IncomingCallActivity : ComponentActivity() {
             StreamVideoInitHelper.init(this@IncomingCallActivity)
             val call = StreamVideo.instance().call(callId.type, callId.id)
 
+            // Update the call state. This activity could have been started from a push notification.
+            // Doing a call.get() will also internally update the Call state object with the latest
+            // state from the backend.
+            val result = call.get()
+
+            if (result is Result.Failure) {
+                // Failed to recover the current state of the call
+                // TODO: Automaticly call this in the SDK?
+                Log.e("IncomingCallActivity", "Call.join failed ${result.value}")
+                Toast.makeText(
+                    this@IncomingCallActivity,
+                    "Failed get call status (${result.value.message})",
+                    Toast.LENGTH_SHORT
+                ).show()
+                finish()
+            }
+
             // We also check if savedInstanceState is null to prevent duplicate calls when activity
             // is recreated (e.g. when entering PiP mode)
             if (NotificationHandler.ACTION_ACCEPT_CALL == intent.action && savedInstanceState == null) {
@@ -73,6 +95,19 @@ class IncomingCallActivity : ComponentActivity() {
                                 call.leave()
                                 finish()
                             }
+                            is DeclineCall -> {
+                                lifecycleScope.launch {
+                                    call.reject()
+                                    call.leave()
+                                    finish()
+                                }
+                            }
+                            is AcceptCall -> {
+                                lifecycleScope.launch {
+                                    call.accept()
+                                    call.join()
+                                }
+                            }
 
                             else -> Unit
                         }
@@ -90,6 +125,10 @@ class IncomingCallActivity : ComponentActivity() {
                                 call = call,
                                 onCallAction = onCallAction
                             )
+                        },
+                        onRejectedContent = {
+                            call.leave()
+                            finish()
                         },
                         onCallAction = onCallAction
                     )

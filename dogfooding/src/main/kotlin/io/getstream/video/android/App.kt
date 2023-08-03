@@ -111,6 +111,6 @@ class App : Application() {
     }
 }
 
-const val API_KEY = BuildConfig.DOGFOODING_API_KEY
+const val API_KEY = BuildConfig.API_KEY
 
 val Context.app get() = applicationContext as App

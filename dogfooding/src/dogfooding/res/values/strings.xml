@@ -16,4 +16,6 @@
 -->
 <resources>
     <string name="app_name">Dogfooding</string>
+    <string name="deeplinking_host">getstream.io</string>
+    <string name="deeplinking_path_prefix">/video/demos</string>
 </resources>

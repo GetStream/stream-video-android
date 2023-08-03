@@ -125,6 +125,18 @@ jobs:
           ./gradlew :stream-video-android-compose:testDebugUnitTest --scan --stacktrace
           ./gradlew :stream-video-android-core:testDebugUnitTest --scan --stacktrace
 
+      - name: Unit tests core results
+        uses: actions/upload-artifact@v2
+        with:
+          name: unit-tests-core-results
+          path: stream-video-android-core/build/reports/tests/testDebugUnitTest/index.html
+
+      - name: Unit tests compose results
+        uses: actions/upload-artifact@v2
+        with:
+          name: unit-tests-compose-results
+          path: stream-video-android-compose/build/reports/tests/testDebugUnitTest/index.html
+
   androidTest-GMD:
     name: Android Test with GMD
     if: ${{ false }}  # disable for now

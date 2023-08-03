@@ -37,11 +37,11 @@ import io.getstream.video.android.compose.ui.components.avatar.LocalAvatarPrevie
 import io.getstream.video.android.compose.ui.components.background.CallBackground
 import io.getstream.video.android.compose.ui.components.call.CallAppBar
 import io.getstream.video.android.core.Call
-import io.getstream.video.android.core.ParticipantState
+import io.getstream.video.android.core.MemberState
 import io.getstream.video.android.core.call.state.CallAction
 import io.getstream.video.android.mock.StreamMockUtils
 import io.getstream.video.android.mock.mockCall
-import io.getstream.video.android.mock.mockParticipantList
+import io.getstream.video.android.mock.mockMemberStateList
 
 /**
  * Represents the Incoming Call state and UI, when the user receives a call from other people.
@@ -65,14 +65,14 @@ public fun IncomingCallContent(
     headerContent: (@Composable ColumnScope.() -> Unit)? = null,
     detailsContent: (
         @Composable ColumnScope.(
-            participants: List<ParticipantState>, topPadding: Dp
+            participants: List<MemberState>, topPadding: Dp
         ) -> Unit
     )? = null,
     controlsContent: (@Composable BoxScope.() -> Unit)? = null,
     onBackPressed: () -> Unit = {},
     onCallAction: (CallAction) -> Unit = {},
 ) {
-    val participants: List<ParticipantState> by call.state.participants.collectAsStateWithLifecycle()
+    val participants: List<MemberState> by call.state.members.collectAsStateWithLifecycle()
     val isCameraEnabled by if (LocalInspectionMode.current) {
         remember { mutableStateOf(true) }
     } else {
@@ -112,13 +112,13 @@ public fun IncomingCallContent(
     modifier: Modifier = Modifier,
     call: Call,
     isVideoType: Boolean = true,
-    participants: List<ParticipantState>,
+    participants: List<MemberState>,
     isCameraEnabled: Boolean,
     isShowingHeader: Boolean = true,
     headerContent: (@Composable ColumnScope.() -> Unit)? = null,
     detailsContent: (
         @Composable ColumnScope.(
-            participants: List<ParticipantState>, topPadding: Dp
+            participants: List<MemberState>, topPadding: Dp
         ) -> Unit
     )? = null,
     controlsContent: (@Composable BoxScope.() -> Unit)? = null,
@@ -177,7 +177,7 @@ private fun IncomingCallPreview1() {
         ) {
             IncomingCallContent(
                 call = mockCall,
-                participants = mockParticipantList.takeLast(1),
+                participants = mockMemberStateList.takeLast(1),
                 isVideoType = true,
                 isCameraEnabled = false,
                 onBackPressed = {}
@@ -197,7 +197,7 @@ private fun IncomingCallPreview2() {
         ) {
             IncomingCallContent(
                 call = mockCall,
-                participants = mockParticipantList,
+                participants = mockMemberStateList,
                 isVideoType = true,
                 isCameraEnabled = false,
                 onBackPressed = {}

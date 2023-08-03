@@ -21,22 +21,25 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.google.firebase.auth.FirebaseAuth
 import dagger.hilt.android.lifecycle.HiltViewModel
+import io.getstream.chat.android.client.ChatClient
 import io.getstream.log.Priority
 import io.getstream.log.streamLog
 import io.getstream.video.android.API_KEY
 import io.getstream.video.android.BuildConfig
 import io.getstream.video.android.app
+import io.getstream.video.android.core.StreamVideo
 import io.getstream.video.android.core.logging.LoggingLevel
 import io.getstream.video.android.datastore.delegate.StreamUserDataStore
 import io.getstream.video.android.model.User
 import io.getstream.video.android.token.StreamVideoNetwork
 import io.getstream.video.android.token.TokenResponse
+import io.getstream.video.android.util.UserIdGenerator
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOf
@@ -86,11 +89,19 @@ class LoginViewModel @Inject constructor(
 
     fun sigInInIfValidUserExist() {
         viewModelScope.launch {
-            handleUiEvent(LoginEvent.Loading)
-            dataStore.user.collectLatest { user ->
-                if (user != null && user.isValid() && !BuildConfig.BENCHMARK) {
+            val user = dataStore.user.firstOrNull()
+            if (user != null) {
+                handleUiEvent(LoginEvent.Loading)
+                if (user.isValid() && !BuildConfig.BENCHMARK) {
                     delay(10)
                     handleUiEvent(LoginEvent.SignInInSuccess(userId = user.id))
+                }
+            } else {
+                // Production apps have an automatic guest login. Logging the user out
+                // will just re-login automatically with a new random user ID.
+                if (BuildConfig.FLAVOR == "production") {
+                    handleUiEvent(LoginEvent.Loading)
+                    handleUiEvent(LoginEvent.SignInInSuccess(UserIdGenerator.generateRandomString()))
                 }
             }
         }
@@ -111,14 +122,18 @@ class LoginViewModel @Inject constructor(
             custom = mapOf("email" to userId)
         )
 
-        context.app.initializeStreamVideo(
-            apiKey = API_KEY,
-            user = user,
-            loggingLevel = LoggingLevel(priority = Priority.DEBUG),
-            token = token
-        )
+        if (!StreamVideo.isInstalled) {
+            context.app.initializeStreamVideo(
+                apiKey = API_KEY,
+                user = user,
+                loggingLevel = LoggingLevel(priority = Priority.DEBUG),
+                token = token
+            )
+        }
 
-        context.app.initializeStreamChat(user = user, token = token)
+        if (!ChatClient.isInitialized) {
+            context.app.initializeStreamChat(user = user, token = token)
+        }
     }
 }
 

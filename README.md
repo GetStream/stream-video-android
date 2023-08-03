@@ -104,30 +104,40 @@ Video roadmap and changelog is available [here](https://github.com/GetStream/pro
 
 - [ ] Complete integration with the video demo flow
 - [ ] Finish usability testing with design team on chat integration (Jaewoong)
-- [ ] Ringing: Finish it, make testing easy and write docs for common changes (Daniel)
-- [ ] Enable ice restarts for publisher and subscriber
-- [ ] Livestream tutorial (depends on RTMP support) (Thierry)
+- [X] Ringing: Finish it, make testing easy and write docs for common changes (Daniel)
 - [ ] Bug: Screensharing on Firefox has some issues when rendering on android (Daniel)
-- [ ] Call Analytics stateflow (Thierry)
-- [ ] Pagination on query members & query channel endpoints (Daniel)
-- [ ] Test coverage
-- [ ] Testing on more devices
+- [ ] Pagination on query members & query call endpoints (Daniel)
 - [ ] local version of audioLevel(s) for lower latency audio visualizations(Daniel)
 - [ ] Android SDK development.md cleanup (Daniel)
+- [ ] Livestream tutorial (depends on RTMP support) (Thierry)
+- [ ] Call Analytics stateflow (Thierry)
+- [ ] Enable ice restarts for publisher and subscriber
+- [ ] Test coverage
+- [ ] Testing on more devices
 - [ ] Logging is too verbose (rtc is very noisy), clean it up to focus on the essential for info and higher
 
 ### 0.4.0 milestone
 
 - [ ] Upgrade to more recent versions of webrtc
-- [ ] Screensharing from mobile
-- [ ] Tap to focus
-- [ ] Camera controls
 - [ ] Picture of the video stream at highest resolution
 - [ ] Review foreground service vs backend for some things like screensharing etc
 - [ ] Audio & Video filters. Support  (Daniel)
 - [ ] H264 workaround on Samsung 23 (see https://github.com/livekit/client-sdk-android/blob/main/livekit-android-sdk/src/main/java/io/livekit/android/webrtc/SimulcastVideoEncoderFactoryWrapper.kt#L34 and
 - https://github.com/react-native-webrtc/react-native-webrtc/issues/983#issuecomment-975624906)
-- [ ] Dynascale 2.0 (codecs, f resolution switches, resolution webrtc handling)
+- [ ] Dynascale 2.0
+
+### 0.5.0 milestone
+
+- [ ] Screensharing from mobile
+- [ ] Camera controls
+- [ ] Tap to focus
+
+### Dynascale 2.0
+
+- currently we support selecting which of the 3 layers you want to send: f, h and q. in addition we should support:
+- changing the resolution of the f track
+- changing the codec that's used from VP8 to h264 or vice versa
+- detecting when webrtc changes the resolution of the f track, and notifying the server about it (if needed)
 
 ## 💼 We are hiring!
 

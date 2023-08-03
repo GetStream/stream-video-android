@@ -26,6 +26,7 @@ androidxComposeCompiler = "1.4.4"
 androidxComposeTracing = "1.0.0-alpha03"
 androidxHiltNavigation = "1.0.0"
 androidxComposeNavigation = "2.5.3"
+composeStableMarker = "1.0.0"
 
 coil = "2.2.2"
 landscapist = "2.1.9"
@@ -102,6 +103,7 @@ androidx-compose-ui = { group = "androidx.compose.ui", name = "ui" }
 androidx-compose-ui-tooling = { group = "androidx.compose.ui", name = "ui-tooling" }
 androidx-compose-ui-tooling-preview = { group = "androidx.compose.ui", name = "ui-tooling-preview" }
 androidx-compose-tracing = { group = "androidx.compose.runtime", name = "runtime-tracing", version.ref = "androidxComposeTracing" }
+compose-stable-marker = { group = "com.github.skydoves", name = "compose-stable-marker", version.ref = "composeStableMarker" }
 
 coil = { group = "io.coil-kt", name = "coil", version.ref = "coil" }
 desugar = { group = "com.android.tools", name = "desugar_jdk_libs", version.ref = "desugar" }

@@ -19,18 +19,19 @@ package io.getstream.video.android.compose.ui.components.call.ringing
 import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.call.activecall.CallContent
 import io.getstream.video.android.compose.ui.components.call.controls.actions.DefaultOnCallActionHandler
 import io.getstream.video.android.compose.ui.components.call.ringing.incomingcall.IncomingCallContent
 import io.getstream.video.android.compose.ui.components.call.ringing.outgoingcall.OutgoingCallContent
 import io.getstream.video.android.core.Call
-import io.getstream.video.android.core.ParticipantState
+import io.getstream.video.android.core.MemberState
 import io.getstream.video.android.core.RingingState
 import io.getstream.video.android.core.call.state.CallAction
 import io.getstream.video.android.mock.StreamMockUtils
@@ -63,7 +64,7 @@ public fun RingingCallContent(
     headerContent: (@Composable ColumnScope.() -> Unit)? = null,
     detailsContent: (
         @Composable ColumnScope.(
-            participants: List<ParticipantState>, topPadding: Dp
+            participants: List<MemberState>, topPadding: Dp
         ) -> Unit
     )? = null,
     controlsContent: (@Composable BoxScope.() -> Unit)? = null,
@@ -73,39 +74,53 @@ public fun RingingCallContent(
     onRejectedContent: @Composable () -> Unit = {},
     onNoAnswerContent: @Composable () -> Unit = {},
 ) {
-    val ringingStateHolder = call.state.ringingState.collectAsState(initial = RingingState.Idle)
-    val ringingState = ringingStateHolder.value
+    val ringingState by call.state.ringingState.collectAsStateWithLifecycle()
 
-    if (ringingState is RingingState.Incoming && !ringingState.acceptedByMe) {
-        IncomingCallContent(
-            call = call,
-            isVideoType = isVideoType,
-            modifier = modifier,
-            isShowingHeader = isShowingHeader,
-            headerContent = headerContent,
-            detailsContent = detailsContent,
-            controlsContent = controlsContent,
-            onBackPressed = onBackPressed,
-            onCallAction = onCallAction
-        )
-    } else if (ringingState is RingingState.Outgoing && !ringingState.acceptedByCallee) {
-        OutgoingCallContent(
-            call = call,
-            isVideoType = isVideoType,
-            modifier = modifier,
-            isShowingHeader = isShowingHeader,
-            headerContent = headerContent,
-            detailsContent = detailsContent,
-            controlsContent = controlsContent,
-            onBackPressed = onBackPressed,
-            onCallAction = onCallAction
-        )
-    } else if (ringingState is RingingState.RejectedByAll) {
-        onRejectedContent.invoke()
-    } else if (ringingState is RingingState.TimeoutNoAnswer) {
-        onNoAnswerContent.invoke()
-    } else {
-        onAcceptedContent.invoke()
+    when (ringingState) {
+        is RingingState.Incoming -> {
+
+            IncomingCallContent(
+                call = call,
+                isVideoType = isVideoType,
+                modifier = modifier,
+                isShowingHeader = isShowingHeader,
+                headerContent = headerContent,
+                detailsContent = detailsContent,
+                controlsContent = controlsContent,
+                onBackPressed = onBackPressed,
+                onCallAction = onCallAction
+            )
+        }
+
+        is RingingState.Outgoing -> {
+            OutgoingCallContent(
+                call = call,
+                isVideoType = isVideoType,
+                modifier = modifier,
+                isShowingHeader = isShowingHeader,
+                headerContent = headerContent,
+                detailsContent = detailsContent,
+                controlsContent = controlsContent,
+                onBackPressed = onBackPressed,
+                onCallAction = onCallAction
+            )
+        }
+
+        RingingState.RejectedByAll -> {
+            onRejectedContent.invoke()
+        }
+
+        RingingState.TimeoutNoAnswer -> {
+            onNoAnswerContent.invoke()
+        }
+
+        RingingState.Active -> {
+            onAcceptedContent.invoke()
+        }
+
+        RingingState.Idle -> {
+            // Call state is not ready yet? Show loading?
+        }
     }
 }
 
@@ -118,7 +133,7 @@ private fun RingingCallContentPreview() {
             call = mockCall,
             isVideoType = true,
             onAcceptedContent = {},
-            onRejectedContent = {}
+            onRejectedContent = {},
         )
     }
 }

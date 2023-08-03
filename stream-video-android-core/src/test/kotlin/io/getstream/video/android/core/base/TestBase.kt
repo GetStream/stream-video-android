@@ -21,12 +21,10 @@ import io.getstream.log.StreamLog
 import io.getstream.log.streamLog
 import io.getstream.result.Result
 import io.getstream.video.android.core.call.connection.StreamPeerConnectionFactory
-import io.getstream.video.android.core.dispatchers.DispatcherProvider
 import io.getstream.video.android.datastore.delegate.StreamUserDataStore
 import io.mockk.MockKAnnotations
 import io.mockk.impl.annotations.MockK
 import io.mockk.junit4.MockKRule
-import kotlinx.coroutines.CoroutineScope
 import org.junit.Before
 import org.junit.Rule
 import org.threeten.bp.Clock
@@ -55,12 +53,9 @@ public open class TestBase {
     lateinit var mockedPCFactory: StreamPeerConnectionFactory
 
     @Before
-    fun setUp() =
+    fun setUp() {
         MockKAnnotations.init(this, relaxUnitFun = true) // turn relaxUnitFun on for all mocks
 
-    private val testLogger = StreamTestLogger()
-
-    init {
         if (!StreamLog.isInstalled) {
             StreamLog.setValidator { priority, _ -> priority > Priority.VERBOSE }
             StreamLog.install(logger = testLogger)
@@ -70,11 +65,12 @@ public open class TestBase {
         if (!StreamUserDataStore.isInstalled) {
             StreamUserDataStore.install(
                 context = context.applicationContext,
-                isEncrypted = false,
-                scope = CoroutineScope(DispatcherProvider.IO)
+                isEncrypted = false
             )
         }
     }
+
+    private val testLogger = StreamTestLogger()
 
     fun setLogLevel(newPriority: Priority) {
         StreamLog.setValidator { priority, _ -> priority > newPriority }

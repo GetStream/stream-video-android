@@ -16,6 +16,7 @@
 
 package io.getstream.video.android.core.model
 
+import androidx.compose.runtime.Stable
 import org.openapitools.client.models.SortParamRequest
 
 /**
@@ -25,13 +26,19 @@ import org.openapitools.client.models.SortParamRequest
  * @param sortField The property by which to apply sorting. Options depend on the object you're
  * querying.
  */
+@Stable
 public data class SortData(
     public val direction: Int = DEFAULT_SORT_DIRECTION,
     public val sortField: String
 )
 
+@Stable
 public sealed class SortField(public val field: String, public val ascending: Boolean = true) {
+
+    @Stable
     public class Asc(field: String) : SortField(field, true)
+
+    @Stable
     public class Desc(field: String) : SortField(field, false)
 }
 

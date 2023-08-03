@@ -3,20 +3,20 @@
 import com.github.burrunan.s3cache.AwsS3BuildCache
 
 pluginManagement {
-  includeBuild("build-logic")
-  repositories {
-    gradlePluginPortal()
-    google()
-    mavenCentral()
-  }
+    includeBuild("build-logic")
+    repositories {
+        gradlePluginPortal()
+        google()
+        mavenCentral()
+    }
 }
 dependencyResolutionManagement {
-  repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
-  repositories {
-    google()
-    mavenCentral()
-    maven(url = "https://plugins.gradle.org/m2/")
-  }
+    repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
+    repositories {
+        google()
+        mavenCentral()
+        maven(url = "https://plugins.gradle.org/m2/")
+    }
 }
 
 plugins {
@@ -44,6 +44,7 @@ include(":stream-video-android-bom")
 // Tutorials
 include(":tutorials:tutorial-video")
 include(":tutorials:tutorial-audio")
+include(":tutorials:tutorial-livestream")
 
 buildCache {
     local {
@@ -55,11 +56,16 @@ buildCache {
     if (file.exists()) {
         file.inputStream().use { localProperties.load(it) }
     }
-    val streamAWSRegion = (localProperties["buildCache.AWSRegion"] as? String) ?: System.getenv("BUILD_CACHE_AWS_REGION") ?: ""
-    val streamAWSBucket = (localProperties["buildCache.AWSBucket"] as? String) ?: System.getenv("BUILD_CACHE_AWS_BUCKET") ?: ""
-    val streamAWSAccessKeyId = (localProperties["buildCache.AWSAccessKeyId"] as? String) ?: System.getenv("BUILD_CACHE_AWS_ACCESS_KEY_ID") ?: ""
-    val streamAWSSecretKey = (localProperties["buildCache.AWSSecretKey"] as? String) ?: System.getenv("BUILD_CACHE_AWS_SECRET_KEY") ?: ""
-    val streamBuildCacheDisabled = (localProperties.get("buildCache.disabled") as? String).toBoolean()
+    val streamAWSRegion = (localProperties["buildCache.AWSRegion"] as? String)
+        ?: System.getenv("BUILD_CACHE_AWS_REGION") ?: ""
+    val streamAWSBucket = (localProperties["buildCache.AWSBucket"] as? String)
+        ?: System.getenv("BUILD_CACHE_AWS_BUCKET") ?: ""
+    val streamAWSAccessKeyId = (localProperties["buildCache.AWSAccessKeyId"] as? String)
+        ?: System.getenv("BUILD_CACHE_AWS_ACCESS_KEY_ID") ?: ""
+    val streamAWSSecretKey = (localProperties["buildCache.AWSSecretKey"] as? String)
+        ?: System.getenv("BUILD_CACHE_AWS_SECRET_KEY") ?: ""
+    val streamBuildCacheDisabled =
+        (localProperties.get("buildCache.disabled") as? String).toBoolean()
     if (!streamBuildCacheDisabled &&
         streamAWSRegion.isNotBlank() &&
         streamAWSBucket.isNotBlank() &&

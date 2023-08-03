@@ -35,11 +35,11 @@ import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.background.CallBackground
 import io.getstream.video.android.compose.ui.components.call.CallAppBar
 import io.getstream.video.android.core.Call
-import io.getstream.video.android.core.ParticipantState
+import io.getstream.video.android.core.MemberState
 import io.getstream.video.android.core.call.state.CallAction
 import io.getstream.video.android.mock.StreamMockUtils
 import io.getstream.video.android.mock.mockCall
-import io.getstream.video.android.mock.mockParticipantList
+import io.getstream.video.android.mock.mockMemberStateList
 
 /**
  * Represents the Outgoing Call state and UI, when the user is calling other people.
@@ -63,14 +63,14 @@ public fun OutgoingCallContent(
     headerContent: (@Composable ColumnScope.() -> Unit)? = null,
     detailsContent: (
         @Composable ColumnScope.(
-            participants: List<ParticipantState>, topPadding: Dp
+            participants: List<MemberState>, topPadding: Dp
         ) -> Unit
     )? = null,
     controlsContent: (@Composable BoxScope.() -> Unit)? = null,
     onBackPressed: () -> Unit = {},
     onCallAction: (CallAction) -> Unit = {},
 ) {
-    val participants: List<ParticipantState> by call.state.participants.collectAsStateWithLifecycle()
+    val participants: List<MemberState> by call.state.members.collectAsStateWithLifecycle()
 
     OutgoingCallContent(
         call = call,
@@ -105,12 +105,12 @@ public fun OutgoingCallContent(
     modifier: Modifier = Modifier,
     call: Call,
     isVideoType: Boolean = true,
-    participants: List<ParticipantState>,
+    participants: List<MemberState>,
     isShowingHeader: Boolean = true,
     headerContent: (@Composable ColumnScope.() -> Unit)? = null,
     detailsContent: (
         @Composable ColumnScope.(
-            participants: List<ParticipantState>, topPadding: Dp
+            participants: List<MemberState>, topPadding: Dp
         ) -> Unit
     )? = null,
     controlsContent: (@Composable BoxScope.() -> Unit)? = null,
@@ -178,7 +178,7 @@ private fun OutgoingCallVideoPreview() {
         OutgoingCallContent(
             call = mockCall,
             isVideoType = true,
-            participants = mockParticipantList,
+            participants = mockMemberStateList,
             onBackPressed = {}
         ) {}
     }
@@ -192,7 +192,7 @@ private fun OutgoingCallAudioPreview() {
         OutgoingCallContent(
             call = mockCall,
             isVideoType = false,
-            participants = mockParticipantList,
+            participants = mockMemberStateList,
             onBackPressed = {}
         ) {}
     }

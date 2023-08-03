@@ -20,9 +20,8 @@ Time to get started building an audio-room for your app.
 
 ### Step 1 - Create a new project in Android Studio
 
-This tutorial was written using [Android Studio Flamingo](https://developer.android.com/studio/releases#android-studio-flamingo-|-2022.2.1-patch-2-may-2023).
-Setup steps can vary slightly across Android Studio versions.
-If you run into trouble, make sure to use the latest version of Android Studio.
+Note that this tutorial was written using Android Studio Giraffe. Setup steps can vary slightly across Android Studio versions.
+We recommend using Android Studio Giraffe or newer.
 
 1. Create a new project
 2. Select Phone & Tablet -> **Empty Activity**
@@ -30,13 +29,13 @@ If you run into trouble, make sure to use the latest version of Android Studio.
 
 ### Step 2 - Install the SDK & Setup the client
 
-**Add the Video Compose SDK** and [Jetpack Compose](https://developer.android.com/jetpack/compose) dependencies to your app's `build.gradle.kts` file found in `app/build.gradle`.
+**Add the Video Compose SDK** and [Jetpack Compose](https://developer.android.com/jetpack/compose) dependencies to your app's `build.gradle.kts` file found in `app/build.gradle.kts`.
 If you're new to android, note that there are 2 `build.gradle` files, you want to open the `build.gradle` in the app folder.
 
 ```groovy
 dependencies {
     // Stream Video Compose SDK
-    implementation("io.getstream:stream-video-android-compose:0.2.0")
+    implementation("io.getstream:stream-video-android-compose:0.2.1")
 
     // Jetpack Compose (optional/ android studio typically adds them when you create a new project)
     implementation(platform("androidx.compose:compose-bom:2023.06.00"))
