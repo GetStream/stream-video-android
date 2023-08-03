@@ -339,7 +339,7 @@ So HLS can be a good option when:
 Let's show how to broadcast your call to HLS:
 
 ```kotlin
-call.startBroadcast()
+call.startHLS()
 val hlsUrl = call.state.egress.value?.hls
 Log.i("Tutorial", "HLS url = $hlsUrl")
 ```

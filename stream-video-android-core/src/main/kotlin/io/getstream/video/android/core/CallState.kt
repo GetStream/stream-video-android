@@ -190,6 +190,9 @@ public class CallState(
     private val _participantCounts: MutableStateFlow<ParticipantCount?> = MutableStateFlow(null)
     val participantCounts: StateFlow<ParticipantCount?> = _participantCounts
 
+    /** a count of the total number of participants. */
+    val totalParticipants = _participantCounts.mapState { it?.total ?: 0 }
+
     /** Your own participant state */
     public val me: StateFlow<ParticipantState?> = _participants.mapState {
         it[call.clientImpl.sessionId]
