@@ -59,7 +59,9 @@ public class ScreenShareView : ConstraintLayout, VideoRenderer, JobHolder {
     public constructor(context: Context) : this(context, null, 0)
     public constructor(context: Context, attrs: AttributeSet?) : this(context, attrs, 0)
     public constructor(context: Context, attrs: AttributeSet?, defStyleAttr: Int) : super(
-        context.createStreamThemeWrapper(), attrs, defStyleAttr
+        context.createStreamThemeWrapper(),
+        attrs,
+        defStyleAttr,
     ) {
         init(context, attrs)
     }
@@ -95,7 +97,9 @@ public class ScreenShareView : ConstraintLayout, VideoRenderer, JobHolder {
             if (::rendererInitializer.isInitialized) {
                 track?.let {
                     rendererInitializer.initRenderer(
-                        binding.screenShare, it.streamId, TrackType.TRACK_TYPE_VIDEO
+                        binding.screenShare,
+                        it.streamId,
+                        TrackType.TRACK_TYPE_VIDEO,
                     ) { onRender(it) }
                     wasRendererInitialised = true
                 }

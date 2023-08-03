@@ -165,7 +165,7 @@ public class CallState(
     private val client: StreamVideo,
     private val call: Call,
     private val user: User,
-    internal val scope: CoroutineScope
+    internal val scope: CoroutineScope,
 ) {
 
     private val logger by taggedLogger("CallState")
@@ -238,8 +238,8 @@ public class CallState(
                     { it.screenSharingEnabled.value },
                     { it.lastSpeakingAt.value },
                     { it.videoEnabled.value },
-                    { it.joinedAt.value }
-                )
+                    { it.joinedAt.value },
+                ),
             ).reversed()
 
             scope.launch {
@@ -328,7 +328,9 @@ public class CallState(
             delay(1000)
             val started = _session.value?.startedAt
             val ended = _session.value?.endedAt ?: OffsetDateTime.now()
-            val difference = if (started == null) null else {
+            val difference = if (started == null) {
+                null
+            } else {
                 ended.toInstant().toEpochMilli() - started.toInstant().toEpochMilli()
             }
             emit(difference)
@@ -743,7 +745,7 @@ public class CallState(
                     val newList = callSessionResponse.participants.toMutableList()
                     newList.removeIf { it.userSessionId == event.participant.userSessionId }
                     _session.value = callSessionResponse.copy(
-                        participants = newList.toImmutableList()
+                        participants = newList.toImmutableList(),
                     )
                 }
             }
@@ -755,7 +757,7 @@ public class CallState(
                         user = event.participant.user,
                         joinedAt = event.createdAt,
                         role = "user",
-                        userSessionId = event.participant.userSessionId
+                        userSessionId = event.participant.userSessionId,
                     )
                     val index = newList.indexOfFirst { user.id == event.participant.user.id }
                     if (index == -1) {
@@ -764,7 +766,7 @@ public class CallState(
                         newList[index] = participant
                     }
                     _session.value = callSessionResponse.copy(
-                        participants = newList.toImmutableList()
+                        participants = newList.toImmutableList(),
                     )
                 }
                 updateRingingState()
@@ -856,7 +858,6 @@ public class CallState(
     private fun startRingingTimer() {
         ringingTimerJob?.cancel()
         ringingTimerJob = scope.launch {
-
             val autoCancelTimeout = settings.value?.ring?.autoCancelTimeoutMs
 
             if (autoCancelTimeout != null && autoCancelTimeout > 0) {
@@ -928,7 +929,7 @@ public class CallState(
         sessionId: String,
         userId: String,
         user: User? = null,
-        updateFlow: Boolean = false
+        updateFlow: Boolean = false,
     ): ParticipantState {
         val participantMap = _participants.value.toSortedMap()
         val participantState = if (participantMap.contains(sessionId)) {
@@ -1066,7 +1067,6 @@ public class CallState(
 }
 
 private fun MemberResponse.toMemberState(): MemberState {
-
     return MemberState(
         user = user.toUser(),
         custom = custom,

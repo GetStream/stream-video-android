@@ -32,28 +32,43 @@ import io.getstream.video.android.xml.widget.screenshare.ScreenShareStyle
 public object TransformStyle {
     @JvmStatic
     public var avatarStyleTransformer: StyleTransformer<AvatarStyle> = noopTransformer()
+
     @JvmStatic
     public var callDetailsStyleTransformer: StyleTransformer<CallDetailsStyle> = noopTransformer()
+
     @JvmStatic
     public var outgoingCallStyleTransformer: StyleTransformer<OutgoingCallStyle> = noopTransformer()
+
     @JvmStatic
     public var incomingCallStyleTransformer: StyleTransformer<IncomingCallStyle> = noopTransformer()
+
     @JvmStatic
     public var callControlsStyleTransformer: StyleTransformer<CallControlsStyle> = noopTransformer()
+
     @JvmStatic
-    public var controlButtonStyleTransformer: StyleTransformer<ControlButtonStyle> = noopTransformer()
+    public var controlButtonStyleTransformer: StyleTransformer<ControlButtonStyle> =
+        noopTransformer()
+
     @JvmStatic
-    public var callParticipantStyleTransformer: StyleTransformer<CallParticipantStyle> = noopTransformer()
+    public var callParticipantStyleTransformer: StyleTransformer<CallParticipantStyle> =
+        noopTransformer()
+
     @JvmStatic
     public var callViewStyleTransformer: StyleTransformer<CallViewStyle> = noopTransformer()
+
     @JvmStatic
-    public var pictureInPictureStyleTransformer: StyleTransformer<PictureInPictureStyle> = noopTransformer()
+    public var pictureInPictureStyleTransformer: StyleTransformer<PictureInPictureStyle> =
+        noopTransformer()
+
     @JvmStatic
     public var screenShareStyleTransformer: StyleTransformer<ScreenShareStyle> = noopTransformer()
+
     @JvmStatic
     public var callAppBarStyleTransformer: StyleTransformer<CallAppBarStyle> = noopTransformer()
+
     @JvmStatic
-    public var callContainerStyleTransformer: StyleTransformer<CallContainerStyle> = noopTransformer()
+    public var callContainerStyleTransformer: StyleTransformer<CallContainerStyle> =
+        noopTransformer()
 
     private fun <T> noopTransformer() = StyleTransformer<T> { it }
 }

@@ -37,10 +37,11 @@ import io.getstream.video.android.mock.mockMemberStateList
 
 @Composable
 public fun ParticipantAvatars(
-    participants: List<MemberState>
+    participants: List<MemberState>,
 ) {
     Box(
-        modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center
+        modifier = Modifier.fillMaxWidth(),
+        contentAlignment = Alignment.Center,
     ) {
         if (participants.isNotEmpty()) {
             if (participants.size == 1) {
@@ -48,7 +49,7 @@ public fun ParticipantAvatars(
 
                 UserAvatar(
                     modifier = Modifier.size(VideoTheme.dimens.singleAvatarSize),
-                    user = participant.user
+                    user = participant.user,
                 )
             } else {
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
@@ -56,7 +57,7 @@ public fun ParticipantAvatars(
                         items(participants.take(2)) { participant ->
                             UserAvatar(
                                 modifier = Modifier.size(VideoTheme.dimens.callAvatarSize),
-                                user = participant.user
+                                user = participant.user,
                             )
                         }
                     }
@@ -64,7 +65,7 @@ public fun ParticipantAvatars(
                     if (participants.size >= 3) {
                         UserAvatar(
                             modifier = Modifier.size(VideoTheme.dimens.callAvatarSize),
-                            user = participants[2].user
+                            user = participants[2].user,
                         )
                     }
                 }
@@ -79,7 +80,7 @@ private fun ParticipantAvatarsPreview() {
     StreamMockUtils.initializeStreamVideo(LocalContext.current)
     VideoTheme {
         ParticipantAvatars(
-            participants = mockMemberStateList
+            participants = mockMemberStateList,
         )
     }
 }

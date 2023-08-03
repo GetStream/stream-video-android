@@ -30,7 +30,7 @@ public fun CallControlActionBackground(
     enabledColor: Color = VideoTheme.colors.callActionIconEnabledBackground,
     disabledColor: Color = VideoTheme.colors.callActionIconDisabledBackground,
     shape: Shape = VideoTheme.shapes.callControlsButton,
-    content: @Composable () -> Unit
+    content: @Composable () -> Unit,
 ) {
     Card(
         modifier = modifier,
@@ -40,6 +40,6 @@ public fun CallControlActionBackground(
         } else {
             disabledColor
         },
-        content = content
+        content = content,
     )
 }

@@ -72,7 +72,7 @@ internal class ConnectionModule(
     val networkStateProvider: NetworkStateProvider by lazy {
         NetworkStateProvider(
             connectivityManager = context
-                .getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+                .getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager,
         )
     }
     private val retrofit: Retrofit by lazy {
@@ -107,7 +107,7 @@ internal class ConnectionModule(
             .addInterceptor(
                 HttpLoggingInterceptor().apply {
                     level = loggingLevel.httpLoggingLevel.level
-                }
+                },
             )
             .retryOnConnectionFailure(true)
             .connectTimeout(connectionTimeoutInMs, TimeUnit.MILLISECONDS)
@@ -133,7 +133,7 @@ internal class ConnectionModule(
             userToken,
             scope,
             okHttpClient,
-            networkStateProvider = networkStateProvider
+            networkStateProvider = networkStateProvider,
         )
     }
 
@@ -151,7 +151,7 @@ internal class ConnectionModule(
             getSubscriberSdp = getSubscriberSdp,
             scope = scope,
             networkStateProvider = networkStateProvider,
-            loggingLevel = loggingLevel
+            loggingLevel = loggingLevel,
         )
     }
 
@@ -185,7 +185,7 @@ internal class SfuConnectionModule(
     /** The scope to use for the socket */
     scope: CoroutineScope = CoroutineScope(DispatcherProvider.IO),
     /** Network monitoring */
-    networkStateProvider: NetworkStateProvider
+    networkStateProvider: NetworkStateProvider,
 ) {
     internal var sfuSocket: SfuSocket
     private val updatedSignalUrl = sfuUrl.removeSuffix(suffix = "/twirp")
@@ -199,7 +199,7 @@ internal class SfuConnectionModule(
             .addInterceptor(
                 HttpLoggingInterceptor().apply {
                     level = loggingLevel.httpLoggingLevel.level
-                }
+                },
             )
             .retryOnConnectionFailure(true)
             .connectTimeout(connectionTimeoutInMs, TimeUnit.MILLISECONDS)
@@ -232,7 +232,7 @@ internal class SfuConnectionModule(
             getSubscriberSdp,
             scope,
             okHttpClient,
-            networkStateProvider
+            networkStateProvider,
         )
     }
 }
@@ -243,7 +243,7 @@ internal class SfuConnectionModule(
 internal class CoordinatorAuthInterceptor(
     var apiKey: String,
     var token: String,
-    var authType: String = "jwt"
+    var authType: String = "jwt",
 ) : Interceptor {
 
     @Throws(IOException::class)

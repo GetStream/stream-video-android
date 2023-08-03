@@ -48,7 +48,7 @@ internal suspend fun Context.registerReceiverAsFlow(vararg actions: String): Flo
                 actions.forEach {
                     addAction(it)
                 }
-            }
+            },
         )
 
         awaitClose {
@@ -65,7 +65,8 @@ internal val Context.vibrator: Vibrator
 
 internal val Context.vibratorManager: VibratorManager
     @RequiresApi(Build.VERSION_CODES.S)
-    @JvmSynthetic get() = getSystemService(Context.VIBRATOR_MANAGER_SERVICE) as VibratorManager
+    @JvmSynthetic
+    get() = getSystemService(Context.VIBRATOR_MANAGER_SERVICE) as VibratorManager
 
 public fun Activity.shouldShowRequestPermissionsRationale(permissions: Array<out String>): Boolean {
     return permissions.map {

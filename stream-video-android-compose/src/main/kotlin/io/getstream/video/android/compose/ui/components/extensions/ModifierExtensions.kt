@@ -26,7 +26,7 @@ internal fun Modifier.toggleAlpha(isEnabled: Boolean): Modifier = composed(
     inspectorInfo = debugInspectorInfo {
         name = "toggleAlpha"
         properties["isEnabled"] = isEnabled
-    }
+    },
 ) {
     val alpha = if (isEnabled) {
         VideoTheme.dimens.buttonToggleOnAlpha

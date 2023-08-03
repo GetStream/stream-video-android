@@ -24,13 +24,13 @@ import java.io.Serializable
 public data class IceServer(
     val urls: List<String>,
     val username: String,
-    val password: String
+    val password: String,
 ) : Serializable
 
 internal fun ICEServer.toIceServer(): IceServer {
     return IceServer(
         urls = urls,
         username = username,
-        password = password
+        password = password,
     )
 }

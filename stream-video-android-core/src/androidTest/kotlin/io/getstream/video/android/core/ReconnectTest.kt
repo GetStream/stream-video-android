@@ -70,7 +70,7 @@ class ReconnectTest : IntegrationTestBase(connectCoordinatorWS = false) {
         val connectionStateItem = connectionState.awaitItem()
         assertThat(connectionStateItem).isAnyOf(
             RealtimeConnection.Connected,
-            RealtimeConnection.Joined(result.getOrThrow())
+            RealtimeConnection.Joined(result.getOrThrow()),
         )
         if (connectionStateItem is RealtimeConnection.Joined) {
             connectionState.awaitItem()
@@ -126,7 +126,7 @@ class ReconnectTest : IntegrationTestBase(connectCoordinatorWS = false) {
         val connectionStateItem = connectionState.awaitItem()
         assertThat(connectionStateItem).isAnyOf(
             RealtimeConnection.Connected,
-            RealtimeConnection.Joined(result.getOrThrow())
+            RealtimeConnection.Joined(result.getOrThrow()),
         )
         if (connectionStateItem is RealtimeConnection.Joined) {
             connectionState.awaitItem()
@@ -163,7 +163,7 @@ class ReconnectTest : IntegrationTestBase(connectCoordinatorWS = false) {
         val connectionStateItem = connectionState.awaitItem()
         assertThat(connectionStateItem).isAnyOf(
             RealtimeConnection.Connected,
-            RealtimeConnection.Joined(result.getOrThrow())
+            RealtimeConnection.Joined(result.getOrThrow()),
         )
         if (connectionStateItem is RealtimeConnection.Joined) {
             connectionState.awaitItem()

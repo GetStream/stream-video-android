@@ -44,7 +44,7 @@ public class CoordinatorSocket(
     url = url,
     httpClient = httpClient,
     scope = scope,
-    networkStateProvider = networkStateProvider
+    networkStateProvider = networkStateProvider,
 ) {
     override val logger by taggedLogger("PersistentCoordinatorSocket")
 
@@ -64,7 +64,7 @@ public class CoordinatorSocket(
                 id = user.id,
                 name = user.name,
                 image = user.image,
-            )
+            ),
         )
         val message = adapter.toJson(authRequest)
 

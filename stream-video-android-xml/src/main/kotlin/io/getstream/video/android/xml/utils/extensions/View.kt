@@ -30,7 +30,7 @@ internal fun View.setBackgroundRipple() {
     context.theme.resolveAttribute(
         android.R.attr.selectableItemBackgroundBorderless,
         outValue,
-        true
+        true,
     )
     setBackgroundResource(outValue.resourceId)
 }
@@ -44,7 +44,9 @@ internal val View.isLandscape: Boolean
  * @param updateParams Lambda that exposes the [ConstraintLayout.LayoutParams] to be manipulated and applied.
  */
 @JvmSynthetic
-internal inline fun View.updateLayoutParams(updateParams: ConstraintLayout.LayoutParams.() -> Unit) {
+internal inline fun View.updateLayoutParams(
+    updateParams: ConstraintLayout.LayoutParams.() -> Unit,
+) {
     if (layoutParams !is ConstraintLayout.LayoutParams) {
         StreamLog.w("View::updateLayoutParams") {
             "Layout params are ${layoutParams::class.java.simpleName}. ConstraintLayout.LayoutParams required."

@@ -50,11 +50,11 @@ public fun IncomingCallControls(
     Row(
         modifier = modifier.fillMaxWidth(),
         verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.SpaceEvenly
+        horizontalArrangement = Arrangement.SpaceEvenly,
     ) {
         DeclineCallAction(
             modifier = Modifier.size(VideoTheme.dimens.largeButtonSize),
-            onCallAction = onCallAction
+            onCallAction = onCallAction,
         )
 
         if (isVideoCall) {
@@ -63,17 +63,17 @@ public fun IncomingCallControls(
                     .toggleAlpha(isCameraEnabled)
                     .background(
                         color = VideoTheme.colors.appBackground,
-                        shape = VideoTheme.shapes.callButton
+                        shape = VideoTheme.shapes.callButton,
                     )
                     .size(VideoTheme.dimens.mediumButtonSize),
                 isCameraEnabled = isCameraEnabled,
-                onCallAction = onCallAction
+                onCallAction = onCallAction,
             )
         }
 
         AcceptCallAction(
             modifier = Modifier.size(VideoTheme.dimens.largeButtonSize),
-            onCallAction = onCallAction
+            onCallAction = onCallAction,
         )
     }
 }
@@ -85,7 +85,7 @@ private fun IncomingCallOptionsPreview() {
         IncomingCallControls(
             isVideoCall = true,
             isCameraEnabled = true,
-            onCallAction = { }
+            onCallAction = { },
         )
     }
 }

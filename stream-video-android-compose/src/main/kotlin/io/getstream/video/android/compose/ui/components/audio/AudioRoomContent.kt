@@ -63,7 +63,10 @@ public fun AudioRoomContent(
     call: Call,
     isShowingAppBar: Boolean = true,
     permissions: VideoPermissionsState = rememberMicrophonePermissionState(call = call),
-    title: String = stringResource(id = io.getstream.video.android.ui.common.R.string.stream_video_audio_room_title),
+    title: String =
+        stringResource(
+            id = io.getstream.video.android.ui.common.R.string.stream_video_audio_room_title,
+        ),
     appBarContent: @Composable (call: Call) -> Unit = {
         AudioAppBar(
             modifier = Modifier.fillMaxWidth(),
@@ -73,11 +76,11 @@ public fun AudioRoomContent(
     style: AudioRendererStyle = RegularAudioRendererStyle(),
     audioRenderer: @Composable (
         participant: ParticipantState,
-        style: AudioRendererStyle
+        style: AudioRendererStyle,
     ) -> Unit = { audioParticipant, audioStyle ->
         ParticipantAudio(
             participant = audioParticipant,
-            style = audioStyle
+            style = audioStyle,
         )
     },
     audioContent: @Composable BoxScope.(call: Call) -> Unit = {
@@ -88,7 +91,7 @@ public fun AudioRoomContent(
                 .fillMaxSize(),
             participants = participants,
             style = style,
-            audioRenderer = audioRenderer
+            audioRenderer = audioRenderer,
         )
     },
     onLeaveRoom: (() -> Unit)? = null,
@@ -98,7 +101,7 @@ public fun AudioRoomContent(
                 .testTag("audio_controls_content")
                 .fillMaxWidth(),
             call = call,
-            onLeaveRoom = onLeaveRoom
+            onLeaveRoom = onLeaveRoom,
         )
     },
 ) {
@@ -119,11 +122,11 @@ public fun AudioRoomContent(
             Box(
                 modifier = Modifier
                     .background(color = VideoTheme.colors.appBackground)
-                    .padding(paddings)
+                    .padding(paddings),
             ) {
                 audioContent.invoke(this, call)
             }
-        }
+        },
     )
 }
 
@@ -147,7 +150,7 @@ private fun AudioRoomPreview() {
     VideoTheme {
         AudioRoomContent(
             modifier = Modifier.fillMaxSize(),
-            call = mockCall
+            call = mockCall,
         )
     }
 }

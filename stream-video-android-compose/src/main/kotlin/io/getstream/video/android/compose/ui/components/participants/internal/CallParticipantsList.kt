@@ -65,7 +65,7 @@ internal fun CallParticipantsList(
     onUserOptionsSelected: (ParticipantState) -> Unit,
     onInviteUser: () -> Unit,
     onMute: (Boolean) -> Unit,
-    onBackPressed: () -> Unit
+    onBackPressed: () -> Unit,
 ) {
     Scaffold(
         modifier = modifier,
@@ -73,7 +73,7 @@ internal fun CallParticipantsList(
         topBar = {
             CallParticipantListAppBar(
                 numberOfParticipants = participants.size,
-                onBackPressed = onBackPressed
+                onBackPressed = onBackPressed,
             )
         },
         bottomBar = {
@@ -81,9 +81,9 @@ internal fun CallParticipantsList(
                 modifier = Modifier.fillMaxWidth(),
                 isLocalAudioEnabled = isLocalAudioEnabled,
                 onInviteUser = onInviteUser,
-                onMute = onMute
+                onMute = onMute,
             )
-        }
+        },
     ) { padding ->
         LazyColumn(
             modifier = Modifier
@@ -92,7 +92,7 @@ internal fun CallParticipantsList(
                 .background(VideoTheme.colors.appBackground),
             contentPadding = PaddingValues(16.dp),
             horizontalAlignment = Alignment.Start,
-            verticalArrangement = Arrangement.spacedBy(8.dp)
+            verticalArrangement = Arrangement.spacedBy(8.dp),
         ) {
             items(participants, key = { it.sessionId }) {
                 CallParticipantInfoItem(it, onUserOptionsSelected)
@@ -110,21 +110,20 @@ internal fun CallParticipantsList(
 @Composable
 private fun CallParticipantInfoItem(
     participant: ParticipantState,
-    onUserOptionsSelected: (ParticipantState) -> Unit
+    onUserOptionsSelected: (ParticipantState) -> Unit,
 ) {
     Row(
         modifier = Modifier.wrapContentWidth(),
         verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.Start
+        horizontalArrangement = Arrangement.Start,
     ) {
-
         Spacer(modifier = Modifier.width(8.dp))
 
         val user by participant.user.collectAsStateWithLifecycle()
         UserAvatar(
             modifier = Modifier.size(VideoTheme.dimens.participantsInfoAvatarSize),
             user = user,
-            isShowingOnlineIndicator = true
+            isShowingOnlineIndicator = true,
         )
 
         val userName by participant.userNameOrId.collectAsStateWithLifecycle()
@@ -136,7 +135,7 @@ private fun CallParticipantInfoItem(
             style = VideoTheme.typography.bodyBold,
             color = VideoTheme.colors.textHighEmphasis,
             fontSize = 16.sp,
-            maxLines = 1
+            maxLines = 1,
         )
 
         Row(verticalAlignment = Alignment.CenterVertically) {
@@ -145,7 +144,7 @@ private fun CallParticipantInfoItem(
                 Icon(
                     painter = painterResource(id = R.drawable.stream_video_ic_mic_off),
                     tint = VideoTheme.colors.errorAccent,
-                    contentDescription = null
+                    contentDescription = null,
                 )
             }
 
@@ -156,7 +155,7 @@ private fun CallParticipantInfoItem(
                 Icon(
                     painter = painterResource(id = R.drawable.stream_video_ic_videocam_off),
                     tint = VideoTheme.colors.errorAccent,
-                    contentDescription = null
+                    contentDescription = null,
                 )
             }
 
@@ -166,7 +165,7 @@ private fun CallParticipantInfoItem(
                 modifier = Modifier.clickable { onUserOptionsSelected(participant) },
                 painter = painterResource(id = R.drawable.stream_video_ic_options),
                 tint = VideoTheme.colors.textHighEmphasis,
-                contentDescription = null
+                contentDescription = null,
             )
 
             Spacer(modifier = Modifier.width(8.dp))
@@ -184,7 +183,7 @@ private fun CallParticipantsListPreview() {
             onUserOptionsSelected = {},
             isLocalAudioEnabled = false,
             onInviteUser = {},
-            onMute = {}
+            onMute = {},
         ) {}
     }
 }

@@ -41,7 +41,7 @@ internal class ControlButtonView : CardView {
     public constructor(context: Context, attrs: AttributeSet?, defStyleAttr: Int) : super(
         context.createStreamThemeWrapper(),
         attrs,
-        defStyleAttr
+        defStyleAttr,
     ) {
         init(context, attrs)
     }

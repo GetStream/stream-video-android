@@ -49,12 +49,12 @@ internal fun CallParticipantsInfoActions(
     modifier: Modifier = Modifier,
     isLocalAudioEnabled: Boolean,
     onInviteUser: () -> Unit,
-    onMute: (Boolean) -> Unit
+    onMute: (Boolean) -> Unit,
 ) {
     Row(
         modifier = modifier.padding(vertical = 20.dp),
         verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.SpaceEvenly
+        horizontalArrangement = Arrangement.SpaceEvenly,
     ) {
         Button(
             modifier = Modifier
@@ -66,11 +66,13 @@ internal fun CallParticipantsInfoActions(
             onClick = { onInviteUser.invoke() },
             content = {
                 Text(
-                    text = stringResource(R.string.stream_video_call_participants_info_options_invite),
+                    text = stringResource(
+                        R.string.stream_video_call_participants_info_options_invite,
+                    ),
                     style = VideoTheme.typography.bodyBold,
-                    color = Color.White
+                    color = Color.White,
                 )
-            }
+            },
         )
 
         OutlinedButton(
@@ -89,12 +91,12 @@ internal fun CallParticipantsInfoActions(
                             R.string.stream_video_call_participants_info_options_mute
                         } else {
                             R.string.stream_video_call_participants_info_options_unmute
-                        }
+                        },
                     ),
                     style = VideoTheme.typography.bodyBold,
-                    color = VideoTheme.colors.textLowEmphasis
+                    color = VideoTheme.colors.textLowEmphasis,
                 )
-            }
+            },
         )
     }
 }
@@ -106,7 +108,7 @@ private fun CallParticipantsInfoOptionsPreview() {
         CallParticipantsInfoActions(
             isLocalAudioEnabled = false,
             onInviteUser = {},
-            onMute = {}
+            onMute = {},
         )
     }
 }

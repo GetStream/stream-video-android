@@ -45,7 +45,7 @@ class ClientAndAuthTest : TestBase() {
             geo = GEO.GlobalEdgeNetwork,
             user = testData.users["thierry"]!!,
             token = testData.tokens["thierry"]!!,
-            ensureSingleInstance = false
+            ensureSingleInstance = false,
         )
         val client = builder.build()
         client.cleanup()
@@ -58,9 +58,9 @@ class ClientAndAuthTest : TestBase() {
             apiKey = apiKey,
             geo = GEO.GlobalEdgeNetwork,
             user = User(
-                type = UserType.Anonymous
+                type = UserType.Anonymous,
             ),
-            ensureSingleInstance = false
+            ensureSingleInstance = false,
         )
         val client = builder.build()
         client.cleanup()
@@ -78,9 +78,9 @@ class ClientAndAuthTest : TestBase() {
             geo = GEO.GlobalEdgeNetwork,
             user = User(
                 id = "guest",
-                type = UserType.Guest
+                type = UserType.Guest,
             ),
-            ensureSingleInstance = false
+            ensureSingleInstance = false,
         ).build()
         client.cleanup()
     }
@@ -94,8 +94,8 @@ class ClientAndAuthTest : TestBase() {
             geo = GEO.GlobalEdgeNetwork,
             user = User(
                 id = "guest",
-                type = UserType.Guest
-            )
+                type = UserType.Guest,
+            ),
         ).build()
         val sub = client.subscribe { event: VideoEvent ->
             logger.d { event.toString() }
@@ -112,8 +112,8 @@ class ClientAndAuthTest : TestBase() {
             geo = GEO.GlobalEdgeNetwork,
             user = User(
                 id = "guest",
-                type = UserType.Guest
-            )
+                type = UserType.Guest,
+            ),
         ).build()
         // Subscribe for new message events
         val sub = client.subscribeFor<ConnectedEvent> { newMessageEvent ->
@@ -185,7 +185,7 @@ class ClientAndAuthTest : TestBase() {
             testData.expiredToken,
             tokenProvider = { error ->
                 testData.tokens["thierry"]!!
-            }
+            },
         ).build()
 
         val result = client.call("default").create()

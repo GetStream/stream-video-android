@@ -34,7 +34,9 @@ internal val ViewGroup.streamThemeInflater: LayoutInflater
  * @param predicate Optional parameter to find the first view that conforms to the predicate.
  */
 @JvmSynthetic
-internal inline fun <reified T : View> ViewGroup.getFirstViewInstance(predicate: (T) -> Boolean = { true }): T? {
+internal inline fun <reified T : View> ViewGroup.getFirstViewInstance(
+    predicate: (T) -> Boolean = { true },
+): T? {
     return children.firstOrNull { it is T && predicate(it) } as? T
 }
 
@@ -49,6 +51,10 @@ internal fun ViewGroup.orientationChanged(isLandscape: Boolean) {
     if (this is OrientationChangeListener) this.onOrientationChanged(isLandscape)
     children.forEach {
         if (it is ViewGroup) it.orientationChanged(isLandscape)
-        if (it !is ViewGroup && it is OrientationChangeListener) it.onOrientationChanged(isLandscape)
+        if (it !is ViewGroup && it is OrientationChangeListener) {
+            it.onOrientationChanged(
+                isLandscape,
+            )
+        }
     }
 }

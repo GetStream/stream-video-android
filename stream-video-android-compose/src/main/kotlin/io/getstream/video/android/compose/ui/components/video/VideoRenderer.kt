@@ -74,7 +74,7 @@ public fun VideoRenderer(
     videoFallbackContent: @Composable (Call) -> Unit = {
         DefaultMediaTrackFallbackContent(
             modifier,
-            call
+            call,
         )
     },
     onRendered: (View) -> Unit = {},
@@ -84,9 +84,11 @@ public fun VideoRenderer(
             modifier = modifier
                 .fillMaxSize()
                 .testTag("video_renderer"),
-            painter = painterResource(id = io.getstream.video.android.ui.common.R.drawable.stream_video_call_sample),
+            painter = painterResource(
+                id = io.getstream.video.android.ui.common.R.drawable.stream_video_call_sample,
+            ),
             contentScale = ContentScale.Crop,
-            contentDescription = null
+            contentDescription = null,
         )
         return
     }
@@ -117,7 +119,7 @@ public fun VideoRenderer(
                             videoRenderer = this,
                             sessionId = sessionId,
                             trackType = trackType,
-                            onRendered = onRendered
+                            onRendered = onRendered,
                         )
                         setScalingType(scalingType = videoScalingType.toCommonScalingType())
                         setupVideo(mediaTrack, this)
@@ -165,7 +167,7 @@ private fun setupVideo(
 @Composable
 private fun DefaultMediaTrackFallbackContent(
     modifier: Modifier,
-    call: Call
+    call: Call,
 ) {
     Column(
         modifier = modifier
@@ -173,24 +175,26 @@ private fun DefaultMediaTrackFallbackContent(
             .background(VideoTheme.colors.appBackground)
             .testTag("video_renderer_fallback"),
         horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center
+        verticalArrangement = Arrangement.Center,
     ) {
         Image(
             modifier = modifier.fillMaxSize(),
-            painter = painterResource(id = io.getstream.video.android.ui.common.R.drawable.stream_video_ic_preview_avatar),
+            painter = painterResource(
+                id = io.getstream.video.android.ui.common.R.drawable.stream_video_ic_preview_avatar,
+            ),
             contentScale = ContentScale.Crop,
-            contentDescription = null
+            contentDescription = null,
         )
 
         Text(
             modifier = Modifier.padding(30.dp),
             text = stringResource(
                 id = io.getstream.video.android.ui.common.R.string.stream_video_call_rendering_failed,
-                call.sessionId
+                call.sessionId,
             ),
             color = VideoTheme.colors.textHighEmphasis,
             textAlign = TextAlign.Center,
-            fontSize = 14.sp
+            fontSize = 14.sp,
         )
     }
 }
@@ -206,7 +210,7 @@ private fun VideoRendererPreview() {
                 track = VideoTrack("", org.webrtc.VideoTrack(123)),
                 enabled = true,
                 sessionId = "",
-            )
+            ),
         )
     }
 }

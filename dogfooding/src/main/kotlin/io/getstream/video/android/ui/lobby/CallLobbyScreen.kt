@@ -71,7 +71,7 @@ import kotlinx.coroutines.delay
 @Composable
 fun CallLobbyScreen(
     callLobbyViewModel: CallLobbyViewModel = hiltViewModel(),
-    navigateUpToLogin: () -> Unit
+    navigateUpToLogin: () -> Unit,
 ) {
     val isLoading by callLobbyViewModel.isLoading.collectAsState()
 
@@ -81,11 +81,11 @@ fun CallLobbyScreen(
                 .fillMaxSize()
                 .background(Colors.background)
                 .testTag("call_lobby"),
-            horizontalAlignment = Alignment.CenterHorizontally
+            horizontalAlignment = Alignment.CenterHorizontally,
         ) {
             CallLobbyHeader(
                 navigateUpToLogin = navigateUpToLogin,
-                callLobbyViewModel = callLobbyViewModel
+                callLobbyViewModel = callLobbyViewModel,
             )
 
             CallLobbyBody(
@@ -100,7 +100,7 @@ fun CallLobbyScreen(
         if (isLoading) {
             CircularProgressIndicator(
                 modifier = Modifier.align(Alignment.Center),
-                color = VideoTheme.colors.primaryAccent
+                color = VideoTheme.colors.primaryAccent,
             )
         }
     }
@@ -109,7 +109,7 @@ fun CallLobbyScreen(
 @Composable
 private fun CallLobbyHeader(
     callLobbyViewModel: CallLobbyViewModel = hiltViewModel(),
-    navigateUpToLogin: () -> Unit
+    navigateUpToLogin: () -> Unit,
 ) {
     val uiState by callLobbyViewModel.uiState.collectAsState(initial = CallLobbyUiState.Nothing)
     val isLoggedOut by callLobbyViewModel.isLoggedOut.collectAsState(initial = false)
@@ -117,14 +117,14 @@ private fun CallLobbyHeader(
 
     HandleCallLobbyUiState(
         callLobbyUiState = uiState,
-        callLobbyViewModel = callLobbyViewModel
+        callLobbyViewModel = callLobbyViewModel,
     )
 
     Row(
         modifier = Modifier
             .fillMaxWidth()
             .padding(24.dp),
-        verticalAlignment = Alignment.CenterVertically
+        verticalAlignment = Alignment.CenterVertically,
     ) {
         val userValue = user.value
         if (userValue != null) {
@@ -142,7 +142,7 @@ private fun CallLobbyHeader(
             text = userValue?.id.orEmpty(),
             overflow = TextOverflow.Ellipsis,
             maxLines = 1,
-            fontSize = 16.sp
+            fontSize = 16.sp,
         )
 
         Spacer(modifier = Modifier.width(4.dp))
@@ -150,7 +150,7 @@ private fun CallLobbyHeader(
         StreamButton(
             modifier = Modifier.width(125.dp),
             text = stringResource(id = R.string.sign_out),
-            onClick = { callLobbyViewModel.signOut() }
+            onClick = { callLobbyViewModel.signOut() },
         )
     }
 
@@ -164,7 +164,7 @@ private fun CallLobbyHeader(
 @Composable
 private fun CallLobbyBody(
     modifier: Modifier,
-    callLobbyViewModel: CallLobbyViewModel = hiltViewModel()
+    callLobbyViewModel: CallLobbyViewModel = hiltViewModel(),
 ) {
     val call by remember { mutableStateOf(callLobbyViewModel.call) }
 
@@ -173,14 +173,14 @@ private fun CallLobbyBody(
             .fillMaxSize()
             .background(Colors.background),
         verticalArrangement = Arrangement.Center,
-        horizontalAlignment = Alignment.CenterHorizontally
+        horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         Text(
             modifier = Modifier.padding(horizontal = 30.dp),
             text = stringResource(id = R.string.stream_video),
             color = Color.White,
             fontSize = 26.sp,
-            textAlign = TextAlign.Center
+            textAlign = TextAlign.Center,
         )
 
         Spacer(modifier = Modifier.height(4.dp))
@@ -230,7 +230,7 @@ private fun CallLobbyBody(
                     is ToggleMicrophone -> callLobbyViewModel.enableMicrophone(!isMicrophoneEnabled)
                     else -> Unit
                 }
-            }
+            },
         )
 
         LobbyDescription(callLobbyViewModel = callLobbyViewModel)
@@ -239,7 +239,7 @@ private fun CallLobbyBody(
 
 @Composable
 private fun LobbyDescription(
-    callLobbyViewModel: CallLobbyViewModel
+    callLobbyViewModel: CallLobbyViewModel,
 ) {
     val session by callLobbyViewModel.call.state.session.collectAsState()
 
@@ -248,16 +248,16 @@ private fun LobbyDescription(
             .padding(horizontal = 35.dp)
             .background(
                 color = VideoTheme.colors.callLobbyBackground,
-                shape = RoundedCornerShape(16.dp)
-            )
+                shape = RoundedCornerShape(16.dp),
+            ),
     ) {
         Text(
             modifier = Modifier.padding(start = 32.dp, end = 32.dp, top = 12.dp, bottom = 8.dp),
             text = stringResource(
                 id = R.string.join_call_description,
-                session?.participants?.size ?: 0
+                session?.participants?.size ?: 0,
             ),
-            color = Color.White
+            color = Color.White,
         )
 
         StreamButton(
@@ -267,7 +267,7 @@ private fun LobbyDescription(
                 .clip(RoundedCornerShape(12.dp))
                 .testTag("start_call"),
             text = stringResource(id = R.string.join_call),
-            onClick = { callLobbyViewModel.handleUiEvent(CallLobbyEvent.JoinCall) }
+            onClick = { callLobbyViewModel.handleUiEvent(CallLobbyEvent.JoinCall) },
         )
     }
 }
@@ -275,7 +275,7 @@ private fun LobbyDescription(
 @Composable
 private fun HandleCallLobbyUiState(
     callLobbyUiState: CallLobbyUiState,
-    callLobbyViewModel: CallLobbyViewModel = hiltViewModel()
+    callLobbyViewModel: CallLobbyViewModel = hiltViewModel(),
 ) {
     val context = LocalContext.current
     LaunchedEffect(key1 = callLobbyUiState) {
@@ -283,7 +283,7 @@ private fun HandleCallLobbyUiState(
             is CallLobbyUiState.JoinCompleted -> {
                 val intent = CallActivity.createIntent(
                     context = context,
-                    callId = callLobbyViewModel.callId
+                    callId = callLobbyViewModel.callId,
                 ).apply {
                     flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
                 }
@@ -307,10 +307,10 @@ private fun CallLobbyScreenPreview() {
         CallLobbyScreen(
             callLobbyViewModel = CallLobbyViewModel(
                 savedStateHandle = SavedStateHandle(
-                    mapOf("cid" to "default:123")
+                    mapOf("cid" to "default:123"),
                 ),
-                dataStore = StreamUserDataStore.instance()
-            )
+                dataStore = StreamUserDataStore.instance(),
+            ),
         ) {}
     }
 }

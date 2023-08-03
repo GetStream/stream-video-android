@@ -39,7 +39,7 @@ public fun CallAppBarView.bindView(
     viewModel: CallViewModel,
     lifecycleOwner: LifecycleOwner,
     onBackPressed: () -> Unit = { },
-    onParticipantsPressed: () -> Unit = { }
+    onParticipantsPressed: () -> Unit = { },
 ) {
     this.onBackPressed = onBackPressed
     this.onParticipantsPressed = onParticipantsPressed

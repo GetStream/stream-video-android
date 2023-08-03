@@ -42,9 +42,8 @@ public fun rememberCallPermissionsState(
         android.Manifest.permission.CAMERA,
         android.Manifest.permission.RECORD_AUDIO,
     ),
-    onPermissionsResult: ((Map<String, Boolean>) -> Unit)? = null
+    onPermissionsResult: ((Map<String, Boolean>) -> Unit)? = null,
 ): VideoPermissionsState {
-
     if (LocalInspectionMode.current) return fakeVideoPermissionsState
 
     val isCameraEnabled by call.camera.isEnabled.collectAsStateWithLifecycle()

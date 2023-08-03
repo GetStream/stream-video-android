@@ -47,7 +47,7 @@ class MainActivity : ComponentActivity() {
         val user = User(
             id = userId, // any string
             name = "Tutorial", // name and image are used in the UI
-            role = "admin"
+            role = "admin",
         )
 
         // step2 - initialize StreamVideo. For a production app we recommend adding the client to your Application class or di module.
@@ -74,13 +74,13 @@ class MainActivity : ComponentActivity() {
                 if (connect == RealtimeConnection.Connected) {
                     AudioRoomContent(
                         call = call,
-                        title = "Audio Room Number 05"
+                        title = "Audio Room Number 05",
                     )
                 } else {
                     Box(modifier = Modifier.fillMaxSize()) {
                         CircularProgressIndicator(
                             modifier = Modifier.align(Alignment.Center),
-                            color = VideoTheme.colors.primaryAccent
+                            color = VideoTheme.colors.primaryAccent,
                         )
                     }
                 }

@@ -96,7 +96,7 @@ internal fun Context.createStreamThemeWrapper(): Context {
         theme.resolveAttribute(R.attr.streamVideoValidTheme, typedValue, true) -> this
         theme.resolveAttribute(R.attr.streamVideoTheme, typedValue, true) -> ContextThemeWrapper(
             this,
-            typedValue.resourceId
+            typedValue.resourceId,
         )
         else -> ContextThemeWrapper(this, R.style.StreamVideoTheme)
     }
@@ -106,7 +106,7 @@ internal fun Context.createStreamThemeWrapper(): Context {
 internal fun Context.getResourceId(style: Int, attr: Int): Int {
     return theme.obtainStyledAttributes(
         style,
-        intArrayOf(attr)
+        intArrayOf(attr),
     ).getResourceId(0, 0)
 }
 

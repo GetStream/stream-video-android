@@ -32,7 +32,7 @@ public sealed interface ParticipantInfoAction
  */
 @Stable
 public data class ChangeMuteState(
-    val isEnabled: Boolean
+    val isEnabled: Boolean,
 ) : ParticipantInfoAction
 
 /**

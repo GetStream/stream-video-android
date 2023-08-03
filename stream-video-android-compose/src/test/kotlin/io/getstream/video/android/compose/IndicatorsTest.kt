@@ -44,12 +44,12 @@ internal class IndicatorsTest : BaseComposeTest() {
                 SoundIndicator(
                     isSpeaking = true,
                     isAudioEnabled = true,
-                    audioLevels = listOf(0.7f, 0f, 0.5f, 0f, 0.9f)
+                    audioLevels = listOf(0.7f, 0f, 0.5f, 0f, 0.9f),
                 )
                 SoundIndicator(
                     isSpeaking = true,
                     isAudioEnabled = false,
-                    audioLevels = listOf(0.7f, 0f, 0.5f, 0f, 0.9f)
+                    audioLevels = listOf(0.7f, 0f, 0.5f, 0f, 0.9f),
                 )
             }
         }
@@ -60,13 +60,13 @@ internal class IndicatorsTest : BaseComposeTest() {
         snapshot {
             Row {
                 NetworkQualityIndicator(
-                    networkQuality = NetworkQuality.Poor()
+                    networkQuality = NetworkQuality.Poor(),
                 )
                 NetworkQualityIndicator(
-                    networkQuality = NetworkQuality.Good()
+                    networkQuality = NetworkQuality.Good(),
                 )
                 NetworkQualityIndicator(
-                    networkQuality = NetworkQuality.Excellent()
+                    networkQuality = NetworkQuality.Excellent(),
                 )
             }
         }

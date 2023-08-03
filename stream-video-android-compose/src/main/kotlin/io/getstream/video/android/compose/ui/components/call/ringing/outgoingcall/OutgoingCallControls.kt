@@ -53,19 +53,19 @@ public fun OutgoingCallControls(
 ) {
     Column(
         modifier = modifier.fillMaxWidth(),
-        horizontalAlignment = Alignment.CenterHorizontally
+        horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         Row(
             modifier = Modifier.fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.SpaceEvenly
+            horizontalArrangement = Arrangement.SpaceEvenly,
         ) {
             ToggleMicrophoneAction(
                 modifier = Modifier
                     .toggleAlpha(isMicrophoneEnabled)
                     .background(
                         color = VideoTheme.colors.appBackground,
-                        shape = VideoTheme.shapes.callButton
+                        shape = VideoTheme.shapes.callButton,
                     )
                     .size(VideoTheme.dimens.mediumButtonSize),
                 isMicrophoneEnabled = isMicrophoneEnabled,
@@ -77,11 +77,11 @@ public fun OutgoingCallControls(
                     .toggleAlpha(isCameraEnabled)
                     .background(
                         color = VideoTheme.colors.appBackground,
-                        shape = VideoTheme.shapes.callButton
+                        shape = VideoTheme.shapes.callButton,
                     )
                     .size(VideoTheme.dimens.mediumButtonSize),
                 isCameraEnabled = isCameraEnabled,
-                onCallAction = onCallAction
+                onCallAction = onCallAction,
             )
         }
 
@@ -89,7 +89,7 @@ public fun OutgoingCallControls(
 
         CancelCallAction(
             modifier = Modifier.size(VideoTheme.dimens.largeButtonSize),
-            onCallAction = onCallAction
+            onCallAction = onCallAction,
         )
     }
 }
@@ -102,13 +102,13 @@ private fun OutgoingCallOptionsPreview() {
             OutgoingCallControls(
                 isMicrophoneEnabled = true,
                 isCameraEnabled = true,
-                onCallAction = { }
+                onCallAction = { },
             )
 
             OutgoingCallControls(
                 isMicrophoneEnabled = false,
                 isCameraEnabled = false,
-                onCallAction = { }
+                onCallAction = { },
             )
         }
     }

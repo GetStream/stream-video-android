@@ -76,18 +76,18 @@ public class CallParticipantView : CallCardView, VideoRenderer {
         context,
         attrs,
         defStyleAttr,
-        0
+        0,
     )
 
     public constructor(
         context: Context,
         attrs: AttributeSet?,
         defStyleAttr: Int,
-        defStyleRes: Int
+        defStyleRes: Int,
     ) : super(
         context.createStreamThemeWrapper(),
         attrs,
-        defStyleAttr
+        defStyleAttr,
     ) {
         init(context, attrs, defStyleAttr, defStyleRes)
     }
@@ -157,7 +157,13 @@ public class CallParticipantView : CallCardView, VideoRenderer {
         val tint =
             if (hasAudio) style.participantAudioLevelTint else style.participantMicOffIconTint
         val icon =
-            if (hasAudio) context.getDrawableCompat(RCommon.drawable.stream_video_ic_mic_on) else style.participantMicOffIcon
+            if (hasAudio) {
+                context.getDrawableCompat(
+                    RCommon.drawable.stream_video_ic_mic_on,
+                )
+            } else {
+                style.participantMicOffIcon
+            }
 
         binding.soundIndicator.setImageDrawable(icon)
         binding.soundIndicator.setColorFilter(tint)
@@ -210,7 +216,7 @@ public class CallParticipantView : CallCardView, VideoRenderer {
                     rendererInitializer.initRenderer(
                         binding.participantVideoRenderer,
                         videoTrack.streamId,
-                        TrackType.TRACK_TYPE_VIDEO
+                        TrackType.TRACK_TYPE_VIDEO,
                     ) { onRender(it) }
                     isRendererInitialised = true
                 }

@@ -55,7 +55,9 @@ public fun AudioVolumeIndicator(
     val deActivatedColor = VideoTheme.colors.deActivatedVolumeIndicator
 
     if (audioLevels.size < 5) {
-        throw IllegalArgumentException("audioLevels list must include five audio float (0 ~ 1f) values.")
+        throw IllegalArgumentException(
+            "audioLevels list must include five audio float (0 ~ 1f) values.",
+        )
     }
 
     val infiniteAnimation = rememberInfiniteTransition("AudioVolumeIndicator")
@@ -70,7 +72,7 @@ public fun AudioVolumeIndicator(
                 animation = tween(durationMillis),
                 repeatMode = RepeatMode.Reverse,
             ),
-            label = "Sounds Levels"
+            label = "Sounds Levels",
         )
     }
 
@@ -79,7 +81,9 @@ public fun AudioVolumeIndicator(
             .height(height = VideoTheme.dimens.audioLevelIndicatorBarMaxHeight)
             .padding(horizontal = 4.dp),
         verticalAlignment = Alignment.Bottom,
-        horizontalArrangement = Arrangement.spacedBy(VideoTheme.dimens.audioLevelIndicatorBarSeparatorWidth)
+        horizontalArrangement = Arrangement.spacedBy(
+            VideoTheme.dimens.audioLevelIndicatorBarSeparatorWidth,
+        ),
     ) {
         repeat(5) { index ->
             if (index % 2 == 0) {
@@ -99,12 +103,12 @@ public fun AudioVolumeIndicator(
                                 0.23f
                             } else {
                                 barHeightPercent
-                            }
+                            },
                         )
                         .background(
                             color = if (audioLevel == 0f) deActivatedColor else activatedColor,
-                            shape = RoundedCornerShape(16.dp)
-                        )
+                            shape = RoundedCornerShape(16.dp),
+                        ),
                 )
             }
         }

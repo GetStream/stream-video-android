@@ -43,7 +43,10 @@ private const val MONITOR_START_DELAY = 1000L
  *
  * Whenever the socket receives an event, monitor.ack should be called
  */
-internal class HealthMonitor(private val healthCallback: HealthCallback, private val scope: CoroutineScope) {
+internal class HealthMonitor(
+    private val healthCallback: HealthCallback,
+    private val scope: CoroutineScope,
+) {
 
     private var reconnectInProgress: Boolean = false
     private var healthPingJob: Job? = null
@@ -58,7 +61,6 @@ internal class HealthMonitor(private val healthCallback: HealthCallback, private
         disconnected = false
 
         healthPingJob = scope.launch {
-
             while (true) {
                 delay(HEALTH_CHECK_INTERVAL)
                 // send the ping
@@ -67,7 +69,6 @@ internal class HealthMonitor(private val healthCallback: HealthCallback, private
         }
 
         monitorJob = scope.launch {
-
             while (true) {
                 delay(MONITOR_INTERVAL)
                 if (needToReconnect()) {
@@ -112,7 +113,7 @@ internal class HealthMonitor(private val healthCallback: HealthCallback, private
         val max = min(500 + consecutiveFailures * 2000, 25000)
         val min = min(
             max(250, (consecutiveFailures - 1) * 2000),
-            25000
+            25000,
         )
         return floor(Math.random() * (max - min) + min).toLong()
     }

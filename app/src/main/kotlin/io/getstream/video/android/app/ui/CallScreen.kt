@@ -34,7 +34,7 @@ import io.getstream.video.android.mock.mockCall
 @Composable
 fun CallScreen(
     call: Call,
-    onLeaveCall: () -> Unit = {}
+    onLeaveCall: () -> Unit = {},
 ) {
     CallContent(
         modifier = Modifier.background(color = VideoTheme.colors.appBackground),
@@ -49,7 +49,7 @@ fun CallScreen(
                 is LeaveCall -> onLeaveCall.invoke()
                 else -> Unit
             }
-        }
+        },
     )
 }
 

@@ -43,7 +43,7 @@ import io.getstream.video.android.mock.mockMemberStateList
 public fun OutgoingCallDetails(
     modifier: Modifier = Modifier,
     isVideoType: Boolean = true,
-    participants: List<MemberState>
+    participants: List<MemberState>,
 ) {
     Column(modifier = modifier.fillMaxWidth()) {
         if (!isVideoType) {
@@ -55,7 +55,7 @@ public fun OutgoingCallDetails(
         ParticipantInformation(
             isVideoType = isVideoType,
             callStatus = CallStatus.Outgoing,
-            participants = participants
+            participants = participants,
         )
     }
 }

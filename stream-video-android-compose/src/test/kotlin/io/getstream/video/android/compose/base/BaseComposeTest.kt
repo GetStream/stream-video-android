@@ -33,14 +33,14 @@ internal abstract class BaseComposeTest {
 
     fun snapshot(
         isInDarkMode: Boolean = false,
-        composable: @Composable () -> Unit
+        composable: @Composable () -> Unit,
     ) {
         basePaparazzi().snapshot {
             StreamMockUtils.initializeStreamVideo(LocalContext.current)
             CompositionLocalProvider(
                 LocalInspectionMode provides true,
                 LocalAvatarPreviewPlaceholder provides
-                    io.getstream.video.android.ui.common.R.drawable.stream_video_call_sample
+                    io.getstream.video.android.ui.common.R.drawable.stream_video_call_sample,
             ) {
                 VideoTheme(isInDarkMode) { composable.invoke() }
             }
@@ -53,7 +53,7 @@ internal abstract class BaseComposeTest {
             CompositionLocalProvider(
                 LocalInspectionMode provides true,
                 LocalAvatarPreviewPlaceholder provides
-                    io.getstream.video.android.ui.common.R.drawable.stream_video_call_sample
+                    io.getstream.video.android.ui.common.R.drawable.stream_video_call_sample,
             ) {
                 Column {
                     VideoTheme(isInDarkMode = true) { composable.invoke() }
@@ -69,7 +69,7 @@ internal abstract class BaseComposeTest {
             CompositionLocalProvider(
                 LocalInspectionMode provides true,
                 LocalAvatarPreviewPlaceholder provides
-                    io.getstream.video.android.ui.common.R.drawable.stream_video_call_sample
+                    io.getstream.video.android.ui.common.R.drawable.stream_video_call_sample,
             ) {
                 Row {
                     VideoTheme(isInDarkMode = true) { composable.invoke() }

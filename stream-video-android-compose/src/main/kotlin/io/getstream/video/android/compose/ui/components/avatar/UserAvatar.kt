@@ -89,7 +89,7 @@ public fun UserAvatar(
             loadingPlaceholder = loadingPlaceholder,
             previewPlaceholder = previewPlaceholder,
             onClick = onClick,
-            initialsAvatarOffset = initialsAvatarOffset
+            initialsAvatarOffset = initialsAvatarOffset,
         )
 
         if (isShowingOnlineIndicator) {
@@ -115,7 +115,7 @@ private fun UserAvatarPreview() {
             user = mockParticipantList[0].initialUser,
             modifier = Modifier.size(82.dp),
             isShowingOnlineIndicator = true,
-            previewPlaceholder = io.getstream.video.android.ui.common.R.drawable.stream_video_call_sample
+            previewPlaceholder = io.getstream.video.android.ui.common.R.drawable.stream_video_call_sample,
         )
     }
 }

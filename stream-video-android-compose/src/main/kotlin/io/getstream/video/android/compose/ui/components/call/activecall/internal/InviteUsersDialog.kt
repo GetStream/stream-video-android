@@ -48,16 +48,15 @@ import io.getstream.video.android.ui.common.R
 internal fun InviteUsersDialog(
     users: List<User>,
     onDismiss: () -> Unit,
-    onInviteUsers: (List<User>) -> Unit
+    onInviteUsers: (List<User>) -> Unit,
 ) {
-
     Dialog(onDismissRequest = onDismiss, content = {
         Surface(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(horizontal = 8.dp),
             shape = VideoTheme.shapes.dialog,
-            color = VideoTheme.colors.appBackground
+            color = VideoTheme.colors.appBackground,
         ) {
             Column(modifier = Modifier.fillMaxWidth()) {
                 Text(
@@ -67,7 +66,7 @@ internal fun InviteUsersDialog(
                         .padding(top = 32.dp),
                     text = stringResource(R.string.stream_video_invite_users_title),
                     style = VideoTheme.typography.bodyBold,
-                    color = VideoTheme.colors.textHighEmphasis
+                    color = VideoTheme.colors.textHighEmphasis,
                 )
 
                 Spacer(modifier = Modifier.height(8.dp))
@@ -76,25 +75,29 @@ internal fun InviteUsersDialog(
                     modifier = Modifier.padding(start = 16.dp, end = 16.dp),
                     text = stringResource(R.string.stream_video_invite_users_message, users.size),
                     style = VideoTheme.typography.body,
-                    color = VideoTheme.colors.textHighEmphasis
+                    color = VideoTheme.colors.textHighEmphasis,
                 )
 
                 Spacer(modifier = Modifier.height(32.dp))
 
                 Row(
                     modifier = Modifier.align(End),
-                    verticalAlignment = Alignment.CenterVertically
+                    verticalAlignment = Alignment.CenterVertically,
                 ) {
                     TextButton(
                         onClick = onDismiss,
-                        colors = ButtonDefaults.textButtonColors(contentColor = VideoTheme.colors.primaryAccent)
+                        colors = ButtonDefaults.textButtonColors(
+                            contentColor = VideoTheme.colors.primaryAccent,
+                        ),
                     ) {
                         Text(text = stringResource(R.string.stream_video_invite_users_cancel))
                     }
 
                     TextButton(
                         onClick = { onInviteUsers(users) },
-                        colors = ButtonDefaults.textButtonColors(contentColor = VideoTheme.colors.primaryAccent)
+                        colors = ButtonDefaults.textButtonColors(
+                            contentColor = VideoTheme.colors.primaryAccent,
+                        ),
                     ) {
                         Text(text = stringResource(R.string.stream_video_invite_users_accept))
                     }

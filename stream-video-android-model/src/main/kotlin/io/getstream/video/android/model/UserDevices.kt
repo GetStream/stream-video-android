@@ -21,5 +21,5 @@ import androidx.compose.runtime.Stable
 @Stable
 @kotlinx.serialization.Serializable
 public data class UserDevices(
-    val devices: List<Device> = emptyList()
+    val devices: List<Device> = emptyList(),
 )

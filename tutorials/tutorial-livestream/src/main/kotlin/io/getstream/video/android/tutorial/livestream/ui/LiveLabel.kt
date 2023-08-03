@@ -37,7 +37,7 @@ import io.getstream.video.android.compose.theme.VideoTheme
 @Composable
 fun LiveLabel(
     modifier: Modifier,
-    liveCount: Int
+    liveCount: Int,
 ) {
     Row(modifier = modifier.clip(RoundedCornerShape(6.dp))) {
         Text(
@@ -45,12 +45,12 @@ fun LiveLabel(
                 .background(VideoTheme.colors.primaryAccent)
                 .padding(vertical = 3.dp, horizontal = 12.dp),
             text = "Live",
-            color = Color.White
+            color = Color.White,
         )
 
         Row(
             modifier = Modifier.background(Color(0xFF1C1E22)),
-            verticalAlignment = Alignment.CenterVertically
+            verticalAlignment = Alignment.CenterVertically,
         ) {
             Icon(
                 modifier = Modifier
@@ -58,13 +58,13 @@ fun LiveLabel(
                     .size(22.dp),
                 imageVector = Icons.Default.Person,
                 tint = Color.White,
-                contentDescription = null
+                contentDescription = null,
             )
 
             Text(
                 modifier = Modifier.padding(end = 12.dp, top = 3.dp, bottom = 3.dp),
                 text = liveCount.toString(),
-                color = Color.White
+                color = Color.White,
             )
         }
     }
@@ -76,7 +76,7 @@ private fun LiveLabelPreview() {
     VideoTheme {
         LiveLabel(
             modifier = Modifier,
-            liveCount = 4321
+            liveCount = 4321,
         )
     }
 }

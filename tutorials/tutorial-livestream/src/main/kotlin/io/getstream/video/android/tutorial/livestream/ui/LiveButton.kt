@@ -48,7 +48,7 @@ fun LiveButton(
     modifier: Modifier,
     call: Call,
     isBackstage: Boolean,
-    onClick: () -> Unit
+    onClick: () -> Unit,
 ) {
     Box(modifier = Modifier.fillMaxWidth()) {
         Button(
@@ -56,15 +56,15 @@ fun LiveButton(
             colors = if (isBackstage) {
                 ButtonDefaults.buttonColors(
                     backgroundColor = VideoTheme.colors.primaryAccent,
-                    contentColor = VideoTheme.colors.primaryAccent
+                    contentColor = VideoTheme.colors.primaryAccent,
                 )
             } else {
                 ButtonDefaults.buttonColors(
                     backgroundColor = VideoTheme.colors.errorAccent,
-                    contentColor = VideoTheme.colors.errorAccent
+                    contentColor = VideoTheme.colors.errorAccent,
                 )
             },
-            onClick = onClick
+            onClick = onClick,
         ) {
             Icon(
                 modifier = Modifier.padding(vertical = 3.dp, horizontal = 6.dp),
@@ -74,7 +74,7 @@ fun LiveButton(
                     Icons.Default.Close
                 },
                 tint = Color.White,
-                contentDescription = null
+                contentDescription = null,
             )
 
             Text(
@@ -82,7 +82,7 @@ fun LiveButton(
                 text = if (isBackstage) "Go Live" else "Stop Broadcast",
                 fontWeight = FontWeight.Bold,
                 fontSize = 16.sp,
-                color = Color.White
+                color = Color.White,
             )
         }
 
@@ -97,7 +97,7 @@ fun LiveButton(
                 disabledColor = VideoTheme.colors.callActionIconEnabledBackground,
                 disabledIconTint = VideoTheme.colors.errorAccent,
                 shape = RoundedCornerShape(8.dp),
-                onCallAction = { callAction -> call.camera.setEnabled(callAction.isEnabled) }
+                onCallAction = { callAction -> call.camera.setEnabled(callAction.isEnabled) },
             )
 
             ToggleMicrophoneAction(
@@ -109,7 +109,7 @@ fun LiveButton(
                 disabledColor = VideoTheme.colors.callActionIconEnabledBackground,
                 disabledIconTint = VideoTheme.colors.errorAccent,
                 shape = RoundedCornerShape(8.dp),
-                onCallAction = { callAction -> call.microphone.setEnabled(callAction.isEnabled) }
+                onCallAction = { callAction -> call.microphone.setEnabled(callAction.isEnabled) },
             )
         }
     }

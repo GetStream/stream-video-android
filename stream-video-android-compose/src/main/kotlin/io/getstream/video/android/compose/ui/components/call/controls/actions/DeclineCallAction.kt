@@ -47,7 +47,7 @@ public fun DeclineCallAction(
     IconButton(
         modifier = modifier.background(
             color = VideoTheme.colors.errorAccent,
-            shape = shape
+            shape = shape,
         ),
         enabled = enabled,
         onClick = { onCallAction(DeclineCall) },
@@ -55,8 +55,10 @@ public fun DeclineCallAction(
             Icon(
                 painter = painterResource(id = R.drawable.stream_video_ic_call_end),
                 tint = Color.White,
-                contentDescription = stringResource(R.string.stream_video_call_controls_cancel_call)
+                contentDescription = stringResource(
+                    R.string.stream_video_call_controls_cancel_call,
+                ),
             )
-        }
+        },
     )
 }

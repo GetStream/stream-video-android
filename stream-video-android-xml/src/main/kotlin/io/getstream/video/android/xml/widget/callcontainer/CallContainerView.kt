@@ -50,7 +50,7 @@ public class CallContainerView : CallConstraintLayout {
     public constructor(context: Context, attrs: AttributeSet?, defStyleAttr: Int) : super(
         context.createStreamThemeWrapper(),
         attrs,
-        defStyleAttr
+        defStyleAttr,
     ) {
         init(context, attrs)
     }
@@ -151,7 +151,11 @@ public class CallContainerView : CallConstraintLayout {
             updateConstraints(true) {
                 constrainViewToParentBySide(appBar, ConstraintSet.TOP)
                 constrainViewToParentBySide(appBar, ConstraintSet.START)
-                constrainViewToParentBySide(appBar, ConstraintSet.END, callView.getCallControlsSize())
+                constrainViewToParentBySide(
+                    appBar,
+                    ConstraintSet.END,
+                    callView.getCallControlsSize(),
+                )
             }
             appBar.updateLayoutParams {
                 width = LayoutParams.MATCH_CONSTRAINT
@@ -207,8 +211,8 @@ public class CallContainerView : CallConstraintLayout {
             view,
             LayoutParams(
                 LayoutParams.MATCH_PARENT,
-                LayoutParams.MATCH_CONSTRAINT
-            )
+                LayoutParams.MATCH_CONSTRAINT,
+            ),
         )
         view.updateLayoutParams {
             width = LayoutParams.MATCH_PARENT

@@ -36,7 +36,7 @@ internal class CallComponentsLandscapeTest : BaseComposeTest() {
         snapshot {
             LandscapeControlActions(
                 call = mockCall,
-                onCallAction = {}
+                onCallAction = {},
             )
         }
     }

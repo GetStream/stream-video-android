@@ -50,17 +50,21 @@ public class IntegrationTestHelper {
             "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoidGhpZXJyeSJ9._4aZL6BR0VGKfZsKYdscsBm8yKVgG-2LatYeHRJUq0g"
 
         val thierry = User(
-            id = "thierry", role = "admin", name = "Thierry", image = "hello",
-            teams = emptyList(), custom = mapOf()
+            id = "thierry",
+            role = "admin",
+            name = "Thierry",
+            image = "hello",
+            teams = emptyList(),
+            custom = mapOf(),
         )
         users["thierry"] = thierry
         users["tommaso"] = User(
             id = "tommaso", role = "admin", name = "Tommaso", image = "hello",
-            teams = emptyList(), custom = mapOf()
+            teams = emptyList(), custom = mapOf(),
         )
         users["jaewoong"] = User(
             id = "jaewoong", role = "admin", name = "Jaewoong", image = "hello",
-            teams = emptyList(), custom = mapOf()
+            teams = emptyList(), custom = mapOf(),
         )
         tokens["thierry"] = token
         context = ApplicationProvider.getApplicationContext()

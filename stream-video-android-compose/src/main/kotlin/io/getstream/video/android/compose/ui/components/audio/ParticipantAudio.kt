@@ -72,7 +72,7 @@ public fun ParticipantAudio(
     microphoneIndicatorContent: @Composable BoxScope.(ParticipantState) -> Unit = {
         DefaultMicrophoneIndicator(style.microphoneLabelPosition)
     },
-    roleBadgeContent: @Composable RowScope.(ParticipantState) -> Unit = {}
+    roleBadgeContent: @Composable RowScope.(ParticipantState) -> Unit = {},
 ) {
     val user by participant.user.collectAsStateWithLifecycle()
     val nameOrId by participant.userNameOrId.collectAsStateWithLifecycle()
@@ -82,28 +82,27 @@ public fun ParticipantAudio(
     Column(
         modifier = modifier,
         horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center
+        verticalArrangement = Arrangement.Center,
     ) {
-
         Box(modifier = Modifier.size(VideoTheme.dimens.audioAvatarSize)) {
             UserAvatar(
                 user = user,
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(VideoTheme.dimens.audioAvatarPadding)
+                    .padding(VideoTheme.dimens.audioAvatarPadding),
             )
 
             if (isSpeaking && style.isShowingSpeakingBorder) {
                 Box(
                     modifier = Modifier
                         .fillMaxSize()
-                        .border(style.speakingBorder, CircleShape)
+                        .border(style.speakingBorder, CircleShape),
                 )
             } else if (style.isShowingMicrophoneAvailability && !audioEnabled) {
                 Box(
                     modifier = Modifier
                         .fillMaxSize()
-                        .padding(VideoTheme.dimens.audioAvatarPadding)
+                        .padding(VideoTheme.dimens.audioAvatarPadding),
                 ) {
                     microphoneIndicatorContent.invoke(this, participant)
                 }
@@ -125,7 +124,7 @@ public fun ParticipantAudio(
 
         Row(
             modifier = Modifier.fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically
+            verticalAlignment = Alignment.CenterVertically,
         ) {
             if (style.isShowingRoleBadge) {
                 roleBadgeContent.invoke(this, participant)
@@ -146,14 +145,14 @@ public fun ParticipantAudio(
 
 @Composable
 private fun BoxScope.DefaultMicrophoneIndicator(
-    alignment: Alignment
+    alignment: Alignment,
 ) {
     Box(
         modifier = Modifier
             .clip(CircleShape)
             .background(VideoTheme.colors.appBackground)
             .size(VideoTheme.dimens.audioRoomMicSize)
-            .align(alignment)
+            .align(alignment),
     ) {
         Icon(
             modifier = Modifier
@@ -161,7 +160,7 @@ private fun BoxScope.DefaultMicrophoneIndicator(
                 .padding(VideoTheme.dimens.audioRoomMicPadding),
             painter = painterResource(id = R.drawable.stream_video_ic_mic_off),
             tint = VideoTheme.colors.errorAccent,
-            contentDescription = null
+            contentDescription = null,
         )
     }
 }
@@ -174,7 +173,7 @@ private fun ParticipantAudioPreview() {
         ParticipantAudio(
             modifier = Modifier.size(150.dp),
             participant = mockParticipant,
-            style = RegularAudioRendererStyle(isShowingSpeakingBorder = true)
+            style = RegularAudioRendererStyle(isShowingSpeakingBorder = true),
         )
     }
 }

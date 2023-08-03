@@ -90,7 +90,7 @@ class RingTest : IntegrationTestBase(connectCoordinatorWS = false) {
 
         val channel = NotificationChannelCompat.Builder(
             INCOMING_CALL_CHANNEL_ID,
-            NotificationManagerCompat.IMPORTANCE_HIGH
+            NotificationManagerCompat.IMPORTANCE_HIGH,
         ).setName("incoming call").setDescription("Incoming audio and video call alerts").build()
 
         notificationManager.createNotificationChannel(channel)

@@ -60,7 +60,9 @@ internal class CallParticipantsGridView : CallConstraintLayout, VideoRenderer {
     internal constructor(context: Context) : this(context, null)
     internal constructor(context: Context, attrs: AttributeSet?) : this(context, attrs, 0)
     internal constructor(context: Context, attrs: AttributeSet?, defStyleAttr: Int) : super(
-        context.createStreamThemeWrapper(), attrs, defStyleAttr
+        context.createStreamThemeWrapper(),
+        attrs,
+        defStyleAttr,
     )
 
     /**

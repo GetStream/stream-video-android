@@ -57,7 +57,7 @@ public class CallHealthMonitor(val call: Call, val callScope: CoroutineScope) {
     val badStates = listOf(
         PeerConnection.PeerConnectionState.DISCONNECTED,
         PeerConnection.PeerConnectionState.FAILED,
-        PeerConnection.PeerConnectionState.CLOSED
+        PeerConnection.PeerConnectionState.CLOSED,
     )
 
     fun start() {
@@ -88,7 +88,9 @@ public class CallHealthMonitor(val call: Call, val callScope: CoroutineScope) {
         val publisherState = call.session?.publisher?.state?.value
         val healthyPeerConnections = subscriberState in goodStates && publisherState in goodStates
 
-        logger.d { "checking call health: peers are healthy: $healthyPeerConnections publisher $publisherState subscriber $subscriberState" }
+        logger.d {
+            "checking call health: peers are healthy: $healthyPeerConnections publisher $publisherState subscriber $subscriberState"
+        }
 
         if (healthyPeerConnections) {
             // don't reconnect if things are healthy
@@ -99,7 +101,9 @@ public class CallHealthMonitor(val call: Call, val callScope: CoroutineScope) {
                 call.state._connection.value = RealtimeConnection.Connected
             }
         } else {
-            logger.w { "call health check failed, reconnecting. publisher $publisherState subscriber $subscriberState" }
+            logger.w {
+                "call health check failed, reconnecting. publisher $publisherState subscriber $subscriberState"
+            }
             scope.launch { reconnect() }
         }
     }
@@ -124,7 +128,9 @@ public class CallHealthMonitor(val call: Call, val callScope: CoroutineScope) {
             10000L
         }
 
-        logger.i { "reconnect called, reconnect attempt: $reconnectionAttempts, time since last reconnect $timeDifference" }
+        logger.i {
+            "reconnect called, reconnect attempt: $reconnectionAttempts, time since last reconnect $timeDifference"
+        }
 
         // ensure we don't run the reconnect too often
         if (timeDifference < reconnectDebounceMs) {
@@ -149,7 +155,9 @@ public class CallHealthMonitor(val call: Call, val callScope: CoroutineScope) {
 
         override fun onDisconnected() {
             val connectionState = call.state._connection.value
-            logger.i { "network disconnected. connection is $connectionState marking the connection as reconnecting" }
+            logger.i {
+                "network disconnected. connection is $connectionState marking the connection as reconnecting"
+            }
             if (connectionState is RealtimeConnection.Joined || connectionState == RealtimeConnection.Connected) {
                 call.state._connection.value = RealtimeConnection.Reconnecting
             }

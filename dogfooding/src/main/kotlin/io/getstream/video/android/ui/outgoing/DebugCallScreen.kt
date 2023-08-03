@@ -49,7 +49,7 @@ import io.getstream.video.android.ui.theme.StreamButton
 
 @Composable
 fun DebugCallScreen(
-    navigateToRingCall: (callId: String, membersList: String) -> Unit
+    navigateToRingCall: (callId: String, membersList: String) -> Unit,
 ) {
     var callId by remember { mutableStateOf("") }
     var membersList by remember { mutableStateOf("") }
@@ -61,9 +61,8 @@ fun DebugCallScreen(
                     .fillMaxSize()
                     .background(Colors.background)
                     .padding(12.dp),
-                horizontalAlignment = Alignment.Start
+                horizontalAlignment = Alignment.Start,
             ) {
-
                 Text(
                     modifier = Modifier
                         .fillMaxWidth(),
@@ -77,7 +76,7 @@ fun DebugCallScreen(
                 TextField(
                     modifier = Modifier.border(
                         BorderStroke(1.dp, Color(0xFF4C525C)),
-                        RoundedCornerShape(6.dp)
+                        RoundedCornerShape(6.dp),
                     ),
                     value = callId,
                     onValueChange = { callId = it },
@@ -86,7 +85,7 @@ fun DebugCallScreen(
                         focusedLabelColor = VideoTheme.colors.primaryAccent,
                         unfocusedIndicatorColor = Colors.secondBackground,
                         focusedIndicatorColor = Colors.secondBackground,
-                        backgroundColor = Colors.secondBackground
+                        backgroundColor = Colors.secondBackground,
                     ),
                 )
 
@@ -105,7 +104,7 @@ fun DebugCallScreen(
                 TextField(
                     modifier = Modifier.border(
                         BorderStroke(1.dp, Color(0xFF4C525C)),
-                        RoundedCornerShape(6.dp)
+                        RoundedCornerShape(6.dp),
                     ),
                     value = membersList,
                     onValueChange = { membersList = it },
@@ -114,7 +113,7 @@ fun DebugCallScreen(
                         focusedLabelColor = VideoTheme.colors.primaryAccent,
                         unfocusedIndicatorColor = Colors.secondBackground,
                         focusedIndicatorColor = Colors.secondBackground,
-                        backgroundColor = Colors.secondBackground
+                        backgroundColor = Colors.secondBackground,
                     ),
                 )
 
@@ -125,7 +124,7 @@ fun DebugCallScreen(
                     onClick = {
                         navigateToRingCall.invoke(callId, membersList)
                     },
-                    text = "Ring"
+                    text = "Ring",
                 )
             }
         }
@@ -138,7 +137,7 @@ private fun DebugCallScreenPreview() {
     StreamMockUtils.initializeStreamVideo(LocalContext.current)
     VideoTheme {
         DebugCallScreen(
-            navigateToRingCall = { _, _ -> }
+            navigateToRingCall = { _, _ -> },
         )
     }
 }

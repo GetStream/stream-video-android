@@ -34,7 +34,7 @@ fun StreamButton(
     modifier: Modifier = Modifier,
     text: String,
     enabled: Boolean = true,
-    onClick: () -> Unit
+    onClick: () -> Unit,
 ) {
     Button(
         modifier = modifier.clip(RoundedCornerShape(8.dp)),
@@ -44,12 +44,12 @@ fun StreamButton(
             backgroundColor = VideoTheme.colors.primaryAccent,
             contentColor = VideoTheme.colors.primaryAccent,
             disabledBackgroundColor = description,
-            disabledContentColor = description
-        )
+            disabledContentColor = description,
+        ),
     ) {
         Text(
             text = text,
-            color = Color.White
+            color = Color.White,
         )
     }
 }

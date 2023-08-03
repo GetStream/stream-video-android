@@ -81,7 +81,8 @@ public fun BoxScope.FloatingParticipantVideo(
     participant: ParticipantState,
     parentBounds: IntSize,
     alignment: Alignment = Alignment.TopEnd,
-    style: VideoRendererStyle = RegularVideoRendererStyle(isShowingConnectionQualityIndicator = false),
+    style: VideoRendererStyle =
+        RegularVideoRendererStyle(isShowingConnectionQualityIndicator = false),
     videoRenderer: @Composable (ParticipantState) -> Unit = {
         ParticipantVideo(
             modifier = Modifier
@@ -89,9 +90,9 @@ public fun BoxScope.FloatingParticipantVideo(
                 .clip(VideoTheme.shapes.floatingParticipant),
             call = call,
             participant = participant,
-            style = style
+            style = style,
         )
-    }
+    },
 ) {
     var videoSize by remember { mutableStateOf(IntSize(0, 0)) }
     var offsetX by remember { mutableStateOf(0f) }
@@ -118,20 +119,20 @@ public fun BoxScope.FloatingParticipantVideo(
                 .onGloballyPositioned { videoSize = it.size }
                 .size(
                     height = VideoTheme.dimens.floatingVideoHeight,
-                    width = VideoTheme.dimens.floatingVideoWidth
+                    width = VideoTheme.dimens.floatingVideoWidth,
                 )
                 .clip(VideoTheme.shapes.floatingParticipant),
-            shape = RoundedCornerShape(16.dp)
+            shape = RoundedCornerShape(16.dp),
         ) {
             Image(
                 modifier = Modifier
                     .fillMaxSize()
                     .testTag("local_video_renderer"),
                 painter = painterResource(
-                    id = LocalAvatarPreviewProvider.getLocalAvatarPreviewPlaceholder()
+                    id = LocalAvatarPreviewProvider.getLocalAvatarPreviewPlaceholder(),
                 ),
                 contentScale = ContentScale.Crop,
-                contentDescription = null
+                contentDescription = null,
             )
         }
         return
@@ -144,7 +145,7 @@ public fun BoxScope.FloatingParticipantVideo(
                 .align(alignment)
                 .size(
                     height = VideoTheme.dimens.floatingVideoHeight,
-                    width = VideoTheme.dimens.floatingVideoWidth
+                    width = VideoTheme.dimens.floatingVideoWidth,
                 )
                 .offset { IntOffset(offset.x.toInt(), offset.y.toInt()) }
                 .pointerInput(parentBounds) {
@@ -158,11 +159,11 @@ public fun BoxScope.FloatingParticipantVideo(
                                     paddingValues = PaddingValues(0.dp),
                                     floatingVideoSize = videoSize,
                                     density = density,
-                                    offset = paddingOffset * 2
-                                )
+                                    offset = paddingOffset * 2,
+                                ),
                             )
                             .coerceAtMost(
-                                0f
+                                0f,
                             )
 
                         val newOffsetY = (offsetY + dragAmount.y)
@@ -173,8 +174,8 @@ public fun BoxScope.FloatingParticipantVideo(
                                     paddingValues = PaddingValues(0.dp),
                                     floatingVideoSize = videoSize,
                                     density = density,
-                                    offset = paddingOffset * 2
-                                )
+                                    offset = paddingOffset * 2,
+                                ),
                             )
 
                         offsetX = newOffsetX
@@ -184,7 +185,7 @@ public fun BoxScope.FloatingParticipantVideo(
                 .then(modifier)
                 .padding(VideoTheme.dimens.floatingVideoPadding)
                 .onGloballyPositioned { videoSize = it.size },
-            shape = VideoTheme.shapes.floatingParticipant
+            shape = VideoTheme.shapes.floatingParticipant,
         ) {
             videoRenderer.invoke(participant)
         }
@@ -196,7 +197,7 @@ private fun calculateHorizontalOffsetBounds(
     paddingValues: PaddingValues,
     floatingVideoSize: IntSize,
     density: Density,
-    offset: Float
+    offset: Float,
 ): Float {
     val rightPadding =
         density.run { paddingValues.calculateRightPadding(LayoutDirection.Ltr).toPx() }
@@ -209,7 +210,7 @@ private fun calculateVerticalOffsetBounds(
     paddingValues: PaddingValues,
     floatingVideoSize: IntSize,
     density: Density,
-    offset: Float
+    offset: Float,
 ): Float {
     val bottomPadding = density.run { paddingValues.calculateBottomPadding().toPx() }
 

@@ -91,7 +91,7 @@ open class IntegrationTestBase(val connectCoordinatorWS: Boolean = true) : TestB
             geo = GEO.GlobalEdgeNetwork,
             testData.users["thierry"]!!,
             testData.tokens["thierry"]!!,
-            loggingLevel = LoggingLevel(Priority.DEBUG, HttpLoggingLevel.BASIC)
+            loggingLevel = LoggingLevel(Priority.DEBUG, HttpLoggingLevel.BASIC),
         )
 //        if (BuildConfig.CORE_TEST_LOCAL == "1") {
 //            builder.videoDomain = "localhost"
@@ -124,7 +124,6 @@ open class IntegrationTestBase(val connectCoordinatorWS: Boolean = true) : TestB
         // monitor for events
         events = mutableListOf()
         client.subscribe {
-
             events.add(it)
 
             nextEventContinuation?.let { continuation ->
@@ -181,7 +180,6 @@ open class IntegrationTestBase(val connectCoordinatorWS: Boolean = true) : TestB
                     }
 
                     client.subscribe {
-
                         if (!finished) {
                             // listen to the latest events
                             if (it is T) {
@@ -210,20 +208,20 @@ internal fun Call.toResponse(createdBy: UserResponse): CallResponse {
         opusDtxEnabled = true,
         redundantCodingEnabled = true,
         speakerDefaultOn = true,
-        defaultDevice = AudioSettings.DefaultDevice.Speaker
+        defaultDevice = AudioSettings.DefaultDevice.Speaker,
     )
     val settings = CallSettingsResponse(
         audio = audioSettings,
         backstage = BackstageSettings(enabled = false),
         broadcasting = BroadcastSettings(
             enabled = false,
-            hls = HLSSettings(autoOn = false, enabled = false, qualityTracks = listOf("f"))
+            hls = HLSSettings(autoOn = false, enabled = false, qualityTracks = listOf("f")),
         ),
         geofencing = GeofenceSettings(names = emptyList()),
         recording = RecordSettings(
             audioOnly = false,
             mode = RecordSettings.Mode.Available,
-            quality = RecordSettings.Quality.`720p`
+            quality = RecordSettings.Quality.`720p`,
         ),
         ring = RingSettings(autoCancelTimeoutMs = 10000, incomingCallTimeoutMs = 10000),
         screensharing = ScreensharingSettings(false, false),
@@ -233,8 +231,8 @@ internal fun Call.toResponse(createdBy: UserResponse): CallResponse {
             false,
             VideoSettings.CameraFacing.Front,
             false,
-            TargetResolution(3000000, 1024, 1280)
-        )
+            TargetResolution(3000000, 1024, 1280),
+        ),
     )
     val response = CallResponse(
         id = id,
@@ -251,7 +249,7 @@ internal fun Call.toResponse(createdBy: UserResponse): CallResponse {
         ingress = ingress,
         settings = settings,
         egress = EgressResponse(false, emptyList(), null),
-        updatedAt = now
+        updatedAt = now,
     )
     return response
 }

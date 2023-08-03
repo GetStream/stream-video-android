@@ -25,5 +25,5 @@ import androidx.compose.runtime.Stable
 public data class UserAudioLevel(
     val userId: String,
     val isSpeaking: Boolean,
-    val audioLevel: Float
+    val audioLevel: Float,
 )
