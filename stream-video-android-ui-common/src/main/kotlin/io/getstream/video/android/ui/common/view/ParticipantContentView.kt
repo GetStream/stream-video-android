@@ -42,7 +42,7 @@ public class ParticipantContentView : LinearLayout {
     public constructor(context: Context?, attrs: AttributeSet?, defStyleAttr: Int) : super(
         context,
         attrs,
-        defStyleAttr
+        defStyleAttr,
     ) {
         init(context)
     }
@@ -51,7 +51,7 @@ public class ParticipantContentView : LinearLayout {
         context: Context?,
         attrs: AttributeSet?,
         defStyleAttr: Int,
-        defStyleRes: Int
+        defStyleRes: Int,
     ) : super(context, attrs, defStyleAttr, defStyleRes) {
         init(context)
     }
@@ -71,7 +71,7 @@ public class ParticipantContentView : LinearLayout {
                 call,
                 otherParticipants[0],
                 otherParticipants[1],
-                otherParticipants[2]
+                otherParticipants[2],
             )
 
             4 -> renderFourParticipants(
@@ -79,7 +79,7 @@ public class ParticipantContentView : LinearLayout {
                 otherParticipants[0],
                 otherParticipants[1],
                 otherParticipants[2],
-                otherParticipants[3]
+                otherParticipants[3],
             )
         }
     }
@@ -93,14 +93,14 @@ public class ParticipantContentView : LinearLayout {
         renderTrack(
             findViewById(R.id.firstParticipant),
             call,
-            callParticipant.videoTrack.value
+            callParticipant.videoTrack.value,
         )
     }
 
     private fun renderTwoParticipants(
         call: Call,
         first: ParticipantState,
-        second: ParticipantState
+        second: ParticipantState,
     ) {
         Log.d("RoomState", "Rendering two, $first $second")
 
@@ -110,13 +110,13 @@ public class ParticipantContentView : LinearLayout {
         renderTrack(
             findViewById(R.id.firstParticipant),
             call,
-            first.videoTrack.value
+            first.videoTrack.value,
         )
 
         renderTrack(
             findViewById(R.id.secondParticipant),
             call,
-            second.videoTrack.value
+            second.videoTrack.value,
         )
     }
 
@@ -124,7 +124,7 @@ public class ParticipantContentView : LinearLayout {
         call: Call,
         first: ParticipantState,
         second: ParticipantState,
-        third: ParticipantState
+        third: ParticipantState,
     ) {
         cleanUpViews()
         setSecondRowVisibility(View.VISIBLE)
@@ -132,19 +132,19 @@ public class ParticipantContentView : LinearLayout {
         renderTrack(
             findViewById(R.id.firstParticipant),
             call,
-            first.videoTrack.value
+            first.videoTrack.value,
         )
 
         renderTrack(
             findViewById(R.id.secondParticipant),
             call,
-            second.videoTrack.value
+            second.videoTrack.value,
         )
 
         renderTrack(
             findViewById(R.id.thirdParticipant),
             call,
-            third.videoTrack.value
+            third.videoTrack.value,
         )
     }
 
@@ -153,7 +153,7 @@ public class ParticipantContentView : LinearLayout {
         first: ParticipantState,
         second: ParticipantState,
         third: ParticipantState,
-        fourth: ParticipantState
+        fourth: ParticipantState,
     ) {
         cleanUpViews()
         setSecondRowVisibility(View.VISIBLE)
@@ -161,32 +161,32 @@ public class ParticipantContentView : LinearLayout {
         renderTrack(
             findViewById(R.id.firstParticipant),
             call,
-            first.videoTrack.value
+            first.videoTrack.value,
         )
 
         renderTrack(
             findViewById(R.id.secondParticipant),
             call,
-            second.videoTrack.value
+            second.videoTrack.value,
         )
 
         renderTrack(
             findViewById(R.id.thirdParticipant),
             call,
-            third.videoTrack.value
+            third.videoTrack.value,
         )
 
         renderTrack(
             findViewById(R.id.fourthParticipant),
             call,
-            fourth.videoTrack.value
+            fourth.videoTrack.value,
         )
     }
 
     private fun renderTrack(
         participantItemView: ParticipantItemView,
         call: Call,
-        track: MediaTrack?
+        track: MediaTrack?,
     ) {
         val video = track?.asVideoTrack()?.video
 
@@ -195,7 +195,9 @@ public class ParticipantContentView : LinearLayout {
 
             if (!participantItemView.isInitialized) {
                 participantItemView.initialize(call, track.streamId) {
-                    CoroutineScope(io.getstream.video.android.core.dispatchers.DispatcherProvider.Main).launch {
+                    CoroutineScope(
+                        io.getstream.video.android.core.dispatchers.DispatcherProvider.Main,
+                    ).launch {
                         participantItemView.z = -10f
                         participantItemView.elevation = 0f
                     }
@@ -218,7 +220,7 @@ public class ParticipantContentView : LinearLayout {
             findViewById(R.id.firstParticipant),
             findViewById(R.id.secondParticipant),
             findViewById(R.id.thirdParticipant),
-            findViewById(R.id.fourthParticipant)
+            findViewById(R.id.fourthParticipant),
         ).forEach {
             it.cleanUp()
             it.visibility = View.GONE

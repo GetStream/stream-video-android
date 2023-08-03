@@ -34,5 +34,5 @@ public data class EdgeData(
     val longitude: Float,
     val green: Int,
     val yellow: Int,
-    val red: Int
+    val red: Int,
 )

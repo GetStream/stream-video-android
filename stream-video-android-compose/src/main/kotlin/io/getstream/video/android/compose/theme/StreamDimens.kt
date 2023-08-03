@@ -129,79 +129,195 @@ public data class StreamDimens(
             mediumButtonSize = dimensionResource(id = R.dimen.stream_video_mediumButtonSize),
             smallButtonSize = dimensionResource(id = R.dimen.stream_video_smallButtonSize),
             topAppbarHeight = dimensionResource(id = R.dimen.stream_video_topAppbarHeight),
-            landscapeTopAppBarHeight = dimensionResource(id = R.dimen.stream_video_landscapeTopAppBarHeight),
+            landscapeTopAppBarHeight = dimensionResource(
+                id = R.dimen.stream_video_landscapeTopAppBarHeight,
+            ),
             avatarAppbarPadding = dimensionResource(id = R.dimen.stream_video_avatarAppbarPadding),
-            singleAvatarAppbarPadding = dimensionResource(id = R.dimen.stream_video_singleAvatarAppbarPadding),
-            participantsTextPadding = dimensionResource(id = R.dimen.stream_video_participantsTextPadding),
+            singleAvatarAppbarPadding = dimensionResource(
+                id = R.dimen.stream_video_singleAvatarAppbarPadding,
+            ),
+            participantsTextPadding = dimensionResource(
+                id = R.dimen.stream_video_participantsTextPadding,
+            ),
             topAppbarTextSize = textSizeResource(id = R.dimen.stream_video_topAppbarTextSize),
-            directCallUserNameTextSize = textSizeResource(id = R.dimen.stream_video_directCallUserNameTextSize),
-            groupCallUserNameTextSize = textSizeResource(id = R.dimen.stream_video_groupCallUserNameTextSize),
+            directCallUserNameTextSize = textSizeResource(
+                id = R.dimen.stream_video_directCallUserNameTextSize,
+            ),
+            groupCallUserNameTextSize = textSizeResource(
+                id = R.dimen.stream_video_groupCallUserNameTextSize,
+            ),
             onCallStatusTextSize = textSizeResource(id = R.dimen.stream_video_onCallStatusTextSize),
             onCallStatusTextAlpha = floatResource(R.dimen.stream_video_onCallStatusTextAlpha),
             buttonToggleOnAlpha = floatResource(R.dimen.stream_video_buttonToggleOnAlpha),
             buttonToggleOffAlpha = floatResource(R.dimen.stream_video_buttonToggleOffAlpha),
-            incomingCallOptionsBottomPadding = dimensionResource(id = R.dimen.stream_video_incomingCallOptionsBottomPadding),
-            outgoingCallOptionsBottomPadding = dimensionResource(id = R.dimen.stream_video_outgoingCallOptionsBottomPadding),
-            callParticipantsAvatarsMargin = dimensionResource(id = R.dimen.stream_video_callParticipantsAvatarsMargin),
-            callStatusParticipantsMargin = dimensionResource(id = R.dimen.stream_video_callStatusParticipantsMargin),
+            incomingCallOptionsBottomPadding = dimensionResource(
+                id = R.dimen.stream_video_incomingCallOptionsBottomPadding,
+            ),
+            outgoingCallOptionsBottomPadding = dimensionResource(
+                id = R.dimen.stream_video_outgoingCallOptionsBottomPadding,
+            ),
+            callParticipantsAvatarsMargin = dimensionResource(
+                id = R.dimen.stream_video_callParticipantsAvatarsMargin,
+            ),
+            callStatusParticipantsMargin = dimensionResource(
+                id = R.dimen.stream_video_callStatusParticipantsMargin,
+            ),
             callAppBarPadding = dimensionResource(id = R.dimen.stream_video_callAppBarPadding),
-            callAppBarLeadingContentSpacingStart = dimensionResource(id = R.dimen.stream_video_callAppBarLeadingContentSpacingStart),
-            callAppBarLeadingContentSpacingEnd = dimensionResource(id = R.dimen.stream_video_callAppBarLeadingContentSpacingEnd),
-            callAppBarCenterContentSpacingStart = dimensionResource(id = R.dimen.stream_video_callAppBarCenterContentSpacingStart),
-            callAppBarCenterContentSpacingEnd = dimensionResource(id = R.dimen.stream_video_callAppBarCenterContentSpacingEnd),
-            callAppBarTrailingContentSpacingStart = dimensionResource(id = R.dimen.stream_video_callAppBarTrailingContentSpacingStart),
-            callAppBarTrailingContentSpacingEnd = dimensionResource(id = R.dimen.stream_video_callAppBarTrailingContentSpacingEnd),
-            controlActionsButtonSize = dimensionResource(id = R.dimen.stream_video_controlActionsButtonSize),
-            participantFocusedBorderWidth = dimensionResource(id = R.dimen.stream_video_activeSpeakerBoarderWidth),
-            participantScreenSharingFocusedBorderWidth = dimensionResource(id = R.dimen.stream_video_activeSpeakerScreenSharingBoarderWidth),
-            participantLabelHeight = dimensionResource(id = R.dimen.stream_video_callParticipantLabelHeight),
-            participantLabelPadding = dimensionResource(id = R.dimen.stream_video_callParticipantLabelPadding),
-            participantLabelTextMaxWidth = dimensionResource(id = R.dimen.stream_video_callParticipantLabelTextMaxWidth),
-            participantSoundIndicatorPadding = dimensionResource(id = R.dimen.stream_video_callParticipantLabelTextPadding),
-            participantLabelTextPaddingStart = dimensionResource(id = R.dimen.stream_video_callParticipantSoundIndicatorPaddingStart),
-            landscapeControlActionsButtonSize = dimensionResource(id = R.dimen.stream_video_landscapeControlActionsButtonSize),
-            controlActionsHeight = dimensionResource(id = R.dimen.stream_video_controlActionsHeight),
-            controlActionsElevation = dimensionResource(id = R.dimen.stream_video_controlActionsElevation),
-            landscapeControlActionsWidth = dimensionResource(id = R.dimen.stream_video_landscapeControlActionsWidth),
-            participantInfoMenuAppBarHeight = dimensionResource(id = R.dimen.stream_video_participantInfoMenuAppBarHeight),
-            participantInfoMenuOptionsHeight = dimensionResource(id = R.dimen.stream_video_participantInfoMenuOptionsHeight),
-            participantsInfoMenuOptionsButtonHeight = dimensionResource(id = R.dimen.stream_video_participantsInfoMenuOptionsButtonHeight),
-            participantsInfoAvatarSize = dimensionResource(id = R.dimen.stream_video_participantsInfoAvatarSize),
-            floatingVideoPadding = dimensionResource(id = R.dimen.stream_video_floatingVideoPadding),
+            callAppBarLeadingContentSpacingStart = dimensionResource(
+                id = R.dimen.stream_video_callAppBarLeadingContentSpacingStart,
+            ),
+            callAppBarLeadingContentSpacingEnd = dimensionResource(
+                id = R.dimen.stream_video_callAppBarLeadingContentSpacingEnd,
+            ),
+            callAppBarCenterContentSpacingStart = dimensionResource(
+                id = R.dimen.stream_video_callAppBarCenterContentSpacingStart,
+            ),
+            callAppBarCenterContentSpacingEnd = dimensionResource(
+                id = R.dimen.stream_video_callAppBarCenterContentSpacingEnd,
+            ),
+            callAppBarTrailingContentSpacingStart = dimensionResource(
+                id = R.dimen.stream_video_callAppBarTrailingContentSpacingStart,
+            ),
+            callAppBarTrailingContentSpacingEnd = dimensionResource(
+                id = R.dimen.stream_video_callAppBarTrailingContentSpacingEnd,
+            ),
+            controlActionsButtonSize = dimensionResource(
+                id = R.dimen.stream_video_controlActionsButtonSize,
+            ),
+            participantFocusedBorderWidth = dimensionResource(
+                id = R.dimen.stream_video_activeSpeakerBoarderWidth,
+            ),
+            participantScreenSharingFocusedBorderWidth = dimensionResource(
+                id = R.dimen.stream_video_activeSpeakerScreenSharingBoarderWidth,
+            ),
+            participantLabelHeight = dimensionResource(
+                id = R.dimen.stream_video_callParticipantLabelHeight,
+            ),
+            participantLabelPadding = dimensionResource(
+                id = R.dimen.stream_video_callParticipantLabelPadding,
+            ),
+            participantLabelTextMaxWidth = dimensionResource(
+                id = R.dimen.stream_video_callParticipantLabelTextMaxWidth,
+            ),
+            participantSoundIndicatorPadding = dimensionResource(
+                id = R.dimen.stream_video_callParticipantLabelTextPadding,
+            ),
+            participantLabelTextPaddingStart = dimensionResource(
+                id = R.dimen.stream_video_callParticipantSoundIndicatorPaddingStart,
+            ),
+            landscapeControlActionsButtonSize = dimensionResource(
+                id = R.dimen.stream_video_landscapeControlActionsButtonSize,
+            ),
+            controlActionsHeight = dimensionResource(
+                id = R.dimen.stream_video_controlActionsHeight,
+            ),
+            controlActionsElevation = dimensionResource(
+                id = R.dimen.stream_video_controlActionsElevation,
+            ),
+            landscapeControlActionsWidth = dimensionResource(
+                id = R.dimen.stream_video_landscapeControlActionsWidth,
+            ),
+            participantInfoMenuAppBarHeight = dimensionResource(
+                id = R.dimen.stream_video_participantInfoMenuAppBarHeight,
+            ),
+            participantInfoMenuOptionsHeight = dimensionResource(
+                id = R.dimen.stream_video_participantInfoMenuOptionsHeight,
+            ),
+            participantsInfoMenuOptionsButtonHeight = dimensionResource(
+                id = R.dimen.stream_video_participantsInfoMenuOptionsButtonHeight,
+            ),
+            participantsInfoAvatarSize = dimensionResource(
+                id = R.dimen.stream_video_participantsInfoAvatarSize,
+            ),
+            floatingVideoPadding = dimensionResource(
+                id = R.dimen.stream_video_floatingVideoPadding,
+            ),
             floatingVideoHeight = dimensionResource(id = R.dimen.stream_video_floatingVideoHeight),
             floatingVideoWidth = dimensionResource(id = R.dimen.stream_video_floatingVideoWidth),
-            connectionIndicatorBarMaxHeight = dimensionResource(id = R.dimen.stream_video_connectionIndicatorBarMaxHeight),
-            connectionIndicatorBarWidth = dimensionResource(id = R.dimen.stream_video_connectionIndicatorBarWidth),
-            connectionIndicatorBarSeparatorWidth = dimensionResource(id = R.dimen.stream_video_connectionIndicatorBarSeparatorWidth),
-            audioLevelIndicatorBarMaxHeight = dimensionResource(id = R.dimen.stream_video_audioLevelIndicatorBarMaxHeight),
-            audioLevelIndicatorBarWidth = dimensionResource(id = R.dimen.stream_video_audioLevelIndicatorBarWidth),
-            audioLevelIndicatorBarSeparatorWidth = dimensionResource(id = R.dimen.stream_video_audioLevelIndicatorBarSeparatorWidth),
-            microphoneIndicatorSize = dimensionResource(id = R.dimen.stream_video_microphoneIndicatorSize),
-            microphoneIndicatorPadding = dimensionResource(id = R.dimen.stream_video_microphoneIndicatorPadding),
-            audioLevelIndicatorBarPadding = dimensionResource(id = R.dimen.stream_video_audioLevelIndicatorBarPadding),
-            screenShareParticipantItemSize = dimensionResource(id = R.dimen.stream_video_screenShareParticipantItemSize),
-            screenShareParticipantsRowHeight = dimensionResource(id = R.dimen.stream_video_screenShareParticipantsListHeight),
-            screenShareParticipantsRowPadding = dimensionResource(id = R.dimen.stream_video_screenShareParticipantsListPadding),
-            screenShareParticipantsListItemMargin = dimensionResource(id = R.dimen.stream_video_screenShareParticipantsListItemMargin),
-            screenShareParticipantsScreenShareListMargin = dimensionResource(id = R.dimen.stream_video_screenShareParticipantsMargin),
-            screenShareParticipantsRadius = dimensionResource(id = R.dimen.stream_video_screenShareParticipantsRadius),
-            screenSharePresenterTooltipMargin = dimensionResource(id = R.dimen.stream_video_screenSharePresenterTooltipMargin),
-            screenSharePresenterTooltipPadding = dimensionResource(id = R.dimen.stream_video_screenSharePresenterTooltipPadding),
-            screenSharePresenterPadding = dimensionResource(id = R.dimen.stream_video_screenSharePresenterPadding),
-            controlActionsBottomPadding = dimensionResource(id = R.dimen.stream_video_controlActionsBottomPadding),
-            screenSharePresenterTooltipIconPadding = dimensionResource(id = R.dimen.stream_video_screenShareTooltipIconPadding),
-            screenSharePresenterTooltipHeight = dimensionResource(id = R.dimen.stream_video_screenSharePresenterTooltipHeight),
+            connectionIndicatorBarMaxHeight = dimensionResource(
+                id = R.dimen.stream_video_connectionIndicatorBarMaxHeight,
+            ),
+            connectionIndicatorBarWidth = dimensionResource(
+                id = R.dimen.stream_video_connectionIndicatorBarWidth,
+            ),
+            connectionIndicatorBarSeparatorWidth = dimensionResource(
+                id = R.dimen.stream_video_connectionIndicatorBarSeparatorWidth,
+            ),
+            audioLevelIndicatorBarMaxHeight = dimensionResource(
+                id = R.dimen.stream_video_audioLevelIndicatorBarMaxHeight,
+            ),
+            audioLevelIndicatorBarWidth = dimensionResource(
+                id = R.dimen.stream_video_audioLevelIndicatorBarWidth,
+            ),
+            audioLevelIndicatorBarSeparatorWidth = dimensionResource(
+                id = R.dimen.stream_video_audioLevelIndicatorBarSeparatorWidth,
+            ),
+            microphoneIndicatorSize = dimensionResource(
+                id = R.dimen.stream_video_microphoneIndicatorSize,
+            ),
+            microphoneIndicatorPadding = dimensionResource(
+                id = R.dimen.stream_video_microphoneIndicatorPadding,
+            ),
+            audioLevelIndicatorBarPadding = dimensionResource(
+                id = R.dimen.stream_video_audioLevelIndicatorBarPadding,
+            ),
+            screenShareParticipantItemSize = dimensionResource(
+                id = R.dimen.stream_video_screenShareParticipantItemSize,
+            ),
+            screenShareParticipantsRowHeight = dimensionResource(
+                id = R.dimen.stream_video_screenShareParticipantsListHeight,
+            ),
+            screenShareParticipantsRowPadding = dimensionResource(
+                id = R.dimen.stream_video_screenShareParticipantsListPadding,
+            ),
+            screenShareParticipantsListItemMargin = dimensionResource(
+                id = R.dimen.stream_video_screenShareParticipantsListItemMargin,
+            ),
+            screenShareParticipantsScreenShareListMargin = dimensionResource(
+                id = R.dimen.stream_video_screenShareParticipantsMargin,
+            ),
+            screenShareParticipantsRadius = dimensionResource(
+                id = R.dimen.stream_video_screenShareParticipantsRadius,
+            ),
+            screenSharePresenterTooltipMargin = dimensionResource(
+                id = R.dimen.stream_video_screenSharePresenterTooltipMargin,
+            ),
+            screenSharePresenterTooltipPadding = dimensionResource(
+                id = R.dimen.stream_video_screenSharePresenterTooltipPadding,
+            ),
+            screenSharePresenterPadding = dimensionResource(
+                id = R.dimen.stream_video_screenSharePresenterPadding,
+            ),
+            controlActionsBottomPadding = dimensionResource(
+                id = R.dimen.stream_video_controlActionsBottomPadding,
+            ),
+            screenSharePresenterTooltipIconPadding = dimensionResource(
+                id = R.dimen.stream_video_screenShareTooltipIconPadding,
+            ),
+            screenSharePresenterTooltipHeight = dimensionResource(
+                id = R.dimen.stream_video_screenSharePresenterTooltipHeight,
+            ),
             lobbyVideoHeight = dimensionResource(id = R.dimen.stream_video_lobbyVideoHeight),
-            lobbyControlActionsPadding = dimensionResource(id = R.dimen.stream_video_lobbyControlActionsPadding),
-            lobbyControlActionsItemSpaceBy = dimensionResource(id = R.dimen.stream_video_lobbyControlActionsItemSpaceBy),
+            lobbyControlActionsPadding = dimensionResource(
+                id = R.dimen.stream_video_lobbyControlActionsPadding,
+            ),
+            lobbyControlActionsItemSpaceBy = dimensionResource(
+                id = R.dimen.stream_video_lobbyControlActionsItemSpaceBy,
+            ),
             reactionSize = dimensionResource(id = R.dimen.stream_video_reactionSize),
-            audioContentTopPadding = dimensionResource(id = R.dimen.stream_video_audioContentTopPadding),
+            audioContentTopPadding = dimensionResource(
+                id = R.dimen.stream_video_audioContentTopPadding,
+            ),
             audioAvatarSize = dimensionResource(id = R.dimen.stream_video_audioAvatarSize),
             audioAvatarPadding = dimensionResource(id = R.dimen.stream_video_audioAvatarPadding),
             audioRoomMicSize = dimensionResource(id = R.dimen.stream_video_audioMicSize),
             audioRoomMicPadding = dimensionResource(id = R.dimen.stream_video_audioMicPadding),
-            audioRoomAvatarPortraitPadding = dimensionResource(id = R.dimen.stream_video_audioRoomAvatarPortraitPadding),
-            audioRoomAvatarLandscapePadding = dimensionResource(id = R.dimen.stream_video_audioRoomAvatarLandscapePadding),
+            audioRoomAvatarPortraitPadding = dimensionResource(
+                id = R.dimen.stream_video_audioRoomAvatarPortraitPadding,
+            ),
+            audioRoomAvatarLandscapePadding = dimensionResource(
+                id = R.dimen.stream_video_audioRoomAvatarLandscapePadding,
+            ),
         )
     }
 }

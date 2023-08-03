@@ -45,7 +45,7 @@ import javax.inject.Inject
 @HiltViewModel
 class CallLobbyViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
-    dataStore: StreamUserDataStore
+    dataStore: StreamUserDataStore,
 ) : ViewModel() {
 
     private val cid: String = checkNotNull(savedStateHandle["cid"])

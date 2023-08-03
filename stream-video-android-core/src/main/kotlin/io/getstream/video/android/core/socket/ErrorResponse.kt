@@ -21,7 +21,7 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class SocketError(
-    val error: ErrorResponse
+    val error: ErrorResponse,
 )
 
 @Serializable
@@ -33,7 +33,7 @@ public data class ErrorResponse(
     var details: List<String> = emptyList(),
     val exceptionFields: Map<String, String> = mapOf(),
     @SerialName("more_info")
-    var moreInfo: String = ""
+    var moreInfo: String = "",
 ) : Throwable() {
     var duration: String = ""
 }

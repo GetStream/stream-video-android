@@ -49,7 +49,7 @@ public open class DefaultNotificationHandler(
     private val application: Application,
     private val notificationPermissionHandler: NotificationPermissionHandler =
         DefaultNotificationPermissionHandler
-            .createDefaultNotificationPermissionHandler(application)
+            .createDefaultNotificationPermissionHandler(application),
 ) : NotificationHandler,
     NotificationPermissionHandler by notificationPermissionHandler {
 
@@ -61,11 +61,11 @@ public open class DefaultNotificationHandler(
                     NotificationChannelCompat
                         .Builder(
                             getChannelId(),
-                            NotificationManager.IMPORTANCE_HIGH
+                            NotificationManager.IMPORTANCE_HIGH,
                         )
                         .setName(getChannelName())
                         .setDescription(getChannelDescription())
-                        .build()
+                        .build(),
                 )
             }
         }
@@ -162,14 +162,19 @@ public open class DefaultNotificationHandler(
      * @return The [PendingIntent] which can trigger a component to consume the call rejection event.
      */
     private fun searchRejectCallPendingIntent(
-        callId: StreamCallId
+        callId: StreamCallId,
     ): PendingIntent? = searchBroadcastPendingIntent(Intent(ACTION_REJECT_CALL), callId)
 
     private fun searchBroadcastPendingIntent(
         baseIntent: Intent,
         callId: StreamCallId,
     ): PendingIntent? =
-        searchResolveInfo { application.packageManager.queryBroadcastReceivers(baseIntent, 0) }?.let {
+        searchResolveInfo {
+            application.packageManager.queryBroadcastReceivers(
+                baseIntent,
+                0,
+            )
+        }?.let {
             getBroadcastForIntent(baseIntent, it, callId)
         }
 
@@ -203,7 +208,9 @@ public open class DefaultNotificationHandler(
         flags: Int = PENDING_INTENT_FLAG,
     ): PendingIntent {
         val baseIntentAction =
-            requireNotNull(baseIntent.action) { logger.e { "Developer error. Intent action must be set" } }
+            requireNotNull(
+                baseIntent.action,
+            ) { logger.e { "Developer error. Intent action must be set" } }
         val dismissIntent = DismissNotificationActivity
             .createIntent(application, notificationId, baseIntentAction)
 
@@ -211,7 +218,7 @@ public open class DefaultNotificationHandler(
             application,
             0,
             arrayOf(buildComponentIntent(baseIntent, resolveInfo, callId), dismissIntent),
-            flags
+            flags,
         )
     }
 
@@ -230,9 +237,10 @@ public open class DefaultNotificationHandler(
         flags: Int = PENDING_INTENT_FLAG,
     ): PendingIntent {
         return PendingIntent.getBroadcast(
-            application, 0,
+            application,
+            0,
             buildComponentIntent(baseIntent, resolveInfo, callId),
-            flags
+            flags,
         )
     }
 
@@ -246,12 +254,12 @@ public open class DefaultNotificationHandler(
     private fun buildComponentIntent(
         baseIntent: Intent,
         resolveInfo: ResolveInfo,
-        callId: StreamCallId
+        callId: StreamCallId,
     ): Intent {
         return Intent(baseIntent).apply {
             component = ComponentName(
                 resolveInfo.activityInfo.applicationInfo.packageName,
-                resolveInfo.activityInfo.name
+                resolveInfo.activityInfo.name,
             )
             putExtra(INTENT_EXTRA_CALL_CID, callId)
             putExtra(INTENT_EXTRA_NOTIFICATION_ID, INCOMING_CALL_NOTIFICATION_ID)
@@ -302,7 +310,10 @@ public open class DefaultNotificationHandler(
     }
 
     @SuppressLint("MissingPermission")
-    private fun showNotification(notificationId: Int, builder: NotificationCompat.Builder.() -> Unit) {
+    private fun showNotification(
+        notificationId: Int,
+        builder: NotificationCompat.Builder.() -> Unit,
+    ) {
         val notification = NotificationCompat.Builder(application, getChannelId())
             .setSmallIcon(android.R.drawable.presence_video_online)
             .setAutoCancel(true)
@@ -313,7 +324,7 @@ public open class DefaultNotificationHandler(
     private fun NotificationCompat.Builder.addCallActions(
         acceptCallPendingIntent: PendingIntent,
         rejectCallPendingIntent: PendingIntent,
-        callDisplayName: String
+        callDisplayName: String,
     ): NotificationCompat.Builder = apply {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
             setStyle(
@@ -323,7 +334,7 @@ public open class DefaultNotificationHandler(
                         .build(),
                     rejectCallPendingIntent,
                     acceptCallPendingIntent,
-                )
+                ),
             )
         } else {
             addAction(
@@ -331,14 +342,14 @@ public open class DefaultNotificationHandler(
                     null,
                     application.getString(R.string.stream_video_call_notification_action_accept),
                     acceptCallPendingIntent,
-                ).build()
+                ).build(),
             )
             addAction(
                 NotificationCompat.Action.Builder(
                     null,
                     application.getString(R.string.stream_video_call_notification_action_reject),
-                    rejectCallPendingIntent
-                ).build()
+                    rejectCallPendingIntent,
+                ).build(),
             )
         }
     }

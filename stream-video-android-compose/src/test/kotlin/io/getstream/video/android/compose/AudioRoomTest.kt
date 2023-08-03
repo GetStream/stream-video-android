@@ -56,7 +56,7 @@ internal class AudioRoomTest : BaseComposeTest() {
         snapshot {
             AudioParticipantsGrid(
                 modifier = Modifier.fillMaxSize(),
-                participants = mockParticipantList
+                participants = mockParticipantList,
             )
         }
     }
@@ -66,7 +66,7 @@ internal class AudioRoomTest : BaseComposeTest() {
         snapshot {
             AudioRoomContent(
                 modifier = Modifier.fillMaxSize(),
-                call = mockCall
+                call = mockCall,
             )
         }
     }
@@ -76,7 +76,7 @@ internal class AudioRoomTest : BaseComposeTest() {
         snapshot(isInDarkMode = true) {
             AudioRoomContent(
                 modifier = Modifier.fillMaxSize(),
-                call = mockCall
+                call = mockCall,
             )
         }
     }

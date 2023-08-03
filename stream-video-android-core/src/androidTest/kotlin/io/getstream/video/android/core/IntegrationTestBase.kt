@@ -66,8 +66,12 @@ class IntegrationTestHelper {
             "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoidGhpZXJyeSJ9._4aZL6BR0VGKfZsKYdscsBm8yKVgG-2LatYeHRJUq0g"
 
         val thierry = User(
-            id = "thierry", role = "admin", name = "Thierry", image = "hello",
-            teams = emptyList(), custom = mapOf()
+            id = "thierry",
+            role = "admin",
+            name = "Thierry",
+            image = "hello",
+            teams = emptyList(),
+            custom = mapOf(),
         )
         users["thierry"] = thierry
         tokens["thierry"] = token
@@ -146,7 +150,7 @@ open class IntegrationTestBase(connectCoordinatorWS: Boolean = true) : TestBase(
             geo = GEO.GlobalEdgeNetwork,
             testData.users["thierry"]!!,
             testData.tokens["thierry"]!!,
-            loggingLevel = LoggingLevel(priority = Priority.VERBOSE)
+            loggingLevel = LoggingLevel(priority = Priority.VERBOSE),
         )
 //        if (BuildConfig.CORE_TEST_LOCAL == "1") {
 //            builder.videoDomain = "localhost"

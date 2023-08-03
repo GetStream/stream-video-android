@@ -51,30 +51,30 @@ public data class AvatarStyle(
             ).apply {
                 val avatarBorderWidth = getDimensionPixelSize(
                     R.styleable.AvatarView_streamVideoAvatarBorderWidth,
-                    0
+                    0,
                 )
 
                 val avatarBorderColor = getColor(
                     R.styleable.AvatarView_streamVideoAvatarBorderColor,
-                    context.getColorCompat(R.color.stream_video_black)
+                    context.getColorCompat(R.color.stream_video_black),
                 )
 
                 val avatarInitialsTextStyle = TextStyle.Builder(this)
                     .size(
                         R.styleable.AvatarView_streamVideoAvatarTextSize,
-                        context.getDimension(RCommon.dimen.stream_video_title3TextSize)
+                        context.getDimension(RCommon.dimen.stream_video_title3TextSize),
                     )
                     .color(
                         R.styleable.AvatarView_streamVideoAvatarTextColor,
-                        context.getColorCompat(RCommon.color.stream_video_text_avatar_initials)
+                        context.getColorCompat(RCommon.color.stream_video_text_avatar_initials),
                     )
                     .font(
                         R.styleable.AvatarView_streamVideoAvatarTextFontAssets,
-                        R.styleable.AvatarView_streamVideoAvatarTextFont
+                        R.styleable.AvatarView_streamVideoAvatarTextFont,
                     )
                     .style(
                         R.styleable.AvatarView_streamVideoAvatarTextStyle,
-                        Typeface.BOLD
+                        Typeface.BOLD,
                     )
                     .build()
 
@@ -84,7 +84,7 @@ public data class AvatarStyle(
                 val borderRadius =
                     getDimensionPixelSize(
                         R.styleable.AvatarView_streamVideoAvatarBorderRadius,
-                        4.dpToPx()
+                        4.dpToPx(),
                     ).toFloat()
 
                 recycle()

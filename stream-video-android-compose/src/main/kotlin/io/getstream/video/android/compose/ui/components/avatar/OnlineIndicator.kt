@@ -39,6 +39,6 @@ public fun OnlineIndicator(modifier: Modifier = Modifier) {
             .size(12.dp)
             .background(VideoTheme.colors.appBackground, CircleShape)
             .padding(2.dp)
-            .background(VideoTheme.colors.infoAccent, CircleShape)
+            .background(VideoTheme.colors.infoAccent, CircleShape),
     )
 }

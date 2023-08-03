@@ -62,7 +62,7 @@ public class CallAppBarView : CallConstraintLayout {
     public constructor(context: Context, attrs: AttributeSet?, defStyleAttr: Int) : super(
         context.createStreamThemeWrapper(),
         attrs,
-        defStyleAttr
+        defStyleAttr,
     ) {
         init(context, attrs)
     }
@@ -161,7 +161,7 @@ public class CallAppBarView : CallConstraintLayout {
         layoutParams: FrameLayout.LayoutParams = FrameLayout.LayoutParams(
             FrameLayout.LayoutParams.WRAP_CONTENT,
             FrameLayout.LayoutParams.WRAP_CONTENT,
-            Gravity.START
+            Gravity.START,
         ),
     ) where V : View, V : CallAppBarContent {
         binding.callAppBarLeadingContent.removeAllViews()
@@ -181,7 +181,7 @@ public class CallAppBarView : CallConstraintLayout {
         layoutParams: FrameLayout.LayoutParams = FrameLayout.LayoutParams(
             FrameLayout.LayoutParams.WRAP_CONTENT,
             FrameLayout.LayoutParams.WRAP_CONTENT,
-            Gravity.START
+            Gravity.START,
         ),
     ) where V : View, V : CallAppBarContent {
         binding.callAppBarCenterContent.removeAllViews()
@@ -201,7 +201,7 @@ public class CallAppBarView : CallConstraintLayout {
         layoutParams: FrameLayout.LayoutParams = FrameLayout.LayoutParams(
             FrameLayout.LayoutParams.WRAP_CONTENT,
             FrameLayout.LayoutParams.WRAP_CONTENT,
-            Gravity.START
+            Gravity.START,
         ),
     ) where V : View, V : CallAppBarContent {
         binding.callAppBarTrailingContent.removeAllViews()
@@ -215,13 +215,13 @@ public class CallAppBarView : CallConstraintLayout {
      */
     public fun renderState(callState: ConnectionState) {
         (binding.callAppBarLeadingContent.children.firstOrNull() as? CallAppBarContent)?.renderState(
-            callState
+            callState,
         )
         (binding.callAppBarCenterContent.children.firstOrNull() as? CallAppBarContent)?.renderState(
-            callState
+            callState,
         )
         (binding.callAppBarTrailingContent.children.firstOrNull() as? CallAppBarContent)?.renderState(
-            callState
+            callState,
         )
     }
 
@@ -250,14 +250,11 @@ public class CallAppBarView : CallConstraintLayout {
             backgroundColor = style.backgroundColour
         }
 
-        binding.callAppBarLeadingContent
-            .getFirstViewInstance<DefaultCallAppBarLeadingContent>()
+        binding.callAppBarLeadingContent.getFirstViewInstance<DefaultCallAppBarLeadingContent>()
             ?.setColorFilter(leadingIconTint)
-        binding.callAppBarCenterContent
-            .getFirstViewInstance<DefaultCallAppBarCenterContent>()
+        binding.callAppBarCenterContent.getFirstViewInstance<DefaultCallAppBarCenterContent>()
             ?.setTextStyle(centerContentTextStyle)
-        binding.callAppBarTrailingContent
-            .getFirstViewInstance<DefaultCallAppBarTrailingContent>()
+        binding.callAppBarTrailingContent.getFirstViewInstance<DefaultCallAppBarTrailingContent>()
             ?.setColorFilter(trailingContentIconTint)
 
         setBackgroundColor(backgroundColor)

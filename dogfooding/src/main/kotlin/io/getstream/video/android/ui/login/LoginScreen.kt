@@ -71,7 +71,7 @@ import io.getstream.video.android.ui.theme.StreamButton
 @Composable
 fun LoginScreen(
     loginViewModel: LoginViewModel = hiltViewModel(),
-    navigateToCallJoin: () -> Unit
+    navigateToCallJoin: () -> Unit,
 ) {
     val uiState by loginViewModel.uiState.collectAsState(initial = LoginUiState.Nothing)
     val isLoading by remember(uiState) {
@@ -83,12 +83,12 @@ fun LoginScreen(
 
     LoginContent(
         isLoading = isLoading,
-        showEmailLoginDialog = { isShowingEmailLoginDialog = true }
+        showEmailLoginDialog = { isShowingEmailLoginDialog = true },
     )
 
     if (isShowingEmailLoginDialog) {
         EmailLoginDialog(
-            onDismissRequest = { isShowingEmailLoginDialog = false }
+            onDismissRequest = { isShowingEmailLoginDialog = false },
         )
     }
 }
@@ -105,12 +105,12 @@ private fun LoginContent(
                 .fillMaxSize()
                 .background(Colors.background),
             verticalArrangement = Arrangement.Center,
-            horizontalAlignment = Alignment.CenterHorizontally
+            horizontalAlignment = Alignment.CenterHorizontally,
         ) {
             Image(
                 modifier = Modifier.size(102.dp),
                 painter = painterResource(id = R.drawable.ic_stream_video_meeting),
-                contentDescription = null
+                contentDescription = null,
             )
 
             Spacer(modifier = Modifier.height(27.dp))
@@ -118,11 +118,10 @@ private fun LoginContent(
             Text(
                 text = stringResource(id = R.string.stream_meetings),
                 color = Color.White,
-                fontSize = 38.sp
+                fontSize = 38.sp,
             )
 
             if (BuildConfig.FLAVOR != "production") {
-
                 Spacer(modifier = Modifier.height(17.dp))
 
                 Text(
@@ -140,7 +139,7 @@ private fun LoginContent(
                         .padding(horizontal = 55.dp),
                     enabled = !isLoading,
                     text = stringResource(id = R.string.sign_in_google),
-                    onClick = { loginViewModel.handleUiEvent(LoginEvent.GoogleSignIn()) }
+                    onClick = { loginViewModel.handleUiEvent(LoginEvent.GoogleSignIn()) },
                 )
 
                 StreamButton(
@@ -149,7 +148,7 @@ private fun LoginContent(
                         .padding(horizontal = 55.dp),
                     enabled = !isLoading,
                     text = stringResource(id = R.string.sign_in_email),
-                    onClick = { showEmailLoginDialog.invoke() }
+                    onClick = { showEmailLoginDialog.invoke() },
                 )
             }
 
@@ -161,7 +160,7 @@ private fun LoginContent(
                     LinkTextData(text = stringResource(id = R.string.sign_in_contact)),
                     LinkTextData(
                         text = stringResource(
-                            id = R.string.sign_in_contact_us
+                            id = R.string.sign_in_contact_us,
                         ),
                         tag = "contact us",
                         annotation = "https://getstream.io/video/docs/",
@@ -169,9 +168,9 @@ private fun LoginContent(
                             val intent = Intent(Intent.ACTION_VIEW)
                             intent.data = Uri.parse(it.item)
                             startActivity(context, intent, null)
-                        }
+                        },
                     ),
-                )
+                ),
             )
 
             if (BuildConfig.BENCHMARK) {
@@ -183,9 +182,9 @@ private fun LoginContent(
                     text = "Login for Benchmark",
                     onClick = {
                         loginViewModel.handleUiEvent(
-                            LoginEvent.SignInInSuccess("benchmark.test@getstream.io")
+                            LoginEvent.SignInInSuccess("benchmark.test@getstream.io"),
                         )
-                    }
+                    },
                 )
             }
         }
@@ -193,7 +192,7 @@ private fun LoginContent(
         if (isLoading) {
             CircularProgressIndicator(
                 modifier = Modifier.align(Alignment.Center),
-                color = VideoTheme.colors.primaryAccent
+                color = VideoTheme.colors.primaryAccent,
             )
         }
     }
@@ -210,7 +209,7 @@ private fun EmailLoginDialog(
         onDismissRequest = { onDismissRequest.invoke() },
         content = {
             Surface(
-                modifier = Modifier.width(300.dp)
+                modifier = Modifier.width(300.dp),
             ) {
                 Column(modifier = Modifier.background(Colors.background)) {
                     TextField(
@@ -225,11 +224,11 @@ private fun EmailLoginDialog(
                             focusedLabelColor = VideoTheme.colors.primaryAccent,
                             unfocusedIndicatorColor = VideoTheme.colors.primaryAccent,
                             focusedIndicatorColor = VideoTheme.colors.primaryAccent,
-                            placeholderColor = Color.White
+                            placeholderColor = Color.White,
                         ),
                         keyboardOptions = KeyboardOptions.Default.copy(
-                            keyboardType = KeyboardType.Email
-                        )
+                            keyboardType = KeyboardType.Email,
+                        ),
                     )
 
                     StreamButton(
@@ -243,11 +242,11 @@ private fun EmailLoginDialog(
                                 .replace("@", "")
                             loginViewModel.handleUiEvent(LoginEvent.SignInInSuccess(userId))
                         },
-                        text = "Log in"
+                        text = "Log in",
                     )
                 }
             }
-        }
+        },
     )
 }
 
@@ -255,7 +254,7 @@ private fun EmailLoginDialog(
 private fun HandleLoginUiStates(
     loginUiState: LoginUiState,
     navigateToCallJoin: () -> Unit,
-    loginViewModel: LoginViewModel = hiltViewModel()
+    loginViewModel: LoginViewModel = hiltViewModel(),
 ) {
     val context = LocalContext.current
     val signInLauncher = rememberRegisterForActivityResult(
@@ -268,7 +267,7 @@ private fun HandleLoginUiStates(
         },
         onSignInFailed = {
             Toast.makeText(context, "Verification failed!", Toast.LENGTH_SHORT).show()
-        }
+        },
     )
 
     LaunchedEffect(key1 = Unit) {
@@ -279,7 +278,7 @@ private fun HandleLoginUiStates(
         when (loginUiState) {
             is LoginUiState.GoogleSignIn -> {
                 val providers = arrayListOf(
-                    AuthUI.IdpConfig.GoogleBuilder().build()
+                    AuthUI.IdpConfig.GoogleBuilder().build(),
                 )
 
                 val signInIntent = AuthUI.getInstance().createSignInIntentBuilder()
@@ -291,7 +290,7 @@ private fun HandleLoginUiStates(
             is LoginUiState.SignInComplete -> {
                 loginViewModel.initializeStreamVideo(
                     context = context,
-                    tokenResponse = loginUiState.tokenResponse
+                    tokenResponse = loginUiState.tokenResponse,
                 )
 
                 navigateToCallJoin.invoke()
@@ -301,7 +300,7 @@ private fun HandleLoginUiStates(
                 Toast.makeText(
                     context,
                     "Login failed! (${loginUiState.errorMessage})",
-                    Toast.LENGTH_SHORT
+                    Toast.LENGTH_SHORT,
                 ).show()
             }
 

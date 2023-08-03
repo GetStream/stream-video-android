@@ -56,22 +56,22 @@ internal fun CallParticipantListAppBar(
             .height(VideoTheme.dimens.participantInfoMenuAppBarHeight)
             .background(VideoTheme.colors.barsBackground)
             .padding(VideoTheme.dimens.callAppBarPadding),
-        verticalAlignment = Alignment.CenterVertically
+        verticalAlignment = Alignment.CenterVertically,
     ) {
         Text(
             modifier = Modifier
                 .weight(1f)
                 .padding(
                     start = VideoTheme.dimens.callAppBarCenterContentSpacingStart,
-                    end = VideoTheme.dimens.callAppBarCenterContentSpacingEnd
+                    end = VideoTheme.dimens.callAppBarCenterContentSpacingEnd,
                 ),
             text = resources.getQuantityString(
                 R.plurals.stream_video_call_participants_info_number_of_participants,
                 numberOfParticipants,
-                numberOfParticipants
+                numberOfParticipants,
             ),
             style = VideoTheme.typography.title3,
-            color = VideoTheme.colors.textHighEmphasis
+            color = VideoTheme.colors.textHighEmphasis,
         )
 
         IconButton(
@@ -83,9 +83,9 @@ internal fun CallParticipantListAppBar(
                 Icon(
                     painter = painterResource(id = R.drawable.stream_video_ic_close),
                     contentDescription = stringResource(
-                        id = R.string.stream_video_back_button_content_description
+                        id = R.string.stream_video_back_button_content_description,
                     ),
-                    tint = VideoTheme.colors.textHighEmphasis
+                    tint = VideoTheme.colors.textHighEmphasis,
                 )
             },
         )
@@ -98,7 +98,7 @@ private fun CallParticipantsInfoAppBarPreview() {
     VideoTheme {
         CallParticipantListAppBar(
             numberOfParticipants = 10,
-            onBackPressed = {}
+            onBackPressed = {},
         )
     }
 }

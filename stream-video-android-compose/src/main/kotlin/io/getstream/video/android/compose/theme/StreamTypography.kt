@@ -63,70 +63,72 @@ public data class StreamTypography(
          * @return [StreamTypography] that holds all the default text styles that we support.
          */
         @Composable
-        public fun defaultTypography(fontFamily: FontFamily? = null): StreamTypography = StreamTypography(
+        public fun defaultTypography(
+            fontFamily: FontFamily? = null,
+        ): StreamTypography = StreamTypography(
             title1 = TextStyle(
                 fontSize = textSizeResource(id = R.dimen.stream_video_title1TextSize),
                 lineHeight = textSizeResource(id = R.dimen.stream_video_title1LineHeight),
                 fontWeight = FontWeight.W500,
-                fontFamily = fontFamily
+                fontFamily = fontFamily,
             ),
             title3 = TextStyle(
                 fontSize = textSizeResource(id = R.dimen.stream_video_title3TextSize),
                 lineHeight = textSizeResource(id = R.dimen.stream_video_title3LineHeight),
                 fontWeight = FontWeight.W400,
-                fontFamily = fontFamily
+                fontFamily = fontFamily,
             ),
             title3Bold = TextStyle(
                 fontSize = textSizeResource(id = R.dimen.stream_video_title3TextSize),
                 lineHeight = textSizeResource(id = R.dimen.stream_video_title3LineHeight),
                 fontWeight = FontWeight.W500,
-                fontFamily = fontFamily
+                fontFamily = fontFamily,
             ),
             body = TextStyle(
                 fontSize = textSizeResource(id = R.dimen.stream_video_bodyTextSize),
                 fontWeight = FontWeight.W400,
-                fontFamily = fontFamily
+                fontFamily = fontFamily,
             ),
             bodyItalic = TextStyle(
                 fontSize = textSizeResource(id = R.dimen.stream_video_bodyTextSize),
                 fontWeight = FontWeight.W400,
                 fontStyle = FontStyle.Italic,
-                fontFamily = fontFamily
+                fontFamily = fontFamily,
             ),
             bodyBold = TextStyle(
                 fontSize = textSizeResource(id = R.dimen.stream_video_bodyTextSize),
                 fontWeight = FontWeight.W500,
-                fontFamily = fontFamily
+                fontFamily = fontFamily,
             ),
             footnote = TextStyle(
                 fontSize = textSizeResource(id = R.dimen.stream_video_footnoteTextSize),
                 lineHeight = textSizeResource(id = R.dimen.stream_video_footnoteLineHeight),
                 fontWeight = FontWeight.W400,
-                fontFamily = fontFamily
+                fontFamily = fontFamily,
             ),
             footnoteItalic = TextStyle(
                 fontSize = textSizeResource(id = R.dimen.stream_video_footnoteTextSize),
                 lineHeight = textSizeResource(id = R.dimen.stream_video_footnoteLineHeight),
                 fontWeight = FontWeight.W400,
                 fontStyle = FontStyle.Italic,
-                fontFamily = fontFamily
+                fontFamily = fontFamily,
             ),
             footnoteBold = TextStyle(
                 fontSize = textSizeResource(id = R.dimen.stream_video_footnoteTextSize),
                 lineHeight = textSizeResource(id = R.dimen.stream_video_footnoteLineHeight),
                 fontWeight = FontWeight.W500,
-                fontFamily = fontFamily
+                fontFamily = fontFamily,
             ),
             captionBold = TextStyle(
                 fontSize = textSizeResource(id = R.dimen.stream_video_captionTextSize),
                 lineHeight = textSizeResource(id = R.dimen.stream_video_captionLineHeight),
                 fontWeight = FontWeight.W700,
-                fontFamily = fontFamily
+                fontFamily = fontFamily,
             ),
             tabBar = TextStyle(
                 fontSize = textSizeResource(id = R.dimen.stream_video_tabBarTextSize),
                 fontWeight = FontWeight.W400,
-                fontFamily = fontFamily
+                fontFamily = fontFamily,
             ),
         )
     }

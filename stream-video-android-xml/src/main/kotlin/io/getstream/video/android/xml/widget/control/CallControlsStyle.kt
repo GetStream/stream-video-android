@@ -51,30 +51,31 @@ public data class CallControlsStyle(
                 attrs,
                 R.styleable.CallControlsView,
                 R.attr.streamVideoCallControlsViewStyle,
-                R.style.StreamVideo_CallControls
+                R.style.StreamVideo_CallControls,
             ).use {
-
                 val callControlButtonSize = it.getDimensionPixelSize(
                     R.styleable.CallControlsView_streamVideoCallControlsButtonSize,
-                    context.getDimension(RCommon.dimen.stream_video_controlActionsButtonSize)
+                    context.getDimension(RCommon.dimen.stream_video_controlActionsButtonSize),
                 )
 
                 val callControlButtonSizeLandscape = it.getDimensionPixelSize(
                     R.styleable.CallControlsView_streamVideoCallControlsButtonSizeLandscape,
-                    context.getDimension(RCommon.dimen.stream_video_landscapeControlActionsButtonSize)
+                    context.getDimension(
+                        RCommon.dimen.stream_video_landscapeControlActionsButtonSize,
+                    ),
                 )
 
                 val callControlsBackground = it.getDrawable(
-                    R.styleable.CallControlsView_streamVideoCallControlsBackground
+                    R.styleable.CallControlsView_streamVideoCallControlsBackground,
                 ) ?: context.getDrawableCompat(R.drawable.stream_video_rect_controls)!!
 
                 val callControlsBackgroundLandscape = it.getDrawable(
-                    R.styleable.CallControlsView_streamVideoCallControlsBackgroundLandscape
+                    R.styleable.CallControlsView_streamVideoCallControlsBackgroundLandscape,
                 ) ?: context.getDrawableCompat(R.drawable.stream_video_rect_controls_landscape)!!
 
                 val callControlsBackgroundColor = it.getColor(
                     R.styleable.CallControlsView_streamVideoCallControlsBackgroundColor,
-                    context.getColorCompat(R.color.stream_video_white)
+                    context.getColorCompat(R.color.stream_video_white),
                 )
 
                 return CallControlsStyle(
@@ -82,7 +83,7 @@ public data class CallControlsStyle(
                     callControlButtonSizeLandscape = callControlButtonSizeLandscape,
                     callControlsBackground = callControlsBackground,
                     callControlsBackgroundLandscape = callControlsBackgroundLandscape,
-                    callControlsBackgroundColor = callControlsBackgroundColor
+                    callControlsBackgroundColor = callControlsBackgroundColor,
                 ).let(TransformStyle.callControlsStyleTransformer::transform)
             }
         }

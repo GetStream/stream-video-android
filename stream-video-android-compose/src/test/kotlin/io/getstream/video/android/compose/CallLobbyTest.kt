@@ -38,7 +38,7 @@ internal class CallLobbyTest : BaseComposeTest() {
         snapshot {
             CallLobby(
                 modifier = Modifier.fillMaxWidth(),
-                call = mockCall
+                call = mockCall,
             )
         }
     }

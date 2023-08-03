@@ -62,7 +62,7 @@ class CallActivity : ComponentActivity() {
                 Toast.makeText(
                     this@CallActivity,
                     "Failed to join call (${result.value.message})",
-                    Toast.LENGTH_SHORT
+                    Toast.LENGTH_SHORT,
                 ).show()
                 finish()
             }
@@ -76,7 +76,7 @@ class CallActivity : ComponentActivity() {
                 onLeaveCall = {
                     call.leave()
                     finish()
-                }
+                },
             )
 
             // step 4 (optional) - chat integration
@@ -88,7 +88,7 @@ class CallActivity : ComponentActivity() {
                         offset = 0,
                         limit = 10,
                         filter = Filters.neutral(),
-                        sort = QuerySortByField()
+                        sort = QuerySortByField(),
                     ).await().onSuccessSuspend { members ->
                         if (members.isNotEmpty()) {
                             channel.addMembers(listOf(user!!.id)).await()

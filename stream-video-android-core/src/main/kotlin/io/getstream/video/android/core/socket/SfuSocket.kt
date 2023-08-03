@@ -38,12 +38,12 @@ public class SfuSocket(
     private val getSubscriberSdp: suspend () -> String,
     private val scope: CoroutineScope = CoroutineScope(DispatcherProvider.IO),
     private val httpClient: OkHttpClient,
-    private val networkStateProvider: NetworkStateProvider
+    private val networkStateProvider: NetworkStateProvider,
 ) : PersistentSocket<JoinCallResponseEvent> (
     url = url,
     httpClient = httpClient,
     scope = scope,
-    networkStateProvider = networkStateProvider
+    networkStateProvider = networkStateProvider,
 ) {
 
     override val logger by taggedLogger("PersistentSFUSocket")
@@ -54,7 +54,7 @@ public class SfuSocket(
             val request = JoinRequest(
                 session_id = sessionId,
                 token = token,
-                subscriber_sdp = getSubscriberSdp()
+                subscriber_sdp = getSubscriberSdp(),
             )
             socket?.send(SfuRequest(join_request = request).encodeByteString())
         }

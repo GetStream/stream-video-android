@@ -52,14 +52,14 @@ internal class ParticipantLandscapeTest : BaseComposeTest() {
             val participants = mockParticipantList
 
             Box(
-                modifier = Modifier.background(color = VideoTheme.colors.appBackground)
+                modifier = Modifier.background(color = VideoTheme.colors.appBackground),
             ) {
                 LandscapeVideoRenderer(
                     call = mockCall,
                     dominantSpeaker = participants[0],
                     callParticipants = participants.take(1),
                     modifier = Modifier.fillMaxSize(),
-                    parentSize = IntSize(screenWidth, screenHeight)
+                    parentSize = IntSize(screenWidth, screenHeight),
                 )
             }
         }
@@ -74,14 +74,14 @@ internal class ParticipantLandscapeTest : BaseComposeTest() {
             val participants = mockParticipantList
 
             Box(
-                modifier = Modifier.background(color = VideoTheme.colors.appBackground)
+                modifier = Modifier.background(color = VideoTheme.colors.appBackground),
             ) {
                 LandscapeVideoRenderer(
                     call = mockCall,
                     dominantSpeaker = participants[0],
                     callParticipants = participants.take(2),
                     modifier = Modifier.fillMaxSize(),
-                    parentSize = IntSize(screenWidth, screenHeight)
+                    parentSize = IntSize(screenWidth, screenHeight),
                 )
             }
         }
@@ -96,14 +96,14 @@ internal class ParticipantLandscapeTest : BaseComposeTest() {
             val participants = mockParticipantList
 
             Box(
-                modifier = Modifier.background(color = VideoTheme.colors.appBackground)
+                modifier = Modifier.background(color = VideoTheme.colors.appBackground),
             ) {
                 LandscapeVideoRenderer(
                     call = mockCall,
                     dominantSpeaker = participants[0],
                     callParticipants = participants.take(3),
                     modifier = Modifier.fillMaxSize(),
-                    parentSize = IntSize(screenWidth, screenHeight)
+                    parentSize = IntSize(screenWidth, screenHeight),
                 )
             }
         }
@@ -118,14 +118,14 @@ internal class ParticipantLandscapeTest : BaseComposeTest() {
             val participants = mockParticipantList
 
             Box(
-                modifier = Modifier.background(color = VideoTheme.colors.appBackground)
+                modifier = Modifier.background(color = VideoTheme.colors.appBackground),
             ) {
                 LandscapeVideoRenderer(
                     call = mockCall,
                     dominantSpeaker = participants[0],
                     callParticipants = participants.take(4),
                     modifier = Modifier.fillMaxSize(),
-                    parentSize = IntSize(screenWidth, screenHeight)
+                    parentSize = IntSize(screenWidth, screenHeight),
                 )
             }
         }
@@ -140,14 +140,14 @@ internal class ParticipantLandscapeTest : BaseComposeTest() {
             val participants = mockParticipantList
 
             Box(
-                modifier = Modifier.background(color = VideoTheme.colors.appBackground)
+                modifier = Modifier.background(color = VideoTheme.colors.appBackground),
             ) {
                 LandscapeVideoRenderer(
                     call = mockCall,
                     dominantSpeaker = participants[0],
                     callParticipants = participants.take(5),
                     modifier = Modifier.fillMaxSize(),
-                    parentSize = IntSize(screenWidth, screenHeight)
+                    parentSize = IntSize(screenWidth, screenHeight),
                 )
             }
         }
@@ -162,14 +162,14 @@ internal class ParticipantLandscapeTest : BaseComposeTest() {
             val participants = mockParticipantList
 
             Box(
-                modifier = Modifier.background(color = VideoTheme.colors.appBackground)
+                modifier = Modifier.background(color = VideoTheme.colors.appBackground),
             ) {
                 LandscapeVideoRenderer(
                     call = mockCall,
                     dominantSpeaker = participants[0],
                     callParticipants = participants.take(6),
                     modifier = Modifier.fillMaxSize(),
-                    parentSize = IntSize(screenWidth, screenHeight)
+                    parentSize = IntSize(screenWidth, screenHeight),
                 )
             }
         }

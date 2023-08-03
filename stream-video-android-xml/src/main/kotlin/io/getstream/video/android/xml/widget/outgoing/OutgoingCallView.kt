@@ -47,7 +47,7 @@ public class OutgoingCallView : CallConstraintLayout {
     public constructor(context: Context, attrs: AttributeSet?, defStyleAttr: Int) : super(
         context.createStreamThemeWrapper(),
         attrs,
-        defStyleAttr
+        defStyleAttr,
     ) {
         init(context, attrs)
     }
@@ -103,7 +103,11 @@ public class OutgoingCallView : CallConstraintLayout {
     init {
         with(binding) {
             cancelCall.setOnClickListener { callActionListener(CancelCall) }
-            micToggle.setOnClickListener { callActionListener(ToggleMicrophone(isMicrophoneEnabled)) }
+            micToggle.setOnClickListener {
+                callActionListener(
+                    ToggleMicrophone(isMicrophoneEnabled),
+                )
+            }
             cameraToggle.setOnClickListener { callActionListener(ToggleCamera(isCameraEnabled)) }
         }
     }
@@ -167,20 +171,20 @@ public class OutgoingCallView : CallConstraintLayout {
                 micToggle.id,
                 ConstraintSet.BOTTOM,
                 controlsHolder.id,
-                ConstraintSet.BOTTOM
+                ConstraintSet.BOTTOM,
             )
             constraintSet.connect(
                 cameraToggle.id,
                 ConstraintSet.BOTTOM,
                 controlsHolder.id,
-                ConstraintSet.BOTTOM
+                ConstraintSet.BOTTOM,
             )
 
             constraintSet.connect(
                 cancelCall.id,
                 ConstraintSet.BOTTOM,
                 micToggle.id,
-                ConstraintSet.TOP
+                ConstraintSet.TOP,
             )
             constraintSet.setMargin(cancelCall.id, ConstraintSet.BOTTOM, 32.dpToPx())
 

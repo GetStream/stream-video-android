@@ -57,19 +57,21 @@ internal fun LazyColumnVideoRenderer(
         modifier: Modifier,
         call: Call,
         participant: ParticipantState,
-        style: VideoRendererStyle
+        style: VideoRendererStyle,
     ) -> Unit = { videoModifier, videoCall, videoParticipant, videoStyle ->
         ParticipantVideo(
             modifier = videoModifier,
             call = videoCall,
             participant = videoParticipant,
-            style = videoStyle
+            style = videoStyle,
         )
     },
 ) {
     LazyColumn(
         modifier = modifier.padding(vertical = VideoTheme.dimens.screenShareParticipantsRowPadding),
-        verticalArrangement = Arrangement.spacedBy(VideoTheme.dimens.screenShareParticipantsListItemMargin),
+        verticalArrangement = Arrangement.spacedBy(
+            VideoTheme.dimens.screenShareParticipantsListItemMargin,
+        ),
         horizontalAlignment = Alignment.CenterHorizontally,
         content = {
             items(items = participants, key = { it.sessionId }) { participant ->
@@ -81,7 +83,7 @@ internal fun LazyColumnVideoRenderer(
                     videoRenderer = videoRenderer,
                 )
             }
-        }
+        },
     )
 }
 
@@ -101,13 +103,13 @@ private fun ListVideoRenderer(
         modifier: Modifier,
         call: Call,
         participant: ParticipantState,
-        style: VideoRendererStyle
+        style: VideoRendererStyle,
     ) -> Unit = { videoModifier, videoCall, videoParticipant, videoStyle ->
         ParticipantVideo(
             modifier = videoModifier,
             call = videoCall,
             participant = videoParticipant,
-            style = videoStyle
+            style = videoStyle,
         )
     },
 ) {
@@ -118,7 +120,7 @@ private fun ListVideoRenderer(
         call = call,
         participant = participant,
         style = style.copy(
-            isFocused = participant.sessionId == dominantSpeaker?.sessionId
+            isFocused = participant.sessionId == dominantSpeaker?.sessionId,
         ),
     )
 }
@@ -131,7 +133,7 @@ private fun ParticipantsColumnPreview() {
         LazyColumnVideoRenderer(
             call = mockCall,
             participants = mockParticipantList,
-            dominantSpeaker = mockParticipantList[0]
+            dominantSpeaker = mockParticipantList[0],
         )
     }
 }

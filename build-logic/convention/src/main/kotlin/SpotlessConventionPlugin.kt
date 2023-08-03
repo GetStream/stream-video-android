@@ -17,6 +17,11 @@ class SpotlessConventionPlugin : Plugin<Project> {
                             "**/org/openapitools/client/**/*.kt" // OpenAPI generated code
                     )
                     ktlint()
+                        .editorConfigOverride(
+                            mapOf(
+                             "ktlint_standard_max-line-length" to "disabled"
+                            )
+                        )
                     trimTrailingWhitespace()
                     endWithNewline()
                     licenseHeaderFile(rootProject.file("$rootDir/spotless/copyright.kt"))

@@ -178,12 +178,11 @@ In `MainActivity.kt` replace the `VideoTheme` with the following code:
 ```kotlin
 VideoTheme {
     val participantCount by call.state.participantCounts.collectAsState()
-    val connection by call.state.connection.collectAsState()
     val total = participantCount?.total
+    val connection by call.state.connection.collectAsState()
     val backstage by call.state.backstage.collectAsState()
     val me by call.state.me.collectAsState()
     val video = me?.video?.collectAsState()?.value
-    val session by call.state.session.collectAsState()
     val durationInMs by call.state.durationInMs.collectAsState()
 
     Scaffold(
@@ -192,7 +191,8 @@ VideoTheme {
             .background(VideoTheme.colors.appBackground)
             .padding(6.dp),
         contentColor = VideoTheme.colors.appBackground,
-
+        // Use containerColor in material3
+        backgroundColor = VideoTheme.colors.appBackground,
         topBar = {
             if (connection == RealtimeConnection.Connected) {
                 if (!backstage) {
@@ -225,17 +225,18 @@ VideoTheme {
         bottomBar = {
             Button(
                 colors = ButtonDefaults.buttonColors(
-                    backgroundColor = VideoTheme.colors.primaryAccent,
-                    contentColor = VideoTheme.colors.primaryAccent
+                    contentColor = VideoTheme.colors.primaryAccent,
+                    // Use containerColor in material3
+                    backgroundColor = VideoTheme.colors.primaryAccent
                 ),
                 onClick = {
                     lifecycleScope.launch {
-                        if (backstage) call.goLive() else call.end()
+                        if (backstage) call.goLive() else call.stopLive()
                     }
                 }
             ) {
                 Text(
-                    text = if (backstage) "Go Live" else "End Livestream",
+                    text = if (backstage) "Go Live" else "Stop Broadcast",
                     color = Color.White
                 )
             }

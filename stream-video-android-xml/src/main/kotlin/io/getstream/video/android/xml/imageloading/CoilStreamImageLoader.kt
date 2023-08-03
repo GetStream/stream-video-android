@@ -47,7 +47,7 @@ internal object CoilStreamImageLoader : StreamImageLoader {
                         .headers(imageHeadersProvider.getImageRequestHeaders().toHeaders())
                         .data(url)
                         .applyTransformation(transformation)
-                        .build()
+                        .build(),
                 )
                 (imageResult.drawable as? BitmapDrawable)?.bitmap
             }
@@ -149,7 +149,7 @@ internal object CoilStreamImageLoader : StreamImageLoader {
                         onSuccess = { _, _ -> onComplete() },
                     )
                     .applyTransformation(transformation)
-                    .build()
+                    .build(),
             )
 
             result.drawable
@@ -163,7 +163,7 @@ internal object CoilStreamImageLoader : StreamImageLoader {
         } else if (drawable is MovieDrawable) {
             drawable.start()
         }
-        */
+         */
 
         target.setImageDrawable(drawable)
     }
@@ -204,12 +204,12 @@ internal object CoilStreamImageLoader : StreamImageLoader {
         when (transformation) {
             is StreamImageLoader.ImageTransformation.None -> this
             is StreamImageLoader.ImageTransformation.Circle -> transformations(
-                CircleCropTransformation()
+                CircleCropTransformation(),
             )
             is StreamImageLoader.ImageTransformation.RoundedCorners -> transformations(
                 RoundedCornersTransformation(
-                    transformation.radius
-                )
+                    transformation.radius,
+                ),
             )
         }
 }

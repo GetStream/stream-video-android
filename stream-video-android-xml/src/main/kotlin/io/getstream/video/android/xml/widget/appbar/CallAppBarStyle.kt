@@ -82,118 +82,129 @@ public data class CallAppBarStyle(
                 attrs,
                 R.styleable.CallAppBar,
                 R.attr.streamVideoCallAppBarStyle,
-                R.style.StreamVideo_CallAppBar
+                R.style.StreamVideo_CallAppBar,
             ).use {
-
                 val backgroundColour = it.getColor(
                     R.styleable.CallAppBar_streamVideoCallAppBarBackgroundColour,
-                    context.getColorCompat(RCommon.color.stream_video_bars_background)
+                    context.getColorCompat(RCommon.color.stream_video_bars_background),
                 )
 
                 val backgroundColourLandscape = it.getColor(
                     R.styleable.CallAppBar_streamVideoCallAppBarBackgroundColourLandscape,
-                    context.getColorCompat(RCommon.color.stream_video_overlay_regular)
+                    context.getColorCompat(RCommon.color.stream_video_overlay_regular),
                 )
 
                 val appBarPadding = it.getDimension(
                     R.styleable.CallAppBar_streamVideoCallAppBarPadding,
-                    context.getDimension(RCommon.dimen.stream_video_callAppBarPadding).toFloat()
+                    context.getDimension(RCommon.dimen.stream_video_callAppBarPadding).toFloat(),
                 ).toInt()
 
                 val leadingContentIcon = it.getDrawable(
-                    R.styleable.CallAppBar_streamVideoCallAppBarLeadingContentIcon
+                    R.styleable.CallAppBar_streamVideoCallAppBarLeadingContentIcon,
                 ) ?: context.getDrawableCompat(RCommon.drawable.stream_video_ic_arrow_back)!!
 
                 val leadingContentIconTint = it.getColor(
                     R.styleable.CallAppBar_streamVideoCallAppBarLeadingContentIconTint,
-                    context.getColorCompat(RCommon.color.stream_video_text_high_emphasis)
+                    context.getColorCompat(RCommon.color.stream_video_text_high_emphasis),
                 )
 
                 val leadingContentIconTintLandscape = it.getColor(
                     R.styleable.CallAppBar_streamVideoCallAppBarLeadingContentIconTintLandscape,
-                    context.getColorCompat(R.color.stream_video_white)
+                    context.getColorCompat(R.color.stream_video_white),
                 )
 
                 val leadingContentMarginStart = it.getDimension(
                     R.styleable.CallAppBar_streamVideoCallAppBarLeadingContentMarginStart,
-                    context.getDimension(RCommon.dimen.stream_video_callAppBarLeadingContentSpacingStart).toFloat()
+                    context.getDimension(
+                        RCommon.dimen.stream_video_callAppBarLeadingContentSpacingStart,
+                    ).toFloat(),
                 ).toInt()
 
                 val leadingContentMarginEnd = it.getDimension(
                     R.styleable.CallAppBar_streamVideoCallAppBarLeadingContentMarginEnd,
-                    context.getDimension(RCommon.dimen.stream_video_callAppBarLeadingContentSpacingEnd).toFloat()
+                    context.getDimension(
+                        RCommon.dimen.stream_video_callAppBarLeadingContentSpacingEnd,
+                    ).toFloat(),
                 ).toInt()
 
                 val centerContentTextStyle = TextStyle.Builder(it)
                     .size(
                         R.styleable.CallAppBar_streamVideoCallAppBarCenterContentTextSize,
-                        context.getDimension(RCommon.dimen.stream_video_topAppbarTextSize)
+                        context.getDimension(RCommon.dimen.stream_video_topAppbarTextSize),
                     )
                     .color(
                         R.styleable.CallAppBar_streamVideoCallAppBarCenterContentTextColor,
-                        context.getColorCompat(RCommon.color.stream_video_text_high_emphasis)
+                        context.getColorCompat(RCommon.color.stream_video_text_high_emphasis),
                     )
                     .font(
                         R.styleable.CallAppBar_streamVideoCallAppBarCenterContentFontAsset,
-                        R.styleable.CallAppBar_streamVideoCallAppBarCenterContentFont
+                        R.styleable.CallAppBar_streamVideoCallAppBarCenterContentFont,
                     )
                     .style(
                         R.styleable.CallAppBar_streamVideoCallAppBarCenterContentTextStyle,
-                        Typeface.NORMAL
+                        Typeface.NORMAL,
                     )
                     .build()
 
                 val centerContentTextStyleLandscape = TextStyle.Builder(it)
                     .size(
                         R.styleable.CallAppBar_streamVideoCallAppBarCenterContentTextSizeLandscape,
-                        context.getDimension(RCommon.dimen.stream_video_topAppbarTextSize)
+                        context.getDimension(RCommon.dimen.stream_video_topAppbarTextSize),
                     )
                     .color(
                         R.styleable.CallAppBar_streamVideoCallAppBarCenterContentTextColorLandscape,
-                        context.getColorCompat(R.color.stream_video_white)
+                        context.getColorCompat(R.color.stream_video_white),
                     )
                     .font(
                         R.styleable.CallAppBar_streamVideoCallAppBarCenterContentFontAssetLandscape,
-                        R.styleable.CallAppBar_streamVideoCallAppBarCenterContentFont
+                        R.styleable.CallAppBar_streamVideoCallAppBarCenterContentFont,
                     )
                     .style(
                         R.styleable.CallAppBar_streamVideoCallAppBarCenterContentTextStyleLandscape,
-                        Typeface.NORMAL
+                        Typeface.NORMAL,
                     )
                     .build()
 
                 val centerContentMarginStart = it.getDimension(
                     R.styleable.CallAppBar_streamVideoCallAppBarCenterContentMarginStart,
-                    context.getDimension(RCommon.dimen.stream_video_callAppBarCenterContentSpacingStart).toFloat()
+                    context.getDimension(
+                        RCommon.dimen.stream_video_callAppBarCenterContentSpacingStart,
+                    ).toFloat(),
                 ).toInt()
 
                 val centerContentMarginEnd = it.getDimension(
                     R.styleable.CallAppBar_streamVideoCallAppBarCenterContentMarginEnd,
-                    context.getDimension(RCommon.dimen.stream_video_callAppBarCenterContentSpacingEnd).toFloat()
+                    context.getDimension(
+                        RCommon.dimen.stream_video_callAppBarCenterContentSpacingEnd,
+                    ).toFloat(),
                 ).toInt()
 
                 val trailingContentIcon = it.getDrawable(
-                    R.styleable.CallAppBar_streamVideoCallAppBarTrailingContentIcon
+                    R.styleable.CallAppBar_streamVideoCallAppBarTrailingContentIcon,
                 ) ?: context.getDrawableCompat(RCommon.drawable.stream_video_ic_participants)!!
 
                 val trailingContentIconTint = it.getColor(
                     R.styleable.CallAppBar_streamVideoCallAppBarTrailingContentIconTint,
-                    context.getColorCompat(RCommon.color.stream_video_text_high_emphasis)
+                    context.getColorCompat(RCommon.color.stream_video_text_high_emphasis),
                 )
 
                 val trailingContentIconTintLandscape = it.getColor(
                     R.styleable.CallAppBar_streamVideoCallAppBarTrailingContentIconTintLandscape,
-                    context.getColorCompat(R.color.stream_video_white)
+                    context.getColorCompat(R.color.stream_video_white),
                 )
 
                 val trailingContentMarginStart = it.getDimension(
                     R.styleable.CallAppBar_streamVideoCallAppBarTrailingContentMarginStart,
-                    context.getDimension(RCommon.dimen.stream_video_callAppBarTrailingContentSpacingStart).toFloat()
+                    context.getDimension(
+                        RCommon.dimen.stream_video_callAppBarTrailingContentSpacingStart,
+                    ).toFloat(),
                 ).toInt()
 
                 val trailingContentMarginEnd = it.getDimension(
                     R.styleable.CallAppBar_streamVideoCallAppBarTrailingContentMarginEnd,
-                    context.getDimension(RCommon.dimen.stream_video_callAppBarTrailingContentSpacingEnd).toFloat()
+                    context.getDimension(
+                        RCommon.dimen.stream_video_callAppBarTrailingContentSpacingEnd,
+                    ).toFloat(),
                 ).toInt()
 
                 return CallAppBarStyle(
@@ -213,7 +224,7 @@ public data class CallAppBarStyle(
                     trailingContentIconTint = trailingContentIconTint,
                     trailingContentIconTintLandscape = trailingContentIconTintLandscape,
                     trailingContentMarginStart = trailingContentMarginStart,
-                    trailingContentMarginEnd = trailingContentMarginEnd
+                    trailingContentMarginEnd = trailingContentMarginEnd,
                 ).let(TransformStyle.callAppBarStyleTransformer::transform)
             }
         }

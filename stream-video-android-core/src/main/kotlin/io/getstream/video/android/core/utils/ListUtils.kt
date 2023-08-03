@@ -21,7 +21,7 @@ import io.getstream.video.android.core.internal.InternalStreamVideoApi
 @InternalStreamVideoApi
 public inline fun <T> List<T>.updateValue(
     predicate: (T) -> Boolean,
-    transformer: (T) -> T
+    transformer: (T) -> T,
 ): List<T> {
     val itemIndex = this.indexOfFirst(predicate)
 

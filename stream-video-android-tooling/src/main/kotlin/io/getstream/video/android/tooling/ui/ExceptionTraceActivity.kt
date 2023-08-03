@@ -51,8 +51,8 @@ internal class ExceptionTraceActivity : ComponentActivity() {
                     bundleOf(
                         EXTRA_EXCEPTION to exception,
                         EXTRA_MESSAGE to message,
-                        EXTRA_PACKAGE_NAME to packageName
-                    )
+                        EXTRA_PACKAGE_NAME to packageName,
+                    ),
                 )
             }
     }

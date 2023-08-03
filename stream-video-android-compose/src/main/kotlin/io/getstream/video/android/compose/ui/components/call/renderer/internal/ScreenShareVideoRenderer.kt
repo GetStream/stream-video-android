@@ -73,7 +73,7 @@ public fun ScreenShareVideoRenderer(
             val connectionQuality by screenShareParticipant.networkQuality.collectAsStateWithLifecycle()
             NetworkQualityIndicator(
                 networkQuality = connectionQuality,
-                modifier = Modifier.align(Alignment.BottomEnd)
+                modifier = Modifier.align(Alignment.BottomEnd),
             )
         }
     }

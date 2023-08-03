@@ -57,7 +57,7 @@ import kotlinx.coroutines.launch
 fun CallScreen(
     call: Call,
     showDebugOptions: Boolean = false,
-    onLeaveCall: () -> Unit = {}
+    onLeaveCall: () -> Unit = {},
 ) {
     val isCameraEnabled by call.camera.isEnabled.collectAsState()
     val isMicrophoneEnabled by call.microphone.isEnabled.collectAsState()
@@ -67,7 +67,7 @@ fun CallScreen(
     var unreadCount by remember { mutableStateOf(0) }
     val chatState = rememberModalBottomSheetState(
         initialValue = ModalBottomSheetValue.Hidden,
-        skipHalfExpanded = true
+        skipHalfExpanded = true,
     )
     val scope = rememberCoroutineScope()
 
@@ -93,15 +93,23 @@ fun CallScreen(
                             actions = listOf(
                                 {
                                     SettingsAction(
-                                        modifier = Modifier.size(VideoTheme.dimens.controlActionsButtonSize),
-                                        onCallAction = { isShowingSettingMenu = true }
+                                        modifier = Modifier.size(
+                                            VideoTheme.dimens.controlActionsButtonSize,
+                                        ),
+                                        onCallAction = { isShowingSettingMenu = true },
                                     )
                                 },
                                 {
-                                    Box(modifier = Modifier.size(VideoTheme.dimens.controlActionsButtonSize)) {
+                                    Box(
+                                        modifier = Modifier.size(
+                                            VideoTheme.dimens.controlActionsButtonSize,
+                                        ),
+                                    ) {
                                         ChatDialogAction(
-                                            modifier = Modifier.size(VideoTheme.dimens.controlActionsButtonSize),
-                                            onCallAction = { scope.launch { chatState.show() } }
+                                            modifier = Modifier.size(
+                                                VideoTheme.dimens.controlActionsButtonSize,
+                                            ),
+                                            onCallAction = { scope.launch { chatState.show() } },
                                         )
 
                                         if (unreadCount > 0) {
@@ -113,7 +121,7 @@ fun CallScreen(
                                                 Text(
                                                     text = unreadCount.toString(),
                                                     color = VideoTheme.colors.textHighEmphasis,
-                                                    fontWeight = FontWeight.Bold
+                                                    fontWeight = FontWeight.Bold,
                                                 )
                                             }
                                         }
@@ -121,37 +129,51 @@ fun CallScreen(
                                 },
                                 {
                                     ToggleCameraAction(
-                                        modifier = Modifier.size(VideoTheme.dimens.controlActionsButtonSize),
+                                        modifier = Modifier.size(
+                                            VideoTheme.dimens.controlActionsButtonSize,
+                                        ),
                                         isCameraEnabled = isCameraEnabled,
-                                        onCallAction = { call.camera.setEnabled(it.isEnabled) }
+                                        onCallAction = { call.camera.setEnabled(it.isEnabled) },
                                     )
                                 },
                                 {
                                     ToggleMicrophoneAction(
-                                        modifier = Modifier.size(VideoTheme.dimens.controlActionsButtonSize),
+                                        modifier = Modifier.size(
+                                            VideoTheme.dimens.controlActionsButtonSize,
+                                        ),
                                         isMicrophoneEnabled = isMicrophoneEnabled,
-                                        onCallAction = { call.microphone.setEnabled(it.isEnabled) }
+                                        onCallAction = { call.microphone.setEnabled(it.isEnabled) },
                                     )
                                 },
                                 {
                                     FlipCameraAction(
-                                        modifier = Modifier.size(VideoTheme.dimens.controlActionsButtonSize),
-                                        onCallAction = { call.camera.flip() }
+                                        modifier = Modifier.size(
+                                            VideoTheme.dimens.controlActionsButtonSize,
+                                        ),
+                                        onCallAction = { call.camera.flip() },
                                     )
                                 },
                                 {
                                     CancelCallAction(
-                                        modifier = Modifier.size(VideoTheme.dimens.controlActionsButtonSize),
-                                        onCallAction = { onLeaveCall.invoke() }
+                                        modifier = Modifier.size(
+                                            VideoTheme.dimens.controlActionsButtonSize,
+                                        ),
+                                        onCallAction = { onLeaveCall.invoke() },
                                     )
                                 },
                             ),
                         )
-                    }
+                    },
                 )
             },
             updateUnreadCount = { unreadCount = it },
-            onDismissed = { scope.launch { chatState.hide() } }
+            onDismissed = {
+                if (chatState.currentValue == ModalBottomSheetValue.Expanded) {
+                    scope.launch { chatState.hide() }
+                } else {
+                    onLeaveCall.invoke()
+                }
+            },
         )
 
         if (speakingWhileMuted) {
@@ -163,14 +185,14 @@ fun CallScreen(
                 call = call,
                 showDebugOptions = showDebugOptions,
                 onDisplayAvailableDevice = { isShowingAvailableDeviceMenu = true },
-                onDismissed = { isShowingSettingMenu = false }
+                onDismissed = { isShowingSettingMenu = false },
             )
         }
 
         if (isShowingAvailableDeviceMenu) {
             AvailableDeviceMenu(
                 call = call,
-                onDismissed = { isShowingAvailableDeviceMenu = false }
+                onDismissed = { isShowingAvailableDeviceMenu = false },
             )
         }
     }

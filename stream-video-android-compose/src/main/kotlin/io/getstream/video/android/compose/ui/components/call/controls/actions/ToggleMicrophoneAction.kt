@@ -49,7 +49,7 @@ public fun ToggleMicrophoneAction(
     disabledColor: Color = VideoTheme.colors.callActionIconDisabledBackground,
     enabledIconTint: Color = VideoTheme.colors.callActionIconEnabled,
     disabledIconTint: Color = VideoTheme.colors.callActionIconDisabled,
-    onCallAction: (ToggleMicrophone) -> Unit
+    onCallAction: (ToggleMicrophone) -> Unit,
 ) {
     val microphoneIcon =
         painterResource(
@@ -57,7 +57,7 @@ public fun ToggleMicrophoneAction(
                 R.drawable.stream_video_ic_mic_on
             } else {
                 R.drawable.stream_video_ic_mic_off
-            }
+            },
         )
 
     CallControlActionBackground(
@@ -72,7 +72,7 @@ public fun ToggleMicrophoneAction(
                 .padding(13.dp)
                 .clickable(enabled = enabled) {
                     onCallAction(
-                        ToggleMicrophone(isMicrophoneEnabled.not())
+                        ToggleMicrophone(isMicrophoneEnabled.not()),
                     )
                 },
             tint = if (isMicrophoneEnabled) {
@@ -81,7 +81,9 @@ public fun ToggleMicrophoneAction(
                 disabledIconTint
             },
             painter = microphoneIcon,
-            contentDescription = stringResource(R.string.stream_video_call_controls_toggle_microphone)
+            contentDescription = stringResource(
+                R.string.stream_video_call_controls_toggle_microphone,
+            ),
         )
     }
 }

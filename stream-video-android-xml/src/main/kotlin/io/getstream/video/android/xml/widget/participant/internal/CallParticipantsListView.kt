@@ -69,7 +69,7 @@ internal class CallParticipantsListView : HorizontalScrollView, VideoRenderer, J
         context.createStreamThemeWrapper(),
         attrs,
         defStyleAttr,
-        defStyleRes
+        defStyleRes,
     )
 
     /**

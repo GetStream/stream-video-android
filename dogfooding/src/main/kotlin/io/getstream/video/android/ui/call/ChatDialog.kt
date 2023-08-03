@@ -43,7 +43,7 @@ internal fun ChatDialog(
     state: ModalBottomSheetState,
     content: @Composable () -> Unit,
     updateUnreadCount: (Int) -> Unit,
-    onDismissed: () -> Unit
+    onDismissed: () -> Unit,
 ) {
     val context = LocalContext.current
     val viewModelFactory = MessagesViewModelFactory(
@@ -67,16 +67,16 @@ internal fun ChatDialog(
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(500.dp)
+                        .height(500.dp),
                 ) {
                     MessagesScreen(
                         viewModelFactory = viewModelFactory,
                         onBackPressed = { onDismissed.invoke() },
-                        onHeaderActionClick = { onDismissed.invoke() }
+                        onHeaderActionClick = { onDismissed.invoke() },
                     )
                 }
             },
-            content = content
+            content = content,
         )
     }
 }

@@ -47,7 +47,7 @@ public fun AcceptCallAction(
     IconButton(
         modifier = modifier.background(
             color = VideoTheme.colors.infoAccent,
-            shape = shape
+            shape = shape,
         ),
         enabled = enabled,
         onClick = { onCallAction(AcceptCall) },
@@ -55,8 +55,10 @@ public fun AcceptCallAction(
             Icon(
                 painter = painterResource(id = R.drawable.stream_video_ic_call),
                 tint = Color.White,
-                contentDescription = stringResource(R.string.stream_video_call_controls_accept_call)
+                contentDescription = stringResource(
+                    R.string.stream_video_call_controls_accept_call,
+                ),
             )
-        }
+        },
     )
 }

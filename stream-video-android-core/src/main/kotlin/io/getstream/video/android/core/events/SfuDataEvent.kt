@@ -34,7 +34,7 @@ public sealed class SfuDataEvent : VideoEvent() {
 }
 
 public data class PublisherAnswerEvent(
-    val sdp: String
+    val sdp: String,
 ) : SfuDataEvent()
 
 public data class CallGrantsUpdatedEvent(
@@ -48,35 +48,35 @@ public data class SFUConnectedEvent(
 
 public data class ICETrickleEvent(
     val candidate: String,
-    val peerType: PeerType
+    val peerType: PeerType,
 ) : SfuDataEvent()
 
 public data class SubscriberOfferEvent(
-    val sdp: String
+    val sdp: String,
 ) : SfuDataEvent()
 
 public data class ConnectionQualityChangeEvent(
-    val updates: List<ConnectionQualityInfo>
+    val updates: List<ConnectionQualityInfo>,
 ) : SfuDataEvent()
 
 public data class AudioLevelChangedEvent(
-    val levels: Map<String, UserAudioLevel>
+    val levels: Map<String, UserAudioLevel>,
 ) : SfuDataEvent()
 
 public data class ChangePublishQualityEvent(
-    val changePublishQuality: ChangePublishQuality
+    val changePublishQuality: ChangePublishQuality,
 ) : SfuDataEvent()
 
 public data class TrackPublishedEvent(
     val userId: String,
     val sessionId: String,
-    val trackType: TrackType
+    val trackType: TrackType,
 ) : SfuDataEvent()
 
 public data class TrackUnpublishedEvent(
     val userId: String,
     val sessionId: String,
-    val trackType: TrackType
+    val trackType: TrackType,
 ) : SfuDataEvent()
 
 public data class ParticipantJoinedEvent(
@@ -101,12 +101,12 @@ public data class ParticipantCount(
 )
 
 public data class SFUHealthCheckEvent(
-    val participantCount: ParticipantCount
+    val participantCount: ParticipantCount,
 ) : SfuDataEvent()
 
 public data class JoinCallResponseEvent(
     val callState: CallState,
-    val participantCount: ParticipantCount
+    val participantCount: ParticipantCount,
 ) : SfuDataEvent()
 
 public data class UnknownEvent(val event: Any?) : SfuDataEvent()

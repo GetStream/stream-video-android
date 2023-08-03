@@ -19,9 +19,9 @@ package io.getstream.video.android.core.logging
 import okhttp3.logging.HttpLoggingInterceptor
 
 public enum class HttpLoggingLevel(
-    internal val level: HttpLoggingInterceptor.Level
+    internal val level: HttpLoggingInterceptor.Level,
 ) {
     NONE(HttpLoggingInterceptor.Level.NONE),
     BASIC(HttpLoggingInterceptor.Level.BASIC),
-    BODY(HttpLoggingInterceptor.Level.BODY)
+    BODY(HttpLoggingInterceptor.Level.BODY),
 }

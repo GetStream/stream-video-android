@@ -103,6 +103,7 @@ public final class io/getstream/video/android/core/CallState {
 	public final fun getCustom ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun getDominantSpeaker ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun getDuration ()Lkotlinx/coroutines/flow/StateFlow;
+	public final fun getDurationInDateFormat ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun getDurationInMs ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun getEgress ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun getEndedAt ()Lkotlinx/coroutines/flow/StateFlow;
@@ -2451,7 +2452,7 @@ public final class io/getstream/video/android/core/utils/LatencyResult {
 	public fun toString ()Ljava/lang/String;
 }
 
-public final class io/getstream/video/android/core/utils/LatencyUtilsKt {
+public final class io/getstream/video/android/core/utils/LatencyResultKt {
 	public static final fun getLatencyMeasurements (Ljava/lang/String;)Lio/getstream/video/android/core/utils/LatencyResult;
 	public static final fun getLatencyMeasurementsOKHttp (Ljava/lang/String;)Lio/getstream/video/android/core/utils/LatencyResult;
 }

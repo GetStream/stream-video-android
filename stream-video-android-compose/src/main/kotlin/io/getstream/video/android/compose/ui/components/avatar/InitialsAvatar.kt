@@ -52,14 +52,14 @@ internal fun InitialsAvatar(
     shape: Shape = VideoTheme.shapes.avatar,
     textStyle: TextStyle = VideoTheme.typography.title3Bold,
     avatarOffset: DpOffset = DpOffset(0.dp, 0.dp),
-    initialTransformer: (String) -> String = { it.initials() }
+    initialTransformer: (String) -> String = { it.initials() },
 ) {
     val initialsGradient = initialsGradient(initials = initials)
 
     Box(
         modifier = modifier
             .clip(shape)
-            .background(brush = initialsGradient)
+            .background(brush = initialsGradient),
     ) {
         Text(
             modifier = Modifier
@@ -67,7 +67,7 @@ internal fun InitialsAvatar(
                 .offset(avatarOffset.x, avatarOffset.y),
             text = initialTransformer.invoke(initials),
             style = textStyle,
-            color = VideoTheme.colors.avatarInitials
+            color = VideoTheme.colors.avatarInitials,
         )
     }
 }
@@ -78,7 +78,7 @@ private fun InitialsAvatarPreview() {
     VideoTheme {
         Avatar(
             modifier = Modifier.size(56.dp),
-            initials = "Jaewoong Eum"
+            initials = "Jaewoong Eum",
         )
     }
 }

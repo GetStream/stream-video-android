@@ -42,7 +42,7 @@ import stream.video.sfu.models.ConnectionQuality
 @Composable
 public fun NetworkQualityIndicator(
     networkQuality: NetworkQuality,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
 ) {
     val quality = networkQuality.quality
 
@@ -51,15 +51,15 @@ public fun NetworkQualityIndicator(
             .padding(8.dp)
             .background(
                 shape = VideoTheme.shapes.connectionQualityIndicator,
-                color = VideoTheme.colors.connectionQualityBackground
+                color = VideoTheme.colors.connectionQualityBackground,
             )
-            .padding(6.dp)
+            .padding(6.dp),
     ) {
         Row(
             modifier = Modifier
                 .height(height = VideoTheme.dimens.connectionIndicatorBarMaxHeight)
                 .align(Alignment.Center),
-            verticalAlignment = Alignment.Bottom
+            verticalAlignment = Alignment.Bottom,
         ) {
             Spacer(
                 modifier = Modifier
@@ -71,8 +71,8 @@ public fun NetworkQualityIndicator(
                         } else {
                             VideoTheme.colors.errorAccent
                         },
-                        shape = VideoTheme.shapes.connectionIndicatorBar
-                    )
+                        shape = VideoTheme.shapes.connectionIndicatorBar,
+                    ),
             )
 
             Spacer(modifier = Modifier.width(3.dp))
@@ -87,8 +87,8 @@ public fun NetworkQualityIndicator(
                         } else {
                             VideoTheme.colors.connectionQualityBar
                         },
-                        shape = VideoTheme.shapes.connectionIndicatorBar
-                    )
+                        shape = VideoTheme.shapes.connectionIndicatorBar,
+                    ),
             )
 
             Spacer(modifier = Modifier.width(3.dp))
@@ -103,8 +103,8 @@ public fun NetworkQualityIndicator(
                         } else {
                             VideoTheme.colors.connectionQualityBar
                         },
-                        shape = VideoTheme.shapes.connectionIndicatorBar
-                    )
+                        shape = VideoTheme.shapes.connectionIndicatorBar,
+                    ),
             )
         }
     }
@@ -116,13 +116,13 @@ private fun ConnectionQualityIndicatorPreview() {
     VideoTheme {
         Row {
             NetworkQualityIndicator(
-                networkQuality = NetworkQuality.Poor()
+                networkQuality = NetworkQuality.Poor(),
             )
             NetworkQualityIndicator(
-                networkQuality = NetworkQuality.Good()
+                networkQuality = NetworkQuality.Good(),
             )
             NetworkQualityIndicator(
-                networkQuality = NetworkQuality.Excellent()
+                networkQuality = NetworkQuality.Excellent(),
             )
         }
     }

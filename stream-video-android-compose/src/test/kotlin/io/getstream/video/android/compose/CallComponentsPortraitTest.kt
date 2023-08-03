@@ -46,7 +46,7 @@ internal class CallComponentsPortraitTest : BaseComposeTest() {
         snapshotWithDarkMode {
             RegularControlActions(
                 call = mockCall,
-                onCallAction = {}
+                onCallAction = {},
             )
         }
     }
@@ -56,7 +56,7 @@ internal class CallComponentsPortraitTest : BaseComposeTest() {
         snapshotWithDarkMode {
             ControlActions(
                 call = mockCall,
-                onCallAction = {}
+                onCallAction = {},
             )
         }
     }

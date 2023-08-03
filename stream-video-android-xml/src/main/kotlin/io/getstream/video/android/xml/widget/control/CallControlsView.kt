@@ -60,7 +60,7 @@ public class CallControlsView : CallConstraintLayout {
     public constructor(context: Context, attrs: AttributeSet?, defStyleAttr: Int) : super(
         context.createStreamThemeWrapper(),
         attrs,
-        defStyleAttr
+        defStyleAttr,
     ) {
         init(context, attrs)
     }
@@ -89,7 +89,9 @@ public class CallControlsView : CallConstraintLayout {
             val callControlView = callControls[callControlItem.action] ?: buildControlView(callControlItem)
             callControlView.setImageResource(callControlItem.icon)
             callControlView.setColorFilter(context.getColorCompat(callControlItem.iconTint))
-            callControlView.background.setTint(context.getColorCompat(callControlItem.backgroundTint))
+            callControlView.background.setTint(
+                context.getColorCompat(callControlItem.backgroundTint),
+            )
             callControlView.setOnClickListener {
                 if (callControlItem.enabled) {
                     onCallAction(callControlItem.action)

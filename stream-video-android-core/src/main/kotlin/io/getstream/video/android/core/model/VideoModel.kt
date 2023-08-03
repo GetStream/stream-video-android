@@ -33,7 +33,7 @@ public data class CallUser(
     val teams: List<String>,
     val state: CallUserState?,
     val createdAt: Date?,
-    val updatedAt: Date?
+    val updatedAt: Date?,
 ) : Serializable
 
 @Stable
@@ -41,7 +41,7 @@ public data class CallUserState(
     val trackIdPrefix: String,
     val online: Boolean,
     val audio: Boolean,
-    val video: Boolean
+    val video: Boolean,
 )
 
 @Stable
@@ -50,7 +50,7 @@ public data class CallMember(
     val role: String,
     val userId: String,
     val createdAt: Date?,
-    val updatedAt: Date?
+    val updatedAt: Date?,
 ) : Serializable
 
 @Stable
@@ -64,20 +64,20 @@ public data class CallInfo(
     val createdAt: Date?,
     val updatedAt: Date?,
 //    val callEgress: CallEgress,
-    val custom: Map<String, Any?>
+    val custom: Map<String, Any?>,
 ) : Serializable
 
 @Stable
 public data class CallDetails(
     val memberUserIds: List<String>,
     val members: Map<String, CallUser>,
-    val ownCapabilities: List<OwnCapability>
+    val ownCapabilities: List<OwnCapability>,
 ) : Serializable
 
 @Stable
 public data class CallEgress(
     val broadcastEgress: String,
-    val recordEgress: String
+    val recordEgress: String,
 )
 
 internal fun List<MemberResponse>.toCallUsers(): Map<String, CallUser> =
@@ -97,7 +97,7 @@ internal fun CallResponse.toCallInfo(): CallInfo {
 //            broadcastEgress = broadcastEgress,
 //            recordEgress = recordEgress
 //        ),
-        custom = custom
+        custom = custom,
     )
 }
 
@@ -139,7 +139,7 @@ public infix fun CallUser.merge(that: CallUser?): CallUser = when (that) {
         state = that.state merge this.state,
         createdAt = that.createdAt ?: this.createdAt,
         updatedAt = that.updatedAt ?: this.updatedAt,
-        teams = (that.teams + this.teams).distinct()
+        teams = (that.teams + this.teams).distinct(),
     )
 }
 

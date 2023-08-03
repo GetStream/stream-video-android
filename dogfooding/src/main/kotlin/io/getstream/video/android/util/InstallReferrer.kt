@@ -34,14 +34,15 @@ class InstallReferrer(val context: Context) {
      * calls even after a process kill will be ignored.
      */
     fun extractInstallReferrer(callIdCallback: (String) -> Unit) {
-
         // The Install Referrer will give us the same value repeatedly. Only attempt to read
         // it on first start.
         if (sharedPreference.getBoolean(PREF_REFERRER_WAS_READ_BOOLEAN, false)) {
             return
         }
 
-        val referrerClient: InstallReferrerClient = InstallReferrerClient.newBuilder(context).build()
+        val referrerClient: InstallReferrerClient = InstallReferrerClient.newBuilder(
+            context,
+        ).build()
         referrerClient.startConnection(object : InstallReferrerStateListener {
 
             override fun onInstallReferrerSetupFinished(responseCode: Int) {

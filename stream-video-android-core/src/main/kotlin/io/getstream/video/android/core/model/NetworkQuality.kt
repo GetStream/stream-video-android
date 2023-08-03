@@ -27,22 +27,22 @@ public sealed class NetworkQuality(public open val quality: Float) {
 
     @Stable
     public data class UnSpecified(
-        public override val quality: Float = 0f
+        public override val quality: Float = 0f,
     ) : NetworkQuality(quality)
 
     @Stable
     public data class Poor(
-        public override val quality: Float = 0.33f
+        public override val quality: Float = 0.33f,
     ) : NetworkQuality(quality)
 
     @Stable
     public data class Good(
-        public override val quality: Float = 0.66f
+        public override val quality: Float = 0.66f,
     ) : NetworkQuality(quality)
 
     @Stable
     public data class Excellent(
-        public override val quality: Float = 1.0f
+        public override val quality: Float = 1.0f,
     ) : NetworkQuality(quality)
 
     public companion object {

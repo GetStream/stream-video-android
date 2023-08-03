@@ -65,7 +65,8 @@ public fun IncomingCallContent(
     headerContent: (@Composable ColumnScope.() -> Unit)? = null,
     detailsContent: (
         @Composable ColumnScope.(
-            participants: List<MemberState>, topPadding: Dp
+            participants: List<MemberState>,
+            topPadding: Dp,
         ) -> Unit
     )? = null,
     controlsContent: (@Composable BoxScope.() -> Unit)? = null,
@@ -90,7 +91,7 @@ public fun IncomingCallContent(
         detailsContent = detailsContent,
         controlsContent = controlsContent,
         onBackPressed = onBackPressed,
-        onCallAction = onCallAction
+        onCallAction = onCallAction,
     )
 }
 
@@ -118,7 +119,8 @@ public fun IncomingCallContent(
     headerContent: (@Composable ColumnScope.() -> Unit)? = null,
     detailsContent: (
         @Composable ColumnScope.(
-            participants: List<MemberState>, topPadding: Dp
+            participants: List<MemberState>,
+            topPadding: Dp,
         ) -> Unit
     )? = null,
     controlsContent: (@Composable BoxScope.() -> Unit)? = null,
@@ -129,14 +131,14 @@ public fun IncomingCallContent(
         modifier = modifier,
         participants = participants,
         isVideoType = isVideoType,
-        isIncoming = true
+        isIncoming = true,
     ) {
         Column {
             if (isShowingHeader) {
                 headerContent?.invoke(this) ?: CallAppBar(
                     call = call,
                     onBackPressed = onBackPressed,
-                    onCallAction = onCallAction
+                    onCallAction = onCallAction,
                 )
             }
 
@@ -161,7 +163,7 @@ public fun IncomingCallContent(
                 .padding(bottom = VideoTheme.dimens.incomingCallOptionsBottomPadding),
             isVideoCall = isVideoType,
             isCameraEnabled = isCameraEnabled,
-            onCallAction = onCallAction
+            onCallAction = onCallAction,
         )
     }
 }
@@ -173,14 +175,14 @@ private fun IncomingCallPreview1() {
     VideoTheme {
         CompositionLocalProvider(
             LocalAvatarPreviewPlaceholder provides
-                io.getstream.video.android.ui.common.R.drawable.stream_video_call_sample
+                io.getstream.video.android.ui.common.R.drawable.stream_video_call_sample,
         ) {
             IncomingCallContent(
                 call = mockCall,
                 participants = mockMemberStateList.takeLast(1),
                 isVideoType = true,
                 isCameraEnabled = false,
-                onBackPressed = {}
+                onBackPressed = {},
             ) {}
         }
     }
@@ -193,14 +195,14 @@ private fun IncomingCallPreview2() {
     VideoTheme {
         CompositionLocalProvider(
             LocalAvatarPreviewPlaceholder provides
-                io.getstream.video.android.ui.common.R.drawable.stream_video_call_sample
+                io.getstream.video.android.ui.common.R.drawable.stream_video_call_sample,
         ) {
             IncomingCallContent(
                 call = mockCall,
                 participants = mockMemberStateList,
                 isVideoType = true,
                 isCameraEnabled = false,
-                onBackPressed = {}
+                onBackPressed = {},
             ) {}
         }
     }

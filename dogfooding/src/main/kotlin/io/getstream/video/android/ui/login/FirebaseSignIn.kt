@@ -24,7 +24,7 @@ import com.firebase.ui.auth.FirebaseAuthUIActivityResultContract
 @Composable
 fun rememberRegisterForActivityResult(
     onSignInSuccess: (email: String) -> Unit,
-    onSignInFailed: () -> Unit
+    onSignInFailed: () -> Unit,
 ) = rememberLauncherForActivityResult(
     FirebaseAuthUIActivityResultContract(),
 ) { result ->

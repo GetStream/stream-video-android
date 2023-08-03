@@ -28,25 +28,25 @@ sealed class StreamAudioDevice {
     /** An [StreamAudioDevice] representing a Bluetooth Headset.*/
     data class BluetoothHeadset constructor(
         override val name: String = "Bluetooth",
-        override val audio: AudioDevice
+        override val audio: AudioDevice,
     ) : StreamAudioDevice()
 
     /** An [StreamAudioDevice] representing a Wired Headset.*/
     data class WiredHeadset constructor(
         override val name: String = "Wired Headset",
-        override val audio: AudioDevice
+        override val audio: AudioDevice,
     ) : StreamAudioDevice()
 
     /** An [StreamAudioDevice] representing the Earpiece.*/
     data class Earpiece constructor(
         override val name: String = "Earpiece",
-        override val audio: AudioDevice
+        override val audio: AudioDevice,
     ) : StreamAudioDevice()
 
     /** An [StreamAudioDevice] representing the Speakerphone.*/
     data class Speakerphone constructor(
         override val name: String = "Speakerphone",
-        override val audio: AudioDevice
+        override val audio: AudioDevice,
     ) : StreamAudioDevice()
 
     companion object {

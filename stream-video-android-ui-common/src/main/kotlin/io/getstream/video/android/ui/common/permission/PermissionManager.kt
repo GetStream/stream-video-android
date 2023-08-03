@@ -83,7 +83,7 @@ public interface PermissionManager {
             return StreamPermissionManagerImpl(
                 activity = activity,
                 onPermissionResult = onPermissionResult,
-                onShowRequestPermissionRationale = onShowRequestPermissionRationale
+                onShowRequestPermissionRationale = onShowRequestPermissionRationale,
             )
         }
     }
@@ -108,7 +108,9 @@ private class StreamPermissionManagerImpl(
      * Used to request permissions. Notifies of result using [onPermissionResult].
      */
     private val permissionsContract = activity
-        .registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { permissions ->
+        .registerForActivityResult(
+            ActivityResultContracts.RequestMultiplePermissions(),
+        ) { permissions ->
             permissions.forEach { (permission, isGranted) ->
                 when (permission) {
                     Manifest.permission.RECORD_AUDIO -> _hasRecordAudioPermission.value = isGranted
@@ -143,7 +145,7 @@ private class StreamPermissionManagerImpl(
     override fun checkPermission(permission: String): Boolean {
         return ContextCompat.checkSelfPermission(
             activity.applicationContext,
-            permission
+            permission,
         ) == PackageManager.PERMISSION_GRANTED
     }
 

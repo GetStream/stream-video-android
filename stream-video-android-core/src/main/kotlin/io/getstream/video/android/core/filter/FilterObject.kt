@@ -45,12 +45,12 @@ public data class NorFilterObject internal constructor(val filterObjects: Set<Fi
 
 public data class ContainsFilterObject internal constructor(
     val fieldName: String,
-    val value: Any
+    val value: Any,
 ) : FilterObject()
 
 public data class AutocompleteFilterObject internal constructor(
     val fieldName: String,
-    val value: String
+    val value: String,
 ) : FilterObject()
 
 public data class ExistsFilterObject internal constructor(val fieldName: String) : FilterObject()
@@ -60,17 +60,17 @@ public data class EqualsFilterObject internal constructor(val fieldName: String,
 
 public data class NotEqualsFilterObject internal constructor(
     val fieldName: String,
-    val value: Any
+    val value: Any,
 ) : FilterObject()
 
 public data class GreaterThanFilterObject internal constructor(
     val fieldName: String,
-    val value: Any
+    val value: Any,
 ) : FilterObject()
 
 public data class GreaterThanOrEqualsFilterObject internal constructor(
     val fieldName: String,
-    val value: Any
+    val value: Any,
 ) : FilterObject()
 
 public data class LessThanFilterObject internal constructor(val fieldName: String, val value: Any) :
@@ -78,7 +78,7 @@ public data class LessThanFilterObject internal constructor(val fieldName: Strin
 
 public data class LessThanOrEqualsFilterObject internal constructor(
     val fieldName: String,
-    val value: Any
+    val value: Any,
 ) : FilterObject()
 
 public data class InFilterObject internal constructor(val fieldName: String, val values: Set<Any>) :
@@ -86,7 +86,7 @@ public data class InFilterObject internal constructor(val fieldName: String, val
 
 public data class NotInFilterObject internal constructor(
     val fieldName: String,
-    val values: Set<Any>
+    val values: Set<Any>,
 ) : FilterObject()
 
 public data class DistinctFilterObject internal constructor(val memberIds: Set<String>) :

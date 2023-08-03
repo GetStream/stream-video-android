@@ -44,7 +44,7 @@ import kotlinx.coroutines.delay
 @Composable
 fun AvailableDeviceMenu(
     call: Call,
-    onDismissed: () -> Unit
+    onDismissed: () -> Unit,
 ) {
     val context = LocalContext.current
     val availableDevices by call.microphone.devices.collectAsState()
@@ -61,18 +61,18 @@ fun AvailableDeviceMenu(
     Popup(
         alignment = Alignment.BottomStart,
         offset = IntOffset(30, -200),
-        onDismissRequest = { onDismissed.invoke() }
+        onDismissRequest = { onDismissed.invoke() },
     ) {
         Card(
             modifier = Modifier.width(140.dp),
             shape = RoundedCornerShape(12.dp),
             contentColor = VideoTheme.colors.appBackground,
             backgroundColor = VideoTheme.colors.appBackground,
-            elevation = 6.dp
+            elevation = 6.dp,
         ) {
             LazyColumn(
                 modifier = Modifier.fillMaxWidth(),
-                contentPadding = PaddingValues(12.dp)
+                contentPadding = PaddingValues(12.dp),
             ) {
                 items(items = availableDevices, key = { it.name }) { audioDevice ->
                     Text(
@@ -85,12 +85,12 @@ fun AvailableDeviceMenu(
                                     .makeText(
                                         context,
                                         "Switched to ${audioDevice.name}",
-                                        Toast.LENGTH_SHORT
+                                        Toast.LENGTH_SHORT,
                                     )
                                     .show()
                             },
                         text = audioDevice.name,
-                        color = VideoTheme.colors.textHighEmphasis
+                        color = VideoTheme.colors.textHighEmphasis,
                     )
                 }
             }
