@@ -350,11 +350,13 @@ public class RtcSession internal constructor(
         // ice restart
         subscriber?.let {
             if (!it.isHealthy()) {
+                logger.i { "ice restarting subscriber peer connection" }
                 it.connection.restartIce()
             }
         }
         publisher?.let {
             if (!it.isHealthy()) {
+                logger.i { "ice restarting publisher peer connection" }
                 it.connection.restartIce()
             }
         }
