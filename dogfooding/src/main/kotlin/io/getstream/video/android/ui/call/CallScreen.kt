@@ -167,7 +167,13 @@ fun CallScreen(
                 )
             },
             updateUnreadCount = { unreadCount = it },
-            onDismissed = { scope.launch { chatState.hide() } },
+            onDismissed = {
+                if (chatState.currentValue == ModalBottomSheetValue.Expanded) {
+                    scope.launch { chatState.hide() }
+                } else {
+                    onLeaveCall.invoke()
+                }
+            },
         )
 
         if (speakingWhileMuted) {
