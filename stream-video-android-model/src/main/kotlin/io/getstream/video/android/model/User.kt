@@ -66,7 +66,7 @@ public data class User(
     val name: String = "",
     val image: String = "",
     val teams: List<String> = emptyList(),
-    val custom: Map<String, Any> = emptyMap(),
+    val custom: Map<String, String> = emptyMap(),
     @Serializable(with = OffsetDateTimeSerializer::class)
     val createdAt: OffsetDateTime? = null,
     @Serializable(with = OffsetDateTimeSerializer::class)
