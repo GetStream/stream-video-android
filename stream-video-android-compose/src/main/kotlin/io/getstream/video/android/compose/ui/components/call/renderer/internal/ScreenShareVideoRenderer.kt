@@ -67,13 +67,13 @@ public fun ScreenShareVideoRenderer(
             videoScalingType = VideoScalingType.SCALE_ASPECT_FIT,
         )
 
-        ParticipantLabel(screenShareParticipant, labelPosition)
+        ParticipantLabel(call, screenShareParticipant, labelPosition)
 
         if (isShowConnectionQualityIndicator) {
             val connectionQuality by screenShareParticipant.networkQuality.collectAsStateWithLifecycle()
             NetworkQualityIndicator(
                 networkQuality = connectionQuality,
-                modifier = Modifier.align(Alignment.BottomEnd)
+                modifier = Modifier.align(Alignment.BottomEnd),
             )
         }
     }

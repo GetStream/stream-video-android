@@ -109,7 +109,7 @@ public abstract class AbstractCallActivity : ComponentActivity() {
             @Suppress("DEPRECATION")
             window.addFlags(
                 WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED or
-                    WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON
+                    WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON,
             )
         }
     }
@@ -130,7 +130,6 @@ public abstract class AbstractCallActivity : ComponentActivity() {
 
     public fun enterPictureInPicture() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-
             val currentOrientation = resources.configuration.orientation
             val screenSharing = call.state.screenSharingSession.value
 
@@ -146,7 +145,7 @@ public abstract class AbstractCallActivity : ComponentActivity() {
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
                         this.setAutoEnterEnabled(true)
                     }
-                }.build()
+                }.build(),
             )
         } else {
             @Suppress("DEPRECATION")

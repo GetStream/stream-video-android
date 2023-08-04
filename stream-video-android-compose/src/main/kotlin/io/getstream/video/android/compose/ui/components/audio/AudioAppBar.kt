@@ -39,7 +39,7 @@ import io.getstream.video.android.compose.theme.VideoTheme
 @Composable
 public fun AudioAppBar(
     modifier: Modifier = Modifier,
-    title: String
+    title: String,
 ) {
     Column(modifier) {
         Text(
@@ -55,7 +55,7 @@ public fun AudioAppBar(
             modifier = Modifier
                 .fillMaxWidth()
                 .height(1.dp)
-                .background(VideoTheme.colors.borders)
+                .background(VideoTheme.colors.borders),
         )
     }
 }
@@ -66,7 +66,7 @@ private fun AudioAppBarPreview() {
     VideoTheme {
         AudioAppBar(
             modifier = Modifier.fillMaxWidth(),
-            title = "Audio Room Number 01"
+            title = "Audio Room Number 01",
         )
     }
 }

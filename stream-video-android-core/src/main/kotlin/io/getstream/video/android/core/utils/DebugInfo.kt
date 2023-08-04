@@ -112,8 +112,12 @@ internal class DebugInfo(val client: StreamVideoImpl) {
 
         logger.i { "Debug info $phoneModel running android $version" }
         logger.i { "Active call is ${call?.cid}, session id $sessionId" }
-        logger.i { "video quality: current resolution $resolution max resolution for camera is $maxResolution" }
-        logger.i { "Coordinator socket: $coordinatorSocket, SFU socket: $sfuSocket Subscriber: $publisherIce Publisher: $subIce" }
+        logger.i {
+            "video quality: current resolution $resolution max resolution for camera is $maxResolution"
+        }
+        logger.i {
+            "Coordinator socket: $coordinatorSocket, SFU socket: $sfuSocket Subscriber: $publisherIce Publisher: $subIce"
+        }
         logger.i { "Performance details" }
         timers.forEach {
             logger.i { "${it.name} took ${it.duration}" }

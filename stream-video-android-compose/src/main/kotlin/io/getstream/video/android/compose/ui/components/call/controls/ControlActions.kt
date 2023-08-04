@@ -61,7 +61,8 @@ public fun ControlActions(
     shape: Shape = VideoTheme.shapes.callControls,
     spaceBy: Dp? = null,
     actions: List<(@Composable () -> Unit)> = buildDefaultCallControlActions(
-        call = call, onCallAction
+        call = call,
+        onCallAction,
     ),
 ) {
     val orientation = LocalConfiguration.current.orientation
@@ -85,7 +86,7 @@ public fun ControlActions(
             elevation = elevation,
             spaceBy = spaceBy,
             onCallAction = onCallAction,
-            actions = actions
+            actions = actions,
         )
     } else if (orientation == ORIENTATION_LANDSCAPE) {
         LandscapeControlActions(
@@ -96,7 +97,7 @@ public fun ControlActions(
             elevation = elevation,
             spaceBy = spaceBy,
             onCallAction = onCallAction,
-            actions = actions
+            actions = actions,
         )
     }
 }

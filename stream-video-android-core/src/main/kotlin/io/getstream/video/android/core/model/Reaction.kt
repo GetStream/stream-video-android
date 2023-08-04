@@ -24,7 +24,7 @@ public data class Reaction(
     val id: String,
     val response: ReactionResponse,
     val createdAt: Long,
-    var isConsumed: Boolean = false
+    var isConsumed: Boolean = false,
 )
 
 @Stable

@@ -84,7 +84,7 @@ open class SocketTestBase : TestBase() {
 
     val networkStateProvider = NetworkStateProvider(
         connectivityManager = context
-            .getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+            .getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager,
     )
     val scope = CoroutineScope(DispatcherProvider.IO)
 
@@ -94,7 +94,7 @@ open class SocketTestBase : TestBase() {
             .addInterceptor(
                 HttpLoggingInterceptor().apply {
                     level = HttpLoggingInterceptor.Level.BASIC
-                }
+                },
             )
             .connectTimeout(connectionTimeoutInMs, TimeUnit.MILLISECONDS)
             .writeTimeout(connectionTimeoutInMs, TimeUnit.MILLISECONDS)
@@ -115,7 +115,6 @@ open class SocketTestBase : TestBase() {
             }
 
             val job2 = launch {
-
                 socket.errors.collect() {
                     errors.add(it)
                 }
@@ -142,7 +141,7 @@ class CoordinatorSocketTest : SocketTestBase() {
             testData.tokens["thierry"]!!,
             scope,
             buildOkHttp(),
-            networkStateProvider
+            networkStateProvider,
         )
         socket.connect()
 
@@ -162,7 +161,7 @@ class CoordinatorSocketTest : SocketTestBase() {
             testData.expiredToken,
             scope,
             buildOkHttp(),
-            networkStateProvider
+            networkStateProvider,
         )
         // token refresh should be handled at the StreamVideoImpl level
         try {
@@ -180,7 +179,7 @@ class CoordinatorSocketTest : SocketTestBase() {
             "invalid token",
             scope,
             buildOkHttp(),
-            networkStateProvider
+            networkStateProvider,
         )
         try {
             socket.connect { it.cancel() }
@@ -204,7 +203,7 @@ class CoordinatorSocketTest : SocketTestBase() {
             testData.tokens["thierry"]!!,
             scope,
             buildOkHttp(),
-            networkStateProvider
+            networkStateProvider,
         )
         socket.mockSocket = mockedWebSocket
         socket.reconnectTimeout = 0
@@ -232,7 +231,7 @@ class CoordinatorSocketTest : SocketTestBase() {
             testData.tokens["thierry"]!!,
             scope,
             buildOkHttp(),
-            networkStateProvider
+            networkStateProvider,
         )
         socket.mockSocket = mockedWebSocket
         socket.reconnectTimeout = 0
@@ -259,7 +258,7 @@ class CoordinatorSocketTest : SocketTestBase() {
             // make sure to use the TestScope because the exceptions will be swallowed by regular CoroutineScope
             scope = this,
             buildOkHttp(),
-            networkStateProvider
+            networkStateProvider,
         )
 
         socket.connect()
@@ -281,7 +280,7 @@ class CoordinatorSocketTest : SocketTestBase() {
             // make sure to use the TestScope because the exceptions will be swallowed by regular CoroutineScope
             scope = this,
             buildOkHttp(),
-            networkStateProvider
+            networkStateProvider,
         )
         socket.connect()
 
@@ -307,7 +306,6 @@ class SfuSocketTest : SocketTestBase() {
             }
 
             val job2 = launch {
-
                 socket.errors.collect() {
                     errors.add(it)
                 }
@@ -336,7 +334,7 @@ class SfuSocketTest : SocketTestBase() {
             updateSdp,
             scope,
             buildOkHttp(),
-            networkStateProvider
+            networkStateProvider,
         )
         socket.connect()
         socket.sendHealthCheck()
@@ -372,7 +370,7 @@ class SfuSocketTest : SocketTestBase() {
             updateSdp,
             scope,
             buildOkHttp(),
-            networkStateProvider
+            networkStateProvider,
         )
         try {
             socket.connect()
@@ -384,6 +382,8 @@ class SfuSocketTest : SocketTestBase() {
         val connectionStateItem = connectionState.awaitItem()
 
         assertThat(socket.reconnectionAttempts).isEqualTo(0)
-        assertThat(connectionStateItem).isInstanceOf(SocketState.DisconnectedPermanently::class.java)
+        assertThat(
+            connectionStateItem,
+        ).isInstanceOf(SocketState.DisconnectedPermanently::class.java)
     }
 }

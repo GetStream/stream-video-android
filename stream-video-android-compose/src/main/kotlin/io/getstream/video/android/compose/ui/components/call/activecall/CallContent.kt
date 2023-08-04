@@ -92,7 +92,7 @@ public fun CallContent(
         CallAppBar(
             call = call,
             leadingContent = null,
-            onCallAction = onCallAction
+            onCallAction = onCallAction,
         )
     },
     style: VideoRendererStyle = RegularVideoRendererStyle(),
@@ -100,13 +100,13 @@ public fun CallContent(
         modifier: Modifier,
         call: Call,
         participant: ParticipantState,
-        style: VideoRendererStyle
+        style: VideoRendererStyle,
     ) -> Unit = { videoModifier, videoCall, videoParticipant, videoStyle ->
         ParticipantVideo(
             modifier = videoModifier,
             call = videoCall,
             participant = videoParticipant,
-            style = videoStyle
+            style = videoStyle,
         )
     },
     videoContent: @Composable RowScope.(call: Call) -> Unit = {
@@ -116,17 +116,17 @@ public fun CallContent(
                 .fillMaxSize()
                 .weight(1f),
             style = style,
-            videoRenderer = videoRenderer
+            videoRenderer = videoRenderer,
         )
     },
     controlsContent: @Composable (call: Call) -> Unit = {
         ControlActions(
             call = call,
-            onCallAction = onCallAction
+            onCallAction = onCallAction,
         )
     },
     enableInPictureInPicture: Boolean = true,
-    pictureInPictureContent: @Composable (Call) -> Unit = { DefaultPictureInPictureContent(it) }
+    pictureInPictureContent: @Composable (Call) -> Unit = { DefaultPictureInPictureContent(it) },
 ) {
     val context = LocalContext.current
     val orientation = LocalConfiguration.current.orientation
@@ -136,12 +136,12 @@ public fun CallContent(
 
     MediaPiPLifecycle(
         call = call,
-        enableInPictureInPicture = enableInPictureInPicture
+        enableInPictureInPicture = enableInPictureInPicture,
     )
 
     CallLifecycle(
         call = call,
-        enableInPictureInPicture = enableInPictureInPicture
+        enableInPictureInPicture = enableInPictureInPicture,
     )
 
     BackHandler {
@@ -172,16 +172,18 @@ public fun CallContent(
             content = {
                 val paddings = PaddingValues(
                     top = it.calculateTopPadding(),
-                    start = it.calculateStartPadding(layoutDirection = LocalLayoutDirection.current),
+                    start = it.calculateStartPadding(
+                        layoutDirection = LocalLayoutDirection.current,
+                    ),
                     end = it.calculateEndPadding(layoutDirection = LocalLayoutDirection.current),
                     bottom = (it.calculateBottomPadding() - VideoTheme.dimens.controlActionsBottomPadding)
-                        .coerceAtLeast(0.dp)
+                        .coerceAtLeast(0.dp),
                 )
 
                 Row(
                     modifier = modifier
                         .background(color = VideoTheme.colors.appBackground)
-                        .padding(paddings)
+                        .padding(paddings),
                 ) {
                     videoContent.invoke(this, call)
 
@@ -193,7 +195,7 @@ public fun CallContent(
                 if (isShowingOverlayAppBar) {
                     appBarContent.invoke(call)
                 }
-            }
+            },
         )
     }
 }
@@ -214,7 +216,7 @@ internal fun DefaultPictureInPictureContent(call: Call) {
         VideoRenderer(
             modifier = Modifier.aspectRatio(pictureInPictureAspectRatio, false),
             call = call,
-            video = video?.value
+            video = video?.value,
         )
     } else {
         val activeSpeakers by call.state.activeSpeakers.collectAsStateWithLifecycle()
@@ -224,13 +226,13 @@ internal fun DefaultPictureInPictureContent(call: Call) {
             ParticipantVideo(
                 call = call,
                 participant = activeSpeakers.first(),
-                style = RegularVideoRendererStyle(labelPosition = Alignment.BottomStart)
+                style = RegularVideoRendererStyle(labelPosition = Alignment.BottomStart),
             )
         } else if (me != null) {
             ParticipantVideo(
                 call = call,
                 participant = me!!,
-                style = RegularVideoRendererStyle(labelPosition = Alignment.BottomStart)
+                style = RegularVideoRendererStyle(labelPosition = Alignment.BottomStart),
             )
         }
     }

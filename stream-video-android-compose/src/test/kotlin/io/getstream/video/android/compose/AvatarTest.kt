@@ -40,7 +40,7 @@ internal class AvatarTest : BaseComposeTest() {
         snapshot {
             Avatar(
                 modifier = Modifier.size(72.dp),
-                initials = "Thierry"
+                initials = "Thierry",
             )
         }
     }
@@ -51,7 +51,7 @@ internal class AvatarTest : BaseComposeTest() {
             UserAvatar(
                 user = mockParticipant.initialUser,
                 modifier = Modifier.size(82.dp),
-                isShowingOnlineIndicator = true
+                isShowingOnlineIndicator = true,
             )
         }
     }

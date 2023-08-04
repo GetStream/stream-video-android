@@ -323,7 +323,6 @@ public open class PersistentSocket<T>(
     }
 
     internal fun handleError(error: Throwable) {
-
         // onFailure, onClosed and the 2 onMessage can all generate errors
         // temporary errors should be logged and retried
         // permanent errors should be emitted so the app can decide how to handle it
@@ -405,7 +404,7 @@ public open class PersistentSocket<T>(
                 }
             }
         },
-        scope
+        scope,
     )
 
     internal companion object {

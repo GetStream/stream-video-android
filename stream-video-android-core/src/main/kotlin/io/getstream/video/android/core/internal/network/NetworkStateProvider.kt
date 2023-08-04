@@ -42,7 +42,7 @@ public class NetworkStateProvider(private val connectivityManager: ConnectivityM
 
         override fun onCapabilitiesChanged(
             network: Network,
-            networkCapabilities: NetworkCapabilities
+            networkCapabilities: NetworkCapabilities,
         ) {
             notifyListenersIfNetworkStateChanged()
         }
@@ -98,7 +98,7 @@ public class NetworkStateProvider(private val connectivityManager: ConnectivityM
             if (isRegistered.compareAndSet(false, true)) {
                 connectivityManager.registerNetworkCallback(
                     NetworkRequest.Builder().build(),
-                    callback
+                    callback,
                 )
             }
         }

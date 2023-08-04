@@ -60,9 +60,9 @@ class CallStateTest : IntegrationTestBase() {
             settings = CallSettingsRequest(
                 screensharing = ScreensharingSettingsRequest(
                     accessRequestEnabled = false,
-                    enabled = false
-                )
-            )
+                    enabled = false,
+                ),
+            ),
         )
         assertSuccess(response)
 
@@ -93,7 +93,7 @@ class CallStateTest : IntegrationTestBase() {
         val call = client.call("default", randomUUID())
         val response = call.joinRequest(
             create = CreateCallOptions(custom = mapOf("color" to "green")),
-            location = "AMS"
+            location = "AMS",
         )
         assertSuccess(response)
         assertThat(call.state.settings.value).isNotNull()
@@ -112,33 +112,37 @@ class CallStateTest : IntegrationTestBase() {
     fun `Participants should be sorted`() = runTest {
         val call = client.call("default", randomUUID())
 
-        val sortedParticipants = call.state.sortedParticipantsFlow.stateIn(backgroundScope, SharingStarted.Eagerly, emptyList())
+        val sortedParticipants = call.state.sortedParticipantsFlow.stateIn(
+            backgroundScope,
+            SharingStarted.Eagerly,
+            emptyList(),
+        )
 
         val sorted1 = sortedParticipants.value
         assertThat(sorted1).isEmpty()
 
         call.state._pinnedParticipants.value = mutableMapOf(
-            "1" to OffsetDateTime.now(Clock.systemUTC())
+            "1" to OffsetDateTime.now(Clock.systemUTC()),
         )
 
         call.state.updateParticipant(
-            ParticipantState("4", call, User("4")).apply { _lastSpeakingAt.value = nowUtc }
+            ParticipantState("4", call, User("4")).apply { _lastSpeakingAt.value = nowUtc },
         )
         call.state.updateParticipant(
-            ParticipantState("5", call, User("5")).apply { _videoEnabled.value = true }
+            ParticipantState("5", call, User("5")).apply { _videoEnabled.value = true },
         )
         call.state.updateParticipant(
-            ParticipantState("6", call, User("6")).apply { _joinedAt.value = nowUtc }
+            ParticipantState("6", call, User("6")).apply { _joinedAt.value = nowUtc },
         )
 
         call.state.updateParticipant(
-            ParticipantState("1", call, User("1"))
+            ParticipantState("1", call, User("1")),
         )
         call.state.updateParticipant(
-            ParticipantState("2", call, User("2")).apply { _dominantSpeaker.value = true }
+            ParticipantState("2", call, User("2")).apply { _dominantSpeaker.value = true },
         )
         call.state.updateParticipant(
-            ParticipantState("3", call, User("3")).apply { _screenSharingEnabled.value = true }
+            ParticipantState("3", call, User("3")).apply { _screenSharingEnabled.value = true },
         )
 
         val participants = call.state.participants.value

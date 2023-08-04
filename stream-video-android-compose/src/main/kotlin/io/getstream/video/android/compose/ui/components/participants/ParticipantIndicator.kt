@@ -52,19 +52,21 @@ public fun ParticipantIndicatorIcon(
     numberColor: Color = Color.White,
     numberBackgroundColor: Color = VideoTheme.colors.textLowEmphasis,
     isShowingNumber: Boolean = true,
-    onClick: () -> Unit
+    onClick: () -> Unit,
 ) {
     Box {
         IconButton(
             onClick = { onClick.invoke() },
             modifier = Modifier.padding(
                 start = VideoTheme.dimens.callAppBarLeadingContentSpacingStart,
-                end = VideoTheme.dimens.callAppBarLeadingContentSpacingEnd
-            )
+                end = VideoTheme.dimens.callAppBarLeadingContentSpacingEnd,
+            ),
         ) {
             Icon(
                 painter = painterResource(id = R.drawable.stream_video_ic_participants),
-                contentDescription = stringResource(id = R.string.stream_video_call_participants_menu_content_description),
+                contentDescription = stringResource(
+                    id = R.string.stream_video_call_participants_menu_content_description,
+                ),
                 tint = VideoTheme.colors.callDescription,
             )
         }
@@ -76,7 +78,7 @@ public fun ParticipantIndicatorIcon(
                     .drawBehind {
                         drawRoundRect(
                             color = numberBackgroundColor,
-                            cornerRadius = CornerRadius(this.size.maxDimension)
+                            cornerRadius = CornerRadius(this.size.maxDimension),
                         )
                     }
                     .widthIn(min = 21.dp)

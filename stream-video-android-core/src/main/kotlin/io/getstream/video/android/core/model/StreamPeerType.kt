@@ -26,7 +26,7 @@ import stream.video.sfu.models.PeerType
 @Stable
 public enum class StreamPeerType {
     PUBLISHER,
-    SUBSCRIBER
+    SUBSCRIBER,
 }
 
 public fun StreamPeerType.toPeerType(): PeerType = when (this) {

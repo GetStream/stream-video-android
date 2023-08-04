@@ -42,13 +42,17 @@ private val LocalDimens = compositionLocalOf<StreamDimens> {
     error("No dimens provided! Make sure to wrap all usages of Stream components in a VideoTheme.")
 }
 private val LocalTypography = compositionLocalOf<StreamTypography> {
-    error("No typography provided! Make sure to wrap all usages of Stream components in a VideoTheme.")
+    error(
+        "No typography provided! Make sure to wrap all usages of Stream components in a VideoTheme.",
+    )
 }
 private val LocalShapes = compositionLocalOf<StreamShapes> {
     error("No shapes provided! Make sure to wrap all usages of Stream components in a VideoTheme.")
 }
 private val LocalReactionMapper = compositionLocalOf<ReactionMapper> {
-    error("No reaction mapper provided! Make sure to wrap all usages of Stream components in a VideoTheme.")
+    error(
+        "No reaction mapper provided! Make sure to wrap all usages of Stream components in a VideoTheme.",
+    )
 }
 
 /**
@@ -76,14 +80,13 @@ public fun VideoTheme(
     allowUIAutomationTest: Boolean = true,
     content: @Composable () -> Unit,
 ) {
-
     CompositionLocalProvider(
         LocalColors provides colors,
         LocalDimens provides dimens,
         LocalTypography provides typography,
         LocalShapes provides shapes,
         LocalRippleTheme provides rippleTheme,
-        LocalReactionMapper provides reactionMapper
+        LocalReactionMapper provides reactionMapper,
     ) {
         Box(
             modifier = Modifier.semantics {
@@ -104,35 +107,41 @@ public object VideoTheme {
      * Retrieves the current [StreamColors] at the call site's position in the hierarchy.
      */
     public val colors: StreamColors
-        @Composable @ReadOnlyComposable get() = LocalColors.current
+        @Composable @ReadOnlyComposable
+        get() = LocalColors.current
 
     /**
      * Retrieves the current [StreamDimens] at the call site's position in the hierarchy.
      */
     public val dimens: StreamDimens
-        @Composable @ReadOnlyComposable get() = LocalDimens.current
+        @Composable @ReadOnlyComposable
+        get() = LocalDimens.current
 
     /**
      * Retrieves the current [StreamTypography] at the call site's position in the hierarchy.
      */
     public val typography: StreamTypography
-        @Composable @ReadOnlyComposable get() = LocalTypography.current
+        @Composable @ReadOnlyComposable
+        get() = LocalTypography.current
 
     /**
      * Retrieves the current [StreamShapes] at the call site's position in the hierarchy.
      */
     public val shapes: StreamShapes
-        @Composable @ReadOnlyComposable get() = LocalShapes.current
+        @Composable @ReadOnlyComposable
+        get() = LocalShapes.current
 
     /**
      * Retrieves the current [RippleTheme] at the call site's position in the hierarchy.
      */
     public val rippleTheme: RippleTheme
-        @Composable @ReadOnlyComposable get() = LocalRippleTheme.current
+        @Composable @ReadOnlyComposable
+        get() = LocalRippleTheme.current
 
     /**
      * Retrieves the current [ReactionMapper] at the call site's position in the hierarchy.
      */
     public val reactionMapper: ReactionMapper
-        @Composable @ReadOnlyComposable get() = LocalReactionMapper.current
+        @Composable @ReadOnlyComposable
+        get() = LocalReactionMapper.current
 }

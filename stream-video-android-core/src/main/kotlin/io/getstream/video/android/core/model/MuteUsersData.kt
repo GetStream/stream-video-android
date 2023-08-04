@@ -34,7 +34,7 @@ public data class MuteUsersData(
     public val muteAllUsers: Boolean? = null,
     public val audio: Boolean? = null,
     public val screenShare: Boolean? = null,
-    public val video: Boolean? = null
+    public val video: Boolean? = null,
 )
 
 /**
@@ -46,6 +46,6 @@ public fun MuteUsersData.toRequest(): MuteUsersRequest {
         video = video,
         screenshare = screenShare,
         muteAllUsers = muteAllUsers,
-        userIds = users
+        userIds = users,
     )
 }

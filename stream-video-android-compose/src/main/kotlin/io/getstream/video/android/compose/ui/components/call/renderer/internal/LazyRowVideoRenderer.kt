@@ -57,19 +57,23 @@ internal fun LazyRowVideoRenderer(
         modifier: Modifier,
         call: Call,
         participant: ParticipantState,
-        style: VideoRendererStyle
+        style: VideoRendererStyle,
     ) -> Unit = { videoModifier, videoCall, videoParticipant, videoStyle ->
         ParticipantVideo(
             modifier = videoModifier,
             call = videoCall,
             participant = videoParticipant,
-            style = videoStyle
+            style = videoStyle,
         )
     },
 ) {
     LazyRow(
-        modifier = modifier.padding(horizontal = VideoTheme.dimens.screenShareParticipantsRowPadding),
-        horizontalArrangement = Arrangement.spacedBy(VideoTheme.dimens.screenShareParticipantsListItemMargin),
+        modifier = modifier.padding(
+            horizontal = VideoTheme.dimens.screenShareParticipantsRowPadding,
+        ),
+        horizontalArrangement = Arrangement.spacedBy(
+            VideoTheme.dimens.screenShareParticipantsListItemMargin,
+        ),
         verticalAlignment = Alignment.CenterVertically,
         content = {
             items(items = participants, key = { it.sessionId }) { participant ->
@@ -81,7 +85,7 @@ internal fun LazyRowVideoRenderer(
                     videoRenderer = videoRenderer,
                 )
             }
-        }
+        },
     )
 }
 
@@ -101,13 +105,13 @@ private fun ListVideoRenderer(
         modifier: Modifier,
         call: Call,
         participant: ParticipantState,
-        style: VideoRendererStyle
+        style: VideoRendererStyle,
     ) -> Unit = { videoModifier, videoCall, videoParticipant, videoStyle ->
         ParticipantVideo(
             modifier = videoModifier,
             call = videoCall,
             participant = videoParticipant,
-            style = videoStyle
+            style = videoStyle,
         )
     },
 ) {
@@ -118,7 +122,7 @@ private fun ListVideoRenderer(
         call = call,
         participant = participant,
         style = style.copy(
-            isFocused = participant.sessionId == dominantSpeaker?.sessionId
+            isFocused = participant.sessionId == dominantSpeaker?.sessionId,
         ),
     )
 }
@@ -131,7 +135,7 @@ private fun ParticipantsRowPreview() {
         LazyRowVideoRenderer(
             call = mockCall,
             participants = mockParticipantList,
-            dominantSpeaker = mockParticipantList[0]
+            dominantSpeaker = mockParticipantList[0],
         )
     }
 }

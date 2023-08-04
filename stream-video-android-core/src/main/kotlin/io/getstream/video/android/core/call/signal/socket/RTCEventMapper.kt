@@ -54,18 +54,20 @@ public object RTCEventMapper {
                     it.session_id to UserAudioLevel(
                         it.user_id,
                         it.is_speaking,
-                        it.level
+                        it.level,
                     )
-                }
+                },
             )
 
-            event.change_publish_quality != null -> ChangePublishQualityEvent(event.change_publish_quality)
+            event.change_publish_quality != null -> ChangePublishQualityEvent(
+                event.change_publish_quality,
+            )
 
             event.track_published != null -> with(event.track_published) {
                 TrackPublishedEvent(
                     user_id,
                     session_id,
-                    type
+                    type,
                 )
             }
 
@@ -73,7 +75,7 @@ public object RTCEventMapper {
                 TrackUnpublishedEvent(
                     user_id,
                     session_id,
-                    type
+                    type,
                 )
             }
 
@@ -87,20 +89,20 @@ public object RTCEventMapper {
 
             event.dominant_speaker_changed != null -> DominantSpeakerChangedEvent(
                 event.dominant_speaker_changed.user_id,
-                event.dominant_speaker_changed.session_id
+                event.dominant_speaker_changed.session_id,
             )
 
             event.health_check_response != null -> SFUHealthCheckEvent(
                 ParticipantCount(
                     event.health_check_response.participant_count?.total ?: 0,
-                    event.health_check_response.participant_count?.anonymous ?: 0
-                )
+                    event.health_check_response.participant_count?.anonymous ?: 0,
+                ),
             )
 
             event.join_response != null -> {
                 val counts = ParticipantCount(
                     event.join_response.call_state?.participant_count?.total ?: 0,
-                    event.join_response.call_state?.participant_count?.anonymous ?: 0
+                    event.join_response.call_state?.participant_count?.anonymous ?: 0,
                 )
                 JoinCallResponseEvent(event.join_response.call_state!!, counts)
             }
@@ -114,7 +116,7 @@ public object RTCEventMapper {
 
             event.call_grants_updated != null -> CallGrantsUpdatedEvent(
                 event.call_grants_updated.current_grants,
-                event.call_grants_updated.message
+                event.call_grants_updated.message,
             )
 
             else -> {

@@ -46,7 +46,7 @@ public class CallDetailsView : ConstraintLayout {
     public constructor(context: Context, attrs: AttributeSet?, defStyleAttr: Int) : super(
         context.createStreamThemeWrapper(),
         attrs,
-        defStyleAttr
+        defStyleAttr,
     ) {
         init(context, attrs)
     }
@@ -155,7 +155,7 @@ public class CallDetailsView : ConstraintLayout {
         binding.avatarsHolder.addView(
             View(context).apply {
                 layoutParams = LayoutParams(style.avatarSpacing, LayoutParams.MATCH_PARENT)
-            }
+            },
         )
     }
 }

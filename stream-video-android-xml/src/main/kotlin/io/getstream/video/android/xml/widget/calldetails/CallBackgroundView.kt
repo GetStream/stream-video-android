@@ -67,7 +67,7 @@ public class CallBackgroundView @JvmOverloads constructor(
         val firstParticipant = participants.first()
         load(
             firstParticipant.imageUrl,
-            io.getstream.video.android.xml.R.drawable.stream_video_bg_call
+            io.getstream.video.android.xml.R.drawable.stream_video_bg_call,
         )
     }
 }

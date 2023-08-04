@@ -37,7 +37,10 @@ internal class UserSerializer : Serializer<StreamUserPreferences?> {
 
     override suspend fun writeTo(t: StreamUserPreferences?, output: OutputStream) {
         val userPreferences = t ?: return
-        val byteArray = ProtoBuf.encodeToByteArray(StreamUserPreferences.serializer(), userPreferences)
+        val byteArray = ProtoBuf.encodeToByteArray(
+            StreamUserPreferences.serializer(),
+            userPreferences,
+        )
 
         @Suppress("BlockingMethodInNonBlockingContext")
         output.write(byteArray)

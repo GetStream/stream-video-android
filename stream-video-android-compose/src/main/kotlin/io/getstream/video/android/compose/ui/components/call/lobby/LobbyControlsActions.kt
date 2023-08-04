@@ -41,9 +41,8 @@ import io.getstream.video.android.core.call.state.CallAction
 @Composable
 public fun buildDefaultLobbyControlActions(
     call: Call,
-    onCallAction: (CallAction) -> Unit
+    onCallAction: (CallAction) -> Unit,
 ): List<@Composable () -> Unit> {
-
     val orientation = LocalConfiguration.current.orientation
 
     val modifier = if (orientation == Configuration.ORIENTATION_PORTRAIT) {
@@ -68,14 +67,14 @@ public fun buildDefaultLobbyControlActions(
             ToggleMicrophoneAction(
                 modifier = modifier,
                 isMicrophoneEnabled = isMicrophoneEnabled,
-                onCallAction = onCallAction
+                onCallAction = onCallAction,
             )
         },
         {
             ToggleCameraAction(
                 modifier = modifier,
                 isCameraEnabled = isCameraEnabled,
-                onCallAction = onCallAction
+                onCallAction = onCallAction,
             )
         },
     )

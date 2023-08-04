@@ -52,7 +52,8 @@ public fun ParticipantInformation(
     isVideoType: Boolean = true,
 ) {
     Column(
-        modifier = Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally
+        modifier = Modifier.fillMaxWidth(),
+        horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         val context = LocalContext.current
         val callUsers by remember { derivedStateOf { participants.map { it.toCallUser() } } }
@@ -89,7 +90,7 @@ public fun ParticipantInformation(
             text = when (callStatus) {
                 CallStatus.Incoming -> stringResource(
                     id = io.getstream.video.android.ui.common.R.string.stream_video_call_status_incoming,
-                    callType.capitalize(Locale.current)
+                    callType.capitalize(Locale.current),
                 )
 
                 CallStatus.Outgoing -> stringResource(
@@ -115,7 +116,7 @@ private fun ParticipantInformationPreview() {
         ParticipantInformation(
             isVideoType = true,
             callStatus = CallStatus.Incoming,
-            participants = mockMemberStateList
+            participants = mockMemberStateList,
         )
     }
 }

@@ -39,9 +39,8 @@ import io.getstream.video.android.core.call.state.CallAction
 @Composable
 public fun buildDefaultAudioControlActions(
     call: Call,
-    onCallAction: (CallAction) -> Unit
+    onCallAction: (CallAction) -> Unit,
 ): List<@Composable () -> Unit> {
-
     val orientation = LocalConfiguration.current.orientation
 
     val modifier = if (orientation == Configuration.ORIENTATION_PORTRAIT) {
@@ -61,14 +60,14 @@ public fun buildDefaultAudioControlActions(
             ToggleMicrophoneAction(
                 modifier = modifier,
                 isMicrophoneEnabled = isMicrophoneEnabled,
-                onCallAction = onCallAction
+                onCallAction = onCallAction,
             )
         },
         {
             LeaveCallAction(
                 modifier = modifier,
-                onCallAction = onCallAction
+                onCallAction = onCallAction,
             )
-        }
+        },
     )
 }

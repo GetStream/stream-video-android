@@ -29,7 +29,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.ButtonDefaults
@@ -80,18 +80,18 @@ fun CallJoinScreen(
     HandleCallJoinUiState(
         callJoinUiState = uiState,
         navigateToCallLobby = navigateToCallLobby,
-        navigateUpToLogin = navigateUpToLogin
+        navigateUpToLogin = navigateUpToLogin,
     )
 
     Column(
         modifier = Modifier
             .fillMaxSize()
             .background(Colors.background),
-        horizontalAlignment = Alignment.CenterHorizontally
+        horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         CallJoinHeader(
             callJoinViewModel = callJoinViewModel,
-            onRingTestClicked = navigateToRingTest
+            onRingTestClicked = navigateToRingTest,
         )
 
         CallJoinBody(
@@ -99,7 +99,7 @@ fun CallJoinScreen(
                 .align(Alignment.CenterHorizontally)
                 .fillMaxWidth()
                 .weight(1f),
-            callJoinViewModel = callJoinViewModel
+            callJoinViewModel = callJoinViewModel,
         )
     }
 
@@ -113,7 +113,7 @@ fun CallJoinScreen(
 @Composable
 private fun CallJoinHeader(
     callJoinViewModel: CallJoinViewModel = hiltViewModel(),
-    onRingTestClicked: () -> Unit
+    onRingTestClicked: () -> Unit,
 ) {
     val user by callJoinViewModel.user.collectAsState(initial = null)
 
@@ -121,29 +121,29 @@ private fun CallJoinHeader(
         modifier = Modifier
             .fillMaxWidth()
             .padding(24.dp),
-        verticalAlignment = Alignment.CenterVertically
+        verticalAlignment = Alignment.CenterVertically,
     ) {
-
         if (BuildConfig.DEBUG) {
             Text(
                 modifier = Modifier.weight(1f),
                 color = Color.White,
-                text = user?.name?.ifBlank { user?.id }?.ifBlank { user!!.custom["email"] }.orEmpty(),
+                text = user?.name?.ifBlank { user?.id }?.ifBlank { user!!.custom["email"] }
+                    .orEmpty(),
                 maxLines = 1,
-                fontSize = 16.sp
+                fontSize = 16.sp,
             )
         }
 
         TextButton(
             colors = ButtonDefaults.textButtonColors(contentColor = Color.White),
             content = { Text(text = "Ring test") },
-            onClick = { onRingTestClicked.invoke() }
+            onClick = { onRingTestClicked.invoke() },
         )
 
         StreamButton(
-            modifier = Modifier.width(125.dp),
+            modifier = Modifier.widthIn(125.dp),
             text = stringResource(id = R.string.sign_out),
-            onClick = { callJoinViewModel.signOut() }
+            onClick = { callJoinViewModel.signOut() },
         )
     }
 }
@@ -164,7 +164,7 @@ private fun CallJoinBody(
             .fillMaxSize()
             .background(Colors.background),
         verticalArrangement = Arrangement.Center,
-        horizontalAlignment = Alignment.CenterHorizontally
+        horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         if (user != null) {
             val name =
@@ -181,7 +181,7 @@ private fun CallJoinBody(
                 text = "Welcome, $name",
                 color = Color.White,
                 fontSize = 32.sp,
-                textAlign = TextAlign.Center
+                textAlign = TextAlign.Center,
             )
         }
 
@@ -203,7 +203,7 @@ private fun CallJoinBody(
                 .padding(horizontal = 35.dp)
                 .testTag("start_new_call"),
             text = stringResource(id = R.string.start_a_new_call),
-            onClick = { callJoinViewModel.handleUiEvent(CallJoinEvent.JoinCall()) }
+            onClick = { callJoinViewModel.handleUiEvent(CallJoinEvent.JoinCall()) },
         )
 
         Spacer(modifier = Modifier.height(40.dp))
@@ -232,7 +232,7 @@ private fun CallJoinBody(
                     .fillMaxHeight()
                     .border(
                         BorderStroke(1.dp, Color(0xFF4C525C)),
-                        RoundedCornerShape(6.dp)
+                        RoundedCornerShape(6.dp),
                     ),
                 shape = RoundedCornerShape(6.dp),
                 value = callId,
@@ -242,11 +242,11 @@ private fun CallJoinBody(
                     focusedLabelColor = VideoTheme.colors.primaryAccent,
                     unfocusedIndicatorColor = Colors.secondBackground,
                     focusedIndicatorColor = Colors.secondBackground,
-                    backgroundColor = Colors.secondBackground
+                    backgroundColor = Colors.secondBackground,
                 ),
                 keyboardOptions = KeyboardOptions.Default.copy(
-                    keyboardType = KeyboardType.Email
-                )
+                    keyboardType = KeyboardType.Email,
+                ),
             )
 
             StreamButton(
@@ -257,7 +257,7 @@ private fun CallJoinBody(
                 onClick = {
                     callJoinViewModel.handleUiEvent(CallJoinEvent.JoinCall(callId = callId))
                 },
-                text = stringResource(id = R.string.join_call)
+                text = stringResource(id = R.string.join_call),
             )
         }
     }
@@ -267,7 +267,7 @@ private fun CallJoinBody(
 private fun HandleCallJoinUiState(
     callJoinUiState: CallJoinUiState,
     navigateToCallLobby: (callId: String) -> Unit,
-    navigateUpToLogin: () -> Unit
+    navigateUpToLogin: () -> Unit,
 ) {
     LaunchedEffect(key1 = callJoinUiState) {
         when (callJoinUiState) {
@@ -291,7 +291,7 @@ private fun CallJoinScreenPreview() {
             callJoinViewModel = CallJoinViewModel(StreamUserDataStore.instance()),
             navigateToCallLobby = {},
             navigateUpToLogin = {},
-            navigateToRingTest = {}
+            navigateToRingTest = {},
         )
     }
 }

@@ -33,5 +33,5 @@ public data class CallControlItem(
     @ColorRes val iconTint: Int,
     @ColorRes val backgroundTint: Int,
     val action: CallAction,
-    val enabled: Boolean = true
+    val enabled: Boolean = true,
 )

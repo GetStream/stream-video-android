@@ -43,9 +43,8 @@ import io.getstream.video.android.core.call.state.ToggleSpeakerphone
 @Composable
 public fun buildDefaultCallControlActions(
     call: Call,
-    onCallAction: (CallAction) -> Unit
+    onCallAction: (CallAction) -> Unit,
 ): List<@Composable () -> Unit> {
-
     val orientation = LocalConfiguration.current.orientation
 
     val modifier = if (orientation == Configuration.ORIENTATION_PORTRAIT) {
@@ -70,28 +69,28 @@ public fun buildDefaultCallControlActions(
             ToggleCameraAction(
                 modifier = modifier,
                 isCameraEnabled = isCameraEnabled,
-                onCallAction = onCallAction
+                onCallAction = onCallAction,
             )
         },
         {
             ToggleMicrophoneAction(
                 modifier = modifier,
                 isMicrophoneEnabled = isMicrophoneEnabled,
-                onCallAction = onCallAction
+                onCallAction = onCallAction,
             )
         },
         {
             FlipCameraAction(
                 modifier = modifier,
-                onCallAction = onCallAction
+                onCallAction = onCallAction,
             )
         },
         {
             LeaveCallAction(
                 modifier = modifier,
-                onCallAction = onCallAction
+                onCallAction = onCallAction,
             )
-        }
+        },
     )
 }
 

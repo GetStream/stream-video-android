@@ -60,7 +60,9 @@ class CallJoinViewModel @Inject constructor(
                     flowOf(CallJoinUiState.JoinCompleted(callId = call.cid))
                 }
 
-                is CallJoinEvent.JoinCompleted -> flowOf(CallJoinUiState.JoinCompleted(event.callId))
+                is CallJoinEvent.JoinCompleted -> flowOf(
+                    CallJoinUiState.JoinCompleted(event.callId),
+                )
                 else -> flowOf(CallJoinUiState.Nothing)
             }
         }

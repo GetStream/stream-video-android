@@ -29,6 +29,6 @@ public fun interface RendererInitializer {
         videoRenderer: VideoTextureViewRenderer,
         streamId: String,
         trackType: TrackType,
-        onRender: (View) -> Unit
+        onRender: (View) -> Unit,
     )
 }

@@ -29,7 +29,7 @@ interface StreamTokenService {
     @GET("api/auth/create-token")
     suspend fun fetchToken(
         @Query("user_id") userId: String?,
-        @Query("api_key") apiKey: String
+        @Query("api_key") apiKey: String,
     ): TokenResponse
 }
 

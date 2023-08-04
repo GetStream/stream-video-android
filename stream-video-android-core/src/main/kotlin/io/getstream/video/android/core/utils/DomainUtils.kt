@@ -97,8 +97,8 @@ internal fun Participant.toPartialUser(): CallUser {
             trackIdPrefix = track_lookup_prefix,
             audio = TrackType.TRACK_TYPE_AUDIO in published_tracks,
             video = TrackType.TRACK_TYPE_VIDEO in published_tracks,
-            online = true
-        )
+            online = true,
+        ),
     )
 }
 
@@ -110,7 +110,7 @@ internal fun UserResponse.toUser(): User {
         name = name ?: "",
         image = image ?: "",
         teams = teams,
-        custom = custom.mapValues { it.value.toString() }
+        custom = custom.mapValues { it.value.toString() },
     )
 }
 
@@ -119,7 +119,7 @@ internal fun QueryCallsResponse.toQueriedCalls(): QueriedCalls {
     return QueriedCalls(
         calls = calls.toCallData(),
         next = next,
-        prev = prev
+        prev = prev,
     )
 }
 
@@ -134,7 +134,7 @@ internal fun CallStateResponseFields.toCallData(): CallData {
         blockedUsers = blockedUsers.map { it.toUser() },
         call = call.toCallInfo(),
         members = members.map { it.toCallUser() },
-        ownMembership = membership?.toCallUser()
+        ownMembership = membership?.toCallUser(),
     )
 }
 
@@ -144,7 +144,7 @@ internal fun CallRecording.toRecording(): CallRecordingData {
         fileName = filename,
         url = url,
         start = startTime.toEpochSecond() * 1000,
-        end = endTime.toEpochSecond() * 1000
+        end = endTime.toEpochSecond() * 1000,
     )
 }
 
@@ -154,7 +154,7 @@ internal fun ReactionResponse.toReaction(): ReactionData {
         type = type,
         user = user.toUser(),
         emoji = emojiCode,
-        custom = custom
+        custom = custom,
     )
 }
 
@@ -167,6 +167,6 @@ internal fun EdgeResponse.toEdge(): EdgeData {
         longitude = longitude,
         green = green,
         yellow = yellow,
-        red = red
+        red = red,
     )
 }

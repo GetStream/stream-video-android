@@ -77,7 +77,7 @@ class AndroidDeviceTest : IntegrationTestBase(connectCoordinatorWS = false) {
         geo = GEO.GlobalEdgeNetwork,
         testData.users["thierry"]!!,
         testData.tokens["thierry"]!!,
-        ensureSingleInstance = false
+        ensureSingleInstance = false,
     ).build()
 
     internal class InterceptorTest : Interceptor {
@@ -153,7 +153,7 @@ class AndroidDeviceTest : IntegrationTestBase(connectCoordinatorWS = false) {
         val connectionStateItem = connectionState.awaitItem()
         assertThat(connectionStateItem).isAnyOf(
             RealtimeConnection.Connected,
-            RealtimeConnection.Joined(result.getOrThrow())
+            RealtimeConnection.Joined(result.getOrThrow()),
         )
         if (connectionStateItem is RealtimeConnection.Joined) {
             connectionState.awaitItem()
@@ -180,7 +180,7 @@ class AndroidDeviceTest : IntegrationTestBase(connectCoordinatorWS = false) {
         val connectionStateItem = connectionState.awaitItem()
         assertThat(connectionStateItem).isAnyOf(
             RealtimeConnection.Connected,
-            RealtimeConnection.Joined(result.getOrThrow())
+            RealtimeConnection.Joined(result.getOrThrow()),
         )
         if (connectionStateItem is RealtimeConnection.Joined) {
             connectionState.awaitItem()
@@ -202,7 +202,7 @@ class AndroidDeviceTest : IntegrationTestBase(connectCoordinatorWS = false) {
             members = listOf(
                 MemberRequest(userId = "thierry", role = "host"),
             ),
-            custom = mapOf("color" to "red")
+            custom = mapOf("color" to "red"),
         )
         assert(result.isSuccess)
 
@@ -281,7 +281,7 @@ class AndroidDeviceTest : IntegrationTestBase(connectCoordinatorWS = false) {
         val connectionStateItem = connectionState.awaitItem()
         assertThat(connectionStateItem).isAnyOf(
             RealtimeConnection.Connected,
-            RealtimeConnection.Joined(result.getOrThrow())
+            RealtimeConnection.Joined(result.getOrThrow()),
         )
         if (connectionStateItem is RealtimeConnection.Joined) {
             connectionState.awaitItem()
@@ -313,7 +313,7 @@ class AndroidDeviceTest : IntegrationTestBase(connectCoordinatorWS = false) {
         val connectionStateItem = connectionState.awaitItem()
         assertThat(connectionStateItem).isAnyOf(
             RealtimeConnection.Connected,
-            RealtimeConnection.Joined(result.getOrThrow())
+            RealtimeConnection.Joined(result.getOrThrow()),
         )
         if (connectionStateItem is RealtimeConnection.Joined) {
             connectionState.awaitItem()
@@ -350,7 +350,7 @@ class AndroidDeviceTest : IntegrationTestBase(connectCoordinatorWS = false) {
         val connectionStateItem = connectionState.awaitItem()
         assertThat(connectionStateItem).isAnyOf(
             RealtimeConnection.Connected,
-            RealtimeConnection.Joined(result.getOrThrow())
+            RealtimeConnection.Joined(result.getOrThrow()),
         )
         if (connectionStateItem is RealtimeConnection.Joined) {
             connectionState.awaitItem()
@@ -423,7 +423,7 @@ class AndroidDeviceTest : IntegrationTestBase(connectCoordinatorWS = false) {
         val connectionStateItem = connectionState.awaitItem()
         assertThat(connectionStateItem).isAnyOf(
             RealtimeConnection.Connected,
-            RealtimeConnection.Joined(result.getOrThrow())
+            RealtimeConnection.Joined(result.getOrThrow()),
         )
         if (connectionStateItem is RealtimeConnection.Joined) {
             connectionState.awaitItem()
@@ -492,7 +492,7 @@ class AndroidDeviceTest : IntegrationTestBase(connectCoordinatorWS = false) {
         val connectionStateItem = connectionState.awaitItem()
         assertThat(connectionStateItem).isAnyOf(
             RealtimeConnection.Connected,
-            RealtimeConnection.Joined(result.getOrThrow())
+            RealtimeConnection.Joined(result.getOrThrow()),
         )
         if (connectionStateItem is RealtimeConnection.Joined) {
             connectionState.awaitItem()
@@ -516,7 +516,7 @@ class AndroidDeviceTest : IntegrationTestBase(connectCoordinatorWS = false) {
         val connectionStateItem = connectionState.awaitItem()
         assertThat(connectionStateItem).isAnyOf(
             RealtimeConnection.Connected,
-            RealtimeConnection.Joined(result.getOrThrow())
+            RealtimeConnection.Joined(result.getOrThrow()),
         )
         if (connectionStateItem is RealtimeConnection.Joined) {
             connectionState.awaitItem()
@@ -543,7 +543,7 @@ class AndroidDeviceTest : IntegrationTestBase(connectCoordinatorWS = false) {
         val connectionStateItem = connectionState.awaitItem()
         assertThat(connectionStateItem).isAnyOf(
             RealtimeConnection.Connected,
-            RealtimeConnection.Joined(joinResult.getOrThrow())
+            RealtimeConnection.Joined(joinResult.getOrThrow()),
         )
         if (connectionStateItem is RealtimeConnection.Joined) {
             connectionState.awaitItem()
@@ -552,7 +552,7 @@ class AndroidDeviceTest : IntegrationTestBase(connectCoordinatorWS = false) {
         // fake a participant joining
         val joinEvent = ParticipantJoinedEvent(
             callCid = call.cid,
-            participant = Participant(session_id = "fake", user_id = "fake")
+            participant = Participant(session_id = "fake", user_id = "fake"),
         )
         clientImpl.fireEvent(joinEvent, call.cid)
 
@@ -588,15 +588,15 @@ class AndroidDeviceTest : IntegrationTestBase(connectCoordinatorWS = false) {
         val layers = listOf(
             VideoLayerSetting(name = "f", active = false),
             VideoLayerSetting(name = "h", active = true),
-            VideoLayerSetting(name = "q", active = false)
+            VideoLayerSetting(name = "q", active = false),
         )
         val quality = ChangePublishQuality(
             video_senders = listOf(
                 VideoSender(
                     media_request = mediaRequest,
-                    layers = layers
-                )
-            )
+                    layers = layers,
+                ),
+            ),
         )
         val event = ChangePublishQualityEvent(changePublishQuality = quality)
         call.session?.updatePublishQuality(event)

@@ -66,13 +66,13 @@ internal fun LandscapeScreenSharingVideoRenderer(
         modifier: Modifier,
         call: Call,
         participant: ParticipantState,
-        style: VideoRendererStyle
+        style: VideoRendererStyle,
     ) -> Unit = { videoModifier, videoCall, videoParticipant, videoStyle ->
         ParticipantVideo(
             modifier = videoModifier,
             call = videoCall,
             participant = videoParticipant,
-            style = videoStyle
+            style = videoStyle,
         )
     },
 ) {
@@ -82,12 +82,12 @@ internal fun LandscapeScreenSharingVideoRenderer(
     Row(
         modifier = modifier
             .fillMaxSize()
-            .background(VideoTheme.colors.screenSharingBackground)
+            .background(VideoTheme.colors.screenSharingBackground),
     ) {
         Box(
             modifier = Modifier
                 .fillMaxHeight()
-                .weight(0.65f)
+                .weight(0.65f),
         ) {
             ScreenShareVideoRenderer(
                 modifier = Modifier.fillMaxSize(),
@@ -99,7 +99,7 @@ internal fun LandscapeScreenSharingVideoRenderer(
             if (me?.sessionId != sharingParticipant.sessionId) {
                 ScreenShareTooltip(
                     modifier = Modifier.align(Alignment.TopStart),
-                    sharingParticipant = sharingParticipant
+                    sharingParticipant = sharingParticipant,
                 )
             }
         }
@@ -112,19 +112,21 @@ internal fun LandscapeScreenSharingVideoRenderer(
             participants = participants,
             dominantSpeaker = dominantSpeaker,
             style = style,
-            videoRenderer = videoRenderer
+            videoRenderer = videoRenderer,
         )
     }
 }
 
 @Preview(
-    device = Devices.AUTOMOTIVE_1024p, widthDp = 1440, heightDp = 720
+    device = Devices.AUTOMOTIVE_1024p,
+    widthDp = 1440,
+    heightDp = 720,
 )
 @Preview(
     uiMode = Configuration.UI_MODE_NIGHT_YES,
     device = Devices.AUTOMOTIVE_1024p,
     widthDp = 1440,
-    heightDp = 720
+    heightDp = 720,
 )
 @Composable
 private fun LandscapeScreenSharingContentPreview() {
@@ -133,7 +135,7 @@ private fun LandscapeScreenSharingContentPreview() {
         LandscapeScreenSharingVideoRenderer(
             call = mockCall,
             session = ScreenSharingSession(
-                participant = mockParticipantList[1]
+                participant = mockParticipantList[1],
             ),
             participants = mockParticipantList,
             dominantSpeaker = mockParticipantList[1],
@@ -143,13 +145,15 @@ private fun LandscapeScreenSharingContentPreview() {
 }
 
 @Preview(
-    device = Devices.AUTOMOTIVE_1024p, widthDp = 1440, heightDp = 720
+    device = Devices.AUTOMOTIVE_1024p,
+    widthDp = 1440,
+    heightDp = 720,
 )
 @Preview(
     uiMode = Configuration.UI_MODE_NIGHT_YES,
     device = Devices.AUTOMOTIVE_1024p,
     widthDp = 1440,
-    heightDp = 720
+    heightDp = 720,
 )
 @Composable
 private fun LandscapeScreenSharingMyContentPreview() {
@@ -158,7 +162,7 @@ private fun LandscapeScreenSharingMyContentPreview() {
         LandscapeScreenSharingVideoRenderer(
             call = mockCall,
             session = ScreenSharingSession(
-                participant = mockParticipantList[0]
+                participant = mockParticipantList[0],
             ),
             participants = mockParticipantList,
             dominantSpeaker = mockParticipantList[0],

@@ -154,7 +154,8 @@ public class StreamPeerConnection(
         logger.d { "[createOffer] #sfu; #$typeTag; no args" }
         return createValue {
             connection.createOffer(
-                it, MediaConstraints()
+                it,
+                MediaConstraints(),
             )
         }
     }
@@ -185,8 +186,9 @@ public class StreamPeerConnection(
             connection.setRemoteDescription(
                 it,
                 SessionDescription(
-                    sessionDescription.type, sessionDescription.description.mungeCodecs()
-                )
+                    sessionDescription.type,
+                    sessionDescription.description.mungeCodecs(),
+                ),
             )
         }.also {
             pendingIceMutex.withLock {
@@ -209,7 +211,8 @@ public class StreamPeerConnection(
      */
     public suspend fun setLocalDescription(sessionDescription: SessionDescription): Result<Unit> {
         val sdp = SessionDescription(
-            sessionDescription.type, sessionDescription.description.mungeCodecs()
+            sessionDescription.type,
+            sessionDescription.description.mungeCodecs(),
         )
 
         localSdp = sdp
@@ -249,9 +252,11 @@ public class StreamPeerConnection(
      */
     public fun addAudioTransceiver(
         track: MediaStreamTrack,
-        streamIds: List<String>
+        streamIds: List<String>,
     ) {
-        logger.i { "[addAudioTransceiver] #sfu; #$typeTag; track: ${track.stringify()}, streamIds: $streamIds" }
+        logger.i {
+            "[addAudioTransceiver] #sfu; #$typeTag; track: ${track.stringify()}, streamIds: $streamIds"
+        }
         val transceiverInit = buildAudioTransceiverInit(streamIds)
 
         audioTransceiver = connection.addTransceiver(track, transceiverInit)
@@ -264,7 +269,9 @@ public class StreamPeerConnection(
      */
     private fun buildAudioTransceiverInit(streamIds: List<String>): RtpTransceiverInit {
         val fullQuality = RtpParameters.Encoding(
-            "a", true, 1.0
+            "a",
+            true,
+            1.0,
         ).apply {
             maxBitrateBps = 500_000
         }
@@ -272,7 +279,9 @@ public class StreamPeerConnection(
         val encodings = listOf(fullQuality)
 
         return RtpTransceiverInit(
-            RtpTransceiver.RtpTransceiverDirection.SEND_ONLY, streamIds, encodings
+            RtpTransceiver.RtpTransceiverDirection.SEND_ONLY,
+            streamIds,
+            encodings,
         )
     }
 
@@ -284,7 +293,9 @@ public class StreamPeerConnection(
      * @param streamIds The IDs that represent the stream tracks.
      */
     public fun addVideoTransceiver(track: MediaStreamTrack, streamIds: List<String>) {
-        logger.d { "[addVideoTransceiver] #sfu; #$typeTag; track: ${track.stringify()}, streamIds: $streamIds" }
+        logger.d {
+            "[addVideoTransceiver] #sfu; #$typeTag; track: ${track.stringify()}, streamIds: $streamIds"
+        }
         val transceiverInit = buildVideoTransceiverInit(streamIds)
 
         videoTransceiver = connection.addTransceiver(track, transceiverInit)
@@ -306,19 +317,25 @@ public class StreamPeerConnection(
          * for "half" and another half, or total quarter of maximum, for "quarter".
          */
         val quarterQuality = RtpParameters.Encoding(
-            "q", true, 4.0
+            "q",
+            true,
+            4.0,
         ).apply {
             maxBitrateBps = maxBitRate / 4
         }
 
         val halfQuality = RtpParameters.Encoding(
-            "h", true, 2.0
+            "h",
+            true,
+            2.0,
         ).apply {
             maxBitrateBps = maxBitRate / 2
         }
 
         val fullQuality = RtpParameters.Encoding(
-            "f", true, 1.0
+            "f",
+            true,
+            1.0,
         ).apply {
             maxBitrateBps = maxBitRate
 //            networkPriority = 3
@@ -328,7 +345,9 @@ public class StreamPeerConnection(
         val encodings = listOf(quarterQuality, halfQuality, fullQuality)
 
         return RtpTransceiverInit(
-            RtpTransceiver.RtpTransceiverDirection.SEND_ONLY, streamIds, encodings
+            RtpTransceiver.RtpTransceiverDirection.SEND_ONLY,
+            streamIds,
+            encodings,
         )
     }
 

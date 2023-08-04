@@ -46,7 +46,7 @@ class App : Application() {
             StreamGlobalExceptionHandler.install(
                 application = this,
                 packageName = MainActivity::class.java.name,
-                exceptionHandler = { stackTrace -> Firebase.crashlytics.log(stackTrace) }
+                exceptionHandler = { stackTrace -> Firebase.crashlytics.log(stackTrace) },
             )
         }
     }
@@ -56,7 +56,7 @@ class App : Application() {
         user: User,
         token: String,
         apiKey: ApiKey,
-        loggingLevel: LoggingLevel
+        loggingLevel: LoggingLevel,
     ): StreamVideo {
         return StreamVideoBuilder(
             context = this,
@@ -66,16 +66,18 @@ class App : Application() {
             loggingLevel = loggingLevel,
             ensureSingleInstance = false,
             notificationConfig = NotificationConfig(
-                pushDeviceGenerators = listOf(FirebasePushDeviceGenerator(providerName = "firebase"))
+                pushDeviceGenerators = listOf(
+                    FirebasePushDeviceGenerator(providerName = "firebase"),
+                ),
             ),
             tokenProvider = {
                 val email = user.custom["email"]
                 val response = StreamVideoNetwork.tokenService.fetchToken(
                     userId = email,
-                    apiKey = API_KEY
+                    apiKey = API_KEY,
                 )
                 response.token
-            }
+            },
         ).build()
     }
 
@@ -89,7 +91,7 @@ class App : Application() {
                 backgroundSyncEnabled = true,
                 userPresence = true,
             ),
-            appContext = this
+            appContext = this,
         )
 
         val logLevel = if (BuildConfig.DEBUG) ChatLogLevel.ALL else ChatLogLevel.NOTHING
@@ -101,16 +103,16 @@ class App : Application() {
         val chatUser = io.getstream.chat.android.client.models.User(
             id = user.id,
             name = user.name,
-            image = user.image
+            image = user.image,
         )
 
         chatClient.connectUser(
             user = chatUser,
-            token = token
+            token = token,
         ).enqueue()
     }
 }
 
-const val API_KEY = BuildConfig.DOGFOODING_API_KEY
+const val API_KEY = BuildConfig.API_KEY
 
 val Context.app get() = applicationContext as App

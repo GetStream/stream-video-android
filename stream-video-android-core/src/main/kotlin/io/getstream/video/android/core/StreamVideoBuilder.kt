@@ -75,7 +75,7 @@ public class StreamVideoBuilder @JvmOverloads constructor(
     private val apiKey: ApiKey,
     private val geo: GEO = GEO.GlobalEdgeNetwork,
     private var user: User = User(
-        type = UserType.Anonymous
+        type = UserType.Anonymous,
     ),
     private val token: UserToken = "",
     private val tokenProvider: (suspend (error: Throwable?) -> String)? = null,
@@ -87,7 +87,7 @@ public class StreamVideoBuilder @JvmOverloads constructor(
     private var encryptPreferences: Boolean = true,
     private val connectionTimeoutInMs: Long = 10000,
     private var ensureSingleInstance: Boolean = true,
-    private val videoDomain: String = "video.stream-io-api.com"
+    private val videoDomain: String = "video.stream-io-api.com",
 ) {
     private val context: Context = context.applicationContext
 
@@ -98,7 +98,9 @@ public class StreamVideoBuilder @JvmOverloads constructor(
 
         val existingInstance = StreamVideo.instanceOrNull()
         if (existingInstance != null && ensureSingleInstance) {
-            throw IllegalArgumentException("Creating 2 instance of the video client will cause bugs with call.state. Before creating a new client, please remove the old one. You can remove the old client using StreamVideo.removeClient()")
+            throw IllegalArgumentException(
+                "Creating 2 instance of the video client will cause bugs with call.state. Before creating a new client, please remove the old one. You can remove the old client using StreamVideo.removeClient()",
+            )
         }
 
         if (apiKey.isBlank()) {
@@ -107,13 +109,13 @@ public class StreamVideoBuilder @JvmOverloads constructor(
 
         if (token.isBlank() && tokenProvider == null && user.type == UserType.Authenticated) {
             throw IllegalArgumentException(
-                "Either a user token or a token provider must be provided"
+                "Either a user token or a token provider must be provided",
             )
         }
 
         if (user.type == UserType.Authenticated && user.id.isEmpty()) {
             throw IllegalArgumentException(
-                "Please specify the user id for authenticated users"
+                "Please specify the user id for authenticated users",
             )
         } else if (user.type == UserType.Anonymous && user.id.isEmpty()) {
             val randomId = UUID.randomUUID().toString()
@@ -149,7 +151,7 @@ public class StreamVideoBuilder @JvmOverloads constructor(
             loggingLevel = loggingLevel,
             user = user,
             apiKey = apiKey,
-            userToken = token
+            userToken = token,
         )
 
         // install the StreamNotificationManager to configure push notifications.

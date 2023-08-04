@@ -138,7 +138,7 @@ public class StreamUserDataStore constructor(
         public fun instance(): StreamUserDataStore {
             return internalStreamUserDataStore
                 ?: throw IllegalStateException(
-                    "StreamUserDataStore.install() must be called before obtaining StreamUserDataStore instance."
+                    "StreamUserDataStore.install() must be called before obtaining StreamUserDataStore instance.",
                 )
         }
 

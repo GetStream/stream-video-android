@@ -45,7 +45,7 @@ internal interface JobHolder {
         runningJobs.add(
             lifecycleOwner.lifecycleScope.launchWhenCreated {
                 job()
-            }
+            },
         )
     }
 

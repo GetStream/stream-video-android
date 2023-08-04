@@ -6,9 +6,9 @@ object Configuration {
     const val minSdk = 24
     const val majorVersion = 0
     const val minorVersion = 2
-    const val patchVersion = 1
+    const val patchVersion = 3
     const val versionName = "$majorVersion.$minorVersion.$patchVersion"
-    const val versionCode = 3
+    const val versionCode = 4
     const val snapshotVersionName = "$majorVersion.$minorVersion.${patchVersion}-SNAPSHOT"
     const val artifactGroup = "io.getstream"
 }

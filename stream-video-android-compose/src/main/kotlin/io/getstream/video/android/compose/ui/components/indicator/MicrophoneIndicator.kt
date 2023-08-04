@@ -46,7 +46,7 @@ public fun MicrophoneIndicator(
                 .padding(end = VideoTheme.dimens.microphoneIndicatorPadding),
             painter = painterResource(id = R.drawable.stream_video_ic_mic_on),
             tint = Color.White,
-            contentDescription = "microphone enabled"
+            contentDescription = "microphone enabled",
         )
     } else {
         Icon(
@@ -55,7 +55,7 @@ public fun MicrophoneIndicator(
                 .padding(end = VideoTheme.dimens.microphoneIndicatorPadding),
             painter = painterResource(id = R.drawable.stream_video_ic_mic_off),
             tint = VideoTheme.colors.errorAccent,
-            contentDescription = "microphone disabled"
+            contentDescription = "microphone disabled",
         )
     }
 }

@@ -77,8 +77,8 @@ class AudioRoomTest : IntegrationTestBase() {
         val result = client.call("audio_room").create(
             members = listOf(
                 MemberRequest("john", role = "admin"),
-                MemberRequest("tommaso", role = "moderator")
-            )
+                MemberRequest("tommaso", role = "moderator"),
+            ),
         )
         assertSuccess(result)
     }

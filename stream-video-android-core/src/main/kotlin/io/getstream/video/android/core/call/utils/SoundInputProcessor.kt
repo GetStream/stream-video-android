@@ -16,8 +16,9 @@
 
 package io.getstream.video.android.core.call.utils
 
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlin.math.log10
-import kotlin.math.pow
+import kotlin.math.sqrt
 
 /**
  * The average decibel value is calculated within the last X milliseconds defined
@@ -31,12 +32,15 @@ private const val SAMPLING_TIME_MS = 600
  * beyond this level then the [thresholdCrossedCallback] is invoked.
  * @param thresholdCrossedCallback - invoked when the threshold is met
  */
-internal class DecibelThresholdDetection(
-    private val thresholdInDecibels: Int = 45,
-    val thresholdCrossedCallback: () -> Unit
+internal class SoundInputProcessor(
+    private val thresholdInDecibels: Int = -45,
+    val thresholdCrossedCallback: () -> Unit,
 ) {
 
     private val decibelSamples = LinkedHashMap<Long, Double>()
+
+    private val _currentAudioLevels = MutableStateFlow(0f)
+    val currentAudioLevel = _currentAudioLevels
 
     /**
      * Forward the input audio data from the microphone to this function.
@@ -44,6 +48,10 @@ internal class DecibelThresholdDetection(
      */
     fun processSoundInput(pcmByteArray: ByteArray) {
         val decibels = calculateAverageDecibelPower(pcmByteArray)
+
+        val normalisedOutput = AudioValuePercentageNormaliser.normalise(decibels)
+        _currentAudioLevels.value = normalisedOutput
+
         if (!decibels.isInfinite()) {
             val average = calculateDecibelAverage(decibels)
             if (average >= thresholdInDecibels) {
@@ -54,26 +62,24 @@ internal class DecibelThresholdDetection(
         }
     }
 
-    private fun calculateAverageDecibelPower(pcmData: ByteArray): Double {
+    private fun calculateAverageDecibelPower(soundData: ByteArray): Double {
         // For code clarity the following code expects the pcmData to be in PCM 16bit format.
         // And this is the default format used by the JavaAudioDeviceModule, so unless someone
         // in this class will override the default value then we are safe.
-
-        val referencePressure = 0.00002 // 20 µPa (reference pressure for 0 dB)
-        val referenceAmplitude = 32767.0 // Maximum amplitude for 16-bit signed PCM
-
-        var totalSquaredAmplitude = 0.0
-
-        for (i in pcmData.indices step 2) {
-            val sample =
-                ((pcmData[i + 1].toInt() shl 8) or (pcmData[i].toInt() and 0xFF)).toDouble()
-            val amplitude = sample / referenceAmplitude
-            totalSquaredAmplitude += amplitude.pow(2)
+        val samples = ShortArray(soundData.size / 2) { i ->
+            ((soundData[i * 2 + 1].toInt() and 0xFF) shl 8 or (soundData[i * 2].toInt() and 0xFF)).toShort()
         }
 
-        val rmsAmplitude = kotlin.math.sqrt(totalSquaredAmplitude / (pcmData.size / 2))
-        val pressureRatio = rmsAmplitude / referencePressure
-        return 10 * log10(pressureRatio.pow(2))
+        // Calculate RMS value
+        var sumSquared = 0.0
+        for (sample in samples) {
+            val sampleValue = sample.toDouble() / Short.MAX_VALUE
+            sumSquared += sampleValue * sampleValue
+        }
+        val rmsValue = sqrt(sumSquared / samples.size)
+
+        // Calculate decibel value (assumes a reference level of 1.0)
+        return 20 * log10(rmsValue)
     }
 
     private fun calculateDecibelAverage(decibels: Double): Double {

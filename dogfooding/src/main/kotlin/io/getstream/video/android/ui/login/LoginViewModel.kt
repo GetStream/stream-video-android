@@ -33,6 +33,7 @@ import io.getstream.video.android.datastore.delegate.StreamUserDataStore
 import io.getstream.video.android.model.User
 import io.getstream.video.android.token.StreamVideoNetwork
 import io.getstream.video.android.token.TokenResponse
+import io.getstream.video.android.util.UserIdGenerator
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -50,7 +51,7 @@ import javax.inject.Inject
 
 @HiltViewModel
 class LoginViewModel @Inject constructor(
-    private val dataStore: StreamUserDataStore
+    private val dataStore: StreamUserDataStore,
 ) : ViewModel() {
 
     private val event: MutableSharedFlow<LoginEvent> = MutableSharedFlow()
@@ -69,11 +70,10 @@ class LoginViewModel @Inject constructor(
     }
 
     private fun signInInSuccess(email: String) = flow {
-
         try {
             val response = StreamVideoNetwork.tokenService.fetchToken(
                 userId = email,
-                apiKey = API_KEY
+                apiKey = API_KEY,
             )
             emit(LoginUiState.SignInComplete(response))
         } catch (exception: Throwable) {
@@ -95,6 +95,15 @@ class LoginViewModel @Inject constructor(
                     delay(10)
                     handleUiEvent(LoginEvent.SignInInSuccess(userId = user.id))
                 }
+            } else {
+                // Production apps have an automatic guest login. Logging the user out
+                // will just re-login automatically with a new random user ID.
+                if (BuildConfig.FLAVOR == "production") {
+                    handleUiEvent(LoginEvent.Loading)
+                    handleUiEvent(
+                        LoginEvent.SignInInSuccess(UserIdGenerator.generateRandomString()),
+                    )
+                }
             }
         }
     }
@@ -111,7 +120,7 @@ class LoginViewModel @Inject constructor(
             name = authUser?.displayName ?: "",
             image = authUser?.photoUrl?.toString() ?: "",
             role = "admin",
-            custom = mapOf("email" to userId)
+            custom = mapOf("email" to userId),
         )
 
         if (!StreamVideo.isInstalled) {
@@ -119,7 +128,7 @@ class LoginViewModel @Inject constructor(
                 apiKey = API_KEY,
                 user = user,
                 loggingLevel = LoggingLevel(priority = Priority.DEBUG),
-                token = token
+                token = token,
             )
         }
 

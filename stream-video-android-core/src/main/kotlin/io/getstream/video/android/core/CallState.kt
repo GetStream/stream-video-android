@@ -103,12 +103,14 @@ import org.openapitools.client.models.UpdateCallResponse
 import org.openapitools.client.models.UpdatedCallPermissionsEvent
 import org.openapitools.client.models.VideoEvent
 import org.threeten.bp.Clock
-import org.threeten.bp.Duration
 import org.threeten.bp.Instant
 import org.threeten.bp.OffsetDateTime
 import org.threeten.bp.ZoneOffset
 import stream.video.sfu.models.Participant
 import stream.video.sfu.models.TrackType
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 import java.util.SortedMap
 import java.util.UUID
 import kotlin.time.DurationUnit
@@ -163,7 +165,7 @@ public class CallState(
     private val client: StreamVideo,
     private val call: Call,
     private val user: User,
-    internal val scope: CoroutineScope
+    internal val scope: CoroutineScope,
 ) {
 
     private val logger by taggedLogger("CallState")
@@ -188,10 +190,16 @@ public class CallState(
     private val _participantCounts: MutableStateFlow<ParticipantCount?> = MutableStateFlow(null)
     val participantCounts: StateFlow<ParticipantCount?> = _participantCounts
 
+    /** a count of the total number of participants. */
+    val totalParticipants = _participantCounts.mapState { it?.total ?: 0 }
+
     /** Your own participant state */
     public val me: StateFlow<ParticipantState?> = _participants.mapState {
         it[call.clientImpl.sessionId]
     }
+
+    /** Your own participant state */
+    public val localParticipant = me
 
     /** participants who are currently speaking */
     private val _activeSpeakers: MutableStateFlow<List<ParticipantState>> =
@@ -236,8 +244,8 @@ public class CallState(
                     { it.screenSharingEnabled.value },
                     { it.lastSpeakingAt.value },
                     { it.videoEnabled.value },
-                    { it.joinedAt.value }
-                )
+                    { it.joinedAt.value },
+                ),
             ).reversed()
 
             scope.launch {
@@ -326,20 +334,34 @@ public class CallState(
             delay(1000)
             val started = _session.value?.startedAt
             val ended = _session.value?.endedAt ?: OffsetDateTime.now()
-            val difference = if (started == null) null else {
+            val difference = if (started == null) {
+                null
+            } else {
                 ended.toInstant().toEpochMilli() - started.toInstant().toEpochMilli()
             }
             emit(difference)
         }
     }
 
-    /** how long the call has been running, null if the call didn't start yet */
+    /** how long the call has been running, rounded to seconds, null if the call didn't start yet */
     public val duration: StateFlow<kotlin.time.Duration?> =
-        _durationInMs.transform { emit((it ?: 0L).toDuration(DurationUnit.MILLISECONDS)) }.stateIn(scope, SharingStarted.WhileSubscribed(10000L), null)
+        _durationInMs.transform { emit(((it ?: 0L) / 1000L).toDuration(DurationUnit.SECONDS)) }
+            .stateIn(scope, SharingStarted.WhileSubscribed(10000L), null)
 
     /** how many milliseconds the call has been running, null if the call didn't start yet */
     public val durationInMs: StateFlow<Long?> =
         _durationInMs.stateIn(scope, SharingStarted.WhileSubscribed(10000L), null)
+
+    /** how many milliseconds the call has been running in the simple date format. */
+    public val durationInDateFormat: StateFlow<String?> = durationInMs.mapState { durationInMs ->
+        if (durationInMs == null) {
+            null
+        } else {
+            val date = Date(durationInMs ?: 0)
+            val dateFormat = SimpleDateFormat("HH:MM:SS", Locale.US)
+            dateFormat.format(date)
+        }
+    }
 
     /** Check if you have permissions to do things like share your audio, video, screen etc */
     public fun hasPermission(permission: String): StateFlow<Boolean> {
@@ -729,7 +751,7 @@ public class CallState(
                     val newList = callSessionResponse.participants.toMutableList()
                     newList.removeIf { it.userSessionId == event.participant.userSessionId }
                     _session.value = callSessionResponse.copy(
-                        participants = newList.toImmutableList()
+                        participants = newList.toImmutableList(),
                     )
                 }
             }
@@ -741,7 +763,7 @@ public class CallState(
                         user = event.participant.user,
                         joinedAt = event.createdAt,
                         role = "user",
-                        userSessionId = event.participant.userSessionId
+                        userSessionId = event.participant.userSessionId,
                     )
                     val index = newList.indexOfFirst { user.id == event.participant.user.id }
                     if (index == -1) {
@@ -750,7 +772,7 @@ public class CallState(
                         newList[index] = participant
                     }
                     _session.value = callSessionResponse.copy(
-                        participants = newList.toImmutableList()
+                        participants = newList.toImmutableList(),
                     )
                 }
                 updateRingingState()
@@ -842,7 +864,6 @@ public class CallState(
     private fun startRingingTimer() {
         ringingTimerJob?.cancel()
         ringingTimerJob = scope.launch {
-
             val autoCancelTimeout = settings.value?.ring?.autoCancelTimeoutMs
 
             if (autoCancelTimeout != null && autoCancelTimeout > 0) {
@@ -914,7 +935,7 @@ public class CallState(
         sessionId: String,
         userId: String,
         user: User? = null,
-        updateFlow: Boolean = false
+        updateFlow: Boolean = false,
     ): ParticipantState {
         val participantMap = _participants.value.toSortedMap()
         val participantState = if (participantMap.contains(sessionId)) {
@@ -1052,7 +1073,6 @@ public class CallState(
 }
 
 private fun MemberResponse.toMemberState(): MemberState {
-
     return MemberState(
         user = user.toUser(),
         custom = custom,

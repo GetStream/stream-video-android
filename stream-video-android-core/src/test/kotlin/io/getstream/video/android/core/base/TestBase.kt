@@ -65,7 +65,7 @@ public open class TestBase {
         if (!StreamUserDataStore.isInstalled) {
             StreamUserDataStore.install(
                 context = context.applicationContext,
-                isEncrypted = false
+                isEncrypted = false,
             )
         }
     }

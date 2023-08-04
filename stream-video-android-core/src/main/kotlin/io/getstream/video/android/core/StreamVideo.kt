@@ -74,7 +74,7 @@ public interface StreamVideo : NotificationHandler {
 
     /** Subscribe to all events */
     public fun subscribe(
-        listener: VideoEventListener<VideoEvent>
+        listener: VideoEventListener<VideoEvent>,
     ): EventSubscription
 
     /**
@@ -130,7 +130,7 @@ public interface StreamVideo : NotificationHandler {
         public fun instance(): StreamVideo {
             return internalStreamVideo
                 ?: throw IllegalStateException(
-                    "StreamVideoBuilder.build() must be called before obtaining StreamVideo instance."
+                    "StreamVideoBuilder.build() must be called before obtaining StreamVideo instance.",
                 )
         }
 

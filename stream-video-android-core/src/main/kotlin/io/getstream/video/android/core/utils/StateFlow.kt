@@ -32,7 +32,7 @@ import kotlinx.coroutines.flow.stateIn
  * */
 class DerivedStateFlow<T>(
     private val getValue: () -> T,
-    private val flow: Flow<T>
+    private val flow: Flow<T>,
 ) : StateFlow<T> {
 
     override val replayCache: List<T>
@@ -50,13 +50,13 @@ class DerivedStateFlow<T>(
 fun <T1, R> StateFlow<T1>.mapState(transform: (a: T1) -> R): StateFlow<R> {
     return DerivedStateFlow(
         getValue = { transform(this.value) },
-        flow = this.map { a -> transform(a) }
+        flow = this.map { a -> transform(a) },
     )
 }
 
 fun <T1, T2, R> combineStates(flow: StateFlow<T1>, flow2: StateFlow<T2>, transform: (a: T1, b: T2) -> R): StateFlow<R> {
     return DerivedStateFlow(
         getValue = { transform(flow.value, flow2.value) },
-        flow = combine(flow, flow2) { a, b -> transform(a, b) }
+        flow = combine(flow, flow2) { a, b -> transform(a, b) },
     )
 }
