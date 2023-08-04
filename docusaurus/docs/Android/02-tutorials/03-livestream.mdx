@@ -180,8 +180,8 @@ VideoTheme {
     val connection by call.state.connection.collectAsState()
     val totalParticipants by call.state.totalParticipants.collectAsState()
     val backstage by call.state.backstage.collectAsState()
-    val me by call.state.me.collectAsState()
-    val video = me?.video?.collectAsState()?.value
+    val localParticipant by call.state.localParticipant.collectAsState()
+    val video = localParticipant?.video?.collectAsState()?.value
     val duration by call.state.duration.collectAsState()
 
     androidx.compose.material.Scaffold(
@@ -213,7 +213,7 @@ VideoTheme {
 
                         Text(
                             modifier = Modifier.align(Alignment.Center),
-                            text = "Live for 1:23",
+                            text = "Live for $duration",
                             color = VideoTheme.colors.textHighEmphasis
                         )
                     }

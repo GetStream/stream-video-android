@@ -97,13 +97,13 @@ class MainActivity : ComponentActivity() {
                 val video = localParticipant?.video?.collectAsState()?.value
                 val duration by call.state.duration.collectAsState()
 
-                Scaffold(
+                androidx.compose.material.Scaffold(
                     modifier = Modifier
                         .fillMaxSize()
                         .background(VideoTheme.colors.appBackground)
                         .padding(6.dp),
                     contentColor = VideoTheme.colors.appBackground,
-                    // Use containerColor in material3
+                    backgroundColor = VideoTheme.colors.appBackground,
                     topBar = {
                         if (connection == RealtimeConnection.Connected) {
                             if (!backstage) {
@@ -134,10 +134,10 @@ class MainActivity : ComponentActivity() {
                         }
                     },
                     bottomBar = {
-                        Button(
+                        androidx.compose.material.Button(
                             colors = ButtonDefaults.buttonColors(
                                 contentColor = VideoTheme.colors.primaryAccent,
-                                // Use containerColor in material3
+                                backgroundColor = VideoTheme.colors.primaryAccent
                             ),
                             onClick = {
                                 lifecycleScope.launch {
