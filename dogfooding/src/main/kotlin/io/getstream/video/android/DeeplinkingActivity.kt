@@ -102,6 +102,7 @@ class DeeplinkingActivity : ComponentActivity() {
                 val intent = CallActivity.createIntent(
                     context = this@DeeplinkingActivity,
                     callId = callId,
+                    disableMicOverride = intent.getBooleanExtra(EXTRA_DISABLE_MIC_OVERRIDE, false),
                 ).apply {
                     flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
                 }
@@ -113,13 +114,24 @@ class DeeplinkingActivity : ComponentActivity() {
 
     companion object {
 
+        private const val EXTRA_DISABLE_MIC_OVERRIDE = "disableMic"
+
+        /**
+         * @param callId the Call ID you want to join
+         * @param disableMicOverride optional parameter if you want to override the users setting
+         * and disable the microphone.
+         */
         @JvmStatic
         fun createIntent(
             context: Context,
             callId: String,
+            disableMicOverride: Boolean = false,
         ): Intent {
             return Intent(context, DeeplinkingActivity::class.java).apply {
-                data = Uri.Builder().appendQueryParameter("id", callId).build()
+                data = Uri.Builder()
+                    .appendQueryParameter("id", callId)
+                    .build()
+                putExtra(EXTRA_DISABLE_MIC_OVERRIDE, disableMicOverride)
             }
         }
     }
