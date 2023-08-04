@@ -345,7 +345,7 @@ public class CallState(
 
     /** how long the call has been running, rounded to seconds, null if the call didn't start yet */
     public val duration: StateFlow<kotlin.time.Duration?> =
-        _durationInMs.transform { emit(((it ?: 0L)/1000L).toDuration(DurationUnit.SECONDS)) }
+        _durationInMs.transform { emit(((it ?: 0L) / 1000L).toDuration(DurationUnit.SECONDS)) }
             .stateIn(scope, SharingStarted.WhileSubscribed(10000L), null)
 
     /** how many milliseconds the call has been running, null if the call didn't start yet */

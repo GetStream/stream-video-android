@@ -45,18 +45,15 @@ import io.getstream.video.android.core.GEO
 import io.getstream.video.android.core.RealtimeConnection
 import io.getstream.video.android.core.StreamVideoBuilder
 import io.getstream.video.android.model.User
-import io.getstream.video.android.tutorial.livestream.ui.LiveButton
-import io.getstream.video.android.tutorial.livestream.ui.LiveLabel
-import io.getstream.video.android.tutorial.livestream.ui.TimeLabel
 import kotlinx.coroutines.launch
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        val userToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoiU2hhYWtfVGkiLCJpc3MiOiJwcm9udG8iLCJzdWIiOiJ1c2VyL1NoYWFrX1RpIiwiaWF0IjoxNjkxMDAyODQ1LCJleHAiOjE2OTE2MDc2NTB9.Siv53HaphgCP4NNY9WlxmznrBPE5Yo2WcO1LZzmG9eU"
-        val userId = "Shaak_Ti"
-        val callId = "BJxqOk7FHbKR"
+        val userToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoiQnJha2lzcyIsImlzcyI6InByb250byIsInN1YiI6InVzZXIvQnJha2lzcyIsImlhdCI6MTY5MTE3MDE1OSwiZXhwIjoxNjkxNzc0OTY0fQ.VVEvnlQK7s-MY3FZ_gnq5K_9-NywidhWZjJiGuARCmQ"
+        val userId = "Brakiss"
+        val callId = "gu0aLbmH9zRf"
 
         // step1 - create a user.
         val user = User(
@@ -110,24 +107,24 @@ class MainActivity : ComponentActivity() {
                                 Box(
                                     modifier = Modifier
                                         .fillMaxWidth()
-                                        .padding(6.dp)
+                                        .padding(6.dp),
                                 ) {
                                     Text(
                                         modifier = Modifier
                                             .align(Alignment.CenterEnd)
                                             .background(
                                                 color = VideoTheme.colors.primaryAccent,
-                                                shape = RoundedCornerShape(6.dp)
+                                                shape = RoundedCornerShape(6.dp),
                                             )
                                             .padding(horizontal = 12.dp, vertical = 4.dp),
                                         text = "Live $totalParticipants",
-                                        color = Color.White
+                                        color = Color.White,
                                     )
 
                                     Text(
                                         modifier = Modifier.align(Alignment.Center),
                                         text = "Live for $duration",
-                                        color = VideoTheme.colors.textHighEmphasis
+                                        color = VideoTheme.colors.textHighEmphasis,
                                     )
                                 }
                             }
@@ -137,20 +134,20 @@ class MainActivity : ComponentActivity() {
                         androidx.compose.material.Button(
                             colors = ButtonDefaults.buttonColors(
                                 contentColor = VideoTheme.colors.primaryAccent,
-                                backgroundColor = VideoTheme.colors.primaryAccent
+                                backgroundColor = VideoTheme.colors.primaryAccent,
                             ),
                             onClick = {
                                 lifecycleScope.launch {
                                     if (backstage) call.goLive() else call.stopLive()
                                 }
-                            }
+                            },
                         ) {
                             Text(
                                 text = if (backstage) "Go Live" else "Stop Broadcast",
-                                color = Color.White
+                                color = Color.White,
                             )
                         }
-                    }
+                    },
                 ) {
                     VideoRenderer(
                         modifier = Modifier
@@ -161,7 +158,7 @@ class MainActivity : ComponentActivity() {
                         video = video,
                         videoFallbackContent = {
                             Text(text = "Video rendering failed")
-                        }
+                        },
                     )
                 }
             }

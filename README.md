@@ -113,12 +113,10 @@ Video roadmap and changelog is available [here](https://github.com/GetStream/pro
 ### 0.4.0 milestone
 
 - [ ] Android SDK development.md cleanup (Daniel)
-- [ ] Upgrade to more recent versions of webrtc
+- [ ] Upgrade to more recent versions of webrtc (Kanat)
 - [ ] Picture of the video stream at highest resolution
 - [ ] Review foreground service vs backend for some things like screensharing etc
 - [ ] Audio & Video filters. Support  (Daniel)
-- [ ] H264 workaround on Samsung 23 (see https://github.com/livekit/client-sdk-android/blob/main/livekit-android-sdk/src/main/java/io/livekit/android/webrtc/SimulcastVideoEncoderFactoryWrapper.kt#L34 and
-- https://github.com/react-native-webrtc/react-native-webrtc/issues/983#issuecomment-975624906)
 - [ ] Dynascale 2.0
 - [ ] Support participant.custom field which was previously ignored. ParticipantState line 216
 - [ ] Bug: Screensharing on Firefox has some issues when rendering on android (Daniel)
@@ -133,6 +131,8 @@ Video roadmap and changelog is available [here](https://github.com/GetStream/pro
 - [ ] Screensharing from mobile
 - [ ] Camera controls
 - [ ] Tap to focus
+- [ ] H264 workaround on Samsung 23 (see https://github.com/livekit/client-sdk-android/blob/main/livekit-android-sdk/src/main/java/io/livekit/android/webrtc/SimulcastVideoEncoderFactoryWrapper.kt#L34 and
+- https://github.com/react-native-webrtc/react-native-webrtc/issues/983#issuecomment-975624906)
 
 ### Dynascale 2.0
 
