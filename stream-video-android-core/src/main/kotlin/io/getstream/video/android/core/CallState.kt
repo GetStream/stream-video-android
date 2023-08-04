@@ -198,6 +198,9 @@ public class CallState(
         it[call.clientImpl.sessionId]
     }
 
+    /** Your own participant state */
+    public val localParticipant = me
+
     /** participants who are currently speaking */
     private val _activeSpeakers: MutableStateFlow<List<ParticipantState>> =
         MutableStateFlow(emptyList())
@@ -340,9 +343,9 @@ public class CallState(
         }
     }
 
-    /** how long the call has been running, null if the call didn't start yet */
+    /** how long the call has been running, rounded to seconds, null if the call didn't start yet */
     public val duration: StateFlow<kotlin.time.Duration?> =
-        _durationInMs.transform { emit((it ?: 0L).toDuration(DurationUnit.MILLISECONDS)) }
+        _durationInMs.transform { emit(((it ?: 0L)/1000L).toDuration(DurationUnit.SECONDS)) }
             .stateIn(scope, SharingStarted.WhileSubscribed(10000L), null)
 
     /** how many milliseconds the call has been running, null if the call didn't start yet */

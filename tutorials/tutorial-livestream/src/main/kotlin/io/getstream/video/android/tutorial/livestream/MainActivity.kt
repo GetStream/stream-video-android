@@ -26,6 +26,8 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.Button
+import androidx.compose.material.ButtonDefaults
 import androidx.compose.material.Scaffold
 import androidx.compose.material.Text
 import androidx.compose.runtime.collectAsState
@@ -52,10 +54,9 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        val userId = "Biggs_Darklighter"
-        val userToken =
-            "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoiQmlnZ3NfRGFya2xpZ2h0ZXIiLCJpc3MiOiJwcm9udG8iLCJzdWIiOiJ1c2VyL0JpZ2dzX0RhcmtsaWdodGVyIiwiaWF0IjoxNjkwNzU5MDI5LCJleHAiOjE2OTEzNjM4MzR9.HRTa18DYVHnDlS3hMCDouQsEfpYDOiqESMlWe-7-NPI"
-        val callId = "yVb6Pi7GgTiJ"
+        val userToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoiU2hhYWtfVGkiLCJpc3MiOiJwcm9udG8iLCJzdWIiOiJ1c2VyL1NoYWFrX1RpIiwiaWF0IjoxNjkxMDAyODQ1LCJleHAiOjE2OTE2MDc2NTB9.Siv53HaphgCP4NNY9WlxmznrBPE5Yo2WcO1LZzmG9eU"
+        val userId = "Shaak_Ti"
+        val callId = "BJxqOk7FHbKR"
 
         // step1 - create a user.
         val user = User(
@@ -67,7 +68,7 @@ class MainActivity : ComponentActivity() {
         // step2 - initialize StreamVideo. For a production app we recommend adding the client to your Application class or di module.
         val client = StreamVideoBuilder(
             context = applicationContext,
-            apiKey = "mmhfdzb5evj2", // demo API key
+            apiKey = "hd8szvscpxvd", // demo API key
             geo = GEO.GlobalEdgeNetwork,
             user = user,
             token = userToken,
@@ -89,52 +90,67 @@ class MainActivity : ComponentActivity() {
 
             // step4 - apply VideoTheme
             VideoTheme {
-                val participantCount by call.state.participantCounts.collectAsState()
                 val connection by call.state.connection.collectAsState()
+                val totalParticipants by call.state.totalParticipants.collectAsState()
                 val backstage by call.state.backstage.collectAsState()
-                val me by call.state.me.collectAsState()
-                val video = me?.video?.collectAsState()?.value
-                val sessionTime by call.state.liveDurationInMs.collectAsState()
+                val localParticipant by call.state.localParticipant.collectAsState()
+                val video = localParticipant?.video?.collectAsState()?.value
+                val duration by call.state.duration.collectAsState()
 
                 Scaffold(
                     modifier = Modifier
                         .fillMaxSize()
-                        .background(Color(0xFF272A30))
+                        .background(VideoTheme.colors.appBackground)
                         .padding(6.dp),
-                    contentColor = Color(0xFF272A30),
-                    backgroundColor = Color(0xFF272A30),
+                    contentColor = VideoTheme.colors.appBackground,
+                    // Use containerColor in material3
                     topBar = {
                         if (connection == RealtimeConnection.Connected) {
-                            Box(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(6.dp),
-                            ) {
-                                if (!backstage) {
-                                    LiveLabel(
-                                        modifier = Modifier.align(Alignment.CenterStart),
-                                        liveCount = participantCount?.total ?: 0,
+                            if (!backstage) {
+                                Box(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(6.dp)
+                                ) {
+                                    Text(
+                                        modifier = Modifier
+                                            .align(Alignment.CenterEnd)
+                                            .background(
+                                                color = VideoTheme.colors.primaryAccent,
+                                                shape = RoundedCornerShape(6.dp)
+                                            )
+                                            .padding(horizontal = 12.dp, vertical = 4.dp),
+                                        text = "Live $totalParticipants",
+                                        color = VideoTheme.colors.textHighEmphasis
+                                    )
+
+                                    Text(
+                                        modifier = Modifier.align(Alignment.Center),
+                                        text = "Live for $duration",
+                                        color = VideoTheme.colors.textHighEmphasis
                                     )
                                 }
-
-                                TimeLabel(
-                                    modifier = Modifier.align(Alignment.Center),
-                                    sessionTime = sessionTime ?: 0,
-                                )
                             }
                         }
                     },
                     bottomBar = {
-                        LiveButton(
-                            modifier = Modifier.padding(9.dp),
-                            call = call,
-                            isBackstage = backstage,
-                        ) {
-                            lifecycleScope.launch {
-                                if (backstage) call.goLive() else call.stopLive()
+                        Button(
+                            colors = ButtonDefaults.buttonColors(
+                                contentColor = VideoTheme.colors.primaryAccent,
+                                // Use containerColor in material3
+                            ),
+                            onClick = {
+                                lifecycleScope.launch {
+                                    if (backstage) call.goLive() else call.stopLive()
+                                }
                             }
+                        ) {
+                            Text(
+                                text = if (backstage) "Go Live" else "Stop Broadcast",
+                                color = Color.White
+                            )
                         }
-                    },
+                    }
                 ) {
                     VideoRenderer(
                         modifier = Modifier
@@ -145,7 +161,7 @@ class MainActivity : ComponentActivity() {
                         video = video,
                         videoFallbackContent = {
                             Text(text = "Video rendering failed")
-                        },
+                        }
                     )
                 }
             }
