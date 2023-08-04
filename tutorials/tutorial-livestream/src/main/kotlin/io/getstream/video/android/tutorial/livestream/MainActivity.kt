@@ -121,7 +121,7 @@ class MainActivity : ComponentActivity() {
                                             )
                                             .padding(horizontal = 12.dp, vertical = 4.dp),
                                         text = "Live $totalParticipants",
-                                        color = VideoTheme.colors.textHighEmphasis
+                                        color = Color.White
                                     )
 
                                     Text(
