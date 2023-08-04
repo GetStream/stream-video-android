@@ -99,7 +99,7 @@ public fun ParticipantVideo(
     modifier: Modifier = Modifier,
     style: VideoRendererStyle = RegularVideoRendererStyle(),
     labelContent: @Composable BoxScope.(ParticipantState) -> Unit = {
-        ParticipantLabel(participant, style.labelPosition)
+        ParticipantLabel(call, participant, style.labelPosition)
     },
     connectionIndicatorContent: @Composable BoxScope.(NetworkQuality) -> Unit = {
         NetworkQualityIndicator(
@@ -213,16 +213,24 @@ public fun ParticipantVideoRenderer(
 
 @Composable
 public fun BoxScope.ParticipantLabel(
+    call: Call,
     participant: ParticipantState,
     labelPosition: Alignment = BottomStart,
     soundIndicatorContent: @Composable RowScope.() -> Unit = {
         val audioEnabled by participant.audioEnabled.collectAsStateWithLifecycle()
         val speaking by participant.speaking.collectAsStateWithLifecycle()
-        val audioLevels by participant.audioLevels.collectAsStateWithLifecycle()
+        val audioLevel by if (participant.isLocal) {
+            call.localMicrophoneAudioLevel.collectAsStateWithLifecycle()
+        } else {
+            participant.audioLevel.collectAsStateWithLifecycle()
+        }
         SoundIndicator(
-            isSpeaking = speaking,
+            // we always draw the audio indicator for the local participant for lower delay
+            // and for now don't draw the indicator for other participants due to the lag
+            // (so we ingore participant.isSpeaking)
+            isSpeaking = participant.isLocal,
             isAudioEnabled = audioEnabled,
-            audioLevels = audioLevels,
+            audioLevel = audioLevel,
             modifier = Modifier
                 .align(CenterVertically)
                 .padding(horizontal = VideoTheme.dimens.participantSoundIndicatorPadding),
@@ -243,7 +251,10 @@ public fun BoxScope.ParticipantLabel(
         nameLabel = nameLabel,
         labelPosition = labelPosition,
         hasAudio = audioEnabled,
-        isSpeaking = speaking,
+        // we always draw the audio indicator for the local participant for lower delay
+        // and for now don't draw the indicator for other participants due to the lag
+        // (so we ingore participant.isSpeaking)
+        isSpeaking = participant.isLocal,
         soundIndicatorContent = soundIndicatorContent,
     )
 }
@@ -254,12 +265,12 @@ public fun BoxScope.ParticipantLabel(
     labelPosition: Alignment = BottomStart,
     hasAudio: Boolean = false,
     isSpeaking: Boolean = false,
-    audioLevels: List<Float> = emptyList(),
+    audioLevel: Float = 0f,
     soundIndicatorContent: @Composable RowScope.() -> Unit = {
         SoundIndicator(
             isSpeaking = isSpeaking,
             isAudioEnabled = hasAudio,
-            audioLevels = audioLevels,
+            audioLevel = audioLevel,
             modifier = Modifier
                 .align(CenterVertically)
                 .padding(horizontal = VideoTheme.dimens.participantSoundIndicatorPadding),
@@ -376,6 +387,7 @@ private fun ParticipantLabelPreview() {
     VideoTheme {
         Box {
             ParticipantLabel(
+                call = mockCall,
                 participant = mockParticipantList[1],
                 BottomStart,
             )

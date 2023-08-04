@@ -102,17 +102,17 @@ Video roadmap and changelog is available [here](https://github.com/GetStream/pro
 
 ### 0.3.0 milestone
 
-- [ ] Complete integration with the video demo flow
 - [ ] Finish usability testing with design team on chat integration (Jaewoong)
 - [ ] Bug: Screensharing on Firefox has some issues when rendering on android (Daniel)
 - [ ] Pagination on query members & query call endpoints (Daniel)
-- [ ] local version of audioLevel(s) for lower latency audio visualizations(Daniel)
 - [ ] Android SDK development.md cleanup (Daniel)
 - [ ] Livestream tutorial (depends on RTMP support) (Thierry)
 - [ ] Call Analytics stateflow (Thierry)
 - [ ] Test coverage
 - [ ] Testing on more devices
 - [ ] Logging is too verbose (rtc is very noisy), clean it up to focus on the essential for info and higher
+- [X] local version of audioLevel(s) for lower latency audio visualizations(Daniel)
+- [X] Complete integration with the video demo flow
 - [X] Enable ice restarts for publisher and subscriber
 - [X] Ringing: Finish it, make testing easy and write docs for common changes (Daniel)
 

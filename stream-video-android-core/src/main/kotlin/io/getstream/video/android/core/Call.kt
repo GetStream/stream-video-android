@@ -24,19 +24,21 @@ import io.getstream.result.Result
 import io.getstream.result.Result.Failure
 import io.getstream.result.Result.Success
 import io.getstream.video.android.core.call.RtcSession
-import io.getstream.video.android.core.call.utils.DecibelThresholdDetection
+import io.getstream.video.android.core.call.utils.SoundInputProcessor
 import io.getstream.video.android.core.events.VideoEventListener
 import io.getstream.video.android.core.internal.InternalStreamVideoApi
 import io.getstream.video.android.core.model.MuteUsersData
 import io.getstream.video.android.core.model.SortField
 import io.getstream.video.android.core.model.UpdateUserPermissionsData
 import io.getstream.video.android.core.model.toIceServer
+import io.getstream.video.android.core.utils.RampValueUpAndDownHelper
 import io.getstream.video.android.model.User
 import io.getstream.webrtc.android.ui.VideoTextureViewRenderer
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
@@ -111,11 +113,23 @@ public class Call(
 
     val monitor = CallHealthMonitor(this, scope)
 
-    private val decibelThresholdDetection = DecibelThresholdDetection(thresholdCrossedCallback = {
+    private val soundInputProcessor = SoundInputProcessor(thresholdCrossedCallback = {
         if (!microphone.isEnabled.value) {
             state.markSpeakingAsMuted()
         }
     })
+    private val audioLevelOutputHelper = RampValueUpAndDownHelper()
+
+    /**
+     * This returns the local microphone volume level. The audio volume is a linear
+     * value between 0 (no sound) and 1 (maximum volume). This is not a raw output -
+     * it is a smoothed-out volume level that gradually goes to the highest measured level
+     * and will then gradually over 250ms return back to 0 or next measured value. This value
+     * can be used directly in your UI for displaying a volume/speaking indicator for the local
+     * participant.
+     * Note: Doesn't return any values until the session is established!
+     */
+    val localMicrophoneAudioLevel: StateFlow<Float> = audioLevelOutputHelper.currentLevel
 
     /** Session handles all real time communication for video and audio */
     internal var session: RtcSession? = null
@@ -129,6 +143,14 @@ public class Call(
                 scope,
                 clientImpl.peerConnectionFactory.eglBase.eglBaseContext,
             )
+        }
+    }
+
+    init {
+        scope.launch {
+            soundInputProcessor.currentAudioLevel.collect {
+                audioLevelOutputHelper.rampToValue(it)
+            }
         }
     }
 
@@ -702,10 +724,7 @@ public class Call(
     }
 
     fun processAudioSample(audioSample: AudioSamples) {
-        // do not unncessarily process the audio sample if we are not muted
-        if (!microphone.isEnabled.value) {
-            decibelThresholdDetection.processSoundInput(audioSample.data)
-        }
+        soundInputProcessor.processSoundInput(audioSample.data)
     }
 
     @InternalStreamVideoApi

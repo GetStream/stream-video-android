@@ -182,6 +182,7 @@ public data class ParticipantState(
             currentAudio[2] = audioLevel
         }
         _audioLevels.value = currentAudio.toList()
+        _audioLevel.value = audioLevel
     }
 
     internal val _roles = MutableStateFlow<List<String>>(emptyList())

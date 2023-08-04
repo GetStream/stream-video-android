@@ -12,6 +12,7 @@ public final class io/getstream/video/android/core/Call {
 	public final fun getCamera ()Lio/getstream/video/android/core/CameraManager;
 	public final fun getCid ()Ljava/lang/String;
 	public final fun getId ()Ljava/lang/String;
+	public final fun getLocalMicrophoneAudioLevel ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun getMicrophone ()Lio/getstream/video/android/core/MicrophoneManager;
 	public final fun getMonitor ()Lio/getstream/video/android/core/CallHealthMonitor;
 	public final fun getSessionId ()Ljava/lang/String;
