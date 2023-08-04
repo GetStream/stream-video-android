@@ -20,6 +20,7 @@ import com.google.common.truth.Truth.assertThat
 import io.getstream.result.Result
 import io.getstream.video.android.core.base.IntegrationTestBase
 import io.getstream.video.android.core.events.DominantSpeakerChangedEvent
+import io.getstream.video.android.core.model.SortField
 import io.getstream.video.android.model.User
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.SharingStarted
@@ -35,7 +36,6 @@ import org.openapitools.client.models.ScreensharingSettingsRequest
 import org.robolectric.RobolectricTestRunner
 import org.threeten.bp.Clock
 import org.threeten.bp.OffsetDateTime
-import kotlin.test.Ignore
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertNotNull
@@ -209,7 +209,6 @@ class CallStateTest : IntegrationTestBase() {
         assertNotNull(successResultPage2.value.next)
     }
 
-    @Ignore("Backend returns 0 members on second page - need to investigate")
     @Test
     fun `Query members pagination works`() = runTest {
         val call = client.call("default", randomUUID())
@@ -218,10 +217,15 @@ class CallStateTest : IntegrationTestBase() {
         assertSuccess(createResponse)
 
         // get first page with one result
-        val queryResult1 = client.queryMembers(type = call.type, id = call.id, limit = 1)
+        val queryResult1 = client.queryMembers(
+            type = call.type,
+            id = call.id,
+            limit = 1,
+            sort = mutableListOf(SortField.Desc("user_id")),
+        )
         assertSuccess(queryResult1)
         assertEquals(queryResult1.getOrThrow().members.size, 1)
-        assertEquals(queryResult1.getOrThrow().members[0].userId, "thierry")
+        assertEquals(queryResult1.getOrThrow().members[0].userId, "tommaso")
 
         // get second page with one result
         val queryResult2 = client.queryMembers(
@@ -229,11 +233,12 @@ class CallStateTest : IntegrationTestBase() {
             id = call.id,
             next = queryResult1.getOrThrow().next,
             limit = 1,
+            sort = mutableListOf(SortField.Desc("user_id")),
         )
 
         assertSuccess(queryResult2)
         assertEquals(queryResult2.getOrThrow().members.size, 1)
-        assertEquals(queryResult2.getOrThrow().members[0].userId, "tommaso")
+        assertEquals(queryResult2.getOrThrow().members[0].userId, "thierry")
     }
 
     @Test

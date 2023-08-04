@@ -43,14 +43,14 @@ Use the `prev` and `next` parameters from the last response as parameters for re
 // Request first page (prev and next are not set)
 val resultPage1 = client.queryCalls(filters=emptyMap(), limit=10)
 ...
-val successResponsePage1 = queryResult as Result.Success
+val resultPage1 = queryResult as Result.Success
 
 // Request second page with prev and next parameters from previous response
 val resultPage2 = client.queryCalls(
-    filters=emptyMap(),
-    limit=10,
-    prev = successResponsePage1.value.prev,
-    next = successResponsePage1.value.next
+    filters = emptyMap(),
+    limit = 10,
+    prev = resultPage1.value.prev,
+    next = resultPage1.value.next
 )
 ```
 
