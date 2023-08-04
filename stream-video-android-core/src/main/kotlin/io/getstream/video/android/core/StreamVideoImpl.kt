@@ -35,6 +35,7 @@ import io.getstream.video.android.core.logging.LoggingLevel
 import io.getstream.video.android.core.model.EdgeData
 import io.getstream.video.android.core.model.MuteUsersData
 import io.getstream.video.android.core.model.QueriedCalls
+import io.getstream.video.android.core.model.QueriedMembers
 import io.getstream.video.android.core.model.SortField
 import io.getstream.video.android.core.model.UpdateUserPermissionsData
 import io.getstream.video.android.core.model.toRequest
@@ -47,6 +48,7 @@ import io.getstream.video.android.core.utils.LatencyResult
 import io.getstream.video.android.core.utils.getLatencyMeasurementsOKHttp
 import io.getstream.video.android.core.utils.toEdge
 import io.getstream.video.android.core.utils.toQueriedCalls
+import io.getstream.video.android.core.utils.toQueriedMembers
 import io.getstream.video.android.core.utils.toUser
 import io.getstream.video.android.datastore.delegate.StreamUserDataStore
 import io.getstream.video.android.model.Device
@@ -650,7 +652,7 @@ internal class StreamVideoImpl internal constructor(
         }
     }
 
-    override suspend fun queryMembers(
+    internal suspend fun queryMembersInternal(
         type: String,
         id: String,
         filter: Map<String, Any>?,
@@ -672,6 +674,26 @@ internal class StreamVideoImpl internal constructor(
                 ),
             )
         }
+    }
+
+    override suspend fun queryMembers(
+        type: String,
+        id: String,
+        filter: Map<String, Any>?,
+        sort: List<SortField>,
+        prev: String?,
+        next: String?,
+        limit: Int,
+    ): Result<QueriedMembers> {
+        return queryMembersInternal(
+            type = type,
+            id = id,
+            filter = filter,
+            sort = sort,
+            prev = prev,
+            next = next,
+            limit = limit,
+        ).map { it.toQueriedMembers() }
     }
 
     suspend fun blockUser(type: String, id: String, userId: String): Result<BlockUserResponse> {

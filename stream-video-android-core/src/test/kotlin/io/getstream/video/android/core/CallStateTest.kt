@@ -199,7 +199,7 @@ class CallStateTest : IntegrationTestBase() {
             emptyMap(),
             prev = successResponsePage1.value.prev,
             next = successResponsePage1.value.next,
-            limit = 1
+            limit = 1,
         )
         assertSuccess(queryResultPage2)
 
@@ -210,7 +210,8 @@ class CallStateTest : IntegrationTestBase() {
     }
 
     @Ignore("Backend returns 0 members on second page - need to investigate")
-    @Test fun `Query members pagination works`() = runTest {
+    @Test
+    fun `Query members pagination works`() = runTest {
         val call = client.call("default", randomUUID())
         // create call
         val createResponse = call.create(memberIds = listOf("thierry", "tommaso"))

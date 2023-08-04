@@ -36,8 +36,8 @@ public final class io/getstream/video/android/core/Call {
 	public static synthetic fun muteUsers$default (Lio/getstream/video/android/core/Call;Ljava/util/List;ZZZLkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
 	public final fun notify (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public final fun processAudioSample (Lorg/webrtc/audio/JavaAudioDeviceModule$AudioSamples;)V
-	public final fun queryMembers (Ljava/util/Map;Ljava/util/List;ILkotlin/coroutines/Continuation;)Ljava/lang/Object;
-	public static synthetic fun queryMembers$default (Lio/getstream/video/android/core/Call;Ljava/util/Map;Ljava/util/List;ILkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
+	public final fun queryMembers (Ljava/util/Map;Ljava/util/List;ILjava/lang/String;Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public static synthetic fun queryMembers$default (Lio/getstream/video/android/core/Call;Ljava/util/Map;Ljava/util/List;ILjava/lang/String;Ljava/lang/String;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
 	public final fun reconnectOrSwitchSfu (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public final fun reject (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public final fun removeMembers (Ljava/util/List;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
@@ -646,6 +646,7 @@ public abstract interface class io/getstream/video/android/core/StreamVideo : io
 	public abstract fun getUserId ()Ljava/lang/String;
 	public abstract fun logOut ()V
 	public abstract fun queryCalls (Ljava/util/Map;Ljava/util/List;ILjava/lang/String;Ljava/lang/String;ZLkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public abstract fun queryMembers (Ljava/lang/String;Ljava/lang/String;Ljava/util/Map;Ljava/util/List;Ljava/lang/String;Ljava/lang/String;ILkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public abstract fun subscribe (Lio/getstream/video/android/core/events/VideoEventListener;)Lio/getstream/video/android/core/EventSubscription;
 	public abstract fun subscribeFor ([Ljava/lang/Class;Lio/getstream/video/android/core/events/VideoEventListener;)Lio/getstream/video/android/core/EventSubscription;
 }
@@ -661,6 +662,7 @@ public final class io/getstream/video/android/core/StreamVideo$Companion {
 public final class io/getstream/video/android/core/StreamVideo$DefaultImpls {
 	public static synthetic fun call$default (Lio/getstream/video/android/core/StreamVideo;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)Lio/getstream/video/android/core/Call;
 	public static synthetic fun queryCalls$default (Lio/getstream/video/android/core/StreamVideo;Ljava/util/Map;Ljava/util/List;ILjava/lang/String;Ljava/lang/String;ZLkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
+	public static synthetic fun queryMembers$default (Lio/getstream/video/android/core/StreamVideo;Ljava/lang/String;Ljava/lang/String;Ljava/util/Map;Ljava/util/List;Ljava/lang/String;Ljava/lang/String;ILkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
 }
 
 public final class io/getstream/video/android/core/StreamVideoBuilder {
@@ -1893,6 +1895,30 @@ public abstract class io/getstream/video/android/core/model/MediaTrack {
 	public fun getStreamId ()Ljava/lang/String;
 }
 
+public final class io/getstream/video/android/core/model/Member {
+	public fun <init> (Lorg/threeten/bp/OffsetDateTime;Ljava/util/Map;Lorg/threeten/bp/OffsetDateTime;Lio/getstream/video/android/model/User;Ljava/lang/String;Lorg/threeten/bp/OffsetDateTime;Ljava/lang/String;)V
+	public synthetic fun <init> (Lorg/threeten/bp/OffsetDateTime;Ljava/util/Map;Lorg/threeten/bp/OffsetDateTime;Lio/getstream/video/android/model/User;Ljava/lang/String;Lorg/threeten/bp/OffsetDateTime;Ljava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Lorg/threeten/bp/OffsetDateTime;
+	public final fun component2 ()Ljava/util/Map;
+	public final fun component3 ()Lorg/threeten/bp/OffsetDateTime;
+	public final fun component4 ()Lio/getstream/video/android/model/User;
+	public final fun component5 ()Ljava/lang/String;
+	public final fun component6 ()Lorg/threeten/bp/OffsetDateTime;
+	public final fun component7 ()Ljava/lang/String;
+	public final fun copy (Lorg/threeten/bp/OffsetDateTime;Ljava/util/Map;Lorg/threeten/bp/OffsetDateTime;Lio/getstream/video/android/model/User;Ljava/lang/String;Lorg/threeten/bp/OffsetDateTime;Ljava/lang/String;)Lio/getstream/video/android/core/model/Member;
+	public static synthetic fun copy$default (Lio/getstream/video/android/core/model/Member;Lorg/threeten/bp/OffsetDateTime;Ljava/util/Map;Lorg/threeten/bp/OffsetDateTime;Lio/getstream/video/android/model/User;Ljava/lang/String;Lorg/threeten/bp/OffsetDateTime;Ljava/lang/String;ILjava/lang/Object;)Lio/getstream/video/android/core/model/Member;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getCreatedAt ()Lorg/threeten/bp/OffsetDateTime;
+	public final fun getCustom ()Ljava/util/Map;
+	public final fun getDeletedAt ()Lorg/threeten/bp/OffsetDateTime;
+	public final fun getRole ()Ljava/lang/String;
+	public final fun getUpdatedAt ()Lorg/threeten/bp/OffsetDateTime;
+	public final fun getUser ()Lio/getstream/video/android/model/User;
+	public final fun getUserId ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
 public final class io/getstream/video/android/core/model/MuteUsersData {
 	public fun <init> ()V
 	public fun <init> (Ljava/util/List;Ljava/lang/Boolean;Ljava/lang/Boolean;Ljava/lang/Boolean;Ljava/lang/Boolean;)V
@@ -1989,6 +2015,21 @@ public final class io/getstream/video/android/core/model/QueriedCalls {
 	public static synthetic fun copy$default (Lio/getstream/video/android/core/model/QueriedCalls;Ljava/util/List;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)Lio/getstream/video/android/core/model/QueriedCalls;
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getCalls ()Ljava/util/List;
+	public final fun getNext ()Ljava/lang/String;
+	public final fun getPrev ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class io/getstream/video/android/core/model/QueriedMembers {
+	public fun <init> (Ljava/util/List;Ljava/lang/String;Ljava/lang/String;)V
+	public final fun component1 ()Ljava/util/List;
+	public final fun component2 ()Ljava/lang/String;
+	public final fun component3 ()Ljava/lang/String;
+	public final fun copy (Ljava/util/List;Ljava/lang/String;Ljava/lang/String;)Lio/getstream/video/android/core/model/QueriedMembers;
+	public static synthetic fun copy$default (Lio/getstream/video/android/core/model/QueriedMembers;Ljava/util/List;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)Lio/getstream/video/android/core/model/QueriedMembers;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getMembers ()Ljava/util/List;
 	public final fun getNext ()Ljava/lang/String;
 	public final fun getPrev ()Ljava/lang/String;
 	public fun hashCode ()I

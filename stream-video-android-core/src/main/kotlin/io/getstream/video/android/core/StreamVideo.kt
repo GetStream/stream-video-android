@@ -24,12 +24,12 @@ import io.getstream.result.Result
 import io.getstream.video.android.core.events.VideoEventListener
 import io.getstream.video.android.core.model.EdgeData
 import io.getstream.video.android.core.model.QueriedCalls
+import io.getstream.video.android.core.model.QueriedMembers
 import io.getstream.video.android.core.model.SortField
 import io.getstream.video.android.core.notifications.NotificationHandler
 import io.getstream.video.android.model.Device
 import io.getstream.video.android.model.User
 import kotlinx.coroutines.Deferred
-import org.openapitools.client.models.QueryMembersResponse
 import org.openapitools.client.models.VideoEvent
 
 /**
@@ -70,7 +70,7 @@ public interface StreamVideo : NotificationHandler {
         limit: Int = DEFAULT_QUERY_CALLS_LIMIT,
         prev: String? = null,
         next: String? = null,
-        watch: Boolean = false
+        watch: Boolean = false,
     ): Result<QueriedCalls>
 
     /**
@@ -90,7 +90,7 @@ public interface StreamVideo : NotificationHandler {
         prev: String? = null,
         next: String? = null,
         limit: Int = 25,
-    ): Result<QueryMembersResponse>
+    ): Result<QueriedMembers>
 
     /** Subscribe for a specific list of events */
     public fun subscribeFor(

@@ -24,7 +24,9 @@ import io.getstream.video.android.core.model.CallRecordingData
 import io.getstream.video.android.core.model.CallUser
 import io.getstream.video.android.core.model.CallUserState
 import io.getstream.video.android.core.model.EdgeData
+import io.getstream.video.android.core.model.Member
 import io.getstream.video.android.core.model.QueriedCalls
+import io.getstream.video.android.core.model.QueriedMembers
 import io.getstream.video.android.core.model.ReactionData
 import io.getstream.video.android.core.model.toCallInfo
 import io.getstream.video.android.model.User
@@ -33,6 +35,7 @@ import org.openapitools.client.models.CallStateResponseFields
 import org.openapitools.client.models.EdgeResponse
 import org.openapitools.client.models.MemberResponse
 import org.openapitools.client.models.QueryCallsResponse
+import org.openapitools.client.models.QueryMembersResponse
 import org.openapitools.client.models.ReactionResponse
 import org.openapitools.client.models.UserResponse
 import stream.video.sfu.models.Participant
@@ -120,6 +123,28 @@ internal fun QueryCallsResponse.toQueriedCalls(): QueriedCalls {
         calls = calls.toCallData(),
         next = next,
         prev = prev,
+    )
+}
+
+@JvmSynthetic
+internal fun QueryMembersResponse.toQueriedMembers(): QueriedMembers {
+    return QueriedMembers(
+        members = members.map { it.toMember() },
+        next = next,
+        prev = prev,
+    )
+}
+
+@JvmSynthetic
+internal fun MemberResponse.toMember(): Member {
+    return Member(
+        createdAt = createdAt,
+        custom = custom,
+        updatedAt = updatedAt,
+        user = user.toUser(),
+        deletedAt = deletedAt,
+        userId = userId,
+        role = role,
     )
 }
 
