@@ -18,6 +18,7 @@ package io.getstream.video.android
 
 import android.content.Context
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Bundle
 import androidx.activity.ComponentActivity
@@ -28,12 +29,16 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.core.content.ContextCompat
 import androidx.lifecycle.lifecycleScope
+import io.getstream.android.push.permissions.NotificationPermissionManager
+import io.getstream.android.push.permissions.NotificationPermissionStatus
 import io.getstream.log.taggedLogger
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.core.StreamVideo
 import io.getstream.video.android.model.StreamCallId
 import io.getstream.video.android.ui.call.CallActivity
+import io.getstream.video.android.ui.theme.Colors
 import io.getstream.video.android.util.StreamVideoInitHelper
 import kotlinx.coroutines.launch
 
@@ -50,7 +55,7 @@ class DeeplinkingActivity : ComponentActivity() {
                 Box(
                     modifier = Modifier
                         .fillMaxSize()
-                        .background(VideoTheme.colors.appBackground),
+                        .background(Colors.background),
                 ) {
                     CircularProgressIndicator(
                         modifier = Modifier.align(Alignment.Center),
@@ -66,7 +71,27 @@ class DeeplinkingActivity : ComponentActivity() {
         logger.d { "Action: ${intent?.action}" }
         logger.d { "Data: ${intent?.data}" }
 
-        joinCall(callId)
+        // The demo app can start a meeting automatically on first application launch - this
+        // means that we haven't yet asked for notification permissions - we should first ask for
+        // these permissions and then proceed with the call (to prevent the video screen from
+        // asking video&audio permissions at the same time)
+        if (ContextCompat.checkSelfPermission(this, android.Manifest.permission.POST_NOTIFICATIONS) == PackageManager.PERMISSION_GRANTED) {
+            // join call directly
+            joinCall(callId)
+        } else {
+            // first ask for push notification permission
+            val manager = NotificationPermissionManager.createNotificationPermissionsManager(
+                application = app,
+                requestPermissionOnAppLaunch = { true },
+                onPermissionStatus = {
+                    // we don't care about the result for demo purposes
+                    if (it != NotificationPermissionStatus.REQUESTED) {
+                        joinCall(callId)
+                    }
+                },
+            )
+            manager.start()
+        }
     }
 
     private fun joinCall(cid: String) {
