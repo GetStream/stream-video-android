@@ -34,26 +34,21 @@ import io.getstream.video.android.ui.common.R
  * @param modifier Modifier for styling.
  * @param isSpeaking Represents is user speaking or not.
  * @param isAudioEnabled Represents is audio enabled or not.
- * @param audioLevels Indicates the audio levels that will be drawn. This list must contains thee float values (0 ~ 1f).
+ * @param audioLevels Indicates the audio level that will be drawn.
  */
 @Composable
 public fun SoundIndicator(
     modifier: Modifier = Modifier,
     isSpeaking: Boolean,
     isAudioEnabled: Boolean,
-    audioLevels: List<Float>,
+    audioLevel: Float,
 ) {
-    if (isSpeaking && isAudioEnabled) {
+    if (isAudioEnabled && isSpeaking) {
         AudioVolumeIndicator(
             modifier = modifier.padding(end = VideoTheme.dimens.audioLevelIndicatorBarPadding),
-            audioLevels = audioLevels,
+            audioLevels = audioLevel,
         )
-    } else if (isAudioEnabled) {
-        AudioVolumeIndicator(
-            modifier = modifier.padding(end = VideoTheme.dimens.audioLevelIndicatorBarPadding),
-            audioLevels = listOf(0f, 0f, 0f, 0f, 0f),
-        )
-    } else {
+    } else if (!isAudioEnabled) {
         Icon(
             modifier = modifier
                 .size(VideoTheme.dimens.microphoneIndicatorSize)
@@ -73,12 +68,12 @@ private fun SoundIndicatorPreview() {
             SoundIndicator(
                 isSpeaking = true,
                 isAudioEnabled = true,
-                audioLevels = listOf(0.7f, 0f, 0.5f, 0f, 0.9f),
+                audioLevel = 0f,
             )
             SoundIndicator(
                 isSpeaking = false,
                 isAudioEnabled = false,
-                audioLevels = listOf(0.7f, 0f, 0.5f, 0f, 0.9f),
+                audioLevel = 0.5f,
             )
         }
     }
