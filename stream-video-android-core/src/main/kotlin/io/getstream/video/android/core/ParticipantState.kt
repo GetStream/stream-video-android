@@ -214,7 +214,7 @@ public data class ParticipantState(
             image = participant.image,
             role = participant.roles.firstOrNull().orEmpty(),
             // TODO: set the custom field
-            //custom = custom
+            // custom = custom
         )
     }
 

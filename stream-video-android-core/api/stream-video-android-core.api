@@ -48,9 +48,9 @@ public final class io/getstream/video/android/core/Call {
 	public static synthetic fun sendReaction$default (Lio/getstream/video/android/core/Call;Ljava/lang/String;Ljava/lang/String;Ljava/util/Map;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
 	public final fun sendStats (Ljava/util/Map;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public final fun setVisibility (Ljava/lang/String;Lstream/video/sfu/models/TrackType;Z)V
-	public final fun startBroadcasting (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public final fun startHLS (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public final fun startRecording (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
-	public final fun stopBroadcasting (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public final fun stopHLS (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public final fun stopLive (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public final fun stopRecording (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public final fun subscribe (Lio/getstream/video/android/core/events/VideoEventListener;)Lio/getstream/video/android/core/EventSubscription;
@@ -137,6 +137,7 @@ public final class io/getstream/video/android/core/CallState {
 	public final fun getStartsAt ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun getStats ()Lio/getstream/video/android/core/CallStats;
 	public final fun getTeam ()Lkotlinx/coroutines/flow/StateFlow;
+	public final fun getTotalParticipants ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun getTranscribing ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun getUpdatedAt ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun handleEvent (Lorg/openapitools/client/models/VideoEvent;)V
