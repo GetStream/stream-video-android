@@ -190,10 +190,16 @@ public class CallState(
     private val _participantCounts: MutableStateFlow<ParticipantCount?> = MutableStateFlow(null)
     val participantCounts: StateFlow<ParticipantCount?> = _participantCounts
 
+    /** a count of the total number of participants. */
+    val totalParticipants = _participantCounts.mapState { it?.total ?: 0 }
+
     /** Your own participant state */
     public val me: StateFlow<ParticipantState?> = _participants.mapState {
         it[call.clientImpl.sessionId]
     }
+
+    /** Your own participant state */
+    public val localParticipant = me
 
     /** participants who are currently speaking */
     private val _activeSpeakers: MutableStateFlow<List<ParticipantState>> =
@@ -337,9 +343,9 @@ public class CallState(
         }
     }
 
-    /** how long the call has been running, null if the call didn't start yet */
+    /** how long the call has been running, rounded to seconds, null if the call didn't start yet */
     public val duration: StateFlow<kotlin.time.Duration?> =
-        _durationInMs.transform { emit((it ?: 0L).toDuration(DurationUnit.MILLISECONDS)) }
+        _durationInMs.transform { emit(((it ?: 0L) / 1000L).toDuration(DurationUnit.SECONDS)) }
             .stateIn(scope, SharingStarted.WhileSubscribed(10000L), null)
 
     /** how many milliseconds the call has been running, null if the call didn't start yet */

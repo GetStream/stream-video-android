@@ -58,12 +58,12 @@ class LivestreamTest : IntegrationTestBase() {
         val createResult = call.create()
         assertSuccess(createResult)
 
-        val result = call.startBroadcasting()
+        val result = call.startHLS()
         assertSuccess(result)
 
         assertThat(call.state.egress.value?.hls).isNotNull()
 
-        val result2 = call.stopBroadcasting()
+        val result2 = call.stopHLS()
         assertSuccess(result2)
     }
 

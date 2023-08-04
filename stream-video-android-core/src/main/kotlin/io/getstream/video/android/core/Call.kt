@@ -553,11 +553,11 @@ public class Call(
         return clientImpl.stopRecording(type, id)
     }
 
-    suspend fun startBroadcasting(): Result<Any> {
+    suspend fun startHLS(): Result<Any> {
         return clientImpl.startBroadcasting(type, id)
     }
 
-    suspend fun stopBroadcasting(): Result<Any> {
+    suspend fun stopHLS(): Result<Any> {
         return clientImpl.stopBroadcasting(type, id)
     }
 

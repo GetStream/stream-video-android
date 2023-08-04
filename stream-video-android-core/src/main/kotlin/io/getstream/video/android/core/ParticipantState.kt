@@ -207,11 +207,15 @@ public data class ParticipantState(
             participant.published_tracks.contains(TrackType.TRACK_TYPE_SCREEN_SHARE)
         _roles.value = participant.roles
 
+        val custom = participant.custom ?: emptyMap<String, Any>()
+
         val currentUser = _user.value
         _user.value = currentUser.copy(
             name = participant.name,
             image = participant.image,
             role = participant.roles.firstOrNull().orEmpty(),
+            // TODO: set the custom field
+            // custom = custom
         )
     }
 
