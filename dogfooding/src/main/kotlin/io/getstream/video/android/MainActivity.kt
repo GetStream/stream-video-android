@@ -35,7 +35,7 @@ class MainActivity : ComponentActivity() {
         @Suppress("KotlinConstantConditions")
         if (BuildConfig.FLAVOR == "production") {
             InstallReferrer(this).extractInstallReferrer { callId: String ->
-                startActivity(DeeplinkingActivity.createIntent(this, callId))
+                startActivity(DeeplinkingActivity.createIntent(this, callId, true))
             }
         }
 
