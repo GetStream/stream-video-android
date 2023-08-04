@@ -34,7 +34,7 @@
     <div class="library-name">
 <a href="../../index.html">
 <span>stream-video-android</span>            </a>    </div>
-    <div>0.2.1
+    <div>0.2.3
     </div>
     <div class="pull-right d-flex">
         <div class="filter-section" id="filter-section">
@@ -100,9 +100,9 @@
                 org.webrtc.VideoTrack(1000L)
             } else {
                 call.camera.mediaManager.videoTrack
-            }
+            },
         ),
-        enabled = isCameraEnabled
+        enabled = isCameraEnabled,
     )<span class="token punctuation">, </span></span><span class="parameter ">permissions<span class="token operator">: </span><a href="../io.getstream.video.android.compose.permission/-video-permissions-state/index.html">VideoPermissionsState</a><span class="token operator"> = </span>rememberCallPermissionsState(call = call)<span class="token punctuation">, </span></span><span class="parameter ">onRendered<span class="token operator">: </span><span class="token punctuation">(</span><span class="token keyword"></span><a href="https://developer.android.com/reference/kotlin/android/view/View.html">View</a><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><span class="token keyword"></span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-unit/index.html">Unit</a><span class="token operator"> = </span>{}<span class="token punctuation">, </span></span><span class="parameter ">onRenderedContent<span class="token operator">: </span><span><span class="token annotation builtin">@</span><a href="https://developer.android.com/reference/kotlin/androidx/compose/runtime/Composable.html"><span class="token annotation builtin">Composable</span></a>&nbsp;</span><span class="token punctuation">(</span><span class="token keyword"></span>video<span class="token operator">: </span><a href="../../stream-video-android-core/io.getstream.video.android.core/-participant-state/-video/index.html">ParticipantState.Video</a><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><span class="token keyword"></span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-unit/index.html">Unit</a><span class="token operator"> = </span>{
         OnRenderedContent(call = call, video = it, onRendered = onRendered)
     }<span class="token punctuation">, </span></span><span class="parameter ">onDisabledContent<span class="token operator">: </span><span><span class="token annotation builtin">@</span><a href="https://developer.android.com/reference/kotlin/androidx/compose/runtime/Composable.html"><span class="token annotation builtin">Composable</span></a>&nbsp;</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><span class="token keyword"></span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-unit/index.html">Unit</a><span class="token operator"> = </span>{
@@ -115,9 +115,9 @@
             elevation = 0.dp,
             actions = buildDefaultLobbyControlActions(
                 call = call,
-                onCallAction = onCallAction
+                onCallAction = onCallAction,
             ),
-            spaceBy = VideoTheme.dimens.lobbyControlActionsItemSpaceBy
+            spaceBy = VideoTheme.dimens.lobbyControlActionsItemSpaceBy,
         )
     }</span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Represents the UI in a preview call that renders a local video track to pre-display a video before joining a call.</p></div></div></div>
                 </div>

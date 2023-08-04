@@ -34,7 +34,7 @@
     <div class="library-name">
 <a href="../../index.html">
 <span>stream-video-android</span>            </a>    </div>
-    <div>0.2.1
+    <div>0.2.3
     </div>
     <div class="pull-right d-flex">
         <div class="filter-section" id="filter-section">
@@ -140,43 +140,50 @@
                 .clip(VideoTheme.shapes.floatingParticipant),
             call = call,
             participant = participant,
-            style = style
+            style = style,
         )
     }</span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Represents a floating item used to feature a participant video, usually the local participant. This component must be used inside <a href="https://developer.android.com/reference/kotlin/androidx/compose/foundation/layout/package-summary.html">Box</a>.</p></div></div></div>
                 </div>
               </div>
             </div>
           </div>
-<a data-name="1926363235%2FFunctions%2F-1668020002" anchor-label="ParticipantLabel" id="1926363235%2FFunctions%2F-1668020002" data-filterable-set=":stream-video-android-compose:dokkaHtmlPartial/release"></a>
+<a data-name="-182313985%2FFunctions%2F-1668020002" anchor-label="ParticipantLabel" id="-182313985%2FFunctions%2F-1668020002" data-filterable-set=":stream-video-android-compose:dokkaHtmlPartial/release"></a>
           <div class="table-row" data-togglable="EXTENSION_FUNCTION" data-filterable-current=":stream-video-android-compose:dokkaHtmlPartial/release" data-filterable-set=":stream-video-android-compose:dokkaHtmlPartial/release">
             <div class="main-subrow keyValue ">
               <div class=""><span class="inline-flex">
                   <div><a href="-participant-label.html"><span>Participant</span><wbr><span><span>Label</span></span></a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1926363235%2FFunctions%2F-1668020002"></span>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-182313985%2FFunctions%2F-1668020002"></span>
                     <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
                   </span></span></div>
               <div>
                 <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":stream-video-android-compose:dokkaHtmlPartial/release"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><a href="https://developer.android.com/reference/kotlin/androidx/compose/runtime/Composable.html"><span class="token annotation builtin">Composable</span></a></div></div><span class="token keyword"></span><span class="token keyword">fun </span><a href="https://developer.android.com/reference/kotlin/androidx/compose/foundation/layout/BoxScope.html">BoxScope</a><span class="token punctuation">.</span><a href="-participant-label.html"><span class="token function">ParticipantLabel</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">participant<span class="token operator">: </span><a href="../../stream-video-android-core/io.getstream.video.android.core/-participant-state/index.html">ParticipantState</a><span class="token punctuation">, </span></span><span class="parameter ">labelPosition<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/androidx/compose/ui/Alignment.html">Alignment</a><span class="token operator"> = </span>BottomStart<span class="token punctuation">, </span></span><span class="parameter ">soundIndicatorContent<span class="token operator">: </span><span><span class="token annotation builtin">@</span><a href="https://developer.android.com/reference/kotlin/androidx/compose/runtime/Composable.html"><span class="token annotation builtin">Composable</span></a>&nbsp;</span><span class="token keyword"></span><a href="https://developer.android.com/reference/kotlin/androidx/compose/foundation/layout/RowScope.html">RowScope</a><span class="token punctuation">.</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><span class="token keyword"></span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-unit/index.html">Unit</a><span class="token operator"> = </span>{
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":stream-video-android-compose:dokkaHtmlPartial/release"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><a href="https://developer.android.com/reference/kotlin/androidx/compose/runtime/Composable.html"><span class="token annotation builtin">Composable</span></a></div></div><span class="token keyword"></span><span class="token keyword">fun </span><a href="https://developer.android.com/reference/kotlin/androidx/compose/foundation/layout/BoxScope.html">BoxScope</a><span class="token punctuation">.</span><a href="-participant-label.html"><span class="token function">ParticipantLabel</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">call<span class="token operator">: </span><a href="../../stream-video-android-core/io.getstream.video.android.core/-call/index.html">Call</a><span class="token punctuation">, </span></span><span class="parameter ">participant<span class="token operator">: </span><a href="../../stream-video-android-core/io.getstream.video.android.core/-participant-state/index.html">ParticipantState</a><span class="token punctuation">, </span></span><span class="parameter ">labelPosition<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/androidx/compose/ui/Alignment.html">Alignment</a><span class="token operator"> = </span>BottomStart<span class="token punctuation">, </span></span><span class="parameter ">soundIndicatorContent<span class="token operator">: </span><span><span class="token annotation builtin">@</span><a href="https://developer.android.com/reference/kotlin/androidx/compose/runtime/Composable.html"><span class="token annotation builtin">Composable</span></a>&nbsp;</span><span class="token keyword"></span><a href="https://developer.android.com/reference/kotlin/androidx/compose/foundation/layout/RowScope.html">RowScope</a><span class="token punctuation">.</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><span class="token keyword"></span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-unit/index.html">Unit</a><span class="token operator"> = </span>{
         val audioEnabled by participant.audioEnabled.collectAsStateWithLifecycle()
         val speaking by participant.speaking.collectAsStateWithLifecycle()
-        val audioLevels by participant.audioLevels.collectAsStateWithLifecycle()
+        val audioLevel by if (participant.isLocal) {
+            call.localMicrophoneAudioLevel.collectAsStateWithLifecycle()
+        } else {
+            participant.audioLevel.collectAsStateWithLifecycle()
+        }
         SoundIndicator(
-            isSpeaking = speaking,
+            // we always draw the audio indicator for the local participant for lower delay
+            // and for now don't draw the indicator for other participants due to the lag
+            // (so we ingore participant.isSpeaking)
+            isSpeaking = participant.isLocal,
             isAudioEnabled = audioEnabled,
-            audioLevels = audioLevels,
+            audioLevel = audioLevel,
             modifier = Modifier
                 .align(CenterVertically)
-                .padding(horizontal = VideoTheme.dimens.participantSoundIndicatorPadding)
+                .padding(horizontal = VideoTheme.dimens.participantSoundIndicatorPadding),
         )
-    }</span></span><span class="token punctuation">)</span></div><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><a href="https://developer.android.com/reference/kotlin/androidx/compose/runtime/Composable.html"><span class="token annotation builtin">Composable</span></a></div></div><span class="token keyword"></span><span class="token keyword">fun </span><a href="https://developer.android.com/reference/kotlin/androidx/compose/foundation/layout/BoxScope.html">BoxScope</a><span class="token punctuation">.</span><a href="-participant-label.html"><span class="token function">ParticipantLabel</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">nameLabel<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a><span class="token punctuation">, </span></span><span class="parameter ">labelPosition<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/androidx/compose/ui/Alignment.html">Alignment</a><span class="token operator"> = </span>BottomStart<span class="token punctuation">, </span></span><span class="parameter ">hasAudio<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-boolean/index.html">Boolean</a><span class="token operator"> = </span><span class="token boolean">false</span><span class="token punctuation">, </span></span><span class="parameter ">isSpeaking<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-boolean/index.html">Boolean</a><span class="token operator"> = </span><span class="token boolean">false</span><span class="token punctuation">, </span></span><span class="parameter ">audioLevels<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin.collections/-list/index.html">List</a><span class="token operator">&lt;</span><span class="token keyword"></span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-float/index.html">Float</a><span class="token operator">&gt;</span><span class="token operator"> = </span>emptyList()<span class="token punctuation">, </span></span><span class="parameter ">soundIndicatorContent<span class="token operator">: </span><span><span class="token annotation builtin">@</span><a href="https://developer.android.com/reference/kotlin/androidx/compose/runtime/Composable.html"><span class="token annotation builtin">Composable</span></a>&nbsp;</span><span class="token keyword"></span><a href="https://developer.android.com/reference/kotlin/androidx/compose/foundation/layout/RowScope.html">RowScope</a><span class="token punctuation">.</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><span class="token keyword"></span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-unit/index.html">Unit</a><span class="token operator"> = </span>{
+    }</span></span><span class="token punctuation">)</span></div><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><a href="https://developer.android.com/reference/kotlin/androidx/compose/runtime/Composable.html"><span class="token annotation builtin">Composable</span></a></div></div><span class="token keyword"></span><span class="token keyword">fun </span><a href="https://developer.android.com/reference/kotlin/androidx/compose/foundation/layout/BoxScope.html">BoxScope</a><span class="token punctuation">.</span><a href="-participant-label.html"><span class="token function">ParticipantLabel</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">nameLabel<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a><span class="token punctuation">, </span></span><span class="parameter ">labelPosition<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/androidx/compose/ui/Alignment.html">Alignment</a><span class="token operator"> = </span>BottomStart<span class="token punctuation">, </span></span><span class="parameter ">hasAudio<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-boolean/index.html">Boolean</a><span class="token operator"> = </span><span class="token boolean">false</span><span class="token punctuation">, </span></span><span class="parameter ">isSpeaking<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-boolean/index.html">Boolean</a><span class="token operator"> = </span><span class="token boolean">false</span><span class="token punctuation">, </span></span><span class="parameter ">audioLevel<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-float/index.html">Float</a><span class="token operator"> = </span><span class="token constant">0.0f</span><span class="token punctuation">, </span></span><span class="parameter ">soundIndicatorContent<span class="token operator">: </span><span><span class="token annotation builtin">@</span><a href="https://developer.android.com/reference/kotlin/androidx/compose/runtime/Composable.html"><span class="token annotation builtin">Composable</span></a>&nbsp;</span><span class="token keyword"></span><a href="https://developer.android.com/reference/kotlin/androidx/compose/foundation/layout/RowScope.html">RowScope</a><span class="token punctuation">.</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><span class="token keyword"></span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-unit/index.html">Unit</a><span class="token operator"> = </span>{
         SoundIndicator(
             isSpeaking = isSpeaking,
             isAudioEnabled = hasAudio,
-            audioLevels = audioLevels,
+            audioLevel = audioLevel,
             modifier = Modifier
                 .align(CenterVertically)
-                .padding(horizontal = VideoTheme.dimens.participantSoundIndicatorPadding)
+                .padding(horizontal = VideoTheme.dimens.participantSoundIndicatorPadding),
         )
     }</span></span><span class="token punctuation">)</span></div></div></div>
                 </div>
@@ -198,7 +205,7 @@
             modifier = videoModifier,
             call = videoCall,
             participant = videoParticipant,
-            style = videoStyle
+            style = videoStyle,
         )
     }</span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Renders all the participants, based on the number of people in a call and the call state. Also takes into account if there are any screen sharing sessions active and adjusts the UI accordingly.</p></div></div></div>
                 </div>
@@ -220,7 +227,7 @@
             modifier = videoModifier,
             call = videoCall,
             participant = videoParticipant,
-            style = videoStyle
+            style = videoStyle,
         )
     }</span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Renders the participants are joining in a call when there are no screen sharing sessions, based on the orientation.</p></div></div></div>
                 </div>
@@ -242,7 +249,7 @@
             modifier = videoModifier,
             call = videoCall,
             participant = videoParticipant,
-            style = videoStyle
+            style = videoStyle,
         )
     }</span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Renders all the CallParticipants, based on the number of people in a call and the call state. Also takes into account if there are any screen sharing sessions active and adjusts the UI accordingly.</p></div></div></div>
                 </div>
@@ -260,11 +267,11 @@
               <div>
                 <div class="title">
                   <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":stream-video-android-compose:dokkaHtmlPartial/release"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><a href="https://developer.android.com/reference/kotlin/androidx/compose/runtime/Composable.html"><span class="token annotation builtin">Composable</span></a></div></div><span class="token keyword"></span><span class="token keyword">fun </span><a href="-participant-video.html"><span class="token function">ParticipantVideo</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">call<span class="token operator">: </span><a href="../../stream-video-android-core/io.getstream.video.android.core/-call/index.html">Call</a><span class="token punctuation">, </span></span><span class="parameter ">participant<span class="token operator">: </span><a href="../../stream-video-android-core/io.getstream.video.android.core/-participant-state/index.html">ParticipantState</a><span class="token punctuation">, </span></span><span class="parameter ">modifier<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/androidx/compose/ui/Modifier.html">Modifier</a><span class="token operator"> = </span>Modifier<span class="token punctuation">, </span></span><span class="parameter ">style<span class="token operator">: </span><a href="-video-renderer-style/index.html">VideoRendererStyle</a><span class="token operator"> = </span>RegularVideoRendererStyle()<span class="token punctuation">, </span></span><span class="parameter ">labelContent<span class="token operator">: </span><span><span class="token annotation builtin">@</span><a href="https://developer.android.com/reference/kotlin/androidx/compose/runtime/Composable.html"><span class="token annotation builtin">Composable</span></a>&nbsp;</span><span class="token keyword"></span><a href="https://developer.android.com/reference/kotlin/androidx/compose/foundation/layout/BoxScope.html">BoxScope</a><span class="token punctuation">.</span><span class="token punctuation">(</span><span class="token keyword"></span><a href="../../stream-video-android-core/io.getstream.video.android.core/-participant-state/index.html">ParticipantState</a><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><span class="token keyword"></span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-unit/index.html">Unit</a><span class="token operator"> = </span>{
-        ParticipantLabel(participant, style.labelPosition)
+        ParticipantLabel(call, participant, style.labelPosition)
     }<span class="token punctuation">, </span></span><span class="parameter ">connectionIndicatorContent<span class="token operator">: </span><span><span class="token annotation builtin">@</span><a href="https://developer.android.com/reference/kotlin/androidx/compose/runtime/Composable.html"><span class="token annotation builtin">Composable</span></a>&nbsp;</span><span class="token keyword"></span><a href="https://developer.android.com/reference/kotlin/androidx/compose/foundation/layout/BoxScope.html">BoxScope</a><span class="token punctuation">.</span><span class="token punctuation">(</span><span class="token keyword"></span><a href="../../stream-video-android-core/io.getstream.video.android.core.model/-network-quality/index.html">NetworkQuality</a><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><span class="token keyword"></span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-unit/index.html">Unit</a><span class="token operator"> = </span>{
         NetworkQualityIndicator(
             networkQuality = it,
-            modifier = Modifier.align(BottomEnd)
+            modifier = Modifier.align(BottomEnd),
         )
     }<span class="token punctuation">, </span></span><span class="parameter ">videoFallbackContent<span class="token operator">: </span><span><span class="token annotation builtin">@</span><a href="https://developer.android.com/reference/kotlin/androidx/compose/runtime/Composable.html"><span class="token annotation builtin">Composable</span></a>&nbsp;</span><span class="token punctuation">(</span><span class="token keyword"></span><a href="../../stream-video-android-core/io.getstream.video.android.core/-call/index.html">Call</a><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><span class="token keyword"></span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-unit/index.html">Unit</a><span class="token operator"> = </span>{
         val user by participant.user.collectAsStateWithLifecycle()
@@ -272,7 +279,7 @@
     }<span class="token punctuation">, </span></span><span class="parameter ">reactionContent<span class="token operator">: </span><span><span class="token annotation builtin">@</span><a href="https://developer.android.com/reference/kotlin/androidx/compose/runtime/Composable.html"><span class="token annotation builtin">Composable</span></a>&nbsp;</span><span class="token keyword"></span><a href="https://developer.android.com/reference/kotlin/androidx/compose/foundation/layout/BoxScope.html">BoxScope</a><span class="token punctuation">.</span><span class="token punctuation">(</span><span class="token keyword"></span><a href="../../stream-video-android-core/io.getstream.video.android.core/-participant-state/index.html">ParticipantState</a><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><span class="token keyword"></span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-unit/index.html">Unit</a><span class="token operator"> = </span>{
         DefaultReaction(
             participant = participant,
-            style = style
+            style = style,
         )
     }</span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Renders a single participant with a given call, which contains all the call states. Also displays participant information with a label and connection quality indicator.</p></div></div></div>
                 </div>

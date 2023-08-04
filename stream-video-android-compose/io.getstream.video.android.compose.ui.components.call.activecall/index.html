@@ -34,7 +34,7 @@
     <div class="library-name">
 <a href="../../index.html">
 <span>stream-video-android</span>            </a>    </div>
-    <div>0.2.1
+    <div>0.2.3
     </div>
     <div class="pull-right d-flex">
         <div class="filter-section" id="filter-section">
@@ -73,14 +73,14 @@
         CallAppBar(
             call = call,
             leadingContent = null,
-            onCallAction = onCallAction
+            onCallAction = onCallAction,
         )
     }<span class="token punctuation">, </span></span><span class="parameter ">style<span class="token operator">: </span><a href="../io.getstream.video.android.compose.ui.components.call.renderer/-video-renderer-style/index.html">VideoRendererStyle</a><span class="token operator"> = </span>RegularVideoRendererStyle()<span class="token punctuation">, </span></span><span class="parameter ">videoRenderer<span class="token operator">: </span><span><span class="token annotation builtin">@</span><a href="https://developer.android.com/reference/kotlin/androidx/compose/runtime/Composable.html"><span class="token annotation builtin">Composable</span></a>&nbsp;</span><span class="token punctuation">(</span><span class="token keyword"></span>modifier<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/androidx/compose/ui/Modifier.html">Modifier</a><span class="token punctuation">, </span><span class="token keyword"></span>call<span class="token operator">: </span><a href="../../stream-video-android-core/io.getstream.video.android.core/-call/index.html">Call</a><span class="token punctuation">, </span><span class="token keyword"></span>participant<span class="token operator">: </span><a href="../../stream-video-android-core/io.getstream.video.android.core/-participant-state/index.html">ParticipantState</a><span class="token punctuation">, </span><span class="token keyword"></span>style<span class="token operator">: </span><a href="../io.getstream.video.android.compose.ui.components.call.renderer/-video-renderer-style/index.html">VideoRendererStyle</a><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><span class="token keyword"></span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-unit/index.html">Unit</a><span class="token operator"> = </span>{ videoModifier, videoCall, videoParticipant, videoStyle -&gt;
         ParticipantVideo(
             modifier = videoModifier,
             call = videoCall,
             participant = videoParticipant,
-            style = videoStyle
+            style = videoStyle,
         )
     }<span class="token punctuation">, </span></span><span class="parameter ">videoContent<span class="token operator">: </span><span><span class="token annotation builtin">@</span><a href="https://developer.android.com/reference/kotlin/androidx/compose/runtime/Composable.html"><span class="token annotation builtin">Composable</span></a>&nbsp;</span><span class="token keyword"></span><a href="https://developer.android.com/reference/kotlin/androidx/compose/foundation/layout/RowScope.html">RowScope</a><span class="token punctuation">.</span><span class="token punctuation">(</span><span class="token keyword"></span>call<span class="token operator">: </span><a href="../../stream-video-android-core/io.getstream.video.android.core/-call/index.html">Call</a><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><span class="token keyword"></span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-unit/index.html">Unit</a><span class="token operator"> = </span>{
         ParticipantsGrid(
@@ -89,12 +89,12 @@
                 .fillMaxSize()
                 .weight(1f),
             style = style,
-            videoRenderer = videoRenderer
+            videoRenderer = videoRenderer,
         )
     }<span class="token punctuation">, </span></span><span class="parameter ">controlsContent<span class="token operator">: </span><span><span class="token annotation builtin">@</span><a href="https://developer.android.com/reference/kotlin/androidx/compose/runtime/Composable.html"><span class="token annotation builtin">Composable</span></a>&nbsp;</span><span class="token punctuation">(</span><span class="token keyword"></span>call<span class="token operator">: </span><a href="../../stream-video-android-core/io.getstream.video.android.core/-call/index.html">Call</a><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><span class="token keyword"></span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-unit/index.html">Unit</a><span class="token operator"> = </span>{
         ControlActions(
             call = call,
-            onCallAction = onCallAction
+            onCallAction = onCallAction,
         )
     }<span class="token punctuation">, </span></span><span class="parameter ">enableInPictureInPicture<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-boolean/index.html">Boolean</a><span class="token operator"> = </span><span class="token boolean">true</span><span class="token punctuation">, </span></span><span class="parameter ">pictureInPictureContent<span class="token operator">: </span><span><span class="token annotation builtin">@</span><a href="https://developer.android.com/reference/kotlin/androidx/compose/runtime/Composable.html"><span class="token annotation builtin">Composable</span></a>&nbsp;</span><span class="token punctuation">(</span><span class="token keyword"></span><a href="../../stream-video-android-core/io.getstream.video.android.core/-call/index.html">Call</a><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><span class="token keyword"></span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-unit/index.html">Unit</a><span class="token operator"> = </span>{ DefaultPictureInPictureContent(it) }</span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Represents the UI in an Active call that shows participants and their video, as well as some extra UI features to control the call settings, browse participants and more.</p></div></div></div>
                 </div>
