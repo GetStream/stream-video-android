@@ -8,7 +8,7 @@ object Configuration {
     const val minorVersion = 2
     const val patchVersion = 2
     const val versionName = "$majorVersion.$minorVersion.$patchVersion"
-    const val versionCode = 3
+    const val versionCode = 4
     const val snapshotVersionName = "$majorVersion.$minorVersion.${patchVersion}-SNAPSHOT"
     const val artifactGroup = "io.getstream"
 }
