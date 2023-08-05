@@ -59,7 +59,6 @@ import kotlinx.coroutines.flow.transform
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
-import okhttp3.internal.toImmutableList
 import org.openapitools.client.models.BlockedUserEvent
 import org.openapitools.client.models.CallAcceptedEvent
 import org.openapitools.client.models.CallCreatedEvent
@@ -751,7 +750,7 @@ public class CallState(
                     val newList = callSessionResponse.participants.toMutableList()
                     newList.removeIf { it.userSessionId == event.participant.userSessionId }
                     _session.value = callSessionResponse.copy(
-                        participants = newList.toImmutableList(),
+                        participants = newList.toList(),
                     )
                 }
             }
@@ -772,7 +771,7 @@ public class CallState(
                         newList[index] = participant
                     }
                     _session.value = callSessionResponse.copy(
-                        participants = newList.toImmutableList(),
+                        participants = newList.toList(),
                     )
                 }
                 updateRingingState()

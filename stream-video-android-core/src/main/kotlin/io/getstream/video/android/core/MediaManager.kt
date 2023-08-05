@@ -35,7 +35,6 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
-import okhttp3.internal.toImmutableList
 import org.openapitools.client.models.AudioSettings
 import org.openapitools.client.models.VideoSettings
 import org.webrtc.Camera2Capturer
@@ -427,7 +426,7 @@ public class CameraManager(
             _direction.value = selectedDevice.direction ?: CameraDirection.Back
             _selectedDevice.value = selectedDevice
             _availableResolutions.value =
-                selectedDevice.supportedFormats?.toImmutableList() ?: emptyList()
+                selectedDevice.supportedFormats?.toList() ?: emptyList()
             _resolution.value = selectDesiredResolution(
                 selectedDevice.supportedFormats,
                 mediaManager.call.state.settings.value?.video,
@@ -501,7 +500,7 @@ public class CameraManager(
                 mediaManager.call.state.settings.value?.video,
             )
             _availableResolutions.value =
-                selectedDevice.supportedFormats?.toImmutableList() ?: emptyList()
+                selectedDevice.supportedFormats?.toList() ?: emptyList()
 
             surfaceTextureHelper = SurfaceTextureHelper.create(
                 "CaptureThread", eglBaseContext,
