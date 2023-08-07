@@ -20,6 +20,7 @@ import android.view.View
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -70,7 +71,7 @@ public fun VideoRenderer(
     call: Call,
     video: ParticipantState.Media?,
     modifier: Modifier = Modifier,
-    videoScalingType: VideoScalingType = VideoScalingType.SCALE_ASPECT_BALANCED,
+    videoScalingType: VideoScalingType = VideoScalingType.SCALE_ASPECT_FILL,
     videoFallbackContent: @Composable (Call) -> Unit = {
         DefaultMediaTrackFallbackContent(
             modifier,
@@ -112,24 +113,26 @@ public fun VideoRenderer(
         }
 
         if (mediaTrack != null) {
-            AndroidView(
-                factory = { context ->
-                    StreamVideoTextureViewRenderer(context).apply {
-                        call.initRenderer(
-                            videoRenderer = this,
-                            sessionId = sessionId,
-                            trackType = trackType,
-                            onRendered = onRendered,
-                        )
-                        setScalingType(scalingType = videoScalingType.toCommonScalingType())
-                        setupVideo(mediaTrack, this)
+            Box(modifier = modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                AndroidView(
+                    factory = { context ->
+                        StreamVideoTextureViewRenderer(context).apply {
+                            call.initRenderer(
+                                videoRenderer = this,
+                                sessionId = sessionId,
+                                trackType = trackType,
+                                onRendered = onRendered,
+                            )
+                            setScalingType(scalingType = videoScalingType.toCommonScalingType())
+                            setupVideo(mediaTrack, this)
 
-                        view = this
-                    }
-                },
-                update = { v -> setupVideo(mediaTrack, v) },
-                modifier = modifier.testTag("video_renderer"),
-            )
+                            view = this
+                        }
+                    },
+                    update = { v -> setupVideo(mediaTrack, v) },
+                    modifier = modifier.testTag("video_renderer"),
+                )
+            }
         } else {
             // fallback when the video is available but the track didn't load yet
             videoFallbackContent.invoke(call)
