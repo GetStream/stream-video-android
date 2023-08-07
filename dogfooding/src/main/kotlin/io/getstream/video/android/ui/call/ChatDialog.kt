@@ -18,17 +18,24 @@
 
 package io.getstream.video.android.ui.call
 
-import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.ExperimentalMaterialApi
+import androidx.compose.material.Icon
 import androidx.compose.material.ModalBottomSheetLayout
 import androidx.compose.material.ModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import io.getstream.chat.android.compose.ui.messages.MessagesScreen
@@ -36,6 +43,7 @@ import io.getstream.chat.android.compose.ui.theme.ChatTheme
 import io.getstream.chat.android.compose.viewmodel.messages.MessageListViewModel
 import io.getstream.chat.android.compose.viewmodel.messages.MessagesViewModelFactory
 import io.getstream.video.android.core.Call
+import io.getstream.video.android.ui.common.R
 
 @Composable
 internal fun ChatDialog(
@@ -46,13 +54,14 @@ internal fun ChatDialog(
     onDismissed: () -> Unit,
 ) {
     val context = LocalContext.current
-    val viewModelFactory = MessagesViewModelFactory(
-        context = context,
-        channelId = "videocall:${call.id}",
-    )
-
+    val viewModelFactory = remember {
+        MessagesViewModelFactory(
+            context = context,
+            channelId = "videocall:${call.id}",
+        )
+    }
     val listViewModel = viewModel(MessageListViewModel::class.java, factory = viewModelFactory)
-    val unreadCount: Int = listViewModel.currentMessagesState.unreadCount
+    val unreadCount = listViewModel.currentMessagesState.unreadCount
 
     LaunchedEffect(key1 = unreadCount) {
         updateUnreadCount.invoke(unreadCount)
@@ -64,16 +73,30 @@ internal fun ChatDialog(
             sheetShape = RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp),
             sheetState = state,
             sheetContent = {
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(500.dp),
-                ) {
-                    MessagesScreen(
-                        viewModelFactory = viewModelFactory,
-                        onBackPressed = { onDismissed.invoke() },
-                        onHeaderActionClick = { onDismissed.invoke() },
-                    )
+                if (state.isVisible) {
+                    Column(
+                        modifier = Modifier
+                            .background(ChatTheme.colors.appBackground)
+                            .fillMaxWidth()
+                            .height(500.dp),
+                    ) {
+                        Icon(
+                            modifier = Modifier
+                                .align(Alignment.End)
+                                .padding(16.dp)
+                                .clickable { onDismissed.invoke() },
+                            tint = ChatTheme.colors.textHighEmphasis,
+                            painter = painterResource(id = R.drawable.stream_video_ic_close),
+                            contentDescription = null,
+                        )
+
+                        MessagesScreen(
+                            showHeader = false,
+                            viewModelFactory = viewModelFactory,
+                            onBackPressed = { onDismissed.invoke() },
+                            onHeaderActionClick = { onDismissed.invoke() },
+                        )
+                    }
                 }
             },
             content = content,
