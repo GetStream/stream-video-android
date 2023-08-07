@@ -107,6 +107,7 @@ Video roadmap and changelog is available [here](https://github.com/GetStream/pro
 - [X] Livestream tutorial (depends on RTMP support) (Thierry)
 - [X] local version of audioLevel(s) for lower latency audio visualizations(Daniel)
 - [X] Complete integration with the video demo flow
+- [X] Pagination on query members & query call endpoints (Daniel)
 - [X] Enable ice restarts for publisher and subscriber
 - [X] Ringing: Finish it, make testing easy and write docs for common changes (Daniel)
 

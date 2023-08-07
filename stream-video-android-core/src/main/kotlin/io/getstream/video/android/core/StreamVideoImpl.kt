@@ -34,6 +34,8 @@ import io.getstream.video.android.core.lifecycle.internal.StreamLifecycleObserve
 import io.getstream.video.android.core.logging.LoggingLevel
 import io.getstream.video.android.core.model.EdgeData
 import io.getstream.video.android.core.model.MuteUsersData
+import io.getstream.video.android.core.model.QueriedCalls
+import io.getstream.video.android.core.model.QueriedMembers
 import io.getstream.video.android.core.model.SortField
 import io.getstream.video.android.core.model.UpdateUserPermissionsData
 import io.getstream.video.android.core.model.toRequest
@@ -45,6 +47,8 @@ import io.getstream.video.android.core.utils.DebugInfo
 import io.getstream.video.android.core.utils.LatencyResult
 import io.getstream.video.android.core.utils.getLatencyMeasurementsOKHttp
 import io.getstream.video.android.core.utils.toEdge
+import io.getstream.video.android.core.utils.toQueriedCalls
+import io.getstream.video.android.core.utils.toQueriedMembers
 import io.getstream.video.android.core.utils.toUser
 import io.getstream.video.android.datastore.delegate.StreamUserDataStore
 import io.getstream.video.android.model.Device
@@ -82,7 +86,6 @@ import org.openapitools.client.models.ListRecordingsResponse
 import org.openapitools.client.models.MemberRequest
 import org.openapitools.client.models.MuteUsersResponse
 import org.openapitools.client.models.QueryCallsRequest
-import org.openapitools.client.models.QueryCallsResponse
 import org.openapitools.client.models.QueryMembersRequest
 import org.openapitools.client.models.QueryMembersResponse
 import org.openapitools.client.models.RejectCallResponse
@@ -649,13 +652,14 @@ internal class StreamVideoImpl internal constructor(
         }
     }
 
-    internal suspend fun queryMembers(
+    internal suspend fun queryMembersInternal(
         type: String,
         id: String,
-        // TODO: why can't the filter be null
-        filter: Map<String, Any>,
-        sort: List<SortField> = mutableListOf(SortField.Desc("created_at")),
-        limit: Int = 100,
+        filter: Map<String, Any>?,
+        sort: List<SortField>,
+        prev: String?,
+        next: String?,
+        limit: Int,
     ): Result<QueryMembersResponse> {
         return wrapAPICall {
             connectionModule.api.queryMembers(
@@ -664,10 +668,32 @@ internal class StreamVideoImpl internal constructor(
                     id = id,
                     filterConditions = filter,
                     sort = sort.map { it.toRequest() },
+                    prev = prev,
+                    next = next,
                     limit = limit,
                 ),
             )
         }
+    }
+
+    override suspend fun queryMembers(
+        type: String,
+        id: String,
+        filter: Map<String, Any>?,
+        sort: List<SortField>,
+        prev: String?,
+        next: String?,
+        limit: Int,
+    ): Result<QueriedMembers> {
+        return queryMembersInternal(
+            type = type,
+            id = id,
+            filter = filter,
+            sort = sort,
+            prev = prev,
+            next = next,
+            limit = limit,
+        ).map { it.toQueriedMembers() }
     }
 
     suspend fun blockUser(type: String, id: String, userId: String): Result<BlockUserResponse> {
@@ -726,13 +752,17 @@ internal class StreamVideoImpl internal constructor(
         filters: Map<String, Any>,
         sort: List<SortField>,
         limit: Int,
+        prev: String?,
+        next: String?,
         watch: Boolean,
-    ): Result<QueryCallsResponse> {
+    ): Result<QueriedCalls> {
         logger.d { "[queryCalls] filters: $filters, sort: $sort, limit: $limit, watch: $watch" }
         val request = QueryCallsRequest(
             filterConditions = filters,
             sort = sort.map { it.toRequest() },
             limit = limit,
+            prev = prev,
+            next = next,
             watch = watch,
         )
         val connectionId = connectionModule.coordinatorSocket.connectionId
@@ -749,7 +779,7 @@ internal class StreamVideoImpl internal constructor(
             }
         }
 
-        return result
+        return result.map { it.toQueriedCalls() }
     }
 
     suspend fun requestPermissions(

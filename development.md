@@ -332,3 +332,12 @@ Scenario 2 - Tests block:
 
 Run this for a local preview of the docs:
 npx stream-chat-docusaurus -i -s
+
+### Release
+
+You can release a new SDK version following the steps below:
+
+1. Increase the [patch number](https://github.com/GetStream/stream-video-android/blob/develop/buildSrc/src/main/kotlin/io/getstream/video/android/Configuration.kt#L9)
+2. Increase the [version code](https://github.com/GetStream/stream-video-android/blob/develop/buildSrc/src/main/kotlin/io/getstream/video/android/Configuration.kt#L11) by 1
+3. Merge them into the `develop` and `main`
+4. [Release on GitHub](https://github.com/GetStream/stream-video-android/releases) with the new version name against the `main` branch. You should make sure the **target branch** is `main`. 

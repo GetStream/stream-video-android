@@ -28,10 +28,12 @@ import io.getstream.video.android.core.call.utils.SoundInputProcessor
 import io.getstream.video.android.core.events.VideoEventListener
 import io.getstream.video.android.core.internal.InternalStreamVideoApi
 import io.getstream.video.android.core.model.MuteUsersData
+import io.getstream.video.android.core.model.QueriedMembers
 import io.getstream.video.android.core.model.SortField
 import io.getstream.video.android.core.model.UpdateUserPermissionsData
 import io.getstream.video.android.core.model.toIceServer
 import io.getstream.video.android.core.utils.RampValueUpAndDownHelper
+import io.getstream.video.android.core.utils.toQueriedMembers
 import io.getstream.video.android.model.User
 import io.getstream.webrtc.android.ui.VideoTextureViewRenderer
 import kotlinx.coroutines.CoroutineScope
@@ -52,7 +54,6 @@ import org.openapitools.client.models.JoinCallResponse
 import org.openapitools.client.models.ListRecordingsResponse
 import org.openapitools.client.models.MemberRequest
 import org.openapitools.client.models.MuteUsersResponse
-import org.openapitools.client.models.QueryMembersResponse
 import org.openapitools.client.models.RejectCallResponse
 import org.openapitools.client.models.SendEventResponse
 import org.openapitools.client.models.SendReactionResponse
@@ -439,15 +440,19 @@ public class Call(
     suspend fun queryMembers(
         filter: Map<String, Any>,
         sort: List<SortField> = mutableListOf(SortField.Desc("created_at")),
-        limit: Int = 100,
-    ): Result<QueryMembersResponse> {
-        return clientImpl.queryMembers(
+        limit: Int = 25,
+        prev: String? = null,
+        next: String? = null,
+    ): Result<QueriedMembers> {
+        return clientImpl.queryMembersInternal(
             type = type,
             id = id,
             filter = filter,
             sort = sort,
+            prev = prev,
+            next = next,
             limit = limit,
-        ).onSuccess { state.updateFromResponse(it) }
+        ).onSuccess { state.updateFromResponse(it) }.map { it.toQueriedMembers() }
     }
 
     suspend fun muteAllUsers(
