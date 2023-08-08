@@ -1,10 +1,3 @@
-public final class io/getstream/video/android/xml/BuildConfig {
-	public static final field BUILD_TYPE Ljava/lang/String;
-	public static final field DEBUG Z
-	public static final field LIBRARY_PACKAGE_NAME Ljava/lang/String;
-	public fun <init> ()V
-}
-
 public final class io/getstream/video/android/xml/VideoUI {
 	public static final field INSTANCE Lio/getstream/video/android/xml/VideoUI;
 	public static final fun getFonts ()Lio/getstream/video/android/xml/font/VideoFonts;
@@ -207,6 +200,7 @@ public abstract interface class io/getstream/video/android/xml/font/VideoFonts {
 	public abstract fun getFont (Lio/getstream/video/android/xml/font/TextStyle;)Landroid/graphics/Typeface;
 	public abstract fun setFont (Lio/getstream/video/android/xml/font/TextStyle;Landroid/widget/TextView;)V
 	public abstract fun setFont (Lio/getstream/video/android/xml/font/TextStyle;Landroid/widget/TextView;Landroid/graphics/Typeface;)V
+	public static synthetic fun setFont$default (Lio/getstream/video/android/xml/font/VideoFonts;Lio/getstream/video/android/xml/font/TextStyle;Landroid/widget/TextView;Landroid/graphics/Typeface;ILjava/lang/Object;)V
 }
 
 public final class io/getstream/video/android/xml/font/VideoFonts$DefaultImpls {
@@ -275,7 +269,7 @@ public abstract interface class io/getstream/video/android/xml/utils/Disposable 
 }
 
 public abstract interface class io/getstream/video/android/xml/utils/OrientationChangeListener {
-	public abstract fun onOrientationChanged (Z)V
+	public fun onOrientationChanged (Z)V
 }
 
 public final class io/getstream/video/android/xml/utils/OrientationChangeListener$DefaultImpls {
@@ -366,6 +360,7 @@ public final class io/getstream/video/android/xml/widget/appbar/CallAppBarView :
 public final class io/getstream/video/android/xml/widget/avatar/AvatarShape : java/lang/Enum {
 	public static final field CIRCLE Lio/getstream/video/android/xml/widget/avatar/AvatarShape;
 	public static final field ROUND_RECT Lio/getstream/video/android/xml/widget/avatar/AvatarShape;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
 	public final fun getValue ()I
 	public static fun valueOf (Ljava/lang/String;)Lio/getstream/video/android/xml/widget/avatar/AvatarShape;
 	public static fun values ()[Lio/getstream/video/android/xml/widget/avatar/AvatarShape;
@@ -687,6 +682,7 @@ public final class io/getstream/video/android/xml/widget/participant/CallPartici
 	public static final field BOTTOM_RIGHT Lio/getstream/video/android/xml/widget/participant/CallParticipantLabelAlignment;
 	public static final field TOP_LEFT Lio/getstream/video/android/xml/widget/participant/CallParticipantLabelAlignment;
 	public static final field TOP_RIGHT Lio/getstream/video/android/xml/widget/participant/CallParticipantLabelAlignment;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
 	public static fun valueOf (Ljava/lang/String;)Lio/getstream/video/android/xml/widget/participant/CallParticipantLabelAlignment;
 	public static fun values ()[Lio/getstream/video/android/xml/widget/participant/CallParticipantLabelAlignment;
 }
@@ -741,8 +737,6 @@ public final class io/getstream/video/android/xml/widget/participant/FloatingPar
 	public fun getRunningJobs ()Ljava/util/List;
 	public final fun setParticipant (Lio/getstream/video/android/core/ParticipantState;)V
 	public final fun setRendererInitializer (Lio/getstream/video/android/xml/widget/participant/RendererInitializer;)V
-	public fun startJob (Landroidx/lifecycle/LifecycleOwner;Lkotlin/jvm/functions/Function1;)V
-	public fun stopAllJobs ()V
 }
 
 public final class io/getstream/video/android/xml/widget/participant/PictureInPictureStyle {
@@ -799,8 +793,6 @@ public final class io/getstream/video/android/xml/widget/screenshare/ScreenShare
 	public final fun setOnRender (Lkotlin/jvm/functions/Function1;)V
 	public fun setRendererInitializer (Lio/getstream/video/android/xml/widget/participant/RendererInitializer;)V
 	public final fun setScreenSharingSession (Lio/getstream/video/android/core/model/ScreenSharingSession;)V
-	public fun startJob (Landroidx/lifecycle/LifecycleOwner;Lkotlin/jvm/functions/Function1;)V
-	public fun stopAllJobs ()V
 }
 
 public abstract interface class io/getstream/video/android/xml/widget/transformer/StyleTransformer {
@@ -841,9 +833,6 @@ public abstract class io/getstream/video/android/xml/widget/view/CallCardView : 
 	public fun <init> (Landroid/content/Context;Landroid/util/AttributeSet;I)V
 	public fun getRunningJobs ()Ljava/util/List;
 	protected fun onDetachedFromWindow ()V
-	public fun onOrientationChanged (Z)V
-	public fun startJob (Landroidx/lifecycle/LifecycleOwner;Lkotlin/jvm/functions/Function1;)V
-	public fun stopAllJobs ()V
 }
 
 public abstract class io/getstream/video/android/xml/widget/view/CallConstraintLayout : androidx/constraintlayout/widget/ConstraintLayout, io/getstream/video/android/xml/utils/OrientationChangeListener, io/getstream/video/android/xml/widget/view/JobHolder {
@@ -852,8 +841,5 @@ public abstract class io/getstream/video/android/xml/widget/view/CallConstraintL
 	public fun <init> (Landroid/content/Context;Landroid/util/AttributeSet;I)V
 	public fun getRunningJobs ()Ljava/util/List;
 	protected fun onDetachedFromWindow ()V
-	public fun onOrientationChanged (Z)V
-	public fun startJob (Landroidx/lifecycle/LifecycleOwner;Lkotlin/jvm/functions/Function1;)V
-	public fun stopAllJobs ()V
 }
 

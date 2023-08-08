@@ -635,6 +635,7 @@ public final class io/getstream/video/android/core/SpeakerManager {
 public abstract interface class io/getstream/video/android/core/StreamVideo : io/getstream/video/android/core/notifications/NotificationHandler {
 	public static final field Companion Lio/getstream/video/android/core/StreamVideo$Companion;
 	public abstract fun call (Ljava/lang/String;Ljava/lang/String;)Lio/getstream/video/android/core/Call;
+	public static synthetic fun call$default (Lio/getstream/video/android/core/StreamVideo;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)Lio/getstream/video/android/core/Call;
 	public abstract fun cleanup ()V
 	public abstract fun connectAsync (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public abstract fun createDevice (Lio/getstream/android/push/PushDevice;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
@@ -646,7 +647,9 @@ public abstract interface class io/getstream/video/android/core/StreamVideo : io
 	public abstract fun getUserId ()Ljava/lang/String;
 	public abstract fun logOut ()V
 	public abstract fun queryCalls (Ljava/util/Map;Ljava/util/List;ILjava/lang/String;Ljava/lang/String;ZLkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public static synthetic fun queryCalls$default (Lio/getstream/video/android/core/StreamVideo;Ljava/util/Map;Ljava/util/List;ILjava/lang/String;Ljava/lang/String;ZLkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
 	public abstract fun queryMembers (Ljava/lang/String;Ljava/lang/String;Ljava/util/Map;Ljava/util/List;Ljava/lang/String;Ljava/lang/String;ILkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public static synthetic fun queryMembers$default (Lio/getstream/video/android/core/StreamVideo;Ljava/lang/String;Ljava/lang/String;Ljava/util/Map;Ljava/util/List;Ljava/lang/String;Ljava/lang/String;ILkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
 	public abstract fun subscribe (Lio/getstream/video/android/core/events/VideoEventListener;)Lio/getstream/video/android/core/EventSubscription;
 	public abstract fun subscribeFor ([Ljava/lang/Class;Lio/getstream/video/android/core/events/VideoEventListener;)Lio/getstream/video/android/core/EventSubscription;
 }
@@ -1089,6 +1092,7 @@ public final class io/getstream/video/android/core/errors/VideoErrorCode : java/
 	public static final field VALIDATION_ERROR Lio/getstream/video/android/core/errors/VideoErrorCode;
 	public final fun getCode ()I
 	public final fun getDescription ()Ljava/lang/String;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
 	public static fun valueOf (Ljava/lang/String;)Lio/getstream/video/android/core/errors/VideoErrorCode;
 	public static fun values ()[Lio/getstream/video/android/core/errors/VideoErrorCode;
 }
@@ -1413,7 +1417,7 @@ public abstract class io/getstream/video/android/core/filter/FilterObject {
 	public synthetic fun <init> (ILkotlinx/serialization/internal/SerializationConstructorMarker;)V
 	public fun equals (Ljava/lang/Object;)Z
 	public fun hashCode ()I
-	public static final fun write$Self (Lio/getstream/video/android/core/filter/FilterObject;Lkotlinx/serialization/encoding/CompositeEncoder;Lkotlinx/serialization/descriptors/SerialDescriptor;)V
+	public static final synthetic fun write$Self (Lio/getstream/video/android/core/filter/FilterObject;Lkotlinx/serialization/encoding/CompositeEncoder;Lkotlinx/serialization/descriptors/SerialDescriptor;)V
 }
 
 public final class io/getstream/video/android/core/filter/FilterObject$Companion {
@@ -1585,6 +1589,7 @@ public final class io/getstream/video/android/core/logging/HttpLoggingLevel : ja
 	public static final field BASIC Lio/getstream/video/android/core/logging/HttpLoggingLevel;
 	public static final field BODY Lio/getstream/video/android/core/logging/HttpLoggingLevel;
 	public static final field NONE Lio/getstream/video/android/core/logging/HttpLoggingLevel;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
 	public static fun valueOf (Ljava/lang/String;)Lio/getstream/video/android/core/logging/HttpLoggingLevel;
 	public static fun values ()[Lio/getstream/video/android/core/logging/HttpLoggingLevel;
 }
@@ -1677,6 +1682,7 @@ public final class io/getstream/video/android/core/model/CallEventType : java/la
 	public static final field CANCELLED Lio/getstream/video/android/core/model/CallEventType;
 	public static final field REJECTED Lio/getstream/video/android/core/model/CallEventType;
 	public static final field UNDEFINED Lio/getstream/video/android/core/model/CallEventType;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
 	public final fun getEventType ()Ljava/lang/String;
 	public static fun valueOf (Ljava/lang/String;)Lio/getstream/video/android/core/model/CallEventType;
 	public static fun values ()[Lio/getstream/video/android/core/model/CallEventType;
@@ -1841,7 +1847,7 @@ public final class io/getstream/video/android/core/model/IceCandidate {
 	public fun equals (Ljava/lang/Object;)Z
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
-	public static final fun write$Self (Lio/getstream/video/android/core/model/IceCandidate;Lkotlinx/serialization/encoding/CompositeEncoder;Lkotlinx/serialization/descriptors/SerialDescriptor;)V
+	public static final synthetic fun write$Self (Lio/getstream/video/android/core/model/IceCandidate;Lkotlinx/serialization/encoding/CompositeEncoder;Lkotlinx/serialization/descriptors/SerialDescriptor;)V
 }
 
 public final class io/getstream/video/android/core/model/IceCandidate$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
@@ -2146,6 +2152,7 @@ public final class io/getstream/video/android/core/model/SortField$Desc : io/get
 public final class io/getstream/video/android/core/model/StreamPeerType : java/lang/Enum {
 	public static final field PUBLISHER Lio/getstream/video/android/core/model/StreamPeerType;
 	public static final field SUBSCRIBER Lio/getstream/video/android/core/model/StreamPeerType;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
 	public static fun valueOf (Ljava/lang/String;)Lio/getstream/video/android/core/model/StreamPeerType;
 	public static fun values ()[Lio/getstream/video/android/core/model/StreamPeerType;
 }
@@ -2318,7 +2325,7 @@ public final class io/getstream/video/android/core/socket/ErrorResponse : java/l
 	public final fun setMoreInfo (Ljava/lang/String;)V
 	public final fun setStatusCode (I)V
 	public fun toString ()Ljava/lang/String;
-	public static final fun write$Self (Lio/getstream/video/android/core/socket/ErrorResponse;Lkotlinx/serialization/encoding/CompositeEncoder;Lkotlinx/serialization/descriptors/SerialDescriptor;)V
+	public static final synthetic fun write$Self (Lio/getstream/video/android/core/socket/ErrorResponse;Lkotlinx/serialization/encoding/CompositeEncoder;Lkotlinx/serialization/descriptors/SerialDescriptor;)V
 }
 
 public final class io/getstream/video/android/core/socket/ErrorResponse$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
@@ -2385,7 +2392,7 @@ public final class io/getstream/video/android/core/socket/SocketError {
 	public final fun getError ()Lio/getstream/video/android/core/socket/ErrorResponse;
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
-	public static final fun write$Self (Lio/getstream/video/android/core/socket/SocketError;Lkotlinx/serialization/encoding/CompositeEncoder;Lkotlinx/serialization/descriptors/SerialDescriptor;)V
+	public static final synthetic fun write$Self (Lio/getstream/video/android/core/socket/SocketError;Lkotlinx/serialization/encoding/CompositeEncoder;Lkotlinx/serialization/descriptors/SerialDescriptor;)V
 }
 
 public final class io/getstream/video/android/core/socket/SocketError$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
@@ -2563,17 +2570,23 @@ public abstract interface class org/openapitools/client/apis/DefaultApi {
 	public abstract fun createDevice (Lorg/openapitools/client/models/CreateDeviceRequest;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public abstract fun createGuest (Lorg/openapitools/client/models/CreateGuestRequest;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public abstract fun deleteDevice (Ljava/lang/String;Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public static synthetic fun deleteDevice$default (Lorg/openapitools/client/apis/DefaultApi;Ljava/lang/String;Ljava/lang/String;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
 	public abstract fun endCall (Ljava/lang/String;Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public abstract fun getCall (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/Integer;Ljava/lang/Boolean;Ljava/lang/Boolean;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public static synthetic fun getCall$default (Lorg/openapitools/client/apis/DefaultApi;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/Integer;Ljava/lang/Boolean;Ljava/lang/Boolean;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
 	public abstract fun getEdges (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public abstract fun getOrCreateCall (Ljava/lang/String;Ljava/lang/String;Lorg/openapitools/client/models/GetOrCreateCallRequest;Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public static synthetic fun getOrCreateCall$default (Lorg/openapitools/client/apis/DefaultApi;Ljava/lang/String;Ljava/lang/String;Lorg/openapitools/client/models/GetOrCreateCallRequest;Ljava/lang/String;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
 	public abstract fun goLive (Ljava/lang/String;Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public abstract fun joinCall (Ljava/lang/String;Ljava/lang/String;Lorg/openapitools/client/models/JoinCallRequest;Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public static synthetic fun joinCall$default (Lorg/openapitools/client/apis/DefaultApi;Ljava/lang/String;Ljava/lang/String;Lorg/openapitools/client/models/JoinCallRequest;Ljava/lang/String;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
 	public abstract fun listDevices (Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public static synthetic fun listDevices$default (Lorg/openapitools/client/apis/DefaultApi;Ljava/lang/String;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
 	public abstract fun listRecordingsTypeId0 (Ljava/lang/String;Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public abstract fun listRecordingsTypeIdSession1 (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public abstract fun muteUsers (Ljava/lang/String;Ljava/lang/String;Lorg/openapitools/client/models/MuteUsersRequest;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public abstract fun queryCalls (Lorg/openapitools/client/models/QueryCallsRequest;Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public static synthetic fun queryCalls$default (Lorg/openapitools/client/apis/DefaultApi;Lorg/openapitools/client/models/QueryCallsRequest;Ljava/lang/String;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
 	public abstract fun queryMembers (Lorg/openapitools/client/models/QueryMembersRequest;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public abstract fun rejectCall (Ljava/lang/String;Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public abstract fun requestPermission (Ljava/lang/String;Ljava/lang/String;Lorg/openapitools/client/models/RequestPermissionRequest;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
@@ -6054,6 +6067,7 @@ public final class stream/video/sfu/event/VideoLayerSetting$Priority : java/lang
 	public static final field PRIORITY_MEDIUM Lstream/video/sfu/event/VideoLayerSetting$Priority;
 	public static final field PRIORITY_VERY_LOW Lstream/video/sfu/event/VideoLayerSetting$Priority;
 	public static final fun fromValue (I)Lstream/video/sfu/event/VideoLayerSetting$Priority;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
 	public fun getValue ()I
 	public static fun valueOf (Ljava/lang/String;)Lstream/video/sfu/event/VideoLayerSetting$Priority;
 	public static fun values ()[Lstream/video/sfu/event/VideoLayerSetting$Priority;
@@ -6246,6 +6260,7 @@ public final class stream/video/sfu/models/ConnectionQuality : java/lang/Enum, c
 	public static final field CONNECTION_QUALITY_UNSPECIFIED Lstream/video/sfu/models/ConnectionQuality;
 	public static final field Companion Lstream/video/sfu/models/ConnectionQuality$Companion;
 	public static final fun fromValue (I)Lstream/video/sfu/models/ConnectionQuality;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
 	public fun getValue ()I
 	public static fun valueOf (Ljava/lang/String;)Lstream/video/sfu/models/ConnectionQuality;
 	public static fun values ()[Lstream/video/sfu/models/ConnectionQuality;
@@ -6315,6 +6330,7 @@ public final class stream/video/sfu/models/ErrorCode : java/lang/Enum, com/squar
 	public static final field ERROR_CODE_UNAUTHENTICATED Lstream/video/sfu/models/ErrorCode;
 	public static final field ERROR_CODE_UNSPECIFIED Lstream/video/sfu/models/ErrorCode;
 	public static final fun fromValue (I)Lstream/video/sfu/models/ErrorCode;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
 	public fun getValue ()I
 	public static fun valueOf (Ljava/lang/String;)Lstream/video/sfu/models/ErrorCode;
 	public static fun values ()[Lstream/video/sfu/models/ErrorCode;
@@ -6331,6 +6347,7 @@ public final class stream/video/sfu/models/GoAwayReason : java/lang/Enum, com/sq
 	public static final field GO_AWAY_REASON_SHUTTING_DOWN Lstream/video/sfu/models/GoAwayReason;
 	public static final field GO_AWAY_REASON_UNSPECIFIED Lstream/video/sfu/models/GoAwayReason;
 	public static final fun fromValue (I)Lstream/video/sfu/models/GoAwayReason;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
 	public fun getValue ()I
 	public static fun valueOf (Ljava/lang/String;)Lstream/video/sfu/models/GoAwayReason;
 	public static fun values ()[Lstream/video/sfu/models/GoAwayReason;
@@ -6439,6 +6456,7 @@ public final class stream/video/sfu/models/PeerType : java/lang/Enum, com/square
 	public static final field PEER_TYPE_PUBLISHER_UNSPECIFIED Lstream/video/sfu/models/PeerType;
 	public static final field PEER_TYPE_SUBSCRIBER Lstream/video/sfu/models/PeerType;
 	public static final fun fromValue (I)Lstream/video/sfu/models/PeerType;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
 	public fun getValue ()I
 	public static fun valueOf (Ljava/lang/String;)Lstream/video/sfu/models/PeerType;
 	public static fun values ()[Lstream/video/sfu/models/PeerType;
@@ -6481,6 +6499,7 @@ public final class stream/video/sfu/models/SdkType : java/lang/Enum, com/squareu
 	public static final field SDK_TYPE_REACT_NATIVE Lstream/video/sfu/models/SdkType;
 	public static final field SDK_TYPE_UNSPECIFIED Lstream/video/sfu/models/SdkType;
 	public static final fun fromValue (I)Lstream/video/sfu/models/SdkType;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
 	public fun getValue ()I
 	public static fun valueOf (Ljava/lang/String;)Lstream/video/sfu/models/SdkType;
 	public static fun values ()[Lstream/video/sfu/models/SdkType;
@@ -6544,6 +6563,7 @@ public final class stream/video/sfu/models/TrackType : java/lang/Enum, com/squar
 	public static final field TRACK_TYPE_UNSPECIFIED Lstream/video/sfu/models/TrackType;
 	public static final field TRACK_TYPE_VIDEO Lstream/video/sfu/models/TrackType;
 	public static final fun fromValue (I)Lstream/video/sfu/models/TrackType;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
 	public fun getValue ()I
 	public static fun valueOf (Ljava/lang/String;)Lstream/video/sfu/models/TrackType;
 	public static fun values ()[Lstream/video/sfu/models/TrackType;
@@ -6561,6 +6581,7 @@ public final class stream/video/sfu/models/TrackUnpublishReason : java/lang/Enum
 	public static final field TRACK_UNPUBLISH_REASON_UNSPECIFIED Lstream/video/sfu/models/TrackUnpublishReason;
 	public static final field TRACK_UNPUBLISH_REASON_USER_MUTED Lstream/video/sfu/models/TrackUnpublishReason;
 	public static final fun fromValue (I)Lstream/video/sfu/models/TrackUnpublishReason;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
 	public fun getValue ()I
 	public static fun valueOf (Ljava/lang/String;)Lstream/video/sfu/models/TrackUnpublishReason;
 	public static fun values ()[Lstream/video/sfu/models/TrackUnpublishReason;
@@ -6621,6 +6642,7 @@ public final class stream/video/sfu/models/VideoQuality : java/lang/Enum, com/sq
 	public static final field VIDEO_QUALITY_MID Lstream/video/sfu/models/VideoQuality;
 	public static final field VIDEO_QUALITY_OFF Lstream/video/sfu/models/VideoQuality;
 	public static final fun fromValue (I)Lstream/video/sfu/models/VideoQuality;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
 	public fun getValue ()I
 	public static fun valueOf (Ljava/lang/String;)Lstream/video/sfu/models/VideoQuality;
 	public static fun values ()[Lstream/video/sfu/models/VideoQuality;
