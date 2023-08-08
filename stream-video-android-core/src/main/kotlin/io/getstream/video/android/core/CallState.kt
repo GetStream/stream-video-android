@@ -356,7 +356,7 @@ public class CallState(
         if (durationInMs == null) {
             null
         } else {
-            val date = Date(durationInMs ?: 0)
+            val date = Date(durationInMs)
             val dateFormat = SimpleDateFormat("HH:MM:SS", Locale.US)
             dateFormat.format(date)
         }

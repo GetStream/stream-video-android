@@ -27,6 +27,7 @@ androidxHiltNavigation = "1.0.0"
 androidxComposeNavigation = "2.5.3"
 composeStableMarker = "1.0.0"
 
+coil = "2.2.2"
 landscapist = "2.1.9"
 accompanist = "0.30.1"
 telephoto = "0.3.0"
@@ -66,6 +67,7 @@ firebaseCrashlytics = "2.9.5"
 installReferrer = "2.2"
 
 hilt = "2.46.1"
+desugar = "2.0.3"
 leakCanary = "2.11"
 binaryCompatabilityValidator = "0.13.2"
 
@@ -101,6 +103,9 @@ androidx-compose-ui-tooling = { group = "androidx.compose.ui", name = "ui-toolin
 androidx-compose-ui-tooling-preview = { group = "androidx.compose.ui", name = "ui-tooling-preview" }
 androidx-compose-tracing = { group = "androidx.compose.runtime", name = "runtime-tracing", version.ref = "androidxComposeTracing" }
 compose-stable-marker = { group = "com.github.skydoves", name = "compose-stable-marker", version.ref = "composeStableMarker" }
+
+coil = { group = "io.coil-kt", name = "coil", version.ref = "coil" }
+desugar = { group = "com.android.tools", name = "desugar_jdk_libs", version.ref = "desugar" }
 
 landscapist-coil = { group = "com.github.skydoves", name = "landscapist-coil", version.ref = "landscapist" }
 landscapist-animation = { group = "com.github.skydoves", name = "landscapist-animation", version.ref = "landscapist" }
