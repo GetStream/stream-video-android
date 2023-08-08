@@ -40,7 +40,6 @@ android {
     }
 }
 
-
 dependencies {
     api(libs.threentenabp2)
 

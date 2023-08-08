@@ -22,7 +22,6 @@ internal fun Project.configureKotlinAndroid(
         compileOptions {
             sourceCompatibility = JavaVersion.VERSION_11
             targetCompatibility = JavaVersion.VERSION_11
-            isCoreLibraryDesugaringEnabled = true
         }
 
         kotlinOptions {
@@ -32,7 +31,7 @@ internal fun Project.configureKotlinAndroid(
             // Set JVM target to 11
             jvmTarget = libs.findVersion("jvmTarget").get().toString()
             freeCompilerArgs = freeCompilerArgs + listOf(
-                "-Xjvm-default=all-compatibility",
+                "-Xjvm-default=all",
                 "-opt-in=kotlin.RequiresOptIn",
                 "-opt-in=kotlinx.coroutines.ExperimentalCoroutinesApi",
                 "-opt-in=androidx.lifecycle.compose.ExperimentalLifecycleComposeApi",
@@ -44,10 +43,6 @@ internal fun Project.configureKotlinAndroid(
             abortOnError = false
         }
     }
-
-  dependencies {
-    add("coreLibraryDesugaring", libs.findLibrary("desugar").get())
-  }
 }
 
 fun CommonExtension<*, *, *, *, *>.kotlinOptions(block: KotlinJvmOptions.() -> Unit) {
