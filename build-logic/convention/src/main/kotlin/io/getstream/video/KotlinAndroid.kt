@@ -34,7 +34,6 @@ internal fun Project.configureKotlinAndroid(
                 "-Xjvm-default=all",
                 "-opt-in=kotlin.RequiresOptIn",
                 "-opt-in=kotlinx.coroutines.ExperimentalCoroutinesApi",
-                "-opt-in=androidx.lifecycle.compose.ExperimentalLifecycleComposeApi",
                 "-opt-in=io.getstream.video.android.core.internal.InternalStreamVideoApi",
             )
         }
