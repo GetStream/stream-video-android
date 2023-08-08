@@ -26,5 +26,5 @@ import io.getstream.log.Priority
  */
 public data class LoggingLevel @JvmOverloads constructor(
     public val priority: Priority = Priority.ERROR,
-    public val httpLoggingLevel: HttpLoggingLevel = HttpLoggingLevel.BASIC
+    public val httpLoggingLevel: HttpLoggingLevel = HttpLoggingLevel.BASIC,
 )

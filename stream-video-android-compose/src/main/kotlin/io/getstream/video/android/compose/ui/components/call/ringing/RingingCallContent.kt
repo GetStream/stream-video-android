@@ -64,7 +64,8 @@ public fun RingingCallContent(
     headerContent: (@Composable ColumnScope.() -> Unit)? = null,
     detailsContent: (
         @Composable ColumnScope.(
-            participants: List<MemberState>, topPadding: Dp
+            participants: List<MemberState>,
+            topPadding: Dp,
         ) -> Unit
     )? = null,
     controlsContent: (@Composable BoxScope.() -> Unit)? = null,
@@ -78,7 +79,6 @@ public fun RingingCallContent(
 
     when (ringingState) {
         is RingingState.Incoming -> {
-
             IncomingCallContent(
                 call = call,
                 isVideoType = isVideoType,
@@ -88,7 +88,7 @@ public fun RingingCallContent(
                 detailsContent = detailsContent,
                 controlsContent = controlsContent,
                 onBackPressed = onBackPressed,
-                onCallAction = onCallAction
+                onCallAction = onCallAction,
             )
         }
 
@@ -102,7 +102,7 @@ public fun RingingCallContent(
                 detailsContent = detailsContent,
                 controlsContent = controlsContent,
                 onBackPressed = onBackPressed,
-                onCallAction = onCallAction
+                onCallAction = onCallAction,
             )
         }
 

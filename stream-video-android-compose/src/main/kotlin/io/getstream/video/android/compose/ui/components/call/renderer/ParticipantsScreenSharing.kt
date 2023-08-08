@@ -51,13 +51,13 @@ public fun ParticipantsScreenSharing(
         modifier: Modifier,
         call: Call,
         participant: ParticipantState,
-        style: VideoRendererStyle
+        style: VideoRendererStyle,
     ) -> Unit = { videoModifier, videoCall, videoParticipant, videoStyle ->
         ParticipantVideo(
             modifier = videoModifier,
             call = videoCall,
             participant = videoParticipant,
-            style = videoStyle
+            style = videoStyle,
         )
     },
 ) {
@@ -75,7 +75,7 @@ public fun ParticipantsScreenSharing(
             modifier = modifier,
             isZoomable = isZoomable,
             style = style,
-            videoRenderer = videoRenderer
+            videoRenderer = videoRenderer,
         )
     } else {
         LandscapeScreenSharingVideoRenderer(
@@ -86,7 +86,7 @@ public fun ParticipantsScreenSharing(
             modifier = modifier,
             isZoomable = isZoomable,
             style = style,
-            videoRenderer = videoRenderer
+            videoRenderer = videoRenderer,
         )
     }
 }

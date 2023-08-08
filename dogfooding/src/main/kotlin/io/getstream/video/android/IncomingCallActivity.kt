@@ -56,7 +56,6 @@ class IncomingCallActivity : ComponentActivity() {
         val callId = intent.streamCallId(NotificationHandler.INTENT_EXTRA_CALL_CID)!!
 
         lifecycleScope.launch {
-
             StreamVideoInitHelper.init(this@IncomingCallActivity)
             val call = StreamVideo.instance().call(callId.type, callId.id)
 
@@ -72,7 +71,7 @@ class IncomingCallActivity : ComponentActivity() {
                 Toast.makeText(
                     this@IncomingCallActivity,
                     "Failed get call status (${result.value.message})",
-                    Toast.LENGTH_SHORT
+                    Toast.LENGTH_SHORT,
                 ).show()
                 finish()
             }
@@ -123,14 +122,14 @@ class IncomingCallActivity : ComponentActivity() {
                             CallContent(
                                 modifier = Modifier.fillMaxSize(),
                                 call = call,
-                                onCallAction = onCallAction
+                                onCallAction = onCallAction,
                             )
                         },
                         onRejectedContent = {
                             call.leave()
                             finish()
                         },
-                        onCallAction = onCallAction
+                        onCallAction = onCallAction,
                     )
                 }
             }
@@ -145,7 +144,7 @@ class IncomingCallActivity : ComponentActivity() {
             @Suppress("DEPRECATION")
             window.addFlags(
                 WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED or
-                    WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON
+                    WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON,
             )
         }
     }

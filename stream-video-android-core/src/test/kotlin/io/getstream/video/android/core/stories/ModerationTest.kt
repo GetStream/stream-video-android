@@ -29,16 +29,16 @@ import org.openapitools.client.models.OwnCapability
 import org.openapitools.client.models.PermissionRequestEvent
 import org.robolectric.RobolectricTestRunner
 
-@RunWith(RobolectricTestRunner::class)
 /**
  *   https://www.notion.so/stream-wiki/Moderation-Permissions-for-video-37a3376268654095b9aafaba12d4bb69
  *   https://www.notion.so/stream-wiki/Call-Permissions-832f914ad4c545cf8f048012900ad21d
  */
+@RunWith(RobolectricTestRunner::class)
 class ModerationTest : IntegrationTestBase() {
 
+    // TODO: Ignored since the backend doesn't seem to fire the event
     @Test
     @Ignore
-    // TODO: Ignored since the backend doesn't seem to fire the event
     fun `Basic moderation - Block a user`() = runTest {
         val response = call.blockUser("tommaso")
         assertSuccess(response)
@@ -46,9 +46,9 @@ class ModerationTest : IntegrationTestBase() {
         assertThat(event.user.id).isEqualTo("tommaso")
     }
 
+    // TODO: Ignored since the backend doesn't seem to fire the event
     @Test
     @Ignore
-    // TODO: Ignored since the backend doesn't seem to fire the event
     fun `Basic moderation - Remove a member`() = runTest {
         // create a call with Thierry & Tommaso
         val members = mutableListOf("thierry", "tommaso")
@@ -73,11 +73,10 @@ class ModerationTest : IntegrationTestBase() {
         assertThat(call.state.members.value.map { it.user.id }).doesNotContain("tommaso")
     }
 
+    // TODO: Ignored since the backend doesn't seem to fire the event
     @Test
     @Ignore
-    // TODO: Ignored since the backend doesn't seem to fire the event
     fun `Basic moderation - Request permission to share your screen`() = runTest {
-
         val hasPermission = call.state.hasPermission("screenshare").value
         assertThat(hasPermission).isTrue()
 

@@ -42,14 +42,23 @@ public enum class VideoErrorCode(public val code: Int, public val description: S
     NETWORK_FAILED(NETWORK_FAILED_ERROR_CODE, "Response is failed. See cause"),
     PARSER_ERROR(PARSER_ERROR_ERROR_CODE, "Unable to parse error"),
     SOCKET_CLOSED(SOCKET_CLOSED_ERROR_CODE, "Server closed connection"),
-    SOCKET_FAILURE(SOCKET_FAILURE_ERROR_CODE, "See stack trace in logs. Intercept error in error handler of setUser"),
-    CANT_PARSE_CONNECTION_EVENT(CANT_PARSE_CONNECTION_EVENT_ERROR_CODE, "Unable to parse connection event"),
+    SOCKET_FAILURE(
+        SOCKET_FAILURE_ERROR_CODE,
+        "See stack trace in logs. Intercept error in error handler of setUser",
+    ),
+    CANT_PARSE_CONNECTION_EVENT(
+        CANT_PARSE_CONNECTION_EVENT_ERROR_CODE,
+        "Unable to parse connection event",
+    ),
     CANT_PARSE_EVENT(CANT_PARSE_EVENT_ERROR_CODE, "Unable to parse event"),
     INVALID_TOKEN(INVALID_TOKEN_ERROR_CODE, "Invalid token"),
-    UNDEFINED_TOKEN(UNDEFINED_TOKEN_ERROR_CODE, "No defined token. Check if client.setUser was called and finished"),
+    UNDEFINED_TOKEN(
+        UNDEFINED_TOKEN_ERROR_CODE,
+        "No defined token. Check if client.setUser was called and finished",
+    ),
     UNABLE_TO_PARSE_SOCKET_EVENT(
         UNABLE_TO_PARSE_SOCKET_EVENT_ERROR_CODE,
-        "Socket event payload either invalid or null"
+        "Socket event payload either invalid or null",
     ),
     NO_ERROR_BODY(NO_ERROR_BODY_ERROR_CODE, "No error body. See http status code"),
 
@@ -59,8 +68,15 @@ public enum class VideoErrorCode(public val code: Int, public val description: S
     TOKEN_EXPIRED(TOKEN_EXPIRED_ERROR_CODE, "Token expired, new one must be requested."),
     TOKEN_NOT_VALID(TOKEN_NOT_VALID_ERROR_CODE, "Unauthenticated, token not valid yet"),
     TOKEN_DATE_INCORRECT(TOKEN_DATE_INCORRECT_ERROR_CODE, "Unauthenticated, token date incorrect"),
-    TOKEN_SIGNATURE_INCORRECT(TOKEN_SIGNATURE_INCORRECT_ERROR_CODE, "Unauthenticated, token signature invalid"),
-    API_KEY_NOT_FOUND(API_KEY_NOT_FOUND_ERROR_CODE, "Api key is not found, verify it if it's correct or was created.");
+    TOKEN_SIGNATURE_INCORRECT(
+        TOKEN_SIGNATURE_INCORRECT_ERROR_CODE,
+        "Unauthenticated, token signature invalid",
+    ),
+    API_KEY_NOT_FOUND(
+        API_KEY_NOT_FOUND_ERROR_CODE,
+        "Api key is not found, verify it if it's correct or was created.",
+    ),
+    ;
 
     public companion object {
         private val authenticationErrors = setOf(
@@ -78,10 +94,13 @@ public enum class VideoErrorCode(public val code: Int, public val description: S
 public fun Error.NetworkError.Companion.create(
     code: VideoErrorCode,
     cause: Throwable? = null,
-    statusCode: Int = -1
+    statusCode: Int = -1,
 ): Error.NetworkError {
     return Error.NetworkError(
-        cause = cause, message = code.description, serverErrorCode = code.code, statusCode = statusCode
+        cause = cause,
+        message = code.description,
+        serverErrorCode = code.code,
+        statusCode = statusCode,
     )
 }
 
@@ -89,9 +108,12 @@ public fun Error.NetworkError.Companion.create(
     streamCode: Int,
     description: String,
     statusCode: Int,
-    cause: Throwable? = null
+    cause: Throwable? = null,
 ): Error.NetworkError {
     return Error.NetworkError(
-        cause = cause, message = description, serverErrorCode = streamCode, statusCode = statusCode
+        cause = cause,
+        message = description,
+        serverErrorCode = streamCode,
+        statusCode = statusCode,
     )
 }

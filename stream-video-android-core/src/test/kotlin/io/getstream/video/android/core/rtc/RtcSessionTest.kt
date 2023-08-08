@@ -108,7 +108,7 @@ class RtcSessionTest : IntegrationTestBase() {
         val publisher = call.session!!.createPublisher()!!
         call.session?.onNegotiationNeeded(
             publisher,
-            StreamPeerType.PUBLISHER
+            StreamPeerType.PUBLISHER,
         )
 
         // TODO verify local and remote description were set

@@ -60,7 +60,7 @@ import io.getstream.video.android.mock.mockCall
 public fun AudioControlActions(
     call: Call,
     modifier: Modifier = Modifier,
-    onLeaveRoom: (() -> Unit)? = null
+    onLeaveRoom: (() -> Unit)? = null,
 ) {
     val isMicrophoneEnabled by if (LocalInspectionMode.current) {
         remember { mutableStateOf(true) }
@@ -83,11 +83,13 @@ public fun AudioControlActions(
             colors = ButtonDefaults.buttonColors(
                 backgroundColor = VideoTheme.colors.primaryAccent,
                 contentColor = VideoTheme.colors.primaryAccent,
-            )
+            ),
         ) {
             Image(
-                painter = painterResource(id = io.getstream.video.android.ui.common.R.drawable.stream_video_ic_leave),
-                contentDescription = null
+                painter = painterResource(
+                    id = io.getstream.video.android.ui.common.R.drawable.stream_video_ic_leave,
+                ),
+                contentDescription = null,
             )
 
             Spacer(modifier = Modifier.width(10.dp))
@@ -95,9 +97,11 @@ public fun AudioControlActions(
             // TODO : Remove the if statement once we update Paparazzi to 1.3.0.
             if (!LocalInspectionMode.current) {
                 Text(
-                    text = stringResource(id = io.getstream.video.android.ui.common.R.string.stream_video_audio_leave),
+                    text = stringResource(
+                        id = io.getstream.video.android.ui.common.R.string.stream_video_audio_leave,
+                    ),
                     color = VideoTheme.colors.audioLeaveButton,
-                    fontSize = 16.sp
+                    fontSize = 16.sp,
                 )
             }
         }
@@ -111,7 +115,7 @@ public fun AudioControlActions(
             disabledColor = VideoTheme.colors.callActionIconEnabledBackground,
             disabledIconTint = VideoTheme.colors.errorAccent,
             shape = RoundedCornerShape(8.dp),
-            onCallAction = { callAction -> call.microphone.setEnabled(callAction.isEnabled) }
+            onCallAction = { callAction -> call.microphone.setEnabled(callAction.isEnabled) },
         )
     }
 }
@@ -123,7 +127,7 @@ private fun AudioControlActionsPreview() {
     VideoTheme {
         AudioControlActions(
             modifier = Modifier.fillMaxWidth(),
-            call = mockCall
+            call = mockCall,
         )
     }
 }

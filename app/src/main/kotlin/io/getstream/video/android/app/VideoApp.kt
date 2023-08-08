@@ -31,7 +31,7 @@ class VideoApp : Application() {
         user: User,
         apiKey: ApiKey,
         token: String,
-        loggingLevel: LoggingLevel
+        loggingLevel: LoggingLevel,
     ): StreamVideo {
         return StreamVideoBuilder(
             context = this,

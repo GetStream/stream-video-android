@@ -25,9 +25,13 @@ import io.getstream.video.android.ui.common.R
 public fun buildSmallCallText(
     context: Context,
     participants: List<CallUser>,
-    maxDisplayedNameCount: Int = 3
+    maxDisplayedNameCount: Int = 3,
 ): String {
-    if (participants.isEmpty()) return context.getString(R.string.stream_video_call_participants_empty)
+    if (participants.isEmpty()) {
+        return context.getString(
+            R.string.stream_video_call_participants_empty,
+        )
+    }
 
     val names = participants.map { it.name }
     val conjunction = context.getString(R.string.stream_video_call_participants_conjunction)
@@ -45,9 +49,13 @@ public fun buildSmallCallText(
 
 public fun buildLargeCallText(
     context: Context,
-    participants: List<CallUser>
+    participants: List<CallUser>,
 ): String {
-    if (participants.isEmpty()) return context.getString(R.string.stream_video_call_participants_empty)
+    if (participants.isEmpty()) {
+        return context.getString(
+            R.string.stream_video_call_participants_empty,
+        )
+    }
 
     val conjunction = context.getString(R.string.stream_video_call_participants_conjunction)
     val trailing = context.getString(R.string.stream_video_call_participants_trailing)

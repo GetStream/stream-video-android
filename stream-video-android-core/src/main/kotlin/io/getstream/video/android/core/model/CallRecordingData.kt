@@ -31,5 +31,5 @@ public data class CallRecordingData(
     val fileName: String,
     val url: String,
     val start: Long,
-    val end: Long
+    val end: Long,
 )

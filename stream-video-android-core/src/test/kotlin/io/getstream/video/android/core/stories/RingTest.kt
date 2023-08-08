@@ -54,7 +54,7 @@ class RingTest : IntegrationTestBase() {
             createdAt = nowUtc,
             sessionId = "",
             user = userResponse,
-            members = emptyList()
+            members = emptyList(),
         )
 
         clientImpl.fireEvent(ringEvent)
@@ -88,7 +88,7 @@ class RingTest : IntegrationTestBase() {
     @Test
     @Ignore(
         "This doesn't work anymore because sending a fake CallAcceptedEvent triggers " +
-            "an auto-join request in CallState and this results in CallRejected event"
+            "an auto-join request in CallState and this results in CallRejected event",
     )
     fun `Accept a call`() = runTest {
         val call = client.call("default", randomUUID())
@@ -100,7 +100,7 @@ class RingTest : IntegrationTestBase() {
             call = call.toResponse(userResponse),
             callCid = call.cid,
             createdAt = nowUtc,
-            user = userResponse
+            user = userResponse,
         )
         clientImpl.fireEvent(callAcceptedEvent)
 
@@ -119,7 +119,7 @@ class RingTest : IntegrationTestBase() {
             call = call.toResponse(userResponse),
             callCid = call.cid,
             createdAt = nowUtc,
-            user = userResponse
+            user = userResponse,
         )
         clientImpl.fireEvent(rejectEvent)
 

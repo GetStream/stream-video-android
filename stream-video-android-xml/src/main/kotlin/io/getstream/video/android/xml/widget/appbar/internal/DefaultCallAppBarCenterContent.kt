@@ -31,7 +31,7 @@ internal class DefaultCallAppBarCenterContent : AppCompatTextView, CallAppBarCon
     public constructor(context: Context, attrs: AttributeSet?, defStyleAttr: Int) : super(
         context.createStreamThemeWrapper(),
         attrs,
-        defStyleAttr
+        defStyleAttr,
     ) {
         init()
     }

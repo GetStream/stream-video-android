@@ -49,7 +49,7 @@ import kotlinx.coroutines.delay
 public fun MediaPiPLifecycle(
     call: Call,
     enableInPictureInPicture: Boolean = false,
-    pipEnteringDuration: Long = 250
+    pipEnteringDuration: Long = 250,
 ) {
     val context = LocalContext.current
     val lifecycle = LocalLifecycleOwner.current.lifecycle

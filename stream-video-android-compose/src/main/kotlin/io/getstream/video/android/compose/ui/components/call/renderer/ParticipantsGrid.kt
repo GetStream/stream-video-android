@@ -48,13 +48,13 @@ public fun ParticipantsGrid(
         modifier: Modifier,
         call: Call,
         participant: ParticipantState,
-        style: VideoRendererStyle
+        style: VideoRendererStyle,
     ) -> Unit = { videoModifier, videoCall, videoParticipant, videoStyle ->
         ParticipantVideo(
             modifier = videoModifier,
             call = videoCall,
             participant = videoParticipant,
-            style = videoStyle
+            style = videoStyle,
         )
     },
 ) {
@@ -74,7 +74,7 @@ public fun ParticipantsGrid(
             call = call,
             modifier = modifier,
             style = style,
-            videoRenderer = videoRenderer
+            videoRenderer = videoRenderer,
         )
     } else {
         ParticipantsScreenSharing(
@@ -84,9 +84,9 @@ public fun ParticipantsGrid(
             style = ScreenSharingVideoRendererStyle().copy(
                 isFocused = style.isFocused,
                 isShowingReactions = style.isShowingReactions,
-                labelPosition = style.labelPosition
+                labelPosition = style.labelPosition,
             ),
-            videoRenderer = videoRenderer
+            videoRenderer = videoRenderer,
         )
     }
 }
@@ -98,7 +98,7 @@ private fun CallVideoRendererPreview() {
     VideoTheme {
         ParticipantsGrid(
             call = mockCall,
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier.fillMaxWidth(),
         )
     }
 }

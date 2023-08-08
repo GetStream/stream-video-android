@@ -43,10 +43,9 @@ import io.getstream.video.android.mock.mockMemberStateList
 public fun IncomingCallDetails(
     modifier: Modifier = Modifier,
     isVideoType: Boolean = true,
-    participants: List<MemberState>
+    participants: List<MemberState>,
 ) {
     Column(modifier = modifier.fillMaxWidth()) {
-
         ParticipantAvatars(participants = participants)
 
         Spacer(modifier = Modifier.height(VideoTheme.dimens.callParticipantsAvatarsMargin))
@@ -54,7 +53,7 @@ public fun IncomingCallDetails(
         ParticipantInformation(
             isVideoType = isVideoType,
             callStatus = CallStatus.Incoming,
-            participants = participants
+            participants = participants,
         )
     }
 }
@@ -66,7 +65,7 @@ private fun IncomingCallDetailsPreview() {
     VideoTheme {
         IncomingCallDetails(
             isVideoType = true,
-            participants = mockMemberStateList
+            participants = mockMemberStateList,
         )
     }
 }

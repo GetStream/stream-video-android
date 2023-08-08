@@ -102,35 +102,38 @@ Video roadmap and changelog is available [here](https://github.com/GetStream/pro
 
 ### 0.3.0 milestone
 
-- [ ] Complete integration with the video demo flow
 - [ ] Finish usability testing with design team on chat integration (Jaewoong)
+- [X] Pagination on query members & query call endpoints (Daniel)
+- [X] Livestream tutorial (depends on RTMP support) (Thierry)
+- [X] local version of audioLevel(s) for lower latency audio visualizations(Daniel)
+- [X] Complete integration with the video demo flow
+- [X] Pagination on query members & query call endpoints (Daniel)
+- [X] Enable ice restarts for publisher and subscriber
 - [X] Ringing: Finish it, make testing easy and write docs for common changes (Daniel)
-- [ ] Bug: Screensharing on Firefox has some issues when rendering on android (Daniel)
-- [ ] Pagination on query members & query call endpoints (Daniel)
-- [ ] local version of audioLevel(s) for lower latency audio visualizations(Daniel)
-- [ ] Android SDK development.md cleanup (Daniel)
-- [ ] Livestream tutorial (depends on RTMP support) (Thierry)
-- [ ] Call Analytics stateflow (Thierry)
-- [ ] Enable ice restarts for publisher and subscriber
-- [ ] Test coverage
-- [ ] Testing on more devices
-- [ ] Logging is too verbose (rtc is very noisy), clean it up to focus on the essential for info and higher
 
 ### 0.4.0 milestone
 
-- [ ] Upgrade to more recent versions of webrtc
+- [ ] Android SDK development.md cleanup (Daniel)
+- [ ] Upgrade to more recent versions of webrtc (Kanat)
 - [ ] Picture of the video stream at highest resolution
 - [ ] Review foreground service vs backend for some things like screensharing etc
 - [ ] Audio & Video filters. Support  (Daniel)
-- [ ] H264 workaround on Samsung 23 (see https://github.com/livekit/client-sdk-android/blob/main/livekit-android-sdk/src/main/java/io/livekit/android/webrtc/SimulcastVideoEncoderFactoryWrapper.kt#L34 and
-- https://github.com/react-native-webrtc/react-native-webrtc/issues/983#issuecomment-975624906)
 - [ ] Dynascale 2.0
+- [ ] Support participant.custom field which was previously ignored. ParticipantState line 216
+- [ ] Bug: Screensharing on Firefox has some issues when rendering on android (Daniel)
+- [ ] Call Analytics stateflow (Thierry)
+- [ ] Test coverage
+- [ ] Logging is too verbose (rtc is very noisy), clean it up to focus on the essential for info and higher
 
 ### 0.5.0 milestone
 
+- [ ] Testing on more devices
+- [ ] Enable SFU switching
 - [ ] Screensharing from mobile
 - [ ] Camera controls
 - [ ] Tap to focus
+- [ ] H264 workaround on Samsung 23 (see https://github.com/livekit/client-sdk-android/blob/main/livekit-android-sdk/src/main/java/io/livekit/android/webrtc/SimulcastVideoEncoderFactoryWrapper.kt#L34 and
+- https://github.com/react-native-webrtc/react-native-webrtc/issues/983#issuecomment-975624906)
 
 ### Dynascale 2.0
 

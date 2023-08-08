@@ -41,7 +41,10 @@ import io.getstream.video.android.xml.widget.control.CallControlItem
 public fun CallContainerView.bindView(
     viewModel: CallViewModel,
     lifecycleOwner: LifecycleOwner,
-    fetchCallMediaState: (CallDeviceState, Boolean) -> List<CallControlItem> = { mediaState, isScreenSharingActive ->
+    fetchCallMediaState: (
+        CallDeviceState,
+        Boolean,
+    ) -> List<CallControlItem> = { mediaState, isScreenSharingActive ->
         defaultControlList(mediaState, isScreenSharingActive)
     },
     // onCallAction: (CallAction) -> Unit = viewModel::onCallAction,

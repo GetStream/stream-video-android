@@ -62,9 +62,11 @@ public fun CallBackground(
     participants: List<MemberState>,
     isVideoType: Boolean = true,
     isIncoming: Boolean,
-    content: @Composable BoxScope.() -> Unit
+    content: @Composable BoxScope.() -> Unit,
 ) {
-    val callUser by remember(participants) { derivedStateOf { participants.map { it.toCallUser() } } }
+    val callUser by remember(
+        participants,
+    ) { derivedStateOf { participants.map { it.toCallUser() } } }
 
     Box(modifier = modifier) {
         if (isIncoming) {
@@ -81,7 +83,7 @@ public fun CallBackground(
 private fun IncomingCallBackground(callUsers: List<CallUser>) {
     if (callUsers.size == 1) {
         ParticipantImageBackground(
-            userImage = callUsers.first().imageUrl
+            userImage = callUsers.first().imageUrl,
         )
     } else {
         DefaultCallBackground()
@@ -134,12 +136,12 @@ public fun ParticipantImageBackground(
             previewPlaceholder = R.drawable.stream_video_call_sample,
             imageOptions = ImageOptions(
                 contentScale = ContentScale.Crop,
-                contentDescription = null
+                contentDescription = null,
             ),
             component = rememberImageComponent {
                 +CrossfadePlugin()
                 +BlurTransformationPlugin(blurRadius)
-            }
+            },
         )
     } else {
         DefaultCallBackground()
@@ -152,7 +154,7 @@ private fun DefaultCallBackground() {
         listOf(
             VideoTheme.colors.callGradientStart,
             VideoTheme.colors.callGradientEnd,
-        )
+        ),
     )
 
     Box(
@@ -170,7 +172,7 @@ private fun CallBackgroundPreview() {
         CallBackground(
             participants = mockMemberStateList.take(1),
             isVideoType = true,
-            isIncoming = true
+            isIncoming = true,
         ) {
             Box(modifier = Modifier.align(Alignment.Center)) {
                 AvatarImagePreview()

@@ -46,7 +46,7 @@ public data class StreamShapes(
     public val connectionIndicatorBar: Shape,
     public val soundIndicatorBar: Shape,
     public val floatingParticipant: Shape,
-    public val connectionQualityIndicator: Shape
+    public val connectionQualityIndicator: Shape,
 ) {
     public companion object {
         /**
@@ -66,7 +66,7 @@ public data class StreamShapes(
             connectionIndicatorBar = RoundedCornerShape(16.dp),
             soundIndicatorBar = RoundedCornerShape(16.dp),
             floatingParticipant = RoundedCornerShape(16.dp),
-            connectionQualityIndicator = RoundedCornerShape(5.dp)
+            connectionQualityIndicator = RoundedCornerShape(5.dp),
         )
     }
 }

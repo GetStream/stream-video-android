@@ -99,12 +99,12 @@ public fun ParticipantVideo(
     modifier: Modifier = Modifier,
     style: VideoRendererStyle = RegularVideoRendererStyle(),
     labelContent: @Composable BoxScope.(ParticipantState) -> Unit = {
-        ParticipantLabel(participant, style.labelPosition)
+        ParticipantLabel(call, participant, style.labelPosition)
     },
     connectionIndicatorContent: @Composable BoxScope.(NetworkQuality) -> Unit = {
         NetworkQualityIndicator(
             networkQuality = it,
-            modifier = Modifier.align(BottomEnd)
+            modifier = Modifier.align(BottomEnd),
         )
     },
     videoFallbackContent: @Composable (Call) -> Unit = {
@@ -114,43 +114,47 @@ public fun ParticipantVideo(
     reactionContent: @Composable BoxScope.(ParticipantState) -> Unit = {
         DefaultReaction(
             participant = participant,
-            style = style
+            style = style,
         )
-    }
+    },
 ) {
     val connectionQuality by participant.networkQuality.collectAsStateWithLifecycle()
     val participants by call.state.participants.collectAsStateWithLifecycle()
 
-    val containerModifier = if (style.isFocused && participants.size > 1) modifier.border(
-        border = if (style.isScreenSharing) {
-            BorderStroke(
-                VideoTheme.dimens.participantScreenSharingFocusedBorderWidth,
-                VideoTheme.colors.callFocusedBorder
-            )
-        } else {
-            BorderStroke(
-                VideoTheme.dimens.participantFocusedBorderWidth,
-                VideoTheme.colors.callFocusedBorder
-            )
-        },
-        shape = if (style.isScreenSharing) {
-            RoundedCornerShape(VideoTheme.dimens.screenShareParticipantsRadius)
-        } else {
-            RectangleShape
-        }
-    ) else modifier
+    val containerModifier = if (style.isFocused && participants.size > 1) {
+        modifier.border(
+            border = if (style.isScreenSharing) {
+                BorderStroke(
+                    VideoTheme.dimens.participantScreenSharingFocusedBorderWidth,
+                    VideoTheme.colors.callFocusedBorder,
+                )
+            } else {
+                BorderStroke(
+                    VideoTheme.dimens.participantFocusedBorderWidth,
+                    VideoTheme.colors.callFocusedBorder,
+                )
+            },
+            shape = if (style.isScreenSharing) {
+                RoundedCornerShape(VideoTheme.dimens.screenShareParticipantsRadius)
+            } else {
+                RectangleShape
+            },
+        )
+    } else {
+        modifier
+    }
 
     Box(
         modifier = containerModifier.apply {
             if (style.isScreenSharing) {
                 clip(RoundedCornerShape(VideoTheme.dimens.screenShareParticipantsRadius))
             }
-        }
+        },
     ) {
         ParticipantVideoRenderer(
             call = call,
             participant = participant,
-            videoFallbackContent = videoFallbackContent
+            videoFallbackContent = videoFallbackContent,
         )
 
         if (style.isShowingParticipantLabel) {
@@ -190,10 +194,10 @@ public fun ParticipantVideoRenderer(
                 .fillMaxSize()
                 .testTag("participant_video_renderer"),
             painter = painterResource(
-                id = LocalAvatarPreviewProvider.getLocalAvatarPreviewPlaceholder()
+                id = LocalAvatarPreviewProvider.getLocalAvatarPreviewPlaceholder(),
             ),
             contentScale = ContentScale.Crop,
-            contentDescription = null
+            contentDescription = null,
         )
         return
     }
@@ -203,27 +207,35 @@ public fun ParticipantVideoRenderer(
     VideoRenderer(
         call = call,
         video = video,
-        videoFallbackContent = videoFallbackContent
+        videoFallbackContent = videoFallbackContent,
     )
 }
 
 @Composable
 public fun BoxScope.ParticipantLabel(
+    call: Call,
     participant: ParticipantState,
     labelPosition: Alignment = BottomStart,
     soundIndicatorContent: @Composable RowScope.() -> Unit = {
         val audioEnabled by participant.audioEnabled.collectAsStateWithLifecycle()
         val speaking by participant.speaking.collectAsStateWithLifecycle()
-        val audioLevels by participant.audioLevels.collectAsStateWithLifecycle()
+        val audioLevel by if (participant.isLocal) {
+            call.localMicrophoneAudioLevel.collectAsStateWithLifecycle()
+        } else {
+            participant.audioLevel.collectAsStateWithLifecycle()
+        }
         SoundIndicator(
-            isSpeaking = speaking,
+            // we always draw the audio indicator for the local participant for lower delay
+            // and for now don't draw the indicator for other participants due to the lag
+            // (so we ingore participant.isSpeaking)
+            isSpeaking = participant.isLocal,
             isAudioEnabled = audioEnabled,
-            audioLevels = audioLevels,
+            audioLevel = audioLevel,
             modifier = Modifier
                 .align(CenterVertically)
-                .padding(horizontal = VideoTheme.dimens.participantSoundIndicatorPadding)
+                .padding(horizontal = VideoTheme.dimens.participantSoundIndicatorPadding),
         )
-    }
+    },
 ) {
     val audioEnabled by participant.audioEnabled.collectAsStateWithLifecycle()
     val speaking by participant.speaking.collectAsStateWithLifecycle()
@@ -239,8 +251,11 @@ public fun BoxScope.ParticipantLabel(
         nameLabel = nameLabel,
         labelPosition = labelPosition,
         hasAudio = audioEnabled,
-        isSpeaking = speaking,
-        soundIndicatorContent = soundIndicatorContent
+        // we always draw the audio indicator for the local participant for lower delay
+        // and for now don't draw the indicator for other participants due to the lag
+        // (so we ingore participant.isSpeaking)
+        isSpeaking = participant.isLocal,
+        soundIndicatorContent = soundIndicatorContent,
     )
 }
 
@@ -250,17 +265,17 @@ public fun BoxScope.ParticipantLabel(
     labelPosition: Alignment = BottomStart,
     hasAudio: Boolean = false,
     isSpeaking: Boolean = false,
-    audioLevels: List<Float> = emptyList(),
+    audioLevel: Float = 0f,
     soundIndicatorContent: @Composable RowScope.() -> Unit = {
         SoundIndicator(
             isSpeaking = isSpeaking,
             isAudioEnabled = hasAudio,
-            audioLevels = audioLevels,
+            audioLevel = audioLevel,
             modifier = Modifier
                 .align(CenterVertically)
-                .padding(horizontal = VideoTheme.dimens.participantSoundIndicatorPadding)
+                .padding(horizontal = VideoTheme.dimens.participantSoundIndicatorPadding),
         )
-    }
+    },
 ) {
     Row(
         modifier = Modifier
@@ -271,7 +286,7 @@ public fun BoxScope.ParticipantLabel(
             .clip(RoundedCornerShape(8.dp))
             .background(
                 VideoTheme.colors.participantLabelBackground,
-                shape = RoundedCornerShape(8.dp)
+                shape = RoundedCornerShape(8.dp),
             ),
         verticalAlignment = CenterVertically,
     ) {
@@ -284,7 +299,7 @@ public fun BoxScope.ParticipantLabel(
             style = VideoTheme.typography.body,
             color = Color.White,
             maxLines = 1,
-            overflow = TextOverflow.Ellipsis
+            overflow = TextOverflow.Ellipsis,
         )
 
         soundIndicatorContent.invoke(this)
@@ -294,7 +309,7 @@ public fun BoxScope.ParticipantLabel(
 @Composable
 private fun BoxScope.DefaultReaction(
     participant: ParticipantState,
-    style: VideoRendererStyle
+    style: VideoRendererStyle,
 ) {
     val reactions by participant.reactions.collectAsStateWithLifecycle()
     val reaction = reactions.lastOrNull { it.createdAt + 3000 > System.currentTimeMillis() }
@@ -334,11 +349,11 @@ private fun BoxScope.DefaultReaction(
             iterations = 2,
             animation = tween(
                 durationMillis = style.reactionDuration,
-                easing = LinearOutSlowInEasing
+                easing = LinearOutSlowInEasing,
             ),
-            repeatMode = RepeatMode.Reverse
+            repeatMode = RepeatMode.Reverse,
         ),
-        label = "reaction"
+        label = "reaction",
     )
 
     val emojiCode = currentReaction?.response?.emojiCode
@@ -348,7 +363,7 @@ private fun BoxScope.DefaultReaction(
         Text(
             text = emojiText,
             modifier = Modifier.align(style.reactionPosition),
-            fontSize = size.value.sp
+            fontSize = size.value.sp,
         )
     }
 }
@@ -372,6 +387,7 @@ private fun ParticipantLabelPreview() {
     VideoTheme {
         Box {
             ParticipantLabel(
+                call = mockCall,
                 participant = mockParticipantList[1],
                 BottomStart,
             )

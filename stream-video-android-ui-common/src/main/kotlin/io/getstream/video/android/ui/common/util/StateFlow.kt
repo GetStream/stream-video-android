@@ -33,7 +33,7 @@ import kotlinx.coroutines.flow.transformLatest
 @JvmSynthetic
 internal fun <T> Flow<T>.asStateFlowWhileSubscribed(
     scope: CoroutineScope,
-    initialValue: T
+    initialValue: T,
 ): StateFlow<T> {
     return stateIn(
         scope = scope,

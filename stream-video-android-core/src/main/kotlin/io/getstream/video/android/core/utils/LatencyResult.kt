@@ -29,7 +29,7 @@ data class LatencyResult(
     val latencyUrl: String,
     val measurements: List<Float> = emptyList(),
     val average: Double = 100.0,
-    val failed: Throwable? = null
+    val failed: Throwable? = null,
 )
 
 public fun getLatencyMeasurementsOKHttp(latencyUrl: String): LatencyResult {

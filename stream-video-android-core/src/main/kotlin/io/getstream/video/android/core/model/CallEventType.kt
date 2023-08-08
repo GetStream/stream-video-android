@@ -25,10 +25,10 @@ import androidx.compose.runtime.Stable
  */
 @Stable
 public enum class CallEventType(
-    public val eventType: String
+    public val eventType: String,
 ) {
     ACCEPTED("call.accepted"),
     REJECTED("call.rejected"),
     CANCELLED("call.cancelled"),
-    UNDEFINED("undefined")
+    UNDEFINED("undefined"),
 }

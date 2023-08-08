@@ -65,13 +65,13 @@ internal fun PortraitScreenSharingVideoRenderer(
         modifier: Modifier,
         call: Call,
         participant: ParticipantState,
-        style: VideoRendererStyle
+        style: VideoRendererStyle,
     ) -> Unit = { videoModifier, videoCall, videoParticipant, videoStyle ->
         ParticipantVideo(
             modifier = videoModifier,
             call = videoCall,
             participant = videoParticipant,
-            style = videoStyle
+            style = videoStyle,
         )
     },
 ) {
@@ -79,29 +79,33 @@ internal fun PortraitScreenSharingVideoRenderer(
     val me by call.state.me.collectAsStateWithLifecycle()
 
     Column(
-        modifier = modifier.background(VideoTheme.colors.screenSharingBackground)
+        modifier = modifier.background(VideoTheme.colors.screenSharingBackground),
     ) {
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .weight(1f)
+                .weight(1f),
         ) {
             ScreenShareVideoRenderer(
                 modifier = Modifier.fillMaxWidth(),
                 call = call,
                 session = session,
-                isZoomable = isZoomable
+                isZoomable = isZoomable,
             )
 
             if (me?.sessionId != sharingParticipant.sessionId) {
                 ScreenShareTooltip(
                     modifier = Modifier.align(Alignment.TopStart),
-                    sharingParticipant = sharingParticipant
+                    sharingParticipant = sharingParticipant,
                 )
             }
         }
 
-        Spacer(modifier = Modifier.height(VideoTheme.dimens.screenShareParticipantsScreenShareListMargin))
+        Spacer(
+            modifier = Modifier.height(
+                VideoTheme.dimens.screenShareParticipantsScreenShareListMargin,
+            ),
+        )
 
         LazyRowVideoRenderer(
             modifier = Modifier.height(VideoTheme.dimens.screenShareParticipantsRowHeight),
@@ -109,7 +113,7 @@ internal fun PortraitScreenSharingVideoRenderer(
             dominantSpeaker = dominantSpeaker,
             participants = participants,
             style = style,
-            videoRenderer = videoRenderer
+            videoRenderer = videoRenderer,
         )
     }
 }
@@ -123,7 +127,7 @@ private fun PortraitScreenSharingContentPreview() {
         PortraitScreenSharingVideoRenderer(
             call = mockCall,
             session = ScreenSharingSession(
-                participant = mockParticipantList[1]
+                participant = mockParticipantList[1],
             ),
             participants = mockParticipantList,
             dominantSpeaker = mockParticipantList[1],
@@ -140,7 +144,7 @@ private fun PortraitScreenSharingMyContentPreview() {
         PortraitScreenSharingVideoRenderer(
             call = mockCall,
             session = ScreenSharingSession(
-                participant = mockParticipantList[0]
+                participant = mockParticipantList[0],
             ),
             participants = mockParticipantList,
             dominantSpeaker = mockParticipantList[0],

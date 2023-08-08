@@ -31,7 +31,11 @@ public abstract class CallCardView : CardView, JobHolder, OrientationChangeListe
 
     public constructor(context: Context) : this(context, null, 0)
     public constructor(context: Context, attrs: AttributeSet?) : this(context, attrs, 0)
-    public constructor(context: Context, attrs: AttributeSet?, defStyleAttr: Int) : super(context, attrs, defStyleAttr)
+    public constructor(
+        context: Context,
+        attrs: AttributeSet?,
+        defStyleAttr: Int,
+    ) : super(context, attrs, defStyleAttr)
 
     override val runningJobs: MutableList<Job> = mutableListOf()
 

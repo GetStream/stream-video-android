@@ -24,12 +24,12 @@ import io.getstream.result.Result
 import io.getstream.video.android.core.events.VideoEventListener
 import io.getstream.video.android.core.model.EdgeData
 import io.getstream.video.android.core.model.QueriedCalls
+import io.getstream.video.android.core.model.QueriedMembers
 import io.getstream.video.android.core.model.SortField
 import io.getstream.video.android.core.notifications.NotificationHandler
 import io.getstream.video.android.model.Device
 import io.getstream.video.android.model.User
 import kotlinx.coroutines.Deferred
-import org.openapitools.client.models.QueryCallsResponse
 import org.openapitools.client.models.VideoEvent
 
 /**
@@ -56,6 +56,11 @@ public interface StreamVideo : NotificationHandler {
      *
      * @param queryCallsData Request with the data describing the calls. Contains the filters
      * as well as pagination logic to be used when querying.
+     * @param limit - maximum number of items in response
+     * @param prev - paging support. Set null for first page. Otherwise set the value from last page
+     * response.
+     * @param next - paging support. Set null for first page. Otherwise set the value from last page
+     * response.
      *
      * @return [Result] containing the [QueriedCalls].
      */
@@ -63,8 +68,29 @@ public interface StreamVideo : NotificationHandler {
         filters: Map<String, Any>,
         sort: List<SortField> = listOf(SortField.Asc(DEFAULT_QUERY_CALLS_SORT)),
         limit: Int = DEFAULT_QUERY_CALLS_LIMIT,
+        prev: String? = null,
+        next: String? = null,
         watch: Boolean = false,
-    ): Result<QueryCallsResponse>
+    ): Result<QueriedCalls>
+
+    /**
+     * Queries calls with a given filter predicate and pagination.
+     *
+     * @param prev - paging support. Set null for first page. Otherwise set the value from last page
+     * response.
+     * @param next - paging support. Set null for first page. Otherwise set the value from last page
+     * response.
+     * @param limit - maximum number of items in response
+     */
+    suspend fun queryMembers(
+        type: String,
+        id: String,
+        filter: Map<String, Any>? = null,
+        sort: List<SortField> = mutableListOf(SortField.Desc("created_at")),
+        prev: String? = null,
+        next: String? = null,
+        limit: Int = 25,
+    ): Result<QueriedMembers>
 
     /** Subscribe for a specific list of events */
     public fun subscribeFor(
@@ -74,7 +100,7 @@ public interface StreamVideo : NotificationHandler {
 
     /** Subscribe to all events */
     public fun subscribe(
-        listener: VideoEventListener<VideoEvent>
+        listener: VideoEventListener<VideoEvent>,
     ): EventSubscription
 
     /**
@@ -130,7 +156,7 @@ public interface StreamVideo : NotificationHandler {
         public fun instance(): StreamVideo {
             return internalStreamVideo
                 ?: throw IllegalStateException(
-                    "StreamVideoBuilder.build() must be called before obtaining StreamVideo instance."
+                    "StreamVideoBuilder.build() must be called before obtaining StreamVideo instance.",
                 )
         }
 

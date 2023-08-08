@@ -17,8 +17,10 @@
 package io.getstream.video.android.core
 
 import com.google.common.truth.Truth.assertThat
+import io.getstream.result.Result
 import io.getstream.video.android.core.base.IntegrationTestBase
 import io.getstream.video.android.core.events.DominantSpeakerChangedEvent
+import io.getstream.video.android.core.model.SortField
 import io.getstream.video.android.model.User
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.SharingStarted
@@ -34,7 +36,10 @@ import org.openapitools.client.models.ScreensharingSettingsRequest
 import org.robolectric.RobolectricTestRunner
 import org.threeten.bp.Clock
 import org.threeten.bp.OffsetDateTime
+import kotlin.test.assertEquals
 import kotlin.test.assertFalse
+import kotlin.test.assertNotNull
+import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
 @RunWith(RobolectricTestRunner::class)
@@ -60,9 +65,9 @@ class CallStateTest : IntegrationTestBase() {
             settings = CallSettingsRequest(
                 screensharing = ScreensharingSettingsRequest(
                     accessRequestEnabled = false,
-                    enabled = false
-                )
-            )
+                    enabled = false,
+                ),
+            ),
         )
         assertSuccess(response)
 
@@ -93,7 +98,7 @@ class CallStateTest : IntegrationTestBase() {
         val call = client.call("default", randomUUID())
         val response = call.joinRequest(
             create = CreateCallOptions(custom = mapOf("color" to "green")),
-            location = "AMS"
+            location = "AMS",
         )
         assertSuccess(response)
         assertThat(call.state.settings.value).isNotNull()
@@ -112,33 +117,37 @@ class CallStateTest : IntegrationTestBase() {
     fun `Participants should be sorted`() = runTest {
         val call = client.call("default", randomUUID())
 
-        val sortedParticipants = call.state.sortedParticipantsFlow.stateIn(backgroundScope, SharingStarted.Eagerly, emptyList())
+        val sortedParticipants = call.state.sortedParticipantsFlow.stateIn(
+            backgroundScope,
+            SharingStarted.Eagerly,
+            emptyList(),
+        )
 
         val sorted1 = sortedParticipants.value
         assertThat(sorted1).isEmpty()
 
         call.state._pinnedParticipants.value = mutableMapOf(
-            "1" to OffsetDateTime.now(Clock.systemUTC())
+            "1" to OffsetDateTime.now(Clock.systemUTC()),
         )
 
         call.state.updateParticipant(
-            ParticipantState("4", call, User("4")).apply { _lastSpeakingAt.value = nowUtc }
+            ParticipantState("4", call, User("4")).apply { _lastSpeakingAt.value = nowUtc },
         )
         call.state.updateParticipant(
-            ParticipantState("5", call, User("5")).apply { _videoEnabled.value = true }
+            ParticipantState("5", call, User("5")).apply { _videoEnabled.value = true },
         )
         call.state.updateParticipant(
-            ParticipantState("6", call, User("6")).apply { _joinedAt.value = nowUtc }
+            ParticipantState("6", call, User("6")).apply { _joinedAt.value = nowUtc },
         )
 
         call.state.updateParticipant(
-            ParticipantState("1", call, User("1"))
+            ParticipantState("1", call, User("1")),
         )
         call.state.updateParticipant(
-            ParticipantState("2", call, User("2")).apply { _dominantSpeaker.value = true }
+            ParticipantState("2", call, User("2")).apply { _dominantSpeaker.value = true },
         )
         call.state.updateParticipant(
-            ParticipantState("3", call, User("3")).apply { _screenSharingEnabled.value = true }
+            ParticipantState("3", call, User("3")).apply { _screenSharingEnabled.value = true },
         )
 
         val participants = call.state.participants.value
@@ -172,6 +181,64 @@ class CallStateTest : IntegrationTestBase() {
                 assertThat(call.state.settings.value).isNotNull()
             }
         }
+    }
+
+    @Test
+    fun `Query calls pagination works`() = runTest {
+        // get first page with one result
+        val queryResult = client.queryCalls(emptyMap(), limit = 1)
+        assertSuccess(queryResult)
+
+        val successResponsePage1 = queryResult as Result.Success
+        // verify the response has no previous page and a next page
+        assertNotNull(successResponsePage1.value.next)
+        assertNull(successResponsePage1.value.prev)
+
+        // request next page
+        val queryResultPage2 = client.queryCalls(
+            emptyMap(),
+            prev = successResponsePage1.value.prev,
+            next = successResponsePage1.value.next,
+            limit = 1,
+        )
+        assertSuccess(queryResultPage2)
+
+        val successResultPage2 = queryResultPage2 as Result.Success
+        // verify the response points to previous page and has a next page
+        assertEquals(queryResult.value.next, successResultPage2.value.prev)
+        assertNotNull(successResultPage2.value.next)
+    }
+
+    @Test
+    fun `Query members pagination works`() = runTest {
+        val call = client.call("default", randomUUID())
+        // create call
+        val createResponse = call.create(memberIds = listOf("thierry", "tommaso"))
+        assertSuccess(createResponse)
+
+        // get first page with one result
+        val queryResult1 = client.queryMembers(
+            type = call.type,
+            id = call.id,
+            limit = 1,
+            sort = mutableListOf(SortField.Desc("user_id")),
+        )
+        assertSuccess(queryResult1)
+        assertEquals(queryResult1.getOrThrow().members.size, 1)
+        assertEquals(queryResult1.getOrThrow().members[0].userId, "tommaso")
+
+        // get second page with one result
+        val queryResult2 = client.queryMembers(
+            type = call.type,
+            id = call.id,
+            next = queryResult1.getOrThrow().next,
+            limit = 1,
+            sort = mutableListOf(SortField.Desc("user_id")),
+        )
+
+        assertSuccess(queryResult2)
+        assertEquals(queryResult2.getOrThrow().members.size, 1)
+        assertEquals(queryResult2.getOrThrow().members[0].userId, "thierry")
     }
 
     @Test

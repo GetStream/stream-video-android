@@ -41,12 +41,12 @@ import io.getstream.video.android.ui.common.R
 public fun ReactionAction(
     modifier: Modifier = Modifier,
     enabled: Boolean = true,
-    onCallAction: (Reaction) -> Unit
+    onCallAction: (Reaction) -> Unit,
 ) {
     CallControlActionBackground(
         modifier = modifier,
         isEnabled = true,
-        enabledColor = VideoTheme.colors.errorAccent
+        enabledColor = VideoTheme.colors.errorAccent,
     ) {
         Icon(
             modifier = Modifier
@@ -54,7 +54,7 @@ public fun ReactionAction(
                 .clickable(enabled = enabled) { onCallAction(Reaction) },
             tint = Color.White,
             painter = painterResource(id = R.drawable.stream_video_ic_reaction),
-            contentDescription = stringResource(R.string.stream_video_call_controls_reaction)
+            contentDescription = stringResource(R.string.stream_video_call_controls_reaction),
         )
     }
 }

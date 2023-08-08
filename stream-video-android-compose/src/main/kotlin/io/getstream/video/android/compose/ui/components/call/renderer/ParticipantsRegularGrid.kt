@@ -54,20 +54,20 @@ public fun ParticipantsRegularGrid(
         modifier: Modifier,
         call: Call,
         participant: ParticipantState,
-        style: VideoRendererStyle
+        style: VideoRendererStyle,
     ) -> Unit = { videoModifier, videoCall, videoParticipant, videoStyle ->
         ParticipantVideo(
             modifier = videoModifier,
             call = videoCall,
             participant = videoParticipant,
-            style = videoStyle
+            style = videoStyle,
         )
     },
 ) {
     var parentSize: IntSize by remember { mutableStateOf(IntSize(0, 0)) }
 
     Box(
-        modifier = modifier.background(color = VideoTheme.colors.appBackground)
+        modifier = modifier.background(color = VideoTheme.colors.appBackground),
     ) {
         val roomParticipants by call.state.participants.collectAsStateWithLifecycle()
 
@@ -79,7 +79,7 @@ public fun ParticipantsRegularGrid(
                 call = call,
                 parentSize = parentSize,
                 style = style,
-                videoRenderer = videoRenderer
+                videoRenderer = videoRenderer,
             )
         }
     }
@@ -92,7 +92,7 @@ private fun RegularCallVideoRendererPreview() {
     VideoTheme {
         ParticipantsRegularGrid(
             call = mockCall,
-            modifier = Modifier.fillMaxSize()
+            modifier = Modifier.fillMaxSize(),
         )
     }
 }

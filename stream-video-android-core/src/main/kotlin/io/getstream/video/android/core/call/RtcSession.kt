@@ -114,7 +114,7 @@ import kotlin.random.Random
  */
 data class TrackDimensions(
     var dimensions: VideoDimension,
-    var visible: Boolean = false
+    var visible: Boolean = false,
 )
 
 /**
@@ -179,14 +179,14 @@ public class RtcSession internal constructor(
 
     internal val _peerConnectionStates =
         MutableStateFlow<Pair<PeerConnection.PeerConnectionState?, PeerConnection.PeerConnectionState?>?>(
-            null
+            null,
         )
 
     internal val sessionId = clientImpl.sessionId
 
     val trackDimensions =
         MutableStateFlow<Map<String, Map<TrackType, TrackDimensions>>>(
-            emptyMap()
+            emptyMap(),
         )
     val trackDimensionsDebounced = trackDimensions.debounce(100)
 
@@ -342,7 +342,7 @@ public class RtcSession internal constructor(
     private fun updatePeerState() {
         _peerConnectionStates.value = Pair(
             subscriber?.state?.value,
-            publisher?.state?.value
+            publisher?.state?.value,
         )
     }
 
@@ -350,11 +350,13 @@ public class RtcSession internal constructor(
         // ice restart
         subscriber?.let {
             if (!it.isHealthy()) {
+                logger.i { "ice restarting subscriber peer connection" }
                 it.connection.restartIce()
             }
         }
         publisher?.let {
             if (!it.isHealthy()) {
+                logger.i { "ice restarting publisher peer connection" }
                 it.connection.restartIce()
             }
         }
@@ -375,7 +377,7 @@ public class RtcSession internal constructor(
             publisher?.let {
                 it.addVideoTransceiver(
                     call.mediaManager.videoTrack,
-                    listOf(buildTrackId(TrackType.TRACK_TYPE_VIDEO))
+                    listOf(buildTrackId(TrackType.TRACK_TYPE_VIDEO)),
                 )
                 transceiverInitialized = true
             }
@@ -412,7 +414,6 @@ public class RtcSession internal constructor(
      * Video only becomes available after we update the subscription
      */
     internal fun addStream(mediaStream: MediaStream) {
-
         val (trackPrefix, trackTypeString) = mediaStream.id.split(':')
         val sessionId = trackPrefixToSessionIdMap.value[trackPrefix]
 
@@ -438,7 +439,7 @@ public class RtcSession internal constructor(
             track.setEnabled(true)
             val audioTrack = AudioTrack(
                 streamId = mediaStream.id,
-                audio = track
+                audio = track,
             )
             val current = trackIdToParticipant.value.toMutableMap()
             current[track.id()] = sessionId
@@ -451,7 +452,7 @@ public class RtcSession internal constructor(
             track.setEnabled(true)
             val videoTrack = VideoTrack(
                 streamId = mediaStream.id,
-                video = track
+                video = track,
             )
             val current = trackIdToParticipant.value.toMutableMap()
             current[track.id()] = sessionId
@@ -475,7 +476,9 @@ public class RtcSession internal constructor(
 
         // if we are allowed to publish, create a peer connection for it
         val canPublish =
-            call.state.ownCapabilities.value.any { it == OwnCapability.SendAudio || it == OwnCapability.SendVideo }
+            call.state.ownCapabilities.value.any {
+                it == OwnCapability.SendAudio || it == OwnCapability.SendVideo
+            }
 
         if (canPublish) {
             publisher = createPublisher()
@@ -504,7 +507,9 @@ public class RtcSession internal constructor(
 
         if (canPublish) {
             if (publisher == null) {
-                throw IllegalStateException("Cant send audio and video since publisher hasn't been setup to connect")
+                throw IllegalStateException(
+                    "Cant send audio and video since publisher hasn't been setup to connect",
+                )
             }
             publisher?.let { publisher ->
                 // step 2 ensure all tracks are setup correctly
@@ -541,20 +546,20 @@ public class RtcSession internal constructor(
                     TrackType.TRACK_TYPE_AUDIO,
                     AudioTrack(
                         streamId = buildTrackId(TrackType.TRACK_TYPE_AUDIO),
-                        audio = call.mediaManager.audioTrack
-                    )
+                        audio = call.mediaManager.audioTrack,
+                    ),
                 )
                 publisher.addAudioTransceiver(
                     call.mediaManager.audioTrack,
-                    listOf(buildTrackId(TrackType.TRACK_TYPE_AUDIO))
+                    listOf(buildTrackId(TrackType.TRACK_TYPE_AUDIO)),
                 )
                 // step 5 create the video track
                 setLocalTrack(
                     TrackType.TRACK_TYPE_VIDEO,
                     VideoTrack(
                         streamId = buildTrackId(TrackType.TRACK_TYPE_VIDEO),
-                        video = call.mediaManager.videoTrack
-                    )
+                        video = call.mediaManager.videoTrack,
+                    ),
                 )
                 // render it on the surface. but we need to start this before forwarding it to the publisher
                 logger.v { "[createUserTracks] #sfu; videoTrack: ${call.mediaManager.videoTrack.stringify()}" }
@@ -587,9 +592,11 @@ public class RtcSession internal constructor(
         sessionId: String,
         trackType: TrackType,
         videoEnabled: Boolean,
-        audioEnabled: Boolean
+        audioEnabled: Boolean,
     ) {
-        logger.d { "[updateMuteState] #sfu; userId: $userId, sessionId: $sessionId, videoEnabled: $videoEnabled, audioEnabled: $audioEnabled" }
+        logger.d {
+            "[updateMuteState] #sfu; userId: $userId, sessionId: $sessionId, videoEnabled: $videoEnabled, audioEnabled: $audioEnabled"
+        }
         val track = getTrack(sessionId, trackType)
         track?.enableVideo(videoEnabled)
         track?.enableAudio(audioEnabled)
@@ -626,7 +633,7 @@ public class RtcSession internal constructor(
             TrackType.TRACK_TYPE_AUDIO to false,
             TrackType.TRACK_TYPE_VIDEO to false,
             TrackType.TRACK_TYPE_SCREEN_SHARE to false,
-        )
+        ),
     )
 
     /**
@@ -657,7 +664,7 @@ public class RtcSession internal constructor(
                     session_id = sessionId,
                     mute_states = copy.map {
                         TrackMuteState(track_type = it.key, muted = !it.value)
-                    }
+                    },
                 )
                 val result = updateMuteState(request)
                 emit(result.getOrThrow())
@@ -667,7 +674,9 @@ public class RtcSession internal constructor(
                 val isPermanent = isPermanentError(cause)
                 val willRetry = !isPermanent && sameValue && sameSfu && attempt < 30
                 val delayInMs = if (attempt <= 1) 100L else if (attempt <= 3) 300L else 2500L
-                logger.w { "updating mute state failed with error $cause, retry attempt: $attempt. will retry $willRetry in $delayInMs ms" }
+                logger.w {
+                    "updating mute state failed with error $cause, retry attempt: $attempt. will retry $willRetry in $delayInMs ms"
+                }
                 delay(delayInMs)
                 willRetry
             }.collect()
@@ -687,7 +696,7 @@ public class RtcSession internal constructor(
             type = StreamPeerType.SUBSCRIBER,
             mediaConstraints = mediaConstraints,
             onStreamAdded = { addStream(it) }, // addTrack
-            onIceCandidateRequest = ::sendIceCandidate
+            onIceCandidateRequest = ::sendIceCandidate,
         )
     }
 
@@ -697,14 +706,14 @@ public class RtcSession internal constructor(
                 addTransceiver(
                     MediaStreamTrack.MediaType.MEDIA_TYPE_VIDEO,
                     RtpTransceiver.RtpTransceiverInit(
-                        RtpTransceiver.RtpTransceiverDirection.RECV_ONLY
-                    )
+                        RtpTransceiver.RtpTransceiverDirection.RECV_ONLY,
+                    ),
                 )
                 addTransceiver(
                     MediaStreamTrack.MediaType.MEDIA_TYPE_AUDIO,
                     RtpTransceiver.RtpTransceiverInit(
-                        RtpTransceiver.RtpTransceiverDirection.RECV_ONLY
-                    )
+                        RtpTransceiver.RtpTransceiverDirection.RECV_ONLY,
+                    ),
                 )
             }
 
@@ -736,7 +745,7 @@ public class RtcSession internal constructor(
             onNegotiationNeeded = ::onNegotiationNeeded,
             onIceCandidateRequest = ::sendIceCandidate,
             maxPublishingBitrate = call.state.settings.value?.video?.targetResolution?.bitrate
-                ?: 1_200_000
+                ?: 1_200_000,
         )
         logger.i { "[createPublisher] #sfu; publisher: $publisher" }
         return publisher
@@ -829,7 +838,7 @@ public class RtcSession internal constructor(
                     user_id = participant.user.value.id,
                     track_type = TrackType.TRACK_TYPE_VIDEO,
                     dimension = defaultVideoDimension,
-                    session_id = participant.sessionId
+                    session_id = participant.sessionId,
                 )
                 tracks.add(track)
             }
@@ -838,7 +847,7 @@ public class RtcSession internal constructor(
                     user_id = participant.user.value.id,
                     track_type = TrackType.TRACK_TYPE_SCREEN_SHARE,
                     dimension = defaultVideoDimension,
-                    session_id = participant.sessionId
+                    session_id = participant.sessionId,
                 )
                 tracks.add(track)
             }
@@ -855,12 +864,14 @@ public class RtcSession internal constructor(
             val trackDisplay = trackDisplayResolution[participant.sessionId] ?: emptyMap()
 
             trackDisplay.entries.filter { it.value.visible }.map { display ->
-                dynascaleLogger.i { "[visibleTracks] $sessionId subscribing ${participant.sessionId} to : ${display.key}" }
+                dynascaleLogger.i {
+                    "[visibleTracks] $sessionId subscribing ${participant.sessionId} to : ${display.key}"
+                }
                 TrackSubscriptionDetails(
                     user_id = participant.user.value.id,
                     track_type = display.key,
                     dimension = display.value.dimensions,
-                    session_id = participant.sessionId
+                    session_id = participant.sessionId,
                 )
             }
         }.flatten()
@@ -868,7 +879,7 @@ public class RtcSession internal constructor(
     }
 
     internal val subscriptions: MutableStateFlow<List<TrackSubscriptionDetails>> = MutableStateFlow(
-        emptyList()
+        emptyList(),
     )
 
     /**
@@ -903,11 +914,13 @@ public class RtcSession internal constructor(
                 flow {
                     val request = UpdateSubscriptionsRequest(
                         session_id = sessionId,
-                        tracks = subscriptions.value
+                        tracks = subscriptions.value,
                     )
                     println("request $request")
                     val sessionToDimension = tracks.map { it.session_id to it.dimension }
-                    dynascaleLogger.i { "[setVideoSubscriptions] $useDefaults #sfu; $sessionId subscribing to : $sessionToDimension" }
+                    dynascaleLogger.i {
+                        "[setVideoSubscriptions] $useDefaults #sfu; $sessionId subscribing to : $sessionToDimension"
+                    }
                     val result = updateSubscriptions(request)
                     emit(result.getOrThrow())
                 }.flowOn(DispatcherProvider.IO).retryWhen { cause, attempt ->
@@ -916,7 +929,9 @@ public class RtcSession internal constructor(
                     val isPermanent = isPermanentError(cause)
                     val willRetry = !isPermanent && sameValue && sameSfu && attempt < 30
                     val delayInMs = if (attempt <= 1) 100L else if (attempt <= 3) 300L else 2500L
-                    logger.w { "updating subscriptions failed with error $cause, retry attempt: $attempt. will retry $willRetry in $delayInMs ms" }
+                    logger.w {
+                        "updating subscriptions failed with error $cause, retry attempt: $attempt. will retry $willRetry in $delayInMs ms"
+                    }
                     delay(delayInMs)
                     willRetry
                 }.collect()
@@ -946,7 +961,7 @@ public class RtcSession internal constructor(
                             sessionId = event.sessionId,
                             trackType = event.trackType,
                             videoEnabled = call.camera.isEnabled.value,
-                            audioEnabled = call.microphone.isEnabled.value
+                            audioEnabled = call.microphone.isEnabled.value,
                         )
                     }
 
@@ -956,7 +971,7 @@ public class RtcSession internal constructor(
                             sessionId = event.sessionId,
                             trackType = event.trackType,
                             videoEnabled = false,
-                            audioEnabled = false
+                            audioEnabled = false,
                         )
                     }
 
@@ -986,7 +1001,7 @@ public class RtcSession internal constructor(
                 val iceTrickle = ICETrickle(
                     peer_type = peerType.toPeerType(),
                     ice_candidate = Json.encodeToString(candidate),
-                    session_id = sessionId
+                    session_id = sessionId,
                 )
                 logger.v { "[sendIceCandidate] #sfu; #${peerType.stringify()}; iceTrickle: $iceTrickle" }
                 val result = sendIceCandidate(iceTrickle)
@@ -1001,7 +1016,9 @@ public class RtcSession internal constructor(
      * Triggered whenever we receive new ice candidate from the SFU
      */
     suspend fun handleIceTrickle(event: ICETrickleEvent) {
-        logger.d { "[handleIceTrickle] #sfu; #${event.peerType.stringify()}; candidate: ${event.candidate}" }
+        logger.d {
+            "[handleIceTrickle] #sfu; #${event.peerType.stringify()}; candidate: ${event.candidate}"
+        }
         val iceCandidate: IceCandidate = Json.decodeFromString(event.candidate)
         val result = if (event.peerType == PeerType.PEER_TYPE_PUBLISHER_UNSPECIFIED) {
             publisher?.addIceCandidate(iceCandidate)
@@ -1027,14 +1044,17 @@ public class RtcSession internal constructor(
 
         // step 1 - receive the offer and set it to the remote
         val offerDescription = SessionDescription(
-            SessionDescription.Type.OFFER, offerEvent.sdp
+            SessionDescription.Type.OFFER,
+            offerEvent.sdp,
         )
         subscriber.setRemoteDescription(offerDescription)
 
         // step 2 - create the answer
         val answerResult = subscriber.createAnswer()
         if (answerResult !is Success) {
-            logger.w { "[handleSubscriberOffer] #sfu; #subscriber; rejected (createAnswer failed): $answerResult" }
+            logger.w {
+                "[handleSubscriberOffer] #sfu; #subscriber; rejected (createAnswer failed): $answerResult"
+            }
             return
         }
         val answerSdp = mangleSdp(answerResult.value)
@@ -1043,7 +1063,9 @@ public class RtcSession internal constructor(
         // step 3 - set local description
         val setAnswerResult = subscriber.setLocalDescription(answerSdp)
         if (setAnswerResult !is Success) {
-            logger.w { "[handleSubscriberOffer] #sfu; #subscriber; rejected (setAnswer failed): $setAnswerResult" }
+            logger.w {
+                "[handleSubscriberOffer] #sfu; #subscriber; rejected (setAnswer failed): $setAnswerResult"
+            }
             return
         }
         subscriberSdpAnswer.value = answerSdp
@@ -1062,7 +1084,7 @@ public class RtcSession internal constructor(
                 // step 4 - send the answer
                 logger.v { "[handleSubscriberOffer] #sfu; #subscriber; setAnswerResult: $setAnswerResult" }
                 val sendAnswerRequest = SendAnswerRequest(
-                    PeerType.PEER_TYPE_SUBSCRIBER, answerSdp.description, sessionId
+                    PeerType.PEER_TYPE_SUBSCRIBER, answerSdp.description, sessionId,
                 )
                 val sendAnswerResult = sendAnswer(sendAnswerRequest)
                 logger.v { "[handleSubscriberOffer] #sfu; #subscriber; sendAnswerResult: $sendAnswerResult" }
@@ -1073,7 +1095,9 @@ public class RtcSession internal constructor(
                 val isPermanent = isPermanentError(cause)
                 val willRetry = !isPermanent && sameValue && sameSfu && attempt <= 3
                 val delayInMs = if (attempt <= 1) 10L else if (attempt <= 2) 30L else 100L
-                logger.w { "sendAnswer failed $cause, retry attempt: $attempt. will retry $willRetry in $delayInMs ms" }
+                logger.w {
+                    "sendAnswer failed $cause, retry attempt: $attempt. will retry $willRetry in $delayInMs ms"
+                }
                 delay(delayInMs)
                 willRetry
             }.catch {
@@ -1107,7 +1131,7 @@ public class RtcSession internal constructor(
     @VisibleForTesting
     fun onNegotiationNeeded(
         peerConnection: StreamPeerConnection,
-        peerType: StreamPeerType
+        peerType: StreamPeerType,
     ) {
         val id = Random.nextInt().absoluteValue
         logger.d { "[negotiate] #$id; #sfu; #${peerType.stringify()}; peerConnection: $peerConnection" }
@@ -1115,7 +1139,9 @@ public class RtcSession internal constructor(
             // step 1 - create a local offer
             val offerResult = peerConnection.createOffer()
             if (offerResult !is Success) {
-                logger.w { "[negotiate] #$id; #sfu; #${peerType.stringify()}; rejected (createOffer failed): $offerResult" }
+                logger.w {
+                    "[negotiate] #$id; #sfu; #${peerType.stringify()}; rejected (createOffer failed): $offerResult"
+                }
                 return@launch
             }
             val mangledSdp = mangleSdp(offerResult.value)
@@ -1151,14 +1177,14 @@ public class RtcSession internal constructor(
                     val request = SetPublisherRequest(
                         sdp = mangledSdp.description,
                         session_id = sessionId,
-                        tracks = tracks
+                        tracks = tracks,
                     )
                     val result = setPublisher(request)
                     // step 5 - set the remote description
                     peerConnection.setRemoteDescription(
                         SessionDescription(
-                            SessionDescription.Type.ANSWER, result.getOrThrow().sdp
-                        )
+                            SessionDescription.Type.ANSWER, result.getOrThrow().sdp,
+                        ),
                     )
                     emit(result.getOrThrow())
                 }.flowOn(DispatcherProvider.IO).retryWhen { cause, attempt ->
@@ -1167,7 +1193,9 @@ public class RtcSession internal constructor(
                     val isPermanent = isPermanentError(cause)
                     val willRetry = !isPermanent && sameValue && sameSfu && attempt <= 3
                     val delayInMs = if (attempt <= 1) 10L else if (attempt <= 2) 30L else 100L
-                    logger.w { "onNegotationNeeded setPublisher failed $cause, retry attempt: $attempt. will retry $willRetry in $delayInMs ms" }
+                    logger.w {
+                        "onNegotationNeeded setPublisher failed $cause, retry attempt: $attempt. will retry $willRetry in $delayInMs ms"
+                    }
                     delay(delayInMs)
                     willRetry
                 }.catch {
@@ -1195,7 +1223,9 @@ public class RtcSession internal constructor(
             }
 
             if (trackType == TrackType.TRACK_TYPE_VIDEO && captureResolution == null) {
-                throw IllegalStateException("video capture needs to be enabled before adding the local track")
+                throw IllegalStateException(
+                    "video capture needs to be enabled before adding the local track",
+                )
             }
 
             val layers: List<VideoLayer> = if (trackType != TrackType.TRACK_TYPE_VIDEO) {
@@ -1227,7 +1257,7 @@ public class RtcSession internal constructor(
                         ),
                         bitrate = it.maxBitrateBps ?: 0,
                         fps = captureResolution?.framerate?.max ?: 0,
-                        quality = quality
+                        quality = quality,
                     )
                 }
             }
@@ -1235,7 +1265,7 @@ public class RtcSession internal constructor(
             TrackInfo(
                 track_id = track.id(),
                 track_type = trackType,
-                layers = layers
+                layers = layers,
             )
         }
         return tracks
@@ -1272,16 +1302,16 @@ public class RtcSession internal constructor(
                 Failure(
                     io.getstream.result.Error.ThrowableError(
                         e.message ?: "RtcException",
-                        e
-                    )
+                        e,
+                    ),
                 )
             } catch (e: IOException) {
                 // TODO: understand the error conditions here
                 Failure(
                     io.getstream.result.Error.ThrowableError(
                         e.message ?: "IOException",
-                        e
-                    )
+                        e,
+                    ),
                 )
             }
         }
@@ -1291,8 +1321,8 @@ public class RtcSession internal constructor(
         return Failure(
             io.getstream.result.Error.ThrowableError(
                 "CallClientImpl error needs to be handled",
-                e
-            )
+                e,
+            ),
         )
     }
 
@@ -1327,7 +1357,9 @@ public class RtcSession internal constructor(
         }
 
     // share what size and which participants we're looking at
-    private suspend fun updateSubscriptions(request: UpdateSubscriptionsRequest): Result<UpdateSubscriptionsResponse> =
+    private suspend fun updateSubscriptions(
+        request: UpdateSubscriptionsRequest,
+    ): Result<UpdateSubscriptionsResponse> =
         wrapAPICall {
             val result = sfuConnectionModule.signalService.updateSubscriptions(request)
             result.error?.let {
@@ -1351,7 +1383,7 @@ public class RtcSession internal constructor(
         sessionId: String,
         trackType: TrackType,
         visible: Boolean,
-        dimensions: VideoDimension = defaultVideoDimension
+        dimensions: VideoDimension = defaultVideoDimension,
     ) {
         // The map contains all track dimensions for all participants
         dynascaleLogger.d { "updating dimensions $sessionId $visible $dimensions" }
@@ -1366,7 +1398,7 @@ public class RtcSession internal constructor(
         // last we get the dimensions for this specific track type
         val oldTrack = participantTrackDimensions[trackType] ?: TrackDimensions(
             dimensions = dimensions,
-            visible = visible
+            visible = visible,
         )
         val newTrack = oldTrack.copy(visible = visible, dimensions = dimensions)
         participantTrackDimensions[trackType] = newTrack

@@ -22,5 +22,5 @@ import androidx.compose.runtime.Stable
 public data class QueriedCalls(
     public val calls: List<CallData>,
     public val next: String?,
-    public val prev: String?
+    public val prev: String?,
 )

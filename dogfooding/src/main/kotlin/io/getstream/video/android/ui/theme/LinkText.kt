@@ -47,7 +47,7 @@ fun LinkText(
         style = TextStyle(
             color = Colors.description,
             textAlign = TextAlign.Center,
-            fontSize = 18.sp
+            fontSize = 18.sp,
         ),
         onClick = { offset ->
             linkTextData.forEach { annotatedStringData ->

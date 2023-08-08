@@ -44,7 +44,7 @@ public interface AudioHandler {
 public class AudioSwitchHandler constructor(
     private val context: Context,
     val preferSpeakerphone: Boolean,
-    var audioDeviceChangeListener: AudioDeviceChangeListener
+    var audioDeviceChangeListener: AudioDeviceChangeListener,
 ) :
     AudioHandler {
 
@@ -77,7 +77,7 @@ public class AudioSwitchHandler constructor(
                 val switch = AudioSwitch(
                     context = context,
                     audioFocusChangeListener = onAudioFocusChangeListener,
-                    preferredDeviceList = devices
+                    preferredDeviceList = devices,
                 )
                 // TODO: AudioSwitch logging is disabled by default and it doesn't allow
                 // to specify a custom logger. At some point we may need to fork the library

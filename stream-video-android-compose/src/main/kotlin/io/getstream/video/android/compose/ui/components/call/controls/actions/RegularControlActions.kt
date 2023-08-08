@@ -55,14 +55,14 @@ public fun RegularControlActions(
     onCallAction: (CallAction) -> Unit = { DefaultOnCallActionHandler.onCallAction(call, it) },
     actions: List<(@Composable () -> Unit)> = buildDefaultCallControlActions(
         call,
-        onCallAction
+        onCallAction,
     ),
 ) {
     Surface(
         modifier = modifier,
         shape = shape,
         color = backgroundColor,
-        elevation = elevation
+        elevation = elevation,
     ) {
         LazyRow(
             verticalAlignment = Alignment.CenterVertically,
@@ -70,7 +70,7 @@ public fun RegularControlActions(
                 Arrangement.spacedBy(space = spaceBy, alignment = Alignment.CenterHorizontally)
             } else {
                 Arrangement.SpaceEvenly
-            }
+            },
         ) {
             items(actions) { action ->
                 action.invoke()
@@ -87,7 +87,7 @@ private fun RegularCallControlsActionsPreview() {
     VideoTheme {
         RegularControlActions(
             call = mockCall,
-            onCallAction = {}
+            onCallAction = {},
         )
     }
 }

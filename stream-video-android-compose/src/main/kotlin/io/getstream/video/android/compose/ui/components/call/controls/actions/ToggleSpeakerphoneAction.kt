@@ -49,14 +49,14 @@ public fun ToggleSpeakerphoneAction(
     disabledColor: Color = VideoTheme.colors.callActionIconDisabledBackground,
     enabledIconTint: Color = VideoTheme.colors.callActionIconEnabled,
     disabledIconTint: Color = VideoTheme.colors.callActionIconDisabled,
-    onCallAction: (ToggleSpeakerphone) -> Unit
+    onCallAction: (ToggleSpeakerphone) -> Unit,
 ) {
     val cameraIcon = painterResource(
         id = if (isSpeakerphoneEnabled) {
             R.drawable.stream_video_ic_speaker_on
         } else {
             R.drawable.stream_video_ic_speaker_off
-        }
+        },
     )
 
     CallControlActionBackground(
@@ -71,7 +71,7 @@ public fun ToggleSpeakerphoneAction(
                 .padding(13.dp)
                 .clickable(enabled = enabled) {
                     onCallAction(
-                        ToggleSpeakerphone(isSpeakerphoneEnabled.not())
+                        ToggleSpeakerphone(isSpeakerphoneEnabled.not()),
                     )
                 },
             tint = if (isSpeakerphoneEnabled) {
@@ -80,7 +80,9 @@ public fun ToggleSpeakerphoneAction(
                 disabledIconTint
             },
             painter = cameraIcon,
-            contentDescription = stringResource(R.string.stream_video_call_controls_toggle_speakerphone)
+            contentDescription = stringResource(
+                R.string.stream_video_call_controls_toggle_speakerphone,
+            ),
         )
     }
 }

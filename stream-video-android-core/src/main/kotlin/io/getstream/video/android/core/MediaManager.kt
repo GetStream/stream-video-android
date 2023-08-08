@@ -35,7 +35,6 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
-import okhttp3.internal.toImmutableList
 import org.openapitools.client.models.AudioSettings
 import org.openapitools.client.models.VideoSettings
 import org.webrtc.Camera2Capturer
@@ -56,13 +55,13 @@ data class CameraDeviceWrapped(
     val characteristics: CameraCharacteristics?,
     val supportedFormats: MutableList<CameraEnumerationAndroid.CaptureFormat>?,
     val maxResolution: Int,
-    val direction: CameraDirection?
+    val direction: CameraDirection?,
 )
 
 class SpeakerManager(
     val mediaManager: MediaManagerImpl,
     val microphoneManager: MicrophoneManager,
-    val initialVolume: Int? = null
+    val initialVolume: Int? = null,
 ) {
 
     private val logger by taggedLogger("Media:SpeakerManager")
@@ -180,7 +179,7 @@ class SpeakerManager(
  */
 class MicrophoneManager(
     val mediaManager: MediaManagerImpl,
-    val preferSpeakerphone: Boolean
+    val preferSpeakerphone: Boolean,
 ) {
     private lateinit var audioHandler: AudioSwitchHandler
     internal var audioManager: AudioManager? = null
@@ -317,7 +316,7 @@ public sealed class CameraDirection {
 public class CameraManager(
     public val mediaManager: MediaManagerImpl,
     public val eglBaseContext: EglBase.Context,
-    defaultCameraDirection: CameraDirection = CameraDirection.Front
+    defaultCameraDirection: CameraDirection = CameraDirection.Front,
 ) {
     private var priorStatus: DeviceStatus? = null
     private lateinit var surfaceTextureHelper: SurfaceTextureHelper
@@ -345,7 +344,8 @@ public class CameraManager(
     private val _resolution = MutableStateFlow<CameraEnumerationAndroid.CaptureFormat?>(null)
     public val resolution: StateFlow<CameraEnumerationAndroid.CaptureFormat?> = _resolution
 
-    private val _availableResolutions: MutableStateFlow<List<CameraEnumerationAndroid.CaptureFormat>> =
+    private val _availableResolutions:
+        MutableStateFlow<List<CameraEnumerationAndroid.CaptureFormat>> =
         MutableStateFlow(emptyList())
     public val availableResolutions: StateFlow<List<CameraEnumerationAndroid.CaptureFormat>> =
         _availableResolutions
@@ -426,10 +426,10 @@ public class CameraManager(
             _direction.value = selectedDevice.direction ?: CameraDirection.Back
             _selectedDevice.value = selectedDevice
             _availableResolutions.value =
-                selectedDevice.supportedFormats?.toImmutableList() ?: emptyList()
+                selectedDevice.supportedFormats?.toList() ?: emptyList()
             _resolution.value = selectDesiredResolution(
                 selectedDevice.supportedFormats,
-                mediaManager.call.state.settings.value?.video
+                mediaManager.call.state.settings.value?.video,
             )
 
             if (startCapture) {
@@ -455,7 +455,7 @@ public class CameraManager(
             videoCapturer.initialize(
                 surfaceTextureHelper,
                 mediaManager.context,
-                mediaManager.videoSource.capturerObserver
+                mediaManager.videoSource.capturerObserver,
             )
         }
 
@@ -464,7 +464,7 @@ public class CameraManager(
             videoCapturer.startCapture(
                 selectedResolution.width,
                 selectedResolution.height,
-                selectedResolution.framerate.max
+                selectedResolution.framerate.max,
             )
         }
         isCapturingVideo = true
@@ -497,13 +497,13 @@ public class CameraManager(
             _selectedDevice.value = selectedDevice
             _resolution.value = selectDesiredResolution(
                 selectedDevice.supportedFormats,
-                mediaManager.call.state.settings.value?.video
+                mediaManager.call.state.settings.value?.video,
             )
             _availableResolutions.value =
-                selectedDevice.supportedFormats?.toImmutableList() ?: emptyList()
+                selectedDevice.supportedFormats?.toList() ?: emptyList()
 
             surfaceTextureHelper = SurfaceTextureHelper.create(
-                "CaptureThread", eglBaseContext
+                "CaptureThread", eglBaseContext,
             )
 
             setupCompleted = true
@@ -537,7 +537,7 @@ public class CameraManager(
                 direction = direction,
                 characteristics = characteristics,
                 supportedFormats = supportedFormats,
-                maxResolution = maxResolution
+                maxResolution = maxResolution,
             )
             devices.add(device)
         }
@@ -597,21 +597,23 @@ class MediaManagerImpl(
     val context: Context,
     val call: Call,
     val scope: CoroutineScope,
-    val eglBaseContext: EglBase.Context
+    val eglBaseContext: EglBase.Context,
 ) {
     // source & tracks
     val videoSource = call.clientImpl.peerConnectionFactory.makeVideoSource(false)
 
     // for track ids we emulate the browser behaviour of random UUIDs, doing something different would be confusing
     val videoTrack = call.clientImpl.peerConnectionFactory.makeVideoTrack(
-        source = videoSource, trackId = UUID.randomUUID().toString()
+        source = videoSource,
+        trackId = UUID.randomUUID().toString(),
     )
 
     val audioSource = call.clientImpl.peerConnectionFactory.makeAudioSource(buildAudioConstraints())
 
     // for track ids we emulate the browser behaviour of random UUIDs, doing something different would be confusing
     val audioTrack = call.clientImpl.peerConnectionFactory.makeAudioTrack(
-        source = audioSource, trackId = UUID.randomUUID().toString()
+        source = audioSource,
+        trackId = UUID.randomUUID().toString(),
     )
 
     internal val camera = CameraManager(this, eglBaseContext)

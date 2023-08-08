@@ -25,7 +25,6 @@ import io.getstream.log.kotlin.KotlinStreamLogger
 internal class StreamTestLogger : KotlinStreamLogger() {
 
     override fun log(priority: Priority, tag: String, message: String, throwable: Throwable?) {
-
         if (throwable != null) {
         }
     }

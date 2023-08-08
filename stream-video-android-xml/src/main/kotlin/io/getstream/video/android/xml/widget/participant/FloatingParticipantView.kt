@@ -33,14 +33,17 @@ public class FloatingParticipantView : CardView, JobHolder {
 
     override val runningJobs: MutableList<Job> = mutableListOf()
 
-    private val binding = StreamVideoViewFloatingParticipantBinding.inflate(streamThemeInflater, this)
+    private val binding = StreamVideoViewFloatingParticipantBinding.inflate(
+        streamThemeInflater,
+        this,
+    )
 
     public constructor(context: Context) : this(context, null)
     public constructor(context: Context, attrs: AttributeSet?) : this(context, attrs, 0)
     public constructor(context: Context, attrs: AttributeSet?, defStyleAttr: Int) : super(
         context.createStreamThemeWrapper(),
         attrs,
-        defStyleAttr
+        defStyleAttr,
     )
 
     /**

@@ -40,6 +40,6 @@ public fun UpdateUserPermissionsData.toRequest(): UpdateUserPermissionsRequest {
     return UpdateUserPermissionsRequest(
         userId = userId,
         grantPermissions = grantedPermissions,
-        revokePermissions = revokedPermissions
+        revokePermissions = revokedPermissions,
     )
 }

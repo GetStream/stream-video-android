@@ -55,14 +55,14 @@ public fun AudioRendererStyle.copy(
     speakingBorder: BorderStroke = this.speakingBorder,
     isShowingMicrophoneAvailability: Boolean = this.isShowingMicrophoneAvailability,
     microphoneLabelPosition: Alignment = this.microphoneLabelPosition,
-    isShowingRoleBadge: Boolean = this.isShowingRoleBadge
+    isShowingRoleBadge: Boolean = this.isShowingRoleBadge,
 ): AudioRendererStyle {
     return RegularAudioRendererStyle(
         isShowingSpeakingBorder = isShowingSpeakingBorder,
         speakingBorder = speakingBorder,
         isShowingMicrophoneAvailability = isShowingMicrophoneAvailability,
         microphoneLabelPosition = microphoneLabelPosition,
-        isShowingRoleBadge = isShowingRoleBadge
+        isShowingRoleBadge = isShowingRoleBadge,
     )
 }
 
@@ -83,17 +83,17 @@ public data class RegularAudioRendererStyle(
         Brush.verticalGradient(
             listOf(
                 Color(0xFF005FFF),
-                Color(0xFF00B2FF)
-            )
-        )
+                Color(0xFF00B2FF),
+            ),
+        ),
     ),
     override val isShowingMicrophoneAvailability: Boolean = true,
     override val microphoneLabelPosition: Alignment = Alignment.BottomEnd,
-    override val isShowingRoleBadge: Boolean = true
+    override val isShowingRoleBadge: Boolean = true,
 ) : AudioRendererStyle(
     isShowingSpeakingBorder = isShowingSpeakingBorder,
     speakingBorder = speakingBorder,
     isShowingMicrophoneAvailability = isShowingMicrophoneAvailability,
     microphoneLabelPosition = microphoneLabelPosition,
-    isShowingRoleBadge = isShowingRoleBadge
+    isShowingRoleBadge = isShowingRoleBadge,
 )

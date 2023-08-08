@@ -21,6 +21,10 @@ import android.widget.TextView
 
 public interface VideoFonts {
     public fun setFont(textStyle: TextStyle, textView: TextView)
-    public fun setFont(textStyle: TextStyle, textView: TextView, defaultTypeface: Typeface = Typeface.DEFAULT)
+    public fun setFont(
+        textStyle: TextStyle,
+        textView: TextView,
+        defaultTypeface: Typeface = Typeface.DEFAULT,
+    )
     public fun getFont(textStyle: TextStyle): Typeface?
 }

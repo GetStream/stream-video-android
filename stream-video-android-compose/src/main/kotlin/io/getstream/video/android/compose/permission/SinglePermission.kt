@@ -32,17 +32,17 @@ public fun rememberCameraPermissionState(
         if (isGranted) {
             call.camera.setEnabled(true)
         }
-    }
+    },
 ): VideoPermissionsState {
     return rememberCallPermissionsState(
         call = call,
         permissions = listOf(
-            android.Manifest.permission.CAMERA
+            android.Manifest.permission.CAMERA,
         ),
         onPermissionsResult = {
             val isGranted = it[android.Manifest.permission.CAMERA] == true
             onPermissionsResult.invoke(isGranted)
-        }
+        },
     )
 }
 
@@ -67,17 +67,17 @@ public fun rememberMicrophonePermissionState(
         if (isGranted) {
             call.microphone.setEnabled(true)
         }
-    }
+    },
 ): VideoPermissionsState {
     return rememberCallPermissionsState(
         call = call,
         permissions = listOf(
-            android.Manifest.permission.RECORD_AUDIO
+            android.Manifest.permission.RECORD_AUDIO,
         ),
         onPermissionsResult = {
             val isGranted = it[android.Manifest.permission.RECORD_AUDIO] == true
             onPermissionsResult.invoke(isGranted)
-        }
+        },
     )
 }
 
@@ -99,7 +99,7 @@ public fun LaunchMicrophonePermissions(call: Call) {
 @RequiresApi(Build.VERSION_CODES.S)
 public fun rememberBluetoothPermissionState(
     call: Call,
-    onPermissionsResult: (Boolean) -> Unit
+    onPermissionsResult: (Boolean) -> Unit,
 ): VideoPermissionsState {
     return rememberCallPermissionsState(
         call = call,
@@ -107,6 +107,6 @@ public fun rememberBluetoothPermissionState(
         onPermissionsResult = {
             val isGranted = it[android.Manifest.permission.BLUETOOTH_CONNECT] == true
             onPermissionsResult.invoke(isGranted)
-        }
+        },
     )
 }

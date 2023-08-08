@@ -63,7 +63,8 @@ public fun OutgoingCallContent(
     headerContent: (@Composable ColumnScope.() -> Unit)? = null,
     detailsContent: (
         @Composable ColumnScope.(
-            participants: List<MemberState>, topPadding: Dp
+            participants: List<MemberState>,
+            topPadding: Dp,
         ) -> Unit
     )? = null,
     controlsContent: (@Composable BoxScope.() -> Unit)? = null,
@@ -82,7 +83,7 @@ public fun OutgoingCallContent(
         detailsContent = detailsContent,
         controlsContent = controlsContent,
         onBackPressed = onBackPressed,
-        onCallAction = onCallAction
+        onCallAction = onCallAction,
     )
 }
 
@@ -110,7 +111,8 @@ public fun OutgoingCallContent(
     headerContent: (@Composable ColumnScope.() -> Unit)? = null,
     detailsContent: (
         @Composable ColumnScope.(
-            participants: List<MemberState>, topPadding: Dp
+            participants: List<MemberState>,
+            topPadding: Dp,
         ) -> Unit
     )? = null,
     controlsContent: (@Composable BoxScope.() -> Unit)? = null,
@@ -132,15 +134,14 @@ public fun OutgoingCallContent(
         modifier = modifier,
         participants = participants,
         isVideoType = isVideoType,
-        isIncoming = false
+        isIncoming = false,
     ) {
-
         Column {
             if (isShowingHeader) {
                 headerContent?.invoke(this) ?: CallAppBar(
                     call = call,
                     onBackPressed = onBackPressed,
-                    onCallAction = onCallAction
+                    onCallAction = onCallAction,
                 )
             }
 
@@ -155,7 +156,7 @@ public fun OutgoingCallContent(
                     .align(Alignment.CenterHorizontally)
                     .padding(top = topPadding),
                 participants = participants,
-                isVideoType = isVideoType
+                isVideoType = isVideoType,
             )
         }
 
@@ -165,7 +166,7 @@ public fun OutgoingCallContent(
                 .padding(bottom = VideoTheme.dimens.outgoingCallOptionsBottomPadding),
             isCameraEnabled = isCameraEnabled,
             isMicrophoneEnabled = isMicrophoneEnabled,
-            onCallAction = onCallAction
+            onCallAction = onCallAction,
         )
     }
 }
@@ -179,7 +180,7 @@ private fun OutgoingCallVideoPreview() {
             call = mockCall,
             isVideoType = true,
             participants = mockMemberStateList,
-            onBackPressed = {}
+            onBackPressed = {},
         ) {}
     }
 }
@@ -193,7 +194,7 @@ private fun OutgoingCallAudioPreview() {
             call = mockCall,
             isVideoType = false,
             participants = mockMemberStateList,
-            onBackPressed = {}
+            onBackPressed = {},
         ) {}
     }
 }

@@ -79,7 +79,7 @@ public fun CallParticipantsInfoMenu(
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(color = VideoTheme.colors.infoMenuOverlayColor)
+            .background(color = VideoTheme.colors.infoMenuOverlayColor),
     ) {
         Column(modifier) {
             val listModifier = Modifier
@@ -95,7 +95,7 @@ public fun CallParticipantsInfoMenu(
                     onUserOptionsSelected = { },
                     onInviteUser = { onCallAction.invoke(InviteUsersToCall(selectedUsers)) },
                     onMute = { enabled -> onCallAction.invoke(ToggleMicrophone(enabled)) },
-                    onBackPressed = onBackPressed
+                    onBackPressed = onBackPressed,
                 )
             } else {
                 InviteUserList(
@@ -108,7 +108,7 @@ public fun CallParticipantsInfoMenu(
                     },
                     onUserUnSelected = { user ->
                         selectedUsers = selectedUsers - user
-                    }
+                    },
                 )
             }
         }
@@ -121,7 +121,7 @@ private fun CallParticipantsInfoMenuPreview() {
     StreamMockUtils.initializeStreamVideo(LocalContext.current)
     VideoTheme {
         CallParticipantsInfoMenu(
-            call = mockCall
+            call = mockCall,
         )
     }
 }

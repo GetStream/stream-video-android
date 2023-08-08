@@ -47,6 +47,6 @@ internal fun initialsGradient(initials: String): Brush {
         listOf(
             Color(adjustColorBrightness(baseColor, GradientDarkerColorFactor)),
             Color(adjustColorBrightness(baseColor, GradientLighterColorFactor)),
-        )
+        ),
     )
 }

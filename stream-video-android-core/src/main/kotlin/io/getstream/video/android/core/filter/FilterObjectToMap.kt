@@ -20,20 +20,26 @@ private fun Map<String, Any>.toFilterObject(): FilterObject = when {
     this.isEmpty() -> NeutralFilterObject
     this.size == 1 -> this.entries.first().toFilterObject()
     this.size == 2 && this.containsKey(KEY_DISTINCT) && this.containsKey(KEY_MEMBERS) -> Filters.distinct(
-        (this[KEY_MEMBERS] as List<String>)
+        (this[KEY_MEMBERS] as List<String>),
     )
     else -> throw IllegalArgumentException("FilterObject can not be created with this map `$this`")
 }
 
 private fun Map.Entry<String, Any>.toFilterObject(): FilterObject = when (this.key) {
     KEY_AND -> Filters.and(
-        *(this.value as List<Map<String, Any>>).map(Map<String, Any>::toFilterObject).toTypedArray()
+        *(this.value as List<Map<String, Any>>).map(
+            Map<String, Any>::toFilterObject,
+        ).toTypedArray(),
     )
     KEY_OR -> Filters.or(
-        *(this.value as List<Map<String, Any>>).map(Map<String, Any>::toFilterObject).toTypedArray()
+        *(this.value as List<Map<String, Any>>).map(
+            Map<String, Any>::toFilterObject,
+        ).toTypedArray(),
     )
     KEY_NOR -> Filters.nor(
-        *(this.value as List<Map<String, Any>>).map(Map<String, Any>::toFilterObject).toTypedArray()
+        *(this.value as List<Map<String, Any>>).map(
+            Map<String, Any>::toFilterObject,
+        ).toTypedArray(),
     )
     else -> (this.value as Map<String, Any>).entries.first().let {
         when (it.key) {
@@ -51,7 +57,9 @@ private fun Map.Entry<String, Any>.toFilterObject(): FilterObject = when (this.k
             KEY_IN -> Filters.`in`(this.key, (it.value as List<Any>))
             KEY_NOT_IN -> Filters.nin(this.key, (it.value as List<Any>))
             KEY_AUTOCOMPLETE -> Filters.autocomplete(this.key, it.value as String)
-            else -> throw IllegalArgumentException("FilterObject can be create with this map `$this`")
+            else -> throw IllegalArgumentException(
+                "FilterObject can be create with this map `$this`",
+            )
         }
     }
 }
@@ -66,9 +74,13 @@ internal fun FilterObject.toMap(): Map<String, Any> = when (this) {
     is NotEqualsFilterObject -> mapOf(this.fieldName to mapOf(KEY_NOT_EQUALS to this.value))
     is ContainsFilterObject -> mapOf(this.fieldName to mapOf(KEY_CONTAINS to this.value))
     is GreaterThanFilterObject -> mapOf(this.fieldName to mapOf(KEY_GREATER_THAN to this.value))
-    is GreaterThanOrEqualsFilterObject -> mapOf(this.fieldName to mapOf(KEY_GREATER_THAN_OR_EQUALS to this.value))
+    is GreaterThanOrEqualsFilterObject -> mapOf(
+        this.fieldName to mapOf(KEY_GREATER_THAN_OR_EQUALS to this.value),
+    )
     is LessThanFilterObject -> mapOf(this.fieldName to mapOf(KEY_LESS_THAN to this.value))
-    is LessThanOrEqualsFilterObject -> mapOf(this.fieldName to mapOf(KEY_LESS_THAN_OR_EQUALS to this.value))
+    is LessThanOrEqualsFilterObject -> mapOf(
+        this.fieldName to mapOf(KEY_LESS_THAN_OR_EQUALS to this.value),
+    )
     is InFilterObject -> mapOf(this.fieldName to mapOf(KEY_IN to this.values))
     is NotInFilterObject -> mapOf(this.fieldName to mapOf(KEY_NOT_IN to this.values))
     is AutocompleteFilterObject -> mapOf(this.fieldName to mapOf(KEY_AUTOCOMPLETE to this.value))

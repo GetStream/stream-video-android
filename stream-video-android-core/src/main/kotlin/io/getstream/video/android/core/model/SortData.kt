@@ -29,7 +29,7 @@ import org.openapitools.client.models.SortParamRequest
 @Stable
 public data class SortData(
     public val direction: Int = DEFAULT_SORT_DIRECTION,
-    public val sortField: String
+    public val sortField: String,
 )
 
 @Stable
@@ -46,7 +46,7 @@ public fun SortField.toRequest(): SortParamRequest {
     val direction = if (ascending) 1 else -1
     return SortParamRequest(
         direction = direction,
-        field = field
+        field = field,
     )
 }
 
@@ -56,7 +56,7 @@ public fun SortField.toRequest(): SortParamRequest {
 public fun SortData.toRequest(): SortParamRequest {
     return SortParamRequest(
         direction = direction,
-        field = sortField
+        field = sortField,
     )
 }
 

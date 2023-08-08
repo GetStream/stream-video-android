@@ -61,7 +61,9 @@ public class CallView : CallConstraintLayout {
     public constructor(context: Context) : this(context, null)
     public constructor(context: Context, attrs: AttributeSet?) : this(context, attrs, 0)
     public constructor(context: Context, attrs: AttributeSet?, defStyleAttr: Int) : super(
-        context, attrs, defStyleAttr
+        context,
+        attrs,
+        defStyleAttr,
     ) {
         init(context, attrs)
     }
@@ -177,7 +179,7 @@ public class CallView : CallConstraintLayout {
             this@CallView.addView(this)
             layoutParams = LayoutParams(
                 LayoutParams.MATCH_PARENT,
-                style.participantListHeight
+                style.participantListHeight,
             )
             setPadding(style.participantListPadding)
             setItemMargin(style.participantListItemMargin)
@@ -193,7 +195,11 @@ public class CallView : CallConstraintLayout {
             constrainViewToParentBySide(presenterText, ConstraintSet.END)
             constrainViewToParentBySide(presenterText, ConstraintSet.TOP)
 
-            constrainViewTopToBottomOfView(screenShareView, presenterText, style.presenterTextMargin)
+            constrainViewTopToBottomOfView(
+                screenShareView,
+                presenterText,
+                style.presenterTextMargin,
+            )
             constrainViewToParentBySide(screenShareView, ConstraintSet.START)
             constrainViewToParentBySide(screenShareView, ConstraintSet.END)
             constrainViewBottomToTopOfView(screenShareView, listView, style.screenShareMargin)
@@ -285,7 +291,7 @@ public class CallView : CallConstraintLayout {
                 id = UUID.randomUUID().hashCode()
                 layoutParams = LayoutParams(
                     style.localParticipantWidth.toInt(),
-                    style.localParticipantHeight.toInt()
+                    style.localParticipantHeight.toInt(),
                 )
                 radius = style.localParticipantRadius
                 translationX = calculateFloatingParticipantMaxXOffset()
@@ -328,7 +334,9 @@ public class CallView : CallConstraintLayout {
                     }
 
                     view.animate().x(newX.coerceIn(style.localParticipantPadding, maxDx))
-                        .y(newY.coerceIn(style.localParticipantPadding, maxDy)).setDuration(0).start()
+                        .y(
+                            newY.coerceIn(style.localParticipantPadding, maxDy),
+                        ).setDuration(0).start()
                     return@setOnTouchListener true
                 }
             }
@@ -399,13 +407,13 @@ public class CallView : CallConstraintLayout {
             context = context,
             attrs = null,
             defStyleAttr = defStyleAttr,
-            defStyleRes = defStyleRes
+            defStyleRes = defStyleRes,
         ).apply {
             this.id = View.generateViewId()
             if (isListView) {
                 layoutParams = LinearLayout.LayoutParams(
                     style.participantListItemWidth,
-                    LinearLayout.LayoutParams.MATCH_PARENT
+                    LinearLayout.LayoutParams.MATCH_PARENT,
                 )
             }
         }

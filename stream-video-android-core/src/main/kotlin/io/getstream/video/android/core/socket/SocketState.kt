@@ -39,6 +39,7 @@ public sealed class SocketState {
 
     /** A temporary error broken the connection, socket will retry */
     data class DisconnectedTemporarily(val error: Throwable) : SocketState()
+
     /** A permanent error broken the connection, socket will not retry */
     data class DisconnectedPermanently(val error: Throwable) : SocketState()
 

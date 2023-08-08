@@ -77,9 +77,9 @@ public fun CallAppBar(
     trailingContent: (@Composable RowScope.() -> Unit)? = {
         DefaultCallAppBarTrailingContent(
             call = call,
-            onCallAction = onCallAction
+            onCallAction = onCallAction,
         )
-    }
+    },
 ) {
     val orientation = LocalConfiguration.current.orientation
     val height = if (orientation == ORIENTATION_LANDSCAPE) {
@@ -102,15 +102,15 @@ public fun CallAppBar(
                 brush = Brush.verticalGradient(
                     listOf(
                         Color.Black.copy(alpha = 0.2f),
-                        Color.Transparent
-                    )
-                )
+                        Color.Transparent,
+                    ),
+                ),
             )
             .padding(
                 start = VideoTheme.dimens.callAppBarPadding,
                 top = VideoTheme.dimens.callAppBarPadding,
                 bottom = VideoTheme.dimens.callAppBarPadding,
-                end = endPadding
+                end = endPadding,
             ),
         verticalAlignment = Alignment.CenterVertically,
     ) {
@@ -127,18 +127,20 @@ public fun CallAppBar(
  */
 @Composable
 internal fun DefaultCallAppBarLeadingContent(
-    onBackButtonClicked: () -> Unit
+    onBackButtonClicked: () -> Unit,
 ) {
     IconButton(
         onClick = onBackButtonClicked,
         modifier = Modifier.padding(
             start = VideoTheme.dimens.callAppBarLeadingContentSpacingStart,
-            end = VideoTheme.dimens.callAppBarLeadingContentSpacingEnd
-        )
+            end = VideoTheme.dimens.callAppBarLeadingContentSpacingEnd,
+        ),
     ) {
         Icon(
             painter = painterResource(id = R.drawable.stream_video_ic_arrow_back),
-            contentDescription = stringResource(id = R.string.stream_video_back_button_content_description),
+            contentDescription = stringResource(
+                id = R.string.stream_video_back_button_content_description,
+            ),
             tint = VideoTheme.colors.callDescription,
         )
     }
@@ -149,7 +151,6 @@ internal fun DefaultCallAppBarLeadingContent(
  */
 @Composable
 internal fun RowScope.DefaultCallAppBarCenterContent(call: Call, title: String) {
-
     val isReconnecting by call.state.isReconnecting.collectAsStateWithLifecycle()
 
     Text(
@@ -157,7 +158,7 @@ internal fun RowScope.DefaultCallAppBarCenterContent(call: Call, title: String) 
             .weight(1f)
             .padding(
                 start = VideoTheme.dimens.callAppBarCenterContentSpacingStart,
-                end = VideoTheme.dimens.callAppBarCenterContentSpacingEnd
+                end = VideoTheme.dimens.callAppBarCenterContentSpacingEnd,
             ),
         text = if (isReconnecting) {
             stringResource(id = R.string.stream_video_call_reconnecting)
@@ -178,13 +179,13 @@ internal fun RowScope.DefaultCallAppBarCenterContent(call: Call, title: String) 
 @Composable
 internal fun DefaultCallAppBarTrailingContent(
     call: Call,
-    onCallAction: (CallAction) -> Unit
+    onCallAction: (CallAction) -> Unit,
 ) {
     val participants by call.state.participants.collectAsStateWithLifecycle()
 
     ParticipantIndicatorIcon(
         number = participants.size,
-        onClick = { onCallAction(ShowCallParticipantInfo) }
+        onClick = { onCallAction(ShowCallParticipantInfo) },
     )
 }
 

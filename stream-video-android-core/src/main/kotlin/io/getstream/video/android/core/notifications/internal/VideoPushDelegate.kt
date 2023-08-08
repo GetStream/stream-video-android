@@ -38,7 +38,7 @@ import kotlinx.coroutines.launch
  * It is used by reflection by [PushDelegateProvider] class.
  */
 internal class VideoPushDelegate(
-    context: Context
+    context: Context,
 ) : PushDelegate(context) {
     private val logger = StreamLog.getLogger("VideoPushDelegate")
     private val DEFAULT_CALL_TEXT = "Unknown caller"
@@ -169,6 +169,7 @@ internal class VideoPushDelegate(
         // TODO: KEY_CALL_DISPLAY_NAME can be empty. Are there any other important key/values?
         // !(this[KEY_CALL_DISPLAY_NAME] as? String).isNullOrBlank()
         true
+
     /**
      * Verify if the map contains key/value from Stream Server.
      */

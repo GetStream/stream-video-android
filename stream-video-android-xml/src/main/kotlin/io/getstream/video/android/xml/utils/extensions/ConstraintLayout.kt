@@ -58,27 +58,47 @@ internal fun ConstraintSet.constrainViewToParentBySide(view: View, side: Int, ma
 }
 
 @JvmSynthetic
-internal fun ConstraintSet.constrainViewStartToEndOfView(startView: View, endView: View, margin: Int = 0) {
+internal fun ConstraintSet.constrainViewStartToEndOfView(
+    startView: View,
+    endView: View,
+    margin: Int = 0,
+) {
     connect(startView.id, ConstraintSet.START, endView.id, ConstraintSet.END, margin)
 }
 
 @JvmSynthetic
-internal fun ConstraintSet.constrainViewEndToEndOfView(startView: View, endView: View, margin: Int = 0) {
+internal fun ConstraintSet.constrainViewEndToEndOfView(
+    startView: View,
+    endView: View,
+    margin: Int = 0,
+) {
     connect(startView.id, ConstraintSet.END, endView.id, ConstraintSet.END, margin)
 }
 
 @JvmSynthetic
-internal fun ConstraintSet.constrainViewEndToStartOfView(startView: View, endView: View, margin: Int = 0) {
+internal fun ConstraintSet.constrainViewEndToStartOfView(
+    startView: View,
+    endView: View,
+    margin: Int = 0,
+) {
     connect(startView.id, ConstraintSet.END, endView.id, ConstraintSet.START, margin)
 }
 
 @JvmSynthetic
-internal fun ConstraintSet.constrainViewBottomToTopOfView(startView: View, endView: View, margin: Int = 0) {
+internal fun ConstraintSet.constrainViewBottomToTopOfView(
+    startView: View,
+    endView: View,
+    margin: Int = 0,
+) {
     connect(startView.id, ConstraintSet.BOTTOM, endView.id, ConstraintSet.TOP, margin)
 }
 
 @JvmSynthetic
-internal fun ConstraintSet.constrainViewTopToBottomOfView(startView: View, endView: View, margin: Int = 0) {
+internal fun ConstraintSet.constrainViewTopToBottomOfView(
+    startView: View,
+    endView: View,
+    margin: Int = 0,
+) {
     connect(startView.id, ConstraintSet.TOP, endView.id, ConstraintSet.BOTTOM, margin)
 }
 
@@ -99,7 +119,7 @@ internal fun ConstraintSet.horizontalChainInParent(views: List<View>) {
         ConstraintSet.RIGHT,
         views.map(View::getId).toIntArray(),
         null,
-        ConstraintSet.CHAIN_SPREAD
+        ConstraintSet.CHAIN_SPREAD,
     )
 }
 
@@ -117,6 +137,6 @@ internal fun ConstraintSet.verticalChainInParent(vararg views: View) {
         ConstraintSet.BOTTOM,
         views.map(View::getId).toIntArray(),
         null,
-        ConstraintSet.CHAIN_SPREAD
+        ConstraintSet.CHAIN_SPREAD,
     )
 }

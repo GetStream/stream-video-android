@@ -25,6 +25,7 @@ import com.google.crypto.tink.KeyTemplates
 import com.google.crypto.tink.aead.AeadConfig
 import com.google.crypto.tink.integration.android.AndroidKeysetManager
 import io.getstream.log.StreamLog
+import io.getstream.log.taggedLogger
 import io.getstream.video.android.datastore.model.StreamUserPreferences
 import io.getstream.video.android.datastore.serializer.UserSerializer
 import io.getstream.video.android.datastore.serializer.encrypted
@@ -34,6 +35,7 @@ import io.getstream.video.android.model.User
 import io.getstream.video.android.model.UserToken
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
+import java.security.KeyStore
 
 /**
  * A DataStore managers to persist Stream user login data safely, consistently, and transactionally.
@@ -117,6 +119,12 @@ public class StreamUserDataStore constructor(
         data.map { it?.userDevice }
 
     public companion object {
+
+        private val logger by taggedLogger("StreamUserDataStore")
+        private const val MASTER_KEY_PREFERENCE_FILE = "master_key_preference"
+        private const val USER_PROTO_FILE = "proto_stream_video_user.pb"
+        private const val MASTER_KEY_NAME = "master_key"
+
         /**
          * Represents if [StreamUserDataStore] is already installed or not.
          * Lets you know if the internal [StreamUserDataStore] instance is being used as the
@@ -138,7 +146,7 @@ public class StreamUserDataStore constructor(
         public fun instance(): StreamUserDataStore {
             return internalStreamUserDataStore
                 ?: throw IllegalStateException(
-                    "StreamUserDataStore.install() must be called before obtaining StreamUserDataStore instance."
+                    "StreamUserDataStore.install() must be called before obtaining StreamUserDataStore instance.",
                 )
         }
 
@@ -167,20 +175,22 @@ public class StreamUserDataStore constructor(
 
                 val dataStore = if (isEncrypted) {
                     AeadConfig.register()
-                    val aead = AndroidKeysetManager.Builder()
-                        .withSharedPref(context, "master_keyset", "master_key_preference")
-                        .withKeyTemplate(KeyTemplates.get("AES256_GCM"))
-                        .withMasterKeyUri("android-keystore://master_key")
-                        .build()
-                        .keysetHandle
-                        .getPrimitive(Aead::class.java)
 
+                    val aead = try {
+                        createAead(context)
+                    } catch (e: Exception) {
+                        // The client application is most likely using allowBack="true" in manifest
+                        // and our encrypted datastore can't be restored. We need to clear it.
+                        logger.e(e) { "Failed to decrypt the datastore - clearing data" }
+                        deleteEncryptionKeysAndData(context)
+                        createAead(context)
+                    }
                     DataStoreFactory.create(serializer = UserSerializer().encrypted(aead)) {
-                        context.dataStoreFile("proto_stream_video_user.pb")
+                        context.dataStoreFile(USER_PROTO_FILE)
                     }
                 } else {
                     DataStoreFactory.create(serializer = UserSerializer()) {
-                        context.dataStoreFile("proto_stream_video_user.pb")
+                        context.dataStoreFile(USER_PROTO_FILE)
                     }
                 }
 
@@ -189,6 +199,36 @@ public class StreamUserDataStore constructor(
                 internalStreamUserDataStore = userDataStore
                 return userDataStore
             }
+        }
+
+        private fun createAead(context: Context) =
+            AndroidKeysetManager.Builder()
+                .withSharedPref(context, "master_keyset", MASTER_KEY_PREFERENCE_FILE)
+                .withKeyTemplate(KeyTemplates.get("AES256_GCM"))
+                .withMasterKeyUri("android-keystore://${MASTER_KEY_NAME}")
+                .build()
+                .keysetHandle
+                .getPrimitive(Aead::class.java)
+
+        private fun deleteEncryptionKeysAndData(context: Context) {
+            // Remove the preference file
+            context.getSharedPreferences(MASTER_KEY_PREFERENCE_FILE, Context.MODE_PRIVATE)
+                .edit()
+                .clear()
+                .apply()
+
+            // Delete the master key
+            val keyStore = KeyStore.getInstance("AndroidKeyStore")
+            try {
+                keyStore.load(null)
+                keyStore.deleteEntry(MASTER_KEY_NAME)
+            } catch (e: Exception) {
+                logger.e(e) { "Failed to delete the master key" }
+                // Let's try to proceed anyway
+            }
+
+            // Delete stored data
+            context.dataStoreFile(USER_PROTO_FILE).delete()
         }
 
         /**

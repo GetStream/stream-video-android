@@ -131,7 +131,7 @@ public data class ParticipantState(
         Video(
             sessionId = sessionId,
             track = track,
-            enabled = enabled
+            enabled = enabled,
         )
     }
 
@@ -139,7 +139,7 @@ public data class ParticipantState(
         Audio(
             sessionId = sessionId,
             track = track,
-            enabled = enabled
+            enabled = enabled,
         )
     }
 
@@ -148,7 +148,7 @@ public data class ParticipantState(
             ScreenSharing(
                 sessionId = sessionId,
                 track = track,
-                enabled = enabled
+                enabled = enabled,
             )
         }
 
@@ -182,6 +182,7 @@ public data class ParticipantState(
             currentAudio[2] = audioLevel
         }
         _audioLevels.value = currentAudio.toList()
+        _audioLevel.value = audioLevel
     }
 
     internal val _roles = MutableStateFlow<List<String>>(emptyList())
@@ -206,11 +207,15 @@ public data class ParticipantState(
             participant.published_tracks.contains(TrackType.TRACK_TYPE_SCREEN_SHARE)
         _roles.value = participant.roles
 
+        val custom = participant.custom ?: emptyMap<String, Any>()
+
         val currentUser = _user.value
         _user.value = currentUser.copy(
             name = participant.name,
             image = participant.image,
-            role = participant.roles.firstOrNull().orEmpty()
+            role = participant.roles.firstOrNull().orEmpty(),
+            // TODO: set the custom field
+            // custom = custom
         )
     }
 
@@ -232,35 +237,35 @@ public data class ParticipantState(
     public data class Video(
         public override val sessionId: String,
         public override val track: VideoTrack?,
-        public override val enabled: Boolean
+        public override val enabled: Boolean,
     ) : Media(
         sessionId = sessionId,
         track = track,
         enabled = enabled,
-        type = TrackType.TRACK_TYPE_VIDEO
+        type = TrackType.TRACK_TYPE_VIDEO,
     )
 
     @Stable
     public data class Audio(
         public override val sessionId: String,
         public override val track: AudioTrack?,
-        public override val enabled: Boolean
+        public override val enabled: Boolean,
     ) : Media(
         sessionId = sessionId,
         track = track,
         enabled = enabled,
-        type = TrackType.TRACK_TYPE_AUDIO
+        type = TrackType.TRACK_TYPE_AUDIO,
     )
 
     @Stable
     public data class ScreenSharing(
         public override val sessionId: String,
         public override val track: VideoTrack?,
-        public override val enabled: Boolean
+        public override val enabled: Boolean,
     ) : Media(
         sessionId = sessionId,
         track = track,
         enabled = enabled,
-        type = TrackType.TRACK_TYPE_SCREEN_SHARE
+        type = TrackType.TRACK_TYPE_SCREEN_SHARE,
     )
 }

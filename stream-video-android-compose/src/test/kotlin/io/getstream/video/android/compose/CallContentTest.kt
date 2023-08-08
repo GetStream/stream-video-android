@@ -61,7 +61,7 @@ internal class CallContentTest : BaseComposeTest() {
             IncomingCallControls(
                 isVideoCall = true,
                 isCameraEnabled = true,
-                onCallAction = { }
+                onCallAction = { },
             )
         }
     }
@@ -73,7 +73,7 @@ internal class CallContentTest : BaseComposeTest() {
                 call = mockCall,
                 participants = mockMemberStateList.takeLast(1),
                 isCameraEnabled = false,
-                onBackPressed = {}
+                onBackPressed = {},
             ) {}
         }
     }
@@ -85,7 +85,7 @@ internal class CallContentTest : BaseComposeTest() {
                 call = mockCall,
                 participants = mockMemberStateList,
                 isCameraEnabled = false,
-                onBackPressed = {}
+                onBackPressed = {},
             ) {}
         }
     }
@@ -111,12 +111,12 @@ internal class CallContentTest : BaseComposeTest() {
                 OutgoingCallControls(
                     isMicrophoneEnabled = true,
                     isCameraEnabled = true,
-                    onCallAction = { }
+                    onCallAction = { },
                 )
                 OutgoingCallControls(
                     isMicrophoneEnabled = false,
                     isCameraEnabled = false,
-                    onCallAction = { }
+                    onCallAction = { },
                 )
             }
         }
@@ -130,7 +130,7 @@ internal class CallContentTest : BaseComposeTest() {
                 participants = mockMemberStateList.take(1),
                 modifier = Modifier.fillMaxSize(),
                 onBackPressed = {},
-                onCallAction = {}
+                onCallAction = {},
             )
         }
     }
@@ -141,7 +141,7 @@ internal class CallContentTest : BaseComposeTest() {
             OutgoingCallContent(
                 call = mockCall,
                 participants = mockMemberStateList,
-                onBackPressed = {}
+                onBackPressed = {},
             ) {}
         }
     }

@@ -23,7 +23,7 @@ package io.getstream.video.android.core.errors
  */
 public class CameraException(
     message: String? = null,
-    cause: Throwable? = null
+    cause: Throwable? = null,
 ) : Exception(message, cause)
 
 /**
@@ -31,7 +31,7 @@ public class CameraException(
  */
 public class MicrophoneException(
     message: String? = null,
-    cause: Throwable? = null
+    cause: Throwable? = null,
 ) : Exception(message, cause)
 
 /**

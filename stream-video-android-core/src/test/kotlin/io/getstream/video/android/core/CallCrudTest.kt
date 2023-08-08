@@ -110,7 +110,7 @@ public class CallCrudTest : IntegrationTestBase() {
             members = listOf(
                 MemberRequest(userId = "thierry", role = "host"),
             ),
-            custom = mapOf("color" to "red")
+            custom = mapOf("color" to "red"),
         )
         assert(result.isSuccess)
 

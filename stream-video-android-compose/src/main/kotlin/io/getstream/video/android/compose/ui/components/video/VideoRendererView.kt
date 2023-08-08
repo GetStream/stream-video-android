@@ -80,7 +80,7 @@ public class VideoRendererView : VideoTextureViewRenderer {
             videoRenderer = this,
             sessionId = sessionId,
             trackType = trackType,
-            onRendered = onRendered
+            onRendered = onRendered,
         )
         setScalingType(scalingType = videoScalingType.toCommonScalingType())
         setupVideo(mediaTrack)

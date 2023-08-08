@@ -52,6 +52,11 @@ class CallActivity : ComponentActivity() {
             ?: throw IllegalArgumentException("call type and id is invalid!")
         val call = streamVideo.call(type = cid.type, id = cid.id)
 
+        // optional - call settings. We disable the mic if coming from QR code demo
+        if (intent.getBooleanExtra(EXTRA_DISABLE_MIC_BOOLEAN, false)) {
+            call.microphone.disable(true)
+        }
+
         // step 2 - join a call
         lifecycleScope.launch {
             val result = call.join(create = true)
@@ -62,7 +67,7 @@ class CallActivity : ComponentActivity() {
                 Toast.makeText(
                     this@CallActivity,
                     "Failed to join call (${result.value.message})",
-                    Toast.LENGTH_SHORT
+                    Toast.LENGTH_SHORT,
                 ).show()
                 finish()
             }
@@ -76,7 +81,7 @@ class CallActivity : ComponentActivity() {
                 onLeaveCall = {
                     call.leave()
                     finish()
-                }
+                },
             )
 
             // step 4 (optional) - chat integration
@@ -88,7 +93,7 @@ class CallActivity : ComponentActivity() {
                         offset = 0,
                         limit = 10,
                         filter = Filters.neutral(),
-                        sort = QuerySortByField()
+                        sort = QuerySortByField(),
                     ).await().onSuccessSuspend { members ->
                         if (members.isNotEmpty()) {
                             channel.addMembers(listOf(user!!.id)).await()
@@ -103,14 +108,22 @@ class CallActivity : ComponentActivity() {
 
     companion object {
         const val EXTRA_CID: String = "EXTRA_CID"
+        const val EXTRA_DISABLE_MIC_BOOLEAN: String = "EXTRA_DISABLE_MIC"
 
+        /**
+         * @param callId the Call ID you want to join
+         * @param disableMicOverride optional parameter if you want to override the users setting
+         * and disable the microphone.
+         */
         @JvmStatic
         fun createIntent(
             context: Context,
             callId: StreamCallId,
+            disableMicOverride: Boolean = false,
         ): Intent {
             return Intent(context, CallActivity::class.java).apply {
                 putExtra(EXTRA_CID, callId)
+                putExtra(EXTRA_DISABLE_MIC_BOOLEAN, disableMicOverride)
             }
         }
     }

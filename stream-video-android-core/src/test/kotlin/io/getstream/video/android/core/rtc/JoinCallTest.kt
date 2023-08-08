@@ -54,7 +54,7 @@ class JoinCallTest : IntegrationTestBase() {
             "https://sfu-9c0dc03.ovh-lim1.stream-io-video.com/latency_test.png",
             "https://sfu-a69b58a.blu-tal1.stream-io-video.com/latency_test.png",
             "https://latency-test.aws-sin1.stream-io-video.com/latency_test.png",
-            "http://kibana.us-east.gtstrm.com/" // This url is blocked, and will hang
+            "http://kibana.us-east.gtstrm.com/", // This url is blocked, and will hang
         )
 
         // related to java threading and coroutine compatibility

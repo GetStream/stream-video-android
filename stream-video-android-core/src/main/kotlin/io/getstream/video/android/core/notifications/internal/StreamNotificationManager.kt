@@ -114,7 +114,7 @@ internal class StreamNotificationManager private constructor(
         Device(
             id = this.token,
             pushProvider = this.pushProvider.key,
-            pushProviderName = this.providerName ?: ""
+            pushProviderName = this.providerName ?: "",
         )
     private fun PushDevice.toCreateDeviceRequest(): Result<CreateDeviceRequest> =
         when (pushProvider) {
@@ -126,12 +126,13 @@ internal class StreamNotificationManager private constructor(
             CreateDeviceRequest(
                 id = token,
                 pushProvider = it,
-                pushProviderName = providerName
+                pushProviderName = providerName,
             )
         }
 
     internal companion object {
         private val logger: TaggedLogger by taggedLogger("StreamVideo:Notifications")
+
         @SuppressLint("StaticFieldLeak")
         private lateinit var internalStreamNotificationManager: StreamNotificationManager
         internal fun install(

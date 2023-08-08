@@ -56,27 +56,27 @@ object StreamVideoInitHelper {
         if (preferences != null) {
             app.initializeStreamChat(
                 user = preferences.user!!,
-                token = preferences.userToken
+                token = preferences.userToken,
             )
 
             app.initializeStreamVideo(
                 user = preferences.user!!,
                 token = preferences.userToken,
                 apiKey = preferences.apiKey,
-                loggingLevel = LoggingLevel(priority = Priority.VERBOSE)
+                loggingLevel = LoggingLevel(priority = Priority.VERBOSE),
             )
         } else if (useGuestAsFallback) {
             val guest = User(id = "guest", name = "Guest", role = "guest")
             val result = StreamVideoNetwork.tokenService.fetchToken(
                 userId = guest.id,
-                apiKey = BuildConfig.API_KEY
+                apiKey = BuildConfig.API_KEY,
             )
             app.initializeStreamChat(user = guest, token = result.token)
             app.initializeStreamVideo(
                 user = guest,
                 token = result.token,
                 apiKey = BuildConfig.API_KEY,
-                loggingLevel = LoggingLevel(priority = Priority.VERBOSE)
+                loggingLevel = LoggingLevel(priority = Priority.VERBOSE),
             )
         }
         isInitialising = false

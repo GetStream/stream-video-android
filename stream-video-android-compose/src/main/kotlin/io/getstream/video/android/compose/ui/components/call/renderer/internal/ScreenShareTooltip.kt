@@ -53,9 +53,9 @@ internal fun ScreenShareTooltip(
             .clip(RoundedCornerShape(8.dp))
             .background(
                 color = VideoTheme.colors.screenSharingTooltipBackground,
-                shape = RoundedCornerShape(8.dp)
+                shape = RoundedCornerShape(8.dp),
             ),
-        verticalAlignment = Alignment.CenterVertically
+        verticalAlignment = Alignment.CenterVertically,
     ) {
         Icon(
             modifier = Modifier.padding(
@@ -64,7 +64,7 @@ internal fun ScreenShareTooltip(
             ),
             painter = painterResource(id = R.drawable.stream_video_ic_screensharing),
             tint = VideoTheme.colors.screenSharingTooltipContent,
-            contentDescription = "Presenting"
+            contentDescription = "Presenting",
         )
 
         Text(
@@ -75,7 +75,7 @@ internal fun ScreenShareTooltip(
             color = VideoTheme.colors.screenSharingTooltipContent,
             style = VideoTheme.typography.title3Bold,
             maxLines = 1,
-            overflow = TextOverflow.Ellipsis
+            overflow = TextOverflow.Ellipsis,
         )
     }
 }

@@ -88,7 +88,7 @@ public fun Avatar(
                 .testTag("avatar"),
             painter = painterResource(id = previewPlaceholder),
             contentScale = ContentScale.Crop,
-            contentDescription = null
+            contentDescription = null,
         )
         return
     }
@@ -99,7 +99,7 @@ public fun Avatar(
             initials = initials,
             shape = shape,
             textStyle = textStyle,
-            avatarOffset = initialsAvatarOffset
+            avatarOffset = initialsAvatarOffset,
         )
         return
     }
@@ -108,7 +108,7 @@ public fun Avatar(
         modifier.clickable(
             onClick = onClick,
             indication = rememberRipple(bounded = false),
-            interactionSource = remember { MutableInteractionSource() }
+            interactionSource = remember { MutableInteractionSource() },
         )
     } else {
         modifier
@@ -120,7 +120,7 @@ public fun Avatar(
         imageOptions = ImageOptions(
             contentDescription = contentDescription,
             contentScale = contentScale,
-            requestSize = requestSize
+            requestSize = requestSize,
         ),
         previewPlaceholder = previewPlaceholder,
         component = rememberImageComponent {
@@ -135,9 +135,9 @@ public fun Avatar(
                 initials = initials.orEmpty(),
                 shape = shape,
                 textStyle = textStyle,
-                avatarOffset = initialsAvatarOffset
+                avatarOffset = initialsAvatarOffset,
             )
-        }
+        },
     )
 }
 
@@ -147,7 +147,7 @@ private fun AvatarInitialPreview() {
     VideoTheme {
         Avatar(
             modifier = Modifier.size(72.dp),
-            initials = "Thierry"
+            initials = "Thierry",
         )
     }
 }
@@ -159,7 +159,7 @@ internal fun AvatarImagePreview() {
         Avatar(
             modifier = Modifier.size(72.dp),
             initials = null,
-            previewPlaceholder = R.drawable.stream_video_call_sample
+            previewPlaceholder = R.drawable.stream_video_call_sample,
         )
     }
 }
