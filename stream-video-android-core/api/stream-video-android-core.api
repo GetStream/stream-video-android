@@ -662,12 +662,6 @@ public final class io/getstream/video/android/core/StreamVideo$Companion {
 	public final fun removeClient ()V
 }
 
-public final class io/getstream/video/android/core/StreamVideo$DefaultImpls {
-	public static synthetic fun call$default (Lio/getstream/video/android/core/StreamVideo;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)Lio/getstream/video/android/core/Call;
-	public static synthetic fun queryCalls$default (Lio/getstream/video/android/core/StreamVideo;Ljava/util/Map;Ljava/util/List;ILjava/lang/String;Ljava/lang/String;ZLkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
-	public static synthetic fun queryMembers$default (Lio/getstream/video/android/core/StreamVideo;Ljava/lang/String;Ljava/lang/String;Ljava/util/Map;Ljava/util/List;Ljava/lang/String;Ljava/lang/String;ILkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
-}
-
 public final class io/getstream/video/android/core/StreamVideoBuilder {
 	public fun <init> (Landroid/content/Context;Ljava/lang/String;)V
 	public fun <init> (Landroid/content/Context;Ljava/lang/String;Lio/getstream/video/android/core/GEO;)V
@@ -2604,15 +2598,6 @@ public abstract interface class org/openapitools/client/apis/DefaultApi {
 	public abstract fun updateCallMembers (Ljava/lang/String;Ljava/lang/String;Lorg/openapitools/client/models/UpdateCallMembersRequest;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public abstract fun updateUserPermissions (Ljava/lang/String;Ljava/lang/String;Lorg/openapitools/client/models/UpdateUserPermissionsRequest;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public abstract fun videoConnect (Lorg/openapitools/client/models/WSAuthMessageRequest;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
-}
-
-public final class org/openapitools/client/apis/DefaultApi$DefaultImpls {
-	public static synthetic fun deleteDevice$default (Lorg/openapitools/client/apis/DefaultApi;Ljava/lang/String;Ljava/lang/String;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
-	public static synthetic fun getCall$default (Lorg/openapitools/client/apis/DefaultApi;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/Integer;Ljava/lang/Boolean;Ljava/lang/Boolean;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
-	public static synthetic fun getOrCreateCall$default (Lorg/openapitools/client/apis/DefaultApi;Ljava/lang/String;Ljava/lang/String;Lorg/openapitools/client/models/GetOrCreateCallRequest;Ljava/lang/String;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
-	public static synthetic fun joinCall$default (Lorg/openapitools/client/apis/DefaultApi;Ljava/lang/String;Ljava/lang/String;Lorg/openapitools/client/models/JoinCallRequest;Ljava/lang/String;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
-	public static synthetic fun listDevices$default (Lorg/openapitools/client/apis/DefaultApi;Ljava/lang/String;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
-	public static synthetic fun queryCalls$default (Lorg/openapitools/client/apis/DefaultApi;Lorg/openapitools/client/models/QueryCallsRequest;Ljava/lang/String;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
 }
 
 public final class org/openapitools/client/infrastructure/BigDecimalAdapter {
