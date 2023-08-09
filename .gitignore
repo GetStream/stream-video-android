@@ -101,8 +101,13 @@ docusaurus/docs/Android/Dokka
 # Ignore Algolia credentials
 docusaurus/.env
 
+# Ignore keysotore files
 .sign/keystore.properties
 .sign/release.keystore
+
+# Ignore Google Play Publisher files
+.sign/service-account-credentials.json
+dogfooding/src/production/play/
 
 # Environment Variables
 .env.properties
