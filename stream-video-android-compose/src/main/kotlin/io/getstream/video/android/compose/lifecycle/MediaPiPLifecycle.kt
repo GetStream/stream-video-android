@@ -72,14 +72,14 @@ public fun MediaPiPLifecycle(
                 call.camera.pause(fromUser = false)
                 call.microphone.pause(fromUser = false)
             } else if (!isInPictureInPicture) {
-                // TODO: There's not way to onUserLeaveHint in Compose for now.
-                // https://developer.android.com/reference/android/app/Activity#onUserLeaveHint()
-                try {
-                    Handler(Looper.getMainLooper()).post {
+                Handler(Looper.getMainLooper()).post {
+                    try {
+                        // TODO: There's not way to onUserLeaveHint in Compose for now.
+                        // https://developer.android.com/reference/android/app/Activity#onUserLeaveHint()
                         enterPictureInPicture(context = context, call = call)
+                    } catch (e: Exception) {
+                        StreamLog.d("MediaPiPLifecycle") { e.stackTraceToString() }
                     }
-                } catch (e: Exception) {
-                    StreamLog.d("MediaPiPLifecycle") { e.stackTraceToString() }
                 }
             }
         }
