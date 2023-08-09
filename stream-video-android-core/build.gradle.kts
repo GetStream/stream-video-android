@@ -144,6 +144,7 @@ dependencies {
     implementation(libs.retrofit.moshi)
     implementation(libs.retrofit.scalars)
     implementation(libs.retrofit.wire.converter)
+    implementation(libs.okhttp)
     implementation(libs.okhttp.logging)
 
     implementation(libs.moshi)

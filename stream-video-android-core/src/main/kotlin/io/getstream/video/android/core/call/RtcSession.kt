@@ -956,12 +956,26 @@ public class RtcSession internal constructor(
                     is ChangePublishQualityEvent -> updatePublishQuality(event)
 
                     is TrackPublishedEvent -> {
+                        // Make sure that we respect the user's choice for video/microphone
+                        // if the track is published (e.g. when the call is first started)
+                        val videoEnabled = if (event.userId == clientImpl.userId) {
+                            call.camera.isEnabled.value
+                        } else {
+                            true
+                        }
+
+                        val audioEnabled = if (event.userId == clientImpl.userId) {
+                            call.microphone.isEnabled.value
+                        } else {
+                            true
+                        }
+
                         updatePublishState(
                             userId = event.userId,
                             sessionId = event.sessionId,
                             trackType = event.trackType,
-                            videoEnabled = call.camera.isEnabled.value,
-                            audioEnabled = call.microphone.isEnabled.value,
+                            videoEnabled = videoEnabled,
+                            audioEnabled = audioEnabled,
                         )
                     }
 
