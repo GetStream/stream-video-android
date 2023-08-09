@@ -70,6 +70,7 @@ hilt = "2.46.1"
 desugar = "2.0.3"
 leakCanary = "2.11"
 binaryCompatabilityValidator = "0.13.2"
+playPublisher = "3.8.4"
 
 [libraries]
 
@@ -201,3 +202,4 @@ wire = { id = "com.squareup.wire", version.ref = "wire" }
 paparazzi = { id = "app.cash.paparazzi", version.ref = "paparazzi" }
 firebase-crashlytics = { id = "com.google.firebase.crashlytics", version.ref = "firebaseCrashlytics" }
 hilt = { id = "com.google.dagger.hilt.android", version.ref = "hilt" }
+play-publisher = { id = "com.github.triplet.play", version.ref = "playPublisher" }

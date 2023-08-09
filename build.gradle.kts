@@ -23,6 +23,7 @@ plugins {
     alias(libs.plugins.paparazzi) apply false
     alias(libs.plugins.firebase.crashlytics) apply false
     alias(libs.plugins.hilt) apply false
+    alias(libs.plugins.play.publisher) apply false
 }
 
 subprojects {

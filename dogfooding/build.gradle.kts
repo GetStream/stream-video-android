@@ -29,6 +29,7 @@ plugins {
     id(libs.plugins.firebase.crashlytics.get().pluginId)
     id(libs.plugins.kotlin.serialization.get().pluginId)
     id(libs.plugins.hilt.get().pluginId)
+    id(libs.plugins.play.publisher.get().pluginId)
     kotlin("kapt")
 }
 
