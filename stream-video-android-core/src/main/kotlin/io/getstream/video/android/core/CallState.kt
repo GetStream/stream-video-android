@@ -455,11 +455,11 @@ public class CallState(
         // TODO: Remove runBlocking and use standard Flow instead for mapping or use other approach
         val token = runBlocking { call.clientImpl.dataStore.userToken.firstOrNull() }
         val apiKey = runBlocking { call.clientImpl.dataStore.apiKey.firstOrNull() }
-        val streamKey = "$apiKey/$token"
-        // TODO: use the address when the server is updated
-        val overwriteUrl =
-            "rtmps://video-ingress-frankfurt-vi1.stream-io-video.com:443/${call.type}/${call.id}"
-        Ingress(rtmp = RTMP(address = overwriteUrl ?: "", streamKey = streamKey))
+        if (it != null) {
+            Ingress(rtmp = RTMP(address = it.rtmp.address, streamKey = "$apiKey/$token"))
+        } else {
+            null
+        }
     }
 
     private val userToSessionIdMap = participants.mapState { participants ->
