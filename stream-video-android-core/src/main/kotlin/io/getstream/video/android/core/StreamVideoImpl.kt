@@ -291,7 +291,7 @@ internal class StreamVideoImpl internal constructor(
         StreamLifecycleObserver(
             lifecycle,
             object : LifecycleHandler {
-                override fun resume() {
+                override fun started() {
                     scope.launch {
                         // We should only connect if we were previously connected
                         if (connectionModule.coordinatorSocket.connectionState.value != SocketState.NotConnected) {

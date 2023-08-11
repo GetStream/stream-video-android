@@ -27,7 +27,7 @@ internal class StreamLifecycleObserver(
     private val lifecycle: Lifecycle,
     private val handler: LifecycleHandler,
 ) : DefaultLifecycleObserver {
-    private var recurringResumeEvent = false
+    private var recurringStartedEvent = false
 
     @Volatile
     private var isObserving = false
@@ -48,15 +48,15 @@ internal class StreamLifecycleObserver(
             }
         }
         isObserving = false
-        recurringResumeEvent = false
+        recurringStartedEvent = false
     }
 
-    override fun onResume(owner: LifecycleOwner) {
+    override fun onStart(owner: LifecycleOwner) {
         // ignore event when we just started observing the lifecycle
-        if (recurringResumeEvent) {
-            handler.resume()
+        if (recurringStartedEvent) {
+            handler.started()
         }
-        recurringResumeEvent = true
+        recurringStartedEvent = true
     }
 
     override fun onStop(owner: LifecycleOwner) {
