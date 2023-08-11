@@ -31,6 +31,7 @@ plugins {
     id(libs.plugins.kotlin.serialization.get().pluginId)
     id(libs.plugins.hilt.get().pluginId)
     id(libs.plugins.play.publisher.get().pluginId)
+    id(libs.plugins.baseline.profile.get().pluginId)
     kotlin("kapt")
 }
 
@@ -246,4 +247,6 @@ dependencies {
 
     // memory detection
     debugImplementation(libs.leakCanary)
+
+    baselineProfile(project(":benchmark"))
 }
