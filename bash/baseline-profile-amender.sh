@@ -12,8 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-awk '/getstream/ && !/compose/ && /core/ && !/android-xml/ && !/dogfooding/ && !/ui-common/ && !/datastore/' dogfooding/src/main/baseline-prof.txt > stream-video-android-core/src/main/baseline-prof.txt
-awk '/getstream/ && /compose/ && !/core/ && !/android-xml/ && !/dogfooding/ && !/ui-common/ && !/datastore/' dogfooding/src/main/baseline-prof.txt > stream-video-android-compose/src/main/baseline-prof.txt
-awk '/getstream/ && !/compose/ && !/core/ && /android-xml/ && !/dogfooding/ && !/ui-common/ && !/datastore/' dogfooding/src/main/baseline-prof.txt > stream-video-android-xml/src/main/baseline-prof.txt
-awk '/getstream/ && !/compose/ && !/core/ && !/android-xml/ && !/dogfooding/ && /ui-common/ && !/datastore/' dogfooding/src/main/baseline-prof.txt > stream-video-android-ui-common/src/main/baseline-prof.txt
-awk '/getstream/ && !/compose/ && !/core/ && !/android-xml/ && !/dogfooding/ && !/ui-common/ && /datastore/' dogfooding/src/main/baseline-prof.txt > stream-video-android-datastore/src/main/baseline-prof.txt
+awk '/getstream/ && !/compose/ && /core/ && !/android-xml/ && !/dogfooding/ && !/ui-common/ && !/datastore/' dogfooding/src/main/generated/baselineProfiles/baseline-prof.txt > stream-video-android-core/src/main/baseline-prof.txt
+awk '/getstream/ && /compose/ && !/core/ && !/android-xml/ && !/dogfooding/ && !/ui-common/ && !/datastore/' dogfooding/src/main/generated/baselineProfiles/baseline-prof.txt > stream-video-android-compose/src/main/baseline-prof.txt
+awk '/getstream/ && !/compose/ && !/core/ && /android-xml/ && !/dogfooding/ && !/ui-common/ && !/datastore/' dogfooding/src/main/generated/baselineProfiles/baseline-prof.txt > stream-video-android-xml/src/main/baseline-prof.txt
+awk '/getstream/ && !/compose/ && !/core/ && !/android-xml/ && !/dogfooding/ && /ui-common/ && !/datastore/' dogfooding/src/main/generated/baselineProfiles/baseline-prof.txt > stream-video-android-ui-common/src/main/baseline-prof.txt
+awk '/getstream/ && !/compose/ && !/core/ && !/android-xml/ && !/dogfooding/ && !/ui-common/ && /datastore/' dogfooding/src/main/generated/baselineProfiles/baseline-prof.txt > stream-video-android-datastore/src/main/baseline-prof.txt

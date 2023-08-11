@@ -40,6 +40,12 @@ android {
     resourcePrefix = "stream_video_tooling"
 }
 
+baselineProfile {
+    filter {
+        include("io.getstream.video.android.tooling.**")
+    }
+}
+
 dependencies {
     implementation(project(":stream-video-android-compose"))
 

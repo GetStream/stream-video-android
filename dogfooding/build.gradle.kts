@@ -31,6 +31,7 @@ plugins {
     id(libs.plugins.kotlin.serialization.get().pluginId)
     id(libs.plugins.hilt.get().pluginId)
     id(libs.plugins.play.publisher.get().pluginId)
+    id(libs.plugins.baseline.profile.get().pluginId)
     kotlin("kapt")
 }
 
@@ -102,9 +103,12 @@ android {
             buildConfigField("Boolean", "BENCHMARK", "false")
         }
         create("benchmark") {
+            isDebuggable = true
+            isMinifyEnabled = false
+            isShrinkResources = false
             signingConfig = signingConfigs.getByName("debug")
             matchingFallbacks += listOf("release")
-            isDebuggable = false
+            proguardFiles("benchmark-rules.pro")
             buildConfigField("Boolean", "BENCHMARK", "true")
         }
     }
@@ -127,6 +131,10 @@ android {
 
     lint {
         baseline = file("lint-baseline.xml")
+    }
+
+    baselineProfile {
+        mergeIntoMain = true
     }
 
     playConfigs {
@@ -246,4 +254,6 @@ dependencies {
 
     // memory detection
     debugImplementation(libs.leakCanary)
+
+    baselineProfile(project(":benchmark"))
 }

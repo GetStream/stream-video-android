@@ -44,6 +44,12 @@ android {
     }
 }
 
+baselineProfile {
+    filter {
+        include("io.getstream.video.android.ui.common.**")
+    }
+}
+
 dependencies {
     api(project(":stream-video-android-core"))
 

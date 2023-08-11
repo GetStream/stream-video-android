@@ -39,6 +39,12 @@ android {
     }
 }
 
+baselineProfile {
+    filter {
+        include("io.getstream.video.android.datastore.**")
+    }
+}
+
 dependencies {
     // Stream modules
     api(project(":stream-video-android-model"))

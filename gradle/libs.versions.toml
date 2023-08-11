@@ -50,8 +50,8 @@ streamPush = "1.1.1"
 androidxTest = "1.5.2"
 androidxTestCore = "1.5.0"
 androidxProfileinstaller = "1.3.1"
-androidxMacroBenchmark = "1.2.0-alpha15"
-androidxUiAutomator = "2.3.0-alpha03"
+androidxMacroBenchmark = "1.2.0-beta03"
+androidxUiAutomator = "2.3.0-alpha04"
 androidxContraintLayout = "2.1.4"
 androidxEspresso = "3.5.1"
 androidxJunit = "1.1.5"
@@ -190,6 +190,7 @@ spotless-gradlePlugin = { group = "com.diffplug.spotless", name = "spotless-plug
 [plugins]
 android-application = { id = "com.android.application", version.ref = "androidGradlePlugin" }
 android-library = { id = "com.android.library", version.ref = "androidGradlePlugin" }
+android-test = { id = "com.android.test", version.ref = "androidGradlePlugin" }
 kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
 kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
 kotlin-compatibility-validator = { id = "org.jetbrains.kotlinx.binary-compatibility-validator", version.ref = "binaryCompatabilityValidator" }
@@ -203,3 +204,4 @@ paparazzi = { id = "app.cash.paparazzi", version.ref = "paparazzi" }
 firebase-crashlytics = { id = "com.google.firebase.crashlytics", version.ref = "firebaseCrashlytics" }
 hilt = { id = "com.google.dagger.hilt.android", version.ref = "hilt" }
 play-publisher = { id = "com.github.triplet.play", version.ref = "playPublisher" }
+baseline-profile = { id = "androidx.baselineprofile", version.ref = "androidxMacroBenchmark" }

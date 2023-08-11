@@ -112,9 +112,16 @@ android {
         kotlin.srcDir("build/generated/source/services")
     }
 
-    packagingOptions {
+    packaging {
         exclude("META-INF/LICENSE.md")
         exclude("META-INF/LICENSE-notice.md")
+    }
+}
+
+baselineProfile {
+    filter {
+        include("io.getstream.video.android.core.**")
+        include("org.openapitools.client.**")
     }
 }
 

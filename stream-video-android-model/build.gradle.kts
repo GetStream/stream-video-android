@@ -40,6 +40,12 @@ android {
     }
 }
 
+baselineProfile {
+    filter {
+        include("io.getstream.video.android.model.**")
+    }
+}
+
 dependencies {
     api(libs.threentenabp2)
 
