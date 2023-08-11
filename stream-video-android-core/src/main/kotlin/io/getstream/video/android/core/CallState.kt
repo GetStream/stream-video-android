@@ -86,6 +86,7 @@ import org.openapitools.client.models.CallUpdatedEvent
 import org.openapitools.client.models.ConnectedEvent
 import org.openapitools.client.models.CustomVideoEvent
 import org.openapitools.client.models.EgressResponse
+import org.openapitools.client.models.EgressHLSResponse
 import org.openapitools.client.models.GetCallResponse
 import org.openapitools.client.models.GetOrCreateCallResponse
 import org.openapitools.client.models.GoLiveResponse
@@ -96,6 +97,7 @@ import org.openapitools.client.models.OwnCapability
 import org.openapitools.client.models.PermissionRequestEvent
 import org.openapitools.client.models.QueryMembersResponse
 import org.openapitools.client.models.ReactionResponse
+import org.openapitools.client.models.StartBroadcastingResponse
 import org.openapitools.client.models.StopLiveResponse
 import org.openapitools.client.models.UnblockedUserEvent
 import org.openapitools.client.models.UpdateCallResponse
@@ -1068,6 +1070,24 @@ public class CallState(
 
     fun updateFromResponse(result: GoLiveResponse) {
         updateFromResponse(result.call)
+    }
+
+    fun updateFromResponse(response: StartBroadcastingResponse) {
+        val curEgress = _egress.value
+        logger.d { "[updateFromResponse] response: $response, curEgress: $curEgress" }
+        val newEgress = curEgress?.copy(
+            broadcasting = true,
+            hls = curEgress.hls?.copy(
+                playlistUrl = response.playlistUrl,
+            ) ?: EgressHLSResponse(playlistUrl = response.playlistUrl),
+        ) ?: EgressResponse(
+            broadcasting = true,
+            rtmps = emptyList(),
+            hls = EgressHLSResponse(playlistUrl = response.playlistUrl),
+        )
+        logger.v { "[updateFromResponse] newEgress: $newEgress" }
+        _egress.value = newEgress
+        _broadcasting.value = true
     }
 }
 

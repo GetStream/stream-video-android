@@ -174,7 +174,6 @@ public class Call(
         team: String? = null,
         ring: Boolean = false,
         notify: Boolean = false,
-
     ): Result<GetOrCreateCallResponse> {
         val response = if (members != null) {
             clientImpl.getOrCreateCallFullMembers(
@@ -560,6 +559,9 @@ public class Call(
 
     suspend fun startHLS(): Result<Any> {
         return clientImpl.startBroadcasting(type, id)
+            .onSuccess {
+                state.updateFromResponse(it)
+            }
     }
 
     suspend fun stopHLS(): Result<Any> {
