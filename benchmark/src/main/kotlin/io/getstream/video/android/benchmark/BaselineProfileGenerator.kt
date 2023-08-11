@@ -38,6 +38,7 @@ internal class BaselineProfileGenerator {
             packageName = packageName,
             stableIterations = 2,
             maxIterations = 8,
+            includeInStartupProfile = true,
         ) {
             startActivityAndWait()
             device.waitForIdle()

@@ -37,7 +37,7 @@ android {
     }
 
     defaultConfig {
-        minSdk = 23
+        minSdk = Configuration.minSdk
         targetSdk = Configuration.targetSdk
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         testInstrumentationRunnerArguments["androidx.benchmark.suppressErrors"] = "EMULATOR"
@@ -54,8 +54,11 @@ android {
         create("benchmark") {
             // Keep the build type debuggable so we can attach a debugger if needed.
             isDebuggable = true
+            isMinifyEnabled = false
+            isShrinkResources = false
             signingConfig = signingConfigs.getByName("debug")
             matchingFallbacks.add("release")
+            proguardFiles("benchmark-rules.pro")
             buildConfigField("Boolean", "BENCHMARK", "true")
         }
     }
@@ -64,9 +67,13 @@ android {
     productFlavors {
         create("dogfooding") {
             dimension = "environment"
+            proguardFiles("benchmark-rules.pro")
+            buildConfigField("Boolean", "BENCHMARK", "true")
         }
         create("production") {
             dimension = "environment"
+            proguardFiles("benchmark-rules.pro")
+            buildConfigField("Boolean", "BENCHMARK", "true")
         }
     }
 

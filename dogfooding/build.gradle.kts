@@ -103,9 +103,12 @@ android {
             buildConfigField("Boolean", "BENCHMARK", "false")
         }
         create("benchmark") {
+            isDebuggable = true
+            isMinifyEnabled = false
+            isShrinkResources = false
             signingConfig = signingConfigs.getByName("debug")
             matchingFallbacks += listOf("release")
-            isDebuggable = false
+            proguardFiles("benchmark-rules.pro")
             buildConfigField("Boolean", "BENCHMARK", "true")
         }
     }
@@ -128,6 +131,10 @@ android {
 
     lint {
         baseline = file("lint-baseline.xml")
+    }
+
+    baselineProfile {
+        mergeIntoMain = true
     }
 
     playConfigs {
