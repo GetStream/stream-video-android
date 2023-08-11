@@ -799,7 +799,6 @@ internal class StreamVideoImpl internal constructor(
         }
     }
     suspend fun startBroadcasting(type: String, id: String): Result<StartBroadcastingResponse> {
-
         logger.d { "[startBroadcasting] callCid: $type $id" }
 
         return wrapAPICall { connectionModule.api.startBroadcasting(type, id) }

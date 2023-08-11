@@ -85,8 +85,8 @@ import org.openapitools.client.models.CallStateResponseFields
 import org.openapitools.client.models.CallUpdatedEvent
 import org.openapitools.client.models.ConnectedEvent
 import org.openapitools.client.models.CustomVideoEvent
-import org.openapitools.client.models.EgressResponse
 import org.openapitools.client.models.EgressHLSResponse
+import org.openapitools.client.models.EgressResponse
 import org.openapitools.client.models.GetCallResponse
 import org.openapitools.client.models.GetOrCreateCallResponse
 import org.openapitools.client.models.GoLiveResponse
