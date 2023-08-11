@@ -15,6 +15,7 @@ class AndroidLibraryConventionPlugin : Plugin<Project> {
             pluginManager.apply("org.jetbrains.kotlin.android")
             pluginManager.apply("binary-compatibility-validator")
             pluginManager.apply("org.jetbrains.dokka")
+            pluginManager.apply("androidx.baselineprofile")
 
             extensions.configure<LibraryExtension> {
                 configureKotlinAndroid(this)
@@ -29,6 +30,10 @@ class AndroidLibraryConventionPlugin : Plugin<Project> {
 //                kotlinOptions {
 //                    freeCompilerArgs = freeCompilerArgs + listOf("-Xexplicit-api=strict")
 //                }
+
+                dependencies {
+                    add("baselineProfile", project(":benchmark"))
+                }
             }
         }
     }
