@@ -134,7 +134,7 @@ public fun CallLobby(
 
     DefaultPermissionHandler(videoPermission = permissions)
 
-    MediaPiPLifecycle(call = call, pipEnteringDuration = 0)
+    MediaPiPLifecycle(call = call)
 
     Column(modifier = modifier) {
         Box(

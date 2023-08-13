@@ -16,24 +16,21 @@
 
 package io.getstream.video.android.compose.lifecycle
 
+import android.app.Activity
+import android.app.Application
+import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLifecycleOwner
-import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.LifecycleOwner
 import io.getstream.log.StreamLog
 import io.getstream.video.android.compose.pip.enterPictureInPicture
+import io.getstream.video.android.compose.pip.findActivity
 import io.getstream.video.android.compose.pip.isInPictureInPictureMode
 import io.getstream.video.android.core.Call
-import kotlinx.coroutines.delay
 
 /**
  * Register a call media lifecycle that controls camera and microphone depending on lifecycles.
@@ -43,56 +40,66 @@ import kotlinx.coroutines.delay
  * - camera/microphone will be enabled if the lifecycle is onResumed, and not on the PIP mode.
  *
  * @param call The call includes states and will be rendered with participants.
- * @param pipEnteringDuration The duration requires to be engaged in Picture-In-Picture mode.
  */
 @Composable
 public fun MediaPiPLifecycle(
     call: Call,
     enableInPictureInPicture: Boolean = false,
-    pipEnteringDuration: Long = 250,
 ) {
     val context = LocalContext.current
-    val lifecycle = LocalLifecycleOwner.current.lifecycle
-    var latestLifecycleEvent by remember { mutableStateOf(Lifecycle.Event.ON_ANY) }
-    DisposableEffect(lifecycle) {
-        val observer = LifecycleEventObserver { _, event ->
-            latestLifecycleEvent = event
-        }
-        lifecycle.addObserver(observer)
-        onDispose {
-            lifecycle.removeObserver(observer)
-        }
-    }
+    val lifecycleOwner: LifecycleOwner = LocalLifecycleOwner.current
+    val currentActivity: Activity? = LocalContext.current.findActivity()
 
-    if (latestLifecycleEvent == Lifecycle.Event.ON_PAUSE) {
-        LaunchedEffect(latestLifecycleEvent) {
-            delay(pipEnteringDuration)
-            val isInPictureInPicture = context.isInPictureInPictureMode
-            if (!isInPictureInPicture && !enableInPictureInPicture) {
-                call.camera.pause(fromUser = false)
-                call.microphone.pause(fromUser = false)
-            } else if (!isInPictureInPicture) {
-                Handler(Looper.getMainLooper()).post {
-                    try {
-                        // TODO: There's not way to onUserLeaveHint in Compose for now.
-                        // https://developer.android.com/reference/android/app/Activity#onUserLeaveHint()
-                        enterPictureInPicture(context = context, call = call)
-                    } catch (e: Exception) {
-                        StreamLog.d("MediaPiPLifecycle") { e.stackTraceToString() }
+    DisposableEffect(key1 = lifecycleOwner) {
+        // TODO: There's not way to onUserLeaveHint in Compose for now. The only thing
+        // that works so far is to listen to ActivityLifecycleCallbacks and enable PiP in
+        // onPause.
+        // https://developer.android.com/reference/android/app/Activity#onUserLeaveHint()
+        val application = (context.applicationContext as? Application)
+        val callbackListener = object : Application.ActivityLifecycleCallbacks {
+            override fun onActivityCreated(activity: Activity, savedInstanceState: Bundle?) { }
+
+            override fun onActivityStarted(activity: Activity) { }
+
+            override fun onActivityResumed(activity: Activity) {
+                if (activity == currentActivity) {
+                    val isInPictureInPicture = context.isInPictureInPictureMode
+                    if (!isInPictureInPicture && !enableInPictureInPicture) {
+                        call.camera.resume(fromUser = false)
+                        call.microphone.resume(fromUser = false)
                     }
                 }
             }
-        }
-    }
 
-    if (latestLifecycleEvent == Lifecycle.Event.ON_RESUME) {
-        LaunchedEffect(latestLifecycleEvent) {
-            delay(pipEnteringDuration)
-            val isInPictureInPicture = context.isInPictureInPictureMode
-            if (!isInPictureInPicture && !enableInPictureInPicture) {
-                call.camera.resume(fromUser = false)
-                call.microphone.resume(fromUser = false)
+            override fun onActivityPaused(activity: Activity) {
+                if (activity == currentActivity) {
+                    val isInPictureInPicture = context.isInPictureInPictureMode
+                    if (!isInPictureInPicture && !enableInPictureInPicture) {
+                        call.camera.pause(fromUser = false)
+                        call.microphone.pause(fromUser = false)
+                    } else if (!isInPictureInPicture) {
+                        Handler(Looper.getMainLooper()).post {
+                            try {
+                                enterPictureInPicture(context = context, call = call)
+                            } catch (e: Exception) {
+                                StreamLog.d("MediaPiPLifecycle") { e.stackTraceToString() }
+                            }
+                        }
+                    }
+                }
             }
+
+            override fun onActivityStopped(activity: Activity) { }
+
+            override fun onActivitySaveInstanceState(activity: Activity, outState: Bundle) { }
+
+            override fun onActivityDestroyed(activity: Activity) { }
+        }
+
+        application?.registerActivityLifecycleCallbacks(callbackListener)
+
+        onDispose {
+            application?.unregisterActivityLifecycleCallbacks(callbackListener)
         }
     }
 }
