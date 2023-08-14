@@ -303,7 +303,10 @@ internal class StreamVideoImpl internal constructor(
 
                 override fun stopped() {
                     // We should only disconnect if we were previously connected
-                    if (connectionModule.coordinatorSocket.connectionState.value != SocketState.NotConnected) {
+                    // Also don't disconnect the socket if we are in an active call
+                    if (connectionModule.coordinatorSocket.connectionState.value != SocketState.NotConnected &&
+                        state.activeCall.value == null
+                    ) {
                         connectionModule.coordinatorSocket.disconnect()
                     }
                 }
