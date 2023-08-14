@@ -210,7 +210,7 @@ private fun CallLobbyBody(
         // turn on camera and microphone by default
         LaunchedEffect(key1 = Unit) {
             delay(300)
-            if (BuildConfig.BENCHMARK) {
+            if (BuildConfig.BENCHMARK.toBoolean()) {
                 callLobbyViewModel.call.camera.disable()
                 callLobbyViewModel.call.microphone.disable()
             } else if (!localInspectionMode) {

@@ -94,6 +94,7 @@ import org.openapitools.client.models.SendEventRequest
 import org.openapitools.client.models.SendEventResponse
 import org.openapitools.client.models.SendReactionRequest
 import org.openapitools.client.models.SendReactionResponse
+import org.openapitools.client.models.StartBroadcastingResponse
 import org.openapitools.client.models.StopLiveResponse
 import org.openapitools.client.models.UnblockUserRequest
 import org.openapitools.client.models.UpdateCallMembersRequest
@@ -797,8 +798,7 @@ internal class StreamVideoImpl internal constructor(
             )
         }
     }
-
-    suspend fun startBroadcasting(type: String, id: String): Result<Unit> {
+    suspend fun startBroadcasting(type: String, id: String): Result<StartBroadcastingResponse> {
         logger.d { "[startBroadcasting] callCid: $type $id" }
 
         return wrapAPICall { connectionModule.api.startBroadcasting(type, id) }
