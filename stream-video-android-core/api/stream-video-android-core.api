@@ -2349,11 +2349,12 @@ public class io/getstream/video/android/core/socket/PersistentSocket : okhttp3/W
 	public final fun createSocket ()Lokhttp3/WebSocket;
 	public final fun disconnect ()V
 	public final fun getConnected ()Lkotlinx/coroutines/CancellableContinuation;
-	public final fun getConnectionId ()Ljava/lang/String;
+	public final fun getConnectionId ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun getConnectionState ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun getErrors ()Lkotlinx/coroutines/flow/MutableSharedFlow;
 	public final fun getEvents ()Lkotlinx/coroutines/flow/MutableSharedFlow;
 	public final fun getReconnectTimeout ()J
+	public final fun get_connectionId ()Lkotlinx/coroutines/flow/MutableStateFlow;
 	public final fun get_connectionState ()Lkotlinx/coroutines/flow/MutableStateFlow;
 	public fun onClosed (Lokhttp3/WebSocket;ILjava/lang/String;)V
 	public fun onClosing (Lokhttp3/WebSocket;ILjava/lang/String;)V
@@ -2366,7 +2367,6 @@ public class io/getstream/video/android/core/socket/PersistentSocket : okhttp3/W
 	public final fun reconnect (JLkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public static synthetic fun reconnect$default (Lio/getstream/video/android/core/socket/PersistentSocket;JLkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
 	public final fun setConnected (Lkotlinx/coroutines/CancellableContinuation;)V
-	public final fun setConnectionId (Ljava/lang/String;)V
 	public final fun setReconnectTimeout (J)V
 }
 
