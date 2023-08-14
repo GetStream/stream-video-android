@@ -1,10 +1,3 @@
-public final class io/getstream/video/android/model/BuildConfig {
-	public static final field BUILD_TYPE Ljava/lang/String;
-	public static final field DEBUG Z
-	public static final field LIBRARY_PACKAGE_NAME Ljava/lang/String;
-	public fun <init> ()V
-}
-
 public final class io/getstream/video/android/model/Device {
 	public static final field Companion Lio/getstream/video/android/model/Device$Companion;
 	public synthetic fun <init> (ILjava/lang/String;Ljava/lang/String;Ljava/lang/String;Lkotlinx/serialization/internal/SerializationConstructorMarker;)V
@@ -20,7 +13,7 @@ public final class io/getstream/video/android/model/Device {
 	public final fun getPushProviderName ()Ljava/lang/String;
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
-	public static final fun write$Self (Lio/getstream/video/android/model/Device;Lkotlinx/serialization/encoding/CompositeEncoder;Lkotlinx/serialization/descriptors/SerialDescriptor;)V
+	public static final synthetic fun write$Self (Lio/getstream/video/android/model/Device;Lkotlinx/serialization/encoding/CompositeEncoder;Lkotlinx/serialization/descriptors/SerialDescriptor;)V
 }
 
 public final class io/getstream/video/android/model/Device$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
@@ -67,7 +60,7 @@ public final class io/getstream/video/android/model/StreamCallId : android/os/Pa
 	public fun hashCode ()I
 	public final fun isValid ()Z
 	public fun toString ()Ljava/lang/String;
-	public static final fun write$Self (Lio/getstream/video/android/model/StreamCallId;Lkotlinx/serialization/encoding/CompositeEncoder;Lkotlinx/serialization/descriptors/SerialDescriptor;)V
+	public static final synthetic fun write$Self (Lio/getstream/video/android/model/StreamCallId;Lkotlinx/serialization/encoding/CompositeEncoder;Lkotlinx/serialization/descriptors/SerialDescriptor;)V
 	public fun writeToParcel (Landroid/os/Parcel;I)V
 }
 
@@ -133,7 +126,7 @@ public final class io/getstream/video/android/model/User {
 	public fun hashCode ()I
 	public final fun isValid ()Z
 	public fun toString ()Ljava/lang/String;
-	public static final fun write$Self (Lio/getstream/video/android/model/User;Lkotlinx/serialization/encoding/CompositeEncoder;Lkotlinx/serialization/descriptors/SerialDescriptor;)V
+	public static final synthetic fun write$Self (Lio/getstream/video/android/model/User;Lkotlinx/serialization/encoding/CompositeEncoder;Lkotlinx/serialization/descriptors/SerialDescriptor;)V
 }
 
 public final class io/getstream/video/android/model/User$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
@@ -179,7 +172,7 @@ public final class io/getstream/video/android/model/UserDevices {
 	public final fun getDevices ()Ljava/util/List;
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
-	public static final fun write$Self (Lio/getstream/video/android/model/UserDevices;Lkotlinx/serialization/encoding/CompositeEncoder;Lkotlinx/serialization/descriptors/SerialDescriptor;)V
+	public static final synthetic fun write$Self (Lio/getstream/video/android/model/UserDevices;Lkotlinx/serialization/encoding/CompositeEncoder;Lkotlinx/serialization/descriptors/SerialDescriptor;)V
 }
 
 public final class io/getstream/video/android/model/UserDevices$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
@@ -200,7 +193,7 @@ public final class io/getstream/video/android/model/UserDevices$Companion {
 public abstract class io/getstream/video/android/model/UserType {
 	public static final field Companion Lio/getstream/video/android/model/UserType$Companion;
 	public synthetic fun <init> (ILkotlinx/serialization/internal/SerializationConstructorMarker;)V
-	public static final fun write$Self (Lio/getstream/video/android/model/UserType;Lkotlinx/serialization/encoding/CompositeEncoder;Lkotlinx/serialization/descriptors/SerialDescriptor;)V
+	public static final synthetic fun write$Self (Lio/getstream/video/android/model/UserType;Lkotlinx/serialization/encoding/CompositeEncoder;Lkotlinx/serialization/descriptors/SerialDescriptor;)V
 }
 
 public final class io/getstream/video/android/model/UserType$Anonymous : io/getstream/video/android/model/UserType {

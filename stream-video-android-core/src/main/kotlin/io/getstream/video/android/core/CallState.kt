@@ -85,6 +85,7 @@ import org.openapitools.client.models.CallStateResponseFields
 import org.openapitools.client.models.CallUpdatedEvent
 import org.openapitools.client.models.ConnectedEvent
 import org.openapitools.client.models.CustomVideoEvent
+import org.openapitools.client.models.EgressHLSResponse
 import org.openapitools.client.models.EgressResponse
 import org.openapitools.client.models.GetCallResponse
 import org.openapitools.client.models.GetOrCreateCallResponse
@@ -96,6 +97,7 @@ import org.openapitools.client.models.OwnCapability
 import org.openapitools.client.models.PermissionRequestEvent
 import org.openapitools.client.models.QueryMembersResponse
 import org.openapitools.client.models.ReactionResponse
+import org.openapitools.client.models.StartBroadcastingResponse
 import org.openapitools.client.models.StopLiveResponse
 import org.openapitools.client.models.UnblockedUserEvent
 import org.openapitools.client.models.UpdateCallResponse
@@ -356,7 +358,7 @@ public class CallState(
         if (durationInMs == null) {
             null
         } else {
-            val date = Date(durationInMs ?: 0)
+            val date = Date(durationInMs)
             val dateFormat = SimpleDateFormat("HH:MM:SS", Locale.US)
             dateFormat.format(date)
         }
@@ -455,11 +457,11 @@ public class CallState(
         // TODO: Remove runBlocking and use standard Flow instead for mapping or use other approach
         val token = runBlocking { call.clientImpl.dataStore.userToken.firstOrNull() }
         val apiKey = runBlocking { call.clientImpl.dataStore.apiKey.firstOrNull() }
-        val streamKey = "$apiKey/$token"
-        // TODO: use the address when the server is updated
-        val overwriteUrl =
-            "rtmps://video-ingress-frankfurt-vi1.stream-io-video.com:443/${call.type}/${call.id}"
-        Ingress(rtmp = RTMP(address = overwriteUrl ?: "", streamKey = streamKey))
+        if (it != null) {
+            Ingress(rtmp = RTMP(address = it.rtmp.address, streamKey = "$apiKey/$token"))
+        } else {
+            null
+        }
     }
 
     private val userToSessionIdMap = participants.mapState { participants ->
@@ -1068,6 +1070,24 @@ public class CallState(
 
     fun updateFromResponse(result: GoLiveResponse) {
         updateFromResponse(result.call)
+    }
+
+    fun updateFromResponse(response: StartBroadcastingResponse) {
+        val curEgress = _egress.value
+        logger.d { "[updateFromResponse] response: $response, curEgress: $curEgress" }
+        val newEgress = curEgress?.copy(
+            broadcasting = true,
+            hls = curEgress.hls?.copy(
+                playlistUrl = response.playlistUrl,
+            ) ?: EgressHLSResponse(playlistUrl = response.playlistUrl),
+        ) ?: EgressResponse(
+            broadcasting = true,
+            rtmps = emptyList(),
+            hls = EgressHLSResponse(playlistUrl = response.playlistUrl),
+        )
+        logger.v { "[updateFromResponse] newEgress: $newEgress" }
+        _egress.value = newEgress
+        _broadcasting.value = true
     }
 }
 

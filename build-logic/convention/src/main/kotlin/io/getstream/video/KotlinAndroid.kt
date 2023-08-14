@@ -13,7 +13,7 @@ import org.jetbrains.kotlin.gradle.dsl.KotlinJvmOptions
  * Configure base Kotlin with Android options
  */
 internal fun Project.configureKotlinAndroid(
-    commonExtension: CommonExtension<*, *, *, *>,
+    commonExtension: CommonExtension<*, *, *, *, *>,
 ) {
     val libs = extensions.getByType<VersionCatalogsExtension>().named("libs")
 
@@ -29,17 +29,15 @@ internal fun Project.configureKotlinAndroid(
             // Treat all Kotlin warnings as errors (disabled by default)
             allWarningsAsErrors = properties["warningsAsErrors"] as? Boolean ?: false
 
-            // Set JVM target to 1.8
+            // Set JVM target to 11
             jvmTarget = libs.findVersion("jvmTarget").get().toString()
             freeCompilerArgs = freeCompilerArgs + listOf(
-                "-Xjvm-default=enable",
+                "-Xjvm-default=all",
                 "-opt-in=kotlin.RequiresOptIn",
                 "-opt-in=kotlinx.coroutines.ExperimentalCoroutinesApi",
-                "-opt-in=androidx.lifecycle.compose.ExperimentalLifecycleComposeApi",
                 "-opt-in=io.getstream.video.android.core.internal.InternalStreamVideoApi",
             )
         }
-
 
         lint {
             abortOnError = false
@@ -51,6 +49,6 @@ internal fun Project.configureKotlinAndroid(
   }
 }
 
-fun CommonExtension<*, *, *, *>.kotlinOptions(block: KotlinJvmOptions.() -> Unit) {
+fun CommonExtension<*, *, *, *, *>.kotlinOptions(block: KotlinJvmOptions.() -> Unit) {
     (this as ExtensionAware).extensions.configure("kotlinOptions", block)
 }

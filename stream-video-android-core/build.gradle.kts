@@ -72,6 +72,10 @@ android {
         buildConfigField("String", "STREAM_VIDEO_VERSION", "\"${Configuration.versionName}\"")
     }
 
+    buildFeatures {
+        buildConfig = true
+    }
+
     testOptions {
         unitTests {
             isIncludeAndroidResources = true
@@ -108,9 +112,16 @@ android {
         kotlin.srcDir("build/generated/source/services")
     }
 
-    packagingOptions {
+    packaging {
         exclude("META-INF/LICENSE.md")
         exclude("META-INF/LICENSE-notice.md")
+    }
+}
+
+baselineProfile {
+    filter {
+        include("io.getstream.video.android.core.**")
+        include("org.openapitools.client.**")
     }
 }
 
@@ -140,6 +151,7 @@ dependencies {
     implementation(libs.retrofit.moshi)
     implementation(libs.retrofit.scalars)
     implementation(libs.retrofit.wire.converter)
+    implementation(libs.okhttp)
     implementation(libs.okhttp.logging)
 
     implementation(libs.moshi)

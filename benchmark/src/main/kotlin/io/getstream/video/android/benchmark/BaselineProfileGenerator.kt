@@ -34,10 +34,11 @@ internal class BaselineProfileGenerator {
 
     @Test
     fun startup() =
-        baselineProfileRule.collectBaselineProfile(
+        baselineProfileRule.collect(
             packageName = packageName,
             stableIterations = 2,
             maxIterations = 8,
+            includeInStartupProfile = true,
         ) {
             startActivityAndWait()
             device.waitForIdle()

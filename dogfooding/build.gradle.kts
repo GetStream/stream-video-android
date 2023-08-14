@@ -17,6 +17,7 @@
 
 import com.android.build.api.variant.BuildConfigField
 import com.android.build.api.variant.ResValue
+import com.github.triplet.gradle.androidpublisher.ResolutionStrategy
 import io.getstream.video.android.Configuration
 import java.io.FileInputStream
 import java.util.*
@@ -29,6 +30,8 @@ plugins {
     id(libs.plugins.firebase.crashlytics.get().pluginId)
     id(libs.plugins.kotlin.serialization.get().pluginId)
     id(libs.plugins.hilt.get().pluginId)
+    id(libs.plugins.play.publisher.get().pluginId)
+    id(libs.plugins.baseline.profile.get().pluginId)
     kotlin("kapt")
 }
 
@@ -40,8 +43,8 @@ android {
         applicationId = "io.getstream.video.android"
         minSdk = Configuration.minSdk
         targetSdk = Configuration.targetSdk
-        versionCode = 2
-        versionName = "1.0.1"
+        versionCode = 1
+        versionName = Configuration.streamVideoCallGooglePlayVersion
         vectorDrawables {
             useSupportLibrary = true
         }
@@ -100,9 +103,12 @@ android {
             buildConfigField("Boolean", "BENCHMARK", "false")
         }
         create("benchmark") {
+            isDebuggable = true
+            isMinifyEnabled = false
+            isShrinkResources = false
             signingConfig = signingConfigs.getByName("debug")
             matchingFallbacks += listOf("release")
-            isDebuggable = false
+            proguardFiles("benchmark-rules.pro")
             buildConfigField("Boolean", "BENCHMARK", "true")
         }
     }
@@ -126,6 +132,27 @@ android {
     lint {
         baseline = file("lint-baseline.xml")
     }
+
+    baselineProfile {
+        mergeIntoMain = true
+    }
+
+    playConfigs {
+        val serviceAccountCredentialsFile: File = rootProject.file(".sign/service-account-credentials.json")
+        if (serviceAccountCredentialsFile.exists()) {
+            register("productionRelease") {
+                enabled.set(true)
+                serviceAccountCredentials.set(serviceAccountCredentialsFile)
+                track.set("internal")
+                defaultToAppBundles.set(true)
+                resolutionStrategy.set(ResolutionStrategy.AUTO)
+            }
+        }
+    }
+}
+
+play {
+    enabled.set(false)
 }
 
 androidComponents {
@@ -160,6 +187,14 @@ androidComponents {
                             ResValue("${it.value}"),
                         )
                     }
+            }
+
+            applicationVariant.outputs.forEach {
+                it.versionName.set(
+                    it.versionCode.map { playVersionCode ->
+                        "${Configuration.streamVideoCallGooglePlayVersion} ($playVersionCode)"
+                    }
+                )
             }
         }
     }
@@ -219,4 +254,6 @@ dependencies {
 
     // memory detection
     debugImplementation(libs.leakCanary)
+
+    baselineProfile(project(":benchmark"))
 }

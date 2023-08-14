@@ -110,6 +110,8 @@ Video roadmap and changelog is available [here](https://github.com/GetStream/pro
 - [X] Pagination on query members & query call endpoints (Daniel)
 - [X] Enable ice restarts for publisher and subscriber
 - [X] Ringing: Finish it, make testing easy and write docs for common changes (Daniel)
+- [X] Bug: Screensharing on Firefox has some issues when rendering on android (Daniel)
+- [X] Bug: Screensharing scaling and zoom doesn't work (Daniel)
 
 ### 0.4.0 milestone
 
@@ -120,7 +122,6 @@ Video roadmap and changelog is available [here](https://github.com/GetStream/pro
 - [ ] Audio & Video filters. Support  (Daniel)
 - [ ] Dynascale 2.0
 - [ ] Support participant.custom field which was previously ignored. ParticipantState line 216
-- [ ] Bug: Screensharing on Firefox has some issues when rendering on android (Daniel)
 - [ ] Call Analytics stateflow (Thierry)
 - [ ] Test coverage
 - [ ] Logging is too verbose (rtc is very noisy), clean it up to focus on the essential for info and higher

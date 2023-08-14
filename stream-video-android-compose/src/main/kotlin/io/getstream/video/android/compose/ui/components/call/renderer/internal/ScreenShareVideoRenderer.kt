@@ -17,7 +17,7 @@
 package io.getstream.video.android.compose.ui.components.call.renderer.internal
 
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -60,7 +60,7 @@ public fun ScreenShareVideoRenderer(
     Box(modifier = modifier) {
         VideoRenderer(
             modifier = zoomableModifier
-                .fillMaxSize()
+                .wrapContentSize()
                 .align(Alignment.Center),
             call = call,
             video = screenSharing,

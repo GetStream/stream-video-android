@@ -26,6 +26,7 @@ plugins {
 }
 
 android {
+    namespace = "io.getstream.video.android.app"
     compileSdk = Configuration.compileSdk
 
     defaultConfig {
@@ -60,6 +61,10 @@ android {
                     buildType.buildConfigField("String", "${it.key}", "\"${it.value}\"")
                 }
         }
+    }
+
+    buildFeatures {
+        buildConfig = true
     }
 
     lint {
