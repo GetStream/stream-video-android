@@ -17,6 +17,6 @@
 package io.getstream.video.android.core.lifecycle
 
 internal interface LifecycleHandler {
-    fun resume()
+    fun started()
     fun stopped()
 }

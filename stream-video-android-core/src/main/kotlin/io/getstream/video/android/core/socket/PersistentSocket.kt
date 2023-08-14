@@ -377,7 +377,14 @@ public open class PersistentSocket<T>(
     override fun onFailure(webSocket: WebSocket, t: Throwable, response: Response?) {
         logger.d { "[onFailure] t: $t, response: $response" }
 
-        handleError(t)
+        if (_connectionState.value == SocketState.DisconnectedByRequest) {
+            // Do not handle failures after we are disconnected by request (intentionally)
+            // The websocket can sometimes throw an EOFException after we disconnected and this
+            // would be handled as recoverable error and we would reconnect.
+            logger.d { "[onFailure] Ignoring the error - already disconnect. t: $t" }
+        } else {
+            handleError(t)
+        }
     }
 
     internal fun sendHealthCheck() {
