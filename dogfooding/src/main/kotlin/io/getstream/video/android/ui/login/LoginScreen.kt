@@ -173,7 +173,7 @@ private fun LoginContent(
                 ),
             )
 
-            if (BuildConfig.BENCHMARK) {
+            if (BuildConfig.BENCHMARK.toBoolean()) {
                 StreamButton(
                     modifier = Modifier
                         .fillMaxWidth()
