@@ -3,7 +3,7 @@ public final class io/getstream/video/android/compose/lifecycle/CallLifecycleKt 
 }
 
 public final class io/getstream/video/android/compose/lifecycle/MediaPiPLifecycleKt {
-	public static final fun MediaPiPLifecycle (Lio/getstream/video/android/core/Call;ZJLandroidx/compose/runtime/Composer;II)V
+	public static final fun MediaPiPLifecycle (Lio/getstream/video/android/core/Call;ZLandroidx/compose/runtime/Composer;II)V
 }
 
 public final class io/getstream/video/android/compose/permission/CallPermissionsKt {
