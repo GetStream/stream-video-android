@@ -155,6 +155,7 @@ public final class io/getstream/video/android/core/CallState {
 	public final fun updateFromResponse (Lorg/openapitools/client/models/GoLiveResponse;)V
 	public final fun updateFromResponse (Lorg/openapitools/client/models/JoinCallResponse;)V
 	public final fun updateFromResponse (Lorg/openapitools/client/models/QueryMembersResponse;)V
+	public final fun updateFromResponse (Lorg/openapitools/client/models/StartBroadcastingResponse;)V
 	public final fun updateFromResponse (Lorg/openapitools/client/models/StopLiveResponse;)V
 	public final fun updateFromResponse (Lorg/openapitools/client/models/UpdateCallResponse;)V
 	public final fun updateParticipant (Lio/getstream/video/android/core/ParticipantState;)V
