@@ -34,6 +34,7 @@ import io.getstream.video.android.core.events.ChangePublishQualityEvent
 import io.getstream.video.android.core.events.ICETrickleEvent
 import io.getstream.video.android.core.events.JoinCallResponseEvent
 import io.getstream.video.android.core.events.ParticipantJoinedEvent
+import io.getstream.video.android.core.events.ParticipantLeftEvent
 import io.getstream.video.android.core.events.SfuDataEvent
 import io.getstream.video.android.core.events.SubscriberOfferEvent
 import io.getstream.video.android.core.events.TrackPublishedEvent
@@ -88,6 +89,7 @@ import org.webrtc.RtpTransceiver
 import org.webrtc.SessionDescription
 import retrofit2.HttpException
 import stream.video.sfu.models.ICETrickle
+import stream.video.sfu.models.Participant
 import stream.video.sfu.models.PeerType
 import stream.video.sfu.models.TrackInfo
 import stream.video.sfu.models.TrackType
@@ -624,6 +626,8 @@ public class RtcSession internal constructor(
             }
         tracks.clear()
 
+        trackDimensions.value = emptyMap()
+
         // disconnect the socket and clean it up
         sfuConnectionModule.sfuSocket.cleanup()
     }
@@ -993,12 +997,41 @@ public class RtcSession internal constructor(
                         // the UI layer will automatically trigger updateParticipantsSubscriptions
                     }
 
+                    is ParticipantLeftEvent -> {
+                        removeParticipantTracks(event.participant)
+                        removeParticipantTrackDimensions(event.participant)
+                    }
+
                     else -> {
                         logger.d { "[onRtcEvent] skipped event: $event" }
                     }
                 }
             }
         }
+    }
+
+    private fun removeParticipantTracks(participant: Participant) {
+        tracks.remove(participant.session_id).also {
+            if (it == null) {
+                logger.e {
+                    "[handleEvent] Failed to remove track on ParticipantLeft " +
+                        "- track ID: ${participant.session_id}). Tracks: $tracks"
+                }
+            }
+        }
+    }
+
+    private fun removeParticipantTrackDimensions(participant: Participant) {
+        val newTrackDimensions = trackDimensions.value.toMutableMap()
+        newTrackDimensions.remove(participant.session_id).also {
+            if (it == null) {
+                logger.e {
+                    "[handleEvent] Failed to remove track dimension on ParticipantLeft " +
+                        "- track ID: ${participant.session_id}). TrackDimensions: $newTrackDimensions"
+                }
+            }
+        }
+        trackDimensions.value = newTrackDimensions
     }
 
     /**
