@@ -90,7 +90,8 @@ public open class PersistentSocket<T>(
     val connectionState: StateFlow<SocketState> = _connectionState
 
     /** the connection id */
-    var connectionId: String = ""
+    val _connectionId: MutableStateFlow<String?> = MutableStateFlow(null)
+    val connectionId: StateFlow<String?> = _connectionId
 
     /** Continuation if the socket successfully connected and we've authenticated */
     lateinit var connected: CancellableContinuation<T>
@@ -146,7 +147,7 @@ public open class PersistentSocket<T>(
         continuationCompleted = false
         _connectionState.value = SocketState.DisconnectedByRequest
         socket?.close(CODE_CLOSE_SOCKET_FROM_CLIENT, "Connection close by client")
-        connectionId = ""
+        _connectionId.value = null
         healthMonitor.stop()
         networkStateProvider.unsubscribe(networkStateListener)
     }
@@ -233,7 +234,7 @@ public open class PersistentSocket<T>(
 
             // TODO: This logic is specific to the Coordinator socket, move it
             if (processedEvent is ConnectedEvent) {
-                connectionId = processedEvent.connectionId
+                _connectionId.value = processedEvent.connectionId
                 _connectionState.value = SocketState.Connected(processedEvent)
                 if (!continuationCompleted) {
                     continuationCompleted = true

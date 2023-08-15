@@ -61,9 +61,11 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.withContext
+import kotlinx.coroutines.withTimeoutOrNull
 import kotlinx.serialization.json.Json
 import okhttp3.Callback
 import okhttp3.Request
@@ -109,6 +111,8 @@ import retrofit2.HttpException
 import java.util.*
 import kotlin.coroutines.Continuation
 import kotlin.coroutines.resumeWithException
+
+internal const val WAIT_FOR_CONNECTION_ID_TIMEOUT = 5000L
 
 /**
  * @param lifecycle The lifecycle used to observe changes in the process
@@ -494,7 +498,7 @@ internal class StreamVideoImpl internal constructor(
             connectionModule.api.getCall(
                 type,
                 id,
-                connectionId = connectionModule.coordinatorSocket.connectionId,
+                connectionId = waitForConnectionId(),
             )
         }
     }
@@ -558,10 +562,21 @@ internal class StreamVideoImpl internal constructor(
                     ring = ring,
                     notify = notify,
                 ),
-                connectionId = connectionModule.coordinatorSocket.connectionId,
+                connectionId = waitForConnectionId(),
             )
         }
     }
+
+    private suspend fun waitForConnectionId(): String? =
+        // The Coordinator WS connection can take a moment to set up - this can be an issue
+        // if we jump right into the call from a deep link and we connect the call quickly.
+        // We return null on timeout. The Coordinator WS will update the connectionId later
+        // after it reconnects (it will call queryCalls)
+        withTimeoutOrNull(timeMillis = WAIT_FOR_CONNECTION_ID_TIMEOUT) {
+            connectionModule.coordinatorSocket.connectionId.first { it != null }
+        }.also {
+            if (it == null) { logger.w { "[waitForConnectionId] connectionId timeout - returning null" } }
+        }
 
     internal suspend fun inviteUsers(
         type: String,
@@ -624,7 +639,7 @@ internal class StreamVideoImpl internal constructor(
                 type,
                 id,
                 joinCallRequest,
-                connectionModule.coordinatorSocket.connectionId,
+                waitForConnectionId(),
             )
         }
         return result
@@ -769,9 +784,8 @@ internal class StreamVideoImpl internal constructor(
             next = next,
             watch = watch,
         )
-        val connectionId = connectionModule.coordinatorSocket.connectionId
         val result = wrapAPICall {
-            connectionModule.api.queryCalls(request, connectionId)
+            connectionModule.api.queryCalls(request, waitForConnectionId())
         }
         if (result.isSuccess) {
             // update state for these calls

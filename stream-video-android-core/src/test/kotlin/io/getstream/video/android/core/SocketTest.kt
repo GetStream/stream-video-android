@@ -149,7 +149,7 @@ class CoordinatorSocketTest : SocketTestBase() {
         val connectionStateItem = connectionState.awaitItem()
 
         assertThat(connectionStateItem).isInstanceOf(Connected::class.java)
-        assertThat(socket.connectionId).isNotEmpty()
+        assertThat(socket.connectionId.value).isNotEmpty()
     }
 
     @Test
