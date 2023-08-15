@@ -27,6 +27,8 @@ import io.getstream.result.Result.Success
 import io.getstream.video.android.core.call.connection.StreamPeerConnectionFactory
 import io.getstream.video.android.core.errors.VideoErrorCode
 import io.getstream.video.android.core.events.VideoEventListener
+import io.getstream.video.android.core.filter.Filters
+import io.getstream.video.android.core.filter.toMap
 import io.getstream.video.android.core.internal.InternalStreamVideoApi
 import io.getstream.video.android.core.internal.module.ConnectionModule
 import io.getstream.video.android.core.lifecycle.LifecycleHandler
@@ -335,6 +337,23 @@ internal class StreamVideoImpl internal constructor(
                     logger.e(it) { "failure on socket connection" }
                 } else {
                     logger.e(it) { "failure on socket connection" }
+                }
+            }
+        }
+
+        scope.launch {
+            connectionModule.coordinatorSocket.connectionState.collect { it ->
+                // If the socket is reconnected then we have a new connection ID.
+                // We need to re-watch every watched call with the new connection ID
+                // (otherwise the WS events will stop)
+                val watchedCalls = calls
+                if (it is SocketState.Connected && watchedCalls.isNotEmpty()) {
+                    val filter = Filters.`in`("cid", watchedCalls.values.map { it.cid }).toMap()
+                    queryCalls(filters = filter, watch = true).also {
+                        if (it is Failure) {
+                            logger.e { "Failed to re-watch calls (${it.value}" }
+                        }
+                    }
                 }
             }
         }
