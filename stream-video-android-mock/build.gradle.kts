@@ -40,6 +40,12 @@ android {
     resourcePrefix = "stream_video_"
 }
 
+baselineProfile {
+    filter {
+        include("io.getstream.video.android.model.**")
+    }
+}
+
 dependencies {
     api(project(":stream-video-android-core"))
     implementation(project(":stream-video-android-datastore"))
