@@ -85,6 +85,7 @@ private fun UiDevice.navigateFromJoinCallToLobby() {
 
 private fun UiDevice.navigateFromLobbyToCall() {
     waitForObject(By.text(getPermissionText()), 5_000)?.click()
+    waitForObject(By.text(getPermissionText()), 5_000)?.click()
 
     wait(Until.hasObject(By.res("call_lobby")), 15_000)
     wait(Until.hasObject(By.res("participant_video_renderer")), 15_000)
@@ -106,6 +107,14 @@ private fun UiDevice.waitForObject(selector: BySelector, timeout: Long = 5_000):
         return findObject(selector)
     }
     return null
+}
+
+private fun getPermissionText(): String {
+    return when {
+        Build.VERSION.SDK_INT <= 28 -> "ALLOW"
+        Build.VERSION.SDK_INT == 29 -> "Allow only while using the app"
+        else -> "While using the app"
+    }
 }
 
 private fun getPermissionText(): String {
