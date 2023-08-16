@@ -62,6 +62,7 @@ public data class StreamDimens(
     public val callAppBarCenterContentSpacingEnd: Dp,
     public val callAppBarTrailingContentSpacingStart: Dp,
     public val callAppBarTrailingContentSpacingEnd: Dp,
+    public val callAppBarRecordingIndicatorSize: Dp,
     public val controlActionsBottomPadding: Dp,
     public val controlActionsHeight: Dp,
     public val controlActionsButtonSize: Dp,
@@ -180,6 +181,9 @@ public data class StreamDimens(
             ),
             callAppBarTrailingContentSpacingEnd = dimensionResource(
                 id = R.dimen.stream_video_callAppBarTrailingContentSpacingEnd,
+            ),
+            callAppBarRecordingIndicatorSize = dimensionResource(
+                id = R.dimen.stream_video_callAppBarRecordingIndicatorSize,
             ),
             controlActionsButtonSize = dimensionResource(
                 id = R.dimen.stream_video_controlActionsButtonSize,

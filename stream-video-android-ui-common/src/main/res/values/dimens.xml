@@ -36,6 +36,7 @@
     <dimen name="stream_video_callAppBarCenterContentSpacingEnd">0dp</dimen>
     <dimen name="stream_video_callAppBarTrailingContentSpacingStart">8dp</dimen>
     <dimen name="stream_video_callAppBarTrailingContentSpacingEnd">8dp</dimen>
+    <dimen name="stream_video_callAppBarRecordingIndicatorSize">18dp</dimen>
     <dimen name="stream_video_controlActionsBottomPadding">6dp</dimen>
     <dimen name="stream_video_controlActionsHeight">96dp</dimen>
     <dimen name="stream_video_controlActionsButtonSize">50dp</dimen>
