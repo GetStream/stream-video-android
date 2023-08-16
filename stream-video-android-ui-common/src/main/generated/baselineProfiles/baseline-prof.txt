@@ -1,0 +1,9 @@
+Lio/getstream/video/android/ui/common/R$array;
+Lio/getstream/video/android/ui/common/R$color;
+Lio/getstream/video/android/ui/common/R$dimen;
+Lio/getstream/video/android/ui/common/R$drawable;
+Lio/getstream/video/android/ui/common/R$string;
+Lio/getstream/video/android/ui/common/util/ColorUtilsKt;
+HSPLio/getstream/video/android/ui/common/util/ColorUtilsKt;->adjustColorBrightness(IF)I
+Lio/getstream/video/android/ui/common/util/ResourcesKt;
+HSPLio/getstream/video/android/ui/common/util/ResourcesKt;->getFloatResource(Landroid/content/Context;I)F

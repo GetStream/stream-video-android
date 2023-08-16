@@ -190,9 +190,9 @@ dependencies {
     androidTestImplementation(libs.truth)
     androidTestImplementation(libs.mockk)
     androidTestImplementation(libs.androidx.test.core)
+    androidTestImplementation(libs.androidx.test.rules)
     androidTestImplementation(libs.androidx.test.junit)
     androidTestImplementation(libs.kotlinx.coroutines.test)
     androidTestImplementation(libs.kotlin.test.junit)
     androidTestImplementation(libs.turbine)
-    androidTestImplementation("androidx.test:rules:1.5.0")
 }
