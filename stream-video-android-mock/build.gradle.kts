@@ -42,7 +42,7 @@ android {
 
 baselineProfile {
     filter {
-        include("io.getstream.video.android.mock.**")
+        include("io.getstream.video.android.model.**")
     }
 }
 
