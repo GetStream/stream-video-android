@@ -70,15 +70,21 @@ class LoginViewModel @Inject constructor(
     }
 
     private fun signInInSuccess(email: String) = flow {
-        try {
-            val response = StreamVideoNetwork.tokenService.fetchToken(
-                userId = email,
-                apiKey = API_KEY,
-            )
-            emit(LoginUiState.SignInComplete(response))
-        } catch (exception: Throwable) {
-            emit(LoginUiState.SignInFailure(exception.message ?: "General error"))
-            streamLog { "Failed to fetch token - cause: $exception" }
+        // skip login if we are already logged in (use has navigated back)
+        if (StreamVideo.isInstalled) {
+            emit(LoginUiState.AlreadyLoggedIn)
+        } else {
+            try {
+                val response = StreamVideoNetwork.tokenService.fetchToken(
+                    userId = email,
+                    apiKey = API_KEY,
+                )
+
+                emit(LoginUiState.SignInComplete(response))
+            } catch (exception: Throwable) {
+                emit(LoginUiState.SignInFailure(exception.message ?: "General error"))
+                streamLog { "Failed to fetch token - cause: $exception" }
+            }
         }
     }.flowOn(Dispatchers.IO)
 
@@ -144,6 +150,8 @@ sealed interface LoginUiState {
     object Loading : LoginUiState
 
     object GoogleSignIn : LoginUiState
+
+    object AlreadyLoggedIn : LoginUiState
 
     data class SignInComplete(val tokenResponse: TokenResponse) : LoginUiState
 

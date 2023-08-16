@@ -296,6 +296,10 @@ private fun HandleLoginUiStates(
                 navigateToCallJoin.invoke()
             }
 
+            is LoginUiState.AlreadyLoggedIn -> {
+                navigateToCallJoin.invoke()
+            }
+
             is LoginUiState.SignInFailure -> {
                 Toast.makeText(
                     context,

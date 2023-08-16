@@ -412,7 +412,7 @@ internal class StreamVideoImpl internal constructor(
                     dataStore.updateUserToken(newToken)
                     connectionModule.updateToken(newToken)
                     // quickly reconnect with the new token
-                    socketImpl.reconnect(0)
+                    socketImpl.reconnect(0, e)
                     Failure(Error.GenericError("initialize error. trying to reconnect."))
                 } else {
                     throw e
