@@ -167,7 +167,8 @@ public class RtcSession internal constructor(
     private var subscriptionSyncJob: Job? = null
     private var muteStateSyncJob: Job? = null
 
-    private var transceiverInitialized: Boolean = false
+    private var videoTransceiverInitialized: Boolean = false
+    private var audioTransceiverInitialized: Boolean = false
     private var errorJob: Job? = null
     private var eventJob: Job? = null
     internal val socket by lazy { sfuConnectionModule.sfuSocket }
@@ -374,19 +375,31 @@ public class RtcSession internal constructor(
         connectRtc()
     }
 
-    fun initializeVideoTransceiver() {
-        if (!transceiverInitialized) {
+    private fun initializeVideoTransceiver() {
+        if (!videoTransceiverInitialized) {
             publisher?.let {
                 it.addVideoTransceiver(
                     call.mediaManager.videoTrack,
                     listOf(buildTrackId(TrackType.TRACK_TYPE_VIDEO)),
                 )
-                transceiverInitialized = true
+                videoTransceiverInitialized = true
             }
         }
     }
 
-    suspend fun listenToMediaChanges() {
+    private fun initialiseAudioTransceiver() {
+        if (!audioTransceiverInitialized) {
+            publisher?.let {
+                it.addAudioTransceiver(
+                    call.mediaManager.audioTrack,
+                    listOf(buildTrackId(TrackType.TRACK_TYPE_AUDIO)),
+                )
+                audioTransceiverInitialized = true
+            }
+        }
+    }
+
+    private suspend fun listenToMediaChanges() {
         coroutineScope.launch {
             // update the tracks when the camera or microphone status changes
             call.mediaManager.camera.status.collectLatest {
@@ -402,6 +415,10 @@ public class RtcSession internal constructor(
             call.mediaManager.microphone.status.collectLatest {
                 // set the mute /unumute status
                 setMuteState(isEnabled = it == DeviceStatus.Enabled, TrackType.TRACK_TYPE_AUDIO)
+
+                if (it == DeviceStatus.Enabled) {
+                    initialiseAudioTransceiver()
+                }
             }
         }
     }
@@ -551,10 +568,10 @@ public class RtcSession internal constructor(
                         audio = call.mediaManager.audioTrack,
                     ),
                 )
-                publisher.addAudioTransceiver(
-                    call.mediaManager.audioTrack,
-                    listOf(buildTrackId(TrackType.TRACK_TYPE_AUDIO)),
-                )
+                if (call.mediaManager.microphone.status.value == DeviceStatus.Enabled) {
+                    initialiseAudioTransceiver()
+                }
+
                 // step 5 create the video track
                 setLocalTrack(
                     TrackType.TRACK_TYPE_VIDEO,
@@ -960,26 +977,12 @@ public class RtcSession internal constructor(
                     is ChangePublishQualityEvent -> updatePublishQuality(event)
 
                     is TrackPublishedEvent -> {
-                        // Make sure that we respect the user's choice for video/microphone
-                        // if the track is published (e.g. when the call is first started)
-                        val videoEnabled = if (event.userId == clientImpl.userId) {
-                            call.camera.isEnabled.value
-                        } else {
-                            true
-                        }
-
-                        val audioEnabled = if (event.userId == clientImpl.userId) {
-                            call.microphone.isEnabled.value
-                        } else {
-                            true
-                        }
-
                         updatePublishState(
                             userId = event.userId,
                             sessionId = event.sessionId,
                             trackType = event.trackType,
-                            videoEnabled = videoEnabled,
-                            audioEnabled = audioEnabled,
+                            videoEnabled = true,
+                            audioEnabled = true,
                         )
                     }
 
