@@ -820,8 +820,6 @@ public final class io/getstream/video/android/core/call/RtcSession {
 	public final fun handleEvent (Lorg/openapitools/client/models/VideoEvent;)V
 	public final fun handleIceTrickle (Lio/getstream/video/android/core/events/ICETrickleEvent;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public final fun handleSubscriberOffer (Lio/getstream/video/android/core/events/SubscriberOfferEvent;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
-	public final fun initializeVideoTransceiver ()V
-	public final fun listenToMediaChanges (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public final fun mangleSdp (Lorg/webrtc/SessionDescription;)Lorg/webrtc/SessionDescription;
 	public final fun onNegotiationNeeded (Lio/getstream/video/android/core/call/connection/StreamPeerConnection;Lio/getstream/video/android/core/model/StreamPeerType;)V
 	public final fun reconnect (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
