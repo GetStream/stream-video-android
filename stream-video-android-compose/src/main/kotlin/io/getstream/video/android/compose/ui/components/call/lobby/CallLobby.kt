@@ -125,6 +125,8 @@ public fun CallLobby(
             actions = buildDefaultLobbyControlActions(
                 call = call,
                 onCallAction = onCallAction,
+                isCameraEnabled = isCameraEnabled,
+                isMicrophoneEnabled = isMicrophoneEnabled,
             ),
             spaceBy = VideoTheme.dimens.lobbyControlActionsItemSpaceBy,
         )

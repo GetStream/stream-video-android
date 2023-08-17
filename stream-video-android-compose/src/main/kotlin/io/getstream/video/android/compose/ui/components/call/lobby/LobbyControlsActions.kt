@@ -20,12 +20,9 @@ import android.content.res.Configuration
 import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalInspectionMode
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.call.controls.actions.ToggleCameraAction
 import io.getstream.video.android.compose.ui.components.call.controls.actions.ToggleMicrophoneAction
@@ -42,6 +39,16 @@ import io.getstream.video.android.core.call.state.CallAction
 public fun buildDefaultLobbyControlActions(
     call: Call,
     onCallAction: (CallAction) -> Unit,
+    isCameraEnabled: Boolean = if (LocalInspectionMode.current) {
+        true
+    } else {
+        call.camera.isEnabled.value
+    },
+    isMicrophoneEnabled: Boolean = if (LocalInspectionMode.current) {
+        true
+    } else {
+        call.microphone.isEnabled.value
+    },
 ): List<@Composable () -> Unit> {
     val orientation = LocalConfiguration.current.orientation
 
@@ -49,17 +56,6 @@ public fun buildDefaultLobbyControlActions(
         Modifier.size(VideoTheme.dimens.controlActionsButtonSize)
     } else {
         Modifier.size(VideoTheme.dimens.landscapeControlActionsButtonSize)
-    }
-
-    val isCameraEnabled by if (LocalInspectionMode.current) {
-        remember { mutableStateOf(true) }
-    } else {
-        call.camera.isEnabled.collectAsStateWithLifecycle()
-    }
-    val isMicrophoneEnabled by if (LocalInspectionMode.current) {
-        remember { mutableStateOf(true) }
-    } else {
-        call.microphone.isEnabled.collectAsStateWithLifecycle()
     }
 
     return listOf(

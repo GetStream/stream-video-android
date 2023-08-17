@@ -195,16 +195,16 @@ private fun CallLobbyBody(
 
         Spacer(modifier = Modifier.height(20.dp))
 
-        val localInspectionMode = LocalInspectionMode.current
         val isCameraEnabled: Boolean by if (LocalInspectionMode.current) {
             remember { mutableStateOf(true) }
         } else {
-            call.camera.isEnabled.collectAsState()
+            callLobbyViewModel.cameraEnabled.collectAsState(initial = false)
         }
+
         val isMicrophoneEnabled by if (LocalInspectionMode.current) {
             remember { mutableStateOf(true) }
         } else {
-            call.microphone.isEnabled.collectAsState()
+            callLobbyViewModel.microphoneEnabled.collectAsState(initial = false)
         }
 
         // turn on camera and microphone by default
@@ -213,9 +213,6 @@ private fun CallLobbyBody(
             if (BuildConfig.BENCHMARK.toBoolean()) {
                 callLobbyViewModel.call.camera.disable()
                 callLobbyViewModel.call.microphone.disable()
-            } else if (!localInspectionMode) {
-                callLobbyViewModel.call.camera.enable()
-                callLobbyViewModel.call.microphone.enable()
             }
         }
 
@@ -233,13 +230,19 @@ private fun CallLobbyBody(
             },
         )
 
-        LobbyDescription(callLobbyViewModel = callLobbyViewModel)
+        LobbyDescription(
+            callLobbyViewModel = callLobbyViewModel,
+            cameraEnabled = isCameraEnabled,
+            microphoneEnabled = isMicrophoneEnabled,
+        )
     }
 }
 
 @Composable
 private fun LobbyDescription(
     callLobbyViewModel: CallLobbyViewModel,
+    cameraEnabled: Boolean,
+    microphoneEnabled: Boolean,
 ) {
     val session by callLobbyViewModel.call.state.session.collectAsState()
 
@@ -267,7 +270,14 @@ private fun LobbyDescription(
                 .clip(RoundedCornerShape(12.dp))
                 .testTag("start_call"),
             text = stringResource(id = R.string.join_call),
-            onClick = { callLobbyViewModel.handleUiEvent(CallLobbyEvent.JoinCall) },
+            onClick = {
+                callLobbyViewModel.handleUiEvent(
+                    CallLobbyEvent.JoinCall(
+                        cameraEnabled = cameraEnabled,
+                        microphoneEnabled = microphoneEnabled,
+                    ),
+                )
+            },
         )
     }
 }
