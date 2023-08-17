@@ -608,6 +608,9 @@ public class RtcSession internal constructor(
         logger.i { "[cleanup] #sfu; no args" }
         supervisorJob.cancel()
 
+        // disconnect the socket and clean it up
+        sfuConnectionModule.sfuSocket.cleanup()
+
         // cleanup the publisher and subcriber peer connections
         subscriber?.connection?.close()
         publisher?.connection?.close()
@@ -627,9 +630,6 @@ public class RtcSession internal constructor(
         tracks.clear()
 
         trackDimensions.value = emptyMap()
-
-        // disconnect the socket and clean it up
-        sfuConnectionModule.sfuSocket.cleanup()
     }
 
     internal val muteState = MutableStateFlow(

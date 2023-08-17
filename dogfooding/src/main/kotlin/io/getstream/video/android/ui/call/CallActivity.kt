@@ -35,6 +35,7 @@ import io.getstream.chat.android.client.models.User
 import io.getstream.chat.android.client.utils.onSuccessSuspend
 import io.getstream.chat.android.state.extensions.globalState
 import io.getstream.result.Result
+import io.getstream.video.android.MainActivity
 import io.getstream.video.android.core.BuildConfig
 import io.getstream.video.android.core.StreamVideo
 import io.getstream.video.android.model.StreamCallId
@@ -81,6 +82,7 @@ class CallActivity : ComponentActivity() {
                 onLeaveCall = {
                     call.leave()
                     finish()
+                    startActivity(Intent(this, MainActivity::class.java))
                 },
             )
 

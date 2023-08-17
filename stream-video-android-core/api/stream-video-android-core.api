@@ -88,6 +88,10 @@ public final class io/getstream/video/android/core/CallHealthMonitor {
 	public final fun stop ()V
 }
 
+public final class io/getstream/video/android/core/CallKt {
+	public static final field sfuReconnectTimeoutMillis I
+}
+
 public final class io/getstream/video/android/core/CallState {
 	public fun <init> (Lio/getstream/video/android/core/StreamVideo;Lio/getstream/video/android/core/Call;Lio/getstream/video/android/model/User;Lkotlinx/coroutines/CoroutineScope;)V
 	public final fun clearParticipants ()V
@@ -2347,7 +2351,8 @@ public class io/getstream/video/android/core/socket/PersistentSocket : okhttp3/W
 	public final fun connect (Lkotlin/jvm/functions/Function1;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public static synthetic fun connect$default (Lio/getstream/video/android/core/socket/PersistentSocket;Lkotlin/jvm/functions/Function1;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
 	public final fun createSocket ()Lokhttp3/WebSocket;
-	public final fun disconnect ()V
+	public final fun disconnect (Ljava/lang/Throwable;)V
+	public static synthetic fun disconnect$default (Lio/getstream/video/android/core/socket/PersistentSocket;Ljava/lang/Throwable;ILjava/lang/Object;)V
 	public final fun getConnected ()Lkotlinx/coroutines/CancellableContinuation;
 	public final fun getConnectionId ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun getConnectionState ()Lkotlinx/coroutines/flow/StateFlow;
@@ -2364,8 +2369,8 @@ public class io/getstream/video/android/core/socket/PersistentSocket : okhttp3/W
 	public fun onMessage (Lokhttp3/WebSocket;Ljava/lang/String;)V
 	public fun onMessage (Lokhttp3/WebSocket;Lokio/ByteString;)V
 	public fun onOpen (Lokhttp3/WebSocket;Lokhttp3/Response;)V
-	public final fun reconnect (JLkotlin/coroutines/Continuation;)Ljava/lang/Object;
-	public static synthetic fun reconnect$default (Lio/getstream/video/android/core/socket/PersistentSocket;JLkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
+	public final fun reconnect (JLjava/lang/Throwable;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public static synthetic fun reconnect$default (Lio/getstream/video/android/core/socket/PersistentSocket;JLjava/lang/Throwable;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
 	public final fun setConnected (Lkotlinx/coroutines/CancellableContinuation;)V
 	public final fun setReconnectTimeout (J)V
 }

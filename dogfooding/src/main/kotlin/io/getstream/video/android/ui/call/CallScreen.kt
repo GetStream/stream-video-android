@@ -18,6 +18,7 @@
 
 package io.getstream.video.android.ui.call
 
+import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.size
@@ -28,6 +29,7 @@ import androidx.compose.material.Snackbar
 import androidx.compose.material.Text
 import androidx.compose.material.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -49,6 +51,7 @@ import io.getstream.video.android.compose.ui.components.call.controls.actions.Se
 import io.getstream.video.android.compose.ui.components.call.controls.actions.ToggleCameraAction
 import io.getstream.video.android.compose.ui.components.call.controls.actions.ToggleMicrophoneAction
 import io.getstream.video.android.core.Call
+import io.getstream.video.android.core.RealtimeConnection
 import io.getstream.video.android.mock.StreamMockUtils
 import io.getstream.video.android.mock.mockCall
 import kotlinx.coroutines.launch
@@ -59,6 +62,7 @@ fun CallScreen(
     showDebugOptions: Boolean = false,
     onLeaveCall: () -> Unit = {},
 ) {
+    val context = LocalContext.current
     val isCameraEnabled by call.camera.isEnabled.collectAsState()
     val isMicrophoneEnabled by call.microphone.isEnabled.collectAsState()
     val speakingWhileMuted by call.state.speakingWhileMuted.collectAsState()
@@ -70,6 +74,21 @@ fun CallScreen(
         skipHalfExpanded = true,
     )
     val scope = rememberCoroutineScope()
+
+    val callState by call.state.connection.collectAsState()
+
+    LaunchedEffect(key1 = callState) {
+        if (callState == RealtimeConnection.Disconnected) {
+            onLeaveCall.invoke()
+        } else if (callState is RealtimeConnection.Failed) {
+            Toast.makeText(
+                context,
+                "Call connection failed (${(callState as RealtimeConnection.Failed).error}",
+                Toast.LENGTH_LONG,
+            ).show()
+            onLeaveCall.invoke()
+        }
+    }
 
     VideoTheme {
         ChatDialog(
