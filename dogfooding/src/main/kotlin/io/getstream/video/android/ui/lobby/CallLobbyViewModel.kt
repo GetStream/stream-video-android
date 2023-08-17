@@ -23,6 +23,7 @@ import com.google.firebase.auth.FirebaseAuth
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.getstream.chat.android.client.ChatClient
 import io.getstream.video.android.core.Call
+import io.getstream.video.android.core.DeviceStatus
 import io.getstream.video.android.core.StreamVideo
 import io.getstream.video.android.datastore.delegate.StreamUserDataStore
 import io.getstream.video.android.model.StreamCallId
@@ -34,6 +35,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
@@ -64,6 +66,47 @@ class CallLobbyViewModel @Inject constructor(
     val user: Flow<User?> = dataStore.user
     val isLoggedOut = dataStore.user.map { it == null }
 
+    val microphoneEnabled: Flow<Boolean> =
+        combine(call.state.settings, call.microphone.status) { settings, status ->
+            val enabled = when (status) {
+                is DeviceStatus.NotSelected -> {
+                    settings?.audio?.micDefaultOn ?: false
+                }
+
+                is DeviceStatus.Enabled -> {
+                    true
+                }
+
+                is DeviceStatus.Disabled -> {
+                    false
+                }
+            }
+
+            // enable/disable audi capture (audio indicator will not work otherwise)
+            call.microphone.setEnabled(enabled, fromUser = false)
+            enabled
+        }
+
+    val cameraEnabled: Flow<Boolean> =
+        combine(call.state.settings, call.camera.status) { settings, status ->
+            val enabled = when (status) {
+                is DeviceStatus.NotSelected -> {
+                    settings?.video?.cameraDefaultOn ?: false
+                }
+
+                is DeviceStatus.Enabled -> {
+                    true
+                }
+
+                is DeviceStatus.Disabled -> {
+                    false
+                }
+            }
+            // enable/disable camera capture (no preview would be visible otherwise
+            call.camera.setEnabled(enabled, fromUser = false)
+            enabled
+        }
+
     private val _isLoading: MutableStateFlow<Boolean> = MutableStateFlow(false)
     internal val isLoading: StateFlow<Boolean> = _isLoading
 
@@ -71,7 +114,13 @@ class CallLobbyViewModel @Inject constructor(
     internal val uiState: SharedFlow<CallLobbyUiState> = event
         .flatMapLatest { event ->
             when (event) {
-                is CallLobbyEvent.JoinCall -> flowOf(CallLobbyUiState.JoinCompleted)
+                is CallLobbyEvent.JoinCall -> {
+                    // mark the settings as "user selected"
+                    // (to prevent the default server settings from overriding them later)
+                    call.camera.setEnabled(enabled = event.cameraEnabled, fromUser = true)
+                    call.microphone.setEnabled(enabled = event.microphoneEnabled, fromUser = true)
+                    flowOf(CallLobbyUiState.JoinCompleted)
+                }
 
                 else -> flowOf(CallLobbyUiState.Nothing)
             }
@@ -113,5 +162,5 @@ sealed interface CallLobbyUiState {
 sealed interface CallLobbyEvent {
     object Nothing : CallLobbyEvent
 
-    object JoinCall : CallLobbyEvent
+    class JoinCall(val cameraEnabled: Boolean, val microphoneEnabled: Boolean) : CallLobbyEvent
 }
