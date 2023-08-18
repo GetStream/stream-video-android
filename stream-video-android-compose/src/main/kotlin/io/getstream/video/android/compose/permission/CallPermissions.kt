@@ -54,10 +54,10 @@ public fun rememberCallPermissionsState(
             onPermissionsResult.invoke(it)
         } else {
             if (it[android.Manifest.permission.CAMERA] == true && isCameraEnabled) {
-                call.camera.setEnabled(true)
+                call.camera.setEnabled(true, fromUser = false)
             }
             if (it[android.Manifest.permission.RECORD_AUDIO] == true && isMicrophoneEnabled) {
-                call.microphone.setEnabled(true)
+                call.microphone.setEnabled(true, fromUser = false)
             }
         }
     }

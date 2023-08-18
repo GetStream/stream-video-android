@@ -568,9 +568,6 @@ public class RtcSession internal constructor(
                         audio = call.mediaManager.audioTrack,
                     ),
                 )
-                if (call.mediaManager.microphone.status.value == DeviceStatus.Enabled) {
-                    initialiseAudioTransceiver()
-                }
 
                 // step 5 create the video track
                 setLocalTrack(
@@ -584,6 +581,9 @@ public class RtcSession internal constructor(
                 logger.v { "[createUserTracks] #sfu; videoTrack: ${call.mediaManager.videoTrack.stringify()}" }
                 if (call.mediaManager.camera.status.value == DeviceStatus.Enabled) {
                     initializeVideoTransceiver()
+                }
+                if (call.mediaManager.microphone.status.value == DeviceStatus.Enabled) {
+                    initialiseAudioTransceiver()
                 }
             }
         }
