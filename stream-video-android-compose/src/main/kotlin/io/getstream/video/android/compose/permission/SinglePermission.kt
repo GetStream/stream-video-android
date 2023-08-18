@@ -65,7 +65,7 @@ public fun rememberMicrophonePermissionState(
     call: Call,
     onPermissionsResult: (Boolean) -> Unit = { isGranted ->
         if (isGranted) {
-            call.microphone.setEnabled(true)
+            call.microphone.setEnabled(true, fromUser = false)
         }
     },
 ): VideoPermissionsState {
