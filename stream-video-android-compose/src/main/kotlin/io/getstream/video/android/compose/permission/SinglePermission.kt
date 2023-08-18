@@ -30,7 +30,7 @@ public fun rememberCameraPermissionState(
     call: Call,
     onPermissionsResult: (Boolean) -> Unit = { isGranted ->
         if (isGranted) {
-            call.camera.setEnabled(true)
+            call.camera.setEnabled(true, fromUser = false)
         }
     },
 ): VideoPermissionsState {
