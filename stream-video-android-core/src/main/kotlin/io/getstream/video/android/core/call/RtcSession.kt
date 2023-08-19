@@ -55,7 +55,6 @@ import io.getstream.video.android.core.utils.buildRemoteIceServers
 import io.getstream.video.android.core.utils.mangleSdpUtil
 import io.getstream.video.android.core.utils.mapState
 import io.getstream.video.android.core.utils.stringify
-import io.getstream.video.android.datastore.delegate.StreamUserDataStore
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
@@ -67,7 +66,6 @@ import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.retry
@@ -280,13 +278,10 @@ public class RtcSession internal constructor(
     internal var sfuConnectionModule: SfuConnectionModule
 
     init {
-        val dataStore = StreamUserDataStore.instance()
-        coroutineScope.launch {
-            val user = dataStore.user.firstOrNull()
-            val apiKey = dataStore.apiKey.first()
-            if (apiKey.isBlank() || user?.id.isNullOrBlank()) {
-                throw IllegalArgumentException("The API key, user ID and token cannot be empty!")
-            }
+        if (!StreamVideo.isInstalled) {
+            throw IllegalArgumentException(
+                "SDK hasn't been initialised yet - can't start a RtcSession",
+            )
         }
 
         // step 1 setup the peer connections

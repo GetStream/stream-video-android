@@ -40,11 +40,16 @@ import io.getstream.video.android.core.call.state.ToggleCamera
 import io.getstream.video.android.core.call.state.ToggleMicrophone
 import io.getstream.video.android.core.call.state.ToggleSpeakerphone
 import io.getstream.video.android.core.notifications.NotificationHandler
+import io.getstream.video.android.datastore.delegate.StreamUserDataStore
 import io.getstream.video.android.model.streamCallId
 import io.getstream.video.android.util.StreamVideoInitHelper
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
 class IncomingCallActivity : ComponentActivity() {
+
+    @Inject
+    lateinit var dataStore: StreamUserDataStore
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -56,7 +61,8 @@ class IncomingCallActivity : ComponentActivity() {
         val callId = intent.streamCallId(NotificationHandler.INTENT_EXTRA_CALL_CID)!!
 
         lifecycleScope.launch {
-            StreamVideoInitHelper.init(this@IncomingCallActivity)
+            // Not necessary if you initialise the SDK in Application.onCreate()
+            StreamVideoInitHelper.loadSdk(dataStore = dataStore)
             val call = StreamVideo.instance().call(callId.type, callId.id)
 
             // Update the call state. This activity could have been started from a push notification.
