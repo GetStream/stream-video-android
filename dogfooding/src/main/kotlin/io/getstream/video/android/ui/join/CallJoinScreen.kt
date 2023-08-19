@@ -134,17 +134,19 @@ private fun CallJoinHeader(
             )
         }
 
-        TextButton(
-            colors = ButtonDefaults.textButtonColors(contentColor = Color.White),
-            content = { Text(text = "Ring test") },
-            onClick = { onRingTestClicked.invoke() },
-        )
+        if (BuildConfig.FLAVOR != "production") {
+            TextButton(
+                colors = ButtonDefaults.textButtonColors(contentColor = Color.White),
+                content = { Text(text = "Ring test") },
+                onClick = { onRingTestClicked.invoke() },
+            )
 
-        StreamButton(
-            modifier = Modifier.widthIn(125.dp),
-            text = stringResource(id = R.string.sign_out),
-            onClick = { callJoinViewModel.signOut() },
-        )
+            StreamButton(
+                modifier = Modifier.widthIn(125.dp),
+                text = stringResource(id = R.string.sign_out),
+                onClick = { callJoinViewModel.signOut() },
+            )
+        }
     }
 }
 
