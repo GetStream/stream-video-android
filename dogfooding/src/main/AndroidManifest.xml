@@ -38,7 +38,7 @@
             android:name="io.getstream.video.android.MainActivity"
             android:exported="true"
             android:theme="@style/Dogfooding"
-            android:windowSoftInputMode="adjustResize">
+            android:windowSoftInputMode="adjustPan">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
