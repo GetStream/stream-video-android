@@ -17,6 +17,7 @@
 package io.getstream.video.android.ui.join
 
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
@@ -29,9 +30,12 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.ButtonDefaults
 import androidx.compose.material.Text
 import androidx.compose.material.TextButton
@@ -50,6 +54,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
@@ -97,7 +102,8 @@ fun CallJoinScreen(
         CallJoinBody(
             modifier = Modifier
                 .align(Alignment.CenterHorizontally)
-                .fillMaxWidth()
+                .widthIn(0.dp, 500.dp)
+                .verticalScroll(rememberScrollState())
                 .weight(1f),
             callJoinViewModel = callJoinViewModel,
         )
@@ -123,28 +129,40 @@ private fun CallJoinHeader(
             .padding(24.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        if (BuildConfig.DEBUG) {
-            Text(
-                modifier = Modifier.weight(1f),
-                color = Color.White,
-                text = user?.name?.ifBlank { user?.id }?.ifBlank { user!!.custom["email"] }
-                    .orEmpty(),
-                maxLines = 1,
-                fontSize = 16.sp,
+        val name =
+            user?.name?.ifBlank { user?.id }?.ifBlank { user!!.custom["email"] }.orEmpty()
+
+        if (user != null) {
+            UserAvatar(
+                modifier = Modifier.size(24.dp),
+                user = user!!,
             )
+
+            Spacer(modifier = Modifier.width(8.dp))
         }
 
-        TextButton(
-            colors = ButtonDefaults.textButtonColors(contentColor = Color.White),
-            content = { Text(text = "Ring test") },
-            onClick = { onRingTestClicked.invoke() },
+        Text(
+            modifier = Modifier.weight(1f),
+            color = Color.White,
+            text = user?.name?.ifBlank { user?.id }?.ifBlank { user!!.custom["email"] }
+                .orEmpty(),
+            maxLines = 1,
+            fontSize = 16.sp,
         )
 
-        StreamButton(
-            modifier = Modifier.widthIn(125.dp),
-            text = stringResource(id = R.string.sign_out),
-            onClick = { callJoinViewModel.signOut() },
-        )
+        if (BuildConfig.FLAVOR == "dogfooding") {
+            TextButton(
+                colors = ButtonDefaults.textButtonColors(contentColor = Color.White),
+                content = { Text(text = "Ring test") },
+                onClick = { onRingTestClicked.invoke() },
+            )
+
+            StreamButton(
+                modifier = Modifier.widthIn(125.dp),
+                text = stringResource(id = R.string.sign_out),
+                onClick = { callJoinViewModel.signOut() },
+            )
+        }
     }
 }
 
@@ -169,16 +187,18 @@ private fun CallJoinBody(
         if (user != null) {
             val name =
                 user?.name?.ifBlank { user?.id }?.ifBlank { user!!.custom["email"] }.orEmpty()
-            UserAvatar(
-                modifier = Modifier.size(100.dp),
-                user = user!!,
+
+            Image(
+                modifier = Modifier.size(102.dp),
+                painter = painterResource(id = R.drawable.ic_stream_video_meeting_logo),
+                contentDescription = null,
             )
 
             Spacer(modifier = Modifier.height(25.dp))
 
             Text(
                 modifier = Modifier.padding(horizontal = 30.dp),
-                text = "Welcome, $name",
+                text = stringResource(id = R.string.app_name),
                 color = Color.White,
                 fontSize = 32.sp,
                 textAlign = TextAlign.Center,
@@ -192,21 +212,10 @@ private fun CallJoinBody(
             color = Colors.description,
             textAlign = TextAlign.Center,
             fontSize = 18.sp,
+            modifier = Modifier.widthIn(0.dp, 350.dp),
         )
 
         Spacer(modifier = Modifier.height(42.dp))
-
-        StreamButton(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(52.dp)
-                .padding(horizontal = 35.dp)
-                .testTag("start_new_call"),
-            text = stringResource(id = R.string.start_a_new_call),
-            onClick = { callJoinViewModel.handleUiEvent(CallJoinEvent.JoinCall()) },
-        )
-
-        Spacer(modifier = Modifier.height(40.dp))
 
         Text(
             modifier = Modifier
@@ -217,9 +226,17 @@ private fun CallJoinBody(
             fontSize = 13.sp,
         )
 
-        Spacer(modifier = Modifier.height(4.dp))
+        Spacer(modifier = Modifier.height(8.dp))
 
-        var callId by remember { mutableStateOf("default:79cYh3J5JgGk") }
+        var callId by remember {
+            mutableStateOf(
+                if (BuildConfig.FLAVOR == "dogfooding") {
+                    "default:79cYh3J5JgGk"
+                } else {
+                    ""
+                },
+            )
+        }
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -247,6 +264,12 @@ private fun CallJoinBody(
                 keyboardOptions = KeyboardOptions.Default.copy(
                     keyboardType = KeyboardType.Email,
                 ),
+                placeholder = {
+                    Text(
+                        stringResource(id = R.string.join_call_call_id_hint),
+                        color = Color(0xFF5D6168),
+                    )
+                },
             )
 
             StreamButton(
@@ -260,6 +283,29 @@ private fun CallJoinBody(
                 text = stringResource(id = R.string.join_call),
             )
         }
+
+        Spacer(modifier = Modifier.height(25.dp))
+
+        Text(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 35.dp),
+            text = stringResource(id = R.string.join_call_no_id_hint),
+            color = Color(0xFF979797),
+            fontSize = 13.sp,
+        )
+
+        Spacer(modifier = Modifier.height(8.dp))
+
+        StreamButton(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(52.dp)
+                .padding(horizontal = 35.dp)
+                .testTag("start_new_call"),
+            text = stringResource(id = R.string.start_a_new_call),
+            onClick = { callJoinViewModel.handleUiEvent(CallJoinEvent.JoinCall()) },
+        )
     }
 }
 

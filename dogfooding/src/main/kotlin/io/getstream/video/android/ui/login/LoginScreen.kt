@@ -109,14 +109,14 @@ private fun LoginContent(
         ) {
             Image(
                 modifier = Modifier.size(102.dp),
-                painter = painterResource(id = R.drawable.ic_stream_video_meeting),
+                painter = painterResource(id = R.drawable.ic_stream_video_meeting_logo),
                 contentDescription = null,
             )
 
             Spacer(modifier = Modifier.height(27.dp))
 
             Text(
-                text = stringResource(id = R.string.stream_meetings),
+                text = stringResource(id = R.string.app_name),
                 color = Color.White,
                 fontSize = 38.sp,
             )
