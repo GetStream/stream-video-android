@@ -1294,6 +1294,11 @@ public class RtcSession internal constructor(
                             VideoQuality.VIDEO_QUALITY_LOW_UNSPECIFIED
                         }
                     }
+
+                    // We need to divide by 1000 because the the FramerateRange is multiplied
+                    // by 1000 (see javadoc).
+                    val fps = (captureResolution?.framerate?.max ?: 0).div(1000)
+
                     VideoLayer(
                         rid = it.rid ?: "",
                         video_dimension = VideoDimension(
@@ -1301,7 +1306,7 @@ public class RtcSession internal constructor(
                             height = height.toInt(),
                         ),
                         bitrate = it.maxBitrateBps ?: 0,
-                        fps = captureResolution?.framerate?.max ?: 0,
+                        fps = fps,
                         quality = quality,
                     )
                 }
