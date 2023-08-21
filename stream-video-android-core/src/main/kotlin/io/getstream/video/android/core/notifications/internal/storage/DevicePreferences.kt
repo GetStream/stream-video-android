@@ -14,21 +14,12 @@
  * limitations under the License.
  */
 
-package io.getstream.video.android.di
+package io.getstream.video.android.core.notifications.internal.storage
 
-import dagger.Provides
-import dagger.hilt.InstallIn
-import dagger.hilt.components.SingletonComponent
-import io.getstream.video.android.datastore.delegate.StreamUserDataStore
-import javax.inject.Singleton
+import io.getstream.video.android.model.Device
+import kotlinx.serialization.Serializable
 
-@dagger.Module
-@InstallIn(SingletonComponent::class)
-object AppModule {
-
-    @Provides
-    @Singleton
-    fun provideUserDataStore(): StreamUserDataStore {
-        return StreamUserDataStore.instance()
-    }
-}
+@Serializable
+internal data class DevicePreferences(
+    public val userDevice: Device? = null,
+)

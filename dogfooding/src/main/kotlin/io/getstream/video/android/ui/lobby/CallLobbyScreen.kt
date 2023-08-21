@@ -315,6 +315,7 @@ private fun HandleCallLobbyUiState(
 @Composable
 private fun CallLobbyScreenPreview() {
     StreamMockUtils.initializeStreamVideo(LocalContext.current)
+    StreamUserDataStore.install(LocalContext.current)
     VideoTheme {
         CallLobbyScreen(
             callLobbyViewModel = CallLobbyViewModel(

@@ -30,7 +30,7 @@ import io.getstream.video.android.core.internal.module.ConnectionModule
 import io.getstream.video.android.core.logging.LoggingLevel
 import io.getstream.video.android.core.notifications.NotificationConfig
 import io.getstream.video.android.core.notifications.internal.StreamNotificationManager
-import io.getstream.video.android.datastore.delegate.StreamUserDataStore
+import io.getstream.video.android.core.notifications.internal.storage.DeviceTokenStorage
 import io.getstream.video.android.model.ApiKey
 import io.getstream.video.android.model.User
 import io.getstream.video.android.model.UserToken
@@ -65,7 +65,6 @@ import java.util.UUID
  * @property ringNotification Overwrite the default notification logic for incoming calls.
  * @property audioFilters Audio filters enable you to add custom effects to your audio before its send to the server.
  * @property videoFilters Video filters enable you to change the video before it's send.
- * @property encryptPreferences If our data store should encrypt the api key, user token etc.
  * @property connectionTimeoutInMs Connection timeout in seconds.
  * @property ensureSingleInstance Verify that only 1 version of the video client exists, prevents integration mistakes.
  * @property videoDomain URL overwrite to allow for testing against a local instance of video.
@@ -84,7 +83,6 @@ public class StreamVideoBuilder @JvmOverloads constructor(
     private val ringNotification: ((call: Call) -> Notification?)? = null,
     private val audioFilters: List<AudioFilter> = emptyList(),
     private val videoFilters: List<VideoFilter> = emptyList(),
-    private var encryptPreferences: Boolean = true,
     private val connectionTimeoutInMs: Long = 10000,
     private var ensureSingleInstance: Boolean = true,
     private val videoDomain: String = "video.stream-io-api.com",
@@ -129,19 +127,6 @@ public class StreamVideoBuilder @JvmOverloads constructor(
         /** android JSR-310 backport backport. */
         AndroidThreeTen.init(context)
 
-        /** install the [StreamUserDataStore] to persist user information with encryption. */
-        val dataStore = if (!StreamUserDataStore.isInstalled) {
-            StreamUserDataStore.install(context, isEncrypted = encryptPreferences)
-        } else {
-            StreamUserDataStore.instance()
-        }
-
-        scope.launch {
-            dataStore.updateUser(user)
-            dataStore.updateApiKey(apiKey)
-            dataStore.updateUserToken(token)
-        }
-
         // This connection module class exposes the connections to the various retrofit APIs.
         val connectionModule = ConnectionModule(
             context = context,
@@ -154,13 +139,15 @@ public class StreamVideoBuilder @JvmOverloads constructor(
             userToken = token,
         )
 
+        val deviceTokenStorage = DeviceTokenStorage(context)
+
         // install the StreamNotificationManager to configure push notifications.
         val streamNotificationManager = StreamNotificationManager.install(
             context = context,
             scope = scope,
             notificationConfig = notificationConfig,
             api = connectionModule.api,
-            streamUserDataStore = dataStore,
+            deviceTokenStorage = deviceTokenStorage,
         )
 
         // create the client
@@ -168,7 +155,8 @@ public class StreamVideoBuilder @JvmOverloads constructor(
             context = context,
             _scope = scope,
             user = user,
-            dataStore = dataStore,
+            apiKey = apiKey,
+            token = token,
             tokenProvider = tokenProvider,
             loggingLevel = loggingLevel,
             lifecycle = lifecycle,
@@ -176,11 +164,6 @@ public class StreamVideoBuilder @JvmOverloads constructor(
             streamNotificationManager = streamNotificationManager,
         )
 
-        scope.launch {
-            if (user.type == UserType.Authenticated) {
-                client.registerPushDevice()
-            }
-        }
         if (user.type == UserType.Guest) {
             connectionModule.updateAuthType("anonymous")
             client.setupGuestUser(user)
@@ -208,6 +191,14 @@ public class StreamVideoBuilder @JvmOverloads constructor(
 
         // installs Stream Video instance
         StreamVideo.install(client)
+
+        // Needs to be started after the client is initialised because the VideoPushDelegate
+        // is accessing the StreamVideo instance
+        scope.launch {
+            if (user.type == UserType.Authenticated) {
+                client.registerPushDevice()
+            }
+        }
 
         return client
     }

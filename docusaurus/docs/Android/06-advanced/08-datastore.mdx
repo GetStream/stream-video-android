@@ -3,7 +3,8 @@ title: DataStore
 description: Persisting DataStore with the stream-video-android-datastore library.
 ---
 
-Stream SDK uses [DataStore](https://developer.android.com/jetpack/androidx/releases/datastore) to manage user login data safely, consistently, and transactionally. It's used internally by Stream's Core SDK, so you don't need to manage it manually. But if you want to access, trace, or use user login data easily, you can use our **datastore** library.
+The `StreamVideoBuilder` requires a valid token and user object to initialise. How this data is managed and stored is the responsibility of the client application.
+For convenience the Stream SDK provides a [DataStore](https://developer.android.com/jetpack/androidx/releases/datastore) to manage user login data safely, consistently, and transactionally. The `DataStore` isn't directly connected to the Stream SDK - but the client application can use it to store and retrieve user related data when initialising the Stream SDK.
 
 ### Usage
 
@@ -19,7 +20,12 @@ dependencies {
 
 Now, it's ready to use the datastore.
 
-If you initialized `StreamVideo` with the `StreamVideoBuilder` class, the `StreamUserDataStore`, which contains user information will be installed automatically,
+For first use you need to initialise the `StreamUserDataStore` with a context (for example in `Application.onCreate()`) and optionally supply `isEncrypted` parameter (default is `true`).
+
+```kotlin
+
+```
+
 So you can get the instance of the `StreamUserDataStore` like the example below:
 
 ```kotlin
@@ -61,22 +67,12 @@ datastore.updateUserToken(userToken: UserToken)
 datastore.updateUserDevice(userDevice: Device?)
 ```
 
-You can also clear the DataStore with `clear()` method. This method is invoked automatically when you call `StreamVideo.logout()` method, so in most cases, you don't need to call this method.
-
-:::caution
-Please keep in mind that, DataStore is used by Stream SDK internally, so we don't recommend you update the data in most cases. SDK may work differently than you expected.
-:::
+You can also clear the DataStore with `clear()` method.
 
 ### Encryption
 
-All data stored in `StreamVideoBuilder` are encrypted by default with [Tink](https://github.com/google/tink). But in some reasons, you may not want to use the encryption. In this case, you can disable encryption when you initialize the `StreamVideo` instance like the sample below:
+All data stored in `StreamUserDataStore` are encrypted by default with [Tink](https://github.com/google/tink). But in some reasons, you may not want to use the encryption. In this case, you can disable encryption when you install the `StreamUserDataStore` instance like the sample below:
 
-```kotlin {4}
-val client = StreamVideoBuilder(
-     context = context,
-     apiKey = apiKey,
-     encryptPreferences = false, // here
-     user = user,
-     token = token,
-).build()
+```kotlin
+StreamUserDataStore.install(context = context, isEncrypted = false)
 ```

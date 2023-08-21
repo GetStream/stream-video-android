@@ -36,15 +36,20 @@ import io.getstream.android.push.permissions.NotificationPermissionStatus
 import io.getstream.log.taggedLogger
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.core.StreamVideo
+import io.getstream.video.android.datastore.delegate.StreamUserDataStore
 import io.getstream.video.android.model.StreamCallId
 import io.getstream.video.android.ui.call.CallActivity
 import io.getstream.video.android.ui.theme.Colors
 import io.getstream.video.android.util.StreamVideoInitHelper
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
 class DeeplinkingActivity : ComponentActivity() {
 
     private val logger by taggedLogger("Call:DeeplinkView")
+
+    @Inject
+    lateinit var dataStore: StreamUserDataStore
 
     override fun onCreate(savedInstanceState: Bundle?) {
         logger.d { "[onCreate] savedInstanceState: $savedInstanceState" }
@@ -96,7 +101,12 @@ class DeeplinkingActivity : ComponentActivity() {
 
     private fun joinCall(cid: String) {
         lifecycleScope.launch {
-            StreamVideoInitHelper.init(this@DeeplinkingActivity)
+            // Deep link can be opened without the app after install - there is no user yet
+            // But in this case the StreamVideoInitHelper will use a random account
+            StreamVideoInitHelper.loadSdk(
+                dataStore = dataStore,
+                useRandomUserAsFallback = true,
+            )
             if (StreamVideo.isInstalled) {
                 val callId = StreamCallId(type = "default", id = cid)
                 val intent = CallActivity.createIntent(

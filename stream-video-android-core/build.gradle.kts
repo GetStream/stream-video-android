@@ -145,6 +145,9 @@ dependencies {
     implementation(libs.kotlinx.coroutines.core)
     implementation(libs.kotlinx.serialization.json)
 
+    // serialization
+    implementation(libs.kotlinx.serialization.protobuf)
+
     // API & Protobuf
     api(libs.wire.runtime)
     implementation(libs.retrofit)
