@@ -193,7 +193,6 @@ private fun CallJoinBody(
                 painter = painterResource(id = R.drawable.ic_stream_video_meeting_logo),
                 contentDescription = null,
             )
-
             Spacer(modifier = Modifier.height(25.dp))
 
             Text(
@@ -333,6 +332,7 @@ private fun HandleCallJoinUiState(
 private fun CallJoinScreenPreview() {
     StreamMockUtils.initializeStreamVideo(LocalContext.current)
     VideoTheme {
+        StreamUserDataStore.install(LocalContext.current)
         CallJoinScreen(
             callJoinViewModel = CallJoinViewModel(StreamUserDataStore.instance()),
             navigateToCallLobby = {},

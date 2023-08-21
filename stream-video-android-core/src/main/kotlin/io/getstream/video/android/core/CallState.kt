@@ -51,14 +51,12 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.channelFlow
 import kotlinx.coroutines.flow.debounce
-import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.transform
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
 import org.openapitools.client.models.BlockedUserEvent
 import org.openapitools.client.models.CallAcceptedEvent
 import org.openapitools.client.models.CallCreatedEvent
@@ -454,10 +452,9 @@ public class CallState(
 
     private val _ingress: MutableStateFlow<CallIngressResponse?> = MutableStateFlow(null)
     val ingress: StateFlow<Ingress?> = _ingress.mapState {
-        // TODO: Remove runBlocking and use standard Flow instead for mapping or use other approach
-        val token = runBlocking { call.clientImpl.dataStore.userToken.firstOrNull() }
-        val apiKey = runBlocking { call.clientImpl.dataStore.apiKey.firstOrNull() }
         if (it != null) {
+            val token = call.clientImpl.token
+            val apiKey = call.clientImpl.apiKey
             Ingress(rtmp = RTMP(address = it.rtmp.address, streamKey = "$apiKey/$token"))
         } else {
             null

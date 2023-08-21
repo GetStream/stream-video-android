@@ -23,7 +23,6 @@ import io.getstream.video.android.core.ParticipantState
 import io.getstream.video.android.core.StreamVideo
 import io.getstream.video.android.core.StreamVideoBuilder
 import io.getstream.video.android.core.model.MediaTrack
-import io.getstream.video.android.datastore.delegate.StreamUserDataStore
 import io.getstream.video.android.model.User
 import org.threeten.bp.OffsetDateTime
 import org.webrtc.VideoTrack
@@ -38,7 +37,6 @@ public object StreamMockUtils {
 
     public fun initializeStreamVideo(context: Context) {
         if (::streamVideo.isInitialized.not()) {
-            StreamUserDataStore.install(context = context.applicationContext, isEncrypted = false)
             streamVideo = StreamVideoBuilder(
                 context = context.applicationContext,
                 apiKey = "stream-api-key",

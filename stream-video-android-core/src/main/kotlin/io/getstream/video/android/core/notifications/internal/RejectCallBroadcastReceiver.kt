@@ -23,16 +23,12 @@ import androidx.core.app.NotificationManagerCompat
 import io.getstream.log.taggedLogger
 import io.getstream.result.Result
 import io.getstream.video.android.core.StreamVideo
-import io.getstream.video.android.core.StreamVideoBuilder
 import io.getstream.video.android.core.notifications.NotificationHandler.Companion.ACTION_REJECT_CALL
 import io.getstream.video.android.core.notifications.NotificationHandler.Companion.INTENT_EXTRA_CALL_CID
 import io.getstream.video.android.core.notifications.NotificationHandler.Companion.INTENT_EXTRA_NOTIFICATION_ID
-import io.getstream.video.android.datastore.delegate.StreamUserDataStore
 import io.getstream.video.android.model.streamCallId
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.launch
 
 /**
@@ -53,28 +49,21 @@ internal class RejectCallBroadcastReceiver : BroadcastReceiver() {
      */
     override fun onReceive(context: Context?, intent: Intent?) {
         logger.d { "[onReceive] context: $context, intent: $intent" }
-        val userDataStore: StreamUserDataStore by lazy {
-            StreamUserDataStore.install(context!!)
-        }
+
         if (context != null && intent?.action == ACTION_REJECT_CALL) {
             val callCid = intent.streamCallId(INTENT_EXTRA_CALL_CID)!!
 
             CoroutineScope(Dispatchers.IO).launch {
                 // TODO: Running asynchronous code in a BroadcastReceiver isn't safe,
                 // we should use wake locks.
-                val streamVideo: StreamVideo = if (StreamVideo.isInstalled) {
-                    StreamVideo.instance()
-                } else {
-                    userDataStore.user.firstOrNull()?.let { user ->
-                        userDataStore.userToken.firstOrNull()?.let { userToken ->
-                            StreamVideoBuilder(
-                                context = context,
-                                user = user,
-                                token = userToken,
-                                apiKey = userDataStore.apiKey.first(),
-                            ).build().also { StreamVideo.removeClient() }
-                        }
-                    }!!
+                val streamVideo: StreamVideo? = StreamVideo.instanceOrNull()
+
+                if (streamVideo == null) {
+                    logger.e {
+                        "Received ${ACTION_REJECT_CALL} but StreamVideo is not initialised. " +
+                            "Handling notifications requires to initialise StreamVideo in Application.onCreate"
+                    }
+                    return@launch
                 }
 
                 when (val rejectResult = streamVideo.call(callCid.type, callCid.id).reject()) {

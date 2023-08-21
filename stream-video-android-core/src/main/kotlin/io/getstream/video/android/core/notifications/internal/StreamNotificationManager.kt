@@ -36,7 +36,7 @@ import io.getstream.video.android.core.StreamVideo
 import io.getstream.video.android.core.notifications.DefaultNotificationHandler
 import io.getstream.video.android.core.notifications.NotificationConfig
 import io.getstream.video.android.core.notifications.NotificationHandler
-import io.getstream.video.android.datastore.delegate.StreamUserDataStore
+import io.getstream.video.android.core.notifications.internal.storage.DeviceTokenStorage
 import io.getstream.video.android.model.Device
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.firstOrNull
@@ -49,7 +49,7 @@ internal class StreamNotificationManager private constructor(
     private val scope: CoroutineScope,
     private val notificationConfig: NotificationConfig,
     private val api: DefaultApi,
-    private val dataStore: StreamUserDataStore,
+    internal val deviceTokenStorage: DeviceTokenStorage,
     private val notificationPermissionManager: NotificationPermissionManager?,
 ) : NotificationHandler by notificationConfig.notificationHandler {
 
@@ -72,12 +72,12 @@ internal class StreamNotificationManager private constructor(
         logger.d { "[createDevice] pushDevice: $pushDevice" }
         val newDevice = pushDevice.toDevice()
         return pushDevice
-            .takeUnless { newDevice == dataStore.userDevice.firstOrNull() }
+            .takeUnless { newDevice == deviceTokenStorage.userDevice.firstOrNull() }
             ?.toCreateDeviceRequest()
             ?.flatMapSuspend { createDeviceRequest ->
                 try {
                     api.createDevice(createDeviceRequest)
-                    dataStore.updateUserDevice(pushDevice.toDevice())
+                    deviceTokenStorage.updateUserDevice(pushDevice.toDevice())
                     Result.Success(newDevice)
                 } catch (e: Exception) {
                     Result.Failure(Error.ThrowableError("Device couldn't be created", e))
@@ -89,9 +89,9 @@ internal class StreamNotificationManager private constructor(
     private fun removeStoredDeivce(device: Device) {
         logger.d { "[storeDevice] device: device" }
         scope.launch {
-            dataStore.userDevice.firstOrNull()
+            deviceTokenStorage.userDevice.firstOrNull()
                 .takeIf { it == device }
-                ?.let { dataStore.updateUserDevice(null) }
+                ?.let { deviceTokenStorage.updateUserDevice(null) }
         }
     }
 
@@ -100,7 +100,7 @@ internal class StreamNotificationManager private constructor(
      */
     suspend fun deleteDevice(device: Device): Result<Unit> {
         logger.d { "[deleteDevice] device: $device" }
-        val userId = dataStore.user.firstOrNull()?.id
+        val userId = StreamVideo.instanceOrNull()?.user?.id
         return try {
             api.deleteDevice(device.id, userId)
             removeStoredDeivce(device)
@@ -140,7 +140,7 @@ internal class StreamNotificationManager private constructor(
             scope: CoroutineScope,
             notificationConfig: NotificationConfig,
             api: DefaultApi,
-            streamUserDataStore: StreamUserDataStore,
+            deviceTokenStorage: DeviceTokenStorage,
         ): StreamNotificationManager {
             synchronized(this) {
                 if (Companion::internalStreamNotificationManager.isInitialized) {
@@ -174,7 +174,7 @@ internal class StreamNotificationManager private constructor(
                         scope,
                         updatedNotificationConfig,
                         api,
-                        streamUserDataStore,
+                        deviceTokenStorage,
                         notificationPermissionManager,
                     )
                 }

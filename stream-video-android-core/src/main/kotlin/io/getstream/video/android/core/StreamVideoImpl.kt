@@ -51,8 +51,7 @@ import io.getstream.video.android.core.utils.getLatencyMeasurementsOKHttp
 import io.getstream.video.android.core.utils.toEdge
 import io.getstream.video.android.core.utils.toQueriedCalls
 import io.getstream.video.android.core.utils.toQueriedMembers
-import io.getstream.video.android.core.utils.toUser
-import io.getstream.video.android.datastore.delegate.StreamUserDataStore
+import io.getstream.video.android.model.ApiKey
 import io.getstream.video.android.model.Device
 import io.getstream.video.android.model.User
 import kotlinx.coroutines.CoroutineScope
@@ -123,11 +122,12 @@ internal class StreamVideoImpl internal constructor(
     override val context: Context,
     internal val _scope: CoroutineScope,
     override val user: User,
+    internal val apiKey: ApiKey,
+    internal var token: String,
     private val lifecycle: Lifecycle,
     private val loggingLevel: LoggingLevel,
     internal val connectionModule: ConnectionModule,
     internal val tokenProvider: (suspend (error: Throwable?) -> String)?,
-    internal val dataStore: StreamUserDataStore,
     internal val streamNotificationManager: StreamNotificationManager,
 ) : StreamVideo,
     NotificationHandler by streamNotificationManager {
@@ -197,7 +197,7 @@ internal class StreamVideoImpl internal constructor(
                     if (tokenProvider != null) {
                         // TODO - handle this better, error structure is not great right now
                         val newToken = tokenProvider.invoke(null)
-                        dataStore.updateUserToken(newToken)
+                        token = newToken
                         connectionModule.updateToken(newToken)
                     }
                     // retry the API call once
@@ -409,7 +409,6 @@ internal class StreamVideoImpl internal constructor(
             } catch (e: ErrorResponse) {
                 if (e.code == VideoErrorCode.TOKEN_EXPIRED.code && tokenProvider != null) {
                     val newToken = tokenProvider.invoke(e)
-                    dataStore.updateUserToken(newToken)
                     connectionModule.updateToken(newToken)
                     // quickly reconnect with the new token
                     socketImpl.reconnect(0, e)
@@ -443,10 +442,6 @@ internal class StreamVideoImpl internal constructor(
             }
             response.onSuccess {
                 connectionModule.updateAuthType("jwt")
-                scope.launch {
-                    dataStore.updateUser(it.user.toUser())
-                    dataStore.updateUserToken(it.accessToken)
-                }
                 connectionModule.updateToken(it.accessToken)
             }
         }
@@ -930,8 +925,7 @@ internal class StreamVideoImpl internal constructor(
      * @see StreamVideo.logOut
      */
     override fun logOut() {
-        val dataStore = StreamUserDataStore.instance()
-        scope.launch { dataStore.clear() }
+        scope.launch { streamNotificationManager.deviceTokenStorage.clear() }
     }
 
     override fun call(type: String, id: String): Call {
