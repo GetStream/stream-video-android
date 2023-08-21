@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+     Copyright (c) 2023 Stream.io Inc. All rights reserved.
+
+     Licensed under the Stream License;
+     you may not use this file except in compliance with the License.
+     You may obtain a copy of the License at
+
+          https://github.com/GetStream/stream-video-android/blob/main/LICENSE
+
+     Unless required by applicable law or agreed to in writing, software
+     distributed under the License is distributed on an "AS IS" BASIS,
+     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     See the License for the specific language governing permissions and
+     limitations under the License.
+-->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:aapt="http://schemas.android.com/aapt"
+    android:width="1024dp"
+    android:height="1024dp"
+    android:viewportWidth="1024"
+    android:viewportHeight="1024">
+  <path
+      android:pathData="M130,0L894,0A130,130 0,0 1,1024 130L1024,894A130,130 0,0 1,894 1024L130,1024A130,130 0,0 1,0 894L0,130A130,130 0,0 1,130 0z"
+      android:fillColor="#005FFF"/>
+  <path
+      android:pathData="M130,0L894,0A130,130 0,0 1,1024 130L1024,894A130,130 0,0 1,894 1024L130,1024A130,130 0,0 1,0 894L0,130A130,130 0,0 1,130 0z">
+    <aapt:attr name="android:fillColor">
+      <gradient 
+          android:startX="1024"
+          android:startY="-0"
+          android:endX="0"
+          android:endY="1024"
+          android:type="linear">
+        <item android:offset="0" android:color="#FF49DDED"/>
+        <item android:offset="1" android:color="#0049DDED"/>
+      </gradient>
+    </aapt:attr>
+  </path>
+  <path
+      android:pathData="M351.6,272.8C322.9,272.8 299.6,296.1 299.6,324.8V396.9H543.1C603.4,396.9 652.2,445.8 652.2,506V595.8H672.4C701.1,595.8 724.3,572.5 724.3,543.8V324.8C724.3,296.1 701.1,272.8 672.4,272.8H351.6Z"
+      android:fillColor="#ffffff"/>
+  <path
+      android:pathData="M748.2,454.6C748.2,477.3 748.2,488.6 752.9,498.5L753.2,499.3C758.1,509.1 767,516.2 784.7,530.3L809.4,549.8C827.6,564.3 853.7,550.7 853.7,526.7V341.9C853.7,317.9 827.6,304.3 809.4,318.7L784.7,338.3C767,352.4 758.1,359.4 753.2,369.2L752.9,370C748.2,379.9 748.2,391.3 748.2,414V454.6Z"
+      android:fillColor="#ffffff"/>
+  <path
+      android:pathData="M170.3,506C170.3,477.3 193.6,454 222.3,454H543.1C571.8,454 595.1,477.3 595.1,506V725C595.1,753.7 571.8,777 543.1,777H222.3C193.6,777 170.3,753.7 170.3,725V506ZM398.4,620.1C418.5,620.1 437.9,627.9 452.4,641.9C467,655.8 475.6,674.8 476.5,694.9L476.6,698.3V729.6H288.9V698.3C288.9,678.2 296.7,658.8 310.6,644.3C324.6,629.7 343.6,621.1 363.7,620.2L367.1,620.1H398.4ZM382.7,510.6C408.6,510.6 429.6,531.7 429.6,557.6C429.6,583.5 408.6,604.5 382.7,604.5C356.8,604.5 335.8,583.5 335.8,557.6C335.8,531.7 356.8,510.6 382.7,510.6Z"
+      android:fillColor="#ffffff"
+      android:fillType="evenOdd"/>
+</vector>

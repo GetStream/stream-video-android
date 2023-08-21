@@ -107,7 +107,9 @@ class LoginViewModel @Inject constructor(
                 if (BuildConfig.FLAVOR == "production") {
                     handleUiEvent(LoginEvent.Loading)
                     handleUiEvent(
-                        LoginEvent.SignInInSuccess(UserIdGenerator.generateRandomString()),
+                        LoginEvent.SignInInSuccess(
+                            UserIdGenerator.generateRandomString(upperCaseOnly = true),
+                        ),
                     )
                 }
             }

@@ -145,13 +145,15 @@ private fun CallLobbyHeader(
             fontSize = 16.sp,
         )
 
-        Spacer(modifier = Modifier.width(4.dp))
+        if (BuildConfig.FLAVOR == "dogfooding") {
+            Spacer(modifier = Modifier.width(4.dp))
 
-        StreamButton(
-            modifier = Modifier.width(125.dp),
-            text = stringResource(id = R.string.sign_out),
-            onClick = { callLobbyViewModel.signOut() },
-        )
+            StreamButton(
+                modifier = Modifier.width(125.dp),
+                text = stringResource(id = R.string.sign_out),
+                onClick = { callLobbyViewModel.signOut() },
+            )
+        }
     }
 
     LaunchedEffect(key1 = isLoggedOut) {

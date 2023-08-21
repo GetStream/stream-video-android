@@ -18,8 +18,8 @@ package io.getstream.video.android.util
 
 object UserIdGenerator {
 
-    fun generateRandomString(length: Int = 8): String {
-        val allowedChars = ('A'..'Z') + ('a'..'z') + ('0'..'9')
+    fun generateRandomString(length: Int = 8, upperCaseOnly: Boolean = false): String {
+        val allowedChars = ('A'..'Z') + ('0'..'9') + if (!upperCaseOnly) { ('a'..'z') } else { }
 
         return (1..length)
             .map { allowedChars.random() }
