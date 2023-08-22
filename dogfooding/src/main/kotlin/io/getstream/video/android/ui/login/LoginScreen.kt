@@ -294,11 +294,6 @@ private fun HandleLoginUiStates(
             }
 
             is LoginUiState.SignInComplete -> {
-                loginViewModel.initializeStreamVideo(
-                    context = context,
-                    tokenResponse = loginUiState.tokenResponse,
-                )
-
                 navigateToCallJoin.invoke()
             }
 

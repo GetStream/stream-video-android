@@ -22,14 +22,10 @@ import io.getstream.android.push.delegate.PushDelegate
 import io.getstream.android.push.delegate.PushDelegateProvider
 import io.getstream.log.StreamLog
 import io.getstream.video.android.core.StreamVideo
-import io.getstream.video.android.core.StreamVideoBuilder
 import io.getstream.video.android.core.dispatchers.DispatcherProvider
-import io.getstream.video.android.datastore.delegate.StreamUserDataStore
 import io.getstream.video.android.model.StreamCallId
 import io.getstream.video.android.model.mapper.toTypeAndId
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.launch
 
 /**
@@ -42,9 +38,6 @@ internal class VideoPushDelegate(
 ) : PushDelegate(context) {
     private val logger = StreamLog.getLogger("VideoPushDelegate")
     private val DEFAULT_CALL_TEXT = "Unknown caller"
-    private val userDataStore: StreamUserDataStore by lazy {
-        StreamUserDataStore.install(context)
-    }
 
     /**
      * Handle a push message.
@@ -69,17 +62,17 @@ internal class VideoPushDelegate(
 
     private suspend fun handleRingType(callId: StreamCallId, payload: Map<String, Any?>) {
         val callDisplayName = (payload[KEY_CREATED_BY_DISPLAY_NAME] as String).ifEmpty { DEFAULT_CALL_TEXT }
-        getStreamVideo()?.onRingingCall(callId, callDisplayName)
+        getStreamVideo("ring-type-notification")?.onRingingCall(callId, callDisplayName)
     }
 
     private suspend fun handleNotificationType(callId: StreamCallId, payload: Map<String, Any?>) {
         val callDisplayName = (payload[KEY_CREATED_BY_DISPLAY_NAME] as String).ifEmpty { DEFAULT_CALL_TEXT }
-        getStreamVideo()?.onNotification(callId, callDisplayName)
+        getStreamVideo("generic-notification")?.onNotification(callId, callDisplayName)
     }
 
     private suspend fun handleLiveStartedType(callId: StreamCallId, payload: Map<String, Any?>) {
         val callDisplayName = (payload[KEY_CREATED_BY_DISPLAY_NAME] as String).ifEmpty { DEFAULT_CALL_TEXT }
-        getStreamVideo()?.onLiveCall(callId, callDisplayName)
+        getStreamVideo("live-started-notification")?.onLiveCall(callId, callDisplayName)
     }
 
     /**
@@ -90,24 +83,19 @@ internal class VideoPushDelegate(
     override fun registerPushDevice(pushDevice: PushDevice) {
         logger.d { "[registerPushDevice] pushDevice: $pushDevice" }
         CoroutineScope(DispatcherProvider.IO).launch {
-            getStreamVideo()?.createDevice(pushDevice)
+            getStreamVideo("register-push-device")?.createDevice(pushDevice)
         }
     }
 
-    private suspend fun getStreamVideo(): StreamVideo? = if (StreamVideo.isInstalled) {
-        StreamVideo.instance()
-    } else {
-        userDataStore.user.firstOrNull()?.let { user ->
-            userDataStore.userToken.firstOrNull()?.let { userToken ->
-                StreamVideoBuilder(
-                    context = context,
-                    user = user,
-                    token = userToken,
-                    apiKey = userDataStore.apiKey.first(),
-                ).build().also { StreamVideo.removeClient() }
+    private fun getStreamVideo(requestReason: String) =
+        StreamVideo.instanceOrNull().also {
+            if (it == null) {
+                logger.e {
+                    "Ignoring a push notification ($requestReason) StreamVideo is not initialised. " +
+                        "Handling notifications requires to initialise StreamVideo in Application.onCreate"
+                }
             }
         }
-    }
 
     /**
      * Return if the map is valid.

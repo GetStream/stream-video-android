@@ -47,7 +47,7 @@ import javax.inject.Inject
 @HiltViewModel
 class CallLobbyViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
-    dataStore: StreamUserDataStore,
+    private val dataStore: StreamUserDataStore,
 ) : ViewModel() {
 
     private val cid: String = checkNotNull(savedStateHandle["cid"])
@@ -143,6 +143,7 @@ class CallLobbyViewModel @Inject constructor(
     fun signOut() {
         viewModelScope.launch {
             FirebaseAuth.getInstance().signOut()
+            dataStore.clear()
             StreamVideo.instance().logOut()
             ChatClient.instance().disconnect(true).enqueue()
             delay(200)

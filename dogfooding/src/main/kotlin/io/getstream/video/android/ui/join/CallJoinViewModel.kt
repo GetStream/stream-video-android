@@ -42,7 +42,7 @@ import javax.inject.Inject
 
 @HiltViewModel
 class CallJoinViewModel @Inject constructor(
-    dataStore: StreamUserDataStore,
+    private val dataStore: StreamUserDataStore,
 ) : ViewModel() {
     val user: Flow<User?> = dataStore.user
     val isLoggedOut = dataStore.user.map { it == null }
@@ -97,6 +97,7 @@ class CallJoinViewModel @Inject constructor(
     fun signOut() {
         viewModelScope.launch {
             FirebaseAuth.getInstance().signOut()
+            dataStore.clear()
             StreamVideo.instance().logOut()
             ChatClient.instance().disconnect(true).enqueue()
             delay(200)

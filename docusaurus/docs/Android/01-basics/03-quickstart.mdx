@@ -23,6 +23,8 @@ val call = client.call("default", "123")
 val joinResult = call.join(create=true)
 ```
 
+**Note**: While you can initialise the SDK on-demand and it's not mandatory to initialise the SDK in the `Application.onCreate()` - it is required to initialise it this way for it to be able to handle incoming call and other types of push notifications. In this case the application process will start, the push notification will be delivered to the SDK automatically but the SDK will not be initialised at this point and will ignore the push notification.
+
 `default` is a call type. There are 4 built-in call types and you can also create your own.
 The call type controls the permissions and which features are enabled.
 
