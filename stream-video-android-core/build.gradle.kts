@@ -145,6 +145,9 @@ dependencies {
     implementation(libs.kotlinx.coroutines.core)
     implementation(libs.kotlinx.serialization.json)
 
+    // serialization
+    implementation(libs.kotlinx.serialization.protobuf)
+
     // API & Protobuf
     api(libs.wire.runtime)
     implementation(libs.retrofit)
@@ -190,9 +193,9 @@ dependencies {
     androidTestImplementation(libs.truth)
     androidTestImplementation(libs.mockk)
     androidTestImplementation(libs.androidx.test.core)
+    androidTestImplementation(libs.androidx.test.rules)
     androidTestImplementation(libs.androidx.test.junit)
     androidTestImplementation(libs.kotlinx.coroutines.test)
     androidTestImplementation(libs.kotlin.test.junit)
     androidTestImplementation(libs.turbine)
-    androidTestImplementation("androidx.test:rules:1.5.0")
 }

@@ -120,6 +120,9 @@ public class CallHealthMonitor(val call: Call, val callScope: CoroutineScope) {
         reconnectInProgress = true
         reconnectionAttempts++
 
+        // TODO: Limit number of SFU peer connection retries - othwerwise the call can get stuck in
+        // reconnection and will never full-reconnect.
+
         val now = OffsetDateTime.now()
 
         val timeDifference = if (lastReconnectAt != null) {

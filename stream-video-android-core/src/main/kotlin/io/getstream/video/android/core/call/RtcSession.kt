@@ -34,6 +34,7 @@ import io.getstream.video.android.core.events.ChangePublishQualityEvent
 import io.getstream.video.android.core.events.ICETrickleEvent
 import io.getstream.video.android.core.events.JoinCallResponseEvent
 import io.getstream.video.android.core.events.ParticipantJoinedEvent
+import io.getstream.video.android.core.events.ParticipantLeftEvent
 import io.getstream.video.android.core.events.SfuDataEvent
 import io.getstream.video.android.core.events.SubscriberOfferEvent
 import io.getstream.video.android.core.events.TrackPublishedEvent
@@ -54,7 +55,6 @@ import io.getstream.video.android.core.utils.buildRemoteIceServers
 import io.getstream.video.android.core.utils.mangleSdpUtil
 import io.getstream.video.android.core.utils.mapState
 import io.getstream.video.android.core.utils.stringify
-import io.getstream.video.android.datastore.delegate.StreamUserDataStore
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
@@ -66,7 +66,6 @@ import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.retry
@@ -88,6 +87,7 @@ import org.webrtc.RtpTransceiver
 import org.webrtc.SessionDescription
 import retrofit2.HttpException
 import stream.video.sfu.models.ICETrickle
+import stream.video.sfu.models.Participant
 import stream.video.sfu.models.PeerType
 import stream.video.sfu.models.TrackInfo
 import stream.video.sfu.models.TrackType
@@ -165,7 +165,8 @@ public class RtcSession internal constructor(
     private var subscriptionSyncJob: Job? = null
     private var muteStateSyncJob: Job? = null
 
-    private var transceiverInitialized: Boolean = false
+    private var videoTransceiverInitialized: Boolean = false
+    private var audioTransceiverInitialized: Boolean = false
     private var errorJob: Job? = null
     private var eventJob: Job? = null
     internal val socket by lazy { sfuConnectionModule.sfuSocket }
@@ -277,13 +278,10 @@ public class RtcSession internal constructor(
     internal var sfuConnectionModule: SfuConnectionModule
 
     init {
-        val dataStore = StreamUserDataStore.instance()
-        coroutineScope.launch {
-            val user = dataStore.user.firstOrNull()
-            val apiKey = dataStore.apiKey.first()
-            if (apiKey.isBlank() || user?.id.isNullOrBlank()) {
-                throw IllegalArgumentException("The API key, user ID and token cannot be empty!")
-            }
+        if (!StreamVideo.isInstalled) {
+            throw IllegalArgumentException(
+                "SDK hasn't been initialised yet - can't start a RtcSession",
+            )
         }
 
         // step 1 setup the peer connections
@@ -372,19 +370,31 @@ public class RtcSession internal constructor(
         connectRtc()
     }
 
-    fun initializeVideoTransceiver() {
-        if (!transceiverInitialized) {
+    private fun initializeVideoTransceiver() {
+        if (!videoTransceiverInitialized) {
             publisher?.let {
                 it.addVideoTransceiver(
                     call.mediaManager.videoTrack,
                     listOf(buildTrackId(TrackType.TRACK_TYPE_VIDEO)),
                 )
-                transceiverInitialized = true
+                videoTransceiverInitialized = true
             }
         }
     }
 
-    suspend fun listenToMediaChanges() {
+    private fun initialiseAudioTransceiver() {
+        if (!audioTransceiverInitialized) {
+            publisher?.let {
+                it.addAudioTransceiver(
+                    call.mediaManager.audioTrack,
+                    listOf(buildTrackId(TrackType.TRACK_TYPE_AUDIO)),
+                )
+                audioTransceiverInitialized = true
+            }
+        }
+    }
+
+    private suspend fun listenToMediaChanges() {
         coroutineScope.launch {
             // update the tracks when the camera or microphone status changes
             call.mediaManager.camera.status.collectLatest {
@@ -400,6 +410,10 @@ public class RtcSession internal constructor(
             call.mediaManager.microphone.status.collectLatest {
                 // set the mute /unumute status
                 setMuteState(isEnabled = it == DeviceStatus.Enabled, TrackType.TRACK_TYPE_AUDIO)
+
+                if (it == DeviceStatus.Enabled) {
+                    initialiseAudioTransceiver()
+                }
             }
         }
     }
@@ -549,10 +563,7 @@ public class RtcSession internal constructor(
                         audio = call.mediaManager.audioTrack,
                     ),
                 )
-                publisher.addAudioTransceiver(
-                    call.mediaManager.audioTrack,
-                    listOf(buildTrackId(TrackType.TRACK_TYPE_AUDIO)),
-                )
+
                 // step 5 create the video track
                 setLocalTrack(
                     TrackType.TRACK_TYPE_VIDEO,
@@ -565,6 +576,9 @@ public class RtcSession internal constructor(
                 logger.v { "[createUserTracks] #sfu; videoTrack: ${call.mediaManager.videoTrack.stringify()}" }
                 if (call.mediaManager.camera.status.value == DeviceStatus.Enabled) {
                     initializeVideoTransceiver()
+                }
+                if (call.mediaManager.microphone.status.value == DeviceStatus.Enabled) {
+                    initialiseAudioTransceiver()
                 }
             }
         }
@@ -606,6 +620,9 @@ public class RtcSession internal constructor(
         logger.i { "[cleanup] #sfu; no args" }
         supervisorJob.cancel()
 
+        // disconnect the socket and clean it up
+        sfuConnectionModule.sfuSocket.cleanup()
+
         // cleanup the publisher and subcriber peer connections
         subscriber?.connection?.close()
         publisher?.connection?.close()
@@ -624,8 +641,7 @@ public class RtcSession internal constructor(
             }
         tracks.clear()
 
-        // disconnect the socket and clean it up
-        sfuConnectionModule.sfuSocket.cleanup()
+        trackDimensions.value = emptyMap()
     }
 
     internal val muteState = MutableStateFlow(
@@ -956,26 +972,12 @@ public class RtcSession internal constructor(
                     is ChangePublishQualityEvent -> updatePublishQuality(event)
 
                     is TrackPublishedEvent -> {
-                        // Make sure that we respect the user's choice for video/microphone
-                        // if the track is published (e.g. when the call is first started)
-                        val videoEnabled = if (event.userId == clientImpl.userId) {
-                            call.camera.isEnabled.value
-                        } else {
-                            true
-                        }
-
-                        val audioEnabled = if (event.userId == clientImpl.userId) {
-                            call.microphone.isEnabled.value
-                        } else {
-                            true
-                        }
-
                         updatePublishState(
                             userId = event.userId,
                             sessionId = event.sessionId,
                             trackType = event.trackType,
-                            videoEnabled = videoEnabled,
-                            audioEnabled = audioEnabled,
+                            videoEnabled = true,
+                            audioEnabled = true,
                         )
                     }
 
@@ -993,12 +995,41 @@ public class RtcSession internal constructor(
                         // the UI layer will automatically trigger updateParticipantsSubscriptions
                     }
 
+                    is ParticipantLeftEvent -> {
+                        removeParticipantTracks(event.participant)
+                        removeParticipantTrackDimensions(event.participant)
+                    }
+
                     else -> {
                         logger.d { "[onRtcEvent] skipped event: $event" }
                     }
                 }
             }
         }
+    }
+
+    private fun removeParticipantTracks(participant: Participant) {
+        tracks.remove(participant.session_id).also {
+            if (it == null) {
+                logger.e {
+                    "[handleEvent] Failed to remove track on ParticipantLeft " +
+                        "- track ID: ${participant.session_id}). Tracks: $tracks"
+                }
+            }
+        }
+    }
+
+    private fun removeParticipantTrackDimensions(participant: Participant) {
+        val newTrackDimensions = trackDimensions.value.toMutableMap()
+        newTrackDimensions.remove(participant.session_id).also {
+            if (it == null) {
+                logger.e {
+                    "[handleEvent] Failed to remove track dimension on ParticipantLeft " +
+                        "- track ID: ${participant.session_id}). TrackDimensions: $newTrackDimensions"
+                }
+            }
+        }
+        trackDimensions.value = newTrackDimensions
     }
 
     /**
@@ -1263,6 +1294,11 @@ public class RtcSession internal constructor(
                             VideoQuality.VIDEO_QUALITY_LOW_UNSPECIFIED
                         }
                     }
+
+                    // We need to divide by 1000 because the the FramerateRange is multiplied
+                    // by 1000 (see javadoc).
+                    val fps = (captureResolution?.framerate?.max ?: 0).div(1000)
+
                     VideoLayer(
                         rid = it.rid ?: "",
                         video_dimension = VideoDimension(
@@ -1270,7 +1306,7 @@ public class RtcSession internal constructor(
                             height = height.toInt(),
                         ),
                         bitrate = it.maxBitrateBps ?: 0,
-                        fps = captureResolution?.framerate?.max ?: 0,
+                        fps = fps,
                         quality = quality,
                     )
                 }

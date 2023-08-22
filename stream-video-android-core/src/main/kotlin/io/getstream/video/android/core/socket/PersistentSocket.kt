@@ -90,7 +90,8 @@ public open class PersistentSocket<T>(
     val connectionState: StateFlow<SocketState> = _connectionState
 
     /** the connection id */
-    var connectionId: String = ""
+    val _connectionId: MutableStateFlow<String?> = MutableStateFlow(null)
+    val connectionId: StateFlow<String?> = _connectionId
 
     /** Continuation if the socket successfully connected and we've authenticated */
     lateinit var connected: CancellableContinuation<T>
@@ -103,11 +104,21 @@ public open class PersistentSocket<T>(
     // we don't raise errors if you're closing the connection yourself
     private var closedByClient: Boolean = false
 
+    // True if cleanup was called and socket is completely destroyed (intentionally).
+    // You need to create a new instance (this is mainly used for the SfuSocket which is tied
+    // to a Subscriber SDP and needs to be recreated from scratch on WebRTC session clean up).
+    private var destroyed: Boolean = false
+
     /**
      * Connect the socket, authenticate, start the healthmonitor and see if the network is online
      */
-    suspend fun connect(invocation: (CancellableContinuation<T>) -> Unit = {}) =
-        suspendCancellableCoroutine { connectedContinuation ->
+    suspend fun connect(invocation: (CancellableContinuation<T>) -> Unit = {}): T? {
+        if (destroyed) {
+            logger.d { "[connect] Can't connect socket - it was already destroyed" }
+            return null
+        }
+
+        return suspendCancellableCoroutine { connectedContinuation ->
             logger.i { "[connect]" }
             connected = connectedContinuation
 
@@ -132,21 +143,32 @@ public open class PersistentSocket<T>(
                 invocation.invoke(connectedContinuation)
             }
         }
+    }
 
     fun cleanup() {
+        destroyed = true
         disconnect()
     }
 
     /**
      * Disconnect the socket
      */
-    fun disconnect() {
+    fun disconnect(reconnectReason: Throwable? = null) {
         logger.i { "[disconnect]" }
+
         closedByClient = true
         continuationCompleted = false
-        _connectionState.value = SocketState.DisconnectedByRequest
+
+        // If we are already DisconnectedByRequest then do not change the state to DisconnectedTemporarily.
+        // This prevents cases where reconnect() will overwrite the original state.
+        if (reconnectReason != null && _connectionState.value != SocketState.DisconnectedByRequest) {
+            _connectionState.value = SocketState.DisconnectedTemporarily(reconnectReason)
+        } else {
+            _connectionState.value = SocketState.DisconnectedByRequest
+        }
         socket?.close(CODE_CLOSE_SOCKET_FROM_CLIENT, "Connection close by client")
-        connectionId = ""
+        socket = null
+        _connectionId.value = null
         healthMonitor.stop()
         networkStateProvider.unsubscribe(networkStateListener)
     }
@@ -154,17 +176,23 @@ public open class PersistentSocket<T>(
     /**
      * Increment the reconnection attempts, disconnect and reconnect
      */
-    suspend fun reconnect(timeout: Long = reconnectTimeout) {
+    suspend fun reconnect(timeout: Long = reconnectTimeout, reconnectReason: Throwable?) {
         logger.i { "[reconnect] reconnectionAttempts: $reconnectionAttempts" }
         if (connectionState.value == SocketState.Connecting) {
             logger.i { "[reconnect] already connecting" }
             return
         }
-        _connectionState.value = SocketState.Connecting
+
+        if (destroyed) {
+            logger.d { "[reconnect] Can't reconnect socket - it was already destroyed" }
+            return
+        }
+
         reconnectionAttempts++
-        disconnect()
+        disconnect(reconnectReason = reconnectReason)
         // reconnect after the timeout
         delay(timeout)
+
         connect()
     }
 
@@ -176,7 +204,8 @@ public open class PersistentSocket<T>(
         logger.i { "[onNetworkConnected] state: $state" }
         if (state is SocketState.DisconnectedTemporarily || state == SocketState.NetworkDisconnected) {
             // reconnect instantly when the internet is back
-            reconnect(0)
+            val throwable = if (state is SocketState.DisconnectedTemporarily) state.error else null
+            reconnect(0, throwable)
         }
     }
 
@@ -233,7 +262,7 @@ public open class PersistentSocket<T>(
 
             // TODO: This logic is specific to the Coordinator socket, move it
             if (processedEvent is ConnectedEvent) {
-                connectionId = processedEvent.connectionId
+                _connectionId.value = processedEvent.connectionId
                 _connectionState.value = SocketState.Connected(processedEvent)
                 if (!continuationCompleted) {
                     continuationCompleted = true
@@ -343,7 +372,7 @@ public open class PersistentSocket<T>(
             logger.w { "[handleError] temporary error: $error" }
             _connectionState.value = SocketState.DisconnectedTemporarily(error)
             if (_connectionState.value != SocketState.Connecting) {
-                scope.launch { reconnect(reconnectTimeout) }
+                scope.launch { reconnect(reconnectTimeout, error) }
             }
         }
     }
@@ -376,7 +405,6 @@ public open class PersistentSocket<T>(
      */
     override fun onFailure(webSocket: WebSocket, t: Throwable, response: Response?) {
         logger.d { "[onFailure] t: $t, response: $response" }
-
         handleError(t)
     }
 
@@ -392,7 +420,7 @@ public open class PersistentSocket<T>(
                 logger.i { "health monitor triggered a reconnect" }
                 val state = connectionState.value
                 if (state is SocketState.DisconnectedTemporarily) {
-                    this@PersistentSocket.reconnect()
+                    this@PersistentSocket.reconnect(reconnectReason = state.error)
                 }
             }
 

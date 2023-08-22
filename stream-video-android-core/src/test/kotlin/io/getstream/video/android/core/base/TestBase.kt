@@ -21,7 +21,6 @@ import io.getstream.log.StreamLog
 import io.getstream.log.streamLog
 import io.getstream.result.Result
 import io.getstream.video.android.core.call.connection.StreamPeerConnectionFactory
-import io.getstream.video.android.datastore.delegate.StreamUserDataStore
 import io.mockk.MockKAnnotations
 import io.mockk.impl.annotations.MockK
 import io.mockk.junit4.MockKRule
@@ -60,13 +59,6 @@ public open class TestBase {
             StreamLog.setValidator { priority, _ -> priority > Priority.VERBOSE }
             StreamLog.install(logger = testLogger)
             testLogger.streamLog { "test logger installed" }
-        }
-
-        if (!StreamUserDataStore.isInstalled) {
-            StreamUserDataStore.install(
-                context = context.applicationContext,
-                isEncrypted = false,
-            )
         }
     }
 

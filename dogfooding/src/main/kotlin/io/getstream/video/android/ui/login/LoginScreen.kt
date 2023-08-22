@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+@file:OptIn(ExperimentalComposeUiApi::class)
+
 package io.getstream.video.android.ui.login
 
 import android.content.Intent
@@ -45,12 +47,15 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.testTagsAsResourceId
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
@@ -103,20 +108,21 @@ private fun LoginContent(
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .background(Colors.background),
+                .background(Colors.background)
+                .semantics { testTagsAsResourceId = true },
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
             Image(
                 modifier = Modifier.size(102.dp),
-                painter = painterResource(id = R.drawable.ic_stream_video_meeting),
+                painter = painterResource(id = R.drawable.ic_stream_video_meeting_logo),
                 contentDescription = null,
             )
 
             Spacer(modifier = Modifier.height(27.dp))
 
             Text(
-                text = stringResource(id = R.string.stream_meetings),
+                text = stringResource(id = R.string.app_name),
                 color = Color.White,
                 fontSize = 38.sp,
             )
@@ -288,11 +294,10 @@ private fun HandleLoginUiStates(
             }
 
             is LoginUiState.SignInComplete -> {
-                loginViewModel.initializeStreamVideo(
-                    context = context,
-                    tokenResponse = loginUiState.tokenResponse,
-                )
+                navigateToCallJoin.invoke()
+            }
 
+            is LoginUiState.AlreadyLoggedIn -> {
                 navigateToCallJoin.invoke()
             }
 

@@ -21,20 +21,10 @@ import android.content.Context
 import com.google.firebase.crashlytics.ktx.crashlytics
 import com.google.firebase.ktx.Firebase
 import dagger.hilt.android.HiltAndroidApp
-import io.getstream.android.push.firebase.FirebasePushDeviceGenerator
-import io.getstream.chat.android.client.ChatClient
-import io.getstream.chat.android.client.logger.ChatLogLevel
-import io.getstream.chat.android.offline.plugin.factory.StreamOfflinePluginFactory
-import io.getstream.chat.android.state.plugin.config.StatePluginConfig
-import io.getstream.chat.android.state.plugin.factory.StreamStatePluginFactory
-import io.getstream.video.android.core.StreamVideo
-import io.getstream.video.android.core.StreamVideoBuilder
-import io.getstream.video.android.core.logging.LoggingLevel
-import io.getstream.video.android.core.notifications.NotificationConfig
-import io.getstream.video.android.model.ApiKey
-import io.getstream.video.android.model.User
-import io.getstream.video.android.token.StreamVideoNetwork
+import io.getstream.video.android.datastore.delegate.StreamUserDataStore
 import io.getstream.video.android.tooling.handler.StreamGlobalExceptionHandler
+import io.getstream.video.android.util.StreamVideoInitHelper
+import kotlinx.coroutines.runBlocking
 
 @HiltAndroidApp
 class App : Application() {
@@ -49,67 +39,29 @@ class App : Application() {
                 exceptionHandler = { stackTrace -> Firebase.crashlytics.log(stackTrace) },
             )
         }
-    }
 
-    /** Sets up and returns the [StreamVideo] required to connect to the API. */
-    fun initializeStreamVideo(
-        user: User,
-        token: String,
-        apiKey: ApiKey,
-        loggingLevel: LoggingLevel,
-    ): StreamVideo {
-        return StreamVideoBuilder(
-            context = this,
-            user = user,
-            token = token,
-            apiKey = apiKey,
-            loggingLevel = loggingLevel,
-            ensureSingleInstance = false,
-            notificationConfig = NotificationConfig(
-                pushDeviceGenerators = listOf(
-                    FirebasePushDeviceGenerator(providerName = "firebase"),
-                ),
-            ),
-            tokenProvider = {
-                val email = user.custom["email"]
-                val response = StreamVideoNetwork.tokenService.fetchToken(
-                    userId = email,
-                    apiKey = API_KEY,
-                )
-                response.token
-            },
-        ).build()
-    }
+        // We use the provided StreamUserDataStore in the demo app for user data storage.
+        // This is a convenience class provided for storage but the SDK itself is not aware of
+        // this instance and doesn't use it. You can use it to store the logged in user and then
+        // retrieve the information for SDK initialisation.
+        StreamUserDataStore.install(this, isEncrypted = true)
 
-    fun initializeStreamChat(
-        user: User,
-        token: String,
-    ) {
-        val offlinePlugin = StreamOfflinePluginFactory(this) // 1
-        val statePluginFactory = StreamStatePluginFactory( // 2
-            config = StatePluginConfig(
-                backgroundSyncEnabled = true,
-                userPresence = true,
-            ),
-            appContext = this,
-        )
+        // Demo helper for initialising the Video and Chat SDK instances from one place.
+        // For simpler code we "inject" the Context manually instead of using DI.
+        StreamVideoInitHelper.init(this)
 
-        val logLevel = if (BuildConfig.DEBUG) ChatLogLevel.ALL else ChatLogLevel.NOTHING
-        val chatClient = ChatClient.Builder(API_KEY, this)
-            .withPlugins(offlinePlugin, statePluginFactory)
-            .logLevel(logLevel)
-            .build()
-
-        val chatUser = io.getstream.chat.android.client.models.User(
-            id = user.id,
-            name = user.name,
-            image = user.image,
-        )
-
-        chatClient.connectUser(
-            user = chatUser,
-            token = token,
-        ).enqueue()
+        // Prepare the Video SDK if we already have a user logged in the demo app.
+        // If you need to receive push messages (incoming call) then the SDK must be initialised
+        // in Application.onCreate. Otherwise it doesn't know how to init itself when push arrives
+        // and will ignore the push messages.
+        // If push messages are not used then you don't need to init here - you can init
+        // on-demand (initialising here is usually less error-prone).
+        runBlocking {
+            StreamVideoInitHelper.loadSdk(
+                dataStore = StreamUserDataStore.instance(),
+                useRandomUserAsFallback = false,
+            )
+        }
     }
 }
 

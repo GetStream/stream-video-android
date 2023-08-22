@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+@file:OptIn(ExperimentalComposeUiApi::class)
+
 package io.getstream.video.android.ui.lobby
 
 import android.content.Intent
@@ -40,6 +42,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
@@ -47,6 +50,8 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.testTagsAsResourceId
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
@@ -145,13 +150,15 @@ private fun CallLobbyHeader(
             fontSize = 16.sp,
         )
 
-        Spacer(modifier = Modifier.width(4.dp))
+        if (BuildConfig.FLAVOR == "dogfooding") {
+            Spacer(modifier = Modifier.width(4.dp))
 
-        StreamButton(
-            modifier = Modifier.width(125.dp),
-            text = stringResource(id = R.string.sign_out),
-            onClick = { callLobbyViewModel.signOut() },
-        )
+            StreamButton(
+                modifier = Modifier.width(125.dp),
+                text = stringResource(id = R.string.sign_out),
+                onClick = { callLobbyViewModel.signOut() },
+            )
+        }
     }
 
     LaunchedEffect(key1 = isLoggedOut) {
@@ -171,7 +178,8 @@ private fun CallLobbyBody(
     Column(
         modifier = modifier
             .fillMaxSize()
-            .background(Colors.background),
+            .background(Colors.background)
+            .semantics { testTagsAsResourceId = true },
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
@@ -195,16 +203,16 @@ private fun CallLobbyBody(
 
         Spacer(modifier = Modifier.height(20.dp))
 
-        val localInspectionMode = LocalInspectionMode.current
         val isCameraEnabled: Boolean by if (LocalInspectionMode.current) {
             remember { mutableStateOf(true) }
         } else {
-            call.camera.isEnabled.collectAsState()
+            callLobbyViewModel.cameraEnabled.collectAsState(initial = false)
         }
+
         val isMicrophoneEnabled by if (LocalInspectionMode.current) {
             remember { mutableStateOf(true) }
         } else {
-            call.microphone.isEnabled.collectAsState()
+            callLobbyViewModel.microphoneEnabled.collectAsState(initial = false)
         }
 
         // turn on camera and microphone by default
@@ -213,9 +221,6 @@ private fun CallLobbyBody(
             if (BuildConfig.BENCHMARK.toBoolean()) {
                 callLobbyViewModel.call.camera.disable()
                 callLobbyViewModel.call.microphone.disable()
-            } else if (!localInspectionMode) {
-                callLobbyViewModel.call.camera.enable()
-                callLobbyViewModel.call.microphone.enable()
             }
         }
 
@@ -233,13 +238,19 @@ private fun CallLobbyBody(
             },
         )
 
-        LobbyDescription(callLobbyViewModel = callLobbyViewModel)
+        LobbyDescription(
+            callLobbyViewModel = callLobbyViewModel,
+            cameraEnabled = isCameraEnabled,
+            microphoneEnabled = isMicrophoneEnabled,
+        )
     }
 }
 
 @Composable
 private fun LobbyDescription(
     callLobbyViewModel: CallLobbyViewModel,
+    cameraEnabled: Boolean,
+    microphoneEnabled: Boolean,
 ) {
     val session by callLobbyViewModel.call.state.session.collectAsState()
 
@@ -267,7 +278,14 @@ private fun LobbyDescription(
                 .clip(RoundedCornerShape(12.dp))
                 .testTag("start_call"),
             text = stringResource(id = R.string.join_call),
-            onClick = { callLobbyViewModel.handleUiEvent(CallLobbyEvent.JoinCall) },
+            onClick = {
+                callLobbyViewModel.handleUiEvent(
+                    CallLobbyEvent.JoinCall(
+                        cameraEnabled = cameraEnabled,
+                        microphoneEnabled = microphoneEnabled,
+                    ),
+                )
+            },
         )
     }
 }
@@ -303,6 +321,7 @@ private fun HandleCallLobbyUiState(
 @Composable
 private fun CallLobbyScreenPreview() {
     StreamMockUtils.initializeStreamVideo(LocalContext.current)
+    StreamUserDataStore.install(LocalContext.current)
     VideoTheme {
         CallLobbyScreen(
             callLobbyViewModel = CallLobbyViewModel(

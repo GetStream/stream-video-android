@@ -32,6 +32,7 @@ import io.getstream.video.android.core.model.QueriedMembers
 import io.getstream.video.android.core.model.SortField
 import io.getstream.video.android.core.model.UpdateUserPermissionsData
 import io.getstream.video.android.core.model.toIceServer
+import io.getstream.video.android.core.socket.SocketState
 import io.getstream.video.android.core.utils.RampValueUpAndDownHelper
 import io.getstream.video.android.core.utils.toQueriedMembers
 import io.getstream.video.android.model.User
@@ -69,6 +70,11 @@ import org.webrtc.RendererCommon
 import org.webrtc.audio.JavaAudioDeviceModule.AudioSamples
 import stream.video.sfu.models.TrackType
 import stream.video.sfu.models.VideoDimension
+
+/**
+ * How long do we keep trying to make a full-reconnect (once the SFU signalling WS went down)
+ */
+const val sfuReconnectTimeoutMillis = 30_000
 
 /**
  * The call class gives you access to all call level API calls
@@ -131,6 +137,12 @@ public class Call(
      * Note: Doesn't return any values until the session is established!
      */
     val localMicrophoneAudioLevel: StateFlow<Float> = audioLevelOutputHelper.currentLevel
+
+    /**
+     * Time (in millis) when the full reconnection flow started. Will be null again once
+     * the reconnection flow ends (success or failure)
+     */
+    private var sfuSocketReconnectionTime: Long? = null
 
     /** Session handles all real time communication for video and audio */
     internal var session: RtcSession? = null
@@ -363,9 +375,67 @@ public class Call(
 
         client.state.setActiveCall(this)
 
+        // listen to Signal WS
+        scope.launch {
+            session?.let {
+                it.sfuConnectionModule.sfuSocket.connectionState.collect { sfuSocketState ->
+                    handleSignalChannelDisconnect(isRetry = false)
+                }
+            }
+        }
+
         timer.finish()
 
         return Success(value = session!!)
+    }
+
+    private suspend fun handleSignalChannelDisconnect(isRetry: Boolean) {
+        val sfuSocketState = session?.sfuConnectionModule?.sfuSocket?.connectionState?.value
+
+        // If SFU signalling connection went down then we start a full call reconnect loop.
+        // The SFU socket state can be null on subsequent tries because the existing
+        // session was cleaned up.
+        if (isRetry || sfuSocketState is SocketState.DisconnectedTemporarily) {
+            val connectionState = state._connection.value
+            if (!isRetry && (
+                    connectionState == RealtimeConnection.Reconnecting ||
+                        connectionState == RealtimeConnection.InProgress
+                    )
+            ) {
+                logger.d {
+                    "[handleSignalChannelDisconnect] skipping full reconnect (connectionState: $connectionState)"
+                }
+                return
+            } else {
+                state._connection.value = RealtimeConnection.Reconnecting
+
+                if (sfuSocketReconnectionTime == null) {
+                    sfuSocketReconnectionTime = System.currentTimeMillis()
+                }
+
+                // We were not able to restore the SFU peer connection in time
+                if (System.currentTimeMillis() - (sfuSocketReconnectionTime ?: System.currentTimeMillis()) > sfuReconnectTimeoutMillis) {
+                    leave(Error("Failed to do a full reconnect - connection issue?"))
+                    return
+                }
+
+                // Clean up the existing RtcSession
+                session?.cleanup()
+                session = null
+
+                // Wait a little for clean-up
+                delay(250)
+
+                // Re-join the call
+                val result = _join()
+                if (result.isFailure) {
+                    // keep trying until timeout
+                    handleSignalChannelDisconnect(isRetry = true)
+                } else {
+                    sfuSocketReconnectionTime = null
+                }
+            }
+        }
     }
 
     suspend fun sendStats(data: Map<String, Any>) {
@@ -410,7 +480,16 @@ public class Call(
 
     /** Leave the call, but don't end it for other users */
     fun leave() {
-        state._connection.value = RealtimeConnection.Disconnected
+        leave(disconnectionReason = null)
+    }
+
+    private fun leave(disconnectionReason: Throwable?) {
+        sfuSocketReconnectionTime = null
+        state._connection.value = if (disconnectionReason != null) {
+            RealtimeConnection.Failed(disconnectionReason)
+        } else {
+            RealtimeConnection.Disconnected
+        }
         client.state.removeActiveCall()
         client.state.removeRingingCall()
         (client as StreamVideoImpl).onCallCleanUp(this)

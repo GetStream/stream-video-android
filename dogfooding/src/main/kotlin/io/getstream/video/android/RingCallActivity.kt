@@ -27,6 +27,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.lifecycleScope
+import dagger.hilt.android.AndroidEntryPoint
 import io.getstream.result.Result
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.call.activecall.CallContent
@@ -40,20 +41,26 @@ import io.getstream.video.android.core.call.state.LeaveCall
 import io.getstream.video.android.core.call.state.ToggleCamera
 import io.getstream.video.android.core.call.state.ToggleMicrophone
 import io.getstream.video.android.core.call.state.ToggleSpeakerphone
+import io.getstream.video.android.datastore.delegate.StreamUserDataStore
 import io.getstream.video.android.model.mapper.isValidCallId
 import io.getstream.video.android.model.mapper.toTypeAndId
 import io.getstream.video.android.util.StreamVideoInitHelper
 import kotlinx.coroutines.launch
 import java.util.UUID
+import javax.inject.Inject
 
+@AndroidEntryPoint
 class RingCallActivity : ComponentActivity() {
+
+    @Inject
+    lateinit var dataStore: StreamUserDataStore
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         lifecycleScope.launch {
-            // Init StreamVideo if it's not already initialised
-            StreamVideoInitHelper.init(this@RingCallActivity)
+            // Not necessary if you initialise the SDK in Application.onCreate()
+            StreamVideoInitHelper.loadSdk(dataStore = dataStore)
 
             // Create Call ID if it wasn't supplied by Intent
             val callId: String = intent.getStringExtra(EXTRA_CID)

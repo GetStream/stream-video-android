@@ -16,23 +16,19 @@
 
 package io.getstream.video.android.ui.login
 
-import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.google.firebase.auth.FirebaseAuth
 import dagger.hilt.android.lifecycle.HiltViewModel
-import io.getstream.chat.android.client.ChatClient
-import io.getstream.log.Priority
 import io.getstream.log.streamLog
 import io.getstream.video.android.API_KEY
 import io.getstream.video.android.BuildConfig
-import io.getstream.video.android.app
 import io.getstream.video.android.core.StreamVideo
-import io.getstream.video.android.core.logging.LoggingLevel
 import io.getstream.video.android.datastore.delegate.StreamUserDataStore
 import io.getstream.video.android.model.User
 import io.getstream.video.android.token.StreamVideoNetwork
 import io.getstream.video.android.token.TokenResponse
+import io.getstream.video.android.util.StreamVideoInitHelper
 import io.getstream.video.android.util.UserIdGenerator
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
@@ -70,15 +66,39 @@ class LoginViewModel @Inject constructor(
     }
 
     private fun signInInSuccess(email: String) = flow {
-        try {
-            val response = StreamVideoNetwork.tokenService.fetchToken(
-                userId = email,
-                apiKey = API_KEY,
-            )
-            emit(LoginUiState.SignInComplete(response))
-        } catch (exception: Throwable) {
-            emit(LoginUiState.SignInFailure(exception.message ?: "General error"))
-            streamLog { "Failed to fetch token - cause: $exception" }
+        // skip login if we are already logged in (use has navigated back)
+        if (StreamVideo.isInstalled) {
+            emit(LoginUiState.AlreadyLoggedIn)
+        } else {
+            try {
+                val response = StreamVideoNetwork.tokenService.fetchToken(
+                    userId = email,
+                    apiKey = API_KEY,
+                )
+
+                // if we are logged in with Google account then read the data (demo app doesn't have
+                // firebase login)
+                val authFirebaseUser = FirebaseAuth.getInstance().currentUser
+                val user = User(
+                    id = response.userId,
+                    name = authFirebaseUser?.displayName ?: "",
+                    image = authFirebaseUser?.photoUrl?.toString() ?: "",
+                    role = "admin",
+                    custom = mapOf("email" to response.userId),
+                )
+
+                // Store the data in the demo app
+                dataStore.updateUser(user)
+                dataStore.updateUserToken(response.token)
+
+                // Init the Video SDK with the data
+                StreamVideoInitHelper.loadSdk(dataStore)
+
+                emit(LoginUiState.SignInComplete(response))
+            } catch (exception: Throwable) {
+                emit(LoginUiState.SignInFailure(exception.message ?: "General error"))
+                streamLog { "Failed to fetch token - cause: $exception" }
+            }
         }
     }.flowOn(Dispatchers.IO)
 
@@ -91,7 +111,7 @@ class LoginViewModel @Inject constructor(
             val user = dataStore.user.firstOrNull()
             if (user != null) {
                 handleUiEvent(LoginEvent.Loading)
-                if (user.isValid() && !BuildConfig.BENCHMARK.toBoolean()) {
+                if (!BuildConfig.BENCHMARK.toBoolean()) {
                     delay(10)
                     handleUiEvent(LoginEvent.SignInInSuccess(userId = user.id))
                 }
@@ -101,39 +121,12 @@ class LoginViewModel @Inject constructor(
                 if (BuildConfig.FLAVOR == "production") {
                     handleUiEvent(LoginEvent.Loading)
                     handleUiEvent(
-                        LoginEvent.SignInInSuccess(UserIdGenerator.generateRandomString()),
+                        LoginEvent.SignInInSuccess(
+                            UserIdGenerator.generateRandomString(upperCaseOnly = true),
+                        ),
                     )
                 }
             }
-        }
-    }
-
-    fun initializeStreamVideo(
-        context: Context,
-        tokenResponse: TokenResponse,
-    ) {
-        val authUser = FirebaseAuth.getInstance().currentUser
-        val userId = tokenResponse.userId
-        val token = tokenResponse.token
-        val user = User(
-            id = userId,
-            name = authUser?.displayName ?: "",
-            image = authUser?.photoUrl?.toString() ?: "",
-            role = "admin",
-            custom = mapOf("email" to userId),
-        )
-
-        if (!StreamVideo.isInstalled) {
-            context.app.initializeStreamVideo(
-                apiKey = API_KEY,
-                user = user,
-                loggingLevel = LoggingLevel(priority = Priority.DEBUG),
-                token = token,
-            )
-        }
-
-        if (!ChatClient.isInitialized) {
-            context.app.initializeStreamChat(user = user, token = token)
         }
     }
 }
@@ -144,6 +137,8 @@ sealed interface LoginUiState {
     object Loading : LoginUiState
 
     object GoogleSignIn : LoginUiState
+
+    object AlreadyLoggedIn : LoginUiState
 
     data class SignInComplete(val tokenResponse: TokenResponse) : LoginUiState
 

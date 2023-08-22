@@ -35,6 +35,7 @@ import io.getstream.chat.android.client.models.User
 import io.getstream.chat.android.client.utils.onSuccessSuspend
 import io.getstream.chat.android.state.extensions.globalState
 import io.getstream.result.Result
+import io.getstream.video.android.MainActivity
 import io.getstream.video.android.core.BuildConfig
 import io.getstream.video.android.core.StreamVideo
 import io.getstream.video.android.model.StreamCallId
@@ -80,6 +81,12 @@ class CallActivity : ComponentActivity() {
                 showDebugOptions = io.getstream.video.android.BuildConfig.DEBUG,
                 onLeaveCall = {
                     call.leave()
+
+                    val intent = Intent(this, MainActivity::class.java).apply {
+                        flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+                    }
+                    startActivity(intent)
+
                     finish()
                 },
             )
