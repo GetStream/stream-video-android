@@ -16,6 +16,7 @@
 
 package io.getstream.video.android.ui.lobby
 
+import android.util.Log
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -56,10 +57,23 @@ class CallLobbyViewModel @Inject constructor(
     val call: Call by lazy {
         val streamVideo = StreamVideo.instance()
         val call = streamVideo.call(type = callId.type, id = callId.id)
-        // start listening to the call events to get the participant count
+
         viewModelScope.launch {
-            call.get()
+            // create the call if it doesn't exist - this will also load the settings for the call,
+            // this way the lobby screen can already display the right mic/camera settings
+            // This also starts listening to the call events to get the participant count
+            val callGetOrCreateResult = call.create()
+            if (callGetOrCreateResult.isFailure) {
+                // in demo we can ignore this. The lobby screen will just display default camera/video,
+                // but we will show an error
+                Log.e(
+                    "CallJoinViewModel",
+                    "Failed to create the call ${callGetOrCreateResult.errorOrNull()}",
+                )
+                event.emit(CallLobbyEvent.JoinFailed(callGetOrCreateResult.errorOrNull()?.message))
+            }
         }
+
         call
     }
 
@@ -121,7 +135,9 @@ class CallLobbyViewModel @Inject constructor(
                     call.microphone.setEnabled(enabled = event.microphoneEnabled, fromUser = true)
                     flowOf(CallLobbyUiState.JoinCompleted)
                 }
-
+                is CallLobbyEvent.JoinFailed -> {
+                    flowOf(CallLobbyUiState.JoinFailed(event.reason))
+                }
                 else -> flowOf(CallLobbyUiState.Nothing)
             }
         }
@@ -164,4 +180,6 @@ sealed interface CallLobbyEvent {
     object Nothing : CallLobbyEvent
 
     class JoinCall(val cameraEnabled: Boolean, val microphoneEnabled: Boolean) : CallLobbyEvent
+
+    data class JoinFailed(val reason: String?) : CallLobbyEvent
 }
