@@ -144,6 +144,11 @@ public class Call(
      */
     private var sfuSocketReconnectionTime: Long? = null
 
+    /**
+     * Call has been left and the object is cleaned up and destroyed.
+     */
+    private var isDestroyed = false
+
     /** Session handles all real time communication for video and audio */
     internal var session: RtcSession? = null
     internal val mediaManager by lazy {
@@ -484,6 +489,12 @@ public class Call(
     }
 
     private fun leave(disconnectionReason: Throwable?) {
+        if (isDestroyed) {
+            logger.w { "[leave] Call already destroyed, ignoring" }
+            return
+        }
+        isDestroyed = true
+
         sfuSocketReconnectionTime = null
         state._connection.value = if (disconnectionReason != null) {
             RealtimeConnection.Failed(disconnectionReason)
@@ -790,6 +801,7 @@ public class Call(
         session?.cleanup()
         supervisorJob.cancel()
         statsGatheringJob?.cancel()
+        mediaManager.cleanup()
         session = null
     }
 

@@ -36,7 +36,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
@@ -67,7 +67,7 @@ class CallLobbyViewModel @Inject constructor(
                 // in demo we can ignore this. The lobby screen will just display default camera/video,
                 // but we will show an error
                 Log.e(
-                    "CallJoinViewModel",
+                    "CallLobbyViewModel",
                     "Failed to create the call ${callGetOrCreateResult.errorOrNull()}",
                 )
                 event.emit(CallLobbyEvent.JoinFailed(callGetOrCreateResult.errorOrNull()?.message))
@@ -79,10 +79,20 @@ class CallLobbyViewModel @Inject constructor(
 
     val user: Flow<User?> = dataStore.user
     val isLoggedOut = dataStore.user.map { it == null }
+    val cameraEnabled: StateFlow<Boolean> = call.camera.isEnabled
+    val microphoneEnabled: StateFlow<Boolean> = call.microphone.isEnabled
 
-    val microphoneEnabled: Flow<Boolean> =
-        combine(call.state.settings, call.microphone.status) { settings, status ->
-            val enabled = when (status) {
+    init {
+        // for demo we set the default state for mic and camera to be on
+        // and then we wait for call settings and we update the default state accordingly
+        call.microphone.setEnabled(true)
+        call.camera.setEnabled(true)
+
+        viewModelScope.launch {
+            // wait for settings (this will not block the UI) and then update the mic
+            // based on it
+            val settings = call.state.settings.first { it != null }
+            val enabled = when (call.microphone.status.first()) {
                 is DeviceStatus.NotSelected -> {
                     settings?.audio?.micDefaultOn ?: false
                 }
@@ -97,13 +107,15 @@ class CallLobbyViewModel @Inject constructor(
             }
 
             // enable/disable audi capture (audio indicator will not work otherwise)
-            call.microphone.setEnabled(enabled, fromUser = false)
-            enabled
+            call.microphone.setEnabled(enabled)
         }
 
-    val cameraEnabled: Flow<Boolean> =
-        combine(call.state.settings, call.camera.status) { settings, status ->
-            val enabled = when (status) {
+        viewModelScope.launch {
+            // wait for settings (this will not block the UI) and then update the camera
+            // based on it
+            val settings = call.state.settings.first { it != null }
+
+            val enabled = when (call.camera.status.first()) {
                 is DeviceStatus.NotSelected -> {
                     settings?.video?.cameraDefaultOn ?: false
                 }
@@ -116,10 +128,11 @@ class CallLobbyViewModel @Inject constructor(
                     false
                 }
             }
-            // enable/disable camera capture (no preview would be visible otherwise
-            call.camera.setEnabled(enabled, fromUser = false)
-            enabled
+
+            // enable/disable camera capture (no preview would be visible otherwise)
+            call.camera.setEnabled(enabled)
         }
+    }
 
     private val _isLoading: MutableStateFlow<Boolean> = MutableStateFlow(false)
     internal val isLoading: StateFlow<Boolean> = _isLoading
@@ -129,10 +142,6 @@ class CallLobbyViewModel @Inject constructor(
         .flatMapLatest { event ->
             when (event) {
                 is CallLobbyEvent.JoinCall -> {
-                    // mark the settings as "user selected"
-                    // (to prevent the default server settings from overriding them later)
-                    call.camera.setEnabled(enabled = event.cameraEnabled, fromUser = true)
-                    call.microphone.setEnabled(enabled = event.microphoneEnabled, fromUser = true)
                     flowOf(CallLobbyUiState.JoinCompleted)
                 }
                 is CallLobbyEvent.JoinFailed -> {
