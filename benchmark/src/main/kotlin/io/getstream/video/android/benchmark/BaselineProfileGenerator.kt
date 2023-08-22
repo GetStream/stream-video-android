@@ -116,11 +116,3 @@ private fun getPermissionText(): String {
         else -> "While using the app"
     }
 }
-
-private fun getPermissionText(): String {
-    return when {
-        Build.VERSION.SDK_INT <= 28 -> "ALLOW"
-        Build.VERSION.SDK_INT == 29 -> "Allow only while using the app"
-        else -> "While using the app"
-    }
-}

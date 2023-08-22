@@ -15,7 +15,7 @@ Lio/getstream/video/android/tooling/handler/StreamGlobalExceptionHandler$1;
 HSPLio/getstream/video/android/tooling/handler/StreamGlobalExceptionHandler$1;-><init>(Lio/getstream/video/android/tooling/handler/StreamGlobalExceptionHandler;)V
 HSPLio/getstream/video/android/tooling/handler/StreamGlobalExceptionHandler$1;->onActivityCreated(Landroid/app/Activity;Landroid/os/Bundle;)V
 PLio/getstream/video/android/tooling/handler/StreamGlobalExceptionHandler$1;->onActivityDestroyed(Landroid/app/Activity;)V
-HSPLio/getstream/video/android/tooling/handler/StreamGlobalExceptionHandler$1;->onActivityPaused(Landroid/app/Activity;)V
+PLio/getstream/video/android/tooling/handler/StreamGlobalExceptionHandler$1;->onActivityPaused(Landroid/app/Activity;)V
 HSPLio/getstream/video/android/tooling/handler/StreamGlobalExceptionHandler$1;->onActivityResumed(Landroid/app/Activity;)V
 PLio/getstream/video/android/tooling/handler/StreamGlobalExceptionHandler$1;->onActivitySaveInstanceState(Landroid/app/Activity;Landroid/os/Bundle;)V
 HSPLio/getstream/video/android/tooling/handler/StreamGlobalExceptionHandler$1;->onActivityStarted(Landroid/app/Activity;)V
