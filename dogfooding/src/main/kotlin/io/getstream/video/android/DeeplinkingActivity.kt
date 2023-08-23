@@ -31,6 +31,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.lifecycleScope
+import dagger.hilt.android.AndroidEntryPoint
 import io.getstream.android.push.permissions.NotificationPermissionManager
 import io.getstream.android.push.permissions.NotificationPermissionStatus
 import io.getstream.log.taggedLogger
@@ -44,6 +45,7 @@ import io.getstream.video.android.util.StreamVideoInitHelper
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
+@AndroidEntryPoint
 class DeeplinkingActivity : ComponentActivity() {
 
     private val logger by taggedLogger("Call:DeeplinkView")
