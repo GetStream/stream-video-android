@@ -1,7 +1,5 @@
 package io.getstream.video.android.core.call.stats.model
 
-import com.squareup.moshi.Json
-
 // {
 //   id: RTCCodec_0_Inbound_101,
 //   type: codec,
@@ -12,7 +10,7 @@ import com.squareup.moshi.Json
 //   sdpFmtpLine: apt=100,
 //   payloadType: 101
 // }
-data class RtcCodec(
+data class RtcCodecStats(
     override val id: String?,
     override val type: String?,
     override val timestampUs: Double?,

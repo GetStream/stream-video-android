@@ -1,4 +1,4 @@
-package io.getstream.video.android.core.call.stats.model
+package io.getstream.video.android.core.call.stats.model.discriminator
 
 enum class RtcReportType(
     private val alias: String,

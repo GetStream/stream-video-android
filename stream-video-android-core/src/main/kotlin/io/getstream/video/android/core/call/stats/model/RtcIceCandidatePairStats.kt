@@ -1,28 +1,30 @@
 package io.getstream.video.android.core.call.stats.model
 
-data class RtcIceCandidatePair(
+import java.math.BigInteger
+
+data class RtcIceCandidatePairStats(
     override val id: String?,
     override val type: String?,
     override val timestampUs: Double?,
     val transportId: String?,
-    val requestsSent: Long?,
+    val requestsSent: BigInteger?,
     val localCandidateId: String?,
-    val bytesSent: Long?,
-    val bytesDiscardedOnSend: Long?,
-    val priority: Long?,
-    val requestsReceived: Long?,
+    val bytesSent: BigInteger?,
+    val bytesDiscardedOnSend: BigInteger?,
+    val priority: BigInteger?,
+    val requestsReceived: BigInteger?,
     val writable: Boolean?,
     val remoteCandidateId: String?,
-    val bytesReceived: Long?,
-    val packetsReceived: Long?,
-    val responsesSent: Long?,
-    val packetsDiscardedOnSend: Long?,
+    val bytesReceived: BigInteger?,
+    val packetsReceived: BigInteger?,
+    val responsesSent: BigInteger?,
+    val packetsDiscardedOnSend: BigInteger?,
     val nominated: Boolean?,
-    val packetsSent: Long?,
+    val packetsSent: BigInteger?,
     val totalRoundTripTime: Double?,
-    val responsesReceived: Long?,
+    val responsesReceived: BigInteger?,
     val state: String?,
-    val consentRequestsSent: Long?,
+    val consentRequestsSent: BigInteger?,
 ) : RtcStats() {
     companion object {
         const val TRANSPORT_ID = "transportId"
