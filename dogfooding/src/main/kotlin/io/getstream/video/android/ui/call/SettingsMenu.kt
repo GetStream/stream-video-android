@@ -151,6 +151,34 @@ internal fun SettingsMenu(
 
                     Row(
                         modifier = Modifier.clickable {
+                            call.debug.doFullReconnection()
+                            onDismissed.invoke()
+                            Toast.makeText(
+                                context,
+                                "Killing SFU WS. Should trigger reconnect...",
+                                Toast.LENGTH_SHORT,
+                            ).show()
+                        },
+                    ) {
+                        Icon(
+                            painter = painterResource(
+                                id = R.drawable.stream_video_ic_fullscreen_exit,
+                            ),
+                            tint = VideoTheme.colors.textHighEmphasis,
+                            contentDescription = null,
+                        )
+
+                        Text(
+                            modifier = Modifier.padding(start = 20.dp),
+                            text = "Kill SFU WS",
+                            color = VideoTheme.colors.textHighEmphasis,
+                        )
+                    }
+
+                    Spacer(modifier = Modifier.height(12.dp))
+
+                    Row(
+                        modifier = Modifier.clickable {
                             call.debug.switchSfu()
                             onDismissed.invoke()
                             Toast.makeText(context, "Switch sfu", Toast.LENGTH_SHORT).show()

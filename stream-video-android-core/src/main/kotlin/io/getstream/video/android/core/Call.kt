@@ -831,6 +831,10 @@ public class Call(
     @InternalStreamVideoApi
     public class Debug(val call: Call) {
 
+        public fun doFullReconnection() {
+            call.session?.sfuConnectionModule?.sfuSocket?.cancel()
+        }
+
         public fun restartSubscriberIce() {
             call.session?.subscriber?.connection?.restartIce()
         }
