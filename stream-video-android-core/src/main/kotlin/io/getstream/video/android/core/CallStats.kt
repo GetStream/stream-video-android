@@ -146,9 +146,9 @@ public class CallStats(val call: Call, val callScope: CoroutineScope) {
 
     fun updateLocalStats() {
         val displayingAt = call.session?.trackDimensions?.value ?: emptyMap()
-        val resolution = call.camera?.resolution?.value
-        val availableResolutions = call.camera?.availableResolutions?.value
-        val maxResolution = availableResolutions?.maxByOrNull { it.width * it.height }
+        val resolution = call.camera.resolution.value
+        val availableResolutions = call.camera.availableResolutions.value
+        val maxResolution = availableResolutions.maxByOrNull { it.width * it.height }
 
         val sfu = call.session?.sfuUrl
 
@@ -172,8 +172,8 @@ public class CallStats(val call: Call, val callScope: CoroutineScope) {
 
         scope.launch {
             val toMap = mutableMapOf<String, Any>()
-            toMap["availableResolutions"] = availableResolutions as Any
-            toMap["maxResolution"] = maxResolution as Any
+            toMap["availableResolutions"] = availableResolutions
+            toMap["maxResolution"] = maxResolution ?: ""
             toMap["displayingAt"] = displayingAt
             call.sendStats(toMap)
         }
