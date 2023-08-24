@@ -22,7 +22,7 @@ enum class RtcReportType(
 
 
     companion object {
-        fun fromAlias(alias: String): RtcReportType {
+        fun fromAlias(alias: String?): RtcReportType {
             return RtcReportType.values().firstOrNull {
                 it.alias == alias
             } ?: UNKNOWN

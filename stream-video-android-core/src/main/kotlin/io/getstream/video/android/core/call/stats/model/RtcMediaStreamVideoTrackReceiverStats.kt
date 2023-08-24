@@ -1,0 +1,72 @@
+package io.getstream.video.android.core.call.stats.model
+
+// {
+//  id: RTCMediaStreamTrack_receiver_6,
+//  type: track,
+//  timestamp: 1679434739982604.0,
+//  kind: video,
+//  frameHeight: 540,
+//  frameWidth: 960,
+//  framesReceived: 127,
+//  framesDecoded: 126,
+//  framesDropped: 1
+//  totalFramesDuration: 4.572,
+//  totalFreezesDuration: 0.0,
+//  freezeCount: 0,
+//  pauseCount: 0,
+//  detached: false,
+//  ended: false,
+//  remoteSource: true,
+//  jitterBufferDelay: 4.69,
+//  trackIdentifier: 7df380d6-8e4c-4fb7-a6f2-bdc42bbd0dc6,
+//  totalPausesDuration: 0.0,
+//  jitterBufferEmittedCount: 126,
+//  sumOfSquaredFramesDuration: 0.2560839999999999,
+// }
+
+data class RtcMediaStreamVideoTrackReceiverStats(
+    override val id: String?,
+    override val type: String?,
+    override val timestampUs: Double?,
+    override val kind: String?,
+    override val trackIdentifier: String?,
+    override val jitterBufferDelay: Double?,
+    override val jitterBufferEmittedCount: Long?,
+    override val remoteSource: Boolean?,
+    override val detached: Boolean?,
+    override val ended: Boolean?,
+    val frameHeight: Long?,
+    val frameWidth: Long?,
+    val framesReceived: Long?,
+    val framesDecoded: Long?,
+    val framesDropped: Long?,
+    val totalFramesDuration: Double?,
+    val totalFreezesDuration: Double?,
+    val freezeCount: Long?,
+    val pauseCount: Long?,
+    val totalPausesDuration: Double?,
+    val sumOfSquaredFramesDuration: Double?,
+) : RtcMediaStreamTrackReceiverStats() {
+
+
+    companion object {
+        const val KIND = "kind"
+        const val TRACK_IDENTIFIER = "trackIdentifier"
+        const val JITTER_BUFFER_DELAY = "jitterBufferDelay"
+        const val JITTER_BUFFER_EMITTED_COUNT = "jitterBufferEmittedCount"
+        const val REMOTE_SOURCE = "remoteSource"
+        const val DETACHED = "detached"
+        const val ENDED = "ended"
+        const val FRAME_HEIGHT = "frameHeight"
+        const val FRAME_WIDTH = "frameWidth"
+        const val FRAMES_RECEIVED = "framesReceived"
+        const val FRAMES_DECODED = "framesDecoded"
+        const val FRAMES_DROPPED = "framesDropped"
+        const val TOTAL_FRAMES_DURATION = "totalFramesDuration"
+        const val TOTAL_FREEZES_DURATION = "totalFreezesDuration"
+        const val FREEZE_COUNT = "freezeCount"
+        const val PAUSE_COUNT = "pauseCount"
+        const val TOTAL_PAUSES_DURATION = "totalPausesDuration"
+        const val SUM_OF_SQUARED_FRAMES_DURATION = "sumOfSquaredFramesDuration"
+    }
+}
