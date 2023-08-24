@@ -145,6 +145,13 @@ public open class PersistentSocket<T>(
         }
     }
 
+    /**
+     * Used for testing only - to bring down the socket connection immediately.
+     */
+    internal fun cancel() {
+        socket?.cancel()
+    }
+
     fun cleanup() {
         destroyed = true
         disconnect()

@@ -79,15 +79,15 @@ class CallActivity : ComponentActivity() {
             CallScreen(
                 call = call,
                 showDebugOptions = io.getstream.video.android.BuildConfig.DEBUG,
-                onLeaveCall = {
+                onCallDisconnected = {
+                    // call state changed to disconnected - we can leave the screen
+                    goBackToMainScreen()
+                },
+                onUserLeaveCall = {
                     call.leave()
-
-                    val intent = Intent(this, MainActivity::class.java).apply {
-                        flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
-                    }
-                    startActivity(intent)
-
-                    finish()
+                    // we don't need to wait for the call state to change to disconnected, we can
+                    // leave immediately
+                    goBackToMainScreen()
                 },
             )
 
@@ -110,6 +110,16 @@ class CallActivity : ComponentActivity() {
                     }
                 }
             }
+        }
+    }
+
+    private fun goBackToMainScreen() {
+        if (!isFinishing) {
+            val intent = Intent(this@CallActivity, MainActivity::class.java).apply {
+                flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+            }
+            startActivity(intent)
+            finish()
         }
     }
 

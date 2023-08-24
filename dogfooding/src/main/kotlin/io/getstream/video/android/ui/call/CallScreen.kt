@@ -60,7 +60,8 @@ import kotlinx.coroutines.launch
 fun CallScreen(
     call: Call,
     showDebugOptions: Boolean = false,
-    onLeaveCall: () -> Unit = {},
+    onCallDisconnected: () -> Unit = {},
+    onUserLeaveCall: () -> Unit = {},
 ) {
     val context = LocalContext.current
     val isCameraEnabled by call.camera.isEnabled.collectAsState()
@@ -79,14 +80,14 @@ fun CallScreen(
 
     LaunchedEffect(key1 = callState) {
         if (callState == RealtimeConnection.Disconnected) {
-            onLeaveCall.invoke()
+            onCallDisconnected.invoke()
         } else if (callState is RealtimeConnection.Failed) {
             Toast.makeText(
                 context,
                 "Call connection failed (${(callState as RealtimeConnection.Failed).error}",
                 Toast.LENGTH_LONG,
             ).show()
-            onLeaveCall.invoke()
+            onCallDisconnected.invoke()
         }
     }
 
@@ -103,7 +104,7 @@ fun CallScreen(
                         if (chatState.currentValue == ModalBottomSheetValue.Expanded) {
                             scope.launch { chatState.hide() }
                         } else {
-                            onLeaveCall.invoke()
+                            onUserLeaveCall.invoke()
                         }
                     },
                     controlsContent = {
@@ -177,7 +178,7 @@ fun CallScreen(
                                         modifier = Modifier.size(
                                             VideoTheme.dimens.controlActionsButtonSize,
                                         ),
-                                        onCallAction = { onLeaveCall.invoke() },
+                                        onCallAction = { onUserLeaveCall.invoke() },
                                     )
                                 },
                             ),
@@ -190,7 +191,7 @@ fun CallScreen(
                 if (chatState.currentValue == ModalBottomSheetValue.Expanded) {
                     scope.launch { chatState.hide() }
                 } else {
-                    onLeaveCall.invoke()
+                    onCallDisconnected.invoke()
                 }
             },
         )
