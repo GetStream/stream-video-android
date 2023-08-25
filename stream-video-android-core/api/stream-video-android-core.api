@@ -233,6 +233,7 @@ public final class io/getstream/video/android/core/CameraManager {
 	public static synthetic fun resume$default (Lio/getstream/video/android/core/CameraManager;ZILjava/lang/Object;)V
 	public final fun select (Ljava/lang/String;Z)V
 	public static synthetic fun select$default (Lio/getstream/video/android/core/CameraManager;Ljava/lang/String;ZILjava/lang/Object;)V
+	public final fun setDirection (Lio/getstream/video/android/core/CameraDirection;)V
 	public final fun setEnabled (ZZ)V
 	public static synthetic fun setEnabled$default (Lio/getstream/video/android/core/CameraManager;ZZILjava/lang/Object;)V
 }
