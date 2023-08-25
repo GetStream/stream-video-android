@@ -46,8 +46,10 @@ import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import org.openapitools.client.models.AcceptCallResponse
+import org.openapitools.client.models.AudioSettings
 import org.openapitools.client.models.BlockUserResponse
 import org.openapitools.client.models.CallSettingsRequest
+import org.openapitools.client.models.CallSettingsResponse
 import org.openapitools.client.models.GetCallResponse
 import org.openapitools.client.models.GetOrCreateCallResponse
 import org.openapitools.client.models.GoLiveResponse
@@ -65,6 +67,7 @@ import org.openapitools.client.models.UpdateCallRequest
 import org.openapitools.client.models.UpdateCallResponse
 import org.openapitools.client.models.UpdateUserPermissionsResponse
 import org.openapitools.client.models.VideoEvent
+import org.openapitools.client.models.VideoSettings
 import org.threeten.bp.OffsetDateTime
 import org.webrtc.RendererCommon
 import org.webrtc.audio.JavaAudioDeviceModule.AudioSamples
@@ -264,6 +267,18 @@ public class Call(
         while (retryCount < 3) {
             result = _join(create, createOptions, ring, notify)
             if (result is Success) {
+                // we initialise the camera, mic and other according to local + backend settings
+                // only when the call is joined to make sure we don't switch and override
+                // the settings during a call.
+                val settings = state.settings.value
+                if (settings != null) {
+                    updateMediaManagerFromSettings(settings)
+                } else {
+                    logger.w {
+                        "[join] Call settings were null - this should never happen after a call" +
+                            "is joined. MediaManager will not be initialised with server settings."
+                    }
+                }
                 return result
             }
             if (result is Failure) {
@@ -731,6 +746,38 @@ public class Call(
                     }
                 }
             }
+        }
+    }
+
+    private fun updateMediaManagerFromSettings(callSettings: CallSettingsResponse) {
+        // Speaker
+        if (speaker.status.value is DeviceStatus.NotSelected) {
+            val enableSpeaker = if (callSettings.video.cameraDefaultOn || camera.status.value is DeviceStatus.Enabled) {
+                // if camera is enabled then enable speaker. Eventually this should
+                // be a new audio.defaultDevice setting returned from backend
+                true
+            } else {
+                callSettings.audio.defaultDevice == AudioSettings.DefaultDevice.Speaker
+            }
+            speaker.setEnabled(enableSpeaker)
+        }
+
+        // Camera
+        if (camera.status.value is DeviceStatus.NotSelected) {
+            val defaultDirection =
+                if (callSettings.video.cameraFacing == VideoSettings.CameraFacing.Front) {
+                    CameraDirection.Front
+                } else {
+                    CameraDirection.Back
+                }
+            camera.setDirection(defaultDirection)
+            camera.setEnabled(callSettings.video.cameraDefaultOn)
+        }
+
+        // Mic
+        if (microphone.status.value == DeviceStatus.NotSelected) {
+            val enabled = callSettings.audio.micDefaultOn
+            microphone.setEnabled(enabled)
         }
     }
 

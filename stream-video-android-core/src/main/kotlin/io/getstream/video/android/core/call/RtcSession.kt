@@ -22,7 +22,6 @@ import io.getstream.result.Result
 import io.getstream.result.Result.Failure
 import io.getstream.result.Result.Success
 import io.getstream.video.android.core.Call
-import io.getstream.video.android.core.CameraDirection
 import io.getstream.video.android.core.DeviceStatus
 import io.getstream.video.android.core.StreamVideo
 import io.getstream.video.android.core.StreamVideoImpl
@@ -77,7 +76,6 @@ import kotlinx.serialization.json.Json
 import okio.IOException
 import org.openapitools.client.models.OwnCapability
 import org.openapitools.client.models.VideoEvent
-import org.openapitools.client.models.VideoSettings
 import org.webrtc.MediaConstraints
 import org.webrtc.MediaStream
 import org.webrtc.MediaStreamTrack
@@ -528,31 +526,6 @@ public class RtcSession internal constructor(
             publisher?.let { publisher ->
                 // step 2 ensure all tracks are setup correctly
                 // start capturing the video
-
-                // if there is no preview and the camera hasn't been selected by the user fallback to settings
-                if (call.mediaManager.camera.status.value == DeviceStatus.NotSelected) {
-                    val enabled = settings?.video?.cameraDefaultOn == true
-                    call.mediaManager.camera.setEnabled(enabled)
-                    if (enabled) {
-                        // check the settings if we should default to front or back facing camera
-                        val defaultDirection =
-                            if (settings?.video?.cameraFacing == VideoSettings.CameraFacing.Front) {
-                                CameraDirection.Front
-                            } else {
-                                CameraDirection.Back
-                            }
-                        // TODO: would be nicer to initialize the camera on the right device to begin with
-                        if (defaultDirection != call.mediaManager.camera.direction.value) {
-                            call.mediaManager.camera.flip()
-                        }
-                    }
-                }
-
-                // if there is no preview and the microphone hasn't been selected by the user fallback to settings
-                if (call.mediaManager.microphone.status.value == DeviceStatus.NotSelected) {
-                    val enabled = settings?.audio?.micDefaultOn == true
-                    call.mediaManager.microphone.setEnabled(enabled)
-                }
 
                 timer.split("media enabled")
                 // step 4 add the audio track to the publisher
