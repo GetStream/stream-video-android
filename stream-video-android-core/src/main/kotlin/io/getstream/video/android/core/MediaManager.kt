@@ -33,9 +33,7 @@ import io.getstream.video.android.core.utils.mapState
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
-import org.openapitools.client.models.AudioSettings
 import org.openapitools.client.models.VideoSettings
 import org.webrtc.Camera2Capturer
 import org.webrtc.Camera2Enumerator
@@ -81,7 +79,7 @@ class SpeakerManager(
 
     val devices: StateFlow<List<StreamAudioDevice>> = microphoneManager.devices
 
-    private val _speakerPhoneEnabled = MutableStateFlow(false)
+    private val _speakerPhoneEnabled = MutableStateFlow(true)
     val speakerPhoneEnabled: StateFlow<Boolean> = _speakerPhoneEnabled
 
     internal var selectedBeforeSpeaker: StreamAudioDevice? = null
@@ -619,22 +617,6 @@ class MediaManagerImpl(
     internal val camera = CameraManager(this, eglBaseContext)
     internal val microphone = MicrophoneManager(this, preferSpeakerphone = true)
     internal val speaker = SpeakerManager(this, microphone)
-
-    init {
-        // listen to audio configuration changes
-        scope.launch {
-            call.state.settings.collect { settingsResponse ->
-                settingsResponse?.let {
-                    // The default is Speaker - so we only switch if Earpiece is set in Settings
-                    if (it.audio.defaultDevice == AudioSettings.DefaultDevice.Earpiece &&
-                        !speaker.speakerPhoneEnabled.value
-                    ) {
-                        speaker.setSpeakerPhone(false)
-                    }
-                }
-            }
-        }
-    }
 
     fun cleanup() {
         videoSource.dispose()
