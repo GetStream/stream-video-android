@@ -18,6 +18,8 @@
 
 package io.getstream.video.android.ui.join
 
+import android.net.Uri
+import android.widget.Toast
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -39,6 +41,8 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.ButtonDefaults
+import androidx.compose.material.Icon
+import androidx.compose.material.IconButton
 import androidx.compose.material.Text
 import androidx.compose.material.TextButton
 import androidx.compose.material.TextField
@@ -67,7 +71,12 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.google.android.gms.tasks.OnSuccessListener
+import com.google.mlkit.vision.barcode.common.Barcode
+import com.google.mlkit.vision.codescanner.GmsBarcodeScannerOptions
+import com.google.mlkit.vision.codescanner.GmsBarcodeScanning
 import io.getstream.video.android.BuildConfig
+import io.getstream.video.android.DeeplinkingActivity
 import io.getstream.video.android.R
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.avatar.UserAvatar
@@ -86,6 +95,8 @@ fun CallJoinScreen(
 ) {
     val uiState by callJoinViewModel.uiState.collectAsState(CallJoinUiState.Nothing)
     val isLoggedOut by callJoinViewModel.isLoggedOut.collectAsState(initial = false)
+    val qrCodeCallback = rememberQrCodeCallback()
+    val context = LocalContext.current
 
     HandleCallJoinUiState(
         callJoinUiState = uiState,
@@ -111,6 +122,12 @@ fun CallJoinScreen(
                 .verticalScroll(rememberScrollState())
                 .weight(1f),
             callJoinViewModel = callJoinViewModel,
+            openCamera = {
+                val options = GmsBarcodeScannerOptions.Builder()
+                    .setBarcodeFormats(Barcode.FORMAT_QR_CODE, Barcode.FORMAT_AZTEC).build()
+                val scanner = GmsBarcodeScanning.getClient(context, options)
+                scanner.startScan().addOnSuccessListener(qrCodeCallback)
+            },
         )
     }
 
@@ -174,6 +191,7 @@ private fun CallJoinHeader(
 @Composable
 private fun CallJoinBody(
     modifier: Modifier,
+    openCamera: () -> Unit,
     callJoinViewModel: CallJoinViewModel = hiltViewModel(),
 ) {
     val user by if (LocalInspectionMode.current) {
@@ -217,7 +235,7 @@ private fun CallJoinBody(
             color = Colors.description,
             textAlign = TextAlign.Center,
             fontSize = 18.sp,
-            modifier = Modifier.widthIn(0.dp, 350.dp),
+            modifier = Modifier.widthIn(0.dp, 320.dp),
         )
 
         Spacer(modifier = Modifier.height(42.dp))
@@ -258,7 +276,24 @@ private fun CallJoinBody(
                     ),
                 shape = RoundedCornerShape(6.dp),
                 value = callId,
+                singleLine = true,
                 onValueChange = { callId = it },
+                trailingIcon = {
+                    IconButton(
+                        onClick = openCamera,
+                        modifier = Modifier.fillMaxHeight(),
+                        content = {
+                            Icon(
+                                painter = painterResource(id = R.drawable.ic_scan_qr),
+                                contentDescription = stringResource(
+                                    id = R.string.join_call_by_qr_code,
+                                ),
+                                tint = Colors.description,
+                                modifier = Modifier.size(36.dp),
+                            )
+                        },
+                    )
+                },
                 colors = TextFieldDefaults.textFieldColors(
                     textColor = Color.White,
                     focusedLabelColor = VideoTheme.colors.primaryAccent,
@@ -329,6 +364,37 @@ private fun HandleCallJoinUiState(
                 navigateUpToLogin.invoke()
 
             else -> Unit
+        }
+    }
+}
+
+@Composable
+private fun rememberQrCodeCallback(): OnSuccessListener<Barcode> {
+    val context = LocalContext.current
+
+    return remember {
+        OnSuccessListener<Barcode> {
+            val url = it.url?.url
+            val callId = if (url != null) {
+                val id = Uri.parse(url).getQueryParameter("id")
+                if (!id.isNullOrEmpty()) {
+                    id
+                } else {
+                    null
+                }
+            } else {
+                null
+            }
+
+            if (!callId.isNullOrEmpty()) {
+                context.startActivity(DeeplinkingActivity.createIntent(context, callId))
+            } else {
+                Toast.makeText(
+                    context,
+                    "Unrecognised meeting QR code format",
+                    Toast.LENGTH_SHORT,
+                ).show()
+            }
         }
     }
 }
