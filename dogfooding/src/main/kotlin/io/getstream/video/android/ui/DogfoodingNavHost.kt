@@ -16,8 +16,11 @@
 
 package io.getstream.video.android.ui
 
+import android.net.Uri
+import android.widget.Toast
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.navigation.NavHostController
@@ -26,6 +29,11 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import com.google.android.gms.tasks.OnSuccessListener
+import com.google.mlkit.vision.barcode.common.Barcode
+import com.google.mlkit.vision.codescanner.GmsBarcodeScannerOptions
+import com.google.mlkit.vision.codescanner.GmsBarcodeScanning
+import io.getstream.video.android.DeeplinkingActivity
 import io.getstream.video.android.RingCallActivity
 import io.getstream.video.android.ui.join.CallJoinScreen
 import io.getstream.video.android.ui.lobby.CallLobbyScreen
@@ -38,6 +46,30 @@ fun AppNavHost(
     navController: NavHostController = rememberNavController(),
     startDestination: String = AppScreens.Login.destination,
 ) {
+    val context = LocalContext.current
+
+    val qrScannedCallback = remember {
+        OnSuccessListener<Barcode> {
+            val url = it.url?.url
+            val callId = if (url != null) {
+                val id = Uri.parse(url).getQueryParameter("id")
+                if (!id.isNullOrEmpty()) {
+                    id
+                } else {
+                    null
+                }
+            } else {
+                null
+            }
+
+            if (!callId.isNullOrEmpty()) {
+                context.startActivity(DeeplinkingActivity.createIntent(context, callId))
+            } else {
+                Toast.makeText(context, "Unrecognised meeting QR code format", Toast.LENGTH_SHORT).show()
+            }
+        }
+    }
+
     NavHost(
         modifier = modifier.fillMaxSize(),
         navController = navController,
@@ -53,6 +85,7 @@ fun AppNavHost(
             )
         }
         composable(AppScreens.CallJoin.destination) {
+
             CallJoinScreen(
                 navigateToCallLobby = { cid ->
                     navController.navigate("${AppScreens.CallLobby.destination}/$cid")
@@ -65,6 +98,12 @@ fun AppNavHost(
                 navigateToRingTest = {
                     navController.navigate(AppScreens.DebugCall.destination)
                 },
+                openCamera = {
+                    val options = GmsBarcodeScannerOptions.Builder()
+                        .setBarcodeFormats(Barcode.FORMAT_QR_CODE, Barcode.FORMAT_AZTEC).build()
+                    val scanner = GmsBarcodeScanning.getClient(context, options)
+                    scanner.startScan().addOnSuccessListener(qrScannedCallback)
+                }
             )
         }
         composable(

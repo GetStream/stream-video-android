@@ -38,7 +38,10 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.Button
 import androidx.compose.material.ButtonDefaults
+import androidx.compose.material.Icon
+import androidx.compose.material.IconButton
 import androidx.compose.material.Text
 import androidx.compose.material.TextButton
 import androidx.compose.material.TextField
@@ -53,6 +56,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalInspectionMode
@@ -65,6 +69,7 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.max
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import io.getstream.video.android.BuildConfig
@@ -83,6 +88,7 @@ fun CallJoinScreen(
     navigateToCallLobby: (callId: String) -> Unit,
     navigateUpToLogin: () -> Unit,
     navigateToRingTest: () -> Unit,
+    openCamera: () -> Unit,
 ) {
     val uiState by callJoinViewModel.uiState.collectAsState(CallJoinUiState.Nothing)
     val isLoggedOut by callJoinViewModel.isLoggedOut.collectAsState(initial = false)
@@ -111,6 +117,7 @@ fun CallJoinScreen(
                 .verticalScroll(rememberScrollState())
                 .weight(1f),
             callJoinViewModel = callJoinViewModel,
+            openCamera = openCamera
         )
     }
 
@@ -174,6 +181,7 @@ private fun CallJoinHeader(
 @Composable
 private fun CallJoinBody(
     modifier: Modifier,
+    openCamera: () -> Unit,
     callJoinViewModel: CallJoinViewModel = hiltViewModel(),
 ) {
     val user by if (LocalInspectionMode.current) {
@@ -217,7 +225,7 @@ private fun CallJoinBody(
             color = Colors.description,
             textAlign = TextAlign.Center,
             fontSize = 18.sp,
-            modifier = Modifier.widthIn(0.dp, 350.dp),
+            modifier = Modifier.widthIn(0.dp, 320.dp),
         )
 
         Spacer(modifier = Modifier.height(42.dp))
@@ -258,7 +266,22 @@ private fun CallJoinBody(
                     ),
                 shape = RoundedCornerShape(6.dp),
                 value = callId,
+                singleLine = true,
                 onValueChange = { callId = it },
+                trailingIcon = {
+                    IconButton(
+                        onClick = openCamera,
+                        modifier = Modifier.fillMaxHeight(),
+                        content = {
+                            Icon(
+                                painter = painterResource(id = R.drawable.ic_scan_qr),
+                                contentDescription = stringResource(id = R.string.join_call_by_qr_code),
+                                tint = Colors.description,
+                                modifier = Modifier.size(36.dp)
+                            )
+                        }
+                    )
+                },
                 colors = TextFieldDefaults.textFieldColors(
                     textColor = Color.White,
                     focusedLabelColor = VideoTheme.colors.primaryAccent,
@@ -344,6 +367,7 @@ private fun CallJoinScreenPreview() {
             navigateToCallLobby = {},
             navigateUpToLogin = {},
             navigateToRingTest = {},
+            openCamera = {},
         )
     }
 }
