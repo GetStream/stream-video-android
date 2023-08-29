@@ -401,6 +401,16 @@ public class CameraManager(
         }
     }
 
+    fun setDirection(cameraDirection: CameraDirection) {
+        val previousDirection = _direction.value
+        _direction.value = cameraDirection
+
+        // flip camera if necessary
+        if (previousDirection != cameraDirection) {
+            flip()
+        }
+    }
+
     /**
      * Flips the camera
      */
