@@ -65,6 +65,7 @@ firebaseBom = "32.1.0"
 firebaseCrashlytics = "2.9.5"
 
 installReferrer = "2.2"
+playCodeScanner = "16.1.0"
 
 hilt = "2.46.1"
 desugar = "2.0.3"
@@ -178,6 +179,7 @@ firebase-crashlytics = { group = "com.google.firebase", name = "firebase-crashly
 firebase-analyrics = { group = "com.google.firebase", name = "firebase-analytics-ktx" }
 
 play-install-referrer = { group = "com.android.installreferrer", name = "installreferrer", version.ref = "installReferrer" }
+play-code-scanner = { group = "com.google.android.gms", name = "play-services-code-scanner", version.ref = "playCodeScanner" }
 
 robolectric = { group = "org.robolectric", name = "robolectric", version.ref = "robolectric" }
 leakCanary = { group = "com.squareup.leakcanary", name = "leakcanary-android", version.ref = "leakCanary" }
