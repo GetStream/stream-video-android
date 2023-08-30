@@ -19,6 +19,7 @@ package io.getstream.video.android.compose.ui.components.call.renderer
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -67,7 +68,9 @@ public fun ParticipantsRegularGrid(
     var parentSize: IntSize by remember { mutableStateOf(IntSize(0, 0)) }
 
     Box(
-        modifier = modifier.background(color = VideoTheme.colors.appBackground),
+        modifier = modifier
+            .background(color = VideoTheme.colors.appBackground)
+            .padding(VideoTheme.dimens.participantsGridPadding),
     ) {
         val roomParticipants by call.state.participants.collectAsStateWithLifecycle()
 
