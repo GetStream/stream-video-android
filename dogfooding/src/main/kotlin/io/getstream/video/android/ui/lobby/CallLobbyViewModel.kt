@@ -144,10 +144,10 @@ class CallLobbyViewModel @Inject constructor(
                 is CallLobbyEvent.JoinCall -> {
                     flowOf(CallLobbyUiState.JoinCompleted)
                 }
+
                 is CallLobbyEvent.JoinFailed -> {
                     flowOf(CallLobbyUiState.JoinFailed(event.reason))
                 }
-                else -> flowOf(CallLobbyUiState.Nothing)
             }
         }
         .onCompletion { _isLoading.value = false }
@@ -178,17 +178,16 @@ class CallLobbyViewModel @Inject constructor(
 }
 
 sealed interface CallLobbyUiState {
-    object Nothing : CallLobbyUiState
+    data object Nothing : CallLobbyUiState
 
-    object JoinCompleted : CallLobbyUiState
+    data object JoinCompleted : CallLobbyUiState
 
     data class JoinFailed(val reason: String?) : CallLobbyUiState
 }
 
 sealed interface CallLobbyEvent {
-    object Nothing : CallLobbyEvent
 
-    class JoinCall(val cameraEnabled: Boolean, val microphoneEnabled: Boolean) : CallLobbyEvent
+    data object JoinCall : CallLobbyEvent
 
     data class JoinFailed(val reason: String?) : CallLobbyEvent
 }
