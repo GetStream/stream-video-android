@@ -241,6 +241,7 @@ dependencies {
     implementation(libs.androidx.compose.material.iconsExtended)
     implementation(libs.androidx.hilt.navigation)
     implementation(libs.landscapist.coil)
+    implementation(libs.accompanist.permission)
 
     // hilt
     implementation(libs.hilt.android)
@@ -251,6 +252,9 @@ dependencies {
 
     // Play Install Referrer library - used to extract the meeting link from demo flow after install
     implementation(libs.play.install.referrer)
+
+    // Only used for launching a QR code scanner in demo app
+    implementation(libs.play.code.scanner)
 
     // memory detection
     debugImplementation(libs.leakCanary)
