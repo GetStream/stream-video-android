@@ -208,10 +208,10 @@ public data class StreamDimens(
                 id = R.dimen.stream_video_callParticipantLabelTextPadding,
             ),
             participantLabelTextPaddingStart = dimensionResource(
-                id = R.dimen.stream_video_participantsGridPadding,
+                id = R.dimen.stream_video_callParticipantSoundIndicatorPaddingStart,
             ),
             participantsGridPadding = dimensionResource(
-                id = R.dimen.stream_video_audioRoomAvatarLandscapePadding,
+                id = R.dimen.stream_video_participantsGridPadding,
             ),
             landscapeControlActionsButtonSize = dimensionResource(
                 id = R.dimen.stream_video_landscapeControlActionsButtonSize,
