@@ -18,6 +18,7 @@ package io.getstream.video.android.core
 
 import android.os.Build
 import io.getstream.log.taggedLogger
+import io.getstream.video.android.core.call.stats.model.RtcStatsReport
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -64,7 +65,7 @@ public class CallStats(val call: Call, val callScope: CoroutineScope) {
     val _local = MutableStateFlow<LocalStats?>(null)
     val local: StateFlow<LocalStats?> = _local
 
-    fun updateFromRTCStats(stats: RTCStatsReport?, isPublisher: Boolean = true) {
+    fun updateFromRTCStats(stats: RtcStatsReport?, isPublisher: Boolean = true) {
         if (stats == null) return
         // also see https://github.com/GetStream/stream-video-js/blob/main/packages/client/src/stats/state-store-stats-reporter.ts
 
@@ -74,7 +75,7 @@ public class CallStats(val call: Call, val callScope: CoroutineScope) {
 
         val statGroups = mutableMapOf<String, MutableList<RTCStats>>()
 
-        for (entry in stats.statsMap) {
+        for (entry in stats.origin.statsMap) {
             val stat = entry.value
 
             val type = stat.type
@@ -139,7 +140,7 @@ public class CallStats(val call: Call, val callScope: CoroutineScope) {
 
         scope.launch {
             val toMap = mutableMapOf<String, Any>()
-            toMap["data"] = stats.statsMap
+            toMap["data"] = stats.origin.statsMap
             call.sendStats(toMap)
         }
     }

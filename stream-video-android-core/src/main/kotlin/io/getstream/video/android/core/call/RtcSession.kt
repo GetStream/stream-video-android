@@ -28,6 +28,7 @@ import io.getstream.video.android.core.ScreenShareManager
 import io.getstream.video.android.core.StreamVideo
 import io.getstream.video.android.core.StreamVideoImpl
 import io.getstream.video.android.core.call.connection.StreamPeerConnection
+import io.getstream.video.android.core.call.stats.model.RtcStatsReport
 import io.getstream.video.android.core.call.utils.stringify
 import io.getstream.video.android.core.dispatchers.DispatcherProvider
 import io.getstream.video.android.core.errors.RtcException
@@ -1388,17 +1389,17 @@ public class RtcSession internal constructor(
         }
 
     /**
-     * @return [StateFlow] that holds [RTCStatsReport] that the publisher exposes.
+     * @return [StateFlow] that holds [RtcStatsReport] that the publisher exposes.
      */
-    fun getPublisherStats(): StateFlow<RTCStatsReport?>? {
+    suspend fun getPublisherStats(): RtcStatsReport? {
         return publisher?.getStats()
     }
 
     /**
      * @return [StateFlow] that holds [RTCStatsReport] that the subscriber exposes.
      */
-    fun getSubscriberStats(): StateFlow<RTCStatsReport?> {
-        return subscriber?.getStats() ?: MutableStateFlow(null)
+    suspend fun getSubscriberStats(): RtcStatsReport? {
+        return subscriber?.getStats()
     }
 
     /***
