@@ -1,10 +1,10 @@
 package io.getstream.video.android.core.call.stats.model
 
-sealed class RtcReceivedRtpStreamStats : RtcRtpStreamStats() {
+sealed interface RtcReceivedRtpStreamStats : RtcRtpStreamStats {
 
-        abstract val packetsReceived: Long?
-        abstract val packetsLost: Long?
-        abstract val jitter: Double?
+        val packetsReceived: Long?
+        val packetsLost: Int?
+        val jitter: Double?
 
         companion object {
             const val SSRC = RtcRtpStreamStats.SSRC

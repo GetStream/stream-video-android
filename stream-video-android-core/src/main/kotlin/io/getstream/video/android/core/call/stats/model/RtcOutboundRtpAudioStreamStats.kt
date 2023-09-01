@@ -24,7 +24,7 @@ data class RtcOutboundRtpAudioStreamStats(
     override val totalEncodeTime: Double?,
     override val totalPacketSendDelay: Double?,
     override val active: Boolean?,
-) : RtcOutboundRtpStreamStats() {
+) : RtcOutboundRtpStreamStats {
     
     companion object {
         const val SSRC = RtcSentRtpStreamStats.SSRC

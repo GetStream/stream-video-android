@@ -12,25 +12,35 @@ package io.getstream.video.android.core.call.stats.model
 //  ended: false,
 // }
 
+// https://www.w3.org/TR/2023/CRD-webrtc-stats-20230427/#dom-rtcmediastreamtrackstats
+@Deprecated("Was deprecated in 11 May 2023")
 data class RtcMediaStreamAudioTrackSenderStats(
     override val id: String?,
     override val type: String?,
     override val timestampUs: Double?,
-    override val kind: String?,
-    override val mediaSourceId: String?,
     override val trackIdentifier: String?,
+    override val ended: Boolean?,
+    override val kind: String?,
+    override val priority: String?,
     override val remoteSource: Boolean?,
     override val detached: Boolean?,
-    override val ended: Boolean?,
-) : RtcMediaStreamTrackSenderStats() {
+    override val mediaSourceId: String?,
+    override val audioLevel: Double?,
+    override val totalAudioEnergy: Double?,
+    override val totalSamplesDuration: Double?,
+) : RtcMediaStreamTrackSenderStats, RtcMediaStreamAudioTrackStats {
 
     companion object {
-        const val KIND = "kind"
         const val TRACK_IDENTIFIER = "trackIdentifier"
-        const val MEDIA_SOURCE_ID = "mediaSourceId"
+        const val ENDED = "ended"
+        const val KIND = "kind"
+        const val PRIORITY = "priority"
         const val REMOTE_SOURCE = "remoteSource"
         const val DETACHED = "detached"
-        const val ENDED = "ended"
+        const val MEDIA_SOURCE_ID = "mediaSourceId"
+        const val AUDIO_LEVEL = "audioLevel"
+        const val TOTAL_AUDIO_ENERGY = "totalAudioEnergy"
+        const val TOTAL_SAMPLES_DURATION = "totalSamplesDuration"
     }
 
 }

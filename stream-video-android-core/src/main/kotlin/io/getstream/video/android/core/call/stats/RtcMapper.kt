@@ -18,6 +18,12 @@ import io.getstream.video.android.core.call.stats.model.RtcMediaStreamVideoTrack
 import io.getstream.video.android.core.call.stats.model.RtcOutboundRtpAudioStreamStats
 import io.getstream.video.android.core.call.stats.model.RtcOutboundRtpStreamStats
 import io.getstream.video.android.core.call.stats.model.RtcOutboundRtpVideoStreamStats
+import io.getstream.video.android.core.call.stats.model.RtcRemoteInboundRtpAudioStreamStats
+import io.getstream.video.android.core.call.stats.model.RtcRemoteInboundRtpStreamStats
+import io.getstream.video.android.core.call.stats.model.RtcRemoteInboundRtpVideoStreamStats
+import io.getstream.video.android.core.call.stats.model.RtcRemoteOutboundRtpAudioStreamStats
+import io.getstream.video.android.core.call.stats.model.RtcRemoteOutboundRtpStreamStats
+import io.getstream.video.android.core.call.stats.model.RtcRemoteOutboundRtpVideoStreamStats
 import io.getstream.video.android.core.call.stats.model.discriminator.RtcReportType
 import io.getstream.video.android.core.call.stats.model.RtcStats
 import io.getstream.video.android.core.call.stats.model.RtcVideoSourceStats
@@ -97,6 +103,40 @@ private fun RTCStats.toRtcStats(): RtcStats? {
 
                 else -> {
                     StreamLog.e("RtcParser") { "[toRtcStats] unexpected outboundRtp: $type($id)" }
+                    null
+                }
+            }
+        }
+
+        RtcReportType.REMOTE_INBOUND_RTP -> {
+            when (getStringOrNull(RtcRemoteInboundRtpStreamStats.KIND)?.let { RtcMediaKind.fromAlias(it) }) {
+                RtcMediaKind.AUDIO -> toRtcRemoteInboundRtpAudioStreamStats().also {
+                    StreamLog.i("RtcParser") { "[toRtcStats] remoteInboundRtpAudio: $it" }
+                }
+
+                RtcMediaKind.VIDEO -> toRtcRemoteInboundRtpVideoStreamStats().also {
+                    StreamLog.i("RtcParser") { "[toRtcStats] remoteInboundRtpVideo: $it" }
+                }
+
+                else -> {
+                    StreamLog.e("RtcParser") { "[toRtcStats] unexpected remoteInboundRtp: $type($id)" }
+                    null
+                }
+            }
+        }
+
+        RtcReportType.REMOTE_OUTBOUND_RTP -> {
+            when (getStringOrNull(RtcRemoteOutboundRtpStreamStats.KIND)?.let { RtcMediaKind.fromAlias(it) }) {
+                RtcMediaKind.AUDIO -> toRtcRemoteOutboundRtpAudioStreamStats().also {
+                    StreamLog.i("RtcParser") { "[toRtcStats] remoteOutboundRtpAudio: $it" }
+                }
+
+                RtcMediaKind.VIDEO -> toRtcRemoteOutboundRtpVideoStreamStats().also {
+                    StreamLog.i("RtcParser") { "[toRtcStats] remoteOutboundRtpVideo: $it" }
+                }
+
+                else -> {
+                    StreamLog.e("RtcParser") { "[toRtcStats] unexpected remoteOutboundRtp: $type($id)" }
                     null
                 }
             }
@@ -238,7 +278,7 @@ private fun RTCStats.toRtcInboundRtpVideoStreamStats() = RtcInboundRtpVideoStrea
     transportId = getStringOrNull(RtcInboundRtpStreamStats.TRANSPORT_ID),
     codecId = getStringOrNull(RtcInboundRtpStreamStats.CODEC_ID),
     packetsReceived = getLongOrNull(RtcInboundRtpStreamStats.PACKETS_RECEIVED),
-    packetsLost = getLongOrNull(RtcInboundRtpStreamStats.PACKETS_LOST),
+    packetsLost = getIntOrNull(RtcInboundRtpStreamStats.PACKETS_LOST),
     jitter = getDoubleOrNull(RtcInboundRtpStreamStats.JITTER),
     trackIdentifier = getStringOrNull(RtcInboundRtpStreamStats.TRACK_IDENTIFIER),
     mid = getStringOrNull(RtcInboundRtpStreamStats.MID),
@@ -295,7 +335,7 @@ private fun RTCStats.toRtcInboundRtpAudioStreamStats() = RtcInboundRtpAudioStrea
     transportId = getStringOrNull(RtcInboundRtpStreamStats.TRANSPORT_ID),
     codecId = getStringOrNull(RtcInboundRtpStreamStats.CODEC_ID),
     packetsReceived = getLongOrNull(RtcInboundRtpStreamStats.PACKETS_RECEIVED),
-    packetsLost = getLongOrNull(RtcInboundRtpStreamStats.PACKETS_LOST),
+    packetsLost = getIntOrNull(RtcInboundRtpStreamStats.PACKETS_LOST),
     jitter = getDoubleOrNull(RtcInboundRtpStreamStats.JITTER),
     trackIdentifier = getStringOrNull(RtcInboundRtpStreamStats.TRACK_IDENTIFIER),
     mid = getStringOrNull(RtcInboundRtpStreamStats.MID),
@@ -402,84 +442,169 @@ private fun RTCStats.toRtcOutboundRtpAudioStreamStats() = RtcOutboundRtpAudioStr
     active = getBooleanOrNull(RtcOutboundRtpAudioStreamStats.ACTIVE),
 )
 
+private fun RTCStats.toRtcRemoteInboundRtpAudioStreamStats() = RtcRemoteInboundRtpAudioStreamStats(
+    id = id,
+    type = type,
+    timestampUs = timestampUs,
+    ssrc = getLongOrNull(RtcRemoteInboundRtpStreamStats.SSRC),
+    kind = getStringOrNull(RtcRemoteInboundRtpStreamStats.KIND),
+    transportId = getStringOrNull(RtcRemoteInboundRtpStreamStats.TRANSPORT_ID),
+    codecId = getStringOrNull(RtcRemoteInboundRtpStreamStats.CODEC_ID),
+    packetsReceived = getLongOrNull(RtcRemoteInboundRtpStreamStats.PACKETS_RECEIVED),
+    packetsLost = getIntOrNull(RtcRemoteInboundRtpStreamStats.PACKETS_LOST),
+    jitter = getDoubleOrNull(RtcRemoteInboundRtpStreamStats.JITTER),
+    localId = getStringOrNull(RtcRemoteInboundRtpStreamStats.LOCAL_ID),
+    roundTripTime = getDoubleOrNull(RtcRemoteInboundRtpStreamStats.ROUND_TRIP_TIME),
+    totalRoundTripTime = getDoubleOrNull(RtcRemoteInboundRtpStreamStats.TOTAL_ROUND_TRIP_TIME),
+    fractionLost = getDoubleOrNull(RtcRemoteInboundRtpStreamStats.FRACTION_LOST),
+    roundTripTimeMeasurements = getIntOrNull(RtcRemoteInboundRtpStreamStats.ROUND_TRIP_TIME_MEASUREMENTS),
+)
+
+private fun RTCStats.toRtcRemoteInboundRtpVideoStreamStats() = RtcRemoteInboundRtpVideoStreamStats(
+    id = id,
+    type = type,
+    timestampUs = timestampUs,
+    ssrc = getLongOrNull(RtcRemoteInboundRtpStreamStats.SSRC),
+    kind = getStringOrNull(RtcRemoteInboundRtpStreamStats.KIND),
+    transportId = getStringOrNull(RtcRemoteInboundRtpStreamStats.TRANSPORT_ID),
+    codecId = getStringOrNull(RtcRemoteInboundRtpStreamStats.CODEC_ID),
+    packetsReceived = getLongOrNull(RtcRemoteInboundRtpStreamStats.PACKETS_RECEIVED),
+    packetsLost = getIntOrNull(RtcRemoteInboundRtpStreamStats.PACKETS_LOST),
+    jitter = getDoubleOrNull(RtcRemoteInboundRtpStreamStats.JITTER),
+    localId = getStringOrNull(RtcRemoteInboundRtpStreamStats.LOCAL_ID),
+    roundTripTime = getDoubleOrNull(RtcRemoteInboundRtpStreamStats.ROUND_TRIP_TIME),
+    totalRoundTripTime = getDoubleOrNull(RtcRemoteInboundRtpStreamStats.TOTAL_ROUND_TRIP_TIME),
+    fractionLost = getDoubleOrNull(RtcRemoteInboundRtpStreamStats.FRACTION_LOST),
+    roundTripTimeMeasurements = getIntOrNull(RtcRemoteInboundRtpStreamStats.ROUND_TRIP_TIME_MEASUREMENTS),
+)
+
+private fun RTCStats.toRtcRemoteOutboundRtpAudioStreamStats() = RtcRemoteOutboundRtpAudioStreamStats(
+    id = id,
+    type = type,
+    timestampUs = timestampUs,
+    ssrc = getLongOrNull(RtcRemoteOutboundRtpStreamStats.SSRC),
+    kind = getStringOrNull(RtcRemoteOutboundRtpStreamStats.KIND),
+    transportId = getStringOrNull(RtcRemoteOutboundRtpStreamStats.TRANSPORT_ID),
+    codecId = getStringOrNull(RtcRemoteOutboundRtpStreamStats.CODEC_ID),
+    packetsSent = getBigIntegerOrNull(RtcRemoteOutboundRtpStreamStats.PACKETS_SENT),
+    bytesSent = getBigIntegerOrNull(RtcRemoteOutboundRtpStreamStats.BYTES_SENT),
+    localId = getStringOrNull(RtcRemoteOutboundRtpStreamStats.LOCAL_ID),
+    remoteTimestamp = getDoubleOrNull(RtcRemoteOutboundRtpStreamStats.REMOTE_TIMESTAMP),
+    reportsSent = getBigIntegerOrNull(RtcRemoteOutboundRtpStreamStats.REPORTS_SENT),
+    roundTripTime = getDoubleOrNull(RtcRemoteOutboundRtpStreamStats.ROUND_TRIP_TIME),
+    totalRoundTripTime = getDoubleOrNull(RtcRemoteOutboundRtpStreamStats.TOTAL_ROUND_TRIP_TIME),
+    roundTripTimeMeasurements = getBigIntegerOrNull(RtcRemoteOutboundRtpStreamStats.ROUND_TRIP_TIME_MEASUREMENTS),
+)
+
+private fun RTCStats.toRtcRemoteOutboundRtpVideoStreamStats() = RtcRemoteOutboundRtpVideoStreamStats(
+    id = id,
+    type = type,
+    timestampUs = timestampUs,
+    ssrc = getLongOrNull(RtcRemoteOutboundRtpStreamStats.SSRC),
+    kind = getStringOrNull(RtcRemoteOutboundRtpStreamStats.KIND),
+    transportId = getStringOrNull(RtcRemoteOutboundRtpStreamStats.TRANSPORT_ID),
+    codecId = getStringOrNull(RtcRemoteOutboundRtpStreamStats.CODEC_ID),
+    packetsSent = getBigIntegerOrNull(RtcRemoteOutboundRtpStreamStats.PACKETS_SENT),
+    bytesSent = getBigIntegerOrNull(RtcRemoteOutboundRtpStreamStats.BYTES_SENT),
+    localId = getStringOrNull(RtcRemoteOutboundRtpStreamStats.LOCAL_ID),
+    remoteTimestamp = getDoubleOrNull(RtcRemoteOutboundRtpStreamStats.REMOTE_TIMESTAMP),
+    reportsSent = getBigIntegerOrNull(RtcRemoteOutboundRtpStreamStats.REPORTS_SENT),
+    roundTripTime = getDoubleOrNull(RtcRemoteOutboundRtpStreamStats.ROUND_TRIP_TIME),
+    totalRoundTripTime = getDoubleOrNull(RtcRemoteOutboundRtpStreamStats.TOTAL_ROUND_TRIP_TIME),
+    roundTripTimeMeasurements = getBigIntegerOrNull(RtcRemoteOutboundRtpStreamStats.ROUND_TRIP_TIME_MEASUREMENTS),
+)
+
 private fun RTCStats.toRtcMediaStreamAudioTrackSenderStats() = RtcMediaStreamAudioTrackSenderStats(
     id = id,
     type = type,
     timestampUs = timestampUs,
-    kind = getStringOrNull(RtcMediaStreamAudioTrackSenderStats.KIND),
-    mediaSourceId = getStringOrNull(RtcMediaStreamAudioTrackSenderStats.MEDIA_SOURCE_ID),
     trackIdentifier = getStringOrNull(RtcMediaStreamAudioTrackSenderStats.TRACK_IDENTIFIER),
+    ended = getBooleanOrNull(RtcMediaStreamAudioTrackSenderStats.ENDED),
+    kind = getStringOrNull(RtcMediaStreamAudioTrackSenderStats.KIND),
+    priority = getStringOrNull(RtcMediaStreamAudioTrackSenderStats.PRIORITY),
     remoteSource = getBooleanOrNull(RtcMediaStreamAudioTrackSenderStats.REMOTE_SOURCE),
     detached = getBooleanOrNull(RtcMediaStreamAudioTrackSenderStats.DETACHED),
-    ended = getBooleanOrNull(RtcMediaStreamAudioTrackSenderStats.ENDED),
+    mediaSourceId = getStringOrNull(RtcMediaStreamAudioTrackSenderStats.MEDIA_SOURCE_ID),
+    audioLevel = getDoubleOrNull(RtcMediaStreamAudioTrackSenderStats.AUDIO_LEVEL),
+    totalAudioEnergy = getDoubleOrNull(RtcMediaStreamAudioTrackSenderStats.TOTAL_AUDIO_ENERGY),
+    totalSamplesDuration = getDoubleOrNull(RtcMediaStreamAudioTrackSenderStats.TOTAL_SAMPLES_DURATION),
 )
 
 private fun RTCStats.toRtcMediaStreamAudioTrackReceiverStats() = RtcMediaStreamAudioTrackReceiverStats(
     id = id,
     type = type,
     timestampUs = timestampUs,
-    kind = getStringOrNull(RtcMediaStreamAudioTrackReceiverStats::kind.name),
-    trackIdentifier = getStringOrNull(RtcMediaStreamAudioTrackReceiverStats::trackIdentifier.name),
-    jitterBufferDelay = getDoubleOrNull(RtcMediaStreamAudioTrackReceiverStats::jitterBufferDelay.name),
-    jitterBufferEmittedCount = getLongOrNull(RtcMediaStreamAudioTrackReceiverStats::jitterBufferEmittedCount.name),
-    remoteSource = getBooleanOrNull(RtcMediaStreamAudioTrackReceiverStats::remoteSource.name),
-    detached = getBooleanOrNull(RtcMediaStreamAudioTrackReceiverStats::detached.name),
-    ended = getBooleanOrNull(RtcMediaStreamAudioTrackReceiverStats::ended.name),
-    totalAudioEnergy = getDoubleOrNull(RtcMediaStreamAudioTrackReceiverStats::totalAudioEnergy.name),
-    totalInterruptionDuration = getDoubleOrNull(RtcMediaStreamAudioTrackReceiverStats::totalInterruptionDuration.name),
-    removedSamplesForAcceleration = getLongOrNull(RtcMediaStreamAudioTrackReceiverStats::removedSamplesForAcceleration.name),
-    audioLevel = getDoubleOrNull(RtcMediaStreamAudioTrackReceiverStats::audioLevel.name),
-    interruptionCount = getLongOrNull(RtcMediaStreamAudioTrackReceiverStats::interruptionCount.name),
-    relativePacketArrivalDelay = getDoubleOrNull(RtcMediaStreamAudioTrackReceiverStats::relativePacketArrivalDelay.name),
-    jitterBufferFlushes = getLongOrNull(RtcMediaStreamAudioTrackReceiverStats::jitterBufferFlushes.name),
-    concealedSamples = getLongOrNull(RtcMediaStreamAudioTrackReceiverStats::concealedSamples.name),
-    jitterBufferTargetDelay = getDoubleOrNull(RtcMediaStreamAudioTrackReceiverStats::jitterBufferTargetDelay.name),
-    totalSamplesDuration = getDoubleOrNull(RtcMediaStreamAudioTrackReceiverStats::totalSamplesDuration.name),
-    insertedSamplesForDeceleration = getLongOrNull(RtcMediaStreamAudioTrackReceiverStats::insertedSamplesForDeceleration.name),
-    delayedPacketOutageSamples = getLongOrNull(RtcMediaStreamAudioTrackReceiverStats::delayedPacketOutageSamples.name),
-    totalSamplesReceived = getLongOrNull(RtcMediaStreamAudioTrackReceiverStats::totalSamplesReceived.name),
-    concealmentEvents = getLongOrNull(RtcMediaStreamAudioTrackReceiverStats::concealmentEvents.name),
-    silentConcealedSamples = getLongOrNull(RtcMediaStreamAudioTrackReceiverStats::silentConcealedSamples.name)
+    trackIdentifier = getStringOrNull(RtcMediaStreamAudioTrackReceiverStats.TRACK_IDENTIFIER),
+    ended = getBooleanOrNull(RtcMediaStreamAudioTrackReceiverStats.ENDED),
+    kind = getStringOrNull(RtcMediaStreamAudioTrackReceiverStats.KIND),
+    priority = getStringOrNull(RtcMediaStreamAudioTrackReceiverStats.PRIORITY),
+    remoteSource = getBooleanOrNull(RtcMediaStreamAudioTrackReceiverStats.REMOTE_SOURCE),
+    detached = getBooleanOrNull(RtcMediaStreamAudioTrackReceiverStats.DETACHED),
+    estimatedPlayoutTimestamp = getDoubleOrNull(RtcMediaStreamAudioTrackReceiverStats.ESTIMATED_PLAYOUT_TIMESTAMP),
+    jitterBufferDelay = getDoubleOrNull(RtcMediaStreamAudioTrackReceiverStats.JITTER_BUFFER_DELAY),
+    jitterBufferEmittedCount = getLongOrNull(RtcMediaStreamAudioTrackReceiverStats.JITTER_BUFFER_EMITTED_COUNT),
+    totalAudioEnergy = getDoubleOrNull(RtcMediaStreamAudioTrackReceiverStats.TOTAL_AUDIO_ENERGY),
+    totalInterruptionDuration = getDoubleOrNull(RtcMediaStreamAudioTrackReceiverStats.TOTAL_INTERRUPTION_DURATION),
+    removedSamplesForAcceleration = getLongOrNull(RtcMediaStreamAudioTrackReceiverStats.REMOVED_SAMPLES_FOR_ACCELERATION),
+    audioLevel = getDoubleOrNull(RtcMediaStreamAudioTrackReceiverStats.AUDIO_LEVEL),
+    interruptionCount = getLongOrNull(RtcMediaStreamAudioTrackReceiverStats.INTERRUPTION_COUNT),
+    relativePacketArrivalDelay = getDoubleOrNull(RtcMediaStreamAudioTrackReceiverStats.RELATIVE_PACKET_ARRIVAL_DELAY),
+    jitterBufferFlushes = getLongOrNull(RtcMediaStreamAudioTrackReceiverStats.JITTER_BUFFER_FLUSHES),
+    concealedSamples = getLongOrNull(RtcMediaStreamAudioTrackReceiverStats.CONCEALED_SAMPLES),
+    jitterBufferTargetDelay = getDoubleOrNull(RtcMediaStreamAudioTrackReceiverStats.JITTER_BUFFER_TARGET_DELAY),
+    totalSamplesDuration = getDoubleOrNull(RtcMediaStreamAudioTrackReceiverStats.TOTAL_SAMPLES_DURATION),
+    insertedSamplesForDeceleration = getLongOrNull(RtcMediaStreamAudioTrackReceiverStats.INSERTED_SAMPLES_FOR_DECELERATION),
+    delayedPacketOutageSamples = getLongOrNull(RtcMediaStreamAudioTrackReceiverStats.DELAYED_PACKET_OUTAGE_SAMPLES),
+    totalSamplesReceived = getLongOrNull(RtcMediaStreamAudioTrackReceiverStats.TOTAL_SAMPLES_RECEIVED),
+    concealmentEvents = getLongOrNull(RtcMediaStreamAudioTrackReceiverStats.CONCEALMENT_EVENTS),
+    silentConcealedSamples = getLongOrNull(RtcMediaStreamAudioTrackReceiverStats.SILENT_CONCEALED_SAMPLES)
 )
 
 private fun RTCStats.toRtcMediaStreamVideoTrackReceiverStats() = RtcMediaStreamVideoTrackReceiverStats(
     id = id,
     type = type,
     timestampUs = timestampUs,
-    kind = getStringOrNull(RtcMediaStreamVideoTrackReceiverStats::kind.name),
-    trackIdentifier = getStringOrNull(RtcMediaStreamVideoTrackReceiverStats::trackIdentifier.name),
-    jitterBufferDelay = getDoubleOrNull(RtcMediaStreamVideoTrackReceiverStats::jitterBufferDelay.name),
-    jitterBufferEmittedCount = getLongOrNull(RtcMediaStreamVideoTrackReceiverStats::jitterBufferEmittedCount.name),
-    remoteSource = getBooleanOrNull(RtcMediaStreamVideoTrackReceiverStats::remoteSource.name),
-    detached = getBooleanOrNull(RtcMediaStreamVideoTrackReceiverStats::detached.name),
-    ended = getBooleanOrNull(RtcMediaStreamVideoTrackReceiverStats::ended.name),
-    frameHeight = getLongOrNull(RtcMediaStreamVideoTrackReceiverStats::frameHeight.name),
-    frameWidth = getLongOrNull(RtcMediaStreamVideoTrackReceiverStats::frameWidth.name),
-    framesReceived = getLongOrNull(RtcMediaStreamVideoTrackReceiverStats::framesReceived.name),
-    framesDecoded = getLongOrNull(RtcMediaStreamVideoTrackReceiverStats::framesDecoded.name),
-    framesDropped = getLongOrNull(RtcMediaStreamVideoTrackReceiverStats::framesDropped.name),
-    totalFramesDuration = getDoubleOrNull(RtcMediaStreamVideoTrackReceiverStats::totalFramesDuration.name),
-    totalFreezesDuration = getDoubleOrNull(RtcMediaStreamVideoTrackReceiverStats::totalFreezesDuration.name),
-    freezeCount = getLongOrNull(RtcMediaStreamVideoTrackReceiverStats::freezeCount.name),
-    pauseCount = getLongOrNull(RtcMediaStreamVideoTrackReceiverStats::pauseCount.name),
-    totalPausesDuration = getDoubleOrNull(RtcMediaStreamVideoTrackReceiverStats::totalPausesDuration.name),
-    sumOfSquaredFramesDuration = getDoubleOrNull(RtcMediaStreamVideoTrackReceiverStats::sumOfSquaredFramesDuration.name)
+    trackIdentifier = getStringOrNull(RtcMediaStreamVideoTrackReceiverStats.TRACK_IDENTIFIER),
+    ended = getBooleanOrNull(RtcMediaStreamVideoTrackReceiverStats.ENDED),
+    kind = getStringOrNull(RtcMediaStreamVideoTrackReceiverStats.KIND),
+    priority = getStringOrNull(RtcMediaStreamVideoTrackReceiverStats.PRIORITY),
+    remoteSource = getBooleanOrNull(RtcMediaStreamVideoTrackReceiverStats.REMOTE_SOURCE),
+    detached = getBooleanOrNull(RtcMediaStreamVideoTrackReceiverStats.DETACHED),
+    estimatedPlayoutTimestamp = getDoubleOrNull(RtcMediaStreamVideoTrackReceiverStats.ESTIMATED_PLAYOUT_TIMESTAMP),
+    jitterBufferDelay = getDoubleOrNull(RtcMediaStreamVideoTrackReceiverStats.JITTER_BUFFER_DELAY),
+    jitterBufferEmittedCount = getLongOrNull(RtcMediaStreamVideoTrackReceiverStats.JITTER_BUFFER_EMITTED_COUNT),
+    frameHeight = getLongOrNull(RtcMediaStreamVideoTrackReceiverStats.FRAME_HEIGHT),
+    frameWidth = getLongOrNull(RtcMediaStreamVideoTrackReceiverStats.FRAME_WIDTH),
+    framesPerSecond = getDoubleOrNull(RtcMediaStreamVideoTrackReceiverStats.FRAMES_PER_SECOND),
+    framesReceived = getLongOrNull(RtcMediaStreamVideoTrackReceiverStats.FRAMES_RECEIVED),
+    framesDecoded = getLongOrNull(RtcMediaStreamVideoTrackReceiverStats.FRAMES_DECODED),
+    framesDropped = getLongOrNull(RtcMediaStreamVideoTrackReceiverStats.FRAMES_DROPPED),
+    totalFramesDuration = getDoubleOrNull(RtcMediaStreamVideoTrackReceiverStats.TOTAL_FRAMES_DURATION),
+    totalFreezesDuration = getDoubleOrNull(RtcMediaStreamVideoTrackReceiverStats.TOTAL_FREEZES_DURATION),
+    freezeCount = getLongOrNull(RtcMediaStreamVideoTrackReceiverStats.FREEZE_COUNT),
+    pauseCount = getLongOrNull(RtcMediaStreamVideoTrackReceiverStats.PAUSE_COUNT),
+    totalPausesDuration = getDoubleOrNull(RtcMediaStreamVideoTrackReceiverStats.TOTAL_PAUSES_DURATION),
+    sumOfSquaredFramesDuration = getDoubleOrNull(RtcMediaStreamVideoTrackReceiverStats.SUM_OF_SQUARED_FRAMES_DURATION)
 )
 
 private fun RTCStats.toRtcMediaStreamVideoTrackSenderStats() = RtcMediaStreamVideoTrackSenderStats(
     id = id,
     type = type,
     timestampUs = timestampUs,
-    kind = getStringOrNull(RtcMediaStreamVideoTrackSenderStats::kind.name),
-    mediaSourceId = getStringOrNull(RtcMediaStreamVideoTrackSenderStats::mediaSourceId.name),
-    trackIdentifier = getStringOrNull(RtcMediaStreamVideoTrackSenderStats::trackIdentifier.name),
-    remoteSource = getBooleanOrNull(RtcMediaStreamVideoTrackSenderStats::remoteSource.name),
-    detached = getBooleanOrNull(RtcMediaStreamVideoTrackSenderStats::detached.name),
-    ended = getBooleanOrNull(RtcMediaStreamVideoTrackSenderStats::ended.name),
-    frameHeight = getLongOrNull(RtcMediaStreamVideoTrackSenderStats::frameHeight.name),
-    frameWidth = getLongOrNull(RtcMediaStreamVideoTrackSenderStats::frameWidth.name),
-    framesSent = getLongOrNull(RtcMediaStreamVideoTrackSenderStats::framesSent.name),
-    hugeFramesSent = getLongOrNull(RtcMediaStreamVideoTrackSenderStats::hugeFramesSent.name)
+    trackIdentifier = getStringOrNull(RtcMediaStreamVideoTrackSenderStats.TRACK_IDENTIFIER),
+    ended = getBooleanOrNull(RtcMediaStreamVideoTrackSenderStats.ENDED),
+    kind = getStringOrNull(RtcMediaStreamVideoTrackSenderStats.KIND),
+    priority = getStringOrNull(RtcMediaStreamVideoTrackSenderStats.PRIORITY),
+    remoteSource = getBooleanOrNull(RtcMediaStreamVideoTrackSenderStats.REMOTE_SOURCE),
+    detached = getBooleanOrNull(RtcMediaStreamVideoTrackSenderStats.DETACHED),
+    mediaSourceId = getStringOrNull(RtcMediaStreamVideoTrackSenderStats.MEDIA_SOURCE_ID),
+    frameHeight = getLongOrNull(RtcMediaStreamVideoTrackSenderStats.FRAME_HEIGHT),
+    frameWidth = getLongOrNull(RtcMediaStreamVideoTrackSenderStats.FRAME_WIDTH),
+    framesPerSecond = getDoubleOrNull(RtcMediaStreamVideoTrackSenderStats.FRAMES_PER_SECOND),
+    keyFramesSent = getLongOrNull(RtcMediaStreamVideoTrackSenderStats.KEY_FRAMES_SENT),
+    framesCaptured = getLongOrNull(RtcMediaStreamVideoTrackSenderStats.FRAMES_CAPTURED),
+    framesSent = getLongOrNull(RtcMediaStreamVideoTrackSenderStats.FRAMES_SENT),
+    hugeFramesSent = getLongOrNull(RtcMediaStreamVideoTrackSenderStats.HUGE_FRAMES_SENT),
 )
 
 operator fun RTCStats.get(key: String): Any? = members[key]

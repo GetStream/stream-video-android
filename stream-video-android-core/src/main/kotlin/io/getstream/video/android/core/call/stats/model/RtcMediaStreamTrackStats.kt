@@ -1,15 +1,21 @@
 package io.getstream.video.android.core.call.stats.model
 
-sealed class RtcMediaStreamTrackStats : RtcStats() {
-    abstract val kind: String?
-    abstract val remoteSource: Boolean?
-    abstract val detached: Boolean?
-    abstract val ended: Boolean?
+// https://www.w3.org/TR/2023/CRD-webrtc-stats-20230427/#dom-rtcmediastreamtrackstats
+@Deprecated("Was deprecated in 11 May 2023")
+sealed interface RtcMediaStreamTrackStats : RtcStats {
+    val trackIdentifier: String?
+    val ended: Boolean?
+    val kind: String?
+    val priority: String?
+    val remoteSource: Boolean?
+    val detached: Boolean?
 
     companion object {
+        const val TRACK_IDENTIFIER = "trackIdentifier"
         const val KIND = "kind"
+        const val ENDED = "ended"
+        const val PRIORITY = "priority"
         const val REMOTE_SOURCE = "remoteSource"
         const val DETACHED = "detached"
-        const val ENDED = "ended"
     }
 }

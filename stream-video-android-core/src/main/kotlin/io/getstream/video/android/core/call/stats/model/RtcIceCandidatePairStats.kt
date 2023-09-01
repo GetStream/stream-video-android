@@ -25,7 +25,7 @@ data class RtcIceCandidatePairStats(
     val responsesReceived: BigInteger?,
     val state: String?,
     val consentRequestsSent: BigInteger?,
-) : RtcStats() {
+) : RtcStats {
     companion object {
         const val TRANSPORT_ID = "transportId"
         const val REQUESTS_SENT = "requestsSent"

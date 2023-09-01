@@ -15,7 +15,7 @@ data class RtcAudioSourceStats(
     val droppedSamplesEvents: Long?,
     val totalCaptureDelay: Double?,
     val totalSamplesCaptured: Long?,
-) : RtcMediaSourceStats() {
+) : RtcMediaSourceStats {
 
     companion object {
         const val KIND = RtcMediaSourceStats.KIND

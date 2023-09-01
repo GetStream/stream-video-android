@@ -17,8 +17,7 @@ data class RtcIceCandidateStats(
     val priority: Int?,
     val url: String?,
     val relayProtocol: String?,
-
-) : RtcStats() {
+) : RtcStats {
 
     companion object {
         const val TRANSPORT_ID = "transportId"

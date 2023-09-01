@@ -2,19 +2,19 @@ package io.getstream.video.android.core.call.stats.model
 
 import java.math.BigInteger
 
-sealed class RtcOutboundRtpStreamStats : RtcSentRtpStreamStats() {
-    abstract val mid: String?
-    abstract val mediaSourceId: String?
-    abstract val remoteId: String?
-    abstract val headerBytesSent: BigInteger?
-    abstract val retransmittedPacketsSent: BigInteger?
-    abstract val retransmittedBytesSent: BigInteger?
-    abstract val rtxSsrc: Long?
-    abstract val targetBitrate: Double?
-    abstract val totalEncodedBytesTarget: BigInteger?
-    abstract val totalEncodeTime: Double?
-    abstract val totalPacketSendDelay: Double?
-    abstract val active: Boolean?
+sealed interface RtcOutboundRtpStreamStats : RtcSentRtpStreamStats {
+    val mid: String?
+    val mediaSourceId: String?
+    val remoteId: String?
+    val headerBytesSent: BigInteger?
+    val retransmittedPacketsSent: BigInteger?
+    val retransmittedBytesSent: BigInteger?
+    val rtxSsrc: Long?
+    val targetBitrate: Double?
+    val totalEncodedBytesTarget: BigInteger?
+    val totalEncodeTime: Double?
+    val totalPacketSendDelay: Double?
+    val active: Boolean?
     
     companion object {
         const val SSRC = RtcSentRtpStreamStats.SSRC

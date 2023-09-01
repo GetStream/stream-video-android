@@ -28,39 +28,45 @@ package io.getstream.video.android.core.call.stats.model
 //  silentConcealedSamples: 57560
 // }
 
+// https://www.w3.org/TR/2023/CRD-webrtc-stats-20230427/#dom-rtcmediastreamtrackstats
+@Deprecated("Was deprecated in 11 May 2023")
 data class RtcMediaStreamAudioTrackReceiverStats(
     override val id: String?,
     override val type: String?,
     override val timestampUs: Double?,
-    override val kind: String?,
     override val trackIdentifier: String?,
-    override val jitterBufferDelay: Double?,
-    override val jitterBufferEmittedCount: Long?,
+    override val ended: Boolean?,
+    override val kind: String?,
+    override val priority: String?,
     override val remoteSource: Boolean?,
     override val detached: Boolean?,
-    override val ended: Boolean?,
-    val totalAudioEnergy: Double?,
+    override val estimatedPlayoutTimestamp: Double?,
+    override val jitterBufferDelay: Double?,
+    override val jitterBufferEmittedCount: Long?,
+    override val audioLevel: Double?,
+    override val totalAudioEnergy: Double?,
+    override val totalSamplesDuration: Double?,
     val totalInterruptionDuration: Double?,
     val removedSamplesForAcceleration: Long?,
-    val audioLevel: Double?,
     val interruptionCount: Long?,
     val relativePacketArrivalDelay: Double?,
     val jitterBufferFlushes: Long?,
     val concealedSamples: Long?,
     val jitterBufferTargetDelay: Double?,
-    val totalSamplesDuration: Double?,
     val insertedSamplesForDeceleration: Long?,
     val delayedPacketOutageSamples: Long?,
     val totalSamplesReceived: Long?,
     val concealmentEvents: Long?,
     val silentConcealedSamples: Long?,
-) : RtcMediaStreamTrackReceiverStats() {
+) : RtcMediaStreamTrackReceiverStats, RtcMediaStreamAudioTrackStats {
 
     companion object {
         const val KIND = "kind"
         const val TRACK_IDENTIFIER = "trackIdentifier"
+        const val PRIORITY = "priority"
         const val JITTER_BUFFER_DELAY = "jitterBufferDelay"
         const val JITTER_BUFFER_EMITTED_COUNT = "jitterBufferEmittedCount"
+        const val ESTIMATED_PLAYOUT_TIMESTAMP = "estimatedPlayoutTimestamp"
         const val REMOTE_SOURCE = "remoteSource"
         const val DETACHED = "detached"
         const val ENDED = "ended"

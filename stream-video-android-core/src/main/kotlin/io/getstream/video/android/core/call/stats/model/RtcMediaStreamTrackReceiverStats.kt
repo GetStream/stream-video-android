@@ -55,8 +55,16 @@ package io.getstream.video.android.core.call.stats.model
 // }
 
 
-sealed class RtcMediaStreamTrackReceiverStats : RtcMediaStreamTrackStats() {
-    abstract val trackIdentifier: String?
-    abstract val jitterBufferDelay: Double?
-    abstract val jitterBufferEmittedCount: Long?
+// https://www.w3.org/TR/2023/CRD-webrtc-stats-20230427/#dom-rtcmediastreamtrackstats
+@Deprecated("Was deprecated in 11 May 2023")
+sealed interface RtcMediaStreamTrackReceiverStats : RtcMediaStreamTrackStats {
+    val estimatedPlayoutTimestamp: Double?
+    val jitterBufferDelay: Double?
+    val jitterBufferEmittedCount: Long?
+
+    companion object {
+        const val ESTIMATED_PLAYOUT_TIMESTAMP = "estimatedPlayoutTimestamp"
+        const val JITTER_BUFFER_DELAY = "jitterBufferDelay"
+        const val JITTER_BUFFER_EMITTED_COUNT = "jitterBufferEmittedCount"
+    }
 }

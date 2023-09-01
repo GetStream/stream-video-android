@@ -12,7 +12,7 @@ data class RtcInboundRtpVideoStreamStats(
     override val transportId: String?,
     override val codecId: String?,
     override val packetsReceived: Long?,
-    override val packetsLost: Long?,
+    override val packetsLost: Int?,
     override val jitter: Double?,
     override val trackIdentifier: String?,
     override val mid: String?,
@@ -58,7 +58,7 @@ data class RtcInboundRtpVideoStreamStats(
     val framesReceived: Long?,
     val framesAssembledFromMultiplePackets: Long?,
     val totalAssemblyTime: Double?,
-) : RtcInboundRtpStreamStats() {
+) : RtcInboundRtpStreamStats {
 
     companion object {
         const val FRAMES_DECODED = "framesDecoded"

@@ -9,6 +9,7 @@ enum class RtcReportType(
     REMOTE_CANDIDATE("remote-candidate"),
     LOCAL_CANDIDATE("local-candidate"),
     REMOTE_INBOUND_RTP("remote-inbound-rtp"),
+    REMOTE_OUTBOUND_RTP("remote-outbound-rtp"),
     INBOUND_RTP("inbound-rtp"),
     OUTBOUND_RTP("outbound-rtp"),
     TRACK("track"),

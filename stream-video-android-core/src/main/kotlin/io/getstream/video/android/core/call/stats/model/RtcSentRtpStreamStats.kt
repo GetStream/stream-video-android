@@ -2,10 +2,10 @@ package io.getstream.video.android.core.call.stats.model
 
 import java.math.BigInteger
 
-sealed class RtcSentRtpStreamStats : RtcRtpStreamStats() {
+sealed interface RtcSentRtpStreamStats : RtcRtpStreamStats {
 
-        abstract val packetsSent: BigInteger?
-        abstract val bytesSent: BigInteger?
+        val packetsSent: BigInteger?
+        val bytesSent: BigInteger?
 
         companion object {
             const val SSRC = RtcRtpStreamStats.SSRC

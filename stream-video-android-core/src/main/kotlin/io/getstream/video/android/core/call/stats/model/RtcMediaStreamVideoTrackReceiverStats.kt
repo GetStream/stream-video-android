@@ -24,19 +24,24 @@ package io.getstream.video.android.core.call.stats.model
 //  sumOfSquaredFramesDuration: 0.2560839999999999,
 // }
 
+// https://www.w3.org/TR/2023/CRD-webrtc-stats-20230427/#dom-rtcmediastreamtrackstats
+@Deprecated("Was deprecated in 11 May 2023")
 data class RtcMediaStreamVideoTrackReceiverStats(
     override val id: String?,
     override val type: String?,
     override val timestampUs: Double?,
-    override val kind: String?,
     override val trackIdentifier: String?,
-    override val jitterBufferDelay: Double?,
-    override val jitterBufferEmittedCount: Long?,
+    override val ended: Boolean?,
+    override val kind: String?,
+    override val priority: String?,
     override val remoteSource: Boolean?,
     override val detached: Boolean?,
-    override val ended: Boolean?,
-    val frameHeight: Long?,
-    val frameWidth: Long?,
+    override val estimatedPlayoutTimestamp: Double?,
+    override val jitterBufferDelay: Double?,
+    override val jitterBufferEmittedCount: Long?,
+    override val frameHeight: Long?,
+    override val frameWidth: Long?,
+    override val framesPerSecond: Double?,
     val framesReceived: Long?,
     val framesDecoded: Long?,
     val framesDropped: Long?,
@@ -46,19 +51,21 @@ data class RtcMediaStreamVideoTrackReceiverStats(
     val pauseCount: Long?,
     val totalPausesDuration: Double?,
     val sumOfSquaredFramesDuration: Double?,
-) : RtcMediaStreamTrackReceiverStats() {
-
+) : RtcMediaStreamTrackReceiverStats, RtcMediaStreamVideoTrackStats {
 
     companion object {
-        const val KIND = "kind"
         const val TRACK_IDENTIFIER = "trackIdentifier"
-        const val JITTER_BUFFER_DELAY = "jitterBufferDelay"
-        const val JITTER_BUFFER_EMITTED_COUNT = "jitterBufferEmittedCount"
+        const val ENDED = "ended"
+        const val KIND = "kind"
+        const val PRIORITY = "priority"
         const val REMOTE_SOURCE = "remoteSource"
         const val DETACHED = "detached"
-        const val ENDED = "ended"
+        const val ESTIMATED_PLAYOUT_TIMESTAMP = "estimatedPlayoutTimestamp"
+        const val JITTER_BUFFER_DELAY = "jitterBufferDelay"
+        const val JITTER_BUFFER_EMITTED_COUNT = "jitterBufferEmittedCount"
         const val FRAME_HEIGHT = "frameHeight"
         const val FRAME_WIDTH = "frameWidth"
+        const val FRAMES_PER_SECOND = "framesPerSecond"
         const val FRAMES_RECEIVED = "framesReceived"
         const val FRAMES_DECODED = "framesDecoded"
         const val FRAMES_DROPPED = "framesDropped"

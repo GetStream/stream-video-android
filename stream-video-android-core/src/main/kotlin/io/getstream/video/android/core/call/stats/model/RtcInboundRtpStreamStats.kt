@@ -3,32 +3,32 @@ package io.getstream.video.android.core.call.stats.model
 import java.math.BigInteger
 
 
-sealed class RtcInboundRtpStreamStats : RtcReceivedRtpStreamStats() {
+sealed interface RtcInboundRtpStreamStats : RtcReceivedRtpStreamStats {
 
-    abstract val trackIdentifier: String?
-    abstract val mid: String?
-    abstract val remoteId: String?
-    abstract val lastPacketReceivedTimestamp: Double?
-    abstract val headerBytesReceived: BigInteger?
-    abstract val bytesReceived: BigInteger?
-    abstract val packetsDiscarded: BigInteger?
-    abstract val fecBytesReceived: BigInteger?
-    abstract val fecPacketsReceived: BigInteger?
-    abstract val fecPacketsDiscarded: BigInteger?
-    abstract val jitterBufferDelay: Double?
-    abstract val jitterBufferTargetDelay: Double?
-    abstract val jitterBufferEmittedCount: BigInteger?
-    abstract val jitterBufferMinimumDelay: Double?
-    abstract val nackCount: Long?
-    abstract val totalProcessingDelay: Double?
-    abstract val estimatedPlayoutTimestamp: Double?
-    abstract val decoderImplementation: String?
-    abstract val playoutId: String?
-    abstract val powerEfficientDecoder: Boolean?
-    abstract val retransmittedPacketsReceived: BigInteger?
-    abstract val retransmittedBytesReceived: BigInteger?
-    abstract val rtxSsrc: Long?
-    abstract val fecSsrc: Long?
+    val trackIdentifier: String?
+    val mid: String?
+    val remoteId: String?
+    val lastPacketReceivedTimestamp: Double?
+    val headerBytesReceived: BigInteger?
+    val bytesReceived: BigInteger?
+    val packetsDiscarded: BigInteger?
+    val fecBytesReceived: BigInteger?
+    val fecPacketsReceived: BigInteger?
+    val fecPacketsDiscarded: BigInteger?
+    val jitterBufferDelay: Double?
+    val jitterBufferTargetDelay: Double?
+    val jitterBufferEmittedCount: BigInteger?
+    val jitterBufferMinimumDelay: Double?
+    val nackCount: Long?
+    val totalProcessingDelay: Double?
+    val estimatedPlayoutTimestamp: Double?
+    val decoderImplementation: String?
+    val playoutId: String?
+    val powerEfficientDecoder: Boolean?
+    val retransmittedPacketsReceived: BigInteger?
+    val retransmittedBytesReceived: BigInteger?
+    val rtxSsrc: Long?
+    val fecSsrc: Long?
 
     companion object {
         const val SSRC = RtcReceivedRtpStreamStats.SSRC

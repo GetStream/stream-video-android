@@ -19,7 +19,7 @@ data class RtcCodecStats(
     val transportId: String?,
     val mimeType: String?,
     val clockRate: Long?,
-) : RtcStats() {
+) : RtcStats {
     companion object {
         const val SDP_FMTP_LINE = "sdpFmtpLine"
         const val PAYLOAD_TYPE = "payloadType"

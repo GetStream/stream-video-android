@@ -11,7 +11,7 @@ data class RtcVideoSourceStats(
     val framesPerSecond: Double?,
     val frames: Long?,
 
-) : RtcMediaSourceStats() {
+) : RtcMediaSourceStats {
 
     companion object {
         const val KIND = RtcMediaSourceStats.KIND

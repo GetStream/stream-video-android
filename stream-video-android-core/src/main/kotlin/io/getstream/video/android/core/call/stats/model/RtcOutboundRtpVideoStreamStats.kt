@@ -43,7 +43,7 @@ data class RtcOutboundRtpVideoStreamStats(
     val encoderImplementation: String?,
     val powerEfficientEncoder: Boolean?,
     val scalabilityMode: String?,
-) : RtcOutboundRtpStreamStats() {
+) : RtcOutboundRtpStreamStats {
     
     
     companion object {
