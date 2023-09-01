@@ -16,6 +16,7 @@
 
 package io.getstream.video.android.core
 
+import android.content.Intent
 import android.view.View
 import androidx.annotation.VisibleForTesting
 import io.getstream.log.taggedLogger
@@ -57,6 +58,7 @@ import org.openapitools.client.models.JoinCallResponse
 import org.openapitools.client.models.ListRecordingsResponse
 import org.openapitools.client.models.MemberRequest
 import org.openapitools.client.models.MuteUsersResponse
+import org.openapitools.client.models.OwnCapability
 import org.openapitools.client.models.RejectCallResponse
 import org.openapitools.client.models.SendEventResponse
 import org.openapitools.client.models.SendReactionResponse
@@ -117,6 +119,7 @@ public class Call(
     val camera by lazy { mediaManager.camera }
     val microphone by lazy { mediaManager.microphone }
     val speaker by lazy { mediaManager.speaker }
+    val screenShare by lazy { mediaManager.screenShare }
 
     /** The cid is type:id */
     val cid = "$type:$id"
@@ -516,6 +519,7 @@ public class Call(
         } else {
             RealtimeConnection.Disconnected
         }
+        stopScreenSharing()
         client.state.removeActiveCall()
         client.state.removeRingingCall()
         (client as StreamVideoImpl).onCallCleanUp(this)
@@ -660,6 +664,28 @@ public class Call(
 
     suspend fun stopRecording(): Result<Any> {
         return clientImpl.stopRecording(type, id)
+    }
+
+    /**
+     * User needs to have [OwnCapability.Screenshare] capability in order to start screen
+     * sharing.
+     *
+     * @param mediaProjectionPermissionResultData - intent data returned from the
+     * activity result after asking for screen sharing permission by launching
+     * MediaProjectionManager.createScreenCaptureIntent().
+     * See https://developer.android.com/guide/topics/large-screens/media-projection#recommended_approach
+     */
+    fun startScreenSharing(mediaProjectionPermissionResultData: Intent) {
+        if (state.ownCapabilities.value.contains(OwnCapability.Screenshare)) {
+            session?.setScreenShareTrack()
+            screenShare.enable(mediaProjectionPermissionResultData)
+        } else {
+            logger.w { "Can't start screen sharing - user doesn't have wnCapability.Screenshare permission" }
+        }
+    }
+
+    fun stopScreenSharing() {
+        screenShare.disable(fromUser = true)
     }
 
     suspend fun startHLS(): Result<Any> {

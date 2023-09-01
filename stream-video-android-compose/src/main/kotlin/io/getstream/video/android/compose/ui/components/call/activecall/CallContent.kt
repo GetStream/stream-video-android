@@ -212,7 +212,7 @@ internal fun DefaultPictureInPictureContent(call: Call) {
     val video = session?.participant?.video?.collectAsStateWithLifecycle()
     val pictureInPictureAspectRatio: Float = 16f / 9f
 
-    if (session != null) {
+    if (session != null && !session.participant.isLocal) {
         VideoRenderer(
             modifier = Modifier.aspectRatio(pictureInPictureAspectRatio, false),
             call = call,

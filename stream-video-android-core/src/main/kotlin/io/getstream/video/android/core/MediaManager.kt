@@ -16,30 +16,40 @@
 
 package io.getstream.video.android.core
 
+import android.content.ComponentName
 import android.content.Context
+import android.content.Intent
+import android.content.ServiceConnection
 import android.hardware.camera2.CameraCharacteristics
 import android.hardware.camera2.CameraManager
 import android.media.AudioAttributes
 import android.media.AudioManager
+import android.media.projection.MediaProjection
 import android.os.Build
+import android.os.IBinder
+import androidx.core.content.ContextCompat
 import androidx.core.content.getSystemService
 import io.getstream.log.taggedLogger
 import io.getstream.video.android.core.audio.AudioSwitchHandler
 import io.getstream.video.android.core.audio.StreamAudioDevice
 import io.getstream.video.android.core.audio.StreamAudioDevice.Companion.fromAudio
 import io.getstream.video.android.core.audio.StreamAudioDevice.Companion.toAudioDevice
+import io.getstream.video.android.core.screenshare.StreamScreenShareService
 import io.getstream.video.android.core.utils.buildAudioConstraints
 import io.getstream.video.android.core.utils.mapState
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import org.openapitools.client.models.VideoSettings
 import org.webrtc.Camera2Capturer
 import org.webrtc.Camera2Enumerator
 import org.webrtc.CameraEnumerationAndroid
 import org.webrtc.EglBase
+import org.webrtc.ScreenCapturerAndroid
 import org.webrtc.SurfaceTextureHelper
+import stream.video.sfu.models.VideoDimension
 import java.util.UUID
 
 sealed class DeviceStatus {
@@ -154,6 +164,130 @@ class SpeakerManager(
                 setVolume(it)
             }
         }
+    }
+}
+
+class ScreenShareManager(
+    val mediaManager: MediaManagerImpl,
+    val eglBaseContext: EglBase.Context,
+) {
+
+    companion object {
+        // TODO: This could be configurable by the client
+        internal val screenShareResolution = VideoDimension(1920, 1080)
+        internal val screenShareBitrate = 1_000_000
+        internal val screenShareFps = 15
+    }
+
+    private val logger by taggedLogger("Media:ScreenShareManager")
+
+    private val _status = MutableStateFlow<DeviceStatus>(DeviceStatus.NotSelected)
+    val status: StateFlow<DeviceStatus> = _status
+
+    public val isEnabled: StateFlow<Boolean> = _status.mapState { it is DeviceStatus.Enabled }
+
+    private lateinit var screenCapturerAndroid: ScreenCapturerAndroid
+    private lateinit var surfaceTextureHelper: SurfaceTextureHelper
+    private var setupCompleted = false
+    private var isScreenSharing = false
+    private var mediaProjectionPermissionResultData: Intent? = null
+
+    /**
+     * The [ServiceConnection.onServiceConnected] is called when our [StreamScreenShareService]
+     * has started. At this point we can start screen-sharing. Starting the screen-sharing without
+     * waiting for the Service to start would throw an exception (
+     */
+    private val connection: ServiceConnection = object : ServiceConnection {
+        override fun onServiceConnected(name: ComponentName, service: IBinder) {
+            if (isScreenSharing) {
+                logger.w { "We are already screen-sharing - ignoring call to start another screenshare" }
+                return
+            }
+
+            // Create the ScreenCapturerAndroid from webrtc-android
+            screenCapturerAndroid =
+                ScreenCapturerAndroid(
+                    mediaProjectionPermissionResultData,
+                    object : MediaProjection.Callback() {
+                        override fun onStop() {
+                            super.onStop()
+                            // User can also disable screen sharing from the system menu
+                            disable()
+                        }
+                    },
+                )
+
+            // initialize it
+            screenCapturerAndroid.initialize(
+                surfaceTextureHelper,
+                mediaManager.context,
+                mediaManager.screenShareVideoSource.capturerObserver,
+            )
+
+            // start
+            screenCapturerAndroid.startCapture(
+                screenShareResolution.width,
+                screenShareResolution.height,
+                0,
+            )
+
+            isScreenSharing = true
+        }
+
+        override fun onServiceDisconnected(name: ComponentName) {}
+    }
+
+    fun enable(mediaProjectionPermissionResultData: Intent, fromUser: Boolean = true) {
+        mediaManager.screenShareTrack.setEnabled(true)
+        if (fromUser) {
+            _status.value = DeviceStatus.Enabled
+        }
+        setup()
+        startScreenShare(mediaProjectionPermissionResultData)
+    }
+
+    fun disable(fromUser: Boolean = true) {
+        if (fromUser) {
+            _status.value = DeviceStatus.Disabled
+        }
+
+        if (isScreenSharing) {
+            mediaManager.screenShareTrack.setEnabled(false)
+            screenCapturerAndroid.stopCapture()
+            mediaManager.context.stopService(
+                Intent(mediaManager.context, StreamScreenShareService::class.java),
+            )
+            isScreenSharing = false
+        }
+    }
+
+    private fun startScreenShare(mediaProjectionPermissionResultData: Intent) {
+        mediaManager.scope.launch {
+            this@ScreenShareManager.mediaProjectionPermissionResultData = mediaProjectionPermissionResultData
+
+            // Screen sharing requires a foreground service with foregroundServiceType "mediaProjection" to be started first.
+            // We can wait for the service to be ready by binding to it and then starting the
+            // media projection in onServiceConnected.
+            val intent = StreamScreenShareService.createIntent(
+                mediaManager.context,
+                mediaManager.call.cid,
+            )
+            ContextCompat.startForegroundService(
+                mediaManager.context,
+                StreamScreenShareService.createIntent(mediaManager.context, mediaManager.call.cid),
+            )
+            mediaManager.context.bindService(intent, connection, 0)
+        }
+    }
+
+    private fun setup() {
+        if (setupCompleted) {
+            return
+        }
+
+        surfaceTextureHelper = SurfaceTextureHelper.create("CaptureThread", eglBaseContext)
+
+        setupCompleted = true
     }
 }
 
@@ -610,11 +744,24 @@ class MediaManagerImpl(
     // source & tracks
     val videoSource = call.clientImpl.peerConnectionFactory.makeVideoSource(false)
 
+    val screenShareVideoSource by lazy {
+        call.clientImpl.peerConnectionFactory.makeVideoSource(
+            true,
+        )
+    }
+
     // for track ids we emulate the browser behaviour of random UUIDs, doing something different would be confusing
     val videoTrack = call.clientImpl.peerConnectionFactory.makeVideoTrack(
         source = videoSource,
         trackId = UUID.randomUUID().toString(),
     )
+
+    val screenShareTrack by lazy {
+        call.clientImpl.peerConnectionFactory.makeVideoTrack(
+            source = screenShareVideoSource,
+            trackId = UUID.randomUUID().toString(),
+        )
+    }
 
     val audioSource = call.clientImpl.peerConnectionFactory.makeAudioSource(buildAudioConstraints())
 
@@ -627,9 +774,11 @@ class MediaManagerImpl(
     internal val camera = CameraManager(this, eglBaseContext)
     internal val microphone = MicrophoneManager(this, preferSpeakerphone = true)
     internal val speaker = SpeakerManager(this, microphone)
+    internal val screenShare = ScreenShareManager(this, eglBaseContext)
 
     fun cleanup() {
         videoSource.dispose()
+        screenShareVideoSource.dispose()
         videoTrack.dispose()
         audioSource.dispose()
         audioTrack.dispose()

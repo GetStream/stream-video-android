@@ -115,6 +115,7 @@ Video roadmap and changelog is available [here](https://github.com/GetStream/pro
 
 ### 0.4.0 milestone
 
+- [X] Screensharing from mobile
 - [ ] Android SDK development.md cleanup (Daniel)
 - [ ] Upgrade to more recent versions of webrtc (Kanat)
 - [ ] Picture of the video stream at highest resolution
@@ -130,7 +131,6 @@ Video roadmap and changelog is available [here](https://github.com/GetStream/pro
 
 - [ ] Testing on more devices
 - [ ] Enable SFU switching
-- [ ] Screensharing from mobile
 - [ ] Camera controls
 - [ ] Tap to focus
 - [ ] H264 workaround on Samsung 23 (see https://github.com/livekit/client-sdk-android/blob/main/livekit-android-sdk/src/main/java/io/livekit/android/webrtc/SimulcastVideoEncoderFactoryWrapper.kt#L34 and
