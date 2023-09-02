@@ -405,6 +405,10 @@ public class StreamPeerConnection(
                 logger.v { "[onAddTrack] #sfu; #$typeTag; remoteAudioTrack: ${remoteAudioTrack.stringify()}" }
                 remoteAudioTrack.setEnabled(true)
             }
+            mediaStream.videoTracks?.forEach { remoteVideoTrack ->
+                logger.v { "[onAddTrack] #sfu; #$typeTag; remoteVideoTrack: ${remoteVideoTrack.stringify()}" }
+                remoteVideoTrack.setEnabled(true)
+            }
             onStreamAdded?.invoke(mediaStream)
         }
     }

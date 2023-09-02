@@ -5,6 +5,6 @@ import io.getstream.video.android.core.internal.InternalStreamVideoApi
 
 @InternalStreamVideoApi
 data class CallStatsReport(
-    val publisherReport: RtcStatsReport?,
-    val subscriberReport: RtcStatsReport?,
+    val publisher: RtcStatsReport?,
+    val subscriber: RtcStatsReport?,
 )

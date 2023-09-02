@@ -18,6 +18,7 @@ package io.getstream.video.android.core
 
 import androidx.compose.runtime.Stable
 import io.getstream.result.Result
+import io.getstream.video.android.core.internal.InternalStreamVideoApi
 import io.getstream.video.android.core.model.AudioTrack
 import io.getstream.video.android.core.model.MediaTrack
 import io.getstream.video.android.core.model.NetworkQuality
@@ -49,7 +50,8 @@ public data class ParticipantState(
     /** The current version of the user, this is the start for participant.user stateflow */
     val initialUser: User,
     /** A prefix to identify tracks, internal */
-    internal var trackLookupPrefix: String = "",
+    @InternalStreamVideoApi
+    var trackLookupPrefix: String = "",
 ) {
 
     val isLocal by lazy {

@@ -25,7 +25,6 @@ import io.getstream.result.Result
 import io.getstream.result.Result.Failure
 import io.getstream.result.Result.Success
 import io.getstream.video.android.core.call.RtcSession
-import io.getstream.video.android.core.call.stats.model.RtcStatsReport
 import io.getstream.video.android.core.call.utils.SoundInputProcessor
 import io.getstream.video.android.core.events.VideoEventListener
 import io.getstream.video.android.core.internal.InternalStreamVideoApi
@@ -398,8 +397,8 @@ public class Call(
                 state.stats.updateFromRTCStats(subscriberStats, isPublisher = false)
                 state.stats.updateLocalStats()
                 statsReport.value = CallStatsReport(
-                    publisherReport = publisherStats,
-                    subscriberReport = subscriberStats,
+                    publisher = publisherStats,
+                    subscriber = subscriberStats,
                 )
             }
         }
