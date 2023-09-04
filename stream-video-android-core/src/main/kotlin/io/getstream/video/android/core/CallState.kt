@@ -62,6 +62,7 @@ import org.openapitools.client.models.CallAcceptedEvent
 import org.openapitools.client.models.CallCreatedEvent
 import org.openapitools.client.models.CallEndedEvent
 import org.openapitools.client.models.CallIngressResponse
+import org.openapitools.client.models.CallLiveStartedEvent
 import org.openapitools.client.models.CallMemberAddedEvent
 import org.openapitools.client.models.CallMemberRemovedEvent
 import org.openapitools.client.models.CallMemberUpdatedEvent
@@ -408,6 +409,10 @@ public class CallState(
     private val _egress: MutableStateFlow<EgressResponse?> = MutableStateFlow(null)
     val egress: StateFlow<EgressResponse?> = _egress
 
+    public val egressPlayListUrl: StateFlow<String?> = egress.mapState {
+        it?.hls?.playlistUrl
+    }
+
     private val _broadcasting: MutableStateFlow<Boolean> = MutableStateFlow(false)
 
     /** if the call is being broadcasted to HLS */
@@ -622,6 +627,10 @@ public class CallState(
 
             is CallRecordingStoppedEvent -> {
                 _recording.value = false
+            }
+
+            is CallLiveStartedEvent -> {
+                // TODO: update call states
             }
 
             is AudioLevelChangedEvent -> {
