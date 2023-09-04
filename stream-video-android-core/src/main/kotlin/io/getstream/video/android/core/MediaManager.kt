@@ -290,7 +290,7 @@ class MicrophoneManager(
 }
 
 public sealed class CameraDirection {
-    public object Front : CameraDirection()
+    public data object Front : CameraDirection()
     public data object Back : CameraDirection()
 }
 
