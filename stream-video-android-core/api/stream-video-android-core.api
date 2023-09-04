@@ -203,10 +203,16 @@ public abstract class io/getstream/video/android/core/CameraDirection {
 
 public final class io/getstream/video/android/core/CameraDirection$Back : io/getstream/video/android/core/CameraDirection {
 	public static final field INSTANCE Lio/getstream/video/android/core/CameraDirection$Back;
+	public fun equals (Ljava/lang/Object;)Z
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
 }
 
 public final class io/getstream/video/android/core/CameraDirection$Front : io/getstream/video/android/core/CameraDirection {
 	public static final field INSTANCE Lio/getstream/video/android/core/CameraDirection$Front;
+	public fun equals (Ljava/lang/Object;)Z
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
 }
 
 public final class io/getstream/video/android/core/CameraManager {
@@ -260,10 +266,16 @@ public abstract interface class io/getstream/video/android/core/ConnectionState 
 
 public final class io/getstream/video/android/core/ConnectionState$Connected : io/getstream/video/android/core/ConnectionState {
 	public static final field INSTANCE Lio/getstream/video/android/core/ConnectionState$Connected;
+	public fun equals (Ljava/lang/Object;)Z
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
 }
 
 public final class io/getstream/video/android/core/ConnectionState$Disconnected : io/getstream/video/android/core/ConnectionState {
 	public static final field INSTANCE Lio/getstream/video/android/core/ConnectionState$Disconnected;
+	public fun equals (Ljava/lang/Object;)Z
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
 }
 
 public final class io/getstream/video/android/core/ConnectionState$Failed : io/getstream/video/android/core/ConnectionState {
@@ -272,14 +284,23 @@ public final class io/getstream/video/android/core/ConnectionState$Failed : io/g
 
 public final class io/getstream/video/android/core/ConnectionState$Loading : io/getstream/video/android/core/ConnectionState {
 	public static final field INSTANCE Lio/getstream/video/android/core/ConnectionState$Loading;
+	public fun equals (Ljava/lang/Object;)Z
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
 }
 
 public final class io/getstream/video/android/core/ConnectionState$PreConnect : io/getstream/video/android/core/ConnectionState {
 	public static final field INSTANCE Lio/getstream/video/android/core/ConnectionState$PreConnect;
+	public fun equals (Ljava/lang/Object;)Z
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
 }
 
 public final class io/getstream/video/android/core/ConnectionState$Reconnecting : io/getstream/video/android/core/ConnectionState {
 	public static final field INSTANCE Lio/getstream/video/android/core/ConnectionState$Reconnecting;
+	public fun equals (Ljava/lang/Object;)Z
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
 }
 
 public final class io/getstream/video/android/core/CreateCallOptions {
@@ -539,10 +560,16 @@ public abstract interface class io/getstream/video/android/core/RealtimeConnecti
 
 public final class io/getstream/video/android/core/RealtimeConnection$Connected : io/getstream/video/android/core/RealtimeConnection {
 	public static final field INSTANCE Lio/getstream/video/android/core/RealtimeConnection$Connected;
+	public fun equals (Ljava/lang/Object;)Z
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
 }
 
 public final class io/getstream/video/android/core/RealtimeConnection$Disconnected : io/getstream/video/android/core/RealtimeConnection {
 	public static final field INSTANCE Lio/getstream/video/android/core/RealtimeConnection$Disconnected;
+	public fun equals (Ljava/lang/Object;)Z
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
 }
 
 public final class io/getstream/video/android/core/RealtimeConnection$Failed : io/getstream/video/android/core/RealtimeConnection {
@@ -558,6 +585,9 @@ public final class io/getstream/video/android/core/RealtimeConnection$Failed : i
 
 public final class io/getstream/video/android/core/RealtimeConnection$InProgress : io/getstream/video/android/core/RealtimeConnection {
 	public static final field INSTANCE Lio/getstream/video/android/core/RealtimeConnection$InProgress;
+	public fun equals (Ljava/lang/Object;)Z
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
 }
 
 public final class io/getstream/video/android/core/RealtimeConnection$Joined : io/getstream/video/android/core/RealtimeConnection {
@@ -573,10 +603,16 @@ public final class io/getstream/video/android/core/RealtimeConnection$Joined : i
 
 public final class io/getstream/video/android/core/RealtimeConnection$PreJoin : io/getstream/video/android/core/RealtimeConnection {
 	public static final field INSTANCE Lio/getstream/video/android/core/RealtimeConnection$PreJoin;
+	public fun equals (Ljava/lang/Object;)Z
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
 }
 
 public final class io/getstream/video/android/core/RealtimeConnection$Reconnecting : io/getstream/video/android/core/RealtimeConnection {
 	public static final field INSTANCE Lio/getstream/video/android/core/RealtimeConnection$Reconnecting;
+	public fun equals (Ljava/lang/Object;)Z
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
 }
 
 public abstract interface class io/getstream/video/android/core/RingingState {
@@ -584,10 +620,16 @@ public abstract interface class io/getstream/video/android/core/RingingState {
 
 public final class io/getstream/video/android/core/RingingState$Active : io/getstream/video/android/core/RingingState {
 	public static final field INSTANCE Lio/getstream/video/android/core/RingingState$Active;
+	public fun equals (Ljava/lang/Object;)Z
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
 }
 
 public final class io/getstream/video/android/core/RingingState$Idle : io/getstream/video/android/core/RingingState {
 	public static final field INSTANCE Lio/getstream/video/android/core/RingingState$Idle;
+	public fun equals (Ljava/lang/Object;)Z
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
 }
 
 public final class io/getstream/video/android/core/RingingState$Incoming : io/getstream/video/android/core/RingingState {
@@ -608,10 +650,16 @@ public final class io/getstream/video/android/core/RingingState$Outgoing : io/ge
 
 public final class io/getstream/video/android/core/RingingState$RejectedByAll : io/getstream/video/android/core/RingingState {
 	public static final field INSTANCE Lio/getstream/video/android/core/RingingState$RejectedByAll;
+	public fun equals (Ljava/lang/Object;)Z
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
 }
 
 public final class io/getstream/video/android/core/RingingState$TimeoutNoAnswer : io/getstream/video/android/core/RingingState {
 	public static final field INSTANCE Lio/getstream/video/android/core/RingingState$TimeoutNoAnswer;
+	public fun equals (Ljava/lang/Object;)Z
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
 }
 
 public final class io/getstream/video/android/core/SpeakerManager {
@@ -903,6 +951,9 @@ public final class io/getstream/video/android/core/call/signal/socket/RTCEventMa
 
 public final class io/getstream/video/android/core/call/state/AcceptCall : io/getstream/video/android/core/call/state/CallAction {
 	public static final field INSTANCE Lio/getstream/video/android/core/call/state/AcceptCall;
+	public fun equals (Ljava/lang/Object;)Z
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
 }
 
 public abstract interface class io/getstream/video/android/core/call/state/CallAction {
@@ -910,10 +961,16 @@ public abstract interface class io/getstream/video/android/core/call/state/CallA
 
 public final class io/getstream/video/android/core/call/state/CancelCall : io/getstream/video/android/core/call/state/CallAction {
 	public static final field INSTANCE Lio/getstream/video/android/core/call/state/CancelCall;
+	public fun equals (Ljava/lang/Object;)Z
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
 }
 
 public final class io/getstream/video/android/core/call/state/ChatDialog : io/getstream/video/android/core/call/state/CallAction {
 	public static final field INSTANCE Lio/getstream/video/android/core/call/state/ChatDialog;
+	public fun equals (Ljava/lang/Object;)Z
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
 }
 
 public class io/getstream/video/android/core/call/state/CustomAction : io/getstream/video/android/core/call/state/CallAction {
@@ -925,10 +982,16 @@ public class io/getstream/video/android/core/call/state/CustomAction : io/getstr
 
 public final class io/getstream/video/android/core/call/state/DeclineCall : io/getstream/video/android/core/call/state/CallAction {
 	public static final field INSTANCE Lio/getstream/video/android/core/call/state/DeclineCall;
+	public fun equals (Ljava/lang/Object;)Z
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
 }
 
 public final class io/getstream/video/android/core/call/state/FlipCamera : io/getstream/video/android/core/call/state/CallAction {
 	public static final field INSTANCE Lio/getstream/video/android/core/call/state/FlipCamera;
+	public fun equals (Ljava/lang/Object;)Z
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
 }
 
 public final class io/getstream/video/android/core/call/state/InviteUsersToCall : io/getstream/video/android/core/call/state/CallAction {
@@ -944,10 +1007,16 @@ public final class io/getstream/video/android/core/call/state/InviteUsersToCall 
 
 public final class io/getstream/video/android/core/call/state/LeaveCall : io/getstream/video/android/core/call/state/CallAction {
 	public static final field INSTANCE Lio/getstream/video/android/core/call/state/LeaveCall;
+	public fun equals (Ljava/lang/Object;)Z
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
 }
 
 public final class io/getstream/video/android/core/call/state/Reaction : io/getstream/video/android/core/call/state/CallAction {
 	public static final field INSTANCE Lio/getstream/video/android/core/call/state/Reaction;
+	public fun equals (Ljava/lang/Object;)Z
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
 }
 
 public final class io/getstream/video/android/core/call/state/SelectAudioDevice : io/getstream/video/android/core/call/state/CallAction {
@@ -963,6 +1032,9 @@ public final class io/getstream/video/android/core/call/state/SelectAudioDevice 
 
 public final class io/getstream/video/android/core/call/state/Settings : io/getstream/video/android/core/call/state/CallAction {
 	public static final field INSTANCE Lio/getstream/video/android/core/call/state/Settings;
+	public fun equals (Ljava/lang/Object;)Z
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
 }
 
 public final class io/getstream/video/android/core/call/state/ShowCallParticipantInfo : io/getstream/video/android/core/call/state/CallAction {
@@ -1038,6 +1110,8 @@ public abstract class io/getstream/video/android/core/errors/DisconnectCause {
 
 public final class io/getstream/video/android/core/errors/DisconnectCause$ConnectionReleased : io/getstream/video/android/core/errors/DisconnectCause {
 	public static final field INSTANCE Lio/getstream/video/android/core/errors/DisconnectCause$ConnectionReleased;
+	public fun equals (Ljava/lang/Object;)Z
+	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
 }
 
@@ -1048,6 +1122,8 @@ public final class io/getstream/video/android/core/errors/DisconnectCause$Error 
 
 public final class io/getstream/video/android/core/errors/DisconnectCause$NetworkNotAvailable : io/getstream/video/android/core/errors/DisconnectCause {
 	public static final field INSTANCE Lio/getstream/video/android/core/errors/DisconnectCause$NetworkNotAvailable;
+	public fun equals (Ljava/lang/Object;)Z
+	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
 }
 
@@ -1764,10 +1840,16 @@ public final class io/getstream/video/android/core/model/CallStatus$Calling : io
 
 public final class io/getstream/video/android/core/model/CallStatus$Incoming : io/getstream/video/android/core/model/CallStatus {
 	public static final field INSTANCE Lio/getstream/video/android/core/model/CallStatus$Incoming;
+	public fun equals (Ljava/lang/Object;)Z
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
 }
 
 public final class io/getstream/video/android/core/model/CallStatus$Outgoing : io/getstream/video/android/core/model/CallStatus {
 	public static final field INSTANCE Lio/getstream/video/android/core/model/CallStatus$Outgoing;
+	public fun equals (Ljava/lang/Object;)Z
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
 }
 
 public final class io/getstream/video/android/core/model/CallUser : java/io/Serializable {
@@ -2095,10 +2177,16 @@ public abstract interface class io/getstream/video/android/core/model/ReactionSt
 
 public final class io/getstream/video/android/core/model/ReactionState$Nothing : io/getstream/video/android/core/model/ReactionState {
 	public static final field INSTANCE Lio/getstream/video/android/core/model/ReactionState$Nothing;
+	public fun equals (Ljava/lang/Object;)Z
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
 }
 
 public final class io/getstream/video/android/core/model/ReactionState$Running : io/getstream/video/android/core/model/ReactionState {
 	public static final field INSTANCE Lio/getstream/video/android/core/model/ReactionState$Running;
+	public fun equals (Ljava/lang/Object;)Z
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
 }
 
 public final class io/getstream/video/android/core/model/ScreenSharingSession {
