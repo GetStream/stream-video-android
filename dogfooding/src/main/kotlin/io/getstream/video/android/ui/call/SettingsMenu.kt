@@ -34,6 +34,7 @@ import androidx.compose.material.Icon
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -69,8 +70,8 @@ internal fun SettingsMenu(
         },
     )
 
-    val isScreenSharing = call.screenShare.isEnabled.collectAsState()
-    val screenShareButtonText = if (isScreenSharing.value) {
+    val isScreenSharing by call.screenShare.isEnabled.collectAsState()
+    val screenShareButtonText = if (isScreenSharing) {
         "Stop screen-sharing"
     } else { "Start screen-sharing" }
 
@@ -114,7 +115,7 @@ internal fun SettingsMenu(
 
                 Row(
                     modifier = Modifier.clickable {
-                        if (!isScreenSharing.value) {
+                        if (!isScreenSharing) {
                             scope.launch {
                                 val mediaProjectionManager = context.getSystemService(
                                     MediaProjectionManager::class.java,
