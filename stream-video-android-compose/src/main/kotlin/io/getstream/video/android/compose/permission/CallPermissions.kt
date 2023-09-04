@@ -82,7 +82,11 @@ public fun rememberCallPermissionsState(
  * - android.Manifest.permission.RECORD_AUDIO
  */
 @Composable
-public fun LaunchCallPermissions(call: Call) {
-    val callPermissionsState = rememberCallPermissionsState(call = call)
+public fun LaunchCallPermissions(
+    call: Call,
+    onPermissionsResult: ((Map<String, Boolean>) -> Unit)? = null,
+) {
+    val callPermissionsState =
+        rememberCallPermissionsState(call = call, onPermissionsResult = onPermissionsResult)
     LaunchedEffect(key1 = call) { callPermissionsState.launchPermissionRequest() }
 }
