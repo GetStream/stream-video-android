@@ -111,6 +111,7 @@ public final class io/getstream/video/android/core/CallState {
 	public final fun getDurationInDateFormat ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun getDurationInMs ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun getEgress ()Lkotlinx/coroutines/flow/StateFlow;
+	public final fun getEgressPlayListUrl ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun getEndedAt ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun getEndedByUser ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun getErrors ()Lkotlinx/coroutines/flow/StateFlow;
