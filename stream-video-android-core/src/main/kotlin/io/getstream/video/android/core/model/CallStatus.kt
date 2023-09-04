@@ -22,10 +22,10 @@ import androidx.compose.runtime.Stable
 public sealed interface CallStatus {
 
     @Stable
-    public object Incoming : CallStatus
+    public data object Incoming : CallStatus
 
     @Stable
-    public object Outgoing : CallStatus
+    public data object Outgoing : CallStatus
 
     @Stable
     public data class Calling(public val duration: String) : CallStatus

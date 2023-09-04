@@ -198,12 +198,18 @@ public abstract class io/getstream/video/android/model/UserType {
 
 public final class io/getstream/video/android/model/UserType$Anonymous : io/getstream/video/android/model/UserType {
 	public static final field INSTANCE Lio/getstream/video/android/model/UserType$Anonymous;
+	public fun equals (Ljava/lang/Object;)Z
+	public fun hashCode ()I
 	public final fun serializer ()Lkotlinx/serialization/KSerializer;
+	public fun toString ()Ljava/lang/String;
 }
 
 public final class io/getstream/video/android/model/UserType$Authenticated : io/getstream/video/android/model/UserType {
 	public static final field INSTANCE Lio/getstream/video/android/model/UserType$Authenticated;
+	public fun equals (Ljava/lang/Object;)Z
+	public fun hashCode ()I
 	public final fun serializer ()Lkotlinx/serialization/KSerializer;
+	public fun toString ()Ljava/lang/String;
 }
 
 public final class io/getstream/video/android/model/UserType$Companion {
@@ -212,7 +218,10 @@ public final class io/getstream/video/android/model/UserType$Companion {
 
 public final class io/getstream/video/android/model/UserType$Guest : io/getstream/video/android/model/UserType {
 	public static final field INSTANCE Lio/getstream/video/android/model/UserType$Guest;
+	public fun equals (Ljava/lang/Object;)Z
+	public fun hashCode ()I
 	public final fun serializer ()Lkotlinx/serialization/KSerializer;
+	public fun toString ()Ljava/lang/String;
 }
 
 public final class io/getstream/video/android/model/mapper/StreamCallCidMapperKt {

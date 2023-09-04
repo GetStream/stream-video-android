@@ -120,12 +120,12 @@ public sealed interface RealtimeConnection {
     /**
      * We start out in the PreJoin state. This is before call.join is called
      */
-    public object PreJoin : RealtimeConnection
+    public data object PreJoin : RealtimeConnection
 
     /**
      * Join is in progress
      */
-    public object InProgress : RealtimeConnection
+    public data object InProgress : RealtimeConnection
 
     /**
      * We set the state to Joined as soon as the call state is available
@@ -136,7 +136,7 @@ public sealed interface RealtimeConnection {
     /**
      * True when the peer connections are ready
      */
-    public object Connected : RealtimeConnection // connected to RTC, able to receive and send video
+    public data object Connected : RealtimeConnection // connected to RTC, able to receive and send video
 
     /**
      * Reconnecting is true whenever Rtc isn't available and trying to recover
@@ -144,9 +144,9 @@ public sealed interface RealtimeConnection {
      * If the publisher peer connection breaks we'll reconnect
      * Also if the network provider from the OS says that internet is down we'll set it to reconnecting
      */
-    public object Reconnecting : RealtimeConnection // reconnecting to recover from temporary issues
+    public data object Reconnecting : RealtimeConnection // reconnecting to recover from temporary issues
     public data class Failed(val error: Any) : RealtimeConnection // permanent failure
-    public object Disconnected : RealtimeConnection // normal disconnect by the app
+    public data object Disconnected : RealtimeConnection // normal disconnect by the app
 }
 
 /**

@@ -24,7 +24,7 @@ public sealed class DisconnectCause {
     /**
      * Happens when networks is not available anymore.
      */
-    public object NetworkNotAvailable : DisconnectCause() { override fun toString(): String = "NetworkNotAvailable" }
+    public data object NetworkNotAvailable : DisconnectCause() { override fun toString(): String = "NetworkNotAvailable" }
 
     /**
      * Happens when some non critical error occurs.
@@ -45,5 +45,5 @@ public sealed class DisconnectCause {
     /**
      * Happens when disconnection has been done intentionally. E.g. we release connection when app went to background.
      */
-    public object ConnectionReleased : DisconnectCause() { override fun toString(): String = "ConnectionReleased" }
+    public data object ConnectionReleased : DisconnectCause() { override fun toString(): String = "ConnectionReleased" }
 }

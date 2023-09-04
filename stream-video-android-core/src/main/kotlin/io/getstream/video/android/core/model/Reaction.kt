@@ -31,8 +31,8 @@ public data class Reaction(
 public sealed interface ReactionState {
 
     @Stable
-    public object Nothing : ReactionState
+    public data object Nothing : ReactionState
 
     @Stable
-    public object Running : ReactionState
+    public data object Running : ReactionState
 }
