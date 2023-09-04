@@ -41,13 +41,6 @@ import io.getstream.video.android.core.permission.PermissionRequest
 import io.getstream.video.android.core.utils.mapState
 import io.getstream.video.android.core.utils.toUser
 import io.getstream.video.android.model.User
-import java.text.SimpleDateFormat
-import java.util.Date
-import java.util.Locale
-import java.util.SortedMap
-import java.util.UUID
-import kotlin.time.DurationUnit
-import kotlin.time.toDuration
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.channels.awaitClose
@@ -115,6 +108,13 @@ import org.threeten.bp.OffsetDateTime
 import org.threeten.bp.ZoneOffset
 import stream.video.sfu.models.Participant
 import stream.video.sfu.models.TrackType
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
+import java.util.SortedMap
+import java.util.UUID
+import kotlin.time.DurationUnit
+import kotlin.time.toDuration
 
 public sealed interface RealtimeConnection {
     /**
