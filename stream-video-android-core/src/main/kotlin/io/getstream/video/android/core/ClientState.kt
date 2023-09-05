@@ -26,21 +26,21 @@ import org.openapitools.client.models.ConnectedEvent
 import org.openapitools.client.models.VideoEvent
 
 public sealed interface ConnectionState {
-    public object PreConnect : ConnectionState
-    public object Loading : ConnectionState
-    public object Connected : ConnectionState
-    public object Reconnecting : ConnectionState
-    public object Disconnected : ConnectionState
+    public data object PreConnect : ConnectionState
+    public data object Loading : ConnectionState
+    public data object Connected : ConnectionState
+    public data object Reconnecting : ConnectionState
+    public data object Disconnected : ConnectionState
     public class Failed(error: Error) : ConnectionState
 }
 
 public sealed interface RingingState {
-    public object Idle : RingingState
+    public data object Idle : RingingState
     public data class Incoming(val acceptedByMe: Boolean) : RingingState
     public class Outgoing(val acceptedByCallee: Boolean) : RingingState
-    public object Active : RingingState
-    public object RejectedByAll : RingingState
-    public object TimeoutNoAnswer : RingingState
+    public data object Active : RingingState
+    public data object RejectedByAll : RingingState
+    public data object TimeoutNoAnswer : RingingState
 }
 
 class ClientState(client: StreamVideo) {

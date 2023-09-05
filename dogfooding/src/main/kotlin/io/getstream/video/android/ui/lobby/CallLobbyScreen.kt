@@ -231,26 +231,20 @@ private fun CallLobbyBody(
             isMicrophoneEnabled = isMicrophoneEnabled,
             onCallAction = { action ->
                 when (action) {
-                    is ToggleCamera -> callLobbyViewModel.enableCamera(!isCameraEnabled)
-                    is ToggleMicrophone -> callLobbyViewModel.enableMicrophone(!isMicrophoneEnabled)
+                    is ToggleCamera -> callLobbyViewModel.enableCamera(action.isEnabled)
+                    is ToggleMicrophone -> callLobbyViewModel.enableMicrophone(action.isEnabled)
                     else -> Unit
                 }
             },
         )
 
-        LobbyDescription(
-            callLobbyViewModel = callLobbyViewModel,
-            cameraEnabled = isCameraEnabled,
-            microphoneEnabled = isMicrophoneEnabled,
-        )
+        LobbyDescription(callLobbyViewModel = callLobbyViewModel)
     }
 }
 
 @Composable
 private fun LobbyDescription(
     callLobbyViewModel: CallLobbyViewModel,
-    cameraEnabled: Boolean,
-    microphoneEnabled: Boolean,
 ) {
     val session by callLobbyViewModel.call.state.session.collectAsState()
 
@@ -280,10 +274,7 @@ private fun LobbyDescription(
             text = stringResource(id = R.string.join_call),
             onClick = {
                 callLobbyViewModel.handleUiEvent(
-                    CallLobbyEvent.JoinCall(
-                        cameraEnabled = cameraEnabled,
-                        microphoneEnabled = microphoneEnabled,
-                    ),
+                    CallLobbyEvent.JoinCall,
                 )
             },
         )

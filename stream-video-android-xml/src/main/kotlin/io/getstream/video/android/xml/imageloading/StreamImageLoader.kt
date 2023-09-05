@@ -80,8 +80,8 @@ internal sealed interface StreamImageLoader {
     ): Bitmap?
 
     public sealed class ImageTransformation {
-        public object None : ImageTransformation()
-        public object Circle : ImageTransformation()
+        public data object None : ImageTransformation()
+        public data object Circle : ImageTransformation()
         public class RoundedCorners(@Px public val radius: Float) : ImageTransformation()
     }
 }

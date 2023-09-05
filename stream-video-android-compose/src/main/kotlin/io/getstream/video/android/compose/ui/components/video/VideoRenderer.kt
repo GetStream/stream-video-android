@@ -148,7 +148,14 @@ private fun cleanTrack(
     mediaTrack: MediaTrack?,
 ) {
     if (view != null && mediaTrack is VideoTrack) {
-        mediaTrack.video.removeSink(view)
+        try {
+            mediaTrack.video.removeSink(view)
+        } catch (e: Exception) {
+            // The MediaStreamTrack can be already disposed at this point (from other parts of the code)
+            // Removing the Sink at this point will throw a IllegalStateException("MediaStreamTrack has been disposed.")
+            // See MediaStreamTrack.checkMediaStreamTrackExists()
+            StreamLog.w("VideoRenderer") { "Failed to removeSink in onDispose:  ${e.message}" }
+        }
     }
 }
 
@@ -163,7 +170,7 @@ private fun setupVideo(
             mediaTrack.video.addSink(renderer)
         }
     } catch (e: Exception) {
-        StreamLog.d("VideoRenderer") { e.message.toString() }
+        StreamLog.w("VideoRenderer") { e.message.toString() }
     }
 }
 

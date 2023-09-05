@@ -80,6 +80,7 @@ public data class StreamDimens(
     public val participantInfoMenuOptionsHeight: Dp,
     public val participantsInfoMenuOptionsButtonHeight: Dp,
     public val participantsInfoAvatarSize: Dp,
+    public val participantsGridPadding: Dp,
     public val floatingVideoPadding: Dp,
     public val floatingVideoHeight: Dp,
     public val floatingVideoWidth: Dp,
@@ -208,6 +209,9 @@ public data class StreamDimens(
             ),
             participantLabelTextPaddingStart = dimensionResource(
                 id = R.dimen.stream_video_callParticipantSoundIndicatorPaddingStart,
+            ),
+            participantsGridPadding = dimensionResource(
+                id = R.dimen.stream_video_participantsGridPadding,
             ),
             landscapeControlActionsButtonSize = dimensionResource(
                 id = R.dimen.stream_video_landscapeControlActionsButtonSize,

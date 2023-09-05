@@ -62,6 +62,7 @@ import org.openapitools.client.models.CallAcceptedEvent
 import org.openapitools.client.models.CallCreatedEvent
 import org.openapitools.client.models.CallEndedEvent
 import org.openapitools.client.models.CallIngressResponse
+import org.openapitools.client.models.CallLiveStartedEvent
 import org.openapitools.client.models.CallMemberAddedEvent
 import org.openapitools.client.models.CallMemberRemovedEvent
 import org.openapitools.client.models.CallMemberUpdatedEvent
@@ -119,12 +120,12 @@ public sealed interface RealtimeConnection {
     /**
      * We start out in the PreJoin state. This is before call.join is called
      */
-    public object PreJoin : RealtimeConnection
+    public data object PreJoin : RealtimeConnection
 
     /**
      * Join is in progress
      */
-    public object InProgress : RealtimeConnection
+    public data object InProgress : RealtimeConnection
 
     /**
      * We set the state to Joined as soon as the call state is available
@@ -135,7 +136,7 @@ public sealed interface RealtimeConnection {
     /**
      * True when the peer connections are ready
      */
-    public object Connected : RealtimeConnection // connected to RTC, able to receive and send video
+    public data object Connected : RealtimeConnection // connected to RTC, able to receive and send video
 
     /**
      * Reconnecting is true whenever Rtc isn't available and trying to recover
@@ -143,9 +144,9 @@ public sealed interface RealtimeConnection {
      * If the publisher peer connection breaks we'll reconnect
      * Also if the network provider from the OS says that internet is down we'll set it to reconnecting
      */
-    public object Reconnecting : RealtimeConnection // reconnecting to recover from temporary issues
+    public data object Reconnecting : RealtimeConnection // reconnecting to recover from temporary issues
     public data class Failed(val error: Any) : RealtimeConnection // permanent failure
-    public object Disconnected : RealtimeConnection // normal disconnect by the app
+    public data object Disconnected : RealtimeConnection // normal disconnect by the app
 }
 
 /**
@@ -408,6 +409,10 @@ public class CallState(
     private val _egress: MutableStateFlow<EgressResponse?> = MutableStateFlow(null)
     val egress: StateFlow<EgressResponse?> = _egress
 
+    public val egressPlayListUrl: StateFlow<String?> = egress.mapState {
+        it?.hls?.playlistUrl
+    }
+
     private val _broadcasting: MutableStateFlow<Boolean> = MutableStateFlow(false)
 
     /** if the call is being broadcasted to HLS */
@@ -622,6 +627,10 @@ public class CallState(
 
             is CallRecordingStoppedEvent -> {
                 _recording.value = false
+            }
+
+            is CallLiveStartedEvent -> {
+                updateFromResponse(event.call)
             }
 
             is AudioLevelChangedEvent -> {

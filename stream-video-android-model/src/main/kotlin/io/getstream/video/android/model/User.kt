@@ -32,15 +32,15 @@ import org.threeten.bp.format.DateTimeFormatter
 public sealed class UserType {
     /** A user that's authenticated in your system */
     @Serializable
-    public object Authenticated : UserType()
+    public data object Authenticated : UserType()
 
     /** A temporary guest user, that can have an image, name etc */
     @Serializable
-    public object Guest : UserType()
+    public data object Guest : UserType()
 
     /** Not authentication, anonymous user. Commonly used for audio rooms and livestreams */
     @Serializable
-    public object Anonymous : UserType()
+    public data object Anonymous : UserType()
 }
 
 @Serializer(forClass = OffsetDateTime::class)

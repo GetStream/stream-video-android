@@ -26,6 +26,7 @@
     <string name="sign_out">Sign out</string>
     <string name="join_description">Build reliable video calling, audio rooms, and live streaming with our easy-to-use SDKs and global edge network</string>
     <string name="join_call">Join Call</string>
+    <string name="join_call_by_qr_code">Scan QR meeting code</string>
     <string name="join_call_description">You are about to join a call. %d more people are in the call.</string>
     <string name="join_call_no_id_hint">Don\'t have a Call ID?</string>
     <string name="join_call_call_id_hint">Call ID</string>

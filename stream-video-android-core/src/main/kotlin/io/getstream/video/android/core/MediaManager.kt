@@ -290,8 +290,8 @@ class MicrophoneManager(
 }
 
 public sealed class CameraDirection {
-    public object Front : CameraDirection()
-    public object Back : CameraDirection()
+    public data object Front : CameraDirection()
+    public data object Back : CameraDirection()
 }
 
 /**
@@ -398,6 +398,16 @@ public class CameraManager(
             mediaManager.videoTrack.setEnabled(false)
             videoCapturer.stopCapture()
             isCapturingVideo = false
+        }
+    }
+
+    fun setDirection(cameraDirection: CameraDirection) {
+        val previousDirection = _direction.value
+        _direction.value = cameraDirection
+
+        // flip camera if necessary
+        if (previousDirection != cameraDirection) {
+            flip()
         }
     }
 

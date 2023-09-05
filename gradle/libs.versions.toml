@@ -1,9 +1,9 @@
 [versions]
-androidGradlePlugin = "8.1.0"
-spotless = "6.20.0"
+androidGradlePlugin = "8.1.1"
+spotless = "6.21.0"
 nexusPlugin = "1.3.0"
-kotlin = "1.9.0"
-kotlinSerialization = "1.5.1"
+kotlin = "1.9.10"
+kotlinSerialization = "1.6.0"
 kotlinSerializationConverter = "1.0.0"
 kotlinxCoroutines = "1.7.3"
 
@@ -21,14 +21,14 @@ androidxDataStore = "1.0.0"
 googleService = "4.3.14"
 
 androidxComposeBom = "2023.08.00"
-androidxComposeCompiler = "1.5.2"
+androidxComposeCompiler = "1.5.3"
 androidxComposeTracing = "1.0.0-alpha03"
 androidxHiltNavigation = "1.0.0"
 androidxComposeNavigation = "2.7.0"
 composeStableMarker = "1.0.0"
 
-coil = "2.2.2"
-landscapist = "2.2.7"
+coil = "2.4.0"
+landscapist = "2.2.8"
 accompanist = "0.30.1"
 telephoto = "0.3.0"
 audioswitch = "1.1.8"
@@ -50,7 +50,7 @@ streamPush = "1.1.1"
 androidxTest = "1.5.2"
 androidxTestCore = "1.5.0"
 androidxProfileinstaller = "1.3.1"
-androidxMacroBenchmark = "1.2.0-beta03"
+androidxMacroBenchmark = "1.2.0-beta05"
 androidxUiAutomator = "2.3.0-alpha04"
 androidxContraintLayout = "2.1.4"
 androidxEspresso = "3.5.1"
@@ -65,6 +65,7 @@ firebaseBom = "32.1.0"
 firebaseCrashlytics = "2.9.5"
 
 installReferrer = "2.2"
+playCodeScanner = "16.1.0"
 
 hilt = "2.46.1"
 desugar = "2.0.3"
@@ -178,6 +179,7 @@ firebase-crashlytics = { group = "com.google.firebase", name = "firebase-crashly
 firebase-analyrics = { group = "com.google.firebase", name = "firebase-analytics-ktx" }
 
 play-install-referrer = { group = "com.android.installreferrer", name = "installreferrer", version.ref = "installReferrer" }
+play-code-scanner = { group = "com.google.android.gms", name = "play-services-code-scanner", version.ref = "playCodeScanner" }
 
 robolectric = { group = "org.robolectric", name = "robolectric", version.ref = "robolectric" }
 leakCanary = { group = "com.squareup.leakcanary", name = "leakcanary-android", version.ref = "leakCanary" }

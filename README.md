@@ -102,7 +102,7 @@ Video roadmap and changelog is available [here](https://github.com/GetStream/pro
 
 ### 0.3.0 milestone
 
-- [ ] Finish usability testing with design team on chat integration (Jaewoong)
+- [X] Finish usability testing with design team on chat integration (Jaewoong)
 - [X] Pagination on query members & query call endpoints (Daniel)
 - [X] Livestream tutorial (depends on RTMP support) (Thierry)
 - [X] local version of audioLevel(s) for lower latency audio visualizations(Daniel)
@@ -115,6 +115,7 @@ Video roadmap and changelog is available [here](https://github.com/GetStream/pro
 
 ### 0.4.0 milestone
 
+- [ ] Complete Livestreaming APIs and Tutorials for hosting & watching
 - [ ] Android SDK development.md cleanup (Daniel)
 - [ ] Upgrade to more recent versions of webrtc (Kanat)
 - [ ] Picture of the video stream at highest resolution

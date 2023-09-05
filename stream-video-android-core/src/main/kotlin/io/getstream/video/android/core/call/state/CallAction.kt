@@ -55,42 +55,42 @@ public data class ToggleMicrophone(
 /**
  * Action to flip the active camera.
  */
-public object FlipCamera : CallAction
+public data object FlipCamera : CallAction
 
 /**
  * Action to accept a call in Incoming Call state.
  */
-public object AcceptCall : CallAction
+public data object AcceptCall : CallAction
 
 /**
  * Action used to cancel an outgoing call.
  */
-public object CancelCall : CallAction
+public data object CancelCall : CallAction
 
 /**
  * Action to decline an oncoming call.
  */
-public object DeclineCall : CallAction
+public data object DeclineCall : CallAction
 
 /**
  * Action to leave the call.
  */
-public object LeaveCall : CallAction
+public data object LeaveCall : CallAction
 
 /**
  * Action to show a chat dialog.
  */
-public object ChatDialog : CallAction
+public data object ChatDialog : CallAction
 
 /**
  * Action to show a settings.
  */
-public object Settings : CallAction
+public data object Settings : CallAction
 
 /**
  * Action to show a reaction popup.
  */
-public object Reaction : CallAction
+public data object Reaction : CallAction
 
 /**
  * Action to invite other users to a call.
