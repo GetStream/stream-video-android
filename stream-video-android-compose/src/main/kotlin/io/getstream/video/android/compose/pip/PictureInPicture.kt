@@ -34,7 +34,7 @@ internal fun enterPictureInPicture(context: Context, call: Call) {
             val screenSharing = call.state.screenSharingSession.value
 
             val aspect =
-                if (currentOrientation == ActivityInfo.SCREEN_ORIENTATION_PORTRAIT && screenSharing == null) {
+                if (currentOrientation == ActivityInfo.SCREEN_ORIENTATION_PORTRAIT && (screenSharing == null || screenSharing.participant.isLocal)) {
                     Rational(9, 16)
                 } else {
                     Rational(16, 9)

@@ -16,7 +16,11 @@
 
 package io.getstream.video.android.ui.call
 
+import android.app.Activity
+import android.media.projection.MediaProjectionManager
 import android.widget.Toast
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
@@ -29,6 +33,8 @@ import androidx.compose.material.Card
 import androidx.compose.material.Icon
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -53,6 +59,21 @@ internal fun SettingsMenu(
     val scope = rememberCoroutineScope()
     val reactions =
         listOf(":fireworks:", ":hello:", ":raise-hand:", ":like:", ":hate:", ":smile:", ":heart:")
+
+    val screenSharePermissionResult = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.StartActivityForResult(),
+        onResult = {
+            if (it.resultCode == Activity.RESULT_OK && it.data != null) {
+                call.startScreenSharing(it.data!!)
+            }
+            onDismissed.invoke()
+        },
+    )
+
+    val isScreenSharing by call.screenShare.isEnabled.collectAsState()
+    val screenShareButtonText = if (isScreenSharing) {
+        "Stop screen-sharing"
+    } else { "Start screen-sharing" }
 
     Popup(
         alignment = Alignment.BottomStart,
@@ -86,6 +107,37 @@ internal fun SettingsMenu(
                     Text(
                         modifier = Modifier.padding(start = 20.dp),
                         text = "Reactions",
+                        color = VideoTheme.colors.textHighEmphasis,
+                    )
+                }
+
+                Spacer(modifier = Modifier.height(12.dp))
+
+                Row(
+                    modifier = Modifier.clickable {
+                        if (!isScreenSharing) {
+                            scope.launch {
+                                val mediaProjectionManager = context.getSystemService(
+                                    MediaProjectionManager::class.java,
+                                )
+                                screenSharePermissionResult.launch(
+                                    mediaProjectionManager.createScreenCaptureIntent(),
+                                )
+                            }
+                        } else {
+                            call.stopScreenSharing()
+                        }
+                    },
+                ) {
+                    Icon(
+                        painter = painterResource(id = R.drawable.stream_video_ic_screensharing),
+                        tint = VideoTheme.colors.textHighEmphasis,
+                        contentDescription = null,
+                    )
+
+                    Text(
+                        modifier = Modifier.padding(start = 20.dp),
+                        text = screenShareButtonText,
                         color = VideoTheme.colors.textHighEmphasis,
                     )
                 }

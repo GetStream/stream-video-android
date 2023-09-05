@@ -69,7 +69,8 @@ public fun ParticipantsGrid(
     val screenSharingSession = call.state.screenSharingSession.collectAsStateWithLifecycle()
     val screenSharing = screenSharingSession.value
 
-    if (screenSharing == null) {
+    // We do not display our own screen-sharing session
+    if (screenSharing == null || screenSharing.participant.isLocal) {
         ParticipantsRegularGrid(
             call = call,
             modifier = modifier,

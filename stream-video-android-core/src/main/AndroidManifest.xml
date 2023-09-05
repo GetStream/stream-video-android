@@ -59,5 +59,15 @@
             </intent-filter>
         </receiver>
         <activity android:name=".notifications.internal.DismissNotificationActivity" />
+
+        <receiver android:name=".notifications.internal.StopScreenshareBroadcastReceiver"
+            android:exported="false">
+            <intent-filter android:priority="-1">
+                <action android:name="io.getstream.video.android.action.CANCEL_SCREEN_SHARE" />
+            </intent-filter>
+        </receiver>
+
+        <service android:name=".screenshare.StreamScreenShareService"
+            android:foregroundServiceType="mediaProjection"/>
     </application>
 </manifest>
