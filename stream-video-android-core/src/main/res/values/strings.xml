@@ -20,4 +20,9 @@
     <string name="stream_video_call_notification_action_reject">Reject</string>
     <string name="stream_video_call_notification_action_cancel">Cancel</string>
     <string name="stream_video_screen_sharing_title">%1$s presenting</string>
+    <string name="stream_video_screen_sharing_notification_title">You are screen sharing</string>
+    <string name="stream_video_screen_sharing_notification_description"></string>
+    <string name="stream_video_screen_sharing_notification_action_stop">Stop screen sharing</string>
+    <string name="stream_video_screen_sharing_notification_channel_title">Screen-sharing</string>
+    <string name="stream_video_screen_sharing_notification_channel_description">Required to be enabled for screen sharing</string>
 </resources>

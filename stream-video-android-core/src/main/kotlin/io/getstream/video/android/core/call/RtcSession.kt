@@ -23,6 +23,8 @@ import io.getstream.result.Result.Failure
 import io.getstream.result.Result.Success
 import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.DeviceStatus
+import io.getstream.video.android.core.MediaManagerImpl
+import io.getstream.video.android.core.ScreenShareManager
 import io.getstream.video.android.core.StreamVideo
 import io.getstream.video.android.core.StreamVideoImpl
 import io.getstream.video.android.core.call.connection.StreamPeerConnection
@@ -76,6 +78,7 @@ import kotlinx.serialization.json.Json
 import okio.IOException
 import org.openapitools.client.models.OwnCapability
 import org.openapitools.client.models.VideoEvent
+import org.webrtc.CameraEnumerationAndroid.CaptureFormat
 import org.webrtc.MediaConstraints
 import org.webrtc.MediaStream
 import org.webrtc.MediaStreamTrack
@@ -165,6 +168,7 @@ public class RtcSession internal constructor(
 
     private var videoTransceiverInitialized: Boolean = false
     private var audioTransceiverInitialized: Boolean = false
+    private var screenshareTransceiverInitialized: Boolean = false
     private var errorJob: Job? = null
     private var eventJob: Job? = null
     internal val socket by lazy { sfuConnectionModule.sfuSocket }
@@ -374,8 +378,22 @@ public class RtcSession internal constructor(
                 it.addVideoTransceiver(
                     call.mediaManager.videoTrack,
                     listOf(buildTrackId(TrackType.TRACK_TYPE_VIDEO)),
+                    isScreenShare = false,
                 )
                 videoTransceiverInitialized = true
+            }
+        }
+    }
+
+    private fun initializeScreenshareTransceiver() {
+        if (!screenshareTransceiverInitialized) {
+            publisher?.let {
+                it.addVideoTransceiver(
+                    call.mediaManager.screenShareTrack,
+                    listOf(buildTrackId(TrackType.TRACK_TYPE_SCREEN_SHARE)),
+                    isScreenShare = true,
+                )
+                screenshareTransceiverInitialized = true
             }
         }
     }
@@ -411,6 +429,20 @@ public class RtcSession internal constructor(
 
                 if (it == DeviceStatus.Enabled) {
                     initialiseAudioTransceiver()
+                }
+            }
+        }
+
+        coroutineScope.launch {
+            call.mediaManager.screenShare.status.collectLatest {
+                // set the mute /unumute status
+                setMuteState(
+                    isEnabled = it == DeviceStatus.Enabled,
+                    TrackType.TRACK_TYPE_SCREEN_SHARE,
+                )
+
+                if (it == DeviceStatus.Enabled) {
+                    initializeScreenshareTransceiver()
                 }
             }
         }
@@ -545,6 +577,7 @@ public class RtcSession internal constructor(
                         video = call.mediaManager.videoTrack,
                     ),
                 )
+
                 // render it on the surface. but we need to start this before forwarding it to the publisher
                 logger.v { "[createUserTracks] #sfu; videoTrack: ${call.mediaManager.videoTrack.stringify()}" }
                 if (call.mediaManager.camera.status.value == DeviceStatus.Enabled) {
@@ -552,6 +585,9 @@ public class RtcSession internal constructor(
                 }
                 if (call.mediaManager.microphone.status.value == DeviceStatus.Enabled) {
                     initialiseAudioTransceiver()
+                }
+                if (call.mediaManager.screenShare.status.value == DeviceStatus.Enabled) {
+                    initializeScreenshareTransceiver()
                 }
             }
         }
@@ -563,6 +599,16 @@ public class RtcSession internal constructor(
         // subscribe to the tracks of other participants
         setVideoSubscriptions(true)
         return
+    }
+
+    fun setScreenShareTrack() {
+        setLocalTrack(
+            TrackType.TRACK_TYPE_SCREEN_SHARE,
+            VideoTrack(
+                streamId = buildTrackId(TrackType.TRACK_TYPE_SCREEN_SHARE),
+                video = call.mediaManager.screenShareTrack,
+            ),
+        )
     }
 
     /**
@@ -1199,6 +1245,7 @@ public class RtcSession internal constructor(
                     )
                     val result = setPublisher(request)
                     // step 5 - set the remote description
+
                     peerConnection.setRemoteDescription(
                         SessionDescription(
                             SessionDescription.Type.ANSWER, result.getOrThrow().sdp,
@@ -1226,6 +1273,7 @@ public class RtcSession internal constructor(
 
     private fun getPublisherTracks(): List<TrackInfo> {
         val captureResolution = call.camera.resolution.value
+        val screenShareTrack = getLocalTrack(TrackType.TRACK_TYPE_SCREEN_SHARE)
 
         val transceivers = publisher?.connection?.transceivers?.toList() ?: emptyList()
         val tracks = transceivers.filter {
@@ -1236,53 +1284,29 @@ public class RtcSession internal constructor(
             val trackType = when (track.kind()) {
                 "audio" -> TrackType.TRACK_TYPE_AUDIO
                 "screen" -> TrackType.TRACK_TYPE_SCREEN_SHARE
-                "video" -> TrackType.TRACK_TYPE_VIDEO
+                "video" -> {
+                    // video tracks and screenshare tracks in webrtc are both video
+                    // (the "screen" track type doesn't seem to be used).
+                    if (screenShareTrack?.asVideoTrack()?.video?.id() == track.id()) {
+                        TrackType.TRACK_TYPE_SCREEN_SHARE
+                    } else {
+                        TrackType.TRACK_TYPE_VIDEO
+                    }
+                }
                 else -> TrackType.TRACK_TYPE_UNSPECIFIED
             }
 
-            if (trackType == TrackType.TRACK_TYPE_VIDEO && captureResolution == null) {
-                throw IllegalStateException(
-                    "video capture needs to be enabled before adding the local track",
-                )
-            }
-
-            val layers: List<VideoLayer> = if (trackType != TrackType.TRACK_TYPE_VIDEO) {
-                emptyList()
-            } else {
-                // we tell the Sfu which resolutions we're sending
-                transceiver.sender.parameters.encodings.map {
-                    val scaleBy = it.scaleResolutionDownBy ?: 1.0
-                    val width = captureResolution?.width?.div(scaleBy) ?: 0
-                    val height = captureResolution?.height?.div(scaleBy) ?: 0
-                    val quality = when (it.rid) {
-                        "f" -> {
-                            VideoQuality.VIDEO_QUALITY_HIGH
-                        }
-
-                        "h" -> {
-                            VideoQuality.VIDEO_QUALITY_MID
-                        }
-
-                        else -> {
-                            VideoQuality.VIDEO_QUALITY_LOW_UNSPECIFIED
-                        }
-                    }
-
-                    // We need to divide by 1000 because the the FramerateRange is multiplied
-                    // by 1000 (see javadoc).
-                    val fps = (captureResolution?.framerate?.max ?: 0).div(1000)
-
-                    VideoLayer(
-                        rid = it.rid ?: "",
-                        video_dimension = VideoDimension(
-                            width = width.toInt(),
-                            height = height.toInt(),
-                        ),
-                        bitrate = it.maxBitrateBps ?: 0,
-                        fps = fps,
-                        quality = quality,
+            val layers: List<VideoLayer> = if (trackType == TrackType.TRACK_TYPE_VIDEO) {
+                checkNotNull(captureResolution) {
+                    throw IllegalStateException(
+                        "video capture needs to be enabled before adding the local track",
                     )
                 }
+                createVideoLayers(transceiver, captureResolution)
+            } else if (trackType == TrackType.TRACK_TYPE_SCREEN_SHARE) {
+                createScreenShareLayers(transceiver)
+            } else {
+                emptyList()
             }
 
             TrackInfo(
@@ -1293,6 +1317,64 @@ public class RtcSession internal constructor(
         }
         return tracks
     }
+
+    private fun createVideoLayers(transceiver: RtpTransceiver, captureResolution: CaptureFormat): List<VideoLayer> {
+        // we tell the Sfu which resolutions we're sending
+        return transceiver.sender.parameters.encodings.map {
+            val scaleBy = it.scaleResolutionDownBy ?: 1.0
+            val width = captureResolution.width.div(scaleBy) ?: 0
+            val height = captureResolution.height.div(scaleBy) ?: 0
+            val quality = ridToVideoQuality(it.rid)
+
+            // We need to divide by 1000 because the the FramerateRange is multiplied
+            // by 1000 (see javadoc).
+            val fps = (captureResolution.framerate?.max ?: 0).div(1000)
+
+            VideoLayer(
+                rid = it.rid ?: "",
+                video_dimension = VideoDimension(
+                    width = width.toInt(),
+                    height = height.toInt(),
+                ),
+                bitrate = it.maxBitrateBps ?: 0,
+                fps = fps,
+                quality = quality,
+            )
+        }
+    }
+
+    private fun createScreenShareLayers(transceiver: RtpTransceiver): List<VideoLayer> {
+        return transceiver.sender.parameters.encodings.map {
+            // So far we use hardcoded parameters for screen-sharing. This is aligned
+            // with iOS.
+
+            VideoLayer(
+                rid = "q",
+                video_dimension = VideoDimension(
+                    width = ScreenShareManager.screenShareResolution.width,
+                    height = ScreenShareManager.screenShareResolution.height,
+                ),
+                bitrate = ScreenShareManager.screenShareBitrate,
+                fps = ScreenShareManager.screenShareFps,
+                quality = VideoQuality.VIDEO_QUALITY_LOW_UNSPECIFIED,
+            )
+        }
+    }
+
+    private fun ridToVideoQuality(rid: String?) =
+        when (rid) {
+            "f" -> {
+                VideoQuality.VIDEO_QUALITY_HIGH
+            }
+
+            "h" -> {
+                VideoQuality.VIDEO_QUALITY_MID
+            }
+
+            else -> {
+                VideoQuality.VIDEO_QUALITY_LOW_UNSPECIFIED
+            }
+        }
 
     /**
      * @return [StateFlow] that holds [RTCStatsReport] that the publisher exposes.
