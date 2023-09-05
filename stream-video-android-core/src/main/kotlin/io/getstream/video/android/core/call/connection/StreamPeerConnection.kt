@@ -292,11 +292,15 @@ public class StreamPeerConnection(
      * @param track The track that contains video.
      * @param streamIds The IDs that represent the stream tracks.
      */
-    public fun addVideoTransceiver(track: MediaStreamTrack, streamIds: List<String>) {
+    public fun addVideoTransceiver(
+        track: MediaStreamTrack,
+        streamIds: List<String>,
+        isScreenShare: Boolean,
+    ) {
         logger.d {
             "[addVideoTransceiver] #sfu; #$typeTag; track: ${track.stringify()}, streamIds: $streamIds"
         }
-        val transceiverInit = buildVideoTransceiverInit(streamIds)
+        val transceiverInit = buildVideoTransceiverInit(streamIds, isScreenShare)
 
         videoTransceiver = connection.addTransceiver(track, transceiverInit)
     }
@@ -306,43 +310,59 @@ public class StreamPeerConnection(
      *
      * @param streamIds The list of stream IDs to bind to this transceiver.
      */
-    private fun buildVideoTransceiverInit(streamIds: List<String>): RtpTransceiverInit {
-        /**
-         * We create different RTP encodings for the transceiver.
-         * Full quality, represented by "f" ID.
-         * Half quality, represented by "h" ID.
-         * Quarter quality, represented by "q" ID.
-         *
-         * Their bitrate is also roughly as the name states - maximum for "full", ~half of that
-         * for "half" and another half, or total quarter of maximum, for "quarter".
-         */
-        val quarterQuality = RtpParameters.Encoding(
-            "q",
-            true,
-            4.0,
-        ).apply {
-            maxBitrateBps = maxBitRate / 4
-        }
+    private fun buildVideoTransceiverInit(
+        streamIds: List<String>,
+        isScreenShare: Boolean,
+    ): RtpTransceiverInit {
+        val encodings = if (!isScreenShare) {
+            /**
+             * We create different RTP encodings for the transceiver.
+             * Full quality, represented by "f" ID.
+             * Half quality, represented by "h" ID.
+             * Quarter quality, represented by "q" ID.
+             *
+             * Their bitrate is also roughly as the name states - maximum for "full", ~half of that
+             * for "half" and another half, or total quarter of maximum, for "quarter".
+             */
+            val quarterQuality = RtpParameters.Encoding(
+                "q",
+                true,
+                4.0,
+            ).apply {
+                maxBitrateBps = maxBitRate / 4
+            }
 
-        val halfQuality = RtpParameters.Encoding(
-            "h",
-            true,
-            2.0,
-        ).apply {
-            maxBitrateBps = maxBitRate / 2
-        }
+            val halfQuality = RtpParameters.Encoding(
+                "h",
+                true,
+                2.0,
+            ).apply {
+                maxBitrateBps = maxBitRate / 2
+            }
 
-        val fullQuality = RtpParameters.Encoding(
-            "f",
-            true,
-            1.0,
-        ).apply {
-            maxBitrateBps = maxBitRate
+            val fullQuality = RtpParameters.Encoding(
+                "f",
+                true,
+                1.0,
+            ).apply {
+                maxBitrateBps = maxBitRate
 //            networkPriority = 3
 //            bitratePriority = 4.0
-        }
+            }
 
-        val encodings = listOf(quarterQuality, halfQuality, fullQuality)
+            listOf(quarterQuality, halfQuality, fullQuality)
+        } else {
+            // this is aligned with iOS
+            val screenshareQuality = RtpParameters.Encoding(
+                "q",
+                true,
+                1.0,
+            ).apply {
+                maxBitrateBps = 1_000_000
+            }
+
+            listOf(screenshareQuality)
+        }
 
         return RtpTransceiverInit(
             RtpTransceiver.RtpTransceiverDirection.SEND_ONLY,
