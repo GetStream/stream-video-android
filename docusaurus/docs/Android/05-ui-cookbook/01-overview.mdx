@@ -3,98 +3,125 @@ title: Overview
 description: Overview of the UI cookbook
 ---
 
+export const CookbookCard = ({ title, link, img }) => (
+  <div
+    style={{
+      display: 'flex',
+      flexDirection: 'column',
+      justifyContent: 'start',
+      alignItems: 'center',
+      gap: '0.5rem',
+    }}
+  >
+    <h4 style={{ margin: '0px' }}>{title}</h4>
+    <a href={link}>
+      <p style={{ margin: '0', padding: '0' }}>
+        <img src={img} />
+      </p>
+    </a>
+  </div>
+);
+
+import CallControls from '../assets/cookbook/replacing-call-controls.png';
+import Label from '../assets/cookbook/removing-label-and-indicators.png';
+import VideoLayout from '../assets/cookbook/custom-video-layout.png';
+import IncomingCall from '../assets/cookbook/incoming-call.png';
+import LobbyPreview from '../assets/cookbook/lobby-preview.png';
+import VideoFallback from '../assets/cookbook/no-video-fallback-avatar.png';
+
+import PermissionRequests from '../assets/cookbook/permission-requests.png';
+import VolumeIndicator from '../assets/cookbook/audio-volume-indicator.png';
+import Reactions from '../assets/cookbook/reactions.png';
+import WatchingLivestream from '../assets/cookbook/livestream-live-label.png';
+
+import ConnectionQuality from '../assets/cookbook/network-quality.png';
+import SpeakingWhileMuted from '../assets/cookbook/speaking-while-muted.png';
+import ConnectionWarning from '../assets/cookbook/connection-unstable.png';
+
 Stream UI components are highly customizable and allow you to fully customize styles to your taste. This UI Cookbook will walk you through how to customize each component in your video call.
-
-## UI Cookbook
-
-export const CookbookCardGrid = ({ children }) => (
-  <ol
-    style={{
-      display: "flex",
-      flexWrap: "wrap",
-      gap: "0.5rem",
-      padding: 0,
-    }}
-  >
-    {children}
-  </ol>
-);
-
-export const CookbookCard = ({ title, children }) => (
-  <li
-    style={{
-      display: "flex",
-      flexDirection: "column",
-      margin: "0 0.5rem",
-      listStyleType: "none",
-      color: "#d3d3d3",
-      width: "250px",
-      height: "200px",
-    }}
-  >
-    <h4>{title}</h4>
-    {children}
-  </li>
-);
-
-This cookbook aims to show you how to build your own UI elements for video calling.
 
 ### Video Calls & Ringing
 
-<div>
-  <CookbookCardGrid>
-    <CookbookCard title="Replacing Call Controls">
-      <img src={require("../assets/cookbook/replacing-call-controls.png").default} />
-    </CookbookCard>
-    <CookbookCard title="Custom label &amp; indicators">
-      <img src={require("../assets/cookbook/removing-label-and-indicators.png").default} />
-    </CookbookCard>
-    <CookbookCard title="Custom Video Layout">
-      <img src={require("../assets/cookbook/custom-video-layout.png").default} />
-    </CookbookCard>
-    <CookbookCard title="Incoming Call">
-      <img src={require("../assets/cookbook/incoming-call.png").default} />
-    </CookbookCard>
-    <CookbookCard title="Lobby/Preview">
-      <img src={require("../assets/cookbook/lobby-preview.png").default} />
-    </CookbookCard>
-    <CookbookCard title="No-video fallback">
-      <img src={require("../assets/cookbook/no-video-fallback-avatar.png").default} />
-    </CookbookCard>
-  </CookbookCardGrid>
+<div
+  style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '1.2rem' }}
+>
+  <CookbookCard
+    title="Replacing Call Controls"
+    link="../05-ui-cookbook/02-control-actions.mdx"
+    img={CallControls}
+  ></CookbookCard>
+  <CookbookCard
+    title="Custom label &amp; indicators"
+    link="../05-ui-cookbook/03-participant-label.mdx"
+    img={Label}
+  ></CookbookCard>
+  <CookbookCard
+    title="Custom Video Layout"
+    link="../05-ui-cookbook/04-video-renderer.mdx"
+    img={VideoLayout}
+  ></CookbookCard>
+  <CookbookCard
+    title="Incoming Call"
+    link="../05-ui-cookbook/05-incoming-and-outgoing-call.mdx"
+    img={VideoLayout}
+  ></CookbookCard>
+  <CookbookCard
+    title="Lobby &amp; Preview"
+    link="../05-ui-cookbook/06-lobby-preview.mdx"
+    img={LobbyPreview}
+  ></CookbookCard>
+  <CookbookCard
+    title="No-video fallback"
+    link="../05-ui-cookbook/07-video-fallback.mdx"
+    img={VideoFallback}
+  ></CookbookCard>
 </div>
 
 ### Audio rooms & Livestreams
 
-<div>
-  <CookbookCardGrid>
-    <CookbookCard title="Permission Requests">
-      <img src={require("../assets/cookbook/permission-requests.png").default} />
-    </CookbookCard>
-    <CookbookCard title="Audio volume Indicator">
-      <img src={require("../assets/cookbook/audio-volume-indicator.png").default} />
-    </CookbookCard>
-    <CookbookCard title="Reactions">
-      <img src={require("../assets/cookbook/reactions.png").default} />
-    </CookbookCard>
-    <CookbookCard title="Watching a Livestream">
-      <img src={require("../assets/cookbook/reactions.png").default} />
-    </CookbookCard>
-  </CookbookCardGrid>
+<div
+  style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '1.2rem' }}
+>
+  <CookbookCard
+    title="Permission Requests"
+    link="../05-ui-cookbook/08-permission-requests.mdx"
+    img={PermissionRequests}
+  ></CookbookCard>
+  <CookbookCard
+    title="Audio volume Indicator"
+    link="../05-ui-cookbook/09-audio-volume-indicator.mdx"
+    img={VolumeIndicator}
+  ></CookbookCard>
+  <CookbookCard
+    title="Reactions"
+    link="../05-ui-cookbook/14-reactions.mdx"
+    img={Reactions}
+  ></CookbookCard>
+  <CookbookCard
+    title="Watching a Livestream"
+    link="../05-ui-cookbook/15-watching-livestream.mdx"
+    img={WatchingLivestream}
+  ></CookbookCard>
 </div>
 
 ### Small Components
 
-<div>
-  <CookbookCardGrid>
-    <CookbookCard title="Network Quality Indicator">
-      <img src={require("../assets/cookbook/network-quality.png").default} />
-    </CookbookCard>
-    <CookbookCard title="Speaking While Muted">
-      <img src={require("../assets/cookbook/speaking-while-muted.png").default} />
-    </CookbookCard>
-    <CookbookCard title="Connection Unstable">
-      <img src={require("../assets/cookbook/connection-unstable.png").default} />
-    </CookbookCard>
-  </CookbookCardGrid>
+<div
+  style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '1.2rem' }}
+>
+  <CookbookCard
+    title="Network Quality Indicator"
+    link="../05-ui-cookbook/10-network-quality-indicator.mdx"
+    img={PermissionRequests}
+  ></CookbookCard>
+  <CookbookCard
+    title="Speaking While Muted"
+    link="../05-ui-cookbook/11-speaking-while-muted.mdx"
+    img={VolumeIndicator}
+  ></CookbookCard>
+  <CookbookCard
+    title="Connection Unstable"
+    link="../05-ui-cookbook/10-network-quality-indicator.mdx"
+    img={Reactions}
+  ></CookbookCard>
 </div>
