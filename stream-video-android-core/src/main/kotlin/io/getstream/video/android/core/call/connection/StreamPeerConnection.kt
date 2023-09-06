@@ -73,6 +73,8 @@ public class StreamPeerConnection(
     private val maxBitRate: Int,
 ) : PeerConnection.Observer {
 
+    private val setDescriptionMutex = Mutex()
+
     private val goodStates = listOf(
         PeerConnection.PeerConnectionState.NEW, // New is good, means we're not using it yet
         PeerConnection.PeerConnectionState.CONNECTED,
@@ -208,7 +210,14 @@ public class StreamPeerConnection(
         localSdp = sdp
 
         logger.d { "[setLocalDescription] #sfu; #$typeTag; offerSdp: ${sessionDescription.stringify()}" }
-        return setValue { connection.setLocalDescription(it, sdp) }
+        // This needs a mutex because parallel calls will result in:
+        // SfuSocketError: subscriber PC: negotiation failed
+        return setDescriptionMutex.withLock {
+            setValue {
+                // Never call this in parallel
+                connection.setLocalDescription(it, sdp)
+            }
+        }
     }
 
     /**

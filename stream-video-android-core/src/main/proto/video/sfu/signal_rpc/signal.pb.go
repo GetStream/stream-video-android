@@ -21,6 +21,108 @@ const (
 	_ = protoimpl.EnforceVersion(protoimpl.MaxVersion - 20)
 )
 
+type ICERestartRequest struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	SessionId string          `protobuf:"bytes,1,opt,name=session_id,json=sessionId,proto3" json:"session_id,omitempty"`
+	PeerType  models.PeerType `protobuf:"varint,2,opt,name=peer_type,json=peerType,proto3,enum=stream.video.sfu.models.PeerType" json:"peer_type,omitempty"`
+}
+
+func (x *ICERestartRequest) Reset() {
+	*x = ICERestartRequest{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_video_sfu_signal_rpc_signal_proto_msgTypes[0]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *ICERestartRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ICERestartRequest) ProtoMessage() {}
+
+func (x *ICERestartRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_video_sfu_signal_rpc_signal_proto_msgTypes[0]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ICERestartRequest.ProtoReflect.Descriptor instead.
+func (*ICERestartRequest) Descriptor() ([]byte, []int) {
+	return file_video_sfu_signal_rpc_signal_proto_rawDescGZIP(), []int{0}
+}
+
+func (x *ICERestartRequest) GetSessionId() string {
+	if x != nil {
+		return x.SessionId
+	}
+	return ""
+}
+
+func (x *ICERestartRequest) GetPeerType() models.PeerType {
+	if x != nil {
+		return x.PeerType
+	}
+	return models.PeerType(0)
+}
+
+type ICERestartResponse struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	Error *models.Error `protobuf:"bytes,1,opt,name=error,proto3" json:"error,omitempty"`
+}
+
+func (x *ICERestartResponse) Reset() {
+	*x = ICERestartResponse{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_video_sfu_signal_rpc_signal_proto_msgTypes[1]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *ICERestartResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ICERestartResponse) ProtoMessage() {}
+
+func (x *ICERestartResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_video_sfu_signal_rpc_signal_proto_msgTypes[1]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ICERestartResponse.ProtoReflect.Descriptor instead.
+func (*ICERestartResponse) Descriptor() ([]byte, []int) {
+	return file_video_sfu_signal_rpc_signal_proto_rawDescGZIP(), []int{1}
+}
+
+func (x *ICERestartResponse) GetError() *models.Error {
+	if x != nil {
+		return x.Error
+	}
+	return nil
+}
+
 type UpdateMuteStatesRequest struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
@@ -33,7 +135,7 @@ type UpdateMuteStatesRequest struct {
 func (x *UpdateMuteStatesRequest) Reset() {
 	*x = UpdateMuteStatesRequest{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_video_sfu_signal_rpc_signal_proto_msgTypes[0]
+		mi := &file_video_sfu_signal_rpc_signal_proto_msgTypes[2]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -46,7 +148,7 @@ func (x *UpdateMuteStatesRequest) String() string {
 func (*UpdateMuteStatesRequest) ProtoMessage() {}
 
 func (x *UpdateMuteStatesRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_video_sfu_signal_rpc_signal_proto_msgTypes[0]
+	mi := &file_video_sfu_signal_rpc_signal_proto_msgTypes[2]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -59,7 +161,7 @@ func (x *UpdateMuteStatesRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use UpdateMuteStatesRequest.ProtoReflect.Descriptor instead.
 func (*UpdateMuteStatesRequest) Descriptor() ([]byte, []int) {
-	return file_video_sfu_signal_rpc_signal_proto_rawDescGZIP(), []int{0}
+	return file_video_sfu_signal_rpc_signal_proto_rawDescGZIP(), []int{2}
 }
 
 func (x *UpdateMuteStatesRequest) GetSessionId() string {
@@ -87,7 +189,7 @@ type UpdateMuteStatesResponse struct {
 func (x *UpdateMuteStatesResponse) Reset() {
 	*x = UpdateMuteStatesResponse{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_video_sfu_signal_rpc_signal_proto_msgTypes[1]
+		mi := &file_video_sfu_signal_rpc_signal_proto_msgTypes[3]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -100,7 +202,7 @@ func (x *UpdateMuteStatesResponse) String() string {
 func (*UpdateMuteStatesResponse) ProtoMessage() {}
 
 func (x *UpdateMuteStatesResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_video_sfu_signal_rpc_signal_proto_msgTypes[1]
+	mi := &file_video_sfu_signal_rpc_signal_proto_msgTypes[3]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -113,7 +215,7 @@ func (x *UpdateMuteStatesResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use UpdateMuteStatesResponse.ProtoReflect.Descriptor instead.
 func (*UpdateMuteStatesResponse) Descriptor() ([]byte, []int) {
-	return file_video_sfu_signal_rpc_signal_proto_rawDescGZIP(), []int{1}
+	return file_video_sfu_signal_rpc_signal_proto_rawDescGZIP(), []int{3}
 }
 
 func (x *UpdateMuteStatesResponse) GetError() *models.Error {
@@ -135,7 +237,7 @@ type TrackMuteState struct {
 func (x *TrackMuteState) Reset() {
 	*x = TrackMuteState{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_video_sfu_signal_rpc_signal_proto_msgTypes[2]
+		mi := &file_video_sfu_signal_rpc_signal_proto_msgTypes[4]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -148,7 +250,7 @@ func (x *TrackMuteState) String() string {
 func (*TrackMuteState) ProtoMessage() {}
 
 func (x *TrackMuteState) ProtoReflect() protoreflect.Message {
-	mi := &file_video_sfu_signal_rpc_signal_proto_msgTypes[2]
+	mi := &file_video_sfu_signal_rpc_signal_proto_msgTypes[4]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -161,7 +263,7 @@ func (x *TrackMuteState) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use TrackMuteState.ProtoReflect.Descriptor instead.
 func (*TrackMuteState) Descriptor() ([]byte, []int) {
-	return file_video_sfu_signal_rpc_signal_proto_rawDescGZIP(), []int{2}
+	return file_video_sfu_signal_rpc_signal_proto_rawDescGZIP(), []int{4}
 }
 
 func (x *TrackMuteState) GetTrackType() models.TrackType {
@@ -189,7 +291,7 @@ type AudioMuteChanged struct {
 func (x *AudioMuteChanged) Reset() {
 	*x = AudioMuteChanged{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_video_sfu_signal_rpc_signal_proto_msgTypes[3]
+		mi := &file_video_sfu_signal_rpc_signal_proto_msgTypes[5]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -202,7 +304,7 @@ func (x *AudioMuteChanged) String() string {
 func (*AudioMuteChanged) ProtoMessage() {}
 
 func (x *AudioMuteChanged) ProtoReflect() protoreflect.Message {
-	mi := &file_video_sfu_signal_rpc_signal_proto_msgTypes[3]
+	mi := &file_video_sfu_signal_rpc_signal_proto_msgTypes[5]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -215,7 +317,7 @@ func (x *AudioMuteChanged) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use AudioMuteChanged.ProtoReflect.Descriptor instead.
 func (*AudioMuteChanged) Descriptor() ([]byte, []int) {
-	return file_video_sfu_signal_rpc_signal_proto_rawDescGZIP(), []int{3}
+	return file_video_sfu_signal_rpc_signal_proto_rawDescGZIP(), []int{5}
 }
 
 func (x *AudioMuteChanged) GetMuted() bool {
@@ -236,7 +338,7 @@ type VideoMuteChanged struct {
 func (x *VideoMuteChanged) Reset() {
 	*x = VideoMuteChanged{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_video_sfu_signal_rpc_signal_proto_msgTypes[4]
+		mi := &file_video_sfu_signal_rpc_signal_proto_msgTypes[6]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -249,7 +351,7 @@ func (x *VideoMuteChanged) String() string {
 func (*VideoMuteChanged) ProtoMessage() {}
 
 func (x *VideoMuteChanged) ProtoReflect() protoreflect.Message {
-	mi := &file_video_sfu_signal_rpc_signal_proto_msgTypes[4]
+	mi := &file_video_sfu_signal_rpc_signal_proto_msgTypes[6]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -262,7 +364,7 @@ func (x *VideoMuteChanged) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use VideoMuteChanged.ProtoReflect.Descriptor instead.
 func (*VideoMuteChanged) Descriptor() ([]byte, []int) {
-	return file_video_sfu_signal_rpc_signal_proto_rawDescGZIP(), []int{4}
+	return file_video_sfu_signal_rpc_signal_proto_rawDescGZIP(), []int{6}
 }
 
 func (x *VideoMuteChanged) GetMuted() bool {
@@ -284,7 +386,7 @@ type UpdateSubscriptionsRequest struct {
 func (x *UpdateSubscriptionsRequest) Reset() {
 	*x = UpdateSubscriptionsRequest{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_video_sfu_signal_rpc_signal_proto_msgTypes[5]
+		mi := &file_video_sfu_signal_rpc_signal_proto_msgTypes[7]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -297,7 +399,7 @@ func (x *UpdateSubscriptionsRequest) String() string {
 func (*UpdateSubscriptionsRequest) ProtoMessage() {}
 
 func (x *UpdateSubscriptionsRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_video_sfu_signal_rpc_signal_proto_msgTypes[5]
+	mi := &file_video_sfu_signal_rpc_signal_proto_msgTypes[7]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -310,7 +412,7 @@ func (x *UpdateSubscriptionsRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use UpdateSubscriptionsRequest.ProtoReflect.Descriptor instead.
 func (*UpdateSubscriptionsRequest) Descriptor() ([]byte, []int) {
-	return file_video_sfu_signal_rpc_signal_proto_rawDescGZIP(), []int{5}
+	return file_video_sfu_signal_rpc_signal_proto_rawDescGZIP(), []int{7}
 }
 
 func (x *UpdateSubscriptionsRequest) GetSessionId() string {
@@ -338,7 +440,7 @@ type UpdateSubscriptionsResponse struct {
 func (x *UpdateSubscriptionsResponse) Reset() {
 	*x = UpdateSubscriptionsResponse{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_video_sfu_signal_rpc_signal_proto_msgTypes[6]
+		mi := &file_video_sfu_signal_rpc_signal_proto_msgTypes[8]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -351,7 +453,7 @@ func (x *UpdateSubscriptionsResponse) String() string {
 func (*UpdateSubscriptionsResponse) ProtoMessage() {}
 
 func (x *UpdateSubscriptionsResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_video_sfu_signal_rpc_signal_proto_msgTypes[6]
+	mi := &file_video_sfu_signal_rpc_signal_proto_msgTypes[8]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -364,7 +466,7 @@ func (x *UpdateSubscriptionsResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use UpdateSubscriptionsResponse.ProtoReflect.Descriptor instead.
 func (*UpdateSubscriptionsResponse) Descriptor() ([]byte, []int) {
-	return file_video_sfu_signal_rpc_signal_proto_rawDescGZIP(), []int{6}
+	return file_video_sfu_signal_rpc_signal_proto_rawDescGZIP(), []int{8}
 }
 
 func (x *UpdateSubscriptionsResponse) GetError() *models.Error {
@@ -388,7 +490,7 @@ type TrackSubscriptionDetails struct {
 func (x *TrackSubscriptionDetails) Reset() {
 	*x = TrackSubscriptionDetails{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_video_sfu_signal_rpc_signal_proto_msgTypes[7]
+		mi := &file_video_sfu_signal_rpc_signal_proto_msgTypes[9]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -401,7 +503,7 @@ func (x *TrackSubscriptionDetails) String() string {
 func (*TrackSubscriptionDetails) ProtoMessage() {}
 
 func (x *TrackSubscriptionDetails) ProtoReflect() protoreflect.Message {
-	mi := &file_video_sfu_signal_rpc_signal_proto_msgTypes[7]
+	mi := &file_video_sfu_signal_rpc_signal_proto_msgTypes[9]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -414,7 +516,7 @@ func (x *TrackSubscriptionDetails) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use TrackSubscriptionDetails.ProtoReflect.Descriptor instead.
 func (*TrackSubscriptionDetails) Descriptor() ([]byte, []int) {
-	return file_video_sfu_signal_rpc_signal_proto_rawDescGZIP(), []int{7}
+	return file_video_sfu_signal_rpc_signal_proto_rawDescGZIP(), []int{9}
 }
 
 func (x *TrackSubscriptionDetails) GetUserId() string {
@@ -458,7 +560,7 @@ type SendAnswerRequest struct {
 func (x *SendAnswerRequest) Reset() {
 	*x = SendAnswerRequest{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_video_sfu_signal_rpc_signal_proto_msgTypes[8]
+		mi := &file_video_sfu_signal_rpc_signal_proto_msgTypes[10]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -471,7 +573,7 @@ func (x *SendAnswerRequest) String() string {
 func (*SendAnswerRequest) ProtoMessage() {}
 
 func (x *SendAnswerRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_video_sfu_signal_rpc_signal_proto_msgTypes[8]
+	mi := &file_video_sfu_signal_rpc_signal_proto_msgTypes[10]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -484,7 +586,7 @@ func (x *SendAnswerRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use SendAnswerRequest.ProtoReflect.Descriptor instead.
 func (*SendAnswerRequest) Descriptor() ([]byte, []int) {
-	return file_video_sfu_signal_rpc_signal_proto_rawDescGZIP(), []int{8}
+	return file_video_sfu_signal_rpc_signal_proto_rawDescGZIP(), []int{10}
 }
 
 func (x *SendAnswerRequest) GetPeerType() models.PeerType {
@@ -519,7 +621,7 @@ type SendAnswerResponse struct {
 func (x *SendAnswerResponse) Reset() {
 	*x = SendAnswerResponse{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_video_sfu_signal_rpc_signal_proto_msgTypes[9]
+		mi := &file_video_sfu_signal_rpc_signal_proto_msgTypes[11]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -532,7 +634,7 @@ func (x *SendAnswerResponse) String() string {
 func (*SendAnswerResponse) ProtoMessage() {}
 
 func (x *SendAnswerResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_video_sfu_signal_rpc_signal_proto_msgTypes[9]
+	mi := &file_video_sfu_signal_rpc_signal_proto_msgTypes[11]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -545,7 +647,7 @@ func (x *SendAnswerResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use SendAnswerResponse.ProtoReflect.Descriptor instead.
 func (*SendAnswerResponse) Descriptor() ([]byte, []int) {
-	return file_video_sfu_signal_rpc_signal_proto_rawDescGZIP(), []int{9}
+	return file_video_sfu_signal_rpc_signal_proto_rawDescGZIP(), []int{11}
 }
 
 func (x *SendAnswerResponse) GetError() *models.Error {
@@ -566,7 +668,7 @@ type ICETrickleResponse struct {
 func (x *ICETrickleResponse) Reset() {
 	*x = ICETrickleResponse{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_video_sfu_signal_rpc_signal_proto_msgTypes[10]
+		mi := &file_video_sfu_signal_rpc_signal_proto_msgTypes[12]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -579,7 +681,7 @@ func (x *ICETrickleResponse) String() string {
 func (*ICETrickleResponse) ProtoMessage() {}
 
 func (x *ICETrickleResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_video_sfu_signal_rpc_signal_proto_msgTypes[10]
+	mi := &file_video_sfu_signal_rpc_signal_proto_msgTypes[12]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -592,7 +694,7 @@ func (x *ICETrickleResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ICETrickleResponse.ProtoReflect.Descriptor instead.
 func (*ICETrickleResponse) Descriptor() ([]byte, []int) {
-	return file_video_sfu_signal_rpc_signal_proto_rawDescGZIP(), []int{10}
+	return file_video_sfu_signal_rpc_signal_proto_rawDescGZIP(), []int{12}
 }
 
 func (x *ICETrickleResponse) GetError() *models.Error {
@@ -616,7 +718,7 @@ type SetPublisherRequest struct {
 func (x *SetPublisherRequest) Reset() {
 	*x = SetPublisherRequest{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_video_sfu_signal_rpc_signal_proto_msgTypes[11]
+		mi := &file_video_sfu_signal_rpc_signal_proto_msgTypes[13]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -629,7 +731,7 @@ func (x *SetPublisherRequest) String() string {
 func (*SetPublisherRequest) ProtoMessage() {}
 
 func (x *SetPublisherRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_video_sfu_signal_rpc_signal_proto_msgTypes[11]
+	mi := &file_video_sfu_signal_rpc_signal_proto_msgTypes[13]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -642,7 +744,7 @@ func (x *SetPublisherRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use SetPublisherRequest.ProtoReflect.Descriptor instead.
 func (*SetPublisherRequest) Descriptor() ([]byte, []int) {
-	return file_video_sfu_signal_rpc_signal_proto_rawDescGZIP(), []int{11}
+	return file_video_sfu_signal_rpc_signal_proto_rawDescGZIP(), []int{13}
 }
 
 func (x *SetPublisherRequest) GetSdp() string {
@@ -681,7 +783,7 @@ type SetPublisherResponse struct {
 func (x *SetPublisherResponse) Reset() {
 	*x = SetPublisherResponse{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_video_sfu_signal_rpc_signal_proto_msgTypes[12]
+		mi := &file_video_sfu_signal_rpc_signal_proto_msgTypes[14]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -694,7 +796,7 @@ func (x *SetPublisherResponse) String() string {
 func (*SetPublisherResponse) ProtoMessage() {}
 
 func (x *SetPublisherResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_video_sfu_signal_rpc_signal_proto_msgTypes[12]
+	mi := &file_video_sfu_signal_rpc_signal_proto_msgTypes[14]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -707,7 +809,7 @@ func (x *SetPublisherResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use SetPublisherResponse.ProtoReflect.Descriptor instead.
 func (*SetPublisherResponse) Descriptor() ([]byte, []int) {
-	return file_video_sfu_signal_rpc_signal_proto_rawDescGZIP(), []int{12}
+	return file_video_sfu_signal_rpc_signal_proto_rawDescGZIP(), []int{14}
 }
 
 func (x *SetPublisherResponse) GetSdp() string {
@@ -746,7 +848,19 @@ var file_video_sfu_signal_rpc_signal_proto_rawDesc = []byte{
 	0x6f, 0x74, 0x6f, 0x12, 0x17, 0x73, 0x74, 0x72, 0x65, 0x61, 0x6d, 0x2e, 0x76, 0x69, 0x64, 0x65,
 	0x6f, 0x2e, 0x73, 0x66, 0x75, 0x2e, 0x73, 0x69, 0x67, 0x6e, 0x61, 0x6c, 0x1a, 0x1d, 0x76, 0x69,
 	0x64, 0x65, 0x6f, 0x2f, 0x73, 0x66, 0x75, 0x2f, 0x6d, 0x6f, 0x64, 0x65, 0x6c, 0x73, 0x2f, 0x6d,
-	0x6f, 0x64, 0x65, 0x6c, 0x73, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x22, 0x82, 0x01, 0x0a, 0x17,
+	0x6f, 0x64, 0x65, 0x6c, 0x73, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x22, 0x72, 0x0a, 0x11, 0x49,
+	0x43, 0x45, 0x52, 0x65, 0x73, 0x74, 0x61, 0x72, 0x74, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74,
+	0x12, 0x1d, 0x0a, 0x0a, 0x73, 0x65, 0x73, 0x73, 0x69, 0x6f, 0x6e, 0x5f, 0x69, 0x64, 0x18, 0x01,
+	0x20, 0x01, 0x28, 0x09, 0x52, 0x09, 0x73, 0x65, 0x73, 0x73, 0x69, 0x6f, 0x6e, 0x49, 0x64, 0x12,
+	0x3e, 0x0a, 0x09, 0x70, 0x65, 0x65, 0x72, 0x5f, 0x74, 0x79, 0x70, 0x65, 0x18, 0x02, 0x20, 0x01,
+	0x28, 0x0e, 0x32, 0x21, 0x2e, 0x73, 0x74, 0x72, 0x65, 0x61, 0x6d, 0x2e, 0x76, 0x69, 0x64, 0x65,
+	0x6f, 0x2e, 0x73, 0x66, 0x75, 0x2e, 0x6d, 0x6f, 0x64, 0x65, 0x6c, 0x73, 0x2e, 0x50, 0x65, 0x65,
+	0x72, 0x54, 0x79, 0x70, 0x65, 0x52, 0x08, 0x70, 0x65, 0x65, 0x72, 0x54, 0x79, 0x70, 0x65, 0x22,
+	0x4a, 0x0a, 0x12, 0x49, 0x43, 0x45, 0x52, 0x65, 0x73, 0x74, 0x61, 0x72, 0x74, 0x52, 0x65, 0x73,
+	0x70, 0x6f, 0x6e, 0x73, 0x65, 0x12, 0x34, 0x0a, 0x05, 0x65, 0x72, 0x72, 0x6f, 0x72, 0x18, 0x01,
+	0x20, 0x01, 0x28, 0x0b, 0x32, 0x1e, 0x2e, 0x73, 0x74, 0x72, 0x65, 0x61, 0x6d, 0x2e, 0x76, 0x69,
+	0x64, 0x65, 0x6f, 0x2e, 0x73, 0x66, 0x75, 0x2e, 0x6d, 0x6f, 0x64, 0x65, 0x6c, 0x73, 0x2e, 0x45,
+	0x72, 0x72, 0x6f, 0x72, 0x52, 0x05, 0x65, 0x72, 0x72, 0x6f, 0x72, 0x22, 0x82, 0x01, 0x0a, 0x17,
 	0x55, 0x70, 0x64, 0x61, 0x74, 0x65, 0x4d, 0x75, 0x74, 0x65, 0x53, 0x74, 0x61, 0x74, 0x65, 0x73,
 	0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x12, 0x1d, 0x0a, 0x0a, 0x73, 0x65, 0x73, 0x73, 0x69,
 	0x6f, 0x6e, 0x5f, 0x69, 0x64, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x09, 0x73, 0x65, 0x73,
@@ -836,7 +950,7 @@ var file_video_sfu_signal_rpc_signal_proto_rawDesc = []byte{
 	0x05, 0x65, 0x72, 0x72, 0x6f, 0x72, 0x18, 0x04, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x1e, 0x2e, 0x73,
 	0x74, 0x72, 0x65, 0x61, 0x6d, 0x2e, 0x76, 0x69, 0x64, 0x65, 0x6f, 0x2e, 0x73, 0x66, 0x75, 0x2e,
 	0x6d, 0x6f, 0x64, 0x65, 0x6c, 0x73, 0x2e, 0x45, 0x72, 0x72, 0x6f, 0x72, 0x52, 0x05, 0x65, 0x72,
-	0x72, 0x6f, 0x72, 0x32, 0xbe, 0x04, 0x0a, 0x0c, 0x53, 0x69, 0x67, 0x6e, 0x61, 0x6c, 0x53, 0x65,
+	0x72, 0x6f, 0x72, 0x32, 0xa5, 0x05, 0x0a, 0x0c, 0x53, 0x69, 0x67, 0x6e, 0x61, 0x6c, 0x53, 0x65,
 	0x72, 0x76, 0x65, 0x72, 0x12, 0x6b, 0x0a, 0x0c, 0x53, 0x65, 0x74, 0x50, 0x75, 0x62, 0x6c, 0x69,
 	0x73, 0x68, 0x65, 0x72, 0x12, 0x2c, 0x2e, 0x73, 0x74, 0x72, 0x65, 0x61, 0x6d, 0x2e, 0x76, 0x69,
 	0x64, 0x65, 0x6f, 0x2e, 0x73, 0x66, 0x75, 0x2e, 0x73, 0x69, 0x67, 0x6e, 0x61, 0x6c, 0x2e, 0x53,
@@ -872,13 +986,20 @@ var file_video_sfu_signal_rpc_signal_proto_rawDesc = []byte{
 	0x74, 0x1a, 0x31, 0x2e, 0x73, 0x74, 0x72, 0x65, 0x61, 0x6d, 0x2e, 0x76, 0x69, 0x64, 0x65, 0x6f,
 	0x2e, 0x73, 0x66, 0x75, 0x2e, 0x73, 0x69, 0x67, 0x6e, 0x61, 0x6c, 0x2e, 0x55, 0x70, 0x64, 0x61,
 	0x74, 0x65, 0x4d, 0x75, 0x74, 0x65, 0x53, 0x74, 0x61, 0x74, 0x65, 0x73, 0x52, 0x65, 0x73, 0x70,
-	0x6f, 0x6e, 0x73, 0x65, 0x42, 0x62, 0x42, 0x0b, 0x53, 0x66, 0x75, 0x53, 0x69, 0x67, 0x6e, 0x61,
-	0x6c, 0x56, 0x31, 0x50, 0x01, 0x5a, 0x3b, 0x67, 0x69, 0x74, 0x68, 0x75, 0x62, 0x2e, 0x63, 0x6f,
-	0x6d, 0x2f, 0x47, 0x65, 0x74, 0x53, 0x74, 0x72, 0x65, 0x61, 0x6d, 0x2f, 0x70, 0x72, 0x6f, 0x74,
-	0x6f, 0x63, 0x6f, 0x6c, 0x2f, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x62, 0x75, 0x66, 0x2f, 0x76, 0x69,
-	0x64, 0x65, 0x6f, 0x2f, 0x73, 0x66, 0x75, 0x2f, 0x73, 0x69, 0x67, 0x6e, 0x61, 0x6c, 0x5f, 0x72,
-	0x70, 0x63, 0xaa, 0x02, 0x13, 0x53, 0x74, 0x72, 0x65, 0x61, 0x6d, 0x2e, 0x56, 0x69, 0x64, 0x65,
-	0x6f, 0x2e, 0x76, 0x31, 0x2e, 0x53, 0x66, 0x75, 0x62, 0x06, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x33,
+	0x6f, 0x6e, 0x73, 0x65, 0x12, 0x65, 0x0a, 0x0a, 0x49, 0x63, 0x65, 0x52, 0x65, 0x73, 0x74, 0x61,
+	0x72, 0x74, 0x12, 0x2a, 0x2e, 0x73, 0x74, 0x72, 0x65, 0x61, 0x6d, 0x2e, 0x76, 0x69, 0x64, 0x65,
+	0x6f, 0x2e, 0x73, 0x66, 0x75, 0x2e, 0x73, 0x69, 0x67, 0x6e, 0x61, 0x6c, 0x2e, 0x49, 0x43, 0x45,
+	0x52, 0x65, 0x73, 0x74, 0x61, 0x72, 0x74, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x1a, 0x2b,
+	0x2e, 0x73, 0x74, 0x72, 0x65, 0x61, 0x6d, 0x2e, 0x76, 0x69, 0x64, 0x65, 0x6f, 0x2e, 0x73, 0x66,
+	0x75, 0x2e, 0x73, 0x69, 0x67, 0x6e, 0x61, 0x6c, 0x2e, 0x49, 0x43, 0x45, 0x52, 0x65, 0x73, 0x74,
+	0x61, 0x72, 0x74, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x42, 0x69, 0x42, 0x0b, 0x53,
+	0x66, 0x75, 0x53, 0x69, 0x67, 0x6e, 0x61, 0x6c, 0x56, 0x31, 0x50, 0x01, 0x5a, 0x3b, 0x67, 0x69,
+	0x74, 0x68, 0x75, 0x62, 0x2e, 0x63, 0x6f, 0x6d, 0x2f, 0x47, 0x65, 0x74, 0x53, 0x74, 0x72, 0x65,
+	0x61, 0x6d, 0x2f, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x63, 0x6f, 0x6c, 0x2f, 0x70, 0x72, 0x6f, 0x74,
+	0x6f, 0x62, 0x75, 0x66, 0x2f, 0x76, 0x69, 0x64, 0x65, 0x6f, 0x2f, 0x73, 0x66, 0x75, 0x2f, 0x73,
+	0x69, 0x67, 0x6e, 0x61, 0x6c, 0x5f, 0x72, 0x70, 0x63, 0xaa, 0x02, 0x1a, 0x53, 0x74, 0x72, 0x65,
+	0x61, 0x6d, 0x2e, 0x56, 0x69, 0x64, 0x65, 0x6f, 0x2e, 0x76, 0x31, 0x2e, 0x53, 0x66, 0x75, 0x2e,
+	0x53, 0x69, 0x67, 0x6e, 0x61, 0x6c, 0x62, 0x06, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x33,
 }
 
 var (
@@ -893,56 +1014,62 @@ func file_video_sfu_signal_rpc_signal_proto_rawDescGZIP() []byte {
 	return file_video_sfu_signal_rpc_signal_proto_rawDescData
 }
 
-var file_video_sfu_signal_rpc_signal_proto_msgTypes = make([]protoimpl.MessageInfo, 13)
+var file_video_sfu_signal_rpc_signal_proto_msgTypes = make([]protoimpl.MessageInfo, 15)
 var file_video_sfu_signal_rpc_signal_proto_goTypes = []interface{}{
-	(*UpdateMuteStatesRequest)(nil),     // 0: stream.video.sfu.signal.UpdateMuteStatesRequest
-	(*UpdateMuteStatesResponse)(nil),    // 1: stream.video.sfu.signal.UpdateMuteStatesResponse
-	(*TrackMuteState)(nil),              // 2: stream.video.sfu.signal.TrackMuteState
-	(*AudioMuteChanged)(nil),            // 3: stream.video.sfu.signal.AudioMuteChanged
-	(*VideoMuteChanged)(nil),            // 4: stream.video.sfu.signal.VideoMuteChanged
-	(*UpdateSubscriptionsRequest)(nil),  // 5: stream.video.sfu.signal.UpdateSubscriptionsRequest
-	(*UpdateSubscriptionsResponse)(nil), // 6: stream.video.sfu.signal.UpdateSubscriptionsResponse
-	(*TrackSubscriptionDetails)(nil),    // 7: stream.video.sfu.signal.TrackSubscriptionDetails
-	(*SendAnswerRequest)(nil),           // 8: stream.video.sfu.signal.SendAnswerRequest
-	(*SendAnswerResponse)(nil),          // 9: stream.video.sfu.signal.SendAnswerResponse
-	(*ICETrickleResponse)(nil),          // 10: stream.video.sfu.signal.ICETrickleResponse
-	(*SetPublisherRequest)(nil),         // 11: stream.video.sfu.signal.SetPublisherRequest
-	(*SetPublisherResponse)(nil),        // 12: stream.video.sfu.signal.SetPublisherResponse
-	(*models.Error)(nil),                // 13: stream.video.sfu.models.Error
-	(models.TrackType)(0),               // 14: stream.video.sfu.models.TrackType
-	(*models.VideoDimension)(nil),       // 15: stream.video.sfu.models.VideoDimension
-	(models.PeerType)(0),                // 16: stream.video.sfu.models.PeerType
-	(*models.TrackInfo)(nil),            // 17: stream.video.sfu.models.TrackInfo
-	(*models.ICETrickle)(nil),           // 18: stream.video.sfu.models.ICETrickle
+	(*ICERestartRequest)(nil),           // 0: stream.video.sfu.signal.ICERestartRequest
+	(*ICERestartResponse)(nil),          // 1: stream.video.sfu.signal.ICERestartResponse
+	(*UpdateMuteStatesRequest)(nil),     // 2: stream.video.sfu.signal.UpdateMuteStatesRequest
+	(*UpdateMuteStatesResponse)(nil),    // 3: stream.video.sfu.signal.UpdateMuteStatesResponse
+	(*TrackMuteState)(nil),              // 4: stream.video.sfu.signal.TrackMuteState
+	(*AudioMuteChanged)(nil),            // 5: stream.video.sfu.signal.AudioMuteChanged
+	(*VideoMuteChanged)(nil),            // 6: stream.video.sfu.signal.VideoMuteChanged
+	(*UpdateSubscriptionsRequest)(nil),  // 7: stream.video.sfu.signal.UpdateSubscriptionsRequest
+	(*UpdateSubscriptionsResponse)(nil), // 8: stream.video.sfu.signal.UpdateSubscriptionsResponse
+	(*TrackSubscriptionDetails)(nil),    // 9: stream.video.sfu.signal.TrackSubscriptionDetails
+	(*SendAnswerRequest)(nil),           // 10: stream.video.sfu.signal.SendAnswerRequest
+	(*SendAnswerResponse)(nil),          // 11: stream.video.sfu.signal.SendAnswerResponse
+	(*ICETrickleResponse)(nil),          // 12: stream.video.sfu.signal.ICETrickleResponse
+	(*SetPublisherRequest)(nil),         // 13: stream.video.sfu.signal.SetPublisherRequest
+	(*SetPublisherResponse)(nil),        // 14: stream.video.sfu.signal.SetPublisherResponse
+	(models.PeerType)(0),                // 15: stream.video.sfu.models.PeerType
+	(*models.Error)(nil),                // 16: stream.video.sfu.models.Error
+	(models.TrackType)(0),               // 17: stream.video.sfu.models.TrackType
+	(*models.VideoDimension)(nil),       // 18: stream.video.sfu.models.VideoDimension
+	(*models.TrackInfo)(nil),            // 19: stream.video.sfu.models.TrackInfo
+	(*models.ICETrickle)(nil),           // 20: stream.video.sfu.models.ICETrickle
 }
 var file_video_sfu_signal_rpc_signal_proto_depIdxs = []int32{
-	2,  // 0: stream.video.sfu.signal.UpdateMuteStatesRequest.mute_states:type_name -> stream.video.sfu.signal.TrackMuteState
-	13, // 1: stream.video.sfu.signal.UpdateMuteStatesResponse.error:type_name -> stream.video.sfu.models.Error
-	14, // 2: stream.video.sfu.signal.TrackMuteState.track_type:type_name -> stream.video.sfu.models.TrackType
-	7,  // 3: stream.video.sfu.signal.UpdateSubscriptionsRequest.tracks:type_name -> stream.video.sfu.signal.TrackSubscriptionDetails
-	13, // 4: stream.video.sfu.signal.UpdateSubscriptionsResponse.error:type_name -> stream.video.sfu.models.Error
-	14, // 5: stream.video.sfu.signal.TrackSubscriptionDetails.track_type:type_name -> stream.video.sfu.models.TrackType
-	15, // 6: stream.video.sfu.signal.TrackSubscriptionDetails.dimension:type_name -> stream.video.sfu.models.VideoDimension
-	16, // 7: stream.video.sfu.signal.SendAnswerRequest.peer_type:type_name -> stream.video.sfu.models.PeerType
-	13, // 8: stream.video.sfu.signal.SendAnswerResponse.error:type_name -> stream.video.sfu.models.Error
-	13, // 9: stream.video.sfu.signal.ICETrickleResponse.error:type_name -> stream.video.sfu.models.Error
-	17, // 10: stream.video.sfu.signal.SetPublisherRequest.tracks:type_name -> stream.video.sfu.models.TrackInfo
-	13, // 11: stream.video.sfu.signal.SetPublisherResponse.error:type_name -> stream.video.sfu.models.Error
-	11, // 12: stream.video.sfu.signal.SignalServer.SetPublisher:input_type -> stream.video.sfu.signal.SetPublisherRequest
-	8,  // 13: stream.video.sfu.signal.SignalServer.SendAnswer:input_type -> stream.video.sfu.signal.SendAnswerRequest
-	18, // 14: stream.video.sfu.signal.SignalServer.IceTrickle:input_type -> stream.video.sfu.models.ICETrickle
-	5,  // 15: stream.video.sfu.signal.SignalServer.UpdateSubscriptions:input_type -> stream.video.sfu.signal.UpdateSubscriptionsRequest
-	0,  // 16: stream.video.sfu.signal.SignalServer.UpdateMuteStates:input_type -> stream.video.sfu.signal.UpdateMuteStatesRequest
-	12, // 17: stream.video.sfu.signal.SignalServer.SetPublisher:output_type -> stream.video.sfu.signal.SetPublisherResponse
-	9,  // 18: stream.video.sfu.signal.SignalServer.SendAnswer:output_type -> stream.video.sfu.signal.SendAnswerResponse
-	10, // 19: stream.video.sfu.signal.SignalServer.IceTrickle:output_type -> stream.video.sfu.signal.ICETrickleResponse
-	6,  // 20: stream.video.sfu.signal.SignalServer.UpdateSubscriptions:output_type -> stream.video.sfu.signal.UpdateSubscriptionsResponse
-	1,  // 21: stream.video.sfu.signal.SignalServer.UpdateMuteStates:output_type -> stream.video.sfu.signal.UpdateMuteStatesResponse
-	17, // [17:22] is the sub-list for method output_type
-	12, // [12:17] is the sub-list for method input_type
-	12, // [12:12] is the sub-list for extension type_name
-	12, // [12:12] is the sub-list for extension extendee
-	0,  // [0:12] is the sub-list for field type_name
+	15, // 0: stream.video.sfu.signal.ICERestartRequest.peer_type:type_name -> stream.video.sfu.models.PeerType
+	16, // 1: stream.video.sfu.signal.ICERestartResponse.error:type_name -> stream.video.sfu.models.Error
+	4,  // 2: stream.video.sfu.signal.UpdateMuteStatesRequest.mute_states:type_name -> stream.video.sfu.signal.TrackMuteState
+	16, // 3: stream.video.sfu.signal.UpdateMuteStatesResponse.error:type_name -> stream.video.sfu.models.Error
+	17, // 4: stream.video.sfu.signal.TrackMuteState.track_type:type_name -> stream.video.sfu.models.TrackType
+	9,  // 5: stream.video.sfu.signal.UpdateSubscriptionsRequest.tracks:type_name -> stream.video.sfu.signal.TrackSubscriptionDetails
+	16, // 6: stream.video.sfu.signal.UpdateSubscriptionsResponse.error:type_name -> stream.video.sfu.models.Error
+	17, // 7: stream.video.sfu.signal.TrackSubscriptionDetails.track_type:type_name -> stream.video.sfu.models.TrackType
+	18, // 8: stream.video.sfu.signal.TrackSubscriptionDetails.dimension:type_name -> stream.video.sfu.models.VideoDimension
+	15, // 9: stream.video.sfu.signal.SendAnswerRequest.peer_type:type_name -> stream.video.sfu.models.PeerType
+	16, // 10: stream.video.sfu.signal.SendAnswerResponse.error:type_name -> stream.video.sfu.models.Error
+	16, // 11: stream.video.sfu.signal.ICETrickleResponse.error:type_name -> stream.video.sfu.models.Error
+	19, // 12: stream.video.sfu.signal.SetPublisherRequest.tracks:type_name -> stream.video.sfu.models.TrackInfo
+	16, // 13: stream.video.sfu.signal.SetPublisherResponse.error:type_name -> stream.video.sfu.models.Error
+	13, // 14: stream.video.sfu.signal.SignalServer.SetPublisher:input_type -> stream.video.sfu.signal.SetPublisherRequest
+	10, // 15: stream.video.sfu.signal.SignalServer.SendAnswer:input_type -> stream.video.sfu.signal.SendAnswerRequest
+	20, // 16: stream.video.sfu.signal.SignalServer.IceTrickle:input_type -> stream.video.sfu.models.ICETrickle
+	7,  // 17: stream.video.sfu.signal.SignalServer.UpdateSubscriptions:input_type -> stream.video.sfu.signal.UpdateSubscriptionsRequest
+	2,  // 18: stream.video.sfu.signal.SignalServer.UpdateMuteStates:input_type -> stream.video.sfu.signal.UpdateMuteStatesRequest
+	0,  // 19: stream.video.sfu.signal.SignalServer.IceRestart:input_type -> stream.video.sfu.signal.ICERestartRequest
+	14, // 20: stream.video.sfu.signal.SignalServer.SetPublisher:output_type -> stream.video.sfu.signal.SetPublisherResponse
+	11, // 21: stream.video.sfu.signal.SignalServer.SendAnswer:output_type -> stream.video.sfu.signal.SendAnswerResponse
+	12, // 22: stream.video.sfu.signal.SignalServer.IceTrickle:output_type -> stream.video.sfu.signal.ICETrickleResponse
+	8,  // 23: stream.video.sfu.signal.SignalServer.UpdateSubscriptions:output_type -> stream.video.sfu.signal.UpdateSubscriptionsResponse
+	3,  // 24: stream.video.sfu.signal.SignalServer.UpdateMuteStates:output_type -> stream.video.sfu.signal.UpdateMuteStatesResponse
+	1,  // 25: stream.video.sfu.signal.SignalServer.IceRestart:output_type -> stream.video.sfu.signal.ICERestartResponse
+	20, // [20:26] is the sub-list for method output_type
+	14, // [14:20] is the sub-list for method input_type
+	14, // [14:14] is the sub-list for extension type_name
+	14, // [14:14] is the sub-list for extension extendee
+	0,  // [0:14] is the sub-list for field type_name
 }
 
 func init() { file_video_sfu_signal_rpc_signal_proto_init() }
@@ -952,7 +1079,7 @@ func file_video_sfu_signal_rpc_signal_proto_init() {
 	}
 	if !protoimpl.UnsafeEnabled {
 		file_video_sfu_signal_rpc_signal_proto_msgTypes[0].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*UpdateMuteStatesRequest); i {
+			switch v := v.(*ICERestartRequest); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -964,7 +1091,7 @@ func file_video_sfu_signal_rpc_signal_proto_init() {
 			}
 		}
 		file_video_sfu_signal_rpc_signal_proto_msgTypes[1].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*UpdateMuteStatesResponse); i {
+			switch v := v.(*ICERestartResponse); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -976,7 +1103,7 @@ func file_video_sfu_signal_rpc_signal_proto_init() {
 			}
 		}
 		file_video_sfu_signal_rpc_signal_proto_msgTypes[2].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*TrackMuteState); i {
+			switch v := v.(*UpdateMuteStatesRequest); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -988,7 +1115,7 @@ func file_video_sfu_signal_rpc_signal_proto_init() {
 			}
 		}
 		file_video_sfu_signal_rpc_signal_proto_msgTypes[3].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*AudioMuteChanged); i {
+			switch v := v.(*UpdateMuteStatesResponse); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -1000,7 +1127,7 @@ func file_video_sfu_signal_rpc_signal_proto_init() {
 			}
 		}
 		file_video_sfu_signal_rpc_signal_proto_msgTypes[4].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*VideoMuteChanged); i {
+			switch v := v.(*TrackMuteState); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -1012,7 +1139,7 @@ func file_video_sfu_signal_rpc_signal_proto_init() {
 			}
 		}
 		file_video_sfu_signal_rpc_signal_proto_msgTypes[5].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*UpdateSubscriptionsRequest); i {
+			switch v := v.(*AudioMuteChanged); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -1024,7 +1151,7 @@ func file_video_sfu_signal_rpc_signal_proto_init() {
 			}
 		}
 		file_video_sfu_signal_rpc_signal_proto_msgTypes[6].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*UpdateSubscriptionsResponse); i {
+			switch v := v.(*VideoMuteChanged); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -1036,7 +1163,7 @@ func file_video_sfu_signal_rpc_signal_proto_init() {
 			}
 		}
 		file_video_sfu_signal_rpc_signal_proto_msgTypes[7].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*TrackSubscriptionDetails); i {
+			switch v := v.(*UpdateSubscriptionsRequest); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -1048,7 +1175,7 @@ func file_video_sfu_signal_rpc_signal_proto_init() {
 			}
 		}
 		file_video_sfu_signal_rpc_signal_proto_msgTypes[8].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*SendAnswerRequest); i {
+			switch v := v.(*UpdateSubscriptionsResponse); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -1060,7 +1187,7 @@ func file_video_sfu_signal_rpc_signal_proto_init() {
 			}
 		}
 		file_video_sfu_signal_rpc_signal_proto_msgTypes[9].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*SendAnswerResponse); i {
+			switch v := v.(*TrackSubscriptionDetails); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -1072,7 +1199,7 @@ func file_video_sfu_signal_rpc_signal_proto_init() {
 			}
 		}
 		file_video_sfu_signal_rpc_signal_proto_msgTypes[10].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*ICETrickleResponse); i {
+			switch v := v.(*SendAnswerRequest); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -1084,7 +1211,7 @@ func file_video_sfu_signal_rpc_signal_proto_init() {
 			}
 		}
 		file_video_sfu_signal_rpc_signal_proto_msgTypes[11].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*SetPublisherRequest); i {
+			switch v := v.(*SendAnswerResponse); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -1096,6 +1223,30 @@ func file_video_sfu_signal_rpc_signal_proto_init() {
 			}
 		}
 		file_video_sfu_signal_rpc_signal_proto_msgTypes[12].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*ICETrickleResponse); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_video_sfu_signal_rpc_signal_proto_msgTypes[13].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*SetPublisherRequest); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_video_sfu_signal_rpc_signal_proto_msgTypes[14].Exporter = func(v interface{}, i int) interface{} {
 			switch v := v.(*SetPublisherResponse); i {
 			case 0:
 				return &v.state
@@ -1114,7 +1265,7 @@ func file_video_sfu_signal_rpc_signal_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: file_video_sfu_signal_rpc_signal_proto_rawDesc,
 			NumEnums:      0,
-			NumMessages:   13,
+			NumMessages:   15,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

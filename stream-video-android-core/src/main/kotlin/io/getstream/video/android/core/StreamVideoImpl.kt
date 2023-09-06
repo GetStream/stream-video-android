@@ -44,6 +44,7 @@ import io.getstream.video.android.core.model.toRequest
 import io.getstream.video.android.core.notifications.NotificationHandler
 import io.getstream.video.android.core.notifications.internal.StreamNotificationManager
 import io.getstream.video.android.core.socket.ErrorResponse
+import io.getstream.video.android.core.socket.PersistentSocket
 import io.getstream.video.android.core.socket.SocketState
 import io.getstream.video.android.core.utils.DebugInfo
 import io.getstream.video.android.core.utils.LatencyResult
@@ -82,6 +83,7 @@ import org.openapitools.client.models.CreateGuestResponse
 import org.openapitools.client.models.GetCallResponse
 import org.openapitools.client.models.GetOrCreateCallRequest
 import org.openapitools.client.models.GetOrCreateCallResponse
+import org.openapitools.client.models.GoLiveRequest
 import org.openapitools.client.models.GoLiveResponse
 import org.openapitools.client.models.JoinCallRequest
 import org.openapitools.client.models.JoinCallResponse
@@ -313,7 +315,9 @@ internal class StreamVideoImpl internal constructor(
                     if (connectionModule.coordinatorSocket.connectionState.value != SocketState.NotConnected &&
                         state.activeCall.value == null
                     ) {
-                        connectionModule.coordinatorSocket.disconnect()
+                        connectionModule.coordinatorSocket.disconnect(
+                            PersistentSocket.DisconnectReason.ByRequest,
+                        )
                     }
                 }
             },
@@ -411,7 +415,7 @@ internal class StreamVideoImpl internal constructor(
                     val newToken = tokenProvider.invoke(e)
                     connectionModule.updateToken(newToken)
                     // quickly reconnect with the new token
-                    socketImpl.reconnect(0, e)
+                    socketImpl.reconnect(0)
                     Failure(Error.GenericError("initialize error. trying to reconnect."))
                 } else {
                     throw e
@@ -587,9 +591,12 @@ internal class StreamVideoImpl internal constructor(
         // We return null on timeout. The Coordinator WS will update the connectionId later
         // after it reconnects (it will call queryCalls)
         withTimeoutOrNull(timeMillis = WAIT_FOR_CONNECTION_ID_TIMEOUT) {
-            connectionModule.coordinatorSocket.connectionId.first { it != null }
+            val value = connectionModule.coordinatorSocket.connectionId.first { it != null }
+            value
         }.also {
-            if (it == null) { logger.w { "[waitForConnectionId] connectionId timeout - returning null" } }
+            if (it == null) {
+                logger.w { "[waitForConnectionId] connectionId timeout - returning null" }
+            }
         }
 
     internal suspend fun inviteUsers(
@@ -757,10 +764,20 @@ internal class StreamVideoImpl internal constructor(
         return wrapAPICall { connectionModule.api.endCall(type, id) }
     }
 
-    suspend fun goLive(type: String, id: String): Result<GoLiveResponse> {
+    suspend fun goLive(type: String, id: String, startHls: Boolean, startRecording: Boolean, startTranscription: Boolean): Result<GoLiveResponse> {
         logger.d { "[goLive] callCid: $type:$id" }
 
-        return wrapAPICall { connectionModule.api.goLive(type, id) }
+        return wrapAPICall {
+            connectionModule.api.goLive(
+                type,
+                id,
+                GoLiveRequest(
+                    startHls = startHls,
+                    startRecording = startRecording,
+                    startTranscription = startTranscription,
+                ),
+            )
+        }
     }
 
     suspend fun stopLive(type: String, id: String): Result<StopLiveResponse> {

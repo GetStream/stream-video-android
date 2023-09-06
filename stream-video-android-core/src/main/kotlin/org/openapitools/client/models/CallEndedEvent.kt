@@ -23,6 +23,7 @@
 
 package org.openapitools.client.models
 
+import org.openapitools.client.models.CallResponse
 import org.openapitools.client.models.UserResponse
 
 
@@ -39,6 +40,7 @@ import org.openapitools.client.infrastructure.Serializer
 /**
  * This event is sent when a call is mark as ended for all its participants. Clients receiving this event should leave the call screen
  *
+ * @param call
  * @param callCid
  * @param createdAt
  * @param type The type of event: \"call.ended\" in this case
@@ -47,6 +49,9 @@ import org.openapitools.client.infrastructure.Serializer
 
 
 data class CallEndedEvent (
+
+    @Json(name = "call")
+    val call: CallResponse,
 
     @Json(name = "call_cid")
     val callCid: kotlin.String,

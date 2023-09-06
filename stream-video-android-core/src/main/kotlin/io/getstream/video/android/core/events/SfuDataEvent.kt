@@ -107,6 +107,7 @@ public data class SFUHealthCheckEvent(
 public data class JoinCallResponseEvent(
     val callState: CallState,
     val participantCount: ParticipantCount,
+    val isReconnected: Boolean,
 ) : SfuDataEvent()
 
 public data class UnknownEvent(val event: Any?) : SfuDataEvent()

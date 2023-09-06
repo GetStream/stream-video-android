@@ -16,14 +16,9 @@
 
 package io.getstream.video.android.core.socket
 
-import com.squareup.moshi.JsonAdapter
 import io.getstream.log.taggedLogger
 import io.getstream.video.android.core.StreamVideo
-import io.getstream.video.android.core.call.signal.socket.RTCEventMapper
 import io.getstream.video.android.core.dispatchers.DispatcherProvider
-import io.getstream.video.android.core.events.ErrorEvent
-import io.getstream.video.android.core.events.JoinCallResponseEvent
-import io.getstream.video.android.core.events.SfuSocketError
 import io.getstream.video.android.core.internal.network.NetworkStateProvider
 import io.getstream.video.android.core.socket.internal.HealthMonitor
 import kotlinx.coroutines.CancellableContinuation
@@ -39,12 +34,8 @@ import okhttp3.Request
 import okhttp3.Response
 import okhttp3.WebSocket
 import okhttp3.WebSocketListener
-import okio.ByteString
-import org.openapitools.client.infrastructure.Serializer
-import org.openapitools.client.models.ConnectedEvent
 import org.openapitools.client.models.VideoEvent
 import stream.video.sfu.event.HealthCheckRequest
-import stream.video.sfu.event.SfuEvent
 import java.io.IOException
 import java.io.InterruptedIOException
 import java.net.SocketTimeoutException
@@ -70,6 +61,7 @@ public open class PersistentSocket<T>(
     private val networkStateProvider: NetworkStateProvider,
     /** Set the scope everything should run in */
     private val scope: CoroutineScope = CoroutineScope(DispatcherProvider.IO),
+    private val onFastReconnected: () -> Unit,
 ) : WebSocketListener() {
     internal open val logger by taggedLogger("PersistentSocket")
 
@@ -84,13 +76,13 @@ public open class PersistentSocket<T>(
     /** flow with temporary and permanent errors */
     val errors = MutableSharedFlow<Throwable>()
 
-    val _connectionState = MutableStateFlow<SocketState>(SocketState.NotConnected)
+    private val _connectionState = MutableStateFlow<SocketState>(SocketState.NotConnected)
 
     /** the current connection state of the socket */
     val connectionState: StateFlow<SocketState> = _connectionState
 
     /** the connection id */
-    val _connectionId: MutableStateFlow<String?> = MutableStateFlow(null)
+    internal val _connectionId: MutableStateFlow<String?> = MutableStateFlow(null)
     val connectionId: StateFlow<String?> = _connectionId
 
     /** Continuation if the socket successfully connected and we've authenticated */
@@ -101,18 +93,19 @@ public open class PersistentSocket<T>(
     // prevent us from resuming the continuation twice
     private var continuationCompleted: Boolean = false
 
-    // we don't raise errors if you're closing the connection yourself
-    private var closedByClient: Boolean = false
-
     // True if cleanup was called and socket is completely destroyed (intentionally).
     // You need to create a new instance (this is mainly used for the SfuSocket which is tied
     // to a Subscriber SDP and needs to be recreated from scratch on WebRTC session clean up).
-    private var destroyed: Boolean = false
+    protected var destroyed: Boolean = false
+
+    internal var reconnectionAttempts = 0
 
     /**
      * Connect the socket, authenticate, start the healthmonitor and see if the network is online
      */
-    suspend fun connect(invocation: (CancellableContinuation<T>) -> Unit = {}): T? {
+    open suspend fun connect(
+        invocation: (CancellableContinuation<T>) -> Unit = {},
+    ): T? {
         if (destroyed) {
             logger.d { "[connect] Can't connect socket - it was already destroyed" }
             return null
@@ -123,6 +116,7 @@ public open class PersistentSocket<T>(
             connected = connectedContinuation
 
             _connectionState.value = SocketState.Connecting
+
             // step 1 create the socket
             socket = mockSocket ?: createSocket()
 
@@ -154,65 +148,80 @@ public open class PersistentSocket<T>(
 
     fun cleanup() {
         destroyed = true
-        disconnect()
+        disconnect(DisconnectReason.ByRequest)
+    }
+
+    sealed class DisconnectReason {
+        data object ByRequest : DisconnectReason()
+        data class PermanentError(val error: Throwable) : DisconnectReason()
     }
 
     /**
      * Disconnect the socket
      */
-    fun disconnect(reconnectReason: Throwable? = null) {
+    fun disconnect(disconnectReason: DisconnectReason) {
         logger.i { "[disconnect]" }
 
-        closedByClient = true
+        _connectionState.value = when (disconnectReason) {
+            DisconnectReason.ByRequest -> SocketState.DisconnectedByRequest
+            is DisconnectReason.PermanentError -> SocketState.DisconnectedPermanently(disconnectReason.error)
+        }
+
         continuationCompleted = false
 
-        // If we are already DisconnectedByRequest then do not change the state to DisconnectedTemporarily.
-        // This prevents cases where reconnect() will overwrite the original state.
-        if (reconnectReason != null && _connectionState.value != SocketState.DisconnectedByRequest) {
-            _connectionState.value = SocketState.DisconnectedTemporarily(reconnectReason)
-        } else {
-            _connectionState.value = SocketState.DisconnectedByRequest
-        }
+        disconnectSocket()
+        healthMonitor.stop()
+        networkStateProvider.unsubscribe(networkStateListener)
+    }
+
+    private fun disconnectSocket() {
         socket?.close(CODE_CLOSE_SOCKET_FROM_CLIENT, "Connection close by client")
         socket = null
         _connectionId.value = null
-        healthMonitor.stop()
-        networkStateProvider.unsubscribe(networkStateListener)
     }
 
     /**
      * Increment the reconnection attempts, disconnect and reconnect
      */
-    suspend fun reconnect(timeout: Long = reconnectTimeout, reconnectReason: Throwable?) {
+    suspend fun reconnect(timeout: Long = reconnectTimeout) {
         logger.i { "[reconnect] reconnectionAttempts: $reconnectionAttempts" }
-        if (connectionState.value == SocketState.Connecting) {
-            logger.i { "[reconnect] already connecting" }
-            return
-        }
-
         if (destroyed) {
             logger.d { "[reconnect] Can't reconnect socket - it was already destroyed" }
             return
         }
 
-        reconnectionAttempts++
-        disconnect(reconnectReason = reconnectReason)
+        if (connectionState.value == SocketState.Connecting) {
+            logger.i { "[reconnect] already connecting" }
+            return
+        }
+
+        // Don't disconnect if we are already disconnected
+        disconnectSocket()
+
+        // Stop sending pings
+        healthMonitor.stop()
+
+        if (!networkStateProvider.isConnected()) {
+            logger.d { "[reconnect] skipping reconnect - disconnected from internet" }
+            return
+        }
+
         // reconnect after the timeout
         delay(timeout)
+
+        reconnectionAttempts++
 
         connect()
     }
 
-    open fun authenticate() {
-    }
+    open fun authenticate() { }
 
     suspend fun onInternetConnected() {
         val state = connectionState.value
         logger.i { "[onNetworkConnected] state: $state" }
         if (state is SocketState.DisconnectedTemporarily || state == SocketState.NetworkDisconnected) {
             // reconnect instantly when the internet is back
-            val throwable = if (state is SocketState.DisconnectedTemporarily) state.error else null
-            reconnect(0, throwable)
+            reconnect(0)
         }
     }
 
@@ -233,9 +242,7 @@ public open class PersistentSocket<T>(
         }
     }
 
-    internal var reconnectionAttempts = 0
-
-    fun createSocket(): WebSocket {
+    private fun createSocket(): WebSocket {
         logger.d { "[createSocket] url: $url" }
 
         val request = Request.Builder()
@@ -252,87 +259,24 @@ public open class PersistentSocket<T>(
         logger.d { "[onOpen] response: $response" }
     }
 
-    /** Invoked when a text (type `0x1`) message has been received. */
-    override fun onMessage(webSocket: WebSocket, text: String) {
-        logger.d { "[onMessage] text: $text " }
+    protected fun ackHealthMonitor() {
+        healthMonitor.ack()
+    }
 
-        scope.launch {
-            // parse the message
-            val jsonAdapter: JsonAdapter<VideoEvent> =
-                Serializer.moshi.adapter(VideoEvent::class.java)
-            val processedEvent = try {
-                jsonAdapter.fromJson(text)
-            } catch (e: Throwable) {
-                logger.w { "[onMessage] VideoEvent parsing error ${e.message}" }
-                null
-            }
+    protected fun setConnectedStateAndContinue(message: VideoEvent) {
+        _connectionState.value = SocketState.Connected(message)
 
-            // TODO: This logic is specific to the Coordinator socket, move it
-            if (processedEvent is ConnectedEvent) {
-                _connectionId.value = processedEvent.connectionId
-                _connectionState.value = SocketState.Connected(processedEvent)
-                if (!continuationCompleted) {
-                    continuationCompleted = true
-                    connected.resume(processedEvent as T)
-                }
-            }
-
-            // handle errors
-            if (text.isNotEmpty() && processedEvent == null) {
-                val errorAdapter: JsonAdapter<SocketError> =
-                    Serializer.moshi.adapter(SocketError::class.java)
-
-                try {
-                    val parsedError = errorAdapter.fromJson(text)
-                    parsedError?.let {
-                        logger.w { "[onMessage] socketErrorEvent: ${parsedError.error}" }
-                        handleError(it.error)
-                    }
-                } catch (e: Throwable) {
-                    logger.w { "[onMessage] socketErrorEvent parsing error: ${e.message}" }
-                    handleError(e)
-                }
-            } else {
-                logger.d { "parsed event $processedEvent" }
-
-                // emit the message
-                if (processedEvent == null) {
-                    logger.w { "[onMessage] failed to parse event: $text" }
-                } else {
-                    healthMonitor.ack()
-                    events.emit(processedEvent)
-                }
-            }
+        if (!continuationCompleted) {
+            continuationCompleted = true
+            connected.resume(message as T)
         }
     }
 
-    /** Invoked when a binary (type `0x2`) message has been received. */
-    override fun onMessage(webSocket: WebSocket, bytes: ByteString) {
-        val byteBuffer = bytes.asByteBuffer()
-        val byteArray = ByteArray(byteBuffer.capacity())
-        byteBuffer.get(byteArray)
-        scope.launch {
-            try {
-                val rawEvent = SfuEvent.ADAPTER.decode(byteArray)
-                val message = RTCEventMapper.mapEvent(rawEvent)
-                if (message is ErrorEvent) {
-                    val errorEvent = message as ErrorEvent
-                    handleError(SfuSocketError(errorEvent.error))
-                }
-                // TODO: This logic is specific to the SfuSocket, move it
-                healthMonitor.ack()
-                events.emit(message)
-                if (message is JoinCallResponseEvent) {
-                    _connectionState.value = SocketState.Connected(message)
-                    if (!continuationCompleted) {
-                        continuationCompleted = true
-                        connected.resume(message as T)
-                    }
-                }
-            } catch (error: Throwable) {
-                logger.e { "[onMessage] failed: $error" }
-                handleError(error)
-            }
+    private fun setPermanentFailureAndContinue(error: Throwable) {
+        _connectionState.value = SocketState.DisconnectedPermanently(error)
+        if (!continuationCompleted) {
+            continuationCompleted = true
+            connected.resumeWithException(error)
         }
     }
 
@@ -362,25 +306,20 @@ public open class PersistentSocket<T>(
         // onFailure, onClosed and the 2 onMessage can all generate errors
         // temporary errors should be logged and retried
         // permanent errors should be emitted so the app can decide how to handle it
+
         val permanentError = isPermanentError(error)
         if (permanentError) {
             // close the connection loop
-            if (!continuationCompleted) {
-                continuationCompleted = true
-                connected.resumeWithException(error)
-            }
+            setPermanentFailureAndContinue(error)
             logger.e { "[handleError] permanent error: $error" }
             // mark us permanently disconnected
-            _connectionState.value = SocketState.DisconnectedPermanently(error)
             scope.launch {
                 errors.emit(error)
             }
         } else {
             logger.w { "[handleError] temporary error: $error" }
             _connectionState.value = SocketState.DisconnectedTemporarily(error)
-            if (_connectionState.value != SocketState.Connecting) {
-                scope.launch { reconnect(reconnectTimeout, error) }
-            }
+            scope.launch { reconnect(reconnectTimeout) }
         }
     }
 
@@ -397,11 +336,8 @@ public open class PersistentSocket<T>(
      */
     override fun onClosed(webSocket: WebSocket, code: Int, reason: String) {
         logger.d { "[onClosed] code: $code, reason: $reason" }
-        if (code == CODE_CLOSE_SOCKET_FROM_CLIENT) {
-            closedByClient = true
-        } else {
-            // Treat as failure and reconnect, socket shouldn't be closed by server
-            handleError(IllegalStateException("socket closed by server, this shouldnt happen"))
+        if (code != CODE_CLOSE_SOCKET_FROM_CLIENT) {
+            handleError(IllegalStateException("socket closed by server, this shouldn't happen"))
         }
     }
 
@@ -427,7 +363,7 @@ public open class PersistentSocket<T>(
                 logger.i { "health monitor triggered a reconnect" }
                 val state = connectionState.value
                 if (state is SocketState.DisconnectedTemporarily) {
-                    this@PersistentSocket.reconnect(reconnectReason = state.error)
+                    this@PersistentSocket.reconnect()
                 }
             }
 

@@ -104,7 +104,11 @@ public object RTCEventMapper {
                     event.join_response.call_state?.participant_count?.total ?: 0,
                     event.join_response.call_state?.participant_count?.anonymous ?: 0,
                 )
-                JoinCallResponseEvent(event.join_response.call_state!!, counts)
+                JoinCallResponseEvent(
+                    event.join_response.call_state!!,
+                    counts,
+                    event.join_response.reconnected,
+                )
             }
 
             event.ice_trickle != null -> with(event.ice_trickle) {
