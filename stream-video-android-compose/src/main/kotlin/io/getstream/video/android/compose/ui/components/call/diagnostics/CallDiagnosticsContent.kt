@@ -1,3 +1,19 @@
+/*
+ * Copyright (c) 2014-2023 Stream.io Inc. All rights reserved.
+ *
+ * Licensed under the Stream License;
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    https://github.com/GetStream/stream-video-android/blob/main/LICENSE
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package io.getstream.video.android.compose.ui.components.call.diagnostics
 
 import android.content.res.Configuration.ORIENTATION_PORTRAIT
@@ -50,7 +66,7 @@ public fun CallDiagnosticsContent(
         modifier = Modifier
             .fillMaxWidth()
             .fillMaxHeight()
-            .background(color = Color(0x80000000))
+            .background(color = Color(0x80000000)),
     ) {
         val stats by call.statsReport.collectAsStateWithLifecycle()
         val configuration = LocalConfiguration.current
@@ -65,7 +81,7 @@ public fun CallDiagnosticsContent(
                         val trackId = it.trackLookupPrefix
                         item {
                             Row {
-                                Text(text = "${name}: ", color = Color.Yellow)
+                                Text(text = "$name: ", color = Color.Yellow)
                                 Text(text = trackId, color = Color.Cyan)
                             }
                         }
@@ -78,7 +94,7 @@ public fun CallDiagnosticsContent(
                     SubscriberDiagnosticsContent(
                         call = call,
                         stats = stats?.subscriber?.parsed.orEmpty(),
-                        showRemoteOutbound = false
+                        showRemoteOutbound = false,
                     )
                     item {
                         Spacer(modifier = Modifier.height(128.dp))
@@ -94,14 +110,14 @@ public fun CallDiagnosticsContent(
                     PublisherDiagnosticsContent(
                         call = call,
                         stats = stats?.publisher?.parsed.orEmpty(),
-                        showRemoteInbound = false
+                        showRemoteInbound = false,
                     )
                 }
                 LazyColumn(modifier = Modifier.weight(1f)) {
                     SubscriberDiagnosticsContent(
                         call = call,
                         stats = stats?.subscriber?.parsed.orEmpty(),
-                        showRemoteOutbound = false
+                        showRemoteOutbound = false,
                     )
                 }
             }
@@ -112,7 +128,7 @@ public fun CallDiagnosticsContent(
 private fun LazyListScope.PublisherDiagnosticsContent(
     call: Call,
     stats: Map<RtcReportType, Set<RtcStats>>,
-    showRemoteInbound: Boolean
+    showRemoteInbound: Boolean,
 ) {
     item {
         Spacer(modifier = Modifier.height(16.dp))
@@ -156,7 +172,7 @@ private fun LazyListScope.PublisherDiagnosticsContent(
                 it,
                 codecs[it.codecId],
                 videRemoteInboundRtpMap[it.id],
-                showRemoteInbound
+                showRemoteInbound,
             )
         }
     }
@@ -183,7 +199,7 @@ private fun LazyListScope.PublisherDiagnosticsContent(
                 it,
                 codecs[it.codecId],
                 audioRemoteInboundRtpMap[it.id],
-                showRemoteInbound
+                showRemoteInbound,
             )
         }
     }
@@ -192,7 +208,7 @@ private fun LazyListScope.PublisherDiagnosticsContent(
 private fun LazyListScope.SubscriberDiagnosticsContent(
     call: Call,
     stats: Map<RtcReportType, Set<RtcStats>>,
-    showRemoteOutbound: Boolean
+    showRemoteOutbound: Boolean,
 ) {
     item {
         Spacer(modifier = Modifier.height(16.dp))
@@ -210,7 +226,9 @@ private fun LazyListScope.SubscriberDiagnosticsContent(
         val candidatePair =
             stats[RtcReportType.CANDIDATE_PAIR]?.firstOrNull() as? RtcIceCandidatePairStats
         val remoteCandidate =
-            stats[RtcReportType.REMOTE_CANDIDATE]?.find { candidatePair?.remoteCandidateId == it.id } as? RtcIceCandidateStats
+            stats[RtcReportType.REMOTE_CANDIDATE]?.find {
+                candidatePair?.remoteCandidateId == it.id
+            } as? RtcIceCandidateStats
         if (remoteCandidate != null && candidatePair?.remoteCandidateId == remoteCandidate.id) {
             IceCandidate(remoteCandidate)
         } else {
@@ -234,7 +252,7 @@ private fun LazyListScope.SubscriberDiagnosticsContent(
                 videoToParticipant[it.trackIdentifier],
                 codecs[it.codecId],
                 videRemoteOutboundRtpMap[it.id],
-                showRemoteOutbound
+                showRemoteOutbound,
             )
         }
     }
@@ -256,7 +274,7 @@ private fun LazyListScope.SubscriberDiagnosticsContent(
                 audioToParticipant[it.trackIdentifier],
                 codecs[it.codecId],
                 audioRemoteOutboundRtpMap[it.id],
-                showRemoteOutbound
+                showRemoteOutbound,
             )
         }
     }
@@ -265,7 +283,7 @@ private fun LazyListScope.SubscriberDiagnosticsContent(
 @Composable
 private fun IceCandidate(stats: RtcIceCandidateStats) {
     stats.apply {
-        Text("ice_candidate: ${ip}:${port}")
+        Text("ice_candidate: $ip:$port")
         Text("protocol: $protocol")
         Text("candidate_type: $candidateType")
         Text("network_type: $networkType")
@@ -274,7 +292,7 @@ private fun IceCandidate(stats: RtcIceCandidateStats) {
 
 @Composable
 private fun AudioSource(
-    source: RtcAudioSourceStats?
+    source: RtcAudioSourceStats?,
 ) {
     source?.apply {
         Spacer(modifier = Modifier.height(8.dp))
@@ -292,7 +310,7 @@ private fun AudioSource(
 
 @Composable
 private fun VideoSource(
-    source: RtcVideoSourceStats?
+    source: RtcVideoSourceStats?,
 ) {
     source?.apply {
         Spacer(modifier = Modifier.height(8.dp))
@@ -311,7 +329,7 @@ private fun AudioOutboundRtp(
     ora: RtcOutboundRtpAudioStreamStats,
     codec: RtcCodecStats?,
     rira: RtcRemoteInboundRtpAudioStreamStats?,
-    showRemoteInbound: Boolean
+    showRemoteInbound: Boolean,
 ) {
     ora.apply {
         Spacer(modifier = Modifier.height(8.dp))
@@ -349,7 +367,7 @@ private fun VideoOutboundRtp(
     orv: RtcOutboundRtpVideoStreamStats,
     codec: RtcCodecStats?,
     rirv: RtcRemoteInboundRtpVideoStreamStats?,
-    showRemoteInbound: Boolean
+    showRemoteInbound: Boolean,
 ) {
     orv.apply {
         Spacer(modifier = Modifier.height(8.dp))
@@ -398,7 +416,7 @@ private fun AudioInboundRtp(
     userNameOrId: String?,
     codec: RtcCodecStats?,
     rora: RtcRemoteOutboundRtpAudioStreamStats?,
-    showRemoteOutbound: Boolean
+    showRemoteOutbound: Boolean,
 ) {
     ira.apply {
         Spacer(modifier = Modifier.height(8.dp))
@@ -442,7 +460,7 @@ private fun VideoInboundRtp(
     userNameOrId: String?,
     codec: RtcCodecStats?,
     rorv: RtcRemoteOutboundRtpVideoStreamStats?,
-    showRemoteOutbound: Boolean
+    showRemoteOutbound: Boolean,
 ) {
     irv.apply {
         Spacer(modifier = Modifier.height(8.dp))

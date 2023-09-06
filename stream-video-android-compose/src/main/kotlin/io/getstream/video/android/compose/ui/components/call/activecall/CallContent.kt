@@ -197,7 +197,7 @@ public fun CallContent(
                                     showDiagnostics = true
                                 },
                             )
-                        }
+                        },
                 ) {
                     videoContent.invoke(this, call)
 

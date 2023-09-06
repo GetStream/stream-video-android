@@ -31,8 +31,6 @@ import io.getstream.video.android.core.model.StreamPeerType
 import io.getstream.video.android.core.model.toDomainCandidate
 import io.getstream.video.android.core.model.toRtcCandidate
 import io.getstream.video.android.core.utils.stringify
-import kotlin.coroutines.resume
-import kotlin.coroutines.suspendCoroutine
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -51,6 +49,8 @@ import org.webrtc.RtpReceiver
 import org.webrtc.RtpTransceiver
 import org.webrtc.RtpTransceiver.RtpTransceiverInit
 import org.webrtc.SessionDescription
+import kotlin.coroutines.resume
+import kotlin.coroutines.suspendCoroutine
 import org.webrtc.IceCandidate as RtcIceCandidate
 
 /**
@@ -462,11 +462,15 @@ public class StreamPeerConnection(
             connection.getStats { origin ->
                 coroutineScope.launch(Dispatchers.IO) {
                     if (DEBUG_STATS) {
-                        logger.v { "[getStats] #sfu; #$typeTag; " +
-                                "stats.keys: ${origin?.statsMap?.keys}" }
+                        logger.v {
+                            "[getStats] #sfu; #$typeTag; " +
+                                "stats.keys: ${origin?.statsMap?.keys}"
+                        }
                         origin?.statsMap?.values?.forEach {
-                            logger.v { "[getStats] #sfu; #$typeTag; " +
-                                    "report.type: ${it.type}, report.members: $it" }
+                            logger.v {
+                                "[getStats] #sfu; #$typeTag; " +
+                                    "report.type: ${it.type}, report.members: $it"
+                            }
                         }
                     }
                     try {

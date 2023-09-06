@@ -26,7 +26,6 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import org.webrtc.CameraEnumerationAndroid
 import org.webrtc.RTCStats
-import org.webrtc.RTCStatsReport
 import stream.video.sfu.models.TrackType
 
 public class PeerConnectionStats {
