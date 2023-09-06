@@ -929,11 +929,22 @@ public class RtcSession internal constructor(
      */
     private fun setVideoSubscriptions(useDefaults: Boolean = false) {
         // default is to subscribe to the top 5 sorted participants
-        val tracks = if (useDefaults) {
+        var tracks = if (useDefaults) {
             defaultTracks()
         } else {
             // if we're not using the default, sub to visible tracks
             visibleTracks()
+        }
+
+        // TODO:
+        // This is a hotfix to help with performance. Most devices struggle even with H resolution
+        // if there are more than 2 remote participants and especially if there is a H264 participant.
+        // We just report a very small window so force SFU to deliver us Q resolution. This will
+        // be later less visible to the user once we make the participant grid smaller
+        if (tracks.size > 2) {
+            tracks = tracks.map {
+                it.copy(dimension = it.dimension?.copy(width = 200, height = 200))
+            }
         }
 
         val new = tracks.toList()
