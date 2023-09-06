@@ -21,6 +21,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
+import io.getstream.video.android.app.BuildConfig
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.call.activecall.CallContent
 import io.getstream.video.android.core.Call
@@ -50,6 +51,7 @@ fun CallScreen(
                 else -> Unit
             }
         },
+        enableDiagnostics = BuildConfig.DEBUG,
     )
 }
 

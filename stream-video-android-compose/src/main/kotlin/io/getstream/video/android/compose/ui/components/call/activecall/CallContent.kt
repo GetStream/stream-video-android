@@ -133,7 +133,7 @@ public fun CallContent(
     },
     enableInPictureInPicture: Boolean = true,
     pictureInPictureContent: @Composable (Call) -> Unit = { DefaultPictureInPictureContent(it) },
-    enableDiagnostics: Boolean = true,
+    enableDiagnostics: Boolean = false,
 ) {
     val context = LocalContext.current
     val orientation = LocalConfiguration.current.orientation
