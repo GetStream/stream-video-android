@@ -22,23 +22,6 @@ export const CookbookCard = ({ title, link, img }) => (
   </div>
 );
 
-export const CookbookCard = ({ title, children }) => (
-  <li
-    style={{
-      display: "flex",
-      flexDirection: "column",
-      margin: "0 0.5rem",
-      listStyleType: "none",
-      color: "#d3d3d3",
-      width: "250px",
-      height: "200px",
-    }}
-  >
-    <h4>{title}</h4>
-    {children}
-  </li>
-);
-
 import CallControls from '../assets/cookbook/replacing-call-controls.png';
 import Label from '../assets/cookbook/removing-label-and-indicators.png';
 import VideoLayout from '../assets/cookbook/custom-video-layout.png';
