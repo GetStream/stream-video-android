@@ -316,7 +316,7 @@ private fun AudioOutboundRtp(
     ora.apply {
         Spacer(modifier = Modifier.height(8.dp))
         Row {
-            Text("Video Outbound RTP: ", color = Color.Green)
+            Text("Audio Outbound RTP: ", color = Color.Green)
             Text("$mid".uppercase(), color = Color.Cyan)
         }
         Codec(codec)

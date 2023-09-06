@@ -461,14 +461,13 @@ public class StreamPeerConnection(
         return suspendCoroutine { cont ->
             connection.getStats { origin ->
                 coroutineScope.launch(Dispatchers.IO) {
-                    /*if (iceState.value != PeerConnection.IceConnectionState.CONNECTED) {
-                        logger.w { "[getStats] #sfu; #$typeTag; rejected (iceState: ${iceState.value})" }
-                        cont.resume(null)
-                        return@launch
-                    }*/
-                    logger.v { "[getStats] #sfu; #$typeTag; stats.keys: ${origin?.statsMap?.keys}" }
-                    origin?.statsMap?.values?.forEach {
-                        logger.v { "[getStats] #sfu; #$typeTag; report.type: ${it.type}, report.members: $it" }
+                    if (DEBUG_STATS) {
+                        logger.v { "[getStats] #sfu; #$typeTag; " +
+                                "stats.keys: ${origin?.statsMap?.keys}" }
+                        origin?.statsMap?.values?.forEach {
+                            logger.v { "[getStats] #sfu; #$typeTag; " +
+                                    "report.type: ${it.type}, report.members: $it" }
+                        }
                     }
                     try {
                         cont.resume(origin?.let { RtcStatsReport(it, it.toRtcStats()) })
@@ -524,5 +523,9 @@ public class StreamPeerConnection(
 
     private fun String.mungeCodecs(): String {
         return this.replace("vp9", "VP9").replace("vp8", "VP8").replace("h264", "H264")
+    }
+
+    private companion object {
+        private const val DEBUG_STATS = false
     }
 }
