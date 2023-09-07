@@ -42,9 +42,11 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import org.openapitools.client.models.AcceptCallResponse
 import org.openapitools.client.models.AudioSettings
@@ -143,6 +145,12 @@ public class Call(
      * Note: Doesn't return any values until the session is established!
      */
     val localMicrophoneAudioLevel: StateFlow<Float> = audioLevelOutputHelper.currentLevel
+
+    /**
+     * Contains stats events for observation.
+     */
+    @InternalStreamVideoApi
+    val statsReport: MutableStateFlow<CallStatsReport?> = MutableStateFlow(null)
 
     /**
      * Time (in millis) when the full reconnection flow started. Will be null again once
@@ -380,19 +388,18 @@ public class Call(
             // wait a bit before we capture stats
             delay(statsGatheringInterval)
 
-            while (true) {
+            while (isActive) {
                 delay(statsGatheringInterval)
 
-                session?.publisher?.let {
-                    val stats = it.getStats().value
-                    state.stats.updateFromRTCStats(stats, isPublisher = true)
-                }
-                session?.subscriber?.let {
-                    val stats = it.getStats().value
-                    state.stats.updateFromRTCStats(stats, isPublisher = false)
-                }
-
+                val publisherStats = session?.publisher?.getStats()
+                val subscriberStats = session?.subscriber?.getStats()
+                state.stats.updateFromRTCStats(publisherStats, isPublisher = true)
+                state.stats.updateFromRTCStats(subscriberStats, isPublisher = false)
                 state.stats.updateLocalStats()
+                statsReport.value = CallStatsReport(
+                    publisher = publisherStats,
+                    subscriber = subscriberStats,
+                )
             }
         }
 
