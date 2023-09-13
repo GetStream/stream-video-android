@@ -23,7 +23,6 @@
 
 package org.openapitools.client.models
 
-import org.openapitools.client.models.UserResponse
 
 
 
@@ -39,25 +38,14 @@ import org.openapitools.client.infrastructure.Serializer
 /**
  *
  *
- * @param type
- * @param user
- * @param custom
- * @param emojiCode
+ * @param duration Duration of the request in human-readable format
  */
 
 
-data class ReactionResponse (
+data class PinResponse (
 
-    @Json(name = "type")
-    val type: kotlin.String,
-
-    @Json(name = "user")
-    val user: UserResponse,
-
-    @Json(name = "custom")
-    val custom: kotlin.collections.Map<kotlin.String, kotlin.Any?>? = null,
-
-    @Json(name = "emoji_code")
-    val emojiCode: kotlin.String? = null
+    /* Duration of the request in human-readable format */
+    @Json(name = "duration")
+    val duration: kotlin.String
 
 )

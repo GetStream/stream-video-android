@@ -23,7 +23,6 @@
 
 package org.openapitools.client.models
 
-import org.openapitools.client.models.UserResponse
 
 
 
@@ -39,25 +38,17 @@ import org.openapitools.client.infrastructure.Serializer
 /**
  *
  *
- * @param type
- * @param user
- * @param custom
- * @param emojiCode
+ * @param sessionId
+ * @param userId
  */
 
 
-data class ReactionResponse (
+data class PinRequest (
 
-    @Json(name = "type")
-    val type: kotlin.String,
+    @Json(name = "session_id")
+    val sessionId: kotlin.String,
 
-    @Json(name = "user")
-    val user: UserResponse,
-
-    @Json(name = "custom")
-    val custom: kotlin.collections.Map<kotlin.String, kotlin.Any?>? = null,
-
-    @Json(name = "emoji_code")
-    val emojiCode: kotlin.String? = null
+    @Json(name = "user_id")
+    val userId: kotlin.String
 
 )

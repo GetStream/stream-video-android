@@ -37,7 +37,7 @@ import com.squareup.moshi.ToJson
 /**
  * All possibility of string to use
  *
- * Values: blockUsers,createCall,createReaction,endCall,joinBackstage,joinCall,joinEndedCall,muteUsers,readCall,removeCallMember,screenshare,sendAudio,sendVideo,startBroadcastCall,startRecordCall,startTranscriptionCall,stopBroadcastCall,stopRecordCall,stopTranscriptionCall,updateCall,updateCallMember,updateCallPermissions,updateCallSettings
+ * Values: blockUsers,createCall,createReaction,endCall,joinBackstage,joinCall,joinEndedCall,muteUsers,pinForEveryone,readCall,removeCallMember,screenshare,sendAudio,sendVideo,startBroadcastCall,startRecordCall,startTranscriptionCall,stopBroadcastCall,stopRecordCall,stopTranscriptionCall,updateCall,updateCallMember,updateCallPermissions,updateCallSettings
  */
 
 sealed class OwnCapability(val value: kotlin.String) {
@@ -53,6 +53,7 @@ sealed class OwnCapability(val value: kotlin.String) {
             "join-call" -> JoinCall
             "join-ended-call" -> JoinEndedCall
             "mute-users" -> MuteUsers
+            "pin-for-everyone" -> PinForEveryone
             "read-call" -> ReadCall
             "remove-call-member" -> RemoveCallMember
             "screenshare" -> Screenshare
@@ -80,6 +81,7 @@ sealed class OwnCapability(val value: kotlin.String) {
     object JoinCall : OwnCapability("join-call")
     object JoinEndedCall : OwnCapability("join-ended-call")
     object MuteUsers : OwnCapability("mute-users")
+    object PinForEveryone : OwnCapability("pin-for-everyone")
     object ReadCall : OwnCapability("read-call")
     object RemoveCallMember : OwnCapability("remove-call-member")
     object Screenshare : OwnCapability("screenshare")

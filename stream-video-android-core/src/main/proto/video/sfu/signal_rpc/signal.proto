@@ -7,7 +7,7 @@ import "video/sfu/models/models.proto";
 option go_package = "github.com/GetStream/protocol/protobuf/video/sfu/signal_rpc";
 option java_multiple_files = true;
 option java_outer_classname = "SfuSignalV1";
-option csharp_namespace = "Stream.Video.v1.Sfu";
+option csharp_namespace = "Stream.Video.v1.Sfu.Signal";
 
 service SignalServer {
 
@@ -25,6 +25,17 @@ service SignalServer {
   rpc UpdateSubscriptions(UpdateSubscriptionsRequest) returns (UpdateSubscriptionsResponse);
 
   rpc UpdateMuteStates(UpdateMuteStatesRequest) returns (UpdateMuteStatesResponse);
+
+  rpc IceRestart(ICERestartRequest) returns (ICERestartResponse);
+}
+
+message ICERestartRequest {
+  string session_id = 1;
+  stream.video.sfu.models.PeerType peer_type = 2;
+}
+
+message ICERestartResponse {
+  models.Error error = 1;
 }
 
 message UpdateMuteStatesRequest{

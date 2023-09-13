@@ -96,6 +96,8 @@ import stream.video.sfu.models.TrackType
 import stream.video.sfu.models.VideoDimension
 import stream.video.sfu.models.VideoLayer
 import stream.video.sfu.models.VideoQuality
+import stream.video.sfu.signal.ICERestartRequest
+import stream.video.sfu.signal.ICERestartResponse
 import stream.video.sfu.signal.ICETrickleResponse
 import stream.video.sfu.signal.SendAnswerRequest
 import stream.video.sfu.signal.SendAnswerResponse
@@ -280,6 +282,14 @@ public class RtcSession internal constructor(
 
     internal var sfuConnectionModule: SfuConnectionModule
 
+    private val sfuFastReconnectListener: () -> Unit = {
+        // SFU socket has done a fast-reconnect. We need to an ICE restart immediately and not wait
+        // until the health check runs
+        coroutineScope.launch {
+            call.monitor.reconnect(forceRestart = true)
+        }
+    }
+
     init {
         if (!StreamVideo.isInstalled) {
             throw IllegalArgumentException(
@@ -304,7 +314,7 @@ public class RtcSession internal constructor(
             session.getSubscriberSdp().description
         }
         sfuConnectionModule =
-            connectionModule.createSFUConnectionModule(sfuUrl, sessionId, sfuToken, getSdp)
+            connectionModule.createSFUConnectionModule(sfuUrl, sessionId, sfuToken, getSdp, sfuFastReconnectListener)
         listenToSocket()
 
         coroutineScope.launch {
@@ -347,17 +357,25 @@ public class RtcSession internal constructor(
         )
     }
 
-    suspend fun reconnect() {
+    /**
+     * @param forceRestart - set to true if you want to force restart both ICE connections
+     * regardless of their current connection status (even if they are CONNECTED)
+     */
+    suspend fun reconnect(forceRestart: Boolean) {
         // ice restart
         subscriber?.let {
             if (!it.isHealthy()) {
-                logger.i { "ice restarting subscriber peer connection" }
-                it.connection.restartIce()
+                // Do not request subscriber ICE restart in fast-reconnect mode - this will
+                // be done for you by the SFU
+                if (!forceRestart) {
+                    logger.i { "ice restarting subscriber peer connection" }
+                    requestSubscriberIceRestart()
+                }
             }
         }
         publisher?.let {
-            if (!it.isHealthy()) {
-                logger.i { "ice restarting publisher peer connection" }
+            if (!it.isHealthy() || forceRestart) {
+                logger.i { "ice restarting publisher peer connection (force restart = $forceRestart)" }
                 it.connection.restartIce()
             }
         }
@@ -646,6 +664,7 @@ public class RtcSession internal constructor(
         // cleanup the publisher and subcriber peer connections
         subscriber?.connection?.close()
         publisher?.connection?.close()
+
         subscriber = null
         publisher = null
 
@@ -726,7 +745,7 @@ public class RtcSession internal constructor(
     @VisibleForTesting
     public fun createSubscriber(): StreamPeerConnection {
         logger.i { "[createSubscriber] #sfu" }
-        return clientImpl.peerConnectionFactory.makePeerConnection(
+        val peerConnection = clientImpl.peerConnectionFactory.makePeerConnection(
             coroutineScope = coroutineScope,
             configuration = connectionConfiguration,
             type = StreamPeerType.SUBSCRIBER,
@@ -734,25 +753,24 @@ public class RtcSession internal constructor(
             onStreamAdded = { addStream(it) }, // addTrack
             onIceCandidateRequest = ::sendIceCandidate,
         )
+        peerConnection.connection.addTransceiver(
+            MediaStreamTrack.MediaType.MEDIA_TYPE_VIDEO,
+            RtpTransceiver.RtpTransceiverInit(
+                RtpTransceiver.RtpTransceiverDirection.RECV_ONLY,
+            ),
+        )
+
+        peerConnection.connection.addTransceiver(
+            MediaStreamTrack.MediaType.MEDIA_TYPE_AUDIO,
+            RtpTransceiver.RtpTransceiverInit(
+                RtpTransceiver.RtpTransceiverDirection.RECV_ONLY,
+            ),
+        )
+        return peerConnection
     }
 
     private suspend fun getSubscriberSdp(): SessionDescription {
-        subscriber?.let {
-            it.connection.apply {
-                addTransceiver(
-                    MediaStreamTrack.MediaType.MEDIA_TYPE_VIDEO,
-                    RtpTransceiver.RtpTransceiverInit(
-                        RtpTransceiver.RtpTransceiverDirection.RECV_ONLY,
-                    ),
-                )
-                addTransceiver(
-                    MediaStreamTrack.MediaType.MEDIA_TYPE_AUDIO,
-                    RtpTransceiver.RtpTransceiverInit(
-                        RtpTransceiver.RtpTransceiverDirection.RECV_ONLY,
-                    ),
-                )
-            }
-
+        subscriber?.let { it ->
             val result = it.createOffer()
 
             return if (result is Success) {
@@ -1178,7 +1196,7 @@ public class RtcSession internal constructor(
                 willRetry
             }.catch {
                 logger.e { "setPublisher failed after 3 retries, asking the call monitor to do an ice restart" }
-                coroutineScope.launch { call.monitor.reconnect() }
+                coroutineScope.launch { call.monitor.reconnect(forceRestart = true) }
             }.collect()
         }
     }
@@ -1277,7 +1295,7 @@ public class RtcSession internal constructor(
                     willRetry
                 }.catch {
                     logger.e { "setPublisher failed after 3 retries, asking the call monitor to do an ice restart" }
-                    coroutineScope.launch { call.monitor.reconnect() }
+                    coroutineScope.launch { call.monitor.reconnect(forceRestart = true) }
                 }.collect()
             }
         }
@@ -1485,6 +1503,16 @@ public class RtcSession internal constructor(
             result
         }
 
+    // share what size and which participants we're looking at
+    suspend fun requestSubscriberIceRestart(): Result<ICERestartResponse> =
+        wrapAPICall {
+            val request = ICERestartRequest(
+                session_id = sessionId,
+                peer_type = PeerType.PEER_TYPE_SUBSCRIBER,
+            )
+            sfuConnectionModule.signalService.iceRestart(request)
+        }
+
     private suspend fun updateMuteState(request: UpdateMuteStatesRequest): Result<UpdateMuteStatesResponse> =
         wrapAPICall {
             val result = sfuConnectionModule.signalService.updateMuteStates(request)
@@ -1541,13 +1569,13 @@ public class RtcSession internal constructor(
         }
         // TODO: updating the turn server requires a new peer connection
         sfuConnectionModule =
-            connectionModule.createSFUConnectionModule(sfuUrl, sessionId, sfuToken, getSdp)
+            connectionModule.createSFUConnectionModule(sfuUrl, sessionId, sfuToken, getSdp, sfuFastReconnectListener)
         listenToSocket()
         sfuConnectionModule.sfuSocket.connect()
         timer.split("socket connected")
 
         // ice restart
-        reconnect()
+        reconnect(forceRestart = true)
         timer.finish("ice restart in progress")
     }
 }

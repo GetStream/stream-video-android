@@ -19,6 +19,7 @@ package io.getstream.video.android.core
 import io.getstream.log.taggedLogger
 import io.getstream.video.android.core.internal.network.NetworkStateProvider
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -39,7 +40,11 @@ import org.webrtc.PeerConnection
  * - So we shouldn't immediately try to reconnect if we're already reconnecting
  *
  */
-public class CallHealthMonitor(val call: Call, val callScope: CoroutineScope) {
+public class CallHealthMonitor(
+    val call: Call,
+    val callScope: CoroutineScope,
+    val onIceRecoveryFailed: () -> Unit,
+) {
     private val logger by taggedLogger("Call:HealthMonitor")
 
     private val network by lazy { call.clientImpl.connectionModule.networkStateProvider }
@@ -48,11 +53,13 @@ public class CallHealthMonitor(val call: Call, val callScope: CoroutineScope) {
     private val scope = CoroutineScope(callScope.coroutineContext + supervisorJob)
 
     // ensures we don't attempt to reconnect, if we attempted to reconnect less than 700ms ago
-    var reconnectInProgress: Boolean = false
-    var reconnectionAttempts = 0
-    val checkInterval = 5000L
-    var lastReconnectAt: OffsetDateTime? = null
-    val reconnectDebounceMs = 700L
+    private var reconnectInProgress: Boolean = false
+    private val checkInterval = 5000L
+    private var lastReconnectAt: OffsetDateTime? = null
+    private val reconnectDebounceMs = 700L
+    private val iceRestartTimeout = 4000L
+    private var isRunning = false
+    private var timeoutJob: Job? = null
 
     val badStates = listOf(
         PeerConnection.PeerConnectionState.DISCONNECTED,
@@ -60,7 +67,20 @@ public class CallHealthMonitor(val call: Call, val callScope: CoroutineScope) {
         PeerConnection.PeerConnectionState.CLOSED,
     )
 
+    val badStatesExcludingClosed = listOf(
+        PeerConnection.PeerConnectionState.DISCONNECTED,
+        PeerConnection.PeerConnectionState.FAILED,
+    )
+
     fun start() {
+        // Don't start multiple instances of call health monitor for one call.
+        // We keep it running until the call is left and then we stop (it can't
+        // be restarted again)
+        if (isRunning) {
+            return
+        }
+        isRunning = true
+        supervisorJob.start()
         logger.i { "starting call health monitor" }
         network.subscribe(networkStateListener)
         monitorPeerConnection()
@@ -68,6 +88,7 @@ public class CallHealthMonitor(val call: Call, val callScope: CoroutineScope) {
     }
 
     fun stop() {
+        isRunning = false
         supervisorJob.cancel()
         network.unsubscribe(networkStateListener)
     }
@@ -94,8 +115,10 @@ public class CallHealthMonitor(val call: Call, val callScope: CoroutineScope) {
 
         if (healthyPeerConnections) {
             // don't reconnect if things are healthy
-            reconnectionAttempts = 0
+            timeoutJob?.cancel()
+            timeoutJob = null
             lastReconnectAt = null
+
             if (call.state._connection.value != RealtimeConnection.Connected) {
                 logger.i { "call health check passed, marking connection as healthy" }
                 call.state._connection.value = RealtimeConnection.Connected
@@ -104,7 +127,20 @@ public class CallHealthMonitor(val call: Call, val callScope: CoroutineScope) {
             logger.w {
                 "call health check failed, reconnecting. publisher $publisherState subscriber $subscriberState"
             }
-            scope.launch { reconnect() }
+
+            // We start a timer in DISCONNECTED or FAILED state (not in CLOSED - because that's usually closed
+            // by us during reconnection)
+            if (timeoutJob == null &&
+                (subscriberState in badStatesExcludingClosed || publisherState in badStatesExcludingClosed)
+            ) {
+                timeoutJob = scope.launch {
+                    delay(iceRestartTimeout)
+                    onIceRecoveryFailed.invoke()
+                    return@launch
+                }
+            }
+
+            scope.launch { reconnect(false) }
         }
     }
 
@@ -112,36 +148,34 @@ public class CallHealthMonitor(val call: Call, val callScope: CoroutineScope) {
      * Only 1 reconnect attempt runs at the same time
      * Will skip if we already tried to reconnect less than reconnectDebounceMs ms ago
      */
-    suspend fun reconnect() {
-        if (reconnectInProgress) return
+    suspend fun reconnect(forceRestart: Boolean) {
+        if (reconnectInProgress) {
+            logger.d { "[reconnect] Reconnect already in progress - skipping" }
+            return
+        }
 
         logger.i { "attempting to reconnect" }
 
         reconnectInProgress = true
-        reconnectionAttempts++
-
-        // TODO: Limit number of SFU peer connection retries - othwerwise the call can get stuck in
-        // reconnection and will never full-reconnect.
 
         val now = OffsetDateTime.now()
 
         val timeDifference = if (lastReconnectAt != null) {
             ChronoUnit.MILLIS.between(lastReconnectAt?.toInstant(), now.toInstant())
         } else {
-            10000L
+            null
         }
 
         logger.i {
-            "reconnect called, reconnect attempt: $reconnectionAttempts, time since last reconnect $timeDifference"
+            "reconnect called, time since last reconnect $timeDifference"
         }
 
         // ensure we don't run the reconnect too often
-        if (timeDifference < reconnectDebounceMs) {
-            logger.d { "reconnect skip" }
+        if (timeDifference != null && timeDifference < reconnectDebounceMs && !forceRestart) {
+            logger.d { "[reconnect] skipping reconnect - too often" }
         } else {
             lastReconnectAt = now
-
-            call.reconnectOrSwitchSfu()
+            call.reconnectOrSwitchSfu(forceRestart = forceRestart)
         }
 
         reconnectInProgress = false
@@ -168,7 +202,7 @@ public class CallHealthMonitor(val call: Call, val callScope: CoroutineScope) {
     }
 
     // monitor the peer connection since it's most likely to break
-    fun monitorPeerConnection() {
+    private fun monitorPeerConnection() {
         val session = call.session
 
         scope.launch {
@@ -195,7 +229,7 @@ public class CallHealthMonitor(val call: Call, val callScope: CoroutineScope) {
     }
 
     // and for all other scenarios recheck every checkInterval ms
-    fun monitorInterval() {
+    private fun monitorInterval() {
         scope.launch {
             while (true) {
                 delay(checkInterval)

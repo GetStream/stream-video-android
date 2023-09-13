@@ -28,7 +28,9 @@ import io.getstream.video.android.core.socket.PersistentSocket
 import io.getstream.video.android.core.socket.SfuSocket
 import io.getstream.video.android.core.socket.SocketState
 import io.getstream.video.android.core.socket.SocketState.Connected
+import io.mockk.every
 import io.mockk.impl.annotations.RelaxedMockK
+import io.mockk.mockk
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -121,7 +123,7 @@ open class SocketTestBase : TestBase() {
             }
 
             delay(1000)
-            socket.disconnect()
+            socket.disconnect(PersistentSocket.DisconnectReason.ByRequest)
             job.cancel()
             job2.cancel()
         }
@@ -135,6 +137,8 @@ class CoordinatorSocketTest : SocketTestBase() {
 
     @Test
     fun `coordinator - connect the socket`() = runTest {
+        val mockNetworkStateProvider = mockk<NetworkStateProvider>()
+        every { mockNetworkStateProvider.isConnected() } returns true
         val socket = CoordinatorSocket(
             coordinatorUrl,
             testData.users["thierry"]!!,
@@ -197,13 +201,15 @@ class CoordinatorSocketTest : SocketTestBase() {
     @Test
     fun `coordinator - a temporary error should be retried`() = runTest {
         // mock the actual socket connection
+        val mockedNetworkStateProvider = mockk<NetworkStateProvider>(relaxed = true)
+        every { mockedNetworkStateProvider.isConnected() } returns true
         val socket = CoordinatorSocket(
             coordinatorUrl,
             testData.users["thierry"]!!,
             testData.tokens["thierry"]!!,
             scope,
             buildOkHttp(),
-            networkStateProvider,
+            mockedNetworkStateProvider,
         )
         socket.mockSocket = mockedWebSocket
         socket.reconnectTimeout = 0
@@ -217,7 +223,7 @@ class CoordinatorSocketTest : SocketTestBase() {
         job2.join()
         // complete the connection (which should fail)
         delay(10) // timeout is 500ms by default
-        socket.disconnect()
+        socket.disconnect(PersistentSocket.DisconnectReason.ByRequest)
 
         assertThat(socket.reconnectionAttempts).isEqualTo(1)
     }
@@ -312,7 +318,7 @@ class SfuSocketTest : SocketTestBase() {
             }
 
             delay(1000)
-            socket.disconnect()
+            socket.disconnect(PersistentSocket.DisconnectReason.ByRequest)
             job.cancel()
             job2.cancel()
         }
@@ -335,6 +341,7 @@ class SfuSocketTest : SocketTestBase() {
             scope,
             buildOkHttp(),
             networkStateProvider,
+            {},
         )
         socket.connect()
         socket.sendHealthCheck()
@@ -371,6 +378,7 @@ class SfuSocketTest : SocketTestBase() {
             scope,
             buildOkHttp(),
             networkStateProvider,
+            {},
         )
         try {
             socket.connect()

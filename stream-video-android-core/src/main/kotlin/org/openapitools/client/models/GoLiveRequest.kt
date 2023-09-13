@@ -23,7 +23,6 @@
 
 package org.openapitools.client.models
 
-import org.openapitools.client.models.UserResponse
 
 
 
@@ -39,25 +38,21 @@ import org.openapitools.client.infrastructure.Serializer
 /**
  *
  *
- * @param type
- * @param user
- * @param custom
- * @param emojiCode
+ * @param startHls
+ * @param startRecording
+ * @param startTranscription
  */
 
 
-data class ReactionResponse (
+data class GoLiveRequest (
 
-    @Json(name = "type")
-    val type: kotlin.String,
+    @Json(name = "start_hls")
+    val startHls: kotlin.Boolean? = null,
 
-    @Json(name = "user")
-    val user: UserResponse,
+    @Json(name = "start_recording")
+    val startRecording: kotlin.Boolean? = null,
 
-    @Json(name = "custom")
-    val custom: kotlin.collections.Map<kotlin.String, kotlin.Any?>? = null,
-
-    @Json(name = "emoji_code")
-    val emojiCode: kotlin.String? = null
+    @Json(name = "start_transcription")
+    val startTranscription: kotlin.Boolean? = null
 
 )
