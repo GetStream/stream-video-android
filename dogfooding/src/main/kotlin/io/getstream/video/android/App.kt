@@ -18,11 +18,8 @@ package io.getstream.video.android
 
 import android.app.Application
 import android.content.Context
-import com.google.firebase.crashlytics.ktx.crashlytics
-import com.google.firebase.ktx.Firebase
 import dagger.hilt.android.HiltAndroidApp
 import io.getstream.video.android.datastore.delegate.StreamUserDataStore
-import io.getstream.video.android.tooling.handler.StreamGlobalExceptionHandler
 import io.getstream.video.android.util.StreamVideoInitHelper
 import kotlinx.coroutines.runBlocking
 
@@ -31,14 +28,6 @@ class App : Application() {
 
     override fun onCreate() {
         super.onCreate()
-
-        if (!BuildConfig.DEBUG) {
-            StreamGlobalExceptionHandler.install(
-                application = this,
-                packageName = MainActivity::class.java.name,
-                exceptionHandler = { stackTrace -> Firebase.crashlytics.log(stackTrace) },
-            )
-        }
 
         // We use the provided StreamUserDataStore in the demo app for user data storage.
         // This is a convenience class provided for storage but the SDK itself is not aware of
