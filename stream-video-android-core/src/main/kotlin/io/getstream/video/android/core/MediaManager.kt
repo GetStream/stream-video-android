@@ -34,6 +34,7 @@ import io.getstream.video.android.core.audio.AudioSwitchHandler
 import io.getstream.video.android.core.audio.StreamAudioDevice
 import io.getstream.video.android.core.audio.StreamAudioDevice.Companion.fromAudio
 import io.getstream.video.android.core.audio.StreamAudioDevice.Companion.toAudioDevice
+import io.getstream.video.android.core.call.video.FilterVideoProcessor
 import io.getstream.video.android.core.screenshare.StreamScreenShareService
 import io.getstream.video.android.core.utils.buildAudioConstraints
 import io.getstream.video.android.core.utils.mapState
@@ -187,7 +188,7 @@ class ScreenShareManager(
     public val isEnabled: StateFlow<Boolean> = _status.mapState { it is DeviceStatus.Enabled }
 
     private lateinit var screenCapturerAndroid: ScreenCapturerAndroid
-    private lateinit var surfaceTextureHelper: SurfaceTextureHelper
+    internal lateinit var surfaceTextureHelper: SurfaceTextureHelper
     private var setupCompleted = false
     private var isScreenSharing = false
     private var mediaProjectionPermissionResultData: Intent? = null
@@ -451,7 +452,7 @@ public class CameraManager(
     defaultCameraDirection: CameraDirection = CameraDirection.Front,
 ) {
     private var priorStatus: DeviceStatus? = null
-    private lateinit var surfaceTextureHelper: SurfaceTextureHelper
+    internal lateinit var surfaceTextureHelper: SurfaceTextureHelper
     private lateinit var devices: List<CameraDeviceWrapped>
     private var isCapturingVideo: Boolean = false
     private lateinit var videoCapturer: Camera2Capturer
@@ -647,7 +648,6 @@ public class CameraManager(
             surfaceTextureHelper = SurfaceTextureHelper.create(
                 "CaptureThread", eglBaseContext,
             )
-
             setupCompleted = true
         }
     }
@@ -741,13 +741,15 @@ class MediaManagerImpl(
     val scope: CoroutineScope,
     val eglBaseContext: EglBase.Context,
 ) {
+    private val filterVideoProcessor =
+        FilterVideoProcessor({ call.videoFilter }, { camera.surfaceTextureHelper })
+
     // source & tracks
-    val videoSource = call.clientImpl.peerConnectionFactory.makeVideoSource(false)
+    val videoSource =
+        call.clientImpl.peerConnectionFactory.makeVideoSource(false, filterVideoProcessor)
 
     val screenShareVideoSource by lazy {
-        call.clientImpl.peerConnectionFactory.makeVideoSource(
-            true,
-        )
+        call.clientImpl.peerConnectionFactory.makeVideoSource(true, filterVideoProcessor)
     }
 
     // for track ids we emulate the browser behaviour of random UUIDs, doing something different would be confusing

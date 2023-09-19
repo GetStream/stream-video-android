@@ -26,6 +26,7 @@ import io.getstream.result.Result.Failure
 import io.getstream.result.Result.Success
 import io.getstream.video.android.core.call.RtcSession
 import io.getstream.video.android.core.call.utils.SoundInputProcessor
+import io.getstream.video.android.core.call.video.VideoFilter
 import io.getstream.video.android.core.events.VideoEventListener
 import io.getstream.video.android.core.internal.InternalStreamVideoApi
 import io.getstream.video.android.core.model.MuteUsersData
@@ -125,6 +126,11 @@ public class Call(
 
     /** The cid is type:id */
     val cid = "$type:$id"
+
+    /**
+     * Set a custom [VideoFilter] that will be applied to the video stream coming from your device.
+     */
+    var videoFilter: VideoFilter? = null
 
     /**
      * Called by the [CallHealthMonitor] when the ICE restarts failed after
