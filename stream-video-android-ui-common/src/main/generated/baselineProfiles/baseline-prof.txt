@@ -1,5 +1,9 @@
 Lio/getstream/video/android/ui/common/R$color;
 Lio/getstream/video/android/ui/common/R$dimen;
+PLio/getstream/video/android/ui/common/renderer/StreamVideoTextureViewRenderer;-><init>(Landroid/content/Context;)V
+PLio/getstream/video/android/ui/common/renderer/StreamVideoTextureViewRenderer;->getLogger()Lio/getstream/log/TaggedLogger;
+PLio/getstream/video/android/ui/common/renderer/StreamVideoTextureViewRenderer;->onDetachedFromWindow()V
+PLio/getstream/video/android/ui/common/renderer/StreamVideoTextureViewRenderer;->onSurfaceTextureDestroyed(Landroid/graphics/SurfaceTexture;)Z
 PLio/getstream/video/android/ui/common/util/ColorUtilsKt;->adjustColorBrightness(IF)I
 Lio/getstream/video/android/ui/common/util/ResourcesKt;
 HSPLio/getstream/video/android/ui/common/util/ResourcesKt;->getFloatResource(Landroid/content/Context;I)F
