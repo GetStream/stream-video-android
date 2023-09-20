@@ -123,6 +123,9 @@ Video roadmap and changelog is available [here](https://github.com/GetStream/pro
 ### 0.4.0 milestone
 
 - [X] Screensharing from mobile
+- [ ] Implement Chat overlay for Dogfooding
+- [ ] Add Dogfooding instructions + directs Google Play
+- [ ] Reaction dialog API for Compose
 - [ ] Complete Livestreaming APIs and Tutorials for hosting & watching
 - [ ] Android SDK development.md cleanup (Daniel)
 - [ ] Upgrade to more recent versions of webrtc (Kanat)
