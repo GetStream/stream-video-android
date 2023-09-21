@@ -17,6 +17,7 @@
 package io.getstream.video.android.ui.call
 
 import android.app.Activity
+import android.graphics.Bitmap
 import android.media.projection.MediaProjectionManager
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -45,7 +46,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Popup
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.core.Call
+import io.getstream.video.android.core.call.video.BitmapVideoFilter
 import io.getstream.video.android.ui.common.R
+import io.getstream.video.android.util.SampleVideoFilter
 import kotlinx.coroutines.launch
 
 @Composable
@@ -138,6 +141,34 @@ internal fun SettingsMenu(
                     Text(
                         modifier = Modifier.padding(start = 20.dp),
                         text = screenShareButtonText,
+                        color = VideoTheme.colors.textHighEmphasis,
+                    )
+                }
+
+                Spacer(modifier = Modifier.height(12.dp))
+
+                Row(
+                    modifier = Modifier.clickable {
+                        if (call.videoFilter == null) {
+                            call.videoFilter = object : BitmapVideoFilter() {
+                                override fun filter(bitmap: Bitmap) {
+                                    SampleVideoFilter.toGrayscale(bitmap)
+                                }
+                            }
+                        } else {
+                            call.videoFilter = null
+                        }
+                    },
+                ) {
+                    Icon(
+                        painter = painterResource(id = R.drawable.stream_video_ic_fullscreen_exit),
+                        tint = VideoTheme.colors.textHighEmphasis,
+                        contentDescription = null,
+                    )
+
+                    Text(
+                        modifier = Modifier.padding(start = 20.dp),
+                        text = "Toggle video filter",
                         color = VideoTheme.colors.textHighEmphasis,
                     )
                 }

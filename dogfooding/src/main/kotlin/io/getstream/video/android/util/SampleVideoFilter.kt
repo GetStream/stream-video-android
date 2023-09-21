@@ -14,6 +14,23 @@
  * limitations under the License.
  */
 
-package io.getstream.video.android.core.filter
+package io.getstream.video.android.util
 
-public interface AudioFilter
+import android.graphics.Bitmap
+import android.graphics.Canvas
+import android.graphics.ColorMatrix
+import android.graphics.ColorMatrixColorFilter
+import android.graphics.Paint
+
+object SampleVideoFilter {
+
+    fun toGrayscale(bmpOriginal: Bitmap) {
+        val c = Canvas(bmpOriginal)
+        val paint = Paint()
+        val cm = ColorMatrix()
+        cm.setSaturation(0f)
+        val f = ColorMatrixColorFilter(cm)
+        paint.colorFilter = f
+        c.drawBitmap(bmpOriginal, 0f, 0f, paint)
+    }
+}

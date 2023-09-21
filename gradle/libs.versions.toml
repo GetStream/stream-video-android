@@ -32,6 +32,7 @@ landscapist = "2.2.8"
 accompanist = "0.30.1"
 telephoto = "0.3.0"
 audioswitch = "1.1.8"
+libyuv = "0.28.0"
 
 wire = "4.7.0"
 okhttp = "4.11.0"
@@ -119,6 +120,8 @@ accompanist-permission = { group = "com.google.accompanist", name = "accompanist
 telephoto = { group = "me.saket.telephoto", name = "zoomable", version.ref = "telephoto"  }
 
 audioswitch = { group = "com.twilio", name = "audioswitch", version.ref = "audioswitch"}
+
+libyuv = { group = "io.github.crow-misia.libyuv", name = "libyuv-android", version.ref = "libyuv"}
 
 wire-runtime = { group = "com.squareup.wire", name = "wire-runtime", version.ref = "wire" }
 retrofit = { group = "com.squareup.retrofit2", name = "retrofit", version.ref = "retrofit" }

@@ -19,6 +19,7 @@ package io.getstream.video.android.core.call.connection
 import android.content.Context
 import android.os.Build
 import io.getstream.log.taggedLogger
+import io.getstream.video.android.core.call.video.FilterVideoProcessor
 import io.getstream.video.android.core.model.IceCandidate
 import io.getstream.video.android.core.model.StreamPeerType
 import kotlinx.coroutines.CoroutineScope
@@ -264,8 +265,11 @@ public class StreamPeerConnectionFactory(private val context: Context) {
      * @param isScreencast If we're screen sharing using this source.
      * @return [VideoSource] that can be used to build tracks.
      */
-    public fun makeVideoSource(isScreencast: Boolean): VideoSource =
-        factory.createVideoSource(isScreencast)
+
+    internal fun makeVideoSource(isScreencast: Boolean, filterVideoProcessor: FilterVideoProcessor): VideoSource =
+        factory.createVideoSource(isScreencast).apply {
+            setVideoProcessor(filterVideoProcessor)
+        }
 
     /**
      * Builds a [VideoTrack] from the [factory] that can be used for regular video share (camera)
