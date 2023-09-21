@@ -20,6 +20,8 @@ import io.getstream.log.taggedLogger
 import io.getstream.result.Error
 import io.getstream.result.Result
 import io.getstream.result.Result.Failure
+import io.getstream.video.android.core.call.stats.model.RtcStatsReport
+import io.getstream.video.android.core.call.stats.toRtcStats
 import io.getstream.video.android.core.call.utils.addRtcIceCandidate
 import io.getstream.video.android.core.call.utils.createValue
 import io.getstream.video.android.core.call.utils.setValue
@@ -30,11 +32,8 @@ import io.getstream.video.android.core.model.toDomainCandidate
 import io.getstream.video.android.core.model.toRtcCandidate
 import io.getstream.video.android.core.utils.stringify
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.delay
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
@@ -45,12 +44,13 @@ import org.webrtc.MediaConstraints
 import org.webrtc.MediaStream
 import org.webrtc.MediaStreamTrack
 import org.webrtc.PeerConnection
-import org.webrtc.RTCStatsReport
 import org.webrtc.RtpParameters
 import org.webrtc.RtpReceiver
 import org.webrtc.RtpTransceiver
 import org.webrtc.RtpTransceiver.RtpTransceiverInit
 import org.webrtc.SessionDescription
+import kotlin.coroutines.resume
+import kotlin.coroutines.suspendCoroutine
 import org.webrtc.IceCandidate as RtcIceCandidate
 
 /**
@@ -72,6 +72,8 @@ public class StreamPeerConnection(
     private val onIceCandidate: ((IceCandidate, StreamPeerType) -> Unit)?,
     private val maxBitRate: Int,
 ) : PeerConnection.Observer {
+
+    private val setDescriptionMutex = Mutex()
 
     private val goodStates = listOf(
         PeerConnection.PeerConnectionState.NEW, // New is good, means we're not using it yet
@@ -107,11 +109,6 @@ public class StreamPeerConnection(
     public var audioTransceiver: RtpTransceiver? = null
         private set
 
-    /**
-     * Used to manage the stats observation lifecycle.
-     */
-    private var statsJob: Job? = null
-
     fun isHealthy(): Boolean {
         return state.value in goodStates
     }
@@ -121,11 +118,6 @@ public class StreamPeerConnection(
      */
     private val pendingIceMutex = Mutex()
     private val pendingIceCandidates = mutableListOf<IceCandidate>()
-
-    /**
-     * Contains stats events for observation.
-     */
-    private val statsFlow: MutableStateFlow<RTCStatsReport?> = MutableStateFlow(null)
 
     init {
         logger.i { "<init> #sfu; #$typeTag; mediaConstraints: $mediaConstraints" }
@@ -218,7 +210,14 @@ public class StreamPeerConnection(
         localSdp = sdp
 
         logger.d { "[setLocalDescription] #sfu; #$typeTag; offerSdp: ${sessionDescription.stringify()}" }
-        return setValue { connection.setLocalDescription(it, sdp) }
+        // This needs a mutex because parallel calls will result in:
+        // SfuSocketError: subscriber PC: negotiation failed
+        return setDescriptionMutex.withLock {
+            setValue {
+                // Never call this in parallel
+                connection.setLocalDescription(it, sdp)
+            }
+        }
     }
 
     /**
@@ -415,6 +414,10 @@ public class StreamPeerConnection(
                 logger.v { "[onAddTrack] #sfu; #$typeTag; remoteAudioTrack: ${remoteAudioTrack.stringify()}" }
                 remoteAudioTrack.setEnabled(true)
             }
+            mediaStream.videoTracks?.forEach { remoteVideoTrack ->
+                logger.v { "[onAddTrack] #sfu; #$typeTag; remoteVideoTrack: ${remoteVideoTrack.stringify()}" }
+                remoteVideoTrack.setEnabled(true)
+            }
             onStreamAdded?.invoke(mediaStream)
         }
     }
@@ -451,11 +454,9 @@ public class StreamPeerConnection(
         iceState.value = newState
         when (newState) {
             PeerConnection.IceConnectionState.CLOSED, PeerConnection.IceConnectionState.FAILED, PeerConnection.IceConnectionState.DISCONNECTED -> {
-                statsJob?.cancel()
             }
 
             PeerConnection.IceConnectionState.CONNECTED -> {
-                statsJob = observeStats()
             }
 
             else -> Unit
@@ -463,22 +464,32 @@ public class StreamPeerConnection(
     }
 
     /**
-     * @return The [RTCStatsReport] for the active connection.
+     * @return The [RtcStatsReport] for the active connection.
      */
-    public fun getStats(): StateFlow<RTCStatsReport?> {
-        return statsFlow
-    }
-
-    /**
-     * Observes the local connection stats and emits it to [statsFlow] that users can consume.
-     */
-    private fun observeStats() = coroutineScope.launch {
-        while (isActive) {
-            connection.getStats {
-                logger.v { "[observeStats] #sfu; #$typeTag; stats: $it" }
-                statsFlow.value = it
+    public suspend fun getStats(): RtcStatsReport? {
+        return suspendCoroutine { cont ->
+            connection.getStats { origin ->
+                coroutineScope.launch(Dispatchers.IO) {
+                    if (DEBUG_STATS) {
+                        logger.v {
+                            "[getStats] #sfu; #$typeTag; " +
+                                "stats.keys: ${origin?.statsMap?.keys}"
+                        }
+                        origin?.statsMap?.values?.forEach {
+                            logger.v {
+                                "[getStats] #sfu; #$typeTag; " +
+                                    "report.type: ${it.type}, report.members: $it"
+                            }
+                        }
+                    }
+                    try {
+                        cont.resume(origin?.let { RtcStatsReport(it, it.toRtcStats()) })
+                    } catch (e: Throwable) {
+                        logger.e(e) { "[getStats] #sfu; #$typeTag; failed: $e" }
+                        cont.resume(null)
+                    }
+                }
             }
-            delay(10_000L)
         }
     }
 
@@ -525,5 +536,9 @@ public class StreamPeerConnection(
 
     private fun String.mungeCodecs(): String {
         return this.replace("vp9", "VP9").replace("vp8", "VP8").replace("h264", "H264")
+    }
+
+    private companion object {
+        private const val DEBUG_STATS = false
     }
 }

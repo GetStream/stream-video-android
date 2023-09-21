@@ -41,6 +41,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
+import io.getstream.video.android.BuildConfig
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.call.activecall.CallContent
 import io.getstream.video.android.compose.ui.components.call.controls.ControlActions
@@ -100,6 +101,7 @@ fun CallScreen(
                     modifier = Modifier.background(color = VideoTheme.colors.appBackground),
                     call = call,
                     enableInPictureInPicture = true,
+                    enableDiagnostics = BuildConfig.DEBUG,
                     onBackPressed = {
                         if (chatState.currentValue == ModalBottomSheetValue.Expanded) {
                             scope.launch { chatState.hide() }

@@ -14,6 +14,10 @@
  * limitations under the License.
  */
 
-package io.getstream.video.android.core.filter
+package io.getstream.video.android.core.call.stats.model
 
-public interface AudioFilter
+sealed interface RtcStats {
+    val id: String?
+    val type: String?
+    val timestampUs: Double?
+}

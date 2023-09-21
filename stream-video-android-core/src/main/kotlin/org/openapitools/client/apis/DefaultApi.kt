@@ -41,6 +41,7 @@ import org.openapitools.client.models.GetCallResponse
 import org.openapitools.client.models.GetEdgesResponse
 import org.openapitools.client.models.GetOrCreateCallRequest
 import org.openapitools.client.models.GetOrCreateCallResponse
+import org.openapitools.client.models.GoLiveRequest
 import org.openapitools.client.models.GoLiveResponse
 import org.openapitools.client.models.JoinCallRequest
 import org.openapitools.client.models.JoinCallResponse
@@ -48,6 +49,8 @@ import org.openapitools.client.models.ListDevicesResponse
 import org.openapitools.client.models.ListRecordingsResponse
 import org.openapitools.client.models.MuteUsersRequest
 import org.openapitools.client.models.MuteUsersResponse
+import org.openapitools.client.models.PinRequest
+import org.openapitools.client.models.PinResponse
 import org.openapitools.client.models.QueryCallsRequest
 import org.openapitools.client.models.QueryCallsResponse
 import org.openapitools.client.models.QueryMembersRequest
@@ -69,6 +72,8 @@ import org.openapitools.client.models.StopRecordingResponse
 import org.openapitools.client.models.StopTranscriptionResponse
 import org.openapitools.client.models.UnblockUserRequest
 import org.openapitools.client.models.UnblockUserResponse
+import org.openapitools.client.models.UnpinRequest
+import org.openapitools.client.models.UnpinResponse
 import org.openapitools.client.models.UpdateCallMembersRequest
 import org.openapitools.client.models.UpdateCallMembersResponse
 import org.openapitools.client.models.UpdateCallRequest
@@ -256,12 +261,14 @@ interface DefaultApi {
      *
      * @param type
      * @param id
+     * @param goLiveRequest
      * @return [GoLiveResponse]
      */
     @POST("/video/call/{type}/{id}/go_live")
     suspend fun goLive(
         @Path("type") type: String,
-        @Path("id") id: String
+        @Path("id") id: String,
+        @Body goLiveRequest: GoLiveRequest
     ): GoLiveResponse
 
     /**
@@ -692,5 +699,45 @@ interface DefaultApi {
     suspend fun videoConnect(
         @Body wsAuthMessageRequest: WSAuthMessageRequest
     ): Unit
+
+    /**
+     * Pin
+     * Pins a track for all users in the call.  Required permissions: - PinCallTrack
+     * Responses:
+     *  - 201: Successful response
+     *  - 400: Bad request
+     *  - 429: Too many requests
+     *
+     * @param type
+     * @param id
+     * @param pinRequest
+     * @return [PinResponse]
+     */
+    @POST("/video/call/{type}/{id}/pin")
+    suspend fun videoPin(
+        @Path("type") type: String,
+        @Path("id") id: String,
+        @Body pinRequest: PinRequest
+    ): PinResponse
+
+    /**
+     * Unpin
+     * Unpins a track for all users in the call.  Required permissions: - PinCallTrack
+     * Responses:
+     *  - 201: Successful response
+     *  - 400: Bad request
+     *  - 429: Too many requests
+     *
+     * @param type
+     * @param id
+     * @param unpinRequest
+     * @return [UnpinResponse]
+     */
+    @POST("/video/call/{type}/{id}/unpin")
+    suspend fun videoUnpin(
+        @Path("type") type: String,
+        @Path("id") id: String,
+        @Body unpinRequest: UnpinRequest
+    ): UnpinResponse
 
 }

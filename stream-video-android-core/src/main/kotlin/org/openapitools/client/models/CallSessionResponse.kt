@@ -45,6 +45,8 @@ import org.openapitools.client.infrastructure.Serializer
  * @param participantsCountByRole
  * @param rejectedBy
  * @param endedAt
+ * @param liveEndedAt
+ * @param liveStartedAt
  * @param startedAt
  */
 
@@ -68,6 +70,12 @@ data class CallSessionResponse (
 
     @Json(name = "ended_at")
     val endedAt: org.threeten.bp.OffsetDateTime? = null,
+
+    @Json(name = "live_ended_at")
+    val liveEndedAt: org.threeten.bp.OffsetDateTime? = null,
+
+    @Json(name = "live_started_at")
+    val liveStartedAt: org.threeten.bp.OffsetDateTime? = null,
 
     @Json(name = "started_at")
     val startedAt: org.threeten.bp.OffsetDateTime? = null

@@ -24,8 +24,6 @@ import io.getstream.log.StreamLog
 import io.getstream.log.android.AndroidStreamLogger
 import io.getstream.log.streamLog
 import io.getstream.video.android.core.dispatchers.DispatcherProvider
-import io.getstream.video.android.core.filter.AudioFilter
-import io.getstream.video.android.core.filter.VideoFilter
 import io.getstream.video.android.core.internal.module.ConnectionModule
 import io.getstream.video.android.core.logging.LoggingLevel
 import io.getstream.video.android.core.notifications.NotificationConfig
@@ -63,8 +61,6 @@ import java.util.UUID
  * @property loggingLevel Represents and wraps the HTTP logging level for our API service.
  * @property notificationConfig The configurations for handling push notification.
  * @property ringNotification Overwrite the default notification logic for incoming calls.
- * @property audioFilters Audio filters enable you to add custom effects to your audio before its send to the server.
- * @property videoFilters Video filters enable you to change the video before it's send.
  * @property connectionTimeoutInMs Connection timeout in seconds.
  * @property ensureSingleInstance Verify that only 1 version of the video client exists, prevents integration mistakes.
  * @property videoDomain URL overwrite to allow for testing against a local instance of video.
@@ -81,8 +77,6 @@ public class StreamVideoBuilder @JvmOverloads constructor(
     private val loggingLevel: LoggingLevel = LoggingLevel(),
     private val notificationConfig: NotificationConfig = NotificationConfig(),
     private val ringNotification: ((call: Call) -> Notification?)? = null,
-    private val audioFilters: List<AudioFilter> = emptyList(),
-    private val videoFilters: List<VideoFilter> = emptyList(),
     private val connectionTimeoutInMs: Long = 10000,
     private var ensureSingleInstance: Boolean = true,
     private val videoDomain: String = "video.stream-io-api.com",

@@ -19,6 +19,7 @@ package io.getstream.video.android.compose.ui.components.call.activecall
 import android.content.res.Configuration.ORIENTATION_LANDSCAPE
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
@@ -31,8 +32,12 @@ import androidx.compose.material.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalInspectionMode
@@ -52,6 +57,7 @@ import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.call.CallAppBar
 import io.getstream.video.android.compose.ui.components.call.controls.ControlActions
 import io.getstream.video.android.compose.ui.components.call.controls.actions.DefaultOnCallActionHandler
+import io.getstream.video.android.compose.ui.components.call.diagnostics.CallDiagnosticsContent
 import io.getstream.video.android.compose.ui.components.call.renderer.ParticipantVideo
 import io.getstream.video.android.compose.ui.components.call.renderer.ParticipantsGrid
 import io.getstream.video.android.compose.ui.components.call.renderer.RegularVideoRendererStyle
@@ -127,6 +133,7 @@ public fun CallContent(
     },
     enableInPictureInPicture: Boolean = true,
     pictureInPictureContent: @Composable (Call) -> Unit = { DefaultPictureInPictureContent(it) },
+    enableDiagnostics: Boolean = false,
 ) {
     val context = LocalContext.current
     val orientation = LocalConfiguration.current.orientation
@@ -179,11 +186,18 @@ public fun CallContent(
                     bottom = (it.calculateBottomPadding() - VideoTheme.dimens.controlActionsBottomPadding)
                         .coerceAtLeast(0.dp),
                 )
-
+                var showDiagnostics by remember { mutableStateOf(false) }
                 Row(
                     modifier = modifier
                         .background(color = VideoTheme.colors.appBackground)
-                        .padding(paddings),
+                        .padding(paddings)
+                        .pointerInput(Unit) {
+                            detectTapGestures(
+                                onDoubleTap = {
+                                    showDiagnostics = true
+                                },
+                            )
+                        },
                 ) {
                     videoContent.invoke(this, call)
 
@@ -194,6 +208,12 @@ public fun CallContent(
 
                 if (isShowingOverlayAppBar) {
                     appBarContent.invoke(call)
+                }
+
+                if (enableDiagnostics && showDiagnostics) {
+                    CallDiagnosticsContent(call = call) {
+                        showDiagnostics = false
+                    }
                 }
             },
         )

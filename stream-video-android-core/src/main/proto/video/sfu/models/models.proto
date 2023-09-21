@@ -7,7 +7,7 @@ import "google/protobuf/timestamp.proto";
 option go_package = "github.com/GetStream/protocol/protobuf/video/sfu/models";
 option java_multiple_files = true;
 option java_outer_classname = "SfuModelsV1";
-option csharp_namespace = "Stream.Video.v1.Sfu";
+option csharp_namespace = "Stream.Video.v1.Sfu.Models";
 
 enum PeerType {
   // todo fix me (marcelo)
@@ -50,6 +50,9 @@ message CallState {
   google.protobuf.Timestamp started_at = 2;
   // participant_count contains the summary of the counts.
   ParticipantCount participant_count = 3;
+  // the list of pins in the call.
+  // Pins are ordered in descending order (most important first).
+  repeated models.Pin pins = 4;
 }
 
 message ParticipantCount {
@@ -58,6 +61,13 @@ message ParticipantCount {
   uint32 total = 1;
   // Total number of anonymous participants in the call.
   uint32 anonymous = 2;
+}
+
+message Pin {
+  // the user to pin
+  string user_id = 1;
+  // the user sesion_id to pin, if not provided, applies to all sessions
+  string session_id = 2;
 }
 
 // those who are online in the call
@@ -148,10 +158,14 @@ enum ErrorCode {
   ERROR_CODE_PUBLISH_TRACKS_MISMATCH = 101;
   ERROR_CODE_PUBLISH_TRACK_OUT_OF_ORDER = 102;
   ERROR_CODE_PUBLISH_TRACK_VIDEO_LAYER_NOT_FOUND = 103;
+  ERROR_CODE_LIVE_ENDED = 104;
 
   ERROR_CODE_PARTICIPANT_NOT_FOUND = 200;
   ERROR_CODE_PARTICIPANT_MIGRATING_OUT = 201;
   ERROR_CODE_PARTICIPANT_MIGRATION_FAILED = 202;
+  ERROR_CODE_PARTICIPANT_MIGRATING = 203;
+  ERROR_CODE_PARTICIPANT_RECONNECT_FAILED = 204;
+  ERROR_CODE_PARTICIPANT_MEDIA_TRANSPORT_FAILURE = 205;
 
   ERROR_CODE_CALL_NOT_FOUND = 300;
 
@@ -163,6 +177,8 @@ enum ErrorCode {
   ERROR_CODE_INTERNAL_SERVER_ERROR = 500;
 
   ERROR_CODE_SFU_SHUTTING_DOWN = 600;
+
+  ERROR_CODE_SFU_FULL = 700;
 }
 
 message Error {
@@ -186,6 +202,7 @@ enum SdkType {
   SDK_TYPE_IOS = 4;
   SDK_TYPE_FLUTTER = 5;
   SDK_TYPE_REACT_NATIVE = 6;
+  SDK_TYPE_UNITY = 7;
 }
 
 message Sdk {

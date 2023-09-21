@@ -26,6 +26,7 @@ import io.getstream.result.Result.Failure
 import io.getstream.result.Result.Success
 import io.getstream.video.android.core.call.RtcSession
 import io.getstream.video.android.core.call.utils.SoundInputProcessor
+import io.getstream.video.android.core.call.video.VideoFilter
 import io.getstream.video.android.core.events.VideoEventListener
 import io.getstream.video.android.core.internal.InternalStreamVideoApi
 import io.getstream.video.android.core.model.MuteUsersData
@@ -42,9 +43,11 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import org.openapitools.client.models.AcceptCallResponse
 import org.openapitools.client.models.AudioSettings
@@ -124,7 +127,23 @@ public class Call(
     /** The cid is type:id */
     val cid = "$type:$id"
 
-    val monitor = CallHealthMonitor(this, scope)
+    /**
+     * Set a custom [VideoFilter] that will be applied to the video stream coming from your device.
+     */
+    var videoFilter: VideoFilter? = null
+
+    /**
+     * Called by the [CallHealthMonitor] when the ICE restarts failed after
+     * several retries. At this point we can do a full reconnect.
+     */
+    private val onIceRecoveryFailed = {
+        scope.launch {
+            handleSignalChannelDisconnect(false)
+        }
+        Unit
+    }
+
+    val monitor = CallHealthMonitor(this, scope, onIceRecoveryFailed)
 
     private val soundInputProcessor = SoundInputProcessor(thresholdCrossedCallback = {
         if (!microphone.isEnabled.value) {
@@ -143,6 +162,12 @@ public class Call(
      * Note: Doesn't return any values until the session is established!
      */
     val localMicrophoneAudioLevel: StateFlow<Float> = audioLevelOutputHelper.currentLevel
+
+    /**
+     * Contains stats events for observation.
+     */
+    @InternalStreamVideoApi
+    val statsReport: MutableStateFlow<CallStatsReport?> = MutableStateFlow(null)
 
     /**
      * Time (in millis) when the full reconnection flow started. Will be null again once
@@ -341,17 +366,19 @@ public class Call(
         val iceServers = result.value.credentials.iceServers.map { it.toIceServer() }
         timer.split("join request completed")
 
-        session = if (testInstanceProvider.rtcSessionCreator != null) {
-            testInstanceProvider.rtcSessionCreator!!.invoke()
-        } else {
-            RtcSession(
-                client = client,
-                call = this,
-                sfuUrl = sfuUrl,
-                sfuToken = sfuToken,
-                connectionModule = (client as StreamVideoImpl).connectionModule,
-                remoteIceServers = iceServers,
-            )
+        if (session == null) {
+            session = if (testInstanceProvider.rtcSessionCreator != null) {
+                testInstanceProvider.rtcSessionCreator!!.invoke()
+            } else {
+                RtcSession(
+                    client = client,
+                    call = this,
+                    sfuUrl = sfuUrl,
+                    sfuToken = sfuToken,
+                    connectionModule = (client as StreamVideoImpl).connectionModule,
+                    remoteIceServers = iceServers,
+                )
+            }
         }
 
         session?.let {
@@ -380,19 +407,18 @@ public class Call(
             // wait a bit before we capture stats
             delay(statsGatheringInterval)
 
-            while (true) {
+            while (isActive) {
                 delay(statsGatheringInterval)
 
-                session?.publisher?.let {
-                    val stats = it.getStats().value
-                    state.stats.updateFromRTCStats(stats, isPublisher = true)
-                }
-                session?.subscriber?.let {
-                    val stats = it.getStats().value
-                    state.stats.updateFromRTCStats(stats, isPublisher = false)
-                }
-
+                val publisherStats = session?.publisher?.getStats()
+                val subscriberStats = session?.subscriber?.getStats()
+                state.stats.updateFromRTCStats(publisherStats, isPublisher = true)
+                state.stats.updateFromRTCStats(subscriberStats, isPublisher = false)
                 state.stats.updateLocalStats()
+                statsReport.value = CallStatsReport(
+                    publisher = publisherStats,
+                    subscriber = subscriberStats,
+                )
             }
         }
 
@@ -402,7 +428,9 @@ public class Call(
         scope.launch {
             session?.let {
                 it.sfuConnectionModule.sfuSocket.connectionState.collect { sfuSocketState ->
-                    handleSignalChannelDisconnect(isRetry = false)
+                    if (sfuSocketState is SocketState.DisconnectedPermanently) {
+                        handleSignalChannelDisconnect(isRetry = false)
+                    }
                 }
             }
         }
@@ -413,50 +441,45 @@ public class Call(
     }
 
     private suspend fun handleSignalChannelDisconnect(isRetry: Boolean) {
-        val sfuSocketState = session?.sfuConnectionModule?.sfuSocket?.connectionState?.value
+        // Prevent multiple starts of the reconnect flow. For the start call
+        // first check if sfuSocketReconnectionTime isn't already set - if yes
+        // then we are already doing a full reconnect
+        if (!isRetry && sfuSocketReconnectionTime != null) {
+            logger.d { "[handleSignalChannelDisconnect] Already doing a full reconnect cycle - ignoring call" }
+            return
+        }
 
-        // If SFU signalling connection went down then we start a full call reconnect loop.
-        // The SFU socket state can be null on subsequent tries because the existing
-        // session was cleaned up.
-        if (isRetry || sfuSocketState is SocketState.DisconnectedTemporarily) {
-            val connectionState = state._connection.value
-            if (!isRetry && (
-                    connectionState == RealtimeConnection.Reconnecting ||
-                        connectionState == RealtimeConnection.InProgress
-                    )
+        if (!isRetry) {
+            state._connection.value = RealtimeConnection.Reconnecting
+
+            if (sfuSocketReconnectionTime == null) {
+                sfuSocketReconnectionTime = System.currentTimeMillis()
+            }
+
+            // We were not able to restore the SFU peer connection in time
+            if (System.currentTimeMillis() - (
+                    sfuSocketReconnectionTime
+                        ?: System.currentTimeMillis()
+                    ) > sfuReconnectTimeoutMillis
             ) {
-                logger.d {
-                    "[handleSignalChannelDisconnect] skipping full reconnect (connectionState: $connectionState)"
-                }
+                leave(Error("Failed to do a full reconnect - connection issue?"))
                 return
+            }
+
+            // Clean up the existing RtcSession
+            session?.cleanup()
+            session = null
+
+            // Wait a little for clean-up
+            delay(250)
+
+            // Re-join the call
+            val result = _join()
+            if (result.isFailure) {
+                // keep trying until timeout
+                handleSignalChannelDisconnect(isRetry = true)
             } else {
-                state._connection.value = RealtimeConnection.Reconnecting
-
-                if (sfuSocketReconnectionTime == null) {
-                    sfuSocketReconnectionTime = System.currentTimeMillis()
-                }
-
-                // We were not able to restore the SFU peer connection in time
-                if (System.currentTimeMillis() - (sfuSocketReconnectionTime ?: System.currentTimeMillis()) > sfuReconnectTimeoutMillis) {
-                    leave(Error("Failed to do a full reconnect - connection issue?"))
-                    return
-                }
-
-                // Clean up the existing RtcSession
-                session?.cleanup()
-                session = null
-
-                // Wait a little for clean-up
-                delay(250)
-
-                // Re-join the call
-                val result = _join()
-                if (result.isFailure) {
-                    // keep trying until timeout
-                    handleSignalChannelDisconnect(isRetry = true)
-                } else {
-                    sfuSocketReconnectionTime = null
-                }
+                sfuSocketReconnectionTime = null
             }
         }
     }
@@ -480,7 +503,7 @@ public class Call(
         }
     }
 
-    suspend fun reconnectOrSwitchSfu() {
+    suspend fun reconnectOrSwitchSfu(forceRestart: Boolean) {
         // mark us as reconnecting
         val connectionState = state._connection.value
 
@@ -493,7 +516,7 @@ public class Call(
 
         if (online) {
             // start by restarting ice connections
-            session?.reconnect()
+            session?.reconnect(forceRestart = forceRestart)
 
             // ask the coordinator if we should switch
             // TODO: disabled since switching SFUs isn't 100% stable yet server side
@@ -636,8 +659,18 @@ public class Call(
         )
     }
 
-    suspend fun goLive(): Result<GoLiveResponse> {
-        val result = clientImpl.goLive(type, id)
+    suspend fun goLive(
+        startHls: Boolean = false,
+        startRecording: Boolean = false,
+        startTranscription: Boolean = false,
+    ): Result<GoLiveResponse> {
+        val result = clientImpl.goLive(
+            type,
+            id,
+            startHls = startHls,
+            startRecording = startRecording,
+            startTranscription = startTranscription,
+        )
         result.onSuccess { state.updateFromResponse(it) }
 
         return result

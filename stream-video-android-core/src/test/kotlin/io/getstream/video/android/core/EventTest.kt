@@ -18,6 +18,7 @@ package io.getstream.video.android.core
 
 import com.google.common.truth.Truth.assertThat
 import io.getstream.video.android.core.base.IntegrationTestBase
+import io.getstream.video.android.core.base.toResponse
 import io.getstream.video.android.core.events.AudioLevelChangedEvent
 import io.getstream.video.android.core.events.ConnectionQualityChangeEvent
 import io.getstream.video.android.core.events.DominantSpeakerChangedEvent
@@ -177,11 +178,13 @@ class EventTest : IntegrationTestBase(connectCoordinatorWS = false) {
     @Test
     fun `Call Ended`() = runTest {
         val call = client.call("default", randomUUID())
+        val userResponse = testData.users["thierry"]!!.toUserResponse()
         val event = CallEndedEvent(
+            call = call.toResponse(userResponse),
+            createdAt = nowUtc,
             callCid = call.cid,
-            nowUtc,
-            "call.ended",
-            user = testData.users["thierry"]!!.toUserResponse(),
+            type = "call.ended",
+            user = userResponse,
         )
 
         clientImpl.fireEvent(event)

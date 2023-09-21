@@ -136,6 +136,9 @@ dependencies {
 
     implementation(libs.audioswitch)
 
+    // video filter dependencies
+    implementation (libs.libyuv)
+
     // androidx
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime)

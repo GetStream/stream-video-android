@@ -391,14 +391,12 @@ class AndroidDeviceTest : IntegrationTestBase(connectCoordinatorWS = false) {
         // verify the stats are being tracked
         val session = call.session
         assertThat(session!!).isNotNull()
-        val reportState =
-            call.session?.publisher?.getStats()?.testIn(backgroundScope, timeout = 20.seconds)
-        val report = reportState?.awaitItem()
+        val report = call.session?.publisher?.getStats()
         assertThat(report).isNotNull()
 
         // verify we are sending data to the SFU
         // it is RTCOutboundRtpStreamStats && it.bytesSent > 0
-        val allStats = report?.statsMap?.values
+        val allStats = report?.origin?.statsMap?.values
         val networkOut = allStats?.filter { it.type == "outbound-rtp" }?.map { it as RTCStats }
         val localSdp = call.session?.publisher?.localSdp
         val remoteSdp = call.session?.publisher?.remoteSdp
@@ -460,14 +458,12 @@ class AndroidDeviceTest : IntegrationTestBase(connectCoordinatorWS = false) {
         // verify the stats are being tracked
         val session = call.session
         assertThat(session!!).isNotNull()
-        val reportState =
-            call.session?.publisher?.getStats()?.testIn(backgroundScope, timeout = 20.seconds)
-        val report = reportState?.awaitItem()
+        val report = call.session?.publisher?.getStats()
         assertThat(report).isNotNull()
 
         // verify we are sending data to the SFU
         // it is RTCOutboundRtpStreamStats && it.bytesSent > 0
-        val allStats = report?.statsMap?.values
+        val allStats = report?.origin?.statsMap?.values
         val networkOut = allStats?.filter { it.type == "inbound-rtp" }?.map { it as RTCStats }
 
         // log debug info

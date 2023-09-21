@@ -39,6 +39,13 @@ If you're interested in customizing the UI components for the Video SDK, check o
 <img src="https://github.com/GetStream/stream-video-android/assets/24237865/3cc08121-c8c8-4b71-8a96-0cf33b9f2c68" width="32%"/>
 </p>
 
+## 👔 Sample Projects
+
+You can find sample projects below that demonstrates use cases of Stream Video SDK for Android:
+
+- [Dogfooding](https://github.com/GetStream/stream-video-android/tree/develop/dogfooding): Dogfooding demonstrates Stream Video SDK for Android with modern Android tech stacks, such as Compose, Hilt, and Coroutines.
+- [Meeting Room Compose](https://github.com/GetStream/meeting-room-compose): A real-time meeting room app built with Jetpack Compose to demonstrate video communications.
+
 ## 👩‍💻 Free for Makers 👨‍💻
 
 Stream is free for most side and hobby projects. To qualify, your project/company needs to have < 5 team members and < $10k in monthly revenue. Makers get $100 in monthly credit for video for free.
@@ -116,6 +123,9 @@ Video roadmap and changelog is available [here](https://github.com/GetStream/pro
 ### 0.4.0 milestone
 
 - [X] Screensharing from mobile
+- [ ] Implement Chat overlay for Dogfooding
+- [ ] Add Dogfooding instructions + directs Google Play
+- [ ] Reaction dialog API for Compose
 - [ ] Complete Livestreaming APIs and Tutorials for hosting & watching
 - [ ] Android SDK development.md cleanup (Daniel)
 - [ ] Upgrade to more recent versions of webrtc (Kanat)

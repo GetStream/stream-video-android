@@ -12,7 +12,7 @@ jvmTarget = "11"
 
 androidxMaterial = "1.9.0"
 androidxAppCompat = "1.6.1"
-androidxCore = "1.12.0-rc01"
+androidxCore = "1.12.0"
 androidxAnnotation = "1.6.0"
 androidxLifecycle = "2.6.1"
 androidxStartup = "1.1.1"
@@ -20,7 +20,7 @@ androidxActivity = "1.7.2"
 androidxDataStore = "1.0.0"
 googleService = "4.3.14"
 
-androidxComposeBom = "2023.08.00"
+androidxComposeBom = "2023.09.00"
 androidxComposeCompiler = "1.5.3"
 androidxComposeTracing = "1.0.0-alpha03"
 androidxHiltNavigation = "1.0.0"
@@ -32,6 +32,7 @@ landscapist = "2.2.8"
 accompanist = "0.30.1"
 telephoto = "0.3.0"
 audioswitch = "1.1.8"
+libyuv = "0.28.0"
 
 wire = "4.7.0"
 okhttp = "4.11.0"
@@ -119,6 +120,8 @@ accompanist-permission = { group = "com.google.accompanist", name = "accompanist
 telephoto = { group = "me.saket.telephoto", name = "zoomable", version.ref = "telephoto"  }
 
 audioswitch = { group = "com.twilio", name = "audioswitch", version.ref = "audioswitch"}
+
+libyuv = { group = "io.github.crow-misia.libyuv", name = "libyuv-android", version.ref = "libyuv"}
 
 wire-runtime = { group = "com.squareup.wire", name = "wire-runtime", version.ref = "wire" }
 retrofit = { group = "com.squareup.retrofit2", name = "retrofit", version.ref = "retrofit" }

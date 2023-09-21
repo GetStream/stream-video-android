@@ -142,6 +142,7 @@ internal class ConnectionModule(
         sessionId: String,
         sfuToken: String,
         getSubscriberSdp: suspend () -> String,
+        onFastReconnect: () -> Unit,
     ): SfuConnectionModule {
         return SfuConnectionModule(
             sfuUrl = sfuUrl,
@@ -152,6 +153,7 @@ internal class ConnectionModule(
             scope = scope,
             networkStateProvider = networkStateProvider,
             loggingLevel = loggingLevel,
+            onFastReconnect = onFastReconnect,
         )
     }
 
@@ -186,6 +188,7 @@ internal class SfuConnectionModule(
     scope: CoroutineScope = CoroutineScope(DispatcherProvider.IO),
     /** Network monitoring */
     networkStateProvider: NetworkStateProvider,
+    onFastReconnect: () -> Unit,
 ) {
     internal var sfuSocket: SfuSocket
     private val updatedSignalUrl = sfuUrl.removeSuffix(suffix = "/twirp")
@@ -233,6 +236,7 @@ internal class SfuConnectionModule(
             scope,
             okHttpClient,
             networkStateProvider,
+            onFastReconnected = onFastReconnect,
         )
     }
 }
