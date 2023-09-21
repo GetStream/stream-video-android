@@ -327,6 +327,15 @@ public class RtcSession internal constructor(
         clientImpl.peerConnectionFactory.setAudioSampleCallback { it ->
             call.processAudioSample(it)
         }
+
+        clientImpl.peerConnectionFactory.setAudioRecordDataCallback { audioFormat, channelCount, sampleRate, sampleData ->
+            call.audioFilter?.filter(
+                audioFormat = audioFormat,
+                channelCount = channelCount,
+                sampleRate = sampleRate,
+                sampleData = sampleData,
+            )
+        }
     }
 
     private fun listenToSocket() {

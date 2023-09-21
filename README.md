@@ -124,9 +124,9 @@ Video roadmap and changelog is available [here](https://github.com/GetStream/pro
 
 - [X] Screensharing from mobile
 - [X] Picture of the video stream at the highest resolution + docs on how to add a button for this (Daniel)
+- [X] Audio & Video filters. Support  (Daniel)
 - [ ] Default livestream player UI + docs (Jaewoong/ Daniel)
 - [ ] Implement Chat overlay for Dogfooding (Jaewoong)
-- [ ] Audio & Video filters. Support  (Daniel)
 - [ ] Add Dogfooding instructions + directs Google Play (Jaewoong)
 - [ ] Reaction dialog API for Compose (Jaewoong)
 - [ ] Android SDK development.md cleanup (Daniel)

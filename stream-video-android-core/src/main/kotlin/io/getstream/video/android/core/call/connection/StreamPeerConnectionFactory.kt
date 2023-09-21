@@ -39,6 +39,7 @@ import org.webrtc.VideoSource
 import org.webrtc.VideoTrack
 import org.webrtc.audio.JavaAudioDeviceModule
 import org.webrtc.audio.JavaAudioDeviceModule.AudioSamples
+import java.nio.ByteBuffer
 
 /**
  * Builds a factory that provides [PeerConnection]s when requested.
@@ -51,6 +52,9 @@ public class StreamPeerConnectionFactory(private val context: Context) {
     private val audioLogger by taggedLogger("Call:AudioTrackCallback")
 
     private var audioSampleCallback: ((AudioSamples) -> Unit)? = null
+    private var audioRecordDataCallback: (
+        (audioFormat: Int, channelCount: Int, sampleRate: Int, sampleData: ByteBuffer) -> Unit
+    )? = null
 
     /**
      * Set to get callbacks when audio input from microphone is received.
@@ -59,6 +63,22 @@ public class StreamPeerConnectionFactory(private val context: Context) {
      */
     public fun setAudioSampleCallback(callback: (AudioSamples) -> Unit) {
         audioSampleCallback = callback
+    }
+
+    /**
+     * Set to get callbacks when audio input from microphone is received.
+     * This can be example used to detect whether a person is speaking
+     * while muted.
+     */
+    public fun setAudioRecordDataCallback(
+        callback: (
+            audioFormat: Int,
+            channelCount: Int,
+            sampleRate: Int,
+            sampleData: ByteBuffer,
+        ) -> Unit,
+    ) {
+        audioRecordDataCallback = callback
     }
 
     /**
@@ -186,6 +206,14 @@ public class StreamPeerConnectionFactory(private val context: Context) {
                     })
                     .setSamplesReadyCallback {
                         audioSampleCallback?.invoke(it)
+                    }
+                    .setAudioRecordDataCallback { audioFormat, channelCount, sampleRate, audioBuffer ->
+                        audioRecordDataCallback?.invoke(
+                            audioFormat,
+                            channelCount,
+                            sampleRate,
+                            audioBuffer,
+                        )
                     }
                     .createAudioDeviceModule().also {
                         it.setMicrophoneMute(false)
