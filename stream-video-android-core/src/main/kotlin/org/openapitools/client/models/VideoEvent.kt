@@ -38,6 +38,9 @@ import org.openapitools.client.models.CallMemberUpdatedPermissionEvent
 import org.openapitools.client.models.CallNotificationEvent
 import org.openapitools.client.models.CallParticipantResponse
 import org.openapitools.client.models.CallReactionEvent
+import org.openapitools.client.models.CallRecording
+import org.openapitools.client.models.CallRecordingFailedEvent
+import org.openapitools.client.models.CallRecordingReadyEvent
 import org.openapitools.client.models.CallRecordingStartedEvent
 import org.openapitools.client.models.CallRecordingStoppedEvent
 import org.openapitools.client.models.CallRejectedEvent
@@ -48,6 +51,7 @@ import org.openapitools.client.models.CallSessionParticipantJoinedEvent
 import org.openapitools.client.models.CallSessionParticipantLeftEvent
 import org.openapitools.client.models.CallSessionStartedEvent
 import org.openapitools.client.models.CallUpdatedEvent
+import org.openapitools.client.models.CallUserMuted
 import org.openapitools.client.models.ConnectedEvent
 import org.openapitools.client.models.ConnectionErrorEvent
 import org.openapitools.client.models.CustomVideoEvent
@@ -128,6 +132,8 @@ class VideoEventAdapter : JsonAdapter<VideoEvent>() {
             "call.permission_request" -> PermissionRequestEvent::class.java
             "call.permissions_updated" -> UpdatedCallPermissionsEvent::class.java
             "call.reaction_new" -> CallReactionEvent::class.java
+            "call.recording_failed" -> CallRecordingFailedEvent::class.java
+            "call.recording_ready" -> CallRecordingReadyEvent::class.java
             "call.recording_started" -> CallRecordingStartedEvent::class.java
             "call.recording_stopped" -> CallRecordingStoppedEvent::class.java
             "call.rejected" -> CallRejectedEvent::class.java
@@ -138,6 +144,7 @@ class VideoEventAdapter : JsonAdapter<VideoEvent>() {
             "call.session_started" -> CallSessionStartedEvent::class.java
             "call.unblocked_user" -> UnblockedUserEvent::class.java
             "call.updated" -> CallUpdatedEvent::class.java
+            "call.user_muted" -> CallUserMuted::class.java
             "connection.error" -> ConnectionErrorEvent::class.java
             "connection.ok" -> ConnectedEvent::class.java
             "custom" -> CustomVideoEvent::class.java
