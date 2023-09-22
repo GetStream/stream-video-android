@@ -123,6 +123,7 @@ Video roadmap and changelog is available [here](https://github.com/GetStream/pro
 ### 0.4.0 milestone
 
 - [X] Screensharing from mobile
+- [X] Picture of the video stream at the highest resolution + docs on how to add a button for this (Daniel)
 - [ ] Default livestream player UI + docs (Jaewoong/ Daniel)
 - [ ] Implement Chat overlay for Dogfooding (Jaewoong)
 - [ ] Audio & Video filters. Support  (Daniel)
@@ -130,7 +131,6 @@ Video roadmap and changelog is available [here](https://github.com/GetStream/pro
 - [ ] Reaction dialog API for Compose (Jaewoong)
 - [ ] Android SDK development.md cleanup (Daniel)
 - [ ] Upgrade to more recent versions of webrtc (Kanat)
-- [ ] Picture of the video stream at the highest resolution + docs on how to add a button for this (Daniel)
 - [ ] Review foreground service vs backend for audio rooms etc. (Daniel)
 - [ ] Support participant.custom field which was previously ignored. ParticipantState line 216 (Daniel)
 - [ ] Logging is too verbose (rtc is very noisy), clean it up to focus on the essential for info and higher (Daniel)
