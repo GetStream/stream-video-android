@@ -46,10 +46,13 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Popup
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.core.Call
+import io.getstream.video.android.core.call.audio.AudioFilter
 import io.getstream.video.android.core.call.video.BitmapVideoFilter
 import io.getstream.video.android.ui.common.R
+import io.getstream.video.android.util.SampleAudioFilter
 import io.getstream.video.android.util.SampleVideoFilter
 import kotlinx.coroutines.launch
+import java.nio.ByteBuffer
 
 @Composable
 internal fun SettingsMenu(
@@ -76,7 +79,9 @@ internal fun SettingsMenu(
     val isScreenSharing by call.screenShare.isEnabled.collectAsState()
     val screenShareButtonText = if (isScreenSharing) {
         "Stop screen-sharing"
-    } else { "Start screen-sharing" }
+    } else {
+        "Start screen-sharing"
+    }
 
     Popup(
         alignment = Alignment.BottomStart,
@@ -147,35 +152,76 @@ internal fun SettingsMenu(
 
                 Spacer(modifier = Modifier.height(12.dp))
 
-                Row(
-                    modifier = Modifier.clickable {
-                        if (call.videoFilter == null) {
-                            call.videoFilter = object : BitmapVideoFilter() {
-                                override fun filter(bitmap: Bitmap) {
-                                    SampleVideoFilter.toGrayscale(bitmap)
-                                }
-                            }
-                        } else {
-                            call.videoFilter = null
-                        }
-                    },
-                ) {
-                    Icon(
-                        painter = painterResource(id = R.drawable.stream_video_ic_fullscreen_exit),
-                        tint = VideoTheme.colors.textHighEmphasis,
-                        contentDescription = null,
-                    )
-
-                    Text(
-                        modifier = Modifier.padding(start = 20.dp),
-                        text = "Toggle video filter",
-                        color = VideoTheme.colors.textHighEmphasis,
-                    )
-                }
-
-                Spacer(modifier = Modifier.height(12.dp))
-
                 if (showDebugOptions) {
+                    Row(
+                        modifier = Modifier.clickable {
+                            if (call.videoFilter == null) {
+                                call.videoFilter = object : BitmapVideoFilter() {
+                                    override fun filter(bitmap: Bitmap) {
+                                        SampleVideoFilter.toGrayscale(bitmap)
+                                    }
+                                }
+                            } else {
+                                call.videoFilter = null
+                            }
+                        },
+                    ) {
+                        Icon(
+                            painter = painterResource(
+                                id = R.drawable.stream_video_ic_fullscreen_exit,
+                            ),
+                            tint = VideoTheme.colors.textHighEmphasis,
+                            contentDescription = null,
+                        )
+
+                        Text(
+                            modifier = Modifier.padding(start = 20.dp),
+                            text = "Toggle video filter",
+                            color = VideoTheme.colors.textHighEmphasis,
+                        )
+                    }
+
+                    Spacer(modifier = Modifier.height(12.dp))
+
+                    Row(
+                        modifier = Modifier.clickable {
+                            if (call.audioFilter == null) {
+                                call.audioFilter = object : AudioFilter {
+                                    override fun filter(
+                                        audioFormat: Int,
+                                        channelCount: Int,
+                                        sampleRate: Int,
+                                        sampleData: ByteBuffer,
+                                    ) {
+                                        SampleAudioFilter.toRoboticVoice(
+                                            sampleData,
+                                            channelCount,
+                                            0.8f,
+                                        )
+                                    }
+                                }
+                            } else {
+                                call.audioFilter = null
+                            }
+                        },
+                    ) {
+                        Icon(
+                            painter = painterResource(
+                                id = R.drawable.stream_video_ic_fullscreen_exit,
+                            ),
+                            tint = VideoTheme.colors.textHighEmphasis,
+                            contentDescription = null,
+                        )
+
+                        Text(
+                            modifier = Modifier.padding(start = 20.dp),
+                            text = "Toggle audio filter",
+                            color = VideoTheme.colors.textHighEmphasis,
+                        )
+                    }
+
+                    Spacer(modifier = Modifier.height(12.dp))
+
                     Row(
                         modifier = Modifier.clickable {
                             call.debug.restartSubscriberIce()
