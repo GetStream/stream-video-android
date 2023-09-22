@@ -23,9 +23,6 @@
 
 package org.openapitools.client.models
 
-import org.openapitools.client.models.CallResponse
-import org.openapitools.client.models.MemberResponse
-import org.openapitools.client.models.OwnCapability
 
 
 
@@ -39,35 +36,41 @@ import com.squareup.moshi.ToJson
 import org.openapitools.client.infrastructure.Serializer
 
 /**
+ * This event is sent when a call member is muted
  *
- *
- * @param call
- * @param created
- * @param duration
- * @param members
- * @param ownCapabilities
- * @param membership
+ * @param callCid
+ * @param createdAt
+ * @param fromUserId
+ * @param mutedUserIds
+ * @param type The type of event: \"call.user_muted\" in this case
  */
 
 
-data class GetOrCreateCallResponse (
+data class CallUserMuted (
 
-    @Json(name = "call")
-    val call: CallResponse,
+    @Json(name = "call_cid")
+    val callCid: kotlin.String,
 
-    @Json(name = "created")
-    val created: kotlin.Boolean,
+    @Json(name = "created_at")
+    val createdAt: org.threeten.bp.OffsetDateTime,
 
-    @Json(name = "duration")
-    val duration: kotlin.String,
+    @Json(name = "from_user_id")
+    val fromUserId: kotlin.String,
 
-    @Json(name = "members")
-    val members: kotlin.collections.List<MemberResponse>,
+    @Json(name = "muted_user_ids")
+    val mutedUserIds: kotlin.collections.List<kotlin.String>,
 
-    @Json(name = "own_capabilities")
-    val ownCapabilities: kotlin.collections.List<OwnCapability>,
+    /* The type of event: \"call.user_muted\" in this case */
+    @Json(name = "type")
+    val type: kotlin.String = "call.user_muted"
 
-    @Json(name = "membership")
-    val membership: MemberResponse? = null
+) : VideoEvent(), WSCallEvent {
 
-)
+    override fun getCallCID(): String {
+        return callCid
+    }
+
+    override fun getEventType(): String {
+        return type
+    }
+}

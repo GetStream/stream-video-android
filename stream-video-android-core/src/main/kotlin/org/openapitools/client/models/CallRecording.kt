@@ -36,7 +36,7 @@ import com.squareup.moshi.ToJson
 import org.openapitools.client.infrastructure.Serializer
 
 /**
- *
+ * CallRecording represents a recording of a call.
  *
  * @param endTime
  * @param filename
