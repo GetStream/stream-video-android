@@ -123,29 +123,29 @@ Video roadmap and changelog is available [here](https://github.com/GetStream/pro
 ### 0.4.0 milestone
 
 - [X] Screensharing from mobile
-- [ ] Implement Chat overlay for Dogfooding
-- [ ] Add Dogfooding instructions + directs Google Play
-- [ ] Reaction dialog API for Compose
-- [ ] Complete Livestreaming APIs and Tutorials for hosting & watching
+- [ ] Default livestream player UI + docs (Jaewoong/ Daniel)
+- [ ] Implement Chat overlay for Dogfooding (Jaewoong)
+- [ ] Audio & Video filters. Support  (Daniel)
+- [ ] Add Dogfooding instructions + directs Google Play (Jaewoong)
+- [ ] Reaction dialog API for Compose (Jaewoong)
 - [ ] Android SDK development.md cleanup (Daniel)
 - [ ] Upgrade to more recent versions of webrtc (Kanat)
-- [ ] Picture of the video stream at highest resolution
-- [ ] Review foreground service vs backend for some things like screensharing etc
-- [ ] Audio & Video filters. Support  (Daniel)
-- [ ] Dynascale 2.0
-- [ ] Support participant.custom field which was previously ignored. ParticipantState line 216
-- [ ] Call Analytics stateflow (Thierry)
-- [ ] Test coverage
-- [ ] Logging is too verbose (rtc is very noisy), clean it up to focus on the essential for info and higher
+- [ ] Picture of the video stream at the highest resolution + docs on how to add a button for this (Daniel)
+- [ ] Review foreground service vs backend for audio rooms etc. (Daniel)
+- [ ] Support participant.custom field which was previously ignored. ParticipantState line 216 (Daniel)
+- [ ] Logging is too verbose (rtc is very noisy), clean it up to focus on the essential for info and higher (Daniel)
 
 ### 0.5.0 milestone
 
-- [ ] Testing on more devices
 - [ ] Enable SFU switching
+- [ ] H264 workaround on Samsung 23? (see https://github.com/livekit/client-sdk-android/blob/main/livekit-android-sdk/src/main/java/io/livekit/android/webrtc/SimulcastVideoEncoderFactoryWrapper.kt#L34 and
+- https://github.com/react-native-webrtc/react-native-webrtc/issues/983#issuecomment-975624906)
+- [ ] Test coverage
+- [ ] Dynascale 2.0 (depending backend support)
+- [ ] Testing on more devices
 - [ ] Camera controls
 - [ ] Tap to focus
-- [ ] H264 workaround on Samsung 23 (see https://github.com/livekit/client-sdk-android/blob/main/livekit-android-sdk/src/main/java/io/livekit/android/webrtc/SimulcastVideoEncoderFactoryWrapper.kt#L34 and
-- https://github.com/react-native-webrtc/react-native-webrtc/issues/983#issuecomment-975624906)
+
 
 ### Dynascale 2.0
 
