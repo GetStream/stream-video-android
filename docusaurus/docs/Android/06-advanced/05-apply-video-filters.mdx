@@ -11,7 +11,7 @@ How does this work? You can inject a filter through `Call.videoFilter`, you will
 
 ## Adding a Video Filter
 
-Create a `BitmapVideoFilter` or `RawVideoFilter` instance in your project. Here is how the abstract classes look like:
+Create a `BitmapVideoFilter` or `RawVideoFilter` instance in your project. Here is how the abstract classes are defined:
 
 ```kotlin
 abstract class BitmapVideoFilter : VideoFilter() {
@@ -131,4 +131,65 @@ The result:
 
 ## Audio Filters
 
-TODO
+The StreamVideo SDK also supports custom audio processing of the local track. This opens up possibilities for custom echo filtering, voice changing or other audio effects.
+
+If you want to have custom audio processing, you need to provide your own implementation of the `AudioFilter` interface to `Call.audioFilter`.
+
+The `AudioFilter` is defined like this:
+
+```kotlin
+interface AudioFilter {
+    /**
+     * Invoked after an audio sample is recorded. Can be used to manipulate
+     * the ByteBuffer before it's fed into WebRTC. Currently the audio in the
+     * ByteBuffer is always PCM 16bit and the buffer sample size is ~10ms.
+     *
+     * @param audioFormat format in android.media.AudioFormat
+     */
+    fun filter(audioFormat: Int, channelCount: Int, sampleRate: Int, sampleData: ByteBuffer)
+}
+```
+
+In the following example, we will build a simple audio filter that gives the user's voice a robotic touch.
+
+```kotlin
+// We assume that you already have a call instance (call is started)
+// Create a simple filter (pitch modification) and assign it to the call
+
+call.audioFilter = object: AudioFilter {
+
+    override fun filter(audioFormat: Int, channelCount: Int, sampleRate: Int, sampleData: ByteBuffer) {
+        // You can modify the pitch factor to achieve a bit different effect
+        val pitchShiftFactor = 0.8f
+        val inputBuffer = audioBuffer.duplicate()
+        inputBuffer.order(ByteOrder.LITTLE_ENDIAN) // Set byte order for correct handling of PCM data
+
+        val numSamples = inputBuffer.remaining() / 2 // Assuming 16-bit PCM audio
+
+        val outputBuffer = ByteBuffer.allocate(inputBuffer.capacity())
+        outputBuffer.order(ByteOrder.LITTLE_ENDIAN)
+
+        for (channel in 0 until numChannels) {
+            val channelBuffer = ShortArray(numSamples)
+            inputBuffer.asShortBuffer().get(channelBuffer)
+
+            for (i in 0 until numSamples) {
+                val originalIndex = (i * pitchShiftFactor).toInt()
+
+                if (originalIndex >= 0 && originalIndex < numSamples) {
+                    outputBuffer.putShort(channelBuffer[originalIndex])
+                } else {
+                    // Fill with silence if the index is out of bounds
+                    outputBuffer.putShort(0)
+                }
+            }
+        }
+
+        outputBuffer.flip()
+        audioBuffer.clear()
+        audioBuffer.put(outputBuffer)
+        audioBuffer.flip()
+    }
+}
+```
+This is a simple algorithm that just does shifting of the indexes. For a more complex one, you can also use some voice processing library. The important part is that you update the `channelBuffer` with the filtered values.

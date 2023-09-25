@@ -23,9 +23,7 @@
 
 package org.openapitools.client.models
 
-import org.openapitools.client.models.CallResponse
-import org.openapitools.client.models.MemberResponse
-import org.openapitools.client.models.OwnCapability
+import org.openapitools.client.models.CallRecording
 
 
 
@@ -39,35 +37,37 @@ import com.squareup.moshi.ToJson
 import org.openapitools.client.infrastructure.Serializer
 
 /**
+ * This event is sent when call recording is ready
  *
- *
- * @param call
- * @param created
- * @param duration
- * @param members
- * @param ownCapabilities
- * @param membership
+ * @param callCid
+ * @param callRecording
+ * @param createdAt
+ * @param type The type of event: \"call.recording_ready\" in this case
  */
 
 
-data class GetOrCreateCallResponse (
+data class CallRecordingReadyEvent (
 
-    @Json(name = "call")
-    val call: CallResponse,
+    @Json(name = "call_cid")
+    val callCid: kotlin.String,
 
-    @Json(name = "created")
-    val created: kotlin.Boolean,
+    @Json(name = "call_recording")
+    val callRecording: CallRecording,
 
-    @Json(name = "duration")
-    val duration: kotlin.String,
+    @Json(name = "created_at")
+    val createdAt: org.threeten.bp.OffsetDateTime,
 
-    @Json(name = "members")
-    val members: kotlin.collections.List<MemberResponse>,
+    /* The type of event: \"call.recording_ready\" in this case */
+    @Json(name = "type")
+    val type: kotlin.String = "call.recording_ready"
 
-    @Json(name = "own_capabilities")
-    val ownCapabilities: kotlin.collections.List<OwnCapability>,
+) : VideoEvent(), WSCallEvent {
 
-    @Json(name = "membership")
-    val membership: MemberResponse? = null
+    override fun getCallCID(): String {
+        return callCid
+    }
 
-)
+    override fun getEventType(): String {
+        return type
+    }
+}

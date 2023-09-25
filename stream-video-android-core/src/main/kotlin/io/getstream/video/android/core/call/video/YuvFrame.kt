@@ -18,120 +18,91 @@ package io.getstream.video.android.core.call.video
 
 import android.graphics.Bitmap
 import android.graphics.Matrix
+import io.getstream.log.taggedLogger
 import io.github.crow_misia.libyuv.AbgrBuffer
-import io.github.crow_misia.libyuv.Nv21Buffer
+import io.github.crow_misia.libyuv.I420Buffer
+import org.webrtc.JniCommon
 import org.webrtc.VideoFrame
+import org.webrtc.YuvHelper
 import java.nio.ByteBuffer
 
-// Based on http://stackoverflow.com/a/12702836
-internal class YuvFrame(videoFrame: VideoFrame?) {
-    var width = 0
-    var height = 0
+object YuvFrame {
 
-    private var nv21Buffer: ByteArray? = null
-    private var rotationDegree: Int = 0
-
-    init {
-        fromVideoFrame(videoFrame)
-    }
-
-    private fun fromVideoFrame(videoFrame: VideoFrame?) {
-        if (videoFrame == null) {
-            return
-        }
-        try {
-            // Copy rotation information
-            // Save rotation info for now, doing actual rotation can wait until per-pixel processing.
-            rotationDegree = videoFrame.rotation
-            copyPlanes(videoFrame.buffer)
-        } catch (t: Throwable) {
-            dispose()
-        }
-    }
-
-    fun dispose() {
-        nv21Buffer = null
-    }
+    private val logger by taggedLogger("YuvFrame")
 
     /**
-     * Copy the Y, V, and U planes from the source I420Buffer.
-     * Sets width and height.
-     * @param videoFrameBuffer Source frame buffer.
+     * Converts VideoFrame.Buffer YUV frame to an ARGB_8888 Bitmap. Applies stored rotation.
+     * @return A new Bitmap containing the converted frame.
      */
-    private fun copyPlanes(videoFrameBuffer: VideoFrame.Buffer?) {
-        var i420Buffer: VideoFrame.I420Buffer? = null
-        if (videoFrameBuffer != null) {
-            i420Buffer = videoFrameBuffer.toI420()
+    fun bitmapFromVideoFrame(videoFrame: VideoFrame?): Bitmap? {
+        if (videoFrame == null) {
+            return null
         }
-        if (i420Buffer == null) {
-            return
+        return try {
+            val buffer = videoFrame.buffer
+            val i420buffer = copyPlanes(buffer, buffer.width, buffer.height)
+            val bitmap = getBitmap(i420buffer, buffer.width, buffer.height, videoFrame.rotation)
+            i420buffer.close()
+            bitmap
+        } catch (t: Throwable) {
+            logger.e(t) { "Failed to convert a VideoFrame" }
+            null
         }
+    }
 
-        // Set the width and height of the frame.
-        width = i420Buffer.width
-        height = i420Buffer.height
+    private fun copyPlanes(videoFrameBuffer: VideoFrame.Buffer, width: Int, height: Int): I420Buffer {
+        val toI420 = videoFrameBuffer.toI420()!!
 
-        // Calculate sizes needed to convert to NV21 buffer format
-        val size = width * height
-        val chromaStride = width
-        val chromaWidth = (width + 1) / 2
-        val chromaHeight = (height + 1) / 2
-        val nv21Size = size + chromaStride * chromaHeight
-        if (nv21Buffer == null || nv21Buffer!!.size != nv21Size) {
-            nv21Buffer = ByteArray(nv21Size)
-        }
-        val yPlane = i420Buffer.dataY
-        val yPlaneArr = getByteArrayFromByteBuffer(yPlane)
-        val uPlane = i420Buffer.dataU
-        val uPlaneArr = getByteArrayFromByteBuffer(uPlane)
-        val vPlane = i420Buffer.dataV
-        val vPlaneArr = getByteArrayFromByteBuffer(vPlane)
-        val yStride = i420Buffer.strideY
-        val uStride = i420Buffer.strideU
-        val vStride = i420Buffer.strideV
+        val planes = arrayOf<ByteBuffer>(toI420.dataY, toI420.dataU, toI420.dataV)
+        val strides = intArrayOf(toI420.strideY, toI420.strideU, toI420.strideV)
 
-        val yPlaneArrOffset = 0
-        val nv21BufferOffset = 0
-        val rowLength = width
+        toI420.release()
 
-        for (y in 0 until height) {
-            val srcOffset = yPlaneArrOffset + y * yStride
-            val destOffset = nv21BufferOffset + y * width
-            System.arraycopy(yPlaneArr, srcOffset, nv21Buffer, destOffset, rowLength)
-        }
+        val halfWidth = (width + 1).shr(1)
+        val halfHeight = (height + 1).shr(1)
 
-        for (y2 in 0 until chromaHeight) {
-            for (x2 in 0 until chromaWidth) {
-                nv21Buffer!![size + y2 * chromaStride + 2 * x2 + 1] =
-                    uPlaneArr[y2 * uStride + x2]
-                nv21Buffer!![size + y2 * chromaStride + 2 * x2] =
-                    vPlaneArr[y2 * vStride + x2]
+        val capacity = width * height
+        val halfCapacity = (halfWidth + 1).shr(1) * height
+
+        val planeWidths = intArrayOf(width, halfWidth, halfWidth)
+        val planeHeights = intArrayOf(height, halfHeight, halfHeight)
+
+        val byteBuffer = JniCommon.nativeAllocateByteBuffer(capacity + halfCapacity + halfCapacity)
+
+        for (i in 0..2) {
+            if (strides[i] == planeWidths[i]) {
+                byteBuffer.put(planes[i])
+            } else {
+                val sliceLengths = planeWidths[i] * planeHeights[i]
+
+                val limit = byteBuffer.position() + sliceLengths
+                byteBuffer.limit(limit)
+
+                val copyBuffer = byteBuffer.slice()
+
+                YuvHelper.copyPlane(
+                    planes[i],
+                    strides[i],
+                    copyBuffer,
+                    planeWidths[i],
+                    planeWidths[i],
+                    planeHeights[i],
+                )
+                byteBuffer.position(limit)
             }
         }
 
-        i420Buffer.release()
+        return I420Buffer.wrap(byteBuffer, width, height)
     }
 
-    /**
-     * Converts this YUV frame to an ARGB_8888 Bitmap. Applies stored rotation.
-     * @return A new Bitmap containing the converted frame.
-     */
-    fun getBitmap(): Bitmap? {
-        val localNv24Buffer = nv21Buffer ?: return null
-
+    private fun getBitmap(i420buffer: I420Buffer, width: Int, height: Int, rotationDegree: Int): Bitmap {
         val newBuffer = AbgrBuffer.allocate(width, height)
-        val directNv21Buffer = ByteBuffer.allocateDirect(width * height * 3 / 2)
-        directNv21Buffer.put(localNv24Buffer)
-
-        val nv21BufferClass = Nv21Buffer.wrap(directNv21Buffer, width, height)
-        nv21BufferClass.convertTo(newBuffer)
+        i420buffer.convertTo(newBuffer)
+        i420buffer.close()
 
         // Construct a Bitmap based on the new pixel data
         val bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
         bitmap.copyPixelsFromBuffer(newBuffer.asBuffer())
-
-        nv21BufferClass.close()
-        directNv21Buffer.clear()
         newBuffer.close()
 
         // If necessary, generate a rotated version of the Bitmap
@@ -159,11 +130,5 @@ internal class YuvFrame(videoFrame: VideoFrame?) {
                 bitmap
             }
         }
-    }
-
-    private fun getByteArrayFromByteBuffer(byteBuffer: ByteBuffer): ByteArray {
-        val bytesArray = ByteArray(byteBuffer.remaining())
-        byteBuffer[bytesArray, 0, bytesArray.size]
-        return bytesArray
     }
 }

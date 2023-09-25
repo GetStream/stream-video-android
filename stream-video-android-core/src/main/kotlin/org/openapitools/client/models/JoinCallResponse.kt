@@ -27,7 +27,6 @@ import org.openapitools.client.models.CallResponse
 import org.openapitools.client.models.Credentials
 import org.openapitools.client.models.MemberResponse
 import org.openapitools.client.models.OwnCapability
-import org.openapitools.client.models.UserResponse
 
 
 
@@ -43,7 +42,6 @@ import org.openapitools.client.infrastructure.Serializer
 /**
  *
  *
- * @param blockedUsers
  * @param call
  * @param created
  * @param credentials
@@ -55,9 +53,6 @@ import org.openapitools.client.infrastructure.Serializer
 
 
 data class JoinCallResponse (
-
-    @Json(name = "blocked_users")
-    val blockedUsers: kotlin.collections.List<UserResponse>,
 
     @Json(name = "call")
     val call: CallResponse,

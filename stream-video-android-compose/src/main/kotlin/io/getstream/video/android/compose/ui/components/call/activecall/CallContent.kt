@@ -20,6 +20,7 @@ import android.content.res.Configuration.ORIENTATION_LANDSCAPE
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
@@ -82,6 +83,7 @@ import io.getstream.video.android.mock.mockCall
  * @param style Defined properties for styling a single video call track.
  * @param videoRenderer A single video renderer renders each individual participant.
  * @param videoContent Content is shown that renders all participants' videos.
+ * @param videoOverlayContent Content is shown that will be drawn over the [videoContent], excludes [controlsContent].
  * @param controlsContent Content is shown that allows users to trigger different actions to control a joined call.
  * @param enableInPictureInPicture If the user has engaged in Picture-In-Picture mode.
  * @param pictureInPictureContent Content shown when the user enters Picture in Picture mode, if it's been enabled in the app.
@@ -125,6 +127,7 @@ public fun CallContent(
             videoRenderer = videoRenderer,
         )
     },
+    videoOverlayContent: @Composable (call: Call) -> Unit = {},
     controlsContent: @Composable (call: Call) -> Unit = {
         ControlActions(
             call = call,
@@ -199,7 +202,10 @@ public fun CallContent(
                             )
                         },
                 ) {
-                    videoContent.invoke(this, call)
+                    Box {
+                        videoContent.invoke(this@Row, call)
+                        videoOverlayContent.invoke(call)
+                    }
 
                     if (orientation == ORIENTATION_LANDSCAPE) {
                         controlsContent.invoke(call)

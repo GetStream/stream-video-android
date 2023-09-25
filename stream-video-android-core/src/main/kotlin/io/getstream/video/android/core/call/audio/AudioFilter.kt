@@ -14,14 +14,17 @@
  * limitations under the License.
  */
 
-package io.getstream.video.android.core.model
+package io.getstream.video.android.core.call.audio
 
-import androidx.compose.runtime.Stable
+import java.nio.ByteBuffer
 
-@Stable
-public data class CallData(
-    public val blockedUsersIds: List<String>,
-    public val call: CallInfo,
-    public val members: List<CallUser>,
-    public val ownMembership: CallUser?,
-)
+interface AudioFilter {
+    /**
+     * Invoked after an audio sample is recorded. Can be used to manipulate
+     * the ByteBuffer before it's fed into WebRTC. Currently the audio in the
+     * ByteBuffer is always PCM 16bit and the buffer sample size is ~10ms.
+     *
+     * @param audioFormat format in android.media.AudioFormat
+     */
+    fun filter(audioFormat: Int, channelCount: Int, sampleRate: Int, sampleData: ByteBuffer)
+}

@@ -26,7 +26,6 @@ package org.openapitools.client.models
 import org.openapitools.client.models.CallResponse
 import org.openapitools.client.models.MemberResponse
 import org.openapitools.client.models.OwnCapability
-import org.openapitools.client.models.UserResponse
 
 
 
@@ -42,7 +41,6 @@ import org.openapitools.client.infrastructure.Serializer
 /**
  * Represents a call
  *
- * @param blockedUsers
  * @param call
  * @param duration
  * @param members
@@ -52,9 +50,6 @@ import org.openapitools.client.infrastructure.Serializer
 
 
 data class UpdateCallResponse (
-
-    @Json(name = "blocked_users")
-    val blockedUsers: kotlin.collections.List<UserResponse>,
 
     @Json(name = "call")
     val call: CallResponse,

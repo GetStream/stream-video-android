@@ -17,6 +17,7 @@
 package io.getstream.video.android.core
 
 import android.content.Intent
+import android.graphics.Bitmap
 import android.view.View
 import androidx.annotation.VisibleForTesting
 import io.getstream.log.taggedLogger
@@ -25,14 +26,17 @@ import io.getstream.result.Result
 import io.getstream.result.Result.Failure
 import io.getstream.result.Result.Success
 import io.getstream.video.android.core.call.RtcSession
+import io.getstream.video.android.core.call.audio.AudioFilter
 import io.getstream.video.android.core.call.utils.SoundInputProcessor
 import io.getstream.video.android.core.call.video.VideoFilter
+import io.getstream.video.android.core.call.video.YuvFrame
 import io.getstream.video.android.core.events.VideoEventListener
 import io.getstream.video.android.core.internal.InternalStreamVideoApi
 import io.getstream.video.android.core.model.MuteUsersData
 import io.getstream.video.android.core.model.QueriedMembers
 import io.getstream.video.android.core.model.SortField
 import io.getstream.video.android.core.model.UpdateUserPermissionsData
+import io.getstream.video.android.core.model.VideoTrack
 import io.getstream.video.android.core.model.toIceServer
 import io.getstream.video.android.core.socket.SocketState
 import io.getstream.video.android.core.utils.RampValueUpAndDownHelper
@@ -49,6 +53,7 @@ import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.suspendCancellableCoroutine
 import org.openapitools.client.models.AcceptCallResponse
 import org.openapitools.client.models.AudioSettings
 import org.openapitools.client.models.BlockUserResponse
@@ -75,9 +80,11 @@ import org.openapitools.client.models.VideoEvent
 import org.openapitools.client.models.VideoSettings
 import org.threeten.bp.OffsetDateTime
 import org.webrtc.RendererCommon
+import org.webrtc.VideoSink
 import org.webrtc.audio.JavaAudioDeviceModule.AudioSamples
 import stream.video.sfu.models.TrackType
 import stream.video.sfu.models.VideoDimension
+import kotlin.coroutines.resume
 
 /**
  * How long do we keep trying to make a full-reconnect (once the SFU signalling WS went down)
@@ -131,6 +138,11 @@ public class Call(
      * Set a custom [VideoFilter] that will be applied to the video stream coming from your device.
      */
     var videoFilter: VideoFilter? = null
+
+    /**
+     * Set a custom [AudioFilter] that will be applied to the audio stream recorded on your device.
+     */
+    var audioFilter: AudioFilter? = null
 
     /**
      * Called by the [CallHealthMonitor] when the ICE restarts failed after
@@ -929,6 +941,31 @@ public class Call(
 
     fun processAudioSample(audioSample: AudioSamples) {
         soundInputProcessor.processSoundInput(audioSample.data)
+    }
+
+    suspend fun takeScreenshot(track: VideoTrack): Bitmap? {
+        return suspendCancellableCoroutine { continuation ->
+            var screenshotSink: VideoSink? = null
+            screenshotSink = VideoSink {
+                // make sure we stop after first frame is delivered
+                if (!continuation.isActive) {
+                    return@VideoSink
+                }
+                it.retain()
+                val bitmap = YuvFrame.bitmapFromVideoFrame(it)
+                it.release()
+
+                // This has to be launched asynchronously - removing the sink on the
+                // same thread as the videoframe is delivered will lead to a deadlock
+                // (needs investigation why)
+                scope.launch {
+                    track.video.removeSink(screenshotSink)
+                }
+                continuation.resume(bitmap)
+            }
+
+            track.video.addSink(screenshotSink)
+        }
     }
 
     @InternalStreamVideoApi

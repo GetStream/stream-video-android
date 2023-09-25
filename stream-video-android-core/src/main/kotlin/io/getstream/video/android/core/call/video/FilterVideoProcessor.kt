@@ -63,9 +63,7 @@ internal class FilterVideoProcessor(
             sink?.onFrame(filteredFrame)
         } else if (currentFilter is BitmapVideoFilter) {
             // first prepare a Bitmap for the client
-            val yuvFrame = YuvFrame(frame)
-            inputFrameBitmap = yuvFrame.getBitmap()
-            yuvFrame.dispose()
+            inputFrameBitmap = YuvFrame.bitmapFromVideoFrame(frame)
 
             if (inputFrameBitmap != null && sink != null) {
                 // Prepare helpers (runs only once or if the dimensions change)

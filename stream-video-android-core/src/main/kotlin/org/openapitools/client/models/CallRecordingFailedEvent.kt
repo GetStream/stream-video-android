@@ -23,9 +23,6 @@
 
 package org.openapitools.client.models
 
-import org.openapitools.client.models.CallResponse
-import org.openapitools.client.models.MemberResponse
-import org.openapitools.client.models.OwnCapability
 
 
 
@@ -39,35 +36,33 @@ import com.squareup.moshi.ToJson
 import org.openapitools.client.infrastructure.Serializer
 
 /**
+ * This event is sent when call recording has failed
  *
- *
- * @param call
- * @param created
- * @param duration
- * @param members
- * @param ownCapabilities
- * @param membership
+ * @param callCid
+ * @param createdAt
+ * @param type The type of event: \"call.recording_failed\" in this case
  */
 
 
-data class GetOrCreateCallResponse (
+data class CallRecordingFailedEvent (
 
-    @Json(name = "call")
-    val call: CallResponse,
+    @Json(name = "call_cid")
+    val callCid: kotlin.String,
 
-    @Json(name = "created")
-    val created: kotlin.Boolean,
+    @Json(name = "created_at")
+    val createdAt: org.threeten.bp.OffsetDateTime,
 
-    @Json(name = "duration")
-    val duration: kotlin.String,
+    /* The type of event: \"call.recording_failed\" in this case */
+    @Json(name = "type")
+    val type: kotlin.String = "call.recording_failed"
 
-    @Json(name = "members")
-    val members: kotlin.collections.List<MemberResponse>,
+) : VideoEvent(), WSCallEvent {
 
-    @Json(name = "own_capabilities")
-    val ownCapabilities: kotlin.collections.List<OwnCapability>,
+    override fun getCallCID(): String {
+        return callCid
+    }
 
-    @Json(name = "membership")
-    val membership: MemberResponse? = null
-
-)
+    override fun getEventType(): String {
+        return type
+    }
+}

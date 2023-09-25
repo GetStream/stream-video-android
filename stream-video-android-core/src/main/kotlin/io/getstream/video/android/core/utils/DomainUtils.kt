@@ -156,7 +156,7 @@ internal fun List<CallStateResponseFields>.toCallData(): List<CallData> {
 @JvmSynthetic
 internal fun CallStateResponseFields.toCallData(): CallData {
     return CallData(
-        blockedUsers = blockedUsers.map { it.toUser() },
+        blockedUsersIds = call.blockedUserIds,
         call = call.toCallInfo(),
         members = members.map { it.toCallUser() },
         ownMembership = membership?.toCallUser(),
