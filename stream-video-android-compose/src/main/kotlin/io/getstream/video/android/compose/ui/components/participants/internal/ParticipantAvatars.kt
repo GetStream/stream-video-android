@@ -49,7 +49,8 @@ public fun ParticipantAvatars(
 
                 UserAvatar(
                     modifier = Modifier.size(VideoTheme.dimens.singleAvatarSize),
-                    user = participant.user,
+                    userName = participant.user.userNameOrId,
+                    userImage = participant.user.image,
                 )
             } else {
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
@@ -57,7 +58,8 @@ public fun ParticipantAvatars(
                         items(participants.take(2)) { participant ->
                             UserAvatar(
                                 modifier = Modifier.size(VideoTheme.dimens.callAvatarSize),
-                                user = participant.user,
+                                userName = participant.user.userNameOrId,
+                                userImage = participant.user.image,
                             )
                         }
                     }
@@ -65,7 +67,8 @@ public fun ParticipantAvatars(
                     if (participants.size >= 3) {
                         UserAvatar(
                             modifier = Modifier.size(VideoTheme.dimens.callAvatarSize),
-                            user = participants[2].user,
+                            userName = participants[2].user.userNameOrId,
+                            userImage = participants[2].user.image,
                         )
                     }
                 }

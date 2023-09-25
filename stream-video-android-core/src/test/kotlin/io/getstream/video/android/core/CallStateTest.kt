@@ -21,7 +21,6 @@ import io.getstream.result.Result
 import io.getstream.video.android.core.base.IntegrationTestBase
 import io.getstream.video.android.core.events.DominantSpeakerChangedEvent
 import io.getstream.video.android.core.model.SortField
-import io.getstream.video.android.model.User
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.first
@@ -131,23 +130,23 @@ class CallStateTest : IntegrationTestBase() {
         )
 
         call.state.updateParticipant(
-            ParticipantState("4", call, User("4")).apply { _lastSpeakingAt.value = nowUtc },
+            ParticipantState("4", call, "4").apply { _lastSpeakingAt.value = nowUtc },
         )
         call.state.updateParticipant(
-            ParticipantState("5", call, User("5")).apply { _videoEnabled.value = true },
+            ParticipantState("5", call, "5").apply { _videoEnabled.value = true },
         )
         call.state.updateParticipant(
-            ParticipantState("6", call, User("6")).apply { _joinedAt.value = nowUtc },
+            ParticipantState("6", call, "6").apply { _joinedAt.value = nowUtc },
         )
 
         call.state.updateParticipant(
-            ParticipantState("1", call, User("1")),
+            ParticipantState("1", call, "1"),
         )
         call.state.updateParticipant(
-            ParticipantState("2", call, User("2")).apply { _dominantSpeaker.value = true },
+            ParticipantState("2", call, "2").apply { _dominantSpeaker.value = true },
         )
         call.state.updateParticipant(
-            ParticipantState("3", call, User("3")).apply { _screenSharingEnabled.value = true },
+            ParticipantState("3", call, "3").apply { _screenSharingEnabled.value = true },
         )
 
         val participants = call.state.participants.value

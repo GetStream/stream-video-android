@@ -467,7 +467,7 @@ public class CallState(
     }
 
     private val userToSessionIdMap = participants.mapState { participants ->
-        participants.associate { it.user.value.id to it.sessionId }
+        participants.associate { it.userId.value to it.sessionId }
     }
 
     internal val _hasPermissionMap = mutableMapOf<String, StateFlow<Boolean>>()
@@ -941,7 +941,6 @@ public class CallState(
     fun getOrCreateParticipant(
         sessionId: String,
         userId: String,
-        user: User? = null,
         updateFlow: Boolean = false,
     ): ParticipantState {
         val participantMap = _participants.value.toSortedMap()
@@ -951,7 +950,7 @@ public class CallState(
             ParticipantState(
                 sessionId = sessionId,
                 call = call,
-                initialUser = user ?: User(userId),
+                initialUserId = userId,
             )
         }
         if (updateFlow) {

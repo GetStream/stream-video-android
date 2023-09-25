@@ -76,7 +76,7 @@ internal class ParticipantsPortraitTest : BaseComposeTest() {
     fun `snapshot InviteUserList composable`() {
         snapshotWithDarkMode {
             InviteUserList(
-                mockParticipantList.map { it.initialUser },
+                mockParticipantList,
                 onUserSelected = {},
                 onUserUnSelected = {},
             )

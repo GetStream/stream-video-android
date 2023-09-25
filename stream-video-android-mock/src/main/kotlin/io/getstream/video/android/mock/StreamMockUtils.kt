@@ -61,7 +61,7 @@ public val mockCall: Call = Call(
             UUID.randomUUID().toString()
         }
         ParticipantState(
-            initialUser = user,
+            initialUserId = user.id,
             sessionId = sessionId,
             call = this,
         )
@@ -130,7 +130,7 @@ public val mockParticipantList: List<ParticipantState>
             }
             participants.add(
                 ParticipantState(
-                    initialUser = user,
+                    initialUserId = user.id,
                     sessionId = sessionId,
                     call = mockCall,
                 ).also { mockCall.state.updateParticipant(it) },

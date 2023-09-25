@@ -152,13 +152,11 @@ private fun CallJoinHeader(
             .padding(24.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        val name =
-            user?.name?.ifBlank { user?.id }?.ifBlank { user!!.custom["email"] }.orEmpty()
-
-        if (user != null) {
+        user?.let {
             UserAvatar(
                 modifier = Modifier.size(24.dp),
-                user = user!!,
+                userName = it.userNameOrId,
+                userImage = it.image,
             )
 
             Spacer(modifier = Modifier.width(8.dp))
