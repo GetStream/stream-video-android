@@ -898,7 +898,7 @@ public class RtcSession internal constructor(
         otherParticipants.forEach { participant ->
             if (participant.videoEnabled.value) {
                 val track = TrackSubscriptionDetails(
-                    user_id = participant.user.value.id,
+                    user_id = participant.userId.value,
                     track_type = TrackType.TRACK_TYPE_VIDEO,
                     dimension = defaultVideoDimension,
                     session_id = participant.sessionId,
@@ -907,7 +907,7 @@ public class RtcSession internal constructor(
             }
             if (participant.screenSharingEnabled.value) {
                 val track = TrackSubscriptionDetails(
-                    user_id = participant.user.value.id,
+                    user_id = participant.userId.value,
                     track_type = TrackType.TRACK_TYPE_SCREEN_SHARE,
                     dimension = defaultVideoDimension,
                     session_id = participant.sessionId,
@@ -931,7 +931,7 @@ public class RtcSession internal constructor(
                     "[visibleTracks] $sessionId subscribing ${participant.sessionId} to : ${display.key}"
                 }
                 TrackSubscriptionDetails(
-                    user_id = participant.user.value.id,
+                    user_id = participant.userId.value,
                     track_type = display.key,
                     dimension = display.value.dimensions,
                     session_id = participant.sessionId,

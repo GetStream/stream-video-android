@@ -25,6 +25,7 @@ import androidx.core.view.isVisible
 import io.getstream.log.taggedLogger
 import io.getstream.video.android.core.ParticipantState
 import io.getstream.video.android.core.model.MediaTrack
+import io.getstream.video.android.core.utils.initials
 import io.getstream.video.android.model.User
 import io.getstream.video.android.xml.databinding.StreamVideoViewCallParticipantBinding
 import io.getstream.video.android.xml.font.setTextStyle
@@ -141,7 +142,8 @@ public class CallParticipantView : CallCardView, VideoRenderer {
      */
     public fun setParticipant(participant: ParticipantState) {
         binding.labelHolder.isVisible = !participant.isLocal
-        setUserData(participant.user.value)
+        val userName = participant.userNameOrId.value
+        setUserData(userName = userName, userImage = participant.image.value)
         setTrack(participant.videoTrack.value)
         setAvatarVisibility(participant)
         setHasAudio(participant.audioEnabled.value)
@@ -174,9 +176,9 @@ public class CallParticipantView : CallCardView, VideoRenderer {
      *
      * @param user The [User] whose video we are viewing.
      */
-    private fun setUserData(user: User) {
-        binding.participantAvatar.setData(user)
-        binding.participantLabel.text = user.name.ifBlank { user.id }
+    private fun setUserData(userName: String, userImage: String?) {
+        binding.participantAvatar.setData(initials = userName.initials(), userImage = userImage)
+        binding.participantLabel.text = userName
     }
 
     /**

@@ -74,8 +74,8 @@ public fun ParticipantAudio(
     },
     roleBadgeContent: @Composable RowScope.(ParticipantState) -> Unit = {},
 ) {
-    val user by participant.user.collectAsStateWithLifecycle()
     val nameOrId by participant.userNameOrId.collectAsStateWithLifecycle()
+    val userImage by participant.image.collectAsStateWithLifecycle()
     val isSpeaking by participant.speaking.collectAsStateWithLifecycle()
     val audioEnabled by participant.audioEnabled.collectAsStateWithLifecycle()
 
@@ -86,7 +86,8 @@ public fun ParticipantAudio(
     ) {
         Box(modifier = Modifier.size(VideoTheme.dimens.audioAvatarSize)) {
             UserAvatar(
-                user = user,
+                userName = nameOrId,
+                userImage = userImage,
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(VideoTheme.dimens.audioAvatarPadding),
@@ -130,9 +131,11 @@ public fun ParticipantAudio(
                 roleBadgeContent.invoke(this, participant)
             }
 
+            val roles by participant.roles.collectAsStateWithLifecycle()
+
             Text(
                 modifier = Modifier.fillMaxWidth(),
-                text = user.role,
+                text = roles.firstOrNull().orEmpty(),
                 fontSize = 11.sp,
                 color = VideoTheme.colors.textHighEmphasis,
                 textAlign = TextAlign.Center,

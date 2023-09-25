@@ -17,8 +17,10 @@
 package io.getstream.video.android.compose
 
 import androidx.compose.foundation.layout.size
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import app.cash.paparazzi.DeviceConfig
 import app.cash.paparazzi.Paparazzi
 import io.getstream.video.android.compose.base.BaseComposeTest
@@ -48,8 +50,11 @@ internal class AvatarTest : BaseComposeTest() {
     @Test
     fun `snapshot UserAvatar composable`() {
         snapshot {
+            val name by mockParticipant.name.collectAsStateWithLifecycle()
+            val image by mockParticipant.image.collectAsStateWithLifecycle()
             UserAvatar(
-                user = mockParticipant.initialUser,
+                userImage = image,
+                userName = name,
                 modifier = Modifier.size(82.dp),
                 isShowingOnlineIndicator = true,
             )

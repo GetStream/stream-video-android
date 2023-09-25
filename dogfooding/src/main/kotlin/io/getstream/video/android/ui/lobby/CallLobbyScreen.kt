@@ -135,7 +135,8 @@ private fun CallLobbyHeader(
         if (userValue != null) {
             UserAvatar(
                 modifier = Modifier.size(32.dp),
-                user = userValue,
+                userName = userValue.userNameOrId,
+                userImage = userValue.image,
             )
 
             Spacer(modifier = Modifier.width(4.dp))

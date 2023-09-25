@@ -38,12 +38,12 @@ import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.participants.internal.CallParticipantsList
 import io.getstream.video.android.compose.ui.components.participants.internal.InviteUserList
 import io.getstream.video.android.core.Call
+import io.getstream.video.android.core.ParticipantState
 import io.getstream.video.android.core.call.state.CallAction
 import io.getstream.video.android.core.call.state.InviteUsersToCall
 import io.getstream.video.android.core.call.state.ToggleMicrophone
 import io.getstream.video.android.mock.StreamMockUtils
 import io.getstream.video.android.mock.mockCall
-import io.getstream.video.android.model.User
 
 /**
  * Represents a menu that shows information on the current call participants, while allowing the user
@@ -65,7 +65,7 @@ public fun CallParticipantsInfoMenu(
     val audioEnabled = me?.audioEnabled?.collectAsStateWithLifecycle()
 
     var infoStateMode by remember { mutableStateOf<CallParticipantInfoMode>(ParticipantListMode) }
-    var selectedUsers: List<User> = remember { mutableStateListOf() }
+    var selectedUsers: List<ParticipantState> = remember { mutableStateListOf() }
 
     val onBackPressed: () -> Unit = {
         when (infoStateMode) {

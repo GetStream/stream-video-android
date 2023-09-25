@@ -1012,7 +1012,14 @@ public data class CreateCallOptions(
     val startsAt: OffsetDateTime? = null,
     val team: String? = null,
 ) {
-    fun memberRequestsFromIds(): List<MemberRequest>? {
-        return memberIds?.map { MemberRequest(userId = it) } ?: members
+    fun memberRequestsFromIds(): List<MemberRequest> {
+        val memberRequestList: MutableList<MemberRequest> = mutableListOf<MemberRequest>()
+        if (memberIds != null) {
+            memberRequestList.addAll(memberIds.map { MemberRequest(userId = it) })
+        }
+        if (members != null) {
+            memberRequestList.addAll(members)
+        }
+        return memberRequestList
     }
 }

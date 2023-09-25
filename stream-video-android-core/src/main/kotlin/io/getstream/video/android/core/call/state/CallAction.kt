@@ -17,7 +17,7 @@
 package io.getstream.video.android.core.call.state
 
 import com.twilio.audioswitch.AudioDevice
-import io.getstream.video.android.model.User
+import io.getstream.video.android.core.ParticipantState
 
 /**
  * Represents various actions users can take while in a call.
@@ -96,7 +96,7 @@ public data object Reaction : CallAction
  * Action to invite other users to a call.
  */
 public data class InviteUsersToCall(
-    val users: List<User>,
+    val users: List<ParticipantState>,
 ) : CallAction
 
 /**

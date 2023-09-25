@@ -38,7 +38,6 @@ import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.background.ParticipantImageBackground
 import io.getstream.video.android.mock.StreamMockUtils
 import io.getstream.video.android.mock.mockUsers
-import io.getstream.video.android.model.User
 
 /**
  * A background that displays a user avatar and a background that reflects the avatar.
@@ -59,7 +58,8 @@ import io.getstream.video.android.model.User
  */
 @Composable
 public fun UserAvatarBackground(
-    user: User,
+    userName: String?,
+    userImage: String?,
     modifier: Modifier = Modifier,
     shape: Shape = VideoTheme.shapes.avatar,
     avatarSize: Dp = 72.dp,
@@ -76,7 +76,7 @@ public fun UserAvatarBackground(
     Box(modifier = modifier) {
         ParticipantImageBackground(
             modifier = Modifier.fillMaxSize(),
-            userImage = user.image,
+            userImage = userImage,
             blurRadius = blurRadius,
         )
 
@@ -85,7 +85,8 @@ public fun UserAvatarBackground(
                 .size(avatarSize)
                 .align(Alignment.Center)
                 .shadow(elevation = avatarShadowElevation, shape = CircleShape),
-            user = user,
+            userName = userName,
+            userImage = userImage,
             shape = shape,
             textStyle = textStyle,
             contentScale = contentScale,
@@ -103,8 +104,10 @@ public fun UserAvatarBackground(
 private fun UserAvatarBackgroundPreview() {
     StreamMockUtils.initializeStreamVideo(LocalContext.current)
     VideoTheme {
+        val user = mockUsers[0]
         UserAvatarBackground(
-            user = mockUsers[0],
+            userName = user.name.ifBlank { user.id },
+            userImage = user.image,
             modifier = Modifier.fillMaxSize(),
             previewPlaceholder = io.getstream.video.android.ui.common.R.drawable.stream_video_call_sample,
         )

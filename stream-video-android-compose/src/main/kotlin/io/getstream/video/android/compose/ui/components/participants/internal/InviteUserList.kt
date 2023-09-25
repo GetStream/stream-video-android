@@ -28,17 +28,19 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.avatar.UserAvatar
+import io.getstream.video.android.core.ParticipantState
 import io.getstream.video.android.mock.StreamMockUtils
 import io.getstream.video.android.mock.mockParticipantList
-import io.getstream.video.android.model.User
 import io.getstream.video.android.ui.common.R
 
 /**
@@ -50,9 +52,9 @@ import io.getstream.video.android.ui.common.R
  */
 @Composable
 internal fun InviteUserList(
-    users: List<User>,
-    onUserSelected: (User) -> Unit,
-    onUserUnSelected: (User) -> Unit,
+    users: List<ParticipantState>,
+    onUserSelected: (ParticipantState) -> Unit,
+    onUserUnSelected: (ParticipantState) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     LazyColumn(
@@ -78,10 +80,10 @@ internal fun InviteUserList(
  */
 @Composable
 internal fun InviteUserItem(
-    user: User,
+    user: ParticipantState,
     isSelected: Boolean,
-    onUserSelected: (User) -> Unit,
-    onUserUnSelected: (User) -> Unit,
+    onUserSelected: (ParticipantState) -> Unit,
+    onUserUnSelected: (ParticipantState) -> Unit,
 ) {
     Row(
         modifier = Modifier
@@ -98,19 +100,17 @@ internal fun InviteUserItem(
     ) {
         Spacer(modifier = Modifier.width(8.dp))
 
+        val userName by user.userNameOrId.collectAsStateWithLifecycle()
+        val userImage by user.image.collectAsStateWithLifecycle()
+
         UserAvatar(
             modifier = Modifier.size(VideoTheme.dimens.participantsInfoAvatarSize),
-            user = user,
+            userName = userName,
+            userImage = userImage,
             isShowingOnlineIndicator = true,
         )
 
         Spacer(modifier = Modifier.width(8.dp))
-
-        val userName = when {
-            user.name.isNotBlank() -> user.name
-            user.id.isNotBlank() -> user.id
-            else -> "Unknown"
-        }
 
         Text(
             modifier = Modifier.weight(1f),
@@ -139,7 +139,7 @@ private fun InviteUserListPreview() {
     StreamMockUtils.initializeStreamVideo(LocalContext.current)
     VideoTheme {
         InviteUserList(
-            mockParticipantList.map { it.initialUser },
+            mockParticipantList,
             onUserSelected = {},
             onUserUnSelected = {},
         )
