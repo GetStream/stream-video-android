@@ -126,6 +126,7 @@ Video roadmap and changelog is available [here](https://github.com/GetStream/pro
 - [X] Picture of the video stream at the highest resolution + docs on how to add a button for this (Daniel)
 - [X] Audio & Video filters. Support  (Daniel)
 - [X] Implement Chat overlay for Dogfooding (Jaewoong)
+- [X] Migrate Stream Chat SDK v6 stable (Jaewoong)
 - [X] Add Dogfooding instructions + directs Google Play (Jaewoong)
 - [ ] Default livestream player UI + docs (Jaewoong/ Daniel)
 - [ ] Reaction dialog API for Compose (Jaewoong)
