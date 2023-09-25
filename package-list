@@ -30,6 +30,7 @@ module:stream-video-android-core
 io.getstream.video.android.core
 io.getstream.video.android.core.audio
 io.getstream.video.android.core.call
+io.getstream.video.android.core.call.audio
 io.getstream.video.android.core.call.connection
 io.getstream.video.android.core.call.signal.socket
 io.getstream.video.android.core.call.state
