@@ -29,14 +29,11 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.lifecycle.lifecycleScope
 import io.getstream.chat.android.client.ChatClient
-import io.getstream.chat.android.client.api.models.querysort.QuerySortByField
-import io.getstream.chat.android.client.models.Filters
-import io.getstream.chat.android.client.models.User
-import io.getstream.chat.android.client.utils.onSuccessSuspend
-import io.getstream.chat.android.state.extensions.globalState
+import io.getstream.chat.android.models.Filters
+import io.getstream.chat.android.models.querysort.QuerySortByField
 import io.getstream.result.Result
+import io.getstream.result.onSuccessSuspend
 import io.getstream.video.android.MainActivity
-import io.getstream.video.android.core.BuildConfig
 import io.getstream.video.android.core.StreamVideo
 import io.getstream.video.android.model.StreamCallId
 import kotlinx.coroutines.launch
@@ -92,7 +89,7 @@ class CallActivity : ComponentActivity() {
             )
 
             // step 4 (optional) - chat integration
-            val user: User? by ChatClient.instance().globalState.user.collectAsState(null)
+            val user by ChatClient.instance().clientState.user.collectAsState(initial = null)
             LaunchedEffect(key1 = user) {
                 if (user != null) {
                     val channel = ChatClient.instance().channel("videocall", cid.id)

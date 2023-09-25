@@ -101,7 +101,7 @@ internal fun ChatDialog(
                             showHeader = false,
                             viewModelFactory = viewModelFactory,
                             onBackPressed = { onDismissed.invoke() },
-                            onHeaderActionClick = { onDismissed.invoke() },
+                            onHeaderTitleClick = { onDismissed.invoke() },
                         )
                     }
                 }
