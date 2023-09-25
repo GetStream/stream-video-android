@@ -42,6 +42,7 @@ import io.getstream.chat.android.compose.ui.messages.MessagesScreen
 import io.getstream.chat.android.compose.ui.theme.ChatTheme
 import io.getstream.chat.android.compose.viewmodel.messages.MessageListViewModel
 import io.getstream.chat.android.compose.viewmodel.messages.MessagesViewModelFactory
+import io.getstream.chat.android.ui.common.state.messages.list.MessageItemState
 import io.getstream.video.android.core.Call
 import io.getstream.video.android.ui.common.R
 
@@ -51,6 +52,7 @@ internal fun ChatDialog(
     state: ModalBottomSheetState,
     content: @Composable () -> Unit,
     updateUnreadCount: (Int) -> Unit,
+    onNewMessages: (List<MessageItemState>) -> Unit,
     onDismissed: () -> Unit,
 ) {
     val context = LocalContext.current
@@ -65,6 +67,11 @@ internal fun ChatDialog(
 
     LaunchedEffect(key1 = unreadCount) {
         updateUnreadCount.invoke(unreadCount)
+    }
+
+    val messageItems = listViewModel.currentMessagesState.messageItems
+    LaunchedEffect(key1 = messageItems) {
+        onNewMessages.invoke(messageItems.filterIsInstance<MessageItemState>().take(3).reversed())
     }
 
     ChatTheme {
