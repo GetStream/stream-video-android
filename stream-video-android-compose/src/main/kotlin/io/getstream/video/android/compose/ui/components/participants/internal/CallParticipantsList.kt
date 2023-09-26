@@ -119,14 +119,15 @@ private fun CallParticipantInfoItem(
     ) {
         Spacer(modifier = Modifier.width(8.dp))
 
-        val user by participant.user.collectAsStateWithLifecycle()
+        val userName by participant.userNameOrId.collectAsStateWithLifecycle()
+        val userImage by participant.image.collectAsStateWithLifecycle()
         UserAvatar(
             modifier = Modifier.size(VideoTheme.dimens.participantsInfoAvatarSize),
-            user = user,
+            userName = userName,
+            userImage = userImage,
             isShowingOnlineIndicator = true,
         )
 
-        val userName by participant.userNameOrId.collectAsStateWithLifecycle()
         Text(
             modifier = Modifier
                 .padding(start = 8.dp)

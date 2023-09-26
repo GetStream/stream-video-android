@@ -108,8 +108,9 @@ public fun ParticipantVideo(
         )
     },
     videoFallbackContent: @Composable (Call) -> Unit = {
-        val user by participant.user.collectAsStateWithLifecycle()
-        UserAvatarBackground(user = user)
+        val userName by participant.userNameOrId.collectAsStateWithLifecycle()
+        val userImage by participant.image.collectAsStateWithLifecycle()
+        UserAvatarBackground(userName = userName, userImage = userImage)
     },
     reactionContent: @Composable BoxScope.(ParticipantState) -> Unit = {
         DefaultReaction(
@@ -184,8 +185,9 @@ public fun ParticipantVideoRenderer(
     call: Call,
     participant: ParticipantState,
     videoFallbackContent: @Composable (Call) -> Unit = {
-        val user by participant.user.collectAsStateWithLifecycle()
-        UserAvatarBackground(user = user)
+        val userName by participant.userNameOrId.collectAsStateWithLifecycle()
+        val userImage by participant.image.collectAsStateWithLifecycle()
+        UserAvatarBackground(userName = userName, userImage = userImage)
     },
 ) {
     if (LocalInspectionMode.current) {

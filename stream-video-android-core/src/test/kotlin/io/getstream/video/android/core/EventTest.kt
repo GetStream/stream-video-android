@@ -80,7 +80,7 @@ class EventTest : IntegrationTestBase(connectCoordinatorWS = false) {
 
         // ensure we update call data and capabilities
         assertThat(
-            call.state.activeSpeakers.value.map { it.initialUser.id },
+            call.state.activeSpeakers.value.map { it.userId.value },
         ).containsExactly("thierry")
     }
 
@@ -90,7 +90,7 @@ class EventTest : IntegrationTestBase(connectCoordinatorWS = false) {
         clientImpl.fireEvent(event, call.cid)
 
         // ensure we update call data and capabilities
-        assertThat(call.state.dominantSpeaker.value?.user?.value?.id).isEqualTo("jaewoong")
+        assertThat(call.state.dominantSpeaker.value?.userId?.value).isEqualTo("jaewoong")
     }
 
     @Test

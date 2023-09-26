@@ -68,6 +68,7 @@ public class CoordinatorSocket(
                 id = user.id,
                 name = user.name,
                 image = user.image,
+                custom = user.custom,
             ),
         )
         val message = adapter.toJson(authRequest)

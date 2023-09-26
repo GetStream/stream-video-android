@@ -128,12 +128,12 @@ Video roadmap and changelog is available [here](https://github.com/GetStream/pro
 - [X] Implement Chat overlay for Dogfooding (Jaewoong)
 - [X] Migrate Stream Chat SDK v6 stable (Jaewoong)
 - [X] Add Dogfooding instructions + directs Google Play (Jaewoong)
+- [X] Support participant.custom field which was previously ignored. ParticipantState line 216 (Daniel)
 - [ ] Default livestream player UI + docs (Jaewoong/ Daniel)
 - [ ] Reaction dialog API for Compose (Jaewoong)
 - [ ] Android SDK development.md cleanup (Daniel)
 - [ ] Upgrade to more recent versions of webrtc (Kanat)
 - [ ] Review foreground service vs backend for audio rooms etc. (Daniel)
-- [ ] Support participant.custom field which was previously ignored. ParticipantState line 216 (Daniel)
 - [ ] Logging is too verbose (rtc is very noisy), clean it up to focus on the essential for info and higher (Daniel)
 
 ### 0.5.0 milestone

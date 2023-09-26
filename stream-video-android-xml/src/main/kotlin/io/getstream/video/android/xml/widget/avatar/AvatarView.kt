@@ -65,12 +65,12 @@ public class AvatarView : ShapeableImageView {
      *
      * @param user The [User] for which we want to show the avatar.
      */
-    public fun setData(user: User) {
+    public fun setData(initials: String, userImage: String?) {
         load(
-            data = user.image,
+            data = userImage,
             placeholderDrawable = AvatarPlaceholderDrawable(
                 context = context,
-                initials = user.name.ifEmpty { user.id }.initials(),
+                initials = initials,
                 initialsTextStyle = avatarStyle.avatarInitialsTextStyle,
             ),
         )

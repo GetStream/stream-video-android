@@ -30,7 +30,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -42,7 +41,6 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.getstream.video.android.compose.lifecycle.MediaPiPLifecycle
 import io.getstream.video.android.compose.permission.VideoPermissionsState
 import io.getstream.video.android.compose.permission.rememberCallPermissionsState
@@ -132,8 +130,6 @@ public fun CallLobby(
         )
     },
 ) {
-    val participant = remember(user) { ParticipantState(initialUser = user, call = call) }
-
     DefaultPermissionHandler(videoPermission = permissions)
 
     MediaPiPLifecycle(call = call)
@@ -153,11 +149,10 @@ public fun CallLobby(
                 onDisabledContent.invoke()
             }
 
-            val userNameOrId by participant.userNameOrId.collectAsStateWithLifecycle()
-            val nameLabel = if (participant.isLocal) {
+            val nameLabel = if (user.id == StreamVideo.instance().user.id) {
                 stringResource(id = R.string.stream_video_myself)
             } else {
-                userNameOrId
+                user.userNameOrId
             }
 
             ParticipantLabel(
@@ -220,7 +215,8 @@ private fun OnDisabledContent(user: User) {
             modifier = Modifier
                 .size(VideoTheme.dimens.callAvatarSize)
                 .align(Alignment.Center),
-            user = user,
+            userImage = user.image,
+            userName = user.name.ifBlank { user.id },
         )
     }
 }
