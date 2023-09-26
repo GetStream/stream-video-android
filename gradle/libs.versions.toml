@@ -179,7 +179,7 @@ hilt-compiler = { group = "com.google.dagger", name = "hilt-android-compiler", v
 
 firebase-bom = { group = "com.google.firebase", name = "firebase-bom", version.ref = "firebaseBom" }
 firebase-crashlytics = { group = "com.google.firebase", name = "firebase-crashlytics-ktx" }
-firebase-analyrics = { group = "com.google.firebase", name = "firebase-analytics-ktx" }
+firebase-analytics = { group = "com.google.firebase", name = "firebase-analytics-ktx" }
 
 play-install-referrer = { group = "com.android.installreferrer", name = "installreferrer", version.ref = "installReferrer" }
 play-code-scanner = { group = "com.google.android.gms", name = "play-services-code-scanner", version.ref = "playCodeScanner" }

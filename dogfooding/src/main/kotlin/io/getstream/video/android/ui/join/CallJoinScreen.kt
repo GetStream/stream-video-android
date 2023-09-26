@@ -73,12 +73,14 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.google.android.gms.tasks.OnSuccessListener
+import com.google.firebase.analytics.FirebaseAnalytics
 import com.google.mlkit.vision.barcode.common.Barcode
 import com.google.mlkit.vision.codescanner.GmsBarcodeScannerOptions
 import com.google.mlkit.vision.codescanner.GmsBarcodeScanning
 import io.getstream.video.android.BuildConfig
 import io.getstream.video.android.DeeplinkingActivity
 import io.getstream.video.android.R
+import io.getstream.video.android.analytics.FirebaseEvents
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.avatar.UserAvatar
 import io.getstream.video.android.datastore.delegate.StreamUserDataStore
@@ -375,6 +377,7 @@ private fun HandleCallJoinUiState(
 @Composable
 private fun rememberQrCodeCallback(): OnSuccessListener<Barcode> {
     val context = LocalContext.current
+    val firebaseAnalytics by lazy { FirebaseAnalytics.getInstance(context) }
 
     return remember {
         OnSuccessListener<Barcode> {
@@ -391,6 +394,7 @@ private fun rememberQrCodeCallback(): OnSuccessListener<Barcode> {
             }
 
             if (!callId.isNullOrEmpty()) {
+                firebaseAnalytics.logEvent(FirebaseEvents.SCAN_QR_CODE, null)
                 context.startActivity(DeeplinkingActivity.createIntent(context, callId))
             } else {
                 Toast.makeText(
