@@ -48,7 +48,7 @@ internal class VideoPushDelegate(
      */
     override fun handlePushMessage(
         metadata: Map<String, Any?>,
-        payload: Map<String, Any?>
+        payload: Map<String, Any?>,
     ): Boolean {
         logger.d { "[handlePushMessage] payload: $payload, metadata: $metadata" }
         return payload.ifValid {
