@@ -45,6 +45,8 @@ import io.getstream.chat.android.compose.viewmodel.messages.MessagesViewModelFac
 import io.getstream.chat.android.ui.common.state.messages.list.MessageItemState
 import io.getstream.video.android.core.Call
 import io.getstream.video.android.ui.common.R
+import java.time.Instant
+import java.util.Date
 
 @Composable
 internal fun ChatDialog(
@@ -71,7 +73,16 @@ internal fun ChatDialog(
 
     val messageItems = listViewModel.currentMessagesState.messageItems
     LaunchedEffect(key1 = messageItems) {
-        onNewMessages.invoke(messageItems.filterIsInstance<MessageItemState>().take(3).reversed())
+        onNewMessages.invoke(
+            messageItems.filterIsInstance<MessageItemState>().take(3)
+                .filter {
+                    it.message.createdAt?.after(
+                        Date.from(
+                            Instant.now().minusSeconds(10),
+                        ),
+                    ) == true
+                }.reversed(),
+        )
     }
 
     ChatTheme {
