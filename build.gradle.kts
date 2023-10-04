@@ -15,6 +15,7 @@ plugins {
     alias(libs.plugins.kotlin.android) apply false
     alias(libs.plugins.kotlin.serialization) apply false
     alias(libs.plugins.kotlin.compatibility.validator) apply false
+    alias(libs.plugins.ksp) apply false
     alias(libs.plugins.wire) apply false
     alias(libs.plugins.nexus) apply false
     alias(libs.plugins.google.gms) apply false
