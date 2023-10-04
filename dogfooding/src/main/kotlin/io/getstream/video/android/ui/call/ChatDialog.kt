@@ -81,7 +81,19 @@ internal fun ChatDialog(
                             Instant.now().minusSeconds(10),
                         ),
                     ) == true
-                }.reversed(),
+                }
+                .map { messageItemState ->
+                    if (messageItemState.message.text.isNotEmpty()) {
+                        messageItemState
+                    } else {
+                        messageItemState.copy(
+                            message = messageItemState.message.copy(
+                                text = "[User shared an attachment]",
+                            ),
+                        )
+                    }
+                }
+                .reversed(),
         )
     }
 

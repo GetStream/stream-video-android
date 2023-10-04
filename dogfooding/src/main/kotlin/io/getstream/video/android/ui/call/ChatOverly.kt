@@ -42,7 +42,7 @@ fun ChatOverly(
     messages: List<MessageItemState>,
 ) {
     val configuration = LocalConfiguration.current
-    Column(modifier = modifier.width((configuration.screenWidthDp * 0.5f).dp)) {
+    Column(modifier = modifier.width((configuration.screenWidthDp * 0.65f).dp)) {
         if (messages.isNotEmpty()) {
             Message(
                 modifier = Modifier
