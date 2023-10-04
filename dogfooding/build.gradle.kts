@@ -30,9 +30,9 @@ plugins {
     id(libs.plugins.firebase.crashlytics.get().pluginId)
     id(libs.plugins.kotlin.serialization.get().pluginId)
     id(libs.plugins.hilt.get().pluginId)
+    id(libs.plugins.ksp.get().pluginId)
     id(libs.plugins.play.publisher.get().pluginId)
     id(libs.plugins.baseline.profile.get().pluginId)
-    kotlin("kapt")
 }
 
 android {
@@ -245,7 +245,7 @@ dependencies {
 
     // hilt
     implementation(libs.hilt.android)
-    kapt(libs.hilt.compiler)
+    ksp(libs.hilt.compiler)
 
     // firebase
     implementation(libs.firebase.crashlytics)
