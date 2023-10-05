@@ -43,6 +43,7 @@ import io.getstream.video.android.core.notifications.NotificationHandler.Compani
 import io.getstream.video.android.core.notifications.NotificationHandler.Companion.INTENT_EXTRA_CALL_CID
 import io.getstream.video.android.core.notifications.NotificationHandler.Companion.INTENT_EXTRA_NOTIFICATION_ID
 import io.getstream.video.android.core.notifications.internal.DismissNotificationActivity
+import io.getstream.video.android.core.utils.stringOrDefault
 import io.getstream.video.android.model.StreamCallId
 
 public open class DefaultNotificationHandler(
@@ -354,9 +355,22 @@ public open class DefaultNotificationHandler(
         }
     }
 
-    open fun getChannelId(): String = CHANNEL_ID
-    open fun getChannelName(): String = CHANNEL_NAME
-    open fun getChannelDescription(): String = CHANNEL_DESCRIPTION
+    open fun getChannelId(): String = stringOrDefault(
+        application.applicationContext,
+        R.string.stream_video_incoming_call_notification_channel_id,
+        CHANNEL_ID,
+    )
+
+    open fun getChannelName(): String = stringOrDefault(
+        application.applicationContext,
+        R.string.stream_video_incoming_call_notification_channel_title,
+        CHANNEL_NAME,
+    )
+    open fun getChannelDescription(): String = stringOrDefault(
+        application.applicationContext,
+        R.string.stream_video_incoming_call_notification_channel_description,
+        CHANNEL_DESCRIPTION,
+    )
 
     companion object {
         private const val CHANNEL_ID = "incoming_calls"

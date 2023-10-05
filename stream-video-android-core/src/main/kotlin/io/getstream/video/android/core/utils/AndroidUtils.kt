@@ -73,3 +73,16 @@ public fun Activity.shouldShowRequestPermissionsRationale(permissions: Array<out
         ActivityCompat.shouldShowRequestPermissionRationale(this, it)
     }.reduce { acc, value -> acc && value }
 }
+
+/**
+ * Get a string or a default value.
+ *
+ * @param context an Android context (possibly applicationContext)
+ * @param resId the resource ID
+ * @param default the default value
+ */
+internal fun stringOrDefault(context: Context, resId: Int, default: String = "") = try {
+    context.getString(resId)
+} catch (e: Exception) {
+    default
+}

@@ -25,4 +25,9 @@
     <string name="stream_video_screen_sharing_notification_action_stop">Stop screen sharing</string>
     <string name="stream_video_screen_sharing_notification_channel_title">Screen-sharing</string>
     <string name="stream_video_screen_sharing_notification_channel_description">Required to be enabled for screen sharing</string>
+
+    <string name="stream_video_incoming_call_notification_channel_id" translatable="false">incoming_calls</string>
+    <string name="stream_video_incoming_call_notification_channel_title">Incoming Calls (translated) </string>
+    <string name="stream_video_incoming_call_notification_channel_description">Incoming audio and video call alerts</string>
+
 </resources>
