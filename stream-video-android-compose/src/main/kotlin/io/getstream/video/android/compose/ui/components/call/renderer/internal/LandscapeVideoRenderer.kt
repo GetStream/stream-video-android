@@ -303,10 +303,7 @@ internal fun BoxScope.LandscapeVideoRenderer(
                     modifier = Modifier.fillMaxSize(),
                     columns = GridCells.Fixed(3),
                     content = {
-                        items(
-                            count = callParticipants.size,
-                            key = { callParticipants[it].sessionId },
-                        ) { key ->
+                        items(count = callParticipants.size) { key ->
                             // make 2 items exactly fit available height
                             val itemHeight = with(LocalDensity.current) {
                                 (constraints.maxHeight / 2).toDp()
