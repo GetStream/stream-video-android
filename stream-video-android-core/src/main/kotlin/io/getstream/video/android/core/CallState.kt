@@ -245,7 +245,7 @@ public class CallState(
                     { it.videoEnabled.value },
                     { it.lastSpeakingAt.value },
                     { it.joinedAt.value },
-                    { it.userId.value}
+                    { it.userId.value },
                 ),
             ).reversed()
             scope.launch {
