@@ -240,14 +240,14 @@ public class CallState(
             val sorted = participants.sortedWith(
                 compareBy(
                     { pinned.containsKey(it.sessionId) },
-                    { it.dominantSpeaker.value },
                     { it.screenSharingEnabled.value },
-                    { it.lastSpeakingAt.value },
+                    { it.dominantSpeaker.value },
                     { it.videoEnabled.value },
+                    { it.lastSpeakingAt.value },
                     { it.joinedAt.value },
+                    { it.userId.value}
                 ),
             ).reversed()
-
             scope.launch {
                 if (lastParticipants != sorted) {
                     send(sorted)
