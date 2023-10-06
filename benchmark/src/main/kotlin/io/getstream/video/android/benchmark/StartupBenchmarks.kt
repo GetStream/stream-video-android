@@ -49,15 +49,27 @@ class StartupBenchmarks {
             },
             measureBlock = {
                 startActivityAndWait()
+                device.waitForIdle()
 
-                // TODO Add interactions to wait for when your app is fully drawn.
-                // The app is fully drawn when Activity.reportFullyDrawn is called.
-                // For Jetpack Compose, you can use ReportDrawn, ReportDrawnWhen and ReportDrawnAfter
-                // from the AndroidX Activity library.
+                // -------------
+                // Authenticate
+                // -------------
+                device.authenticateAndNavigateToHome()
 
-                // Check the UiAutomator documentation for more information on how to
-                // interact with the app.
-                // https://d.android.com/training/testing/other-components/ui-automator
+                // -------------
+                // JoinCall
+                // -------------
+                device.navigateFromJoinCallToLobby()
+
+                // -------------
+                // Lobby
+                // -------------
+                device.navigateFromLobbyToCall()
+
+                // -------------
+                // Call
+                // -------------
+                device.testCall()
             },
         )
     }
