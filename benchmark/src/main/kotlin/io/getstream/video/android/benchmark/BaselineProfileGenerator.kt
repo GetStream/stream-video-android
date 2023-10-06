@@ -65,7 +65,7 @@ internal class BaselineProfileGenerator {
         }
 }
 
-private fun UiDevice.authenticateAndNavigateToHome() {
+internal fun UiDevice.authenticateAndNavigateToHome() {
     wait(Until.hasObject(By.res("authenticate")), 5_000)
 
     // Click the Authenticate button and login.
@@ -74,7 +74,7 @@ private fun UiDevice.authenticateAndNavigateToHome() {
     waitForIdle()
 }
 
-private fun UiDevice.navigateFromJoinCallToLobby() {
+internal fun UiDevice.navigateFromJoinCallToLobby() {
     wait(Until.hasObject(By.res("start_new_call")), 5_000)
 
     // wait for the Join Call button and navigate to the lobby screen by clicking.
@@ -83,7 +83,7 @@ private fun UiDevice.navigateFromJoinCallToLobby() {
     waitForIdle()
 }
 
-private fun UiDevice.navigateFromLobbyToCall() {
+internal fun UiDevice.navigateFromLobbyToCall() {
     waitForObject(By.text(getPermissionText()), 5_000)?.click()
     waitForObject(By.text(getPermissionText()), 5_000)?.click()
 
@@ -96,20 +96,20 @@ private fun UiDevice.navigateFromLobbyToCall() {
     waitForIdle()
 }
 
-private fun UiDevice.testCall() {
+internal fun UiDevice.testCall() {
     wait(Until.hasObject(By.res("call_content")), 5_000)
     wait(Until.hasObject(By.res("video_renderer")), 5_000)
     waitForIdle()
 }
 
-private fun UiDevice.waitForObject(selector: BySelector, timeout: Long = 5_000): UiObject2? {
+internal fun UiDevice.waitForObject(selector: BySelector, timeout: Long = 5_000): UiObject2? {
     if (wait(Until.hasObject(selector), timeout)) {
         return findObject(selector)
     }
     return null
 }
 
-private fun getPermissionText(): String {
+internal fun getPermissionText(): String {
     return when {
         Build.VERSION.SDK_INT <= 28 -> "ALLOW"
         Build.VERSION.SDK_INT == 29 -> "Allow only while using the app"
