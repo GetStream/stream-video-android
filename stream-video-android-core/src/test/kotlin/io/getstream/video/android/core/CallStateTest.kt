@@ -130,10 +130,10 @@ class CallStateTest : IntegrationTestBase() {
         )
 
         call.state.updateParticipant(
-            ParticipantState("4", call, "4").apply { _lastSpeakingAt.value = nowUtc },
+            ParticipantState("4", call, "4").apply { _videoEnabled.value = true },
         )
         call.state.updateParticipant(
-            ParticipantState("5", call, "5").apply { _videoEnabled.value = true },
+            ParticipantState("5", call, "5").apply { _lastSpeakingAt.value = nowUtc },
         )
         call.state.updateParticipant(
             ParticipantState("6", call, "6").apply { _joinedAt.value = nowUtc },
@@ -143,10 +143,10 @@ class CallStateTest : IntegrationTestBase() {
             ParticipantState("1", call, "1"),
         )
         call.state.updateParticipant(
-            ParticipantState("2", call, "2").apply { _dominantSpeaker.value = true },
+            ParticipantState("2", call, "2").apply { _screenSharingEnabled.value = true },
         )
         call.state.updateParticipant(
-            ParticipantState("3", call, "3").apply { _screenSharingEnabled.value = true },
+            ParticipantState("3", call, "3").apply { _dominantSpeaker.value = true },
         )
 
         val participants = call.state.participants.value
@@ -162,7 +162,7 @@ class CallStateTest : IntegrationTestBase() {
         delay(60)
 
         val sorted3 = sortedParticipants.value.map { it.sessionId }
-        assertThat(sorted3).isEqualTo(listOf("1", "3", "2", "4", "5", "6"))
+        assertThat(sorted3).isEqualTo(listOf("1", "2", "3", "4", "5", "6"))
     }
 
     @Test
