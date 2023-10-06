@@ -43,7 +43,6 @@ import io.getstream.video.android.core.notifications.NotificationHandler.Compani
 import io.getstream.video.android.core.notifications.NotificationHandler.Companion.INTENT_EXTRA_CALL_CID
 import io.getstream.video.android.core.notifications.NotificationHandler.Companion.INTENT_EXTRA_NOTIFICATION_ID
 import io.getstream.video.android.core.notifications.internal.DismissNotificationActivity
-import io.getstream.video.android.core.utils.stringOrDefault
 import io.getstream.video.android.model.StreamCallId
 
 public open class DefaultNotificationHandler(
@@ -355,27 +354,17 @@ public open class DefaultNotificationHandler(
         }
     }
 
-    open fun getChannelId(): String = stringOrDefault(
-        application.applicationContext,
+    open fun getChannelId(): String = application.applicationContext.getString(
         R.string.stream_video_incoming_call_notification_channel_id,
-        CHANNEL_ID,
     )
-
-    open fun getChannelName(): String = stringOrDefault(
-        application.applicationContext,
+    open fun getChannelName(): String = application.applicationContext.getString(
         R.string.stream_video_incoming_call_notification_channel_title,
-        CHANNEL_NAME,
     )
-    open fun getChannelDescription(): String = stringOrDefault(
-        application.applicationContext,
+    open fun getChannelDescription(): String = application.applicationContext.getString(
         R.string.stream_video_incoming_call_notification_channel_description,
-        CHANNEL_DESCRIPTION,
     )
 
     companion object {
-        private const val CHANNEL_ID = "incoming_calls"
-        private const val CHANNEL_NAME = "Incoming Calls"
-        private const val CHANNEL_DESCRIPTION = "Incoming audio and video call alerts"
 
         private val PENDING_INTENT_FLAG: Int by lazy {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
