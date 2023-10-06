@@ -354,13 +354,13 @@ public open class DefaultNotificationHandler(
         }
     }
 
-    open fun getChannelId(): String = application.applicationContext.getString(
+    open fun getChannelId(): String = application.getString(
         R.string.stream_video_incoming_call_notification_channel_id,
     )
-    open fun getChannelName(): String = application.applicationContext.getString(
+    open fun getChannelName(): String = application.getString(
         R.string.stream_video_incoming_call_notification_channel_title,
     )
-    open fun getChannelDescription(): String = application.applicationContext.getString(
+    open fun getChannelDescription(): String = application.getString(
         R.string.stream_video_incoming_call_notification_channel_description,
     )
 
