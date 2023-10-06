@@ -79,9 +79,9 @@ public fun Activity.shouldShowRequestPermissionsRationale(permissions: Array<out
  *
  * @param context an Android context (possibly applicationContext)
  * @param resId the resource ID
- * @param default the default value
+ * @param default the default value if the string could not be retrieved from strings.
  */
-internal fun stringOrDefault(context: Context, resId: Int, default: String = "") = try {
+internal fun stringOrDefault(context: Context, resId: Int, default: String) = try {
     context.getString(resId)
 } catch (e: Exception) {
     default
