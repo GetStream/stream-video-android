@@ -354,14 +354,17 @@ public open class DefaultNotificationHandler(
         }
     }
 
-    open fun getChannelId(): String = CHANNEL_ID
-    open fun getChannelName(): String = CHANNEL_NAME
-    open fun getChannelDescription(): String = CHANNEL_DESCRIPTION
+    open fun getChannelId(): String = application.getString(
+        R.string.stream_video_incoming_call_notification_channel_id,
+    )
+    open fun getChannelName(): String = application.getString(
+        R.string.stream_video_incoming_call_notification_channel_title,
+    )
+    open fun getChannelDescription(): String = application.getString(
+        R.string.stream_video_incoming_call_notification_channel_description,
+    )
 
     companion object {
-        private const val CHANNEL_ID = "incoming_calls"
-        private const val CHANNEL_NAME = "Incoming Calls"
-        private const val CHANNEL_DESCRIPTION = "Incoming audio and video call alerts"
 
         private val PENDING_INTENT_FLAG: Int by lazy {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
