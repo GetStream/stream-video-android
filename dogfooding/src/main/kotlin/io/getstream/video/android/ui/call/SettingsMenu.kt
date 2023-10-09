@@ -60,11 +60,10 @@ internal fun SettingsMenu(
     showDebugOptions: Boolean,
     onDisplayAvailableDevice: () -> Unit,
     onDismissed: () -> Unit,
+    onShowReactionsMenu: () -> Unit,
 ) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
-    val reactions =
-        listOf(":fireworks:", ":hello:", ":raise-hand:", ":like:", ":hate:", ":smile:", ":heart:")
 
     val screenSharePermissionResult = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.StartActivityForResult(),
@@ -99,11 +98,8 @@ internal fun SettingsMenu(
             ) {
                 Row(
                     modifier = Modifier.clickable {
-                        scope.launch {
-                            val shuffled = reactions.shuffled()
-                            call.sendReaction(type = "default", emoji = shuffled.first())
-                            onDismissed.invoke()
-                        }
+                        onDismissed()
+                        onShowReactionsMenu()
                     },
                 ) {
                     Icon(
