@@ -77,6 +77,7 @@ fun CallScreen(
     val isMicrophoneEnabled by call.microphone.isEnabled.collectAsState()
     val speakingWhileMuted by call.state.speakingWhileMuted.collectAsState()
     var isShowingSettingMenu by remember { mutableStateOf(false) }
+    var isShowingReactionsMenu by remember { mutableStateOf(false) }
     var isShowingAvailableDeviceMenu by remember { mutableStateOf(false) }
     var unreadCount by remember { mutableIntStateOf(0) }
     val chatState = rememberModalBottomSheetState(
@@ -250,6 +251,15 @@ fun CallScreen(
                 showDebugOptions = showDebugOptions,
                 onDisplayAvailableDevice = { isShowingAvailableDeviceMenu = true },
                 onDismissed = { isShowingSettingMenu = false },
+                onShowReactionsMenu = { isShowingReactionsMenu = true },
+            )
+        }
+
+        if (isShowingReactionsMenu) {
+            ReactionsMenu(
+                call = call,
+                reactionMapper = VideoTheme.reactionMapper,
+                onDismiss = { isShowingReactionsMenu = false },
             )
         }
 
