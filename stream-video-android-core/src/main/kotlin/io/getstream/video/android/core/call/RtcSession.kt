@@ -51,6 +51,8 @@ import io.getstream.video.android.core.model.MediaTrack
 import io.getstream.video.android.core.model.StreamPeerType
 import io.getstream.video.android.core.model.VideoTrack
 import io.getstream.video.android.core.model.toPeerType
+import io.getstream.video.android.core.socket.SocketState
+import io.getstream.video.android.core.utils.SdpSession
 import io.getstream.video.android.core.utils.buildAudioConstraints
 import io.getstream.video.android.core.utils.buildConnectionConfiguration
 import io.getstream.video.android.core.utils.buildMediaConstraints
@@ -61,9 +63,11 @@ import io.getstream.video.android.core.utils.stringify
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.collectLatest
@@ -85,10 +89,12 @@ import org.webrtc.MediaConstraints
 import org.webrtc.MediaStream
 import org.webrtc.MediaStreamTrack
 import org.webrtc.PeerConnection
+import org.webrtc.PeerConnection.PeerConnectionState
 import org.webrtc.RTCStatsReport
 import org.webrtc.RtpTransceiver
 import org.webrtc.SessionDescription
 import retrofit2.HttpException
+import stream.video.sfu.event.Migration
 import stream.video.sfu.models.ICETrickle
 import stream.video.sfu.models.Participant
 import stream.video.sfu.models.PeerType
@@ -161,6 +167,7 @@ public class RtcSession internal constructor(
     internal var sfuUrl: String,
     internal var sfuToken: String,
     internal var remoteIceServers: List<IceServer>,
+    internal var onMigrationCompleted: () -> Unit,
 ) {
 
     internal val trackIdToParticipant: MutableStateFlow<Map<String, String>> =
@@ -169,15 +176,17 @@ public class RtcSession internal constructor(
     private var syncPublisherJob: Job? = null
     private var subscriptionSyncJob: Job? = null
     private var muteStateSyncJob: Job? = null
+    private var sfuSocketStateJob: Job? = null
+    private var subscriberListenJob: Job? = null
 
     private var videoTransceiverInitialized: Boolean = false
     private var audioTransceiverInitialized: Boolean = false
     private var screenshareTransceiverInitialized: Boolean = false
     private var errorJob: Job? = null
     private var eventJob: Job? = null
-    internal val socket by lazy { sfuConnectionModule.sfuSocket }
+    internal val socket
+        get() = sfuConnectionModule.sfuSocket
 
-    private val context = client.context
     private val logger by taggedLogger("Call:RtcSession")
     private val dynascaleLogger by taggedLogger("Call:RtcSession:Dynascale")
     private val clientImpl = client as StreamVideoImpl
@@ -263,9 +272,8 @@ public class RtcSession internal constructor(
 
     private var iceServers = buildRemoteIceServers(remoteIceServers)
 
-    private val connectionConfiguration: PeerConnection.RTCConfiguration by lazy {
-        buildConnectionConfiguration(iceServers)
-    }
+    private val connectionConfiguration: PeerConnection.RTCConfiguration
+        get() = buildConnectionConfiguration(iceServers)
 
     /** subscriber peer connection is used for subs */
     public var subscriber: StreamPeerConnection? = null
@@ -281,7 +289,16 @@ public class RtcSession internal constructor(
         buildAudioConstraints()
     }
 
-    internal var sfuConnectionModule: SfuConnectionModule
+    internal lateinit var sfuConnectionModule: SfuConnectionModule
+
+    /**
+     * Used during a SFU migration as a temporary new SFU connection. Is null before and after
+     * the migration is finished.
+     */
+    private var sfuConnectionMigrationModule: SfuConnectionModule? = null
+
+    private val _sfuSocketState = MutableStateFlow<SocketState>(SocketState.NotConnected)
+    val sfuSocketState = _sfuSocketState.asStateFlow()
 
     private val sfuFastReconnectListener: () -> Unit = {
         // SFU socket has done a fast-reconnect. We need to an ICE restart immediately and not wait
@@ -301,22 +318,22 @@ public class RtcSession internal constructor(
         // step 1 setup the peer connections
         subscriber = createSubscriber()
 
-        coroutineScope.launch {
-            // call update participant subscriptions debounced
-            subscriber?.let {
-                it.state.collect {
-                    updatePeerState()
-                }
-            }
-        }
+        listenToSubscriberConnection()
 
         val session = this
         val getSdp = suspend {
             session.getSubscriberSdp().description
         }
-        sfuConnectionModule =
-            connectionModule.createSFUConnectionModule(sfuUrl, sessionId, sfuToken, getSdp, sfuFastReconnectListener)
-        listenToSocket()
+        val sfuConnectionModule =
+            connectionModule.createSFUConnectionModule(
+                sfuUrl,
+                sessionId,
+                sfuToken,
+                getSdp,
+                sfuFastReconnectListener,
+            )
+        setSfuConnectionModule(sfuConnectionModule)
+        listenToSocketEventsAndErrors()
 
         coroutineScope.launch {
             // call update participant subscriptions debounced
@@ -339,19 +356,19 @@ public class RtcSession internal constructor(
         }
     }
 
-    private fun listenToSocket() {
+    private fun listenToSocketEventsAndErrors() {
         // cancel any old socket monitoring if needed
         eventJob?.cancel()
         errorJob?.cancel()
 
         // listen to socket events and errors
         eventJob = coroutineScope.launch {
-            sfuConnectionModule.sfuSocket.events.collect() {
+            sfuConnectionModule.sfuSocket.events.collect {
                 clientImpl.fireEvent(it, call.cid)
             }
         }
         errorJob = coroutineScope.launch {
-            sfuConnectionModule.sfuSocket.errors.collect() {
+            sfuConnectionModule.sfuSocket.errors.collect {
                 logger.e(it) { "permanent failure on socket connection" }
                 if (clientImpl.developmentMode) {
                     throw it
@@ -410,6 +427,22 @@ public class RtcSession internal constructor(
                     isScreenShare = false,
                 )
                 videoTransceiverInitialized = true
+            }
+        }
+    }
+
+    private fun setSfuConnectionModule(sfuConnectionModule: SfuConnectionModule) {
+        // This is used to switch from a current SFU connection to a new migrated SFU connection
+        this@RtcSession.sfuConnectionModule = sfuConnectionModule
+
+        // Stop listening to connection state on the existing SFU connection
+        sfuSocketStateJob?.cancel()
+        sfuSocketStateJob = null
+
+        // Start listening to connection state on new SFU connection
+        sfuSocketStateJob = coroutineScope.launch {
+            sfuConnectionModule.sfuSocket.connectionState.collect { sfuSocketState ->
+                _sfuSocketState.value = sfuSocketState
             }
         }
     }
@@ -671,6 +704,9 @@ public class RtcSession internal constructor(
         // disconnect the socket and clean it up
         sfuConnectionModule.sfuSocket.cleanup()
 
+        sfuConnectionMigrationModule?.sfuSocket?.cleanup()
+        sfuConnectionMigrationModule = null
+
         // cleanup the publisher and subcriber peer connections
         subscriber?.connection?.close()
         publisher?.connection?.close()
@@ -791,7 +827,7 @@ public class RtcSession internal constructor(
         } ?: throw Error("Couldn't create a generic SDP, subscriber isn't setup")
     }
 
-    fun mangleSdp(sdp: SessionDescription): SessionDescription {
+    private fun mangleSdp(sdp: SessionDescription): SessionDescription {
         val settings = call.state.settings.value
         val red = settings?.audio?.redundantCodingEnabled ?: true
         val opus = settings?.audio?.opusDtxEnabled ?: true
@@ -1265,7 +1301,7 @@ public class RtcSession internal constructor(
             }
 
             // step 3 - create the list of tracks
-            val tracks = getPublisherTracks()
+            val tracks = getPublisherTracks(mangledSdp.description)
             val currentSfu = sfuUrl
 
             publisherSdpOffer.value = mangledSdp
@@ -1283,6 +1319,7 @@ public class RtcSession internal constructor(
                         session_id = sessionId,
                         tracks = tracks,
                     )
+
                     val result = setPublisher(request)
                     // step 5 - set the remote description
 
@@ -1311,7 +1348,7 @@ public class RtcSession internal constructor(
         }
     }
 
-    private fun getPublisherTracks(): List<TrackInfo> {
+    private fun getPublisherTracks(sdp: String): List<TrackInfo> {
         val captureResolution = call.camera.resolution.value
         val screenShareTrack = getLocalTrack(TrackType.TRACK_TYPE_SCREEN_SHARE)
 
@@ -1321,20 +1358,7 @@ public class RtcSession internal constructor(
         }.map { transceiver ->
             val track = transceiver.sender.track()!!
 
-            val trackType = when (track.kind()) {
-                "audio" -> TrackType.TRACK_TYPE_AUDIO
-                "screen" -> TrackType.TRACK_TYPE_SCREEN_SHARE
-                "video" -> {
-                    // video tracks and screenshare tracks in webrtc are both video
-                    // (the "screen" track type doesn't seem to be used).
-                    if (screenShareTrack?.asVideoTrack()?.video?.id() == track.id()) {
-                        TrackType.TRACK_TYPE_SCREEN_SHARE
-                    } else {
-                        TrackType.TRACK_TYPE_VIDEO
-                    }
-                }
-                else -> TrackType.TRACK_TYPE_UNSPECIFIED
-            }
+            val trackType = convertKindToTrackType(track, screenShareTrack)
 
             val layers: List<VideoLayer> = if (trackType == TrackType.TRACK_TYPE_VIDEO) {
                 checkNotNull(captureResolution) {
@@ -1353,9 +1377,69 @@ public class RtcSession internal constructor(
                 track_id = track.id(),
                 track_type = trackType,
                 layers = layers,
+                mid = transceiver.mid ?: extractMid(sdp, track, screenShareTrack, trackType, transceivers),
             )
         }
         return tracks
+    }
+
+    private fun convertKindToTrackType(track: MediaStreamTrack, screenShareTrack: MediaTrack?) =
+        when (track.kind()) {
+            "audio" -> TrackType.TRACK_TYPE_AUDIO
+            "screen" -> TrackType.TRACK_TYPE_SCREEN_SHARE
+            "video" -> {
+                // video tracks and screenshare tracks in webrtc are both video
+                // (the "screen" track type doesn't seem to be used).
+                if (screenShareTrack?.asVideoTrack()?.video?.id() == track.id()) {
+                    TrackType.TRACK_TYPE_SCREEN_SHARE
+                } else {
+                    TrackType.TRACK_TYPE_VIDEO
+                }
+            }
+            else -> TrackType.TRACK_TYPE_UNSPECIFIED
+        }
+
+    private fun extractMid(
+        sdp: String?,
+        track: MediaStreamTrack,
+        screenShareTrack: MediaTrack?,
+        trackType: TrackType,
+        transceivers: List<RtpTransceiver>,
+    ): String {
+        if (sdp.isNullOrBlank()) {
+            logger.w { "[extractMid] No SDP found. Returning empty mid" }
+            return ""
+        }
+
+        logger.d {
+            "[extractMid] No 'mid' found for track. Trying to find it from the Offer SDP"
+        }
+
+        val sdpSession = SdpSession()
+        sdpSession.parse(sdp)
+        val media = sdpSession.media.find { m ->
+            m.mline?.type == track.kind() &&
+                // if `msid` is not present, we assume that the track is the first one
+                (m.msid?.equals(track.id()) ?: true)
+        }
+
+        if (media?.mid == null) {
+            logger.d {
+                "[extractMid] No mid found in SDP for track type ${track.kind()} and id ${track.id()}. Attempting to find a heuristic mid"
+            }
+
+            val heuristicMid = transceivers.firstOrNull {
+                convertKindToTrackType(track, screenShareTrack) == trackType
+            }
+            if (heuristicMid != null) {
+                return heuristicMid.mid
+            }
+
+            logger.d { "[extractMid] No heuristic mid found. Returning empty mid" }
+            return ""
+        }
+
+        return media.mid.toString()
     }
 
     private fun createVideoLayers(transceiver: RtpTransceiver, captureResolution: CaptureFormat): List<VideoLayer> {
@@ -1564,28 +1648,143 @@ public class RtcSession internal constructor(
         trackDimensions.value = trackDimensionsMap
     }
 
-    suspend fun switchSfu(sfuUrl: String, sfuToken: String, remoteIceServers: List<IceServer>) {
-        logger.i { "switchSfu from ${this.sfuUrl} to $sfuUrl" }
-        val timer = clientImpl.debugInfo.trackTime("call.switchSfu")
-        // update internal vars ot the new SFU
-        this.sfuUrl = sfuUrl
-        this.sfuToken = sfuToken
-        this.remoteIceServers = remoteIceServers
-        this.iceServers = buildRemoteIceServers(remoteIceServers)
+    private fun listenToSubscriberConnection() {
+        subscriberListenJob?.cancel()
+        subscriberListenJob = coroutineScope.launch {
+            // call update participant subscriptions debounced
+            subscriber?.let {
+                it.state.collect {
+                    updatePeerState()
+                }
+            }
+        }
+    }
 
-        // create the new socket
+    suspend fun switchSfu(sfuName: String, sfuUrl: String, sfuToken: String, remoteIceServers: List<IceServer>, failedToSwitch: () -> Unit) {
+        logger.i { "[switchSfu] from ${this.sfuUrl} to $sfuUrl" }
+        val timer = clientImpl.debugInfo.trackTime("call.switchSfu")
+
+        // Prepare SDP
         val getSdp = suspend {
             getSubscriberSdp().description
         }
-        // TODO: updating the turn server requires a new peer connection
-        sfuConnectionModule =
-            connectionModule.createSFUConnectionModule(sfuUrl, sessionId, sfuToken, getSdp, sfuFastReconnectListener)
-        listenToSocket()
-        sfuConnectionModule.sfuSocket.connect()
-        timer.split("socket connected")
 
-        // ice restart
-        reconnect(forceRestart = true)
-        timer.finish("ice restart in progress")
+        // Prepare migration object for SFU socket
+        val migration = suspend {
+            Migration(
+                from_sfu_id = sfuName,
+                announced_tracks = getPublisherTracks(getSdp.invoke()),
+                subscriptions = subscriptions.value,
+            )
+        }
+        // Create a parallel SFU socket
+        sfuConnectionMigrationModule =
+            connectionModule.createSFUConnectionModule(
+                sfuUrl,
+                sessionId,
+                sfuToken,
+                getSdp,
+                sfuFastReconnectListener,
+            )
+
+        // Wait until the socket connects - if it fails to connect then return to "Reconnecting"
+        // state (to make sure that the full reconnect logic will kick in)
+        coroutineScope.launch {
+            sfuConnectionMigrationModule!!.sfuSocket.connectionState.collect { it ->
+                when (it) {
+                    is SocketState.Connected -> {
+                        logger.d { "[switchSfu] Migration SFU socket state changed to Connected" }
+                        timer.split("SFU socket connected")
+
+                        // Disconnect the old SFU and stop listening to SFU stateflows
+                        eventJob?.cancel()
+                        errorJob?.cancel()
+                        sfuConnectionModule.sfuSocket.cleanup()
+
+                        // Make the new SFU the currently used one
+                        setSfuConnectionModule(sfuConnectionMigrationModule!!)
+                        sfuConnectionMigrationModule = null
+
+                        // We are connected to the new SFU, change the RtcSession parameters to
+                        // match the new SFU
+                        this@RtcSession.sfuUrl = sfuUrl
+                        this@RtcSession.sfuToken = sfuToken
+                        this@RtcSession.remoteIceServers = remoteIceServers
+                        this@RtcSession.iceServers = buildRemoteIceServers(remoteIceServers)
+
+                        // reconnect socket listeners
+                        listenToSocketEventsAndErrors()
+
+                        var tempSubscriber = subscriber
+
+                        // step 1 setup the peer connections
+                        subscriber = createSubscriber()
+
+                        // This makes sure that the new subscriber starts listening to the existing tracks
+                        // Without this the peer connection state would stay in NEW
+                        setVideoSubscriptions()
+
+                        // Start emiting the new subscriber connection state (used by CallHealthMonitor)
+                        listenToSubscriberConnection()
+
+                        // Necessary after SFU migration. This will trigger onNegotiationNeeded
+                        publisher?.connection?.restartIce()
+
+                        coroutineScope.launch {
+                            subscriber?.state?.collect {
+                                if (it == PeerConnectionState.CONNECTED) {
+                                    logger.d { "[switchSfu] Migration subscriber state changed to Connected" }
+                                    timer.split("Subscriber connected")
+                                    tempSubscriber?.let { tempSubscriberValue ->
+                                        tempSubscriberValue.connection.close()
+                                        tempSubscriber = null
+                                    }
+
+                                    onMigrationCompleted.invoke()
+
+                                    timer.finish()
+                                    cancel()
+                                } else if (it == PeerConnectionState.CLOSED ||
+                                    it == PeerConnectionState.DISCONNECTED ||
+                                    it == PeerConnectionState.FAILED
+                                ) {
+                                    logger.d { "[switchSfu] Failed to migrate - subscriber didn't connect ($it)" }
+                                    // Something when wrong with the new subscriber connection
+                                    // We give up the migration and wait for full reconnect
+                                    failedToSwitch()
+                                    cancel()
+                                }
+                            }
+                        }
+
+                        updatePeerState()
+
+                        // Only listen for the connection event once
+                        cancel()
+                    }
+
+                    is SocketState.DisconnectedPermanently -> {
+                        logger.d { "[switchSfu] Failed to migrate - SFU socket disconnected permanently ${it.error}" }
+                        failedToSwitch()
+                        cancel()
+                    }
+
+                    is SocketState.DisconnectedTemporarily -> {
+                        logger.d { "[switchSfu] Failed to migrate - SFU socket disconnected temporarily ${it.error}" }
+                        // We don't wait for the socket to retry during migration
+                        // In this case we will fall back to full-reconnect
+                        failedToSwitch()
+                        cancel()
+                    }
+
+                    else -> {
+                        // Wait
+                    }
+                }
+            }
+        }
+
+        // Connect to SFU socket
+        sfuConnectionMigrationModule!!.sfuSocket.connectMigrating(migration) {}
     }
 }

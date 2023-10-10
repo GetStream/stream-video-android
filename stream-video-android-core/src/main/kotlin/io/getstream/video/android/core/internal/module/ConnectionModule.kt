@@ -180,7 +180,7 @@ internal class SfuConnectionModule(
     /** A token which gives you access to the sfu */
     private val sfuToken: String,
     /** A token which gives you access to the sfu */
-    val apiKey: String,
+    private val apiKey: String,
     /** Function that gives a fresh SDP */
     getSubscriberSdp: suspend () -> String,
     private val loggingLevel: LoggingLevel = LoggingLevel(),
@@ -228,6 +228,7 @@ internal class SfuConnectionModule(
 
     init {
         val socketUrl = "$updatedSignalUrl/ws".replace("https", "wss")
+
         sfuSocket = SfuSocket(
             socketUrl,
             sessionId,

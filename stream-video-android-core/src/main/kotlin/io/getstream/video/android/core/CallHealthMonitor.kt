@@ -105,6 +105,12 @@ public class CallHealthMonitor(
      */
     @Synchronized
     fun check() {
+        // skip health checks if we are migrating
+        if (call.state._connection.value == RealtimeConnection.Migrating) {
+            logger.d { "Skipping health-check - we are migrating" }
+            return
+        }
+
         val subscriberState = call.session?.subscriber?.state?.value
         val publisherState = call.session?.publisher?.state?.value
         val healthyPeerConnections = subscriberState in goodStates && publisherState in goodStates
@@ -154,6 +160,11 @@ public class CallHealthMonitor(
             return
         }
 
+        if (call.state._connection.value == RealtimeConnection.Migrating) {
+            logger.d { "[reconnect] Skipping reconnect - already migrating" }
+            return
+        }
+
         logger.i { "attempting to reconnect" }
 
         reconnectInProgress = true
@@ -175,7 +186,7 @@ public class CallHealthMonitor(
             logger.d { "[reconnect] skipping reconnect - too often" }
         } else {
             lastReconnectAt = now
-            call.reconnectOrSwitchSfu(forceRestart = forceRestart)
+            call.reconnect(forceRestart = forceRestart)
         }
 
         reconnectInProgress = false
