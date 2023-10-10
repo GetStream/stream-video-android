@@ -19,12 +19,14 @@ import com.android.build.api.variant.BuildConfigField
 import com.android.build.api.variant.ResValue
 import com.github.triplet.gradle.androidpublisher.ResolutionStrategy
 import io.getstream.video.android.Configuration
+import io.getstream.video.DogfoodingBuildType
 import java.io.FileInputStream
 import java.util.*
 
 @Suppress("DSL_SCOPE_VIOLATION")
 plugins {
     id("io.getstream.android.application.compose")
+    id("io.getstream.android.application.flavors")
     id("io.getstream.spotless")
     id("com.google.gms.google-services")
     id(libs.plugins.firebase.crashlytics.get().pluginId)
@@ -86,7 +88,7 @@ android {
     buildTypes {
         getByName("debug") {
             versionNameSuffix = "-DEBUG"
-            applicationIdSuffix = ".debug"
+            applicationIdSuffix = DogfoodingBuildType.DEBUG.applicationIdSuffix
             isDebuggable = true
             isMinifyEnabled = false
             isShrinkResources = false
@@ -95,6 +97,7 @@ android {
         }
         getByName("release") {
             isMinifyEnabled = true
+            applicationIdSuffix = DogfoodingBuildType.RELEASE.applicationIdSuffix
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
@@ -106,21 +109,11 @@ android {
             isDebuggable = true
             isMinifyEnabled = false
             isShrinkResources = false
+            applicationIdSuffix = DogfoodingBuildType.BENCHMARK.applicationIdSuffix
             signingConfig = signingConfigs.getByName("debug")
             matchingFallbacks += listOf("release")
             proguardFiles("benchmark-rules.pro")
             buildConfigField("Boolean", "BENCHMARK", "true")
-        }
-    }
-
-    flavorDimensions += "environment"
-    productFlavors {
-        create("dogfooding") {
-            dimension = "environment"
-            applicationIdSuffix = ".dogfooding"
-        }
-        create("production") {
-            dimension = "environment"
         }
     }
 
