@@ -29,8 +29,10 @@ import io.getstream.video.android.core.call.audio.AudioFilter
 import io.getstream.video.android.core.call.utils.SoundInputProcessor
 import io.getstream.video.android.core.call.video.VideoFilter
 import io.getstream.video.android.core.call.video.YuvFrame
+import io.getstream.video.android.core.events.GoAwayEvent
 import io.getstream.video.android.core.events.VideoEventListener
 import io.getstream.video.android.core.internal.InternalStreamVideoApi
+import io.getstream.video.android.core.internal.module.ConnectionModule
 import io.getstream.video.android.core.model.MuteUsersData
 import io.getstream.video.android.core.model.QueriedMembers
 import io.getstream.video.android.core.model.SortField
@@ -377,25 +379,33 @@ public class Call(
         val iceServers = result.value.credentials.iceServers.map { it.toIceServer() }
         timer.split("join request completed")
 
-        if (session == null) {
-            session = if (testInstanceProvider.rtcSessionCreator != null) {
-                testInstanceProvider.rtcSessionCreator!!.invoke()
+        session = if (testInstanceProvider.rtcSessionCreator != null) {
+            testInstanceProvider.rtcSessionCreator!!.invoke()
+        } else {
+
+            val updatedSignalUrl = if (ConnectionModule.secondSfu) {
+                "http://10.0.2.2:3033/twirp"
             } else {
-                RtcSession(
-                    client = client,
-                    call = this,
-                    sfuUrl = sfuUrl,
-                    sfuToken = sfuToken,
-                    connectionModule = (client as StreamVideoImpl).connectionModule,
-                    remoteIceServers = iceServers,
-                )
+                "http://10.0.2.2:3031/twirp"
             }
+
+            RtcSession(
+                client = client,
+                call = this,
+                sfuUrl = updatedSignalUrl,
+                sfuToken = sfuToken,
+                connectionModule = (client as StreamVideoImpl).connectionModule,
+                remoteIceServers = iceServers,
+                onMigrationCompleted = {
+                    state._connection.value = RealtimeConnection.Connected
+                    monitor.check()
+                }
+            )
         }
 
         session?.let {
             state._connection.value = RealtimeConnection.Joined(it)
         }
-
         timer.split("rtc session init")
 
         session?.connect()
@@ -438,7 +448,7 @@ public class Call(
         // listen to Signal WS
         scope.launch {
             session?.let {
-                it.sfuConnectionModule.sfuSocket.connectionState.collect { sfuSocketState ->
+                it.sfuSocketState.collect { sfuSocketState ->
                     if (sfuSocketState is SocketState.DisconnectedPermanently) {
                         handleSignalChannelDisconnect(isRetry = false)
                     }
@@ -455,6 +465,11 @@ public class Call(
         // Prevent multiple starts of the reconnect flow. For the start call
         // first check if sfuSocketReconnectionTime isn't already set - if yes
         // then we are already doing a full reconnect
+        if (state._connection.value == RealtimeConnection.Migrating) {
+            logger.d { "Skipping disconnected channel event - we are migrating" }
+            return
+        }
+
         if (!isRetry && sfuSocketReconnectionTime != null) {
             logger.d { "[handleSignalChannelDisconnect] Already doing a full reconnect cycle - ignoring call" }
             return
@@ -499,22 +514,38 @@ public class Call(
         return clientImpl.sendStats(type, id, data)
     }
 
-    suspend fun switchSfu(forceSwitch: Boolean = false) {
-        location?.let {
-            val joinResponse = joinRequest(location = it, currentSfu = session?.sfuUrl)
-            val shouldSwitch = false
+    suspend fun switchSfu() {
+        state._connection.value = RealtimeConnection.Migrating
 
-            if ((shouldSwitch || forceSwitch) && joinResponse is Success) {
+        location?.let {
+            val joinResponse = joinRequest(location = it, migratingFrom = session?.sfuUrl)
+
+            if (joinResponse is Success) {
                 // switch to the new SFU
                 val cred = joinResponse.value.credentials
                 logger.i { "Switching SFU from ${session?.sfuUrl} to ${cred.server.url}" }
                 val iceServers = cred.iceServers.map { it.toIceServer() }
-                session?.switchSfu(cred.server.url, cred.token, iceServers)
+
+                //TODO:
+                val updatedSignalUrl = if (ConnectionModule.secondSfu) {
+                    "http://10.0.2.2:3033/twirp"
+                } else {
+                    "http://10.0.2.2:3031/twirp"
+                }
+
+                session?.switchSfu(cred.server.edgeName, updatedSignalUrl, cred.token, iceServers, failedToSwitch = {
+                    logger.e { "[switchSfu] Failed to connect to new SFU during migration. Reverting to full reconnect" }
+                    state._connection.value = RealtimeConnection.Reconnecting
+                })
+            } else {
+                logger.e { "[switchSfu] Failed to get a join response during " +
+                        "migration - falling back to reconnect. Error ${joinResponse.errorOrNull()}" }
+                state._connection.value = RealtimeConnection.Reconnecting
             }
         }
     }
 
-    suspend fun reconnectOrSwitchSfu(forceRestart: Boolean) {
+    suspend fun reconnect(forceRestart: Boolean) {
         // mark us as reconnecting
         val connectionState = state._connection.value
 
@@ -528,10 +559,6 @@ public class Call(
         if (online) {
             // start by restarting ice connections
             session?.reconnect(forceRestart = forceRestart)
-
-            // ask the coordinator if we should switch
-            // TODO: disabled since switching SFUs isn't 100% stable yet server side
-            // switchSfu()
         }
     }
 
@@ -613,6 +640,24 @@ public class Call(
 
     fun setVisibility(sessionId: String, trackType: TrackType, visible: Boolean) {
         session?.updateTrackDimensions(sessionId, trackType, visible)
+    }
+
+    fun handleEvent(event: VideoEvent) {
+        logger.i { "[call handleEvent] #sfu; event: $event" }
+
+        when (event) {
+            is GoAwayEvent ->
+                scope.launch {
+                    handleSessionMigrationEvent()
+                }
+        }
+    }
+
+
+    private suspend fun handleSessionMigrationEvent() {
+        ConnectionModule.secondSfu = true
+        logger.d { "[handleSessionMigrationEvent] Received goAway event - starting migration" }
+        switchSfu()
     }
 
     // TODO: review this
@@ -891,7 +936,7 @@ public class Call(
     internal suspend fun joinRequest(
         create: CreateCallOptions? = null,
         location: String,
-        currentSfu: String? = null,
+        migratingFrom: String? = null,
         ring: Boolean = false,
         notify: Boolean = false,
     ): Result<JoinCallResponse> {
@@ -906,6 +951,7 @@ public class Call(
             ring = ring,
             notify = notify,
             location = location,
+            migratingFrom = migratingFrom,
         )
         result.onSuccess {
             state.updateFromResponse(it)
@@ -987,7 +1033,7 @@ public class Call(
 
         public fun switchSfu() {
             call.scope.launch {
-                call.switchSfu(true)
+                call.switchSfu()
             }
         }
     }

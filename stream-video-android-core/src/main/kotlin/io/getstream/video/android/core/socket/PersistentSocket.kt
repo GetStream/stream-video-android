@@ -306,6 +306,10 @@ public open class PersistentSocket<T>(
         // onFailure, onClosed and the 2 onMessage can all generate errors
         // temporary errors should be logged and retried
         // permanent errors should be emitted so the app can decide how to handle it
+        if (destroyed) {
+            logger.d { "[handleError] Ignoring socket error - already closed ${error}" }
+            return
+        }
 
         val permanentError = isPermanentError(error)
         if (permanentError) {
@@ -319,6 +323,7 @@ public open class PersistentSocket<T>(
         } else {
             logger.w { "[handleError] temporary error: $error" }
             _connectionState.value = SocketState.DisconnectedTemporarily(error)
+
             scope.launch { reconnect(reconnectTimeout) }
         }
     }
@@ -336,6 +341,12 @@ public open class PersistentSocket<T>(
      */
     override fun onClosed(webSocket: WebSocket, code: Int, reason: String) {
         logger.d { "[onClosed] code: $code, reason: $reason" }
+
+        if (destroyed) {
+            logger.d { "[onClosed] Ignoring onClosed - socket already closed" }
+            return
+        }
+
         if (code != CODE_CLOSE_SOCKET_FROM_CLIENT) {
             handleError(IllegalStateException("socket closed by server, this shouldn't happen"))
         }

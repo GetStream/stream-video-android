@@ -16,6 +16,7 @@
 
 package io.getstream.video.android.core.socket
 
+import android.os.Build
 import io.getstream.log.taggedLogger
 import io.getstream.video.android.core.BuildConfig
 import io.getstream.video.android.core.call.signal.socket.RTCEventMapper
@@ -31,8 +32,14 @@ import okhttp3.OkHttpClient
 import okhttp3.WebSocket
 import okio.ByteString
 import stream.video.sfu.event.JoinRequest
+import stream.video.sfu.event.Migration
 import stream.video.sfu.event.SfuEvent
 import stream.video.sfu.event.SfuRequest
+import stream.video.sfu.models.ClientDetails
+import stream.video.sfu.models.Device
+import stream.video.sfu.models.OS
+import stream.video.sfu.models.Sdk
+import stream.video.sfu.models.SdkType
 
 /**
  * The SFU socket is slightly different from the coordinator socket
@@ -63,6 +70,26 @@ public class SfuSocket(
     private val maxReconnectWindowTime = if (BuildConfig.DEBUG) { 10000L } else { 3000L }
     private var lastDisconnectTime: Long? = null
 
+    // Only set during SFU migration
+    private var migrationData: (suspend () -> Migration)? = null
+
+    private val clientDetails
+        get() = ClientDetails(
+            os = OS(
+                name = "Android",
+                version = Build.VERSION.SDK_INT.toString()
+            ),
+            device = Device(
+                name = "${Build.MANUFACTURER} : ${Build.MODEL}",
+            ),
+            sdk = Sdk(
+                type = SdkType.SDK_TYPE_ANDROID,
+                major = BuildConfig.STREAM_VIDEO_VERSION_MAJOR.toString(),
+                minor = BuildConfig.STREAM_VIDEO_VERSION_MINOR.toString(),
+                patch = BuildConfig.STREAM_VIDEO_VERSION_PATCH.toString()
+            )
+        )
+
     init {
         scope.launch {
             connectionState.collect {
@@ -76,6 +103,11 @@ public class SfuSocket(
                 }
             }
         }
+    }
+
+    suspend fun connectMigrating(migration: (suspend () -> Migration), invocation: (CancellableContinuation<JoinCallResponseEvent>) -> Unit): JoinCallResponseEvent? {
+        migrationData = migration
+        return connect(invocation)
     }
 
     override suspend fun connect(invocation: (CancellableContinuation<JoinCallResponseEvent>) -> Unit): JoinCallResponseEvent? {
@@ -98,12 +130,29 @@ public class SfuSocket(
             if (socket != null) {
                 val sdp = getSubscriberSdp()
 
-                val request = JoinRequest(
-                    session_id = sessionId,
-                    token = token,
-                    subscriber_sdp = sdp,
-                    fast_reconnect = reconnectionAttempts > 0,
-                )
+                val migration = migrationData?.invoke()
+                // clear migration data - we only try to migrate once
+                migrationData = null
+
+                val request = if (migration == null) {
+                    JoinRequest(
+                        session_id = sessionId,
+                        token = token,
+                        subscriber_sdp = sdp,
+                        fast_reconnect = reconnectionAttempts > 0,
+                        client_details = clientDetails
+                    )
+                } else {
+                    JoinRequest(
+                        session_id = sessionId,
+                        token = token,
+                        subscriber_sdp = sdp,
+                        fast_reconnect = false,
+                        migration = migration,
+                        client_details = clientDetails
+                    )
+                }
+
                 socket?.send(SfuRequest(join_request = request).encodeByteString())
             }
         }

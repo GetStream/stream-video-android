@@ -137,6 +137,10 @@ internal class ConnectionModule(
         )
     }
 
+    companion object {
+        var secondSfu = false
+    }
+
     internal fun createSFUConnectionModule(
         sfuUrl: String,
         sessionId: String,
@@ -174,11 +178,11 @@ internal class ConnectionModule(
  */
 internal class SfuConnectionModule(
     /** The url of the SFU */
-    sfuUrl: String,
+    internal val sfuUrl: String,
     /** the session id, generated when we join/ client side */
     sessionId: String,
     /** A token which gives you access to the sfu */
-    private val sfuToken: String,
+    internal val sfuToken: String,
     /** A token which gives you access to the sfu */
     val apiKey: String,
     /** Function that gives a fresh SDP */
@@ -192,6 +196,14 @@ internal class SfuConnectionModule(
 ) {
     internal var sfuSocket: SfuSocket
     private val updatedSignalUrl = sfuUrl.removeSuffix(suffix = "/twirp")
+    /*
+    private val updatedSignalUrl = if (ConnectionModule.secondSfu) {
+        "http://10.0.2.2:3033/twirp".removeSuffix(suffix = "/twirp")
+    } else {
+        "http://10.0.2.2:3031/twirp".removeSuffix(suffix = "/twirp")
+    }
+
+     */
 
     private fun buildSfuOkHttpClient(): OkHttpClient {
         val connectionTimeoutInMs = 10000L
@@ -228,6 +240,14 @@ internal class SfuConnectionModule(
 
     init {
         val socketUrl = "$updatedSignalUrl/ws".replace("https", "wss")
+        /*
+        val socketUrl = if (ConnectionModule.secondSfu) {
+            "ws://10.0.2.2:3033/ws"
+        } else {
+            "ws://10.0.2.2:3031/ws"
+        }
+
+         */
         sfuSocket = SfuSocket(
             socketUrl,
             sessionId,
@@ -240,7 +260,6 @@ internal class SfuConnectionModule(
         )
     }
 }
-
 /**
  * CoordinatorAuthInterceptor adds the token authentication to the API calls
  */
@@ -253,6 +272,8 @@ internal class CoordinatorAuthInterceptor(
     @Throws(IOException::class)
     override fun intercept(chain: Interceptor.Chain): Response {
         val original = chain.request()
+
+
 
         val updatedUrl = if (original.url.toString().contains("video")) {
             original.url.newBuilder()
