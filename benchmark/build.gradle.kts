@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 import io.getstream.video.android.Configuration
+import io.getstream.video.DogfoodingBuildType
+import io.getstream.video.configureFlavors
 
 @Suppress("DSL_SCOPE_VIOLATION")
 plugins {
@@ -60,21 +62,23 @@ android {
             matchingFallbacks.add("release")
             proguardFiles("benchmark-rules.pro")
             buildConfigField("Boolean", "BENCHMARK", "true")
+            buildConfigField(
+                "String",
+                "APP_BUILD_TYPE_SUFFIX",
+                "\"${DogfoodingBuildType.BENCHMARK.applicationIdSuffix ?: ""}\""
+            )
         }
     }
 
-    flavorDimensions += "environment"
-    productFlavors {
-        create("dogfooding") {
-            dimension = "environment"
-            proguardFiles("benchmark-rules.pro")
-            buildConfigField("Boolean", "BENCHMARK", "true")
-        }
-        create("production") {
-            dimension = "environment"
-            proguardFiles("benchmark-rules.pro")
-            buildConfigField("Boolean", "BENCHMARK", "true")
-        }
+    // Use the same flavor dimensions as the application to allow generating Baseline Profiles on prod,
+    // which is more close to what will be shipped to users (no fake data), but has ability to run the
+    // benchmarks on demo, so we benchmark on stable data.
+    configureFlavors(this) { flavor ->
+        buildConfigField(
+            "String",
+            "APP_FLAVOR_SUFFIX",
+            "\"${flavor.applicationIdSuffix ?: ""}\""
+        )
     }
 
     targetProjectPath = ":dogfooding"
@@ -106,4 +110,10 @@ dependencies {
     implementation(libs.androidx.test.uiautomator)
     implementation(libs.androidx.profileinstaller)
     implementation(libs.androidx.benchmark.macro)
+}
+
+androidComponents {
+    beforeVariants {
+        it.enable = it.buildType == "benchmark"
+    }
 }
