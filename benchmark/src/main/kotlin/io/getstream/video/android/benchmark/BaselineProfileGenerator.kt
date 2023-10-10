@@ -30,7 +30,7 @@ internal class BaselineProfileGenerator {
     @Test
     fun startup() =
         baselineProfileRule.collect(
-            packageName = packageName,
+            packageName = PACKAGE_NAME,
             stableIterations = 2,
             maxIterations = 8,
             includeInStartupProfile = true,

@@ -22,6 +22,12 @@ import androidx.test.uiautomator.UiDevice
 import androidx.test.uiautomator.UiObject2
 import androidx.test.uiautomator.Until
 
+internal val PACKAGE_NAME = buildString {
+    append("io.getstream.video.android")
+    append(BuildConfig.APP_FLAVOR_SUFFIX)
+    append(BuildConfig.APP_BUILD_TYPE_SUFFIX)
+}
+
 internal fun UiDevice.waitForObject(selector: BySelector, timeout: Long = 5_000): UiObject2? {
     if (wait(Until.hasObject(selector), timeout)) {
         return findObject(selector)
