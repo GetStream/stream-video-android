@@ -49,7 +49,7 @@ import io.getstream.video.android.mock.mockCall
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
-object ReactionsMenuData {
+private object ReactionsMenuData {
     const val raiseHand = ":raise-hand:"
     val reactions = listOf(":fireworks:", ":hello:", ":like:", ":hate:", ":smile:", ":heart:")
 }
