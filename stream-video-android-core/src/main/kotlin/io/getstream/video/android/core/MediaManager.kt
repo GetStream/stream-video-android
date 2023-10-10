@@ -633,7 +633,8 @@ public class CameraManager(
         }
         cameraManager = mediaManager.context.getSystemService()
         enumerator = Camera2Enumerator(mediaManager.context)
-        devices = sortDevices()
+        val cameraIds = cameraManager?.cameraIdList ?: emptyArray()
+        devices = sortDevices(cameraIds, cameraManager, enumerator)
         val devicesMatchingDirection = devices.filter { it.direction == _direction.value }
         val selectedDevice = devicesMatchingDirection.firstOrNull()
         if (selectedDevice != null) {
@@ -654,34 +655,24 @@ public class CameraManager(
 
     /**
      * Creates a sorted list of camera devices
+     *
+     * @param cameraManager the system camera manager ([CameraManager].
+     * @param enumerator the enumerator of cameras ([Camera2Enumerator]
      */
-    internal fun sortDevices(): List<CameraDeviceWrapped> {
+    internal fun sortDevices(
+        ids: Array<String>,
+        cameraManager: CameraManager?,
+        enumerator: Camera2Enumerator,
+    ): List<CameraDeviceWrapped> {
         val devices = mutableListOf<CameraDeviceWrapped>()
 
-        val ids = cameraManager?.cameraIdList ?: emptyArray()
-
         for (id in ids) {
-            val characteristics = cameraManager?.getCameraCharacteristics(id)
-
-            val direction = when (characteristics?.get(CameraCharacteristics.LENS_FACING) ?: -1) {
-                CameraCharacteristics.LENS_FACING_FRONT -> CameraDirection.Front
-                CameraCharacteristics.LENS_FACING_BACK -> CameraDirection.Back
-                // Note: The camera device is an external camera, and has no fixed facing relative to the device's screen.
-                CameraCharacteristics.LENS_FACING_EXTERNAL -> CameraDirection.Back
-                else -> null
+            try {
+                val device = createCameraDeviceWrapper(id, cameraManager, enumerator)
+                devices.add(device)
+            } catch (t: Throwable) {
+                logger.e(t) { "Could not create camera device for camera with id: $id" }
             }
-
-            val supportedFormats = enumerator.getSupportedFormats(id)
-
-            val maxResolution = supportedFormats?.maxOfOrNull { it.width * it.height } ?: 0
-            val device = CameraDeviceWrapped(
-                id = id,
-                direction = direction,
-                characteristics = characteristics,
-                supportedFormats = supportedFormats,
-                maxResolution = maxResolution,
-            )
-            devices.add(device)
         }
         return devices.sortedBy { it.maxResolution }
     }
@@ -715,6 +706,31 @@ public class CameraManager(
             surfaceTextureHelper.dispose()
         }
         setupCompleted = false
+    }
+
+    private fun createCameraDeviceWrapper(
+        id: String,
+        cameraManager: CameraManager?,
+        enumerator: Camera2Enumerator,
+    ): CameraDeviceWrapped {
+        val characteristics = cameraManager?.getCameraCharacteristics(id)
+        val direction = when (characteristics?.get(CameraCharacteristics.LENS_FACING) ?: -1) {
+            CameraCharacteristics.LENS_FACING_FRONT -> CameraDirection.Front
+            CameraCharacteristics.LENS_FACING_BACK -> CameraDirection.Back
+            // Note: The camera device is an external camera, and has no fixed facing relative to the device's screen.
+            CameraCharacteristics.LENS_FACING_EXTERNAL -> CameraDirection.Back
+            else -> null
+        }
+        val supportedFormats = enumerator.getSupportedFormats(id)
+        val maxResolution = supportedFormats?.maxOfOrNull { it.width * it.height } ?: 0
+
+        return CameraDeviceWrapped(
+            id = id,
+            direction = direction,
+            characteristics = characteristics,
+            supportedFormats = supportedFormats,
+            maxResolution = maxResolution,
+        )
     }
 }
 
