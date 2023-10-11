@@ -101,7 +101,7 @@ internal fun ReactionsMenu(
 
     Dialog(onDismiss) {
         Card(
-            modifier.wrapContentWidth(),
+            modifier = modifier.wrapContentWidth(),
         ) {
             Column(Modifier.padding(16.dp)) {
                 Row(horizontalArrangement = Arrangement.Center) {
