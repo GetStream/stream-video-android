@@ -877,11 +877,9 @@ public final class io/getstream/video/android/core/call/RtcSession {
 	public final fun connect (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public final fun createPublisher ()Lio/getstream/video/android/core/call/connection/StreamPeerConnection;
 	public final fun createSubscriber ()Lio/getstream/video/android/core/call/connection/StreamPeerConnection;
-	public final fun getLocalTrack (Lstream/video/sfu/models/TrackType;)Lio/getstream/video/android/core/model/MediaTrack;
 	public final fun getPublisherStats (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public final fun getSubscriber ()Lio/getstream/video/android/core/call/connection/StreamPeerConnection;
 	public final fun getSubscriberStats (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
-	public final fun getTrack (Ljava/lang/String;Lstream/video/sfu/models/TrackType;)Lio/getstream/video/android/core/model/MediaTrack;
 	public final fun getTrackDimensions ()Lkotlinx/coroutines/flow/MutableStateFlow;
 	public final fun getTrackDimensionsDebounced ()Lkotlinx/coroutines/flow/Flow;
 	public final fun getTracks ()Ljava/util/Map;
@@ -892,11 +890,9 @@ public final class io/getstream/video/android/core/call/RtcSession {
 	public final fun onNegotiationNeeded (Lio/getstream/video/android/core/call/connection/StreamPeerConnection;Lio/getstream/video/android/core/model/StreamPeerType;)V
 	public final fun reconnect (ZLkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public final fun requestSubscriberIceRestart (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
-	public final fun setLocalTrack (Lstream/video/sfu/models/TrackType;Lio/getstream/video/android/core/model/MediaTrack;)V
 	public final fun setMuteState (ZLstream/video/sfu/models/TrackType;)V
 	public final fun setScreenShareTrack ()V
 	public final fun setSubscriber (Lio/getstream/video/android/core/call/connection/StreamPeerConnection;)V
-	public final fun setTrack (Ljava/lang/String;Lstream/video/sfu/models/TrackType;Lio/getstream/video/android/core/model/MediaTrack;)V
 	public final fun setTracks (Ljava/util/Map;)V
 	public final fun switchSfu (Ljava/lang/String;Ljava/lang/String;Ljava/util/List;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public final fun updateTrackDimensions (Ljava/lang/String;Lstream/video/sfu/models/TrackType;ZLstream/video/sfu/models/VideoDimension;)V

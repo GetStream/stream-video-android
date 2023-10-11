@@ -213,14 +213,14 @@ public class RtcSession internal constructor(
     // It's cleaner to store here and have the participant state reference to it
     var tracks: MutableMap<String, MutableMap<TrackType, MediaTrack>> = mutableMapOf()
 
-    fun getTrack(sessionId: String, type: TrackType): MediaTrack? {
+    private fun getTrack(sessionId: String, type: TrackType): MediaTrack? {
         if (!tracks.containsKey(sessionId)) {
             tracks[sessionId] = mutableMapOf()
         }
         return tracks[sessionId]?.get(type)
     }
 
-    fun setTrack(sessionId: String, type: TrackType, track: MediaTrack) {
+    private fun setTrack(sessionId: String, type: TrackType, track: MediaTrack) {
         if (!tracks.containsKey(sessionId)) {
             tracks[sessionId] = mutableMapOf()
         }
@@ -248,11 +248,11 @@ public class RtcSession internal constructor(
         }
     }
 
-    fun getLocalTrack(type: TrackType): MediaTrack? {
+    private fun getLocalTrack(type: TrackType): MediaTrack? {
         return getTrack(sessionId, type)
     }
 
-    fun setLocalTrack(type: TrackType, track: MediaTrack) {
+    private fun setLocalTrack(type: TrackType, track: MediaTrack) {
         return setTrack(sessionId, type, track)
     }
 
@@ -485,7 +485,7 @@ public class RtcSession internal constructor(
      * Audio is available from the start.
      * Video only becomes available after we update the subscription
      */
-    internal fun addStream(mediaStream: MediaStream) {
+    private fun addStream(mediaStream: MediaStream) {
         val (trackPrefix, trackTypeString) = mediaStream.id.split(':')
         val sessionId = trackPrefixToSessionIdMap.value[trackPrefix]
 

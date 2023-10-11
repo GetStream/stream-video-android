@@ -41,6 +41,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
+import io.getstream.log.Priority
 import io.getstream.video.android.compose.permission.LaunchCallPermissions
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.video.VideoRenderer
@@ -48,6 +49,7 @@ import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.GEO
 import io.getstream.video.android.core.RealtimeConnection
 import io.getstream.video.android.core.StreamVideoBuilder
+import io.getstream.video.android.core.logging.LoggingLevel
 import io.getstream.video.android.model.User
 import kotlinx.coroutines.launch
 
@@ -78,6 +80,7 @@ fun LiveHost() {
             user = user,
             token = userToken,
             ensureSingleInstance = false,
+            loggingLevel = LoggingLevel(priority = Priority.VERBOSE),
         ).build()
 
         // step3 - join a call, which type is `default` and id is `123`.

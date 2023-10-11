@@ -16,7 +16,6 @@
 
 package io.getstream.video.android.tutorial.livestream
 
-import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -99,12 +98,7 @@ private fun LiveGuestContent(call: Call) {
     val totalParticipants by call.state.totalParticipants.collectAsState()
     val backstage by call.state.backstage.collectAsState()
     val duration by call.state.duration.collectAsState()
-    val livestream = participants.mapNotNull { it.video.value }.firstOrNull { it.enabled }
-    val videos = participants.mapNotNull { it.video.value }
-
-    LaunchedEffect(key1 = videos) {
-        Log.e("Test", "videos: $videos")
-    }
+    val livestream = participants.mapNotNull { it.video.value }.firstOrNull { it.track != null }
 
     Column(
         modifier = Modifier
