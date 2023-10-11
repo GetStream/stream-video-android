@@ -41,6 +41,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
+import io.getstream.log.Priority
 import io.getstream.video.android.compose.permission.LaunchCallPermissions
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.video.VideoRenderer
@@ -48,6 +49,7 @@ import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.GEO
 import io.getstream.video.android.core.RealtimeConnection
 import io.getstream.video.android.core.StreamVideoBuilder
+import io.getstream.video.android.core.logging.LoggingLevel
 import io.getstream.video.android.model.User
 import kotlinx.coroutines.launch
 
@@ -59,25 +61,26 @@ fun LiveHost() {
 
     LaunchedEffect(key1 = Unit) {
         val userToken =
-            "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoiQWRtaXJhbF9BY2tiYXIiLCJpc3MiOiJwcm9udG8iLCJzdWIiOiJ1c2VyL0FkbWlyYWxfQWNrYmFyIiwiaWF0IjoxNjkzNzk0NTc4LCJleHAiOjE2OTQzOTkzODN9.7uYF4xB1zUrQ1GIpsoICoU5G0DpXq_5_IDyohz6p3VU"
-        val userId = "Admiral_Ackbar"
-        val callId = "szua8Iy5iMX2"
+            "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoiRGFydGhfS3JheXQiLCJpc3MiOiJwcm9udG8iLCJzdWIiOiJ1c2VyL0RhcnRoX0tyYXl0IiwiaWF0IjoxNjk2OTgzMjk1LCJleHAiOjE2OTc1ODgxMDB9.g5K76Vv5D-uCoBfAfDpI3pyQIpoFMx8J9Eus0VkHk-M"
+        val userId = "Darth_Krayt"
+        val callId = "dE8AsD5Qxqrt"
 
         // step1 - create a user.
         val user = User(
             id = userId, // any string
             name = "Tutorial", // name and image are used in the UI
-            role = "admin",
+            role = "guest",
         )
 
         // step2 - initialize StreamVideo. For a production app we recommend adding the client to your Application class or di module.
         val client = StreamVideoBuilder(
             context = context,
-            apiKey = "mmhfdzb5evj2", // demo API key
+            apiKey = "hd8szvscpxvd", // demo API key
             geo = GEO.GlobalEdgeNetwork,
             user = user,
             token = userToken,
             ensureSingleInstance = false,
+            loggingLevel = LoggingLevel(priority = Priority.VERBOSE),
         ).build()
 
         // step3 - join a call, which type is `default` and id is `123`.
