@@ -98,7 +98,7 @@ private fun LiveGuestContent(call: Call) {
     val totalParticipants by call.state.totalParticipants.collectAsState()
     val backstage by call.state.backstage.collectAsState()
     val duration by call.state.duration.collectAsState()
-    val livestream = participants.mapNotNull { it.video.value }.firstOrNull { it.track != null }
+    val livestream by call.state.livestream.collectAsState()
 
     Column(
         modifier = Modifier

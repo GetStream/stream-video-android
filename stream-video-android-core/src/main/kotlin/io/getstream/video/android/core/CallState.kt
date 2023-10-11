@@ -46,6 +46,7 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -136,7 +137,8 @@ public sealed interface RealtimeConnection {
     /**
      * True when the peer connections are ready
      */
-    public data object Connected : RealtimeConnection // connected to RTC, able to receive and send video
+    public data object Connected :
+        RealtimeConnection // connected to RTC, able to receive and send video
 
     /**
      * Reconnecting is true whenever Rtc isn't available and trying to recover
@@ -144,7 +146,9 @@ public sealed interface RealtimeConnection {
      * If the publisher peer connection breaks we'll reconnect
      * Also if the network provider from the OS says that internet is down we'll set it to reconnecting
      */
-    public data object Reconnecting : RealtimeConnection // reconnecting to recover from temporary issues
+    public data object Reconnecting :
+        RealtimeConnection // reconnecting to recover from temporary issues
+
     public data class Failed(val error: Any) : RealtimeConnection // permanent failure
     public data object Disconnected : RealtimeConnection // normal disconnect by the app
 }
@@ -229,6 +233,40 @@ public class CallState(
     val pinnedParticipants: StateFlow<Map<String, OffsetDateTime>> = _pinnedParticipants
 
     val stats = CallStats(call, scope)
+
+    private val livestreamFlow: Flow<ParticipantState.Video?> = channelFlow {
+        fun emitLivestreamVideo() {
+            val participants = participants.value
+            val filteredVideo =
+                participants.mapNotNull { it.video.value }.firstOrNull { it.track != null }
+            scope.launch {
+                if (_backstage.value) {
+                    send(null)
+                } else {
+                    send(filteredVideo)
+                }
+            }
+        }
+
+        scope.launch {
+            _participants.collect {
+                emitLivestreamVideo()
+            }
+        }
+
+        // TODO: could optimize performance by subscribing only to relevant events
+        call.subscribe {
+            emitLivestreamVideo()
+        }
+
+        // emit livestream Video
+        emitLivestreamVideo()
+
+        awaitClose { }
+    }
+
+    val livestream: StateFlow<ParticipantState.Video?> = livestreamFlow.debounce(1000)
+        .stateIn(scope, SharingStarted.WhileSubscribed(10000L), null)
 
     internal val sortedParticipantsFlow = channelFlow {
         // uses a channel flow to handle concurrency and 3 things updating: https://kotlinlang.org/api/kotlinx.coroutines/kotlinx-coroutines-core/kotlinx.coroutines.flow/channel-flow.html
