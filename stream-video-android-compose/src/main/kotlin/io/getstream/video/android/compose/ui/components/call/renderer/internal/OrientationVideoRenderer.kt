@@ -63,7 +63,7 @@ internal fun BoxScope.OrientationVideoRenderer(
 ) {
     val dominantSpeaker by call.state.dominantSpeaker.collectAsStateWithLifecycle()
     val participants by call.state.participants.collectAsStateWithLifecycle()
-    val sortedParticipants by call.state.sortedParticipants.collectAsStateWithLifecycle()
+    val sortedParticipants by call.state.sortedParticipants.collectAsStateWithLifecycle(emptyList())
     val callParticipants by remember(participants) {
         derivedStateOf {
             if (sortedParticipants.size > 6) {

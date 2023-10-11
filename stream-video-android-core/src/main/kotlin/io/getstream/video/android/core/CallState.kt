@@ -39,7 +39,7 @@ import io.getstream.video.android.core.model.Reaction
 import io.getstream.video.android.core.model.ScreenSharingSession
 import io.getstream.video.android.core.model.VisibilityOnScreenState
 import io.getstream.video.android.core.permission.PermissionRequest
-import io.getstream.video.android.core.sorting.SortedParticipants
+import io.getstream.video.android.core.sorting.SortedParticipantsState
 import io.getstream.video.android.core.utils.mapState
 import io.getstream.video.android.core.utils.toUser
 import io.getstream.video.android.model.User
@@ -281,13 +281,12 @@ public class CallState(
      *
      * Debounced 100ms to avoid rapid changes
      */
-    val sortedParticipants = SortedParticipants(
+    val sortedParticipants = SortedParticipantsState(
         scope,
         call,
         _participants,
         _pinnedParticipants,
     ).asFlow().debounce(100)
-        .stateIn(scope, SharingStarted.WhileSubscribed(10000L), emptyList())
 
     /** Members contains the list of users who are permanently associated with this call. This includes users who are currently not active in the call
      * As an example if you invite "john", "bob" and "jane" to a call and only Jane joins.

@@ -30,7 +30,16 @@ import org.openapitools.client.models.VideoEvent
 import org.threeten.bp.OffsetDateTime
 import java.util.SortedMap
 
-class SortedParticipants(
+/**
+ * A state that takes care of book-keeping participants and its sort order.
+ *
+ * @param scope the coroutine scope where
+ * @param call the call for which the participants are sorted
+ * @param participants the flow of participants
+ * @param pinnedParticipants the pinned participants flow
+ * @param comparator the comparator
+ */
+internal class SortedParticipantsState(
     scope: CoroutineScope,
     private val call: Call,
     private val participants: MutableStateFlow<SortedMap<String, ParticipantState>>,
