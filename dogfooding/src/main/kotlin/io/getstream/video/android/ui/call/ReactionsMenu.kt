@@ -49,11 +49,39 @@ import io.getstream.video.android.mock.mockCall
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
-private object ReactionsMenuData {
-    const val raiseHand = ":raise-hand:"
-    val reactions = listOf(":fireworks:", ":hello:", ":like:", ":hate:", ":smile:", ":heart:")
+/**
+ * Default reaction item data
+ *
+ * @param displayText the text visible on the screen.
+ * @param emojiCode the code of the emoju e.g. ":like:"
+ * */
+private data class ReactionItemData(val displayText: String, val emojiCode: String)
+
+/**
+ * Default defined reactions.
+ *
+ * There is one main reaction, and a list of other reactions. The main reaction is shown on top of the rest.
+ */
+private object DefaultReactionsMenuData {
+    val mainReaction = ReactionItemData("Raise hand", ":raise-hand:")
+    val defaultReactions = listOf(
+        ReactionItemData("Fireworks", ":fireworks:"),
+        ReactionItemData("Wave", ":hello:"),
+        ReactionItemData("Like", ":raise-hand:"),
+        ReactionItemData("Dislike", ":hate:"),
+        ReactionItemData("Smile", ":smile:"),
+        ReactionItemData("Heart", ":heart:"),
+    )
 }
 
+/**
+ * Reactions menu. The reaction menu is a dialog displaying the list of reactions found in
+ * [DefaultReactionsMenuData].
+ *
+ * @param call the call object.
+ * @param reactionMapper the mapper of reactions to map from emoji code into UTF see: [ReactionMapper]
+ * @param onDismiss on dismiss listener.
+ */
 @Composable
 internal fun ReactionsMenu(
     call: Call,
@@ -61,17 +89,19 @@ internal fun ReactionsMenu(
     onDismiss: () -> Unit,
 ) {
     val scope = rememberCoroutineScope()
-    val modifier = Modifier.background(
-        color = Color.White,
-        shape = RoundedCornerShape(2.dp),
-    ).wrapContentWidth()
+    val modifier = Modifier
+        .background(
+            color = Color.White,
+            shape = RoundedCornerShape(2.dp),
+        )
+        .wrapContentWidth()
     val onEmojiSelected: (emoji: String) -> Unit = {
         sendReaction(scope, call, it, onDismiss)
     }
 
     Dialog(onDismiss) {
         Card(
-            Modifier.wrapContentWidth(),
+            modifier.wrapContentWidth(),
         ) {
             Column(Modifier.padding(16.dp)) {
                 Row(horizontalArrangement = Arrangement.Center) {
@@ -84,8 +114,7 @@ internal fun ReactionsMenu(
                             .fillMaxWidth(),
                         textModifier = Modifier.fillMaxWidth(),
                         reactionMapper = reactionMapper,
-                        emojiCode = ReactionsMenuData.raiseHand,
-                        reactionText = "Raise hand",
+                        reaction = DefaultReactionsMenuData.mainReaction,
                         onEmojiSelected = onEmojiSelected,
                     )
                 }
@@ -94,75 +123,41 @@ internal fun ReactionsMenu(
                     maxItemsInEachRow = 3,
                     verticalArrangement = Arrangement.Center,
                 ) {
-                    ReactionItem(
-                        modifier = modifier,
-                        reactionMapper = reactionMapper,
-                        emojiCode = ReactionsMenuData.reactions[0],
-                        reactionText = "Fireworks",
-                        onEmojiSelected = onEmojiSelected,
-                    )
-                    ReactionItem(
-                        modifier = modifier,
-                        reactionMapper = reactionMapper,
-                        emojiCode = ReactionsMenuData.reactions[1],
-                        reactionText = "Hello",
-                        onEmojiSelected = onEmojiSelected,
-                    )
-                    ReactionItem(
-                        modifier = modifier,
-                        reactionMapper = reactionMapper,
-                        emojiCode = ReactionsMenuData.reactions[2],
-                        reactionText = "Like",
-                        onEmojiSelected = onEmojiSelected,
-                    )
-                    ReactionItem(
-                        modifier = modifier,
-                        reactionMapper = reactionMapper,
-                        emojiCode = ReactionsMenuData.reactions[3],
-                        reactionText = "Dislike",
-                        onEmojiSelected = onEmojiSelected,
-                    )
-                    ReactionItem(
-                        modifier = modifier,
-                        reactionMapper = reactionMapper,
-                        emojiCode = ReactionsMenuData.reactions[4],
-                        reactionText = "Smile",
-                        onEmojiSelected = onEmojiSelected,
-                    )
-                    ReactionItem(
-                        modifier = modifier,
-                        reactionMapper = reactionMapper,
-                        emojiCode = ReactionsMenuData.reactions[5],
-                        reactionText = "Heart",
-                        onEmojiSelected = onEmojiSelected,
-                    )
+                    DefaultReactionsMenuData.defaultReactions.forEach {
+                        ReactionItem(
+                            modifier = modifier,
+                            reactionMapper = reactionMapper,
+                            onEmojiSelected = onEmojiSelected,
+                            reaction = it,
+                        )
+                    }
                 }
             }
         }
     }
 }
 
+
 @Composable
 private fun ReactionItem(
     modifier: Modifier = Modifier,
     textModifier: Modifier = Modifier,
     reactionMapper: ReactionMapper,
-    emojiCode: String,
-    reactionText: String,
+    reaction: ReactionItemData,
     onEmojiSelected: (emoji: String) -> Unit,
 ) {
-    val mappedEmoji = reactionMapper.map(emojiCode)
+    val mappedEmoji = reactionMapper.map(reaction.emojiCode)
     Box(
         modifier = modifier
             .clickable {
-                onEmojiSelected(emojiCode)
+                onEmojiSelected(reaction.emojiCode)
             }
             .padding(2.dp),
     ) {
         Text(
             textAlign = TextAlign.Center,
             modifier = textModifier.padding(12.dp),
-            text = "$mappedEmoji $reactionText",
+            text = "$mappedEmoji ${reaction.displayText}",
         )
     }
 }
@@ -179,12 +174,12 @@ private fun sendReaction(scope: CoroutineScope, call: Call, emoji: String, onDis
 private fun ReactionItemPreview() {
     StreamMockUtils.initializeStreamVideo(LocalContext.current)
     ReactionItem(
-        emojiCode = ":raise-hand",
         reactionMapper = ReactionMapper.defaultReactionMapper(),
-        reactionText = "Raise hand",
-    ) {
-        // Ignore
-    }
+        onEmojiSelected = {
+            // Ignore
+        },
+        reaction = DefaultReactionsMenuData.mainReaction,
+    )
 }
 
 @Preview
