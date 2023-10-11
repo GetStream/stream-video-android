@@ -677,8 +677,8 @@ public class Call(
         startTranscription: Boolean = false,
     ): Result<GoLiveResponse> {
         val result = clientImpl.goLive(
-            type,
-            id,
+            type = type,
+            id = id,
             startHls = startHls,
             startRecording = startRecording,
             startTranscription = startTranscription,
