@@ -51,25 +51,7 @@ class StartupBenchmarks {
                 startActivityAndWait()
                 device.waitForIdle()
 
-                // -------------
-                // Authenticate
-                // -------------
-                device.authenticateAndNavigateToHome()
-
-                // -------------
-                // JoinCall
-                // -------------
-                device.navigateFromJoinCallToLobby()
-
-                // -------------
-                // Lobby
-                // -------------
-                device.navigateFromLobbyToCall()
-
-                // -------------
-                // Call
-                // -------------
-                device.testCall()
+                dogfoodingScenarios()
             },
         )
     }
