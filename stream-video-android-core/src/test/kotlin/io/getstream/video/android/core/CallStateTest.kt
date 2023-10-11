@@ -19,12 +19,8 @@ package io.getstream.video.android.core
 import com.google.common.truth.Truth.assertThat
 import io.getstream.result.Result
 import io.getstream.video.android.core.base.IntegrationTestBase
-import io.getstream.video.android.core.events.DominantSpeakerChangedEvent
 import io.getstream.video.android.core.model.SortField
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.test.advanceTimeBy
 import kotlinx.coroutines.test.runTest
 import org.junit.Ignore
@@ -34,8 +30,6 @@ import org.openapitools.client.models.CallSettingsRequest
 import org.openapitools.client.models.MemberRequest
 import org.openapitools.client.models.ScreensharingSettingsRequest
 import org.robolectric.RobolectricTestRunner
-import org.threeten.bp.Clock
-import org.threeten.bp.OffsetDateTime
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertNotNull
@@ -114,58 +108,9 @@ class CallStateTest : IntegrationTestBase() {
      * * audio only participants by when they joined
      */
     @Test
-    @Ignore
+    @Ignore("Rewrite test")
     fun `Participants should be sorted`() = runTest {
         // TODO: AAP rewrite this test for sorting participants.
-        /*val call = client.call("default", randomUUID())
-
-        val sortedParticipants = call.state.sortedParticipantsFlow.stateIn(
-            backgroundScope,
-            SharingStarted.Eagerly,
-            emptyList(),
-        )
-
-        val sorted1 = sortedParticipants.value
-        assertThat(sorted1).isEmpty()
-
-        call.state._pinnedParticipants.value = mutableMapOf(
-            "1" to OffsetDateTime.now(Clock.systemUTC()),
-        )
-
-        call.state.updateParticipant(
-            ParticipantState("4", call, "4").apply { _videoEnabled.value = true },
-        )
-        call.state.updateParticipant(
-            ParticipantState("5", call, "5").apply { _lastSpeakingAt.value = nowUtc },
-        )
-        call.state.updateParticipant(
-            ParticipantState("6", call, "6").apply { _joinedAt.value = nowUtc },
-        )
-
-        call.state.updateParticipant(
-            ParticipantState("1", call, "1"),
-        )
-        call.state.updateParticipant(
-            ParticipantState("2", call, "2").apply { _screenSharingEnabled.value = true },
-        )
-        call.state.updateParticipant(
-            ParticipantState("3", call, "3").apply { _dominantSpeaker.value = true },
-        )
-
-        val participants = call.state.participants.value
-        println("emitSorted participants size is ${participants.size}")
-        assertThat(participants.size).isEqualTo(6)
-        delay(60)
-
-        val sorted2 = sortedParticipants.value.map { it.sessionId }
-        assertThat(sorted2).isEqualTo(listOf("1", "2", "3", "4", "5", "6"))
-
-        clientImpl.fireEvent(DominantSpeakerChangedEvent("3", "3"), call.cid)
-        assertThat(call.state.getParticipantBySessionId("3")?.dominantSpeaker?.value).isTrue()
-        delay(60)
-
-        val sorted3 = sortedParticipants.value.map { it.sessionId }
-        assertThat(sorted3).isEqualTo(listOf("1", "2", "3", "4", "5", "6"))*/
     }
 
     @Test
