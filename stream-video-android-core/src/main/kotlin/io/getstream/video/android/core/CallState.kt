@@ -270,57 +270,6 @@ public class CallState(
     val livestream: StateFlow<ParticipantState.Video?> = livestreamFlow.debounce(1000)
         .stateIn(scope, SharingStarted.WhileSubscribed(10000L), null)
 
-    internal val sortedParticipantsFlow = channelFlow {
-        // uses a channel flow to handle concurrency and 3 things updating: https://kotlinlang.org/api/kotlinx.coroutines/kotlinx-coroutines-core/kotlinx.coroutines.flow/channel-flow.html
-
-        fun emitSorted() {
-            val participants = participants.value
-            val pinned = _pinnedParticipants.value
-            var lastParticipants: List<ParticipantState>? = null
-            val sorted = participants.sortedWith(
-                compareBy(
-                    { pinned.containsKey(it.sessionId) },
-                    { it.screenSharingEnabled.value },
-                    { it.dominantSpeaker.value },
-                    { it.videoEnabled.value },
-                    { it.lastSpeakingAt.value },
-                    { it.joinedAt.value },
-                    { it.userId.value },
-                ),
-            ).reversed()
-            scope.launch {
-                if (lastParticipants != sorted) {
-                    send(sorted)
-                    lastParticipants = sorted
-                }
-            }
-        }
-
-        scope.launch {
-            _participants.collect {
-                emitSorted()
-            }
-        }
-        // Since participant state exposes it's own stateflows this is a little harder to do than usual
-        // we need to listen to the events and update the flow when it changes
-
-        // emit the sorted list
-        emitSorted()
-
-        // TODO: could optimize performance by subscribing only to relevant events
-        call.subscribe {
-            emitSorted()
-        }
-
-        scope.launch {
-            _pinnedParticipants.collect {
-                emitSorted()
-            }
-        }
-
-        awaitClose {}
-    }
-
     /**
      * Sorted participants based on
      * - Pinned
