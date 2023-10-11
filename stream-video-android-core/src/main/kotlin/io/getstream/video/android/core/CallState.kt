@@ -37,19 +37,19 @@ import io.getstream.video.android.core.model.NetworkQuality
 import io.getstream.video.android.core.model.RTMP
 import io.getstream.video.android.core.model.Reaction
 import io.getstream.video.android.core.model.ScreenSharingSession
+import io.getstream.video.android.core.model.VisibilityOnScreenState
 import io.getstream.video.android.core.permission.PermissionRequest
+import io.getstream.video.android.core.sorting.SortedParticipants
 import io.getstream.video.android.core.utils.mapState
 import io.getstream.video.android.core.utils.toUser
 import io.getstream.video.android.model.User
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.channelFlow
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
@@ -230,57 +230,6 @@ public class CallState(
 
     val stats = CallStats(call, scope)
 
-    internal val sortedParticipantsFlow = channelFlow {
-        // uses a channel flow to handle concurrency and 3 things updating: https://kotlinlang.org/api/kotlinx.coroutines/kotlinx-coroutines-core/kotlinx.coroutines.flow/channel-flow.html
-
-        fun emitSorted() {
-            val participants = participants.value
-            val pinned = _pinnedParticipants.value
-            var lastParticipants: List<ParticipantState>? = null
-            val sorted = participants.sortedWith(
-                compareBy(
-                    { pinned.containsKey(it.sessionId) },
-                    { it.screenSharingEnabled.value },
-                    { it.dominantSpeaker.value },
-                    { it.videoEnabled.value },
-                    { it.lastSpeakingAt.value },
-                    { it.joinedAt.value },
-                    { it.userId.value },
-                ),
-            ).reversed()
-            scope.launch {
-                if (lastParticipants != sorted) {
-                    send(sorted)
-                    lastParticipants = sorted
-                }
-            }
-        }
-
-        scope.launch {
-            _participants.collect {
-                emitSorted()
-            }
-        }
-        // Since participant state exposes it's own stateflows this is a little harder to do than usual
-        // we need to listen to the events and update the flow when it changes
-
-        // emit the sorted list
-        emitSorted()
-
-        // TODO: could optimize performance by subscribing only to relevant events
-        call.subscribe {
-            emitSorted()
-        }
-
-        scope.launch {
-            _pinnedParticipants.collect {
-                emitSorted()
-            }
-        }
-
-        awaitClose {}
-    }
-
     /**
      * Sorted participants based on
      * - Pinned
@@ -292,7 +241,12 @@ public class CallState(
      *
      * Debounced 100ms to avoid rapid changes
      */
-    val sortedParticipants = sortedParticipantsFlow.debounce(100)
+    val sortedParticipants = SortedParticipants(
+        scope,
+        call,
+        _participants,
+        _pinnedParticipants,
+    ).asFlow().debounce(100)
         .stateIn(scope, SharingStarted.WhileSubscribed(10000L), emptyList())
 
     /** Members contains the list of users who are permanently associated with this call. This includes users who are currently not active in the call
@@ -1093,6 +1047,21 @@ public class CallState(
         logger.v { "[updateFromResponse] newEgress: $newEgress" }
         _egress.value = newEgress
         _broadcasting.value = true
+    }
+
+    /**
+     * Update participants visibility on the UI.
+     *
+     * @param sessionId the session ID of the participant.
+     * @param visibilityOnScreenState the visibility state.
+     *
+     * @see VisibilityOnScreenState
+     */
+    fun updateParticipantVisibility(
+        sessionId: String,
+        visibilityOnScreenState: VisibilityOnScreenState,
+    ) {
+        _participants.value[sessionId]?._visibleOnScreen?.value = visibilityOnScreenState
     }
 }
 

@@ -73,3 +73,14 @@ public fun Activity.shouldShowRequestPermissionsRationale(permissions: Array<out
         ActivityCompat.shouldShowRequestPermissionRationale(this, it)
     }.reduce { acc, value -> acc && value }
 }
+
+/**
+ * Combine multiple comparators.
+ *
+ * @param comparators a list of comparators.
+ */
+fun <T> combineComparators(vararg comparators: Comparator<T>): Comparator<T> {
+    return comparators.reduceRight { comparator, combined ->
+        comparator.thenComparing(combined)
+    }
+}
