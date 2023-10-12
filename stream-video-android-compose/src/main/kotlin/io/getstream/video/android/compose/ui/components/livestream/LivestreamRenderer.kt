@@ -30,6 +30,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -38,6 +39,7 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.res.painterResource
 import io.getstream.video.android.compose.ui.components.video.VideoRenderer
 import io.getstream.video.android.core.Call
+import io.getstream.webrtc.android.ui.VideoTextureViewRenderer
 
 @Composable
 internal fun LivestreamRenderer(
@@ -45,6 +47,7 @@ internal fun LivestreamRenderer(
     onPausedPlayer: ((isPaused: Boolean) -> Unit)? = {},
 ) {
     val livestream by call.state.livestream.collectAsState()
+    var videoTextureView: VideoTextureViewRenderer? by remember { mutableStateOf(null) }
     var isPaused by rememberSaveable { mutableStateOf(false) }
 
     Box(modifier = Modifier.fillMaxSize()) {
@@ -54,13 +57,21 @@ internal fun LivestreamRenderer(
                 .clickable(enabled = onPausedPlayer != null) {
                     if (onPausedPlayer != null) {
                         isPaused = !isPaused
-                        // TODO: We should implement pause & resume methods for VideoRenderer & TextureView
                         livestream?.track?.video?.setEnabled(!isPaused)
                         onPausedPlayer.invoke(isPaused)
+
+                        if (isPaused) {
+                            videoTextureView?.pauseVideo()
+                        } else {
+                            videoTextureView?.resumeVideo()
+                        }
                     }
                 },
             call = call,
             video = livestream,
+            onRendered = { renderer ->
+                videoTextureView = renderer
+            },
         )
 
         AnimatedVisibility(
