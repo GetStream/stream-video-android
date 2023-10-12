@@ -27,7 +27,6 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.test.advanceTimeBy
 import kotlinx.coroutines.test.runTest
-import org.junit.Ignore
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.openapitools.client.models.CallSettingsRequest
@@ -114,10 +113,8 @@ class CallStateTest : IntegrationTestBase() {
      * * audio only participants by when they joined
      */
     @Test
-    @Ignore
     fun `Participants should be sorted`() = runTest {
-        // TODO: AAP rewrite this test for sorting participants.
-        /*val call = client.call("default", randomUUID())
+        val call = client.call("default", randomUUID())
 
         val sortedParticipants = call.state.sortedParticipantsFlow.stateIn(
             backgroundScope,
@@ -165,7 +162,7 @@ class CallStateTest : IntegrationTestBase() {
         delay(60)
 
         val sorted3 = sortedParticipants.value.map { it.sessionId }
-        assertThat(sorted3).isEqualTo(listOf("1", "2", "3", "4", "5", "6"))*/
+        assertThat(sorted3).isEqualTo(listOf("1", "2", "3", "4", "5", "6"))
     }
 
     @Test
