@@ -54,7 +54,8 @@ internal fun LivestreamRenderer(
                 .clickable(enabled = onPausedPlayer != null) {
                     if (onPausedPlayer != null) {
                         isPaused = !isPaused
-                        livestream?.track?.video?.setEnabled(isPaused)
+                        // TODO: We should implement pause & resume methods for VideoRenderer & TextureView
+                        livestream?.track?.video?.setEnabled(!isPaused)
                         onPausedPlayer.invoke(isPaused)
                     }
                 },

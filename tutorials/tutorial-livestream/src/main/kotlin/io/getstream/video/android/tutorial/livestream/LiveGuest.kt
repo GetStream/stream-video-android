@@ -19,11 +19,8 @@ package io.getstream.video.android.tutorial.livestream
 import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
@@ -42,7 +39,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import io.getstream.video.android.compose.theme.VideoTheme
-import io.getstream.video.android.compose.ui.components.video.VideoRenderer
+import io.getstream.video.android.compose.ui.components.livestream.LivestreamPlayer
 import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.GEO
 import io.getstream.video.android.core.StreamVideoBuilder
@@ -95,62 +92,33 @@ fun LiveAudience() {
 @Composable
 private fun LiveGuestContent(call: Call) {
     val totalParticipants by call.state.totalParticipants.collectAsState()
-    val backstage by call.state.backstage.collectAsState()
     val duration by call.state.duration.collectAsState()
-    val livestream by call.state.livestream.collectAsState()
 
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(VideoTheme.colors.appBackground)
-            .padding(6.dp),
-    ) {
-        Box(
+    LivestreamPlayer(call = call, overlayContent = {
+        Row(
             modifier = Modifier
-                .fillMaxSize()
-                .padding(6.dp),
+                .fillMaxWidth()
+                .align(Alignment.BottomCenter),
+            horizontalArrangement = Arrangement.Center,
+            verticalAlignment = Alignment.CenterVertically,
         ) {
-            if (backstage) {
-                Text(
-                    modifier = Modifier.align(Alignment.Center),
-                    text = "Waiting for live host",
-                    color = VideoTheme.colors.textHighEmphasis,
-                )
-            } else {
-                Column(modifier = Modifier.fillMaxSize()) {
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.Center,
-                        verticalAlignment = Alignment.CenterVertically,
-                    ) {
-                        Text(
-                            modifier = Modifier
-                                .background(
-                                    color = VideoTheme.colors.primaryAccent,
-                                    shape = RoundedCornerShape(6.dp),
-                                )
-                                .padding(horizontal = 16.dp, vertical = 4.dp),
-                            text = "Live $totalParticipants",
-                            color = Color.White,
-                        )
-
-                        Spacer(modifier = Modifier.width(12.dp))
-
-                        Text(
-                            text = "Live for $duration",
-                            color = VideoTheme.colors.textHighEmphasis,
-                        )
-                    }
-
-                    VideoRenderer(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .padding(6.dp),
-                        call = call,
-                        video = livestream,
+            Text(
+                modifier = Modifier
+                    .background(
+                        color = VideoTheme.colors.primaryAccent,
+                        shape = RoundedCornerShape(6.dp),
                     )
-                }
-            }
+                    .padding(horizontal = 16.dp, vertical = 4.dp),
+                text = "Live $totalParticipants",
+                color = Color.White,
+            )
+
+            Spacer(modifier = Modifier.width(12.dp))
+
+            Text(
+                text = "Live for $duration",
+                color = VideoTheme.colors.textHighEmphasis,
+            )
         }
-    }
+    })
 }
