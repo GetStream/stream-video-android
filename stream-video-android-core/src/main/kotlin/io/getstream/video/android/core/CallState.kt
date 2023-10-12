@@ -53,6 +53,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.channelFlow
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
@@ -175,6 +176,7 @@ public class CallState(
 ) {
 
     private val logger by taggedLogger("CallState")
+    private var participantsVisibilityMonitor: Job? = null
 
     internal val _connection = MutableStateFlow<RealtimeConnection>(RealtimeConnection.PreJoin)
     public val connection: StateFlow<RealtimeConnection> = _connection
@@ -1146,12 +1148,56 @@ public class CallState(
      * @param visibilityOnScreenState the visibility state.
      *
      * @see VisibilityOnScreenState
+     * @see CallState.updateParticipantVisibilityFlow
      */
     fun updateParticipantVisibility(
         sessionId: String,
         visibilityOnScreenState: VisibilityOnScreenState,
     ) {
         _participants.value[sessionId]?._visibleOnScreen?.value = visibilityOnScreenState
+    }
+
+    /**
+     * Set a flow to update the participants visibility.
+     * The flow should emit lists with currently visible participant session IDs.
+     *
+     * Note: If you pass null to the parameter it will just cancel the currently observing flow.
+     *
+     * E.g. Grid visible items info can be used to update the [CallState]
+     * ```
+     * val gridState = rememberLazyGridState()
+     * val updateFlow = snapshotFlow {
+     *      gridState.layoutInfo.visibleItemsInfo.map {
+     *          it.key // Assuming keys are sessionId
+     *      }
+     * }
+     *
+     * call.state.updateParticipantVisibilityFlow(updateFlow)
+     * ```
+     *
+     * @param flow a flow that emits updates with list of visible participants.
+     *
+     * @see CallState.updateParticipantVisibility
+     */
+    fun updateParticipantVisibilityFlow(flow: Flow<List<String>>?) {
+        // Cancel any previous job.
+        participantsVisibilityMonitor?.cancel()
+
+        if (flow != null) {
+            participantsVisibilityMonitor = scope.launch {
+                flow.collectLatest { visibleParticipantIds ->
+                    _participants.value.forEach {
+                        if (visibleParticipantIds.contains(it.key)) {
+                            // If participant is in the lists its visible
+                            it.value._visibleOnScreen.value = VisibilityOnScreenState.VISIBLE
+                        } else {
+                            // Participant is not in the list, thus invisible
+                            it.value._visibleOnScreen.value = VisibilityOnScreenState.INVISIBLE
+                        }
+                    }
+                }
+            }
+        }
     }
 }
 
