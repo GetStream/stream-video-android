@@ -20,9 +20,6 @@ import android.annotation.SuppressLint
 import android.app.Application
 import android.app.NotificationManager
 import android.app.PendingIntent
-import android.content.ComponentName
-import android.content.Intent
-import android.content.pm.ResolveInfo
 import android.os.Build
 import androidx.core.app.NotificationChannelCompat
 import androidx.core.app.NotificationCompat
@@ -38,11 +35,8 @@ import io.getstream.video.android.core.notifications.NotificationHandler.Compani
 import io.getstream.video.android.core.notifications.NotificationHandler.Companion.ACTION_INCOMING_CALL
 import io.getstream.video.android.core.notifications.NotificationHandler.Companion.ACTION_LIVE_CALL
 import io.getstream.video.android.core.notifications.NotificationHandler.Companion.ACTION_NOTIFICATION
-import io.getstream.video.android.core.notifications.NotificationHandler.Companion.ACTION_REJECT_CALL
 import io.getstream.video.android.core.notifications.NotificationHandler.Companion.INCOMING_CALL_NOTIFICATION_ID
-import io.getstream.video.android.core.notifications.NotificationHandler.Companion.INTENT_EXTRA_CALL_CID
-import io.getstream.video.android.core.notifications.NotificationHandler.Companion.INTENT_EXTRA_NOTIFICATION_ID
-import io.getstream.video.android.core.notifications.internal.DismissNotificationActivity
+import io.getstream.video.android.core.notifications.internal.DefaultStreamIntentResolver
 import io.getstream.video.android.model.StreamCallId
 
 public open class DefaultNotificationHandler(
@@ -54,6 +48,7 @@ public open class DefaultNotificationHandler(
     NotificationPermissionHandler by notificationPermissionHandler {
 
     private val logger: TaggedLogger by taggedLogger("Video:DefaultNotificationHandler")
+    private val intentResolver = DefaultStreamIntentResolver(application)
     private val notificationManager: NotificationManagerCompat by lazy {
         NotificationManagerCompat.from(application).also {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
@@ -72,9 +67,9 @@ public open class DefaultNotificationHandler(
     }
 
     override fun onRingingCall(callId: StreamCallId, callDisplayName: String) {
-        searchIncomingCallPendingIntent(callId)?.let { fullScreenPendingIntent ->
-            searchAcceptCallPendingIntent(callId)?.let { acceptCallPendingIntent ->
-                searchRejectCallPendingIntent(callId)?.let { rejectCallPendingIntent ->
+        intentResolver.searchIncomingCallPendingIntent(callId)?.let { fullScreenPendingIntent ->
+            intentResolver.searchAcceptCallPendingIntent(callId)?.let { acceptCallPendingIntent ->
+                intentResolver.searchRejectCallPendingIntent(callId)?.let { rejectCallPendingIntent ->
                     showIncomingCallNotification(
                         fullScreenPendingIntent,
                         acceptCallPendingIntent,
@@ -88,7 +83,7 @@ public open class DefaultNotificationHandler(
 
     override fun onNotification(callId: StreamCallId, callDisplayName: String) {
         val notificationId = callId.hashCode()
-        searchNotificationCallPendingIntent(callId, notificationId)
+        intentResolver.searchNotificationCallPendingIntent(callId, notificationId)
             ?.let { notificationPendingIntent ->
                 showNotificationCallNotification(
                     notificationPendingIntent,
@@ -100,170 +95,13 @@ public open class DefaultNotificationHandler(
 
     override fun onLiveCall(callId: StreamCallId, callDisplayName: String) {
         val notificationId = callId.hashCode()
-        searchLiveCallPendingIntent(callId, notificationId)?.let { liveCallPendingIntent ->
+        intentResolver.searchLiveCallPendingIntent(callId, notificationId)?.let { liveCallPendingIntent ->
             showLiveCallNotification(
                 liveCallPendingIntent,
                 callDisplayName,
                 notificationId,
             )
         } ?: logger.e { "Couldn't find any activity for $ACTION_LIVE_CALL" }
-    }
-
-    /**
-     * Search for an activity that can receive incoming calls from Stream Server.
-     *
-     * @param callId The call id from the incoming call.
-     */
-    private fun searchIncomingCallPendingIntent(
-        callId: StreamCallId,
-        notificationId: Int = INCOMING_CALL_NOTIFICATION_ID,
-    ): PendingIntent? =
-        searchActivityPendingIntent(Intent(ACTION_INCOMING_CALL), callId, notificationId)
-
-    /**
-     * Search for an activity that can receive live calls from Stream Server.
-     *
-     * @param callId The call id from the incoming call.
-     */
-    private fun searchNotificationCallPendingIntent(
-        callId: StreamCallId,
-        notificationId: Int,
-    ): PendingIntent? =
-        searchActivityPendingIntent(Intent(ACTION_NOTIFICATION), callId, notificationId)
-
-    /**
-     * Search for an activity that can receive live calls from Stream Server.
-     *
-     * @param callId The call id from the incoming call.
-     */
-    private fun searchLiveCallPendingIntent(
-        callId: StreamCallId,
-        notificationId: Int,
-    ): PendingIntent? =
-        searchActivityPendingIntent(Intent(ACTION_LIVE_CALL), callId, notificationId)
-
-    /**
-     * Search for an activity that can accept call from Stream Server.
-     *
-     * @param callId The call id from the incoming call.
-     * @return The [PendingIntent] which can trigger a component to consume accept call events.
-     */
-    private fun searchAcceptCallPendingIntent(
-        callId: StreamCallId,
-        notificationId: Int = INCOMING_CALL_NOTIFICATION_ID,
-    ): PendingIntent? =
-        searchActivityPendingIntent(Intent(ACTION_ACCEPT_CALL), callId, notificationId)
-
-    /**
-     * Searches for a broadcast receiver that can consume the [ACTION_REJECT_CALL] intent to reject
-     * a call from the Stream Server.
-     *
-     * @param callId The ID of the call.
-     * @return The [PendingIntent] which can trigger a component to consume the call rejection event.
-     */
-    private fun searchRejectCallPendingIntent(
-        callId: StreamCallId,
-    ): PendingIntent? = searchBroadcastPendingIntent(Intent(ACTION_REJECT_CALL), callId)
-
-    private fun searchBroadcastPendingIntent(
-        baseIntent: Intent,
-        callId: StreamCallId,
-    ): PendingIntent? =
-        searchResolveInfo {
-            application.packageManager.queryBroadcastReceivers(
-                baseIntent,
-                0,
-            )
-        }?.let {
-            getBroadcastForIntent(baseIntent, it, callId)
-        }
-
-    private fun searchActivityPendingIntent(
-        baseIntent: Intent,
-        callId: StreamCallId,
-        notificationId: Int,
-    ): PendingIntent? =
-        searchResolveInfo { application.packageManager.queryIntentActivities(baseIntent, 0) }?.let {
-            getActivityForIntent(baseIntent, it, callId, notificationId)
-        }
-
-    private fun searchResolveInfo(availableComponents: () -> List<ResolveInfo>): ResolveInfo? =
-        availableComponents()
-            .filter { it.activityInfo.packageName == application.packageName }
-            .maxByOrNull { it.priority }
-
-    /**
-     * Uses the provided [ResolveInfo] to find an Activity which can consume the intent.
-     *
-     * @param baseIntent The base intent for the notification.
-     * @param resolveInfo Info used to resolve a component matching the action.
-     * @param callId The ID of the call.
-     * @param flags Any flags required by the component.
-     */
-    private fun getActivityForIntent(
-        baseIntent: Intent,
-        resolveInfo: ResolveInfo,
-        callId: StreamCallId,
-        notificationId: Int,
-        flags: Int = PENDING_INTENT_FLAG,
-    ): PendingIntent {
-        val baseIntentAction =
-            requireNotNull(
-                baseIntent.action,
-            ) { logger.e { "Developer error. Intent action must be set" } }
-        val dismissIntent = DismissNotificationActivity
-            .createIntent(application, notificationId, baseIntentAction)
-
-        return PendingIntent.getActivities(
-            application,
-            0,
-            arrayOf(buildComponentIntent(baseIntent, resolveInfo, callId), dismissIntent),
-            flags,
-        )
-    }
-
-    /**
-     * Uses the provided [ResolveInfo] to find a BroadcastReceiver which can consume the intent.
-     *
-     * @param baseIntent The base intent for the notification.
-     * @param resolveInfo Info used to resolve a component matching the action.
-     * @param callId The ID of the call.
-     * @param flags Any flags required by the component.
-     */
-    private fun getBroadcastForIntent(
-        baseIntent: Intent,
-        resolveInfo: ResolveInfo,
-        callId: StreamCallId,
-        flags: Int = PENDING_INTENT_FLAG,
-    ): PendingIntent {
-        return PendingIntent.getBroadcast(
-            application,
-            0,
-            buildComponentIntent(baseIntent, resolveInfo, callId),
-            flags,
-        )
-    }
-
-    /**
-     * Builds an intent used to start the target component for the [PendingIntent].
-     *
-     * @param baseIntent The base intent with fundamental data and actions.
-     * @param resolveInfo Info used to resolve a component matching the action.
-     * @param callId The ID of the call.
-     */
-    private fun buildComponentIntent(
-        baseIntent: Intent,
-        resolveInfo: ResolveInfo,
-        callId: StreamCallId,
-    ): Intent {
-        return Intent(baseIntent).apply {
-            component = ComponentName(
-                resolveInfo.activityInfo.applicationInfo.packageName,
-                resolveInfo.activityInfo.name,
-            )
-            putExtra(INTENT_EXTRA_CALL_CID, callId)
-            putExtra(INTENT_EXTRA_NOTIFICATION_ID, INCOMING_CALL_NOTIFICATION_ID)
-        }
     }
 
     private fun showNotificationCallNotification(
@@ -366,7 +204,7 @@ public open class DefaultNotificationHandler(
 
     companion object {
 
-        private val PENDING_INTENT_FLAG: Int by lazy {
+        internal val PENDING_INTENT_FLAG: Int by lazy {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
                 PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
             } else {

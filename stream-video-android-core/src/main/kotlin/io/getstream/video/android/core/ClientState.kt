@@ -17,6 +17,10 @@
 package io.getstream.video.android.core
 
 import android.content.Context
+import android.content.Intent
+import io.getstream.video.android.core.notifications.NotificationHandler
+import io.getstream.video.android.core.notifications.internal.service.RunningCallService
+import io.getstream.video.android.model.StreamCallId
 import io.getstream.video.android.model.User
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -97,11 +101,21 @@ class ClientState(client: StreamVideo) {
 
     fun setActiveCall(call: Call) {
         removeRingingCall()
+        val context = clientImpl.context
+        val serviceIntent = Intent(context, RunningCallService::class.java)
+        serviceIntent.putExtra(
+            NotificationHandler.INTENT_EXTRA_CALL_CID,
+            StreamCallId.fromCallCid(call.cid),
+        )
+        context.startService(serviceIntent)
         this._activeCall.value = call
     }
 
     fun removeActiveCall() {
         this._activeCall.value = null
+        val context = clientImpl.context
+        val serviceIntent = Intent(context, RunningCallService::class.java)
+        context.stopService(serviceIntent)
         removeRingingCall()
     }
 

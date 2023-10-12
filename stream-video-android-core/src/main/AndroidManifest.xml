@@ -58,6 +58,13 @@
                 <action android:name="io.getstream.video.android.action.REJECT_CALL" />
             </intent-filter>
         </receiver>
+        <receiver
+            android:name=".notifications.internal.EndCallBroadcastReceiver"
+            android:exported="false">
+            <intent-filter android:priority="-1">
+                <action android:name="io.getstream.video.android.action.END_CALL" />
+            </intent-filter>
+        </receiver>
         <activity android:name=".notifications.internal.DismissNotificationActivity" />
 
         <receiver android:name=".notifications.internal.StopScreenshareBroadcastReceiver"
@@ -66,6 +73,10 @@
                 <action android:name="io.getstream.video.android.action.CANCEL_SCREEN_SHARE" />
             </intent-filter>
         </receiver>
+
+
+        <service android:name=".notifications.internal.service.RunningCallService"
+            android:foregroundServiceType="microphone"/>
 
         <service android:name=".screenshare.StreamScreenShareService"
             android:foregroundServiceType="mediaProjection"/>
