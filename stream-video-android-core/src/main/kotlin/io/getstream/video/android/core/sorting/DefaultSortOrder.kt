@@ -24,7 +24,7 @@ import io.getstream.video.android.core.utils.combineComparators
  * Default comparator for the participants.
  * Returns a function that takes a set of the pinned participants before starting the sorting.
  */
-val defaultComparator: (pinned: Set<String>) -> Comparator<ParticipantState> = { pinned ->
+internal val defaultComparator: (pinned: Set<String>) -> Comparator<ParticipantState> = { pinned ->
     combineComparators(
         onlyIfInvisibleOrUnknown(
             { it.userId.value },

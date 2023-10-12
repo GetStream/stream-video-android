@@ -79,7 +79,7 @@ public fun Activity.shouldShowRequestPermissionsRationale(permissions: Array<out
  *
  * @param comparators a list of comparators.
  */
-fun <T> combineComparators(vararg comparators: Comparator<T>): Comparator<T> {
+internal fun <T> combineComparators(vararg comparators: Comparator<T>): Comparator<T> {
     return comparators.reduceRight { comparator, combined ->
         comparator.thenComparing(combined)
     }
