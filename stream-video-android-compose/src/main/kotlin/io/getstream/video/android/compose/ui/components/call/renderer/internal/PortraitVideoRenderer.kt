@@ -320,7 +320,7 @@ internal fun BoxScope.PortraitVideoRenderer(
 
         else -> {
             BoxWithConstraints(modifier = Modifier.fillMaxSize()) {
-                val gridState = lazyGridStateWithVisibilityNotification(call)
+                val gridState = lazyGridStateWithVisibilityNotification(call = call)
                 LazyVerticalGrid(
                     modifier = Modifier.fillMaxSize(),
                     columns = GridCells.Fixed(2),
