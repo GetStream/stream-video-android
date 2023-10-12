@@ -19,15 +19,11 @@ package io.getstream.video.android.compose.ui.components.livestream
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.unit.sp
-import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.core.Call
 
 /**
@@ -45,7 +41,7 @@ public fun LivestreamPlayer(
     call: Call,
     onPausedPlayer: ((isPaused: Boolean) -> Unit)? = {},
     backstageContent: @Composable (call: Call) -> Unit = {
-        BackStageContent()
+        LivestreamBackStage()
     },
     rendererContent: @Composable (call: Call) -> Unit = {
         LivestreamRenderer(
@@ -71,15 +67,4 @@ public fun LivestreamPlayer(
             overlayContent.invoke(this, call = call)
         }
     }
-}
-
-@Composable
-private fun BackStageContent() {
-    Text(
-        text = stringResource(
-            id = io.getstream.video.android.ui.common.R.string.stream_video_livestreaming_on_backstage,
-        ),
-        fontSize = 14.sp,
-        color = VideoTheme.colors.textHighEmphasis,
-    )
 }
