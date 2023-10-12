@@ -19,14 +19,14 @@ package io.getstream.video.android.core.sorting
 import io.getstream.log.taggedLogger
 import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.ParticipantState
-import io.getstream.video.android.core.events.VideoEventListener
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.channels.ProducerScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.channelFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.launch
-import org.openapitools.client.models.VideoEvent
 import org.threeten.bp.OffsetDateTime
 import java.util.SortedMap
 
@@ -48,40 +48,46 @@ internal class SortedParticipantsState(
 ) {
     // Internal
     private val logger by taggedLogger("ParticipantSorting")
-    private val lastSortOrder: MutableList<String> = mutableListOf()
-    private val internalFlow: MutableStateFlow<List<ParticipantState>> =
-        MutableStateFlow(emptyList())
-    private val callEventsListener = VideoEventListener<VideoEvent> {
-        logger.v { "Call event received ${it.getEventType()}, updating sort order" }
-        sortAndPublish(participants.value, pinnedParticipants.value)
-    }
+    private var lastSortOrder: List<String> = emptyList()
+    private val internalFlow: Flow<List<ParticipantState>>
 
     init {
-        scope.launch {
+        internalFlow = channelFlow {
             // Respond to call events
-            call.subscribe(callEventsListener)
-            // Subscribe to participants and pinning
-            combine(participants, pinnedParticipants) { p1, p2 ->
-                Pair(p1, p2)
-            }.collectLatest {
-                sortAndPublish(it.first, it.second)
+            call.subscribe {
+                scope.launch {
+                    sortAndPublish(lastSortOrder, participants.value, pinnedParticipants.value)
+                }
+            }
+
+            // Combine the participants and pinned flow
+            scope.launch {
+                combine(participants, pinnedParticipants) { p1, p2 ->
+                    Pair(p1, p2)
+                }.collectLatest {
+                    sortAndPublish(lastSortOrder, it.first, it.second)
+                }
             }
         }
     }
 
     // Internal logic
-    private fun sortAndPublish(
+    private fun ProducerScope<List<ParticipantState>>.sortAndPublish(
+        previousSortOrder: List<String>,
         participants: Map<String, ParticipantState>,
         pinnedParticipants: Map<String, OffsetDateTime>,
     ) {
-        val sorted = internalSort(participants.values.toSet(), pinnedParticipants.keys.toSet())
+        // Sort
+        val sorted = internalSort(previousSortOrder, participants, pinnedParticipants.keys)
         val newOrder = sorted.map { it.sessionId }
-        val differentOrder = lastSortOrder != newOrder
+        val differentOrder = previousSortOrder != newOrder
+
         if (differentOrder) {
-            updateLastSortOrder(sorted)
+            // Update last sort order
+            lastSortOrder = newOrder
             // Publish
             logger.v { "Publishing sorted participants." }
-            internalFlow.value = sorted
+            trySend(sorted) // Try send instead of send.
         } else {
             // Order is same
             logger.v { "Order and participants are the same, do not publish." }
@@ -89,41 +95,34 @@ internal class SortedParticipantsState(
     }
 
     private fun internalSort(
-        participants: Set<ParticipantState>,
+        previousSortOrder: List<String>,
+        participants: Map<String, ParticipantState>,
         pinned: Set<String>,
     ): List<ParticipantState> {
-        logger.v {
-            "Sorting ${participants.size} participants. (diff: ${participants.size - lastSortOrder.size})"
-        }
-        val currentSortOrder = determineCurrentSortOrder(lastSortOrder, participants)
+        val currentSortOrder = determineCurrentSortOrder(previousSortOrder, participants)
         val resolvedComparator = comparator ?: defaultComparator(pinned)
         return currentSortOrder.sortedWith(resolvedComparator)
     }
 
-    private fun determineCurrentSortOrder(lastSortOrder: List<String>, participants: Set<ParticipantState>): List<ParticipantState> {
-        val map = linkedMapOf<String, ParticipantState>()
-        participants.forEach {
-            map[it.sessionId] = it
-        }
+    private fun determineCurrentSortOrder(
+        previousSortOrder: List<String>,
+        participants: Map<String, ParticipantState>,
+    ): List<ParticipantState> {
         val sortedMap = linkedMapOf<String, ParticipantState>()
-        lastSortOrder.forEach { key ->
-            val participant = map[key]
-            participant?.let {
+        // Add participants in the sortedMap according to the last sort order,
+        // only if they exist in participant list
+        previousSortOrder.forEach { key ->
+            participants[key]?.let {
                 sortedMap[key] = it
             }
         }
-        participants.forEach {
-            sortedMap[it.sessionId] = it
+        // Add any remaining participants at the end
+        participants.forEach { (key, value) ->
+            if (!sortedMap.containsKey(key)) {
+                sortedMap[key] = value
+            }
         }
         return sortedMap.values.toList()
-    }
-
-    private fun updateLastSortOrder(newSortOrder: List<ParticipantState>) {
-        val newSortOrderIds = newSortOrder.map {
-            it.sessionId
-        }
-        lastSortOrder.clear()
-        lastSortOrder.addAll(newSortOrderIds)
     }
 
     // API

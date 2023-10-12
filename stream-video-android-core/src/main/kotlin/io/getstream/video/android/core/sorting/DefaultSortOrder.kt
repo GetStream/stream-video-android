@@ -47,10 +47,8 @@ private fun onlyIfInvisibleOrUnknown(
     vararg selectors: (ParticipantState) -> Comparable<*>?,
 ): Comparator<ParticipantState> {
     return Comparator { p1, p2 ->
-        if (p1.visibleOnScreen.value == VisibilityOnScreenState.INVISIBLE ||
-            p1.visibleOnScreen.value == VisibilityOnScreenState.UNKNOWN ||
-            p2.visibleOnScreen.value == VisibilityOnScreenState.INVISIBLE ||
-            p2.visibleOnScreen.value == VisibilityOnScreenState.UNKNOWN
+        if (p1.visibleOnScreen.value != VisibilityOnScreenState.VISIBLE
+            || p2.visibleOnScreen.value != VisibilityOnScreenState.VISIBLE
         ) {
             var comparisonResult = 0
             for (selector in selectors) {
