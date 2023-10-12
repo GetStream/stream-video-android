@@ -94,7 +94,6 @@ fun LiveAudience() {
 
 @Composable
 private fun LiveGuestContent(call: Call) {
-    val participants by call.state.participants.collectAsState()
     val totalParticipants by call.state.totalParticipants.collectAsState()
     val backstage by call.state.backstage.collectAsState()
     val duration by call.state.duration.collectAsState()
