@@ -19,7 +19,6 @@ package io.getstream.video.android.compose.ui.components.livestream
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -27,10 +26,8 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import io.getstream.video.android.compose.theme.VideoTheme
-import io.getstream.video.android.compose.ui.components.video.VideoRenderer
 import io.getstream.video.android.core.Call
 
 /**
@@ -46,11 +43,15 @@ import io.getstream.video.android.core.Call
 public fun LivestreamPlayer(
     modifier: Modifier = Modifier,
     call: Call,
+    onPausedPlayer: ((isPaused: Boolean) -> Unit)? = {},
     backstageContent: @Composable (call: Call) -> Unit = {
         BackStageContent()
     },
     rendererContent: @Composable (call: Call) -> Unit = {
-        LivestreamRenderer(call = call)
+        LivestreamRenderer(
+            call = call,
+            onPausedPlayer = onPausedPlayer,
+        )
     },
     overlayContent: @Composable BoxScope.(call: Call) -> Unit = {
         LivestreamPlayerOverlay(call = call)
@@ -80,20 +81,5 @@ private fun BackStageContent() {
         ),
         fontSize = 14.sp,
         color = VideoTheme.colors.textHighEmphasis,
-    )
-}
-
-@Composable
-private fun LivestreamRenderer(
-    call: Call,
-) {
-    val livestream by call.state.livestream.collectAsState()
-
-    VideoRenderer(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(6.dp),
-        call = call,
-        video = livestream,
     )
 }
