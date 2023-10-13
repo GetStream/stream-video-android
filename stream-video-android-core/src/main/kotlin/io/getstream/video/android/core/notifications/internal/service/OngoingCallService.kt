@@ -16,16 +16,12 @@
 
 package io.getstream.video.android.core.notifications.internal.service
 
-import android.app.Notification
-import android.app.NotificationChannel
-import android.app.NotificationManager
 import android.app.Service
 import android.content.Intent
-import android.os.Build
 import android.os.IBinder
-import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
-import androidx.core.graphics.drawable.IconCompat
+import io.getstream.log.taggedLogger
+import io.getstream.video.android.core.StreamVideo
 import io.getstream.video.android.core.notifications.NotificationHandler.Companion.INTENT_EXTRA_CALL_CID
 import io.getstream.video.android.core.notifications.internal.DefaultStreamIntentResolver
 import io.getstream.video.android.model.StreamCallId
@@ -34,15 +30,33 @@ import io.getstream.video.android.model.streamCallId
 /**
  * A foreground service that is running when there is an active call.
  */
-internal class RunningCallService : Service() {
+internal class OngoingCallService : Service() {
+    private val logger by taggedLogger("OngoingCallService")
     private var callId: StreamCallId? = null
     private val intentResolver = DefaultStreamIntentResolver(this)
+
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         callId = intent?.streamCallId(INTENT_EXTRA_CALL_CID)
-        callId?.let {
-            val notificationId = callId.hashCode()
-            val notification: Notification = createNotification(it)
-            startForeground(notificationId, notification)
+        val streamVideo = StreamVideo.instanceOrNull()
+        val started = if (callId != null && streamVideo != null) {
+            val notification = streamVideo.getOngoingCallNotification(callId!!)
+            if (notification != null) {
+                startForeground(callId.hashCode(), notification)
+                true
+            } else {
+                // Service not started no notification
+                logger.e { "Could not get notification for ongoing call" }
+                false
+            }
+        } else {
+            // Service not started, no call Id or stream video
+            logger.e { "Call id or streamVideo are not available." }
+            false
+        }
+
+        if (!started) {
+            logger.w { "Foreground service did not start!" }
+            stopSelf()
         }
         return START_NOT_STICKY
     }
@@ -57,32 +71,4 @@ internal class RunningCallService : Service() {
 
     // This service does not return a Binder
     override fun onBind(intent: Intent?): IBinder? = null
-
-    private fun createNotification(callId: StreamCallId): Notification {
-        val channelId = "your_channel_id"
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            val channelName = "Your Channel Name"
-            val importance = NotificationManager.IMPORTANCE_DEFAULT
-            val channel = NotificationChannel(channelId, channelName, importance)
-            val notificationManager = getSystemService(NotificationManager::class.java)
-            notificationManager.createNotificationChannel(channel)
-        }
-        val endCallIntent = intentResolver.searchEndCallPendingIntent(callId)
-        return NotificationCompat.Builder(this, channelId)
-            .setContentTitle("Call in progress...")
-            .setContentText("You can end it via the action button, or go back to the app.")
-            .setSmallIcon(android.R.drawable.ic_menu_call)
-            .setAutoCancel(false)
-            .addAction(
-                NotificationCompat.Action.Builder(
-                    IconCompat.createWithResource(
-                        applicationContext,
-                        android.R.drawable.ic_menu_close_clear_cancel,
-                    ),
-                    "End",
-                    endCallIntent,
-                ).build(),
-            )
-            .build()
-    }
 }

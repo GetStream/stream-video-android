@@ -750,7 +750,8 @@ public final class io/getstream/video/android/core/StreamVideoBuilder {
 	public fun <init> (Landroid/content/Context;Ljava/lang/String;Lio/getstream/video/android/core/GEO;Lio/getstream/video/android/model/User;Ljava/lang/String;Lkotlin/jvm/functions/Function2;Lio/getstream/video/android/core/logging/LoggingLevel;Lio/getstream/video/android/core/notifications/NotificationConfig;Lkotlin/jvm/functions/Function1;J)V
 	public fun <init> (Landroid/content/Context;Ljava/lang/String;Lio/getstream/video/android/core/GEO;Lio/getstream/video/android/model/User;Ljava/lang/String;Lkotlin/jvm/functions/Function2;Lio/getstream/video/android/core/logging/LoggingLevel;Lio/getstream/video/android/core/notifications/NotificationConfig;Lkotlin/jvm/functions/Function1;JZ)V
 	public fun <init> (Landroid/content/Context;Ljava/lang/String;Lio/getstream/video/android/core/GEO;Lio/getstream/video/android/model/User;Ljava/lang/String;Lkotlin/jvm/functions/Function2;Lio/getstream/video/android/core/logging/LoggingLevel;Lio/getstream/video/android/core/notifications/NotificationConfig;Lkotlin/jvm/functions/Function1;JZLjava/lang/String;)V
-	public synthetic fun <init> (Landroid/content/Context;Ljava/lang/String;Lio/getstream/video/android/core/GEO;Lio/getstream/video/android/model/User;Ljava/lang/String;Lkotlin/jvm/functions/Function2;Lio/getstream/video/android/core/logging/LoggingLevel;Lio/getstream/video/android/core/notifications/NotificationConfig;Lkotlin/jvm/functions/Function1;JZLjava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun <init> (Landroid/content/Context;Ljava/lang/String;Lio/getstream/video/android/core/GEO;Lio/getstream/video/android/model/User;Ljava/lang/String;Lkotlin/jvm/functions/Function2;Lio/getstream/video/android/core/logging/LoggingLevel;Lio/getstream/video/android/core/notifications/NotificationConfig;Lkotlin/jvm/functions/Function1;JZLjava/lang/String;Z)V
+	public synthetic fun <init> (Landroid/content/Context;Ljava/lang/String;Lio/getstream/video/android/core/GEO;Lio/getstream/video/android/model/User;Ljava/lang/String;Lkotlin/jvm/functions/Function2;Lio/getstream/video/android/core/logging/LoggingLevel;Lio/getstream/video/android/core/notifications/NotificationConfig;Lkotlin/jvm/functions/Function1;JZLjava/lang/String;ZILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun build ()Lio/getstream/video/android/core/StreamVideo;
 	public final fun getScope ()Lkotlinx/coroutines/CoroutineScope;
 }
@@ -3963,6 +3964,7 @@ public class io/getstream/video/android/core/notifications/DefaultNotificationHa
 	public fun getChannelDescription ()Ljava/lang/String;
 	public fun getChannelId ()Ljava/lang/String;
 	public fun getChannelName ()Ljava/lang/String;
+	public fun getOngoingCallNotification (Lio/getstream/video/android/model/StreamCallId;)Landroid/app/Notification;
 	public fun onLiveCall (Lio/getstream/video/android/model/StreamCallId;Ljava/lang/String;)V
 	public fun onNotification (Lio/getstream/video/android/model/StreamCallId;Ljava/lang/String;)V
 	public fun onPermissionDenied ()V
@@ -3998,11 +4000,13 @@ public abstract interface class io/getstream/video/android/core/notifications/No
 	public static final field ACTION_LEAVE_CALL Ljava/lang/String;
 	public static final field ACTION_LIVE_CALL Ljava/lang/String;
 	public static final field ACTION_NOTIFICATION Ljava/lang/String;
+	public static final field ACTION_ONGOING_CALL Ljava/lang/String;
 	public static final field ACTION_REJECT_CALL Ljava/lang/String;
 	public static final field Companion Lio/getstream/video/android/core/notifications/NotificationHandler$Companion;
 	public static final field INCOMING_CALL_NOTIFICATION_ID I
 	public static final field INTENT_EXTRA_CALL_CID Ljava/lang/String;
 	public static final field INTENT_EXTRA_NOTIFICATION_ID Ljava/lang/String;
+	public abstract fun getOngoingCallNotification (Lio/getstream/video/android/model/StreamCallId;)Landroid/app/Notification;
 	public abstract fun onLiveCall (Lio/getstream/video/android/model/StreamCallId;Ljava/lang/String;)V
 	public abstract fun onNotification (Lio/getstream/video/android/model/StreamCallId;Ljava/lang/String;)V
 	public abstract fun onRingingCall (Lio/getstream/video/android/model/StreamCallId;Ljava/lang/String;)V
@@ -4014,6 +4018,7 @@ public final class io/getstream/video/android/core/notifications/NotificationHan
 	public static final field ACTION_LEAVE_CALL Ljava/lang/String;
 	public static final field ACTION_LIVE_CALL Ljava/lang/String;
 	public static final field ACTION_NOTIFICATION Ljava/lang/String;
+	public static final field ACTION_ONGOING_CALL Ljava/lang/String;
 	public static final field ACTION_REJECT_CALL Ljava/lang/String;
 	public static final field INCOMING_CALL_NOTIFICATION_ID I
 	public static final field INTENT_EXTRA_CALL_CID Ljava/lang/String;

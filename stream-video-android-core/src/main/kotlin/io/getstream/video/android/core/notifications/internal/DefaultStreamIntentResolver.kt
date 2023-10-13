@@ -24,7 +24,10 @@ import android.content.pm.ResolveInfo
 import io.getstream.log.taggedLogger
 import io.getstream.video.android.core.notifications.DefaultNotificationHandler
 import io.getstream.video.android.core.notifications.NotificationHandler
+import io.getstream.video.android.core.notifications.NotificationHandler.Companion.ACTION_LIVE_CALL
+import io.getstream.video.android.core.notifications.NotificationHandler.Companion.ACTION_ONGOING_CALL
 import io.getstream.video.android.core.notifications.NotificationHandler.Companion.ACTION_REJECT_CALL
+import io.getstream.video.android.core.notifications.NotificationHandler.Companion.INTENT_EXTRA_CALL_CID
 import io.getstream.video.android.model.StreamCallId
 
 internal class DefaultStreamIntentResolver(val context: Context) {
@@ -116,6 +119,22 @@ internal class DefaultStreamIntentResolver(val context: Context) {
         Intent(NotificationHandler.ACTION_LEAVE_CALL),
         callId,
     )
+
+    /**
+     * Searches an activity that will accept the [ACTION_ONGOING_CALL] intent and jump right back into the call.
+     *
+     * @param callId the call id
+     * @param notificationId the notification ID.
+     */
+    fun searchOngoingCallPendingIntent(callId: StreamCallId, notificationId: Int): PendingIntent? {
+        val intent = Intent(ACTION_ONGOING_CALL)
+        intent.putExtra(INTENT_EXTRA_CALL_CID, callId.cid)
+        return searchActivityPendingIntent(
+            intent,
+            callId,
+            notificationId,
+        )
+    }
 
     private fun searchBroadcastPendingIntent(
         baseIntent: Intent,

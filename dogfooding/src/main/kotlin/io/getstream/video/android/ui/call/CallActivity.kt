@@ -35,6 +35,7 @@ import io.getstream.result.Result
 import io.getstream.result.onSuccessSuspend
 import io.getstream.video.android.MainActivity
 import io.getstream.video.android.core.StreamVideo
+import io.getstream.video.android.core.notifications.NotificationHandler
 import io.getstream.video.android.model.StreamCallId
 import kotlinx.coroutines.launch
 
@@ -48,7 +49,26 @@ class CallActivity : ComponentActivity() {
         val streamVideo = StreamVideo.instance()
         val cid = intent.getParcelableExtra<StreamCallId>(EXTRA_CID)
             ?: throw IllegalArgumentException("call type and id is invalid!")
-        val call = streamVideo.call(type = cid.type, id = cid.id)
+
+        // optional - check for already active call that can be utilized
+        // This step is optional and can be skipped
+        // val cal = streamVideo.call(type = cid.type, id = cid.id)
+        val activeCall = streamVideo.state.activeCall.value
+        val call = if (activeCall != null) {
+            if (activeCall.id != cid.id) {
+                Log.w("CallActivity", "A call with id: ${cid.cid} existed. Leaving.")
+                // If the call id is different leave the previous call
+                activeCall.leave()
+                // Return a new call
+                streamVideo.call(type = cid.type, id = cid.id)
+            } else {
+                // Call ID is the same, use the active call
+                activeCall
+            }
+        } else {
+            // There is no active call, create new call
+            streamVideo.call(type = cid.type, id = cid.id)
+        }
 
         // optional - call settings. We disable the mic if coming from QR code demo
         if (intent.getBooleanExtra(EXTRA_DISABLE_MIC_BOOLEAN, false)) {
@@ -57,17 +77,20 @@ class CallActivity : ComponentActivity() {
 
         // step 2 - join a call
         lifecycleScope.launch {
-            val result = call.join(create = true)
+            // If the call is new, join the call
+            if (activeCall != call) {
+                val result = call.join(create = true)
 
-            // Unable to join. Device is offline or other usually connection issue.
-            if (result is Result.Failure) {
-                Log.e("CallActivity", "Call.join failed ${result.value}")
-                Toast.makeText(
-                    this@CallActivity,
-                    "Failed to join call (${result.value.message})",
-                    Toast.LENGTH_SHORT,
-                ).show()
-                finish()
+                // Unable to join. Device is offline or other usually connection issue.
+                if (result is Result.Failure) {
+                    Log.e("CallActivity", "Call.join failed ${result.value}")
+                    Toast.makeText(
+                        this@CallActivity,
+                        "Failed to join call (${result.value.message})",
+                        Toast.LENGTH_SHORT,
+                    ).show()
+                    finish()
+                }
             }
         }
 
@@ -121,7 +144,7 @@ class CallActivity : ComponentActivity() {
     }
 
     companion object {
-        const val EXTRA_CID: String = "EXTRA_CID"
+        const val EXTRA_CID: String = NotificationHandler.INTENT_EXTRA_CALL_CID
         const val EXTRA_DISABLE_MIC_BOOLEAN: String = "EXTRA_DISABLE_MIC"
 
         /**

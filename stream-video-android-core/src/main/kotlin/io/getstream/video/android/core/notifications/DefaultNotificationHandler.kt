@@ -18,8 +18,11 @@ package io.getstream.video.android.core.notifications
 
 import android.annotation.SuppressLint
 import android.app.Application
+import android.app.Notification
+import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.PendingIntent
+import android.content.Context
 import android.os.Build
 import androidx.core.app.NotificationChannelCompat
 import androidx.core.app.NotificationCompat
@@ -102,6 +105,69 @@ public open class DefaultNotificationHandler(
                 notificationId,
             )
         } ?: logger.e { "Couldn't find any activity for $ACTION_LIVE_CALL" }
+    }
+
+    override fun getOngoingCallNotification(callId: StreamCallId): Notification? {
+        val notificationId = callId.hashCode() // Notification ID
+
+        // Intents
+        val ongoingCallIntent = intentResolver.searchOngoingCallPendingIntent(
+            callId,
+            notificationId,
+        )
+        val endCallIntent = intentResolver.searchEndCallPendingIntent(callId = callId)
+
+        // Channel preparation
+        val ongoingCallsChannelId = application.getString(
+            R.string.stream_video_ongoing_call_notification_channel_id,
+        )
+        maybeCreateChannel(ongoingCallsChannelId, application)
+
+        // Build notification
+        return NotificationCompat.Builder(application, ongoingCallsChannelId)
+            .setSmallIcon(android.R.drawable.ic_menu_call)
+            .also {
+                // If the intent is configured, clicking the notification will return to the call
+                if (ongoingCallIntent != null) {
+                    it.setContentIntent(ongoingCallIntent)
+                } else {
+                    logger.w { "Ongoing intent is null click on the ongoing call notification will not work." }
+                }
+            }
+            .setContentTitle(
+                application.getString(R.string.stream_video_ongoing_call_notification_title),
+            )
+            .setContentText(
+                application.getString(R.string.stream_video_ongoing_call_notification_description),
+            )
+            .setAutoCancel(false)
+            .setOngoing(true)
+            .addAction(
+                NotificationCompat.Action.Builder(
+                    android.R.drawable.ic_menu_close_clear_cancel,
+                    application.getString(R.string.stream_video_call_notification_action_leave),
+                    endCallIntent,
+                ).build(),
+            )
+            .build()
+    }
+
+    private fun maybeCreateChannel(channelId: String, context: Context) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            val channel = NotificationChannel(
+                channelId,
+                application.getString(
+                    R.string.stream_video_ongoing_call_notification_channel_title,
+                ),
+                NotificationManager.IMPORTANCE_DEFAULT,
+            ).apply {
+                description = application.getString(R.string.stream_video_ongoing_call_notification_channel_description)
+            }
+
+            val notificationManager =
+                context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+            notificationManager.createNotificationChannel(channel)
+        }
     }
 
     private fun showNotificationCallNotification(

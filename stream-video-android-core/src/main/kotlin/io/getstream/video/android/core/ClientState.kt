@@ -19,7 +19,7 @@ package io.getstream.video.android.core
 import android.content.Context
 import android.content.Intent
 import io.getstream.video.android.core.notifications.NotificationHandler
-import io.getstream.video.android.core.notifications.internal.service.RunningCallService
+import io.getstream.video.android.core.notifications.internal.service.OngoingCallService
 import io.getstream.video.android.model.StreamCallId
 import io.getstream.video.android.model.User
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -101,21 +101,13 @@ class ClientState(client: StreamVideo) {
 
     fun setActiveCall(call: Call) {
         removeRingingCall()
-        val context = clientImpl.context
-        val serviceIntent = Intent(context, RunningCallService::class.java)
-        serviceIntent.putExtra(
-            NotificationHandler.INTENT_EXTRA_CALL_CID,
-            StreamCallId.fromCallCid(call.cid),
-        )
-        context.startService(serviceIntent)
+        maybeStartForeGroundService(call)
         this._activeCall.value = call
     }
 
     fun removeActiveCall() {
         this._activeCall.value = null
-        val context = clientImpl.context
-        val serviceIntent = Intent(context, RunningCallService::class.java)
-        context.stopService(serviceIntent)
+        maybeStopForegroundService()
         removeRingingCall()
     }
 
@@ -126,6 +118,27 @@ class ClientState(client: StreamVideo) {
 
     fun removeRingingCall() {
         _ringingCall.value = null
+    }
+
+    // Internal logic
+    private fun maybeStartForeGroundService(call: Call) {
+        if (clientImpl.runForeGroundService) {
+            val context = clientImpl.context
+            val serviceIntent = Intent(context, OngoingCallService::class.java)
+            serviceIntent.putExtra(
+                NotificationHandler.INTENT_EXTRA_CALL_CID,
+                StreamCallId.fromCallCid(call.cid),
+            )
+            context.startService(serviceIntent)
+        }
+    }
+
+    private fun maybeStopForegroundService() {
+        if (clientImpl.runForeGroundService) {
+            val context = clientImpl.context
+            val serviceIntent = Intent(context, OngoingCallService::class.java)
+            context.stopService(serviceIntent)
+        }
     }
 }
 
