@@ -251,6 +251,9 @@ dependencies {
     implementation(libs.firebase.crashlytics)
     implementation(libs.firebase.analytics)
 
+    // moshi
+    implementation(libs.moshi.kotlin)
+
     // Play Install Referrer library - used to extract the meeting link from demo flow after install
     implementation(libs.play.install.referrer)
 

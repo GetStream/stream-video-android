@@ -16,9 +16,12 @@
 
 package io.getstream.video.android.di
 
+import android.content.Context
 import dagger.Provides
 import dagger.hilt.InstallIn
+import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
+import io.getstream.video.android.data.repositories.GoogleAccountRepository
 import io.getstream.video.android.datastore.delegate.StreamUserDataStore
 import javax.inject.Singleton
 
@@ -31,4 +34,7 @@ object AppModule {
     fun provideUserDataStore(): StreamUserDataStore {
         return StreamUserDataStore.instance()
     }
+
+    @Provides
+    fun provideGoogleAccountRepository(@ApplicationContext context: Context) = GoogleAccountRepository(context)
 }
