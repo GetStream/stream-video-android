@@ -24,6 +24,7 @@ import io.getstream.video.android.core.model.MediaTrack
 import io.getstream.video.android.core.model.NetworkQuality
 import io.getstream.video.android.core.model.Reaction
 import io.getstream.video.android.core.model.VideoTrack
+import io.getstream.video.android.core.model.VisibilityOnScreenState
 import io.getstream.video.android.core.utils.combineStates
 import io.getstream.video.android.core.utils.mapState
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -60,6 +61,9 @@ public data class ParticipantState(
     /** video track */
     internal val _videoTrack = MutableStateFlow<VideoTrack?>(null)
     val videoTrack: StateFlow<VideoTrack?> = _videoTrack
+
+    internal val _visibleOnScreen = MutableStateFlow(VisibilityOnScreenState.UNKNOWN)
+    val visibleOnScreen: StateFlow<VisibilityOnScreenState> = _visibleOnScreen
 
     /**
      * State that indicates whether the camera is capturing and sending video or not.

@@ -116,7 +116,7 @@ class CallStateTest : IntegrationTestBase() {
     fun `Participants should be sorted`() = runTest {
         val call = client.call("default", randomUUID())
 
-        val sortedParticipants = call.state.sortedParticipantsFlow.stateIn(
+        val sortedParticipants = call.state.sortedParticipants.stateIn(
             backgroundScope,
             SharingStarted.Eagerly,
             emptyList(),
