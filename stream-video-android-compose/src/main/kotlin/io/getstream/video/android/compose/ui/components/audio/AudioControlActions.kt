@@ -94,16 +94,13 @@ public fun AudioControlActions(
 
             Spacer(modifier = Modifier.width(10.dp))
 
-            // TODO : Remove the if statement once we update Paparazzi to 1.3.0.
-            if (!LocalInspectionMode.current) {
-                Text(
-                    text = stringResource(
-                        id = io.getstream.video.android.ui.common.R.string.stream_video_audio_leave,
-                    ),
-                    color = VideoTheme.colors.audioLeaveButton,
-                    fontSize = 16.sp,
-                )
-            }
+            Text(
+                text = stringResource(
+                    id = io.getstream.video.android.ui.common.R.string.stream_video_audio_leave,
+                ),
+                color = VideoTheme.colors.audioLeaveButton,
+                fontSize = 16.sp,
+            )
         }
 
         ToggleMicrophoneAction(

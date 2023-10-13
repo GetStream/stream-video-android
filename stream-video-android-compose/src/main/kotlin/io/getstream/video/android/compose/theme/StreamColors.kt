@@ -78,6 +78,7 @@ public data class StreamColors(
     public val callLobbyBackground: Color,
     public val audioLeaveButton: Color,
     public val audioActionColor: Color,
+    public val liveIndicator: Color,
 ) {
 
     public companion object {
@@ -140,6 +141,7 @@ public data class StreamColors(
             callLobbyBackground = colorResource(id = R.color.stream_video_lobby_background),
             audioLeaveButton = colorResource(id = R.color.stream_video_audio_leave),
             audioActionColor = colorResource(id = R.color.stream_video_audio_room_actions),
+            liveIndicator = colorResource(id = R.color.stream_video_live_indicator),
         )
 
         /**
@@ -205,6 +207,7 @@ public data class StreamColors(
             callLobbyBackground = colorResource(id = R.color.stream_video_lobby_background_dark),
             audioLeaveButton = colorResource(id = R.color.stream_video_audio_leave_dark),
             audioActionColor = colorResource(id = R.color.stream_video_audio_room_actions_dark),
+            liveIndicator = colorResource(id = R.color.stream_video_live_indicator_dark),
         )
     }
 }
