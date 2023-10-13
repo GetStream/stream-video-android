@@ -50,6 +50,7 @@
     <string name="stream_video_audio_leave">Leave Quietly</string>
     <string name="stream_video_audio_room_title">Audio Room</string>
     <string name="stream_video_livestreaming_on_backstage">Waiting for live host</string>
+    <string name="stream_video_live">Live</string>
 
     <string name="stream_video_call_status_incoming">Incoming %s call…</string>
     <string name="stream_video_call_status_outgoing">Calling…</string>
