@@ -109,6 +109,7 @@ androidx-compose-tracing = { group = "androidx.compose.runtime", name = "runtime
 compose-stable-marker = { group = "com.github.skydoves", name = "compose-stable-marker", version.ref = "composeStableMarker" }
 
 coil = { group = "io.coil-kt", name = "coil", version.ref = "coil" }
+coil-compose = { group = "io.coil-kt", name = "coil-compose", version.ref = "coil" }
 desugar = { group = "com.android.tools", name = "desugar_jdk_libs", version.ref = "desugar" }
 
 landscapist-coil = { group = "com.github.skydoves", name = "landscapist-coil", version.ref = "landscapist" }

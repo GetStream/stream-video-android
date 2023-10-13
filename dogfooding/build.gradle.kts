@@ -242,6 +242,8 @@ dependencies {
     implementation(libs.androidx.hilt.navigation)
     implementation(libs.landscapist.coil)
     implementation(libs.accompanist.permission)
+    implementation(libs.androidx.lifecycle.runtime.compose)
+    implementation(libs.coil.compose)
 
     // hilt
     implementation(libs.hilt.android)
