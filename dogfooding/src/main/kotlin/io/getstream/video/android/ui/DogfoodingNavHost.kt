@@ -30,7 +30,7 @@ import io.getstream.video.android.RingCallActivity
 import io.getstream.video.android.ui.join.CallJoinScreen
 import io.getstream.video.android.ui.lobby.CallLobbyScreen
 import io.getstream.video.android.ui.login.LoginScreen
-import io.getstream.video.android.ui.outgoing.DebugCallScreen
+import io.getstream.video.android.ui.outgoing.DirectCallScreen
 
 @Composable
 fun AppNavHost(
@@ -81,7 +81,7 @@ fun AppNavHost(
         }
         composable(AppScreens.DebugCall.destination) {
             val context = LocalContext.current
-            DebugCallScreen(
+            DirectCallScreen(
                 navigateToRingCall = { callId, members ->
                     context.startActivity(
                         RingCallActivity.createIntent(
