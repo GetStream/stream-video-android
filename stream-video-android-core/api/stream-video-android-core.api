@@ -3994,8 +3994,8 @@ public final class io/getstream/video/android/core/notifications/NotificationCon
 
 public abstract interface class io/getstream/video/android/core/notifications/NotificationHandler : io/getstream/android/push/permissions/NotificationPermissionHandler {
 	public static final field ACTION_ACCEPT_CALL Ljava/lang/String;
-	public static final field ACTION_END_CALL Ljava/lang/String;
 	public static final field ACTION_INCOMING_CALL Ljava/lang/String;
+	public static final field ACTION_LEAVE_CALL Ljava/lang/String;
 	public static final field ACTION_LIVE_CALL Ljava/lang/String;
 	public static final field ACTION_NOTIFICATION Ljava/lang/String;
 	public static final field ACTION_REJECT_CALL Ljava/lang/String;
@@ -4010,8 +4010,8 @@ public abstract interface class io/getstream/video/android/core/notifications/No
 
 public final class io/getstream/video/android/core/notifications/NotificationHandler$Companion {
 	public static final field ACTION_ACCEPT_CALL Ljava/lang/String;
-	public static final field ACTION_END_CALL Ljava/lang/String;
 	public static final field ACTION_INCOMING_CALL Ljava/lang/String;
+	public static final field ACTION_LEAVE_CALL Ljava/lang/String;
 	public static final field ACTION_LIVE_CALL Ljava/lang/String;
 	public static final field ACTION_NOTIFICATION Ljava/lang/String;
 	public static final field ACTION_REJECT_CALL Ljava/lang/String;
