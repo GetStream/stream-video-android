@@ -129,7 +129,7 @@ Video roadmap and changelog is available [here](https://github.com/GetStream/pro
 - [X] Migrate Stream Chat SDK v6 stable (Jaewoong)
 - [X] Add Dogfooding instructions + directs Google Play (Jaewoong)
 - [X] Support participant.custom field which was previously ignored. ParticipantState line 216 (Daniel)
-- [ ] Default livestream player UI + docs (Jaewoong/ Daniel)
+- [X] Default livestream player UI + docs (Jaewoong)
 - [ ] Reaction dialog API for Compose (Jaewoong)
 - [ ] Android SDK development.md cleanup (Daniel)
 - [ ] Upgrade to more recent versions of webrtc (Kanat)
