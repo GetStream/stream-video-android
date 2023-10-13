@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package io.getstream.video.android.compose.ui.components.extensions
+package io.getstream.video.android.compose.ui.extensions
 
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.composed
