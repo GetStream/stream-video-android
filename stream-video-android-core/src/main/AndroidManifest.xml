@@ -52,22 +52,22 @@
         </provider>
 
         <receiver
-            android:name=".notifications.internal.RejectCallBroadcastReceiver"
+            android:name=".notifications.internal.receivers.RejectCallBroadcastReceiver"
             android:exported="false">
             <intent-filter android:priority="-1">
                 <action android:name="io.getstream.video.android.action.REJECT_CALL" />
             </intent-filter>
         </receiver>
         <receiver
-            android:name=".notifications.internal.EndCallBroadcastReceiver"
+            android:name=".notifications.internal.receivers.LeaveCallBroadcastReceiver"
             android:exported="false">
             <intent-filter android:priority="-1">
-                <action android:name="io.getstream.video.android.action.END_CALL" />
+                <action android:name="io.getstream.video.android.action.LEAVE_CALL" />
             </intent-filter>
         </receiver>
         <activity android:name=".notifications.internal.DismissNotificationActivity" />
 
-        <receiver android:name=".notifications.internal.StopScreenshareBroadcastReceiver"
+        <receiver android:name=".notifications.internal.receivers.StopScreenshareBroadcastReceiver"
             android:exported="false">
             <intent-filter android:priority="-1">
                 <action android:name="io.getstream.video.android.action.CANCEL_SCREEN_SHARE" />

@@ -113,7 +113,7 @@ internal class DefaultStreamIntentResolver(val context: Context) {
     internal fun searchEndCallPendingIntent(
         callId: StreamCallId,
     ): PendingIntent? = searchBroadcastPendingIntent(
-        Intent(NotificationHandler.ACTION_END_CALL),
+        Intent(NotificationHandler.ACTION_LEAVE_CALL),
         callId,
     )
 

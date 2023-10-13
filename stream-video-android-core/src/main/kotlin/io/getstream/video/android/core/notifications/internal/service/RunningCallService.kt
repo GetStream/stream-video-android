@@ -25,7 +25,7 @@ import android.os.Build
 import android.os.IBinder
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
-import io.getstream.video.android.core.notifications.NotificationHandler
+import androidx.core.graphics.drawable.IconCompat
 import io.getstream.video.android.core.notifications.NotificationHandler.Companion.INTENT_EXTRA_CALL_CID
 import io.getstream.video.android.core.notifications.internal.DefaultStreamIntentResolver
 import io.getstream.video.android.model.StreamCallId
@@ -75,7 +75,10 @@ internal class RunningCallService : Service() {
             .setAutoCancel(false)
             .addAction(
                 NotificationCompat.Action.Builder(
-                    null,
+                    IconCompat.createWithResource(
+                        applicationContext,
+                        android.R.drawable.ic_menu_close_clear_cancel,
+                    ),
                     "End",
                     endCallIntent,
                 ).build(),
