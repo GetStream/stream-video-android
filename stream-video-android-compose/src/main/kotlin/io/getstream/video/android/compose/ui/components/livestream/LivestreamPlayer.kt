@@ -24,7 +24,12 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.tooling.preview.Preview
+import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.core.Call
+import io.getstream.video.android.mock.StreamMockUtils
+import io.getstream.video.android.mock.mockCall
 
 /**
  * Represents livestreaming content based on the call state provided from the [call].
@@ -40,16 +45,16 @@ public fun LivestreamPlayer(
     modifier: Modifier = Modifier,
     call: Call,
     onPausedPlayer: ((isPaused: Boolean) -> Unit)? = {},
-    backstageContent: @Composable (call: Call) -> Unit = {
+    backstageContent: @Composable (Call) -> Unit = {
         LivestreamBackStage()
     },
-    rendererContent: @Composable (call: Call) -> Unit = {
+    rendererContent: @Composable (Call) -> Unit = {
         LivestreamRenderer(
             call = call,
             onPausedPlayer = onPausedPlayer,
         )
     },
-    overlayContent: @Composable BoxScope.(call: Call) -> Unit = {
+    overlayContent: @Composable BoxScope.(Call) -> Unit = {
         LivestreamPlayerOverlay(call = call)
     },
 ) {
@@ -60,11 +65,20 @@ public fun LivestreamPlayer(
         contentAlignment = Alignment.Center,
     ) {
         if (backstage) {
-            backstageContent.invoke(call = call)
+            backstageContent.invoke(call)
         } else {
-            rendererContent.invoke(call = call)
+            rendererContent.invoke(call)
 
-            overlayContent.invoke(this, call = call)
+            overlayContent.invoke(this, call)
         }
+    }
+}
+
+@Preview
+@Composable
+private fun LivestreamPlayerPreview() {
+    StreamMockUtils.initializeStreamVideo(LocalContext.current)
+    VideoTheme {
+        LivestreamPlayer(call = mockCall)
     }
 }

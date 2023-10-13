@@ -56,8 +56,9 @@ import io.getstream.video.android.mock.mockCall
 public fun BoxScope.LivestreamPlayerOverlay(call: Call) {
     Box(
         modifier = Modifier
+            .fillMaxWidth()
             .align(Alignment.BottomCenter)
-            .fillMaxWidth(),
+            .padding(6.dp),
     ) {
         LiveBadge(call = call)
 
@@ -129,7 +130,7 @@ private fun BoxScope.LiveDuration(call: Call) {
 
         Text(
             modifier = Modifier.padding(horizontal = 6.dp),
-            text = duration.toString(),
+            text = (duration ?: 0).toString(),
             color = Color.White,
             fontSize = 13.sp,
             fontWeight = FontWeight.Bold,

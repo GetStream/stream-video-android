@@ -17,28 +17,13 @@
 package io.getstream.video.android.tutorial.livestream
 
 import android.widget.Toast
-import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.unit.dp
-import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.livestream.LivestreamPlayer
 import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.GEO
@@ -85,40 +70,6 @@ fun LiveAudience() {
     }
 
     if (call != null) {
-        LiveGuestContent(call!!)
+        LivestreamPlayer(call = call!!)
     }
-}
-
-@Composable
-private fun LiveGuestContent(call: Call) {
-    val totalParticipants by call.state.totalParticipants.collectAsState()
-    val duration by call.state.duration.collectAsState()
-
-    LivestreamPlayer(call = call, overlayContent = {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .align(Alignment.BottomCenter),
-            horizontalArrangement = Arrangement.Center,
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            Text(
-                modifier = Modifier
-                    .background(
-                        color = VideoTheme.colors.primaryAccent,
-                        shape = RoundedCornerShape(6.dp),
-                    )
-                    .padding(horizontal = 16.dp, vertical = 4.dp),
-                text = "Live $totalParticipants",
-                color = Color.White,
-            )
-
-            Spacer(modifier = Modifier.width(12.dp))
-
-            Text(
-                text = "Live for $duration",
-                color = VideoTheme.colors.textHighEmphasis,
-            )
-        }
-    })
 }
