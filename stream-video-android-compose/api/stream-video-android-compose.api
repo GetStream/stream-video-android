@@ -58,7 +58,7 @@ public abstract interface class io/getstream/video/android/compose/state/ui/part
 public final class io/getstream/video/android/compose/theme/StreamColors {
 	public static final field $stable I
 	public static final field Companion Lio/getstream/video/android/compose/theme/StreamColors$Companion;
-	public synthetic fun <init> (JJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJLkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public synthetic fun <init> (JJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJLkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun component1-0d7_KjU ()J
 	public final fun component10-0d7_KjU ()J
 	public final fun component11-0d7_KjU ()J
@@ -89,14 +89,15 @@ public final class io/getstream/video/android/compose/theme/StreamColors {
 	public final fun component34-0d7_KjU ()J
 	public final fun component35-0d7_KjU ()J
 	public final fun component36-0d7_KjU ()J
+	public final fun component37-0d7_KjU ()J
 	public final fun component4-0d7_KjU ()J
 	public final fun component5-0d7_KjU ()J
 	public final fun component6-0d7_KjU ()J
 	public final fun component7-0d7_KjU ()J
 	public final fun component8-0d7_KjU ()J
 	public final fun component9-0d7_KjU ()J
-	public final fun copy-C-Xl9yA (JJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJ)Lio/getstream/video/android/compose/theme/StreamColors;
-	public static synthetic fun copy-C-Xl9yA$default (Lio/getstream/video/android/compose/theme/StreamColors;JJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJIILjava/lang/Object;)Lio/getstream/video/android/compose/theme/StreamColors;
+	public final fun copy-siJM_ko (JJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJ)Lio/getstream/video/android/compose/theme/StreamColors;
+	public static synthetic fun copy-siJM_ko$default (Lio/getstream/video/android/compose/theme/StreamColors;JJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJIILjava/lang/Object;)Lio/getstream/video/android/compose/theme/StreamColors;
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getActivatedVolumeIndicator-0d7_KjU ()J
 	public final fun getAppBackground-0d7_KjU ()J
@@ -125,6 +126,7 @@ public final class io/getstream/video/android/compose/theme/StreamColors {
 	public final fun getInfoMenuOverlayColor-0d7_KjU ()J
 	public final fun getInputBackground-0d7_KjU ()J
 	public final fun getLinkBackground-0d7_KjU ()J
+	public final fun getLiveIndicator-0d7_KjU ()J
 	public final fun getOverlay-0d7_KjU ()J
 	public final fun getOverlayDark-0d7_KjU ()J
 	public final fun getParticipantLabelBackground-0d7_KjU ()J
@@ -1156,6 +1158,37 @@ public final class io/getstream/video/android/compose/ui/components/indicator/Mi
 
 public final class io/getstream/video/android/compose/ui/components/indicator/SoundIndicatorKt {
 	public static final fun SoundIndicator (Landroidx/compose/ui/Modifier;ZZFLandroidx/compose/runtime/Composer;II)V
+}
+
+public final class io/getstream/video/android/compose/ui/components/livestream/ComposableSingletons$LivestreamPlayerKt {
+	public static final field INSTANCE Lio/getstream/video/android/compose/ui/components/livestream/ComposableSingletons$LivestreamPlayerKt;
+	public static field lambda-1 Lkotlin/jvm/functions/Function4;
+	public static field lambda-2 Lkotlin/jvm/functions/Function2;
+	public fun <init> ()V
+	public final fun getLambda-1$stream_video_android_compose_release ()Lkotlin/jvm/functions/Function4;
+	public final fun getLambda-2$stream_video_android_compose_release ()Lkotlin/jvm/functions/Function2;
+}
+
+public final class io/getstream/video/android/compose/ui/components/livestream/ComposableSingletons$LivestreamPlayerOverlayKt {
+	public static final field INSTANCE Lio/getstream/video/android/compose/ui/components/livestream/ComposableSingletons$LivestreamPlayerOverlayKt;
+	public static field lambda-1 Lkotlin/jvm/functions/Function2;
+	public fun <init> ()V
+	public final fun getLambda-1$stream_video_android_compose_release ()Lkotlin/jvm/functions/Function2;
+}
+
+public final class io/getstream/video/android/compose/ui/components/livestream/ComposableSingletons$LivestreamRendererKt {
+	public static final field INSTANCE Lio/getstream/video/android/compose/ui/components/livestream/ComposableSingletons$LivestreamRendererKt;
+	public static field lambda-1 Lkotlin/jvm/functions/Function3;
+	public fun <init> ()V
+	public final fun getLambda-1$stream_video_android_compose_release ()Lkotlin/jvm/functions/Function3;
+}
+
+public final class io/getstream/video/android/compose/ui/components/livestream/LivestreamPlayerKt {
+	public static final fun LivestreamPlayer (Landroidx/compose/ui/Modifier;Lio/getstream/video/android/core/Call;ZLkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function4;Lkotlin/jvm/functions/Function4;Lkotlin/jvm/functions/Function4;Landroidx/compose/runtime/Composer;II)V
+}
+
+public final class io/getstream/video/android/compose/ui/components/livestream/LivestreamPlayerOverlayKt {
+	public static final fun LivestreamPlayerOverlay (Landroidx/compose/foundation/layout/BoxScope;Lio/getstream/video/android/core/Call;Landroidx/compose/runtime/Composer;I)V
 }
 
 public final class io/getstream/video/android/compose/ui/components/participants/CallParticipantsInfoMenuKt {

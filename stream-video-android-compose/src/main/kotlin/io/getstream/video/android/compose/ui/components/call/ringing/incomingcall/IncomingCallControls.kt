@@ -29,7 +29,7 @@ import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.call.controls.actions.AcceptCallAction
 import io.getstream.video.android.compose.ui.components.call.controls.actions.DeclineCallAction
 import io.getstream.video.android.compose.ui.components.call.controls.actions.ToggleCameraAction
-import io.getstream.video.android.compose.ui.components.extensions.toggleAlpha
+import io.getstream.video.android.compose.ui.extensions.toggleAlpha
 import io.getstream.video.android.core.call.state.CallAction
 
 /**

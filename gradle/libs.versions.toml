@@ -43,7 +43,7 @@ threetenAbp = "1.4.6"
 tink = "1.9.0"
 turbine = "0.13.0"
 
-streamWebRTC = "1.0.6"
+streamWebRTC = "1.0.7"
 streamResult = "1.1.0"
 streamChat = "6.0.4"
 streamLog = "1.1.4"

@@ -140,7 +140,7 @@ public final class io/getstream/video/android/core/CallState {
 	public final fun getScreenSharingSession ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun getSession ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun getSettings ()Lkotlinx/coroutines/flow/StateFlow;
-	public final fun getSortedParticipants ()Lkotlinx/coroutines/flow/StateFlow;
+	public final fun getSortedParticipants ()Lkotlinx/coroutines/flow/Flow;
 	public final fun getSpeakingWhileMuted ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun getStartedAt ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun getStartsAt ()Lkotlinx/coroutines/flow/StateFlow;
@@ -166,6 +166,8 @@ public final class io/getstream/video/android/core/CallState {
 	public final fun updateFromResponse (Lorg/openapitools/client/models/StopLiveResponse;)V
 	public final fun updateFromResponse (Lorg/openapitools/client/models/UpdateCallResponse;)V
 	public final fun updateParticipant (Lio/getstream/video/android/core/ParticipantState;)V
+	public final fun updateParticipantVisibility (Ljava/lang/String;Lio/getstream/video/android/core/model/VisibilityOnScreenState;)V
+	public final fun updateParticipantVisibilityFlow (Lkotlinx/coroutines/flow/Flow;)V
 	public final fun upsertParticipants (Ljava/util/List;)V
 }
 
@@ -483,6 +485,7 @@ public final class io/getstream/video/android/core/ParticipantState {
 	public final fun getVideo ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun getVideoEnabled ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun getVideoTrack ()Lkotlinx/coroutines/flow/StateFlow;
+	public final fun getVisibleOnScreen ()Lkotlinx/coroutines/flow/StateFlow;
 	public fun hashCode ()I
 	public final fun isLocal ()Z
 	public final fun muteAudio (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
@@ -3955,6 +3958,15 @@ public final class io/getstream/video/android/core/model/VideoTrack : io/getstre
 	public final fun getVideo ()Lorg/webrtc/VideoTrack;
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
+}
+
+public final class io/getstream/video/android/core/model/VisibilityOnScreenState : java/lang/Enum {
+	public static final field INVISIBLE Lio/getstream/video/android/core/model/VisibilityOnScreenState;
+	public static final field UNKNOWN Lio/getstream/video/android/core/model/VisibilityOnScreenState;
+	public static final field VISIBLE Lio/getstream/video/android/core/model/VisibilityOnScreenState;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
+	public static fun valueOf (Ljava/lang/String;)Lio/getstream/video/android/core/model/VisibilityOnScreenState;
+	public static fun values ()[Lio/getstream/video/android/core/model/VisibilityOnScreenState;
 }
 
 public class io/getstream/video/android/core/notifications/DefaultNotificationHandler : io/getstream/android/push/permissions/NotificationPermissionHandler, io/getstream/video/android/core/notifications/NotificationHandler {
