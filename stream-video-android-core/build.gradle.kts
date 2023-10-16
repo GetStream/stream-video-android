@@ -131,8 +131,8 @@ dependencies {
     implementation(project(":stream-video-android-datastore"))
 
     // webrtc
-    api(libs.stream.webrtc)
-    api(libs.stream.webrtc.ui)
+    implementation(fileTree(mapOf("dir" to "libs", "include" to listOf("*.jar"))))
+    api(files("libs/libwebrtc.aar"))
 
     implementation(libs.audioswitch)
 

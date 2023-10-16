@@ -39,7 +39,7 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.res.painterResource
 import io.getstream.video.android.compose.ui.components.video.VideoRenderer
 import io.getstream.video.android.core.Call
-import io.getstream.webrtc.android.ui.VideoTextureViewRenderer
+import io.getstream.video.android.core.VideoTextureViewRenderer
 
 @Composable
 internal fun LivestreamRenderer(

@@ -28,7 +28,7 @@
         android:layout_height="match_parent"
         >
 
-        <io.getstream.webrtc.android.ui.VideoTextureViewRenderer
+        <import io.getstream.video.android.core.VideoTextureViewRenderer
             android:id="@+id/participantVideoRenderer"
             android:layout_width="match_parent"
             android:layout_height="match_parent"

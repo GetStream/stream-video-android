@@ -41,7 +41,6 @@ import io.getstream.video.android.core.socket.SocketState
 import io.getstream.video.android.core.utils.RampValueUpAndDownHelper
 import io.getstream.video.android.core.utils.toQueriedMembers
 import io.getstream.video.android.model.User
-import io.getstream.webrtc.android.ui.VideoTextureViewRenderer
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
