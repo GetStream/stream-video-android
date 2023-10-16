@@ -314,42 +314,49 @@ class MicrophoneManager(
     val mediaManager: MediaManagerImpl,
     val preferSpeakerphone: Boolean,
 ) {
-    private lateinit var audioHandler: AudioSwitchHandler
-    internal var audioManager: AudioManager? = null
-
+    // Internal data
     private val logger by taggedLogger("Media:MicrophoneManager")
 
-    /** The status of the audio */
+    private lateinit var audioHandler: AudioSwitchHandler
+    private var setupCompleted: Boolean = false
+    internal var audioManager: AudioManager? = null
+    internal var priorStatus: DeviceStatus? = null
+
+    // Exposed state
     private val _status = MutableStateFlow<DeviceStatus>(DeviceStatus.NotSelected)
+
+    /** The status of the audio */
     val status: StateFlow<DeviceStatus> = _status
 
     /** Represents whether the audio is enabled */
     public val isEnabled: StateFlow<Boolean> = _status.mapState { it is DeviceStatus.Enabled }
 
     private val _selectedDevice = MutableStateFlow<StreamAudioDevice?>(null)
+
+    /** Currently selected device */
     val selectedDevice: StateFlow<StreamAudioDevice?> = _selectedDevice
 
     private val _devices = MutableStateFlow<List<StreamAudioDevice>>(emptyList())
+
+    /** List of available devices. */
     val devices: StateFlow<List<StreamAudioDevice>> = _devices
 
-    internal var priorStatus: DeviceStatus? = null
-
+    // API
     /** Enable the audio, the rtc engine will automatically inform the SFU */
-    fun enable(fromUser: Boolean = true) {
-        setup()
+    fun enable(fromUser: Boolean = true) = enforceSetup {
         if (fromUser) {
             _status.value = DeviceStatus.Enabled
         }
         mediaManager.audioTrack.setEnabled(true)
     }
 
-    fun pause(fromUser: Boolean = true) {
+    fun pause(fromUser: Boolean = true) = enforceSetup {
         // pause the microphone, and when resuming switched back to the previous state
         priorStatus = _status.value
         disable(fromUser = fromUser)
     }
 
-    fun resume(fromUser: Boolean = true) {
+    fun resume(fromUser: Boolean = true) = enforceSetup {
         priorStatus?.let {
             if (it == DeviceStatus.Enabled) {
                 enable(fromUser = fromUser)
@@ -359,7 +366,7 @@ class MicrophoneManager(
 
     /** Disable the audio track. Audio is still captured, but not send.
      * This allows for the "you are muted" toast to indicate you are talking while muted */
-    fun disable(fromUser: Boolean = true) {
+    fun disable(fromUser: Boolean = true) = enforceSetup {
         if (fromUser) {
             _status.value = DeviceStatus.Disabled
         }
@@ -369,7 +376,7 @@ class MicrophoneManager(
     /**
      * Enable or disable the microphone
      */
-    fun setEnabled(enabled: Boolean, fromUser: Boolean = true) {
+    fun setEnabled(enabled: Boolean, fromUser: Boolean = true) = enforceSetup {
         if (enabled) {
             enable(fromUser = fromUser)
         } else {
@@ -380,10 +387,9 @@ class MicrophoneManager(
     /**
      * Select a specific device
      */
-    fun select(device: StreamAudioDevice?) {
+    fun select(device: StreamAudioDevice?) = enforceSetup {
         logger.i { "selecting device $device" }
-        audioHandler.selectDevice(device?.toAudioDevice())
-
+        ifAudioHandlerInitialized { it.selectDevice(device?.toAudioDevice()) }
         _selectedDevice.value = device
     }
 
@@ -395,11 +401,18 @@ class MicrophoneManager(
         return devices
     }
 
+    fun cleanup() {
+        ifAudioHandlerInitialized { it.stop() }
+        setupCompleted = false
+    }
+
+    // Internal logic
     internal fun setup() {
-        if (setupCompleted) return
-
+        if (setupCompleted) {
+            // Already setup, return
+            return
+        }
         audioManager = mediaManager.context.getSystemService()
-
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
             audioManager?.allowedCapturePolicy = AudioAttributes.ALLOW_CAPTURE_BY_ALL
         }
@@ -412,16 +425,21 @@ class MicrophoneManager(
             }
 
         audioHandler.start()
-
         setupCompleted = true
     }
 
-    fun cleanup() {
-        audioHandler.stop()
-        setupCompleted = false
+    private inline fun <T> enforceSetup(actual: () -> T): T {
+        setup()
+        return actual.invoke()
     }
 
-    private var setupCompleted: Boolean = false
+    private fun ifAudioHandlerInitialized(then: (audioHandler: AudioSwitchHandler) -> Unit) {
+        if (this::audioHandler.isInitialized) {
+            then(this.audioHandler)
+        } else {
+            logger.e { "Audio handler not initialized. Ensure calling setup(), before using the handler." }
+        }
+    }
 }
 
 public sealed class CameraDirection {
