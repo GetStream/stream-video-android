@@ -22,7 +22,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
@@ -36,6 +35,8 @@ import io.getstream.video.android.mock.mockCall
 
  * @param call The call that contains all the participants state and tracks.
  * @param modifier Modifier for styling.
+ * @param enablePausing Enables pausing or resuming the livestream video.
+ * @param onPausedPlayer Listen to pause or resume the livestream video.
  * @param backstageContent Content shown when the host has not yet started the live stream.
  * @param rendererContent The rendered stream originating from the host.
  * @param overlayContent Content displayed to indicate participant counts, live stream duration, and device settings controls.
@@ -44,13 +45,15 @@ import io.getstream.video.android.mock.mockCall
 public fun LivestreamPlayer(
     modifier: Modifier = Modifier,
     call: Call,
+    enablePausing: Boolean = true,
     onPausedPlayer: ((isPaused: Boolean) -> Unit)? = {},
-    backstageContent: @Composable (Call) -> Unit = {
+    backstageContent: @Composable BoxScope.(Call) -> Unit = {
         LivestreamBackStage()
     },
-    rendererContent: @Composable (Call) -> Unit = {
+    rendererContent: @Composable BoxScope.(Call) -> Unit = {
         LivestreamRenderer(
             call = call,
+            enablePausing = enablePausing,
             onPausedPlayer = onPausedPlayer,
         )
     },
@@ -62,12 +65,11 @@ public fun LivestreamPlayer(
 
     Box(
         modifier = modifier.fillMaxSize(),
-        contentAlignment = Alignment.Center,
     ) {
         if (backstage) {
-            backstageContent.invoke(call)
+            backstageContent.invoke(this, call)
         } else {
-            rendererContent.invoke(call)
+            rendererContent.invoke(this, call)
 
             overlayContent.invoke(this, call)
         }

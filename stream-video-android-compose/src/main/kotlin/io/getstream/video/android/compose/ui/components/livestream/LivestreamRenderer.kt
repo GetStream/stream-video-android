@@ -44,6 +44,7 @@ import io.getstream.webrtc.android.ui.VideoTextureViewRenderer
 @Composable
 internal fun LivestreamRenderer(
     call: Call,
+    enablePausing: Boolean,
     onPausedPlayer: ((isPaused: Boolean) -> Unit)? = {},
 ) {
     val livestream by call.state.livestream.collectAsState()
@@ -54,7 +55,7 @@ internal fun LivestreamRenderer(
         VideoRenderer(
             modifier = Modifier
                 .fillMaxSize()
-                .clickable(enabled = onPausedPlayer != null) {
+                .clickable(enabled = enablePausing) {
                     if (onPausedPlayer != null) {
                         isPaused = !isPaused
                         livestream?.track?.video?.setEnabled(!isPaused)
