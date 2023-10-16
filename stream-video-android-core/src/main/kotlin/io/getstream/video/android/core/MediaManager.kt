@@ -343,54 +343,66 @@ class MicrophoneManager(
 
     // API
     /** Enable the audio, the rtc engine will automatically inform the SFU */
-    fun enable(fromUser: Boolean = true) = enforceSetup {
-        if (fromUser) {
-            _status.value = DeviceStatus.Enabled
+    fun enable(fromUser: Boolean = true) {
+        enforceSetup {
+            if (fromUser) {
+                _status.value = DeviceStatus.Enabled
+            }
+            mediaManager.audioTrack.setEnabled(true)
         }
-        mediaManager.audioTrack.setEnabled(true)
     }
 
-    fun pause(fromUser: Boolean = true) = enforceSetup {
-        // pause the microphone, and when resuming switched back to the previous state
-        priorStatus = _status.value
-        disable(fromUser = fromUser)
+    fun pause(fromUser: Boolean = true) {
+        enforceSetup {
+            // pause the microphone, and when resuming switched back to the previous state
+            priorStatus = _status.value
+            disable(fromUser = fromUser)
+        }
     }
 
-    fun resume(fromUser: Boolean = true) = enforceSetup {
-        priorStatus?.let {
-            if (it == DeviceStatus.Enabled) {
-                enable(fromUser = fromUser)
+    fun resume(fromUser: Boolean = true) {
+        enforceSetup {
+            priorStatus?.let {
+                if (it == DeviceStatus.Enabled) {
+                    enable(fromUser = fromUser)
+                }
             }
         }
     }
 
     /** Disable the audio track. Audio is still captured, but not send.
      * This allows for the "you are muted" toast to indicate you are talking while muted */
-    fun disable(fromUser: Boolean = true) = enforceSetup {
-        if (fromUser) {
-            _status.value = DeviceStatus.Disabled
+    fun disable(fromUser: Boolean = true) {
+        enforceSetup {
+            if (fromUser) {
+                _status.value = DeviceStatus.Disabled
+            }
+            mediaManager.audioTrack.setEnabled(false)
         }
-        mediaManager.audioTrack.setEnabled(false)
     }
 
     /**
      * Enable or disable the microphone
      */
-    fun setEnabled(enabled: Boolean, fromUser: Boolean = true) = enforceSetup {
-        if (enabled) {
-            enable(fromUser = fromUser)
-        } else {
-            disable(fromUser = fromUser)
+    fun setEnabled(enabled: Boolean, fromUser: Boolean = true) {
+        enforceSetup {
+            if (enabled) {
+                enable(fromUser = fromUser)
+            } else {
+                disable(fromUser = fromUser)
+            }
         }
     }
 
     /**
      * Select a specific device
      */
-    fun select(device: StreamAudioDevice?) = enforceSetup {
-        logger.i { "selecting device $device" }
-        ifAudioHandlerInitialized { it.selectDevice(device?.toAudioDevice()) }
-        _selectedDevice.value = device
+    fun select(device: StreamAudioDevice?){
+        enforceSetup {
+            logger.i { "selecting device $device" }
+            ifAudioHandlerInitialized { it.selectDevice(device?.toAudioDevice()) }
+            _selectedDevice.value = device
+        }
     }
 
     /**
