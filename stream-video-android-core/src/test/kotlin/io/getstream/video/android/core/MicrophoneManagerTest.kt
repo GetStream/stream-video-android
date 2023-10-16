@@ -96,7 +96,7 @@ class MicrophoneManagerTest {
 
         // Then
         verify(exactly = 2) {
-            // Setup was called 3 times
+            // Setup was called twice
             microphoneManager.setup()
         }
         verifyOrder {
