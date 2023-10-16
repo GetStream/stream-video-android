@@ -292,7 +292,10 @@ There are many possibilities and the [participant state docs](../03-guides/03-ca
 The livestream layout is built using standard Jetpack Compose. The [VideoRenderer](../04-ui-components/02-video-renderer.mdx) component is provided by Stream.
 **VideoRenderer** renders the video and a fallback. You can use it for rendering the local and remote video.
 
-If you want to learn more about building an advanced UIs for watching a livestream, check out [Cookbook: Watching a livestream](../05-ui-cookbook/15-watching-livestream.mdx).
+If you want to learn more about building an advanced UIs for hosting/watching a livestream, check out the cookbooks below.
+
+- [Cookbook: Hosting a livestream](../05-ui-cookbook/15-hosting-livestream.mdx)
+- [Cookbook: Watching a livestream](../05-ui-cookbook/16-watching-livestream.mdx)
 
 #### Backstage mode
 
@@ -326,7 +329,7 @@ B. Open OBS and go to settings -> stream
 Press start streaming in OBS. The RTMP stream will now show up in your call just like a regular video participant.
 Now that we've learned to publish using WebRTC or RTMP let's talk about watching the livestream.
 
-### Step 5 - Viewing a livestream (WebRTC)
+### Step 5 - Watching a livestream (WebRTC)
 
 Watching a livestream is even easier than broadcasting.
 
@@ -349,11 +352,11 @@ Let's show how to broadcast your call to HLS:
 
 ```kotlin
 call.startHLS()
-val hlsUrl = call.state.egress.value?.hls
+val hlsUrl = call.state.egress.value?.hls?.playlistUrl
 Log.i("Tutorial", "HLS url = $hlsUrl")
 ```
 
-You can view the HLS video feed using any HLS capable video player.
+You can play the HLS video feed using any HLS capable video player, such as [ExoPlayer](https://github.com/google/ExoPlayer).
 
 ### 7 - Advanced Features
 
