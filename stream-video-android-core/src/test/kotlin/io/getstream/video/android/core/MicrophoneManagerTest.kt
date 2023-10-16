@@ -106,4 +106,26 @@ class MicrophoneManagerTest {
             microphoneManager.setup() // Automatic as part of enforce setup strategy of resume()
         }
     }
+
+    @Test
+    fun `Resume will call enable only if prior status was DeviceStatus#enabled`() {
+        // Given
+        val mediaManager = mockk<MediaManagerImpl>(relaxed = true)
+        val actual = MicrophoneManager(mediaManager, false)
+        val context = mockk<Context>(relaxed = true)
+        val microphoneManager = spyk(actual)
+        every { mediaManager.context } returns context
+        every { context.getSystemService(any()) } returns mockk<AudioManager>(relaxed = true)
+
+        // When
+        microphoneManager.setup()
+        microphoneManager.priorStatus = DeviceStatus.Enabled
+        microphoneManager.resume() // Should call setup again
+
+        // Then
+        verify(exactly = 1) {
+            // Setup was called twice
+            microphoneManager.enable()
+        }
+    }
 }
