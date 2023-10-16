@@ -16,16 +16,20 @@
 
 package io.getstream.video.android.compose.ui.components.livestream
 
+import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.sp
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.ui.common.R
 
 @Composable
-internal fun LivestreamBackStage() {
+internal fun BoxScope.LivestreamBackStage() {
     Text(
+        modifier = Modifier.align(Alignment.Center),
         text = stringResource(
             id = R.string.stream_video_livestreaming_on_backstage,
         ),
