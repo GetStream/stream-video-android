@@ -68,9 +68,9 @@ The different actions we provide are:
 * `io.getstream.video.android.action.INCOMING_CALL`: Action used to process an incoming call. The `activity` that handles this action should show options to accept/reject the call. You can use our [RigningCallContent](../../04-ui-components/04-call/04-ringing-call.mdx) component to build your screen. This screen can be shown when the device is locked, by adding some arguments on the manifest.
 * `io.getstream.video.android.action.ACCEPT_CALL`: Action used to accept an incoming call. The `activity` that handles this action should accept the call and show the call screen. You can use our [CallContent](../../04-ui-components/04-call/03-call-content.mdx) component to build your screen.
 * `io.getstream.video.android.action.LIVE_CALL`: Action used to go into a live call. The `activity` that handles this action should show the live call screen. You can use our [CallContent](../../04-ui-components/04-call/03-call-content.mdx) component to build your screen.
-
+* `io.getstream.video.android.action.ONGOING_CALL`: Action used to get back into already running call. The `activity` that handles this action should show the call screen. You can use our [CallContent](../../04-ui-components/04-call/03-call-content.mdx) component to build your screen. 
 These actions need to be included on the `AndroidManifest` while you declare your activities:
-``` xml {4,6-7,9-11,14,17-19,22,25-27}
+``` xml {4,9-11,15,18-20,24,27-29,33,36-38}
 <manifest>
     <application>
         <activity
@@ -82,6 +82,7 @@ These actions need to be included on the `AndroidManifest` while you declare you
             <intent-filter android:priority="1">
                 <action android:name="io.getstream.video.android.action.INCOMING_CALL" />
             </intent-filter>
+        </activity>
 
         <activity
             android:name=".AcceptCallActivity"
@@ -90,6 +91,7 @@ These actions need to be included on the `AndroidManifest` while you declare you
             <intent-filter android:priority="1">
                 <action android:name="io.getstream.video.android.action.ACCEPT_CALL" />
             </intent-filter>
+        </activity>
 
         <activity
             android:name=".LiveCallActivity"
@@ -97,6 +99,15 @@ These actions need to be included on the `AndroidManifest` while you declare you
             >
             <intent-filter android:priority="1">
                 <action android:name="io.getstream.video.android.action.LIVE_CALL" />
+            </intent-filter>
+        </activity>
+        
+        <activity
+            android:name=".CallActivity"
+            android:exported="true"
+            android:launchMode="singleTask">
+            <intent-filter android:priority="1">
+                <action android:name="io.getstream.video.android.action.ONGOING_CALL" />
             </intent-filter>
         </activity>
     </application>
@@ -125,7 +136,7 @@ To do this, implement the `NotificationHandler` interface and show your own noti
 <Tabs>
 <TabItem value="kotlin" label="Kotlin">
 
-```kotlin {7-12,15-20}
+```kotlin {7-12,15-20,23-27}
 class MyNotificationHandler(private val context: Context) : NotificationHandler {
     private val notificationManager: NotificationManager by lazy {
         context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
@@ -145,6 +156,14 @@ class MyNotificationHandler(private val context: Context) : NotificationHandler 
             ... // Configure your own notification
             .build()
         notificationManager.notify(notificationId, notification)
+    }
+    
+    // Called when the foreground service is started, to supply the notification
+    override fun getOngoingCallNotification(callId: StreamCallId): Notification? {
+        val notification = NotificationCompat.Builder(context, notificationChannelId)
+        ... // Configure your own notification
+        .build()
+        return notification
     }
 
 }
@@ -178,6 +197,15 @@ class MyNotificationHandler implements NotificationHandler {
             ... // Configure your own notification
             .build();
         notificationManager.notify(notificationId, notification);
+    }
+
+    // Called when the foreground service is started, to supply the notification
+    @Override
+    public Notification getOngoingCallNotification(@NonNull StreamCallId callId) {
+        Notification notification = new NotificationCompat.Builder(context, notificationChannelId)
+            ... // Configure your own notification
+            .build();
+        return notification;
     }
 }
 ```
@@ -246,6 +274,11 @@ class MyNotificationHandler(application: Application) : DefaultNotificationHandl
 
     // Override this method if you want a custom behavior for Live Call notifications
     override fun onLiveCall(callId: StreamCallId, callDisplayName: String) {
+        [...]
+    }
+
+    // Override this method if you want a custom notification when there is an ongoing call
+    override fun getOngoingCallNotification(callId: StreamCallId): Notification? {
         [...]
     }
 }
