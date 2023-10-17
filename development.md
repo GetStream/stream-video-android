@@ -1,20 +1,19 @@
 
 ## Build process
 
-- Snapshots build are created automatically from the "development" branch. Configuration.kt has the version number
-- Testing app. Merge code into "main". Github will build a new zipped apk. You can upload a new testing app here: https://console.firebase.google.com/project/stream-video-9b586/appdistribution/app/android:io.getstream.video.android.dogfooding/releases
-- Release versions are created when you create a new release tag on github
-- TODO: Updating the sample app in play store?
+- Snapshots build are created automatically from the "development" branch. Configuration.kt has the version number.
+- Testing app. Merge code into "main". Github will build a new zipped apk. It will be automatically published on Google Play via GitHub Actions CI builds.
+- You can release a new SDK version on Maven Central by creating a new release tag on Github. To release a new version, inquiry to Jaewoong.
 
 ## Build vars
 
 You can copy environment variables like this:
+
 ```
 cp env.properties.sample .env.properties
 ```
 
-build.gradle.kts for each repo reads the .env.properties file and translated it into
-build variables. So CORE_TEST_LOCAL in the stream-video-android-core is turned into
+`build.gradle.kts` for each repo reads the `.env.properties` file and translated it into build variables. So `CORE_TEST_LOCAL` in the stream-video-android-core is turned into the build config property once you build the project.
 
 ```kotlin
 BuildConfig.CORE_TEST_LOCAL
@@ -32,22 +31,20 @@ BuildConfig.CORE_TEST_LOCAL
 
 ## OpenAPI build
 
-Clone the protocol
-```bash
-```
+Run the generate openapi. This command line will automatically pull/update the latest version of the protocol repository and generate Open API classes.  
 
-Run the generate openapi
 ```bash
 ./generate-openapi.sh
 ```
 
 Note that now you have your generated files here:
+
 * ~/workspace/generated/
 
 The code for android is here
 * ~/workspace/stream-video-android/
 
-You can see the diff here
+You can see the diff here:
 
 ```bash
 diff -rq ~/workspace/generated/src/main/kotlin/org/openapitools/client ~/workspace/stream-video-android/src/main/kotlin/org/openapitools/client
@@ -71,7 +68,7 @@ Typically a combination of integration testing and unit testing is best.
 
 We use Truth and Mockk for testing
 
-Here's an example test
+Here's an example test:
 
 ```kotlin
 @RunWith(RobolectricTestRunner::class)
@@ -88,29 +85,38 @@ public class MyTest : IntegrationTestBase() {
 }
 ```
 
-Check the docs on TestBase, TestHelper and IntegrationTestBase for more utility functions for testing
+Check the docs on `TestBase`, `TestHelper` and `IntegrationTestBase` for more utility functions for testing.
 
 ## Architecture
 
+The SDK architecture consists of several modules and they depend on each other.
+
+- stream-video-android-core: This is the most fundamental module, which implements socket connections to the Stream server, WebRTC, and the rest of the video calling protocols.
+- stream-video-android-model: A pure Android module that contains several domain models of the Stream SDK.
+- stream-video-android-datastore: An Android module that offers persistence of Stream's domain data, such as `User`, `Device`, which are used by the core module.
+- stream-video-android-ui-common: An ui common module contains the common resources, such as colors, strings, drawables, and so on to share those resources with the compose and xml modules.
+- stream-video-android-compose: Video Compose SDK that provides several UI components to implement seamless video call, audio room, and livestream with highly optimized performance.
+- stream-video-android-mock: A test module that provides several ways to create a mock (real) objects of the Stream's domain object. This is very useful to write unit test codes and previews for Compose.
+- stream-video-android-tooling: An internal module that helps to trace the Stream SDK.
+
 ### API calls
 
-* StreamVideoImpl makes the API calls to the coordinator. Internally there are 4 retrofit APIs it calls
-* CallClient makes the API calls to the SFU on the edge
-* StreamVideoImpl.developmentMode determines if we should log an error or fail fast. 
-Typically for development you want to fail fast and loud. For production you want to ignore most non-critical errors.
-* PersistentSocket is subclassed by CoordinatorSocket and SfuSocket. It keeps a websocket connection
+* `StreamVideoImpl` makes the API calls to the coordinator. Internally there are 4 retrofit APIs it calls.
+* `ConnectionModule` makes the API calls to the SFU on the edge.
+* `StreamVideoImpl.developmentMode` determines if we should log an error or fail fast. 
+* Typically for development you want to fail fast and loud. For production you want to ignore most non-critical errors.
+* `PersistentSocket` is subclassed by `CoordinatorSocket` and `SfuSocket`. It keeps a websocket connection.
 
 ### State management
 
-* All events are routed via the StreamVideoImpl.subscribe method. Both the SFU & Coordinator events
-* Based on these events the following state is updated: client.state, call.state, member and participant state
-* client.fireEvent is used for firing local events and testing
-* client.handleEvent updates client state, call state and after that calls any listeners
+* All events are routed via the `StreamVideoImpl.subscribe` method. Both the SFU & Coordinator events.
+* Based on these events the following state is updated: `client.state`, `call.state`, member and participant state.
+* `client.fireEvent` is used for firing local events and testing.
+* `client.handleEvent` updates client state, call state and after that calls any listeners.
 
 ## WebRTC layer
 
-* RtcSession maintains all the tracks and the webrtc logic
-  https://www.notion.so/stream-wiki/WebRTC-SFU-Setup-37b5a4a260264d3f92332774e5ec9ee9#ee96064deb73480383f6be2a6a36a315
+* RtcSession maintains all the tracks and the webrtc logic: https://www.notion.so/stream-wiki/WebRTC-SFU-Setup-37b5a4a260264d3f92332774e5ec9ee9#ee96064deb73480383f6be2a6a36a315
 
 ### RTC offer/answer cycle
 
@@ -127,16 +133,18 @@ Camera/device changes -> listener in ActiveSFUSession -> updates the tracks.
 ### RTC dynascale
 
 ** Part one **
-We try to render the video if participant.videoEnabled is true
-VideoRenderer is responsible for marking:
+We try to render the video if `participant.videoEnabled` is `true`.
+
+`VideoRenderer` is responsible for marking:
 - the video as visible
 - the resolution that the video is rendered at
-And calls RtcSession.updateTrackDimensions
+- And calls `RtcSession.updateTrackDimensions`
 
-All resolutions are stored in RtcSession.trackDimensions. 
+All resolutions are stored in `RtcSession.trackDimensions`. 
+
 Which is a map of participants, track types and resolutions that the video is displayed at.
 
-Whenever visibility or resolutions change, we call updateParticipantSubscriptions
+Whenever visibility or resolutions change, we call `updateParticipantSubscriptions`
 - It runs debounced (100ms delay)
 - It only calls update subscriptions if the list of tracks we sub to changed
 
@@ -144,16 +152,14 @@ This ensures that we can run large tracks (since video is lazy loaded at the rig
 
 ** Part two **
 
-The SFU tells us what resolution to publish using the ChangePublishQualityEvent event.
+The SFU tells us what resolution to publish using the `ChangePublishQualityEvent` event.
 So it will say: disable "f" (full) and only send h and q (half and quarter)
-
 
 ### ParticipantState
 
 * Participants have a session id. the session id is unique
 * Each participant has a trackPrefix
-* New media streams have a streamID, which starts with the trackPrefix
-  val (trackPrefix, trackType) = mediaStream.id.split(':');
+* New media streams have a streamID, which starts with the trackPrefix `val (trackPrefix, trackType) = mediaStream.id.split(':');`
 * Note that members are unique per user, not per session
 
 ## Compose
@@ -172,15 +178,17 @@ CallComposable()
 A better approach is to show the underlying components, so people understand how to swap them out
 
 ```
-Call {
-  ParticipantGrid(card= { ParticipantCard() })
-  CallControls {
-    ChatButton()
-    FlipVideoButton()
-    MuteAudioButton()
-    MuteVideoButton()
+CallContent(
+  videoRenderer = { ParticipantGrid(card= { ParticipantCard() }) }
+  callControls = {
+    CallControls {
+        ChatButton()
+        FlipVideoButton()
+        MuteAudioButton()
+        MuteVideoButton()
+    }
   }
-}
+)
 ```
 
 The second approach is better since:
@@ -194,16 +202,16 @@ With the second approach everything is easy to understand and customize.
 
 ### Ringing
 
-* Push notifications or the coordinator WS can trigger a callCreatedEvent with ring=true
+* Push notifications or the coordinator WS can trigger a callCreatedEvent with `ring=true`
 * The UI should show an incoming call interface
 * Clicking accept or reject fires triggers the accept/reject API endpoints
-* Call members have an accepted_at, rejected_at field
+* Call members have an `accepted_at`, `rejected_at` field
 
 ### Media Manager
 
 The media manager should support capturing local video with or without joining a call
 
-* Camera2Capturer starts capture the video
+* `Camera2Capturer` starts capture the video
 * It captures it on SurfaceTextureHelper
 * The webrtc part needs to know the video capture resolution
 
@@ -216,32 +224,21 @@ The media manager should support capturing local video with or without joining a
 ### Dynascale
 
 Sfu -> Client
-- ChangePublishQualityEvent triggers RtcSession.updatePublishQuality. It enables/disables different resolutions in the simulcast
+- `ChangePublishQualityEvent` triggers `RtcSession.updatePublishQuality`. It enables/disables different resolutions in the simulcast
 
 Client -> Sfu
 - updateParticipantsSubscriptions subscribes to the participants we want to display
 - call.initRender tracks the resolution we render the video at. It writes it to updateParticipantTrackSize
-
-Question:
-- How do we know if a given video element is visible or not?
-- https://developer.android.com/jetpack/compose/side-effects#disposableeffect
-- https://proandroiddev.com/the-life-cycle-of-a-view-in-android-6a2c4665b95e (onDetachedFromWindow)
-- Our VideoRenderer removes the sink. But it doesn't unsubcribe from the SFU.
-- Requirements for any custom video renderer: Informs the state of the size it's rendering at, informs if it's visible or not
-
-Current issues
-- The view layer doesn't update the state to mark a participant as not displayed
-- updateParticipantsSubscriptions should run whenever the UI changes with a debounce of 100ms or so
 
 Goals
 - A customer integrating without the SDK knowing the size and visibility of video elements will lead to crashes in large calls. So we should prevent that.
 
 ### Knowing if participant is publishing tracks
 
-- JoinCallResponse, ParticipantJoinedEvent contain published_tracks
-- TrackPublishedEvent, TrackUnpublishedEvent
-- Locally you call updateMuteState. It's not clear what this does. 
-Is muting connected to track publish/unpublish?
+- `JoinCallResponse`, `ParticipantJoinedEvent` contain `published_tracks`
+- `TrackPublishedEvent`, `TrackUnpublishedEvent`
+- Locally you call `updateMuteState`. It's not clear what this does. 
+- Is muting connected to track publish/unpublish?
 
 ### Retry Behaviour
 
@@ -318,8 +315,8 @@ When we have time we should rebuild this with:
 There are 2 common ways how you can get your tests that use coroutines to hang forever
 
 Scenario 1 - Tests block:
-- Never use Dispatchers.Main/IO directly. Always use DispatcherProvider.IO/Main
-- Solution: Replace Dispatchers.Main with DispatcherProvider.Main
+- Never use `Dispatchers.Main/IO` directly. Always use `DispatcherProvider.IO/Main`
+- Solution: Replace `Dispatchers.Main` with `DispatcherProvider.Main`
 
 Scenario 2 - Tests block:
 - Inside of runTest the coroutine dispatcher waits for all coroutines to finish

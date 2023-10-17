@@ -131,8 +131,8 @@ Video roadmap and changelog is available [here](https://github.com/GetStream/pro
 - [X] Support participant.custom field which was previously ignored. ParticipantState line 216 (Daniel)
 - [X] Default livestream player UI + docs (Jaewoong)
 - [X] Reaction dialog API for Compose (Jaewoong)
-- [ ] Android SDK development.md cleanup (Daniel)
-- [ ] Upgrade to more recent versions of webrtc (Kanat)
+- [X] Android SDK development.md cleanup (Jaewoong)
+- [ ] Upgrade to more recent versions of webrtc (Jaewoong/Kanat)
 - [ ] Review foreground service vs backend for audio rooms etc. (Daniel)
 - [ ] Logging is too verbose (rtc is very noisy), clean it up to focus on the essential for info and higher (Daniel)
 
