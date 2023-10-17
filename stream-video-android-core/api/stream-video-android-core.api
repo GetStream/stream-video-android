@@ -119,6 +119,7 @@ public final class io/getstream/video/android/core/CallState {
 	public final fun getIngress ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun getLive ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun getLiveDurationInMs ()Lkotlinx/coroutines/flow/StateFlow;
+	public final fun getLivestream ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun getLocalParticipant ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun getMe ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun getMember (Ljava/lang/String;)Lio/getstream/video/android/core/MemberState;
@@ -139,7 +140,7 @@ public final class io/getstream/video/android/core/CallState {
 	public final fun getScreenSharingSession ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun getSession ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun getSettings ()Lkotlinx/coroutines/flow/StateFlow;
-	public final fun getSortedParticipants ()Lkotlinx/coroutines/flow/StateFlow;
+	public final fun getSortedParticipants ()Lkotlinx/coroutines/flow/Flow;
 	public final fun getSpeakingWhileMuted ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun getStartedAt ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun getStartsAt ()Lkotlinx/coroutines/flow/StateFlow;
@@ -165,6 +166,8 @@ public final class io/getstream/video/android/core/CallState {
 	public final fun updateFromResponse (Lorg/openapitools/client/models/StopLiveResponse;)V
 	public final fun updateFromResponse (Lorg/openapitools/client/models/UpdateCallResponse;)V
 	public final fun updateParticipant (Lio/getstream/video/android/core/ParticipantState;)V
+	public final fun updateParticipantVisibility (Ljava/lang/String;Lio/getstream/video/android/core/model/VisibilityOnScreenState;)V
+	public final fun updateParticipantVisibilityFlow (Lkotlinx/coroutines/flow/Flow;)V
 	public final fun upsertParticipants (Ljava/util/List;)V
 }
 
@@ -482,6 +485,7 @@ public final class io/getstream/video/android/core/ParticipantState {
 	public final fun getVideo ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun getVideoEnabled ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun getVideoTrack ()Lkotlinx/coroutines/flow/StateFlow;
+	public final fun getVisibleOnScreen ()Lkotlinx/coroutines/flow/StateFlow;
 	public fun hashCode ()I
 	public final fun isLocal ()Z
 	public final fun muteAudio (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
@@ -877,11 +881,9 @@ public final class io/getstream/video/android/core/call/RtcSession {
 	public final fun connect (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public final fun createPublisher ()Lio/getstream/video/android/core/call/connection/StreamPeerConnection;
 	public final fun createSubscriber ()Lio/getstream/video/android/core/call/connection/StreamPeerConnection;
-	public final fun getLocalTrack (Lstream/video/sfu/models/TrackType;)Lio/getstream/video/android/core/model/MediaTrack;
 	public final fun getPublisherStats (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public final fun getSubscriber ()Lio/getstream/video/android/core/call/connection/StreamPeerConnection;
 	public final fun getSubscriberStats (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
-	public final fun getTrack (Ljava/lang/String;Lstream/video/sfu/models/TrackType;)Lio/getstream/video/android/core/model/MediaTrack;
 	public final fun getTrackDimensions ()Lkotlinx/coroutines/flow/MutableStateFlow;
 	public final fun getTrackDimensionsDebounced ()Lkotlinx/coroutines/flow/Flow;
 	public final fun getTracks ()Ljava/util/Map;
@@ -892,11 +894,8 @@ public final class io/getstream/video/android/core/call/RtcSession {
 	public final fun onNegotiationNeeded (Lio/getstream/video/android/core/call/connection/StreamPeerConnection;Lio/getstream/video/android/core/model/StreamPeerType;)V
 	public final fun reconnect (ZLkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public final fun requestSubscriberIceRestart (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
-	public final fun setLocalTrack (Lstream/video/sfu/models/TrackType;Lio/getstream/video/android/core/model/MediaTrack;)V
-	public final fun setMuteState (ZLstream/video/sfu/models/TrackType;)V
 	public final fun setScreenShareTrack ()V
 	public final fun setSubscriber (Lio/getstream/video/android/core/call/connection/StreamPeerConnection;)V
-	public final fun setTrack (Ljava/lang/String;Lstream/video/sfu/models/TrackType;Lio/getstream/video/android/core/model/MediaTrack;)V
 	public final fun setTracks (Ljava/util/Map;)V
 	public final fun switchSfu (Ljava/lang/String;Ljava/lang/String;Ljava/util/List;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public final fun updateTrackDimensions (Ljava/lang/String;Lstream/video/sfu/models/TrackType;ZLstream/video/sfu/models/VideoDimension;)V
@@ -3958,6 +3957,15 @@ public final class io/getstream/video/android/core/model/VideoTrack : io/getstre
 	public final fun getVideo ()Lorg/webrtc/VideoTrack;
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
+}
+
+public final class io/getstream/video/android/core/model/VisibilityOnScreenState : java/lang/Enum {
+	public static final field INVISIBLE Lio/getstream/video/android/core/model/VisibilityOnScreenState;
+	public static final field UNKNOWN Lio/getstream/video/android/core/model/VisibilityOnScreenState;
+	public static final field VISIBLE Lio/getstream/video/android/core/model/VisibilityOnScreenState;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
+	public static fun valueOf (Ljava/lang/String;)Lio/getstream/video/android/core/model/VisibilityOnScreenState;
+	public static fun values ()[Lio/getstream/video/android/core/model/VisibilityOnScreenState;
 }
 
 public class io/getstream/video/android/core/notifications/DefaultNotificationHandler : io/getstream/android/push/permissions/NotificationPermissionHandler, io/getstream/video/android/core/notifications/NotificationHandler {

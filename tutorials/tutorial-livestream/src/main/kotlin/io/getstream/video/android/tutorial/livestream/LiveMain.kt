@@ -17,15 +17,18 @@
 package io.getstream.video.android.tutorial.livestream
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.width
 import androidx.compose.material.Button
 import androidx.compose.material.ButtonDefaults
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
@@ -40,8 +43,15 @@ fun LiveMain(
             .fillMaxSize()
             .background(VideoTheme.colors.appBackground),
     ) {
-        Column {
+        Column(
+            modifier = Modifier.fillMaxSize(),
+            verticalArrangement = Arrangement.Center,
+            horizontalAlignment = Alignment.CenterHorizontally,
+        ) {
             Button(
+                modifier = Modifier
+                    .width(300.dp)
+                    .height(64.dp),
                 colors = ButtonDefaults.buttonColors(
                     contentColor = VideoTheme.colors.primaryAccent,
                     backgroundColor = VideoTheme.colors.primaryAccent,
@@ -53,9 +63,12 @@ fun LiveMain(
                 Text(text = "host", color = VideoTheme.colors.textHighEmphasis)
             }
 
-            Spacer(modifier = Modifier.height(20.dp))
+            Spacer(modifier = Modifier.height(14.dp))
 
             Button(
+                modifier = Modifier
+                    .width(300.dp)
+                    .height(64.dp),
                 colors = ButtonDefaults.buttonColors(
                     contentColor = VideoTheme.colors.primaryAccent,
                     backgroundColor = VideoTheme.colors.primaryAccent,

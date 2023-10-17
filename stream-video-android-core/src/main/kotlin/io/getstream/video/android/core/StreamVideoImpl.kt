@@ -764,14 +764,20 @@ internal class StreamVideoImpl internal constructor(
         return wrapAPICall { connectionModule.api.endCall(type, id) }
     }
 
-    suspend fun goLive(type: String, id: String, startHls: Boolean, startRecording: Boolean, startTranscription: Boolean): Result<GoLiveResponse> {
+    suspend fun goLive(
+        type: String,
+        id: String,
+        startHls: Boolean,
+        startRecording: Boolean,
+        startTranscription: Boolean,
+    ): Result<GoLiveResponse> {
         logger.d { "[goLive] callCid: $type:$id" }
 
         return wrapAPICall {
             connectionModule.api.goLive(
-                type,
-                id,
-                GoLiveRequest(
+                type = type,
+                id = id,
+                goLiveRequest = GoLiveRequest(
                     startHls = startHls,
                     startRecording = startRecording,
                     startTranscription = startTranscription,
@@ -846,6 +852,7 @@ internal class StreamVideoImpl internal constructor(
             )
         }
     }
+
     suspend fun startBroadcasting(type: String, id: String): Result<StartBroadcastingResponse> {
         logger.d { "[startBroadcasting] callCid: $type $id" }
 

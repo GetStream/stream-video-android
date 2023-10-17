@@ -18,10 +18,14 @@ package io.getstream.video.android.compose.ui.components.call.renderer.internal
 
 import android.content.res.Configuration.ORIENTATION_LANDSCAPE
 import androidx.compose.foundation.layout.BoxScope
+import androidx.compose.foundation.lazy.grid.LazyGridState
+import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.unit.IntSize
@@ -63,7 +67,7 @@ internal fun BoxScope.OrientationVideoRenderer(
 ) {
     val dominantSpeaker by call.state.dominantSpeaker.collectAsStateWithLifecycle()
     val participants by call.state.participants.collectAsStateWithLifecycle()
-    val sortedParticipants by call.state.sortedParticipants.collectAsStateWithLifecycle()
+    val sortedParticipants by call.state.sortedParticipants.collectAsStateWithLifecycle(emptyList())
     val callParticipants by remember(participants) {
         derivedStateOf {
             if (sortedParticipants.size > 6) {
@@ -97,4 +101,28 @@ internal fun BoxScope.OrientationVideoRenderer(
             videoRenderer = videoRenderer,
         )
     }
+}
+
+/**
+ * Creates a [LazyGridState] which also monitors the visibility of items on the UI and exposes
+ * a snapshot flow to the [Call].
+ *
+ * @param call the current call.
+ */
+@Composable
+internal fun lazyGridStateWithVisibilityNotification(call: Call): LazyGridState {
+    val gridState = rememberLazyGridState()
+    val snapshotFlow = snapshotFlow {
+        gridState.layoutInfo.visibleItemsInfo.map {
+            it.key as String
+        }
+    }
+    DisposableEffect(key1 = call, effect = {
+        call.state.updateParticipantVisibilityFlow(snapshotFlow)
+
+        onDispose {
+            call.state.updateParticipantVisibilityFlow(null)
+        }
+    })
+    return gridState
 }

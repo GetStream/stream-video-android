@@ -18,7 +18,6 @@ package io.getstream.video.android.core
 
 import android.content.Intent
 import android.graphics.Bitmap
-import android.view.View
 import androidx.annotation.VisibleForTesting
 import io.getstream.log.taggedLogger
 import io.getstream.result.Error
@@ -628,7 +627,7 @@ public class Call(
         videoRenderer: VideoTextureViewRenderer,
         sessionId: String,
         trackType: TrackType,
-        onRendered: (View) -> Unit = {},
+        onRendered: (VideoTextureViewRenderer) -> Unit = {},
     ) {
         logger.d { "[initRenderer] #sfu; sessionId: $sessionId" }
 
@@ -677,8 +676,8 @@ public class Call(
         startTranscription: Boolean = false,
     ): Result<GoLiveResponse> {
         val result = clientImpl.goLive(
-            type,
-            id,
+            type = type,
+            id = id,
             startHls = startHls,
             startRecording = startRecording,
             startTranscription = startTranscription,
