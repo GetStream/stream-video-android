@@ -133,7 +133,7 @@ Video roadmap and changelog is available [here](https://github.com/GetStream/pro
 - [X] Reaction dialog API for Compose (Jaewoong)
 - [X] Android SDK development.md cleanup (Jaewoong)
 - [X] Upgrade to more recent versions of webrtc (Jaewoong/Kanat)
-- [ ] Review foreground service vs backend for audio rooms etc. (Daniel)
+- [X] Review foreground service vs backend for audio rooms etc. (Aleks)
 - [ ] Logging is too verbose (rtc is very noisy), clean it up to focus on the essential for info and higher (Daniel)
 
 ### 0.5.0 milestone
