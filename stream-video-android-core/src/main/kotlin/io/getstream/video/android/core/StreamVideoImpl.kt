@@ -131,6 +131,7 @@ internal class StreamVideoImpl internal constructor(
     internal val connectionModule: ConnectionModule,
     internal val tokenProvider: (suspend (error: Throwable?) -> String)?,
     internal val streamNotificationManager: StreamNotificationManager,
+    internal val runForeGroundService: Boolean = true,
 ) : StreamVideo,
     NotificationHandler by streamNotificationManager {
 

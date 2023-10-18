@@ -64,6 +64,7 @@ import java.util.UUID
  * @property connectionTimeoutInMs Connection timeout in seconds.
  * @property ensureSingleInstance Verify that only 1 version of the video client exists, prevents integration mistakes.
  * @property videoDomain URL overwrite to allow for testing against a local instance of video.
+ * @property runForegroundServiceForCalls if set to true, when there is an active call the SDK will run a foreground service to keep the process alive. (default: true)
  */
 public class StreamVideoBuilder @JvmOverloads constructor(
     context: Context,
@@ -80,6 +81,7 @@ public class StreamVideoBuilder @JvmOverloads constructor(
     private val connectionTimeoutInMs: Long = 10000,
     private var ensureSingleInstance: Boolean = true,
     private val videoDomain: String = "video.stream-io-api.com",
+    private val runForegroundServiceForCalls: Boolean = true,
 ) {
     private val context: Context = context.applicationContext
 
@@ -156,6 +158,7 @@ public class StreamVideoBuilder @JvmOverloads constructor(
             lifecycle = lifecycle,
             connectionModule = connectionModule,
             streamNotificationManager = streamNotificationManager,
+            runForeGroundService = runForegroundServiceForCalls,
         )
 
         if (user.type == UserType.Guest) {

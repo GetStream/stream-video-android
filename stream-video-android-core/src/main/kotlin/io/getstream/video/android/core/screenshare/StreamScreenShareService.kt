@@ -27,7 +27,7 @@ import androidx.core.app.NotificationChannelCompat
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import io.getstream.video.android.core.R
-import io.getstream.video.android.core.notifications.internal.StopScreenshareBroadcastReceiver
+import io.getstream.video.android.core.notifications.internal.receivers.StopScreenshareBroadcastReceiver
 
 /**
  * Screen-sharing in Android requires a ForegroundService (with type foregroundServiceType set to "mediaProjection").
