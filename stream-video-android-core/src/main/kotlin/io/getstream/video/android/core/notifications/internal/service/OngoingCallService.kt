@@ -33,7 +33,6 @@ import io.getstream.video.android.model.streamCallId
 internal class OngoingCallService : Service() {
     private val logger by taggedLogger("OngoingCallService")
     private var callId: StreamCallId? = null
-    private val intentResolver = DefaultStreamIntentResolver(this)
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         callId = intent?.streamCallId(INTENT_EXTRA_CALL_CID)
