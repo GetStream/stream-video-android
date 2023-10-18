@@ -132,7 +132,7 @@ Video roadmap and changelog is available [here](https://github.com/GetStream/pro
 - [X] Default livestream player UI + docs (Jaewoong)
 - [X] Reaction dialog API for Compose (Jaewoong)
 - [X] Android SDK development.md cleanup (Jaewoong)
-- [ ] Upgrade to more recent versions of webrtc (Jaewoong/Kanat)
+- [X] Upgrade to more recent versions of webrtc (Jaewoong/Kanat)
 - [ ] Review foreground service vs backend for audio rooms etc. (Daniel)
 - [ ] Logging is too verbose (rtc is very noisy), clean it up to focus on the essential for info and higher (Daniel)
 
