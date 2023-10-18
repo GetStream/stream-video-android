@@ -122,6 +122,7 @@ baselineProfile {
     filter {
         include("io.getstream.video.android.core.**")
         include("org.openapitools.client.**")
+        include("org.webrtc.**")
     }
 }
 
