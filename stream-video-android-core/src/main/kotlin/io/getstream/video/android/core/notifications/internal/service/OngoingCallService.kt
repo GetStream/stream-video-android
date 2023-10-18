@@ -23,7 +23,6 @@ import androidx.core.app.NotificationManagerCompat
 import io.getstream.log.taggedLogger
 import io.getstream.video.android.core.StreamVideo
 import io.getstream.video.android.core.notifications.NotificationHandler.Companion.INTENT_EXTRA_CALL_CID
-import io.getstream.video.android.core.notifications.internal.DefaultStreamIntentResolver
 import io.getstream.video.android.model.StreamCallId
 import io.getstream.video.android.model.streamCallId
 
