@@ -65,6 +65,7 @@ public data class StreamColors(
     public val connectionQualityBackground: Color,
     public val connectionQualityBar: Color,
     public val connectionQualityBarFilled: Color,
+    public val connectionQualityBarFilledPoor: Color,
     public val participantLabelBackground: Color,
     public val infoMenuOverlayColor: Color,
     public val callFocusedBorder: Color,
@@ -79,6 +80,7 @@ public data class StreamColors(
     public val audioLeaveButton: Color,
     public val audioActionColor: Color,
     public val liveIndicator: Color,
+    public val audioIndicatorBackground: Color,
 ) {
 
     public companion object {
@@ -118,9 +120,14 @@ public data class StreamColors(
             connectionQualityBackground = colorResource(
                 id = R.color.stream_video_connection_quality_background,
             ),
-            connectionQualityBarFilled = colorResource(id = R.color.stream_video_primary_accent),
+            connectionQualityBarFilledPoor = colorResource(
+                id = R.color.stream_video_connection_indicator_poor,
+            ),
+            connectionQualityBarFilled = colorResource(
+                id = R.color.stream_video_connection_indicator_great,
+            ),
             connectionQualityBar = colorResource(
-                id = R.color.stream_video_connection_quality_bar_background,
+                id = R.color.stream_video_connection_indicator_good,
             ),
             participantLabelBackground = colorResource(
                 id = R.color.stream_video_participant_label_background,
@@ -142,6 +149,9 @@ public data class StreamColors(
             audioLeaveButton = colorResource(id = R.color.stream_video_audio_leave),
             audioActionColor = colorResource(id = R.color.stream_video_audio_room_actions),
             liveIndicator = colorResource(id = R.color.stream_video_live_indicator),
+            audioIndicatorBackground = colorResource(
+                id = R.color.stream_video_volume_indicator_background,
+            ),
         )
 
         /**
@@ -180,12 +190,17 @@ public data class StreamColors(
             connectionQualityBackground = colorResource(
                 id = R.color.stream_video_connection_quality_background,
             ),
-            connectionQualityBarFilled = colorResource(id = R.color.stream_video_primary_accent),
+            connectionQualityBarFilledPoor = colorResource(
+                id = R.color.stream_video_connection_indicator_poor,
+            ),
+            connectionQualityBarFilled = colorResource(
+                id = R.color.stream_video_connection_indicator_great,
+            ),
             connectionQualityBar = colorResource(
-                id = R.color.stream_video_connection_quality_bar_background,
+                id = R.color.stream_video_connection_indicator_good,
             ),
             participantLabelBackground = colorResource(
-                id = R.color.stream_video_participant_label_background,
+                id = R.color.stream_video_participant_label_background_dark,
             ),
             infoMenuOverlayColor = Color.LightGray.copy(alpha = 0.7f),
             callFocusedBorder = colorResource(id = R.color.stream_video_focused_border_color),
@@ -208,6 +223,9 @@ public data class StreamColors(
             audioLeaveButton = colorResource(id = R.color.stream_video_audio_leave_dark),
             audioActionColor = colorResource(id = R.color.stream_video_audio_room_actions_dark),
             liveIndicator = colorResource(id = R.color.stream_video_live_indicator_dark),
+            audioIndicatorBackground = colorResource(
+                id = R.color.stream_video_volume_indicator_background_dark,
+            ),
         )
     }
 }

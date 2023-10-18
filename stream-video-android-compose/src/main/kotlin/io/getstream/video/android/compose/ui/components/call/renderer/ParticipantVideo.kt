@@ -46,11 +46,11 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Alignment.Companion.BottomEnd
 import androidx.compose.ui.Alignment.Companion.BottomStart
+import androidx.compose.ui.Alignment.Companion.Center
 import androidx.compose.ui.Alignment.Companion.CenterVertically
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalInspectionMode
@@ -106,7 +106,9 @@ public fun ParticipantVideo(
     connectionIndicatorContent: @Composable BoxScope.(NetworkQuality) -> Unit = {
         NetworkQualityIndicator(
             networkQuality = it,
-            modifier = Modifier.align(BottomEnd),
+            modifier = Modifier
+                .align(BottomEnd)
+                .height(VideoTheme.dimens.participantLabelHeight),
         )
     },
     videoFallbackContent: @Composable (Call) -> Unit = {
@@ -137,6 +139,11 @@ public fun ParticipantVideo(
         }
     }
 
+    val containerShape = if (style.isScreenSharing) {
+        RoundedCornerShape(VideoTheme.dimens.screenShareParticipantsRadius)
+    } else {
+        VideoTheme.shapes.participantContainerShape
+    }
     val containerModifier = if (style.isFocused && participants.size > 1) {
         modifier.border(
             border = if (style.isScreenSharing) {
@@ -150,22 +157,15 @@ public fun ParticipantVideo(
                     VideoTheme.colors.callFocusedBorder,
                 )
             },
-            shape = if (style.isScreenSharing) {
-                RoundedCornerShape(VideoTheme.dimens.screenShareParticipantsRadius)
-            } else {
-                RectangleShape
-            },
+            shape = containerShape,
         )
     } else {
         modifier
     }
+    val paddedContent = containerModifier.padding(VideoTheme.dimens.participantsGridPadding)
 
     Box(
-        modifier = containerModifier.apply {
-            if (style.isScreenSharing) {
-                clip(RoundedCornerShape(VideoTheme.dimens.screenShareParticipantsRadius))
-            }
-        },
+        modifier = paddedContent.clip(containerShape),
     ) {
         ParticipantVideoRenderer(
             call = call,
@@ -294,32 +294,34 @@ public fun BoxScope.ParticipantLabel(
         )
     },
 ) {
-    Row(
+    Box(
         modifier = Modifier
             .align(labelPosition)
-            .padding(VideoTheme.dimens.participantLabelPadding)
             .height(VideoTheme.dimens.participantLabelHeight)
             .wrapContentWidth()
-            .clip(RoundedCornerShape(8.dp))
             .background(
                 VideoTheme.colors.participantLabelBackground,
-                shape = RoundedCornerShape(8.dp),
+                shape = VideoTheme.shapes.participantLabelShape,
             ),
-        verticalAlignment = CenterVertically,
     ) {
-        Text(
-            modifier = Modifier
-                .widthIn(max = VideoTheme.dimens.participantLabelTextMaxWidth)
-                .padding(start = VideoTheme.dimens.participantLabelTextPaddingStart)
-                .align(CenterVertically),
-            text = nameLabel,
-            style = VideoTheme.typography.body,
-            color = Color.White,
-            maxLines = 1,
-            overflow = TextOverflow.Ellipsis,
-        )
+        Row(
+            modifier = Modifier.align(Center),
+            verticalAlignment = CenterVertically,
+        ) {
+            Text(
+                modifier = Modifier
+                    .widthIn(max = VideoTheme.dimens.participantLabelTextMaxWidth)
+                    .padding(start = VideoTheme.dimens.participantLabelTextPaddingStart)
+                    .align(CenterVertically),
+                text = nameLabel,
+                style = VideoTheme.typography.body,
+                color = Color.White,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+            )
 
-        soundIndicatorContent.invoke(this)
+            soundIndicatorContent.invoke(this)
+        }
     }
 }
 

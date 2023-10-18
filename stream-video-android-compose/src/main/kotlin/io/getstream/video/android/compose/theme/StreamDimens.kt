@@ -81,6 +81,7 @@ public data class StreamDimens(
     public val participantsInfoMenuOptionsButtonHeight: Dp,
     public val participantsInfoAvatarSize: Dp,
     public val participantsGridPadding: Dp,
+    public val participantContentRadius: Dp,
     public val floatingVideoPadding: Dp,
     public val floatingVideoHeight: Dp,
     public val floatingVideoWidth: Dp,
@@ -115,6 +116,7 @@ public data class StreamDimens(
     public val audioRoomMicPadding: Dp,
     public val audioRoomAvatarPortraitPadding: Dp,
     public val audioRoomAvatarLandscapePadding: Dp,
+    public val indicatorBackgroundSize: Dp,
 ) {
     public companion object {
         /**
@@ -325,6 +327,12 @@ public data class StreamDimens(
             ),
             audioRoomAvatarLandscapePadding = dimensionResource(
                 id = R.dimen.stream_video_audioRoomAvatarLandscapePadding,
+            ),
+            indicatorBackgroundSize = dimensionResource(
+                id = R.dimen.stream_video_IndicatorBackgroundSize,
+            ),
+            participantContentRadius = dimensionResource(
+                id = R.dimen.stream_video_callParticipant_container_radius,
             ),
         )
     }
