@@ -58,7 +58,7 @@
     <dimen name="stream_video_connectionIndicatorBarWidth">1dp</dimen>
     <dimen name="stream_video_connectionIndicatorBarSeparatorWidth">2dp</dimen>
     <dimen name="stream_video_audioLevelIndicatorBarMaxHeight">22dp</dimen>
-    <dimen name="stream_video_audioLevelIndicatorBarWidth">1dp</dimen>
+    <dimen name="stream_video_audioLevelIndicatorBarWidth">2dp</dimen>
     <dimen name="stream_video_audioLevelIndicatorBarSeparatorWidth">1dp</dimen>
     <dimen name="stream_video_IndicatorBackgroundSize">24dp</dimen>
     <dimen name="stream_video_microphoneIndicatorSize">18dp</dimen>

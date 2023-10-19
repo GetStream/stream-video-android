@@ -52,7 +52,7 @@ public fun AudioVolumeIndicator(
     Row(
         modifier = modifier
             .height(height = VideoTheme.dimens.audioLevelIndicatorBarMaxHeight)
-            .padding(horizontal = 4.dp),
+            .padding(horizontal = 2.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(
             VideoTheme.dimens.audioLevelIndicatorBarSeparatorWidth,
