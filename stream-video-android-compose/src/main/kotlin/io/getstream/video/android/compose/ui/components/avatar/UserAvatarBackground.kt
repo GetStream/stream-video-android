@@ -37,7 +37,6 @@ import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import io.getstream.video.android.compose.theme.VideoTheme
-import io.getstream.video.android.compose.ui.components.background.ParticipantImageBackground
 import io.getstream.video.android.mock.StreamMockUtils
 import io.getstream.video.android.mock.mockUsers
 
@@ -71,7 +70,6 @@ public fun UserAvatarBackground(
     contentDescription: String? = null,
     requestSize: IntSize = IntSize(DEFAULT_IMAGE_SIZE, DEFAULT_IMAGE_SIZE),
     initialsAvatarOffset: DpOffset = DpOffset(0.dp, 0.dp),
-    blurRadius: Int = 20,
     @DrawableRes previewPlaceholder: Int = LocalAvatarPreviewProvider.getLocalAvatarPreviewPlaceholder(),
     @DrawableRes loadingPlaceholder: Int? = LocalAvatarPreviewProvider.getLocalAvatarLoadingPlaceholder(),
 ) {
