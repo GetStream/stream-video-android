@@ -81,6 +81,7 @@ public data class StreamColors(
     public val audioActionColor: Color,
     public val liveIndicator: Color,
     public val audioIndicatorBackground: Color,
+    val avatarBorderColor: Color,
 ) {
 
     public companion object {
@@ -105,7 +106,6 @@ public data class StreamColors(
             errorAccent = colorResource(R.color.stream_video_error_accent),
             infoAccent = colorResource(R.color.stream_video_info_accent),
             highlight = colorResource(R.color.stream_video_highlight),
-            avatarInitials = colorResource(id = R.color.stream_video_text_avatar_initials),
             screenSharingBackground = colorResource(R.color.stream_video_app_background),
             screenSharingTooltipBackground = colorResource(
                 R.color.stream_video_screen_sharing_tooltip_background,
@@ -113,6 +113,7 @@ public data class StreamColors(
             screenSharingTooltipContent = colorResource(
                 id = R.color.stream_video_screen_sharing_tooltip_content,
             ),
+            avatarInitials = colorResource(id = R.color.stream_video_text_avatar_initials),
             activatedVolumeIndicator = colorResource(id = R.color.stream_video_primary_accent),
             deActivatedVolumeIndicator = colorResource(
                 id = R.color.stream_video_deactivated_volume_indicator,
@@ -120,14 +121,14 @@ public data class StreamColors(
             connectionQualityBackground = colorResource(
                 id = R.color.stream_video_connection_quality_background,
             ),
-            connectionQualityBarFilledPoor = colorResource(
-                id = R.color.stream_video_connection_indicator_poor,
+            connectionQualityBar = colorResource(
+                id = R.color.stream_video_connection_indicator_good,
             ),
             connectionQualityBarFilled = colorResource(
                 id = R.color.stream_video_connection_indicator_great,
             ),
-            connectionQualityBar = colorResource(
-                id = R.color.stream_video_connection_indicator_good,
+            connectionQualityBarFilledPoor = colorResource(
+                id = R.color.stream_video_connection_indicator_poor,
             ),
             participantLabelBackground = colorResource(
                 id = R.color.stream_video_participant_label_background,
@@ -137,14 +138,14 @@ public data class StreamColors(
             callGradientStart = colorResource(id = R.color.stream_video_call_gradient_start),
             callGradientEnd = colorResource(id = R.color.stream_video_call_gradient_end),
             callDescription = colorResource(id = R.color.stream_video_call_description),
-            callActionIconEnabled = colorResource(id = R.color.stream_video_action_icon_enabled),
-            callActionIconDisabled = colorResource(id = R.color.stream_video_action_icon_disabled),
             callActionIconEnabledBackground = colorResource(
                 id = R.color.stream_video_action_icon_enabled_background,
             ),
             callActionIconDisabledBackground = colorResource(
                 id = R.color.stream_video_action_icon_disabled_background,
             ),
+            callActionIconEnabled = colorResource(id = R.color.stream_video_action_icon_enabled),
+            callActionIconDisabled = colorResource(id = R.color.stream_video_action_icon_disabled),
             callLobbyBackground = colorResource(id = R.color.stream_video_lobby_background),
             audioLeaveButton = colorResource(id = R.color.stream_video_audio_leave),
             audioActionColor = colorResource(id = R.color.stream_video_audio_room_actions),
@@ -152,6 +153,7 @@ public data class StreamColors(
             audioIndicatorBackground = colorResource(
                 id = R.color.stream_video_volume_indicator_background,
             ),
+            avatarBorderColor = colorResource(id = R.color.stream_video_avatar_border_color),
         )
 
         /**
@@ -190,14 +192,14 @@ public data class StreamColors(
             connectionQualityBackground = colorResource(
                 id = R.color.stream_video_connection_quality_background,
             ),
-            connectionQualityBarFilledPoor = colorResource(
-                id = R.color.stream_video_connection_indicator_poor,
+            connectionQualityBar = colorResource(
+                id = R.color.stream_video_connection_indicator_good,
             ),
             connectionQualityBarFilled = colorResource(
                 id = R.color.stream_video_connection_indicator_great,
             ),
-            connectionQualityBar = colorResource(
-                id = R.color.stream_video_connection_indicator_good,
+            connectionQualityBarFilledPoor = colorResource(
+                id = R.color.stream_video_connection_indicator_poor,
             ),
             participantLabelBackground = colorResource(
                 id = R.color.stream_video_participant_label_background_dark,
@@ -207,17 +209,17 @@ public data class StreamColors(
             callGradientStart = colorResource(id = R.color.stream_video_call_gradient_start),
             callGradientEnd = colorResource(id = R.color.stream_video_call_gradient_end),
             callDescription = colorResource(id = R.color.stream_video_call_description_dark),
-            callActionIconEnabled = colorResource(
-                id = R.color.stream_video_action_icon_enabled_dark,
-            ),
-            callActionIconDisabled = colorResource(
-                id = R.color.stream_video_action_icon_disabled_dark,
-            ),
             callActionIconEnabledBackground = colorResource(
                 id = R.color.stream_video_action_icon_enabled_background_dark,
             ),
             callActionIconDisabledBackground = colorResource(
                 id = R.color.stream_video_action_icon_disabled_background_dark,
+            ),
+            callActionIconEnabled = colorResource(
+                id = R.color.stream_video_action_icon_enabled_dark,
+            ),
+            callActionIconDisabled = colorResource(
+                id = R.color.stream_video_action_icon_disabled_dark,
             ),
             callLobbyBackground = colorResource(id = R.color.stream_video_lobby_background_dark),
             audioLeaveButton = colorResource(id = R.color.stream_video_audio_leave_dark),
@@ -226,6 +228,7 @@ public data class StreamColors(
             audioIndicatorBackground = colorResource(
                 id = R.color.stream_video_volume_indicator_background_dark,
             ),
+            avatarBorderColor = colorResource(id = R.color.stream_video_avatar_border_color),
         )
     }
 }
