@@ -1,4 +1,3 @@
-import glob
 import os
 import subprocess
 import sys
@@ -36,7 +35,7 @@ def install_file_to_local_maven(
     subprocess.run(mvn_cmd, check=True)
 
     # Output for verification
-    print(f"Installed library {artifact_id} version {version} to local Maven repository.")
+    print(f"...installed library {artifact_id} version {version} to local Maven repository.")
 
 
 def install_android_lib_module_to_local_maven(module_name: str):

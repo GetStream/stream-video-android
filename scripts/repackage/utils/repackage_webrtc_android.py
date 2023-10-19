@@ -9,7 +9,7 @@ from utils.project_configuration import extract_version_name_and_artifact_group
 from utils.string_replacement import replace_string_in_directory
 
 
-def repackage_and_install_webrtc_android(path: str, repackaged_webrtc_version: str):
+def repackage_and_install_webrtc_android(path: str) -> str:
     start_time = int(datetime.utcnow().timestamp() * 1000)
     os.chdir(path)
 
@@ -49,7 +49,7 @@ def repackage_and_install_webrtc_android(path: str, repackaged_webrtc_version: s
 
     # Modify build.gradle files
     print("> WebRTC-Android: modify build.gradle files")
-    _modify_build_gradle_files(path, repackaged_webrtc_version)
+    _modify_build_gradle_files(path, project_version)
     print("> WebRTC-Android: build.gradle files have been modified")
 
     # Install modules
@@ -61,6 +61,7 @@ def repackage_and_install_webrtc_android(path: str, repackaged_webrtc_version: s
     now = int(datetime.utcnow().timestamp() * 1000)
     elapsed = now - start_time
     print(f"\nREPACKAGE SUCCESSFUL (WebRTC-Android) in {elapsed}ms")
+    return project_version
 
 
 def _make_kotlin_class_public(file_path: str) -> None:
@@ -83,16 +84,16 @@ def _make_kotlin_class_public(file_path: str) -> None:
         file.writelines(modified_content)
 
 
-def _modify_build_gradle_files(path: str, repackaged_webrtc_version: str) -> None:
+def _modify_build_gradle_files(path: str, project_version: str) -> None:
     os.chdir(path)
     for subdir, _, files in os.walk(path):
         for filename in files:
             if 'build.gradle' in filename:
                 file_path = os.path.join(subdir, filename)
-                _modify_build_gradle(file_path, repackaged_webrtc_version)
+                _modify_build_gradle(file_path, project_version)
 
 
-def _modify_build_gradle(file_path: str, repackaged_webrtc_version: str) -> None:
+def _modify_build_gradle(file_path: str, project_version: str) -> None:
     # Read the content of the file
     with open(file_path, 'r') as file:
         lines = file.readlines()
@@ -104,12 +105,12 @@ def _modify_build_gradle(file_path: str, repackaged_webrtc_version: str) -> None
             elif 'api(project(":stream-webrtc-android"))' in line:
                 line = line.replace(
                     'api(project(":stream-webrtc-android"))',
-                    f'api("io.getstream:streamx-webrtc-android:{repackaged_webrtc_version}")'
+                    f'api("io.getstream:streamx-webrtc-android:{project_version}")'
                 )
             elif 'implementation(project(":stream-webrtc-android"))' in line:
                 line = line.replace(
                     'implementation(project(":stream-webrtc-android"))',
-                    f'implementation("io.getstream:streamx-webrtc-android:{repackaged_webrtc_version}")'
+                    f'implementation("io.getstream:streamx-webrtc-android:{project_version}")'
                 )
             file.write(line)
 
@@ -142,7 +143,7 @@ def _modify_build_gradle_webrtc_android_module(
     with open(file_path, 'w') as f:
         f.write(content)
 
-    print(f"build.gradle.kts in {file_path} has been modified.")
+    print(f"...build.gradle.kts in {file_path} has been modified.")
 
 
 def _install_modules():

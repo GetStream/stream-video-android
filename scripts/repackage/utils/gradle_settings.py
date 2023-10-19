@@ -19,4 +19,4 @@ def modify_gradle_settings():
     with open(file_path, 'w') as f:
         f.writelines(lines)
 
-    print(f"{file_path} has been modified.")
+    print(f"...{file_path} has been modified.")

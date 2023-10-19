@@ -25,7 +25,7 @@ def _replace_string_in_file(file_path: str, search_string: str, replace_string: 
         with open(file_path, 'r', encoding='utf-8') as file:
             content = file.read()
     except UnicodeDecodeError:
-        print(f"Failed to read {file_path} as UTF-8. Skipping...")
+        print(f"[ERROR] Failed to read {file_path} as UTF-8. Skipping...")
         return
 
     new_content = content.replace(search_string, replace_string)
