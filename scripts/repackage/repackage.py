@@ -1,9 +1,6 @@
 import argparse
 import os
 
-import sys
-print(sys.path)
-
 from utils.repackage_video_sdk import repackage_and_install_video_sdk
 from utils.maven import install_file_to_local_maven
 
@@ -40,8 +37,15 @@ if __name__ == "__main__":
 
     args = parser.parse_args()
 
+    repackaged_webrtc = args.repackaged_webrtc
+    repackaged_webrtc_version = args.repackaged_webrtc_version
+    webrtc_android = args.webrtc_android
+    print(f">>> repackaged_webrtc: {repackaged_webrtc}")
+    print(f">>> repackaged_webrtc_version: {repackaged_webrtc_version}")
+    print(f">>> webrtc_android: {webrtc_android}")
+
     repackage_and_install(
-        args.repackaged_webrtc,
-        args.repackaged_webrtc_version,
-        args.webrtc_android
+        repackaged_webrtc,
+        repackaged_webrtc_version,
+        webrtc_android
     )

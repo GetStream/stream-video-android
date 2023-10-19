@@ -45,14 +45,11 @@ def install_android_lib_module_to_local_maven(
         group_id: str,
         version: str,
 ):
-    # Navigate to module
-    os.chdir(module_name)
-
     # Clean module
-    subprocess.run(["./gradlew", "clean"], check=True)
+    subprocess.run(["./gradlew", f":{module_name}:clean"], check=True)
 
     # Assemble release AAR
-    subprocess.run(["./gradlew", "assembleRelease"], check=True)
+    subprocess.run(["./gradlew", f":{module_name}:assembleRelease"], check=True)
 
     aar_files = glob.glob(os.path.join(module_name, "build/outputs/aar/*release.aar"))
     sources_files = glob.glob(os.path.join(module_name, "build/libs/*sources.jar"))

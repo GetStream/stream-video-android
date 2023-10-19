@@ -1,8 +1,9 @@
 import os
 
-from maven import install_android_lib_module_to_local_maven
-from project_configuration import extract_version_name_and_artifact_group
-from string_replacement import replace_string_in_directory
+from utils.gradle_settings import modify_settings_gradle
+from utils.maven import install_android_lib_module_to_local_maven
+from utils.project_configuration import extract_version_name_and_artifact_group
+from utils.string_replacement import replace_string_in_directory
 
 
 def repackage_and_install_video_sdk(path: str, repackaged_webrtc_version: str):
@@ -13,19 +14,22 @@ def repackage_and_install_video_sdk(path: str, repackaged_webrtc_version: str):
         "Configuration.kt"
     )
     project_version, group_id = extract_version_name_and_artifact_group(configuration_path)
-    print(f"VideoSDK version: {project_version}")
-    print(f"VideoSDK groupId: {group_id}")
+    print(f"> VideoSDK: version => {project_version}")
+    print(f"> VideoSDK: groupId => {group_id}")
 
     # Repackage
+    print(f"> VideoSDK: Repackage Started")
     replace_string_in_directory(
         directory_path=path,
         search_string="org.webrtc",
         replace_string="io.getstream.webrtc"
     )
+    print(f"> VideoSDK: Repackage Completed")
 
     # Modify settings.gradle file
     os.chdir(path)
-    _modify_settings_gradle()
+    modify_settings_gradle()
+    print(f"> VideoSDK: settings.gradle has been modified")
 
     # Modify libs.versions.toml file
     os.chdir(path)
@@ -33,32 +37,11 @@ def repackage_and_install_video_sdk(path: str, repackaged_webrtc_version: str):
 
     # Modify build.gradle files
     os.chdir(path)
-    _modify_build_gradle_files(path)
+    # _modify_build_gradle_files(path)
 
     # Install modules
     os.chdir(path)
     _install_modules(path=path, group_id=group_id, project_version=project_version)
-
-def _modify_settings_gradle():
-    file_path = 'settings.gradle.kts'
-
-    # Read the content of the file
-    with open(file_path, 'r') as f:
-        lines = f.readlines()
-
-    # Add mavenLocal() at appropriate places
-    for i, line in enumerate(lines):
-        if line.strip() == "google()":
-            lines.insert(i, "mavenLocal()\n")
-
-    # Remove the line include(":stream-webrtc-android")
-    lines = [line for line in lines if 'include(":stream-webrtc-android")' not in line]
-
-    # Write the modified content back to the original file
-    with open(file_path, 'w') as f:
-        f.writelines(lines)
-
-    print(f"mavenLocal() was added to {file_path}.")
 
 
 def _modify_gradle_libs_version(repackaged_webrtc_version: str):
@@ -70,36 +53,15 @@ def _modify_gradle_libs_version(repackaged_webrtc_version: str):
 
     with open(file_path, 'w') as file:
         for line in lines:
-            if 'streamWebRTC' in line:
-                line = line.split('=')[0] + '= "' + repackaged_webrtc_version + '"\n'
+            if line.startswith("streamWebRTC"):
+                line = f'streamWebRTC = "{repackaged_webrtc_version}"\n'
+            elif "stream-webrtc-android" in line:
+                line = line.replace("stream-webrtc-android", "streamx-webrtc-android")
             file.write(line)
-
-    # Read the content of the file
-    with open(file_path, 'r') as f:
-        content = f.read()
-
-    # Perform replacements
-    content = content.replace(
-        'stream-webrtc = { group = "io.getstream", name = "stream-webrtc-android", version.ref = "streamWebRTC" }',
-        'stream-webrtc = { group = "io.getstream", name = "streamx-webrtc-android", version.ref = "streamWebRTC" }'
-    )
-    content = content.replace(
-        'stream-webrtc-ui = { group = "io.getstream", name = "stream-webrtc-android-ui", version.ref = "streamWebRTC" }',
-        'stream-webrtc-ui = { group = "io.getstream", name = "streamx-webrtc-android-ui", version.ref = "streamWebRTC" }'
-    )
-    content = content.replace(
-        'stream-webrtc-ktx = { group = "io.getstream", name = "stream-webrtc-android-ktx", version.ref = "streamWebRTC" }',
-        'stream-webrtc-ktx = { group = "io.getstream", name = "streamx-webrtc-android-ktx", version.ref = "streamWebRTC" }'
-    )
-
-    # Write the modified content back to the original file
-    with open(file_path, 'w') as f:
-        f.write(content)
-
     print(f"{file_path} has been modified.")
 
 
-def _modify_build_gradle_files(path: str):
+def _modify_build_gradle_files(path: str) -> None:
     modules = [
         "stream-video-android-bom",
         "stream-video-android-mock",
@@ -114,13 +76,20 @@ def _modify_build_gradle_files(path: str):
         "dogfooding",
         "app",
     ]
-    for module_name, _ in modules:
-        os.chdir(path)
-        _modify_build_gradle(module_name)
+    os.chdir(path)
+    for subdir, _, files in os.walk(path):
+        for filename in files:
+            if 'build.gradle' in filename:
+                file_path = os.path.join(subdir, filename)
+                _modify_build_gradle(file_path)
+
+    # for module_name in modules:
+    #     os.chdir(path)
+    #     _modify_build_gradle(module_name)
 
 
-def _modify_build_gradle(module_name: str):
-    file_path = os.path.join(module_name, "build.gradle.kts")
+def _modify_build_gradle(file_path: str) -> None:
+    # file_path = os.path.join(module_name, "build.gradle.kts")
 
     # Read the content of the file
     with open(file_path, 'r') as f:
