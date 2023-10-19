@@ -12,7 +12,10 @@ def repackage_and_install(
         repackaged_webrtc: str,
         webrtc_android: str
 ):
-    original_cwd = os.getcwd()
+    script_root = os.getcwd()
+    if script_root.endswith('stream-video-android'):
+        script_root = os.path.join(script_root, 'scripts', 'repackage')
+    print(f'>>>>>>>>> ROOT: {script_root}')
 
     # Install webrtc aar
     os.chdir(webrtc_android)
@@ -32,8 +35,8 @@ def repackage_and_install(
     repackage_and_install_webrtc_android(webrtc_android)
 
     # Repackage video_sdk project
-    os.chdir(original_cwd)
-    video_sdk_path = os.path.dirname(os.path.dirname(original_cwd))
+    os.chdir(script_root)
+    video_sdk_path = os.path.dirname(os.path.dirname(script_root))
     repackage_and_install_video_sdk(video_sdk_path, webrtc_android_version)
 
 
