@@ -162,10 +162,8 @@ public fun ParticipantVideo(
     } else {
         modifier
     }
-    val paddedContent = containerModifier.padding(VideoTheme.dimens.participantsGridPadding)
-
     Box(
-        modifier = paddedContent.clip(containerShape),
+        modifier = containerModifier.clip(containerShape),
     ) {
         ParticipantVideoRenderer(
             call = call,
