@@ -1,9 +1,13 @@
 import argparse
 import os
 
-from scripts.repackage.utils.maven import install_file_to_local_maven
-from scripts.repackage.utils.repackage_video_sdk import repackage_and_install_video_sdk
-from scripts.repackage.utils.repackage_webrtc_android import repackage_and_install_webrtc_android
+import sys
+print(sys.path)
+
+from utils.repackage_video_sdk import repackage_and_install_video_sdk
+from utils.maven import install_file_to_local_maven
+
+from utils.repackage_webrtc_android import repackage_and_install_webrtc_android
 
 
 def repackage_and_install(

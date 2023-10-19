@@ -1,9 +1,9 @@
 import os
 import shutil
 
-from scripts.repackage.utils.android import install_android_lib_module_to_local_maven
-from scripts.repackage.utils.project_configuration import extract_version_name_and_artifact_group
-from scripts.repackage.utils.string_replacement import replace_string_in_directory
+from maven import install_android_lib_module_to_local_maven
+from project_configuration import extract_version_name_and_artifact_group
+from string_replacement import replace_string_in_directory
 
 
 def repackage_and_install_webrtc_android(path: str, repackaged_webrtc_version: str):

@@ -1,9 +1,8 @@
 import os
-import shutil
 
-from scripts.repackage.utils.android import install_android_lib_module_to_local_maven
-from scripts.repackage.utils.project_configuration import extract_version_name_and_artifact_group
-from scripts.repackage.utils.string_replacement import replace_string_in_directory
+from maven import install_android_lib_module_to_local_maven
+from project_configuration import extract_version_name_and_artifact_group
+from string_replacement import replace_string_in_directory
 
 
 def repackage_and_install_video_sdk(path: str, repackaged_webrtc_version: str):
@@ -30,7 +29,7 @@ def repackage_and_install_video_sdk(path: str, repackaged_webrtc_version: str):
 
     # Modify libs.versions.toml file
     os.chdir(path)
-    _modify_gradle_libs_version()
+    _modify_gradle_libs_version(repackaged_webrtc_version)
 
     # Modify build.gradle files
     os.chdir(path)
@@ -62,8 +61,18 @@ def _modify_settings_gradle():
     print(f"mavenLocal() was added to {file_path}.")
 
 
-def _modify_gradle_libs_version():
+def _modify_gradle_libs_version(repackaged_webrtc_version: str):
     file_path = os.path.join("gradle", "libs.versions.toml")
+
+    # streamWebRTC = "1.1.0"
+    with open(file_path, 'r') as file:
+        lines = file.readlines()
+
+    with open(file_path, 'w') as file:
+        for line in lines:
+            if 'streamWebRTC' in line:
+                line = line.split('=')[0] + '= "' + repackaged_webrtc_version + '"\n'
+            file.write(line)
 
     # Read the content of the file
     with open(file_path, 'r') as f:
