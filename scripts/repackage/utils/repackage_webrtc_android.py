@@ -1,13 +1,16 @@
 import os
 import shutil
+from datetime import datetime, time
 
-from utils.gradle_settings import modify_settings_gradle
+from utils.gradle_publish import override_gradle_publish
+from utils.gradle_settings import modify_gradle_settings
 from utils.maven import install_android_lib_module_to_local_maven
 from utils.project_configuration import extract_version_name_and_artifact_group
 from utils.string_replacement import replace_string_in_directory
 
 
 def repackage_and_install_webrtc_android(path: str, repackaged_webrtc_version: str):
+    start_time = int(datetime.utcnow().timestamp() * 1000)
     os.chdir(path)
 
     configuration_path = os.path.join(
@@ -26,64 +29,38 @@ def repackage_and_install_webrtc_android(path: str, repackaged_webrtc_version: s
     _make_kotlin_class_public(os.path.join(target_dir, file_name))
 
     # Repackage
-    print(f"> WebRTC-Android: Repackage Started")
+    print("> WebRTC-Android: Repackage Started")
     replace_string_in_directory(
         directory_path=path,
         search_string="org.webrtc",
         replace_string="io.getstream.webrtc"
     )
-    print(f"> WebRTC-Android: Repackage Completed")
+    print("> WebRTC-Android: Repackage Completed")
 
     # Modify settings.gradle file
     os.chdir(path)
-    modify_settings_gradle()
-    print(f"> WebRTC-Android: settings.gradle has been modified")
+    modify_gradle_settings()
+    print("> WebRTC-Android: settings.gradle has been modified")
+
+    # Modify publish-module.gradle file
+    os.chdir(path)
+    override_gradle_publish(os.path.join('scripts', 'publish-module.gradle'))
+    print("> WebRTC-Android: publish-module.gradle has been modified")
 
     # Modify build.gradle files
-    print(f"> WebRTC-Android: modify build.gradle files")
-    os.chdir(path)
-    _modify_build_gradle_webrtc_android_module(
-        module_name="stream-webrtc-android-ui",
-        repackaged_module_name="streamx-webrtc-android-ui",
-        repackaged_webrtc_version=repackaged_webrtc_version
-    )
-    os.chdir(path)
-    _modify_build_gradle_webrtc_android_module(
-        module_name="stream-webrtc-android-ktx",
-        repackaged_module_name="streamx-webrtc-android-ktx",
-        repackaged_webrtc_version=repackaged_webrtc_version
-    )
-    os.chdir(path)
-    _modify_build_gradle_webrtc_android_module(
-        module_name="stream-webrtc-android-bom",
-        repackaged_module_name="streamx-webrtc-android-bom",
-        repackaged_webrtc_version=repackaged_webrtc_version
-    )
-    os.chdir(path)
-    _modify_build_gradle_webrtc_android_module(
-        module_name="app",
-        repackaged_module_name="app",
-        repackaged_webrtc_version=repackaged_webrtc_version
-    )
-    print(f"> WebRTC-Android: build.gradle files have been modified")
+    print("> WebRTC-Android: modify build.gradle files")
+    _modify_build_gradle_files(path, repackaged_webrtc_version)
+    print("> WebRTC-Android: build.gradle files have been modified")
 
     # Install modules
     os.chdir(path)
-    install_android_lib_module_to_local_maven(
-        module_name="stream-webrtc-android-ui",
-        artifact_id="streamx-webrtc-android-ui",
-        group_id=group_id,
-        version=project_version
-    )
-    print(f"> WebRTC-Android: installed stream-webrtc-android-ui")
-    os.chdir(path)
-    install_android_lib_module_to_local_maven(
-        module_name="stream-webrtc-android-ktx",
-        artifact_id="streamx-webrtc-android-ktx",
-        group_id=group_id,
-        version=project_version
-    )
-    print(f"> WebRTC-Android: installed stream-webrtc-android-ktx")
+    print(f"> WebRTC-Android: install modules")
+    _install_modules()
+    print("> WebRTC-Android: modules have been installed")
+
+    now = int(datetime.utcnow().timestamp() * 1000)
+    elapsed = now - start_time
+    print(f"\nREPACKAGE SUCCESSFUL (WebRTC-Android) in {elapsed}ms")
 
 
 def _make_kotlin_class_public(file_path: str) -> None:
@@ -104,6 +81,39 @@ def _make_kotlin_class_public(file_path: str) -> None:
 
     with open(file_path, 'w', encoding='utf-8') as file:
         file.writelines(modified_content)
+
+
+def _modify_build_gradle_files(path: str, repackaged_webrtc_version: str) -> None:
+    os.chdir(path)
+    for subdir, _, files in os.walk(path):
+        for filename in files:
+            if 'build.gradle' in filename:
+                file_path = os.path.join(subdir, filename)
+                _modify_build_gradle(file_path, repackaged_webrtc_version)
+
+
+def _modify_build_gradle(file_path: str, repackaged_webrtc_version: str) -> None:
+    # Read the content of the file
+    with open(file_path, 'r') as file:
+        lines = file.readlines()
+
+    with open(file_path, 'w') as file:
+        for line in lines:
+            if "PUBLISH_ARTIFACT_ID" in line:
+                line = line.replace("stream-webrtc-android", "streamx-webrtc-android")
+            elif 'api(project(":stream-webrtc-android"))' in line:
+                line = line.replace(
+                    'api(project(":stream-webrtc-android"))',
+                    f'api("io.getstream:streamx-webrtc-android:{repackaged_webrtc_version}")'
+                )
+            elif 'implementation(project(":stream-webrtc-android"))' in line:
+                line = line.replace(
+                    'implementation(project(":stream-webrtc-android"))',
+                    f'implementation("io.getstream:streamx-webrtc-android:{repackaged_webrtc_version}")'
+                )
+            file.write(line)
+
+    print(f"...{file_path} has been modified.")
 
 
 def _modify_build_gradle_webrtc_android_module(
@@ -133,3 +143,13 @@ def _modify_build_gradle_webrtc_android_module(
         f.write(content)
 
     print(f"build.gradle.kts in {file_path} has been modified.")
+
+
+def _install_modules():
+    modules = [
+        'stream-webrtc-android-ui',
+        'stream-webrtc-android-ktx',
+        'stream-webrtc-android-compose'
+    ]
+    for module in modules:
+        install_android_lib_module_to_local_maven(module)

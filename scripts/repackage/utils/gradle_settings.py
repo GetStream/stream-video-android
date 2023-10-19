@@ -1,4 +1,4 @@
-def modify_settings_gradle():
+def modify_gradle_settings():
     file_path = 'settings.gradle.kts'
 
     # Read the content of the file
@@ -6,9 +6,6 @@ def modify_settings_gradle():
         lines = f.readlines()
 
     # Add mavenLocal() at appropriate places
-    # for i, line in enumerate(lines):
-    #     if lines[i - 1].strip() == "repositories {" and line.strip() == "google()":
-    #         lines.insert(i, "    mavenLocal()\n")
     for i, line in enumerate(lines):
         if line.strip() == "repositories {":
             space_count = len(line) - len(line.lstrip())
