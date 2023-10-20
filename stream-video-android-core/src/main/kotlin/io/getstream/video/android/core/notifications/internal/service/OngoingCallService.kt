@@ -23,7 +23,6 @@ import androidx.core.app.NotificationManagerCompat
 import io.getstream.log.taggedLogger
 import io.getstream.video.android.core.StreamVideo
 import io.getstream.video.android.core.notifications.NotificationHandler.Companion.INTENT_EXTRA_CALL_CID
-import io.getstream.video.android.core.notifications.internal.DefaultStreamIntentResolver
 import io.getstream.video.android.model.StreamCallId
 import io.getstream.video.android.model.streamCallId
 
@@ -33,7 +32,6 @@ import io.getstream.video.android.model.streamCallId
 internal class OngoingCallService : Service() {
     private val logger by taggedLogger("OngoingCallService")
     private var callId: StreamCallId? = null
-    private val intentResolver = DefaultStreamIntentResolver(this)
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         callId = intent?.streamCallId(INTENT_EXTRA_CALL_CID)
