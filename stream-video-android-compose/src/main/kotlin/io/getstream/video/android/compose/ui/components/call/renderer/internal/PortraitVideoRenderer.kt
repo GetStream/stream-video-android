@@ -108,7 +108,7 @@ internal fun BoxScope.PortraitVideoRenderer(
             )
         }
 
-        3 -> {
+        3, 4 -> {
             ParticipantColumn(
                 modifier,
                 remoteParticipants,
@@ -117,15 +117,13 @@ internal fun BoxScope.PortraitVideoRenderer(
                 call,
                 style,
                 dominantSpeaker,
+                0
             )
         }
 
-        4, 5, 6 -> {
-            val columnSize = when (callParticipants.size) {
-                4 -> Pair(2, 2)
-                5 -> Pair(2, 3)
-                else -> Pair(3, 3) // 6, because if 7 we are not in this branch
-            }
+        5, 6 -> {
+            val columnSize = if (callParticipants.size == 5) Pair(3, 2) else Pair(3, 3)
+
             Row(modifier) {
                 ParticipantColumn(
                     modifier = modifier.weight(1f),
@@ -145,6 +143,7 @@ internal fun BoxScope.PortraitVideoRenderer(
                     call = call,
                     style = style,
                     dominantSpeaker = dominantSpeaker,
+                    expectedColumnSize = columnSize.first,
                 )
             }
         }
@@ -180,7 +179,7 @@ internal fun BoxScope.PortraitVideoRenderer(
         }
     }
 
-    if (callParticipants.size in 2..3) {
+    if (callParticipants.size in 2..4) {
         val currentLocal by call.state.me.collectAsStateWithLifecycle()
 
         if (currentLocal != null || LocalInspectionMode.current) {
@@ -212,6 +211,7 @@ private fun ParticipantColumn(
     call: Call,
     style: VideoRendererStyle,
     dominantSpeaker: ParticipantState?,
+    expectedColumnSize: Int = remoteParticipants.size,
 ) {
     Column(modifier) {
         repeat(remoteParticipants.size) {
@@ -224,6 +224,9 @@ private fun ParticipantColumn(
                     isFocused = dominantSpeaker?.sessionId == participant.sessionId,
                 ),
             )
+        }
+        repeat(expectedColumnSize - remoteParticipants.size) {
+            Box(modifier = paddedModifier.weight(1f))
         }
     }
 }

@@ -104,9 +104,8 @@ internal fun BoxScope.LandscapeVideoRenderer(
             )
         }
 
-        3 -> {
+        3, 4 -> {
             val rowItemWeight = 1f / callParticipants.size
-
             Row(modifier = modifier) {
                 remoteParticipants.take(callParticipants.size - 1).forEach { participant ->
                     videoRenderer.invoke(
@@ -123,13 +122,8 @@ internal fun BoxScope.LandscapeVideoRenderer(
             }
         }
 
-        4, 5, 6 -> {
-            val rowSize = when (callParticipants.size) {
-                4 -> Pair(2, 2)
-                5 -> Pair(2, 3)
-                else -> Pair(3, 3) // 6, because if 7 we are not in this branch
-            }
-
+        5, 6 -> {
+            val rowSize = if (callParticipants.size == 5) Pair(3, 2) else Pair(3, 3)
             Column(modifier) {
                 ParticipantRow(
                     modifier = Modifier.weight(1f),
@@ -148,6 +142,7 @@ internal fun BoxScope.LandscapeVideoRenderer(
                     call = call,
                     style = style,
                     dominantSpeaker = dominantSpeaker,
+                    expectedRowSize = rowSize.first,
                 )
             }
         }
@@ -184,7 +179,7 @@ internal fun BoxScope.LandscapeVideoRenderer(
         }
     }
 
-    if (callParticipants.size in 2..3) {
+    if (callParticipants.size in 2..4) {
         val currentLocal by call.state.me.collectAsStateWithLifecycle()
 
         if (currentLocal != null || LocalInspectionMode.current) {
@@ -216,6 +211,7 @@ private fun ParticipantRow(
     call: Call,
     style: VideoRendererStyle,
     dominantSpeaker: ParticipantState?,
+    expectedRowSize: Int = participants.size
 ) {
     Row(modifier) {
         repeat(participants.size) {
@@ -228,6 +224,9 @@ private fun ParticipantRow(
                     isFocused = dominantSpeaker?.sessionId == participant.sessionId,
                 ),
             )
+        }
+        repeat(expectedRowSize - participants.size) {
+            Box(modifier = paddedModifier.weight(1f))
         }
     }
 }

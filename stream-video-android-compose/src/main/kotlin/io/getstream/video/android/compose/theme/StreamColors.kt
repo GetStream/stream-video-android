@@ -155,7 +155,9 @@ public data class StreamColors(
                 id = R.color.stream_video_volume_indicator_background,
             ),
             avatarBorderColor = colorResource(id = R.color.stream_video_avatar_border_color),
-            participantContainerBackground = colorResource(id = R.color.stream_video_participant_container_background),
+            participantContainerBackground = colorResource(
+                id = R.color.stream_video_participant_container_background,
+            ),
         )
 
         /**
@@ -231,7 +233,9 @@ public data class StreamColors(
                 id = R.color.stream_video_volume_indicator_background_dark,
             ),
             avatarBorderColor = colorResource(id = R.color.stream_video_avatar_border_color),
-            participantContainerBackground = colorResource(id = R.color.stream_video_participant_container_background),
+            participantContainerBackground = colorResource(
+                id = R.color.stream_video_participant_container_background,
+            ),
         )
     }
 }
