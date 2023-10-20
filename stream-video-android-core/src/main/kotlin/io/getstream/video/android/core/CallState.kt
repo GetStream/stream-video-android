@@ -896,7 +896,7 @@ public class CallState(
         // update the participant count
         _participantCounts.value = event.participantCount
 
-        val instant = Instant.ofEpochSecond(event.callState.started_at?.epochSecond!!, 0)
+        val instant = Instant.ofEpochSecond(event.callState.started_at?.epochSecond ?: 0, 0)
         _startedAt.value = OffsetDateTime.ofInstant(instant, ZoneOffset.UTC)
         // creates the participants
         val participantStates = event.callState.participants.map {
