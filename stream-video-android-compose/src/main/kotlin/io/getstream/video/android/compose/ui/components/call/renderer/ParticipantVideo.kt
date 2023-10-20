@@ -163,7 +163,9 @@ public fun ParticipantVideo(
         modifier
     }
     Box(
-        modifier = containerModifier.clip(containerShape),
+        modifier = containerModifier
+            .clip(containerShape)
+            .background(VideoTheme.colors.participantContainerBackground),
     ) {
         ParticipantVideoRenderer(
             call = call,

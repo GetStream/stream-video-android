@@ -35,7 +35,8 @@
     <color name="stream_video_error_accent">#FF3742</color>
     <color name="stream_video_info_accent">#20E070</color>
     <color name="stream_video_focused_border_color">#005FFF</color>
-    <color name="stream_video_avatar_border_color">#1E262E</color>
+    <color name="stream_video_avatar_border_color">#123D82</color>
+    <color name="stream_video_participant_container_background">#1E262E</color>
     <color name="stream_video_highlight">#FBF4DD</color>
     <color name="stream_video_text_avatar_initials">#FFFFFF</color>
     <color name="stream_video_call_gradient_start">#545A64</color>
