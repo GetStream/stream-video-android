@@ -15,7 +15,7 @@ def repackage_and_install(
     script_root = os.getcwd()
     if script_root.endswith('stream-video-android'):
         script_root = os.path.join(script_root, 'scripts', 'repackage')
-    print(f'>>>>>>>>> ROOT: {script_root}')
+    print(f'[REPACKAGE] root folder: "{script_root}"')
 
     # Install webrtc aar
     os.chdir(webrtc_android)
@@ -48,10 +48,12 @@ if __name__ == "__main__":
 
     args = parser.parse_args()
 
-    repackaged_webrtc = args.repackaged_webrtc
-    webrtc_android = args.webrtc_android
-    print(f">>> repackaged_webrtc: {repackaged_webrtc}")
-    print(f">>> webrtc_android: {webrtc_android}")
+    # Resolve relative paths
+    repackaged_webrtc = os.path.abspath(args.repackaged_webrtc)
+    webrtc_android = os.path.abspath(args.webrtc_android)
+
+    print(f'[REPACKAGE] repackaged webrtc aar file: "{repackaged_webrtc}"')
+    print(f'[REPACKAGE] webrtc-android folder: "{webrtc_android}"')
 
     repackage_and_install(
         repackaged_webrtc,
