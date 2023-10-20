@@ -17,9 +17,7 @@
 package io.getstream.video.android.core.call.connection
 
 import io.getstream.log.taggedLogger
-import io.getstream.result.Error
 import io.getstream.result.Result
-import io.getstream.result.Result.Failure
 import io.getstream.video.android.core.call.stats.model.RtcStatsReport
 import io.getstream.video.android.core.call.stats.toRtcStats
 import io.getstream.video.android.core.call.utils.addRtcIceCandidate
@@ -113,12 +111,6 @@ public class StreamPeerConnection(
         return state.value in goodStates
     }
 
-    /**
-     * Used to pool together and store [IceCandidate]s before consuming them.
-     */
-    private val pendingIceMutex = Mutex()
-    private val pendingIceCandidates = mutableListOf<IceCandidate>()
-
     init {
         logger.i { "<init> #sfu; #$typeTag; mediaConstraints: $mediaConstraints" }
     }
@@ -182,15 +174,6 @@ public class StreamPeerConnection(
                     sessionDescription.description.mungeCodecs(),
                 ),
             )
-        }.also {
-            pendingIceMutex.withLock {
-                pendingIceCandidates.forEach { iceCandidate ->
-                    val rtcIceCandidate = iceCandidate.toRtcCandidate()
-                    logger.i { "[setRemoteDescription] #sfu; #subscriber; pendingRtcIceCandidate: $rtcIceCandidate" }
-                    connection.addRtcIceCandidate(rtcIceCandidate)
-                }
-                pendingIceCandidates.clear()
-            }
         }
     }
 
@@ -228,13 +211,6 @@ public class StreamPeerConnection(
      * @return An empty [Result], if the operation has been successful or not.
      */
     public suspend fun addIceCandidate(iceCandidate: IceCandidate): Result<Unit> {
-        if (connection.remoteDescription == null) {
-            logger.w { "[addIceCandidate] #sfu; #$typeTag; postponed (no remoteDescription): $iceCandidate" }
-            pendingIceMutex.withLock {
-                pendingIceCandidates.add(iceCandidate)
-            }
-            return Failure(Error.GenericError(message = "RemoteDescription is not set"))
-        }
         val rtcIceCandidate = iceCandidate.toRtcCandidate()
         logger.d { "[addIceCandidate] #sfu; #$typeTag; rtcIceCandidate: $rtcIceCandidate" }
         return connection.addRtcIceCandidate(rtcIceCandidate).also {

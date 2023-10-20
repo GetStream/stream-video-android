@@ -64,6 +64,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
+import kotlinx.coroutines.channels.consumeEach
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -173,6 +174,7 @@ public class RtcSession internal constructor(
     internal val trackIdToParticipant: MutableStateFlow<Map<String, String>> =
         MutableStateFlow(emptyMap())
     private var syncSubscriberAnswer: Job? = null
+    private var syncSubscriberCandidates: Job? = null
     private var syncPublisherJob: Job? = null
     private var subscriptionSyncJob: Job? = null
     private var muteStateSyncJob: Job? = null
@@ -1061,7 +1063,6 @@ public class RtcSession internal constructor(
             coroutineScope.launch {
                 logger.v { "[onRtcEvent] event: $event" }
                 when (event) {
-                    is ICETrickleEvent -> handleIceTrickle(event)
                     is SubscriberOfferEvent -> handleSubscriberOffer(event)
                     // this dynascale event tells the SDK to change the quality of the video it's uploading
                     is ChangePublishQualityEvent -> updatePublishQuality(event)
@@ -1188,6 +1189,13 @@ public class RtcSession internal constructor(
             offerEvent.sdp,
         )
         subscriber.setRemoteDescription(offerDescription)
+
+        syncSubscriberCandidates?.cancel()
+        syncSubscriberCandidates = coroutineScope.launch {
+            sfuConnectionModule.sfuSocket.pendingSubscriberIceCandidates.consumeEach { iceCandidates ->
+                subscriber.addIceCandidate(iceCandidates)
+            }
+        }
 
         // step 2 - create the answer
         val answerResult = subscriber.createAnswer()
@@ -1328,6 +1336,14 @@ public class RtcSession internal constructor(
                             SessionDescription.Type.ANSWER, result.getOrThrow().sdp,
                         ),
                     )
+
+                    // start listening to ICE candidates
+                    launch {
+                        sfuConnectionModule.sfuSocket.pendingPublisherIceCandidates.consumeEach { iceCandidates ->
+                            publisher?.addIceCandidate(iceCandidates)
+                        }
+                    }
+
                     emit(result.getOrThrow())
                 }.flowOn(DispatcherProvider.IO).retryWhen { cause, attempt ->
                     val sameValue = mangledSdp == publisherSdpOffer.value
