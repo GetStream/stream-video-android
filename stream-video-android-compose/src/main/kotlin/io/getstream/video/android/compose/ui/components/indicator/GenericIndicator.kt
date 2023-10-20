@@ -55,8 +55,7 @@ public fun GenericIndicator(
                 .background(
                     color = backgroundColor,
                     shape = shape,
-                )
-                .blur(30.dp),
+                ),
         )
         Box(
             modifier = Modifier
