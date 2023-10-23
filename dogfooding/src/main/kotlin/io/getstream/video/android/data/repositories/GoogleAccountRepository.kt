@@ -79,4 +79,15 @@ class GoogleAccountRepository @Inject constructor(
         val response = jsonAdapter.fromJson(jsonString)
         return response?.people?.map { it.asDomainModel() }
     }
+
+    fun getCurrentUser(): GoogleAccount {
+        val currentUser = GoogleSignIn.getLastSignedInAccount(context)
+        return GoogleAccount(
+            email = currentUser?.email ?: "",
+            id = currentUser?.id ?: "",
+            name = currentUser?.givenName ?: "",
+            photoUrl = currentUser?.photoUrl?.toString(),
+            isFavorite = false
+        )
+    }
 }
