@@ -64,7 +64,6 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
-import kotlinx.coroutines.channels.consumeEach
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -1192,7 +1191,7 @@ public class RtcSession internal constructor(
 
         syncSubscriberCandidates?.cancel()
         syncSubscriberCandidates = coroutineScope.launch {
-            sfuConnectionModule.sfuSocket.pendingSubscriberIceCandidates.consumeEach { iceCandidates ->
+            sfuConnectionModule.sfuSocket.pendingSubscriberIceCandidates.collect { iceCandidates ->
                 subscriber.addIceCandidate(iceCandidates)
             }
         }
@@ -1339,7 +1338,7 @@ public class RtcSession internal constructor(
 
                     // start listening to ICE candidates
                     launch {
-                        sfuConnectionModule.sfuSocket.pendingPublisherIceCandidates.consumeEach { iceCandidates ->
+                        sfuConnectionModule.sfuSocket.pendingPublisherIceCandidates.collect { iceCandidates ->
                             publisher?.addIceCandidate(iceCandidates)
                         }
                     }

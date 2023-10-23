@@ -31,6 +31,8 @@ import io.getstream.video.android.core.model.IceCandidate
 import kotlinx.coroutines.CancellableContinuation
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.ensureActive
+import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
 import kotlinx.serialization.json.Json
 import okhttp3.OkHttpClient
@@ -79,8 +81,11 @@ public class SfuSocket(
     // Only set during SFU migration
     private var migrationData: (suspend () -> Migration)? = null
 
-    internal val pendingPublisherIceCandidates = Channel<IceCandidate>(capacity = 99)
-    internal val pendingSubscriberIceCandidates = Channel<IceCandidate>(capacity = 99)
+    private val _pendingPublisherIceCandidates = Channel<IceCandidate>(capacity = 99)
+    internal val pendingPublisherIceCandidates = _pendingPublisherIceCandidates.receiveAsFlow()
+
+    private val _pendingSubscriberIceCandidates = Channel<IceCandidate>(capacity = 99)
+    internal val pendingSubscriberIceCandidates = _pendingSubscriberIceCandidates.receiveAsFlow()
 
     private val clientDetails
         get() = ClientDetails(
@@ -206,6 +211,7 @@ public class SfuSocket(
                     handleIceTrickle(message)
                 }
             } catch (error: Throwable) {
+                coroutineContext.ensureActive()
                 logger.e { "[onMessage] failed: $error" }
                 handleError(error)
             }
@@ -218,9 +224,9 @@ public class SfuSocket(
         }
         val iceCandidate: IceCandidate = Json.decodeFromString(event.candidate)
         val result = if (event.peerType == PeerType.PEER_TYPE_PUBLISHER_UNSPECIFIED) {
-            pendingPublisherIceCandidates.send(iceCandidate)
+            _pendingPublisherIceCandidates.send(iceCandidate)
         } else {
-            pendingSubscriberIceCandidates.send(iceCandidate)
+            _pendingSubscriberIceCandidates.send(iceCandidate)
         }
         logger.v { "[handleTrickle] #sfu; #${event.peerType.stringify()}; result: $result" }
     }
