@@ -11,7 +11,7 @@ import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 import dagger.hilt.android.qualifiers.ApplicationContext
 import io.getstream.video.android.data.dto.GetGoogleAccountsResponseDto
 import io.getstream.video.android.data.dto.asDomainModel
-import io.getstream.video.android.models.StreamUser
+import io.getstream.video.android.models.GoogleAccount
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import okhttp3.HttpUrl.Companion.toHttpUrl
@@ -24,7 +24,7 @@ class GoogleAccountRepository @Inject constructor(
 ) {
     private val baseUrl = "https://people.googleapis.com/v1/people:listDirectoryPeople"
 
-    suspend fun getAllAccounts(): List<StreamUser>? {
+    suspend fun getAllAccounts(): List<GoogleAccount>? {
         val readMask = "readMask=emailAddresses,names,photos"
         val sources = "sources=DIRECTORY_SOURCE_TYPE_DOMAIN_PROFILE"
         val pageSize = "pageSize=1000"
@@ -70,7 +70,7 @@ class GoogleAccountRepository @Inject constructor(
         .build()
 
     @OptIn(ExperimentalStdlibApi::class)
-    private fun parseUserListJson(jsonString: String): List<StreamUser>? {
+    private fun parseUserListJson(jsonString: String): List<GoogleAccount>? {
         val moshi: Moshi = Moshi.Builder()
             .add(KotlinJsonAdapterFactory())
             .build()

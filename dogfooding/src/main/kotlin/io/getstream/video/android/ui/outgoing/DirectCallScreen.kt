@@ -66,7 +66,7 @@ fun DirectCallScreen(
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
-    LaunchedEffect(key1 = Unit) { viewModel.getAllUsers() }
+    LaunchedEffect(key1 = Unit) { viewModel.getGoogleAccounts() }
 
     VideoTheme {
         Column {
@@ -127,13 +127,13 @@ private fun AppBar() {
 }
 
 @Composable
-private fun UserList(entries: List<UserUiState>, onUserClick: (Int) -> Unit) {
+private fun UserList(entries: List<GoogleAccountUiState>, onUserClick: (Int) -> Unit) {
     Column(Modifier.verticalScroll(rememberScrollState())) {
         entries.forEachIndexed { index, entry ->
             UserRow(
                 index = index,
-                name = entry.user.name,
-                avatarUrl = entry.user.avatarUrl,
+                name = entry.account.name ?: "",
+                avatarUrl = entry.account.photoUrl,
                 isSelected = entry.isSelected,
                 onClick = { onUserClick(index) }
             )

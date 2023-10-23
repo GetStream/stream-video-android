@@ -267,7 +267,7 @@ private fun HandleLoginUiStates(
     loginViewModel: LoginViewModel = hiltViewModel(),
 ) {
     val context = LocalContext.current
-    val signInLauncher = rememberRegisterForActivityResult(
+    val signInLauncher = rememberLauncherForGoogleSignInActivityResult(
         onSignInSuccess = { email ->
             val userId = email
                 .replace(" ", "")
