@@ -134,11 +134,11 @@ Video roadmap and changelog is available [here](https://github.com/GetStream/pro
 - [X] Android SDK development.md cleanup (Jaewoong)
 - [X] Upgrade to more recent versions of webrtc (Jaewoong/Kanat)
 - [X] Review foreground service vs backend for audio rooms etc. (Aleks)
+- [X] Enable SFU switching
 - [ ] Logging is too verbose (rtc is very noisy), clean it up to focus on the essential for info and higher (Daniel)
 
 ### 0.5.0 milestone
 
-- [ ] Enable SFU switching
 - [ ] H264 workaround on Samsung 23? (see https://github.com/livekit/client-sdk-android/blob/main/livekit-android-sdk/src/main/java/io/livekit/android/webrtc/SimulcastVideoEncoderFactoryWrapper.kt#L34 and
 - https://github.com/react-native-webrtc/react-native-webrtc/issues/983#issuecomment-975624906)
 - [ ] Test coverage

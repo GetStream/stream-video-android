@@ -487,6 +487,7 @@ internal class StreamVideoImpl internal constructor(
             calls[selectedCid]?.let {
                 it.state.handleEvent(event)
                 it.session?.handleEvent(event)
+                it.handleEvent(event)
             }
         }
 
@@ -641,6 +642,7 @@ internal class StreamVideoImpl internal constructor(
         ring: Boolean = false,
         notify: Boolean = false,
         location: String,
+        migratingFrom: String?,
     ): Result<JoinCallResponse> {
         val joinCallRequest = JoinCallRequest(
             create = create,
@@ -654,6 +656,7 @@ internal class StreamVideoImpl internal constructor(
             ring = ring,
             notify = notify,
             location = location,
+            migratingFrom = migratingFrom,
         )
 
         val result = wrapAPICall {
