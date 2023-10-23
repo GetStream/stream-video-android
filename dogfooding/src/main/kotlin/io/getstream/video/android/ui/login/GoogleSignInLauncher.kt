@@ -38,20 +38,17 @@ fun rememberLauncherForGoogleSignInActivityResult(
         ActivityResultContracts.StartActivityForResult(),
     ) { result ->
         if (result.resultCode != ComponentActivity.RESULT_OK) {
-            onSignInFailed.invoke()
-        }
-
-        val task: Task<GoogleSignInAccount> = GoogleSignIn.getSignedInAccountFromIntent(result.data)
-        try {
-            val account = task.getResult(ApiException::class.java)
-
-            account?.email?.let {
-                onSignInSuccess(it)
-            } ?: onSignInFailed()
-        } catch (e: ApiException) {
-            // The ApiException status code indicates the detailed failure reason.
-            // Please refer to the GoogleSignInStatusCodes class reference for more information.
             onSignInFailed()
+        } else {
+            val task: Task<GoogleSignInAccount> = GoogleSignIn.getSignedInAccountFromIntent(result.data)
+            try {
+                val account = task.getResult(ApiException::class.java)
+                account?.email?.let { onSignInSuccess(it) } ?: onSignInFailed()
+            } catch (e: ApiException) {
+                // The ApiException status code indicates the detailed failure reason.
+                // Please refer to the GoogleSignInStatusCodes class reference for more information.
+                onSignInFailed()
+            }
         }
     }
 }

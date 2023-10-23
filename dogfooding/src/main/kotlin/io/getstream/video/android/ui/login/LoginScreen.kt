@@ -276,6 +276,7 @@ private fun HandleLoginUiStates(
             loginViewModel.handleUiEvent(LoginEvent.SignInInSuccess(userId = userId))
         },
         onSignInFailed = {
+            loginViewModel.handleUiEvent(LoginEvent.Nothing)
             Toast.makeText(context, "Verification failed!", Toast.LENGTH_SHORT).show()
         },
     )
