@@ -1,6 +1,6 @@
 package io.getstream.video.android.data.dto
 
-import io.getstream.video.android.models.StreamUser
+import io.getstream.video.android.models.GoogleAccount
 import java.util.Locale
 
 data class GetGoogleAccountsResponseDto(
@@ -20,10 +20,10 @@ data class EmailAddressDto(
     val value: String
 )
 
-fun GoogleAccountDto.asDomainModel(): StreamUser {
+fun GoogleAccountDto.asDomainModel(): GoogleAccount {
     val email = emailAddresses.firstOrNull()?.value ?: ""
 
-    return StreamUser(
+    return GoogleAccount(
         email = email,
         id = email.replace(".", "_"),
         name = email
@@ -32,7 +32,7 @@ fun GoogleAccountDto.asDomainModel(): StreamUser {
             ?.split(".")
             ?.firstOrNull()
             ?.capitalize(Locale.ROOT) ?: email,
-        avatarUrl = photos?.firstOrNull()?.url,
+        photoUrl = photos?.firstOrNull()?.url,
         isFavorite = false
     )
 }

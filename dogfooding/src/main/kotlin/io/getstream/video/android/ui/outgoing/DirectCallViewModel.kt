@@ -20,7 +20,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.getstream.video.android.data.repositories.GoogleAccountRepository
-import io.getstream.video.android.models.StreamUser
+import io.getstream.video.android.models.GoogleAccount
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
@@ -35,17 +35,17 @@ class DirectCallViewModel @Inject constructor(
     private val _uiState = MutableStateFlow(DirectCallUiState())
     val uiState = _uiState.asStateFlow()
 
-    fun getAllUsers() {
+    fun getGoogleAccounts() {
         _uiState.update { it.copy(isLoading = true) }
 
         viewModelScope.launch {
             _uiState.update {
                 it.copy(
                     isLoading = false,
-                    users = googleAccountRepository.getAllAccounts()?.map { user ->
-                        UserUiState(
+                    googleAccounts = googleAccountRepository.getAllAccounts()?.map { user ->
+                        GoogleAccountUiState(
                             isSelected = false,
-                            user = user
+                            account = user
                         )
                     } ?: emptyList()
                 )
@@ -53,14 +53,17 @@ class DirectCallViewModel @Inject constructor(
         }
     }
 
-    fun toggleUserSelection(selectedIndex: Int) {
+    fun toggleGoogleAccountSelection(selectedIndex: Int) {
         _uiState.update {
             it.copy(
-                users = it.users.mapIndexed { index, userUiState ->
+                googleAccounts = it.googleAccounts?.mapIndexed { index, accountUiState ->
                     if (index == selectedIndex) {
-                        UserUiState(isSelected = !userUiState.isSelected, user = userUiState.user)
+                        GoogleAccountUiState(
+                            isSelected = !accountUiState.isSelected,
+                            account = accountUiState.account
+                        )
                     } else {
-                        userUiState
+                        accountUiState
                     }
                 }
             )
@@ -70,10 +73,10 @@ class DirectCallViewModel @Inject constructor(
 
 data class DirectCallUiState(
     val isLoading: Boolean = false,
-    val users: List<UserUiState> = emptyList(),
+    val googleAccounts: List<GoogleAccountUiState>? = emptyList(),
 )
 
-data class UserUiState(
+data class GoogleAccountUiState(
     val isSelected: Boolean = false,
-    val user: StreamUser
+    val account: GoogleAccount
 )

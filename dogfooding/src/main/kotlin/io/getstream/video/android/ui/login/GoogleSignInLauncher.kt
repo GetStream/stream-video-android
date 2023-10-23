@@ -30,7 +30,7 @@ import com.google.android.gms.tasks.Task
 
 
 @Composable
-fun rememberRegisterForActivityResult(
+fun rememberLauncherForGoogleSignInActivityResult(
     onSignInSuccess: (email: String) -> Unit,
     onSignInFailed: () -> Unit,
 ): ManagedActivityResultLauncher<Intent, ActivityResult> {
