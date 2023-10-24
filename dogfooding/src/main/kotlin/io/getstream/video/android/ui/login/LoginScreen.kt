@@ -189,7 +189,7 @@ private fun LoginContent(
                     text = "Login for Benchmark",
                     onClick = {
                         loginViewModel.handleUiEvent(
-                            LoginEvent.SignInInSuccess("benchmark.test@getstream.io"),
+                            LoginEvent.SignInSuccess("benchmark.test@getstream.io"),
                         )
                     },
                 )
@@ -247,7 +247,7 @@ private fun EmailLoginDialog(
                                 .replace(" ", "")
                                 .replace(".", "")
                                 .replace("@", "")
-                            loginViewModel.handleUiEvent(LoginEvent.SignInInSuccess(userId))
+                            loginViewModel.handleUiEvent(LoginEvent.SignInSuccess(userId))
                         },
                         text = "Log in",
                     )
@@ -270,7 +270,7 @@ private fun HandleLoginUiStates(
                 .replace(" ", "")
                 .replace(".", "")
                 .replace("@", "")
-            loginViewModel.handleUiEvent(LoginEvent.SignInInSuccess(userId = userId))
+            loginViewModel.handleUiEvent(LoginEvent.SignInSuccess(userId = userId))
         },
         onSignInFailed = {
             loginViewModel.handleUiEvent(LoginEvent.Nothing)
@@ -279,7 +279,7 @@ private fun HandleLoginUiStates(
     )
 
     LaunchedEffect(key1 = Unit) {
-        loginViewModel.sigInInIfValidUserExist()
+        loginViewModel.signInIfValidUserExist()
     }
 
     LaunchedEffect(key1 = loginUiState) {
