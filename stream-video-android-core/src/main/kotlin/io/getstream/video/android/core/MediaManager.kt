@@ -54,9 +54,9 @@ import stream.video.sfu.models.VideoDimension
 import java.util.UUID
 
 sealed class DeviceStatus {
-    object NotSelected : DeviceStatus()
-    object Disabled : DeviceStatus()
-    object Enabled : DeviceStatus()
+    data object NotSelected : DeviceStatus()
+    data object Disabled : DeviceStatus()
+    data object Enabled : DeviceStatus()
 }
 
 data class CameraDeviceWrapped(

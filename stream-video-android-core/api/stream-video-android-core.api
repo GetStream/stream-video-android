@@ -335,14 +335,23 @@ public abstract class io/getstream/video/android/core/DeviceStatus {
 
 public final class io/getstream/video/android/core/DeviceStatus$Disabled : io/getstream/video/android/core/DeviceStatus {
 	public static final field INSTANCE Lio/getstream/video/android/core/DeviceStatus$Disabled;
+	public fun equals (Ljava/lang/Object;)Z
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
 }
 
 public final class io/getstream/video/android/core/DeviceStatus$Enabled : io/getstream/video/android/core/DeviceStatus {
 	public static final field INSTANCE Lio/getstream/video/android/core/DeviceStatus$Enabled;
+	public fun equals (Ljava/lang/Object;)Z
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
 }
 
 public final class io/getstream/video/android/core/DeviceStatus$NotSelected : io/getstream/video/android/core/DeviceStatus {
 	public static final field INSTANCE Lio/getstream/video/android/core/DeviceStatus$NotSelected;
+	public fun equals (Ljava/lang/Object;)Z
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
 }
 
 public final class io/getstream/video/android/core/EventSubscription {
