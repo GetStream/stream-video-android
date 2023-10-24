@@ -35,7 +35,7 @@ import io.getstream.video.android.compose.theme.VideoTheme
  * A composable that wraps its content into a rounded semi-transparent background.
  */
 @Composable
-public fun GenericIndicator(
+internal fun GenericIndicator(
     modifier: Modifier = Modifier,
     shape: Shape,
     backgroundColor: Color,

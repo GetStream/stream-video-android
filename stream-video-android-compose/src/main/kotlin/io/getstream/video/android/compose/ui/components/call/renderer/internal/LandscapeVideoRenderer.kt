@@ -211,7 +211,7 @@ private fun ParticipantRow(
     call: Call,
     style: VideoRendererStyle,
     dominantSpeaker: ParticipantState?,
-    expectedRowSize: Int = participants.size
+    expectedRowSize: Int = participants.size,
 ) {
     Row(modifier) {
         repeat(participants.size) {

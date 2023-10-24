@@ -23,6 +23,7 @@ import stream.video.sfu.event.ConnectionQualityInfo
 import stream.video.sfu.models.CallGrants
 import stream.video.sfu.models.CallState
 import stream.video.sfu.models.Error
+import stream.video.sfu.models.GoAwayReason
 import stream.video.sfu.models.Participant
 import stream.video.sfu.models.PeerType
 import stream.video.sfu.models.TrackType
@@ -35,6 +36,10 @@ public sealed class SfuDataEvent : VideoEvent() {
 
 public data class PublisherAnswerEvent(
     val sdp: String,
+) : SfuDataEvent()
+
+public data class GoAwayEvent(
+    val reason: GoAwayReason,
 ) : SfuDataEvent()
 
 public data class CallGrantsUpdatedEvent(
