@@ -23,6 +23,7 @@ import io.getstream.video.android.core.events.ChangePublishQualityEvent
 import io.getstream.video.android.core.events.ConnectionQualityChangeEvent
 import io.getstream.video.android.core.events.DominantSpeakerChangedEvent
 import io.getstream.video.android.core.events.ErrorEvent
+import io.getstream.video.android.core.events.GoAwayEvent
 import io.getstream.video.android.core.events.ICETrickleEvent
 import io.getstream.video.android.core.events.JoinCallResponseEvent
 import io.getstream.video.android.core.events.ParticipantCount
@@ -122,6 +123,8 @@ public object RTCEventMapper {
                 event.call_grants_updated.current_grants,
                 event.call_grants_updated.message,
             )
+
+            event.go_away != null -> GoAwayEvent(reason = event.go_away.reason)
 
             else -> {
                 logger.w { "Unknown event: $event" }

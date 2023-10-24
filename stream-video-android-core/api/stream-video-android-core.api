@@ -26,6 +26,7 @@ public final class io/getstream/video/android/core/Call {
 	public final fun goLive (ZZZLkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public static synthetic fun goLive$default (Lio/getstream/video/android/core/Call;ZZZLkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
 	public final fun grantPermissions (Ljava/lang/String;Ljava/util/List;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public final fun handleEvent (Lorg/openapitools/client/models/VideoEvent;)V
 	public final fun initRenderer (Lio/getstream/webrtc/android/ui/VideoTextureViewRenderer;Ljava/lang/String;Lstream/video/sfu/models/TrackType;Lkotlin/jvm/functions/Function1;)V
 	public static synthetic fun initRenderer$default (Lio/getstream/video/android/core/Call;Lio/getstream/webrtc/android/ui/VideoTextureViewRenderer;Ljava/lang/String;Lstream/video/sfu/models/TrackType;Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)V
 	public final fun join (ZLio/getstream/video/android/core/CreateCallOptions;ZZLkotlin/coroutines/Continuation;)Ljava/lang/Object;
@@ -42,7 +43,7 @@ public final class io/getstream/video/android/core/Call {
 	public final fun processAudioSample (Lorg/webrtc/audio/JavaAudioDeviceModule$AudioSamples;)V
 	public final fun queryMembers (Ljava/util/Map;Ljava/util/List;ILjava/lang/String;Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public static synthetic fun queryMembers$default (Lio/getstream/video/android/core/Call;Ljava/util/Map;Ljava/util/List;ILjava/lang/String;Ljava/lang/String;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
-	public final fun reconnectOrSwitchSfu (ZLkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public final fun reconnect (ZLkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public final fun reject (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public final fun removeMembers (Ljava/util/List;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public final fun requestPermissions ([Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
@@ -64,8 +65,7 @@ public final class io/getstream/video/android/core/Call {
 	public final fun stopScreenSharing ()V
 	public final fun subscribe (Lio/getstream/video/android/core/events/VideoEventListener;)Lio/getstream/video/android/core/EventSubscription;
 	public final fun subscribeFor ([Ljava/lang/Class;Lio/getstream/video/android/core/events/VideoEventListener;)Lio/getstream/video/android/core/EventSubscription;
-	public final fun switchSfu (ZLkotlin/coroutines/Continuation;)Ljava/lang/Object;
-	public static synthetic fun switchSfu$default (Lio/getstream/video/android/core/Call;ZLkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
+	public final fun switchSfu (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public final fun takeScreenshot (Lio/getstream/video/android/core/model/VideoTrack;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public final fun update (Ljava/util/Map;Lorg/openapitools/client/models/CallSettingsRequest;Lorg/threeten/bp/OffsetDateTime;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public static synthetic fun update$default (Lio/getstream/video/android/core/Call;Ljava/util/Map;Lorg/openapitools/client/models/CallSettingsRequest;Lorg/threeten/bp/OffsetDateTime;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
@@ -615,6 +615,13 @@ public final class io/getstream/video/android/core/RealtimeConnection$Joined : i
 	public fun toString ()Ljava/lang/String;
 }
 
+public final class io/getstream/video/android/core/RealtimeConnection$Migrating : io/getstream/video/android/core/RealtimeConnection {
+	public static final field INSTANCE Lio/getstream/video/android/core/RealtimeConnection$Migrating;
+	public fun equals (Ljava/lang/Object;)Z
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
 public final class io/getstream/video/android/core/RealtimeConnection$PreJoin : io/getstream/video/android/core/RealtimeConnection {
 	public static final field INSTANCE Lio/getstream/video/android/core/RealtimeConnection$PreJoin;
 	public fun equals (Ljava/lang/Object;)Z
@@ -886,6 +893,7 @@ public final class io/getstream/video/android/core/call/RtcSession {
 	public final fun createPublisher ()Lio/getstream/video/android/core/call/connection/StreamPeerConnection;
 	public final fun createSubscriber ()Lio/getstream/video/android/core/call/connection/StreamPeerConnection;
 	public final fun getPublisherStats (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public final fun getSfuSocketState ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun getSubscriber ()Lio/getstream/video/android/core/call/connection/StreamPeerConnection;
 	public final fun getSubscriberStats (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public final fun getTrackDimensions ()Lkotlinx/coroutines/flow/MutableStateFlow;
@@ -894,14 +902,13 @@ public final class io/getstream/video/android/core/call/RtcSession {
 	public final fun handleEvent (Lorg/openapitools/client/models/VideoEvent;)V
 	public final fun handleIceTrickle (Lio/getstream/video/android/core/events/ICETrickleEvent;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public final fun handleSubscriberOffer (Lio/getstream/video/android/core/events/SubscriberOfferEvent;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
-	public final fun mangleSdp (Lorg/webrtc/SessionDescription;)Lorg/webrtc/SessionDescription;
 	public final fun onNegotiationNeeded (Lio/getstream/video/android/core/call/connection/StreamPeerConnection;Lio/getstream/video/android/core/model/StreamPeerType;)V
 	public final fun reconnect (ZLkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public final fun requestSubscriberIceRestart (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public final fun setScreenShareTrack ()V
 	public final fun setSubscriber (Lio/getstream/video/android/core/call/connection/StreamPeerConnection;)V
 	public final fun setTracks (Ljava/util/Map;)V
-	public final fun switchSfu (Ljava/lang/String;Ljava/lang/String;Ljava/util/List;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public final fun switchSfu (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/util/List;Lkotlin/jvm/functions/Function0;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public final fun updateTrackDimensions (Ljava/lang/String;Lstream/video/sfu/models/TrackType;ZLstream/video/sfu/models/VideoDimension;)V
 	public static synthetic fun updateTrackDimensions$default (Lio/getstream/video/android/core/call/RtcSession;Ljava/lang/String;Lstream/video/sfu/models/TrackType;ZLstream/video/sfu/models/VideoDimension;ILjava/lang/Object;)V
 }
@@ -2933,6 +2940,17 @@ public final class io/getstream/video/android/core/events/ErrorEvent : io/getstr
 	public fun toString ()Ljava/lang/String;
 }
 
+public final class io/getstream/video/android/core/events/GoAwayEvent : io/getstream/video/android/core/events/SfuDataEvent {
+	public fun <init> (Lstream/video/sfu/models/GoAwayReason;)V
+	public final fun component1 ()Lstream/video/sfu/models/GoAwayReason;
+	public final fun copy (Lstream/video/sfu/models/GoAwayReason;)Lio/getstream/video/android/core/events/GoAwayEvent;
+	public static synthetic fun copy$default (Lio/getstream/video/android/core/events/GoAwayEvent;Lstream/video/sfu/models/GoAwayReason;ILjava/lang/Object;)Lio/getstream/video/android/core/events/GoAwayEvent;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getReason ()Lstream/video/sfu/models/GoAwayReason;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
 public final class io/getstream/video/android/core/events/ICETrickleEvent : io/getstream/video/android/core/events/SfuDataEvent {
 	public fun <init> (Ljava/lang/String;Lstream/video/sfu/models/PeerType;)V
 	public final fun component1 ()Ljava/lang/String;
@@ -4178,6 +4196,7 @@ public final class io/getstream/video/android/core/socket/SfuSocket : io/getstre
 	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Lkotlin/jvm/functions/Function1;Lkotlinx/coroutines/CoroutineScope;Lokhttp3/OkHttpClient;Lio/getstream/video/android/core/internal/network/NetworkStateProvider;Lkotlin/jvm/functions/Function0;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public fun authenticate ()V
 	public fun connect (Lkotlin/jvm/functions/Function1;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public final fun connectMigrating (Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public fun onMessage (Lokhttp3/WebSocket;Lokio/ByteString;)V
 }
 
@@ -4351,6 +4370,1221 @@ public final class io/getstream/video/android/core/utils/RtpMapAttribute {
 	public final fun getIndex ()I
 	public final fun getLine ()Ljava/lang/String;
 	public final fun getNumber ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class io/getstream/video/android/core/utils/SdpBandwidth {
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Ljava/lang/String;
+	public final fun copy (Ljava/lang/String;Ljava/lang/String;)Lio/getstream/video/android/core/utils/SdpBandwidth;
+	public static synthetic fun copy$default (Lio/getstream/video/android/core/utils/SdpBandwidth;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)Lio/getstream/video/android/core/utils/SdpBandwidth;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getLimit ()Ljava/lang/String;
+	public final fun getType ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class io/getstream/video/android/core/utils/SdpBfcpconfid {
+	public fun <init> (Ljava/lang/String;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun copy (Ljava/lang/String;)Lio/getstream/video/android/core/utils/SdpBfcpconfid;
+	public static synthetic fun copy$default (Lio/getstream/video/android/core/utils/SdpBfcpconfid;Ljava/lang/String;ILjava/lang/Object;)Lio/getstream/video/android/core/utils/SdpBfcpconfid;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getValue ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class io/getstream/video/android/core/utils/SdpBfcpfloorctrl {
+	public fun <init> (Ljava/lang/String;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun copy (Ljava/lang/String;)Lio/getstream/video/android/core/utils/SdpBfcpfloorctrl;
+	public static synthetic fun copy$default (Lio/getstream/video/android/core/utils/SdpBfcpfloorctrl;Ljava/lang/String;ILjava/lang/Object;)Lio/getstream/video/android/core/utils/SdpBfcpfloorctrl;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getValue ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class io/getstream/video/android/core/utils/SdpBfcpfloorid {
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Ljava/lang/String;
+	public final fun copy (Ljava/lang/String;Ljava/lang/String;)Lio/getstream/video/android/core/utils/SdpBfcpfloorid;
+	public static synthetic fun copy$default (Lio/getstream/video/android/core/utils/SdpBfcpfloorid;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)Lio/getstream/video/android/core/utils/SdpBfcpfloorid;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getId ()Ljava/lang/String;
+	public final fun getMStream ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class io/getstream/video/android/core/utils/SdpBfcpuserid {
+	public fun <init> (Ljava/lang/String;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun copy (Ljava/lang/String;)Lio/getstream/video/android/core/utils/SdpBfcpuserid;
+	public static synthetic fun copy$default (Lio/getstream/video/android/core/utils/SdpBfcpuserid;Ljava/lang/String;ILjava/lang/Object;)Lio/getstream/video/android/core/utils/SdpBfcpuserid;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getValue ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class io/getstream/video/android/core/utils/SdpBundleonly {
+	public fun <init> (Ljava/lang/String;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun copy (Ljava/lang/String;)Lio/getstream/video/android/core/utils/SdpBundleonly;
+	public static synthetic fun copy$default (Lio/getstream/video/android/core/utils/SdpBundleonly;Ljava/lang/String;ILjava/lang/Object;)Lio/getstream/video/android/core/utils/SdpBundleonly;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getValue ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class io/getstream/video/android/core/utils/SdpCandidates {
+	public fun <init> (Ljava/lang/String;JLjava/lang/String;JLjava/lang/String;JLjava/lang/String;Ljava/lang/String;Ljava/lang/Long;Ljava/lang/String;Ljava/lang/Long;Ljava/lang/Long;Ljava/lang/Long;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component10 ()Ljava/lang/String;
+	public final fun component11 ()Ljava/lang/Long;
+	public final fun component12 ()Ljava/lang/Long;
+	public final fun component13 ()Ljava/lang/Long;
+	public final fun component2 ()J
+	public final fun component3 ()Ljava/lang/String;
+	public final fun component4 ()J
+	public final fun component5 ()Ljava/lang/String;
+	public final fun component6 ()J
+	public final fun component7 ()Ljava/lang/String;
+	public final fun component8 ()Ljava/lang/String;
+	public final fun component9 ()Ljava/lang/Long;
+	public final fun copy (Ljava/lang/String;JLjava/lang/String;JLjava/lang/String;JLjava/lang/String;Ljava/lang/String;Ljava/lang/Long;Ljava/lang/String;Ljava/lang/Long;Ljava/lang/Long;Ljava/lang/Long;)Lio/getstream/video/android/core/utils/SdpCandidates;
+	public static synthetic fun copy$default (Lio/getstream/video/android/core/utils/SdpCandidates;Ljava/lang/String;JLjava/lang/String;JLjava/lang/String;JLjava/lang/String;Ljava/lang/String;Ljava/lang/Long;Ljava/lang/String;Ljava/lang/Long;Ljava/lang/Long;Ljava/lang/Long;ILjava/lang/Object;)Lio/getstream/video/android/core/utils/SdpCandidates;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getComponent ()J
+	public final fun getFoundation ()Ljava/lang/String;
+	public final fun getGeneration ()Ljava/lang/Long;
+	public final fun getIp ()Ljava/lang/String;
+	public final fun getNetworkCost ()Ljava/lang/Long;
+	public final fun getNetworkId ()Ljava/lang/Long;
+	public final fun getPort ()J
+	public final fun getPriority ()J
+	public final fun getRaddr ()Ljava/lang/String;
+	public final fun getRport ()Ljava/lang/Long;
+	public final fun getTcptype ()Ljava/lang/String;
+	public final fun getTransport ()Ljava/lang/String;
+	public final fun getType ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class io/getstream/video/android/core/utils/SdpConnection {
+	public fun <init> (JLjava/lang/String;)V
+	public final fun component1 ()J
+	public final fun component2 ()Ljava/lang/String;
+	public final fun copy (JLjava/lang/String;)Lio/getstream/video/android/core/utils/SdpConnection;
+	public static synthetic fun copy$default (Lio/getstream/video/android/core/utils/SdpConnection;JLjava/lang/String;ILjava/lang/Object;)Lio/getstream/video/android/core/utils/SdpConnection;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getIp ()Ljava/lang/String;
+	public final fun getVersion ()J
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class io/getstream/video/android/core/utils/SdpConnectiontype {
+	public fun <init> (Ljava/lang/String;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun copy (Ljava/lang/String;)Lio/getstream/video/android/core/utils/SdpConnectiontype;
+	public static synthetic fun copy$default (Lio/getstream/video/android/core/utils/SdpConnectiontype;Ljava/lang/String;ILjava/lang/Object;)Lio/getstream/video/android/core/utils/SdpConnectiontype;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getValue ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class io/getstream/video/android/core/utils/SdpContent {
+	public fun <init> (Ljava/lang/String;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun copy (Ljava/lang/String;)Lio/getstream/video/android/core/utils/SdpContent;
+	public static synthetic fun copy$default (Lio/getstream/video/android/core/utils/SdpContent;Ljava/lang/String;ILjava/lang/Object;)Lio/getstream/video/android/core/utils/SdpContent;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getValue ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class io/getstream/video/android/core/utils/SdpControl {
+	public fun <init> (Ljava/lang/String;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun copy (Ljava/lang/String;)Lio/getstream/video/android/core/utils/SdpControl;
+	public static synthetic fun copy$default (Lio/getstream/video/android/core/utils/SdpControl;Ljava/lang/String;ILjava/lang/Object;)Lio/getstream/video/android/core/utils/SdpControl;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getValue ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class io/getstream/video/android/core/utils/SdpCrypto {
+	public fun <init> (JLjava/lang/String;Ljava/lang/String;Ljava/lang/String;)V
+	public final fun component1 ()J
+	public final fun component2 ()Ljava/lang/String;
+	public final fun component3 ()Ljava/lang/String;
+	public final fun component4 ()Ljava/lang/String;
+	public final fun copy (JLjava/lang/String;Ljava/lang/String;Ljava/lang/String;)Lio/getstream/video/android/core/utils/SdpCrypto;
+	public static synthetic fun copy$default (Lio/getstream/video/android/core/utils/SdpCrypto;JLjava/lang/String;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)Lio/getstream/video/android/core/utils/SdpCrypto;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getConfig ()Ljava/lang/String;
+	public final fun getId ()J
+	public final fun getSessionConfig ()Ljava/lang/String;
+	public final fun getSuite ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class io/getstream/video/android/core/utils/SdpDescription {
+	public fun <init> (Ljava/lang/String;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun copy (Ljava/lang/String;)Lio/getstream/video/android/core/utils/SdpDescription;
+	public static synthetic fun copy$default (Lio/getstream/video/android/core/utils/SdpDescription;Ljava/lang/String;ILjava/lang/Object;)Lio/getstream/video/android/core/utils/SdpDescription;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getValue ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class io/getstream/video/android/core/utils/SdpDirection {
+	public fun <init> (Ljava/lang/String;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun copy (Ljava/lang/String;)Lio/getstream/video/android/core/utils/SdpDirection;
+	public static synthetic fun copy$default (Lio/getstream/video/android/core/utils/SdpDirection;Ljava/lang/String;ILjava/lang/Object;)Lio/getstream/video/android/core/utils/SdpDirection;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getValue ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class io/getstream/video/android/core/utils/SdpEmail {
+	public fun <init> (Ljava/lang/String;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun copy (Ljava/lang/String;)Lio/getstream/video/android/core/utils/SdpEmail;
+	public static synthetic fun copy$default (Lio/getstream/video/android/core/utils/SdpEmail;Ljava/lang/String;ILjava/lang/Object;)Lio/getstream/video/android/core/utils/SdpEmail;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getValue ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class io/getstream/video/android/core/utils/SdpEndofcandidates {
+	public fun <init> (Ljava/lang/String;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun copy (Ljava/lang/String;)Lio/getstream/video/android/core/utils/SdpEndofcandidates;
+	public static synthetic fun copy$default (Lio/getstream/video/android/core/utils/SdpEndofcandidates;Ljava/lang/String;ILjava/lang/Object;)Lio/getstream/video/android/core/utils/SdpEndofcandidates;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getValue ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class io/getstream/video/android/core/utils/SdpExt {
+	public fun <init> (JLjava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V
+	public final fun component1 ()J
+	public final fun component2 ()Ljava/lang/String;
+	public final fun component3 ()Ljava/lang/String;
+	public final fun component4 ()Ljava/lang/String;
+	public final fun component5 ()Ljava/lang/String;
+	public final fun copy (JLjava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)Lio/getstream/video/android/core/utils/SdpExt;
+	public static synthetic fun copy$default (Lio/getstream/video/android/core/utils/SdpExt;JLjava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)Lio/getstream/video/android/core/utils/SdpExt;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getConfig ()Ljava/lang/String;
+	public final fun getDirection ()Ljava/lang/String;
+	public final fun getEncryptUri ()Ljava/lang/String;
+	public final fun getUri ()Ljava/lang/String;
+	public final fun getValue ()J
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class io/getstream/video/android/core/utils/SdpExtmapallowmixed {
+	public fun <init> (Ljava/lang/String;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun copy (Ljava/lang/String;)Lio/getstream/video/android/core/utils/SdpExtmapallowmixed;
+	public static synthetic fun copy$default (Lio/getstream/video/android/core/utils/SdpExtmapallowmixed;Ljava/lang/String;ILjava/lang/Object;)Lio/getstream/video/android/core/utils/SdpExtmapallowmixed;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getValue ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class io/getstream/video/android/core/utils/SdpFingerprint {
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Ljava/lang/String;
+	public final fun copy (Ljava/lang/String;Ljava/lang/String;)Lio/getstream/video/android/core/utils/SdpFingerprint;
+	public static synthetic fun copy$default (Lio/getstream/video/android/core/utils/SdpFingerprint;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)Lio/getstream/video/android/core/utils/SdpFingerprint;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getHash ()Ljava/lang/String;
+	public final fun getType ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class io/getstream/video/android/core/utils/SdpFmtp {
+	public fun <init> (JLjava/lang/String;)V
+	public final fun component1 ()J
+	public final fun component2 ()Ljava/lang/String;
+	public final fun copy (JLjava/lang/String;)Lio/getstream/video/android/core/utils/SdpFmtp;
+	public static synthetic fun copy$default (Lio/getstream/video/android/core/utils/SdpFmtp;JLjava/lang/String;ILjava/lang/Object;)Lio/getstream/video/android/core/utils/SdpFmtp;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getConfig ()Ljava/lang/String;
+	public final fun getPayload ()J
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class io/getstream/video/android/core/utils/SdpFramerate {
+	public fun <init> (J)V
+	public final fun component1 ()J
+	public final fun copy (J)Lio/getstream/video/android/core/utils/SdpFramerate;
+	public static synthetic fun copy$default (Lio/getstream/video/android/core/utils/SdpFramerate;JILjava/lang/Object;)Lio/getstream/video/android/core/utils/SdpFramerate;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getValue ()J
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class io/getstream/video/android/core/utils/SdpGrammar {
+	public static final field INSTANCE Lio/getstream/video/android/core/utils/SdpGrammar;
+	public final fun tryParseBandwidth (Ljava/lang/String;)Lio/getstream/video/android/core/utils/SdpBandwidth;
+	public final fun tryParseBfcpconfid (Ljava/lang/String;)Lio/getstream/video/android/core/utils/SdpBfcpconfid;
+	public final fun tryParseBfcpfloorctrl (Ljava/lang/String;)Lio/getstream/video/android/core/utils/SdpBfcpfloorctrl;
+	public final fun tryParseBfcpfloorid (Ljava/lang/String;)Lio/getstream/video/android/core/utils/SdpBfcpfloorid;
+	public final fun tryParseBfcpuserid (Ljava/lang/String;)Lio/getstream/video/android/core/utils/SdpBfcpuserid;
+	public final fun tryParseBundleonly (Ljava/lang/String;)Lio/getstream/video/android/core/utils/SdpBundleonly;
+	public final fun tryParseCandidates (Ljava/lang/String;)Lio/getstream/video/android/core/utils/SdpCandidates;
+	public final fun tryParseConnection (Ljava/lang/String;)Lio/getstream/video/android/core/utils/SdpConnection;
+	public final fun tryParseConnectiontype (Ljava/lang/String;)Lio/getstream/video/android/core/utils/SdpConnectiontype;
+	public final fun tryParseContent (Ljava/lang/String;)Lio/getstream/video/android/core/utils/SdpContent;
+	public final fun tryParseControl (Ljava/lang/String;)Lio/getstream/video/android/core/utils/SdpControl;
+	public final fun tryParseCrypto (Ljava/lang/String;)Lio/getstream/video/android/core/utils/SdpCrypto;
+	public final fun tryParseDescription (Ljava/lang/String;)Lio/getstream/video/android/core/utils/SdpDescription;
+	public final fun tryParseDirection (Ljava/lang/String;)Lio/getstream/video/android/core/utils/SdpDirection;
+	public final fun tryParseEmail (Ljava/lang/String;)Lio/getstream/video/android/core/utils/SdpEmail;
+	public final fun tryParseEndofcandidates (Ljava/lang/String;)Lio/getstream/video/android/core/utils/SdpEndofcandidates;
+	public final fun tryParseExt (Ljava/lang/String;)Lio/getstream/video/android/core/utils/SdpExt;
+	public final fun tryParseExtmapallowmixed (Ljava/lang/String;)Lio/getstream/video/android/core/utils/SdpExtmapallowmixed;
+	public final fun tryParseFingerprint (Ljava/lang/String;)Lio/getstream/video/android/core/utils/SdpFingerprint;
+	public final fun tryParseFmtp (Ljava/lang/String;)Lio/getstream/video/android/core/utils/SdpFmtp;
+	public final fun tryParseFramerate (Ljava/lang/String;)Lio/getstream/video/android/core/utils/SdpFramerate;
+	public final fun tryParseGroups (Ljava/lang/String;)Lio/getstream/video/android/core/utils/SdpGroups;
+	public final fun tryParseIcelite (Ljava/lang/String;)Lio/getstream/video/android/core/utils/SdpIcelite;
+	public final fun tryParseIceoptions (Ljava/lang/String;)Lio/getstream/video/android/core/utils/SdpIceoptions;
+	public final fun tryParseIcepwd (Ljava/lang/String;)Lio/getstream/video/android/core/utils/SdpIcepwd;
+	public final fun tryParseIceufrag (Ljava/lang/String;)Lio/getstream/video/android/core/utils/SdpIceufrag;
+	public final fun tryParseImageattrs (Ljava/lang/String;)Lio/getstream/video/android/core/utils/SdpImageattrs;
+	public final fun tryParseInvalid (Ljava/lang/String;)Lio/getstream/video/android/core/utils/SdpInvalid;
+	public final fun tryParseKeywords (Ljava/lang/String;)Lio/getstream/video/android/core/utils/SdpKeywords;
+	public final fun tryParseLabel (Ljava/lang/String;)Lio/getstream/video/android/core/utils/SdpLabel;
+	public final fun tryParseMaxmessagesize (Ljava/lang/String;)Lio/getstream/video/android/core/utils/SdpMaxmessagesize;
+	public final fun tryParseMaxptime (Ljava/lang/String;)Lio/getstream/video/android/core/utils/SdpMaxptime;
+	public final fun tryParseMediaclk (Ljava/lang/String;)Lio/getstream/video/android/core/utils/SdpMediaclk;
+	public final fun tryParseMid (Ljava/lang/String;)Lio/getstream/video/android/core/utils/SdpMid;
+	public final fun tryParseMline (Ljava/lang/String;)Lio/getstream/video/android/core/utils/SdpMline;
+	public final fun tryParseMsid (Ljava/lang/String;)Lio/getstream/video/android/core/utils/SdpMsid;
+	public final fun tryParseMsidsemantic (Ljava/lang/String;)Lio/getstream/video/android/core/utils/SdpMsidsemantic;
+	public final fun tryParseName (Ljava/lang/String;)Lio/getstream/video/android/core/utils/SdpName;
+	public final fun tryParseOrigin (Ljava/lang/String;)Lio/getstream/video/android/core/utils/SdpOrigin;
+	public final fun tryParsePhone (Ljava/lang/String;)Lio/getstream/video/android/core/utils/SdpPhone;
+	public final fun tryParsePtime (Ljava/lang/String;)Lio/getstream/video/android/core/utils/SdpPtime;
+	public final fun tryParseRemotecandidates (Ljava/lang/String;)Lio/getstream/video/android/core/utils/SdpRemotecandidates;
+	public final fun tryParseRepeats (Ljava/lang/String;)Lio/getstream/video/android/core/utils/SdpRepeats;
+	public final fun tryParseRids (Ljava/lang/String;)Lio/getstream/video/android/core/utils/SdpRids;
+	public final fun tryParseRtcp (Ljava/lang/String;)Lio/getstream/video/android/core/utils/SdpRtcp;
+	public final fun tryParseRtcpfb (Ljava/lang/String;)Lio/getstream/video/android/core/utils/SdpRtcpfb;
+	public final fun tryParseRtcpfbtrrint (Ljava/lang/String;)Lio/getstream/video/android/core/utils/SdpRtcpfbtrrint;
+	public final fun tryParseRtcpmux (Ljava/lang/String;)Lio/getstream/video/android/core/utils/SdpRtcpmux;
+	public final fun tryParseRtcprsize (Ljava/lang/String;)Lio/getstream/video/android/core/utils/SdpRtcprsize;
+	public final fun tryParseRtp (Ljava/lang/String;)Lio/getstream/video/android/core/utils/SdpRtp;
+	public final fun tryParseSctpmap (Ljava/lang/String;)Lio/getstream/video/android/core/utils/SdpSctpmap;
+	public final fun tryParseSctpport (Ljava/lang/String;)Lio/getstream/video/android/core/utils/SdpSctpport;
+	public final fun tryParseSetup (Ljava/lang/String;)Lio/getstream/video/android/core/utils/SdpSetup;
+	public final fun tryParseSimulcast (Ljava/lang/String;)Lio/getstream/video/android/core/utils/SdpSimulcast;
+	public final fun tryParseSimulcast03 (Ljava/lang/String;)Lio/getstream/video/android/core/utils/SdpSimulcast03;
+	public final fun tryParseSourcefilter (Ljava/lang/String;)Lio/getstream/video/android/core/utils/SdpSourcefilter;
+	public final fun tryParseSsrcgroups (Ljava/lang/String;)Lio/getstream/video/android/core/utils/SdpSsrcgroups;
+	public final fun tryParseSsrcs (Ljava/lang/String;)Lio/getstream/video/android/core/utils/SdpSsrcs;
+	public final fun tryParseTimezones (Ljava/lang/String;)Lio/getstream/video/android/core/utils/SdpTimezones;
+	public final fun tryParseTiming (Ljava/lang/String;)Lio/getstream/video/android/core/utils/SdpTiming;
+	public final fun tryParseTsrefclocks (Ljava/lang/String;)Lio/getstream/video/android/core/utils/SdpTsrefclocks;
+	public final fun tryParseUri (Ljava/lang/String;)Lio/getstream/video/android/core/utils/SdpUri;
+	public final fun tryParseVersion (Ljava/lang/String;)Lio/getstream/video/android/core/utils/SdpVersion;
+	public final fun tryParseXgoogleflag (Ljava/lang/String;)Lio/getstream/video/android/core/utils/SdpXgoogleflag;
+	public final fun writeBandwidth (Lio/getstream/video/android/core/utils/SdpBandwidth;)Ljava/lang/String;
+	public final fun writeBfcpconfid (Lio/getstream/video/android/core/utils/SdpBfcpconfid;)Ljava/lang/String;
+	public final fun writeBfcpfloorctrl (Lio/getstream/video/android/core/utils/SdpBfcpfloorctrl;)Ljava/lang/String;
+	public final fun writeBfcpfloorid (Lio/getstream/video/android/core/utils/SdpBfcpfloorid;)Ljava/lang/String;
+	public final fun writeBfcpuserid (Lio/getstream/video/android/core/utils/SdpBfcpuserid;)Ljava/lang/String;
+	public final fun writeBundleonly (Lio/getstream/video/android/core/utils/SdpBundleonly;)Ljava/lang/String;
+	public final fun writeCandidates (Lio/getstream/video/android/core/utils/SdpCandidates;)Ljava/lang/String;
+	public final fun writeConnection (Lio/getstream/video/android/core/utils/SdpConnection;)Ljava/lang/String;
+	public final fun writeConnectiontype (Lio/getstream/video/android/core/utils/SdpConnectiontype;)Ljava/lang/String;
+	public final fun writeContent (Lio/getstream/video/android/core/utils/SdpContent;)Ljava/lang/String;
+	public final fun writeControl (Lio/getstream/video/android/core/utils/SdpControl;)Ljava/lang/String;
+	public final fun writeCrypto (Lio/getstream/video/android/core/utils/SdpCrypto;)Ljava/lang/String;
+	public final fun writeDescription (Lio/getstream/video/android/core/utils/SdpDescription;)Ljava/lang/String;
+	public final fun writeDirection (Lio/getstream/video/android/core/utils/SdpDirection;)Ljava/lang/String;
+	public final fun writeEmail (Lio/getstream/video/android/core/utils/SdpEmail;)Ljava/lang/String;
+	public final fun writeEndofcandidates (Lio/getstream/video/android/core/utils/SdpEndofcandidates;)Ljava/lang/String;
+	public final fun writeExt (Lio/getstream/video/android/core/utils/SdpExt;)Ljava/lang/String;
+	public final fun writeExtmapallowmixed (Lio/getstream/video/android/core/utils/SdpExtmapallowmixed;)Ljava/lang/String;
+	public final fun writeFingerprint (Lio/getstream/video/android/core/utils/SdpFingerprint;)Ljava/lang/String;
+	public final fun writeFmtp (Lio/getstream/video/android/core/utils/SdpFmtp;)Ljava/lang/String;
+	public final fun writeFramerate (Lio/getstream/video/android/core/utils/SdpFramerate;)Ljava/lang/String;
+	public final fun writeGroups (Lio/getstream/video/android/core/utils/SdpGroups;)Ljava/lang/String;
+	public final fun writeIcelite (Lio/getstream/video/android/core/utils/SdpIcelite;)Ljava/lang/String;
+	public final fun writeIceoptions (Lio/getstream/video/android/core/utils/SdpIceoptions;)Ljava/lang/String;
+	public final fun writeIcepwd (Lio/getstream/video/android/core/utils/SdpIcepwd;)Ljava/lang/String;
+	public final fun writeIceufrag (Lio/getstream/video/android/core/utils/SdpIceufrag;)Ljava/lang/String;
+	public final fun writeImageattrs (Lio/getstream/video/android/core/utils/SdpImageattrs;)Ljava/lang/String;
+	public final fun writeInvalid (Lio/getstream/video/android/core/utils/SdpInvalid;)Ljava/lang/String;
+	public final fun writeKeywords (Lio/getstream/video/android/core/utils/SdpKeywords;)Ljava/lang/String;
+	public final fun writeLabel (Lio/getstream/video/android/core/utils/SdpLabel;)Ljava/lang/String;
+	public final fun writeMaxmessagesize (Lio/getstream/video/android/core/utils/SdpMaxmessagesize;)Ljava/lang/String;
+	public final fun writeMaxptime (Lio/getstream/video/android/core/utils/SdpMaxptime;)Ljava/lang/String;
+	public final fun writeMediaclk (Lio/getstream/video/android/core/utils/SdpMediaclk;)Ljava/lang/String;
+	public final fun writeMid (Lio/getstream/video/android/core/utils/SdpMid;)Ljava/lang/String;
+	public final fun writeMline (Lio/getstream/video/android/core/utils/SdpMline;)Ljava/lang/String;
+	public final fun writeMsid (Lio/getstream/video/android/core/utils/SdpMsid;)Ljava/lang/String;
+	public final fun writeMsidsemantic (Lio/getstream/video/android/core/utils/SdpMsidsemantic;)Ljava/lang/String;
+	public final fun writeName (Lio/getstream/video/android/core/utils/SdpName;)Ljava/lang/String;
+	public final fun writeOrigin (Lio/getstream/video/android/core/utils/SdpOrigin;)Ljava/lang/String;
+	public final fun writePhone (Lio/getstream/video/android/core/utils/SdpPhone;)Ljava/lang/String;
+	public final fun writePtime (Lio/getstream/video/android/core/utils/SdpPtime;)Ljava/lang/String;
+	public final fun writeRemotecandidates (Lio/getstream/video/android/core/utils/SdpRemotecandidates;)Ljava/lang/String;
+	public final fun writeRepeats (Lio/getstream/video/android/core/utils/SdpRepeats;)Ljava/lang/String;
+	public final fun writeRids (Lio/getstream/video/android/core/utils/SdpRids;)Ljava/lang/String;
+	public final fun writeRtcp (Lio/getstream/video/android/core/utils/SdpRtcp;)Ljava/lang/String;
+	public final fun writeRtcpfb (Lio/getstream/video/android/core/utils/SdpRtcpfb;)Ljava/lang/String;
+	public final fun writeRtcpfbtrrint (Lio/getstream/video/android/core/utils/SdpRtcpfbtrrint;)Ljava/lang/String;
+	public final fun writeRtcpmux (Lio/getstream/video/android/core/utils/SdpRtcpmux;)Ljava/lang/String;
+	public final fun writeRtcprsize (Lio/getstream/video/android/core/utils/SdpRtcprsize;)Ljava/lang/String;
+	public final fun writeRtp (Lio/getstream/video/android/core/utils/SdpRtp;)Ljava/lang/String;
+	public final fun writeSctpmap (Lio/getstream/video/android/core/utils/SdpSctpmap;)Ljava/lang/String;
+	public final fun writeSctpport (Lio/getstream/video/android/core/utils/SdpSctpport;)Ljava/lang/String;
+	public final fun writeSetup (Lio/getstream/video/android/core/utils/SdpSetup;)Ljava/lang/String;
+	public final fun writeSimulcast (Lio/getstream/video/android/core/utils/SdpSimulcast;)Ljava/lang/String;
+	public final fun writeSimulcast03 (Lio/getstream/video/android/core/utils/SdpSimulcast03;)Ljava/lang/String;
+	public final fun writeSourcefilter (Lio/getstream/video/android/core/utils/SdpSourcefilter;)Ljava/lang/String;
+	public final fun writeSsrcgroups (Lio/getstream/video/android/core/utils/SdpSsrcgroups;)Ljava/lang/String;
+	public final fun writeSsrcs (Lio/getstream/video/android/core/utils/SdpSsrcs;)Ljava/lang/String;
+	public final fun writeTimezones (Lio/getstream/video/android/core/utils/SdpTimezones;)Ljava/lang/String;
+	public final fun writeTiming (Lio/getstream/video/android/core/utils/SdpTiming;)Ljava/lang/String;
+	public final fun writeTsrefclocks (Lio/getstream/video/android/core/utils/SdpTsrefclocks;)Ljava/lang/String;
+	public final fun writeUri (Lio/getstream/video/android/core/utils/SdpUri;)Ljava/lang/String;
+	public final fun writeVersion (Lio/getstream/video/android/core/utils/SdpVersion;)Ljava/lang/String;
+	public final fun writeXgoogleflag (Lio/getstream/video/android/core/utils/SdpXgoogleflag;)Ljava/lang/String;
+}
+
+public final class io/getstream/video/android/core/utils/SdpGroups {
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Ljava/lang/String;
+	public final fun copy (Ljava/lang/String;Ljava/lang/String;)Lio/getstream/video/android/core/utils/SdpGroups;
+	public static synthetic fun copy$default (Lio/getstream/video/android/core/utils/SdpGroups;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)Lio/getstream/video/android/core/utils/SdpGroups;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getMids ()Ljava/lang/String;
+	public final fun getType ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class io/getstream/video/android/core/utils/SdpIcelite {
+	public fun <init> (Ljava/lang/String;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun copy (Ljava/lang/String;)Lio/getstream/video/android/core/utils/SdpIcelite;
+	public static synthetic fun copy$default (Lio/getstream/video/android/core/utils/SdpIcelite;Ljava/lang/String;ILjava/lang/Object;)Lio/getstream/video/android/core/utils/SdpIcelite;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getValue ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class io/getstream/video/android/core/utils/SdpIceoptions {
+	public fun <init> (Ljava/lang/String;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun copy (Ljava/lang/String;)Lio/getstream/video/android/core/utils/SdpIceoptions;
+	public static synthetic fun copy$default (Lio/getstream/video/android/core/utils/SdpIceoptions;Ljava/lang/String;ILjava/lang/Object;)Lio/getstream/video/android/core/utils/SdpIceoptions;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getValue ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class io/getstream/video/android/core/utils/SdpIcepwd {
+	public fun <init> (Ljava/lang/String;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun copy (Ljava/lang/String;)Lio/getstream/video/android/core/utils/SdpIcepwd;
+	public static synthetic fun copy$default (Lio/getstream/video/android/core/utils/SdpIcepwd;Ljava/lang/String;ILjava/lang/Object;)Lio/getstream/video/android/core/utils/SdpIcepwd;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getValue ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class io/getstream/video/android/core/utils/SdpIceufrag {
+	public fun <init> (Ljava/lang/String;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun copy (Ljava/lang/String;)Lio/getstream/video/android/core/utils/SdpIceufrag;
+	public static synthetic fun copy$default (Lio/getstream/video/android/core/utils/SdpIceufrag;Ljava/lang/String;ILjava/lang/Object;)Lio/getstream/video/android/core/utils/SdpIceufrag;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getValue ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class io/getstream/video/android/core/utils/SdpImageattrs {
+	public fun <init> (Ljava/lang/String;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun copy (Ljava/lang/String;)Lio/getstream/video/android/core/utils/SdpImageattrs;
+	public static synthetic fun copy$default (Lio/getstream/video/android/core/utils/SdpImageattrs;Ljava/lang/String;ILjava/lang/Object;)Lio/getstream/video/android/core/utils/SdpImageattrs;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getPt ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class io/getstream/video/android/core/utils/SdpInvalid {
+	public fun <init> (Ljava/lang/String;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun copy (Ljava/lang/String;)Lio/getstream/video/android/core/utils/SdpInvalid;
+	public static synthetic fun copy$default (Lio/getstream/video/android/core/utils/SdpInvalid;Ljava/lang/String;ILjava/lang/Object;)Lio/getstream/video/android/core/utils/SdpInvalid;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getValue ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class io/getstream/video/android/core/utils/SdpKeywords {
+	public fun <init> (Ljava/lang/String;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun copy (Ljava/lang/String;)Lio/getstream/video/android/core/utils/SdpKeywords;
+	public static synthetic fun copy$default (Lio/getstream/video/android/core/utils/SdpKeywords;Ljava/lang/String;ILjava/lang/Object;)Lio/getstream/video/android/core/utils/SdpKeywords;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getValue ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class io/getstream/video/android/core/utils/SdpLabel {
+	public fun <init> (Ljava/lang/String;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun copy (Ljava/lang/String;)Lio/getstream/video/android/core/utils/SdpLabel;
+	public static synthetic fun copy$default (Lio/getstream/video/android/core/utils/SdpLabel;Ljava/lang/String;ILjava/lang/Object;)Lio/getstream/video/android/core/utils/SdpLabel;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getValue ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class io/getstream/video/android/core/utils/SdpMaxmessagesize {
+	public fun <init> (J)V
+	public final fun component1 ()J
+	public final fun copy (J)Lio/getstream/video/android/core/utils/SdpMaxmessagesize;
+	public static synthetic fun copy$default (Lio/getstream/video/android/core/utils/SdpMaxmessagesize;JILjava/lang/Object;)Lio/getstream/video/android/core/utils/SdpMaxmessagesize;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getValue ()J
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class io/getstream/video/android/core/utils/SdpMaxptime {
+	public fun <init> (J)V
+	public final fun component1 ()J
+	public final fun copy (J)Lio/getstream/video/android/core/utils/SdpMaxptime;
+	public static synthetic fun copy$default (Lio/getstream/video/android/core/utils/SdpMaxptime;JILjava/lang/Object;)Lio/getstream/video/android/core/utils/SdpMaxptime;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getValue ()J
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class io/getstream/video/android/core/utils/SdpMedia {
+	public fun <init> ()V
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getBandwidth ()Ljava/util/List;
+	public final fun getBfcpConfId ()Lio/getstream/video/android/core/utils/SdpBfcpconfid;
+	public final fun getBfcpFloorCtrl ()Lio/getstream/video/android/core/utils/SdpBfcpfloorctrl;
+	public final fun getBfcpFloorId ()Lio/getstream/video/android/core/utils/SdpBfcpfloorid;
+	public final fun getBfcpUserId ()Lio/getstream/video/android/core/utils/SdpBfcpuserid;
+	public final fun getBundleOnly ()Lio/getstream/video/android/core/utils/SdpBundleonly;
+	public final fun getCandidates ()Ljava/util/List;
+	public final fun getConnection ()Lio/getstream/video/android/core/utils/SdpConnection;
+	public final fun getConnectionType ()Lio/getstream/video/android/core/utils/SdpConnectiontype;
+	public final fun getContent ()Lio/getstream/video/android/core/utils/SdpContent;
+	public final fun getControl ()Lio/getstream/video/android/core/utils/SdpControl;
+	public final fun getCrypto ()Ljava/util/List;
+	public final fun getDescription ()Lio/getstream/video/android/core/utils/SdpDescription;
+	public final fun getDirection ()Lio/getstream/video/android/core/utils/SdpDirection;
+	public final fun getEmail ()Lio/getstream/video/android/core/utils/SdpEmail;
+	public final fun getEndOfCandidates ()Lio/getstream/video/android/core/utils/SdpEndofcandidates;
+	public final fun getExt ()Ljava/util/List;
+	public final fun getExtmapAllowMixed ()Lio/getstream/video/android/core/utils/SdpExtmapallowmixed;
+	public final fun getFingerprint ()Lio/getstream/video/android/core/utils/SdpFingerprint;
+	public final fun getFmtp ()Ljava/util/List;
+	public final fun getFramerate ()Lio/getstream/video/android/core/utils/SdpFramerate;
+	public final fun getGroups ()Ljava/util/List;
+	public final fun getIceOptions ()Lio/getstream/video/android/core/utils/SdpIceoptions;
+	public final fun getIcePwd ()Lio/getstream/video/android/core/utils/SdpIcepwd;
+	public final fun getIceUfrag ()Lio/getstream/video/android/core/utils/SdpIceufrag;
+	public final fun getIcelite ()Lio/getstream/video/android/core/utils/SdpIcelite;
+	public final fun getImageattrs ()Ljava/util/List;
+	public final fun getInvalid ()Ljava/util/List;
+	public final fun getKeywords ()Lio/getstream/video/android/core/utils/SdpKeywords;
+	public final fun getLabel ()Lio/getstream/video/android/core/utils/SdpLabel;
+	public final fun getMaxMessageSize ()Lio/getstream/video/android/core/utils/SdpMaxmessagesize;
+	public final fun getMaxptime ()Lio/getstream/video/android/core/utils/SdpMaxptime;
+	public final fun getMediaClk ()Lio/getstream/video/android/core/utils/SdpMediaclk;
+	public final fun getMid ()Lio/getstream/video/android/core/utils/SdpMid;
+	public final fun getMline ()Lio/getstream/video/android/core/utils/SdpMline;
+	public final fun getMsid ()Lio/getstream/video/android/core/utils/SdpMsid;
+	public final fun getMsidSemantic ()Lio/getstream/video/android/core/utils/SdpMsidsemantic;
+	public final fun getName ()Lio/getstream/video/android/core/utils/SdpName;
+	public final fun getOrigin ()Lio/getstream/video/android/core/utils/SdpOrigin;
+	public final fun getPhone ()Lio/getstream/video/android/core/utils/SdpPhone;
+	public final fun getPtime ()Lio/getstream/video/android/core/utils/SdpPtime;
+	public final fun getRemoteCandidates ()Lio/getstream/video/android/core/utils/SdpRemotecandidates;
+	public final fun getRepeats ()Lio/getstream/video/android/core/utils/SdpRepeats;
+	public final fun getRids ()Ljava/util/List;
+	public final fun getRtcp ()Lio/getstream/video/android/core/utils/SdpRtcp;
+	public final fun getRtcpFb ()Ljava/util/List;
+	public final fun getRtcpFbTrrInt ()Ljava/util/List;
+	public final fun getRtcpMux ()Lio/getstream/video/android/core/utils/SdpRtcpmux;
+	public final fun getRtcpRsize ()Lio/getstream/video/android/core/utils/SdpRtcprsize;
+	public final fun getRtp ()Ljava/util/List;
+	public final fun getSctpPort ()Lio/getstream/video/android/core/utils/SdpSctpport;
+	public final fun getSctpmap ()Lio/getstream/video/android/core/utils/SdpSctpmap;
+	public final fun getSetup ()Lio/getstream/video/android/core/utils/SdpSetup;
+	public final fun getSimulcast ()Lio/getstream/video/android/core/utils/SdpSimulcast;
+	public final fun getSimulcast03 ()Lio/getstream/video/android/core/utils/SdpSimulcast03;
+	public final fun getSourceFilter ()Lio/getstream/video/android/core/utils/SdpSourcefilter;
+	public final fun getSsrcGroups ()Ljava/util/List;
+	public final fun getSsrcs ()Ljava/util/List;
+	public final fun getTimezones ()Lio/getstream/video/android/core/utils/SdpTimezones;
+	public final fun getTiming ()Lio/getstream/video/android/core/utils/SdpTiming;
+	public final fun getTsRefClocks ()Ljava/util/List;
+	public final fun getUri ()Lio/getstream/video/android/core/utils/SdpUri;
+	public final fun getVersion ()Lio/getstream/video/android/core/utils/SdpVersion;
+	public final fun getXGoogleFlag ()Lio/getstream/video/android/core/utils/SdpXgoogleflag;
+	public final fun setBandwidth (Ljava/util/List;)V
+	public final fun setBfcpConfId (Lio/getstream/video/android/core/utils/SdpBfcpconfid;)V
+	public final fun setBfcpFloorCtrl (Lio/getstream/video/android/core/utils/SdpBfcpfloorctrl;)V
+	public final fun setBfcpFloorId (Lio/getstream/video/android/core/utils/SdpBfcpfloorid;)V
+	public final fun setBfcpUserId (Lio/getstream/video/android/core/utils/SdpBfcpuserid;)V
+	public final fun setBundleOnly (Lio/getstream/video/android/core/utils/SdpBundleonly;)V
+	public final fun setCandidates (Ljava/util/List;)V
+	public final fun setConnection (Lio/getstream/video/android/core/utils/SdpConnection;)V
+	public final fun setConnectionType (Lio/getstream/video/android/core/utils/SdpConnectiontype;)V
+	public final fun setContent (Lio/getstream/video/android/core/utils/SdpContent;)V
+	public final fun setControl (Lio/getstream/video/android/core/utils/SdpControl;)V
+	public final fun setCrypto (Ljava/util/List;)V
+	public final fun setDescription (Lio/getstream/video/android/core/utils/SdpDescription;)V
+	public final fun setDirection (Lio/getstream/video/android/core/utils/SdpDirection;)V
+	public final fun setEmail (Lio/getstream/video/android/core/utils/SdpEmail;)V
+	public final fun setEndOfCandidates (Lio/getstream/video/android/core/utils/SdpEndofcandidates;)V
+	public final fun setExt (Ljava/util/List;)V
+	public final fun setExtmapAllowMixed (Lio/getstream/video/android/core/utils/SdpExtmapallowmixed;)V
+	public final fun setFingerprint (Lio/getstream/video/android/core/utils/SdpFingerprint;)V
+	public final fun setFmtp (Ljava/util/List;)V
+	public final fun setFramerate (Lio/getstream/video/android/core/utils/SdpFramerate;)V
+	public final fun setGroups (Ljava/util/List;)V
+	public final fun setIceOptions (Lio/getstream/video/android/core/utils/SdpIceoptions;)V
+	public final fun setIcePwd (Lio/getstream/video/android/core/utils/SdpIcepwd;)V
+	public final fun setIceUfrag (Lio/getstream/video/android/core/utils/SdpIceufrag;)V
+	public final fun setIcelite (Lio/getstream/video/android/core/utils/SdpIcelite;)V
+	public final fun setImageattrs (Ljava/util/List;)V
+	public final fun setInvalid (Ljava/util/List;)V
+	public final fun setKeywords (Lio/getstream/video/android/core/utils/SdpKeywords;)V
+	public final fun setLabel (Lio/getstream/video/android/core/utils/SdpLabel;)V
+	public final fun setMaxMessageSize (Lio/getstream/video/android/core/utils/SdpMaxmessagesize;)V
+	public final fun setMaxptime (Lio/getstream/video/android/core/utils/SdpMaxptime;)V
+	public final fun setMediaClk (Lio/getstream/video/android/core/utils/SdpMediaclk;)V
+	public final fun setMid (Lio/getstream/video/android/core/utils/SdpMid;)V
+	public final fun setMline (Lio/getstream/video/android/core/utils/SdpMline;)V
+	public final fun setMsid (Lio/getstream/video/android/core/utils/SdpMsid;)V
+	public final fun setMsidSemantic (Lio/getstream/video/android/core/utils/SdpMsidsemantic;)V
+	public final fun setName (Lio/getstream/video/android/core/utils/SdpName;)V
+	public final fun setOrigin (Lio/getstream/video/android/core/utils/SdpOrigin;)V
+	public final fun setPhone (Lio/getstream/video/android/core/utils/SdpPhone;)V
+	public final fun setPtime (Lio/getstream/video/android/core/utils/SdpPtime;)V
+	public final fun setRemoteCandidates (Lio/getstream/video/android/core/utils/SdpRemotecandidates;)V
+	public final fun setRepeats (Lio/getstream/video/android/core/utils/SdpRepeats;)V
+	public final fun setRids (Ljava/util/List;)V
+	public final fun setRtcp (Lio/getstream/video/android/core/utils/SdpRtcp;)V
+	public final fun setRtcpFb (Ljava/util/List;)V
+	public final fun setRtcpFbTrrInt (Ljava/util/List;)V
+	public final fun setRtcpMux (Lio/getstream/video/android/core/utils/SdpRtcpmux;)V
+	public final fun setRtcpRsize (Lio/getstream/video/android/core/utils/SdpRtcprsize;)V
+	public final fun setRtp (Ljava/util/List;)V
+	public final fun setSctpPort (Lio/getstream/video/android/core/utils/SdpSctpport;)V
+	public final fun setSctpmap (Lio/getstream/video/android/core/utils/SdpSctpmap;)V
+	public final fun setSetup (Lio/getstream/video/android/core/utils/SdpSetup;)V
+	public final fun setSimulcast (Lio/getstream/video/android/core/utils/SdpSimulcast;)V
+	public final fun setSimulcast03 (Lio/getstream/video/android/core/utils/SdpSimulcast03;)V
+	public final fun setSourceFilter (Lio/getstream/video/android/core/utils/SdpSourcefilter;)V
+	public final fun setSsrcGroups (Ljava/util/List;)V
+	public final fun setSsrcs (Ljava/util/List;)V
+	public final fun setTimezones (Lio/getstream/video/android/core/utils/SdpTimezones;)V
+	public final fun setTiming (Lio/getstream/video/android/core/utils/SdpTiming;)V
+	public final fun setTsRefClocks (Ljava/util/List;)V
+	public final fun setUri (Lio/getstream/video/android/core/utils/SdpUri;)V
+	public final fun setVersion (Lio/getstream/video/android/core/utils/SdpVersion;)V
+	public final fun setXGoogleFlag (Lio/getstream/video/android/core/utils/SdpXgoogleflag;)V
+}
+
+public final class io/getstream/video/android/core/utils/SdpMediaclk {
+	public fun <init> (Ljava/lang/String;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun copy (Ljava/lang/String;)Lio/getstream/video/android/core/utils/SdpMediaclk;
+	public static synthetic fun copy$default (Lio/getstream/video/android/core/utils/SdpMediaclk;Ljava/lang/String;ILjava/lang/Object;)Lio/getstream/video/android/core/utils/SdpMediaclk;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getId ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class io/getstream/video/android/core/utils/SdpMid {
+	public fun <init> (Ljava/lang/String;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun copy (Ljava/lang/String;)Lio/getstream/video/android/core/utils/SdpMid;
+	public static synthetic fun copy$default (Lio/getstream/video/android/core/utils/SdpMid;Ljava/lang/String;ILjava/lang/Object;)Lio/getstream/video/android/core/utils/SdpMid;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getValue ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class io/getstream/video/android/core/utils/SdpMline {
+	public fun <init> (Ljava/lang/String;JLjava/lang/String;Ljava/lang/String;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()J
+	public final fun component3 ()Ljava/lang/String;
+	public final fun component4 ()Ljava/lang/String;
+	public final fun copy (Ljava/lang/String;JLjava/lang/String;Ljava/lang/String;)Lio/getstream/video/android/core/utils/SdpMline;
+	public static synthetic fun copy$default (Lio/getstream/video/android/core/utils/SdpMline;Ljava/lang/String;JLjava/lang/String;Ljava/lang/String;ILjava/lang/Object;)Lio/getstream/video/android/core/utils/SdpMline;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getPayloads ()Ljava/lang/String;
+	public final fun getPort ()J
+	public final fun getProtocol ()Ljava/lang/String;
+	public final fun getType ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class io/getstream/video/android/core/utils/SdpMsid {
+	public fun <init> (Ljava/lang/String;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun copy (Ljava/lang/String;)Lio/getstream/video/android/core/utils/SdpMsid;
+	public static synthetic fun copy$default (Lio/getstream/video/android/core/utils/SdpMsid;Ljava/lang/String;ILjava/lang/Object;)Lio/getstream/video/android/core/utils/SdpMsid;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getValue ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class io/getstream/video/android/core/utils/SdpMsidsemantic {
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Ljava/lang/String;
+	public final fun copy (Ljava/lang/String;Ljava/lang/String;)Lio/getstream/video/android/core/utils/SdpMsidsemantic;
+	public static synthetic fun copy$default (Lio/getstream/video/android/core/utils/SdpMsidsemantic;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)Lio/getstream/video/android/core/utils/SdpMsidsemantic;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getSemantic ()Ljava/lang/String;
+	public final fun getToken ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class io/getstream/video/android/core/utils/SdpName {
+	public fun <init> (Ljava/lang/String;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun copy (Ljava/lang/String;)Lio/getstream/video/android/core/utils/SdpName;
+	public static synthetic fun copy$default (Lio/getstream/video/android/core/utils/SdpName;Ljava/lang/String;ILjava/lang/Object;)Lio/getstream/video/android/core/utils/SdpName;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getValue ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class io/getstream/video/android/core/utils/SdpOrigin {
+	public fun <init> (Ljava/lang/String;JJLjava/lang/String;JLjava/lang/String;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()J
+	public final fun component3 ()J
+	public final fun component4 ()Ljava/lang/String;
+	public final fun component5 ()J
+	public final fun component6 ()Ljava/lang/String;
+	public final fun copy (Ljava/lang/String;JJLjava/lang/String;JLjava/lang/String;)Lio/getstream/video/android/core/utils/SdpOrigin;
+	public static synthetic fun copy$default (Lio/getstream/video/android/core/utils/SdpOrigin;Ljava/lang/String;JJLjava/lang/String;JLjava/lang/String;ILjava/lang/Object;)Lio/getstream/video/android/core/utils/SdpOrigin;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getAddress ()Ljava/lang/String;
+	public final fun getIpVer ()J
+	public final fun getNetType ()Ljava/lang/String;
+	public final fun getSessionId ()J
+	public final fun getSessionVersion ()J
+	public final fun getUsername ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class io/getstream/video/android/core/utils/SdpPhone {
+	public fun <init> (Ljava/lang/String;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun copy (Ljava/lang/String;)Lio/getstream/video/android/core/utils/SdpPhone;
+	public static synthetic fun copy$default (Lio/getstream/video/android/core/utils/SdpPhone;Ljava/lang/String;ILjava/lang/Object;)Lio/getstream/video/android/core/utils/SdpPhone;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getValue ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class io/getstream/video/android/core/utils/SdpPtime {
+	public fun <init> (J)V
+	public final fun component1 ()J
+	public final fun copy (J)Lio/getstream/video/android/core/utils/SdpPtime;
+	public static synthetic fun copy$default (Lio/getstream/video/android/core/utils/SdpPtime;JILjava/lang/Object;)Lio/getstream/video/android/core/utils/SdpPtime;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getValue ()J
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class io/getstream/video/android/core/utils/SdpRemotecandidates {
+	public fun <init> (Ljava/lang/String;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun copy (Ljava/lang/String;)Lio/getstream/video/android/core/utils/SdpRemotecandidates;
+	public static synthetic fun copy$default (Lio/getstream/video/android/core/utils/SdpRemotecandidates;Ljava/lang/String;ILjava/lang/Object;)Lio/getstream/video/android/core/utils/SdpRemotecandidates;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getValue ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class io/getstream/video/android/core/utils/SdpRepeats {
+	public fun <init> (Ljava/lang/String;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun copy (Ljava/lang/String;)Lio/getstream/video/android/core/utils/SdpRepeats;
+	public static synthetic fun copy$default (Lio/getstream/video/android/core/utils/SdpRepeats;Ljava/lang/String;ILjava/lang/Object;)Lio/getstream/video/android/core/utils/SdpRepeats;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getValue ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class io/getstream/video/android/core/utils/SdpRids {
+	public fun <init> (Ljava/lang/String;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun copy (Ljava/lang/String;)Lio/getstream/video/android/core/utils/SdpRids;
+	public static synthetic fun copy$default (Lio/getstream/video/android/core/utils/SdpRids;Ljava/lang/String;ILjava/lang/Object;)Lio/getstream/video/android/core/utils/SdpRids;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getId ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class io/getstream/video/android/core/utils/SdpRtcp {
+	public fun <init> (JLjava/lang/String;Ljava/lang/Long;Ljava/lang/String;)V
+	public final fun component1 ()J
+	public final fun component2 ()Ljava/lang/String;
+	public final fun component3 ()Ljava/lang/Long;
+	public final fun component4 ()Ljava/lang/String;
+	public final fun copy (JLjava/lang/String;Ljava/lang/Long;Ljava/lang/String;)Lio/getstream/video/android/core/utils/SdpRtcp;
+	public static synthetic fun copy$default (Lio/getstream/video/android/core/utils/SdpRtcp;JLjava/lang/String;Ljava/lang/Long;Ljava/lang/String;ILjava/lang/Object;)Lio/getstream/video/android/core/utils/SdpRtcp;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getAddress ()Ljava/lang/String;
+	public final fun getIpVer ()Ljava/lang/Long;
+	public final fun getNetType ()Ljava/lang/String;
+	public final fun getPort ()J
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class io/getstream/video/android/core/utils/SdpRtcpfb {
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Ljava/lang/String;
+	public final fun component3 ()Ljava/lang/String;
+	public final fun copy (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)Lio/getstream/video/android/core/utils/SdpRtcpfb;
+	public static synthetic fun copy$default (Lio/getstream/video/android/core/utils/SdpRtcpfb;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)Lio/getstream/video/android/core/utils/SdpRtcpfb;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getPayload ()Ljava/lang/String;
+	public final fun getSubtype ()Ljava/lang/String;
+	public final fun getType ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class io/getstream/video/android/core/utils/SdpRtcpfbtrrint {
+	public fun <init> (Ljava/lang/String;J)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()J
+	public final fun copy (Ljava/lang/String;J)Lio/getstream/video/android/core/utils/SdpRtcpfbtrrint;
+	public static synthetic fun copy$default (Lio/getstream/video/android/core/utils/SdpRtcpfbtrrint;Ljava/lang/String;JILjava/lang/Object;)Lio/getstream/video/android/core/utils/SdpRtcpfbtrrint;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getPayload ()Ljava/lang/String;
+	public final fun getValue ()J
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class io/getstream/video/android/core/utils/SdpRtcpmux {
+	public fun <init> (Ljava/lang/String;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun copy (Ljava/lang/String;)Lio/getstream/video/android/core/utils/SdpRtcpmux;
+	public static synthetic fun copy$default (Lio/getstream/video/android/core/utils/SdpRtcpmux;Ljava/lang/String;ILjava/lang/Object;)Lio/getstream/video/android/core/utils/SdpRtcpmux;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getValue ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class io/getstream/video/android/core/utils/SdpRtcprsize {
+	public fun <init> (Ljava/lang/String;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun copy (Ljava/lang/String;)Lio/getstream/video/android/core/utils/SdpRtcprsize;
+	public static synthetic fun copy$default (Lio/getstream/video/android/core/utils/SdpRtcprsize;Ljava/lang/String;ILjava/lang/Object;)Lio/getstream/video/android/core/utils/SdpRtcprsize;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getValue ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class io/getstream/video/android/core/utils/SdpRtp {
+	public fun <init> (JLjava/lang/String;Ljava/lang/Long;Ljava/lang/String;)V
+	public final fun component1 ()J
+	public final fun component2 ()Ljava/lang/String;
+	public final fun component3 ()Ljava/lang/Long;
+	public final fun component4 ()Ljava/lang/String;
+	public final fun copy (JLjava/lang/String;Ljava/lang/Long;Ljava/lang/String;)Lio/getstream/video/android/core/utils/SdpRtp;
+	public static synthetic fun copy$default (Lio/getstream/video/android/core/utils/SdpRtp;JLjava/lang/String;Ljava/lang/Long;Ljava/lang/String;ILjava/lang/Object;)Lio/getstream/video/android/core/utils/SdpRtp;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getCodec ()Ljava/lang/String;
+	public final fun getEncoding ()Ljava/lang/String;
+	public final fun getPayload ()J
+	public final fun getRate ()Ljava/lang/Long;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class io/getstream/video/android/core/utils/SdpSctpmap {
+	public fun <init> (Ljava/lang/String;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun copy (Ljava/lang/String;)Lio/getstream/video/android/core/utils/SdpSctpmap;
+	public static synthetic fun copy$default (Lio/getstream/video/android/core/utils/SdpSctpmap;Ljava/lang/String;ILjava/lang/Object;)Lio/getstream/video/android/core/utils/SdpSctpmap;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getSctpmapNumber ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class io/getstream/video/android/core/utils/SdpSctpport {
+	public fun <init> (J)V
+	public final fun component1 ()J
+	public final fun copy (J)Lio/getstream/video/android/core/utils/SdpSctpport;
+	public static synthetic fun copy$default (Lio/getstream/video/android/core/utils/SdpSctpport;JILjava/lang/Object;)Lio/getstream/video/android/core/utils/SdpSctpport;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getValue ()J
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class io/getstream/video/android/core/utils/SdpSession {
+	public fun <init> ()V
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getBandwidth ()Ljava/util/List;
+	public final fun getBfcpConfId ()Lio/getstream/video/android/core/utils/SdpBfcpconfid;
+	public final fun getBfcpFloorCtrl ()Lio/getstream/video/android/core/utils/SdpBfcpfloorctrl;
+	public final fun getBfcpFloorId ()Lio/getstream/video/android/core/utils/SdpBfcpfloorid;
+	public final fun getBfcpUserId ()Lio/getstream/video/android/core/utils/SdpBfcpuserid;
+	public final fun getBundleOnly ()Lio/getstream/video/android/core/utils/SdpBundleonly;
+	public final fun getCandidates ()Ljava/util/List;
+	public final fun getConnection ()Lio/getstream/video/android/core/utils/SdpConnection;
+	public final fun getConnectionType ()Lio/getstream/video/android/core/utils/SdpConnectiontype;
+	public final fun getContent ()Lio/getstream/video/android/core/utils/SdpContent;
+	public final fun getControl ()Lio/getstream/video/android/core/utils/SdpControl;
+	public final fun getCrypto ()Ljava/util/List;
+	public final fun getDescription ()Lio/getstream/video/android/core/utils/SdpDescription;
+	public final fun getDirection ()Lio/getstream/video/android/core/utils/SdpDirection;
+	public final fun getEmail ()Lio/getstream/video/android/core/utils/SdpEmail;
+	public final fun getEndOfCandidates ()Lio/getstream/video/android/core/utils/SdpEndofcandidates;
+	public final fun getExt ()Ljava/util/List;
+	public final fun getExtmapAllowMixed ()Lio/getstream/video/android/core/utils/SdpExtmapallowmixed;
+	public final fun getFingerprint ()Lio/getstream/video/android/core/utils/SdpFingerprint;
+	public final fun getFmtp ()Ljava/util/List;
+	public final fun getFramerate ()Lio/getstream/video/android/core/utils/SdpFramerate;
+	public final fun getGroups ()Ljava/util/List;
+	public final fun getIceOptions ()Lio/getstream/video/android/core/utils/SdpIceoptions;
+	public final fun getIcePwd ()Lio/getstream/video/android/core/utils/SdpIcepwd;
+	public final fun getIceUfrag ()Lio/getstream/video/android/core/utils/SdpIceufrag;
+	public final fun getIcelite ()Lio/getstream/video/android/core/utils/SdpIcelite;
+	public final fun getImageattrs ()Ljava/util/List;
+	public final fun getInvalid ()Ljava/util/List;
+	public final fun getKeywords ()Lio/getstream/video/android/core/utils/SdpKeywords;
+	public final fun getLabel ()Lio/getstream/video/android/core/utils/SdpLabel;
+	public final fun getMaxMessageSize ()Lio/getstream/video/android/core/utils/SdpMaxmessagesize;
+	public final fun getMaxptime ()Lio/getstream/video/android/core/utils/SdpMaxptime;
+	public final fun getMedia ()Ljava/util/List;
+	public final fun getMediaClk ()Lio/getstream/video/android/core/utils/SdpMediaclk;
+	public final fun getMid ()Lio/getstream/video/android/core/utils/SdpMid;
+	public final fun getMline ()Lio/getstream/video/android/core/utils/SdpMline;
+	public final fun getMsid ()Lio/getstream/video/android/core/utils/SdpMsid;
+	public final fun getMsidSemantic ()Lio/getstream/video/android/core/utils/SdpMsidsemantic;
+	public final fun getName ()Lio/getstream/video/android/core/utils/SdpName;
+	public final fun getOrigin ()Lio/getstream/video/android/core/utils/SdpOrigin;
+	public final fun getPhone ()Lio/getstream/video/android/core/utils/SdpPhone;
+	public final fun getPtime ()Lio/getstream/video/android/core/utils/SdpPtime;
+	public final fun getRemoteCandidates ()Lio/getstream/video/android/core/utils/SdpRemotecandidates;
+	public final fun getRepeats ()Lio/getstream/video/android/core/utils/SdpRepeats;
+	public final fun getRids ()Ljava/util/List;
+	public final fun getRtcp ()Lio/getstream/video/android/core/utils/SdpRtcp;
+	public final fun getRtcpFb ()Ljava/util/List;
+	public final fun getRtcpFbTrrInt ()Ljava/util/List;
+	public final fun getRtcpMux ()Lio/getstream/video/android/core/utils/SdpRtcpmux;
+	public final fun getRtcpRsize ()Lio/getstream/video/android/core/utils/SdpRtcprsize;
+	public final fun getRtp ()Ljava/util/List;
+	public final fun getSctpPort ()Lio/getstream/video/android/core/utils/SdpSctpport;
+	public final fun getSctpmap ()Lio/getstream/video/android/core/utils/SdpSctpmap;
+	public final fun getSetup ()Lio/getstream/video/android/core/utils/SdpSetup;
+	public final fun getSimulcast ()Lio/getstream/video/android/core/utils/SdpSimulcast;
+	public final fun getSimulcast03 ()Lio/getstream/video/android/core/utils/SdpSimulcast03;
+	public final fun getSourceFilter ()Lio/getstream/video/android/core/utils/SdpSourcefilter;
+	public final fun getSsrcGroups ()Ljava/util/List;
+	public final fun getSsrcs ()Ljava/util/List;
+	public final fun getTimezones ()Lio/getstream/video/android/core/utils/SdpTimezones;
+	public final fun getTiming ()Lio/getstream/video/android/core/utils/SdpTiming;
+	public final fun getTsRefClocks ()Ljava/util/List;
+	public final fun getUri ()Lio/getstream/video/android/core/utils/SdpUri;
+	public final fun getVersion ()Lio/getstream/video/android/core/utils/SdpVersion;
+	public final fun getXGoogleFlag ()Lio/getstream/video/android/core/utils/SdpXgoogleflag;
+	public final fun parse (Ljava/lang/String;)V
+	public final fun setBandwidth (Ljava/util/List;)V
+	public final fun setBfcpConfId (Lio/getstream/video/android/core/utils/SdpBfcpconfid;)V
+	public final fun setBfcpFloorCtrl (Lio/getstream/video/android/core/utils/SdpBfcpfloorctrl;)V
+	public final fun setBfcpFloorId (Lio/getstream/video/android/core/utils/SdpBfcpfloorid;)V
+	public final fun setBfcpUserId (Lio/getstream/video/android/core/utils/SdpBfcpuserid;)V
+	public final fun setBundleOnly (Lio/getstream/video/android/core/utils/SdpBundleonly;)V
+	public final fun setCandidates (Ljava/util/List;)V
+	public final fun setConnection (Lio/getstream/video/android/core/utils/SdpConnection;)V
+	public final fun setConnectionType (Lio/getstream/video/android/core/utils/SdpConnectiontype;)V
+	public final fun setContent (Lio/getstream/video/android/core/utils/SdpContent;)V
+	public final fun setControl (Lio/getstream/video/android/core/utils/SdpControl;)V
+	public final fun setCrypto (Ljava/util/List;)V
+	public final fun setDescription (Lio/getstream/video/android/core/utils/SdpDescription;)V
+	public final fun setDirection (Lio/getstream/video/android/core/utils/SdpDirection;)V
+	public final fun setEmail (Lio/getstream/video/android/core/utils/SdpEmail;)V
+	public final fun setEndOfCandidates (Lio/getstream/video/android/core/utils/SdpEndofcandidates;)V
+	public final fun setExt (Ljava/util/List;)V
+	public final fun setExtmapAllowMixed (Lio/getstream/video/android/core/utils/SdpExtmapallowmixed;)V
+	public final fun setFingerprint (Lio/getstream/video/android/core/utils/SdpFingerprint;)V
+	public final fun setFmtp (Ljava/util/List;)V
+	public final fun setFramerate (Lio/getstream/video/android/core/utils/SdpFramerate;)V
+	public final fun setGroups (Ljava/util/List;)V
+	public final fun setIceOptions (Lio/getstream/video/android/core/utils/SdpIceoptions;)V
+	public final fun setIcePwd (Lio/getstream/video/android/core/utils/SdpIcepwd;)V
+	public final fun setIceUfrag (Lio/getstream/video/android/core/utils/SdpIceufrag;)V
+	public final fun setIcelite (Lio/getstream/video/android/core/utils/SdpIcelite;)V
+	public final fun setImageattrs (Ljava/util/List;)V
+	public final fun setInvalid (Ljava/util/List;)V
+	public final fun setKeywords (Lio/getstream/video/android/core/utils/SdpKeywords;)V
+	public final fun setLabel (Lio/getstream/video/android/core/utils/SdpLabel;)V
+	public final fun setMaxMessageSize (Lio/getstream/video/android/core/utils/SdpMaxmessagesize;)V
+	public final fun setMaxptime (Lio/getstream/video/android/core/utils/SdpMaxptime;)V
+	public final fun setMediaClk (Lio/getstream/video/android/core/utils/SdpMediaclk;)V
+	public final fun setMid (Lio/getstream/video/android/core/utils/SdpMid;)V
+	public final fun setMline (Lio/getstream/video/android/core/utils/SdpMline;)V
+	public final fun setMsid (Lio/getstream/video/android/core/utils/SdpMsid;)V
+	public final fun setMsidSemantic (Lio/getstream/video/android/core/utils/SdpMsidsemantic;)V
+	public final fun setName (Lio/getstream/video/android/core/utils/SdpName;)V
+	public final fun setOrigin (Lio/getstream/video/android/core/utils/SdpOrigin;)V
+	public final fun setPhone (Lio/getstream/video/android/core/utils/SdpPhone;)V
+	public final fun setPtime (Lio/getstream/video/android/core/utils/SdpPtime;)V
+	public final fun setRemoteCandidates (Lio/getstream/video/android/core/utils/SdpRemotecandidates;)V
+	public final fun setRepeats (Lio/getstream/video/android/core/utils/SdpRepeats;)V
+	public final fun setRids (Ljava/util/List;)V
+	public final fun setRtcp (Lio/getstream/video/android/core/utils/SdpRtcp;)V
+	public final fun setRtcpFb (Ljava/util/List;)V
+	public final fun setRtcpFbTrrInt (Ljava/util/List;)V
+	public final fun setRtcpMux (Lio/getstream/video/android/core/utils/SdpRtcpmux;)V
+	public final fun setRtcpRsize (Lio/getstream/video/android/core/utils/SdpRtcprsize;)V
+	public final fun setRtp (Ljava/util/List;)V
+	public final fun setSctpPort (Lio/getstream/video/android/core/utils/SdpSctpport;)V
+	public final fun setSctpmap (Lio/getstream/video/android/core/utils/SdpSctpmap;)V
+	public final fun setSetup (Lio/getstream/video/android/core/utils/SdpSetup;)V
+	public final fun setSimulcast (Lio/getstream/video/android/core/utils/SdpSimulcast;)V
+	public final fun setSimulcast03 (Lio/getstream/video/android/core/utils/SdpSimulcast03;)V
+	public final fun setSourceFilter (Lio/getstream/video/android/core/utils/SdpSourcefilter;)V
+	public final fun setSsrcGroups (Ljava/util/List;)V
+	public final fun setSsrcs (Ljava/util/List;)V
+	public final fun setTimezones (Lio/getstream/video/android/core/utils/SdpTimezones;)V
+	public final fun setTiming (Lio/getstream/video/android/core/utils/SdpTiming;)V
+	public final fun setTsRefClocks (Ljava/util/List;)V
+	public final fun setUri (Lio/getstream/video/android/core/utils/SdpUri;)V
+	public final fun setVersion (Lio/getstream/video/android/core/utils/SdpVersion;)V
+	public final fun setXGoogleFlag (Lio/getstream/video/android/core/utils/SdpXgoogleflag;)V
+	public final fun write ()Ljava/lang/String;
+}
+
+public final class io/getstream/video/android/core/utils/SdpSetup {
+	public fun <init> (Ljava/lang/String;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun copy (Ljava/lang/String;)Lio/getstream/video/android/core/utils/SdpSetup;
+	public static synthetic fun copy$default (Lio/getstream/video/android/core/utils/SdpSetup;Ljava/lang/String;ILjava/lang/Object;)Lio/getstream/video/android/core/utils/SdpSetup;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getValue ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class io/getstream/video/android/core/utils/SdpSimulcast {
+	public fun <init> (Ljava/lang/String;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun copy (Ljava/lang/String;)Lio/getstream/video/android/core/utils/SdpSimulcast;
+	public static synthetic fun copy$default (Lio/getstream/video/android/core/utils/SdpSimulcast;Ljava/lang/String;ILjava/lang/Object;)Lio/getstream/video/android/core/utils/SdpSimulcast;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getDir1 ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class io/getstream/video/android/core/utils/SdpSimulcast03 {
+	public fun <init> (Ljava/lang/String;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun copy (Ljava/lang/String;)Lio/getstream/video/android/core/utils/SdpSimulcast03;
+	public static synthetic fun copy$default (Lio/getstream/video/android/core/utils/SdpSimulcast03;Ljava/lang/String;ILjava/lang/Object;)Lio/getstream/video/android/core/utils/SdpSimulcast03;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getValue ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class io/getstream/video/android/core/utils/SdpSourcefilter {
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Ljava/lang/String;
+	public final fun component3 ()Ljava/lang/String;
+	public final fun component4 ()Ljava/lang/String;
+	public final fun component5 ()Ljava/lang/String;
+	public final fun copy (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)Lio/getstream/video/android/core/utils/SdpSourcefilter;
+	public static synthetic fun copy$default (Lio/getstream/video/android/core/utils/SdpSourcefilter;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)Lio/getstream/video/android/core/utils/SdpSourcefilter;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getAddressTypes ()Ljava/lang/String;
+	public final fun getDestAddress ()Ljava/lang/String;
+	public final fun getFilterMode ()Ljava/lang/String;
+	public final fun getNetType ()Ljava/lang/String;
+	public final fun getSrcList ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class io/getstream/video/android/core/utils/SdpSsrcgroups {
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Ljava/lang/String;
+	public final fun copy (Ljava/lang/String;Ljava/lang/String;)Lio/getstream/video/android/core/utils/SdpSsrcgroups;
+	public static synthetic fun copy$default (Lio/getstream/video/android/core/utils/SdpSsrcgroups;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)Lio/getstream/video/android/core/utils/SdpSsrcgroups;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getSemantics ()Ljava/lang/String;
+	public final fun getSsrcs ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class io/getstream/video/android/core/utils/SdpSsrcs {
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Ljava/lang/String;
+	public final fun component3 ()Ljava/lang/String;
+	public final fun copy (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)Lio/getstream/video/android/core/utils/SdpSsrcs;
+	public static synthetic fun copy$default (Lio/getstream/video/android/core/utils/SdpSsrcs;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)Lio/getstream/video/android/core/utils/SdpSsrcs;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getAttribute ()Ljava/lang/String;
+	public final fun getId ()Ljava/lang/String;
+	public final fun getValue ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class io/getstream/video/android/core/utils/SdpTimezones {
+	public fun <init> (Ljava/lang/String;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun copy (Ljava/lang/String;)Lio/getstream/video/android/core/utils/SdpTimezones;
+	public static synthetic fun copy$default (Lio/getstream/video/android/core/utils/SdpTimezones;Ljava/lang/String;ILjava/lang/Object;)Lio/getstream/video/android/core/utils/SdpTimezones;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getValue ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class io/getstream/video/android/core/utils/SdpTiming {
+	public fun <init> (JJ)V
+	public final fun component1 ()J
+	public final fun component2 ()J
+	public final fun copy (JJ)Lio/getstream/video/android/core/utils/SdpTiming;
+	public static synthetic fun copy$default (Lio/getstream/video/android/core/utils/SdpTiming;JJILjava/lang/Object;)Lio/getstream/video/android/core/utils/SdpTiming;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getStart ()J
+	public final fun getStop ()J
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class io/getstream/video/android/core/utils/SdpTsrefclocks {
+	public fun <init> (Ljava/lang/String;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun copy (Ljava/lang/String;)Lio/getstream/video/android/core/utils/SdpTsrefclocks;
+	public static synthetic fun copy$default (Lio/getstream/video/android/core/utils/SdpTsrefclocks;Ljava/lang/String;ILjava/lang/Object;)Lio/getstream/video/android/core/utils/SdpTsrefclocks;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getClksrc ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class io/getstream/video/android/core/utils/SdpUri {
+	public fun <init> (Ljava/lang/String;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun copy (Ljava/lang/String;)Lio/getstream/video/android/core/utils/SdpUri;
+	public static synthetic fun copy$default (Lio/getstream/video/android/core/utils/SdpUri;Ljava/lang/String;ILjava/lang/Object;)Lio/getstream/video/android/core/utils/SdpUri;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getValue ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class io/getstream/video/android/core/utils/SdpVersion {
+	public fun <init> (J)V
+	public final fun component1 ()J
+	public final fun copy (J)Lio/getstream/video/android/core/utils/SdpVersion;
+	public static synthetic fun copy$default (Lio/getstream/video/android/core/utils/SdpVersion;JILjava/lang/Object;)Lio/getstream/video/android/core/utils/SdpVersion;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getValue ()J
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class io/getstream/video/android/core/utils/SdpVersionKt {
+	public static final fun component11 (Lkotlin/text/MatchResult$Destructured;)Ljava/lang/String;
+	public static final fun component12 (Lkotlin/text/MatchResult$Destructured;)Ljava/lang/String;
+	public static final fun component13 (Lkotlin/text/MatchResult$Destructured;)Ljava/lang/String;
+	public static final fun toOptionalLong (Ljava/lang/String;)Ljava/lang/Long;
+	public static final fun toOptionalString (Ljava/lang/String;)Ljava/lang/String;
+}
+
+public final class io/getstream/video/android/core/utils/SdpXgoogleflag {
+	public fun <init> (Ljava/lang/String;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun copy (Ljava/lang/String;)Lio/getstream/video/android/core/utils/SdpXgoogleflag;
+	public static synthetic fun copy$default (Lio/getstream/video/android/core/utils/SdpXgoogleflag;Ljava/lang/String;ILjava/lang/Object;)Lio/getstream/video/android/core/utils/SdpXgoogleflag;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getValue ()Ljava/lang/String;
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
 }

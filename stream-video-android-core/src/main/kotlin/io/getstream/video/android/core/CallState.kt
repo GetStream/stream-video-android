@@ -151,7 +151,7 @@ public sealed interface RealtimeConnection {
      */
     public data object Reconnecting :
         RealtimeConnection // reconnecting to recover from temporary issues
-
+    public data object Migrating : RealtimeConnection
     public data class Failed(val error: Any) : RealtimeConnection // permanent failure
     public data object Disconnected : RealtimeConnection // normal disconnect by the app
 }
@@ -193,6 +193,11 @@ public class CallState(
         _participants.mapState { it.values.toList() }
 
     private val _startedAt: MutableStateFlow<OffsetDateTime?> = MutableStateFlow(null)
+
+    /**
+     * Will return always null with current SFU implementation - it may be fixed later. For now
+     * do not use it.
+     */
     public val startedAt: StateFlow<OffsetDateTime?> = _startedAt
 
     private val _participantCounts: MutableStateFlow<ParticipantCount?> = MutableStateFlow(null)
@@ -896,8 +901,14 @@ public class CallState(
         // update the participant count
         _participantCounts.value = event.participantCount
 
-        val instant = Instant.ofEpochSecond(event.callState.started_at?.epochSecond!!, 0)
-        _startedAt.value = OffsetDateTime.ofInstant(instant, ZoneOffset.UTC)
+        val startedAt = event.callState.started_at
+        if (startedAt != null) {
+            val instant = Instant.ofEpochSecond(startedAt.epochSecond, 0)
+            _startedAt.value = OffsetDateTime.ofInstant(instant, ZoneOffset.UTC)
+        } else {
+            _startedAt.value = null
+        }
+
         // creates the participants
         val participantStates = event.callState.participants.map {
             getOrCreateParticipant(it)
