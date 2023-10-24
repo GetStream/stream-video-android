@@ -62,12 +62,8 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
-import androidx.core.content.ContextCompat.getString
 import androidx.core.content.ContextCompat.startActivity
 import androidx.hilt.navigation.compose.hiltViewModel
-import com.google.android.gms.auth.api.signin.GoogleSignIn
-import com.google.android.gms.auth.api.signin.GoogleSignInOptions
-import com.google.android.gms.common.api.Scope
 import io.getstream.video.android.BuildConfig
 import io.getstream.video.android.R
 import io.getstream.video.android.compose.theme.VideoTheme
@@ -75,6 +71,7 @@ import io.getstream.video.android.ui.theme.Colors
 import io.getstream.video.android.ui.theme.LinkText
 import io.getstream.video.android.ui.theme.LinkTextData
 import io.getstream.video.android.ui.theme.StreamButton
+import io.getstream.video.android.util.GoogleSignInHelper
 
 
 @Composable
@@ -288,16 +285,7 @@ private fun HandleLoginUiStates(
     LaunchedEffect(key1 = loginUiState) {
         when (loginUiState) {
             is LoginUiState.GoogleSignIn -> {
-                val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-                    .requestEmail()
-                    .requestIdToken(getString(context, R.string.default_web_client_id))
-                    .requestServerAuthCode(getString(context, R.string.default_web_client_id))
-                    .requestScopes(Scope("https://www.googleapis.com/auth/directory.readonly"))
-                    .build()
-                val gsc = GoogleSignIn.getClient(context, gso)
-
-                val signInIntent: Intent = gsc.signInIntent
-                signInLauncher.launch(signInIntent)
+                signInLauncher.launch(GoogleSignInHelper.getGoogleSignInClient(context).signInIntent)
             }
 
             is LoginUiState.SignInComplete -> {
