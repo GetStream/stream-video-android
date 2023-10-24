@@ -57,7 +57,7 @@ class LoginViewModel @Inject constructor(
             when (event) {
                 is LoginEvent.Loading -> flowOf(LoginUiState.Loading)
                 is LoginEvent.GoogleSignIn -> flowOf(LoginUiState.GoogleSignIn)
-                is LoginEvent.SignInInSuccess -> signInInSuccess(event.userId)
+                is LoginEvent.SignInSuccess -> signInSuccess(event.userId)
                 else -> flowOf(LoginUiState.Nothing)
             }
         }.shareIn(viewModelScope, SharingStarted.Lazily, 0)
@@ -66,7 +66,7 @@ class LoginViewModel @Inject constructor(
         viewModelScope.launch { this@LoginViewModel.event.emit(event) }
     }
 
-    private fun signInInSuccess(email: String) = flow {
+    private fun signInSuccess(email: String) = flow {
         // skip login if we are already logged in (use has navigated back)
         if (StreamVideo.isInstalled) {
             emit(LoginUiState.AlreadyLoggedIn)
@@ -102,17 +102,17 @@ class LoginViewModel @Inject constructor(
     }.flowOn(Dispatchers.IO)
 
     init {
-        sigInInIfValidUserExist()
+        signInIfValidUserExist()
     }
 
-    fun sigInInIfValidUserExist() {
+    fun signInIfValidUserExist() {
         viewModelScope.launch {
             val user = dataStore.user.firstOrNull()
             if (user != null) {
                 handleUiEvent(LoginEvent.Loading)
                 if (!BuildConfig.BENCHMARK.toBoolean()) {
                     delay(10)
-                    handleUiEvent(LoginEvent.SignInInSuccess(userId = user.id))
+                    handleUiEvent(LoginEvent.SignInSuccess(userId = user.id))
                 }
             } else {
                 // Production apps have an automatic guest login. Logging the user out
@@ -120,7 +120,7 @@ class LoginViewModel @Inject constructor(
                 if (BuildConfig.FLAVOR == "production") {
                     handleUiEvent(LoginEvent.Loading)
                     handleUiEvent(
-                        LoginEvent.SignInInSuccess(
+                        LoginEvent.SignInSuccess(
                             UserIdGenerator.generateRandomString(upperCaseOnly = true),
                         ),
                     )
@@ -151,5 +151,5 @@ sealed interface LoginEvent {
 
     data class GoogleSignIn(val id: String = UUID.randomUUID().toString()) : LoginEvent
 
-    data class SignInInSuccess(val userId: String) : LoginEvent
+    data class SignInSuccess(val userId: String) : LoginEvent
 }
