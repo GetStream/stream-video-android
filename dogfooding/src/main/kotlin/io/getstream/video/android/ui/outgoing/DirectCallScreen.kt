@@ -16,6 +16,7 @@
 
 package io.getstream.video.android.ui.outgoing
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -46,6 +47,7 @@ import androidx.compose.ui.graphics.painter.ColorPainter
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -55,8 +57,11 @@ import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import coil.size.Size
 import io.getstream.video.android.compose.theme.VideoTheme
+import io.getstream.video.android.compose.ui.components.avatar.UserAvatar
 import io.getstream.video.android.core.R
 import io.getstream.video.android.mock.StreamMockUtils
+import io.getstream.video.android.model.User
+import io.getstream.video.android.ui.theme.Colors
 import io.getstream.video.android.ui.theme.StreamImageButton
 
 @Composable
@@ -69,60 +74,104 @@ fun DirectCallScreen(
     LaunchedEffect(key1 = Unit) { viewModel.getGoogleAccounts() }
 
     VideoTheme {
-        Column {
-//            AppBar()
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(12.dp),
-            ) {
-                if (uiState.isLoading) {
-                    CircularProgressIndicator(
-                        modifier = Modifier
-                            .size(50.dp)
-                            .align(Alignment.Center),
-                        color = VideoTheme.colors.primaryAccent
-                    )
-                } else {
-                    UserList(
-                        entries = uiState.users,
-                        onUserClick = { clickedIndex -> viewModel.toggleUserSelection(clickedIndex) }
-                    )
-                    StreamImageButton(
-                        modifier = Modifier
-                            .align(Alignment.BottomCenter)
-                            .padding(bottom = 10.dp),
-                        enabled = uiState.users.any { it.isSelected },
-                        imageRes = R.drawable.stream_video_ic_call,
-                        onClick = {
-                            navigateToRingCall(
-                                "123",
-                                uiState.users.filter { it.isSelected }
-                                    .joinToString(separator = ",") { it.user.id }
-                            )
-                        }
-                    )
-                }
-            }
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(Colors.background),
+            horizontalAlignment = Alignment.CenterHorizontally,
+        ) {
+            Header(user = uiState.currentUser)
+
+            Body(
+                uiState = uiState,
+                toggleUserSelection = { viewModel.toggleGoogleAccountSelection(it) },
+                navigateToRingCall = navigateToRingCall
+            )
         }
     }
 }
 
 @Composable
-private fun AppBar() {
+private fun Header(user: User?) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(10.dp),
-        horizontalArrangement = Arrangement.Center,
+            .padding(start = 24.dp, top = 24.dp, end = 12.dp, bottom = 24.dp) // Outer padding
+            .padding(vertical = 12.dp), // Inner padding
         verticalAlignment = Alignment.CenterVertically,
     ) {
+        user?.let {
+            UserAvatar(
+                modifier = Modifier.size(24.dp),
+                userName = it.userNameOrId,
+                userImage = it.image,
+            )
+            Spacer(modifier = Modifier.width(8.dp))
+        }
+
         Text(
+            modifier = Modifier.weight(1f),
             color = Color.White,
-            text = "Direct Call",
+            text = user?.name?.ifBlank { user.id }?.ifBlank { user.custom["email"] }.orEmpty(),
             maxLines = 1,
             fontSize = 16.sp,
         )
+
+        Text(
+            text = stringResource(io.getstream.video.android.R.string.select_your_conversation_partners),
+            color = Color(0xFF979797),
+            fontSize = 13.sp,
+        )
+    }
+}
+
+@Composable
+private fun Body(
+    uiState: DirectCallUiState,
+    toggleUserSelection: (Int) -> Unit,
+    navigateToRingCall: (callId: String, membersList: String) -> Unit
+) {
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(horizontal = 12.dp),
+    ) {
+        if (uiState.isLoading) {
+            CircularProgressIndicator(
+                modifier = Modifier
+                    .size(50.dp)
+                    .align(Alignment.Center),
+                color = VideoTheme.colors.primaryAccent
+            )
+        } else {
+            uiState.googleAccounts?.let { users ->
+                UserList(
+                    entries = users,
+                    onUserClick = { clickedIndex -> toggleUserSelection(clickedIndex) }
+                )
+                StreamImageButton( // Floating button
+                    modifier = Modifier
+                        .align(Alignment.BottomCenter)
+                        .padding(bottom = 10.dp),
+                    enabled = users.any { it.isSelected },
+                    imageRes = R.drawable.stream_video_ic_call,
+                    onClick = {
+                        navigateToRingCall(
+                            "123",
+                            users
+                                .filter { it.isSelected }
+                                .joinToString(separator = ",") { it.account.id ?: "" }
+                        )
+                    }
+                )
+            } ?: Text(
+                text = stringResource(io.getstream.video.android.R.string.cannot_load_google_account_list),
+                modifier = Modifier.align(Alignment.Center),
+                color = Color.White,
+                maxLines = 1,
+                fontSize = 16.sp
+            )
+        }
     }
 }
 

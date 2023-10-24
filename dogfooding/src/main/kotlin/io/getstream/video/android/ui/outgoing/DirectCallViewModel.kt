@@ -20,9 +20,12 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.getstream.video.android.data.repositories.GoogleAccountRepository
+import io.getstream.video.android.datastore.delegate.StreamUserDataStore
+import io.getstream.video.android.model.User
 import io.getstream.video.android.models.GoogleAccount
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -30,10 +33,17 @@ import javax.inject.Inject
 
 @HiltViewModel
 class DirectCallViewModel @Inject constructor(
+    private val userDataStore: StreamUserDataStore,
     private val googleAccountRepository: GoogleAccountRepository
 ) : ViewModel() {
     private val _uiState = MutableStateFlow(DirectCallUiState())
     val uiState = _uiState.asStateFlow()
+
+    init {
+        viewModelScope.launch {
+            _uiState.update { it.copy(currentUser = userDataStore.user.firstOrNull()) }
+        }
+    }
 
     fun getGoogleAccounts() {
         _uiState.update { it.copy(isLoading = true) }
@@ -73,6 +83,7 @@ class DirectCallViewModel @Inject constructor(
 
 data class DirectCallUiState(
     val isLoading: Boolean = false,
+    val currentUser: User? = null,
     val googleAccounts: List<GoogleAccountUiState>? = emptyList(),
 )
 
