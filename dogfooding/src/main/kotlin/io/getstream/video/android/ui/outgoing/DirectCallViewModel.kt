@@ -57,7 +57,7 @@ class DirectCallViewModel @Inject constructor(
                             isSelected = false,
                             account = user
                         )
-                    } ?: emptyList()
+                    }
                 )
             }
         }

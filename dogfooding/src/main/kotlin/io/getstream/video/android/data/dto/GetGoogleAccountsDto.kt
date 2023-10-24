@@ -21,18 +21,17 @@ data class EmailAddressDto(
 )
 
 fun GoogleAccountDto.asDomainModel(): GoogleAccount {
-    val email = emailAddresses.firstOrNull()?.value ?: ""
+    val email = emailAddresses.firstOrNull()?.value
 
     return GoogleAccount(
         email = email,
-        id = email.replace(".", "_"),
+        id = email?.replace(".", "_"),
         name = email
-            .split("@")
-            .firstOrNull()
+            ?.split("@")
+            ?.firstOrNull()
             ?.split(".")
             ?.firstOrNull()
             ?.capitalize(Locale.ROOT) ?: email,
         photoUrl = photos?.firstOrNull()?.url,
-        isFavorite = false
     )
 }
