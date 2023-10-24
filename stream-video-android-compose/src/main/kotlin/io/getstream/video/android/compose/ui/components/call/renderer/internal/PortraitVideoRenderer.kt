@@ -117,7 +117,7 @@ internal fun BoxScope.PortraitVideoRenderer(
                 call,
                 style,
                 dominantSpeaker,
-                0
+                0,
             )
         }
 

@@ -107,7 +107,9 @@ public data class StreamColors(
             errorAccent = colorResource(R.color.stream_video_error_accent),
             infoAccent = colorResource(R.color.stream_video_info_accent),
             highlight = colorResource(R.color.stream_video_highlight),
-            screenSharingBackground = colorResource(R.color.stream_video_participant_container_background),
+            screenSharingBackground = colorResource(
+                R.color.stream_video_participant_container_background,
+            ),
             screenSharingTooltipBackground = colorResource(
                 R.color.stream_video_screen_sharing_tooltip_background,
             ),
@@ -181,7 +183,9 @@ public data class StreamColors(
             errorAccent = colorResource(R.color.stream_video_error_accent_dark),
             infoAccent = colorResource(R.color.stream_video_info_accent_dark),
             highlight = colorResource(R.color.stream_video_highlight_dark),
-            screenSharingBackground = colorResource(R.color.stream_video_participant_container_background),
+            screenSharingBackground = colorResource(
+                R.color.stream_video_participant_container_background,
+            ),
             screenSharingTooltipBackground = colorResource(
                 R.color.stream_video_screen_sharing_tooltip_background,
             ),
