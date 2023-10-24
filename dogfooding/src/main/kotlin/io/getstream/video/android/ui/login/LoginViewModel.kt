@@ -80,7 +80,7 @@ class LoginViewModel @Inject constructor(
                 val loggedInUser = googleAccountRepository.getCurrentUser()
                 val user = User(
                     id = tokenResponse.userId,
-                    name = loggedInUser.name,
+                    name = loggedInUser.name ?: "",
                     image = loggedInUser.photoUrl ?: "",
                     role = "admin",
                     custom = mapOf("email" to tokenResponse.userId),
