@@ -95,7 +95,7 @@ class SpeakerManager(
 
     internal var selectedBeforeSpeaker: StreamAudioDevice? = null
 
-    fun enable(fromUser: Boolean = true) {
+    internal fun enable(fromUser: Boolean = true) {
         if (fromUser) {
             _status.value = DeviceStatus.Enabled
         }
@@ -343,7 +343,7 @@ class MicrophoneManager(
 
     // API
     /** Enable the audio, the rtc engine will automatically inform the SFU */
-    fun enable(fromUser: Boolean = true) {
+    internal fun enable(fromUser: Boolean = true) {
         enforceSetup {
             if (fromUser) {
                 _status.value = DeviceStatus.Enabled
@@ -518,7 +518,7 @@ public class CameraManager(
         return devices
     }
 
-    fun enable(fromUser: Boolean = true) {
+    internal fun enable(fromUser: Boolean = true) {
         setup()
         // 1. update our local state
         // 2. update the track enabled status
