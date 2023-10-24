@@ -1187,10 +1187,6 @@ public final class io/getstream/video/android/compose/ui/components/indicator/Co
 	public final fun getLambda-1$stream_video_android_compose_release ()Lkotlin/jvm/functions/Function2;
 }
 
-public final class io/getstream/video/android/compose/ui/components/indicator/GenericIndicatorKt {
-	public static final fun GenericIndicator-cf5BqRc (Landroidx/compose/ui/Modifier;Landroidx/compose/ui/graphics/Shape;JLkotlin/jvm/functions/Function3;Landroidx/compose/runtime/Composer;II)V
-}
-
 public final class io/getstream/video/android/compose/ui/components/indicator/MicrophoneIndicatorKt {
 	public static final fun MicrophoneIndicator (Landroidx/compose/ui/Modifier;ZLandroidx/compose/runtime/Composer;II)V
 }
