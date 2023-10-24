@@ -167,18 +167,21 @@ private fun CallJoinHeader(
         Text(
             modifier = Modifier.weight(1f),
             color = Color.White,
-            text = user?.name?.ifBlank { user?.id }?.ifBlank { user!!.custom["email"] }
-                .orEmpty(),
+            text = user?.name?.ifBlank { user?.id }?.ifBlank { user!!.custom["email"] }.orEmpty(),
             maxLines = 1,
             fontSize = 16.sp,
         )
 
         if (BuildConfig.FLAVOR == "dogfooding") {
-            TextButton(
-                colors = ButtonDefaults.textButtonColors(contentColor = Color.White),
-                content = { Text(text = "Ring test") },
-                onClick = { onRingTestClicked.invoke() },
-            )
+            if (user?.custom?.get("email")?.contains("getstreamio") == true) {
+                TextButton(
+                    colors = ButtonDefaults.textButtonColors(contentColor = Color.White),
+                    content = { Text(text = stringResource(R.string.direct_call)) },
+                    onClick = { onRingTestClicked.invoke() },
+                )
+
+                Spacer(modifier = Modifier.width(5.dp))
+            }
 
             StreamButton(
                 modifier = Modifier.widthIn(125.dp),
