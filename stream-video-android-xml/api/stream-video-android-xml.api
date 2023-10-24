@@ -382,8 +382,8 @@ public final class io/getstream/video/android/xml/widget/avatar/AvatarView : com
 	public fun <init> (Landroid/content/Context;Landroid/util/AttributeSet;)V
 	public fun <init> (Landroid/content/Context;Landroid/util/AttributeSet;I)V
 	public final fun setData (Lio/getstream/video/android/core/model/CallUser;)V
-	public final fun setData (Lio/getstream/video/android/model/User;)V
 	public final fun setData (Ljava/lang/String;)V
+	public final fun setData (Ljava/lang/String;Ljava/lang/String;)V
 }
 
 public final class io/getstream/video/android/xml/widget/call/CallView : io/getstream/video/android/xml/widget/view/CallConstraintLayout {

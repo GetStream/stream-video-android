@@ -125,19 +125,20 @@ Video roadmap and changelog is available [here](https://github.com/GetStream/pro
 - [X] Screensharing from mobile
 - [X] Picture of the video stream at the highest resolution + docs on how to add a button for this (Daniel)
 - [X] Audio & Video filters. Support  (Daniel)
-- [ ] Default livestream player UI + docs (Jaewoong/ Daniel)
-- [ ] Implement Chat overlay for Dogfooding (Jaewoong)
-- [ ] Add Dogfooding instructions + directs Google Play (Jaewoong)
-- [ ] Reaction dialog API for Compose (Jaewoong)
-- [ ] Android SDK development.md cleanup (Daniel)
-- [ ] Upgrade to more recent versions of webrtc (Kanat)
-- [ ] Review foreground service vs backend for audio rooms etc. (Daniel)
-- [ ] Support participant.custom field which was previously ignored. ParticipantState line 216 (Daniel)
+- [X] Implement Chat overlay for Dogfooding (Jaewoong)
+- [X] Migrate Stream Chat SDK v6 stable (Jaewoong)
+- [X] Add Dogfooding instructions + directs Google Play (Jaewoong)
+- [X] Support participant.custom field which was previously ignored. ParticipantState line 216 (Daniel)
+- [X] Default livestream player UI + docs (Jaewoong)
+- [X] Reaction dialog API for Compose (Jaewoong)
+- [X] Android SDK development.md cleanup (Jaewoong)
+- [X] Upgrade to more recent versions of webrtc (Jaewoong/Kanat)
+- [X] Review foreground service vs backend for audio rooms etc. (Aleks)
+- [X] Enable SFU switching
 - [ ] Logging is too verbose (rtc is very noisy), clean it up to focus on the essential for info and higher (Daniel)
 
 ### 0.5.0 milestone
 
-- [ ] Enable SFU switching
 - [ ] H264 workaround on Samsung 23? (see https://github.com/livekit/client-sdk-android/blob/main/livekit-android-sdk/src/main/java/io/livekit/android/webrtc/SimulcastVideoEncoderFactoryWrapper.kt#L34 and
 - https://github.com/react-native-webrtc/react-native-webrtc/issues/983#issuecomment-975624906)
 - [ ] Test coverage

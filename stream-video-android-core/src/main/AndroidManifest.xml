@@ -36,6 +36,7 @@
 
     <uses-permission android:name="android.permission.USE_FULL_SCREEN_INTENT" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MICROPHONE" />
     <uses-permission android:name="android.permission.VIBRATE" />
 
     <application>
@@ -52,20 +53,31 @@
         </provider>
 
         <receiver
-            android:name=".notifications.internal.RejectCallBroadcastReceiver"
+            android:name=".notifications.internal.receivers.RejectCallBroadcastReceiver"
             android:exported="false">
             <intent-filter android:priority="-1">
                 <action android:name="io.getstream.video.android.action.REJECT_CALL" />
             </intent-filter>
         </receiver>
+        <receiver
+            android:name=".notifications.internal.receivers.LeaveCallBroadcastReceiver"
+            android:exported="false">
+            <intent-filter android:priority="-1">
+                <action android:name="io.getstream.video.android.action.LEAVE_CALL" />
+            </intent-filter>
+        </receiver>
         <activity android:name=".notifications.internal.DismissNotificationActivity" />
 
-        <receiver android:name=".notifications.internal.StopScreenshareBroadcastReceiver"
+        <receiver android:name=".notifications.internal.receivers.StopScreenshareBroadcastReceiver"
             android:exported="false">
             <intent-filter android:priority="-1">
                 <action android:name="io.getstream.video.android.action.CANCEL_SCREEN_SHARE" />
             </intent-filter>
         </receiver>
+
+
+        <service android:name=".notifications.internal.service.OngoingCallService"
+            android:foregroundServiceType="microphone"/>
 
         <service android:name=".screenshare.StreamScreenShareService"
             android:foregroundServiceType="mediaProjection"/>

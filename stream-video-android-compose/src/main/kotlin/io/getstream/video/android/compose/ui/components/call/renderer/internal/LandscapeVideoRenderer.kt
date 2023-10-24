@@ -299,8 +299,10 @@ internal fun BoxScope.LandscapeVideoRenderer(
 
         else -> {
             BoxWithConstraints(modifier = Modifier.fillMaxHeight()) {
+                val gridState = lazyGridStateWithVisibilityNotification(call = call)
                 LazyVerticalGrid(
                     modifier = Modifier.fillMaxSize(),
+                    state = gridState,
                     columns = GridCells.Fixed(3),
                     content = {
                         items(

@@ -42,7 +42,7 @@ android {
 
 baselineProfile {
     filter {
-        include("io.getstream.video.android.tooling.**")
+        exclude("io.getstream.video.android.**")
     }
 }
 

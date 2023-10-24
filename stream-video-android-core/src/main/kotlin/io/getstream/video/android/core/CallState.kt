@@ -37,7 +37,9 @@ import io.getstream.video.android.core.model.NetworkQuality
 import io.getstream.video.android.core.model.RTMP
 import io.getstream.video.android.core.model.Reaction
 import io.getstream.video.android.core.model.ScreenSharingSession
+import io.getstream.video.android.core.model.VisibilityOnScreenState
 import io.getstream.video.android.core.permission.PermissionRequest
+import io.getstream.video.android.core.sorting.SortedParticipantsState
 import io.getstream.video.android.core.utils.mapState
 import io.getstream.video.android.core.utils.toUser
 import io.getstream.video.android.model.User
@@ -46,10 +48,12 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.channelFlow
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
@@ -136,7 +140,8 @@ public sealed interface RealtimeConnection {
     /**
      * True when the peer connections are ready
      */
-    public data object Connected : RealtimeConnection // connected to RTC, able to receive and send video
+    public data object Connected :
+        RealtimeConnection // connected to RTC, able to receive and send video
 
     /**
      * Reconnecting is true whenever Rtc isn't available and trying to recover
@@ -144,7 +149,9 @@ public sealed interface RealtimeConnection {
      * If the publisher peer connection breaks we'll reconnect
      * Also if the network provider from the OS says that internet is down we'll set it to reconnecting
      */
-    public data object Reconnecting : RealtimeConnection // reconnecting to recover from temporary issues
+    public data object Reconnecting :
+        RealtimeConnection // reconnecting to recover from temporary issues
+    public data object Migrating : RealtimeConnection
     public data class Failed(val error: Any) : RealtimeConnection // permanent failure
     public data object Disconnected : RealtimeConnection // normal disconnect by the app
 }
@@ -169,6 +176,7 @@ public class CallState(
 ) {
 
     private val logger by taggedLogger("CallState")
+    private var participantsVisibilityMonitor: Job? = null
 
     internal val _connection = MutableStateFlow<RealtimeConnection>(RealtimeConnection.PreJoin)
     public val connection: StateFlow<RealtimeConnection> = _connection
@@ -185,6 +193,11 @@ public class CallState(
         _participants.mapState { it.values.toList() }
 
     private val _startedAt: MutableStateFlow<OffsetDateTime?> = MutableStateFlow(null)
+
+    /**
+     * Will return always null with current SFU implementation - it may be fixed later. For now
+     * do not use it.
+     */
     public val startedAt: StateFlow<OffsetDateTime?> = _startedAt
 
     private val _participantCounts: MutableStateFlow<ParticipantCount?> = MutableStateFlow(null)
@@ -230,6 +243,40 @@ public class CallState(
 
     val stats = CallStats(call, scope)
 
+    private val livestreamFlow: Flow<ParticipantState.Video?> = channelFlow {
+        fun emitLivestreamVideo() {
+            val participants = participants.value
+            val filteredVideo =
+                participants.mapNotNull { it.video.value }.firstOrNull { it.track != null }
+            scope.launch {
+                if (_backstage.value) {
+                    send(null)
+                } else {
+                    send(filteredVideo)
+                }
+            }
+        }
+
+        scope.launch {
+            _participants.collect {
+                emitLivestreamVideo()
+            }
+        }
+
+        // TODO: could optimize performance by subscribing only to relevant events
+        call.subscribe {
+            emitLivestreamVideo()
+        }
+
+        // emit livestream Video
+        emitLivestreamVideo()
+
+        awaitClose { }
+    }
+
+    val livestream: StateFlow<ParticipantState.Video?> = livestreamFlow.debounce(1000)
+        .stateIn(scope, SharingStarted.WhileSubscribed(10000L), null)
+
     internal val sortedParticipantsFlow = channelFlow {
         // uses a channel flow to handle concurrency and 3 things updating: https://kotlinlang.org/api/kotlinx.coroutines/kotlinx-coroutines-core/kotlinx.coroutines.flow/channel-flow.html
 
@@ -240,14 +287,14 @@ public class CallState(
             val sorted = participants.sortedWith(
                 compareBy(
                     { pinned.containsKey(it.sessionId) },
-                    { it.dominantSpeaker.value },
                     { it.screenSharingEnabled.value },
-                    { it.lastSpeakingAt.value },
+                    { it.dominantSpeaker.value },
                     { it.videoEnabled.value },
+                    { it.lastSpeakingAt.value },
                     { it.joinedAt.value },
+                    { it.userId.value },
                 ),
             ).reversed()
-
             scope.launch {
                 if (lastParticipants != sorted) {
                     send(sorted)
@@ -292,8 +339,12 @@ public class CallState(
      *
      * Debounced 100ms to avoid rapid changes
      */
-    val sortedParticipants = sortedParticipantsFlow.debounce(100)
-        .stateIn(scope, SharingStarted.WhileSubscribed(10000L), emptyList())
+    val sortedParticipants = SortedParticipantsState(
+        scope,
+        call,
+        _participants,
+        _pinnedParticipants,
+    ).asFlow().debounce(100)
 
     /** Members contains the list of users who are permanently associated with this call. This includes users who are currently not active in the call
      * As an example if you invite "john", "bob" and "jane" to a call and only Jane joins.
@@ -467,7 +518,7 @@ public class CallState(
     }
 
     private val userToSessionIdMap = participants.mapState { participants ->
-        participants.associate { it.user.value.id to it.sessionId }
+        participants.associate { it.userId.value to it.sessionId }
     }
 
     internal val _hasPermissionMap = mutableMapOf<String, StateFlow<Boolean>>()
@@ -850,8 +901,14 @@ public class CallState(
         // update the participant count
         _participantCounts.value = event.participantCount
 
-        val instant = Instant.ofEpochSecond(event.callState.started_at?.epochSecond!!, 0)
-        _startedAt.value = OffsetDateTime.ofInstant(instant, ZoneOffset.UTC)
+        val startedAt = event.callState.started_at
+        if (startedAt != null) {
+            val instant = Instant.ofEpochSecond(startedAt.epochSecond, 0)
+            _startedAt.value = OffsetDateTime.ofInstant(instant, ZoneOffset.UTC)
+        } else {
+            _startedAt.value = null
+        }
+
         // creates the participants
         val participantStates = event.callState.participants.map {
             getOrCreateParticipant(it)
@@ -941,7 +998,6 @@ public class CallState(
     fun getOrCreateParticipant(
         sessionId: String,
         userId: String,
-        user: User? = null,
         updateFlow: Boolean = false,
     ): ParticipantState {
         val participantMap = _participants.value.toSortedMap()
@@ -951,7 +1007,7 @@ public class CallState(
             ParticipantState(
                 sessionId = sessionId,
                 call = call,
-                initialUser = user ?: User(userId),
+                initialUserId = userId,
             )
         }
         if (updateFlow) {
@@ -1094,6 +1150,65 @@ public class CallState(
         logger.v { "[updateFromResponse] newEgress: $newEgress" }
         _egress.value = newEgress
         _broadcasting.value = true
+    }
+
+    /**
+     * Update participants visibility on the UI.
+     *
+     * @param sessionId the session ID of the participant.
+     * @param visibilityOnScreenState the visibility state.
+     *
+     * @see VisibilityOnScreenState
+     * @see CallState.updateParticipantVisibilityFlow
+     */
+    fun updateParticipantVisibility(
+        sessionId: String,
+        visibilityOnScreenState: VisibilityOnScreenState,
+    ) {
+        _participants.value[sessionId]?._visibleOnScreen?.value = visibilityOnScreenState
+    }
+
+    /**
+     * Set a flow to update the participants visibility.
+     * The flow should emit lists with currently visible participant session IDs.
+     *
+     * Note: If you pass null to the parameter it will just cancel the currently observing flow.
+     *
+     * E.g. Grid visible items info can be used to update the [CallState]
+     * ```
+     * val gridState = rememberLazyGridState()
+     * val updateFlow = snapshotFlow {
+     *      gridState.layoutInfo.visibleItemsInfo.map {
+     *          it.key // Assuming keys are sessionId
+     *      }
+     * }
+     *
+     * call.state.updateParticipantVisibilityFlow(updateFlow)
+     * ```
+     *
+     * @param flow a flow that emits updates with list of visible participants.
+     *
+     * @see CallState.updateParticipantVisibility
+     */
+    fun updateParticipantVisibilityFlow(flow: Flow<List<String>>?) {
+        // Cancel any previous job.
+        participantsVisibilityMonitor?.cancel()
+
+        if (flow != null) {
+            participantsVisibilityMonitor = scope.launch {
+                flow.collectLatest { visibleParticipantIds ->
+                    _participants.value.forEach {
+                        if (visibleParticipantIds.contains(it.key)) {
+                            // If participant is in the lists its visible
+                            it.value._visibleOnScreen.value = VisibilityOnScreenState.VISIBLE
+                        } else {
+                            // Participant is not in the list, thus invisible
+                            it.value._visibleOnScreen.value = VisibilityOnScreenState.INVISIBLE
+                        }
+                    }
+                }
+            }
+        }
     }
 }
 

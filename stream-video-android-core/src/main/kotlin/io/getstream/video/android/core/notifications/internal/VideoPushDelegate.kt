@@ -42,11 +42,15 @@ internal class VideoPushDelegate(
     /**
      * Handle a push message.
      *
+     * @param metadata The metadata of the Push Notification.
      * @param payload The content of the Push Notification.
      * @return true if the payload was handled properly.
      */
-    override fun handlePushMessage(payload: Map<String, Any?>): Boolean {
-        logger.d { "[handlePushMessage] payload: $payload" }
+    override fun handlePushMessage(
+        metadata: Map<String, Any?>,
+        payload: Map<String, Any?>,
+    ): Boolean {
+        logger.d { "[handlePushMessage] payload: $payload, metadata: $metadata" }
         return payload.ifValid {
             val callId = (payload[KEY_CALL_CID] as String).toTypeAndId()
                 .let { StreamCallId(it.first, it.second) }

@@ -139,7 +139,7 @@ class ReconnectTest : IntegrationTestBase(connectCoordinatorWS = false) {
 
         // the socket and rtc connection disconnect...,
         // or ice candidate don't arrive due to temporary network failure
-        call.session?.reconnect()
+        call.session?.reconnect(forceRestart = true)
 
         // leave and clean up a call
         call.leave()
@@ -172,7 +172,7 @@ class ReconnectTest : IntegrationTestBase(connectCoordinatorWS = false) {
         // connect to the new socket
         // do an ice restart
         call.session?.let {
-            it.switchSfu(it.sfuUrl, it.sfuToken, it.remoteIceServers)
+            it.switchSfu(it.sfuUrl, it.sfuToken, it.sfuToken, it.remoteIceServers)
         }
 
         // assert the publisher is still connected

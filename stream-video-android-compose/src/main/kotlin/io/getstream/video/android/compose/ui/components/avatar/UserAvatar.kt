@@ -22,6 +22,7 @@ import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.layout.ContentScale
@@ -31,6 +32,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.getstream.video.android.compose.R
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.mock.StreamMockUtils
@@ -59,7 +61,8 @@ import io.getstream.video.android.model.User
  */
 @Composable
 public fun UserAvatar(
-    user: User,
+    userName: String?,
+    userImage: String?,
     modifier: Modifier = Modifier,
     shape: Shape = VideoTheme.shapes.avatar,
     textStyle: TextStyle = VideoTheme.typography.title3Bold,
@@ -79,8 +82,8 @@ public fun UserAvatar(
     Box(modifier = modifier) {
         Avatar(
             modifier = Modifier.fillMaxSize(),
-            imageUrl = user.image,
-            initials = user.name.ifBlank { user.id },
+            imageUrl = userImage,
+            initials = userName,
             textStyle = textStyle,
             shape = shape,
             contentScale = contentScale,
@@ -111,8 +114,14 @@ internal fun BoxScope.DefaultOnlineIndicator(onlineIndicatorAlignment: OnlineInd
 private fun UserAvatarPreview() {
     StreamMockUtils.initializeStreamVideo(LocalContext.current)
     VideoTheme {
+        val participant = mockParticipantList[0]
+        val userId by participant.userId.collectAsStateWithLifecycle()
+        val userImage by participant.image.collectAsStateWithLifecycle()
+        val userName by participant.userNameOrId.collectAsStateWithLifecycle()
+
         UserAvatar(
-            user = mockParticipantList[0].initialUser,
+            userImage = userImage,
+            userName = userName,
             modifier = Modifier.size(82.dp),
             isShowingOnlineIndicator = true,
             previewPlaceholder = io.getstream.video.android.ui.common.R.drawable.stream_video_call_sample,

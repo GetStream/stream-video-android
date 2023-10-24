@@ -20,7 +20,9 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.lifecycle.lifecycleScope
+import com.google.firebase.analytics.FirebaseAnalytics
 import dagger.hilt.android.AndroidEntryPoint
+import io.getstream.video.android.analytics.FirebaseEvents
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.datastore.delegate.StreamUserDataStore
 import io.getstream.video.android.ui.AppNavHost
@@ -35,6 +37,8 @@ class MainActivity : ComponentActivity() {
 
     @Inject lateinit var dataStore: StreamUserDataStore
 
+    private val firebaseAnalytics by lazy { FirebaseAnalytics.getInstance(this) }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -43,6 +47,7 @@ class MainActivity : ComponentActivity() {
         @Suppress("KotlinConstantConditions")
         if (BuildConfig.FLAVOR == "production") {
             InstallReferrer(this).extractInstallReferrer { callId: String ->
+                firebaseAnalytics.logEvent(FirebaseEvents.INSTALL_FROM_QR_CODE, null)
                 startActivity(DeeplinkingActivity.createIntent(this, callId, true))
             }
         }

@@ -1,57 +1,58 @@
 [versions]
-androidGradlePlugin = "8.1.1"
+androidGradlePlugin = "8.1.2"
 spotless = "6.21.0"
 nexusPlugin = "1.3.0"
 kotlin = "1.9.10"
+ksp = "1.9.10-1.0.13"
 kotlinSerialization = "1.6.0"
 kotlinSerializationConverter = "1.0.0"
 kotlinxCoroutines = "1.7.3"
 
-kotlinDokka = "1.9.0"
+kotlinDokka = "1.9.10"
 jvmTarget = "11"
 
 androidxMaterial = "1.9.0"
 androidxAppCompat = "1.6.1"
 androidxCore = "1.12.0"
-androidxAnnotation = "1.6.0"
-androidxLifecycle = "2.6.1"
+androidxAnnotation = "1.7.0"
+androidxLifecycle = "2.6.2"
 androidxStartup = "1.1.1"
 androidxActivity = "1.7.2"
 androidxDataStore = "1.0.0"
 googleService = "4.3.14"
 
-androidxComposeBom = "2023.09.01"
+androidxComposeBom = "2023.10.01"
 androidxComposeCompiler = "1.5.3"
 androidxComposeTracing = "1.0.0-alpha03"
 androidxHiltNavigation = "1.0.0"
-androidxComposeNavigation = "2.7.0"
-composeStableMarker = "1.0.0"
+androidxComposeNavigation = "2.7.4"
+composeStableMarker = "1.0.1"
 
 coil = "2.4.0"
-landscapist = "2.2.9"
-accompanist = "0.30.1"
+landscapist = "2.2.10"
+accompanist = "0.32.0"
 telephoto = "0.3.0"
 audioswitch = "1.1.8"
 libyuv = "0.28.0"
 
 wire = "4.7.0"
-okhttp = "4.11.0"
+okhttp = "4.12.0"
 retrofit = "2.9.0"
 moshi = "1.15.0"
 threetenAbp = "1.4.6"
 tink = "1.9.0"
 turbine = "0.13.0"
 
-streamWebRTC = "1.0.6"
+streamWebRTC = "1.1.0"
 streamResult = "1.1.0"
-streamChat = "6.0.0-beta1"
+streamChat = "6.0.4"
 streamLog = "1.1.4"
-streamPush = "1.1.1"
+streamPush = "1.1.4"
 
 androidxTest = "1.5.2"
 androidxTestCore = "1.5.0"
 androidxProfileinstaller = "1.3.1"
-androidxMacroBenchmark = "1.2.0-beta05"
+androidxMacroBenchmark = "1.2.0"
 androidxUiAutomator = "2.3.0-alpha04"
 androidxContraintLayout = "2.1.4"
 androidxEspresso = "3.5.1"
@@ -68,9 +69,9 @@ firebaseCrashlytics = "2.9.5"
 installReferrer = "2.2"
 playCodeScanner = "16.1.0"
 
-hilt = "2.46.1"
+hilt = "2.48.1"
 desugar = "2.0.3"
-leakCanary = "2.11"
+leakCanary = "2.12"
 binaryCompatabilityValidator = "0.13.2"
 playPublisher = "3.8.4"
 
@@ -179,7 +180,7 @@ hilt-compiler = { group = "com.google.dagger", name = "hilt-android-compiler", v
 
 firebase-bom = { group = "com.google.firebase", name = "firebase-bom", version.ref = "firebaseBom" }
 firebase-crashlytics = { group = "com.google.firebase", name = "firebase-crashlytics-ktx" }
-firebase-analyrics = { group = "com.google.firebase", name = "firebase-analytics-ktx" }
+firebase-analytics = { group = "com.google.firebase", name = "firebase-analytics-ktx" }
 
 play-install-referrer = { group = "com.android.installreferrer", name = "installreferrer", version.ref = "installReferrer" }
 play-code-scanner = { group = "com.google.android.gms", name = "play-services-code-scanner", version.ref = "playCodeScanner" }
@@ -196,6 +197,7 @@ spotless-gradlePlugin = { group = "com.diffplug.spotless", name = "spotless-plug
 android-application = { id = "com.android.application", version.ref = "androidGradlePlugin" }
 android-library = { id = "com.android.library", version.ref = "androidGradlePlugin" }
 android-test = { id = "com.android.test", version.ref = "androidGradlePlugin" }
+ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
 kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
 kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
 kotlin-compatibility-validator = { id = "org.jetbrains.kotlinx.binary-compatibility-validator", version.ref = "binaryCompatabilityValidator" }

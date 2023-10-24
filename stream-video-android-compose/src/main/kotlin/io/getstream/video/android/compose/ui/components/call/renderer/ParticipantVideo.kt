@@ -37,6 +37,7 @@ import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -73,6 +74,7 @@ import io.getstream.video.android.core.ParticipantState
 import io.getstream.video.android.core.model.NetworkQuality
 import io.getstream.video.android.core.model.Reaction
 import io.getstream.video.android.core.model.ReactionState
+import io.getstream.video.android.core.model.VisibilityOnScreenState
 import io.getstream.video.android.mock.StreamMockUtils
 import io.getstream.video.android.mock.mockCall
 import io.getstream.video.android.mock.mockParticipantList
@@ -108,8 +110,9 @@ public fun ParticipantVideo(
         )
     },
     videoFallbackContent: @Composable (Call) -> Unit = {
-        val user by participant.user.collectAsStateWithLifecycle()
-        UserAvatarBackground(user = user)
+        val userName by participant.userNameOrId.collectAsStateWithLifecycle()
+        val userImage by participant.image.collectAsStateWithLifecycle()
+        UserAvatarBackground(userName = userName, userImage = userImage)
     },
     reactionContent: @Composable BoxScope.(ParticipantState) -> Unit = {
         DefaultReaction(
@@ -120,6 +123,19 @@ public fun ParticipantVideo(
 ) {
     val connectionQuality by participant.networkQuality.collectAsStateWithLifecycle()
     val participants by call.state.participants.collectAsStateWithLifecycle()
+
+    DisposableEffect(call, participant.sessionId) {
+        // Inform the call of this participant visibility on screen, affects sorting order.
+        updateParticipantVisibility(participant.sessionId, call, VisibilityOnScreenState.VISIBLE)
+
+        onDispose {
+            updateParticipantVisibility(
+                participant.sessionId,
+                call,
+                VisibilityOnScreenState.INVISIBLE,
+            )
+        }
+    }
 
     val containerModifier = if (style.isFocused && participants.size > 1) {
         modifier.border(
@@ -184,8 +200,9 @@ public fun ParticipantVideoRenderer(
     call: Call,
     participant: ParticipantState,
     videoFallbackContent: @Composable (Call) -> Unit = {
-        val user by participant.user.collectAsStateWithLifecycle()
-        UserAvatarBackground(user = user)
+        val userName by participant.userNameOrId.collectAsStateWithLifecycle()
+        val userImage by participant.image.collectAsStateWithLifecycle()
+        UserAvatarBackground(userName = userName, userImage = userImage)
     },
 ) {
     if (LocalInspectionMode.current) {
@@ -366,6 +383,17 @@ private fun BoxScope.DefaultReaction(
             fontSize = size.value.sp,
         )
     }
+}
+
+private fun updateParticipantVisibility(
+    sessionId: String,
+    call: Call,
+    visibilityOnScreenState: VisibilityOnScreenState,
+) {
+    call.state.updateParticipantVisibility(
+        sessionId,
+        visibilityOnScreenState,
+    )
 }
 
 @Preview

@@ -70,6 +70,10 @@ android {
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles("consumer-proguard-rules.pro")
         buildConfigField("String", "STREAM_VIDEO_VERSION", "\"${Configuration.versionName}\"")
+        buildConfigField("Integer", "STREAM_VIDEO_VERSION_MAJOR", "${Configuration.majorVersion}")
+        buildConfigField("Integer", "STREAM_VIDEO_VERSION_MINOR", "${Configuration.minorVersion}")
+        buildConfigField("Integer", "STREAM_VIDEO_VERSION_PATCH", "${Configuration.patchVersion}")
+
     }
 
     buildFeatures {
@@ -122,6 +126,7 @@ baselineProfile {
     filter {
         include("io.getstream.video.android.core.**")
         include("org.openapitools.client.**")
+        include("org.webrtc.**")
     }
 }
 

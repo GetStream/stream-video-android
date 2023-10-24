@@ -35,7 +35,7 @@ If you're new to android, note that there are 2 `build.gradle` files, you want t
 ```kotlin
 dependencies {
     // Stream Video Compose SDK
-    implementation("io.getstream:stream-video-android-compose:0.3.4")
+    implementation("io.getstream:stream-video-android-compose:0.4.0")
 
     // Jetpack Compose (optional/ android studio typically adds them when you create a new project)
     implementation(platform("androidx.compose:compose-bom:2023.08.00"))
@@ -292,7 +292,7 @@ There are many possibilities and the [participant state docs](../03-guides/03-ca
 The livestream layout is built using standard Jetpack Compose. The [VideoRenderer](../04-ui-components/02-video-renderer.mdx) component is provided by Stream.
 **VideoRenderer** renders the video and a fallback. You can use it for rendering the local and remote video.
 
-If you want to learn more about building an advanced UIs for watching a livestream, check out [Cookbook: Watching a livestream](../05-ui-cookbook/15-watching-livestream.mdx).
+If you want to learn more about building an advanced UIs for watching a livestream, check out [Cookbook: Watching a livestream](../05-ui-cookbook/16-watching-livestream.mdx).
 
 #### Backstage mode
 
@@ -349,11 +349,11 @@ Let's show how to broadcast your call to HLS:
 
 ```kotlin
 call.startHLS()
-val hlsUrl = call.state.egress.value?.hls
+val hlsUrl = call.state.egress.value?.hls?.playlistUrl
 Log.i("Tutorial", "HLS url = $hlsUrl")
 ```
 
-You can view the HLS video feed using any HLS capable video player.
+You can play the HLS video feed using any HLS capable video player, such as [ExoPlayer](https://github.com/google/ExoPlayer).
 
 ### 7 - Advanced Features
 
@@ -363,8 +363,8 @@ It also went into more details about HLS & RTMP-in.
 There are several advanced features that can improve the livestreaming experience:
 
 * ** [Co-hosts](../03-guides/02-joining-creating-calls.mdx) ** You can add members to your livestream with elevated permissions. So you can have co-hosts, moderators etc.
-* ** [Custom events](../03-guides/08-reactions-and-custom-events.mdx) ** You can use custom events on the call to share any additional data. Think about showing the score for a game, or any other realtime use case.
-* ** [Reactions & Chat](../03-guides/08-reactions-and-custom-events.mdx) ** Users can react to the livestream, and you can add chat. This makes for a more engaging experience.
+* ** [Custom events](../03-guides/09-reactions-and-custom-events.mdx) ** You can use custom events on the call to share any additional data. Think about showing the score for a game, or any other realtime use case.
+* ** [Reactions & Chat](../03-guides/09-reactions-and-custom-events.mdx) ** Users can react to the livestream, and you can add chat. This makes for a more engaging experience.
 * ** [Notifications](../06-advanced/01-ringing.mdx) ** You can notify users via push notifications when the livestream starts
 * ** [Recording](../06-advanced/06-recording.mdx) ** The call recording functionality allows you to record the call with various options and layouts
 

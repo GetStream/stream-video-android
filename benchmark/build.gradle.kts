@@ -63,7 +63,7 @@ android {
         }
     }
 
-    flavorDimensions("environment")
+    flavorDimensions += "environment"
     productFlavors {
         create("dogfooding") {
             dimension = "environment"

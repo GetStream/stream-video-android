@@ -166,7 +166,7 @@ object StreamVideoInitHelper {
             .logLevel(logLevel)
             .build()
 
-        val chatUser = io.getstream.chat.android.client.models.User(
+        val chatUser = io.getstream.chat.android.models.User(
             id = user.id,
             name = user.name,
             image = user.image,

@@ -131,6 +131,7 @@ internal class StreamVideoImpl internal constructor(
     internal val connectionModule: ConnectionModule,
     internal val tokenProvider: (suspend (error: Throwable?) -> String)?,
     internal val streamNotificationManager: StreamNotificationManager,
+    internal val runForeGroundService: Boolean = true,
 ) : StreamVideo,
     NotificationHandler by streamNotificationManager {
 
@@ -486,6 +487,7 @@ internal class StreamVideoImpl internal constructor(
             calls[selectedCid]?.let {
                 it.state.handleEvent(event)
                 it.session?.handleEvent(event)
+                it.handleEvent(event)
             }
         }
 
@@ -640,6 +642,7 @@ internal class StreamVideoImpl internal constructor(
         ring: Boolean = false,
         notify: Boolean = false,
         location: String,
+        migratingFrom: String?,
     ): Result<JoinCallResponse> {
         val joinCallRequest = JoinCallRequest(
             create = create,
@@ -653,6 +656,7 @@ internal class StreamVideoImpl internal constructor(
             ring = ring,
             notify = notify,
             location = location,
+            migratingFrom = migratingFrom,
         )
 
         val result = wrapAPICall {
@@ -764,14 +768,20 @@ internal class StreamVideoImpl internal constructor(
         return wrapAPICall { connectionModule.api.endCall(type, id) }
     }
 
-    suspend fun goLive(type: String, id: String, startHls: Boolean, startRecording: Boolean, startTranscription: Boolean): Result<GoLiveResponse> {
+    suspend fun goLive(
+        type: String,
+        id: String,
+        startHls: Boolean,
+        startRecording: Boolean,
+        startTranscription: Boolean,
+    ): Result<GoLiveResponse> {
         logger.d { "[goLive] callCid: $type:$id" }
 
         return wrapAPICall {
             connectionModule.api.goLive(
-                type,
-                id,
-                GoLiveRequest(
+                type = type,
+                id = id,
+                goLiveRequest = GoLiveRequest(
                     startHls = startHls,
                     startRecording = startRecording,
                     startTranscription = startTranscription,
@@ -846,6 +856,7 @@ internal class StreamVideoImpl internal constructor(
             )
         }
     }
+
     suspend fun startBroadcasting(type: String, id: String): Result<StartBroadcastingResponse> {
         logger.d { "[startBroadcasting] callCid: $type $id" }
 

@@ -24,9 +24,9 @@ import io.getstream.video.android.core.model.MediaTrack
 import io.getstream.video.android.core.model.NetworkQuality
 import io.getstream.video.android.core.model.Reaction
 import io.getstream.video.android.core.model.VideoTrack
+import io.getstream.video.android.core.model.VisibilityOnScreenState
 import io.getstream.video.android.core.utils.combineStates
 import io.getstream.video.android.core.utils.mapState
-import io.getstream.video.android.model.User
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import org.openapitools.client.models.MuteUsersResponse
@@ -48,7 +48,7 @@ public data class ParticipantState(
     /** The call object */
     val call: Call,
     /** The current version of the user, this is the start for participant.user stateflow */
-    val initialUser: User,
+    private val initialUserId: String,
     /** A prefix to identify tracks, internal */
     @InternalStreamVideoApi
     var trackLookupPrefix: String = "",
@@ -61,6 +61,9 @@ public data class ParticipantState(
     /** video track */
     internal val _videoTrack = MutableStateFlow<VideoTrack?>(null)
     val videoTrack: StateFlow<VideoTrack?> = _videoTrack
+
+    internal val _visibleOnScreen = MutableStateFlow(VisibilityOnScreenState.UNKNOWN)
+    val visibleOnScreen: StateFlow<VisibilityOnScreenState> = _visibleOnScreen
 
     /**
      * State that indicates whether the camera is capturing and sending video or not.
@@ -84,12 +87,17 @@ public data class ParticipantState(
     internal val _screenSharingTrack = MutableStateFlow<VideoTrack?>(null)
     val screenSharingTrack: StateFlow<VideoTrack?> = _screenSharingTrack
 
-    /** The user, automatically updates when we receive user events. */
-    internal val _user: MutableStateFlow<User> = MutableStateFlow(initialUser)
-    val user: StateFlow<User> = _user
+    internal val _name = MutableStateFlow("")
+    val name: StateFlow<String> = _name
+
+    internal val _image = MutableStateFlow("")
+    val image: StateFlow<String> = _image
+
+    internal val _userId = MutableStateFlow(initialUserId)
+    val userId: StateFlow<String> = _userId
 
     // Could also be a property on the user
-    val userNameOrId: StateFlow<String> = _user.mapState { it.name.ifEmpty { it.id } }
+    val userNameOrId: StateFlow<String> = _name.mapState { it.ifEmpty { _userId.value } }
 
     /**
      * When you joined the call
@@ -156,15 +164,15 @@ public data class ParticipantState(
 
     suspend fun muteAudio(): Result<MuteUsersResponse> {
         // how do i mute another user?
-        return call.muteUser(user.value.id, audio = true, video = false, screenShare = false)
+        return call.muteUser(_userId.value, audio = true, video = false, screenShare = false)
     }
 
     suspend fun muteVideo(): Result<MuteUsersResponse> {
-        return call.muteUser(user.value.id, audio = false, video = true, screenShare = false)
+        return call.muteUser(_userId.value, audio = false, video = true, screenShare = false)
     }
 
     suspend fun muteScreenshare(): Result<MuteUsersResponse> {
-        return call.muteUser(user.value.id, audio = false, video = false, screenShare = true)
+        return call.muteUser(_userId.value, audio = false, video = false, screenShare = true)
     }
 
     suspend fun pin() {
@@ -209,16 +217,8 @@ public data class ParticipantState(
             participant.published_tracks.contains(TrackType.TRACK_TYPE_SCREEN_SHARE)
         _roles.value = participant.roles
 
-        val custom = participant.custom ?: emptyMap<String, Any>()
-
-        val currentUser = _user.value
-        _user.value = currentUser.copy(
-            name = participant.name,
-            image = participant.image,
-            role = participant.roles.firstOrNull().orEmpty(),
-            // TODO: set the custom field
-            // custom = custom
-        )
+        _name.value = participant.name
+        _image.value = participant.image
     }
 
     public fun consumeReaction(reaction: Reaction) {

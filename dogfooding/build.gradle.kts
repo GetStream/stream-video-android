@@ -30,9 +30,9 @@ plugins {
     id(libs.plugins.firebase.crashlytics.get().pluginId)
     id(libs.plugins.kotlin.serialization.get().pluginId)
     id(libs.plugins.hilt.get().pluginId)
+    id(libs.plugins.ksp.get().pluginId)
     id(libs.plugins.play.publisher.get().pluginId)
     id(libs.plugins.baseline.profile.get().pluginId)
-    kotlin("kapt")
 }
 
 android {
@@ -113,7 +113,7 @@ android {
         }
     }
 
-    flavorDimensions("environment")
+    flavorDimensions += "environment"
     productFlavors {
         create("dogfooding") {
             dimension = "environment"
@@ -245,10 +245,11 @@ dependencies {
 
     // hilt
     implementation(libs.hilt.android)
-    kapt(libs.hilt.compiler)
+    ksp(libs.hilt.compiler)
 
     // firebase
     implementation(libs.firebase.crashlytics)
+    implementation(libs.firebase.analytics)
 
     // Play Install Referrer library - used to extract the meeting link from demo flow after install
     implementation(libs.play.install.referrer)

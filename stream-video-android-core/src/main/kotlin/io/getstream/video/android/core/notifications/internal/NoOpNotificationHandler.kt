@@ -16,6 +16,7 @@
 
 package io.getstream.video.android.core.notifications.internal
 
+import android.app.Notification
 import io.getstream.video.android.core.notifications.NotificationHandler
 import io.getstream.video.android.model.StreamCallId
 
@@ -23,6 +24,7 @@ internal object NoOpNotificationHandler : NotificationHandler {
     override fun onRingingCall(callId: StreamCallId, callDisplayName: String) { /* NoOp */ }
     override fun onNotification(callId: StreamCallId, callDisplayName: String) { /* NoOp */ }
     override fun onLiveCall(callId: StreamCallId, callDisplayName: String) { /* NoOp */ }
+    override fun getOngoingCallNotification(callId: StreamCallId): Notification? = null
     override fun onPermissionDenied() { /* NoOp */ }
     override fun onPermissionGranted() { /* NoOp */ }
     override fun onPermissionRationale() { /* NoOp */ }

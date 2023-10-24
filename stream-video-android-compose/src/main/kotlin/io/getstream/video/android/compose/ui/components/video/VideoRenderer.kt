@@ -16,7 +16,6 @@
 
 package io.getstream.video.android.compose.ui.components.video
 
-import android.view.View
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -78,7 +77,7 @@ public fun VideoRenderer(
             call,
         )
     },
-    onRendered: (View) -> Unit = {},
+    onRendered: (VideoTextureViewRenderer) -> Unit = {},
 ) {
     if (LocalInspectionMode.current) {
         Image(
