@@ -226,8 +226,6 @@ public final class io/getstream/video/android/core/CameraManager {
 	public final fun cleanup ()V
 	public final fun disable (Z)V
 	public static synthetic fun disable$default (Lio/getstream/video/android/core/CameraManager;ZILjava/lang/Object;)V
-	public final fun enable (Z)V
-	public static synthetic fun enable$default (Lio/getstream/video/android/core/CameraManager;ZILjava/lang/Object;)V
 	public final fun flip ()V
 	public final fun getAvailableResolutions ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun getDirection ()Lkotlinx/coroutines/flow/StateFlow;
@@ -337,14 +335,23 @@ public abstract class io/getstream/video/android/core/DeviceStatus {
 
 public final class io/getstream/video/android/core/DeviceStatus$Disabled : io/getstream/video/android/core/DeviceStatus {
 	public static final field INSTANCE Lio/getstream/video/android/core/DeviceStatus$Disabled;
+	public fun equals (Ljava/lang/Object;)Z
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
 }
 
 public final class io/getstream/video/android/core/DeviceStatus$Enabled : io/getstream/video/android/core/DeviceStatus {
 	public static final field INSTANCE Lio/getstream/video/android/core/DeviceStatus$Enabled;
+	public fun equals (Ljava/lang/Object;)Z
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
 }
 
 public final class io/getstream/video/android/core/DeviceStatus$NotSelected : io/getstream/video/android/core/DeviceStatus {
 	public static final field INSTANCE Lio/getstream/video/android/core/DeviceStatus$NotSelected;
+	public fun equals (Ljava/lang/Object;)Z
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
 }
 
 public final class io/getstream/video/android/core/EventSubscription {
@@ -433,8 +440,6 @@ public final class io/getstream/video/android/core/MicrophoneManager {
 	public final fun cleanup ()V
 	public final fun disable (Z)V
 	public static synthetic fun disable$default (Lio/getstream/video/android/core/MicrophoneManager;ZILjava/lang/Object;)V
-	public final fun enable (Z)V
-	public static synthetic fun enable$default (Lio/getstream/video/android/core/MicrophoneManager;ZILjava/lang/Object;)V
 	public final fun getDevices ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun getMediaManager ()Lio/getstream/video/android/core/MediaManagerImpl;
 	public final fun getPreferSpeakerphone ()Z
@@ -699,8 +704,6 @@ public final class io/getstream/video/android/core/SpeakerManager {
 	public synthetic fun <init> (Lio/getstream/video/android/core/MediaManagerImpl;Lio/getstream/video/android/core/MicrophoneManager;Ljava/lang/Integer;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun disable (Z)V
 	public static synthetic fun disable$default (Lio/getstream/video/android/core/SpeakerManager;ZILjava/lang/Object;)V
-	public final fun enable (Z)V
-	public static synthetic fun enable$default (Lio/getstream/video/android/core/SpeakerManager;ZILjava/lang/Object;)V
 	public final fun getDevices ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun getInitialVolume ()Ljava/lang/Integer;
 	public final fun getMediaManager ()Lio/getstream/video/android/core/MediaManagerImpl;
