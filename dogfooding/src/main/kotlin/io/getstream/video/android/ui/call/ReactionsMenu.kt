@@ -53,7 +53,7 @@ import kotlinx.coroutines.launch
  * Default reaction item data
  *
  * @param displayText the text visible on the screen.
- * @param emojiCode the code of the emoju e.g. ":like:"
+ * @param emojiCode the code of the emoji e.g. ":like:"
  * */
 private data class ReactionItemData(val displayText: String, val emojiCode: String)
 
