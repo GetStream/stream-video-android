@@ -93,7 +93,7 @@
         </activity>
 
         <activity
-            android:name="io.getstream.video.android.RingCallActivity"
+            android:name="io.getstream.video.android.DirectCallActivity"
             android:configChanges="screenSize|smallestScreenSize|screenLayout|orientation"
             android:exported="true"
             android:hardwareAccelerated="true"

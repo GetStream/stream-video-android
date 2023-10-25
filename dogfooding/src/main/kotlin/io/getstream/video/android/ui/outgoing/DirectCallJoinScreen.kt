@@ -66,9 +66,9 @@ import io.getstream.video.android.ui.theme.Colors
 import io.getstream.video.android.ui.theme.StreamImageButton
 
 @Composable
-fun DirectCallScreen(
+fun DirectCallJoinScreen(
     viewModel: DirectCallViewModel = hiltViewModel(),
-    navigateToRingCall: (callId: String, membersList: String) -> Unit,
+    navigateToDirectCall: (callId: String, membersList: String) -> Unit,
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
@@ -86,7 +86,7 @@ fun DirectCallScreen(
             Body(
                 uiState = uiState,
                 toggleUserSelection = { viewModel.toggleGoogleAccountSelection(it) },
-                navigateToRingCall = navigateToRingCall,
+                onStartCallClick = navigateToDirectCall,
             )
         }
     }
@@ -130,7 +130,7 @@ private fun Header(user: User?) {
 private fun Body(
     uiState: DirectCallUiState,
     toggleUserSelection: (Int) -> Unit,
-    navigateToRingCall: (callId: String, membersList: String) -> Unit,
+    onStartCallClick: (callId: String, membersList: String) -> Unit,
 ) {
     Box(
         modifier = Modifier
@@ -157,7 +157,7 @@ private fun Body(
                     enabled = users.any { it.isSelected },
                     imageRes = R.drawable.stream_video_ic_call,
                     onClick = {
-                        navigateToRingCall(
+                        onStartCallClick(
                             "123",
                             users
                                 .filter { it.isSelected }
@@ -275,8 +275,8 @@ private fun NetworkImage(
 private fun DebugCallScreenPreview() {
     StreamMockUtils.initializeStreamVideo(LocalContext.current)
     VideoTheme {
-        DirectCallScreen(
-            navigateToRingCall = { _, _ -> },
+        DirectCallJoinScreen(
+            navigateToDirectCall = { _, _ -> },
         )
     }
 }

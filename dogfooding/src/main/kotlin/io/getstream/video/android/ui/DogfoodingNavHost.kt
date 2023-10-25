@@ -26,11 +26,11 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
-import io.getstream.video.android.RingCallActivity
+import io.getstream.video.android.DirectCallActivity
 import io.getstream.video.android.ui.join.CallJoinScreen
 import io.getstream.video.android.ui.lobby.CallLobbyScreen
 import io.getstream.video.android.ui.login.LoginScreen
-import io.getstream.video.android.ui.outgoing.DirectCallScreen
+import io.getstream.video.android.ui.outgoing.DirectCallJoinScreen
 
 @Composable
 fun AppNavHost(
@@ -62,8 +62,8 @@ fun AppNavHost(
                         popUpTo(AppScreens.CallJoin.destination) { inclusive = true }
                     }
                 },
-                navigateToRingTest = {
-                    navController.navigate(AppScreens.DebugCall.destination)
+                navigateToDirectCallJoin = {
+                    navController.navigate(AppScreens.DirectCallJoin.destination)
                 },
             )
         }
@@ -79,12 +79,12 @@ fun AppNavHost(
                 },
             )
         }
-        composable(AppScreens.DebugCall.destination) {
+        composable(AppScreens.DirectCallJoin.destination) {
             val context = LocalContext.current
-            DirectCallScreen(
-                navigateToRingCall = { callId, members ->
+            DirectCallJoinScreen(
+                navigateToDirectCall = { callId, members ->
                     context.startActivity(
-                        RingCallActivity.createIntent(
+                        DirectCallActivity.createIntent(
                             context,
                             members = members.split(","),
                             callId = callId,
@@ -100,5 +100,5 @@ enum class AppScreens(val destination: String) {
     Login("login"),
     CallJoin("call_join"),
     CallLobby("call_preview"),
-    DebugCall("debug_call"),
+    DirectCallJoin("direct_call_join"),
 }
