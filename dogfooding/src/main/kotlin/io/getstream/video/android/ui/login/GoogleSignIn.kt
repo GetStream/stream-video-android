@@ -29,7 +29,7 @@ import com.google.android.gms.common.api.ApiException
 import com.google.android.gms.tasks.Task
 
 @Composable
-fun rememberLauncherForGoogleSignInActivityResult(
+fun rememberRegisterForActivityResult(
     onSignInSuccess: (email: String) -> Unit,
     onSignInFailed: () -> Unit,
 ): ManagedActivityResultLauncher<Intent, ActivityResult> {
@@ -37,19 +37,20 @@ fun rememberLauncherForGoogleSignInActivityResult(
         ActivityResultContracts.StartActivityForResult(),
     ) { result ->
         if (result.resultCode != ComponentActivity.RESULT_OK) {
+            onSignInFailed.invoke()
+        }
+
+        val task: Task<GoogleSignInAccount> = GoogleSignIn.getSignedInAccountFromIntent(result.data)
+        try {
+            val account = task.getResult(ApiException::class.java)
+
+            account?.email?.let {
+                onSignInSuccess(it)
+            } ?: onSignInFailed()
+        } catch (e: ApiException) {
+            // The ApiException status code indicates the detailed failure reason.
+            // Please refer to the GoogleSignInStatusCodes class reference for more information.
             onSignInFailed()
-        } else {
-            val task: Task<GoogleSignInAccount> = GoogleSignIn.getSignedInAccountFromIntent(
-                result.data,
-            )
-            try {
-                val account = task.getResult(ApiException::class.java)
-                account?.email?.let { onSignInSuccess(it) } ?: onSignInFailed()
-            } catch (e: ApiException) {
-                // The ApiException status code indicates the detailed failure reason.
-                // Please refer to the GoogleSignInStatusCodes class reference for more information.
-                onSignInFailed()
-            }
         }
     }
 }

@@ -30,11 +30,10 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
-
 @HiltViewModel
 class DirectCallViewModel @Inject constructor(
     private val userDataStore: StreamUserDataStore,
-    private val googleAccountRepository: GoogleAccountRepository
+    private val googleAccountRepository: GoogleAccountRepository,
 ) : ViewModel() {
     private val _uiState = MutableStateFlow(DirectCallUiState())
     val uiState = _uiState.asStateFlow()
@@ -55,9 +54,9 @@ class DirectCallViewModel @Inject constructor(
                     googleAccounts = googleAccountRepository.getAllAccounts()?.map { user ->
                         GoogleAccountUiState(
                             isSelected = false,
-                            account = user
+                            account = user,
                         )
-                    }
+                    },
                 )
             }
         }
@@ -70,12 +69,12 @@ class DirectCallViewModel @Inject constructor(
                     if (index == selectedIndex) {
                         GoogleAccountUiState(
                             isSelected = !accountUiState.isSelected,
-                            account = accountUiState.account
+                            account = accountUiState.account,
                         )
                     } else {
                         accountUiState
                     }
-                }
+                },
             )
         }
     }
@@ -89,5 +88,5 @@ data class DirectCallUiState(
 
 data class GoogleAccountUiState(
     val isSelected: Boolean = false,
-    val account: GoogleAccount
+    val account: GoogleAccount,
 )

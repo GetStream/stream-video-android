@@ -73,7 +73,6 @@ import io.getstream.video.android.ui.theme.LinkTextData
 import io.getstream.video.android.ui.theme.StreamButton
 import io.getstream.video.android.util.GoogleSignInHelper
 
-
 @Composable
 fun LoginScreen(
     loginViewModel: LoginViewModel = hiltViewModel(),
@@ -285,7 +284,9 @@ private fun HandleLoginUiStates(
     LaunchedEffect(key1 = loginUiState) {
         when (loginUiState) {
             is LoginUiState.GoogleSignIn -> {
-                signInLauncher.launch(GoogleSignInHelper.getGoogleSignInClient(context).signInIntent)
+                signInLauncher.launch(
+                    GoogleSignInHelper.getGoogleSignInClient(context).signInIntent,
+                )
             }
 
             is LoginUiState.SignInComplete -> {
