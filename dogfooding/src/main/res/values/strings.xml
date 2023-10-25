@@ -37,7 +37,7 @@
     <string name="call_lobby_description">Try out a video call in this demo powered by Stream\'s video SDK</string>
     <string name="cannot_load_google_account_list">Cannot load user list.\nPlease try again or re-login into the app.</string>
     <string name="direct_call">Direct Call</string>
-    <string name="select_your_conversation_partners">Select your conversation partners below</string>
+    <string name="select_direct_call_users">Select users and tap the call button below</string>
     <plurals name="chat_typing">
         <item quantity="one">%s is typing</item>
         <item quantity="other">%s and %d more are typing</item>

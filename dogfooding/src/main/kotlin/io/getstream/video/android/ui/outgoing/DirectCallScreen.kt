@@ -97,7 +97,7 @@ private fun Header(user: User?) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(start = 24.dp, top = 24.dp, end = 12.dp, bottom = 24.dp) // Outer padding
+            .padding(24.dp) // Outer padding
             .padding(vertical = 12.dp), // Inner padding
         verticalAlignment = Alignment.CenterVertically,
     ) {
@@ -119,7 +119,7 @@ private fun Header(user: User?) {
         )
 
         Text(
-            text = stringResource(io.getstream.video.android.R.string.select_your_conversation_partners),
+            text = stringResource(io.getstream.video.android.R.string.select_direct_call_users),
             color = Color(0xFF979797),
             fontSize = 13.sp,
         )
