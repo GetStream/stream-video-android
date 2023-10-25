@@ -82,12 +82,11 @@ fun AppNavHost(
         composable(AppScreens.DirectCallJoin.destination) {
             val context = LocalContext.current
             DirectCallJoinScreen(
-                navigateToDirectCall = { callId, members ->
+                navigateToDirectCall = { members ->
                     context.startActivity(
                         DirectCallActivity.createIntent(
                             context,
                             members = members.split(","),
-                            callId = callId,
                         ),
                     )
                 },
