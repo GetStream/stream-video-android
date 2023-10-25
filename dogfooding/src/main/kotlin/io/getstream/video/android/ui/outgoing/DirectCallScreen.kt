@@ -86,7 +86,7 @@ fun DirectCallScreen(
             Body(
                 uiState = uiState,
                 toggleUserSelection = { viewModel.toggleGoogleAccountSelection(it) },
-                navigateToRingCall = navigateToRingCall
+                navigateToRingCall = navigateToRingCall,
             )
         }
     }
@@ -130,7 +130,7 @@ private fun Header(user: User?) {
 private fun Body(
     uiState: DirectCallUiState,
     toggleUserSelection: (Int) -> Unit,
-    navigateToRingCall: (callId: String, membersList: String) -> Unit
+    navigateToRingCall: (callId: String, membersList: String) -> Unit,
 ) {
     Box(
         modifier = Modifier
@@ -142,13 +142,13 @@ private fun Body(
                 modifier = Modifier
                     .size(50.dp)
                     .align(Alignment.Center),
-                color = VideoTheme.colors.primaryAccent
+                color = VideoTheme.colors.primaryAccent,
             )
         } else {
             uiState.googleAccounts?.let { users ->
                 UserList(
                     entries = users,
-                    onUserClick = { clickedIndex -> toggleUserSelection(clickedIndex) }
+                    onUserClick = { clickedIndex -> toggleUserSelection(clickedIndex) },
                 )
                 StreamImageButton( // Floating button
                     modifier = Modifier
@@ -161,9 +161,9 @@ private fun Body(
                             "123",
                             users
                                 .filter { it.isSelected }
-                                .joinToString(separator = ",") { it.account.id ?: "" }
+                                .joinToString(separator = ",") { it.account.id ?: "" },
                         )
-                    }
+                    },
                 )
             } ?: Text(
                 text = stringResource(io.getstream.video.android.R.string.cannot_load_google_account_list),
@@ -171,7 +171,7 @@ private fun Body(
                 color = Color.White,
                 fontSize = 16.sp,
                 textAlign = TextAlign.Center,
-                lineHeight = 24.sp
+                lineHeight = 24.sp,
             )
         }
     }
@@ -186,7 +186,7 @@ private fun UserList(entries: List<GoogleAccountUiState>, onUserClick: (Int) -> 
                 name = entry.account.name ?: "",
                 avatarUrl = entry.account.photoUrl,
                 isSelected = entry.isSelected,
-                onClick = { onUserClick(index) }
+                onClick = { onUserClick(index) },
             )
             Spacer(modifier = Modifier.height(10.dp))
         }
@@ -194,13 +194,19 @@ private fun UserList(entries: List<GoogleAccountUiState>, onUserClick: (Int) -> 
 }
 
 @Composable
-private fun UserRow(index: Int, name: String, avatarUrl: String?, isSelected: Boolean, onClick: (Int) -> Unit) {
+private fun UserRow(
+    index: Int,
+    name: String,
+    avatarUrl: String?,
+    isSelected: Boolean,
+    onClick: (Int) -> Unit,
+) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
             .clickable { onClick(index) },
         horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.CenterVertically
+        verticalAlignment = Alignment.CenterVertically,
     ) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             UserAvatar(avatarUrl)
@@ -218,10 +224,9 @@ private fun UserRow(index: Int, name: String, avatarUrl: String?, isSelected: Bo
             colors = RadioButtonDefaults.colors(
                 selectedColor = VideoTheme.colors.primaryAccent,
                 unselectedColor = Color.LightGray,
-            )
+            ),
         )
     }
-
 }
 
 @Composable
@@ -235,7 +240,7 @@ private fun UserAvatar(url: String?) {
         alpha = 0.8f,
         error = ColorPainter(color = Color.DarkGray),
         fallback = ColorPainter(color = Color.DarkGray),
-        placeholder = ColorPainter(color = Color.DarkGray)
+        placeholder = ColorPainter(color = Color.DarkGray),
     )
 }
 
@@ -261,7 +266,7 @@ private fun NetworkImage(
         alpha = alpha,
         error = error,
         fallback = fallback,
-        placeholder = placeholder
+        placeholder = placeholder,
     )
 }
 

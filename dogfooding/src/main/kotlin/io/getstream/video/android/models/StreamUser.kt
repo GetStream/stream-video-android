@@ -16,10 +16,10 @@
 
 package io.getstream.video.android.models
 
-data class GoogleAccount(
-    val email: String?,
-    val id: String?,
-    val name: String?,
-    val photoUrl: String?,
-    val isFavorite: Boolean = false,
+data class StreamUser(
+    val email: String,
+    val id: String,
+    val name: String,
+    val avatarUrl: String?,
+    val isFavorite: Boolean,
 )

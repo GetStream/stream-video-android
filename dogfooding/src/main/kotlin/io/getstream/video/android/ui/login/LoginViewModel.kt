@@ -48,7 +48,7 @@ import javax.inject.Inject
 @HiltViewModel
 class LoginViewModel @Inject constructor(
     private val dataStore: StreamUserDataStore,
-    private val googleAccountRepository: GoogleAccountRepository
+    private val googleAccountRepository: GoogleAccountRepository,
 ) : ViewModel() {
 
     private val event: MutableSharedFlow<LoginEvent> = MutableSharedFlow()

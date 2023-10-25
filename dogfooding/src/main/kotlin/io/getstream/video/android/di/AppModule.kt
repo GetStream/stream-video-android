@@ -36,5 +36,7 @@ object AppModule {
     }
 
     @Provides
-    fun provideGoogleAccountRepository(@ApplicationContext context: Context) = GoogleAccountRepository(context)
+    fun provideGoogleAccountRepository(
+        @ApplicationContext context: Context,
+    ) = GoogleAccountRepository(context)
 }
