@@ -72,6 +72,7 @@ import io.getstream.video.android.ui.theme.LinkText
 import io.getstream.video.android.ui.theme.LinkTextData
 import io.getstream.video.android.ui.theme.StreamButton
 import io.getstream.video.android.util.GoogleSignInHelper
+import io.getstream.video.android.util.UserIdHelper
 
 @Composable
 fun LoginScreen(
@@ -242,10 +243,7 @@ private fun EmailLoginDialog(
                             .fillMaxWidth()
                             .padding(horizontal = 16.dp),
                         onClick = {
-                            val userId = email
-                                .replace(" ", "")
-                                .replace(".", "")
-                                .replace("@", "")
+                            val userId = UserIdHelper.getUserIdFromEmail(email)
                             loginViewModel.handleUiEvent(LoginEvent.SignInSuccess(userId))
                         },
                         text = "Log in",
@@ -265,10 +263,7 @@ private fun HandleLoginUiStates(
     val context = LocalContext.current
     val signInLauncher = rememberLauncherForGoogleSignInActivityResult(
         onSignInSuccess = { email ->
-            val userId = email
-                .replace(" ", "")
-                .replace(".", "")
-                .replace("@", "")
+            val userId = UserIdHelper.getUserIdFromEmail(email)
             loginViewModel.handleUiEvent(LoginEvent.SignInSuccess(userId = userId))
         },
         onSignInFailed = {

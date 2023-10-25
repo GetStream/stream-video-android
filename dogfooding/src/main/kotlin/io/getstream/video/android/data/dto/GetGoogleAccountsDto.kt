@@ -17,6 +17,7 @@
 package io.getstream.video.android.data.dto
 
 import io.getstream.video.android.models.GoogleAccount
+import io.getstream.video.android.util.UserIdHelper
 import java.util.Locale
 
 data class GetGoogleAccountsResponseDto(
@@ -41,7 +42,7 @@ fun GoogleAccountDto.asDomainModel(): GoogleAccount {
 
     return GoogleAccount(
         email = email,
-        id = email?.replace(".", "_"),
+        id = email?.let { UserIdHelper.getUserIdFromEmail(it) },
         name = email
             ?.split("@")
             ?.firstOrNull()
