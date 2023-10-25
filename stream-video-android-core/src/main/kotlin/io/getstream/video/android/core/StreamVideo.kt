@@ -27,6 +27,7 @@ import io.getstream.video.android.core.model.QueriedCalls
 import io.getstream.video.android.core.model.QueriedMembers
 import io.getstream.video.android.core.model.SortField
 import io.getstream.video.android.core.notifications.NotificationHandler
+import io.getstream.video.android.core.utils.TokenUtils
 import io.getstream.video.android.model.Device
 import io.getstream.video.android.model.User
 import kotlinx.coroutines.Deferred
@@ -215,6 +216,13 @@ public interface StreamVideo : NotificationHandler {
             internalStreamVideo = null
         }
     }
+
+    /**
+     * Generate a developer token that can be used to connect users while the app is using a development environment.
+     *
+     * @param userId the desired id of the user to be connected.
+     */
+    public fun devToken(userId: String): String = TokenUtils.devToken(userId)
 
     public fun cleanup()
 }

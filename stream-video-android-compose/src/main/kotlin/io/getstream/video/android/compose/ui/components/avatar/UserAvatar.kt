@@ -44,7 +44,8 @@ import io.getstream.video.android.model.User
  *
  * Based on the state within the [User], we either show an image or their initials.
  *
- * @param user The user whose avatar we want to show.
+ * @param userName The user name whose avatar we want to show.
+ * @param userImage The user image whose avatar we want to show.
  * @param modifier Modifier for styling.
  * @param shape The shape of the avatar.
  * @param textStyle The [TextStyle] that will be used for the initials.
