@@ -24,7 +24,7 @@ import java.nio.charset.StandardCharsets
 
 internal object TokenUtils {
 
-    val logger by taggedLogger("Chat:TokenUtils")
+    val logger by taggedLogger("Video:TokenUtils")
 
     fun getUserId(token: String): String = try {
         JSONObject(
