@@ -94,7 +94,7 @@ fun CallJoinScreen(
     callJoinViewModel: CallJoinViewModel = hiltViewModel(),
     navigateToCallLobby: (callId: String) -> Unit,
     navigateUpToLogin: () -> Unit,
-    navigateToRingTest: () -> Unit,
+    navigateToDirectCallJoin: () -> Unit,
 ) {
     val uiState by callJoinViewModel.uiState.collectAsState(CallJoinUiState.Nothing)
     val isLoggedOut by callJoinViewModel.isLoggedOut.collectAsState(initial = false)
@@ -115,7 +115,7 @@ fun CallJoinScreen(
     ) {
         CallJoinHeader(
             callJoinViewModel = callJoinViewModel,
-            onRingTestClicked = navigateToRingTest,
+            onDirectCallClick = navigateToDirectCallJoin,
         )
 
         CallJoinBody(
@@ -144,7 +144,7 @@ fun CallJoinScreen(
 @Composable
 private fun CallJoinHeader(
     callJoinViewModel: CallJoinViewModel = hiltViewModel(),
-    onRingTestClicked: () -> Unit,
+    onDirectCallClick: () -> Unit,
 ) {
     val user by callJoinViewModel.user.collectAsState(initial = null)
 
@@ -167,18 +167,21 @@ private fun CallJoinHeader(
         Text(
             modifier = Modifier.weight(1f),
             color = Color.White,
-            text = user?.name?.ifBlank { user?.id }?.ifBlank { user!!.custom["email"] }
-                .orEmpty(),
+            text = user?.name?.ifBlank { user?.id }?.ifBlank { user!!.custom["email"] }.orEmpty(),
             maxLines = 1,
             fontSize = 16.sp,
         )
 
         if (BuildConfig.FLAVOR == "dogfooding") {
-            TextButton(
-                colors = ButtonDefaults.textButtonColors(contentColor = Color.White),
-                content = { Text(text = "Ring test") },
-                onClick = { onRingTestClicked.invoke() },
-            )
+            if (user?.custom?.get("email")?.contains("getstreamio") == true) {
+                TextButton(
+                    colors = ButtonDefaults.textButtonColors(contentColor = Color.White),
+                    content = { Text(text = stringResource(R.string.direct_call)) },
+                    onClick = { onDirectCallClick.invoke() },
+                )
+
+                Spacer(modifier = Modifier.width(5.dp))
+            }
 
             StreamButton(
                 modifier = Modifier.widthIn(125.dp),
@@ -417,7 +420,7 @@ private fun CallJoinScreenPreview() {
             callJoinViewModel = CallJoinViewModel(StreamUserDataStore.instance()),
             navigateToCallLobby = {},
             navigateUpToLogin = {},
-            navigateToRingTest = {},
+            navigateToDirectCallJoin = {},
         )
     }
 }

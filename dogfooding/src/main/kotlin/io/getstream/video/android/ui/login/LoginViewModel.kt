@@ -18,18 +18,18 @@ package io.getstream.video.android.ui.login
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.google.firebase.auth.FirebaseAuth
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.getstream.log.streamLog
 import io.getstream.video.android.API_KEY
 import io.getstream.video.android.BuildConfig
 import io.getstream.video.android.core.StreamVideo
+import io.getstream.video.android.data.repositories.GoogleAccountRepository
 import io.getstream.video.android.datastore.delegate.StreamUserDataStore
 import io.getstream.video.android.model.User
 import io.getstream.video.android.token.StreamVideoNetwork
 import io.getstream.video.android.token.TokenResponse
 import io.getstream.video.android.util.StreamVideoInitHelper
-import io.getstream.video.android.util.UserIdGenerator
+import io.getstream.video.android.util.UserIdHelper
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -48,6 +48,7 @@ import javax.inject.Inject
 @HiltViewModel
 class LoginViewModel @Inject constructor(
     private val dataStore: StreamUserDataStore,
+    private val googleAccountRepository: GoogleAccountRepository,
 ) : ViewModel() {
 
     private val event: MutableSharedFlow<LoginEvent> = MutableSharedFlow()
@@ -56,7 +57,7 @@ class LoginViewModel @Inject constructor(
             when (event) {
                 is LoginEvent.Loading -> flowOf(LoginUiState.Loading)
                 is LoginEvent.GoogleSignIn -> flowOf(LoginUiState.GoogleSignIn)
-                is LoginEvent.SignInInSuccess -> signInInSuccess(event.userId)
+                is LoginEvent.SignInSuccess -> signInSuccess(event.userId)
                 else -> flowOf(LoginUiState.Nothing)
             }
         }.shareIn(viewModelScope, SharingStarted.Lazily, 0)
@@ -65,36 +66,34 @@ class LoginViewModel @Inject constructor(
         viewModelScope.launch { this@LoginViewModel.event.emit(event) }
     }
 
-    private fun signInInSuccess(email: String) = flow {
+    private fun signInSuccess(email: String) = flow {
         // skip login if we are already logged in (use has navigated back)
         if (StreamVideo.isInstalled) {
             emit(LoginUiState.AlreadyLoggedIn)
         } else {
             try {
-                val response = StreamVideoNetwork.tokenService.fetchToken(
+                val tokenResponse = StreamVideoNetwork.tokenService.fetchToken(
                     userId = email,
                     apiKey = API_KEY,
                 )
 
-                // if we are logged in with Google account then read the data (demo app doesn't have
-                // firebase login)
-                val authFirebaseUser = FirebaseAuth.getInstance().currentUser
+                val loggedInUser = googleAccountRepository.getCurrentUser()
                 val user = User(
-                    id = response.userId,
-                    name = authFirebaseUser?.displayName ?: "",
-                    image = authFirebaseUser?.photoUrl?.toString() ?: "",
+                    id = tokenResponse.userId,
+                    name = loggedInUser.name ?: "",
+                    image = loggedInUser.photoUrl ?: "",
                     role = "admin",
-                    custom = mapOf("email" to response.userId),
+                    custom = mapOf("email" to tokenResponse.userId),
                 )
 
                 // Store the data in the demo app
                 dataStore.updateUser(user)
-                dataStore.updateUserToken(response.token)
+                dataStore.updateUserToken(tokenResponse.token)
 
                 // Init the Video SDK with the data
                 StreamVideoInitHelper.loadSdk(dataStore)
 
-                emit(LoginUiState.SignInComplete(response))
+                emit(LoginUiState.SignInComplete(tokenResponse))
             } catch (exception: Throwable) {
                 emit(LoginUiState.SignInFailure(exception.message ?: "General error"))
                 streamLog { "Failed to fetch token - cause: $exception" }
@@ -103,17 +102,17 @@ class LoginViewModel @Inject constructor(
     }.flowOn(Dispatchers.IO)
 
     init {
-        sigInInIfValidUserExist()
+        signInIfValidUserExist()
     }
 
-    fun sigInInIfValidUserExist() {
+    fun signInIfValidUserExist() {
         viewModelScope.launch {
             val user = dataStore.user.firstOrNull()
             if (user != null) {
                 handleUiEvent(LoginEvent.Loading)
                 if (!BuildConfig.BENCHMARK.toBoolean()) {
                     delay(10)
-                    handleUiEvent(LoginEvent.SignInInSuccess(userId = user.id))
+                    handleUiEvent(LoginEvent.SignInSuccess(userId = user.id))
                 }
             } else {
                 // Production apps have an automatic guest login. Logging the user out
@@ -121,8 +120,8 @@ class LoginViewModel @Inject constructor(
                 if (BuildConfig.FLAVOR == "production") {
                     handleUiEvent(LoginEvent.Loading)
                     handleUiEvent(
-                        LoginEvent.SignInInSuccess(
-                            UserIdGenerator.generateRandomString(upperCaseOnly = true),
+                        LoginEvent.SignInSuccess(
+                            UserIdHelper.generateRandomString(upperCaseOnly = true),
                         ),
                     )
                 }
@@ -152,5 +151,5 @@ sealed interface LoginEvent {
 
     data class GoogleSignIn(val id: String = UUID.randomUUID().toString()) : LoginEvent
 
-    data class SignInInSuccess(val userId: String) : LoginEvent
+    data class SignInSuccess(val userId: String) : LoginEvent
 }

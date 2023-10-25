@@ -50,7 +50,7 @@ import java.util.UUID
 import javax.inject.Inject
 
 @AndroidEntryPoint
-class RingCallActivity : ComponentActivity() {
+class DirectCallActivity : ComponentActivity() {
 
     @Inject
     lateinit var dataStore: StreamUserDataStore
@@ -87,9 +87,9 @@ class RingCallActivity : ComponentActivity() {
             if (result is Result.Failure) {
                 // Failed to recover the current state of the call
                 // TODO: Automaticly call this in the SDK?
-                Log.e("RingCallActivity", "Call.create failed ${result.value}")
+                Log.e("DirectCallActivity", "Call.create failed ${result.value}")
                 Toast.makeText(
-                    this@RingCallActivity,
+                    this@DirectCallActivity,
                     "Failed get call status (${result.value.message})",
                     Toast.LENGTH_SHORT,
                 ).show()
@@ -163,7 +163,7 @@ class RingCallActivity : ComponentActivity() {
             callId: String? = null,
             members: List<String>,
         ): Intent {
-            return Intent(context, RingCallActivity::class.java).apply {
+            return Intent(context, DirectCallActivity::class.java).apply {
                 putExtra(EXTRA_CID, callId)
                 putExtra(EXTRA_MEMBERS_ARRAY, members.toTypedArray())
             }

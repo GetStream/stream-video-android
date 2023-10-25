@@ -242,6 +242,8 @@ dependencies {
     implementation(libs.androidx.hilt.navigation)
     implementation(libs.landscapist.coil)
     implementation(libs.accompanist.permission)
+    implementation(libs.androidx.lifecycle.runtime.compose)
+    implementation(libs.coil.compose)
 
     // hilt
     implementation(libs.hilt.android)
@@ -250,6 +252,9 @@ dependencies {
     // firebase
     implementation(libs.firebase.crashlytics)
     implementation(libs.firebase.analytics)
+
+    // moshi
+    implementation(libs.moshi.kotlin)
 
     // Play Install Referrer library - used to extract the meeting link from demo flow after install
     implementation(libs.play.install.referrer)
