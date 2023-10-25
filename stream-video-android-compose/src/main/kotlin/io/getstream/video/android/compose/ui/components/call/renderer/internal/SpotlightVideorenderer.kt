@@ -1,39 +1,47 @@
+/*
+ * Copyright (c) 2014-2023 Stream.io Inc. All rights reserved.
+ *
+ * Licensed under the Stream License;
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    https://github.com/GetStream/stream-video-android/blob/main/LICENSE
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package io.getstream.video.android.compose.ui.components.call.renderer.internal
 
-import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Box
+import android.content.res.Configuration.ORIENTATION_LANDSCAPE
 import androidx.compose.foundation.layout.BoxWithConstraints
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.grid.GridCells
-import androidx.compose.foundation.lazy.grid.GridItemSpan
-import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.layout.wrapContentWidth
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
-import androidx.compose.ui.Alignment
+import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment.Companion.CenterHorizontally
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.unit.dp
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.call.renderer.ParticipantVideo
-import io.getstream.video.android.compose.ui.components.call.renderer.ParticipantsGrid
 import io.getstream.video.android.compose.ui.components.call.renderer.VideoRendererStyle
-import io.getstream.video.android.compose.ui.components.call.renderer.copy
 import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.ParticipantState
-import io.getstream.video.android.core.model.ScreenSharingSession
 import me.saket.telephoto.zoomable.rememberZoomableState
 import me.saket.telephoto.zoomable.zoomable
-
 
 @Composable
 internal fun SpotlightVideoRenderer(
     call: Call,
+    speaker: ParticipantState?,
+    participants: List<ParticipantState>,
     orientation: Int,
     modifier: Modifier,
     isZoomable: Boolean,
@@ -50,78 +58,51 @@ internal fun SpotlightVideoRenderer(
             participant = videoParticipant,
             style = videoStyle,
         )
-    }
+    },
 ) {
-    val participants by call.state.participants.collectAsStateWithLifecycle()
-    val dominantSpeaker by call.state.dominantSpeaker.collectAsStateWithLifecycle()
-
-    val speaker = dominantSpeaker ?: participants.firstOrNull()
-
-        BoxWithConstraints(modifier = modifier.fillMaxSize()) {
-            val gridState = lazyGridStateWithVisibilityNotification(call = call)
-            LazyVerticalGrid(
-                modifier = Modifier.fillMaxWidth(),
-                columns = GridCells.Fixed(2),
-                state = gridState,
-                content = {
-                    item(
-                        key = "spotlight",
-                        span = { GridItemSpan(2) }
-                    ) {
-                        SpotlightParticipantRenderer(
-                            participant = dominantSpeaker,
-                            call = call,
-                            isZoomable = isZoomable,
-                            style = style,
-                            videoRenderer = videoRenderer
-                        )
-                    }
-                    items(
-                        count = participants.size,
-                        key = { participants[it].sessionId },
-                    ) { key ->
-                        val itemHeight = with(LocalDensity.current) {
-                            (constraints.maxHeight / 6).toDp()
-                        }
-                        val participant = participants[key]
-                        videoRenderer.invoke(
-                            modifier = modifier.height(itemHeight),
-                            call = call,
-                            participant = participant,
-                            style = style.copy(
-                                isFocused = dominantSpeaker?.sessionId == participant.sessionId,
-                            ),
-                        )
-                    }
-                },
-            )
+    val derivedParticipants by remember(key1 = participants) {
+        derivedStateOf {
+            participants.filterNot {
+                it.sessionId == speaker?.sessionId
+            }
         }
-}
+    }
+    val spotlightFractions = if (ORIENTATION_LANDSCAPE == orientation) {
+        Pair(0.6f, 0.4f)
+    } else {
+        Pair(0.8f, 0.2f)
+    }
 
-@Composable
-internal fun SpotlightParticipantRenderer(call: Call,
-                                 participant: ParticipantState?,
-                                 modifier: Modifier = Modifier,
-                                 style: VideoRendererStyle,
-                                 labelPosition: Alignment = Alignment.BottomStart,
-                                 isShowConnectionQualityIndicator: Boolean = true,
-                                 isZoomable: Boolean = true,
-                                 videoRenderer: @Composable (modifier: Modifier, call: Call, participant: ParticipantState, style: VideoRendererStyle) -> Unit
-) {
-    val zoomableState = rememberZoomableState()
-    Box(modifier = modifier
-        .fillMaxWidth()
-        .zoomable(
-            state = zoomableState,
-            enabled = isZoomable,
-        )
-    ) {
-        if (participant != null) {
-            videoRenderer.invoke(Modifier.fillMaxSize(), call, participant, style)
-        } else {
-            Box(modifier = Modifier
-                .fillMaxHeight(0.4f)
-                .background(VideoTheme.colors.appBackground)
+    val listState =
+        lazyStateWithVisibilityNotification(call = call, original = rememberLazyListState())
+    BoxWithConstraints(modifier = modifier.fillMaxSize()) {
+        Column {
+            this@BoxWithConstraints.SpotlightContentPortrait(
+                modifier = modifier,
+                fractionHeight = spotlightFractions.first,
+                background = VideoTheme.colors.participantContainerBackground,
+            ) {
+                if (speaker != null) {
+                    videoRenderer.invoke(
+                        Modifier
+                            .fillMaxSize()
+                            .zoomable(rememberZoomableState(), isZoomable),
+                        call,
+                        speaker,
+                        style,
+                    )
+                }
+            }
+            LazyRowVideoRenderer(
+                state = listState,
+                modifier = Modifier.wrapContentWidth().align(
+                    CenterHorizontally,
+                ).fillMaxHeight(spotlightFractions.second),
+                call = call,
+                participants = derivedParticipants,
+                dominantSpeaker = speaker,
+                style = style,
+                videoRenderer = videoRenderer,
             )
         }
     }

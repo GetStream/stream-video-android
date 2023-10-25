@@ -28,6 +28,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
@@ -149,7 +150,11 @@ internal fun BoxScope.LandscapeVideoRenderer(
 
         else -> {
             BoxWithConstraints(modifier = Modifier.fillMaxHeight()) {
-                val gridState = lazyGridStateWithVisibilityNotification(call = call)
+                val gridState =
+                    lazyStateWithVisibilityNotification(
+                        call = call,
+                        original = rememberLazyGridState(),
+                    )
                 LazyVerticalGrid(
                     modifier = Modifier.fillMaxSize(),
                     state = gridState,

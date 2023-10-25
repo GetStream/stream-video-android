@@ -19,13 +19,13 @@ package io.getstream.video.android.compose.ui.components.call.renderer.internal
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import io.getstream.video.android.compose.theme.VideoTheme
@@ -45,13 +45,19 @@ import io.getstream.video.android.mock.mockParticipantList
  * @param call The state of the call.
  * @param participants List of participants to show.
  * @param modifier Modifier for styling.
+ * @param state [LazyListState] if needed from outside
  */
 @Composable
 internal fun LazyRowVideoRenderer(
     modifier: Modifier = Modifier,
+    itemModifier: Modifier = Modifier.size(
+        VideoTheme.dimens.screenShareParticipantItemSize * 1.5f,
+        VideoTheme.dimens.screenShareParticipantItemSize,
+    ),
     call: Call,
     participants: List<ParticipantState>,
     dominantSpeaker: ParticipantState?,
+    state: LazyListState = rememberLazyListState(),
     style: VideoRendererStyle = ScreenSharingVideoRendererStyle(),
     videoRenderer: @Composable (
         modifier: Modifier,
@@ -68,6 +74,7 @@ internal fun LazyRowVideoRenderer(
     },
 ) {
     LazyRow(
+        state = state,
         modifier = modifier.padding(
             horizontal = VideoTheme.dimens.screenShareParticipantsRowPadding,
         ),
@@ -78,6 +85,7 @@ internal fun LazyRowVideoRenderer(
         content = {
             items(items = participants, key = { it.sessionId }) { participant ->
                 ListVideoRenderer(
+                    modifier = itemModifier,
                     call = call,
                     participant = participant,
                     dominantSpeaker = dominantSpeaker,
@@ -97,6 +105,7 @@ internal fun LazyRowVideoRenderer(
  */
 @Composable
 private fun ListVideoRenderer(
+    modifier: Modifier = Modifier,
     call: Call,
     participant: ParticipantState,
     dominantSpeaker: ParticipantState?,
@@ -115,12 +124,8 @@ private fun ListVideoRenderer(
         )
     },
 ) {
-    val height = VideoTheme.dimens.screenShareParticipantItemSize
-    val width = height * 1.5f
     videoRenderer.invoke(
-        modifier = Modifier
-            .size(width, height)
-            .clip(RoundedCornerShape(VideoTheme.dimens.screenShareParticipantsRadius)),
+        modifier = modifier,
         call = call,
         participant = participant,
         style = style.copy(

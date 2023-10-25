@@ -181,7 +181,7 @@ public data class SpotlightVideoRendererStyle(
     override val reactionDuration: Int = 1000,
     override val reactionPosition: Alignment = Alignment.Center,
 
-    ) : VideoRendererStyle(
+) : VideoRendererStyle(
     isFocused,
     isScreenSharing,
     isShowingReactions,

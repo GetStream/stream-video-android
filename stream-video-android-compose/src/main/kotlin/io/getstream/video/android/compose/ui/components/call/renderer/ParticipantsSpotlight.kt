@@ -16,24 +16,21 @@
 
 package io.getstream.video.android.compose.ui.components.call.renderer
 
-import android.content.res.Configuration.ORIENTATION_PORTRAIT
 import android.util.Log
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.getstream.video.android.compose.theme.VideoTheme
-import io.getstream.video.android.compose.ui.components.call.renderer.internal.LandscapeScreenSharingVideoRenderer
-import io.getstream.video.android.compose.ui.components.call.renderer.internal.PortraitScreenSharingVideoRenderer
 import io.getstream.video.android.compose.ui.components.call.renderer.internal.SpotlightVideoRenderer
 import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.ParticipantState
-import io.getstream.video.android.core.model.ScreenSharingSession
 
 /**
  * Renders all the CallParticipants, based on the number of people in a call and the call state.
@@ -41,7 +38,6 @@ import io.getstream.video.android.core.model.ScreenSharingSession
  * accordingly.
  *
  * @param call The call that contains all the participants state and tracks.
- * @param session The screen sharing session which is active.
  * @param modifier Modifier for styling.
  * @param isZoomable Decide to this screensharing video renderer is zoomable or not.
  * @param style Defined properties for styling a single video call track.
@@ -68,20 +64,35 @@ public fun ParticipantsSpotlight(
     },
 ) {
     val configuration = LocalConfiguration.current
-
-    Box(modifier = modifier
-        .fillMaxSize()
-        .padding(VideoTheme.dimens.participantsGridPadding)
-    ) {
-            // Either the dominant speaker, or the first participant in the spotlight
-            SpotlightVideoRenderer(
-                call = call,
-                orientation = configuration.orientation,
-                modifier = modifier.fillMaxSize(),
-                isZoomable = isZoomable,
-                style = style,
-                videoRenderer = videoRenderer,
-            )
+    val participants by call.state.participants.collectAsStateWithLifecycle(emptyList())
+    val dominantSpeaker by call.state.dominantSpeaker.collectAsStateWithLifecycle()
+    val pinnedParticipant by call.state.pinnedParticipants.collectAsStateWithLifecycle()
+    val speaker by remember(key1 = dominantSpeaker, key2 = pinnedParticipant, key3 = participants) {
+        derivedStateOf {
+            val pinnedSpeakerId = pinnedParticipant.keys.firstOrNull()
+            val pinnedSpeaker = participants.find { it.sessionId == pinnedSpeakerId }
+            pinnedSpeaker ?: dominantSpeaker ?: participants.firstOrNull()
         }
+    }
 
+    Box(
+        modifier = modifier
+            .fillMaxSize()
+            .padding(VideoTheme.dimens.participantsGridPadding),
+    ) {
+        Log.d("SPOTLIGHT", "${speaker?.sessionId}")
+        Log.d("SPOTLIGHT", participants.map { it.sessionId }.toTypedArray().contentToString())
+        Log.d("SPOTLIGHT", pinnedParticipant.keys.toTypedArray().contentToString())
+        // Either the dominant speaker, or the first participant in the spotlight
+        SpotlightVideoRenderer(
+            call = call,
+            speaker = speaker,
+            participants = participants,
+            orientation = configuration.orientation,
+            modifier = modifier.fillMaxSize(),
+            isZoomable = isZoomable,
+            style = style,
+            videoRenderer = videoRenderer,
+        )
+    }
 }
