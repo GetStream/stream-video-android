@@ -16,16 +16,12 @@
 
 package io.getstream.video.android.compose.ui.components.indicator
 
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.material.Icon
+import androidx.compose.foundation.layout.Column
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import io.getstream.video.android.compose.theme.VideoTheme
-import io.getstream.video.android.ui.common.R
 
 /**
  * Used to indicate the sound state of a given participant. Either shows a mute icon or the sound
@@ -34,7 +30,7 @@ import io.getstream.video.android.ui.common.R
  * @param modifier Modifier for styling.
  * @param isSpeaking Represents is user speaking or not.
  * @param isAudioEnabled Represents is audio enabled or not.
- * @param audioLevels Indicates the audio level that will be drawn.
+ * @param audioLevel Indicates the audio level that will be drawn.
  */
 @Composable
 public fun SoundIndicator(
@@ -43,20 +39,19 @@ public fun SoundIndicator(
     isAudioEnabled: Boolean,
     audioLevel: Float,
 ) {
-    if (isAudioEnabled && isSpeaking) {
-        AudioVolumeIndicator(
-            modifier = modifier.padding(end = VideoTheme.dimens.audioLevelIndicatorBarPadding),
-            audioLevels = audioLevel,
-        )
-    } else if (!isAudioEnabled) {
-        Icon(
-            modifier = modifier
-                .size(VideoTheme.dimens.microphoneIndicatorSize)
-                .padding(end = VideoTheme.dimens.microphoneIndicatorPadding),
-            painter = painterResource(id = R.drawable.stream_video_ic_mic_off),
-            tint = VideoTheme.colors.errorAccent,
-            contentDescription = null,
-        )
+    GenericIndicator(
+        modifier = modifier,
+        backgroundColor = VideoTheme.colors.audioIndicatorBackground,
+        shape = VideoTheme.shapes.indicatorBackground,
+    ) {
+        if (isAudioEnabled && isSpeaking) {
+            AudioVolumeIndicator(
+                modifier = Modifier.align(Alignment.Center),
+                audioLevels = audioLevel,
+            )
+        } else {
+            MicrophoneIndicator(isMicrophoneEnabled = isAudioEnabled)
+        }
     }
 }
 
@@ -64,7 +59,7 @@ public fun SoundIndicator(
 @Composable
 private fun SoundIndicatorPreview() {
     VideoTheme {
-        Row {
+        Column {
             SoundIndicator(
                 isSpeaking = true,
                 isAudioEnabled = true,
@@ -73,6 +68,11 @@ private fun SoundIndicatorPreview() {
             SoundIndicator(
                 isSpeaking = false,
                 isAudioEnabled = false,
+                audioLevel = 0.5f,
+            )
+            SoundIndicator(
+                isSpeaking = false,
+                isAudioEnabled = true,
                 audioLevel = 0.5f,
             )
         }

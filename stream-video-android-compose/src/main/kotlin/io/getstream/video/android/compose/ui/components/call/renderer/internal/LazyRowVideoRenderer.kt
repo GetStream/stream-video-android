@@ -115,9 +115,11 @@ private fun ListVideoRenderer(
         )
     },
 ) {
+    val height = VideoTheme.dimens.screenShareParticipantItemSize
+    val width = height * 1.5f
     videoRenderer.invoke(
         modifier = Modifier
-            .size(VideoTheme.dimens.screenShareParticipantItemSize)
+            .size(width, height)
             .clip(RoundedCornerShape(VideoTheme.dimens.screenShareParticipantsRadius)),
         call = call,
         participant = participant,

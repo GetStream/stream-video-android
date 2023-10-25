@@ -111,7 +111,7 @@ public data class RegularVideoRendererStyle(
     override val isShowingConnectionQualityIndicator: Boolean = true,
     override val labelPosition: Alignment = Alignment.BottomStart,
     override val reactionDuration: Int = 650,
-    override val reactionPosition: Alignment = Alignment.Center,
+    override val reactionPosition: Alignment = Alignment.TopEnd,
 
 ) : VideoRendererStyle(
     isFocused,

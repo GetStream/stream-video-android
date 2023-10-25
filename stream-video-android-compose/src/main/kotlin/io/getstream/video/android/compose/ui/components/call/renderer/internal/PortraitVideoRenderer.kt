@@ -24,6 +24,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.runtime.Composable
@@ -89,12 +90,16 @@ internal fun BoxScope.PortraitVideoRenderer(
         return
     }
 
+    val paddedModifier = modifier.padding(VideoTheme.dimens.participantsGridPadding)
     when (callParticipants.size) {
-        1 -> {
-            val participant = callParticipants.first()
-
+        1, 2 -> {
+            val participant = if (remoteParticipants.isEmpty()) {
+                callParticipants.first()
+            } else {
+                remoteParticipants.first()
+            }
             videoRenderer.invoke(
-                modifier = modifier,
+                modifier = paddedModifier,
                 call = call,
                 participant = participant,
                 style = style.copy(
@@ -103,221 +108,45 @@ internal fun BoxScope.PortraitVideoRenderer(
             )
         }
 
-        2 -> {
-            val participant = remoteParticipants.first()
-
-            videoRenderer.invoke(
-                modifier = modifier,
-                call = call,
-                participant = participant,
-                style = style.copy(
-                    isFocused = dominantSpeaker?.sessionId == participant.sessionId,
-                ),
+        3, 4 -> {
+            ParticipantColumn(
+                modifier,
+                remoteParticipants,
+                videoRenderer,
+                paddedModifier,
+                call,
+                style,
+                dominantSpeaker,
+                0,
             )
         }
 
-        3 -> {
-            val firstParticipant = remoteParticipants[0]
-            val secondParticipant = remoteParticipants[1]
+        5, 6 -> {
+            val columnSize = if (callParticipants.size == 5) Pair(3, 2) else Pair(3, 3)
 
-            Column(modifier) {
-                videoRenderer.invoke(
-                    modifier = Modifier.weight(1f),
+            Row(modifier) {
+                ParticipantColumn(
+                    modifier = modifier.weight(1f),
+                    remoteParticipants = callParticipants.take(columnSize.first),
+                    videoRenderer = videoRenderer,
+                    paddedModifier = paddedModifier,
                     call = call,
-                    participant = firstParticipant,
-                    style = style.copy(
-                        isFocused = dominantSpeaker?.sessionId == firstParticipant.sessionId,
-                    ),
+                    style = style,
+                    dominantSpeaker = dominantSpeaker,
                 )
 
-                videoRenderer.invoke(
-                    modifier = Modifier.weight(1f),
+                ParticipantColumn(
+                    modifier = modifier.weight(1f),
+                    remoteParticipants = callParticipants.takeLast(columnSize.second),
+                    videoRenderer = videoRenderer,
+                    paddedModifier = paddedModifier,
                     call = call,
-                    participant = secondParticipant,
-                    style = style.copy(
-                        isFocused = dominantSpeaker?.sessionId == secondParticipant.sessionId,
-                    ),
+                    style = style,
+                    dominantSpeaker = dominantSpeaker,
+                    expectedColumnSize = columnSize.first,
                 )
             }
         }
-
-        4 -> {
-            val firstParticipant = callParticipants[0]
-            val secondParticipant = callParticipants[1]
-            val thirdParticipant = callParticipants[2]
-            val fourthParticipant = callParticipants[3]
-
-            Row(modifier) {
-                Column(modifier = Modifier.weight(1f)) {
-                    videoRenderer.invoke(
-                        modifier = Modifier.weight(1f),
-                        call = call,
-                        participant = firstParticipant,
-                        style = style.copy(
-                            isFocused = dominantSpeaker?.sessionId == firstParticipant.sessionId,
-                        ),
-                    )
-
-                    videoRenderer.invoke(
-                        modifier = Modifier.weight(1f),
-                        call = call,
-                        participant = secondParticipant,
-                        style = style.copy(
-                            isFocused = dominantSpeaker?.sessionId == secondParticipant.sessionId,
-                        ),
-                    )
-                }
-
-                Column(modifier = Modifier.weight(1f)) {
-                    videoRenderer.invoke(
-                        modifier = Modifier.weight(1f),
-                        call = call,
-                        participant = thirdParticipant,
-                        style = style.copy(
-                            isFocused = dominantSpeaker?.sessionId == thirdParticipant.sessionId,
-                        ),
-                    )
-
-                    videoRenderer.invoke(
-                        modifier = Modifier.weight(1f),
-                        call = call,
-                        participant = fourthParticipant,
-                        style = style.copy(
-                            isFocused = dominantSpeaker?.sessionId == fourthParticipant.sessionId,
-                        ),
-                    )
-                }
-            }
-        }
-
-        5 -> {
-            val firstParticipant = callParticipants[0]
-            val secondParticipant = callParticipants[1]
-            val thirdParticipant = callParticipants[2]
-            val fourthParticipant = callParticipants[3]
-            val fifthParticipant = callParticipants[4]
-
-            Row(modifier) {
-                Column(modifier = Modifier.weight(1f)) {
-                    videoRenderer.invoke(
-                        modifier = Modifier.weight(1f),
-                        call = call,
-                        participant = firstParticipant,
-                        style = style.copy(
-                            isFocused = dominantSpeaker?.sessionId == firstParticipant.sessionId,
-                        ),
-                    )
-
-                    videoRenderer.invoke(
-                        modifier = Modifier.weight(1f),
-                        call = call,
-                        participant = secondParticipant,
-                        style = style.copy(
-                            isFocused = dominantSpeaker?.sessionId == secondParticipant.sessionId,
-                        ),
-                    )
-                }
-
-                Column(modifier = Modifier.weight(1f)) {
-                    videoRenderer.invoke(
-                        modifier = Modifier.weight(1f),
-                        call = call,
-                        participant = thirdParticipant,
-                        style = style.copy(
-                            isFocused = dominantSpeaker?.sessionId == thirdParticipant.sessionId,
-                        ),
-                    )
-
-                    videoRenderer.invoke(
-                        modifier = Modifier.weight(1f),
-                        call = call,
-                        participant = fourthParticipant,
-                        style = style.copy(
-                            isFocused = dominantSpeaker?.sessionId == fourthParticipant.sessionId,
-                        ),
-                    )
-
-                    videoRenderer.invoke(
-                        modifier = Modifier.weight(1f),
-                        call = call,
-                        participant = fifthParticipant,
-                        style = style.copy(
-                            isFocused = dominantSpeaker?.sessionId == fifthParticipant.sessionId,
-                        ),
-                    )
-                }
-            }
-        }
-
-        6 -> {
-            val firstParticipant = callParticipants[0]
-            val secondParticipant = callParticipants[1]
-            val thirdParticipant = callParticipants[2]
-            val fourthParticipant = callParticipants[3]
-            val fifthParticipant = callParticipants[4]
-            val sixthParticipant = callParticipants[5]
-
-            Row(modifier) {
-                Column(modifier = Modifier.weight(1f)) {
-                    videoRenderer.invoke(
-                        modifier = Modifier.weight(1f),
-                        call = call,
-                        participant = firstParticipant,
-                        style = style.copy(
-                            isFocused = dominantSpeaker?.sessionId == firstParticipant.sessionId,
-                        ),
-                    )
-
-                    videoRenderer.invoke(
-                        modifier = Modifier.weight(1f),
-                        call = call,
-                        participant = secondParticipant,
-                        style = style.copy(
-                            isFocused = dominantSpeaker?.sessionId == secondParticipant.sessionId,
-                        ),
-                    )
-
-                    videoRenderer.invoke(
-                        modifier = Modifier.weight(1f),
-                        call = call,
-                        participant = thirdParticipant,
-                        style = style.copy(
-                            isFocused = dominantSpeaker?.sessionId == thirdParticipant.sessionId,
-                        ),
-                    )
-                }
-
-                Column(modifier = Modifier.weight(1f)) {
-                    videoRenderer.invoke(
-                        modifier = Modifier.weight(1f),
-                        call = call,
-                        participant = fourthParticipant,
-                        style = style.copy(
-                            isFocused = dominantSpeaker?.sessionId == fourthParticipant.sessionId,
-                        ),
-                    )
-
-                    videoRenderer.invoke(
-                        modifier = Modifier.weight(1f),
-                        call = call,
-                        participant = fifthParticipant,
-                        style = style.copy(
-                            isFocused = dominantSpeaker?.sessionId == fifthParticipant.sessionId,
-                        ),
-                    )
-
-                    videoRenderer.invoke(
-                        modifier = Modifier.weight(1f),
-                        call = call,
-                        participant = sixthParticipant,
-                        style = style.copy(
-                            isFocused = dominantSpeaker?.sessionId == sixthParticipant.sessionId,
-                        ),
-                    )
-                }
-            }
-        }
-
         else -> {
             BoxWithConstraints(modifier = Modifier.fillMaxSize()) {
                 val gridState = lazyGridStateWithVisibilityNotification(call = call)
@@ -336,7 +165,7 @@ internal fun BoxScope.PortraitVideoRenderer(
                             }
                             val participant = callParticipants[key]
                             videoRenderer.invoke(
-                                modifier = modifier.height(itemHeight),
+                                modifier = paddedModifier.height(itemHeight),
                                 call = call,
                                 participant = participant,
                                 style = style.copy(
@@ -350,7 +179,7 @@ internal fun BoxScope.PortraitVideoRenderer(
         }
     }
 
-    if (callParticipants.size in 2..3) {
+    if (callParticipants.size in 2..4) {
         val currentLocal by call.state.me.collectAsStateWithLifecycle()
 
         if (currentLocal != null || LocalInspectionMode.current) {
@@ -364,6 +193,40 @@ internal fun BoxScope.PortraitVideoRenderer(
                 style = style.copy(isShowingConnectionQualityIndicator = false),
                 parentBounds = parentSize,
             )
+        }
+    }
+}
+
+@Composable
+private fun ParticipantColumn(
+    modifier: Modifier,
+    remoteParticipants: List<ParticipantState>,
+    videoRenderer: @Composable (
+        modifier: Modifier,
+        call: Call,
+        participant: ParticipantState,
+        style: VideoRendererStyle,
+    ) -> Unit,
+    paddedModifier: Modifier,
+    call: Call,
+    style: VideoRendererStyle,
+    dominantSpeaker: ParticipantState?,
+    expectedColumnSize: Int = remoteParticipants.size,
+) {
+    Column(modifier) {
+        repeat(remoteParticipants.size) {
+            val participant = remoteParticipants[it]
+            videoRenderer.invoke(
+                modifier = paddedModifier.weight(1f),
+                call = call,
+                participant = participant,
+                style = style.copy(
+                    isFocused = dominantSpeaker?.sessionId == participant.sessionId,
+                ),
+            )
+        }
+        repeat(expectedColumnSize - remoteParticipants.size) {
+            Box(modifier = paddedModifier.weight(1f))
         }
     }
 }

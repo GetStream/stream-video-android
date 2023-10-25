@@ -17,8 +17,10 @@
 package io.getstream.video.android.compose.ui.components.avatar
 
 import androidx.annotation.DrawableRes
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.runtime.Composable
@@ -35,7 +37,6 @@ import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import io.getstream.video.android.compose.theme.VideoTheme
-import io.getstream.video.android.compose.ui.components.background.ParticipantImageBackground
 import io.getstream.video.android.mock.StreamMockUtils
 import io.getstream.video.android.mock.mockUsers
 
@@ -62,40 +63,44 @@ public fun UserAvatarBackground(
     userImage: String?,
     modifier: Modifier = Modifier,
     shape: Shape = VideoTheme.shapes.avatar,
-    avatarSize: Dp = 72.dp,
+    avatarSize: Dp = 84.dp,
     avatarShadowElevation: Dp = 12.dp,
     textStyle: TextStyle = VideoTheme.typography.title3Bold,
     contentScale: ContentScale = ContentScale.Crop,
     contentDescription: String? = null,
     requestSize: IntSize = IntSize(DEFAULT_IMAGE_SIZE, DEFAULT_IMAGE_SIZE),
     initialsAvatarOffset: DpOffset = DpOffset(0.dp, 0.dp),
-    blurRadius: Int = 20,
     @DrawableRes previewPlaceholder: Int = LocalAvatarPreviewProvider.getLocalAvatarPreviewPlaceholder(),
     @DrawableRes loadingPlaceholder: Int? = LocalAvatarPreviewProvider.getLocalAvatarLoadingPlaceholder(),
 ) {
-    Box(modifier = modifier) {
-        ParticipantImageBackground(
-            modifier = Modifier.fillMaxSize(),
-            userImage = userImage,
-            blurRadius = blurRadius,
-        )
-
-        UserAvatar(
+    Box(modifier = modifier.fillMaxSize()) {
+        Box(
             modifier = Modifier
                 .size(avatarSize)
                 .align(Alignment.Center)
-                .shadow(elevation = avatarShadowElevation, shape = CircleShape),
-            userName = userName,
-            userImage = userImage,
-            shape = shape,
-            textStyle = textStyle,
-            contentScale = contentScale,
-            contentDescription = contentDescription,
-            requestSize = requestSize,
-            initialsAvatarOffset = initialsAvatarOffset,
-            previewPlaceholder = previewPlaceholder,
-            loadingPlaceholder = loadingPlaceholder,
-        )
+                .border(
+                    width = VideoTheme.dimens.avatarBorderWidth,
+                    color = VideoTheme.colors.avatarBorderColor,
+                    shape = VideoTheme.shapes.avatar,
+                ),
+        ) {
+            UserAvatar(
+                modifier = Modifier
+                    .padding(VideoTheme.dimens.avatarBorderPadding)
+                    .align(Alignment.Center)
+                    .shadow(elevation = avatarShadowElevation, shape = CircleShape),
+                userName = userName,
+                userImage = userImage,
+                shape = shape,
+                textStyle = textStyle,
+                contentScale = contentScale,
+                contentDescription = contentDescription,
+                requestSize = requestSize,
+                initialsAvatarOffset = initialsAvatarOffset,
+                previewPlaceholder = previewPlaceholder,
+                loadingPlaceholder = loadingPlaceholder,
+            )
+        }
     }
 }
 
