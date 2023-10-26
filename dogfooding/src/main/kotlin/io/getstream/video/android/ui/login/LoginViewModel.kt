@@ -101,11 +101,7 @@ class LoginViewModel @Inject constructor(
         }
     }.flowOn(Dispatchers.IO)
 
-    init {
-        signInIfValidUserExist()
-    }
-
-    fun signInIfValidUserExist() {
+    fun signInIfValidUserExist(autoLogin: Boolean) {
         viewModelScope.launch {
             val user = dataStore.user.firstOrNull()
             if (user != null) {
