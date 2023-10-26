@@ -70,7 +70,7 @@ private object DefaultReactionsMenuData {
         ReactionItemData("Like", ":raise-hand:"),
         ReactionItemData("Dislike", ":hate:"),
         ReactionItemData("Smile", ":smile:"),
-        ReactionItemData("Heart", ":heart:")
+        ReactionItemData("Heart", ":heart:"),
     )
 }
 
@@ -86,13 +86,13 @@ private object DefaultReactionsMenuData {
 internal fun ReactionsMenu(
     call: Call,
     reactionMapper: ReactionMapper,
-    onDismiss: () -> Unit
+    onDismiss: () -> Unit,
 ) {
     val scope = rememberCoroutineScope()
     val modifier = Modifier
         .background(
             color = VideoTheme.colors.barsBackground,
-            shape = RoundedCornerShape(2.dp)
+            shape = RoundedCornerShape(2.dp),
         )
         .wrapContentWidth()
     val onEmojiSelected: (emoji: String) -> Unit = {
@@ -102,7 +102,7 @@ internal fun ReactionsMenu(
     Dialog(onDismiss) {
         Card(
             modifier = modifier.wrapContentWidth(),
-            backgroundColor = VideoTheme.colors.barsBackground
+            backgroundColor = VideoTheme.colors.barsBackground,
         ) {
             Column(Modifier.padding(16.dp)) {
                 Row(horizontalArrangement = Arrangement.Center) {
@@ -110,26 +110,26 @@ internal fun ReactionsMenu(
                         modifier = Modifier
                             .background(
                                 color = VideoTheme.colors.appBackground,
-                                shape = RoundedCornerShape(2.dp)
+                                shape = RoundedCornerShape(2.dp),
                             )
                             .fillMaxWidth(),
                         textModifier = Modifier.fillMaxWidth(),
                         reactionMapper = reactionMapper,
                         reaction = DefaultReactionsMenuData.mainReaction,
-                        onEmojiSelected = onEmojiSelected
+                        onEmojiSelected = onEmojiSelected,
                     )
                 }
                 FlowRow(
                     horizontalArrangement = Arrangement.Center,
                     maxItemsInEachRow = 3,
-                    verticalArrangement = Arrangement.Center
+                    verticalArrangement = Arrangement.Center,
                 ) {
                     DefaultReactionsMenuData.defaultReactions.forEach {
                         ReactionItem(
                             modifier = modifier,
                             reactionMapper = reactionMapper,
                             onEmojiSelected = onEmojiSelected,
-                            reaction = it
+                            reaction = it,
                         )
                     }
                 }
@@ -144,7 +144,7 @@ private fun ReactionItem(
     textModifier: Modifier = Modifier,
     reactionMapper: ReactionMapper,
     reaction: ReactionItemData,
-    onEmojiSelected: (emoji: String) -> Unit
+    onEmojiSelected: (emoji: String) -> Unit,
 ) {
     val mappedEmoji = reactionMapper.map(reaction.emojiCode)
     Box(
@@ -152,13 +152,13 @@ private fun ReactionItem(
             .clickable {
                 onEmojiSelected(reaction.emojiCode)
             }
-            .padding(2.dp)
+            .padding(2.dp),
     ) {
         Text(
             textAlign = TextAlign.Center,
             modifier = textModifier.padding(12.dp),
             text = "$mappedEmoji ${reaction.displayText}",
-            color = VideoTheme.colors.textHighEmphasis
+            color = VideoTheme.colors.textHighEmphasis,
         )
     }
 }
@@ -182,7 +182,7 @@ private fun ReactionItemPreview() {
                 onEmojiSelected = {
                     // Ignore
                 },
-                reaction = DefaultReactionsMenuData.mainReaction
+                reaction = DefaultReactionsMenuData.mainReaction,
             )
         }
     }
@@ -197,7 +197,7 @@ private fun ReactionMenuPreview() {
         ReactionsMenu(
             call = mockCall,
             reactionMapper = ReactionMapper.defaultReactionMapper(),
-            onDismiss = { }
+            onDismiss = { },
         )
     }
 }
