@@ -125,10 +125,10 @@ private fun ListVideoRenderer(
     },
 ) {
     videoRenderer.invoke(
-        modifier = modifier,
-        call = call,
-        participant = participant,
-        style = style.copy(
+        modifier,
+        call,
+        participant,
+        style.copy(
             isFocused = participant.sessionId == dominantSpeaker?.sessionId,
         ),
     )

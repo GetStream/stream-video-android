@@ -17,10 +17,15 @@
 package io.getstream.video.android.compose.ui.components.call.renderer.internal
 
 import android.content.res.Configuration.ORIENTATION_LANDSCAPE
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.offset
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.runtime.Composable
@@ -28,7 +33,9 @@ import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment.Companion.CenterHorizontally
+import androidx.compose.ui.Alignment.Companion.CenterVertically
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.call.renderer.ParticipantVideo
 import io.getstream.video.android.compose.ui.components.call.renderer.VideoRendererStyle
@@ -67,43 +74,88 @@ internal fun SpotlightVideoRenderer(
             }
         }
     }
-    val spotlightFractions = if (ORIENTATION_LANDSCAPE == orientation) {
-        Pair(0.6f, 0.4f)
-    } else {
-        Pair(0.8f, 0.2f)
-    }
-
     val listState =
         lazyStateWithVisibilityNotification(call = call, original = rememberLazyListState())
+
     BoxWithConstraints(modifier = modifier.fillMaxSize()) {
-        Column {
-            this@BoxWithConstraints.SpotlightContentPortrait(
-                modifier = modifier,
-                fractionHeight = spotlightFractions.first,
-                background = VideoTheme.colors.participantContainerBackground,
-            ) {
-                if (speaker != null) {
-                    videoRenderer.invoke(
-                        Modifier
-                            .fillMaxSize()
-                            .zoomable(rememberZoomableState(), isZoomable),
-                        call,
-                        speaker,
-                        style,
+        if (ORIENTATION_LANDSCAPE == orientation) {
+            val spotlightFractions = Pair(0.8f, 0.2f)
+            Row {
+                this@BoxWithConstraints.SpotlightContentLandscape(
+                    modifier = modifier,
+                    fractionWidth = spotlightFractions.first,
+                    background = VideoTheme.colors.participantContainerBackground,
+                ) {
+                    SpeakerSpotlight(speaker, videoRenderer, isZoomable, call, style)
+                }
+                LazyColumnVideoRenderer(
+                    state = listState,
+                    modifier = Modifier
+                        .wrapContentHeight()
+                        .align(CenterVertically)
+                        .fillMaxWidth(spotlightFractions.second),
+                    call = call,
+                    participants = derivedParticipants,
+                    dominantSpeaker = speaker,
+                    style = style,
+                    videoRenderer = videoRenderer,
+                )
+            }
+        } else {
+            val spotlightFractions = Pair(0.9f, 0.2f)
+            Column {
+                this@BoxWithConstraints.SpotlightContentPortrait(
+                    modifier = modifier,
+                    fractionHeight = spotlightFractions.first,
+                    background = VideoTheme.colors.participantContainerBackground,
+                ) {
+                    SpeakerSpotlight(
+                        speaker = speaker,
+                        videoRenderer = videoRenderer,
+                        isZoomable = isZoomable,
+                        call = call,
+                        style = style,
                     )
                 }
+                LazyRowVideoRenderer(
+                    state = listState,
+                    modifier = Modifier
+                        .wrapContentWidth()
+                        .offset(y = (-1).dp)
+                        .align(CenterHorizontally)
+                        .fillMaxHeight(spotlightFractions.second),
+                    call = call,
+                    participants = derivedParticipants,
+                    dominantSpeaker = speaker,
+                    style = style,
+                    videoRenderer = videoRenderer,
+                )
             }
-            LazyRowVideoRenderer(
-                state = listState,
-                modifier = Modifier.wrapContentWidth().align(
-                    CenterHorizontally,
-                ).fillMaxHeight(spotlightFractions.second),
-                call = call,
-                participants = derivedParticipants,
-                dominantSpeaker = speaker,
-                style = style,
-                videoRenderer = videoRenderer,
-            )
         }
+    }
+}
+
+@Composable
+private fun SpeakerSpotlight(
+    speaker: ParticipantState?,
+    videoRenderer: @Composable (
+        modifier: Modifier,
+        call: Call,
+        participant: ParticipantState,
+        style: VideoRendererStyle,
+    ) -> Unit,
+    isZoomable: Boolean,
+    call: Call,
+    style: VideoRendererStyle,
+) {
+    if (speaker != null) {
+        videoRenderer.invoke(
+            Modifier
+                .fillMaxSize()
+                .zoomable(rememberZoomableState(), isZoomable),
+            call,
+            speaker,
+            style,
+        )
     }
 }

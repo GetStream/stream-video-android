@@ -21,9 +21,12 @@ import androidx.compose.foundation.gestures.ScrollableState
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraintsScope
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.grid.LazyGridState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -86,14 +89,14 @@ internal fun <T : ScrollableState> lazyStateWithVisibilityNotification(call: Cal
  *
  * @param modifier the modifier
  * @param background the background color if there is no content or content is loading
- * @param fractionHeight how much of the screen height this spotlight should take. Default - 45%
+ * @param fractionHeight how much of the screen height this spotlight should take. Default - 60%
  * @param content the content to be displayed.
  */
 @Composable
 internal fun BoxWithConstraintsScope.SpotlightContentPortrait(
     modifier: Modifier,
     background: Color,
-    fractionHeight: Float = 0.45f,
+    fractionHeight: Float = 0.6f,
     content: @Composable () -> Unit,
 ) {
     val itemHeight = with(LocalDensity.current) {
@@ -109,6 +112,41 @@ internal fun BoxWithConstraintsScope.SpotlightContentPortrait(
                 .background(background)
                 .fillMaxWidth()
                 .height(itemHeight),
+        ) {
+            content()
+        }
+    }
+}
+
+/**
+ * Wraps a content that needs to be spotlighted at top of the screen.
+ * Used in [PortraitScreenSharingVideoRenderer] and [SpotlightVideoRenderer].
+ *
+ * @param modifier the modifier
+ * @param background the background color if there is no content or content is loading
+ * @param fractionWidth how much of the screen width this spotlight should take. Default - 60%
+ * @param content the content to be displayed.
+ */
+@Composable
+internal fun BoxWithConstraintsScope.SpotlightContentLandscape(
+    modifier: Modifier,
+    background: Color,
+    fractionWidth: Float = 0.6f,
+    content: @Composable () -> Unit,
+) {
+    val itemHeight = with(LocalDensity.current) {
+        ((constraints.maxWidth * fractionWidth).toInt()).toDp()
+    }
+    Row(
+        modifier = modifier
+            .padding(VideoTheme.dimens.participantsGridPadding),
+    ) {
+        Box(
+            modifier = Modifier
+                .clip(RoundedCornerShape(16.dp))
+                .background(background)
+                .fillMaxHeight()
+                .width(itemHeight),
         ) {
             content()
         }
