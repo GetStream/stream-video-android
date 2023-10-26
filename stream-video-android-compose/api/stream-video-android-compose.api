@@ -747,7 +747,7 @@ public final class io/getstream/video/android/compose/ui/components/call/control
 }
 
 public final class io/getstream/video/android/compose/ui/components/call/controls/actions/ReactionActionKt {
-	public static final fun ReactionAction (Landroidx/compose/ui/Modifier;ZLkotlin/jvm/functions/Function1;Landroidx/compose/runtime/Composer;II)V
+	public static final fun ReactionAction-jB83MbM (Landroidx/compose/ui/Modifier;ZLandroidx/compose/ui/graphics/Shape;JJLkotlin/jvm/functions/Function1;Landroidx/compose/runtime/Composer;II)V
 }
 
 public final class io/getstream/video/android/compose/ui/components/call/controls/actions/RegularControlActionsKt {
