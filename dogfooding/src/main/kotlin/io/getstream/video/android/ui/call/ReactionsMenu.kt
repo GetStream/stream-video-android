@@ -18,6 +18,7 @@
 
 package io.getstream.video.android.ui.call
 
+import android.content.res.Configuration
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -35,7 +36,6 @@ import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
@@ -91,7 +91,7 @@ internal fun ReactionsMenu(
     val scope = rememberCoroutineScope()
     val modifier = Modifier
         .background(
-            color = Color.White,
+            color = VideoTheme.colors.barsBackground,
             shape = RoundedCornerShape(2.dp),
         )
         .wrapContentWidth()
@@ -102,13 +102,14 @@ internal fun ReactionsMenu(
     Dialog(onDismiss) {
         Card(
             modifier = modifier.wrapContentWidth(),
+            backgroundColor = VideoTheme.colors.barsBackground,
         ) {
             Column(Modifier.padding(16.dp)) {
                 Row(horizontalArrangement = Arrangement.Center) {
                     ReactionItem(
                         modifier = Modifier
                             .background(
-                                color = Color(0xFFF1F4F0),
+                                color = VideoTheme.colors.appBackground,
                                 shape = RoundedCornerShape(2.dp),
                             )
                             .fillMaxWidth(),
@@ -157,6 +158,7 @@ private fun ReactionItem(
             textAlign = TextAlign.Center,
             modifier = textModifier.padding(12.dp),
             text = "$mappedEmoji ${reaction.displayText}",
+            color = VideoTheme.colors.textHighEmphasis,
         )
     }
 }
@@ -168,20 +170,26 @@ private fun sendReaction(scope: CoroutineScope, call: Call, emoji: String, onDis
     }
 }
 
-@Preview
+@Preview(showBackground = true)
+@Preview(showBackground = true, uiMode = Configuration.UI_MODE_NIGHT_YES)
 @Composable
 private fun ReactionItemPreview() {
     StreamMockUtils.initializeStreamVideo(LocalContext.current)
-    ReactionItem(
-        reactionMapper = ReactionMapper.defaultReactionMapper(),
-        onEmojiSelected = {
-            // Ignore
-        },
-        reaction = DefaultReactionsMenuData.mainReaction,
-    )
+    VideoTheme {
+        Box(modifier = Modifier.background(VideoTheme.colors.appBackground)) {
+            ReactionItem(
+                reactionMapper = ReactionMapper.defaultReactionMapper(),
+                onEmojiSelected = {
+                    // Ignore
+                },
+                reaction = DefaultReactionsMenuData.mainReaction,
+            )
+        }
+    }
 }
 
 @Preview
+@Preview(uiMode = Configuration.UI_MODE_NIGHT_YES)
 @Composable
 private fun ReactionMenuPreview() {
     VideoTheme {
@@ -189,7 +197,7 @@ private fun ReactionMenuPreview() {
         ReactionsMenu(
             call = mockCall,
             reactionMapper = ReactionMapper.defaultReactionMapper(),
-            onDismiss = { /* Do nothing */ },
+            onDismiss = { },
         )
     }
 }
