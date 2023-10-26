@@ -17,15 +17,18 @@
 package io.getstream.video.android.compose.ui.components.call.renderer.internal
 
 import android.content.res.Configuration.ORIENTATION_LANDSCAPE
+import android.content.res.Configuration.ORIENTATION_PORTRAIT
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.offset
-import androidx.compose.foundation.layout.wrapContentHeight
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.runtime.Composable
@@ -35,24 +38,35 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment.Companion.CenterHorizontally
 import androidx.compose.ui.Alignment.Companion.CenterVertically
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.composed
+import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.tooling.preview.Devices
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.call.renderer.ParticipantVideo
+import io.getstream.video.android.compose.ui.components.call.renderer.SpotlightVideoRendererStyle
 import io.getstream.video.android.compose.ui.components.call.renderer.VideoRendererStyle
 import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.ParticipantState
+import io.getstream.video.android.mock.StreamMockUtils
+import io.getstream.video.android.mock.mockCall
+import io.getstream.video.android.mock.mockParticipant
+import io.getstream.video.android.mock.mockParticipantList
 import me.saket.telephoto.zoomable.rememberZoomableState
 import me.saket.telephoto.zoomable.zoomable
+import java.lang.Integer.max
 
 @Composable
 internal fun SpotlightVideoRenderer(
+    modifier: Modifier = Modifier,
     call: Call,
     speaker: ParticipantState?,
     participants: List<ParticipantState>,
-    orientation: Int,
-    modifier: Modifier,
-    isZoomable: Boolean,
-    style: VideoRendererStyle,
+    orientation: Int = ORIENTATION_PORTRAIT,
+    isZoomable: Boolean = true,
+    style: VideoRendererStyle = SpotlightVideoRendererStyle(),
     videoRenderer: @Composable (
         modifier: Modifier,
         call: Call,
@@ -67,6 +81,17 @@ internal fun SpotlightVideoRenderer(
         )
     },
 ) {
+    if (participants.size == 1) {
+        // Just display the one participant
+        videoRenderer.invoke(
+            modifier.fillMaxSize().padding(VideoTheme.dimens.participantsGridPadding),
+            call,
+            participants[0],
+            style,
+        )
+        return
+    }
+
     val derivedParticipants by remember(key1 = participants) {
         derivedStateOf {
             participants.filterNot {
@@ -79,21 +104,19 @@ internal fun SpotlightVideoRenderer(
 
     BoxWithConstraints(modifier = modifier.fillMaxSize()) {
         if (ORIENTATION_LANDSCAPE == orientation) {
-            val spotlightFractions = Pair(0.8f, 0.2f)
             Row {
                 this@BoxWithConstraints.SpotlightContentLandscape(
-                    modifier = modifier,
-                    fractionWidth = spotlightFractions.first,
+                    modifier = modifier.weight(0.7f),
                     background = VideoTheme.colors.participantContainerBackground,
                 ) {
                     SpeakerSpotlight(speaker, videoRenderer, isZoomable, call, style)
                 }
                 LazyColumnVideoRenderer(
                     state = listState,
+                    itemModifier = Modifier.fillHeightIfParticipantsCount(3, participants.size),
                     modifier = Modifier
-                        .wrapContentHeight()
                         .align(CenterVertically)
-                        .fillMaxWidth(spotlightFractions.second),
+                        .wrapContentSize(),
                     call = call,
                     participants = derivedParticipants,
                     dominantSpeaker = speaker,
@@ -102,11 +125,12 @@ internal fun SpotlightVideoRenderer(
                 )
             }
         } else {
-            val spotlightFractions = Pair(0.9f, 0.2f)
-            Column {
+            // *2 to account for the controls
+            Column(
+                modifier = Modifier.padding(bottom = VideoTheme.dimens.participantsGridPadding * 2),
+            ) {
                 this@BoxWithConstraints.SpotlightContentPortrait(
-                    modifier = modifier,
-                    fractionHeight = spotlightFractions.first,
+                    modifier = modifier.weight(1f),
                     background = VideoTheme.colors.participantContainerBackground,
                 ) {
                     SpeakerSpotlight(
@@ -119,11 +143,11 @@ internal fun SpotlightVideoRenderer(
                 }
                 LazyRowVideoRenderer(
                     state = listState,
+                    itemModifier = Modifier.fillWidthIfParticipantCount(3, participants.size),
                     modifier = Modifier
                         .wrapContentWidth()
-                        .offset(y = (-1).dp)
                         .align(CenterHorizontally)
-                        .fillMaxHeight(spotlightFractions.second),
+                        .height(VideoTheme.dimens.screenShareParticipantItemSize),
                     call = call,
                     participants = derivedParticipants,
                     dominantSpeaker = speaker,
@@ -156,6 +180,97 @@ private fun SpeakerSpotlight(
             call,
             speaker,
             style,
+        )
+    }
+}
+
+private fun Modifier.fillWidthIfParticipantCount(fillCount: Int, totalCount: Int): Modifier = composed {
+    // -1 because one user is in spotlight
+    val itemWidth = LocalConfiguration.current.screenWidthDp / max(fillCount - 1, 1)
+    when (totalCount) {
+        fillCount -> this.fillMaxHeight().width(itemWidth.dp)
+        else -> this.size(
+            VideoTheme.dimens.screenShareParticipantItemSize * 1.5f,
+            VideoTheme.dimens.screenShareParticipantItemSize,
+        )
+    }
+}
+private fun Modifier.fillHeightIfParticipantsCount(
+    fillCount: Int,
+    totalCount: Int,
+): Modifier = composed {
+    // -1 because one user is in spotlight
+    val itemHeight = LocalConfiguration.current.screenHeightDp / max(fillCount - 1, 1)
+    when (totalCount) {
+        fillCount -> this.size(
+            VideoTheme.dimens.screenShareParticipantItemSize * 1.5f,
+            itemHeight.dp,
+        )
+        else -> this.size(
+            VideoTheme.dimens.screenShareParticipantItemSize * 1.5f,
+            VideoTheme.dimens.screenShareParticipantItemSize,
+        )
+    }
+}
+
+@Preview
+@Composable
+private fun SpotlightParticipantsPreview() {
+    StreamMockUtils.initializeStreamVideo(LocalContext.current)
+    VideoTheme {
+        SpotlightVideoRenderer(
+            call = mockCall,
+            speaker = mockParticipant,
+            participants = mockParticipantList,
+        )
+    }
+}
+
+@Preview
+@Composable
+private fun SpotlightTwoParticipantsPreview() {
+    StreamMockUtils.initializeStreamVideo(LocalContext.current)
+    VideoTheme {
+        SpotlightVideoRenderer(
+            call = mockCall,
+            speaker = mockParticipant,
+            participants = mockParticipantList.take(3),
+        )
+    }
+}
+
+@Preview(
+    device = Devices.AUTOMOTIVE_1024p,
+    widthDp = 1440,
+    heightDp = 720,
+)
+@Composable
+private fun SpotlightParticipantsLandscapePreview() {
+    StreamMockUtils.initializeStreamVideo(LocalContext.current)
+    VideoTheme {
+        SpotlightVideoRenderer(
+            call = mockCall,
+            orientation = ORIENTATION_LANDSCAPE,
+            speaker = mockParticipant,
+            participants = mockParticipantList,
+        )
+    }
+}
+
+@Preview(
+    device = Devices.AUTOMOTIVE_1024p,
+    widthDp = 1440,
+    heightDp = 720,
+)
+@Composable
+private fun SpotlightThreeParticipantsLandscapePreview() {
+    StreamMockUtils.initializeStreamVideo(LocalContext.current)
+    VideoTheme {
+        SpotlightVideoRenderer(
+            call = mockCall,
+            orientation = ORIENTATION_LANDSCAPE,
+            speaker = mockParticipant,
+            participants = mockParticipantList.take(3),
         )
     }
 }

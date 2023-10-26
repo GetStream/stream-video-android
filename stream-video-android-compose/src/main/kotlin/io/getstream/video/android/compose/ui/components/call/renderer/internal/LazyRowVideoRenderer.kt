@@ -17,11 +17,10 @@
 package io.getstream.video.android.compose.ui.components.call.renderer.internal
 
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -33,6 +32,7 @@ import io.getstream.video.android.compose.ui.components.call.renderer.Participan
 import io.getstream.video.android.compose.ui.components.call.renderer.ScreenSharingVideoRendererStyle
 import io.getstream.video.android.compose.ui.components.call.renderer.VideoRendererStyle
 import io.getstream.video.android.compose.ui.components.call.renderer.copy
+import io.getstream.video.android.compose.ui.extensions.startOrEndPadding
 import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.ParticipantState
 import io.getstream.video.android.mock.StreamMockUtils
@@ -75,26 +75,28 @@ internal fun LazyRowVideoRenderer(
 ) {
     LazyRow(
         state = state,
-        modifier = modifier.padding(
-            horizontal = VideoTheme.dimens.screenShareParticipantsRowPadding,
-        ),
+        modifier = modifier,
         horizontalArrangement = Arrangement.spacedBy(
             VideoTheme.dimens.screenShareParticipantsListItemMargin,
         ),
         verticalAlignment = Alignment.CenterVertically,
-        content = {
-            items(items = participants, key = { it.sessionId }) { participant ->
-                ListVideoRenderer(
-                    modifier = itemModifier,
-                    call = call,
-                    participant = participant,
-                    dominantSpeaker = dominantSpeaker,
-                    style = style,
-                    videoRenderer = videoRenderer,
-                )
-            }
-        },
-    )
+    ) {
+        itemsIndexed(items = participants, key = { _, it -> it.sessionId }) { index, participant ->
+            ListVideoRenderer(
+                modifier = itemModifier.startOrEndPadding(
+                    value = VideoTheme.dimens.participantsGridPadding,
+                    index = index,
+                    first = 0,
+                    last = participants.lastIndex,
+                ),
+                call = call,
+                participant = participant,
+                dominantSpeaker = dominantSpeaker,
+                style = style,
+                videoRenderer = videoRenderer,
+            )
+        }
+    }
 }
 
 /**

@@ -18,7 +18,10 @@ package io.getstream.video.android.compose.ui.components.call.renderer.internal
 
 import android.content.res.Configuration
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
+import androidx.compose.foundation.layout.BoxWithConstraintsScope
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -26,6 +29,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -33,10 +37,12 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.IntSize
+import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.call.renderer.ParticipantVideo
@@ -94,24 +100,14 @@ internal fun PortraitScreenSharingVideoRenderer(
             columns = GridCells.Fixed(2),
             content = {
                 item(span = { GridItemSpan(2) }) {
-                    SpotlightContentPortrait(
+                    ScreenSharingContent(
                         modifier = modifier,
-                        background = VideoTheme.colors.screenSharingBackground,
-                    ) {
-                        ScreenShareVideoRenderer(
-                            modifier = Modifier.fillMaxWidth(),
-                            call = call,
-                            session = session,
-                            isZoomable = isZoomable,
-                        )
-
-                        if (me?.sessionId != sharingParticipant.sessionId) {
-                            ScreenShareTooltip(
-                                modifier = Modifier.align(Alignment.TopStart),
-                                sharingParticipant = sharingParticipant,
-                            )
-                        }
-                    }
+                        call = call,
+                        session = session,
+                        isZoomable = isZoomable,
+                        me = me,
+                        sharingParticipant = sharingParticipant,
+                    )
                 }
                 items(
                     count = participants.size,
@@ -132,6 +128,46 @@ internal fun PortraitScreenSharingVideoRenderer(
                 }
             },
         )
+    }
+}
+
+@Composable
+private fun BoxWithConstraintsScope.ScreenSharingContent(
+    modifier: Modifier,
+    call: Call,
+    session: ScreenSharingSession,
+    isZoomable: Boolean,
+    me: ParticipantState?,
+    sharingParticipant: ParticipantState,
+) {
+    val itemHeight = with(LocalDensity.current) {
+        ((constraints.maxHeight * 0.45).toInt()).toDp()
+    }
+    Column(
+        modifier = modifier
+            .padding(VideoTheme.dimens.participantsGridPadding),
+    ) {
+        Box(
+            modifier = Modifier
+                .clip(RoundedCornerShape(16.dp))
+                .background(VideoTheme.colors.screenSharingBackground)
+                .fillMaxWidth()
+                .height(itemHeight),
+        ) {
+            ScreenShareVideoRenderer(
+                modifier = Modifier.fillMaxWidth(),
+                call = call,
+                session = session,
+                isZoomable = isZoomable,
+            )
+
+            if (me?.sessionId != sharingParticipant.sessionId) {
+                ScreenShareTooltip(
+                    modifier = Modifier.align(Alignment.TopStart),
+                    sharingParticipant = sharingParticipant,
+                )
+            }
+        }
     }
 }
 

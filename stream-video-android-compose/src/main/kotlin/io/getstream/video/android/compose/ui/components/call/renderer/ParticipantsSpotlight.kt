@@ -18,7 +18,6 @@ package io.getstream.video.android.compose.ui.components.call.renderer
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
@@ -26,7 +25,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.call.renderer.internal.SpotlightVideoRenderer
 import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.ParticipantState
@@ -75,9 +73,7 @@ public fun ParticipantsSpotlight(
     }
 
     Box(
-        modifier = modifier
-            .fillMaxSize()
-            .padding(VideoTheme.dimens.participantsGridPadding),
+        modifier = modifier.fillMaxSize(),
     ) {
         // Either the dominant speaker, or the first participant in the spotlight
         SpotlightVideoRenderer(

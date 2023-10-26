@@ -16,12 +16,20 @@
 
 package io.getstream.video.android.compose.ui.extensions
 
+import androidx.compose.foundation.layout.padding
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.composed
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.platform.debugInspectorInfo
+import androidx.compose.ui.unit.Dp
 import io.getstream.video.android.compose.theme.VideoTheme
 
+/**
+ * Toggle alpha.
+ * Based on the [isEnabled] parameter the alpha value will be chosen from the theme.
+ *
+ * @param isEnabled if view is enabled
+ */
 internal fun Modifier.toggleAlpha(isEnabled: Boolean): Modifier = composed(
     inspectorInfo = debugInspectorInfo {
         name = "toggleAlpha"
@@ -34,4 +42,54 @@ internal fun Modifier.toggleAlpha(isEnabled: Boolean): Modifier = composed(
         VideoTheme.dimens.buttonToggleOffAlpha
     }
     alpha(alpha)
+}
+
+/**
+ * Add padding to the modifier based on the index and its relative position in the list.
+ *
+ *
+ * If [first] equal to [index] then this boils down to:
+ * ```
+ * modifier.padding(start = value)
+ * ```
+ * If [last] equals to [index] then this is
+ * ```
+ * modifier.padding(end = value)
+ * ```
+ * Otherwise the modifier itself is returned.
+ */
+internal fun Modifier.startOrEndPadding(
+    value: Dp,
+    index: Int,
+    first: Int = 0,
+    last: Int,
+): Modifier = when (index) {
+    first -> this.padding(start = value)
+    last -> this.padding(end = value)
+    else -> this
+}
+
+/**
+ * Add padding to the modifier based on the index and its relative position in the list.
+ *
+ *
+ * If [first] equal to [index] then this boils down to:
+ * ```
+ * modifier.padding(top = value)
+ * ```
+ * If [last] equals to [index] then this is
+ * ```
+ * modifier.padding(bottom = value)
+ * ```
+ * Otherwise the modifier itself is returned.
+ */
+internal fun Modifier.topOrBottomPadding(
+    value: Dp,
+    index: Int,
+    first: Int = 0,
+    last: Int,
+): Modifier = when (index) {
+    first -> this.padding(top = value)
+    last -> this.padding(bottom = value)
+    else -> this
 }

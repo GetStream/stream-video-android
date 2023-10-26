@@ -145,7 +145,7 @@ public data class ScreenSharingVideoRendererStyle(
     override val isShowingConnectionQualityIndicator: Boolean = false,
     override val labelPosition: Alignment = Alignment.BottomStart,
     override val reactionDuration: Int = 1000,
-    override val reactionPosition: Alignment = Alignment.Center,
+    override val reactionPosition: Alignment = Alignment.TopEnd,
 
 ) : VideoRendererStyle(
     isFocused,
@@ -173,13 +173,13 @@ public data class ScreenSharingVideoRendererStyle(
 @Stable
 public data class SpotlightVideoRendererStyle(
     override val isFocused: Boolean = false,
-    override val isScreenSharing: Boolean = true,
+    override val isScreenSharing: Boolean = false,
     override val isShowingReactions: Boolean = true,
     override val isShowingParticipantLabel: Boolean = true,
-    override val isShowingConnectionQualityIndicator: Boolean = false,
+    override val isShowingConnectionQualityIndicator: Boolean = true,
     override val labelPosition: Alignment = Alignment.BottomStart,
     override val reactionDuration: Int = 1000,
-    override val reactionPosition: Alignment = Alignment.Center,
+    override val reactionPosition: Alignment = Alignment.TopEnd,
 
 ) : VideoRendererStyle(
     isFocused,

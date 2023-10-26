@@ -17,11 +17,10 @@
 package io.getstream.video.android.compose.ui.components.call.renderer.internal
 
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -33,6 +32,7 @@ import io.getstream.video.android.compose.ui.components.call.renderer.Participan
 import io.getstream.video.android.compose.ui.components.call.renderer.ScreenSharingVideoRendererStyle
 import io.getstream.video.android.compose.ui.components.call.renderer.VideoRendererStyle
 import io.getstream.video.android.compose.ui.components.call.renderer.copy
+import io.getstream.video.android.compose.ui.extensions.topOrBottomPadding
 import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.ParticipantState
 import io.getstream.video.android.mock.StreamMockUtils
@@ -51,7 +51,7 @@ internal fun LazyColumnVideoRenderer(
     modifier: Modifier = Modifier,
     state: LazyListState = rememberLazyListState(),
     itemModifier: Modifier = Modifier.size(
-        VideoTheme.dimens.screenShareParticipantItemSize * 1.5f,
+        VideoTheme.dimens.screenShareParticipantItemSize * 1.4f,
         VideoTheme.dimens.screenShareParticipantItemSize,
     ),
     call: Call,
@@ -73,16 +73,24 @@ internal fun LazyColumnVideoRenderer(
     },
 ) {
     LazyColumn(
+        modifier = modifier,
         state = state,
-        modifier = modifier.padding(vertical = VideoTheme.dimens.screenShareParticipantsRowPadding),
         verticalArrangement = Arrangement.spacedBy(
             VideoTheme.dimens.screenShareParticipantsListItemMargin,
         ),
         horizontalAlignment = Alignment.CenterHorizontally,
         content = {
-            items(items = participants, key = { it.sessionId }) { participant ->
+            itemsIndexed(
+                items = participants,
+                key = { _, it -> it.sessionId },
+            ) { index, participant ->
                 ListVideoRenderer(
-                    modifier = itemModifier,
+                    modifier = itemModifier.topOrBottomPadding(
+                        value = VideoTheme.dimens.participantsGridPadding,
+                        index = index,
+                        first = 0,
+                        last = participants.lastIndex,
+                    ),
                     call = call,
                     participant = participant,
                     dominantSpeaker = dominantSpeaker,

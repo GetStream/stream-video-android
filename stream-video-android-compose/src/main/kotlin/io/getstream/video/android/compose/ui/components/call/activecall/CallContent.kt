@@ -60,7 +60,7 @@ import io.getstream.video.android.compose.ui.components.call.controls.ControlAct
 import io.getstream.video.android.compose.ui.components.call.controls.actions.DefaultOnCallActionHandler
 import io.getstream.video.android.compose.ui.components.call.diagnostics.CallDiagnosticsContent
 import io.getstream.video.android.compose.ui.components.call.renderer.ParticipantVideo
-import io.getstream.video.android.compose.ui.components.call.renderer.ParticipantsGrid
+import io.getstream.video.android.compose.ui.components.call.renderer.ParticipantsLayout
 import io.getstream.video.android.compose.ui.components.call.renderer.RegularVideoRendererStyle
 import io.getstream.video.android.compose.ui.components.call.renderer.VideoRendererStyle
 import io.getstream.video.android.compose.ui.components.video.VideoRenderer
@@ -118,7 +118,7 @@ public fun CallContent(
         )
     },
     videoContent: @Composable RowScope.(call: Call) -> Unit = {
-        ParticipantsGrid(
+        ParticipantsLayout(
             call = call,
             modifier = Modifier
                 .fillMaxSize()

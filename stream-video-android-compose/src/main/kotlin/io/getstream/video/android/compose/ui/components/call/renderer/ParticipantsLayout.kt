@@ -18,9 +18,11 @@ package io.getstream.video.android.compose.ui.components.call.renderer
 
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.getstream.video.android.compose.theme.VideoTheme
@@ -28,6 +30,17 @@ import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.ParticipantState
 import io.getstream.video.android.mock.StreamMockUtils
 import io.getstream.video.android.mock.mockCall
+
+public enum class LayoutType {
+    /** Automatically choose between Grid and Spotlight based on pinned participants and dominant speaker. */
+    DYNAMIC,
+
+    /** Force a spotlight view, showing the dominant speaker or the first speaker in the list. */
+    SPOTLIGHT,
+
+    /** Always show a grid layout, regardless of pinned participants. */
+    GRID,
+}
 
 /**
  * Renders all the participants, based on the number of people in a call and the call state.
@@ -37,13 +50,15 @@ import io.getstream.video.android.mock.mockCall
  * @param call The call that contains all the participants state and tracks.
  * @param modifier Modifier for styling.
  * @param style Defined properties for styling a single video call track.
+ * @param layoutType The type of layout. [LayoutType], default - [LayoutType.DYNAMIC]
  * @param videoRenderer A single video renderer renders each individual participant.
  */
 @Composable
-public fun ParticipantsGrid(
+public fun ParticipantsLayout(
     call: Call,
     modifier: Modifier = Modifier,
     style: VideoRendererStyle = RegularVideoRendererStyle(),
+    layoutType: LayoutType = LayoutType.DYNAMIC,
     videoRenderer: @Composable (
         modifier: Modifier,
         call: Call,
@@ -58,32 +73,38 @@ public fun ParticipantsGrid(
         )
     },
 ) {
-    if (LocalInspectionMode.current) {
-        ParticipantsRegularGrid(
-            call = call,
-            modifier = modifier,
-        )
-        return
-    }
-
     val screenSharingSession = call.state.screenSharingSession.collectAsStateWithLifecycle()
     val screenSharing = screenSharingSession.value
-    val spotlight = true // call.state.pinnedParticipants.collectAsStateWithLifecycle()
+    val pinnedParticipants by call.state.pinnedParticipants.collectAsStateWithLifecycle()
+    val showSpotlight by remember(pinnedParticipants) {
+        derivedStateOf {
+            when (layoutType) {
+                LayoutType.GRID -> false
+                LayoutType.SPOTLIGHT -> true
+                else -> pinnedParticipants.isNotEmpty()
+            }
+        }
+    }
 
-    if (spotlight) {
-        ParticipantsSpotlight(
-            call = call,
-            modifier = modifier,
-            style = style,
-            videoRenderer = videoRenderer,
-        )
-    } else if (screenSharing == null || screenSharing.participant.isLocal) {
-        ParticipantsRegularGrid(
-            call = call,
-            modifier = modifier,
-            style = style,
-            videoRenderer = videoRenderer,
-        )
+    if (screenSharing == null || screenSharing.participant.isLocal) {
+        if (showSpotlight) {
+            ParticipantsSpotlight(
+                call = call,
+                modifier = modifier,
+                style = SpotlightVideoRendererStyle().copy(
+                    isFocused = style.isFocused,
+                    isShowingReactions = style.isShowingReactions,
+                    labelPosition = style.labelPosition,
+                ),
+            )
+        } else {
+            ParticipantsRegularGrid(
+                call = call,
+                modifier = modifier,
+                style = style,
+                videoRenderer = videoRenderer,
+            )
+        }
     } else {
         ParticipantsScreenSharing(
             call = call,
@@ -104,9 +125,10 @@ public fun ParticipantsGrid(
 private fun CallVideoRendererPreview() {
     StreamMockUtils.initializeStreamVideo(LocalContext.current)
     VideoTheme {
-        ParticipantsGrid(
+        ParticipantsLayout(
             call = mockCall,
             modifier = Modifier.fillMaxWidth(),
+            layoutType = LayoutType.GRID,
         )
     }
 }
