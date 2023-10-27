@@ -77,6 +77,7 @@ import io.getstream.video.android.util.UserIdHelper
 @Composable
 fun LoginScreen(
     loginViewModel: LoginViewModel = hiltViewModel(),
+    autoLogin: Boolean = true,
     navigateToCallJoin: () -> Unit,
 ) {
     val uiState by loginViewModel.uiState.collectAsState(initial = LoginUiState.Nothing)
@@ -85,9 +86,14 @@ fun LoginScreen(
     }
     var isShowingEmailLoginDialog by remember { mutableStateOf(false) }
 
-    HandleLoginUiStates(loginUiState = uiState, navigateToCallJoin = navigateToCallJoin)
+    HandleLoginUiStates(
+        autoLogin = autoLogin,
+        loginUiState = uiState,
+        navigateToCallJoin = navigateToCallJoin
+    )
 
     LoginContent(
+        autoLogin = autoLogin,
         isLoading = isLoading,
         showEmailLoginDialog = { isShowingEmailLoginDialog = true },
     )
@@ -101,6 +107,7 @@ fun LoginScreen(
 
 @Composable
 private fun LoginContent(
+    autoLogin: Boolean,
     isLoading: Boolean,
     showEmailLoginDialog: () -> Unit,
     loginViewModel: LoginViewModel = hiltViewModel(),
@@ -157,6 +164,28 @@ private fun LoginContent(
                     text = stringResource(id = R.string.sign_in_email),
                     onClick = { showEmailLoginDialog.invoke() },
                 )
+            } else {
+                if (!autoLogin) {
+                    Spacer(modifier = Modifier.height(50.dp))
+
+                    StreamButton(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 55.dp),
+                        enabled = !isLoading,
+                        text = stringResource(id = R.string.sign_in_google),
+                        onClick = { loginViewModel.handleUiEvent(LoginEvent.GoogleSignIn()) },
+                    )
+
+                    StreamButton(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 55.dp),
+                        enabled = !isLoading,
+                        text = "Random User Sign In",
+                        onClick = { loginViewModel.signInIfValidUserExist(autoLogin = true) },
+                    )
+                }
             }
 
             Spacer(modifier = Modifier.height(47.dp))
@@ -256,9 +285,10 @@ private fun EmailLoginDialog(
 
 @Composable
 private fun HandleLoginUiStates(
-    loginUiState: LoginUiState,
-    navigateToCallJoin: () -> Unit,
     loginViewModel: LoginViewModel = hiltViewModel(),
+    loginUiState: LoginUiState,
+    autoLogin: Boolean,
+    navigateToCallJoin: () -> Unit,
 ) {
     val context = LocalContext.current
     val signInLauncher = rememberLauncherForGoogleSignInActivityResult(
@@ -273,7 +303,7 @@ private fun HandleLoginUiStates(
     )
 
     LaunchedEffect(key1 = Unit) {
-        loginViewModel.signInIfValidUserExist()
+        loginViewModel.signInIfValidUserExist(autoLogin = autoLogin)
     }
 
     LaunchedEffect(key1 = loginUiState) {

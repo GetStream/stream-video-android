@@ -114,12 +114,14 @@ class LoginViewModel @Inject constructor(
                 // Production apps have an automatic guest login. Logging the user out
                 // will just re-login automatically with a new random user ID.
                 if (BuildConfig.FLAVOR == "production") {
-                    handleUiEvent(LoginEvent.Loading)
-                    handleUiEvent(
-                        LoginEvent.SignInSuccess(
-                            UserIdHelper.generateRandomString(upperCaseOnly = true),
-                        ),
-                    )
+                    if (autoLogin) {
+                        handleUiEvent(LoginEvent.Loading)
+                        handleUiEvent(
+                            LoginEvent.SignInSuccess(
+                                UserIdHelper.generateRandomString(upperCaseOnly = true),
+                            ),
+                        )
+                    }
                 }
             }
         }

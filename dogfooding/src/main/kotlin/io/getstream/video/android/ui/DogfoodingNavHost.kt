@@ -43,8 +43,9 @@ fun AppNavHost(
         navController = navController,
         startDestination = startDestination,
     ) {
-        composable(AppScreens.Login.destination) {
+        composable("${AppScreens.Login.destination}/{auto_login}") { backStackEntry ->
             LoginScreen(
+                autoLogin = backStackEntry.arguments?.getString("auto_login")?.let { it.toBoolean() } ?: true,
                 navigateToCallJoin = {
                     navController.navigate(AppScreens.CallJoin.destination) {
                         popUpTo(AppScreens.Login.destination) { inclusive = true }
@@ -57,8 +58,8 @@ fun AppNavHost(
                 navigateToCallLobby = { cid ->
                     navController.navigate("${AppScreens.CallLobby.destination}/$cid")
                 },
-                navigateUpToLogin = {
-                    navController.navigate(AppScreens.Login.destination) {
+                navigateUpToLogin = { autoLogin ->
+                    navController.navigate("${AppScreens.Login.destination}/$autoLogin") {
                         popUpTo(AppScreens.CallJoin.destination) { inclusive = true }
                     }
                 },
