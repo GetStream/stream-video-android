@@ -183,7 +183,10 @@ private fun LoginContent(
                             .padding(horizontal = 55.dp),
                         enabled = !isLoading,
                         text = "Random User Sign In",
-                        onClick = { loginViewModel.signInIfValidUserExist(autoLogin = true) },
+                        onClick = {
+                            loginViewModel.autoLogin = true
+                            loginViewModel.signInIfValidUserExist()
+                        },
                     )
                 }
             }
@@ -302,8 +305,12 @@ private fun HandleLoginUiStates(
         },
     )
 
+    LaunchedEffect(key1 = autoLogin) {
+        loginViewModel.autoLogin = autoLogin
+    }
+
     LaunchedEffect(key1 = Unit) {
-        loginViewModel.signInIfValidUserExist(autoLogin = autoLogin)
+        loginViewModel.signInIfValidUserExist()
     }
 
     LaunchedEffect(key1 = loginUiState) {
