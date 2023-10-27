@@ -24,7 +24,9 @@ import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -93,7 +95,7 @@ import io.getstream.video.android.ui.theme.StreamButton
 fun CallJoinScreen(
     callJoinViewModel: CallJoinViewModel = hiltViewModel(),
     navigateToCallLobby: (callId: String) -> Unit,
-    navigateUpToLogin: () -> Unit,
+    navigateUpToLogin: (autoLogin: Boolean) -> Unit,
     navigateToDirectCallJoin: () -> Unit,
 ) {
     val uiState by callJoinViewModel.uiState.collectAsState(CallJoinUiState.Nothing)
@@ -104,7 +106,7 @@ fun CallJoinScreen(
     HandleCallJoinUiState(
         callJoinUiState = uiState,
         navigateToCallLobby = navigateToCallLobby,
-        navigateUpToLogin = navigateUpToLogin,
+        navigateUpToLogin = { navigateUpToLogin(true) },
     )
 
     Column(
@@ -114,6 +116,10 @@ fun CallJoinScreen(
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         CallJoinHeader(
+            onAvatarLongClick = {
+                callJoinViewModel.shouldAutoLogin = true
+                callJoinViewModel.signOut()
+            },
             callJoinViewModel = callJoinViewModel,
             onDirectCallClick = navigateToDirectCallJoin,
         )
@@ -136,7 +142,7 @@ fun CallJoinScreen(
 
     LaunchedEffect(key1 = isLoggedOut) {
         if (isLoggedOut) {
-            navigateUpToLogin.invoke()
+            navigateUpToLogin.invoke(callJoinViewModel.shouldAutoLogin)
         }
     }
 }
@@ -144,6 +150,7 @@ fun CallJoinScreen(
 @Composable
 private fun CallJoinHeader(
     callJoinViewModel: CallJoinViewModel = hiltViewModel(),
+    onAvatarLongClick: () -> Unit,
     onDirectCallClick: () -> Unit,
 ) {
     val user by callJoinViewModel.user.collectAsState(initial = null)
@@ -155,11 +162,19 @@ private fun CallJoinHeader(
         verticalAlignment = Alignment.CenterVertically,
     ) {
         user?.let {
-            UserAvatar(
-                modifier = Modifier.size(24.dp),
-                userName = it.userNameOrId,
-                userImage = it.image,
-            )
+            Box(
+                modifier = if (BuildConfig.FLAVOR == "production") {
+                    Modifier.clickable(onClick = onAvatarLongClick)
+                } else {
+                    Modifier
+                }
+            ) {
+                UserAvatar(
+                    modifier = Modifier.size(24.dp),
+                    userName = it.userNameOrId,
+                    userImage = it.image,
+                )
+            }
 
             Spacer(modifier = Modifier.width(8.dp))
         }
@@ -172,16 +187,16 @@ private fun CallJoinHeader(
             fontSize = 16.sp,
         )
 
-        if (BuildConfig.FLAVOR == "dogfooding") {
-            if (user?.custom?.get("email")?.contains("getstreamio") == true) {
-                TextButton(
-                    colors = ButtonDefaults.textButtonColors(contentColor = Color.White),
-                    content = { Text(text = stringResource(R.string.direct_call)) },
-                    onClick = { onDirectCallClick.invoke() },
-                )
+        if (user?.custom?.get("email")?.contains("getstreamio") == true) {
+            TextButton(
+                colors = ButtonDefaults.textButtonColors(contentColor = Color.White),
+                content = { Text(text = stringResource(R.string.direct_call)) },
+                onClick = { onDirectCallClick.invoke() },
+            )
+        }
 
-                Spacer(modifier = Modifier.width(5.dp))
-            }
+        if (BuildConfig.FLAVOR == "dogfooding") {
+            Spacer(modifier = Modifier.width(5.dp))
 
             StreamButton(
                 modifier = Modifier.widthIn(125.dp),

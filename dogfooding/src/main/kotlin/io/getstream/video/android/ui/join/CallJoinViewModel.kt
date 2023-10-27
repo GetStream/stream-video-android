@@ -46,6 +46,7 @@ class CallJoinViewModel @Inject constructor(
 ) : ViewModel() {
     val user: Flow<User?> = dataStore.user
     val isLoggedOut = dataStore.user.map { it == null }
+    var shouldAutoLogin = false
 
     private val event: MutableSharedFlow<CallJoinEvent> = MutableSharedFlow()
     internal val uiState: SharedFlow<CallJoinUiState> = event
