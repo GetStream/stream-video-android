@@ -16,7 +16,6 @@
 
 package io.getstream.video.android.compose.ui.components.call.renderer
 
-import android.util.Log
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.derivedStateOf
