@@ -117,8 +117,8 @@ fun CallJoinScreen(
     ) {
         CallJoinHeader(
             onAvatarLongClick = {
-                callJoinViewModel.shouldAutoLogin = true
-                callJoinViewModel.signOut()
+                callJoinViewModel.autoLogInAfterLogOut = true
+                callJoinViewModel.logOut()
             },
             callJoinViewModel = callJoinViewModel,
             onDirectCallClick = navigateToDirectCallJoin,
@@ -142,7 +142,7 @@ fun CallJoinScreen(
 
     LaunchedEffect(key1 = isLoggedOut) {
         if (isLoggedOut) {
-            navigateUpToLogin.invoke(callJoinViewModel.shouldAutoLogin)
+            navigateUpToLogin.invoke(callJoinViewModel.autoLogInAfterLogOut)
         }
     }
 }
@@ -201,7 +201,7 @@ private fun CallJoinHeader(
             StreamButton(
                 modifier = Modifier.widthIn(125.dp),
                 text = stringResource(id = R.string.sign_out),
-                onClick = { callJoinViewModel.signOut() },
+                onClick = { callJoinViewModel.logOut() },
             )
         }
     }
