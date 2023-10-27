@@ -228,9 +228,6 @@ private fun CallJoinBody(
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         if (user != null) {
-            val name =
-                user?.name?.ifBlank { user?.id }?.ifBlank { user!!.custom["email"] }.orEmpty()
-
             Image(
                 modifier = Modifier.size(102.dp),
                 painter = painterResource(id = R.drawable.ic_stream_video_meeting_logo),

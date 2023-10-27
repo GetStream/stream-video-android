@@ -135,37 +135,17 @@ private fun LoginContent(
                 fontSize = 38.sp,
             )
 
-            if (BuildConfig.FLAVOR != "production") {
-                Spacer(modifier = Modifier.height(17.dp))
+            when {
+                BuildConfig.FLAVOR != "production" -> {
+                    Spacer(modifier = Modifier.height(17.dp))
 
-                Text(
-                    text = stringResource(id = R.string.sign_in_description),
-                    color = Colors.description,
-                    textAlign = TextAlign.Center,
-                    fontSize = 18.sp,
-                )
+                    Text(
+                        text = stringResource(id = R.string.sign_in_description),
+                        color = Colors.description,
+                        textAlign = TextAlign.Center,
+                        fontSize = 18.sp,
+                    )
 
-                Spacer(modifier = Modifier.height(50.dp))
-
-                StreamButton(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 55.dp),
-                    enabled = !isLoading,
-                    text = stringResource(id = R.string.sign_in_google),
-                    onClick = { loginViewModel.handleUiEvent(LoginEvent.GoogleSignIn()) },
-                )
-
-                StreamButton(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 55.dp),
-                    enabled = !isLoading,
-                    text = stringResource(id = R.string.sign_in_email),
-                    onClick = { showEmailLoginDialog.invoke() },
-                )
-            } else {
-                if (!autoLogin) {
                     Spacer(modifier = Modifier.height(50.dp))
 
                     StreamButton(
@@ -182,7 +162,28 @@ private fun LoginContent(
                             .fillMaxWidth()
                             .padding(horizontal = 55.dp),
                         enabled = !isLoading,
-                        text = "Random User Sign In",
+                        text = stringResource(id = R.string.sign_in_email),
+                        onClick = { showEmailLoginDialog.invoke() },
+                    )
+                }
+                BuildConfig.FLAVOR == "production" && !autoLogin -> {
+                    Spacer(modifier = Modifier.height(50.dp))
+
+                    StreamButton(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 55.dp),
+                        enabled = !isLoading,
+                        text = stringResource(id = R.string.sign_in_google),
+                        onClick = { loginViewModel.handleUiEvent(LoginEvent.GoogleSignIn()) },
+                    )
+
+                    StreamButton(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 55.dp),
+                        enabled = !isLoading,
+                        text = stringResource(R.string.random_user_sign_in),
                         onClick = {
                             loginViewModel.autoLogin = true
                             loginViewModel.signInIfValidUserExist()
