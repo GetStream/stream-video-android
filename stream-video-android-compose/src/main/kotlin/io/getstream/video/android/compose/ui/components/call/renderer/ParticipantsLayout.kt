@@ -16,6 +16,7 @@
 
 package io.getstream.video.android.compose.ui.components.call.renderer
 
+import android.util.Log
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.derivedStateOf
@@ -76,7 +77,7 @@ public fun ParticipantsLayout(
     val screenSharingSession = call.state.screenSharingSession.collectAsStateWithLifecycle()
     val screenSharing = screenSharingSession.value
     val pinnedParticipants by call.state.pinnedParticipants.collectAsStateWithLifecycle()
-    val showSpotlight by remember(pinnedParticipants) {
+    val showSpotlight by remember(key1 = pinnedParticipants, key2 = layoutType) {
         derivedStateOf {
             when (layoutType) {
                 LayoutType.GRID -> false

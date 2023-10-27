@@ -1010,6 +1010,13 @@ public final class io/getstream/video/android/core/call/state/ChatDialog : io/ge
 	public fun toString ()Ljava/lang/String;
 }
 
+public final class io/getstream/video/android/core/call/state/ChooseLayout : io/getstream/video/android/core/call/state/CallAction {
+	public static final field INSTANCE Lio/getstream/video/android/core/call/state/ChooseLayout;
+	public fun equals (Ljava/lang/Object;)Z
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
 public class io/getstream/video/android/core/call/state/CustomAction : io/getstream/video/android/core/call/state/CallAction {
 	public fun <init> (Ljava/util/Map;Ljava/lang/String;)V
 	public synthetic fun <init> (Ljava/util/Map;Ljava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
