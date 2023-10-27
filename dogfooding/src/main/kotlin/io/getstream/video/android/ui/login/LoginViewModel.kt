@@ -29,7 +29,7 @@ import io.getstream.video.android.model.User
 import io.getstream.video.android.token.StreamVideoNetwork
 import io.getstream.video.android.token.TokenResponse
 import io.getstream.video.android.util.StreamVideoInitHelper
-import io.getstream.video.android.util.UserIdHelper
+import io.getstream.video.android.util.UserHelper
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -118,7 +118,7 @@ class LoginViewModel @Inject constructor(
                         handleUiEvent(LoginEvent.Loading)
                         handleUiEvent(
                             LoginEvent.SignInSuccess(
-                                UserIdHelper.generateRandomString(upperCaseOnly = true),
+                                UserHelper.generateRandomString(upperCaseOnly = true),
                             ),
                         )
                     }

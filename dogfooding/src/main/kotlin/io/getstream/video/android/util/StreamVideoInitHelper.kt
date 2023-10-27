@@ -74,7 +74,7 @@ object StreamVideoInitHelper {
 
         // Create and login a random new user if user is null and we allow a random user login
         if (loggedInUser == null && useRandomUserAsFallback) {
-            val userId = UserIdHelper.generateRandomString()
+            val userId = UserHelper.generateRandomString()
 
             val result = StreamVideoNetwork.tokenService.fetchToken(
                 userId = userId,
