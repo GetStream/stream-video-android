@@ -89,7 +89,7 @@ fun LoginScreen(
     HandleLoginUiStates(
         autoLogin = autoLogin,
         loginUiState = uiState,
-        navigateToCallJoin = navigateToCallJoin
+        navigateToCallJoin = navigateToCallJoin,
     )
 
     LoginContent(

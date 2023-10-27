@@ -167,7 +167,7 @@ private fun CallJoinHeader(
                     Modifier.clickable(onClick = onAvatarLongClick)
                 } else {
                     Modifier
-                }
+                },
             ) {
                 UserAvatar(
                     modifier = Modifier.size(24.dp),

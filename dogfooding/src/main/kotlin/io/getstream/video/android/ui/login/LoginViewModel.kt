@@ -83,7 +83,7 @@ class LoginViewModel @Inject constructor(
                     id = tokenResponse.userId,
                     // if autoLogin is true it means we have a random user, so do not set name & image
                     name = if (autoLogin) "" else loggedInUser.name ?: "",
-                    image = if (autoLogin) "" else  loggedInUser.photoUrl ?: "",
+                    image = if (autoLogin) "" else loggedInUser.photoUrl ?: "",
                     role = "admin",
                     custom = mapOf("email" to tokenResponse.userId),
                 )
