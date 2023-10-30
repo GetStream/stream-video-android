@@ -5,13 +5,13 @@
 # Common
 
 # Core
-stream-video-android                                @GetStream/android-developers-core
-stream-video-android-pushprovider-firebase     @GetStream/android-developers-core
+stream-video-android                                @GetStream/android-developers
+stream-video-android-pushprovider-firebase     @GetStream/android-developers
 
 # UI
-app                                 @GetStream/android-developers-ui
-dogfooding                          @GetStream/android-developers-ui
-stream-video-android-compose        @GetStream/android-developers-ui
+app                                 @GetStream/android-developers
+dogfooding                          @GetStream/android-developers
+stream-video-android-compose        @GetStream/android-developers
 
 ### Top level files and directories
 # Git and GitHub
