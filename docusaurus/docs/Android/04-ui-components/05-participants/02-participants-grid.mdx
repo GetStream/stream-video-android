@@ -1,34 +1,37 @@
-# ParticipantsGrid
+# ParticipantsLayout
 
-The `ParticipantsGrid` component is one of our most versatile and complex UI components, designed to render a list of participants in a call. It handles different UI layouts based on the number of participants and different screen orientations. Additionally, it can also render screen sharing content when there is an active session.
+The `ParticipantsLayout` component is one of our most versatile and complex UI components, designed to render a list of participants in a call. It handles different UI layouts based on the number of participants and different screen orientations. Additionally, it can also render screen sharing content when there is an active session.
 
 Before jumping into how to use the component and how to customize it, let's review what some of these features mean.
 
-What you can do with the `ParticipantsGrid` are:
+What you can do with the `ParticipantsLayout` are:
 
-- Displays a grid list of the remote/local participants.
-- Supports landscape configuration.
-- Renders [Screensharing](../04-call/05-screen-share-content.mdx).
+- Displays a list of the remote/local participants.
+- There are two available layouts, Grid and [Spotlight](04-participants-spotlight.mdx)
+- There is also a dynamic option where the layout will switch automatically based on any pinned participants.
+- All the layout variants are supported in portrait and in landscape mode
+- Renders [Screensharing](../04-call/05-screen-share-content.mdx) on demand, regardless of selected layout.
 
 ### Flexible Layout
 
-The `ParticipantsGrid` changes the UI layout based on the number of participants. In calls with fewer than four people, the local participant video is rendered in a floating item, using the [FloatingParticipantVideo](03-floating-participant-video.mdx). In calls with four or more people, it's rendered with other participants in a grid.
+The `ParticipantsLayout` changes the UI layout based on the number of participants. In calls with fewer than four people, the local participant video is rendered in a floating item, using the [FloatingParticipantVideo](03-floating-participant-video.mdx). In calls with six or more people, it's rendered with other participants in a grid.
 
 Additionally, the participants are rendered in the following way:
 
-* **One participant**: Rendered as the only single item in the "grid", taking up the full component space.
+* **One participant**: Rendered as the only single item in the layout, taking up the full component space.
 * **Two participants** (1 remote + local): The remote participant is rendered within the full component space while the local participant is a floating item.
-* **Three participants** (2 remote + local): Remote participants are in a vertical split-screen, while the local participant is a floating item.
-* **Four or more participants**: (4 or more remote): Participants are rendered as a grid of items, in a paginated way. Up to 6 participants per page, with the sorted participant.
+* **Three to four participants** (2-3 remote + local): Remote participants are in a vertical split-screen, while the local participant is a floating item.
+* **Five or more** (4 remote + local): Participants are rendered as a grid of items, in a paginated way. Up to 6 participants per page, with the sorted participant.
 
 Sorted participants gives you the list of participants sorted by:
-
 * anyone who is pinned
-* dominant speaker
 * if you are screensharing
-* last speaking at
+
+If the participants are not visible on the screen they are also sorted by:
+* is dominant speaker
+* has video enabled
+* has audio enabled
 * all other video participants by when they joined
-* audio only participants by when they joined
 
 ### Orientation 
 
@@ -36,9 +39,9 @@ The component handles both Landscape and Portrait orientations by rendering diff
 
 Additionally, both of these orientations work for screen sharing and adjust the UI accordingly.
 
-| Portrait ParticipantsGrid | Landscape ParticipantsGrid |
+| Portrait ParticipantsLayout | Landscape ParticipantsLayout |
 | ------- | ------------------------------------------------------------ |
-| ![Portrait ParticipantsGrid](../../assets/compose_single_participant.png) | ![Landscape ParticipantsGrid](../../assets/compose_call_landscape.png) |
+| ![Portrait ParticipantsLayout](../../assets/compose_single_participant.png) | ![Landscape ParticipantsLayout](../../assets/compose_call_landscape.png) |
 
 ### Screen Sharing
 
@@ -50,7 +53,7 @@ Users can then focus on the shared content more or choose to enter the full scre
 | ------- | ------------------------------------------------------------ |
 | ![Portrait Screensharing](../../assets/compose_screensharing.png) | ![Landscape Screensharing](../../assets/compose_screensharing_landscape.png) |
 
-Now that you've learned a lot about the `ParticipantsGrid` internal works, let's see how to use the component to add it to your UI.
+Now that you've learned a lot about the `ParticipantsLayout` internal works, let's see how to use the component to add it to your UI.
 
 ## Usage
 
@@ -58,11 +61,11 @@ To use the component in your UI, once you have the required state, you can rende
 
 ```kotlin
 @Composable
-public fun MyParticipantsGridScreen() {
+public fun MyParticipantsLayoutScreen() {
     Scaffold(
         topBar = { /* Custom top bar */ },
     ) { padding ->
-        ParticipantsGrid(
+        ParticipantsLayout(
             modifier = Modifier.fillMaxSize(),
             call = call
         )
@@ -107,7 +110,7 @@ In terms of UI customization, you can very easily customize each participant vid
 
 ```kotlin
 @Composable
-public fun ParticipantsGrid(
+public fun ParticipantsLayout(
     modifier: Modifier = Modifier.fillMaxSize(),
     call = call,
     style = RegularVideoRendererStyle(
@@ -125,7 +128,7 @@ With these options, you have more than enough space to customize how the compone
 You can also custom the entire video renderer by implementing your own video renderer:
 
 ```kotlin
-ParticipantsGrid(
+ParticipantsLayout(
     call = call,
     modifier = Modifier.fillMaxSize(),
     videoRenderer = { modifier, call, participant, style ->
