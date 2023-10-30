@@ -27,6 +27,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.tooling.preview.Preview
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.core.model.NetworkQuality
 
@@ -93,5 +94,13 @@ internal fun ConnectionBars(modifier: Modifier = Modifier, colors: Triple<Color,
                     shape = VideoTheme.shapes.connectionIndicatorBar,
                 ),
         )
+    }
+}
+
+@Preview
+@Composable
+private fun BarsPreview() {
+    VideoTheme {
+        ConnectionBars(colors = Triple(Color.Red, Color.Blue, Color.Green))
     }
 }

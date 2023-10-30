@@ -54,8 +54,8 @@
     <dimen name="stream_video_floatingVideoWidth">140dp</dimen>
     <dimen name="stream_video_floatingVideoRadius">16dp</dimen>
     <dimen name="stream_video_callParticipant_container_radius">16dp</dimen>
-    <dimen name="stream_video_connectionIndicatorBarMaxHeight">8dp</dimen>
-    <dimen name="stream_video_connectionIndicatorBarWidth">1dp</dimen>
+    <dimen name="stream_video_connectionIndicatorBarMaxHeight">10dp</dimen>
+    <dimen name="stream_video_connectionIndicatorBarWidth">2dp</dimen>
     <dimen name="stream_video_connectionIndicatorBarSeparatorWidth">2dp</dimen>
     <dimen name="stream_video_audioLevelIndicatorBarMaxHeight">22dp</dimen>
     <dimen name="stream_video_audioLevelIndicatorBarWidth">2dp</dimen>
