@@ -88,7 +88,7 @@ internal fun <T : ScrollableState> lazyStateWithVisibilityNotification(call: Cal
  * @param content the content to be displayed.
  */
 @Composable
-internal fun BoxWithConstraintsScope.SpotlightContentPortrait(
+internal fun SpotlightContentPortrait(
     modifier: Modifier,
     background: Color,
     content: @Composable () -> Unit,
@@ -117,7 +117,7 @@ internal fun BoxWithConstraintsScope.SpotlightContentPortrait(
  * @param content the content to be displayed.
  */
 @Composable
-internal fun BoxWithConstraintsScope.SpotlightContentLandscape(
+internal fun SpotlightContentLandscape(
     modifier: Modifier,
     background: Color,
     content: @Composable () -> Unit,

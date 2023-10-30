@@ -19,6 +19,7 @@ package io.getstream.video.android.compose.ui.components.call.renderer.internal
 import android.content.res.Configuration.ORIENTATION_LANDSCAPE
 import android.content.res.Configuration.ORIENTATION_PORTRAIT
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -102,10 +103,10 @@ internal fun SpotlightVideoRenderer(
     val listState =
         lazyStateWithVisibilityNotification(call = call, original = rememberLazyListState())
 
-    BoxWithConstraints(modifier = modifier.fillMaxSize()) {
+    Box(modifier = modifier.fillMaxSize()) {
         if (ORIENTATION_LANDSCAPE == orientation) {
             Row {
-                this@BoxWithConstraints.SpotlightContentLandscape(
+                SpotlightContentLandscape(
                     modifier = modifier.weight(0.7f),
                     background = VideoTheme.colors.participantContainerBackground,
                 ) {
@@ -129,7 +130,7 @@ internal fun SpotlightVideoRenderer(
             Column(
                 modifier = Modifier.padding(bottom = VideoTheme.dimens.participantsGridPadding * 2),
             ) {
-                this@BoxWithConstraints.SpotlightContentPortrait(
+                SpotlightContentPortrait(
                     modifier = modifier.weight(1f),
                     background = VideoTheme.colors.participantContainerBackground,
                 ) {
