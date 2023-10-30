@@ -29,7 +29,11 @@ import androidx.compose.foundation.layout.calculateEndPadding
 import androidx.compose.foundation.layout.calculateStartPadding
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material.Icon
+import androidx.compose.material.IconButton
 import androidx.compose.material.Scaffold
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.AutoAwesomeMosaic
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -43,6 +47,7 @@ import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.platform.LocalLayoutDirection
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.coerceAtLeast
 import androidx.compose.ui.unit.dp
@@ -59,16 +64,19 @@ import io.getstream.video.android.compose.ui.components.call.CallAppBar
 import io.getstream.video.android.compose.ui.components.call.controls.ControlActions
 import io.getstream.video.android.compose.ui.components.call.controls.actions.DefaultOnCallActionHandler
 import io.getstream.video.android.compose.ui.components.call.diagnostics.CallDiagnosticsContent
+import io.getstream.video.android.compose.ui.components.call.renderer.LayoutType
 import io.getstream.video.android.compose.ui.components.call.renderer.ParticipantVideo
-import io.getstream.video.android.compose.ui.components.call.renderer.ParticipantsGrid
+import io.getstream.video.android.compose.ui.components.call.renderer.ParticipantsLayout
 import io.getstream.video.android.compose.ui.components.call.renderer.RegularVideoRendererStyle
 import io.getstream.video.android.compose.ui.components.call.renderer.VideoRendererStyle
 import io.getstream.video.android.compose.ui.components.video.VideoRenderer
 import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.ParticipantState
 import io.getstream.video.android.core.call.state.CallAction
+import io.getstream.video.android.core.call.state.ChooseLayout
 import io.getstream.video.android.mock.StreamMockUtils
 import io.getstream.video.android.mock.mockCall
+import io.getstream.video.android.ui.common.R
 
 /**
  * Represents the UI in an Active call that shows participants and their video, as well as some
@@ -76,6 +84,7 @@ import io.getstream.video.android.mock.mockCall
  *
  * @param call The call includes states and will be rendered with participants.
  * @param modifier Modifier for styling.
+ * @param layout the type of layout that the call content will display [LayoutType]
  * @param onBackPressed Handler when the user taps on the back button.
  * @param permissions Android permissions that should be required to render a video call properly.
  * @param onCallAction Handler when the user triggers a Call Control Action.
@@ -92,6 +101,7 @@ import io.getstream.video.android.mock.mockCall
 public fun CallContent(
     call: Call,
     modifier: Modifier = Modifier,
+    layout: LayoutType = LayoutType.DYNAMIC,
     isShowingOverlayAppBar: Boolean = true,
     permissions: VideoPermissionsState = rememberCallPermissionsState(call = call),
     onBackPressed: () -> Unit = {},
@@ -99,7 +109,9 @@ public fun CallContent(
     appBarContent: @Composable (call: Call) -> Unit = {
         CallAppBar(
             call = call,
-            leadingContent = null,
+            leadingContent = {
+                LayoutChoiceLeadingContent(onCallAction)
+            },
             onCallAction = onCallAction,
         )
     },
@@ -118,7 +130,8 @@ public fun CallContent(
         )
     },
     videoContent: @Composable RowScope.(call: Call) -> Unit = {
-        ParticipantsGrid(
+        ParticipantsLayout(
+            layoutType = layout,
             call = call,
             modifier = Modifier
                 .fillMaxSize()
@@ -222,6 +235,25 @@ public fun CallContent(
                     }
                 }
             },
+        )
+    }
+}
+
+@Composable
+internal fun LayoutChoiceLeadingContent(onCallAction: (CallAction) -> Unit) {
+    IconButton(
+        onClick = { onCallAction.invoke(ChooseLayout) },
+        modifier = Modifier.padding(
+            start = VideoTheme.dimens.callAppBarLeadingContentSpacingStart,
+            end = VideoTheme.dimens.callAppBarLeadingContentSpacingEnd,
+        ),
+    ) {
+        Icon(
+            imageVector = Icons.Rounded.AutoAwesomeMosaic,
+            contentDescription = stringResource(
+                id = R.string.stream_video_back_button_content_description,
+            ),
+            tint = VideoTheme.colors.callDescription,
         )
     }
 }

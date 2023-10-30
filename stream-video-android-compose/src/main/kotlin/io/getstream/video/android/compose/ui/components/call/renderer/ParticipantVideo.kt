@@ -52,7 +52,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
@@ -294,6 +296,10 @@ public fun BoxScope.ParticipantLabel(
         )
     },
 ) {
+    var componentWidth by remember { mutableStateOf(0.dp) }
+    componentWidth = VideoTheme.dimens.participantLabelTextMaxWidth
+    // get local density from composable
+    val density = LocalDensity.current
     Box(
         modifier = Modifier
             .align(labelPosition)
@@ -302,7 +308,11 @@ public fun BoxScope.ParticipantLabel(
             .background(
                 VideoTheme.colors.participantLabelBackground,
                 shape = VideoTheme.shapes.participantLabelShape,
-            ),
+            ).onGloballyPositioned {
+                componentWidth = with(density) {
+                    it.size.width.toDp()
+                }
+            },
     ) {
         Row(
             modifier = Modifier.align(Center),
@@ -310,7 +320,7 @@ public fun BoxScope.ParticipantLabel(
         ) {
             Text(
                 modifier = Modifier
-                    .widthIn(max = VideoTheme.dimens.participantLabelTextMaxWidth)
+                    .widthIn(max = componentWidth)
                     .padding(start = VideoTheme.dimens.participantLabelTextPaddingStart)
                     .align(CenterVertically),
                 text = nameLabel,

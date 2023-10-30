@@ -101,12 +101,12 @@ internal fun PortraitScreenSharingVideoRenderer(
             content = {
                 item(span = { GridItemSpan(2) }) {
                     ScreenSharingContent(
-                        modifier,
-                        call,
-                        session,
-                        isZoomable,
-                        me,
-                        sharingParticipant,
+                        modifier = modifier,
+                        call = call,
+                        session = session,
+                        isZoomable = isZoomable,
+                        me = me,
+                        sharingParticipant = sharingParticipant,
                     )
                 }
                 items(

@@ -145,7 +145,41 @@ public data class ScreenSharingVideoRendererStyle(
     override val isShowingConnectionQualityIndicator: Boolean = false,
     override val labelPosition: Alignment = Alignment.BottomStart,
     override val reactionDuration: Int = 1000,
-    override val reactionPosition: Alignment = Alignment.Center,
+    override val reactionPosition: Alignment = Alignment.TopEnd,
+
+) : VideoRendererStyle(
+    isFocused,
+    isScreenSharing,
+    isShowingReactions,
+    isShowingParticipantLabel,
+    isShowingConnectionQualityIndicator,
+    labelPosition,
+    reactionDuration,
+    reactionPosition,
+)
+
+/**
+ * A spotlight video renderer style, which displays the reactions, and participant label.
+ *
+ * @param isFocused Represents whether the participant is focused or not.
+ * @param isScreenSharing Represents whether the video renderer is about screen sharing.
+ * @param isShowingReactions Represents whether display reaction comes from the call state.
+ * @param isShowingParticipantLabel Represents whether display the participant label that contains the name and microphone status of a participant.
+ * @param isShowingConnectionQualityIndicator Represents whether displays the connection quality indicator or not.
+ * @param labelPosition The position of the participant label that contains the name and microphone status of a participant.
+ * @param reactionDuration The duration of the reaction animation.
+ * @param reactionPosition The position of the reaction.
+ */
+@Stable
+public data class SpotlightVideoRendererStyle(
+    override val isFocused: Boolean = false,
+    override val isScreenSharing: Boolean = false,
+    override val isShowingReactions: Boolean = true,
+    override val isShowingParticipantLabel: Boolean = true,
+    override val isShowingConnectionQualityIndicator: Boolean = true,
+    override val labelPosition: Alignment = Alignment.BottomStart,
+    override val reactionDuration: Int = 1000,
+    override val reactionPosition: Alignment = Alignment.TopEnd,
 
 ) : VideoRendererStyle(
     isFocused,

@@ -54,12 +54,15 @@ import io.getstream.video.android.compose.ui.components.call.activecall.CallCont
 import io.getstream.video.android.compose.ui.components.call.controls.ControlActions
 import io.getstream.video.android.compose.ui.components.call.controls.actions.CancelCallAction
 import io.getstream.video.android.compose.ui.components.call.controls.actions.ChatDialogAction
+import io.getstream.video.android.compose.ui.components.call.controls.actions.DefaultOnCallActionHandler
 import io.getstream.video.android.compose.ui.components.call.controls.actions.FlipCameraAction
 import io.getstream.video.android.compose.ui.components.call.controls.actions.SettingsAction
 import io.getstream.video.android.compose.ui.components.call.controls.actions.ToggleCameraAction
 import io.getstream.video.android.compose.ui.components.call.controls.actions.ToggleMicrophoneAction
+import io.getstream.video.android.compose.ui.components.call.renderer.LayoutType
 import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.RealtimeConnection
+import io.getstream.video.android.core.call.state.ChooseLayout
 import io.getstream.video.android.mock.StreamMockUtils
 import io.getstream.video.android.mock.mockCall
 import kotlinx.coroutines.delay
@@ -77,8 +80,10 @@ fun CallScreen(
     val isMicrophoneEnabled by call.microphone.isEnabled.collectAsState()
     val speakingWhileMuted by call.state.speakingWhileMuted.collectAsState()
     var isShowingSettingMenu by remember { mutableStateOf(false) }
+    var isShowingLayoutChooseMenu by remember { mutableStateOf(false) }
     var isShowingReactionsMenu by remember { mutableStateOf(false) }
     var isShowingAvailableDeviceMenu by remember { mutableStateOf(false) }
+    var layout by remember { mutableStateOf(LayoutType.DYNAMIC) }
     var unreadCount by remember { mutableIntStateOf(0) }
     val chatState = rememberModalBottomSheetState(
         initialValue = ModalBottomSheetValue.Hidden,
@@ -113,8 +118,18 @@ fun CallScreen(
                     CallContent(
                         modifier = Modifier.background(color = VideoTheme.colors.appBackground),
                         call = call,
+                        layout = layout,
                         enableInPictureInPicture = true,
                         enableDiagnostics = BuildConfig.DEBUG,
+                        onCallAction = {
+                            when (it) {
+                                ChooseLayout -> isShowingLayoutChooseMenu = true
+                                else -> DefaultOnCallActionHandler.onCallAction(
+                                    call,
+                                    it,
+                                )
+                            }
+                        },
                         onBackPressed = {
                             if (chatState.currentValue == ModalBottomSheetValue.Expanded) {
                                 scope.launch { chatState.hide() }
@@ -260,6 +275,17 @@ fun CallScreen(
                 call = call,
                 reactionMapper = VideoTheme.reactionMapper,
                 onDismiss = { isShowingReactionsMenu = false },
+            )
+        }
+
+        if (isShowingLayoutChooseMenu) {
+            LayoutChooser(
+                onLayoutChoice = {
+                    layout = it
+                    isShowingLayoutChooseMenu = false
+                },
+                current = layout,
+                onDismiss = { isShowingLayoutChooseMenu = false },
             )
         }
 
