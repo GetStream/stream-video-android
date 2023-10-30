@@ -71,7 +71,7 @@
     <dimen name="stream_video_callParticipantSoundIndicatorPaddingStart">8dp</dimen>
     <dimen name="stream_video_participantsGridPadding">4dp</dimen>
     <dimen name="stream_video_callParticipantLabelPadding">8dp</dimen>
-    <dimen name="stream_video_callParticipantLabelTextMaxWidth">64dp</dimen>
+    <dimen name="stream_video_callParticipantLabelTextMaxWidth">120dp</dimen>
     <dimen name="stream_video_callParticipantLabelTextPadding">4dp</dimen>
     <dimen name="stream_video_screenShareParticipantItemSize">110dp</dimen>
     <dimen name="stream_video_screenShareParticipantsListHeight">125dp</dimen>
