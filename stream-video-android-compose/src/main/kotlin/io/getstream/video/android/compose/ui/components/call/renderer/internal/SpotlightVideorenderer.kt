@@ -92,7 +92,7 @@ internal fun SpotlightVideoRenderer(
         return
     }
 
-    val derivedParticipants by remember(key1 = participants) {
+    val derivedParticipants by remember(key1 = participants, key2 = speaker) {
         derivedStateOf {
             participants.filterNot {
                 it.sessionId == speaker?.sessionId
