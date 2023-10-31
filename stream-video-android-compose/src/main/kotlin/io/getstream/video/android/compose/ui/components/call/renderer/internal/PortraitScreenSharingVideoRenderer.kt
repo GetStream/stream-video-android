@@ -19,23 +19,36 @@ package io.getstream.video.android.compose.ui.components.call.renderer.internal
 import android.content.res.Configuration
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
+import androidx.compose.foundation.layout.BoxWithConstraintsScope
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.GridItemSpan
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.IntSize
+import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.call.renderer.ParticipantVideo
 import io.getstream.video.android.compose.ui.components.call.renderer.ScreenSharingVideoRendererStyle
 import io.getstream.video.android.compose.ui.components.call.renderer.VideoRendererStyle
+import io.getstream.video.android.compose.ui.components.call.renderer.copy
 import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.ParticipantState
 import io.getstream.video.android.core.model.ScreenSharingSession
@@ -78,15 +91,68 @@ internal fun PortraitScreenSharingVideoRenderer(
 ) {
     val sharingParticipant = session.participant
     val me by call.state.me.collectAsStateWithLifecycle()
+    var parentSize: IntSize by remember { mutableStateOf(IntSize(0, 0)) }
 
+    val paddedModifier = modifier.padding(VideoTheme.dimens.participantsGridPadding)
+    BoxWithConstraints(modifier = Modifier.fillMaxWidth()) {
+        LazyVerticalGrid(
+            modifier = Modifier.fillMaxSize(),
+            columns = GridCells.Fixed(2),
+            content = {
+                item(span = { GridItemSpan(2) }) {
+                    ScreenSharingContent(
+                        modifier = modifier,
+                        call = call,
+                        session = session,
+                        isZoomable = isZoomable,
+                        me = me,
+                        sharingParticipant = sharingParticipant,
+                    )
+                }
+                items(
+                    count = participants.size,
+                ) { key ->
+                    // make 3 items exactly fit available height
+                    val itemHeight = with(LocalDensity.current) {
+                        (constraints.maxHeight / 6).toDp()
+                    }
+                    val participant = participants[key]
+                    videoRenderer.invoke(
+                        modifier = paddedModifier.height(itemHeight),
+                        call = call,
+                        participant = participant,
+                        style = style.copy(
+                            isFocused = dominantSpeaker?.sessionId == participant.sessionId,
+                        ),
+                    )
+                }
+            },
+        )
+    }
+}
+
+@Composable
+private fun BoxWithConstraintsScope.ScreenSharingContent(
+    modifier: Modifier,
+    call: Call,
+    session: ScreenSharingSession,
+    isZoomable: Boolean,
+    me: ParticipantState?,
+    sharingParticipant: ParticipantState,
+) {
+    val itemHeight = with(LocalDensity.current) {
+        ((constraints.maxHeight * 0.45).toInt()).toDp()
+    }
     Column(
-        modifier = modifier.background(VideoTheme.colors.screenSharingBackground),
+        modifier = modifier
+            .padding(VideoTheme.dimens.participantsGridPadding),
     ) {
         Box(
             modifier = Modifier
+                .clip(RoundedCornerShape(16.dp))
+                .background(VideoTheme.colors.screenSharingBackground)
                 .fillMaxWidth()
-                .weight(1f)
-                .padding(VideoTheme.dimens.participantsGridPadding),
+                .height(itemHeight),
         ) {
             ScreenShareVideoRenderer(
                 modifier = Modifier.fillMaxWidth(),
@@ -102,21 +168,6 @@ internal fun PortraitScreenSharingVideoRenderer(
                 )
             }
         }
-
-        Spacer(
-            modifier = Modifier.height(
-                VideoTheme.dimens.screenShareParticipantsScreenShareListMargin,
-            ),
-        )
-
-        LazyRowVideoRenderer(
-            modifier = Modifier.height(VideoTheme.dimens.screenShareParticipantsRowHeight),
-            call = call,
-            dominantSpeaker = dominantSpeaker,
-            participants = participants,
-            style = style,
-            videoRenderer = videoRenderer,
-        )
     }
 }
 

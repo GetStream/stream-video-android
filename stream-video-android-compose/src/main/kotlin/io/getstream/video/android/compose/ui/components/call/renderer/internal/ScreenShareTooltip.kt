@@ -47,13 +47,12 @@ internal fun ScreenShareTooltip(
 
     Row(
         modifier = modifier
-            .padding(VideoTheme.dimens.screenSharePresenterTooltipMargin)
             .height(VideoTheme.dimens.screenSharePresenterTooltipHeight)
             .wrapContentWidth()
-            .clip(RoundedCornerShape(8.dp))
+            .clip(RoundedCornerShape(bottomEnd = 8.dp))
             .background(
                 color = VideoTheme.colors.screenSharingTooltipBackground,
-                shape = RoundedCornerShape(8.dp),
+                shape = RoundedCornerShape(bottomEnd = 8.dp),
             ),
         verticalAlignment = Alignment.CenterVertically,
     ) {

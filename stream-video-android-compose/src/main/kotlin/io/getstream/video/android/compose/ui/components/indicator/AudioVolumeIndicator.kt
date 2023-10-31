@@ -52,21 +52,28 @@ public fun AudioVolumeIndicator(
     Row(
         modifier = modifier
             .height(height = VideoTheme.dimens.audioLevelIndicatorBarMaxHeight)
-            .padding(horizontal = 4.dp),
-        verticalAlignment = Alignment.Bottom,
+            .padding(horizontal = 2.dp),
+        verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(
             VideoTheme.dimens.audioLevelIndicatorBarSeparatorWidth,
         ),
     ) {
         repeat(3) { index ->
 
+            // First bar 60%, second 100%, third 33%
             val audioLevel =
-                if (index == 0 || index == 2) {
-                    // Draw "fake" side bars that reach 70% of the middle bar, similar to
-                    // what Google Meet is doing.
-                    audioLevels * 0.7f
-                } else {
-                    audioLevels
+                when (index) {
+                    0 -> {
+                        audioLevels * 0.6f
+                    }
+
+                    2 -> {
+                        audioLevels * 0.33f
+                    }
+
+                    else -> {
+                        audioLevels
+                    }
                 }
 
             Spacer(

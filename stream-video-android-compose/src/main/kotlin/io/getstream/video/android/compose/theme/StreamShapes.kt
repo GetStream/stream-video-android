@@ -33,6 +33,7 @@ import androidx.compose.ui.unit.dp
  * @param callControls The shape of the call controls sheet when in a call.
  * @param callControlsButton Tha shape of the buttons within Call Controls.
  * @param participantsInfoMenuButton The shape of buttons in the Participants Info menu.
+ * @param indicatorBackground The indicator background shape.
  */
 @Immutable
 public data class StreamShapes(
@@ -47,6 +48,9 @@ public data class StreamShapes(
     public val soundIndicatorBar: Shape,
     public val floatingParticipant: Shape,
     public val connectionQualityIndicator: Shape,
+    public val indicatorBackground: Shape,
+    val participantLabelShape: Shape,
+    val participantContainerShape: Shape,
 ) {
     public companion object {
         /**
@@ -57,16 +61,19 @@ public data class StreamShapes(
         @Composable
         public fun defaultShapes(): StreamShapes = StreamShapes(
             avatar = CircleShape,
+            dialog = RoundedCornerShape(16.dp),
             callButton = CircleShape,
             callControls = RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp),
             callControlsLandscape = RectangleShape,
             callControlsButton = CircleShape,
             participantsInfoMenuButton = RoundedCornerShape(32.dp),
-            dialog = RoundedCornerShape(16.dp),
             connectionIndicatorBar = RoundedCornerShape(16.dp),
             soundIndicatorBar = RoundedCornerShape(16.dp),
             floatingParticipant = RoundedCornerShape(16.dp),
-            connectionQualityIndicator = RoundedCornerShape(5.dp),
+            connectionQualityIndicator = RoundedCornerShape(topStart = 5.dp),
+            indicatorBackground = RoundedCornerShape(5.dp),
+            participantLabelShape = RoundedCornerShape(topEnd = 5.dp),
+            participantContainerShape = RoundedCornerShape(16.dp),
         )
     }
 }

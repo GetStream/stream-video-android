@@ -46,13 +46,15 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Alignment.Companion.BottomEnd
 import androidx.compose.ui.Alignment.Companion.BottomStart
+import androidx.compose.ui.Alignment.Companion.Center
 import androidx.compose.ui.Alignment.Companion.CenterVertically
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
@@ -106,7 +108,9 @@ public fun ParticipantVideo(
     connectionIndicatorContent: @Composable BoxScope.(NetworkQuality) -> Unit = {
         NetworkQualityIndicator(
             networkQuality = it,
-            modifier = Modifier.align(BottomEnd),
+            modifier = Modifier
+                .align(BottomEnd)
+                .height(VideoTheme.dimens.participantLabelHeight),
         )
     },
     videoFallbackContent: @Composable (Call) -> Unit = {
@@ -137,6 +141,11 @@ public fun ParticipantVideo(
         }
     }
 
+    val containerShape = if (style.isScreenSharing) {
+        RoundedCornerShape(VideoTheme.dimens.screenShareParticipantsRadius)
+    } else {
+        VideoTheme.shapes.participantContainerShape
+    }
     val containerModifier = if (style.isFocused && participants.size > 1) {
         modifier.border(
             border = if (style.isScreenSharing) {
@@ -150,22 +159,15 @@ public fun ParticipantVideo(
                     VideoTheme.colors.callFocusedBorder,
                 )
             },
-            shape = if (style.isScreenSharing) {
-                RoundedCornerShape(VideoTheme.dimens.screenShareParticipantsRadius)
-            } else {
-                RectangleShape
-            },
+            shape = containerShape,
         )
     } else {
         modifier
     }
-
     Box(
-        modifier = containerModifier.apply {
-            if (style.isScreenSharing) {
-                clip(RoundedCornerShape(VideoTheme.dimens.screenShareParticipantsRadius))
-            }
-        },
+        modifier = containerModifier
+            .clip(containerShape)
+            .background(VideoTheme.colors.participantContainerBackground),
     ) {
         ParticipantVideoRenderer(
             call = call,
@@ -294,32 +296,42 @@ public fun BoxScope.ParticipantLabel(
         )
     },
 ) {
-    Row(
+    var componentWidth by remember { mutableStateOf(0.dp) }
+    componentWidth = VideoTheme.dimens.participantLabelTextMaxWidth
+    // get local density from composable
+    val density = LocalDensity.current
+    Box(
         modifier = Modifier
             .align(labelPosition)
-            .padding(VideoTheme.dimens.participantLabelPadding)
             .height(VideoTheme.dimens.participantLabelHeight)
             .wrapContentWidth()
-            .clip(RoundedCornerShape(8.dp))
             .background(
                 VideoTheme.colors.participantLabelBackground,
-                shape = RoundedCornerShape(8.dp),
-            ),
-        verticalAlignment = CenterVertically,
+                shape = VideoTheme.shapes.participantLabelShape,
+            ).onGloballyPositioned {
+                componentWidth = with(density) {
+                    it.size.width.toDp()
+                }
+            },
     ) {
-        Text(
-            modifier = Modifier
-                .widthIn(max = VideoTheme.dimens.participantLabelTextMaxWidth)
-                .padding(start = VideoTheme.dimens.participantLabelTextPaddingStart)
-                .align(CenterVertically),
-            text = nameLabel,
-            style = VideoTheme.typography.body,
-            color = Color.White,
-            maxLines = 1,
-            overflow = TextOverflow.Ellipsis,
-        )
+        Row(
+            modifier = Modifier.align(Center),
+            verticalAlignment = CenterVertically,
+        ) {
+            Text(
+                modifier = Modifier
+                    .widthIn(max = componentWidth)
+                    .padding(start = VideoTheme.dimens.participantLabelTextPaddingStart)
+                    .align(CenterVertically),
+                text = nameLabel,
+                style = VideoTheme.typography.body,
+                color = Color.White,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+            )
 
-        soundIndicatorContent.invoke(this)
+            soundIndicatorContent.invoke(this)
+        }
     }
 }
 

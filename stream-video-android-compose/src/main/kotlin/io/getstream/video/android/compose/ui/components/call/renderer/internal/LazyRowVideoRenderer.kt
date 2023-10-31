@@ -17,15 +17,14 @@
 package io.getstream.video.android.compose.ui.components.call.renderer.internal
 
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import io.getstream.video.android.compose.theme.VideoTheme
@@ -33,6 +32,7 @@ import io.getstream.video.android.compose.ui.components.call.renderer.Participan
 import io.getstream.video.android.compose.ui.components.call.renderer.ScreenSharingVideoRendererStyle
 import io.getstream.video.android.compose.ui.components.call.renderer.VideoRendererStyle
 import io.getstream.video.android.compose.ui.components.call.renderer.copy
+import io.getstream.video.android.compose.ui.extensions.startOrEndPadding
 import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.ParticipantState
 import io.getstream.video.android.mock.StreamMockUtils
@@ -45,13 +45,19 @@ import io.getstream.video.android.mock.mockParticipantList
  * @param call The state of the call.
  * @param participants List of participants to show.
  * @param modifier Modifier for styling.
+ * @param state [LazyListState] if needed from outside
  */
 @Composable
 internal fun LazyRowVideoRenderer(
     modifier: Modifier = Modifier,
+    itemModifier: Modifier = Modifier.size(
+        VideoTheme.dimens.screenShareParticipantItemSize * 1.5f,
+        VideoTheme.dimens.screenShareParticipantItemSize,
+    ),
     call: Call,
     participants: List<ParticipantState>,
     dominantSpeaker: ParticipantState?,
+    state: LazyListState = rememberLazyListState(),
     style: VideoRendererStyle = ScreenSharingVideoRendererStyle(),
     videoRenderer: @Composable (
         modifier: Modifier,
@@ -68,25 +74,29 @@ internal fun LazyRowVideoRenderer(
     },
 ) {
     LazyRow(
-        modifier = modifier.padding(
-            horizontal = VideoTheme.dimens.screenShareParticipantsRowPadding,
-        ),
+        state = state,
+        modifier = modifier,
         horizontalArrangement = Arrangement.spacedBy(
             VideoTheme.dimens.screenShareParticipantsListItemMargin,
         ),
         verticalAlignment = Alignment.CenterVertically,
-        content = {
-            items(items = participants, key = { it.sessionId }) { participant ->
-                ListVideoRenderer(
-                    call = call,
-                    participant = participant,
-                    dominantSpeaker = dominantSpeaker,
-                    style = style,
-                    videoRenderer = videoRenderer,
-                )
-            }
-        },
-    )
+    ) {
+        itemsIndexed(items = participants, key = { _, it -> it.sessionId }) { index, participant ->
+            ListVideoRenderer(
+                modifier = itemModifier.startOrEndPadding(
+                    value = VideoTheme.dimens.participantsGridPadding,
+                    index = index,
+                    first = 0,
+                    last = participants.lastIndex,
+                ),
+                call = call,
+                participant = participant,
+                dominantSpeaker = dominantSpeaker,
+                style = style,
+                videoRenderer = videoRenderer,
+            )
+        }
+    }
 }
 
 /**
@@ -97,6 +107,7 @@ internal fun LazyRowVideoRenderer(
  */
 @Composable
 private fun ListVideoRenderer(
+    modifier: Modifier = Modifier,
     call: Call,
     participant: ParticipantState,
     dominantSpeaker: ParticipantState?,
@@ -116,12 +127,10 @@ private fun ListVideoRenderer(
     },
 ) {
     videoRenderer.invoke(
-        modifier = Modifier
-            .size(VideoTheme.dimens.screenShareParticipantItemSize)
-            .clip(RoundedCornerShape(VideoTheme.dimens.screenShareParticipantsRadius)),
-        call = call,
-        participant = participant,
-        style = style.copy(
+        modifier,
+        call,
+        participant,
+        style.copy(
             isFocused = participant.sessionId == dominantSpeaker?.sessionId,
         ),
     )

@@ -21,20 +21,22 @@
     <color name="stream_video_disabled">#B4B7BB</color>
     <color name="stream_video_borders">#DBDDE1</color>
     <color name="stream_video_input_background">#E9EAED</color>
-    <color name="stream_video_app_background">#F7F7F8</color>
+    <color name="stream_video_app_background">#FFFFFF</color>
     <color name="stream_video_bars_background">#FFFFFF</color>
     <color name="stream_video_link_background">#E9F1FF</color>
     <color name="stream_video_overlay_regular">#80000000</color>
     <color name="stream_video_overlay_dark">#99000000</color>
     <color name="stream_video_primary_accent">#005FFF</color>
-    <color name="stream_video_connection_quality_background">#D9303030</color>
-    <color name="stream_video_participant_label_background">#D9303030</color>
+    <color name="stream_video_connection_quality_background">#A60C0D0E</color>
+    <color name="stream_video_participant_label_background">#A60C0D0E</color>
     <color name="stream_video_connection_quality_bar_background">#FFFFFF</color>
     <color name="stream_video_screen_sharing_tooltip_background">#D9000000</color>
     <color name="stream_video_screen_sharing_tooltip_content">#FCFCFC</color>
     <color name="stream_video_error_accent">#FF3742</color>
     <color name="stream_video_info_accent">#20E070</color>
     <color name="stream_video_focused_border_color">#005FFF</color>
+    <color name="stream_video_avatar_border_color">#123D82</color>
+    <color name="stream_video_participant_container_background">#1E262E</color>
     <color name="stream_video_highlight">#FBF4DD</color>
     <color name="stream_video_text_avatar_initials">#FFFFFF</color>
     <color name="stream_video_call_gradient_start">#545A64</color>
@@ -47,7 +49,11 @@
     <color name="stream_video_lobby_background">#4C525C</color>
     <color name="stream_video_audio_leave">#FFFFFF</color>
     <color name="stream_video_audio_room_actions">#1E262E</color>
-    <color name="stream_video_deactivated_volume_indicator">#FFFFFF</color>
+    <color name="stream_video_deactivated_volume_indicator">#005FFF</color>
+    <color name="stream_video_volume_indicator_background">#A60C0D0E</color>
+    <color name="stream_video_connection_indicator_great">#00E2A1</color>
+    <color name="stream_video_connection_indicator_good">#FFFFFF</color>
+    <color name="stream_video_connection_indicator_poor">#DC433B</color>
     <color name="stream_video_live_indicator">#FF3742</color>
 
     <!-- Default Dark colors -->
@@ -73,8 +79,11 @@
     <color name="stream_video_lobby_background_dark">#4C525C</color>
     <color name="stream_video_audio_leave_dark">#FFFFFF</color>
     <color name="stream_video_audio_room_actions_dark">#FFFFFF</color>
-    <color name="stream_video_deactivated_volume_indicator_dark">#FFFFFF</color>
+    <color name="stream_video_deactivated_volume_indicator_dark">#005FFF</color>
+    <color name="stream_video_volume_indicator_background_dark">#A60C0D0E</color>
     <color name="stream_video_live_indicator_dark">#FF3742</color>
+    <color name="stream_video_connection_quality_background_dark">#A60C0D0E</color>
+    <color name="stream_video_participant_label_background_dark">#A60C0D0E</color>
 
     <!-- Avatar gradient colors -->
     <color name="stream_video_avatar_gradient_orange">#FF8A65</color>

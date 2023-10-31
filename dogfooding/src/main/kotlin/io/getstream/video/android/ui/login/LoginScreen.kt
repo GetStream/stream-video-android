@@ -64,7 +64,6 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.core.content.ContextCompat.startActivity
 import androidx.hilt.navigation.compose.hiltViewModel
-import com.firebase.ui.auth.AuthUI
 import io.getstream.video.android.BuildConfig
 import io.getstream.video.android.R
 import io.getstream.video.android.compose.theme.VideoTheme
@@ -72,6 +71,8 @@ import io.getstream.video.android.ui.theme.Colors
 import io.getstream.video.android.ui.theme.LinkText
 import io.getstream.video.android.ui.theme.LinkTextData
 import io.getstream.video.android.ui.theme.StreamButton
+import io.getstream.video.android.util.GoogleSignInHelper
+import io.getstream.video.android.util.UserIdHelper
 
 @Composable
 fun LoginScreen(
@@ -188,7 +189,7 @@ private fun LoginContent(
                     text = "Login for Benchmark",
                     onClick = {
                         loginViewModel.handleUiEvent(
-                            LoginEvent.SignInInSuccess("benchmark.test@getstream.io"),
+                            LoginEvent.SignInSuccess("benchmark.test@getstream.io"),
                         )
                     },
                 )
@@ -242,11 +243,8 @@ private fun EmailLoginDialog(
                             .fillMaxWidth()
                             .padding(horizontal = 16.dp),
                         onClick = {
-                            val userId = email
-                                .replace(" ", "")
-                                .replace(".", "")
-                                .replace("@", "")
-                            loginViewModel.handleUiEvent(LoginEvent.SignInInSuccess(userId))
+                            val userId = UserIdHelper.getUserIdFromEmail(email)
+                            loginViewModel.handleUiEvent(LoginEvent.SignInSuccess(userId))
                         },
                         text = "Log in",
                     )
@@ -263,34 +261,27 @@ private fun HandleLoginUiStates(
     loginViewModel: LoginViewModel = hiltViewModel(),
 ) {
     val context = LocalContext.current
-    val signInLauncher = rememberRegisterForActivityResult(
+    val signInLauncher = rememberLauncherForGoogleSignInActivityResult(
         onSignInSuccess = { email ->
-            val userId = email
-                .replace(" ", "")
-                .replace(".", "")
-                .replace("@", "")
-            loginViewModel.handleUiEvent(LoginEvent.SignInInSuccess(userId = userId))
+            val userId = UserIdHelper.getUserIdFromEmail(email)
+            loginViewModel.handleUiEvent(LoginEvent.SignInSuccess(userId = userId))
         },
         onSignInFailed = {
+            loginViewModel.handleUiEvent(LoginEvent.Nothing)
             Toast.makeText(context, "Verification failed!", Toast.LENGTH_SHORT).show()
         },
     )
 
     LaunchedEffect(key1 = Unit) {
-        loginViewModel.sigInInIfValidUserExist()
+        loginViewModel.signInIfValidUserExist()
     }
 
     LaunchedEffect(key1 = loginUiState) {
         when (loginUiState) {
             is LoginUiState.GoogleSignIn -> {
-                val providers = arrayListOf(
-                    AuthUI.IdpConfig.GoogleBuilder().build(),
+                signInLauncher.launch(
+                    GoogleSignInHelper.getGoogleSignInClient(context).signInIntent,
                 )
-
-                val signInIntent = AuthUI.getInstance().createSignInIntentBuilder()
-                    .setAvailableProviders(providers)
-                    .build()
-                signInLauncher.launch(signInIntent)
             }
 
             is LoginUiState.SignInComplete -> {

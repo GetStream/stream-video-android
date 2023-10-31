@@ -16,34 +16,36 @@
 
 package io.getstream.video.android.compose.ui.components.call.renderer
 
-import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalInspectionMode
-import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import io.getstream.video.android.compose.theme.VideoTheme
+import io.getstream.video.android.compose.ui.components.call.renderer.internal.SpotlightVideoRenderer
 import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.ParticipantState
-import io.getstream.video.android.mock.StreamMockUtils
-import io.getstream.video.android.mock.mockCall
 
 /**
- * Renders all the participants, based on the number of people in a call and the call state.
+ * Renders all the CallParticipants, based on the number of people in a call and the call state.
  * Also takes into account if there are any screen sharing sessions active and adjusts the UI
  * accordingly.
  *
  * @param call The call that contains all the participants state and tracks.
  * @param modifier Modifier for styling.
+ * @param isZoomable Decide to this screensharing video renderer is zoomable or not.
  * @param style Defined properties for styling a single video call track.
  * @param videoRenderer A single video renderer renders each individual participant.
  */
 @Composable
-public fun ParticipantsGrid(
+public fun ParticipantsSpotlight(
     call: Call,
     modifier: Modifier = Modifier,
-    style: VideoRendererStyle = RegularVideoRendererStyle(),
+    isZoomable: Boolean = false,
+    style: VideoRendererStyle = SpotlightVideoRendererStyle(),
     videoRenderer: @Composable (
         modifier: Modifier,
         call: Call,
@@ -58,48 +60,31 @@ public fun ParticipantsGrid(
         )
     },
 ) {
-    if (LocalInspectionMode.current) {
-        ParticipantsRegularGrid(
-            call = call,
-            modifier = modifier,
-        )
-        return
+    val configuration = LocalConfiguration.current
+    val participants by call.state.participants.collectAsStateWithLifecycle(emptyList())
+    val dominantSpeaker by call.state.dominantSpeaker.collectAsStateWithLifecycle()
+    val pinnedParticipant by call.state.pinnedParticipants.collectAsStateWithLifecycle()
+    val speaker by remember(key1 = dominantSpeaker, key2 = pinnedParticipant, key3 = participants) {
+        derivedStateOf {
+            val pinnedSpeakerId = pinnedParticipant.keys.firstOrNull()
+            val pinnedSpeaker = participants.find { it.sessionId == pinnedSpeakerId }
+            pinnedSpeaker ?: dominantSpeaker ?: participants.firstOrNull()
+        }
     }
 
-    val screenSharingSession = call.state.screenSharingSession.collectAsStateWithLifecycle()
-    val screenSharing = screenSharingSession.value
-
-    // We do not display our own screen-sharing session
-    if (screenSharing == null || screenSharing.participant.isLocal) {
-        ParticipantsRegularGrid(
+    Box(
+        modifier = modifier.fillMaxSize(),
+    ) {
+        // Either the dominant speaker, or the first participant in the spotlight
+        SpotlightVideoRenderer(
             call = call,
-            modifier = modifier,
+            speaker = speaker,
+            participants = participants,
+            orientation = configuration.orientation,
+            modifier = modifier.fillMaxSize(),
+            isZoomable = isZoomable,
             style = style,
             videoRenderer = videoRenderer,
-        )
-    } else {
-        ParticipantsScreenSharing(
-            call = call,
-            modifier = modifier,
-            session = screenSharing,
-            style = ScreenSharingVideoRendererStyle().copy(
-                isFocused = style.isFocused,
-                isShowingReactions = style.isShowingReactions,
-                labelPosition = style.labelPosition,
-            ),
-            videoRenderer = videoRenderer,
-        )
-    }
-}
-
-@Preview
-@Composable
-private fun CallVideoRendererPreview() {
-    StreamMockUtils.initializeStreamVideo(LocalContext.current)
-    VideoTheme {
-        ParticipantsGrid(
-            call = mockCall,
-            modifier = Modifier.fillMaxWidth(),
         )
     }
 }

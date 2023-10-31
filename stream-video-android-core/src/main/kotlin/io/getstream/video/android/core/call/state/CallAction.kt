@@ -93,6 +93,11 @@ public data object Settings : CallAction
 public data object Reaction : CallAction
 
 /**
+ * Action to show a layout chooser.
+ */
+public data object ChooseLayout : CallAction
+
+/**
  * Action to invite other users to a call.
  */
 public data class InviteUsersToCall(

@@ -16,11 +16,13 @@
 
 package io.getstream.video.android.compose.ui.components.indicator
 
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.Icon
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
@@ -39,24 +41,26 @@ public fun MicrophoneIndicator(
     modifier: Modifier = Modifier,
     isMicrophoneEnabled: Boolean,
 ) {
-    if (isMicrophoneEnabled) {
-        Icon(
-            modifier = modifier
-                .size(VideoTheme.dimens.microphoneIndicatorSize)
-                .padding(end = VideoTheme.dimens.microphoneIndicatorPadding),
-            painter = painterResource(id = R.drawable.stream_video_ic_mic_on),
-            tint = Color.White,
-            contentDescription = "microphone enabled",
-        )
-    } else {
-        Icon(
-            modifier = modifier
-                .size(VideoTheme.dimens.microphoneIndicatorSize)
-                .padding(end = VideoTheme.dimens.microphoneIndicatorPadding),
-            painter = painterResource(id = R.drawable.stream_video_ic_mic_off),
-            tint = VideoTheme.colors.errorAccent,
-            contentDescription = "microphone disabled",
-        )
+    Box(
+        modifier = modifier
+            .size(VideoTheme.dimens.microphoneIndicatorSize)
+            .padding(VideoTheme.dimens.microphoneIndicatorPadding),
+    ) {
+        if (isMicrophoneEnabled) {
+            Icon(
+                modifier = Modifier.align(Alignment.Center),
+                painter = painterResource(id = R.drawable.stream_video_ic_mic_on),
+                tint = Color.White,
+                contentDescription = "microphone enabled",
+            )
+        } else {
+            Icon(
+                modifier = Modifier.align(Alignment.Center),
+                painter = painterResource(id = R.drawable.stream_video_ic_mic_off),
+                tint = Color.White,
+                contentDescription = "microphone disabled",
+            )
+        }
     }
 }
 
