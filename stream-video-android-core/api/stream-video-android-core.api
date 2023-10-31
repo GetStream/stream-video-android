@@ -729,7 +729,6 @@ public abstract interface class io/getstream/video/android/core/StreamVideo : io
 	public abstract fun connectAsync (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public abstract fun createDevice (Lio/getstream/android/push/PushDevice;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public abstract fun deleteDevice (Lio/getstream/video/android/model/Device;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
-	public fun devToken (Ljava/lang/String;)Ljava/lang/String;
 	public abstract fun getContext ()Landroid/content/Context;
 	public abstract fun getEdges (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public abstract fun getState ()Lio/getstream/video/android/core/ClientState;
@@ -745,6 +744,7 @@ public abstract interface class io/getstream/video/android/core/StreamVideo : io
 }
 
 public final class io/getstream/video/android/core/StreamVideo$Companion {
+	public final fun devToken (Ljava/lang/String;)Ljava/lang/String;
 	public final fun instance ()Lio/getstream/video/android/core/StreamVideo;
 	public final fun instanceOrNull ()Lio/getstream/video/android/core/StreamVideo;
 	public final fun isInstalled ()Z
