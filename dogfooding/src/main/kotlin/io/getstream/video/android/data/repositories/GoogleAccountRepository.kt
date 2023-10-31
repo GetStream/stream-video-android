@@ -135,7 +135,7 @@ class GoogleAccountRepository @Inject constructor(
         return GoogleAccount(
             email = currentUser?.email ?: "",
             id = currentUser?.id ?: "",
-            name = currentUser?.givenName ?: "",
+            name = currentUser?.displayName ?: "",
             photoUrl = currentUser?.photoUrl?.toString(),
             isFavorite = false,
         )
