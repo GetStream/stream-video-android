@@ -58,7 +58,6 @@ public fun ReactionAction(
             modifier = Modifier
                 .padding(12.dp)
                 .clickable(enabled = enabled) { onCallAction(Reaction) },
-            tint = Color.White,
             painter = painterResource(id = R.drawable.stream_video_ic_reaction),
             contentDescription = stringResource(R.string.stream_video_call_controls_reaction),
         )
