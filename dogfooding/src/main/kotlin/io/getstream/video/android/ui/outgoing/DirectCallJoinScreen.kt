@@ -67,7 +67,7 @@ import io.getstream.video.android.ui.theme.StreamImageButton
 
 @Composable
 fun DirectCallJoinScreen(
-    viewModel: DirectCallViewModel = hiltViewModel(),
+    viewModel: DirectCallJoinViewModel = hiltViewModel(),
     navigateToDirectCall: (memberList: String) -> Unit,
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
