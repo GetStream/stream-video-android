@@ -43,10 +43,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.painter.ColorPainter
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
@@ -60,7 +60,6 @@ import coil.size.Size
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.avatar.UserAvatar
 import io.getstream.video.android.core.R
-import io.getstream.video.android.mock.StreamMockUtils
 import io.getstream.video.android.model.User
 import io.getstream.video.android.ui.theme.Colors
 import io.getstream.video.android.ui.theme.StreamImageButton
@@ -94,29 +93,33 @@ fun DirectCallJoinScreen(
 
 @Composable
 private fun Header(user: User?) {
-    Row(
+    Column(
         modifier = Modifier
             .fillMaxWidth()
             .padding(24.dp) // Outer padding
             .padding(vertical = 12.dp), // Inner padding
-        verticalAlignment = Alignment.CenterVertically,
+        verticalArrangement = Arrangement.Center,
     ) {
-        user?.let {
-            UserAvatar(
-                modifier = Modifier.size(24.dp),
-                userName = it.userNameOrId,
-                userImage = it.image,
+        Row {
+            user?.let {
+                UserAvatar(
+                    modifier = Modifier.size(24.dp),
+                    userName = it.userNameOrId,
+                    userImage = it.image,
+                )
+                Spacer(modifier = Modifier.width(8.dp))
+            }
+
+            Text(
+                modifier = Modifier.weight(1f),
+                color = Color.White,
+                text = user?.name?.ifBlank { user.id }?.ifBlank { user.custom["email"] }.orEmpty(),
+                maxLines = 1,
+                fontSize = 16.sp,
             )
-            Spacer(modifier = Modifier.width(8.dp))
         }
 
-        Text(
-            modifier = Modifier.weight(1f),
-            color = Color.White,
-            text = user?.name?.ifBlank { user.id }?.ifBlank { user.custom["email"] }.orEmpty(),
-            maxLines = 1,
-            fontSize = 16.sp,
-        )
+        Spacer(modifier = Modifier.height(10.dp))
 
         Text(
             text = stringResource(io.getstream.video.android.R.string.select_direct_call_users),
@@ -135,7 +138,7 @@ private fun Body(
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .padding(horizontal = 12.dp),
+            .padding(horizontal = 24.dp),
     ) {
         if (uiState.isLoading) {
             CircularProgressIndicator(
@@ -166,7 +169,9 @@ private fun Body(
                 )
             } ?: Text(
                 text = stringResource(io.getstream.video.android.R.string.cannot_load_google_account_list),
-                modifier = Modifier.align(Alignment.Center).padding(horizontal = 24.dp),
+                modifier = Modifier
+                    .align(Alignment.Center)
+                    .padding(horizontal = 24.dp),
                 color = Color.White,
                 fontSize = 16.sp,
                 textAlign = TextAlign.Center,
@@ -237,9 +242,9 @@ private fun UserAvatar(url: String?) {
             .clip(shape = CircleShape),
         crossfadeMillis = 200,
         alpha = 0.8f,
-        error = ColorPainter(color = Color.DarkGray),
-        fallback = ColorPainter(color = Color.DarkGray),
-        placeholder = ColorPainter(color = Color.DarkGray),
+        error = painterResource(id = io.getstream.video.android.R.drawable.ic_default_avatar),
+        fallback = painterResource(id = io.getstream.video.android.R.drawable.ic_default_avatar),
+        placeholder = painterResource(id = io.getstream.video.android.R.drawable.ic_default_avatar),
     )
 }
 
@@ -271,11 +276,8 @@ private fun NetworkImage(
 
 @Preview
 @Composable
-private fun DebugCallScreenPreview() {
-    StreamMockUtils.initializeStreamVideo(LocalContext.current)
+private fun HeaderPreview() {
     VideoTheme {
-        DirectCallJoinScreen(
-            navigateToDirectCall = {},
-        )
+        Header(user = User(name = "Very very very long user name here"))
     }
 }
