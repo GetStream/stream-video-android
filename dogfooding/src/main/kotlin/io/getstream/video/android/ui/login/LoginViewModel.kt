@@ -67,14 +67,14 @@ class LoginViewModel @Inject constructor(
         viewModelScope.launch { this@LoginViewModel.event.emit(event) }
     }
 
-    private fun signInSuccess(email: String) = flow {
+    private fun signInSuccess(userId: String) = flow {
         // skip login if we are already logged in (use has navigated back)
         if (StreamVideo.isInstalled) {
             emit(LoginUiState.AlreadyLoggedIn)
         } else {
             try {
                 val tokenResponse = StreamVideoNetwork.tokenService.fetchToken(
-                    userId = email,
+                    userId = userId,
                     apiKey = API_KEY,
                 )
 
