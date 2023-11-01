@@ -78,3 +78,8 @@ HSPLio/getstream/video/android/model/UserType$Guest$1;-><init>()V
 Lio/getstream/video/android/model/mapper/StreamCallCidMapperKt;
 HSPLio/getstream/video/android/model/mapper/StreamCallCidMapperKt;->isValidCallId(Ljava/lang/String;)Z
 HSPLio/getstream/video/android/model/mapper/StreamCallCidMapperKt;->toTypeAndId(Ljava/lang/String;)Lkotlin/Pair;
+Lio/getstream/video/android/models/GoogleAccount;
+HSPLio/getstream/video/android/models/GoogleAccount;-><clinit>()V
+HSPLio/getstream/video/android/models/GoogleAccount;-><init>(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Z)V
+HSPLio/getstream/video/android/models/GoogleAccount;->getName()Ljava/lang/String;
+HSPLio/getstream/video/android/models/GoogleAccount;->getPhotoUrl()Ljava/lang/String;
