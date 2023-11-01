@@ -45,6 +45,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.AlertDialog
 import androidx.compose.material.ButtonDefaults
 import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
@@ -101,9 +102,10 @@ fun CallJoinScreen(
     navigateToDirectCallJoin: () -> Unit,
 ) {
     val uiState by callJoinViewModel.uiState.collectAsState(CallJoinUiState.Nothing)
-    val isLoggedOut by callJoinViewModel.isLoggedOut.collectAsState(initial = false)
-    val qrCodeCallback = rememberQrCodeCallback()
     val context = LocalContext.current
+    val qrCodeCallback = rememberQrCodeCallback()
+    var isSignOutDialogVisible by remember { mutableStateOf(false) }
+    val isLoggedOut by callJoinViewModel.isLoggedOut.collectAsState(initial = false)
 
     HandleCallJoinUiState(
         callJoinUiState = uiState,
@@ -118,10 +120,7 @@ fun CallJoinScreen(
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         CallJoinHeader(
-            onAvatarLongClick = {
-                callJoinViewModel.autoLogInAfterLogOut = false
-                callJoinViewModel.logOut()
-            },
+            onAvatarLongClick = { isSignOutDialogVisible = true },
             callJoinViewModel = callJoinViewModel,
             onDirectCallClick = navigateToDirectCallJoin,
             onSignOutClick = {
@@ -146,9 +145,39 @@ fun CallJoinScreen(
         )
     }
 
+    if (isSignOutDialogVisible) {
+        SignOutDialog(
+            onConfirmation = {
+                isSignOutDialogVisible = false
+                callJoinViewModel.autoLogInAfterLogOut = false
+                callJoinViewModel.logOut()
+            },
+            onDismissRequest = { isSignOutDialogVisible = false }
+        )
+    }
+
     LaunchedEffect(key1 = isLoggedOut) {
         if (isLoggedOut) {
             navigateUpToLogin.invoke(callJoinViewModel.autoLogInAfterLogOut)
+        }
+    }
+}
+
+@Composable
+private fun HandleCallJoinUiState(
+    callJoinUiState: CallJoinUiState,
+    navigateToCallLobby: (callId: String) -> Unit,
+    navigateUpToLogin: () -> Unit,
+) {
+    LaunchedEffect(key1 = callJoinUiState) {
+        when (callJoinUiState) {
+            is CallJoinUiState.JoinCompleted ->
+                navigateToCallLobby.invoke(callJoinUiState.callId)
+
+            is CallJoinUiState.GoBackToLogin ->
+                navigateUpToLogin.invoke()
+
+            else -> Unit
         }
     }
 }
@@ -384,22 +413,32 @@ private fun CallJoinBody(
 }
 
 @Composable
-private fun HandleCallJoinUiState(
-    callJoinUiState: CallJoinUiState,
-    navigateToCallLobby: (callId: String) -> Unit,
-    navigateUpToLogin: () -> Unit,
+private fun SignOutDialog(
+    onConfirmation: () -> Unit,
+    onDismissRequest: () -> Unit,
 ) {
-    LaunchedEffect(key1 = callJoinUiState) {
-        when (callJoinUiState) {
-            is CallJoinUiState.JoinCompleted ->
-                navigateToCallLobby.invoke(callJoinUiState.callId)
-
-            is CallJoinUiState.GoBackToLogin ->
-                navigateUpToLogin.invoke()
-
-            else -> Unit
-        }
-    }
+    AlertDialog(
+        modifier = Modifier.border(
+            BorderStroke(1.dp, Colors.background),
+            RoundedCornerShape(6.dp),
+        ),
+        title = { Text(text = "Sign Out") },
+        text = { Text(text = "Are you sure you want to sign out?") },
+        confirmButton = {
+            TextButton(onClick = { onConfirmation() }) {
+                Text(text = "Sign Out", color = VideoTheme.colors.primaryAccent)
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = { onDismissRequest() }) {
+                Text(text = "Cancel", color = VideoTheme.colors.primaryAccent)
+            }
+        },
+        onDismissRequest = { onDismissRequest },
+        shape = RoundedCornerShape(6.dp),
+        backgroundColor = Colors.secondBackground,
+        contentColor = Color.White,
+    )
 }
 
 @Composable
