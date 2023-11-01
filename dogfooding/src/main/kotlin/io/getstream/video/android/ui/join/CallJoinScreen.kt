@@ -127,7 +127,7 @@ fun CallJoinScreen(
             onSignOutClick = {
                 callJoinViewModel.autoLogInAfterLogOut = false
                 callJoinViewModel.logOut()
-            }
+            },
         )
 
         CallJoinBody(
