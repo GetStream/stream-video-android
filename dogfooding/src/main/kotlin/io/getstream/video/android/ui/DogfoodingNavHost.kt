@@ -100,7 +100,8 @@ enum class AppScreens(val route: String) {
     Login("login/{auto_log_in}"),
     CallJoin("call_join"),
     CallLobby("call_lobby/{cid}"),
-    DirectCallJoin("direct_call_join");
+    DirectCallJoin("direct_call_join"),
+    ;
 
     fun routeWithArg(argValue: Any): String = when (this) {
         Login -> this.route.replace("{auto_log_in}", argValue.toString())

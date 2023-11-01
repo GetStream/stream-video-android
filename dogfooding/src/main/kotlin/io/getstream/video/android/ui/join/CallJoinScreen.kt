@@ -152,7 +152,7 @@ fun CallJoinScreen(
                 callJoinViewModel.autoLogInAfterLogOut = false
                 callJoinViewModel.logOut()
             },
-            onDismissRequest = { isSignOutDialogVisible = false }
+            onDismissRequest = { isSignOutDialogVisible = false },
         )
     }
 
