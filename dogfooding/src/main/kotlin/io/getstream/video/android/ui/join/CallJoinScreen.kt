@@ -119,11 +119,15 @@ fun CallJoinScreen(
     ) {
         CallJoinHeader(
             onAvatarLongClick = {
-                callJoinViewModel.autoLogInAfterLogOut = true
+                callJoinViewModel.autoLogInAfterLogOut = false
                 callJoinViewModel.logOut()
             },
             callJoinViewModel = callJoinViewModel,
             onDirectCallClick = navigateToDirectCallJoin,
+            onSignOutClick = {
+                callJoinViewModel.autoLogInAfterLogOut = false
+                callJoinViewModel.logOut()
+            }
         )
 
         CallJoinBody(
@@ -155,6 +159,7 @@ private fun CallJoinHeader(
     callJoinViewModel: CallJoinViewModel = hiltViewModel(),
     onAvatarLongClick: () -> Unit,
     onDirectCallClick: () -> Unit,
+    onSignOutClick: () -> Unit,
 ) {
     val user by callJoinViewModel.user.collectAsState(initial = null)
 
@@ -209,7 +214,7 @@ private fun CallJoinHeader(
             StreamButton(
                 modifier = Modifier.widthIn(125.dp),
                 text = stringResource(id = R.string.sign_out),
-                onClick = { callJoinViewModel.logOut() },
+                onClick = onSignOutClick,
             )
         }
     }

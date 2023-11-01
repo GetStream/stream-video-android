@@ -154,7 +154,10 @@ private fun LoginContent(
                             .padding(horizontal = 55.dp),
                         enabled = !isLoading,
                         text = stringResource(id = R.string.sign_in_google),
-                        onClick = { loginViewModel.handleUiEvent(LoginEvent.GoogleSignIn()) },
+                        onClick = {
+                            loginViewModel.autoLogin = false
+                            loginViewModel.handleUiEvent(LoginEvent.GoogleSignIn())
+                        },
                     )
 
                     StreamButton(
@@ -163,7 +166,10 @@ private fun LoginContent(
                             .padding(horizontal = 55.dp),
                         enabled = !isLoading,
                         text = stringResource(id = R.string.sign_in_email),
-                        onClick = { showEmailLoginDialog.invoke() },
+                        onClick = {
+                            loginViewModel.autoLogin = true
+                            showEmailLoginDialog.invoke()
+                        },
                     )
                 }
                 BuildConfig.FLAVOR == "production" && !autoLogin -> {
