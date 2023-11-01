@@ -59,9 +59,9 @@ class MainActivity : ComponentActivity() {
                 VideoTheme {
                     AppNavHost(
                         startDestination = if (!isLoggedIn) {
-                            "${AppScreens.Login.destination}/true" // Pass true for autoLogIn
+                            AppScreens.Login.routeWithArg(true) // Pass true for autoLogIn
                         } else {
-                            AppScreens.CallJoin.destination
+                            AppScreens.CallJoin.route
                         },
                     )
                 }
