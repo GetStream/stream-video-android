@@ -178,15 +178,19 @@ private fun LoginContent(
                     StreamButton(
                         modifier = Modifier
                             .fillMaxWidth()
+                            .height(52.dp)
                             .padding(horizontal = 55.dp),
                         enabled = !isLoading,
                         text = stringResource(id = R.string.sign_in_google),
                         onClick = { loginViewModel.handleUiEvent(LoginEvent.GoogleSignIn()) },
                     )
 
+                    Spacer(modifier = Modifier.height(15.dp))
+
                     StreamButton(
                         modifier = Modifier
                             .fillMaxWidth()
+                            .height(52.dp)
                             .padding(horizontal = 55.dp),
                         enabled = !isLoading,
                         text = stringResource(R.string.random_user_sign_in),
@@ -308,7 +312,7 @@ private fun HandleLoginUiStates(
         },
         onSignInFailed = {
             loginViewModel.handleUiEvent(LoginEvent.Nothing)
-            Toast.makeText(context, "Verification failed!", Toast.LENGTH_SHORT).show()
+            Toast.makeText(context, "Sign in failed", Toast.LENGTH_SHORT).show()
         },
     )
 
