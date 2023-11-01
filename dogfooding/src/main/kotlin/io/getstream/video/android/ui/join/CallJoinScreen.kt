@@ -97,7 +97,7 @@ import io.getstream.video.android.ui.theme.StreamButton
 fun CallJoinScreen(
     callJoinViewModel: CallJoinViewModel = hiltViewModel(),
     navigateToCallLobby: (callId: String) -> Unit,
-    navigateUpToLogin: (autoLogin: Boolean) -> Unit,
+    navigateUpToLogin: (autoLogIn: Boolean) -> Unit,
     navigateToDirectCallJoin: () -> Unit,
 ) {
     val uiState by callJoinViewModel.uiState.collectAsState(CallJoinUiState.Nothing)

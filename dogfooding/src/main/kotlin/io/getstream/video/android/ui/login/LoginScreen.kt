@@ -77,7 +77,7 @@ import io.getstream.video.android.util.UserHelper
 @Composable
 fun LoginScreen(
     loginViewModel: LoginViewModel = hiltViewModel(),
-    autoLogin: Boolean = true,
+    autoLogIn: Boolean = true,
     navigateToCallJoin: () -> Unit,
 ) {
     val uiState by loginViewModel.uiState.collectAsState(initial = LoginUiState.Nothing)
@@ -87,13 +87,13 @@ fun LoginScreen(
     var isShowingEmailLoginDialog by remember { mutableStateOf(false) }
 
     HandleLoginUiStates(
-        autoLogin = autoLogin,
+        autoLogIn = autoLogIn,
         loginUiState = uiState,
         navigateToCallJoin = navigateToCallJoin,
     )
 
     LoginContent(
-        autoLogin = autoLogin,
+        autoLogIn = autoLogIn,
         isLoading = isLoading,
         showEmailLoginDialog = { isShowingEmailLoginDialog = true },
     )
@@ -107,7 +107,7 @@ fun LoginScreen(
 
 @Composable
 private fun LoginContent(
-    autoLogin: Boolean,
+    autoLogIn: Boolean,
     isLoading: Boolean,
     showEmailLoginDialog: () -> Unit,
     loginViewModel: LoginViewModel = hiltViewModel(),
@@ -155,7 +155,7 @@ private fun LoginContent(
                         enabled = !isLoading,
                         text = stringResource(id = R.string.sign_in_google),
                         onClick = {
-                            loginViewModel.autoLogin = false
+                            loginViewModel.autoLogIn = false
                             loginViewModel.handleUiEvent(LoginEvent.GoogleSignIn())
                         },
                     )
@@ -167,12 +167,12 @@ private fun LoginContent(
                         enabled = !isLoading,
                         text = stringResource(id = R.string.sign_in_email),
                         onClick = {
-                            loginViewModel.autoLogin = true
+                            loginViewModel.autoLogIn = true
                             showEmailLoginDialog.invoke()
                         },
                     )
                 }
-                BuildConfig.FLAVOR == "production" && !autoLogin -> {
+                BuildConfig.FLAVOR == "production" && !autoLogIn -> {
                     Spacer(modifier = Modifier.height(50.dp))
 
                     StreamButton(
@@ -191,7 +191,7 @@ private fun LoginContent(
                         enabled = !isLoading,
                         text = stringResource(R.string.random_user_sign_in),
                         onClick = {
-                            loginViewModel.autoLogin = true
+                            loginViewModel.autoLogIn = true
                             loginViewModel.signInIfValidUserExist()
                         },
                     )
@@ -297,7 +297,7 @@ private fun EmailLoginDialog(
 private fun HandleLoginUiStates(
     loginViewModel: LoginViewModel = hiltViewModel(),
     loginUiState: LoginUiState,
-    autoLogin: Boolean,
+    autoLogIn: Boolean,
     navigateToCallJoin: () -> Unit,
 ) {
     val context = LocalContext.current
@@ -312,8 +312,8 @@ private fun HandleLoginUiStates(
         },
     )
 
-    LaunchedEffect(key1 = autoLogin) {
-        loginViewModel.autoLogin = autoLogin
+    LaunchedEffect(key1 = autoLogIn) {
+        loginViewModel.autoLogIn = autoLogIn
     }
 
     LaunchedEffect(key1 = Unit) {

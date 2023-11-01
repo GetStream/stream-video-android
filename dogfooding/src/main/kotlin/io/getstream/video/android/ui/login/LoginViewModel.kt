@@ -50,7 +50,7 @@ class LoginViewModel @Inject constructor(
     private val dataStore: StreamUserDataStore,
     private val googleAccountRepository: GoogleAccountRepository,
 ) : ViewModel() {
-    var autoLogin: Boolean = true
+    var autoLogIn: Boolean = true
 
     private val event: MutableSharedFlow<LoginEvent> = MutableSharedFlow()
     internal val uiState: SharedFlow<LoginUiState> = event
@@ -78,13 +78,13 @@ class LoginViewModel @Inject constructor(
                     apiKey = API_KEY,
                 )
 
-                val loggedInGoogleUser = if (autoLogin) null else googleAccountRepository.getCurrentUser()
+                val loggedInGoogleUser = if (autoLogIn) null else googleAccountRepository.getCurrentUser()
 
                 val user = User(
                     id = tokenResponse.userId,
-                    // if autoLogin is true it means we have a random user, so do not set name & image
-                    name = if (autoLogin) "" else loggedInGoogleUser?.name ?: "",
-                    image = if (autoLogin) "" else loggedInGoogleUser?.photoUrl ?: "",
+                    // if autoLogIn is true it means we have a random user, so do not set name & image
+                    name = if (autoLogIn) "" else loggedInGoogleUser?.name ?: "",
+                    image = if (autoLogIn) "" else loggedInGoogleUser?.photoUrl ?: "",
                     role = "admin",
                     custom = mapOf("email" to tokenResponse.userId),
                 )
@@ -115,7 +115,7 @@ class LoginViewModel @Inject constructor(
                 }
             } else {
                 if (BuildConfig.FLAVOR == "production") {
-                    if (autoLogin) {
+                    if (autoLogIn) {
                         handleUiEvent(LoginEvent.Loading)
                         handleUiEvent(
                             LoginEvent.SignInSuccess(
