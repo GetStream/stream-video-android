@@ -29,9 +29,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.RadioButton
 import androidx.compose.material.RadioButtonDefaults
@@ -41,12 +39,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.painter.Painter
-import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
@@ -54,9 +47,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import coil.compose.AsyncImage
-import coil.request.ImageRequest
-import coil.size.Size
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.avatar.UserAvatar
 import io.getstream.video.android.core.R
@@ -183,16 +173,18 @@ private fun Body(
 
 @Composable
 private fun UserList(entries: List<GoogleAccountUiState>, onUserClick: (Int) -> Unit) {
-    Column(Modifier.verticalScroll(rememberScrollState())) {
-        entries.forEachIndexed { index, entry ->
-            UserRow(
-                index = index,
-                name = entry.account.name ?: "",
-                avatarUrl = entry.account.photoUrl,
-                isSelected = entry.isSelected,
-                onClick = { onUserClick(index) },
-            )
-            Spacer(modifier = Modifier.height(10.dp))
+    LazyColumn {
+        items(entries.size) { index ->
+            with(entries[index]) {
+                UserRow(
+                    index = index,
+                    name = account.name ?: "",
+                    avatarUrl = account.photoUrl,
+                    isSelected = isSelected,
+                    onClick = { onUserClick(index) },
+                )
+            }
+            Spacer(modifier = Modifier.height(12.dp))
         }
     }
 }
@@ -213,7 +205,11 @@ private fun UserRow(
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Row(verticalAlignment = Alignment.CenterVertically) {
-            UserAvatar(avatarUrl)
+            UserAvatar(
+                modifier = Modifier.size(50.dp),
+                userName = name,
+                userImage = avatarUrl,
+            )
             Spacer(modifier = Modifier.width(10.dp))
             Text(
                 text = name,
@@ -231,47 +227,6 @@ private fun UserRow(
             ),
         )
     }
-}
-
-@Composable
-private fun UserAvatar(url: String?) {
-    NetworkImage(
-        url = url ?: "",
-        modifier = Modifier
-            .size(50.dp)
-            .clip(shape = CircleShape),
-        crossfadeMillis = 200,
-        alpha = 0.8f,
-        error = painterResource(id = io.getstream.video.android.R.drawable.ic_default_avatar),
-        fallback = painterResource(id = io.getstream.video.android.R.drawable.ic_default_avatar),
-        placeholder = painterResource(id = io.getstream.video.android.R.drawable.ic_default_avatar),
-    )
-}
-
-@Composable
-private fun NetworkImage(
-    url: String,
-    modifier: Modifier = Modifier,
-    crossfadeMillis: Int = 0,
-    alpha: Float = 1f,
-    error: Painter? = null,
-    fallback: Painter? = null,
-    placeholder: Painter? = null,
-) {
-    AsyncImage(
-        model = ImageRequest.Builder(LocalContext.current)
-            .data(url)
-            .size(Size.ORIGINAL)
-            .crossfade(durationMillis = crossfadeMillis)
-            .build(),
-        contentDescription = null,
-        modifier = modifier,
-        contentScale = ContentScale.Crop,
-        alpha = alpha,
-        error = error,
-        fallback = fallback,
-        placeholder = placeholder,
-    )
 }
 
 @Preview
