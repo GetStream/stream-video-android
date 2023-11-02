@@ -74,6 +74,12 @@ import io.getstream.video.android.ui.theme.StreamButton
 import io.getstream.video.android.util.GoogleSignInHelper
 import io.getstream.video.android.util.UserHelper
 
+/**
+ * @param autoLogIn Flag that controls auto log-in with a random user.
+ * - True in places where original login behavior is required (first start, StreamVideo instance not initialized, etc).
+ * - False where showing login options (Google or random user) on the Login screen is required (avatar long press on Call Join screen, etc)
+ */
+
 @Composable
 fun LoginScreen(
     loginViewModel: LoginViewModel = hiltViewModel(),
