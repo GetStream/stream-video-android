@@ -214,7 +214,11 @@ private fun UserRow(
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Row(verticalAlignment = Alignment.CenterVertically) {
-            UserAvatar(avatarUrl)
+            UserAvatar(
+                modifier = Modifier.size(50.dp),
+                userName = name,
+                userImage = avatarUrl,
+            )
             Spacer(modifier = Modifier.width(10.dp))
             Text(
                 text = name,
@@ -232,47 +236,6 @@ private fun UserRow(
             ),
         )
     }
-}
-
-@Composable
-private fun UserAvatar(url: String?) {
-    NetworkImage(
-        url = url ?: "",
-        modifier = Modifier
-            .size(50.dp)
-            .clip(shape = CircleShape),
-        crossfadeMillis = 200,
-        alpha = 0.8f,
-        error = painterResource(id = io.getstream.video.android.R.drawable.ic_default_avatar),
-        fallback = painterResource(id = io.getstream.video.android.R.drawable.ic_default_avatar),
-        placeholder = painterResource(id = io.getstream.video.android.R.drawable.ic_default_avatar),
-    )
-}
-
-@Composable
-private fun NetworkImage(
-    url: String,
-    modifier: Modifier = Modifier,
-    crossfadeMillis: Int = 0,
-    alpha: Float = 1f,
-    error: Painter? = null,
-    fallback: Painter? = null,
-    placeholder: Painter? = null,
-) {
-    AsyncImage(
-        model = ImageRequest.Builder(LocalContext.current)
-            .data(url)
-            .size(Size.ORIGINAL)
-            .crossfade(durationMillis = crossfadeMillis)
-            .build(),
-        contentDescription = null,
-        modifier = modifier,
-        contentScale = ContentScale.Crop,
-        alpha = alpha,
-        error = error,
-        fallback = fallback,
-        placeholder = placeholder,
-    )
 }
 
 @Preview
