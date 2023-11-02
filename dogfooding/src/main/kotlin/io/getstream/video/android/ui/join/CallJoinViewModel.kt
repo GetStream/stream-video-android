@@ -46,6 +46,7 @@ class CallJoinViewModel @Inject constructor(
 ) : ViewModel() {
     val user: Flow<User?> = dataStore.user
     val isLoggedOut = dataStore.user.map { it == null }
+    var autoLogInAfterLogOut = true
 
     private val event: MutableSharedFlow<CallJoinEvent> = MutableSharedFlow()
     internal val uiState: SharedFlow<CallJoinUiState> = event
@@ -94,7 +95,7 @@ class CallJoinViewModel @Inject constructor(
         return streamVideo.call(type = type, id = id)
     }
 
-    fun signOut() {
+    fun logOut() {
         viewModelScope.launch {
             FirebaseAuth.getInstance().signOut()
             dataStore.clear()

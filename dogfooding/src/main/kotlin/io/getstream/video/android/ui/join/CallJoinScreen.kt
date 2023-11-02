@@ -21,10 +21,14 @@ package io.getstream.video.android.ui.join
 import android.net.Uri
 import android.widget.Toast
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.combinedClickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -41,6 +45,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.AlertDialog
 import androidx.compose.material.ButtonDefaults
 import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
@@ -93,18 +98,19 @@ import io.getstream.video.android.ui.theme.StreamButton
 fun CallJoinScreen(
     callJoinViewModel: CallJoinViewModel = hiltViewModel(),
     navigateToCallLobby: (callId: String) -> Unit,
-    navigateUpToLogin: () -> Unit,
+    navigateUpToLogin: (autoLogIn: Boolean) -> Unit,
     navigateToDirectCallJoin: () -> Unit,
 ) {
     val uiState by callJoinViewModel.uiState.collectAsState(CallJoinUiState.Nothing)
-    val isLoggedOut by callJoinViewModel.isLoggedOut.collectAsState(initial = false)
-    val qrCodeCallback = rememberQrCodeCallback()
     val context = LocalContext.current
+    val qrCodeCallback = rememberQrCodeCallback()
+    var isSignOutDialogVisible by remember { mutableStateOf(false) }
+    val isLoggedOut by callJoinViewModel.isLoggedOut.collectAsState(initial = false)
 
     HandleCallJoinUiState(
         callJoinUiState = uiState,
         navigateToCallLobby = navigateToCallLobby,
-        navigateUpToLogin = navigateUpToLogin,
+        navigateUpToLogin = { navigateUpToLogin(true) },
     )
 
     Column(
@@ -114,8 +120,13 @@ fun CallJoinScreen(
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         CallJoinHeader(
+            onAvatarLongClick = { isSignOutDialogVisible = true },
             callJoinViewModel = callJoinViewModel,
             onDirectCallClick = navigateToDirectCallJoin,
+            onSignOutClick = {
+                callJoinViewModel.autoLogInAfterLogOut = false
+                callJoinViewModel.logOut()
+            },
         )
 
         CallJoinBody(
@@ -134,17 +145,50 @@ fun CallJoinScreen(
         )
     }
 
+    if (isSignOutDialogVisible) {
+        SignOutDialog(
+            onConfirmation = {
+                isSignOutDialogVisible = false
+                callJoinViewModel.autoLogInAfterLogOut = false
+                callJoinViewModel.logOut()
+            },
+            onDismissRequest = { isSignOutDialogVisible = false },
+        )
+    }
+
     LaunchedEffect(key1 = isLoggedOut) {
         if (isLoggedOut) {
-            navigateUpToLogin.invoke()
+            navigateUpToLogin.invoke(callJoinViewModel.autoLogInAfterLogOut)
         }
     }
 }
 
 @Composable
+private fun HandleCallJoinUiState(
+    callJoinUiState: CallJoinUiState,
+    navigateToCallLobby: (callId: String) -> Unit,
+    navigateUpToLogin: () -> Unit,
+) {
+    LaunchedEffect(key1 = callJoinUiState) {
+        when (callJoinUiState) {
+            is CallJoinUiState.JoinCompleted ->
+                navigateToCallLobby.invoke(callJoinUiState.callId)
+
+            is CallJoinUiState.GoBackToLogin ->
+                navigateUpToLogin.invoke()
+
+            else -> Unit
+        }
+    }
+}
+
+@OptIn(ExperimentalFoundationApi::class)
+@Composable
 private fun CallJoinHeader(
     callJoinViewModel: CallJoinViewModel = hiltViewModel(),
+    onAvatarLongClick: () -> Unit,
     onDirectCallClick: () -> Unit,
+    onSignOutClick: () -> Unit,
 ) {
     val user by callJoinViewModel.user.collectAsState(initial = null)
 
@@ -155,11 +199,24 @@ private fun CallJoinHeader(
         verticalAlignment = Alignment.CenterVertically,
     ) {
         user?.let {
-            UserAvatar(
-                modifier = Modifier.size(24.dp),
-                userName = it.userNameOrId,
-                userImage = it.image,
-            )
+            Box(
+                modifier = if (BuildConfig.FLAVOR == "production") {
+                    Modifier.combinedClickable(
+                        interactionSource = remember { MutableInteractionSource() },
+                        indication = null,
+                        onClick = {},
+                        onLongClick = onAvatarLongClick,
+                    )
+                } else {
+                    Modifier
+                },
+            ) {
+                UserAvatar(
+                    modifier = Modifier.size(24.dp),
+                    userName = it.userNameOrId,
+                    userImage = it.image,
+                )
+            }
 
             Spacer(modifier = Modifier.width(8.dp))
         }
@@ -172,21 +229,21 @@ private fun CallJoinHeader(
             fontSize = 16.sp,
         )
 
-        if (BuildConfig.FLAVOR == "dogfooding") {
-            if (user?.custom?.get("email")?.contains("getstreamio") == true) {
-                TextButton(
-                    colors = ButtonDefaults.textButtonColors(contentColor = Color.White),
-                    content = { Text(text = stringResource(R.string.direct_call)) },
-                    onClick = { onDirectCallClick.invoke() },
-                )
+        if (user?.custom?.get("email")?.contains("getstreamio") == true) {
+            TextButton(
+                colors = ButtonDefaults.textButtonColors(contentColor = Color.White),
+                content = { Text(text = stringResource(R.string.direct_call)) },
+                onClick = { onDirectCallClick.invoke() },
+            )
+        }
 
-                Spacer(modifier = Modifier.width(5.dp))
-            }
+        if (BuildConfig.FLAVOR == "dogfooding") {
+            Spacer(modifier = Modifier.width(5.dp))
 
             StreamButton(
                 modifier = Modifier.widthIn(125.dp),
                 text = stringResource(id = R.string.sign_out),
-                onClick = { callJoinViewModel.signOut() },
+                onClick = onSignOutClick,
             )
         }
     }
@@ -213,9 +270,6 @@ private fun CallJoinBody(
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         if (user != null) {
-            val name =
-                user?.name?.ifBlank { user?.id }?.ifBlank { user!!.custom["email"] }.orEmpty()
-
             Image(
                 modifier = Modifier.size(102.dp),
                 painter = painterResource(id = R.drawable.ic_stream_video_meeting_logo),
@@ -359,22 +413,32 @@ private fun CallJoinBody(
 }
 
 @Composable
-private fun HandleCallJoinUiState(
-    callJoinUiState: CallJoinUiState,
-    navigateToCallLobby: (callId: String) -> Unit,
-    navigateUpToLogin: () -> Unit,
+private fun SignOutDialog(
+    onConfirmation: () -> Unit,
+    onDismissRequest: () -> Unit,
 ) {
-    LaunchedEffect(key1 = callJoinUiState) {
-        when (callJoinUiState) {
-            is CallJoinUiState.JoinCompleted ->
-                navigateToCallLobby.invoke(callJoinUiState.callId)
-
-            is CallJoinUiState.GoBackToLogin ->
-                navigateUpToLogin.invoke()
-
-            else -> Unit
-        }
-    }
+    AlertDialog(
+        modifier = Modifier.border(
+            BorderStroke(1.dp, Colors.background),
+            RoundedCornerShape(6.dp),
+        ),
+        title = { Text(text = "Sign Out") },
+        text = { Text(text = "Are you sure you want to sign out?") },
+        confirmButton = {
+            TextButton(onClick = { onConfirmation() }) {
+                Text(text = "Sign Out", color = VideoTheme.colors.primaryAccent)
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = { onDismissRequest() }) {
+                Text(text = "Cancel", color = VideoTheme.colors.primaryAccent)
+            }
+        },
+        onDismissRequest = { onDismissRequest },
+        shape = RoundedCornerShape(6.dp),
+        backgroundColor = Colors.secondBackground,
+        contentColor = Color.White,
+    )
 }
 
 @Composable

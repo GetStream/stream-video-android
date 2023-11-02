@@ -60,7 +60,9 @@ class GoogleAccountRepository @Inject constructor(
                         okHttpClient.newCall(request).execute().let { response ->
                             if (response.isSuccessful) {
                                 responseBody = response.body?.string()
-                                responseBody?.let { parseUserListJson(it) }
+                                responseBody?.let { body ->
+                                    parseUserListJson(body)?.sortedBy { user -> user.name }
+                                }
                             } else {
                                 null
                             }
@@ -133,7 +135,7 @@ class GoogleAccountRepository @Inject constructor(
         return GoogleAccount(
             email = currentUser?.email ?: "",
             id = currentUser?.id ?: "",
-            name = currentUser?.givenName ?: "",
+            name = currentUser?.displayName ?: "",
             photoUrl = currentUser?.photoUrl?.toString(),
             isFavorite = false,
         )
