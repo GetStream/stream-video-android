@@ -29,9 +29,8 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.RadioButton
 import androidx.compose.material.RadioButtonDefaults
@@ -183,16 +182,18 @@ private fun Body(
 
 @Composable
 private fun UserList(entries: List<GoogleAccountUiState>, onUserClick: (Int) -> Unit) {
-    Column(Modifier.verticalScroll(rememberScrollState())) {
-        entries.forEachIndexed { index, entry ->
-            UserRow(
-                index = index,
-                name = entry.account.name ?: "",
-                avatarUrl = entry.account.photoUrl,
-                isSelected = entry.isSelected,
-                onClick = { onUserClick(index) },
-            )
-            Spacer(modifier = Modifier.height(10.dp))
+    LazyColumn {
+        items(entries.size) { index ->
+            with(entries[index]) {
+                UserRow(
+                    index = index,
+                    name = account.name ?: "",
+                    avatarUrl = account.photoUrl,
+                    isSelected = isSelected,
+                    onClick = { onUserClick(index) },
+                )
+            }
+            Spacer(modifier = Modifier.height(12.dp))
         }
     }
 }
