@@ -62,6 +62,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
+import androidx.core.content.ContextCompat.getString
 import androidx.core.content.ContextCompat.startActivity
 import androidx.hilt.navigation.compose.hiltViewModel
 import io.getstream.video.android.BuildConfig
@@ -157,6 +158,7 @@ private fun LoginContent(
                     StreamButton(
                         modifier = Modifier
                             .fillMaxWidth()
+                            .height(52.dp)
                             .padding(horizontal = 55.dp),
                         enabled = !isLoading,
                         text = stringResource(id = R.string.sign_in_google),
@@ -166,9 +168,12 @@ private fun LoginContent(
                         },
                     )
 
+                    Spacer(modifier = Modifier.height(15.dp))
+
                     StreamButton(
                         modifier = Modifier
                             .fillMaxWidth()
+                            .height(52.dp)
                             .padding(horizontal = 55.dp),
                         enabled = !isLoading,
                         text = stringResource(id = R.string.sign_in_email),
@@ -274,13 +279,14 @@ private fun EmailLoginDialog(
                             .padding(16.dp),
                         value = email,
                         onValueChange = { email = it },
-                        label = { Text(text = "Enter your e-mail address") },
+                        label = { Text(text = stringResource(R.string.enter_your_email_address)) },
                         colors = TextFieldDefaults.textFieldColors(
-                            textColor = VideoTheme.colors.textLowEmphasis,
+                            textColor = Colors.description,
                             focusedLabelColor = VideoTheme.colors.primaryAccent,
+                            unfocusedLabelColor = VideoTheme.colors.textLowEmphasis,
                             unfocusedIndicatorColor = VideoTheme.colors.primaryAccent,
                             focusedIndicatorColor = VideoTheme.colors.primaryAccent,
-                            placeholderColor = Color.White,
+                            cursorColor = Colors.description,
                         ),
                         keyboardOptions = KeyboardOptions.Default.copy(
                             keyboardType = KeyboardType.Email,
@@ -297,6 +303,8 @@ private fun EmailLoginDialog(
                         },
                         text = "Log in",
                     )
+
+                    Spacer(modifier = Modifier.height(12.dp))
                 }
             }
         },
