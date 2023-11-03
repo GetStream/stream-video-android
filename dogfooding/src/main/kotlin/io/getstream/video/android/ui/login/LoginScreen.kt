@@ -317,8 +317,7 @@ private fun HandleLoginUiStates(
             loginViewModel.handleUiEvent(LoginEvent.SignInSuccess(userId = userId))
         },
         onSignInFailed = {
-            loginViewModel.handleUiEvent(LoginEvent.Nothing)
-            Toast.makeText(context, "Sign in failed", Toast.LENGTH_SHORT).show()
+            loginViewModel.handleUiEvent(LoginEvent.SignInFailure(errorMessage = getString(context, R.string.google_sign_in_not_finalized)))
         },
     )
 
@@ -349,8 +348,8 @@ private fun HandleLoginUiStates(
             is LoginUiState.SignInFailure -> {
                 Toast.makeText(
                     context,
-                    "Login failed! (${loginUiState.errorMessage})",
-                    Toast.LENGTH_SHORT,
+                    loginUiState.errorMessage,
+                    Toast.LENGTH_LONG,
                 ).show()
             }
 
