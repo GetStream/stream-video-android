@@ -325,7 +325,11 @@ private fun HandleLoginUiStates(
             loginViewModel.handleUiEvent(LoginEvent.SignInSuccess(userId = userId))
         },
         onSignInFailed = {
-            loginViewModel.handleUiEvent(LoginEvent.SignInFailure(errorMessage = getString(context, R.string.google_sign_in_not_finalized)))
+            loginViewModel.handleUiEvent(
+                LoginEvent.SignInFailure(
+                    errorMessage = getString(context, R.string.google_sign_in_not_finalized),
+                ),
+            )
         },
     )
 
