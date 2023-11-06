@@ -179,3 +179,7 @@ internal fun EdgeResponse.toEdge(): EdgeData {
         red = red,
     )
 }
+
+@JvmSynthetic
+@InternalStreamVideoApi
+fun CallUser.getNameOrId(): String = name.ifEmpty { id }
