@@ -31,12 +31,10 @@ include(":dogfooding")
 
 // SDK
 include(":benchmark")
-include(":stream-video-android-model")
 include(":stream-video-android-core")
 include(":stream-video-android-ui-common")
 include(":stream-video-android-xml")
 include(":stream-video-android-compose")
-include(":stream-video-android-datastore")
 include(":stream-video-android-tooling")
 include(":stream-video-android-mock")
 include(":stream-video-android-bom")

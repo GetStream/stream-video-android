@@ -48,5 +48,4 @@ baselineProfile {
 
 dependencies {
     api(project(":stream-video-android-core"))
-    implementation(project(":stream-video-android-datastore"))
 }
