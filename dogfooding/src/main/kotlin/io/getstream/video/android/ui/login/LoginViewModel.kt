@@ -82,8 +82,8 @@ class LoginViewModel @Inject constructor(
 
                 val user = User(
                     id = tokenResponse.userId,
-                    // if autoLogIn is true it means we have a random user, so do not set name & image
-                    name = if (autoLogIn) "" else loggedInGoogleUser?.name ?: "",
+                    // if autoLogIn is true it means we have a random user
+                    name = if (autoLogIn) userId else loggedInGoogleUser?.name ?: "",
                     image = if (autoLogIn) "" else loggedInGoogleUser?.photoUrl ?: "",
                     role = "admin",
                     custom = mapOf("email" to tokenResponse.userId),
