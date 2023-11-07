@@ -29,7 +29,7 @@ import io.getstream.video.android.model.User
 import io.getstream.video.android.token.StreamVideoNetwork
 import io.getstream.video.android.token.TokenResponse
 import io.getstream.video.android.util.StreamVideoInitHelper
-import io.getstream.video.android.util.UserIdHelper
+import io.getstream.video.android.util.UserHelper
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -50,6 +50,7 @@ class LoginViewModel @Inject constructor(
     private val dataStore: StreamUserDataStore,
     private val googleAccountRepository: GoogleAccountRepository,
 ) : ViewModel() {
+    var autoLogIn: Boolean = true
 
     private val event: MutableSharedFlow<LoginEvent> = MutableSharedFlow()
     internal val uiState: SharedFlow<LoginUiState> = event
@@ -66,22 +67,24 @@ class LoginViewModel @Inject constructor(
         viewModelScope.launch { this@LoginViewModel.event.emit(event) }
     }
 
-    private fun signInSuccess(email: String) = flow {
+    private fun signInSuccess(userId: String) = flow {
         // skip login if we are already logged in (use has navigated back)
         if (StreamVideo.isInstalled) {
             emit(LoginUiState.AlreadyLoggedIn)
         } else {
             try {
                 val tokenResponse = StreamVideoNetwork.tokenService.fetchToken(
-                    userId = email,
+                    userId = userId,
                     apiKey = API_KEY,
                 )
 
-                val loggedInUser = googleAccountRepository.getCurrentUser()
+                val loggedInGoogleUser = if (autoLogIn) null else googleAccountRepository.getCurrentUser()
+
                 val user = User(
                     id = tokenResponse.userId,
-                    name = loggedInUser.name ?: "",
-                    image = loggedInUser.photoUrl ?: "",
+                    // if autoLogIn is true it means we have a random user, so do not set name & image
+                    name = if (autoLogIn) "" else loggedInGoogleUser?.name ?: "",
+                    image = if (autoLogIn) "" else loggedInGoogleUser?.photoUrl ?: "",
                     role = "admin",
                     custom = mapOf("email" to tokenResponse.userId),
                 )
@@ -101,10 +104,6 @@ class LoginViewModel @Inject constructor(
         }
     }.flowOn(Dispatchers.IO)
 
-    init {
-        signInIfValidUserExist()
-    }
-
     fun signInIfValidUserExist() {
         viewModelScope.launch {
             val user = dataStore.user.firstOrNull()
@@ -115,15 +114,15 @@ class LoginViewModel @Inject constructor(
                     handleUiEvent(LoginEvent.SignInSuccess(userId = user.id))
                 }
             } else {
-                // Production apps have an automatic guest login. Logging the user out
-                // will just re-login automatically with a new random user ID.
                 if (BuildConfig.FLAVOR == "production") {
-                    handleUiEvent(LoginEvent.Loading)
-                    handleUiEvent(
-                        LoginEvent.SignInSuccess(
-                            UserIdHelper.generateRandomString(upperCaseOnly = true),
-                        ),
-                    )
+                    if (autoLogIn) {
+                        handleUiEvent(LoginEvent.Loading)
+                        handleUiEvent(
+                            LoginEvent.SignInSuccess(
+                                UserHelper.generateRandomString(upperCaseOnly = true),
+                            ),
+                        )
+                    }
                 }
             }
         }

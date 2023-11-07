@@ -16,7 +16,9 @@
 
 package io.getstream.video.android.util
 
-object UserIdHelper {
+import java.util.Locale
+
+object UserHelper {
     fun generateRandomString(length: Int = 8, upperCaseOnly: Boolean = false): String {
         val allowedChars: List<Char> = ('A'..'Z') + ('0'..'9') + if (!upperCaseOnly) {
             ('a'..'z')
@@ -33,4 +35,15 @@ object UserIdHelper {
         .replace(" ", "")
         .replace(".", "")
         .replace("@", "")
+
+    fun getFullNameFromEmail(email: String) = email
+        .split("@")
+        .first()
+        .let {
+            val parts = it.split(".")
+            val firstName = parts[0].capitalize(Locale.getDefault())
+            val lastName = parts.getOrNull(1)?.capitalize(Locale.getDefault())?.let { lastName -> " $lastName" } ?: ""
+
+            "$firstName$lastName"
+        }
 }

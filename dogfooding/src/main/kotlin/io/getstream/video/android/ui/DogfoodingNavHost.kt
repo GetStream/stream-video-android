@@ -37,34 +37,35 @@ import io.getstream.video.android.ui.outgoing.DirectCallJoinScreen
 fun AppNavHost(
     modifier: Modifier = Modifier,
     navController: NavHostController = rememberNavController(),
-    startDestination: String = AppScreens.Login.destination,
+    startDestination: String = AppScreens.Login.route,
 ) {
     NavHost(
         modifier = modifier.fillMaxSize(),
         navController = navController,
         startDestination = startDestination,
     ) {
-        composable(AppScreens.Login.destination) {
+        composable(AppScreens.Login.route) { backStackEntry ->
             LoginScreen(
+                autoLogIn = backStackEntry.arguments?.getString("auto_log_in")?.let { it.toBoolean() } ?: true,
                 navigateToCallJoin = {
-                    navController.navigate(AppScreens.CallJoin.destination) {
-                        popUpTo(AppScreens.Login.destination) { inclusive = true }
+                    navController.navigate(AppScreens.CallJoin.route) {
+                        popUpTo(AppScreens.Login.route) { inclusive = true }
                     }
                 },
             )
         }
-        composable(AppScreens.CallJoin.destination) {
+        composable(AppScreens.CallJoin.route) {
             CallJoinScreen(
                 navigateToCallLobby = { cid ->
-                    navController.navigate("${AppScreens.CallLobby.destination}/$cid")
+                    navController.navigate(AppScreens.CallLobby.routeWithArg(cid))
                 },
-                navigateUpToLogin = {
-                    navController.navigate(AppScreens.Login.destination) {
-                        popUpTo(AppScreens.CallJoin.destination) { inclusive = true }
+                navigateUpToLogin = { autoLogIn ->
+                    navController.navigate(AppScreens.Login.routeWithArg(autoLogIn)) {
+                        popUpTo(AppScreens.CallJoin.route) { inclusive = true }
                     }
                 },
                 navigateToDirectCallJoin = {
-                    navController.navigate(AppScreens.DirectCallJoin.destination)
+                    navController.navigate(AppScreens.DirectCallJoin.route)
                 },
                 navigateToBarcodeScanner = {
                     navController.navigate(AppScreens.BarcodeScanning.destination)
@@ -72,18 +73,18 @@ fun AppNavHost(
             )
         }
         composable(
-            "${AppScreens.CallLobby.destination}/{cid}",
+            AppScreens.CallLobby.route,
             arguments = listOf(navArgument("cid") { type = NavType.StringType }),
         ) {
             CallLobbyScreen(
                 navigateUpToLogin = {
-                    navController.navigate(AppScreens.Login.destination) {
-                        popUpTo(AppScreens.CallJoin.destination) { inclusive = true }
+                    navController.navigate(AppScreens.Login.route) {
+                        popUpTo(AppScreens.CallJoin.route) { inclusive = true }
                     }
                 },
             )
         }
-        composable(AppScreens.DirectCallJoin.destination) {
+        composable(AppScreens.DirectCallJoin.route) {
             val context = LocalContext.current
             DirectCallJoinScreen(
                 navigateToDirectCall = { members ->
@@ -104,10 +105,17 @@ fun AppNavHost(
     }
 }
 
-enum class AppScreens(val destination: String) {
-    Login("login"),
+enum class AppScreens(val route: String) {
+    Login("login/{auto_log_in}"),
     CallJoin("call_join"),
-    CallLobby("call_preview"),
+    CallLobby("call_lobby/{cid}"),
     DirectCallJoin("direct_call_join"),
     BarcodeScanning("barcode_scanning"),
+    ;
+
+    fun routeWithArg(argValue: Any): String = when (this) {
+        Login -> this.route.replace("{auto_log_in}", argValue.toString())
+        CallLobby -> this.route.replace("{cid}", argValue.toString())
+        else -> this.route
+    }
 }

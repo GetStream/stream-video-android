@@ -17,8 +17,7 @@
 package io.getstream.video.android.data.dto
 
 import io.getstream.video.android.models.GoogleAccount
-import io.getstream.video.android.util.UserIdHelper
-import java.util.Locale
+import io.getstream.video.android.util.UserHelper
 
 data class GetGoogleAccountsResponseDto(
     val people: List<GoogleAccountDto>,
@@ -42,13 +41,8 @@ fun GoogleAccountDto.asDomainModel(): GoogleAccount {
 
     return GoogleAccount(
         email = email,
-        id = email?.let { UserIdHelper.getUserIdFromEmail(it) },
-        name = email
-            ?.split("@")
-            ?.firstOrNull()
-            ?.split(".")
-            ?.firstOrNull()
-            ?.capitalize(Locale.ROOT) ?: email,
+        id = email?.let { UserHelper.getUserIdFromEmail(it) },
+        name = email?.let { UserHelper.getFullNameFromEmail(it) },
         photoUrl = photos?.firstOrNull()?.url,
     )
 }

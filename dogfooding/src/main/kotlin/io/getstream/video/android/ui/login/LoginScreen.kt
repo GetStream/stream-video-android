@@ -72,11 +72,18 @@ import io.getstream.video.android.ui.theme.LinkText
 import io.getstream.video.android.ui.theme.LinkTextData
 import io.getstream.video.android.ui.theme.StreamButton
 import io.getstream.video.android.util.GoogleSignInHelper
-import io.getstream.video.android.util.UserIdHelper
+import io.getstream.video.android.util.UserHelper
+
+/**
+ * @param autoLogIn Flag that controls auto log-in with a random user.
+ * - True in places where original login behavior is required (first start, StreamVideo instance not initialized, etc).
+ * - False where showing login options (Google or random user) on the Login screen is required (avatar long press on Call Join screen, etc)
+ */
 
 @Composable
 fun LoginScreen(
     loginViewModel: LoginViewModel = hiltViewModel(),
+    autoLogIn: Boolean = true,
     navigateToCallJoin: () -> Unit,
 ) {
     val uiState by loginViewModel.uiState.collectAsState(initial = LoginUiState.Nothing)
@@ -85,9 +92,14 @@ fun LoginScreen(
     }
     var isShowingEmailLoginDialog by remember { mutableStateOf(false) }
 
-    HandleLoginUiStates(loginUiState = uiState, navigateToCallJoin = navigateToCallJoin)
+    HandleLoginUiStates(
+        autoLogIn = autoLogIn,
+        loginUiState = uiState,
+        navigateToCallJoin = navigateToCallJoin,
+    )
 
     LoginContent(
+        autoLogIn = autoLogIn,
         isLoading = isLoading,
         showEmailLoginDialog = { isShowingEmailLoginDialog = true },
     )
@@ -101,6 +113,7 @@ fun LoginScreen(
 
 @Composable
 private fun LoginContent(
+    autoLogIn: Boolean,
     isLoading: Boolean,
     showEmailLoginDialog: () -> Unit,
     loginViewModel: LoginViewModel = hiltViewModel(),
@@ -128,35 +141,71 @@ private fun LoginContent(
                 fontSize = 38.sp,
             )
 
-            if (BuildConfig.FLAVOR != "production") {
-                Spacer(modifier = Modifier.height(17.dp))
+            when {
+                BuildConfig.FLAVOR != "production" -> {
+                    Spacer(modifier = Modifier.height(17.dp))
 
-                Text(
-                    text = stringResource(id = R.string.sign_in_description),
-                    color = Colors.description,
-                    textAlign = TextAlign.Center,
-                    fontSize = 18.sp,
-                )
+                    Text(
+                        text = stringResource(id = R.string.sign_in_description),
+                        color = Colors.description,
+                        textAlign = TextAlign.Center,
+                        fontSize = 18.sp,
+                    )
 
-                Spacer(modifier = Modifier.height(50.dp))
+                    Spacer(modifier = Modifier.height(50.dp))
 
-                StreamButton(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 55.dp),
-                    enabled = !isLoading,
-                    text = stringResource(id = R.string.sign_in_google),
-                    onClick = { loginViewModel.handleUiEvent(LoginEvent.GoogleSignIn()) },
-                )
+                    StreamButton(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 55.dp),
+                        enabled = !isLoading,
+                        text = stringResource(id = R.string.sign_in_google),
+                        onClick = {
+                            loginViewModel.autoLogIn = false
+                            loginViewModel.handleUiEvent(LoginEvent.GoogleSignIn())
+                        },
+                    )
 
-                StreamButton(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 55.dp),
-                    enabled = !isLoading,
-                    text = stringResource(id = R.string.sign_in_email),
-                    onClick = { showEmailLoginDialog.invoke() },
-                )
+                    StreamButton(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 55.dp),
+                        enabled = !isLoading,
+                        text = stringResource(id = R.string.sign_in_email),
+                        onClick = {
+                            loginViewModel.autoLogIn = true
+                            showEmailLoginDialog.invoke()
+                        },
+                    )
+                }
+                BuildConfig.FLAVOR == "production" && !autoLogIn -> {
+                    Spacer(modifier = Modifier.height(50.dp))
+
+                    StreamButton(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(52.dp)
+                            .padding(horizontal = 55.dp),
+                        enabled = !isLoading,
+                        text = stringResource(id = R.string.sign_in_google),
+                        onClick = { loginViewModel.handleUiEvent(LoginEvent.GoogleSignIn()) },
+                    )
+
+                    Spacer(modifier = Modifier.height(15.dp))
+
+                    StreamButton(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(52.dp)
+                            .padding(horizontal = 55.dp),
+                        enabled = !isLoading,
+                        text = stringResource(R.string.random_user_sign_in),
+                        onClick = {
+                            loginViewModel.autoLogIn = true
+                            loginViewModel.signInIfValidUserExist()
+                        },
+                    )
+                }
             }
 
             Spacer(modifier = Modifier.height(47.dp))
@@ -243,7 +292,7 @@ private fun EmailLoginDialog(
                             .fillMaxWidth()
                             .padding(horizontal = 16.dp),
                         onClick = {
-                            val userId = UserIdHelper.getUserIdFromEmail(email)
+                            val userId = UserHelper.getUserIdFromEmail(email)
                             loginViewModel.handleUiEvent(LoginEvent.SignInSuccess(userId))
                         },
                         text = "Log in",
@@ -256,21 +305,26 @@ private fun EmailLoginDialog(
 
 @Composable
 private fun HandleLoginUiStates(
-    loginUiState: LoginUiState,
-    navigateToCallJoin: () -> Unit,
     loginViewModel: LoginViewModel = hiltViewModel(),
+    loginUiState: LoginUiState,
+    autoLogIn: Boolean,
+    navigateToCallJoin: () -> Unit,
 ) {
     val context = LocalContext.current
     val signInLauncher = rememberLauncherForGoogleSignInActivityResult(
         onSignInSuccess = { email ->
-            val userId = UserIdHelper.getUserIdFromEmail(email)
+            val userId = UserHelper.getUserIdFromEmail(email)
             loginViewModel.handleUiEvent(LoginEvent.SignInSuccess(userId = userId))
         },
         onSignInFailed = {
             loginViewModel.handleUiEvent(LoginEvent.Nothing)
-            Toast.makeText(context, "Verification failed!", Toast.LENGTH_SHORT).show()
+            Toast.makeText(context, "Sign in failed", Toast.LENGTH_SHORT).show()
         },
     )
+
+    LaunchedEffect(key1 = autoLogIn) {
+        loginViewModel.autoLogIn = autoLogIn
+    }
 
     LaunchedEffect(key1 = Unit) {
         loginViewModel.signInIfValidUserExist()
