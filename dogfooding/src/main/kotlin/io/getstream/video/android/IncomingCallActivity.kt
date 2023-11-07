@@ -98,6 +98,7 @@ class IncomingCallActivity : ComponentActivity() {
                             is ToggleCamera -> call.camera.setEnabled(callAction.isEnabled)
                             is ToggleMicrophone -> call.microphone.setEnabled(callAction.isEnabled)
                             is ToggleSpeakerphone -> call.speaker.setEnabled(callAction.isEnabled)
+                            is FlipCamera -> call.camera.flip()
                             is LeaveCall -> {
                                 call.leave()
                                 finish()
@@ -115,7 +116,6 @@ class IncomingCallActivity : ComponentActivity() {
                                     call.join()
                                 }
                             }
-
                             else -> Unit
                         }
                     }
