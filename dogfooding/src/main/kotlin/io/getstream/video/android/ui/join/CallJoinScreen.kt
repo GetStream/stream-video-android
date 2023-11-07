@@ -94,8 +94,6 @@ fun CallJoinScreen(
     navigateToBarcodeScanner: () -> Unit = {},
 ) {
     val uiState by callJoinViewModel.uiState.collectAsState(CallJoinUiState.Nothing)
-    val context = LocalContext.current
-    val qrCodeCallback = rememberQrCodeCallback()
     var isSignOutDialogVisible by remember { mutableStateOf(false) }
     val isLoggedOut by callJoinViewModel.isLoggedOut.collectAsState(initial = false)
 

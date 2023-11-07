@@ -68,7 +68,7 @@ fun AppNavHost(
                     navController.navigate(AppScreens.DirectCallJoin.route)
                 },
                 navigateToBarcodeScanner = {
-                    navController.navigate(AppScreens.BarcodeScanning.destination)
+                    navController.navigate(AppScreens.BarcodeScanning.route)
                 },
             )
         }
@@ -97,7 +97,7 @@ fun AppNavHost(
                 },
             )
         }
-        composable(AppScreens.BarcodeScanning.destination) {
+        composable(AppScreens.BarcodeScanning.route) {
             BarcodeScanner {
                 navController.popBackStack()
             }
@@ -110,9 +110,7 @@ enum class AppScreens(val route: String) {
     CallJoin("call_join"),
     CallLobby("call_lobby/{cid}"),
     DirectCallJoin("direct_call_join"),
-    BarcodeScanning("barcode_scanning"),
-    ;
-
+    BarcodeScanning("barcode_scanning"), ;
     fun routeWithArg(argValue: Any): String = when (this) {
         Login -> this.route.replace("{auto_log_in}", argValue.toString())
         CallLobby -> this.route.replace("{cid}", argValue.toString())
