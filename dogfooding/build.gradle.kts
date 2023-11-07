@@ -208,7 +208,6 @@ dependencies {
     // Stream Video SDK
     implementation(project(":stream-video-android-compose"))
     implementation(project(":stream-video-android-xml"))
-    implementation(project(":stream-video-android-tooling"))
     compileOnly(project(":stream-video-android-mock"))
 
     // Stream Chat SDK

@@ -39,6 +39,9 @@
     <string name="cannot_load_google_account_list">Cannot load user list.\nPlease try again or re-login into the app.</string>
     <string name="direct_call">Direct Call</string>
     <string name="select_direct_call_users">Select users and tap the call button below</string>
+    <string name="stream_video_tooling_restart_app">Restart App</string>
+    <string name="stream_video_tooling_exception_log">Error Log</string>
+    <string name="stream_video_tooling_copy_into_clipboard">Log messages copied to clipboard!</string>
     <plurals name="chat_typing">
         <item quantity="one">%s is typing</item>
         <item quantity="other">%s and %d more are typing</item>

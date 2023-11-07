@@ -16,7 +16,6 @@ dependencies {
     api(project(":stream-video-android-ui-common"))
     api(project(":stream-video-android-xml"))
     api(project(":stream-video-android-compose"))
-    api(project(":stream-video-android-tooling"))
     api(project(":stream-video-android-mock"))
   }
 }

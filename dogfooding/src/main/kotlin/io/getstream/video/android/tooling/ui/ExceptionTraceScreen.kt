@@ -46,8 +46,8 @@ import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import io.getstream.video.android.R
 import io.getstream.video.android.compose.theme.VideoTheme
-import io.getstream.video.android.tooling.R
 import io.getstream.video.android.tooling.extensions.toast
 
 @Composable

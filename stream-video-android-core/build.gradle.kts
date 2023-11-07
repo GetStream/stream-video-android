@@ -126,6 +126,8 @@ android {
 baselineProfile {
     filter {
         include("io.getstream.video.android.core.**")
+        include("io.getstream.video.android.datastore.**")
+        include("io.getstream.video.android.model.**")
         include("org.openapitools.client.**")
         include("org.webrtc.**")
     }
