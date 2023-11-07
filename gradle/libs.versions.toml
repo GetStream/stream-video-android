@@ -1,5 +1,6 @@
 [versions]
 androidGradlePlugin = "8.1.2"
+cameraCamera2 = "1.3.0"
 spotless = "6.21.0"
 nexusPlugin = "1.3.0"
 kotlin = "1.9.10"
@@ -77,6 +78,7 @@ playPublisher = "3.8.4"
 
 [libraries]
 
+androidx-camera-camera2 = { module = "androidx.camera:camera-camera2", version.ref = "cameraCamera2" }
 androidx-material = { group = "com.google.android.material", name = "material", version.ref = "androidxMaterial" }
 androidx-appcompat = { group = "androidx.appcompat", name = "appcompat", version.ref = "androidxAppCompat" }
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "androidxCore" }
@@ -193,6 +195,10 @@ leakCanary = { group = "com.squareup.leakcanary", name = "leakcanary-android", v
 android-gradlePlugin = { group = "com.android.tools.build", name = "gradle", version.ref = "androidGradlePlugin" }
 kotlin-gradlePlugin = { group = "org.jetbrains.kotlin", name = "kotlin-gradle-plugin", version.ref = "kotlin" }
 spotless-gradlePlugin = { group = "com.diffplug.spotless", name = "spotless-plugin-gradle", version.ref = "spotless" }
+androidx-camera-core = { group = "androidx.camera", name = "camera-core", version = "1.3.0" }
+play-services-mlkit-barcode-scanning = { group = "com.google.android.gms", name = "play-services-mlkit-barcode-scanning", version = "18.3.0" }
+androidx-camera-view = { group = "androidx.camera", name = "camera-view", version = "1.3.0" }
+androidx-camera-lifecycle = { group = "androidx.camera", name = "camera-lifecycle", version = "1.3.0" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "androidGradlePlugin" }

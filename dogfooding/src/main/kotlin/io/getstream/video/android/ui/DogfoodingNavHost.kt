@@ -28,6 +28,7 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import io.getstream.video.android.DirectCallActivity
 import io.getstream.video.android.ui.join.CallJoinScreen
+import io.getstream.video.android.ui.join.barcode.BarcodeScanner
 import io.getstream.video.android.ui.lobby.CallLobbyScreen
 import io.getstream.video.android.ui.login.LoginScreen
 import io.getstream.video.android.ui.outgoing.DirectCallJoinScreen
@@ -65,6 +66,9 @@ fun AppNavHost(
                 navigateToDirectCallJoin = {
                     navController.navigate(AppScreens.DirectCallJoin.destination)
                 },
+                navigateToBarcodeScanner = {
+                    navController.navigate(AppScreens.BarcodeScanning.destination)
+                },
             )
         }
         composable(
@@ -92,6 +96,11 @@ fun AppNavHost(
                 },
             )
         }
+        composable(AppScreens.BarcodeScanning.destination) {
+            BarcodeScanner {
+                navController.popBackStack()
+            }
+        }
     }
 }
 
@@ -100,4 +109,5 @@ enum class AppScreens(val destination: String) {
     CallJoin("call_join"),
     CallLobby("call_preview"),
     DirectCallJoin("direct_call_join"),
+    BarcodeScanning("barcode_scanning"),
 }
