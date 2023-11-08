@@ -19,6 +19,7 @@ package io.getstream.video.android.ui.common.util
 import android.content.Context
 import io.getstream.video.android.core.internal.InternalStreamVideoApi
 import io.getstream.video.android.core.model.CallUser
+import io.getstream.video.android.core.utils.getNameOrId
 import io.getstream.video.android.ui.common.R
 
 @InternalStreamVideoApi
@@ -33,7 +34,7 @@ public fun buildSmallCallText(
         )
     }
 
-    val names = participants.map { it.name }
+    val names = participants.map { it.getNameOrId() }
     val conjunction = context.getString(R.string.stream_video_call_participants_conjunction)
 
     val stringBuilder = StringBuilder(names.first())
