@@ -205,9 +205,9 @@ dependencies {
     implementation("com.google.firebase:firebase-auth")
     implementation("com.firebaseui:firebase-ui-auth:7.2.0")
     implementation(project(":stream-video-android-ui-compose"))
+    implementation(project(":stream-video-android-ui-xml"))
 
     // Stream Video SDK
-    implementation(project(":stream-video-android-xml"))
     compileOnly(project(":stream-video-android-previewdata"))
 
     // Stream Chat SDK
