@@ -18,8 +18,6 @@
 
 package io.getstream.video.android.ui.join
 
-import android.net.Uri
-import android.widget.Toast
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
@@ -77,15 +75,8 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
-import com.google.android.gms.tasks.OnSuccessListener
-import com.google.firebase.analytics.FirebaseAnalytics
-import com.google.mlkit.vision.barcode.common.Barcode
-import com.google.mlkit.vision.codescanner.GmsBarcodeScannerOptions
-import com.google.mlkit.vision.codescanner.GmsBarcodeScanning
 import io.getstream.video.android.BuildConfig
-import io.getstream.video.android.DeeplinkingActivity
 import io.getstream.video.android.R
-import io.getstream.video.android.analytics.FirebaseEvents
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.avatar.UserAvatar
 import io.getstream.video.android.datastore.delegate.StreamUserDataStore
@@ -100,10 +91,9 @@ fun CallJoinScreen(
     navigateToCallLobby: (callId: String) -> Unit,
     navigateUpToLogin: (autoLogIn: Boolean) -> Unit,
     navigateToDirectCallJoin: () -> Unit,
+    navigateToBarcodeScanner: () -> Unit = {},
 ) {
     val uiState by callJoinViewModel.uiState.collectAsState(CallJoinUiState.Nothing)
-    val context = LocalContext.current
-    val qrCodeCallback = rememberQrCodeCallback()
     var isSignOutDialogVisible by remember { mutableStateOf(false) }
     val isLoggedOut by callJoinViewModel.isLoggedOut.collectAsState(initial = false)
 
@@ -137,10 +127,7 @@ fun CallJoinScreen(
                 .weight(1f),
             callJoinViewModel = callJoinViewModel,
             openCamera = {
-                val options = GmsBarcodeScannerOptions.Builder()
-                    .setBarcodeFormats(Barcode.FORMAT_QR_CODE, Barcode.FORMAT_AZTEC).build()
-                val scanner = GmsBarcodeScanning.getClient(context, options)
-                scanner.startScan().addOnSuccessListener(qrCodeCallback)
+                navigateToBarcodeScanner()
             },
         )
     }
@@ -439,39 +426,6 @@ private fun SignOutDialog(
         backgroundColor = Colors.secondBackground,
         contentColor = Color.White,
     )
-}
-
-@Composable
-private fun rememberQrCodeCallback(): OnSuccessListener<Barcode> {
-    val context = LocalContext.current
-    val firebaseAnalytics by lazy { FirebaseAnalytics.getInstance(context) }
-
-    return remember {
-        OnSuccessListener<Barcode> {
-            val url = it.url?.url
-            val callId = if (url != null) {
-                val id = Uri.parse(url).getQueryParameter("id")
-                if (!id.isNullOrEmpty()) {
-                    id
-                } else {
-                    null
-                }
-            } else {
-                null
-            }
-
-            if (!callId.isNullOrEmpty()) {
-                firebaseAnalytics.logEvent(FirebaseEvents.SCAN_QR_CODE, null)
-                context.startActivity(DeeplinkingActivity.createIntent(context, callId))
-            } else {
-                Toast.makeText(
-                    context,
-                    "Unrecognised meeting QR code format",
-                    Toast.LENGTH_SHORT,
-                ).show()
-            }
-        }
-    }
 }
 
 @Preview

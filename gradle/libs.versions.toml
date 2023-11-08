@@ -1,9 +1,10 @@
 [versions]
-androidGradlePlugin = "8.1.2"
+androidGradlePlugin = "8.1.3"
+cameraCamera2 = "1.3.0"
 spotless = "6.21.0"
 nexusPlugin = "1.3.0"
-kotlin = "1.9.10"
-ksp = "1.9.10-1.0.13"
+kotlin = "1.9.20"
+ksp = "1.9.20-1.0.13"
 kotlinSerialization = "1.6.0"
 kotlinSerializationConverter = "1.0.0"
 kotlinxCoroutines = "1.7.3"
@@ -22,14 +23,14 @@ androidxDataStore = "1.0.0"
 googleService = "4.3.14"
 
 androidxComposeBom = "2023.10.01"
-androidxComposeCompiler = "1.5.3"
+androidxComposeCompiler = "1.5.4"
 androidxComposeTracing = "1.0.0-alpha03"
-androidxHiltNavigation = "1.0.0"
-androidxComposeNavigation = "2.7.4"
-composeStableMarker = "1.0.1"
+androidxHiltNavigation = "1.1.0"
+androidxComposeNavigation = "2.7.5"
+composeStableMarker = "1.0.2"
 
 coil = "2.4.0"
-landscapist = "2.2.10"
+landscapist = "2.2.11"
 accompanist = "0.32.0"
 telephoto = "0.3.0"
 audioswitch = "1.1.8"
@@ -45,9 +46,9 @@ turbine = "0.13.0"
 
 streamWebRTC = "1.1.0"
 streamResult = "1.1.0"
-streamChat = "6.0.4"
+streamChat = "6.0.6"
 streamLog = "1.1.4"
-streamPush = "1.1.4"
+streamPush = "1.1.6"
 
 androidxTest = "1.5.2"
 androidxTestCore = "1.5.0"
@@ -77,6 +78,7 @@ playPublisher = "3.8.4"
 
 [libraries]
 
+androidx-camera-camera2 = { module = "androidx.camera:camera-camera2", version.ref = "cameraCamera2" }
 androidx-material = { group = "com.google.android.material", name = "material", version.ref = "androidxMaterial" }
 androidx-appcompat = { group = "androidx.appcompat", name = "appcompat", version.ref = "androidxAppCompat" }
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "androidxCore" }
@@ -193,6 +195,10 @@ leakCanary = { group = "com.squareup.leakcanary", name = "leakcanary-android", v
 android-gradlePlugin = { group = "com.android.tools.build", name = "gradle", version.ref = "androidGradlePlugin" }
 kotlin-gradlePlugin = { group = "org.jetbrains.kotlin", name = "kotlin-gradle-plugin", version.ref = "kotlin" }
 spotless-gradlePlugin = { group = "com.diffplug.spotless", name = "spotless-plugin-gradle", version.ref = "spotless" }
+androidx-camera-core = { group = "androidx.camera", name = "camera-core", version = "1.3.0" }
+play-services-mlkit-barcode-scanning = { group = "com.google.android.gms", name = "play-services-mlkit-barcode-scanning", version = "18.3.0" }
+androidx-camera-view = { group = "androidx.camera", name = "camera-view", version = "1.3.0" }
+androidx-camera-lifecycle = { group = "androidx.camera", name = "camera-lifecycle", version = "1.3.0" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "androidGradlePlugin" }
