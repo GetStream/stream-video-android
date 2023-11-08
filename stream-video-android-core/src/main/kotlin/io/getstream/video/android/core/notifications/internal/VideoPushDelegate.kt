@@ -59,6 +59,7 @@ internal class VideoPushDelegate(
                     KEY_TYPE_RING -> handleRingType(callId, payload)
                     KEY_TYPE_NOTIFICATION -> handleNotificationType(callId, payload)
                     KEY_TYPE_LIVE_STARTED -> handleLiveStartedType(callId, payload)
+                    KEY_TYPE_CANCELLED -> handleCallCancelledType(callId, payload)
                 }
             }
         }
@@ -77,6 +78,10 @@ internal class VideoPushDelegate(
     private suspend fun handleLiveStartedType(callId: StreamCallId, payload: Map<String, Any?>) {
         val callDisplayName = (payload[KEY_CREATED_BY_DISPLAY_NAME] as String).ifEmpty { DEFAULT_CALL_TEXT }
         getStreamVideo("live-started-notification")?.onLiveCall(callId, callDisplayName)
+    }
+
+    private fun handleCallCancelledType(callId: StreamCallId, payload: Map<String, Any?>) {
+        getStreamVideo("call-cancelled-notification")?.onCallCancelled(callId)
     }
 
     /**
@@ -135,6 +140,7 @@ internal class VideoPushDelegate(
         KEY_TYPE_RING -> isValidRingType()
         KEY_TYPE_NOTIFICATION -> isValidNotificationType()
         KEY_TYPE_LIVE_STARTED -> isValidLiveStarted()
+        KEY_TYPE_CANCELLED -> true
         else -> false
     }
 
@@ -180,6 +186,7 @@ internal class VideoPushDelegate(
         private const val KEY_TYPE_RING = "call.ring"
         private const val KEY_TYPE_NOTIFICATION = "call.notification"
         private const val KEY_TYPE_LIVE_STARTED = "call.live_started"
+        private const val KEY_TYPE_CANCELLED = "call.cancelled"
         private const val KEY_CALL_CID = "call_cid"
         private const val KEY_CALL_DISPLAY_NAME = "call_display_name"
         private const val KEY_CREATED_BY_DISPLAY_NAME = "created_by_display_name"

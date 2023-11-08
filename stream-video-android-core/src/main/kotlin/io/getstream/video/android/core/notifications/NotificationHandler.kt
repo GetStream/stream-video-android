@@ -25,6 +25,7 @@ public interface NotificationHandler : NotificationPermissionHandler {
     fun onNotification(callId: StreamCallId, callDisplayName: String)
     fun onLiveCall(callId: StreamCallId, callDisplayName: String)
     fun getOngoingCallNotification(callId: StreamCallId): Notification?
+    fun onCallCancelled(callId: StreamCallId)
 
     companion object {
         const val ACTION_NOTIFICATION = "io.getstream.video.android.action.NOTIFICATION"

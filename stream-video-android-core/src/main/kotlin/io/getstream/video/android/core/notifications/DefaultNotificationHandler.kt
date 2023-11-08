@@ -152,6 +152,10 @@ public open class DefaultNotificationHandler(
             .build()
     }
 
+    override fun onCallCancelled(callId: StreamCallId) {
+        notificationManager.cancel(INCOMING_CALL_NOTIFICATION_ID)
+    }
+
     private fun maybeCreateChannel(channelId: String, context: Context) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             val channel = NotificationChannel(
