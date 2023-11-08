@@ -34,7 +34,7 @@ include(":benchmark")
 include(":stream-video-android-core")
 include(":stream-video-android-ui-common")
 include(":stream-video-android-xml")
-include(":stream-video-android-compose")
+include(":stream-video-android-ui-compose")
 include(":stream-video-android-previewdata")
 include(":stream-video-android-bom")
 

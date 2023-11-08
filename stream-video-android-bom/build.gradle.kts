@@ -15,7 +15,7 @@ dependencies {
     api(project(":stream-video-android-core"))
     api(project(":stream-video-android-ui-common"))
     api(project(":stream-video-android-xml"))
-    api(project(":stream-video-android-compose"))
+    api(project(":stream-video-android-ui-compose"))
     api(project(":stream-video-android-previewdata"))
   }
 }

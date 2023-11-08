@@ -204,9 +204,9 @@ dependencies {
     implementation(platform(libs.firebase.bom))
     implementation("com.google.firebase:firebase-auth")
     implementation("com.firebaseui:firebase-ui-auth:7.2.0")
+    implementation(project(":stream-video-android-ui-compose"))
 
     // Stream Video SDK
-    implementation(project(":stream-video-android-compose"))
     implementation(project(":stream-video-android-xml"))
     compileOnly(project(":stream-video-android-previewdata"))
 

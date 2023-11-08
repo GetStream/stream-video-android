@@ -73,8 +73,8 @@ android {
 }
 
 dependencies {
+    implementation(project(":stream-video-android-ui-compose"))
     // Stream Video SDK
-    implementation(project(":stream-video-android-compose"))
     compileOnly(project(":stream-video-android-previewdata"))
 
     // androidx
