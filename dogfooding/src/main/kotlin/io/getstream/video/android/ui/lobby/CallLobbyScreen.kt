@@ -67,7 +67,7 @@ import io.getstream.video.android.compose.ui.components.call.lobby.CallLobby
 import io.getstream.video.android.core.call.state.ToggleCamera
 import io.getstream.video.android.core.call.state.ToggleMicrophone
 import io.getstream.video.android.datastore.delegate.StreamUserDataStore
-import io.getstream.video.android.mock.StreamMockUtils
+import io.getstream.video.android.mock.StreamPreviewDataUtils
 import io.getstream.video.android.ui.call.CallActivity
 import io.getstream.video.android.ui.theme.Colors
 import io.getstream.video.android.ui.theme.StreamButton
@@ -312,7 +312,7 @@ private fun HandleCallLobbyUiState(
 @Preview
 @Composable
 private fun CallLobbyScreenPreview() {
-    StreamMockUtils.initializeStreamVideo(LocalContext.current)
+    StreamPreviewDataUtils.initializeStreamVideo(LocalContext.current)
     StreamUserDataStore.install(LocalContext.current)
     VideoTheme {
         CallLobbyScreen(

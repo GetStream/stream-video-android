@@ -31,7 +31,7 @@ import java.util.UUID
 /**
  * Stream Video mock utils to initialize [StreamVideo] for writing unit testings or supporting Compose previews.
  */
-public object StreamMockUtils {
+public object StreamPreviewDataUtils {
     @PublishedApi
     internal lateinit var streamVideo: StreamVideo
 
@@ -40,7 +40,7 @@ public object StreamMockUtils {
             streamVideo = StreamVideoBuilder(
                 context = context.applicationContext,
                 apiKey = "stream-api-key",
-                user = mockUsers.first(),
+                user = previewUsers.first(),
                 token = "user-token",
             ).build()
         }
@@ -48,14 +48,14 @@ public object StreamMockUtils {
 }
 
 /** Mock a [Call] that contains a mock user. */
-public val mockCall: Call = Call(
-    client = StreamMockUtils.streamVideo,
+public val previewCall: Call = Call(
+    client = StreamPreviewDataUtils.streamVideo,
     type = "default",
     id = "123",
-    user = mockUsers[0],
+    user = previewUsers[0],
 ).apply {
-    val participants = mockUsers.take(2).map { user ->
-        val sessionId = if (user == mockUsers.first()) {
+    val participants = previewUsers.take(2).map { user ->
+        val sessionId = if (user == previewUsers.first()) {
             sessionId ?: UUID.randomUUID().toString()
         } else {
             UUID.randomUUID().toString()
@@ -77,7 +77,7 @@ public val mockVideoMediaTrack: MediaTrack
     )
 
 /** Mock a list of [User]. */
-public val mockUsers: List<User>
+public val previewUsers: List<User>
     inline get() = listOf(
         User(
             id = "thierry",
@@ -118,13 +118,13 @@ public val mockUsers: List<User>
     )
 
 /** Mock a new list of [ParticipantState]. */
-public val mockParticipantList: List<ParticipantState>
+public val previewParticipantsList: List<ParticipantState>
     inline get() {
         val participants = arrayListOf<ParticipantState>()
-        mockCall.state.clearParticipants()
-        mockUsers.forEach { user ->
-            val sessionId = if (user == mockUsers.first()) {
-                mockCall.sessionId ?: UUID.randomUUID().toString()
+        previewCall.state.clearParticipants()
+        previewUsers.forEach { user ->
+            val sessionId = if (user == previewUsers.first()) {
+                previewCall.sessionId ?: UUID.randomUUID().toString()
             } else {
                 UUID.randomUUID().toString()
             }
@@ -132,21 +132,21 @@ public val mockParticipantList: List<ParticipantState>
                 ParticipantState(
                     initialUserId = user.id,
                     sessionId = sessionId,
-                    call = mockCall,
-                ).also { mockCall.state.updateParticipant(it) },
+                    call = previewCall,
+                ).also { previewCall.state.updateParticipant(it) },
             )
         }
         return participants
     }
 
 /** Mock a new list of [ParticipantState]. */
-public val mockMemberStateList: List<MemberState>
+public val previewMemberListState: List<MemberState>
     inline get() {
         val participants = arrayListOf<MemberState>()
-        mockCall.state.clearParticipants()
-        mockUsers.forEach { user ->
-            val sessionId = if (user == mockUsers.first()) {
-                mockCall.sessionId ?: UUID.randomUUID().toString()
+        previewCall.state.clearParticipants()
+        previewUsers.forEach { user ->
+            val sessionId = if (user == previewUsers.first()) {
+                previewCall.sessionId ?: UUID.randomUUID().toString()
             } else {
                 UUID.randomUUID().toString()
             }
@@ -164,9 +164,9 @@ public val mockMemberStateList: List<MemberState>
     }
 
 /** Mock a new [ParticipantState]. */
-public val mockParticipant: ParticipantState
-    inline get() = mockParticipantList[0]
+public val previewParticipant: ParticipantState
+    inline get() = previewParticipantsList[0]
 
-/** Mock a new [MemberState]. */
-public val mockMember: MemberState
-    inline get() = mockMemberStateList[0]
+/** Preview a new [MemberState]. */
+public val previewMember: MemberState
+    inline get() = previewMemberListState[0]

@@ -32,8 +32,8 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.core.ParticipantState
-import io.getstream.video.android.mock.StreamMockUtils
-import io.getstream.video.android.mock.mockParticipantList
+import io.getstream.video.android.mock.StreamPreviewDataUtils
+import io.getstream.video.android.mock.previewParticipantsList
 
 /**
  * Renders all the participants to construct a audio room, based on the number of people in a call and the call state.
@@ -83,11 +83,11 @@ public fun AudioParticipantsGrid(
 @Preview(device = Devices.AUTOMOTIVE_1024p, widthDp = 1440, heightDp = 720)
 @Composable
 private fun AudioParticipantsGridPreview() {
-    StreamMockUtils.initializeStreamVideo(LocalContext.current)
+    StreamPreviewDataUtils.initializeStreamVideo(LocalContext.current)
     VideoTheme {
         AudioParticipantsGrid(
             modifier = Modifier.fillMaxSize(),
-            participants = mockParticipantList,
+            participants = previewParticipantsList,
         )
     }
 }

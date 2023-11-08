@@ -58,9 +58,9 @@ import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.avatar.LocalAvatarPreviewProvider
 import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.ParticipantState
-import io.getstream.video.android.mock.StreamMockUtils
-import io.getstream.video.android.mock.mockCall
-import io.getstream.video.android.mock.mockParticipant
+import io.getstream.video.android.mock.StreamPreviewDataUtils
+import io.getstream.video.android.mock.previewCall
+import io.getstream.video.android.mock.previewParticipant
 
 /**
  * Represents a floating item used to feature a participant video, usually the local participant.
@@ -220,7 +220,7 @@ private fun calculateVerticalOffsetBounds(
 @Preview
 @Composable
 private fun LocalVideoContentPreview() {
-    StreamMockUtils.initializeStreamVideo(LocalContext.current)
+    StreamPreviewDataUtils.initializeStreamVideo(LocalContext.current)
     val configuration = LocalConfiguration.current
     val screenWidth = configuration.screenWidthDp
     val screenHeight = configuration.screenHeightDp
@@ -228,9 +228,9 @@ private fun LocalVideoContentPreview() {
     VideoTheme {
         Box {
             FloatingParticipantVideo(
-                call = mockCall,
+                call = previewCall,
                 modifier = Modifier.fillMaxSize(),
-                participant = mockParticipant,
+                participant = previewParticipant,
                 parentBounds = IntSize(screenWidth, screenHeight),
             )
         }

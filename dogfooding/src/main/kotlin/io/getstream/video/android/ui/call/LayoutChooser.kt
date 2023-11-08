@@ -47,7 +47,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.call.renderer.LayoutType
-import io.getstream.video.android.mock.StreamMockUtils
+import io.getstream.video.android.mock.StreamPreviewDataUtils
 
 private data class LayoutChooserDataItem(
     val which: LayoutType,
@@ -225,7 +225,7 @@ private fun SpotlightRepresentation() {
 @Preview(showBackground = true)
 @Composable
 private fun LayoutChooserPreview() {
-    StreamMockUtils.initializeStreamVideo(LocalContext.current)
+    StreamPreviewDataUtils.initializeStreamVideo(LocalContext.current)
     VideoTheme {
         LayoutChooser(
             current = LayoutType.GRID,
@@ -238,7 +238,7 @@ private fun LayoutChooserPreview() {
 @Preview(showBackground = true, uiMode = Configuration.UI_MODE_NIGHT_YES)
 @Composable
 private fun LayoutChooserPreviewDark() {
-    StreamMockUtils.initializeStreamVideo(LocalContext.current)
+    StreamPreviewDataUtils.initializeStreamVideo(LocalContext.current)
     VideoTheme {
         LayoutChooser(
             current = LayoutType.GRID,
@@ -251,7 +251,7 @@ private fun LayoutChooserPreviewDark() {
 @Preview(showBackground = true)
 @Composable
 private fun GridItemPreview() {
-    StreamMockUtils.initializeStreamVideo(LocalContext.current)
+    StreamPreviewDataUtils.initializeStreamVideo(LocalContext.current)
     VideoTheme {
         LayoutItem(
             current = LayoutType.GRID,
@@ -263,7 +263,7 @@ private fun GridItemPreview() {
 @Preview(showBackground = true, uiMode = Configuration.UI_MODE_NIGHT_YES)
 @Composable
 private fun GridItemPreviewDark() {
-    StreamMockUtils.initializeStreamVideo(LocalContext.current)
+    StreamPreviewDataUtils.initializeStreamVideo(LocalContext.current)
     VideoTheme {
         LayoutItem(
             current = LayoutType.GRID,
@@ -275,7 +275,7 @@ private fun GridItemPreviewDark() {
 @Preview(showBackground = true)
 @Composable
 private fun SpotlightItemPreview() {
-    StreamMockUtils.initializeStreamVideo(LocalContext.current)
+    StreamPreviewDataUtils.initializeStreamVideo(LocalContext.current)
     VideoTheme {
         LayoutItem(
             current = LayoutType.GRID,
@@ -287,7 +287,7 @@ private fun SpotlightItemPreview() {
 @Preview(showBackground = true, uiMode = Configuration.UI_MODE_NIGHT_YES)
 @Composable
 private fun SpotlightItemPreviewDark() {
-    StreamMockUtils.initializeStreamVideo(LocalContext.current)
+    StreamPreviewDataUtils.initializeStreamVideo(LocalContext.current)
     VideoTheme {
         LayoutItem(
             current = LayoutType.GRID,
@@ -299,7 +299,7 @@ private fun SpotlightItemPreviewDark() {
 @Preview(showBackground = true)
 @Composable
 private fun DynamicItemPreview() {
-    StreamMockUtils.initializeStreamVideo(LocalContext.current)
+    StreamPreviewDataUtils.initializeStreamVideo(LocalContext.current)
     VideoTheme {
         LayoutItem(
             current = LayoutType.GRID,
@@ -311,7 +311,7 @@ private fun DynamicItemPreview() {
 @Preview(showBackground = true, uiMode = Configuration.UI_MODE_NIGHT_YES)
 @Composable
 private fun DynamicItemPreviewDark() {
-    StreamMockUtils.initializeStreamVideo(LocalContext.current)
+    StreamPreviewDataUtils.initializeStreamVideo(LocalContext.current)
     VideoTheme {
         LayoutItem(
             current = LayoutType.GRID,

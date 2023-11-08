@@ -52,9 +52,9 @@ import io.getstream.video.android.compose.ui.components.call.renderer.copy
 import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.ParticipantState
 import io.getstream.video.android.core.model.ScreenSharingSession
-import io.getstream.video.android.mock.StreamMockUtils
-import io.getstream.video.android.mock.mockCall
-import io.getstream.video.android.mock.mockParticipantList
+import io.getstream.video.android.mock.StreamPreviewDataUtils
+import io.getstream.video.android.mock.previewCall
+import io.getstream.video.android.mock.previewParticipantsList
 
 /**
  * Represents the portrait screen sharing content.
@@ -175,15 +175,15 @@ private fun BoxWithConstraintsScope.ScreenSharingContent(
 @Preview(uiMode = Configuration.UI_MODE_NIGHT_YES)
 @Composable
 private fun PortraitScreenSharingContentPreview() {
-    StreamMockUtils.initializeStreamVideo(LocalContext.current)
+    StreamPreviewDataUtils.initializeStreamVideo(LocalContext.current)
     VideoTheme {
         PortraitScreenSharingVideoRenderer(
-            call = mockCall,
+            call = previewCall,
             session = ScreenSharingSession(
-                participant = mockParticipantList[1],
+                participant = previewParticipantsList[1],
             ),
-            participants = mockParticipantList,
-            dominantSpeaker = mockParticipantList[1],
+            participants = previewParticipantsList,
+            dominantSpeaker = previewParticipantsList[1],
             modifier = Modifier.fillMaxSize(),
         )
     }
@@ -195,12 +195,12 @@ private fun PortraitScreenSharingContentPreview() {
 private fun PortraitScreenSharingMyContentPreview() {
     VideoTheme {
         PortraitScreenSharingVideoRenderer(
-            call = mockCall,
+            call = previewCall,
             session = ScreenSharingSession(
-                participant = mockParticipantList[0],
+                participant = previewParticipantsList[0],
             ),
-            participants = mockParticipantList,
-            dominantSpeaker = mockParticipantList[0],
+            participants = previewParticipantsList,
+            dominantSpeaker = previewParticipantsList[0],
             modifier = Modifier.fillMaxSize(),
         )
     }

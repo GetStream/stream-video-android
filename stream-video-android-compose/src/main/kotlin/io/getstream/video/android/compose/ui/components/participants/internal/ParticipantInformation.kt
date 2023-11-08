@@ -40,8 +40,8 @@ import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.core.MemberState
 import io.getstream.video.android.core.model.CallStatus
 import io.getstream.video.android.core.utils.toCallUser
-import io.getstream.video.android.mock.StreamMockUtils
-import io.getstream.video.android.mock.mockMemberStateList
+import io.getstream.video.android.mock.StreamPreviewDataUtils
+import io.getstream.video.android.mock.previewMemberListState
 import io.getstream.video.android.ui.common.util.buildLargeCallText
 import io.getstream.video.android.ui.common.util.buildSmallCallText
 
@@ -111,12 +111,12 @@ public fun ParticipantInformation(
 @Preview
 @Composable
 private fun ParticipantInformationPreview() {
-    StreamMockUtils.initializeStreamVideo(LocalContext.current)
+    StreamPreviewDataUtils.initializeStreamVideo(LocalContext.current)
     VideoTheme {
         ParticipantInformation(
             isVideoType = true,
             callStatus = CallStatus.Incoming,
-            participants = mockMemberStateList,
+            participants = previewMemberListState,
         )
     }
 }

@@ -32,8 +32,8 @@ import androidx.compose.ui.unit.dp
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.avatar.UserAvatar
 import io.getstream.video.android.core.MemberState
-import io.getstream.video.android.mock.StreamMockUtils
-import io.getstream.video.android.mock.mockMemberStateList
+import io.getstream.video.android.mock.StreamPreviewDataUtils
+import io.getstream.video.android.mock.previewMemberListState
 
 @Composable
 public fun ParticipantAvatars(
@@ -80,10 +80,10 @@ public fun ParticipantAvatars(
 @Preview
 @Composable
 private fun ParticipantAvatarsPreview() {
-    StreamMockUtils.initializeStreamVideo(LocalContext.current)
+    StreamPreviewDataUtils.initializeStreamVideo(LocalContext.current)
     VideoTheme {
         ParticipantAvatars(
-            participants = mockMemberStateList,
+            participants = previewMemberListState,
         )
     }
 }

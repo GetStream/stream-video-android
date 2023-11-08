@@ -26,8 +26,8 @@ import io.getstream.video.android.compose.ui.components.call.renderer.Participan
 import io.getstream.video.android.compose.ui.components.connection.NetworkQualityIndicator
 import io.getstream.video.android.compose.ui.components.indicator.SoundIndicator
 import io.getstream.video.android.core.model.NetworkQuality
-import io.getstream.video.android.mock.mockCall
-import io.getstream.video.android.mock.mockParticipantList
+import io.getstream.video.android.mock.previewCall
+import io.getstream.video.android.mock.previewParticipantsList
 import org.junit.Rule
 import org.junit.Test
 
@@ -78,8 +78,8 @@ internal class IndicatorsTest : BaseComposeTest() {
         snapshot {
             Box {
                 ParticipantLabel(
-                    call = mockCall,
-                    participant = mockParticipantList[1],
+                    call = previewCall,
+                    participant = previewParticipantsList[1],
                     Alignment.BottomStart,
                 )
             }

@@ -41,10 +41,10 @@ import io.getstream.video.android.compose.ui.components.participants.internal.Pa
 import io.getstream.video.android.compose.ui.components.participants.internal.ParticipantInformation
 import io.getstream.video.android.core.model.CallStatus
 import io.getstream.video.android.core.model.ScreenSharingSession
-import io.getstream.video.android.mock.mockCall
-import io.getstream.video.android.mock.mockMemberStateList
-import io.getstream.video.android.mock.mockParticipant
-import io.getstream.video.android.mock.mockParticipantList
+import io.getstream.video.android.mock.previewCall
+import io.getstream.video.android.mock.previewMemberListState
+import io.getstream.video.android.mock.previewParticipant
+import io.getstream.video.android.mock.previewParticipantsList
 import org.junit.Rule
 import org.junit.Test
 
@@ -58,7 +58,7 @@ internal class ParticipantsPortraitTest : BaseComposeTest() {
     @Test
     fun `snapshot ParticipantAvatars composable`() {
         snapshotWithDarkMode {
-            ParticipantAvatars(participants = mockMemberStateList)
+            ParticipantAvatars(participants = previewMemberListState)
         }
     }
 
@@ -67,7 +67,7 @@ internal class ParticipantsPortraitTest : BaseComposeTest() {
         snapshotWithDarkMode {
             ParticipantInformation(
                 callStatus = CallStatus.Incoming,
-                participants = mockMemberStateList,
+                participants = previewMemberListState,
             )
         }
     }
@@ -76,7 +76,7 @@ internal class ParticipantsPortraitTest : BaseComposeTest() {
     fun `snapshot InviteUserList composable`() {
         snapshotWithDarkMode {
             InviteUserList(
-                mockParticipantList,
+                previewParticipantsList,
                 onUserSelected = {},
                 onUserUnSelected = {},
             )
@@ -108,8 +108,8 @@ internal class ParticipantsPortraitTest : BaseComposeTest() {
     fun `snapshot CallParticipant a local call composable`() {
         snapshot {
             ParticipantVideo(
-                call = mockCall,
-                participant = mockParticipantList[0],
+                call = previewCall,
+                participant = previewParticipantsList[0],
                 style = RegularVideoRendererStyle(isFocused = true),
             )
         }
@@ -119,8 +119,8 @@ internal class ParticipantsPortraitTest : BaseComposeTest() {
     fun `snapshot CallParticipant a remote call composable`() {
         snapshot {
             ParticipantVideo(
-                call = mockCall,
-                participant = mockParticipantList[1],
+                call = previewCall,
+                participant = previewParticipantsList[1],
                 style = RegularVideoRendererStyle(isFocused = true),
             )
         }
@@ -130,8 +130,8 @@ internal class ParticipantsPortraitTest : BaseComposeTest() {
     fun `snapshot ParticipantVideo composable`() {
         snapshot {
             ParticipantVideoRenderer(
-                call = mockCall,
-                participant = mockParticipant,
+                call = previewCall,
+                participant = previewParticipant,
             ) {}
         }
     }
@@ -144,9 +144,9 @@ internal class ParticipantsPortraitTest : BaseComposeTest() {
             val screenHeight = configuration.screenHeightDp
             Box {
                 FloatingParticipantVideo(
-                    call = mockCall,
+                    call = previewCall,
                     modifier = Modifier.fillMaxSize(),
-                    participant = mockParticipant,
+                    participant = previewParticipant,
                     parentBounds = IntSize(screenWidth, screenHeight),
                 )
             }
@@ -157,7 +157,7 @@ internal class ParticipantsPortraitTest : BaseComposeTest() {
     fun `snapshot CallParticipantsList composable`() {
         snapshotWithDarkMode {
             CallParticipantsList(
-                participants = mockParticipantList,
+                participants = previewParticipantsList,
                 onUserOptionsSelected = {},
                 isLocalAudioEnabled = false,
                 onInviteUser = {},
@@ -172,13 +172,13 @@ internal class ParticipantsPortraitTest : BaseComposeTest() {
             val configuration = LocalConfiguration.current
             val screenWidth = configuration.screenWidthDp
             val screenHeight = configuration.screenHeightDp
-            val participants = mockParticipantList
+            val participants = previewParticipantsList
 
             Box(
                 modifier = Modifier.background(color = VideoTheme.colors.appBackground),
             ) {
                 PortraitVideoRenderer(
-                    call = mockCall,
+                    call = previewCall,
                     dominantSpeaker = participants[0],
                     callParticipants = participants.take(1),
                     modifier = Modifier.fillMaxSize(),
@@ -194,13 +194,13 @@ internal class ParticipantsPortraitTest : BaseComposeTest() {
             val configuration = LocalConfiguration.current
             val screenWidth = configuration.screenWidthDp
             val screenHeight = configuration.screenHeightDp
-            val participants = mockParticipantList
+            val participants = previewParticipantsList
 
             Box(
                 modifier = Modifier.background(color = VideoTheme.colors.appBackground),
             ) {
                 PortraitVideoRenderer(
-                    call = mockCall,
+                    call = previewCall,
                     dominantSpeaker = participants[0],
                     callParticipants = participants.take(2),
                     modifier = Modifier.fillMaxSize(),
@@ -216,13 +216,13 @@ internal class ParticipantsPortraitTest : BaseComposeTest() {
             val configuration = LocalConfiguration.current
             val screenWidth = configuration.screenWidthDp
             val screenHeight = configuration.screenHeightDp
-            val participants = mockParticipantList
+            val participants = previewParticipantsList
 
             Box(
                 modifier = Modifier.background(color = VideoTheme.colors.appBackground),
             ) {
                 PortraitVideoRenderer(
-                    call = mockCall,
+                    call = previewCall,
                     dominantSpeaker = participants[0],
                     callParticipants = participants.take(3),
                     modifier = Modifier.fillMaxSize(),
@@ -238,13 +238,13 @@ internal class ParticipantsPortraitTest : BaseComposeTest() {
             val configuration = LocalConfiguration.current
             val screenWidth = configuration.screenWidthDp
             val screenHeight = configuration.screenHeightDp
-            val participants = mockParticipantList
+            val participants = previewParticipantsList
 
             Box(
                 modifier = Modifier.background(color = VideoTheme.colors.appBackground),
             ) {
                 PortraitVideoRenderer(
-                    call = mockCall,
+                    call = previewCall,
                     dominantSpeaker = participants[0],
                     callParticipants = participants.take(4),
                     modifier = Modifier.fillMaxSize(),
@@ -260,13 +260,13 @@ internal class ParticipantsPortraitTest : BaseComposeTest() {
             val configuration = LocalConfiguration.current
             val screenWidth = configuration.screenWidthDp
             val screenHeight = configuration.screenHeightDp
-            val participants = mockParticipantList
+            val participants = previewParticipantsList
 
             Box(
                 modifier = Modifier.background(color = VideoTheme.colors.appBackground),
             ) {
                 PortraitVideoRenderer(
-                    call = mockCall,
+                    call = previewCall,
                     dominantSpeaker = participants[0],
                     callParticipants = participants.take(5),
                     modifier = Modifier.fillMaxSize(),
@@ -282,13 +282,13 @@ internal class ParticipantsPortraitTest : BaseComposeTest() {
             val configuration = LocalConfiguration.current
             val screenWidth = configuration.screenWidthDp
             val screenHeight = configuration.screenHeightDp
-            val participants = mockParticipantList
+            val participants = previewParticipantsList
 
             Box(
                 modifier = Modifier.background(color = VideoTheme.colors.appBackground),
             ) {
                 PortraitVideoRenderer(
-                    call = mockCall,
+                    call = previewCall,
                     dominantSpeaker = participants[0],
                     callParticipants = participants.take(6),
                     modifier = Modifier.fillMaxSize(),
@@ -302,10 +302,10 @@ internal class ParticipantsPortraitTest : BaseComposeTest() {
     fun `snapshot PortraitScreenSharingContent for other participant composable`() {
         snapshot(isInDarkMode = true) {
             PortraitScreenSharingVideoRenderer(
-                call = mockCall,
-                session = ScreenSharingSession(participant = mockParticipantList[0]),
-                participants = mockParticipantList,
-                dominantSpeaker = mockParticipantList[1],
+                call = previewCall,
+                session = ScreenSharingSession(participant = previewParticipantsList[0]),
+                participants = previewParticipantsList,
+                dominantSpeaker = previewParticipantsList[1],
                 modifier = Modifier.fillMaxSize(),
             )
         }
@@ -315,10 +315,10 @@ internal class ParticipantsPortraitTest : BaseComposeTest() {
     fun `snapshot PortraitScreenSharingContent for myself composable`() {
         snapshot(isInDarkMode = true) {
             PortraitScreenSharingVideoRenderer(
-                call = mockCall,
-                session = ScreenSharingSession(participant = mockParticipantList[0]),
-                participants = mockParticipantList,
-                dominantSpeaker = mockParticipantList[0],
+                call = previewCall,
+                session = ScreenSharingSession(participant = previewParticipantsList[0]),
+                participants = previewParticipantsList,
+                dominantSpeaker = previewParticipantsList[0],
                 modifier = Modifier.fillMaxSize(),
             )
         }
@@ -328,9 +328,9 @@ internal class ParticipantsPortraitTest : BaseComposeTest() {
     fun `snapshot ParticipantsColumn composable`() {
         snapshotWithDarkModeRow {
             LazyColumnVideoRenderer(
-                call = mockCall,
-                participants = mockParticipantList,
-                dominantSpeaker = mockParticipant,
+                call = previewCall,
+                participants = previewParticipantsList,
+                dominantSpeaker = previewParticipant,
             )
         }
     }

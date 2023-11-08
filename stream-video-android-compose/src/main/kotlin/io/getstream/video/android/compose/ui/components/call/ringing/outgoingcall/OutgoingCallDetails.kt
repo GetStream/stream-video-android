@@ -30,8 +30,8 @@ import io.getstream.video.android.compose.ui.components.participants.internal.Pa
 import io.getstream.video.android.compose.ui.components.participants.internal.ParticipantInformation
 import io.getstream.video.android.core.MemberState
 import io.getstream.video.android.core.model.CallStatus
-import io.getstream.video.android.mock.StreamMockUtils
-import io.getstream.video.android.mock.mockMemberStateList
+import io.getstream.video.android.mock.StreamPreviewDataUtils
+import io.getstream.video.android.mock.previewMemberListState
 
 /**
  * A details of an outgoing call that displays a list of participant information.
@@ -63,11 +63,11 @@ public fun OutgoingCallDetails(
 @Preview
 @Composable
 private fun OutgoingCallDetailsPreview() {
-    StreamMockUtils.initializeStreamVideo(LocalContext.current)
+    StreamPreviewDataUtils.initializeStreamVideo(LocalContext.current)
     VideoTheme {
         OutgoingCallDetails(
             isVideoType = false,
-            participants = mockMemberStateList,
+            participants = previewMemberListState,
         )
     }
 }

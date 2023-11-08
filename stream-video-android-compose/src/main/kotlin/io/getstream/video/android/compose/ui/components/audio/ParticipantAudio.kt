@@ -50,8 +50,8 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.avatar.UserAvatar
 import io.getstream.video.android.core.ParticipantState
-import io.getstream.video.android.mock.StreamMockUtils
-import io.getstream.video.android.mock.mockParticipant
+import io.getstream.video.android.mock.StreamPreviewDataUtils
+import io.getstream.video.android.mock.previewParticipant
 import io.getstream.video.android.ui.common.R
 
 /**
@@ -171,11 +171,11 @@ private fun BoxScope.DefaultMicrophoneIndicator(
 @Preview
 @Composable
 private fun ParticipantAudioPreview() {
-    StreamMockUtils.initializeStreamVideo(LocalContext.current)
+    StreamPreviewDataUtils.initializeStreamVideo(LocalContext.current)
     VideoTheme {
         ParticipantAudio(
             modifier = Modifier.size(150.dp),
-            participant = mockParticipant,
+            participant = previewParticipant,
             style = RegularAudioRendererStyle(isShowingSpeakingBorder = true),
         )
     }

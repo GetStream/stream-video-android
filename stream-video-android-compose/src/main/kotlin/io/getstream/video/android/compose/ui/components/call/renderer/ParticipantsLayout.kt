@@ -28,8 +28,8 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.ParticipantState
-import io.getstream.video.android.mock.StreamMockUtils
-import io.getstream.video.android.mock.mockCall
+import io.getstream.video.android.mock.StreamPreviewDataUtils
+import io.getstream.video.android.mock.previewCall
 
 public enum class LayoutType {
     /** Automatically choose between Grid and Spotlight based on pinned participants and dominant speaker. */
@@ -123,10 +123,10 @@ public fun ParticipantsLayout(
 @Preview
 @Composable
 private fun CallVideoRendererPreview() {
-    StreamMockUtils.initializeStreamVideo(LocalContext.current)
+    StreamPreviewDataUtils.initializeStreamVideo(LocalContext.current)
     VideoTheme {
         ParticipantsLayout(
-            call = mockCall,
+            call = previewCall,
             modifier = Modifier.fillMaxWidth(),
             layoutType = LayoutType.GRID,
         )

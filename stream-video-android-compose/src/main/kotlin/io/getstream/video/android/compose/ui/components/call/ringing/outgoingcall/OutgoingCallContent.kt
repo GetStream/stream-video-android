@@ -37,9 +37,9 @@ import io.getstream.video.android.compose.ui.components.call.CallAppBar
 import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.MemberState
 import io.getstream.video.android.core.call.state.CallAction
-import io.getstream.video.android.mock.StreamMockUtils
-import io.getstream.video.android.mock.mockCall
-import io.getstream.video.android.mock.mockMemberStateList
+import io.getstream.video.android.mock.StreamPreviewDataUtils
+import io.getstream.video.android.mock.previewCall
+import io.getstream.video.android.mock.previewMemberListState
 
 /**
  * Represents the Outgoing Call state and UI, when the user is calling other people.
@@ -174,12 +174,12 @@ public fun OutgoingCallContent(
 @Preview
 @Composable
 private fun OutgoingCallVideoPreview() {
-    StreamMockUtils.initializeStreamVideo(LocalContext.current)
+    StreamPreviewDataUtils.initializeStreamVideo(LocalContext.current)
     VideoTheme {
         OutgoingCallContent(
-            call = mockCall,
+            call = previewCall,
             isVideoType = true,
-            participants = mockMemberStateList,
+            participants = previewMemberListState,
             onBackPressed = {},
         ) {}
     }
@@ -188,12 +188,12 @@ private fun OutgoingCallVideoPreview() {
 @Preview
 @Composable
 private fun OutgoingCallAudioPreview() {
-    StreamMockUtils.initializeStreamVideo(LocalContext.current)
+    StreamPreviewDataUtils.initializeStreamVideo(LocalContext.current)
     VideoTheme {
         OutgoingCallContent(
-            call = mockCall,
+            call = previewCall,
             isVideoType = false,
-            participants = mockMemberStateList,
+            participants = previewMemberListState,
             onBackPressed = {},
         ) {}
     }

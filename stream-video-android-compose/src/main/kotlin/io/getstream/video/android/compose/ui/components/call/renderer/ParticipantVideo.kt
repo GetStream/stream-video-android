@@ -77,9 +77,9 @@ import io.getstream.video.android.core.model.NetworkQuality
 import io.getstream.video.android.core.model.Reaction
 import io.getstream.video.android.core.model.ReactionState
 import io.getstream.video.android.core.model.VisibilityOnScreenState
-import io.getstream.video.android.mock.StreamMockUtils
-import io.getstream.video.android.mock.mockCall
-import io.getstream.video.android.mock.mockParticipantList
+import io.getstream.video.android.mock.StreamPreviewDataUtils
+import io.getstream.video.android.mock.previewCall
+import io.getstream.video.android.mock.previewParticipantsList
 import io.getstream.video.android.ui.common.R
 import kotlinx.coroutines.delay
 
@@ -411,11 +411,11 @@ private fun updateParticipantVisibility(
 @Preview
 @Composable
 private fun CallParticipantPreview() {
-    StreamMockUtils.initializeStreamVideo(LocalContext.current)
+    StreamPreviewDataUtils.initializeStreamVideo(LocalContext.current)
     VideoTheme {
         ParticipantVideo(
-            call = mockCall,
-            participant = mockParticipantList[1],
+            call = previewCall,
+            participant = previewParticipantsList[1],
         )
     }
 }
@@ -423,12 +423,12 @@ private fun CallParticipantPreview() {
 @Preview
 @Composable
 private fun ParticipantLabelPreview() {
-    StreamMockUtils.initializeStreamVideo(LocalContext.current)
+    StreamPreviewDataUtils.initializeStreamVideo(LocalContext.current)
     VideoTheme {
         Box {
             ParticipantLabel(
-                call = mockCall,
-                participant = mockParticipantList[1],
+                call = previewCall,
+                participant = previewParticipantsList[1],
                 BottomStart,
             )
         }
@@ -438,11 +438,11 @@ private fun ParticipantLabelPreview() {
 @Preview
 @Composable
 private fun ParticipantVideoPreview() {
-    StreamMockUtils.initializeStreamVideo(LocalContext.current)
+    StreamPreviewDataUtils.initializeStreamVideo(LocalContext.current)
     VideoTheme {
         ParticipantVideoRenderer(
-            call = mockCall,
-            participant = mockParticipantList[1],
+            call = previewCall,
+            participant = previewParticipantsList[1],
         )
     }
 }

@@ -34,8 +34,8 @@ import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.call.renderer.internal.OrientationVideoRenderer
 import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.ParticipantState
-import io.getstream.video.android.mock.StreamMockUtils
-import io.getstream.video.android.mock.mockCall
+import io.getstream.video.android.mock.StreamPreviewDataUtils
+import io.getstream.video.android.mock.previewCall
 
 /**
  * Renders the participants are joining in a call when there are no screen sharing sessions, based on the orientation.
@@ -86,10 +86,10 @@ public fun ParticipantsRegularGrid(
 @Preview
 @Composable
 private fun RegularCallVideoRendererPreview() {
-    StreamMockUtils.initializeStreamVideo(LocalContext.current)
+    StreamPreviewDataUtils.initializeStreamVideo(LocalContext.current)
     VideoTheme {
         ParticipantsRegularGrid(
-            call = mockCall,
+            call = previewCall,
             modifier = Modifier.fillMaxSize(),
         )
     }

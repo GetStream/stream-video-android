@@ -80,8 +80,8 @@ import io.getstream.video.android.R
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.avatar.UserAvatar
 import io.getstream.video.android.datastore.delegate.StreamUserDataStore
-import io.getstream.video.android.mock.StreamMockUtils
-import io.getstream.video.android.mock.mockUsers
+import io.getstream.video.android.mock.StreamPreviewDataUtils
+import io.getstream.video.android.mock.previewUsers
 import io.getstream.video.android.ui.theme.Colors
 import io.getstream.video.android.ui.theme.StreamButton
 
@@ -243,7 +243,7 @@ private fun CallJoinBody(
     callJoinViewModel: CallJoinViewModel = hiltViewModel(),
 ) {
     val user by if (LocalInspectionMode.current) {
-        remember { mutableStateOf(mockUsers[0]) }
+        remember { mutableStateOf(previewUsers[0]) }
     } else {
         callJoinViewModel.user.collectAsState(initial = null)
     }
@@ -431,7 +431,7 @@ private fun SignOutDialog(
 @Preview
 @Composable
 private fun CallJoinScreenPreview() {
-    StreamMockUtils.initializeStreamVideo(LocalContext.current)
+    StreamPreviewDataUtils.initializeStreamVideo(LocalContext.current)
     VideoTheme {
         StreamUserDataStore.install(LocalContext.current)
         CallJoinScreen(

@@ -26,7 +26,7 @@ import app.cash.paparazzi.Paparazzi
 import io.getstream.video.android.compose.base.BaseComposeTest
 import io.getstream.video.android.compose.ui.components.avatar.Avatar
 import io.getstream.video.android.compose.ui.components.avatar.UserAvatar
-import io.getstream.video.android.mock.mockParticipant
+import io.getstream.video.android.mock.previewParticipant
 import org.junit.Rule
 import org.junit.Test
 
@@ -50,8 +50,8 @@ internal class AvatarTest : BaseComposeTest() {
     @Test
     fun `snapshot UserAvatar composable`() {
         snapshot {
-            val name by mockParticipant.name.collectAsStateWithLifecycle()
-            val image by mockParticipant.image.collectAsStateWithLifecycle()
+            val name by previewParticipant.name.collectAsStateWithLifecycle()
+            val image by previewParticipant.image.collectAsStateWithLifecycle()
             UserAvatar(
                 userImage = image,
                 userName = name,

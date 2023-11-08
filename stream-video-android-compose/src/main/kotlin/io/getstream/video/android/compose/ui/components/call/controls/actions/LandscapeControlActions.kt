@@ -31,8 +31,8 @@ import androidx.compose.ui.unit.Dp
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.call.state.CallAction
-import io.getstream.video.android.mock.StreamMockUtils
-import io.getstream.video.android.mock.mockCall
+import io.getstream.video.android.mock.StreamPreviewDataUtils
+import io.getstream.video.android.mock.previewCall
 
 /**
  * Shows the call controls in a different way when in landscape mode.
@@ -81,10 +81,10 @@ public fun LandscapeControlActions(
 @Preview
 @Composable
 private fun LandscapeCallControlsPreview() {
-    StreamMockUtils.initializeStreamVideo(LocalContext.current)
+    StreamPreviewDataUtils.initializeStreamVideo(LocalContext.current)
     VideoTheme {
         LandscapeControlActions(
-            call = mockCall,
+            call = previewCall,
             onCallAction = {},
         )
     }

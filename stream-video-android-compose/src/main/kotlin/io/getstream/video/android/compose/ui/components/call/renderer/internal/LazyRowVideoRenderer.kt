@@ -35,9 +35,9 @@ import io.getstream.video.android.compose.ui.components.call.renderer.copy
 import io.getstream.video.android.compose.ui.extensions.startOrEndPadding
 import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.ParticipantState
-import io.getstream.video.android.mock.StreamMockUtils
-import io.getstream.video.android.mock.mockCall
-import io.getstream.video.android.mock.mockParticipantList
+import io.getstream.video.android.mock.StreamPreviewDataUtils
+import io.getstream.video.android.mock.previewCall
+import io.getstream.video.android.mock.previewParticipantsList
 
 /**
  * Shows a row of call participants.
@@ -139,12 +139,12 @@ private fun ListVideoRenderer(
 @Preview
 @Composable
 private fun ParticipantsRowPreview() {
-    StreamMockUtils.initializeStreamVideo(LocalContext.current)
+    StreamPreviewDataUtils.initializeStreamVideo(LocalContext.current)
     VideoTheme {
         LazyRowVideoRenderer(
-            call = mockCall,
-            participants = mockParticipantList,
-            dominantSpeaker = mockParticipantList[0],
+            call = previewCall,
+            participants = previewParticipantsList,
+            dominantSpeaker = previewParticipantsList[0],
         )
     }
 }

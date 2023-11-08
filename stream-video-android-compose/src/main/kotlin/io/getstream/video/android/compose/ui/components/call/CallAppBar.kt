@@ -53,8 +53,8 @@ import io.getstream.video.android.compose.ui.components.participants.Participant
 import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.call.state.CallAction
 import io.getstream.video.android.core.call.state.ShowCallParticipantInfo
-import io.getstream.video.android.mock.StreamMockUtils
-import io.getstream.video.android.mock.mockCall
+import io.getstream.video.android.mock.StreamPreviewDataUtils
+import io.getstream.video.android.mock.previewCall
 import io.getstream.video.android.ui.common.R
 
 /**
@@ -217,8 +217,8 @@ internal fun DefaultCallAppBarTrailingContent(
 @Preview(uiMode = Configuration.UI_MODE_NIGHT_YES)
 @Composable
 private fun CallTopAppbarPreview() {
-    StreamMockUtils.initializeStreamVideo(LocalContext.current)
+    StreamPreviewDataUtils.initializeStreamVideo(LocalContext.current)
     VideoTheme {
-        CallAppBar(call = mockCall)
+        CallAppBar(call = previewCall)
     }
 }

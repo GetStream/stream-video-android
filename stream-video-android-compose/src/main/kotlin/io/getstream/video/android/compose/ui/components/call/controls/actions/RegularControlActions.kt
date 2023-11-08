@@ -32,8 +32,8 @@ import androidx.compose.ui.unit.Dp
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.call.state.CallAction
-import io.getstream.video.android.mock.StreamMockUtils
-import io.getstream.video.android.mock.mockCall
+import io.getstream.video.android.mock.StreamPreviewDataUtils
+import io.getstream.video.android.mock.previewCall
 
 /**
  * Represents the set of controls the user can use to change their audio and video device state, or
@@ -83,10 +83,10 @@ public fun RegularControlActions(
 @Preview(uiMode = Configuration.UI_MODE_NIGHT_YES)
 @Composable
 private fun RegularCallControlsActionsPreview() {
-    StreamMockUtils.initializeStreamVideo(LocalContext.current)
+    StreamPreviewDataUtils.initializeStreamVideo(LocalContext.current)
     VideoTheme {
         RegularControlActions(
-            call = mockCall,
+            call = previewCall,
             onCallAction = {},
         )
     }

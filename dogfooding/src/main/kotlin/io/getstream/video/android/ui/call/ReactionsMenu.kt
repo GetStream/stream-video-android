@@ -44,8 +44,8 @@ import androidx.compose.ui.window.Dialog
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.mapper.ReactionMapper
-import io.getstream.video.android.mock.StreamMockUtils
-import io.getstream.video.android.mock.mockCall
+import io.getstream.video.android.mock.StreamPreviewDataUtils
+import io.getstream.video.android.mock.previewCall
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
@@ -174,7 +174,7 @@ private fun sendReaction(scope: CoroutineScope, call: Call, emoji: String, onDis
 @Preview(showBackground = true, uiMode = Configuration.UI_MODE_NIGHT_YES)
 @Composable
 private fun ReactionItemPreview() {
-    StreamMockUtils.initializeStreamVideo(LocalContext.current)
+    StreamPreviewDataUtils.initializeStreamVideo(LocalContext.current)
     VideoTheme {
         Box(modifier = Modifier.background(VideoTheme.colors.appBackground)) {
             ReactionItem(
@@ -193,9 +193,9 @@ private fun ReactionItemPreview() {
 @Composable
 private fun ReactionMenuPreview() {
     VideoTheme {
-        StreamMockUtils.initializeStreamVideo(LocalContext.current)
+        StreamPreviewDataUtils.initializeStreamVideo(LocalContext.current)
         ReactionsMenu(
-            call = mockCall,
+            call = previewCall,
             reactionMapper = ReactionMapper.defaultReactionMapper(),
             onDismiss = { },
         )

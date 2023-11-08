@@ -39,9 +39,9 @@ import io.getstream.video.android.compose.ui.components.call.CallAppBar
 import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.MemberState
 import io.getstream.video.android.core.call.state.CallAction
-import io.getstream.video.android.mock.StreamMockUtils
-import io.getstream.video.android.mock.mockCall
-import io.getstream.video.android.mock.mockMemberStateList
+import io.getstream.video.android.mock.StreamPreviewDataUtils
+import io.getstream.video.android.mock.previewCall
+import io.getstream.video.android.mock.previewMemberListState
 
 /**
  * Represents the Incoming Call state and UI, when the user receives a call from other people.
@@ -171,15 +171,15 @@ public fun IncomingCallContent(
 @Preview
 @Composable
 private fun IncomingCallPreview1() {
-    StreamMockUtils.initializeStreamVideo(LocalContext.current)
+    StreamPreviewDataUtils.initializeStreamVideo(LocalContext.current)
     VideoTheme {
         CompositionLocalProvider(
             LocalAvatarPreviewPlaceholder provides
                 io.getstream.video.android.ui.common.R.drawable.stream_video_call_sample,
         ) {
             IncomingCallContent(
-                call = mockCall,
-                participants = mockMemberStateList.takeLast(1),
+                call = previewCall,
+                participants = previewMemberListState.takeLast(1),
                 isVideoType = true,
                 isCameraEnabled = false,
                 onBackPressed = {},
@@ -191,15 +191,15 @@ private fun IncomingCallPreview1() {
 @Preview
 @Composable
 private fun IncomingCallPreview2() {
-    StreamMockUtils.initializeStreamVideo(LocalContext.current)
+    StreamPreviewDataUtils.initializeStreamVideo(LocalContext.current)
     VideoTheme {
         CompositionLocalProvider(
             LocalAvatarPreviewPlaceholder provides
                 io.getstream.video.android.ui.common.R.drawable.stream_video_call_sample,
         ) {
             IncomingCallContent(
-                call = mockCall,
-                participants = mockMemberStateList,
+                call = previewCall,
+                participants = previewMemberListState,
                 isVideoType = true,
                 isCameraEnabled = false,
                 onBackPressed = {},

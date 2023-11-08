@@ -43,8 +43,8 @@ import io.getstream.video.android.compose.ui.components.avatar.AvatarImagePrevie
 import io.getstream.video.android.core.MemberState
 import io.getstream.video.android.core.model.CallUser
 import io.getstream.video.android.core.utils.toCallUser
-import io.getstream.video.android.mock.StreamMockUtils
-import io.getstream.video.android.mock.mockMemberStateList
+import io.getstream.video.android.mock.StreamPreviewDataUtils
+import io.getstream.video.android.mock.previewMemberListState
 import io.getstream.video.android.ui.common.R
 
 /**
@@ -167,10 +167,10 @@ private fun DefaultCallBackground() {
 @Preview
 @Composable
 private fun CallBackgroundPreview() {
-    StreamMockUtils.initializeStreamVideo(LocalContext.current)
+    StreamPreviewDataUtils.initializeStreamVideo(LocalContext.current)
     VideoTheme {
         CallBackground(
-            participants = mockMemberStateList.take(1),
+            participants = previewMemberListState.take(1),
             isVideoType = true,
             isIncoming = true,
         ) {

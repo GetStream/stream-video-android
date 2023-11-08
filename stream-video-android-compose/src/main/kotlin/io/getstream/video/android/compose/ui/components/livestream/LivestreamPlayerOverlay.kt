@@ -49,8 +49,8 @@ import androidx.compose.ui.unit.sp
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.call.controls.actions.ToggleSpeakerphoneAction
 import io.getstream.video.android.core.Call
-import io.getstream.video.android.mock.StreamMockUtils
-import io.getstream.video.android.mock.mockCall
+import io.getstream.video.android.mock.StreamPreviewDataUtils
+import io.getstream.video.android.mock.previewCall
 
 @Composable
 public fun BoxScope.LivestreamPlayerOverlay(call: Call) {
@@ -162,10 +162,10 @@ private fun BoxScope.LiveControls(call: Call) {
 @Preview
 @Composable
 private fun LivestreamPlayerOverlayPreview() {
-    StreamMockUtils.initializeStreamVideo(LocalContext.current)
+    StreamPreviewDataUtils.initializeStreamVideo(LocalContext.current)
     VideoTheme {
         Box {
-            LivestreamPlayerOverlay(call = mockCall)
+            LivestreamPlayerOverlay(call = previewCall)
         }
     }
 }

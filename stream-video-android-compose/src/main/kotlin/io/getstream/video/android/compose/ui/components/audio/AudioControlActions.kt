@@ -45,8 +45,8 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.call.controls.actions.ToggleMicrophoneAction
 import io.getstream.video.android.core.Call
-import io.getstream.video.android.mock.StreamMockUtils
-import io.getstream.video.android.mock.mockCall
+import io.getstream.video.android.mock.StreamPreviewDataUtils
+import io.getstream.video.android.mock.previewCall
 
 /**
  * Represents the set of controls the user can use to change their audio and video device state, or
@@ -120,11 +120,11 @@ public fun AudioControlActions(
 @Preview
 @Composable
 private fun AudioControlActionsPreview() {
-    StreamMockUtils.initializeStreamVideo(LocalContext.current)
+    StreamPreviewDataUtils.initializeStreamVideo(LocalContext.current)
     VideoTheme {
         AudioControlActions(
             modifier = Modifier.fillMaxWidth(),
-            call = mockCall,
+            call = previewCall,
         )
     }
 }

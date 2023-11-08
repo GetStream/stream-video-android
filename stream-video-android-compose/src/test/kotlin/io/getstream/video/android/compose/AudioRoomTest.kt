@@ -25,8 +25,8 @@ import io.getstream.video.android.compose.ui.components.audio.AudioAppBar
 import io.getstream.video.android.compose.ui.components.audio.AudioControlActions
 import io.getstream.video.android.compose.ui.components.audio.AudioParticipantsGrid
 import io.getstream.video.android.compose.ui.components.audio.AudioRoomContent
-import io.getstream.video.android.mock.mockCall
-import io.getstream.video.android.mock.mockParticipantList
+import io.getstream.video.android.mock.previewCall
+import io.getstream.video.android.mock.previewParticipantsList
 import org.junit.Rule
 import org.junit.Test
 
@@ -47,7 +47,7 @@ internal class AudioRoomTest : BaseComposeTest() {
     @Test
     fun `snapshot AudioControlActions composable`() {
         snapshot {
-            AudioControlActions(call = mockCall, modifier = Modifier.fillMaxSize())
+            AudioControlActions(call = previewCall, modifier = Modifier.fillMaxSize())
         }
     }
 
@@ -56,7 +56,7 @@ internal class AudioRoomTest : BaseComposeTest() {
         snapshot {
             AudioParticipantsGrid(
                 modifier = Modifier.fillMaxSize(),
-                participants = mockParticipantList,
+                participants = previewParticipantsList,
             )
         }
     }
@@ -66,7 +66,7 @@ internal class AudioRoomTest : BaseComposeTest() {
         snapshot {
             AudioRoomContent(
                 modifier = Modifier.fillMaxSize(),
-                call = mockCall,
+                call = previewCall,
             )
         }
     }
@@ -76,7 +76,7 @@ internal class AudioRoomTest : BaseComposeTest() {
         snapshot(isInDarkMode = true) {
             AudioRoomContent(
                 modifier = Modifier.fillMaxSize(),
-                call = mockCall,
+                call = previewCall,
             )
         }
     }

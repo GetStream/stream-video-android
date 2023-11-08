@@ -41,8 +41,8 @@ import io.getstream.video.android.compose.permission.rememberMicrophonePermissio
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.ParticipantState
-import io.getstream.video.android.mock.StreamMockUtils
-import io.getstream.video.android.mock.mockCall
+import io.getstream.video.android.mock.StreamPreviewDataUtils
+import io.getstream.video.android.mock.previewCall
 
 /**
  * Represents audio room content based on the call state provided from the [call].
@@ -146,11 +146,11 @@ private fun DefaultPermissionHandler(
 @Preview(device = Devices.AUTOMOTIVE_1024p, widthDp = 1440, heightDp = 720)
 @Composable
 private fun AudioRoomPreview() {
-    StreamMockUtils.initializeStreamVideo(LocalContext.current)
+    StreamPreviewDataUtils.initializeStreamVideo(LocalContext.current)
     VideoTheme {
         AudioRoomContent(
             modifier = Modifier.fillMaxSize(),
-            call = mockCall,
+            call = previewCall,
         )
     }
 }

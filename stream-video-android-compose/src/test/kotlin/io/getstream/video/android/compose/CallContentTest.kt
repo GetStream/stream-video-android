@@ -29,8 +29,8 @@ import io.getstream.video.android.compose.ui.components.call.ringing.incomingcal
 import io.getstream.video.android.compose.ui.components.call.ringing.outgoingcall.OutgoingCallContent
 import io.getstream.video.android.compose.ui.components.call.ringing.outgoingcall.OutgoingCallControls
 import io.getstream.video.android.compose.ui.components.call.ringing.outgoingcall.OutgoingCallDetails
-import io.getstream.video.android.mock.mockCall
-import io.getstream.video.android.mock.mockMemberStateList
+import io.getstream.video.android.mock.previewCall
+import io.getstream.video.android.mock.previewMemberListState
 import org.junit.Rule
 import org.junit.Test
 
@@ -44,14 +44,14 @@ internal class CallContentTest : BaseComposeTest() {
     @Test
     fun `snapshot IncomingCallContentDetails Video composable`() {
         snapshot {
-            IncomingCallDetails(participants = mockMemberStateList)
+            IncomingCallDetails(participants = previewMemberListState)
         }
     }
 
     @Test
     fun `snapshot IncomingCallContentDetails Audio composable`() {
         snapshot {
-            IncomingCallDetails(participants = mockMemberStateList)
+            IncomingCallDetails(participants = previewMemberListState)
         }
     }
 
@@ -70,8 +70,8 @@ internal class CallContentTest : BaseComposeTest() {
     fun `snapshot IncomingCallContent with one participant composable`() {
         snapshot {
             IncomingCallContent(
-                call = mockCall,
-                participants = mockMemberStateList.takeLast(1),
+                call = previewCall,
+                participants = previewMemberListState.takeLast(1),
                 isCameraEnabled = false,
                 onBackPressed = {},
             ) {}
@@ -82,8 +82,8 @@ internal class CallContentTest : BaseComposeTest() {
     fun `snapshot IncomingCallContent Video type with multiple participants composable`() {
         snapshot {
             IncomingCallContent(
-                call = mockCall,
-                participants = mockMemberStateList,
+                call = previewCall,
+                participants = previewMemberListState,
                 isCameraEnabled = false,
                 onBackPressed = {},
             ) {}
@@ -93,14 +93,14 @@ internal class CallContentTest : BaseComposeTest() {
     @Test
     fun `snapshot OutgoingCallDetails Video composable`() {
         snapshot {
-            OutgoingCallDetails(participants = mockMemberStateList)
+            OutgoingCallDetails(participants = previewMemberListState)
         }
     }
 
     @Test
     fun `snapshot OutgoingCallDetails Audio composable`() {
         snapshot {
-            OutgoingCallDetails(participants = mockMemberStateList)
+            OutgoingCallDetails(participants = previewMemberListState)
         }
     }
 
@@ -126,8 +126,8 @@ internal class CallContentTest : BaseComposeTest() {
     fun `snapshot OutgoingCallContent with one participant composable`() {
         snapshot {
             OutgoingCallContent(
-                call = mockCall,
-                participants = mockMemberStateList.take(1),
+                call = previewCall,
+                participants = previewMemberListState.take(1),
                 modifier = Modifier.fillMaxSize(),
                 onBackPressed = {},
                 onCallAction = {},
@@ -139,8 +139,8 @@ internal class CallContentTest : BaseComposeTest() {
     fun `snapshot OutgoingCallContent with multiple participants composable`() {
         snapshot {
             OutgoingCallContent(
-                call = mockCall,
-                participants = mockMemberStateList,
+                call = previewCall,
+                participants = previewMemberListState,
                 onBackPressed = {},
             ) {}
         }
@@ -149,7 +149,7 @@ internal class CallContentTest : BaseComposeTest() {
     @Test
     fun `snapshot CallContent with multiple participants composable`() {
         snapshot {
-            CallContent(call = mockCall)
+            CallContent(call = previewCall)
         }
     }
 }

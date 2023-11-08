@@ -75,7 +75,7 @@ android {
 dependencies {
     // Stream Video SDK
     implementation(project(":stream-video-android-compose"))
-    compileOnly(project(":stream-video-android-mock"))
+    compileOnly(project(":stream-video-android-previewdata"))
 
     // androidx
     implementation(libs.androidx.material)

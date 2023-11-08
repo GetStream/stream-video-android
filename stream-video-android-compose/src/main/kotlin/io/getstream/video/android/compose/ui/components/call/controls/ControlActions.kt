@@ -38,8 +38,8 @@ import io.getstream.video.android.compose.ui.components.call.controls.actions.Re
 import io.getstream.video.android.compose.ui.components.call.controls.actions.buildDefaultCallControlActions
 import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.call.state.CallAction
-import io.getstream.video.android.mock.StreamMockUtils
-import io.getstream.video.android.mock.mockCall
+import io.getstream.video.android.mock.StreamPreviewDataUtils
+import io.getstream.video.android.mock.previewCall
 
 /**
  * Represents the set of controls the user can use to change their audio and video device state, or
@@ -105,13 +105,13 @@ public fun ControlActions(
 @Preview
 @Composable
 private fun CallControlsPreview() {
-    StreamMockUtils.initializeStreamVideo(LocalContext.current)
+    StreamPreviewDataUtils.initializeStreamVideo(LocalContext.current)
     Column {
         VideoTheme {
-            ControlActions(call = mockCall, onCallAction = {})
+            ControlActions(call = previewCall, onCallAction = {})
         }
         VideoTheme(isInDarkMode = true) {
-            ControlActions(call = mockCall, onCallAction = {})
+            ControlActions(call = previewCall, onCallAction = {})
         }
     }
 }

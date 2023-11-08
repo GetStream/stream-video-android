@@ -50,8 +50,8 @@ import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.ParticipantState
 import io.getstream.video.android.core.model.MediaTrack
 import io.getstream.video.android.core.model.VideoTrack
-import io.getstream.video.android.mock.StreamMockUtils
-import io.getstream.video.android.mock.mockCall
+import io.getstream.video.android.mock.StreamPreviewDataUtils
+import io.getstream.video.android.mock.previewCall
 import io.getstream.video.android.ui.common.renderer.StreamVideoTextureViewRenderer
 import io.getstream.webrtc.android.ui.VideoTextureViewRenderer
 
@@ -211,10 +211,10 @@ private fun DefaultMediaTrackFallbackContent(
 @Preview
 @Composable
 private fun VideoRendererPreview() {
-    StreamMockUtils.initializeStreamVideo(LocalContext.current)
+    StreamPreviewDataUtils.initializeStreamVideo(LocalContext.current)
     VideoTheme {
         VideoRenderer(
-            call = mockCall,
+            call = previewCall,
             video = ParticipantState.Video(
                 track = VideoTrack("", org.webrtc.VideoTrack(123)),
                 enabled = true,

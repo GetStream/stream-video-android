@@ -26,7 +26,7 @@ import app.cash.paparazzi.Paparazzi
 import io.getstream.video.android.compose.base.BaseComposeTest
 import io.getstream.video.android.compose.ui.components.avatar.Avatar
 import io.getstream.video.android.compose.ui.components.background.CallBackground
-import io.getstream.video.android.mock.mockMemberStateList
+import io.getstream.video.android.mock.previewMemberListState
 import io.getstream.video.android.ui.common.R
 import org.junit.Rule
 import org.junit.Test
@@ -42,7 +42,7 @@ internal class CallBackgroundTest : BaseComposeTest() {
     fun `snapshot CallBackground composable`() {
         snapshot {
             CallBackground(
-                participants = mockMemberStateList.take(1),
+                participants = previewMemberListState.take(1),
                 isIncoming = true,
             ) {
                 Box(modifier = Modifier.align(Alignment.Center)) {

@@ -42,8 +42,8 @@ import io.getstream.video.android.core.ParticipantState
 import io.getstream.video.android.core.call.state.CallAction
 import io.getstream.video.android.core.call.state.InviteUsersToCall
 import io.getstream.video.android.core.call.state.ToggleMicrophone
-import io.getstream.video.android.mock.StreamMockUtils
-import io.getstream.video.android.mock.mockCall
+import io.getstream.video.android.mock.StreamPreviewDataUtils
+import io.getstream.video.android.mock.previewCall
 
 /**
  * Represents a menu that shows information on the current call participants, while allowing the user
@@ -118,10 +118,10 @@ public fun CallParticipantsInfoMenu(
 @Preview
 @Composable
 private fun CallParticipantsInfoMenuPreview() {
-    StreamMockUtils.initializeStreamVideo(LocalContext.current)
+    StreamPreviewDataUtils.initializeStreamVideo(LocalContext.current)
     VideoTheme {
         CallParticipantsInfoMenu(
-            call = mockCall,
+            call = previewCall,
         )
     }
 }

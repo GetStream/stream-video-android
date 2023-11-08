@@ -37,8 +37,8 @@ import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import io.getstream.video.android.compose.theme.VideoTheme
-import io.getstream.video.android.mock.StreamMockUtils
-import io.getstream.video.android.mock.mockUsers
+import io.getstream.video.android.mock.StreamPreviewDataUtils
+import io.getstream.video.android.mock.previewUsers
 
 /**
  * A background that displays a user avatar and a background that reflects the avatar.
@@ -107,9 +107,9 @@ public fun UserAvatarBackground(
 @Preview
 @Composable
 private fun UserAvatarBackgroundPreview() {
-    StreamMockUtils.initializeStreamVideo(LocalContext.current)
+    StreamPreviewDataUtils.initializeStreamVideo(LocalContext.current)
     VideoTheme {
-        val user = mockUsers[0]
+        val user = previewUsers[0]
         UserAvatarBackground(
             userName = user.name.ifBlank { user.id },
             userImage = user.image,

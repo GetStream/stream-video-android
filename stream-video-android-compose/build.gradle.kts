@@ -70,8 +70,8 @@ dependencies {
 
     // telephoto
     implementation(libs.telephoto)
+    compileOnly(project(":stream-video-android-previewdata"))
+    testImplementation(project(":stream-video-android-previewdata"))
 
     // mock
-    compileOnly(project(":stream-video-android-mock"))
-    testImplementation(project(":stream-video-android-mock"))
 }

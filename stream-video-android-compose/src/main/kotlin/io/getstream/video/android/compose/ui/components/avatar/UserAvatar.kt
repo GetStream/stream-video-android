@@ -33,10 +33,9 @@ import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import io.getstream.video.android.compose.R
 import io.getstream.video.android.compose.theme.VideoTheme
-import io.getstream.video.android.mock.StreamMockUtils
-import io.getstream.video.android.mock.mockParticipantList
+import io.getstream.video.android.mock.StreamPreviewDataUtils
+import io.getstream.video.android.mock.previewParticipantsList
 import io.getstream.video.android.model.User
 
 /**
@@ -113,9 +112,9 @@ internal fun BoxScope.DefaultOnlineIndicator(onlineIndicatorAlignment: OnlineInd
 @Preview
 @Composable
 private fun UserAvatarPreview() {
-    StreamMockUtils.initializeStreamVideo(LocalContext.current)
+    StreamPreviewDataUtils.initializeStreamVideo(LocalContext.current)
     VideoTheme {
-        val participant = mockParticipantList[0]
+        val participant = previewParticipantsList[0]
         val userId by participant.userId.collectAsStateWithLifecycle()
         val userImage by participant.image.collectAsStateWithLifecycle()
         val userName by participant.userNameOrId.collectAsStateWithLifecycle()

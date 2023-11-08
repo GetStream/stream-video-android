@@ -74,8 +74,8 @@ import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.ParticipantState
 import io.getstream.video.android.core.call.state.CallAction
 import io.getstream.video.android.core.call.state.ChooseLayout
-import io.getstream.video.android.mock.StreamMockUtils
-import io.getstream.video.android.mock.mockCall
+import io.getstream.video.android.mock.StreamPreviewDataUtils
+import io.getstream.video.android.mock.previewCall
 import io.getstream.video.android.ui.common.R
 
 /**
@@ -310,8 +310,8 @@ private fun DefaultPermissionHandler(
 @Preview
 @Composable
 private fun CallContentPreview() {
-    StreamMockUtils.initializeStreamVideo(LocalContext.current)
+    StreamPreviewDataUtils.initializeStreamVideo(LocalContext.current)
     VideoTheme {
-        CallContent(call = mockCall)
+        CallContent(call = previewCall)
     }
 }

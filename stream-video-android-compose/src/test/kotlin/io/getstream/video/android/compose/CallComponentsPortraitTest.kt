@@ -23,7 +23,7 @@ import io.getstream.video.android.compose.ui.components.call.CallAppBar
 import io.getstream.video.android.compose.ui.components.call.controls.ControlActions
 import io.getstream.video.android.compose.ui.components.call.controls.actions.RegularControlActions
 import io.getstream.video.android.compose.ui.components.participants.ParticipantIndicatorIcon
-import io.getstream.video.android.mock.mockCall
+import io.getstream.video.android.mock.previewCall
 import org.junit.Rule
 import org.junit.Test
 
@@ -37,7 +37,7 @@ internal class CallComponentsPortraitTest : BaseComposeTest() {
     @Test
     fun `snapshot CallAppBar composable`() {
         snapshotWithDarkMode {
-            CallAppBar(call = mockCall)
+            CallAppBar(call = previewCall)
         }
     }
 
@@ -45,7 +45,7 @@ internal class CallComponentsPortraitTest : BaseComposeTest() {
     fun `snapshot RegularCallControls composable`() {
         snapshotWithDarkMode {
             RegularControlActions(
-                call = mockCall,
+                call = previewCall,
                 onCallAction = {},
             )
         }
@@ -55,7 +55,7 @@ internal class CallComponentsPortraitTest : BaseComposeTest() {
     fun `snapshot CallControls composable`() {
         snapshotWithDarkMode {
             ControlActions(
-                call = mockCall,
+                call = previewCall,
                 onCallAction = {},
             )
         }

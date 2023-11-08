@@ -29,7 +29,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -56,8 +55,8 @@ import io.getstream.video.android.core.ParticipantState
 import io.getstream.video.android.core.StreamVideo
 import io.getstream.video.android.core.call.state.CallAction
 import io.getstream.video.android.core.model.VideoTrack
-import io.getstream.video.android.mock.StreamMockUtils
-import io.getstream.video.android.mock.mockCall
+import io.getstream.video.android.mock.StreamPreviewDataUtils
+import io.getstream.video.android.mock.previewCall
 import io.getstream.video.android.model.User
 import io.getstream.video.android.ui.common.R
 
@@ -224,14 +223,14 @@ private fun OnDisabledContent(user: User) {
 @Preview
 @Composable
 private fun CallLobbyPreview() {
-    StreamMockUtils.initializeStreamVideo(LocalContext.current)
+    StreamPreviewDataUtils.initializeStreamVideo(LocalContext.current)
     VideoTheme {
         CallLobby(
-            call = mockCall,
+            call = previewCall,
             video = ParticipantState.Video(
-                sessionId = mockCall.sessionId,
+                sessionId = previewCall.sessionId,
                 track = VideoTrack(
-                    streamId = mockCall.sessionId,
+                    streamId = previewCall.sessionId,
                     video = org.webrtc.VideoTrack(1000L),
                 ),
                 enabled = true,

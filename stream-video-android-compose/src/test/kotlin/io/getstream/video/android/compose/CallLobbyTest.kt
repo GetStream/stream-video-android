@@ -22,7 +22,7 @@ import app.cash.paparazzi.DeviceConfig
 import app.cash.paparazzi.Paparazzi
 import io.getstream.video.android.compose.base.BaseComposeTest
 import io.getstream.video.android.compose.ui.components.call.lobby.CallLobby
-import io.getstream.video.android.mock.mockCall
+import io.getstream.video.android.mock.previewCall
 import org.junit.Rule
 import org.junit.Test
 
@@ -38,7 +38,7 @@ internal class CallLobbyTest : BaseComposeTest() {
         snapshot {
             CallLobby(
                 modifier = Modifier.fillMaxWidth(),
-                call = mockCall,
+                call = previewCall,
             )
         }
     }

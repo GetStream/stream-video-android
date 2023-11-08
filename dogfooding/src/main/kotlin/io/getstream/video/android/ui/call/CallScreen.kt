@@ -63,8 +63,8 @@ import io.getstream.video.android.compose.ui.components.call.renderer.LayoutType
 import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.RealtimeConnection
 import io.getstream.video.android.core.call.state.ChooseLayout
-import io.getstream.video.android.mock.StreamMockUtils
-import io.getstream.video.android.mock.mockCall
+import io.getstream.video.android.mock.StreamPreviewDataUtils
+import io.getstream.video.android.mock.previewCall
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
@@ -308,8 +308,8 @@ private fun SpeakingWhileMuted() {
 @Preview
 @Composable
 private fun CallScreenPreview() {
-    StreamMockUtils.initializeStreamVideo(LocalContext.current)
+    StreamPreviewDataUtils.initializeStreamVideo(LocalContext.current)
     VideoTheme {
-        CallScreen(call = mockCall)
+        CallScreen(call = previewCall)
     }
 }

@@ -20,7 +20,7 @@ import app.cash.paparazzi.DeviceConfig
 import app.cash.paparazzi.Paparazzi
 import io.getstream.video.android.compose.base.BaseComposeTest
 import io.getstream.video.android.compose.ui.components.call.controls.actions.LandscapeControlActions
-import io.getstream.video.android.mock.mockCall
+import io.getstream.video.android.mock.previewCall
 import org.junit.Rule
 import org.junit.Test
 
@@ -35,7 +35,7 @@ internal class CallComponentsLandscapeTest : BaseComposeTest() {
     fun `snapshot LandscapeCallControls composable`() {
         snapshot {
             LandscapeControlActions(
-                call = mockCall,
+                call = previewCall,
                 onCallAction = {},
             )
         }

@@ -22,7 +22,7 @@ import app.cash.paparazzi.Paparazzi
 import io.getstream.video.android.compose.base.BaseComposeTest
 import io.getstream.video.android.compose.ui.components.livestream.LivestreamPlayer
 import io.getstream.video.android.compose.ui.components.livestream.LivestreamPlayerOverlay
-import io.getstream.video.android.mock.mockCall
+import io.getstream.video.android.mock.previewCall
 import org.junit.Rule
 import org.junit.Test
 
@@ -37,7 +37,7 @@ internal class LivestreamTest : BaseComposeTest() {
     fun `snapshot Livestream Player Overlay composable`() {
         snapshot {
             Box {
-                LivestreamPlayerOverlay(call = mockCall)
+                LivestreamPlayerOverlay(call = previewCall)
             }
         }
     }
@@ -45,7 +45,7 @@ internal class LivestreamTest : BaseComposeTest() {
     @Test
     fun `snapshot Livestream Player composable`() {
         snapshot {
-            LivestreamPlayer(call = mockCall)
+            LivestreamPlayer(call = previewCall)
         }
     }
 }

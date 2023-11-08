@@ -18,7 +18,6 @@ package io.getstream.video.android.compose.ui.components.call.renderer.internal
 
 import android.content.res.Configuration.ORIENTATION_LANDSCAPE
 import android.content.res.Configuration.ORIENTATION_PORTRAIT
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -50,10 +49,10 @@ import io.getstream.video.android.compose.ui.components.call.renderer.SpotlightV
 import io.getstream.video.android.compose.ui.components.call.renderer.VideoRendererStyle
 import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.ParticipantState
-import io.getstream.video.android.mock.StreamMockUtils
-import io.getstream.video.android.mock.mockCall
-import io.getstream.video.android.mock.mockParticipant
-import io.getstream.video.android.mock.mockParticipantList
+import io.getstream.video.android.mock.StreamPreviewDataUtils
+import io.getstream.video.android.mock.previewCall
+import io.getstream.video.android.mock.previewParticipant
+import io.getstream.video.android.mock.previewParticipantsList
 import me.saket.telephoto.zoomable.rememberZoomableState
 import me.saket.telephoto.zoomable.zoomable
 import java.lang.Integer.max
@@ -216,12 +215,12 @@ private fun Modifier.fillHeightIfParticipantsCount(
 @Preview
 @Composable
 private fun SpotlightParticipantsPreview() {
-    StreamMockUtils.initializeStreamVideo(LocalContext.current)
+    StreamPreviewDataUtils.initializeStreamVideo(LocalContext.current)
     VideoTheme {
         SpotlightVideoRenderer(
-            call = mockCall,
-            speaker = mockParticipant,
-            participants = mockParticipantList,
+            call = previewCall,
+            speaker = previewParticipant,
+            participants = previewParticipantsList,
         )
     }
 }
@@ -229,12 +228,12 @@ private fun SpotlightParticipantsPreview() {
 @Preview
 @Composable
 private fun SpotlightTwoParticipantsPreview() {
-    StreamMockUtils.initializeStreamVideo(LocalContext.current)
+    StreamPreviewDataUtils.initializeStreamVideo(LocalContext.current)
     VideoTheme {
         SpotlightVideoRenderer(
-            call = mockCall,
-            speaker = mockParticipant,
-            participants = mockParticipantList.take(3),
+            call = previewCall,
+            speaker = previewParticipant,
+            participants = previewParticipantsList.take(3),
         )
     }
 }
@@ -246,13 +245,13 @@ private fun SpotlightTwoParticipantsPreview() {
 )
 @Composable
 private fun SpotlightParticipantsLandscapePreview() {
-    StreamMockUtils.initializeStreamVideo(LocalContext.current)
+    StreamPreviewDataUtils.initializeStreamVideo(LocalContext.current)
     VideoTheme {
         SpotlightVideoRenderer(
-            call = mockCall,
+            call = previewCall,
             orientation = ORIENTATION_LANDSCAPE,
-            speaker = mockParticipant,
-            participants = mockParticipantList,
+            speaker = previewParticipant,
+            participants = previewParticipantsList,
         )
     }
 }
@@ -264,13 +263,13 @@ private fun SpotlightParticipantsLandscapePreview() {
 )
 @Composable
 private fun SpotlightThreeParticipantsLandscapePreview() {
-    StreamMockUtils.initializeStreamVideo(LocalContext.current)
+    StreamPreviewDataUtils.initializeStreamVideo(LocalContext.current)
     VideoTheme {
         SpotlightVideoRenderer(
-            call = mockCall,
+            call = previewCall,
             orientation = ORIENTATION_LANDSCAPE,
-            speaker = mockParticipant,
-            participants = mockParticipantList.take(3),
+            speaker = previewParticipant,
+            participants = previewParticipantsList.take(3),
         )
     }
 }

@@ -39,8 +39,8 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.avatar.UserAvatar
 import io.getstream.video.android.core.ParticipantState
-import io.getstream.video.android.mock.StreamMockUtils
-import io.getstream.video.android.mock.mockParticipantList
+import io.getstream.video.android.mock.StreamPreviewDataUtils
+import io.getstream.video.android.mock.previewParticipantsList
 import io.getstream.video.android.ui.common.R
 
 /**
@@ -136,10 +136,10 @@ internal fun InviteUserItem(
 @Preview
 @Composable
 private fun InviteUserListPreview() {
-    StreamMockUtils.initializeStreamVideo(LocalContext.current)
+    StreamPreviewDataUtils.initializeStreamVideo(LocalContext.current)
     VideoTheme {
         InviteUserList(
-            mockParticipantList,
+            previewParticipantsList,
             onUserSelected = {},
             onUserUnSelected = {},
         )
