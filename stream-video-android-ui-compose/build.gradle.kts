@@ -46,7 +46,7 @@ baselineProfile {
 
 dependencies {
     api(project(":stream-video-android-core"))
-    api(project(":stream-video-android-ui-common"))
+    api(project(":stream-video-android-ui-core"))
 
     // androidx
     implementation(libs.stream.log.android)
