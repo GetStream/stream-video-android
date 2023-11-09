@@ -21,7 +21,6 @@ import android.util.Log
 import com.google.android.gms.auth.GoogleAuthUtil
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount
-import com.google.android.gms.common.api.ApiException
 import com.squareup.moshi.JsonAdapter
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.adapter
@@ -32,6 +31,7 @@ import io.getstream.video.android.data.dto.asDomainModel
 import io.getstream.video.android.models.GoogleAccount
 import io.getstream.video.android.util.GoogleSignInHelper
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.tasks.await
 import kotlinx.coroutines.withContext
 import okhttp3.HttpUrl.Companion.toHttpUrl
 import okhttp3.OkHttpClient
@@ -48,7 +48,7 @@ class GoogleAccountRepository @Inject constructor(
         val sources = "sources=DIRECTORY_SOURCE_TYPE_DOMAIN_PROFILE"
         val pageSize = "pageSize=1000"
 
-        return if (silentSignIn()) {
+        return if (signInSilently()) {
             GoogleSignIn.getLastSignedInAccount(context)?.let { account ->
                 withContext(Dispatchers.IO) {
                     getAccessToken(account)?.let { accessToken ->
@@ -75,28 +75,22 @@ class GoogleAccountRepository @Inject constructor(
         }
     }
 
-    private fun silentSignIn(): Boolean { // Used to refresh token
+    private suspend fun signInSilently(): Boolean {
         val gsc = GoogleSignInHelper.getGoogleSignInClient(context)
         val task = gsc.silentSignIn()
 
-        // Below code needed for debugging silent sign-in failures
-        if (task.isSuccessful) {
+        return if (task.isSuccessful) {
             Log.d("Google Silent Sign In", "Successful")
-            return true
+            true
         } else {
-            task.addOnCompleteListener {
-                try {
-                    val signInAccount = task.getResult(ApiException::class.java)
-                    Log.d("Google Silent Sign In", signInAccount.email.toString())
-                } catch (apiException: ApiException) {
-                    // You can get from apiException.getStatusCode() the detailed error code
-                    // e.g. GoogleSignInStatusCodes.SIGN_IN_REQUIRED means user needs to take
-                    // explicit action to finish sign-in;
-                    // Please refer to GoogleSignInStatusCodes Javadoc for details
-                    Log.d("Google Silent Sign In", apiException.statusCode.toString())
-                }
+            try {
+                task.await()
+                Log.d("Google Silent Sign In", "Successful after await")
+                true
+            } catch (exception: Exception) {
+                Log.d("Google Silent Sign In", "Failed")
+                false
             }
-            return false
         }
     }
 
