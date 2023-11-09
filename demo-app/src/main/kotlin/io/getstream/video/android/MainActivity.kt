@@ -17,9 +17,14 @@
 package io.getstream.video.android
 
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.activity.viewModels
 import androidx.lifecycle.lifecycleScope
+import com.google.android.play.core.install.model.ActivityResult.RESULT_IN_APP_UPDATE_FAILED
+import com.google.android.play.core.ktx.AppUpdateResult
 import com.google.firebase.analytics.FirebaseAnalytics
 import dagger.hilt.android.AndroidEntryPoint
 import io.getstream.video.android.analytics.FirebaseEvents
@@ -28,6 +33,8 @@ import io.getstream.video.android.datastore.delegate.StreamUserDataStore
 import io.getstream.video.android.ui.AppNavHost
 import io.getstream.video.android.ui.AppScreens
 import io.getstream.video.android.util.InstallReferrer
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -36,7 +43,7 @@ import javax.inject.Inject
 class MainActivity : ComponentActivity() {
 
     @Inject lateinit var dataStore: StreamUserDataStore
-
+    private val viewModel: MainActivityViewModel by viewModels()
     private val firebaseAnalytics by lazy { FirebaseAnalytics.getInstance(this) }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -55,6 +62,8 @@ class MainActivity : ComponentActivity() {
         lifecycleScope.launch {
             val isLoggedIn = dataStore.user.firstOrNull() != null
 
+            checkForAppUpdates(viewModel.appUpdateResultFlow)
+
             setContent {
                 VideoTheme {
                     AppNavHost(
@@ -65,6 +74,28 @@ class MainActivity : ComponentActivity() {
                         },
                     )
                 }
+            }
+        }
+    }
+
+    private suspend fun checkForAppUpdates(appUpdateResultFlow: Flow<AppUpdateResult>) {
+        val appUpdateActivityResultLauncher by lazy {
+            registerForActivityResult(ActivityResultContracts.StartIntentSenderForResult()) { activityResult ->
+                when (activityResult.resultCode) {
+                    RESULT_OK -> println("Update Successful")
+                    RESULT_CANCELED -> finish() // TODO: Read docs on how to handle this
+                    RESULT_IN_APP_UPDATE_FAILED -> println("Update Failed")
+                    else -> Unit
+                }
+            }
+        }
+
+        appUpdateResultFlow.collectLatest { result ->
+            when (result) {
+                is AppUpdateResult.Available -> result.startImmediateUpdate(appUpdateActivityResultLauncher)
+                is AppUpdateResult.InProgress -> Unit
+                is AppUpdateResult.Downloaded -> Unit
+                is AppUpdateResult.NotAvailable -> Log.i("In-App Update", "No update available")
             }
         }
     }
