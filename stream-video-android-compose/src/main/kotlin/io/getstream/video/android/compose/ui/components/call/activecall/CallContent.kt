@@ -135,7 +135,8 @@ public fun CallContent(
             call = call,
             modifier = Modifier
                 .fillMaxSize()
-                .weight(1f),
+                .weight(1f)
+                .padding(bottom = 2.dp),
             style = style,
             videoRenderer = videoRenderer,
         )

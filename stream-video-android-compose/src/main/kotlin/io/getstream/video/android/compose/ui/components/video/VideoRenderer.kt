@@ -93,6 +93,9 @@ public fun VideoRenderer(
         return
     }
 
+    // Sow avatar always behind the video.
+    videoFallbackContent.invoke(call)
+
     if (video?.enabled == true) {
         val mediaTrack = video.track
         val sessionId = video.sessionId
@@ -132,13 +135,7 @@ public fun VideoRenderer(
                     modifier = modifier.testTag("video_renderer"),
                 )
             }
-        } else {
-            // fallback when the video is available but the track didn't load yet
-            videoFallbackContent.invoke(call)
         }
-    } else {
-        // fallback when no video is available. video.enabled is false
-        videoFallbackContent.invoke(call)
     }
 }
 
