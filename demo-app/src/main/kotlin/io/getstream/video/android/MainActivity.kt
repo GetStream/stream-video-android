@@ -80,7 +80,9 @@ class MainActivity : ComponentActivity() {
 
     private suspend fun checkForAppUpdates(appUpdateResultFlow: Flow<AppUpdateResult>) {
         val appUpdateActivityResultLauncher by lazy {
-            registerForActivityResult(ActivityResultContracts.StartIntentSenderForResult()) { activityResult ->
+            registerForActivityResult(
+                ActivityResultContracts.StartIntentSenderForResult(),
+            ) { activityResult ->
                 when (activityResult.resultCode) {
                     RESULT_OK -> println("Update Successful")
                     RESULT_CANCELED -> finish() // TODO: Read docs on how to handle this
@@ -92,7 +94,9 @@ class MainActivity : ComponentActivity() {
 
         appUpdateResultFlow.collectLatest { result ->
             when (result) {
-                is AppUpdateResult.Available -> result.startImmediateUpdate(appUpdateActivityResultLauncher)
+                is AppUpdateResult.Available -> result.startImmediateUpdate(
+                    appUpdateActivityResultLauncher,
+                )
                 is AppUpdateResult.InProgress -> Unit
                 is AppUpdateResult.Downloaded -> Unit
                 is AppUpdateResult.NotAvailable -> Log.i("In-App Update", "No update available")
