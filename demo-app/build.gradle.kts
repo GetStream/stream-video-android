@@ -115,9 +115,9 @@ android {
 
     flavorDimensions += "environment"
     productFlavors {
-        create("dogfooding") {
+        create("development") {
             dimension = "environment"
-            applicationIdSuffix = ".dogfooding"
+            applicationIdSuffix = ".dev"
         }
         create("production") {
             dimension = "environment"
