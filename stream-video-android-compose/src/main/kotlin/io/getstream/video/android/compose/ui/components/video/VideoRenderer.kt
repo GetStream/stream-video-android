@@ -93,7 +93,7 @@ public fun VideoRenderer(
         return
     }
 
-    // Sow avatar always behind the video.
+    // Show avatar always behind the video.
     videoFallbackContent.invoke(call)
 
     if (video?.enabled == true) {
