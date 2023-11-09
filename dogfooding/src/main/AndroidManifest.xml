@@ -18,6 +18,7 @@
     xmlns:tools="http://schemas.android.com/tools">
 
     <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="com.google.android.gms.permission.AD_ID" tools:node="remove"/>
 
     <application
         android:name="io.getstream.video.android.App"
