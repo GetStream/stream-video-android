@@ -56,16 +56,16 @@ internal class VideoPushDelegate(
                 .let { StreamCallId(it.first, it.second) }
             CoroutineScope(DispatcherProvider.IO).launch {
                 when (payload[KEY_TYPE]) {
-                    KEY_TYPE_RING -> handleRingType(callId, payload)
+                    KEY_TYPE_DIRECT_CALL -> handleDirectCallType(callId, payload)
                     KEY_TYPE_NOTIFICATION -> handleNotificationType(callId, payload)
                     KEY_TYPE_LIVE_STARTED -> handleLiveStartedType(callId, payload)
-                    KEY_TYPE_CANCELLED -> handleCallCancelledType(callId, payload)
+                    KEY_TYPE_DIRECT_CALL_CANCELLED -> handleDirectCallCancelledType(callId, payload)
                 }
             }
         }
     }
 
-    private suspend fun handleRingType(callId: StreamCallId, payload: Map<String, Any?>) {
+    private suspend fun handleDirectCallType(callId: StreamCallId, payload: Map<String, Any?>) {
         val callDisplayName = (payload[KEY_CREATED_BY_DISPLAY_NAME] as String).ifEmpty { DEFAULT_CALL_TEXT }
         getStreamVideo("ring-type-notification")?.onRingingCall(callId, callDisplayName)
     }
@@ -80,7 +80,7 @@ internal class VideoPushDelegate(
         getStreamVideo("live-started-notification")?.onLiveCall(callId, callDisplayName)
     }
 
-    private fun handleCallCancelledType(callId: StreamCallId, payload: Map<String, Any?>) {
+    private fun handleDirectCallCancelledType(callId: StreamCallId, payload: Map<String, Any?>) {
         getStreamVideo("call-cancelled-notification")?.onCallCancelled(callId)
     }
 
@@ -137,17 +137,17 @@ internal class VideoPushDelegate(
      * Verify if the map contains a known type.
      */
     private fun Map<String, Any?>.containsKnownType(): Boolean = when (this[KEY_TYPE]) {
-        KEY_TYPE_RING -> isValidRingType()
+        KEY_TYPE_DIRECT_CALL -> isValidDirectCallType()
         KEY_TYPE_NOTIFICATION -> isValidNotificationType()
         KEY_TYPE_LIVE_STARTED -> isValidLiveStarted()
-        KEY_TYPE_CANCELLED -> true
+        KEY_TYPE_DIRECT_CALL_CANCELLED -> true
         else -> false
     }
 
     /**
      * Verify if the map contains all keys/values for a Ring Type.
      */
-    private fun Map<String, Any?>.isValidRingType(): Boolean =
+    private fun Map<String, Any?>.isValidDirectCallType(): Boolean =
         // TODO: KEY_CALL_DISPLAY_NAME can be empty. Are there any other important key/values?
         // !(this[KEY_CALL_DISPLAY_NAME] as? String).isNullOrBlank()
         true
@@ -183,10 +183,10 @@ internal class VideoPushDelegate(
     private companion object {
         private const val KEY_SENDER = "sender"
         private const val KEY_TYPE = "type"
-        private const val KEY_TYPE_RING = "call.ring"
+        private const val KEY_TYPE_DIRECT_CALL = "call.ring"
         private const val KEY_TYPE_NOTIFICATION = "call.notification"
         private const val KEY_TYPE_LIVE_STARTED = "call.live_started"
-        private const val KEY_TYPE_CANCELLED = "call.cancelled"
+        private const val KEY_TYPE_DIRECT_CALL_CANCELLED = "call.direct_call_cancelled"
         private const val KEY_CALL_CID = "call_cid"
         private const val KEY_CALL_DISPLAY_NAME = "call_display_name"
         private const val KEY_CREATED_BY_DISPLAY_NAME = "created_by_display_name"
