@@ -267,6 +267,9 @@ dependencies {
     // Only used for launching a QR code scanner in demo app
     implementation(libs.play.code.scanner)
 
+    // Play in-app updates
+    implementation(libs.play.app.update.ktx)
+
     // memory detection
     debugImplementation(libs.leakCanary)
 
