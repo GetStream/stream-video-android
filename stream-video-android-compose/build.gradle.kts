@@ -39,6 +39,7 @@ android {
 }
 
 baselineProfile {
+    baselineProfileOutputDir = "."
     filter {
         include("io.getstream.video.android.compose.**")
     }

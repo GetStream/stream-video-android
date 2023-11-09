@@ -41,6 +41,7 @@ android {
 }
 
 baselineProfile {
+    baselineProfileOutputDir = "."
     filter {
         exclude("io.getstream.video.android.**")
     }
