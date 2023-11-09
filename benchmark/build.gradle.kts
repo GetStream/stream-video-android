@@ -77,7 +77,7 @@ android {
         }
     }
 
-    targetProjectPath = ":dogfooding"
+    targetProjectPath = ":demo-app"
 
     testOptions.managedDevices.devices {
         maybeCreate<com.android.build.api.dsl.ManagedVirtualDevice>("pixel6api31").apply {

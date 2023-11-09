@@ -26,7 +26,7 @@ plugins {
 rootProject.name = "stream-video-android"
 
 // Sample apps
-include(":dogfooding")
+include(":demo-app")
 
 // SDK
 include(":benchmark")
