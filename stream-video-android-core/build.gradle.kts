@@ -123,6 +123,7 @@ android {
 }
 
 baselineProfile {
+    baselineProfileOutputDir = "."
     filter {
         include("io.getstream.video.android.core.**")
         include("org.openapitools.client.**")
