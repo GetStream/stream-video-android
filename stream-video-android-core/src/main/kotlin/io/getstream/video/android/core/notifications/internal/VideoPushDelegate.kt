@@ -65,17 +65,17 @@ internal class VideoPushDelegate(
         }
     }
 
-    private suspend fun handleDirectCallType(callId: StreamCallId, payload: Map<String, Any?>) {
+    private fun handleDirectCallType(callId: StreamCallId, payload: Map<String, Any?>) {
         val callDisplayName = (payload[KEY_CREATED_BY_DISPLAY_NAME] as String).ifEmpty { DEFAULT_CALL_TEXT }
         getStreamVideo("ring-type-notification")?.onRingingCall(callId, callDisplayName)
     }
 
-    private suspend fun handleNotificationType(callId: StreamCallId, payload: Map<String, Any?>) {
+    private fun handleNotificationType(callId: StreamCallId, payload: Map<String, Any?>) {
         val callDisplayName = (payload[KEY_CREATED_BY_DISPLAY_NAME] as String).ifEmpty { DEFAULT_CALL_TEXT }
         getStreamVideo("generic-notification")?.onNotification(callId, callDisplayName)
     }
 
-    private suspend fun handleLiveStartedType(callId: StreamCallId, payload: Map<String, Any?>) {
+    private fun handleLiveStartedType(callId: StreamCallId, payload: Map<String, Any?>) {
         val callDisplayName = (payload[KEY_CREATED_BY_DISPLAY_NAME] as String).ifEmpty { DEFAULT_CALL_TEXT }
         getStreamVideo("live-started-notification")?.onLiveCall(callId, callDisplayName)
     }

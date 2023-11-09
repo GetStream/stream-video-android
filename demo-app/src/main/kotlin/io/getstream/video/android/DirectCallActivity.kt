@@ -76,7 +76,7 @@ class DirectCallActivity : ComponentActivity() {
             val call = StreamVideo.instance().call(type, id)
 
             // Get list of members
-            val members: List<String> = listOf("XPU1WRE9")
+            val members: List<String> = intent.getStringArrayExtra(EXTRA_MEMBERS_ARRAY)?.asList() ?: emptyList()
 
             // You must add yourself as member too
             val membersWithMe = members.toMutableList().apply { add(call.user.id) }
