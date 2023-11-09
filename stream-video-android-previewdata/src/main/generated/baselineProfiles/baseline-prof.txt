@@ -19,7 +19,7 @@ HSPLio/getstream/video/android/model/StreamCallIdKt$$ExternalSyntheticApiModelOu
 HSPLio/getstream/video/android/model/StreamCallIdKt$$ExternalSyntheticApiModelOutline0;->m(Landroid/media/AudioManager;I)V
 Lio/getstream/video/android/model/User;
 HSPLio/getstream/video/android/model/User;-><clinit>()V
-HPLio/getstream/video/android/model/User;-><init>(Ljava/lang/String;Ljava/lang/String;Lio/getstream/video/android/model/UserType;Ljava/lang/String;Ljava/lang/String;Ljava/util/List;Ljava/util/Map;Lorg/threeten/bp/OffsetDateTime;Lorg/threeten/bp/OffsetDateTime;Lorg/threeten/bp/OffsetDateTime;)V
+HSPLio/getstream/video/android/model/User;-><init>(Ljava/lang/String;Ljava/lang/String;Lio/getstream/video/android/model/UserType;Ljava/lang/String;Ljava/lang/String;Ljava/util/List;Ljava/util/Map;Lorg/threeten/bp/OffsetDateTime;Lorg/threeten/bp/OffsetDateTime;Lorg/threeten/bp/OffsetDateTime;)V
 HSPLio/getstream/video/android/model/User;-><init>(Ljava/lang/String;Ljava/lang/String;Lio/getstream/video/android/model/UserType;Ljava/lang/String;Ljava/lang/String;Ljava/util/List;Ljava/util/Map;Lorg/threeten/bp/OffsetDateTime;Lorg/threeten/bp/OffsetDateTime;Lorg/threeten/bp/OffsetDateTime;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 HSPLio/getstream/video/android/model/User;->equals(Ljava/lang/Object;)Z
 HSPLio/getstream/video/android/model/User;->getCustom()Ljava/util/Map;
@@ -29,7 +29,7 @@ HSPLio/getstream/video/android/model/User;->getName()Ljava/lang/String;
 HSPLio/getstream/video/android/model/User;->getType()Lio/getstream/video/android/model/UserType;
 HSPLio/getstream/video/android/model/User;->hashCode()I
 HSPLio/getstream/video/android/model/User;->toString()Ljava/lang/String;
-HSPLio/getstream/video/android/model/User;->write$Self(Lio/getstream/video/android/model/User;Lkotlinx/serialization/encoding/CompositeEncoder;Lkotlinx/serialization/descriptors/SerialDescriptor;)V
+HSPLio/getstream/video/android/model/User;->write$Self$stream_video_android_model_release(Lio/getstream/video/android/model/User;Lkotlinx/serialization/encoding/CompositeEncoder;Lkotlinx/serialization/descriptors/SerialDescriptor;)V
 Lio/getstream/video/android/model/User$$serializer;
 HSPLio/getstream/video/android/model/User$$serializer;-><clinit>()V
 HSPLio/getstream/video/android/model/User$$serializer;-><init>()V
@@ -78,8 +78,3 @@ HSPLio/getstream/video/android/model/UserType$Guest$1;-><init>()V
 Lio/getstream/video/android/model/mapper/StreamCallCidMapperKt;
 HSPLio/getstream/video/android/model/mapper/StreamCallCidMapperKt;->isValidCallId(Ljava/lang/String;)Z
 HSPLio/getstream/video/android/model/mapper/StreamCallCidMapperKt;->toTypeAndId(Ljava/lang/String;)Lkotlin/Pair;
-Lio/getstream/video/android/models/GoogleAccount;
-HSPLio/getstream/video/android/models/GoogleAccount;-><clinit>()V
-HSPLio/getstream/video/android/models/GoogleAccount;-><init>(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Z)V
-HSPLio/getstream/video/android/models/GoogleAccount;->getName()Ljava/lang/String;
-HSPLio/getstream/video/android/models/GoogleAccount;->getPhotoUrl()Ljava/lang/String;

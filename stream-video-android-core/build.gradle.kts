@@ -124,6 +124,7 @@ android {
 }
 
 baselineProfile {
+    baselineProfileOutputDir = "."
     filter {
         include("io.getstream.video.android.core.**")
         include("io.getstream.video.android.datastore.**")

@@ -39,6 +39,10 @@
     <string name="cannot_load_google_account_list">Cannot load user list.\nPlease try again or re-login into the app.</string>
     <string name="direct_call">Direct Call</string>
     <string name="select_direct_call_users">Select users and tap the call button below</string>
+    <string name="enter_your_email_address">Enter your e-mail address</string>
+    <string name="google_sign_in_not_finalized">Google sign in not finalized, please try again</string>
+    <string name="are_you_sure_sign_out">Are you sure you want to sign out?</string>
+    <string name="cancel">Cancel</string>
     <string name="scan_qr_code_to_enter">To continue into the call\nScan the QR Code</string>
     <string name="stream_video_tooling_restart_app">Restart App</string>
     <string name="stream_video_tooling_exception_log">Error Log</string>

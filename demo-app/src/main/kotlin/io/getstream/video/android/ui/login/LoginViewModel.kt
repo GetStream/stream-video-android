@@ -59,6 +59,9 @@ class LoginViewModel @Inject constructor(
                 is LoginEvent.Loading -> flowOf(LoginUiState.Loading)
                 is LoginEvent.GoogleSignIn -> flowOf(LoginUiState.GoogleSignIn)
                 is LoginEvent.SignInSuccess -> signInSuccess(event.userId)
+                is LoginEvent.SignInFailure -> flowOf(
+                    LoginUiState.SignInFailure(event.errorMessage),
+                )
                 else -> flowOf(LoginUiState.Nothing)
             }
         }.shareIn(viewModelScope, SharingStarted.Lazily, 0)
@@ -98,7 +101,8 @@ class LoginViewModel @Inject constructor(
 
                 emit(LoginUiState.SignInComplete(tokenResponse))
             } catch (exception: Throwable) {
-                emit(LoginUiState.SignInFailure(exception.message ?: "General error"))
+                val message = "Sign in failed: ${exception.message ?: "Generic error"}"
+                emit(LoginUiState.SignInFailure(message))
                 streamLog { "Failed to fetch token - cause: $exception" }
             }
         }
@@ -151,4 +155,6 @@ sealed interface LoginEvent {
     data class GoogleSignIn(val id: String = UUID.randomUUID().toString()) : LoginEvent
 
     data class SignInSuccess(val userId: String) : LoginEvent
+
+    data class SignInFailure(val errorMessage: String) : LoginEvent
 }

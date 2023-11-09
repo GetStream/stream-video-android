@@ -409,16 +409,22 @@ private fun SignOutDialog(
             BorderStroke(1.dp, Colors.background),
             RoundedCornerShape(6.dp),
         ),
-        title = { Text(text = "Sign Out") },
-        text = { Text(text = "Are you sure you want to sign out?") },
+        title = { Text(text = stringResource(id = R.string.sign_out)) },
+        text = { Text(text = stringResource(R.string.are_you_sure_sign_out)) },
         confirmButton = {
             TextButton(onClick = { onConfirmation() }) {
-                Text(text = "Sign Out", color = VideoTheme.colors.primaryAccent)
+                Text(
+                    text = stringResource(id = R.string.sign_out),
+                    color = VideoTheme.colors.primaryAccent,
+                )
             }
         },
         dismissButton = {
             TextButton(onClick = { onDismissRequest() }) {
-                Text(text = "Cancel", color = VideoTheme.colors.primaryAccent)
+                Text(
+                    text = stringResource(R.string.cancel),
+                    color = VideoTheme.colors.primaryAccent,
+                )
             }
         },
         onDismissRequest = { onDismissRequest },
