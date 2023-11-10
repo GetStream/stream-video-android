@@ -75,6 +75,8 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.google.android.gms.auth.api.signin.GoogleSignIn
+import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import io.getstream.video.android.BuildConfig
 import io.getstream.video.android.R
 import io.getstream.video.android.compose.theme.VideoTheme
@@ -83,6 +85,7 @@ import io.getstream.video.android.datastore.delegate.StreamUserDataStore
 import io.getstream.video.android.mock.StreamPreviewDataUtils
 import io.getstream.video.android.mock.previewUsers
 import io.getstream.video.android.tooling.util.StreamFlavors
+import io.getstream.video.android.model.User
 import io.getstream.video.android.ui.theme.Colors
 import io.getstream.video.android.ui.theme.StreamButton
 
@@ -95,6 +98,8 @@ fun CallJoinScreen(
     navigateToBarcodeScanner: () -> Unit = {},
 ) {
     val uiState by callJoinViewModel.uiState.collectAsState(CallJoinUiState.Nothing)
+    val user by callJoinViewModel.user.collectAsState(initial = null)
+
     var isSignOutDialogVisible by remember { mutableStateOf(false) }
     val isLoggedOut by callJoinViewModel.isLoggedOut.collectAsState(initial = false)
 
@@ -111,8 +116,8 @@ fun CallJoinScreen(
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         CallJoinHeader(
+            user = user,
             onAvatarLongClick = { isSignOutDialogVisible = true },
-            callJoinViewModel = callJoinViewModel,
             onDirectCallClick = navigateToDirectCallJoin,
             onSignOutClick = {
                 callJoinViewModel.autoLogInAfterLogOut = false
@@ -173,13 +178,11 @@ private fun HandleCallJoinUiState(
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 private fun CallJoinHeader(
-    callJoinViewModel: CallJoinViewModel = hiltViewModel(),
+    user: User?,
     onAvatarLongClick: () -> Unit,
     onDirectCallClick: () -> Unit,
     onSignOutClick: () -> Unit,
 ) {
-    val user by callJoinViewModel.user.collectAsState(initial = null)
-
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -442,7 +445,13 @@ private fun CallJoinScreenPreview() {
     VideoTheme {
         StreamUserDataStore.install(LocalContext.current)
         CallJoinScreen(
-            callJoinViewModel = CallJoinViewModel(StreamUserDataStore.instance()),
+            callJoinViewModel = CallJoinViewModel(
+                dataStore = StreamUserDataStore.instance(),
+                googleSignInClient = GoogleSignIn.getClient(
+                    LocalContext.current,
+                    GoogleSignInOptions.Builder().build(),
+                ),
+            ),
             navigateToCallLobby = {},
             navigateUpToLogin = {},
             navigateToDirectCallJoin = {},

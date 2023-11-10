@@ -60,8 +60,10 @@ class LoginViewModel @Inject constructor(
         .flatMapLatest { event ->
             when (event) {
                 is LoginEvent.Loading -> flowOf(LoginUiState.Loading)
-                is LoginEvent.GoogleSignIn -> flowOf(LoginUiState.GoogleSignIn(
-                    signInIntent = googleSignInClient.signInIntent)
+                is LoginEvent.GoogleSignIn -> flowOf(
+                    LoginUiState.GoogleSignIn(
+                        signInIntent = googleSignInClient.signInIntent,
+                    ),
                 )
                 is LoginEvent.SignInSuccess -> signInSuccess(event.userId)
                 is LoginEvent.SignInFailure -> flowOf(
