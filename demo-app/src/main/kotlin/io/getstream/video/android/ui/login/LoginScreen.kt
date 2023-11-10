@@ -72,7 +72,6 @@ import io.getstream.video.android.ui.theme.Colors
 import io.getstream.video.android.ui.theme.LinkText
 import io.getstream.video.android.ui.theme.LinkTextData
 import io.getstream.video.android.ui.theme.StreamButton
-import io.getstream.video.android.util.GoogleSignInHelper
 import io.getstream.video.android.util.UserHelper
 
 /**
@@ -344,9 +343,7 @@ private fun HandleLoginUiStates(
     LaunchedEffect(key1 = loginUiState) {
         when (loginUiState) {
             is LoginUiState.GoogleSignIn -> {
-                signInLauncher.launch(
-                    GoogleSignInHelper.getGoogleSignInClient(context).signInIntent,
-                )
+                signInLauncher.launch(loginUiState.signInIntent)
             }
 
             is LoginUiState.SignInComplete -> {

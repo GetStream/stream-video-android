@@ -16,8 +16,10 @@
 
 package io.getstream.video.android.ui.login
 
+import android.content.Intent
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.google.android.gms.auth.api.signin.GoogleSignInClient
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.getstream.log.streamLog
 import io.getstream.video.android.API_KEY
@@ -48,6 +50,7 @@ import javax.inject.Inject
 @HiltViewModel
 class LoginViewModel @Inject constructor(
     private val dataStore: StreamUserDataStore,
+    private val googleSignInClient: GoogleSignInClient,
     private val googleAccountRepository: GoogleAccountRepository,
 ) : ViewModel() {
     var autoLogIn: Boolean = true
@@ -57,7 +60,9 @@ class LoginViewModel @Inject constructor(
         .flatMapLatest { event ->
             when (event) {
                 is LoginEvent.Loading -> flowOf(LoginUiState.Loading)
-                is LoginEvent.GoogleSignIn -> flowOf(LoginUiState.GoogleSignIn)
+                is LoginEvent.GoogleSignIn -> flowOf(LoginUiState.GoogleSignIn(
+                    signInIntent = googleSignInClient.signInIntent)
+                )
                 is LoginEvent.SignInSuccess -> signInSuccess(event.userId)
                 is LoginEvent.SignInFailure -> flowOf(
                     LoginUiState.SignInFailure(event.errorMessage),
@@ -138,9 +143,9 @@ sealed interface LoginUiState {
 
     object Loading : LoginUiState
 
-    object GoogleSignIn : LoginUiState
-
     object AlreadyLoggedIn : LoginUiState
+
+    data class GoogleSignIn(val signInIntent: Intent) : LoginUiState
 
     data class SignInComplete(val tokenResponse: TokenResponse) : LoginUiState
 
