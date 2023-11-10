@@ -155,7 +155,7 @@ public class CallHealthMonitor(
      * Will skip if we already tried to reconnect less than reconnectDebounceMs ms ago
      */
     suspend fun reconnect(forceRestart: Boolean) {
-        if (reconnectInProgress) {
+        if (reconnectInProgress && !forceRestart) {
             logger.d { "[reconnect] Reconnect already in progress - skipping" }
             return
         }
