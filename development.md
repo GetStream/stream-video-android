@@ -92,12 +92,9 @@ Check the docs on `TestBase`, `TestHelper` and `IntegrationTestBase` for more ut
 The SDK architecture consists of several modules and they depend on each other.
 
 - stream-video-android-core: This is the most fundamental module, which implements socket connections to the Stream server, WebRTC, and the rest of the video calling protocols.
-- stream-video-android-model: A pure Android module that contains several domain models of the Stream SDK.
-- stream-video-android-datastore: An Android module that offers persistence of Stream's domain data, such as `User`, `Device`, which are used by the core module.
-- stream-video-android-ui-common: An ui common module contains the common resources, such as colors, strings, drawables, and so on to share those resources with the compose and xml modules.
-- stream-video-android-compose: Video Compose SDK that provides several UI components to implement seamless video call, audio room, and livestream with highly optimized performance.
-- stream-video-android-mock: A test module that provides several ways to create a mock (real) objects of the Stream's domain object. This is very useful to write unit test codes and previews for Compose.
-- stream-video-android-tooling: An internal module that helps to trace the Stream SDK.
+- stream-video-android-ui-core: An ui common module contains the common resources, such as colors, strings, drawables, and so on to share those resources with the compose and xml modules.
+- stream-video-android-ui-compose: Video Compose SDK that provides several UI components to implement seamless video call, audio room, and livestream with highly optimized performance.
+- stream-video-android-previewdata: A test module that provides several ways to create a mock (real) objects of the Stream's domain object. This is very useful to write unit test codes and previews for Compose.
 
 ### API calls
 

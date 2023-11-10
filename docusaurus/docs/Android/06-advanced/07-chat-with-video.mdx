@@ -31,7 +31,7 @@ Let the project sync. It should have all the dependencies required for you to fi
 ```groovy
 dependencies {
     // Stream Video Compose SDK
-    implementation("io.getstream:stream-video-android-compose:0.4.2")
+    implementation("io.getstream:stream-video-android-ui-compose:0.4.2")
     
     // Stream Chat
     implementation(libs.stream.chat.compose)
@@ -41,7 +41,7 @@ dependencies {
 }
 ```
 
-You'll be integrating two SDKs - Video and Chat. There is only one Video dependency right now, `stream-video-android-compose`, used to gain access to Jetpack Compose components and the low level client of the Video project.
+You'll be integrating two SDKs - Video and Chat. There is only one Video dependency right now, `stream-video-android-ui-compose`, used to gain access to Jetpack Compose components and the low level client of the Video project.
 
 For chat, you have a few dependencies:
 * `stream-chat-compose`: Similar to Video, gives access to Jetpack Components for Chat.

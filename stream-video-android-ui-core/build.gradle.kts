@@ -23,7 +23,7 @@ plugins {
 
 rootProject.extra.apply {
     set("PUBLISH_GROUP_ID", Configuration.artifactGroup)
-    set("PUBLISH_ARTIFACT_ID", "stream-video-android-ui-common")
+    set("PUBLISH_ARTIFACT_ID", "stream-video-android-ui-core")
     set("PUBLISH_VERSION", rootProject.extra.get("rootVersionName"))
 }
 

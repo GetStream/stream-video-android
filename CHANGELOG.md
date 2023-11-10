@@ -21,13 +21,13 @@
 
 ### ❌ Removed
 
-## stream-video-android-compose
+## stream-video-android-ui-compose
 ### 🐞 Fixed
 
 ### ⬆️ Improved
 
 ### ✅ Added
-
+Ï
 ### ⚠️ Changed
 
 ### ❌ Removed
