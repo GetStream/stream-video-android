@@ -18,6 +18,7 @@ package io.getstream.video.android
 
 import android.os.Bundle
 import android.util.Log
+import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.result.contract.ActivityResultContracts
@@ -41,7 +42,6 @@ import javax.inject.Inject
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
-
     @Inject lateinit var dataStore: StreamUserDataStore
     private val viewModel: MainActivityViewModel by viewModels()
     private val firebaseAnalytics by lazy { FirebaseAnalytics.getInstance(this) }
@@ -62,8 +62,6 @@ class MainActivity : ComponentActivity() {
         lifecycleScope.launch {
             val isLoggedIn = dataStore.user.firstOrNull() != null
 
-            checkForAppUpdates(viewModel.appUpdateResultFlow)
-
             setContent {
                 VideoTheme {
                     AppNavHost(
@@ -75,32 +73,52 @@ class MainActivity : ComponentActivity() {
                     )
                 }
             }
+
+            checkForAppUpdates(viewModel.appUpdateResultFlow)
         }
     }
 
     private suspend fun checkForAppUpdates(appUpdateResultFlow: Flow<AppUpdateResult>) {
-        val appUpdateActivityResultLauncher by lazy {
-            registerForActivityResult(
-                ActivityResultContracts.StartIntentSenderForResult(),
-            ) { activityResult ->
-                when (activityResult.resultCode) {
-                    RESULT_OK -> println("Update Successful")
-                    RESULT_CANCELED -> finish() // TODO: Read docs on how to handle this
-                    RESULT_IN_APP_UPDATE_FAILED -> println("Update Failed")
-                    else -> Unit
-                }
-            }
-        }
-
         appUpdateResultFlow.collectLatest { result ->
             when (result) {
-                is AppUpdateResult.Available -> result.startImmediateUpdate(
-                    appUpdateActivityResultLauncher,
-                )
-                is AppUpdateResult.InProgress -> Unit
-                is AppUpdateResult.Downloaded -> Unit
-                is AppUpdateResult.NotAvailable -> Log.i("In-App Update", "No update available")
+                is AppUpdateResult.Available -> {
+                    Log.d(IN_APP_UPDATE_LOG_TAG, "Update available")
+                    result.startImmediateUpdate(appUpdateActivityResultLauncher)
+                }
+                is AppUpdateResult.InProgress -> Log.d(IN_APP_UPDATE_LOG_TAG, "Update in progress")
+                is AppUpdateResult.Downloaded -> Log.d(IN_APP_UPDATE_LOG_TAG, "Update downloaded")
+                is AppUpdateResult.NotAvailable -> Log.i(IN_APP_UPDATE_LOG_TAG, "None available")
             }
         }
     }
+
+    private val appUpdateActivityResultLauncher = registerForActivityResult(
+        ActivityResultContracts.StartIntentSenderForResult(),
+    ) { activityResult ->
+        handleAppUpdateActivityResult(activityResult.resultCode)
+    }
+
+    private fun handleAppUpdateActivityResult(resultCode: Int) {
+        when (resultCode) {
+            // For immediate updates, you might not receive RESULT_OK because
+            // the update should already be finished by the time control is given back to your app.
+            RESULT_OK -> {
+                Log.d(IN_APP_UPDATE_LOG_TAG, "Update successful")
+                showToast(getString(R.string.in_app_update_successful))
+            }
+            RESULT_CANCELED -> {
+                Log.d(IN_APP_UPDATE_LOG_TAG, "Update canceled")
+                showToast(getString(R.string.in_app_update_canceled))
+            }
+            RESULT_IN_APP_UPDATE_FAILED -> {
+                Log.d(IN_APP_UPDATE_LOG_TAG, "Update failed")
+                showToast(getString(R.string.in_app_update_failed))
+            }
+        }
+    }
+
+    private fun showToast(userMessage: String) =
+        Toast.makeText(this, userMessage, Toast.LENGTH_LONG).show()
 }
+
+private const val IN_APP_UPDATE_LOG_TAG = "In-app update"

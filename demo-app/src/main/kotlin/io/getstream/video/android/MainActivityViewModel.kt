@@ -31,5 +31,7 @@ class MainActivityViewModel @Inject constructor(
 ) : ViewModel() {
     val appUpdateResultFlow: Flow<AppUpdateResult> = appUpdateManager
         .requestUpdateFlow()
-        .catch { emit(AppUpdateResult.NotAvailable) }
+        .catch {
+            emit(AppUpdateResult.NotAvailable)
+        } // Catch exception when app is not downloaded from Play Store
 }
