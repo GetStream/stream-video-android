@@ -393,12 +393,8 @@ public class RtcSession internal constructor(
         // ice restart
         subscriber?.let {
             if (!it.isHealthy()) {
-                // Do not request subscriber ICE restart in fast-reconnect mode - this will
-                // be done for you by the SFU
-                if (!forceRestart) {
-                    logger.i { "ice restarting subscriber peer connection" }
-                    requestSubscriberIceRestart()
-                }
+                logger.i { "ice restarting subscriber peer connection" }
+                requestSubscriberIceRestart()
             }
         }
         publisher?.let {
