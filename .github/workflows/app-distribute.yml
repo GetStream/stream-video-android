@@ -25,7 +25,7 @@ jobs:
           gpg -d --passphrase "${{ secrets.PASSPHRASE }}" --batch .sign/keystore.properties.asc > .sign/keystore.properties
           echo "${{ secrets.ENV_PROPERTIES }}" > .env.properties
       - name: Assemble
-        run: bash ./gradlew :dogfooding:assembleRelease --stacktrace
+        run: bash ./gradlew :demo-app:assembleRelease --stacktrace
       - name: Upload APK
         uses: actions/upload-artifact@v2
         with:
