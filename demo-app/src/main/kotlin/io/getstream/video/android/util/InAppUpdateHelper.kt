@@ -30,11 +30,8 @@ import io.getstream.video.android.R
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.collectLatest
-import javax.inject.Inject
 
-class InAppUpdateHelper @Inject constructor(
-    private val context: Context,
-) {
+class InAppUpdateHelper(private val context: Context) {
     private val appUpdateResultFlow: Flow<AppUpdateResult> = AppUpdateManagerFactory
         .create(context)
         .requestUpdateFlow()
