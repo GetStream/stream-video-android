@@ -82,6 +82,7 @@ import io.getstream.video.android.compose.ui.components.avatar.UserAvatar
 import io.getstream.video.android.datastore.delegate.StreamUserDataStore
 import io.getstream.video.android.mock.StreamPreviewDataUtils
 import io.getstream.video.android.mock.previewUsers
+import io.getstream.video.android.tooling.util.StreamFlavors
 import io.getstream.video.android.ui.theme.Colors
 import io.getstream.video.android.ui.theme.StreamButton
 
@@ -224,7 +225,7 @@ private fun CallJoinHeader(
             )
         }
 
-        if (BuildConfig.FLAVOR == "dogfooding") {
+        if (BuildConfig.FLAVOR == StreamFlavors.development) {
             Spacer(modifier = Modifier.width(5.dp))
 
             StreamButton(
@@ -298,7 +299,7 @@ private fun CallJoinBody(
 
         var callId by remember {
             mutableStateOf(
-                if (BuildConfig.FLAVOR == "dogfooding") {
+                if (BuildConfig.FLAVOR == StreamFlavors.development) {
                     "default:79cYh3J5JgGk"
                 } else {
                     ""

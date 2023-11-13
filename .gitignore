@@ -107,7 +107,7 @@ docusaurus/.env
 
 # Ignore Google Play Publisher files
 .sign/service-account-credentials.json
-dogfooding/src/production/play/
+demo-app/src/production/play/
 
 # Environment Variables
 .env.properties

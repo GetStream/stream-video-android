@@ -115,7 +115,7 @@ def _install_modules():
 def _update_dogfooding_dependencies(project_root: str, group_id: str) -> None:
     # Read the content of the file
 
-    file_path = os.path.join(project_root, "dogfooding", "build.gradle.kts")
+    file_path = os.path.join(project_root, "demo-app", "build.gradle.kts")
     with open(file_path, 'r') as file:
         lines = file.readlines()
 
