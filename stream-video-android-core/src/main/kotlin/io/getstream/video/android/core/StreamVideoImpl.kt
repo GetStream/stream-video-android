@@ -90,6 +90,7 @@ import org.openapitools.client.models.JoinCallResponse
 import org.openapitools.client.models.ListRecordingsResponse
 import org.openapitools.client.models.MemberRequest
 import org.openapitools.client.models.MuteUsersResponse
+import org.openapitools.client.models.PinRequest
 import org.openapitools.client.models.QueryCallsRequest
 import org.openapitools.client.models.QueryMembersRequest
 import org.openapitools.client.models.QueryMembersResponse
@@ -102,6 +103,7 @@ import org.openapitools.client.models.SendReactionResponse
 import org.openapitools.client.models.StartBroadcastingResponse
 import org.openapitools.client.models.StopLiveResponse
 import org.openapitools.client.models.UnblockUserRequest
+import org.openapitools.client.models.UnpinRequest
 import org.openapitools.client.models.UpdateCallMembersRequest
 import org.openapitools.client.models.UpdateCallMembersResponse
 import org.openapitools.client.models.UpdateCallRequest
@@ -763,6 +765,30 @@ internal class StreamVideoImpl internal constructor(
             )
         }
     }
+
+    suspend fun pinForEveryone(type: String, callId: String, sessionId: String, userId: String) =
+        wrapAPICall {
+            connectionModule.api.videoPin(
+                type,
+                callId,
+                PinRequest(
+                    sessionId,
+                    userId,
+                ),
+            )
+        }
+
+    suspend fun unpinForEveryone(type: String, callId: String, sessionId: String, userId: String) =
+        wrapAPICall {
+            connectionModule.api.videoUnpin(
+                type,
+                callId,
+                UnpinRequest(
+                    sessionId,
+                    userId,
+                ),
+            )
+        }
 
     suspend fun endCall(type: String, id: String): Result<Unit> {
         return wrapAPICall { connectionModule.api.endCall(type, id) }

@@ -81,7 +81,40 @@ import io.getstream.video.android.mock.StreamPreviewDataUtils
 import io.getstream.video.android.mock.previewCall
 import io.getstream.video.android.mock.previewParticipantsList
 import io.getstream.video.android.ui.common.R
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
+
+public class ParticipantAction(
+    text: String,
+    condition: CoroutineScope.(Call, ParticipantState) -> Unit = { _, _ -> },
+    action: CoroutineScope.(Call, ParticipantState) -> Unit = { _, _ -> },
+)
+
+public val defaultParticipantActions: List<ParticipantAction> = listOf(
+    ParticipantAction(
+        text = "Pin",
+        condition = { call, participantState ->
+            !call.isPinnedParticipant(participantState.sessionId)
+        },
+        action = { call, participantState ->
+            launch {
+                call.state.pin(participantState.sessionId)
+            }
+        },
+    ),
+    ParticipantAction(
+        text = "Pin for everyone",
+        condition = { call, participantState ->
+            !call.isPinnedParticipant(participantState.sessionId)
+        },
+        action = { call, participantState ->
+            launch {
+                call.pinForEveryone(call.type, participantState.sessionId)
+            }
+        },
+    ),
+)
 
 /**
  * Renders a single participant with a given call, which contains all the call states.
@@ -124,6 +157,7 @@ public fun ParticipantVideo(
             style = style,
         )
     },
+    options: List<ParticipantAction> = emptyList(),
 ) {
     val connectionQuality by participant.networkQuality.collectAsStateWithLifecycle()
     val participants by call.state.participants.collectAsStateWithLifecycle()
@@ -308,7 +342,8 @@ public fun BoxScope.ParticipantLabel(
             .background(
                 VideoTheme.colors.participantLabelBackground,
                 shape = VideoTheme.shapes.participantLabelShape,
-            ).onGloballyPositioned {
+            )
+            .onGloballyPositioned {
                 componentWidth = with(density) {
                     it.size.width.toDp()
                 }
