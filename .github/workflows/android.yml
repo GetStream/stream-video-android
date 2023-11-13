@@ -122,7 +122,7 @@ jobs:
 
       - name: Run unit tests
         run: |
-          ./gradlew :stream-video-android-compose:testDebugUnitTest --scan --stacktrace
+          ./gradlew :stream-video-android-ui-compose:testDebugUnitTest --scan --stacktrace
           ./gradlew :stream-video-android-core:testDebugUnitTest --scan --stacktrace
 
       - name: Unit tests core results
@@ -135,7 +135,7 @@ jobs:
         uses: actions/upload-artifact@v2
         with:
           name: unit-tests-compose-results
-          path: stream-video-android-compose/build/reports/tests/testDebugUnitTest/index.html
+          path: stream-video-android-ui-compose/build/reports/tests/testDebugUnitTest/index.html
 
   androidTest-GMD:
     name: Android Test with GMD

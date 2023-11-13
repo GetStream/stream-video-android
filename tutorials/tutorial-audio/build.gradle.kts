@@ -39,7 +39,7 @@ android {
 }
 
 dependencies {
-    implementation(project(":stream-video-android-compose"))
+    implementation(project(":stream-video-android-ui-compose"))
 
     // Compose
     implementation(libs.androidx.activity.compose)

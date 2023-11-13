@@ -26,19 +26,15 @@ plugins {
 rootProject.name = "stream-video-android"
 
 // Sample apps
-include(":app")
-include(":dogfooding")
+include(":demo-app")
 
 // SDK
 include(":benchmark")
-include(":stream-video-android-model")
 include(":stream-video-android-core")
-include(":stream-video-android-ui-common")
-include(":stream-video-android-xml")
-include(":stream-video-android-compose")
-include(":stream-video-android-datastore")
-include(":stream-video-android-tooling")
-include(":stream-video-android-mock")
+include(":stream-video-android-ui-core")
+include(":stream-video-android-ui-xml")
+include(":stream-video-android-ui-compose")
+include(":stream-video-android-previewdata")
 include(":stream-video-android-bom")
 
 // Tutorials

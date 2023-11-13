@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+     Copyright (c) 2023 Stream.io Inc. All rights reserved.
+
+     Licensed under the Stream License;
+     you may not use this file except in compliance with the License.
+     You may obtain a copy of the License at
+
+          https://github.com/GetStream/stream-video-android/blob/main/LICENSE
+
+     Unless required by applicable law or agreed to in writing, software
+     distributed under the License is distributed on an "AS IS" BASIS,
+     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     See the License for the specific language governing permissions and
+     limitations under the License.
+-->
+<resources>
+    <string name="app_name">Stream Video Calls</string>
+    <string name="filter_call_link">call_link</string>
+    <string name="unauthorized_error">Your login token is expired. Please re-login.</string>
+    <string name="sign_in_description">Please sign in with your Google \nStream account.</string>
+    <string name="sign_in_google">Google Sign In</string>
+    <string name="sign_in_email">Sign In with Email</string>
+    <string name="random_user_sign_in">Random User Sign In</string>
+    <string name="sign_in_contact">Having problems logging in?&#160;</string>
+    <string name="sign_in_contact_us">Contact us</string>
+    <string name="sign_out">Sign out</string>
+    <string name="join_description">Build reliable video calling, audio rooms, and live streaming with our easy-to-use SDKs and global edge network</string>
+    <string name="join_call">Join Call</string>
+    <string name="join_call_by_qr_code">Scan QR meeting code</string>
+    <string name="join_call_description">You are about to join a call. %d more people are in the call.</string>
+    <string name="join_call_no_id_hint">Don\'t have a Call ID?</string>
+    <string name="join_call_call_id_hint">Call ID</string>
+    <string name="start_a_new_call">Start a New Call</string>
+    <string name="start_call">Start Call</string>
+    <string name="call_id_number">Call ID Number</string>
+    <string name="stream_video">Stream Video</string>
+    <string name="call_lobby_description">Try out a video call in this demo powered by Stream\'s video SDK</string>
+    <string name="cannot_load_google_account_list">Cannot load user list.\nPlease try again or re-login into the app.</string>
+    <string name="direct_call">Direct Call</string>
+    <string name="select_direct_call_users">Select users and tap the call button below</string>
+    <string name="enter_your_email_address">Enter your e-mail address</string>
+    <string name="google_sign_in_not_finalized">Google sign in not finalized, please try again</string>
+    <string name="are_you_sure_sign_out">Are you sure you want to sign out?</string>
+    <string name="cancel">Cancel</string>
+    <string name="scan_qr_code_to_enter">To continue into the call\nScan the QR Code</string>
+    <string name="stream_video_tooling_restart_app">Restart App</string>
+    <string name="stream_video_tooling_exception_log">Error Log</string>
+    <string name="stream_video_tooling_copy_into_clipboard">Log messages copied to clipboard!</string>
+    <plurals name="chat_typing">
+        <item quantity="one">%s is typing</item>
+        <item quantity="other">%s and %d more are typing</item>
+    </plurals>
+</resources>
