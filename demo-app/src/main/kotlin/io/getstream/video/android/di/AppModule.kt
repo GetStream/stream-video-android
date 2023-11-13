@@ -17,7 +17,6 @@
 package io.getstream.video.android.di
 
 import android.content.Context
-import com.google.android.play.core.appupdate.AppUpdateManagerFactory
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
@@ -40,9 +39,4 @@ object AppModule {
     fun provideGoogleAccountRepository(
         @ApplicationContext context: Context,
     ) = GoogleAccountRepository(context)
-
-    @Provides
-    fun provideAppUpdateManager(
-        @ApplicationContext context: Context,
-    ) = AppUpdateManagerFactory.create(context)
 }
