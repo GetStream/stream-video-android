@@ -68,6 +68,7 @@ import io.getstream.video.android.core.call.state.ToggleCamera
 import io.getstream.video.android.core.call.state.ToggleMicrophone
 import io.getstream.video.android.datastore.delegate.StreamUserDataStore
 import io.getstream.video.android.mock.StreamPreviewDataUtils
+import io.getstream.video.android.tooling.util.StreamFlavors
 import io.getstream.video.android.ui.call.CallActivity
 import io.getstream.video.android.ui.theme.Colors
 import io.getstream.video.android.ui.theme.StreamButton
@@ -151,7 +152,7 @@ private fun CallLobbyHeader(
             fontSize = 16.sp,
         )
 
-        if (BuildConfig.FLAVOR == "dogfooding") {
+        if (BuildConfig.FLAVOR == StreamFlavors.development) {
             Spacer(modifier = Modifier.width(4.dp))
 
             StreamButton(

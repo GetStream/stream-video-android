@@ -163,7 +163,7 @@ androidComponents {
 
         onVariants { applicationVariant ->
             applicationVariant.flavorName?.let { flavor ->
-                val keyPrefix = if (flavor == "dogfooding") "DOGFOODING" else "PRODUCTION"
+                val keyPrefix = if (flavor == "development") "DOGFOODING" else "PRODUCTION"
                 val buildConfigKeyPrefix = "${keyPrefix}_BUILD_CONFIG_"
                 val resConfigKeyPrefix = "${keyPrefix}_RES_CONFIG_"
                 val appProperties = properties.filterKeys { "$it".startsWith(keyPrefix) }
