@@ -37,4 +37,4 @@ jobs:
           appId: ${{secrets.FIREBASE_DOGFOODING_SAMPLE_APP_ID}}
           serviceCredentialsFileContent: ${{ secrets.CREDENTIAL_FILE_CONTENT }}
           groups: stream-testers
-          file: demo-app/build/outputs/apk/demo-app/release/demo-app-development-release.apk
+          file: demo-app/build/outputs/apk/development/release/demo-app-development-release.apk
