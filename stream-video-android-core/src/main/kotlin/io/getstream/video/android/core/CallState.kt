@@ -28,6 +28,7 @@ import io.getstream.video.android.core.events.JoinCallResponseEvent
 import io.getstream.video.android.core.events.ParticipantCount
 import io.getstream.video.android.core.events.ParticipantJoinedEvent
 import io.getstream.video.android.core.events.ParticipantLeftEvent
+import io.getstream.video.android.core.events.PinsUpdatedEvent
 import io.getstream.video.android.core.events.SFUHealthCheckEvent
 import io.getstream.video.android.core.events.SubscriberOfferEvent
 import io.getstream.video.android.core.events.TrackPublishedEvent
@@ -546,6 +547,12 @@ public class CallState(
                 val newBlockedUsers = _blockedUsers.value.toMutableSet()
                 newBlockedUsers.add(event.user.id)
                 _blockedUsers.value = newBlockedUsers
+            }
+
+            is PinsUpdatedEvent -> {
+                _pinnedParticipants.value = event.pins.associate {
+                    Pair(it.sessionId, OffsetDateTime.now())
+                }
             }
 
             is UnblockedUserEvent -> {

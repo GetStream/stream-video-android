@@ -116,7 +116,7 @@ public data class JoinCallResponseEvent(
 ) : SfuDataEvent()
 
 public data class PinsUpdatedEvent(
-    val pins: List<PinUpdate>
+    val pins: List<PinUpdate>,
 ) : SfuDataEvent()
 
 public data class PinUpdate(val userId: String, val sessionId: String)
