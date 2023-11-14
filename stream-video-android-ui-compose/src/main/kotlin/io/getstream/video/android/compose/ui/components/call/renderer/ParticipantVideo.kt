@@ -91,7 +91,7 @@ public class ParticipantAction(
     action: CoroutineScope.(Call, ParticipantState) -> Unit = { _, _ -> },
 )
 
-public val defaultParticipantActions: List<ParticipantAction> = listOf(
+public val pinUnpinActions: List<ParticipantAction> = listOf(
     ParticipantAction(
         text = "Pin",
         condition = { call, participantState ->
@@ -111,6 +111,28 @@ public val defaultParticipantActions: List<ParticipantAction> = listOf(
         action = { call, participantState ->
             launch {
                 call.pinForEveryone(call.type, participantState.sessionId)
+            }
+        },
+    ),
+    ParticipantAction(
+        text = "Unpin for everyone",
+        condition = { call, participantState ->
+            call.isPinnedParticipant(participantState.sessionId)
+        },
+        action = { call, participantState ->
+            launch {
+                call.unpinForEveryone(call.type, participantState.sessionId)
+            }
+        },
+    ),
+    ParticipantAction(
+        text = "Unpin",
+        condition = { call, participantState ->
+            !call.isPinnedParticipant(participantState.sessionId)
+        },
+        action = { call, participantState ->
+            launch {
+                call.state.unpin(participantState.sessionId)
             }
         },
     ),
