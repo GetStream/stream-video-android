@@ -16,9 +16,11 @@
 
 package io.getstream.video.android.compose.ui.components.call.pinning
 
+import android.content.res.Configuration
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
@@ -45,8 +47,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -56,6 +60,9 @@ import io.getstream.video.android.compose.ui.components.avatar.UserAvatar
 import io.getstream.video.android.compose.ui.components.indicator.GenericIndicator
 import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.ParticipantState
+import io.getstream.video.android.mock.StreamPreviewDataUtils
+import io.getstream.video.android.mock.previewCall
+import io.getstream.video.android.mock.previewParticipant
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import org.openapitools.client.models.OwnCapability
@@ -213,7 +220,7 @@ internal fun BoxScope.ParticipantActionsDialog(
             Spacer(modifier = Modifier.height(16.dp))
             FlowRow(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
+                horizontalArrangement = Arrangement.SpaceEvenly,
                 verticalArrangement = Arrangement.Center,
             ) {
                 actions.forEach {
@@ -228,19 +235,47 @@ internal fun BoxScope.ParticipantActionsDialog(
                                 Icon(
                                     imageVector = hasIcon,
                                     contentDescription = it.label,
-                                    tint = VideoTheme.colors.textHighEmphasis,
                                 )
                             }
                             Text(
                                 textAlign = TextAlign.Start,
                                 text = it.label,
-                                color = VideoTheme.colors.textHighEmphasis,
                             )
                         }
                     }
                 }
             }
             Spacer(modifier = Modifier.height(16.dp))
+        }
+    }
+}
+
+@Preview
+@Composable
+private fun ParticipantActionDialogPreview() {
+    StreamPreviewDataUtils.initializeStreamVideo(LocalContext.current)
+    VideoTheme {
+        Box {
+            ParticipantActionsDialog(
+                call = previewCall,
+                participant = previewParticipant,
+                actions = pinUnpinActions,
+            )
+        }
+    }
+}
+
+@Preview(uiMode = Configuration.UI_MODE_NIGHT_YES)
+@Composable
+private fun ParticipantActionDialogPreviewDark() {
+    StreamPreviewDataUtils.initializeStreamVideo(LocalContext.current)
+    VideoTheme {
+        Box {
+            ParticipantActionsDialog(
+                call = previewCall,
+                participant = previewParticipant,
+                actions = pinUnpinActions,
+            )
         }
     }
 }
