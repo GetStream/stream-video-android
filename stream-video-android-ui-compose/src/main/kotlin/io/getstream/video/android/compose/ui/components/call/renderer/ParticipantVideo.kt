@@ -46,7 +46,6 @@ import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Button
 import androidx.compose.material.Icon
-import androidx.compose.material.IconButton
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Cancel
@@ -239,21 +238,26 @@ internal fun BoxScope.ParticipantActionsDialog(
                 userName = userName,
                 userImage = userImage,
             )
-            Text(modifier = Modifier.fillMaxWidth(), text = name, color = VideoTheme.colors.textHighEmphasis, textAlign = TextAlign.Center)
+            Text(
+                modifier = Modifier.fillMaxWidth(),
+                text = name,
+                color = VideoTheme.colors.textHighEmphasis,
+                textAlign = TextAlign.Center,
+            )
             Spacer(modifier = Modifier.height(16.dp))
             FlowRow(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.Center,
-                verticalArrangement = Arrangement.Center
+                verticalArrangement = Arrangement.Center,
             ) {
-
                 actions.forEach {
                     if (it.condition.invoke(call, participant)) {
                         Button(
                             modifier = Modifier.padding(8.dp),
                             onClick = {
                                 it.action.invoke(coroutineScope, call, participant)
-                            }) {
+                            },
+                        ) {
                             it.icon?.let { hasIcon ->
                                 Icon(
                                     imageVector = hasIcon,
