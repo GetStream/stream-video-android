@@ -29,6 +29,8 @@ import io.getstream.video.android.core.events.JoinCallResponseEvent
 import io.getstream.video.android.core.events.ParticipantCount
 import io.getstream.video.android.core.events.ParticipantJoinedEvent
 import io.getstream.video.android.core.events.ParticipantLeftEvent
+import io.getstream.video.android.core.events.PinUpdate
+import io.getstream.video.android.core.events.PinsUpdatedEvent
 import io.getstream.video.android.core.events.PublisherAnswerEvent
 import io.getstream.video.android.core.events.SFUHealthCheckEvent
 import io.getstream.video.android.core.events.SfuDataEvent
@@ -37,6 +39,7 @@ import io.getstream.video.android.core.events.TrackPublishedEvent
 import io.getstream.video.android.core.events.TrackUnpublishedEvent
 import io.getstream.video.android.core.events.UnknownEvent
 import io.getstream.video.android.model.UserAudioLevel
+import stream.video.sfu.event.PinsChanged
 import stream.video.sfu.event.SfuEvent
 
 public object RTCEventMapper {
@@ -125,6 +128,10 @@ public object RTCEventMapper {
             )
 
             event.go_away != null -> GoAwayEvent(reason = event.go_away.reason)
+
+            event.pins_updated != null -> PinsUpdatedEvent(event.pins_updated.pins.map {
+                PinUpdate(it.user_id, it.session_id)
+            })
 
             else -> {
                 logger.w { "Unknown event: $event" }

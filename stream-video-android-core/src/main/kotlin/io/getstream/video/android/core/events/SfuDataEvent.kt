@@ -115,6 +115,12 @@ public data class JoinCallResponseEvent(
     val isReconnected: Boolean,
 ) : SfuDataEvent()
 
+public data class PinsUpdatedEvent(
+    val pins: List<PinUpdate>
+) : SfuDataEvent()
+
+public data class PinUpdate(val userId: String, val sessionId: String)
+
 public data class UnknownEvent(val event: Any?) : SfuDataEvent()
 
 public data class ErrorEvent(val error: Error?) : SfuDataEvent()
