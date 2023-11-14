@@ -106,7 +106,7 @@ public val pinUnpinActions: List<ParticipantAction> = listOf(
     ParticipantAction(
         text = "Pin for everyone",
         condition = { call, participantState ->
-            !call.isPinnedParticipant(participantState.sessionId)
+            call.isPinnedParticipant(participantState.sessionId)
         },
         action = { call, participantState ->
             launch {
@@ -128,7 +128,7 @@ public val pinUnpinActions: List<ParticipantAction> = listOf(
     ParticipantAction(
         text = "Unpin",
         condition = { call, participantState ->
-            !call.isPinnedParticipant(participantState.sessionId)
+            call.isPinnedParticipant(participantState.sessionId)
         },
         action = { call, participantState ->
             launch {
