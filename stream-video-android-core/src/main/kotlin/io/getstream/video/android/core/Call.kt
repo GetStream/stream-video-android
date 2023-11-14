@@ -1014,6 +1014,11 @@ public class Call(
         sessionId,
     )
 
+    fun hasCapability(vararg capability: OwnCapability): Boolean {
+        val elements = capability.toList()
+        return state.ownCapabilities.value.containsAll(elements)
+    }
+
     @InternalStreamVideoApi
     public val debug = Debug(this)
 

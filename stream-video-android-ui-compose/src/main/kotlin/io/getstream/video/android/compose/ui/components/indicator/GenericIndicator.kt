@@ -37,8 +37,8 @@ import io.getstream.video.android.compose.theme.VideoTheme
 @Composable
 internal fun GenericIndicator(
     modifier: Modifier = Modifier,
-    shape: Shape,
-    backgroundColor: Color,
+    shape: Shape = VideoTheme.shapes.indicatorBackground,
+    backgroundColor: Color = VideoTheme.colors.audioIndicatorBackground,
     content: @Composable BoxScope.() -> Unit,
 ) {
     Box(

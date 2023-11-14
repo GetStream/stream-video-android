@@ -25,17 +25,33 @@ import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.Button
+import androidx.compose.material.Icon
+import androidx.compose.material.IconButton
 import androidx.compose.material.Text
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Cancel
+import androidx.compose.material.icons.filled.PushPin
+import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
@@ -47,28 +63,37 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Alignment.Companion.BottomEnd
 import androidx.compose.ui.Alignment.Companion.BottomStart
 import androidx.compose.ui.Alignment.Companion.Center
+import androidx.compose.ui.Alignment.Companion.CenterHorizontally
 import androidx.compose.ui.Alignment.Companion.CenterVertically
+import androidx.compose.ui.Alignment.Companion.TopCenter
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalInspectionMode
+import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.window.Dialog
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.lifecycleScope
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.avatar.LocalAvatarPreviewProvider
+import io.getstream.video.android.compose.ui.components.avatar.UserAvatar
 import io.getstream.video.android.compose.ui.components.avatar.UserAvatarBackground
 import io.getstream.video.android.compose.ui.components.connection.NetworkQualityIndicator
+import io.getstream.video.android.compose.ui.components.indicator.GenericIndicator
 import io.getstream.video.android.compose.ui.components.indicator.SoundIndicator
 import io.getstream.video.android.compose.ui.components.video.VideoRenderer
 import io.getstream.video.android.core.Call
@@ -84,16 +109,19 @@ import io.getstream.video.android.ui.common.R
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import org.openapitools.client.models.OwnCapability
 
 public class ParticipantAction(
-    text: String,
-    condition: CoroutineScope.(Call, ParticipantState) -> Unit = { _, _ -> },
-    action: CoroutineScope.(Call, ParticipantState) -> Unit = { _, _ -> },
+    public val icon: ImageVector? = null,
+    public val label: String,
+    public val condition: (Call, ParticipantState) -> Boolean = { _, _ -> true },
+    public val action: CoroutineScope.(Call, ParticipantState) -> Unit = { _, _ -> },
 )
 
 public val pinUnpinActions: List<ParticipantAction> = listOf(
     ParticipantAction(
-        text = "Pin",
+        icon = Icons.Filled.PushPin,
+        label = "Pin",
         condition = { call, participantState ->
             !call.isPinnedParticipant(participantState.sessionId)
         },
@@ -104,29 +132,34 @@ public val pinUnpinActions: List<ParticipantAction> = listOf(
         },
     ),
     ParticipantAction(
-        text = "Pin for everyone",
+        icon = Icons.Filled.PushPin,
+        label = "Pin for everyone",
         condition = { call, participantState ->
-            !call.isPinnedParticipant(participantState.sessionId)
+            call.hasCapability(OwnCapability.PinForEveryone) && !call.isPinnedParticipant(participantState.sessionId)
         },
         action = { call, participantState ->
             launch {
+                call.state.pin(participantState.sessionId)
                 call.pinForEveryone(call.type, participantState.sessionId)
             }
         },
     ),
     ParticipantAction(
-        text = "Unpin for everyone",
+        icon = Icons.Filled.Cancel,
+        label = "Unpin for everyone",
         condition = { call, participantState ->
-            call.isPinnedParticipant(participantState.sessionId)
+            call.hasCapability(OwnCapability.PinForEveryone) && call.isPinnedParticipant(participantState.sessionId)
         },
         action = { call, participantState ->
             launch {
+                call.state.unpin(participantState.sessionId)
                 call.unpinForEveryone(call.type, participantState.sessionId)
             }
         },
     ),
     ParticipantAction(
-        text = "Unpin",
+        icon = Icons.Filled.Cancel,
+        label = "Unpin",
         condition = { call, participantState ->
             call.isPinnedParticipant(participantState.sessionId)
         },
@@ -137,6 +170,110 @@ public val pinUnpinActions: List<ParticipantAction> = listOf(
         },
     ),
 )
+
+@Composable
+internal fun BoxScope.ParticipantActions(
+    modifier: Modifier = Modifier,
+    actions: List<ParticipantAction>,
+    call: Call,
+    participant: ParticipantState,
+) {
+    var showDialog by remember {
+        mutableStateOf(false)
+    }
+    if (actions.any {
+            it.condition.invoke(call, participant)
+        }
+    ) {
+        GenericIndicator(
+            modifier = modifier.clickable {
+                showDialog = !showDialog
+            },
+        ) {
+            Icon(
+                imageVector = Icons.Outlined.Settings,
+                contentDescription = "Call actions",
+                tint = Color.White,
+            )
+        }
+
+        if (showDialog) {
+            ParticipantActionsDialog(
+                call = call,
+                participant = participant,
+                actions = actions,
+                onDismiss = {
+                    showDialog = false
+                },
+            )
+        }
+    }
+}
+
+@OptIn(ExperimentalLayoutApi::class)
+@Composable
+internal fun BoxScope.ParticipantActionsDialog(
+    call: Call,
+    participant: ParticipantState,
+    actions: List<ParticipantAction>,
+    onDismiss: () -> Unit = {},
+) {
+    val coroutineScope = LocalLifecycleOwner.current.lifecycleScope
+    val userName by participant.userNameOrId.collectAsStateWithLifecycle()
+    val userImage by participant.image.collectAsStateWithLifecycle()
+    val name = remember {
+        participant.name.value
+    }
+    Dialog(onDismiss) {
+        Column(
+            Modifier
+                .background(VideoTheme.colors.appBackground)
+                .align(Center)
+                .padding(16.dp),
+        ) {
+            UserAvatar(
+                modifier = Modifier
+                    .size(82.dp)
+                    .align(CenterHorizontally)
+                    .aspectRatio(1f),
+                userName = userName,
+                userImage = userImage,
+            )
+            Text(modifier = Modifier.fillMaxWidth(), text = name, color = VideoTheme.colors.textHighEmphasis, textAlign = TextAlign.Center)
+            Spacer(modifier = Modifier.height(16.dp))
+            FlowRow(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.Center,
+                verticalArrangement = Arrangement.Center
+            ) {
+
+                actions.forEach {
+                    if (it.condition.invoke(call, participant)) {
+                        Button(
+                            modifier = Modifier.padding(8.dp),
+                            onClick = {
+                                it.action.invoke(coroutineScope, call, participant)
+                            }) {
+                            it.icon?.let { hasIcon ->
+                                Icon(
+                                    imageVector = hasIcon,
+                                    contentDescription = it.label,
+                                    tint = VideoTheme.colors.textHighEmphasis,
+                                )
+                            }
+                            Text(
+                                textAlign = TextAlign.Start,
+                                text = it.label,
+                                color = VideoTheme.colors.textHighEmphasis,
+                            )
+                        }
+                    }
+                }
+            }
+            Spacer(modifier = Modifier.height(16.dp))
+        }
+    }
+}
 
 /**
  * Renders a single participant with a given call, which contains all the call states.
@@ -150,6 +287,7 @@ public val pinUnpinActions: List<ParticipantAction> = listOf(
  * @param connectionIndicatorContent Content is shown that indicates the connection quality.
  * @param videoFallbackContent Content is shown the video track is failed to load or not available.
  * @param reactionContent Content is shown for the reaction.
+ * @param actionsContent Content to show action picker with call actions related to the selected participant.
  */
 @Composable
 public fun ParticipantVideo(
@@ -179,7 +317,20 @@ public fun ParticipantVideo(
             style = style,
         )
     },
-    options: List<ParticipantAction> = emptyList(),
+    actionsContent: @Composable BoxScope.(
+        actions: List<ParticipantAction>,
+        call: Call,
+        participant: ParticipantState,
+    ) -> Unit = { actions, call, participant ->
+        ParticipantActions(
+            Modifier
+                .align(TopCenter)
+                .padding(top = 8.dp),
+            actions,
+            call,
+            participant,
+        )
+    },
 ) {
     val connectionQuality by participant.networkQuality.collectAsStateWithLifecycle()
     val participants by call.state.participants.collectAsStateWithLifecycle()
@@ -230,6 +381,8 @@ public fun ParticipantVideo(
             participant = participant,
             videoFallbackContent = videoFallbackContent,
         )
+
+        actionsContent.invoke(this, pinUnpinActions, call, participant)
 
         if (style.isShowingParticipantLabel) {
             labelContent.invoke(this, participant)
