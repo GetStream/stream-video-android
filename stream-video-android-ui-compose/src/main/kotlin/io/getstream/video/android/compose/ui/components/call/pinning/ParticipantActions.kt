@@ -182,7 +182,12 @@ internal fun BoxScope.ParticipantActionsDialog(
     val userName by participant.userNameOrId.collectAsStateWithLifecycle()
     val userImage by participant.image.collectAsStateWithLifecycle()
     val name = remember {
-        participant.name.value
+        val nameValue = participant.name.value
+        if (nameValue.isEmpty()) {
+            participant.userNameOrId.value
+        } else {
+            nameValue
+        }
     }
     Dialog(onDismiss) {
         Column(
@@ -208,7 +213,7 @@ internal fun BoxScope.ParticipantActionsDialog(
             Spacer(modifier = Modifier.height(16.dp))
             FlowRow(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.Center,
+                horizontalArrangement = Arrangement.SpaceBetween,
                 verticalArrangement = Arrangement.Center,
             ) {
                 actions.forEach {
