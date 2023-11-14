@@ -182,7 +182,7 @@ public class SfuSocket(
         val byteBuffer = bytes.asByteBuffer()
         val byteArray = ByteArray(byteBuffer.capacity())
         byteBuffer.get(byteArray)
-        scope.launch {
+        scope.launch(singleThreadDispatcher) {
             try {
                 val rawEvent = SfuEvent.ADAPTER.decode(byteArray)
                 val message = RTCEventMapper.mapEvent(rawEvent)

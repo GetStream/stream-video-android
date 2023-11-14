@@ -80,7 +80,7 @@ public class CoordinatorSocket(
     override fun onMessage(webSocket: WebSocket, text: String) {
         logger.d { "[onMessage] text: $text " }
 
-        scope.launch {
+        scope.launch(singleThreadDispatcher) {
             // parse the message
             val jsonAdapter: JsonAdapter<VideoEvent> =
                 Serializer.moshi.adapter(VideoEvent::class.java)
