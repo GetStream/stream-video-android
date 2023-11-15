@@ -18,4 +18,4 @@ package io.getstream.video.android.token
 
 import kotlinx.serialization.Serializable
 
-@Serializable data class TokenResponse(val userId: String, val token: String)
+@Serializable data class TokenResponse(val userId: String, val apiKey: String, val token: String)

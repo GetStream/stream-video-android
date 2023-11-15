@@ -22,8 +22,8 @@ import androidx.lifecycle.viewModelScope
 import com.google.android.gms.auth.api.signin.GoogleSignInClient
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.getstream.log.streamLog
-import io.getstream.video.android.API_KEY
 import io.getstream.video.android.BuildConfig
+import io.getstream.video.android.STREAM_SDK_ENVIRONMENT
 import io.getstream.video.android.core.StreamVideo
 import io.getstream.video.android.data.repositories.GoogleAccountRepository
 import io.getstream.video.android.datastore.delegate.StreamUserDataStore
@@ -84,8 +84,8 @@ class LoginViewModel @Inject constructor(
         } else {
             try {
                 val tokenResponse = StreamVideoNetwork.tokenService.fetchToken(
+                    environment = STREAM_SDK_ENVIRONMENT,
                     userId = userId,
-                    apiKey = API_KEY,
                 )
 
                 val loggedInGoogleUser = if (autoLogIn) null else googleAccountRepository.getCurrentUser()
@@ -100,6 +100,7 @@ class LoginViewModel @Inject constructor(
                 )
 
                 // Store the data in the demo app
+                dataStore.updateApiKey(tokenResponse.apiKey)
                 dataStore.updateUser(user)
                 dataStore.updateUserToken(tokenResponse.token)
 

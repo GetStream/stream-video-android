@@ -26,8 +26,8 @@ import io.getstream.chat.android.offline.plugin.factory.StreamOfflinePluginFacto
 import io.getstream.chat.android.state.plugin.config.StatePluginConfig
 import io.getstream.chat.android.state.plugin.factory.StreamStatePluginFactory
 import io.getstream.log.Priority
-import io.getstream.video.android.API_KEY
 import io.getstream.video.android.BuildConfig
+import io.getstream.video.android.STREAM_SDK_ENVIRONMENT
 import io.getstream.video.android.core.StreamVideo
 import io.getstream.video.android.core.StreamVideoBuilder
 import io.getstream.video.android.core.logging.LoggingLevel
@@ -69,6 +69,7 @@ object StreamVideoInitHelper {
         // Load the signed-in user (can be null)
         val storedUser = dataStore.data.firstOrNull()
 
+        var apiKey = storedUser?.apiKey
         var loggedInUser = storedUser?.user
         var userToken = storedUser?.userToken
 
@@ -77,35 +78,39 @@ object StreamVideoInitHelper {
             val userId = UserHelper.generateRandomString()
 
             val result = StreamVideoNetwork.tokenService.fetchToken(
-                userId = userId,
-                apiKey = BuildConfig.API_KEY,
+                environment = STREAM_SDK_ENVIRONMENT,
+                userId = userId
             )
             val user = User(id = result.userId, role = "admin")
 
             // Store the data (note that this datastore belongs to the client - it's not
             // used by the SDK directly in any way)
+            dataStore.updateApiKey(result.apiKey)
             dataStore.updateUser(user)
             dataStore.updateUserToken(result.token)
 
+            apiKey = result.apiKey
             loggedInUser = user
             userToken = result.token
         }
 
         if (loggedInUser != null) {
-            // there is a user - so we expect a token too
-            val token = checkNotNull(userToken)
+            // there is a user - so we expect an apiKey and token too
+            require(!apiKey.isNullOrBlank()) { "Stream SDK api key is empty" }
+            require(!userToken.isNullOrBlank()) { "Stream SDK token key is empty" }
 
             initializeStreamChat(
                 context = context,
+                apiKey = apiKey,
                 user = loggedInUser,
-                token = token,
+                token = userToken,
             )
 
             initializeStreamVideo(
                 context = context,
+                apiKey = apiKey,
                 user = loggedInUser,
-                token = token,
-                apiKey = API_KEY,
+                token = userToken,
                 loggingLevel = LoggingLevel(priority = Priority.VERBOSE),
                 dataStore = dataStore,
             )
@@ -116,17 +121,17 @@ object StreamVideoInitHelper {
     /** Sets up and returns the [StreamVideo] required to connect to the API. */
     private fun initializeStreamVideo(
         context: Context,
+        apiKey: ApiKey,
         user: User,
         token: String,
-        apiKey: ApiKey,
         loggingLevel: LoggingLevel,
         dataStore: StreamUserDataStore,
     ): StreamVideo {
         return StreamVideoBuilder(
             context = context,
+            apiKey = apiKey,
             user = user,
             token = token,
-            apiKey = apiKey,
             loggingLevel = loggingLevel,
             ensureSingleInstance = false,
             notificationConfig = NotificationConfig(
@@ -137,8 +142,8 @@ object StreamVideoInitHelper {
             tokenProvider = {
                 val email = user.custom["email"]
                 val response = StreamVideoNetwork.tokenService.fetchToken(
-                    userId = email,
-                    apiKey = API_KEY,
+                    environment = STREAM_SDK_ENVIRONMENT,
+                    userId = email
                 )
                 dataStore.updateUserToken(response.token)
                 response.token
@@ -148,6 +153,7 @@ object StreamVideoInitHelper {
 
     private fun initializeStreamChat(
         context: Context,
+        apiKey: String,
         user: User,
         token: String,
     ) {
@@ -161,7 +167,7 @@ object StreamVideoInitHelper {
         )
 
         val logLevel = if (BuildConfig.DEBUG) ChatLogLevel.ALL else ChatLogLevel.NOTHING
-        val chatClient = ChatClient.Builder(API_KEY, context)
+        val chatClient = ChatClient.Builder(apiKey, context)
             .withPlugins(offlinePlugin, statePluginFactory)
             .logLevel(logLevel)
             .build()

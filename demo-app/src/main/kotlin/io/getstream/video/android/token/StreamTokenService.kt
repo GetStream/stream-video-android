@@ -25,23 +25,21 @@ import retrofit2.http.GET
 import retrofit2.http.Query
 
 interface StreamTokenService {
-
     @GET("api/auth/create-token")
     suspend fun fetchToken(
-        @Query("user_id") userId: String?,
-        @Query("api_key") apiKey: String,
+        @Query("environment") environment: String,
+        @Query("user_id") userId: String?
     ): TokenResponse
 }
 
 object StreamVideoNetwork {
-
     private val contentType = "application/json".toMediaType()
     private val json = Json {
         ignoreUnknownKeys = true
     }
     private val retrofit =
         Retrofit.Builder()
-            .baseUrl("https://stream-calls-dogfood.vercel.app/")
+            .baseUrl("https://pronto.getstream.io/")
             .addConverterFactory(json.asConverterFactory(contentType))
             .build()
 

@@ -54,6 +54,6 @@ class App : Application() {
     }
 }
 
-const val API_KEY = BuildConfig.API_KEY
+val STREAM_SDK_ENVIRONMENT = if (BuildConfig.FLAVOR == "production") "pronto" else "demo"
 
 val Context.app get() = applicationContext as App
