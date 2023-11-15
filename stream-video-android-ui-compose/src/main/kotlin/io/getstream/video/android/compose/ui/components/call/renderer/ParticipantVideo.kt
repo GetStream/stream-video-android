@@ -362,7 +362,13 @@ public fun BoxScope.ParticipantLabel(
             )
 
             if (isPinned) {
-                GenericIndicator {
+                GenericIndicator(
+                    modifier = Modifier.padding(
+                        start = VideoTheme.dimens.participantSoundIndicatorPadding,
+                        top = VideoTheme.dimens.participantSoundIndicatorPadding,
+                        bottom = VideoTheme.dimens.participantSoundIndicatorPadding,
+                    ),
+                ) {
                     Icon(
                         imageVector = Icons.Filled.PushPin,
                         contentDescription = "Pin",
