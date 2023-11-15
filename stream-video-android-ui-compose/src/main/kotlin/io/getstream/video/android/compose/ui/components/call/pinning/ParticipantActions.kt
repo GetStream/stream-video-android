@@ -99,6 +99,18 @@ internal val pinUnpinActions: List<ParticipantAction> = listOf(
         },
     ),
     ParticipantAction(
+        icon = Icons.Filled.Cancel,
+        label = "Unpin",
+        condition = { call, participantState ->
+            call.isLocalPin(participantState.sessionId)
+        },
+        action = { call, participantState ->
+            launch {
+                call.state.unpin(participantState.sessionId)
+            }
+        },
+    ),
+    ParticipantAction(
         icon = Icons.Filled.PushPin,
         label = "Pin for everyone",
         condition = { call, participantState ->
@@ -106,7 +118,6 @@ internal val pinUnpinActions: List<ParticipantAction> = listOf(
         },
         action = { call, participantState ->
             launch {
-                call.state.pin(participantState.userId.value, participantState.sessionId)
                 call.pinForEveryone(call.type, participantState.sessionId)
             }
         },
@@ -119,20 +130,7 @@ internal val pinUnpinActions: List<ParticipantAction> = listOf(
         },
         action = { call, participantState ->
             launch {
-                call.state.unpin(participantState.sessionId)
                 call.unpinForEveryone(call.type, participantState.sessionId)
-            }
-        },
-    ),
-    ParticipantAction(
-        icon = Icons.Filled.Cancel,
-        label = "Unpin",
-        condition = { call, participantState ->
-            call.isLocalPin(participantState.sessionId)
-        },
-        action = { call, participantState ->
-            launch {
-                call.state.unpin(participantState.sessionId)
             }
         },
     ),
