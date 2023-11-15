@@ -17,7 +17,6 @@
 package io.getstream.video.android.di
 
 import android.content.Context
-import com.google.android.play.core.appupdate.AppUpdateManagerFactory
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
