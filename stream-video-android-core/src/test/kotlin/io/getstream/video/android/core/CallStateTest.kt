@@ -20,7 +20,10 @@ import com.google.common.truth.Truth.assertThat
 import io.getstream.result.Result
 import io.getstream.video.android.core.base.IntegrationTestBase
 import io.getstream.video.android.core.events.DominantSpeakerChangedEvent
+import io.getstream.video.android.core.events.PinUpdate
 import io.getstream.video.android.core.model.SortField
+import io.getstream.video.android.core.pinning.PinType
+import io.getstream.video.android.core.pinning.PinUpdateAtTime
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.first
@@ -125,8 +128,9 @@ class CallStateTest : IntegrationTestBase() {
         val sorted1 = sortedParticipants.value
         assertThat(sorted1).isEmpty()
 
-        call.state._pinnedParticipants.value = mutableMapOf(
-            "1" to OffsetDateTime.now(Clock.systemUTC()),
+        call.state._localPins.value = mutableMapOf(
+            "1" to PinUpdateAtTime(
+                PinUpdate("1", "userId"), OffsetDateTime.now(Clock.systemUTC()), PinType.Local)
         )
 
         call.state.updateParticipant(
