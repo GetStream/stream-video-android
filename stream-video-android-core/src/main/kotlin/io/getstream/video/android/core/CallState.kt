@@ -560,7 +560,11 @@ public class CallState(
             }
 
             is PinsUpdatedEvent -> {
-                _serverPins.value = event.pins.associate {
+                // Update particioants that are still in the call
+                val pinnedInCall = event.pins.filter {
+                    _participants.value.containsKey(it.sessionId)
+                }
+                _serverPins.value = pinnedInCall.associate {
                     Pair(it.sessionId, PinUpdateAtTime(it, OffsetDateTime.now(Clock.systemUTC()), PinType.Server))
                 }
             }
