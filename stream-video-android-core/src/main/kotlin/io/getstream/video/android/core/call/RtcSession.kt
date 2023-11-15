@@ -440,6 +440,13 @@ public class RtcSession internal constructor(
         sfuSocketStateJob = coroutineScope.launch {
             sfuConnectionModule.sfuSocket.connectionState.collect { sfuSocketState ->
                 _sfuSocketState.value = sfuSocketState
+
+                // make sure we stop handling subscriber ICE candidates when a new SFU socket
+                // connection is being established. We need to wait until a SubscriberOffer
+                // is received again and then we start listening to the ICE candidate queue
+                if (sfuSocketState == SocketState.Connecting) {
+                    syncSubscriberCandidates?.cancel()
+                }
             }
         }
     }
@@ -1178,19 +1185,14 @@ public class RtcSession internal constructor(
         logger.d { "[handleSubscriberOffer] #sfu; #subscriber; event: $offerEvent" }
         val subscriber = subscriber ?: return
 
+        syncSubscriberCandidates?.cancel()
+
         // step 1 - receive the offer and set it to the remote
         val offerDescription = SessionDescription(
             SessionDescription.Type.OFFER,
             offerEvent.sdp,
         )
         subscriber.setRemoteDescription(offerDescription)
-
-        syncSubscriberCandidates?.cancel()
-        syncSubscriberCandidates = coroutineScope.launch {
-            sfuConnectionModule.sfuSocket.pendingSubscriberIceCandidates.collect { iceCandidates ->
-                subscriber.addIceCandidate(iceCandidates)
-            }
-        }
 
         // step 2 - create the answer
         val answerResult = subscriber.createAnswer()
@@ -1232,6 +1234,14 @@ public class RtcSession internal constructor(
                 val sendAnswerResult = sendAnswer(sendAnswerRequest)
                 logger.v { "[handleSubscriberOffer] #sfu; #subscriber; sendAnswerResult: $sendAnswerResult" }
                 emit(sendAnswerResult.getOrThrow())
+
+                // setRemoteDescription has been called and everything is ready - we can
+                // now start handling the ICE subscriber candidates queue
+                syncSubscriberCandidates = coroutineScope.launch {
+                    sfuConnectionModule.sfuSocket.pendingSubscriberIceCandidates.collect { iceCandidates ->
+                        subscriber.addIceCandidate(iceCandidates)
+                    }
+                }
             }.flowOn(DispatcherProvider.IO).retryWhen { cause, attempt ->
                 val sameValue = answerSdp == subscriberSdpAnswer.value
                 val sameSfu = currentSfu == sfuUrl

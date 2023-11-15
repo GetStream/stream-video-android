@@ -23,6 +23,7 @@ import io.getstream.video.android.core.internal.network.NetworkStateProvider
 import io.getstream.video.android.core.socket.internal.HealthMonitor
 import kotlinx.coroutines.CancellableContinuation
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.asCoroutineDispatcher
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -40,6 +41,7 @@ import java.io.IOException
 import java.io.InterruptedIOException
 import java.net.SocketTimeoutException
 import java.net.UnknownHostException
+import java.util.concurrent.Executors
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
 
@@ -64,6 +66,8 @@ public open class PersistentSocket<T>(
     private val onFastReconnected: () -> Unit,
 ) : WebSocketListener() {
     internal open val logger by taggedLogger("PersistentSocket")
+
+    internal val singleThreadDispatcher = Executors.newSingleThreadExecutor().asCoroutineDispatcher()
 
     /** Mock the socket for testing */
     internal var mockSocket: WebSocket? = null

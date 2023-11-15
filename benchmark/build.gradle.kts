@@ -65,7 +65,7 @@ android {
 
     flavorDimensions += "environment"
     productFlavors {
-        create("dogfooding") {
+        create("development") {
             dimension = "environment"
             proguardFiles("benchmark-rules.pro")
             buildConfigField("Boolean", "BENCHMARK", "true")
