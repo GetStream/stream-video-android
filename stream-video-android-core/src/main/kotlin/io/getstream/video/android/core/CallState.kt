@@ -763,12 +763,23 @@ public class CallState(
             }
 
             is ParticipantLeftEvent -> {
-                removeParticipant(event.participant.session_id)
+                val sessionId = event.participant.session_id
+                removeParticipant(sessionId)
 
                 // clean up - stop screen-sharing session if it was still running
                 val current = _screenSharingSession.value
-                if (current?.participant?.sessionId == event.participant.session_id) {
+                if (current?.participant?.sessionId == sessionId) {
                     _screenSharingSession.value = null
+                }
+                if (_localPins.value.containsKey(sessionId)) {
+                    // Remove any pins for the participant
+                    unpin(sessionId)
+                }
+
+                if (_serverPins.value.containsKey(sessionId)) {
+                    scope.launch {
+                        call.unpinForEveryone(sessionId, event.participant.user_id)
+                    }
                 }
             }
 
