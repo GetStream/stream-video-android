@@ -27,8 +27,8 @@ import com.squareup.moshi.Moshi
 import com.squareup.moshi.adapter
 import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 import dagger.hilt.android.qualifiers.ApplicationContext
-import io.getstream.video.android.data.dto.GetGoogleAccountsResponseDto
-import io.getstream.video.android.data.dto.asDomainModel
+import io.getstream.video.android.data.services.google.ListDirectoryPeopleResponse
+import io.getstream.video.android.data.services.google.asDomainModel
 import io.getstream.video.android.models.GoogleAccount
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.tasks.await
@@ -118,7 +118,7 @@ class GoogleAccountRepository @Inject constructor(
         val moshi: Moshi = Moshi.Builder()
             .add(KotlinJsonAdapterFactory())
             .build()
-        val jsonAdapter: JsonAdapter<GetGoogleAccountsResponseDto> = moshi.adapter()
+        val jsonAdapter: JsonAdapter<ListDirectoryPeopleResponse> = moshi.adapter()
 
         val response = jsonAdapter.fromJson(jsonString)
         return response?.people?.map { it.asDomainModel() }

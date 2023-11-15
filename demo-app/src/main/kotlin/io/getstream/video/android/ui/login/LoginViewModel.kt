@@ -26,10 +26,10 @@ import io.getstream.video.android.BuildConfig
 import io.getstream.video.android.STREAM_SDK_ENVIRONMENT
 import io.getstream.video.android.core.StreamVideo
 import io.getstream.video.android.data.repositories.GoogleAccountRepository
+import io.getstream.video.android.data.services.stream.GetAuthDataResponse
+import io.getstream.video.android.data.services.stream.StreamService
 import io.getstream.video.android.datastore.delegate.StreamUserDataStore
 import io.getstream.video.android.model.User
-import io.getstream.video.android.token.StreamVideoNetwork
-import io.getstream.video.android.token.TokenResponse
 import io.getstream.video.android.util.StreamVideoInitHelper
 import io.getstream.video.android.util.UserHelper
 import kotlinx.coroutines.Dispatchers
@@ -83,7 +83,7 @@ class LoginViewModel @Inject constructor(
             emit(LoginUiState.AlreadyLoggedIn)
         } else {
             try {
-                val tokenResponse = StreamVideoNetwork.tokenService.fetchToken(
+                val authData = StreamService.instance.getAuthData(
                     environment = STREAM_SDK_ENVIRONMENT,
                     userId = userId,
                 )
@@ -91,23 +91,23 @@ class LoginViewModel @Inject constructor(
                 val loggedInGoogleUser = if (autoLogIn) null else googleAccountRepository.getCurrentUser()
 
                 val user = User(
-                    id = tokenResponse.userId,
+                    id = authData.userId,
                     // if autoLogIn is true it means we have a random user
                     name = if (autoLogIn) userId else loggedInGoogleUser?.name ?: "",
                     image = if (autoLogIn) "" else loggedInGoogleUser?.photoUrl ?: "",
                     role = "admin",
-                    custom = mapOf("email" to tokenResponse.userId),
+                    custom = mapOf("email" to authData.userId),
                 )
 
                 // Store the data in the demo app
-                dataStore.updateApiKey(tokenResponse.apiKey)
+                dataStore.updateApiKey(authData.apiKey)
                 dataStore.updateUser(user)
-                dataStore.updateUserToken(tokenResponse.token)
+                dataStore.updateUserToken(authData.token)
 
                 // Init the Video SDK with the data
                 StreamVideoInitHelper.loadSdk(dataStore)
 
-                emit(LoginUiState.SignInComplete(tokenResponse))
+                emit(LoginUiState.SignInComplete(authData))
             } catch (exception: Throwable) {
                 val message = "Sign in failed: ${exception.message ?: "Generic error"}"
                 emit(LoginUiState.SignInFailure(message))
@@ -150,7 +150,7 @@ sealed interface LoginUiState {
 
     data class GoogleSignIn(val signInIntent: Intent) : LoginUiState
 
-    data class SignInComplete(val tokenResponse: TokenResponse) : LoginUiState
+    data class SignInComplete(val authDataResponse: GetAuthDataResponse) : LoginUiState
 
     data class SignInFailure(val errorMessage: String) : LoginUiState
 }

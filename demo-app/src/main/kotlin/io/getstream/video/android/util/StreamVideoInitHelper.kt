@@ -32,10 +32,10 @@ import io.getstream.video.android.core.StreamVideo
 import io.getstream.video.android.core.StreamVideoBuilder
 import io.getstream.video.android.core.logging.LoggingLevel
 import io.getstream.video.android.core.notifications.NotificationConfig
+import io.getstream.video.android.data.services.stream.StreamService
 import io.getstream.video.android.datastore.delegate.StreamUserDataStore
 import io.getstream.video.android.model.ApiKey
 import io.getstream.video.android.model.User
-import io.getstream.video.android.token.StreamVideoNetwork
 import kotlinx.coroutines.flow.firstOrNull
 
 @SuppressLint("StaticFieldLeak")
@@ -77,21 +77,21 @@ object StreamVideoInitHelper {
         if (loggedInUser == null && useRandomUserAsFallback) {
             val userId = UserHelper.generateRandomString()
 
-            val result = StreamVideoNetwork.tokenService.fetchToken(
+            val authData = StreamService.instance.getAuthData(
                 environment = STREAM_SDK_ENVIRONMENT,
-                userId = userId
+                userId = userId,
             )
-            val user = User(id = result.userId, role = "admin")
+            val user = User(id = authData.userId, role = "admin")
 
             // Store the data (note that this datastore belongs to the client - it's not
             // used by the SDK directly in any way)
-            dataStore.updateApiKey(result.apiKey)
+            dataStore.updateApiKey(authData.apiKey)
             dataStore.updateUser(user)
-            dataStore.updateUserToken(result.token)
+            dataStore.updateUserToken(authData.token)
 
-            apiKey = result.apiKey
+            apiKey = authData.apiKey
             loggedInUser = user
-            userToken = result.token
+            userToken = authData.token
         }
 
         if (loggedInUser != null) {
@@ -141,12 +141,12 @@ object StreamVideoInitHelper {
             ),
             tokenProvider = {
                 val email = user.custom["email"]
-                val response = StreamVideoNetwork.tokenService.fetchToken(
+                val authData = StreamService.instance.getAuthData(
                     environment = STREAM_SDK_ENVIRONMENT,
-                    userId = email
+                    userId = email,
                 )
-                dataStore.updateUserToken(response.token)
-                response.token
+                dataStore.updateUserToken(authData.token)
+                authData.token
             },
         ).build()
     }

@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-package io.getstream.video.android.token
+package io.getstream.video.android.data.services.stream
 
 import kotlinx.serialization.Serializable
 
-@Serializable data class TokenResponse(val userId: String, val apiKey: String, val token: String)
+@Serializable data class GetAuthDataResponse(val userId: String, val apiKey: String, val token: String)
