@@ -560,13 +560,7 @@ public class CallState(
             }
 
             is PinsUpdatedEvent -> {
-                // Update particioants that are still in the call
-                val pinnedInCall = event.pins.filter {
-                    _participants.value.containsKey(it.sessionId)
-                }
-                _serverPins.value = pinnedInCall.associate {
-                    Pair(it.sessionId, PinUpdateAtTime(it, OffsetDateTime.now(Clock.systemUTC()), PinType.Server))
-                }
+                updateServerSidePins(event.pins)
             }
 
             is UnblockedUserEvent -> {
@@ -756,6 +750,11 @@ public class CallState(
                 // time to update call state based on the join response
                 updateFromJoinResponse(event)
                 updateRingingState()
+                updateServerSidePins(
+                    event.callState.pins.map {
+                        PinUpdate(it.user_id, it.session_id)
+                    },
+                )
             }
 
             is ParticipantJoinedEvent -> {
@@ -867,6 +866,19 @@ public class CallState(
                 }
                 updateRingingState()
             }
+        }
+    }
+
+    private fun updateServerSidePins(pins: List<PinUpdate>) {
+        // Update particioants that are still in the call
+        val pinnedInCall = pins.filter {
+            _participants.value.containsKey(it.sessionId)
+        }
+        _serverPins.value = pinnedInCall.associate {
+            Pair(
+                it.sessionId,
+                PinUpdateAtTime(it, OffsetDateTime.now(Clock.systemUTC()), PinType.Server),
+            )
         }
     }
 
