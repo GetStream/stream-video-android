@@ -77,6 +77,7 @@ import io.getstream.video.android.compose.ui.components.call.pinning.Participant
 import io.getstream.video.android.compose.ui.components.call.pinning.ParticipantActions
 import io.getstream.video.android.compose.ui.components.call.pinning.pinUnpinActions
 import io.getstream.video.android.compose.ui.components.connection.NetworkQualityIndicator
+import io.getstream.video.android.compose.ui.components.indicator.GenericIndicator
 import io.getstream.video.android.compose.ui.components.indicator.SoundIndicator
 import io.getstream.video.android.compose.ui.components.video.VideoRenderer
 import io.getstream.video.android.core.Call
@@ -348,13 +349,6 @@ public fun BoxScope.ParticipantLabel(
             modifier = Modifier.align(Center),
             verticalAlignment = CenterVertically,
         ) {
-            if (isPinned) {
-                Icon(
-                    imageVector = Icons.Filled.PushPin,
-                    contentDescription = "Pin",
-                    tint = Color.White,
-                )
-            }
             Text(
                 modifier = Modifier
                     .widthIn(max = componentWidth)
@@ -367,6 +361,15 @@ public fun BoxScope.ParticipantLabel(
                 overflow = TextOverflow.Ellipsis,
             )
 
+            if (isPinned) {
+                GenericIndicator {
+                    Icon(
+                        imageVector = Icons.Filled.PushPin,
+                        contentDescription = "Pin",
+                        tint = Color.White,
+                    )
+                }
+            }
             soundIndicatorContent.invoke(this)
         }
     }

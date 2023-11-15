@@ -118,7 +118,7 @@ internal val pinUnpinActions: List<ParticipantAction> = listOf(
         },
         action = { call, participantState ->
             launch {
-                call.pinForEveryone(call.type, participantState.sessionId)
+                call.pinForEveryone(participantState.sessionId, participantState.userId.value)
             }
         },
     ),
@@ -130,7 +130,7 @@ internal val pinUnpinActions: List<ParticipantAction> = listOf(
         },
         action = { call, participantState ->
             launch {
-                call.unpinForEveryone(call.type, participantState.sessionId)
+                call.unpinForEveryone(participantState.sessionId, participantState.userId.value)
             }
         },
     ),
