@@ -84,8 +84,8 @@ import io.getstream.video.android.compose.ui.components.avatar.UserAvatar
 import io.getstream.video.android.datastore.delegate.StreamUserDataStore
 import io.getstream.video.android.mock.StreamPreviewDataUtils
 import io.getstream.video.android.mock.previewUsers
-import io.getstream.video.android.tooling.util.StreamFlavors
 import io.getstream.video.android.model.User
+import io.getstream.video.android.tooling.util.StreamFlavors
 import io.getstream.video.android.ui.theme.Colors
 import io.getstream.video.android.ui.theme.StreamButton
 
