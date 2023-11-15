@@ -28,6 +28,7 @@ import io.getstream.video.android.core.events.JoinCallResponseEvent
 import io.getstream.video.android.core.events.ParticipantCount
 import io.getstream.video.android.core.events.ParticipantJoinedEvent
 import io.getstream.video.android.core.events.ParticipantLeftEvent
+import io.getstream.video.android.core.events.PinUpdate
 import io.getstream.video.android.core.events.PinsUpdatedEvent
 import io.getstream.video.android.core.events.SFUHealthCheckEvent
 import io.getstream.video.android.core.events.SubscriberOfferEvent
@@ -40,6 +41,8 @@ import io.getstream.video.android.core.model.Reaction
 import io.getstream.video.android.core.model.ScreenSharingSession
 import io.getstream.video.android.core.model.VisibilityOnScreenState
 import io.getstream.video.android.core.permission.PermissionRequest
+import io.getstream.video.android.core.pinning.PinType
+import io.getstream.video.android.core.pinning.PinUpdateAtTime
 import io.getstream.video.android.core.sorting.SortedParticipantsState
 import io.getstream.video.android.core.utils.mapState
 import io.getstream.video.android.core.utils.toUser
@@ -55,6 +58,7 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.channelFlow
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
@@ -228,18 +232,24 @@ public class CallState(
     private val _dominantSpeaker: MutableStateFlow<ParticipantState?> = MutableStateFlow(null)
     public val dominantSpeaker: StateFlow<ParticipantState?> = _dominantSpeaker
 
-    /**
-     * Sorted participants gives you the list of participants sorted by
-     * * anyone who is pinned
-     * * dominant speaker
-     * * if you are screensharing
-     * * last speaking at
-     * * all other video participants by when they joined
-     * * audio only participants by when they joined
-     *
-     */
-    internal val _pinnedParticipants: MutableStateFlow<Map<String, OffsetDateTime>> =
+    internal val _localPins: MutableStateFlow<Map<String, PinUpdateAtTime>> =
         MutableStateFlow(emptyMap())
+    internal val _serverPins: MutableStateFlow<Map<String, PinUpdateAtTime>> =
+        MutableStateFlow(emptyMap())
+
+    internal val _pinnedParticipants: StateFlow<Map<String, OffsetDateTime>> =
+        combine(_localPins, _serverPins) { local, server ->
+            val combined = mutableMapOf<String, PinUpdateAtTime>()
+            combined.putAll(local)
+            combined.putAll(server)
+            combined.toMap().asIterable().associate {
+                Pair(it.key, it.value.at)
+            }
+        }.stateIn(scope, SharingStarted.Eagerly, emptyMap())
+
+    /**
+     * Pinned participants, combined value both from server and local pins.
+     */
     val pinnedParticipants: StateFlow<Map<String, OffsetDateTime>> = _pinnedParticipants
 
     val stats = CallStats(call, scope)
@@ -550,8 +560,8 @@ public class CallState(
             }
 
             is PinsUpdatedEvent -> {
-                _pinnedParticipants.value = event.pins.associate {
-                    Pair(it.sessionId, OffsetDateTime.now())
+                _serverPins.value = event.pins.associate {
+                    Pair(it.sessionId, PinUpdateAtTime(it, OffsetDateTime.now(Clock.systemUTC()), PinType.Server))
                 }
             }
 
@@ -1121,16 +1131,16 @@ public class CallState(
         updateFromResponse(it.members)
     }
 
-    fun pin(sessionId: String) {
-        val pins = _pinnedParticipants.value.toMutableMap()
-        pins[sessionId] = OffsetDateTime.now(Clock.systemUTC())
-        _pinnedParticipants.value = pins
+    fun pin(userId: String, sessionId: String) {
+        val pins = _localPins.value.toMutableMap()
+        pins[sessionId] = PinUpdateAtTime(PinUpdate(userId, sessionId), OffsetDateTime.now(Clock.systemUTC()), PinType.Local)
+        _localPins.value = pins
     }
 
     fun unpin(sessionId: String) {
-        val pins = _pinnedParticipants.value.toMutableMap()
+        val pins = _localPins.value.toMutableMap()
         pins.remove(sessionId)
-        _pinnedParticipants.value = pins
+        _localPins.value = pins
     }
 
     fun updateFromResponse(result: StopLiveResponse) {

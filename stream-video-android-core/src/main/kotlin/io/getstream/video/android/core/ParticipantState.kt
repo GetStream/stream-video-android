@@ -176,7 +176,7 @@ public data class ParticipantState(
     }
 
     suspend fun pin() {
-        return call.state.pin(this.sessionId)
+        return call.state.pin(this.userId.value, this.sessionId)
     }
 
     suspend fun unpin() {

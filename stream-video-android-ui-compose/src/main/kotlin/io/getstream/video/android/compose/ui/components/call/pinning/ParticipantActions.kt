@@ -90,11 +90,11 @@ internal val pinUnpinActions: List<ParticipantAction> = listOf(
         icon = Icons.Filled.PushPin,
         label = "Pin",
         condition = { call, participantState ->
-            !call.isPinnedParticipant(participantState.sessionId)
+            !call.isLocalPin(participantState.sessionId)
         },
         action = { call, participantState ->
             launch {
-                call.state.pin(participantState.sessionId)
+                call.state.pin(participantState.userId.value, participantState.sessionId)
             }
         },
     ),
@@ -102,11 +102,11 @@ internal val pinUnpinActions: List<ParticipantAction> = listOf(
         icon = Icons.Filled.PushPin,
         label = "Pin for everyone",
         condition = { call, participantState ->
-            call.hasCapability(OwnCapability.PinForEveryone) && !call.isPinnedParticipant(participantState.sessionId)
+            call.hasCapability(OwnCapability.PinForEveryone) && !call.isServerPin(participantState.sessionId)
         },
         action = { call, participantState ->
             launch {
-                call.state.pin(participantState.sessionId)
+                call.state.pin(participantState.userId.value, participantState.sessionId)
                 call.pinForEveryone(call.type, participantState.sessionId)
             }
         },
@@ -115,7 +115,7 @@ internal val pinUnpinActions: List<ParticipantAction> = listOf(
         icon = Icons.Filled.Cancel,
         label = "Unpin for everyone",
         condition = { call, participantState ->
-            call.hasCapability(OwnCapability.PinForEveryone) && call.isPinnedParticipant(participantState.sessionId)
+            call.hasCapability(OwnCapability.PinForEveryone) && call.isServerPin(participantState.sessionId)
         },
         action = { call, participantState ->
             launch {
@@ -128,7 +128,7 @@ internal val pinUnpinActions: List<ParticipantAction> = listOf(
         icon = Icons.Filled.Cancel,
         label = "Unpin",
         condition = { call, participantState ->
-            call.isPinnedParticipant(participantState.sessionId)
+            call.isLocalPin(participantState.sessionId)
         },
         action = { call, participantState ->
             launch {

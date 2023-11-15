@@ -35,10 +35,14 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.Icon
 import androidx.compose.material.Text
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.PushPin
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -279,7 +283,9 @@ public fun BoxScope.ParticipantLabel(
 ) {
     val audioEnabled by participant.audioEnabled.collectAsStateWithLifecycle()
     val speaking by participant.speaking.collectAsStateWithLifecycle()
-
+    val pinned by remember {
+        derivedStateOf { call.state.pinnedParticipants.value.contains(participant.sessionId) }
+    }
     val userNameOrId by participant.userNameOrId.collectAsStateWithLifecycle()
     val nameLabel = if (participant.isLocal) {
         stringResource(id = R.string.stream_video_myself)
@@ -289,6 +295,7 @@ public fun BoxScope.ParticipantLabel(
 
     ParticipantLabel(
         nameLabel = nameLabel,
+        isPinned = pinned,
         labelPosition = labelPosition,
         hasAudio = audioEnabled,
         // we always draw the audio indicator for the local participant for lower delay
@@ -302,6 +309,7 @@ public fun BoxScope.ParticipantLabel(
 @Composable
 public fun BoxScope.ParticipantLabel(
     nameLabel: String,
+    isPinned: Boolean = false,
     labelPosition: Alignment = BottomStart,
     hasAudio: Boolean = false,
     isSpeaking: Boolean = false,
@@ -340,6 +348,13 @@ public fun BoxScope.ParticipantLabel(
             modifier = Modifier.align(Center),
             verticalAlignment = CenterVertically,
         ) {
+            if (isPinned) {
+                Icon(
+                    imageVector = Icons.Filled.PushPin,
+                    contentDescription = "Pin",
+                    tint = Color.White,
+                )
+            }
             Text(
                 modifier = Modifier
                     .widthIn(max = componentWidth)
