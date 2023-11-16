@@ -9,7 +9,7 @@ This quickstart gives you a quick overview of how Stream's video SDKs work
 
 The example below creates the client. Normally you'd do that in your `Application` class.
 Next you create a call object and join the call. We'll specify create=true to create the call if it doesn't exist
-
+<!-- call is a verb, should it be named createCall? -->
 ```kotlin
 val client = StreamVideoBuilder(
      context = context,
@@ -19,10 +19,10 @@ val client = StreamVideoBuilder(
      token = token,
 ).build()
 
-val call = client.call("default", "123") {/* call is a verb, should it be named createCall? */}
+val call = client.call("default", "123")
 val joinResult = call.join(create=true)
 ```
-{/* starting from "in this case" below, bad phrasing */}
+<!-- starting from "in this case" below, bad phrasing -->
 **Note**: While you can initialise the SDK on-demand and it's not mandatory to initialise the SDK in the `Application.onCreate()` - it is required to initialise it this way for it to be able to handle incoming call and other types of push notifications. In this case the application process will start, the push notification will be delivered to the SDK automatically but the SDK will not be initialised at this point and will ignore the push notification.
 
 `default` is a call type. There are 4 built-in call types and you can also create your own.
@@ -57,15 +57,15 @@ ParticipantVideo(
     participant = participant
 )
 ```
-
-The fields available on the participants are documented [here](https://github.com/GetStream/stream-video-android/blob/main/docusaurus/docs/Android/02-guides/03-call-and-participant-state.mdx#participant-state). {/* broken link */}
+<!-- broken link below -->
+The fields available on the participants are documented [here](https://github.com/GetStream/stream-video-android/blob/main/docusaurus/docs/Android/02-guides/03-call-and-participant-state.mdx#participant-state).
 
 ### Camera & Audio
 
 Most video apps will show buttons to mute/unmute the audio or video and flip the camera.
 The example below shows how to use the camera
 
-{/* code errors below */}
+<!-- code errors below -->
 
 ```kotlin
 val call = client.call("default", "123")
