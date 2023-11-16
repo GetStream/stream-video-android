@@ -27,6 +27,7 @@ import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.datastore.delegate.StreamUserDataStore
 import io.getstream.video.android.ui.AppNavHost
 import io.getstream.video.android.ui.AppScreens
+import io.getstream.video.android.util.InAppUpdateHelper
 import io.getstream.video.android.util.InstallReferrer
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.launch
@@ -34,9 +35,7 @@ import javax.inject.Inject
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
-
     @Inject lateinit var dataStore: StreamUserDataStore
-
     private val firebaseAnalytics by lazy { FirebaseAnalytics.getInstance(this) }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -66,6 +65,8 @@ class MainActivity : ComponentActivity() {
                     )
                 }
             }
+
+            InAppUpdateHelper(this@MainActivity).checkForAppUpdates()
         }
     }
 }

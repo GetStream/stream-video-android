@@ -47,6 +47,9 @@
     <string name="stream_video_tooling_restart_app">Restart App</string>
     <string name="stream_video_tooling_exception_log">Error Log</string>
     <string name="stream_video_tooling_copy_into_clipboard">Log messages copied to clipboard!</string>
+    <string name="in_app_update_successful">App has been updated</string>
+    <string name="in_app_update_canceled">Please consider installing the update.\nIt contains important features or bug fixes.</string>
+    <string name="in_app_update_failed">App update failed. Try again later</string>
     <plurals name="chat_typing">
         <item quantity="one">%s is typing</item>
         <item quantity="other">%s and %d more are typing</item>
