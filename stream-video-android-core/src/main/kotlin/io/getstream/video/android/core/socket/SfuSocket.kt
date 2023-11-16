@@ -44,6 +44,7 @@ import stream.video.sfu.event.SfuEvent
 import stream.video.sfu.event.SfuRequest
 import stream.video.sfu.models.ClientDetails
 import stream.video.sfu.models.Device
+import stream.video.sfu.models.ErrorCode
 import stream.video.sfu.models.OS
 import stream.video.sfu.models.PeerType
 import stream.video.sfu.models.Sdk
@@ -62,7 +63,7 @@ public class SfuSocket(
     private val scope: CoroutineScope = CoroutineScope(DispatcherProvider.IO),
     private val httpClient: OkHttpClient,
     private val networkStateProvider: NetworkStateProvider,
-    private val onFastReconnected: () -> Unit,
+    private val onFastReconnected: suspend () -> Unit,
 ) : PersistentSocket<JoinCallResponseEvent> (
     url = url,
     httpClient = httpClient,
@@ -216,6 +217,16 @@ public class SfuSocket(
                 handleError(error)
             }
         }
+    }
+
+    override fun isPermanentError(error: Throwable): Boolean {
+        if (error is SfuSocketError &&
+            error.error?.code == ErrorCode.ERROR_CODE_PARTICIPANT_MEDIA_TRANSPORT_FAILURE
+        ) {
+            logger.w { "Received negotiation failure - disconnecting: $error" }
+            return false
+        }
+        return super.isPermanentError(error)
     }
 
     private suspend fun handleIceTrickle(event: ICETrickleEvent) {

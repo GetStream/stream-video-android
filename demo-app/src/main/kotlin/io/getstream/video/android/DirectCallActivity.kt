@@ -112,7 +112,6 @@ class DirectCallActivity : ComponentActivity() {
                             }
                             is CancelCall -> {
                                 lifecycleScope.launch {
-                                    val test = call.reject()
                                     call.leave()
                                     finish()
                                 }

@@ -63,6 +63,8 @@ import io.getstream.video.android.core.utils.stringify
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -301,12 +303,11 @@ public class RtcSession internal constructor(
     private val _sfuSocketState = MutableStateFlow<SocketState>(SocketState.NotConnected)
     val sfuSocketState = _sfuSocketState.asStateFlow()
 
-    private val sfuFastReconnectListener: () -> Unit = {
+    private val sfuFastReconnectListener: suspend () -> Unit = {
         // SFU socket has done a fast-reconnect. We need to an ICE restart immediately and not wait
         // until the health check runs
-        coroutineScope.launch {
-            call.monitor.reconnect(forceRestart = true)
-        }
+        call.monitor.stopTimer()
+        call.monitor.reconnect(forceRestart = true)
     }
 
     init {
@@ -391,18 +392,25 @@ public class RtcSession internal constructor(
      */
     suspend fun reconnect(forceRestart: Boolean) {
         // ice restart
-        subscriber?.let {
-            if (!it.isHealthy()) {
-                logger.i { "ice restarting subscriber peer connection" }
-                requestSubscriberIceRestart()
+        val subscriberAsync = coroutineScope.async {
+            subscriber?.let {
+                if (!it.isHealthy()) {
+                    logger.i { "ice restarting subscriber peer connection" }
+                    requestSubscriberIceRestart()
+                }
             }
         }
-        publisher?.let {
-            if (!it.isHealthy() || forceRestart) {
-                logger.i { "ice restarting publisher peer connection (force restart = $forceRestart)" }
-                it.connection.restartIce()
+
+        val publisherAsync = coroutineScope.async {
+            publisher?.let {
+                if (!it.isHealthy() || forceRestart) {
+                    logger.i { "ice restarting publisher peer connection (force restart = $forceRestart)" }
+                    it.connection.restartIce()
+                }
             }
         }
+
+        awaitAll(subscriberAsync, publisherAsync)
     }
 
     suspend fun connect() {
@@ -440,6 +448,17 @@ public class RtcSession internal constructor(
         sfuSocketStateJob = coroutineScope.launch {
             sfuConnectionModule.sfuSocket.connectionState.collect { sfuSocketState ->
                 _sfuSocketState.value = sfuSocketState
+
+                // make sure we stop handling ICE candidates when a new SFU socket
+                // connection is being established. We need to wait until a SubscriberOffer
+                // is received again and then we start listening to the ICE candidate queue
+                if (sfuSocketState == SocketState.Connecting ||
+                    sfuSocketState is SocketState.DisconnectedTemporarily ||
+                    sfuSocketState is SocketState.DisconnectedByRequest
+                ) {
+                    syncSubscriberCandidates?.cancel()
+                    syncSubscriberCandidates?.cancel()
+                }
             }
         }
     }
@@ -1178,19 +1197,14 @@ public class RtcSession internal constructor(
         logger.d { "[handleSubscriberOffer] #sfu; #subscriber; event: $offerEvent" }
         val subscriber = subscriber ?: return
 
+        syncSubscriberCandidates?.cancel()
+
         // step 1 - receive the offer and set it to the remote
         val offerDescription = SessionDescription(
             SessionDescription.Type.OFFER,
             offerEvent.sdp,
         )
         subscriber.setRemoteDescription(offerDescription)
-
-        syncSubscriberCandidates?.cancel()
-        syncSubscriberCandidates = coroutineScope.launch {
-            sfuConnectionModule.sfuSocket.pendingSubscriberIceCandidates.collect { iceCandidates ->
-                subscriber.addIceCandidate(iceCandidates)
-            }
-        }
 
         // step 2 - create the answer
         val answerResult = subscriber.createAnswer()
@@ -1232,6 +1246,14 @@ public class RtcSession internal constructor(
                 val sendAnswerResult = sendAnswer(sendAnswerRequest)
                 logger.v { "[handleSubscriberOffer] #sfu; #subscriber; sendAnswerResult: $sendAnswerResult" }
                 emit(sendAnswerResult.getOrThrow())
+
+                // setRemoteDescription has been called and everything is ready - we can
+                // now start handling the ICE subscriber candidates queue
+                syncSubscriberCandidates = coroutineScope.launch {
+                    sfuConnectionModule.sfuSocket.pendingSubscriberIceCandidates.collect { iceCandidates ->
+                        subscriber.addIceCandidate(iceCandidates)
+                    }
+                }
             }.flowOn(DispatcherProvider.IO).retryWhen { cause, attempt ->
                 val sameValue = answerSdp == subscriberSdpAnswer.value
                 val sameSfu = currentSfu == sfuUrl

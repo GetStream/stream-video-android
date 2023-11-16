@@ -59,6 +59,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.SavedStateHandle
+import com.google.android.gms.auth.api.signin.GoogleSignIn
+import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import io.getstream.video.android.BuildConfig
 import io.getstream.video.android.R
 import io.getstream.video.android.compose.theme.VideoTheme
@@ -322,6 +324,10 @@ private fun CallLobbyScreenPreview() {
                     mapOf("cid" to "default:123"),
                 ),
                 dataStore = StreamUserDataStore.instance(),
+                googleSignInClient = GoogleSignIn.getClient(
+                    LocalContext.current,
+                    GoogleSignInOptions.Builder().build(),
+                ),
             ),
         ) {}
     }

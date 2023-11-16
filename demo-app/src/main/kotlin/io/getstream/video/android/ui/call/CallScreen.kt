@@ -65,6 +65,7 @@ import io.getstream.video.android.core.RealtimeConnection
 import io.getstream.video.android.core.call.state.ChooseLayout
 import io.getstream.video.android.mock.StreamPreviewDataUtils
 import io.getstream.video.android.mock.previewCall
+import io.getstream.video.android.tooling.util.StreamFlavors
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
@@ -120,7 +121,8 @@ fun CallScreen(
                         call = call,
                         layout = layout,
                         enableInPictureInPicture = true,
-                        enableDiagnostics = BuildConfig.DEBUG,
+                        enableDiagnostics = BuildConfig.DEBUG ||
+                            BuildConfig.FLAVOR == StreamFlavors.development,
                         onCallAction = {
                             when (it) {
                                 ChooseLayout -> isShowingLayoutChooseMenu = true
