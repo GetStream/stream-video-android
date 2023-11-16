@@ -63,6 +63,8 @@ import io.getstream.video.android.core.utils.stringify
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -301,12 +303,11 @@ public class RtcSession internal constructor(
     private val _sfuSocketState = MutableStateFlow<SocketState>(SocketState.NotConnected)
     val sfuSocketState = _sfuSocketState.asStateFlow()
 
-    private val sfuFastReconnectListener: () -> Unit = {
+    private val sfuFastReconnectListener: suspend () -> Unit = {
         // SFU socket has done a fast-reconnect. We need to an ICE restart immediately and not wait
         // until the health check runs
-        coroutineScope.launch {
-            call.monitor.reconnect(forceRestart = true)
-        }
+        call.monitor.stopTimer()
+        call.monitor.reconnect(forceRestart = true)
     }
 
     init {
@@ -391,18 +392,25 @@ public class RtcSession internal constructor(
      */
     suspend fun reconnect(forceRestart: Boolean) {
         // ice restart
-        subscriber?.let {
-            if (!it.isHealthy()) {
-                logger.i { "ice restarting subscriber peer connection" }
-                requestSubscriberIceRestart()
+        val subscriberAsync = coroutineScope.async {
+            subscriber?.let {
+                if (!it.isHealthy()) {
+                    logger.i { "ice restarting subscriber peer connection" }
+                    requestSubscriberIceRestart()
+                }
             }
         }
-        publisher?.let {
-            if (!it.isHealthy() || forceRestart) {
-                logger.i { "ice restarting publisher peer connection (force restart = $forceRestart)" }
-                it.connection.restartIce()
+
+        val publisherAsync = coroutineScope.async {
+            publisher?.let {
+                if (!it.isHealthy() || forceRestart) {
+                    logger.i { "ice restarting publisher peer connection (force restart = $forceRestart)" }
+                    it.connection.restartIce()
+                }
             }
         }
+
+        awaitAll(subscriberAsync, publisherAsync)
     }
 
     suspend fun connect() {
@@ -441,10 +449,14 @@ public class RtcSession internal constructor(
             sfuConnectionModule.sfuSocket.connectionState.collect { sfuSocketState ->
                 _sfuSocketState.value = sfuSocketState
 
-                // make sure we stop handling subscriber ICE candidates when a new SFU socket
+                // make sure we stop handling ICE candidates when a new SFU socket
                 // connection is being established. We need to wait until a SubscriberOffer
                 // is received again and then we start listening to the ICE candidate queue
-                if (sfuSocketState == SocketState.Connecting) {
+                if (sfuSocketState == SocketState.Connecting ||
+                    sfuSocketState is SocketState.DisconnectedTemporarily ||
+                    sfuSocketState is SocketState.DisconnectedByRequest
+                ) {
+                    syncSubscriberCandidates?.cancel()
                     syncSubscriberCandidates?.cancel()
                 }
             }
