@@ -18,7 +18,7 @@ package io.getstream.video.android.ui.join
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.google.firebase.auth.FirebaseAuth
+import com.google.android.gms.auth.api.signin.GoogleSignInClient
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.getstream.chat.android.client.ChatClient
 import io.getstream.video.android.core.Call
@@ -43,6 +43,7 @@ import javax.inject.Inject
 @HiltViewModel
 class CallJoinViewModel @Inject constructor(
     private val dataStore: StreamUserDataStore,
+    private val googleSignInClient: GoogleSignInClient,
 ) : ViewModel() {
     val user: Flow<User?> = dataStore.user
     val isLoggedOut = dataStore.user.map { it == null }
@@ -97,7 +98,7 @@ class CallJoinViewModel @Inject constructor(
 
     fun logOut() {
         viewModelScope.launch {
-            FirebaseAuth.getInstance().signOut()
+            googleSignInClient.signOut()
             dataStore.clear()
             StreamVideo.instance().logOut()
             ChatClient.instance().disconnect(true).enqueue()
