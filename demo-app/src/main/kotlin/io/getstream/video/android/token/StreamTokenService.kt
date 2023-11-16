@@ -36,10 +36,13 @@ interface StreamTokenService {
 object StreamVideoNetwork {
 
     private val contentType = "application/json".toMediaType()
+    private val json = Json {
+        ignoreUnknownKeys = true
+    }
     private val retrofit =
         Retrofit.Builder()
             .baseUrl("https://stream-calls-dogfood.vercel.app/")
-            .addConverterFactory(Json.asConverterFactory(contentType))
+            .addConverterFactory(json.asConverterFactory(contentType))
             .build()
 
     val tokenService = retrofit.create<StreamTokenService>()
