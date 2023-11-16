@@ -63,7 +63,7 @@ public open class PersistentSocket<T>(
     private val networkStateProvider: NetworkStateProvider,
     /** Set the scope everything should run in */
     private val scope: CoroutineScope = CoroutineScope(DispatcherProvider.IO),
-    private val onFastReconnected: () -> Unit,
+    private val onFastReconnected: suspend () -> Unit,
 ) : WebSocketListener() {
     internal open val logger by taggedLogger("PersistentSocket")
 
@@ -284,7 +284,7 @@ public open class PersistentSocket<T>(
         }
     }
 
-    internal fun isPermanentError(error: Throwable): Boolean {
+    internal open fun isPermanentError(error: Throwable): Boolean {
         // errors returned by the server can be permanent. IE an invalid API call
         // or an expired token (required a refresh)
         // or temporary

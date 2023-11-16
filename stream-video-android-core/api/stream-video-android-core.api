@@ -87,6 +87,7 @@ public final class io/getstream/video/android/core/CallHealthMonitor {
 	public final fun reconnect (ZLkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public final fun start ()V
 	public final fun stop ()V
+	public final fun stopTimer ()V
 }
 
 public final class io/getstream/video/android/core/CallKt {
@@ -4145,8 +4146,8 @@ public final class io/getstream/video/android/core/socket/ErrorResponse$Companio
 
 public class io/getstream/video/android/core/socket/PersistentSocket : okhttp3/WebSocketListener {
 	public field connected Lkotlinx/coroutines/CancellableContinuation;
-	public fun <init> (Ljava/lang/String;Lokhttp3/OkHttpClient;Lio/getstream/video/android/core/internal/network/NetworkStateProvider;Lkotlinx/coroutines/CoroutineScope;Lkotlin/jvm/functions/Function0;)V
-	public synthetic fun <init> (Ljava/lang/String;Lokhttp3/OkHttpClient;Lio/getstream/video/android/core/internal/network/NetworkStateProvider;Lkotlinx/coroutines/CoroutineScope;Lkotlin/jvm/functions/Function0;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun <init> (Ljava/lang/String;Lokhttp3/OkHttpClient;Lio/getstream/video/android/core/internal/network/NetworkStateProvider;Lkotlinx/coroutines/CoroutineScope;Lkotlin/jvm/functions/Function1;)V
+	public synthetic fun <init> (Ljava/lang/String;Lokhttp3/OkHttpClient;Lio/getstream/video/android/core/internal/network/NetworkStateProvider;Lkotlinx/coroutines/CoroutineScope;Lkotlin/jvm/functions/Function1;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	protected final fun ackHealthMonitor ()V
 	public fun authenticate ()V
 	public final fun cleanup ()V
@@ -4196,8 +4197,8 @@ public final class io/getstream/video/android/core/socket/PersistentSocket$Disco
 }
 
 public final class io/getstream/video/android/core/socket/SfuSocket : io/getstream/video/android/core/socket/PersistentSocket {
-	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Lkotlin/jvm/functions/Function1;Lkotlinx/coroutines/CoroutineScope;Lokhttp3/OkHttpClient;Lio/getstream/video/android/core/internal/network/NetworkStateProvider;Lkotlin/jvm/functions/Function0;)V
-	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Lkotlin/jvm/functions/Function1;Lkotlinx/coroutines/CoroutineScope;Lokhttp3/OkHttpClient;Lio/getstream/video/android/core/internal/network/NetworkStateProvider;Lkotlin/jvm/functions/Function0;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Lkotlin/jvm/functions/Function1;Lkotlinx/coroutines/CoroutineScope;Lokhttp3/OkHttpClient;Lio/getstream/video/android/core/internal/network/NetworkStateProvider;Lkotlin/jvm/functions/Function1;)V
+	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Lkotlin/jvm/functions/Function1;Lkotlinx/coroutines/CoroutineScope;Lokhttp3/OkHttpClient;Lio/getstream/video/android/core/internal/network/NetworkStateProvider;Lkotlin/jvm/functions/Function1;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public fun authenticate ()V
 	public fun connect (Lkotlin/jvm/functions/Function1;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public final fun connectMigrating (Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
