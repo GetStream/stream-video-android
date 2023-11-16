@@ -21,6 +21,7 @@ import android.util.Log
 import com.google.android.gms.auth.GoogleAuthUtil
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount
+import com.google.android.gms.auth.api.signin.GoogleSignInClient
 import com.squareup.moshi.JsonAdapter
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.adapter
@@ -29,7 +30,6 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import io.getstream.video.android.data.dto.GetGoogleAccountsResponseDto
 import io.getstream.video.android.data.dto.asDomainModel
 import io.getstream.video.android.models.GoogleAccount
-import io.getstream.video.android.util.GoogleSignInHelper
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.tasks.await
 import kotlinx.coroutines.withContext
@@ -40,6 +40,7 @@ import javax.inject.Inject
 
 class GoogleAccountRepository @Inject constructor(
     @ApplicationContext private val context: Context,
+    private val googleSignInClient: GoogleSignInClient,
 ) {
     private val baseUrl = "https://people.googleapis.com/v1/people:listDirectoryPeople"
 
@@ -76,8 +77,7 @@ class GoogleAccountRepository @Inject constructor(
     }
 
     private suspend fun signInSilently(): Boolean {
-        val gsc = GoogleSignInHelper.getGoogleSignInClient(context)
-        val task = gsc.silentSignIn()
+        val task = googleSignInClient.silentSignIn()
 
         return if (task.isSuccessful) {
             Log.d("Google Silent Sign In", "Successful")

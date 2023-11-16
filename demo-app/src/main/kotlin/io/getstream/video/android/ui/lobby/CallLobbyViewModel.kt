@@ -20,7 +20,7 @@ import android.util.Log
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.google.firebase.auth.FirebaseAuth
+import com.google.android.gms.auth.api.signin.GoogleSignInClient
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.getstream.chat.android.client.ChatClient
 import io.getstream.video.android.core.Call
@@ -49,6 +49,7 @@ import javax.inject.Inject
 class CallLobbyViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
     private val dataStore: StreamUserDataStore,
+    private val googleSignInClient: GoogleSignInClient,
 ) : ViewModel() {
 
     private val cid: String = checkNotNull(savedStateHandle["cid"])
@@ -167,7 +168,7 @@ class CallLobbyViewModel @Inject constructor(
 
     fun signOut() {
         viewModelScope.launch {
-            FirebaseAuth.getInstance().signOut()
+            googleSignInClient.signOut()
             dataStore.clear()
             StreamVideo.instance().logOut()
             ChatClient.instance().disconnect(true).enqueue()
