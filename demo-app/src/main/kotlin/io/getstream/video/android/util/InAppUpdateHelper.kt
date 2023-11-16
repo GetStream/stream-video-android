@@ -33,7 +33,8 @@ import kotlinx.coroutines.flow.collectLatest
 
 class InAppUpdateHelper(private val activity: ComponentActivity) {
     private lateinit var appUpdateResultFlow: Flow<AppUpdateResult>
-    private lateinit var appUpdateActivityResultLauncher: ActivityResultLauncher<IntentSenderRequest>
+    private lateinit var appUpdateActivityResultLauncher:
+        ActivityResultLauncher<IntentSenderRequest>
 
     init {
         try {
