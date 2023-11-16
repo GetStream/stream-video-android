@@ -19,7 +19,6 @@ package io.getstream.video.android
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.lifecycle.lifecycleScope
 import com.google.firebase.analytics.FirebaseAnalytics
 import dagger.hilt.android.AndroidEntryPoint
@@ -37,7 +36,6 @@ import javax.inject.Inject
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
     @Inject lateinit var dataStore: StreamUserDataStore
-    private lateinit var inAppUpdateHelper: InAppUpdateHelper
     private val firebaseAnalytics by lazy { FirebaseAnalytics.getInstance(this) }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -68,20 +66,7 @@ class MainActivity : ComponentActivity() {
                 }
             }
 
-            checkForAppUpdates()
+            InAppUpdateHelper(this@MainActivity).checkForAppUpdates()
         }
     }
-
-    // region In-App Updates
-    private suspend fun checkForAppUpdates() {
-        inAppUpdateHelper = InAppUpdateHelper(this)
-        inAppUpdateHelper.checkForAppUpdates(appUpdateActivityResultLauncher)
-    }
-
-    private val appUpdateActivityResultLauncher = registerForActivityResult(
-        ActivityResultContracts.StartIntentSenderForResult(),
-    ) { activityResult ->
-        inAppUpdateHelper.handleAppUpdateActivityResult(activityResult.resultCode)
-    }
-    // endregion
 }
