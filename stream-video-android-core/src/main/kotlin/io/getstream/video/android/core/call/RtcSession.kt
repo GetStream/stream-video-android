@@ -93,6 +93,7 @@ import org.webrtc.MediaStreamTrack
 import org.webrtc.PeerConnection
 import org.webrtc.PeerConnection.PeerConnectionState
 import org.webrtc.RTCStatsReport
+import org.webrtc.RtpParameters.Encoding
 import org.webrtc.RtpTransceiver
 import org.webrtc.SessionDescription
 import retrofit2.HttpException
@@ -879,59 +880,43 @@ public class RtcSession internal constructor(
      * Change the quality of video we upload when the ChangePublishQualityEvent event is received
      * This is used for dynsacle
      */
-    internal fun updatePublishQuality(event: ChangePublishQualityEvent) {
-        if (publisher == null) {
-            return
-        }
-        val enabledRids =
-            event.changePublishQuality.video_senders.firstOrNull()?.layers?.associate { it.name to it.active }
-        val transceiver = publisher?.videoTransceiver ?: return
-        // enable or disable tracks
+    internal fun updatePublishQuality(event: ChangePublishQualityEvent) = synchronized(this) {
+        val sender = publisher?.connection?.transceivers?.firstOrNull {
+            it.mediaType == MediaStreamTrack.MediaType.MEDIA_TYPE_VIDEO
+        }?.sender
 
-        if (transceiver.sender.dtmf() == null) return
-
-        val encodings = transceiver.sender.parameters.encodings.toList()
-        for (encoding in encodings) {
-            encoding.active = enabledRids?.get(encoding.rid ?: "") ?: false
+        if (sender == null) {
+            dynascaleLogger.w {
+                "Request to change publishing quality not fulfilled due to missing transceivers or sender."
+            }
+            return@synchronized
         }
 
-        dynascaleLogger.i { "video quality: marking layers active $enabledRids " }
-
-        transceiver.sender.parameters.encodings.clear()
-        transceiver.sender.parameters.encodings.addAll(encodings)
-
-        // publisher?.videoTransceiver?.sender?.parameters = transceiver.sender.parameters
-
-        return
-
-        logger.v { "[updatePublishQuality] #sfu; updateQuality: $enabledRids" }
-        val params = transceiver.sender.parameters
-
-        var encodingChanged = false
-        logger.v { "[updatePublishQuality] #sfu; currentQuality: $params" }
-
-//        for (encoding in params.encodings) {
-//            if (encoding.rid != null) {
-//                val shouldEnable = encoding.rid in enabledRids
-//
-//                if (shouldEnable && encoding.active) {
-//                    updatedEncodings.add(encoding)
-//                } else if (!shouldEnable && !encoding.active) {
-//                    updatedEncodings.add(encoding)
-//                } else {
-//                    encodingChanged = true
-//                    encoding.active = shouldEnable
-//                    updatedEncodings.add(encoding)
-//                }
-//            }
-//        }
-//        if (encodingChanged && false) {
-// //            logger.v { "[updatePublishQuality] #sfu; updatedEncodings: $updatedEncodings" }
-//            params.encodings.clear()
-//            params.encodings.addAll(updatedEncodings)
-//
-//            publisher?.videoTransceiver?.sender?.parameters = params
-//        }
+        val enabledRids = event.changePublishQuality.video_senders.firstOrNull()?.layers?.associate {
+            it.name to it.active
+        }
+        dynascaleLogger.i { "enabled rids: $enabledRids}" }
+        val params = sender.parameters
+        val updatedEncodings: MutableList<Encoding> = mutableListOf()
+        var changed = false
+        for (encoding in params.encodings) {
+            val shouldEnable = enabledRids?.get(encoding.rid) ?: false
+            if (shouldEnable && encoding.active) {
+                updatedEncodings.add(encoding)
+            } else if (!shouldEnable && !encoding.active) {
+                updatedEncodings.add(encoding)
+            } else {
+                changed = true
+                encoding.active = shouldEnable
+                updatedEncodings.add(encoding)
+            }
+        }
+        if (changed) {
+            dynascaleLogger.i { "Updated publish quality with encodings $updatedEncodings" }
+            params.encodings.clear()
+            params.encodings.addAll(updatedEncodings)
+            sender.parameters = params
+        }
     }
 
     private val defaultVideoDimension = VideoDimension(1080, 2340)
