@@ -26,16 +26,17 @@ import io.getstream.chat.android.offline.plugin.factory.StreamOfflinePluginFacto
 import io.getstream.chat.android.state.plugin.config.StatePluginConfig
 import io.getstream.chat.android.state.plugin.factory.StreamStatePluginFactory
 import io.getstream.log.Priority
-import io.getstream.video.android.API_KEY
 import io.getstream.video.android.BuildConfig
+import io.getstream.video.android.STREAM_SDK_ENVIRONMENT
 import io.getstream.video.android.core.StreamVideo
 import io.getstream.video.android.core.StreamVideoBuilder
 import io.getstream.video.android.core.logging.LoggingLevel
 import io.getstream.video.android.core.notifications.NotificationConfig
+import io.getstream.video.android.data.services.stream.GetAuthDataResponse
+import io.getstream.video.android.data.services.stream.StreamService
 import io.getstream.video.android.datastore.delegate.StreamUserDataStore
 import io.getstream.video.android.model.ApiKey
 import io.getstream.video.android.model.User
-import io.getstream.video.android.token.StreamVideoNetwork
 import kotlinx.coroutines.flow.firstOrNull
 
 @SuppressLint("StaticFieldLeak")
@@ -67,92 +68,61 @@ object StreamVideoInitHelper {
         isInitialising = true
 
         // Load the signed-in user (can be null)
-        val storedUser = dataStore.data.firstOrNull()
-
-        var loggedInUser = storedUser?.user
-        var userToken = storedUser?.userToken
+        var loggedInUser = dataStore.data.firstOrNull()?.user
+        var authData: GetAuthDataResponse? = null
 
         // Create and login a random new user if user is null and we allow a random user login
         if (loggedInUser == null && useRandomUserAsFallback) {
             val userId = UserHelper.generateRandomString()
 
-            val result = StreamVideoNetwork.tokenService.fetchToken(
+            authData = StreamService.instance.getAuthData(
+                environment = STREAM_SDK_ENVIRONMENT,
                 userId = userId,
-                apiKey = BuildConfig.API_KEY,
             )
-            val user = User(id = result.userId, role = "admin")
+
+            loggedInUser = User(id = authData.userId, role = "admin")
 
             // Store the data (note that this datastore belongs to the client - it's not
             // used by the SDK directly in any way)
-            dataStore.updateUser(user)
-            dataStore.updateUserToken(result.token)
-
-            loggedInUser = user
-            userToken = result.token
+            dataStore.updateUser(loggedInUser)
         }
 
+        // If we have a logged in user (from the data store or randomly created above)
+        // then we can initialise the SDK
         if (loggedInUser != null) {
-            // there is a user - so we expect a token too
-            val token = checkNotNull(userToken)
+            if (authData == null) {
+                authData = StreamService.instance.getAuthData(
+                    environment = STREAM_SDK_ENVIRONMENT,
+                    userId = loggedInUser.id,
+                )
+            }
 
             initializeStreamChat(
                 context = context,
+                apiKey = authData.apiKey,
                 user = loggedInUser,
-                token = token,
+                token = authData.token,
             )
 
             initializeStreamVideo(
                 context = context,
+                apiKey = authData.apiKey,
                 user = loggedInUser,
-                token = token,
-                apiKey = API_KEY,
+                token = authData.token,
                 loggingLevel = LoggingLevel(priority = Priority.VERBOSE),
-                dataStore = dataStore,
             )
         }
         isInitialising = false
     }
 
-    /** Sets up and returns the [StreamVideo] required to connect to the API. */
-    private fun initializeStreamVideo(
-        context: Context,
-        user: User,
-        token: String,
-        apiKey: ApiKey,
-        loggingLevel: LoggingLevel,
-        dataStore: StreamUserDataStore,
-    ): StreamVideo {
-        return StreamVideoBuilder(
-            context = context,
-            user = user,
-            token = token,
-            apiKey = apiKey,
-            loggingLevel = loggingLevel,
-            ensureSingleInstance = false,
-            notificationConfig = NotificationConfig(
-                pushDeviceGenerators = listOf(
-                    FirebasePushDeviceGenerator(providerName = "firebase"),
-                ),
-            ),
-            tokenProvider = {
-                val email = user.custom["email"]
-                val response = StreamVideoNetwork.tokenService.fetchToken(
-                    userId = email,
-                    apiKey = API_KEY,
-                )
-                dataStore.updateUserToken(response.token)
-                response.token
-            },
-        ).build()
-    }
-
     private fun initializeStreamChat(
         context: Context,
+        apiKey: String,
         user: User,
         token: String,
     ) {
-        val offlinePlugin = StreamOfflinePluginFactory(context) // 1
-        val statePluginFactory = StreamStatePluginFactory( // 2
+        val offlinePlugin = StreamOfflinePluginFactory(context)
+        val statePluginFactory = StreamStatePluginFactory(
             config = StatePluginConfig(
                 backgroundSyncEnabled = true,
                 userPresence = true,
@@ -161,7 +131,7 @@ object StreamVideoInitHelper {
         )
 
         val logLevel = if (BuildConfig.DEBUG) ChatLogLevel.ALL else ChatLogLevel.NOTHING
-        val chatClient = ChatClient.Builder(API_KEY, context)
+        val chatClient = ChatClient.Builder(apiKey, context)
             .withPlugins(offlinePlugin, statePluginFactory)
             .logLevel(logLevel)
             .build()
@@ -176,5 +146,36 @@ object StreamVideoInitHelper {
             user = chatUser,
             token = token,
         ).enqueue()
+    }
+
+    /** Sets up and returns the [StreamVideo] required to connect to the API. */
+    private fun initializeStreamVideo(
+        context: Context,
+        apiKey: ApiKey,
+        user: User,
+        token: String,
+        loggingLevel: LoggingLevel,
+    ): StreamVideo {
+        return StreamVideoBuilder(
+            context = context,
+            apiKey = apiKey,
+            user = user,
+            token = token,
+            loggingLevel = loggingLevel,
+            ensureSingleInstance = false,
+            notificationConfig = NotificationConfig(
+                pushDeviceGenerators = listOf(
+                    FirebasePushDeviceGenerator(providerName = "firebase"),
+                ),
+            ),
+            tokenProvider = {
+                val email = user.custom["email"]
+                val authData = StreamService.instance.getAuthData(
+                    environment = STREAM_SDK_ENVIRONMENT,
+                    userId = email,
+                )
+                authData.token
+            },
+        ).build()
     }
 }

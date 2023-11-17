@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-package io.getstream.video.android.data.dto
+package io.getstream.video.android.data.services.google
 
 import io.getstream.video.android.models.GoogleAccount
 import io.getstream.video.android.util.UserHelper
 
-data class GetGoogleAccountsResponseDto(
+data class ListDirectoryPeopleResponse(
     val people: List<GoogleAccountDto>,
 )
 

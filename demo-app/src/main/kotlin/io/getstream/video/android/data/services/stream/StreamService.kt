@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package io.getstream.video.android.token
+package io.getstream.video.android.data.services.stream
 
 import com.jakewharton.retrofit2.converter.kotlinx.serialization.asConverterFactory
 import kotlinx.serialization.json.Json
@@ -24,26 +24,23 @@ import retrofit2.create
 import retrofit2.http.GET
 import retrofit2.http.Query
 
-interface StreamTokenService {
-
+interface StreamService {
     @GET("api/auth/create-token")
-    suspend fun fetchToken(
+    suspend fun getAuthData(
+        @Query("environment") environment: String,
         @Query("user_id") userId: String?,
-        @Query("api_key") apiKey: String,
-    ): TokenResponse
-}
+    ): GetAuthDataResponse
 
-object StreamVideoNetwork {
+    companion object {
+        private const val BASE_URL = "https://pronto.getstream.io/"
 
-    private val contentType = "application/json".toMediaType()
-    private val json = Json {
-        ignoreUnknownKeys = true
-    }
-    private val retrofit =
-        Retrofit.Builder()
-            .baseUrl("https://stream-calls-dogfood.vercel.app/")
-            .addConverterFactory(json.asConverterFactory(contentType))
+        private val json = Json { ignoreUnknownKeys = true }
+
+        private val retrofit = Retrofit.Builder()
+            .baseUrl(BASE_URL)
+            .addConverterFactory(json.asConverterFactory("application/json".toMediaType()))
             .build()
 
-    val tokenService = retrofit.create<StreamTokenService>()
+        val instance = retrofit.create<StreamService>()
+    }
 }
