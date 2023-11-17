@@ -887,7 +887,7 @@ public class RtcSession internal constructor(
 
         if (sender == null) {
             dynascaleLogger.w {
-                "Request to change publishing quality not fulfilled due to incomplete publisher."
+                "Request to change publishing quality not fulfilled due to missing transceivers or sender."
             }
             return@synchronized
         }
