@@ -893,7 +893,7 @@ public class RtcSession internal constructor(
         val updatedEncodings: MutableList<Encoding> = mutableListOf()
         var changed = false
         for (encoding in params.encodings) {
-            val shouldEnable = enabledRids?.contains(encoding.rid) ?: false
+            val shouldEnable = enabledRids?.get(encoding.rid) ?: false
             if (shouldEnable && encoding.active) {
                 updatedEncodings.add(encoding)
             } else if (!shouldEnable && !encoding.active) {
