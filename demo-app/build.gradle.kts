@@ -201,13 +201,9 @@ androidComponents {
 }
 
 dependencies {
-    implementation(platform(libs.firebase.bom))
-    implementation("com.google.firebase:firebase-auth")
-    implementation("com.firebaseui:firebase-ui-auth:7.2.0")
+    // Stream Video SDK
     implementation(project(":stream-video-android-ui-compose"))
     implementation(project(":stream-video-android-ui-xml"))
-
-    // Stream Video SDK
     compileOnly(project(":stream-video-android-previewdata"))
 
     // Stream Chat SDK
@@ -250,27 +246,24 @@ dependencies {
     implementation(libs.androidx.camera.lifecycle)
     implementation(libs.androidx.camera.camera2)
 
-    // hilt
+    // Hilt
     implementation(libs.hilt.android)
     ksp(libs.hilt.compiler)
 
-    // firebase
+    // Firebase
+    implementation(platform(libs.firebase.bom))
     implementation(libs.firebase.crashlytics)
     implementation(libs.firebase.analytics)
 
-    // moshi
+    // Moshi
     implementation(libs.moshi.kotlin)
 
-    // Play Install Referrer library - used to extract the meeting link from demo flow after install
-    implementation(libs.play.install.referrer)
-
-    // Only used for launching a QR code scanner in demo app
-    implementation(libs.play.code.scanner)
-
-    // Play in-app updates
+    // Play
+    implementation(libs.play.install.referrer) // Used to extract the meeting link from demo flow after install
+    implementation(libs.play.auth)
     implementation(libs.play.app.update.ktx)
 
-    // memory detection
+    // Memory detection
     debugImplementation(libs.leakCanary)
 
     baselineProfile(project(":benchmark"))
