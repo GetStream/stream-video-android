@@ -35,10 +35,14 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.Icon
 import androidx.compose.material.Text
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.PushPin
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -48,6 +52,7 @@ import androidx.compose.ui.Alignment.Companion.BottomEnd
 import androidx.compose.ui.Alignment.Companion.BottomStart
 import androidx.compose.ui.Alignment.Companion.Center
 import androidx.compose.ui.Alignment.Companion.CenterVertically
+import androidx.compose.ui.Alignment.Companion.TopStart
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
@@ -68,7 +73,11 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.avatar.LocalAvatarPreviewProvider
 import io.getstream.video.android.compose.ui.components.avatar.UserAvatarBackground
+import io.getstream.video.android.compose.ui.components.call.pinning.ParticipantAction
+import io.getstream.video.android.compose.ui.components.call.pinning.ParticipantActions
+import io.getstream.video.android.compose.ui.components.call.pinning.pinUnpinActions
 import io.getstream.video.android.compose.ui.components.connection.NetworkQualityIndicator
+import io.getstream.video.android.compose.ui.components.indicator.GenericIndicator
 import io.getstream.video.android.compose.ui.components.indicator.SoundIndicator
 import io.getstream.video.android.compose.ui.components.video.VideoRenderer
 import io.getstream.video.android.core.Call
@@ -95,6 +104,7 @@ import kotlinx.coroutines.delay
  * @param connectionIndicatorContent Content is shown that indicates the connection quality.
  * @param videoFallbackContent Content is shown the video track is failed to load or not available.
  * @param reactionContent Content is shown for the reaction.
+ * @param actionsContent Content to show action picker with call actions related to the selected participant.
  */
 @Composable
 public fun ParticipantVideo(
@@ -122,6 +132,20 @@ public fun ParticipantVideo(
         DefaultReaction(
             participant = participant,
             style = style,
+        )
+    },
+    actionsContent: @Composable BoxScope.(
+        actions: List<ParticipantAction>,
+        call: Call,
+        participant: ParticipantState,
+    ) -> Unit = { actions, call, participant ->
+        ParticipantActions(
+            Modifier
+                .align(TopStart)
+                .padding(8.dp),
+            actions,
+            call,
+            participant,
         )
     },
 ) {
@@ -174,6 +198,8 @@ public fun ParticipantVideo(
             participant = participant,
             videoFallbackContent = videoFallbackContent,
         )
+
+        actionsContent.invoke(this, pinUnpinActions, call, participant)
 
         if (style.isShowingParticipantLabel) {
             labelContent.invoke(this, participant)
@@ -258,7 +284,9 @@ public fun BoxScope.ParticipantLabel(
 ) {
     val audioEnabled by participant.audioEnabled.collectAsStateWithLifecycle()
     val speaking by participant.speaking.collectAsStateWithLifecycle()
-
+    val pinned by remember {
+        derivedStateOf { call.state.pinnedParticipants.value.contains(participant.sessionId) }
+    }
     val userNameOrId by participant.userNameOrId.collectAsStateWithLifecycle()
     val nameLabel = if (participant.isLocal) {
         stringResource(id = R.string.stream_video_myself)
@@ -268,6 +296,7 @@ public fun BoxScope.ParticipantLabel(
 
     ParticipantLabel(
         nameLabel = nameLabel,
+        isPinned = pinned,
         labelPosition = labelPosition,
         hasAudio = audioEnabled,
         // we always draw the audio indicator for the local participant for lower delay
@@ -281,6 +310,7 @@ public fun BoxScope.ParticipantLabel(
 @Composable
 public fun BoxScope.ParticipantLabel(
     nameLabel: String,
+    isPinned: Boolean = false,
     labelPosition: Alignment = BottomStart,
     hasAudio: Boolean = false,
     isSpeaking: Boolean = false,
@@ -308,7 +338,8 @@ public fun BoxScope.ParticipantLabel(
             .background(
                 VideoTheme.colors.participantLabelBackground,
                 shape = VideoTheme.shapes.participantLabelShape,
-            ).onGloballyPositioned {
+            )
+            .onGloballyPositioned {
                 componentWidth = with(density) {
                     it.size.width.toDp()
                 }
@@ -330,6 +361,21 @@ public fun BoxScope.ParticipantLabel(
                 overflow = TextOverflow.Ellipsis,
             )
 
+            if (isPinned) {
+                GenericIndicator(
+                    modifier = Modifier.padding(
+                        start = VideoTheme.dimens.participantSoundIndicatorPadding,
+                        top = VideoTheme.dimens.participantSoundIndicatorPadding,
+                        bottom = VideoTheme.dimens.participantSoundIndicatorPadding,
+                    ),
+                ) {
+                    Icon(
+                        imageVector = Icons.Filled.PushPin,
+                        contentDescription = "Pin",
+                        tint = Color.White,
+                    )
+                }
+            }
             soundIndicatorContent.invoke(this)
         }
     }
