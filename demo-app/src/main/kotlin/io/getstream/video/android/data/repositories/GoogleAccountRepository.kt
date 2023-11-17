@@ -98,7 +98,7 @@ class GoogleAccountRepository @Inject constructor(
         try {
             GoogleAuthUtil.getToken(
                 context,
-                account.account,
+                account.account!!,
                 "oauth2:profile email",
             )
         } catch (e: Exception) {

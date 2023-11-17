@@ -68,7 +68,7 @@ firebaseBom = "32.1.0"
 firebaseCrashlytics = "2.9.5"
 
 installReferrer = "2.2"
-playCodeScanner = "16.1.0"
+playAuth = "20.7.0"
 playAppUpdate = "2.1.0"
 
 hilt = "2.48.1"
@@ -78,7 +78,6 @@ binaryCompatabilityValidator = "0.13.2"
 playPublisher = "3.8.4"
 
 [libraries]
-
 androidx-camera-camera2 = { module = "androidx.camera:camera-camera2", version.ref = "cameraCamera2" }
 androidx-material = { group = "com.google.android.material", name = "material", version.ref = "androidxMaterial" }
 androidx-appcompat = { group = "androidx.appcompat", name = "appcompat", version.ref = "androidxAppCompat" }
@@ -187,7 +186,7 @@ firebase-crashlytics = { group = "com.google.firebase", name = "firebase-crashly
 firebase-analytics = { group = "com.google.firebase", name = "firebase-analytics-ktx" }
 
 play-install-referrer = { group = "com.android.installreferrer", name = "installreferrer", version.ref = "installReferrer" }
-play-code-scanner = { group = "com.google.android.gms", name = "play-services-code-scanner", version.ref = "playCodeScanner" }
+play-auth = { group = "com.google.android.gms", name = "play-services-auth", version.ref = "playAuth" }
 play-app-update-ktx = { group = "com.google.android.play", name = "app-update-ktx", version.ref = "playAppUpdate" }
 
 robolectric = { group = "org.robolectric", name = "robolectric", version.ref = "robolectric" }
