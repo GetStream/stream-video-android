@@ -191,7 +191,7 @@ private fun CallJoinHeader(
     ) {
         user?.let {
             Box(
-                modifier = if (BuildConfig.FLAVOR == "production") {
+                modifier = if (BuildConfig.FLAVOR == StreamFlavors.production) {
                     Modifier.combinedClickable(
                         interactionSource = remember { MutableInteractionSource() },
                         indication = null,
