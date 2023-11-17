@@ -27,7 +27,7 @@ Typically, you'll want to initialize the client in your app's `Application` clas
 Typically you integrate this into the part of your codebase where you login or register users.
 The tokens provide a way to authenticate a user or give access to a specific set of calls.
 
-* Here's a valid user and token to help you get started on the client side, before integrating with your backend API.
+* Here's a valid user and token to help you get started on the client side, before integrating with your backend API. <!-- ? -->
 
 ### Different types of users
 
@@ -81,14 +81,14 @@ Once you invoke the `build()` method of `StreamVideoBuilder`, you can get the sa
 val streamVideo = StreamVideo.instance()
 ```
 
-If you don't need to use the user information, you can clear the by calling `logout()` method like so:
+If you don't need the user information, you can clear it by calling the `logout()` method like so:
 
 ```kotlin
 val streamVideo = StreamVideo.instance()
 streamVideo.logout()
 ```
 
-Lastly, if you don't need to use the `StreamVideo` instance anymore, you can uninstall by calling `removeClient()` method:
+Lastly, if you don't need to use the `StreamVideo` instance anymore, you can uninstall it by calling `removeClient()` method:
 
 ```kotlin
 StreamVideo.removeClient()
@@ -96,7 +96,7 @@ StreamVideo.removeClient()
 
 ### Logging Stream SDK
 
-Stream SDK provides you to trace log messages and debug what's going on and what problems you're facing. By setting the logging level on `StreamVideoBuilder`, you can filter the log messages depending on the priority:
+Stream SDK allows you to trace log messages and debug what's going on and what problems you're facing. By setting the logging level on `StreamVideoBuilder`, you can filter the log messages depending on the priority:
 
 ```kotlin
 val streamVideo = StreamVideoBuilder(
@@ -118,11 +118,9 @@ The full list of supported options is:
 | `tokenProvider` | A function to call if the token is expired or invalid | null |
 | `loggingLevel` | The logging level. Recommend to set it to debug while in development | LoggingLevel.BASIC |
 | `enablePush` | If push notifications should be enabled | false |
-| `pushDeviceGenerators` | Support firebase and other push providers | false |
+| `pushDeviceGenerators` | Support Firebase and other push providers | false |
 | `encryptPreferences` | If our data store should encrypt the api key, user token etc. | true |
 | `ensureSingleInstance` | Verify that only 1 version of the video client exists, prevents integration mistakes. | true |
 | `ringNotification` | A function to create your own notification when there's an incoming "ringing" call | null |
 | `audioFilters` | Run audio through a filter before sending it | - |
 | `videoFilters` | Run video through a filter before sending it | - |
-
-`
