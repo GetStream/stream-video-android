@@ -883,7 +883,14 @@ public class RtcSession internal constructor(
     internal fun updatePublishQuality(event: ChangePublishQualityEvent) = synchronized(this) {
         val sender = publisher?.connection?.transceivers?.firstOrNull {
             it.mediaType == MediaStreamTrack.MediaType.MEDIA_TYPE_VIDEO
-        }?.sender ?: return
+        }?.sender
+
+        if (sender == null) {
+            dynascaleLogger.w {
+                "Request to change publishing quality not fulfilled due to incomplete publisher."
+            }
+            return@synchronized
+        }
 
         val enabledRids = event.changePublishQuality.video_senders.firstOrNull()?.layers?.associate {
             it.name to it.active
