@@ -881,7 +881,7 @@ public class RtcSession internal constructor(
      * This is used for dynsacle
      */
     internal fun updatePublishQuality(event: ChangePublishQualityEvent) = synchronized(this) {
-       val sender = publisher?.connection?.transceivers?.firstOrNull {
+        val sender = publisher?.connection?.transceivers?.firstOrNull {
             it.mediaType == MediaStreamTrack.MediaType.MEDIA_TYPE_VIDEO
         }?.sender ?: return
 
