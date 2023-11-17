@@ -150,7 +150,7 @@ sealed interface LoginUiState {
 
     data class GoogleSignIn(val signInIntent: Intent) : LoginUiState
 
-    data class SignInComplete(val authDataResponse: GetAuthDataResponse) : LoginUiState
+    data class SignInComplete(val authData: GetAuthDataResponse) : LoginUiState
 
     data class SignInFailure(val errorMessage: String) : LoginUiState
 }

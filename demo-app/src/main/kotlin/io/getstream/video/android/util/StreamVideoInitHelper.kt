@@ -157,8 +157,8 @@ object StreamVideoInitHelper {
         user: User,
         token: String,
     ) {
-        val offlinePlugin = StreamOfflinePluginFactory(context) // 1
-        val statePluginFactory = StreamStatePluginFactory( // 2
+        val offlinePlugin = StreamOfflinePluginFactory(context)
+        val statePluginFactory = StreamStatePluginFactory(
             config = StatePluginConfig(
                 backgroundSyncEnabled = true,
                 userPresence = true,

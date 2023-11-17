@@ -34,14 +34,12 @@ interface StreamService {
     companion object {
         private const val BASE_URL = "https://pronto.getstream.io/"
 
-        private val json = Json {
-        ignoreUnknownKeys = true
-    }
-    private val retrofit =
-            Retrofit.Builder()
-                .baseUrl(BASE_URL)
-                .addConverterFactory(json.asConverterFactory("application/json".toMediaType()))
-                .build()
+        private val json = Json { ignoreUnknownKeys = true }
+
+        private val retrofit = Retrofit.Builder()
+            .baseUrl(BASE_URL)
+            .addConverterFactory(json.asConverterFactory("application/json".toMediaType()))
+            .build()
 
         val instance = retrofit.create<StreamService>()
     }
