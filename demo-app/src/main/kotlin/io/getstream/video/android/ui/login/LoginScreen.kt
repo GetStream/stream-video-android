@@ -68,6 +68,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import io.getstream.video.android.BuildConfig
 import io.getstream.video.android.R
 import io.getstream.video.android.compose.theme.VideoTheme
+import io.getstream.video.android.tooling.util.StreamFlavors
 import io.getstream.video.android.ui.theme.Colors
 import io.getstream.video.android.ui.theme.LinkText
 import io.getstream.video.android.ui.theme.LinkTextData
@@ -142,7 +143,7 @@ private fun LoginContent(
             )
 
             when {
-                BuildConfig.FLAVOR != "production" -> {
+                BuildConfig.FLAVOR != StreamFlavors.production -> {
                     Spacer(modifier = Modifier.height(17.dp))
 
                     Text(
@@ -182,7 +183,7 @@ private fun LoginContent(
                         },
                     )
                 }
-                BuildConfig.FLAVOR == "production" && !autoLogIn -> {
+                BuildConfig.FLAVOR == StreamFlavors.production && !autoLogIn -> {
                     Spacer(modifier = Modifier.height(50.dp))
 
                     StreamButton(

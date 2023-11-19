@@ -30,6 +30,7 @@ import io.getstream.video.android.data.services.stream.GetAuthDataResponse
 import io.getstream.video.android.data.services.stream.StreamService
 import io.getstream.video.android.datastore.delegate.StreamUserDataStore
 import io.getstream.video.android.model.User
+import io.getstream.video.android.tooling.util.StreamFlavors
 import io.getstream.video.android.util.StreamVideoInitHelper
 import io.getstream.video.android.util.UserHelper
 import kotlinx.coroutines.Dispatchers
@@ -124,7 +125,7 @@ class LoginViewModel @Inject constructor(
                     handleUiEvent(LoginEvent.SignInSuccess(userId = user.id))
                 }
             } else {
-                if (BuildConfig.FLAVOR == "production") {
+                if (BuildConfig.FLAVOR == StreamFlavors.production) {
                     if (autoLogIn) {
                         handleUiEvent(LoginEvent.Loading)
                         handleUiEvent(

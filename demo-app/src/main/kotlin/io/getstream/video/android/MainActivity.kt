@@ -25,6 +25,7 @@ import dagger.hilt.android.AndroidEntryPoint
 import io.getstream.video.android.analytics.FirebaseEvents
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.datastore.delegate.StreamUserDataStore
+import io.getstream.video.android.tooling.util.StreamFlavors
 import io.getstream.video.android.ui.AppNavHost
 import io.getstream.video.android.ui.AppScreens
 import io.getstream.video.android.util.InAppUpdateHelper
@@ -44,7 +45,7 @@ class MainActivity : ComponentActivity() {
         // Try to read the Google Play install referrer value. We use it to deliver
         // the Call ID from the QR code link.
         @Suppress("KotlinConstantConditions")
-        if (BuildConfig.FLAVOR == "production") {
+        if (BuildConfig.FLAVOR == StreamFlavors.production) {
             InstallReferrer(this).extractInstallReferrer { callId: String ->
                 firebaseAnalytics.logEvent(FirebaseEvents.INSTALL_FROM_QR_CODE, null)
                 startActivity(DeeplinkingActivity.createIntent(this, callId, true))
