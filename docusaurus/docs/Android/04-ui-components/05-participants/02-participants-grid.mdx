@@ -1,10 +1,10 @@
 # ParticipantsLayout
-
+<!-- file name needs to be changed -->
 The `ParticipantsLayout` component is one of our most versatile and complex UI components, designed to render a list of participants in a call. It handles different UI layouts based on the number of participants and different screen orientations. Additionally, it can also render screen sharing content when there is an active session.
 
 Before jumping into how to use the component and how to customize it, let's review what some of these features mean.
 
-What you can do with the `ParticipantsLayout` are:
+What can you do with `ParticipantsLayout`:
 
 - Displays a list of the remote/local participants.
 - There are two available layouts, Grid and [Spotlight](04-participants-spotlight.mdx)
@@ -21,7 +21,7 @@ Additionally, the participants are rendered in the following way:
 * **One participant**: Rendered as the only single item in the layout, taking up the full component space.
 * **Two participants** (1 remote + local): The remote participant is rendered within the full component space while the local participant is a floating item.
 * **Three to four participants** (2-3 remote + local): Remote participants are in a vertical split-screen, while the local participant is a floating item.
-* **Five or more** (4 remote + local): Participants are rendered as a grid of items, in a paginated way. Up to 6 participants per page, with the sorted participant.
+* **Five or more** (4 remote + local): Participants are rendered as a grid of items, in a paginated way. Up to 6 participants per page, with the sorted participant. <!-- what does "with the sorted participant" mean? -->
 
 Sorted participants gives you the list of participants sorted by:
 * anyone who is pinned
@@ -53,7 +53,7 @@ Users can then focus on the shared content more or choose to enter the full scre
 | ------- | ------------------------------------------------------------ |
 | ![Portrait Screensharing](../../assets/compose_screensharing.png) | ![Landscape Screensharing](../../assets/compose_screensharing_landscape.png) |
 
-Now that you've learned a lot about the `ParticipantsLayout` internal works, let's see how to use the component to add it to your UI.
+Now that you've learned a lot about the `ParticipantsLayout` internal works, let's see how to use this component.
 
 ## Usage
 
@@ -100,12 +100,10 @@ This UI also works for Landscape:
 
 ![Landscape Screen Sharing](../../assets/compose_screensharing_landscape.png)
 
-This component is truly versatile and lets you cover almost every use case for video calls, supporting smaller, group based calls, 1:1 calls, large meetings, screen sharing and much more.
-
-Let's see how to handle the actions that are available within the component.
+This component is truly versatile and lets you cover almost every use case for video calls, supporting smaller, group based calls, 1:1 calls, large meetings, screen sharing and much more. <!-- much more - what? :) -->
 
 ## Customization
-
+<!-- show the layoutType parameter that's mentioned in the page about ParticipantsSpotlight -->
 In terms of UI customization, you can very easily customize each participant video in the grid:
 
 ```kotlin

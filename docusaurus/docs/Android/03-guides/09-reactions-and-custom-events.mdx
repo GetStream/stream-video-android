@@ -9,7 +9,7 @@ You can send reactions to your call very easily like the code below:
 val response = call.sendReaction(type = "default", emoji = ":raise-hand:")
 ```
 
-You can also add custom data to the reaction or specify a specific emoji.
+You can also add custom data to the reaction or specify a specific emoji. <!-- isn't the emoji part same as above? -->
 
 ```kotlin
 val response = call.sendReaction(type = "default", emoji = ":raise-hand:", custom = mapOf("mycustomfield" to "hello"))
