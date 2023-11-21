@@ -34,7 +34,6 @@ import androidx.compose.material.Card
 import androidx.compose.material.Icon
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
@@ -44,6 +43,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Popup
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.call.audio.AudioFilter
@@ -75,7 +75,7 @@ internal fun SettingsMenu(
         },
     )
 
-    val isScreenSharing by call.screenShare.isEnabled.collectAsState()
+    val isScreenSharing by call.screenShare.isEnabled.collectAsStateWithLifecycle()
     val screenShareButtonText = if (isScreenSharing) {
         "Stop screen-sharing"
     } else {

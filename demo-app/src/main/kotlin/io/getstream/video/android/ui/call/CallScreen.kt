@@ -33,7 +33,6 @@ import androidx.compose.material.Text
 import androidx.compose.material.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateListOf
@@ -47,6 +46,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.getstream.chat.android.ui.common.state.messages.list.MessageItemState
 import io.getstream.video.android.BuildConfig
 import io.getstream.video.android.compose.theme.VideoTheme
@@ -77,9 +77,9 @@ fun CallScreen(
     onUserLeaveCall: () -> Unit = {},
 ) {
     val context = LocalContext.current
-    val isCameraEnabled by call.camera.isEnabled.collectAsState()
-    val isMicrophoneEnabled by call.microphone.isEnabled.collectAsState()
-    val speakingWhileMuted by call.state.speakingWhileMuted.collectAsState()
+    val isCameraEnabled by call.camera.isEnabled.collectAsStateWithLifecycle()
+    val isMicrophoneEnabled by call.microphone.isEnabled.collectAsStateWithLifecycle()
+    val speakingWhileMuted by call.state.speakingWhileMuted.collectAsStateWithLifecycle()
     var isShowingSettingMenu by remember { mutableStateOf(false) }
     var isShowingLayoutChooseMenu by remember { mutableStateOf(false) }
     var isShowingReactionsMenu by remember { mutableStateOf(false) }
@@ -95,7 +95,7 @@ fun CallScreen(
     val scope = rememberCoroutineScope()
     val messageScope = rememberCoroutineScope()
 
-    val callState by call.state.connection.collectAsState()
+    val callState by call.state.connection.collectAsStateWithLifecycle()
 
     LaunchedEffect(key1 = callState) {
         if (callState == RealtimeConnection.Disconnected) {

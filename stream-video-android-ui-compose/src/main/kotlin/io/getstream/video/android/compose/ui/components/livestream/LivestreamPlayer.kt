@@ -20,11 +20,11 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.core.Call
 import io.getstream.video.android.mock.StreamPreviewDataUtils
@@ -61,7 +61,7 @@ public fun LivestreamPlayer(
         LivestreamPlayerOverlay(call = call)
     },
 ) {
-    val backstage by call.state.backstage.collectAsState()
+    val backstage by call.state.backstage.collectAsStateWithLifecycle()
 
     Box(
         modifier = modifier.fillMaxSize(),

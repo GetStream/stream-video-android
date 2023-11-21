@@ -29,7 +29,6 @@ import androidx.compose.material.Card
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -37,6 +36,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Popup
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.core.Call
 import kotlinx.coroutines.delay
@@ -47,7 +47,7 @@ fun AvailableDeviceMenu(
     onDismissed: () -> Unit,
 ) {
     val context = LocalContext.current
-    val availableDevices by call.microphone.devices.collectAsState()
+    val availableDevices by call.microphone.devices.collectAsStateWithLifecycle()
 
     LaunchedEffect(key1 = availableDevices) {
         delay(3000)
