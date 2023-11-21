@@ -71,7 +71,8 @@ class IncomingCallActivity : ComponentActivity() {
             // Update the call state. This activity could have been started from a push notification.
             // Doing a call.get() will also internally update the Call state object with the latest
             // state from the backend.
-            val result = call.get()
+            // We know it's a direct call because we're in the IncomingCallActivity
+            val result = call.get(ring = true)
 
             if (result is Result.Failure) {
                 // Failed to recover the current state of the call
@@ -92,6 +93,8 @@ class IncomingCallActivity : ComponentActivity() {
                 call.join()
             }
 
+            // Activity has no content for a while, because setContent isn't called, as it
+            // waits for several suspend functions. Move setContent outside of this coroutine?
             setContent {
                 VideoTheme {
                     val onCallAction: (CallAction) -> Unit = { callAction ->

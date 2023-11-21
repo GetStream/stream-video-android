@@ -218,12 +218,13 @@ public class Call(
     }
 
     /** Basic crud operations */
-    suspend fun get(): Result<GetCallResponse> {
-        val response = clientImpl.getCall(type, id)
-        response.onSuccess {
-            state.updateFromResponse(it)
+    suspend fun get(ring: Boolean = false): Result<GetCallResponse> {
+        if (ring) client.state.addRingingCall(this)
+
+        return clientImpl.getCall(type, id).apply {
+            onSuccess { state.updateFromResponse(it) }
+            onError { client.state.removeRingingCall() }
         }
-        return response
     }
 
     /** Create a call. You can create a call client side, many apps prefer to do this server side though */
