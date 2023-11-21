@@ -59,7 +59,6 @@ android {
             signingConfig = signingConfigs.getByName("debug")
             matchingFallbacks.add("release")
             proguardFiles("benchmark-rules.pro")
-            buildConfigField("Boolean", "BENCHMARK", "true")
         }
     }
 
@@ -68,12 +67,10 @@ android {
         create("development") {
             dimension = "environment"
             proguardFiles("benchmark-rules.pro")
-            buildConfigField("Boolean", "BENCHMARK", "true")
         }
         create("production") {
             dimension = "environment"
             proguardFiles("benchmark-rules.pro")
-            buildConfigField("Boolean", "BENCHMARK", "true")
         }
     }
 
