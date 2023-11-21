@@ -234,7 +234,7 @@ private fun LoginContent(
                 ),
             )
 
-            if (BuildConfig.BENCHMARK.toBoolean()) {
+            if (BuildConfig.BUILD_TYPE == "benchmark") {
                 StreamButton(
                     modifier = Modifier
                         .fillMaxWidth()

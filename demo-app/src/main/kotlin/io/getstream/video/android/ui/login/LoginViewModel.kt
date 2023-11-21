@@ -120,7 +120,7 @@ class LoginViewModel @Inject constructor(
             val user = dataStore.user.firstOrNull()
             if (user != null) {
                 handleUiEvent(LoginEvent.Loading)
-                if (!BuildConfig.BENCHMARK.toBoolean()) {
+                if (BuildConfig.BUILD_TYPE != "benchmark") {
                     delay(10)
                     handleUiEvent(LoginEvent.SignInSuccess(userId = user.id))
                 }
