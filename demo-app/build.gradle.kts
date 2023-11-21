@@ -264,4 +264,8 @@ dependencies {
     debugImplementation(libs.leakCanary)
 
     baselineProfile(project(":benchmark"))
+
+    // Kaspresso
+    androidTestImplementation(libs.kaspresso)
+    androidTestImplementation(libs.junitKtx)
 }

@@ -70,6 +70,11 @@ fastlane/Preview.html
 fastlane/screenshots
 fastlane/test_output
 fastlane/readme.md
+fastlane/allurectl
+fastlane/recordings
+sinatra-log.txt
+video-buddy-log.txt
+video-buddy-session.json
 
 # Version control
 vcs.xml
