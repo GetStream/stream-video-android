@@ -38,11 +38,11 @@ Have a look below for a basic Compose example of how to render the video of all 
 
 ```kotlin
 val participants by call.state.participants.collectAsState()
-participants.value.forEach {
-   val videoTrack = it.videoTrack // contains the video track
-   val userName = it.user.name // the user name
+participants.forEach {
+    val videoTrack = it.videoTrack // contains the video track
+    val userName = it.userNameOrId // the user name
 
-   ..
+    ..
 }
 ```
 

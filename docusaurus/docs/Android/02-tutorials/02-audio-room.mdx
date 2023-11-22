@@ -234,7 +234,7 @@ public fun AudioRoom(
     val participants by call.state.participants.collectAsState()
     val activeSpeakers by call.state.activeSpeakers.collectAsState()
     val activeSpeaker = activeSpeakers.firstOrNull()
-    val sortedParticipants by call.state.sortedParticipants.collectAsState()
+    val sortedParticipants by call.state.sortedParticipants.collectAsState(emptyList())
 
     val backstage by call.state.backstage.collectAsState()
     val isMicrophoneEnabled by call.microphone.isEnabled.collectAsState()
@@ -242,7 +242,7 @@ public fun AudioRoom(
     Description(title, description, participants)
 
     activeSpeaker?.let {
-        Text("${it.user.value.name} is speaking")
+        Text("${it.userNameOrId.value} is speaking")
     }
 
     Column(
