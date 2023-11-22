@@ -260,6 +260,9 @@ dependencies {
     implementation(libs.play.auth)
     implementation(libs.play.app.update.ktx)
 
+    // Video Filters
+    implementation(libs.google.mlkit.selfie.segmentation)
+
     // Memory detection
     debugImplementation(libs.leakCanary)
 

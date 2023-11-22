@@ -77,6 +77,8 @@ leakCanary = "2.12"
 binaryCompatabilityValidator = "0.13.2"
 playPublisher = "3.8.4"
 
+googleMlKitSelfieSegmentation = "16.0.0-beta4"
+
 [libraries]
 androidx-camera-camera2 = { module = "androidx.camera:camera-camera2", version.ref = "cameraCamera2" }
 androidx-material = { group = "com.google.android.material", name = "material", version.ref = "androidxMaterial" }
@@ -191,6 +193,8 @@ play-app-update-ktx = { group = "com.google.android.play", name = "app-update-kt
 
 robolectric = { group = "org.robolectric", name = "robolectric", version.ref = "robolectric" }
 leakCanary = { group = "com.squareup.leakcanary", name = "leakcanary-android", version.ref = "leakCanary" }
+
+google-mlkit-selfie-segmentation = { group = "com.google.mlkit", name = "segmentation-selfie", version.ref = "googleMlKitSelfieSegmentation" }
 
 # Dependencies of the included build-logic
 android-gradlePlugin = { group = "com.android.tools.build", name = "gradle", version.ref = "androidGradlePlugin" }
