@@ -9,7 +9,7 @@ This quickstart gives you a quick overview of how Stream's video SDKs work
 
 The example below creates the client. Normally you'd do that in your `Application` class.
 Next you create a call object and join the call. We'll specify create=true to create the call if it doesn't exist
-<!-- call is a verb, should it be named createCall? -->
+<!-- client.call, call.create, call.get, when can you join - a bit confusing for first time users -->
 ```kotlin
 val client = StreamVideoBuilder(
      context = context,
@@ -22,8 +22,8 @@ val client = StreamVideoBuilder(
 val call = client.call("default", "123")
 val joinResult = call.join(create=true)
 ```
-<!-- starting from "in this case" below, bad phrasing -->
-**Note**: While you can initialise the SDK on-demand and it's not mandatory to initialise the SDK in the `Application.onCreate()` - it is required to initialise it this way for it to be able to handle incoming call and other types of push notifications. In this case the application process will start, the push notification will be delivered to the SDK automatically but the SDK will not be initialised at this point and will ignore the push notification.
+
+**Note**: While you can initialise the SDK on-demand and it's not mandatory to initialise the SDK in the `Application.onCreate()` - it is required to initialise it this way for it to be able to handle incoming calls and other types of push notifications. Otherwise, the application process will start, the push notification will be delivered to the SDK automatically but the SDK will not be initialised at this point and will ignore the push notification.
 
 `default` is a call type. There are 4 built-in call types and you can also create your own.
 The call type controls the permissions and which features are enabled.
