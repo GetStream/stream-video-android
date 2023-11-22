@@ -23,7 +23,7 @@ You can either specify your own or use the default. Here's a tiny custom PIP con
 CallContent(
     call = call,
     pictureInPictureContent: { call ->
-        val otherParticipant by call.state.sortedParticipants.collectAsState()
+        val otherParticipant by call.state.sortedParticipants.collectAsState(emptyList())
 
         VideoRenderer(
             modifier = Modifier.aspectRatio(ScreenShareAspectRatio, false),
