@@ -49,6 +49,7 @@ import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.call.audio.AudioFilter
 import io.getstream.video.android.core.call.video.BitmapVideoFilter
 import io.getstream.video.android.ui.common.R
+import io.getstream.video.android.util.BlurredBackgroundVideoFilter
 import io.getstream.video.android.util.SampleAudioFilter
 import io.getstream.video.android.util.SampleVideoFilter
 import kotlinx.coroutines.launch
@@ -154,9 +155,11 @@ internal fun SettingsMenu(
                             if (call.videoFilter == null) {
                                 call.videoFilter = object : BitmapVideoFilter() {
                                     override fun filter(bitmap: Bitmap) {
-                                        SampleVideoFilter.toGrayscale(bitmap)
+                                        val filter = BlurredBackgroundVideoFilter()
+                                        filter.applyFilter(bitmap)
                                     }
                                 }
+
                             } else {
                                 call.videoFilter = null
                             }
