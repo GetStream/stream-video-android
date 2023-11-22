@@ -37,15 +37,14 @@ import io.getstream.video.android.core.ParticipantState
  *
  * @param call The state of the call.
  * @param modifier Modifier for styling.
- * @param parentSize The size of the parent.
  * @param style Defined properties for styling a single video call track.
  * @param videoRenderer A single video renderer renders each individual participant.
+ * @param floatingVideoRenderer A floating video renderer renders an individual participant.
  */
 @Composable
 internal fun BoxScope.OrientationVideoRenderer(
     modifier: Modifier = Modifier,
     call: Call,
-    parentSize: IntSize = IntSize(0, 0),
     style: VideoRendererStyle = RegularVideoRendererStyle(),
     videoRenderer: @Composable (
         modifier: Modifier,
@@ -60,6 +59,7 @@ internal fun BoxScope.OrientationVideoRenderer(
             style = videoStyle,
         )
     },
+    floatingVideoRenderer: @Composable (BoxScope.(call: Call, IntSize) -> Unit)? = null,
 ) {
     val dominantSpeaker by call.state.dominantSpeaker.collectAsStateWithLifecycle()
     val participants by call.state.participants.collectAsStateWithLifecycle()
@@ -76,6 +76,7 @@ internal fun BoxScope.OrientationVideoRenderer(
 
     val orientation = LocalConfiguration.current.orientation
 
+    val parentSize = LocalVideoContentSize.current
     if (orientation == ORIENTATION_LANDSCAPE) {
         LandscapeVideoRenderer(
             call = call,
@@ -85,6 +86,7 @@ internal fun BoxScope.OrientationVideoRenderer(
             parentSize = parentSize,
             style = style,
             videoRenderer = videoRenderer,
+            floatingVideoRenderer = floatingVideoRenderer,
         )
     } else {
         PortraitVideoRenderer(
@@ -95,6 +97,7 @@ internal fun BoxScope.OrientationVideoRenderer(
             parentSize = parentSize,
             style = style,
             videoRenderer = videoRenderer,
+            floatingVideoRenderer = floatingVideoRenderer,
         )
     }
 }

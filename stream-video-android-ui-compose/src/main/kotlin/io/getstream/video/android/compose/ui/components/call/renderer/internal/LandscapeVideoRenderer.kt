@@ -41,7 +41,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.IntSize
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.getstream.video.android.compose.theme.VideoTheme
-import io.getstream.video.android.compose.ui.components.call.renderer.FloatingParticipantVideo
+import io.getstream.video.android.compose.ui.components.call.renderer.DefaultFloatingParticipantVideo
 import io.getstream.video.android.compose.ui.components.call.renderer.ParticipantVideo
 import io.getstream.video.android.compose.ui.components.call.renderer.RegularVideoRendererStyle
 import io.getstream.video.android.compose.ui.components.call.renderer.VideoRendererStyle
@@ -62,6 +62,7 @@ import io.getstream.video.android.mock.previewParticipantsList
  * @param parentSize The size of the parent.
  * @param style Defined properties for styling a single video call track.
  * @param videoRenderer A single video renderer renders each individual participant.
+ * @param floatingVideoRenderer A floating video renderer renders an individual participant.
  */
 @Composable
 internal fun BoxScope.LandscapeVideoRenderer(
@@ -84,6 +85,7 @@ internal fun BoxScope.LandscapeVideoRenderer(
             style = videoStyle,
         )
     },
+    floatingVideoRenderer: @Composable (BoxScope.(call: Call, IntSize) -> Unit)? = null,
 ) {
     val remoteParticipants by call.state.remoteParticipants.collectAsStateWithLifecycle()
     val paddedModifier = modifier.padding(VideoTheme.dimens.participantsGridPadding)
@@ -96,10 +98,10 @@ internal fun BoxScope.LandscapeVideoRenderer(
             }
 
             videoRenderer.invoke(
-                modifier = paddedModifier.fillMaxHeight(),
-                call = call,
-                participant = participant,
-                style = style.copy(
+                paddedModifier.fillMaxHeight(),
+                call,
+                participant,
+                style.copy(
                     isFocused = dominantSpeaker?.sessionId == participant.sessionId,
                 ),
             )
@@ -110,12 +112,12 @@ internal fun BoxScope.LandscapeVideoRenderer(
             Row(modifier = modifier) {
                 remoteParticipants.take(callParticipants.size - 1).forEach { participant ->
                     videoRenderer.invoke(
-                        modifier = paddedModifier
+                        paddedModifier
                             .fillMaxHeight()
                             .weight(rowItemWeight),
-                        call = call,
-                        participant = participant,
-                        style = style.copy(
+                        call,
+                        participant,
+                        style.copy(
                             isFocused = dominantSpeaker?.sessionId == participant.sessionId,
                         ),
                     )
@@ -170,10 +172,10 @@ internal fun BoxScope.LandscapeVideoRenderer(
                             }
                             val participant = callParticipants[key]
                             videoRenderer.invoke(
-                                modifier = paddedModifier.height(itemHeight),
-                                call = call,
-                                participant = participant,
-                                style = style.copy(
+                                paddedModifier.height(itemHeight),
+                                call,
+                                participant,
+                                style.copy(
                                     isFocused = dominantSpeaker?.sessionId == participant.sessionId,
                                 ),
                             )
@@ -188,16 +190,14 @@ internal fun BoxScope.LandscapeVideoRenderer(
         val currentLocal by call.state.me.collectAsStateWithLifecycle()
 
         if (currentLocal != null || LocalInspectionMode.current) {
-            FloatingParticipantVideo(
-                call = call,
-                participant = if (LocalInspectionMode.current) {
-                    callParticipants.first()
-                } else {
-                    currentLocal!!
-                },
-                style = style.copy(isShowingConnectionQualityIndicator = false),
-                parentBounds = parentSize,
-            )
+            floatingVideoRenderer?.invoke(this, call, parentSize)
+                ?: DefaultFloatingParticipantVideo(
+                    call = call,
+                    me = currentLocal!!,
+                    callParticipants = callParticipants,
+                    parentSize = parentSize,
+                    style = style,
+                )
         }
     }
 }
@@ -222,10 +222,10 @@ private fun ParticipantRow(
         repeat(participants.size) {
             val participant = participants[it]
             videoRenderer.invoke(
-                modifier = paddedModifier.weight(1f),
-                call = call,
-                participant = participant,
-                style = style.copy(
+                paddedModifier.weight(1f),
+                call,
+                participant,
+                style.copy(
                     isFocused = dominantSpeaker?.sessionId == participant.sessionId,
                 ),
             )

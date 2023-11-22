@@ -58,6 +58,7 @@ import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.avatar.LocalAvatarPreviewProvider
 import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.ParticipantState
+import io.getstream.video.android.core.internal.InternalStreamVideoApi
 import io.getstream.video.android.mock.StreamPreviewDataUtils
 import io.getstream.video.android.mock.previewCall
 import io.getstream.video.android.mock.previewParticipant
@@ -215,6 +216,27 @@ private fun calculateVerticalOffsetBounds(
     val bottomPadding = density.run { paddingValues.calculateBottomPadding().toPx() }
 
     return parentBounds.height - bottomPadding - floatingVideoSize.height - offset
+}
+
+@Composable
+@InternalStreamVideoApi
+public fun BoxScope.DefaultFloatingParticipantVideo(
+    call: Call,
+    me: ParticipantState,
+    callParticipants: List<ParticipantState>,
+    parentSize: IntSize,
+    style: VideoRendererStyle,
+) {
+    FloatingParticipantVideo(
+        call = call,
+        participant = if (LocalInspectionMode.current) {
+            callParticipants.first()
+        } else {
+            me
+        },
+        style = style.copy(isShowingConnectionQualityIndicator = false),
+        parentBounds = parentSize,
+    )
 }
 
 @Preview

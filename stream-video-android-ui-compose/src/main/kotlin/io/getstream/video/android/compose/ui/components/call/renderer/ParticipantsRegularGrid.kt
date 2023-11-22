@@ -18,14 +18,12 @@ package io.getstream.video.android.compose.ui.components.call.renderer
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.IntSize
@@ -44,6 +42,7 @@ import io.getstream.video.android.mock.previewCall
  * @param modifier Modifier for styling.
  * @param style Defined properties for styling a single video call track.
  * @param videoRenderer A single video renderer renders each individual participant.
+ * @param floatingVideoRenderer A floating video renderer renders an individual participant.
  */
 @Composable
 public fun ParticipantsRegularGrid(
@@ -63,21 +62,18 @@ public fun ParticipantsRegularGrid(
             style = videoStyle,
         )
     },
+    floatingVideoRenderer: @Composable (BoxScope.(call: Call, IntSize) -> Unit)? = null,
 ) {
-    var parentSize: IntSize by remember { mutableStateOf(IntSize(0, 0)) }
-
     Box(modifier = modifier.background(color = VideoTheme.colors.appBackground)) {
         val roomParticipants by call.state.participants.collectAsStateWithLifecycle()
 
         if (roomParticipants.isNotEmpty()) {
             OrientationVideoRenderer(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .onSizeChanged { parentSize = it },
+                modifier = Modifier.fillMaxSize(),
                 call = call,
-                parentSize = parentSize,
                 style = style,
                 videoRenderer = videoRenderer,
+                floatingVideoRenderer = floatingVideoRenderer,
             )
         }
     }

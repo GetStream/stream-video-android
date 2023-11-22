@@ -16,6 +16,7 @@
 
 package io.getstream.video.android.compose.ui.components.call.renderer
 
+import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.derivedStateOf
@@ -24,6 +25,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.IntSize
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.core.Call
@@ -72,6 +74,7 @@ public fun ParticipantsLayout(
             style = videoStyle,
         )
     },
+    floatingVideoRenderer: @Composable (BoxScope.(call: Call, IntSize) -> Unit)? = null,
 ) {
     val screenSharingSession = call.state.screenSharingSession.collectAsStateWithLifecycle()
     val screenSharing = screenSharingSession.value
@@ -103,6 +106,7 @@ public fun ParticipantsLayout(
                 modifier = modifier,
                 style = style,
                 videoRenderer = videoRenderer,
+                floatingVideoRenderer = floatingVideoRenderer,
             )
         }
     } else {

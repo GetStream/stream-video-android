@@ -20,7 +20,8 @@ import android.content.res.Configuration.ORIENTATION_LANDSCAPE
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.detectTapGestures
-import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxScope
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
@@ -35,6 +36,7 @@ import androidx.compose.material.Scaffold
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.AutoAwesomeMosaic
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -49,6 +51,7 @@ import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.coerceAtLeast
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -69,6 +72,7 @@ import io.getstream.video.android.compose.ui.components.call.renderer.Participan
 import io.getstream.video.android.compose.ui.components.call.renderer.ParticipantsLayout
 import io.getstream.video.android.compose.ui.components.call.renderer.RegularVideoRendererStyle
 import io.getstream.video.android.compose.ui.components.call.renderer.VideoRendererStyle
+import io.getstream.video.android.compose.ui.components.call.renderer.internal.LocalVideoContentSize
 import io.getstream.video.android.compose.ui.components.video.VideoRenderer
 import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.ParticipantState
@@ -91,6 +95,7 @@ import io.getstream.video.android.ui.common.R
  * @param appBarContent Content is shown that calls information or additional actions.
  * @param style Defined properties for styling a single video call track.
  * @param videoRenderer A single video renderer renders each individual participant.
+ * @param floatingVideoRenderer A floating video renderer renders an individual participant.
  * @param videoContent Content is shown that renders all participants' videos.
  * @param videoOverlayContent Content is shown that will be drawn over the [videoContent], excludes [controlsContent].
  * @param controlsContent Content is shown that allows users to trigger different actions to control a joined call.
@@ -129,6 +134,7 @@ public fun CallContent(
             style = videoStyle,
         )
     },
+    floatingVideoRenderer: @Composable (BoxScope.(call: Call, IntSize) -> Unit)? = null,
     videoContent: @Composable RowScope.(call: Call) -> Unit = {
         ParticipantsLayout(
             layoutType = layout,
@@ -139,6 +145,7 @@ public fun CallContent(
                 .padding(bottom = VideoTheme.dimens.participantsGridPadding),
             style = style,
             videoRenderer = videoRenderer,
+            floatingVideoRenderer = floatingVideoRenderer,
         )
     },
     videoOverlayContent: @Composable (call: Call) -> Unit = {},
@@ -216,9 +223,13 @@ public fun CallContent(
                             )
                         },
                 ) {
-                    Box {
-                        videoContent.invoke(this@Row, call)
-                        videoOverlayContent.invoke(call)
+                    BoxWithConstraints {
+                        val contentSize = IntSize(constraints.maxWidth, constraints.maxHeight)
+
+                        CompositionLocalProvider(LocalVideoContentSize provides contentSize) {
+                            videoContent.invoke(this@Row, call)
+                            videoOverlayContent.invoke(call)
+                        }
                     }
 
                     if (orientation == ORIENTATION_LANDSCAPE) {
