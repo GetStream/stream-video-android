@@ -409,8 +409,8 @@ public fun ParticipantAvatar(
     participant: ParticipantState,
     modifier: Modifier = Modifier
 ) {
-    val user by participant.user.collectAsState()
     val nameOrId by participant.userNameOrId.collectAsState()
+    val image by participant.image.collectAsState()
     val isSpeaking by participant.speaking.collectAsState()
     val audioEnabled by participant.audioEnabled.collectAsState()
 
@@ -422,7 +422,8 @@ public fun ParticipantAvatar(
 
         Box(modifier = Modifier.size(VideoTheme.dimens.audioAvatarSize)) {
             UserAvatar(
-                user = user,
+                userName = nameOrId,
+                userImage = image,
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(VideoTheme.dimens.audioAvatarPadding)
