@@ -18,8 +18,11 @@ package io.getstream.video.android.core.notifications.internal.service
 
 import android.app.Service
 import android.content.Intent
+import android.content.pm.ServiceInfo
+import android.os.Build
 import android.os.IBinder
 import androidx.core.app.NotificationManagerCompat
+import androidx.core.app.ServiceCompat
 import io.getstream.log.taggedLogger
 import io.getstream.video.android.core.StreamVideo
 import io.getstream.video.android.core.notifications.NotificationHandler.Companion.INTENT_EXTRA_CALL_CID
@@ -39,7 +42,11 @@ internal class OngoingCallService : Service() {
         val started = if (callId != null && streamVideo != null) {
             val notification = streamVideo.getOngoingCallNotification(callId!!)
             if (notification != null) {
-                startForeground(callId.hashCode(), notification)
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                    ServiceCompat.startForeground(this, callId.hashCode(), notification, ServiceInfo.FOREGROUND_SERVICE_TYPE_MICROPHONE)
+                } else {
+                    startForeground(callId.hashCode(), notification)
+                }
                 true
             } else {
                 // Service not started no notification
