@@ -30,61 +30,6 @@ object YuvFrame {
 
     private val logger by taggedLogger("YuvFrame")
 
-    fun bitmapFromVideoFrameWithToolkit(videoFrame: VideoFrame?): Bitmap? {
-        if (videoFrame == null) {
-            return null
-        }
-
-        return try {
-            val toI420 = videoFrame.buffer.toI420()!!
-
-            val byteArray = byteBufferToByteArray(toI420.dataY) +
-                    byteBufferToByteArray(toI420.dataV) +
-                    byteBufferToByteArray(toI420.dataU)
-
-            val byteBuffer = ByteBuffer.wrap(byteArray, 0, byteArray.size)
-
-            val bitmap = Bitmap.createBitmap(toI420.width, toI420.height, Bitmap.Config.ARGB_8888)
-            bitmap.copyPixelsFromBuffer(byteBuffer)
-
-            rotateBitmap(
-                bitmap = bitmap,
-                rotationDegree = videoFrame.rotation,
-            )
-        } catch (t: Throwable) {
-            logger.e(t) { "Failed to convert a VideoFrame" }
-            null
-        }
-    }
-
-    private fun byteBufferToByteArray(byteBuffer: ByteBuffer): ByteArray =
-        if (byteBuffer.hasArray()) {
-            byteBuffer.array()
-        } else {
-            val array = ByteArray(byteBuffer.remaining())
-            byteBuffer.get(array)
-            array
-        }
-
-    private fun rotateBitmap(bitmap: Bitmap, rotationDegree: Int): Bitmap = when (rotationDegree) {
-        90, -270 -> {
-            val m = Matrix()
-            m.postRotate(90f)
-            Bitmap.createBitmap(bitmap, 0, 0, bitmap.width, bitmap.height, m, true)
-        }
-        180, -180 -> {
-            val m = Matrix()
-            m.postRotate(180f)
-            Bitmap.createBitmap(bitmap, 0, 0, bitmap.width, bitmap.height, m, true)
-        }
-        270, -90 -> {
-            val m = Matrix()
-            m.postRotate(270f)
-            Bitmap.createBitmap(bitmap, 0, 0, bitmap.width, bitmap.height, m, true)
-        }
-        else -> bitmap
-    }
-
     /**
      * Converts VideoFrame.Buffer YUV frame to an ARGB_8888 Bitmap. Applies stored rotation.
      * @return A new Bitmap containing the converted frame.
@@ -103,50 +48,6 @@ object YuvFrame {
             logger.e(t) { "Failed to convert a VideoFrame" }
             null
         }
-    }
-
-    fun bitmapFromVideoFrame2(videoFrame: VideoFrame?): Bitmap? {
-        if (videoFrame == null) {
-            return null
-        }
-
-        return try {
-            val i420buffer = copyData(videoFrame)
-            val bitmap = getBitmap(i420buffer, videoFrame.buffer.width, videoFrame.buffer.height, videoFrame.rotation)
-            i420buffer.close()
-            bitmap
-        } catch (t: Throwable) {
-            logger.e(t) { "Failed to convert a VideoFrame" }
-            null
-        }
-    }
-
-    private fun copyData(videoFrame: VideoFrame): I420Buffer {
-        val i420Buffer: VideoFrame.I420Buffer = videoFrame.buffer.toI420()!!
-
-        val yPlane = i420Buffer.dataY
-        val uPlane = i420Buffer.dataU
-        val vPlane = i420Buffer.dataV
-
-        val width = i420Buffer.width
-        val height = i420Buffer.height
-        val strideY = i420Buffer.strideY
-        val strideU = i420Buffer.strideU
-        val strideV = i420Buffer.strideV
-
-        val totalSize =
-            strideY * height + strideU * ((height + 1) / 2) + strideV * ((height + 1) / 2)
-
-        val outputBuffer = ByteBuffer.allocateDirect(totalSize)
-        outputBuffer.position(0)
-
-        outputBuffer.put(yPlane)
-        outputBuffer.put(uPlane)
-        outputBuffer.put(vPlane)
-
-        outputBuffer.position(0) // Reset position to beginning for reading
-
-        return I420Buffer.wrap(outputBuffer, width, height)
     }
 
     private fun copyPlanes(videoFrameBuffer: VideoFrame.Buffer, width: Int, height: Int): I420Buffer {
