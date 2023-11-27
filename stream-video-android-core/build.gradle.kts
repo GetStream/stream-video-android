@@ -81,6 +81,10 @@ android {
         buildConfig = true
     }
 
+    packaging {
+        jniLibs.pickFirsts.add("lib/*/librenderscript-toolkit.so")
+    }
+
     testOptions {
         unitTests {
             isIncludeAndroidResources = true
@@ -189,6 +193,8 @@ dependencies {
 
     // crypto
     implementation(libs.tink)
+
+    implementation(files("../libs/renderscript-toolkit.aar"))
 
     // unit tests
     testImplementation(libs.junit)

@@ -1,23 +1,42 @@
+/*
+ * Copyright (c) 2014-2023 Stream.io Inc. All rights reserved.
+ *
+ * Licensed under the Stream License;
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    https://github.com/GetStream/stream-video-android/blob/main/LICENSE
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package io.getstream.video.android.util
 
-import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.Matrix
-import android.renderscript.Allocation
-import android.renderscript.Element
-import android.renderscript.RenderScript
-import android.renderscript.ScriptIntrinsicBlur
+import android.util.Log
 import com.google.android.gms.tasks.Tasks
 import com.google.android.renderscript.Toolkit
+import com.google.android.renderscript.YuvFormat
 import com.google.mlkit.vision.common.InputImage
 import com.google.mlkit.vision.segmentation.Segmentation
 import com.google.mlkit.vision.segmentation.SegmentationMask
 import com.google.mlkit.vision.segmentation.selfie.SelfieSegmenterOptions
+import org.webrtc.VideoFrame
 
+/*
+   - For better performance
+     - Research Android built-in accelerated operations: https://developer.android.com/guide/topics/renderscript/migrate#image_blur_on_android_12_rendered_into_a_bitmap
+   - Determine what is available for which Android version (Toolkit library vs built-in).
+ */
 
-class BlurredBackgroundVideoFilter(private val context: Context) {
+class BlurredBackgroundVideoFilter {
     private val options =
         SelfieSegmenterOptions.Builder()
             .setDetectorMode(SelfieSegmenterOptions.STREAM_MODE)
@@ -25,33 +44,38 @@ class BlurredBackgroundVideoFilter(private val context: Context) {
             .build()
     private val segmenter = Segmentation.getClient(options)
 
+    private lateinit var segmentationMask: SegmentationMask
+    private val onlyBackgroundBitmap by lazy {
+        Bitmap.createBitmap(
+            segmentationMask.width,
+            segmentationMask.height,
+            Bitmap.Config.ARGB_8888
+        )
+    }
+
     fun applyFilter(bitmap: Bitmap) {
         val mlImage = InputImage.fromBitmap(bitmap, 0)
         val task = segmenter.process(mlImage)
-        val mask: SegmentationMask = Tasks.await(task)
+        segmentationMask = Tasks.await(task)
 
-        val onlyBackgroundBitmap = Bitmap.createBitmap(mask.width, mask.height, Bitmap.Config.ARGB_8888)
-        val scaleBetweenBitmapAndMask = getScalingFactors(
-            widths = Pair(bitmap.width, mask.width),
-            heights = Pair(bitmap.height, mask.height)
+        copySegment(
+            segment = Segment.BACKGROUND,
+            source = bitmap,
+            destination = onlyBackgroundBitmap,
+            segmentationMask = segmentationMask
         )
-        for (y in 0 until mask.height) {
-            for (x in 0 until mask.width) {
-                if (mask.buffer.float.isBackground()) {
-                    val scaledX = (x * scaleBetweenBitmapAndMask.first).toInt()
-                    val scaledY = (y * scaleBetweenBitmapAndMask.second).toInt()
-                    onlyBackgroundBitmap.setPixel(x, y, bitmap.getPixel(scaledX, scaledY))
-                }
-            }
-        }
 
         val blurredBackgroundBitmap = Toolkit.blur(onlyBackgroundBitmap, BLUR_RADIUS.toInt())
-
-        // Create a canvas from the frame bitmap
         val canvas = Canvas(bitmap)
-        val matrix = newMatrix(bitmap, mask)
-        // Draw the mask onto the original bitmap
+        val matrix = newMatrix(bitmap, segmentationMask)
+
         canvas.drawBitmap(blurredBackgroundBitmap, matrix, null)
+//         Draw the mask onto the original bitmap
+
+//        canvas.drawBitmap(onlyForegroundBitmap, matrix, Paint().apply {
+//            isAntiAlias = true
+//            maskFilter = BlurMaskFilter(25f, BlurMaskFilter.Blur.OUTER)
+//        })
 
         // Clear references to pixel data and allow it to be garbage collected
 //        onlyBackgroundBitmap.recycle()
@@ -59,17 +83,92 @@ class BlurredBackgroundVideoFilter(private val context: Context) {
 //        matrix.reset()
     }
 
+    private fun copySegment(
+        segment: Segment,
+        source: Bitmap,
+        destination: Bitmap,
+        segmentationMask: SegmentationMask
+    ) {
+        val start = System.currentTimeMillis()
+
+        val scaleBetweenSourceAndMask = getScalingFactors(
+            widths = Pair(source.width, segmentationMask.width),
+            heights = Pair(source.height, segmentationMask.height),
+        )
+
+        segmentationMask.buffer.rewind()
+
+        val sourcePixels = IntArray(source.width * source.height)
+        source.getPixels(sourcePixels, 0, source.width, 0, 0, source.width, source.height)
+        val destinationPixels = IntArray(destination.width * destination.height)
+
+        for (y in 0 until segmentationMask.height) {
+            for (x in 0 until segmentationMask.width) {
+                val confidence = segmentationMask.buffer.float
+
+                if (((segment == Segment.BACKGROUND) && confidence.isBackground()) ||
+                    ((segment == Segment.FOREGROUND) && !confidence.isBackground())
+                ) {
+                    val scaledX = (x * scaleBetweenSourceAndMask.first).toInt()
+                    val scaledY = (y * scaleBetweenSourceAndMask.second).toInt()
+                    destinationPixels[y * destination.width + x] = sourcePixels[scaledY * source.width + scaledX]
+                }
+            }
+        }
+
+        destination.setPixels(destinationPixels, 0, destination.width, 0, 0, destination.width, destination.height)
+
+        val end = System.currentTimeMillis()
+        Log.i("copySegment", "Time: ${end - start}")
+    }
+
     private fun getScalingFactors(widths: Pair<Int, Int>, heights: Pair<Int, Int>) =
         Pair(widths.first.toFloat() / widths.second, heights.first.toFloat() / heights.second)
+
+    private enum class Segment {
+        FOREGROUND, BACKGROUND
+    }
 
     private fun newMatrix(bitmap: Bitmap, mask: SegmentationMask): Matrix {
         val isRawSizeMaskEnabled = mask.width != bitmap.width || mask.height != bitmap.height
         return if (!isRawSizeMaskEnabled) {
             Matrix()
         } else {
-            val scale = getScalingFactors(Pair(bitmap.width, mask.width), Pair(bitmap.height, mask.height))
+            val scale =
+                getScalingFactors(Pair(bitmap.width, mask.width), Pair(bitmap.height, mask.height))
             Matrix().apply { preScale(scale.first, scale.second) }
         }
+    }
+
+    // region Old code
+    fun applyFilter2(bitmap: Bitmap) {
+        // Send the bitmap into ML Kit for processing
+        val mlImage = InputImage.fromBitmap(bitmap, 0)
+        val task = segmenter.process(mlImage)
+        // Wait for result synchronously on same thread
+        val mask = Tasks.await(task)
+
+        val isRawSizeMaskEnabled = mask.width != bitmap.width || mask.height != bitmap.height
+        val scaleX = bitmap.width * 1f / mask.width
+        val scaleY = bitmap.height * 1f / mask.height
+
+        // Create a bitmap mask to cover the background
+        val maskBitmap = Bitmap.createBitmap(
+            maskColorsFromByteBuffer(mask),
+            mask.width,
+            mask.height,
+            Bitmap.Config.ARGB_8888,
+        )
+        // Create a canvas from the frame bitmap
+        val canvas = Canvas(bitmap)
+        val matrix = Matrix()
+        if (isRawSizeMaskEnabled) {
+            matrix.preScale(scaleX, scaleY)
+        }
+        // And now draw the bitmap mask onto the original bitmap
+        canvas.drawBitmap(maskBitmap, matrix, null)
+
+        maskBitmap.recycle()
     }
 
     private fun maskColorsFromByteBuffer(mask: SegmentationMask): IntArray {
@@ -85,53 +184,10 @@ class BlurredBackgroundVideoFilter(private val context: Context) {
         }
         return colors
     }
-
-
-
-    fun _applyFilter(bitmap: Bitmap) {
-        // Send the bitmap into ML Kit for processing
-        val mlImage = InputImage.fromBitmap(bitmap, 0)
-        val task = segmenter.process(mlImage)
-        // Wait for result synchronously on same thread
-        val mask = Tasks.await(task)
-
-        val isRawSizeMaskEnabled =  mask.width != bitmap.width || mask.height != bitmap.height
-        val scaleX = bitmap.width * 1f / mask.width
-        val scaleY = bitmap.height * 1f / mask.height
-
-        // Create a bitmap mask to cover the background
-        val maskBitmap = Bitmap.createBitmap(
-            maskColorsFromByteBuffer(mask), mask.width, mask.height, Bitmap.Config.ARGB_8888
-        )
-        // Create a canvas from the frame bitmap
-        val canvas = Canvas(bitmap)
-        val matrix = Matrix()
-        if (isRawSizeMaskEnabled) {
-            matrix.preScale(scaleX, scaleY)
-        }
-        // And now draw the bitmap mask onto the original bitmap
-        canvas.drawBitmap(maskBitmap, matrix, null)
-
-        maskBitmap.recycle()
-    }
-
-    private fun blur(bitmap: Bitmap): Bitmap {
-        val rs = RenderScript.create(context)
-        val input = Allocation.createFromBitmap(rs, bitmap)
-        val output = Allocation.createTyped(rs, input.type)
-        val outputBitmap = Bitmap.createBitmap(bitmap)
-
-        val blur = ScriptIntrinsicBlur.create(rs, Element.U8_4(rs))
-        blur.setInput(input)
-        blur.setRadius(BLUR_RADIUS)
-        blur.forEach(output)
-        output.copyTo(outputBitmap)
-
-        return outputBitmap
-    }
+    // endregion
 }
 
-private fun Float.isBackground() = this < BACKGROUND_UPPER_CONFIDENCE
+private fun Float.isBackground() = this <= BACKGROUND_UPPER_CONFIDENCE
 
-private const val BACKGROUND_UPPER_CONFIDENCE = 0.4f // 1 is max confidence that pixel is in the foreground
-private const val BLUR_RADIUS = 25f // Set the radius of the Blur. Supported range 0 < radius <= 25
+private const val BACKGROUND_UPPER_CONFIDENCE = 0.9 // 1 is max confidence that pixel is in the foreground
+private const val BLUR_RADIUS = 13f // Set the radius of the Blur. Supported range 0 < radius <= 25
