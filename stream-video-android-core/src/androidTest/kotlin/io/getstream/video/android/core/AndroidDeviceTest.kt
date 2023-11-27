@@ -21,6 +21,7 @@ import app.cash.turbine.testIn
 import com.google.common.truth.Truth.assertThat
 import io.getstream.log.taggedLogger
 import io.getstream.video.android.core.api.SignalServerService
+import io.getstream.video.android.core.call.video.FilterVideoProcessor
 import io.getstream.video.android.core.events.ChangePublishQualityEvent
 import io.getstream.video.android.core.events.ParticipantJoinedEvent
 import io.getstream.video.android.core.utils.buildAudioConstraints
@@ -214,8 +215,7 @@ class AndroidDeviceTest : IntegrationTestBase(connectCoordinatorWS = false) {
         assert(join.isSuccess)
 
         val participant = call.state.participants.value.first()
-        assertThat(participant.user.value.id).isEqualTo("thierry")
-        assertThat(participant.user.value.role).isEqualTo("user")
+        assertThat(participant.userNameOrId.value).isEqualTo("thierry")
         assertThat(participant.roles.value).contains("host")
     }
 
@@ -250,7 +250,10 @@ class AndroidDeviceTest : IntegrationTestBase(connectCoordinatorWS = false) {
     @Test
     fun audioAndVideoSource() = runTest {
         val audioConstraints = buildAudioConstraints()
-        val videoSource = clientImpl.peerConnectionFactory.makeVideoSource(false)
+        val filterVideoProcessor =
+            FilterVideoProcessor({ call.videoFilter }, { call.camera.surfaceTextureHelper })
+        val videoSource =
+            clientImpl.peerConnectionFactory.makeVideoSource(false, filterVideoProcessor)
         assertThat(videoSource).isNotNull()
         val audioSource = clientImpl.peerConnectionFactory.makeAudioSource(audioConstraints)
         assertThat(audioSource).isNotNull()
