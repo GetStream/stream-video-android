@@ -34,7 +34,7 @@ landscapist = "2.2.11"
 accompanist = "0.32.0"
 telephoto = "0.3.0"
 audioswitch = "1.1.8"
-libyuv = "0.28.0"
+libyuv = "0.30.0"
 
 wire = "4.7.0"
 okhttp = "4.12.0"
