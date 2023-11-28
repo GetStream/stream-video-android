@@ -25,6 +25,7 @@ public interface NotificationHandler : NotificationPermissionHandler {
     fun onNotification(callId: StreamCallId, callDisplayName: String)
     fun onLiveCall(callId: StreamCallId, callDisplayName: String)
     fun getOngoingCallNotification(callId: StreamCallId): Notification?
+    fun getRingingCallNotification(callId: StreamCallId, callDisplayName: String): Notification?
 
     companion object {
         const val ACTION_NOTIFICATION = "io.getstream.video.android.action.NOTIFICATION"
@@ -35,6 +36,8 @@ public interface NotificationHandler : NotificationPermissionHandler {
         const val ACTION_LEAVE_CALL = "io.getstream.video.android.action.LEAVE_CALL"
         const val ACTION_ONGOING_CALL = "io.getstream.video.android.action.ONGOING_CALL"
         const val INTENT_EXTRA_CALL_CID: String = "io.getstream.video.android.intent-extra.call_cid"
+        const val INTENT_EXTRA_CALL_DISPLAY_NAME: String = "io.getstream.video.android.intent-extra.call_displayname"
+
         const val INTENT_EXTRA_NOTIFICATION_ID: String =
             "io.getstream.video.android.intent-extra.notification_id"
         const val INCOMING_CALL_NOTIFICATION_ID = 24756

@@ -23,23 +23,24 @@ import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.PendingIntent
 import android.content.Context
+import android.content.Intent
 import android.os.Build
 import androidx.core.app.NotificationChannelCompat
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationCompat.CallStyle
 import androidx.core.app.NotificationManagerCompat
 import androidx.core.app.Person
+import androidx.core.content.ContextCompat
 import io.getstream.android.push.permissions.DefaultNotificationPermissionHandler
 import io.getstream.android.push.permissions.NotificationPermissionHandler
 import io.getstream.log.TaggedLogger
 import io.getstream.log.taggedLogger
 import io.getstream.video.android.core.R
-import io.getstream.video.android.core.notifications.NotificationHandler.Companion.ACTION_ACCEPT_CALL
-import io.getstream.video.android.core.notifications.NotificationHandler.Companion.ACTION_INCOMING_CALL
 import io.getstream.video.android.core.notifications.NotificationHandler.Companion.ACTION_LIVE_CALL
 import io.getstream.video.android.core.notifications.NotificationHandler.Companion.ACTION_NOTIFICATION
 import io.getstream.video.android.core.notifications.NotificationHandler.Companion.INCOMING_CALL_NOTIFICATION_ID
 import io.getstream.video.android.core.notifications.internal.DefaultStreamIntentResolver
+import io.getstream.video.android.core.notifications.internal.service.CallService
 import io.getstream.video.android.model.StreamCallId
 
 public open class DefaultNotificationHandler(
@@ -70,18 +71,52 @@ public open class DefaultNotificationHandler(
     }
 
     override fun onRingingCall(callId: StreamCallId, callDisplayName: String) {
-        intentResolver.searchIncomingCallPendingIntent(callId)?.let { fullScreenPendingIntent ->
-            intentResolver.searchAcceptCallPendingIntent(callId)?.let { acceptCallPendingIntent ->
-                intentResolver.searchRejectCallPendingIntent(callId)?.let { rejectCallPendingIntent ->
-                    showIncomingCallNotification(
-                        fullScreenPendingIntent,
-                        acceptCallPendingIntent,
-                        rejectCallPendingIntent,
-                        callDisplayName,
-                    )
-                }
-            } ?: logger.e { "Couldn't find any activity for $ACTION_ACCEPT_CALL" }
-        } ?: logger.e { "Couldn't find any activity for $ACTION_INCOMING_CALL" }
+        // Start service
+        val serviceIntent = Intent(application.applicationContext, CallService::class.java)
+        serviceIntent.putExtra(NotificationHandler.INTENT_EXTRA_CALL_CID, callId)
+        serviceIntent.putExtra(NotificationHandler.INTENT_EXTRA_CALL_DISPLAY_NAME, callDisplayName)
+        serviceIntent.putExtra(CallService.TRIGGER_KEY, CallService.TRIGGER_INCOMING_CALL)
+        ContextCompat.startForegroundService(application.applicationContext, serviceIntent)
+    }
+
+    override fun getRingingCallNotification(callId: StreamCallId, callDisplayName: String): Notification? {
+        val fullScreenPendingIntent = intentResolver.searchIncomingCallPendingIntent(callId)
+        val acceptCallPendingIntent = intentResolver.searchAcceptCallPendingIntent(callId)
+        val rejectCallPendingIntent = intentResolver.searchRejectCallPendingIntent(callId)
+        return if (fullScreenPendingIntent != null && acceptCallPendingIntent != null && rejectCallPendingIntent != null) {
+            getIncomingCallNotification(
+                fullScreenPendingIntent,
+                acceptCallPendingIntent,
+                rejectCallPendingIntent,
+                callDisplayName,
+            )
+        } else {
+            logger.e { "Ringing call notification not  shown, one of the intents is null." }
+            null
+        }
+    }
+
+    private fun getIncomingCallNotification(
+        fullScreenPendingIntent: PendingIntent,
+        acceptCallPendingIntent: PendingIntent,
+        rejectCallPendingIntent: PendingIntent,
+        callDisplayName: String,
+    ): Notification {
+        val ongoingCallsChannelId = application.getString(
+            R.string.stream_video_ongoing_call_notification_channel_id,
+        )
+        maybeCreateChannel(ongoingCallsChannelId, application)
+        return getNotification {
+            priority = NotificationCompat.PRIORITY_HIGH
+            setContentTitle("Incoming call")
+            setContentText(callDisplayName)
+            setChannelId(ongoingCallsChannelId)
+            setOngoing(false)
+            setContentIntent(fullScreenPendingIntent)
+            setFullScreenIntent(fullScreenPendingIntent, true)
+            setCategory(NotificationCompat.CATEGORY_CALL)
+            addCallActions(acceptCallPendingIntent, rejectCallPendingIntent, callDisplayName)
+        }
     }
 
     override fun onNotification(callId: StreamCallId, callDisplayName: String) {
@@ -218,13 +253,20 @@ public open class DefaultNotificationHandler(
         notificationId: Int,
         builder: NotificationCompat.Builder.() -> Unit,
     ) {
-        val notification = NotificationCompat.Builder(application, getChannelId())
+        val notification = getNotification(builder)
+        notificationManager.notify(notificationId, notification)
+    }
+
+    private fun getNotification(
+        builder: NotificationCompat.Builder.() -> Unit,
+    ): Notification {
+        return NotificationCompat.Builder(application, getChannelId())
             .setSmallIcon(android.R.drawable.presence_video_online)
             .setAutoCancel(true)
             .apply(builder)
             .build()
-        notificationManager.notify(notificationId, notification)
     }
+
     private fun NotificationCompat.Builder.addCallActions(
         acceptCallPendingIntent: PendingIntent,
         rejectCallPendingIntent: PendingIntent,

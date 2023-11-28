@@ -83,3 +83,5 @@ public fun Intent.streamCallId(key: String): StreamCallId? = when {
         getParcelableExtra(key)
             as? StreamCallId
 }
+
+public fun Intent.streamCallDisplayName(key: String): String = this.getStringExtra(key) ?: ""

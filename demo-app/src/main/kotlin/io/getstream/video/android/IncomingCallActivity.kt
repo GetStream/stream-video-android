@@ -62,11 +62,12 @@ class IncomingCallActivity : ComponentActivity() {
         window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
 
         val callId = intent.streamCallId(NotificationHandler.INTENT_EXTRA_CALL_CID)!!
+        val streamVideo = StreamVideo.instance()
 
         lifecycleScope.launch {
             // Not necessary if you initialise the SDK in Application.onCreate()
             StreamVideoInitHelper.loadSdk(dataStore = dataStore)
-            val call = StreamVideo.instance().call(callId.type, callId.id)
+            val call = streamVideo.call(callId.type, callId.id)
 
             // Update the call state. This activity could have been started from a push notification.
             // Doing a call.get() will also internally update the Call state object with the latest
@@ -87,9 +88,34 @@ class IncomingCallActivity : ComponentActivity() {
 
             // We also check if savedInstanceState is null to prevent duplicate calls when activity
             // is recreated (e.g. when entering PiP mode)
+            //TODO: AAP This is the same logic as in CallActivity, should be merged
             if (NotificationHandler.ACTION_ACCEPT_CALL == intent.action && savedInstanceState == null) {
                 call.accept()
-                call.join()
+                val activeCall = streamVideo.state.activeCall.value
+                val activeOrNewCall = if (activeCall != null) {
+                    if (activeCall.id != callId.id) {
+                        Log.w("CallActivity", "A call with id: ${callId.cid} existed. Leaving.")
+                        // If the call id is different leave the previous call
+                        activeCall.leave()
+                        // Return a new call
+                        streamVideo.call(type = callId.type, id = callId.id)
+                    } else {
+                        // Call ID is the same, use the active call
+                        activeCall
+                    }
+                } else {
+                    // There is no active call, create new call
+                    streamVideo.call(type = callId.type, id = callId.id)
+                }
+                if (activeCall != activeOrNewCall) {
+                    val joinResult = call.join(create = true)
+
+                    // Unable to join. Device is offline or other usually connection issue.
+                    if (joinResult is Result.Failure) {
+                        Log.e("CallActivity", "Call.join failed ${joinResult.value}")
+                        finish()
+                    }
+                }
             }
 
             setContent {

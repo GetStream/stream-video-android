@@ -20,7 +20,7 @@ import android.content.Context
 import android.content.Intent
 import androidx.core.content.ContextCompat
 import io.getstream.video.android.core.notifications.NotificationHandler
-import io.getstream.video.android.core.notifications.internal.service.OngoingCallService
+import io.getstream.video.android.core.notifications.internal.service.CallService
 import io.getstream.video.android.model.StreamCallId
 import io.getstream.video.android.model.User
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -125,11 +125,12 @@ class ClientState(client: StreamVideo) {
     private fun maybeStartForegroundService(call: Call) {
         if (clientImpl.runForeGroundService) {
             val context = clientImpl.context
-            val serviceIntent = Intent(context, OngoingCallService::class.java)
+            val serviceIntent = Intent(context, CallService::class.java)
             serviceIntent.putExtra(
                 NotificationHandler.INTENT_EXTRA_CALL_CID,
                 StreamCallId.fromCallCid(call.cid),
             )
+            serviceIntent.putExtra(CallService.TRIGGER_KEY, CallService.TRIGGER_ONGOING_CALL)
             ContextCompat.startForegroundService(context, serviceIntent)
         }
     }
@@ -137,7 +138,7 @@ class ClientState(client: StreamVideo) {
     private fun maybeStopForegroundService() {
         if (clientImpl.runForeGroundService) {
             val context = clientImpl.context
-            val serviceIntent = Intent(context, OngoingCallService::class.java)
+            val serviceIntent = Intent(context, CallService::class.java)
             context.stopService(serviceIntent)
         }
     }
