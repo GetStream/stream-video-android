@@ -100,13 +100,13 @@ class BlurredBackgroundVideoFilter {
         }
 
         destination.setPixels(
-            /* pixels = */ destinationPixels,
-            /* offset = */ 0,
-            /* stride = */ destination.width,
-            /* x = */ 0,
-            /* y = */ 0,
-            /* width = */ destination.width,
-            /* height = */ destination.height,
+            destinationPixels,
+            0,
+            destination.width,
+            0,
+            0,
+            destination.width,
+            destination.height,
         )
     }
 
