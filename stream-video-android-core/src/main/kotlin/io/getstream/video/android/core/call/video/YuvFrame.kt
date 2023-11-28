@@ -56,8 +56,6 @@ object YuvFrame {
         val planes = arrayOf<ByteBuffer>(toI420.dataY, toI420.dataU, toI420.dataV)
         val strides = intArrayOf(toI420.strideY, toI420.strideU, toI420.strideV)
 
-        toI420.release()
-
         val halfWidth = (width + 1).shr(1)
         val halfHeight = (height + 1).shr(1)
 
@@ -91,6 +89,8 @@ object YuvFrame {
                 byteBuffer.position(limit)
             }
         }
+
+        toI420.release()
 
         return I420Buffer.wrap(byteBuffer, width, height)
     }
