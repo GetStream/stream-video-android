@@ -23,6 +23,7 @@ plugins {
     id("io.getstream.video.generateServices")
     id("io.getstream.spotless")
     id(libs.plugins.kotlin.serialization.get().pluginId)
+    id(libs.plugins.kotlin.parcelize.get().pluginId)
     id(libs.plugins.wire.get().pluginId)
 }
 
@@ -123,18 +124,17 @@ android {
 }
 
 baselineProfile {
+    baselineProfileOutputDir = "."
     filter {
         include("io.getstream.video.android.core.**")
+        include("io.getstream.video.android.datastore.**")
+        include("io.getstream.video.android.model.**")
         include("org.openapitools.client.**")
         include("org.webrtc.**")
     }
 }
 
 dependencies {
-    // stream modules
-    api(project(":stream-video-android-model"))
-    implementation(project(":stream-video-android-datastore"))
-
     // webrtc
     api(libs.stream.webrtc)
     api(libs.stream.webrtc.ui)
@@ -155,6 +155,7 @@ dependencies {
 
     // serialization
     implementation(libs.kotlinx.serialization.protobuf)
+    implementation(libs.kotlinx.serialization.json)
 
     // API & Protobuf
     api(libs.wire.runtime)
@@ -180,6 +181,14 @@ dependencies {
     implementation(libs.stream.push)
     implementation(libs.stream.push.delegate)
     api(libs.stream.push.permissions)
+
+
+    // datastore
+    api(libs.androidx.datastore)
+    api(libs.androidx.datastore.core)
+
+    // crypto
+    implementation(libs.tink)
 
     // unit tests
     testImplementation(libs.junit)

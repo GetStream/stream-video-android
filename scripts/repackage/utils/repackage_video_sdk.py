@@ -102,14 +102,11 @@ def _modify_build_gradle(file_path: str) -> None:
 
 def _install_modules():
     modules = [
-        "stream-video-android-mock",
-        "stream-video-android-model",
-        "stream-video-android-datastore",
-        "stream-video-android-tooling",
+        "stream-video-android-previewdata",
         "stream-video-android-core",
-        "stream-video-android-ui-common",
-        "stream-video-android-compose",
-        "stream-video-android-xml",
+        "stream-video-android-ui-core",
+        "stream-video-android-ui-compose",
+        "stream-video-android-ui-xml",
     ]
     for module in modules:
         install_android_lib_module_to_local_maven(module)
@@ -118,7 +115,7 @@ def _install_modules():
 def _update_dogfooding_dependencies(project_root: str, group_id: str) -> None:
     # Read the content of the file
 
-    file_path = os.path.join(project_root, "dogfooding", "build.gradle.kts")
+    file_path = os.path.join(project_root, "demo-app", "build.gradle.kts")
     with open(file_path, 'r') as file:
         lines = file.readlines()
 

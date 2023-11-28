@@ -57,7 +57,7 @@ public class CallHealthMonitor(
     private val checkInterval = 5000L
     private var lastReconnectAt: OffsetDateTime? = null
     private val reconnectDebounceMs = 700L
-    private val iceRestartTimeout = 4000L
+    private val iceRestartTimeout = 6000L
     private var isRunning = false
     private var timeoutJob: Job? = null
 
@@ -91,6 +91,10 @@ public class CallHealthMonitor(
         isRunning = false
         supervisorJob.cancel()
         network.unsubscribe(networkStateListener)
+    }
+
+    fun stopTimer() {
+        timeoutJob?.cancel()
     }
 
     val goodStates = listOf(
@@ -155,7 +159,7 @@ public class CallHealthMonitor(
      * Will skip if we already tried to reconnect less than reconnectDebounceMs ms ago
      */
     suspend fun reconnect(forceRestart: Boolean) {
-        if (reconnectInProgress) {
+        if (reconnectInProgress && !forceRestart) {
             logger.d { "[reconnect] Reconnect already in progress - skipping" }
             return
         }

@@ -9,9 +9,8 @@ stream-video-android                                @GetStream/android-developer
 stream-video-android-pushprovider-firebase     @GetStream/android-developers
 
 # UI
-app                                 @GetStream/android-developers
-dogfooding                          @GetStream/android-developers
-stream-video-android-compose        @GetStream/android-developers
+demo-app                          @GetStream/android-developers
+stream-video-android-ui-compose        @GetStream/android-developers
 
 ### Top level files and directories
 # Git and GitHub

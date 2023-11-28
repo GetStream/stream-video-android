@@ -25,16 +25,16 @@ jobs:
           gpg -d --passphrase "${{ secrets.PASSPHRASE }}" --batch .sign/keystore.properties.asc > .sign/keystore.properties
           echo "${{ secrets.ENV_PROPERTIES }}" > .env.properties
       - name: Assemble
-        run: bash ./gradlew :dogfooding:assembleRelease --stacktrace
+        run: bash ./gradlew :demo-app:assembleRelease --stacktrace
       - name: Upload APK
         uses: actions/upload-artifact@v2
         with:
-          name: dogfooding-release
-          path: dogfooding/build/outputs/apk/dogfooding/release/
+          name: demo-app-release
+          path: demo-app/build/outputs/apk/demo-app/release/
       - name: Upload artifact to Firebase App Distribution
         uses: wzieba/Firebase-Distribution-Github-Action@v1.5.0
         with:
           appId: ${{secrets.FIREBASE_DOGFOODING_SAMPLE_APP_ID}}
           serviceCredentialsFileContent: ${{ secrets.CREDENTIAL_FILE_CONTENT }}
           groups: stream-testers
-          file: dogfooding/build/outputs/apk/dogfooding/release/dogfooding-dogfooding-release.apk
+          file: demo-app/build/outputs/apk/development/release/demo-app-development-release.apk

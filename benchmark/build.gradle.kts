@@ -59,25 +59,22 @@ android {
             signingConfig = signingConfigs.getByName("debug")
             matchingFallbacks.add("release")
             proguardFiles("benchmark-rules.pro")
-            buildConfigField("Boolean", "BENCHMARK", "true")
         }
     }
 
     flavorDimensions += "environment"
     productFlavors {
-        create("dogfooding") {
+        create("development") {
             dimension = "environment"
             proguardFiles("benchmark-rules.pro")
-            buildConfigField("Boolean", "BENCHMARK", "true")
         }
         create("production") {
             dimension = "environment"
             proguardFiles("benchmark-rules.pro")
-            buildConfigField("Boolean", "BENCHMARK", "true")
         }
     }
 
-    targetProjectPath = ":dogfooding"
+    targetProjectPath = ":demo-app"
 
     testOptions.managedDevices.devices {
         maybeCreate<com.android.build.api.dsl.ManagedVirtualDevice>("pixel6api31").apply {

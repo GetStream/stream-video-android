@@ -35,7 +35,7 @@ If you're new to android, note that there are 2 `build.gradle` files, you want t
 ```groovy
 dependencies {
     // Stream Video Compose SDK
-    implementation("io.getstream:stream-video-android-compose:0.4.2")
+    implementation("io.getstream:stream-video-android-ui-compose:0.4.2")
 
     // Jetpack Compose (optional/ android studio typically adds them when you create a new project)
     implementation(platform("androidx.compose:compose-bom:2023.08.00"))
@@ -50,7 +50,7 @@ dependencies {
 
 There are 2 versions of Stream's SDK.
 
-- **Video Compose SDK**: `io.getstream:stream-video-android-compose` dependency that includes the video core SDK + compose UI components.
+- **Video Compose SDK**: `io.getstream:stream-video-android-ui-compose` dependency that includes the video core SDK + compose UI components.
 - **Video Core SDK**: `io.getstream:stream-video-android-core` that only includes the core parts of the video SDK.
 
 For this tutorial, we'll use the compose UI components.
@@ -234,7 +234,7 @@ public fun AudioRoom(
     val participants by call.state.participants.collectAsState()
     val activeSpeakers by call.state.activeSpeakers.collectAsState()
     val activeSpeaker = activeSpeakers.firstOrNull()
-    val sortedParticipants by call.state.sortedParticipants.collectAsState()
+    val sortedParticipants by call.state.sortedParticipants.collectAsState(emptyList())
 
     val backstage by call.state.backstage.collectAsState()
     val isMicrophoneEnabled by call.microphone.isEnabled.collectAsState()
@@ -242,7 +242,7 @@ public fun AudioRoom(
     Description(title, description, participants)
 
     activeSpeaker?.let {
-        Text("${it.user.value.name} is speaking")
+        Text("${it.userNameOrId.value} is speaking")
     }
 
     Column(
@@ -409,8 +409,8 @@ public fun ParticipantAvatar(
     participant: ParticipantState,
     modifier: Modifier = Modifier
 ) {
-    val user by participant.user.collectAsState()
     val nameOrId by participant.userNameOrId.collectAsState()
+    val image by participant.image.collectAsState()
     val isSpeaking by participant.speaking.collectAsState()
     val audioEnabled by participant.audioEnabled.collectAsState()
 
@@ -422,7 +422,8 @@ public fun ParticipantAvatar(
 
         Box(modifier = Modifier.size(VideoTheme.dimens.audioAvatarSize)) {
             UserAvatar(
-                user = user,
+                userName = nameOrId,
+                userImage = image,
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(VideoTheme.dimens.audioAvatarPadding)

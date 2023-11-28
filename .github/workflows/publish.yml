@@ -24,7 +24,7 @@ jobs:
 
       - name: Release build
         # assembleRelease for all modules, excluding non-library modules: samples, docs
-        run: ./gradlew assembleRelease -x :app:assembleRelease -x :dogfooding:assembleRelease -x :tutorials:tutorial-video:assembleRelease -x :tutorials:tutorial-audio:assembleRelease
+        run: ./gradlew assembleRelease -x :demo-app:assembleRelease -x :tutorials:tutorial-video:assembleRelease -x :tutorials:tutorial-audio:assembleRelease
 
       - name: Source jar and dokka
         run: ./gradlew androidSourcesJar javadocJar

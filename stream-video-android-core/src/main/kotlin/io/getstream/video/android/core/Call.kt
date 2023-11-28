@@ -67,10 +67,12 @@ import org.openapitools.client.models.ListRecordingsResponse
 import org.openapitools.client.models.MemberRequest
 import org.openapitools.client.models.MuteUsersResponse
 import org.openapitools.client.models.OwnCapability
+import org.openapitools.client.models.PinResponse
 import org.openapitools.client.models.RejectCallResponse
 import org.openapitools.client.models.SendEventResponse
 import org.openapitools.client.models.SendReactionResponse
 import org.openapitools.client.models.StopLiveResponse
+import org.openapitools.client.models.UnpinResponse
 import org.openapitools.client.models.UpdateCallMembersRequest
 import org.openapitools.client.models.UpdateCallMembersResponse
 import org.openapitools.client.models.UpdateCallRequest
@@ -587,6 +589,14 @@ public class Call(
         return result
     }
 
+    suspend fun pinForEveryone(sessionId: String, userId: String): Result<PinResponse> {
+        return clientImpl.pinForEveryone(type, id, sessionId, userId)
+    }
+
+    suspend fun unpinForEveryone(sessionId: String, userId: String): Result<UnpinResponse> {
+        return clientImpl.unpinForEveryone(type, id, sessionId, userId)
+    }
+
     suspend fun sendReaction(
         type: String,
         emoji: String? = null,
@@ -998,6 +1008,19 @@ public class Call(
 
             track.video.addSink(screenshotSink)
         }
+    }
+
+    fun isPinnedParticipant(sessionId: String): Boolean = state.pinnedParticipants.value.containsKey(
+        sessionId,
+    )
+
+    fun isServerPin(sessionId: String): Boolean = state._serverPins.value.containsKey(sessionId)
+
+    fun isLocalPin(sessionId: String): Boolean = state._localPins.value.containsKey(sessionId)
+
+    fun hasCapability(vararg capability: OwnCapability): Boolean {
+        val elements = capability.toList()
+        return state.ownCapabilities.value.containsAll(elements)
     }
 
     @InternalStreamVideoApi

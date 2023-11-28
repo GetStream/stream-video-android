@@ -1,9 +1,10 @@
 [versions]
-androidGradlePlugin = "8.1.2"
+androidGradlePlugin = "8.1.3"
+cameraCamera2 = "1.3.0"
 spotless = "6.21.0"
 nexusPlugin = "1.3.0"
-kotlin = "1.9.10"
-ksp = "1.9.10-1.0.13"
+kotlin = "1.9.20"
+ksp = "1.9.20-1.0.13"
 kotlinSerialization = "1.6.0"
 kotlinSerializationConverter = "1.0.0"
 kotlinxCoroutines = "1.7.3"
@@ -11,25 +12,25 @@ kotlinxCoroutines = "1.7.3"
 kotlinDokka = "1.9.10"
 jvmTarget = "11"
 
-androidxMaterial = "1.9.0"
+androidxMaterial = "1.10.0"
 androidxAppCompat = "1.6.1"
 androidxCore = "1.12.0"
 androidxAnnotation = "1.7.0"
 androidxLifecycle = "2.6.2"
 androidxStartup = "1.1.1"
-androidxActivity = "1.7.2"
+androidxActivity = "1.8.0"
 androidxDataStore = "1.0.0"
 googleService = "4.3.14"
 
 androidxComposeBom = "2023.10.01"
-androidxComposeCompiler = "1.5.3"
+androidxComposeCompiler = "1.5.4"
 androidxComposeTracing = "1.0.0-alpha03"
-androidxHiltNavigation = "1.0.0"
-androidxComposeNavigation = "2.7.4"
-composeStableMarker = "1.0.1"
+androidxHiltNavigation = "1.1.0"
+androidxComposeNavigation = "2.7.5"
+composeStableMarker = "1.0.2"
 
-coil = "2.4.0"
-landscapist = "2.2.10"
+coil = "2.5.0"
+landscapist = "2.2.11"
 accompanist = "0.32.0"
 telephoto = "0.3.0"
 audioswitch = "1.1.8"
@@ -43,17 +44,17 @@ threetenAbp = "1.4.6"
 tink = "1.9.0"
 turbine = "0.13.0"
 
-streamWebRTC = "1.1.0"
+streamWebRTC = "1.1.1"
 streamResult = "1.1.0"
-streamChat = "6.0.4"
+streamChat = "6.0.8"
 streamLog = "1.1.4"
-streamPush = "1.1.4"
+streamPush = "1.1.6"
 
 androidxTest = "1.5.2"
 androidxTestCore = "1.5.0"
 androidxProfileinstaller = "1.3.1"
 androidxMacroBenchmark = "1.2.0"
-androidxUiAutomator = "2.3.0-alpha04"
+androidxUiAutomator = "2.3.0-alpha05"
 androidxContraintLayout = "2.1.4"
 androidxEspresso = "3.5.1"
 androidxJunit = "1.1.5"
@@ -63,20 +64,21 @@ junit = "4.13.2"
 truth = "1.1.3"
 mockk = "1.13.4"
 kotlinTestJunit = "1.8.20"
-firebaseBom = "32.1.0"
+firebaseBom = "32.5.0"
 firebaseCrashlytics = "2.9.5"
 
 installReferrer = "2.2"
-playCodeScanner = "16.1.0"
+playAuth = "20.7.0"
+playAppUpdate = "2.1.0"
 
 hilt = "2.48.1"
-desugar = "2.0.3"
+desugar = "2.0.4"
 leakCanary = "2.12"
 binaryCompatabilityValidator = "0.13.2"
 playPublisher = "3.8.4"
 
 [libraries]
-
+androidx-camera-camera2 = { module = "androidx.camera:camera-camera2", version.ref = "cameraCamera2" }
 androidx-material = { group = "com.google.android.material", name = "material", version.ref = "androidxMaterial" }
 androidx-appcompat = { group = "androidx.appcompat", name = "appcompat", version.ref = "androidxAppCompat" }
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "androidxCore" }
@@ -184,7 +186,8 @@ firebase-crashlytics = { group = "com.google.firebase", name = "firebase-crashly
 firebase-analytics = { group = "com.google.firebase", name = "firebase-analytics-ktx" }
 
 play-install-referrer = { group = "com.android.installreferrer", name = "installreferrer", version.ref = "installReferrer" }
-play-code-scanner = { group = "com.google.android.gms", name = "play-services-code-scanner", version.ref = "playCodeScanner" }
+play-auth = { group = "com.google.android.gms", name = "play-services-auth", version.ref = "playAuth" }
+play-app-update-ktx = { group = "com.google.android.play", name = "app-update-ktx", version.ref = "playAppUpdate" }
 
 robolectric = { group = "org.robolectric", name = "robolectric", version.ref = "robolectric" }
 leakCanary = { group = "com.squareup.leakcanary", name = "leakcanary-android", version.ref = "leakCanary" }
@@ -193,6 +196,10 @@ leakCanary = { group = "com.squareup.leakcanary", name = "leakcanary-android", v
 android-gradlePlugin = { group = "com.android.tools.build", name = "gradle", version.ref = "androidGradlePlugin" }
 kotlin-gradlePlugin = { group = "org.jetbrains.kotlin", name = "kotlin-gradle-plugin", version.ref = "kotlin" }
 spotless-gradlePlugin = { group = "com.diffplug.spotless", name = "spotless-plugin-gradle", version.ref = "spotless" }
+androidx-camera-core = { group = "androidx.camera", name = "camera-core", version = "1.3.0" }
+play-services-mlkit-barcode-scanning = { group = "com.google.android.gms", name = "play-services-mlkit-barcode-scanning", version = "18.3.0" }
+androidx-camera-view = { group = "androidx.camera", name = "camera-view", version = "1.3.0" }
+androidx-camera-lifecycle = { group = "androidx.camera", name = "camera-lifecycle", version = "1.3.0" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "androidGradlePlugin" }

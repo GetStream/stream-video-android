@@ -23,6 +23,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.channels.ProducerScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.channelFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
@@ -43,7 +44,7 @@ internal class SortedParticipantsState(
     scope: CoroutineScope,
     private val call: Call,
     private val participants: MutableStateFlow<SortedMap<String, ParticipantState>>,
-    private val pinnedParticipants: MutableStateFlow<Map<String, OffsetDateTime>>,
+    private val pinnedParticipants: StateFlow<Map<String, OffsetDateTime>>,
     private var comparator: Comparator<ParticipantState>? = null,
 ) {
     // Internal

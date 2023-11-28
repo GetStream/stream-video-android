@@ -63,6 +63,8 @@ import io.getstream.video.android.core.utils.stringify
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -91,6 +93,7 @@ import org.webrtc.MediaStreamTrack
 import org.webrtc.PeerConnection
 import org.webrtc.PeerConnection.PeerConnectionState
 import org.webrtc.RTCStatsReport
+import org.webrtc.RtpParameters.Encoding
 import org.webrtc.RtpTransceiver
 import org.webrtc.SessionDescription
 import retrofit2.HttpException
@@ -301,12 +304,11 @@ public class RtcSession internal constructor(
     private val _sfuSocketState = MutableStateFlow<SocketState>(SocketState.NotConnected)
     val sfuSocketState = _sfuSocketState.asStateFlow()
 
-    private val sfuFastReconnectListener: () -> Unit = {
+    private val sfuFastReconnectListener: suspend () -> Unit = {
         // SFU socket has done a fast-reconnect. We need to an ICE restart immediately and not wait
         // until the health check runs
-        coroutineScope.launch {
-            call.monitor.reconnect(forceRestart = true)
-        }
+        call.monitor.stopTimer()
+        call.monitor.reconnect(forceRestart = true)
     }
 
     init {
@@ -391,22 +393,25 @@ public class RtcSession internal constructor(
      */
     suspend fun reconnect(forceRestart: Boolean) {
         // ice restart
-        subscriber?.let {
-            if (!it.isHealthy()) {
-                // Do not request subscriber ICE restart in fast-reconnect mode - this will
-                // be done for you by the SFU
-                if (!forceRestart) {
+        val subscriberAsync = coroutineScope.async {
+            subscriber?.let {
+                if (!it.isHealthy()) {
                     logger.i { "ice restarting subscriber peer connection" }
                     requestSubscriberIceRestart()
                 }
             }
         }
-        publisher?.let {
-            if (!it.isHealthy() || forceRestart) {
-                logger.i { "ice restarting publisher peer connection (force restart = $forceRestart)" }
-                it.connection.restartIce()
+
+        val publisherAsync = coroutineScope.async {
+            publisher?.let {
+                if (!it.isHealthy() || forceRestart) {
+                    logger.i { "ice restarting publisher peer connection (force restart = $forceRestart)" }
+                    it.connection.restartIce()
+                }
             }
         }
+
+        awaitAll(subscriberAsync, publisherAsync)
     }
 
     suspend fun connect() {
@@ -444,6 +449,17 @@ public class RtcSession internal constructor(
         sfuSocketStateJob = coroutineScope.launch {
             sfuConnectionModule.sfuSocket.connectionState.collect { sfuSocketState ->
                 _sfuSocketState.value = sfuSocketState
+
+                // make sure we stop handling ICE candidates when a new SFU socket
+                // connection is being established. We need to wait until a SubscriberOffer
+                // is received again and then we start listening to the ICE candidate queue
+                if (sfuSocketState == SocketState.Connecting ||
+                    sfuSocketState is SocketState.DisconnectedTemporarily ||
+                    sfuSocketState is SocketState.DisconnectedByRequest
+                ) {
+                    syncSubscriberCandidates?.cancel()
+                    syncSubscriberCandidates?.cancel()
+                }
             }
         }
     }
@@ -864,59 +880,43 @@ public class RtcSession internal constructor(
      * Change the quality of video we upload when the ChangePublishQualityEvent event is received
      * This is used for dynsacle
      */
-    internal fun updatePublishQuality(event: ChangePublishQualityEvent) {
-        if (publisher == null) {
-            return
-        }
-        val enabledRids =
-            event.changePublishQuality.video_senders.firstOrNull()?.layers?.associate { it.name to it.active }
-        val transceiver = publisher?.videoTransceiver ?: return
-        // enable or disable tracks
+    internal fun updatePublishQuality(event: ChangePublishQualityEvent) = synchronized(this) {
+        val sender = publisher?.connection?.transceivers?.firstOrNull {
+            it.mediaType == MediaStreamTrack.MediaType.MEDIA_TYPE_VIDEO
+        }?.sender
 
-        if (transceiver.sender.dtmf() == null) return
-
-        val encodings = transceiver.sender.parameters.encodings.toList()
-        for (encoding in encodings) {
-            encoding.active = enabledRids?.get(encoding.rid ?: "") ?: false
+        if (sender == null) {
+            dynascaleLogger.w {
+                "Request to change publishing quality not fulfilled due to missing transceivers or sender."
+            }
+            return@synchronized
         }
 
-        dynascaleLogger.i { "video quality: marking layers active $enabledRids " }
-
-        transceiver.sender.parameters.encodings.clear()
-        transceiver.sender.parameters.encodings.addAll(encodings)
-
-        // publisher?.videoTransceiver?.sender?.parameters = transceiver.sender.parameters
-
-        return
-
-        logger.v { "[updatePublishQuality] #sfu; updateQuality: $enabledRids" }
-        val params = transceiver.sender.parameters
-
-        var encodingChanged = false
-        logger.v { "[updatePublishQuality] #sfu; currentQuality: $params" }
-
-//        for (encoding in params.encodings) {
-//            if (encoding.rid != null) {
-//                val shouldEnable = encoding.rid in enabledRids
-//
-//                if (shouldEnable && encoding.active) {
-//                    updatedEncodings.add(encoding)
-//                } else if (!shouldEnable && !encoding.active) {
-//                    updatedEncodings.add(encoding)
-//                } else {
-//                    encodingChanged = true
-//                    encoding.active = shouldEnable
-//                    updatedEncodings.add(encoding)
-//                }
-//            }
-//        }
-//        if (encodingChanged && false) {
-// //            logger.v { "[updatePublishQuality] #sfu; updatedEncodings: $updatedEncodings" }
-//            params.encodings.clear()
-//            params.encodings.addAll(updatedEncodings)
-//
-//            publisher?.videoTransceiver?.sender?.parameters = params
-//        }
+        val enabledRids = event.changePublishQuality.video_senders.firstOrNull()?.layers?.associate {
+            it.name to it.active
+        }
+        dynascaleLogger.i { "enabled rids: $enabledRids}" }
+        val params = sender.parameters
+        val updatedEncodings: MutableList<Encoding> = mutableListOf()
+        var changed = false
+        for (encoding in params.encodings) {
+            val shouldEnable = enabledRids?.get(encoding.rid) ?: false
+            if (shouldEnable && encoding.active) {
+                updatedEncodings.add(encoding)
+            } else if (!shouldEnable && !encoding.active) {
+                updatedEncodings.add(encoding)
+            } else {
+                changed = true
+                encoding.active = shouldEnable
+                updatedEncodings.add(encoding)
+            }
+        }
+        if (changed) {
+            dynascaleLogger.i { "Updated publish quality with encodings $updatedEncodings" }
+            params.encodings.clear()
+            params.encodings.addAll(updatedEncodings)
+            sender.parameters = params
+        }
     }
 
     private val defaultVideoDimension = VideoDimension(1080, 2340)
@@ -1182,19 +1182,14 @@ public class RtcSession internal constructor(
         logger.d { "[handleSubscriberOffer] #sfu; #subscriber; event: $offerEvent" }
         val subscriber = subscriber ?: return
 
+        syncSubscriberCandidates?.cancel()
+
         // step 1 - receive the offer and set it to the remote
         val offerDescription = SessionDescription(
             SessionDescription.Type.OFFER,
             offerEvent.sdp,
         )
         subscriber.setRemoteDescription(offerDescription)
-
-        syncSubscriberCandidates?.cancel()
-        syncSubscriberCandidates = coroutineScope.launch {
-            sfuConnectionModule.sfuSocket.pendingSubscriberIceCandidates.collect { iceCandidates ->
-                subscriber.addIceCandidate(iceCandidates)
-            }
-        }
 
         // step 2 - create the answer
         val answerResult = subscriber.createAnswer()
@@ -1236,6 +1231,14 @@ public class RtcSession internal constructor(
                 val sendAnswerResult = sendAnswer(sendAnswerRequest)
                 logger.v { "[handleSubscriberOffer] #sfu; #subscriber; sendAnswerResult: $sendAnswerResult" }
                 emit(sendAnswerResult.getOrThrow())
+
+                // setRemoteDescription has been called and everything is ready - we can
+                // now start handling the ICE subscriber candidates queue
+                syncSubscriberCandidates = coroutineScope.launch {
+                    sfuConnectionModule.sfuSocket.pendingSubscriberIceCandidates.collect { iceCandidates ->
+                        subscriber.addIceCandidate(iceCandidates)
+                    }
+                }
             }.flowOn(DispatcherProvider.IO).retryWhen { cause, attempt ->
                 val sameValue = answerSdp == subscriberSdpAnswer.value
                 val sameSfu = currentSfu == sfuUrl

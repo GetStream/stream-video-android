@@ -12,14 +12,11 @@ rootProject.extra.apply {
 
 dependencies {
   constraints {
-    api(project(":stream-video-android-model"))
     api(project(":stream-video-android-core"))
-    api(project(":stream-video-android-ui-common"))
-    api(project(":stream-video-android-xml"))
-    api(project(":stream-video-android-compose"))
-    api(project(":stream-video-android-datastore"))
-    api(project(":stream-video-android-tooling"))
-    api(project(":stream-video-android-mock"))
+    api(project(":stream-video-android-ui-core"))
+    api(project(":stream-video-android-ui-xml"))
+    api(project(":stream-video-android-ui-compose"))
+    api(project(":stream-video-android-previewdata"))
   }
 }
 

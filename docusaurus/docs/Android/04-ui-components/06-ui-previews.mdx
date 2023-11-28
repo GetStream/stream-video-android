@@ -1,13 +1,13 @@
 ---
 title: UI Previews
-description: How to preview UI components in Android Studio using stream-video-android-mock library
+description: How to preview UI components in Android Studio using stream-video-android-previewdata library
 ---
 
 [Preview your Composable functions](https://developer.android.com/jetpack/compose/tooling/previews) is really powerful feature of the Android Studio.
 
 Most of Stream Video SDK's UI components rely on the `Call`, `ParticipantState`, and much more, and it's difficult to make mock instances of them.
 
-So we provide a useful library called `stream-video-android-mock` that allows you to get some mock instances of them and write your preview or test codes for Stream Video UI components easily.
+So we provide a useful library called `stream-video-android-previewdata` that allows you to get some mock instances of them and write your preview or test codes for Stream Video UI components easily.
 
 You'll be able to build your own preview Composable functions like so:
 
@@ -25,7 +25,7 @@ To use this library, add the dependency below below to your module's `build.grad
 
 ```groovy
 dependencies {
-    implementation "io.getstream:stream-video-android-mock:$stream_version"
+    implementation "io.getstream:stream-video-android-previewdata:$stream_version"
 }
 ```
 

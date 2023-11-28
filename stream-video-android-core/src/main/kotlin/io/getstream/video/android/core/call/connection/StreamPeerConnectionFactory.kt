@@ -27,14 +27,13 @@ import org.webrtc.AudioSource
 import org.webrtc.AudioTrack
 import org.webrtc.DefaultVideoDecoderFactory
 import org.webrtc.EglBase
-import org.webrtc.HardwareVideoEncoderFactory
 import org.webrtc.Logging
 import org.webrtc.MediaConstraints
 import org.webrtc.MediaStream
 import org.webrtc.PeerConnection
 import org.webrtc.PeerConnectionFactory
-import org.webrtc.SimulcastVideoEncoderFactory
-import org.webrtc.SoftwareVideoEncoderFactory
+import org.webrtc.ResolutionAdjustment
+import org.webrtc.SimulcastAlignedVideoEncoderFactory
 import org.webrtc.VideoSource
 import org.webrtc.VideoTrack
 import org.webrtc.audio.JavaAudioDeviceModule
@@ -101,8 +100,12 @@ public class StreamPeerConnectionFactory(private val context: Context) {
      * Default encoder factory that supports Simulcast, used to send video tracks to the server.
      */
     private val videoEncoderFactory by lazy {
-        val hardwareEncoder = HardwareVideoEncoderFactory(eglBase.eglBaseContext, true, true)
-        SimulcastVideoEncoderFactory(hardwareEncoder, SoftwareVideoEncoderFactory())
+        SimulcastAlignedVideoEncoderFactory(
+            eglBase.eglBaseContext,
+            enableIntelVp8Encoder = true,
+            enableH264HighProfile = true,
+            resolutionAdjustment = ResolutionAdjustment.MULTIPLE_OF_16,
+        )
     }
 
     /**
