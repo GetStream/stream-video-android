@@ -100,8 +100,9 @@ internal fun SettingsMenu(
                     modifier = Modifier.clickable {
                         if (call.videoFilter == null) {
                             call.videoFilter = object : BitmapVideoFilter() {
+                                val filter = BlurredBackgroundVideoFilter()
+
                                 override fun filter(bitmap: Bitmap) {
-                                    val filter = BlurredBackgroundVideoFilter()
                                     filter.applyFilter(bitmap)
                                 }
                             }
