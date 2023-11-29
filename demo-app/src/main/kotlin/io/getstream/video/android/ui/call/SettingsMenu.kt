@@ -128,7 +128,7 @@ internal fun SettingsMenu(
                         } else {
                             call.stopScreenSharing()
                         }
-                    }
+                    },
                 )
 
                 Spacer(modifier = Modifier.height(12.dp))
@@ -139,7 +139,7 @@ internal fun SettingsMenu(
                     onClick = {
                         onDismissed.invoke()
                         onDisplayAvailableDevice.invoke()
-                    }
+                    },
                 )
 
                 Spacer(modifier = Modifier.height(12.dp))
@@ -169,7 +169,7 @@ internal fun SettingsMenu(
                         } else {
                             call.videoFilter = null
                         }
-                    }
+                    },
                 )
 
                 if (showDebugOptions) {
@@ -197,7 +197,7 @@ internal fun SettingsMenu(
                             } else {
                                 call.audioFilter = null
                             }
-                        }
+                        },
                     )
 
                     Spacer(modifier = Modifier.height(12.dp))
@@ -213,7 +213,7 @@ internal fun SettingsMenu(
                                 "Restart Subscriber Ice",
                                 Toast.LENGTH_SHORT,
                             ).show()
-                        }
+                        },
                     )
 
                     Spacer(modifier = Modifier.height(12.dp))
@@ -229,7 +229,7 @@ internal fun SettingsMenu(
                                 "Restart Publisher Ice",
                                 Toast.LENGTH_SHORT,
                             ).show()
-                        }
+                        },
                     )
 
                     Spacer(modifier = Modifier.height(12.dp))
@@ -245,7 +245,7 @@ internal fun SettingsMenu(
                                 "Killing SFU WS. Should trigger reconnect...",
                                 Toast.LENGTH_SHORT,
                             ).show()
-                        }
+                        },
                     )
 
                     Spacer(modifier = Modifier.height(12.dp))
@@ -257,7 +257,7 @@ internal fun SettingsMenu(
                             call.debug.switchSfu()
                             onDismissed.invoke()
                             Toast.makeText(context, "Switch sfu", Toast.LENGTH_SHORT).show()
-                        }
+                        },
                     )
                 }
             }
@@ -269,7 +269,7 @@ internal fun SettingsMenu(
 private fun MenuEntry(
     @DrawableRes icon: Int,
     label: String,
-    onClick: () -> Unit
+    onClick: () -> Unit,
 ) {
     Row(modifier = Modifier.clickable(onClick = onClick)) {
         Icon(
