@@ -131,5 +131,5 @@ class BlurredBackgroundVideoFilter {
 
 private fun Float.isBackground() = this <= BACKGROUND_UPPER_CONFIDENCE
 
-private const val BACKGROUND_UPPER_CONFIDENCE = 0.9 // 1 is max confidence that pixel is in the foreground
-private const val BLUR_RADIUS = 13f // Set the radius of the Blur. Supported range 0 < radius <= 25
+private const val BACKGROUND_UPPER_CONFIDENCE = 0.999 // 1 is max confidence that pixel is in the foreground
+private const val BLUR_RADIUS = 10f // Set the radius of the Blur. Supported range 0 < radius <= 25
