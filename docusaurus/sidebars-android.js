@@ -12,27 +12,6 @@ module.exports = {
     },
     {
       type: "category",
-      label: "Tutorials",
-      items: [
-            {
-              type: 'doc',
-              id: 'tutorials/video-calling', // document ID
-              label: 'Video Call Tutorial', // sidebar label
-            },
-             {
-              type: 'doc',
-              id: 'tutorials/audio-room', // document ID
-              label: 'Audio Room Tutorial', // sidebar label
-            },
-             {
-              type: 'doc',
-              id: 'tutorials/livestream', // document ID
-              label: 'Livestream Tutorial', // sidebar label
-            },
-      ],
-    },
-    {
-      type: "category",
       label: "Core Concepts",
       items: [
         {
