@@ -98,6 +98,37 @@ internal fun SettingsMenu(
             ) {
                 Row(
                     modifier = Modifier.clickable {
+                        if (call.videoFilter == null) {
+                            call.videoFilter = object : BitmapVideoFilter() {
+                                override fun filter(bitmap: Bitmap) {
+                                    val filter = BlurredBackgroundVideoFilter()
+                                    filter.applyFilter(bitmap)
+                                }
+                            }
+                        } else {
+                            call.videoFilter = null
+                        }
+                    },
+                ) {
+                    Icon(
+                        painter = painterResource(
+                            id = R.drawable.stream_video_ic_fullscreen_exit,
+                        ),
+                        tint = VideoTheme.colors.textHighEmphasis,
+                        contentDescription = null,
+                    )
+
+                    Text(
+                        modifier = Modifier.padding(start = 20.dp),
+                        text = "Toggle background blur (beta)",
+                        color = VideoTheme.colors.textHighEmphasis,
+                    )
+                }
+
+                Spacer(modifier = Modifier.height(12.dp))
+
+                Row(
+                    modifier = Modifier.clickable {
                         onDismissed()
                         onShowReactionsMenu()
                     },
@@ -149,37 +180,6 @@ internal fun SettingsMenu(
                 Spacer(modifier = Modifier.height(12.dp))
 
                 if (showDebugOptions) {
-                    Row(
-                        modifier = Modifier.clickable {
-                            if (call.videoFilter == null) {
-                                call.videoFilter = object : BitmapVideoFilter() {
-                                    override fun filter(bitmap: Bitmap) {
-                                        val filter = BlurredBackgroundVideoFilter()
-                                        filter.applyFilter(bitmap)
-                                    }
-                                }
-                            } else {
-                                call.videoFilter = null
-                            }
-                        },
-                    ) {
-                        Icon(
-                            painter = painterResource(
-                                id = R.drawable.stream_video_ic_fullscreen_exit,
-                            ),
-                            tint = VideoTheme.colors.textHighEmphasis,
-                            contentDescription = null,
-                        )
-
-                        Text(
-                            modifier = Modifier.padding(start = 20.dp),
-                            text = "Toggle video filter",
-                            color = VideoTheme.colors.textHighEmphasis,
-                        )
-                    }
-
-                    Spacer(modifier = Modifier.height(12.dp))
-
                     Row(
                         modifier = Modifier.clickable {
                             if (call.audioFilter == null) {
