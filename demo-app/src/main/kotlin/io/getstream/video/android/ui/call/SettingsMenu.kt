@@ -160,10 +160,10 @@ internal fun SettingsMenu(
 
                         if (call.videoFilter == null) {
                             call.videoFilter = object : BitmapVideoFilter() {
-//                              val filter = BlurredBackgroundVideoFilter()
+                                val filter = BlurredBackgroundVideoFilter()
 
                                 override fun filter(bitmap: Bitmap) {
-//                                    filter.applyFilter(bitmap)
+                                    filter.applyFilter(bitmap)
                                 }
                             }
                         } else {
