@@ -34,7 +34,7 @@ landscapist = "2.2.11"
 accompanist = "0.32.0"
 telephoto = "0.3.0"
 audioswitch = "1.1.8"
-libyuv = "0.28.0"
+libyuv = "0.30.0"
 
 wire = "4.7.0"
 okhttp = "4.12.0"
@@ -76,6 +76,8 @@ desugar = "2.0.4"
 leakCanary = "2.12"
 binaryCompatabilityValidator = "0.13.2"
 playPublisher = "3.8.4"
+
+googleMlKitSelfieSegmentation = "16.0.0-beta4"
 
 [libraries]
 androidx-camera-camera2 = { module = "androidx.camera:camera-camera2", version.ref = "cameraCamera2" }
@@ -191,6 +193,8 @@ play-app-update-ktx = { group = "com.google.android.play", name = "app-update-kt
 
 robolectric = { group = "org.robolectric", name = "robolectric", version.ref = "robolectric" }
 leakCanary = { group = "com.squareup.leakcanary", name = "leakcanary-android", version.ref = "leakCanary" }
+
+google-mlkit-selfie-segmentation = { group = "com.google.mlkit", name = "segmentation-selfie", version.ref = "googleMlKitSelfieSegmentation" }
 
 # Dependencies of the included build-logic
 android-gradlePlugin = { group = "com.android.tools.build", name = "gradle", version.ref = "androidGradlePlugin" }

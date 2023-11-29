@@ -17,10 +17,10 @@
 package io.getstream.video.android.core.call.video
 
 import android.graphics.Bitmap
-import android.graphics.Matrix
 import io.getstream.log.taggedLogger
 import io.github.crow_misia.libyuv.AbgrBuffer
 import io.github.crow_misia.libyuv.I420Buffer
+import io.github.crow_misia.libyuv.RotateMode
 import org.webrtc.JniCommon
 import org.webrtc.VideoFrame
 import org.webrtc.YuvHelper
@@ -96,39 +96,47 @@ object YuvFrame {
     }
 
     private fun getBitmap(i420buffer: I420Buffer, width: Int, height: Int, rotationDegree: Int): Bitmap {
-        val newBuffer = AbgrBuffer.allocate(width, height)
-        i420buffer.convertTo(newBuffer)
+        val abgrBuffer = AbgrBuffer.allocate(width, height)
+        i420buffer.convertTo(abgrBuffer)
         i420buffer.close()
 
-        // Construct a Bitmap based on the new pixel data
-        val bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
-        bitmap.copyPixelsFromBuffer(newBuffer.asBuffer())
-        newBuffer.close()
-
         // If necessary, generate a rotated version of the Bitmap
-        return when (rotationDegree) {
+        var swapWidthAndHeight = false
+        val rotatedAbgrBuffer = when (rotationDegree) {
             90, -270 -> {
-                val m = Matrix()
-                m.postRotate(90f)
-                Bitmap.createBitmap(bitmap, 0, 0, bitmap.width, bitmap.height, m, true)
-            }
+                swapWidthAndHeight = true
 
+                val dstBuffer = AbgrBuffer.allocate(height, width)
+                abgrBuffer.rotate(dstBuffer, RotateMode.ROTATE_90)
+                dstBuffer
+            }
             180, -180 -> {
-                val m = Matrix()
-                m.postRotate(180f)
-                Bitmap.createBitmap(bitmap, 0, 0, bitmap.width, bitmap.height, m, true)
+                val dstBuffer = AbgrBuffer.allocate(width, height)
+                abgrBuffer.rotate(dstBuffer, RotateMode.ROTATE_180)
+                dstBuffer
             }
-
             270, -90 -> {
-                val m = Matrix()
-                m.postRotate(270f)
-                Bitmap.createBitmap(bitmap, 0, 0, bitmap.width, bitmap.height, m, true)
-            }
+                swapWidthAndHeight = true
 
+                val dstBuffer = AbgrBuffer.allocate(height, width)
+                abgrBuffer.rotate(dstBuffer, RotateMode.ROTATE_270)
+                dstBuffer
+            }
             else -> {
-                // Don't rotate, just return the Bitmap
-                bitmap
+                abgrBuffer
             }
         }
+
+        // Construct a Bitmap based on the new pixel data
+        val bitmap = Bitmap.createBitmap(
+            if (swapWidthAndHeight) height else width,
+            if (swapWidthAndHeight) width else height,
+            Bitmap.Config.ARGB_8888,
+        )
+        bitmap.copyPixelsFromBuffer(rotatedAbgrBuffer.asBuffer())
+        abgrBuffer.close()
+        rotatedAbgrBuffer.close()
+
+        return bitmap
     }
 }
