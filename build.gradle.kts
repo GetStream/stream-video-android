@@ -6,9 +6,6 @@ buildscript {
         google()
         mavenCentral()
         maven("https://plugins.gradle.org/m2/")
-        flatDir {
-            dirs("libs")
-        }
     }
 }
 

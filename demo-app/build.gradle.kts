@@ -266,7 +266,7 @@ dependencies {
 
     // Video Filters
     implementation(libs.google.mlkit.selfie.segmentation)
-    implementation(files("../libs/renderscript-toolkit.aar"))
+    implementation(files("libs/renderscript-toolkit.aar"))
 
     // Memory detection
     debugImplementation(libs.leakCanary)
