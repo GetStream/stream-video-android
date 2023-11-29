@@ -26,12 +26,15 @@ import com.google.mlkit.vision.segmentation.Segmentation
 import com.google.mlkit.vision.segmentation.SegmentationMask
 import com.google.mlkit.vision.segmentation.selfie.SelfieSegmenterOptions
 
-/*
-   - For better performance
-     - Research Android built-in accelerated operations: https://developer.android.com/guide/topics/renderscript/migrate#image_blur_on_android_12_rendered_into_a_bitmap
-   - Determine what is available for which Android version (Toolkit library vs built-in).
+/**
+ * Applies a blur effect to the background of a video frame.
+ *
+ * Note that this filter is still in beta and may not work as expected. To tweak it, see constants at bottom of file.
+ *
+ * To do:
+ * - For better performance research the [Android built-in accelerated image operations](https://developer.android.com/guide/topics/renderscript/migrate#image_blur_on_android_12_rendered_into_a_bitmap).
+ * - Determine what is available for which Android version (Toolkit library vs built-in operations).
  */
-
 class BlurredBackgroundVideoFilter {
     private val options =
         SelfieSegmenterOptions.Builder()
