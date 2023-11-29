@@ -271,7 +271,10 @@ fun CallScreen(
                 onDisplayAvailableDevice = { isShowingAvailableDeviceMenu = true },
                 onDismissed = { isShowingSettingMenu = false },
                 onShowReactionsMenu = { isShowingReactionsMenu = true },
-                onToggleBackgroundBlur = { isBackgroundBlurEnabled = !isBackgroundBlurEnabled },
+                onToggleBackgroundBlur = {
+                    isBackgroundBlurEnabled = !isBackgroundBlurEnabled
+                    isShowingSettingMenu = false
+                },
             )
         }
 
