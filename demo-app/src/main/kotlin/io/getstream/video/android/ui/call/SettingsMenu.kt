@@ -101,7 +101,7 @@ internal fun SettingsMenu(
                     .background(VideoTheme.colors.appBackground)
                     .padding(12.dp),
             ) {
-                SettingsRow(
+                MenuEntry(
                     icon = R.drawable.stream_video_ic_reaction,
                     label = "Reactions",
                     onClick = {
@@ -112,7 +112,7 @@ internal fun SettingsMenu(
 
                 Spacer(modifier = Modifier.height(12.dp))
 
-                SettingsRow(
+                MenuEntry(
                     icon = R.drawable.stream_video_ic_screensharing,
                     label = screenShareButtonText,
                     onClick = {
@@ -133,7 +133,7 @@ internal fun SettingsMenu(
 
                 Spacer(modifier = Modifier.height(12.dp))
 
-                SettingsRow(
+                MenuEntry(
                     icon = io.getstream.video.android.R.drawable.ic_mic,
                     label = "Switch Microphone",
                     onClick = {
@@ -144,7 +144,7 @@ internal fun SettingsMenu(
 
                 Spacer(modifier = Modifier.height(12.dp))
 
-                SettingsRow(
+                MenuEntry(
                     icon = if (isBackgroundBlurEnabled) {
                         io.getstream.video.android.R.drawable.ic_blur_off
                     } else {
@@ -175,7 +175,7 @@ internal fun SettingsMenu(
                 if (showDebugOptions) {
                     Spacer(modifier = Modifier.height(12.dp))
 
-                    SettingsRow(
+                    MenuEntry(
                         icon = R.drawable.stream_video_ic_fullscreen_exit,
                         label = "Toggle audio filter",
                         onClick = {
@@ -202,7 +202,7 @@ internal fun SettingsMenu(
 
                     Spacer(modifier = Modifier.height(12.dp))
 
-                    SettingsRow(
+                    MenuEntry(
                         icon = R.drawable.stream_video_ic_fullscreen_exit,
                         label = "Restart Subscriber Ice",
                         onClick = {
@@ -218,7 +218,7 @@ internal fun SettingsMenu(
 
                     Spacer(modifier = Modifier.height(12.dp))
 
-                    SettingsRow(
+                    MenuEntry(
                         icon = R.drawable.stream_video_ic_fullscreen_exit,
                         label = "Restart Publisher Ice",
                         onClick = {
@@ -234,7 +234,7 @@ internal fun SettingsMenu(
 
                     Spacer(modifier = Modifier.height(12.dp))
 
-                    SettingsRow(
+                    MenuEntry(
                         icon = R.drawable.stream_video_ic_fullscreen_exit,
                         label = "Kill SFU WS",
                         onClick = {
@@ -250,7 +250,7 @@ internal fun SettingsMenu(
 
                     Spacer(modifier = Modifier.height(12.dp))
 
-                    SettingsRow(
+                    MenuEntry(
                         icon = R.drawable.stream_video_ic_fullscreen,
                         label = "Switch sfu",
                         onClick = {
@@ -266,7 +266,7 @@ internal fun SettingsMenu(
 }
 
 @Composable
-private fun SettingsRow(
+private fun MenuEntry(
     @DrawableRes icon: Int,
     label: String,
     onClick: () -> Unit
