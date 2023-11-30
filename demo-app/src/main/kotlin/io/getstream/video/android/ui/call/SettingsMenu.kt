@@ -22,6 +22,7 @@ import android.media.projection.MediaProjectionManager
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.annotation.DrawableRes
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
@@ -29,6 +30,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Card
 import androidx.compose.material.Icon
@@ -49,8 +51,8 @@ import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.call.audio.AudioFilter
 import io.getstream.video.android.core.call.video.BitmapVideoFilter
 import io.getstream.video.android.ui.common.R
+import io.getstream.video.android.util.BlurredBackgroundVideoFilter
 import io.getstream.video.android.util.SampleAudioFilter
-import io.getstream.video.android.util.SampleVideoFilter
 import kotlinx.coroutines.launch
 import java.nio.ByteBuffer
 
@@ -58,9 +60,11 @@ import java.nio.ByteBuffer
 internal fun SettingsMenu(
     call: Call,
     showDebugOptions: Boolean,
+    isBackgroundBlurEnabled: Boolean,
     onDisplayAvailableDevice: () -> Unit,
     onDismissed: () -> Unit,
     onShowReactionsMenu: () -> Unit,
+    onToggleBackgroundBlur: () -> Unit,
 ) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
@@ -84,7 +88,7 @@ internal fun SettingsMenu(
 
     Popup(
         alignment = Alignment.BottomStart,
-        offset = IntOffset(30, -200),
+        offset = IntOffset(30, -210),
         onDismissRequest = { onDismissed.invoke() },
     ) {
         Card(
@@ -93,32 +97,25 @@ internal fun SettingsMenu(
         ) {
             Column(
                 modifier = Modifier
+                    .width(245.dp)
                     .background(VideoTheme.colors.appBackground)
                     .padding(12.dp),
             ) {
-                Row(
-                    modifier = Modifier.clickable {
+                MenuEntry(
+                    icon = R.drawable.stream_video_ic_reaction,
+                    label = "Reactions",
+                    onClick = {
                         onDismissed()
                         onShowReactionsMenu()
                     },
-                ) {
-                    Icon(
-                        painter = painterResource(id = R.drawable.stream_video_ic_reaction),
-                        tint = VideoTheme.colors.textHighEmphasis,
-                        contentDescription = null,
-                    )
-
-                    Text(
-                        modifier = Modifier.padding(start = 20.dp),
-                        text = "Reactions",
-                        color = VideoTheme.colors.textHighEmphasis,
-                    )
-                }
+                )
 
                 Spacer(modifier = Modifier.height(12.dp))
 
-                Row(
-                    modifier = Modifier.clickable {
+                MenuEntry(
+                    icon = R.drawable.stream_video_ic_screensharing,
+                    label = screenShareButtonText,
+                    onClick = {
                         if (!isScreenSharing) {
                             scope.launch {
                                 val mediaProjectionManager = context.getSystemService(
@@ -132,55 +129,56 @@ internal fun SettingsMenu(
                             call.stopScreenSharing()
                         }
                     },
-                ) {
-                    Icon(
-                        painter = painterResource(id = R.drawable.stream_video_ic_screensharing),
-                        tint = VideoTheme.colors.textHighEmphasis,
-                        contentDescription = null,
-                    )
-
-                    Text(
-                        modifier = Modifier.padding(start = 20.dp),
-                        text = screenShareButtonText,
-                        color = VideoTheme.colors.textHighEmphasis,
-                    )
-                }
+                )
 
                 Spacer(modifier = Modifier.height(12.dp))
 
-                if (showDebugOptions) {
-                    Row(
-                        modifier = Modifier.clickable {
-                            if (call.videoFilter == null) {
-                                call.videoFilter = object : BitmapVideoFilter() {
-                                    override fun filter(bitmap: Bitmap) {
-                                        SampleVideoFilter.toGrayscale(bitmap)
-                                    }
+                MenuEntry(
+                    icon = io.getstream.video.android.R.drawable.ic_mic,
+                    label = "Switch Microphone",
+                    onClick = {
+                        onDismissed.invoke()
+                        onDisplayAvailableDevice.invoke()
+                    },
+                )
+
+                Spacer(modifier = Modifier.height(12.dp))
+
+                MenuEntry(
+                    icon = if (isBackgroundBlurEnabled) {
+                        io.getstream.video.android.R.drawable.ic_blur_off
+                    } else {
+                        io.getstream.video.android.R.drawable.ic_blur_on
+                    },
+                    label = if (isBackgroundBlurEnabled) {
+                        "Disable background blur"
+                    } else {
+                        "Enable background blur (beta)"
+                    },
+                    onClick = {
+                        onToggleBackgroundBlur()
+
+                        if (call.videoFilter == null) {
+                            call.videoFilter = object : BitmapVideoFilter() {
+                                val filter = BlurredBackgroundVideoFilter()
+
+                                override fun filter(bitmap: Bitmap) {
+                                    filter.applyFilter(bitmap)
                                 }
-                            } else {
-                                call.videoFilter = null
                             }
-                        },
-                    ) {
-                        Icon(
-                            painter = painterResource(
-                                id = R.drawable.stream_video_ic_fullscreen_exit,
-                            ),
-                            tint = VideoTheme.colors.textHighEmphasis,
-                            contentDescription = null,
-                        )
+                        } else {
+                            call.videoFilter = null
+                        }
+                    },
+                )
 
-                        Text(
-                            modifier = Modifier.padding(start = 20.dp),
-                            text = "Toggle video filter",
-                            color = VideoTheme.colors.textHighEmphasis,
-                        )
-                    }
-
+                if (showDebugOptions) {
                     Spacer(modifier = Modifier.height(12.dp))
 
-                    Row(
-                        modifier = Modifier.clickable {
+                    MenuEntry(
+                        icon = R.drawable.stream_video_ic_fullscreen_exit,
+                        label = "Toggle audio filter",
+                        onClick = {
                             if (call.audioFilter == null) {
                                 call.audioFilter = object : AudioFilter {
                                     override fun filter(
@@ -200,26 +198,14 @@ internal fun SettingsMenu(
                                 call.audioFilter = null
                             }
                         },
-                    ) {
-                        Icon(
-                            painter = painterResource(
-                                id = R.drawable.stream_video_ic_fullscreen_exit,
-                            ),
-                            tint = VideoTheme.colors.textHighEmphasis,
-                            contentDescription = null,
-                        )
-
-                        Text(
-                            modifier = Modifier.padding(start = 20.dp),
-                            text = "Toggle audio filter",
-                            color = VideoTheme.colors.textHighEmphasis,
-                        )
-                    }
+                    )
 
                     Spacer(modifier = Modifier.height(12.dp))
 
-                    Row(
-                        modifier = Modifier.clickable {
+                    MenuEntry(
+                        icon = R.drawable.stream_video_ic_fullscreen_exit,
+                        label = "Restart Subscriber Ice",
+                        onClick = {
                             call.debug.restartSubscriberIce()
                             onDismissed.invoke()
                             Toast.makeText(
@@ -228,26 +214,14 @@ internal fun SettingsMenu(
                                 Toast.LENGTH_SHORT,
                             ).show()
                         },
-                    ) {
-                        Icon(
-                            painter = painterResource(
-                                id = R.drawable.stream_video_ic_fullscreen_exit,
-                            ),
-                            tint = VideoTheme.colors.textHighEmphasis,
-                            contentDescription = null,
-                        )
-
-                        Text(
-                            modifier = Modifier.padding(start = 20.dp),
-                            text = "Restart Subscriber Ice",
-                            color = VideoTheme.colors.textHighEmphasis,
-                        )
-                    }
+                    )
 
                     Spacer(modifier = Modifier.height(12.dp))
 
-                    Row(
-                        modifier = Modifier.clickable {
+                    MenuEntry(
+                        icon = R.drawable.stream_video_ic_fullscreen_exit,
+                        label = "Restart Publisher Ice",
+                        onClick = {
                             call.debug.restartPublisherIce()
                             onDismissed.invoke()
                             Toast.makeText(
@@ -256,26 +230,14 @@ internal fun SettingsMenu(
                                 Toast.LENGTH_SHORT,
                             ).show()
                         },
-                    ) {
-                        Icon(
-                            painter = painterResource(
-                                id = R.drawable.stream_video_ic_fullscreen_exit,
-                            ),
-                            tint = VideoTheme.colors.textHighEmphasis,
-                            contentDescription = null,
-                        )
-
-                        Text(
-                            modifier = Modifier.padding(start = 20.dp),
-                            text = "Restart Publisher Ice",
-                            color = VideoTheme.colors.textHighEmphasis,
-                        )
-                    }
+                    )
 
                     Spacer(modifier = Modifier.height(12.dp))
 
-                    Row(
-                        modifier = Modifier.clickable {
+                    MenuEntry(
+                        icon = R.drawable.stream_video_ic_fullscreen_exit,
+                        label = "Kill SFU WS",
+                        onClick = {
                             call.debug.doFullReconnection()
                             onDismissed.invoke()
                             Toast.makeText(
@@ -284,66 +246,41 @@ internal fun SettingsMenu(
                                 Toast.LENGTH_SHORT,
                             ).show()
                         },
-                    ) {
-                        Icon(
-                            painter = painterResource(
-                                id = R.drawable.stream_video_ic_fullscreen_exit,
-                            ),
-                            tint = VideoTheme.colors.textHighEmphasis,
-                            contentDescription = null,
-                        )
-
-                        Text(
-                            modifier = Modifier.padding(start = 20.dp),
-                            text = "Kill SFU WS",
-                            color = VideoTheme.colors.textHighEmphasis,
-                        )
-                    }
+                    )
 
                     Spacer(modifier = Modifier.height(12.dp))
 
-                    Row(
-                        modifier = Modifier.clickable {
+                    MenuEntry(
+                        icon = R.drawable.stream_video_ic_fullscreen,
+                        label = "Switch sfu",
+                        onClick = {
                             call.debug.switchSfu()
                             onDismissed.invoke()
                             Toast.makeText(context, "Switch sfu", Toast.LENGTH_SHORT).show()
                         },
-                    ) {
-                        Icon(
-                            painter = painterResource(id = R.drawable.stream_video_ic_fullscreen),
-                            tint = VideoTheme.colors.textHighEmphasis,
-                            contentDescription = null,
-                        )
-
-                        Text(
-                            modifier = Modifier.padding(start = 20.dp),
-                            text = "Switch sfu",
-                            color = VideoTheme.colors.textHighEmphasis,
-                        )
-                    }
-                }
-
-                Spacer(modifier = Modifier.height(12.dp))
-
-                Row(
-                    modifier = Modifier.clickable {
-                        onDismissed.invoke()
-                        onDisplayAvailableDevice.invoke()
-                    },
-                ) {
-                    Icon(
-                        painter = painterResource(id = R.drawable.stream_video_ic_mic_on),
-                        tint = VideoTheme.colors.textHighEmphasis,
-                        contentDescription = null,
-                    )
-
-                    Text(
-                        modifier = Modifier.padding(start = 20.dp),
-                        text = "Switch Microphone",
-                        color = VideoTheme.colors.textHighEmphasis,
                     )
                 }
             }
         }
+    }
+}
+
+@Composable
+private fun MenuEntry(
+    @DrawableRes icon: Int,
+    label: String,
+    onClick: () -> Unit,
+) {
+    Row(modifier = Modifier.clickable(onClick = onClick)) {
+        Icon(
+            painter = painterResource(id = icon),
+            tint = VideoTheme.colors.textHighEmphasis,
+            contentDescription = null,
+        )
+        Text(
+            modifier = Modifier.padding(start = 12.dp, top = 2.dp),
+            text = label,
+            color = VideoTheme.colors.textHighEmphasis,
+        )
     }
 }

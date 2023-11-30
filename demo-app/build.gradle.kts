@@ -130,6 +130,10 @@ android {
         baseline = file("lint-baseline.xml")
     }
 
+    packaging {
+        jniLibs.pickFirsts.add("lib/*/librenderscript-toolkit.so")
+    }
+
     baselineProfile {
         mergeIntoMain = true
     }
@@ -259,6 +263,10 @@ dependencies {
     implementation(libs.play.install.referrer) // Used to extract the meeting link from demo flow after install
     implementation(libs.play.auth)
     implementation(libs.play.app.update.ktx)
+
+    // Video Filters
+    implementation(libs.google.mlkit.selfie.segmentation)
+    implementation(files("libs/renderscript-toolkit.aar"))
 
     // Memory detection
     debugImplementation(libs.leakCanary)
