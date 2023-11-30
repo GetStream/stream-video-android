@@ -77,7 +77,7 @@
 
 
         <service android:name=".notifications.internal.service.CallService"
-            android:foregroundServiceType="microphone"/>
+            android:foregroundServiceType="shortService|microphone"/>
 
         <service android:name=".screenshare.StreamScreenShareService"
             android:foregroundServiceType="mediaProjection"/>

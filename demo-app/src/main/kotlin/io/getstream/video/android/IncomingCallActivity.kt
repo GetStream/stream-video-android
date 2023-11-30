@@ -88,7 +88,7 @@ class IncomingCallActivity : ComponentActivity() {
 
             // We also check if savedInstanceState is null to prevent duplicate calls when activity
             // is recreated (e.g. when entering PiP mode)
-            //TODO: AAP This is the same logic as in CallActivity, should be merged
+            // TODO: AAP This is the same logic as in CallActivity, should be merged
             if (NotificationHandler.ACTION_ACCEPT_CALL == intent.action && savedInstanceState == null) {
                 call.accept()
                 val activeCall = streamVideo.state.activeCall.value

@@ -84,4 +84,4 @@ public fun Intent.streamCallId(key: String): StreamCallId? = when {
             as? StreamCallId
 }
 
-public fun Intent.streamCallDisplayName(key: String): String = this.getStringExtra(key) ?: ""
+public fun Intent.streamCallDisplayName(key: String): String = this.getStringExtra(key) ?: "."

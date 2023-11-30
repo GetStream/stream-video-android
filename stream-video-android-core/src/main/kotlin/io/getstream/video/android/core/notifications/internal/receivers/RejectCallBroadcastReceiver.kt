@@ -22,8 +22,9 @@ import androidx.core.app.NotificationManagerCompat
 import io.getstream.log.taggedLogger
 import io.getstream.result.Result
 import io.getstream.video.android.core.Call
+import io.getstream.video.android.core.notifications.NotificationHandler
 import io.getstream.video.android.core.notifications.NotificationHandler.Companion.ACTION_REJECT_CALL
-import io.getstream.video.android.core.notifications.NotificationHandler.Companion.INTENT_EXTRA_NOTIFICATION_ID
+import io.getstream.video.android.core.notifications.internal.service.CallService
 
 /**
  * Used to process any pending intents that feature the [ACTION_REJECT_CALL] action. By consuming this
@@ -40,7 +41,12 @@ internal class RejectCallBroadcastReceiver : GenericCallActionBroadcastReceiver(
             is Result.Success -> logger.d { "[onReceive] rejectCall, Success: $rejectResult" }
             is Result.Failure -> logger.d { "[onReceive] rejectCall, Failure: $rejectResult" }
         }
-        val notificationId = intent.getIntExtra(INTENT_EXTRA_NOTIFICATION_ID, 0)
-        NotificationManagerCompat.from(context).cancel(notificationId)
+        val serviceIntent = CallService.buildStopIntent(context)
+        context.stopService(serviceIntent)
+
+        // As a second precaution cancel also the notification
+        NotificationManagerCompat.from(
+            context,
+        ).cancel(NotificationHandler.INCOMING_CALL_NOTIFICATION_ID)
     }
 }
