@@ -32,6 +32,7 @@ import io.getstream.result.Result
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.call.activecall.CallContent
 import io.getstream.video.android.compose.ui.components.call.ringing.RingingCallContent
+import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.StreamVideo
 import io.getstream.video.android.core.call.state.AcceptCall
 import io.getstream.video.android.core.call.state.CallAction
@@ -45,7 +46,9 @@ import io.getstream.video.android.datastore.delegate.StreamUserDataStore
 import io.getstream.video.android.model.mapper.isValidCallId
 import io.getstream.video.android.model.mapper.toTypeAndId
 import io.getstream.video.android.util.StreamVideoInitHelper
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.util.UUID
 import javax.inject.Inject
 
@@ -108,13 +111,10 @@ class DirectCallActivity : ComponentActivity() {
                                 finish()
                             }
                             is DeclineCall -> {
-                                // Not needed. this activity is only used for outgoing calls.
+                                reject(call)
                             }
                             is CancelCall -> {
-                                lifecycleScope.launch {
-                                    call.leave()
-                                    finish()
-                                }
+                                reject(call)
                             }
                             is AcceptCall -> {
                                 lifecycleScope.launch {
@@ -131,8 +131,7 @@ class DirectCallActivity : ComponentActivity() {
                         modifier = Modifier.background(color = VideoTheme.colors.appBackground),
                         call = call,
                         onBackPressed = {
-                            call.leave()
-                            finish()
+                            reject(call)
                         },
                         onAcceptedContent = {
                             CallContent(
@@ -142,12 +141,20 @@ class DirectCallActivity : ComponentActivity() {
                             )
                         },
                         onRejectedContent = {
-                            call.leave()
-                            finish()
+                            reject(call)
                         },
                         onCallAction = onCallAction,
                     )
                 }
+            }
+        }
+    }
+
+    private fun reject(call: Call) {
+        lifecycleScope.launch(Dispatchers.Default) {
+            call.reject()
+            withContext(Dispatchers.Main) {
+                finish()
             }
         }
     }
