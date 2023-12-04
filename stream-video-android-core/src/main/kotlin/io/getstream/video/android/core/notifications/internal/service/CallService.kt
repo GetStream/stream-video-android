@@ -26,7 +26,6 @@ import android.os.IBinder
 import androidx.core.app.NotificationManagerCompat
 import androidx.core.app.ServiceCompat
 import io.getstream.log.taggedLogger
-import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.RingingState
 import io.getstream.video.android.core.StreamVideo
 import io.getstream.video.android.core.notifications.NotificationHandler
@@ -54,7 +53,6 @@ internal class CallService : Service() {
     private var startJob: Job? = null
     private var observeRingingState: Job? = null
     private var observeCallState: Job? = null
-    private var call: Call? = null
 
     internal companion object {
         const val TRIGGER_KEY = "io.getstream.video.android.core.notifications.internal.service.CallService.call_trigger"
