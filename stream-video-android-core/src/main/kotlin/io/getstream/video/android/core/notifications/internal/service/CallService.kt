@@ -26,6 +26,7 @@ import android.os.IBinder
 import androidx.core.app.NotificationManagerCompat
 import androidx.core.app.ServiceCompat
 import io.getstream.log.taggedLogger
+import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.RingingState
 import io.getstream.video.android.core.StreamVideo
 import io.getstream.video.android.core.notifications.NotificationHandler
@@ -39,6 +40,8 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
+import org.openapitools.client.models.CallEndedEvent
+import org.openapitools.client.models.CallRejectedEvent
 import java.lang.IllegalArgumentException
 
 /**
@@ -50,6 +53,8 @@ internal class CallService : Service() {
     private var callDisplayName: String? = null
     private var startJob: Job? = null
     private var observeRingingState: Job? = null
+    private var observeCallState: Job? = null
+    private var call: Call? = null
 
     internal companion object {
         const val TRIGGER_KEY = "io.getstream.video.android.core.notifications.internal.service.CallService.call_trigger"
@@ -57,7 +62,7 @@ internal class CallService : Service() {
         const val TRIGGER_ONGOING_CALL = "ongoing_call"
 
         /**
-         * Build start intent.
+         * Build start intent.       mnu vvhnv         ,≤
          *
          * @param context the context.
          * @param callId the call id.
@@ -169,6 +174,7 @@ internal class CallService : Service() {
         return START_NOT_STICKY
     }
 
+    @OptIn(DelicateCoroutinesApi::class)
     private fun observeCallState(callId: StreamCallId, streamVideo: StreamVideo) {
         val call = streamVideo.call(callId.type, callId.id)
         // Ringing state
@@ -179,6 +185,23 @@ internal class CallService : Service() {
                     is RingingState.RejectedByAll -> stopSelf()
                     else -> {
                         // Do nothing
+                    }
+                }
+            }
+        }
+
+        // Call state
+        observeCallState = GlobalScope.launch {
+            call.subscribe {
+                logger.i { "Received event in service: $it" }
+                when (it) {
+                    is CallRejectedEvent -> {
+                        // When call is rejected by the caller
+                        stopSelf()
+                    }
+                    is CallEndedEvent -> {
+                        // When call ends for any reason
+                        stopSelf()
                     }
                 }
             }
@@ -223,6 +246,7 @@ internal class CallService : Service() {
         // Stop any jobs
         startJob?.cancel()
         observeRingingState?.cancel()
+        observeCallState?.cancel()
         super.onDestroy()
     }
 
