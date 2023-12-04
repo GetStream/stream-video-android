@@ -69,23 +69,6 @@ class IncomingCallActivity : ComponentActivity() {
             StreamVideoInitHelper.loadSdk(dataStore = dataStore)
             val call = streamVideo.call(callId.type, callId.id)
 
-            // Update the call state. This activity could have been started from a push notification.
-            // Doing a call.get() will also internally update the Call state object with the latest
-            // state from the backend.
-            val result = call.get()
-
-            if (result is Result.Failure) {
-                // Failed to recover the current state of the call
-                // TODO: Automaticly call this in the SDK?
-                Log.e("IncomingCallActivity", "Call.join failed ${result.value}")
-                Toast.makeText(
-                    this@IncomingCallActivity,
-                    "Failed get call status (${result.value.message})",
-                    Toast.LENGTH_SHORT,
-                ).show()
-                finish()
-            }
-
             // We also check if savedInstanceState is null to prevent duplicate calls when activity
             // is recreated (e.g. when entering PiP mode)
             // TODO: AAP This is the same logic as in CallActivity, should be merged
