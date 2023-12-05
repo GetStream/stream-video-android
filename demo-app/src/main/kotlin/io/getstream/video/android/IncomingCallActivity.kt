@@ -18,18 +18,14 @@ package io.getstream.video.android
 
 import android.os.Build
 import android.os.Bundle
-import android.util.Log
 import android.view.WindowManager
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.ui.Modifier
-import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
-import androidx.lifecycle.repeatOnLifecycle
 import dagger.hilt.android.AndroidEntryPoint
-import io.getstream.result.Result
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.call.activecall.CallContent
 import io.getstream.video.android.compose.ui.components.call.ringing.RingingCallContent
@@ -46,8 +42,9 @@ import io.getstream.video.android.core.call.state.ToggleSpeakerphone
 import io.getstream.video.android.core.notifications.NotificationHandler
 import io.getstream.video.android.datastore.delegate.StreamUserDataStore
 import io.getstream.video.android.model.streamCallId
-import io.getstream.video.android.util.StreamVideoInitHelper
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
 @AndroidEntryPoint
@@ -70,15 +67,12 @@ class IncomingCallActivity : ComponentActivity() {
                             is ToggleSpeakerphone -> call.speaker.setEnabled(callAction.isEnabled)
                             is FlipCamera -> call.camera.flip()
                             is LeaveCall -> {
-                                call.leave()
-                                finish()
+                                reject(call)
                             }
 
                             is DeclineCall -> {
                                 lifecycleScope.launch {
-                                    call.reject()
-                                    call.leave()
-                                    finish()
+                                    reject(call)
                                 }
                             }
 
@@ -96,8 +90,7 @@ class IncomingCallActivity : ComponentActivity() {
                         modifier = Modifier.background(color = VideoTheme.colors.appBackground),
                         call = call,
                         onBackPressed = {
-                            call.leave()
-                            finish()
+                            reject(call)
                         },
                         onAcceptedContent = {
                             CallContent(
@@ -107,8 +100,7 @@ class IncomingCallActivity : ComponentActivity() {
                             )
                         },
                         onRejectedContent = {
-                            call.leave()
-                            finish()
+                            reject(call)
                         },
                         onCallAction = onCallAction,
                     )
@@ -120,10 +112,17 @@ class IncomingCallActivity : ComponentActivity() {
         window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
 
         lifecycleScope.launch {
-            lifecycle.repeatOnLifecycle(Lifecycle.State.CREATED) {
-                val callId = intent.streamCallId(NotificationHandler.INTENT_EXTRA_CALL_CID)!!
-                val streamVideo = StreamVideo.instance()
-                callState = streamVideo.call(callId.type, callId.id)
+            val callId = intent.streamCallId(NotificationHandler.INTENT_EXTRA_CALL_CID)!!
+            val streamVideo = StreamVideo.instance()
+            callState = streamVideo.call(callId.type, callId.id)
+        }
+    }
+
+    private fun reject(call: Call) {
+        lifecycleScope.launch(Dispatchers.Default) {
+            call.reject()
+            withContext(Dispatchers.Main) {
+                finish()
             }
         }
     }

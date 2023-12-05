@@ -39,7 +39,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
-import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import org.openapitools.client.models.CallEndedEvent
 import org.openapitools.client.models.CallRejectedEvent
@@ -59,12 +58,13 @@ internal class CallService : Service() {
     private val supervisorJob = SupervisorJob()
 
     internal companion object {
-        const val TRIGGER_KEY = "io.getstream.video.android.core.notifications.internal.service.CallService.call_trigger"
+        const val TRIGGER_KEY =
+            "io.getstream.video.android.core.notifications.internal.service.CallService.call_trigger"
         const val TRIGGER_INCOMING_CALL = "incomming_call"
         const val TRIGGER_ONGOING_CALL = "ongoing_call"
 
         /**
-         * Build start intent.       mnu vvhnv         ,≤
+         * Build start intent.
          *
          * @param context the context.
          * @param callId the call id.
@@ -84,9 +84,11 @@ internal class CallService : Service() {
                     serviceIntent.putExtra(TRIGGER_KEY, TRIGGER_INCOMING_CALL)
                     serviceIntent.putExtra(INTENT_EXTRA_CALL_DISPLAY_NAME, callDisplayName)
                 }
+
                 TRIGGER_ONGOING_CALL -> {
                     serviceIntent.putExtra(TRIGGER_KEY, TRIGGER_ONGOING_CALL)
                 }
+
                 else -> {
                     throw IllegalArgumentException(
                         "Unknown $trigger, must be one of $TRIGGER_INCOMING_CALL or $TRIGGER_ONGOING_CALL",
@@ -125,6 +127,7 @@ internal class CallService : Service() {
                         ),
                         callId.hashCode(),
                     )
+
                     TRIGGER_INCOMING_CALL -> Pair(
                         streamVideo.getRingingCallNotification(
                             callId!!,
@@ -132,6 +135,7 @@ internal class CallService : Service() {
                         ),
                         NotificationHandler.INCOMING_CALL_NOTIFICATION_ID,
                     )
+
                     else -> Pair(null, callId.hashCode())
                 }
             val notification = notificationData.first
@@ -178,10 +182,10 @@ internal class CallService : Service() {
 
     @OptIn(DelicateCoroutinesApi::class)
     private fun observeCallState(callId: StreamCallId, streamVideo: StreamVideo) {
-        val call = streamVideo.call(callId.type, callId.id)
         // Ringing state
         observeRingingState = GlobalScope.launch(supervisorJob + Dispatchers.IO) {
-            call.state.ringingState.collectLatest {
+            val call = streamVideo.call(callId.type, callId.id)
+            call.state.ringingState.collect {
                 logger.i { "Ringing state: $it" }
                 when (it) {
                     is RingingState.RejectedByAll -> stopSelf()
@@ -194,6 +198,7 @@ internal class CallService : Service() {
 
         // Call state
         observeCallState = GlobalScope.launch(supervisorJob + Dispatchers.IO) {
+            val call = streamVideo.call(callId.type, callId.id)
             call.subscribe {
                 logger.i { "Received event in service: $it" }
                 when (it) {
@@ -201,6 +206,7 @@ internal class CallService : Service() {
                         // When call is rejected by the caller
                         stopSelf()
                     }
+
                     is CallEndedEvent -> {
                         // When call ends for any reason
                         stopSelf()
@@ -228,11 +234,10 @@ internal class CallService : Service() {
                 stopSelf() // Failed to update call
                 return@launch
             }
-
         }
 
         // Start coordinator socket
-        startCoordinatorSocketJob =  GlobalScope.launch(supervisorJob + Dispatchers.IO) {
+        startCoordinatorSocketJob = GlobalScope.launch(supervisorJob + Dispatchers.IO) {
             val coordinator = streamVideo.connectAsync().await()
             if (coordinator.isFailure) {
                 coordinator.errorOrNull()?.let {
