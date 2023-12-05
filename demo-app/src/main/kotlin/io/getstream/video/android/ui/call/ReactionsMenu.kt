@@ -66,9 +66,8 @@ private object DefaultReactionsMenuData {
     val mainReaction = ReactionItemData("Raise hand", ":raise-hand:")
     val defaultReactions = listOf(
         ReactionItemData("Fireworks", ":fireworks:"),
-        ReactionItemData("Wave", ":hello:"),
-        ReactionItemData("Like", ":raise-hand:"),
-        ReactionItemData("Dislike", ":hate:"),
+        ReactionItemData("Like", ":like:"),
+        ReactionItemData("Dislike", ":dislike:"),
         ReactionItemData("Smile", ":smile:"),
         ReactionItemData("Heart", ":heart:"),
     )
