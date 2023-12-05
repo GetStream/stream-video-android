@@ -99,6 +99,7 @@ public fun ParticipantsLayout(
                     isShowingReactions = style.isShowingReactions,
                     labelPosition = style.labelPosition,
                 ),
+                videoRenderer = videoRenderer
             )
         } else {
             ParticipantsRegularGrid(
