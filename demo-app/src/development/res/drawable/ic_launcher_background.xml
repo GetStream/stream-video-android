@@ -22,7 +22,7 @@
     android:viewportHeight="107">
   <path
       android:pathData="M0,0h107v107h-107z"
-      android:fillColor="#005FFF"/>
+      android:fillColor="#008E30"/>
   <path
       android:pathData="M0,0h107v107h-107z">
     <aapt:attr name="android:fillColor">
