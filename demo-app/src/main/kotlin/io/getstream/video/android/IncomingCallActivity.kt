@@ -18,18 +18,21 @@ package io.getstream.video.android
 
 import android.os.Build
 import android.os.Bundle
+import android.util.Log
 import android.view.WindowManager
+import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.lifecycleScope
 import dagger.hilt.android.AndroidEntryPoint
+import io.getstream.result.Result
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.call.activecall.CallContent
 import io.getstream.video.android.compose.ui.components.call.ringing.RingingCallContent
-import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.StreamVideo
 import io.getstream.video.android.core.call.state.AcceptCall
 import io.getstream.video.android.core.call.state.CallAction
@@ -42,9 +45,8 @@ import io.getstream.video.android.core.call.state.ToggleSpeakerphone
 import io.getstream.video.android.core.notifications.NotificationHandler
 import io.getstream.video.android.datastore.delegate.StreamUserDataStore
 import io.getstream.video.android.model.streamCallId
-import kotlinx.coroutines.Dispatchers
+import io.getstream.video.android.util.StreamVideoInitHelper
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
 @AndroidEntryPoint
@@ -53,13 +55,46 @@ class IncomingCallActivity : ComponentActivity() {
     @Inject
     lateinit var dataStore: StreamUserDataStore
 
-    private var callState: Call? = null
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContent {
-            VideoTheme {
-                callState?.let { call ->
+
+        // release the lock, turn on screen, and keep the device awake.
+        showWhenLockedAndTurnScreenOn()
+        window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+
+        val callId = intent.streamCallId(NotificationHandler.INTENT_EXTRA_CALL_CID)!!
+
+        lifecycleScope.launch {
+            // Not necessary if you initialise the SDK in Application.onCreate()
+            StreamVideoInitHelper.loadSdk(dataStore = dataStore)
+            val call = StreamVideo.instance().call(callId.type, callId.id)
+
+            // Update the call state. This activity could have been started from a push notification.
+            // Doing a call.get() will also internally update the Call state object with the latest
+            // state from the backend.
+            val result = call.get()
+
+            if (result is Result.Failure) {
+                // Failed to recover the current state of the call
+                // TODO: Automaticly call this in the SDK?
+                Log.e("IncomingCallActivity", "Call.join failed ${result.value}")
+                Toast.makeText(
+                    this@IncomingCallActivity,
+                    "Failed get call status (${result.value.message})",
+                    Toast.LENGTH_SHORT,
+                ).show()
+                finish()
+            }
+
+            // We also check if savedInstanceState is null to prevent duplicate calls when activity
+            // is recreated (e.g. when entering PiP mode)
+            if (NotificationHandler.ACTION_ACCEPT_CALL == intent.action && savedInstanceState == null) {
+                call.accept()
+                call.join()
+            }
+
+            setContent {
+                VideoTheme {
                     val onCallAction: (CallAction) -> Unit = { callAction ->
                         when (callAction) {
                             is ToggleCamera -> call.camera.setEnabled(callAction.isEnabled)
@@ -67,22 +102,22 @@ class IncomingCallActivity : ComponentActivity() {
                             is ToggleSpeakerphone -> call.speaker.setEnabled(callAction.isEnabled)
                             is FlipCamera -> call.camera.flip()
                             is LeaveCall -> {
-                                reject(call)
+                                call.leave()
+                                finish()
                             }
-
                             is DeclineCall -> {
                                 lifecycleScope.launch {
-                                    reject(call)
+                                    call.reject()
+                                    call.leave()
+                                    finish()
                                 }
                             }
-
                             is AcceptCall -> {
                                 lifecycleScope.launch {
                                     call.accept()
                                     call.join()
                                 }
                             }
-
                             else -> Unit
                         }
                     }
@@ -90,7 +125,8 @@ class IncomingCallActivity : ComponentActivity() {
                         modifier = Modifier.background(color = VideoTheme.colors.appBackground),
                         call = call,
                         onBackPressed = {
-                            reject(call)
+                            call.leave()
+                            finish()
                         },
                         onAcceptedContent = {
                             CallContent(
@@ -100,29 +136,14 @@ class IncomingCallActivity : ComponentActivity() {
                             )
                         },
                         onRejectedContent = {
-                            reject(call)
+                            LaunchedEffect(key1 = call) {
+                                call.reject()
+                                finish()
+                            }
                         },
                         onCallAction = onCallAction,
                     )
                 }
-            }
-        }
-        // release the lock, turn on screen, and keep the device awake.
-        showWhenLockedAndTurnScreenOn()
-        window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
-
-        lifecycleScope.launch {
-            val callId = intent.streamCallId(NotificationHandler.INTENT_EXTRA_CALL_CID)!!
-            val streamVideo = StreamVideo.instance()
-            callState = streamVideo.call(callId.type, callId.id)
-        }
-    }
-
-    private fun reject(call: Call) {
-        lifecycleScope.launch(Dispatchers.Default) {
-            call.reject()
-            withContext(Dispatchers.Main) {
-                finish()
             }
         }
     }
@@ -135,7 +156,7 @@ class IncomingCallActivity : ComponentActivity() {
             @Suppress("DEPRECATION")
             window.addFlags(
                 WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED or
-                    WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON,
+                        WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON,
             )
         }
     }
