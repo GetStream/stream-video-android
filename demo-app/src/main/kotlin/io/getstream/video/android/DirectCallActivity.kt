@@ -57,7 +57,7 @@ class DirectCallActivity : ComponentActivity() {
 
     @Inject
     lateinit var dataStore: StreamUserDataStore
-    private var call: Call? = null
+    private lateinit var call: Call
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -83,10 +83,10 @@ class DirectCallActivity : ComponentActivity() {
             val members: List<String> = intent.getStringArrayExtra(EXTRA_MEMBERS_ARRAY)?.asList() ?: emptyList()
 
             // You must add yourself as member too
-            val membersWithMe = members.toMutableList().apply { add(call!!.user.id) }
+            val membersWithMe = members.toMutableList().apply { add(call.user.id) }
 
             // Ring the members
-            val result = call!!.create(ring = true, memberIds = membersWithMe)
+            val result = call.create(ring = true, memberIds = membersWithMe)
 
             if (result is Result.Failure) {
                 // Failed to recover the current state of the call
@@ -104,25 +104,25 @@ class DirectCallActivity : ComponentActivity() {
                 VideoTheme {
                     val onCallAction: (CallAction) -> Unit = { callAction ->
                         when (callAction) {
-                            is ToggleCamera -> call!!.camera.setEnabled(callAction.isEnabled)
-                            is ToggleMicrophone -> call!!.microphone.setEnabled(
+                            is ToggleCamera -> call.camera.setEnabled(callAction.isEnabled)
+                            is ToggleMicrophone -> call.microphone.setEnabled(
                                 callAction.isEnabled,
                             )
-                            is ToggleSpeakerphone -> call!!.speaker.setEnabled(callAction.isEnabled)
+                            is ToggleSpeakerphone -> call.speaker.setEnabled(callAction.isEnabled)
                             is LeaveCall -> {
-                                call!!.leave()
+                                call.leave()
                                 finish()
                             }
                             is DeclineCall -> {
-                                reject(call!!)
+                                reject(call)
                             }
                             is CancelCall -> {
-                                reject(call!!)
+                                reject(call)
                             }
                             is AcceptCall -> {
                                 lifecycleScope.launch {
-                                    call!!.accept()
-                                    call!!.join()
+                                    call.accept()
+                                    call.join()
                                 }
                             }
 
@@ -132,19 +132,19 @@ class DirectCallActivity : ComponentActivity() {
 
                     RingingCallContent(
                         modifier = Modifier.background(color = VideoTheme.colors.appBackground),
-                        call = call!!,
+                        call = call,
                         onBackPressed = {
-                            reject(call!!)
+                            reject(call)
                         },
                         onAcceptedContent = {
                             CallContent(
                                 modifier = Modifier.fillMaxSize(),
-                                call = call!!,
+                                call = call,
                                 onCallAction = onCallAction,
                             )
                         },
                         onRejectedContent = {
-                            reject(call!!)
+                            reject(call)
                         },
                         onCallAction = onCallAction,
                     )
@@ -155,8 +155,8 @@ class DirectCallActivity : ComponentActivity() {
 
     override fun onStop() {
         super.onStop()
-        call?.let {
-            reject(it)
+        if (::call.isInitialized) {
+            reject(call)
         }
     }
 
