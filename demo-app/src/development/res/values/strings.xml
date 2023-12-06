@@ -15,7 +15,7 @@
      limitations under the License.
 -->
 <resources>
-    <string name="app_name">Dogfooding</string>
+    <string name="app_name">Stream Video Calls (Development)</string>
     <string name="deeplinking_host">getstream.io</string>
     <string name="deeplinking_path_prefix">/video/demos</string>
 </resources>
