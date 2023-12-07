@@ -37,6 +37,7 @@ internal class FilterVideoProcessor(
     private var inputWidth = 0
     private var inputHeight = 0
     private var inputBuffer: VideoFrame.TextureBuffer? = null
+    private var yuvBuffer: VideoFrame.I420Buffer? = null
     private val textures = IntArray(1)
     private var inputFrameBitmap: Bitmap? = null
 
@@ -90,9 +91,9 @@ internal class FilterVideoProcessor(
                 GLUtils.texImage2D(GLES20.GL_TEXTURE_2D, 0, inputFrameBitmap!!, 0)
 
                 // Convert the buffer back to YUV (VideoFrame needs YUV)
-                val convert = yuvConverter.convert(inputBuffer)
+                yuvBuffer = yuvConverter.convert(inputBuffer)
 
-                sink?.onFrame(VideoFrame(convert, 0, frame.timestampNs))
+                sink?.onFrame(VideoFrame(yuvBuffer, 0, frame.timestampNs))
             }
         } else {
             throw Error("Unsupported video filter type ${filter.invoke()}")
@@ -104,6 +105,8 @@ internal class FilterVideoProcessor(
     }
 
     private fun initialize(width: Int, height: Int, textureHelper: SurfaceTextureHelper) {
+        yuvBuffer?.release()
+
         if (this.inputWidth != width || this.inputHeight != height) {
             this.inputWidth = width
             this.inputHeight = height
