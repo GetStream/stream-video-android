@@ -32,7 +32,6 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.skydoves.landscapist.ImageOptions
 import com.skydoves.landscapist.animation.crossfade.CrossfadePlugin
@@ -40,6 +39,7 @@ import com.skydoves.landscapist.coil.CoilImage
 import com.skydoves.landscapist.components.rememberImageComponent
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.avatar.AvatarImagePreview
+import io.getstream.video.android.compose.ui.components.plugins.BlurTransformationPlugin
 import io.getstream.video.android.core.MemberState
 import io.getstream.video.android.core.model.CallUser
 import io.getstream.video.android.core.utils.toCallUser
@@ -120,7 +120,7 @@ private fun OutgoingCallBackground(callUsers: List<CallUser>, isVideoType: Boole
 public fun ParticipantImageBackground(
     userImage: String?,
     modifier: Modifier = Modifier,
-    blurRadius: Dp = 20.dp,
+    blurRadius: Int = 20,
 ) {
     if (!userImage.isNullOrEmpty()) {
         CoilImage(
@@ -130,9 +130,7 @@ public fun ParticipantImageBackground(
                     .fillMaxSize()
                     .blur(15.dp)
             } else {
-                modifier
-                    .fillMaxSize()
-                    .blur(blurRadius)
+                modifier.fillMaxSize()
             },
             imageModel = { userImage },
             previewPlaceholder = R.drawable.stream_video_call_sample,
@@ -142,6 +140,7 @@ public fun ParticipantImageBackground(
             ),
             component = rememberImageComponent {
                 +CrossfadePlugin()
+                +BlurTransformationPlugin(blurRadius)
             },
         )
     } else {

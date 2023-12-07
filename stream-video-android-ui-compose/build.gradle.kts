@@ -67,12 +67,14 @@ dependencies {
     implementation(libs.landscapist.coil)
     implementation(libs.landscapist.animation)
     implementation(libs.landscapist.placeholder)
-    implementation(libs.landscapist.transformation)
+
+    // render scripts
+    implementation(files("libs/renderscript-toolkit.aar"))
 
     // telephoto
     implementation(libs.telephoto)
+
+    // preview
     compileOnly(project(":stream-video-android-previewdata"))
     testImplementation(project(":stream-video-android-previewdata"))
-
-    // mock
 }
