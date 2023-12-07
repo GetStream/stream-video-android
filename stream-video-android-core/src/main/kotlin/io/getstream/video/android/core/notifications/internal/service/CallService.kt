@@ -49,9 +49,14 @@ import java.lang.IllegalArgumentException
  */
 internal class CallService : Service() {
     private val logger by taggedLogger("CallService")
+
+    // Data
     private var callId: StreamCallId? = null
     private var callDisplayName: String? = null
+
+    // Running jobs
     private var observeRingingState: Job? = null
+    private var updateRingingStateJob: Job? = null
     private var observeCallState: Job? = null
     private var updateCallJob: Job? = null
     private var startCoordinatorSocketJob: Job? = null
@@ -109,7 +114,7 @@ internal class CallService : Service() {
     override fun onTimeout(startId: Int) {
         super.onTimeout(startId)
         logger.w { "Timeout received from the system, service will stop." }
-        stopSelf()
+        stopService()
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
@@ -170,14 +175,23 @@ internal class CallService : Service() {
 
         if (!started) {
             logger.w { "Foreground service did not start!" }
-            stopSelf()
+            stopService()
         } else {
             if (trigger == TRIGGER_INCOMING_CALL) {
-                initializeCallAndSocket(streamVideo!!, callId!!)
+                updateRingingCall(streamVideo!!, callId!!)
+                initializeCallAndSocket(streamVideo, callId!!)
             }
             observeCallState(callId!!, streamVideo!!)
         }
         return START_NOT_STICKY
+    }
+
+    @OptIn(DelicateCoroutinesApi::class)
+    private fun updateRingingCall(streamVideo: StreamVideo, callId: StreamCallId) {
+        updateRingingStateJob = GlobalScope.launch(supervisorJob + Dispatchers.IO) {
+            val call = streamVideo.call(callId.type, callId.id)
+            streamVideo.state.addRingingCall(call)
+        }
     }
 
     @OptIn(DelicateCoroutinesApi::class)
@@ -188,7 +202,9 @@ internal class CallService : Service() {
             call.state.ringingState.collect {
                 logger.i { "Ringing state: $it" }
                 when (it) {
-                    is RingingState.RejectedByAll -> stopSelf()
+                    is RingingState.RejectedByAll -> {
+                        stopService()
+                    }
                     else -> {
                         // Do nothing
                     }
@@ -204,12 +220,12 @@ internal class CallService : Service() {
                 when (it) {
                     is CallRejectedEvent -> {
                         // When call is rejected by the caller
-                        stopSelf()
+                        stopService()
                     }
 
                     is CallEndedEvent -> {
                         // When call ends for any reason
-                        stopSelf()
+                        stopService()
                     }
                 }
             }
@@ -231,34 +247,38 @@ internal class CallService : Service() {
                 } ?: let {
                     logger.e { "Failed to update call." }
                 }
-                stopSelf() // Failed to update call
+                stopService() // Failed to update call
                 return@launch
             }
         }
 
-        // Start coordinator socket
+        // Monitor coordinator socket
         startCoordinatorSocketJob = GlobalScope.launch(supervisorJob + Dispatchers.IO) {
-            val coordinator = streamVideo.connectAsync().await()
-            if (coordinator.isFailure) {
-                coordinator.errorOrNull()?.let {
-                    logger.e { it.message }
-                } ?: let {
-                    logger.e { "Failed to start coordinator socket." }
-                }
-                stopSelf() // Failed to connect coordinator socket
-                return@launch
-            }
+            streamVideo.connectIfNotAlreadyConnected()
         }
     }
 
     override fun onDestroy() {
+        stopService()
+        super.onDestroy()
+    }
+
+    private fun stopService() {
+        // Cancel the notification
         callId?.let {
             val notificationId = callId.hashCode()
             NotificationManagerCompat.from(this).cancel(notificationId)
         }
         // Stop any jobs
+        observeRingingState?.cancel()
+        updateRingingStateJob?.cancel()
+        observeCallState?.cancel()
+        updateCallJob?.cancel()
+        startCoordinatorSocketJob?.cancel()
         supervisorJob.cancel()
-        super.onDestroy()
+
+        // Optionally (no-op if already stopping)
+        stopSelf()
     }
 
     // This service does not return a Binder

@@ -296,6 +296,14 @@ internal class StreamVideoImpl internal constructor(
         return sub
     }
 
+    override suspend fun connectIfNotAlreadyConnected() {
+        if (connectionModule.coordinatorSocket.connectionState.value != SocketState.NotConnected &&
+            connectionModule.coordinatorSocket.connectionState.value != SocketState.Connecting
+        ) {
+            connectionModule.coordinatorSocket.connect()
+        }
+    }
+
     /**
      * Observes the app lifecycle and attempts to reconnect/release the socket connection.
      */
