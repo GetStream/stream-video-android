@@ -376,7 +376,7 @@ public class Call(
             return result as Failure
         }
         val sfuToken = result.value.credentials.token
-        val sfuUrl = result.value.credentials.server.url
+        val sfuUrl = clientImpl.testSfuAddress ?: result.value.credentials.server.url
         val iceServers = result.value.credentials.iceServers.map { it.toIceServer() }
         timer.split("join request completed")
 

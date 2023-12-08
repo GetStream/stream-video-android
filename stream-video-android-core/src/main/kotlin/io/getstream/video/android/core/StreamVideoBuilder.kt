@@ -64,7 +64,8 @@ import java.util.UUID
  * @property connectionTimeoutInMs Connection timeout in seconds.
  * @property ensureSingleInstance Verify that only 1 version of the video client exists, prevents integration mistakes.
  * @property videoDomain URL overwrite to allow for testing against a local instance of video.
- * @property runForegroundServiceForCalls if set to true, when there is an active call the SDK will run a foreground service to keep the process alive. (default: true)
+ * @property runForegroundServiceForCalls If set to true, when there is an active call the SDK will run a foreground service to keep the process alive. (default: true)
+ * @property localSfuAddress Local SFU address (IP:port) to be used for testing. Leave null if not needed.
  */
 public class StreamVideoBuilder @JvmOverloads constructor(
     context: Context,
@@ -82,6 +83,7 @@ public class StreamVideoBuilder @JvmOverloads constructor(
     private var ensureSingleInstance: Boolean = true,
     private val videoDomain: String = "video.stream-io-api.com",
     private val runForegroundServiceForCalls: Boolean = true,
+    private val localSfuAddress: String? = null,
 ) {
     private val context: Context = context.applicationContext
 
@@ -159,6 +161,7 @@ public class StreamVideoBuilder @JvmOverloads constructor(
             connectionModule = connectionModule,
             streamNotificationManager = streamNotificationManager,
             runForeGroundService = runForegroundServiceForCalls,
+            testSfuAddress = localSfuAddress,
         )
 
         if (user.type == UserType.Guest) {
