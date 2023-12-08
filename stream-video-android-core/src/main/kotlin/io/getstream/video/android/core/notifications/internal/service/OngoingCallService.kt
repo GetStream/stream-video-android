@@ -63,7 +63,14 @@ internal class OngoingCallService : Service() {
         callId?.let {
             val notificationId = callId.hashCode()
             NotificationManagerCompat.from(this).cancel(notificationId)
+
+            val streamVideo = StreamVideo.instanceOrNull()
+            if (streamVideo != null) {
+                val call = streamVideo.call(it.type, it.id)
+                call.leave()
+            }
         }
+        logger.w { "Service was destroyed. Left call." }
         super.onDestroy()
     }
 
