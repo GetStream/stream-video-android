@@ -49,6 +49,8 @@ import io.getstream.video.android.util.StreamVideoInitHelper
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import org.openapitools.client.models.CallEndedEvent
+import org.openapitools.client.models.CallRejectedEvent
 import java.util.UUID
 import javax.inject.Inject
 
@@ -87,6 +89,18 @@ class DirectCallActivity : ComponentActivity() {
 
             // Ring the members
             val result = call.create(ring = true, memberIds = membersWithMe)
+
+            // Update the call
+            call.get()
+
+            call.subscribe {
+                when (it) {
+                    // Finish this activity if ever a call.reject is received
+                    is CallRejectedEvent -> {
+                        finish()
+                    }
+                }
+            }
 
             if (result is Result.Failure) {
                 // Failed to recover the current state of the call
@@ -161,7 +175,7 @@ class DirectCallActivity : ComponentActivity() {
     }
 
     private fun reject(call: Call) {
-        lifecycleScope.launch(Dispatchers.Default) {
+        lifecycleScope.launch(Dispatchers.IO) {
             call.reject()
             withContext(Dispatchers.Main) {
                 finish()
