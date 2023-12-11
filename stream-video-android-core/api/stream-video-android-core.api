@@ -4096,6 +4096,12 @@ public final class io/getstream/video/android/core/notifications/NotificationHan
 	public static final field INTENT_EXTRA_NOTIFICATION_ID Ljava/lang/String;
 }
 
+public final class io/getstream/video/android/core/notifications/internal/receivers/ToggleCameraBroadcastReceiver : android/content/BroadcastReceiver {
+	public fun <init> ()V
+	public final fun getLogger ()Lio/getstream/log/TaggedLogger;
+	public fun onReceive (Landroid/content/Context;Landroid/content/Intent;)V
+}
+
 public final class io/getstream/video/android/core/permission/PermissionRequest {
 	public fun <init> (Lio/getstream/video/android/core/Call;Lio/getstream/video/android/model/User;Lorg/threeten/bp/OffsetDateTime;Ljava/util/List;Lorg/threeten/bp/OffsetDateTime;Lorg/threeten/bp/OffsetDateTime;)V
 	public synthetic fun <init> (Lio/getstream/video/android/core/Call;Lio/getstream/video/android/model/User;Lorg/threeten/bp/OffsetDateTime;Ljava/util/List;Lorg/threeten/bp/OffsetDateTime;Lorg/threeten/bp/OffsetDateTime;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
