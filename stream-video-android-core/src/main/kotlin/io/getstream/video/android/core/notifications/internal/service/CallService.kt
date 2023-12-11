@@ -118,13 +118,13 @@ internal class CallService : Service() {
 
     override fun onTaskRemoved(rootIntent: Intent?) {
         super.onTaskRemoved(rootIntent)
-        
+
         // Leave the call
         callId?.let {
             StreamVideo.instanceOrNull()?.call(it.type, it.id)?.leave()
             logger.i { "Left ongoing call." }
         }
-        
+
         // Stop the service
         stopService()
     }
@@ -293,7 +293,7 @@ internal class CallService : Service() {
 
         // Optionally cancel any incoming call notification
         notificationManager.cancel(INCOMING_CALL_NOTIFICATION_ID)
-        
+
         // Stop
         unregisterToggleCameraBroadcastReceiver()
 
