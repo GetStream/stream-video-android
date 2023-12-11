@@ -63,15 +63,24 @@ internal class OngoingCallService : Service() {
         callId?.let {
             val notificationId = callId.hashCode()
             NotificationManagerCompat.from(this).cancel(notificationId)
-
-            val streamVideo = StreamVideo.instanceOrNull()
-            if (streamVideo != null) {
-                val call = streamVideo.call(it.type, it.id)
-                call.leave()
-            }
         }
-        logger.w { "Service was destroyed. Left call." }
         super.onDestroy()
+    }
+
+    override fun onTaskRemoved(rootIntent: Intent?) {
+        super.onTaskRemoved(rootIntent)
+        callId?.let { leaveCall(it) }
+    }
+
+    private fun leaveCall(callId: StreamCallId) {
+        val streamVideo = StreamVideo.instanceOrNull()
+        if (streamVideo != null) {
+            val call = streamVideo.call(callId.type, callId.id)
+            streamVideo.state.activeCall
+            call.leave()
+        }
+
+        logger.w { "Left ongoing call." }
     }
 
     // This service does not return a Binder
