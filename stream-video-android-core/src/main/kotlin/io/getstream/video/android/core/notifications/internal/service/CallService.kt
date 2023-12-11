@@ -28,7 +28,6 @@ import androidx.core.app.ServiceCompat
 import io.getstream.log.taggedLogger
 import io.getstream.video.android.core.RingingState
 import io.getstream.video.android.core.StreamVideo
-import io.getstream.video.android.core.notifications.NotificationHandler
 import io.getstream.video.android.core.notifications.NotificationHandler.Companion.INCOMING_CALL_NOTIFICATION_ID
 import io.getstream.video.android.core.notifications.NotificationHandler.Companion.INTENT_EXTRA_CALL_CID
 import io.getstream.video.android.core.notifications.NotificationHandler.Companion.INTENT_EXTRA_CALL_DISPLAY_NAME
@@ -38,9 +37,6 @@ import io.getstream.video.android.model.streamCallId
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
 import org.openapitools.client.models.CallEndedEvent
