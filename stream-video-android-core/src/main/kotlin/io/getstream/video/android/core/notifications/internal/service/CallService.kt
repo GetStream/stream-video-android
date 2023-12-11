@@ -20,6 +20,7 @@ import android.app.Notification
 import android.app.Service
 import android.content.Context
 import android.content.Intent
+import android.content.IntentFilter
 import android.content.pm.ServiceInfo
 import android.os.Build
 import android.os.IBinder
@@ -31,6 +32,7 @@ import io.getstream.video.android.core.StreamVideo
 import io.getstream.video.android.core.notifications.NotificationHandler.Companion.INCOMING_CALL_NOTIFICATION_ID
 import io.getstream.video.android.core.notifications.NotificationHandler.Companion.INTENT_EXTRA_CALL_CID
 import io.getstream.video.android.core.notifications.NotificationHandler.Companion.INTENT_EXTRA_CALL_DISPLAY_NAME
+import io.getstream.video.android.core.notifications.internal.receivers.ToggleCameraBroadcastReceiver
 import io.getstream.video.android.model.StreamCallId
 import io.getstream.video.android.model.streamCallDisplayName
 import io.getstream.video.android.model.streamCallId
@@ -55,6 +57,9 @@ internal class CallService : Service() {
 
     // Service scope
     private val serviceScope: CoroutineScope = CoroutineScope(Dispatchers.IO)
+
+    // Camera handling receiver
+    private val toggleCameraBroadcastReceiver = ToggleCameraBroadcastReceiver()
 
     internal companion object {
         const val TRIGGER_KEY =
@@ -108,6 +113,19 @@ internal class CallService : Service() {
     override fun onTimeout(startId: Int) {
         super.onTimeout(startId)
         logger.w { "Timeout received from the system, service will stop." }
+        stopService()
+    }
+
+    override fun onTaskRemoved(rootIntent: Intent?) {
+        super.onTaskRemoved(rootIntent)
+        
+        // Leave the call
+        callId?.let {
+            StreamVideo.instanceOrNull()?.call(it.type, it.id)?.leave()
+            logger.i { "Left ongoing call." }
+        }
+        
+        // Stop the service
         stopService()
     }
 
@@ -176,6 +194,7 @@ internal class CallService : Service() {
                 initializeCallAndSocket(streamVideo, callId!!)
             }
             observeCallState(callId!!, streamVideo!!)
+            registerToggleCameraBroadcastReceiver()
         }
         return START_NOT_STICKY
     }
@@ -257,6 +276,13 @@ internal class CallService : Service() {
         super.onDestroy()
     }
 
+    // This service does not return a Binder
+    override fun onBind(intent: Intent?): IBinder? = null
+
+    // Internal logic
+    /**
+     * Handle all aspects of stopping the service.
+     */
     private fun stopService() {
         // Cancel the notification
         val notificationManager = NotificationManagerCompat.from(this)
@@ -267,6 +293,9 @@ internal class CallService : Service() {
 
         // Optionally cancel any incoming call notification
         notificationManager.cancel(INCOMING_CALL_NOTIFICATION_ID)
+        
+        // Stop
+        unregisterToggleCameraBroadcastReceiver()
 
         // Stop any jobs
         serviceScope.cancel()
@@ -274,7 +303,26 @@ internal class CallService : Service() {
         // Optionally (no-op if already stopping)
         stopSelf()
     }
+    private fun registerToggleCameraBroadcastReceiver() {
+        try {
+            registerReceiver(
+                toggleCameraBroadcastReceiver,
+                IntentFilter().apply {
+                    addAction(Intent.ACTION_SCREEN_ON)
+                    addAction(Intent.ACTION_SCREEN_OFF)
+                    addAction(Intent.ACTION_USER_PRESENT)
+                },
+            )
+        } catch (e: Exception) {
+            logger.e(e) { "Unable to register ToggleCameraBroadcastReceiver." }
+        }
+    }
 
-    // This service does not return a Binder
-    override fun onBind(intent: Intent?): IBinder? = null
+    private fun unregisterToggleCameraBroadcastReceiver() {
+        try {
+            unregisterReceiver(toggleCameraBroadcastReceiver)
+        } catch (e: Exception) {
+            logger.e(e) { "Unable to unregister ToggleCameraBroadcastReceiver." }
+        }
+    }
 }
