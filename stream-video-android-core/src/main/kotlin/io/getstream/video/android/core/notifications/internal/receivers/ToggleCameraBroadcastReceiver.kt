@@ -23,7 +23,9 @@ import io.getstream.log.taggedLogger
 import io.getstream.video.android.core.StreamVideo
 
 class ToggleCameraBroadcastReceiver : BroadcastReceiver() {
-    val logger by taggedLogger("ToggleCameraBroadcastReceiver")
+    private val activeCall = StreamVideo.instanceOrNull()?.state?.activeCall?.value
+    private var shouldEnableCameraAgain = false
+    private val logger by taggedLogger("ToggleCameraBroadcastReceiver")
 
     override fun onReceive(context: Context, intent: Intent) {
         when (intent.action) {
@@ -32,13 +34,17 @@ class ToggleCameraBroadcastReceiver : BroadcastReceiver() {
             }
             Intent.ACTION_USER_PRESENT -> {
                 logger.d { "Screen is on and unlocked." }
-                StreamVideo.instanceOrNull()?.state?.activeCall?.value?.camera?.enable()
+                if (shouldEnableCameraAgain) activeCall?.camera?.enable()
             }
             Intent.ACTION_SCREEN_OFF -> {
-                // This flag actually means that the device is non-interactive.
+                // This broadcast action actually means that the device is non-interactive.
                 // In a video call scenario, the only way to be non-interactive is when locking the phone manually.
-                logger.d { "Screen is off." }
-                StreamVideo.instanceOrNull()?.state?.activeCall?.value?.camera?.disable()
+                activeCall?.camera.let { camera ->
+                    shouldEnableCameraAgain = camera?.isEnabled?.value ?: false
+                    camera?.disable()
+                }
+
+                logger.d { "Screen is off. Should re-enable camera: $shouldEnableCameraAgain." }
             }
         }
     }
