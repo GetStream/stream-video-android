@@ -34,6 +34,7 @@ import io.getstream.video.android.model.streamCallId
 internal class OngoingCallService : Service() {
     private val logger by taggedLogger("OngoingCallService")
     private var callId: StreamCallId? = null
+    private val toggleCameraBroadcastReceiver = ToggleCameraBroadcastReceiver()
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         callId = intent?.streamCallId(INTENT_EXTRA_CALL_CID)
@@ -65,14 +66,18 @@ internal class OngoingCallService : Service() {
     }
 
     private fun registerToggleCameraBroadcastReceiver() {
-        registerReceiver(
-            ToggleCameraBroadcastReceiver(),
-            IntentFilter().apply {
-                addAction(Intent.ACTION_SCREEN_ON)
-                addAction(Intent.ACTION_SCREEN_OFF)
-                addAction(Intent.ACTION_USER_PRESENT)
-            },
-        )
+        try {
+            registerReceiver(
+                toggleCameraBroadcastReceiver,
+                IntentFilter().apply {
+                    addAction(Intent.ACTION_SCREEN_ON)
+                    addAction(Intent.ACTION_SCREEN_OFF)
+                    addAction(Intent.ACTION_USER_PRESENT)
+                },
+            )
+        } catch (e: Exception) {
+            logger.e(e) { "Unable to register ToggleCameraBroadcastReceiver." }
+        }
     }
 
     override fun onDestroy() {
@@ -81,9 +86,17 @@ internal class OngoingCallService : Service() {
             NotificationManagerCompat.from(this).cancel(notificationId)
         }
 
-        unregisterReceiver(ToggleCameraBroadcastReceiver())
+        unregisterToggleCameraBroadcastReceiver()
 
         super.onDestroy()
+    }
+
+    private fun unregisterToggleCameraBroadcastReceiver() {
+        try {
+            unregisterReceiver(toggleCameraBroadcastReceiver)
+        } catch (e: Exception) {
+            logger.e(e) { "Unable to unregister ToggleCameraBroadcastReceiver." }
+        }
     }
 
     override fun onTaskRemoved(rootIntent: Intent?) {
