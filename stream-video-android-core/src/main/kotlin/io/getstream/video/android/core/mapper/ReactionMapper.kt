@@ -29,12 +29,12 @@ public fun interface ReactionMapper {
             return ReactionMapper { emojiCode ->
                 when (emojiCode) {
                     ":fireworks:", ":tada:" -> "\uD83C\uDF89"
-                    ":hello:" -> "\uD83D\uDC4B"
                     ":raise-hand:" -> "✋"
                     ":like:" -> "\uD83D\uDC4D"
-                    ":hate:" -> "\uD83D\uDC4E"
-                    ":smile:" -> "\uD83D\uDE04"
-                    ":heart:" -> "❤️"
+                    ":dislike:" -> "\uD83D\uDC4E"
+                    ":hello:" -> "\uD83D\uDC4B"
+                    ":smile:" -> "\uD83D\uDE42"
+                    ":heart:" -> "\u2665"
                     else -> emojiCode
                 }
             }

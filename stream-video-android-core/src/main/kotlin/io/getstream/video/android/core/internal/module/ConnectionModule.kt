@@ -191,7 +191,11 @@ internal class SfuConnectionModule(
     onFastReconnect: suspend () -> Unit,
 ) {
     internal var sfuSocket: SfuSocket
-    private val updatedSignalUrl = sfuUrl.removeSuffix(suffix = "/twirp")
+    private val updatedSignalUrl = if (sfuUrl.contains(Regex("https?://"))) {
+        sfuUrl
+    } else {
+        "http://$sfuUrl"
+    }.removeSuffix("/twirp")
 
     private fun buildSfuOkHttpClient(): OkHttpClient {
         val connectionTimeoutInMs = 10000L
@@ -227,7 +231,9 @@ internal class SfuConnectionModule(
     }
 
     init {
-        val socketUrl = "$updatedSignalUrl/ws".replace("https", "wss")
+        val socketUrl = "$updatedSignalUrl/ws"
+            .replace("https", "wss")
+            .replace("http", "ws")
 
         sfuSocket = SfuSocket(
             socketUrl,
