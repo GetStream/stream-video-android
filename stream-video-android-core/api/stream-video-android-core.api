@@ -734,6 +734,7 @@ public abstract interface class io/getstream/video/android/core/StreamVideo : io
 	public static synthetic fun call$default (Lio/getstream/video/android/core/StreamVideo;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)Lio/getstream/video/android/core/Call;
 	public abstract fun cleanup ()V
 	public abstract fun connectAsync (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public abstract fun connectIfNotAlreadyConnected (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public abstract fun createDevice (Lio/getstream/android/push/PushDevice;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public abstract fun deleteDevice (Lio/getstream/video/android/model/Device;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public abstract fun getContext ()Landroid/content/Context;
