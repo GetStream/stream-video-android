@@ -18,11 +18,13 @@ package io.getstream.video.android.core.notifications.internal.service
 
 import android.app.Service
 import android.content.Intent
+import android.content.IntentFilter
 import android.os.IBinder
 import androidx.core.app.NotificationManagerCompat
 import io.getstream.log.taggedLogger
 import io.getstream.video.android.core.StreamVideo
 import io.getstream.video.android.core.notifications.NotificationHandler.Companion.INTENT_EXTRA_CALL_CID
+import io.getstream.video.android.core.notifications.internal.receivers.ToggleCameraBroadcastReceiver
 import io.getstream.video.android.model.StreamCallId
 import io.getstream.video.android.model.streamCallId
 
@@ -52,11 +54,25 @@ internal class OngoingCallService : Service() {
             false
         }
 
-        if (!started) {
+        if (started) {
+            registerToggleCameraBroadcastReceiver()
+        } else {
             logger.w { "Foreground service did not start!" }
             stopSelf()
         }
+
         return START_NOT_STICKY
+    }
+
+    private fun registerToggleCameraBroadcastReceiver() {
+        registerReceiver(
+            ToggleCameraBroadcastReceiver(),
+            IntentFilter().apply {
+                addAction(Intent.ACTION_SCREEN_ON)
+                addAction(Intent.ACTION_SCREEN_OFF)
+                addAction(Intent.ACTION_USER_PRESENT)
+            },
+        )
     }
 
     override fun onDestroy() {
@@ -64,23 +80,18 @@ internal class OngoingCallService : Service() {
             val notificationId = callId.hashCode()
             NotificationManagerCompat.from(this).cancel(notificationId)
         }
+
+        unregisterReceiver(ToggleCameraBroadcastReceiver())
+
         super.onDestroy()
     }
 
     override fun onTaskRemoved(rootIntent: Intent?) {
         super.onTaskRemoved(rootIntent)
-        callId?.let { leaveCall(it) }
-    }
-
-    private fun leaveCall(callId: StreamCallId) {
-        val streamVideo = StreamVideo.instanceOrNull()
-        if (streamVideo != null) {
-            val call = streamVideo.call(callId.type, callId.id)
-            streamVideo.state.activeCall
-            call.leave()
+        callId?.let {
+            StreamVideo.instanceOrNull()?.call(it.type, it.id)?.leave()
+            logger.i { "Left ongoing call." }
         }
-
-        logger.w { "Left ongoing call." }
     }
 
     // This service does not return a Binder
