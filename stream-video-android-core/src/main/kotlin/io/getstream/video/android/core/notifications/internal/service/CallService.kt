@@ -29,16 +29,19 @@ import io.getstream.log.taggedLogger
 import io.getstream.video.android.core.RingingState
 import io.getstream.video.android.core.StreamVideo
 import io.getstream.video.android.core.notifications.NotificationHandler
+import io.getstream.video.android.core.notifications.NotificationHandler.Companion.INCOMING_CALL_NOTIFICATION_ID
 import io.getstream.video.android.core.notifications.NotificationHandler.Companion.INTENT_EXTRA_CALL_CID
 import io.getstream.video.android.core.notifications.NotificationHandler.Companion.INTENT_EXTRA_CALL_DISPLAY_NAME
 import io.getstream.video.android.model.StreamCallId
 import io.getstream.video.android.model.streamCallDisplayName
 import io.getstream.video.android.model.streamCallId
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
 import org.openapitools.client.models.CallEndedEvent
 import org.openapitools.client.models.CallRejectedEvent
@@ -54,13 +57,8 @@ internal class CallService : Service() {
     private var callId: StreamCallId? = null
     private var callDisplayName: String? = null
 
-    // Running jobs
-    private var observeRingingState: Job? = null
-    private var updateRingingStateJob: Job? = null
-    private var observeCallState: Job? = null
-    private var updateCallJob: Job? = null
-    private var startCoordinatorSocketJob: Job? = null
-    private val supervisorJob = SupervisorJob()
+    // Service scope
+    private val serviceScope: CoroutineScope = CoroutineScope(Dispatchers.IO)
 
     internal companion object {
         const val TRIGGER_KEY =
@@ -138,7 +136,7 @@ internal class CallService : Service() {
                             callId!!,
                             callDisplayName!!,
                         ),
-                        NotificationHandler.INCOMING_CALL_NOTIFICATION_ID,
+                        INCOMING_CALL_NOTIFICATION_ID,
                     )
 
                     else -> Pair(null, callId.hashCode())
@@ -188,7 +186,7 @@ internal class CallService : Service() {
 
     @OptIn(DelicateCoroutinesApi::class)
     private fun updateRingingCall(streamVideo: StreamVideo, callId: StreamCallId) {
-        updateRingingStateJob = GlobalScope.launch(supervisorJob + Dispatchers.IO) {
+        serviceScope.launch {
             val call = streamVideo.call(callId.type, callId.id)
             streamVideo.state.addRingingCall(call)
         }
@@ -197,7 +195,7 @@ internal class CallService : Service() {
     @OptIn(DelicateCoroutinesApi::class)
     private fun observeCallState(callId: StreamCallId, streamVideo: StreamVideo) {
         // Ringing state
-        observeRingingState = GlobalScope.launch(supervisorJob + Dispatchers.IO) {
+        serviceScope.launch {
             val call = streamVideo.call(callId.type, callId.id)
             call.state.ringingState.collect {
                 logger.i { "Ringing state: $it" }
@@ -213,7 +211,7 @@ internal class CallService : Service() {
         }
 
         // Call state
-        observeCallState = GlobalScope.launch(supervisorJob + Dispatchers.IO) {
+        serviceScope.launch {
             val call = streamVideo.call(callId.type, callId.id)
             call.subscribe {
                 logger.i { "Received event in service: $it" }
@@ -238,7 +236,7 @@ internal class CallService : Service() {
         callId: StreamCallId,
     ) {
         // Update call
-        updateCallJob = GlobalScope.launch(supervisorJob + Dispatchers.IO) {
+        serviceScope.launch {
             val call = streamVideo.call(callId.type, callId.id)
             val update = call.get()
             if (update.isFailure) {
@@ -253,7 +251,7 @@ internal class CallService : Service() {
         }
 
         // Monitor coordinator socket
-        startCoordinatorSocketJob = GlobalScope.launch(supervisorJob + Dispatchers.IO) {
+        serviceScope.launch {
             streamVideo.connectIfNotAlreadyConnected()
         }
     }
@@ -265,17 +263,17 @@ internal class CallService : Service() {
 
     private fun stopService() {
         // Cancel the notification
+        val notificationManager = NotificationManagerCompat.from(this)
         callId?.let {
             val notificationId = callId.hashCode()
-            NotificationManagerCompat.from(this).cancel(notificationId)
+            notificationManager.cancel(notificationId)
         }
+
+        // Optionally cancel any incoming call notification
+        notificationManager.cancel(INCOMING_CALL_NOTIFICATION_ID)
+
         // Stop any jobs
-        observeRingingState?.cancel()
-        updateRingingStateJob?.cancel()
-        observeCallState?.cancel()
-        updateCallJob?.cancel()
-        startCoordinatorSocketJob?.cancel()
-        supervisorJob.cancel()
+        serviceScope.cancel()
 
         // Optionally (no-op if already stopping)
         stopSelf()
