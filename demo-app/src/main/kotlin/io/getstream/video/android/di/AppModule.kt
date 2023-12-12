@@ -28,6 +28,7 @@ import dagger.hilt.components.SingletonComponent
 import io.getstream.video.android.R
 import io.getstream.video.android.data.repositories.GoogleAccountRepository
 import io.getstream.video.android.datastore.delegate.StreamUserDataStore
+import io.getstream.video.android.util.NetworkConnectivityHelper
 import javax.inject.Singleton
 
 @dagger.Module
@@ -56,4 +57,9 @@ object AppModule {
         @ApplicationContext context: Context,
         googleSignInClient: GoogleSignInClient,
     ) = GoogleAccountRepository(context, googleSignInClient)
+
+    @Provides
+    @Singleton
+    fun provideNetworkConnectivityHelper(@ApplicationContext context: Context) =
+        NetworkConnectivityHelper(context)
 }
