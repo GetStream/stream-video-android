@@ -49,7 +49,6 @@ import io.getstream.video.android.util.StreamVideoInitHelper
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import org.openapitools.client.models.CallEndedEvent
 import org.openapitools.client.models.CallRejectedEvent
 import java.util.UUID
 import javax.inject.Inject
