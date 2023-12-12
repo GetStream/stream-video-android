@@ -30,6 +30,7 @@ import androidx.camera.view.PreviewView
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -40,6 +41,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Cancel
 import androidx.compose.material.icons.outlined.Cancel
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -55,6 +57,9 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.content.ContextCompat
+import com.google.accompanist.permissions.ExperimentalPermissionsApi
+import com.google.accompanist.permissions.PermissionStatus
+import com.google.accompanist.permissions.rememberPermissionState
 import com.google.android.gms.tasks.OnSuccessListener
 import com.google.firebase.analytics.FirebaseAnalytics
 import com.google.mlkit.vision.barcode.BarcodeScanner
@@ -66,9 +71,11 @@ import io.getstream.video.android.DeeplinkingActivity
 import io.getstream.video.android.R
 import io.getstream.video.android.analytics.FirebaseEvents
 import io.getstream.video.android.compose.theme.VideoTheme
+import io.getstream.video.android.ui.theme.StreamButton
 import java.util.concurrent.Executor
 import java.util.concurrent.Executors
 
+@kotlin.OptIn(ExperimentalPermissionsApi::class)
 @Composable
 internal fun BarcodeScanner(navigateBack: () -> Unit = {}) {
     val executor: Executor = Executors.newSingleThreadExecutor()
@@ -84,32 +91,72 @@ internal fun BarcodeScanner(navigateBack: () -> Unit = {}) {
                 processImageProxy(imageProxy, barcodeScanner, qrCodeCallback)
             }
         }
-    val color = VideoTheme.colors.primaryAccent
-    Box(modifier = Modifier.fillMaxSize()) {
-        CameraPreview(imageAnalysis = imageAnalysis)
-        CornerRectWithArcs(color = color, cornerRadius = 32f, strokeWidth = 12f)
-        IconButton(
-            modifier = Modifier
-                .align(Alignment.TopStart)
-                .padding(8.dp),
-            onClick = {
-                navigateBack()
-            },
-        ) {
-            Icon(
-                imageVector = Icons.Filled.Cancel,
-                contentDescription = null,
-                tint = Color.White,
-            )
+
+    // Camera permission
+    val cameraPermissionState = rememberPermissionState(
+        android.Manifest.permission.CAMERA,
+    )
+
+    when (val cameraPermissionStatus = cameraPermissionState.status) {
+        PermissionStatus.Granted -> {
+            val color = VideoTheme.colors.primaryAccent
+            Box(modifier = Modifier.fillMaxSize()) {
+                CameraPreview(imageAnalysis = imageAnalysis)
+                CornerRectWithArcs(color = color, cornerRadius = 32f, strokeWidth = 12f)
+                IconButton(
+                    modifier = Modifier
+                        .align(Alignment.TopStart)
+                        .padding(8.dp),
+                    onClick = {
+                        navigateBack()
+                    },
+                ) {
+                    Icon(
+                        imageVector = Icons.Filled.Cancel,
+                        contentDescription = null,
+                        tint = Color.White,
+                    )
+                }
+                Text(
+                    modifier = Modifier
+                        .align(Alignment.TopCenter)
+                        .padding(8.dp),
+                    textAlign = TextAlign.Center,
+                    color = Color.White,
+                    text = stringResource(id = R.string.scan_qr_code_to_enter),
+                )
+            }
         }
-        Text(
-            modifier = Modifier
-                .align(Alignment.TopCenter)
-                .padding(8.dp),
-            textAlign = TextAlign.Center,
-            color = Color.White,
-            text = stringResource(id = R.string.scan_qr_code_to_enter),
-        )
+
+        is PermissionStatus.Denied -> {
+            Box(
+                modifier = Modifier.fillMaxSize(),
+            ) {
+                Column(modifier = Modifier.align(Alignment.Center)) {
+                    if (cameraPermissionStatus.shouldShowRationale) {
+                        Text(
+                            modifier = Modifier
+                                .align(Alignment.CenterHorizontally)
+                                .padding(8.dp),
+                            textAlign = TextAlign.Center,
+                            color = Color.White,
+                            text = stringResource(
+                                id = io.getstream.video.android.ui.common.R.string.stream_video_permissions_title,
+                            ),
+                        )
+                        StreamButton(
+                            modifier = Modifier.align(Alignment.CenterHorizontally),
+                            text = "Request permission",
+                            onClick = { cameraPermissionState.launchPermissionRequest() },
+                        )
+                    } else {
+                        LaunchedEffect(key1 = "") {
+                            cameraPermissionState.launchPermissionRequest()
+                        }
+                    }
+                }
+            }
+        }
     }
 }
 

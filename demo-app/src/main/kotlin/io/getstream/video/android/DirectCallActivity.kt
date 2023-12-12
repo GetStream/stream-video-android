@@ -32,6 +32,7 @@ import io.getstream.result.Result
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.call.activecall.CallContent
 import io.getstream.video.android.compose.ui.components.call.ringing.RingingCallContent
+import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.StreamVideo
 import io.getstream.video.android.core.call.state.AcceptCall
 import io.getstream.video.android.core.call.state.CallAction
@@ -45,7 +46,10 @@ import io.getstream.video.android.datastore.delegate.StreamUserDataStore
 import io.getstream.video.android.model.mapper.isValidCallId
 import io.getstream.video.android.model.mapper.toTypeAndId
 import io.getstream.video.android.util.StreamVideoInitHelper
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import org.openapitools.client.models.CallRejectedEvent
 import java.util.UUID
 import javax.inject.Inject
 
@@ -54,6 +58,7 @@ class DirectCallActivity : ComponentActivity() {
 
     @Inject
     lateinit var dataStore: StreamUserDataStore
+    private lateinit var call: Call
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -73,7 +78,7 @@ class DirectCallActivity : ComponentActivity() {
             }
 
             // Create call object
-            val call = StreamVideo.instance().call(type, id)
+            call = StreamVideo.instance().call(type, id)
 
             // Get list of members
             val members: List<String> = intent.getStringArrayExtra(EXTRA_MEMBERS_ARRAY)?.asList() ?: emptyList()
@@ -83,6 +88,18 @@ class DirectCallActivity : ComponentActivity() {
 
             // Ring the members
             val result = call.create(ring = true, memberIds = membersWithMe)
+
+            // Update the call
+            call.get()
+
+            call.subscribe {
+                when (it) {
+                    // Finish this activity if ever a call.reject is received
+                    is CallRejectedEvent -> {
+                        finish()
+                    }
+                }
+            }
 
             if (result is Result.Failure) {
                 // Failed to recover the current state of the call
@@ -101,20 +118,19 @@ class DirectCallActivity : ComponentActivity() {
                     val onCallAction: (CallAction) -> Unit = { callAction ->
                         when (callAction) {
                             is ToggleCamera -> call.camera.setEnabled(callAction.isEnabled)
-                            is ToggleMicrophone -> call.microphone.setEnabled(callAction.isEnabled)
+                            is ToggleMicrophone -> call.microphone.setEnabled(
+                                callAction.isEnabled,
+                            )
                             is ToggleSpeakerphone -> call.speaker.setEnabled(callAction.isEnabled)
                             is LeaveCall -> {
                                 call.leave()
                                 finish()
                             }
                             is DeclineCall -> {
-                                // Not needed. this activity is only used for outgoing calls.
+                                reject(call)
                             }
                             is CancelCall -> {
-                                lifecycleScope.launch {
-                                    call.leave()
-                                    finish()
-                                }
+                                reject(call)
                             }
                             is AcceptCall -> {
                                 lifecycleScope.launch {
@@ -131,8 +147,7 @@ class DirectCallActivity : ComponentActivity() {
                         modifier = Modifier.background(color = VideoTheme.colors.appBackground),
                         call = call,
                         onBackPressed = {
-                            call.leave()
-                            finish()
+                            reject(call)
                         },
                         onAcceptedContent = {
                             CallContent(
@@ -142,12 +157,27 @@ class DirectCallActivity : ComponentActivity() {
                             )
                         },
                         onRejectedContent = {
-                            call.leave()
-                            finish()
+                            reject(call)
                         },
                         onCallAction = onCallAction,
                     )
                 }
+            }
+        }
+    }
+
+    override fun onStop() {
+        super.onStop()
+        if (::call.isInitialized) {
+            reject(call)
+        }
+    }
+
+    private fun reject(call: Call) {
+        lifecycleScope.launch(Dispatchers.IO) {
+            call.reject()
+            withContext(Dispatchers.Main) {
+                finish()
             }
         }
     }

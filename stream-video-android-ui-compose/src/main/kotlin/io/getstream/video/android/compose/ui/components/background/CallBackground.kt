@@ -37,9 +37,9 @@ import com.skydoves.landscapist.ImageOptions
 import com.skydoves.landscapist.animation.crossfade.CrossfadePlugin
 import com.skydoves.landscapist.coil.CoilImage
 import com.skydoves.landscapist.components.rememberImageComponent
-import com.skydoves.landscapist.transformation.blur.BlurTransformationPlugin
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.avatar.AvatarImagePreview
+import io.getstream.video.android.compose.ui.components.plugins.BlurTransformationPlugin
 import io.getstream.video.android.core.MemberState
 import io.getstream.video.android.core.model.CallUser
 import io.getstream.video.android.core.utils.toCallUser

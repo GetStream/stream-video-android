@@ -1,10 +1,10 @@
 [versions]
-androidGradlePlugin = "8.1.3"
+androidGradlePlugin = "8.2.0"
 cameraCamera2 = "1.3.0"
 spotless = "6.21.0"
 nexusPlugin = "1.3.0"
-kotlin = "1.9.20"
-ksp = "1.9.20-1.0.13"
+kotlin = "1.9.21"
+ksp = "1.9.21-1.0.15"
 kotlinSerialization = "1.6.0"
 kotlinSerializationConverter = "1.0.0"
 kotlinxCoroutines = "1.7.3"
@@ -23,18 +23,18 @@ androidxDataStore = "1.0.0"
 googleService = "4.3.14"
 
 androidxComposeBom = "2023.10.01"
-androidxComposeCompiler = "1.5.4"
+androidxComposeCompiler = "1.5.6"
 androidxComposeTracing = "1.0.0-alpha03"
 androidxHiltNavigation = "1.1.0"
 androidxComposeNavigation = "2.7.5"
 composeStableMarker = "1.0.2"
 
 coil = "2.5.0"
-landscapist = "2.2.11"
+landscapist = "2.2.12"
 accompanist = "0.32.0"
 telephoto = "0.3.0"
 audioswitch = "1.1.8"
-libyuv = "0.28.0"
+libyuv = "0.30.0"
 
 wire = "4.7.0"
 okhttp = "4.12.0"
@@ -48,12 +48,12 @@ streamWebRTC = "1.1.1"
 streamResult = "1.1.0"
 streamChat = "6.0.8"
 streamLog = "1.1.4"
-streamPush = "1.1.6"
+streamPush = "1.1.7"
 
 androidxTest = "1.5.2"
 androidxTestCore = "1.5.0"
 androidxProfileinstaller = "1.3.1"
-androidxMacroBenchmark = "1.2.0"
+androidxMacroBenchmark = "1.2.2"
 androidxUiAutomator = "2.3.0-alpha05"
 androidxContraintLayout = "2.1.4"
 androidxEspresso = "3.5.1"
@@ -71,11 +71,13 @@ installReferrer = "2.2"
 playAuth = "20.7.0"
 playAppUpdate = "2.1.0"
 
-hilt = "2.48.1"
+hilt = "2.49"
 desugar = "2.0.4"
 leakCanary = "2.12"
 binaryCompatabilityValidator = "0.13.2"
 playPublisher = "3.8.4"
+
+googleMlKitSelfieSegmentation = "16.0.0-beta4"
 
 [libraries]
 androidx-camera-camera2 = { module = "androidx.camera:camera-camera2", version.ref = "cameraCamera2" }
@@ -191,6 +193,8 @@ play-app-update-ktx = { group = "com.google.android.play", name = "app-update-kt
 
 robolectric = { group = "org.robolectric", name = "robolectric", version.ref = "robolectric" }
 leakCanary = { group = "com.squareup.leakcanary", name = "leakcanary-android", version.ref = "leakCanary" }
+
+google-mlkit-selfie-segmentation = { group = "com.google.mlkit", name = "segmentation-selfie", version.ref = "googleMlKitSelfieSegmentation" }
 
 # Dependencies of the included build-logic
 android-gradlePlugin = { group = "com.android.tools.build", name = "gradle", version.ref = "androidGradlePlugin" }

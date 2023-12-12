@@ -134,6 +134,7 @@ internal class StreamVideoImpl internal constructor(
     internal val tokenProvider: (suspend (error: Throwable?) -> String)?,
     internal val streamNotificationManager: StreamNotificationManager,
     internal val runForeGroundService: Boolean = true,
+    internal val testSfuAddress: String? = null,
 ) : StreamVideo,
     NotificationHandler by streamNotificationManager {
 
@@ -294,6 +295,14 @@ internal class StreamVideoImpl internal constructor(
         val sub = EventSubscription(listener)
         subscriptions.add(sub)
         return sub
+    }
+
+    override suspend fun connectIfNotAlreadyConnected() {
+        if (connectionModule.coordinatorSocket.connectionState.value != SocketState.NotConnected &&
+            connectionModule.coordinatorSocket.connectionState.value != SocketState.Connecting
+        ) {
+            connectionModule.coordinatorSocket.connect()
+        }
     }
 
     /**

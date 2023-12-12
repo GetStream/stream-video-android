@@ -22,6 +22,7 @@ import android.widget.Toast
 import androidx.compose.animation.Crossfade
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -33,6 +34,7 @@ import androidx.compose.material.Text
 import androidx.compose.material.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateListOf
@@ -42,13 +44,16 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.getstream.chat.android.ui.common.state.messages.list.MessageItemState
 import io.getstream.video.android.BuildConfig
+import io.getstream.video.android.compose.theme.StreamDimens
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.call.activecall.CallContent
 import io.getstream.video.android.compose.ui.components.call.controls.ControlActions
@@ -59,7 +64,11 @@ import io.getstream.video.android.compose.ui.components.call.controls.actions.Fl
 import io.getstream.video.android.compose.ui.components.call.controls.actions.SettingsAction
 import io.getstream.video.android.compose.ui.components.call.controls.actions.ToggleCameraAction
 import io.getstream.video.android.compose.ui.components.call.controls.actions.ToggleMicrophoneAction
+import io.getstream.video.android.compose.ui.components.call.renderer.FloatingParticipantVideo
 import io.getstream.video.android.compose.ui.components.call.renderer.LayoutType
+import io.getstream.video.android.compose.ui.components.call.renderer.ParticipantVideo
+import io.getstream.video.android.compose.ui.components.call.renderer.RegularVideoRendererStyle
+import io.getstream.video.android.compose.ui.components.call.renderer.copy
 import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.RealtimeConnection
 import io.getstream.video.android.core.call.state.ChooseLayout
@@ -84,6 +93,7 @@ fun CallScreen(
     var isShowingLayoutChooseMenu by remember { mutableStateOf(false) }
     var isShowingReactionsMenu by remember { mutableStateOf(false) }
     var isShowingAvailableDeviceMenu by remember { mutableStateOf(false) }
+    var isBackgroundBlurEnabled by remember { mutableStateOf(false) }
     var layout by remember { mutableStateOf(LayoutType.DYNAMIC) }
     var unreadCount by remember { mutableIntStateOf(0) }
     val chatState = rememberModalBottomSheetState(
@@ -95,27 +105,30 @@ fun CallScreen(
     val scope = rememberCoroutineScope()
     val messageScope = rememberCoroutineScope()
 
-    val callState by call.state.connection.collectAsStateWithLifecycle()
+    val connection by call.state.connection.collectAsStateWithLifecycle()
+    val me by call.state.me.collectAsState()
 
-    LaunchedEffect(key1 = callState) {
-        if (callState == RealtimeConnection.Disconnected) {
+    LaunchedEffect(key1 = connection) {
+        if (connection == RealtimeConnection.Disconnected) {
             onCallDisconnected.invoke()
-        } else if (callState is RealtimeConnection.Failed) {
+        } else if (connection is RealtimeConnection.Failed) {
             Toast.makeText(
                 context,
-                "Call connection failed (${(callState as RealtimeConnection.Failed).error}",
+                "Call connection failed (${(connection as RealtimeConnection.Failed).error}",
                 Toast.LENGTH_LONG,
             ).show()
             onCallDisconnected.invoke()
         }
     }
 
-    VideoTheme {
+    VideoTheme(
+        dimens = StreamDimens.defaultDimens().copy(reactionSize = 32.dp),
+    ) {
         ChatDialog(
             state = chatState,
             call = call,
             content = {
-                Box(modifier = Modifier.fillMaxSize()) {
+                BoxWithConstraints(modifier = Modifier.fillMaxSize()) {
                     CallContent(
                         modifier = Modifier.background(color = VideoTheme.colors.appBackground),
                         call = call,
@@ -220,6 +233,52 @@ fun CallScreen(
                                 ),
                             )
                         },
+                        videoRenderer = { modifier, call, participant, style ->
+                            ParticipantVideo(
+                                modifier = modifier,
+                                call = call,
+                                participant = participant,
+                                style = style,
+                                reactionContent = {
+                                    CustomReactionContent(
+                                        participant = participant,
+                                        style = style.copy(
+                                            reactionPosition = Alignment.TopCenter,
+                                            reactionDuration = 5000,
+                                        ),
+                                    )
+                                },
+                            )
+                        },
+                        floatingVideoRenderer = { _, _ ->
+                            FloatingParticipantVideo(
+                                call = call,
+                                participant = me!!,
+                                parentBounds = IntSize(
+                                    this@BoxWithConstraints.constraints.maxWidth,
+                                    this@BoxWithConstraints.constraints.maxHeight,
+                                ),
+                                videoRenderer = { participant ->
+                                    ParticipantVideo(
+                                        modifier = Modifier
+                                            .fillMaxSize()
+                                            .clip(VideoTheme.shapes.floatingParticipant),
+                                        call = call,
+                                        participant = participant,
+                                        reactionContent = {
+                                            CustomReactionContent(
+                                                participant = participant,
+                                                style = RegularVideoRendererStyle().copy(
+                                                    isShowingConnectionQualityIndicator = false,
+                                                    reactionPosition = Alignment.TopCenter,
+                                                    reactionDuration = 5000,
+                                                ),
+                                            )
+                                        },
+                                    )
+                                },
+                            )
+                        },
                         videoOverlayContent = {
                             Crossfade(
                                 modifier = Modifier
@@ -266,9 +325,14 @@ fun CallScreen(
             SettingsMenu(
                 call = call,
                 showDebugOptions = showDebugOptions,
+                isBackgroundBlurEnabled = isBackgroundBlurEnabled,
                 onDisplayAvailableDevice = { isShowingAvailableDeviceMenu = true },
                 onDismissed = { isShowingSettingMenu = false },
                 onShowReactionsMenu = { isShowingReactionsMenu = true },
+                onToggleBackgroundBlur = {
+                    isBackgroundBlurEnabled = !isBackgroundBlurEnabled
+                    isShowingSettingMenu = false
+                },
             )
         }
 

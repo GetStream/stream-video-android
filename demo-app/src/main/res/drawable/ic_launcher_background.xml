@@ -16,10 +16,13 @@
 -->
 <vector xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:aapt="http://schemas.android.com/aapt"
-    android:width="108dp"
-    android:height="108dp"
+    android:width="107dp"
+    android:height="107dp"
     android:viewportWidth="107"
     android:viewportHeight="107">
+  <path
+      android:pathData="M0,0h107v107h-107z"
+      android:fillColor="#005FFF"/>
   <path
       android:pathData="M0,0h107v107h-107z">
     <aapt:attr name="android:fillColor">
@@ -30,7 +33,7 @@
           android:endY="107"
           android:type="linear">
         <item android:offset="0" android:color="#FF49DDED"/>
-        <item android:offset="1" android:color="#FF005FFF"/>
+        <item android:offset="1" android:color="#0049DDED"/>
       </gradient>
     </aapt:attr>
   </path>

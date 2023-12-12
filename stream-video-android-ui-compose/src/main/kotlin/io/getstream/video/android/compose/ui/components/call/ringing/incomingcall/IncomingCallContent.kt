@@ -147,7 +147,6 @@ public fun IncomingCallContent(
             } else {
                 VideoTheme.dimens.avatarAppbarPadding
             }
-
             detailsContent?.invoke(this, participants, topPadding) ?: IncomingCallDetails(
                 modifier = Modifier
                     .align(Alignment.CenterHorizontally)

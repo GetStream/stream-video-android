@@ -55,6 +55,6 @@ class App : Application() {
     }
 }
 
-val STREAM_SDK_ENVIRONMENT = if (BuildConfig.FLAVOR == StreamFlavors.production) "pronto" else "demo"
+val STREAM_SDK_ENVIRONMENT = if (BuildConfig.FLAVOR == StreamFlavors.production) "demo" else "pronto"
 
 val Context.app get() = applicationContext as App
