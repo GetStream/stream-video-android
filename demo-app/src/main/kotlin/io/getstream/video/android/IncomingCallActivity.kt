@@ -25,6 +25,7 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.lifecycleScope
 import dagger.hilt.android.AndroidEntryPoint
@@ -135,8 +136,10 @@ class IncomingCallActivity : ComponentActivity() {
                             )
                         },
                         onRejectedContent = {
-                            call.leave()
-                            finish()
+                            LaunchedEffect(key1 = call) {
+                                call.reject()
+                                finish()
+                            }
                         },
                         onCallAction = onCallAction,
                     )

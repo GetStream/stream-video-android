@@ -225,6 +225,7 @@ public interface StreamVideo : NotificationHandler {
     }
 
     public fun cleanup()
+    suspend fun connectIfNotAlreadyConnected()
 }
 
 private const val DEFAULT_QUERY_CALLS_SORT = "cid"

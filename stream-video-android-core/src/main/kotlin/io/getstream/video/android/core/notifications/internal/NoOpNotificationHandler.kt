@@ -25,6 +25,11 @@ internal object NoOpNotificationHandler : NotificationHandler {
     override fun onNotification(callId: StreamCallId, callDisplayName: String) { /* NoOp */ }
     override fun onLiveCall(callId: StreamCallId, callDisplayName: String) { /* NoOp */ }
     override fun getOngoingCallNotification(callId: StreamCallId): Notification? = null
+    override fun getRingingCallNotification(
+        callId: StreamCallId,
+        callDisplayName: String,
+    ): Notification? = null
+
     override fun onPermissionDenied() { /* NoOp */ }
     override fun onPermissionGranted() { /* NoOp */ }
     override fun onPermissionRationale() { /* NoOp */ }
