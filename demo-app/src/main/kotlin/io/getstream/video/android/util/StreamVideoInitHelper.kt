@@ -91,26 +91,30 @@ object StreamVideoInitHelper {
         // then we can initialise the SDK
         if (loggedInUser != null) {
             if (authData == null) {
-                authData = StreamService.instance.getAuthData(
-                    environment = STREAM_SDK_ENVIRONMENT,
-                    userId = loggedInUser.id,
-                )
+                try {
+                    authData = StreamService.instance.getAuthData(
+                        environment = STREAM_SDK_ENVIRONMENT,
+                        userId = loggedInUser.id,
+                    )
+
+                    initializeStreamChat(
+                        context = context,
+                        apiKey = authData.apiKey,
+                        user = loggedInUser,
+                        token = authData.token,
+                    )
+
+                    initializeStreamVideo(
+                        context = context,
+                        apiKey = authData.apiKey,
+                        user = loggedInUser,
+                        token = authData.token,
+                        loggingLevel = LoggingLevel(priority = Priority.VERBOSE),
+                    )
+                } catch (e: Exception) {
+                    Log.e("StreamVideoInitHelper", "StreamService failed to get auth data.")
+                }
             }
-
-            initializeStreamChat(
-                context = context,
-                apiKey = authData.apiKey,
-                user = loggedInUser,
-                token = authData.token,
-            )
-
-            initializeStreamVideo(
-                context = context,
-                apiKey = authData.apiKey,
-                user = loggedInUser,
-                token = authData.token,
-                loggingLevel = LoggingLevel(priority = Priority.VERBOSE),
-            )
         }
         isInitialising = false
     }
