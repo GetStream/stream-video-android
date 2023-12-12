@@ -18,6 +18,7 @@
 
 package io.getstream.video.android.ui.join
 
+import android.util.Log
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
@@ -88,6 +89,7 @@ import io.getstream.video.android.model.User
 import io.getstream.video.android.tooling.util.StreamFlavors
 import io.getstream.video.android.ui.theme.Colors
 import io.getstream.video.android.ui.theme.StreamButton
+import io.getstream.video.android.util.NetworkConnectivityHelper
 
 @Composable
 fun CallJoinScreen(
@@ -102,11 +104,13 @@ fun CallJoinScreen(
 
     var isSignOutDialogVisible by remember { mutableStateOf(false) }
     val isLoggedOut by callJoinViewModel.isLoggedOut.collectAsState(initial = false)
+    var isNetworkAvailable by remember { mutableStateOf(true) }
 
     HandleCallJoinUiState(
         callJoinUiState = uiState,
         navigateToCallLobby = navigateToCallLobby,
         navigateUpToLogin = { navigateUpToLogin(true) },
+        onNetworkConnectivityChange = { isNetworkAvailable = it },
     )
 
     Column(
@@ -135,6 +139,7 @@ fun CallJoinScreen(
             openCamera = {
                 navigateToBarcodeScanner()
             },
+            isNetworkAvailable = isNetworkAvailable,
         )
     }
 
@@ -161,6 +166,7 @@ private fun HandleCallJoinUiState(
     callJoinUiState: CallJoinUiState,
     navigateToCallLobby: (callId: String) -> Unit,
     navigateUpToLogin: () -> Unit,
+    onNetworkConnectivityChange: (isNetworkAvailable: Boolean) -> Unit,
 ) {
     LaunchedEffect(key1 = callJoinUiState) {
         when (callJoinUiState) {
@@ -169,6 +175,9 @@ private fun HandleCallJoinUiState(
 
             is CallJoinUiState.GoBackToLogin ->
                 navigateUpToLogin.invoke()
+
+            is CallJoinUiState.NetworkConnectivityChanged ->
+                onNetworkConnectivityChange.invoke(callJoinUiState.isNetworkAvailable)
 
             else -> Unit
         }
@@ -245,161 +254,173 @@ private fun CallJoinBody(
     modifier: Modifier,
     openCamera: () -> Unit,
     callJoinViewModel: CallJoinViewModel = hiltViewModel(),
+    isNetworkAvailable: Boolean,
 ) {
+    Log.i("NetworkConnectivity", "isNetworkAvailable: $isNetworkAvailable")
+
     val user by if (LocalInspectionMode.current) {
         remember { mutableStateOf(previewUsers[0]) }
     } else {
         callJoinViewModel.user.collectAsState(initial = null)
     }
 
-    Column(
-        modifier = modifier
-            .fillMaxSize()
-            .background(Colors.background)
-            .semantics { testTagsAsResourceId = true },
-        verticalArrangement = Arrangement.Center,
-        horizontalAlignment = Alignment.CenterHorizontally,
-    ) {
-        if (user != null) {
-            Image(
-                modifier = Modifier.size(102.dp),
-                painter = painterResource(id = R.drawable.ic_stream_video_meeting_logo),
-                contentDescription = null,
+    if (!isNetworkAvailable) {
+        Box(modifier = Modifier.fillMaxSize()) {
+            Text(
+                text = "No network connection",
+                modifier = Modifier.align(Alignment.Center),
             )
+        }
+    } else {
+        Column(
+            modifier = modifier
+                .fillMaxSize()
+                .background(Colors.background)
+                .semantics { testTagsAsResourceId = true },
+            verticalArrangement = Arrangement.Center,
+            horizontalAlignment = Alignment.CenterHorizontally,
+        ) {
+            if (user != null) {
+                Image(
+                    modifier = Modifier.size(102.dp),
+                    painter = painterResource(id = R.drawable.ic_stream_video_meeting_logo),
+                    contentDescription = null,
+                )
+                Spacer(modifier = Modifier.height(25.dp))
+
+                Text(
+                    modifier = Modifier.padding(horizontal = 30.dp),
+                    text = stringResource(id = R.string.app_name),
+                    color = Color.White,
+                    fontSize = 32.sp,
+                    textAlign = TextAlign.Center,
+                )
+            }
+
+            Spacer(modifier = Modifier.height(20.dp))
+
+            Text(
+                text = stringResource(id = R.string.join_description),
+                color = Colors.description,
+                textAlign = TextAlign.Center,
+                fontSize = 18.sp,
+                modifier = Modifier.widthIn(0.dp, 320.dp),
+            )
+
+            Spacer(modifier = Modifier.height(42.dp))
+
+            Text(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 35.dp),
+                text = stringResource(id = R.string.call_id_number),
+                color = Color(0xFF979797),
+                fontSize = 13.sp,
+            )
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+            var callId by remember {
+                mutableStateOf(
+                    if (BuildConfig.FLAVOR == StreamFlavors.development) {
+                        "default:79cYh3J5JgGk"
+                    } else {
+                        ""
+                    },
+                )
+            }
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(50.dp)
+                    .padding(horizontal = 35.dp),
+            ) {
+                TextField(
+                    modifier = Modifier
+                        .weight(1f)
+                        .fillMaxHeight()
+                        .border(
+                            BorderStroke(1.dp, Color(0xFF4C525C)),
+                            RoundedCornerShape(6.dp),
+                        ),
+                    shape = RoundedCornerShape(6.dp),
+                    value = callId,
+                    singleLine = true,
+                    onValueChange = { callId = it },
+                    trailingIcon = {
+                        IconButton(
+                            onClick = openCamera,
+                            modifier = Modifier.fillMaxHeight(),
+                            content = {
+                                Icon(
+                                    painter = painterResource(id = R.drawable.ic_scan_qr),
+                                    contentDescription = stringResource(
+                                        id = R.string.join_call_by_qr_code,
+                                    ),
+                                    tint = Colors.description,
+                                    modifier = Modifier.size(36.dp),
+                                )
+                            },
+                        )
+                    },
+                    colors = TextFieldDefaults.textFieldColors(
+                        textColor = Color.White,
+                        focusedLabelColor = VideoTheme.colors.primaryAccent,
+                        unfocusedIndicatorColor = Colors.secondBackground,
+                        focusedIndicatorColor = Colors.secondBackground,
+                        backgroundColor = Colors.secondBackground,
+                    ),
+                    keyboardOptions = KeyboardOptions.Default.copy(
+                        keyboardType = KeyboardType.Email,
+                    ),
+                    placeholder = {
+                        Text(
+                            stringResource(id = R.string.join_call_call_id_hint),
+                            color = Color(0xFF5D6168),
+                        )
+                    },
+                    keyboardActions = KeyboardActions(
+                        onDone = {
+                            callJoinViewModel.handleUiEvent(CallJoinEvent.JoinCall(callId = callId))
+                        },
+                    ),
+                )
+
+                StreamButton(
+                    modifier = Modifier
+                        .padding(start = 16.dp)
+                        .fillMaxHeight()
+                        .testTag("join_call"),
+                    onClick = {
+                        callJoinViewModel.handleUiEvent(CallJoinEvent.JoinCall(callId = callId))
+                    },
+                    text = stringResource(id = R.string.join_call),
+                )
+            }
+
             Spacer(modifier = Modifier.height(25.dp))
 
             Text(
-                modifier = Modifier.padding(horizontal = 30.dp),
-                text = stringResource(id = R.string.app_name),
-                color = Color.White,
-                fontSize = 32.sp,
-                textAlign = TextAlign.Center,
-            )
-        }
-
-        Spacer(modifier = Modifier.height(20.dp))
-
-        Text(
-            text = stringResource(id = R.string.join_description),
-            color = Colors.description,
-            textAlign = TextAlign.Center,
-            fontSize = 18.sp,
-            modifier = Modifier.widthIn(0.dp, 320.dp),
-        )
-
-        Spacer(modifier = Modifier.height(42.dp))
-
-        Text(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 35.dp),
-            text = stringResource(id = R.string.call_id_number),
-            color = Color(0xFF979797),
-            fontSize = 13.sp,
-        )
-
-        Spacer(modifier = Modifier.height(8.dp))
-
-        var callId by remember {
-            mutableStateOf(
-                if (BuildConfig.FLAVOR == StreamFlavors.development) {
-                    "default:79cYh3J5JgGk"
-                } else {
-                    ""
-                },
-            )
-        }
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(50.dp)
-                .padding(horizontal = 35.dp),
-        ) {
-            TextField(
                 modifier = Modifier
-                    .weight(1f)
-                    .fillMaxHeight()
-                    .border(
-                        BorderStroke(1.dp, Color(0xFF4C525C)),
-                        RoundedCornerShape(6.dp),
-                    ),
-                shape = RoundedCornerShape(6.dp),
-                value = callId,
-                singleLine = true,
-                onValueChange = { callId = it },
-                trailingIcon = {
-                    IconButton(
-                        onClick = openCamera,
-                        modifier = Modifier.fillMaxHeight(),
-                        content = {
-                            Icon(
-                                painter = painterResource(id = R.drawable.ic_scan_qr),
-                                contentDescription = stringResource(
-                                    id = R.string.join_call_by_qr_code,
-                                ),
-                                tint = Colors.description,
-                                modifier = Modifier.size(36.dp),
-                            )
-                        },
-                    )
-                },
-                colors = TextFieldDefaults.textFieldColors(
-                    textColor = Color.White,
-                    focusedLabelColor = VideoTheme.colors.primaryAccent,
-                    unfocusedIndicatorColor = Colors.secondBackground,
-                    focusedIndicatorColor = Colors.secondBackground,
-                    backgroundColor = Colors.secondBackground,
-                ),
-                keyboardOptions = KeyboardOptions.Default.copy(
-                    keyboardType = KeyboardType.Email,
-                ),
-                placeholder = {
-                    Text(
-                        stringResource(id = R.string.join_call_call_id_hint),
-                        color = Color(0xFF5D6168),
-                    )
-                },
-                keyboardActions = KeyboardActions(
-                    onDone = {
-                        callJoinViewModel.handleUiEvent(CallJoinEvent.JoinCall(callId = callId))
-                    },
-                ),
+                    .fillMaxWidth()
+                    .padding(horizontal = 35.dp),
+                text = stringResource(id = R.string.join_call_no_id_hint),
+                color = Color(0xFF979797),
+                fontSize = 13.sp,
             )
+
+            Spacer(modifier = Modifier.height(8.dp))
 
             StreamButton(
                 modifier = Modifier
-                    .padding(start = 16.dp)
-                    .fillMaxHeight()
-                    .testTag("join_call"),
-                onClick = {
-                    callJoinViewModel.handleUiEvent(CallJoinEvent.JoinCall(callId = callId))
-                },
-                text = stringResource(id = R.string.join_call),
+                    .fillMaxWidth()
+                    .height(52.dp)
+                    .padding(horizontal = 35.dp)
+                    .testTag("start_new_call"),
+                text = stringResource(id = R.string.start_a_new_call),
+                onClick = { callJoinViewModel.handleUiEvent(CallJoinEvent.JoinCall()) },
             )
         }
-
-        Spacer(modifier = Modifier.height(25.dp))
-
-        Text(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 35.dp),
-            text = stringResource(id = R.string.join_call_no_id_hint),
-            color = Color(0xFF979797),
-            fontSize = 13.sp,
-        )
-
-        Spacer(modifier = Modifier.height(8.dp))
-
-        StreamButton(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(52.dp)
-                .padding(horizontal = 35.dp)
-                .testTag("start_new_call"),
-            text = stringResource(id = R.string.start_a_new_call),
-            onClick = { callJoinViewModel.handleUiEvent(CallJoinEvent.JoinCall()) },
-        )
     }
 }
 
@@ -451,6 +472,7 @@ private fun CallJoinScreenPreview() {
                     LocalContext.current,
                     GoogleSignInOptions.Builder().build(),
                 ),
+                networkConnectivityHelper = NetworkConnectivityHelper(LocalContext.current),
             ),
             navigateToCallLobby = {},
             navigateUpToLogin = {},

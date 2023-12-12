@@ -27,6 +27,7 @@ import io.getstream.video.android.datastore.delegate.StreamUserDataStore
 import io.getstream.video.android.model.User
 import io.getstream.video.android.model.mapper.isValidCallId
 import io.getstream.video.android.model.mapper.toTypeAndId
+import io.getstream.video.android.util.NetworkConnectivityHelper
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -44,10 +45,13 @@ import javax.inject.Inject
 class CallJoinViewModel @Inject constructor(
     private val dataStore: StreamUserDataStore,
     private val googleSignInClient: GoogleSignInClient,
+    networkConnectivityHelper: NetworkConnectivityHelper,
 ) : ViewModel() {
     val user: Flow<User?> = dataStore.user
     val isLoggedOut = dataStore.user.map { it == null }
     var autoLogInAfterLogOut = true
+
+    private val networkConnectivity: Flow<Boolean> = networkConnectivityHelper.observe()
 
     private val event: MutableSharedFlow<CallJoinEvent> = MutableSharedFlow()
     internal val uiState: SharedFlow<CallJoinUiState> = event
@@ -56,14 +60,15 @@ class CallJoinViewModel @Inject constructor(
                 is CallJoinEvent.GoBackToLogin -> {
                     flowOf(CallJoinUiState.GoBackToLogin)
                 }
-
                 is CallJoinEvent.JoinCall -> {
                     val call = joinCall(event.callId)
                     flowOf(CallJoinUiState.JoinCompleted(callId = call.cid))
                 }
-
                 is CallJoinEvent.JoinCompleted -> flowOf(
                     CallJoinUiState.JoinCompleted(event.callId),
+                )
+                is CallJoinEvent.NetworkConnectivityChanged -> flowOf(
+                    CallJoinUiState.NetworkConnectivityChanged(event.isNetworkAvailable),
                 )
                 else -> flowOf(CallJoinUiState.Nothing)
             }
@@ -77,6 +82,11 @@ class CallJoinViewModel @Inject constructor(
             // Android process is restored then the Login is skipped Stream Video is not initialised.
             if (!StreamVideo.isInstalled) {
                 event.emit(CallJoinEvent.GoBackToLogin)
+            }
+
+            networkConnectivity.collect { isConnected ->
+//                if (isConnected) StreamVideoInitHelper.init()
+                event.emit(CallJoinEvent.NetworkConnectivityChanged(isConnected))
             }
         }
     }
@@ -114,6 +124,8 @@ sealed interface CallJoinUiState {
     data class JoinCompleted(val callId: String) : CallJoinUiState
 
     object GoBackToLogin : CallJoinUiState
+
+    data class NetworkConnectivityChanged(val isNetworkAvailable: Boolean) : CallJoinUiState
 }
 
 sealed interface CallJoinEvent {
@@ -124,4 +136,6 @@ sealed interface CallJoinEvent {
     data class JoinCompleted(val callId: String) : CallJoinEvent
 
     object GoBackToLogin : CallJoinEvent
+
+    data class NetworkConnectivityChanged(val isNetworkAvailable: Boolean) : CallJoinEvent
 }
