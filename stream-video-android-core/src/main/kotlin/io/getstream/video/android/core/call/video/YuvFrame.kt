@@ -30,6 +30,12 @@ object YuvFrame {
 
     private val logger by taggedLogger("YuvFrame")
 
+    private lateinit var byteBuffer: ByteBuffer
+    private lateinit var copyBuffer: ByteBuffer
+    private lateinit var planes: Array<ByteBuffer>
+    private lateinit var toI420: VideoFrame.I420Buffer
+
+
     /**
      * Converts VideoFrame.Buffer YUV frame to an ARGB_8888 Bitmap. Applies stored rotation.
      * @return A new Bitmap containing the converted frame.
@@ -51,10 +57,12 @@ object YuvFrame {
     }
 
     private fun copyPlanes(videoFrameBuffer: VideoFrame.Buffer, width: Int, height: Int): I420Buffer {
-        val toI420 = videoFrameBuffer.toI420()!!
+        toI420 = videoFrameBuffer.toI420()!!
 
-        val planes = arrayOf<ByteBuffer>(toI420.dataY, toI420.dataU, toI420.dataV)
+        planes = arrayOf(toI420.dataY, toI420.dataU, toI420.dataV)
         val strides = intArrayOf(toI420.strideY, toI420.strideU, toI420.strideV)
+
+        toI420.release()
 
         val halfWidth = (width + 1).shr(1)
         val halfHeight = (height + 1).shr(1)
@@ -65,7 +73,8 @@ object YuvFrame {
         val planeWidths = intArrayOf(width, halfWidth, halfWidth)
         val planeHeights = intArrayOf(height, halfHeight, halfHeight)
 
-        val byteBuffer = JniCommon.nativeAllocateByteBuffer(capacity + halfCapacity + halfCapacity)
+        byteBuffer.clear()
+        byteBuffer = JniCommon.nativeAllocateByteBuffer(capacity + halfCapacity + halfCapacity)
 
         for (i in 0..2) {
             if (strides[i] == planeWidths[i]) {
@@ -76,7 +85,8 @@ object YuvFrame {
                 val limit = byteBuffer.position() + sliceLengths
                 byteBuffer.limit(limit)
 
-                val copyBuffer = byteBuffer.slice()
+                copyBuffer.clear()
+                copyBuffer = byteBuffer.slice()
 
                 YuvHelper.copyPlane(
                     planes[i],
@@ -90,7 +100,7 @@ object YuvFrame {
             }
         }
 
-        toI420.release()
+        planes = emptyArray()
 
         return I420Buffer.wrap(byteBuffer, width, height)
     }
