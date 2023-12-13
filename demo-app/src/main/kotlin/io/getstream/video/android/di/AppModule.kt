@@ -28,7 +28,7 @@ import dagger.hilt.components.SingletonComponent
 import io.getstream.video.android.R
 import io.getstream.video.android.data.repositories.GoogleAccountRepository
 import io.getstream.video.android.datastore.delegate.StreamUserDataStore
-import io.getstream.video.android.util.NetworkConnectivityHelper
+import io.getstream.video.android.util.NetworkMonitor
 import javax.inject.Singleton
 
 @dagger.Module
@@ -60,6 +60,6 @@ object AppModule {
 
     @Provides
     @Singleton
-    fun provideNetworkConnectivityHelper(@ApplicationContext context: Context) =
-        NetworkConnectivityHelper(context)
+    fun provideNetworkMonitor(@ApplicationContext context: Context) =
+        NetworkMonitor(context)
 }
