@@ -113,10 +113,12 @@ object StreamVideoInitHelper {
                     loggingLevel = LoggingLevel(priority = Priority.VERBOSE),
                 )
             }
-            isInitialising = false
+            Log.i("StreamVideoInitHelper", "Init successful.")
         } catch (e: Exception) {
             Log.e("StreamVideoInitHelper", "Init failed.", e)
         }
+
+        isInitialising = false
     }
 
     private fun initializeStreamChat(
