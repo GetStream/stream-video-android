@@ -76,6 +76,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import io.getstream.video.android.BuildConfig
@@ -89,7 +90,7 @@ import io.getstream.video.android.model.User
 import io.getstream.video.android.tooling.util.StreamFlavors
 import io.getstream.video.android.ui.theme.Colors
 import io.getstream.video.android.ui.theme.StreamButton
-import io.getstream.video.android.util.NetworkConnectivityHelper
+import io.getstream.video.android.util.NetworkMonitor
 
 @Composable
 fun CallJoinScreen(
@@ -104,13 +105,12 @@ fun CallJoinScreen(
 
     var isSignOutDialogVisible by remember { mutableStateOf(false) }
     val isLoggedOut by callJoinViewModel.isLoggedOut.collectAsState(initial = false)
-    var isNetworkAvailable by remember { mutableStateOf(true) }
+    val isNetworkAvailable by callJoinViewModel.isNetworkAvailable.collectAsStateWithLifecycle()
 
     HandleCallJoinUiState(
         callJoinUiState = uiState,
         navigateToCallLobby = navigateToCallLobby,
         navigateUpToLogin = { navigateUpToLogin(true) },
-        onNetworkConnectivityChange = { isNetworkAvailable = it },
     )
 
     Column(
@@ -166,7 +166,6 @@ private fun HandleCallJoinUiState(
     callJoinUiState: CallJoinUiState,
     navigateToCallLobby: (callId: String) -> Unit,
     navigateUpToLogin: () -> Unit,
-    onNetworkConnectivityChange: (isNetworkAvailable: Boolean) -> Unit,
 ) {
     LaunchedEffect(key1 = callJoinUiState) {
         when (callJoinUiState) {
@@ -175,9 +174,6 @@ private fun HandleCallJoinUiState(
 
             is CallJoinUiState.GoBackToLogin ->
                 navigateUpToLogin.invoke()
-
-            is CallJoinUiState.NetworkConnectivityChanged ->
-                onNetworkConnectivityChange.invoke(callJoinUiState.isNetworkAvailable)
 
             else -> Unit
         }
@@ -256,7 +252,7 @@ private fun CallJoinBody(
     callJoinViewModel: CallJoinViewModel = hiltViewModel(),
     isNetworkAvailable: Boolean,
 ) {
-    Log.i("NetworkConnectivity", "isNetworkAvailable: $isNetworkAvailable")
+    Log.i("NetworkConnectivity", "isNetworkAvailable Compose State: $isNetworkAvailable")
 
     val user by if (LocalInspectionMode.current) {
         remember { mutableStateOf(previewUsers[0]) }
@@ -472,7 +468,7 @@ private fun CallJoinScreenPreview() {
                     LocalContext.current,
                     GoogleSignInOptions.Builder().build(),
                 ),
-                networkConnectivityHelper = NetworkConnectivityHelper(LocalContext.current),
+                networkMonitor = NetworkMonitor(LocalContext.current),
             ),
             navigateToCallLobby = {},
             navigateUpToLogin = {},
