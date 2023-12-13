@@ -261,11 +261,20 @@ private fun CallJoinBody(
     }
 
     if (!isNetworkAvailable) {
-        Box(modifier = Modifier.fillMaxSize()) {
-            Text(
-                text = "No network connection",
-                modifier = Modifier.align(Alignment.Center),
-            )
+        Column(
+            modifier = Modifier.fillMaxSize(),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center,
+        ) {
+            StreamLogo()
+
+            Spacer(modifier = Modifier.height(25.dp))
+
+            AppName()
+
+            Spacer(modifier = Modifier.height(25.dp))
+
+            Description(text = stringResource(id = R.string.you_are_offline))
         }
     } else {
         Column(
@@ -277,146 +286,168 @@ private fun CallJoinBody(
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
             if (user != null) {
-                Image(
-                    modifier = Modifier.size(102.dp),
-                    painter = painterResource(id = R.drawable.ic_stream_video_meeting_logo),
-                    contentDescription = null,
-                )
+                StreamLogo()
+
                 Spacer(modifier = Modifier.height(25.dp))
 
-                Text(
-                    modifier = Modifier.padding(horizontal = 30.dp),
-                    text = stringResource(id = R.string.app_name),
-                    color = Color.White,
-                    fontSize = 32.sp,
-                    textAlign = TextAlign.Center,
-                )
-            }
+                AppName()
 
-            Spacer(modifier = Modifier.height(20.dp))
+                Spacer(modifier = Modifier.height(20.dp))
 
-            Text(
-                text = stringResource(id = R.string.join_description),
-                color = Colors.description,
-                textAlign = TextAlign.Center,
-                fontSize = 18.sp,
-                modifier = Modifier.widthIn(0.dp, 320.dp),
-            )
+                Description(text = stringResource(id = R.string.join_description))
 
-            Spacer(modifier = Modifier.height(42.dp))
+                Spacer(modifier = Modifier.height(42.dp))
 
-            Text(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 35.dp),
-                text = stringResource(id = R.string.call_id_number),
-                color = Color(0xFF979797),
-                fontSize = 13.sp,
-            )
+                Label(text = stringResource(id = R.string.call_id_number))
 
-            Spacer(modifier = Modifier.height(8.dp))
+                Spacer(modifier = Modifier.height(8.dp))
 
-            var callId by remember {
-                mutableStateOf(
-                    if (BuildConfig.FLAVOR == StreamFlavors.development) {
-                        "default:79cYh3J5JgGk"
-                    } else {
-                        ""
-                    },
-                )
-            }
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(50.dp)
-                    .padding(horizontal = 35.dp),
-            ) {
-                TextField(
-                    modifier = Modifier
-                        .weight(1f)
-                        .fillMaxHeight()
-                        .border(
-                            BorderStroke(1.dp, Color(0xFF4C525C)),
-                            RoundedCornerShape(6.dp),
-                        ),
-                    shape = RoundedCornerShape(6.dp),
-                    value = callId,
-                    singleLine = true,
-                    onValueChange = { callId = it },
-                    trailingIcon = {
-                        IconButton(
-                            onClick = openCamera,
-                            modifier = Modifier.fillMaxHeight(),
-                            content = {
-                                Icon(
-                                    painter = painterResource(id = R.drawable.ic_scan_qr),
-                                    contentDescription = stringResource(
-                                        id = R.string.join_call_by_qr_code,
-                                    ),
-                                    tint = Colors.description,
-                                    modifier = Modifier.size(36.dp),
-                                )
-                            },
-                        )
-                    },
-                    colors = TextFieldDefaults.textFieldColors(
-                        textColor = Color.White,
-                        focusedLabelColor = VideoTheme.colors.primaryAccent,
-                        unfocusedIndicatorColor = Colors.secondBackground,
-                        focusedIndicatorColor = Colors.secondBackground,
-                        backgroundColor = Colors.secondBackground,
-                    ),
-                    keyboardOptions = KeyboardOptions.Default.copy(
-                        keyboardType = KeyboardType.Email,
-                    ),
-                    placeholder = {
-                        Text(
-                            stringResource(id = R.string.join_call_call_id_hint),
-                            color = Color(0xFF5D6168),
-                        )
-                    },
-                    keyboardActions = KeyboardActions(
-                        onDone = {
-                            callJoinViewModel.handleUiEvent(CallJoinEvent.JoinCall(callId = callId))
-                        },
-                    ),
-                )
+                JoinCallForm(openCamera = openCamera, callJoinViewModel = callJoinViewModel)
+
+                Spacer(modifier = Modifier.height(25.dp))
+
+                Label(text = stringResource(id = R.string.join_call_no_id_hint))
+
+                Spacer(modifier = Modifier.height(8.dp))
 
                 StreamButton(
                     modifier = Modifier
-                        .padding(start = 16.dp)
-                        .fillMaxHeight()
-                        .testTag("join_call"),
-                    onClick = {
-                        callJoinViewModel.handleUiEvent(CallJoinEvent.JoinCall(callId = callId))
-                    },
-                    text = stringResource(id = R.string.join_call),
+                        .fillMaxWidth()
+                        .height(52.dp)
+                        .padding(horizontal = 35.dp)
+                        .testTag("start_new_call"),
+                    text = stringResource(id = R.string.start_a_new_call),
+                    onClick = { callJoinViewModel.handleUiEvent(CallJoinEvent.JoinCall()) },
                 )
             }
-
-            Spacer(modifier = Modifier.height(25.dp))
-
-            Text(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 35.dp),
-                text = stringResource(id = R.string.join_call_no_id_hint),
-                color = Color(0xFF979797),
-                fontSize = 13.sp,
-            )
-
-            Spacer(modifier = Modifier.height(8.dp))
-
-            StreamButton(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(52.dp)
-                    .padding(horizontal = 35.dp)
-                    .testTag("start_new_call"),
-                text = stringResource(id = R.string.start_a_new_call),
-                onClick = { callJoinViewModel.handleUiEvent(CallJoinEvent.JoinCall()) },
-            )
         }
+    }
+}
+
+@Composable
+private fun StreamLogo() {
+    Image(
+        modifier = Modifier.size(102.dp),
+        painter = painterResource(id = R.drawable.ic_stream_video_meeting_logo),
+        contentDescription = null,
+    )
+}
+
+@Composable
+private fun AppName() {
+    Text(
+        modifier = Modifier.padding(horizontal = 30.dp),
+        text = stringResource(id = R.string.app_name),
+        color = Color.White,
+        fontSize = 32.sp,
+        textAlign = TextAlign.Center,
+    )
+}
+
+@Composable
+private fun Description(text: String) {
+    Text(
+        text = text,
+        color = Colors.description,
+        textAlign = TextAlign.Center,
+        fontSize = 18.sp,
+        modifier = Modifier.widthIn(0.dp, 320.dp),
+    )
+}
+
+@Composable
+private fun Label(text: String) {
+    Text(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 35.dp),
+        text = text,
+        color = Color(0xFF979797),
+        fontSize = 13.sp,
+    )
+}
+
+@Composable
+private fun JoinCallForm(
+    openCamera: () -> Unit,
+    callJoinViewModel: CallJoinViewModel,
+) {
+    var callId by remember {
+        mutableStateOf(
+            if (BuildConfig.FLAVOR == StreamFlavors.development) {
+                "default:79cYh3J5JgGk"
+            } else {
+                ""
+            },
+        )
+    }
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(50.dp)
+            .padding(horizontal = 35.dp),
+    ) {
+        TextField(
+            modifier = Modifier
+                .weight(1f)
+                .fillMaxHeight()
+                .border(
+                    BorderStroke(1.dp, Color(0xFF4C525C)),
+                    RoundedCornerShape(6.dp),
+                ),
+            shape = RoundedCornerShape(6.dp),
+            value = callId,
+            singleLine = true,
+            onValueChange = { callId = it },
+            trailingIcon = {
+                IconButton(
+                    onClick = openCamera,
+                    modifier = Modifier.fillMaxHeight(),
+                    content = {
+                        Icon(
+                            painter = painterResource(id = R.drawable.ic_scan_qr),
+                            contentDescription = stringResource(
+                                id = R.string.join_call_by_qr_code,
+                            ),
+                            tint = Colors.description,
+                            modifier = Modifier.size(36.dp),
+                        )
+                    },
+                )
+            },
+            colors = TextFieldDefaults.textFieldColors(
+                textColor = Color.White,
+                focusedLabelColor = VideoTheme.colors.primaryAccent,
+                unfocusedIndicatorColor = Colors.secondBackground,
+                focusedIndicatorColor = Colors.secondBackground,
+                backgroundColor = Colors.secondBackground,
+            ),
+            keyboardOptions = KeyboardOptions.Default.copy(
+                keyboardType = KeyboardType.Email,
+            ),
+            placeholder = {
+                Text(
+                    stringResource(id = R.string.join_call_call_id_hint),
+                    color = Color(0xFF5D6168),
+                )
+            },
+            keyboardActions = KeyboardActions(
+                onDone = {
+                    callJoinViewModel.handleUiEvent(CallJoinEvent.JoinCall(callId = callId))
+                },
+            ),
+        )
+
+        StreamButton(
+            modifier = Modifier
+                .padding(start = 16.dp)
+                .fillMaxHeight()
+                .testTag("join_call"),
+            onClick = {
+                callJoinViewModel.handleUiEvent(CallJoinEvent.JoinCall(callId = callId))
+            },
+            text = stringResource(id = R.string.join_call),
+        )
     }
 }
 
