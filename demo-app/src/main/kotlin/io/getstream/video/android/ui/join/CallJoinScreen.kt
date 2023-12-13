@@ -18,7 +18,6 @@
 
 package io.getstream.video.android.ui.join
 
-import android.util.Log
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
@@ -252,8 +251,6 @@ private fun CallJoinBody(
     callJoinViewModel: CallJoinViewModel = hiltViewModel(),
     isNetworkAvailable: Boolean,
 ) {
-    Log.i("NetworkConnectivity", "isNetworkAvailable Compose State: $isNetworkAvailable")
-
     val user by if (LocalInspectionMode.current) {
         remember { mutableStateOf(previewUsers[0]) }
     } else {

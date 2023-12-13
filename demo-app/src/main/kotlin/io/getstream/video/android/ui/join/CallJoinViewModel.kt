@@ -67,9 +67,6 @@ class CallJoinViewModel @Inject constructor(
                 is CallJoinEvent.JoinCompleted -> flowOf(
                     CallJoinUiState.JoinCompleted(event.callId),
                 )
-                is CallJoinEvent.NetworkConnectivityChanged -> flowOf(
-                    CallJoinUiState.NetworkConnectivityChanged(event.isNetworkAvailable),
-                )
                 else -> flowOf(CallJoinUiState.Nothing)
             }
         }
@@ -120,8 +117,6 @@ sealed interface CallJoinUiState {
     data class JoinCompleted(val callId: String) : CallJoinUiState
 
     object GoBackToLogin : CallJoinUiState
-
-    data class NetworkConnectivityChanged(val isNetworkAvailable: Boolean) : CallJoinUiState
 }
 
 sealed interface CallJoinEvent {
@@ -132,6 +127,4 @@ sealed interface CallJoinEvent {
     data class JoinCompleted(val callId: String) : CallJoinEvent
 
     object GoBackToLogin : CallJoinEvent
-
-    data class NetworkConnectivityChanged(val isNetworkAvailable: Boolean) : CallJoinEvent
 }
