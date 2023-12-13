@@ -28,7 +28,7 @@ class NetworkMonitor(context: Context) {
     private val connectivityManager = context.getSystemService(
         Context.CONNECTIVITY_SERVICE,
     ) as ConnectivityManager
-    private val logger by taggedLogger("NetworkConnectivity")
+    private val logger by taggedLogger("NetworkMonitor")
 
     private val _isNetworkAvailable = MutableStateFlow(true)
     val isNetworkAvailable = _isNetworkAvailable.asStateFlow()
