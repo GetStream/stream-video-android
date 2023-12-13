@@ -67,56 +67,56 @@ object StreamVideoInitHelper {
 
         isInitialising = true
 
-        // Load the signed-in user (can be null)
-        var loggedInUser = dataStore.data.firstOrNull()?.user
-        var authData: GetAuthDataResponse? = null
+        try {
+            // Load the signed-in user (can be null)
+            var loggedInUser = dataStore.data.firstOrNull()?.user
+            var authData: GetAuthDataResponse? = null
 
-        // Create and login a random new user if user is null and we allow a random user login
-        if (loggedInUser == null && useRandomUserAsFallback) {
-            val userId = UserHelper.generateRandomString()
+            // Create and login a random new user if user is null and we allow a random user login
+            if (loggedInUser == null && useRandomUserAsFallback) {
+                val userId = UserHelper.generateRandomString()
 
-            authData = StreamService.instance.getAuthData(
-                environment = STREAM_SDK_ENVIRONMENT,
-                userId = userId,
-            )
+                authData = StreamService.instance.getAuthData(
+                    environment = STREAM_SDK_ENVIRONMENT,
+                    userId = userId,
+                )
 
-            loggedInUser = User(id = authData.userId, role = "admin")
+                loggedInUser = User(id = authData.userId, role = "admin")
 
-            // Store the data (note that this datastore belongs to the client - it's not
-            // used by the SDK directly in any way)
-            dataStore.updateUser(loggedInUser)
-        }
+                // Store the data (note that this datastore belongs to the client - it's not
+                // used by the SDK directly in any way)
+                dataStore.updateUser(loggedInUser)
+            }
 
-        // If we have a logged in user (from the data store or randomly created above)
-        // then we can initialise the SDK
-        if (loggedInUser != null) {
-            if (authData == null) {
-                try {
+            // If we have a logged in user (from the data store or randomly created above)
+            // then we can initialise the SDK
+            if (loggedInUser != null) {
+                if (authData == null) {
                     authData = StreamService.instance.getAuthData(
                         environment = STREAM_SDK_ENVIRONMENT,
                         userId = loggedInUser.id,
                     )
-
-                    initializeStreamChat(
-                        context = context,
-                        apiKey = authData.apiKey,
-                        user = loggedInUser,
-                        token = authData.token,
-                    )
-
-                    initializeStreamVideo(
-                        context = context,
-                        apiKey = authData.apiKey,
-                        user = loggedInUser,
-                        token = authData.token,
-                        loggingLevel = LoggingLevel(priority = Priority.VERBOSE),
-                    )
-                } catch (e: Exception) {
-                    Log.e("StreamVideoInitHelper", "StreamService failed to get auth data.")
                 }
+
+                initializeStreamChat(
+                    context = context,
+                    apiKey = authData.apiKey,
+                    user = loggedInUser,
+                    token = authData.token,
+                )
+
+                initializeStreamVideo(
+                    context = context,
+                    apiKey = authData.apiKey,
+                    user = loggedInUser,
+                    token = authData.token,
+                    loggingLevel = LoggingLevel(priority = Priority.VERBOSE),
+                )
             }
+            isInitialising = false
+        } catch (e: Exception) {
+            Log.e("StreamVideoInitHelper", "Init failed.", e)
         }
-        isInitialising = false
     }
 
     private fun initializeStreamChat(
