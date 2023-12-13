@@ -120,7 +120,7 @@ fun CallJoinScreen(
     ) {
         CallJoinHeader(
             user = user,
-            onAvatarLongClick = { isSignOutDialogVisible = true },
+            onAvatarLongClick = { if (isNetworkAvailable) isSignOutDialogVisible = true },
             onDirectCallClick = navigateToDirectCallJoin,
             onSignOutClick = {
                 callJoinViewModel.autoLogInAfterLogOut = false
