@@ -6,7 +6,7 @@ echo "*********************************************************"
 stagedFiles=$(git diff --staged --name-only)
 
 # run spotless apply
-./gradlew spotlessApply
+./gradlew spotlessCheck
 
 status=$?
 
