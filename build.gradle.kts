@@ -61,12 +61,10 @@ apply(from = "${rootDir}/scripts/publish-root.gradle")
 //    return File(teamPropsDir, propsFile)
 //}
 
-
-// Spotless  pre-commit hook
-task("addPreCommitGitHookOnBuild") {
-    println("⚈ ⚈ ⚈ Running Add Pre Commit Git Hook Script on Build ⚈ ⚈ ⚈")
+afterEvaluate {
+    println("Running Add Pre Commit Git Hook Script on Build")
     exec {
-        commandLine("cp", "./scripts/pre-commit", "./.git/hooks")
+        commandLine("cp", "./scripts/pre-push", "./.git/hooks")
     }
-    println("✅ Added Pre Commit Git Hook Script.")
+    println("Added pre-push Git Hook Script.")
 }
