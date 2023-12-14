@@ -97,9 +97,6 @@ interface DefaultApi {
      */
     @POST("/video/call/{type}/{id}/accept")
     suspend fun acceptCall(
-
-
-
         @Path("type") type: String,
         @Path("id") id: String
     ): AcceptCallResponse
