@@ -125,7 +125,7 @@ class LoginViewModel @Inject constructor(
                     handleUiEvent(LoginEvent.SignInSuccess(userId = user.id))
                 }
             } else {
-                if (              BuildConfig.FLAVOR == StreamFlavors.production) {
+                if (BuildConfig.FLAVOR == StreamFlavors.production) {
                     if (autoLogIn) {
                         handleUiEvent(LoginEvent.Loading)
                         handleUiEvent(
