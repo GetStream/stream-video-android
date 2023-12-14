@@ -66,7 +66,7 @@ apply(from = "${rootDir}/scripts/publish-root.gradle")
 task("addPreCommitGitHookOnBuild") {
     println("⚈ ⚈ ⚈ Running Add Pre Commit Git Hook Script on Build ⚈ ⚈ ⚈")
     exec {
-        commandLine("cp", "./scripts/pre-commit.sh", "./.git/hooks")
+        commandLine("cp", "./scripts/pre-commit", "./.git/hooks")
     }
     println("✅ Added Pre Commit Git Hook Script.")
 }
