@@ -186,20 +186,9 @@ internal class CallService : Service() {
         }
 
         if (!started) {
-            logger.w {
-
-
-
-                "Foreground service did not start!"
-            }
-
-
+            logger.w { "Foreground service did not start!" }
             stopService()
         } else {
-
-
-
-
             if (trigger == TRIGGER_INCOMING_CALL) {
                 updateRingingCall(streamVideo!!, callId!!)
                 initializeCallAndSocket(streamVideo, callId!!)
