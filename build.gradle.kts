@@ -64,7 +64,7 @@ apply(from = "${rootDir}/scripts/publish-root.gradle")
 afterEvaluate {
     println("Running Add Pre Commit Git Hook Script on Build")
     exec {
-        commandLine("cp", "./scripts/pre-push", "./.git/hooks")
+        commandLine("cp", "./scripts/git-hooks/pre-push", "./.git/hooks")
     }
     println("Added pre-push Git Hook Script.")
 }
