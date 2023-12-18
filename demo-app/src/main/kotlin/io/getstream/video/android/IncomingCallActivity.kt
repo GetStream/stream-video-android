@@ -45,6 +45,7 @@ import io.getstream.video.android.core.call.state.ToggleSpeakerphone
 import io.getstream.video.android.core.notifications.NotificationHandler
 import io.getstream.video.android.datastore.delegate.StreamUserDataStore
 import io.getstream.video.android.model.streamCallId
+import io.getstream.video.android.ui.call.CallScreen
 import io.getstream.video.android.util.StreamVideoInitHelper
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -129,10 +130,16 @@ class IncomingCallActivity : ComponentActivity() {
                             finish()
                         },
                         onAcceptedContent = {
-                            CallContent(
-                                modifier = Modifier.fillMaxSize(),
+                            CallScreen(
                                 call = call,
-                                onCallAction = onCallAction,
+                                showDebugOptions = BuildConfig.DEBUG,
+                                onCallDisconnected = {
+                                    finish()
+                                },
+                                onUserLeaveCall = {
+                                    call.leave()
+                                    finish()
+                                },
                             )
                         },
                         onRejectedContent = {

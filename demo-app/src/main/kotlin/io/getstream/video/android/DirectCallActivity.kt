@@ -43,8 +43,11 @@ import io.getstream.video.android.core.call.state.ToggleCamera
 import io.getstream.video.android.core.call.state.ToggleMicrophone
 import io.getstream.video.android.core.call.state.ToggleSpeakerphone
 import io.getstream.video.android.datastore.delegate.StreamUserDataStore
+import io.getstream.video.android.model.StreamCallId
 import io.getstream.video.android.model.mapper.isValidCallId
 import io.getstream.video.android.model.mapper.toTypeAndId
+import io.getstream.video.android.ui.call.CallActivity
+import io.getstream.video.android.ui.call.CallScreen
 import io.getstream.video.android.util.StreamVideoInitHelper
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -150,10 +153,16 @@ class DirectCallActivity : ComponentActivity() {
                             reject(call)
                         },
                         onAcceptedContent = {
-                            CallContent(
-                                modifier = Modifier.fillMaxSize(),
+                            CallScreen(
                                 call = call,
-                                onCallAction = onCallAction,
+                                showDebugOptions = BuildConfig.DEBUG,
+                                onCallDisconnected = {
+                                    finish()
+                                },
+                                onUserLeaveCall = {
+                                    call.leave()
+                                    finish()
+                                },
                             )
                         },
                         onRejectedContent = {
