@@ -75,7 +75,7 @@ object YuvFrame {
             90, -270 -> changeOrientation(width, height, RotateMode.ROTATE_90) // upside down, 90
             180, -180 -> keepOrientation(width, height, RotateMode.ROTATE_180) // right, 180
             270, -90 -> changeOrientation(width, height, RotateMode.ROTATE_270) // upright, 270
-            else -> keepOrientation(width, height, RotateMode.ROTATE_0) // left, 0 - default video frame rotation
+            else -> keepOrientation(width, height, RotateMode.ROTATE_0) // left, 0, default
         }
     }
 
