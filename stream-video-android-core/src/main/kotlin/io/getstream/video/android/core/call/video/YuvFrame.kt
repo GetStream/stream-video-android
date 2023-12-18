@@ -20,21 +20,17 @@ import android.graphics.Bitmap
 import io.getstream.log.taggedLogger
 import io.github.crow_misia.libyuv.AbgrBuffer
 import io.github.crow_misia.libyuv.I420Buffer
+import io.github.crow_misia.libyuv.PlanePrimitive
 import io.github.crow_misia.libyuv.RotateMode
-import org.webrtc.JniCommon
 import org.webrtc.VideoFrame
-import org.webrtc.YuvHelper
-import java.nio.ByteBuffer
 
 object YuvFrame {
-
     private val logger by taggedLogger("YuvFrame")
 
-    private lateinit var byteBuffer: ByteBuffer
-    private lateinit var copyBuffer: ByteBuffer
-    private lateinit var planes: Array<ByteBuffer>
-    private lateinit var toI420: VideoFrame.I420Buffer
-
+    private lateinit var webRtcI420Buffer: VideoFrame.I420Buffer
+    private lateinit var libYuvI420Buffer: I420Buffer
+    private var libYuvRotatedI420Buffer: I420Buffer? = null
+    private var libYuvAbgrBuffer: AbgrBuffer? = null
 
     /**
      * Converts VideoFrame.Buffer YUV frame to an ARGB_8888 Bitmap. Applies stored rotation.
@@ -44,109 +40,72 @@ object YuvFrame {
         if (videoFrame == null) {
             return null
         }
+
         return try {
-            val buffer = videoFrame.buffer
-            val i420buffer = copyPlanes(buffer, buffer.width, buffer.height)
-            val bitmap = getBitmap(i420buffer, buffer.width, buffer.height, videoFrame.rotation)
-            i420buffer.close()
-            bitmap
+            webRtcI420Buffer = videoFrame.buffer.toI420()!!
+            createLibYuvI420Buffer()
+            rotateLibYuvI420Buffer(videoFrame.rotation)
+            createLibYuvAbgrBuffer()
+            cleanUp()
+            libYuvAbgrBuffer!!.asBitmap()
         } catch (t: Throwable) {
             logger.e(t) { "Failed to convert a VideoFrame" }
             null
         }
     }
 
-    private fun copyPlanes(videoFrameBuffer: VideoFrame.Buffer, width: Int, height: Int): I420Buffer {
-        toI420 = videoFrameBuffer.toI420()!!
+    private fun createLibYuvI420Buffer() {
+        val width = webRtcI420Buffer.width
+        val height = webRtcI420Buffer.height
 
-        planes = arrayOf(toI420.dataY, toI420.dataU, toI420.dataV)
-        val strides = intArrayOf(toI420.strideY, toI420.strideU, toI420.strideV)
-
-        toI420.release()
-
-        val halfWidth = (width + 1).shr(1)
-        val halfHeight = (height + 1).shr(1)
-
-        val capacity = width * height
-        val halfCapacity = (halfWidth + 1).shr(1) * height
-
-        val planeWidths = intArrayOf(width, halfWidth, halfWidth)
-        val planeHeights = intArrayOf(height, halfHeight, halfHeight)
-
-        byteBuffer.clear()
-        byteBuffer = JniCommon.nativeAllocateByteBuffer(capacity + halfCapacity + halfCapacity)
-
-        for (i in 0..2) {
-            if (strides[i] == planeWidths[i]) {
-                byteBuffer.put(planes[i])
-            } else {
-                val sliceLengths = planeWidths[i] * planeHeights[i]
-
-                val limit = byteBuffer.position() + sliceLengths
-                byteBuffer.limit(limit)
-
-                copyBuffer.clear()
-                copyBuffer = byteBuffer.slice()
-
-                YuvHelper.copyPlane(
-                    planes[i],
-                    strides[i],
-                    copyBuffer,
-                    planeWidths[i],
-                    planeWidths[i],
-                    planeHeights[i],
-                )
-                byteBuffer.position(limit)
-            }
-        }
-
-        planes = emptyArray()
-
-        return I420Buffer.wrap(byteBuffer, width, height)
+        libYuvI420Buffer = I420Buffer.wrap(
+            planeY = PlanePrimitive(webRtcI420Buffer.strideY, webRtcI420Buffer.dataY),
+            planeU = PlanePrimitive(webRtcI420Buffer.strideU, webRtcI420Buffer.dataU),
+            planeV = PlanePrimitive(webRtcI420Buffer.strideV, webRtcI420Buffer.dataV),
+            width = width,
+            height = height,
+        )
     }
 
-    private fun getBitmap(i420buffer: I420Buffer, width: Int, height: Int, rotationDegree: Int): Bitmap {
-        val abgrBuffer = AbgrBuffer.allocate(width, height)
-        i420buffer.convertTo(abgrBuffer)
-        i420buffer.close()
+    private fun rotateLibYuvI420Buffer(rotationDegrees: Int) {
+        val width = webRtcI420Buffer.width
+        val height = webRtcI420Buffer.height
 
-        // If necessary, generate a rotated version of the Bitmap
-        var swapWidthAndHeight = false
-        val rotatedAbgrBuffer = when (rotationDegree) {
+        when (videoFrame!!.rotation) {
             90, -270 -> {
-                swapWidthAndHeight = true
-
-                val dstBuffer = AbgrBuffer.allocate(height, width)
-                abgrBuffer.rotate(dstBuffer, RotateMode.ROTATE_90)
-                dstBuffer
+                libYuvRotatedI420Buffer?.close()
+                libYuvRotatedI420Buffer = I420Buffer.allocate(height, width) // swapped width and height
+                libYuvI420Buffer.rotate(libYuvRotatedI420Buffer!!, RotateMode.ROTATE_90)
             }
             180, -180 -> {
-                val dstBuffer = AbgrBuffer.allocate(width, height)
-                abgrBuffer.rotate(dstBuffer, RotateMode.ROTATE_180)
-                dstBuffer
+                if (width != libYuvRotatedI420Buffer?.width || height != libYuvRotatedI420Buffer?.height) {
+                    libYuvRotatedI420Buffer?.close()
+                    libYuvRotatedI420Buffer = I420Buffer.allocate(width, height)
+                }
+                libYuvI420Buffer.rotate(libYuvRotatedI420Buffer!!, RotateMode.ROTATE_180)
             }
             270, -90 -> {
-                swapWidthAndHeight = true
-
-                val dstBuffer = AbgrBuffer.allocate(height, width)
-                abgrBuffer.rotate(dstBuffer, RotateMode.ROTATE_270)
-                dstBuffer
-            }
-            else -> {
-                abgrBuffer
+                libYuvRotatedI420Buffer?.close()
+                libYuvRotatedI420Buffer = I420Buffer.allocate(height, width) // swapped width and height
+                libYuvI420Buffer.rotate(libYuvRotatedI420Buffer!!, RotateMode.ROTATE_270)
             }
         }
+    }
 
-        // Construct a Bitmap based on the new pixel data
-        val bitmap = Bitmap.createBitmap(
-            if (swapWidthAndHeight) height else width,
-            if (swapWidthAndHeight) width else height,
-            Bitmap.Config.ARGB_8888,
-        )
-        bitmap.copyPixelsFromBuffer(rotatedAbgrBuffer.asBuffer())
-        abgrBuffer.close()
-        rotatedAbgrBuffer.close()
+    private fun createLibYuvAbgrBuffer() {
+        val width = libYuvRotatedI420Buffer!!.width
+        val height = libYuvRotatedI420Buffer!!.height
 
-        return bitmap
+        if (width != libYuvAbgrBuffer?.width || height != libYuvAbgrBuffer?.height) {
+            libYuvAbgrBuffer?.close()
+            libYuvAbgrBuffer = AbgrBuffer.allocate(width, height)
+        }
+        libYuvRotatedI420Buffer!!.convertTo(libYuvAbgrBuffer!!)
+    }
+
+    private fun cleanUp() {
+        libYuvI420Buffer.close()
+        webRtcI420Buffer.release()
+        // Rest of buffers are closed in the methods above
     }
 }
