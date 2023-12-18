@@ -71,25 +71,26 @@ object YuvFrame {
         val width = webRtcI420Buffer.width
         val height = webRtcI420Buffer.height
 
-        when (videoFrame!!.rotation) {
-            90, -270 -> {
-                libYuvRotatedI420Buffer?.close()
-                libYuvRotatedI420Buffer = I420Buffer.allocate(height, width) // swapped width and height
-                libYuvI420Buffer.rotate(libYuvRotatedI420Buffer!!, RotateMode.ROTATE_90)
-            }
-            180, -180 -> {
-                if (width != libYuvRotatedI420Buffer?.width || height != libYuvRotatedI420Buffer?.height) {
-                    libYuvRotatedI420Buffer?.close()
-                    libYuvRotatedI420Buffer = I420Buffer.allocate(width, height)
-                }
-                libYuvI420Buffer.rotate(libYuvRotatedI420Buffer!!, RotateMode.ROTATE_180)
-            }
-            270, -90 -> {
-                libYuvRotatedI420Buffer?.close()
-                libYuvRotatedI420Buffer = I420Buffer.allocate(height, width) // swapped width and height
-                libYuvI420Buffer.rotate(libYuvRotatedI420Buffer!!, RotateMode.ROTATE_270)
-            }
+        when (rotationDegrees) {
+            90, -270 -> changeOrientation(width, height, RotateMode.ROTATE_90) // upside down, 90
+            180, -180 -> keepOrientation(width, height, RotateMode.ROTATE_180) // right, 180
+            270, -90 -> changeOrientation(width, height, RotateMode.ROTATE_270) // upright, 270
+            else -> keepOrientation(width, height, RotateMode.ROTATE_0) // left, 0 - default video frame rotation
         }
+    }
+
+    private fun changeOrientation(width: Int, height: Int, rotateMode: RotateMode) {
+        libYuvRotatedI420Buffer?.close()
+        libYuvRotatedI420Buffer = I420Buffer.allocate(height, width) // swapped width and height
+        libYuvI420Buffer.rotate(libYuvRotatedI420Buffer!!, rotateMode)
+    }
+
+    private fun keepOrientation(width: Int, height: Int, rotateMode: RotateMode) {
+        if (width != libYuvRotatedI420Buffer?.width || height != libYuvRotatedI420Buffer?.height) {
+            libYuvRotatedI420Buffer?.close()
+            libYuvRotatedI420Buffer = I420Buffer.allocate(width, height)
+        }
+        libYuvI420Buffer.rotate(libYuvRotatedI420Buffer!!, rotateMode)
     }
 
     private fun createLibYuvAbgrBuffer() {
