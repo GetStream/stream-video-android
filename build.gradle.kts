@@ -60,3 +60,11 @@ apply(from = "${rootDir}/scripts/publish-root.gradle")
 //    val teamPropsDir = file("team-props")
 //    return File(teamPropsDir, propsFile)
 //}
+
+afterEvaluate {
+    println("Running Add Pre Commit Git Hook Script on Build")
+    exec {
+        commandLine("cp", "./scripts/git-hooks/pre-push", "./.git/hooks")
+    }
+    println("Added pre-push Git Hook Script.")
+}
