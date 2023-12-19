@@ -50,6 +50,9 @@ internal fun enterPictureInPicture(context: Context, call: Call) {
                     setSeamlessResizeEnabled(true)
                 }
             }
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                params.setAutoEnterEnabled(true)
+            }
 
             context.findActivity()?.enterPictureInPictureMode(params.build())
         } else {

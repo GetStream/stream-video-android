@@ -79,6 +79,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import io.getstream.video.android.BuildConfig
+import io.getstream.video.android.DirectCallActivity
 import io.getstream.video.android.R
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.avatar.UserAvatar
@@ -118,10 +119,18 @@ fun CallJoinScreen(
             .background(Colors.background),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
+        val context = LocalContext.current
         CallJoinHeader(
             user = user,
             onAvatarLongClick = { if (isNetworkAvailable) isSignOutDialogVisible = true },
-            onDirectCallClick = navigateToDirectCallJoin,
+            onDirectCallClick = {
+                context.startActivity(
+                    DirectCallActivity.createIntent(
+                        context,
+                        members = listOf("testaapgetstreamio"),
+                    ),
+                )
+            },
             onSignOutClick = {
                 callJoinViewModel.autoLogInAfterLogOut = false
                 callJoinViewModel.logOut()
