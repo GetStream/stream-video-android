@@ -38,6 +38,7 @@ import androidx.compose.material.icons.rounded.AutoAwesomeMosaic
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -283,22 +284,18 @@ internal fun DefaultPictureInPictureContent(call: Call) {
             video = video?.value,
         )
     } else {
-        val activeSpeakers by call.state.activeSpeakers.collectAsStateWithLifecycle()
+        val dominantSpeaker by call.state.dominantSpeaker.collectAsStateWithLifecycle()
         val me by call.state.me.collectAsStateWithLifecycle()
-
-        if (activeSpeakers.isNotEmpty()) {
-            ParticipantVideo(
-                call = call,
-                participant = activeSpeakers.first(),
-                style = RegularVideoRendererStyle(labelPosition = Alignment.BottomStart),
-            )
-        } else if (me != null) {
-            ParticipantVideo(
-                call = call,
-                participant = me!!,
-                style = RegularVideoRendererStyle(labelPosition = Alignment.BottomStart),
-            )
+        val participant by remember {
+            derivedStateOf {
+                dominantSpeaker ?: me
+            }
         }
+        ParticipantVideo(
+            call = call,
+            participant = participant!!,
+            style = RegularVideoRendererStyle(labelPosition = Alignment.BottomStart),
+        )
     }
 }
 
