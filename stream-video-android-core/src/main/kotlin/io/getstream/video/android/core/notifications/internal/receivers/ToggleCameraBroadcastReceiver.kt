@@ -22,8 +22,10 @@ import android.content.Intent
 import io.getstream.log.taggedLogger
 import io.getstream.video.android.core.StreamVideo
 
-class ToggleCameraBroadcastReceiver : BroadcastReceiver() {
-    private val activeCall = StreamVideo.instanceOrNull()?.state?.activeCall?.value
+class ToggleCameraBroadcastReceiver(coroutineScope: CoroutineScope) : BroadcastReceiver() {
+    private val logger by taggedLogger("ToggleCameraBroadcastReceiver")
+    private val streamVideo = StreamVideo.instanceOrNull()
+    private var call: Call? = null
     private var shouldEnableCameraAgain = false
     private val logger by taggedLogger("ToggleCameraBroadcastReceiver")
 

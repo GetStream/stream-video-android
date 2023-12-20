@@ -59,7 +59,7 @@ internal class CallService : Service() {
     private val serviceScope: CoroutineScope = CoroutineScope(Dispatchers.IO)
 
     // Camera handling receiver
-    private val toggleCameraBroadcastReceiver = ToggleCameraBroadcastReceiver()
+    private val toggleCameraBroadcastReceiver = ToggleCameraBroadcastReceiver(serviceScope)
 
     internal companion object {
         const val TRIGGER_KEY =
