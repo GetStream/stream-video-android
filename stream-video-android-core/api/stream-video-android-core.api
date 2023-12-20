@@ -4102,7 +4102,7 @@ public final class io/getstream/video/android/core/notifications/NotificationHan
 }
 
 public final class io/getstream/video/android/core/notifications/internal/receivers/ToggleCameraBroadcastReceiver : android/content/BroadcastReceiver {
-	public fun <init> ()V
+	public fun <init> (Lkotlinx/coroutines/CoroutineScope;)V
 	public fun onReceive (Landroid/content/Context;Landroid/content/Intent;)V
 }
 
