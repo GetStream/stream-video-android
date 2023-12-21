@@ -23,6 +23,7 @@ import io.getstream.log.taggedLogger
 import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.StreamVideo
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.flow.distinctUntilChangedBy
 import kotlinx.coroutines.flow.merge
 import kotlinx.coroutines.launch
 
@@ -43,10 +44,12 @@ class ToggleCameraBroadcastReceiver(coroutineScope: CoroutineScope) : BroadcastR
 
             if (call == null) {
                 coroutineScope.launch {
-                    merge(streamVideo.state.activeCall, streamVideo.state.ringingCall).collect {
-                        if (it != null) call = it
-                        logger.d { "Collected call: ${it?.cid}" }
-                    }
+                    merge(streamVideo.state.activeCall, streamVideo.state.ringingCall)
+                        .distinctUntilChangedBy { it?.cid }
+                        .collect {
+                            if (it != null) call = it
+                            logger.d { "Collected call: ${it?.cid}" }
+                        }
                 }
             }
         }
