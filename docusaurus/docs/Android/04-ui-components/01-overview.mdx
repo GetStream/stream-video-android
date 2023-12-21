@@ -5,7 +5,7 @@ description: Overview of the UI components
 
 Stream SDK aims to make it as easy as possible to build your own video calling, audio rooms, and live streams.
 We support a low-level client, guides on building your own UI, and several pre-built UI components.
-If you quickly want to add calling to your app, you can do that just in an hour with these UI components.
+If you quickly want to add calling to your app, you can do that in just an hour with these UI components.
 
 ### Rendering a Single Video
 
@@ -57,9 +57,9 @@ You will see the result below:
 
 We also support the full UI component called [CallContent](04-call/01-call-content.mdx), which consists of:
 
-- **AppBar**: Content is shown that calls information or additional actions.
-- **Video Grids**: A call video that renders the full participants of the call.
-- **Controls**: Content is shown that allows users to trigger different actions to control a joined call.
+- **AppBar**: Additional information or actions
+- **Video Grids**: Main content area that shows all call participants in a type of grid
+- **Controls**: Several actions to control a joined call
 
 The following example renders a full video calling interface:
 
@@ -80,7 +80,7 @@ You will see the result below:
 
 ### Ringing (incoming/outgoing calls)
 
-You can implement incoming/outgoing respectively screens depending on the call state with [RingingCallContent](04-call/04-ringing-call.mdx)` composable:
+You can implement incoming/outgoing screens, respectively, depending on the call state, with the [RingingCallContent](04-call/04-ringing-call.mdx) composable:
 
 ```Kotlin
 VideoTheme {
@@ -109,4 +109,4 @@ Stream SDK provides highly customizable UI components and you can adjust each st
 
 - Theming the entire UI components with [VideoTheme](03-video-theme.mdx).
 - Swapping each part of UI components with your own variations.
-- You can also build your UI components from scratch with our low-level UI component, such as The [VideoRenderer](02-video-renderer.mdx).
+- You can also build your UI components from scratch with our low-level UI components, such as [VideoRenderer](02-video-renderer.mdx).

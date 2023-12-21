@@ -28,7 +28,7 @@ The camera manager also exposes these stateflow objects:
 
 ```kotlin
 call.camera.direction // front/back
-call.camera.status // enabled/ disabled.
+call.camera.status // enabled/disabled.
 call.camera.selectedDevice // currently selected camera
 call.camera.resolution // resolution
 call.camera.availableResolutions // the resolutions that are available
@@ -39,21 +39,21 @@ call.camera.availableResolutions // the resolutions that are available
 The microphone manager supports both bluetooth and regular audio sources:
 
 ```kotlin
-call.microphone.enable() // enable the camera
-call.microphone.disable() // disable the camera
+call.microphone.enable() // enable the microphone
+call.microphone.disable() // disable the microphone
 call.microphone.select(AudioDevice?) // select a specific audio device
 ```
 
 These stateflow objects are available:
 
 ```kotlin
-call.microphone.status // enabled/ disabled.
-call.microphone.selectedDevice // currently selected camera
+call.microphone.status // enabled/disabled.
+call.microphone.selectedDevice // currently selected microphone
 ```
 
 ### Speaker Manager
 
-The speaker allows you to enable/disable the speaker phone and set the volume.
+The speaker manager allows you to enable/disable the speakerphone and set the volume.
 
 ```kotlin
 speaker.setVolume(100)
@@ -67,7 +67,7 @@ speaker.disableSpeakerPhone()
 ### Pause & Resume
 
 You'll often want to pause and resume the camera and microphone.
-If the device is locked or your receive an incoming call many apps pause the camera.
+If the device is locked or you receive an incoming call many apps pause the camera.
 The APIs make this easy to do
 
 ```kotlin

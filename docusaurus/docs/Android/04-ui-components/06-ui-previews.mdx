@@ -3,11 +3,11 @@ title: UI Previews
 description: How to preview UI components in Android Studio using stream-video-android-previewdata library
 ---
 
-[Preview your Composable functions](https://developer.android.com/jetpack/compose/tooling/previews) is really powerful feature of the Android Studio.
+[Previewing your Composable functions](https://developer.android.com/jetpack/compose/tooling/previews) is a powerful feature of Android Studio.
 
-Most of Stream Video SDK's UI components rely on the `Call`, `ParticipantState`, and much more, and it's difficult to make mock instances of them.
+Most of Stream Video SDK's UI components rely on `Call`, `ParticipantState` and other types which are difficult to mock.
 
-So we provide a useful library called `stream-video-android-previewdata` that allows you to get some mock instances of them and write your preview or test codes for Stream Video UI components easily.
+So we provide a useful library called `stream-video-android-previewdata` that allows you to get mock instances of them and write your preview or test codes for Stream Video UI components easily.
 
 You'll be able to build your own preview Composable functions like so:
 
@@ -15,7 +15,6 @@ You'll be able to build your own preview Composable functions like so:
 | ------------------------------------------------------------ | ------------------------------------------------------------ | ------------------------------------------------------------ |
 | ![Dogfooding](../assets/preview-dogfooding-01.png) | ![Dogfooding](../assets/preview-dogfooding-02.png) | ![Dogfooding](../assets/preview-dogfooding-03.png) |
 
-preview-dogfooding-01.png
 
 ### Usage
 
@@ -45,25 +44,25 @@ private fun CallContentPreview() {
 }
 ```
 
-After adding the above example to your project, you'll see the preview results on your Android Studio like the images below:
+After adding the above example to your project, you'll see the following previews in Android Studio:
 
 ![Preview fro CallContent](../assets/preview-call-container.png)
 
-You should follow the steps below to make working well for your preview Composable functions.
+You should follow the steps below to make your previews work well:
 
 1. Initialize a mock `StreamVideo` with the following method: `StreamMockUtils.initializeStreamVideo`.
 2. Wrap your composable with the `VideoTheme`.
 3. Use the provided mock instances for Stream Video UI components.
 
-This library provide mocked instances below:
+This library provides the following mocks:
 
 - **mockCall**: Mock a `Call` that contains few of mock users.
-- **mockParticipant**: Mock a new `ParticipantState` instance.
-- **mockParticipantList**: Mock a new list of `ParticipantState` instance.
-- **mockUsers**: Mock a list of `User` instance.
+- **mockParticipant**: Mock a `ParticipantState` instance.
+- **mockParticipantList**: Mock a list of `ParticipantState` instances.
+- **mockUsers**: Mock a list of `User` instances.
 - **mockVideoMediaTrack**: Mock a new `MediaTrack` instance.
 
-For example, you can build a preview Composable about `ParticipantVideo` like the example below:
+For example, you can build a preview Composable for `ParticipantVideo` as in the example below:
 
 ```kotlin
 @Preview
@@ -79,6 +78,6 @@ private fun ParticipantVideoPreview() {
 }
 ```
 
-After adding the above example to your project, you'll see the preview results on your Android Studio like the images below:
+After adding the above example to your project, you'll see the following previews in Android Studio:
 
 ![Preview fro ParticipantVideo](../assets/preview-participant-video.png)
