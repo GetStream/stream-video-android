@@ -23,6 +23,7 @@ import io.getstream.log.taggedLogger
 import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.StreamVideo
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.flow.merge
 import kotlinx.coroutines.launch
 
 class ToggleCameraBroadcastReceiver(coroutineScope: CoroutineScope) : BroadcastReceiver() {
@@ -32,25 +33,19 @@ class ToggleCameraBroadcastReceiver(coroutineScope: CoroutineScope) : BroadcastR
     private var shouldEnableCameraAgain = false
 
     init {
-        logger.d { "Init" }
-        logger.d { "Active call value: " + streamVideo?.state?.activeCall?.value?.id }
-        logger.d { "Ringing call value: " + streamVideo?.state?.ringingCall?.value?.id }
+        logger.d { "Init active call value: " + streamVideo?.state?.activeCall?.value?.cid }
+        logger.d { "Init ringing call value: " + streamVideo?.state?.ringingCall?.value?.cid }
 
         // TODO: active call should be set to ringing call automatically?
-        call = streamVideo?.state?.activeCall?.value ?: streamVideo?.state?.ringingCall?.value
 
-        coroutineScope.launch {
+        streamVideo?.let { streamVideo ->
+            call = streamVideo.state.activeCall.value ?: streamVideo.state.ringingCall.value
+
             if (call == null) {
-                streamVideo?.state?.ringingCall?.collect {
-                    if (it != null) {
-                        call = it
-                        logger.d { "Ringing call changed to ${call?.id}" }
-                    }
-                }
-                streamVideo?.state?.activeCall?.collect {
-                    if (it != null) {
-                        call = it
-                        logger.d { "Active call changed to ${call?.id}" }
+                coroutineScope.launch {
+                    merge(streamVideo.state.activeCall, streamVideo.state.ringingCall).collect {
+                        if (it != null) call = it
+                        logger.d { "Collected call: ${it?.cid}" }
                     }
                 }
             }
@@ -59,13 +54,18 @@ class ToggleCameraBroadcastReceiver(coroutineScope: CoroutineScope) : BroadcastR
 
     override fun onReceive(context: Context, intent: Intent) {
         when (intent.action) {
+            // For when the call screen is visible even if the screen is locked.
+            // Because of lockscreenVisibility = Notification.VISIBILITY_PUBLIC for channel?
+            // To reproduce scenario: answer from locked screen then lock-unlock
             Intent.ACTION_SCREEN_ON -> {
                 logger.d { "Screen is on and locked. Call: ${call?.id}" }
                 // TODO:
-                // For when the call screen is visible even if the screen is locked.
-                // Because of lockscreenVisibility = Notification.VISIBILITY_PUBLIC for channel?
-                // To reproduce: answer from locked screen the lock-unlock
-                // Problem: answer call while unlocked. Lock then turn screen on by moving phone -> camera is on. Turn screen on by tap or button -> camera is off.
+                // Solution works for normal active call & ringing call scenarios, but:
+                // Problem:
+                //  - answer call while unlocked
+                //  - lock then turn screen on by moving phone -> camera is on
+                //  - turn screen on by tap or button -> camera is off
+                //  - do the same in normal call -> camera is on even if unlocking by moving phone or button
                 if (shouldEnableCameraAgain) call?.camera?.enable()
             }
             Intent.ACTION_USER_PRESENT -> {
