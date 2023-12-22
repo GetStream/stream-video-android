@@ -20,31 +20,59 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import io.getstream.log.taggedLogger
+import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.StreamVideo
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.flow.distinctUntilChangedBy
+import kotlinx.coroutines.flow.merge
+import kotlinx.coroutines.launch
 
-class ToggleCameraBroadcastReceiver : BroadcastReceiver() {
-    private val activeCall = StreamVideo.instanceOrNull()?.state?.activeCall?.value
-    private var shouldEnableCameraAgain = false
+class ToggleCameraBroadcastReceiver(coroutineScope: CoroutineScope) : BroadcastReceiver() {
     private val logger by taggedLogger("ToggleCameraBroadcastReceiver")
+    private val streamVideo = StreamVideo.instanceOrNull()
+    private var call: Call? = null
+    private var shouldEnableCameraAgain = false
+
+    init {
+        logger.d { "Init active call value: " + streamVideo?.state?.activeCall?.value?.cid }
+        logger.d { "Init ringing call value: " + streamVideo?.state?.ringingCall?.value?.cid }
+
+        streamVideo?.let { streamVideo ->
+            call = streamVideo.state.activeCall.value ?: streamVideo.state.ringingCall.value
+
+            if (call == null) {
+                coroutineScope.launch {
+                    merge(streamVideo.state.activeCall, streamVideo.state.ringingCall)
+                        .distinctUntilChangedBy { it?.cid }
+                        .collect {
+                            if (it != null) call = it
+                            logger.d { "Collected call: ${it?.cid}" }
+                        }
+                }
+            }
+        }
+    }
 
     override fun onReceive(context: Context, intent: Intent) {
         when (intent.action) {
             Intent.ACTION_SCREEN_ON -> {
-                logger.d { "Screen is on and locked." }
+                // Could be useful when the call screen is visible even if the screen is locked.
+                // Because of lockscreenVisibility = Notification.VISIBILITY_PUBLIC for channel?
+                logger.d { "Screen is on and locked. Call: ${call?.id}" }
             }
             Intent.ACTION_USER_PRESENT -> {
-                logger.d { "Screen is on and unlocked." }
-                if (shouldEnableCameraAgain) activeCall?.camera?.enable()
+                logger.d { "Screen is on and unlocked. Call: ${call?.id}" }
+                if (shouldEnableCameraAgain) call?.camera?.enable()
             }
             Intent.ACTION_SCREEN_OFF -> {
                 // This broadcast action actually means that the device is non-interactive.
                 // In a video call scenario, the only way to be non-interactive is when locking the phone manually.
-                activeCall?.camera.let { camera ->
+                call?.camera.let { camera ->
                     shouldEnableCameraAgain = camera?.isEnabled?.value ?: false
                     camera?.disable()
                 }
 
-                logger.d { "Screen is off. Should re-enable camera: $shouldEnableCameraAgain." }
+                logger.d { "Screen is off. Call: ${call?.id}. Should re-enable camera: $shouldEnableCameraAgain." }
             }
         }
     }
