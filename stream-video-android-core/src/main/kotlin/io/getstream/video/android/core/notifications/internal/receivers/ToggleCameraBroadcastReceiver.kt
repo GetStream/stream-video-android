@@ -37,8 +37,6 @@ class ToggleCameraBroadcastReceiver(coroutineScope: CoroutineScope) : BroadcastR
         logger.d { "Init active call value: " + streamVideo?.state?.activeCall?.value?.cid }
         logger.d { "Init ringing call value: " + streamVideo?.state?.ringingCall?.value?.cid }
 
-        // TODO: active call should be set to ringing call automatically?
-
         streamVideo?.let { streamVideo ->
             call = streamVideo.state.activeCall.value ?: streamVideo.state.ringingCall.value
 
@@ -57,19 +55,10 @@ class ToggleCameraBroadcastReceiver(coroutineScope: CoroutineScope) : BroadcastR
 
     override fun onReceive(context: Context, intent: Intent) {
         when (intent.action) {
-            // For when the call screen is visible even if the screen is locked.
-            // Because of lockscreenVisibility = Notification.VISIBILITY_PUBLIC for channel?
-            // To reproduce scenario: answer from locked screen then lock-unlock
             Intent.ACTION_SCREEN_ON -> {
+                // Could be useful when the call screen is visible even if the screen is locked.
+                // Because of lockscreenVisibility = Notification.VISIBILITY_PUBLIC for channel?
                 logger.d { "Screen is on and locked. Call: ${call?.id}" }
-                // TODO:
-                // Solution works for normal active call & ringing call scenarios, but:
-                // Problem:
-                //  - answer call while unlocked
-                //  - lock then turn screen on by moving phone -> camera is on
-                //  - turn screen on by tap or button -> camera is off
-                //  - do the same in normal call -> camera is on even if unlocking by moving phone or button
-                if (shouldEnableCameraAgain) call?.camera?.enable()
             }
             Intent.ACTION_USER_PRESENT -> {
                 logger.d { "Screen is on and unlocked. Call: ${call?.id}" }
