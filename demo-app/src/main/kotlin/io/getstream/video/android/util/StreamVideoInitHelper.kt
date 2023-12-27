@@ -27,7 +27,6 @@ import io.getstream.chat.android.state.plugin.config.StatePluginConfig
 import io.getstream.chat.android.state.plugin.factory.StreamStatePluginFactory
 import io.getstream.log.Priority
 import io.getstream.video.android.BuildConfig
-import io.getstream.video.android.STREAM_SDK_ENVIRONMENT
 import io.getstream.video.android.core.StreamVideo
 import io.getstream.video.android.core.StreamVideoBuilder
 import io.getstream.video.android.core.logging.LoggingLevel
@@ -37,6 +36,7 @@ import io.getstream.video.android.data.services.stream.StreamService
 import io.getstream.video.android.datastore.delegate.StreamUserDataStore
 import io.getstream.video.android.model.ApiKey
 import io.getstream.video.android.model.User
+import io.getstream.video.android.util.config.AppConfig
 import kotlinx.coroutines.flow.firstOrNull
 
 @SuppressLint("StaticFieldLeak")
@@ -77,7 +77,7 @@ object StreamVideoInitHelper {
                 val userId = UserHelper.generateRandomString()
 
                 authData = StreamService.instance.getAuthData(
-                    environment = STREAM_SDK_ENVIRONMENT,
+                    environment = AppConfig.currentEnvironment.value!!.env,
                     userId = userId,
                 )
 
@@ -93,7 +93,7 @@ object StreamVideoInitHelper {
             if (loggedInUser != null) {
                 if (authData == null) {
                     authData = StreamService.instance.getAuthData(
-                        environment = STREAM_SDK_ENVIRONMENT,
+                        environment = AppConfig.currentEnvironment.value!!.env,
                         userId = loggedInUser.id,
                     )
                 }
@@ -177,7 +177,7 @@ object StreamVideoInitHelper {
             tokenProvider = {
                 val email = user.custom["email"]
                 val authData = StreamService.instance.getAuthData(
-                    environment = STREAM_SDK_ENVIRONMENT,
+                    environment = AppConfig.currentEnvironment.value!!.env,
                     userId = email,
                 )
                 authData.token

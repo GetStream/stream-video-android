@@ -26,6 +26,9 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -33,7 +36,9 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material.AlertDialog
 import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.Surface
 import androidx.compose.material.Text
@@ -74,6 +79,8 @@ import io.getstream.video.android.ui.theme.LinkText
 import io.getstream.video.android.ui.theme.LinkTextData
 import io.getstream.video.android.ui.theme.StreamButton
 import io.getstream.video.android.util.UserHelper
+import io.getstream.video.android.util.config.AppConfig
+import io.getstream.video.android.util.config.types.StreamEnvironment
 
 /**
  * @param autoLogIn Flag that controls auto log-in with a random user.
@@ -120,9 +127,25 @@ private fun LoginContent(
     loginViewModel: LoginViewModel = hiltViewModel(),
 ) {
     Box(modifier = Modifier.fillMaxSize()) {
+        val selectedEnv by AppConfig.currentEnvironment
+        val availableEnvs by AppConfig.availableEnvironments
+
+        selectedEnv?.let {
+            Box(modifier = Modifier.align(Alignment.TopEnd)) {
+                SelectableDialog(
+                    items = availableEnvs,
+                    selectedItem = it,
+                    onItemSelected = { env ->
+                        AppConfig.selectEnv(env)
+                        loginViewModel.reloadSdk()
+                    },
+                )
+            }
+        }
         Column(
             modifier = Modifier
-                .fillMaxSize()
+                .align(Alignment.Center)
+                .wrapContentHeight()
                 .background(Colors.background)
                 .semantics { testTagsAsResourceId = true },
             verticalArrangement = Arrangement.Center,
@@ -309,6 +332,57 @@ private fun EmailLoginDialog(
             }
         },
     )
+}
+
+@OptIn(ExperimentalLayoutApi::class)
+@Composable
+fun SelectableDialog(
+    items: List<StreamEnvironment>,
+    selectedItem: StreamEnvironment?,
+    onItemSelected: (StreamEnvironment) -> Unit,
+) {
+    var showDialog by remember { mutableStateOf(false) }
+    var selectedText by remember { mutableStateOf(selectedItem?.displayName ?: "") }
+
+    Row(verticalAlignment = Alignment.CenterVertically) {
+        Text(
+            modifier = Modifier.padding(16.dp),
+            text = "Current environment: $selectedText",
+            color = Color.White,
+        )
+        if (items.size > 1) {
+            StreamButton(
+                text = "Change",
+                onClick = { showDialog = true },
+                modifier = Modifier.padding(16.dp),
+            )
+            if (showDialog) {
+                AlertDialog(
+                    onDismissRequest = { showDialog = false },
+                    title = {
+                        Text("Available environments")
+                    },
+                    text = {
+                        FlowRow {
+                            items.forEach { item ->
+                                StreamButton(
+                                    text = item.displayName,
+                                    onClick = {
+                                        onItemSelected(item)
+                                        selectedText = item.displayName
+                                        showDialog = false
+                                    },
+                                    modifier = Modifier.padding(8.dp),
+                                )
+                            }
+                        }
+                    },
+                    confirmButton = {},
+                    dismissButton = {},
+                )
+            }
+        }
+    }
 }
 
 @Composable

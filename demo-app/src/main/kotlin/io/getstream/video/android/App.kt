@@ -20,8 +20,8 @@ import android.app.Application
 import android.content.Context
 import dagger.hilt.android.HiltAndroidApp
 import io.getstream.video.android.datastore.delegate.StreamUserDataStore
-import io.getstream.video.android.tooling.util.StreamFlavors
 import io.getstream.video.android.util.StreamVideoInitHelper
+import io.getstream.video.android.util.config.AppConfig
 import kotlinx.coroutines.runBlocking
 
 @HiltAndroidApp
@@ -47,6 +47,7 @@ class App : Application() {
         // If push messages are not used then you don't need to init here - you can init
         // on-demand (initialising here is usually less error-prone).
         runBlocking {
+            AppConfig.load(applicationContext)
             StreamVideoInitHelper.loadSdk(
                 dataStore = StreamUserDataStore.instance(),
                 useRandomUserAsFallback = false,
@@ -54,7 +55,5 @@ class App : Application() {
         }
     }
 }
-
-val STREAM_SDK_ENVIRONMENT = if (BuildConfig.FLAVOR == StreamFlavors.production) "demo" else "pronto"
 
 val Context.app get() = applicationContext as App

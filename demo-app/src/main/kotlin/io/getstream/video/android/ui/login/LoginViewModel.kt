@@ -23,7 +23,6 @@ import com.google.android.gms.auth.api.signin.GoogleSignInClient
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.getstream.log.streamLog
 import io.getstream.video.android.BuildConfig
-import io.getstream.video.android.STREAM_SDK_ENVIRONMENT
 import io.getstream.video.android.core.StreamVideo
 import io.getstream.video.android.data.repositories.GoogleAccountRepository
 import io.getstream.video.android.data.services.stream.GetAuthDataResponse
@@ -33,6 +32,7 @@ import io.getstream.video.android.model.User
 import io.getstream.video.android.tooling.util.StreamFlavors
 import io.getstream.video.android.util.StreamVideoInitHelper
 import io.getstream.video.android.util.UserHelper
+import io.getstream.video.android.util.config.AppConfig
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -78,6 +78,12 @@ class LoginViewModel @Inject constructor(
         viewModelScope.launch { this@LoginViewModel.event.emit(event) }
     }
 
+    public fun reloadSdk() {
+        viewModelScope.launch {
+            StreamVideoInitHelper.loadSdk(dataStore)
+        }
+    }
+
     private fun signInSuccess(userId: String) = flow {
         // skip login if we are already logged in (use has navigated back)
         if (StreamVideo.isInstalled) {
@@ -85,7 +91,7 @@ class LoginViewModel @Inject constructor(
         } else {
             try {
                 val authData = StreamService.instance.getAuthData(
-                    environment = STREAM_SDK_ENVIRONMENT,
+                    environment = AppConfig.currentEnvironment.value!!.env,
                     userId = userId,
                 )
 

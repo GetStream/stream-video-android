@@ -81,15 +81,14 @@
             <intent-filter
                 android:autoVerify="true"
                 android:label="@string/filter_call_link">
-
                 <action android:name="android.intent.action.VIEW" />
-
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
-
                 <data android:scheme="https" />
-                <data android:host="@string/deeplinking_host" />
-                <data android:pathPrefix="@string/deeplinking_path_prefix" />
+                <data android:host="getstream.io" />
+                <data android:host="pronto.getstream.io" />
+                <data android:pathPrefix="/join" />
+                <data android:pathPrefix="/video/demos" />
             </intent-filter>
         </activity>
 

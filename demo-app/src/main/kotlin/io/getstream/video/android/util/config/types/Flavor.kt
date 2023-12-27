@@ -14,17 +14,13 @@
  * limitations under the License.
  */
 
-package io.getstream.video.android.tooling.util
+package io.getstream.video.android.util.config.types
 
-/**
- * Defined flavors. Used in code logic.
- */
-internal object StreamFlavors {
-    const val development = "development"
-    const val production = "production"
-}
+import com.squareup.moshi.Json
 
-public object StreamEnvironments {
-    const val demo = "demo"
-    const val pronto = "pronto"
-}
+data class Flavor(
+
+    @Json(name = "flavor") var flavor: String? = null,
+    @Json(name = "default") var default: Boolean? = null,
+
+)
