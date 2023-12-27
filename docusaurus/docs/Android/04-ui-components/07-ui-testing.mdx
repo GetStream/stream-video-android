@@ -3,17 +3,17 @@ title: UI Testing
 description: How to test Stream Video SDK's UI components with Paparazzi.
 ---
 
-Writing UI tests is important to verify your UI layouts are going well. For example, you can take snapshots and compared them to your previous screens and keep tracking the differences.
+Writing UI tests is important to verify your UI layouts are implemented correctly. For example, you can take snapshots, compare them to your previous screens and track the differences.
 
 In these docs, you'll learn how to write snapshot testing with [Paparazzi](https://cashapp.github.io/paparazzi/) and Stream Video's mock library.
 
 ## Set Up
 
-First, you should import our library called `stream-video-android-previewdata` that allows you to get some mock instances of them and write your preview or test codes for Stream Video UI components easily.
+First, you should import our `stream-video-android-previewdata` library to get mock instances and write your preview or test code for Stream Video UI components easily.
 
 <img src="https://img.shields.io/maven-central/v/io.getstream/stream-video-android-mock.svg?label=Maven%20Central" width="140"/>
 
-Next, add the dependency below below to your module's `build.gradle` file:
+So add the dependency below below to your module's `build.gradle` file:
 
 ```groovy
 dependencies {
@@ -21,7 +21,7 @@ dependencies {
 }
 ```
 
-Now, let's see how to write simple snapshot tests about Stream Video UI components.
+Now, let's see how to write simple snapshot tests for Stream Video UI components.
 
 ```kotlin
 class ScreenTests {
@@ -65,7 +65,7 @@ class ScreenTests {
 }
 ```
 
-Let's break the code down one by one.
+Let's break the code down line by line.
 
 First, you should initialize Stream Video SDK with the `initializeStreamVideo()` method. You can learn more about our mock library on [UI Previews](07-ui-previews.mdx).
 
@@ -101,6 +101,8 @@ After running the command below, you'll see generated snapshots:
 ./gradlew recordPaparazziDebug
 ```
 
-The snapshot images will be like so:
+The snapshot images will look like this:
 
 ![Snapshot Images](../assets/portrait-video-five.png)
+
+<!-- more details on what to do with them? -->

@@ -23,23 +23,23 @@ fun CustomVideoComponent(
         VideoRenderer(
             modifier = Modifier.fillMaxSize(),
             call = call,
-            video = videoTrack,
+            video = videoTrack, // step 3 - pass the video track to VideoRenderer to render the video
             sessionId = participant.sessionId,
             trackType = TrackType.TRACK_TYPE_VIDEO
         ) 
     } else {
-        // shows fallback of a video track by your taste
+        // show a custom fallback for an unavailable video track
     }
 }
 ```
 
 There are a few steps going on here:
 
-1. Using the `ParticipantState`, you can get that participant's `videoTrack`. It also contains the `sessionId` of that participant, which is a unique UUID value, and used to connect the tracks and rendering.
-2. When you have the track, it's not `null`, you're ready to show the UI using `VideoRenderer` and its parameters.
-3. Using the `modifier`, you can customize the size, shape, elevation and similar properties of the component UI.
+1. Using the `ParticipantState`, you can get that participant's `videoTrack`. It also contains the `sessionId` of that participant, which is a unique UUID value, used to connect the tracks and rendering.
+2. When you have the track and it's not `null`, you're ready to show the UI using `VideoRenderer` and its parameters.
+3. Using `modifier`, you can customize the size, shape, elevation and similar properties of the component UI.
 
-This snippet of code will render a single video track that is currently joining a call.
+This snippet of code will render a single video track from a call.
 
 ## Choosing the VideoTrack
 
