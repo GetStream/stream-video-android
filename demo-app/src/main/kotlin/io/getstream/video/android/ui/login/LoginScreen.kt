@@ -73,7 +73,6 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import io.getstream.video.android.BuildConfig
 import io.getstream.video.android.R
 import io.getstream.video.android.compose.theme.VideoTheme
-import io.getstream.video.android.tooling.util.StreamFlavors
 import io.getstream.video.android.ui.theme.Colors
 import io.getstream.video.android.ui.theme.LinkText
 import io.getstream.video.android.ui.theme.LinkTextData
@@ -146,6 +145,7 @@ private fun LoginContent(
             modifier = Modifier
                 .align(Alignment.Center)
                 .wrapContentHeight()
+                .fillMaxWidth()
                 .background(Colors.background)
                 .semantics { testTagsAsResourceId = true },
             verticalArrangement = Arrangement.Center,
@@ -160,83 +160,63 @@ private fun LoginContent(
             Spacer(modifier = Modifier.height(27.dp))
 
             Text(
+                modifier = Modifier.fillMaxWidth(),
+                textAlign = TextAlign.Center,
                 text = stringResource(id = R.string.app_name),
                 color = Color.White,
                 fontSize = 38.sp,
             )
+            Spacer(modifier = Modifier.height(30.dp))
 
-            when {
-                BuildConfig.FLAVOR != StreamFlavors.production -> {
-                    Spacer(modifier = Modifier.height(17.dp))
+            val availableLogins by AppConfig.availableLogins
 
-                    Text(
-                        text = stringResource(id = R.string.sign_in_description),
-                        color = Colors.description,
-                        textAlign = TextAlign.Center,
-                        fontSize = 18.sp,
-                    )
-
-                    Spacer(modifier = Modifier.height(50.dp))
-
-                    StreamButton(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(52.dp)
-                            .padding(horizontal = 55.dp),
-                        enabled = !isLoading,
-                        text = stringResource(id = R.string.sign_in_google),
-                        onClick = {
-                            loginViewModel.autoLogIn = false
-                            loginViewModel.handleUiEvent(LoginEvent.GoogleSignIn())
-                        },
-                    )
-
-                    Spacer(modifier = Modifier.height(15.dp))
-
-                    StreamButton(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(52.dp)
-                            .padding(horizontal = 55.dp),
-                        enabled = !isLoading,
-                        text = stringResource(id = R.string.sign_in_email),
-                        onClick = {
-                            loginViewModel.autoLogIn = true
-                            showEmailLoginDialog.invoke()
-                        },
-                    )
+            availableLogins.forEach {
+                when (it) {
+                    "google" -> {
+                        StreamButton(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(52.dp)
+                                .padding(horizontal = 55.dp),
+                            enabled = !isLoading,
+                            text = stringResource(id = R.string.sign_in_google),
+                            onClick = {
+                                loginViewModel.autoLogIn = false
+                                loginViewModel.handleUiEvent(LoginEvent.GoogleSignIn())
+                            },
+                        )
+                    }
+                    "email" -> {
+                        StreamButton(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(52.dp)
+                                .padding(horizontal = 55.dp),
+                            enabled = !isLoading,
+                            text = stringResource(id = R.string.sign_in_email),
+                            onClick = {
+                                loginViewModel.autoLogIn = true
+                                showEmailLoginDialog.invoke()
+                            },
+                        )
+                    }
+                    "guest" -> {
+                        StreamButton(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(52.dp)
+                                .padding(horizontal = 55.dp),
+                            enabled = !isLoading,
+                            text = stringResource(R.string.random_user_sign_in),
+                            onClick = {
+                                loginViewModel.autoLogIn = true
+                                loginViewModel.signInIfValidUserExist()
+                            },
+                        )
+                    }
                 }
-                BuildConfig.FLAVOR == StreamFlavors.production && !autoLogIn -> {
-                    Spacer(modifier = Modifier.height(50.dp))
-
-                    StreamButton(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(52.dp)
-                            .padding(horizontal = 55.dp),
-                        enabled = !isLoading,
-                        text = stringResource(id = R.string.sign_in_google),
-                        onClick = { loginViewModel.handleUiEvent(LoginEvent.GoogleSignIn()) },
-                    )
-
-                    Spacer(modifier = Modifier.height(15.dp))
-
-                    StreamButton(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(52.dp)
-                            .padding(horizontal = 55.dp),
-                        enabled = !isLoading,
-                        text = stringResource(R.string.random_user_sign_in),
-                        onClick = {
-                            loginViewModel.autoLogIn = true
-                            loginViewModel.signInIfValidUserExist()
-                        },
-                    )
-                }
+                Spacer(modifier = Modifier.height(15.dp))
             }
-
-            Spacer(modifier = Modifier.height(47.dp))
 
             val context = LocalContext.current
             LinkText(

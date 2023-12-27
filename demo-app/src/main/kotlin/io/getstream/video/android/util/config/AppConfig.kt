@@ -35,7 +35,6 @@ import io.getstream.video.android.R
 import io.getstream.video.android.util.config.types.Flavor
 import io.getstream.video.android.util.config.types.StreamEnvironment
 import io.getstream.video.android.util.config.types.StreamRemoteConfig
-import kotlinx.coroutines.flow.MutableStateFlow
 import java.util.concurrent.Executors
 
 /**
@@ -57,7 +56,7 @@ object AppConfig {
     // State
     public val currentEnvironment = mutableStateOf<StreamEnvironment?>(null)
     public val availableEnvironments = mutableStateOf<List<StreamEnvironment>>(arrayListOf())
-    public val currentEnvFlow = MutableStateFlow<StreamEnvironment?>(null)
+    public val availableLogins = mutableStateOf<List<String>>(arrayListOf())
 
     // Utils
     private val moshi: Moshi = Moshi.Builder().add(KotlinJsonAdapterFactory()).build()
@@ -90,34 +89,32 @@ object AppConfig {
                     val parsed = parseConfig(remoteConfig)
                     config = parsed!!
 
+                    // Update available logins
+                    availableLogins.value = config.supportedLogins.firstOrNull {
+                        it.flavor.contains(BuildConfig.FLAVOR)
+                    }?.logins ?: arrayListOf("email")
+
                     // Select environment
                     val jsonAdapter: JsonAdapter<StreamEnvironment> = moshi.adapter()
                     val selectedEnvData = prefs.getString(SELECTED_ENV, null)
-                    val selectedEnvironment = selectedEnvData?.let {
+                    var selectedEnvironment = selectedEnvData?.let {
                         jsonAdapter.fromJson(it)
+                    }
+                    if (selectedEnvironment?.isForFlavor(BuildConfig.FLAVOR) != true) {
+                        // We may have selected environment previously which is no longer available
+                        selectedEnvironment = null
                     }
                     val which = selectedEnvironment ?: config.environments.default(BuildConfig.FLAVOR)
                     selectEnv(which)
-                    availableEnvironments.value = config.environments
+                    availableEnvironments.value = config.environments.filter {
+                        it.isForFlavor(BuildConfig.FLAVOR)
+                    }
                     currentEnvironment.value = which
-                    currentEnvFlow.value = which
                     onLoaded()
                 } catch (e: Exception) {
                     logger.e(e) { "Failed to parse  remote config. Deeplinks not working!" }
                 }
             }
-    }
-
-    /**
-     * Get the loaded configuration. Load the config with [load].
-     *
-     * @return [StreamRemoteConfig] object or null if config was not loaded.
-     */
-    fun getConfigOrNull(): StreamRemoteConfig? = if (::config.isInitialized) {
-        config
-    } else {
-        logger.e { "Call #load(context) first before accessing properties in the config object." }
-        null
     }
 
     /**
@@ -139,7 +136,6 @@ object AppConfig {
         prefs.edit(commit = true) {
             putString(SELECTED_ENV, jsonAdapter.toJson(environment))
         }
-        currentEnvFlow.value = environment
         currentEnvironment.value = environment
     }
 
@@ -176,16 +172,18 @@ object AppConfig {
     }
 
     private fun StreamEnvironment.isForFlavor(flavor: String): Boolean {
-        return flavors.find { it.flavor!! == flavor } != null
+        return flavors.find { it.flavor == flavor } != null
     }
 
     private fun StreamEnvironment.isDefaultForFlavor(flavor: String): Boolean {
-        return flavors.find { it.flavor!! == flavor }?.default != true
+        return flavors.find { it.flavor == flavor }?.default == true
     }
 
     private fun List<StreamEnvironment>.default(currentFlavor: String): StreamEnvironment {
         return findLast { env ->
             env.isDefaultForFlavor(currentFlavor)
+        } ?: config.environments.find {
+            it.isForFlavor(currentFlavor)
         } ?: config.environments.first()
     }
 }

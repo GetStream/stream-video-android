@@ -29,7 +29,6 @@ import io.getstream.video.android.data.services.stream.GetAuthDataResponse
 import io.getstream.video.android.data.services.stream.StreamService
 import io.getstream.video.android.datastore.delegate.StreamUserDataStore
 import io.getstream.video.android.model.User
-import io.getstream.video.android.tooling.util.StreamFlavors
 import io.getstream.video.android.util.StreamVideoInitHelper
 import io.getstream.video.android.util.UserHelper
 import io.getstream.video.android.util.config.AppConfig
@@ -66,10 +65,12 @@ class LoginViewModel @Inject constructor(
                         signInIntent = googleSignInClient.signInIntent,
                     ),
                 )
+
                 is LoginEvent.SignInSuccess -> signInSuccess(event.userId)
                 is LoginEvent.SignInFailure -> flowOf(
                     LoginUiState.SignInFailure(event.errorMessage),
                 )
+
                 else -> flowOf(LoginUiState.Nothing)
             }
         }.shareIn(viewModelScope, SharingStarted.Lazily, 0)
@@ -95,7 +96,8 @@ class LoginViewModel @Inject constructor(
                     userId = userId,
                 )
 
-                val loggedInGoogleUser = if (autoLogIn) null else googleAccountRepository.getCurrentUser()
+                val loggedInGoogleUser =
+                    if (autoLogIn) null else googleAccountRepository.getCurrentUser()
 
                 val user = User(
                     id = authData.userId,
@@ -131,15 +133,13 @@ class LoginViewModel @Inject constructor(
                     handleUiEvent(LoginEvent.SignInSuccess(userId = user.id))
                 }
             } else {
-                if (BuildConfig.FLAVOR == StreamFlavors.production) {
-                    if (autoLogIn) {
-                        handleUiEvent(LoginEvent.Loading)
-                        handleUiEvent(
-                            LoginEvent.SignInSuccess(
-                                UserHelper.generateRandomString(upperCaseOnly = true),
-                            ),
-                        )
-                    }
+                if (autoLogIn) {
+                    handleUiEvent(LoginEvent.Loading)
+                    handleUiEvent(
+                        LoginEvent.SignInSuccess(
+                            UserHelper.generateRandomString(upperCaseOnly = true),
+                        ),
+                    )
                 }
             }
         }
