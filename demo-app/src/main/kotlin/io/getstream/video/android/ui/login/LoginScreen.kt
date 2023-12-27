@@ -168,74 +168,78 @@ private fun LoginContent(
             )
             Spacer(modifier = Modifier.height(30.dp))
 
-            val availableLogins by AppConfig.availableLogins
+            if (!isLoading) {
+                val availableLogins by AppConfig.availableLogins
 
-            availableLogins.forEach {
-                when (it) {
-                    "google" -> {
-                        StreamButton(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .height(52.dp)
-                                .padding(horizontal = 55.dp),
-                            enabled = !isLoading,
-                            text = stringResource(id = R.string.sign_in_google),
-                            onClick = {
-                                loginViewModel.autoLogIn = false
-                                loginViewModel.handleUiEvent(LoginEvent.GoogleSignIn())
-                            },
-                        )
+                availableLogins.forEach {
+                    when (it) {
+                        "google" -> {
+                            StreamButton(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .height(52.dp)
+                                    .padding(horizontal = 55.dp),
+                                enabled = !isLoading,
+                                text = stringResource(id = R.string.sign_in_google),
+                                onClick = {
+                                    loginViewModel.autoLogIn = false
+                                    loginViewModel.handleUiEvent(LoginEvent.GoogleSignIn())
+                                },
+                            )
+                        }
+
+                        "email" -> {
+                            StreamButton(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .height(52.dp)
+                                    .padding(horizontal = 55.dp),
+                                enabled = !isLoading,
+                                text = stringResource(id = R.string.sign_in_email),
+                                onClick = {
+                                    loginViewModel.autoLogIn = true
+                                    showEmailLoginDialog.invoke()
+                                },
+                            )
+                        }
+
+                        "guest" -> {
+                            StreamButton(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .height(52.dp)
+                                    .padding(horizontal = 55.dp),
+                                enabled = !isLoading,
+                                text = stringResource(R.string.random_user_sign_in),
+                                onClick = {
+                                    loginViewModel.autoLogIn = true
+                                    loginViewModel.signInIfValidUserExist()
+                                },
+                            )
+                        }
                     }
-                    "email" -> {
-                        StreamButton(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .height(52.dp)
-                                .padding(horizontal = 55.dp),
-                            enabled = !isLoading,
-                            text = stringResource(id = R.string.sign_in_email),
-                            onClick = {
-                                loginViewModel.autoLogIn = true
-                                showEmailLoginDialog.invoke()
-                            },
-                        )
-                    }
-                    "guest" -> {
-                        StreamButton(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .height(52.dp)
-                                .padding(horizontal = 55.dp),
-                            enabled = !isLoading,
-                            text = stringResource(R.string.random_user_sign_in),
-                            onClick = {
-                                loginViewModel.autoLogIn = true
-                                loginViewModel.signInIfValidUserExist()
-                            },
-                        )
-                    }
+                    Spacer(modifier = Modifier.height(15.dp))
                 }
-                Spacer(modifier = Modifier.height(15.dp))
-            }
 
-            val context = LocalContext.current
-            LinkText(
-                linkTextData = listOf(
-                    LinkTextData(text = stringResource(id = R.string.sign_in_contact)),
-                    LinkTextData(
-                        text = stringResource(
-                            id = R.string.sign_in_contact_us,
+                val context = LocalContext.current
+                LinkText(
+                    linkTextData = listOf(
+                        LinkTextData(text = stringResource(id = R.string.sign_in_contact)),
+                        LinkTextData(
+                            text = stringResource(
+                                id = R.string.sign_in_contact_us,
+                            ),
+                            tag = "contact us",
+                            annotation = "https://getstream.io/video/docs/",
+                            onClick = {
+                                val intent = Intent(Intent.ACTION_VIEW)
+                                intent.data = Uri.parse(it.item)
+                                startActivity(context, intent, null)
+                            },
                         ),
-                        tag = "contact us",
-                        annotation = "https://getstream.io/video/docs/",
-                        onClick = {
-                            val intent = Intent(Intent.ACTION_VIEW)
-                            intent.data = Uri.parse(it.item)
-                            startActivity(context, intent, null)
-                        },
                     ),
-                ),
-            )
+                )
+            }
 
             if (BuildConfig.BUILD_TYPE == "benchmark") {
                 StreamButton(
