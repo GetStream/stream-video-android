@@ -73,8 +73,20 @@ class DeeplinkingActivity : ComponentActivity() {
         }
 
         val callIdFromExtra = intent?.getStringExtra(CALL_ID)
-        val data: Uri = intent?.data ?: return
-        val callId = callIdFromExtra ?: extractCallId(data) ?: return
+        val data: Uri? = intent?.data
+
+        if (data == null) {
+            logger.e { "Can't open the call from deeplink because intent data is null" }
+            finish()
+            return
+        }
+
+        val callId = callIdFromExtra ?: extractCallId(data)
+        if (callId == null) {
+            logger.e { "Can't open the call from deeplink because call ID is null" }
+            finish()
+            return
+        }
 
         logger.d { "Action: ${intent?.action}" }
         logger.d { "Data: ${intent?.data}" }
