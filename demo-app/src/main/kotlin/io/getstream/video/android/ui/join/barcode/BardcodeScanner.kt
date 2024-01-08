@@ -239,9 +239,15 @@ private fun BoxScope.CornerRectWithArcs(color: Color, cornerRadius: Float, strok
 private fun rememberQrCodeCallback(): OnSuccessListener<Barcode> {
     val context = LocalContext.current
     val firebaseAnalytics by lazy { FirebaseAnalytics.getInstance(context) }
+    var codeScanned = false
 
     return remember {
         OnSuccessListener<Barcode> {
+            if (codeScanned) {
+                Log.d("BarcodeScanner", "Barcode already processed - skipping")
+                return@OnSuccessListener
+            }
+
             val linkUrl = try {
                 Uri.parse(it.url?.url)
             } catch (e: Exception) {
@@ -249,6 +255,7 @@ private fun rememberQrCodeCallback(): OnSuccessListener<Barcode> {
                 null
             }
             if (linkUrl != null) {
+                codeScanned = true
                 firebaseAnalytics.logEvent(FirebaseEvents.SCAN_QR_CODE, null)
                 context.startActivity(DeeplinkingActivity.createIntent(context, linkUrl))
             } else {
