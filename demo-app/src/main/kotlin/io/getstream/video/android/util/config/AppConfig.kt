@@ -19,7 +19,6 @@ package io.getstream.video.android.util.config
 import android.content.Context
 import android.content.Context.MODE_PRIVATE
 import android.content.SharedPreferences
-import androidx.compose.runtime.mutableStateOf
 import androidx.core.content.edit
 import com.google.firebase.ktx.Firebase
 import com.google.firebase.remoteconfig.FirebaseRemoteConfig
@@ -35,6 +34,11 @@ import io.getstream.video.android.R
 import io.getstream.video.android.util.config.types.Flavor
 import io.getstream.video.android.util.config.types.StreamEnvironment
 import io.getstream.video.android.util.config.types.StreamRemoteConfig
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.DelicateCoroutinesApi
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.launch
 import java.util.concurrent.Executors
 
 /**
@@ -53,10 +57,10 @@ object AppConfig {
     private lateinit var environment: StreamEnvironment
     private lateinit var prefs: SharedPreferences
 
-    // State
-    public val currentEnvironment = mutableStateOf<StreamEnvironment?>(null)
-    public val availableEnvironments = mutableStateOf<List<StreamEnvironment>>(arrayListOf())
-    public val availableLogins = mutableStateOf<List<String>>(arrayListOf())
+    // State of config values
+    public val currentEnvironment = MutableStateFlow<StreamEnvironment?>(null)
+    public val availableEnvironments = MutableStateFlow<List<StreamEnvironment>>(arrayListOf())
+    public val availableLogins = MutableStateFlow<List<String>>(arrayListOf())
 
     // Utils
     private val moshi: Moshi = Moshi.Builder().add(KotlinJsonAdapterFactory()).build()
@@ -68,8 +72,14 @@ object AppConfig {
      * Will automatically put config into [AppConfig.config]
      *
      * @param context an android context.
+     * @param coroutineScope the scope used to run [onLoaded]
      */
-    fun load(context: Context, onLoaded: () -> Unit = {}) {
+    @OptIn(DelicateCoroutinesApi::class)
+    fun load(
+        context: Context,
+        coroutineScope: CoroutineScope = GlobalScope,
+        onLoaded: suspend () -> Unit = {},
+    ) {
         // Load prefs
         prefs = context.getSharedPreferences(SHARED_PREF_NAME, MODE_PRIVATE)
 
@@ -110,7 +120,9 @@ object AppConfig {
                         it.isForFlavor(BuildConfig.FLAVOR)
                     }
                     currentEnvironment.value = which
-                    onLoaded()
+                    coroutineScope.launch {
+                        onLoaded()
+                    }
                 } catch (e: Exception) {
                     logger.e(e) { "Failed to parse  remote config. Deeplinks not working!" }
                 }

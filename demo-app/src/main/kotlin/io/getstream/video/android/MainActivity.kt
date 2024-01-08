@@ -52,6 +52,10 @@ class MainActivity : ComponentActivity() {
             }
         }
 
+        lifecycleScope.launchWhenCreated {
+            InAppUpdateHelper(this@MainActivity).checkForAppUpdates()
+        }
+
         lifecycleScope.launch {
             val isLoggedIn = dataStore.user.firstOrNull() != null
 
@@ -66,8 +70,6 @@ class MainActivity : ComponentActivity() {
                     )
                 }
             }
-
-            InAppUpdateHelper(this@MainActivity).checkForAppUpdates()
         }
     }
 }

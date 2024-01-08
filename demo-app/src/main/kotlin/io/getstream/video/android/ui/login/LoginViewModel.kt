@@ -32,16 +32,14 @@ import io.getstream.video.android.model.User
 import io.getstream.video.android.util.StreamVideoInitHelper
 import io.getstream.video.android.util.UserHelper
 import io.getstream.video.android.util.config.AppConfig
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.flatMapLatest
-import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOf
-import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.shareIn
 import kotlinx.coroutines.launch
 import java.util.UUID
@@ -85,43 +83,41 @@ class LoginViewModel @Inject constructor(
         }
     }
 
-    private fun signInSuccess(userId: String) = flow {
-        // skip login if we are already logged in (use has navigated back)
-        if (StreamVideo.isInstalled) {
-            emit(LoginUiState.AlreadyLoggedIn)
-        } else {
-            try {
-                val authData = StreamService.instance.getAuthData(
-                    environment = AppConfig.currentEnvironment.value!!.env,
-                    userId = userId,
-                )
-
-                val loggedInGoogleUser =
-                    if (autoLogIn) null else googleAccountRepository.getCurrentUser()
-
-                val user = User(
-                    id = authData.userId,
-                    // if autoLogIn is true it means we have a random user
-                    name = if (autoLogIn) userId else loggedInGoogleUser?.name ?: "",
-                    image = if (autoLogIn) "" else loggedInGoogleUser?.photoUrl ?: "",
-                    role = "admin",
-                    custom = mapOf("email" to authData.userId),
-                )
-
-                // Store the data in the demo app
-                dataStore.updateUser(user)
-
-                // Init the Video SDK with the data
-                StreamVideoInitHelper.loadSdk(dataStore)
-
-                emit(LoginUiState.SignInComplete(authData))
-            } catch (exception: Throwable) {
-                val message = "Sign in failed: ${exception.message ?: "Generic error"}"
-                emit(LoginUiState.SignInFailure(message))
-                streamLog { "Failed to fetch token - cause: $exception" }
+    private fun signInSuccess(userId: String): Flow<LoginUiState> = AppConfig.currentEnvironment.flatMapLatest {
+        if (it != null) {
+            if (StreamVideo.isInstalled) {
+                flowOf(LoginUiState.AlreadyLoggedIn)
+            } else {
+                try {
+                    val authData = StreamService.instance.getAuthData(
+                        environment = it.env,
+                        userId = userId,
+                    )
+                    val loggedInGoogleUser =
+                        if (autoLogIn) null else googleAccountRepository.getCurrentUser()
+                    val user = User(
+                        id = authData.userId,
+                        // if autoLogIn is true it means we have a random user
+                        name = if (autoLogIn) userId else loggedInGoogleUser?.name ?: "",
+                        image = if (autoLogIn) "" else loggedInGoogleUser?.photoUrl ?: "",
+                        role = "admin",
+                        custom = mapOf("email" to authData.userId),
+                    )
+                    // Store the data in the demo app
+                    dataStore.updateUser(user)
+                    // Init the Video SDK with the data
+                    StreamVideoInitHelper.loadSdk(dataStore)
+                    flowOf(LoginUiState.SignInComplete(authData))
+                } catch (exception: Throwable) {
+                    val message = "Sign in failed: ${exception.message ?: "Generic error"}"
+                    streamLog { "Failed to fetch token - cause: $exception" }
+                    flowOf(LoginUiState.SignInFailure(message))
+                }
             }
+        } else {
+            flowOf(LoginUiState.Loading)
         }
-    }.flowOn(Dispatchers.IO)
+    }
 
     fun signInIfValidUserExist() {
         viewModelScope.launch {

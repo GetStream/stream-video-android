@@ -70,6 +70,7 @@ import androidx.compose.ui.window.Dialog
 import androidx.core.content.ContextCompat.getString
 import androidx.core.content.ContextCompat.startActivity
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.getstream.video.android.BuildConfig
 import io.getstream.video.android.R
 import io.getstream.video.android.compose.theme.VideoTheme
@@ -126,8 +127,8 @@ private fun LoginContent(
     loginViewModel: LoginViewModel = hiltViewModel(),
 ) {
     Box(modifier = Modifier.fillMaxSize()) {
-        val selectedEnv by AppConfig.currentEnvironment
-        val availableEnvs by AppConfig.availableEnvironments
+        val selectedEnv by AppConfig.currentEnvironment.collectAsStateWithLifecycle()
+        val availableEnvs by AppConfig.availableEnvironments.collectAsStateWithLifecycle()
 
         selectedEnv?.let {
             Box(modifier = Modifier.align(Alignment.TopEnd)) {
@@ -169,7 +170,7 @@ private fun LoginContent(
             Spacer(modifier = Modifier.height(30.dp))
 
             if (!isLoading) {
-                val availableLogins by AppConfig.availableLogins
+                val availableLogins by AppConfig.availableLogins.collectAsStateWithLifecycle()
 
                 availableLogins.forEach {
                     when (it) {

@@ -54,15 +54,18 @@ object StreamVideoInitHelper {
      * Set [useRandomUserAsFallback] to true if you want to use a guest fallback if the user is not
      * logged in.
      */
-    suspend fun loadSdk(dataStore: StreamUserDataStore, useRandomUserAsFallback: Boolean = true) {
+    suspend fun loadSdk(
+        dataStore: StreamUserDataStore,
+        useRandomUserAsFallback: Boolean = true,
+    ) = AppConfig.load(context) {
         if (StreamVideo.isInstalled) {
             Log.w("StreamVideoInitHelper", "[initStreamVideo] StreamVideo is already initialised.")
-            return
+            return@load
         }
 
         if (isInitialising) {
             Log.d("StreamVideoInitHelper", "[initStreamVideo] StreamVideo is already initialising")
-            return
+            return@load
         }
 
         isInitialising = true
