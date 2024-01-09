@@ -248,22 +248,16 @@ private fun rememberQrCodeCallback(): OnSuccessListener<Barcode> {
                 return@OnSuccessListener
             }
 
-            val url = it.url?.url
-            val callId = if (url != null) {
-                val id = Uri.parse(url).getQueryParameter("id")
-                if (!id.isNullOrEmpty()) {
-                    id
-                } else {
-                    null
-                }
-            } else {
+            val linkUrl = try {
+                Uri.parse(it.url?.url)
+            } catch (e: Exception) {
+                // Nothing will happen
                 null
             }
-
-            if (!callId.isNullOrEmpty()) {
+            if (linkUrl != null) {
                 codeScanned = true
                 firebaseAnalytics.logEvent(FirebaseEvents.SCAN_QR_CODE, null)
-                context.startActivity(DeeplinkingActivity.createIntent(context, callId))
+                context.startActivity(DeeplinkingActivity.createIntent(context, linkUrl))
             } else {
                 Toast.makeText(
                     context,

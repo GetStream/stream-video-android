@@ -14,17 +14,11 @@
  * limitations under the License.
  */
 
-package io.getstream.video.android.tooling.util
+package io.getstream.video.android.util.config.types
 
-/**
- * Defined flavors. Used in code logic.
- */
-internal object StreamFlavors {
-    const val development = "development"
-    const val production = "production"
-}
+import com.squareup.moshi.Json
 
-public object StreamEnvironments {
-    const val demo = "demo"
-    const val pronto = "pronto"
-}
+data class StreamRemoteConfig(
+    @Json(name = "supportedLogins") var supportedLogins: List<SupportedLogins> = arrayListOf(),
+    @Json(name = "environments") var environments: List<StreamEnvironment> = arrayListOf(),
+)

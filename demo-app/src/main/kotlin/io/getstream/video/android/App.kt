@@ -20,7 +20,6 @@ import android.app.Application
 import android.content.Context
 import dagger.hilt.android.HiltAndroidApp
 import io.getstream.video.android.datastore.delegate.StreamUserDataStore
-import io.getstream.video.android.tooling.util.StreamFlavors
 import io.getstream.video.android.util.StreamVideoInitHelper
 import kotlinx.coroutines.runBlocking
 
@@ -54,7 +53,5 @@ class App : Application() {
         }
     }
 }
-
-val STREAM_SDK_ENVIRONMENT = if (BuildConfig.FLAVOR == StreamFlavors.production) "demo" else "pronto"
 
 val Context.app get() = applicationContext as App

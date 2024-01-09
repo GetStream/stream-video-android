@@ -72,8 +72,21 @@ class DeeplinkingActivity : ComponentActivity() {
             }
         }
 
-        val data: Uri = intent?.data ?: return
-        val callId = data.getQueryParameter("id") ?: return
+        val callIdFromExtra = intent?.getStringExtra(CALL_ID)
+        val data: Uri? = intent?.data
+
+        if (data == null) {
+            logger.e { "Can't open the call from deeplink because intent data is null" }
+            finish()
+            return
+        }
+
+        val callId = callIdFromExtra ?: extractCallId(data)
+        if (callId == null) {
+            logger.e { "Can't open the call from deeplink because call ID is null" }
+            finish()
+            return
+        }
 
         logger.d { "Action: ${intent?.action}" }
         logger.d { "Data: ${intent?.data}" }
@@ -99,6 +112,22 @@ class DeeplinkingActivity : ComponentActivity() {
             )
             manager.start()
         }
+    }
+
+    private fun extractCallId(data: Uri): String? {
+        var callId: String? = null
+
+        // Get call id from path
+        val pathSegments = data.pathSegments
+        pathSegments?.forEachIndexed { index, segment ->
+            if (segment == "join") {
+                // Next segment is the callId
+                callId = pathSegments[index + 1]
+            }
+        }
+
+        // Try to take from query string
+        return callId ?: data.getQueryParameter("id")
     }
 
     private fun joinCall(cid: String) {
@@ -127,22 +156,38 @@ class DeeplinkingActivity : ComponentActivity() {
     companion object {
 
         private const val EXTRA_DISABLE_MIC_OVERRIDE = "disableMic"
+        private const val CALL_ID = "cid-deeplink"
 
         /**
-         * @param callId the Call ID you want to join
+         * @param url the URL containing the call ID
          * @param disableMicOverride optional parameter if you want to override the users setting
          * and disable the microphone.
          */
         @JvmStatic
         fun createIntent(
             context: Context,
-            callId: String,
+            url: Uri,
             disableMicOverride: Boolean = false,
         ): Intent {
             return Intent(context, DeeplinkingActivity::class.java).apply {
-                data = Uri.Builder()
-                    .appendQueryParameter("id", callId)
-                    .build()
+                data = url
+                putExtra(EXTRA_DISABLE_MIC_OVERRIDE, disableMicOverride)
+            }
+        }
+
+        /**
+         * @param url the URL containing the call ID
+         * @param disableMicOverride optional parameter if you want to override the users setting
+         * and disable the microphone.
+         */
+        @JvmStatic
+        fun createIntent(
+            context: Context,
+            callID: String,
+            disableMicOverride: Boolean = false,
+        ): Intent {
+            return Intent(context, DeeplinkingActivity::class.java).apply {
+                putExtra(CALL_ID, callID)
                 putExtra(EXTRA_DISABLE_MIC_OVERRIDE, disableMicOverride)
             }
         }

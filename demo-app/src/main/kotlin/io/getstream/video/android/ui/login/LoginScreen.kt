@@ -26,6 +26,9 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -33,7 +36,9 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material.AlertDialog
 import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.Surface
 import androidx.compose.material.Text
@@ -65,15 +70,17 @@ import androidx.compose.ui.window.Dialog
 import androidx.core.content.ContextCompat.getString
 import androidx.core.content.ContextCompat.startActivity
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.getstream.video.android.BuildConfig
 import io.getstream.video.android.R
 import io.getstream.video.android.compose.theme.VideoTheme
-import io.getstream.video.android.tooling.util.StreamFlavors
 import io.getstream.video.android.ui.theme.Colors
 import io.getstream.video.android.ui.theme.LinkText
 import io.getstream.video.android.ui.theme.LinkTextData
 import io.getstream.video.android.ui.theme.StreamButton
 import io.getstream.video.android.util.UserHelper
+import io.getstream.video.android.util.config.AppConfig
+import io.getstream.video.android.util.config.types.StreamEnvironment
 
 /**
  * @param autoLogIn Flag that controls auto log-in with a random user.
@@ -120,9 +127,26 @@ private fun LoginContent(
     loginViewModel: LoginViewModel = hiltViewModel(),
 ) {
     Box(modifier = Modifier.fillMaxSize()) {
+        val selectedEnv by AppConfig.currentEnvironment.collectAsStateWithLifecycle()
+        val availableEnvs by AppConfig.availableEnvironments.collectAsStateWithLifecycle()
+
+        selectedEnv?.let {
+            Box(modifier = Modifier.align(Alignment.TopEnd)) {
+                SelectableDialog(
+                    items = availableEnvs,
+                    selectedItem = it,
+                    onItemSelected = { env ->
+                        AppConfig.selectEnv(env)
+                        loginViewModel.reloadSdk()
+                    },
+                )
+            }
+        }
         Column(
             modifier = Modifier
-                .fillMaxSize()
+                .align(Alignment.Center)
+                .wrapContentHeight()
+                .fillMaxWidth()
                 .background(Colors.background)
                 .semantics { testTagsAsResourceId = true },
             verticalArrangement = Arrangement.Center,
@@ -137,102 +161,86 @@ private fun LoginContent(
             Spacer(modifier = Modifier.height(27.dp))
 
             Text(
+                modifier = Modifier.fillMaxWidth(),
+                textAlign = TextAlign.Center,
                 text = stringResource(id = R.string.app_name),
                 color = Color.White,
                 fontSize = 38.sp,
             )
+            Spacer(modifier = Modifier.height(30.dp))
 
-            when {
-                BuildConfig.FLAVOR != StreamFlavors.production -> {
-                    Spacer(modifier = Modifier.height(17.dp))
+            if (!isLoading) {
+                val availableLogins by AppConfig.availableLogins.collectAsStateWithLifecycle()
 
-                    Text(
-                        text = stringResource(id = R.string.sign_in_description),
-                        color = Colors.description,
-                        textAlign = TextAlign.Center,
-                        fontSize = 18.sp,
-                    )
+                availableLogins.forEach {
+                    when (it) {
+                        "google" -> {
+                            StreamButton(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .height(52.dp)
+                                    .padding(horizontal = 55.dp),
+                                enabled = !isLoading,
+                                text = stringResource(id = R.string.sign_in_google),
+                                onClick = {
+                                    loginViewModel.autoLogIn = false
+                                    loginViewModel.handleUiEvent(LoginEvent.GoogleSignIn())
+                                },
+                            )
+                        }
 
-                    Spacer(modifier = Modifier.height(50.dp))
+                        "email" -> {
+                            StreamButton(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .height(52.dp)
+                                    .padding(horizontal = 55.dp),
+                                enabled = !isLoading,
+                                text = stringResource(id = R.string.sign_in_email),
+                                onClick = {
+                                    loginViewModel.autoLogIn = true
+                                    showEmailLoginDialog.invoke()
+                                },
+                            )
+                        }
 
-                    StreamButton(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(52.dp)
-                            .padding(horizontal = 55.dp),
-                        enabled = !isLoading,
-                        text = stringResource(id = R.string.sign_in_google),
-                        onClick = {
-                            loginViewModel.autoLogIn = false
-                            loginViewModel.handleUiEvent(LoginEvent.GoogleSignIn())
-                        },
-                    )
-
+                        "guest" -> {
+                            StreamButton(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .height(52.dp)
+                                    .padding(horizontal = 55.dp),
+                                enabled = !isLoading,
+                                text = stringResource(R.string.random_user_sign_in),
+                                onClick = {
+                                    loginViewModel.autoLogIn = true
+                                    loginViewModel.signInIfValidUserExist()
+                                },
+                            )
+                        }
+                    }
                     Spacer(modifier = Modifier.height(15.dp))
-
-                    StreamButton(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(52.dp)
-                            .padding(horizontal = 55.dp),
-                        enabled = !isLoading,
-                        text = stringResource(id = R.string.sign_in_email),
-                        onClick = {
-                            loginViewModel.autoLogIn = true
-                            showEmailLoginDialog.invoke()
-                        },
-                    )
                 }
-                BuildConfig.FLAVOR == StreamFlavors.production && !autoLogIn -> {
-                    Spacer(modifier = Modifier.height(50.dp))
 
-                    StreamButton(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(52.dp)
-                            .padding(horizontal = 55.dp),
-                        enabled = !isLoading,
-                        text = stringResource(id = R.string.sign_in_google),
-                        onClick = { loginViewModel.handleUiEvent(LoginEvent.GoogleSignIn()) },
-                    )
-
-                    Spacer(modifier = Modifier.height(15.dp))
-
-                    StreamButton(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(52.dp)
-                            .padding(horizontal = 55.dp),
-                        enabled = !isLoading,
-                        text = stringResource(R.string.random_user_sign_in),
-                        onClick = {
-                            loginViewModel.autoLogIn = true
-                            loginViewModel.signInIfValidUserExist()
-                        },
-                    )
-                }
-            }
-
-            Spacer(modifier = Modifier.height(47.dp))
-
-            val context = LocalContext.current
-            LinkText(
-                linkTextData = listOf(
-                    LinkTextData(text = stringResource(id = R.string.sign_in_contact)),
-                    LinkTextData(
-                        text = stringResource(
-                            id = R.string.sign_in_contact_us,
+                val context = LocalContext.current
+                LinkText(
+                    linkTextData = listOf(
+                        LinkTextData(text = stringResource(id = R.string.sign_in_contact)),
+                        LinkTextData(
+                            text = stringResource(
+                                id = R.string.sign_in_contact_us,
+                            ),
+                            tag = "contact us",
+                            annotation = "https://getstream.io/video/docs/",
+                            onClick = {
+                                val intent = Intent(Intent.ACTION_VIEW)
+                                intent.data = Uri.parse(it.item)
+                                startActivity(context, intent, null)
+                            },
                         ),
-                        tag = "contact us",
-                        annotation = "https://getstream.io/video/docs/",
-                        onClick = {
-                            val intent = Intent(Intent.ACTION_VIEW)
-                            intent.data = Uri.parse(it.item)
-                            startActivity(context, intent, null)
-                        },
                     ),
-                ),
-            )
+                )
+            }
 
             if (BuildConfig.BUILD_TYPE == "benchmark") {
                 StreamButton(
@@ -309,6 +317,57 @@ private fun EmailLoginDialog(
             }
         },
     )
+}
+
+@OptIn(ExperimentalLayoutApi::class)
+@Composable
+fun SelectableDialog(
+    items: List<StreamEnvironment>,
+    selectedItem: StreamEnvironment?,
+    onItemSelected: (StreamEnvironment) -> Unit,
+) {
+    var showDialog by remember { mutableStateOf(false) }
+    var selectedText by remember { mutableStateOf(selectedItem?.displayName ?: "") }
+
+    Row(verticalAlignment = Alignment.CenterVertically) {
+        Text(
+            modifier = Modifier.padding(16.dp),
+            text = "Current environment: $selectedText",
+            color = Color.White,
+        )
+        if (items.size > 1) {
+            StreamButton(
+                text = "Change",
+                onClick = { showDialog = true },
+                modifier = Modifier.padding(16.dp),
+            )
+            if (showDialog) {
+                AlertDialog(
+                    onDismissRequest = { showDialog = false },
+                    title = {
+                        Text("Available environments")
+                    },
+                    text = {
+                        FlowRow {
+                            items.forEach { item ->
+                                StreamButton(
+                                    text = item.displayName,
+                                    onClick = {
+                                        onItemSelected(item)
+                                        selectedText = item.displayName
+                                        showDialog = false
+                                    },
+                                    modifier = Modifier.padding(8.dp),
+                                )
+                            }
+                        }
+                    },
+                    confirmButton = {},
+                    dismissButton = {},
+                )
+            }
+        }
+    }
 }
 
 @Composable
