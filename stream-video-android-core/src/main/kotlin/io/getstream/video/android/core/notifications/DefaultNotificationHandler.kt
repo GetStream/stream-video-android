@@ -118,7 +118,9 @@ public open class DefaultNotificationHandler(
         }
         return getNotification {
             priority = NotificationCompat.PRIORITY_HIGH
-            setContentTitle("Incoming call")
+            setContentTitle(
+                application.getString(R.string.stream_video_incoming_call_notification_title),
+            )
             setContentText(callDisplayName)
             setChannelId(channelId)
             setOngoing(false)
@@ -169,7 +171,7 @@ public open class DefaultNotificationHandler(
         maybeCreateChannel(ongoingCallsChannelId, application) {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                 description =
-                    application.getString(R.string.stream_video_incoming_call_notification_channel_description)
+                    application.getString(R.string.stream_video_ongoing_call_notification_channel_description)
             }
         }
 
