@@ -790,7 +790,7 @@ class MediaManagerImpl(
     private val filterVideoProcessor =
         FilterVideoProcessor({ call.videoFilter }, { camera.surfaceTextureHelper })
     private val screenShareFilterVideoProcessor =
-        FilterVideoProcessor({ call.videoFilter }, { screenShare.surfaceTextureHelper })
+        FilterVideoProcessor({ null }, { screenShare.surfaceTextureHelper })
 
     // source & tracks
     val videoSource =
