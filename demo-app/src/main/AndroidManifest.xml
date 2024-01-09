@@ -100,7 +100,11 @@
             android:exported="true"
             android:hardwareAccelerated="true"
             android:supportsPictureInPicture="true"
-            android:windowSoftInputMode="adjustResize" />
+            android:windowSoftInputMode="adjustResize">
+            <intent-filter android:priority="1">
+                <action android:name="io.getstream.video.android.action.OUTGOING_CALL" />
+            </intent-filter>
+        </activity>
 
         <!-- Prevent firebase from using advertisement ID -->
         <meta-data
