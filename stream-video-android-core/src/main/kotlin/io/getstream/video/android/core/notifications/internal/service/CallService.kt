@@ -22,11 +22,14 @@ import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import android.content.pm.ServiceInfo
+import android.media.MediaPlayer
 import android.os.Build
 import android.os.IBinder
+import androidx.annotation.RawRes
 import androidx.core.app.NotificationManagerCompat
 import androidx.core.app.ServiceCompat
 import io.getstream.log.taggedLogger
+import io.getstream.video.android.core.R
 import io.getstream.video.android.core.RingingState
 import io.getstream.video.android.core.StreamVideo
 import io.getstream.video.android.core.notifications.NotificationHandler.Companion.INCOMING_CALL_NOTIFICATION_ID
@@ -44,6 +47,7 @@ import kotlinx.coroutines.launch
 import org.openapitools.client.models.CallEndedEvent
 import org.openapitools.client.models.CallRejectedEvent
 import java.lang.IllegalArgumentException
+import java.lang.IllegalStateException
 
 /**
  * A foreground service that is running when there is an active call.
@@ -62,10 +66,14 @@ internal class CallService : Service() {
     private val toggleCameraBroadcastReceiver = ToggleCameraBroadcastReceiver(serviceScope)
     private var isToggleCameraBroadcastReceiverRegistered = false
 
+    // Direct call ringtones
+    private var mediaPlayer: MediaPlayer? = null
+
     internal companion object {
         const val TRIGGER_KEY =
             "io.getstream.video.android.core.notifications.internal.service.CallService.call_trigger"
-        const val TRIGGER_INCOMING_CALL = "incomming_call"
+        const val TRIGGER_INCOMING_CALL = "incoming_call"
+        const val TRIGGER_OUTGOING_CALL = "outgoing_call"
         const val TRIGGER_ONGOING_CALL = "ongoing_call"
 
         /**
@@ -73,7 +81,7 @@ internal class CallService : Service() {
          *
          * @param context the context.
          * @param callId the call id.
-         * @param trigger one of [TRIGGER_INCOMING_CALL] or [TRIGGER_ONGOING_CALL]
+         * @param trigger one of [TRIGGER_INCOMING_CALL], [TRIGGER_OUTGOING_CALL] or [TRIGGER_ONGOING_CALL]
          * @param callDisplayName the display name.
          */
         fun buildStartIntent(
@@ -90,13 +98,17 @@ internal class CallService : Service() {
                     serviceIntent.putExtra(INTENT_EXTRA_CALL_DISPLAY_NAME, callDisplayName)
                 }
 
+                TRIGGER_OUTGOING_CALL -> {
+                    serviceIntent.putExtra(TRIGGER_KEY, TRIGGER_OUTGOING_CALL)
+                }
+
                 TRIGGER_ONGOING_CALL -> {
                     serviceIntent.putExtra(TRIGGER_KEY, TRIGGER_ONGOING_CALL)
                 }
 
                 else -> {
                     throw IllegalArgumentException(
-                        "Unknown $trigger, must be one of $TRIGGER_INCOMING_CALL or $TRIGGER_ONGOING_CALL",
+                        "Unknown $trigger, must be one of: $TRIGGER_INCOMING_CALL, $TRIGGER_OUTGOING_CALL, $TRIGGER_ONGOING_CALL",
                     )
                 }
             }
@@ -140,18 +152,30 @@ internal class CallService : Service() {
             val notificationData: Pair<Notification?, Int> =
                 when (trigger) {
                     TRIGGER_ONGOING_CALL -> Pair(
-                        streamVideo.getOngoingCallNotification(
-                            callId!!,
+                        first = streamVideo.getOngoingCallNotification(
+                            callId = callId!!,
                         ),
-                        callId.hashCode(),
+                        second = callId.hashCode(),
                     )
 
                     TRIGGER_INCOMING_CALL -> Pair(
-                        streamVideo.getRingingCallNotification(
-                            callId!!,
-                            callDisplayName!!,
+                        first = streamVideo.getRingingCallNotification(
+                            ringingState = RingingState.Incoming(),
+                            callId = callId!!,
+                            callDisplayName = callDisplayName!!,
                         ),
-                        INCOMING_CALL_NOTIFICATION_ID,
+                        second = INCOMING_CALL_NOTIFICATION_ID,
+                    )
+
+                    TRIGGER_OUTGOING_CALL -> Pair(
+                        first = streamVideo.getRingingCallNotification(
+                            ringingState = RingingState.Outgoing(),
+                            callId = callId!!,
+                            callDisplayName = getString(
+                                R.string.stream_video_ongoing_call_notification_description,
+                            ),
+                        ),
+                        second = INCOMING_CALL_NOTIFICATION_ID, // Same for incoming and outgoing
                     )
 
                     else -> Pair(null, callId.hashCode())
@@ -163,6 +187,7 @@ internal class CallService : Service() {
                         when (trigger) {
                             TRIGGER_ONGOING_CALL -> ServiceInfo.FOREGROUND_SERVICE_TYPE_MICROPHONE
                             TRIGGER_INCOMING_CALL -> ServiceInfo.FOREGROUND_SERVICE_TYPE_SHORT_SERVICE
+                            TRIGGER_OUTGOING_CALL -> ServiceInfo.FOREGROUND_SERVICE_TYPE_SHORT_SERVICE
                             else -> ServiceInfo.FOREGROUND_SERVICE_TYPE_SHORT_SERVICE
                         }
                     ServiceCompat.startForeground(
@@ -191,7 +216,7 @@ internal class CallService : Service() {
             stopService()
         } else {
             if (trigger == TRIGGER_INCOMING_CALL) {
-                updateRingingCall(streamVideo!!, callId!!)
+                updateRingingCall(streamVideo!!, callId!!, RingingState.Incoming())
                 initializeCallAndSocket(streamVideo, callId!!)
             }
             observeCallState(callId!!, streamVideo!!)
@@ -201,10 +226,14 @@ internal class CallService : Service() {
     }
 
     @OptIn(DelicateCoroutinesApi::class)
-    private fun updateRingingCall(streamVideo: StreamVideo, callId: StreamCallId) {
+    private fun updateRingingCall(
+        streamVideo: StreamVideo,
+        callId: StreamCallId,
+        ringingState: RingingState,
+    ) {
         serviceScope.launch {
             val call = streamVideo.call(callId.type, callId.id)
-            streamVideo.state.addRingingCall(call)
+            streamVideo.state.addRingingCall(call, ringingState)
         }
     }
 
@@ -216,8 +245,29 @@ internal class CallService : Service() {
             call.state.ringingState.collect {
                 logger.i { "Ringing state: $it" }
                 when (it) {
+                    is RingingState.Incoming -> {
+                        if (!it.acceptedByMe) {
+                            playRingtone(R.raw.direct_call_incoming_sound)
+                        } else {
+                            stopRingtone() // Stops sound sooner than Active. More responsive.
+                        }
+                    }
+                    is RingingState.Outgoing -> {
+                        if (!it.acceptedByCallee) {
+                            playRingtone(R.raw.direct_call_outgoing_sound)
+                        } else {
+                            stopRingtone() // Stops sound sooner than Active. More responsive.
+                        }
+                    }
+                    is RingingState.Active -> { // Handle Active to make it more reliable
+                        stopRingtone()
+                    }
                     is RingingState.RejectedByAll -> {
+                        stopRingtone()
                         stopService()
+                    }
+                    is RingingState.TimeoutNoAnswer -> {
+                        stopRingtone()
                     }
                     else -> {
                         // Do nothing
@@ -243,6 +293,26 @@ internal class CallService : Service() {
                     }
                 }
             }
+        }
+    }
+
+    private fun playRingtone(@RawRes sound: Int) {
+        try {
+            mediaPlayer = MediaPlayer.create(this, sound)
+            mediaPlayer?.isLooping = true
+            mediaPlayer?.start()
+        } catch (e: IllegalStateException) {
+            logger.d { "Error playing ringtone." }
+        }
+    }
+
+    private fun stopRingtone() {
+        try {
+            mediaPlayer?.stop()
+            mediaPlayer?.release()
+            mediaPlayer = null
+        } catch (e: IllegalStateException) {
+            logger.d { "Error stopping ringtone." }
         }
     }
 
@@ -295,7 +365,10 @@ internal class CallService : Service() {
         // Optionally cancel any incoming call notification
         notificationManager.cancel(INCOMING_CALL_NOTIFICATION_ID)
 
-        // Stop
+        // Direct call ringtones
+        stopRingtone()
+
+        // Camera privacy
         unregisterToggleCameraBroadcastReceiver()
 
         // Stop any jobs
