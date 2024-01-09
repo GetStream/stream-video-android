@@ -789,13 +789,15 @@ class MediaManagerImpl(
 ) {
     private val filterVideoProcessor =
         FilterVideoProcessor({ call.videoFilter }, { camera.surfaceTextureHelper })
+    private val screenShareFilterVideoProcessor =
+        FilterVideoProcessor({ call.videoFilter }, { screenShare.surfaceTextureHelper })
 
     // source & tracks
     val videoSource =
         call.clientImpl.peerConnectionFactory.makeVideoSource(false, filterVideoProcessor)
 
     val screenShareVideoSource by lazy {
-        call.clientImpl.peerConnectionFactory.makeVideoSource(true, filterVideoProcessor)
+        call.clientImpl.peerConnectionFactory.makeVideoSource(true, screenShareFilterVideoProcessor)
     }
 
     // for track ids we emulate the browser behaviour of random UUIDs, doing something different would be confusing
