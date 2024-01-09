@@ -160,7 +160,7 @@ public class StreamVideoBuilder @JvmOverloads constructor(
             lifecycle = lifecycle,
             connectionModule = connectionModule,
             streamNotificationManager = streamNotificationManager,
-            runForeGroundService = runForegroundServiceForCalls,
+            runForegroundService = runForegroundServiceForCalls,
             testSfuAddress = localSfuAddress,
         )
 

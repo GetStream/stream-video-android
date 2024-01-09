@@ -121,7 +121,7 @@ class ClientState(client: StreamVideo) {
 
     // Internal logic
     private fun maybeStartForegroundService(call: Call) {
-        if (clientImpl.runForeGroundService) {
+        if (clientImpl.runForegroundService) {
             val context = clientImpl.context
             val serviceIntent = CallService.buildStartIntent(
                 context,
@@ -133,7 +133,7 @@ class ClientState(client: StreamVideo) {
     }
 
     private fun maybeStopForegroundService() {
-        if (clientImpl.runForeGroundService) {
+        if (clientImpl.runForegroundService) {
             val context = clientImpl.context
             val serviceIntent = CallService.buildStopIntent(context)
             context.stopService(serviceIntent)
