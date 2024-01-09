@@ -19,12 +19,12 @@ package io.getstream.video.android.compose.ui.components.call.ringing
 import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.call.activecall.CallContent
 import io.getstream.video.android.compose.ui.components.call.controls.actions.DefaultOnCallActionHandler
@@ -75,7 +75,7 @@ public fun RingingCallContent(
     onRejectedContent: @Composable () -> Unit = {},
     onNoAnswerContent: @Composable () -> Unit = {},
 ) {
-    val ringingState by call.state.ringingState.collectAsStateWithLifecycle()
+    val ringingState by call.state.ringingState.collectAsState()
 
     when (ringingState) {
         is RingingState.Incoming -> {
