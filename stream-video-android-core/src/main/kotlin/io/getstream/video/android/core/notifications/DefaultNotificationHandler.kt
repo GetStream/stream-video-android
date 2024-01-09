@@ -240,7 +240,7 @@ public open class DefaultNotificationHandler(
 
         // Build notification
         return NotificationCompat.Builder(application, ongoingCallsChannelId)
-            .setSmallIcon(android.R.drawable.ic_menu_call)
+            .setSmallIcon(android.R.drawable.presence_video_online)
             .also {
                 // If the intent is configured, clicking the notification will return to the call
                 if (ongoingCallIntent != null) {
