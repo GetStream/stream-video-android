@@ -202,7 +202,7 @@ internal class CallService : Service() {
                 true
             } else {
                 // Service not started no notification
-                logger.e { "Could not get notification for ongoing call" }
+                logger.e { "Could not get notification for ongoing call." }
                 false
             }
         } else {
@@ -390,7 +390,7 @@ internal class CallService : Service() {
                 )
                 isToggleCameraBroadcastReceiverRegistered = true
             } catch (e: Exception) {
-                logger.e(e) { "Unable to register ToggleCameraBroadcastReceiver." }
+                logger.d { "Unable to register ToggleCameraBroadcastReceiver." }
             }
         }
     }
@@ -401,7 +401,7 @@ internal class CallService : Service() {
                 unregisterReceiver(toggleCameraBroadcastReceiver)
                 isToggleCameraBroadcastReceiverRegistered = false
             } catch (e: Exception) {
-                logger.e(e) { "Unable to unregister ToggleCameraBroadcastReceiver." }
+                logger.d { "Unable to unregister ToggleCameraBroadcastReceiver." }
             }
         }
     }
