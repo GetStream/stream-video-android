@@ -100,7 +100,7 @@ class ClientState(client: StreamVideo) {
 
     fun setActiveCall(call: Call) {
         removeRingingCall()
-        maybeStartForegroundService(call)
+        maybeStartForegroundService(call, CallService.TRIGGER_ONGOING_CALL)
         this._activeCall.value = call
     }
 
@@ -110,9 +110,13 @@ class ClientState(client: StreamVideo) {
         removeRingingCall()
     }
 
-    fun addRingingCall(call: Call) {
-        // TODO: behaviour if you are already in a call
+    fun addRingingCall(call: Call, ringingState: RingingState) {
         _ringingCall.value = call
+        if (ringingState is RingingState.Outgoing) {
+            maybeStartForegroundService(call, CallService.TRIGGER_OUTGOING_CALL)
+        }
+
+        // TODO: behaviour if you are already in a call
     }
 
     fun removeRingingCall() {
@@ -120,13 +124,13 @@ class ClientState(client: StreamVideo) {
     }
 
     // Internal logic
-    private fun maybeStartForegroundService(call: Call) {
+    private fun maybeStartForegroundService(call: Call, trigger: String) {
         if (clientImpl.runForegroundService) {
             val context = clientImpl.context
             val serviceIntent = CallService.buildStartIntent(
                 context,
                 StreamCallId.fromCallCid(call.cid),
-                CallService.TRIGGER_ONGOING_CALL,
+                trigger,
             )
             ContextCompat.startForegroundService(context, serviceIntent)
         }
