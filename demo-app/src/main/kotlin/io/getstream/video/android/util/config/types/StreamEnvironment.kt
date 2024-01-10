@@ -16,10 +16,11 @@
 
 package io.getstream.video.android.util.config.types
 
+import androidx.annotation.Keep
 import com.squareup.moshi.Json
 
+@Keep
 data class StreamEnvironment(
-
     @Json(name = "env") var env: String,
     @Json(name = "displayName") var displayName: String,
     @Json(name = "flavors") var flavors: List<Flavor> = arrayListOf(),

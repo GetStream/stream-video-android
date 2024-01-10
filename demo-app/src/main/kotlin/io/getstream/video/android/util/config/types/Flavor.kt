@@ -16,11 +16,11 @@
 
 package io.getstream.video.android.util.config.types
 
+import androidx.annotation.Keep
 import com.squareup.moshi.Json
 
+@Keep
 data class Flavor(
-
     @Json(name = "flavor") var flavor: String? = null,
     @Json(name = "default") var default: Boolean? = null,
-
 )
