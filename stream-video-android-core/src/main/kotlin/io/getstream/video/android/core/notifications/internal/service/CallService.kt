@@ -32,6 +32,7 @@ import io.getstream.log.taggedLogger
 import io.getstream.video.android.core.R
 import io.getstream.video.android.core.RingingState
 import io.getstream.video.android.core.StreamVideo
+import io.getstream.video.android.core.StreamVideoImpl
 import io.getstream.video.android.core.notifications.NotificationHandler.Companion.INCOMING_CALL_NOTIFICATION_ID
 import io.getstream.video.android.core.notifications.NotificationHandler.Companion.INTENT_EXTRA_CALL_CID
 import io.getstream.video.android.core.notifications.NotificationHandler.Companion.INTENT_EXTRA_CALL_DISPLAY_NAME
@@ -147,7 +148,7 @@ internal class CallService : Service() {
         callId = intent?.streamCallId(INTENT_EXTRA_CALL_CID)
         callDisplayName = intent?.streamCallDisplayName(INTENT_EXTRA_CALL_DISPLAY_NAME)
         val trigger = intent?.getStringExtra(TRIGGER_KEY)
-        val streamVideo = StreamVideo.instanceOrNull()
+        val streamVideo = StreamVideo.instanceOrNull() as? StreamVideoImpl
         val started = if (callId != null && streamVideo != null && trigger != null) {
             val notificationData: Pair<Notification?, Int> =
                 when (trigger) {
@@ -238,7 +239,7 @@ internal class CallService : Service() {
     }
 
     @OptIn(DelicateCoroutinesApi::class)
-    private fun observeCallState(callId: StreamCallId, streamVideo: StreamVideo) {
+    private fun observeCallState(callId: StreamCallId, streamVideo: StreamVideoImpl) {
         // Ringing state
         serviceScope.launch {
             val call = streamVideo.call(callId.type, callId.id)
@@ -247,14 +248,14 @@ internal class CallService : Service() {
                 when (it) {
                     is RingingState.Incoming -> {
                         if (!it.acceptedByMe) {
-                            playCallSound(R.raw.incoming_call_sound)
+                            playCallSound(streamVideo.sounds.incomingCallSound)
                         } else {
                             stopCallSound() // Stops sound sooner than Active. More responsive.
                         }
                     }
                     is RingingState.Outgoing -> {
                         if (!it.acceptedByCallee) {
-                            playCallSound(R.raw.outgoing_call_sound)
+                            playCallSound(streamVideo.sounds.outgoingCallSound)
                         } else {
                             stopCallSound() // Stops sound sooner than Active. More responsive.
                         }
