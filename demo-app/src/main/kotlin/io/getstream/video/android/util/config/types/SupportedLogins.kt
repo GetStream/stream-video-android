@@ -16,11 +16,11 @@
 
 package io.getstream.video.android.util.config.types
 
+import androidx.annotation.Keep
 import com.squareup.moshi.Json
 
+@Keep
 data class SupportedLogins(
-
     @Json(name = "flavor") var flavor: List<String> = arrayListOf(),
     @Json(name = "logins") var logins: List<String> = arrayListOf(),
-
 )

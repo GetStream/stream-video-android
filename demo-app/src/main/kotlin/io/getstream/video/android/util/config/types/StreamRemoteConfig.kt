@@ -16,8 +16,10 @@
 
 package io.getstream.video.android.util.config.types
 
+import androidx.annotation.Keep
 import com.squareup.moshi.Json
 
+@Keep
 data class StreamRemoteConfig(
     @Json(name = "supportedLogins") var supportedLogins: List<SupportedLogins> = arrayListOf(),
     @Json(name = "environments") var environments: List<StreamEnvironment> = arrayListOf(),
