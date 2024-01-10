@@ -46,6 +46,7 @@ import io.getstream.video.android.core.notifications.internal.StreamNotification
 import io.getstream.video.android.core.socket.ErrorResponse
 import io.getstream.video.android.core.socket.PersistentSocket
 import io.getstream.video.android.core.socket.SocketState
+import io.getstream.video.android.core.sounds.Sounds
 import io.getstream.video.android.core.utils.DebugInfo
 import io.getstream.video.android.core.utils.LatencyResult
 import io.getstream.video.android.core.utils.getLatencyMeasurementsOKHttp
@@ -135,6 +136,7 @@ internal class StreamVideoImpl internal constructor(
     internal val streamNotificationManager: StreamNotificationManager,
     internal val runForegroundService: Boolean = true,
     internal val testSfuAddress: String? = null,
+    internal val sounds: Sounds,
 ) : StreamVideo,
     NotificationHandler by streamNotificationManager {
 
