@@ -66,7 +66,7 @@ internal class CallService : Service() {
     private val toggleCameraBroadcastReceiver = ToggleCameraBroadcastReceiver(serviceScope)
     private var isToggleCameraBroadcastReceiverRegistered = false
 
-    // Direct call ringtones
+    // Call sounds
     private var mediaPlayer: MediaPlayer? = null
 
     internal companion object {
@@ -247,27 +247,27 @@ internal class CallService : Service() {
                 when (it) {
                     is RingingState.Incoming -> {
                         if (!it.acceptedByMe) {
-                            playRingtone(R.raw.direct_call_incoming_sound)
+                            playCallSound(R.raw.incoming_call_sound)
                         } else {
-                            stopRingtone() // Stops sound sooner than Active. More responsive.
+                            stopCallSound() // Stops sound sooner than Active. More responsive.
                         }
                     }
                     is RingingState.Outgoing -> {
                         if (!it.acceptedByCallee) {
-                            playRingtone(R.raw.direct_call_outgoing_sound)
+                            playCallSound(R.raw.outgoing_call_sound)
                         } else {
-                            stopRingtone() // Stops sound sooner than Active. More responsive.
+                            stopCallSound() // Stops sound sooner than Active. More responsive.
                         }
                     }
                     is RingingState.Active -> { // Handle Active to make it more reliable
-                        stopRingtone()
+                        stopCallSound()
                     }
                     is RingingState.RejectedByAll -> {
-                        stopRingtone()
+                        stopCallSound()
                         stopService()
                     }
                     is RingingState.TimeoutNoAnswer -> {
-                        stopRingtone()
+                        stopCallSound()
                     }
                     else -> {
                         // Do nothing
@@ -296,23 +296,23 @@ internal class CallService : Service() {
         }
     }
 
-    private fun playRingtone(@RawRes sound: Int) {
+    private fun playCallSound(@RawRes sound: Int) {
         try {
             mediaPlayer = MediaPlayer.create(this, sound)
             mediaPlayer?.isLooping = true
             mediaPlayer?.start()
         } catch (e: IllegalStateException) {
-            logger.d { "Error playing ringtone." }
+            logger.d { "Error playing call sound." }
         }
     }
 
-    private fun stopRingtone() {
+    private fun stopCallSound() {
         try {
             mediaPlayer?.stop()
             mediaPlayer?.release()
             mediaPlayer = null
         } catch (e: IllegalStateException) {
-            logger.d { "Error stopping ringtone." }
+            logger.d { "Error stopping call sound." }
         }
     }
 
@@ -365,8 +365,8 @@ internal class CallService : Service() {
         // Optionally cancel any incoming call notification
         notificationManager.cancel(INCOMING_CALL_NOTIFICATION_ID)
 
-        // Direct call ringtones
-        stopRingtone()
+        // Call sounds
+        stopCallSound()
 
         // Camera privacy
         unregisterToggleCameraBroadcastReceiver()
