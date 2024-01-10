@@ -37,6 +37,7 @@ import io.getstream.video.android.MainActivity
 import io.getstream.video.android.core.StreamVideo
 import io.getstream.video.android.core.notifications.NotificationHandler
 import io.getstream.video.android.model.StreamCallId
+import io.getstream.video.android.model.streamCallId
 import kotlinx.coroutines.launch
 
 class CallActivity : ComponentActivity() {
@@ -47,7 +48,7 @@ class CallActivity : ComponentActivity() {
 
         // step 1 - get the StreamVideo instance and create a call
         val streamVideo = StreamVideo.instance()
-        val cid = intent.getParcelableExtra<StreamCallId>(EXTRA_CID)
+        val cid = intent.streamCallId(EXTRA_CID)
             ?: throw IllegalArgumentException("call type and id is invalid!")
 
         // optional - check for already active call that can be utilized

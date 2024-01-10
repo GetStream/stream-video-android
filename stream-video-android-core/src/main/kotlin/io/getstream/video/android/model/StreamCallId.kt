@@ -17,9 +17,9 @@
 package io.getstream.video.android.model
 
 import android.content.Intent
-import android.os.Build
 import android.os.Parcelable
 import androidx.compose.runtime.Stable
+import androidx.core.content.IntentCompat
 import io.getstream.video.android.model.mapper.toTypeAndId
 import kotlinx.parcelize.Parcelize
 import kotlinx.serialization.Serializable
@@ -76,12 +76,7 @@ public data class StreamCallId constructor(
  *
  * @return A parceled [StreamCallId].
  */
-public fun Intent.streamCallId(key: String): StreamCallId? = when {
-    Build.VERSION.SDK_INT >= 33 -> getParcelableExtra(key, StreamCallId::class.java)
-    else ->
-        @Suppress("DEPRECATION")
-        getParcelableExtra(key)
-            as? StreamCallId
-}
+public fun Intent.streamCallId(key: String): StreamCallId? =
+    IntentCompat.getParcelableExtra(this, key, StreamCallId::class.java)
 
 public fun Intent.streamCallDisplayName(key: String): String = this.getStringExtra(key) ?: "."
