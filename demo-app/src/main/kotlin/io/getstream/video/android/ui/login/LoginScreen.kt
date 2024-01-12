@@ -147,14 +147,13 @@ private fun LoginContent(
                 .align(Alignment.Center)
                 .wrapContentHeight()
                 .fillMaxWidth()
-                .background(Colors.background)
                 .semantics { testTagsAsResourceId = true },
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
             Image(
-                modifier = Modifier.size(102.dp),
-                painter = painterResource(id = R.drawable.ic_stream_video_meeting_logo),
+                modifier = Modifier.size(width = 254.dp, height = 179.dp),
+                painter = painterResource(id = R.drawable.stream_calls_logo),
                 contentDescription = null,
             )
 

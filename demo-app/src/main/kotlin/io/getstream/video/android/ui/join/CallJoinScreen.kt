@@ -51,6 +51,8 @@ import androidx.compose.material.Text
 import androidx.compose.material.TextButton
 import androidx.compose.material.TextField
 import androidx.compose.material.TextFieldDefaults
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ExitToApp
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -390,9 +392,9 @@ private fun JoinCallForm(
                 .fillMaxHeight()
                 .border(
                     BorderStroke(1.dp, Color(0xFF4C525C)),
-                    RoundedCornerShape(6.dp),
+                    RoundedCornerShape(32.dp),
                 ),
-            shape = RoundedCornerShape(6.dp),
+            shape = RoundedCornerShape(32.dp),
             value = callId,
             singleLine = true,
             onValueChange = { callId = it },
@@ -440,6 +442,7 @@ private fun JoinCallForm(
                 .padding(start = 16.dp)
                 .fillMaxHeight()
                 .testTag("join_call"),
+            icon = VideoTheme.icons.joinCall,
             onClick = {
                 callJoinViewModel.handleUiEvent(CallJoinEvent.JoinCall(callId = callId))
             },

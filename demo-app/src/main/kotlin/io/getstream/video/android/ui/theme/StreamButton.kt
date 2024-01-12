@@ -19,25 +19,29 @@ package io.getstream.video.android.ui.theme
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Button
 import androidx.compose.material.ButtonDefaults
+import androidx.compose.material.Icon
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.ui.theme.Colors.description
+import okhttp3.internal.wait
 
 @Composable
 fun StreamButton(
     modifier: Modifier = Modifier,
+    icon: ImageVector? = null,
     text: String,
     enabled: Boolean = true,
     onClick: () -> Unit,
 ) {
     Button(
-        modifier = modifier.clip(RoundedCornerShape(8.dp)),
+        modifier = modifier.clip(RoundedCornerShape(32.dp)),
         enabled = enabled,
         onClick = onClick,
         colors = ButtonDefaults.buttonColors(
@@ -47,6 +51,9 @@ fun StreamButton(
             disabledContentColor = description,
         ),
     ) {
+        icon?.let {
+            Icon(imageVector = icon, contentDescription = "", tint = Color.White)
+        }
         Text(
             text = text,
             color = Color.White,
