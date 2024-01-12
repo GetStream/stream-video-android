@@ -299,6 +299,8 @@ internal class CallService : Service() {
 
     private fun playCallSound(@RawRes sound: Int) {
         try {
+            mediaPlayer?.stop()
+            mediaPlayer?.release()
             mediaPlayer = MediaPlayer.create(this, sound)
             mediaPlayer?.isLooping = true
             mediaPlayer?.start()
@@ -312,6 +314,7 @@ internal class CallService : Service() {
             mediaPlayer?.stop()
             mediaPlayer?.release()
             mediaPlayer = null
+            logger.i { "Ringing state: Stopped call sound" }
         } catch (e: IllegalStateException) {
             logger.d { "Error stopping call sound." }
         }
