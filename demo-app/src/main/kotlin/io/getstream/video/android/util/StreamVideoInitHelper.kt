@@ -37,13 +37,21 @@ import io.getstream.video.android.datastore.delegate.StreamUserDataStore
 import io.getstream.video.android.model.ApiKey
 import io.getstream.video.android.model.User
 import io.getstream.video.android.util.config.AppConfig
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.firstOrNull
+
+public enum class InitializedState {
+    NOT_STARTED, RUNNING, FINISHED, FAILED
+}
 
 @SuppressLint("StaticFieldLeak")
 object StreamVideoInitHelper {
 
     private var isInitialising = false
     private lateinit var context: Context
+    private val _initState = MutableStateFlow(InitializedState.NOT_STARTED)
+    public val initializedState: StateFlow<InitializedState> = _initState
 
     fun init(appContext: Context) {
         context = appContext.applicationContext
@@ -59,16 +67,19 @@ object StreamVideoInitHelper {
         useRandomUserAsFallback: Boolean = true,
     ) = AppConfig.load(context) {
         if (StreamVideo.isInstalled) {
+            _initState.value = InitializedState.FINISHED
             Log.w("StreamVideoInitHelper", "[initStreamVideo] StreamVideo is already initialised.")
             return@load
         }
 
         if (isInitialising) {
+            _initState.value = InitializedState.RUNNING
             Log.d("StreamVideoInitHelper", "[initStreamVideo] StreamVideo is already initialising")
             return@load
         }
 
         isInitialising = true
+        _initState.value = InitializedState.RUNNING
 
         try {
             // Load the signed-in user (can be null)
@@ -117,7 +128,9 @@ object StreamVideoInitHelper {
                 )
             }
             Log.i("StreamVideoInitHelper", "Init successful.")
+            _initState.value = InitializedState.FINISHED
         } catch (e: Exception) {
+            _initState.value = InitializedState.FAILED
             Log.e("StreamVideoInitHelper", "Init failed.", e)
         }
 
