@@ -41,7 +41,9 @@ import io.getstream.video.android.datastore.delegate.StreamUserDataStore
 import io.getstream.video.android.model.StreamCallId
 import io.getstream.video.android.ui.call.CallActivity
 import io.getstream.video.android.ui.theme.Colors
+import io.getstream.video.android.util.InitializedState
 import io.getstream.video.android.util.StreamVideoInitHelper
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -95,7 +97,11 @@ class DeeplinkingActivity : ComponentActivity() {
         // means that we haven't yet asked for notification permissions - we should first ask for
         // these permissions and then proceed with the call (to prevent the video screen from
         // asking video&audio permissions at the same time)
-        if (ContextCompat.checkSelfPermission(this, android.Manifest.permission.POST_NOTIFICATIONS) == PackageManager.PERMISSION_GRANTED) {
+        if (ContextCompat.checkSelfPermission(
+                this,
+                android.Manifest.permission.POST_NOTIFICATIONS,
+            ) == PackageManager.PERMISSION_GRANTED
+        ) {
             // join call directly
             joinCall(callId)
         } else {
@@ -138,17 +144,29 @@ class DeeplinkingActivity : ComponentActivity() {
                 dataStore = dataStore,
                 useRandomUserAsFallback = true,
             )
-            if (StreamVideo.isInstalled) {
-                val callId = StreamCallId(type = "default", id = cid)
-                val intent = CallActivity.createIntent(
-                    context = this@DeeplinkingActivity,
-                    callId = callId,
-                    disableMicOverride = intent.getBooleanExtra(EXTRA_DISABLE_MIC_OVERRIDE, false),
-                ).apply {
-                    flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+
+            logger.d { "SDK loaded." }
+            StreamVideoInitHelper.initializedState.collectLatest {
+                if (it == InitializedState.FINISHED || it == InitializedState.FAILED) {
+                    if (StreamVideo.isInstalled) {
+                        val callId = StreamCallId(type = "default", id = cid)
+                        val intent = CallActivity.createIntent(
+                            context = this@DeeplinkingActivity,
+                            callId = callId,
+                            disableMicOverride = intent.getBooleanExtra(
+                                EXTRA_DISABLE_MIC_OVERRIDE,
+                                false,
+                            ),
+                        ).apply {
+                            flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+                        }
+                        startActivity(intent)
+                        finish()
+                    } else {
+                        // We can not go into the call.
+                        finish()
+                    }
                 }
-                startActivity(intent)
-                finish()
             }
         }
     }
