@@ -300,16 +300,18 @@ internal class CallService : Service() {
         }
     }
 
-    private fun playCallSound(@RawRes sound: Int) {
-        try {
-            mediaPlayer?.let {
-                if (!it.isPlaying) {
-                    setMediaPlayerDataSource(it, sound)
-                    it.start()
+    private fun playCallSound(@RawRes sound: Int?) {
+        sound?.let {
+            try {
+                mediaPlayer?.let {
+                    if (!it.isPlaying) {
+                        setMediaPlayerDataSource(it, sound)
+                        it.start()
+                    }
                 }
+            } catch (e: IllegalStateException) {
+                logger.d { "Error playing call sound." }
             }
-        } catch (e: IllegalStateException) {
-            logger.d { "Error playing call sound." }
         }
     }
 

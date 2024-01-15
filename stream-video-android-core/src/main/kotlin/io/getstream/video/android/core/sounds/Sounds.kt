@@ -26,6 +26,6 @@ import io.getstream.video.android.core.R
  * @param outgoingCallSound Resource used as a ringing tone for outgoing calls.
  */
 data class Sounds(
-    @RawRes val incomingCallSound: Int = R.raw.call_incoming_sound,
-    @RawRes val outgoingCallSound: Int = R.raw.call_outgoing_sound,
+    @RawRes val incomingCallSound: Int? = R.raw.call_incoming_sound,
+    @RawRes val outgoingCallSound: Int? = R.raw.call_outgoing_sound,
 )
