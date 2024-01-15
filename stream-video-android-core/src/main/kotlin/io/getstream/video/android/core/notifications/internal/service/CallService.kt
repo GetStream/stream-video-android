@@ -219,6 +219,9 @@ internal class CallService : Service() {
             if (trigger == TRIGGER_INCOMING_CALL) {
                 updateRingingCall(streamVideo!!, callId!!, RingingState.Incoming())
                 initializeCallAndSocket(streamVideo, callId!!)
+                if (mediaPlayer == null) mediaPlayer = MediaPlayer()
+            } else if (trigger == TRIGGER_OUTGOING_CALL) {
+                if (mediaPlayer == null) mediaPlayer = MediaPlayer()
             }
             observeCallState(callId!!, streamVideo!!)
             registerToggleCameraBroadcastReceiver()
@@ -299,24 +302,33 @@ internal class CallService : Service() {
 
     private fun playCallSound(@RawRes sound: Int) {
         try {
-            mediaPlayer?.stop()
-            mediaPlayer?.release()
-            mediaPlayer = MediaPlayer.create(this, sound)
-            mediaPlayer?.isLooping = true
-            mediaPlayer?.start()
+            mediaPlayer?.let {
+                if (!it.isPlaying) {
+                    setMediaPlayerDataSource(it, sound)
+                    it.start()
+                }
+            }
         } catch (e: IllegalStateException) {
             logger.d { "Error playing call sound." }
         }
     }
 
+    private fun setMediaPlayerDataSource(mediaPlayer: MediaPlayer, @RawRes resId: Int) {
+        mediaPlayer.reset()
+        val afd = resources.openRawResourceFd(resId)
+        if (afd != null) {
+            mediaPlayer.setDataSource(afd.fileDescriptor, afd.startOffset, afd.length)
+            afd.close()
+        }
+        mediaPlayer.isLooping = true
+        mediaPlayer.prepare()
+    }
+
     private fun stopCallSound() {
         try {
-            mediaPlayer?.stop()
-            mediaPlayer?.release()
-            mediaPlayer = null
-            logger.i { "Ringing state: Stopped call sound" }
+            if (mediaPlayer?.isPlaying == true) mediaPlayer?.stop()
         } catch (e: IllegalStateException) {
-            logger.d { "Error stopping call sound." }
+            logger.d { "Error stopping call sound. MediaPlayer might have already been released." }
         }
     }
 
@@ -369,11 +381,11 @@ internal class CallService : Service() {
         // Optionally cancel any incoming call notification
         notificationManager.cancel(INCOMING_CALL_NOTIFICATION_ID)
 
-        // Call sounds
-        stopCallSound()
-
         // Camera privacy
         unregisterToggleCameraBroadcastReceiver()
+
+        // Call sounds
+        clearMediaPlayer()
 
         // Stop any jobs
         serviceScope.cancel()
@@ -408,5 +420,10 @@ internal class CallService : Service() {
                 logger.d { "Unable to unregister ToggleCameraBroadcastReceiver." }
             }
         }
+    }
+
+    private fun clearMediaPlayer() {
+        mediaPlayer?.release()
+        mediaPlayer = null
     }
 }
