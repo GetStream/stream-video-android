@@ -4338,15 +4338,15 @@ public final class io/getstream/video/android/core/socket/SocketState$NotConnect
 
 public final class io/getstream/video/android/core/sounds/Sounds {
 	public fun <init> ()V
-	public fun <init> (II)V
-	public synthetic fun <init> (IIILkotlin/jvm/internal/DefaultConstructorMarker;)V
-	public final fun component1 ()I
-	public final fun component2 ()I
-	public final fun copy (II)Lio/getstream/video/android/core/sounds/Sounds;
-	public static synthetic fun copy$default (Lio/getstream/video/android/core/sounds/Sounds;IIILjava/lang/Object;)Lio/getstream/video/android/core/sounds/Sounds;
+	public fun <init> (Ljava/lang/Integer;Ljava/lang/Integer;)V
+	public synthetic fun <init> (Ljava/lang/Integer;Ljava/lang/Integer;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Ljava/lang/Integer;
+	public final fun component2 ()Ljava/lang/Integer;
+	public final fun copy (Ljava/lang/Integer;Ljava/lang/Integer;)Lio/getstream/video/android/core/sounds/Sounds;
+	public static synthetic fun copy$default (Lio/getstream/video/android/core/sounds/Sounds;Ljava/lang/Integer;Ljava/lang/Integer;ILjava/lang/Object;)Lio/getstream/video/android/core/sounds/Sounds;
 	public fun equals (Ljava/lang/Object;)Z
-	public final fun getIncomingCallSound ()I
-	public final fun getOutgoingCallSound ()I
+	public final fun getIncomingCallSound ()Ljava/lang/Integer;
+	public final fun getOutgoingCallSound ()Ljava/lang/Integer;
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
 }
