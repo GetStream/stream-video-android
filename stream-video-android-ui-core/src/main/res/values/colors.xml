@@ -1,5 +1,50 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="stream_video_dark_blue">#19232D00</color>
-    <color name="stream_video_base_sheet_scondary">#101213</color>
+    <!-- Brand -->
+    <color name="stream_video_brand_blue">#005FFF</color>
+    <color name="stream_video_brand_blue_lt">#4C8FFF</color>
+    <color name="stream_video_brand_blue_dk">#123D82</color>
+    <color name="stream_video_brand_navy">#1B2C43</color>
+    <color name="stream_video_brand_navy_transparent">#1E262E29</color>
+    <color name="stream_video_brand_cyan">#69E5F6</color>
+    <color name="stream_video_brand_green">#00E2A1</color>
+    <color name="stream_video_brand_yellow">#FFD646</color>
+    <color name="stream_video_brand_red">#DC433B</color>
+    <color name="stream_video_brand_red_lt">#E36962</color>
+    <color name="stream_video_brand_red_dk">#6A3233</color>
+    <color name="stream_video_brand_maroon">#31292F</color>
+    <color name="stream_video_brand_violet">#B38AF8</color>
+
+    <!-- Base -->
+    <color name="stream_video_base_primary">#E3E4E5</color>
+    <color name="stream_video_base_secondary">#979CA0</color>
+    <color name="stream_video_base_tetriary">#4C535B</color>
+    <color name="stream_video_base_quaternary">#656B72</color>
+    <color name="stream_video_base_quinary">#7E8389</color>
+    <color name="stream_video_base_sheet_primary">#000000</color>
+    <color name="stream_video_base_sheet_secondary">#0C0D0E</color>
+    <color name="stream_video_base_sheet_tetriary">#19232D</color>
+
+    <!-- Buttons -->
+    <color name="stream_video_button_primary_default">@color/stream_video_base_sheet_tetriary</color>
+    <color name="stream_video_button_primary_pressed">@color/stream_video_base_sheet_secondary</color>
+    <color name="stream_video_button_primary_disabled">@color/stream_video_brand_navy_transparent</color>
+    <color name="stream_video_button_brand_default">@color/stream_video_brand_blue</color>
+    <color name="stream_video_button_brand_pressed">@color/stream_video_brand_blue_dk</color>
+    <color name="stream_video_button_brand_disabled">@color/stream_video_brand_navy</color>
+    <color name="stream_video_button_alert_default">@color/stream_video_brand_red</color>
+    <color name="stream_video_button_alert_pressed">@color/stream_video_brand_red_dk</color>
+    <color name="stream_video_button_alert_disabled">@color/stream_video_brand_maroon</color>
+
+    <!-- Icons -->
+    <color name="stream_video_icon_default">@color/stream_video_base_primary</color>
+    <color name="stream_video_icon_pressed">@color/stream_video_base_quaternary</color>
+    <color name="stream_video_icon_active">@color/stream_video_brand_blue</color>
+    <color name="stream_video_icon_alert">@color/stream_video_brand_red</color>
+    <color name="stream_video_icon_disabled">@color/stream_video_base_quinary</color>
+
+    <!-- Alert -->
+    <color name="stream_video_alert_success">@color/stream_video_brand_green</color>
+    <color name="stream_video_alert_caution">@color/stream_video_brand_yellow</color>
+    <color name="stream_video_alert_warning">@color/stream_video_brand_red</color>
 </resources>
