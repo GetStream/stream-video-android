@@ -216,14 +216,15 @@ internal class CallService : Service() {
             logger.w { "Foreground service did not start!" }
             stopService()
         } else {
+            initializeCallAndSocket(streamVideo!!, callId!!)
+
             if (trigger == TRIGGER_INCOMING_CALL) {
-                updateRingingCall(streamVideo!!, callId!!, RingingState.Incoming())
-                initializeCallAndSocket(streamVideo, callId!!)
+                updateRingingCall(streamVideo, callId!!, RingingState.Incoming())
                 if (mediaPlayer == null) mediaPlayer = MediaPlayer()
             } else if (trigger == TRIGGER_OUTGOING_CALL) {
                 if (mediaPlayer == null) mediaPlayer = MediaPlayer()
             }
-            observeCallState(callId!!, streamVideo!!)
+            observeCallState(callId!!, streamVideo)
             registerToggleCameraBroadcastReceiver()
         }
         return START_NOT_STICKY
