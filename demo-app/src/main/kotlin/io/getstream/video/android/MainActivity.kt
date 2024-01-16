@@ -17,6 +17,7 @@
 package io.getstream.video.android
 
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.lifecycle.lifecycleScope
@@ -47,8 +48,10 @@ class MainActivity : ComponentActivity() {
         @Suppress("KotlinConstantConditions")
         if (BuildConfig.FLAVOR == StreamFlavors.production) {
             InstallReferrer(this).extractInstallReferrer { callId: String ->
+                Log.d("MainActivity", "Call ID: $callId")
                 firebaseAnalytics.logEvent(FirebaseEvents.INSTALL_FROM_QR_CODE, null)
                 startActivity(DeeplinkingActivity.createIntent(this, callId, true))
+                finish()
             }
         }
 

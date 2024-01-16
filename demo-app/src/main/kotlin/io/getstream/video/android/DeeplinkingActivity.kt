@@ -23,6 +23,7 @@ import android.net.Uri
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
@@ -41,7 +42,9 @@ import io.getstream.video.android.datastore.delegate.StreamUserDataStore
 import io.getstream.video.android.model.StreamCallId
 import io.getstream.video.android.ui.call.CallActivity
 import io.getstream.video.android.ui.theme.Colors
+import io.getstream.video.android.util.InitializedState
 import io.getstream.video.android.util.StreamVideoInitHelper
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -75,12 +78,6 @@ class DeeplinkingActivity : ComponentActivity() {
         val callIdFromExtra = intent?.getStringExtra(CALL_ID)
         val data: Uri? = intent?.data
 
-        if (data == null) {
-            logger.e { "Can't open the call from deeplink because intent data is null" }
-            finish()
-            return
-        }
-
         val callId = callIdFromExtra ?: extractCallId(data)
         if (callId == null) {
             logger.e { "Can't open the call from deeplink because call ID is null" }
@@ -91,30 +88,61 @@ class DeeplinkingActivity : ComponentActivity() {
         logger.d { "Action: ${intent?.action}" }
         logger.d { "Data: ${intent?.data}" }
 
-        // The demo app can start a meeting automatically on first application launch - this
-        // means that we haven't yet asked for notification permissions - we should first ask for
-        // these permissions and then proceed with the call (to prevent the video screen from
-        // asking video&audio permissions at the same time)
-        if (ContextCompat.checkSelfPermission(this, android.Manifest.permission.POST_NOTIFICATIONS) == PackageManager.PERMISSION_GRANTED) {
-            // join call directly
-            joinCall(callId)
-        } else {
-            // first ask for push notification permission
-            val manager = NotificationPermissionManager.createNotificationPermissionsManager(
-                application = app,
-                requestPermissionOnAppLaunch = { true },
-                onPermissionStatus = {
-                    // we don't care about the result for demo purposes
-                    if (it != NotificationPermissionStatus.REQUESTED) {
+        val requestMultiplePermissionsLauncher =
+            registerForActivityResult(
+                ActivityResultContracts.RequestMultiplePermissions(),
+            ) { permissions ->
+                // Handle the permissions result here
+                if (permissions.all { it.value }) {
+                    logger.d { "All permissions granted, joining call." }
+                    // All permissions were granted
+                    // The demo app can start a meeting automatically on first application launch - this
+                    // means that we haven't yet asked for notification permissions - we should first ask for
+                    // these permissions and then proceed with the call (to prevent the video screen from
+                    // asking video&audio permissions at the same time)
+                    if (ContextCompat.checkSelfPermission(
+                            this,
+                            android.Manifest.permission.POST_NOTIFICATIONS,
+                        ) == PackageManager.PERMISSION_GRANTED
+                    ) {
+                        // ensure that audio & video permissions are granted
                         joinCall(callId)
+                    } else {
+                        // first ask for push notification permission
+                        val manager = NotificationPermissionManager.createNotificationPermissionsManager(
+                            application = app,
+                            requestPermissionOnAppLaunch = { true },
+                            onPermissionStatus = {
+                                // we don't care about the result for demo purposes
+                                if (it != NotificationPermissionStatus.REQUESTED) {
+                                    joinCall(callId)
+                                }
+                            },
+                        )
+                        manager.start()
                     }
-                },
-            )
-            manager.start()
-        }
+                } else {
+                    logger.d { "Not all permissions were granted!" }
+                    // At least one permission was denied
+                    finish()
+                }
+            }
+
+        val permissions = arrayOf(
+            android.Manifest.permission.CAMERA,
+            android.Manifest.permission.RECORD_AUDIO,
+            // Add any other permissions you need here
+        )
+
+        requestMultiplePermissionsLauncher.launch(permissions)
     }
 
-    private fun extractCallId(data: Uri): String? {
+    private fun extractCallId(data: Uri?): String? {
+        if (data == null) {
+            // No data, return null
+            return null
+        }
+
         var callId: String? = null
 
         // Get call id from path
@@ -138,17 +166,29 @@ class DeeplinkingActivity : ComponentActivity() {
                 dataStore = dataStore,
                 useRandomUserAsFallback = true,
             )
-            if (StreamVideo.isInstalled) {
-                val callId = StreamCallId(type = "default", id = cid)
-                val intent = CallActivity.createIntent(
-                    context = this@DeeplinkingActivity,
-                    callId = callId,
-                    disableMicOverride = intent.getBooleanExtra(EXTRA_DISABLE_MIC_OVERRIDE, false),
-                ).apply {
-                    flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+
+            logger.d { "SDK loaded." }
+            StreamVideoInitHelper.initializedState.collectLatest {
+                if (it == InitializedState.FINISHED || it == InitializedState.FAILED) {
+                    if (StreamVideo.isInstalled) {
+                        val callId = StreamCallId(type = "default", id = cid)
+                        val intent = CallActivity.createIntent(
+                            context = this@DeeplinkingActivity,
+                            callId = callId,
+                            disableMicOverride = intent.getBooleanExtra(
+                                EXTRA_DISABLE_MIC_OVERRIDE,
+                                false,
+                            ),
+                        ).apply {
+                            flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+                        }
+                        startActivity(intent)
+                        finish()
+                    } else {
+                        // We can not go into the call.
+                        finish()
+                    }
                 }
-                startActivity(intent)
-                finish()
             }
         }
     }
