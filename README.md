@@ -137,6 +137,7 @@ Video roadmap and changelog is available [here](https://github.com/GetStream/pro
 - [X] Upgrade to more recent versions of webrtc (Jaewoong/Kanat)
 - [X] Review foreground service vs backend for audio rooms etc. (Aleks)
 - [X] Enable SFU switching
+- [X] Support R8 full mode
 - [ ] Logging is too verbose (rtc is very noisy), clean it up to focus on the essential for info and higher (Daniel)
 
 ### 0.5.0 milestone
