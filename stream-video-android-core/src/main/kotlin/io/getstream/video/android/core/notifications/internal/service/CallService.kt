@@ -230,7 +230,6 @@ internal class CallService : Service() {
         return START_NOT_STICKY
     }
 
-    @OptIn(DelicateCoroutinesApi::class)
     private fun updateRingingCall(
         streamVideo: StreamVideo,
         callId: StreamCallId,
@@ -242,7 +241,6 @@ internal class CallService : Service() {
         }
     }
 
-    @OptIn(DelicateCoroutinesApi::class)
     private fun observeCallState(callId: StreamCallId, streamVideo: StreamVideoImpl) {
         // Ringing state
         serviceScope.launch {
