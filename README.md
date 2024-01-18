@@ -44,6 +44,8 @@ If you're interested in customizing the UI components for the Video SDK, check o
 You can find sample projects below that demonstrates use cases of Stream Video SDK for Android:
 
 - [Dogfooding](https://github.com/GetStream/stream-video-android/tree/develop/dogfooding): Dogfooding demonstrates Stream Video SDK for Android with modern Android tech stacks, such as Compose, Hilt, and Coroutines.
+- [WhatsApp Clone Compose](https://github.com/getstream/whatsapp-clone-compose): WhatsApp clone project demonstrates modern Android development built with Jetpack Compose and Stream Chat/Video SDK for Compose.
+- [Twitch Clone Compose](https://github.com/skydoves/twitch-clone-compose): Twitch clone project demonstrates modern Android development built with Jetpack Compose and Stream Chat/Video SDK for Compose.
 - [Meeting Room Compose](https://github.com/GetStream/meeting-room-compose): A real-time meeting room app built with Jetpack Compose to demonstrate video communications.
 
 ## 👩‍💻 Free for Makers 👨‍💻
@@ -135,6 +137,7 @@ Video roadmap and changelog is available [here](https://github.com/GetStream/pro
 - [X] Upgrade to more recent versions of webrtc (Jaewoong/Kanat)
 - [X] Review foreground service vs backend for audio rooms etc. (Aleks)
 - [X] Enable SFU switching
+- [X] Support R8 full mode
 - [ ] Logging is too verbose (rtc is very noisy), clean it up to focus on the essential for info and higher (Daniel)
 
 ### 0.5.0 milestone

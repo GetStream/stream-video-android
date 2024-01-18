@@ -27,6 +27,8 @@ import io.getstream.video.android.datastore.delegate.StreamUserDataStore
 import io.getstream.video.android.model.User
 import io.getstream.video.android.model.mapper.isValidCallId
 import io.getstream.video.android.model.mapper.toTypeAndId
+import io.getstream.video.android.util.NetworkMonitor
+import io.getstream.video.android.util.StreamVideoInitHelper
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -44,10 +46,12 @@ import javax.inject.Inject
 class CallJoinViewModel @Inject constructor(
     private val dataStore: StreamUserDataStore,
     private val googleSignInClient: GoogleSignInClient,
+    networkMonitor: NetworkMonitor,
 ) : ViewModel() {
     val user: Flow<User?> = dataStore.user
     val isLoggedOut = dataStore.user.map { it == null }
     var autoLogInAfterLogOut = true
+    val isNetworkAvailable = networkMonitor.isNetworkAvailable
 
     private val event: MutableSharedFlow<CallJoinEvent> = MutableSharedFlow()
     internal val uiState: SharedFlow<CallJoinUiState> = event
@@ -56,12 +60,10 @@ class CallJoinViewModel @Inject constructor(
                 is CallJoinEvent.GoBackToLogin -> {
                     flowOf(CallJoinUiState.GoBackToLogin)
                 }
-
                 is CallJoinEvent.JoinCall -> {
                     val call = joinCall(event.callId)
                     flowOf(CallJoinUiState.JoinCompleted(callId = call.cid))
                 }
-
                 is CallJoinEvent.JoinCompleted -> flowOf(
                     CallJoinUiState.JoinCompleted(event.callId),
                 )
@@ -72,11 +74,12 @@ class CallJoinViewModel @Inject constructor(
 
     init {
         viewModelScope.launch {
-            // We need to check whether the StreamVideo instance is initialised and go back to Login
-            // if not. In the current implementation we only initialise after Login and if the
-            // Android process is restored then the Login is skipped Stream Video is not initialised.
-            if (!StreamVideo.isInstalled) {
-                event.emit(CallJoinEvent.GoBackToLogin)
+            isNetworkAvailable.collect { isNetworkAvailable ->
+                if (isNetworkAvailable && !StreamVideo.isInstalled) {
+                    StreamVideoInitHelper.loadSdk(
+                        dataStore = dataStore,
+                    )
+                }
             }
         }
     }

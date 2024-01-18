@@ -1,18 +1,18 @@
 [versions]
-androidGradlePlugin = "8.2.0"
+androidGradlePlugin = "8.2.1"
 cameraCamera2 = "1.3.0"
 spotless = "6.21.0"
 nexusPlugin = "1.3.0"
-kotlin = "1.9.21"
-ksp = "1.9.21-1.0.15"
-kotlinSerialization = "1.6.0"
+kotlin = "1.9.22"
+ksp = "1.9.22-1.0.16"
+kotlinSerialization = "1.6.2"
 kotlinSerializationConverter = "1.0.0"
 kotlinxCoroutines = "1.7.3"
 
 kotlinDokka = "1.9.10"
 jvmTarget = "11"
 
-androidxMaterial = "1.10.0"
+androidxMaterial = "1.11.0"
 androidxAppCompat = "1.6.1"
 androidxCore = "1.12.0"
 androidxAnnotation = "1.7.0"
@@ -23,10 +23,10 @@ androidxDataStore = "1.0.0"
 googleService = "4.3.14"
 
 androidxComposeBom = "2023.10.01"
-androidxComposeCompiler = "1.5.6"
+androidxComposeCompiler = "1.5.8"
 androidxComposeTracing = "1.0.0-alpha03"
 androidxHiltNavigation = "1.1.0"
-androidxComposeNavigation = "2.7.5"
+androidxComposeNavigation = "2.7.6"
 composeStableMarker = "1.0.2"
 
 coil = "2.5.0"
@@ -54,7 +54,7 @@ androidxTest = "1.5.2"
 androidxTestCore = "1.5.0"
 androidxProfileinstaller = "1.3.1"
 androidxMacroBenchmark = "1.2.2"
-androidxUiAutomator = "2.3.0-alpha05"
+androidxUiAutomator = "2.3.0-beta01"
 androidxContraintLayout = "2.1.4"
 androidxEspresso = "3.5.1"
 androidxJunit = "1.1.5"
@@ -71,7 +71,7 @@ installReferrer = "2.2"
 playAuth = "20.7.0"
 playAppUpdate = "2.1.0"
 
-hilt = "2.49"
+hilt = "2.50"
 desugar = "2.0.4"
 leakCanary = "2.12"
 binaryCompatabilityValidator = "0.13.2"
@@ -186,6 +186,8 @@ hilt-compiler = { group = "com.google.dagger", name = "hilt-android-compiler", v
 firebase-bom = { group = "com.google.firebase", name = "firebase-bom", version.ref = "firebaseBom" }
 firebase-crashlytics = { group = "com.google.firebase", name = "firebase-crashlytics-ktx" }
 firebase-analytics = { group = "com.google.firebase", name = "firebase-analytics-ktx" }
+firebase-config = { group = "com.google.firebase", name = "firebase-config" }
+firebase-config-ktx = { group = "com.google.firebase", name = "firebase-config-ktx" }
 
 play-install-referrer = { group = "com.android.installreferrer", name = "installreferrer", version.ref = "installReferrer" }
 play-auth = { group = "com.google.android.gms", name = "play-services-auth", version.ref = "playAuth" }

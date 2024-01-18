@@ -1,6 +1,7 @@
 # RingingCallContent
 
-The `RingingCallContent` lets you easily build UI when you're calling or ringing other people in an app. It's used to show more information about the participants you're calling, as well as give you the option to cancel the call before anyone accepts.
+<!-- is "ringing" a good term? should we replace it with "direct" or something else? -->
+The `RingingCallContent` component lets you easily build UI when you're calling or ringing other people in an app. It's used to show more information about the participants you're calling, as well as give you the option to cancel the call before anyone accepts.
 
 Based on the call's ringing state and a call type, the `RingingCallContent` provides a list of participants, with their avatars and names, or a background with the avatar of the person you're calling, if it's a 1:1 conversation.
 
@@ -68,7 +69,7 @@ RingingCallContent(
 )
 ```
 
-You can also compose [CallContent](03-call-content.mdx) inside the `onAcceptedContent` block and shows a call screen like the example below:
+You can also compose [CallContent](03-call-content.mdx) inside the `onAcceptedContent` block and show a call screen like the example below:
 
 ```kotlin
 RingingCallContent(
@@ -134,7 +135,7 @@ Using this you can build custom behavior that shows the user more options or inf
 * `IncomingCallContent`: Represents the Incoming Call state and UI, when the user receives a call from other people.
 * `OutgoingCallContent`: Represents the Outgoing Call state and UI, when the user is calling other people.
 
-You can implement an incoming and outgoing call screen, respectively depending on the call states under your controls:
+You can implement an incoming and outgoing call screen, respectively, depending on the call state:
 
 ```kotlin
 IncomingCallContent(

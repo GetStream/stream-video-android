@@ -27,7 +27,6 @@ import io.getstream.chat.android.state.plugin.config.StatePluginConfig
 import io.getstream.chat.android.state.plugin.factory.StreamStatePluginFactory
 import io.getstream.log.Priority
 import io.getstream.video.android.BuildConfig
-import io.getstream.video.android.STREAM_SDK_ENVIRONMENT
 import io.getstream.video.android.core.StreamVideo
 import io.getstream.video.android.core.StreamVideoBuilder
 import io.getstream.video.android.core.logging.LoggingLevel
@@ -37,13 +36,22 @@ import io.getstream.video.android.data.services.stream.StreamService
 import io.getstream.video.android.datastore.delegate.StreamUserDataStore
 import io.getstream.video.android.model.ApiKey
 import io.getstream.video.android.model.User
+import io.getstream.video.android.util.config.AppConfig
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.firstOrNull
+
+public enum class InitializedState {
+    NOT_STARTED, RUNNING, FINISHED, FAILED
+}
 
 @SuppressLint("StaticFieldLeak")
 object StreamVideoInitHelper {
 
     private var isInitialising = false
     private lateinit var context: Context
+    private val _initState = MutableStateFlow(InitializedState.NOT_STARTED)
+    public val initializedState: StateFlow<InitializedState> = _initState
 
     fun init(appContext: Context) {
         context = appContext.applicationContext
@@ -54,64 +62,78 @@ object StreamVideoInitHelper {
      * Set [useRandomUserAsFallback] to true if you want to use a guest fallback if the user is not
      * logged in.
      */
-    suspend fun loadSdk(dataStore: StreamUserDataStore, useRandomUserAsFallback: Boolean = true) {
+    suspend fun loadSdk(
+        dataStore: StreamUserDataStore,
+        useRandomUserAsFallback: Boolean = true,
+    ) = AppConfig.load(context) {
         if (StreamVideo.isInstalled) {
+            _initState.value = InitializedState.FINISHED
             Log.w("StreamVideoInitHelper", "[initStreamVideo] StreamVideo is already initialised.")
-            return
+            return@load
         }
 
         if (isInitialising) {
+            _initState.value = InitializedState.RUNNING
             Log.d("StreamVideoInitHelper", "[initStreamVideo] StreamVideo is already initialising")
-            return
+            return@load
         }
 
         isInitialising = true
+        _initState.value = InitializedState.RUNNING
 
-        // Load the signed-in user (can be null)
-        var loggedInUser = dataStore.data.firstOrNull()?.user
-        var authData: GetAuthDataResponse? = null
+        try {
+            // Load the signed-in user (can be null)
+            var loggedInUser = dataStore.data.firstOrNull()?.user
+            var authData: GetAuthDataResponse? = null
 
-        // Create and login a random new user if user is null and we allow a random user login
-        if (loggedInUser == null && useRandomUserAsFallback) {
-            val userId = UserHelper.generateRandomString()
+            // Create and login a random new user if user is null and we allow a random user login
+            if (loggedInUser == null && useRandomUserAsFallback) {
+                val userId = UserHelper.generateRandomString()
 
-            authData = StreamService.instance.getAuthData(
-                environment = STREAM_SDK_ENVIRONMENT,
-                userId = userId,
-            )
-
-            loggedInUser = User(id = authData.userId, role = "admin")
-
-            // Store the data (note that this datastore belongs to the client - it's not
-            // used by the SDK directly in any way)
-            dataStore.updateUser(loggedInUser)
-        }
-
-        // If we have a logged in user (from the data store or randomly created above)
-        // then we can initialise the SDK
-        if (loggedInUser != null) {
-            if (authData == null) {
                 authData = StreamService.instance.getAuthData(
-                    environment = STREAM_SDK_ENVIRONMENT,
-                    userId = loggedInUser.id,
+                    environment = AppConfig.currentEnvironment.value!!.env,
+                    userId = userId,
                 )
+
+                loggedInUser = User(id = authData.userId, role = "admin")
+
+                // Store the data (note that this datastore belongs to the client - it's not
+                // used by the SDK directly in any way)
+                dataStore.updateUser(loggedInUser)
             }
 
-            initializeStreamChat(
-                context = context,
-                apiKey = authData.apiKey,
-                user = loggedInUser,
-                token = authData.token,
-            )
+            // If we have a logged in user (from the data store or randomly created above)
+            // then we can initialise the SDK
+            if (loggedInUser != null) {
+                if (authData == null) {
+                    authData = StreamService.instance.getAuthData(
+                        environment = AppConfig.currentEnvironment.value!!.env,
+                        userId = loggedInUser.id,
+                    )
+                }
 
-            initializeStreamVideo(
-                context = context,
-                apiKey = authData.apiKey,
-                user = loggedInUser,
-                token = authData.token,
-                loggingLevel = LoggingLevel(priority = Priority.VERBOSE),
-            )
+                initializeStreamChat(
+                    context = context,
+                    apiKey = authData.apiKey,
+                    user = loggedInUser,
+                    token = authData.token,
+                )
+
+                initializeStreamVideo(
+                    context = context,
+                    apiKey = authData.apiKey,
+                    user = loggedInUser,
+                    token = authData.token,
+                    loggingLevel = LoggingLevel(priority = Priority.VERBOSE),
+                )
+            }
+            Log.i("StreamVideoInitHelper", "Init successful.")
+            _initState.value = InitializedState.FINISHED
+        } catch (e: Exception) {
+            _initState.value = InitializedState.FAILED
+            Log.e("StreamVideoInitHelper", "Init failed.", e)
         }
+
         isInitialising = false
     }
 
@@ -171,7 +193,7 @@ object StreamVideoInitHelper {
             tokenProvider = {
                 val email = user.custom["email"]
                 val authData = StreamService.instance.getAuthData(
-                    environment = STREAM_SDK_ENVIRONMENT,
+                    environment = AppConfig.currentEnvironment.value!!.env,
                     userId = email,
                 )
                 authData.token

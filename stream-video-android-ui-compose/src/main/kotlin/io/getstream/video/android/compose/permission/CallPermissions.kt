@@ -16,6 +16,7 @@
 
 package io.getstream.video.android.compose.permission
 
+import android.os.Build
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -38,10 +39,18 @@ import io.getstream.video.android.core.Call
 @Composable
 public fun rememberCallPermissionsState(
     call: Call,
-    permissions: List<String> = mutableListOf(
-        android.Manifest.permission.CAMERA,
-        android.Manifest.permission.RECORD_AUDIO,
-    ),
+    permissions: List<String> = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+        mutableListOf(
+            android.Manifest.permission.CAMERA,
+            android.Manifest.permission.RECORD_AUDIO,
+            android.Manifest.permission.BLUETOOTH_CONNECT,
+        )
+    } else {
+        mutableListOf(
+            android.Manifest.permission.CAMERA,
+            android.Manifest.permission.RECORD_AUDIO,
+        )
+    },
     onPermissionsResult: ((Map<String, Boolean>) -> Unit)? = null,
 ): VideoPermissionsState {
     if (LocalInspectionMode.current) return fakeVideoPermissionsState

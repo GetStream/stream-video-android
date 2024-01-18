@@ -59,7 +59,8 @@ internal class CallService : Service() {
     private val serviceScope: CoroutineScope = CoroutineScope(Dispatchers.IO)
 
     // Camera handling receiver
-    private val toggleCameraBroadcastReceiver = ToggleCameraBroadcastReceiver()
+    private val toggleCameraBroadcastReceiver = ToggleCameraBroadcastReceiver(serviceScope)
+    private var isToggleCameraBroadcastReceiverRegistered = false
 
     internal companion object {
         const val TRIGGER_KEY =
@@ -304,25 +305,31 @@ internal class CallService : Service() {
         stopSelf()
     }
     private fun registerToggleCameraBroadcastReceiver() {
-        try {
-            registerReceiver(
-                toggleCameraBroadcastReceiver,
-                IntentFilter().apply {
-                    addAction(Intent.ACTION_SCREEN_ON)
-                    addAction(Intent.ACTION_SCREEN_OFF)
-                    addAction(Intent.ACTION_USER_PRESENT)
-                },
-            )
-        } catch (e: Exception) {
-            logger.e(e) { "Unable to register ToggleCameraBroadcastReceiver." }
+        if (!isToggleCameraBroadcastReceiverRegistered) {
+            try {
+                registerReceiver(
+                    toggleCameraBroadcastReceiver,
+                    IntentFilter().apply {
+                        addAction(Intent.ACTION_SCREEN_ON)
+                        addAction(Intent.ACTION_SCREEN_OFF)
+                        addAction(Intent.ACTION_USER_PRESENT)
+                    },
+                )
+                isToggleCameraBroadcastReceiverRegistered = true
+            } catch (e: Exception) {
+                logger.e(e) { "Unable to register ToggleCameraBroadcastReceiver." }
+            }
         }
     }
 
     private fun unregisterToggleCameraBroadcastReceiver() {
-        try {
-            unregisterReceiver(toggleCameraBroadcastReceiver)
-        } catch (e: Exception) {
-            logger.e(e) { "Unable to unregister ToggleCameraBroadcastReceiver." }
+        if (isToggleCameraBroadcastReceiverRegistered) {
+            try {
+                unregisterReceiver(toggleCameraBroadcastReceiver)
+                isToggleCameraBroadcastReceiverRegistered = false
+            } catch (e: Exception) {
+                logger.e(e) { "Unable to unregister ToggleCameraBroadcastReceiver." }
+            }
         }
     }
 }

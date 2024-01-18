@@ -23,3 +23,8 @@ internal object StreamFlavors {
     const val development = "development"
     const val production = "production"
 }
+
+public object StreamEnvironments {
+    const val demo = "demo"
+    const val pronto = "pronto"
+}

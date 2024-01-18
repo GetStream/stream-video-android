@@ -1,13 +1,13 @@
 # ParticipantsSpotlight
 
-The `ParticipantsSpotlight` is a Composable component that allows you to highlight one participant and this one participant takes much of the screen, while the rest are rendered
-either as a horizontal or vertical list depending on orientation.
+`ParticipantsSpotlight` is a Composable component that allows you to highlight one participant so that it takes up most of the screen, while the rest are rendered
+either as a horizontal or vertical list, depending on orientation.
 
-Let's see how to use the `ParticipantsSpotlight`.
+Let's see how to use the `ParticipantsSpotlight` component.
 
 ## Usage
 
-To use the `ParticipantsSpotlight` component in your app you can use it direcyly as a component or you can configure the [ParticipantsLayout](02-participants-grid.mdx) to display the spotlight.
+To use the `ParticipantsSpotlight` component in your app you can use it directly as a component or you can configure the [ParticipantsLayout](02-participants-grid.mdx) to display the spotlight.
 
 ### Use it directly
 ```kotlin
@@ -42,11 +42,11 @@ ParticipantsLayout(
 The [ParticipantsLayout](02-participants-grid.mdx) internally displays the `ParticipantSpotlight` in two cases. 
 1. You have set the `layoutType` to `LayoutType.SPOTLIGHT` in which case a participant is always spotlighted. The participant shown in the spotlight is chosen based on the following order:
     1. is pinned
-    2. is dominantSpeaker    
+    2. is dominant speaker
     3. is first in the participants list
-2. You have set the `LayoutType` to `LayoutType.DYNAMIC` in which case if there is a "pinned" participant, the spotlight view will be chosen in favor of grid.
+2. You have set the `LayoutType` to `LayoutType.DYNAMIC` in which case if there is a pinned participant, the spotlight view will be chosen in favor of grid.
 
-*Note*: `ParticipantLayout` will always prioritize screensharing regardless of the `LayoutType` if there is a [screensharing session](../04-call/05-screen-share-content.mdx).s
+*Note*: `ParticipantLayout` will always prioritize screen sharing regardless of the `LayoutType` if there is a [screen sharing session](../04-call/05-screen-share-content.mdx) active.
 
 
 Using this component, you'll likely see something similar to the following UI:
@@ -65,6 +65,6 @@ This is a very simple component so it doesn't have replaceable slots, but it sti
 - `modifier`: Modifier for styling.
 - `isZoomable`: Decide if this spotlight video renderer is zoomable or not.
 - `style`: Defined properties for styling a single video call track.
-- `videoRenderer`: A single video renderer renders each individual participant.
+- `videoRenderer`: A single video renderer that renders each individual participant. If you want to use your own video renderer, you can implement your own composable with `videoRenderer`.
 
 If you're looking for guides on how to override and customize this UI, we have various [UI Cookbook](../../05-ui-cookbook/01-overview.mdx) recipes for you and we cover a portion of customization within the [Video Android SDK Tutorial](https://getstream.io/video/sdk/android/tutorial/video-calling/).

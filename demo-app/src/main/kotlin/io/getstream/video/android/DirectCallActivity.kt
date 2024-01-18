@@ -24,13 +24,11 @@ import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.lifecycleScope
 import dagger.hilt.android.AndroidEntryPoint
 import io.getstream.result.Result
 import io.getstream.video.android.compose.theme.VideoTheme
-import io.getstream.video.android.compose.ui.components.call.activecall.CallContent
 import io.getstream.video.android.compose.ui.components.call.ringing.RingingCallContent
 import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.StreamVideo
@@ -45,6 +43,7 @@ import io.getstream.video.android.core.call.state.ToggleSpeakerphone
 import io.getstream.video.android.datastore.delegate.StreamUserDataStore
 import io.getstream.video.android.model.mapper.isValidCallId
 import io.getstream.video.android.model.mapper.toTypeAndId
+import io.getstream.video.android.ui.call.CallScreen
 import io.getstream.video.android.util.StreamVideoInitHelper
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -150,10 +149,16 @@ class DirectCallActivity : ComponentActivity() {
                             reject(call)
                         },
                         onAcceptedContent = {
-                            CallContent(
-                                modifier = Modifier.fillMaxSize(),
+                            CallScreen(
                                 call = call,
-                                onCallAction = onCallAction,
+                                showDebugOptions = BuildConfig.DEBUG,
+                                onCallDisconnected = {
+                                    finish()
+                                },
+                                onUserLeaveCall = {
+                                    call.leave()
+                                    finish()
+                                },
                             )
                         },
                         onRejectedContent = {

@@ -48,8 +48,10 @@ If you want to build and run the [dogfooding app](https://github.com/GetStream/s
 ```
 # Environment Variable for dogfooding app
 DOGFOODING_RES_CONFIG_DEEPLINKING_HOST=pronto.getstream.io
-PRODUCTION_RES_CONFIG_DEEPLINKING_HOST=getstream.io
+DOGFOODING_RES_CONFIG_DEEPLINKING_HOST_LEGACY=stream-calls-dogfood.vercel.app
 DOGFOODING_RES_CONFIG_DEEPLINKING_PATH_PREFIX=/
+PRODUCTION_RES_CONFIG_DEEPLINKING_HOST=getstream.io
+PRODUCTION_RES_CONFIG_DEEPLINKING_HOST_LEGACY=
 PRODUCTION_RES_CONFIG_DEEPLINKING_PATH_PREFIX=/video/demos/
 ```
 

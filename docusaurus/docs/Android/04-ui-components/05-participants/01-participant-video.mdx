@@ -4,9 +4,9 @@ The `ParticipantVideo` component is used to render a participant based on [Parti
 
 The component also renders the user label, which includes the user's name and call status, such as mute state. Additionally, if the user is focused, the component renders a border to indicate that the participant is the primary speaker.
 
-What you can do with the `ParticipantVideo` are:
+What can you do with `ParticipantVideo`:
 
-- Render a audio/video track of the given `ParticipantState`.
+- Render a audio/video track from the given `ParticipantState`.
 - Displays participant's information, such as name, audio level, microphone status, network connectivity quality, reactions, and more.
 - Displays a border on the participant who is currently speaking.
 
@@ -34,13 +34,13 @@ fun CustomCallScreen(call: Call) {
 }
 ```
 
-You can fetch the state of all participants using the `call.state` and you can enrich it by exploring the `dominantSpeaker`. Using the `participants`, you can render any UI group of elements based on your use case - in this snippet a `Column` of items.
+You can fetch the state of all participants by using `call.state` and you can enrich it by exploring the `dominantSpeaker`. Using the `participants`, you can render any UI group of elements based on your use case - in this snippet a `Column` of items.
 
 To render the participant, you need the following state:
 
 * `call`: Used to determine the rest of the information we represent in the UI, based on the call state.
 * `participant`: The state of the call participant you want to render. It contains audio & video tracks, user information, screensharing sessions, reactions, and everything that should be needed to render each participant.
-* `style`: `VideoRendererStyle` defines that allows you to customize participant videos, such as displaying a focused border, a participant label, reactions, and more. There are two pre-defined styles, which are `RegularVideoRendererStyle` and `ScreenSharingVideoRendererStyle`.
+* `style`: `VideoRendererStyle` allows you to customize participant videos, such as displaying a focused border, a participant label, reactions, and more. There are two pre-defined styles, which are `RegularVideoRendererStyle` and `ScreenSharingVideoRendererStyle`.
 
 Each of the `ParticipantVideo` items should look something like this:
 
@@ -68,10 +68,10 @@ public fun ParticipantVideo(
 
 - `modifier`: Used to apply styling to the component, such as extra borders, background, elevation, size or shape and more.
 - `style`: Allows you to customize pre-built components, such as the label, the connection indicator, reactions, and everything that is built top on the video renderer.
-- `labelContent`: Content is shown that displays participant's name and device states. For more details, check out [Participant Label](../../05-ui-cookbook/03-participant-label.mdx) to customize the participant's label.
-- `connectionIndicatorContent`: Content is shown that indicates the connection quality. For more details, check out [Network Quality Indicator](../../05-ui-cookbook/10-network-quality-indicator.mdx) to customize the network quality indicator.
-- `videoFallbackContent`: Content is shown the video track is failed to load or not available. For more details, check out [Video Fallback](../../05-ui-cookbook/07-video-fallback.mdx) to customize the network quality indicator.
-- `reactionContent`: Content is shown for the reaction.
+- `labelContent`: Content that displays participant's name and device states. For more details, check out [Participant Label](../../05-ui-cookbook/03-participant-label.mdx) to customize the participant's label.
+- `connectionIndicatorContent`: Content that indicates the connection quality. For more details, check out [Network Quality Indicator](../../05-ui-cookbook/10-network-quality-indicator.mdx) to customize the network quality indicator.
+- `videoFallbackContent`: Content that is shown when the video track has failed to load or not available. For more details, check out [Video Fallback](../../05-ui-cookbook/07-video-fallback.mdx) to customize the network quality indicator.
+- `reactionContent`: Content that is shown for reactions.
 
 Use this to further customize the look and feel of participant video items in your UI. By using those custom styles above, you can build many different types of video renderers by your taste:
 
@@ -79,6 +79,6 @@ Use this to further customize the look and feel of participant video items in yo
 | ------------------------------------------------------------ | ------------------------------------------------------------ | ------------------------------------------------------------ | ------------------------------------------------------------ |
 | ![Volume Indicator ](../../assets/cookbook/volume-indicator.png) | ![Network Quality Indicator](../../assets/cookbook/network-quality-indicator-customize.png) | ![Custom Participant Label](../../assets/cookbook/participant-label-custom.png) | ![Video Renderer](../../assets/cookbook/video-renderer-circular.png)
 
-The `ParticipantVideo` is a crucial component in our SDK, used by many of our larger-scale and higher-level components, such as the `ParticipantsGrid`, which you'll explore next. `ParticipantsGrid` is just a group version that shows more than one participant and adjusts its UI accordingly.
+The `ParticipantVideo` is a crucial component in our SDK, used by many of our larger-scale and higher-level components, such as the `ParticipantsLayout`, which you'll explore next. `ParticipantsLayout` is just a group version that shows more than one participant and adjusts its UI accordingly.
 
-For more customization of `ParticipantVideo`, check out [Video Renderer UI Cookbook](../../05-ui-cookbook/04-video-renderer.mdx)
+For more customization of `ParticipantVideo`, check out [Video Renderer UI Cookbook](../../05-ui-cookbook/04-video-renderer.mdx).

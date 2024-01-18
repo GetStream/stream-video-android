@@ -15,8 +15,10 @@
      limitations under the License.
 -->
 <resources>
-    <string name="app_name">Stream Video Calls</string>
-    <string name="filter_call_link">call_link</string>
+    <string name="deeplinking_host">getstream.io</string> <!-- for CI build -->
+    <string name="deeplinking_host_legacy">getstream.io</string> <!-- for CI build -->
+    <string name="deeplinking_path_prefix">/video/demos</string> <!-- for CI build -->
+    <string name="filter_call_link">Join video call</string>
     <string name="unauthorized_error">Your login token is expired. Please re-login.</string>
     <string name="sign_in_description">Please sign in with your Google \nStream account.</string>
     <string name="sign_in_google">Google Sign In</string>
@@ -50,6 +52,7 @@
     <string name="in_app_update_successful">App has been updated</string>
     <string name="in_app_update_canceled">Please consider installing the update.\nIt contains important features or bug fixes.</string>
     <string name="in_app_update_failed">App update failed. Try again later</string>
+    <string name="you_are_offline">You are offline. Check your internet connection.</string>
     <plurals name="chat_typing">
         <item quantity="one">%s is typing</item>
         <item quantity="other">%s and %d more are typing</item>
