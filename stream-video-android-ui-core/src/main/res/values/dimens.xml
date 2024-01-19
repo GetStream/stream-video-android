@@ -15,108 +15,49 @@
      limitations under the License.
 -->
 <resources>
+    <!-- Generic -->
+    <dimen name="stream_video_generic_max">100dp</dimen>
+    <dimen name="stream_video_generic_xxl">44dp</dimen>
+    <dimen name="stream_video_generic_xl">32dp</dimen>
+    <dimen name="stream_video_generic_l">24dp</dimen>
+    <dimen name="stream_video_generic_m">16dp</dimen>
+    <dimen name="stream_video_generic_s">8dp</dimen>
+    <dimen name="stream_video_generic_xs">4dp</dimen>
 
-    <dimen name="stream_video_callAvatarSize">86dp</dimen>
-    <dimen name="stream_video_singleAvatarSize">172dp</dimen>
-    <dimen name="stream_video_headerElevation">4dp</dimen>
-    <dimen name="stream_video_largeButtonSize">80dp</dimen>
-    <dimen name="stream_video_mediumButtonSize">64dp</dimen>
-    <dimen name="stream_video_smallButtonSize">32dp</dimen>
-    <dimen name="stream_video_topAppbarHeight">64dp</dimen>
-    <dimen name="stream_video_landscapeTopAppBarHeight">48dp</dimen>
-    <dimen name="stream_video_avatarAppbarPadding">20dp</dimen>
-    <dimen name="stream_video_singleAvatarAppbarPadding">20dp</dimen>
-    <dimen name="stream_video_participantsTextPadding">65dp</dimen>
-    <dimen name="stream_video_incomingCallOptionsBottomPadding">64dp</dimen>
-    <dimen name="stream_video_outgoingCallOptionsBottomPadding">44dp</dimen>
-    <dimen name="stream_video_callAppBarPadding">12dp</dimen>
-    <dimen name="stream_video_callAppBarLeadingContentSpacingStart">0dp</dimen>
-    <dimen name="stream_video_callAppBarLeadingContentSpacingEnd">0dp</dimen>
-    <dimen name="stream_video_callAppBarCenterContentSpacingStart">8dp</dimen>
-    <dimen name="stream_video_callAppBarCenterContentSpacingEnd">0dp</dimen>
-    <dimen name="stream_video_callAppBarTrailingContentSpacingStart">8dp</dimen>
-    <dimen name="stream_video_callAppBarTrailingContentSpacingEnd">8dp</dimen>
-    <dimen name="stream_video_callAppBarRecordingIndicatorSize">18dp</dimen>
-    <dimen name="stream_video_controlActionsBottomPadding">6dp</dimen>
-    <dimen name="stream_video_controlActionsHeight">96dp</dimen>
-    <dimen name="stream_video_controlActionsButtonSize">50dp</dimen>
-    <dimen name="stream_video_landscapeControlActionsButtonSize">45dp</dimen>
-    <dimen name="stream_video_landscapeControlActionsWidth">64dp</dimen>
-    <dimen name="stream_video_controlActionsElevation">8dp</dimen>
-    <dimen name="stream_video_participantInfoMenuAppBarHeight">64dp</dimen>
-    <dimen name="stream_video_participantInfoMenuOptionsHeight">56dp</dimen>
-    <dimen name="stream_video_participantsInfoMenuOptionsButtonHeight">40dp</dimen>
-    <dimen name="stream_video_participantsInfoAvatarSize">56dp</dimen>
-    <dimen name="stream_video_callParticipantsAvatarsMargin">32dp</dimen>
-    <dimen name="stream_video_callStatusParticipantsMargin">16dp</dimen>
-    <dimen name="stream_video_floatingVideoPadding">16dp</dimen>
-    <dimen name="stream_video_floatingVideoHeight">200dp</dimen>
-    <dimen name="stream_video_floatingVideoWidth">140dp</dimen>
-    <dimen name="stream_video_floatingVideoRadius">16dp</dimen>
-    <dimen name="stream_video_callParticipant_container_radius">16dp</dimen>
-    <dimen name="stream_video_connectionIndicatorBarMaxHeight">10dp</dimen>
-    <dimen name="stream_video_connectionIndicatorBarWidth">2dp</dimen>
-    <dimen name="stream_video_connectionIndicatorBarSeparatorWidth">2dp</dimen>
-    <dimen name="stream_video_audioLevelIndicatorBarMaxHeight">22dp</dimen>
-    <dimen name="stream_video_audioLevelIndicatorBarWidth">2dp</dimen>
-    <dimen name="stream_video_audioLevelIndicatorBarSeparatorWidth">1dp</dimen>
-    <dimen name="stream_video_IndicatorBackgroundSize">24dp</dimen>
-    <dimen name="stream_video_microphoneIndicatorSize">18dp</dimen>
-    <dimen name="stream_video_microphoneIndicatorPadding">2dp</dimen>
-    <dimen name="stream_video_audioLevelIndicatorBarPadding">2dp</dimen>
-    <dimen name="stream_video_audioLevelIndicatorInternalPadding">1dp</dimen>
-    <dimen name="stream_video_activeSpeakerBoarderWidth">2dp</dimen>
-    <dimen name="stream_video_activeSpeakerScreenSharingBoarderWidth">2dp</dimen>
-    <dimen name="stream_video_callParticipantLabelHeight">32dp</dimen>
-    <dimen name="stream_video_callParticipantSoundIndicatorPaddingStart">8dp</dimen>
-    <dimen name="stream_video_participantsGridPadding">4dp</dimen>
-    <dimen name="stream_video_callParticipantLabelPadding">8dp</dimen>
-    <dimen name="stream_video_callParticipantLabelTextMaxWidth">120dp</dimen>
-    <dimen name="stream_video_callParticipantLabelTextPadding">4dp</dimen>
-    <dimen name="stream_video_screenShareParticipantItemSize">110dp</dimen>
-    <dimen name="stream_video_screenShareParticipantsListHeight">125dp</dimen>
-    <dimen name="stream_video_screenShareParticipantsListPadding">8dp</dimen>
-    <dimen name="stream_video_screenShareParticipantsListItemMargin">4dp</dimen>
-    <dimen name="stream_video_screenShareParticipantsMargin">16dp</dimen>
-    <dimen name="stream_video_screenShareParticipantsRadius">16dp</dimen>
-    <dimen name="stream_video_screenSharePresenterPadding">16dp</dimen>
-    <dimen name="stream_video_screenSharePresenterTooltipMargin">16dp</dimen>
-    <dimen name="stream_video_screenSharePresenterTooltipPadding">16dp</dimen>
-    <dimen name="stream_video_screenSharePresenterTooltipHeight">35dp</dimen>
-    <dimen name="stream_video_screenShareTooltipIconPadding">5dp</dimen>
-    <dimen name="stream_video_screenShareButtonSize">40dp</dimen>
-    <dimen name="stream_video_lobbyVideoHeight">280dp</dimen>
-    <dimen name="stream_video_lobbyControlActionsPadding">12dp</dimen>
-    <dimen name="stream_video_lobbyControlActionsItemSpaceBy">32dp</dimen>
-    <dimen name="stream_video_reactionSize">24dp</dimen>
-    <dimen name="stream_video_audioContentTopPadding">44dp</dimen>
-    <dimen name="stream_video_audioAvatarSize">84dp</dimen>
-    <dimen name="stream_video_audioAvatarBorderPadding">8dp</dimen>
-    <dimen name="stream_video_avatarBorderWidth">4dp</dimen>
-    <dimen name="stream_video_audioAvatarPadding">5dp</dimen>
-    <dimen name="stream_video_audioMicSize">20dp</dimen>
-    <dimen name="stream_video_audioMicPadding">5dp</dimen>
-    <dimen name="stream_video_audioRoomAvatarPortraitPadding">22dp</dimen>
-    <dimen name="stream_video_audioRoomAvatarLandscapePadding">40dp</dimen>
+    <!-- Roundness -->
+    <dimen name="stream_video_roundness_xl">@dimen/stream_video_generic_xl</dimen>
+    <dimen name="stream_video_roundness_l">@dimen/stream_video_generic_l</dimen>
+    <dimen name="stream_video_roundness_m">@dimen/stream_video_generic_m</dimen>
+    <dimen name="stream_video_roundness_s">@dimen/stream_video_generic_s</dimen>
 
-    <dimen name="stream_video_title1TextSize">24sp</dimen>
-    <dimen name="stream_video_title1LineHeight">34sp</dimen>
-    <dimen name="stream_video_title3TextSize">18sp</dimen>
-    <dimen name="stream_video_title3LineHeight">23sp</dimen>
-    <dimen name="stream_video_bodyTextSize">14sp</dimen>
-    <dimen name="stream_video_footnoteTextSize">12sp</dimen>
-    <dimen name="stream_video_footnoteLineHeight">20sp</dimen>
-    <dimen name="stream_video_captionTextSize">10sp</dimen>
-    <dimen name="stream_video_captionLineHeight">16sp</dimen>
-    <dimen name="stream_video_tabBarTextSize">10sp</dimen>
-    <dimen name="stream_video_topAppbarTextSize">17sp</dimen>
+    <!-- Spacing -->
+    <dimen name="stream_video_spacing_xl">@dimen/stream_video_generic_xl</dimen>
+    <dimen name="stream_video_spacing_l">@dimen/stream_video_generic_l</dimen>
+    <dimen name="stream_video_spacing_m">@dimen/stream_video_generic_m</dimen>
+    <dimen name="stream_video_spacing_s">@dimen/stream_video_generic_s</dimen>
+    <dimen name="stream_video_spacing_xs">@dimen/stream_video_generic_xs</dimen>
 
-    <dimen name="stream_video_directCallUserNameTextSize">34sp</dimen>
-    <dimen name="stream_video_groupCallUserNameTextSize">24sp</dimen>
-    <dimen name="stream_video_onCallStatusTextSize">20sp</dimen>
+    <!-- Components -->
+    <dimen name="stream_video_component_height_l">@dimen/stream_video_generic_xxl</dimen>
+    <dimen name="stream_video_component_height_m">@dimen/stream_video_generic_xl</dimen>
+    <dimen name="stream_video_component_height_s">@dimen/stream_video_generic_l</dimen>
+    <dimen name="stream_video_component_padding_top">@dimen/stream_video_spacing_s</dimen>
+    <dimen name="stream_video_component_padding_start">@dimen/stream_video_spacing_m</dimen>
+    <dimen name="stream_video_component_padding_bottom">@dimen/stream_video_spacing_s</dimen>
+    <dimen name="stream_video_component_padding_end">@dimen/stream_video_spacing_m</dimen>
+    <dimen name="stream_video_component_padding_fixed">@dimen/stream_video_spacing_s</dimen>
 
-    <item name="stream_video_onCallStatusTextAlpha" format="float" type="dimen">0.6</item>
-    <item name="stream_video_buttonToggleOnAlpha" format="float" type="dimen">1.0</item>
-    <item name="stream_video_buttonToggleOffAlpha" format="float" type="dimen">0.6</item>
-
+    <!-- Text -->
+    <dimen name="stream_video_text_size_xxl">93sp</dimen>
+    <dimen name="stream_video_text_size_xl">48sp</dimen>
+    <dimen name="stream_video_text_size_l">24sp</dimen>
+    <dimen name="stream_video_text_size_m">20sp</dimen>
+    <dimen name="stream_video_text_size_s">16sp</dimen>
+    <dimen name="stream_video_text_size_xs">13sp</dimen>
+    <dimen name="stream_video_line_height_xxl">43sp</dimen>
+    <dimen name="stream_video_line_height_xl">28sp</dimen>
+    <dimen name="stream_video_line_height_l">24sp</dimen>
+    <dimen name="stream_video_line_height_m">20sp</dimen>
+    <dimen name="stream_video_line_height_s">16sp</dimen>
+    <dimen name="stream_video_line_height_xs">13sp</dimen>
 </resources>

@@ -1,11 +1,26 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!--
+     Copyright (c) 2023 Stream.io Inc. All rights reserved.
+
+     Licensed under the Stream License;
+     you may not use this file except in compliance with the License.
+     You may obtain a copy of the License at
+
+          https://github.com/GetStream/stream-video-android/blob/main/LICENSE
+
+     Unless required by applicable law or agreed to in writing, software
+     distributed under the License is distributed on an "AS IS" BASIS,
+     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     See the License for the specific language governing permissions and
+     limitations under the License.
+-->
 <resources>
     <!-- Brand -->
-    <color name="stream_video_brand_blue">#005FFF</color>
-    <color name="stream_video_brand_blue_lt">#4C8FFF</color>
-    <color name="stream_video_brand_blue_dk">#123D82</color>
-    <color name="stream_video_brand_navy">#1B2C43</color>
-    <color name="stream_video_brand_navy_transparent">#1E262E29</color>
+    <color name="stream_video_brand_primary">#005FFF</color>
+    <color name="stream_video_brand_primary_lt">#4C8FFF</color>
+    <color name="stream_video_brand_primary_dk">#123D82</color>
+    <color name="stream_video_brand_secondary">#1B2C43</color>
+    <color name="stream_video_brand_secondary_transparent">#1E262E29</color>
     <color name="stream_video_brand_cyan">#69E5F6</color>
     <color name="stream_video_brand_green">#00E2A1</color>
     <color name="stream_video_brand_yellow">#FFD646</color>
@@ -21,6 +36,7 @@
     <color name="stream_video_base_tetriary">#4C535B</color>
     <color name="stream_video_base_quaternary">#656B72</color>
     <color name="stream_video_base_quinary">#7E8389</color>
+    <color name="stream_video_base_senary">#323B44</color>
     <color name="stream_video_base_sheet_primary">#000000</color>
     <color name="stream_video_base_sheet_secondary">#0C0D0E</color>
     <color name="stream_video_base_sheet_tetriary">#19232D</color>
@@ -28,10 +44,10 @@
     <!-- Buttons -->
     <color name="stream_video_button_primary_default">@color/stream_video_base_sheet_tetriary</color>
     <color name="stream_video_button_primary_pressed">@color/stream_video_base_sheet_secondary</color>
-    <color name="stream_video_button_primary_disabled">@color/stream_video_brand_navy_transparent</color>
-    <color name="stream_video_button_brand_default">@color/stream_video_brand_blue</color>
-    <color name="stream_video_button_brand_pressed">@color/stream_video_brand_blue_dk</color>
-    <color name="stream_video_button_brand_disabled">@color/stream_video_brand_navy</color>
+    <color name="stream_video_button_primary_disabled">@color/stream_video_brand_secondary_transparent</color>
+    <color name="stream_video_button_brand_default">@color/stream_video_brand_primary</color>
+    <color name="stream_video_button_brand_pressed">@color/stream_video_brand_primary_dk</color>
+    <color name="stream_video_button_brand_disabled">@color/stream_video_brand_secondary</color>
     <color name="stream_video_button_alert_default">@color/stream_video_brand_red</color>
     <color name="stream_video_button_alert_pressed">@color/stream_video_brand_red_dk</color>
     <color name="stream_video_button_alert_disabled">@color/stream_video_brand_maroon</color>
@@ -39,7 +55,7 @@
     <!-- Icons -->
     <color name="stream_video_icon_default">@color/stream_video_base_primary</color>
     <color name="stream_video_icon_pressed">@color/stream_video_base_quaternary</color>
-    <color name="stream_video_icon_active">@color/stream_video_brand_blue</color>
+    <color name="stream_video_icon_active">@color/stream_video_brand_primary</color>
     <color name="stream_video_icon_alert">@color/stream_video_brand_red</color>
     <color name="stream_video_icon_disabled">@color/stream_video_base_quinary</color>
 
