@@ -30,7 +30,6 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.ui.theme.Colors.description
-import okhttp3.internal.wait
 
 @Composable
 fun StreamButton(

@@ -14,7 +14,6 @@ import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.testTagsAsResourceId
-import io.getstream.video.android.compose.theme.StreamRippleTheme
 import io.getstream.video.android.core.mapper.ReactionMapper
 
 /**

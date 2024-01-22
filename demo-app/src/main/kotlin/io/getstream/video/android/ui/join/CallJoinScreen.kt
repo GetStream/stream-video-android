@@ -18,6 +18,7 @@
 
 package io.getstream.video.android.ui.join
 
+import android.widget.Toast
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
@@ -51,8 +52,6 @@ import androidx.compose.material.Text
 import androidx.compose.material.TextButton
 import androidx.compose.material.TextField
 import androidx.compose.material.TextFieldDefaults
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ExitToApp
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -437,17 +436,18 @@ private fun JoinCallForm(
             ),
         )
 
-        StreamButton(
-            modifier = Modifier
-                .padding(start = 16.dp)
-                .fillMaxHeight()
-                .testTag("join_call"),
-            icon = VideoTheme.icons.joinCall,
-            onClick = {
-                callJoinViewModel.handleUiEvent(CallJoinEvent.JoinCall(callId = callId))
-            },
-            text = stringResource(id = R.string.join_call),
-        )
+        io.getstream.video.android.compose.theme.v2.VideoTheme {
+            StreamButton(
+                modifier = Modifier
+                    .padding(start = 16.dp)
+                    .fillMaxHeight()
+                    .testTag("join_call"),
+                onClick = {
+                    callJoinViewModel.handleUiEvent(CallJoinEvent.JoinCall(callId = callId))
+                },
+                text = stringResource(id = R.string.join_call),
+            )
+        }
     }
 }
 

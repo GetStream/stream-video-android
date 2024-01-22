@@ -7,28 +7,25 @@ import androidx.compose.material.ButtonDefaults
 import androidx.compose.material.ButtonElevation
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
-import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Shape
-import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.dp
 import io.getstream.video.android.compose.theme.v2.VideoTheme
-import io.getstream.video.android.compose.ui.components.base.icons.DefaultIconStyles
-import io.getstream.video.android.compose.ui.components.base.icons.IconStyle
-import io.getstream.video.android.compose.ui.components.base.icons.IconStyleContainer
+import io.getstream.video.android.compose.ui.components.base.icons.StreamIconStyle
+import io.getstream.video.android.compose.ui.components.base.icons.StreamIconStyles
 import io.getstream.video.android.compose.ui.components.base.texts.StreamTextStyle
+import io.getstream.video.android.compose.ui.components.base.texts.StreamTextStyles
 
-public object DefaultStreamButtonStyles: StreamButtonStyles()
+public object DefaultStreamButtonStyles : StreamButtonStyles()
 
 @Immutable
 public open class StreamButtonStyle(
-    public val modifier: Modifier,
     public val elevation: ButtonElevation?,
     public val shape: Shape,
     public val border: BorderStroke?,
     public val colors: ButtonColors,
     public val contentPadding: PaddingValues,
     public val textStyle: StreamTextStyle,
-    public val iconStyle: IconStyleContainer,
+    public val iconStyle: StreamIconStyle,
 ) {
 
     /**
@@ -36,17 +33,16 @@ public open class StreamButtonStyle(
      */
     @Composable
     public fun copy(
-        modifier: Modifier = this.modifier,
         elevation: ButtonElevation? = this.elevation,
         shape: Shape = this.shape,
         border: BorderStroke? = this.border,
         colors: ButtonColors = this.colors,
         contentPadding: PaddingValues = this.contentPadding,
-        textStyle: TextStyle = this.textStyle,
-        iconStyle: IconStyle = this.iconStyle
+        textStyle: StreamTextStyle = this.textStyle,
+        iconStyle: StreamIconStyle = this.iconStyle
     ): StreamButtonStyle {
         return StreamButtonStyle(
-            modifier, elevation, shape, border, colors, contentPadding, textStyle, iconStyle
+            elevation, shape, border, colors, contentPadding, textStyle, iconStyle
         )
     }
 }
@@ -65,27 +61,24 @@ public open class StreamButtonStyles {
      */
     @Composable
     public fun genericButtonStyle(
-        modifier: Modifier = Modifier,
         elevation: ButtonElevation? = null,
         shape: Shape = VideoTheme.shapes.buttonShape,
         border: BorderStroke? = null,
         colors: ButtonColors = ButtonDefaults.buttonColors(),
         contentPadding: PaddingValues = ButtonDefaults.ContentPadding
     ): StreamButtonStyle = StreamButtonStyle(
-        modifier,
         elevation,
         shape,
         border,
         colors,
         contentPadding,
-        VideoTheme.typography.label,
-        DefaultIconStyles.iconStyle()
+        StreamTextStyles.defaultTextStyle(),
+        StreamIconStyles.defaultIconStyle()
     )
 
     @Composable
-    public fun primaryButtonStyle(modifier: Modifier = Modifier): StreamButtonStyle =
+    public fun primaryButtonStyle(): StreamButtonStyle =
         genericButtonStyle(
-            modifier = modifier,
             shape = VideoTheme.shapes.buttonShape,
             colors = ButtonDefaults.buttonColors(
                 backgroundColor = VideoTheme.colors.buttonPrimaryDefault,
@@ -101,8 +94,8 @@ public open class StreamButtonStyles {
         )
 
     @Composable
-    public fun secondaryButtonStyle(modifier: Modifier = Modifier): StreamButtonStyle =
-        genericButtonStyle(modifier = modifier).copy(
+    public fun secondaryButtonStyle(): StreamButtonStyle =
+        genericButtonStyle().copy(
             colors = ButtonDefaults.buttonColors(
                 backgroundColor = VideoTheme.colors.buttonBrandDefault,
                 contentColor = VideoTheme.colors.basePrimary,
@@ -111,8 +104,8 @@ public open class StreamButtonStyles {
         )
 
     @Composable
-    public fun tetriaryButtonStyle(modifier: Modifier = Modifier): StreamButtonStyle =
-        genericButtonStyle(modifier = modifier).copy(
+    public fun tetriaryButtonStyle(): StreamButtonStyle =
+        genericButtonStyle().copy(
             colors = ButtonDefaults.buttonColors(
                 backgroundColor = VideoTheme.colors.baseSheetPrimary,
                 contentColor = VideoTheme.colors.basePrimary,
