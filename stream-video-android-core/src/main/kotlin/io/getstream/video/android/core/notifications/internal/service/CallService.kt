@@ -133,14 +133,44 @@ internal class CallService : Service() {
     override fun onTaskRemoved(rootIntent: Intent?) {
         super.onTaskRemoved(rootIntent)
 
-        // Leave the call
-        callId?.let {
-            StreamVideo.instanceOrNull()?.call(it.type, it.id)?.leave()
-            logger.i { "Left ongoing call." }
-        }
-
-        // Stop the service
+        endCall()
         stopService()
+    }
+
+    private fun endCall() {
+        callId?.let { callId ->
+            StreamVideo.instanceOrNull()?.let { streamVideo ->
+                val call = streamVideo.call(callId.type, callId.id)
+                val ringingState = call.state.ringingState.value
+
+                if (ringingState is RingingState.Outgoing) {
+                    // If I'm calling, end the call for everyone
+                    serviceScope.launch {
+                        call.reject()
+                        logger.i { "[onTaskRemoved] Ended outgoing call for all users." }
+                    }
+                } else if (ringingState is RingingState.Incoming) {
+                    // If I'm receiving a call...
+                    val memberCount = call.state.members.value.size
+                    logger.i { "[onTaskRemoved] Total members: $memberCount" }
+                    if (memberCount == 2) {
+                        // ...and I'm the only one being called, end the call for both users
+                        serviceScope.launch {
+                            call.reject()
+                            logger.i { "[onTaskRemoved] Ended incoming call for both users." }
+                        }
+                    } else {
+                        // ...and there are other users other than me and the caller, end the call just for me
+                        call.leave()
+                        logger.i { "[onTaskRemoved] Ended incoming call for me." }
+                    }
+                } else {
+                    // If I'm in an ongoing call, end the call for me
+                    call.leave()
+                    logger.i { "[onTaskRemoved] Ended ongoing call for me." }
+                }
+            }
+        }
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
