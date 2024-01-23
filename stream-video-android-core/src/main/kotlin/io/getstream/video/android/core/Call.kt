@@ -421,7 +421,7 @@ public class Call(
 
         monitor.start()
 
-        val statsGatheringInterval = 2000L
+        val statsGatheringInterval = 5000L
 
         statsGatheringJob = scope.launch {
             // wait a bit before we capture stats
