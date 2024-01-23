@@ -441,7 +441,7 @@ public class Call(
                     publisher = publisherStats,
                     subscriber = subscriberStats,
                     local = local,
-                    stateStats = state.stats
+                    stateStats = state.stats,
                 )
                 statsReport.value = report
                 statLatencyHistory.value += report.stateStats.publisher.latency.value

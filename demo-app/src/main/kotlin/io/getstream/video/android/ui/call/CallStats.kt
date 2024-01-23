@@ -8,7 +8,7 @@
  *    https://github.com/GetStream/stream-video-android/blob/main/LICENSE
  *
  * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distÏributed on an "AS IS" BASIS,
+ * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
@@ -65,13 +65,13 @@ import java.util.Locale
 fun CallStatsDialog(call: Call, onDismiss: () -> Unit) {
     Dialog(
         properties = DialogProperties(usePlatformDefaultWidth = false),
-        onDismissRequest = onDismiss
+        onDismissRequest = onDismiss,
     ) {
         Box(
             modifier = Modifier
                 .fillMaxSize()
                 .background(
-                    color = Color.Black
+                    color = Color.Black,
                 ),
         ) {
             CallStats(call = call)
@@ -86,19 +86,21 @@ fun CallStats(call: Call) {
     Column(
         modifier = Modifier
             .padding(8.dp)
-            .background(Color.Black)
+            .background(Color.Black),
     ) {
         UserAndCallId(call = call)
         if (LocalInspectionMode.current) {
             LineChartPreview()
         } else {
-            LineChart(modifier =
-            Modifier
-                .fillMaxWidth()
-                .height(200.dp),
+            LineChart(
+                modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .height(200.dp),
                 data = stats.map {
                     it.toFloat()
-                }, dates = emptyList()
+                },
+                dates = emptyList(),
             )
         }
     }

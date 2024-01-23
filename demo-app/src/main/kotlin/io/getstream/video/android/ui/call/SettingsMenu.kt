@@ -69,7 +69,7 @@ internal fun SettingsMenu(
     onDismissed: () -> Unit,
     onShowReactionsMenu: () -> Unit,
     onToggleBackgroundBlur: () -> Unit,
-    onShowCallStats: () -> Unit
+    onShowCallStats: () -> Unit,
 ) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
