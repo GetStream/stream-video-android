@@ -19,6 +19,7 @@ public final class io/getstream/video/android/core/Call {
 	public final fun getScreenShare ()Lio/getstream/video/android/core/ScreenShareManager;
 	public final fun getSessionId ()Ljava/lang/String;
 	public final fun getSpeaker ()Lio/getstream/video/android/core/SpeakerManager;
+	public final fun getStatLatencyHistory ()Lkotlinx/coroutines/flow/MutableStateFlow;
 	public final fun getState ()Lio/getstream/video/android/core/CallState;
 	public final fun getType ()Ljava/lang/String;
 	public final fun getUser ()Lio/getstream/video/android/model/User;
@@ -416,6 +417,32 @@ public final class io/getstream/video/android/core/MediaManagerImpl {
 	public final fun getVideoTrack ()Lorg/webrtc/VideoTrack;
 }
 
+public final class io/getstream/video/android/core/MediaStatsInfo {
+	public static final field Companion Lio/getstream/video/android/core/MediaStatsInfo$Companion;
+	public fun <init> (Ljava/lang/String;Ljava/lang/Double;Ljava/lang/Long;Ljava/lang/Long;Ljava/lang/Double;Ljava/lang/Double;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Ljava/lang/Double;
+	public final fun component3 ()Ljava/lang/Long;
+	public final fun component4 ()Ljava/lang/Long;
+	public final fun component5 ()Ljava/lang/Double;
+	public final fun component6 ()Ljava/lang/Double;
+	public final fun copy (Ljava/lang/String;Ljava/lang/Double;Ljava/lang/Long;Ljava/lang/Long;Ljava/lang/Double;Ljava/lang/Double;)Lio/getstream/video/android/core/MediaStatsInfo;
+	public static synthetic fun copy$default (Lio/getstream/video/android/core/MediaStatsInfo;Ljava/lang/String;Ljava/lang/Double;Ljava/lang/Long;Ljava/lang/Long;Ljava/lang/Double;Ljava/lang/Double;ILjava/lang/Object;)Lio/getstream/video/android/core/MediaStatsInfo;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getDeviceLatency ()Ljava/lang/Double;
+	public final fun getFps ()Ljava/lang/Double;
+	public final fun getHeight ()Ljava/lang/Long;
+	public final fun getJitter ()Ljava/lang/Double;
+	public final fun getQualityLimit ()Ljava/lang/String;
+	public final fun getWidth ()Ljava/lang/Long;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class io/getstream/video/android/core/MediaStatsInfo$Companion {
+	public final fun fromMap (Ljava/util/Map;)Lio/getstream/video/android/core/MediaStatsInfo;
+}
+
 public final class io/getstream/video/android/core/MemberState {
 	public fun <init> (Lio/getstream/video/android/model/User;Ljava/util/Map;Ljava/lang/String;Lorg/threeten/bp/OffsetDateTime;Lorg/threeten/bp/OffsetDateTime;Lorg/threeten/bp/OffsetDateTime;Lorg/threeten/bp/OffsetDateTime;Lorg/threeten/bp/OffsetDateTime;)V
 	public synthetic fun <init> (Lio/getstream/video/android/model/User;Ljava/util/Map;Ljava/lang/String;Lorg/threeten/bp/OffsetDateTime;Lorg/threeten/bp/OffsetDateTime;Lorg/threeten/bp/OffsetDateTime;Lorg/threeten/bp/OffsetDateTime;Lorg/threeten/bp/OffsetDateTime;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
@@ -569,9 +596,10 @@ public final class io/getstream/video/android/core/ParticipantState$Video : io/g
 }
 
 public final class io/getstream/video/android/core/PeerConnectionStats {
-	public fun <init> ()V
+	public fun <init> (Lkotlinx/coroutines/CoroutineScope;)V
 	public final fun getBitrateKbps ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun getJitterInMs ()Lkotlinx/coroutines/flow/StateFlow;
+	public final fun getLatency ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun getQualityDropReason ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun getResolution ()Lkotlinx/coroutines/flow/StateFlow;
 }
