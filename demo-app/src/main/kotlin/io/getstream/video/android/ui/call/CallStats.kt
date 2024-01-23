@@ -49,10 +49,7 @@ import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.ContentCopy
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -98,12 +95,12 @@ fun CallStatsDialog(call: Call, onDismiss: () -> Unit) {
                     color = Color.Black,
                 ),
         ) {
-
             CallStats(call = call)
             IconButton(modifier = Modifier.align(Alignment.TopEnd), onClick = onDismiss) {
                 Icon(
                     tint = Color.White,
-                    imageVector = Icons.Default.Close, contentDescription = Icons.Default.Close.name
+                    imageVector = Icons.Default.Close,
+                    contentDescription = Icons.Default.Close.name,
                 )
             }
         }
@@ -134,14 +131,14 @@ fun CallStats(call: Call) {
                 fontWeight = FontWeight(600),
                 color = Color.White,
                 textAlign = TextAlign.Center,
-            )
+            ),
         )
         Spacer(modifier = Modifier.size(32.dp))
         UserAndCallId(call = call, clipboardManager)
         HeaderWithIconAndBody(
             icon = Icons.Default.AvTimer,
             "Call latency",
-            "Very high latency values may reduce call quality, cause lag, and make the call less enjoyable."
+            "Very high latency values may reduce call quality, cause lag, and make the call less enjoyable.",
         )
         Spacer(modifier = Modifier.size(6.dp))
         if (LocalInspectionMode.current) {
@@ -162,12 +159,11 @@ fun CallStats(call: Call) {
         HeaderWithIconAndBody(
             icon = Icons.Default.BarChart,
             "Call performance",
-            "Very high latency values may reduce call quality, cause lag, and make the call less enjoyable."
+            "Very high latency values may reduce call quality, cause lag, and make the call less enjoyable.",
         )
         Spacer(modifier = Modifier.size(16.dp))
 
         Column(modifier = Modifier.padding(horizontal = 16.dp)) {
-
             val latency by call.state.stats.publisher.latency.collectAsStateWithLifecycle()
             LaunchedEffect(call) {
                 call.statsReport.collectLatest {
@@ -207,7 +203,6 @@ fun CallStats(call: Call) {
 fun HeaderWithIconAndBody(icon: ImageVector, header: String, body: String) {
     val color = remember { Color(0xFFFFFFFF) }
     Column(modifier = Modifier.padding(16.dp)) {
-
         Row(verticalAlignment = Alignment.CenterVertically) {
             Icon(
                 modifier = Modifier
@@ -216,16 +211,17 @@ fun HeaderWithIconAndBody(icon: ImageVector, header: String, body: String) {
                     .height(28.dp),
                 imageVector = icon,
                 contentDescription = icon.name,
-                tint = color
+                tint = color,
             )
             Spacer(modifier = Modifier.size(8.dp))
             Text(
-                text = header, style = TextStyle(
+                text = header,
+                style = TextStyle(
                     fontSize = 16.sp,
                     lineHeight = 20.sp,
                     fontWeight = FontWeight(500),
                     color = color,
-                )
+                ),
             )
         }
         Text(
@@ -234,7 +230,7 @@ fun HeaderWithIconAndBody(icon: ImageVector, header: String, body: String) {
                 fontSize = 16.sp,
                 fontWeight = FontWeight(400),
                 color = VideoTheme.colors.textLowEmphasis,
-            )
+            ),
         )
     }
 }
@@ -265,14 +261,14 @@ fun StatItem(
     modifier: Modifier = Modifier,
     title: String,
     value: String?,
-    indicator: @Composable () -> Unit = {}
+    indicator: @Composable () -> Unit = {},
 ) {
     val text = value
     Log.d("SKALI", "Recomposing (StatItem): $text")
     Column(
         modifier = modifier
             .background(color = Color.Black, shape = RoundedCornerShape(16.dp))
-            .padding(16.dp)
+            .padding(16.dp),
     ) {
         Text(
             text = title,
@@ -281,11 +277,11 @@ fun StatItem(
                 lineHeight = 16.sp,
                 fontWeight = FontWeight.W600,
                 color = Color(0xFF979CA0),
-            )
+            ),
         )
         Row(
             modifier = Modifier.fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically
+            verticalAlignment = Alignment.CenterVertically,
         ) {
             Text(
                 modifier = Modifier
@@ -297,7 +293,7 @@ fun StatItem(
                     lineHeight = 24.sp,
                     fontWeight = FontWeight.W600,
                     color = Color.White,
-                )
+                ),
             )
             Spacer(modifier = Modifier.width(8.dp))
             indicator()
@@ -312,9 +308,9 @@ fun StatIndicator(modifier: Modifier = Modifier, indicatorColor: Color, indicato
             .width(80.dp)
             .background(
                 color = indicatorColor.copy(alpha = 0.16f),
-                shape = RoundedCornerShape(8.dp)
+                shape = RoundedCornerShape(8.dp),
             )
-            .padding(horizontal = 12.dp, vertical = 8.dp)
+            .padding(horizontal = 12.dp, vertical = 8.dp),
     ) {
         Text(
             modifier = Modifier.fillMaxWidth(),
@@ -325,7 +321,7 @@ fun StatIndicator(modifier: Modifier = Modifier, indicatorColor: Color, indicato
                 lineHeight = 16.sp,
                 fontWeight = FontWeight.W600,
                 color = indicatorColor,
-            )
+            ),
         )
     }
 }
@@ -338,7 +334,7 @@ fun UserAndCallId(call: Call, clipboardManager: ClipboardManager?) {
                 .background(color = Color.Black, shape = RoundedCornerShape(16.dp))
                 .padding(16.dp).fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.Bottom
+            verticalAlignment = Alignment.Bottom,
         ) {
             Row(
                 horizontalArrangement = Arrangement.Start,
@@ -351,12 +347,13 @@ fun UserAndCallId(call: Call, clipboardManager: ClipboardManager?) {
                 )
                 Column(modifier = Modifier.padding(start = 8.dp)) {
                     Text(
-                        text = "Call ID:", style = TextStyle(
+                        text = "Call ID:",
+                        style = TextStyle(
                             fontSize = 16.sp,
                             lineHeight = 20.sp,
                             fontWeight = FontWeight(500),
                             color = Color.White,
-                        )
+                        ),
                     )
                     Text(
                         text = call.cid,
@@ -377,11 +374,12 @@ fun UserAndCallId(call: Call, clipboardManager: ClipboardManager?) {
                     onClick = {
                         val clipData = ClipData.newPlainText("Call ID", call.cid)
                         clipboardManager.setPrimaryClip(clipData)
-                    }) {
+                    },
+                ) {
                     Icon(
                         tint = Color.White,
                         imageVector = Icons.Default.ContentCopy,
-                        contentDescription = "Copy"
+                        contentDescription = "Copy",
                     )
                 }
             }
@@ -555,7 +553,7 @@ fun StatsItemPreview() {
             Spacer(Modifier.size(16.dp))
             StatItem(
                 title = "Region",
-                value = "sfu-7d887ab5-9c00-4f1f-b6b0-d8f097164727-7d887ab5-9c00-4f1f-b6b0-d8f097164727"
+                value = "sfu-7d887ab5-9c00-4f1f-b6b0-d8f097164727-7d887ab5-9c00-4f1f-b6b0-d8f097164727",
             )
         }
     }

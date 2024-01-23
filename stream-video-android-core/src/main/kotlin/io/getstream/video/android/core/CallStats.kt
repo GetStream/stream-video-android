@@ -30,14 +30,13 @@ import org.webrtc.CameraEnumerationAndroid
 import org.webrtc.RTCStats
 import stream.video.sfu.models.TrackType
 
-
 data class MediaStatsInfo(
     val qualityLimit: String?,
     val jitter: Double?,
     val width: Long?,
     val height: Long?,
     val fps: Double?,
-    val deviceLatency: Double?
+    val deviceLatency: Double?,
 ) {
     companion object {
         fun fromMap(map: Map<String, Any?>): MediaStatsInfo {
