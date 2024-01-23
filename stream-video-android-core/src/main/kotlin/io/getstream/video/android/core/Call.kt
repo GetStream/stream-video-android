@@ -445,7 +445,7 @@ public class Call(
                 )
                 statsReport.value = report
                 statLatencyHistory.value += report.stateStats.publisher.latency.value
-                if (statLatencyHistory.value.size > 50) {
+                if (statLatencyHistory.value.size > 20) {
                     statLatencyHistory.value = statLatencyHistory.value.takeLast(20)
                 }
             }
