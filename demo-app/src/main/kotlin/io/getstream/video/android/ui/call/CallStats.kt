@@ -522,7 +522,7 @@ fun LineChartPreview() {
     )
     VideoTheme {
         Surface(
-            modifier = Modifier.size(300.dp, 200.dp),
+            modifier = Modifier.size(400.dp, 200.dp),
             color = Color(0xFAFAFA),
         ) {
             LineChart(
