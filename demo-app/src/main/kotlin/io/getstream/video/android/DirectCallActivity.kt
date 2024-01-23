@@ -171,13 +171,6 @@ class DirectCallActivity : ComponentActivity() {
         }
     }
 
-    override fun onStop() {
-        super.onStop()
-        if (::call.isInitialized) {
-            reject(call)
-        }
-    }
-
     private fun reject(call: Call) {
         lifecycleScope.launch(Dispatchers.IO) {
             call.reject()
