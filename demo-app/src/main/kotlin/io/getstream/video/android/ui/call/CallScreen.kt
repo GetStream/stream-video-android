@@ -50,6 +50,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.Dialog
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.getstream.chat.android.ui.common.state.messages.list.MessageItemState
 import io.getstream.video.android.BuildConfig
@@ -94,6 +95,7 @@ fun CallScreen(
     var isShowingReactionsMenu by remember { mutableStateOf(false) }
     var isShowingAvailableDeviceMenu by remember { mutableStateOf(false) }
     var isBackgroundBlurEnabled by remember { mutableStateOf(false) }
+    var isShowingStats by remember { mutableStateOf(false) }
     var layout by remember { mutableStateOf(LayoutType.DYNAMIC) }
     var unreadCount by remember { mutableIntStateOf(0) }
     val chatState = rememberModalBottomSheetState(
@@ -333,6 +335,7 @@ fun CallScreen(
                     isBackgroundBlurEnabled = !isBackgroundBlurEnabled
                     isShowingSettingMenu = false
                 },
+                onShowCallStats = { isShowingStats = true }
             )
         }
 
@@ -353,6 +356,10 @@ fun CallScreen(
                 current = layout,
                 onDismiss = { isShowingLayoutChooseMenu = false },
             )
+        }
+
+        if (isShowingStats) {
+            CallStatsDialog(call) { isShowingStats = false }
         }
 
         if (isShowingAvailableDeviceMenu) {
