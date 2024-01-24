@@ -40,10 +40,6 @@ private val LocalColors = compositionLocalOf<StreamColors> {
     error("No colors provided! Make sure to wrap all usages of Stream components in a VideoTheme.")
 }
 
-private val LocalIcons = compositionLocalOf<StreamIcons> {
-    error("No icons provided! Make sure to wrap all usages of Stream components in a VideoTheme.")
-}
-
 private val LocalDimens = compositionLocalOf<StreamDimens> {
     error("No dimens provided! Make sure to wrap all usages of Stream components in a VideoTheme.")
 }
@@ -115,10 +111,6 @@ public object VideoTheme {
     public val colors: StreamColors
         @Composable @ReadOnlyComposable
         get() = LocalColors.current
-
-    public val icons: StreamIcons
-        @Composable @ReadOnlyComposable
-        get() = LocalIcons.current
 
     /**
      * Retrieves the current [StreamDimens] at the call site's position in the hierarchy.
