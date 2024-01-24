@@ -1,3 +1,19 @@
+/*
+ * Copyright (c) 2014-2024 Stream.io Inc. All rights reserved.
+ *
+ * Licensed under the Stream License;
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    https://github.com/GetStream/stream-video-android/blob/main/LICENSE
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package io.getstream.video.android.compose.ui.components.base.icons
 
 import androidx.compose.foundation.layout.PaddingValues
@@ -16,7 +32,7 @@ import io.getstream.video.android.compose.ui.components.base.styling.StreamStyle
  */
 public data class IconStyle(
     val color: Color,
-    val padding: PaddingValues = PaddingValues(0.dp)
+    val padding: PaddingValues = PaddingValues(0.dp),
 ) : StreamStyle
 
 /**
@@ -48,11 +64,11 @@ public open class StreamIconStyleProvider {
         padding: PaddingValues = PaddingValues(VideoTheme.dimens.spacingM),
         default: Color = VideoTheme.colors.basePrimary,
         pressed: Color = VideoTheme.colors.basePrimary,
-        disabled: Color = VideoTheme.colors.baseQuaternary
+        disabled: Color = VideoTheme.colors.baseQuaternary,
     ): StreamIconStyle = StreamIconStyle(
         default = IconStyle(default, padding),
         pressed = IconStyle(pressed, padding),
-        disabled = IconStyle(disabled, padding)
+        disabled = IconStyle(disabled, padding),
     )
 }
 
@@ -60,4 +76,3 @@ public open class StreamIconStyleProvider {
  * Object accessor for a default [StreamIconStyleProvider]
  */
 public object StreamIconStyles : StreamIconStyleProvider()
-

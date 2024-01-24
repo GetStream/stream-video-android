@@ -1,27 +1,23 @@
+/*
+ * Copyright (c) 2014-2024 Stream.io Inc. All rights reserved.
+ *
+ * Licensed under the Stream License;
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    https://github.com/GetStream/stream-video-android/blob/main/LICENSE
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package io.getstream.video.android.compose.ui.components.base.texts
 
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.Shadow
-import androidx.compose.ui.graphics.drawscope.DrawStyle
-import androidx.compose.ui.text.PlatformTextStyle
 import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.font.FontFamily
-import androidx.compose.ui.text.font.FontStyle
-import androidx.compose.ui.text.font.FontSynthesis
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.intl.LocaleList
-import androidx.compose.ui.text.style.BaselineShift
-import androidx.compose.ui.text.style.Hyphens
-import androidx.compose.ui.text.style.LineBreak
-import androidx.compose.ui.text.style.LineHeightStyle
-import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.text.style.TextDecoration
-import androidx.compose.ui.text.style.TextDirection
-import androidx.compose.ui.text.style.TextGeometricTransform
-import androidx.compose.ui.text.style.TextIndent
-import androidx.compose.ui.text.style.TextMotion
-import androidx.compose.ui.unit.TextUnit
 import io.getstream.video.android.compose.theme.v2.VideoTheme
 import io.getstream.video.android.compose.ui.components.base.styling.StreamStateStyle
 import io.getstream.video.android.compose.ui.components.base.styling.StreamStyle
@@ -31,7 +27,7 @@ import io.getstream.video.android.compose.ui.components.base.styling.StyleSize
  * Wrapper for the platform text style.
  */
 public data class TextStyleWrapper(
-    public val platform: TextStyle
+    public val platform: TextStyle,
 ) : StreamStyle
 
 /**
@@ -40,7 +36,7 @@ public data class TextStyleWrapper(
 public data class StreamTextStyle(
     override val default: TextStyleWrapper,
     override val disabled: TextStyleWrapper,
-    override val pressed: TextStyleWrapper
+    override val pressed: TextStyleWrapper,
 ) : StreamStateStyle<TextStyleWrapper>
 
 public open class TextStyleStyleProvider {
@@ -54,7 +50,7 @@ public open class TextStyleStyleProvider {
             else -> VideoTheme.typography.labelL.wrapper()
         },
         pressed: TextStyleWrapper = default,
-        disabled: TextStyleWrapper = default.disabledAlpha()
+        disabled: TextStyleWrapper = default.disabledAlpha(),
     ): StreamTextStyle = StreamTextStyle(default, disabled, pressed)
 
     @Composable
@@ -67,7 +63,7 @@ public open class TextStyleStyleProvider {
             else -> VideoTheme.typography.titleL.wrapper()
         },
         pressed: TextStyleWrapper = default,
-        disabled: TextStyleWrapper = default.disabledAlpha()
+        disabled: TextStyleWrapper = default.disabledAlpha(),
     ): StreamTextStyle = StreamTextStyle(default, disabled, pressed)
 
     @Composable
@@ -78,7 +74,7 @@ public open class TextStyleStyleProvider {
             else -> VideoTheme.typography.bodyL.wrapper()
         },
         pressed: TextStyleWrapper = default,
-        disabled: TextStyleWrapper = default.disabledAlpha()
+        disabled: TextStyleWrapper = default.disabledAlpha(),
     ): StreamTextStyle = StreamTextStyle(default, disabled, pressed)
 }
 
@@ -89,8 +85,8 @@ internal fun TextStyle.wrapper(): TextStyleWrapper = TextStyleWrapper(platform =
 
 internal fun TextStyleWrapper.withAlpha(alpha: Float): TextStyleWrapper = this.platform.copy(
     color = this.platform.color.copy(
-        alpha = alpha
-    )
+        alpha = alpha,
+    ),
 ).wrapper()
 
 internal fun TextStyleWrapper.disabledAlpha() = this.withAlpha(0.16f)

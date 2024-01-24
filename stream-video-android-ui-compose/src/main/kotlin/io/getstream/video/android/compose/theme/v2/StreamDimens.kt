@@ -1,3 +1,19 @@
+/*
+ * Copyright (c) 2014-2024 Stream.io Inc. All rights reserved.
+ *
+ * Licensed under the Stream License;
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    https://github.com/GetStream/stream-video-android/blob/main/LICENSE
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package io.getstream.video.android.compose.theme.v2
 
 import androidx.compose.runtime.Composable
@@ -43,7 +59,7 @@ public data class StreamDimens(
     val lineHeightL: TextUnit,
     val lineHeightM: TextUnit,
     val lineHeightS: TextUnit,
-    val lineHeightXs: TextUnit
+    val lineHeightXs: TextUnit,
 ) {
     public companion object {
 
@@ -70,10 +86,16 @@ public data class StreamDimens(
                 componentHeightM = dimensionResource(R.dimen.stream_video_component_height_m),
                 componentHeightS = dimensionResource(R.dimen.stream_video_component_height_s),
                 componentPaddingTop = dimensionResource(R.dimen.stream_video_component_padding_top),
-                componentPaddingStart = dimensionResource(R.dimen.stream_video_component_padding_start),
-                componentPaddingBottom = dimensionResource(R.dimen.stream_video_component_padding_bottom),
+                componentPaddingStart = dimensionResource(
+                    R.dimen.stream_video_component_padding_start,
+                ),
+                componentPaddingBottom = dimensionResource(
+                    R.dimen.stream_video_component_padding_bottom,
+                ),
                 componentPaddingEnd = dimensionResource(R.dimen.stream_video_component_padding_end),
-                componentPaddingFixed = dimensionResource(R.dimen.stream_video_component_padding_fixed),
+                componentPaddingFixed = dimensionResource(
+                    R.dimen.stream_video_component_padding_fixed,
+                ),
                 textSizeXxl = textSizeResource(R.dimen.stream_video_text_size_xxl),
                 textSizeXl = textSizeResource(R.dimen.stream_video_text_size_xl),
                 textSizeL = textSizeResource(R.dimen.stream_video_text_size_l),
@@ -85,7 +107,7 @@ public data class StreamDimens(
                 lineHeightL = textSizeResource(R.dimen.stream_video_line_height_l),
                 lineHeightM = textSizeResource(R.dimen.stream_video_line_height_m),
                 lineHeightS = textSizeResource(R.dimen.stream_video_line_height_s),
-                lineHeightXs = textSizeResource(R.dimen.stream_video_line_height_xs)
+                lineHeightXs = textSizeResource(R.dimen.stream_video_line_height_xs),
             )
         }
     }

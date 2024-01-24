@@ -69,21 +69,21 @@ public data class StreamTypography(
                 lineHeight = dimens.lineHeightXxl,
                 fontFamily = fontFamily,
                 fontWeight = FontWeight.W500,
-                color = colors.basePrimary
+                color = colors.basePrimary,
             ),
             titleM = TextStyle(
                 fontSize = dimens.textSizeXl,
                 lineHeight = dimens.lineHeightXl,
                 fontFamily = fontFamily,
                 fontWeight = FontWeight.W500,
-                color = colors.basePrimary
+                color = colors.basePrimary,
             ),
             titleS = TextStyle(
                 fontSize = dimens.textSizeL,
                 lineHeight = dimens.lineHeightL,
                 fontFamily = fontFamily,
                 fontWeight = FontWeight.W500,
-                color = colors.basePrimary
+                color = colors.basePrimary,
             ),
             titleXs = TextStyle(
                 fontSize = dimens.textSizeXs,
@@ -127,7 +127,7 @@ public data class StreamTypography(
                 fontFamily = fontFamily,
                 fontWeight = FontWeight.W500,
                 color = colors.basePrimary,
-            )
+            ),
         )
     }
 }

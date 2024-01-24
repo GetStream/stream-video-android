@@ -20,9 +20,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
-import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.graphics.Shape
-import androidx.compose.ui.unit.dp
 
 /**
  * Contains all the shapes we provide for our components.
@@ -37,7 +35,7 @@ import androidx.compose.ui.unit.dp
  */
 @Immutable
 public data class StreamShapes(
-    public val circle : Shape,
+    public val circle: Shape,
     public val button: Shape,
     public val input: Shape,
     public val dialog: Shape,
@@ -55,7 +53,7 @@ public data class StreamShapes(
             button = RoundedCornerShape(dimens.roundnessXl),
             input = RoundedCornerShape(dimens.roundnessXl),
             sheet = RoundedCornerShape(dimens.roundnessM),
-            dialog = RoundedCornerShape(dimens.roundnessL)
+            dialog = RoundedCornerShape(dimens.roundnessL),
         )
     }
 }

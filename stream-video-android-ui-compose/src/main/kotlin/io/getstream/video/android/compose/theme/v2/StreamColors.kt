@@ -1,3 +1,19 @@
+/*
+ * Copyright (c) 2014-2024 Stream.io Inc. All rights reserved.
+ *
+ * Licensed under the Stream License;
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    https://github.com/GetStream/stream-video-android/blob/main/LICENSE
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package io.getstream.video.android.compose.theme.v2
 
 import androidx.compose.runtime.Composable
@@ -53,7 +69,9 @@ public data class StreamColors(
             brandPrimaryLt = colorResource(id = R.color.stream_video_brand_primary_lt),
             brandPrimaryDk = colorResource(id = R.color.stream_video_brand_primary_dk),
             brandSecondary = colorResource(id = R.color.stream_video_brand_secondary),
-            brandSecondaryTransparent = colorResource(id = R.color.stream_video_brand_secondary_transparent),
+            brandSecondaryTransparent = colorResource(
+                id = R.color.stream_video_brand_secondary_transparent,
+            ),
             brandCyan = colorResource(id = R.color.stream_video_brand_cyan),
             brandGreen = colorResource(id = R.color.stream_video_brand_green),
             brandYellow = colorResource(id = R.color.stream_video_brand_yellow),
@@ -73,7 +91,9 @@ public data class StreamColors(
             baseSheetTertiary = colorResource(id = R.color.stream_video_base_sheet_tetriary),
             buttonPrimaryDefault = colorResource(id = R.color.stream_video_button_primary_default),
             buttonPrimaryPressed = colorResource(id = R.color.stream_video_button_primary_pressed),
-            buttonPrimaryDisabled = colorResource(id = R.color.stream_video_button_primary_disabled),
+            buttonPrimaryDisabled = colorResource(
+                id = R.color.stream_video_button_primary_disabled,
+            ),
             buttonBrandDefault = colorResource(id = R.color.stream_video_button_brand_default),
             buttonBrandPressed = colorResource(id = R.color.stream_video_button_brand_pressed),
             buttonBrandDisabled = colorResource(id = R.color.stream_video_button_brand_disabled),
