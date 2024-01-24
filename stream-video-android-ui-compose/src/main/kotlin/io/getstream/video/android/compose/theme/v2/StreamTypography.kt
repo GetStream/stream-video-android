@@ -135,7 +135,7 @@ public data class StreamTypography(
                 fontFamily = fontFamily,
                 fontWeight = FontWeight.W500,
                 color = colors.basePrimary,
-            )
+            ),
         )
     }
 }

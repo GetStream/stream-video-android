@@ -17,7 +17,6 @@
 package io.getstream.video.android.compose.ui.components.base
 
 import androidx.compose.foundation.interaction.MutableInteractionSource
-import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
@@ -46,7 +45,6 @@ import io.getstream.video.android.compose.ui.components.base.styling.DefaultStre
 import io.getstream.video.android.compose.ui.components.base.styling.StreamButtonStyle
 import io.getstream.video.android.compose.ui.components.base.styling.StreamFixedSizeButtonStyle
 import io.getstream.video.android.compose.ui.components.base.styling.StyleSize
-import io.getstream.video.android.compose.ui.components.base.styling.StyleState
 import io.getstream.video.android.compose.ui.components.base.styling.styleState
 
 @Composable

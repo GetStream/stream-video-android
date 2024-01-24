@@ -1,3 +1,19 @@
+/*
+ * Copyright (c) 2014-2024 Stream.io Inc. All rights reserved.
+ *
+ * Licensed under the Stream License;
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    https://github.com/GetStream/stream-video-android/blob/main/LICENSE
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package io.getstream.video.android.compose.ui.components.base
 
 import androidx.compose.foundation.background
@@ -27,7 +43,7 @@ public fun StreamBadgeOn(
     modifier: Modifier = Modifier,
     text: String? = null,
     style: BadgeStyle,
-    content: @Composable BoxScope.(Modifier) -> Unit
+    content: @Composable BoxScope.(Modifier) -> Unit,
 ) {
     WithBadge(text = text, style = style) {
         content(modifier)
@@ -39,7 +55,7 @@ private fun WithBadge(
     modifier: Modifier = Modifier,
     style: BadgeStyle,
     text: String? = null,
-    content: @Composable BoxScope.() -> Unit
+    content: @Composable BoxScope.() -> Unit,
 ) {
     Box(modifier = modifier) {
         content()
@@ -54,12 +70,12 @@ private fun BoxScope.BadgeContent(style: BadgeStyle, text: String? = null) {
         modifier = Modifier
             .size(style.size)
             .align(Alignment.TopEnd)
-            .background(style.color, CircleShape)
+            .background(style.color, CircleShape),
     ) {
         Text(
             modifier = Modifier.align(Alignment.Center).wrapContentSize(),
             text = text ?: "",
-            style = style.textStyle
+            style = style.textStyle,
         )
     }
 }
@@ -71,22 +87,22 @@ private fun ButtonWithBadgePreview() {
         Column {
             StreamBadgeOn(
                 text = "!",
-                style = StreamBadgeStyles.defaultBadgeStyle()
+                style = StreamBadgeStyles.defaultBadgeStyle(),
             ) {
                 StreamIconButton(
                     icon = Icons.Default.AddAlert,
-                    style = DefaultStreamButtonStyles.secondaryIconButtonStyle()
+                    style = DefaultStreamButtonStyles.secondaryIconButtonStyle(),
                 )
             }
             Spacer(modifier = Modifier.size(16.dp))
             StreamBadgeOn(
                 text = "10",
-                style = StreamBadgeStyles.defaultBadgeStyle()
+                style = StreamBadgeStyles.defaultBadgeStyle(),
             ) {
                 StreamButton(
                     icon = Icons.Default.Info,
                     text = "Secondary Button",
-                    style = DefaultStreamButtonStyles.secondaryButtonStyle()
+                    style = DefaultStreamButtonStyles.secondaryButtonStyle(),
                 )
             }
         }
