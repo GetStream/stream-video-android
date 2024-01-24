@@ -34,7 +34,7 @@ public data class StreamDimens(
     val componentPaddingFixed: Dp,
     val textSizeXxl: TextUnit,
     val textSizeXl: TextUnit,
-    val     textSizeL: TextUnit,
+    val textSizeL: TextUnit,
     val textSizeM: TextUnit,
     val textSizeS: TextUnit,
     val textSizeXs: TextUnit,

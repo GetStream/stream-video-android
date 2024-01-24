@@ -37,22 +37,9 @@ import androidx.compose.ui.unit.dp
  */
 @Immutable
 public data class StreamShapes(
-    public val avatar: Shape,
-    public val callButton: Shape,
-    public val callControls: Shape,
-    public val callControlsLandscape: Shape,
-    public val callControlsButton: Shape,
-    public val participantsInfoMenuButton: Shape,
-    public val connectionIndicatorBar: Shape,
-    public val soundIndicatorBar: Shape,
-    public val floatingParticipant: Shape,
-    public val connectionQualityIndicator: Shape,
-    public val indicatorBackground: Shape,
-    val participantLabelShape: Shape,
-    val participantContainerShape: Shape,
-
-    public val buttonShape: Shape,
-    public val inputShape: Shape,
+    public val circle : Shape,
+    public val button: Shape,
+    public val input: Shape,
     public val dialog: Shape,
     public val sheet: Shape,
 ) {
@@ -64,25 +51,11 @@ public data class StreamShapes(
          */
         @Composable
         public fun defaultShapes(dimens: StreamDimens): StreamShapes = StreamShapes(
-            avatar = CircleShape,
-            dialog = RoundedCornerShape(16.dp),
-            callButton = CircleShape,
-            callControls = RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp),
-            callControlsLandscape = RectangleShape,
-            callControlsButton = CircleShape,
-            participantsInfoMenuButton = RoundedCornerShape(32.dp),
-            connectionIndicatorBar = RoundedCornerShape(16.dp),
-            soundIndicatorBar = RoundedCornerShape(16.dp),
-            floatingParticipant = RoundedCornerShape(16.dp),
-            connectionQualityIndicator = RoundedCornerShape(topStart = 5.dp),
-            indicatorBackground = RoundedCornerShape(5.dp),
-            participantLabelShape = RoundedCornerShape(topEnd = 5.dp),
-            participantContainerShape = RoundedCornerShape(dimens.roundnessS),
-
-
-            buttonShape = RoundedCornerShape(dimens.roundnessXl),
-            inputShape = RoundedCornerShape(dimens.roundnessXl),
-            sheet = RoundedCornerShape(dimens.roundnessM)
+            circle = CircleShape,
+            button = RoundedCornerShape(dimens.roundnessXl),
+            input = RoundedCornerShape(dimens.roundnessXl),
+            sheet = RoundedCornerShape(dimens.roundnessM),
+            dialog = RoundedCornerShape(dimens.roundnessL)
         )
     }
 }

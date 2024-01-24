@@ -18,7 +18,6 @@
 
 package io.getstream.video.android.ui.join
 
-import android.widget.Toast
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image

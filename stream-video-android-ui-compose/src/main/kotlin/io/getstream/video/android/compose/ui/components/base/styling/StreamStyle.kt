@@ -19,6 +19,13 @@ public enum class StyleState {
 }
 
 /**
+ * Possible sizes for the stile.
+ */
+public enum class StyleSize {
+    XS, S, M, L, XL, XXL
+}
+
+/**
  * Stream style container, containing multiple styles
  */
 @Stable

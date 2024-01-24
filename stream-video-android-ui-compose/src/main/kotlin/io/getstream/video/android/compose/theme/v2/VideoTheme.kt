@@ -64,7 +64,6 @@ public fun VideoTheme(
     dimens: StreamDimens = StreamDimens.defaultDimens(),
     typography: StreamTypography = StreamTypography.defaultTypography(colors, dimens),
     shapes: StreamShapes = StreamShapes.defaultShapes(dimens),
-    icons: StreamIcons = StreamIcons.defaultIcons(),
     rippleTheme: RippleTheme = StreamRippleTheme,
     reactionMapper: ReactionMapper = ReactionMapper.defaultReactionMapper(),
     allowUIAutomationTest: Boolean = true,

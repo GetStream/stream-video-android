@@ -25,36 +25,72 @@ import androidx.compose.ui.unit.TextUnit
 import io.getstream.video.android.compose.theme.v2.VideoTheme
 import io.getstream.video.android.compose.ui.components.base.styling.StreamStateStyle
 import io.getstream.video.android.compose.ui.components.base.styling.StreamStyle
+import io.getstream.video.android.compose.ui.components.base.styling.StyleSize
 
 /**
  * Wrapper for the platform text style.
  */
 public data class TextStyleWrapper(
-        public val platform: TextStyle
+    public val platform: TextStyle
 ) : StreamStyle
 
 /**
  * Stream text style
  */
 public data class StreamTextStyle(
-        override val default: TextStyleWrapper,
-        override val disabled: TextStyleWrapper,
-        override val pressed: TextStyleWrapper
+    override val default: TextStyleWrapper,
+    override val disabled: TextStyleWrapper,
+    override val pressed: TextStyleWrapper
 ) : StreamStateStyle<TextStyleWrapper>
 
 public open class TextStyleStyleProvider {
 
     @Composable
-    public fun defaultTextStyle(
-        default: TextStyleWrapper = VideoTheme.typography.label.wrapper(),
-        pressed: TextStyleWrapper = VideoTheme.typography.label.wrapper(),
-        disabled: TextStyleWrapper = VideoTheme.typography.label.copy(
-            color = VideoTheme.typography.label.color.copy(alpha = 0.2f)
-        ).wrapper()
-    ) : StreamTextStyle = StreamTextStyle(default, disabled, pressed)
+    public fun defaultLabel(
+        size: StyleSize = StyleSize.L,
+        default: TextStyleWrapper = when (size) {
+            StyleSize.XS, StyleSize.S -> VideoTheme.typography.labelS.wrapper()
+            StyleSize.M -> VideoTheme.typography.labelM.wrapper()
+            else -> VideoTheme.typography.labelL.wrapper()
+        },
+        pressed: TextStyleWrapper = default,
+        disabled: TextStyleWrapper = default.disabledAlpha()
+    ): StreamTextStyle = StreamTextStyle(default, disabled, pressed)
+
+    @Composable
+    public fun defaultTitle(
+        size: StyleSize = StyleSize.L,
+        default: TextStyleWrapper = when (size) {
+            StyleSize.XS -> VideoTheme.typography.titleXs.wrapper()
+            StyleSize.S -> VideoTheme.typography.titleS.wrapper()
+            StyleSize.M -> VideoTheme.typography.titleM.wrapper()
+            else -> VideoTheme.typography.titleL.wrapper()
+        },
+        pressed: TextStyleWrapper = default,
+        disabled: TextStyleWrapper = default.disabledAlpha()
+    ): StreamTextStyle = StreamTextStyle(default, disabled, pressed)
+
+    @Composable
+    public fun defaultBody(
+        size: StyleSize = StyleSize.L,
+        default: TextStyleWrapper = when (size) {
+            StyleSize.XS, StyleSize.S, StyleSize.M -> VideoTheme.typography.bodyM.wrapper()
+            else -> VideoTheme.typography.bodyL.wrapper()
+        },
+        pressed: TextStyleWrapper = default,
+        disabled: TextStyleWrapper = default.disabledAlpha()
+    ): StreamTextStyle = StreamTextStyle(default, disabled, pressed)
 }
 
 public object StreamTextStyles : TextStyleStyleProvider()
 
 // Utilities
-internal fun TextStyle.wrapper() : TextStyleWrapper = TextStyleWrapper(platform = this)
+internal fun TextStyle.wrapper(): TextStyleWrapper = TextStyleWrapper(platform = this)
+
+internal fun TextStyleWrapper.withAlpha(alpha: Float): TextStyleWrapper = this.platform.copy(
+    color = this.platform.color.copy(
+        alpha = alpha
+    )
+).wrapper()
+
+internal fun TextStyleWrapper.disabledAlpha() = this.withAlpha(0.16f)
