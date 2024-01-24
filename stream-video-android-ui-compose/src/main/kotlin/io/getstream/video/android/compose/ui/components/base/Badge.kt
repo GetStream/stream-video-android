@@ -21,12 +21,16 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.requiredWidthIn
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AddAlert
+import androidx.compose.material.icons.filled.Chat
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -68,12 +72,16 @@ private fun WithBadge(
 private fun BoxScope.BadgeContent(style: BadgeStyle, text: String? = null) {
     Box(
         modifier = Modifier
-            .size(style.size)
+            .height(style.size)
+            .requiredWidthIn(min = style.size)
             .align(Alignment.TopEnd)
             .background(style.color, CircleShape),
     ) {
         Text(
-            modifier = Modifier.align(Alignment.Center).wrapContentSize(),
+            modifier = Modifier
+                .align(Alignment.Center)
+                .wrapContentSize()
+                .padding(horizontal = 4.dp),
             text = text ?: "",
             style = style.textStyle,
         )
@@ -103,6 +111,16 @@ private fun ButtonWithBadgePreview() {
                     icon = Icons.Default.Info,
                     text = "Secondary Button",
                     style = DefaultStreamButtonStyles.secondaryButtonStyle(),
+                )
+            }
+            Spacer(modifier = Modifier.size(16.dp))
+            StreamBadgeOn(
+                text = "10+",
+                style = StreamBadgeStyles.defaultBadgeStyle(),
+            ) {
+                StreamIconButton(
+                    icon = Icons.Default.Chat,
+                    style = DefaultStreamButtonStyles.primaryIconButtonStyle(),
                 )
             }
         }

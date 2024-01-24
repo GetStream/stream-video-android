@@ -16,6 +16,7 @@
 
 package io.getstream.video.android.compose.ui.components.base.styling
 
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextStyle
@@ -29,6 +30,7 @@ public class BadgeStyle(
     public val size: Dp,
     public val color: Color,
     public val textStyle: TextStyle,
+    public val contentPaddings: PaddingValues
 ) : StreamStyle
 
 public open class BadgeStyleProvider {
@@ -37,11 +39,12 @@ public open class BadgeStyleProvider {
         color = VideoTheme.colors.alertSuccess,
         size = 16.dp,
         textStyle = TextStyle(
-            fontSize = 10.sp,
-            lineHeight = 16.sp,
+            fontSize = 8.sp,
+            lineHeight = 10.sp,
             fontWeight = FontWeight.W600,
             color = VideoTheme.colors.buttonPrimaryPressed,
         ),
+        contentPaddings = PaddingValues(VideoTheme.dimens.genericXs, 0.dp)
     )
 }
 
