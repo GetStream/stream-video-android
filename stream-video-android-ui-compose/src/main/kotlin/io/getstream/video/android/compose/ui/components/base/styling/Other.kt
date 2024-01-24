@@ -30,7 +30,7 @@ public class BadgeStyle(
     public val size: Dp,
     public val color: Color,
     public val textStyle: TextStyle,
-    public val contentPaddings: PaddingValues
+    public val contentPaddings: PaddingValues,
 ) : StreamStyle
 
 public open class BadgeStyleProvider {
@@ -44,7 +44,7 @@ public open class BadgeStyleProvider {
             fontWeight = FontWeight.W600,
             color = VideoTheme.colors.buttonPrimaryPressed,
         ),
-        contentPaddings = PaddingValues(VideoTheme.dimens.genericXs, 0.dp)
+        contentPaddings = PaddingValues(VideoTheme.dimens.genericXs, 0.dp),
     )
 }
 
