@@ -14,14 +14,11 @@
  * limitations under the License.
  */
 
-package io.getstream.video.android.compose.ui.components.base.texts
+package io.getstream.video.android.compose.ui.components.base.styling
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.text.TextStyle
 import io.getstream.video.android.compose.theme.v2.VideoTheme
-import io.getstream.video.android.compose.ui.components.base.styling.StreamStateStyle
-import io.getstream.video.android.compose.ui.components.base.styling.StreamStyle
-import io.getstream.video.android.compose.ui.components.base.styling.StyleSize
 
 /**
  * Wrapper for the platform text style.
@@ -39,7 +36,7 @@ public data class StreamTextStyle(
     override val pressed: TextStyleWrapper,
 ) : StreamStateStyle<TextStyleWrapper>
 
-public open class TextStyleStyleProvider {
+public open class TextStyleProvider {
 
     @Composable
     public fun defaultLabel(
@@ -76,9 +73,16 @@ public open class TextStyleStyleProvider {
         pressed: TextStyleWrapper = default,
         disabled: TextStyleWrapper = default.disabledAlpha(),
     ): StreamTextStyle = StreamTextStyle(default, disabled, pressed)
+
+    @Composable
+    public fun defaultBadgeTextStyle(
+        default: TextStyleWrapper = VideoTheme.typography.labelXS.wrapper(),
+        pressed: TextStyleWrapper = default,
+        disabled: TextStyleWrapper = default.disabledAlpha(),
+    ): StreamTextStyle = StreamTextStyle(default, disabled, pressed)
 }
 
-public object StreamTextStyles : TextStyleStyleProvider()
+public object StreamTextStyles : TextStyleProvider()
 
 // Utilities
 internal fun TextStyle.wrapper(): TextStyleWrapper = TextStyleWrapper(platform = this)

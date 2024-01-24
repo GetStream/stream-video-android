@@ -14,15 +14,13 @@
  * limitations under the License.
  */
 
-package io.getstream.video.android.compose.ui.components.base.icons
+package io.getstream.video.android.compose.ui.components.base.styling
 
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import io.getstream.video.android.compose.theme.v2.VideoTheme
-import io.getstream.video.android.compose.ui.components.base.styling.StreamStateStyle
-import io.getstream.video.android.compose.ui.components.base.styling.StreamStyle
 
 /**
  * Represents an icon style. Consists of color and padding.

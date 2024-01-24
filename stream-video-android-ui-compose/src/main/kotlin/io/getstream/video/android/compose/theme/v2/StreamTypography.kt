@@ -49,6 +49,7 @@ public data class StreamTypography(
     public val labelL: TextStyle,
     public val labelM: TextStyle,
     public val labelS: TextStyle,
+    public val labelXS: TextStyle,
 ) {
 
     public companion object {
@@ -128,6 +129,13 @@ public data class StreamTypography(
                 fontWeight = FontWeight.W500,
                 color = colors.basePrimary,
             ),
+            labelXS = TextStyle(
+                fontSize = dimens.textSizeXs,
+                lineHeight = dimens.lineHeightXs,
+                fontFamily = fontFamily,
+                fontWeight = FontWeight.W500,
+                color = colors.basePrimary,
+            )
         )
     }
 }

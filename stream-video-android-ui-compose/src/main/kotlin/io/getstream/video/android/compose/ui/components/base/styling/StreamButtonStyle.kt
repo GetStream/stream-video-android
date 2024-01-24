@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package io.getstream.video.android.compose.ui.components.base.buttons
+package io.getstream.video.android.compose.ui.components.base.styling
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.PaddingValues
@@ -27,11 +27,6 @@ import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import io.getstream.video.android.compose.theme.v2.VideoTheme
-import io.getstream.video.android.compose.ui.components.base.icons.StreamIconStyle
-import io.getstream.video.android.compose.ui.components.base.icons.StreamIconStyles
-import io.getstream.video.android.compose.ui.components.base.styling.StyleSize
-import io.getstream.video.android.compose.ui.components.base.texts.StreamTextStyle
-import io.getstream.video.android.compose.ui.components.base.texts.StreamTextStyles
 
 public object DefaultStreamButtonStyles : StreamButtonStyles()
 

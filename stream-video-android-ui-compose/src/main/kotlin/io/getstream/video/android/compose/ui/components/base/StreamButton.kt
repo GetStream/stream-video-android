@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package io.getstream.video.android.compose.ui.components.base.buttons
+package io.getstream.video.android.compose.ui.components.base
 
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsPressedAsState
@@ -23,7 +23,6 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.Button
@@ -43,8 +42,12 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import io.getstream.video.android.compose.theme.v2.VideoTheme
+import io.getstream.video.android.compose.ui.components.base.styling.DefaultStreamButtonStyles
+import io.getstream.video.android.compose.ui.components.base.styling.StreamButtonStyle
+import io.getstream.video.android.compose.ui.components.base.styling.StreamFixedSizeButtonStyle
 import io.getstream.video.android.compose.ui.components.base.styling.StyleSize
 import io.getstream.video.android.compose.ui.components.base.styling.StyleState
+import io.getstream.video.android.compose.ui.components.base.styling.styleState
 
 @Composable
 public fun GenericStreamButton(
@@ -132,22 +135,6 @@ public fun StreamIconButton(
             contentDescription = icon.name,
         )
     }
-}
-
-@Composable
-private fun styleState(
-    interactionSource: MutableInteractionSource,
-    enabled: Boolean,
-): StyleState {
-    val pressed by interactionSource.collectIsPressedAsState()
-    val state = if (enabled) {
-        StyleState.ENABLED
-    } else if (pressed) {
-        StyleState.PRESSED
-    } else {
-        StyleState.DISABLED
-    }
-    return state
 }
 
 @Preview
