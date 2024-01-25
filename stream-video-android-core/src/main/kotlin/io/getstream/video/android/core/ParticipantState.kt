@@ -42,6 +42,7 @@ import stream.video.sfu.models.TrackType
  * * A list of participants is shared when you join a call the SFU send you the participant joined event.
  *
  */
+@Stable
 public data class ParticipantState(
     /** The SFU returns a session id for each participant. This session id is unique */
     var sessionId: String = "",
