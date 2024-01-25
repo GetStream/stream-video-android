@@ -2,9 +2,7 @@ Lio/getstream/video/android/ui/common/R$array;
 Lio/getstream/video/android/ui/common/R$color;
 Lio/getstream/video/android/ui/common/R$dimen;
 Lio/getstream/video/android/ui/common/R$drawable;
-Lio/getstream/video/android/ui/common/R$string;
-Lio/getstream/video/android/ui/common/renderer/StreamVideoTextureViewRenderer;
-HSPLio/getstream/video/android/ui/common/renderer/StreamVideoTextureViewRenderer;-><init>(Landroid/content/Context;)V
+PLio/getstream/video/android/ui/common/renderer/StreamVideoTextureViewRenderer;-><init>(Landroid/content/Context;)V
 PLio/getstream/video/android/ui/common/renderer/StreamVideoTextureViewRenderer;->getLogger()Lio/getstream/log/TaggedLogger;
 PLio/getstream/video/android/ui/common/renderer/StreamVideoTextureViewRenderer;->onDetachedFromWindow()V
 PLio/getstream/video/android/ui/common/renderer/StreamVideoTextureViewRenderer;->onSurfaceTextureDestroyed(Landroid/graphics/SurfaceTexture;)Z
