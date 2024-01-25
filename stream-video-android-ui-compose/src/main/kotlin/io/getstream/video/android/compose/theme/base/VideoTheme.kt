@@ -99,11 +99,7 @@ public fun VideoTheme(
     }
 }
 
-/**
- * Contains ease-of-use accessors for different properties used to style and customize the app
- * look and feel.
- */
-public object VideoTheme {
+public interface StreamTheme {
     /**
      * Retrieves the current [StreamColors] at the call site's position in the hierarchy.
      */
@@ -146,3 +142,9 @@ public object VideoTheme {
         @Composable @ReadOnlyComposable
         get() = LocalReactionMapper.current
 }
+
+/**
+ * Contains ease-of-use accessors for different properties used to style and customize the app
+ * look and feel.
+ */
+public object VideoTheme : StreamTheme
