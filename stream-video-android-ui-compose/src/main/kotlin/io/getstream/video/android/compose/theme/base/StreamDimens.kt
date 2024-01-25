@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package io.getstream.video.android.compose.theme.v2
+package io.getstream.video.android.compose.theme.base
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.res.dimensionResource

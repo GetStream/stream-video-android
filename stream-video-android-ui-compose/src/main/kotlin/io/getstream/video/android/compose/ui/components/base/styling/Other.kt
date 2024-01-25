@@ -24,9 +24,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import io.getstream.video.android.compose.theme.v2.VideoTheme
+import io.getstream.video.android.compose.theme.base.VideoTheme
 
-public class BadgeStyle(
+public data class BadgeStyle(
     public val size: Dp,
     public val color: Color,
     public val textStyle: TextStyle,

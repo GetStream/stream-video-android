@@ -44,12 +44,20 @@ import androidx.compose.material.Surface
 import androidx.compose.material.Text
 import androidx.compose.material.TextField
 import androidx.compose.material.TextFieldDefaults
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Email
+import androidx.compose.material.icons.filled.GroupAdd
+import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material.icons.filled.SupervisedUserCircle
+import androidx.compose.material.icons.outlined.GroupAdd
+import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
@@ -61,6 +69,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.testTagsAsResourceId
+import androidx.compose.ui.state.ToggleableState
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
@@ -73,11 +82,15 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.getstream.video.android.BuildConfig
 import io.getstream.video.android.R
-import io.getstream.video.android.compose.theme.VideoTheme
+import io.getstream.video.android.compose.theme.base.VideoTheme
+import io.getstream.video.android.compose.ui.components.base.StreamButton
+import io.getstream.video.android.compose.ui.components.base.StreamIconButton
+import io.getstream.video.android.compose.ui.components.base.StreamIconToggleButton
+import io.getstream.video.android.compose.ui.components.base.styling.DefaultStreamButtonStyles
+import io.getstream.video.android.compose.ui.components.base.styling.StyleSize
 import io.getstream.video.android.ui.theme.Colors
 import io.getstream.video.android.ui.theme.LinkText
 import io.getstream.video.android.ui.theme.LinkTextData
-import io.getstream.video.android.ui.theme.StreamButton
 import io.getstream.video.android.util.UserHelper
 import io.getstream.video.android.util.config.AppConfig
 import io.getstream.video.android.util.config.types.StreamEnvironment
@@ -94,28 +107,30 @@ fun LoginScreen(
     autoLogIn: Boolean = true,
     navigateToCallJoin: () -> Unit,
 ) {
-    val uiState by loginViewModel.uiState.collectAsState(initial = LoginUiState.Nothing)
-    val isLoading by remember(uiState) {
-        mutableStateOf(uiState !is LoginUiState.Nothing && uiState !is LoginUiState.SignInFailure)
-    }
-    var isShowingEmailLoginDialog by remember { mutableStateOf(false) }
+    VideoTheme {
+        val uiState by loginViewModel.uiState.collectAsState(initial = LoginUiState.Nothing)
+        val isLoading by remember(uiState) {
+            mutableStateOf(uiState !is LoginUiState.Nothing && uiState !is LoginUiState.SignInFailure)
+        }
+        var isShowingEmailLoginDialog by remember { mutableStateOf(false) }
 
-    HandleLoginUiStates(
-        autoLogIn = autoLogIn,
-        loginUiState = uiState,
-        navigateToCallJoin = navigateToCallJoin,
-    )
-
-    LoginContent(
-        autoLogIn = autoLogIn,
-        isLoading = isLoading,
-        showEmailLoginDialog = { isShowingEmailLoginDialog = true },
-    )
-
-    if (isShowingEmailLoginDialog) {
-        EmailLoginDialog(
-            onDismissRequest = { isShowingEmailLoginDialog = false },
+        HandleLoginUiStates(
+            autoLogIn = autoLogIn,
+            loginUiState = uiState,
+            navigateToCallJoin = navigateToCallJoin,
         )
+
+        LoginContent(
+            autoLogIn = autoLogIn,
+            isLoading = isLoading,
+            showEmailLoginDialog = { isShowingEmailLoginDialog = true },
+        )
+
+        if (isShowingEmailLoginDialog) {
+            EmailLoginDialog(
+                onDismissRequest = { isShowingEmailLoginDialog = false },
+            )
+        }
     }
 }
 
@@ -175,12 +190,10 @@ private fun LoginContent(
                     when (it) {
                         "google" -> {
                             StreamButton(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .height(52.dp)
-                                    .padding(horizontal = 55.dp),
+                                modifier = Modifier.fillMaxWidth(),
                                 enabled = !isLoading,
                                 text = stringResource(id = R.string.sign_in_google),
+                                style = DefaultStreamButtonStyles.primaryButtonStyle(),
                                 onClick = {
                                     loginViewModel.autoLogIn = false
                                     loginViewModel.handleUiEvent(LoginEvent.GoogleSignIn())
@@ -190,12 +203,11 @@ private fun LoginContent(
 
                         "email" -> {
                             StreamButton(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .height(52.dp)
-                                    .padding(horizontal = 55.dp),
+                                modifier = Modifier.fillMaxWidth(),
+                                icon = Icons.Default.Email,
                                 enabled = !isLoading,
                                 text = stringResource(id = R.string.sign_in_email),
+                                style = DefaultStreamButtonStyles.primaryButtonStyle(),
                                 onClick = {
                                     loginViewModel.autoLogIn = true
                                     showEmailLoginDialog.invoke()
@@ -205,20 +217,20 @@ private fun LoginContent(
 
                         "guest" -> {
                             StreamButton(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .height(52.dp)
-                                    .padding(horizontal = 55.dp),
+                                modifier = Modifier.fillMaxWidth(),
+                                icon = Icons.Outlined.GroupAdd,
                                 enabled = !isLoading,
-                                text = stringResource(R.string.random_user_sign_in),
+                                text = stringResource(id = R.string.random_user_sign_in),
+                                style = DefaultStreamButtonStyles.tetriaryButtonStyle(),
                                 onClick = {
+
                                     loginViewModel.autoLogIn = true
                                     loginViewModel.signInIfValidUserExist()
                                 },
                             )
                         }
                     }
-                    Spacer(modifier = Modifier.height(15.dp))
+                    Spacer(modifier = Modifier.height(VideoTheme.dimens.spacingM))
                 }
 
                 val context = LocalContext.current
@@ -242,12 +254,14 @@ private fun LoginContent(
             }
 
             if (BuildConfig.BUILD_TYPE == "benchmark") {
+
                 StreamButton(
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(horizontal = 55.dp)
                         .testTag("authenticate"),
                     text = "Login for Benchmark",
+                    style = DefaultStreamButtonStyles.secondaryButtonStyle(),
                     onClick = {
                         loginViewModel.handleUiEvent(
                             LoginEvent.SignInSuccess("benchmark.test@getstream.io"),
@@ -260,7 +274,7 @@ private fun LoginContent(
         if (isLoading) {
             CircularProgressIndicator(
                 modifier = Modifier.align(Alignment.Center),
-                color = VideoTheme.colors.primaryAccent,
+                color = VideoTheme.colors.brandPrimary,
             )
         }
     }
@@ -289,10 +303,10 @@ private fun EmailLoginDialog(
                         label = { Text(text = stringResource(R.string.enter_your_email_address)) },
                         colors = TextFieldDefaults.textFieldColors(
                             textColor = Colors.description,
-                            focusedLabelColor = VideoTheme.colors.primaryAccent,
-                            unfocusedLabelColor = VideoTheme.colors.textLowEmphasis,
-                            unfocusedIndicatorColor = VideoTheme.colors.primaryAccent,
-                            focusedIndicatorColor = VideoTheme.colors.primaryAccent,
+                            focusedLabelColor = VideoTheme.colors.basePrimary,
+                            unfocusedLabelColor = VideoTheme.colors.basePrimary,
+                            unfocusedIndicatorColor = VideoTheme.colors.basePrimary,
+                            focusedIndicatorColor = VideoTheme.colors.basePrimary,
                             cursorColor = Colors.description,
                         ),
                         keyboardOptions = KeyboardOptions.Default.copy(
@@ -308,6 +322,7 @@ private fun EmailLoginDialog(
                             val userId = UserHelper.getUserIdFromEmail(email)
                             loginViewModel.handleUiEvent(LoginEvent.SignInSuccess(userId))
                         },
+                        style = DefaultStreamButtonStyles.secondaryButtonStyle(StyleSize.S),
                         text = "Log in",
                     )
 
@@ -335,9 +350,13 @@ fun SelectableDialog(
             color = Color.White,
         )
         if (items.size > 1) {
-            StreamButton(
-                text = "Change",
+            StreamIconToggleButton(
+                toggleState = rememberUpdatedState(newValue = ToggleableState(showDialog)),
                 onClick = { showDialog = true },
+                onIcon = Icons.Outlined.Settings,
+                offIcon = Icons.Default.Settings,
+                onStyle = DefaultStreamButtonStyles.secondaryIconButtonStyle(),
+                offStyle = DefaultStreamButtonStyles.primaryIconButtonStyle(),
                 modifier = Modifier.padding(16.dp),
             )
             if (showDialog) {
@@ -356,6 +375,7 @@ fun SelectableDialog(
                                         selectedText = item.displayName
                                         showDialog = false
                                     },
+                                    style = DefaultStreamButtonStyles.secondaryButtonStyle(),
                                     modifier = Modifier.padding(8.dp),
                                 )
                             }

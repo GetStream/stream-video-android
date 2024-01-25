@@ -435,7 +435,7 @@ private fun JoinCallForm(
             ),
         )
 
-        io.getstream.video.android.compose.theme.v2.VideoTheme {
+        io.getstream.video.android.compose.theme.base.VideoTheme {
             StreamButton(
                 modifier = Modifier
                     .padding(start = 16.dp)

@@ -20,7 +20,7 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
-import io.getstream.video.android.compose.theme.v2.VideoTheme
+import io.getstream.video.android.compose.theme.base.VideoTheme
 
 /**
  * Represents an icon style. Consists of color and padding.

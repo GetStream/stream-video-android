@@ -18,7 +18,7 @@ package io.getstream.video.android.compose.ui.components.base.styling
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.text.TextStyle
-import io.getstream.video.android.compose.theme.v2.VideoTheme
+import io.getstream.video.android.compose.theme.base.VideoTheme
 
 /**
  * Wrapper for the platform text style.

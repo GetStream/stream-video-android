@@ -16,7 +16,7 @@
 
 @file:OptIn(ExperimentalComposeUiApi::class)
 
-package io.getstream.video.android.compose.theme.v2
+package io.getstream.video.android.compose.theme.base
 
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Box

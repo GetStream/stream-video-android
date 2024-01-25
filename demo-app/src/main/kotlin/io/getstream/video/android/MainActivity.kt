@@ -24,7 +24,7 @@ import androidx.lifecycle.lifecycleScope
 import com.google.firebase.analytics.FirebaseAnalytics
 import dagger.hilt.android.AndroidEntryPoint
 import io.getstream.video.android.analytics.FirebaseEvents
-import io.getstream.video.android.compose.theme.v2.VideoTheme
+import io.getstream.video.android.compose.theme.base.VideoTheme
 import io.getstream.video.android.datastore.delegate.StreamUserDataStore
 import io.getstream.video.android.tooling.util.StreamFlavors
 import io.getstream.video.android.ui.AppNavHost
@@ -63,7 +63,13 @@ class MainActivity : ComponentActivity() {
             val isLoggedIn = dataStore.user.firstOrNull() != null
 
             setContent {
-                VideoTheme {
+                if (!isLoggedIn) {
+                    VideoTheme {
+                        AppNavHost(
+                            startDestination = AppScreens.Login.routeWithArg(false))
+                    }
+                }
+                io.getstream.video.android.compose.theme.VideoTheme {
                     AppNavHost(
                         startDestination = if (!isLoggedIn) {
                             AppScreens.Login.routeWithArg(true) // Pass true for autoLogIn
