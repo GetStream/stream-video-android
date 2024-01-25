@@ -17,6 +17,7 @@
 package io.getstream.video.android.core
 
 import android.content.Context
+import androidx.compose.runtime.Stable
 import androidx.core.content.ContextCompat
 import io.getstream.video.android.core.notifications.internal.service.CallService
 import io.getstream.video.android.model.StreamCallId
@@ -28,6 +29,7 @@ import org.openapitools.client.models.CallRingEvent
 import org.openapitools.client.models.ConnectedEvent
 import org.openapitools.client.models.VideoEvent
 
+@Stable
 public sealed interface ConnectionState {
     public data object PreConnect : ConnectionState
     public data object Loading : ConnectionState
@@ -37,6 +39,7 @@ public sealed interface ConnectionState {
     public class Failed(error: Error) : ConnectionState
 }
 
+@Stable
 public sealed interface RingingState {
     public data object Idle : RingingState
     public data class Incoming(val acceptedByMe: Boolean = false) : RingingState
@@ -46,6 +49,7 @@ public sealed interface RingingState {
     public data object TimeoutNoAnswer : RingingState
 }
 
+@Stable
 class ClientState(client: StreamVideo) {
     /**
      * Current user object

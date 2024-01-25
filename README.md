@@ -142,6 +142,7 @@ Video roadmap and changelog is available [here](https://github.com/GetStream/pro
 
 ### 0.5.0 milestone
 
+- [X] Improve Compose UI SDK performance by marking WebRTC models as stable.
 - [X] Development token to support a development environment  
 - [ ] H264 workaround on Samsung 23? (see https://github.com/livekit/client-sdk-android/blob/main/livekit-android-sdk/src/main/java/io/livekit/android/webrtc/SimulcastVideoEncoderFactoryWrapper.kt#L34 and
 - https://github.com/react-native-webrtc/react-native-webrtc/issues/983#issuecomment-975624906)

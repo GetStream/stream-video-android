@@ -18,6 +18,7 @@ package io.getstream.video.android.core
 
 import android.content.Context
 import android.os.Build
+import androidx.compose.runtime.Stable
 import io.getstream.android.push.PushDevice
 import io.getstream.log.StreamLog
 import io.getstream.result.Result
@@ -36,6 +37,7 @@ import org.openapitools.client.models.VideoEvent
 /**
  * The main interface to control the Video calls. [StreamVideoImpl] implements this interface.
  */
+@Stable
 public interface StreamVideo : NotificationHandler {
 
     /**

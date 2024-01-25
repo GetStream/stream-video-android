@@ -16,6 +16,9 @@
 
 package io.getstream.video.android.core.call.stats.model
 
+import androidx.compose.runtime.Immutable
+
+@Immutable
 data class RtcIceCandidateStats(
     override val id: String?,
     override val type: String?,

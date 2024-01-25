@@ -16,6 +16,7 @@
 
 package io.getstream.video.android.core
 
+import androidx.compose.runtime.Stable
 import io.getstream.log.taggedLogger
 import io.getstream.video.android.core.call.RtcSession
 import io.getstream.video.android.core.events.AudioLevelChangedEvent
@@ -125,6 +126,7 @@ import java.util.UUID
 import kotlin.time.DurationUnit
 import kotlin.time.toDuration
 
+@Stable
 public sealed interface RealtimeConnection {
     /**
      * We start out in the PreJoin state. This is before call.join is called
@@ -173,6 +175,7 @@ public sealed interface RealtimeConnection {
  *
  *
  */
+@Stable
 public class CallState(
     private val client: StreamVideo,
     private val call: Call,
