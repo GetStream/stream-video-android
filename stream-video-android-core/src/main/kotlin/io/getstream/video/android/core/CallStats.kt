@@ -22,13 +22,40 @@ import io.getstream.video.android.core.call.stats.model.RtcStatsReport
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import org.webrtc.CameraEnumerationAndroid
 import org.webrtc.RTCStats
 import stream.video.sfu.models.TrackType
 
-public class PeerConnectionStats {
+data class MediaStatsInfo(
+    val qualityLimit: String?,
+    val jitter: Double?,
+    val width: Long?,
+    val height: Long?,
+    val fps: Double?,
+    val deviceLatency: Double?,
+) {
+    companion object {
+        fun fromMap(map: Map<String, Any?>): MediaStatsInfo {
+            val qualityLimit = map["qualityLimitationReason"] as? String
+            val jitter = map["jitter"] as? Double
+            val width = (map["frameWidth"] as? Long)?.takeIf { it > 0 }
+            val height = (map["frameHeight"] as? Long)?.takeIf { it > 0 }
+            val fps = map["framesPerSecond"] as? Double
+            val deviceLatency = map["totalPacketSendDelay"] as? Double
+
+            return MediaStatsInfo(qualityLimit, jitter, width, height, fps, deviceLatency)
+        }
+    }
+}
+
+public class PeerConnectionStats(scope: CoroutineScope) {
+    internal var _latency: MutableStateFlow<Int> = MutableStateFlow(0)
+    val latency: StateFlow<Int> = _latency
+
     internal val _resolution: MutableStateFlow<String> = MutableStateFlow("")
     val resolution: StateFlow<String> = _resolution
 
@@ -59,10 +86,11 @@ public class CallStats(val call: Call, val callScope: CoroutineScope) {
     private val scope = CoroutineScope(callScope.coroutineContext + supervisorJob)
     // TODO: cleanup the scope
 
-    val publisher = PeerConnectionStats()
-    val subscriber = PeerConnectionStats()
+    val publisher = PeerConnectionStats(scope)
+    val subscriber = PeerConnectionStats(scope)
     val _local = MutableStateFlow<LocalStats?>(null)
-    val local: StateFlow<LocalStats?> = _local
+    val local: StateFlow<LocalStats?> =
+        _local.stateIn(scope, SharingStarted.WhileSubscribed(), null)
 
     fun updateFromRTCStats(stats: RtcStatsReport?, isPublisher: Boolean = true) {
         if (stats == null) return
@@ -98,19 +126,62 @@ public class CallStats(val call: Call, val callScope: CoroutineScope) {
                 statGroups[statGroup]?.add(stat)
             }
 
-            statGroups["outbound-rtp:video:f"]?.firstOrNull()?.let {
-                val qualityLimit = it.members["qualityLimitationReason"] as? String
-                val width = it.members["frameWidth"] as? Long
-                val height = it.members["frameHeight"] as? Long
-                val fps = it.members["framesPerSecond"] as? Double
-                val deviceLatency = it.members["totalPacketSendDelay"] as? Double
-                // fir pli nack are also interesting
-                publisher._qualityDropReason.value = qualityLimit ?: ""
+            if (isPublisher) {
+                // Get all outbound video qualities
+                val mediaStatsF = statGroups["outbound-rtp:video:f"]?.firstOrNull()?.let {
+                    MediaStatsInfo.fromMap(it.members)
+                }
+                val mediaStatsH = statGroups["outbound-rtp:video:h"]?.firstOrNull()?.let {
+                    MediaStatsInfo.fromMap(it.members)
+                }
+                val mediaStatsQ = statGroups["outbound-rtp:video:q"]?.firstOrNull()?.let {
+                    MediaStatsInfo.fromMap(it.members)
+                }
+
+                // Choose the quality that actually streams and has data, starting from highest one
+                val mediaStats = mediaStatsF?.takeIf {
+                    it.width != null && it.height != null && it.fps != null
+                } ?: mediaStatsH?.takeIf {
+                    it.width != null && it.height != null && it.fps != null
+                } ?: mediaStatsQ?.takeIf {
+                    it.width != null && it.height != null && it.fps != null
+                }
+                publisher._qualityDropReason.value = mediaStats?.qualityLimit ?: ""
+                publisher._jitterInMs.value = mediaStats?.jitter?.times(1000)?.toInt() ?: 0
+                val resolutionUpdate = mediaStats?.takeUnless {
+                    it.width == null || it.height == null || it.fps == null
+                }?.let {
+                    "${it.width} x ${it.height} @ ${it.fps}fps"
+                }
+                if (resolutionUpdate != null) {
+                    publisher._resolution.value = resolutionUpdate
+                }
             }
 
             statGroups["inbound-rtp:video"]?.firstOrNull()?.let {
                 val jitter = it.members["jitter"] as Double
+                val width = it.members["frameWidth"] as? Long
+                val height = it.members["frameHeight"] as? Long
+                val fps = it.members["framesPerSecond"] as? Double
                 subscriber._jitterInMs.value = (jitter * 1000).toInt()
+                if (width != null && height != null && fps != null) {
+                    subscriber._resolution.value = "$width x $height @ $fps fps"
+                }
+            }
+            statGroups["candidate-pair"]?.firstOrNull()?.let {
+                val latency = it.members["currentRoundTripTime"] as? Double
+                val outgoingBitrate = it.members["availableOutgoingBitrate"] as? Double
+                val incomingBitrate = it.members["availableIncomingBitrate"] as? Double
+                latency?.let {
+                    publisher._latency.value = (latency * 1000).toInt()
+                }
+                outgoingBitrate?.let {
+                    publisher._bitrateKbps.value = (outgoingBitrate / 1000).toFloat()
+                }
+
+                incomingBitrate?.let {
+                    subscriber._bitrateKbps.value = (incomingBitrate / 1000).toFloat()
+                }
             }
             statGroups["track:video"]?.forEach {
                 // trackIdentifier is a random UUID generated by the browser
@@ -124,7 +195,6 @@ public class CallStats(val call: Call, val callScope: CoroutineScope) {
                 val frameHeight = it.members["frameHeight"] as? Long
                 val received = it.members["framesReceived"] as? Long
                 val duration = it.members["totalFramesDuration"] as? Long
-
                 if (participantId != null) {
                     logger.i {
                         "receiving video for $participantId at $frameWidth: ${it.members["frameWidth"]} and rendering it at ${visibleAt?.dimensions?.width} visible: ${visibleAt?.visible}"

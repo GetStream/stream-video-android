@@ -186,6 +186,11 @@ public class Call(
     val statsReport: MutableStateFlow<CallStatsReport?> = MutableStateFlow(null)
 
     /**
+     * Contains stats history.
+     */
+    val statLatencyHistory: MutableStateFlow<List<Int>> = MutableStateFlow(listOf(0, 0, 0))
+
+    /**
      * Time (in millis) when the full reconnection flow started. Will be null again once
      * the reconnection flow ends (success or failure)
      */
@@ -432,10 +437,19 @@ public class Call(
                 state.stats.updateFromRTCStats(publisherStats, isPublisher = true)
                 state.stats.updateFromRTCStats(subscriberStats, isPublisher = false)
                 state.stats.updateLocalStats()
-                statsReport.value = CallStatsReport(
+                val local = state.stats._local.value
+
+                val report = CallStatsReport(
                     publisher = publisherStats,
                     subscriber = subscriberStats,
+                    local = local,
+                    stateStats = state.stats,
                 )
+                statsReport.value = report
+                statLatencyHistory.value += report.stateStats.publisher.latency.value
+                if (statLatencyHistory.value.size > 20) {
+                    statLatencyHistory.value = statLatencyHistory.value.takeLast(20)
+                }
             }
         }
 

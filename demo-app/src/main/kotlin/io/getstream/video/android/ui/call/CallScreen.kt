@@ -94,6 +94,7 @@ fun CallScreen(
     var isShowingReactionsMenu by remember { mutableStateOf(false) }
     var isShowingAvailableDeviceMenu by remember { mutableStateOf(false) }
     var isBackgroundBlurEnabled by remember { mutableStateOf(false) }
+    var isShowingStats by remember { mutableStateOf(false) }
     var layout by remember { mutableStateOf(LayoutType.DYNAMIC) }
     var unreadCount by remember { mutableIntStateOf(0) }
     val chatState = rememberModalBottomSheetState(
@@ -333,6 +334,7 @@ fun CallScreen(
                     isBackgroundBlurEnabled = !isBackgroundBlurEnabled
                     isShowingSettingMenu = false
                 },
+                onShowCallStats = { isShowingStats = true },
             )
         }
 
@@ -353,6 +355,10 @@ fun CallScreen(
                 current = layout,
                 onDismiss = { isShowingLayoutChooseMenu = false },
             )
+        }
+
+        if (isShowingStats) {
+            CallStatsDialog(call) { isShowingStats = false }
         }
 
         if (isShowingAvailableDeviceMenu) {
