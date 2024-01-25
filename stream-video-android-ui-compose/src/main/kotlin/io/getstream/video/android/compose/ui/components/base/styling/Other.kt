@@ -25,7 +25,6 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import io.getstream.video.android.compose.theme.base.VideoTheme
-import org.jetbrains.annotations.ApiStatus.Experimental
 
 public data class BadgeStyle(
     public val size: Dp,

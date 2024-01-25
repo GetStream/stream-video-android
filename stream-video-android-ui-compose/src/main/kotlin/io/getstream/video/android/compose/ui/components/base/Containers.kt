@@ -1,6 +1,21 @@
+/*
+ * Copyright (c) 2014-2024 Stream.io Inc. All rights reserved.
+ *
+ * Licensed under the Stream License;
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    https://github.com/GetStream/stream-video-android/blob/main/LICENSE
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package io.getstream.video.android.compose.ui.components.base
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
@@ -31,14 +46,13 @@ import io.getstream.video.android.compose.ui.components.base.styling.StreamButto
 import io.getstream.video.android.compose.ui.components.base.styling.StreamDialogStyles
 import io.getstream.video.android.compose.ui.components.base.styling.StyleSize
 
-
 @Composable
 public fun StreamDialog(
     modifier: Modifier = Modifier,
     onDismiss: () -> Unit = {},
     style: DialogStyle,
     dialogProperties: DialogProperties = DialogProperties(),
-    content: @Composable BoxScope.() -> Unit
+    content: @Composable BoxScope.() -> Unit,
 ): Unit = Dialog(onDismissRequest = onDismiss, dialogProperties) {
     Box(
         modifier = modifier
@@ -61,18 +75,18 @@ public fun StreamDialogPositiveNegative(
     contentText: String? = null,
     positiveButton: Triple<String, StreamButtonStyle, () -> Unit>,
     negativeButton: Triple<String, StreamButtonStyle, () -> Unit>? = null,
-    content: (@Composable () -> Unit)? = null
+    content: (@Composable () -> Unit)? = null,
 ): Unit = StreamDialog(
     modifier = modifier,
     style = style,
     onDismiss = onDismiss,
-    dialogProperties = dialogProperties
+    dialogProperties = dialogProperties,
 ) {
     Column(horizontalAlignment = Alignment.CenterHorizontally) {
         Row(
             modifier = Modifier.fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.Start
+            horizontalArrangement = Arrangement.Start,
         ) {
             icon?.let {
                 val iconStyle = style.iconStyle
@@ -108,7 +122,7 @@ public fun StreamDialogPositiveNegative(
                     modifier = Modifier.weight(1f),
                     text = it.first,
                     style = it.second,
-                    onClick = it.third
+                    onClick = it.third,
                 )
                 Spacer(modifier = Modifier.size(16.dp))
             }
@@ -116,7 +130,7 @@ public fun StreamDialogPositiveNegative(
                 modifier = Modifier.weight(1f),
                 text = positiveButton.first,
                 style = positiveButton.second,
-                onClick = positiveButton.third
+                onClick = positiveButton.third,
             )
         }
     }
@@ -133,13 +147,13 @@ private fun StreamDialogPreview() {
             contentText = "By staying in the call you’re consenting to being recorded.",
             positiveButton = Triple(
                 "Continue",
-                DefaultStreamButtonStyles.secondaryButtonStyle(StyleSize.S)
+                DefaultStreamButtonStyles.secondaryButtonStyle(StyleSize.S),
             ) {
                 // Do nothing
             },
             negativeButton = Triple(
                 "Leave call",
-                DefaultStreamButtonStyles.tetriaryButtonStyle(StyleSize.S)
+                DefaultStreamButtonStyles.tetriaryButtonStyle(StyleSize.S),
             ) {
                 // Do nothing
             },
