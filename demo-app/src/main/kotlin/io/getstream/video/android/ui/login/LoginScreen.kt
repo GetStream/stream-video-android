@@ -48,7 +48,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.icons.filled.GroupAdd
 import androidx.compose.material.icons.filled.Settings
-import androidx.compose.material.icons.filled.SupervisedUserCircle
 import androidx.compose.material.icons.outlined.GroupAdd
 import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.runtime.Composable
@@ -84,7 +83,6 @@ import io.getstream.video.android.BuildConfig
 import io.getstream.video.android.R
 import io.getstream.video.android.compose.theme.base.VideoTheme
 import io.getstream.video.android.compose.ui.components.base.StreamButton
-import io.getstream.video.android.compose.ui.components.base.StreamIconButton
 import io.getstream.video.android.compose.ui.components.base.StreamIconToggleButton
 import io.getstream.video.android.compose.ui.components.base.styling.DefaultStreamButtonStyles
 import io.getstream.video.android.compose.ui.components.base.styling.StyleSize
@@ -110,7 +108,9 @@ fun LoginScreen(
     VideoTheme {
         val uiState by loginViewModel.uiState.collectAsState(initial = LoginUiState.Nothing)
         val isLoading by remember(uiState) {
-            mutableStateOf(uiState !is LoginUiState.Nothing && uiState !is LoginUiState.SignInFailure)
+            mutableStateOf(
+                uiState !is LoginUiState.Nothing && uiState !is LoginUiState.SignInFailure,
+            )
         }
         var isShowingEmailLoginDialog by remember { mutableStateOf(false) }
 
@@ -223,7 +223,6 @@ private fun LoginContent(
                                 text = stringResource(id = R.string.random_user_sign_in),
                                 style = DefaultStreamButtonStyles.tetriaryButtonStyle(),
                                 onClick = {
-
                                     loginViewModel.autoLogIn = true
                                     loginViewModel.signInIfValidUserExist()
                                 },
@@ -254,7 +253,6 @@ private fun LoginContent(
             }
 
             if (BuildConfig.BUILD_TYPE == "benchmark") {
-
                 StreamButton(
                     modifier = Modifier
                         .fillMaxWidth()

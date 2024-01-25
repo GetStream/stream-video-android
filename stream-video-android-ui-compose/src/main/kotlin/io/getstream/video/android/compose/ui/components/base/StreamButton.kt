@@ -16,7 +16,6 @@
 
 package io.getstream.video.android.compose.ui.components.base
 
-import android.widget.ToggleButton
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
@@ -53,9 +52,7 @@ import io.getstream.video.android.compose.ui.components.base.styling.DefaultStre
 import io.getstream.video.android.compose.ui.components.base.styling.StreamBadgeStyles
 import io.getstream.video.android.compose.ui.components.base.styling.StreamButtonStyle
 import io.getstream.video.android.compose.ui.components.base.styling.StreamFixedSizeButtonStyle
-import io.getstream.video.android.compose.ui.components.base.styling.StreamTextStyles
 import io.getstream.video.android.compose.ui.components.base.styling.StyleSize
-import io.getstream.video.android.compose.ui.components.base.styling.TextStyleWrapper
 import io.getstream.video.android.compose.ui.components.base.styling.styleState
 
 @Composable
@@ -171,7 +168,8 @@ public fun StreamIconToggleButton(
     onClick: (ToggleableState) -> Unit = {},
     enabled: Boolean = true,
     interactionSource: MutableInteractionSource = remember { MutableInteractionSource() },
-): Unit = GenericToggleButton(modifier = modifier,
+): Unit = GenericToggleButton(
+    modifier = modifier,
     toggleState = toggleState,
     onClick = onClick,
     onContent = {
@@ -182,7 +180,8 @@ public fun StreamIconToggleButton(
             style = onStyle,
             onClick = {
                 it(toggleState.value)
-            })
+            },
+        )
     },
     offContent = {
         StreamIconButton(
@@ -192,8 +191,10 @@ public fun StreamIconToggleButton(
             style = offStyle,
             onClick = {
                 it(toggleState.value)
-            })
-    })
+            },
+        )
+    },
+)
 
 // Start of previews
 
@@ -391,7 +392,7 @@ private fun StreamToggleIconButtonPreview() {
                 onStyle = DefaultStreamButtonStyles.primaryIconButtonStyle(),
                 offStyle = DefaultStreamButtonStyles.alertIconButtonStyle(),
                 onIcon = Icons.Default.Videocam,
-                offIcon = Icons.Default.VideocamOff
+                offIcon = Icons.Default.VideocamOff,
             )
             Spacer(modifier = Modifier.width(24.dp))
             StreamIconToggleButton(
@@ -399,15 +400,16 @@ private fun StreamToggleIconButtonPreview() {
                 onStyle = DefaultStreamButtonStyles.primaryIconButtonStyle(),
                 offStyle = DefaultStreamButtonStyles.alertIconButtonStyle(),
                 onIcon = Icons.Default.Videocam,
-                offIcon = Icons.Default.VideocamOff
+                offIcon = Icons.Default.VideocamOff,
             )
 
             Spacer(modifier = Modifier.width(24.dp))
             StreamBadgeOn(
                 style = StreamBadgeStyles.defaultBadgeStyle().copy(
                     color = VideoTheme.colors.alertCaution,
-                    textStyle = VideoTheme.typography.labelXS.copy(color = Color.Black)
-                ), text = "!"
+                    textStyle = VideoTheme.typography.labelXS.copy(color = Color.Black),
+                ),
+                text = "!",
             ) {
                 StreamIconToggleButton(
                     enabled = false,
@@ -415,7 +417,7 @@ private fun StreamToggleIconButtonPreview() {
                     onStyle = DefaultStreamButtonStyles.secondaryIconButtonStyle(),
                     offStyle = DefaultStreamButtonStyles.alertIconButtonStyle(),
                     onIcon = Icons.Default.Videocam,
-                    offIcon = Icons.Default.VideocamOff
+                    offIcon = Icons.Default.VideocamOff,
                 )
             }
         }

@@ -66,7 +66,8 @@ class MainActivity : ComponentActivity() {
                 if (!isLoggedIn) {
                     VideoTheme {
                         AppNavHost(
-                            startDestination = AppScreens.Login.routeWithArg(false))
+                            startDestination = AppScreens.Login.routeWithArg(false),
+                        )
                     }
                 }
                 io.getstream.video.android.compose.theme.VideoTheme {
