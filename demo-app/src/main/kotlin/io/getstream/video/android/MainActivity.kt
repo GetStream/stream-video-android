@@ -20,7 +20,9 @@ import android.os.Bundle
 import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import com.google.firebase.analytics.FirebaseAnalytics
 import dagger.hilt.android.AndroidEntryPoint
 import io.getstream.video.android.analytics.FirebaseEvents
@@ -37,7 +39,8 @@ import javax.inject.Inject
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
-    @Inject lateinit var dataStore: StreamUserDataStore
+    @Inject
+    lateinit var dataStore: StreamUserDataStore
     private val firebaseAnalytics by lazy { FirebaseAnalytics.getInstance(this) }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -55,8 +58,10 @@ class MainActivity : ComponentActivity() {
             }
         }
 
-        lifecycleScope.launchWhenCreated {
-            InAppUpdateHelper(this@MainActivity).checkForAppUpdates()
+        lifecycleScope.launch {
+            repeatOnLifecycle(Lifecycle.State.CREATED) {
+                InAppUpdateHelper(this@MainActivity).checkForAppUpdates()
+            }
         }
 
         lifecycleScope.launch {
