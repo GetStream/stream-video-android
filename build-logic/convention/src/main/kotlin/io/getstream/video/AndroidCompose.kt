@@ -1,11 +1,11 @@
 package io.getstream.video
 
 import com.android.build.api.dsl.CommonExtension
-import java.io.File
 import org.gradle.api.Project
 import org.gradle.api.artifacts.VersionCatalogsExtension
 import org.gradle.kotlin.dsl.dependencies
 import org.gradle.kotlin.dsl.getByType
+import java.io.File
 
 /**
  * Configure Compose-specific options
@@ -26,7 +26,7 @@ internal fun Project.configureAndroidCompose(
         }
 
         kotlinOptions {
-            freeCompilerArgs = freeCompilerArgs + buildComposeMetricsParameters()
+            freeCompilerArgs += buildComposeMetricsParameters() + configureComposeStabilityPath()
         }
     }
 
@@ -58,5 +58,15 @@ private fun Project.buildComposeMetricsParameters(): List<String> {
             "plugin:androidx.compose.compiler.plugins.kotlin:reportsDestination=" + reportsFolder.absolutePath
         )
     }
+    return metricParameters.toList()
+}
+
+private fun Project.configureComposeStabilityPath(): List<String> {
+    val metricParameters = mutableListOf<String>()
+    metricParameters.add("-P")
+    metricParameters.add(
+        "plugin:androidx.compose.compiler.plugins.kotlin:stabilityConfigurationPath=" +
+            project.path + "/compose_compiler_config.conf"
+    )
     return metricParameters.toList()
 }

@@ -16,8 +16,10 @@
 
 package io.getstream.video.android.core
 
+import androidx.compose.runtime.Immutable
 import io.getstream.video.android.model.User
 
+@Immutable
 public data class MemberState(
     val user: User,
     val custom: Map<String, Any?>,
