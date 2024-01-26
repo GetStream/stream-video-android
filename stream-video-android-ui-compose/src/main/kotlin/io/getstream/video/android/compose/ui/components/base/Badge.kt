@@ -43,26 +43,14 @@ import io.getstream.video.android.compose.ui.components.base.styling.DefaultStre
 import io.getstream.video.android.compose.ui.components.base.styling.StreamBadgeStyles
 
 @Composable
-public fun StreamBadgeOn(
+public fun StreamBadgeBox(
     modifier: Modifier = Modifier,
     text: String? = null,
     style: BadgeStyle,
     content: @Composable BoxScope.(Modifier) -> Unit,
 ) {
-    WithBadge(text = text, style = style) {
-        content(modifier)
-    }
-}
-
-@Composable
-private fun WithBadge(
-    modifier: Modifier = Modifier,
-    style: BadgeStyle,
-    text: String? = null,
-    content: @Composable BoxScope.() -> Unit,
-) {
     Box(modifier = modifier) {
-        content()
+        content(modifier)
         // Badge content
         BadgeContent(style = style, text = text)
     }
@@ -93,7 +81,7 @@ private fun BoxScope.BadgeContent(style: BadgeStyle, text: String? = null) {
 private fun ButtonWithBadgePreview() {
     VideoTheme {
         Column {
-            StreamBadgeOn(
+            StreamBadgeBox(
                 text = "!",
                 style = StreamBadgeStyles.defaultBadgeStyle(),
             ) {
@@ -103,7 +91,7 @@ private fun ButtonWithBadgePreview() {
                 )
             }
             Spacer(modifier = Modifier.size(16.dp))
-            StreamBadgeOn(
+            StreamBadgeBox(
                 text = "10",
                 style = StreamBadgeStyles.defaultBadgeStyle(),
             ) {
@@ -114,7 +102,7 @@ private fun ButtonWithBadgePreview() {
                 )
             }
             Spacer(modifier = Modifier.size(16.dp))
-            StreamBadgeOn(
+            StreamBadgeBox(
                 text = "10+",
                 style = StreamBadgeStyles.defaultBadgeStyle(),
             ) {

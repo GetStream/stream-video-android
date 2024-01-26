@@ -404,7 +404,7 @@ private fun StreamToggleIconButtonPreview() {
             )
 
             Spacer(modifier = Modifier.width(24.dp))
-            StreamBadgeOn(
+            StreamBadgeBox(
                 style = StreamBadgeStyles.defaultBadgeStyle().copy(
                     color = VideoTheme.colors.alertCaution,
                     textStyle = VideoTheme.typography.labelXS.copy(color = Color.Black),

@@ -125,7 +125,7 @@ public open class StreamButtonStyles {
         border,
         colors,
         contentPadding,
-        StreamTextStyles.defaultLabel(size),
+        StreamTextStyles.defaultButtonLabel(size),
         StreamIconStyles.defaultIconStyle(),
     )
 

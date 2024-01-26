@@ -51,6 +51,18 @@ public open class TextStyleProvider {
     ): StreamTextStyle = StreamTextStyle(default, disabled, pressed)
 
     @Composable
+    public fun defaultButtonLabel(
+        size: StyleSize = StyleSize.L,
+        default: TextStyleWrapper = when (size) {
+            StyleSize.XS, StyleSize.S -> VideoTheme.typography.labelXS.wrapper()
+            StyleSize.M -> VideoTheme.typography.labelS.wrapper()
+            else -> VideoTheme.typography.labelM.wrapper()
+        },
+        pressed: TextStyleWrapper = default,
+        disabled: TextStyleWrapper = default.disabledAlpha(),
+    ): StreamTextStyle = StreamTextStyle(default, disabled, pressed)
+
+    @Composable
     public fun defaultTitle(
         size: StyleSize = StyleSize.L,
         default: TextStyleWrapper = when (size) {

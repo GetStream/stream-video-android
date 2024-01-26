@@ -16,6 +16,7 @@
 
 package io.getstream.video.android.compose.ui.components.base
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
@@ -46,6 +47,7 @@ import io.getstream.video.android.compose.ui.components.base.styling.StreamButto
 import io.getstream.video.android.compose.ui.components.base.styling.StreamDialogStyles
 import io.getstream.video.android.compose.ui.components.base.styling.StyleSize
 
+
 @Composable
 public fun StreamDialog(
     modifier: Modifier = Modifier,
@@ -57,6 +59,7 @@ public fun StreamDialog(
     Box(
         modifier = modifier
             .clip(style.shape)
+            .background(color = style.backgroundColor, shape = style.shape)
             .padding(style.contentPaddings),
         contentAlignment = Alignment.Center,
     ) {
@@ -143,7 +146,8 @@ private fun StreamDialogPreview() {
         StreamDialogPositiveNegative(
             icon = Icons.Default.StopCircle,
             title = "This Call is Being Recorded",
-            style = StreamDialogStyles.defaultDialogStyle(),
+            // Color is for preview only
+            style = StreamDialogStyles.defaultDialogStyle().copy(backgroundColor = VideoTheme.colors.baseSheetTertiary),
             contentText = "By staying in the call you’re consenting to being recorded.",
             positiveButton = Triple(
                 "Continue",
