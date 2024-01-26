@@ -47,7 +47,6 @@ import io.getstream.video.android.compose.ui.components.base.styling.StreamButto
 import io.getstream.video.android.compose.ui.components.base.styling.StreamDialogStyles
 import io.getstream.video.android.compose.ui.components.base.styling.StyleSize
 
-
 @Composable
 public fun StreamDialog(
     modifier: Modifier = Modifier,
@@ -147,7 +146,9 @@ private fun StreamDialogPreview() {
             icon = Icons.Default.StopCircle,
             title = "This Call is Being Recorded",
             // Color is for preview only
-            style = StreamDialogStyles.defaultDialogStyle().copy(backgroundColor = VideoTheme.colors.baseSheetTertiary),
+            style = StreamDialogStyles.defaultDialogStyle().copy(
+                backgroundColor = VideoTheme.colors.baseSheetTertiary,
+            ),
             contentText = "By staying in the call you’re consenting to being recorded.",
             positiveButton = Triple(
                 "Continue",

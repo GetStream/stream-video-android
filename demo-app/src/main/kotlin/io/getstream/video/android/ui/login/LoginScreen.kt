@@ -39,7 +39,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.AlertDialog
 import androidx.compose.material.CircularProgressIndicator
-import androidx.compose.material.Surface
 import androidx.compose.material.Text
 import androidx.compose.material.TextField
 import androidx.compose.material.TextFieldDefaults
@@ -74,7 +73,6 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.ui.window.Dialog
 import androidx.core.content.ContextCompat.getString
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -82,13 +80,11 @@ import io.getstream.video.android.BuildConfig
 import io.getstream.video.android.R
 import io.getstream.video.android.compose.theme.base.VideoTheme
 import io.getstream.video.android.compose.ui.components.base.StreamButton
-import io.getstream.video.android.compose.ui.components.base.StreamDialog
 import io.getstream.video.android.compose.ui.components.base.StreamDialogPositiveNegative
 import io.getstream.video.android.compose.ui.components.base.StreamIconToggleButton
 import io.getstream.video.android.compose.ui.components.base.styling.DefaultStreamButtonStyles
 import io.getstream.video.android.compose.ui.components.base.styling.StreamDialogStyles
 import io.getstream.video.android.compose.ui.components.base.styling.StreamIconStyles
-import io.getstream.video.android.compose.ui.components.base.styling.StyleSize
 import io.getstream.video.android.ui.theme.Colors
 import io.getstream.video.android.util.UserHelper
 import io.getstream.video.android.util.config.AppConfig
@@ -141,12 +137,11 @@ fun LoginScreen(
                     loginViewModel.autoLogIn = it
                 }
                 if (event == null) {
-
                     loginViewModel.signInIfValidUserExist()
                 } else {
                     loginViewModel.handleUiEvent(event)
                 }
-            }
+            },
         )
 
         if (isShowingEmailLoginDialog) {
@@ -179,9 +174,8 @@ private fun LoginContent(
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(color = VideoTheme.colors.baseSheetPrimary)
+            .background(color = VideoTheme.colors.baseSheetPrimary),
     ) {
-
         selectedEnv?.let {
             Box(modifier = Modifier.align(Alignment.TopEnd)) {
                 SelectableDialog(
@@ -226,11 +220,10 @@ private fun LoginContent(
                 .align(Alignment.BottomCenter)
                 .background(
                     color = VideoTheme.colors.baseSheetSecondary,
-                    shape = RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp)
+                    shape = RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp),
                 )
-                .padding(horizontal = 24.dp, vertical = 32.dp)
+                .padding(horizontal = 24.dp, vertical = 32.dp),
         ) {
-
             if (!isLoading) {
                 availableLogins.forEach {
                     when (it) {
@@ -242,7 +235,9 @@ private fun LoginContent(
                                 text = stringResource(id = R.string.sign_in_google),
                                 style = DefaultStreamButtonStyles.primaryButtonStyle()
                                     .copy(
-                                        iconStyle = StreamIconStyles.customColorIconStyle(color = Color.Unspecified)
+                                        iconStyle = StreamIconStyles.customColorIconStyle(
+                                            color = Color.Unspecified,
+                                        ),
                                     ),
                                 onClick = {
                                     login(false, LoginEvent.GoogleSignIn())
@@ -307,7 +302,7 @@ private fun LoginContent(
 @Composable
 private fun EmailLoginDialog(
     onDismissRequest: () -> Unit = {},
-    login: (Boolean?, LoginEvent?) -> Unit = { _, _ -> }
+    login: (Boolean?, LoginEvent?) -> Unit = { _, _ -> },
 ) {
     var email by remember { mutableStateOf("") }
 
@@ -334,10 +329,11 @@ private fun EmailLoginDialog(
                     keyboardType = KeyboardType.Email,
                 ),
             )
-        }, positiveButton = Triple("Login", DefaultStreamButtonStyles.secondaryButtonStyle()) {
+        },
+        positiveButton = Triple("Login", DefaultStreamButtonStyles.secondaryButtonStyle()) {
             val userId = UserHelper.getUserIdFromEmail(email)
             login(true, LoginEvent.SignInSuccess(userId))
-        }
+        },
     )
 }
 
@@ -460,10 +456,11 @@ private fun LoginScreenPreview() {
     VideoTheme {
         val env = StreamEnvironment("demo", "Demo", listOf(Flavor("development", true)))
         LoginContent(
-            autoLogIn = false, isLoading = false,
+            autoLogIn = false,
+            isLoading = false,
             availableEnvs = listOf(env),
             selectedEnv = env,
-            availableLogins = listOf("google", "email", "guest")
+            availableLogins = listOf("google", "email", "guest"),
         )
     }
 }
@@ -487,7 +484,7 @@ private fun SelectEnvOption() {
         SelectableDialog(
             items = listOf(env, env2),
             selectedItem = env,
-            onItemSelected = {}
+            onItemSelected = {},
         )
     }
 }
