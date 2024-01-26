@@ -18,8 +18,6 @@
 
 package io.getstream.video.android.ui.login
 
-import android.content.Intent
-import android.net.Uri
 import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -37,6 +35,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.AlertDialog
 import androidx.compose.material.CircularProgressIndicator
@@ -46,7 +45,6 @@ import androidx.compose.material.TextField
 import androidx.compose.material.TextFieldDefaults
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Email
-import androidx.compose.material.icons.filled.GroupAdd
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.outlined.GroupAdd
 import androidx.compose.material.icons.outlined.Settings
@@ -62,10 +60,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.testTagsAsResourceId
 import androidx.compose.ui.state.ToggleableState
@@ -76,21 +76,23 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.core.content.ContextCompat.getString
-import androidx.core.content.ContextCompat.startActivity
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.getstream.video.android.BuildConfig
 import io.getstream.video.android.R
 import io.getstream.video.android.compose.theme.base.VideoTheme
 import io.getstream.video.android.compose.ui.components.base.StreamButton
+import io.getstream.video.android.compose.ui.components.base.StreamDialog
+import io.getstream.video.android.compose.ui.components.base.StreamDialogPositiveNegative
 import io.getstream.video.android.compose.ui.components.base.StreamIconToggleButton
 import io.getstream.video.android.compose.ui.components.base.styling.DefaultStreamButtonStyles
+import io.getstream.video.android.compose.ui.components.base.styling.StreamDialogStyles
+import io.getstream.video.android.compose.ui.components.base.styling.StreamIconStyles
 import io.getstream.video.android.compose.ui.components.base.styling.StyleSize
 import io.getstream.video.android.ui.theme.Colors
-import io.getstream.video.android.ui.theme.LinkText
-import io.getstream.video.android.ui.theme.LinkTextData
 import io.getstream.video.android.util.UserHelper
 import io.getstream.video.android.util.config.AppConfig
+import io.getstream.video.android.util.config.types.Flavor
 import io.getstream.video.android.util.config.types.StreamEnvironment
 
 /**
@@ -112,6 +114,10 @@ fun LoginScreen(
                 uiState !is LoginUiState.Nothing && uiState !is LoginUiState.SignInFailure,
             )
         }
+        val selectedEnv by AppConfig.currentEnvironment.collectAsStateWithLifecycle()
+        val availableEnvs by AppConfig.availableEnvironments.collectAsStateWithLifecycle()
+        val availableLogins by AppConfig.availableLogins.collectAsStateWithLifecycle()
+
         var isShowingEmailLoginDialog by remember { mutableStateOf(false) }
 
         HandleLoginUiStates(
@@ -121,13 +127,38 @@ fun LoginScreen(
         )
 
         LoginContent(
+            availableEnvs = availableEnvs,
+            selectedEnv = selectedEnv,
+            availableLogins = availableLogins,
             autoLogIn = autoLogIn,
             isLoading = isLoading,
             showEmailLoginDialog = { isShowingEmailLoginDialog = true },
+            reloadSdk = {
+                loginViewModel.reloadSdk()
+            },
+            login = { autoLoginBoolean, event ->
+                autoLoginBoolean?.let {
+                    loginViewModel.autoLogIn = it
+                }
+                if (event == null) {
+
+                    loginViewModel.signInIfValidUserExist()
+                } else {
+                    loginViewModel.handleUiEvent(event)
+                }
+            }
         )
 
         if (isShowingEmailLoginDialog) {
             EmailLoginDialog(
+                login = { autoLoginBoolean, event ->
+                    autoLoginBoolean?.let {
+                        loginViewModel.autoLogIn = it
+                    }
+                    event?.let {
+                        loginViewModel.handleUiEvent(event)
+                    }
+                },
                 onDismissRequest = { isShowingEmailLoginDialog = false },
             )
         }
@@ -138,12 +169,18 @@ fun LoginScreen(
 private fun LoginContent(
     autoLogIn: Boolean,
     isLoading: Boolean,
-    showEmailLoginDialog: () -> Unit,
-    loginViewModel: LoginViewModel = hiltViewModel(),
+    showEmailLoginDialog: () -> Unit = {},
+    reloadSdk: () -> Unit = {},
+    login: (Boolean?, LoginEvent?) -> Unit = { _, _ -> },
+    availableEnvs: List<StreamEnvironment>,
+    selectedEnv: StreamEnvironment?,
+    availableLogins: List<String>,
 ) {
-    Box(modifier = Modifier.fillMaxSize()) {
-        val selectedEnv by AppConfig.currentEnvironment.collectAsStateWithLifecycle()
-        val availableEnvs by AppConfig.availableEnvironments.collectAsStateWithLifecycle()
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(color = VideoTheme.colors.baseSheetPrimary)
+    ) {
 
         selectedEnv?.let {
             Box(modifier = Modifier.align(Alignment.TopEnd)) {
@@ -152,7 +189,7 @@ private fun LoginContent(
                     selectedItem = it,
                     onItemSelected = { env ->
                         AppConfig.selectEnv(env)
-                        loginViewModel.reloadSdk()
+                        reloadSdk()
                     },
                 )
             }
@@ -182,21 +219,33 @@ private fun LoginContent(
                 fontSize = 38.sp,
             )
             Spacer(modifier = Modifier.height(30.dp))
+        }
+
+        Column(
+            modifier = Modifier
+                .align(Alignment.BottomCenter)
+                .background(
+                    color = VideoTheme.colors.baseSheetSecondary,
+                    shape = RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp)
+                )
+                .padding(horizontal = 24.dp, vertical = 32.dp)
+        ) {
 
             if (!isLoading) {
-                val availableLogins by AppConfig.availableLogins.collectAsStateWithLifecycle()
-
                 availableLogins.forEach {
                     when (it) {
                         "google" -> {
                             StreamButton(
+                                icon = ImageVector.vectorResource(R.drawable.google_button_logo),
                                 modifier = Modifier.fillMaxWidth(),
                                 enabled = !isLoading,
                                 text = stringResource(id = R.string.sign_in_google),
-                                style = DefaultStreamButtonStyles.primaryButtonStyle(),
+                                style = DefaultStreamButtonStyles.primaryButtonStyle()
+                                    .copy(
+                                        iconStyle = StreamIconStyles.customColorIconStyle(color = Color.Unspecified)
+                                    ),
                                 onClick = {
-                                    loginViewModel.autoLogIn = false
-                                    loginViewModel.handleUiEvent(LoginEvent.GoogleSignIn())
+                                    login(false, LoginEvent.GoogleSignIn())
                                 },
                             )
                         }
@@ -209,7 +258,6 @@ private fun LoginContent(
                                 text = stringResource(id = R.string.sign_in_email),
                                 style = DefaultStreamButtonStyles.primaryButtonStyle(),
                                 onClick = {
-                                    loginViewModel.autoLogIn = true
                                     showEmailLoginDialog.invoke()
                                 },
                             )
@@ -223,33 +271,13 @@ private fun LoginContent(
                                 text = stringResource(id = R.string.random_user_sign_in),
                                 style = DefaultStreamButtonStyles.tetriaryButtonStyle(),
                                 onClick = {
-                                    loginViewModel.autoLogIn = true
-                                    loginViewModel.signInIfValidUserExist()
+                                    login(true, null)
                                 },
                             )
                         }
                     }
                     Spacer(modifier = Modifier.height(VideoTheme.dimens.spacingM))
                 }
-
-                val context = LocalContext.current
-                LinkText(
-                    linkTextData = listOf(
-                        LinkTextData(text = stringResource(id = R.string.sign_in_contact)),
-                        LinkTextData(
-                            text = stringResource(
-                                id = R.string.sign_in_contact_us,
-                            ),
-                            tag = "contact us",
-                            annotation = "https://getstream.io/video/docs/",
-                            onClick = {
-                                val intent = Intent(Intent.ACTION_VIEW)
-                                intent.data = Uri.parse(it.item)
-                                startActivity(context, intent, null)
-                            },
-                        ),
-                    ),
-                )
             }
 
             if (BuildConfig.BUILD_TYPE == "benchmark") {
@@ -261,9 +289,7 @@ private fun LoginContent(
                     text = "Login for Benchmark",
                     style = DefaultStreamButtonStyles.secondaryButtonStyle(),
                     onClick = {
-                        loginViewModel.handleUiEvent(
-                            LoginEvent.SignInSuccess("benchmark.test@getstream.io"),
-                        )
+                        login(null, LoginEvent.SignInSuccess("benchmark.test@getstream.io"))
                     },
                 )
             }
@@ -280,54 +306,38 @@ private fun LoginContent(
 
 @Composable
 private fun EmailLoginDialog(
-    onDismissRequest: () -> Unit,
-    loginViewModel: LoginViewModel = hiltViewModel(),
+    onDismissRequest: () -> Unit = {},
+    login: (Boolean?, LoginEvent?) -> Unit = { _, _ -> }
 ) {
     var email by remember { mutableStateOf("") }
 
-    Dialog(
-        onDismissRequest = { onDismissRequest.invoke() },
+    StreamDialogPositiveNegative(
+        style = StreamDialogStyles.defaultDialogStyle(),
+        onDismiss = { onDismissRequest.invoke() },
         content = {
-            Surface(
-                modifier = Modifier.width(300.dp),
-            ) {
-                Column(modifier = Modifier.background(Colors.background)) {
-                    TextField(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(16.dp),
-                        value = email,
-                        onValueChange = { email = it },
-                        label = { Text(text = stringResource(R.string.enter_your_email_address)) },
-                        colors = TextFieldDefaults.textFieldColors(
-                            textColor = Colors.description,
-                            focusedLabelColor = VideoTheme.colors.basePrimary,
-                            unfocusedLabelColor = VideoTheme.colors.basePrimary,
-                            unfocusedIndicatorColor = VideoTheme.colors.basePrimary,
-                            focusedIndicatorColor = VideoTheme.colors.basePrimary,
-                            cursorColor = Colors.description,
-                        ),
-                        keyboardOptions = KeyboardOptions.Default.copy(
-                            keyboardType = KeyboardType.Email,
-                        ),
-                    )
-
-                    StreamButton(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(horizontal = 16.dp),
-                        onClick = {
-                            val userId = UserHelper.getUserIdFromEmail(email)
-                            loginViewModel.handleUiEvent(LoginEvent.SignInSuccess(userId))
-                        },
-                        style = DefaultStreamButtonStyles.secondaryButtonStyle(StyleSize.S),
-                        text = "Log in",
-                    )
-
-                    Spacer(modifier = Modifier.height(12.dp))
-                }
-            }
-        },
+            TextField(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp),
+                value = email,
+                onValueChange = { email = it },
+                label = { Text(text = stringResource(R.string.enter_your_email_address)) },
+                colors = TextFieldDefaults.textFieldColors(
+                    textColor = Colors.description,
+                    focusedLabelColor = VideoTheme.colors.basePrimary,
+                    unfocusedLabelColor = VideoTheme.colors.basePrimary,
+                    unfocusedIndicatorColor = VideoTheme.colors.basePrimary,
+                    focusedIndicatorColor = VideoTheme.colors.basePrimary,
+                    cursorColor = Colors.description,
+                ),
+                keyboardOptions = KeyboardOptions.Default.copy(
+                    keyboardType = KeyboardType.Email,
+                ),
+            )
+        }, positiveButton = Triple("Login", DefaultStreamButtonStyles.secondaryButtonStyle()) {
+            val userId = UserHelper.getUserIdFromEmail(email)
+            login(true, LoginEvent.SignInSuccess(userId))
+        }
     )
 }
 
@@ -448,6 +458,36 @@ private fun HandleLoginUiStates(
 @Composable
 private fun LoginScreenPreview() {
     VideoTheme {
-        LoginScreen {}
+        val env = StreamEnvironment("demo", "Demo", listOf(Flavor("development", true)))
+        LoginContent(
+            autoLogIn = false, isLoading = false,
+            availableEnvs = listOf(env),
+            selectedEnv = env,
+            availableLogins = listOf("google", "email", "guest")
+        )
+    }
+}
+
+@Preview
+@Composable
+private fun EmailDialogPreview() {
+    VideoTheme {
+        val env = StreamEnvironment("demo", "Demo", listOf(Flavor("development", true)))
+        EmailLoginDialog()
+    }
+}
+
+@Preview
+@Composable
+private fun SelectEnvOption() {
+    VideoTheme {
+        val env = StreamEnvironment("demo", "Demo", listOf(Flavor("development", true)))
+        val env2 = StreamEnvironment("pronto", "Pronto", listOf(Flavor("development", true)))
+
+        SelectableDialog(
+            items = listOf(env, env2),
+            selectedItem = env,
+            onItemSelected = {}
+        )
     }
 }

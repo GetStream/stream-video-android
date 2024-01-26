@@ -68,6 +68,13 @@ public open class StreamIconStyleProvider {
         pressed = IconStyle(pressed, padding),
         disabled = IconStyle(disabled, padding),
     )
+
+    @Composable
+    public fun customColorIconStyle(color: Color) : StreamIconStyle = defaultIconStyle(
+        default = color,
+        pressed = color,
+        disabled = color.copy(alpha = 0.16f)
+    )
 }
 
 /**
