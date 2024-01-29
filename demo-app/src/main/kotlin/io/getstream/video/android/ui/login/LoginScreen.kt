@@ -33,7 +33,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
@@ -82,7 +81,7 @@ import io.getstream.video.android.compose.theme.base.VideoTheme
 import io.getstream.video.android.compose.ui.components.base.StreamButton
 import io.getstream.video.android.compose.ui.components.base.StreamDialogPositiveNegative
 import io.getstream.video.android.compose.ui.components.base.StreamIconToggleButton
-import io.getstream.video.android.compose.ui.components.base.styling.DefaultStreamButtonStyles
+import io.getstream.video.android.compose.ui.components.base.styling.StreamButtonStyles
 import io.getstream.video.android.compose.ui.components.base.styling.StreamDialogStyles
 import io.getstream.video.android.compose.ui.components.base.styling.StreamIconStyles
 import io.getstream.video.android.ui.theme.Colors
@@ -233,7 +232,7 @@ private fun LoginContent(
                                 modifier = Modifier.fillMaxWidth(),
                                 enabled = !isLoading,
                                 text = stringResource(id = R.string.sign_in_google),
-                                style = DefaultStreamButtonStyles.primaryButtonStyle()
+                                style = StreamButtonStyles.primaryButtonStyle()
                                     .copy(
                                         iconStyle = StreamIconStyles.customColorIconStyle(
                                             color = Color.Unspecified,
@@ -251,7 +250,7 @@ private fun LoginContent(
                                 icon = Icons.Default.Email,
                                 enabled = !isLoading,
                                 text = stringResource(id = R.string.sign_in_email),
-                                style = DefaultStreamButtonStyles.primaryButtonStyle(),
+                                style = StreamButtonStyles.primaryButtonStyle(),
                                 onClick = {
                                     showEmailLoginDialog.invoke()
                                 },
@@ -264,7 +263,7 @@ private fun LoginContent(
                                 icon = Icons.Outlined.GroupAdd,
                                 enabled = !isLoading,
                                 text = stringResource(id = R.string.random_user_sign_in),
-                                style = DefaultStreamButtonStyles.tetriaryButtonStyle(),
+                                style = StreamButtonStyles.tetriaryButtonStyle(),
                                 onClick = {
                                     login(true, null)
                                 },
@@ -282,7 +281,7 @@ private fun LoginContent(
                         .padding(horizontal = 55.dp)
                         .testTag("authenticate"),
                     text = "Login for Benchmark",
-                    style = DefaultStreamButtonStyles.secondaryButtonStyle(),
+                    style = StreamButtonStyles.secondaryButtonStyle(),
                     onClick = {
                         login(null, LoginEvent.SignInSuccess("benchmark.test@getstream.io"))
                     },
@@ -330,7 +329,7 @@ private fun EmailLoginDialog(
                 ),
             )
         },
-        positiveButton = Triple("Login", DefaultStreamButtonStyles.secondaryButtonStyle()) {
+        positiveButton = Triple("Login", StreamButtonStyles.secondaryButtonStyle()) {
             val userId = UserHelper.getUserIdFromEmail(email)
             login(true, LoginEvent.SignInSuccess(userId))
         },
@@ -359,8 +358,8 @@ fun SelectableDialog(
                 onClick = { showDialog = true },
                 onIcon = Icons.Outlined.Settings,
                 offIcon = Icons.Default.Settings,
-                onStyle = DefaultStreamButtonStyles.secondaryIconButtonStyle(),
-                offStyle = DefaultStreamButtonStyles.primaryIconButtonStyle(),
+                onStyle = StreamButtonStyles.secondaryIconButtonStyle(),
+                offStyle = StreamButtonStyles.primaryIconButtonStyle(),
                 modifier = Modifier.padding(16.dp),
             )
             if (showDialog) {
@@ -379,7 +378,7 @@ fun SelectableDialog(
                                         selectedText = item.displayName
                                         showDialog = false
                                     },
-                                    style = DefaultStreamButtonStyles.secondaryButtonStyle(),
+                                    style = StreamButtonStyles.secondaryButtonStyle(),
                                     modifier = Modifier.padding(8.dp),
                                 )
                             }

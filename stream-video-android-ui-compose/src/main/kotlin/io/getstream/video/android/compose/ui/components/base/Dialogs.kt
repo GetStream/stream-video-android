@@ -41,9 +41,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import io.getstream.video.android.compose.theme.base.VideoTheme
-import io.getstream.video.android.compose.ui.components.base.styling.DefaultStreamButtonStyles
 import io.getstream.video.android.compose.ui.components.base.styling.DialogStyle
 import io.getstream.video.android.compose.ui.components.base.styling.StreamButtonStyle
+import io.getstream.video.android.compose.ui.components.base.styling.StreamButtonStyles
 import io.getstream.video.android.compose.ui.components.base.styling.StreamDialogStyles
 import io.getstream.video.android.compose.ui.components.base.styling.StyleSize
 
@@ -152,13 +152,13 @@ private fun StreamDialogPreview() {
             contentText = "By staying in the call you’re consenting to being recorded.",
             positiveButton = Triple(
                 "Continue",
-                DefaultStreamButtonStyles.secondaryButtonStyle(StyleSize.S),
+                StreamButtonStyles.secondaryButtonStyle(StyleSize.S),
             ) {
                 // Do nothing
             },
             negativeButton = Triple(
                 "Leave call",
-                DefaultStreamButtonStyles.tetriaryButtonStyle(StyleSize.S),
+                StreamButtonStyles.tetriaryButtonStyle(StyleSize.S),
             ) {
                 // Do nothing
             },

@@ -17,6 +17,7 @@
 package io.getstream.video.android.compose.ui.components.base.styling
 
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextStyle
 import io.getstream.video.android.compose.theme.base.VideoTheme
 
@@ -76,6 +77,19 @@ public open class TextStyleProvider {
     ): StreamTextStyle = StreamTextStyle(default, disabled, pressed)
 
     @Composable
+    public fun defaultSubtitle(
+        size: StyleSize = StyleSize.M,
+        default: TextStyleWrapper = when (size) {
+            StyleSize.XS -> VideoTheme.typography.subtitleS.wrapper()
+            StyleSize.S -> VideoTheme.typography.subtitleS.wrapper()
+            StyleSize.M -> VideoTheme.typography.subtitleM.wrapper()
+            else -> VideoTheme.typography.subtitleL.wrapper()
+        },
+        pressed: TextStyleWrapper = default,
+        disabled: TextStyleWrapper = default.disabledAlpha(),
+    ): StreamTextStyle = StreamTextStyle(default, disabled, pressed)
+
+    @Composable
     public fun defaultBody(
         size: StyleSize = StyleSize.L,
         default: TextStyleWrapper = when (size) {
@@ -92,12 +106,31 @@ public open class TextStyleProvider {
         pressed: TextStyleWrapper = default,
         disabled: TextStyleWrapper = default.disabledAlpha(),
     ): StreamTextStyle = StreamTextStyle(default, disabled, pressed)
+
+    @Composable
+    public fun defaultTextField(
+        size: StyleSize = StyleSize.M,
+        default: TextStyleWrapper = when (size) {
+            StyleSize.XS -> VideoTheme.typography.subtitleS.withColor(VideoTheme.colors.basePrimary)
+            StyleSize.S -> VideoTheme.typography.subtitleS.withColor(VideoTheme.colors.basePrimary)
+            StyleSize.M -> VideoTheme.typography.subtitleM.withColor(VideoTheme.colors.basePrimary)
+            else -> VideoTheme.typography.subtitleL.withColor(VideoTheme.colors.basePrimary)
+        },
+        pressed: TextStyleWrapper = default,
+        disabled: TextStyleWrapper = default.disabledAlpha(),
+    ): StreamTextStyle = StreamTextStyle(default, disabled, pressed)
 }
 
 public object StreamTextStyles : TextStyleProvider()
 
 // Utilities
 internal fun TextStyle.wrapper(): TextStyleWrapper = TextStyleWrapper(platform = this)
+
+internal fun TextStyle.withColor(color: Color) = TextStyleWrapper(
+    platform = this.copy(
+        color = color,
+    ),
+)
 
 internal fun TextStyleWrapper.withAlpha(alpha: Float): TextStyleWrapper = this.platform.copy(
     color = this.platform.color.copy(

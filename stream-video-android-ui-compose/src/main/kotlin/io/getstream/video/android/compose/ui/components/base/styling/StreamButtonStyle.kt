@@ -28,7 +28,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import io.getstream.video.android.compose.theme.base.VideoTheme
 
-public object DefaultStreamButtonStyles : StreamButtonStyles()
+public object StreamButtonStyles : StreamButtonStyleProvider()
 
 @Immutable
 public open class StreamButtonStyle(
@@ -100,7 +100,7 @@ public open class StreamFixedSizeButtonStyle(
 }
 
 @Immutable
-public open class StreamButtonStyles {
+public open class StreamButtonStyleProvider {
 
     /**
      * You can create any style with the [StreamButtonStyle].

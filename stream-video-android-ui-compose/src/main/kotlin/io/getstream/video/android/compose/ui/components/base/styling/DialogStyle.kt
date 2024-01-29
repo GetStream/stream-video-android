@@ -37,7 +37,7 @@ public open class DialogStyleProvider {
     public fun defaultDialogStyle(): DialogStyle = DialogStyle(
         shape = VideoTheme.shapes.dialog,
         backgroundColor = VideoTheme.colors.baseSheetSecondary,
-        titleStyle = StreamTextStyles.defaultTitle(StyleSize.S).default.platform,
+        titleStyle = StreamTextStyles.defaultTitle().default.platform,
         contentTextStyle = StreamTextStyles.defaultBody(StyleSize.S).default.platform,
         iconStyle = StreamIconStyles.defaultIconStyle().default,
         contentPaddings = PaddingValues(VideoTheme.dimens.spacingL),

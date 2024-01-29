@@ -48,9 +48,9 @@ import androidx.compose.ui.state.ToggleableState
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import io.getstream.video.android.compose.theme.base.VideoTheme
-import io.getstream.video.android.compose.ui.components.base.styling.DefaultStreamButtonStyles
 import io.getstream.video.android.compose.ui.components.base.styling.StreamBadgeStyles
 import io.getstream.video.android.compose.ui.components.base.styling.StreamButtonStyle
+import io.getstream.video.android.compose.ui.components.base.styling.StreamButtonStyles
 import io.getstream.video.android.compose.ui.components.base.styling.StreamFixedSizeButtonStyle
 import io.getstream.video.android.compose.ui.components.base.styling.StyleSize
 import io.getstream.video.android.compose.ui.components.base.styling.styleState
@@ -60,7 +60,7 @@ public fun GenericStreamButton(
     modifier: Modifier = Modifier,
     onClick: () -> Unit,
     enabled: Boolean = true,
-    style: StreamButtonStyle = DefaultStreamButtonStyles.primaryButtonStyle(),
+    style: StreamButtonStyle = StreamButtonStyles.primaryButtonStyle(),
     interactionSource: MutableInteractionSource = remember { MutableInteractionSource() },
     content: @Composable RowScope.() -> Unit,
 ): Unit = Button(
@@ -206,22 +206,22 @@ private fun StreamIconButtonPreview() {
             Row {
                 StreamIconButton(
                     icon = Icons.Default.GroupAdd,
-                    style = DefaultStreamButtonStyles.primaryIconButtonStyle(),
+                    style = StreamButtonStyles.primaryIconButtonStyle(),
                 )
                 Spacer(modifier = Modifier.size(16.dp))
                 StreamIconButton(
                     icon = Icons.Default.ExitToApp,
-                    style = DefaultStreamButtonStyles.secondaryIconButtonStyle(),
+                    style = StreamButtonStyles.secondaryIconButtonStyle(),
                 )
                 Spacer(modifier = Modifier.size(16.dp))
                 StreamIconButton(
                     icon = Icons.Default.Settings,
-                    style = DefaultStreamButtonStyles.tetriaryIconButtonStyle(),
+                    style = StreamButtonStyles.tetriaryIconButtonStyle(),
                 )
                 Spacer(modifier = Modifier.size(16.dp))
                 StreamIconButton(
                     icon = Icons.Default.PhoneMissed,
-                    style = DefaultStreamButtonStyles.alertIconButtonStyle(),
+                    style = StreamButtonStyles.alertIconButtonStyle(),
                 )
             }
 
@@ -230,25 +230,25 @@ private fun StreamIconButtonPreview() {
                 StreamIconButton(
                     enabled = false,
                     icon = Icons.Default.GroupAdd,
-                    style = DefaultStreamButtonStyles.primaryIconButtonStyle(),
+                    style = StreamButtonStyles.primaryIconButtonStyle(),
                 )
                 Spacer(modifier = Modifier.size(16.dp))
                 StreamIconButton(
                     enabled = false,
                     icon = Icons.Default.ExitToApp,
-                    style = DefaultStreamButtonStyles.secondaryIconButtonStyle(),
+                    style = StreamButtonStyles.secondaryIconButtonStyle(),
                 )
                 Spacer(modifier = Modifier.size(16.dp))
                 StreamIconButton(
                     enabled = false,
                     icon = Icons.Default.Settings,
-                    style = DefaultStreamButtonStyles.tetriaryIconButtonStyle(),
+                    style = StreamButtonStyles.tetriaryIconButtonStyle(),
                 )
                 Spacer(modifier = Modifier.size(16.dp))
                 StreamIconButton(
                     enabled = false,
                     icon = Icons.Default.PhoneMissed,
-                    style = DefaultStreamButtonStyles.alertIconButtonStyle(),
+                    style = StreamButtonStyles.alertIconButtonStyle(),
                 )
             }
 
@@ -257,17 +257,17 @@ private fun StreamIconButtonPreview() {
                 Spacer(modifier = Modifier.size(16.dp))
                 StreamIconButton(
                     icon = Icons.Default.PhoneMissed,
-                    style = DefaultStreamButtonStyles.alertIconButtonStyle(size = StyleSize.L),
+                    style = StreamButtonStyles.alertIconButtonStyle(size = StyleSize.L),
                 )
                 Spacer(modifier = Modifier.size(16.dp))
                 StreamIconButton(
                     icon = Icons.Default.PhoneMissed,
-                    style = DefaultStreamButtonStyles.alertIconButtonStyle(size = StyleSize.M),
+                    style = StreamButtonStyles.alertIconButtonStyle(size = StyleSize.M),
                 )
                 Spacer(modifier = Modifier.size(16.dp))
                 StreamIconButton(
                     icon = Icons.Default.PhoneMissed,
-                    style = DefaultStreamButtonStyles.alertIconButtonStyle(size = StyleSize.S),
+                    style = StreamButtonStyles.alertIconButtonStyle(size = StyleSize.S),
                 )
             }
         }
@@ -282,22 +282,22 @@ private fun StreamButtonPreview() {
             // Default
             StreamButton(
                 text = "Primary Button",
-                style = DefaultStreamButtonStyles.primaryButtonStyle(),
+                style = StreamButtonStyles.primaryButtonStyle(),
             )
             Spacer(modifier = Modifier.height(24.dp))
             StreamButton(
                 text = "Secondary Button",
-                style = DefaultStreamButtonStyles.secondaryButtonStyle(),
+                style = StreamButtonStyles.secondaryButtonStyle(),
             )
             Spacer(modifier = Modifier.height(24.dp))
             StreamButton(
                 text = "Tetriary Button",
-                style = DefaultStreamButtonStyles.tetriaryButtonStyle(),
+                style = StreamButtonStyles.tetriaryButtonStyle(),
             )
             Spacer(modifier = Modifier.height(48.dp))
             StreamButton(
                 text = "Alert Button",
-                style = DefaultStreamButtonStyles.alertButtonStyle(),
+                style = StreamButtonStyles.alertButtonStyle(),
             )
             Spacer(modifier = Modifier.height(48.dp))
 
@@ -305,25 +305,25 @@ private fun StreamButtonPreview() {
             StreamButton(
                 enabled = false,
                 text = "Primary Button",
-                style = DefaultStreamButtonStyles.primaryButtonStyle(),
+                style = StreamButtonStyles.primaryButtonStyle(),
             )
             Spacer(modifier = Modifier.height(24.dp))
             StreamButton(
                 enabled = false,
                 text = "Secondary Button",
-                style = DefaultStreamButtonStyles.secondaryButtonStyle(),
+                style = StreamButtonStyles.secondaryButtonStyle(),
             )
             Spacer(modifier = Modifier.height(24.dp))
             StreamButton(
                 enabled = false,
                 text = "Tetriary Button",
-                style = DefaultStreamButtonStyles.tetriaryButtonStyle(),
+                style = StreamButtonStyles.tetriaryButtonStyle(),
             )
             Spacer(modifier = Modifier.height(24.dp))
             StreamButton(
                 enabled = false,
                 text = "Alert Button",
-                style = DefaultStreamButtonStyles.alertButtonStyle(),
+                style = StreamButtonStyles.alertButtonStyle(),
             )
             Spacer(modifier = Modifier.height(48.dp))
         }
@@ -339,19 +339,19 @@ private fun StreamButtonWithIconPreview() {
             StreamButton(
                 icon = Icons.Filled.AccessAlarm,
                 text = "Primary Button",
-                style = DefaultStreamButtonStyles.primaryButtonStyle(),
+                style = StreamButtonStyles.primaryButtonStyle(),
             )
             Spacer(modifier = Modifier.height(24.dp))
             StreamButton(
                 icon = Icons.Filled.AccessAlarm,
                 text = "Secondary Button",
-                style = DefaultStreamButtonStyles.secondaryButtonStyle(),
+                style = StreamButtonStyles.secondaryButtonStyle(),
             )
             Spacer(modifier = Modifier.height(24.dp))
             StreamButton(
                 icon = Icons.Filled.AccessAlarm,
                 text = "Tetriary Button",
-                style = DefaultStreamButtonStyles.tetriaryButtonStyle(),
+                style = StreamButtonStyles.tetriaryButtonStyle(),
             )
         }
     }
@@ -366,17 +366,17 @@ private fun StreamButtonSizePreview() {
             Spacer(modifier = Modifier.height(24.dp))
             StreamButton(
                 text = "Small Button",
-                style = DefaultStreamButtonStyles.secondaryButtonStyle(size = StyleSize.S),
+                style = StreamButtonStyles.secondaryButtonStyle(size = StyleSize.S),
             )
             Spacer(modifier = Modifier.height(24.dp))
             StreamButton(
                 text = "Medium Button",
-                style = DefaultStreamButtonStyles.secondaryButtonStyle(size = StyleSize.M),
+                style = StreamButtonStyles.secondaryButtonStyle(size = StyleSize.M),
             )
             Spacer(modifier = Modifier.height(24.dp))
             StreamButton(
                 text = "Large Button",
-                style = DefaultStreamButtonStyles.secondaryButtonStyle(size = StyleSize.L),
+                style = StreamButtonStyles.secondaryButtonStyle(size = StyleSize.L),
             )
         }
     }
@@ -389,16 +389,16 @@ private fun StreamToggleIconButtonPreview() {
         Row {
             // Size
             StreamIconToggleButton(
-                onStyle = DefaultStreamButtonStyles.primaryIconButtonStyle(),
-                offStyle = DefaultStreamButtonStyles.alertIconButtonStyle(),
+                onStyle = StreamButtonStyles.primaryIconButtonStyle(),
+                offStyle = StreamButtonStyles.alertIconButtonStyle(),
                 onIcon = Icons.Default.Videocam,
                 offIcon = Icons.Default.VideocamOff,
             )
             Spacer(modifier = Modifier.width(24.dp))
             StreamIconToggleButton(
                 toggleState = rememberUpdatedState(newValue = ToggleableState.On),
-                onStyle = DefaultStreamButtonStyles.primaryIconButtonStyle(),
-                offStyle = DefaultStreamButtonStyles.alertIconButtonStyle(),
+                onStyle = StreamButtonStyles.primaryIconButtonStyle(),
+                offStyle = StreamButtonStyles.alertIconButtonStyle(),
                 onIcon = Icons.Default.Videocam,
                 offIcon = Icons.Default.VideocamOff,
             )
@@ -414,8 +414,8 @@ private fun StreamToggleIconButtonPreview() {
                 StreamIconToggleButton(
                     enabled = false,
                     toggleState = rememberUpdatedState(newValue = ToggleableState.Off),
-                    onStyle = DefaultStreamButtonStyles.secondaryIconButtonStyle(),
-                    offStyle = DefaultStreamButtonStyles.alertIconButtonStyle(),
+                    onStyle = StreamButtonStyles.secondaryIconButtonStyle(),
+                    offStyle = StreamButtonStyles.alertIconButtonStyle(),
                     onIcon = Icons.Default.Videocam,
                     offIcon = Icons.Default.VideocamOff,
                 )
