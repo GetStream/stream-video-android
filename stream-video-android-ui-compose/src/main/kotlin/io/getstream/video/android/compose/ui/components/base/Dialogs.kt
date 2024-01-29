@@ -36,8 +36,13 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.TextFieldValue
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import io.getstream.video.android.compose.theme.base.VideoTheme
@@ -45,6 +50,7 @@ import io.getstream.video.android.compose.ui.components.base.styling.DialogStyle
 import io.getstream.video.android.compose.ui.components.base.styling.StreamButtonStyle
 import io.getstream.video.android.compose.ui.components.base.styling.StreamButtonStyles
 import io.getstream.video.android.compose.ui.components.base.styling.StreamDialogStyles
+import io.getstream.video.android.compose.ui.components.base.styling.StreamTextFieldStyles
 import io.getstream.video.android.compose.ui.components.base.styling.StyleSize
 
 @Composable
@@ -158,6 +164,70 @@ private fun StreamDialogPreview() {
             },
             negativeButton = Triple(
                 "Leave call",
+                StreamButtonStyles.tetriaryButtonStyle(StyleSize.S),
+            ) {
+                // Do nothing
+            },
+        )
+    }
+}
+
+@Preview
+@Composable
+private fun StreamDialogWithInputPreview() {
+    VideoTheme {
+        StreamDialogPositiveNegative(
+            content = {
+                Text(
+                    text = "How is your call Going?",
+                    style = TextStyle(
+                        fontSize = 24.sp,
+                        lineHeight = 28.sp,
+                        fontWeight = FontWeight(500),
+                        color = VideoTheme.colors.basePrimary,
+                        textAlign = TextAlign.Center,
+                    ),
+                )
+                Spacer(modifier = Modifier.size(8.dp))
+                Text(
+                    text = "All feedback is celebrated!",
+                    style = TextStyle(
+                        fontSize = 16.sp,
+                        lineHeight = 18.5.sp,
+                        fontWeight = FontWeight(400),
+                        color = VideoTheme.colors.baseSecondary,
+                        textAlign = TextAlign.Center,
+                    ),
+                )
+                Spacer(modifier = Modifier.size(16.dp))
+                StreamTextField(
+                    value = TextFieldValue(""),
+                    placeholder = "Email address (required)",
+                    onValueChange = {},
+                    style = StreamTextFieldStyles.defaultTextField(StyleSize.S),
+                )
+
+                Spacer(modifier = Modifier.size(16.dp))
+                StreamTextField(
+                    value = TextFieldValue(""),
+                    placeholder = "Message",
+                    onValueChange = {},
+                    minLines = 7,
+                    style = StreamTextFieldStyles.defaultTextField(StyleSize.S),
+                )
+            },
+            // Color is for preview only
+            style = StreamDialogStyles.defaultDialogStyle().copy(
+                backgroundColor = VideoTheme.colors.baseSheetTertiary,
+            ),
+            positiveButton = Triple(
+                "Submit",
+                StreamButtonStyles.secondaryButtonStyle(StyleSize.S),
+            ) {
+                // Do nothing
+            },
+            negativeButton = Triple(
+                "Not now",
                 StreamButtonStyles.tetriaryButtonStyle(StyleSize.S),
             ) {
                 // Do nothing

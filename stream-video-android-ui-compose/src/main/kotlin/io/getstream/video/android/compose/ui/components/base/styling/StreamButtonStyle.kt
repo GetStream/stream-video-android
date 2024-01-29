@@ -169,6 +169,29 @@ public open class StreamButtonStyleProvider {
         )
 
     @Composable
+    public fun toggleButtonStyleOn(size: StyleSize = StyleSize.L): StreamButtonStyle =
+        genericButtonStyle(size = size).copy(
+            colors = ButtonDefaults.buttonColors(
+                backgroundColor = VideoTheme.colors.buttonPrimaryDefault,
+                contentColor = VideoTheme.colors.basePrimary,
+                disabledBackgroundColor = VideoTheme.colors.buttonPrimaryDisabled,
+            ),
+            iconStyle = StreamIconStyles.customColorIconStyle(
+                color = VideoTheme.colors.brandPrimary,
+            ),
+        )
+
+    @Composable
+    public fun toggleButtonStyleOff(size: StyleSize = StyleSize.L): StreamButtonStyle =
+        genericButtonStyle(size = size).copy(
+            colors = ButtonDefaults.buttonColors(
+                backgroundColor = VideoTheme.colors.baseSheetPrimary,
+                contentColor = VideoTheme.colors.basePrimary,
+                disabledBackgroundColor = VideoTheme.colors.baseSheetPrimary,
+            ),
+        )
+
+    @Composable
     public fun alertButtonStyle(size: StyleSize = StyleSize.L): StreamButtonStyle =
         genericButtonStyle(size = size).copy(
             colors = ButtonDefaults.buttonColors(

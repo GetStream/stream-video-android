@@ -23,6 +23,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -32,6 +33,7 @@ import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccessAlarm
 import androidx.compose.material.icons.filled.ExitToApp
+import androidx.compose.material.icons.filled.GridView
 import androidx.compose.material.icons.filled.GroupAdd
 import androidx.compose.material.icons.filled.PhoneMissed
 import androidx.compose.material.icons.filled.Settings
@@ -41,6 +43,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.State
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -196,8 +199,82 @@ public fun StreamIconToggleButton(
     },
 )
 
-// Start of previews
+@Composable
+public fun StreamToggleButton(
+    modifier: Modifier = Modifier,
+    toggleState: State<ToggleableState> = rememberUpdatedState(newValue = ToggleableState(false)),
+    onText: String,
+    offText: String,
+    onIcon: ImageVector? = null,
+    offIcon: ImageVector? = onIcon,
+    onStyle: StreamButtonStyle,
+    offStyle: StreamButtonStyle = onStyle,
+    onClick: (ToggleableState) -> Unit = {},
+    enabled: Boolean = true,
+    interactionSource: MutableInteractionSource = remember { MutableInteractionSource() },
+): Unit = GenericToggleButton(
+    modifier = modifier,
+    toggleState = toggleState,
+    onClick = onClick,
+    onContent = {
+        GenericStreamButton(
+            modifier = Modifier.align(Alignment.CenterStart),
+            interactionSource = interactionSource,
+            enabled = enabled,
+            style = onStyle,
+            onClick = {
+                it(toggleState.value)
+            },
+        ) {
+            val state = styleState(interactionSource, enabled)
+            onIcon?.let {
+                val iconStyle = onStyle.iconStyle.of(state = state).value
+                Icon(
+                    imageVector = it,
+                    contentDescription = "",
+                    tint = iconStyle.color,
+                )
+                Spacer(modifier = Modifier.width(iconStyle.padding.calculateTopPadding()))
+            }
+            val textStyle = onStyle.textStyle.of(state = state)
+            Text(
+                modifier = Modifier.fillMaxWidth(),
+                style = textStyle.value.platform,
+                text = onText,
+            )
+        }
+    },
+    offContent = {
+        GenericStreamButton(
+            modifier = Modifier.align(Alignment.CenterStart),
+            interactionSource = interactionSource,
+            enabled = enabled,
+            style = offStyle,
+            onClick = {
+                it(toggleState.value)
+            },
+        ) {
+            val state = styleState(interactionSource, enabled)
+            offIcon?.let {
+                val iconStyle = offStyle.iconStyle.of(state = state).value
+                Icon(
+                    imageVector = it,
+                    contentDescription = "",
+                    tint = iconStyle.color,
+                )
+                Spacer(modifier = Modifier.width(iconStyle.padding.calculateTopPadding()))
+            }
+            val textStyle = offStyle.textStyle.of(state = state)
+            Text(
+                modifier = Modifier.fillMaxWidth(),
+                style = textStyle.value.platform,
+                text = offText,
+            )
+        }
+    },
+)
 
+// Start of previews
 @Preview
 @Composable
 private fun StreamIconButtonPreview() {
@@ -420,6 +497,37 @@ private fun StreamToggleIconButtonPreview() {
                     offIcon = Icons.Default.VideocamOff,
                 )
             }
+        }
+    }
+}
+
+@Preview
+@Composable
+private fun StreamToggleButtonPreview() {
+    VideoTheme {
+        Column {
+            // Size
+            StreamToggleButton(
+                modifier = Modifier.fillMaxWidth(),
+                toggleState = rememberUpdatedState(newValue = ToggleableState.On),
+                onText = "Grid",
+                offText = "Grid",
+                onStyle = StreamButtonStyles.toggleButtonStyleOn(),
+                offStyle = StreamButtonStyles.toggleButtonStyleOff(),
+                onIcon = Icons.Filled.GridView,
+                offIcon = Icons.Filled.GridView,
+            )
+            Spacer(modifier = Modifier.width(24.dp))
+            StreamToggleButton(
+                modifier = Modifier.fillMaxWidth(),
+                toggleState = rememberUpdatedState(newValue = ToggleableState.Off),
+                onText = "Grid (On)",
+                offText = "Grid (Off)",
+                onStyle = StreamButtonStyles.toggleButtonStyleOn(),
+                offStyle = StreamButtonStyles.toggleButtonStyleOff(),
+                onIcon = Icons.Filled.GridView,
+                offIcon = Icons.Filled.GridView,
+            )
         }
     }
 }
