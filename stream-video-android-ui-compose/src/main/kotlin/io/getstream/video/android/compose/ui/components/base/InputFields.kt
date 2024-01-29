@@ -91,6 +91,7 @@ public fun StreamTextField(
     placeholder: String? = null,
     error: Boolean = false,
     maxLines: Int = 1,
+    minLines: Int = 1,
     icon: ImageVector? = null,
     visualTransformation: VisualTransformation = VisualTransformation.None,
     keyboardOptions: KeyboardOptions = KeyboardOptions.Default,
@@ -138,8 +139,8 @@ public fun StreamTextField(
     keyboardActions = keyboardActions,
     keyboardOptions = keyboardOptions,
     singleLine = maxLines == 1,
-    maxLines = maxLines,
-    minLines = 1,
+    maxLines = Math.max(minLines, maxLines),
+    minLines = minLines,
     interactionSource = interactionSource,
     value = value,
     onValueChange = onValueChange,
@@ -207,6 +208,15 @@ private fun StreamInputFieldsPreviews() {
                 value = TextFieldValue("Wrong data"),
                 placeholder = "Call ID",
                 onValueChange = { },
+                style = StreamTextFieldStyles.defaultTextField(),
+            )
+            Spacer(modifier = Modifier.size(16.dp))
+
+            StreamTextField(
+                value = TextFieldValue(""),
+                placeholder = "Message",
+                onValueChange = { },
+                minLines = 8,
                 style = StreamTextFieldStyles.defaultTextField(),
             )
             Spacer(modifier = Modifier.size(16.dp))
