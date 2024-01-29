@@ -1,9 +1,22 @@
+/*
+ * Copyright (c) 2014-2024 Stream.io Inc. All rights reserved.
+ *
+ * Licensed under the Stream License;
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    https://github.com/GetStream/stream-video-android/blob/main/LICENSE
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package io.getstream.video.android.compose.ui.components.call.controls.actions
 
 import androidx.compose.material.ButtonDefaults
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Mic
-import androidx.compose.material.icons.filled.MicOff
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Modifier
@@ -15,7 +28,6 @@ import io.getstream.video.android.compose.theme.base.VideoTheme
 import io.getstream.video.android.compose.ui.components.base.StreamIconToggleButton
 import io.getstream.video.android.compose.ui.components.base.styling.StreamFixedSizeButtonStyle
 import io.getstream.video.android.core.call.state.CallAction
-import io.getstream.video.android.core.call.state.ToggleMicrophone
 
 /**
  * A call action button represents toggling a microphone.
@@ -53,9 +65,9 @@ public fun ToggleAction(
                     ?: it.colors,
                 iconStyle = it.iconStyle.copy(
                     default = it.iconStyle.default.copy(
-                        color = enabledIconTint ?: it.iconStyle.default.color
-                    )
-                )
+                        color = enabledIconTint ?: it.iconStyle.default.color,
+                    ),
+                ),
             )
         },
     offStyle = offStyle ?: VideoTheme.styles.buttonStyles.alertIconButtonStyle().let {
@@ -64,18 +76,18 @@ public fun ToggleAction(
             colors = disabledColor?.let {
                 ButtonDefaults.buttonColors(
                     backgroundColor = disabledColor,
-                    disabledBackgroundColor = disabledColor
+                    disabledBackgroundColor = disabledColor,
                 )
             }
                 ?: it.colors,
             iconStyle = it.iconStyle.copy(
                 default = it.iconStyle.default.copy(
-                    color = disabledIconTint ?: it.iconStyle.default.color
-                )
-            )
+                    color = disabledIconTint ?: it.iconStyle.default.color,
+                ),
+            ),
         )
     },
     onClick = {
         onAction()
-    }
+    },
 )

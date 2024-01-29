@@ -33,7 +33,6 @@ import androidx.compose.ui.semantics.testTagsAsResourceId
 import io.getstream.video.android.compose.theme.base.StreamRippleTheme
 import io.getstream.video.android.core.mapper.ReactionMapper
 
-
 /**
  * Local providers for various properties we connect to our components, for styling.
  */

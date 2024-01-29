@@ -16,29 +16,19 @@
 
 package io.getstream.video.android.compose.ui.components.call.controls.actions
 
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material.Icon
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Mic
-import androidx.compose.material.icons.filled.MicOff
 import androidx.compose.material.icons.filled.Videocam
 import androidx.compose.material.icons.filled.VideocamOff
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
-import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.dp
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.core.call.state.CallAction
 import io.getstream.video.android.core.call.state.ToggleCamera
-import io.getstream.video.android.core.call.state.ToggleMicrophone
-import io.getstream.video.android.ui.common.R
 
 /**
  * A call action button represents toggling a camera.
@@ -59,7 +49,7 @@ public fun ToggleCameraAction(
     enabledIconTint: Color? = null,
     disabledIconTint: Color? = null,
     onCallAction: (ToggleCamera) -> Unit,
-) : Unit = ToggleAction(
+): Unit = ToggleAction(
     modifier = modifier,
     enabled = enabled,
     shape = shape,
@@ -68,7 +58,7 @@ public fun ToggleCameraAction(
     enabledIconTint = enabledIconTint,
     disabledIconTint = disabledIconTint,
     isActionActive = isCameraEnabled,
-    iconOnOff = Pair(Icons.Default.Videocam, Icons.Default.VideocamOff)
+    iconOnOff = Pair(Icons.Default.Videocam, Icons.Default.VideocamOff),
 ) {
     onCallAction(ToggleCamera(isCameraEnabled.not()))
 }
@@ -80,11 +70,9 @@ public fun ToggleCameraActionPreview() {
         Column {
             Row {
                 ToggleCameraAction(isCameraEnabled = false) {
-
                 }
 
                 ToggleCameraAction(isCameraEnabled = true) {
-
                 }
             }
         }

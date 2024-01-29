@@ -46,12 +46,14 @@ public fun ToggleSettingsAction(
     disabledColor: Color? = null,
     onCallAction: (Settings) -> Unit,
 ): Unit = ToggleAction(
-    isActionActive = isShowingSettings, iconOnOff =
-    Pair(Icons.Default.MoreVert, Icons.Default.MoreVert), modifier = modifier,
+    isActionActive = isShowingSettings,
+    iconOnOff =
+    Pair(Icons.Default.MoreVert, Icons.Default.MoreVert),
+    modifier = modifier,
     enabled = enabled, shape = shape,
     enabledColor = enabledColor, disabledColor = disabledColor,
     offStyle = VideoTheme.styles.buttonStyles.secondaryIconButtonStyle(),
-    onStyle = VideoTheme.styles.buttonStyles.primaryIconButtonStyle()
+    onStyle = VideoTheme.styles.buttonStyles.primaryIconButtonStyle(),
 ) {
     onCallAction(Settings(!isShowingSettings))
 }
@@ -63,15 +65,11 @@ public fun ToggleSettingsActionPreview() {
         Column {
             Row {
                 ToggleSettingsAction(isShowingSettings = false) {
-
                 }
 
                 ToggleSettingsAction(isShowingSettings = true) {
-
                 }
             }
         }
     }
 }
-
-

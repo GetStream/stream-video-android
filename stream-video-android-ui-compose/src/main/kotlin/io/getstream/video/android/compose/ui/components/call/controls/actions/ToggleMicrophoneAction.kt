@@ -58,7 +58,7 @@ public fun ToggleMicrophoneAction(
     enabledIconTint = enabledIconTint,
     disabledIconTint = disabledIconTint,
     isActionActive = isMicrophoneEnabled,
-    iconOnOff = Pair(Icons.Default.Mic, Icons.Default.MicOff)
+    iconOnOff = Pair(Icons.Default.Mic, Icons.Default.MicOff),
 ) {
     onCallAction(ToggleMicrophone(isMicrophoneEnabled.not()))
 }
@@ -68,14 +68,11 @@ public fun ToggleMicrophoneAction(
 public fun ToggleMicrophoneActionPreview() {
     VideoTheme {
         Column {
-
             Row {
                 ToggleMicrophoneAction(isMicrophoneEnabled = false) {
-
                 }
 
                 ToggleMicrophoneAction(isMicrophoneEnabled = true) {
-
                 }
             }
         }

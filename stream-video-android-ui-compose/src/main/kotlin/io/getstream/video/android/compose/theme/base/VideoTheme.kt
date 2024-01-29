@@ -96,7 +96,7 @@ public fun VideoTheme(
         LocalShapes provides shapes,
         LocalRippleTheme provides rippleTheme,
         LocalReactionMapper provides reactionMapper,
-        LocalStyles provides styles
+        LocalStyles provides styles,
     ) {
         Box(
             modifier = Modifier.semantics {

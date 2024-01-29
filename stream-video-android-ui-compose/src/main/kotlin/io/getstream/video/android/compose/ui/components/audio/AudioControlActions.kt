@@ -17,16 +17,10 @@
 package io.getstream.video.android.compose.ui.components.audio
 
 import androidx.activity.ComponentActivity
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.Button
-import androidx.compose.material.ButtonDefaults
-import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ExitToApp
 import androidx.compose.runtime.Composable
@@ -35,14 +29,11 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalInspectionMode
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.getstream.video.android.compose.theme.base.VideoTheme
 import io.getstream.video.android.compose.ui.components.base.StreamButton
@@ -71,9 +62,10 @@ public fun AudioControlActions(
         call.microphone.isEnabled.collectAsStateWithLifecycle()
     }
     val activity = LocalContext.current as? ComponentActivity
-    StreamButton(text = stringResource(
-        id = io.getstream.video.android.ui.common.R.string.stream_video_audio_leave,
-    ),
+    StreamButton(
+        text = stringResource(
+            id = io.getstream.video.android.ui.common.R.string.stream_video_audio_leave,
+        ),
         icon = Icons.Default.ExitToApp,
         style = VideoTheme.styles.buttonStyles.secondaryButtonStyle(),
         onClick = {
@@ -81,7 +73,8 @@ public fun AudioControlActions(
                 call.leave()
                 activity?.onBackPressedDispatcher?.onBackPressed()
             }
-        })
+        },
+    )
 
     ToggleMicrophoneAction(
         modifier = Modifier

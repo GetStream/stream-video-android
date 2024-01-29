@@ -89,8 +89,8 @@ public open class StreamFixedSizeButtonStyle(
         colors: ButtonColors = this.colors,
         contentPadding: PaddingValues = this.contentPadding,
         textStyle: StreamTextStyle = this.textStyle,
-        iconStyle: StreamIconStyle = this.iconStyle
-    ) : StreamFixedSizeButtonStyle = StreamFixedSizeButtonStyle(
+        iconStyle: StreamIconStyle = this.iconStyle,
+    ): StreamFixedSizeButtonStyle = StreamFixedSizeButtonStyle(
         width,
         height,
         elevation,
@@ -99,7 +99,7 @@ public open class StreamFixedSizeButtonStyle(
         colors,
         contentPadding,
         textStyle,
-        iconStyle
+        iconStyle,
     )
     public companion object {
         public fun of(
