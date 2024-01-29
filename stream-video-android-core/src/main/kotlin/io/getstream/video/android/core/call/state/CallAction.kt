@@ -85,7 +85,9 @@ public data object ChatDialog : CallAction
 /**
  * Action to show a settings.
  */
-public data object Settings : CallAction
+public data class Settings(
+    val isEnabled: Boolean,
+) : CallAction
 
 /**
  * Action to show a reaction popup.

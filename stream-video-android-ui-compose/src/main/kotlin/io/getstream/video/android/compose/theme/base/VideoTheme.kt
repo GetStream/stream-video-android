@@ -30,6 +30,7 @@ import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.testTagsAsResourceId
+import io.getstream.video.android.compose.ui.components.base.styling.CompositeStyleProvider
 import io.getstream.video.android.core.mapper.ReactionMapper
 
 /**
@@ -56,6 +57,12 @@ private val LocalReactionMapper = compositionLocalOf<ReactionMapper> {
     )
 }
 
+private val LocalStyles = compositionLocalOf<CompositeStyleProvider> {
+    error(
+        "No styles provided! Make sure to wrap all usages of Stream components in a VideoTheme.",
+    )
+}
+
 /**
  * Our theme that provides all the important properties for styling to the user.
  *
@@ -79,6 +86,7 @@ public fun VideoTheme(
     rippleTheme: RippleTheme = StreamRippleTheme,
     reactionMapper: ReactionMapper = ReactionMapper.defaultReactionMapper(),
     allowUIAutomationTest: Boolean = true,
+    styles: CompositeStyleProvider = CompositeStyleProvider(),
     content: @Composable () -> Unit,
 ) {
     CompositionLocalProvider(
@@ -88,6 +96,7 @@ public fun VideoTheme(
         LocalShapes provides shapes,
         LocalRippleTheme provides rippleTheme,
         LocalReactionMapper provides reactionMapper,
+        LocalStyles provides styles
     ) {
         Box(
             modifier = Modifier.semantics {
@@ -141,6 +150,13 @@ public interface StreamTheme {
     public val reactionMapper: ReactionMapper
         @Composable @ReadOnlyComposable
         get() = LocalReactionMapper.current
+
+    /**
+     * Retrieves the current [ReactionMapper] at the call site's position in the hierarchy.
+     */
+    public val styles: CompositeStyleProvider
+        @Composable @ReadOnlyComposable
+        get() = LocalStyles.current
 }
 
 /**

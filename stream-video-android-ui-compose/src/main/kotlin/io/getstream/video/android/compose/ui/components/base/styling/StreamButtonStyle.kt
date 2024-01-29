@@ -28,7 +28,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import io.getstream.video.android.compose.theme.base.VideoTheme
 
-public object StreamButtonStyles : StreamButtonStyleProvider()
+public object ButtonStyles : ButtonStyleProvider()
 
 @Immutable
 public open class StreamButtonStyle(
@@ -80,6 +80,27 @@ public open class StreamFixedSizeButtonStyle(
     iconStyle: StreamIconStyle,
 ) : StreamButtonStyle(elevation, shape, border, colors, contentPadding, textStyle, iconStyle) {
 
+    public fun copyFixed(
+        width: Dp = this.width,
+        height: Dp = this.height,
+        elevation: ButtonElevation? = this.elevation,
+        shape: Shape = this.shape,
+        border: BorderStroke? = this.border,
+        colors: ButtonColors = this.colors,
+        contentPadding: PaddingValues = this.contentPadding,
+        textStyle: StreamTextStyle = this.textStyle,
+        iconStyle: StreamIconStyle = this.iconStyle
+    ) : StreamFixedSizeButtonStyle = StreamFixedSizeButtonStyle(
+        width,
+        height,
+        elevation,
+        shape,
+        border,
+        colors,
+        contentPadding,
+        textStyle,
+        iconStyle
+    )
     public companion object {
         public fun of(
             width: Dp,
@@ -100,7 +121,7 @@ public open class StreamFixedSizeButtonStyle(
 }
 
 @Immutable
-public open class StreamButtonStyleProvider {
+public open class ButtonStyleProvider {
 
     /**
      * You can create any style with the [StreamButtonStyle].
@@ -126,7 +147,7 @@ public open class StreamButtonStyleProvider {
         colors,
         contentPadding,
         StreamTextStyles.defaultButtonLabel(size),
-        StreamIconStyles.defaultIconStyle(),
+        IconStyles.defaultIconStyle(),
     )
 
     @Composable
@@ -176,7 +197,7 @@ public open class StreamButtonStyleProvider {
                 contentColor = VideoTheme.colors.basePrimary,
                 disabledBackgroundColor = VideoTheme.colors.buttonPrimaryDisabled,
             ),
-            iconStyle = StreamIconStyles.customColorIconStyle(
+            iconStyle = IconStyles.customColorIconStyle(
                 color = VideoTheme.colors.brandPrimary,
             ),
         )
@@ -215,7 +236,7 @@ public open class StreamButtonStyleProvider {
                 else -> VideoTheme.dimens.componentHeightL
             },
             origin = primaryButtonStyle(size = size).copy(
-                iconStyle = StreamIconStyles.defaultIconStyle(
+                iconStyle = IconStyles.defaultIconStyle(
                     padding = PaddingValues(VideoTheme.dimens.spacingXs),
                 ),
             ),
@@ -235,7 +256,7 @@ public open class StreamButtonStyleProvider {
                 else -> VideoTheme.dimens.componentHeightL
             },
             origin = secondaryButtonStyle(size = size).copy(
-                iconStyle = StreamIconStyles.defaultIconStyle(
+                iconStyle = IconStyles.defaultIconStyle(
                     padding = PaddingValues(VideoTheme.dimens.spacingXs),
                 ),
             ),
@@ -255,7 +276,7 @@ public open class StreamButtonStyleProvider {
                 else -> VideoTheme.dimens.componentHeightL
             },
             origin = tetriaryButtonStyle(size = size).copy(
-                iconStyle = StreamIconStyles.defaultIconStyle(
+                iconStyle = IconStyles.defaultIconStyle(
                     padding = PaddingValues(VideoTheme.dimens.spacingXs),
                 ),
             ),
@@ -275,7 +296,7 @@ public open class StreamButtonStyleProvider {
                 else -> VideoTheme.dimens.componentHeightL
             },
             origin = alertButtonStyle(size = size).copy(
-                iconStyle = StreamIconStyles.defaultIconStyle(
+                iconStyle = IconStyles.defaultIconStyle(
                     padding = PaddingValues(VideoTheme.dimens.spacingXs),
                 ),
             ),

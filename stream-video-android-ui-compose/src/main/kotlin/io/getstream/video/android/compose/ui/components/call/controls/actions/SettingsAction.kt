@@ -16,20 +16,18 @@
 
 package io.getstream.video.android.compose.ui.components.call.controls.actions
 
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material.Icon
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
-import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.unit.dp
-import io.getstream.video.android.compose.theme.VideoTheme
+import androidx.compose.ui.tooling.preview.Preview
+import io.getstream.video.android.compose.theme.base.VideoTheme
 import io.getstream.video.android.core.call.state.CallAction
 import io.getstream.video.android.core.call.state.Settings
-import io.getstream.video.android.ui.common.R
 
 /**
  * A call action button represents displaying a chat dialog.
@@ -39,28 +37,41 @@ import io.getstream.video.android.ui.common.R
  * @param onCallAction A [CallAction] event that will be fired.
  */
 @Composable
-public fun SettingsAction(
+public fun ToggleSettingsAction(
     modifier: Modifier = Modifier,
+    isShowingSettings: Boolean,
     enabled: Boolean = true,
-    shape: Shape = VideoTheme.shapes.callControlsButton,
-    enabledColor: Color = VideoTheme.colors.callActionIconEnabledBackground,
-    disabledColor: Color = VideoTheme.colors.callActionIconDisabledBackground,
+    shape: Shape? = null,
+    enabledColor: Color? = null,
+    disabledColor: Color? = null,
     onCallAction: (Settings) -> Unit,
+): Unit = ToggleAction(
+    isActionActive = isShowingSettings, iconOnOff =
+    Pair(Icons.Default.MoreVert, Icons.Default.MoreVert), modifier = modifier,
+    enabled = enabled, shape = shape,
+    enabledColor = enabledColor, disabledColor = disabledColor,
+    offStyle = VideoTheme.styles.buttonStyles.secondaryIconButtonStyle(),
+    onStyle = VideoTheme.styles.buttonStyles.primaryIconButtonStyle()
 ) {
-    CallControlActionBackground(
-        modifier = modifier,
-        isEnabled = enabled,
-        shape = shape,
-        enabledColor = enabledColor,
-        disabledColor = disabledColor,
-    ) {
-        Icon(
-            modifier = Modifier
-                .padding(13.dp)
-                .clickable(enabled = enabled) { onCallAction(Settings) },
-            tint = VideoTheme.colors.callActionIconEnabled,
-            painter = painterResource(id = R.drawable.stream_video_ic_options),
-            contentDescription = stringResource(R.string.stream_video_call_controls_settings),
-        )
+    onCallAction(Settings(!isShowingSettings))
+}
+
+@Preview
+@Composable
+public fun ToggleSettingsActionPreview() {
+    io.getstream.video.android.compose.theme.base.VideoTheme {
+        Column {
+            Row {
+                ToggleSettingsAction(isShowingSettings = false) {
+
+                }
+
+                ToggleSettingsAction(isShowingSettings = true) {
+
+                }
+            }
+        }
     }
 }
+
+

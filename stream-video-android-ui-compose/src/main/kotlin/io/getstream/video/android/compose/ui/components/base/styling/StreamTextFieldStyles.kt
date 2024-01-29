@@ -42,7 +42,7 @@ public open class TextFieldStyleProvider {
         styleSize: StyleSize = StyleSize.L,
         textStyle: StreamTextStyle = StreamTextStyles.defaultTextField(styleSize),
         placeholderStyle: StreamTextStyle = StreamTextStyles.defaultSubtitle(styleSize),
-        iconStyle: StreamIconStyle = StreamIconStyles.defaultIconStyle(),
+        iconStyle: StreamIconStyle = IconStyles.defaultIconStyle(),
     ): TextFieldStyle =
         TextFieldStyle(
             textStyle = textStyle,

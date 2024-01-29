@@ -40,7 +40,7 @@ import androidx.compose.ui.unit.dp
 import io.getstream.video.android.compose.theme.base.VideoTheme
 import io.getstream.video.android.compose.ui.components.base.styling.BadgeStyle
 import io.getstream.video.android.compose.ui.components.base.styling.StreamBadgeStyles
-import io.getstream.video.android.compose.ui.components.base.styling.StreamButtonStyles
+import io.getstream.video.android.compose.ui.components.base.styling.ButtonStyles
 
 @Composable
 public fun StreamBadgeBox(
@@ -87,7 +87,7 @@ private fun ButtonWithBadgePreview() {
             ) {
                 StreamIconButton(
                     icon = Icons.Default.AddAlert,
-                    style = StreamButtonStyles.secondaryIconButtonStyle(),
+                    style = ButtonStyles.secondaryIconButtonStyle(),
                 )
             }
             Spacer(modifier = Modifier.size(16.dp))
@@ -98,7 +98,7 @@ private fun ButtonWithBadgePreview() {
                 StreamButton(
                     icon = Icons.Default.Info,
                     text = "Secondary Button",
-                    style = StreamButtonStyles.secondaryButtonStyle(),
+                    style = ButtonStyles.secondaryButtonStyle(),
                 )
             }
             Spacer(modifier = Modifier.size(16.dp))
@@ -108,7 +108,7 @@ private fun ButtonWithBadgePreview() {
             ) {
                 StreamIconButton(
                     icon = Icons.Default.Chat,
-                    style = StreamButtonStyles.primaryIconButtonStyle(),
+                    style = ButtonStyles.primaryIconButtonStyle(),
                 )
             }
         }

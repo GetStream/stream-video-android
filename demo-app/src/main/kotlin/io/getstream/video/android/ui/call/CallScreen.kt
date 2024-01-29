@@ -61,9 +61,9 @@ import io.getstream.video.android.compose.ui.components.call.controls.actions.Ca
 import io.getstream.video.android.compose.ui.components.call.controls.actions.ChatDialogAction
 import io.getstream.video.android.compose.ui.components.call.controls.actions.DefaultOnCallActionHandler
 import io.getstream.video.android.compose.ui.components.call.controls.actions.FlipCameraAction
-import io.getstream.video.android.compose.ui.components.call.controls.actions.SettingsAction
 import io.getstream.video.android.compose.ui.components.call.controls.actions.ToggleCameraAction
 import io.getstream.video.android.compose.ui.components.call.controls.actions.ToggleMicrophoneAction
+import io.getstream.video.android.compose.ui.components.call.controls.actions.ToggleSettingsAction
 import io.getstream.video.android.compose.ui.components.call.renderer.FloatingParticipantVideo
 import io.getstream.video.android.compose.ui.components.call.renderer.LayoutType
 import io.getstream.video.android.compose.ui.components.call.renderer.ParticipantVideo
@@ -157,11 +157,12 @@ fun CallScreen(
                                 call = call,
                                 actions = listOf(
                                     {
-                                        SettingsAction(
+                                        ToggleSettingsAction(
+                                            isShowingSettings = isShowingSettingMenu,
                                             modifier = Modifier.size(
                                                 VideoTheme.dimens.controlActionsButtonSize,
                                             ),
-                                            onCallAction = { isShowingSettingMenu = true },
+                                            onCallAction = { isShowingSettingMenu = !isShowingSettingMenu },
                                         )
                                     },
                                     {

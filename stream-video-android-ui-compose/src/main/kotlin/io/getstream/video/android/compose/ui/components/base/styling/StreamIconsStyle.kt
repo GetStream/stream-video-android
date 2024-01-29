@@ -45,7 +45,7 @@ public data class StreamIconStyle(
 /**
  * Provides default icon style.
  */
-public open class StreamIconStyleProvider {
+public open class IconStyleProvider {
 
     /**
      * Composable that provides default icon style.
@@ -78,6 +78,6 @@ public open class StreamIconStyleProvider {
 }
 
 /**
- * Object accessor for a default [StreamIconStyleProvider]
+ * Object accessor for a default [IconStyleProvider]
  */
-public object StreamIconStyles : StreamIconStyleProvider()
+public object IconStyles : IconStyleProvider()

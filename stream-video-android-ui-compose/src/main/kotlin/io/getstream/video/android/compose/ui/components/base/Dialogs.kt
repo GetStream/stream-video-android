@@ -48,7 +48,7 @@ import androidx.compose.ui.window.DialogProperties
 import io.getstream.video.android.compose.theme.base.VideoTheme
 import io.getstream.video.android.compose.ui.components.base.styling.DialogStyle
 import io.getstream.video.android.compose.ui.components.base.styling.StreamButtonStyle
-import io.getstream.video.android.compose.ui.components.base.styling.StreamButtonStyles
+import io.getstream.video.android.compose.ui.components.base.styling.ButtonStyles
 import io.getstream.video.android.compose.ui.components.base.styling.StreamDialogStyles
 import io.getstream.video.android.compose.ui.components.base.styling.StreamTextFieldStyles
 import io.getstream.video.android.compose.ui.components.base.styling.StyleSize
@@ -158,13 +158,13 @@ private fun StreamDialogPreview() {
             contentText = "By staying in the call you’re consenting to being recorded.",
             positiveButton = Triple(
                 "Continue",
-                StreamButtonStyles.secondaryButtonStyle(StyleSize.S),
+                ButtonStyles.secondaryButtonStyle(StyleSize.S),
             ) {
                 // Do nothing
             },
             negativeButton = Triple(
                 "Leave call",
-                StreamButtonStyles.tetriaryButtonStyle(StyleSize.S),
+                ButtonStyles.tetriaryButtonStyle(StyleSize.S),
             ) {
                 // Do nothing
             },
@@ -222,13 +222,13 @@ private fun StreamDialogWithInputPreview() {
             ),
             positiveButton = Triple(
                 "Submit",
-                StreamButtonStyles.secondaryButtonStyle(StyleSize.S),
+                ButtonStyles.secondaryButtonStyle(StyleSize.S),
             ) {
                 // Do nothing
             },
             negativeButton = Triple(
                 "Not now",
-                StreamButtonStyles.tetriaryButtonStyle(StyleSize.S),
+                ButtonStyles.tetriaryButtonStyle(StyleSize.S),
             ) {
                 // Do nothing
             },

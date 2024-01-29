@@ -39,7 +39,7 @@ public open class DialogStyleProvider {
         backgroundColor = VideoTheme.colors.baseSheetSecondary,
         titleStyle = StreamTextStyles.defaultTitle(StyleSize.S).default.platform,
         contentTextStyle = StreamTextStyles.defaultBody(StyleSize.S).default.platform,
-        iconStyle = StreamIconStyles.defaultIconStyle().default,
+        iconStyle = IconStyles.defaultIconStyle().default,
         contentPaddings = PaddingValues(VideoTheme.dimens.spacingL),
     )
 }
