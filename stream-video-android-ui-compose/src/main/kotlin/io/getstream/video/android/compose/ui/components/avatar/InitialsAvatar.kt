@@ -18,6 +18,9 @@ package io.getstream.video.android.compose.ui.components.avatar
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.Text
@@ -30,8 +33,8 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
-import io.getstream.video.android.compose.theme.VideoTheme
-import io.getstream.video.android.compose.utils.initialsGradient
+import io.getstream.video.android.compose.theme.base.VideoTheme
+import io.getstream.video.android.compose.utils.initialsColors
 import io.getstream.video.android.core.utils.initials
 
 /**
@@ -49,25 +52,24 @@ import io.getstream.video.android.core.utils.initials
 internal fun InitialsAvatar(
     initials: String,
     modifier: Modifier = Modifier,
-    shape: Shape = VideoTheme.shapes.avatar,
-    textStyle: TextStyle = VideoTheme.typography.title3Bold,
+    shape: Shape = VideoTheme.shapes.circle,
+    textStyle: TextStyle = VideoTheme.typography.titleM,
     avatarOffset: DpOffset = DpOffset(0.dp, 0.dp),
     initialTransformer: (String) -> String = { it.initials() },
 ) {
-    val initialsGradient = initialsGradient(initials = initials)
-
+    val colors = initialsColors(initials = initials)
     Box(
         modifier = modifier
+            .aspectRatio(1f)
             .clip(shape)
-            .background(brush = initialsGradient),
+            .background(color = colors.second),
     ) {
         Text(
             modifier = Modifier
                 .align(Alignment.Center)
                 .offset(avatarOffset.x, avatarOffset.y),
             text = initialTransformer.invoke(initials),
-            style = textStyle,
-            color = VideoTheme.colors.avatarInitials,
+            style = textStyle.copy(color = colors.first),
         )
     }
 }
@@ -76,9 +78,23 @@ internal fun InitialsAvatar(
 @Composable
 private fun InitialsAvatarPreview() {
     VideoTheme {
-        Avatar(
-            modifier = Modifier.size(56.dp),
-            initials = "Jaewoong Eum",
-        )
+        Column {
+            Avatar(
+                initials = "Jaewoong Eum",
+            )
+            Spacer(modifier = Modifier.size(24.dp))
+            Avatar(
+                initials = "Aleksandar Apostolov",
+            )
+            Spacer(modifier = Modifier.size(24.dp))
+            Avatar(
+                initials = "Danie",
+            )
+            Spacer(modifier = Modifier.size(24.dp))
+            Avatar(
+                initials = "Jaewoong Eum",
+            )
+            Spacer(modifier = Modifier.size(24.dp))
+        }
     }
 }

@@ -44,6 +44,7 @@ import io.getstream.video.android.ui.common.R
  * @param onDismiss Handler when the user wants to dismiss and cancel the operation.
  * @param onInviteUsers Handler when the user wants to confirm invites.
  */
+// TODO AAP: Move into demo-app
 @Composable
 internal fun InviteUsersDialog(
     users: List<User>,

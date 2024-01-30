@@ -40,6 +40,7 @@
     <color name="stream_video_base_sheet_primary">#101213</color>
     <color name="stream_video_base_sheet_secondary">#0C0D0E</color>
     <color name="stream_video_base_sheet_tetriary">#19232D</color>
+    <color name="stream_video_base_sheet_quaternary">#A60C0D0E</color>
 
     <!-- Buttons -->
     <color name="stream_video_button_primary_default">@color/stream_video_base_sheet_tetriary</color>

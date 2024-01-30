@@ -17,12 +17,14 @@
 <resources>
     <!-- Generic -->
     <dimen name="stream_video_generic_max">100dp</dimen>
+    <dimen name="stream_video_generic_3xl">84dp</dimen>
     <dimen name="stream_video_generic_xxl">44dp</dimen>
     <dimen name="stream_video_generic_xl">32dp</dimen>
     <dimen name="stream_video_generic_l">24dp</dimen>
     <dimen name="stream_video_generic_m">16dp</dimen>
     <dimen name="stream_video_generic_s">8dp</dimen>
     <dimen name="stream_video_generic_xs">4dp</dimen>
+    <dimen name="stream_video_generic_xxs">2dp</dimen>
 
     <!-- Roundness -->
     <dimen name="stream_video_roundness_xl">@dimen/stream_video_generic_xl</dimen>
@@ -36,6 +38,7 @@
     <dimen name="stream_video_spacing_m">@dimen/stream_video_generic_m</dimen>
     <dimen name="stream_video_spacing_s">@dimen/stream_video_generic_s</dimen>
     <dimen name="stream_video_spacing_xs">@dimen/stream_video_generic_xs</dimen>
+    <dimen name="stream_video_spacing_xxs">@dimen/stream_video_generic_xxs</dimen>
 
     <!-- Components -->
     <dimen name="stream_video_component_height_l">@dimen/stream_video_generic_xxl</dimen>

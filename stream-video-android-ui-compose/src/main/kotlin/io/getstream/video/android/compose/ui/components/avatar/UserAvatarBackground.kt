@@ -17,16 +17,12 @@
 package io.getstream.video.android.compose.ui.components.avatar
 
 import androidx.annotation.DrawableRes
-import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
@@ -36,7 +32,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
-import io.getstream.video.android.compose.theme.VideoTheme
+import io.getstream.video.android.compose.theme.base.VideoTheme
 import io.getstream.video.android.mock.StreamPreviewDataUtils
 import io.getstream.video.android.mock.previewUsers
 
@@ -62,10 +58,8 @@ public fun UserAvatarBackground(
     userName: String?,
     userImage: String?,
     modifier: Modifier = Modifier,
-    shape: Shape = VideoTheme.shapes.avatar,
-    avatarSize: Dp = 84.dp,
-    avatarShadowElevation: Dp = 12.dp,
-    textStyle: TextStyle = VideoTheme.typography.title3Bold,
+    shape: Shape = VideoTheme.shapes.circle,
+    avatarSize: Dp = VideoTheme.dimens.genericMax,
     contentScale: ContentScale = ContentScale.Crop,
     contentDescription: String? = null,
     requestSize: IntSize = IntSize(DEFAULT_IMAGE_SIZE, DEFAULT_IMAGE_SIZE),
@@ -77,22 +71,12 @@ public fun UserAvatarBackground(
         Box(
             modifier = Modifier
                 .size(avatarSize)
-                .align(Alignment.Center)
-                .border(
-                    width = VideoTheme.dimens.avatarBorderWidth,
-                    color = VideoTheme.colors.avatarBorderColor,
-                    shape = VideoTheme.shapes.avatar,
-                ),
+                .align(Alignment.Center),
         ) {
             UserAvatar(
-                modifier = Modifier
-                    .padding(VideoTheme.dimens.avatarBorderPadding)
-                    .align(Alignment.Center)
-                    .shadow(elevation = avatarShadowElevation, shape = CircleShape),
                 userName = userName,
                 userImage = userImage,
                 shape = shape,
-                textStyle = textStyle,
                 contentScale = contentScale,
                 contentDescription = contentDescription,
                 requestSize = requestSize,

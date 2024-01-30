@@ -24,7 +24,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.getstream.video.android.compose.ui.components.call.renderer.ParticipantLabel
-import io.getstream.video.android.compose.ui.components.connection.NetworkQualityIndicator
+import io.getstream.video.android.compose.ui.components.indicator.NetworkQualityIndicator
 import io.getstream.video.android.compose.ui.components.video.VideoRenderer
 import io.getstream.video.android.compose.ui.components.video.VideoScalingType
 import io.getstream.video.android.core.Call

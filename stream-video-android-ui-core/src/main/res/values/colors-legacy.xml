@@ -93,11 +93,13 @@
     <color name="stream_video_avatar_gradient_yellow">#FFF176</color>
     <color name="stream_video_avatar_gradient_red">#E57373</color>
     <array name="stream_video_avatar_gradient_colors">
-        <item>@color/stream_video_avatar_gradient_orange</item>
-        <item>@color/stream_video_avatar_gradient_green</item>
-        <item>@color/stream_video_avatar_gradient_blue</item>
-        <item>@color/stream_video_avatar_gradient_brown</item>
-        <item>@color/stream_video_avatar_gradient_yellow</item>
-        <item>@color/stream_video_avatar_gradient_red</item>
+        <item>@color/stream_video_brand_cyan</item>
+        <item>@color/stream_video_brand_green</item>
+        <item>@color/stream_video_brand_primary</item>
+        <item>@color/stream_video_brand_primary_lt</item>
+        <item>@color/stream_video_brand_red</item>
+        <item>@color/stream_video_brand_red_lt</item>
+        <item>@color/stream_video_brand_violet</item>
+        <item>@color/stream_video_brand_yellow</item>
     </array>
 </resources>

@@ -30,7 +30,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import io.getstream.video.android.compose.theme.VideoTheme
+import io.getstream.video.android.compose.theme.base.VideoTheme
 import io.getstream.video.android.core.ParticipantState
 import io.getstream.video.android.mock.StreamPreviewDataUtils
 import io.getstream.video.android.mock.previewParticipantsList
@@ -62,13 +62,13 @@ public fun AudioParticipantsGrid(
 
     LazyVerticalGrid(
         modifier = modifier,
-        columns = GridCells.Adaptive(VideoTheme.dimens.audioAvatarSize),
+        columns = GridCells.Adaptive(VideoTheme.dimens.componentHeightM),
         contentPadding = PaddingValues(vertical = 32.dp),
         verticalArrangement = Arrangement.spacedBy(
-            VideoTheme.dimens.audioRoomAvatarLandscapePadding,
+            VideoTheme.dimens.spacingM,
         ),
         horizontalArrangement = if (orientation == Configuration.ORIENTATION_LANDSCAPE) {
-            Arrangement.spacedBy(VideoTheme.dimens.audioRoomAvatarLandscapePadding)
+            Arrangement.spacedBy(VideoTheme.dimens.spacingM)
         } else {
             Arrangement.spacedBy(0.dp)
         },

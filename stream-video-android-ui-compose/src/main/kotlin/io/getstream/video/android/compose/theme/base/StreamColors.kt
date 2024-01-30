@@ -44,6 +44,7 @@ public data class StreamColors(
     val baseSheetPrimary: Color,
     val baseSheetSecondary: Color,
     val baseSheetTertiary: Color,
+    val baseSheetQuarternary: Color,
     val buttonPrimaryDefault: Color,
     val buttonPrimaryPressed: Color,
     val buttonPrimaryDisabled: Color,
@@ -89,6 +90,7 @@ public data class StreamColors(
             baseSheetPrimary = colorResource(id = R.color.stream_video_base_sheet_primary),
             baseSheetSecondary = colorResource(id = R.color.stream_video_base_sheet_secondary),
             baseSheetTertiary = colorResource(id = R.color.stream_video_base_sheet_tetriary),
+            baseSheetQuarternary = colorResource(id = R.color.stream_video_base_sheet_quaternary),
             buttonPrimaryDefault = colorResource(id = R.color.stream_video_button_primary_default),
             buttonPrimaryPressed = colorResource(id = R.color.stream_video_button_primary_pressed),
             buttonPrimaryDisabled = colorResource(

@@ -20,7 +20,6 @@ import androidx.activity.ComponentActivity
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ExitToApp
 import androidx.compose.runtime.Composable
@@ -81,7 +80,6 @@ public fun AudioControlActions(
             .align(Alignment.CenterEnd)
             .size(45.dp),
         isMicrophoneEnabled = isMicrophoneEnabled,
-        shape = RoundedCornerShape(8.dp),
         onCallAction = { callAction -> call.microphone.setEnabled(callAction.isEnabled) },
     )
 }

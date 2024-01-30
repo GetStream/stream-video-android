@@ -434,7 +434,7 @@ public final class io/getstream/video/android/compose/theme/VideoThemeKt {
 public final class io/getstream/video/android/compose/theme/base/StreamColors {
 	public static final field $stable I
 	public static final field Companion Lio/getstream/video/android/compose/theme/base/StreamColors$Companion;
-	public synthetic fun <init> (JJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJLkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public synthetic fun <init> (JJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJLkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun component1-0d7_KjU ()J
 	public final fun component10-0d7_KjU ()J
 	public final fun component11-0d7_KjU ()J
@@ -469,13 +469,14 @@ public final class io/getstream/video/android/compose/theme/base/StreamColors {
 	public final fun component38-0d7_KjU ()J
 	public final fun component39-0d7_KjU ()J
 	public final fun component4-0d7_KjU ()J
+	public final fun component40-0d7_KjU ()J
 	public final fun component5-0d7_KjU ()J
 	public final fun component6-0d7_KjU ()J
 	public final fun component7-0d7_KjU ()J
 	public final fun component8-0d7_KjU ()J
 	public final fun component9-0d7_KjU ()J
-	public final fun copy-hdHz8jU (JJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJ)Lio/getstream/video/android/compose/theme/base/StreamColors;
-	public static synthetic fun copy-hdHz8jU$default (Lio/getstream/video/android/compose/theme/base/StreamColors;JJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJIILjava/lang/Object;)Lio/getstream/video/android/compose/theme/base/StreamColors;
+	public final fun copy-KR53e2g (JJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJ)Lio/getstream/video/android/compose/theme/base/StreamColors;
+	public static synthetic fun copy-KR53e2g$default (Lio/getstream/video/android/compose/theme/base/StreamColors;JJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJIILjava/lang/Object;)Lio/getstream/video/android/compose/theme/base/StreamColors;
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getAlertCaution-0d7_KjU ()J
 	public final fun getAlertSuccess-0d7_KjU ()J
@@ -486,6 +487,7 @@ public final class io/getstream/video/android/compose/theme/base/StreamColors {
 	public final fun getBaseSecondary-0d7_KjU ()J
 	public final fun getBaseSenary-0d7_KjU ()J
 	public final fun getBaseSheetPrimary-0d7_KjU ()J
+	public final fun getBaseSheetQuarternary-0d7_KjU ()J
 	public final fun getBaseSheetSecondary-0d7_KjU ()J
 	public final fun getBaseSheetTertiary-0d7_KjU ()J
 	public final fun getBaseTertiary-0d7_KjU ()J
@@ -527,7 +529,7 @@ public final class io/getstream/video/android/compose/theme/base/StreamColors$Co
 public final class io/getstream/video/android/compose/theme/base/StreamDimens {
 	public static final field $stable I
 	public static final field Companion Lio/getstream/video/android/compose/theme/base/StreamDimens$Companion;
-	public synthetic fun <init> (FFFFFFFFFFFFFFFFFFFFFFFFJJJJJJJJJJJJLkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public synthetic fun <init> (FFFFFFFFFFFFFFFFFFFFFFFFFFJJJJJJJJJJJJLkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun component1-D9Ej5fM ()F
 	public final fun component10-D9Ej5fM ()F
 	public final fun component11-D9Ej5fM ()F
@@ -545,8 +547,8 @@ public final class io/getstream/video/android/compose/theme/base/StreamDimens {
 	public final fun component22-D9Ej5fM ()F
 	public final fun component23-D9Ej5fM ()F
 	public final fun component24-D9Ej5fM ()F
-	public final fun component25-XSAIIZE ()J
-	public final fun component26-XSAIIZE ()J
+	public final fun component25-D9Ej5fM ()F
+	public final fun component26-D9Ej5fM ()F
 	public final fun component27-XSAIIZE ()J
 	public final fun component28-XSAIIZE ()J
 	public final fun component29-XSAIIZE ()J
@@ -558,14 +560,16 @@ public final class io/getstream/video/android/compose/theme/base/StreamDimens {
 	public final fun component34-XSAIIZE ()J
 	public final fun component35-XSAIIZE ()J
 	public final fun component36-XSAIIZE ()J
+	public final fun component37-XSAIIZE ()J
+	public final fun component38-XSAIIZE ()J
 	public final fun component4-D9Ej5fM ()F
 	public final fun component5-D9Ej5fM ()F
 	public final fun component6-D9Ej5fM ()F
 	public final fun component7-D9Ej5fM ()F
 	public final fun component8-D9Ej5fM ()F
 	public final fun component9-D9Ej5fM ()F
-	public final fun copy-z-RPGdI (FFFFFFFFFFFFFFFFFFFFFFFFJJJJJJJJJJJJ)Lio/getstream/video/android/compose/theme/base/StreamDimens;
-	public static synthetic fun copy-z-RPGdI$default (Lio/getstream/video/android/compose/theme/base/StreamDimens;FFFFFFFFFFFFFFFFFFFFFFFFJJJJJJJJJJJJIILjava/lang/Object;)Lio/getstream/video/android/compose/theme/base/StreamDimens;
+	public final fun copy-xjaEkcA (FFFFFFFFFFFFFFFFFFFFFFFFFFJJJJJJJJJJJJ)Lio/getstream/video/android/compose/theme/base/StreamDimens;
+	public static synthetic fun copy-xjaEkcA$default (Lio/getstream/video/android/compose/theme/base/StreamDimens;FFFFFFFFFFFFFFFFFFFFFFFFFFJJJJJJJJJJJJIILjava/lang/Object;)Lio/getstream/video/android/compose/theme/base/StreamDimens;
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getComponentHeightL-D9Ej5fM ()F
 	public final fun getComponentHeightM-D9Ej5fM ()F
@@ -575,6 +579,7 @@ public final class io/getstream/video/android/compose/theme/base/StreamDimens {
 	public final fun getComponentPaddingFixed-D9Ej5fM ()F
 	public final fun getComponentPaddingStart-D9Ej5fM ()F
 	public final fun getComponentPaddingTop-D9Ej5fM ()F
+	public final fun getGeneric3xl-D9Ej5fM ()F
 	public final fun getGenericL-D9Ej5fM ()F
 	public final fun getGenericM-D9Ej5fM ()F
 	public final fun getGenericMax-D9Ej5fM ()F
@@ -595,6 +600,7 @@ public final class io/getstream/video/android/compose/theme/base/StreamDimens {
 	public final fun getSpacingL-D9Ej5fM ()F
 	public final fun getSpacingM-D9Ej5fM ()F
 	public final fun getSpacingS-D9Ej5fM ()F
+	public final fun getSpacingXXs-D9Ej5fM ()F
 	public final fun getSpacingXl-D9Ej5fM ()F
 	public final fun getSpacingXs-D9Ej5fM ()F
 	public final fun getTextSizeL-XSAIIZE ()J
@@ -614,18 +620,20 @@ public final class io/getstream/video/android/compose/theme/base/StreamDimens$Co
 public final class io/getstream/video/android/compose/theme/base/StreamShapes {
 	public static final field $stable I
 	public static final field Companion Lio/getstream/video/android/compose/theme/base/StreamShapes$Companion;
-	public fun <init> (Landroidx/compose/ui/graphics/Shape;Landroidx/compose/ui/graphics/Shape;Landroidx/compose/ui/graphics/Shape;Landroidx/compose/ui/graphics/Shape;Landroidx/compose/ui/graphics/Shape;)V
+	public fun <init> (Landroidx/compose/ui/graphics/Shape;Landroidx/compose/ui/graphics/Shape;Landroidx/compose/ui/graphics/Shape;Landroidx/compose/ui/graphics/Shape;Landroidx/compose/ui/graphics/Shape;Landroidx/compose/ui/graphics/Shape;)V
 	public final fun component1 ()Landroidx/compose/ui/graphics/Shape;
 	public final fun component2 ()Landroidx/compose/ui/graphics/Shape;
 	public final fun component3 ()Landroidx/compose/ui/graphics/Shape;
 	public final fun component4 ()Landroidx/compose/ui/graphics/Shape;
 	public final fun component5 ()Landroidx/compose/ui/graphics/Shape;
-	public final fun copy (Landroidx/compose/ui/graphics/Shape;Landroidx/compose/ui/graphics/Shape;Landroidx/compose/ui/graphics/Shape;Landroidx/compose/ui/graphics/Shape;Landroidx/compose/ui/graphics/Shape;)Lio/getstream/video/android/compose/theme/base/StreamShapes;
-	public static synthetic fun copy$default (Lio/getstream/video/android/compose/theme/base/StreamShapes;Landroidx/compose/ui/graphics/Shape;Landroidx/compose/ui/graphics/Shape;Landroidx/compose/ui/graphics/Shape;Landroidx/compose/ui/graphics/Shape;Landroidx/compose/ui/graphics/Shape;ILjava/lang/Object;)Lio/getstream/video/android/compose/theme/base/StreamShapes;
+	public final fun component6 ()Landroidx/compose/ui/graphics/Shape;
+	public final fun copy (Landroidx/compose/ui/graphics/Shape;Landroidx/compose/ui/graphics/Shape;Landroidx/compose/ui/graphics/Shape;Landroidx/compose/ui/graphics/Shape;Landroidx/compose/ui/graphics/Shape;Landroidx/compose/ui/graphics/Shape;)Lio/getstream/video/android/compose/theme/base/StreamShapes;
+	public static synthetic fun copy$default (Lio/getstream/video/android/compose/theme/base/StreamShapes;Landroidx/compose/ui/graphics/Shape;Landroidx/compose/ui/graphics/Shape;Landroidx/compose/ui/graphics/Shape;Landroidx/compose/ui/graphics/Shape;Landroidx/compose/ui/graphics/Shape;Landroidx/compose/ui/graphics/Shape;ILjava/lang/Object;)Lio/getstream/video/android/compose/theme/base/StreamShapes;
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getButton ()Landroidx/compose/ui/graphics/Shape;
 	public final fun getCircle ()Landroidx/compose/ui/graphics/Shape;
 	public final fun getDialog ()Landroidx/compose/ui/graphics/Shape;
+	public final fun getIndicator ()Landroidx/compose/ui/graphics/Shape;
 	public final fun getInput ()Landroidx/compose/ui/graphics/Shape;
 	public final fun getSheet ()Landroidx/compose/ui/graphics/Shape;
 	public fun hashCode ()I
@@ -851,11 +859,11 @@ public final class io/getstream/video/android/compose/ui/components/avatar/Onlin
 }
 
 public final class io/getstream/video/android/compose/ui/components/avatar/UserAvatarBackgroundKt {
-	public static final fun UserAvatarBackground-5WCoS_E (Ljava/lang/String;Ljava/lang/String;Landroidx/compose/ui/Modifier;Landroidx/compose/ui/graphics/Shape;FFLandroidx/compose/ui/text/TextStyle;Landroidx/compose/ui/layout/ContentScale;Ljava/lang/String;JJILjava/lang/Integer;Landroidx/compose/runtime/Composer;III)V
+	public static final fun UserAvatarBackground-xr0SGnQ (Ljava/lang/String;Ljava/lang/String;Landroidx/compose/ui/Modifier;Landroidx/compose/ui/graphics/Shape;FLandroidx/compose/ui/layout/ContentScale;Ljava/lang/String;JJILjava/lang/Integer;Landroidx/compose/runtime/Composer;III)V
 }
 
 public final class io/getstream/video/android/compose/ui/components/avatar/UserAvatarKt {
-	public static final fun UserAvatar-8W8krDU (Ljava/lang/String;Ljava/lang/String;Landroidx/compose/ui/Modifier;Landroidx/compose/ui/graphics/Shape;Landroidx/compose/ui/text/TextStyle;Landroidx/compose/ui/layout/ContentScale;Ljava/lang/String;JILjava/lang/Integer;JZLio/getstream/video/android/compose/ui/components/avatar/OnlineIndicatorAlignment;Lkotlin/jvm/functions/Function3;Lkotlin/jvm/functions/Function0;Landroidx/compose/runtime/Composer;III)V
+	public static final fun UserAvatar-ts-XYlQ (Ljava/lang/String;Ljava/lang/String;Landroidx/compose/ui/Modifier;Landroidx/compose/ui/graphics/Shape;Landroidx/compose/ui/layout/ContentScale;Ljava/lang/String;JILjava/lang/Integer;JZLio/getstream/video/android/compose/ui/components/avatar/OnlineIndicatorAlignment;Lkotlin/jvm/functions/Function3;Lkotlin/jvm/functions/Function0;Landroidx/compose/runtime/Composer;III)V
 }
 
 public final class io/getstream/video/android/compose/ui/components/background/CallBackgroundKt {
@@ -1275,14 +1283,12 @@ public final class io/getstream/video/android/compose/ui/components/call/activec
 public final class io/getstream/video/android/compose/ui/components/call/controls/ComposableSingletons$ControlActionsKt {
 	public static final field INSTANCE Lio/getstream/video/android/compose/ui/components/call/controls/ComposableSingletons$ControlActionsKt;
 	public static field lambda-1 Lkotlin/jvm/functions/Function2;
-	public static field lambda-2 Lkotlin/jvm/functions/Function2;
 	public fun <init> ()V
 	public final fun getLambda-1$stream_video_android_ui_compose_release ()Lkotlin/jvm/functions/Function2;
-	public final fun getLambda-2$stream_video_android_ui_compose_release ()Lkotlin/jvm/functions/Function2;
 }
 
 public final class io/getstream/video/android/compose/ui/components/call/controls/ControlActionsKt {
-	public static final fun ControlActions--6D8GgA (Lio/getstream/video/android/core/Call;Landroidx/compose/ui/Modifier;Lkotlin/jvm/functions/Function1;JFLandroidx/compose/ui/graphics/Shape;Landroidx/compose/ui/unit/Dp;Ljava/util/List;Landroidx/compose/runtime/Composer;II)V
+	public static final fun ControlActions-fWhpE4E (Lio/getstream/video/android/core/Call;Landroidx/compose/ui/Modifier;Lkotlin/jvm/functions/Function1;JLandroidx/compose/ui/graphics/Shape;Ljava/util/List;Landroidx/compose/runtime/Composer;II)V
 }
 
 public final class io/getstream/video/android/compose/ui/components/call/controls/actions/AcceptCallActionKt {
@@ -1337,6 +1343,13 @@ public final class io/getstream/video/android/compose/ui/components/call/control
 	public final fun getLambda-1$stream_video_android_ui_compose_release ()Lkotlin/jvm/functions/Function2;
 }
 
+public final class io/getstream/video/android/compose/ui/components/call/controls/actions/ComposableSingletons$LeaveCallActionKt {
+	public static final field INSTANCE Lio/getstream/video/android/compose/ui/components/call/controls/actions/ComposableSingletons$LeaveCallActionKt;
+	public static field lambda-1 Lkotlin/jvm/functions/Function2;
+	public fun <init> ()V
+	public final fun getLambda-1$stream_video_android_ui_compose_release ()Lkotlin/jvm/functions/Function2;
+}
+
 public final class io/getstream/video/android/compose/ui/components/call/controls/actions/ComposableSingletons$RegularControlActionsKt {
 	public static final field INSTANCE Lio/getstream/video/android/compose/ui/components/call/controls/actions/ComposableSingletons$RegularControlActionsKt;
 	public static field lambda-1 Lkotlin/jvm/functions/Function2;
@@ -1365,6 +1378,13 @@ public final class io/getstream/video/android/compose/ui/components/call/control
 	public final fun getLambda-1$stream_video_android_ui_compose_release ()Lkotlin/jvm/functions/Function2;
 }
 
+public final class io/getstream/video/android/compose/ui/components/call/controls/actions/ComposableSingletons$ToggleSpeakerphoneActionKt {
+	public static final field INSTANCE Lio/getstream/video/android/compose/ui/components/call/controls/actions/ComposableSingletons$ToggleSpeakerphoneActionKt;
+	public static field lambda-1 Lkotlin/jvm/functions/Function2;
+	public fun <init> ()V
+	public final fun getLambda-1$stream_video_android_ui_compose_release ()Lkotlin/jvm/functions/Function2;
+}
+
 public final class io/getstream/video/android/compose/ui/components/call/controls/actions/DeclineCallActionKt {
 	public static final fun DeclineCallAction (Landroidx/compose/ui/Modifier;ZLkotlin/jvm/functions/Function1;Landroidx/compose/ui/graphics/Shape;Landroidx/compose/runtime/Composer;II)V
 }
@@ -1384,11 +1404,8 @@ public final class io/getstream/video/android/compose/ui/components/call/control
 }
 
 public final class io/getstream/video/android/compose/ui/components/call/controls/actions/LeaveCallActionKt {
+	public static final fun LeaveCalLActionPreview (Landroidx/compose/runtime/Composer;I)V
 	public static final fun LeaveCallAction (Landroidx/compose/ui/Modifier;ZLkotlin/jvm/functions/Function1;Landroidx/compose/runtime/Composer;II)V
-}
-
-public final class io/getstream/video/android/compose/ui/components/call/controls/actions/ReactionActionKt {
-	public static final fun ReactionAction-jB83MbM (Landroidx/compose/ui/Modifier;ZLandroidx/compose/ui/graphics/Shape;JJLkotlin/jvm/functions/Function1;Landroidx/compose/runtime/Composer;II)V
 }
 
 public final class io/getstream/video/android/compose/ui/components/call/controls/actions/RegularControlActionsKt {
@@ -1415,7 +1432,8 @@ public final class io/getstream/video/android/compose/ui/components/call/control
 }
 
 public final class io/getstream/video/android/compose/ui/components/call/controls/actions/ToggleSpeakerphoneActionKt {
-	public static final fun ToggleSpeakerphoneAction-md9il-k (Landroidx/compose/ui/Modifier;ZZLandroidx/compose/ui/graphics/Shape;JJJJLkotlin/jvm/functions/Function1;Landroidx/compose/runtime/Composer;II)V
+	public static final fun ToggleSpeakerphoneAction-uMBdHk4 (Landroidx/compose/ui/Modifier;ZZLandroidx/compose/ui/graphics/Shape;Landroidx/compose/ui/graphics/Color;Landroidx/compose/ui/graphics/Color;Landroidx/compose/ui/graphics/Color;Landroidx/compose/ui/graphics/Color;Lkotlin/jvm/functions/Function1;Landroidx/compose/runtime/Composer;II)V
+	public static final fun ToggleSpeakerphoneActionPreview (Landroidx/compose/runtime/Composer;I)V
 }
 
 public final class io/getstream/video/android/compose/ui/components/call/diagnostics/CallDiagnosticsContentKt {
@@ -1876,19 +1894,8 @@ public final class io/getstream/video/android/compose/ui/components/call/ringing
 	public static final fun OutgoingCallDetails (Landroidx/compose/ui/Modifier;ZLjava/util/List;Landroidx/compose/runtime/Composer;II)V
 }
 
-public final class io/getstream/video/android/compose/ui/components/connection/ComposableSingletons$NetworkQualityIndicatorKt {
-	public static final field INSTANCE Lio/getstream/video/android/compose/ui/components/connection/ComposableSingletons$NetworkQualityIndicatorKt;
-	public static field lambda-1 Lkotlin/jvm/functions/Function2;
-	public fun <init> ()V
-	public final fun getLambda-1$stream_video_android_ui_compose_release ()Lkotlin/jvm/functions/Function2;
-}
-
-public final class io/getstream/video/android/compose/ui/components/connection/NetworkQualityIndicatorKt {
-	public static final fun NetworkQualityIndicator (Lio/getstream/video/android/core/model/NetworkQuality;Landroidx/compose/ui/Modifier;Landroidx/compose/runtime/Composer;II)V
-}
-
 public final class io/getstream/video/android/compose/ui/components/indicator/AudioVolumeIndicatorKt {
-	public static final fun AudioVolumeIndicator (Landroidx/compose/ui/Modifier;FLandroidx/compose/runtime/Composer;II)V
+	public static final fun AudioVolumeIndicator-FNF3uiM (Landroidx/compose/ui/Modifier;FJLandroidx/compose/runtime/Composer;II)V
 }
 
 public final class io/getstream/video/android/compose/ui/components/indicator/ComposableSingletons$AudioVolumeIndicatorKt {
@@ -1918,6 +1925,13 @@ public final class io/getstream/video/android/compose/ui/components/indicator/Co
 	public final fun getLambda-1$stream_video_android_ui_compose_release ()Lkotlin/jvm/functions/Function2;
 }
 
+public final class io/getstream/video/android/compose/ui/components/indicator/ComposableSingletons$NetworkQualityIndicatorKt {
+	public static final field INSTANCE Lio/getstream/video/android/compose/ui/components/indicator/ComposableSingletons$NetworkQualityIndicatorKt;
+	public static field lambda-1 Lkotlin/jvm/functions/Function2;
+	public fun <init> ()V
+	public final fun getLambda-1$stream_video_android_ui_compose_release ()Lkotlin/jvm/functions/Function2;
+}
+
 public final class io/getstream/video/android/compose/ui/components/indicator/ComposableSingletons$SoundIndicatorKt {
 	public static final field INSTANCE Lio/getstream/video/android/compose/ui/components/indicator/ComposableSingletons$SoundIndicatorKt;
 	public static field lambda-1 Lkotlin/jvm/functions/Function2;
@@ -1927,6 +1941,10 @@ public final class io/getstream/video/android/compose/ui/components/indicator/Co
 
 public final class io/getstream/video/android/compose/ui/components/indicator/MicrophoneIndicatorKt {
 	public static final fun MicrophoneIndicator (Landroidx/compose/ui/Modifier;ZLandroidx/compose/runtime/Composer;II)V
+}
+
+public final class io/getstream/video/android/compose/ui/components/indicator/NetworkQualityIndicatorKt {
+	public static final fun NetworkQualityIndicator (Lio/getstream/video/android/core/model/NetworkQuality;Landroidx/compose/ui/Modifier;Landroidx/compose/runtime/Composer;II)V
 }
 
 public final class io/getstream/video/android/compose/ui/components/indicator/SoundIndicatorKt {

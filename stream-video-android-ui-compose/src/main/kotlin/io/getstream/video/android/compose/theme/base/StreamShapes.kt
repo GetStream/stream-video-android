@@ -40,6 +40,7 @@ public data class StreamShapes(
     public val input: Shape,
     public val dialog: Shape,
     public val sheet: Shape,
+    public val indicator: Shape,
 ) {
     public companion object {
         /**
@@ -54,6 +55,7 @@ public data class StreamShapes(
             input = RoundedCornerShape(dimens.roundnessXl),
             sheet = RoundedCornerShape(dimens.roundnessM),
             dialog = RoundedCornerShape(dimens.roundnessL),
+            indicator = RoundedCornerShape(dimens.roundnessS),
         )
     }
 }

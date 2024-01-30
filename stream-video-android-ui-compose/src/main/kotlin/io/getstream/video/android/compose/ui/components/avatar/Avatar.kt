@@ -43,7 +43,7 @@ import com.skydoves.landscapist.animation.crossfade.CrossfadePlugin
 import com.skydoves.landscapist.coil.CoilImage
 import com.skydoves.landscapist.components.rememberImageComponent
 import com.skydoves.landscapist.placeholder.placeholder.PlaceholderPlugin
-import io.getstream.video.android.compose.theme.VideoTheme
+import io.getstream.video.android.compose.theme.base.VideoTheme
 import io.getstream.video.android.ui.common.R
 
 /**
@@ -68,8 +68,8 @@ public fun Avatar(
     modifier: Modifier = Modifier,
     imageUrl: String? = null,
     initials: String? = null,
-    shape: Shape = VideoTheme.shapes.avatar,
-    textStyle: TextStyle = VideoTheme.typography.title3Bold,
+    shape: Shape = VideoTheme.shapes.circle,
+    textStyle: TextStyle = VideoTheme.typography.titleM,
     contentScale: ContentScale = ContentScale.Crop,
     contentDescription: String? = null,
     requestSize: IntSize = IntSize(DEFAULT_IMAGE_SIZE, DEFAULT_IMAGE_SIZE),
@@ -99,7 +99,6 @@ public fun Avatar(
             initials = initials,
             shape = shape,
             textStyle = textStyle,
-            avatarOffset = initialsAvatarOffset,
         )
         return
     }

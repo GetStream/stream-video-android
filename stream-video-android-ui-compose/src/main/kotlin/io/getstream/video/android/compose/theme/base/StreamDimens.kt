@@ -25,6 +25,7 @@ import io.getstream.video.android.ui.common.R
 
 public data class StreamDimens(
     val genericMax: Dp,
+    val generic3xl: Dp,
     val genericXxl: Dp,
     val genericXl: Dp,
     val genericL: Dp,
@@ -40,6 +41,7 @@ public data class StreamDimens(
     val spacingM: Dp,
     val spacingS: Dp,
     val spacingXs: Dp,
+    val spacingXXs: Dp,
     val componentHeightL: Dp,
     val componentHeightM: Dp,
     val componentHeightS: Dp,
@@ -67,7 +69,8 @@ public data class StreamDimens(
         public fun defaultDimens(): StreamDimens {
             return StreamDimens(
                 genericMax = dimensionResource(R.dimen.stream_video_generic_max),
-                genericXxl = dimensionResource(R.dimen.stream_video_generic_xxl),
+                generic3xl = dimensionResource(id = R.dimen.stream_video_generic_3xl),
+                genericXxl = dimensionResource(id = R.dimen.stream_video_generic_xxl),
                 genericXl = dimensionResource(R.dimen.stream_video_generic_xl),
                 genericL = dimensionResource(R.dimen.stream_video_generic_l),
                 genericM = dimensionResource(R.dimen.stream_video_generic_m),
@@ -82,6 +85,7 @@ public data class StreamDimens(
                 spacingM = dimensionResource(R.dimen.stream_video_spacing_m),
                 spacingS = dimensionResource(R.dimen.stream_video_spacing_s),
                 spacingXs = dimensionResource(R.dimen.stream_video_spacing_xs),
+                spacingXXs = dimensionResource(R.dimen.stream_video_spacing_xxs),
                 componentHeightL = dimensionResource(R.dimen.stream_video_component_height_l),
                 componentHeightM = dimensionResource(R.dimen.stream_video_component_height_m),
                 componentHeightS = dimensionResource(R.dimen.stream_video_component_height_s),

@@ -33,13 +33,14 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.Icon
 import androidx.compose.material.Text
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.MicOff
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
@@ -47,12 +48,11 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import io.getstream.video.android.compose.theme.VideoTheme
+import io.getstream.video.android.compose.theme.base.VideoTheme
 import io.getstream.video.android.compose.ui.components.avatar.UserAvatar
 import io.getstream.video.android.core.ParticipantState
 import io.getstream.video.android.mock.StreamPreviewDataUtils
 import io.getstream.video.android.mock.previewParticipant
-import io.getstream.video.android.ui.common.R
 
 /**
  * Renders a single participant with a given call, which displays an avatar of the participant.
@@ -84,13 +84,13 @@ public fun ParticipantAudio(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center,
     ) {
-        Box(modifier = Modifier.size(VideoTheme.dimens.audioAvatarSize)) {
+        Box(modifier = Modifier.size(VideoTheme.dimens.genericXxl)) {
             UserAvatar(
                 userName = nameOrId,
                 userImage = userImage,
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(VideoTheme.dimens.audioAvatarPadding),
+                    .padding(VideoTheme.dimens.spacingM),
             )
 
             if (isSpeaking && style.isShowingSpeakingBorder) {
@@ -103,7 +103,7 @@ public fun ParticipantAudio(
                 Box(
                     modifier = Modifier
                         .fillMaxSize()
-                        .padding(VideoTheme.dimens.audioAvatarPadding),
+                        .padding(VideoTheme.dimens.spacingM),
                 ) {
                     microphoneIndicatorContent.invoke(this, participant)
                 }
@@ -117,7 +117,7 @@ public fun ParticipantAudio(
             text = nameOrId,
             fontSize = 14.sp,
             fontWeight = FontWeight.Bold,
-            color = VideoTheme.colors.textHighEmphasis,
+            color = VideoTheme.colors.basePrimary,
             textAlign = TextAlign.Center,
             overflow = TextOverflow.Ellipsis,
             maxLines = 1,
@@ -137,7 +137,7 @@ public fun ParticipantAudio(
                 modifier = Modifier.fillMaxWidth(),
                 text = roles.firstOrNull().orEmpty(),
                 fontSize = 11.sp,
-                color = VideoTheme.colors.textHighEmphasis,
+                color = VideoTheme.colors.basePrimary,
                 textAlign = TextAlign.Center,
                 overflow = TextOverflow.Ellipsis,
                 maxLines = 1,
@@ -153,16 +153,16 @@ private fun BoxScope.DefaultMicrophoneIndicator(
     Box(
         modifier = Modifier
             .clip(CircleShape)
-            .background(VideoTheme.colors.appBackground)
-            .size(VideoTheme.dimens.audioRoomMicSize)
+            .background(VideoTheme.colors.baseSheetQuarternary)
+            .size(VideoTheme.dimens.componentHeightM)
             .align(alignment),
     ) {
         Icon(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(VideoTheme.dimens.audioRoomMicPadding),
-            painter = painterResource(id = R.drawable.stream_video_ic_mic_off),
-            tint = VideoTheme.colors.errorAccent,
+                .padding(VideoTheme.dimens.spacingM),
+            imageVector = Icons.Default.MicOff,
+            tint = VideoTheme.colors.alertWarning,
             contentDescription = null,
         )
     }

@@ -33,7 +33,7 @@ import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import io.getstream.video.android.compose.theme.VideoTheme
+import io.getstream.video.android.compose.theme.base.VideoTheme
 import io.getstream.video.android.mock.StreamPreviewDataUtils
 import io.getstream.video.android.mock.previewParticipantsList
 import io.getstream.video.android.model.User
@@ -64,8 +64,7 @@ public fun UserAvatar(
     userName: String?,
     userImage: String?,
     modifier: Modifier = Modifier,
-    shape: Shape = VideoTheme.shapes.avatar,
-    textStyle: TextStyle = VideoTheme.typography.title3Bold,
+    shape: Shape = VideoTheme.shapes.circle,
     contentScale: ContentScale = ContentScale.Crop,
     contentDescription: String? = null,
     requestSize: IntSize = IntSize(DEFAULT_IMAGE_SIZE, DEFAULT_IMAGE_SIZE),
@@ -84,7 +83,6 @@ public fun UserAvatar(
             modifier = Modifier.fillMaxSize(),
             imageUrl = userImage,
             initials = userName,
-            textStyle = textStyle,
             shape = shape,
             contentScale = contentScale,
             contentDescription = contentDescription,
@@ -115,7 +113,6 @@ private fun UserAvatarPreview() {
     StreamPreviewDataUtils.initializeStreamVideo(LocalContext.current)
     VideoTheme {
         val participant = previewParticipantsList[0]
-        val userId by participant.userId.collectAsStateWithLifecycle()
         val userImage by participant.image.collectAsStateWithLifecycle()
         val userName by participant.userNameOrId.collectAsStateWithLifecycle()
 

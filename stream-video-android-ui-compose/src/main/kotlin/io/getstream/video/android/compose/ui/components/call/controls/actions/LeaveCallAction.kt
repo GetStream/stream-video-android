@@ -16,19 +16,15 @@
 
 package io.getstream.video.android.compose.ui.components.call.controls.actions
 
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material.Icon
+import androidx.compose.foundation.layout.Row
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.CallEnd
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.unit.dp
-import io.getstream.video.android.compose.theme.VideoTheme
+import androidx.compose.ui.tooling.preview.Preview
+import io.getstream.video.android.compose.theme.base.VideoTheme
 import io.getstream.video.android.core.call.state.CallAction
 import io.getstream.video.android.core.call.state.LeaveCall
-import io.getstream.video.android.ui.common.R
 
 /**
  * A call action button represents leaving a call.
@@ -42,19 +38,26 @@ public fun LeaveCallAction(
     modifier: Modifier = Modifier,
     enabled: Boolean = true,
     onCallAction: (LeaveCall) -> Unit,
+): Unit = ToggleAction(
+    modifier = modifier,
+    enabled = enabled,
+    isActionActive = false,
+    onStyle = VideoTheme.styles.buttonStyles.alertIconButtonStyle(),
+    offStyle = VideoTheme.styles.buttonStyles.alertIconButtonStyle(),
+    iconOnOff = Pair(Icons.Default.CallEnd, Icons.Default.CallEnd),
 ) {
-    CallControlActionBackground(
-        modifier = modifier,
-        isEnabled = true,
-        enabledColor = VideoTheme.colors.errorAccent,
-    ) {
-        Icon(
-            modifier = Modifier
-                .padding(12.dp)
-                .clickable(enabled = enabled) { onCallAction(LeaveCall) },
-            tint = Color.White,
-            painter = painterResource(id = R.drawable.stream_video_ic_call_end),
-            contentDescription = stringResource(R.string.stream_video_call_controls_leave_call),
-        )
+    onCallAction(LeaveCall)
+}
+
+@Preview
+@Composable
+public fun LeaveCalLActionPreview() {
+    VideoTheme {
+        Row {
+            LeaveCallAction(enabled = false) {
+            }
+            LeaveCallAction {
+            }
+        }
     }
 }

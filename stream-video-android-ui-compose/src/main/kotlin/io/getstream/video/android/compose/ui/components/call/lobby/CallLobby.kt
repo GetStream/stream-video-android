@@ -32,8 +32,6 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.platform.testTag
@@ -116,16 +114,12 @@ public fun CallLobby(
     lobbyControlsContent: @Composable (call: Call) -> Unit = {
         ControlActions(
             call = call,
-            backgroundColor = Color.Transparent,
-            shape = RectangleShape,
-            elevation = 0.dp,
             actions = buildDefaultLobbyControlActions(
                 call = call,
                 onCallAction = onCallAction,
                 isCameraEnabled = isCameraEnabled,
                 isMicrophoneEnabled = isMicrophoneEnabled,
             ),
-            spaceBy = VideoTheme.dimens.lobbyControlActionsItemSpaceBy,
         )
     },
 ) {

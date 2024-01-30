@@ -76,8 +76,8 @@ import io.getstream.video.android.compose.ui.components.avatar.UserAvatarBackgro
 import io.getstream.video.android.compose.ui.components.call.pinning.ParticipantAction
 import io.getstream.video.android.compose.ui.components.call.pinning.ParticipantActions
 import io.getstream.video.android.compose.ui.components.call.pinning.pinUnpinActions
-import io.getstream.video.android.compose.ui.components.connection.NetworkQualityIndicator
 import io.getstream.video.android.compose.ui.components.indicator.GenericIndicator
+import io.getstream.video.android.compose.ui.components.indicator.NetworkQualityIndicator
 import io.getstream.video.android.compose.ui.components.indicator.SoundIndicator
 import io.getstream.video.android.compose.ui.components.video.VideoRenderer
 import io.getstream.video.android.core.Call
