@@ -26,6 +26,7 @@ io.getstream.video.android.core.notifications
 io.getstream.video.android.core.notifications.internal.receivers
 io.getstream.video.android.core.permission
 io.getstream.video.android.core.socket
+io.getstream.video.android.core.sounds
 io.getstream.video.android.core.utils
 io.getstream.video.android.datastore.delegate
 io.getstream.video.android.datastore.model
