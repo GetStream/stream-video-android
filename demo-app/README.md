@@ -60,7 +60,7 @@ PRODUCTION_RES_CONFIG_DEEPLINKING_PATH_PREFIX=/video/demos/
 ## License
 
 ```
-Copyright (c) 2014-2023 Stream.io Inc. All rights reserved.
+Copyright (c) 2014-2024 Stream.io Inc. All rights reserved.
 
 Licensed under the Stream License;
 you may not use this file except in compliance with the License.
