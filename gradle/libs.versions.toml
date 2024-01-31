@@ -74,7 +74,7 @@ playAppUpdate = "2.1.0"
 hilt = "2.50"
 desugar = "2.0.4"
 leakCanary = "2.12"
-binaryCompatabilityValidator = "0.13.2"
+binaryCompatabilityValidator = "0.14.0"
 playPublisher = "3.8.4"
 
 googleMlKitSelfieSegmentation = "16.0.0-beta4"
