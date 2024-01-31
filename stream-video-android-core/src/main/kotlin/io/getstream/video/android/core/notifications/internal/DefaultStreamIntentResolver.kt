@@ -50,6 +50,26 @@ internal class DefaultStreamIntentResolver(val context: Context) {
         )
 
     /**
+     * Search for an activity that is used for outgoing calls.
+     * Calls are considered outgoing until the call is accepted.
+     *
+     * @param callId the call id
+     * @param notificationId the notification ID.
+     */
+    fun searchOutgoingCallPendingIntent(
+        callId: StreamCallId,
+        notificationId: Int = NotificationHandler.INCOMING_CALL_NOTIFICATION_ID,
+    ): PendingIntent? {
+        return searchActivityPendingIntent(
+            Intent(
+                NotificationHandler.ACTION_OUTGOING_CALL,
+            ).addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT),
+            callId,
+            notificationId,
+        )
+    }
+
+    /**
      * Search for an activity that can receive live calls from Stream Server.
      *
      * @param callId The call id from the incoming call.

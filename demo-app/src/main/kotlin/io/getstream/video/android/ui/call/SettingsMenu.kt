@@ -18,6 +18,7 @@ package io.getstream.video.android.ui.call
 
 import android.app.Activity
 import android.graphics.Bitmap
+import android.graphics.drawable.Icon
 import android.media.projection.MediaProjectionManager
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -35,11 +36,14 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Card
 import androidx.compose.material.Icon
 import androidx.compose.material.Text
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.AutoGraph
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.IntOffset
@@ -65,6 +69,7 @@ internal fun SettingsMenu(
     onDismissed: () -> Unit,
     onShowReactionsMenu: () -> Unit,
     onToggleBackgroundBlur: () -> Unit,
+    onShowCallStats: () -> Unit,
 ) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
@@ -107,6 +112,17 @@ internal fun SettingsMenu(
                     onClick = {
                         onDismissed()
                         onShowReactionsMenu()
+                    },
+                )
+
+                Spacer(modifier = Modifier.height(12.dp))
+
+                MenuEntry(
+                    imageVector = Icons.Default.AutoGraph,
+                    label = "Call stats",
+                    onClick = {
+                        onDismissed()
+                        onShowCallStats()
                     },
                 )
 
@@ -267,16 +283,26 @@ internal fun SettingsMenu(
 
 @Composable
 private fun MenuEntry(
-    @DrawableRes icon: Int,
+    @DrawableRes icon: Int? = null,
+    imageVector: ImageVector? = null,
     label: String,
     onClick: () -> Unit,
 ) {
     Row(modifier = Modifier.clickable(onClick = onClick)) {
-        Icon(
-            painter = painterResource(id = icon),
-            tint = VideoTheme.colors.textHighEmphasis,
-            contentDescription = null,
-        )
+        imageVector?.let {
+            Icon(
+                imageVector = imageVector,
+                tint = VideoTheme.colors.textHighEmphasis,
+                contentDescription = null,
+            )
+        }
+        icon?.let {
+            Icon(
+                painter = painterResource(id = icon),
+                tint = VideoTheme.colors.textHighEmphasis,
+                contentDescription = null,
+            )
+        }
         Text(
             modifier = Modifier.padding(start = 12.dp, top = 2.dp),
             text = label,

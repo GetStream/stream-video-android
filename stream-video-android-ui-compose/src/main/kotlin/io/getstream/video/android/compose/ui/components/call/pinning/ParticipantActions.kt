@@ -42,6 +42,7 @@ import androidx.compose.material.icons.filled.PushPin
 import androidx.compose.material.icons.outlined.MoreHoriz
 import androidx.compose.material.icons.outlined.PushPin
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -86,7 +87,8 @@ import org.openapitools.client.models.OwnCapability
  * @param condition the condition if the action is to be shown or not.
  * @param action the action (i.e. callable)
  */
-public class ParticipantAction(
+@Immutable
+public data class ParticipantAction(
     public val icon: ImageVector,
     public val label: String,
     public val firstToggleAction: Boolean = true,
@@ -235,7 +237,8 @@ internal fun BoxScope.ParticipantActionsDialog(
             ) {
                 actions.forEach {
                     if (it.condition.invoke(call, participant)) {
-                        val circleColor = if (it.firstToggleAction) VideoTheme.colors.textHighEmphasis else VideoTheme.colors.primaryAccent
+                        val circleColor =
+                            if (it.firstToggleAction) VideoTheme.colors.textHighEmphasis else VideoTheme.colors.primaryAccent
                         val strokeWidth = if (it.firstToggleAction) 2.dp else 4.dp
                         Column {
                             CircleIcon(
@@ -249,7 +252,9 @@ internal fun BoxScope.ParticipantActionsDialog(
                             }
                             Spacer(modifier = Modifier.height(8.dp))
                             Text(
-                                modifier = Modifier.align(CenterHorizontally).width(80.dp),
+                                modifier = Modifier
+                                    .align(CenterHorizontally)
+                                    .width(80.dp),
                                 textAlign = TextAlign.Center,
                                 text = it.label,
                                 color = VideoTheme.colors.textHighEmphasis,
