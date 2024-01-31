@@ -32,10 +32,9 @@ import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import io.getstream.video.android.compose.theme.VideoTheme
+import io.getstream.video.android.compose.theme.base.VideoTheme
 import io.getstream.video.android.compose.ui.components.avatar.LocalAvatarPreviewPlaceholder
 import io.getstream.video.android.compose.ui.components.background.CallBackground
-import io.getstream.video.android.compose.ui.components.call.CallAppBar
 import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.MemberState
 import io.getstream.video.android.core.call.state.CallAction
@@ -128,24 +127,17 @@ public fun IncomingCallContent(
     onCallAction: (CallAction) -> Unit = {},
 ) {
     CallBackground(
-        modifier = modifier,
-        participants = participants,
-        isVideoType = isVideoType,
-        isIncoming = true,
+        modifier = modifier.padding(VideoTheme.dimens.spacingXl),
     ) {
         Column {
             if (isShowingHeader) {
-                headerContent?.invoke(this) ?: CallAppBar(
-                    call = call,
-                    onBackPressed = onBackPressed,
-                    onCallAction = onCallAction,
-                )
+                headerContent?.invoke(this)
             }
 
             val topPadding = if (participants.size == 1) {
-                VideoTheme.dimens.singleAvatarAppbarPadding
+                VideoTheme.dimens.spacingL
             } else {
-                VideoTheme.dimens.avatarAppbarPadding
+                VideoTheme.dimens.spacingM
             }
             detailsContent?.invoke(this, participants, topPadding) ?: IncomingCallDetails(
                 modifier = Modifier
@@ -159,7 +151,7 @@ public fun IncomingCallContent(
         controlsContent?.invoke(this) ?: IncomingCallControls(
             modifier = Modifier
                 .align(Alignment.BottomCenter)
-                .padding(bottom = VideoTheme.dimens.incomingCallOptionsBottomPadding),
+                .padding(bottom = VideoTheme.dimens.componentPaddingBottom),
             isVideoCall = isVideoType,
             isCameraEnabled = isCameraEnabled,
             onCallAction = onCallAction,

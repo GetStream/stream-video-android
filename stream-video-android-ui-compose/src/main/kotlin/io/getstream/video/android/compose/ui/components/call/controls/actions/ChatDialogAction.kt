@@ -16,20 +16,17 @@
 
 package io.getstream.video.android.compose.ui.components.call.controls.actions
 
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material.Icon
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.QuestionAnswer
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.Shape
-import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.unit.dp
-import io.getstream.video.android.compose.theme.VideoTheme
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.tooling.preview.Preview
+import io.getstream.video.android.compose.theme.base.VideoTheme
+import io.getstream.video.android.compose.ui.components.base.StreamBadgeBox
 import io.getstream.video.android.core.call.state.CallAction
-import io.getstream.video.android.core.call.state.ChatDialog
-import io.getstream.video.android.ui.common.R
+import io.getstream.video.android.core.call.state.CancelCall
 
 /**
  * A call action button represents displaying a chat dialog.
@@ -42,25 +39,36 @@ import io.getstream.video.android.ui.common.R
 public fun ChatDialogAction(
     modifier: Modifier = Modifier,
     enabled: Boolean = true,
-    shape: Shape = VideoTheme.shapes.callControlsButton,
-    enabledColor: Color = VideoTheme.colors.callActionIconEnabledBackground,
-    disabledColor: Color = VideoTheme.colors.callActionIconDisabledBackground,
-    onCallAction: (ChatDialog) -> Unit,
+    messageCount: Int? = null,
+    icon: ImageVector? = null,
+    bgColor: Color? = null,
+    iconTint: Color? = null,
+    badgeColor: Color? = null,
+    onCallAction: (CancelCall) -> Unit,
+): Unit = StreamBadgeBox(
+    showWithoutValue = false,
+    style = VideoTheme.styles.badgeStyles.defaultBadgeStyle().copy(
+        color = badgeColor ?: VideoTheme.colors.alertSuccess,
+    ),
+    text = messageCount?.toString(),
 ) {
-    CallControlActionBackground(
+    GenericAction(
         modifier = modifier,
-        isEnabled = enabled,
-        shape = shape,
-        enabledColor = enabledColor,
-        disabledColor = disabledColor,
-    ) {
-        Icon(
-            modifier = Modifier
-                .padding(13.dp)
-                .clickable(enabled = enabled) { onCallAction(ChatDialog) },
-            tint = VideoTheme.colors.callActionIconEnabled,
-            painter = painterResource(id = R.drawable.stream_video_ic_message),
-            contentDescription = stringResource(R.string.stream_video_call_controls_chat_dialog),
-        )
+        enabled = enabled,
+        onAction = { onCallAction(CancelCall) },
+        icon = icon ?: Icons.Default.QuestionAnswer,
+        color = bgColor,
+        iconTint = iconTint,
+    )
+}
+
+@Preview
+@Composable
+private fun ChatActionPreview() {
+    VideoTheme {
+        ChatDialogAction {
+        }
+        ChatDialogAction(messageCount = 15) {
+        }
     }
 }

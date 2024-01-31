@@ -25,7 +25,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import io.getstream.video.android.compose.theme.VideoTheme
+import io.getstream.video.android.compose.theme.base.VideoTheme
 import io.getstream.video.android.compose.ui.components.call.activecall.CallContent
 import io.getstream.video.android.compose.ui.components.call.controls.actions.DefaultOnCallActionHandler
 import io.getstream.video.android.compose.ui.components.call.ringing.incomingcall.IncomingCallContent
@@ -120,6 +120,10 @@ public fun RingingCallContent(
 
         RingingState.Idle -> {
             // Call state is not ready yet? Show loading?
+        }
+
+        else -> {
+            // Unknown
         }
     }
 }

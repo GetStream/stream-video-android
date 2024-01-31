@@ -22,13 +22,12 @@ import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.IntSize
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import io.getstream.video.android.compose.theme.VideoTheme
+import io.getstream.video.android.compose.theme.base.VideoTheme
 import io.getstream.video.android.compose.ui.components.call.renderer.internal.OrientationVideoRenderer
 import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.ParticipantState
@@ -64,7 +63,7 @@ public fun ParticipantsRegularGrid(
     },
     floatingVideoRenderer: @Composable (BoxScope.(call: Call, IntSize) -> Unit)? = null,
 ) {
-    Box(modifier = modifier.background(color = VideoTheme.colors.appBackground)) {
+    Box(modifier = modifier.background(color = VideoTheme.colors.baseSheetPrimary)) {
         val roomParticipants by call.state.participants.collectAsStateWithLifecycle()
 
         if (roomParticipants.isNotEmpty()) {

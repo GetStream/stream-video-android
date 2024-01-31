@@ -44,7 +44,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
 import io.getstream.log.StreamLog
-import io.getstream.video.android.compose.theme.VideoTheme
+import io.getstream.video.android.compose.theme.base.VideoTheme
 import io.getstream.video.android.compose.ui.components.video.VideoScalingType.Companion.toCommonScalingType
 import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.ParticipantState
@@ -178,7 +178,7 @@ private fun DefaultMediaTrackFallbackContent(
     Column(
         modifier = modifier
             .fillMaxSize()
-            .background(VideoTheme.colors.appBackground)
+            .background(VideoTheme.colors.baseSheetPrimary)
             .testTag("video_renderer_fallback"),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center,
@@ -198,7 +198,7 @@ private fun DefaultMediaTrackFallbackContent(
                 id = io.getstream.video.android.ui.common.R.string.stream_video_call_rendering_failed,
                 call.sessionId,
             ),
-            color = VideoTheme.colors.textHighEmphasis,
+            color = VideoTheme.colors.basePrimary,
             textAlign = TextAlign.Center,
             fontSize = 14.sp,
         )

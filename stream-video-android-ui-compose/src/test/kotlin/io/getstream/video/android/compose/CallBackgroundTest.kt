@@ -50,6 +50,7 @@ internal class CallBackgroundTest : BaseComposeTest() {
                         modifier = Modifier.size(72.dp),
                         initials = null,
                         previewPlaceholder = R.drawable.stream_video_call_sample,
+                        textSize = textSize,
                     )
                 }
             }

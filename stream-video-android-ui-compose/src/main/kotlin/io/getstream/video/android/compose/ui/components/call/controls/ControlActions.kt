@@ -16,21 +16,19 @@
 
 package io.getstream.video.android.compose.ui.components.call.controls
 
-import android.content.res.Configuration.ORIENTATION_LANDSCAPE
-import android.content.res.Configuration.ORIENTATION_PORTRAIT
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.Shape
-import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import io.getstream.video.android.compose.theme.base.VideoTheme
 import io.getstream.video.android.compose.ui.components.call.controls.actions.DefaultOnCallActionHandler
-import io.getstream.video.android.compose.ui.components.call.controls.actions.LandscapeControlActions
-import io.getstream.video.android.compose.ui.components.call.controls.actions.RegularControlActions
 import io.getstream.video.android.compose.ui.components.call.controls.actions.buildDefaultCallControlActions
 import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.call.state.CallAction
@@ -52,32 +50,25 @@ public fun ControlActions(
     call: Call,
     modifier: Modifier = Modifier,
     onCallAction: (CallAction) -> Unit = { DefaultOnCallActionHandler.onCallAction(call, it) },
-    backgroundColor: Color = VideoTheme.colors.baseSheetPrimary,
-    shape: Shape = VideoTheme.shapes.sheet,
     actions: List<(@Composable () -> Unit)> = buildDefaultCallControlActions(
         call = call,
         onCallAction,
     ),
 ) {
-    val orientation = LocalConfiguration.current.orientation
-    if (orientation == ORIENTATION_PORTRAIT) {
-        RegularControlActions(
-            modifier = modifier.fillMaxHeight(),
-            call = call,
-            backgroundColor = backgroundColor,
-            shape = shape,
-            onCallAction = onCallAction,
-            actions = actions,
-        )
-    } else if (orientation == ORIENTATION_LANDSCAPE) {
-        LandscapeControlActions(
-            modifier = modifier.fillMaxHeight(),
-            call = call,
-            backgroundColor = backgroundColor,
-            shape = shape,
-            onCallAction = onCallAction,
-            actions = actions,
-        )
+    Box(
+        modifier = modifier.fillMaxWidth(),
+    ) {
+        LazyRow(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(
+                VideoTheme.dimens.spacingM,
+                Alignment.CenterHorizontally,
+            ),
+        ) {
+            items(actions) { action ->
+                action.invoke()
+            }
+        }
     }
 }
 

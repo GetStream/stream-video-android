@@ -30,8 +30,8 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AddAlert
-import androidx.compose.material.icons.filled.Chat
 import androidx.compose.material.icons.filled.Info
+import androidx.compose.material.icons.filled.QuestionAnswer
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -46,13 +46,16 @@ import io.getstream.video.android.compose.ui.components.base.styling.StreamBadge
 public fun StreamBadgeBox(
     modifier: Modifier = Modifier,
     text: String? = null,
+    showWithoutValue: Boolean = true,
     style: BadgeStyle,
     content: @Composable BoxScope.(Modifier) -> Unit,
 ) {
     Box(modifier = modifier) {
         content(modifier)
         // Badge content
-        BadgeContent(style = style, text = text)
+        if (text != null || showWithoutValue) {
+            BadgeContent(style = style, text = text)
+        }
     }
 }
 
@@ -107,7 +110,17 @@ private fun ButtonWithBadgePreview() {
                 style = StreamBadgeStyles.defaultBadgeStyle(),
             ) {
                 StreamIconButton(
-                    icon = Icons.Default.Chat,
+                    icon = Icons.Default.QuestionAnswer,
+                    style = ButtonStyles.primaryIconButtonStyle(),
+                )
+            }
+            Spacer(modifier = Modifier.size(16.dp))
+            StreamBadgeBox(
+                showWithoutValue = false,
+                style = StreamBadgeStyles.defaultBadgeStyle(),
+            ) {
+                StreamIconButton(
+                    icon = Icons.Default.QuestionAnswer,
                     style = ButtonStyles.primaryIconButtonStyle(),
                 )
             }

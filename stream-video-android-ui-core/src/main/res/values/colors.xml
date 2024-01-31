@@ -38,7 +38,7 @@
     <color name="stream_video_base_quinary">#7E8389</color>
     <color name="stream_video_base_senary">#323B44</color>
     <color name="stream_video_base_sheet_primary">#101213</color>
-    <color name="stream_video_base_sheet_secondary">#0C0D0E</color>
+    <color name="stream_video_base_sheet_secondary">#0C0D0EA6</color>
     <color name="stream_video_base_sheet_tetriary">#19232D</color>
     <color name="stream_video_base_sheet_quaternary">#A60C0D0E</color>
 
@@ -64,4 +64,5 @@
     <color name="stream_video_alert_success">@color/stream_video_brand_green</color>
     <color name="stream_video_alert_caution">@color/stream_video_brand_yellow</color>
     <color name="stream_video_alert_warning">@color/stream_video_brand_red</color>
+
 </resources>

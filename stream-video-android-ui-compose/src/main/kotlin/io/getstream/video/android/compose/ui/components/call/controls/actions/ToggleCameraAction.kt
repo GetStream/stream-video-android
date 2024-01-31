@@ -27,6 +27,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.tooling.preview.Preview
 import io.getstream.video.android.compose.theme.VideoTheme
+import io.getstream.video.android.compose.ui.components.base.styling.StreamFixedSizeButtonStyle
 import io.getstream.video.android.core.call.state.CallAction
 import io.getstream.video.android.core.call.state.ToggleCamera
 
@@ -48,6 +49,8 @@ public fun ToggleCameraAction(
     disabledColor: Color? = null,
     enabledIconTint: Color? = null,
     disabledIconTint: Color? = null,
+    onStyle: StreamFixedSizeButtonStyle? = null,
+    offStyle: StreamFixedSizeButtonStyle? = null,
     onCallAction: (ToggleCamera) -> Unit,
 ): Unit = ToggleAction(
     modifier = modifier,
@@ -58,6 +61,8 @@ public fun ToggleCameraAction(
     enabledIconTint = enabledIconTint,
     disabledIconTint = disabledIconTint,
     isActionActive = isCameraEnabled,
+    onStyle = onStyle,
+    offStyle = offStyle,
     iconOnOff = Pair(Icons.Default.Videocam, Icons.Default.VideocamOff),
 ) {
     onCallAction(ToggleCamera(isCameraEnabled.not()))

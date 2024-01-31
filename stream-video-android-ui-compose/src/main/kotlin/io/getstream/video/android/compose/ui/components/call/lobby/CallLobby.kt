@@ -41,7 +41,7 @@ import androidx.compose.ui.unit.dp
 import io.getstream.video.android.compose.lifecycle.MediaPiPLifecycle
 import io.getstream.video.android.compose.permission.VideoPermissionsState
 import io.getstream.video.android.compose.permission.rememberCallPermissionsState
-import io.getstream.video.android.compose.theme.VideoTheme
+import io.getstream.video.android.compose.theme.base.VideoTheme
 import io.getstream.video.android.compose.ui.components.avatar.UserAvatar
 import io.getstream.video.android.compose.ui.components.call.controls.ControlActions
 import io.getstream.video.android.compose.ui.components.call.controls.actions.DefaultOnCallActionHandler
@@ -111,8 +111,9 @@ public fun CallLobby(
         OnDisabledContent(user = user)
     },
     onCallAction: (CallAction) -> Unit = { DefaultOnCallActionHandler.onCallAction(call, it) },
-    lobbyControlsContent: @Composable (call: Call) -> Unit = {
+    lobbyControlsContent: @Composable (modifier: Modifier, call: Call) -> Unit = { modifier, call ->
         ControlActions(
+            modifier = modifier,
             call = call,
             actions = buildDefaultLobbyControlActions(
                 call = call,
@@ -131,10 +132,13 @@ public fun CallLobby(
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(VideoTheme.dimens.lobbyVideoHeight)
-                .padding(horizontal = 30.dp)
+                .height(280.dp)
+                .padding(
+                    vertical = VideoTheme.dimens.spacingL,
+                    horizontal = VideoTheme.dimens.spacingS,
+                )
                 .clip(RoundedCornerShape(12.dp))
-                .background(VideoTheme.colors.callLobbyBackground),
+                .background(VideoTheme.colors.baseSheetPrimary),
         ) {
             if (isCameraEnabled) {
                 onRenderedContent.invoke(video)
@@ -153,22 +157,15 @@ public fun CallLobby(
                 labelPosition = labelPosition,
                 hasAudio = isMicrophoneEnabled,
                 soundIndicatorContent = {
-                    MicrophoneIndicator(
-                        modifier = Modifier
-                            .align(Alignment.CenterVertically)
-                            .padding(
-                                horizontal = VideoTheme.dimens.participantSoundIndicatorPadding,
-                            ),
-                        isMicrophoneEnabled = isMicrophoneEnabled,
-                    )
+                    MicrophoneIndicator(isMicrophoneEnabled = isMicrophoneEnabled)
                 },
                 isSpeaking = false,
             )
         }
 
-        Spacer(modifier = Modifier.height(VideoTheme.dimens.lobbyControlActionsPadding))
+        Spacer(modifier = Modifier.height(VideoTheme.dimens.spacingM))
 
-        lobbyControlsContent.invoke(call)
+        lobbyControlsContent.invoke(Modifier.align(Alignment.Start), call)
     }
 }
 
@@ -206,7 +203,7 @@ private fun OnDisabledContent(user: User) {
     ) {
         UserAvatar(
             modifier = Modifier
-                .size(VideoTheme.dimens.callAvatarSize)
+                .size(VideoTheme.dimens.genericMax)
                 .align(Alignment.Center),
             userImage = user.image,
             userName = user.name.ifBlank { user.id },

@@ -31,9 +31,8 @@ import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import io.getstream.video.android.compose.theme.VideoTheme
+import io.getstream.video.android.compose.theme.base.VideoTheme
 import io.getstream.video.android.compose.ui.components.background.CallBackground
-import io.getstream.video.android.compose.ui.components.call.CallAppBar
 import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.MemberState
 import io.getstream.video.android.core.call.state.CallAction
@@ -132,23 +131,16 @@ public fun OutgoingCallContent(
 
     CallBackground(
         modifier = modifier,
-        participants = participants,
-        isVideoType = isVideoType,
-        isIncoming = false,
     ) {
         Column {
             if (isShowingHeader) {
-                headerContent?.invoke(this) ?: CallAppBar(
-                    call = call,
-                    onBackPressed = onBackPressed,
-                    onCallAction = onCallAction,
-                )
+                headerContent?.invoke(this)
             }
 
             val topPadding = if (participants.size == 1 || isVideoType) {
-                VideoTheme.dimens.singleAvatarAppbarPadding
+                VideoTheme.dimens.spacingL
             } else {
-                VideoTheme.dimens.avatarAppbarPadding
+                VideoTheme.dimens.spacingM
             }
 
             detailsContent?.invoke(this, participants, topPadding) ?: OutgoingCallDetails(
@@ -163,7 +155,7 @@ public fun OutgoingCallContent(
         controlsContent?.invoke(this) ?: OutgoingCallControls(
             modifier = Modifier
                 .align(Alignment.BottomCenter)
-                .padding(bottom = VideoTheme.dimens.outgoingCallOptionsBottomPadding),
+                .padding(bottom = VideoTheme.dimens.componentHeightM),
             isCameraEnabled = isCameraEnabled,
             isMicrophoneEnabled = isMicrophoneEnabled,
             onCallAction = onCallAction,

@@ -23,8 +23,11 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.requiredHeight
+import androidx.compose.foundation.layout.requiredWidth
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.Button
@@ -128,8 +131,9 @@ public fun StreamIconButton(
         interactionSource = interactionSource,
         enabled = enabled,
         modifier = modifier
-            .width(style.width)
-            .height(style.height),
+            .requiredWidth(style.width)
+            .requiredHeight(style.height)
+            .aspectRatio(style.height / style.width),
         elevation = style.elevation,
         shape = style.shape,
         colors = style.colors,
@@ -209,9 +213,9 @@ public fun StreamToggleButton(
     offIcon: ImageVector? = onIcon,
     onStyle: StreamButtonStyle,
     offStyle: StreamButtonStyle = onStyle,
-    onClick: (ToggleableState) -> Unit = {},
     enabled: Boolean = true,
     interactionSource: MutableInteractionSource = remember { MutableInteractionSource() },
+    onClick: (ToggleableState) -> Unit = {},
 ): Unit = GenericToggleButton(
     modifier = modifier,
     toggleState = toggleState,

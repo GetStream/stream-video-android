@@ -16,17 +16,12 @@
 
 package io.getstream.video.android.compose.ui.components.call.controls.actions
 
-import android.content.res.Configuration
-import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.call.state.CallAction
 import io.getstream.video.android.core.call.state.FlipCamera
@@ -41,18 +36,40 @@ import io.getstream.video.android.core.call.state.ToggleSpeakerphone
  * @return [List] of call control actions that the user can trigger.
  */
 @Composable
+public fun buildDefaultAudioControlActions(
+    call: Call,
+    onCallAction: (CallAction) -> Unit,
+): List<@Composable () -> Unit> {
+    val isMicrophoneEnabled by if (LocalInspectionMode.current) {
+        remember { mutableStateOf(true) }
+    } else {
+        call.microphone.isEnabled.collectAsStateWithLifecycle()
+    }
+
+    return listOf(
+        {
+            ToggleMicrophoneAction(
+                isMicrophoneEnabled = isMicrophoneEnabled,
+                onCallAction = onCallAction,
+            )
+        },
+        {
+            LeaveCallAction(onCallAction = onCallAction)
+        },
+    )
+}
+
+/**
+ * Builds the default set of Call Control actions based on the call devices.
+ *
+ * @param call The call that contains all the participants state and tracks.
+ * @return [List] of call control actions that the user can trigger.
+ */
+@Composable
 public fun buildDefaultCallControlActions(
     call: Call,
     onCallAction: (CallAction) -> Unit,
 ): List<@Composable () -> Unit> {
-    val orientation = LocalConfiguration.current.orientation
-
-    val modifier = if (orientation == Configuration.ORIENTATION_PORTRAIT) {
-        Modifier.size(VideoTheme.dimens.controlActionsButtonSize)
-    } else {
-        Modifier.size(VideoTheme.dimens.landscapeControlActionsButtonSize)
-    }
-
     val isCameraEnabled by if (LocalInspectionMode.current) {
         remember { mutableStateOf(true) }
     } else {
@@ -67,27 +84,18 @@ public fun buildDefaultCallControlActions(
     return listOf(
         {
             ToggleCameraAction(
-                modifier = modifier,
                 isCameraEnabled = isCameraEnabled,
                 onCallAction = onCallAction,
             )
         },
         {
             ToggleMicrophoneAction(
-                modifier = modifier,
                 isMicrophoneEnabled = isMicrophoneEnabled,
                 onCallAction = onCallAction,
             )
         },
         {
             FlipCameraAction(
-                modifier = modifier,
-                onCallAction = onCallAction,
-            )
-        },
-        {
-            LeaveCallAction(
-                modifier = modifier,
                 onCallAction = onCallAction,
             )
         },

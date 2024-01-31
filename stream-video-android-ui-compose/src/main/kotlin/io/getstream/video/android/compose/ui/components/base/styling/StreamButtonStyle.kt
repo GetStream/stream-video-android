@@ -283,6 +283,27 @@ public open class ButtonStyleProvider {
         )
 
     @Composable
+    public fun onlyIconIconButtonStyle(size: StyleSize = StyleSize.L): StreamFixedSizeButtonStyle =
+        StreamFixedSizeButtonStyle.of(
+            width = when (size) {
+                StyleSize.XS, StyleSize.S -> VideoTheme.dimens.componentHeightS
+                StyleSize.M -> VideoTheme.dimens.componentHeightM
+                else -> VideoTheme.dimens.componentHeightL
+            },
+            height = when (size) {
+                StyleSize.XS, StyleSize.S -> VideoTheme.dimens.componentHeightS
+                StyleSize.M -> VideoTheme.dimens.componentHeightM
+                else -> VideoTheme.dimens.componentHeightL
+            },
+            origin = tetriaryButtonStyle(size = size).copy(
+                iconStyle = IconStyles.defaultIconStyle(
+                    padding = PaddingValues(VideoTheme.dimens.spacingXs),
+                ),
+                border = null,
+            ),
+        )
+
+    @Composable
     public fun alertIconButtonStyle(size: StyleSize = StyleSize.L): StreamFixedSizeButtonStyle =
         StreamFixedSizeButtonStyle.of(
             width = when (size) {

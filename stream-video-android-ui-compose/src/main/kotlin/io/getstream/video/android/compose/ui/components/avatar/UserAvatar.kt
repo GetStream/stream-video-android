@@ -34,6 +34,7 @@ import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.getstream.video.android.compose.theme.base.VideoTheme
+import io.getstream.video.android.compose.ui.components.base.styling.StyleSize
 import io.getstream.video.android.mock.StreamPreviewDataUtils
 import io.getstream.video.android.mock.previewParticipantsList
 import io.getstream.video.android.model.User
@@ -67,6 +68,7 @@ public fun UserAvatar(
     shape: Shape = VideoTheme.shapes.circle,
     contentScale: ContentScale = ContentScale.Crop,
     contentDescription: String? = null,
+    textSize: StyleSize = StyleSize.XL,
     requestSize: IntSize = IntSize(DEFAULT_IMAGE_SIZE, DEFAULT_IMAGE_SIZE),
     @DrawableRes previewPlaceholder: Int = LocalAvatarPreviewProvider.getLocalAvatarPreviewPlaceholder(),
     @DrawableRes loadingPlaceholder: Int? = LocalAvatarPreviewProvider.getLocalAvatarLoadingPlaceholder(),
@@ -81,6 +83,7 @@ public fun UserAvatar(
     Box(modifier = modifier) {
         Avatar(
             modifier = Modifier.fillMaxSize(),
+            textSize = textSize,
             imageUrl = userImage,
             initials = userName,
             shape = shape,

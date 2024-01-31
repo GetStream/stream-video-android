@@ -23,6 +23,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -34,6 +35,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import io.getstream.video.android.compose.theme.base.VideoTheme
+import io.getstream.video.android.compose.ui.components.base.styling.StyleSize
 import io.getstream.video.android.compose.utils.initialsColors
 import io.getstream.video.android.core.utils.initials
 
@@ -53,6 +55,7 @@ internal fun InitialsAvatar(
     initials: String,
     modifier: Modifier = Modifier,
     shape: Shape = VideoTheme.shapes.circle,
+    textSize: StyleSize = StyleSize.XL,
     textStyle: TextStyle = VideoTheme.typography.titleM,
     avatarOffset: DpOffset = DpOffset(0.dp, 0.dp),
     initialTransformer: (String) -> String = { it.initials() },
@@ -60,15 +63,25 @@ internal fun InitialsAvatar(
     val colors = initialsColors(initials = initials)
     Box(
         modifier = modifier
+            .widthIn(VideoTheme.dimens.genericS, VideoTheme.dimens.genericMax)
             .aspectRatio(1f)
             .clip(shape)
             .background(color = colors.second),
     ) {
+        val resolvedTextSize = when (textSize) {
+            StyleSize.L -> VideoTheme.dimens.textSizeL
+            StyleSize.XS -> VideoTheme.dimens.textSizeXs
+            StyleSize.S -> VideoTheme.dimens.textSizeS
+            StyleSize.M -> VideoTheme.dimens.textSizeM
+            StyleSize.XL -> VideoTheme.dimens.textSizeXl
+            StyleSize.XXL -> VideoTheme.dimens.textSizeXxl
+        }
         Text(
             modifier = Modifier
                 .align(Alignment.Center)
                 .offset(avatarOffset.x, avatarOffset.y),
             text = initialTransformer.invoke(initials),
+            fontSize = resolvedTextSize,
             style = textStyle.copy(color = colors.first),
         )
     }

@@ -46,6 +46,7 @@ public fun NetworkQualityIndicator(
 ) {
     val colors = barColorsFromQuality(networkQuality)
     GenericIndicator(
+        shape = VideoTheme.shapes.square,
         modifier = modifier,
     ) {
         ConnectionBars(colors = colors)

@@ -42,7 +42,7 @@ public open class BadgeStyleProvider {
             fontSize = 8.sp,
             lineHeight = 10.sp,
             fontWeight = FontWeight.W600,
-            color = VideoTheme.colors.buttonPrimaryPressed,
+            color = VideoTheme.colors.baseTertiary,
         ),
         contentPaddings = PaddingValues(VideoTheme.dimens.genericXs, 0.dp),
     )

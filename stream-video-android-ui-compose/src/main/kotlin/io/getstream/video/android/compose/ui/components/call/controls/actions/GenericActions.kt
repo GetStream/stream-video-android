@@ -25,9 +25,47 @@ import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.state.ToggleableState
 import io.getstream.video.android.compose.theme.base.VideoTheme
+import io.getstream.video.android.compose.ui.components.base.StreamIconButton
 import io.getstream.video.android.compose.ui.components.base.StreamIconToggleButton
 import io.getstream.video.android.compose.ui.components.base.styling.StreamFixedSizeButtonStyle
 import io.getstream.video.android.core.call.state.CallAction
+
+@Composable
+public fun GenericAction(
+    modifier: Modifier = Modifier,
+    icon: ImageVector,
+    enabled: Boolean = true,
+    shape: Shape? = null,
+    color: Color? = null,
+    iconTint: Color? = null,
+    style: StreamFixedSizeButtonStyle? = null,
+    onAction: () -> Unit,
+): Unit = StreamIconButton(
+    modifier = modifier,
+    enabled = enabled,
+    icon = icon,
+    style = style ?: VideoTheme.styles.buttonStyles.primaryIconButtonStyle()
+        .let {
+            it.copyFixed(
+                shape = shape ?: it.shape,
+                colors = color?.let {
+                    ButtonDefaults.buttonColors(
+                        backgroundColor = color,
+                        disabledBackgroundColor = color.copy(alpha = 0.16f),
+                    )
+                }
+                    ?: it.colors,
+                iconStyle = it.iconStyle.copy(
+                    default = it.iconStyle.default.copy(
+                        color = iconTint ?: it.iconStyle.default.color,
+                    ),
+                ),
+            )
+        },
+    onClick = {
+        onAction()
+    },
+)
 
 /**
  * A call action button represents toggling a microphone.

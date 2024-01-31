@@ -61,7 +61,7 @@ import io.getstream.video.android.compose.permission.VideoPermissionsState
 import io.getstream.video.android.compose.permission.rememberCallPermissionsState
 import io.getstream.video.android.compose.pip.enterPictureInPicture
 import io.getstream.video.android.compose.pip.isInPictureInPictureMode
-import io.getstream.video.android.compose.theme.VideoTheme
+import io.getstream.video.android.compose.theme.base.VideoTheme
 import io.getstream.video.android.compose.ui.components.call.CallAppBar
 import io.getstream.video.android.compose.ui.components.call.controls.ControlActions
 import io.getstream.video.android.compose.ui.components.call.controls.actions.DefaultOnCallActionHandler
@@ -113,9 +113,9 @@ public fun CallContent(
     appBarContent: @Composable (call: Call) -> Unit = {
         CallAppBar(
             call = call,
-            leadingContent = {
-                LayoutChoiceLeadingContent(onCallAction)
-            },
+            /*leadingContent = {
+                //LayoutChoiceLeadingContent(onCallAction)
+            }*/
             onCallAction = onCallAction,
         )
     },
@@ -141,7 +141,7 @@ public fun CallContent(
             modifier = Modifier
                 .fillMaxSize()
                 .weight(1f)
-                .padding(bottom = VideoTheme.dimens.participantsGridPadding),
+                .padding(bottom = VideoTheme.dimens.spacingS),
             style = style,
             videoRenderer = videoRenderer,
             floatingVideoRenderer = floatingVideoRenderer,
@@ -187,7 +187,7 @@ public fun CallContent(
     } else {
         Scaffold(
             modifier = modifier,
-            contentColor = VideoTheme.colors.appBackground,
+            contentColor = VideoTheme.colors.baseSheetPrimary,
             topBar = { },
             bottomBar = {
                 if (orientation != ORIENTATION_LANDSCAPE) {
@@ -201,13 +201,13 @@ public fun CallContent(
                         layoutDirection = LocalLayoutDirection.current,
                     ),
                     end = it.calculateEndPadding(layoutDirection = LocalLayoutDirection.current),
-                    bottom = (it.calculateBottomPadding() - VideoTheme.dimens.controlActionsBottomPadding)
+                    bottom = (it.calculateBottomPadding() - VideoTheme.dimens.spacingS)
                         .coerceAtLeast(0.dp),
                 )
                 var showDiagnostics by remember { mutableStateOf(false) }
                 Row(
                     modifier = modifier
-                        .background(color = VideoTheme.colors.appBackground)
+                        .background(color = VideoTheme.colors.baseSheetPrimary)
                         .padding(paddings)
                         .pointerInput(Unit) {
                             detectTapGestures(
@@ -249,17 +249,13 @@ public fun CallContent(
 internal fun LayoutChoiceLeadingContent(onCallAction: (CallAction) -> Unit) {
     IconButton(
         onClick = { onCallAction.invoke(ChooseLayout) },
-        modifier = Modifier.padding(
-            start = VideoTheme.dimens.callAppBarLeadingContentSpacingStart,
-            end = VideoTheme.dimens.callAppBarLeadingContentSpacingEnd,
-        ),
     ) {
         Icon(
             imageVector = Icons.Rounded.AutoAwesomeMosaic,
             contentDescription = stringResource(
                 id = R.string.stream_video_back_button_content_description,
             ),
-            tint = VideoTheme.colors.callDescription,
+            tint = VideoTheme.colors.basePrimary,
         )
     }
 }

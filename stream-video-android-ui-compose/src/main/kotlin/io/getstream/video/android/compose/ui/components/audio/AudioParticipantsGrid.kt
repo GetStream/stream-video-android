@@ -62,7 +62,7 @@ public fun AudioParticipantsGrid(
 
     LazyVerticalGrid(
         modifier = modifier,
-        columns = GridCells.Adaptive(VideoTheme.dimens.componentHeightM),
+        columns = GridCells.Adaptive(VideoTheme.dimens.genericMax),
         contentPadding = PaddingValues(vertical = 32.dp),
         verticalArrangement = Arrangement.spacedBy(
             VideoTheme.dimens.spacingM,

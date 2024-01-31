@@ -17,10 +17,13 @@
 package io.getstream.video.android.compose.theme.base
 
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.CornerSize
+import androidx.compose.foundation.shape.CutCornerShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
 import androidx.compose.ui.graphics.Shape
+import androidx.compose.ui.unit.dp
 
 /**
  * Contains all the shapes we provide for our components.
@@ -36,11 +39,13 @@ import androidx.compose.ui.graphics.Shape
 @Immutable
 public data class StreamShapes(
     public val circle: Shape,
+    public val square: Shape,
     public val button: Shape,
     public val input: Shape,
     public val dialog: Shape,
     public val sheet: Shape,
     public val indicator: Shape,
+    public val container: Shape,
 ) {
     public companion object {
         /**
@@ -55,7 +60,9 @@ public data class StreamShapes(
             input = RoundedCornerShape(dimens.roundnessXl),
             sheet = RoundedCornerShape(dimens.roundnessM),
             dialog = RoundedCornerShape(dimens.roundnessL),
+            container = RoundedCornerShape(dimens.roundnessXl),
             indicator = RoundedCornerShape(dimens.roundnessS),
+            square = CutCornerShape(CornerSize(0.dp)),
         )
     }
 }

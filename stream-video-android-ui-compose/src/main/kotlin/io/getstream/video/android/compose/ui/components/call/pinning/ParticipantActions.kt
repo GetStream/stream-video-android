@@ -16,27 +16,16 @@
 
 package io.getstream.video.android.compose.ui.components.call.pinning
 
-import android.content.res.Configuration
-import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
-import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.aspectRatio
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.Icon
-import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.PushPin
 import androidx.compose.material.icons.outlined.MoreHoriz
@@ -45,28 +34,23 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Alignment.Companion.Center
-import androidx.compose.ui.Alignment.Companion.CenterHorizontally
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.drawscope.DrawScope
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalLifecycleOwner
-import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.state.ToggleableState
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.Density
-import androidx.compose.ui.unit.Dp
-import androidx.compose.ui.unit.dp
-import androidx.compose.ui.window.Dialog
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.compose.ui.unit.IntOffset
+import androidx.compose.ui.unit.IntSize
+import androidx.compose.ui.window.Popup
 import androidx.lifecycle.lifecycleScope
-import io.getstream.video.android.compose.theme.VideoTheme
-import io.getstream.video.android.compose.ui.components.avatar.UserAvatar
+import io.getstream.video.android.compose.theme.base.VideoTheme
+import io.getstream.video.android.compose.ui.components.base.StreamToggleButton
 import io.getstream.video.android.compose.ui.components.indicator.GenericIndicator
 import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.ParticipantState
@@ -160,29 +144,52 @@ internal fun BoxScope.ParticipantActions(
     var showDialog by remember {
         mutableStateOf(false)
     }
+    ParticipantActionsWithoutState(actions, call, participant, modifier, showDialog)
+}
+
+@Composable
+private fun BoxScope.ParticipantActionsWithoutState(
+    actions: List<ParticipantAction>,
+    call: Call,
+    participant: ParticipantState,
+    modifier: Modifier = Modifier,
+    showDialog: Boolean = false,
+) {
+    val buttonPosition = remember { mutableStateOf(Offset.Zero) }
+    val buttonSize = remember { mutableStateOf(IntSize.Zero) }
+    var showDialog1 = showDialog
     if (actions.any {
             it.condition.invoke(call, participant)
         }
     ) {
         GenericIndicator(
+            backgroundColor = VideoTheme.colors.baseSheetPrimary,
+            shape = VideoTheme.shapes.circle,
             modifier = modifier.clickable {
-                showDialog = !showDialog
+                showDialog1 = !showDialog1
+            }.onGloballyPositioned { coordinates ->
+                buttonPosition.value = coordinates.localToRoot(Offset.Zero)
+                buttonSize.value = coordinates.size
             },
         ) {
             Icon(
                 imageVector = Icons.Outlined.MoreHoriz,
                 contentDescription = "Call actions",
-                tint = Color.White,
+                tint = VideoTheme.colors.basePrimary,
             )
         }
 
-        if (showDialog) {
+        if (showDialog1) {
             ParticipantActionsDialog(
+                offset = IntOffset(
+                    x = buttonPosition.value.x.toInt(),
+                    y = (buttonPosition.value.y + buttonSize.value.height).toInt(),
+                ),
                 call = call,
                 participant = participant,
                 actions = actions,
                 onDismiss = {
-                    showDialog = false
+                    showDialog1 = false
                 },
             )
         }
@@ -196,110 +203,36 @@ internal fun BoxScope.ParticipantActionsDialog(
     participant: ParticipantState,
     actions: List<ParticipantAction>,
     onDismiss: () -> Unit = {},
+    offset: IntOffset,
 ) {
     val coroutineScope = LocalLifecycleOwner.current.lifecycleScope
-    val userName by participant.userNameOrId.collectAsStateWithLifecycle()
-    val userImage by participant.image.collectAsStateWithLifecycle()
-    val name = remember {
-        val nameValue = participant.name.value
-        nameValue.ifEmpty {
-            participant.userNameOrId.value
-        }
-    }
-    Dialog(onDismiss) {
+    Popup(
+        offset = offset,
+        onDismissRequest = onDismiss,
+    ) {
         Column(
             Modifier
-                .background(VideoTheme.colors.appBackground)
-                .align(Alignment.Center)
-                .padding(16.dp),
+                .background(VideoTheme.colors.baseSheetPrimary, shape = VideoTheme.shapes.dialog)
+                .align(Center)
+                .padding(VideoTheme.dimens.spacingM),
         ) {
-            UserAvatar(
-                modifier = Modifier
-                    .size(82.dp)
-                    .align(Alignment.CenterHorizontally)
-                    .aspectRatio(1f),
-                userName = userName,
-                userImage = userImage,
-            )
-            Text(
-                modifier = Modifier.fillMaxWidth(),
-                text = name,
-                color = VideoTheme.colors.textHighEmphasis,
-                textAlign = TextAlign.Center,
-            )
-            Spacer(modifier = Modifier.height(16.dp))
-            FlowRow(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceEvenly,
-                verticalArrangement = Arrangement.Center,
-            ) {
-                actions.forEach {
-                    if (it.condition.invoke(call, participant)) {
-                        val circleColor = if (it.firstToggleAction) VideoTheme.colors.textHighEmphasis else VideoTheme.colors.primaryAccent
-                        val strokeWidth = if (it.firstToggleAction) 2.dp else 4.dp
-                        Column {
-                            CircleIcon(
-                                icon = it.icon,
-                                modifier = Modifier.align(CenterHorizontally),
-                                tint = circleColor,
-                                circleColor = circleColor,
-                                strokeWidth = strokeWidth,
-                            ) {
-                                it.action.invoke(coroutineScope, call, participant)
-                            }
-                            Spacer(modifier = Modifier.height(8.dp))
-                            Text(
-                                modifier = Modifier.align(CenterHorizontally).width(80.dp),
-                                textAlign = TextAlign.Center,
-                                text = it.label,
-                                color = VideoTheme.colors.textHighEmphasis,
-                            )
-                        }
-                    }
+            actions.forEach {
+                StreamToggleButton(
+                    toggleState = rememberUpdatedState(
+                        newValue = ToggleableState(!it.firstToggleAction),
+                    ),
+                    onIcon = it.icon,
+                    onText = it.label,
+                    offText = it.label,
+                    onStyle = VideoTheme.styles.buttonStyles.toggleButtonStyleOn(),
+                    offStyle = VideoTheme.styles.buttonStyles.toggleButtonStyleOff(),
+                ) { _ ->
+                    it.action.invoke(coroutineScope, call, participant)
                 }
             }
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(VideoTheme.dimens.spacingM))
         }
     }
-}
-
-@Composable
-private fun CircleIcon(
-    icon: ImageVector,
-    modifier: Modifier,
-    tint: Color,
-    circleColor: Color,
-    strokeWidth: Dp = 2.dp,
-    onClick: () -> Unit,
-) {
-    val density = LocalDensity.current
-    Box(
-        modifier = modifier
-            .size(48.dp)
-            .clip(CircleShape)
-            .background(Color.Transparent)
-            .clickable {
-                onClick()
-            },
-    ) {
-        Canvas(modifier = Modifier.fillMaxSize(), onDraw = {
-            drawCircleOutline(density, circleColor, strokeWidth)
-        })
-        Icon(
-            modifier = Modifier.align(Center),
-            imageVector = icon,
-            contentDescription = null,
-            tint = tint,
-        )
-    }
-}
-
-private fun DrawScope.drawCircleOutline(density: Density, color: Color, width: Dp) {
-    val strokeWidth = with(density) { width.toPx() }
-    drawCircle(
-        color = color,
-        style = androidx.compose.ui.graphics.drawscope.Stroke(strokeWidth),
-    )
 }
 
 @Preview
@@ -312,21 +245,26 @@ private fun ParticipantActionDialogPreview() {
                 call = previewCall,
                 participant = previewParticipant,
                 actions = pinUnpinActions,
+                offset = IntOffset(
+                    x = 0,
+                    y = 50,
+                ),
             )
         }
     }
 }
 
-@Preview(uiMode = Configuration.UI_MODE_NIGHT_YES)
+@Preview
 @Composable
-private fun ParticipantActionDialogPreviewDark() {
+private fun ParticipantActionsPreview() {
     StreamPreviewDataUtils.initializeStreamVideo(LocalContext.current)
     VideoTheme {
         Box {
-            ParticipantActionsDialog(
+            ParticipantActionsWithoutState(
                 call = previewCall,
                 participant = previewParticipant,
                 actions = pinUnpinActions,
+                showDialog = true,
             )
         }
     }

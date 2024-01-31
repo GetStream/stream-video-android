@@ -84,7 +84,7 @@ public fun ParticipantAudio(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center,
     ) {
-        Box(modifier = Modifier.size(VideoTheme.dimens.genericXxl)) {
+        Box(modifier = Modifier.fillMaxSize()) {
             UserAvatar(
                 userName = nameOrId,
                 userImage = userImage,
@@ -153,14 +153,13 @@ private fun BoxScope.DefaultMicrophoneIndicator(
     Box(
         modifier = Modifier
             .clip(CircleShape)
-            .background(VideoTheme.colors.baseSheetQuarternary)
+            .background(VideoTheme.colors.baseSheetPrimary)
             .size(VideoTheme.dimens.componentHeightM)
             .align(alignment),
     ) {
         Icon(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(VideoTheme.dimens.spacingM),
+
+            modifier = Modifier.align(alignment).fillMaxSize().padding(VideoTheme.dimens.spacingS),
             imageVector = Icons.Default.MicOff,
             tint = VideoTheme.colors.alertWarning,
             contentDescription = null,
