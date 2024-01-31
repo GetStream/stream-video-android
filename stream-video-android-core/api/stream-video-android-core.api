@@ -4395,9 +4395,6 @@ public final class io/getstream/video/android/core/utils/DerivedStateFlow : kotl
 	public fun getValue ()Ljava/lang/Object;
 }
 
-public final class io/getstream/video/android/core/utils/DomainUtilsKt {
-}
-
 public final class io/getstream/video/android/core/utils/LatencyResult {
 	public fun <init> (Ljava/lang/String;Ljava/util/List;DLjava/lang/Throwable;)V
 	public synthetic fun <init> (Ljava/lang/String;Ljava/util/List;DLjava/lang/Throwable;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
@@ -4419,9 +4416,6 @@ public final class io/getstream/video/android/core/utils/LatencyResult {
 public final class io/getstream/video/android/core/utils/LatencyResultKt {
 	public static final fun getLatencyMeasurements (Ljava/lang/String;)Lio/getstream/video/android/core/utils/LatencyResult;
 	public static final fun getLatencyMeasurementsOKHttp (Ljava/lang/String;)Lio/getstream/video/android/core/utils/LatencyResult;
-}
-
-public final class io/getstream/video/android/core/utils/ListUtilsKt {
 }
 
 public final class io/getstream/video/android/core/utils/MediaStream {
