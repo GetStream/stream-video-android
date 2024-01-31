@@ -1,6 +1,6 @@
-# Dogfooding App
+# Demo App
 
-Dogfooding demonstrates Stream Video SDK for Android with modern Android tech stacks, such as Compose, Hilt, and Coroutines.
+Demo demonstrates Stream Video SDK for Android with modern Android tech stacks, such as Compose, Hilt, and Coroutines.
 
 ## 📱 Previews
 
@@ -12,11 +12,11 @@ Dogfooding demonstrates Stream Video SDK for Android with modern Android tech st
 
 ## Download
 
-Dogfooding app is available on **[Google Play](https://play.google.com/store/apps/details?id=io.getstream.video.android)**. If you have any feedback on this, please [create an issue on GitHub](https://github.com/GetStream/stream-video-android/issues/new/choose).
+Demo app is available on **[Google Play](https://play.google.com/store/apps/details?id=io.getstream.video.android)**. If you have any feedback on this, please [create an issue on GitHub](https://github.com/GetStream/stream-video-android/issues/new/choose).
 
 ## Build Setup
 
-If you want to build and run the [dogfooding app](https://github.com/GetStream/stream-video-android/tree/develop/dogfooding) on your computer, you can follow the instructions below:
+If you want to build and run the [demo app](https://github.com/GetStream/stream-video-android/tree/develop/demo-app) on your computer, you can follow the instructions below:
 
 1. Get your Stream API KEY on the [Stream dashboard](https://dashboard.getstream.io?utm_source=Github&utm_medium=DevRel_GitHub_Repo_Jaewoong&utm_content=Developer&utm_campaign=Github_Sep2023_Jaewoong_StreamVideoSDK&utm_term=DevRelOss).
 
@@ -43,19 +43,19 @@ If you want to build and run the [dogfooding app](https://github.com/GetStream/s
 
 </details>
 
-2. Next, create a file named **.env.properties** on the root project with the formats below:
+7. Next, create a file named **.env.properties** on the root project with the formats below:
 
 ```
 # Environment Variable for dogfooding app
-DOGFOODING_RES_CONFIG_DEEPLINKING_HOST=pronto.getstream.io
-DOGFOODING_RES_CONFIG_DEEPLINKING_HOST_LEGACY=stream-calls-dogfood.vercel.app
+DOGFOODING_BUILD_CONFIG_API_KEY=YOUR_API_KEY
+DOGFOODING_BUILD_CONFIG_BENCHMARK=true
+DOGFOODING_RES_CONFIG_DEEPLINKING_HOST=stream-calls-dogfood.vercel.app
 DOGFOODING_RES_CONFIG_DEEPLINKING_PATH_PREFIX=/
-PRODUCTION_RES_CONFIG_DEEPLINKING_HOST=getstream.io
-PRODUCTION_RES_CONFIG_DEEPLINKING_HOST_LEGACY=
-PRODUCTION_RES_CONFIG_DEEPLINKING_PATH_PREFIX=/video/demos/
 ```
 
-3. Finally, run the dogfooding project on your Android Studio.
+Make sure that you properly copy-pasted the Stream API key to the `DOGFOODING_BUILD_CONFIG_API_KEY` property.
+
+8. Finally, run the demo project on your Android Studio.
 
 ## License
 
