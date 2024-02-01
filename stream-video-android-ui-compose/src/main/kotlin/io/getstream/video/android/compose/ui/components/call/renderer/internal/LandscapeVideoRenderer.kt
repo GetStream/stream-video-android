@@ -40,7 +40,7 @@ import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.IntSize
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import io.getstream.video.android.compose.theme.VideoTheme
+import io.getstream.video.android.compose.theme.base.VideoTheme
 import io.getstream.video.android.compose.ui.components.call.renderer.DefaultFloatingParticipantVideo
 import io.getstream.video.android.compose.ui.components.call.renderer.ParticipantVideo
 import io.getstream.video.android.compose.ui.components.call.renderer.RegularVideoRendererStyle
@@ -88,7 +88,7 @@ internal fun BoxScope.LandscapeVideoRenderer(
     floatingVideoRenderer: @Composable (BoxScope.(call: Call, IntSize) -> Unit)? = null,
 ) {
     val remoteParticipants by call.state.remoteParticipants.collectAsStateWithLifecycle()
-    val paddedModifier = modifier.padding(VideoTheme.dimens.participantsGridPadding)
+    val paddedModifier = modifier.padding(VideoTheme.dimens.spacingXXs)
     when (callParticipants.size) {
         1, 2 -> {
             val participant = if (remoteParticipants.isEmpty()) {
@@ -247,7 +247,7 @@ private fun LandscapeParticipantsPreview1() {
         val participants = previewParticipantsList
 
         Box(
-            modifier = Modifier.background(color = VideoTheme.colors.appBackground),
+            modifier = Modifier.background(color = VideoTheme.colors.baseSheetPrimary),
         ) {
             LandscapeVideoRenderer(
                 call = previewCall,
@@ -271,7 +271,7 @@ private fun LandscapeParticipantsPreview2() {
         val participants = previewParticipantsList
 
         Box(
-            modifier = Modifier.background(color = VideoTheme.colors.appBackground),
+            modifier = Modifier.background(color = VideoTheme.colors.baseSheetPrimary),
         ) {
             LandscapeVideoRenderer(
                 call = previewCall,
@@ -295,7 +295,7 @@ private fun LandscapeParticipantsPreview3() {
         val participants = previewParticipantsList
 
         Box(
-            modifier = Modifier.background(color = VideoTheme.colors.appBackground),
+            modifier = Modifier.background(color = VideoTheme.colors.baseSheetPrimary),
         ) {
             LandscapeVideoRenderer(
                 call = previewCall,
@@ -319,7 +319,7 @@ private fun LandscapeParticipantsPreview4() {
         val participants = previewParticipantsList
 
         Box(
-            modifier = Modifier.background(color = VideoTheme.colors.appBackground),
+            modifier = Modifier.background(color = VideoTheme.colors.baseSheetPrimary),
         ) {
             LandscapeVideoRenderer(
                 call = previewCall,
@@ -343,7 +343,7 @@ private fun LandscapeParticipantsPreview5() {
         val participants = previewParticipantsList
 
         Box(
-            modifier = Modifier.background(color = VideoTheme.colors.appBackground),
+            modifier = Modifier.background(color = VideoTheme.colors.baseSheetPrimary),
         ) {
             LandscapeVideoRenderer(
                 call = previewCall,
@@ -367,7 +367,7 @@ private fun LandscapeParticipantsPreview6() {
         val participants = previewParticipantsList
 
         Box(
-            modifier = Modifier.background(color = VideoTheme.colors.appBackground),
+            modifier = Modifier.background(color = VideoTheme.colors.baseSheetPrimary),
         ) {
             LandscapeVideoRenderer(
                 call = previewCall,
@@ -391,7 +391,7 @@ private fun LandscapeParticipantsPreview7() {
         val participants = previewParticipantsList
 
         Box(
-            modifier = Modifier.background(color = VideoTheme.colors.appBackground),
+            modifier = Modifier.background(color = VideoTheme.colors.baseSheetPrimary),
         ) {
             LandscapeVideoRenderer(
                 call = previewCall,

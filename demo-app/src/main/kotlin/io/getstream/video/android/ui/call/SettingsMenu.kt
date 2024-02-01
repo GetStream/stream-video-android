@@ -24,32 +24,33 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.DrawableRes
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.Card
-import androidx.compose.material.Icon
-import androidx.compose.material.Text
+import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.ui.Alignment
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.unit.IntOffset
+import androidx.compose.ui.res.vectorResource
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Popup
+import androidx.compose.ui.window.PopupProperties
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import io.getstream.video.android.compose.theme.VideoTheme
+import io.getstream.video.android.compose.theme.base.VideoTheme
+import io.getstream.video.android.compose.ui.components.base.StreamToggleButton
+import io.getstream.video.android.compose.ui.components.base.styling.StyleSize
 import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.call.audio.AudioFilter
 import io.getstream.video.android.core.call.video.BitmapVideoFilter
+import io.getstream.video.android.core.mapper.ReactionMapper
+import io.getstream.video.android.mock.StreamPreviewDataUtils
+import io.getstream.video.android.mock.previewCall
 import io.getstream.video.android.ui.common.R
 import io.getstream.video.android.util.BlurredBackgroundVideoFilter
 import io.getstream.video.android.util.SampleAudioFilter
@@ -86,182 +87,176 @@ internal fun SettingsMenu(
         "Start screen-sharing"
     }
 
-    Popup(
-        alignment = Alignment.BottomStart,
-        offset = IntOffset(30, -210),
-        onDismissRequest = { onDismissed.invoke() },
-    ) {
-        Card(
-            shape = RoundedCornerShape(12.dp),
-            elevation = 6.dp,
-        ) {
-            Column(
-                modifier = Modifier
-                    .width(245.dp)
-                    .background(VideoTheme.colors.appBackground)
-                    .padding(12.dp),
-            ) {
-                MenuEntry(
-                    icon = R.drawable.stream_video_ic_reaction,
-                    label = "Reactions",
-                    onClick = {
-                        onDismissed()
-                        onShowReactionsMenu()
-                    },
-                )
+    // Define the actions as lambda variables
+    val onReactionsClick: () -> Unit = {
+        onDismissed()
+        onShowReactionsMenu()
+    }
 
-                Spacer(modifier = Modifier.height(12.dp))
+    val onScreenShareClick: () -> Unit = {
+        if (!isScreenSharing) {
+            scope.launch {
+                val mediaProjectionManager =
+                    context.getSystemService(MediaProjectionManager::class.java)
+                screenSharePermissionResult.launch(mediaProjectionManager.createScreenCaptureIntent())
+            }
+        } else {
+            call.stopScreenSharing()
+        }
+    }
 
-                MenuEntry(
-                    icon = R.drawable.stream_video_ic_screensharing,
-                    label = screenShareButtonText,
-                    onClick = {
-                        if (!isScreenSharing) {
-                            scope.launch {
-                                val mediaProjectionManager = context.getSystemService(
-                                    MediaProjectionManager::class.java,
-                                )
-                                screenSharePermissionResult.launch(
-                                    mediaProjectionManager.createScreenCaptureIntent(),
-                                )
-                            }
-                        } else {
-                            call.stopScreenSharing()
-                        }
-                    },
-                )
+    val onSwitchMicrophoneClick: () -> Unit = {
+        onDismissed.invoke()
+        onDisplayAvailableDevice.invoke()
+    }
 
-                Spacer(modifier = Modifier.height(12.dp))
+    val onToggleBackgroundBlurClick: () -> Unit = {
+        onToggleBackgroundBlur()
 
-                MenuEntry(
-                    icon = io.getstream.video.android.R.drawable.ic_mic,
-                    label = "Switch Microphone",
-                    onClick = {
-                        onDismissed.invoke()
-                        onDisplayAvailableDevice.invoke()
-                    },
-                )
+        if (call.videoFilter == null) {
+            call.videoFilter = object : BitmapVideoFilter() {
+                val filter = BlurredBackgroundVideoFilter()
 
-                Spacer(modifier = Modifier.height(12.dp))
-
-                MenuEntry(
-                    icon = if (isBackgroundBlurEnabled) {
-                        io.getstream.video.android.R.drawable.ic_blur_off
-                    } else {
-                        io.getstream.video.android.R.drawable.ic_blur_on
-                    },
-                    label = if (isBackgroundBlurEnabled) {
-                        "Disable background blur"
-                    } else {
-                        "Enable background blur (beta)"
-                    },
-                    onClick = {
-                        onToggleBackgroundBlur()
-
-                        if (call.videoFilter == null) {
-                            call.videoFilter = object : BitmapVideoFilter() {
-                                val filter = BlurredBackgroundVideoFilter()
-
-                                override fun filter(bitmap: Bitmap) {
-                                    filter.applyFilter(bitmap)
-                                }
-                            }
-                        } else {
-                            call.videoFilter = null
-                        }
-                    },
-                )
-
-                if (showDebugOptions) {
-                    Spacer(modifier = Modifier.height(12.dp))
-
-                    MenuEntry(
-                        icon = R.drawable.stream_video_ic_fullscreen_exit,
-                        label = "Toggle audio filter",
-                        onClick = {
-                            if (call.audioFilter == null) {
-                                call.audioFilter = object : AudioFilter {
-                                    override fun filter(
-                                        audioFormat: Int,
-                                        channelCount: Int,
-                                        sampleRate: Int,
-                                        sampleData: ByteBuffer,
-                                    ) {
-                                        SampleAudioFilter.toRoboticVoice(
-                                            sampleData,
-                                            channelCount,
-                                            0.8f,
-                                        )
-                                    }
-                                }
-                            } else {
-                                call.audioFilter = null
-                            }
-                        },
-                    )
-
-                    Spacer(modifier = Modifier.height(12.dp))
-
-                    MenuEntry(
-                        icon = R.drawable.stream_video_ic_fullscreen_exit,
-                        label = "Restart Subscriber Ice",
-                        onClick = {
-                            call.debug.restartSubscriberIce()
-                            onDismissed.invoke()
-                            Toast.makeText(
-                                context,
-                                "Restart Subscriber Ice",
-                                Toast.LENGTH_SHORT,
-                            ).show()
-                        },
-                    )
-
-                    Spacer(modifier = Modifier.height(12.dp))
-
-                    MenuEntry(
-                        icon = R.drawable.stream_video_ic_fullscreen_exit,
-                        label = "Restart Publisher Ice",
-                        onClick = {
-                            call.debug.restartPublisherIce()
-                            onDismissed.invoke()
-                            Toast.makeText(
-                                context,
-                                "Restart Publisher Ice",
-                                Toast.LENGTH_SHORT,
-                            ).show()
-                        },
-                    )
-
-                    Spacer(modifier = Modifier.height(12.dp))
-
-                    MenuEntry(
-                        icon = R.drawable.stream_video_ic_fullscreen_exit,
-                        label = "Kill SFU WS",
-                        onClick = {
-                            call.debug.doFullReconnection()
-                            onDismissed.invoke()
-                            Toast.makeText(
-                                context,
-                                "Killing SFU WS. Should trigger reconnect...",
-                                Toast.LENGTH_SHORT,
-                            ).show()
-                        },
-                    )
-
-                    Spacer(modifier = Modifier.height(12.dp))
-
-                    MenuEntry(
-                        icon = R.drawable.stream_video_ic_fullscreen,
-                        label = "Switch sfu",
-                        onClick = {
-                            call.debug.switchSfu()
-                            onDismissed.invoke()
-                            Toast.makeText(context, "Switch sfu", Toast.LENGTH_SHORT).show()
-                        },
-                    )
+                override fun filter(bitmap: Bitmap) {
+                    filter.applyFilter(bitmap)
                 }
             }
+        } else {
+            call.videoFilter = null
         }
+    }
+
+    val onToggleAudioFilterClick: () -> Unit = {
+        if (call.audioFilter == null) {
+            call.audioFilter = object : AudioFilter {
+                override fun filter(
+                    audioFormat: Int, channelCount: Int, sampleRate: Int, sampleData: ByteBuffer
+                ) {
+                    SampleAudioFilter.toRoboticVoice(sampleData, channelCount, 0.8f)
+                }
+            }
+        } else {
+            call.audioFilter = null
+        }
+    }
+
+    val onRestartSubscriberIceClick: () -> Unit = {
+        call.debug.restartSubscriberIce()
+        onDismissed.invoke()
+        Toast.makeText(context, "Restart Subscriber Ice", Toast.LENGTH_SHORT).show()
+    }
+
+    val onRestartPublisherIceClick: () -> Unit = {
+        call.debug.restartPublisherIce()
+        onDismissed.invoke()
+        Toast.makeText(context, "Restart Publisher Ice", Toast.LENGTH_SHORT).show()
+    }
+
+    val onKillSfuWsClick: () -> Unit = {
+        call.debug.doFullReconnection()
+        onDismissed.invoke()
+        Toast.makeText(context, "Killing SFU WS. Should trigger reconnect...", Toast.LENGTH_SHORT)
+            .show()
+    }
+
+    val onSwitchSfuClick: () -> Unit = {
+        call.debug.switchSfu()
+        onDismissed.invoke()
+        Toast.makeText(context, "Switch sfu", Toast.LENGTH_SHORT).show()
+    }
+
+    SettingsMenuItems(
+        onScreenShareClick = onScreenShareClick,
+        onSwitchMicrophoneClick = onSwitchMicrophoneClick,
+        onToggleBackgroundBlurClick = onToggleBackgroundBlurClick,
+        onToggleAudioFilterClick = onToggleAudioFilterClick,
+        onRestartSubscriberIceClick = onRestartSubscriberIceClick,
+        onRestartPublisherIceClick = onRestartPublisherIceClick,
+        onKillSfuWsClick = onKillSfuWsClick,
+        onSwitchSfuClick = onSwitchSfuClick,
+        showDebugOptions = showDebugOptions,
+        isBackgroundBlurEnabled = isBackgroundBlurEnabled,
+        onDismissed = onDismissed,
+    ) {
+
+    }
+}
+
+@OptIn(ExperimentalComposeUiApi::class)
+@Composable
+fun SettingsMenuItems(
+    isBackgroundBlurEnabled: Boolean,
+    onScreenShareClick: () -> Unit,
+    onSwitchMicrophoneClick: () -> Unit,
+    onToggleBackgroundBlurClick: () -> Unit,
+    onToggleAudioFilterClick: () -> Unit,
+    onRestartSubscriberIceClick: () -> Unit,
+    onRestartPublisherIceClick: () -> Unit,
+    onKillSfuWsClick: () -> Unit,
+    onSwitchSfuClick: () -> Unit,
+    showDebugOptions: Boolean,
+    onDismissed: () -> Unit,
+    reactionsMenu: @Composable () -> Unit,
+) {
+    Popup(
+        onDismissRequest = { onDismissed.invoke() }, properties = PopupProperties(
+            usePlatformDefaultWidth = false
+        )
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .background(VideoTheme.colors.baseSheetPrimary)
+                .padding(12.dp),
+        ) {
+
+            reactionsMenu()
+            Spacer(modifier = Modifier.size(VideoTheme.dimens.spacingM))
+
+            MenuEntry(
+                icon = R.drawable.stream_video_ic_screensharing,
+                label = "Toggle screen-sharing",
+                onClick = onScreenShareClick
+            )
+            MenuEntry(
+                icon = io.getstream.video.android.R.drawable.ic_mic,
+                label = "Switch Microphone",
+                onClick = onSwitchMicrophoneClick
+            )
+            MenuEntry(
+                icon = if (isBackgroundBlurEnabled) io.getstream.video.android.R.drawable.ic_blur_off else io.getstream.video.android.R.drawable.ic_blur_on,
+                label = if (isBackgroundBlurEnabled) "Disable background blur" else "Enable background blur (beta)",
+                onClick = onToggleBackgroundBlurClick
+            )
+            if (showDebugOptions) {
+                MenuEntry(
+                    icon = R.drawable.stream_video_ic_fullscreen_exit,
+                    label = "Toggle audio filter",
+                    onClick = onToggleAudioFilterClick
+                )
+                MenuEntry(
+                    icon = R.drawable.stream_video_ic_fullscreen_exit,
+                    label = "Restart Subscriber Ice",
+                    onClick = onRestartSubscriberIceClick
+                )
+                MenuEntry(
+                    icon = R.drawable.stream_video_ic_fullscreen_exit,
+                    label = "Restart Publisher Ice",
+                    onClick = onRestartPublisherIceClick
+                )
+                MenuEntry(
+                    icon = R.drawable.stream_video_ic_fullscreen_exit,
+                    label = "Kill SFU WS",
+                    onClick = onKillSfuWsClick
+                )
+                MenuEntry(
+                    icon = R.drawable.stream_video_ic_fullscreen,
+                    label = "Switch SFU",
+                    onClick = onSwitchSfuClick
+                )
+            }
+        }
+
     }
 }
 
@@ -270,17 +265,38 @@ private fun MenuEntry(
     @DrawableRes icon: Int,
     label: String,
     onClick: () -> Unit,
-) {
-    Row(modifier = Modifier.clickable(onClick = onClick)) {
-        Icon(
-            painter = painterResource(id = icon),
-            tint = VideoTheme.colors.textHighEmphasis,
-            contentDescription = null,
-        )
-        Text(
-            modifier = Modifier.padding(start = 12.dp, top = 2.dp),
-            text = label,
-            color = VideoTheme.colors.textHighEmphasis,
-        )
+) = StreamToggleButton(
+    onText = label,
+    offText = label,
+    onIcon = ImageVector.vectorResource(icon),
+    onStyle = VideoTheme.styles.buttonStyles.toggleButtonStyleOn(StyleSize.XS).copy(
+        iconStyle = VideoTheme.styles.iconStyles.customColorIconStyle(color = VideoTheme.colors.basePrimary)
+    )
+) { onClick() }
+
+@Preview
+@Composable
+private fun SettingsPreview() {
+    StreamPreviewDataUtils.initializeStreamVideo(LocalContext.current)
+    VideoTheme {
+        SettingsMenuItems(
+            onScreenShareClick = { },
+            onSwitchMicrophoneClick = { },
+            onToggleBackgroundBlurClick = { },
+            onToggleAudioFilterClick = { },
+            onRestartSubscriberIceClick = { },
+            onRestartPublisherIceClick = { },
+            onKillSfuWsClick = { },
+            onSwitchSfuClick = { },
+            showDebugOptions = true,
+            onDismissed = { },
+            isBackgroundBlurEnabled = true,
+        ) {
+            ReactionsMenu(
+                call = previewCall, reactionMapper = ReactionMapper.defaultReactionMapper()
+            ) {
+
+            }
+        }
     }
 }

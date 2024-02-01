@@ -63,6 +63,8 @@ public fun OutgoingCallControls(
             )
 
             ToggleCameraAction(
+                offStyle = VideoTheme.styles.buttonStyles.secondaryIconButtonStyle(),
+                onStyle = VideoTheme.styles.buttonStyles.tetriaryIconButtonStyle(),
                 isCameraEnabled = isCameraEnabled,
                 onCallAction = onCallAction,
             )

@@ -89,7 +89,7 @@ public fun StreamButton(
     text: String,
     onClick: () -> Unit = { },
     enabled: Boolean = true,
-    style: StreamButtonStyle,
+    style: StreamButtonStyle = VideoTheme.styles.buttonStyles.primaryButtonStyle(),
     interactionSource: MutableInteractionSource = remember { MutableInteractionSource() },
 ): Unit = GenericStreamButton(
     modifier = modifier,
@@ -172,9 +172,9 @@ public fun StreamIconToggleButton(
     offIcon: ImageVector = onIcon,
     onStyle: StreamFixedSizeButtonStyle,
     offStyle: StreamFixedSizeButtonStyle = onStyle,
-    onClick: (ToggleableState) -> Unit = {},
     enabled: Boolean = true,
     interactionSource: MutableInteractionSource = remember { MutableInteractionSource() },
+    onClick: (ToggleableState) -> Unit = {},
 ): Unit = GenericToggleButton(
     modifier = modifier,
     toggleState = toggleState,

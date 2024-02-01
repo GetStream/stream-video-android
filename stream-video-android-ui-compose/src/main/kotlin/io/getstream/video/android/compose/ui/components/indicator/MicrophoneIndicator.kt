@@ -44,7 +44,7 @@ public fun MicrophoneIndicator(
 ) {
     Box(
         modifier = modifier
-            .size(VideoTheme.dimens.componentHeightM)
+            .size(VideoTheme.dimens.componentHeightS)
             .padding(1.dp),
     ) {
         if (isMicrophoneEnabled) {

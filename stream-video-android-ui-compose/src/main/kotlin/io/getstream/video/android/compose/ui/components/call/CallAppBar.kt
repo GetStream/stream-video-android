@@ -134,7 +134,7 @@ internal fun RowScope.DefaultCallAppBarCenterContent(call: Call, title: String) 
     val duration by call.state.duration.collectAsStateWithLifecycle()
     CalLCenterContent(
         modifier = Modifier.align(CenterVertically),
-        text = duration?.toIsoString() ?: title,
+        text = duration?.toString() ?: title,
         isRecording = isRecording,
         isReconnecting = isReconnecting,
     )

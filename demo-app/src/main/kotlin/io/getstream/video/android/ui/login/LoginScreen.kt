@@ -68,6 +68,7 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.testTagsAsResourceId
 import androidx.compose.ui.state.ToggleableState
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -81,10 +82,10 @@ import io.getstream.video.android.compose.theme.base.VideoTheme
 import io.getstream.video.android.compose.ui.components.base.StreamButton
 import io.getstream.video.android.compose.ui.components.base.StreamDialogPositiveNegative
 import io.getstream.video.android.compose.ui.components.base.StreamIconToggleButton
+import io.getstream.video.android.compose.ui.components.base.StreamTextField
 import io.getstream.video.android.compose.ui.components.base.styling.ButtonStyles
 import io.getstream.video.android.compose.ui.components.base.styling.IconStyles
 import io.getstream.video.android.compose.ui.components.base.styling.StreamDialogStyles
-import io.getstream.video.android.ui.theme.Colors
 import io.getstream.video.android.util.UserHelper
 import io.getstream.video.android.util.config.AppConfig
 import io.getstream.video.android.util.config.types.Flavor
@@ -159,6 +160,7 @@ fun LoginScreen(
     }
 }
 
+@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 private fun LoginContent(
     autoLogIn: Boolean,
@@ -303,34 +305,27 @@ private fun EmailLoginDialog(
     onDismissRequest: () -> Unit = {},
     login: (Boolean?, LoginEvent?) -> Unit = { _, _ -> },
 ) {
-    var email by remember { mutableStateOf("") }
+    var email by remember { mutableStateOf(TextFieldValue("")) }
 
     StreamDialogPositiveNegative(
         style = StreamDialogStyles.defaultDialogStyle(),
         onDismiss = { onDismissRequest.invoke() },
+        icon = Icons.Default.Email,
+        title = stringResource(R.string.enter_your_email_address),
         content = {
-            TextField(
+            StreamTextField(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(16.dp),
                 value = email,
                 onValueChange = { email = it },
-                label = { Text(text = stringResource(R.string.enter_your_email_address)) },
-                colors = TextFieldDefaults.textFieldColors(
-                    textColor = Colors.description,
-                    focusedLabelColor = VideoTheme.colors.basePrimary,
-                    unfocusedLabelColor = VideoTheme.colors.basePrimary,
-                    unfocusedIndicatorColor = VideoTheme.colors.basePrimary,
-                    focusedIndicatorColor = VideoTheme.colors.basePrimary,
-                    cursorColor = Colors.description,
-                ),
                 keyboardOptions = KeyboardOptions.Default.copy(
                     keyboardType = KeyboardType.Email,
                 ),
             )
         },
         positiveButton = Triple("Login", ButtonStyles.secondaryButtonStyle()) {
-            val userId = UserHelper.getUserIdFromEmail(email)
+            val userId = UserHelper.getUserIdFromEmail(email.text)
             login(true, LoginEvent.SignInSuccess(userId))
         },
     )

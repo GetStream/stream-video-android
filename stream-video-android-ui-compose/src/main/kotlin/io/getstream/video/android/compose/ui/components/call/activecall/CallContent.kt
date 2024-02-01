@@ -188,7 +188,10 @@ public fun CallContent(
         Scaffold(
             modifier = modifier,
             contentColor = VideoTheme.colors.baseSheetPrimary,
-            topBar = { },
+            topBar = {
+                if (isShowingOverlayAppBar) {
+                    appBarContent.invoke(call)
+                }},
             bottomBar = {
                 if (orientation != ORIENTATION_LANDSCAPE) {
                     controlsContent.invoke(call)
@@ -196,7 +199,8 @@ public fun CallContent(
             },
             content = {
                 val paddings = PaddingValues(
-                    top = it.calculateTopPadding(),
+                    top = (it.calculateTopPadding() - VideoTheme.dimens.spacingS)
+                        .coerceAtLeast(0.dp),
                     start = it.calculateStartPadding(
                         layoutDirection = LocalLayoutDirection.current,
                     ),
@@ -229,10 +233,6 @@ public fun CallContent(
                     if (orientation == ORIENTATION_LANDSCAPE) {
                         controlsContent.invoke(call)
                     }
-                }
-
-                if (isShowingOverlayAppBar) {
-                    appBarContent.invoke(call)
                 }
 
                 if (enableDiagnostics && showDiagnostics) {

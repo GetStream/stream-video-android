@@ -34,6 +34,8 @@ import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.RadioButton
 import androidx.compose.material.RadioButtonDefaults
 import androidx.compose.material.Text
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Call
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -47,12 +49,15 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import io.getstream.video.android.compose.theme.VideoTheme
+import io.getstream.video.android.compose.theme.base.VideoTheme
 import io.getstream.video.android.compose.ui.components.avatar.UserAvatar
+import io.getstream.video.android.compose.ui.components.base.StreamButton
+import io.getstream.video.android.compose.ui.components.base.StreamIconButton
+import io.getstream.video.android.compose.ui.components.base.styling.StyleSize
 import io.getstream.video.android.core.R
+import io.getstream.video.android.mock.previewUsers
 import io.getstream.video.android.model.User
-import io.getstream.video.android.ui.theme.Colors
-import io.getstream.video.android.ui.theme.StreamImageButton
+import io.getstream.video.android.models.GoogleAccount
 
 @Composable
 fun DirectCallJoinScreen(
@@ -67,7 +72,7 @@ fun DirectCallJoinScreen(
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .background(Colors.background),
+                .background(VideoTheme.colors.baseSheetPrimary),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
             Header(user = uiState.currentUser)
@@ -93,6 +98,7 @@ private fun Header(user: User?) {
         Row {
             user?.let {
                 UserAvatar(
+                    textSize = StyleSize.XS,
                     modifier = Modifier.size(24.dp),
                     userName = it.userNameOrId,
                     userImage = it.image,
@@ -135,7 +141,7 @@ private fun Body(
                 modifier = Modifier
                     .size(50.dp)
                     .align(Alignment.Center),
-                color = VideoTheme.colors.primaryAccent,
+                color = VideoTheme.colors.brandPrimary,
             )
         } else {
             uiState.googleAccounts?.let { users ->
@@ -143,12 +149,15 @@ private fun Body(
                     entries = users,
                     onUserClick = { clickedIndex -> toggleUserSelection(clickedIndex) },
                 )
-                StreamImageButton( // Floating button
+                StreamButton(
+                    // Floating button
                     modifier = Modifier
                         .align(Alignment.BottomCenter)
                         .padding(bottom = 10.dp),
                     enabled = users.any { it.isSelected },
-                    imageRes = R.drawable.stream_video_ic_call,
+                    icon = Icons.Default.Call,
+                    text = "Start call",
+                    style = VideoTheme.styles.buttonStyles.secondaryButtonStyle(),
                     onClick = {
                         onStartCallClick(
                             users
@@ -206,6 +215,7 @@ private fun UserRow(
     ) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             UserAvatar(
+                textSize = StyleSize.M,
                 modifier = Modifier.size(50.dp),
                 userName = name,
                 userImage = avatarUrl,
@@ -222,7 +232,7 @@ private fun UserRow(
             modifier = Modifier.size(20.dp),
             onClick = null,
             colors = RadioButtonDefaults.colors(
-                selectedColor = VideoTheme.colors.primaryAccent,
+                selectedColor = VideoTheme.colors.basePrimary,
                 unselectedColor = Color.LightGray,
             ),
         )
@@ -234,5 +244,20 @@ private fun UserRow(
 private fun HeaderPreview() {
     VideoTheme {
         Header(user = User(name = "Very very very long user name here"))
+        Body(uiState = DirectCallUiState(googleAccounts =
+        previewUsers.map {
+            GoogleAccountUiState(
+                isSelected = false,
+                account = GoogleAccount(
+                    it.id,
+                    it.id,
+                    it.name,
+                    null,
+                    false
+                )
+            )
+        }), toggleUserSelection = {}) {
+
+        }
     }
 }

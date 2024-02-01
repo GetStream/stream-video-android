@@ -38,7 +38,7 @@ import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.IntSize
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import io.getstream.video.android.compose.theme.VideoTheme
+import io.getstream.video.android.compose.theme.base.VideoTheme
 import io.getstream.video.android.compose.ui.components.call.renderer.DefaultFloatingParticipantVideo
 import io.getstream.video.android.compose.ui.components.call.renderer.ParticipantVideo
 import io.getstream.video.android.compose.ui.components.call.renderer.RegularVideoRendererStyle
@@ -93,7 +93,7 @@ internal fun BoxScope.PortraitVideoRenderer(
         return
     }
 
-    val paddedModifier = modifier.padding(VideoTheme.dimens.participantsGridPadding)
+    val paddedModifier = modifier.padding(VideoTheme.dimens.spacingXXs)
     when (callParticipants.size) {
         1, 2 -> {
             val participant = if (remoteParticipants.isEmpty()) {
@@ -248,7 +248,7 @@ private fun PortraitParticipantsPreview1() {
         val participants = previewParticipantsList
 
         Box(
-            modifier = Modifier.background(color = VideoTheme.colors.appBackground),
+            modifier = Modifier.background(color = VideoTheme.colors.baseSheetPrimary),
         ) {
             PortraitVideoRenderer(
                 call = previewCall,
@@ -272,7 +272,7 @@ private fun PortraitParticipantsPreview2() {
         val participants = previewParticipantsList
 
         Box(
-            modifier = Modifier.background(color = VideoTheme.colors.appBackground),
+            modifier = Modifier.background(color = VideoTheme.colors.baseSheetPrimary),
         ) {
             PortraitVideoRenderer(
                 call = previewCall,
@@ -296,7 +296,7 @@ private fun PortraitParticipantsPreview3() {
         val participants = previewParticipantsList
 
         Box(
-            modifier = Modifier.background(color = VideoTheme.colors.appBackground),
+            modifier = Modifier.background(color = VideoTheme.colors.baseSheetPrimary),
         ) {
             PortraitVideoRenderer(
                 call = previewCall,
@@ -320,7 +320,7 @@ private fun PortraitParticipantsPreview4() {
         val participants = previewParticipantsList
 
         Box(
-            modifier = Modifier.background(color = VideoTheme.colors.appBackground),
+            modifier = Modifier.background(color = VideoTheme.colors.baseSheetPrimary),
         ) {
             PortraitVideoRenderer(
                 call = previewCall,
@@ -344,7 +344,7 @@ private fun PortraitParticipantsPreview5() {
         val participants = previewParticipantsList
 
         Box(
-            modifier = Modifier.background(color = VideoTheme.colors.appBackground),
+            modifier = Modifier.background(color = VideoTheme.colors.baseSheetPrimary),
         ) {
             PortraitVideoRenderer(
                 call = previewCall,
@@ -368,7 +368,7 @@ private fun PortraitParticipantsPreview6() {
         val participants = previewParticipantsList
 
         Box(
-            modifier = Modifier.background(color = VideoTheme.colors.appBackground),
+            modifier = Modifier.background(color = VideoTheme.colors.baseSheetPrimary),
         ) {
             PortraitVideoRenderer(
                 call = previewCall,
@@ -392,7 +392,7 @@ private fun PortraitParticipantsPreview7() {
         val participants = previewParticipantsList
 
         Box(
-            modifier = Modifier.background(color = VideoTheme.colors.appBackground),
+            modifier = Modifier.background(color = VideoTheme.colors.baseSheetPrimary),
         ) {
             PortraitVideoRenderer(
                 call = previewCall,

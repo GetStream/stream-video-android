@@ -34,7 +34,7 @@ import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import io.getstream.video.android.compose.theme.VideoTheme
+import io.getstream.video.android.compose.theme.base.VideoTheme
 import io.getstream.video.android.compose.ui.components.call.renderer.ParticipantVideo
 import io.getstream.video.android.compose.ui.components.call.renderer.ScreenSharingVideoRendererStyle
 import io.getstream.video.android.compose.ui.components.call.renderer.VideoRendererStyle
@@ -86,11 +86,11 @@ internal fun LandscapeScreenSharingVideoRenderer(
     ) {
         Box(
             modifier = Modifier
-                .padding(VideoTheme.dimens.participantsGridPadding)
+                .padding(VideoTheme.dimens.spacingXs)
                 .clip(RoundedCornerShape(16.dp))
                 .fillMaxWidth()
                 .weight(0.65f)
-                .background(VideoTheme.colors.screenSharingBackground),
+                .background(VideoTheme.colors.baseSheetSecondary),
         ) {
             ScreenShareVideoRenderer(
                 modifier = Modifier.fillMaxSize(),
@@ -118,41 +118,8 @@ internal fun LandscapeScreenSharingVideoRenderer(
     }
 }
 
-@Preview(
-    device = Devices.AUTOMOTIVE_1024p,
-    widthDp = 1440,
-    heightDp = 720,
-)
-@Preview(
-    uiMode = Configuration.UI_MODE_NIGHT_YES,
-    device = Devices.AUTOMOTIVE_1024p,
-    widthDp = 1440,
-    heightDp = 720,
-)
-@Composable
-private fun LandscapeScreenSharingContentPreview() {
-    StreamPreviewDataUtils.initializeStreamVideo(LocalContext.current)
-    VideoTheme {
-        LandscapeScreenSharingVideoRenderer(
-            call = previewCall,
-            session = ScreenSharingSession(
-                participant = previewParticipantsList[1],
-            ),
-            participants = previewParticipantsList,
-            dominantSpeaker = previewParticipantsList[1],
-            modifier = Modifier.fillMaxSize(),
-        )
-    }
-}
 
 @Preview(
-    device = Devices.AUTOMOTIVE_1024p,
-    widthDp = 1440,
-    heightDp = 720,
-)
-@Preview(
-    uiMode = Configuration.UI_MODE_NIGHT_YES,
-    device = Devices.AUTOMOTIVE_1024p,
     widthDp = 1440,
     heightDp = 720,
 )

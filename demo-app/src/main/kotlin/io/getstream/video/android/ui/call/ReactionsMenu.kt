@@ -18,30 +18,27 @@
 
 package io.getstream.video.android.ui.call
 
-import android.content.res.Configuration
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.requiredHeight
+import androidx.compose.foundation.layout.requiredWidth
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.Card
-import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.window.Dialog
-import io.getstream.video.android.compose.theme.VideoTheme
+import io.getstream.video.android.compose.theme.base.VideoTheme
+import io.getstream.video.android.compose.ui.components.base.StreamButton
+import io.getstream.video.android.compose.ui.components.base.styling.StyleSize
 import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.mapper.ReactionMapper
 import io.getstream.video.android.mock.StreamPreviewDataUtils
@@ -88,78 +85,60 @@ internal fun ReactionsMenu(
     onDismiss: () -> Unit,
 ) {
     val scope = rememberCoroutineScope()
-    val modifier = Modifier
-        .background(
-            color = VideoTheme.colors.barsBackground,
-            shape = RoundedCornerShape(2.dp),
-        )
-        .wrapContentWidth()
     val onEmojiSelected: (emoji: String) -> Unit = {
         sendReaction(scope, call, it, onDismiss)
     }
-
-    Dialog(onDismiss) {
-        Card(
-            modifier = modifier.wrapContentWidth(),
-            backgroundColor = VideoTheme.colors.barsBackground,
+    Column(Modifier.fillMaxWidth()) {
+        FlowRow(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            maxItemsInEachRow = 5,
+            verticalArrangement = Arrangement.Center,
         ) {
-            Column(Modifier.padding(16.dp)) {
-                Row(horizontalArrangement = Arrangement.Center) {
-                    ReactionItem(
-                        modifier = Modifier
-                            .background(
-                                color = VideoTheme.colors.appBackground,
-                                shape = RoundedCornerShape(2.dp),
-                            )
-                            .fillMaxWidth(),
-                        textModifier = Modifier.fillMaxWidth(),
-                        reactionMapper = reactionMapper,
-                        reaction = DefaultReactionsMenuData.mainReaction,
-                        onEmojiSelected = onEmojiSelected,
-                    )
-                }
-                FlowRow(
-                    horizontalArrangement = Arrangement.Center,
-                    maxItemsInEachRow = 3,
-                    verticalArrangement = Arrangement.Center,
-                ) {
-                    DefaultReactionsMenuData.defaultReactions.forEach {
-                        ReactionItem(
-                            modifier = modifier,
-                            reactionMapper = reactionMapper,
-                            onEmojiSelected = onEmojiSelected,
-                            reaction = it,
-                        )
-                    }
-                }
+            DefaultReactionsMenuData.defaultReactions.forEach {
+                ReactionItem(
+                    reactionMapper = reactionMapper,
+                    onEmojiSelected = onEmojiSelected,
+                    reaction = it,
+                )
             }
+        }
+
+        Row(horizontalArrangement = Arrangement.Center) {
+            ReactionItem(
+                showText = true,
+                reactionMapper = reactionMapper,
+                reaction = DefaultReactionsMenuData.mainReaction,
+                onEmojiSelected = onEmojiSelected,
+            )
         }
     }
 }
 
 @Composable
 private fun ReactionItem(
-    modifier: Modifier = Modifier,
-    textModifier: Modifier = Modifier,
     reactionMapper: ReactionMapper,
     reaction: ReactionItemData,
+    showText: Boolean = false,
     onEmojiSelected: (emoji: String) -> Unit,
 ) {
     val mappedEmoji = reactionMapper.map(reaction.emojiCode)
-    Box(
-        modifier = modifier
-            .clickable {
-                onEmojiSelected(reaction.emojiCode)
-            }
-            .padding(2.dp),
-    ) {
-        Text(
-            textAlign = TextAlign.Center,
-            modifier = textModifier.padding(12.dp),
-            text = "$mappedEmoji ${reaction.displayText}",
-            color = VideoTheme.colors.textHighEmphasis,
-        )
+    val text = if (showText) {
+        "$mappedEmoji ${reaction.displayText}"
+    } else {
+        mappedEmoji
     }
+    val modifier = if (showText) {
+        Modifier.fillMaxWidth()
+    } else {
+        Modifier
+            .requiredWidth(VideoTheme.dimens.componentHeightL)
+            .requiredHeight(VideoTheme.dimens.componentHeightL)
+    }
+    StreamButton(modifier = modifier,
+        style = VideoTheme.styles.buttonStyles.primaryIconButtonStyle(StyleSize.S),
+        text = text,
+        onClick = { onEmojiSelected(reaction.emojiCode) })
 }
 
 private fun sendReaction(scope: CoroutineScope, call: Call, emoji: String, onDismiss: () -> Unit) {
@@ -169,26 +148,8 @@ private fun sendReaction(scope: CoroutineScope, call: Call, emoji: String, onDis
     }
 }
 
-@Preview(showBackground = true)
-@Preview(showBackground = true, uiMode = Configuration.UI_MODE_NIGHT_YES)
-@Composable
-private fun ReactionItemPreview() {
-    StreamPreviewDataUtils.initializeStreamVideo(LocalContext.current)
-    VideoTheme {
-        Box(modifier = Modifier.background(VideoTheme.colors.appBackground)) {
-            ReactionItem(
-                reactionMapper = ReactionMapper.defaultReactionMapper(),
-                onEmojiSelected = {
-                    // Ignore
-                },
-                reaction = DefaultReactionsMenuData.mainReaction,
-            )
-        }
-    }
-}
 
 @Preview
-@Preview(uiMode = Configuration.UI_MODE_NIGHT_YES)
 @Composable
 private fun ReactionMenuPreview() {
     VideoTheme {

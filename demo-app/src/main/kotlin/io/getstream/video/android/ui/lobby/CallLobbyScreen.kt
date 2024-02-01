@@ -63,8 +63,9 @@ import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import io.getstream.video.android.BuildConfig
 import io.getstream.video.android.R
-import io.getstream.video.android.compose.theme.VideoTheme
+import io.getstream.video.android.compose.theme.base.VideoTheme
 import io.getstream.video.android.compose.ui.components.avatar.UserAvatar
+import io.getstream.video.android.compose.ui.components.base.StreamButton
 import io.getstream.video.android.compose.ui.components.call.lobby.CallLobby
 import io.getstream.video.android.core.call.state.ToggleCamera
 import io.getstream.video.android.core.call.state.ToggleMicrophone
@@ -72,8 +73,6 @@ import io.getstream.video.android.datastore.delegate.StreamUserDataStore
 import io.getstream.video.android.mock.StreamPreviewDataUtils
 import io.getstream.video.android.tooling.util.StreamFlavors
 import io.getstream.video.android.ui.call.CallActivity
-import io.getstream.video.android.ui.theme.Colors
-import io.getstream.video.android.ui.theme.StreamButton
 import kotlinx.coroutines.delay
 
 @Composable
@@ -87,7 +86,7 @@ fun CallLobbyScreen(
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .background(Colors.background)
+                .background(VideoTheme.colors.baseSheetPrimary)
                 .testTag("call_lobby"),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
@@ -108,7 +107,7 @@ fun CallLobbyScreen(
         if (isLoading) {
             CircularProgressIndicator(
                 modifier = Modifier.align(Alignment.Center),
-                color = VideoTheme.colors.primaryAccent,
+                color = VideoTheme.colors.brandPrimary,
             )
         }
     }
@@ -182,7 +181,7 @@ private fun CallLobbyBody(
     Column(
         modifier = modifier
             .fillMaxSize()
-            .background(Colors.background)
+            .background(VideoTheme.colors.baseSheetPrimary)
             .semantics { testTagsAsResourceId = true },
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -200,7 +199,7 @@ private fun CallLobbyBody(
         Text(
             modifier = Modifier.padding(horizontal = 30.dp),
             text = stringResource(id = R.string.call_lobby_description),
-            color = Colors.description,
+            color = VideoTheme.colors.brandPrimary,
             textAlign = TextAlign.Center,
             fontSize = 17.sp,
         )
@@ -256,7 +255,7 @@ private fun LobbyDescription(
         modifier = Modifier
             .padding(horizontal = 35.dp)
             .background(
-                color = VideoTheme.colors.callLobbyBackground,
+                color = VideoTheme.colors.baseSheetPrimary,
                 shape = RoundedCornerShape(16.dp),
             ),
     ) {

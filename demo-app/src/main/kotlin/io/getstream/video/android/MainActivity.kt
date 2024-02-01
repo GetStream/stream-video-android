@@ -63,14 +63,7 @@ class MainActivity : ComponentActivity() {
             val isLoggedIn = dataStore.user.firstOrNull() != null
 
             setContent {
-                if (!isLoggedIn) {
-                    VideoTheme {
-                        AppNavHost(
-                            startDestination = AppScreens.Login.routeWithArg(false),
-                        )
-                    }
-                }
-                io.getstream.video.android.compose.theme.VideoTheme {
+                VideoTheme {
                     AppNavHost(
                         startDestination = if (!isLoggedIn) {
                             AppScreens.Login.routeWithArg(true) // Pass true for autoLogIn

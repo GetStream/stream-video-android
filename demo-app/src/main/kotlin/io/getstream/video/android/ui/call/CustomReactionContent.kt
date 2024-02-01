@@ -30,7 +30,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import io.getstream.video.android.compose.theme.VideoTheme
+import io.getstream.video.android.compose.theme.base.VideoTheme
 import io.getstream.video.android.compose.ui.components.call.renderer.VideoRendererStyle
 import io.getstream.video.android.core.ParticipantState
 import io.getstream.video.android.core.model.Reaction
@@ -88,7 +88,7 @@ fun BoxScope.CustomReactionContent(
                     modifier = Modifier
                         .padding(top = maxHeight * 0.10f)
                         .align(style.reactionPosition),
-                    fontSize = VideoTheme.dimens.reactionSize.value.sp,
+                    fontSize = VideoTheme.dimens.componentHeightM.value.sp,
                 )
             }
         }

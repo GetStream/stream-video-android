@@ -169,12 +169,12 @@ public fun ParticipantVideo(
         modifier.border(
             border = if (style.isScreenSharing) {
                 BorderStroke(
-                    VideoTheme.dimens.genericXs,
+                    VideoTheme.dimens.genericXXs,
                     VideoTheme.colors.brandPrimary,
                 )
             } else {
                 BorderStroke(
-                    VideoTheme.dimens.genericXs,
+                    VideoTheme.dimens.genericXXs,
                     VideoTheme.colors.brandPrimary,
                 )
             },

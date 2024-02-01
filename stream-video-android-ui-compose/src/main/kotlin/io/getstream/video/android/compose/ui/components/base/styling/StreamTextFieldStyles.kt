@@ -39,7 +39,7 @@ public open class TextFieldStyleProvider {
 
     @Composable
     public fun defaultTextField(
-        styleSize: StyleSize = StyleSize.L,
+        styleSize: StyleSize = StyleSize.S,
         textStyle: StreamTextStyle = StreamTextStyles.defaultTextField(styleSize),
         placeholderStyle: StreamTextStyle = StreamTextStyles.defaultSubtitle(styleSize),
         iconStyle: StreamIconStyle = IconStyles.defaultIconStyle(),

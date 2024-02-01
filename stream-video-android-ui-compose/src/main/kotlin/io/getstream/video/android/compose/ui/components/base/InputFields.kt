@@ -87,7 +87,7 @@ public fun StreamTextField(
     onValueChange: (TextFieldValue) -> Unit,
     enabled: Boolean = true,
     readOnly: Boolean = false,
-    style: TextFieldStyle,
+    style: TextFieldStyle = VideoTheme.styles.textFieldStyles.defaultTextField(),
     placeholder: String? = null,
     error: Boolean = false,
     maxLines: Int = 1,

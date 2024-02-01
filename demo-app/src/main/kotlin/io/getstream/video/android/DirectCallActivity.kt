@@ -28,7 +28,7 @@ import androidx.compose.ui.Modifier
 import androidx.lifecycle.lifecycleScope
 import dagger.hilt.android.AndroidEntryPoint
 import io.getstream.result.Result
-import io.getstream.video.android.compose.theme.VideoTheme
+import io.getstream.video.android.compose.theme.base.VideoTheme
 import io.getstream.video.android.compose.ui.components.call.ringing.RingingCallContent
 import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.StreamVideo
@@ -143,7 +143,7 @@ class DirectCallActivity : ComponentActivity() {
                     }
 
                     RingingCallContent(
-                        modifier = Modifier.background(color = VideoTheme.colors.appBackground),
+                        modifier = Modifier.background(color = VideoTheme.colors.baseSheetPrimary),
                         call = call,
                         onBackPressed = {
                             reject(call)

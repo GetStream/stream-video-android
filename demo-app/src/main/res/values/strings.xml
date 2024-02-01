@@ -46,6 +46,7 @@
     <string name="are_you_sure_sign_out">Are you sure you want to sign out?</string>
     <string name="cancel">Cancel</string>
     <string name="scan_qr_code_to_enter">To continue into the call\nScan the QR Code</string>
+    <string name="scan_qr_code">Scan QR Code</string>
     <string name="stream_video_tooling_restart_app">Restart App</string>
     <string name="stream_video_tooling_exception_log">Error Log</string>
     <string name="stream_video_tooling_copy_into_clipboard">Log messages copied to clipboard!</string>

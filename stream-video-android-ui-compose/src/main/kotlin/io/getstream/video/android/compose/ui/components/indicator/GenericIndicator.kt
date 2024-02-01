@@ -43,10 +43,8 @@ internal fun GenericIndicator(
 ) {
     val alphaColor = backgroundColor.copy(alpha = 0.3f)
     Box(
-        modifier = modifier.size(VideoTheme.dimens.componentHeightL),
+        modifier = modifier.size(VideoTheme.dimens.componentHeightM),
     ) {
-        val backgroundModifier = modifier
-            .matchParentSize()
 
         // Ensure content is center aligned and padded
         Box(

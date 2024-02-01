@@ -36,16 +36,26 @@ import androidx.compose.material.Card
 import androidx.compose.material.Icon
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.AutoAwesome
+import androidx.compose.material.icons.filled.GridView
+import androidx.compose.material.icons.filled.Square
 import androidx.compose.material.icons.rounded.AutoAwesome
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Alignment.Companion.CenterHorizontally
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.vectorResource
+import androidx.compose.ui.state.ToggleableState
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
-import io.getstream.video.android.compose.theme.VideoTheme
+import androidx.compose.ui.window.Popup
+import io.getstream.video.android.R
+import io.getstream.video.android.compose.theme.base.VideoTheme
+import io.getstream.video.android.compose.ui.components.base.StreamToggleButton
 import io.getstream.video.android.compose.ui.components.call.renderer.LayoutType
 import io.getstream.video.android.mock.StreamPreviewDataUtils
 
@@ -72,157 +82,32 @@ internal fun LayoutChooser(
     onLayoutChoice: (LayoutType) -> Unit,
     onDismiss: () -> Unit,
 ) {
-    Dialog(onDismiss) {
-        Row(Modifier.background(VideoTheme.colors.appBackground)) {
-            layouts.forEach {
-                LayoutItem(
-                    current = current,
-                    item = it,
-                    onClicked = onLayoutChoice,
-                )
-            }
-        }
-    }
-}
+    Popup(onDismissRequest = onDismiss) {
+        Column(Modifier.background(VideoTheme.colors.baseSheetPrimary)) {
+            layouts.forEach { layout ->
 
-@Composable
-private fun LayoutItem(
-    modifier: Modifier = Modifier,
-    current: LayoutType,
-    item: LayoutChooserDataItem,
-    onClicked: (LayoutType) -> Unit = {},
-) {
-    val border =
-        if (current == item.which) BorderStroke(2.dp, VideoTheme.colors.primaryAccent) else null
-    Card(
-        modifier = modifier
-            .clickable { onClicked(item.which) }
-            .padding(12.dp),
-        backgroundColor = VideoTheme.colors.appBackground,
-        elevation = 3.dp,
-        border = border,
-    ) {
-        Column {
-            Box(
-                modifier = Modifier
-                    .size(84.dp, 84.dp)
-                    .padding(2.dp),
-            ) {
-                when (item.which) {
-                    LayoutType.DYNAMIC -> {
-                        DynamicRepresentation()
-                    }
-
-                    LayoutType.SPOTLIGHT -> {
-                        SpotlightRepresentation()
-                    }
-
-                    LayoutType.GRID -> {
-                        GridRepresentation()
-                    }
+                val state = ToggleableState(layout.which == current)
+                val icon = when (layout.which) {
+                    LayoutType.DYNAMIC -> Icons.Default.AutoAwesome
+                    LayoutType.SPOTLIGHT -> ImageVector.vectorResource(R.drawable.ic_layout_spotlight)
+                    LayoutType.GRID -> ImageVector.vectorResource(R.drawable.ic_layout_grid)
                 }
-            }
-            Text(
-                modifier = Modifier
-                    .align(CenterHorizontally)
-                    .padding(12.dp),
-                textAlign = TextAlign.Center,
-                text = item.text,
-                color = VideoTheme.colors.textHighEmphasis,
-            )
-        }
-    }
-}
-
-@Composable
-private fun DynamicRepresentation() {
-    Column {
-        Card(
-            modifier = Modifier
-                .weight(2f)
-                .fillMaxWidth()
-                .padding(2.dp),
-            backgroundColor = VideoTheme.colors.participantContainerBackground,
-        ) {
-        }
-
-        Row(modifier = Modifier.weight(1f)) {
-            Card(
-                modifier = Modifier
-                    .fillMaxHeight()
-                    .weight(1f)
-                    .padding(2.dp),
-                backgroundColor = VideoTheme.colors.participantContainerBackground,
-            ) {
-            }
-            Card(
-                backgroundColor = VideoTheme.colors.appBackground,
-                modifier = Modifier
-                    .fillMaxHeight()
-                    .weight(1f)
-                    .padding(2.dp),
-            ) {
-                Icon(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(2.dp),
-                    tint = VideoTheme.colors.participantContainerBackground,
-                    imageVector = Icons.Rounded.AutoAwesome,
-                    contentDescription = "dynamic",
-                )
-            }
-        }
-    }
-}
-
-@Composable
-private fun GridRepresentation() {
-    Column {
-        repeat(3) {
-            Row {
-                repeat(3) {
-                    Card(
-                        modifier = Modifier
-                            .aspectRatio(1f)
-                            .weight(1f)
-                            .padding(2.dp),
-                        backgroundColor = VideoTheme.colors.participantContainerBackground,
-                    ) {
-                    }
-                }
-            }
-        }
-    }
-}
-
-@Composable
-private fun SpotlightRepresentation() {
-    Column {
-        Card(
-            modifier = Modifier
-                .weight(2f)
-                .fillMaxWidth()
-                .padding(2.dp),
-            backgroundColor = VideoTheme.colors.participantContainerBackground,
-        ) {
-        }
-
-        Row(modifier = Modifier.weight(1f)) {
-            repeat(3) {
-                Card(
-                    modifier = Modifier
-                        .fillMaxHeight()
-                        .weight(1f)
-                        .padding(2.dp),
-                    backgroundColor = VideoTheme.colors.participantContainerBackground,
+                StreamToggleButton(
+                    onText = layout.text,
+                    offText = layout.text,
+                    toggleState = rememberUpdatedState(newValue = state),
+                    onIcon = icon,
+                    onStyle = VideoTheme.styles.buttonStyles.toggleButtonStyleOn(),
+                    offStyle = VideoTheme.styles.buttonStyles.toggleButtonStyleOff(),
                 ) {
+                    onLayoutChoice(layout.which)
                 }
             }
         }
     }
 }
 
-@Preview(showBackground = true)
+@Preview
 @Composable
 private fun LayoutChooserPreview() {
     StreamPreviewDataUtils.initializeStreamVideo(LocalContext.current)
@@ -235,87 +120,27 @@ private fun LayoutChooserPreview() {
     }
 }
 
-@Preview(showBackground = true, uiMode = Configuration.UI_MODE_NIGHT_YES)
+@Preview
 @Composable
-private fun LayoutChooserPreviewDark() {
+private fun LayoutChooserPreview2() {
     StreamPreviewDataUtils.initializeStreamVideo(LocalContext.current)
     VideoTheme {
         LayoutChooser(
-            current = LayoutType.GRID,
+            current = LayoutType.SPOTLIGHT,
             onLayoutChoice = {},
             onDismiss = {},
         )
     }
 }
-
-@Preview(showBackground = true)
+@Preview
 @Composable
-private fun GridItemPreview() {
+private fun LayoutChooserPreview3() {
     StreamPreviewDataUtils.initializeStreamVideo(LocalContext.current)
     VideoTheme {
-        LayoutItem(
-            current = LayoutType.GRID,
-            item = layouts[2],
-        )
-    }
-}
-
-@Preview(showBackground = true, uiMode = Configuration.UI_MODE_NIGHT_YES)
-@Composable
-private fun GridItemPreviewDark() {
-    StreamPreviewDataUtils.initializeStreamVideo(LocalContext.current)
-    VideoTheme {
-        LayoutItem(
-            current = LayoutType.GRID,
-            item = layouts[2],
-        )
-    }
-}
-
-@Preview(showBackground = true)
-@Composable
-private fun SpotlightItemPreview() {
-    StreamPreviewDataUtils.initializeStreamVideo(LocalContext.current)
-    VideoTheme {
-        LayoutItem(
-            current = LayoutType.GRID,
-            item = layouts[1],
-        )
-    }
-}
-
-@Preview(showBackground = true, uiMode = Configuration.UI_MODE_NIGHT_YES)
-@Composable
-private fun SpotlightItemPreviewDark() {
-    StreamPreviewDataUtils.initializeStreamVideo(LocalContext.current)
-    VideoTheme {
-        LayoutItem(
-            current = LayoutType.GRID,
-            item = layouts[1],
-        )
-    }
-}
-
-@Preview(showBackground = true)
-@Composable
-private fun DynamicItemPreview() {
-    StreamPreviewDataUtils.initializeStreamVideo(LocalContext.current)
-    VideoTheme {
-        LayoutItem(
-            current = LayoutType.GRID,
-            item = layouts[0],
-        )
-    }
-}
-
-@Preview(showBackground = true, uiMode = Configuration.UI_MODE_NIGHT_YES)
-@Composable
-private fun DynamicItemPreviewDark() {
-    StreamPreviewDataUtils.initializeStreamVideo(LocalContext.current)
-    VideoTheme {
-        LayoutItem(
-            current = LayoutType.GRID,
-            item = layouts[0],
+        LayoutChooser(
+            current = LayoutType.DYNAMIC,
+            onLayoutChoice = {},
+            onDismiss = {},
         )
     }
 }

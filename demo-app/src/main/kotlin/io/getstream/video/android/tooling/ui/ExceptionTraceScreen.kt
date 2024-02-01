@@ -47,7 +47,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import io.getstream.video.android.R
-import io.getstream.video.android.compose.theme.VideoTheme
+import io.getstream.video.android.compose.theme.base.VideoTheme
+import io.getstream.video.android.compose.ui.components.base.StreamButton
 import io.getstream.video.android.tooling.extensions.toast
 
 @Composable
@@ -55,13 +56,15 @@ internal fun ExceptionTraceScreen(packageName: String, message: String) {
     val scrollState = rememberScrollState()
     Column(
         modifier =
-        Modifier.verticalScroll(scrollState)
-            .background(VideoTheme.colors.appBackground)
+        Modifier
+            .verticalScroll(scrollState)
+            .background(VideoTheme.colors.baseSheetPrimary)
             .padding(16.dp),
     ) {
         val context: Context = LocalContext.current
-        StreamPrimaryButton(
-            text = R.string.stream_video_tooling_restart_app,
+        StreamButton(
+            style = VideoTheme.styles.buttonStyles.secondaryButtonStyle(),
+            text = stringResource(id = R.string.stream_video_tooling_restart_app),
             onClick = {
                 val mainActivity = Class.forName(packageName)
                 context.startActivity(Intent(context, mainActivity))
@@ -72,7 +75,7 @@ internal fun ExceptionTraceScreen(packageName: String, message: String) {
             Text(
                 modifier = Modifier.align(Alignment.CenterStart),
                 text = stringResource(id = R.string.stream_video_tooling_exception_log),
-                color = VideoTheme.colors.primaryAccent,
+                color = VideoTheme.colors.basePrimary,
                 fontWeight = FontWeight.Bold,
                 fontSize = 16.sp,
             )
@@ -80,12 +83,14 @@ internal fun ExceptionTraceScreen(packageName: String, message: String) {
             val clipboardManager: ClipboardManager = LocalClipboardManager.current
             Icon(
                 modifier =
-                Modifier.align(Alignment.CenterEnd).clickable {
-                    clipboardManager.setText(AnnotatedString(message))
-                    context.toast(R.string.stream_video_tooling_copy_into_clipboard)
-                },
+                Modifier
+                    .align(Alignment.CenterEnd)
+                    .clickable {
+                        clipboardManager.setText(AnnotatedString(message))
+                        context.toast(R.string.stream_video_tooling_copy_into_clipboard)
+                    },
                 imageVector = Icons.Filled.ContentCopy,
-                tint = VideoTheme.colors.textHighEmphasis,
+                tint = VideoTheme.colors.basePrimary,
                 contentDescription = null,
             )
         }
@@ -94,13 +99,14 @@ internal fun ExceptionTraceScreen(packageName: String, message: String) {
 
         Text(
             modifier =
-            Modifier.border(
-                border = BorderStroke(2.dp, VideoTheme.colors.primaryAccent),
-                shape = RoundedCornerShape(6.dp),
-            )
+            Modifier
+                .border(
+                    border = BorderStroke(2.dp, VideoTheme.colors.brandPrimary),
+                    shape = RoundedCornerShape(6.dp),
+                )
                 .padding(12.dp),
             text = message,
-            color = VideoTheme.colors.textHighEmphasis,
+            color = VideoTheme.colors.basePrimary,
             fontSize = 14.sp,
         )
     }

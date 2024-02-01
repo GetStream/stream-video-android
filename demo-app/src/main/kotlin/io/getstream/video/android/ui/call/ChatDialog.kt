@@ -43,6 +43,7 @@ import io.getstream.chat.android.compose.ui.theme.ChatTheme
 import io.getstream.chat.android.compose.viewmodel.messages.MessageListViewModel
 import io.getstream.chat.android.compose.viewmodel.messages.MessagesViewModelFactory
 import io.getstream.chat.android.ui.common.state.messages.list.MessageItemState
+import io.getstream.video.android.compose.theme.base.VideoTheme
 import io.getstream.video.android.core.Call
 import io.getstream.video.android.ui.common.R
 import java.time.Instant
@@ -102,6 +103,7 @@ internal fun ChatDialog(
             modifier = Modifier.fillMaxWidth(),
             sheetShape = RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp),
             sheetState = state,
+            sheetBackgroundColor = VideoTheme.colors.baseSheetPrimary,
             sheetContent = {
                 if (state.isVisible) {
                     Column(

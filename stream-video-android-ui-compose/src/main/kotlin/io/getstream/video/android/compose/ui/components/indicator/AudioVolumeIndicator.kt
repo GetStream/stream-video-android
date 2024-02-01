@@ -45,7 +45,7 @@ public fun AudioVolumeIndicator(
     audioLevels: Float,
     color: Color = VideoTheme.colors.brandPrimary,
 ) {
-    val defaultBarHeight = 0.23f
+    val defaultBarHeight = 0.1f
     Row(
         modifier = modifier
             .height(height = VideoTheme.dimens.componentHeightS)
