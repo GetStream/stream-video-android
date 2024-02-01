@@ -98,7 +98,9 @@ internal fun SettingsMenu(
             scope.launch {
                 val mediaProjectionManager =
                     context.getSystemService(MediaProjectionManager::class.java)
-                screenSharePermissionResult.launch(mediaProjectionManager.createScreenCaptureIntent())
+                screenSharePermissionResult.launch(
+                    mediaProjectionManager.createScreenCaptureIntent(),
+                )
             }
         } else {
             call.stopScreenSharing()
@@ -130,7 +132,10 @@ internal fun SettingsMenu(
         if (call.audioFilter == null) {
             call.audioFilter = object : AudioFilter {
                 override fun filter(
-                    audioFormat: Int, channelCount: Int, sampleRate: Int, sampleData: ByteBuffer
+                    audioFormat: Int,
+                    channelCount: Int,
+                    sampleRate: Int,
+                    sampleData: ByteBuffer,
                 ) {
                     SampleAudioFilter.toRoboticVoice(sampleData, channelCount, 0.8f)
                 }
@@ -178,7 +183,6 @@ internal fun SettingsMenu(
         isBackgroundBlurEnabled = isBackgroundBlurEnabled,
         onDismissed = onDismissed,
     ) {
-
     }
 }
 
@@ -199,9 +203,10 @@ fun SettingsMenuItems(
     reactionsMenu: @Composable () -> Unit,
 ) {
     Popup(
-        onDismissRequest = { onDismissed.invoke() }, properties = PopupProperties(
-            usePlatformDefaultWidth = false
-        )
+        onDismissRequest = { onDismissed.invoke() },
+        properties = PopupProperties(
+            usePlatformDefaultWidth = false,
+        ),
     ) {
         Column(
             modifier = Modifier
@@ -209,54 +214,52 @@ fun SettingsMenuItems(
                 .background(VideoTheme.colors.baseSheetPrimary)
                 .padding(12.dp),
         ) {
-
             reactionsMenu()
             Spacer(modifier = Modifier.size(VideoTheme.dimens.spacingM))
 
             MenuEntry(
                 icon = R.drawable.stream_video_ic_screensharing,
                 label = "Toggle screen-sharing",
-                onClick = onScreenShareClick
+                onClick = onScreenShareClick,
             )
             MenuEntry(
                 icon = io.getstream.video.android.R.drawable.ic_mic,
                 label = "Switch Microphone",
-                onClick = onSwitchMicrophoneClick
+                onClick = onSwitchMicrophoneClick,
             )
             MenuEntry(
                 icon = if (isBackgroundBlurEnabled) io.getstream.video.android.R.drawable.ic_blur_off else io.getstream.video.android.R.drawable.ic_blur_on,
                 label = if (isBackgroundBlurEnabled) "Disable background blur" else "Enable background blur (beta)",
-                onClick = onToggleBackgroundBlurClick
+                onClick = onToggleBackgroundBlurClick,
             )
             if (showDebugOptions) {
                 MenuEntry(
                     icon = R.drawable.stream_video_ic_fullscreen_exit,
                     label = "Toggle audio filter",
-                    onClick = onToggleAudioFilterClick
+                    onClick = onToggleAudioFilterClick,
                 )
                 MenuEntry(
                     icon = R.drawable.stream_video_ic_fullscreen_exit,
                     label = "Restart Subscriber Ice",
-                    onClick = onRestartSubscriberIceClick
+                    onClick = onRestartSubscriberIceClick,
                 )
                 MenuEntry(
                     icon = R.drawable.stream_video_ic_fullscreen_exit,
                     label = "Restart Publisher Ice",
-                    onClick = onRestartPublisherIceClick
+                    onClick = onRestartPublisherIceClick,
                 )
                 MenuEntry(
                     icon = R.drawable.stream_video_ic_fullscreen_exit,
                     label = "Kill SFU WS",
-                    onClick = onKillSfuWsClick
+                    onClick = onKillSfuWsClick,
                 )
                 MenuEntry(
                     icon = R.drawable.stream_video_ic_fullscreen,
                     label = "Switch SFU",
-                    onClick = onSwitchSfuClick
+                    onClick = onSwitchSfuClick,
                 )
             }
         }
-
     }
 }
 
@@ -270,8 +273,10 @@ private fun MenuEntry(
     offText = label,
     onIcon = ImageVector.vectorResource(icon),
     onStyle = VideoTheme.styles.buttonStyles.toggleButtonStyleOn(StyleSize.XS).copy(
-        iconStyle = VideoTheme.styles.iconStyles.customColorIconStyle(color = VideoTheme.colors.basePrimary)
-    )
+        iconStyle = VideoTheme.styles.iconStyles.customColorIconStyle(
+            color = VideoTheme.colors.basePrimary,
+        ),
+    ),
 ) { onClick() }
 
 @Preview
@@ -293,9 +298,9 @@ private fun SettingsPreview() {
             isBackgroundBlurEnabled = true,
         ) {
             ReactionsMenu(
-                call = previewCall, reactionMapper = ReactionMapper.defaultReactionMapper()
+                call = previewCall,
+                reactionMapper = ReactionMapper.defaultReactionMapper(),
             ) {
-
             }
         }
     }

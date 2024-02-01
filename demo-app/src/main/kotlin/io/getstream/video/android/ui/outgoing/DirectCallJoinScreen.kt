@@ -52,7 +52,6 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.getstream.video.android.compose.theme.base.VideoTheme
 import io.getstream.video.android.compose.ui.components.avatar.UserAvatar
 import io.getstream.video.android.compose.ui.components.base.StreamButton
-import io.getstream.video.android.compose.ui.components.base.StreamIconButton
 import io.getstream.video.android.compose.ui.components.base.styling.StyleSize
 import io.getstream.video.android.core.R
 import io.getstream.video.android.mock.previewUsers
@@ -244,20 +243,24 @@ private fun UserRow(
 private fun HeaderPreview() {
     VideoTheme {
         Header(user = User(name = "Very very very long user name here"))
-        Body(uiState = DirectCallUiState(googleAccounts =
-        previewUsers.map {
-            GoogleAccountUiState(
-                isSelected = false,
-                account = GoogleAccount(
-                    it.id,
-                    it.id,
-                    it.name,
-                    null,
-                    false
-                )
-            )
-        }), toggleUserSelection = {}) {
-
+        Body(
+            uiState = DirectCallUiState(
+                googleAccounts =
+                previewUsers.map {
+                    GoogleAccountUiState(
+                        isSelected = false,
+                        account = GoogleAccount(
+                            it.id,
+                            it.id,
+                            it.name,
+                            null,
+                            false,
+                        ),
+                    )
+                },
+            ),
+            toggleUserSelection = {},
+        ) {
         }
     }
 }

@@ -199,7 +199,7 @@ private fun CallJoinHeader(
             .padding(VideoTheme.dimens.spacingM)
             .fillMaxWidth(),
         verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.SpaceAround
+        horizontalArrangement = Arrangement.SpaceAround,
     ) {
         user?.let {
             Box(
@@ -245,14 +245,14 @@ private fun CallJoinHeader(
                     val buttonBounds = coordinates.boundsInParent()
                     popupPosition = IntOffset(
                         x = buttonBounds.right.toInt() - buttonSize.width,
-                        y = buttonBounds.bottom.toInt()
+                        y = buttonBounds.bottom.toInt(),
                     )
                     buttonSize = coordinates.size
                 },
                 toggleState = rememberUpdatedState(newValue = ToggleableState(showMenu)),
                 onIcon = Icons.Default.Settings,
                 onStyle = VideoTheme.styles.buttonStyles.secondaryIconButtonStyle(),
-                offStyle = VideoTheme.styles.buttonStyles.primaryIconButtonStyle()
+                offStyle = VideoTheme.styles.buttonStyles.primaryIconButtonStyle(),
             ) {
                 showMenu = when (it) {
                     ToggleableState.On -> false
@@ -263,17 +263,17 @@ private fun CallJoinHeader(
 
             if (showMenu) {
                 Popup(
-                    offset = popupPosition
+                    offset = popupPosition,
                 ) {
                     Column(
                         modifier = Modifier
                             .width(200.dp)
                             .background(
-                                VideoTheme.colors.baseSheetTertiary, VideoTheme.shapes.dialog
+                                VideoTheme.colors.baseSheetTertiary,
+                                VideoTheme.shapes.dialog,
                             )
-                            .padding(VideoTheme.dimens.spacingM)
+                            .padding(VideoTheme.dimens.spacingM),
                     ) {
-
                         if (showDirectCall) {
                             StreamButton(
                                 modifier = Modifier.fillMaxWidth(),
@@ -347,7 +347,9 @@ private fun CallJoinBody(
 @Composable
 private fun CallActualContent(
     modifier: Modifier = Modifier,
-    onJoinCall: (String) -> Unit, onNewCall: () -> Unit, gotoQR: () -> Unit,
+    onJoinCall: (String) -> Unit,
+    onNewCall: () -> Unit,
+    gotoQR: () -> Unit,
 ) = Box(modifier = Modifier.background(VideoTheme.colors.baseSheetPrimary)) {
     Column(
         modifier = modifier
@@ -439,14 +441,14 @@ private fun JoinCallForm(
                     "default:79cYh3J5JgGk"
                 } else {
                     ""
-                }
+                },
             ),
         )
     }
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .height(50.dp)
+            .height(50.dp),
     ) {
         StreamTextField(
             modifier = Modifier
@@ -490,37 +492,39 @@ private fun SignOutDialog(
         style = VideoTheme.styles.dialogStyles.defaultDialogStyle(),
         positiveButton = Triple(
             stringResource(id = R.string.sign_out),
-            VideoTheme.styles.buttonStyles.secondaryButtonStyle()
+            VideoTheme.styles.buttonStyles.secondaryButtonStyle(),
         ) {
             onConfirmation()
         },
         negativeButton = Triple(
-            stringResource(R.string.cancel), VideoTheme.styles.buttonStyles.tetriaryButtonStyle()
+            stringResource(R.string.cancel),
+            VideoTheme.styles.buttonStyles.tetriaryButtonStyle(),
         ) {
             onDismissRequest()
         },
         title = stringResource(id = R.string.sign_out),
-        contentText = stringResource(R.string.are_you_sure_sign_out)
+        contentText = stringResource(R.string.are_you_sure_sign_out),
     )
 }
 
 class BelowElementPositionProvider(
     private val anchorBounds: androidx.compose.ui.geometry.Rect,
-    private val screenPadding: Int = 8 // Padding from screen edges
+    private val screenPadding: Int = 8, // Padding from screen edges
 ) : PopupPositionProvider {
     override fun calculatePosition(
         anchorBounds: IntRect,
         windowSize: IntSize,
         layoutDirection: LayoutDirection,
-        popupContentSize: IntSize
+        popupContentSize: IntSize,
     ): IntOffset {
         val x = anchorBounds.left.coerceIn(
-            screenPadding, (windowSize.width - popupContentSize.width - screenPadding)
+            screenPadding,
+            (windowSize.width - popupContentSize.width - screenPadding),
         )
 
         val y = (this.anchorBounds.bottom + screenPadding).coerceIn(
             screenPadding.toFloat(),
-            (windowSize.height - popupContentSize.height - screenPadding).toFloat()
+            (windowSize.height - popupContentSize.height - screenPadding).toFloat(),
         ).toInt()
 
         return IntOffset(x, y)

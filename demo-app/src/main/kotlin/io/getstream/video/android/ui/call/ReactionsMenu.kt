@@ -18,24 +18,19 @@
 
 package io.getstream.video.android.ui.call
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredHeight
 import androidx.compose.foundation.layout.requiredWidth
-import androidx.compose.foundation.layout.wrapContentWidth
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.dp
 import io.getstream.video.android.compose.theme.base.VideoTheme
 import io.getstream.video.android.compose.ui.components.base.StreamButton
 import io.getstream.video.android.compose.ui.components.base.styling.StyleSize
@@ -135,10 +130,12 @@ private fun ReactionItem(
             .requiredWidth(VideoTheme.dimens.componentHeightL)
             .requiredHeight(VideoTheme.dimens.componentHeightL)
     }
-    StreamButton(modifier = modifier,
+    StreamButton(
+        modifier = modifier,
         style = VideoTheme.styles.buttonStyles.primaryIconButtonStyle(StyleSize.S),
         text = text,
-        onClick = { onEmojiSelected(reaction.emojiCode) })
+        onClick = { onEmojiSelected(reaction.emojiCode) },
+    )
 }
 
 private fun sendReaction(scope: CoroutineScope, call: Call, emoji: String, onDismiss: () -> Unit) {
@@ -147,7 +144,6 @@ private fun sendReaction(scope: CoroutineScope, call: Call, emoji: String, onDis
         onDismiss()
     }
 }
-
 
 @Preview
 @Composable

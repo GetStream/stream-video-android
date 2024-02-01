@@ -67,10 +67,8 @@ public fun ChatDialogAction(
 private fun ChatActionPreview() {
     VideoTheme {
         ChatDialogAction {
-
         }
         ChatDialogAction(messageCount = 15) {
-
         }
     }
 }

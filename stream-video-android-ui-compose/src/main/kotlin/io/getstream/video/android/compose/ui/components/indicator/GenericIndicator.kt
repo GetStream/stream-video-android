@@ -45,7 +45,6 @@ internal fun GenericIndicator(
     Box(
         modifier = modifier.size(VideoTheme.dimens.componentHeightM),
     ) {
-
         // Ensure content is center aligned and padded
         Box(
             modifier = Modifier

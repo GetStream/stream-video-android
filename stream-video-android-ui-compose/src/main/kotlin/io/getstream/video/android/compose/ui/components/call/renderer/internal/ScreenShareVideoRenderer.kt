@@ -34,7 +34,6 @@ import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.model.ScreenSharingSession
 import io.getstream.video.android.mock.StreamPreviewDataUtils
 import io.getstream.video.android.mock.previewCall
-import io.getstream.video.android.mock.previewParticipant
 import io.getstream.video.android.mock.previewParticipantsList
 import me.saket.telephoto.zoomable.rememberZoomableState
 import me.saket.telephoto.zoomable.zoomable
@@ -92,9 +91,10 @@ private fun ScreenShareVideoRendererPreview() {
     VideoTheme {
         StreamPreviewDataUtils.initializeStreamVideo(LocalContext.current)
         ScreenShareVideoRenderer(
-            call = previewCall, session = ScreenSharingSession(
+            call = previewCall,
+            session = ScreenSharingSession(
                 participant = previewParticipantsList[0],
-            )
+            ),
         )
     }
 }

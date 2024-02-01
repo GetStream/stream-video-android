@@ -18,40 +18,20 @@
 
 package io.getstream.video.android.ui.call
 
-import android.content.res.Configuration
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.aspectRatio
-import androidx.compose.foundation.layout.fillMaxHeight
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.material.Card
-import androidx.compose.material.Icon
-import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AutoAwesome
-import androidx.compose.material.icons.filled.GridView
-import androidx.compose.material.icons.filled.Square
 import androidx.compose.material.icons.rounded.AutoAwesome
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberUpdatedState
-import androidx.compose.ui.Alignment.Companion.CenterHorizontally
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.state.ToggleableState
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.dp
-import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.Popup
 import io.getstream.video.android.R
 import io.getstream.video.android.compose.theme.base.VideoTheme
@@ -89,7 +69,9 @@ internal fun LayoutChooser(
                 val state = ToggleableState(layout.which == current)
                 val icon = when (layout.which) {
                     LayoutType.DYNAMIC -> Icons.Default.AutoAwesome
-                    LayoutType.SPOTLIGHT -> ImageVector.vectorResource(R.drawable.ic_layout_spotlight)
+                    LayoutType.SPOTLIGHT -> ImageVector.vectorResource(
+                        R.drawable.ic_layout_spotlight,
+                    )
                     LayoutType.GRID -> ImageVector.vectorResource(R.drawable.ic_layout_grid)
                 }
                 StreamToggleButton(
@@ -132,6 +114,7 @@ private fun LayoutChooserPreview2() {
         )
     }
 }
+
 @Preview
 @Composable
 private fun LayoutChooserPreview3() {

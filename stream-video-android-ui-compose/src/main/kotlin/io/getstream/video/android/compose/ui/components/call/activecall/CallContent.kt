@@ -191,7 +191,8 @@ public fun CallContent(
             topBar = {
                 if (isShowingOverlayAppBar) {
                     appBarContent.invoke(call)
-                }},
+                }
+            },
             bottomBar = {
                 if (orientation != ORIENTATION_LANDSCAPE) {
                     controlsContent.invoke(call)
