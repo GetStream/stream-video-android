@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014-2023 Stream.io Inc. All rights reserved.
+ * Copyright (c) 2014-2024 Stream.io Inc. All rights reserved.
  *
  * Licensed under the Stream License;
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,7 @@ package io.getstream.video.android.core
 import android.content.Intent
 import android.graphics.Bitmap
 import androidx.annotation.VisibleForTesting
+import androidx.compose.runtime.Stable
 import io.getstream.log.taggedLogger
 import io.getstream.result.Error
 import io.getstream.result.Result
@@ -104,6 +105,7 @@ const val sfuReconnectTimeoutMillis = 30_000
  * val result = call.join()
  *
  */
+@Stable
 public class Call(
     internal val client: StreamVideo,
     val type: String,
@@ -111,7 +113,7 @@ public class Call(
     val user: User,
 ) {
     private var statsGatheringJob: Job? = null
-    internal var location: String? = null
+    private var location: String? = null
 
     private var subscriptions = mutableSetOf<EventSubscription>()
 
@@ -182,6 +184,11 @@ public class Call(
      */
     @InternalStreamVideoApi
     val statsReport: MutableStateFlow<CallStatsReport?> = MutableStateFlow(null)
+
+    /**
+     * Contains stats history.
+     */
+    val statLatencyHistory: MutableStateFlow<List<Int>> = MutableStateFlow(listOf(0, 0, 0))
 
     /**
      * Time (in millis) when the full reconnection flow started. Will be null again once
@@ -266,7 +273,7 @@ public class Call(
         response.onSuccess {
             state.updateFromResponse(it)
             if (ring) {
-                client.state.addRingingCall(this)
+                client.state.addRingingCall(this, RingingState.Outgoing())
             }
         }
         return response
@@ -430,10 +437,19 @@ public class Call(
                 state.stats.updateFromRTCStats(publisherStats, isPublisher = true)
                 state.stats.updateFromRTCStats(subscriberStats, isPublisher = false)
                 state.stats.updateLocalStats()
-                statsReport.value = CallStatsReport(
+                val local = state.stats._local.value
+
+                val report = CallStatsReport(
                     publisher = publisherStats,
                     subscriber = subscriberStats,
+                    local = local,
+                    stateStats = state.stats,
                 )
+                statsReport.value = report
+                statLatencyHistory.value += report.stateStats.publisher.latency.value
+                if (statLatencyHistory.value.size > 20) {
+                    statLatencyHistory.value = statLatencyHistory.value.takeLast(20)
+                }
             }
         }
 
@@ -520,12 +536,18 @@ public class Call(
                 logger.i { "Switching SFU from ${session?.sfuUrl} to ${cred.server.url}" }
                 val iceServers = cred.iceServers.map { it.toIceServer() }
 
-                session?.switchSfu(cred.server.edgeName, cred.server.url, cred.token, iceServers, failedToSwitch = {
-                    logger.e {
-                        "[switchSfu] Failed to connect to new SFU during migration. Reverting to full reconnect"
-                    }
-                    state._connection.value = RealtimeConnection.Reconnecting
-                })
+                session?.switchSfu(
+                    cred.server.edgeName,
+                    cred.server.url,
+                    cred.token,
+                    iceServers,
+                    failedToSwitch = {
+                        logger.e {
+                            "[switchSfu] Failed to connect to new SFU during migration. Reverting to full reconnect"
+                        }
+                        state._connection.value = RealtimeConnection.Reconnecting
+                    },
+                )
             } else {
                 logger.e {
                     "[switchSfu] Failed to get a join response during " +
@@ -864,13 +886,14 @@ public class Call(
     private fun updateMediaManagerFromSettings(callSettings: CallSettingsResponse) {
         // Speaker
         if (speaker.status.value is DeviceStatus.NotSelected) {
-            val enableSpeaker = if (callSettings.video.cameraDefaultOn || camera.status.value is DeviceStatus.Enabled) {
-                // if camera is enabled then enable speaker. Eventually this should
-                // be a new audio.defaultDevice setting returned from backend
-                true
-            } else {
-                callSettings.audio.defaultDevice == AudioSettings.DefaultDevice.Speaker
-            }
+            val enableSpeaker =
+                if (callSettings.video.cameraDefaultOn || camera.status.value is DeviceStatus.Enabled) {
+                    // if camera is enabled then enable speaker. Eventually this should
+                    // be a new audio.defaultDevice setting returned from backend
+                    true
+                } else {
+                    callSettings.audio.defaultDevice == AudioSettings.DefaultDevice.Speaker
+                }
             speaker.setEnabled(enableSpeaker)
         }
 
@@ -1010,9 +1033,10 @@ public class Call(
         }
     }
 
-    fun isPinnedParticipant(sessionId: String): Boolean = state.pinnedParticipants.value.containsKey(
-        sessionId,
-    )
+    fun isPinnedParticipant(sessionId: String): Boolean =
+        state.pinnedParticipants.value.containsKey(
+            sessionId,
+        )
 
     fun isServerPin(sessionId: String): Boolean = state._serverPins.value.containsKey(sessionId)
 

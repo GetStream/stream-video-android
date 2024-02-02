@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014-2023 Stream.io Inc. All rights reserved.
+ * Copyright (c) 2014-2024 Stream.io Inc. All rights reserved.
  *
  * Licensed under the Stream License;
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@ package io.getstream.video.android.core.notifications
 
 import android.app.Notification
 import io.getstream.android.push.permissions.NotificationPermissionHandler
+import io.getstream.video.android.core.RingingState
 import io.getstream.video.android.model.StreamCallId
 
 public interface NotificationHandler : NotificationPermissionHandler {
@@ -25,12 +26,17 @@ public interface NotificationHandler : NotificationPermissionHandler {
     fun onNotification(callId: StreamCallId, callDisplayName: String)
     fun onLiveCall(callId: StreamCallId, callDisplayName: String)
     fun getOngoingCallNotification(callId: StreamCallId): Notification?
-    fun getRingingCallNotification(callId: StreamCallId, callDisplayName: String): Notification?
+    fun getRingingCallNotification(
+        ringingState: RingingState,
+        callId: StreamCallId,
+        callDisplayName: String,
+    ): Notification?
 
     companion object {
         const val ACTION_NOTIFICATION = "io.getstream.video.android.action.NOTIFICATION"
         const val ACTION_LIVE_CALL = "io.getstream.video.android.action.LIVE_CALL"
         const val ACTION_INCOMING_CALL = "io.getstream.video.android.action.INCOMING_CALL"
+        const val ACTION_OUTGOING_CALL = "io.getstream.video.android.action.OUTGOING_CALL"
         const val ACTION_ACCEPT_CALL = "io.getstream.video.android.action.ACCEPT_CALL"
         const val ACTION_REJECT_CALL = "io.getstream.video.android.action.REJECT_CALL"
         const val ACTION_LEAVE_CALL = "io.getstream.video.android.action.LEAVE_CALL"

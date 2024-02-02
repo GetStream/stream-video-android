@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014-2023 Stream.io Inc. All rights reserved.
+ * Copyright (c) 2014-2024 Stream.io Inc. All rights reserved.
  *
  * Licensed under the Stream License;
  * you may not use this file except in compliance with the License.
@@ -93,6 +93,7 @@ fun CallScreen(
     var isShowingReactionsMenu by remember { mutableStateOf(false) }
     var isShowingAvailableDeviceMenu by remember { mutableStateOf(false) }
     var isBackgroundBlurEnabled by remember { mutableStateOf(false) }
+    var isShowingStats by remember { mutableStateOf(false) }
     var layout by remember { mutableStateOf(LayoutType.DYNAMIC) }
     var unreadCount by remember { mutableIntStateOf(0) }
     val chatState = rememberModalBottomSheetState(
@@ -310,6 +311,7 @@ fun CallScreen(
                     isBackgroundBlurEnabled = !isBackgroundBlurEnabled
                     isShowingSettingMenu = false
                 },
+                onShowCallStats = { isShowingStats = true },
             )
         }
 
@@ -330,6 +332,10 @@ fun CallScreen(
                 current = layout,
                 onDismiss = { isShowingLayoutChooseMenu = false },
             )
+        }
+
+        if (isShowingStats) {
+            CallStatsDialog(call) { isShowingStats = false }
         }
 
         if (isShowingAvailableDeviceMenu) {

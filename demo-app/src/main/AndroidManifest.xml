@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-     Copyright (c) 2023 Stream.io Inc. All rights reserved.
+     Copyright (c) 2024 Stream.io Inc. All rights reserved.
 
      Licensed under the Stream License;
      you may not use this file except in compliance with the License.
@@ -100,7 +100,11 @@
             android:exported="true"
             android:hardwareAccelerated="true"
             android:supportsPictureInPicture="true"
-            android:windowSoftInputMode="adjustResize" />
+            android:windowSoftInputMode="adjustResize">
+            <intent-filter android:priority="1">
+                <action android:name="io.getstream.video.android.action.OUTGOING_CALL" />
+            </intent-filter>
+        </activity>
 
         <!-- Prevent firebase from using advertisement ID -->
         <meta-data

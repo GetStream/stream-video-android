@@ -25,11 +25,11 @@ Stream provides UI components and state handling that make it easy to build vide
 
 With Stream's video components, you can use their SDK to build in-app video calling, audio rooms, audio calls, or live streaming. The best place to get started is with their tutorials:
 
-- **[Video & Audio Calling Tutorial](https://getstream.io/video/docs/android/tutorials/video-calling/)**
-- **[Audio Rooms Tutorial](https://getstream.io/video/docs/android/tutorials/audio-room/)**
-- **[Livestreaming Tutorial](https://getstream.io/video/docs/android/tutorials/livestream/)**
+- **[Video & Audio Calling Tutorial](https://getstream.io/video/docs/android/tutorials/video-calling?utm_source=Github&utm_medium=Github_Repo_Content_Ad&utm_content=Developer&utm_campaign=Github_Android_Video_SDK&utm_term=DevRelOss)**
+- **[Audio Rooms Tutorial](https://getstream.io/video/docs/android/tutorials/audio-room?utm_source=Github&utm_medium=Github_Repo_Content_Ad&utm_content=Developer&utm_campaign=Github_Android_Video_SDK&utm_term=DevRelOss)**
+- **[Livestreaming Tutorial](https://getstream.io/video/docs/android/tutorials/livestream?utm_source=Github&utm_medium=Github_Repo_Content_Ad&utm_content=Developer&utm_campaign=Github_Android_Video_SDK&utm_term=DevRelOss)**
 
-If you're interested in customizing the UI components for the Video SDK, check out the **[UI Cookbook](https://getstream.io/video/docs/android/ui-cookbook/overview/)**.
+If you're interested in customizing the UI components for the Video SDK, check out the **[UI Cookbook](https://getstream.io/video/docs/android/ui-cookbook/overview?utm_source=Github&utm_medium=Github_Repo_Content_Ad&utm_content=Developer&utm_campaign=Github_Android_Video_SDK&utm_term=DevRelOss)**.
 
 ## 📱 Previews
 
@@ -43,7 +43,7 @@ If you're interested in customizing the UI components for the Video SDK, check o
 
 You can find sample projects below that demonstrates use cases of Stream Video SDK for Android:
 
-- [Dogfooding](https://github.com/GetStream/stream-video-android/tree/develop/dogfooding): Dogfooding demonstrates Stream Video SDK for Android with modern Android tech stacks, such as Compose, Hilt, and Coroutines.
+- [Demo App](https://github.com/GetStream/stream-video-android/tree/develop/demo-app): Demo App demonstrates Stream Video SDK for Android with modern Android tech stacks, such as Compose, Hilt, and Coroutines.
 - [WhatsApp Clone Compose](https://github.com/getstream/whatsapp-clone-compose): WhatsApp clone project demonstrates modern Android development built with Jetpack Compose and Stream Chat/Video SDK for Compose.
 - [Twitch Clone Compose](https://github.com/skydoves/twitch-clone-compose): Twitch clone project demonstrates modern Android development built with Jetpack Compose and Stream Chat/Video SDK for Compose.
 - [Meeting Room Compose](https://github.com/GetStream/meeting-room-compose): A real-time meeting room app built with Jetpack Compose to demonstrate video communications.
@@ -137,10 +137,12 @@ Video roadmap and changelog is available [here](https://github.com/GetStream/pro
 - [X] Upgrade to more recent versions of webrtc (Jaewoong/Kanat)
 - [X] Review foreground service vs backend for audio rooms etc. (Aleks)
 - [X] Enable SFU switching
+- [X] Support R8 full mode
 - [ ] Logging is too verbose (rtc is very noisy), clean it up to focus on the essential for info and higher (Daniel)
 
 ### 0.5.0 milestone
 
+- [X] Improve Compose UI SDK performance by marking WebRTC models as stable.
 - [X] Development token to support a development environment  
 - [ ] H264 workaround on Samsung 23? (see https://github.com/livekit/client-sdk-android/blob/main/livekit-android-sdk/src/main/java/io/livekit/android/webrtc/SimulcastVideoEncoderFactoryWrapper.kt#L34 and
 - https://github.com/react-native-webrtc/react-native-webrtc/issues/983#issuecomment-975624906)
@@ -167,7 +169,7 @@ Check out our current openings and apply via [Stream's website](https://getstrea
 ## License
 
 ```
-Copyright (c) 2014-2023 Stream.io Inc. All rights reserved.
+Copyright (c) 2014-2024 Stream.io Inc. All rights reserved.
 
 Licensed under the Stream License;
 you may not use this file except in compliance with the License.

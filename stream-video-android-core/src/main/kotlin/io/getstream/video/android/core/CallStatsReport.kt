@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014-2023 Stream.io Inc. All rights reserved.
+ * Copyright (c) 2014-2024 Stream.io Inc. All rights reserved.
  *
  * Licensed under the Stream License;
  * you may not use this file except in compliance with the License.
@@ -23,4 +23,6 @@ import io.getstream.video.android.core.internal.InternalStreamVideoApi
 data class CallStatsReport(
     val publisher: RtcStatsReport?,
     val subscriber: RtcStatsReport?,
+    val local: LocalStats?,
+    val stateStats: CallStats,
 )

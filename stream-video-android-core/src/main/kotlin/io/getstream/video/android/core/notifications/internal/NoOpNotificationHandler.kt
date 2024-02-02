@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014-2023 Stream.io Inc. All rights reserved.
+ * Copyright (c) 2014-2024 Stream.io Inc. All rights reserved.
  *
  * Licensed under the Stream License;
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@
 package io.getstream.video.android.core.notifications.internal
 
 import android.app.Notification
+import io.getstream.video.android.core.RingingState
 import io.getstream.video.android.core.notifications.NotificationHandler
 import io.getstream.video.android.model.StreamCallId
 
@@ -26,6 +27,7 @@ internal object NoOpNotificationHandler : NotificationHandler {
     override fun onLiveCall(callId: StreamCallId, callDisplayName: String) { /* NoOp */ }
     override fun getOngoingCallNotification(callId: StreamCallId): Notification? = null
     override fun getRingingCallNotification(
+        ringingState: RingingState,
         callId: StreamCallId,
         callDisplayName: String,
     ): Notification? = null

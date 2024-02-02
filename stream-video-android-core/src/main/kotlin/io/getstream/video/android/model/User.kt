@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014-2022 Stream.io Inc. All rights reserved.
+ * Copyright (c) 2014-2024 Stream.io Inc. All rights reserved.
  *
  * Licensed under the Stream License;
  * you may not use this file except in compliance with the License.
@@ -18,7 +18,7 @@
 
 package io.getstream.video.android.model
 
-import androidx.compose.runtime.Stable
+import androidx.compose.runtime.Immutable
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.Serializable
@@ -65,7 +65,7 @@ public object OffsetDateTimeSerializer : KSerializer<OffsetDateTime> {
         )
 }
 
-@Stable
+@Immutable
 @Serializable
 public data class User(
     /** ID is required, the rest is optional */

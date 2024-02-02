@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014-2022 Stream.io Inc. All rights reserved.
+ * Copyright (c) 2014-2024 Stream.io Inc. All rights reserved.
  *
  * Licensed under the Stream License;
  * you may not use this file except in compliance with the License.
@@ -29,6 +29,7 @@ import io.getstream.video.android.core.logging.LoggingLevel
 import io.getstream.video.android.core.notifications.NotificationConfig
 import io.getstream.video.android.core.notifications.internal.StreamNotificationManager
 import io.getstream.video.android.core.notifications.internal.storage.DeviceTokenStorage
+import io.getstream.video.android.core.sounds.Sounds
 import io.getstream.video.android.model.ApiKey
 import io.getstream.video.android.model.User
 import io.getstream.video.android.model.UserToken
@@ -66,6 +67,7 @@ import java.util.UUID
  * @property videoDomain URL overwrite to allow for testing against a local instance of video.
  * @property runForegroundServiceForCalls If set to true, when there is an active call the SDK will run a foreground service to keep the process alive. (default: true)
  * @property localSfuAddress Local SFU address (IP:port) to be used for testing. Leave null if not needed.
+ * @property sounds Overwrite the default SDK sounds. See [Sounds].
  */
 public class StreamVideoBuilder @JvmOverloads constructor(
     context: Context,
@@ -84,6 +86,7 @@ public class StreamVideoBuilder @JvmOverloads constructor(
     private val videoDomain: String = "video.stream-io-api.com",
     private val runForegroundServiceForCalls: Boolean = true,
     private val localSfuAddress: String? = null,
+    private val sounds: Sounds = Sounds(),
 ) {
     private val context: Context = context.applicationContext
 
@@ -160,8 +163,9 @@ public class StreamVideoBuilder @JvmOverloads constructor(
             lifecycle = lifecycle,
             connectionModule = connectionModule,
             streamNotificationManager = streamNotificationManager,
-            runForeGroundService = runForegroundServiceForCalls,
+            runForegroundService = runForegroundServiceForCalls,
             testSfuAddress = localSfuAddress,
+            sounds = sounds,
         )
 
         if (user.type == UserType.Guest) {

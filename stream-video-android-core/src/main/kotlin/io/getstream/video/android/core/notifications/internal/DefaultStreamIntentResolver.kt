@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014-2023 Stream.io Inc. All rights reserved.
+ * Copyright (c) 2014-2024 Stream.io Inc. All rights reserved.
  *
  * Licensed under the Stream License;
  * you may not use this file except in compliance with the License.
@@ -48,6 +48,26 @@ internal class DefaultStreamIntentResolver(val context: Context) {
             callId,
             notificationId,
         )
+
+    /**
+     * Search for an activity that is used for outgoing calls.
+     * Calls are considered outgoing until the call is accepted.
+     *
+     * @param callId the call id
+     * @param notificationId the notification ID.
+     */
+    fun searchOutgoingCallPendingIntent(
+        callId: StreamCallId,
+        notificationId: Int = NotificationHandler.INCOMING_CALL_NOTIFICATION_ID,
+    ): PendingIntent? {
+        return searchActivityPendingIntent(
+            Intent(
+                NotificationHandler.ACTION_OUTGOING_CALL,
+            ).addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT),
+            callId,
+            notificationId,
+        )
+    }
 
     /**
      * Search for an activity that can receive live calls from Stream Server.

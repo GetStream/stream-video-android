@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014-2022 Stream.io Inc. All rights reserved.
+ * Copyright (c) 2014-2024 Stream.io Inc. All rights reserved.
  *
  * Licensed under the Stream License;
  * you may not use this file except in compliance with the License.
@@ -46,6 +46,7 @@ import io.getstream.video.android.core.notifications.internal.StreamNotification
 import io.getstream.video.android.core.socket.ErrorResponse
 import io.getstream.video.android.core.socket.PersistentSocket
 import io.getstream.video.android.core.socket.SocketState
+import io.getstream.video.android.core.sounds.Sounds
 import io.getstream.video.android.core.utils.DebugInfo
 import io.getstream.video.android.core.utils.LatencyResult
 import io.getstream.video.android.core.utils.getLatencyMeasurementsOKHttp
@@ -133,8 +134,9 @@ internal class StreamVideoImpl internal constructor(
     internal val connectionModule: ConnectionModule,
     internal val tokenProvider: (suspend (error: Throwable?) -> String)?,
     internal val streamNotificationManager: StreamNotificationManager,
-    internal val runForeGroundService: Boolean = true,
+    internal val runForegroundService: Boolean = true,
     internal val testSfuAddress: String? = null,
+    internal val sounds: Sounds,
 ) : StreamVideo,
     NotificationHandler by streamNotificationManager {
 
