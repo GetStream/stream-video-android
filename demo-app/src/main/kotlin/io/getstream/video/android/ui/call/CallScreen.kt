@@ -18,16 +18,26 @@
 
 package io.getstream.video.android.ui.call
 
+import android.content.ClipboardManager
+import android.content.Context
 import android.widget.Toast
 import androidx.compose.animation.Crossfade
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.BoxWithConstraints
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.ModalBottomSheetValue
 import androidx.compose.material.Snackbar
 import androidx.compose.material.Text
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.People
+import androidx.compose.material.icons.filled.RadioButtonChecked
 import androidx.compose.material.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -46,18 +56,22 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.IntSize
+import androidx.compose.ui.window.Popup
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.getstream.chat.android.ui.common.state.messages.list.MessageItemState
 import io.getstream.video.android.BuildConfig
 import io.getstream.video.android.R
 import io.getstream.video.android.compose.theme.base.VideoTheme
+import io.getstream.video.android.compose.ui.components.base.StreamBadgeBox
+import io.getstream.video.android.compose.ui.components.base.StreamDialogPositiveNegative
 import io.getstream.video.android.compose.ui.components.call.CallAppBar
 import io.getstream.video.android.compose.ui.components.call.activecall.CallContent
-import io.getstream.video.android.compose.ui.components.call.controls.ControlActions
 import io.getstream.video.android.compose.ui.components.call.controls.actions.ChatDialogAction
 import io.getstream.video.android.compose.ui.components.call.controls.actions.DefaultOnCallActionHandler
 import io.getstream.video.android.compose.ui.components.call.controls.actions.FlipCameraAction
+import io.getstream.video.android.compose.ui.components.call.controls.actions.GenericAction
 import io.getstream.video.android.compose.ui.components.call.controls.actions.LeaveCallAction
 import io.getstream.video.android.compose.ui.components.call.controls.actions.ToggleAction
 import io.getstream.video.android.compose.ui.components.call.controls.actions.ToggleCameraAction
@@ -73,10 +87,15 @@ import io.getstream.video.android.core.RealtimeConnection
 import io.getstream.video.android.core.call.state.ChooseLayout
 import io.getstream.video.android.mock.StreamPreviewDataUtils
 import io.getstream.video.android.mock.previewCall
+import io.getstream.video.android.tooling.extensions.toPx
 import io.getstream.video.android.tooling.util.StreamFlavors
+import io.getstream.video.android.util.config.AppConfig
+import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import org.openapitools.client.models.OwnCapability
 
+@OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun CallScreen(
     call: Call,
@@ -96,10 +115,18 @@ fun CallScreen(
     var isShowingStats by remember { mutableStateOf(false) }
     var layout by remember { mutableStateOf(LayoutType.DYNAMIC) }
     var unreadCount by remember { mutableIntStateOf(0) }
+    var showParticipants by remember { mutableStateOf(false) }
     val chatState = rememberModalBottomSheetState(
         initialValue = ModalBottomSheetValue.Hidden,
-        skipHalfExpanded = false,
+        skipHalfExpanded = true,
     )
+    var showRecordingWarning by remember {
+        mutableStateOf(false)
+    }
+    var showEndRecordingDialog by remember { mutableStateOf(false) }
+    var acceptedCallRecording by remember { mutableStateOf(false) }
+    val isRecording by call.state.recording.collectAsStateWithLifecycle()
+    val participantsSize by call.state.participants.collectAsStateWithLifecycle()
     val messages: MutableList<MessageItemState> = remember { mutableStateListOf() }
     var messagesVisibility by remember { mutableStateOf(false) }
     val scope = rememberCoroutineScope()
@@ -128,14 +155,15 @@ fun CallScreen(
             content = {
                 BoxWithConstraints(modifier = Modifier.fillMaxSize()) {
                     CallContent(
-                        modifier = Modifier.background(
-                            color = VideoTheme.colors.baseSheetPrimary,
-                        ).padding(vertical = VideoTheme.dimens.genericL),
+                        modifier = Modifier
+                            .background(
+                                color = VideoTheme.colors.baseSheetPrimary,
+                            )
+                            .padding(vertical = VideoTheme.dimens.genericL),
                         call = call,
                         layout = layout,
                         enableInPictureInPicture = true,
-                        enableDiagnostics = BuildConfig.DEBUG ||
-                            BuildConfig.FLAVOR == StreamFlavors.development,
+                        enableDiagnostics = BuildConfig.DEBUG || BuildConfig.FLAVOR == StreamFlavors.development,
                         onCallAction = {
                             when (it) {
                                 ChooseLayout -> isShowingLayoutChooseMenu = true
@@ -152,11 +180,20 @@ fun CallScreen(
                                     val iconOnOff = ImageVector.vectorResource(
                                         R.drawable.ic_layout_grid,
                                     )
-                                    ToggleAction(
-                                        isActionActive = isShowingLayoutChooseMenu,
-                                        iconOnOff = Pair(iconOnOff, iconOnOff),
-                                    ) {
-                                        isShowingLayoutChooseMenu = !isShowingLayoutChooseMenu
+                                    Row {
+                                        ToggleAction(
+                                            offStyle = VideoTheme.styles.buttonStyles.secondaryIconButtonStyle(),
+                                            isActionActive = !isShowingLayoutChooseMenu,
+                                            iconOnOff = Pair(iconOnOff, iconOnOff),
+                                        ) {
+                                            isShowingLayoutChooseMenu = !isShowingLayoutChooseMenu
+                                        }
+
+                                        Spacer(modifier = Modifier.size(VideoTheme.dimens.spacingM))
+
+                                        FlipCameraAction(
+                                            onCallAction = { call.camera.flip() },
+                                        )
                                     }
                                 },
                                 trailingContent = {
@@ -174,46 +211,71 @@ fun CallScreen(
                             }
                         },
                         controlsContent = {
-                            ControlActions(
-                                call = call,
-                                actions = listOf(
-                                    {
-                                        ToggleSettingsAction(
-                                            isShowingSettings = isShowingSettingMenu,
-                                            onCallAction = {
-                                                isShowingSettingMenu = !isShowingSettingMenu
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                            ) {
+                                Row {
+                                    ToggleSettingsAction(
+                                        isShowingSettings = !isShowingSettingMenu,
+                                        onCallAction = {
+                                            isShowingSettingMenu = !isShowingSettingMenu
+                                        },
+                                    )
+                                    Spacer(modifier = Modifier.size(VideoTheme.dimens.spacingM))
+                                    if (call.hasCapability(OwnCapability.StartRecordCall) || call.hasCapability(
+                                            OwnCapability.StopRecordCall,
+                                        )
+                                    ) {
+                                        ToggleAction(
+                                            progress = showEndRecordingDialog,
+                                            isActionActive = !isRecording,
+                                            iconOnOff = Pair(
+                                                Icons.Default.RadioButtonChecked,
+                                                Icons.Default.RadioButtonChecked,
+                                            ),
+                                            onAction = {
+                                                GlobalScope.launch {
+                                                    if (isRecording) {
+                                                        showEndRecordingDialog = true
+                                                    } else {
+                                                        call.startRecording()
+                                                    }
+                                                }
                                             },
                                         )
-                                    },
-                                    {
-                                        ChatDialogAction(
-                                            messageCount = unreadCount,
-                                            onCallAction = { scope.launch { chatState.show() } },
-                                        )
-                                    },
-                                    {
-                                        ToggleCameraAction(
-                                            isCameraEnabled = isCameraEnabled,
-                                            onCallAction = { call.camera.setEnabled(it.isEnabled) },
-                                        )
-                                    },
-                                    {
-                                        ToggleMicrophoneAction(
-                                            isMicrophoneEnabled = isMicrophoneEnabled,
-                                            onCallAction = {
-                                                call.microphone.setEnabled(
-                                                    it.isEnabled,
-                                                )
-                                            },
-                                        )
-                                    },
-                                    {
-                                        FlipCameraAction(
-                                            onCallAction = { call.camera.flip() },
-                                        )
-                                    },
-                                ),
-                            )
+                                        Spacer(modifier = Modifier.size(VideoTheme.dimens.spacingM))
+                                    }
+                                    ToggleCameraAction(
+                                        isCameraEnabled = isCameraEnabled,
+                                        onCallAction = { call.camera.setEnabled(it.isEnabled) },
+                                    )
+                                    Spacer(modifier = Modifier.size(VideoTheme.dimens.spacingM))
+                                    ToggleMicrophoneAction(
+                                        isMicrophoneEnabled = isMicrophoneEnabled,
+                                        onCallAction = {
+                                            call.microphone.setEnabled(
+                                                it.isEnabled,
+                                            )
+                                        },
+                                    )
+                                    Spacer(modifier = Modifier.size(VideoTheme.dimens.spacingM))
+                                }
+                                Row {
+                                    StreamBadgeBox(
+                                        text = participantsSize.size.toString(),
+                                    ) {
+                                        GenericAction(icon = Icons.Default.People) {
+                                            showParticipants = !showParticipants
+                                        }
+                                    }
+                                    ChatDialogAction(
+                                        messageCount = unreadCount,
+                                        onCallAction = { scope.launch { chatState.show() } },
+                                    )
+                                }
+                            }
                         },
                         videoRenderer = { modifier, call, participant, style ->
                             ParticipantVideo(
@@ -263,8 +325,7 @@ fun CallScreen(
                         },
                         videoOverlayContent = {
                             Crossfade(
-                                modifier = Modifier
-                                    .align(Alignment.BottomStart),
+                                modifier = Modifier.align(Alignment.BottomStart),
                                 targetState = messagesVisibility,
                                 label = "chat_overlay",
                             ) { visibility ->
@@ -295,6 +356,26 @@ fun CallScreen(
             },
         )
 
+        if (participantsSize.size == 1) {
+            val context = LocalContext.current
+            val clipboardManager = remember(context) {
+                context.getSystemService(Context.CLIPBOARD_SERVICE) as? ClipboardManager
+            }
+            val env = AppConfig.currentEnvironment.collectAsStateWithLifecycle()
+            Popup(
+                alignment = Alignment.BottomCenter,
+                offset = IntOffset(0, -VideoTheme.dimens.generic3xl.toPx().toInt()),
+            ) {
+                ShareCallWithOthers(
+                    modifier = Modifier.fillMaxWidth(),
+                    call = call,
+                    clipboardManager = clipboardManager,
+                    env = env,
+                    context = context,
+                )
+            }
+        }
+
         if (speakingWhileMuted) {
             SpeakingWhileMuted()
         }
@@ -311,8 +392,10 @@ fun CallScreen(
                     isBackgroundBlurEnabled = !isBackgroundBlurEnabled
                     isShowingSettingMenu = false
                 },
-                onShowCallStats = { isShowingStats = true },
-            )
+            ) {
+                isShowingStats = true
+                isShowingSettingMenu = false
+            }
         }
 
         if (isShowingReactionsMenu) {
@@ -338,10 +421,60 @@ fun CallScreen(
             CallStatsDialog(call) { isShowingStats = false }
         }
 
+        if (showParticipants) {
+            ParticipantsDialog(call) {
+                showParticipants = false
+            }
+        }
+
         if (isShowingAvailableDeviceMenu) {
             AvailableDeviceMenu(
                 call = call,
                 onDismissed = { isShowingAvailableDeviceMenu = false },
+            )
+        }
+
+        // TODO: AAP, move recording and actions in separate composables.
+        if (isRecording && !showRecordingWarning) {
+            StreamDialogPositiveNegative(
+                title = "This call is being recorded",
+                contentText = "By staying in the call you’re consenting to being recorded.",
+                positiveButton = Triple(
+                    "Continue",
+                    VideoTheme.styles.buttonStyles.secondaryButtonStyle(),
+                ) {
+                    showRecordingWarning = true
+                    acceptedCallRecording = true
+                },
+                negativeButton = Triple(
+                    "Leave",
+                    VideoTheme.styles.buttonStyles.tetriaryButtonStyle(),
+                ) {
+                    showRecordingWarning = false
+                    acceptedCallRecording = false
+                    call.leave()
+                },
+            )
+        }
+        if (showEndRecordingDialog) {
+            StreamDialogPositiveNegative(
+                title = "End recording",
+                contentText = "Are you sure you want to end the recording?",
+                positiveButton = Triple(
+                    "End",
+                    VideoTheme.styles.buttonStyles.alertButtonStyle(),
+                ) {
+                    GlobalScope.launch {
+                        call.stopRecording()
+                    }
+                    showEndRecordingDialog = false
+                },
+                negativeButton = Triple(
+                    "Cancel",
+                    VideoTheme.styles.buttonStyles.tetriaryButtonStyle(),
+                ) {
+                    showEndRecordingDialog = false
+                },
             )
         }
     }

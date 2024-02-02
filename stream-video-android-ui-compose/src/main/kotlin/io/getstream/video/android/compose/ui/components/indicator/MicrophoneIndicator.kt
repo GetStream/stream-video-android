@@ -18,7 +18,6 @@ package io.getstream.video.android.compose.ui.components.indicator
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.Icon
 import androidx.compose.material.icons.Icons
@@ -28,7 +27,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.dp
 import io.getstream.video.android.compose.theme.base.VideoTheme
 
 /**
@@ -44,8 +42,7 @@ public fun MicrophoneIndicator(
 ) {
     Box(
         modifier = modifier
-            .size(VideoTheme.dimens.componentHeightS)
-            .padding(1.dp),
+            .size(VideoTheme.dimens.genericM),
     ) {
         if (isMicrophoneEnabled) {
             Icon(

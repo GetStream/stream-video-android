@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014-2023 Stream.io Inc. All rights reserved.
+ * Copyright (c) 2014-2024 Stream.io Inc. All rights reserved.
  *
  * Licensed under the Stream License;
  * you may not use this file except in compliance with the License.
@@ -25,6 +25,7 @@ import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.material.Icon
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.PushPin
@@ -38,15 +39,18 @@ import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment.Companion.Center
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.layout.positionInParent
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.state.ToggleableState
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.IntSize
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Popup
 import androidx.lifecycle.lifecycleScope
 import io.getstream.video.android.compose.theme.base.VideoTheme
@@ -144,7 +148,9 @@ internal fun BoxScope.ParticipantActions(
     var showDialog by remember {
         mutableStateOf(false)
     }
-    ParticipantActionsWithoutState(actions, call, participant, modifier, showDialog)
+    ParticipantActionsWithoutState(actions, call, participant, modifier, showDialog) {
+        showDialog = !showDialog
+    }
 }
 
 @Composable
@@ -154,6 +160,7 @@ private fun BoxScope.ParticipantActionsWithoutState(
     participant: ParticipantState,
     modifier: Modifier = Modifier,
     showDialog: Boolean = false,
+    onClick: () -> Unit = {},
 ) {
     val buttonPosition = remember { mutableStateOf(Offset.Zero) }
     val buttonSize = remember { mutableStateOf(IntSize.Zero) }
@@ -166,11 +173,11 @@ private fun BoxScope.ParticipantActionsWithoutState(
             backgroundColor = VideoTheme.colors.baseSheetPrimary,
             shape = VideoTheme.shapes.circle,
             modifier = modifier.clickable {
-                showDialog1 = !showDialog1
+                onClick()
             }.onGloballyPositioned { coordinates ->
-                buttonPosition.value = coordinates.localToRoot(Offset.Zero)
+                buttonPosition.value = coordinates.positionInParent()
                 buttonSize.value = coordinates.size
-            },
+            }.clip(VideoTheme.shapes.circle),
         ) {
             Icon(
                 imageVector = Icons.Outlined.MoreHoriz,
@@ -217,20 +224,23 @@ internal fun BoxScope.ParticipantActionsDialog(
                 .padding(VideoTheme.dimens.spacingM),
         ) {
             actions.forEach {
-                StreamToggleButton(
-                    toggleState = rememberUpdatedState(
-                        newValue = ToggleableState(!it.firstToggleAction),
-                    ),
-                    onIcon = it.icon,
-                    onText = it.label,
-                    offText = it.label,
-                    onStyle = VideoTheme.styles.buttonStyles.toggleButtonStyleOn(),
-                    offStyle = VideoTheme.styles.buttonStyles.toggleButtonStyleOff(),
-                ) { _ ->
-                    it.action.invoke(coroutineScope, call, participant)
+                if (it.condition(call, participant)) {
+                    Spacer(modifier = Modifier.height(VideoTheme.dimens.spacingM))
+                    StreamToggleButton(
+                        modifier = Modifier.width(200.dp),
+                        toggleState = rememberUpdatedState(
+                            newValue = ToggleableState(!it.firstToggleAction),
+                        ),
+                        onIcon = it.icon,
+                        onText = it.label,
+                        offText = it.label,
+                        onStyle = VideoTheme.styles.buttonStyles.toggleButtonStyleOn(),
+                        offStyle = VideoTheme.styles.buttonStyles.toggleButtonStyleOff(),
+                    ) { _ ->
+                        it.action.invoke(coroutineScope, call, participant)
+                    }
                 }
             }
-            Spacer(modifier = Modifier.height(VideoTheme.dimens.spacingM))
         }
     }
 }
@@ -261,11 +271,12 @@ private fun ParticipantActionsPreview() {
     VideoTheme {
         Box {
             ParticipantActionsWithoutState(
+                actions = pinUnpinActions,
                 call = previewCall,
                 participant = previewParticipant,
-                actions = pinUnpinActions,
                 showDialog = true,
-            )
+            ) {
+            }
         }
     }
 }

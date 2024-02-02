@@ -44,7 +44,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalInspectionMode
@@ -66,12 +65,12 @@ import io.getstream.video.android.R
 import io.getstream.video.android.compose.theme.base.VideoTheme
 import io.getstream.video.android.compose.ui.components.avatar.UserAvatar
 import io.getstream.video.android.compose.ui.components.base.StreamButton
+import io.getstream.video.android.compose.ui.components.base.styling.StyleSize
 import io.getstream.video.android.compose.ui.components.call.lobby.CallLobby
 import io.getstream.video.android.core.call.state.ToggleCamera
 import io.getstream.video.android.core.call.state.ToggleMicrophone
 import io.getstream.video.android.datastore.delegate.StreamUserDataStore
 import io.getstream.video.android.mock.StreamPreviewDataUtils
-import io.getstream.video.android.tooling.util.StreamFlavors
 import io.getstream.video.android.ui.call.CallActivity
 import kotlinx.coroutines.delay
 
@@ -136,6 +135,7 @@ private fun CallLobbyHeader(
         val userValue = user.value
         if (userValue != null) {
             UserAvatar(
+                textSize = StyleSize.S,
                 modifier = Modifier.size(32.dp),
                 userName = userValue.userNameOrId,
                 userImage = userValue.image,
@@ -152,16 +152,6 @@ private fun CallLobbyHeader(
             maxLines = 1,
             fontSize = 16.sp,
         )
-
-        if (BuildConfig.FLAVOR == StreamFlavors.development) {
-            Spacer(modifier = Modifier.width(4.dp))
-
-            StreamButton(
-                modifier = Modifier.width(125.dp),
-                text = stringResource(id = R.string.sign_out),
-                onClick = { callLobbyViewModel.signOut() },
-            )
-        }
     }
 
     LaunchedEffect(key1 = isLoggedOut) {
@@ -229,7 +219,9 @@ private fun CallLobbyBody(
 
         CallLobby(
             call = call,
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(VideoTheme.dimens.spacingM),
             isCameraEnabled = isCameraEnabled,
             isMicrophoneEnabled = isMicrophoneEnabled,
             onCallAction = { action ->
@@ -269,10 +261,9 @@ private fun LobbyDescription(
         )
 
         StreamButton(
+            style = VideoTheme.styles.buttonStyles.secondaryButtonStyle(),
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(start = 16.dp, end = 16.dp, top = 8.dp, bottom = 12.dp)
-                .clip(RoundedCornerShape(12.dp))
                 .testTag("start_call"),
             text = stringResource(id = R.string.join_call),
             onClick = {

@@ -119,7 +119,7 @@ public fun BoxScope.FloatingParticipantVideo(
                 .padding(VideoTheme.dimens.spacingS)
                 .onGloballyPositioned { videoSize = it.size }
                 .size(
-                    height = VideoTheme.dimens.genericMax * 1.8f,
+                    height = VideoTheme.dimens.genericMax * 1.2f,
                     width = VideoTheme.dimens.genericMax,
                 )
                 .clip(VideoTheme.shapes.dialog),

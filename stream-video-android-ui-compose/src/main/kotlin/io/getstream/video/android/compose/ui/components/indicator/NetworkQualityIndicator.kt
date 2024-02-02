@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014-2023 Stream.io Inc. All rights reserved.
+ * Copyright (c) 2014-2024 Stream.io Inc. All rights reserved.
  *
  * Licensed under the Stream License;
  * you may not use this file except in compliance with the License.
@@ -21,7 +21,6 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
@@ -46,7 +45,7 @@ public fun NetworkQualityIndicator(
 ) {
     val colors = barColorsFromQuality(networkQuality)
     GenericIndicator(
-        shape = VideoTheme.shapes.square,
+        shape = RoundedCornerShape(topStart = VideoTheme.dimens.roundnessM),
         modifier = modifier,
     ) {
         ConnectionBars(colors = colors)
@@ -84,33 +83,32 @@ internal fun ConnectionBars(modifier: Modifier = Modifier, colors: Triple<Color,
     val shape = RoundedCornerShape(VideoTheme.dimens.roundnessM)
     Row(
         modifier = modifier
-            .padding(VideoTheme.dimens.spacingXXs)
-            .height(height = VideoTheme.dimens.componentHeightS),
+            .height(height = VideoTheme.dimens.genericS),
         verticalAlignment = Alignment.Bottom,
     ) {
         Spacer(
             modifier = Modifier
-                .width(VideoTheme.dimens.genericXs)
+                .width(VideoTheme.dimens.genericXXs)
                 .fillMaxHeight(0.4f)
                 .background(
                     color = colors.first,
                     shape = shape,
                 ),
         )
-        Spacer(modifier = Modifier.width(VideoTheme.dimens.genericXs))
+        Spacer(modifier = Modifier.width(VideoTheme.dimens.genericXXs))
         Spacer(
             modifier = Modifier
-                .width(VideoTheme.dimens.genericXs)
+                .width(VideoTheme.dimens.genericXXs)
                 .fillMaxHeight(fraction = 0.7f)
                 .background(
                     color = colors.second,
                     shape = shape,
                 ),
         )
-        Spacer(modifier = Modifier.width(VideoTheme.dimens.genericXs))
+        Spacer(modifier = Modifier.width(VideoTheme.dimens.genericXXs))
         Spacer(
             modifier = Modifier
-                .width(VideoTheme.dimens.genericXs)
+                .width(VideoTheme.dimens.genericXXs)
                 .fillMaxHeight(fraction = 1f)
                 .background(
                     color = colors.third,

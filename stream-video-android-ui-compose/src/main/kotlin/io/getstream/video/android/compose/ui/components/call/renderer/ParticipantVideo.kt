@@ -34,6 +34,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.layout.wrapContentWidth
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Icon
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
@@ -119,7 +120,7 @@ public fun ParticipantVideo(
             networkQuality = it,
             modifier = Modifier
                 .align(BottomEnd)
-                .height(VideoTheme.dimens.componentHeightL),
+                .height(VideoTheme.dimens.componentHeightM),
         )
     },
     videoFallbackContent: @Composable (Call) -> Unit = {
@@ -186,7 +187,7 @@ public fun ParticipantVideo(
     Box(
         modifier = containerModifier
             .clip(containerShape)
-            .background(VideoTheme.colors.baseSheetPrimary),
+            .background(VideoTheme.colors.baseSheetTertiary),
     ) {
         ParticipantVideoRenderer(
             call = call,
@@ -258,7 +259,6 @@ public fun BoxScope.ParticipantLabel(
     labelPosition: Alignment = BottomStart,
     soundIndicatorContent: @Composable RowScope.() -> Unit = {
         val audioEnabled by participant.audioEnabled.collectAsStateWithLifecycle()
-        val speaking by participant.speaking.collectAsStateWithLifecycle()
         val audioLevel by if (participant.isLocal) {
             call.localMicrophoneAudioLevel.collectAsStateWithLifecycle()
         } else {
@@ -281,7 +281,6 @@ public fun BoxScope.ParticipantLabel(
     },
 ) {
     val audioEnabled by participant.audioEnabled.collectAsStateWithLifecycle()
-    val speaking by participant.speaking.collectAsStateWithLifecycle()
     val pinned by remember {
         derivedStateOf { call.state.pinnedParticipants.value.contains(participant.sessionId) }
     }
@@ -331,11 +330,11 @@ public fun BoxScope.ParticipantLabel(
     Box(
         modifier = Modifier
             .align(labelPosition)
-            .height(VideoTheme.dimens.componentHeightL)
+            .height(VideoTheme.dimens.componentHeightM)
             .wrapContentWidth()
             .background(
                 VideoTheme.colors.baseSheetQuarternary,
-                shape = VideoTheme.shapes.square,
+                shape = RoundedCornerShape(topEnd = VideoTheme.dimens.roundnessM),
             )
             .onGloballyPositioned {
                 componentWidth = with(density) {
@@ -353,8 +352,8 @@ public fun BoxScope.ParticipantLabel(
                     .padding(start = VideoTheme.dimens.spacingM)
                     .align(CenterVertically),
                 text = nameLabel,
-                style = VideoTheme.typography.bodyM,
-                color = Color.White,
+                style = VideoTheme.typography.bodyS,
+                color = VideoTheme.colors.basePrimary,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
             )

@@ -70,6 +70,7 @@ private val LocalReactionMapper = compositionLocalOf<ReactionMapper> {
  * @param reactionMapper Defines a mapper of the emoji code from the reaction events.
  * @param content The content shown within the theme wrapper.
  */
+@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 public fun VideoTheme(
     isInDarkMode: Boolean = isSystemInDarkTheme(),

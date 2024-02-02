@@ -98,7 +98,7 @@ internal fun ChatDialog(
         )
     }
 
-    ChatTheme {
+    ChatTheme(isInDarkMode = true) {
         ModalBottomSheetLayout(
             modifier = Modifier.fillMaxWidth(),
             sheetShape = RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp),

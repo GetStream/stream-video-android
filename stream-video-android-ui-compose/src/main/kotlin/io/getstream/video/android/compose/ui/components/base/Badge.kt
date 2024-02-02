@@ -47,7 +47,7 @@ public fun StreamBadgeBox(
     modifier: Modifier = Modifier,
     text: String? = null,
     showWithoutValue: Boolean = true,
-    style: BadgeStyle,
+    style: BadgeStyle = VideoTheme.styles.badgeStyles.defaultBadgeStyle(),
     content: @Composable BoxScope.(Modifier) -> Unit,
 ) {
     Box(modifier = modifier) {

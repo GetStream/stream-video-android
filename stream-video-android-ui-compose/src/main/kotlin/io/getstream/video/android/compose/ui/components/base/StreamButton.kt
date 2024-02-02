@@ -31,10 +31,12 @@ import androidx.compose.foundation.layout.requiredWidth
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.Button
+import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.Icon
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccessAlarm
+import androidx.compose.material.icons.filled.Camera
 import androidx.compose.material.icons.filled.ExitToApp
 import androidx.compose.material.icons.filled.GridView
 import androidx.compose.material.icons.filled.GroupAdd
@@ -53,6 +55,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.state.ToggleableState
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.times
 import io.getstream.video.android.compose.theme.base.VideoTheme
 import io.getstream.video.android.compose.ui.components.base.styling.ButtonStyles
 import io.getstream.video.android.compose.ui.components.base.styling.StreamBadgeStyles
@@ -87,10 +90,11 @@ public fun StreamButton(
     modifier: Modifier = Modifier,
     icon: ImageVector? = null,
     text: String,
-    onClick: () -> Unit = { },
     enabled: Boolean = true,
+    showProgress: Boolean = false,
     style: StreamButtonStyle = VideoTheme.styles.buttonStyles.primaryButtonStyle(),
     interactionSource: MutableInteractionSource = remember { MutableInteractionSource() },
+    onClick: () -> Unit = { },
 ): Unit = GenericStreamButton(
     modifier = modifier,
     style = style,
@@ -113,6 +117,12 @@ public fun StreamButton(
         style = textStyle.value.platform,
         text = text,
     )
+    if (showProgress) {
+        CircularProgressIndicator(
+            color = textStyle.value.platform.color,
+            modifier = Modifier.height(VideoTheme.dimens.genericS),
+        )
+    }
 }
 
 @Composable
@@ -122,6 +132,7 @@ public fun StreamIconButton(
     style: StreamFixedSizeButtonStyle,
     onClick: () -> Unit = {},
     enabled: Boolean = true,
+    showProgress: Boolean = false,
     interactionSource: MutableInteractionSource = remember { MutableInteractionSource() },
 ) {
     val state = styleState(interactionSource = interactionSource, enabled = enabled)
@@ -141,11 +152,17 @@ public fun StreamIconButton(
         contentPadding = iconStyle.padding,
         onClick = onClick,
     ) {
-        Icon(
-            tint = iconStyle.color,
-            imageVector = icon,
-            contentDescription = icon.name,
-        )
+        if (showProgress) {
+            CircularProgressIndicator(
+                color = iconStyle.color,
+            )
+        } else {
+            Icon(
+                tint = iconStyle.color,
+                imageVector = icon,
+                contentDescription = icon.name,
+            )
+        }
     }
 }
 
@@ -171,6 +188,7 @@ public fun StreamIconToggleButton(
     onIcon: ImageVector,
     offIcon: ImageVector = onIcon,
     onStyle: StreamFixedSizeButtonStyle,
+    showProgress: Boolean = false,
     offStyle: StreamFixedSizeButtonStyle = onStyle,
     enabled: Boolean = true,
     interactionSource: MutableInteractionSource = remember { MutableInteractionSource() },
@@ -181,6 +199,7 @@ public fun StreamIconToggleButton(
     onClick = onClick,
     onContent = {
         StreamIconButton(
+            showProgress = showProgress,
             interactionSource = interactionSource,
             enabled = enabled,
             icon = onIcon,
@@ -192,6 +211,7 @@ public fun StreamIconToggleButton(
     },
     offContent = {
         StreamIconButton(
+            showProgress = showProgress,
             interactionSource = interactionSource,
             enabled = enabled,
             icon = offIcon,
@@ -531,6 +551,21 @@ private fun StreamToggleButtonPreview() {
                 offStyle = ButtonStyles.toggleButtonStyleOff(),
                 onIcon = Icons.Filled.GridView,
                 offIcon = Icons.Filled.GridView,
+            )
+        }
+    }
+}
+
+@Preview
+@Composable
+private fun StreamProgressButtonsPreview() {
+    VideoTheme {
+        Column {
+            StreamButton(text = "Progress", showProgress = true)
+            StreamIconButton(
+                icon = Icons.Default.Camera,
+                style = VideoTheme.styles.buttonStyles.secondaryIconButtonStyle(),
+                showProgress = true,
             )
         }
     }

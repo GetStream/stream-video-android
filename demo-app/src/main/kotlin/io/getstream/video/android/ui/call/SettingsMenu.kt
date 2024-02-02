@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014-2023 Stream.io Inc. All rights reserved.
+ * Copyright (c) 2014-2024 Stream.io Inc. All rights reserved.
  *
  * Licensed under the Stream License;
  * you may not use this file except in compliance with the License.
@@ -29,15 +29,19 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ShowChart
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Popup
 import androidx.compose.ui.window.PopupProperties
@@ -51,6 +55,7 @@ import io.getstream.video.android.core.call.video.BitmapVideoFilter
 import io.getstream.video.android.core.mapper.ReactionMapper
 import io.getstream.video.android.mock.StreamPreviewDataUtils
 import io.getstream.video.android.mock.previewCall
+import io.getstream.video.android.tooling.extensions.toPx
 import io.getstream.video.android.ui.common.R
 import io.getstream.video.android.util.BlurredBackgroundVideoFilter
 import io.getstream.video.android.util.SampleAudioFilter
@@ -66,6 +71,7 @@ internal fun SettingsMenu(
     onDismissed: () -> Unit,
     onShowReactionsMenu: () -> Unit,
     onToggleBackgroundBlur: () -> Unit,
+    onShowCallStats: () -> Unit,
 ) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
@@ -181,9 +187,14 @@ internal fun SettingsMenu(
         onSwitchSfuClick = onSwitchSfuClick,
         showDebugOptions = showDebugOptions,
         isBackgroundBlurEnabled = isBackgroundBlurEnabled,
+        onShowStates = onShowCallStats,
         onDismissed = onDismissed,
-    ) {
-    }
+        reactionsMenu = {
+            ReactionsMenu(call = call, reactionMapper = ReactionMapper.defaultReactionMapper()) {
+                onDismissed()
+            }
+        },
+    )
 }
 
 @OptIn(ExperimentalComposeUiApi::class)
@@ -201,8 +212,11 @@ fun SettingsMenuItems(
     showDebugOptions: Boolean,
     onDismissed: () -> Unit,
     reactionsMenu: @Composable () -> Unit,
+    onShowStates: () -> Unit,
 ) {
     Popup(
+        offset = IntOffset(0, -VideoTheme.dimens.generic3xl.toPx().toInt()),
+        alignment = Alignment.BottomStart,
         onDismissRequest = { onDismissed.invoke() },
         properties = PopupProperties(
             usePlatformDefaultWidth = false,
@@ -211,7 +225,10 @@ fun SettingsMenuItems(
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .background(VideoTheme.colors.baseSheetPrimary)
+                .background(
+                    shape = VideoTheme.shapes.sheet,
+                    color = VideoTheme.colors.baseSheetPrimary,
+                )
                 .padding(12.dp),
         ) {
             reactionsMenu()
@@ -221,6 +238,12 @@ fun SettingsMenuItems(
                 icon = R.drawable.stream_video_ic_screensharing,
                 label = "Toggle screen-sharing",
                 onClick = onScreenShareClick,
+            )
+            MenuEntry(
+                vector = Icons.Default.ShowChart,
+                icon = io.getstream.video.android.R.drawable.ic_layout_grid,
+                label = "Call stats",
+                onClick = onShowStates,
             )
             MenuEntry(
                 icon = io.getstream.video.android.R.drawable.ic_mic,
@@ -265,13 +288,14 @@ fun SettingsMenuItems(
 
 @Composable
 private fun MenuEntry(
+    vector: ImageVector? = null,
     @DrawableRes icon: Int,
     label: String,
     onClick: () -> Unit,
 ) = StreamToggleButton(
     onText = label,
     offText = label,
-    onIcon = ImageVector.vectorResource(icon),
+    onIcon = vector ?: ImageVector.vectorResource(icon),
     onStyle = VideoTheme.styles.buttonStyles.toggleButtonStyleOn(StyleSize.XS).copy(
         iconStyle = VideoTheme.styles.iconStyles.customColorIconStyle(
             color = VideoTheme.colors.basePrimary,
@@ -285,6 +309,7 @@ private fun SettingsPreview() {
     StreamPreviewDataUtils.initializeStreamVideo(LocalContext.current)
     VideoTheme {
         SettingsMenuItems(
+            isBackgroundBlurEnabled = true,
             onScreenShareClick = { },
             onSwitchMicrophoneClick = { },
             onToggleBackgroundBlurClick = { },
@@ -295,13 +320,14 @@ private fun SettingsPreview() {
             onSwitchSfuClick = { },
             showDebugOptions = true,
             onDismissed = { },
-            isBackgroundBlurEnabled = true,
-        ) {
-            ReactionsMenu(
-                call = previewCall,
-                reactionMapper = ReactionMapper.defaultReactionMapper(),
-            ) {
-            }
-        }
+            onShowStates = { },
+            reactionsMenu = {
+                ReactionsMenu(
+                    call = previewCall,
+                    reactionMapper = ReactionMapper.defaultReactionMapper(),
+                ) {
+                }
+            },
+        )
     }
 }

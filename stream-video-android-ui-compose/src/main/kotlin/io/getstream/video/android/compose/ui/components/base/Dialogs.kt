@@ -77,7 +77,7 @@ public fun StreamDialogPositiveNegative(
     modifier: Modifier = Modifier,
     onDismiss: () -> Unit = {},
     dialogProperties: DialogProperties = DialogProperties(),
-    style: DialogStyle,
+    style: DialogStyle = VideoTheme.styles.dialogStyles.defaultDialogStyle(),
     title: String? = null,
     icon: ImageVector? = null,
     contentText: String? = null,

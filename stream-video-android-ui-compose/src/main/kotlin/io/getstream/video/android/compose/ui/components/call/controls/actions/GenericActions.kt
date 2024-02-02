@@ -86,13 +86,15 @@ public fun ToggleAction(
     disabledColor: Color? = null,
     enabledIconTint: Color? = null,
     disabledIconTint: Color? = null,
+    progress: Boolean = false,
     onStyle: StreamFixedSizeButtonStyle? = null,
     offStyle: StreamFixedSizeButtonStyle? = null,
     onAction: () -> Unit,
 ): Unit = StreamIconToggleButton(
     modifier = modifier,
     enabled = enabled,
-    toggleState = rememberUpdatedState(newValue = ToggleableState(!isActionActive)),
+    showProgress = progress,
+    toggleState = rememberUpdatedState(newValue = ToggleableState(isActionActive)),
     onIcon = iconOnOff.first,
     offIcon = iconOnOff.second,
     onStyle = onStyle ?: VideoTheme.styles.buttonStyles.primaryIconButtonStyle()

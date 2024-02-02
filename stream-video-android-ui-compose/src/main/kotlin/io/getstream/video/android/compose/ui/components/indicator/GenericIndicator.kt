@@ -41,7 +41,7 @@ internal fun GenericIndicator(
     backgroundColor: Color = VideoTheme.colors.baseSheetQuarternary,
     content: @Composable BoxScope.() -> Unit,
 ) {
-    val alphaColor = backgroundColor.copy(alpha = 0.3f)
+    // val alphaColor = backgroundColor.copy(alpha = 0.3f)
     Box(
         modifier = modifier.size(VideoTheme.dimens.componentHeightM),
     ) {
@@ -50,7 +50,7 @@ internal fun GenericIndicator(
             modifier = Modifier
                 .matchParentSize()
                 .background(
-                    color = alphaColor,
+                    color = backgroundColor,
                     shape = shape,
                 ),
         )

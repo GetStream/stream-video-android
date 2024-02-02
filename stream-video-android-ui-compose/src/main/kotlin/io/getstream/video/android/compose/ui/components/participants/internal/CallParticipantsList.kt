@@ -111,7 +111,7 @@ internal fun CallParticipantsList(
 @Composable
 private fun CallParticipantInfoItem(
     participant: ParticipantState,
-    onUserOptionsSelected: (ParticipantState) -> Unit,
+    onUserOptionsSelected: ((ParticipantState) -> Unit)? = null,
 ) {
     Row(
         modifier = Modifier.wrapContentWidth(),
@@ -164,14 +164,16 @@ private fun CallParticipantInfoItem(
 
             Spacer(modifier = Modifier.width(8.dp))
 
-            Icon(
-                modifier = Modifier.clickable { onUserOptionsSelected(participant) },
-                painter = painterResource(id = R.drawable.stream_video_ic_options),
-                tint = VideoTheme.colors.basePrimary,
-                contentDescription = null,
-            )
+            onUserOptionsSelected?.let {
+                Icon(
+                    modifier = Modifier.clickable { onUserOptionsSelected(participant) },
+                    painter = painterResource(id = R.drawable.stream_video_ic_options),
+                    tint = VideoTheme.colors.basePrimary,
+                    contentDescription = null,
+                )
 
-            Spacer(modifier = Modifier.width(8.dp))
+                Spacer(modifier = Modifier.width(8.dp))
+            }
         }
     }
 }

@@ -21,6 +21,7 @@ package io.getstream.video.android.ui.call
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AutoAwesome
 import androidx.compose.material.icons.rounded.AutoAwesome
@@ -32,12 +33,15 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.state.ToggleableState
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.IntOffset
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Popup
 import io.getstream.video.android.R
 import io.getstream.video.android.compose.theme.base.VideoTheme
 import io.getstream.video.android.compose.ui.components.base.StreamToggleButton
 import io.getstream.video.android.compose.ui.components.call.renderer.LayoutType
 import io.getstream.video.android.mock.StreamPreviewDataUtils
+import io.getstream.video.android.tooling.extensions.toPx
 
 private data class LayoutChooserDataItem(
     val which: LayoutType,
@@ -62,8 +66,17 @@ internal fun LayoutChooser(
     onLayoutChoice: (LayoutType) -> Unit,
     onDismiss: () -> Unit,
 ) {
-    Popup(onDismissRequest = onDismiss) {
-        Column(Modifier.background(VideoTheme.colors.baseSheetPrimary)) {
+    Popup(
+        offset = IntOffset(0, VideoTheme.dimens.generic3xl.toPx().toInt()),
+        onDismissRequest = onDismiss,
+    ) {
+        Column(
+            Modifier.background(
+                color = VideoTheme.colors.baseSheetPrimary,
+                shape = VideoTheme.shapes.sheet,
+            )
+                .width(300.dp),
+        ) {
             layouts.forEach { layout ->
 
                 val state = ToggleableState(layout.which == current)

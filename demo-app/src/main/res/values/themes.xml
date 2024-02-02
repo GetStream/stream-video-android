@@ -17,6 +17,6 @@
 <resources>
 
     <style name="Dogfooding" parent="Theme.AppCompat.NoActionBar">
-        <item name="android:statusBarColor">@color/stream_video_primary_accent</item>
+        <item name="android:statusBarColor">@color/stream_video_base_sheet_primary</item>
     </style>
 </resources>
