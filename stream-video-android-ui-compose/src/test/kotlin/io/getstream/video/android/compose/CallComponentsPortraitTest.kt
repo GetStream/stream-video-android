@@ -21,8 +21,6 @@ import app.cash.paparazzi.Paparazzi
 import io.getstream.video.android.compose.base.BaseComposeTest
 import io.getstream.video.android.compose.ui.components.call.CallAppBar
 import io.getstream.video.android.compose.ui.components.call.controls.ControlActions
-import io.getstream.video.android.compose.ui.components.call.controls.actions.RegularControlActions
-import io.getstream.video.android.compose.ui.components.participants.ParticipantIndicatorIcon
 import io.getstream.video.android.mock.previewCall
 import org.junit.Rule
 import org.junit.Test
@@ -44,7 +42,7 @@ internal class CallComponentsPortraitTest : BaseComposeTest() {
     @Test
     fun `snapshot RegularCallControls composable`() {
         snapshotWithDarkMode {
-            RegularControlActions(
+            ControlActions(
                 call = previewCall,
                 onCallAction = {},
             )
@@ -58,13 +56,6 @@ internal class CallComponentsPortraitTest : BaseComposeTest() {
                 call = previewCall,
                 onCallAction = {},
             )
-        }
-    }
-
-    @Test
-    fun `snapshot ParticipantIndicatorIcon composable`() {
-        snapshot {
-            ParticipantIndicatorIcon(number = 42) {}
         }
     }
 }

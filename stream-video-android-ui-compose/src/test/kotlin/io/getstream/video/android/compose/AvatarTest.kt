@@ -43,7 +43,6 @@ internal class AvatarTest : BaseComposeTest() {
             Avatar(
                 modifier = Modifier.size(72.dp),
                 initials = "Thierry",
-                textSize = textSize,
             )
         }
     }
