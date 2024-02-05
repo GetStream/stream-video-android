@@ -295,6 +295,7 @@ fun CallScreen(
                                             showParticipants = !showParticipants
                                         }
                                     }
+                                    Spacer(modifier = Modifier.size(VideoTheme.dimens.spacingM))
                                     ChatDialogAction(
                                         messageCount = unreadCount,
                                         onCallAction = { scope.launch { chatState.show() } },
@@ -479,7 +480,7 @@ fun CallScreen(
 
         if (showParticipants) {
             ParticipantsDialog(call) {
-                showParticipants = false
+                showParticipants = !showParticipants
             }
         }
 
