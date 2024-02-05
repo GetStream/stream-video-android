@@ -65,6 +65,9 @@ import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.testTagsAsResourceId
 import androidx.compose.ui.state.ToggleableState
+import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextAlign
@@ -170,13 +173,14 @@ private fun LoginContent(
     selectedEnv: StreamEnvironment?,
     availableLogins: List<String>,
 ) {
-    Box(
+    Column(
         modifier = Modifier
             .fillMaxSize()
             .background(color = VideoTheme.colors.baseSheetPrimary),
+        verticalArrangement = Arrangement.SpaceBetween
     ) {
         selectedEnv?.let {
-            Box(modifier = Modifier.align(Alignment.TopEnd)) {
+            Box(modifier = Modifier.align(Alignment.End)) {
                 SelectableDialog(
                     items = availableEnvs,
                     selectedItem = it,
@@ -189,7 +193,6 @@ private fun LoginContent(
         }
         Column(
             modifier = Modifier
-                .align(Alignment.Center)
                 .wrapContentHeight()
                 .fillMaxWidth()
                 .semantics { testTagsAsResourceId = true },
@@ -207,16 +210,25 @@ private fun LoginContent(
             Text(
                 modifier = Modifier.fillMaxWidth(),
                 textAlign = TextAlign.Center,
-                text = stringResource(id = R.string.app_name),
+                text = buildAnnotatedString {
+                                            append("Stream\n")
+                    append(
+                        AnnotatedString(
+                            "[Video Calling]\n",
+                            spanStyle = SpanStyle(VideoTheme.colors.brandGreen)
+                        )
+                    )
+                    append("Demo")
+                },
                 color = Color.White,
-                fontSize = 38.sp,
+                fontSize = 24.sp,
             )
             Spacer(modifier = Modifier.height(30.dp))
         }
 
         Column(
             modifier = Modifier
-                .align(Alignment.BottomCenter)
+                .align(Alignment.CenterHorizontally)
                 .background(
                     color = VideoTheme.colors.baseSheetSecondary,
                     shape = RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp),
@@ -291,7 +303,7 @@ private fun LoginContent(
 
         if (isLoading) {
             CircularProgressIndicator(
-                modifier = Modifier.align(Alignment.Center),
+                modifier = Modifier.align(Alignment.CenterHorizontally),
                 color = VideoTheme.colors.brandPrimary,
             )
         }
