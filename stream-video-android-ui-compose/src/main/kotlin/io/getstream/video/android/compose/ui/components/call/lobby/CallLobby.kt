@@ -133,7 +133,7 @@ public fun CallLobby(
             modifier = Modifier
                 .fillMaxWidth()
                 .height(280.dp)
-                .clip(RoundedCornerShape(12.dp))
+                .clip(RoundedCornerShape(12.dp)),
         ) {
             if (isCameraEnabled) {
                 onRenderedContent.invoke(video)
@@ -154,7 +154,7 @@ public fun CallLobby(
                 soundIndicatorContent = {
                     MicrophoneIndicator(
                         modifier = Modifier.padding(horizontal = VideoTheme.dimens.spacingM),
-                        isMicrophoneEnabled = isMicrophoneEnabled
+                        isMicrophoneEnabled = isMicrophoneEnabled,
                     )
                 },
                 isSpeaking = false,

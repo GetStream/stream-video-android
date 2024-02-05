@@ -99,7 +99,6 @@ import io.getstream.video.android.compose.ui.components.base.styling.StyleSize
 import io.getstream.video.android.mock.StreamPreviewDataUtils
 import io.getstream.video.android.mock.previewUsers
 import io.getstream.video.android.model.User
-import io.getstream.video.android.tooling.util.StreamEnvironments
 import io.getstream.video.android.tooling.util.StreamFlavors
 import io.getstream.video.android.util.config.AppConfig
 import io.getstream.video.android.util.config.types.StreamEnvironment
@@ -429,8 +428,7 @@ private fun AppName(env: StreamEnvironment? = null) {
 private fun Description(text: String) {
     Text(
         text = text,
-        style = VideoTheme.typography.bodyM
-        ,
+        style = VideoTheme.typography.bodyM,
         textAlign = TextAlign.Center,
         modifier = Modifier.widthIn(0.dp, 320.dp),
     )

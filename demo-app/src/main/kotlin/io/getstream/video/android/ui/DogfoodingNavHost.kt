@@ -78,7 +78,7 @@ fun AppNavHost(
         ) {
             CallLobbyScreen(
                 onBack = {
-                        navController.popBackStack()
+                    navController.popBackStack()
                 },
             )
         }

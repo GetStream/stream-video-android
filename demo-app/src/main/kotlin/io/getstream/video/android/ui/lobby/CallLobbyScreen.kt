@@ -19,7 +19,6 @@
 package io.getstream.video.android.ui.lobby
 
 import android.content.Intent
-import android.widget.Space
 import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -32,9 +31,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentWidth
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
@@ -161,7 +158,7 @@ private fun CallLobbyHeader(
 @Composable
 private fun CallLobbyHeaderContent(
     user: State<User?>,
-    onBack: () -> Unit
+    onBack: () -> Unit,
 ) {
     Row(
         modifier = Modifier
@@ -234,12 +231,12 @@ private fun CallLobbyBody(
             modifier = Modifier.size(36.dp),
             imageVector = Icons.Default.Language,
             tint = VideoTheme.colors.brandGreen,
-            contentDescription = ""
+            contentDescription = "",
         )
         Text(
             modifier = Modifier.padding(VideoTheme.dimens.spacingM),
             text = "Set up your test call",
-            style = VideoTheme.typography.titleS
+            style = VideoTheme.typography.titleS,
         )
         CallLobby(
             call = call,
@@ -273,25 +270,29 @@ private fun LobbyDescription(
 ) {
     val session by callLobbyViewModel.call.state.session.collectAsState()
     val participantsSize = session?.participants?.size ?: 0
-    val onClick = {
+
+    LobbyDescriptionContent(participantsSize = participantsSize) {
         callLobbyViewModel.handleUiEvent(
             CallLobbyEvent.JoinCall,
         )
     }
-
-
 }
 
 @Composable
 private fun LobbyDescriptionContent(participantsSize: Int, onClick: () -> Unit) {
     val text = if (participantsSize > 0) {
-        Pair(stringResource(
-            id = R.string.join_call_description,
-            participantsSize,
-        ), stringResource(id = R.string.join_call))
+        Pair(
+            stringResource(
+                id = R.string.join_call_description,
+                participantsSize,
+            ),
+            stringResource(id = R.string.join_call),
+        )
     } else {
-        Pair("Start a private test call. This demo is\nbuilt on Stream’s SDKs and runs on our \nglobal edge network.",
-            "Start a test call")
+        Pair(
+            "Start a private test call. This demo is\nbuilt on Stream’s SDKs and runs on our \nglobal edge network.",
+            "Start a test call",
+        )
     }
     Column(
         modifier = Modifier.padding(VideoTheme.dimens.spacingM),
@@ -301,13 +302,12 @@ private fun LobbyDescriptionContent(participantsSize: Int, onClick: () -> Unit) 
         Row(
             modifier = Modifier.wrapContentWidth(),
             horizontalArrangement = Arrangement.Center,
-            verticalAlignment = Alignment.CenterVertically
+            verticalAlignment = Alignment.CenterVertically,
         ) {
-
             Icon(
                 imageVector = Icons.Default.LockPerson,
                 tint = VideoTheme.colors.basePrimary,
-                contentDescription = ""
+                contentDescription = "",
             )
 
             Text(
@@ -360,9 +360,11 @@ private fun HandleCallLobbyUiState(
 private fun CallLobbyHeaderPreview() {
     StreamPreviewDataUtils.initializeStreamVideo(LocalContext.current)
     VideoTheme {
-        CallLobbyHeaderContent(user = remember {
-            mutableStateOf(previewUsers[0])
-        }) {
+        CallLobbyHeaderContent(
+            user = remember {
+                mutableStateOf(previewUsers[0])
+            },
+        ) {
         }
     }
 }
@@ -380,7 +382,6 @@ private fun CallLobbyBodyPreview() {
             onToggleCamera = {},
         ) {
             LobbyDescriptionContent(participantsSize = 0) {
-
             }
         }
     }
