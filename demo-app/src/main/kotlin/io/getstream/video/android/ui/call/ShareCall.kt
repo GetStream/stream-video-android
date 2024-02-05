@@ -83,7 +83,7 @@ public fun ShareSettingsBox(
     onShare: (String) -> Unit,
 ) {
     Box(
-        modifier = Modifier
+        modifier = modifier
             .background(
                 color = VideoTheme.colors.baseSheetTertiary,
                 shape = VideoTheme.shapes.dialog,

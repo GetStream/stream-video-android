@@ -356,7 +356,7 @@ fun CallScreen(
             },
         )
 
-        if (participantsSize.size == 1) {
+        if (participantsSize.size == 1 && !chatState.isVisible) {
             val context = LocalContext.current
             val clipboardManager = remember(context) {
                 context.getSystemService(Context.CLIPBOARD_SERVICE) as? ClipboardManager
