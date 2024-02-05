@@ -133,12 +133,7 @@ public fun CallLobby(
             modifier = Modifier
                 .fillMaxWidth()
                 .height(280.dp)
-                .padding(
-                    vertical = VideoTheme.dimens.spacingL,
-                    horizontal = VideoTheme.dimens.spacingS,
-                )
                 .clip(RoundedCornerShape(12.dp))
-                .background(VideoTheme.colors.baseSheetPrimary),
         ) {
             if (isCameraEnabled) {
                 onRenderedContent.invoke(video)
@@ -157,7 +152,10 @@ public fun CallLobby(
                 labelPosition = labelPosition,
                 hasAudio = isMicrophoneEnabled,
                 soundIndicatorContent = {
-                    MicrophoneIndicator(isMicrophoneEnabled = isMicrophoneEnabled)
+                    MicrophoneIndicator(
+                        modifier = Modifier.padding(horizontal = VideoTheme.dimens.spacingM),
+                        isMicrophoneEnabled = isMicrophoneEnabled
+                    )
                 },
                 isSpeaking = false,
             )
@@ -187,6 +185,7 @@ private fun OnRenderedContent(
     VideoRenderer(
         modifier = Modifier
             .fillMaxSize()
+            .background(VideoTheme.colors.baseSheetTertiary)
             .testTag("on_rendered_content"),
         call = call,
         video = video,
@@ -199,6 +198,7 @@ private fun OnDisabledContent(user: User) {
     Box(
         modifier = Modifier
             .fillMaxSize()
+            .background(VideoTheme.colors.baseSheetTertiary)
             .testTag("on_disabled_content"),
     ) {
         UserAvatar(

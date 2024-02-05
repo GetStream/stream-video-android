@@ -77,10 +77,8 @@ fun AppNavHost(
             arguments = listOf(navArgument("cid") { type = NavType.StringType }),
         ) {
             CallLobbyScreen(
-                navigateUpToLogin = {
-                    navController.navigate(AppScreens.Login.route) {
-                        popUpTo(AppScreens.CallJoin.route) { inclusive = true }
-                    }
+                onBack = {
+                        navController.popBackStack()
                 },
             )
         }

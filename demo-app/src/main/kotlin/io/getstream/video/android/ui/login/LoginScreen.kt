@@ -177,7 +177,7 @@ private fun LoginContent(
         modifier = Modifier
             .fillMaxSize()
             .background(color = VideoTheme.colors.baseSheetPrimary),
-        verticalArrangement = Arrangement.SpaceBetween
+        verticalArrangement = Arrangement.SpaceBetween,
     ) {
         selectedEnv?.let {
             Box(modifier = Modifier.align(Alignment.End)) {
@@ -211,14 +211,14 @@ private fun LoginContent(
                 modifier = Modifier.fillMaxWidth(),
                 textAlign = TextAlign.Center,
                 text = buildAnnotatedString {
-                                            append("Stream\n")
+                    append("Stream\n")
                     append(
                         AnnotatedString(
                             "[Video Calling]\n",
-                            spanStyle = SpanStyle(VideoTheme.colors.brandGreen)
-                        )
+                            spanStyle = SpanStyle(VideoTheme.colors.brandGreen),
+                        ),
                     )
-                    append("Demo")
+                    append(selectedEnv?.displayName ?: "")
                 },
                 color = Color.White,
                 fontSize = 24.sp,

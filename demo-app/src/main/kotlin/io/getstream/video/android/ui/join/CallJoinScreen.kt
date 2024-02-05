@@ -70,6 +70,9 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.testTagsAsResourceId
 import androidx.compose.ui.state.ToggleableState
+import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextAlign
@@ -96,7 +99,10 @@ import io.getstream.video.android.compose.ui.components.base.styling.StyleSize
 import io.getstream.video.android.mock.StreamPreviewDataUtils
 import io.getstream.video.android.mock.previewUsers
 import io.getstream.video.android.model.User
+import io.getstream.video.android.tooling.util.StreamEnvironments
 import io.getstream.video.android.tooling.util.StreamFlavors
+import io.getstream.video.android.util.config.AppConfig
+import io.getstream.video.android.util.config.types.StreamEnvironment
 
 @Composable
 fun CallJoinScreen(
@@ -313,6 +319,7 @@ private fun CallJoinBody(
     callJoinViewModel: CallJoinViewModel = hiltViewModel(),
     isNetworkAvailable: Boolean,
 ) {
+    val selectedEnv by AppConfig.currentEnvironment.collectAsStateWithLifecycle()
     val user by if (LocalInspectionMode.current) {
         remember { mutableStateOf(previewUsers[0]) }
     } else {
@@ -327,7 +334,7 @@ private fun CallJoinBody(
         ) {
             StreamLogo()
             Spacer(modifier = Modifier.height(25.dp))
-            AppName()
+            AppName(selectedEnv)
             Spacer(modifier = Modifier.height(25.dp))
             Description(text = stringResource(id = R.string.you_are_offline))
         }
@@ -399,12 +406,22 @@ private fun StreamLogo() {
 }
 
 @Composable
-private fun AppName() {
+private fun AppName(env: StreamEnvironment? = null) {
     Text(
-        modifier = Modifier.padding(horizontal = 30.dp),
-        text = stringResource(id = R.string.app_name),
-        style = VideoTheme.styles.textStyles.defaultTitle(StyleSize.S).default.platform,
+        modifier = Modifier.fillMaxWidth(),
         textAlign = TextAlign.Center,
+        text = buildAnnotatedString {
+            append("Stream\n")
+            append(
+                AnnotatedString(
+                    "[Video Calling]\n",
+                    spanStyle = SpanStyle(VideoTheme.colors.brandGreen),
+                ),
+            )
+            append(env?.displayName ?: "")
+        },
+        color = Color.White,
+        fontSize = 24.sp,
     )
 }
 
@@ -412,7 +429,8 @@ private fun AppName() {
 private fun Description(text: String) {
     Text(
         text = text,
-        style = VideoTheme.styles.textStyles.defaultLabel(StyleSize.S).default.platform,
+        style = VideoTheme.typography.bodyM
+        ,
         textAlign = TextAlign.Center,
         modifier = Modifier.widthIn(0.dp, 320.dp),
     )
