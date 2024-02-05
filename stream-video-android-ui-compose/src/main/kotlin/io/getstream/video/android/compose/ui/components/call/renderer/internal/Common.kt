@@ -93,8 +93,7 @@ internal fun SpotlightContentPortrait(
     content: @Composable () -> Unit,
 ) {
     Column(
-        modifier = modifier
-            .padding(VideoTheme.dimens.spacingS),
+        modifier = modifier,
     ) {
         Box(
             modifier = Modifier
@@ -123,7 +122,7 @@ internal fun SpotlightContentLandscape(
 ) {
     Row(
         modifier = modifier
-            .padding(VideoTheme.dimens.spacingS),
+            .padding(end = VideoTheme.dimens.spacingXs),
     ) {
         Box(
             modifier = Modifier

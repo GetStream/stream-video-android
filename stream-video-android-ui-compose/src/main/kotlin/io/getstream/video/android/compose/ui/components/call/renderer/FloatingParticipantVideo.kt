@@ -111,6 +111,8 @@ public fun BoxScope.FloatingParticipantVideo(
     val track by participant.videoTrack.collectAsStateWithLifecycle()
 
     if (LocalInspectionMode.current) {
+        val width = VideoTheme.dimens.genericMax * 2
+        val height = width * 1.2f
         Card(
             elevation = 8.dp,
             modifier = Modifier
@@ -119,8 +121,8 @@ public fun BoxScope.FloatingParticipantVideo(
                 .padding(VideoTheme.dimens.spacingS)
                 .onGloballyPositioned { videoSize = it.size }
                 .size(
-                    height = VideoTheme.dimens.genericMax * 1.2f,
-                    width = VideoTheme.dimens.genericMax,
+                    height = height,
+                    width = width,
                 )
                 .clip(VideoTheme.shapes.dialog),
             shape = RoundedCornerShape(16.dp),

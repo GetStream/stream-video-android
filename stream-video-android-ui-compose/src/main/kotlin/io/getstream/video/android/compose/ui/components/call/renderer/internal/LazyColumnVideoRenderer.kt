@@ -52,7 +52,7 @@ internal fun LazyColumnVideoRenderer(
     state: LazyListState = rememberLazyListState(),
     itemModifier: Modifier = Modifier.size(
         VideoTheme.dimens.genericMax * 1.8f,
-        VideoTheme.dimens.genericMax * 1.2f,
+        VideoTheme.dimens.genericMax,
     ),
     call: Call,
     participants: List<ParticipantState>,

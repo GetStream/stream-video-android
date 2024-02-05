@@ -67,7 +67,10 @@ internal fun LayoutChooser(
     onDismiss: () -> Unit,
 ) {
     Popup(
-        offset = IntOffset(0, VideoTheme.dimens.generic3xl.toPx().toInt()),
+        offset = IntOffset(
+            0,
+            (VideoTheme.dimens.componentHeightL + VideoTheme.dimens.spacingS).toPx().toInt(),
+        ),
         onDismissRequest = onDismiss,
     ) {
         Column(

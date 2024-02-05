@@ -178,20 +178,11 @@ private fun DefaultMediaTrackFallbackContent(
     Column(
         modifier = modifier
             .fillMaxSize()
-            .background(VideoTheme.colors.baseSheetPrimary)
+            .background(VideoTheme.colors.baseSheetTertiary)
             .testTag("video_renderer_fallback"),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center,
     ) {
-        Image(
-            modifier = modifier.fillMaxSize(),
-            painter = painterResource(
-                id = io.getstream.video.android.ui.common.R.drawable.stream_video_ic_preview_avatar,
-            ),
-            contentScale = ContentScale.Crop,
-            contentDescription = null,
-        )
-
         Text(
             modifier = Modifier.padding(30.dp),
             text = stringResource(
@@ -218,5 +209,14 @@ private fun VideoRendererPreview() {
                 sessionId = "",
             ),
         )
+    }
+}
+
+@Preview
+@Composable
+private fun VideoRendererFallbackPreview() {
+    StreamPreviewDataUtils.initializeStreamVideo(LocalContext.current)
+    VideoTheme {
+        DefaultMediaTrackFallbackContent(modifier = Modifier, call = previewCall)
     }
 }

@@ -20,11 +20,13 @@ package io.getstream.video.android.ui.call
 
 import android.content.ClipboardManager
 import android.content.Context
+import android.content.res.Configuration
 import android.widget.Toast
 import androidx.compose.animation.Crossfade
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.BoxWithConstraints
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -36,6 +38,7 @@ import androidx.compose.material.ModalBottomSheetValue
 import androidx.compose.material.Snackbar
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.People
 import androidx.compose.material.icons.filled.RadioButtonChecked
 import androidx.compose.material.rememberModalBottomSheetState
@@ -48,16 +51,20 @@ import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.vectorResource
+import androidx.compose.ui.state.ToggleableState
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.IntSize
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Popup
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.getstream.chat.android.ui.common.state.messages.list.MessageItemState
@@ -66,6 +73,7 @@ import io.getstream.video.android.R
 import io.getstream.video.android.compose.theme.base.VideoTheme
 import io.getstream.video.android.compose.ui.components.base.StreamBadgeBox
 import io.getstream.video.android.compose.ui.components.base.StreamDialogPositiveNegative
+import io.getstream.video.android.compose.ui.components.base.StreamIconToggleButton
 import io.getstream.video.android.compose.ui.components.call.CallAppBar
 import io.getstream.video.android.compose.ui.components.call.activecall.CallContent
 import io.getstream.video.android.compose.ui.components.call.controls.actions.ChatDialogAction
@@ -123,6 +131,7 @@ fun CallScreen(
     var showRecordingWarning by remember {
         mutableStateOf(false)
     }
+    val orientation = LocalConfiguration.current.orientation
     var showEndRecordingDialog by remember { mutableStateOf(false) }
     var acceptedCallRecording by remember { mutableStateOf(false) }
     val isRecording by call.state.recording.collectAsStateWithLifecycle()
@@ -131,6 +140,7 @@ fun CallScreen(
     var messagesVisibility by remember { mutableStateOf(false) }
     val scope = rememberCoroutineScope()
     val messageScope = rememberCoroutineScope()
+    var showingLandscapeControls by remember { mutableStateOf(false) }
 
     val connection by call.state.connection.collectAsStateWithLifecycle()
     val me by call.state.me.collectAsState()
@@ -147,6 +157,11 @@ fun CallScreen(
             onCallDisconnected.invoke()
         }
     }
+    val paddings = if (orientation == Configuration.ORIENTATION_PORTRAIT) {
+        PaddingValues(top = 8.dp, bottom = 16.dp)
+    } else {
+        PaddingValues(0.dp)
+    }
 
     VideoTheme {
         ChatDialog(
@@ -156,10 +171,11 @@ fun CallScreen(
                 BoxWithConstraints(modifier = Modifier.fillMaxSize()) {
                     CallContent(
                         modifier = Modifier
+                            .fillMaxSize()
+                            .padding(paddings)
                             .background(
                                 color = VideoTheme.colors.baseSheetPrimary,
-                            )
-                            .padding(vertical = VideoTheme.dimens.genericL),
+                            ),
                         call = call,
                         layout = layout,
                         enableInPictureInPicture = true,
@@ -186,10 +202,15 @@ fun CallScreen(
                                             isActionActive = !isShowingLayoutChooseMenu,
                                             iconOnOff = Pair(iconOnOff, iconOnOff),
                                         ) {
-                                            isShowingLayoutChooseMenu = !isShowingLayoutChooseMenu
+                                            isShowingLayoutChooseMenu =
+                                                !isShowingLayoutChooseMenu
                                         }
 
-                                        Spacer(modifier = Modifier.size(VideoTheme.dimens.spacingM))
+                                        Spacer(
+                                            modifier = Modifier.size(
+                                                VideoTheme.dimens.spacingM,
+                                            ),
+                                        )
 
                                         FlipCameraAction(
                                             onCallAction = { call.camera.flip() },
@@ -245,13 +266,12 @@ fun CallScreen(
                                                 }
                                             },
                                         )
-                                        Spacer(modifier = Modifier.size(VideoTheme.dimens.spacingM))
+                                        Spacer(
+                                            modifier = Modifier.size(
+                                                VideoTheme.dimens.spacingM,
+                                            ),
+                                        )
                                     }
-                                    ToggleCameraAction(
-                                        isCameraEnabled = isCameraEnabled,
-                                        onCallAction = { call.camera.setEnabled(it.isEnabled) },
-                                    )
-                                    Spacer(modifier = Modifier.size(VideoTheme.dimens.spacingM))
                                     ToggleMicrophoneAction(
                                         isMicrophoneEnabled = isMicrophoneEnabled,
                                         onCallAction = {
@@ -259,6 +279,11 @@ fun CallScreen(
                                                 it.isEnabled,
                                             )
                                         },
+                                    )
+                                    Spacer(modifier = Modifier.size(VideoTheme.dimens.spacingM))
+                                    ToggleCameraAction(
+                                        isCameraEnabled = isCameraEnabled,
+                                        onCallAction = { call.camera.setEnabled(it.isEnabled) },
                                     )
                                     Spacer(modifier = Modifier.size(VideoTheme.dimens.spacingM))
                                 }
@@ -335,6 +360,27 @@ fun CallScreen(
                             }
                         },
                     )
+                    if (orientation == Configuration.ORIENTATION_LANDSCAPE) {
+                        StreamIconToggleButton(
+                            modifier = Modifier
+                                .align(Alignment.TopEnd)
+                                .padding(VideoTheme.dimens.spacingM),
+                            toggleState = rememberUpdatedState(
+                                newValue = ToggleableState(
+                                    showingLandscapeControls,
+                                ),
+                            ),
+                            onIcon = Icons.Default.MoreVert,
+                            onStyle = VideoTheme.styles.buttonStyles.secondaryIconButtonStyle(),
+                            offStyle = VideoTheme.styles.buttonStyles.tetriaryIconButtonStyle(),
+                        ) {
+                            showingLandscapeControls = when (it) {
+                                ToggleableState.On -> false
+                                ToggleableState.Off -> true
+                                ToggleableState.Indeterminate -> false
+                            }
+                        }
+                    }
                 }
             },
             updateUnreadCount = { unreadCount = it },
@@ -356,7 +402,7 @@ fun CallScreen(
             },
         )
 
-        if (participantsSize.size == 1 && !chatState.isVisible) {
+        if (participantsSize.size == 1 && !chatState.isVisible && orientation == Configuration.ORIENTATION_PORTRAIT) {
             val context = LocalContext.current
             val clipboardManager = remember(context) {
                 context.getSystemService(Context.CLIPBOARD_SERVICE) as? ClipboardManager
@@ -364,7 +410,11 @@ fun CallScreen(
             val env = AppConfig.currentEnvironment.collectAsStateWithLifecycle()
             Popup(
                 alignment = Alignment.BottomCenter,
-                offset = IntOffset(0, -VideoTheme.dimens.generic3xl.toPx().toInt()),
+                offset = IntOffset(
+                    0,
+                    -(VideoTheme.dimens.componentHeightL + VideoTheme.dimens.spacingS).toPx()
+                        .toInt(),
+                ),
             ) {
                 ShareCallWithOthers(
                     modifier = Modifier.fillMaxWidth(),
@@ -378,6 +428,12 @@ fun CallScreen(
 
         if (speakingWhileMuted) {
             SpeakingWhileMuted()
+        }
+
+        if (showingLandscapeControls && orientation == Configuration.ORIENTATION_LANDSCAPE) {
+            LandscapeControls(call) {
+                showingLandscapeControls = !showingLandscapeControls
+            }
         }
 
         if (isShowingSettingMenu) {

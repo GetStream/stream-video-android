@@ -24,7 +24,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.Icon
 import androidx.compose.material.icons.Icons
@@ -52,6 +51,7 @@ import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Popup
+import androidx.compose.ui.window.PopupProperties
 import androidx.lifecycle.lifecycleScope
 import io.getstream.video.android.compose.theme.base.VideoTheme
 import io.getstream.video.android.compose.ui.components.base.StreamToggleButton
@@ -215,13 +215,13 @@ internal fun BoxScope.ParticipantActionsDialog(
     val coroutineScope = LocalLifecycleOwner.current.lifecycleScope
     Popup(
         offset = offset,
+        properties = PopupProperties(dismissOnClickOutside = true),
         onDismissRequest = onDismiss,
     ) {
         Column(
             Modifier
                 .background(VideoTheme.colors.baseSheetPrimary, shape = VideoTheme.shapes.dialog)
-                .align(Center)
-                .padding(VideoTheme.dimens.spacingM),
+                .align(Center),
         ) {
             actions.forEach {
                 if (it.condition(call, participant)) {

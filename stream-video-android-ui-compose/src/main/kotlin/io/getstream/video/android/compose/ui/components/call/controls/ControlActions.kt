@@ -19,7 +19,6 @@ package io.getstream.video.android.compose.ui.components.call.controls
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.runtime.Composable
@@ -56,7 +55,7 @@ public fun ControlActions(
     ),
 ) {
     Box(
-        modifier = modifier.fillMaxWidth(),
+        modifier = modifier,
     ) {
         LazyRow(
             verticalAlignment = Alignment.CenterVertically,

@@ -25,7 +25,6 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
-import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -36,7 +35,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material.AlertDialog
 import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
@@ -72,8 +70,10 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.window.Popup
 import androidx.core.content.ContextCompat.getString
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -87,6 +87,7 @@ import io.getstream.video.android.compose.ui.components.base.StreamTextField
 import io.getstream.video.android.compose.ui.components.base.styling.ButtonStyles
 import io.getstream.video.android.compose.ui.components.base.styling.IconStyles
 import io.getstream.video.android.compose.ui.components.base.styling.StreamDialogStyles
+import io.getstream.video.android.tooling.extensions.toPx
 import io.getstream.video.android.util.UserHelper
 import io.getstream.video.android.util.config.AppConfig
 import io.getstream.video.android.util.config.types.Flavor
@@ -360,38 +361,42 @@ fun SelectableDialog(
         if (items.size > 1) {
             StreamIconToggleButton(
                 toggleState = rememberUpdatedState(newValue = ToggleableState(showDialog)),
-                onClick = { showDialog = true },
-                onIcon = Icons.Outlined.Settings,
+                onClick = { showDialog = !showDialog },
+                onIcon = Icons.Default.Settings,
                 offIcon = Icons.Default.Settings,
                 onStyle = ButtonStyles.secondaryIconButtonStyle(),
                 offStyle = ButtonStyles.primaryIconButtonStyle(),
                 modifier = Modifier.padding(16.dp),
             )
             if (showDialog) {
-                AlertDialog(
-                    onDismissRequest = { showDialog = false },
-                    title = {
-                        Text("Available environments")
-                    },
-                    text = {
-                        FlowRow {
-                            items.forEach { item ->
-                                StreamButton(
-                                    text = item.displayName,
-                                    onClick = {
-                                        onItemSelected(item)
-                                        selectedText = item.displayName
-                                        showDialog = false
-                                    },
-                                    style = ButtonStyles.secondaryButtonStyle(),
-                                    modifier = Modifier.padding(8.dp),
-                                )
-                            }
+                Popup(
+                    alignment = Alignment.TopEnd,
+                    offset = IntOffset(
+                        0,
+                        (VideoTheme.dimens.componentHeightL + VideoTheme.dimens.spacingL).toPx()
+                            .toInt(),
+                    ),
+                ) {
+                    Column(
+                        Modifier.background(
+                            color = VideoTheme.colors.baseSheetTertiary,
+                            shape = VideoTheme.shapes.dialog,
+                        ),
+                    ) {
+                        items.forEach { item ->
+                            StreamButton(
+                                text = item.displayName,
+                                onClick = {
+                                    onItemSelected(item)
+                                    selectedText = item.displayName
+                                    showDialog = !showDialog
+                                },
+                                style = ButtonStyles.tetriaryButtonStyle(),
+                                modifier = Modifier.padding(8.dp),
+                            )
                         }
-                    },
-                    confirmButton = {},
-                    dismissButton = {},
-                )
+                    }
+                }
             }
         }
     }

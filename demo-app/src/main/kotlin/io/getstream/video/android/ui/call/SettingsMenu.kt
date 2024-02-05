@@ -30,6 +30,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.AutoGraph
 import androidx.compose.material.icons.filled.ShowChart
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -215,7 +216,11 @@ fun SettingsMenuItems(
     onShowStates: () -> Unit,
 ) {
     Popup(
-        offset = IntOffset(0, -VideoTheme.dimens.generic3xl.toPx().toInt()),
+
+        offset = IntOffset(
+            0,
+            -(VideoTheme.dimens.componentHeightL + VideoTheme.dimens.spacingS).toPx().toInt(),
+        ),
         alignment = Alignment.BottomStart,
         onDismissRequest = { onDismissed.invoke() },
         properties = PopupProperties(
@@ -240,7 +245,7 @@ fun SettingsMenuItems(
                 onClick = onScreenShareClick,
             )
             MenuEntry(
-                vector = Icons.Default.ShowChart,
+                vector = Icons.Default.AutoGraph,
                 icon = io.getstream.video.android.R.drawable.ic_layout_grid,
                 label = "Call stats",
                 onClick = onShowStates,
