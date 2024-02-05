@@ -23,7 +23,6 @@ import androidx.compose.material.icons.filled.StopCircle
 import androidx.compose.material.icons.filled.Videocam
 import androidx.compose.material.icons.filled.VideocamOff
 import androidx.compose.material.icons.outlined.Phone
-import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -32,7 +31,6 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import app.cash.paparazzi.DeviceConfig
@@ -55,7 +53,7 @@ import io.getstream.video.android.compose.ui.components.base.styling.StyleSize
 import org.junit.Rule
 import org.junit.Test
 
-internal class BaseComponentsTest :  BaseComposeTest() {
+internal class BaseComponentsTest : BaseComposeTest() {
 
     @get:Rule
     val paparazzi = Paparazzi(deviceConfig = DeviceConfig.PIXEL_4A)
@@ -504,7 +502,7 @@ internal class BaseComponentsTest :  BaseComposeTest() {
     }
 
     @Test
-    private fun `Badges with buttons`() {
+    fun `Badges with buttons`() {
         snapshot {
             Column {
                 StreamBadgeBox(
