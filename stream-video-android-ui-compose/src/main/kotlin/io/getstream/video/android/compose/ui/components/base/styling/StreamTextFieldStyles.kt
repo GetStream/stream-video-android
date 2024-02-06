@@ -50,7 +50,7 @@ public open class TextFieldStyleProvider {
                 // Background
                 backgroundColor = VideoTheme.colors.baseSheetPrimary,
                 // Border
-                focusedBorderColor = VideoTheme.colors.baseSenary,
+                focusedBorderColor = VideoTheme.colors.brandPrimary,
                 unfocusedBorderColor = VideoTheme.colors.baseSenary,
                 disabledBorderColor = VideoTheme.colors.baseSenary.copy(alpha = 0.16f),
                 errorBorderColor = VideoTheme.colors.alertWarning,

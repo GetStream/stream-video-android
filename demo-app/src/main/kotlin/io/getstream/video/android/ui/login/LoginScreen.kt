@@ -370,6 +370,7 @@ fun SelectableDialog(
             )
             if (showDialog) {
                 Popup(
+                    onDismissRequest = { showDialog = !showDialog },
                     alignment = Alignment.TopEnd,
                     offset = IntOffset(
                         0,

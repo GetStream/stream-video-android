@@ -76,7 +76,10 @@ public fun ParticipantsDialog(call: Call, onDismiss: () -> Unit) {
                     color = Color.Black,
                 ),
         ) {
-            IconButton(modifier = Modifier.align(Alignment.TopEnd), onClick = onDismiss) {
+            ParticipantsList(call = call)
+            IconButton(modifier = Modifier.align(Alignment.TopEnd), onClick = {
+                onDismiss()
+            }) {
                 Icon(
                     tint = Color.White,
                     imageVector = Icons.Default.Close,
@@ -84,7 +87,6 @@ public fun ParticipantsDialog(call: Call, onDismiss: () -> Unit) {
                 )
             }
             Spacer(modifier = Modifier.size(VideoTheme.dimens.spacingM))
-            ParticipantsList(call = call)
         }
     }
 }
@@ -119,9 +121,10 @@ fun ParticipantsListContent(
             )
             Spacer(modifier = Modifier.size(16.dp))
             val env = AppConfig.currentEnvironment.collectAsStateWithLifecycle()
-
             ShareCallWithOthers(
-                modifier = Modifier.fillMaxWidth().padding(16.dp),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp),
                 call,
                 clipboardManager,
                 env,

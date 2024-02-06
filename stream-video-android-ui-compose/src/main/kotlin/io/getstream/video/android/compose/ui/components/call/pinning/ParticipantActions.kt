@@ -21,8 +21,6 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.ExperimentalLayoutApi
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.Icon
@@ -51,7 +49,6 @@ import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Popup
-import androidx.compose.ui.window.PopupProperties
 import androidx.lifecycle.lifecycleScope
 import io.getstream.video.android.compose.theme.base.VideoTheme
 import io.getstream.video.android.compose.ui.components.base.StreamToggleButton
@@ -164,7 +161,6 @@ private fun BoxScope.ParticipantActionsWithoutState(
 ) {
     val buttonPosition = remember { mutableStateOf(Offset.Zero) }
     val buttonSize = remember { mutableStateOf(IntSize.Zero) }
-    var showDialog1 = showDialog
     if (actions.any {
             it.condition.invoke(call, participant)
         }
@@ -186,7 +182,7 @@ private fun BoxScope.ParticipantActionsWithoutState(
             )
         }
 
-        if (showDialog1) {
+        if (showDialog) {
             ParticipantActionsDialog(
                 offset = IntOffset(
                     x = buttonPosition.value.x.toInt(),
@@ -196,14 +192,13 @@ private fun BoxScope.ParticipantActionsWithoutState(
                 participant = participant,
                 actions = actions,
                 onDismiss = {
-                    showDialog1 = false
+                    onClick()
                 },
             )
         }
     }
 }
 
-@OptIn(ExperimentalLayoutApi::class)
 @Composable
 internal fun BoxScope.ParticipantActionsDialog(
     call: Call,
@@ -215,19 +210,18 @@ internal fun BoxScope.ParticipantActionsDialog(
     val coroutineScope = LocalLifecycleOwner.current.lifecycleScope
     Popup(
         offset = offset,
-        properties = PopupProperties(dismissOnClickOutside = true),
         onDismissRequest = onDismiss,
     ) {
         Column(
             Modifier
                 .background(VideoTheme.colors.baseSheetPrimary, shape = VideoTheme.shapes.dialog)
-                .align(Center),
+                .align(Center)
+                .width(220.dp),
         ) {
             actions.forEach {
                 if (it.condition(call, participant)) {
-                    Spacer(modifier = Modifier.height(VideoTheme.dimens.spacingM))
                     StreamToggleButton(
-                        modifier = Modifier.width(200.dp),
+                        modifier = Modifier.width(220.dp),
                         toggleState = rememberUpdatedState(
                             newValue = ToggleableState(!it.firstToggleAction),
                         ),
@@ -238,6 +232,7 @@ internal fun BoxScope.ParticipantActionsDialog(
                         offStyle = VideoTheme.styles.buttonStyles.toggleButtonStyleOff(),
                     ) { _ ->
                         it.action.invoke(coroutineScope, call, participant)
+                        onDismiss()
                     }
                 }
             }

@@ -158,7 +158,7 @@ fun CallScreen(
         }
     }
     val paddings = if (orientation == Configuration.ORIENTATION_PORTRAIT) {
-        PaddingValues(top = 8.dp, bottom = 16.dp)
+        PaddingValues(start = 4.dp, end = 4.dp, top = 8.dp, bottom = 16.dp)
     } else {
         PaddingValues(0.dp)
     }
@@ -191,6 +191,7 @@ fun CallScreen(
                         },
                         appBarContent = {
                             CallAppBar(
+                                modifier = Modifier.padding(horizontal = 8.dp),
                                 call = call,
                                 leadingContent = {
                                     val iconOnOff = ImageVector.vectorResource(
@@ -233,7 +234,8 @@ fun CallScreen(
                         },
                         controlsContent = {
                             Row(
-                                modifier = Modifier.fillMaxWidth(),
+                                modifier = Modifier.fillMaxWidth()
+                                    .padding(horizontal = 8.dp),
                                 verticalAlignment = Alignment.CenterVertically,
                                 horizontalArrangement = Arrangement.SpaceBetween,
                             ) {

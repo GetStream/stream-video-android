@@ -268,6 +268,9 @@ private fun CallJoinHeader(
 
             if (showMenu) {
                 Popup(
+                    onDismissRequest = {
+                        showMenu = !showMenu
+                    },
                     offset = popupPosition,
                 ) {
                     Column(

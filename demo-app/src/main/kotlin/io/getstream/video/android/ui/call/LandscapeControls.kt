@@ -23,14 +23,15 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CallEnd
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
@@ -47,6 +48,7 @@ import io.getstream.video.android.mock.StreamPreviewDataUtils
 import io.getstream.video.android.mock.previewCall
 import io.getstream.video.android.tooling.extensions.toPx
 
+@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun LandscapeControls(call: Call, onDismiss: () -> Unit) {
     val isCameraEnabled by call.camera.isEnabled.collectAsStateWithLifecycle()
@@ -62,6 +64,7 @@ fun LandscapeControls(call: Call, onDismiss: () -> Unit) {
     }
 
     Popup(
+        onDismissRequest = onDismiss,
         alignment = Alignment.TopEnd,
         offset = IntOffset(
             0,
@@ -76,7 +79,7 @@ fun LandscapeControls(call: Call, onDismiss: () -> Unit) {
             mic = toggleMicrophone,
             onClick = onClick,
         ) {
-            onDismiss
+            onDismiss()
         }
     }
 }
@@ -91,19 +94,13 @@ fun LandscapeControlsContent(
     onClick: () -> Unit,
     onDismiss: () -> Unit,
 ) {
-    val fraction = if (LocalInspectionMode.current) {
-        1f
-    } else {
-        0.5f
-    }
-
     Box(
         modifier = Modifier
             .background(
                 color = VideoTheme.colors.baseSheetPrimary,
                 shape = VideoTheme.shapes.dialog,
             )
-            .fillMaxWidth(fraction),
+            .width(400.dp),
     ) {
         Column(
             modifier = Modifier
