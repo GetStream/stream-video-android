@@ -31,6 +31,7 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalInspectionMode
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.skydoves.landscapist.ImageOptions
@@ -133,7 +134,7 @@ public fun ParticipantImageBackground(
                 modifier.fillMaxSize()
             },
             imageModel = { userImage },
-            previewPlaceholder = R.drawable.stream_video_call_sample,
+            previewPlaceholder = painterResource(id = R.drawable.stream_video_call_sample),
             imageOptions = ImageOptions(
                 contentScale = ContentScale.Crop,
                 contentDescription = null,
