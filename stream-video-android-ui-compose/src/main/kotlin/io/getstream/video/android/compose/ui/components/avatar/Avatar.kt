@@ -127,7 +127,7 @@ public fun Avatar(
             contentScale = contentScale,
             requestSize = requestSize,
         ),
-        previewPlaceholder = previewPlaceholder,
+        previewPlaceholder = painterResource(id = previewPlaceholder),
         component = rememberImageComponent {
             +CrossfadePlugin()
             loadingPlaceholder?.let {
