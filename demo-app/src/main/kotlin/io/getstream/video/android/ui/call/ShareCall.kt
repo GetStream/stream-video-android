@@ -116,7 +116,7 @@ public fun ShareSettingsBox(
             ) {
                 Row {
                     Text(
-                        text = "Call ID:",
+                        text = "Call ID: ",
                         style = TextStyle(
                             fontSize = 16.sp,
                             lineHeight = 20.sp,
