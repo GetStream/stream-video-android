@@ -30,6 +30,7 @@ import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.testTagsAsResourceId
+import io.getstream.video.android.compose.theme.base.StreamRippleTheme
 import io.getstream.video.android.core.mapper.ReactionMapper
 
 /**
@@ -38,6 +39,7 @@ import io.getstream.video.android.core.mapper.ReactionMapper
 private val LocalColors = compositionLocalOf<StreamColors> {
     error("No colors provided! Make sure to wrap all usages of Stream components in a VideoTheme.")
 }
+
 private val LocalDimens = compositionLocalOf<StreamDimens> {
     error("No dimens provided! Make sure to wrap all usages of Stream components in a VideoTheme.")
 }
@@ -68,6 +70,7 @@ private val LocalReactionMapper = compositionLocalOf<ReactionMapper> {
  * @param reactionMapper Defines a mapper of the emoji code from the reaction events.
  * @param content The content shown within the theme wrapper.
  */
+@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 public fun VideoTheme(
     isInDarkMode: Boolean = isSystemInDarkTheme(),

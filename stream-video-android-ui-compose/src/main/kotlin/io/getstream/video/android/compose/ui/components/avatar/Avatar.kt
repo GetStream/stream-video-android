@@ -43,7 +43,8 @@ import com.skydoves.landscapist.animation.crossfade.CrossfadePlugin
 import com.skydoves.landscapist.coil.CoilImage
 import com.skydoves.landscapist.components.rememberImageComponent
 import com.skydoves.landscapist.placeholder.placeholder.PlaceholderPlugin
-import io.getstream.video.android.compose.theme.VideoTheme
+import io.getstream.video.android.compose.theme.base.VideoTheme
+import io.getstream.video.android.compose.ui.components.base.styling.StyleSize
 import io.getstream.video.android.ui.common.R
 
 /**
@@ -68,11 +69,15 @@ public fun Avatar(
     modifier: Modifier = Modifier,
     imageUrl: String? = null,
     initials: String? = null,
-    shape: Shape = VideoTheme.shapes.avatar,
-    textStyle: TextStyle = VideoTheme.typography.title3Bold,
+    shape: Shape = VideoTheme.shapes.circle,
+    textSize: StyleSize = StyleSize.XL,
+    textStyle: TextStyle = VideoTheme.typography.titleM,
     contentScale: ContentScale = ContentScale.Crop,
     contentDescription: String? = null,
-    requestSize: IntSize = IntSize(DEFAULT_IMAGE_SIZE, DEFAULT_IMAGE_SIZE),
+    requestSize: IntSize = IntSize(
+        DEFAULT_IMAGE_SIZE,
+        DEFAULT_IMAGE_SIZE,
+    ),
     @DrawableRes previewPlaceholder: Int =
         LocalAvatarPreviewProvider.getLocalAvatarPreviewPlaceholder(),
     @DrawableRes loadingPlaceholder: Int? =
@@ -97,9 +102,9 @@ public fun Avatar(
         InitialsAvatar(
             modifier = modifier,
             initials = initials,
+            textSize = textSize,
             shape = shape,
             textStyle = textStyle,
-            avatarOffset = initialsAvatarOffset,
         )
         return
     }

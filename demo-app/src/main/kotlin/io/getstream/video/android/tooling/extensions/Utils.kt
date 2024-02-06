@@ -14,12 +14,14 @@
  * limitations under the License.
  */
 
-package io.getstream.video.android.ui.theme
+package io.getstream.video.android.tooling.extensions
 
-import androidx.compose.ui.graphics.Color
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.unit.Dp
 
-object Colors {
-    val background: Color = Color(0xFF2C2C2E)
-    val secondBackground: Color = Color(0xFF1C1E22)
-    val description: Color = Color(0xFF979797)
+@Composable
+fun Dp.toPx(): Float {
+    val density = LocalDensity.current.density
+    return this.value * density
 }

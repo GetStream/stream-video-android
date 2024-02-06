@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+     Copyright (c) 2024 Stream.io Inc. All rights reserved.
+
+     Licensed under the Stream License;
+     you may not use this file except in compliance with the License.
+     You may obtain a copy of the License at
+
+          https://github.com/GetStream/stream-video-android/blob/main/LICENSE
+
+     Unless required by applicable law or agreed to in writing, software
+     distributed under the License is distributed on an "AS IS" BASIS,
+     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     See the License for the specific language governing permissions and
+     limitations under the License.
+-->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="25dp"
+    android:height="24dp"
+    android:viewportWidth="25"
+    android:viewportHeight="24">
+  <path
+      android:pathData="M20.5,3L4.5,3C3.95,3 3.5,3.45 3.5,4L3.5,12C3.5,12.55 3.95,13 4.5,13L20.5,13C21.05,13 21.5,12.55 21.5,12L21.5,4C21.5,3.45 21.05,3 20.5,3ZM11.5,20L11.5,16C11.5,15.45 11.05,15 10.5,15L4.5,15C3.95,15 3.5,15.45 3.5,16L3.5,20C3.5,20.55 3.95,21 4.5,21L10.5,21C11.05,21 11.5,20.55 11.5,20Z"
+      android:fillColor="#E3E4E5"/>
+  <path
+      android:pathData="M21.446,16L21.446,20C21.446,20.55 20.996,21 20.446,21L14.446,21C13.896,21 13.446,20.55 13.446,20L13.446,16C13.446,15.45 13.896,15 14.446,15L20.446,15C20.996,15 21.446,15.45 21.446,16Z"
+      android:fillColor="#E3E4E5"/>
+</vector>

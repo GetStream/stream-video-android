@@ -36,12 +36,11 @@ import dagger.hilt.android.AndroidEntryPoint
 import io.getstream.android.push.permissions.NotificationPermissionManager
 import io.getstream.android.push.permissions.NotificationPermissionStatus
 import io.getstream.log.taggedLogger
-import io.getstream.video.android.compose.theme.VideoTheme
+import io.getstream.video.android.compose.theme.base.VideoTheme
 import io.getstream.video.android.core.StreamVideo
 import io.getstream.video.android.datastore.delegate.StreamUserDataStore
 import io.getstream.video.android.model.StreamCallId
 import io.getstream.video.android.ui.call.CallActivity
-import io.getstream.video.android.ui.theme.Colors
 import io.getstream.video.android.util.InitializedState
 import io.getstream.video.android.util.StreamVideoInitHelper
 import kotlinx.coroutines.flow.collectLatest
@@ -65,11 +64,11 @@ class DeeplinkingActivity : ComponentActivity() {
                 Box(
                     modifier = Modifier
                         .fillMaxSize()
-                        .background(Colors.background),
+                        .background(VideoTheme.colors.baseSheetPrimary),
                 ) {
                     CircularProgressIndicator(
                         modifier = Modifier.align(Alignment.Center),
-                        color = VideoTheme.colors.primaryAccent,
+                        color = VideoTheme.colors.brandPrimary,
                     )
                 }
             }

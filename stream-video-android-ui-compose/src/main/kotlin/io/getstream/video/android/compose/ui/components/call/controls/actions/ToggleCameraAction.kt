@@ -16,20 +16,20 @@
 
 package io.getstream.video.android.compose.ui.components.call.controls.actions
 
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material.Icon
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Videocam
+import androidx.compose.material.icons.filled.VideocamOff
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
-import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.unit.dp
+import androidx.compose.ui.tooling.preview.Preview
 import io.getstream.video.android.compose.theme.VideoTheme
+import io.getstream.video.android.compose.ui.components.base.styling.StreamFixedSizeButtonStyle
 import io.getstream.video.android.core.call.state.CallAction
 import io.getstream.video.android.core.call.state.ToggleCamera
-import io.getstream.video.android.ui.common.R
 
 /**
  * A call action button represents toggling a camera.
@@ -44,43 +44,42 @@ public fun ToggleCameraAction(
     modifier: Modifier = Modifier,
     isCameraEnabled: Boolean,
     enabled: Boolean = true,
-    shape: Shape = VideoTheme.shapes.callControlsButton,
-    enabledColor: Color = VideoTheme.colors.callActionIconEnabledBackground,
-    disabledColor: Color = VideoTheme.colors.callActionIconDisabledBackground,
-    enabledIconTint: Color = VideoTheme.colors.callActionIconEnabled,
-    disabledIconTint: Color = VideoTheme.colors.callActionIconDisabled,
+    shape: Shape? = null,
+    enabledColor: Color? = null,
+    disabledColor: Color? = null,
+    enabledIconTint: Color? = null,
+    disabledIconTint: Color? = null,
+    onStyle: StreamFixedSizeButtonStyle? = null,
+    offStyle: StreamFixedSizeButtonStyle? = null,
     onCallAction: (ToggleCamera) -> Unit,
+): Unit = ToggleAction(
+    modifier = modifier,
+    enabled = enabled,
+    shape = shape,
+    enabledColor = enabledColor,
+    disabledColor = disabledColor,
+    enabledIconTint = enabledIconTint,
+    disabledIconTint = disabledIconTint,
+    isActionActive = isCameraEnabled,
+    onStyle = onStyle,
+    offStyle = offStyle,
+    iconOnOff = Pair(Icons.Default.Videocam, Icons.Default.VideocamOff),
 ) {
-    val cameraIcon = painterResource(
-        id = if (isCameraEnabled) {
-            R.drawable.stream_video_ic_videocam_on
-        } else {
-            R.drawable.stream_video_ic_videocam_off
-        },
-    )
+    onCallAction(ToggleCamera(isCameraEnabled.not()))
+}
 
-    CallControlActionBackground(
-        modifier = modifier,
-        isEnabled = isCameraEnabled,
-        shape = shape,
-        enabledColor = enabledColor,
-        disabledColor = disabledColor,
-    ) {
-        Icon(
-            modifier = Modifier
-                .padding(13.dp)
-                .clickable(enabled = enabled) {
-                    onCallAction(
-                        ToggleCamera(isCameraEnabled.not()),
-                    )
-                },
-            tint = if (isCameraEnabled) {
-                enabledIconTint
-            } else {
-                disabledIconTint
-            },
-            painter = cameraIcon,
-            contentDescription = stringResource(R.string.stream_video_call_controls_toggle_camera),
-        )
+@Preview
+@Composable
+public fun ToggleCameraActionPreview() {
+    io.getstream.video.android.compose.theme.base.VideoTheme {
+        Column {
+            Row {
+                ToggleCameraAction(isCameraEnabled = false) {
+                }
+
+                ToggleCameraAction(isCameraEnabled = true) {
+                }
+            }
+        }
     }
 }

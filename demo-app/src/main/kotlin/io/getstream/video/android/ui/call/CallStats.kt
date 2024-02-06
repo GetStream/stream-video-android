@@ -72,8 +72,9 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import io.getstream.video.android.compose.theme.VideoTheme
+import io.getstream.video.android.compose.theme.base.VideoTheme
 import io.getstream.video.android.compose.ui.components.avatar.UserAvatar
+import io.getstream.video.android.compose.ui.components.base.styling.StyleSize
 import io.getstream.video.android.core.Call
 import io.getstream.video.android.mock.StreamPreviewDataUtils
 import io.getstream.video.android.mock.previewCall
@@ -229,7 +230,7 @@ fun HeaderWithIconAndBody(icon: ImageVector, header: String, body: String) {
             style = TextStyle(
                 fontSize = 16.sp,
                 fontWeight = FontWeight(400),
-                color = VideoTheme.colors.textLowEmphasis,
+                color = VideoTheme.colors.basePrimary,
             ),
         )
     }
@@ -341,6 +342,7 @@ fun UserAndCallId(call: Call, clipboardManager: ClipboardManager?) {
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 UserAvatar(
+                    textSize = StyleSize.S,
                     modifier = Modifier.size(44.dp),
                     userName = call.user.userNameOrId,
                     userImage = call.user.image,
@@ -362,7 +364,7 @@ fun UserAndCallId(call: Call, clipboardManager: ClipboardManager?) {
                             fontSize = 16.sp,
                             lineHeight = 16.sp,
                             fontWeight = FontWeight.W400,
-                            color = VideoTheme.colors.textLowEmphasis,
+                            color = VideoTheme.colors.baseSecondary,
                         ),
                     )
                 }

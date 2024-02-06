@@ -27,7 +27,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
-import io.getstream.video.android.compose.theme.VideoTheme
+import io.getstream.video.android.compose.theme.base.VideoTheme
 import io.getstream.video.android.compose.ui.components.call.renderer.ParticipantVideo
 import io.getstream.video.android.compose.ui.components.call.renderer.ScreenSharingVideoRendererStyle
 import io.getstream.video.android.compose.ui.components.call.renderer.VideoRendererStyle
@@ -51,8 +51,8 @@ import io.getstream.video.android.mock.previewParticipantsList
 internal fun LazyRowVideoRenderer(
     modifier: Modifier = Modifier,
     itemModifier: Modifier = Modifier.size(
-        VideoTheme.dimens.screenShareParticipantItemSize * 1.5f,
-        VideoTheme.dimens.screenShareParticipantItemSize,
+        VideoTheme.dimens.genericMax * 1.8f,
+        VideoTheme.dimens.genericMax,
     ),
     call: Call,
     participants: List<ParticipantState>,
@@ -77,14 +77,14 @@ internal fun LazyRowVideoRenderer(
         state = state,
         modifier = modifier,
         horizontalArrangement = Arrangement.spacedBy(
-            VideoTheme.dimens.screenShareParticipantsListItemMargin,
+            VideoTheme.dimens.spacingXs,
         ),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         itemsIndexed(items = participants, key = { _, it -> it.sessionId }) { index, participant ->
             ListVideoRenderer(
                 modifier = itemModifier.startOrEndPadding(
-                    value = VideoTheme.dimens.participantsGridPadding,
+                    value = VideoTheme.dimens.spacingXs,
                     index = index,
                     first = 0,
                     last = participants.lastIndex,

@@ -19,6 +19,7 @@
 package io.getstream.video.android.ui.lobby
 
 import android.content.Intent
+import android.content.res.Configuration
 import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -28,15 +29,21 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.material.CircularProgressIndicator
+import androidx.compose.material.Icon
+import androidx.compose.material.IconButton
 import androidx.compose.material.Text
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Language
+import androidx.compose.material.icons.filled.LockPerson
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.State
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -44,55 +51,59 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.testTagsAsResourceId
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.lifecycle.SavedStateHandle
-import com.google.android.gms.auth.api.signin.GoogleSignIn
-import com.google.android.gms.auth.api.signin.GoogleSignInOptions
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.getstream.video.android.BuildConfig
 import io.getstream.video.android.R
-import io.getstream.video.android.compose.theme.VideoTheme
+import io.getstream.video.android.compose.theme.base.VideoTheme
 import io.getstream.video.android.compose.ui.components.avatar.UserAvatar
+import io.getstream.video.android.compose.ui.components.base.StreamButton
+import io.getstream.video.android.compose.ui.components.base.styling.StyleSize
 import io.getstream.video.android.compose.ui.components.call.lobby.CallLobby
+import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.call.state.ToggleCamera
 import io.getstream.video.android.core.call.state.ToggleMicrophone
-import io.getstream.video.android.datastore.delegate.StreamUserDataStore
 import io.getstream.video.android.mock.StreamPreviewDataUtils
-import io.getstream.video.android.tooling.util.StreamFlavors
+import io.getstream.video.android.mock.previewCall
+import io.getstream.video.android.mock.previewUsers
+import io.getstream.video.android.model.User
 import io.getstream.video.android.ui.call.CallActivity
-import io.getstream.video.android.ui.theme.Colors
-import io.getstream.video.android.ui.theme.StreamButton
+import io.getstream.video.android.util.LockScreenOrientation
 import kotlinx.coroutines.delay
 
 @Composable
 fun CallLobbyScreen(
     callLobbyViewModel: CallLobbyViewModel = hiltViewModel(),
-    navigateUpToLogin: () -> Unit,
+    onBack: () -> Unit,
 ) {
+    LockScreenOrientation(orientation = Configuration.ORIENTATION_PORTRAIT)
     val isLoading by callLobbyViewModel.isLoading.collectAsState()
+    val isMicrophoneEnabled by callLobbyViewModel.microphoneEnabled.collectAsStateWithLifecycle()
+    val isCameraEnabled by callLobbyViewModel.cameraEnabled.collectAsStateWithLifecycle()
+    val call by remember {
+        mutableStateOf(callLobbyViewModel.call)
+    }
 
     Box(modifier = Modifier.fillMaxSize()) {
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .background(Colors.background)
+                .background(VideoTheme.colors.baseSheetPrimary)
                 .testTag("call_lobby"),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
             CallLobbyHeader(
-                navigateUpToLogin = navigateUpToLogin,
+                onBack = onBack,
                 callLobbyViewModel = callLobbyViewModel,
             )
 
@@ -101,14 +112,24 @@ fun CallLobbyScreen(
                     .align(Alignment.CenterHorizontally)
                     .fillMaxWidth()
                     .weight(1f),
-                callLobbyViewModel = callLobbyViewModel,
-            )
+                isMicrophoneEnabled = isMicrophoneEnabled,
+                isCameraEnabled = isCameraEnabled,
+                onToggleCamera = {
+                    callLobbyViewModel.enableCamera(it)
+                },
+                onToggleMicrophone = {
+                    callLobbyViewModel.enableMicrophone(it)
+                },
+                call = call,
+            ) {
+                LobbyDescription(callLobbyViewModel = callLobbyViewModel)
+            }
         }
 
         if (isLoading) {
             CircularProgressIndicator(
                 modifier = Modifier.align(Alignment.Center),
-                color = VideoTheme.colors.primaryAccent,
+                color = VideoTheme.colors.brandPrimary,
             )
         }
     }
@@ -117,7 +138,7 @@ fun CallLobbyScreen(
 @Composable
 private fun CallLobbyHeader(
     callLobbyViewModel: CallLobbyViewModel = hiltViewModel(),
-    navigateUpToLogin: () -> Unit,
+    onBack: () -> Unit,
 ) {
     val uiState by callLobbyViewModel.uiState.collectAsState(initial = CallLobbyUiState.Nothing)
     val isLoggedOut by callLobbyViewModel.isLoggedOut.collectAsState(initial = false)
@@ -128,15 +149,31 @@ private fun CallLobbyHeader(
         callLobbyViewModel = callLobbyViewModel,
     )
 
+    CallLobbyHeaderContent(user, onBack)
+
+    LaunchedEffect(key1 = isLoggedOut) {
+        if (isLoggedOut) {
+            onBack.invoke()
+        }
+    }
+}
+
+@Composable
+private fun CallLobbyHeaderContent(
+    user: State<User?>,
+    onBack: () -> Unit,
+) {
     Row(
         modifier = Modifier
-            .fillMaxWidth()
-            .padding(24.dp),
+            .padding(VideoTheme.dimens.spacingM)
+            .fillMaxWidth(),
+        horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically,
     ) {
         val userValue = user.value
         if (userValue != null) {
             UserAvatar(
+                textSize = StyleSize.S,
                 modifier = Modifier.size(32.dp),
                 userName = userValue.userNameOrId,
                 userImage = userValue.image,
@@ -153,96 +190,80 @@ private fun CallLobbyHeader(
             maxLines = 1,
             fontSize = 16.sp,
         )
-
-        if (BuildConfig.FLAVOR == StreamFlavors.development) {
-            Spacer(modifier = Modifier.width(4.dp))
-
-            StreamButton(
-                modifier = Modifier.width(125.dp),
-                text = stringResource(id = R.string.sign_out),
-                onClick = { callLobbyViewModel.signOut() },
+        IconButton(
+            modifier = Modifier
+                .padding(8.dp),
+            onClick = {
+                onBack()
+            },
+        ) {
+            Icon(
+                imageVector = Icons.Default.Close,
+                contentDescription = null,
+                tint = VideoTheme.colors.basePrimary,
             )
-        }
-    }
-
-    LaunchedEffect(key1 = isLoggedOut) {
-        if (isLoggedOut) {
-            navigateUpToLogin.invoke()
         }
     }
 }
 
+@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 private fun CallLobbyBody(
-    modifier: Modifier,
-    callLobbyViewModel: CallLobbyViewModel = hiltViewModel(),
+    modifier: Modifier = Modifier,
+    call: Call,
+    isCameraEnabled: Boolean,
+    isMicrophoneEnabled: Boolean,
+    onToggleCamera: (Boolean) -> Unit,
+    onToggleMicrophone: (Boolean) -> Unit,
+    description: @Composable () -> Unit,
 ) {
-    val call by remember { mutableStateOf(callLobbyViewModel.call) }
-
     Column(
         modifier = modifier
             .fillMaxSize()
-            .background(Colors.background)
+            .background(VideoTheme.colors.baseSheetPrimary)
             .semantics { testTagsAsResourceId = true },
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
-        Text(
-            modifier = Modifier.padding(horizontal = 30.dp),
-            text = stringResource(id = R.string.stream_video),
-            color = Color.White,
-            fontSize = 26.sp,
-            textAlign = TextAlign.Center,
+        // Text and Spacer elements remain unchanged
+
+        // LaunchedEffect to handle initial setup might need adjustments
+        // based on how you handle benchmarks or initial setup externally
+
+        Icon(
+            modifier = Modifier.size(36.dp),
+            imageVector = Icons.Default.Language,
+            tint = VideoTheme.colors.brandGreen,
+            contentDescription = "",
         )
-
-        Spacer(modifier = Modifier.height(4.dp))
-
         Text(
-            modifier = Modifier.padding(horizontal = 30.dp),
-            text = stringResource(id = R.string.call_lobby_description),
-            color = Colors.description,
-            textAlign = TextAlign.Center,
-            fontSize = 17.sp,
+            modifier = Modifier.padding(VideoTheme.dimens.spacingM),
+            text = "Set up your test call",
+            style = VideoTheme.typography.titleS,
         )
-
-        Spacer(modifier = Modifier.height(20.dp))
-
-        val isCameraEnabled: Boolean by if (LocalInspectionMode.current) {
-            remember { mutableStateOf(true) }
-        } else {
-            callLobbyViewModel.cameraEnabled.collectAsState(initial = false)
-        }
-
-        val isMicrophoneEnabled by if (LocalInspectionMode.current) {
-            remember { mutableStateOf(true) }
-        } else {
-            callLobbyViewModel.microphoneEnabled.collectAsState(initial = false)
-        }
-
-        // turn on camera and microphone by default
-        LaunchedEffect(key1 = Unit) {
-            delay(300)
-            if (BuildConfig.BUILD_TYPE == "benchmark") {
-                callLobbyViewModel.call.camera.disable()
-                callLobbyViewModel.call.microphone.disable()
-            }
-        }
-
         CallLobby(
             call = call,
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(VideoTheme.dimens.spacingM),
             isCameraEnabled = isCameraEnabled,
             isMicrophoneEnabled = isMicrophoneEnabled,
             onCallAction = { action ->
                 when (action) {
-                    is ToggleCamera -> callLobbyViewModel.enableCamera(action.isEnabled)
-                    is ToggleMicrophone -> callLobbyViewModel.enableMicrophone(action.isEnabled)
+                    is ToggleCamera -> onToggleCamera(action.isEnabled)
+                    is ToggleMicrophone -> onToggleMicrophone(action.isEnabled)
                     else -> Unit
                 }
             },
         )
-
-        LobbyDescription(callLobbyViewModel = callLobbyViewModel)
+        if (BuildConfig.BUILD_TYPE == "benchmark") {
+            LaunchedEffect(key1 = Unit) {
+                delay(300)
+                onToggleCamera(true)
+                onToggleMicrophone(true)
+            }
+        }
+        description()
     }
 }
 
@@ -251,36 +272,61 @@ private fun LobbyDescription(
     callLobbyViewModel: CallLobbyViewModel,
 ) {
     val session by callLobbyViewModel.call.state.session.collectAsState()
+    val participantsSize = session?.participants?.size ?: 0
 
-    Column(
-        modifier = Modifier
-            .padding(horizontal = 35.dp)
-            .background(
-                color = VideoTheme.colors.callLobbyBackground,
-                shape = RoundedCornerShape(16.dp),
-            ),
-    ) {
-        Text(
-            modifier = Modifier.padding(start = 32.dp, end = 32.dp, top = 12.dp, bottom = 8.dp),
-            text = stringResource(
-                id = R.string.join_call_description,
-                session?.participants?.size ?: 0,
-            ),
-            color = Color.White,
+    LobbyDescriptionContent(participantsSize = participantsSize) {
+        callLobbyViewModel.handleUiEvent(
+            CallLobbyEvent.JoinCall,
         )
+    }
+}
 
+@Composable
+private fun LobbyDescriptionContent(participantsSize: Int, onClick: () -> Unit) {
+    val text = if (participantsSize > 0) {
+        Pair(
+            stringResource(
+                id = R.string.join_call_description,
+                participantsSize,
+            ),
+            stringResource(id = R.string.join_call),
+        )
+    } else {
+        Pair(
+            "Start a private test call. This demo is\nbuilt on Stream’s SDKs and runs on our \nglobal edge network.",
+            "Start a test call",
+        )
+    }
+    Column(
+        modifier = Modifier.padding(VideoTheme.dimens.spacingM),
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally,
+    ) {
+        Row(
+            modifier = Modifier.wrapContentWidth(),
+            horizontalArrangement = Arrangement.Center,
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Icon(
+                imageVector = Icons.Default.LockPerson,
+                tint = VideoTheme.colors.basePrimary,
+                contentDescription = "",
+            )
+
+            Text(
+                modifier = Modifier.padding(horizontal = VideoTheme.dimens.spacingM),
+                text = text.first,
+                style = VideoTheme.typography.bodyS,
+            )
+        }
+        Spacer(modifier = Modifier.size(VideoTheme.dimens.spacingM))
         StreamButton(
+            style = VideoTheme.styles.buttonStyles.secondaryButtonStyle(),
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(start = 16.dp, end = 16.dp, top = 8.dp, bottom = 12.dp)
-                .clip(RoundedCornerShape(12.dp))
                 .testTag("start_call"),
-            text = stringResource(id = R.string.join_call),
-            onClick = {
-                callLobbyViewModel.handleUiEvent(
-                    CallLobbyEvent.JoinCall,
-                )
-            },
+            text = text.second,
+            onClick = onClick,
         )
     }
 }
@@ -314,21 +360,32 @@ private fun HandleCallLobbyUiState(
 
 @Preview
 @Composable
-private fun CallLobbyScreenPreview() {
+private fun CallLobbyHeaderPreview() {
     StreamPreviewDataUtils.initializeStreamVideo(LocalContext.current)
-    StreamUserDataStore.install(LocalContext.current)
     VideoTheme {
-        CallLobbyScreen(
-            callLobbyViewModel = CallLobbyViewModel(
-                savedStateHandle = SavedStateHandle(
-                    mapOf("cid" to "default:123"),
-                ),
-                dataStore = StreamUserDataStore.instance(),
-                googleSignInClient = GoogleSignIn.getClient(
-                    LocalContext.current,
-                    GoogleSignInOptions.Builder().build(),
-                ),
-            ),
-        ) {}
+        CallLobbyHeaderContent(
+            user = remember {
+                mutableStateOf(previewUsers[0])
+            },
+        ) {
+        }
+    }
+}
+
+@Preview
+@Composable
+private fun CallLobbyBodyPreview() {
+    StreamPreviewDataUtils.initializeStreamVideo(LocalContext.current)
+    VideoTheme {
+        CallLobbyBody(
+            isCameraEnabled = false,
+            isMicrophoneEnabled = false,
+            call = previewCall,
+            onToggleMicrophone = {},
+            onToggleCamera = {},
+        ) {
+            LobbyDescriptionContent(participantsSize = 0) {
+            }
+        }
     }
 }

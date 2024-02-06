@@ -28,15 +28,13 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.capitalize
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.intl.Locale
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
-import io.getstream.video.android.compose.theme.VideoTheme
+import io.getstream.video.android.compose.theme.base.VideoTheme
 import io.getstream.video.android.core.MemberState
 import io.getstream.video.android.core.model.CallStatus
 import io.getstream.video.android.core.utils.toCallUser
@@ -64,20 +62,20 @@ public fun ParticipantInformation(
         }
 
         val fontSize = if (participants.size == 1) {
-            VideoTheme.dimens.directCallUserNameTextSize
+            VideoTheme.dimens.textSizeL
         } else {
-            VideoTheme.dimens.groupCallUserNameTextSize
+            VideoTheme.dimens.textSizeM
         }
 
         Text(
-            modifier = Modifier.padding(horizontal = VideoTheme.dimens.participantsTextPadding),
+            modifier = Modifier.padding(horizontal = VideoTheme.dimens.spacingM),
             text = text,
             fontSize = fontSize,
-            color = VideoTheme.colors.callDescription,
+            color = VideoTheme.colors.basePrimary,
             textAlign = TextAlign.Center,
         )
 
-        Spacer(modifier = Modifier.height(VideoTheme.dimens.callStatusParticipantsMargin))
+        Spacer(modifier = Modifier.height(VideoTheme.dimens.spacingM))
 
         val callType = if (isVideoType) {
             "video"
@@ -86,7 +84,6 @@ public fun ParticipantInformation(
         }
 
         Text(
-            modifier = Modifier.alpha(VideoTheme.dimens.onCallStatusTextAlpha),
             text = when (callStatus) {
                 CallStatus.Incoming -> stringResource(
                     id = io.getstream.video.android.ui.common.R.string.stream_video_call_status_incoming,
@@ -99,10 +96,7 @@ public fun ParticipantInformation(
 
                 is CallStatus.Calling -> callStatus.duration
             },
-            style = VideoTheme.typography.body,
-            fontSize = VideoTheme.dimens.onCallStatusTextSize,
-            fontWeight = FontWeight.Bold,
-            color = VideoTheme.colors.callDescription,
+            style = VideoTheme.typography.bodyM,
             textAlign = TextAlign.Center,
         )
     }

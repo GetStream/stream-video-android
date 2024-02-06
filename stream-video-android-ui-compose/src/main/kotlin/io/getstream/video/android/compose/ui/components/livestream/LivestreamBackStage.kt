@@ -23,7 +23,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.sp
-import io.getstream.video.android.compose.theme.VideoTheme
+import io.getstream.video.android.compose.theme.base.VideoTheme
 import io.getstream.video.android.ui.common.R
 
 @Composable
@@ -34,6 +34,6 @@ internal fun BoxScope.LivestreamBackStage() {
             id = R.string.stream_video_livestreaming_on_backstage,
         ),
         fontSize = 14.sp,
-        color = VideoTheme.colors.textHighEmphasis,
+        color = VideoTheme.colors.basePrimary,
     )
 }

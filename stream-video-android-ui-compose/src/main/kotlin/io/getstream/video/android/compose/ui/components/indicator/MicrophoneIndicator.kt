@@ -18,17 +18,16 @@ package io.getstream.video.android.compose.ui.components.indicator
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.Icon
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Mic
+import androidx.compose.material.icons.filled.MicOff
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
-import io.getstream.video.android.compose.theme.VideoTheme
-import io.getstream.video.android.ui.common.R
+import io.getstream.video.android.compose.theme.base.VideoTheme
 
 /**
  * Used to indicate the microphone state of a given participant.
@@ -43,22 +42,21 @@ public fun MicrophoneIndicator(
 ) {
     Box(
         modifier = modifier
-            .size(VideoTheme.dimens.microphoneIndicatorSize)
-            .padding(VideoTheme.dimens.microphoneIndicatorPadding),
+            .size(VideoTheme.dimens.genericM),
     ) {
         if (isMicrophoneEnabled) {
             Icon(
                 modifier = Modifier.align(Alignment.Center),
-                painter = painterResource(id = R.drawable.stream_video_ic_mic_on),
-                tint = Color.White,
-                contentDescription = "microphone enabled",
+                imageVector = Icons.Default.Mic,
+                tint = VideoTheme.colors.basePrimary,
+                contentDescription = Icons.Default.Mic.name,
             )
         } else {
             Icon(
                 modifier = Modifier.align(Alignment.Center),
-                painter = painterResource(id = R.drawable.stream_video_ic_mic_off),
-                tint = Color.White,
-                contentDescription = "microphone disabled",
+                imageVector = Icons.Default.MicOff,
+                tint = VideoTheme.colors.basePrimary,
+                contentDescription = Icons.Default.MicOff.name,
             )
         }
     }

@@ -29,9 +29,9 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.dp
-import io.getstream.video.android.compose.theme.VideoTheme
+import io.getstream.video.android.compose.theme.base.VideoTheme
 
 /**
  * Used to indicate the active sound levels of a given participant.
@@ -43,23 +43,19 @@ import io.getstream.video.android.compose.theme.VideoTheme
 public fun AudioVolumeIndicator(
     modifier: Modifier = Modifier,
     audioLevels: Float,
+    color: Color = VideoTheme.colors.brandPrimary,
 ) {
-    val activatedColor = VideoTheme.colors.activatedVolumeIndicator
-    val deActivatedColor = VideoTheme.colors.deActivatedVolumeIndicator
-
-    val defaultBarHeight = 0.23f
-
+    val defaultBarHeight = 0.1f
     Row(
         modifier = modifier
-            .height(height = VideoTheme.dimens.audioLevelIndicatorBarMaxHeight)
-            .padding(horizontal = 2.dp),
+            .height(height = VideoTheme.dimens.componentHeightS)
+            .padding(horizontal = VideoTheme.dimens.spacingXXs),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(
-            VideoTheme.dimens.audioLevelIndicatorBarSeparatorWidth,
+            VideoTheme.dimens.spacingXXs,
         ),
     ) {
         repeat(3) { index ->
-
             // First bar 60%, second 100%, third 33%
             val audioLevel =
                 when (index) {
@@ -75,10 +71,9 @@ public fun AudioVolumeIndicator(
                         audioLevels
                     }
                 }
-
             Spacer(
                 modifier = Modifier
-                    .width(VideoTheme.dimens.audioLevelIndicatorBarWidth)
+                    .width(VideoTheme.dimens.spacingXXs)
                     .fillMaxHeight(
                         if (audioLevel == 0f) {
                             defaultBarHeight
@@ -87,8 +82,8 @@ public fun AudioVolumeIndicator(
                         },
                     )
                     .background(
-                        color = if (audioLevel == 0f) deActivatedColor else activatedColor,
-                        shape = RoundedCornerShape(16.dp),
+                        color = color,
+                        shape = RoundedCornerShape(VideoTheme.dimens.roundnessM),
                     ),
             )
         }
@@ -101,7 +96,7 @@ private fun ActiveSoundLevelsPreview() {
     VideoTheme {
         Column {
             AudioVolumeIndicator(audioLevels = 0f)
-            AudioVolumeIndicator(audioLevels = 0.3f)
+            AudioVolumeIndicator(audioLevels = 0.2f)
         }
     }
 }

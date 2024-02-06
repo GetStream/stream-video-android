@@ -16,7 +16,8 @@
 
 package io.getstream.video.android.compose.ui.components.call.activecall
 
-import android.content.res.Configuration.ORIENTATION_LANDSCAPE
+import android.content.res.Configuration.ORIENTATION_PORTRAIT
+import android.content.res.Configuration.UI_MODE_TYPE_CAR
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.detectTapGestures
@@ -30,11 +31,8 @@ import androidx.compose.foundation.layout.calculateEndPadding
 import androidx.compose.foundation.layout.calculateStartPadding
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material.Icon
-import androidx.compose.material.IconButton
+import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.material.Scaffold
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.AutoAwesomeMosaic
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
@@ -49,7 +47,6 @@ import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.platform.LocalLayoutDirection
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.coerceAtLeast
@@ -61,7 +58,7 @@ import io.getstream.video.android.compose.permission.VideoPermissionsState
 import io.getstream.video.android.compose.permission.rememberCallPermissionsState
 import io.getstream.video.android.compose.pip.enterPictureInPicture
 import io.getstream.video.android.compose.pip.isInPictureInPictureMode
-import io.getstream.video.android.compose.theme.VideoTheme
+import io.getstream.video.android.compose.theme.base.VideoTheme
 import io.getstream.video.android.compose.ui.components.call.CallAppBar
 import io.getstream.video.android.compose.ui.components.call.controls.ControlActions
 import io.getstream.video.android.compose.ui.components.call.controls.actions.DefaultOnCallActionHandler
@@ -76,10 +73,8 @@ import io.getstream.video.android.compose.ui.components.video.VideoRenderer
 import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.ParticipantState
 import io.getstream.video.android.core.call.state.CallAction
-import io.getstream.video.android.core.call.state.ChooseLayout
 import io.getstream.video.android.mock.StreamPreviewDataUtils
 import io.getstream.video.android.mock.previewCall
-import io.getstream.video.android.ui.common.R
 
 /**
  * Represents the UI in an Active call that shows participants and their video, as well as some
@@ -106,16 +101,13 @@ public fun CallContent(
     call: Call,
     modifier: Modifier = Modifier,
     layout: LayoutType = LayoutType.DYNAMIC,
-    isShowingOverlayAppBar: Boolean = true,
+    isShowingOverlayAppBar: Boolean = false,
     permissions: VideoPermissionsState = rememberCallPermissionsState(call = call),
     onBackPressed: () -> Unit = {},
     onCallAction: (CallAction) -> Unit = { DefaultOnCallActionHandler.onCallAction(call, it) },
     appBarContent: @Composable (call: Call) -> Unit = {
         CallAppBar(
             call = call,
-            leadingContent = {
-                LayoutChoiceLeadingContent(onCallAction)
-            },
             onCallAction = onCallAction,
         )
     },
@@ -141,7 +133,7 @@ public fun CallContent(
             modifier = Modifier
                 .fillMaxSize()
                 .weight(1f)
-                .padding(bottom = VideoTheme.dimens.participantsGridPadding),
+                .padding(bottom = VideoTheme.dimens.spacingXXs),
             style = style,
             videoRenderer = videoRenderer,
             floatingVideoRenderer = floatingVideoRenderer,
@@ -150,6 +142,7 @@ public fun CallContent(
     videoOverlayContent: @Composable (call: Call) -> Unit = {},
     controlsContent: @Composable (call: Call) -> Unit = {
         ControlActions(
+            modifier = Modifier.wrapContentWidth(),
             call = call,
             onCallAction = onCallAction,
         )
@@ -186,28 +179,35 @@ public fun CallContent(
         pictureInPictureContent(call)
     } else {
         Scaffold(
-            modifier = modifier,
-            contentColor = VideoTheme.colors.appBackground,
-            topBar = { },
+            backgroundColor = VideoTheme.colors.baseSheetPrimary,
+            contentColor = VideoTheme.colors.baseSheetPrimary,
+            topBar = {
+                if (orientation == ORIENTATION_PORTRAIT) {
+                    appBarContent.invoke(call)
+                }
+            },
             bottomBar = {
-                if (orientation != ORIENTATION_LANDSCAPE) {
+                if (orientation == ORIENTATION_PORTRAIT) {
                     controlsContent.invoke(call)
                 }
             },
             content = {
                 val paddings = PaddingValues(
-                    top = it.calculateTopPadding(),
+                    top = (it.calculateTopPadding() - VideoTheme.dimens.spacingS)
+                        .coerceAtLeast(0.dp),
                     start = it.calculateStartPadding(
                         layoutDirection = LocalLayoutDirection.current,
                     ),
-                    end = it.calculateEndPadding(layoutDirection = LocalLayoutDirection.current),
-                    bottom = (it.calculateBottomPadding() - VideoTheme.dimens.controlActionsBottomPadding)
+                    end = it.calculateEndPadding(
+                        layoutDirection = LocalLayoutDirection.current,
+                    ),
+                    bottom = (it.calculateBottomPadding() - VideoTheme.dimens.spacingS)
                         .coerceAtLeast(0.dp),
                 )
                 var showDiagnostics by remember { mutableStateOf(false) }
                 Row(
                     modifier = modifier
-                        .background(color = VideoTheme.colors.appBackground)
+                        .background(color = VideoTheme.colors.baseSheetPrimary)
                         .padding(paddings)
                         .pointerInput(Unit) {
                             detectTapGestures(
@@ -225,14 +225,6 @@ public fun CallContent(
                             videoOverlayContent.invoke(call)
                         }
                     }
-
-                    if (orientation == ORIENTATION_LANDSCAPE) {
-                        controlsContent.invoke(call)
-                    }
-                }
-
-                if (isShowingOverlayAppBar) {
-                    appBarContent.invoke(call)
                 }
 
                 if (enableDiagnostics && showDiagnostics) {
@@ -241,25 +233,6 @@ public fun CallContent(
                     }
                 }
             },
-        )
-    }
-}
-
-@Composable
-internal fun LayoutChoiceLeadingContent(onCallAction: (CallAction) -> Unit) {
-    IconButton(
-        onClick = { onCallAction.invoke(ChooseLayout) },
-        modifier = Modifier.padding(
-            start = VideoTheme.dimens.callAppBarLeadingContentSpacingStart,
-            end = VideoTheme.dimens.callAppBarLeadingContentSpacingEnd,
-        ),
-    ) {
-        Icon(
-            imageVector = Icons.Rounded.AutoAwesomeMosaic,
-            contentDescription = stringResource(
-                id = R.string.stream_video_back_button_content_description,
-            ),
-            tint = VideoTheme.colors.callDescription,
         )
     }
 }
@@ -316,6 +289,19 @@ private fun DefaultPermissionHandler(
 @Preview
 @Composable
 private fun CallContentPreview() {
+    StreamPreviewDataUtils.initializeStreamVideo(LocalContext.current)
+    VideoTheme {
+        CallContent(call = previewCall)
+    }
+}
+
+@Preview(
+    widthDp = 640,
+    heightDp = 360,
+    uiMode = UI_MODE_TYPE_CAR,
+)
+@Composable
+private fun CallContentPreviewLandscape() {
     StreamPreviewDataUtils.initializeStreamVideo(LocalContext.current)
     VideoTheme {
         CallContent(call = previewCall)

@@ -39,7 +39,6 @@ import androidx.compose.material.IconButton
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Cancel
-import androidx.compose.material.icons.outlined.Cancel
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
@@ -70,8 +69,8 @@ import com.google.mlkit.vision.common.InputImage
 import io.getstream.video.android.DeeplinkingActivity
 import io.getstream.video.android.R
 import io.getstream.video.android.analytics.FirebaseEvents
-import io.getstream.video.android.compose.theme.VideoTheme
-import io.getstream.video.android.ui.theme.StreamButton
+import io.getstream.video.android.compose.theme.base.VideoTheme
+import io.getstream.video.android.compose.ui.components.base.StreamButton
 import java.util.concurrent.Executor
 import java.util.concurrent.Executors
 
@@ -99,7 +98,7 @@ internal fun BarcodeScanner(navigateBack: () -> Unit = {}) {
 
     when (val cameraPermissionStatus = cameraPermissionState.status) {
         PermissionStatus.Granted -> {
-            val color = VideoTheme.colors.primaryAccent
+            val color = VideoTheme.colors.brandPrimary
             Box(modifier = Modifier.fillMaxSize()) {
                 CameraPreview(imageAnalysis = imageAnalysis)
                 CornerRectWithArcs(color = color, cornerRadius = 32f, strokeWidth = 12f)

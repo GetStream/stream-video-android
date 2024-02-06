@@ -34,7 +34,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.getstream.video.android.compose.state.ui.internal.CallParticipantInfoMode
 import io.getstream.video.android.compose.state.ui.internal.ParticipantListMode
-import io.getstream.video.android.compose.theme.VideoTheme
+import io.getstream.video.android.compose.theme.base.VideoTheme
 import io.getstream.video.android.compose.ui.components.participants.internal.CallParticipantsList
 import io.getstream.video.android.compose.ui.components.participants.internal.InviteUserList
 import io.getstream.video.android.core.Call
@@ -79,13 +79,13 @@ public fun CallParticipantsInfoMenu(
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(color = VideoTheme.colors.infoMenuOverlayColor),
+            .background(color = VideoTheme.colors.baseSheetPrimary),
     ) {
         Column(modifier) {
             val listModifier = Modifier
                 .weight(2f)
                 .fillMaxWidth()
-                .background(VideoTheme.colors.appBackground)
+                .background(VideoTheme.colors.baseSheetPrimary)
 
             if (infoStateMode is ParticipantListMode) {
                 CallParticipantsList(

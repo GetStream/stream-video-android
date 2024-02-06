@@ -43,8 +43,9 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import io.getstream.video.android.compose.theme.VideoTheme
+import io.getstream.video.android.compose.theme.base.VideoTheme
 import io.getstream.video.android.compose.ui.components.avatar.UserAvatar
+import io.getstream.video.android.compose.ui.components.base.styling.StyleSize
 import io.getstream.video.android.core.ParticipantState
 import io.getstream.video.android.mock.StreamPreviewDataUtils
 import io.getstream.video.android.mock.previewParticipantsList
@@ -69,7 +70,7 @@ internal fun CallParticipantsList(
 ) {
     Scaffold(
         modifier = modifier,
-        backgroundColor = VideoTheme.colors.appBackground,
+        backgroundColor = VideoTheme.colors.baseSheetPrimary,
         topBar = {
             CallParticipantListAppBar(
                 numberOfParticipants = participants.size,
@@ -78,7 +79,7 @@ internal fun CallParticipantsList(
         },
         bottomBar = {
             CallParticipantsInfoActions(
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier.fillMaxWidth().padding(horizontal = VideoTheme.dimens.spacingM),
                 isLocalAudioEnabled = isLocalAudioEnabled,
                 onInviteUser = onInviteUser,
                 onMute = onMute,
@@ -89,7 +90,7 @@ internal fun CallParticipantsList(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(padding)
-                .background(VideoTheme.colors.appBackground),
+                .background(VideoTheme.colors.baseSheetPrimary),
             contentPadding = PaddingValues(16.dp),
             horizontalAlignment = Alignment.Start,
             verticalArrangement = Arrangement.spacedBy(8.dp),
@@ -110,7 +111,7 @@ internal fun CallParticipantsList(
 @Composable
 private fun CallParticipantInfoItem(
     participant: ParticipantState,
-    onUserOptionsSelected: (ParticipantState) -> Unit,
+    onUserOptionsSelected: ((ParticipantState) -> Unit)? = null,
 ) {
     Row(
         modifier = Modifier.wrapContentWidth(),
@@ -122,7 +123,8 @@ private fun CallParticipantInfoItem(
         val userName by participant.userNameOrId.collectAsStateWithLifecycle()
         val userImage by participant.image.collectAsStateWithLifecycle()
         UserAvatar(
-            modifier = Modifier.size(VideoTheme.dimens.participantsInfoAvatarSize),
+            textSize = StyleSize.S,
+            modifier = Modifier.size(VideoTheme.dimens.genericL),
             userName = userName,
             userImage = userImage,
             isShowingOnlineIndicator = true,
@@ -133,8 +135,8 @@ private fun CallParticipantInfoItem(
                 .padding(start = 8.dp)
                 .weight(1f),
             text = userName,
-            style = VideoTheme.typography.bodyBold,
-            color = VideoTheme.colors.textHighEmphasis,
+            style = VideoTheme.typography.bodyM,
+            color = VideoTheme.colors.basePrimary,
             fontSize = 16.sp,
             maxLines = 1,
         )
@@ -144,7 +146,7 @@ private fun CallParticipantInfoItem(
             if (!audioEnabled) {
                 Icon(
                     painter = painterResource(id = R.drawable.stream_video_ic_mic_off),
-                    tint = VideoTheme.colors.errorAccent,
+                    tint = VideoTheme.colors.alertWarning,
                     contentDescription = null,
                 )
             }
@@ -155,21 +157,23 @@ private fun CallParticipantInfoItem(
             if (!videoEnabled) {
                 Icon(
                     painter = painterResource(id = R.drawable.stream_video_ic_videocam_off),
-                    tint = VideoTheme.colors.errorAccent,
+                    tint = VideoTheme.colors.alertWarning,
                     contentDescription = null,
                 )
             }
 
             Spacer(modifier = Modifier.width(8.dp))
 
-            Icon(
-                modifier = Modifier.clickable { onUserOptionsSelected(participant) },
-                painter = painterResource(id = R.drawable.stream_video_ic_options),
-                tint = VideoTheme.colors.textHighEmphasis,
-                contentDescription = null,
-            )
+            onUserOptionsSelected?.let {
+                Icon(
+                    modifier = Modifier.clickable { onUserOptionsSelected(participant) },
+                    painter = painterResource(id = R.drawable.stream_video_ic_options),
+                    tint = VideoTheme.colors.basePrimary,
+                    contentDescription = null,
+                )
 
-            Spacer(modifier = Modifier.width(8.dp))
+                Spacer(modifier = Modifier.width(8.dp))
+            }
         }
     }
 }

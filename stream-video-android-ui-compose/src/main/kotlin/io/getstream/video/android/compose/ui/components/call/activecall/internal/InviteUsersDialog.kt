@@ -16,24 +16,14 @@
 
 package io.getstream.video.android.compose.ui.components.call.activecall.internal
 
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material.ButtonDefaults
-import androidx.compose.material.Surface
-import androidx.compose.material.Text
-import androidx.compose.material.TextButton
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.GroupAdd
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.Alignment.Companion.End
-import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.unit.dp
-import androidx.compose.ui.window.Dialog
-import io.getstream.video.android.compose.theme.VideoTheme
+import androidx.compose.ui.tooling.preview.Preview
+import io.getstream.video.android.compose.theme.base.VideoTheme
+import io.getstream.video.android.compose.ui.components.base.StreamDialogPositiveNegative
+import io.getstream.video.android.mock.previewUsers
 import io.getstream.video.android.model.User
 import io.getstream.video.android.ui.common.R
 
@@ -44,65 +34,38 @@ import io.getstream.video.android.ui.common.R
  * @param onDismiss Handler when the user wants to dismiss and cancel the operation.
  * @param onInviteUsers Handler when the user wants to confirm invites.
  */
+// TODO AAP: Move into demo-app
 @Composable
 internal fun InviteUsersDialog(
     users: List<User>,
     onDismiss: () -> Unit,
     onInviteUsers: (List<User>) -> Unit,
 ) {
-    Dialog(onDismissRequest = onDismiss, content = {
-        Surface(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 8.dp),
-            shape = VideoTheme.shapes.dialog,
-            color = VideoTheme.colors.appBackground,
+    StreamDialogPositiveNegative(
+        icon = Icons.Default.GroupAdd,
+        title = stringResource(R.string.stream_video_invite_users_title),
+        positiveButton = Triple(
+            stringResource(R.string.stream_video_invite_users_accept),
+            VideoTheme.styles.buttonStyles.secondaryButtonStyle(),
         ) {
-            Column(modifier = Modifier.fillMaxWidth()) {
-                Text(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 16.dp)
-                        .padding(top = 32.dp),
-                    text = stringResource(R.string.stream_video_invite_users_title),
-                    style = VideoTheme.typography.bodyBold,
-                    color = VideoTheme.colors.textHighEmphasis,
-                )
+            onInviteUsers(users)
+        },
+        negativeButton = Triple(
+            stringResource(R.string.stream_video_invite_users_cancel),
+            VideoTheme.styles.buttonStyles.tetriaryButtonStyle(),
+        ) {
+            onDismiss()
+        },
+        contentText = stringResource(R.string.stream_video_invite_users_message, users.size),
+        style = VideoTheme.styles.dialogStyles.defaultDialogStyle(),
+    )
+}
 
-                Spacer(modifier = Modifier.height(8.dp))
-
-                Text(
-                    modifier = Modifier.padding(start = 16.dp, end = 16.dp),
-                    text = stringResource(R.string.stream_video_invite_users_message, users.size),
-                    style = VideoTheme.typography.body,
-                    color = VideoTheme.colors.textHighEmphasis,
-                )
-
-                Spacer(modifier = Modifier.height(32.dp))
-
-                Row(
-                    modifier = Modifier.align(End),
-                    verticalAlignment = Alignment.CenterVertically,
-                ) {
-                    TextButton(
-                        onClick = onDismiss,
-                        colors = ButtonDefaults.textButtonColors(
-                            contentColor = VideoTheme.colors.primaryAccent,
-                        ),
-                    ) {
-                        Text(text = stringResource(R.string.stream_video_invite_users_cancel))
-                    }
-
-                    TextButton(
-                        onClick = { onInviteUsers(users) },
-                        colors = ButtonDefaults.textButtonColors(
-                            contentColor = VideoTheme.colors.primaryAccent,
-                        ),
-                    ) {
-                        Text(text = stringResource(R.string.stream_video_invite_users_accept))
-                    }
-                }
-            }
+@Preview
+@Composable
+private fun InviteUsersDialogPreview() {
+    VideoTheme {
+        InviteUsersDialog(users = previewUsers, onDismiss = { }) {
         }
-    })
+    }
 }

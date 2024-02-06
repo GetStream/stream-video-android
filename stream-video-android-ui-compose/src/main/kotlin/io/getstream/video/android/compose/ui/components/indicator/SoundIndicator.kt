@@ -21,7 +21,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
-import io.getstream.video.android.compose.theme.VideoTheme
+import io.getstream.video.android.compose.theme.base.VideoTheme
 
 /**
  * Used to indicate the sound state of a given participant. Either shows a mute icon or the sound
@@ -39,11 +39,7 @@ public fun SoundIndicator(
     isAudioEnabled: Boolean,
     audioLevel: Float,
 ) {
-    GenericIndicator(
-        modifier = modifier,
-        backgroundColor = VideoTheme.colors.audioIndicatorBackground,
-        shape = VideoTheme.shapes.indicatorBackground,
-    ) {
+    GenericIndicator(modifier = modifier) {
         if (isAudioEnabled && isSpeaking) {
             AudioVolumeIndicator(
                 modifier = Modifier.align(Alignment.Center),
