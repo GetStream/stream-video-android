@@ -18,6 +18,7 @@
 
 package io.getstream.video.android.ui.login
 
+import android.content.res.Configuration
 import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -88,6 +89,7 @@ import io.getstream.video.android.compose.ui.components.base.styling.ButtonStyle
 import io.getstream.video.android.compose.ui.components.base.styling.IconStyles
 import io.getstream.video.android.compose.ui.components.base.styling.StreamDialogStyles
 import io.getstream.video.android.tooling.extensions.toPx
+import io.getstream.video.android.util.LockScreenOrientation
 import io.getstream.video.android.util.UserHelper
 import io.getstream.video.android.util.config.AppConfig
 import io.getstream.video.android.util.config.types.Flavor
@@ -106,6 +108,7 @@ fun LoginScreen(
     navigateToCallJoin: () -> Unit,
 ) {
     VideoTheme {
+        LockScreenOrientation(orientation = Configuration.ORIENTATION_PORTRAIT)
         val uiState by loginViewModel.uiState.collectAsState(initial = LoginUiState.Nothing)
         val isLoading by remember(uiState) {
             mutableStateOf(

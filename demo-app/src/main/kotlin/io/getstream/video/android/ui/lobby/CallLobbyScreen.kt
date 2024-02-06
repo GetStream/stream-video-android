@@ -19,6 +19,7 @@
 package io.getstream.video.android.ui.lobby
 
 import android.content.Intent
+import android.content.res.Configuration
 import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -77,6 +78,7 @@ import io.getstream.video.android.mock.previewCall
 import io.getstream.video.android.mock.previewUsers
 import io.getstream.video.android.model.User
 import io.getstream.video.android.ui.call.CallActivity
+import io.getstream.video.android.util.LockScreenOrientation
 import kotlinx.coroutines.delay
 
 @Composable
@@ -84,6 +86,7 @@ fun CallLobbyScreen(
     callLobbyViewModel: CallLobbyViewModel = hiltViewModel(),
     onBack: () -> Unit,
 ) {
+    LockScreenOrientation(orientation = Configuration.ORIENTATION_PORTRAIT)
     val isLoading by callLobbyViewModel.isLoading.collectAsState()
     val isMicrophoneEnabled by callLobbyViewModel.microphoneEnabled.collectAsStateWithLifecycle()
     val isCameraEnabled by callLobbyViewModel.cameraEnabled.collectAsStateWithLifecycle()

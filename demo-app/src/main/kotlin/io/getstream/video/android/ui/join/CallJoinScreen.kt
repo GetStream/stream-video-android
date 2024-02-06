@@ -18,6 +18,7 @@
 
 package io.getstream.video.android.ui.join
 
+import android.content.res.Configuration
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -100,6 +101,7 @@ import io.getstream.video.android.mock.StreamPreviewDataUtils
 import io.getstream.video.android.mock.previewUsers
 import io.getstream.video.android.model.User
 import io.getstream.video.android.tooling.util.StreamFlavors
+import io.getstream.video.android.util.LockScreenOrientation
 import io.getstream.video.android.util.config.AppConfig
 import io.getstream.video.android.util.config.types.StreamEnvironment
 
@@ -111,6 +113,7 @@ fun CallJoinScreen(
     navigateToDirectCallJoin: () -> Unit,
     navigateToBarcodeScanner: () -> Unit = {},
 ) {
+    LockScreenOrientation(orientation = Configuration.ORIENTATION_PORTRAIT)
     val uiState by callJoinViewModel.uiState.collectAsState(CallJoinUiState.Nothing)
     val user by callJoinViewModel.user.collectAsState(initial = null)
 
