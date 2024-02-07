@@ -79,7 +79,7 @@ class LoginViewModel @Inject constructor(
 
     public fun reloadSdk() {
         viewModelScope.launch {
-            StreamVideoInitHelper.loadSdk(dataStore)
+            StreamVideoInitHelper.reloadSdk(dataStore)
         }
     }
 
