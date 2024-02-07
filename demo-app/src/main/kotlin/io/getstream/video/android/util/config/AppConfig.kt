@@ -41,7 +41,7 @@ object AppConfig {
     // Constants
     private val logger by taggedLogger("RemoteConfig")
     private const val SHARED_PREF_NAME = "stream_demo_app"
-    private const val SELECTED_ENV = "selected_env"
+    private const val SELECTED_ENV = "selected_env_v2"
 
     // Data
     private lateinit var environment: StreamEnvironment
