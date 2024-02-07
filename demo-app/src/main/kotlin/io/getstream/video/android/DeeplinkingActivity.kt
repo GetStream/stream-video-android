@@ -43,6 +43,8 @@ import io.getstream.video.android.model.StreamCallId
 import io.getstream.video.android.ui.call.CallActivity
 import io.getstream.video.android.util.InitializedState
 import io.getstream.video.android.util.StreamVideoInitHelper
+import io.getstream.video.android.util.config.AppConfig
+import io.getstream.video.android.util.config.AppConfig.fromUri
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -105,7 +107,7 @@ class DeeplinkingActivity : ComponentActivity() {
                         ) == PackageManager.PERMISSION_GRANTED
                     ) {
                         // ensure that audio & video permissions are granted
-                        joinCall(callId)
+                        joinCall(data, callId)
                     } else {
                         // first ask for push notification permission
                         val manager = NotificationPermissionManager.createNotificationPermissionsManager(
@@ -114,7 +116,7 @@ class DeeplinkingActivity : ComponentActivity() {
                             onPermissionStatus = {
                                 // we don't care about the result for demo purposes
                                 if (it != NotificationPermissionStatus.REQUESTED) {
-                                    joinCall(callId)
+                                    joinCall(data, callId)
                                 }
                             },
                         )
@@ -157,11 +159,17 @@ class DeeplinkingActivity : ComponentActivity() {
         return callId ?: data.getQueryParameter("id")
     }
 
-    private fun joinCall(cid: String) {
+    private fun joinCall(data: Uri?, cid: String) {
         lifecycleScope.launch {
+            data?.let {
+                val determinedEnv = AppConfig.availableEnvironments.fromUri(it)
+                determinedEnv?.let {
+                    AppConfig.selectEnv(determinedEnv)
+                }
+            }
             // Deep link can be opened without the app after install - there is no user yet
             // But in this case the StreamVideoInitHelper will use a random account
-            StreamVideoInitHelper.loadSdk(
+            StreamVideoInitHelper.reloadSdk(
                 dataStore = dataStore,
                 useRandomUserAsFallback = true,
             )

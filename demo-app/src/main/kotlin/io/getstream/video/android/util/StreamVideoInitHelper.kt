@@ -57,6 +57,14 @@ object StreamVideoInitHelper {
         context = appContext.applicationContext
     }
 
+    suspend fun reloadSdk(
+        dataStore: StreamUserDataStore,
+        useRandomUserAsFallback: Boolean = true,
+    ) {
+        StreamVideo.removeClient()
+        loadSdk(dataStore, useRandomUserAsFallback)
+    }
+
     /**
      * A helper function that will initialise the [StreamVideo] SDK and also the [ChatClient].
      * Set [useRandomUserAsFallback] to true if you want to use a guest fallback if the user is not

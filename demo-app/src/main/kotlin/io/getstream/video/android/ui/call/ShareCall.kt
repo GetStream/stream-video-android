@@ -49,7 +49,6 @@ import androidx.compose.ui.unit.sp
 import io.getstream.video.android.compose.theme.base.VideoTheme
 import io.getstream.video.android.compose.ui.components.base.StreamButton
 import io.getstream.video.android.core.Call
-import io.getstream.video.android.tooling.util.StreamEnvironments
 import io.getstream.video.android.util.config.types.StreamEnvironment
 
 @Composable
@@ -61,11 +60,7 @@ public fun ShareCallWithOthers(
     context: Context,
 ) {
     ShareSettingsBox(modifier, call, clipboardManager) {
-        val link = if (env.value?.env == StreamEnvironments.demo) {
-            "https://getstream.io/video/demos/join/${call.id}"
-        } else {
-            "https://${env.value?.env}.getstream.io/video/demos/join/${call.id}"
-        }
+        val link = "${env.value?.sharelink}${call.id}"
         val sendIntent: Intent = Intent().apply {
             action = Intent.ACTION_SEND
             putExtra(Intent.EXTRA_TEXT, link)

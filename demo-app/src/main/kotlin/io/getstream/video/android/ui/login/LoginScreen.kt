@@ -33,6 +33,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
@@ -42,7 +43,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.outlined.GroupAdd
-import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -92,7 +92,6 @@ import io.getstream.video.android.tooling.extensions.toPx
 import io.getstream.video.android.util.LockScreenOrientation
 import io.getstream.video.android.util.UserHelper
 import io.getstream.video.android.util.config.AppConfig
-import io.getstream.video.android.util.config.types.Flavor
 import io.getstream.video.android.util.config.types.StreamEnvironment
 
 /**
@@ -116,8 +115,8 @@ fun LoginScreen(
             )
         }
         val selectedEnv by AppConfig.currentEnvironment.collectAsStateWithLifecycle()
-        val availableEnvs by AppConfig.availableEnvironments.collectAsStateWithLifecycle()
-        val availableLogins by AppConfig.availableLogins.collectAsStateWithLifecycle()
+        val availableEnvs by remember { mutableStateOf(AppConfig.availableEnvironments) }
+        val availableLogins = listOf("google", "email", "guest")
 
         var isShowingEmailLoginDialog by remember { mutableStateOf(false) }
 
@@ -385,7 +384,7 @@ fun SelectableDialog(
                         Modifier.background(
                             color = VideoTheme.colors.baseSheetTertiary,
                             shape = VideoTheme.shapes.dialog,
-                        ),
+                        ).width(180.dp),
                     ) {
                         items.forEach { item ->
                             StreamButton(
@@ -396,7 +395,7 @@ fun SelectableDialog(
                                     showDialog = !showDialog
                                 },
                                 style = ButtonStyles.tetriaryButtonStyle(),
-                                modifier = Modifier.padding(8.dp),
+                                modifier = Modifier.padding(horizontal = 8.dp).fillMaxWidth(),
                             )
                         }
                     }
@@ -467,7 +466,7 @@ private fun HandleLoginUiStates(
 @Composable
 private fun LoginScreenPreview() {
     VideoTheme {
-        val env = StreamEnvironment("demo", "Demo", listOf(Flavor("development", true)))
+        val env = StreamEnvironment(env = "demo", displayName = "Demo")
         LoginContent(
             autoLogIn = false,
             isLoading = false,
@@ -482,7 +481,7 @@ private fun LoginScreenPreview() {
 @Composable
 private fun EmailDialogPreview() {
     VideoTheme {
-        val env = StreamEnvironment("demo", "Demo", listOf(Flavor("development", true)))
+        val env = StreamEnvironment(env = "demo", displayName = "Demo")
         EmailLoginDialog()
     }
 }
@@ -491,8 +490,8 @@ private fun EmailDialogPreview() {
 @Composable
 private fun SelectEnvOption() {
     VideoTheme {
-        val env = StreamEnvironment("demo", "Demo", listOf(Flavor("development", true)))
-        val env2 = StreamEnvironment("pronto", "Pronto", listOf(Flavor("development", true)))
+        val env = StreamEnvironment(env = "demo", displayName = "Demo")
+        val env2 = StreamEnvironment(env = "pronto", displayName = "Pronto")
 
         SelectableDialog(
             items = listOf(env, env2),
