@@ -147,8 +147,8 @@ public fun BoxScope.FloatingParticipantVideo(
             modifier = Modifier
                 .align(alignment)
                 .size(
-                    height = VideoTheme.dimens.genericMax * 1.8f,
-                    width = VideoTheme.dimens.genericMax,
+                    height = VideoTheme.dimens.genericMax * 2.2f,
+                    width = VideoTheme.dimens.genericMax * 1.5f,
                 )
                 .offset { IntOffset(offset.x.toInt(), offset.y.toInt()) }
                 .pointerInput(parentBounds) {
