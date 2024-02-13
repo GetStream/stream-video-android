@@ -63,21 +63,21 @@ fun defaultStreamMenu(
             title = if (isScreenShareEnabled) "Stop screen-share" else "Start screen-share",
             icon = if (isScreenShareEnabled) Icons.AutoMirrored.Default.StopScreenShare else Icons.AutoMirrored.Default.ScreenShare,
             action = onToggleScreenShare,
-        )
+        ),
     )
     add(
         ActionMenuItem(
             title = "Call stats",
             icon = Icons.Default.AutoGraph,
             action = onShowCallStats,
-        )
+        ),
     )
     add(
         ActionMenuItem(
             title = if (isBackgroundBlurEnabled) "Disable background blur" else "Enable background blur",
             icon = if (isBackgroundBlurEnabled) Icons.Default.BlurOff else Icons.Default.BlurOn,
             action = onToggleBackgroundBlurClick,
-        )
+        ),
     )
     add(
         SubMenuItem(
@@ -96,7 +96,7 @@ fun defaultStreamMenu(
                     action = { onDeviceSelected(it) },
                 )
             },
-        )
+        ),
     )
     if (showDebugOptions) {
         add(
@@ -112,7 +112,7 @@ fun defaultStreamMenu(
                     onKillSfuWsClick,
                     onSwitchSfuClick,
                 ),
-            )
+            ),
         )
     }
 }
