@@ -88,10 +88,6 @@ internal fun SettingsMenu(
             call.stopScreenSharing()
         }
     }
-    val onSwitchMicrophoneClick: () -> Unit = {
-        onDismissed.invoke()
-        onDisplayAvailableDevice.invoke()
-    }
 
     val onToggleBackgroundBlurClick: () -> Unit = {
         onToggleBackgroundBlur()
@@ -180,6 +176,7 @@ internal fun SettingsMenu(
                 }
             },
             items = defaultStreamMenu(
+                showDebugOptions = showDebugOptions,
                 codecList = codecInfos,
                 availableDevices = availableDevices,
                 onDeviceSelected = {
@@ -193,7 +190,6 @@ internal fun SettingsMenu(
                 onKillSfuWsClick = onKillSfuWsClick,
                 onRestartPublisherIceClick = onRestartPublisherIceClick,
                 onRestartSubscriberIceClick = onRestartSubscriberIceClick,
-                onSwitchMicrophoneClick = onSwitchMicrophoneClick,
                 onToggleAudioFilterClick = onToggleAudioFilterClick,
                 onToggleBackgroundBlurClick = onToggleBackgroundBlurClick,
                 onSwitchSfuClick = onSwitchSfuClick,
@@ -216,7 +212,6 @@ private fun SettingsMenuPreview() {
                 },
                 isScreenShareEnabled = false,
                 isBackgroundBlurEnabled = true,
-                onSwitchMicrophoneClick = { },
                 onToggleScreenShare = { },
                 onShowCallStats = { },
                 onToggleBackgroundBlurClick = { },

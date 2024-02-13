@@ -38,14 +38,15 @@ import androidx.compose.material.icons.filled.VideoFile
 import androidx.compose.material.icons.filled.VideoSettings
 import io.getstream.video.android.core.audio.StreamAudioDevice
 import io.getstream.video.android.ui.menu.base.ActionMenuItem
+import io.getstream.video.android.ui.menu.base.MenuItem
 import io.getstream.video.android.ui.menu.base.SubMenuItem
 
 fun defaultStreamMenu(
+    showDebugOptions: Boolean = false,
     codecList: List<MediaCodecInfo>,
     onCodecSelected: (MediaCodecInfo) -> Unit,
     isScreenShareEnabled: Boolean,
     isBackgroundBlurEnabled: Boolean,
-    onSwitchMicrophoneClick: () -> Unit,
     onToggleScreenShare: () -> Unit = {},
     onShowCallStats: () -> Unit,
     onToggleBackgroundBlurClick: () -> Unit,
@@ -56,53 +57,65 @@ fun defaultStreamMenu(
     onSwitchSfuClick: () -> Unit,
     onDeviceSelected: (StreamAudioDevice) -> Unit,
     availableDevices: List<StreamAudioDevice>,
-) = listOf(
-    ActionMenuItem(
-        title = if (isScreenShareEnabled) "Stop screen-share" else "Start screen-share",
-        icon = if (isScreenShareEnabled) Icons.AutoMirrored.Default.StopScreenShare else Icons.AutoMirrored.Default.ScreenShare,
-        action = onToggleScreenShare,
-    ),
-    ActionMenuItem(
-        title = "Call stats",
-        icon = Icons.Default.AutoGraph,
-        action = onShowCallStats,
-    ),
-    ActionMenuItem(
-        title = if (isBackgroundBlurEnabled) "Disable background blur" else "Enable background blur",
-        icon = if (isBackgroundBlurEnabled) Icons.Default.BlurOff else Icons.Default.BlurOn,
-        action = onToggleBackgroundBlurClick,
-    ),
-    SubMenuItem(
-        title = "Choose audio device",
-        icon = Icons.Default.SettingsVoice,
-        items = availableDevices.map {
-            val icon = when (it) {
-                is StreamAudioDevice.BluetoothHeadset -> Icons.Default.BluetoothAudio
-                is StreamAudioDevice.Earpiece -> Icons.Default.Headphones
-                is StreamAudioDevice.Speakerphone -> Icons.Default.SpeakerPhone
-                is StreamAudioDevice.WiredHeadset -> Icons.Default.HeadsetMic
-            }
-            ActionMenuItem(
-                title = it.name,
-                icon = icon,
-                action = { onDeviceSelected(it) },
-            )
-        },
-    ),
-    SubMenuItem(
-        title = "Debug options",
-        icon = Icons.AutoMirrored.Default.ReadMore,
-        items = debugSubmenu(
-            codecList,
-            onCodecSelected,
-            onToggleAudioFilterClick,
-            onRestartSubscriberIceClick,
-            onRestartPublisherIceClick,
-            onKillSfuWsClick,
-            onSwitchSfuClick,
+) = buildList<MenuItem> {
+    add(
+        ActionMenuItem(
+            title = if (isScreenShareEnabled) "Stop screen-share" else "Start screen-share",
+            icon = if (isScreenShareEnabled) Icons.AutoMirrored.Default.StopScreenShare else Icons.AutoMirrored.Default.ScreenShare,
+            action = onToggleScreenShare,
         ),
-    ),
-)
+    )
+    add(
+        ActionMenuItem(
+            title = "Call stats",
+            icon = Icons.Default.AutoGraph,
+            action = onShowCallStats,
+        ),
+    )
+    add(
+        ActionMenuItem(
+            title = if (isBackgroundBlurEnabled) "Disable background blur" else "Enable background blur",
+            icon = if (isBackgroundBlurEnabled) Icons.Default.BlurOff else Icons.Default.BlurOn,
+            action = onToggleBackgroundBlurClick,
+        ),
+    )
+    add(
+        SubMenuItem(
+            title = "Choose audio device",
+            icon = Icons.Default.SettingsVoice,
+            items = availableDevices.map {
+                val icon = when (it) {
+                    is StreamAudioDevice.BluetoothHeadset -> Icons.Default.BluetoothAudio
+                    is StreamAudioDevice.Earpiece -> Icons.Default.Headphones
+                    is StreamAudioDevice.Speakerphone -> Icons.Default.SpeakerPhone
+                    is StreamAudioDevice.WiredHeadset -> Icons.Default.HeadsetMic
+                }
+                ActionMenuItem(
+                    title = it.name,
+                    icon = icon,
+                    action = { onDeviceSelected(it) },
+                )
+            },
+        ),
+    )
+    if (showDebugOptions) {
+        add(
+            SubMenuItem(
+                title = "Debug options",
+                icon = Icons.AutoMirrored.Default.ReadMore,
+                items = debugSubmenu(
+                    codecList,
+                    onCodecSelected,
+                    onToggleAudioFilterClick,
+                    onRestartSubscriberIceClick,
+                    onRestartPublisherIceClick,
+                    onKillSfuWsClick,
+                    onSwitchSfuClick,
+                ),
+            ),
+        )
+    }
+}
 
 fun codecMenu(codecList: List<MediaCodecInfo>, onCodecSelected: (MediaCodecInfo) -> Unit) =
     codecList.map {

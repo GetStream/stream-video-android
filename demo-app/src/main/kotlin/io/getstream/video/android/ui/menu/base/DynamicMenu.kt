@@ -151,7 +151,34 @@ private fun DynamicMenuPreview() {
                 },
                 isScreenShareEnabled = false,
                 isBackgroundBlurEnabled = true,
-                onSwitchMicrophoneClick = { },
+                onToggleScreenShare = { },
+                onShowCallStats = { },
+                onToggleBackgroundBlurClick = { },
+                onToggleAudioFilterClick = { },
+                onRestartSubscriberIceClick = { },
+                onRestartPublisherIceClick = { },
+                onKillSfuWsClick = { },
+                onSwitchSfuClick = { },
+                availableDevices = emptyList(),
+                onDeviceSelected = {
+                },
+            ),
+        )
+    }
+}
+
+@Preview
+@Composable
+private fun DynamicMenuDebugOptionPreview() {
+    VideoTheme {
+        DynamicMenu(
+            items = defaultStreamMenu(
+                showDebugOptions = true,
+                codecList = emptyList(),
+                onCodecSelected = {
+                },
+                isScreenShareEnabled = true,
+                isBackgroundBlurEnabled = true,
                 onToggleScreenShare = { },
                 onShowCallStats = { },
                 onToggleBackgroundBlurClick = { },
