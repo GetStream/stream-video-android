@@ -35,12 +35,17 @@ import androidx.compose.material.icons.filled.SettingsVoice
 import androidx.compose.material.icons.filled.SpeakerPhone
 import androidx.compose.material.icons.filled.SwitchLeft
 import androidx.compose.material.icons.filled.VideoFile
+import androidx.compose.material.icons.filled.VideoLibrary
 import androidx.compose.material.icons.filled.VideoSettings
 import io.getstream.video.android.core.audio.StreamAudioDevice
 import io.getstream.video.android.ui.menu.base.ActionMenuItem
+import io.getstream.video.android.ui.menu.base.DynamicSubMenuItem
 import io.getstream.video.android.ui.menu.base.MenuItem
 import io.getstream.video.android.ui.menu.base.SubMenuItem
 
+/**
+ * Defines the default Stream menu for the demo app.
+ */
 fun defaultStreamMenu(
     showDebugOptions: Boolean = false,
     codecList: List<MediaCodecInfo>,
@@ -57,6 +62,7 @@ fun defaultStreamMenu(
     onSwitchSfuClick: () -> Unit,
     onDeviceSelected: (StreamAudioDevice) -> Unit,
     availableDevices: List<StreamAudioDevice>,
+    loadRecordings: suspend () -> List<MenuItem>,
 ) = buildList<MenuItem> {
     add(
         ActionMenuItem(
@@ -98,6 +104,13 @@ fun defaultStreamMenu(
             },
         ),
     )
+    add(
+        DynamicSubMenuItem(
+            title = "Recordings",
+            icon = Icons.Default.VideoLibrary,
+            itemsLoader = loadRecordings,
+        ),
+    )
     if (showDebugOptions) {
         add(
             SubMenuItem(
@@ -117,6 +130,9 @@ fun defaultStreamMenu(
     }
 }
 
+/**
+ * Lists the available codecs for this device as list of [MenuItem]
+ */
 fun codecMenu(codecList: List<MediaCodecInfo>, onCodecSelected: (MediaCodecInfo) -> Unit) =
     codecList.map {
         val isHw = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
@@ -132,6 +148,9 @@ fun codecMenu(codecList: List<MediaCodecInfo>, onCodecSelected: (MediaCodecInfo)
         )
     }
 
+/**
+ * Optionally defines the debug sub-menu of the demo app.
+ */
 fun debugSubmenu(
     codecList: List<MediaCodecInfo>,
     onCodecSelected: (MediaCodecInfo) -> Unit,

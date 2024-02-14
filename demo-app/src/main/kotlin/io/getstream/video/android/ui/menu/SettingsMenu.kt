@@ -17,12 +17,19 @@
 package io.getstream.video.android.ui.menu
 
 import android.app.Activity
+import android.app.DownloadManager
+import android.content.Context
+import android.content.Context.DOWNLOAD_SERVICE
 import android.graphics.Bitmap
 import android.media.MediaCodecList
 import android.media.projection.MediaProjectionManager
+import android.net.Uri
+import android.os.Environment
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.VideoFile
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
@@ -34,6 +41,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.window.Popup
 import androidx.compose.ui.window.PopupProperties
+import androidx.core.content.ContextCompat.getSystemService
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.getstream.video.android.compose.theme.base.VideoTheme
 import io.getstream.video.android.core.Call
@@ -42,7 +50,9 @@ import io.getstream.video.android.core.call.video.BitmapVideoFilter
 import io.getstream.video.android.core.mapper.ReactionMapper
 import io.getstream.video.android.tooling.extensions.toPx
 import io.getstream.video.android.ui.call.ReactionsMenu
+import io.getstream.video.android.ui.menu.base.ActionMenuItem
 import io.getstream.video.android.ui.menu.base.DynamicMenu
+import io.getstream.video.android.ui.menu.base.MenuItem
 import io.getstream.video.android.util.BlurredBackgroundVideoFilter
 import io.getstream.video.android.util.SampleAudioFilter
 import kotlinx.coroutines.launch
@@ -155,6 +165,20 @@ internal fun SettingsMenu(
             } != null
         }
     }
+
+    val onLoadRecordings: suspend () -> List<MenuItem> = {
+        call.listRecordings().getOrNull()?.recordings?.map {
+            ActionMenuItem(
+                title = it.filename,
+                icon = Icons.Default.VideoFile,
+                action = {
+                    context.downloadFile(it.url, it.filename)
+                    onDismissed()
+                },
+            )
+        } ?: emptyList()
+    }
+
     Popup(
         offset = IntOffset(
             0,
@@ -196,9 +220,25 @@ internal fun SettingsMenu(
                 onShowCallStats = onShowCallStats,
                 isBackgroundBlurEnabled = isBackgroundBlurEnabled,
                 isScreenShareEnabled = isScreenSharing,
+                loadRecordings = onLoadRecordings,
             ),
         )
     }
+}
+
+private fun Context.downloadFile(url: String, title: String) {
+    val request = DownloadManager.Request(Uri.parse(url))
+        .setTitle(title) // Title of the Download Notification
+        .setDescription("Downloading") // Description of the Download Notification
+        .setNotificationVisibility(
+            DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED,
+        ) // Visibility of the download Notification
+        .setAllowedOverMetered(true) // Set if download is allowed on Mobile network
+        .setAllowedOverRoaming(true) // Set if download is allowed on Roaming network
+        .setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS, title)
+
+    val downloadManager = getSystemService(DOWNLOAD_SERVICE) as DownloadManager
+    downloadManager.enqueue(request) // enqueue puts the download request in the queue.
 }
 
 @Preview
@@ -223,6 +263,7 @@ private fun SettingsMenuPreview() {
                 availableDevices = emptyList(),
                 onDeviceSelected = {
                 },
+                loadRecordings = { emptyList() },
             ),
         )
     }

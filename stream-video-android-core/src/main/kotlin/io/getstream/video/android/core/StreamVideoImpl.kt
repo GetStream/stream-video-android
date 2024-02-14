@@ -931,11 +931,15 @@ internal class StreamVideoImpl internal constructor(
     suspend fun listRecordings(
         type: String,
         id: String,
-        sessionId: String,
+        sessionId: String?,
     ): Result<ListRecordingsResponse> {
         return wrapAPICall {
             val result =
-                connectionModule.api.listRecordingsTypeIdSession1(type, id, sessionId)
+                if (sessionId == null) {
+                    connectionModule.api.listRecordingsTypeId0(type, id)
+                } else {
+                    connectionModule.api.listRecordingsTypeIdSession1(type, id, sessionId)
+                }
             result
         }
     }

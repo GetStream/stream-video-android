@@ -18,12 +18,24 @@ package io.getstream.video.android.ui.menu.base
 
 import androidx.compose.ui.graphics.vector.ImageVector
 
-open class MenuItem(
+/**
+ * Parent class on all menu items.
+ *
+ * @param title - title of the item, used to display in the menu, or a subtitle to the sub menu.
+ * @param icon - the icon to be shown with the item.
+ * @param highlight -  if the icon should be highlighted or not (usually tinted with primary color)
+ */
+abstract class MenuItem(
     val title: String,
     val icon: ImageVector,
     val highlight: Boolean = false,
 )
 
+/**
+ * Same as [MenuItem] but additionally has an action associated with it.
+ *
+ * @param action - the action that will execute when the item is clicked.
+ */
 class ActionMenuItem(
     title: String,
     icon: ImageVector,
@@ -31,5 +43,23 @@ class ActionMenuItem(
     val action: () -> Unit,
 ) : MenuItem(title, icon, highlight)
 
-class SubMenuItem(title: String, icon: ImageVector, val items: List<MenuItem>) :
+/**
+ * Unlike the [ActionMenuItem] the [SubMenuItem] contains a list of [MenuItem] that create a new submenu.
+ * Clicking a [SubMenuItem] will show the [items].
+ *
+ * @param items - the items will be shown in the menu.
+ */
+open class SubMenuItem(title: String, icon: ImageVector, val items: List<MenuItem>) :
     MenuItem(title, icon)
+
+/**
+ * Similar to the [SubMenuItem] the [DynamicSubMenuItem] contains an [itemsLoader] function to load the items.
+ * The [DynamicMenu] knows how to invoke this function to dynamically load the items while showing a progress indicator.
+ *
+ * @param itemsLoader the items provider function.
+ */
+class DynamicSubMenuItem(
+    title: String,
+    icon: ImageVector,
+    val itemsLoader: suspend () -> List<MenuItem>,
+) : MenuItem(title, icon)
