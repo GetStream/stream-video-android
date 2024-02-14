@@ -62,4 +62,4 @@ class DynamicSubMenuItem(
     title: String,
     icon: ImageVector,
     val itemsLoader: suspend () -> List<MenuItem>,
-) : MenuItem(title, icon)
+) : SubMenuItem(title, icon, emptyList())
