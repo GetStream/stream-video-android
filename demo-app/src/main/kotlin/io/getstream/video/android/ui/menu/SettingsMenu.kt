@@ -16,14 +16,24 @@
 
 package io.getstream.video.android.ui.menu
 
+import android.Manifest
 import android.app.Activity
+import android.app.DownloadManager
+import android.content.Context
+import android.content.Context.DOWNLOAD_SERVICE
 import android.graphics.Bitmap
 import android.media.MediaCodecList
 import android.media.projection.MediaProjectionManager
+import android.net.Uri
+import android.os.Build
+import android.os.Environment
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.VideoFile
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -34,7 +44,11 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.window.Popup
 import androidx.compose.ui.window.PopupProperties
+import androidx.core.content.ContextCompat.getSystemService
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.google.accompanist.permissions.ExperimentalPermissionsApi
+import com.google.accompanist.permissions.PermissionStatus
+import com.google.accompanist.permissions.rememberPermissionState
 import io.getstream.video.android.compose.theme.base.VideoTheme
 import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.call.audio.AudioFilter
@@ -42,13 +56,15 @@ import io.getstream.video.android.core.call.video.BitmapVideoFilter
 import io.getstream.video.android.core.mapper.ReactionMapper
 import io.getstream.video.android.tooling.extensions.toPx
 import io.getstream.video.android.ui.call.ReactionsMenu
+import io.getstream.video.android.ui.menu.base.ActionMenuItem
 import io.getstream.video.android.ui.menu.base.DynamicMenu
+import io.getstream.video.android.ui.menu.base.MenuItem
 import io.getstream.video.android.util.BlurredBackgroundVideoFilter
 import io.getstream.video.android.util.SampleAudioFilter
 import kotlinx.coroutines.launch
 import java.nio.ByteBuffer
 
-@OptIn(ExperimentalComposeUiApi::class)
+@OptIn(ExperimentalComposeUiApi::class, ExperimentalPermissionsApi::class)
 @Composable
 internal fun SettingsMenu(
     call: Call,
@@ -155,6 +171,29 @@ internal fun SettingsMenu(
             } != null
         }
     }
+
+    val onLoadRecordings: suspend () -> List<MenuItem> = storagePermissionAndroidBellow10 {
+        when (it) {
+            is PermissionStatus.Granted -> {
+                {
+                    call.listRecordings().getOrNull()?.recordings?.map {
+                        ActionMenuItem(
+                            title = it.filename,
+                            icon = Icons.Default.VideoFile,
+                            action = {
+                                context.downloadFile(it.url, it.filename)
+                                onDismissed()
+                            },
+                        )
+                    } ?: emptyList()
+                }
+            }
+            is PermissionStatus.Denied -> {
+                { emptyList() }
+            }
+        }
+    }
+
     Popup(
         offset = IntOffset(
             0,
@@ -196,9 +235,44 @@ internal fun SettingsMenu(
                 onShowCallStats = onShowCallStats,
                 isBackgroundBlurEnabled = isBackgroundBlurEnabled,
                 isScreenShareEnabled = isScreenSharing,
+                loadRecordings = onLoadRecordings,
             ),
         )
     }
+}
+
+@OptIn(ExperimentalPermissionsApi::class)
+@Composable
+private fun storagePermissionAndroidBellow10(
+    permission: (PermissionStatus) -> suspend () -> List<MenuItem>,
+): suspend () -> List<MenuItem> {
+    // Check if the device's API level is below Android 10 (API level 29)
+    return if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) {
+        val writeStoragePermissionState =
+            rememberPermissionState(Manifest.permission.WRITE_EXTERNAL_STORAGE)
+        LaunchedEffect(key1 = true) {
+            // Request permission
+            writeStoragePermissionState.launchPermissionRequest()
+        }
+        permission(writeStoragePermissionState.status)
+    } else {
+        permission(PermissionStatus.Granted)
+    }
+}
+
+private fun Context.downloadFile(url: String, title: String) {
+    val request = DownloadManager.Request(Uri.parse(url))
+        .setTitle(title) // Title of the Download Notification
+        .setDescription("Downloading") // Description of the Download Notification
+        .setNotificationVisibility(
+            DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED,
+        ) // Visibility of the download Notification
+        .setAllowedOverMetered(true) // Set if download is allowed on Mobile network
+        .setAllowedOverRoaming(true) // Set if download is allowed on Roaming network
+        .setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS, title)
+
+    val downloadManager = getSystemService(DOWNLOAD_SERVICE) as DownloadManager
+    downloadManager.enqueue(request) // enqueue puts the download request in the queue.
 }
 
 @Preview
@@ -223,6 +297,7 @@ private fun SettingsMenuPreview() {
                 availableDevices = emptyList(),
                 onDeviceSelected = {
                 },
+                loadRecordings = { emptyList() },
             ),
         )
     }
