@@ -19,14 +19,14 @@ package io.getstream.video.android.ui.menu
 import android.media.MediaCodecInfo
 import android.os.Build
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.MobileScreenShare
 import androidx.compose.material.icons.automirrored.filled.ReadMore
-import androidx.compose.material.icons.automirrored.filled.ScreenShare
-import androidx.compose.material.icons.automirrored.filled.StopScreenShare
 import androidx.compose.material.icons.filled.Audiotrack
 import androidx.compose.material.icons.filled.AutoGraph
 import androidx.compose.material.icons.filled.BluetoothAudio
 import androidx.compose.material.icons.filled.BlurOff
 import androidx.compose.material.icons.filled.BlurOn
+import androidx.compose.material.icons.filled.Feedback
 import androidx.compose.material.icons.filled.Headphones
 import androidx.compose.material.icons.filled.HeadsetMic
 import androidx.compose.material.icons.filled.PortableWifiOff
@@ -60,15 +60,16 @@ fun defaultStreamMenu(
     onRestartPublisherIceClick: () -> Unit,
     onKillSfuWsClick: () -> Unit,
     onSwitchSfuClick: () -> Unit,
+    onShowFeedback: () -> Unit,
     onDeviceSelected: (StreamAudioDevice) -> Unit,
     availableDevices: List<StreamAudioDevice>,
     loadRecordings: suspend () -> List<MenuItem>,
 ) = buildList<MenuItem> {
     add(
-        ActionMenuItem(
-            title = if (isScreenShareEnabled) "Stop screen-share" else "Start screen-share",
-            icon = if (isScreenShareEnabled) Icons.AutoMirrored.Default.StopScreenShare else Icons.AutoMirrored.Default.ScreenShare,
-            action = onToggleScreenShare,
+        DynamicSubMenuItem(
+            title = "Recordings",
+            icon = Icons.Default.VideoLibrary,
+            itemsLoader = loadRecordings,
         ),
     )
     add(
@@ -105,10 +106,17 @@ fun defaultStreamMenu(
         ),
     )
     add(
-        DynamicSubMenuItem(
-            title = "Recordings",
-            icon = Icons.Default.VideoLibrary,
-            itemsLoader = loadRecordings,
+        ActionMenuItem(
+            title = "Feedback",
+            icon = Icons.Default.Feedback,
+            action = onShowFeedback,
+        ),
+    )
+    add(
+        ActionMenuItem(
+            title = if (isScreenShareEnabled) "Stop screen-share" else "Start screen-share",
+            icon = Icons.AutoMirrored.Default.MobileScreenShare,
+            action = onToggleScreenShare,
         ),
     )
     if (showDebugOptions) {

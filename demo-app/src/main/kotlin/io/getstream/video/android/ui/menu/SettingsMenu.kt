@@ -70,9 +70,8 @@ internal fun SettingsMenu(
     call: Call,
     showDebugOptions: Boolean,
     isBackgroundBlurEnabled: Boolean,
-    onDisplayAvailableDevice: () -> Unit,
     onDismissed: () -> Unit,
-    onShowReactionsMenu: () -> Unit,
+    onShowFeedback: () -> Unit,
     onToggleBackgroundBlur: () -> Unit,
     onShowCallStats: () -> Unit,
 ) {
@@ -225,6 +224,7 @@ internal fun SettingsMenu(
                 onCodecSelected = {
                     onDismissed()
                 },
+                onShowFeedback = onShowFeedback,
                 onToggleScreenShare = onScreenShareClick,
                 onKillSfuWsClick = onKillSfuWsClick,
                 onRestartPublisherIceClick = onRestartPublisherIceClick,
@@ -297,6 +297,7 @@ private fun SettingsMenuPreview() {
                 availableDevices = emptyList(),
                 onDeviceSelected = {
                 },
+                onShowFeedback = {},
                 loadRecordings = { emptyList() },
             ),
         )

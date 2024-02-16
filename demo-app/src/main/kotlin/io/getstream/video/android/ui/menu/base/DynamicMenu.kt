@@ -223,6 +223,7 @@ private fun DynamicMenuPreview() {
                 onSwitchSfuClick = { },
                 availableDevices = emptyList(),
                 onDeviceSelected = {},
+                onShowFeedback = {},
                 loadRecordings = { emptyList() },
             ),
         )
@@ -250,6 +251,7 @@ private fun DynamicMenuDebugOptionPreview() {
                 onSwitchSfuClick = { },
                 availableDevices = emptyList(),
                 onDeviceSelected = {},
+                onShowFeedback = {},
                 loadRecordings = { emptyList() },
             ),
         )
