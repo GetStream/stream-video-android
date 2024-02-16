@@ -121,6 +121,7 @@ fun CallScreen(
     var isShowingReactionsMenu by remember { mutableStateOf(false) }
     var isShowingAvailableDeviceMenu by remember { mutableStateOf(false) }
     var isBackgroundBlurEnabled by remember { mutableStateOf(false) }
+    var isShowingFeedbackDialog by remember { mutableStateOf(false) }
     var isShowingStats by remember { mutableStateOf(false) }
     var layout by remember { mutableStateOf(LayoutType.DYNAMIC) }
     var unreadCount by remember { mutableIntStateOf(0) }
@@ -446,25 +447,26 @@ fun CallScreen(
                 call = call,
                 showDebugOptions = showDebugOptions,
                 isBackgroundBlurEnabled = isBackgroundBlurEnabled,
-                onDisplayAvailableDevice = { isShowingAvailableDeviceMenu = true },
                 onDismissed = { isShowingSettingMenu = false },
-                onShowReactionsMenu = { isShowingReactionsMenu = true },
+                onShowFeedback = {
+                    isShowingSettingMenu = false
+                    isShowingFeedbackDialog = true
+                },
                 onToggleBackgroundBlur = {
                     isBackgroundBlurEnabled = !isBackgroundBlurEnabled
                     isShowingSettingMenu = false
                 },
-            ) {
-                isShowingStats = true
-                isShowingSettingMenu = false
-            }
+                onShowCallStats = {
+                    isShowingStats = true
+                    isShowingSettingMenu = false
+                },
+            )
         }
 
-        if (isShowingReactionsMenu) {
-            ReactionsMenu(
-                call = call,
-                reactionMapper = VideoTheme.reactionMapper,
-                onDismiss = { isShowingReactionsMenu = false },
-            )
+        if (isShowingFeedbackDialog) {
+            FeedbackDialog(call = call) {
+                isShowingFeedbackDialog = false
+            }
         }
 
         if (isShowingLayoutChooseMenu) {

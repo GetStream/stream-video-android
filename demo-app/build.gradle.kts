@@ -269,6 +269,9 @@ dependencies {
     implementation(libs.google.mlkit.selfie.segmentation)
     implementation(files("libs/renderscript-toolkit.aar"))
 
+    // Http
+    implementation(libs.okhttp)
+
     // Memory detection
     debugImplementation(libs.leakCanary)
 
