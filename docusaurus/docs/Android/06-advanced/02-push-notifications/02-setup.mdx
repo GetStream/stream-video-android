@@ -66,28 +66,36 @@ You only need to create the `Activity`/`Activities` will be called when the Push
 The different actions we provide are:
 
 * `io.getstream.video.android.action.INCOMING_CALL`: Action used to process an incoming call. The `activity` that handles this action should show options to accept/reject the call. You can use our [RigningCallContent](../../04-ui-components/04-call/04-ringing-call.mdx) component to build your screen. This screen can be shown when the device is locked, by adding some arguments on the manifest.
+* `io.getstream.video.android.action.OUTGOING_CALL`: Action used to process an outgoing call. The `activity` that handles this action should show options to cancel the call. You can use our [RigningCallContent](../../04-ui-components/04-call/04-ringing-call.mdx) component to build your screen.
 * `io.getstream.video.android.action.ACCEPT_CALL`: Action used to accept an incoming call. The `activity` that handles this action should accept the call and show the call screen. You can use our [CallContent](../../04-ui-components/04-call/03-call-content.mdx) component to build your screen.
 * `io.getstream.video.android.action.LIVE_CALL`: Action used to go into a live call. The `activity` that handles this action should show the live call screen. You can use our [CallContent](../../04-ui-components/04-call/03-call-content.mdx) component to build your screen.
 * `io.getstream.video.android.action.ONGOING_CALL`: Action used to get back into already running call. The `activity` that handles this action should show the call screen. You can use our [CallContent](../../04-ui-components/04-call/03-call-content.mdx) component to build your screen. 
 These actions need to be included on the `AndroidManifest` while you declare your activities:
-``` xml {4,9-11,15,18-20,24,27-29,33,36-38}
+``` xml {4,8-10,13,17-19,23,26-28,31,33-35,39,42-44}
 <manifest>
     <application>
         <activity
             android:name=".IncomingCallActivity"
             android:exported="false"
             android:showOnLockScreen="true"
-            android:showWhenLocked="true"
-            >
+            android:showWhenLocked="true">
             <intent-filter android:priority="1">
                 <action android:name="io.getstream.video.android.action.INCOMING_CALL" />
+            </intent-filter>
+        </activity>
+        <activity
+            android:name=".OutgoingCallActivity"
+            android:exported="false"
+            android:showOnLockScreen="true"
+            android:showWhenLocked="true">
+            <intent-filter android:priority="1">
+                <action android:name="io.getstream.video.android.action.OUTGOING_CALL" />
             </intent-filter>
         </activity>
 
         <activity
             android:name=".AcceptCallActivity"
-            android:exported="false"
-            >
+            android:exported="false">
             <intent-filter android:priority="1">
                 <action android:name="io.getstream.video.android.action.ACCEPT_CALL" />
             </intent-filter>
@@ -95,8 +103,7 @@ These actions need to be included on the `AndroidManifest` while you declare you
 
         <activity
             android:name=".LiveCallActivity"
-            android:exported="false"
-            >
+            android:exported="false">
             <intent-filter android:priority="1">
                 <action android:name="io.getstream.video.android.action.LIVE_CALL" />
             </intent-filter>
@@ -142,7 +149,7 @@ class MyNotificationHandler(private val context: Context) : NotificationHandler 
         context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
     }
 
-    // Called when a Ringing Call arrives.
+    // Called when a Ringing Call arrives. (outgoing or incoming)
     override fun onRingingCall(callId: StreamCallId, callDisplayName: String) {
         val notification = NotificationCompat.Builder(context, notificationChannelId)
             ... // Configure your own notification

@@ -31,6 +31,58 @@ The call type controls the permissions and which features are enabled.
 The second argument is the call id and is optional. It's convenient to specify an ID if the call is associated with an object in your database.
 As an example if you're building a ride sharing app like Uber, you could use the ride id as the call id to easily align with your internal systems.
 
+#### Incoming / outgoing calls
+If you intend to support incoming and outgoing calls the SDK must know which activities to call in the notification `PendingIntent`.
+In order to be able to accept and send incoming calls via the default notification handler provided by the SDK, you need to handle the intent actions in your manifest.
+
+The SDK defines the following actions:
+```kotlin
+ACTION_NOTIFICATION = "io.getstream.video.android.action.NOTIFICATION"
+ACTION_LIVE_CALL = "io.getstream.video.android.action.LIVE_CALL"
+ACTION_INCOMING_CALL = "io.getstream.video.android.action.INCOMING_CALL"
+ACTION_OUTGOING_CALL = "io.getstream.video.android.action.OUTGOING_CALL"
+ACTION_ACCEPT_CALL = "io.getstream.video.android.action.ACCEPT_CALL"
+ACTION_REJECT_CALL = "io.getstream.video.android.action.REJECT_CALL"
+ACTION_LEAVE_CALL = "io.getstream.video.android.action.LEAVE_CALL"
+ACTION_ONGOING_CALL = "io.getstream.video.android.action.ONGOING_CALL"
+```
+
+If you do not support incoming and outgoing calls, you can skip the `<intent-filter>` declarations.
+
+In order to be able to fully utilize the incoming / outgoing feature the SDK needs to know which activity these actions resolve to in order to construct the `PendingIntent`s.
+You have to provide this information into your manifest.
+
+The `ACTION_REJECT_CALL` and `ACTION_LEAVE_CALL` are handled by default by the SDK and you do not have to do anything about them.
+The `ACTION_ONGOING_CALL` does not mandate an `<intent-filter>` with the consequence that omitting this will result in reduced functionality where the user will not be returned to your app if the notification is clicked.
+
+All the other actions must be declared in your manifest, otherwise the internal `CallService` will fail to create the required notification for a foreground service and thus not start, resulting in an exception.
+
+```xml
+<manifest>
+    <application>
+        <activity
+            android:name=".Activity"
+            android:exported="false"
+            android:showOnLockScreen="true"
+            android:showWhenLocked="true"
+            >
+            <intent-filter android:priority="1">
+                <action android:name="io.getstream.video.android.action.INCOMING_CALL" />
+                <action android:name="io.getstream.video.android.action.ONGOING_CALL" />
+                <action android:name="io.getstream.video.android.action.ACCEPT_CALL" />
+                <action android:name="io.getstream.video.android.action.OUTGOING_CALL" />
+                <action android:name="io.getstream.video.android.action.NOTIFICATION" />
+            </intent-filter>
+        </activity>
+    </application>
+<manifest>
+```
+:::info
+You can handle multiple `IntentFilter` within a single `activity` if you prefer or have separate activity for each action.
+:::
+
+For more details on notification customization see our [Push Notification Guide](../06-advanced/02-push-notifications/01-overview.mdx).
+
 ### Rendering video
 
 The call's state is available in [`call.state`](../03-guides/03-call-and-participant-state.mdx) and you'll often work with `call.state.participants`.
