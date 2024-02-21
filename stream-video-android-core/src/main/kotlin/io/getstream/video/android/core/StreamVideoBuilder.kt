@@ -18,6 +18,9 @@ package io.getstream.video.android.core
 
 import android.app.Notification
 import android.content.Context
+import android.os.Build
+import androidx.annotation.RequiresApi
+import androidx.core.telecom.CallsManager
 import androidx.lifecycle.ProcessLifecycleOwner
 import com.jakewharton.threetenabp.AndroidThreeTen
 import io.getstream.log.StreamLog
@@ -193,6 +196,12 @@ public class StreamVideoBuilder @JvmOverloads constructor(
             streamLog { "location initialized: ${location.getOrNull()}" }
         }
 
+        // Register stream with platform's call manager
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            registerWithTelecomAPI()
+        }
+
         // installs Stream Video instance
         StreamVideo.install(client)
 
@@ -205,6 +214,14 @@ public class StreamVideoBuilder @JvmOverloads constructor(
         }
 
         return client
+    }
+
+    @RequiresApi(Build.VERSION_CODES.O)
+    private fun registerWithTelecomAPI() {
+        val callsManager = CallsManager(context)
+        val capabilities: @CallsManager.Companion.Capability Int =
+            CallsManager.CAPABILITY_BASELINE or CallsManager.CAPABILITY_SUPPORTS_VIDEO_CALLING
+        callsManager.registerAppWithTelecom(capabilities)
     }
 }
 

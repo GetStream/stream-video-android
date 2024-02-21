@@ -41,6 +41,8 @@ import io.getstream.video.android.core.notifications.NotificationHandler.Compani
 import io.getstream.video.android.core.notifications.NotificationHandler.Companion.INCOMING_CALL_NOTIFICATION_ID
 import io.getstream.video.android.core.notifications.internal.DefaultStreamIntentResolver
 import io.getstream.video.android.core.notifications.internal.service.CallService
+import io.getstream.video.android.core.notifications.internal.service.CallTrigger
+import io.getstream.video.android.core.notifications.internal.service.CallTriggers
 import io.getstream.video.android.model.StreamCallId
 
 public open class DefaultNotificationHandler(
@@ -74,7 +76,7 @@ public open class DefaultNotificationHandler(
         val serviceIntent = CallService.buildStartIntent(
             this.application,
             callId,
-            CallService.TRIGGER_INCOMING_CALL,
+            CallTriggers.TRIGGER_INCOMING_CALL,
             callDisplayName,
         )
         ContextCompat.startForegroundService(application.applicationContext, serviceIntent)

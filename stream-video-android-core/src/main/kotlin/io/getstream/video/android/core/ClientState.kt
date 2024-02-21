@@ -20,6 +20,7 @@ import android.content.Context
 import androidx.compose.runtime.Stable
 import androidx.core.content.ContextCompat
 import io.getstream.video.android.core.notifications.internal.service.CallService
+import io.getstream.video.android.core.notifications.internal.service.CallTriggers
 import io.getstream.video.android.model.StreamCallId
 import io.getstream.video.android.model.User
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -104,7 +105,7 @@ class ClientState(client: StreamVideo) {
 
     fun setActiveCall(call: Call) {
         removeRingingCall()
-        maybeStartForegroundService(call, CallService.TRIGGER_ONGOING_CALL)
+        maybeStartForegroundService(call, CallTriggers.TRIGGER_ONGOING_CALL)
         this._activeCall.value = call
     }
 
@@ -117,7 +118,7 @@ class ClientState(client: StreamVideo) {
     fun addRingingCall(call: Call, ringingState: RingingState) {
         _ringingCall.value = call
         if (ringingState is RingingState.Outgoing) {
-            maybeStartForegroundService(call, CallService.TRIGGER_OUTGOING_CALL)
+            maybeStartForegroundService(call, CallTriggers.TRIGGER_OUTGOING_CALL)
         }
 
         // TODO: behaviour if you are already in a call

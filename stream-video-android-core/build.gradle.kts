@@ -170,6 +170,9 @@ dependencies {
     implementation(libs.moshi.kotlin)
     implementation(libs.moshi.adapters)
 
+    // Telcom
+    implementation (libs.androidx.core.telecom)
+
     api(libs.threentenabp2)
 
     // stable marker annotations
