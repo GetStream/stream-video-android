@@ -57,9 +57,11 @@ import java.lang.IllegalStateException
 /**
  * A foreground service that is running when there is an active call.
  */
-@Deprecated("This service handles calls and notifications prior to API 26, " +
+@Deprecated(
+    "This service handles calls and notifications prior to API 26, " +
         "since the Telecom API requires minimum of SDK 26. " +
-        "After the Video SDK has moved to minSDK=26 the service will be deleted.")
+        "After the Video SDK has moved to minSDK=26 the service will be deleted.",
+)
 @ScheduledForRemoval(inVersion = "minSDK=26")
 internal class CallService : Service() {
     private val logger by taggedLogger("CallService")
@@ -82,7 +84,6 @@ internal class CallService : Service() {
 
         const val TRIGGER_KEY =
             "io.getstream.video.android.core.notifications.internal.service.CallService.call_trigger"
-
 
         /**
          * Build start intent.
