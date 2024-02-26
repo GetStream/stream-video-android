@@ -21,7 +21,6 @@ import android.app.Activity
 import android.app.DownloadManager
 import android.content.Context
 import android.content.Context.DOWNLOAD_SERVICE
-import android.graphics.Bitmap
 import android.media.MediaCodecList
 import android.media.projection.MediaProjectionManager
 import android.net.Uri
@@ -51,15 +50,14 @@ import com.google.accompanist.permissions.rememberPermissionState
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.call.audio.AudioFilter
-import io.getstream.video.android.core.call.video.BitmapVideoFilter
 import io.getstream.video.android.core.mapper.ReactionMapper
 import io.getstream.video.android.tooling.extensions.toPx
 import io.getstream.video.android.ui.call.ReactionsMenu
 import io.getstream.video.android.ui.menu.base.ActionMenuItem
 import io.getstream.video.android.ui.menu.base.DynamicMenu
 import io.getstream.video.android.ui.menu.base.MenuItem
-import io.getstream.video.android.util.BlurredBackgroundVideoFilter
-import io.getstream.video.android.util.SampleAudioFilter
+import io.getstream.video.android.util.filters.BlurredBackgroundVideoFilter
+import io.getstream.video.android.util.filters.SampleAudioFilter
 import kotlinx.coroutines.launch
 import java.nio.ByteBuffer
 
@@ -107,13 +105,7 @@ internal fun SettingsMenu(
         onToggleBackgroundBlur()
 
         if (call.videoFilter == null) {
-            call.videoFilter = object : BitmapVideoFilter() {
-                val filter = BlurredBackgroundVideoFilter()
-
-                override fun filter(bitmap: Bitmap) {
-                    filter.applyFilter(bitmap)
-                }
-            }
+            call.videoFilter = BlurredBackgroundVideoFilter()
         } else {
             call.videoFilter = null
         }

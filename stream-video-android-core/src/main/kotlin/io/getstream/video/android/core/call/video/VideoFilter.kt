@@ -30,7 +30,7 @@ open class VideoFilter internal constructor()
  * [RawVideoFilter] because we do YUV<->ARGB conversions internally.
  */
 abstract class BitmapVideoFilter : VideoFilter() {
-    abstract fun filter(bitmap: Bitmap)
+    abstract fun filter(videoFrameBitmap: Bitmap)
 }
 
 /**
