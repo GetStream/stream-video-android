@@ -43,9 +43,12 @@ io.getstream.video.android.compose.permission
 io.getstream.video.android.compose.state.ui.internal
 io.getstream.video.android.compose.state.ui.participants
 io.getstream.video.android.compose.theme
+io.getstream.video.android.compose.theme.base
 io.getstream.video.android.compose.ui.components.audio
 io.getstream.video.android.compose.ui.components.avatar
 io.getstream.video.android.compose.ui.components.background
+io.getstream.video.android.compose.ui.components.base
+io.getstream.video.android.compose.ui.components.base.styling
 io.getstream.video.android.compose.ui.components.call
 io.getstream.video.android.compose.ui.components.call.activecall
 io.getstream.video.android.compose.ui.components.call.controls
@@ -58,7 +61,6 @@ io.getstream.video.android.compose.ui.components.call.renderer.internal
 io.getstream.video.android.compose.ui.components.call.ringing
 io.getstream.video.android.compose.ui.components.call.ringing.incomingcall
 io.getstream.video.android.compose.ui.components.call.ringing.outgoingcall
-io.getstream.video.android.compose.ui.components.connection
 io.getstream.video.android.compose.ui.components.indicator
 io.getstream.video.android.compose.ui.components.livestream
 io.getstream.video.android.compose.ui.components.participants
