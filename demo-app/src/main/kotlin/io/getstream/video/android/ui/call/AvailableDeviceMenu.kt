@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014-2023 Stream.io Inc. All rights reserved.
+ * Copyright (c) 2014-2024 Stream.io Inc. All rights reserved.
  *
  * Licensed under the Stream License;
  * you may not use this file except in compliance with the License.
@@ -37,7 +37,7 @@ import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Popup
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import io.getstream.video.android.compose.theme.VideoTheme
+import io.getstream.video.android.compose.theme.base.VideoTheme
 import io.getstream.video.android.core.Call
 import kotlinx.coroutines.delay
 
@@ -66,8 +66,8 @@ fun AvailableDeviceMenu(
         Card(
             modifier = Modifier.width(140.dp),
             shape = RoundedCornerShape(12.dp),
-            contentColor = VideoTheme.colors.appBackground,
-            backgroundColor = VideoTheme.colors.appBackground,
+            contentColor = VideoTheme.colors.basePrimary,
+            backgroundColor = VideoTheme.colors.baseSheetPrimary,
             elevation = 6.dp,
         ) {
             LazyColumn(
@@ -90,7 +90,7 @@ fun AvailableDeviceMenu(
                                     .show()
                             },
                         text = audioDevice.name,
-                        color = VideoTheme.colors.textHighEmphasis,
+                        color = VideoTheme.colors.basePrimary,
                     )
                 }
             }

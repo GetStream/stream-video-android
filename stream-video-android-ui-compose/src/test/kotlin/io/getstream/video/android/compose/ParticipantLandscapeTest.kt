@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014-2023 Stream.io Inc. All rights reserved.
+ * Copyright (c) 2014-2024 Stream.io Inc. All rights reserved.
  *
  * Licensed under the Stream License;
  * you may not use this file except in compliance with the License.
@@ -25,7 +25,7 @@ import androidx.compose.ui.unit.IntSize
 import app.cash.paparazzi.DeviceConfig
 import app.cash.paparazzi.Paparazzi
 import io.getstream.video.android.compose.base.BaseComposeTest
-import io.getstream.video.android.compose.theme.VideoTheme
+import io.getstream.video.android.compose.theme.base.VideoTheme
 import io.getstream.video.android.compose.ui.components.call.renderer.internal.LandscapeScreenSharingVideoRenderer
 import io.getstream.video.android.compose.ui.components.call.renderer.internal.LandscapeVideoRenderer
 import io.getstream.video.android.compose.ui.components.call.renderer.internal.LazyRowVideoRenderer
@@ -52,7 +52,7 @@ internal class ParticipantLandscapeTest : BaseComposeTest() {
             val participants = previewParticipantsList
 
             Box(
-                modifier = Modifier.background(color = VideoTheme.colors.appBackground),
+                modifier = Modifier.background(color = VideoTheme.colors.baseSheetPrimary),
             ) {
                 LandscapeVideoRenderer(
                     call = previewCall,
@@ -74,7 +74,7 @@ internal class ParticipantLandscapeTest : BaseComposeTest() {
             val participants = previewParticipantsList
 
             Box(
-                modifier = Modifier.background(color = VideoTheme.colors.appBackground),
+                modifier = Modifier.background(color = VideoTheme.colors.baseSheetPrimary),
             ) {
                 LandscapeVideoRenderer(
                     call = previewCall,
@@ -96,7 +96,7 @@ internal class ParticipantLandscapeTest : BaseComposeTest() {
             val participants = previewParticipantsList
 
             Box(
-                modifier = Modifier.background(color = VideoTheme.colors.appBackground),
+                modifier = Modifier.background(color = VideoTheme.colors.baseSheetPrimary),
             ) {
                 LandscapeVideoRenderer(
                     call = previewCall,
@@ -118,7 +118,7 @@ internal class ParticipantLandscapeTest : BaseComposeTest() {
             val participants = previewParticipantsList
 
             Box(
-                modifier = Modifier.background(color = VideoTheme.colors.appBackground),
+                modifier = Modifier.background(color = VideoTheme.colors.baseSheetPrimary),
             ) {
                 LandscapeVideoRenderer(
                     call = previewCall,
@@ -140,7 +140,7 @@ internal class ParticipantLandscapeTest : BaseComposeTest() {
             val participants = previewParticipantsList
 
             Box(
-                modifier = Modifier.background(color = VideoTheme.colors.appBackground),
+                modifier = Modifier.background(color = VideoTheme.colors.baseSheetPrimary),
             ) {
                 LandscapeVideoRenderer(
                     call = previewCall,
@@ -162,7 +162,7 @@ internal class ParticipantLandscapeTest : BaseComposeTest() {
             val participants = previewParticipantsList
 
             Box(
-                modifier = Modifier.background(color = VideoTheme.colors.appBackground),
+                modifier = Modifier.background(color = VideoTheme.colors.baseSheetPrimary),
             ) {
                 LandscapeVideoRenderer(
                     call = previewCall,

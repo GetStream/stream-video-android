@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014-2023 Stream.io Inc. All rights reserved.
+ * Copyright (c) 2014-2024 Stream.io Inc. All rights reserved.
  *
  * Licensed under the Stream License;
  * you may not use this file except in compliance with the License.
@@ -16,20 +16,19 @@
 
 package io.getstream.video.android.compose.ui.components.call.controls.actions
 
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material.Icon
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.VolumeOff
+import androidx.compose.material.icons.filled.VolumeUp
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
-import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.unit.dp
-import io.getstream.video.android.compose.theme.VideoTheme
+import androidx.compose.ui.tooling.preview.Preview
+import io.getstream.video.android.compose.theme.base.VideoTheme
 import io.getstream.video.android.core.call.state.CallAction
 import io.getstream.video.android.core.call.state.ToggleSpeakerphone
-import io.getstream.video.android.ui.common.R
 
 /**
  * A call action button represents toggling a speakerphone.
@@ -44,45 +43,38 @@ public fun ToggleSpeakerphoneAction(
     modifier: Modifier = Modifier,
     isSpeakerphoneEnabled: Boolean,
     enabled: Boolean = true,
-    shape: Shape = VideoTheme.shapes.callControlsButton,
-    enabledColor: Color = VideoTheme.colors.callActionIconEnabledBackground,
-    disabledColor: Color = VideoTheme.colors.callActionIconDisabledBackground,
-    enabledIconTint: Color = VideoTheme.colors.callActionIconEnabled,
-    disabledIconTint: Color = VideoTheme.colors.callActionIconDisabled,
+    shape: Shape? = null,
+    enabledColor: Color? = null,
+    disabledColor: Color? = null,
+    enabledIconTint: Color? = null,
+    disabledIconTint: Color? = null,
     onCallAction: (ToggleSpeakerphone) -> Unit,
+): Unit = ToggleAction(
+    modifier = modifier,
+    enabled = enabled,
+    shape = shape,
+    enabledColor = enabledColor,
+    disabledColor = disabledColor,
+    enabledIconTint = enabledIconTint,
+    disabledIconTint = disabledIconTint,
+    isActionActive = isSpeakerphoneEnabled,
+    iconOnOff = Pair(Icons.Default.VolumeUp, Icons.Default.VolumeOff),
 ) {
-    val cameraIcon = painterResource(
-        id = if (isSpeakerphoneEnabled) {
-            R.drawable.stream_video_ic_speaker_on
-        } else {
-            R.drawable.stream_video_ic_speaker_off
-        },
-    )
+    onCallAction(ToggleSpeakerphone(isSpeakerphoneEnabled.not()))
+}
 
-    CallControlActionBackground(
-        modifier = modifier,
-        isEnabled = isSpeakerphoneEnabled,
-        shape = shape,
-        enabledColor = enabledColor,
-        disabledColor = disabledColor,
-    ) {
-        Icon(
-            modifier = Modifier
-                .padding(13.dp)
-                .clickable(enabled = enabled) {
-                    onCallAction(
-                        ToggleSpeakerphone(isSpeakerphoneEnabled.not()),
-                    )
-                },
-            tint = if (isSpeakerphoneEnabled) {
-                enabledIconTint
-            } else {
-                disabledIconTint
-            },
-            painter = cameraIcon,
-            contentDescription = stringResource(
-                R.string.stream_video_call_controls_toggle_speakerphone,
-            ),
-        )
+@Preview
+@Composable
+public fun ToggleSpeakerphoneActionPreview() {
+    VideoTheme {
+        Column {
+            Row {
+                ToggleSpeakerphoneAction(isSpeakerphoneEnabled = false) {
+                }
+
+                ToggleSpeakerphoneAction(isSpeakerphoneEnabled = true) {
+                }
+            }
+        }
     }
 }

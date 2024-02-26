@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014-2023 Stream.io Inc. All rights reserved.
+ * Copyright (c) 2014-2024 Stream.io Inc. All rights reserved.
  *
  * Licensed under the Stream License;
  * you may not use this file except in compliance with the License.
@@ -916,8 +916,13 @@ public class Call(
         }
     }
 
-    suspend fun listRecordings(): Result<ListRecordingsResponse> {
-        return clientImpl.listRecordings(type, id, "what")
+    /**
+     * List the recordings for this call.
+     *
+     * @param sessionId - if session ID is supplied, only recordings for that session will be loaded.
+     */
+    suspend fun listRecordings(sessionId: String? = null): Result<ListRecordingsResponse> {
+        return clientImpl.listRecordings(type, id, sessionId)
     }
 
     suspend fun muteUser(

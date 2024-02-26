@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014-2022 Stream.io Inc. All rights reserved.
+ * Copyright (c) 2014-2024 Stream.io Inc. All rights reserved.
  *
  * Licensed under the Stream License;
  * you may not use this file except in compliance with the License.
@@ -16,14 +16,8 @@
 
 package io.getstream.video.android.compose.ui.components.call.lobby
 
-import android.content.res.Configuration
-import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalInspectionMode
-import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.call.controls.actions.ToggleCameraAction
 import io.getstream.video.android.compose.ui.components.call.controls.actions.ToggleMicrophoneAction
 import io.getstream.video.android.core.Call
@@ -50,25 +44,15 @@ public fun buildDefaultLobbyControlActions(
         call.microphone.isEnabled.value
     },
 ): List<@Composable () -> Unit> {
-    val orientation = LocalConfiguration.current.orientation
-
-    val modifier = if (orientation == Configuration.ORIENTATION_PORTRAIT) {
-        Modifier.size(VideoTheme.dimens.controlActionsButtonSize)
-    } else {
-        Modifier.size(VideoTheme.dimens.landscapeControlActionsButtonSize)
-    }
-
     return listOf(
         {
             ToggleMicrophoneAction(
-                modifier = modifier,
                 isMicrophoneEnabled = isMicrophoneEnabled,
                 onCallAction = onCallAction,
             )
         },
         {
             ToggleCameraAction(
-                modifier = modifier,
                 isCameraEnabled = isCameraEnabled,
                 onCallAction = onCallAction,
             )

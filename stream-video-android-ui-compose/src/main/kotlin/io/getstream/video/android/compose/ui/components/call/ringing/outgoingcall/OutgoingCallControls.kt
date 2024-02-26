@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014-2022 Stream.io Inc. All rights reserved.
+ * Copyright (c) 2014-2024 Stream.io Inc. All rights reserved.
  *
  * Licensed under the Stream License;
  * you may not use this file except in compliance with the License.
@@ -16,24 +16,21 @@
 
 package io.getstream.video.android.compose.ui.components.call.ringing.outgoingcall
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import io.getstream.video.android.compose.theme.VideoTheme
+import io.getstream.video.android.compose.theme.base.VideoTheme
 import io.getstream.video.android.compose.ui.components.call.controls.actions.CancelCallAction
 import io.getstream.video.android.compose.ui.components.call.controls.actions.ToggleCameraAction
 import io.getstream.video.android.compose.ui.components.call.controls.actions.ToggleMicrophoneAction
-import io.getstream.video.android.compose.ui.extensions.toggleAlpha
 import io.getstream.video.android.core.call.state.CallAction
 
 /**
@@ -61,25 +58,13 @@ public fun OutgoingCallControls(
             horizontalArrangement = Arrangement.SpaceEvenly,
         ) {
             ToggleMicrophoneAction(
-                modifier = Modifier
-                    .toggleAlpha(isMicrophoneEnabled)
-                    .background(
-                        color = VideoTheme.colors.appBackground,
-                        shape = VideoTheme.shapes.callButton,
-                    )
-                    .size(VideoTheme.dimens.mediumButtonSize),
                 isMicrophoneEnabled = isMicrophoneEnabled,
                 onCallAction = onCallAction,
             )
 
             ToggleCameraAction(
-                modifier = Modifier
-                    .toggleAlpha(isCameraEnabled)
-                    .background(
-                        color = VideoTheme.colors.appBackground,
-                        shape = VideoTheme.shapes.callButton,
-                    )
-                    .size(VideoTheme.dimens.mediumButtonSize),
+                offStyle = VideoTheme.styles.buttonStyles.secondaryIconButtonStyle(),
+                onStyle = VideoTheme.styles.buttonStyles.tetriaryIconButtonStyle(),
                 isCameraEnabled = isCameraEnabled,
                 onCallAction = onCallAction,
             )
@@ -88,7 +73,6 @@ public fun OutgoingCallControls(
         Spacer(modifier = Modifier.height(32.dp))
 
         CancelCallAction(
-            modifier = Modifier.size(VideoTheme.dimens.largeButtonSize),
             onCallAction = onCallAction,
         )
     }

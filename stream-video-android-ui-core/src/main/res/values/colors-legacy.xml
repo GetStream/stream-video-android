@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+     Copyright (c) 2024 Stream.io Inc. All rights reserved.
+
+     Licensed under the Stream License;
+     you may not use this file except in compliance with the License.
+     You may obtain a copy of the License at
+
+          https://github.com/GetStream/stream-video-android/blob/main/LICENSE
+
+     Unless required by applicable law or agreed to in writing, software
+     distributed under the License is distributed on an "AS IS" BASIS,
+     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     See the License for the specific language governing permissions and
+     limitations under the License.
+-->
+<resources>
+    <!-- Default colors -->
+    <color name="stream_video_text_high_emphasis">#000000</color>
+    <color name="stream_video_text_low_emphasis">#72767E</color>
+    <color name="stream_video_disabled">#B4B7BB</color>
+    <color name="stream_video_borders">#DBDDE1</color>
+    <color name="stream_video_input_background">#E9EAED</color>
+    <color name="stream_video_app_background">#FFFFFF</color>
+    <color name="stream_video_bars_background">#FFFFFF</color>
+    <color name="stream_video_link_background">#E9F1FF</color>
+    <color name="stream_video_overlay_regular">#80000000</color>
+    <color name="stream_video_overlay_dark">#99000000</color>
+    <color name="stream_video_primary_accent">#005FFF</color>
+    <color name="stream_video_connection_quality_background">#A60C0D0E</color>
+    <color name="stream_video_participant_label_background">#A60C0D0E</color>
+    <color name="stream_video_connection_quality_bar_background">#FFFFFF</color>
+    <color name="stream_video_screen_sharing_tooltip_background">#D9000000</color>
+    <color name="stream_video_screen_sharing_tooltip_content">#FCFCFC</color>
+    <color name="stream_video_error_accent">#FF3742</color>
+    <color name="stream_video_info_accent">#20E070</color>
+    <color name="stream_video_focused_border_color">#005FFF</color>
+    <color name="stream_video_avatar_border_color">#123D82</color>
+    <color name="stream_video_participant_container_background">#1E262E</color>
+    <color name="stream_video_highlight">#FBF4DD</color>
+    <color name="stream_video_text_avatar_initials">#FFFFFF</color>
+    <color name="stream_video_call_gradient_start">#545A64</color>
+    <color name="stream_video_call_gradient_end">#272A30</color>
+    <color name="stream_video_call_description">#FFFFFF</color>
+    <color name="stream_video_action_icon_enabled_background">#000000</color>
+    <color name="stream_video_action_icon_disabled_background">#FFFFFF</color>
+    <color name="stream_video_action_icon_enabled">#FFFFFF</color>
+    <color name="stream_video_action_icon_disabled">#000000</color>
+    <color name="stream_video_lobby_background">#4C525C</color>
+    <color name="stream_video_audio_leave">#FFFFFF</color>
+    <color name="stream_video_audio_room_actions">#1E262E</color>
+    <color name="stream_video_deactivated_volume_indicator">#005FFF</color>
+    <color name="stream_video_volume_indicator_background">#A60C0D0E</color>
+    <color name="stream_video_connection_indicator_great">#00E2A1</color>
+    <color name="stream_video_connection_indicator_good">#FFFFFF</color>
+    <color name="stream_video_connection_indicator_poor">#DC433B</color>
+    <color name="stream_video_live_indicator">#FF3742</color>
+
+    <!-- Default Dark colors -->
+    <color name="stream_video_text_high_emphasis_dark">#FFFFFF</color>
+    <color name="stream_video_text_low_emphasis_dark">#72767E</color>
+    <color name="stream_video_disabled_dark">#4C525C</color>
+    <color name="stream_video_borders_dark">#272A30</color>
+    <color name="stream_video_input_background_dark">#1C1E22</color>
+    <color name="stream_video_app_background_dark">#000000</color>
+    <color name="stream_video_bars_background_dark">#121416</color>
+    <color name="stream_video_link_background_dark">#00193D</color>
+    <color name="stream_video_overlay_regular_dark">#33000000</color>
+    <color name="stream_video_overlay_dark_dark">#99FFFFFF</color>
+    <color name="stream_video_primary_accent_dark">#337EFF</color>
+    <color name="stream_video_error_accent_dark">#FF3742</color>
+    <color name="stream_video_info_accent_dark">#20E070</color>
+    <color name="stream_video_highlight_dark">#302D22</color>
+    <color name="stream_video_call_description_dark">#FFFFFF</color>
+    <color name="stream_video_action_icon_enabled_background_dark">#FFFFFF</color>
+    <color name="stream_video_action_icon_disabled_background_dark">#000000</color>
+    <color name="stream_video_action_icon_enabled_dark">#000000</color>
+    <color name="stream_video_action_icon_disabled_dark">#FFFFFF</color>
+    <color name="stream_video_lobby_background_dark">#4C525C</color>
+    <color name="stream_video_audio_leave_dark">#FFFFFF</color>
+    <color name="stream_video_audio_room_actions_dark">#FFFFFF</color>
+    <color name="stream_video_deactivated_volume_indicator_dark">#005FFF</color>
+    <color name="stream_video_volume_indicator_background_dark">#A60C0D0E</color>
+    <color name="stream_video_live_indicator_dark">#FF3742</color>
+    <color name="stream_video_connection_quality_background_dark">#A60C0D0E</color>
+    <color name="stream_video_participant_label_background_dark">#A60C0D0E</color>
+
+    <!-- Avatar gradient colors -->
+    <color name="stream_video_avatar_gradient_orange">#FF8A65</color>
+    <color name="stream_video_avatar_gradient_green">#81C784</color>
+    <color name="stream_video_avatar_gradient_blue">#4FC3F7</color>
+    <color name="stream_video_avatar_gradient_brown">#A1887F</color>
+    <color name="stream_video_avatar_gradient_yellow">#FFF176</color>
+    <color name="stream_video_avatar_gradient_red">#E57373</color>
+    <array name="stream_video_avatar_gradient_colors">
+        <item>@color/stream_video_brand_cyan</item>
+        <item>@color/stream_video_brand_green</item>
+        <item>@color/stream_video_brand_primary</item>
+        <item>@color/stream_video_brand_primary_lt</item>
+        <item>@color/stream_video_brand_red</item>
+        <item>@color/stream_video_brand_red_lt</item>
+        <item>@color/stream_video_brand_violet</item>
+        <item>@color/stream_video_brand_yellow</item>
+    </array>
+</resources>

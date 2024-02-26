@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014-2023 Stream.io Inc. All rights reserved.
+ * Copyright (c) 2014-2024 Stream.io Inc. All rights reserved.
  *
  * Licensed under the Stream License;
  * you may not use this file except in compliance with the License.
@@ -29,13 +29,17 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import io.getstream.video.android.compose.theme.VideoTheme
+import io.getstream.video.android.compose.theme.base.VideoTheme
 import io.getstream.video.android.core.ParticipantState
+import io.getstream.video.android.mock.StreamPreviewDataUtils
+import io.getstream.video.android.mock.previewParticipant
 import io.getstream.video.android.ui.common.R
 
 @Composable
@@ -47,34 +51,43 @@ internal fun ScreenShareTooltip(
 
     Row(
         modifier = modifier
-            .height(VideoTheme.dimens.screenSharePresenterTooltipHeight)
+            .height(VideoTheme.dimens.componentHeightM)
             .wrapContentWidth()
             .clip(RoundedCornerShape(bottomEnd = 8.dp))
             .background(
-                color = VideoTheme.colors.screenSharingTooltipBackground,
+                color = VideoTheme.colors.baseSheetQuarternary,
                 shape = RoundedCornerShape(bottomEnd = 8.dp),
             ),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Icon(
             modifier = Modifier.padding(
-                start = VideoTheme.dimens.screenSharePresenterTooltipPadding,
-                end = VideoTheme.dimens.screenSharePresenterTooltipIconPadding,
+                start = VideoTheme.dimens.spacingXs,
+                end = VideoTheme.dimens.spacingXs,
             ),
             painter = painterResource(id = R.drawable.stream_video_ic_screensharing),
-            tint = VideoTheme.colors.screenSharingTooltipContent,
+            tint = VideoTheme.colors.basePrimary,
             contentDescription = "Presenting",
         )
 
         Text(
             modifier = Modifier.padding(
-                end = VideoTheme.dimens.screenSharePresenterTooltipPadding,
+                end = VideoTheme.dimens.spacingXs,
             ),
             text = stringResource(id = R.string.stream_video_screen_sharing_title, userNameOrId),
-            color = VideoTheme.colors.screenSharingTooltipContent,
-            style = VideoTheme.typography.title3Bold,
+            color = VideoTheme.colors.basePrimary,
+            style = VideoTheme.typography.titleXs,
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,
         )
+    }
+}
+
+@Preview
+@Composable
+private fun ScreenShareTooltipPreview() {
+    StreamPreviewDataUtils.initializeStreamVideo(LocalContext.current)
+    VideoTheme {
+        ScreenShareTooltip(sharingParticipant = previewParticipant)
     }
 }

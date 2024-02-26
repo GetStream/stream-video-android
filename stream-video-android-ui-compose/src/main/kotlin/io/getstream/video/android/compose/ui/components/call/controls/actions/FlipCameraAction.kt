@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014-2023 Stream.io Inc. All rights reserved.
+ * Copyright (c) 2014-2024 Stream.io Inc. All rights reserved.
  *
  * Licensed under the Stream License;
  * you may not use this file except in compliance with the License.
@@ -16,20 +16,15 @@
 
 package io.getstream.video.android.compose.ui.components.call.controls.actions
 
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material.Icon
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.FlipCameraIos
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.Shape
-import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.unit.dp
-import io.getstream.video.android.compose.theme.VideoTheme
+import androidx.compose.ui.tooling.preview.Preview
+import io.getstream.video.android.compose.theme.base.VideoTheme
 import io.getstream.video.android.core.call.state.CallAction
 import io.getstream.video.android.core.call.state.FlipCamera
-import io.getstream.video.android.ui.common.R
 
 /**
  * A call action button represents flipping a camera.
@@ -42,25 +37,24 @@ import io.getstream.video.android.ui.common.R
 public fun FlipCameraAction(
     modifier: Modifier = Modifier,
     enabled: Boolean = true,
-    shape: Shape = VideoTheme.shapes.callControlsButton,
-    enabledColor: Color = VideoTheme.colors.callActionIconEnabledBackground,
-    disabledColor: Color = VideoTheme.colors.callActionIconDisabledBackground,
+    color: Color? = null,
+    iconTint: Color? = null,
     onCallAction: (FlipCamera) -> Unit,
+): Unit = GenericAction(
+    modifier = modifier,
+    enabled = enabled,
+    color = color,
+    iconTint = iconTint,
+    icon = Icons.Default.FlipCameraIos,
 ) {
-    CallControlActionBackground(
-        modifier = modifier,
-        isEnabled = true,
-        shape = shape,
-        enabledColor = enabledColor,
-        disabledColor = disabledColor,
-    ) {
-        Icon(
-            modifier = Modifier
-                .padding(13.dp)
-                .clickable(enabled = enabled) { onCallAction(FlipCamera) },
-            tint = VideoTheme.colors.callActionIconEnabled,
-            painter = painterResource(id = R.drawable.stream_video_ic_camera_flip),
-            contentDescription = stringResource(R.string.stream_video_call_controls_flip_camera),
-        )
+    onCallAction(FlipCamera)
+}
+
+@Preview
+@Composable
+private fun FlipActionPreview() {
+    VideoTheme {
+        FlipCameraAction {
+        }
     }
 }

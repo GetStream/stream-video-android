@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014-2022 Stream.io Inc. All rights reserved.
+ * Copyright (c) 2014-2024 Stream.io Inc. All rights reserved.
  *
  * Licensed under the Stream License;
  * you may not use this file except in compliance with the License.
@@ -85,7 +85,9 @@ public data object ChatDialog : CallAction
 /**
  * Action to show a settings.
  */
-public data object Settings : CallAction
+public data class Settings(
+    val isEnabled: Boolean,
+) : CallAction
 
 /**
  * Action to show a reaction popup.

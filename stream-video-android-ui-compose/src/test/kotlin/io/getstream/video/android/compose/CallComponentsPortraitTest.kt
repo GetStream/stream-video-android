@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014-2023 Stream.io Inc. All rights reserved.
+ * Copyright (c) 2014-2024 Stream.io Inc. All rights reserved.
  *
  * Licensed under the Stream License;
  * you may not use this file except in compliance with the License.
@@ -21,8 +21,6 @@ import app.cash.paparazzi.Paparazzi
 import io.getstream.video.android.compose.base.BaseComposeTest
 import io.getstream.video.android.compose.ui.components.call.CallAppBar
 import io.getstream.video.android.compose.ui.components.call.controls.ControlActions
-import io.getstream.video.android.compose.ui.components.call.controls.actions.RegularControlActions
-import io.getstream.video.android.compose.ui.components.participants.ParticipantIndicatorIcon
 import io.getstream.video.android.mock.previewCall
 import org.junit.Rule
 import org.junit.Test
@@ -44,7 +42,7 @@ internal class CallComponentsPortraitTest : BaseComposeTest() {
     @Test
     fun `snapshot RegularCallControls composable`() {
         snapshotWithDarkMode {
-            RegularControlActions(
+            ControlActions(
                 call = previewCall,
                 onCallAction = {},
             )
@@ -58,13 +56,6 @@ internal class CallComponentsPortraitTest : BaseComposeTest() {
                 call = previewCall,
                 onCallAction = {},
             )
-        }
-    }
-
-    @Test
-    fun `snapshot ParticipantIndicatorIcon composable`() {
-        snapshot {
-            ParticipantIndicatorIcon(number = 42) {}
         }
     }
 }

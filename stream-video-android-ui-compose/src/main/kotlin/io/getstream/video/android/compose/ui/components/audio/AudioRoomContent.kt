@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014-2023 Stream.io Inc. All rights reserved.
+ * Copyright (c) 2014-2024 Stream.io Inc. All rights reserved.
  *
  * Licensed under the Stream License;
  * you may not use this file except in compliance with the License.
@@ -38,7 +38,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.getstream.video.android.compose.permission.VideoPermissionsState
 import io.getstream.video.android.compose.permission.rememberMicrophonePermissionState
-import io.getstream.video.android.compose.theme.VideoTheme
+import io.getstream.video.android.compose.theme.base.VideoTheme
 import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.ParticipantState
 import io.getstream.video.android.mock.StreamPreviewDataUtils
@@ -109,9 +109,9 @@ public fun AudioRoomContent(
 
     Scaffold(
         modifier = modifier
-            .background(VideoTheme.colors.appBackground)
+            .background(VideoTheme.colors.baseSheetPrimary)
             .padding(32.dp),
-        contentColor = VideoTheme.colors.appBackground,
+        contentColor = VideoTheme.colors.baseSheetPrimary,
         topBar = {
             if (isShowingAppBar) {
                 appBarContent.invoke(call)
@@ -121,7 +121,7 @@ public fun AudioRoomContent(
         content = { paddings ->
             Box(
                 modifier = Modifier
-                    .background(color = VideoTheme.colors.appBackground)
+                    .background(color = VideoTheme.colors.baseSheetPrimary)
                     .padding(paddings),
             ) {
                 audioContent.invoke(this, call)

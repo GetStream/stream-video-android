@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014-2023 Stream.io Inc. All rights reserved.
+ * Copyright (c) 2014-2024 Stream.io Inc. All rights reserved.
  *
  * Licensed under the Stream License;
  * you may not use this file except in compliance with the License.
@@ -27,7 +27,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -46,7 +45,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import io.getstream.video.android.compose.theme.VideoTheme
+import io.getstream.video.android.compose.theme.base.VideoTheme
 import io.getstream.video.android.compose.ui.components.call.controls.actions.ToggleSpeakerphoneAction
 import io.getstream.video.android.core.Call
 import io.getstream.video.android.mock.StreamPreviewDataUtils
@@ -81,8 +80,8 @@ private fun BoxScope.LiveBadge(call: Call) {
         Text(
             modifier = Modifier
                 .background(
-                    color = VideoTheme.colors.primaryAccent,
-                    shape = RoundedCornerShape(6.dp),
+                    color = VideoTheme.colors.brandPrimary,
+                    shape = VideoTheme.shapes.container,
                 )
                 .padding(horizontal = 16.dp, vertical = 4.dp),
             text = stringResource(
@@ -125,7 +124,7 @@ private fun BoxScope.LiveDuration(call: Call) {
             modifier = Modifier
                 .size(8.dp)
                 .clip(CircleShape)
-                .background(VideoTheme.colors.liveIndicator),
+                .background(VideoTheme.colors.alertWarning),
         )
 
         Text(
@@ -151,10 +150,6 @@ private fun BoxScope.LiveControls(call: Call) {
             .align(Alignment.CenterEnd)
             .size(45.dp),
         isSpeakerphoneEnabled = speakerphoneEnabled,
-        enabledColor = VideoTheme.colors.callActionIconEnabledBackground,
-        disabledColor = VideoTheme.colors.callActionIconEnabledBackground,
-        disabledIconTint = VideoTheme.colors.errorAccent,
-        shape = RoundedCornerShape(8.dp),
         onCallAction = { callAction -> call.speaker.setEnabled(callAction.isEnabled) },
     )
 }

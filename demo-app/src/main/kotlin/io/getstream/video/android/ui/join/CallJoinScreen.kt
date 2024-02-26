@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014-2023 Stream.io Inc. All rights reserved.
+ * Copyright (c) 2014-2024 Stream.io Inc. All rights reserved.
  *
  * Licensed under the Stream License;
  * you may not use this file except in compliance with the License.
@@ -18,11 +18,10 @@
 
 package io.getstream.video.android.ui.join
 
-import androidx.compose.foundation.BorderStroke
+import android.content.res.Configuration
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
@@ -39,29 +38,31 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.AlertDialog
-import androidx.compose.material.ButtonDefaults
-import androidx.compose.material.Icon
-import androidx.compose.material.IconButton
 import androidx.compose.material.Text
-import androidx.compose.material.TextButton
-import androidx.compose.material.TextField
-import androidx.compose.material.TextFieldDefaults
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Call
+import androidx.compose.material.icons.filled.Login
+import androidx.compose.material.icons.filled.Logout
+import androidx.compose.material.icons.filled.QrCodeScanner
+import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material.icons.filled.VideoCall
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.boundsInParent
+import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.platform.testTag
@@ -69,27 +70,40 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.testTagsAsResourceId
+import androidx.compose.ui.state.ToggleableState
+import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.IntOffset
+import androidx.compose.ui.unit.IntRect
+import androidx.compose.ui.unit.IntSize
+import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.window.Popup
+import androidx.compose.ui.window.PopupPositionProvider
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.google.android.gms.auth.api.signin.GoogleSignIn
-import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import io.getstream.video.android.BuildConfig
 import io.getstream.video.android.R
-import io.getstream.video.android.compose.theme.VideoTheme
+import io.getstream.video.android.compose.theme.base.VideoTheme
 import io.getstream.video.android.compose.ui.components.avatar.UserAvatar
-import io.getstream.video.android.datastore.delegate.StreamUserDataStore
+import io.getstream.video.android.compose.ui.components.base.StreamButton
+import io.getstream.video.android.compose.ui.components.base.StreamDialogPositiveNegative
+import io.getstream.video.android.compose.ui.components.base.StreamIconToggleButton
+import io.getstream.video.android.compose.ui.components.base.StreamTextField
+import io.getstream.video.android.compose.ui.components.base.styling.StyleSize
 import io.getstream.video.android.mock.StreamPreviewDataUtils
 import io.getstream.video.android.mock.previewUsers
 import io.getstream.video.android.model.User
 import io.getstream.video.android.tooling.util.StreamFlavors
-import io.getstream.video.android.ui.theme.Colors
-import io.getstream.video.android.ui.theme.StreamButton
-import io.getstream.video.android.util.NetworkMonitor
+import io.getstream.video.android.util.LockScreenOrientation
+import io.getstream.video.android.util.config.AppConfig
+import io.getstream.video.android.util.config.types.StreamEnvironment
 
 @Composable
 fun CallJoinScreen(
@@ -99,6 +113,7 @@ fun CallJoinScreen(
     navigateToDirectCallJoin: () -> Unit,
     navigateToBarcodeScanner: () -> Unit = {},
 ) {
+    LockScreenOrientation(orientation = Configuration.ORIENTATION_PORTRAIT)
     val uiState by callJoinViewModel.uiState.collectAsState(CallJoinUiState.Nothing)
     val user by callJoinViewModel.user.collectAsState(initial = null)
 
@@ -115,7 +130,8 @@ fun CallJoinScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(Colors.background),
+            .background(VideoTheme.colors.baseSheetPrimary),
+        verticalArrangement = Arrangement.Top,
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         CallJoinHeader(
@@ -127,11 +143,10 @@ fun CallJoinScreen(
                 callJoinViewModel.logOut()
             },
         )
-
+        Spacer(modifier = Modifier.size(VideoTheme.dimens.genericMax))
         CallJoinBody(
             modifier = Modifier
                 .align(Alignment.CenterHorizontally)
-                .widthIn(0.dp, 500.dp)
                 .verticalScroll(rememberScrollState())
                 .weight(1f),
             callJoinViewModel = callJoinViewModel,
@@ -168,11 +183,9 @@ private fun HandleCallJoinUiState(
 ) {
     LaunchedEffect(key1 = callJoinUiState) {
         when (callJoinUiState) {
-            is CallJoinUiState.JoinCompleted ->
-                navigateToCallLobby.invoke(callJoinUiState.callId)
+            is CallJoinUiState.JoinCompleted -> navigateToCallLobby.invoke(callJoinUiState.callId)
 
-            is CallJoinUiState.GoBackToLogin ->
-                navigateUpToLogin.invoke()
+            is CallJoinUiState.GoBackToLogin -> navigateUpToLogin.invoke()
 
             else -> Unit
         }
@@ -183,19 +196,22 @@ private fun HandleCallJoinUiState(
 @Composable
 private fun CallJoinHeader(
     user: User?,
+    isProduction: Boolean = BuildConfig.FLAVOR == StreamFlavors.production,
+    showDirectCall: Boolean = user?.custom?.get("email")?.contains("getstreamio") == true,
     onAvatarLongClick: () -> Unit,
     onDirectCallClick: () -> Unit,
     onSignOutClick: () -> Unit,
 ) {
     Row(
         modifier = Modifier
-            .fillMaxWidth()
-            .padding(24.dp),
+            .padding(VideoTheme.dimens.spacingM)
+            .fillMaxWidth(),
         verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.SpaceAround,
     ) {
         user?.let {
             Box(
-                modifier = if (BuildConfig.FLAVOR == StreamFlavors.production) {
+                modifier = if (isProduction) {
                     Modifier.combinedClickable(
                         interactionSource = remember { MutableInteractionSource() },
                         indication = null,
@@ -207,7 +223,8 @@ private fun CallJoinHeader(
                 },
             ) {
                 UserAvatar(
-                    modifier = Modifier.size(24.dp),
+                    modifier = Modifier.size(VideoTheme.dimens.componentHeightL),
+                    textSize = StyleSize.S,
                     userName = it.userNameOrId,
                     userImage = it.image,
                 )
@@ -224,22 +241,78 @@ private fun CallJoinHeader(
             fontSize = 16.sp,
         )
 
-        if (user?.custom?.get("email")?.contains("getstreamio") == true) {
-            TextButton(
-                colors = ButtonDefaults.textButtonColors(contentColor = Color.White),
-                content = { Text(text = stringResource(R.string.direct_call)) },
-                onClick = { onDirectCallClick.invoke() },
-            )
-        }
+        if (!isProduction || showDirectCall) {
+            var showMenu by remember {
+                mutableStateOf(false)
+            }
+            var popupPosition by remember { mutableStateOf(IntOffset(0, 0)) }
+            var buttonSize by remember { mutableStateOf(IntSize(0, 0)) }
 
-        if (BuildConfig.FLAVOR == StreamFlavors.development) {
-            Spacer(modifier = Modifier.width(5.dp))
+            StreamIconToggleButton(
+                modifier = Modifier.onGloballyPositioned { coordinates ->
+                    val buttonBounds = coordinates.boundsInParent()
+                    popupPosition = IntOffset(
+                        x = buttonBounds.right.toInt() - buttonSize.width,
+                        y = buttonBounds.bottom.toInt(),
+                    )
+                    buttonSize = coordinates.size
+                },
+                toggleState = rememberUpdatedState(newValue = ToggleableState(showMenu)),
+                onIcon = Icons.Default.Settings,
+                onStyle = VideoTheme.styles.buttonStyles.secondaryIconButtonStyle(),
+                offStyle = VideoTheme.styles.buttonStyles.primaryIconButtonStyle(),
+            ) {
+                showMenu = when (it) {
+                    ToggleableState.On -> false
+                    ToggleableState.Off -> true
+                    ToggleableState.Indeterminate -> false
+                }
+            }
 
-            StreamButton(
-                modifier = Modifier.widthIn(125.dp),
-                text = stringResource(id = R.string.sign_out),
-                onClick = onSignOutClick,
-            )
+            if (showMenu) {
+                Popup(
+                    onDismissRequest = {
+                        showMenu = !showMenu
+                    },
+                    offset = popupPosition,
+                ) {
+                    Column(
+                        modifier = Modifier
+                            .width(200.dp)
+                            .background(
+                                VideoTheme.colors.baseSheetTertiary,
+                                VideoTheme.shapes.dialog,
+                            )
+                            .padding(VideoTheme.dimens.spacingM),
+                    ) {
+                        if (showDirectCall) {
+                            StreamButton(
+                                modifier = Modifier.fillMaxWidth(),
+                                text = stringResource(id = R.string.direct_call),
+                                icon = Icons.Default.Call,
+                                style = VideoTheme.styles.buttonStyles.primaryButtonStyle(),
+                                onClick = {
+                                    showMenu = false
+                                    onDirectCallClick.invoke()
+                                },
+                            )
+                        }
+                        Spacer(modifier = Modifier.width(5.dp))
+                        if (!isProduction) {
+                            StreamButton(
+                                modifier = Modifier.fillMaxWidth(),
+                                icon = Icons.Default.Logout,
+                                style = VideoTheme.styles.buttonStyles.tetriaryButtonStyle(),
+                                text = stringResource(id = R.string.sign_out),
+                                onClick = {
+                                    showMenu = false
+                                    onSignOutClick()
+                                },
+                            )
+                        }
+                    }
+                }
+            }
         }
     }
 }
@@ -251,6 +324,7 @@ private fun CallJoinBody(
     callJoinViewModel: CallJoinViewModel = hiltViewModel(),
     isNetworkAvailable: Boolean,
 ) {
+    val selectedEnv by AppConfig.currentEnvironment.collectAsStateWithLifecycle()
     val user by if (LocalInspectionMode.current) {
         remember { mutableStateOf(previewUsers[0]) }
     } else {
@@ -264,60 +338,66 @@ private fun CallJoinBody(
             verticalArrangement = Arrangement.Center,
         ) {
             StreamLogo()
-
             Spacer(modifier = Modifier.height(25.dp))
-
-            AppName()
-
+            AppName(selectedEnv)
             Spacer(modifier = Modifier.height(25.dp))
-
             Description(text = stringResource(id = R.string.you_are_offline))
         }
     } else {
-        Column(
-            modifier = modifier
-                .fillMaxSize()
-                .background(Colors.background)
-                .semantics { testTagsAsResourceId = true },
-            verticalArrangement = Arrangement.Center,
-            horizontalAlignment = Alignment.CenterHorizontally,
-        ) {
-            if (user != null) {
-                StreamLogo()
-
-                Spacer(modifier = Modifier.height(25.dp))
-
-                AppName()
-
-                Spacer(modifier = Modifier.height(20.dp))
-
-                Description(text = stringResource(id = R.string.join_description))
-
-                Spacer(modifier = Modifier.height(42.dp))
-
-                Label(text = stringResource(id = R.string.call_id_number))
-
-                Spacer(modifier = Modifier.height(8.dp))
-
-                JoinCallForm(openCamera = openCamera, callJoinViewModel = callJoinViewModel)
-
-                Spacer(modifier = Modifier.height(25.dp))
-
-                Label(text = stringResource(id = R.string.join_call_no_id_hint))
-
-                Spacer(modifier = Modifier.height(8.dp))
-
-                StreamButton(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(52.dp)
-                        .padding(horizontal = 35.dp)
-                        .testTag("start_new_call"),
-                    text = stringResource(id = R.string.start_a_new_call),
-                    onClick = { callJoinViewModel.handleUiEvent(CallJoinEvent.JoinCall()) },
-                )
-            }
+        if (user != null) {
+            CallActualContent(modifier = modifier.fillMaxSize(), onJoinCall = {
+                callJoinViewModel.handleUiEvent(CallJoinEvent.JoinCall(callId = it))
+            }, onNewCall = {
+                callJoinViewModel.handleUiEvent(CallJoinEvent.JoinCall())
+            }, gotoQR = {
+                openCamera()
+            })
         }
+    }
+}
+
+@Composable
+private fun CallActualContent(
+    modifier: Modifier = Modifier,
+    onJoinCall: (String) -> Unit,
+    onNewCall: () -> Unit,
+    gotoQR: () -> Unit,
+) = Box(modifier = Modifier.background(VideoTheme.colors.baseSheetPrimary)) {
+    Column(
+        modifier = modifier
+            .padding(horizontal = VideoTheme.dimens.spacingM)
+            .semantics { testTagsAsResourceId = true },
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally,
+    ) {
+        StreamLogo()
+        Spacer(modifier = Modifier.height(VideoTheme.dimens.spacingL))
+        AppName()
+        Spacer(modifier = Modifier.height(20.dp))
+        Description(text = stringResource(id = R.string.join_description))
+        Spacer(modifier = Modifier.height(VideoTheme.dimens.spacingL))
+        JoinCallForm {
+            onJoinCall(it)
+        }
+        Spacer(modifier = Modifier.height(VideoTheme.dimens.spacingS))
+        StreamButton(
+            modifier = Modifier
+                .fillMaxWidth()
+                .testTag("start_new_call"),
+            text = stringResource(id = R.string.start_a_new_call),
+            icon = Icons.Default.VideoCall,
+            onClick = { onNewCall() },
+        )
+        Spacer(modifier = Modifier.height(VideoTheme.dimens.spacingS))
+        StreamButton(
+            style = VideoTheme.styles.buttonStyles.tetriaryButtonStyle(),
+            modifier = Modifier
+                .fillMaxWidth()
+                .testTag("scan_qr_code"),
+            text = stringResource(id = R.string.scan_qr_code),
+            icon = Icons.Default.QrCodeScanner,
+            onClick = { gotoQR() },
+        )
     }
 }
 
@@ -331,13 +411,22 @@ private fun StreamLogo() {
 }
 
 @Composable
-private fun AppName() {
+private fun AppName(env: StreamEnvironment? = null) {
     Text(
-        modifier = Modifier.padding(horizontal = 30.dp),
-        text = stringResource(id = R.string.app_name),
-        color = Color.White,
-        fontSize = 32.sp,
+        modifier = Modifier.fillMaxWidth(),
         textAlign = TextAlign.Center,
+        text = buildAnnotatedString {
+            append("Stream\n")
+            append(
+                AnnotatedString(
+                    "[Video Calling]\n",
+                    spanStyle = SpanStyle(VideoTheme.colors.brandGreen),
+                ),
+            )
+            append(env?.displayName ?: "")
+        },
+        color = Color.White,
+        fontSize = 24.sp,
     )
 }
 
@@ -345,9 +434,8 @@ private fun AppName() {
 private fun Description(text: String) {
     Text(
         text = text,
-        color = Colors.description,
+        style = VideoTheme.typography.bodyM,
         textAlign = TextAlign.Center,
-        fontSize = 18.sp,
         modifier = Modifier.widthIn(0.dp, 320.dp),
     )
 }
@@ -366,82 +454,51 @@ private fun Label(text: String) {
 
 @Composable
 private fun JoinCallForm(
-    openCamera: () -> Unit,
-    callJoinViewModel: CallJoinViewModel,
+    joinCall: (String) -> Unit,
 ) {
     var callId by remember {
         mutableStateOf(
-            if (BuildConfig.FLAVOR == StreamFlavors.development) {
-                "default:79cYh3J5JgGk"
-            } else {
-                ""
-            },
+            TextFieldValue(
+                if (BuildConfig.FLAVOR == StreamFlavors.development) {
+                    "default:79cYh3J5JgGk"
+                } else {
+                    ""
+                },
+            ),
         )
     }
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .height(50.dp)
-            .padding(horizontal = 35.dp),
+            .height(50.dp),
     ) {
-        TextField(
+        StreamTextField(
             modifier = Modifier
                 .weight(1f)
-                .fillMaxHeight()
-                .border(
-                    BorderStroke(1.dp, Color(0xFF4C525C)),
-                    RoundedCornerShape(6.dp),
-                ),
-            shape = RoundedCornerShape(6.dp),
-            value = callId,
-            singleLine = true,
+                .fillMaxHeight(),
             onValueChange = { callId = it },
-            trailingIcon = {
-                IconButton(
-                    onClick = openCamera,
-                    modifier = Modifier.fillMaxHeight(),
-                    content = {
-                        Icon(
-                            painter = painterResource(id = R.drawable.ic_scan_qr),
-                            contentDescription = stringResource(
-                                id = R.string.join_call_by_qr_code,
-                            ),
-                            tint = Colors.description,
-                            modifier = Modifier.size(36.dp),
-                        )
-                    },
-                )
-            },
-            colors = TextFieldDefaults.textFieldColors(
-                textColor = Color.White,
-                focusedLabelColor = VideoTheme.colors.primaryAccent,
-                unfocusedIndicatorColor = Colors.secondBackground,
-                focusedIndicatorColor = Colors.secondBackground,
-                backgroundColor = Colors.secondBackground,
-            ),
             keyboardOptions = KeyboardOptions.Default.copy(
                 keyboardType = KeyboardType.Email,
             ),
-            placeholder = {
-                Text(
-                    stringResource(id = R.string.join_call_call_id_hint),
-                    color = Color(0xFF5D6168),
-                )
-            },
+            style = VideoTheme.styles.textFieldStyles.defaultTextField(),
+            value = callId,
+            placeholder = stringResource(id = R.string.join_call_call_id_hint),
             keyboardActions = KeyboardActions(
                 onDone = {
-                    callJoinViewModel.handleUiEvent(CallJoinEvent.JoinCall(callId = callId))
+                    joinCall(callId.text)
                 },
             ),
         )
 
         StreamButton(
+            icon = Icons.Default.Login,
+            style = VideoTheme.styles.buttonStyles.secondaryButtonStyle(),
             modifier = Modifier
                 .padding(start = 16.dp)
                 .fillMaxHeight()
                 .testTag("join_call"),
             onClick = {
-                callJoinViewModel.handleUiEvent(CallJoinEvent.JoinCall(callId = callId))
+                joinCall(callId.text)
             },
             text = stringResource(id = R.string.join_call),
         )
@@ -453,34 +510,47 @@ private fun SignOutDialog(
     onConfirmation: () -> Unit,
     onDismissRequest: () -> Unit,
 ) {
-    AlertDialog(
-        modifier = Modifier.border(
-            BorderStroke(1.dp, Colors.background),
-            RoundedCornerShape(6.dp),
-        ),
-        title = { Text(text = stringResource(id = R.string.sign_out)) },
-        text = { Text(text = stringResource(R.string.are_you_sure_sign_out)) },
-        confirmButton = {
-            TextButton(onClick = { onConfirmation() }) {
-                Text(
-                    text = stringResource(id = R.string.sign_out),
-                    color = VideoTheme.colors.primaryAccent,
-                )
-            }
+    StreamDialogPositiveNegative(
+        style = VideoTheme.styles.dialogStyles.defaultDialogStyle(),
+        positiveButton = Triple(
+            stringResource(id = R.string.sign_out),
+            VideoTheme.styles.buttonStyles.secondaryButtonStyle(),
+        ) {
+            onConfirmation()
         },
-        dismissButton = {
-            TextButton(onClick = { onDismissRequest() }) {
-                Text(
-                    text = stringResource(R.string.cancel),
-                    color = VideoTheme.colors.primaryAccent,
-                )
-            }
+        negativeButton = Triple(
+            stringResource(R.string.cancel),
+            VideoTheme.styles.buttonStyles.tetriaryButtonStyle(),
+        ) {
+            onDismissRequest()
         },
-        onDismissRequest = { onDismissRequest },
-        shape = RoundedCornerShape(6.dp),
-        backgroundColor = Colors.secondBackground,
-        contentColor = Color.White,
+        title = stringResource(id = R.string.sign_out),
+        contentText = stringResource(R.string.are_you_sure_sign_out),
     )
+}
+
+class BelowElementPositionProvider(
+    private val anchorBounds: androidx.compose.ui.geometry.Rect,
+    private val screenPadding: Int = 8, // Padding from screen edges
+) : PopupPositionProvider {
+    override fun calculatePosition(
+        anchorBounds: IntRect,
+        windowSize: IntSize,
+        layoutDirection: LayoutDirection,
+        popupContentSize: IntSize,
+    ): IntOffset {
+        val x = anchorBounds.left.coerceIn(
+            screenPadding,
+            (windowSize.width - popupContentSize.width - screenPadding),
+        )
+
+        val y = (this.anchorBounds.bottom + screenPadding).coerceIn(
+            screenPadding.toFloat(),
+            (windowSize.height - popupContentSize.height - screenPadding).toFloat(),
+        ).toInt()
+
+        return IntOffset(x, y)
+    }
 }
 
 @Preview
@@ -488,19 +558,15 @@ private fun SignOutDialog(
 private fun CallJoinScreenPreview() {
     StreamPreviewDataUtils.initializeStreamVideo(LocalContext.current)
     VideoTheme {
-        StreamUserDataStore.install(LocalContext.current)
-        CallJoinScreen(
-            callJoinViewModel = CallJoinViewModel(
-                dataStore = StreamUserDataStore.instance(),
-                googleSignInClient = GoogleSignIn.getClient(
-                    LocalContext.current,
-                    GoogleSignInOptions.Builder().build(),
-                ),
-                networkMonitor = NetworkMonitor(LocalContext.current),
-            ),
-            navigateToCallLobby = {},
-            navigateUpToLogin = {},
-            navigateToDirectCallJoin = {},
-        )
+        CallActualContent(onJoinCall = {}, onNewCall = {}, gotoQR = {})
+    }
+}
+
+@Preview
+@Composable
+private fun CallJoinScreenHeader() {
+    StreamPreviewDataUtils.initializeStreamVideo(LocalContext.current)
+    VideoTheme {
+        CallJoinHeader(previewUsers[0], false, true, {}, {}, {})
     }
 }

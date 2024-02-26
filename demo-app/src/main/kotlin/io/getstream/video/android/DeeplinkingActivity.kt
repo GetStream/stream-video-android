@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014-2022 Stream.io Inc. All rights reserved.
+ * Copyright (c) 2014-2024 Stream.io Inc. All rights reserved.
  *
  * Licensed under the Stream License;
  * you may not use this file except in compliance with the License.
@@ -36,14 +36,15 @@ import dagger.hilt.android.AndroidEntryPoint
 import io.getstream.android.push.permissions.NotificationPermissionManager
 import io.getstream.android.push.permissions.NotificationPermissionStatus
 import io.getstream.log.taggedLogger
-import io.getstream.video.android.compose.theme.VideoTheme
+import io.getstream.video.android.compose.theme.base.VideoTheme
 import io.getstream.video.android.core.StreamVideo
 import io.getstream.video.android.datastore.delegate.StreamUserDataStore
 import io.getstream.video.android.model.StreamCallId
 import io.getstream.video.android.ui.call.CallActivity
-import io.getstream.video.android.ui.theme.Colors
 import io.getstream.video.android.util.InitializedState
 import io.getstream.video.android.util.StreamVideoInitHelper
+import io.getstream.video.android.util.config.AppConfig
+import io.getstream.video.android.util.config.AppConfig.fromUri
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -65,11 +66,11 @@ class DeeplinkingActivity : ComponentActivity() {
                 Box(
                     modifier = Modifier
                         .fillMaxSize()
-                        .background(Colors.background),
+                        .background(VideoTheme.colors.baseSheetPrimary),
                 ) {
                     CircularProgressIndicator(
                         modifier = Modifier.align(Alignment.Center),
-                        color = VideoTheme.colors.primaryAccent,
+                        color = VideoTheme.colors.brandPrimary,
                     )
                 }
             }
@@ -106,7 +107,7 @@ class DeeplinkingActivity : ComponentActivity() {
                         ) == PackageManager.PERMISSION_GRANTED
                     ) {
                         // ensure that audio & video permissions are granted
-                        joinCall(callId)
+                        joinCall(data, callId)
                     } else {
                         // first ask for push notification permission
                         val manager = NotificationPermissionManager.createNotificationPermissionsManager(
@@ -115,7 +116,7 @@ class DeeplinkingActivity : ComponentActivity() {
                             onPermissionStatus = {
                                 // we don't care about the result for demo purposes
                                 if (it != NotificationPermissionStatus.REQUESTED) {
-                                    joinCall(callId)
+                                    joinCall(data, callId)
                                 }
                             },
                         )
@@ -158,11 +159,17 @@ class DeeplinkingActivity : ComponentActivity() {
         return callId ?: data.getQueryParameter("id")
     }
 
-    private fun joinCall(cid: String) {
+    private fun joinCall(data: Uri?, cid: String) {
         lifecycleScope.launch {
+            data?.let {
+                val determinedEnv = AppConfig.availableEnvironments.fromUri(it)
+                determinedEnv?.let {
+                    AppConfig.selectEnv(determinedEnv)
+                }
+            }
             // Deep link can be opened without the app after install - there is no user yet
             // But in this case the StreamVideoInitHelper will use a random account
-            StreamVideoInitHelper.loadSdk(
+            StreamVideoInitHelper.reloadSdk(
                 dataStore = dataStore,
                 useRandomUserAsFallback = true,
             )

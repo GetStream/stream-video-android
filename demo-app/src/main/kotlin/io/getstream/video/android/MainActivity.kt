@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014-2023 Stream.io Inc. All rights reserved.
+ * Copyright (c) 2014-2024 Stream.io Inc. All rights reserved.
  *
  * Licensed under the Stream License;
  * you may not use this file except in compliance with the License.
@@ -26,7 +26,7 @@ import androidx.lifecycle.repeatOnLifecycle
 import com.google.firebase.analytics.FirebaseAnalytics
 import dagger.hilt.android.AndroidEntryPoint
 import io.getstream.video.android.analytics.FirebaseEvents
-import io.getstream.video.android.compose.theme.VideoTheme
+import io.getstream.video.android.compose.theme.base.VideoTheme
 import io.getstream.video.android.datastore.delegate.StreamUserDataStore
 import io.getstream.video.android.tooling.util.StreamFlavors
 import io.getstream.video.android.ui.AppNavHost

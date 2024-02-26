@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014-2023 Stream.io Inc. All rights reserved.
+ * Copyright (c) 2014-2024 Stream.io Inc. All rights reserved.
  *
  * Licensed under the Stream License;
  * you may not use this file except in compliance with the License.
@@ -16,19 +16,16 @@
 
 package io.getstream.video.android.compose.ui.components.call.controls.actions
 
-import androidx.compose.foundation.background
-import androidx.compose.material.Icon
-import androidx.compose.material.IconButton
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Call
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.Shape
-import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.res.stringResource
-import io.getstream.video.android.compose.theme.VideoTheme
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.tooling.preview.Preview
+import io.getstream.video.android.compose.theme.base.VideoTheme
 import io.getstream.video.android.core.call.state.CallAction
 import io.getstream.video.android.core.call.state.DeclineCall
-import io.getstream.video.android.ui.common.R
 
 /**
  * A call action button represents canceling a call.
@@ -42,23 +39,22 @@ public fun DeclineCallAction(
     modifier: Modifier = Modifier,
     enabled: Boolean = true,
     onCallAction: (DeclineCall) -> Unit,
-    shape: Shape = VideoTheme.shapes.callButton,
-) {
-    IconButton(
-        modifier = modifier.background(
-            color = VideoTheme.colors.errorAccent,
-            shape = shape,
-        ),
-        enabled = enabled,
-        onClick = { onCallAction(DeclineCall) },
-        content = {
-            Icon(
-                painter = painterResource(id = R.drawable.stream_video_ic_call_end),
-                tint = Color.White,
-                contentDescription = stringResource(
-                    R.string.stream_video_call_controls_cancel_call,
-                ),
-            )
-        },
-    )
+    icon: ImageVector? = null,
+    bgColor: Color? = null,
+    iconTint: Color? = null,
+): Unit = GenericAction(
+    modifier = modifier,
+    enabled = enabled,
+    onAction = { onCallAction(DeclineCall) },
+    icon = icon ?: Icons.Default.Call,
+    color = bgColor ?: VideoTheme.colors.alertWarning,
+    iconTint = iconTint ?: VideoTheme.colors.basePrimary,
+)
+
+@Preview
+@Composable
+private fun DeclineCallActionPreview() {
+    VideoTheme {
+        DeclineCallAction(onCallAction = {})
+    }
 }

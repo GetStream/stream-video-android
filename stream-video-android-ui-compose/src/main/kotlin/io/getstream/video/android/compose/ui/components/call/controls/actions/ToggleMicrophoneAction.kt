@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014-2023 Stream.io Inc. All rights reserved.
+ * Copyright (c) 2014-2024 Stream.io Inc. All rights reserved.
  *
  * Licensed under the Stream License;
  * you may not use this file except in compliance with the License.
@@ -16,20 +16,19 @@
 
 package io.getstream.video.android.compose.ui.components.call.controls.actions
 
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material.Icon
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Mic
+import androidx.compose.material.icons.filled.MicOff
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
-import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.unit.dp
-import io.getstream.video.android.compose.theme.VideoTheme
+import androidx.compose.ui.tooling.preview.Preview
+import io.getstream.video.android.compose.theme.base.VideoTheme
 import io.getstream.video.android.core.call.state.CallAction
 import io.getstream.video.android.core.call.state.ToggleMicrophone
-import io.getstream.video.android.ui.common.R
 
 /**
  * A call action button represents toggling a microphone.
@@ -44,46 +43,38 @@ public fun ToggleMicrophoneAction(
     modifier: Modifier = Modifier,
     isMicrophoneEnabled: Boolean,
     enabled: Boolean = true,
-    shape: Shape = VideoTheme.shapes.callControlsButton,
-    enabledColor: Color = VideoTheme.colors.callActionIconEnabledBackground,
-    disabledColor: Color = VideoTheme.colors.callActionIconDisabledBackground,
-    enabledIconTint: Color = VideoTheme.colors.callActionIconEnabled,
-    disabledIconTint: Color = VideoTheme.colors.callActionIconDisabled,
+    shape: Shape? = null,
+    enabledColor: Color? = null,
+    disabledColor: Color? = null,
+    enabledIconTint: Color? = null,
+    disabledIconTint: Color? = null,
     onCallAction: (ToggleMicrophone) -> Unit,
+): Unit = ToggleAction(
+    modifier = modifier,
+    enabled = enabled,
+    shape = shape,
+    enabledColor = enabledColor,
+    disabledColor = disabledColor,
+    enabledIconTint = enabledIconTint,
+    disabledIconTint = disabledIconTint,
+    isActionActive = isMicrophoneEnabled,
+    iconOnOff = Pair(Icons.Default.Mic, Icons.Default.MicOff),
 ) {
-    val microphoneIcon =
-        painterResource(
-            id = if (isMicrophoneEnabled) {
-                R.drawable.stream_video_ic_mic_on
-            } else {
-                R.drawable.stream_video_ic_mic_off
-            },
-        )
+    onCallAction(ToggleMicrophone(isMicrophoneEnabled.not()))
+}
 
-    CallControlActionBackground(
-        modifier = modifier,
-        isEnabled = isMicrophoneEnabled,
-        shape = shape,
-        enabledColor = enabledColor,
-        disabledColor = disabledColor,
-    ) {
-        Icon(
-            modifier = Modifier
-                .padding(13.dp)
-                .clickable(enabled = enabled) {
-                    onCallAction(
-                        ToggleMicrophone(isMicrophoneEnabled.not()),
-                    )
-                },
-            tint = if (isMicrophoneEnabled) {
-                enabledIconTint
-            } else {
-                disabledIconTint
-            },
-            painter = microphoneIcon,
-            contentDescription = stringResource(
-                R.string.stream_video_call_controls_toggle_microphone,
-            ),
-        )
+@Preview
+@Composable
+public fun ToggleMicrophoneActionPreview() {
+    VideoTheme {
+        Column {
+            Row {
+                ToggleMicrophoneAction(isMicrophoneEnabled = false) {
+                }
+
+                ToggleMicrophoneAction(isMicrophoneEnabled = true) {
+                }
+            }
+        }
     }
 }

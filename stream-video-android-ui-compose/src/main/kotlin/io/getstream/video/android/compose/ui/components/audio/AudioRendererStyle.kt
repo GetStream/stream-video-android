@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014-2023 Stream.io Inc. All rights reserved.
+ * Copyright (c) 2014-2024 Stream.io Inc. All rights reserved.
  *
  * Licensed under the Stream License;
  * you may not use this file except in compliance with the License.
@@ -19,7 +19,6 @@ package io.getstream.video.android.compose.ui.components.audio
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.runtime.Stable
 import androidx.compose.ui.Alignment
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 
@@ -80,12 +79,7 @@ public data class RegularAudioRendererStyle(
     override val isShowingSpeakingBorder: Boolean = true,
     override val speakingBorder: BorderStroke = BorderStroke(
         2.dp,
-        Brush.verticalGradient(
-            listOf(
-                Color(0xFF005FFF),
-                Color(0xFF00B2FF),
-            ),
-        ),
+        Color(0xFF005FFF),
     ),
     override val isShowingMicrophoneAvailability: Boolean = true,
     override val microphoneLabelPosition: Alignment = Alignment.BottomEnd,

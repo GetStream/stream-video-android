@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014-2022 Stream.io Inc. All rights reserved.
+ * Copyright (c) 2014-2024 Stream.io Inc. All rights reserved.
  *
  * Licensed under the Stream License;
  * you may not use this file except in compliance with the License.
@@ -34,7 +34,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.getstream.video.android.compose.state.ui.internal.CallParticipantInfoMode
 import io.getstream.video.android.compose.state.ui.internal.ParticipantListMode
-import io.getstream.video.android.compose.theme.VideoTheme
+import io.getstream.video.android.compose.theme.base.VideoTheme
 import io.getstream.video.android.compose.ui.components.participants.internal.CallParticipantsList
 import io.getstream.video.android.compose.ui.components.participants.internal.InviteUserList
 import io.getstream.video.android.core.Call
@@ -79,13 +79,13 @@ public fun CallParticipantsInfoMenu(
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(color = VideoTheme.colors.infoMenuOverlayColor),
+            .background(color = VideoTheme.colors.baseSheetPrimary),
     ) {
         Column(modifier) {
             val listModifier = Modifier
                 .weight(2f)
                 .fillMaxWidth()
-                .background(VideoTheme.colors.appBackground)
+                .background(VideoTheme.colors.baseSheetPrimary)
 
             if (infoStateMode is ParticipantListMode) {
                 CallParticipantsList(

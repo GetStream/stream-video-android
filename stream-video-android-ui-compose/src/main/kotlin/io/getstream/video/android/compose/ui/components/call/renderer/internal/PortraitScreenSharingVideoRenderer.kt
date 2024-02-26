@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014-2022 Stream.io Inc. All rights reserved.
+ * Copyright (c) 2014-2024 Stream.io Inc. All rights reserved.
  *
  * Licensed under the Stream License;
  * you may not use this file except in compliance with the License.
@@ -44,7 +44,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import io.getstream.video.android.compose.theme.VideoTheme
+import io.getstream.video.android.compose.theme.base.VideoTheme
 import io.getstream.video.android.compose.ui.components.call.renderer.ParticipantVideo
 import io.getstream.video.android.compose.ui.components.call.renderer.ScreenSharingVideoRendererStyle
 import io.getstream.video.android.compose.ui.components.call.renderer.VideoRendererStyle
@@ -93,7 +93,7 @@ internal fun PortraitScreenSharingVideoRenderer(
     val me by call.state.me.collectAsStateWithLifecycle()
     var parentSize: IntSize by remember { mutableStateOf(IntSize(0, 0)) }
 
-    val paddedModifier = modifier.padding(VideoTheme.dimens.participantsGridPadding)
+    val paddedModifier = modifier.padding(VideoTheme.dimens.spacingXXs)
     BoxWithConstraints(modifier = Modifier.fillMaxWidth()) {
         LazyVerticalGrid(
             modifier = Modifier.fillMaxSize(),
@@ -145,12 +145,12 @@ private fun BoxWithConstraintsScope.ScreenSharingContent(
     }
     Column(
         modifier = modifier
-            .padding(VideoTheme.dimens.participantsGridPadding),
+            .padding(VideoTheme.dimens.spacingXXs),
     ) {
         Box(
             modifier = Modifier
                 .clip(RoundedCornerShape(16.dp))
-                .background(VideoTheme.colors.screenSharingBackground)
+                .background(VideoTheme.colors.baseSheetSecondary)
                 .fillMaxWidth()
                 .height(itemHeight),
         ) {

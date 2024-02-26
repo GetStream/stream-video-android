@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014-2023 Stream.io Inc. All rights reserved.
+ * Copyright (c) 2014-2024 Stream.io Inc. All rights reserved.
  *
  * Licensed under the Stream License;
  * you may not use this file except in compliance with the License.
@@ -16,25 +16,18 @@
 
 package io.getstream.video.android.compose.ui.components.call.controls
 
-import android.content.res.Configuration.ORIENTATION_LANDSCAPE
-import android.content.res.Configuration.ORIENTATION_PORTRAIT
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxHeight
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.Shape
-import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.Dp
-import io.getstream.video.android.compose.theme.VideoTheme
+import io.getstream.video.android.compose.theme.base.VideoTheme
 import io.getstream.video.android.compose.ui.components.call.controls.actions.DefaultOnCallActionHandler
-import io.getstream.video.android.compose.ui.components.call.controls.actions.LandscapeControlActions
-import io.getstream.video.android.compose.ui.components.call.controls.actions.RegularControlActions
 import io.getstream.video.android.compose.ui.components.call.controls.actions.buildDefaultCallControlActions
 import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.call.state.CallAction
@@ -56,49 +49,25 @@ public fun ControlActions(
     call: Call,
     modifier: Modifier = Modifier,
     onCallAction: (CallAction) -> Unit = { DefaultOnCallActionHandler.onCallAction(call, it) },
-    backgroundColor: Color = VideoTheme.colors.barsBackground,
-    elevation: Dp = VideoTheme.dimens.controlActionsElevation,
-    shape: Shape = VideoTheme.shapes.callControls,
-    spaceBy: Dp? = null,
     actions: List<(@Composable () -> Unit)> = buildDefaultCallControlActions(
         call = call,
         onCallAction,
     ),
 ) {
-    val orientation = LocalConfiguration.current.orientation
-
-    val controlsModifier = if (orientation == ORIENTATION_LANDSCAPE) {
-        modifier
-            .fillMaxHeight()
-            .width(VideoTheme.dimens.landscapeControlActionsWidth)
-    } else {
-        modifier
-            .fillMaxWidth()
-            .height(VideoTheme.dimens.controlActionsHeight)
-    }
-
-    if (orientation == ORIENTATION_PORTRAIT) {
-        RegularControlActions(
-            modifier = controlsModifier,
-            call = call,
-            backgroundColor = backgroundColor,
-            shape = shape,
-            elevation = elevation,
-            spaceBy = spaceBy,
-            onCallAction = onCallAction,
-            actions = actions,
-        )
-    } else if (orientation == ORIENTATION_LANDSCAPE) {
-        LandscapeControlActions(
-            modifier = controlsModifier,
-            call = call,
-            backgroundColor = backgroundColor,
-            shape = shape,
-            elevation = elevation,
-            spaceBy = spaceBy,
-            onCallAction = onCallAction,
-            actions = actions,
-        )
+    Box(
+        modifier = modifier,
+    ) {
+        LazyRow(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(
+                VideoTheme.dimens.spacingM,
+                Alignment.CenterHorizontally,
+            ),
+        ) {
+            items(actions) { action ->
+                action.invoke()
+            }
+        }
     }
 }
 
@@ -108,9 +77,6 @@ private fun CallControlsPreview() {
     StreamPreviewDataUtils.initializeStreamVideo(LocalContext.current)
     Column {
         VideoTheme {
-            ControlActions(call = previewCall, onCallAction = {})
-        }
-        VideoTheme(isInDarkMode = true) {
             ControlActions(call = previewCall, onCallAction = {})
         }
     }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014-2022 Stream.io Inc. All rights reserved.
+ * Copyright (c) 2014-2024 Stream.io Inc. All rights reserved.
  *
  * Licensed under the Stream License;
  * you may not use this file except in compliance with the License.
@@ -16,23 +16,20 @@
 
 package io.getstream.video.android.compose.ui.components.participants.internal
 
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material.Button
-import androidx.compose.material.ButtonDefaults
-import androidx.compose.material.OutlinedButton
-import androidx.compose.material.Text
+import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import io.getstream.video.android.compose.theme.VideoTheme
+import io.getstream.video.android.compose.theme.base.VideoTheme
+import io.getstream.video.android.compose.ui.components.base.StreamButton
+import io.getstream.video.android.compose.ui.components.call.controls.actions.ToggleMicrophoneAction
 import io.getstream.video.android.ui.common.R
 
 /**
@@ -54,49 +51,19 @@ internal fun CallParticipantsInfoActions(
     Row(
         modifier = modifier.padding(vertical = 20.dp),
         verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.SpaceEvenly,
+        horizontalArrangement = Arrangement.Center,
     ) {
-        Button(
+        StreamButton(
             modifier = Modifier
-                .height(VideoTheme.dimens.participantsInfoMenuOptionsButtonHeight)
-                .weight(1f)
-                .padding(start = 16.dp, end = 8.dp),
-            colors = ButtonDefaults.buttonColors(backgroundColor = VideoTheme.colors.primaryAccent),
-            shape = VideoTheme.shapes.participantsInfoMenuButton,
+                .weight(1f),
             onClick = { onInviteUser.invoke() },
-            content = {
-                Text(
-                    text = stringResource(
-                        R.string.stream_video_call_participants_info_options_invite,
-                    ),
-                    style = VideoTheme.typography.bodyBold,
-                    color = Color.White,
-                )
-            },
+            text = stringResource(id = R.string.stream_video_call_participants_info_options_invite),
+            style = VideoTheme.styles.buttonStyles.secondaryButtonStyle(),
         )
-
-        OutlinedButton(
-            modifier = Modifier
-                .weight(1f)
-                .height(VideoTheme.dimens.participantsInfoMenuOptionsButtonHeight)
-                .padding(start = 8.dp, end = 16.dp),
-            colors = ButtonDefaults.buttonColors(backgroundColor = VideoTheme.colors.appBackground),
-            border = BorderStroke(1.dp, VideoTheme.colors.textLowEmphasis),
-            onClick = { onMute(!isLocalAudioEnabled) },
-            shape = VideoTheme.shapes.participantsInfoMenuButton,
-            content = {
-                Text(
-                    text = stringResource(
-                        if (isLocalAudioEnabled) {
-                            R.string.stream_video_call_participants_info_options_mute
-                        } else {
-                            R.string.stream_video_call_participants_info_options_unmute
-                        },
-                    ),
-                    style = VideoTheme.typography.bodyBold,
-                    color = VideoTheme.colors.textLowEmphasis,
-                )
-            },
+        Spacer(modifier = Modifier.size(VideoTheme.dimens.spacingM))
+        ToggleMicrophoneAction(
+            isMicrophoneEnabled = isLocalAudioEnabled,
+            onCallAction = { onMute(!isLocalAudioEnabled) },
         )
     }
 }

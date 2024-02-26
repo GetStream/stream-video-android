@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014-2023 Stream.io Inc. All rights reserved.
+ * Copyright (c) 2014-2024 Stream.io Inc. All rights reserved.
  *
  * Licensed under the Stream License;
  * you may not use this file except in compliance with the License.
@@ -32,8 +32,6 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.platform.testTag
@@ -43,7 +41,7 @@ import androidx.compose.ui.unit.dp
 import io.getstream.video.android.compose.lifecycle.MediaPiPLifecycle
 import io.getstream.video.android.compose.permission.VideoPermissionsState
 import io.getstream.video.android.compose.permission.rememberCallPermissionsState
-import io.getstream.video.android.compose.theme.VideoTheme
+import io.getstream.video.android.compose.theme.base.VideoTheme
 import io.getstream.video.android.compose.ui.components.avatar.UserAvatar
 import io.getstream.video.android.compose.ui.components.call.controls.ControlActions
 import io.getstream.video.android.compose.ui.components.call.controls.actions.DefaultOnCallActionHandler
@@ -113,19 +111,16 @@ public fun CallLobby(
         OnDisabledContent(user = user)
     },
     onCallAction: (CallAction) -> Unit = { DefaultOnCallActionHandler.onCallAction(call, it) },
-    lobbyControlsContent: @Composable (call: Call) -> Unit = {
+    lobbyControlsContent: @Composable (modifier: Modifier, call: Call) -> Unit = { modifier, call ->
         ControlActions(
+            modifier = modifier,
             call = call,
-            backgroundColor = Color.Transparent,
-            shape = RectangleShape,
-            elevation = 0.dp,
             actions = buildDefaultLobbyControlActions(
                 call = call,
                 onCallAction = onCallAction,
                 isCameraEnabled = isCameraEnabled,
                 isMicrophoneEnabled = isMicrophoneEnabled,
             ),
-            spaceBy = VideoTheme.dimens.lobbyControlActionsItemSpaceBy,
         )
     },
 ) {
@@ -137,10 +132,8 @@ public fun CallLobby(
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(VideoTheme.dimens.lobbyVideoHeight)
-                .padding(horizontal = 30.dp)
-                .clip(RoundedCornerShape(12.dp))
-                .background(VideoTheme.colors.callLobbyBackground),
+                .height(280.dp)
+                .clip(RoundedCornerShape(12.dp)),
         ) {
             if (isCameraEnabled) {
                 onRenderedContent.invoke(video)
@@ -160,11 +153,7 @@ public fun CallLobby(
                 hasAudio = isMicrophoneEnabled,
                 soundIndicatorContent = {
                     MicrophoneIndicator(
-                        modifier = Modifier
-                            .align(Alignment.CenterVertically)
-                            .padding(
-                                horizontal = VideoTheme.dimens.participantSoundIndicatorPadding,
-                            ),
+                        modifier = Modifier.padding(horizontal = VideoTheme.dimens.spacingM),
                         isMicrophoneEnabled = isMicrophoneEnabled,
                     )
                 },
@@ -172,9 +161,9 @@ public fun CallLobby(
             )
         }
 
-        Spacer(modifier = Modifier.height(VideoTheme.dimens.lobbyControlActionsPadding))
+        Spacer(modifier = Modifier.height(VideoTheme.dimens.spacingM))
 
-        lobbyControlsContent.invoke(call)
+        lobbyControlsContent.invoke(Modifier.align(Alignment.Start), call)
     }
 }
 
@@ -196,6 +185,7 @@ private fun OnRenderedContent(
     VideoRenderer(
         modifier = Modifier
             .fillMaxSize()
+            .background(VideoTheme.colors.baseSheetTertiary)
             .testTag("on_rendered_content"),
         call = call,
         video = video,
@@ -208,11 +198,12 @@ private fun OnDisabledContent(user: User) {
     Box(
         modifier = Modifier
             .fillMaxSize()
+            .background(VideoTheme.colors.baseSheetTertiary)
             .testTag("on_disabled_content"),
     ) {
         UserAvatar(
             modifier = Modifier
-                .size(VideoTheme.dimens.callAvatarSize)
+                .size(VideoTheme.dimens.genericMax)
                 .align(Alignment.Center),
             userImage = user.image,
             userName = user.name.ifBlank { user.id },

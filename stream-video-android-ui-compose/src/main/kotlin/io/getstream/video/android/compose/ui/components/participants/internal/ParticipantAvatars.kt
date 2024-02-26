@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014-2022 Stream.io Inc. All rights reserved.
+ * Copyright (c) 2014-2024 Stream.io Inc. All rights reserved.
  *
  * Licensed under the Stream License;
  * you may not use this file except in compliance with the License.
@@ -29,7 +29,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import io.getstream.video.android.compose.theme.VideoTheme
+import io.getstream.video.android.compose.theme.base.VideoTheme
 import io.getstream.video.android.compose.ui.components.avatar.UserAvatar
 import io.getstream.video.android.core.MemberState
 import io.getstream.video.android.mock.StreamPreviewDataUtils
@@ -48,7 +48,7 @@ public fun ParticipantAvatars(
                 val participant = participants.first()
 
                 UserAvatar(
-                    modifier = Modifier.size(VideoTheme.dimens.singleAvatarSize),
+                    modifier = Modifier.size(VideoTheme.dimens.genericMax),
                     userName = participant.user.userNameOrId,
                     userImage = participant.user.image,
                 )
@@ -57,7 +57,7 @@ public fun ParticipantAvatars(
                     LazyRow(horizontalArrangement = Arrangement.spacedBy(20.dp)) {
                         items(participants.take(2)) { participant ->
                             UserAvatar(
-                                modifier = Modifier.size(VideoTheme.dimens.callAvatarSize),
+                                modifier = Modifier.size(VideoTheme.dimens.genericL),
                                 userName = participant.user.userNameOrId,
                                 userImage = participant.user.image,
                             )
@@ -66,7 +66,7 @@ public fun ParticipantAvatars(
 
                     if (participants.size >= 3) {
                         UserAvatar(
-                            modifier = Modifier.size(VideoTheme.dimens.callAvatarSize),
+                            modifier = Modifier.size(VideoTheme.dimens.genericM),
                             userName = participants[2].user.userNameOrId,
                             userImage = participants[2].user.image,
                         )

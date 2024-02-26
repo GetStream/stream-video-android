@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014-2022 Stream.io Inc. All rights reserved.
+ * Copyright (c) 2014-2024 Stream.io Inc. All rights reserved.
  *
  * Licensed under the Stream License;
  * you may not use this file except in compliance with the License.
@@ -24,7 +24,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import io.getstream.video.android.compose.theme.VideoTheme
+import io.getstream.video.android.compose.theme.base.VideoTheme
 
 /**
  * Component that represents an online indicator to be used with
@@ -37,8 +37,8 @@ public fun OnlineIndicator(modifier: Modifier = Modifier) {
     Box(
         modifier = modifier
             .size(12.dp)
-            .background(VideoTheme.colors.appBackground, CircleShape)
+            .background(VideoTheme.colors.baseSheetPrimary, CircleShape)
             .padding(2.dp)
-            .background(VideoTheme.colors.infoAccent, CircleShape),
+            .background(VideoTheme.colors.alertSuccess, CircleShape),
     )
 }

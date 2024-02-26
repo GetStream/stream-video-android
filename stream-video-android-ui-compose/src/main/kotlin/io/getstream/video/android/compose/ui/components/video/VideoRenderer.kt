@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014-2022 Stream.io Inc. All rights reserved.
+ * Copyright (c) 2014-2024 Stream.io Inc. All rights reserved.
  *
  * Licensed under the Stream License;
  * you may not use this file except in compliance with the License.
@@ -44,7 +44,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
 import io.getstream.log.StreamLog
-import io.getstream.video.android.compose.theme.VideoTheme
+import io.getstream.video.android.compose.theme.base.VideoTheme
 import io.getstream.video.android.compose.ui.components.video.VideoScalingType.Companion.toCommonScalingType
 import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.ParticipantState
@@ -178,27 +178,18 @@ private fun DefaultMediaTrackFallbackContent(
     Column(
         modifier = modifier
             .fillMaxSize()
-            .background(VideoTheme.colors.appBackground)
+            .background(VideoTheme.colors.baseSheetTertiary)
             .testTag("video_renderer_fallback"),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center,
     ) {
-        Image(
-            modifier = modifier.fillMaxSize(),
-            painter = painterResource(
-                id = io.getstream.video.android.ui.common.R.drawable.stream_video_ic_preview_avatar,
-            ),
-            contentScale = ContentScale.Crop,
-            contentDescription = null,
-        )
-
         Text(
             modifier = Modifier.padding(30.dp),
             text = stringResource(
                 id = io.getstream.video.android.ui.common.R.string.stream_video_call_rendering_failed,
                 call.sessionId,
             ),
-            color = VideoTheme.colors.textHighEmphasis,
+            color = VideoTheme.colors.basePrimary,
             textAlign = TextAlign.Center,
             fontSize = 14.sp,
         )
@@ -218,5 +209,14 @@ private fun VideoRendererPreview() {
                 sessionId = "",
             ),
         )
+    }
+}
+
+@Preview
+@Composable
+private fun VideoRendererFallbackPreview() {
+    StreamPreviewDataUtils.initializeStreamVideo(LocalContext.current)
+    VideoTheme {
+        DefaultMediaTrackFallbackContent(modifier = Modifier, call = previewCall)
     }
 }

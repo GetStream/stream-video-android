@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014-2022 Stream.io Inc. All rights reserved.
+ * Copyright (c) 2014-2024 Stream.io Inc. All rights reserved.
  *
  * Licensed under the Stream License;
  * you may not use this file except in compliance with the License.
@@ -16,20 +16,21 @@
 
 package io.getstream.video.android.compose.ui.components.call.ringing.incomingcall
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
-import io.getstream.video.android.compose.theme.VideoTheme
+import androidx.compose.ui.unit.dp
+import io.getstream.video.android.compose.theme.base.VideoTheme
 import io.getstream.video.android.compose.ui.components.call.controls.actions.AcceptCallAction
 import io.getstream.video.android.compose.ui.components.call.controls.actions.DeclineCallAction
 import io.getstream.video.android.compose.ui.components.call.controls.actions.ToggleCameraAction
-import io.getstream.video.android.compose.ui.extensions.toggleAlpha
 import io.getstream.video.android.core.call.state.CallAction
 
 /**
@@ -53,26 +54,19 @@ public fun IncomingCallControls(
         horizontalArrangement = Arrangement.SpaceEvenly,
     ) {
         DeclineCallAction(
-            modifier = Modifier.size(VideoTheme.dimens.largeButtonSize),
             onCallAction = onCallAction,
         )
 
         if (isVideoCall) {
             ToggleCameraAction(
-                modifier = Modifier
-                    .toggleAlpha(isCameraEnabled)
-                    .background(
-                        color = VideoTheme.colors.appBackground,
-                        shape = VideoTheme.shapes.callButton,
-                    )
-                    .size(VideoTheme.dimens.mediumButtonSize),
+                onStyle = VideoTheme.styles.buttonStyles.tetriaryIconButtonStyle(),
+                offStyle = VideoTheme.styles.buttonStyles.secondaryIconButtonStyle(),
                 isCameraEnabled = isCameraEnabled,
                 onCallAction = onCallAction,
             )
         }
 
         AcceptCallAction(
-            modifier = Modifier.size(VideoTheme.dimens.largeButtonSize),
             onCallAction = onCallAction,
         )
     }
@@ -82,10 +76,18 @@ public fun IncomingCallControls(
 @Composable
 private fun IncomingCallOptionsPreview() {
     VideoTheme {
-        IncomingCallControls(
-            isVideoCall = true,
-            isCameraEnabled = true,
-            onCallAction = { },
-        )
+        Column {
+            IncomingCallControls(
+                isVideoCall = true,
+                isCameraEnabled = true,
+                onCallAction = { },
+            )
+            Spacer(modifier = Modifier.size(16.dp))
+            IncomingCallControls(
+                isVideoCall = true,
+                isCameraEnabled = false,
+                onCallAction = { },
+            )
+        }
     }
 }

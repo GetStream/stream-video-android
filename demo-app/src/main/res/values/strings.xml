@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-     Copyright (c) 2023 Stream.io Inc. All rights reserved.
+     Copyright (c) 2024 Stream.io Inc. All rights reserved.
 
      Licensed under the Stream License;
      you may not use this file except in compliance with the License.
@@ -27,7 +27,7 @@
     <string name="sign_in_contact">Having problems logging in?&#160;</string>
     <string name="sign_in_contact_us">Contact us</string>
     <string name="sign_out">Sign out</string>
-    <string name="join_description">Build reliable video calling, audio rooms, and live streaming with our easy-to-use SDKs and global edge network</string>
+    <string name="join_description">Start a new call, join a meeting by \nentering the call ID or by scanning \na QR code.</string>
     <string name="join_call">Join Call</string>
     <string name="join_call_by_qr_code">Scan QR meeting code</string>
     <string name="join_call_description">You are about to join a call. %d more people are in the call.</string>
@@ -46,6 +46,7 @@
     <string name="are_you_sure_sign_out">Are you sure you want to sign out?</string>
     <string name="cancel">Cancel</string>
     <string name="scan_qr_code_to_enter">To continue into the call\nScan the QR Code</string>
+    <string name="scan_qr_code">Scan QR Code</string>
     <string name="stream_video_tooling_restart_app">Restart App</string>
     <string name="stream_video_tooling_exception_log">Error Log</string>
     <string name="stream_video_tooling_copy_into_clipboard">Log messages copied to clipboard!</string>

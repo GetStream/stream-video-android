@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014-2022 Stream.io Inc. All rights reserved.
+ * Copyright (c) 2014-2024 Stream.io Inc. All rights reserved.
  *
  * Licensed under the Stream License;
  * you may not use this file except in compliance with the License.
@@ -29,9 +29,11 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -70,14 +72,14 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import io.getstream.video.android.compose.theme.VideoTheme
+import io.getstream.video.android.compose.theme.base.VideoTheme
 import io.getstream.video.android.compose.ui.components.avatar.LocalAvatarPreviewProvider
 import io.getstream.video.android.compose.ui.components.avatar.UserAvatarBackground
 import io.getstream.video.android.compose.ui.components.call.pinning.ParticipantAction
 import io.getstream.video.android.compose.ui.components.call.pinning.ParticipantActions
 import io.getstream.video.android.compose.ui.components.call.pinning.pinUnpinActions
-import io.getstream.video.android.compose.ui.components.connection.NetworkQualityIndicator
 import io.getstream.video.android.compose.ui.components.indicator.GenericIndicator
+import io.getstream.video.android.compose.ui.components.indicator.NetworkQualityIndicator
 import io.getstream.video.android.compose.ui.components.indicator.SoundIndicator
 import io.getstream.video.android.compose.ui.components.video.VideoRenderer
 import io.getstream.video.android.core.Call
@@ -120,7 +122,7 @@ public fun ParticipantVideo(
             networkQuality = it,
             modifier = Modifier
                 .align(BottomEnd)
-                .height(VideoTheme.dimens.participantLabelHeight),
+                .height(VideoTheme.dimens.componentHeightM),
         )
     },
     videoFallbackContent: @Composable (Call) -> Unit = {
@@ -165,22 +167,18 @@ public fun ParticipantVideo(
         }
     }
 
-    val containerShape = if (style.isScreenSharing) {
-        RoundedCornerShape(VideoTheme.dimens.screenShareParticipantsRadius)
-    } else {
-        VideoTheme.shapes.participantContainerShape
-    }
+    val containerShape = VideoTheme.shapes.sheet
     val containerModifier = if (style.isFocused && participants.size > 1) {
         modifier.border(
             border = if (style.isScreenSharing) {
                 BorderStroke(
-                    VideoTheme.dimens.participantScreenSharingFocusedBorderWidth,
-                    VideoTheme.colors.callFocusedBorder,
+                    VideoTheme.dimens.genericXXs,
+                    VideoTheme.colors.brandPrimary,
                 )
             } else {
                 BorderStroke(
-                    VideoTheme.dimens.participantFocusedBorderWidth,
-                    VideoTheme.colors.callFocusedBorder,
+                    VideoTheme.dimens.genericXXs,
+                    VideoTheme.colors.brandPrimary,
                 )
             },
             shape = containerShape,
@@ -191,7 +189,7 @@ public fun ParticipantVideo(
     Box(
         modifier = containerModifier
             .clip(containerShape)
-            .background(VideoTheme.colors.participantContainerBackground),
+            .background(VideoTheme.colors.baseSheetTertiary),
     ) {
         ParticipantVideoRenderer(
             call = call,
@@ -263,7 +261,6 @@ public fun BoxScope.ParticipantLabel(
     labelPosition: Alignment = BottomStart,
     soundIndicatorContent: @Composable RowScope.() -> Unit = {
         val audioEnabled by participant.audioEnabled.collectAsStateWithLifecycle()
-        val speaking by participant.speaking.collectAsStateWithLifecycle()
         val audioLevel by if (participant.isLocal) {
             call.localMicrophoneAudioLevel.collectAsStateWithLifecycle()
         } else {
@@ -278,12 +275,14 @@ public fun BoxScope.ParticipantLabel(
             audioLevel = audioLevel,
             modifier = Modifier
                 .align(CenterVertically)
-                .padding(horizontal = VideoTheme.dimens.participantSoundIndicatorPadding),
+                .padding(
+                    vertical = VideoTheme.dimens.spacingXs,
+                    horizontal = VideoTheme.dimens.spacingS,
+                ),
         )
     },
 ) {
     val audioEnabled by participant.audioEnabled.collectAsStateWithLifecycle()
-    val speaking by participant.speaking.collectAsStateWithLifecycle()
     val pinned by remember {
         derivedStateOf { call.state.pinnedParticipants.value.contains(participant.sessionId) }
     }
@@ -322,22 +321,22 @@ public fun BoxScope.ParticipantLabel(
             audioLevel = audioLevel,
             modifier = Modifier
                 .align(CenterVertically)
-                .padding(horizontal = VideoTheme.dimens.participantSoundIndicatorPadding),
+                .padding(horizontal = VideoTheme.dimens.spacingS),
         )
     },
 ) {
     var componentWidth by remember { mutableStateOf(0.dp) }
-    componentWidth = VideoTheme.dimens.participantLabelTextMaxWidth
+    componentWidth = VideoTheme.dimens.genericMax
     // get local density from composable
     val density = LocalDensity.current
     Box(
         modifier = Modifier
             .align(labelPosition)
-            .height(VideoTheme.dimens.participantLabelHeight)
+            .height(VideoTheme.dimens.componentHeightM)
             .wrapContentWidth()
             .background(
-                VideoTheme.colors.participantLabelBackground,
-                shape = VideoTheme.shapes.participantLabelShape,
+                VideoTheme.colors.baseSheetQuarternary,
+                shape = RoundedCornerShape(topEnd = VideoTheme.dimens.roundnessM),
             )
             .onGloballyPositioned {
                 componentWidth = with(density) {
@@ -352,23 +351,18 @@ public fun BoxScope.ParticipantLabel(
             Text(
                 modifier = Modifier
                     .widthIn(max = componentWidth)
-                    .padding(start = VideoTheme.dimens.participantLabelTextPaddingStart)
+                    .padding(start = VideoTheme.dimens.spacingM)
                     .align(CenterVertically),
                 text = nameLabel,
-                style = VideoTheme.typography.body,
-                color = Color.White,
+                style = VideoTheme.typography.bodyS,
+                color = VideoTheme.colors.basePrimary,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
             )
 
             if (isPinned) {
-                GenericIndicator(
-                    modifier = Modifier.padding(
-                        start = VideoTheme.dimens.participantSoundIndicatorPadding,
-                        top = VideoTheme.dimens.participantSoundIndicatorPadding,
-                        bottom = VideoTheme.dimens.participantSoundIndicatorPadding,
-                    ),
-                ) {
+                Spacer(modifier = Modifier.size(VideoTheme.dimens.spacingM))
+                GenericIndicator {
                     Icon(
                         imageVector = Icons.Filled.PushPin,
                         contentDescription = "Pin",
@@ -416,7 +410,7 @@ private fun BoxScope.DefaultReaction(
 
     val size: Dp by animateDpAsState(
         targetValue = if (currentReaction != null) {
-            VideoTheme.dimens.reactionSize
+            VideoTheme.dimens.componentHeightL
         } else {
             0.dp
         },
@@ -473,9 +467,22 @@ private fun ParticipantLabelPreview() {
     VideoTheme {
         Box {
             ParticipantLabel(
-                call = previewCall,
-                participant = previewParticipantsList[1],
-                BottomStart,
+                nameLabel = "The name",
+                isPinned = true,
+                labelPosition = BottomStart,
+                hasAudio = true,
+                isSpeaking = true,
+                audioLevel = 0f,
+                soundIndicatorContent = {
+                    SoundIndicator(
+                        isSpeaking = true,
+                        isAudioEnabled = true,
+                        audioLevel = 0.8f,
+                        modifier = Modifier
+                            .align(CenterVertically)
+                            .padding(horizontal = VideoTheme.dimens.spacingS),
+                    )
+                },
             )
         }
     }

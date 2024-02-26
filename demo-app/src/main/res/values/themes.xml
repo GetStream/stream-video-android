@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-     Copyright (c) 2023 Stream.io Inc. All rights reserved.
+     Copyright (c) 2024 Stream.io Inc. All rights reserved.
 
      Licensed under the Stream License;
      you may not use this file except in compliance with the License.
@@ -17,6 +17,6 @@
 <resources>
 
     <style name="Dogfooding" parent="Theme.AppCompat.NoActionBar">
-        <item name="android:statusBarColor">@color/stream_video_primary_accent</item>
+        <item name="android:statusBarColor">@color/stream_video_base_sheet_primary</item>
     </style>
 </resources>

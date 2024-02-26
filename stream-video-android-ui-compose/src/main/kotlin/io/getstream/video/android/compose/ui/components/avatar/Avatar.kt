@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014-2022 Stream.io Inc. All rights reserved.
+ * Copyright (c) 2014-2024 Stream.io Inc. All rights reserved.
  *
  * Licensed under the Stream License;
  * you may not use this file except in compliance with the License.
@@ -43,7 +43,8 @@ import com.skydoves.landscapist.animation.crossfade.CrossfadePlugin
 import com.skydoves.landscapist.coil.CoilImage
 import com.skydoves.landscapist.components.rememberImageComponent
 import com.skydoves.landscapist.placeholder.placeholder.PlaceholderPlugin
-import io.getstream.video.android.compose.theme.VideoTheme
+import io.getstream.video.android.compose.theme.base.VideoTheme
+import io.getstream.video.android.compose.ui.components.base.styling.StyleSize
 import io.getstream.video.android.ui.common.R
 
 /**
@@ -68,11 +69,15 @@ public fun Avatar(
     modifier: Modifier = Modifier,
     imageUrl: String? = null,
     initials: String? = null,
-    shape: Shape = VideoTheme.shapes.avatar,
-    textStyle: TextStyle = VideoTheme.typography.title3Bold,
+    shape: Shape = VideoTheme.shapes.circle,
+    textSize: StyleSize = StyleSize.XL,
+    textStyle: TextStyle = VideoTheme.typography.titleM,
     contentScale: ContentScale = ContentScale.Crop,
     contentDescription: String? = null,
-    requestSize: IntSize = IntSize(DEFAULT_IMAGE_SIZE, DEFAULT_IMAGE_SIZE),
+    requestSize: IntSize = IntSize(
+        DEFAULT_IMAGE_SIZE,
+        DEFAULT_IMAGE_SIZE,
+    ),
     @DrawableRes previewPlaceholder: Int =
         LocalAvatarPreviewProvider.getLocalAvatarPreviewPlaceholder(),
     @DrawableRes loadingPlaceholder: Int? =
@@ -97,9 +102,9 @@ public fun Avatar(
         InitialsAvatar(
             modifier = modifier,
             initials = initials,
+            textSize = textSize,
             shape = shape,
             textStyle = textStyle,
-            avatarOffset = initialsAvatarOffset,
         )
         return
     }
@@ -122,7 +127,7 @@ public fun Avatar(
             contentScale = contentScale,
             requestSize = requestSize,
         ),
-        previewPlaceholder = previewPlaceholder,
+        previewPlaceholder = painterResource(id = previewPlaceholder),
         component = rememberImageComponent {
             +CrossfadePlugin()
             loadingPlaceholder?.let {

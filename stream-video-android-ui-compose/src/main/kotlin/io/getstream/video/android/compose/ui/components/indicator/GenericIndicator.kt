@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014-2023 Stream.io Inc. All rights reserved.
+ * Copyright (c) 2014-2024 Stream.io Inc. All rights reserved.
  *
  * Licensed under the Stream License;
  * you may not use this file except in compliance with the License.
@@ -29,7 +29,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import io.getstream.video.android.compose.theme.VideoTheme
+import io.getstream.video.android.compose.theme.base.VideoTheme
 
 /**
  * A composable that wraps its content into a rounded semi-transparent background.
@@ -37,16 +37,14 @@ import io.getstream.video.android.compose.theme.VideoTheme
 @Composable
 internal fun GenericIndicator(
     modifier: Modifier = Modifier,
-    shape: Shape = VideoTheme.shapes.indicatorBackground,
-    backgroundColor: Color = VideoTheme.colors.audioIndicatorBackground,
+    shape: Shape = VideoTheme.shapes.indicator,
+    backgroundColor: Color = VideoTheme.colors.baseSheetQuarternary,
     content: @Composable BoxScope.() -> Unit,
 ) {
+    // val alphaColor = backgroundColor.copy(alpha = 0.3f)
     Box(
-        modifier = modifier.size(VideoTheme.dimens.indicatorBackgroundSize),
+        modifier = modifier.size(VideoTheme.dimens.componentHeightM),
     ) {
-        val backgroundModifier = modifier
-            .matchParentSize()
-
         // Ensure content is center aligned and padded
         Box(
             modifier = Modifier
@@ -73,22 +71,13 @@ internal fun GenericIndicator(
 private fun PreviewIndicatorBackground() {
     VideoTheme {
         Column {
-            GenericIndicator(
-                backgroundColor = VideoTheme.colors.audioIndicatorBackground,
-                shape = VideoTheme.shapes.indicatorBackground,
-            ) {
+            GenericIndicator {
                 AudioVolumeIndicator(audioLevels = 0.5f)
             }
-            GenericIndicator(
-                backgroundColor = VideoTheme.colors.audioIndicatorBackground,
-                shape = VideoTheme.shapes.indicatorBackground,
-            ) {
+            GenericIndicator {
                 MicrophoneIndicator(isMicrophoneEnabled = false)
             }
-            GenericIndicator(
-                backgroundColor = VideoTheme.colors.audioIndicatorBackground,
-                shape = VideoTheme.shapes.indicatorBackground,
-            ) {
+            GenericIndicator {
                 MicrophoneIndicator(isMicrophoneEnabled = true)
             }
         }

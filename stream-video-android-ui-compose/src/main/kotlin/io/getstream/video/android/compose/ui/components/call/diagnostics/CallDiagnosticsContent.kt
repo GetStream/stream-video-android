@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014-2023 Stream.io Inc. All rights reserved.
+ * Copyright (c) 2014-2024 Stream.io Inc. All rights reserved.
  *
  * Licensed under the Stream License;
  * you may not use this file except in compliance with the License.
@@ -66,7 +66,7 @@ public fun CallDiagnosticsContent(
         modifier = Modifier
             .fillMaxWidth()
             .fillMaxHeight()
-            .background(color = Color(0x80000000)),
+            .background(color = Color(0x80B9B9B9)),
     ) {
         val stats by call.statsReport.collectAsStateWithLifecycle()
         val configuration = LocalConfiguration.current

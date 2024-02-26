@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014-2022 Stream.io Inc. All rights reserved.
+ * Copyright (c) 2014-2024 Stream.io Inc. All rights reserved.
  *
  * Licensed under the Stream License;
  * you may not use this file except in compliance with the License.
@@ -16,10 +16,11 @@
 
 package io.getstream.video.android.compose.ui.components.call
 
-import android.content.res.Configuration
-import android.content.res.Configuration.ORIENTATION_LANDSCAPE
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Spacer
@@ -27,19 +28,16 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
 import androidx.compose.material.Text
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.VerifiedUser
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.ui.Alignment
+import androidx.compose.ui.Alignment.Companion.CenterVertically
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -48,14 +46,17 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import io.getstream.video.android.compose.theme.VideoTheme
-import io.getstream.video.android.compose.ui.components.participants.ParticipantIndicatorIcon
+import io.getstream.video.android.compose.theme.base.VideoTheme
+import io.getstream.video.android.compose.ui.components.base.GenericContainer
+import io.getstream.video.android.compose.ui.components.call.controls.actions.LeaveCallAction
 import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.call.state.CallAction
-import io.getstream.video.android.core.call.state.ShowCallParticipantInfo
+import io.getstream.video.android.core.call.state.LeaveCall
 import io.getstream.video.android.mock.StreamPreviewDataUtils
 import io.getstream.video.android.mock.previewCall
 import io.getstream.video.android.ui.common.R
+import kotlin.time.Duration.Companion.milliseconds
+import kotlin.time.ExperimentalTime
 
 /**
  * Represents the default AppBar that's shown in calls. Exposes handlers for the two default slot
@@ -84,49 +85,20 @@ public fun CallAppBar(
         DefaultCallAppBarCenterContent(call, title)
     },
     trailingContent: (@Composable RowScope.() -> Unit)? = {
-        DefaultCallAppBarTrailingContent(
-            call = call,
-            onCallAction = onCallAction,
-        )
+        LeaveCallAction {
+            onCallAction(LeaveCall)
+        }
     },
 ) {
-    val orientation = LocalConfiguration.current.orientation
-    val height = if (orientation == ORIENTATION_LANDSCAPE) {
-        VideoTheme.dimens.landscapeTopAppBarHeight
-    } else {
-        VideoTheme.dimens.topAppbarHeight
-    }
-
-    val endPadding = if (orientation == ORIENTATION_LANDSCAPE) {
-        VideoTheme.dimens.controlActionsHeight
-    } else {
-        VideoTheme.dimens.callAppBarPadding
-    }
-
     Row(
         modifier = modifier
             .fillMaxWidth()
-            .height(height)
-            .background(
-                brush = Brush.verticalGradient(
-                    listOf(
-                        Color.Black.copy(alpha = 0.2f),
-                        Color.Transparent,
-                    ),
-                ),
-            )
-            .padding(
-                start = VideoTheme.dimens.callAppBarPadding,
-                top = VideoTheme.dimens.callAppBarPadding,
-                bottom = VideoTheme.dimens.callAppBarPadding,
-                end = endPadding,
-            ),
-        verticalAlignment = Alignment.CenterVertically,
+            .height(VideoTheme.dimens.componentHeightL),
+        verticalAlignment = CenterVertically,
+        horizontalArrangement = Arrangement.SpaceBetween,
     ) {
         leadingContent?.invoke(this)
-
         centerContent?.invoke(this)
-
         trailingContent?.invoke(this)
     }
 }
@@ -140,17 +112,13 @@ internal fun DefaultCallAppBarLeadingContent(
 ) {
     IconButton(
         onClick = onBackButtonClicked,
-        modifier = Modifier.padding(
-            start = VideoTheme.dimens.callAppBarLeadingContentSpacingStart,
-            end = VideoTheme.dimens.callAppBarLeadingContentSpacingEnd,
-        ),
     ) {
         Icon(
             painter = painterResource(id = R.drawable.stream_video_ic_arrow_back),
             contentDescription = stringResource(
                 id = R.string.stream_video_back_button_content_description,
             ),
-            tint = VideoTheme.colors.callDescription,
+            tint = VideoTheme.colors.basePrimary,
         )
     }
 }
@@ -162,63 +130,112 @@ internal fun DefaultCallAppBarLeadingContent(
 internal fun RowScope.DefaultCallAppBarCenterContent(call: Call, title: String) {
     val isReconnecting by call.state.isReconnecting.collectAsStateWithLifecycle()
     val isRecording by call.state.recording.collectAsStateWithLifecycle()
-
-    if (isRecording) {
-        Box(
-            modifier = Modifier
-                .size(VideoTheme.dimens.callAppBarRecordingIndicatorSize)
-                .align(Alignment.CenterVertically)
-                .clip(CircleShape)
-                .background(VideoTheme.colors.errorAccent),
-        )
-
-        Spacer(modifier = Modifier.width(6.dp))
-    }
-
-    Text(
-        modifier = Modifier
-            .weight(1f)
-            .padding(
-                start = VideoTheme.dimens.callAppBarCenterContentSpacingStart,
-                end = VideoTheme.dimens.callAppBarCenterContentSpacingEnd,
-            ),
-        text = if (isReconnecting) {
-            stringResource(id = R.string.stream_video_call_reconnecting)
-        } else if (isRecording) {
-            stringResource(id = R.string.stream_video_call_recording)
-        } else {
-            title
-        },
-        fontSize = VideoTheme.dimens.topAppbarTextSize,
-        color = VideoTheme.colors.callDescription,
-        maxLines = 1,
-        overflow = TextOverflow.Ellipsis,
-        textAlign = TextAlign.Start,
+    val duration by call.state.duration.collectAsStateWithLifecycle()
+    CalLCenterContent(
+        modifier = Modifier.align(CenterVertically),
+        text = duration?.toString() ?: title,
+        isRecording = isRecording,
+        isReconnecting = isReconnecting,
     )
 }
 
-/**
- * Default trailing content slot, representing an icon to show the call participants menu.
- */
 @Composable
-internal fun DefaultCallAppBarTrailingContent(
-    call: Call,
-    onCallAction: (CallAction) -> Unit,
+private fun CalLCenterContent(
+    modifier: Modifier = Modifier,
+    text: String,
+    isRecording: Boolean,
+    isReconnecting: Boolean,
 ) {
-    val participants by call.state.participants.collectAsStateWithLifecycle()
-
-    ParticipantIndicatorIcon(
-        number = participants.size,
-        onClick = { onCallAction(ShowCallParticipantInfo) },
-    )
+    GenericContainer(modifier = modifier) {
+        Row {
+            if (isRecording) {
+                Box(
+                    modifier = Modifier
+                        .size(VideoTheme.dimens.componentHeightS)
+                        .clip(VideoTheme.shapes.circle)
+                        .background(
+                            color = VideoTheme.colors.alertWarning,
+                            shape = VideoTheme.shapes.circle,
+                        )
+                        .border(2.dp, VideoTheme.colors.basePrimary, VideoTheme.shapes.circle),
+                )
+            } else {
+                Icon(
+                    imageVector = Icons.Default.VerifiedUser,
+                    tint = VideoTheme.colors.alertSuccess,
+                    contentDescription = "call duration",
+                )
+            }
+            Text(
+                modifier = Modifier
+                    .padding(
+                        start = VideoTheme.dimens.componentPaddingStart,
+                        end = VideoTheme.dimens.componentPaddingEnd,
+                    ),
+                text = if (isReconnecting) {
+                    stringResource(id = R.string.stream_video_call_reconnecting)
+                } else if (isRecording) {
+                    stringResource(id = R.string.stream_video_call_recording)
+                } else {
+                    text
+                },
+                fontSize = VideoTheme.dimens.textSizeS,
+                color = VideoTheme.colors.baseSecondary,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+                textAlign = TextAlign.Start,
+            )
+        }
+    }
 }
 
 @Preview
-@Preview(uiMode = Configuration.UI_MODE_NIGHT_YES)
 @Composable
+@ExperimentalTime
 private fun CallTopAppbarPreview() {
     StreamPreviewDataUtils.initializeStreamVideo(LocalContext.current)
     VideoTheme {
-        CallAppBar(call = previewCall)
+        Column {
+            CallAppBar(call = previewCall, centerContent = {
+                CalLCenterContent(
+                    text = 100000000L.milliseconds.toString(),
+                    isRecording = false,
+                    isReconnecting = false,
+                )
+            })
+            Spacer(modifier = Modifier.size(16.dp))
+            CallAppBar(call = previewCall, centerContent = {
+                CalLCenterContent(
+                    text = 100000000L.milliseconds.toString(),
+                    isRecording = true,
+                    isReconnecting = false,
+                )
+            })
+            Spacer(modifier = Modifier.size(16.dp))
+            CallAppBar(call = previewCall, centerContent = {
+                CalLCenterContent(
+                    text = 100000000L.milliseconds.toString(),
+                    isRecording = false,
+                    isReconnecting = false,
+                )
+            })
+            Spacer(modifier = Modifier.size(16.dp))
+            CallAppBar(call = previewCall, centerContent = {
+                CalLCenterContent(
+                    text = 100000000L.milliseconds.toString(),
+                    isRecording = false,
+                    isReconnecting = true,
+                )
+            })
+            Spacer(modifier = Modifier.size(16.dp))
+            CallAppBar(call = previewCall, centerContent = {
+                CalLCenterContent(
+                    text = 100000000L.milliseconds.toString(),
+                    isRecording = true,
+                    isReconnecting = false,
+                )
+            })
+            Spacer(modifier = Modifier.size(16.dp))
+        }
     }
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014-2022 Stream.io Inc. All rights reserved.
+ * Copyright (c) 2014-2024 Stream.io Inc. All rights reserved.
  *
  * Licensed under the Stream License;
  * you may not use this file except in compliance with the License.
@@ -931,11 +931,15 @@ internal class StreamVideoImpl internal constructor(
     suspend fun listRecordings(
         type: String,
         id: String,
-        sessionId: String,
+        sessionId: String?,
     ): Result<ListRecordingsResponse> {
         return wrapAPICall {
             val result =
-                connectionModule.api.listRecordingsTypeIdSession1(type, id, sessionId)
+                if (sessionId == null) {
+                    connectionModule.api.listRecordingsTypeId0(type, id)
+                } else {
+                    connectionModule.api.listRecordingsTypeIdSession1(type, id, sessionId)
+                }
             result
         }
     }

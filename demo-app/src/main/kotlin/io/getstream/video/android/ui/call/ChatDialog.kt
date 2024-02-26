@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014-2023 Stream.io Inc. All rights reserved.
+ * Copyright (c) 2014-2024 Stream.io Inc. All rights reserved.
  *
  * Licensed under the Stream License;
  * you may not use this file except in compliance with the License.
@@ -43,6 +43,7 @@ import io.getstream.chat.android.compose.ui.theme.ChatTheme
 import io.getstream.chat.android.compose.viewmodel.messages.MessageListViewModel
 import io.getstream.chat.android.compose.viewmodel.messages.MessagesViewModelFactory
 import io.getstream.chat.android.ui.common.state.messages.list.MessageItemState
+import io.getstream.video.android.compose.theme.base.VideoTheme
 import io.getstream.video.android.core.Call
 import io.getstream.video.android.ui.common.R
 import java.time.Instant
@@ -97,11 +98,12 @@ internal fun ChatDialog(
         )
     }
 
-    ChatTheme {
+    ChatTheme(isInDarkMode = true) {
         ModalBottomSheetLayout(
             modifier = Modifier.fillMaxWidth(),
             sheetShape = RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp),
             sheetState = state,
+            sheetBackgroundColor = VideoTheme.colors.baseSheetPrimary,
             sheetContent = {
                 if (state.isVisible) {
                     Column(

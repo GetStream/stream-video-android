@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014-2022 Stream.io Inc. All rights reserved.
+ * Copyright (c) 2014-2024 Stream.io Inc. All rights reserved.
  *
  * Licensed under the Stream License;
  * you may not use this file except in compliance with the License.
@@ -17,23 +17,20 @@
 package io.getstream.video.android.compose.ui.components.participants.internal
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.aspectRatio
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material.Icon
-import androidx.compose.material.IconButton
 import androidx.compose.material.Text
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
-import io.getstream.video.android.compose.theme.VideoTheme
+import io.getstream.video.android.compose.theme.base.VideoTheme
+import io.getstream.video.android.compose.ui.components.base.StreamIconButton
 import io.getstream.video.android.ui.common.R
 
 /**
@@ -53,41 +50,29 @@ internal fun CallParticipantListAppBar(
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .height(VideoTheme.dimens.participantInfoMenuAppBarHeight)
-            .background(VideoTheme.colors.barsBackground)
-            .padding(VideoTheme.dimens.callAppBarPadding),
+            .background(VideoTheme.colors.baseSheetPrimary),
         verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.SpaceBetween,
     ) {
         Text(
             modifier = Modifier
-                .weight(1f)
                 .padding(
-                    start = VideoTheme.dimens.callAppBarCenterContentSpacingStart,
-                    end = VideoTheme.dimens.callAppBarCenterContentSpacingEnd,
+                    start = VideoTheme.dimens.componentPaddingStart,
+                    end = VideoTheme.dimens.componentPaddingEnd,
                 ),
             text = resources.getQuantityString(
                 R.plurals.stream_video_call_participants_info_number_of_participants,
                 numberOfParticipants,
                 numberOfParticipants,
             ),
-            style = VideoTheme.typography.title3,
-            color = VideoTheme.colors.textHighEmphasis,
+            style = VideoTheme.typography.titleS,
+            color = VideoTheme.colors.basePrimary,
         )
 
-        IconButton(
-            modifier = Modifier
-                .fillMaxHeight()
-                .aspectRatio(1f, matchHeightConstraintsFirst = true),
+        StreamIconButton(
             onClick = onBackPressed,
-            content = {
-                Icon(
-                    painter = painterResource(id = R.drawable.stream_video_ic_close),
-                    contentDescription = stringResource(
-                        id = R.string.stream_video_back_button_content_description,
-                    ),
-                    tint = VideoTheme.colors.textHighEmphasis,
-                )
-            },
+            icon = Icons.Default.Close,
+            style = VideoTheme.styles.buttonStyles.onlyIconIconButtonStyle(),
         )
     }
 }
