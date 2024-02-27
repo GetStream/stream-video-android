@@ -21,6 +21,7 @@ import androidx.compose.runtime.Stable
 import androidx.core.content.ContextCompat
 import io.getstream.video.android.core.notifications.internal.service.CallService
 import io.getstream.video.android.core.notifications.internal.service.CallTriggers
+import io.getstream.video.android.core.notifications.internal.service.PlatformCallManagement
 import io.getstream.video.android.model.StreamCallId
 import io.getstream.video.android.model.User
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -79,6 +80,10 @@ class ClientState(client: StreamVideo) {
 
     internal val clientImpl = client as StreamVideoImpl
 
+    init {
+
+    }
+
     /**
      * Handles the events for the client state.
      * Most event logic happens in the Call instead of the client
@@ -132,20 +137,38 @@ class ClientState(client: StreamVideo) {
     private fun maybeStartForegroundService(call: Call, trigger: String) {
         if (clientImpl.runForegroundService) {
             val context = clientImpl.context
-            val serviceIntent = CallService.buildStartIntent(
-                context,
-                StreamCallId.fromCallCid(call.cid),
-                trigger,
+            PlatformCallManagement.checkSupport(context,
+                supported = {
+                    PlatformCallManagement.instance.addCall(
+                        callId = StreamCallId.fromCallCid(call.cid),
+                        trigger = trigger
+                    )
+                },
+                notSupported = {
+                    val serviceIntent = CallService.buildStartIntent(
+                        context,
+                        StreamCallId.fromCallCid(call.cid),
+                        trigger,
+                    )
+                    ContextCompat.startForegroundService(context, serviceIntent)
+                }
             )
-            ContextCompat.startForegroundService(context, serviceIntent)
         }
     }
 
     private fun maybeStopForegroundService() {
         if (clientImpl.runForegroundService) {
             val context = clientImpl.context
-            val serviceIntent = CallService.buildStopIntent(context)
-            context.stopService(serviceIntent)
+            PlatformCallManagement.checkSupport(context,
+                supported = {
+                    PlatformCallManagement.instance.endAll()
+                },
+                notSupported = {
+                    val serviceIntent = CallService.buildStopIntent(context)
+                    context.stopService(serviceIntent)
+                }
+            )
+
         }
     }
 }

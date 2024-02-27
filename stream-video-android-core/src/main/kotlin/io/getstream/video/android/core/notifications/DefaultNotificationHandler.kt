@@ -42,6 +42,7 @@ import io.getstream.video.android.core.notifications.NotificationHandler.Compani
 import io.getstream.video.android.core.notifications.internal.DefaultStreamIntentResolver
 import io.getstream.video.android.core.notifications.internal.service.CallService
 import io.getstream.video.android.core.notifications.internal.service.CallTriggers
+import io.getstream.video.android.core.notifications.internal.service.PlatformCallManagement
 import io.getstream.video.android.model.StreamCallId
 
 public open class DefaultNotificationHandler(
@@ -72,13 +73,22 @@ public open class DefaultNotificationHandler(
     }
 
     override fun onRingingCall(callId: StreamCallId, callDisplayName: String) {
-        val serviceIntent = CallService.buildStartIntent(
-            this.application,
-            callId,
-            CallTriggers.TRIGGER_INCOMING_CALL,
-            callDisplayName,
-        )
-        ContextCompat.startForegroundService(application.applicationContext, serviceIntent)
+        logger.e { "[onRingingCall] Starting ringing call." }
+        PlatformCallManagement.checkSupport(application.applicationContext,
+            supported = {
+                PlatformCallManagement.instance.addCall(
+                    callId, callDisplayName, CallTriggers.TRIGGER_INCOMING_CALL
+                )
+            },
+            notSupported = {
+                val serviceIntent = CallService.buildStartIntent(
+                    this.application,
+                    callId,
+                    CallTriggers.TRIGGER_INCOMING_CALL,
+                    callDisplayName,
+                )
+                ContextCompat.startForegroundService(application.applicationContext, serviceIntent)
+            })
     }
 
     override fun getRingingCallNotification(

@@ -18,7 +18,11 @@ package io.getstream.video.android
 
 import android.app.Application
 import android.content.Context
+import android.os.Build
+import androidx.annotation.RequiresApi
 import dagger.hilt.android.HiltAndroidApp
+import io.getstream.log.streamLog
+import io.getstream.video.android.core.notifications.internal.service.PlatformCallManagement
 import io.getstream.video.android.datastore.delegate.StreamUserDataStore
 import io.getstream.video.android.util.StreamVideoInitHelper
 import kotlinx.coroutines.runBlocking
@@ -38,6 +42,10 @@ class App : Application() {
         // Demo helper for initialising the Video and Chat SDK instances from one place.
         // For simpler code we "inject" the Context manually instead of using DI.
         StreamVideoInitHelper.init(this)
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            PlatformCallManagement.initialize(applicationContext)
+        }
 
         // Prepare the Video SDK if we already have a user logged in the demo app.
         // If you need to receive push messages (incoming call) then the SDK must be initialised

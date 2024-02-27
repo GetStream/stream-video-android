@@ -89,6 +89,7 @@ import androidx.compose.ui.window.PopupPositionProvider
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.getstream.video.android.BuildConfig
+import io.getstream.video.android.DirectCallActivity
 import io.getstream.video.android.R
 import io.getstream.video.android.compose.theme.base.VideoTheme
 import io.getstream.video.android.compose.ui.components.avatar.UserAvatar
@@ -104,6 +105,7 @@ import io.getstream.video.android.tooling.util.StreamFlavors
 import io.getstream.video.android.util.LockScreenOrientation
 import io.getstream.video.android.util.config.AppConfig
 import io.getstream.video.android.util.config.types.StreamEnvironment
+import java.util.UUID
 
 @Composable
 fun CallJoinScreen(
@@ -490,6 +492,7 @@ private fun JoinCallForm(
             ),
         )
 
+        val context = LocalContext.current
         StreamButton(
             icon = Icons.Default.Login,
             style = VideoTheme.styles.buttonStyles.secondaryButtonStyle(),
@@ -498,7 +501,15 @@ private fun JoinCallForm(
                 .fillMaxHeight()
                 .testTag("join_call"),
             onClick = {
-                joinCall(callId.text)
+               val intent =  DirectCallActivity.createIntent(
+                    context,
+                    callId = UUID.randomUUID().toString(),
+                    members = listOf(
+                        "aleksandarapostolovgetstreamio"
+                    )
+                )
+                context.startActivity(intent)
+                //joinCall(callId.text)
             },
             text = stringResource(id = R.string.join_call),
         )
