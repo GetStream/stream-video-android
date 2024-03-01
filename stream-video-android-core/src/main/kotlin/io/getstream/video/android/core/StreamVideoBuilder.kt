@@ -16,7 +16,6 @@
 
 package io.getstream.video.android.core
 
-import android.app.ForegroundServiceTypeException
 import android.app.Notification
 import android.content.Context
 import android.os.Build

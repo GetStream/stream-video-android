@@ -21,7 +21,6 @@ import android.app.Notification
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
-import android.content.Intent.FLAG_ACTIVITY_NEW_TASK
 import android.content.IntentFilter
 import android.content.pm.PackageManager
 import android.content.pm.ServiceInfo
@@ -41,7 +40,6 @@ import androidx.core.app.ActivityCompat
 import androidx.core.app.NotificationManagerCompat
 import androidx.core.app.ServiceCompat
 import androidx.core.os.bundleOf
-import androidx.core.telecom.CallAttributesCompat
 import io.getstream.log.taggedLogger
 import io.getstream.video.android.core.R
 import io.getstream.video.android.core.RingingState
@@ -147,20 +145,25 @@ internal class CallService : ConnectionService() {
         @RequiresPermission(android.Manifest.permission.MANAGE_OWN_CALLS)
         @RequiresApi(Build.VERSION_CODES.O)
         fun register(
-            context: Context, phoneAccountHandle: PhoneAccountHandle = PhoneAccountHandle(
+            context: Context,
+            phoneAccountHandle: PhoneAccountHandle = PhoneAccountHandle(
                 ComponentName(
                     context,
-                    "io.getstream.video.android.core.notifications.internal.service.CallService"
-                ), "StreamCalls"
-            )
+                    "io.getstream.video.android.core.notifications.internal.service.CallService",
+                ),
+                "StreamCalls",
+            ),
         ) {
-            logger.d { "Register phone account for component. [${phoneAccountHandle.componentName.flattenToString()}" }
+            logger.d {
+                "Register phone account for component. [${phoneAccountHandle.componentName.flattenToString()}"
+            }
             try {
                 accountHandle = phoneAccountHandle
                 val telecomService =
                     context.getSystemService(Context.TELECOM_SERVICE) as TelecomManager
                 val phoneAccountBuilder = PhoneAccount.Builder(
-                    accountHandle, accountHandle.id
+                    accountHandle,
+                    accountHandle.id,
                 ).setCapabilities(PhoneAccount.CAPABILITY_SELF_MANAGED)
                 telecomService.registerPhoneAccount(phoneAccountBuilder.build())
             } catch (e: Exception) {
@@ -306,10 +309,12 @@ internal class CallService : ConnectionService() {
 
     @RequiresApi(Build.VERSION_CODES.O)
     private fun initializeTelecomConnection(
-        streamVideo: StreamVideoImpl, callId: StreamCallId, trigger: String?
+        streamVideo: StreamVideoImpl,
+        callId: StreamCallId,
+        trigger: String?,
     ) = try {
         val hasManageCallPermission = ActivityCompat.checkSelfPermission(
-            this, Manifest.permission.MANAGE_OWN_CALLS
+            this, Manifest.permission.MANAGE_OWN_CALLS,
         ) == PackageManager.PERMISSION_GRANTED
         if (hasManageCallPermission) {
             val telecomService = this.getSystemService(Context.TELECOM_SERVICE) as? TelecomManager
@@ -317,16 +322,17 @@ internal class CallService : ConnectionService() {
             when (trigger) {
                 TRIGGER_INCOMING_CALL -> {
                     telecomService?.addNewIncomingCall(
-                        accountHandle, bundleOf(
-                            TelecomManager.EXTRA_INCOMING_CALL_ADDRESS to address
-                        )
+                        accountHandle,
+                        bundleOf(
+                            TelecomManager.EXTRA_INCOMING_CALL_ADDRESS to address,
+                        ),
                     )
                 }
 
                 TRIGGER_OUTGOING_CALL -> {
                     telecomService?.placeCall(
                         address,
-                        bundleOf(TelecomManager.EXTRA_PHONE_ACCOUNT_HANDLE to accountHandle)
+                        bundleOf(TelecomManager.EXTRA_PHONE_ACCOUNT_HANDLE to accountHandle),
                     )
                 }
 
@@ -349,13 +355,16 @@ internal class CallService : ConnectionService() {
             val callConnection = call.telecomConnection
             callConnection
         } else {
-            logger.w { "Missing StreamVideo or call ID, call will not be registered with the platform, no connection returned" }
+            logger.w {
+                "Missing StreamVideo or call ID, call will not be registered with the platform, no connection returned"
+            }
             null
         }
     }
 
     override fun onCreateIncomingConnection(
-        connectionManagerPhoneAccount: PhoneAccountHandle?, request: ConnectionRequest?
+        connectionManagerPhoneAccount: PhoneAccountHandle?,
+        request: ConnectionRequest?,
     ): Connection? {
         val connection = getConnection()
         connection?.setRinging()
@@ -363,7 +372,8 @@ internal class CallService : ConnectionService() {
     }
 
     override fun onCreateOutgoingConnection(
-        connectionManagerPhoneAccount: PhoneAccountHandle?, request: ConnectionRequest?
+        connectionManagerPhoneAccount: PhoneAccountHandle?,
+        request: ConnectionRequest?,
     ): Connection? {
         val connection = getConnection()
         connection?.setDialing()

@@ -18,7 +18,6 @@ package io.getstream.video.android.core
 
 import android.content.Intent
 import android.graphics.Bitmap
-import android.telecom.CallControlCallback
 import android.telecom.Connection
 import androidx.annotation.VisibleForTesting
 import androidx.compose.runtime.Stable
