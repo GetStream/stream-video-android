@@ -16,8 +16,10 @@
 
 package io.getstream.video.android.core
 
+import android.app.ForegroundServiceTypeException
 import android.app.Notification
 import android.content.Context
+import android.os.Build
 import androidx.lifecycle.ProcessLifecycleOwner
 import com.jakewharton.threetenabp.AndroidThreeTen
 import io.getstream.log.StreamLog
@@ -28,6 +30,7 @@ import io.getstream.video.android.core.internal.module.ConnectionModule
 import io.getstream.video.android.core.logging.LoggingLevel
 import io.getstream.video.android.core.notifications.NotificationConfig
 import io.getstream.video.android.core.notifications.internal.StreamNotificationManager
+import io.getstream.video.android.core.notifications.internal.service.CallService
 import io.getstream.video.android.core.notifications.internal.storage.DeviceTokenStorage
 import io.getstream.video.android.core.sounds.Sounds
 import io.getstream.video.android.model.ApiKey
@@ -196,6 +199,9 @@ public class StreamVideoBuilder @JvmOverloads constructor(
         // installs Stream Video instance
         StreamVideo.install(client)
 
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            CallService.register(context)
+        }
         // Needs to be started after the client is initialised because the VideoPushDelegate
         // is accessing the StreamVideo instance
         scope.launch {

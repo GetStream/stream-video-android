@@ -182,6 +182,9 @@ dependencies {
     implementation(libs.stream.push.delegate)
     api(libs.stream.push.permissions)
 
+    //Telecom
+    implementation ("androidx.core:core-telecom:1.0.0-alpha02")
+
 
     // datastore
     api(libs.androidx.datastore)

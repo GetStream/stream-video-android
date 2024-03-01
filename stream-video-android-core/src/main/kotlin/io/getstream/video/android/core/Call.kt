@@ -18,6 +18,8 @@ package io.getstream.video.android.core
 
 import android.content.Intent
 import android.graphics.Bitmap
+import android.telecom.CallControlCallback
+import android.telecom.Connection
 import androidx.annotation.VisibleForTesting
 import androidx.compose.runtime.Stable
 import io.getstream.log.taggedLogger
@@ -27,6 +29,7 @@ import io.getstream.result.Result.Failure
 import io.getstream.result.Result.Success
 import io.getstream.video.android.core.call.RtcSession
 import io.getstream.video.android.core.call.audio.AudioFilter
+import io.getstream.video.android.core.call.platform.StreamCallTelecomConnection
 import io.getstream.video.android.core.call.utils.SoundInputProcessor
 import io.getstream.video.android.core.call.video.VideoFilter
 import io.getstream.video.android.core.call.video.YuvFrame
@@ -122,6 +125,8 @@ public class Call(
 
     private val supervisorJob = SupervisorJob()
     private val scope = CoroutineScope(clientImpl.scope.coroutineContext + supervisorJob)
+
+    internal var telecomConnection: Connection? = StreamCallTelecomConnection(this, scope)
 
     /** The call state contains all state such as the participant list, reactions etc */
     val state = CallState(client, this, user, scope)

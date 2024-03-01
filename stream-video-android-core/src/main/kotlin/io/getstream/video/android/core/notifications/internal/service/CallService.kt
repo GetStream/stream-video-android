@@ -16,18 +16,32 @@
 
 package io.getstream.video.android.core.notifications.internal.service
 
+import android.Manifest
 import android.app.Notification
-import android.app.Service
+import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
+import android.content.Intent.FLAG_ACTIVITY_NEW_TASK
 import android.content.IntentFilter
+import android.content.pm.PackageManager
 import android.content.pm.ServiceInfo
 import android.media.MediaPlayer
+import android.net.Uri
 import android.os.Build
-import android.os.IBinder
+import android.telecom.Connection
+import android.telecom.ConnectionRequest
+import android.telecom.ConnectionService
+import android.telecom.PhoneAccount
+import android.telecom.PhoneAccountHandle
+import android.telecom.TelecomManager
 import androidx.annotation.RawRes
+import androidx.annotation.RequiresApi
+import androidx.annotation.RequiresPermission
+import androidx.core.app.ActivityCompat
 import androidx.core.app.NotificationManagerCompat
 import androidx.core.app.ServiceCompat
+import androidx.core.os.bundleOf
+import androidx.core.telecom.CallAttributesCompat
 import io.getstream.log.taggedLogger
 import io.getstream.video.android.core.R
 import io.getstream.video.android.core.RingingState
@@ -47,13 +61,11 @@ import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
 import org.openapitools.client.models.CallEndedEvent
 import org.openapitools.client.models.CallRejectedEvent
-import java.lang.IllegalArgumentException
-import java.lang.IllegalStateException
 
 /**
  * A foreground service that is running when there is an active call.
  */
-internal class CallService : Service() {
+internal class CallService : ConnectionService() {
     private val logger by taggedLogger("CallService")
 
     // Data
@@ -70,12 +82,17 @@ internal class CallService : Service() {
     // Call sounds
     private var mediaPlayer: MediaPlayer? = null
 
+    private val managedConnections: MutableMap<String, Connection> = mutableMapOf()
+
     internal companion object {
+        private val logger by taggedLogger("CallServiceCompanion")
         const val TRIGGER_KEY =
             "io.getstream.video.android.core.notifications.internal.service.CallService.call_trigger"
         const val TRIGGER_INCOMING_CALL = "incoming_call"
         const val TRIGGER_OUTGOING_CALL = "outgoing_call"
         const val TRIGGER_ONGOING_CALL = "ongoing_call"
+
+        lateinit var accountHandle: PhoneAccountHandle
 
         /**
          * Build start intent.
@@ -91,6 +108,7 @@ internal class CallService : Service() {
             trigger: String,
             callDisplayName: String? = null,
         ): Intent {
+            logger.d { "Building start intent [$callId, $callDisplayName, $trigger]" }
             val serviceIntent = Intent(context, CallService::class.java)
             serviceIntent.putExtra(INTENT_EXTRA_CALL_CID, callId)
             when (trigger) {
@@ -122,6 +140,33 @@ internal class CallService : Service() {
          * @param context the context.
          */
         fun buildStopIntent(context: Context) = Intent(context, CallService::class.java)
+
+        /**
+         * In order for the calls to be integrated into the Android platform and the Telecom API, you have to register the call service with the platform.
+         */
+        @RequiresPermission(android.Manifest.permission.MANAGE_OWN_CALLS)
+        @RequiresApi(Build.VERSION_CODES.O)
+        fun register(
+            context: Context, phoneAccountHandle: PhoneAccountHandle = PhoneAccountHandle(
+                ComponentName(
+                    context,
+                    "io.getstream.video.android.core.notifications.internal.service.CallService"
+                ), "StreamCalls"
+            )
+        ) {
+            logger.d { "Register phone account for component. [${phoneAccountHandle.componentName.flattenToString()}" }
+            try {
+                accountHandle = phoneAccountHandle
+                val telecomService =
+                    context.getSystemService(Context.TELECOM_SERVICE) as TelecomManager
+                val phoneAccountBuilder = PhoneAccount.Builder(
+                    accountHandle, accountHandle.id
+                ).setCapabilities(PhoneAccount.CAPABILITY_SELF_MANAGED)
+                telecomService.registerPhoneAccount(phoneAccountBuilder.build())
+            } catch (e: Exception) {
+                logger.e(e) { "Failed to register phone account." }
+            }
+        }
     }
 
     override fun onTimeout(startId: Int) {
@@ -132,7 +177,6 @@ internal class CallService : Service() {
 
     override fun onTaskRemoved(rootIntent: Intent?) {
         super.onTaskRemoved(rootIntent)
-
         endCall()
         stopService()
     }
@@ -180,52 +224,50 @@ internal class CallService : Service() {
         val trigger = intent?.getStringExtra(TRIGGER_KEY)
         val streamVideo = StreamVideo.instanceOrNull() as? StreamVideoImpl
         val started = if (callId != null && streamVideo != null && trigger != null) {
-            val notificationData: Pair<Notification?, Int> =
-                when (trigger) {
-                    TRIGGER_ONGOING_CALL -> Pair(
-                        first = streamVideo.getOngoingCallNotification(
-                            callId = callId!!,
-                        ),
-                        second = callId.hashCode(),
-                    )
+            val notificationData: Pair<Notification?, Int> = when (trigger) {
+                TRIGGER_ONGOING_CALL -> Pair(
+                    first = streamVideo.getOngoingCallNotification(
+                        callId = callId!!,
+                    ),
+                    second = callId.hashCode(),
+                )
 
-                    TRIGGER_INCOMING_CALL -> Pair(
-                        first = streamVideo.getRingingCallNotification(
-                            ringingState = RingingState.Incoming(),
-                            callId = callId!!,
-                            callDisplayName = callDisplayName!!,
-                        ),
-                        second = INCOMING_CALL_NOTIFICATION_ID,
-                    )
+                TRIGGER_INCOMING_CALL -> Pair(
+                    first = streamVideo.getRingingCallNotification(
+                        ringingState = RingingState.Incoming(),
+                        callId = callId!!,
+                        callDisplayName = callDisplayName!!,
+                    ),
+                    second = INCOMING_CALL_NOTIFICATION_ID,
+                )
 
-                    TRIGGER_OUTGOING_CALL -> Pair(
-                        first = streamVideo.getRingingCallNotification(
-                            ringingState = RingingState.Outgoing(),
-                            callId = callId!!,
-                            callDisplayName = getString(
-                                R.string.stream_video_ongoing_call_notification_description,
-                            ),
+                TRIGGER_OUTGOING_CALL -> Pair(
+                    first = streamVideo.getRingingCallNotification(
+                        ringingState = RingingState.Outgoing(),
+                        callId = callId!!,
+                        callDisplayName = getString(
+                            R.string.stream_video_ongoing_call_notification_description,
                         ),
-                        second = INCOMING_CALL_NOTIFICATION_ID, // Same for incoming and outgoing
-                    )
+                    ),
+                    second = INCOMING_CALL_NOTIFICATION_ID, // Same for incoming and outgoing
+                )
 
-                    else -> Pair(null, callId.hashCode())
-                }
+                else -> Pair(null, callId.hashCode())
+            }
             val notification = notificationData.first
             if (notification != null) {
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
-                    val foregroundServiceType =
-                        when (trigger) {
-                            TRIGGER_ONGOING_CALL -> ServiceInfo.FOREGROUND_SERVICE_TYPE_MICROPHONE
-                            TRIGGER_INCOMING_CALL -> ServiceInfo.FOREGROUND_SERVICE_TYPE_SHORT_SERVICE
-                            TRIGGER_OUTGOING_CALL -> ServiceInfo.FOREGROUND_SERVICE_TYPE_SHORT_SERVICE
-                            else -> ServiceInfo.FOREGROUND_SERVICE_TYPE_SHORT_SERVICE
-                        }
+                    val foregroundServiceType = when (trigger) {
+                        TRIGGER_ONGOING_CALL -> ServiceInfo.FOREGROUND_SERVICE_TYPE_MICROPHONE
+                        TRIGGER_INCOMING_CALL -> ServiceInfo.FOREGROUND_SERVICE_TYPE_SHORT_SERVICE
+                        TRIGGER_OUTGOING_CALL -> ServiceInfo.FOREGROUND_SERVICE_TYPE_SHORT_SERVICE
+                        else -> ServiceInfo.FOREGROUND_SERVICE_TYPE_SHORT_SERVICE
+                    }
                     ServiceCompat.startForeground(
                         this@CallService,
                         callId.hashCode(),
                         notification,
-                        foregroundServiceType,
+                        ServiceInfo.FOREGROUND_SERVICE_TYPE_PHONE_CALL,
                     )
                 } else {
                     startForeground(callId.hashCode(), notification)
@@ -247,17 +289,85 @@ internal class CallService : Service() {
             stopService()
         } else {
             initializeCallAndSocket(streamVideo!!, callId!!)
-
             if (trigger == TRIGGER_INCOMING_CALL) {
                 updateRingingCall(streamVideo, callId!!, RingingState.Incoming())
                 if (mediaPlayer == null) mediaPlayer = MediaPlayer()
             } else if (trigger == TRIGGER_OUTGOING_CALL) {
                 if (mediaPlayer == null) mediaPlayer = MediaPlayer()
             }
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                initializeTelecomConnection(streamVideo, callId!!, trigger)
+            }
             observeCallState(callId!!, streamVideo)
             registerToggleCameraBroadcastReceiver()
         }
         return START_NOT_STICKY
+    }
+
+    @RequiresApi(Build.VERSION_CODES.O)
+    private fun initializeTelecomConnection(
+        streamVideo: StreamVideoImpl, callId: StreamCallId, trigger: String?
+    ) = try {
+        val hasManageCallPermission = ActivityCompat.checkSelfPermission(
+            this, Manifest.permission.MANAGE_OWN_CALLS
+        ) == PackageManager.PERMISSION_GRANTED
+        if (hasManageCallPermission) {
+            val telecomService = this.getSystemService(Context.TELECOM_SERVICE) as? TelecomManager
+            val address = Uri.parse("${this.packageName}://call/${callId.type}/${callId.cid}")
+            when (trigger) {
+                TRIGGER_INCOMING_CALL -> {
+                    telecomService?.addNewIncomingCall(
+                        accountHandle, bundleOf(
+                            TelecomManager.EXTRA_INCOMING_CALL_ADDRESS to address
+                        )
+                    )
+                }
+
+                TRIGGER_OUTGOING_CALL -> {
+                    telecomService?.placeCall(
+                        address,
+                        bundleOf(TelecomManager.EXTRA_PHONE_ACCOUNT_HANDLE to accountHandle)
+                    )
+                }
+
+                else -> {
+                    getConnection()?.setActive()
+                }
+            }
+        } else {
+            logger.w { "Missing Manifest.permission.MANAGE_OWN_CALLS" }
+        }
+    } catch (e: Exception) {
+        logger.e(e) { "Failed to initialize telecom and add call." }
+    }
+
+    private fun getConnection(): Connection? {
+        val streamVideo = StreamVideo.instanceOrNull()
+        val cid = callId
+        return if (streamVideo != null && cid != null) {
+            val call = streamVideo.call(cid.type, cid.id)
+            val callConnection = call.telecomConnection
+            callConnection
+        } else {
+            logger.w { "Missing StreamVideo or call ID, call will not be registered with the platform, no connection returned" }
+            null
+        }
+    }
+
+    override fun onCreateIncomingConnection(
+        connectionManagerPhoneAccount: PhoneAccountHandle?, request: ConnectionRequest?
+    ): Connection? {
+        val connection = getConnection()
+        connection?.setRinging()
+        return connection
+    }
+
+    override fun onCreateOutgoingConnection(
+        connectionManagerPhoneAccount: PhoneAccountHandle?, request: ConnectionRequest?
+    ): Connection? {
+        val connection = getConnection()
+        connection?.setDialing()
+        return connection
     }
 
     private fun updateRingingCall(
@@ -285,6 +395,7 @@ internal class CallService : Service() {
                             stopCallSound() // Stops sound sooner than Active. More responsive.
                         }
                     }
+
                     is RingingState.Outgoing -> {
                         if (!it.acceptedByCallee) {
                             playCallSound(streamVideo.sounds.outgoingCallSound)
@@ -292,16 +403,23 @@ internal class CallService : Service() {
                             stopCallSound() // Stops sound sooner than Active. More responsive.
                         }
                     }
+
                     is RingingState.Active -> { // Handle Active to make it more reliable
                         stopCallSound()
+                        getConnection()?.setActive()
                     }
+
                     is RingingState.RejectedByAll -> {
                         stopCallSound()
                         stopService()
+                        getConnection()?.onDisconnect()
                     }
+
                     is RingingState.TimeoutNoAnswer -> {
                         stopCallSound()
+                        getConnection()?.onDisconnect()
                     }
+
                     else -> {
                         // Do nothing
                     }
@@ -394,9 +512,6 @@ internal class CallService : Service() {
         super.onDestroy()
     }
 
-    // This service does not return a Binder
-    override fun onBind(intent: Intent?): IBinder? = null
-
     // Internal logic
     /**
      * Handle all aspects of stopping the service.
@@ -424,6 +539,7 @@ internal class CallService : Service() {
         // Optionally (no-op if already stopping)
         stopSelf()
     }
+
     private fun registerToggleCameraBroadcastReceiver() {
         if (!isToggleCameraBroadcastReceiverRegistered) {
             try {
