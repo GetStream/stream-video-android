@@ -74,10 +74,13 @@ public open class DefaultNotificationHandler(
 
     override fun onRingingCall(callId: StreamCallId, callDisplayName: String) {
         logger.e { "[onRingingCall] Starting ringing call." }
-        PlatformCallManagement.checkSupport(application.applicationContext,
+        PlatformCallManagement.checkSupport(
+            application.applicationContext,
             supported = {
                 PlatformCallManagement.instance.addCall(
-                    callId, callDisplayName, CallTriggers.TRIGGER_INCOMING_CALL
+                    callId,
+                    callDisplayName,
+                    CallTriggers.TRIGGER_INCOMING_CALL,
                 )
             },
             notSupported = {
@@ -88,7 +91,8 @@ public open class DefaultNotificationHandler(
                     callDisplayName,
                 )
                 ContextCompat.startForegroundService(application.applicationContext, serviceIntent)
-            })
+            },
+        )
     }
 
     override fun getRingingCallNotification(

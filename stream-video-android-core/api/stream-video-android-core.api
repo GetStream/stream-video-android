@@ -4146,6 +4146,27 @@ public final class io/getstream/video/android/core/notifications/internal/receiv
 	public fun onReceive (Landroid/content/Context;Landroid/content/Intent;)V
 }
 
+public final class io/getstream/video/android/core/notifications/internal/service/PlatformCallManagement {
+	public static final field Companion Lio/getstream/video/android/core/notifications/internal/service/PlatformCallManagement$Companion;
+	public static field instance Lio/getstream/video/android/core/notifications/internal/service/PlatformCallManagement;
+	public synthetic fun <init> (Lkotlinx/coroutines/CoroutineScope;Landroidx/core/telecom/CallsManager;Lkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun addCall (Lio/getstream/video/android/model/StreamCallId;Ljava/lang/String;Ljava/lang/String;)V
+	public static synthetic fun addCall$default (Lio/getstream/video/android/core/notifications/internal/service/PlatformCallManagement;Lio/getstream/video/android/model/StreamCallId;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)V
+	public final fun answerCall (Lio/getstream/video/android/model/StreamCallId;)V
+	public final fun endAll ()V
+	public final fun endCall (Lio/getstream/video/android/model/StreamCallId;)V
+	public final fun rejectCall (Lio/getstream/video/android/model/StreamCallId;)V
+}
+
+public final class io/getstream/video/android/core/notifications/internal/service/PlatformCallManagement$Companion {
+	public final fun checkSupport (Landroid/content/Context;Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function0;)V
+	public final fun getInstance ()Lio/getstream/video/android/core/notifications/internal/service/PlatformCallManagement;
+	public final fun initialize (Landroid/content/Context;Lkotlinx/coroutines/CoroutineScope;)V
+	public static synthetic fun initialize$default (Lio/getstream/video/android/core/notifications/internal/service/PlatformCallManagement$Companion;Landroid/content/Context;Lkotlinx/coroutines/CoroutineScope;ILjava/lang/Object;)V
+	public final fun isSupported (Landroid/content/Context;)Z
+	public final fun setInstance (Lio/getstream/video/android/core/notifications/internal/service/PlatformCallManagement;)V
+}
+
 public final class io/getstream/video/android/core/permission/PermissionRequest {
 	public fun <init> (Lio/getstream/video/android/core/Call;Lio/getstream/video/android/model/User;Lorg/threeten/bp/OffsetDateTime;Ljava/util/List;Lorg/threeten/bp/OffsetDateTime;Lorg/threeten/bp/OffsetDateTime;)V
 	public synthetic fun <init> (Lio/getstream/video/android/core/Call;Lio/getstream/video/android/model/User;Lorg/threeten/bp/OffsetDateTime;Ljava/util/List;Lorg/threeten/bp/OffsetDateTime;Lorg/threeten/bp/OffsetDateTime;ILkotlin/jvm/internal/DefaultConstructorMarker;)V

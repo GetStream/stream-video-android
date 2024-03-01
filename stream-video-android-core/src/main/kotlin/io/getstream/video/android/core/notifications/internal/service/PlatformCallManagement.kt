@@ -47,7 +47,8 @@ import kotlin.contracts.contract
 
 class PlatformCallManagement
 private constructor(
-    private val scope: CoroutineScope, private val callManager: CallsManager
+    private val scope: CoroutineScope,
+    private val callManager: CallsManager,
 ) {
     companion object {
         private val logger by taggedLogger("PlatformCallManagement")
@@ -79,11 +80,12 @@ private constructor(
 
         @OptIn(ExperimentalContracts::class)
         fun isSupported(
-            context: Context
+            context: Context,
         ): Boolean = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             // For Android 14+, check the TELECOM feature directly.
             context.packageManager.hasSystemFeature(PackageManager.FEATURE_TELECOM)
-        } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {/*
+        } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            /*
                 For API 26+ presume that the FEATURE_TELECOM feature is available if the device supports SIM.
                 To check for SIM availability we check if the device is SIM capable
                 instead of using TelephonyManager.getSimState(slot) to see if there is actual sim,
@@ -91,9 +93,9 @@ private constructor(
 
                 According to the docs, most devices with SIM card have telecom implementation.
                 https://developer.android.com/develop/connectivity/telecom/voip-app#supported_telecom_device
-                */
+             */
             context.packageManager.hasSystemFeature(PackageManager.FEATURE_TELEPHONY) && context.packageManager.hasSystemFeature(
-                PackageManager.FEATURE_TELEPHONY_GSM
+                PackageManager.FEATURE_TELEPHONY_GSM,
             )
         } else {
             false
@@ -104,10 +106,13 @@ private constructor(
          * Create an instance of [PlatformCallManagement] to manage the current call.
          */
         @RequiresApi(Build.VERSION_CODES.O)
-        fun initialize(context: Context, scope: CoroutineScope = CoroutineScope(Dispatchers.Default)) {
+        fun initialize(
+            context: Context,
+            scope: CoroutineScope = CoroutineScope(Dispatchers.Default),
+        ) {
             logger.e { "[telecom] Initializing..." }
             instance = PlatformCallManagement(
-                scope = scope, callManager = CallsManager(context)
+                scope = scope, callManager = CallsManager(context),
             )
         }
     }
@@ -149,7 +154,9 @@ private constructor(
 
     @RequiresApi(Build.VERSION_CODES.O)
     fun addCall(
-        callId: StreamCallId, displayName: String = callId.id, @CallTrigger trigger: String
+        callId: StreamCallId,
+        displayName: String = callId.id,
+        @CallTrigger trigger: String,
     ) {
         scope.launch {
             val call = StreamVideo.instanceOrNull()?.call(callId.type, callId.id)

@@ -81,7 +81,6 @@ class ClientState(client: StreamVideo) {
     internal val clientImpl = client as StreamVideoImpl
 
     init {
-
     }
 
     /**
@@ -137,11 +136,12 @@ class ClientState(client: StreamVideo) {
     private fun maybeStartForegroundService(call: Call, trigger: String) {
         if (clientImpl.runForegroundService) {
             val context = clientImpl.context
-            PlatformCallManagement.checkSupport(context,
+            PlatformCallManagement.checkSupport(
+                context,
                 supported = {
                     PlatformCallManagement.instance.addCall(
                         callId = StreamCallId.fromCallCid(call.cid),
-                        trigger = trigger
+                        trigger = trigger,
                     )
                 },
                 notSupported = {
@@ -151,7 +151,7 @@ class ClientState(client: StreamVideo) {
                         trigger,
                     )
                     ContextCompat.startForegroundService(context, serviceIntent)
-                }
+                },
             )
         }
     }
@@ -159,16 +159,16 @@ class ClientState(client: StreamVideo) {
     private fun maybeStopForegroundService() {
         if (clientImpl.runForegroundService) {
             val context = clientImpl.context
-            PlatformCallManagement.checkSupport(context,
+            PlatformCallManagement.checkSupport(
+                context,
                 supported = {
                     PlatformCallManagement.instance.endAll()
                 },
                 notSupported = {
                     val serviceIntent = CallService.buildStopIntent(context)
                     context.stopService(serviceIntent)
-                }
+                },
             )
-
         }
     }
 }

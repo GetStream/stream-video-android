@@ -501,15 +501,15 @@ private fun JoinCallForm(
                 .fillMaxHeight()
                 .testTag("join_call"),
             onClick = {
-               val intent =  DirectCallActivity.createIntent(
+                val intent = DirectCallActivity.createIntent(
                     context,
                     callId = UUID.randomUUID().toString(),
                     members = listOf(
-                        "aleksandarapostolovgetstreamio"
-                    )
+                        "aleksandarapostolovgetstreamio",
+                    ),
                 )
                 context.startActivity(intent)
-                //joinCall(callId.text)
+                // joinCall(callId.text)
             },
             text = stringResource(id = R.string.join_call),
         )
