@@ -78,7 +78,7 @@ private fun IncomingCallOptionsPreview() {
     VideoTheme {
         Column {
             IncomingCallControls(
-                isVideoCall = true,
+                isVideoCall = false,
                 isCameraEnabled = true,
                 onCallAction = { },
             )
