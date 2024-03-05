@@ -126,9 +126,7 @@ public fun IncomingCallContent(
     onBackPressed: () -> Unit = {},
     onCallAction: (CallAction) -> Unit = {},
 ) {
-    CallBackground(
-        modifier = modifier.padding(VideoTheme.dimens.spacingXl),
-    ) {
+    CallBackground {
         Column {
             if (isShowingHeader) {
                 headerContent?.invoke(this)
