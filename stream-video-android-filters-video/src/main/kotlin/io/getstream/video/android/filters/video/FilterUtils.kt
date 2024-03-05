@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-package io.getstream.video.android.util.filters
+package io.getstream.video.android.filters.video
 
 import android.graphics.Bitmap
 import android.graphics.Matrix
 import com.google.mlkit.vision.segmentation.SegmentationMask
 
-fun copySegment(
+public fun copySegment(
     segment: Segment,
     source: Bitmap,
     destination: Bitmap,
@@ -62,7 +62,7 @@ fun copySegment(
     )
 }
 
-enum class Segment {
+public enum class Segment {
     FOREGROUND, BACKGROUND
 }
 
@@ -73,7 +73,7 @@ private fun Float.isBackground() = this <= BACKGROUND_UPPER_CONFIDENCE
 
 private const val BACKGROUND_UPPER_CONFIDENCE = 0.999 // 1 is max confidence that pixel is in the foreground
 
-fun newSegmentationMaskMatrix(bitmap: Bitmap, mask: SegmentationMask): Matrix {
+public fun newSegmentationMaskMatrix(bitmap: Bitmap, mask: SegmentationMask): Matrix {
     val isRawSizeMaskEnabled = mask.width != bitmap.width || mask.height != bitmap.height
     return if (!isRawSizeMaskEnabled) {
         Matrix()

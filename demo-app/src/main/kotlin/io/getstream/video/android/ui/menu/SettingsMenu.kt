@@ -51,12 +51,12 @@ import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.call.audio.AudioFilter
 import io.getstream.video.android.core.mapper.ReactionMapper
+import io.getstream.video.android.filters.video.BlurredBackgroundVideoFilter
 import io.getstream.video.android.tooling.extensions.toPx
 import io.getstream.video.android.ui.call.ReactionsMenu
 import io.getstream.video.android.ui.menu.base.ActionMenuItem
 import io.getstream.video.android.ui.menu.base.DynamicMenu
 import io.getstream.video.android.ui.menu.base.MenuItem
-import io.getstream.video.android.util.filters.BlurredBackgroundVideoFilter
 import io.getstream.video.android.util.filters.SampleAudioFilter
 import kotlinx.coroutines.launch
 import java.nio.ByteBuffer
