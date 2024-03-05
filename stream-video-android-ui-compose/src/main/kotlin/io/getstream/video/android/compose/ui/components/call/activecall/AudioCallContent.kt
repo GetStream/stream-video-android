@@ -131,6 +131,6 @@ private fun AudioCallPreview() {
     val context = LocalContext.current
     StreamPreviewDataUtils.initializeStreamVideo(context)
     VideoTheme {
-        AudioCallContent(call = previewCall, isMicrophoneEnabled = false)
+        AudioCallContent(call = previewCall, isMicrophoneEnabled = false, durationPlaceholder = "11:45")
     }
 }
