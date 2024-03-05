@@ -60,6 +60,7 @@ public class BlurredBackgroundVideoFilter(
             source = videoFrameBitmap,
             destination = backgroundBitmap,
             segmentationMask = segmentationMask,
+            confidenceThreshold = FOREGROUND_THRESHOLD,
         )
 
         // 3. Blur the background bitmap

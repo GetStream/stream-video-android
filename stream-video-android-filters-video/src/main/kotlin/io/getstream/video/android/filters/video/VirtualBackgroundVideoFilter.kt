@@ -71,6 +71,7 @@ public class VirtualBackgroundVideoFilter(
             source = videoFrameBitmap,
             destination = foregroundBitmap,
             segmentationMask = segmentationMask,
+            confidenceThreshold = FOREGROUND_THRESHOLD,
         )
 
         val videoFrameCanvas = Canvas(videoFrameBitmap)
@@ -127,3 +128,5 @@ public class VirtualBackgroundVideoFilter(
         }
     }
 }
+
+private const val FOREGROUND_THRESHOLD: Double = 0.7 // 1 is max confidence that pixel is in the foreground

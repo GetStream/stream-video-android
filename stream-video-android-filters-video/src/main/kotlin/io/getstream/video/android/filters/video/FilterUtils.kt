@@ -25,6 +25,7 @@ public fun copySegment(
     source: Bitmap,
     destination: Bitmap,
     segmentationMask: SegmentationMask,
+    confidenceThreshold: Double,
 ) {
     val scaleBetweenSourceAndMask = getScalingFactors(
         widths = Pair(source.width, segmentationMask.width),
@@ -41,8 +42,8 @@ public fun copySegment(
         for (x in 0 until segmentationMask.width) {
             val confidence = segmentationMask.buffer.float
 
-            if (((segment == Segment.BACKGROUND) && confidence.isBackground()) ||
-                ((segment == Segment.FOREGROUND) && !confidence.isBackground())
+            if (((segment == Segment.BACKGROUND) && confidence < confidenceThreshold) ||
+                ((segment == Segment.FOREGROUND) && confidence >= confidenceThreshold)
             ) {
                 val scaledX = (x * scaleBetweenSourceAndMask.first).toInt()
                 val scaledY = (y * scaleBetweenSourceAndMask.second).toInt()
@@ -68,10 +69,6 @@ public enum class Segment {
 
 private fun getScalingFactors(widths: Pair<Int, Int>, heights: Pair<Int, Int>) =
     Pair(widths.first.toFloat() / widths.second, heights.first.toFloat() / heights.second)
-
-private fun Float.isBackground() = this <= BACKGROUND_UPPER_CONFIDENCE
-
-private const val BACKGROUND_UPPER_CONFIDENCE = 0.999 // 1 is max confidence that pixel is in the foreground
 
 public fun newSegmentationMaskMatrix(bitmap: Bitmap, mask: SegmentationMask): Matrix {
     val isRawSizeMaskEnabled = mask.width != bitmap.width || mask.height != bitmap.height
