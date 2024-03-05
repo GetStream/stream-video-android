@@ -72,7 +72,6 @@ playAuth = "20.7.0"
 playAppUpdate = "2.1.0"
 
 hilt = "2.50"
-desugar = "2.0.4"
 leakCanary = "2.12"
 binaryCompatabilityValidator = "0.14.0"
 playPublisher = "3.8.4"
@@ -114,7 +113,6 @@ compose-stable-marker = { group = "com.github.skydoves", name = "compose-stable-
 
 coil = { group = "io.coil-kt", name = "coil", version.ref = "coil" }
 coil-compose = { group = "io.coil-kt", name = "coil-compose", version.ref = "coil" }
-desugar = { group = "com.android.tools", name = "desugar_jdk_libs", version.ref = "desugar" }
 
 landscapist-coil = { group = "com.github.skydoves", name = "landscapist-coil", version.ref = "landscapist" }
 landscapist-animation = { group = "com.github.skydoves", name = "landscapist-animation", version.ref = "landscapist" }
