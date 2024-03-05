@@ -29,7 +29,9 @@ import io.getstream.video.android.core.call.video.BitmapVideoFilter
 /**
  * Applies a blur effect to the background of a video frame.
  */
-public class BlurredBackgroundVideoFilter : BitmapVideoFilter() {
+public class BlurredBackgroundVideoFilter(
+    private val blurIntensity: BlurIntensity = BlurIntensity.MEDIUM,
+) : BitmapVideoFilter() {
     private val options =
         SelfieSegmenterOptions.Builder()
             .setDetectorMode(SelfieSegmenterOptions.STREAM_MODE)
@@ -61,7 +63,7 @@ public class BlurredBackgroundVideoFilter : BitmapVideoFilter() {
         )
 
         // 3. Blur the background bitmap
-        val blurredBackgroundBitmap = Toolkit.blur(backgroundBitmap, BLUR_RADIUS.toInt())
+        val blurredBackgroundBitmap = Toolkit.blur(backgroundBitmap, blurIntensity.radius)
 
         // 4. Draw the blurred background bitmap on the original bitmap
         val canvas = Canvas(videoFrameBitmap)
@@ -70,4 +72,10 @@ public class BlurredBackgroundVideoFilter : BitmapVideoFilter() {
     }
 }
 
-private const val BLUR_RADIUS = 10f // Set the radius of the Blur. Supported range 0 < radius <= 25
+public enum class BlurIntensity(public val radius: Int) {
+    LIGHT(7),
+    MEDIUM(11),
+    HEAVY(16),
+}
+
+private const val FOREGROUND_THRESHOLD: Double = 0.99999 // 1 is max confidence that pixel is in the foreground
