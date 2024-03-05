@@ -27,7 +27,9 @@ import com.google.mlkit.vision.segmentation.selfie.SelfieSegmenterOptions
 import io.getstream.video.android.core.call.video.BitmapVideoFilter
 
 /**
- * Applies a blur effect to the background of a video frame.
+ * Applies a blur effect to the background of a video call.
+ *
+ * @param blurIntensity The intensity of the blur effect. See [BlurIntensity] for options. Defaults to [BlurIntensity.MEDIUM].
  */
 public class BlurredBackgroundVideoFilter(
     private val blurIntensity: BlurIntensity = BlurIntensity.MEDIUM,
@@ -73,6 +75,9 @@ public class BlurredBackgroundVideoFilter(
     }
 }
 
+/**
+ * The intensity of the blur effect. Used in [BlurredBackgroundVideoFilter].
+ */
 public enum class BlurIntensity(public val radius: Int) {
     LIGHT(7),
     MEDIUM(11),

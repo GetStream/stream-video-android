@@ -32,7 +32,10 @@ import com.google.mlkit.vision.segmentation.selfie.SelfieSegmenterOptions
 import io.getstream.video.android.core.call.video.BitmapVideoFilter
 
 /**
- * Applies a virtual background to a video frame.
+ * Applies a virtual background (custom image) to a video call.
+ *
+ * @param context Context used to access resources.
+ * @param backgroundImage The drawable resource ID of the custom background image.
  */
 public class VirtualBackgroundVideoFilter(
     private val context: Context,

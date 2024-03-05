@@ -20,7 +20,7 @@ import android.graphics.Bitmap
 import android.graphics.Matrix
 import com.google.mlkit.vision.segmentation.SegmentationMask
 
-public fun copySegment(
+internal fun copySegment(
     segment: Segment,
     source: Bitmap,
     destination: Bitmap,
@@ -63,14 +63,14 @@ public fun copySegment(
     )
 }
 
-public enum class Segment {
+internal enum class Segment {
     FOREGROUND, BACKGROUND
 }
 
 private fun getScalingFactors(widths: Pair<Int, Int>, heights: Pair<Int, Int>) =
     Pair(widths.first.toFloat() / widths.second, heights.first.toFloat() / heights.second)
 
-public fun newSegmentationMaskMatrix(bitmap: Bitmap, mask: SegmentationMask): Matrix {
+internal fun newSegmentationMaskMatrix(bitmap: Bitmap, mask: SegmentationMask): Matrix {
     val isRawSizeMaskEnabled = mask.width != bitmap.width || mask.height != bitmap.height
     return if (!isRawSizeMaskEnabled) {
         Matrix()

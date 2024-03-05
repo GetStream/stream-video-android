@@ -1,19 +1,18 @@
+public final class io/getstream/video/android/filters/video/BlurIntensity : java/lang/Enum {
+	public static final field HEAVY Lio/getstream/video/android/filters/video/BlurIntensity;
+	public static final field LIGHT Lio/getstream/video/android/filters/video/BlurIntensity;
+	public static final field MEDIUM Lio/getstream/video/android/filters/video/BlurIntensity;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
+	public final fun getRadius ()I
+	public static fun valueOf (Ljava/lang/String;)Lio/getstream/video/android/filters/video/BlurIntensity;
+	public static fun values ()[Lio/getstream/video/android/filters/video/BlurIntensity;
+}
+
 public final class io/getstream/video/android/filters/video/BlurredBackgroundVideoFilter : io/getstream/video/android/core/call/video/BitmapVideoFilter {
 	public fun <init> ()V
+	public fun <init> (Lio/getstream/video/android/filters/video/BlurIntensity;)V
+	public synthetic fun <init> (Lio/getstream/video/android/filters/video/BlurIntensity;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public fun filter (Landroid/graphics/Bitmap;)V
-}
-
-public final class io/getstream/video/android/filters/video/FilterUtilsKt {
-	public static final fun copySegment (Lio/getstream/video/android/filters/video/Segment;Landroid/graphics/Bitmap;Landroid/graphics/Bitmap;Lcom/google/mlkit/vision/segmentation/SegmentationMask;)V
-	public static final fun newSegmentationMaskMatrix (Landroid/graphics/Bitmap;Lcom/google/mlkit/vision/segmentation/SegmentationMask;)Landroid/graphics/Matrix;
-}
-
-public final class io/getstream/video/android/filters/video/Segment : java/lang/Enum {
-	public static final field BACKGROUND Lio/getstream/video/android/filters/video/Segment;
-	public static final field FOREGROUND Lio/getstream/video/android/filters/video/Segment;
-	public static fun getEntries ()Lkotlin/enums/EnumEntries;
-	public static fun valueOf (Ljava/lang/String;)Lio/getstream/video/android/filters/video/Segment;
-	public static fun values ()[Lio/getstream/video/android/filters/video/Segment;
 }
 
 public final class io/getstream/video/android/filters/video/VirtualBackgroundVideoFilter : io/getstream/video/android/core/call/video/BitmapVideoFilter {
