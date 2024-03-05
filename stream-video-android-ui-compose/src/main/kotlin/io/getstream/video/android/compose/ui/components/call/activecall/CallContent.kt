@@ -35,7 +35,6 @@ import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.material.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -45,7 +44,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.IntSize
@@ -60,6 +58,7 @@ import io.getstream.video.android.compose.pip.enterPictureInPicture
 import io.getstream.video.android.compose.pip.isInPictureInPictureMode
 import io.getstream.video.android.compose.theme.base.VideoTheme
 import io.getstream.video.android.compose.ui.components.call.CallAppBar
+import io.getstream.video.android.compose.ui.components.call.activecall.internal.DefaultPermissionHandler
 import io.getstream.video.android.compose.ui.components.call.controls.ControlActions
 import io.getstream.video.android.compose.ui.components.call.controls.actions.DefaultOnCallActionHandler
 import io.getstream.video.android.compose.ui.components.call.diagnostics.CallDiagnosticsContent
@@ -272,17 +271,6 @@ internal fun DefaultPictureInPictureContent(call: Call) {
                 style = RegularVideoRendererStyle(labelPosition = Alignment.BottomStart),
             )
         }
-    }
-}
-
-@Composable
-private fun DefaultPermissionHandler(
-    videoPermission: VideoPermissionsState,
-) {
-    if (LocalInspectionMode.current) return
-
-    LaunchedEffect(key1 = videoPermission) {
-        videoPermission.launchPermissionRequest()
     }
 }
 
