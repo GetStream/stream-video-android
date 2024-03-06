@@ -60,7 +60,7 @@ fun TimeLabel(
                 .size(28.dp)
                 .padding(start = 12.dp),
             imageVector = Icons.Default.CheckCircle,
-            tint = VideoTheme.colors.infoAccent,
+            tint = VideoTheme.colors.basePrimary,
             contentDescription = null,
         )
 

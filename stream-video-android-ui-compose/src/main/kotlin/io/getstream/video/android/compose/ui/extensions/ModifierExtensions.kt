@@ -24,25 +24,6 @@ import androidx.compose.ui.platform.debugInspectorInfo
 import androidx.compose.ui.unit.Dp
 import io.getstream.video.android.compose.theme.VideoTheme
 
-/**
- * Toggle alpha.
- * Based on the [isEnabled] parameter the alpha value will be chosen from the theme.
- *
- * @param isEnabled if view is enabled
- */
-internal fun Modifier.toggleAlpha(isEnabled: Boolean): Modifier = composed(
-    inspectorInfo = debugInspectorInfo {
-        name = "toggleAlpha"
-        properties["isEnabled"] = isEnabled
-    },
-) {
-    val alpha = if (isEnabled) {
-        VideoTheme.dimens.buttonToggleOnAlpha
-    } else {
-        VideoTheme.dimens.buttonToggleOffAlpha
-    }
-    alpha(alpha)
-}
 
 /**
  * Add padding to the modifier based on the index and its relative position in the list.
