@@ -172,7 +172,7 @@ class ReconnectTest : IntegrationTestBase(connectCoordinatorWS = false) {
         // connect to the new socket
         // do an ice restart
         call.session?.let {
-            it.switchSfu(it.sfuUrl, it.sfuToken, it.sfuToken, it.remoteIceServers)
+            it.switchSfu(it.sfuUrl, it.sfuToken, it.sfuToken, it.remoteIceServers, {})
         }
 
         // assert the publisher is still connected
