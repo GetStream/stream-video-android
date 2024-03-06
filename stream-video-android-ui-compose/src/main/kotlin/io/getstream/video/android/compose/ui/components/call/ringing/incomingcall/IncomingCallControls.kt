@@ -27,7 +27,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import io.getstream.video.android.compose.theme.base.VideoTheme
+import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.call.controls.actions.AcceptCallAction
 import io.getstream.video.android.compose.ui.components.call.controls.actions.DeclineCallAction
 import io.getstream.video.android.compose.ui.components.call.controls.actions.ToggleCameraAction

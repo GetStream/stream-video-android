@@ -113,10 +113,10 @@ private fun LiveHostContent(call: Call) {
     Scaffold(
         modifier = Modifier
             .fillMaxSize()
-            .background(VideoTheme.colors.appBackground)
+            .background(VideoTheme.colors.baseSheetPrimary)
             .padding(6.dp),
-        contentColor = VideoTheme.colors.appBackground,
-        backgroundColor = VideoTheme.colors.appBackground,
+        contentColor = VideoTheme.colors.baseSheetPrimary,
+        backgroundColor = VideoTheme.colors.baseSheetPrimary,
         topBar = {
             if (connection == RealtimeConnection.Connected) {
                 if (!backstage) {
@@ -129,7 +129,7 @@ private fun LiveHostContent(call: Call) {
                             modifier = Modifier
                                 .align(Alignment.CenterEnd)
                                 .background(
-                                    color = VideoTheme.colors.primaryAccent,
+                                    color = VideoTheme.colors.brandPrimary,
                                     shape = RoundedCornerShape(6.dp),
                                 )
                                 .padding(horizontal = 12.dp, vertical = 4.dp),
@@ -140,27 +140,27 @@ private fun LiveHostContent(call: Call) {
                         Text(
                             modifier = Modifier.align(Alignment.Center),
                             text = "Live for $duration",
-                            color = VideoTheme.colors.textHighEmphasis,
+                            color = VideoTheme.colors.basePrimary,
                         )
                     }
                 } else {
                     Text(
                         text = "Backstage",
-                        color = VideoTheme.colors.textHighEmphasis,
+                        color = VideoTheme.colors.basePrimary,
                     )
                 }
             } else if (connection is RealtimeConnection.Failed) {
                 Text(
                     text = "Connection failed",
-                    color = VideoTheme.colors.textHighEmphasis,
+                    color = VideoTheme.colors.basePrimary,
                 )
             }
         },
         bottomBar = {
             Button(
                 colors = ButtonDefaults.buttonColors(
-                    contentColor = VideoTheme.colors.primaryAccent,
-                    backgroundColor = VideoTheme.colors.primaryAccent,
+                    contentColor = VideoTheme.colors.brandPrimary,
+                    backgroundColor = VideoTheme.colors.brandPrimary,
                 ),
                 onClick = {
                     scope.launch {

@@ -42,7 +42,7 @@ fun LiveLabel(
     Row(modifier = modifier.clip(RoundedCornerShape(6.dp))) {
         Text(
             modifier = Modifier
-                .background(VideoTheme.colors.primaryAccent)
+                .background(VideoTheme.colors.brandPrimary)
                 .padding(vertical = 3.dp, horizontal = 12.dp),
             text = "Live",
             color = Color.White,

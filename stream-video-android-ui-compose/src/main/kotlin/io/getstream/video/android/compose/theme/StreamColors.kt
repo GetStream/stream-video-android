@@ -17,229 +17,99 @@
 package io.getstream.video.android.compose.theme
 
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.Immutable
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.colorResource
 import io.getstream.video.android.ui.common.R
 
-/**
- * Contains all the colors in our palette. Each color is used for various things an can be changed to
- * customize the app design style.
- * @param textHighEmphasis Used for main text and active icon status.
- * @param textLowEmphasis Used for secondary text, default icon state, deleted messages text and datestamp background.
- * @param disabled Used for disabled icons and empty states.
- * @param borders Used for borders, the background of self messages, selected items, pressed state, button dividers.
- * @param inputBackground Used for the input background, deleted messages, section headings.
- * @param appBackground Used for the default app background and channel list item background.
- * @param barsBackground Used for button text, top and bottom bar background and other user messages.
- * @param linkBackground Used for the message link card background.
- * @param overlay Used for general overlays and background when opening modals.
- * @param overlayDark Used for the date separator background color.
- * @param primaryAccent Used for selected icon state, call to actions, white buttons text and links.
- * @param errorAccent Used for error text labels, notification badges and disruptive action text and icons.
- * @param infoAccent Used for the online status.
- * @param highlight Used for message highlights.
- */
-@Immutable
 public data class StreamColors(
-    public val textHighEmphasis: Color,
-    public val textLowEmphasis: Color,
-    public val disabled: Color,
-    public val borders: Color,
-    public val inputBackground: Color,
-    public val appBackground: Color,
-    public val barsBackground: Color,
-    public val linkBackground: Color,
-    public val overlay: Color,
-    public val overlayDark: Color,
-    public val primaryAccent: Color,
-    public val errorAccent: Color,
-    public val infoAccent: Color,
-    public val highlight: Color,
-    public val screenSharingBackground: Color,
-    public val screenSharingTooltipBackground: Color,
-    public val screenSharingTooltipContent: Color,
-    public val avatarInitials: Color,
-    public val activatedVolumeIndicator: Color,
-    public val deActivatedVolumeIndicator: Color,
-    public val connectionQualityBackground: Color,
-    public val connectionQualityBar: Color,
-    public val connectionQualityBarFilled: Color,
-    public val connectionQualityBarFilledPoor: Color,
-    public val participantLabelBackground: Color,
-    public val infoMenuOverlayColor: Color,
-    public val callFocusedBorder: Color,
-    public val callGradientStart: Color,
-    public val callGradientEnd: Color,
-    public val callDescription: Color,
-    public val callActionIconEnabledBackground: Color,
-    public val callActionIconDisabledBackground: Color,
-    public val callActionIconEnabled: Color,
-    public val callActionIconDisabled: Color,
-    public val callLobbyBackground: Color,
-    public val audioLeaveButton: Color,
-    public val audioActionColor: Color,
-    public val liveIndicator: Color,
-    public val audioIndicatorBackground: Color,
-    public val avatarBorderColor: Color,
-    public val participantContainerBackground: Color,
+    val brandPrimary: Color,
+    val brandPrimaryLt: Color,
+    val brandPrimaryDk: Color,
+    val brandSecondary: Color,
+    val brandSecondaryTransparent: Color,
+    val brandCyan: Color,
+    val brandGreen: Color,
+    val brandYellow: Color,
+    val brandRed: Color,
+    val brandRedLt: Color,
+    val brandRedDk: Color,
+    val brandMaroon: Color,
+    val brandViolet: Color,
+    val basePrimary: Color,
+    val baseSecondary: Color,
+    val baseTertiary: Color,
+    val baseQuaternary: Color,
+    val baseQuinary: Color,
+    val baseSenary: Color,
+    val baseSheetPrimary: Color,
+    val baseSheetSecondary: Color,
+    val baseSheetTertiary: Color,
+    val baseSheetQuarternary: Color,
+    val buttonPrimaryDefault: Color,
+    val buttonPrimaryPressed: Color,
+    val buttonPrimaryDisabled: Color,
+    val buttonBrandDefault: Color,
+    val buttonBrandPressed: Color,
+    val buttonBrandDisabled: Color,
+    val buttonAlertDefault: Color,
+    val buttonAlertPressed: Color,
+    val buttonAlertDisabled: Color,
+    val iconDefault: Color,
+    val iconPressed: Color,
+    val iconActive: Color,
+    val iconAlert: Color,
+    val iconDisabled: Color,
+    val alertSuccess: Color,
+    val alertCaution: Color,
+    val alertWarning: Color,
 ) {
-
     public companion object {
-        /**
-         * Provides the default colors for the light mode of the app.
-         *
-         * @return A [StreamColors] instance holding our color palette.
-         */
         @Composable
         public fun defaultColors(): StreamColors = StreamColors(
-            textHighEmphasis = colorResource(R.color.stream_video_text_high_emphasis),
-            textLowEmphasis = colorResource(R.color.stream_video_text_low_emphasis),
-            disabled = colorResource(R.color.stream_video_disabled),
-            borders = colorResource(R.color.stream_video_borders),
-            inputBackground = colorResource(R.color.stream_video_input_background),
-            appBackground = colorResource(R.color.stream_video_app_background),
-            barsBackground = colorResource(R.color.stream_video_bars_background),
-            linkBackground = colorResource(R.color.stream_video_link_background),
-            overlay = colorResource(R.color.stream_video_overlay_regular),
-            overlayDark = colorResource(R.color.stream_video_overlay_dark),
-            primaryAccent = colorResource(R.color.stream_video_primary_accent),
-            errorAccent = colorResource(R.color.stream_video_error_accent),
-            infoAccent = colorResource(R.color.stream_video_info_accent),
-            highlight = colorResource(R.color.stream_video_highlight),
-            screenSharingBackground = colorResource(
-                R.color.stream_video_participant_container_background,
+            brandPrimary = colorResource(id = R.color.stream_video_brand_primary),
+            brandPrimaryLt = colorResource(id = R.color.stream_video_brand_primary_lt),
+            brandPrimaryDk = colorResource(id = R.color.stream_video_brand_primary_dk),
+            brandSecondary = colorResource(id = R.color.stream_video_brand_secondary),
+            brandSecondaryTransparent = colorResource(
+                id = R.color.stream_video_brand_secondary_transparent,
             ),
-            screenSharingTooltipBackground = colorResource(
-                R.color.stream_video_screen_sharing_tooltip_background,
+            brandCyan = colorResource(id = R.color.stream_video_brand_cyan),
+            brandGreen = colorResource(id = R.color.stream_video_brand_green),
+            brandYellow = colorResource(id = R.color.stream_video_brand_yellow),
+            brandRed = colorResource(id = R.color.stream_video_brand_red),
+            brandRedLt = colorResource(id = R.color.stream_video_brand_red_lt),
+            brandRedDk = colorResource(id = R.color.stream_video_brand_red_dk),
+            brandMaroon = colorResource(id = R.color.stream_video_brand_maroon),
+            brandViolet = colorResource(id = R.color.stream_video_brand_violet),
+            basePrimary = colorResource(id = R.color.stream_video_base_primary),
+            baseSecondary = colorResource(id = R.color.stream_video_base_secondary),
+            baseTertiary = colorResource(id = R.color.stream_video_base_tetriary),
+            baseQuaternary = colorResource(id = R.color.stream_video_base_quaternary),
+            baseQuinary = colorResource(id = R.color.stream_video_base_quinary),
+            baseSenary = colorResource(id = R.color.stream_video_base_senary),
+            baseSheetPrimary = colorResource(id = R.color.stream_video_base_sheet_primary),
+            baseSheetSecondary = colorResource(id = R.color.stream_video_base_sheet_secondary),
+            baseSheetTertiary = colorResource(id = R.color.stream_video_base_sheet_tetriary),
+            baseSheetQuarternary = colorResource(id = R.color.stream_video_base_sheet_quaternary),
+            buttonPrimaryDefault = colorResource(id = R.color.stream_video_button_primary_default),
+            buttonPrimaryPressed = colorResource(id = R.color.stream_video_button_primary_pressed),
+            buttonPrimaryDisabled = colorResource(
+                id = R.color.stream_video_button_primary_disabled,
             ),
-            screenSharingTooltipContent = colorResource(
-                id = R.color.stream_video_screen_sharing_tooltip_content,
-            ),
-            avatarInitials = colorResource(id = R.color.stream_video_text_avatar_initials),
-            activatedVolumeIndicator = colorResource(id = R.color.stream_video_primary_accent),
-            deActivatedVolumeIndicator = colorResource(
-                id = R.color.stream_video_deactivated_volume_indicator,
-            ),
-            connectionQualityBackground = colorResource(
-                id = R.color.stream_video_connection_quality_background,
-            ),
-            connectionQualityBar = colorResource(
-                id = R.color.stream_video_connection_indicator_good,
-            ),
-            connectionQualityBarFilled = colorResource(
-                id = R.color.stream_video_connection_indicator_great,
-            ),
-            connectionQualityBarFilledPoor = colorResource(
-                id = R.color.stream_video_connection_indicator_poor,
-            ),
-            participantLabelBackground = colorResource(
-                id = R.color.stream_video_participant_label_background,
-            ),
-            infoMenuOverlayColor = Color.LightGray.copy(alpha = 0.7f),
-            callFocusedBorder = colorResource(id = R.color.stream_video_focused_border_color),
-            callGradientStart = colorResource(id = R.color.stream_video_call_gradient_start),
-            callGradientEnd = colorResource(id = R.color.stream_video_call_gradient_end),
-            callDescription = colorResource(id = R.color.stream_video_call_description),
-            callActionIconEnabledBackground = colorResource(
-                id = R.color.stream_video_action_icon_enabled_background,
-            ),
-            callActionIconDisabledBackground = colorResource(
-                id = R.color.stream_video_action_icon_disabled_background,
-            ),
-            callActionIconEnabled = colorResource(id = R.color.stream_video_action_icon_enabled),
-            callActionIconDisabled = colorResource(id = R.color.stream_video_action_icon_disabled),
-            callLobbyBackground = colorResource(id = R.color.stream_video_lobby_background),
-            audioLeaveButton = colorResource(id = R.color.stream_video_audio_leave),
-            audioActionColor = colorResource(id = R.color.stream_video_audio_room_actions),
-            liveIndicator = colorResource(id = R.color.stream_video_live_indicator),
-            audioIndicatorBackground = colorResource(
-                id = R.color.stream_video_volume_indicator_background,
-            ),
-            avatarBorderColor = colorResource(id = R.color.stream_video_avatar_border_color),
-            participantContainerBackground = colorResource(
-                id = R.color.stream_video_participant_container_background,
-            ),
-        )
-
-        /**
-         * Provides the default colors for the dark mode of the app.
-         *
-         * @return A [StreamColors] instance holding our color palette.
-         */
-        @Composable
-        public fun defaultDarkColors(): StreamColors = StreamColors(
-            textHighEmphasis = colorResource(R.color.stream_video_text_high_emphasis_dark),
-            textLowEmphasis = colorResource(R.color.stream_video_text_low_emphasis_dark),
-            disabled = colorResource(R.color.stream_video_disabled_dark),
-            borders = colorResource(R.color.stream_video_borders_dark),
-            inputBackground = colorResource(R.color.stream_video_input_background_dark),
-            appBackground = colorResource(R.color.stream_video_app_background_dark),
-            barsBackground = colorResource(R.color.stream_video_bars_background_dark),
-            linkBackground = colorResource(R.color.stream_video_link_background_dark),
-            overlay = colorResource(R.color.stream_video_overlay_regular_dark),
-            overlayDark = colorResource(R.color.stream_video_overlay_dark_dark),
-            primaryAccent = colorResource(R.color.stream_video_primary_accent_dark),
-            errorAccent = colorResource(R.color.stream_video_error_accent_dark),
-            infoAccent = colorResource(R.color.stream_video_info_accent_dark),
-            highlight = colorResource(R.color.stream_video_highlight_dark),
-            screenSharingBackground = colorResource(
-                R.color.stream_video_participant_container_background,
-            ),
-            screenSharingTooltipBackground = colorResource(
-                R.color.stream_video_screen_sharing_tooltip_background,
-            ),
-            screenSharingTooltipContent = colorResource(
-                id = R.color.stream_video_screen_sharing_tooltip_content,
-            ),
-            avatarInitials = colorResource(id = R.color.stream_video_text_avatar_initials),
-            activatedVolumeIndicator = colorResource(id = R.color.stream_video_primary_accent),
-            deActivatedVolumeIndicator = colorResource(
-                id = R.color.stream_video_deactivated_volume_indicator_dark,
-            ),
-            connectionQualityBackground = colorResource(
-                id = R.color.stream_video_connection_quality_background,
-            ),
-            connectionQualityBar = colorResource(
-                id = R.color.stream_video_connection_indicator_good,
-            ),
-            connectionQualityBarFilled = colorResource(
-                id = R.color.stream_video_connection_indicator_great,
-            ),
-            connectionQualityBarFilledPoor = colorResource(
-                id = R.color.stream_video_connection_indicator_poor,
-            ),
-            participantLabelBackground = colorResource(
-                id = R.color.stream_video_participant_label_background_dark,
-            ),
-            infoMenuOverlayColor = Color.LightGray.copy(alpha = 0.7f),
-            callFocusedBorder = colorResource(id = R.color.stream_video_focused_border_color),
-            callGradientStart = colorResource(id = R.color.stream_video_call_gradient_start),
-            callGradientEnd = colorResource(id = R.color.stream_video_call_gradient_end),
-            callDescription = colorResource(id = R.color.stream_video_call_description_dark),
-            callActionIconEnabledBackground = colorResource(
-                id = R.color.stream_video_action_icon_enabled_background_dark,
-            ),
-            callActionIconDisabledBackground = colorResource(
-                id = R.color.stream_video_action_icon_disabled_background_dark,
-            ),
-            callActionIconEnabled = colorResource(
-                id = R.color.stream_video_action_icon_enabled_dark,
-            ),
-            callActionIconDisabled = colorResource(
-                id = R.color.stream_video_action_icon_disabled_dark,
-            ),
-            callLobbyBackground = colorResource(id = R.color.stream_video_lobby_background_dark),
-            audioLeaveButton = colorResource(id = R.color.stream_video_audio_leave_dark),
-            audioActionColor = colorResource(id = R.color.stream_video_audio_room_actions_dark),
-            liveIndicator = colorResource(id = R.color.stream_video_live_indicator_dark),
-            audioIndicatorBackground = colorResource(
-                id = R.color.stream_video_volume_indicator_background_dark,
-            ),
-            avatarBorderColor = colorResource(id = R.color.stream_video_avatar_border_color),
-            participantContainerBackground = colorResource(
-                id = R.color.stream_video_participant_container_background,
-            ),
+            buttonBrandDefault = colorResource(id = R.color.stream_video_button_brand_default),
+            buttonBrandPressed = colorResource(id = R.color.stream_video_button_brand_pressed),
+            buttonBrandDisabled = colorResource(id = R.color.stream_video_button_brand_disabled),
+            buttonAlertDefault = colorResource(id = R.color.stream_video_button_alert_default),
+            buttonAlertPressed = colorResource(id = R.color.stream_video_button_alert_pressed),
+            buttonAlertDisabled = colorResource(id = R.color.stream_video_button_alert_disabled),
+            iconDefault = colorResource(id = R.color.stream_video_icon_default),
+            iconPressed = colorResource(id = R.color.stream_video_icon_pressed),
+            iconActive = colorResource(id = R.color.stream_video_icon_active),
+            iconAlert = colorResource(id = R.color.stream_video_icon_alert),
+            iconDisabled = colorResource(id = R.color.stream_video_icon_disabled),
+            alertSuccess = colorResource(id = R.color.stream_video_alert_success),
+            alertCaution = colorResource(id = R.color.stream_video_alert_caution),
+            alertWarning = colorResource(id = R.color.stream_video_alert_warning),
         )
     }
 }

@@ -80,7 +80,7 @@ class MainActivity : ComponentActivity() {
                     Box(modifier = Modifier.fillMaxSize()) {
                         CircularProgressIndicator(
                             modifier = Modifier.align(Alignment.Center),
-                            color = VideoTheme.colors.primaryAccent,
+                            color = VideoTheme.colors.brandPrimary,
                         )
                     }
                 }

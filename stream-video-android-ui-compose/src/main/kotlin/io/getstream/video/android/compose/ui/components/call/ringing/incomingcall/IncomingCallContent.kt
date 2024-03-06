@@ -32,7 +32,7 @@ import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import io.getstream.video.android.compose.theme.base.VideoTheme
+import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.avatar.LocalAvatarPreviewPlaceholder
 import io.getstream.video.android.compose.ui.components.background.CallBackground
 import io.getstream.video.android.core.Call
@@ -41,6 +41,7 @@ import io.getstream.video.android.core.call.state.CallAction
 import io.getstream.video.android.mock.StreamPreviewDataUtils
 import io.getstream.video.android.mock.previewCall
 import io.getstream.video.android.mock.previewMemberListState
+import io.getstream.video.android.ui.common.R
 
 /**
  * Represents the Incoming Call state and UI, when the user receives a call from other people.
@@ -164,7 +165,7 @@ private fun IncomingCallPreview1() {
     VideoTheme {
         CompositionLocalProvider(
             LocalAvatarPreviewPlaceholder provides
-                io.getstream.video.android.ui.common.R.drawable.stream_video_call_sample,
+                R.drawable.stream_video_call_sample,
         ) {
             IncomingCallContent(
                 call = previewCall,
@@ -184,7 +185,7 @@ private fun IncomingCallPreview2() {
     VideoTheme {
         CompositionLocalProvider(
             LocalAvatarPreviewPlaceholder provides
-                io.getstream.video.android.ui.common.R.drawable.stream_video_call_sample,
+                R.drawable.stream_video_call_sample,
         ) {
             IncomingCallContent(
                 call = previewCall,
