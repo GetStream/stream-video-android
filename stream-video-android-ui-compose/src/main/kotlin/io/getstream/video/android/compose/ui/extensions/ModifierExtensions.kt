@@ -18,12 +18,7 @@ package io.getstream.video.android.compose.ui.extensions
 
 import androidx.compose.foundation.layout.padding
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.composed
-import androidx.compose.ui.draw.alpha
-import androidx.compose.ui.platform.debugInspectorInfo
 import androidx.compose.ui.unit.Dp
-import io.getstream.video.android.compose.theme.VideoTheme
-
 
 /**
  * Add padding to the modifier based on the index and its relative position in the list.
