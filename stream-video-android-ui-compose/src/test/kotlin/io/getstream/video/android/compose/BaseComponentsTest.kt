@@ -86,7 +86,7 @@ internal class BaseComponentsTest : BaseComposeTest() {
                     Spacer(modifier = Modifier.size(16.dp))
                     StreamIconButton(
                         icon = Icons.Default.Settings,
-                        style = ButtonStyles.tetriaryIconButtonStyle(),
+                        style = ButtonStyles.tertiaryIconButtonStyle(),
                     )
                     Spacer(modifier = Modifier.size(16.dp))
                     StreamIconButton(
@@ -112,7 +112,7 @@ internal class BaseComponentsTest : BaseComposeTest() {
                     StreamIconButton(
                         enabled = false,
                         icon = Icons.Default.Settings,
-                        style = ButtonStyles.tetriaryIconButtonStyle(),
+                        style = ButtonStyles.tertiaryIconButtonStyle(),
                     )
                     Spacer(modifier = Modifier.size(16.dp))
                     StreamIconButton(
@@ -160,8 +160,8 @@ internal class BaseComponentsTest : BaseComposeTest() {
                 )
                 Spacer(modifier = Modifier.height(24.dp))
                 StreamButton(
-                    text = "Tetriary Button",
-                    style = ButtonStyles.tetriaryButtonStyle(),
+                    text = "Tertiary Button",
+                    style = ButtonStyles.tertiaryButtonStyle(),
                 )
                 Spacer(modifier = Modifier.height(48.dp))
                 StreamButton(
@@ -185,8 +185,8 @@ internal class BaseComponentsTest : BaseComposeTest() {
                 Spacer(modifier = Modifier.height(24.dp))
                 StreamButton(
                     enabled = false,
-                    text = "Tetriary Button",
-                    style = ButtonStyles.tetriaryButtonStyle(),
+                    text = "Tertiary Button",
+                    style = ButtonStyles.tertiaryButtonStyle(),
                 )
                 Spacer(modifier = Modifier.height(24.dp))
                 StreamButton(
@@ -218,8 +218,8 @@ internal class BaseComponentsTest : BaseComposeTest() {
                 Spacer(modifier = Modifier.height(24.dp))
                 StreamButton(
                     icon = Icons.Filled.AccessAlarm,
-                    text = "Tetriary Button",
-                    style = ButtonStyles.tetriaryButtonStyle(),
+                    text = "Tertiary Button",
+                    style = ButtonStyles.tertiaryButtonStyle(),
                 )
             }
         }

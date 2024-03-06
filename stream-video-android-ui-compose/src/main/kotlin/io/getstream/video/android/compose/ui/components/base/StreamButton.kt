@@ -59,9 +59,8 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.state.ToggleableState
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.R
-import io.getstream.video.android.compose.theme.base.VideoTheme
+import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.base.styling.ButtonStyles
 import io.getstream.video.android.compose.ui.components.base.styling.StreamBadgeStyles
 import io.getstream.video.android.compose.ui.components.base.styling.StreamButtonStyle
@@ -396,7 +395,7 @@ private fun StreamIconButtonPreview() {
                 Spacer(modifier = Modifier.size(16.dp))
                 StreamIconButton(
                     icon = Icons.Default.Settings,
-                    style = ButtonStyles.tetriaryIconButtonStyle(),
+                    style = ButtonStyles.tertiaryIconButtonStyle(),
                 )
                 Spacer(modifier = Modifier.size(16.dp))
                 StreamIconButton(
@@ -422,7 +421,7 @@ private fun StreamIconButtonPreview() {
                 StreamIconButton(
                     enabled = false,
                     icon = Icons.Default.Settings,
-                    style = ButtonStyles.tetriaryIconButtonStyle(),
+                    style = ButtonStyles.tertiaryIconButtonStyle(),
                 )
                 Spacer(modifier = Modifier.size(16.dp))
                 StreamIconButton(
@@ -492,8 +491,8 @@ private fun StreamButtonPreview() {
             )
             Spacer(modifier = Modifier.height(24.dp))
             StreamButton(
-                text = "Tetriary Button",
-                style = ButtonStyles.tetriaryButtonStyle(),
+                text = "Tertiary Button",
+                style = ButtonStyles.tertiaryButtonStyle(),
             )
             Spacer(modifier = Modifier.height(48.dp))
             StreamButton(
@@ -517,8 +516,8 @@ private fun StreamButtonPreview() {
             Spacer(modifier = Modifier.height(24.dp))
             StreamButton(
                 enabled = false,
-                text = "Tetriary Button",
-                style = ButtonStyles.tetriaryButtonStyle(),
+                text = "Tertiary Button",
+                style = ButtonStyles.tertiaryButtonStyle(),
             )
             Spacer(modifier = Modifier.height(24.dp))
             StreamButton(
@@ -551,8 +550,8 @@ private fun StreamButtonWithIconPreview() {
             Spacer(modifier = Modifier.height(24.dp))
             StreamButton(
                 icon = Icons.Filled.AccessAlarm,
-                text = "Tetriary Button",
-                style = ButtonStyles.tetriaryButtonStyle(),
+                text = "Tertiary Button",
+                style = ButtonStyles.tertiaryButtonStyle(),
             )
         }
     }

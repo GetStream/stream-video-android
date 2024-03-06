@@ -34,7 +34,7 @@ public data class IconStyle(
 ) : StreamStyle
 
 /**
- * Contains state styles for the icons.
+ * Contains state styles for the icon.
  */
 public data class StreamIconStyle(
     override val default: IconStyle,

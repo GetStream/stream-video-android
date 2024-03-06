@@ -381,7 +381,7 @@ fun CallScreen(
                             ),
                             onIcon = Icons.Default.MoreVert,
                             onStyle = VideoTheme.styles.buttonStyles.secondaryIconButtonStyle(),
-                            offStyle = VideoTheme.styles.buttonStyles.tetriaryIconButtonStyle(),
+                            offStyle = VideoTheme.styles.buttonStyles.tertiaryIconButtonStyle(),
                         ) {
                             showingLandscapeControls = when (it) {
                                 ToggleableState.On -> false
@@ -524,7 +524,7 @@ fun CallScreen(
                 },
                 negativeButton = Triple(
                     "Leave",
-                    VideoTheme.styles.buttonStyles.tetriaryButtonStyle(),
+                    VideoTheme.styles.buttonStyles.tertiaryButtonStyle(),
                 ) {
                     showRecordingWarning = false
                     acceptedCallRecording = false
@@ -547,7 +547,7 @@ fun CallScreen(
                 },
                 negativeButton = Triple(
                     "Cancel",
-                    VideoTheme.styles.buttonStyles.tetriaryButtonStyle(),
+                    VideoTheme.styles.buttonStyles.tertiaryButtonStyle(),
                 ) {
                     showEndRecordingDialog = false
                 },

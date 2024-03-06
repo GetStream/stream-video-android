@@ -1,3 +1,19 @@
+/*
+ * Copyright (c) 2014-2024 Stream.io Inc. All rights reserved.
+ *
+ * Licensed under the Stream License;
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    https://github.com/GetStream/stream-video-android/blob/main/LICENSE
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package io.getstream.video.android.ui.menu
 
 import androidx.annotation.DrawableRes
@@ -18,7 +34,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.state.ToggleableState
 import androidx.compose.ui.tooling.preview.Preview
 import io.getstream.video.android.R
-import io.getstream.video.android.compose.theme.base.VideoTheme
+import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.base.StreamDrawableToggleButton
 import io.getstream.video.android.compose.ui.components.base.StreamIconToggleButton
 import io.getstream.video.android.compose.ui.components.base.styling.ButtonStyles
@@ -41,17 +57,17 @@ internal fun VideoFiltersMenu(selectedFilterIndex: Int = 0, onSelectFilter: (Int
                 is VideoFilter.None -> BlurredBackgroundToggleItem(
                     icon = Icons.Default.AccountCircle,
                     toggleState = toggleState,
-                    onClick = { onSelectFilter(index) }
+                    onClick = { onSelectFilter(index) },
                 )
                 is VideoFilter.BlurredBackground -> BlurredBackgroundToggleItem(
                     icon = Icons.Default.BlurOn,
                     toggleState = toggleState,
-                    onClick = { onSelectFilter(index) }
+                    onClick = { onSelectFilter(index) },
                 )
                 is VideoFilter.VirtualBackground -> VirtualBackgroundToggleItem(
                     drawable = filter.drawable,
                     toggleState = toggleState,
-                    onClick = { onSelectFilter(index) }
+                    onClick = { onSelectFilter(index) },
                 )
             }
         }
@@ -78,14 +94,14 @@ sealed class VideoFilter {
 private fun BlurredBackgroundToggleItem(
     icon: ImageVector,
     toggleState: ToggleableState,
-    onClick: () -> Unit = {}
+    onClick: () -> Unit = {},
 ) {
     StreamIconToggleButton(
         toggleState = rememberUpdatedState(newValue = toggleState),
         onIcon = icon,
         onStyle = VideoTheme.styles.buttonStyles.primaryIconButtonStyle(),
-        offStyle = VideoTheme.styles.buttonStyles.tetriaryIconButtonStyle(),
-        onClick = { onClick() }
+        offStyle = VideoTheme.styles.buttonStyles.tertiaryIconButtonStyle(),
+        onClick = { onClick() },
     )
 }
 
@@ -93,14 +109,14 @@ private fun BlurredBackgroundToggleItem(
 private fun VirtualBackgroundToggleItem(
     @DrawableRes drawable: Int,
     toggleState: ToggleableState,
-    onClick: () -> Unit = {}
+    onClick: () -> Unit = {},
 ) {
     StreamDrawableToggleButton(
         toggleState = rememberUpdatedState(newValue = toggleState),
         onDrawable = drawable,
         onStyle = ButtonStyles.drawableToggleButtonStyleOn(),
         offStyle = ButtonStyles.drawableToggleButtonStyleOff(),
-        onClick = { onClick() }
+        onClick = { onClick() },
     )
 }
 

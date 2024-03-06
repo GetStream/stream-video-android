@@ -84,7 +84,16 @@ public open class StreamFixedSizeButtonStyle(
     textStyle: StreamTextStyle,
     iconStyle: StreamIconStyle,
     drawableStyle: StreamButtonDrawableStyle,
-) : StreamButtonStyle(elevation, shape, border, colors, contentPadding, textStyle, iconStyle, drawableStyle) {
+) : StreamButtonStyle(
+    elevation,
+    shape,
+    border,
+    colors,
+    contentPadding,
+    textStyle,
+    iconStyle,
+    drawableStyle,
+) {
 
     public fun copyFixed(
         width: Dp = this.width,
@@ -189,7 +198,7 @@ public open class ButtonStyleProvider {
         )
 
     @Composable
-    public fun tetriaryButtonStyle(size: StyleSize = StyleSize.L): StreamButtonStyle =
+    public fun tertiaryButtonStyle(size: StyleSize = StyleSize.L): StreamButtonStyle =
         genericButtonStyle(size = size).copy(
             colors = ButtonDefaults.buttonColors(
                 backgroundColor = VideoTheme.colors.baseSheetPrimary,
@@ -273,7 +282,7 @@ public open class ButtonStyleProvider {
         )
 
     @Composable
-    public fun tetriaryIconButtonStyle(size: StyleSize = StyleSize.L): StreamFixedSizeButtonStyle =
+    public fun tertiaryIconButtonStyle(size: StyleSize = StyleSize.L): StreamFixedSizeButtonStyle =
         StreamFixedSizeButtonStyle.of(
             width = when (size) {
                 StyleSize.XS, StyleSize.S -> VideoTheme.dimens.componentHeightS
@@ -285,7 +294,7 @@ public open class ButtonStyleProvider {
                 StyleSize.M -> VideoTheme.dimens.componentHeightM
                 else -> VideoTheme.dimens.componentHeightL
             },
-            origin = tetriaryButtonStyle(size = size).copy(
+            origin = tertiaryButtonStyle(size = size).copy(
                 iconStyle = IconStyles.defaultIconStyle(
                     padding = PaddingValues(VideoTheme.dimens.spacingXs),
                 ),
@@ -305,7 +314,7 @@ public open class ButtonStyleProvider {
                 StyleSize.M -> VideoTheme.dimens.componentHeightM
                 else -> VideoTheme.dimens.componentHeightL
             },
-            origin = tetriaryButtonStyle(size = size).copy(
+            origin = tertiaryButtonStyle(size = size).copy(
                 iconStyle = IconStyles.defaultIconStyle(
                     padding = PaddingValues(VideoTheme.dimens.spacingXs),
                 ),
@@ -334,7 +343,9 @@ public open class ButtonStyleProvider {
         )
 
     @Composable
-    public fun primaryDrawableButtonStyle(size: StyleSize = StyleSize.L): StreamFixedSizeButtonStyle =
+    public fun primaryDrawableButtonStyle(
+        size: StyleSize = StyleSize.L,
+    ): StreamFixedSizeButtonStyle =
         StreamFixedSizeButtonStyle.of(
             width = when (size) {
                 StyleSize.XS, StyleSize.S -> VideoTheme.dimens.componentHeightS
@@ -350,7 +361,9 @@ public open class ButtonStyleProvider {
         )
 
     @Composable
-    public fun drawableToggleButtonStyleOn(size: StyleSize = StyleSize.L): StreamFixedSizeButtonStyle =
+    public fun drawableToggleButtonStyleOn(
+        size: StyleSize = StyleSize.L,
+    ): StreamFixedSizeButtonStyle =
         StreamFixedSizeButtonStyle.of(
             width = when (size) {
                 StyleSize.XS, StyleSize.S -> VideoTheme.dimens.componentHeightS
@@ -373,7 +386,9 @@ public open class ButtonStyleProvider {
         )
 
     @Composable
-    public fun drawableToggleButtonStyleOff(size: StyleSize = StyleSize.L): StreamFixedSizeButtonStyle =
+    public fun drawableToggleButtonStyleOff(
+        size: StyleSize = StyleSize.L,
+    ): StreamFixedSizeButtonStyle =
         StreamFixedSizeButtonStyle.of(
             width = when (size) {
                 StyleSize.XS, StyleSize.S -> VideoTheme.dimens.componentHeightS
@@ -393,7 +408,7 @@ public open class ButtonStyleProvider {
                 ),
                 drawableStyle = ButtonDrawableStyles.customColorFilterButtonDrawableStyle(
                     colorFilter = ColorFilter.lighting(Color.Gray, Color.Transparent),
-                )
+                ),
             ),
         )
 }

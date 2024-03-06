@@ -278,7 +278,7 @@ private fun LoginContent(
                                 icon = Icons.Outlined.GroupAdd,
                                 enabled = !isLoading,
                                 text = stringResource(id = R.string.random_user_sign_in),
-                                style = ButtonStyles.tetriaryButtonStyle(),
+                                style = ButtonStyles.tertiaryButtonStyle(),
                                 onClick = {
                                     login(true, null)
                                 },
@@ -394,7 +394,7 @@ fun SelectableDialog(
                                     selectedText = item.displayName
                                     showDialog = !showDialog
                                 },
-                                style = ButtonStyles.tetriaryButtonStyle(),
+                                style = ButtonStyles.tertiaryButtonStyle(),
                                 modifier = Modifier.padding(horizontal = 8.dp).fillMaxWidth(),
                             )
                         }
