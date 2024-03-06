@@ -34,7 +34,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import io.getstream.video.android.compose.theme.base.VideoTheme
+import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.base.StreamButton
 import io.getstream.video.android.compose.ui.components.call.controls.actions.ToggleMicrophoneAction
 import io.getstream.video.android.core.Call

@@ -55,8 +55,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.state.ToggleableState
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.times
-import io.getstream.video.android.compose.theme.base.VideoTheme
+import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.base.styling.ButtonStyles
 import io.getstream.video.android.compose.ui.components.base.styling.StreamBadgeStyles
 import io.getstream.video.android.compose.ui.components.base.styling.StreamButtonStyle

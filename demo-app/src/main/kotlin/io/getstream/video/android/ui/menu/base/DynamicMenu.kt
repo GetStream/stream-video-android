@@ -43,7 +43,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import io.getstream.video.android.compose.theme.base.VideoTheme
+import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.base.StreamToggleButton
 import io.getstream.video.android.compose.ui.components.base.styling.StyleSize
 import io.getstream.video.android.ui.menu.debugSubmenu

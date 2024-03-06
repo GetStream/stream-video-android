@@ -34,7 +34,7 @@ import androidx.compose.ui.text.capitalize
 import androidx.compose.ui.text.intl.Locale
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
-import io.getstream.video.android.compose.theme.base.VideoTheme
+import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.core.MemberState
 import io.getstream.video.android.core.model.CallStatus
 import io.getstream.video.android.core.utils.toCallUser

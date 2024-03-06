@@ -55,13 +55,13 @@ fun LiveButton(
             modifier = modifier,
             colors = if (isBackstage) {
                 ButtonDefaults.buttonColors(
-                    backgroundColor = VideoTheme.colors.primaryAccent,
-                    contentColor = VideoTheme.colors.primaryAccent,
+                    backgroundColor = VideoTheme.colors.brandPrimary,
+                    contentColor = VideoTheme.colors.brandPrimary,
                 )
             } else {
                 ButtonDefaults.buttonColors(
-                    backgroundColor = VideoTheme.colors.errorAccent,
-                    contentColor = VideoTheme.colors.errorAccent,
+                    backgroundColor = VideoTheme.colors.brandPrimary,
+                    contentColor = VideoTheme.colors.brandPrimary,
                 )
             },
             onClick = onClick,
@@ -93,9 +93,6 @@ fun LiveButton(
             ToggleCameraAction(
                 modifier = Modifier.size(45.dp),
                 isCameraEnabled = isCameraEnabled,
-                enabledColor = VideoTheme.colors.callActionIconEnabledBackground,
-                disabledColor = VideoTheme.colors.callActionIconEnabledBackground,
-                disabledIconTint = VideoTheme.colors.errorAccent,
                 shape = RoundedCornerShape(8.dp),
                 onCallAction = { callAction -> call.camera.setEnabled(callAction.isEnabled) },
             )
@@ -105,9 +102,6 @@ fun LiveButton(
                     .padding(horizontal = 12.dp)
                     .size(45.dp),
                 isMicrophoneEnabled = isMicrophoneEnabled,
-                enabledColor = VideoTheme.colors.callActionIconEnabledBackground,
-                disabledColor = VideoTheme.colors.callActionIconEnabledBackground,
-                disabledIconTint = VideoTheme.colors.errorAccent,
                 shape = RoundedCornerShape(8.dp),
                 onCallAction = { callAction -> call.microphone.setEnabled(callAction.isEnabled) },
             )

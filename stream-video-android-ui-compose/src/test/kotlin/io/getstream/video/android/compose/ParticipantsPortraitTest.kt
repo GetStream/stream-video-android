@@ -25,7 +25,7 @@ import androidx.compose.ui.unit.IntSize
 import app.cash.paparazzi.DeviceConfig
 import app.cash.paparazzi.Paparazzi
 import io.getstream.video.android.compose.base.BaseComposeTest
-import io.getstream.video.android.compose.theme.base.VideoTheme
+import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.call.renderer.FloatingParticipantVideo
 import io.getstream.video.android.compose.ui.components.call.renderer.ParticipantVideo
 import io.getstream.video.android.compose.ui.components.call.renderer.ParticipantVideoRenderer

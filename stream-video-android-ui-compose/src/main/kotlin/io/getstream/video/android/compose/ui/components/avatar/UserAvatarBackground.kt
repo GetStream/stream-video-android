@@ -31,9 +31,10 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
-import io.getstream.video.android.compose.theme.base.VideoTheme
+import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.mock.StreamPreviewDataUtils
 import io.getstream.video.android.mock.previewUsers
+import io.getstream.video.android.ui.common.R
 
 /**
  * A background that displays a user avatar and a background that reflects the avatar.
@@ -93,7 +94,7 @@ private fun UserAvatarBackgroundPreview() {
             userName = user.name.ifBlank { user.id },
             userImage = user.image,
             modifier = Modifier.fillMaxSize(),
-            previewPlaceholder = io.getstream.video.android.ui.common.R.drawable.stream_video_call_sample,
+            previewPlaceholder = R.drawable.stream_video_call_sample,
         )
     }
 }

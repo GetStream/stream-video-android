@@ -32,7 +32,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import io.getstream.video.android.compose.theme.base.VideoTheme
+import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.call.renderer.ParticipantVideo
 import io.getstream.video.android.compose.ui.components.call.renderer.ScreenSharingVideoRendererStyle
 import io.getstream.video.android.compose.ui.components.call.renderer.VideoRendererStyle

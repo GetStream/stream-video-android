@@ -45,7 +45,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
-import io.getstream.video.android.compose.theme.base.VideoTheme
+import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.base.styling.ButtonStyles
 import io.getstream.video.android.compose.ui.components.base.styling.DialogStyle
 import io.getstream.video.android.compose.ui.components.base.styling.StreamButtonStyle
