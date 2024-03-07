@@ -121,7 +121,7 @@ private fun VirtualBackgroundToggleItem(
 
 @Preview(showBackground = true)
 @Composable
-fun VideoFiltersMenuPreview() {
+private fun VideoFiltersMenuPreview() {
     VideoTheme {
         StreamPreviewDataUtils.initializeStreamVideo(LocalContext.current)
         VideoFiltersMenu(selectedFilterIndex = 0, onSelectFilter = {})
