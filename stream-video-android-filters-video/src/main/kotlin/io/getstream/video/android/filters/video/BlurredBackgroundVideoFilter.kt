@@ -18,6 +18,7 @@ package io.getstream.video.android.filters.video
 
 import android.graphics.Bitmap
 import android.graphics.Canvas
+import androidx.annotation.Keep
 import com.google.android.gms.tasks.Tasks
 import com.google.android.renderscript.Toolkit
 import com.google.mlkit.vision.common.InputImage
@@ -32,6 +33,7 @@ import io.getstream.video.android.core.call.video.BitmapVideoFilter
  * @param blurIntensity The intensity of the blur effect. See [BlurIntensity] for options. Defaults to [BlurIntensity.MEDIUM].
  * @param foregroundThreshold The confidence threshold for the foreground. Pixels with a confidence value greater than or equal to this threshold are considered to be in the foreground. Value is coerced between 0 and 1, inclusive.
  */
+@Keep
 public class BlurredBackgroundVideoFilter(
     private val blurIntensity: BlurIntensity = BlurIntensity.MEDIUM,
     foregroundThreshold: Double = DEFAULT_FOREGROUND_THRESHOLD,
@@ -78,8 +80,9 @@ public class BlurredBackgroundVideoFilter(
 }
 
 /**
- * The intensity of the blur effect. Used in [BlurredBackgroundVideoFilter].
+ * The intensity of the background blur effect. Used in [BlurredBackgroundVideoFilter].
  */
+@Keep
 public enum class BlurIntensity(public val radius: Int) {
     LIGHT(7),
     MEDIUM(11),

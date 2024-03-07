@@ -24,6 +24,7 @@ import android.graphics.Paint
 import android.graphics.PorterDuff
 import android.graphics.PorterDuffXfermode
 import androidx.annotation.DrawableRes
+import androidx.annotation.Keep
 import com.google.android.gms.tasks.Tasks
 import com.google.mlkit.vision.common.InputImage
 import com.google.mlkit.vision.segmentation.Segmentation
@@ -38,6 +39,7 @@ import io.getstream.video.android.core.call.video.BitmapVideoFilter
  * @param backgroundImage The drawable resource ID of the custom background image.
  * @param foregroundThreshold The confidence threshold for the foreground. Pixels with a confidence value greater than or equal to this threshold are considered to be in the foreground. Value is coerced between 0 and 1, inclusive.
  */
+@Keep
 public class VirtualBackgroundVideoFilter(
     private val context: Context,
     @DrawableRes backgroundImage: Int,
