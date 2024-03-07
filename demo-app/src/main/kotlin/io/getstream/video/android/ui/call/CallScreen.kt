@@ -459,7 +459,7 @@ fun CallScreen(
                             call.videoFilter = null
                         }
                         is VideoFilter.BlurredBackground -> {
-                            call.videoFilter = BlurredBackgroundVideoFilter(filter.blurIntensity)
+                            call.videoFilter = BlurredBackgroundVideoFilter()
                         }
                         is VideoFilter.VirtualBackground -> {
                             call.videoFilter = VirtualBackgroundVideoFilter(context, filter.drawable)

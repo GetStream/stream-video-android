@@ -38,7 +38,6 @@ import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.base.StreamDrawableToggleButton
 import io.getstream.video.android.compose.ui.components.base.StreamIconToggleButton
 import io.getstream.video.android.compose.ui.components.base.styling.ButtonStyles
-import io.getstream.video.android.filters.video.BlurIntensity
 import io.getstream.video.android.mock.StreamPreviewDataUtils
 
 @Composable
@@ -76,7 +75,7 @@ internal fun VideoFiltersMenu(selectedFilterIndex: Int = 0, onSelectFilter: (Int
 
 val availableVideoFilters = listOf(
     VideoFilter.None,
-    VideoFilter.BlurredBackground(BlurIntensity.MEDIUM),
+    VideoFilter.BlurredBackground,
     VideoFilter.VirtualBackground(R.drawable.amsterdam1),
     VideoFilter.VirtualBackground(R.drawable.amsterdam2),
     VideoFilter.VirtualBackground(R.drawable.boulder1),
@@ -86,7 +85,7 @@ val availableVideoFilters = listOf(
 
 sealed class VideoFilter {
     data object None : VideoFilter()
-    data class BlurredBackground(val blurIntensity: BlurIntensity) : VideoFilter()
+    data object BlurredBackground : VideoFilter()
     data class VirtualBackground(@DrawableRes val drawable: Int) : VideoFilter()
 }
 
