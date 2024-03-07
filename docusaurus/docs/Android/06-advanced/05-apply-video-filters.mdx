@@ -1,5 +1,5 @@
 ---
-title: Video & Audio filters
+title: Video & Audio Filters
 description: How to use video and audio filters
 toc_max_heading_level: 5
 ---
@@ -12,29 +12,44 @@ Our SDK offers background blurring and virtual backgrounds out of the box and al
 
 ### AI Filters
 
-We ship two AI filters in a separate library: background blur and virtual background.
+We ship two AI video filters, _background blur_ and _virtual background_, in a separate artifact. To use these filters, add the video filter library as a dependency:
 
-<!-- TODO: Add gradle dependency and describe library contents -->
+```groovy
+dependencies {
+    implementation "io.getstream:stream-video-android-filters-video:$stream_version"
+}
+```
 
 #### Background Blur
 
-Use the `BlurredBackgroundVideoFilter` class to add a blur effect to the video feed. Pass an instance of it to the `videoFilter` call property.
-
-<!-- TODO: Parameters (blur, threshold) -->
+Use the `BlurredBackgroundVideoFilter` class to add a background blur effect to the video feed. Pass an instance of it to the `videoFilter` call property.
 
 ```kotlin
 call.videoFilter = BlurredBackgroundVideoFilter()
 ```
 
+The `BlurredBackgroundVideoFilter` class has the following parameters:
+
+| Parameter             | Description                                                                                                                                                                                 | Default Value          |
+|-----------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|------------------------|
+| `blurIntensity`       | Intensity of the blur effect. Three options available in the `BlurIntensity` enum: `LIGHT`, `MEDIUM`, `HEAVY`.                                                                              | `BlurIntensity.MEDIUM` |
+| `foregroundThreshold` | Confidence threshold for the foreground. Pixels with a confidence value greater than or equal to this threshold are considered to be in the foreground. Coerced between 0 and 1, inclusive. | `0.99999`              |
+
 #### Virtual Backgrounds
 
-Pass an instance of `VirtualBackgroundFilter` to the `videoFilter` call property to set an image as the participant's background.
-
-<!-- TODO: Parameters (image) -->
+Pass an instance of `VirtualBackgroundFilter` to the `videoFilter` call property to set a custom image as the participant's background.
 
 ```kotlin
-call.videoFilter = VirtualBackgroundVideoFilter(context)
+call.videoFilter = VirtualBackgroundVideoFilter(context, R.drawable.background_image)
 ```
+
+The `VirtualBackgroundFilter` class has the following parameters:
+
+| Parameter             | Description                                                                                                                                                                                 | Default Value |
+|-----------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|---------------|
+| `context`             | Context used to access resources.                                                                                                                                                           | None          |
+| `backgroundImage`     | The drawable resource ID of the image to be used as a virtual background.                                                                                                                   | None          |
+| `foregroundThreshold` | Confidence threshold for the foreground. Pixels with a confidence value greater than or equal to this threshold are considered to be in the foreground. Coerced between 0 and 1, inclusive. | `0.99999`     |
 
 ## Adding Your Custom Filter
 
