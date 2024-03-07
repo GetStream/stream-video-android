@@ -36,10 +36,12 @@ import io.getstream.video.android.core.call.video.BitmapVideoFilter
  *
  * @param context Context used to access resources.
  * @param backgroundImage The drawable resource ID of the custom background image.
+ * @param foregroundThreshold The confidence threshold for the foreground. Pixels with a confidence value greater than or equal to this threshold are considered to be in the foreground. Value is coerced between 0 and 1, inclusive.
  */
 public class VirtualBackgroundVideoFilter(
     private val context: Context,
     @DrawableRes backgroundImage: Int,
+    foregroundThreshold: Double = DEFAULT_FOREGROUND_THRESHOLD,
 ) : BitmapVideoFilter() {
     private val options =
         SelfieSegmenterOptions.Builder()
@@ -48,6 +50,7 @@ public class VirtualBackgroundVideoFilter(
             .build()
     private val segmenter = Segmentation.getClient(options)
     private lateinit var segmentationMask: SegmentationMask
+    private var foregroundThreshold: Double = foregroundThreshold.coerceIn(0.0, 1.0)
     private val foregroundBitmap by lazy {
         Bitmap.createBitmap(
             segmentationMask.width,
@@ -74,7 +77,7 @@ public class VirtualBackgroundVideoFilter(
             source = videoFrameBitmap,
             destination = foregroundBitmap,
             segmentationMask = segmentationMask,
-            confidenceThreshold = FOREGROUND_THRESHOLD,
+            confidenceThreshold = foregroundThreshold,
         )
 
         val videoFrameCanvas = Canvas(videoFrameBitmap)
@@ -132,4 +135,4 @@ public class VirtualBackgroundVideoFilter(
     }
 }
 
-private const val FOREGROUND_THRESHOLD: Double = 0.7 // 1 is max confidence that pixel is in the foreground
+private const val DEFAULT_FOREGROUND_THRESHOLD: Double = 0.7 // 1 is max confidence that pixel is in the foreground

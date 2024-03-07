@@ -10,13 +10,14 @@ public final class io/getstream/video/android/filters/video/BlurIntensity : java
 
 public final class io/getstream/video/android/filters/video/BlurredBackgroundVideoFilter : io/getstream/video/android/core/call/video/BitmapVideoFilter {
 	public fun <init> ()V
-	public fun <init> (Lio/getstream/video/android/filters/video/BlurIntensity;)V
-	public synthetic fun <init> (Lio/getstream/video/android/filters/video/BlurIntensity;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun <init> (Lio/getstream/video/android/filters/video/BlurIntensity;D)V
+	public synthetic fun <init> (Lio/getstream/video/android/filters/video/BlurIntensity;DILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public fun filter (Landroid/graphics/Bitmap;)V
 }
 
 public final class io/getstream/video/android/filters/video/VirtualBackgroundVideoFilter : io/getstream/video/android/core/call/video/BitmapVideoFilter {
-	public fun <init> (Landroid/content/Context;I)V
+	public fun <init> (Landroid/content/Context;ID)V
+	public synthetic fun <init> (Landroid/content/Context;IDILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public fun filter (Landroid/graphics/Bitmap;)V
 }
 

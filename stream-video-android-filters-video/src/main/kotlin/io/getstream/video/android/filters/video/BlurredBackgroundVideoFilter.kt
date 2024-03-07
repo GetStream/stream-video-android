@@ -30,9 +30,11 @@ import io.getstream.video.android.core.call.video.BitmapVideoFilter
  * Applies a blur effect to the background of a video call.
  *
  * @param blurIntensity The intensity of the blur effect. See [BlurIntensity] for options. Defaults to [BlurIntensity.MEDIUM].
+ * @param foregroundThreshold The confidence threshold for the foreground. Pixels with a confidence value greater than or equal to this threshold are considered to be in the foreground. Value is coerced between 0 and 1, inclusive.
  */
 public class BlurredBackgroundVideoFilter(
     private val blurIntensity: BlurIntensity = BlurIntensity.MEDIUM,
+    foregroundThreshold: Double = DEFAULT_FOREGROUND_THRESHOLD,
 ) : BitmapVideoFilter() {
     private val options =
         SelfieSegmenterOptions.Builder()
@@ -40,8 +42,8 @@ public class BlurredBackgroundVideoFilter(
             .enableRawSizeMask()
             .build()
     private val segmenter = Segmentation.getClient(options)
-
     private lateinit var segmentationMask: SegmentationMask
+    private var foregroundThreshold: Double = foregroundThreshold.coerceIn(0.0, 1.0)
     private val backgroundBitmap by lazy {
         Bitmap.createBitmap(
             segmentationMask.width,
@@ -62,7 +64,7 @@ public class BlurredBackgroundVideoFilter(
             source = videoFrameBitmap,
             destination = backgroundBitmap,
             segmentationMask = segmentationMask,
-            confidenceThreshold = FOREGROUND_THRESHOLD,
+            confidenceThreshold = foregroundThreshold,
         )
 
         // 3. Blur the background bitmap
@@ -84,4 +86,4 @@ public enum class BlurIntensity(public val radius: Int) {
     HEAVY(16),
 }
 
-private const val FOREGROUND_THRESHOLD: Double = 0.99999 // 1 is max confidence that pixel is in the foreground
+private const val DEFAULT_FOREGROUND_THRESHOLD: Double = 0.99999 // 1 is max confidence that pixel is in the foreground
