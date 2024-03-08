@@ -52,11 +52,16 @@ import io.getstream.video.android.mock.previewCall
  *
  * @param call The call includes states and will be rendered with participants.
  * @param modifier Modifier for styling.
+ * @param isMicrophoneEnabled weather or not the microphone icon will be enabled or not
  * @param permissions the permissions required for the call to work (e.g. manifest.RECORD_AUDIO)
  * @param onBackPressed Handler when the user taps on the back button.
  * @param permissions Android permissions that should be required to render a video call properly.
  * @param onCallAction Handler when the user triggers a Call Control Action.
  * @param controlsContent Content is shown that allows users to trigger different actions to control a joined call.
+ * @param durationPlaceholder Content (text) shown while the duration is not available yet
+ * @param isShowingHeader if true, header content is shown
+ * @param headerContent override the header content
+ * @param detailsContent override the details content (middle part of the screen)
  */
 @Composable
 public fun AudioCallContent(
