@@ -7,6 +7,27 @@ public final class io/getstream/video/android/compose/permission/CallPermissions
 	public static final fun rememberCallPermissionsState (Lio/getstream/video/android/core/Call;Ljava/util/List;Lkotlin/jvm/functions/Function1;Landroidx/compose/runtime/Composer;II)Lio/getstream/video/android/compose/permission/VideoPermissionsState;
 }
 
+public final class io/getstream/video/android/compose/permission/ComposableSingletons$LaunchPermissionRequestKt {
+	public static final field INSTANCE Lio/getstream/video/android/compose/permission/ComposableSingletons$LaunchPermissionRequestKt;
+	public static field lambda-1 Lkotlin/jvm/functions/Function2;
+	public static field lambda-2 Lkotlin/jvm/functions/Function5;
+	public static field lambda-3 Lkotlin/jvm/functions/Function3;
+	public fun <init> ()V
+	public final fun getLambda-1$stream_video_android_ui_compose_release ()Lkotlin/jvm/functions/Function2;
+	public final fun getLambda-2$stream_video_android_ui_compose_release ()Lkotlin/jvm/functions/Function5;
+	public final fun getLambda-3$stream_video_android_ui_compose_release ()Lkotlin/jvm/functions/Function3;
+}
+
+public final class io/getstream/video/android/compose/permission/LaunchPermissionRequestKt {
+	public static final fun LaunchPermissionRequest (Ljava/util/List;Lkotlin/jvm/functions/Function3;Landroidx/compose/runtime/Composer;I)V
+}
+
+public abstract interface class io/getstream/video/android/compose/permission/LaunchPermissionRequestScope {
+	public abstract fun AllPermissionsGranted (Lkotlin/jvm/functions/Function2;Landroidx/compose/runtime/Composer;I)V
+	public abstract fun NoneGranted (Lkotlin/jvm/functions/Function3;Landroidx/compose/runtime/Composer;I)V
+	public abstract fun SomeGranted (Lkotlin/jvm/functions/Function5;Landroidx/compose/runtime/Composer;I)V
+}
+
 public final class io/getstream/video/android/compose/permission/SinglePermissionKt {
 	public static final fun LaunchCameraPermissions (Lio/getstream/video/android/core/Call;Landroidx/compose/runtime/Composer;I)V
 	public static final fun LaunchMicrophonePermissions (Lio/getstream/video/android/core/Call;Landroidx/compose/runtime/Composer;I)V
