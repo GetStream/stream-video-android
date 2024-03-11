@@ -18,6 +18,7 @@
 
 package io.getstream.video.android.ui.call
 
+import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
@@ -66,10 +67,10 @@ internal fun ChatDialog(
         )
     }
     val listViewModel = viewModel(MessageListViewModel::class.java, factory = viewModelFactory)
-    val unreadCount = listViewModel.currentMessagesState.unreadCount
+    val messageState = listViewModel.currentMessagesState
 
-    LaunchedEffect(key1 = unreadCount) {
-        updateUnreadCount.invoke(unreadCount)
+    LaunchedEffect(key1 = messageState) {
+        updateUnreadCount.invoke(messageState.unreadCount)
     }
 
     val messageItems = listViewModel.currentMessagesState.messageItems
