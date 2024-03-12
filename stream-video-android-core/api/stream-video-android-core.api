@@ -59,7 +59,7 @@ public final class io/getstream/video/android/core/Call {
 	public final fun sendCustomEvent (Ljava/util/Map;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public final fun sendReaction (Ljava/lang/String;Ljava/lang/String;Ljava/util/Map;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public static synthetic fun sendReaction$default (Lio/getstream/video/android/core/Call;Ljava/lang/String;Ljava/lang/String;Ljava/util/Map;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
-	public final fun sendStats (Ljava/util/Map;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public final fun sendStats (Ljava/util/Map;)V
 	public final fun setAudioFilter (Lio/getstream/video/android/core/call/audio/AudioFilter;)V
 	public final fun setVideoFilter (Lio/getstream/video/android/core/call/video/VideoFilter;)V
 	public final fun setVisibility (Ljava/lang/String;Lstream/video/sfu/models/TrackType;Z)V
@@ -191,6 +191,10 @@ public final class io/getstream/video/android/core/CallStats {
 	public final fun updateFromRTCStats (Lio/getstream/video/android/core/call/stats/model/RtcStatsReport;Z)V
 	public static synthetic fun updateFromRTCStats$default (Lio/getstream/video/android/core/CallStats;Lio/getstream/video/android/core/call/stats/model/RtcStatsReport;ZILjava/lang/Object;)V
 	public final fun updateLocalStats ()V
+}
+
+public final class io/getstream/video/android/core/CallStatsReportKt {
+	public static final fun toJson (Lio/getstream/video/android/core/CallStatsReport;Lio/getstream/video/android/core/model/StreamPeerType;)Ljava/lang/String;
 }
 
 public final class io/getstream/video/android/core/CameraDeviceWrapped {
@@ -839,6 +843,7 @@ public abstract interface class io/getstream/video/android/core/api/SignalServer
 	public abstract fun iceRestart (Lstream/video/sfu/signal/ICERestartRequest;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public abstract fun iceTrickle (Lstream/video/sfu/models/ICETrickle;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public abstract fun sendAnswer (Lstream/video/sfu/signal/SendAnswerRequest;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public abstract fun sendStats (Lstream/video/sfu/signal/SendStatsRequest;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public abstract fun setPublisher (Lstream/video/sfu/signal/SetPublisherRequest;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public abstract fun updateMuteStates (Lstream/video/sfu/signal/UpdateMuteStatesRequest;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public abstract fun updateSubscriptions (Lstream/video/sfu/signal/UpdateSubscriptionsRequest;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
@@ -950,6 +955,7 @@ public final class io/getstream/video/android/core/call/RtcSession {
 	public final fun onNegotiationNeeded (Lio/getstream/video/android/core/call/connection/StreamPeerConnection;Lio/getstream/video/android/core/model/StreamPeerType;)V
 	public final fun reconnect (ZLkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public final fun requestSubscriberIceRestart (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public final fun sendCallStats (Lio/getstream/video/android/core/CallStatsReport;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public final fun setScreenShareTrack ()V
 	public final fun setSubscriber (Lio/getstream/video/android/core/call/connection/StreamPeerConnection;)V
 	public final fun setTracks (Ljava/util/Map;)V
@@ -7604,17 +7610,18 @@ public final class org/openapitools/client/models/JoinCallRequest {
 }
 
 public final class org/openapitools/client/models/JoinCallResponse {
-	public fun <init> (Lorg/openapitools/client/models/CallResponse;ZLorg/openapitools/client/models/Credentials;Ljava/lang/String;Ljava/util/List;Ljava/util/List;Lorg/openapitools/client/models/MemberResponse;)V
-	public synthetic fun <init> (Lorg/openapitools/client/models/CallResponse;ZLorg/openapitools/client/models/Credentials;Ljava/lang/String;Ljava/util/List;Ljava/util/List;Lorg/openapitools/client/models/MemberResponse;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun <init> (Lorg/openapitools/client/models/CallResponse;ZLorg/openapitools/client/models/Credentials;Ljava/lang/String;Ljava/util/List;Ljava/util/List;Lorg/openapitools/client/models/StatsOptions;Lorg/openapitools/client/models/MemberResponse;)V
+	public synthetic fun <init> (Lorg/openapitools/client/models/CallResponse;ZLorg/openapitools/client/models/Credentials;Ljava/lang/String;Ljava/util/List;Ljava/util/List;Lorg/openapitools/client/models/StatsOptions;Lorg/openapitools/client/models/MemberResponse;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun component1 ()Lorg/openapitools/client/models/CallResponse;
 	public final fun component2 ()Z
 	public final fun component3 ()Lorg/openapitools/client/models/Credentials;
 	public final fun component4 ()Ljava/lang/String;
 	public final fun component5 ()Ljava/util/List;
 	public final fun component6 ()Ljava/util/List;
-	public final fun component7 ()Lorg/openapitools/client/models/MemberResponse;
-	public final fun copy (Lorg/openapitools/client/models/CallResponse;ZLorg/openapitools/client/models/Credentials;Ljava/lang/String;Ljava/util/List;Ljava/util/List;Lorg/openapitools/client/models/MemberResponse;)Lorg/openapitools/client/models/JoinCallResponse;
-	public static synthetic fun copy$default (Lorg/openapitools/client/models/JoinCallResponse;Lorg/openapitools/client/models/CallResponse;ZLorg/openapitools/client/models/Credentials;Ljava/lang/String;Ljava/util/List;Ljava/util/List;Lorg/openapitools/client/models/MemberResponse;ILjava/lang/Object;)Lorg/openapitools/client/models/JoinCallResponse;
+	public final fun component7 ()Lorg/openapitools/client/models/StatsOptions;
+	public final fun component8 ()Lorg/openapitools/client/models/MemberResponse;
+	public final fun copy (Lorg/openapitools/client/models/CallResponse;ZLorg/openapitools/client/models/Credentials;Ljava/lang/String;Ljava/util/List;Ljava/util/List;Lorg/openapitools/client/models/StatsOptions;Lorg/openapitools/client/models/MemberResponse;)Lorg/openapitools/client/models/JoinCallResponse;
+	public static synthetic fun copy$default (Lorg/openapitools/client/models/JoinCallResponse;Lorg/openapitools/client/models/CallResponse;ZLorg/openapitools/client/models/Credentials;Ljava/lang/String;Ljava/util/List;Ljava/util/List;Lorg/openapitools/client/models/StatsOptions;Lorg/openapitools/client/models/MemberResponse;ILjava/lang/Object;)Lorg/openapitools/client/models/JoinCallResponse;
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getCall ()Lorg/openapitools/client/models/CallResponse;
 	public final fun getCreated ()Z
@@ -7623,6 +7630,7 @@ public final class org/openapitools/client/models/JoinCallResponse {
 	public final fun getMembers ()Ljava/util/List;
 	public final fun getMembership ()Lorg/openapitools/client/models/MemberResponse;
 	public final fun getOwnCapabilities ()Ljava/util/List;
+	public final fun getStatsOptions ()Lorg/openapitools/client/models/StatsOptions;
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
 }
@@ -8477,6 +8485,17 @@ public final class org/openapitools/client/models/StartTranscriptionResponse {
 	public static synthetic fun copy$default (Lorg/openapitools/client/models/StartTranscriptionResponse;Ljava/lang/String;ILjava/lang/Object;)Lorg/openapitools/client/models/StartTranscriptionResponse;
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getDuration ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class org/openapitools/client/models/StatsOptions {
+	public fun <init> (I)V
+	public final fun component1 ()I
+	public final fun copy (I)Lorg/openapitools/client/models/StatsOptions;
+	public static synthetic fun copy$default (Lorg/openapitools/client/models/StatsOptions;IILjava/lang/Object;)Lorg/openapitools/client/models/StatsOptions;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getReportingIntervalMs ()I
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
 }
@@ -9616,14 +9635,15 @@ public final class stream/video/sfu/event/VideoLayerSetting : com/squareup/wire/
 	public static final field ADAPTER Lcom/squareup/wire/ProtoAdapter;
 	public static final field Companion Lstream/video/sfu/event/VideoLayerSetting$Companion;
 	public fun <init> ()V
-	public fun <init> (Ljava/lang/String;ZIFLstream/video/sfu/event/VideoLayerSetting$Priority;Lstream/video/sfu/models/Codec;Lokio/ByteString;)V
-	public synthetic fun <init> (Ljava/lang/String;ZIFLstream/video/sfu/event/VideoLayerSetting$Priority;Lstream/video/sfu/models/Codec;Lokio/ByteString;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
-	public final fun copy (Ljava/lang/String;ZIFLstream/video/sfu/event/VideoLayerSetting$Priority;Lstream/video/sfu/models/Codec;Lokio/ByteString;)Lstream/video/sfu/event/VideoLayerSetting;
-	public static synthetic fun copy$default (Lstream/video/sfu/event/VideoLayerSetting;Ljava/lang/String;ZIFLstream/video/sfu/event/VideoLayerSetting$Priority;Lstream/video/sfu/models/Codec;Lokio/ByteString;ILjava/lang/Object;)Lstream/video/sfu/event/VideoLayerSetting;
+	public fun <init> (Ljava/lang/String;ZIFLstream/video/sfu/event/VideoLayerSetting$Priority;Lstream/video/sfu/models/Codec;ILokio/ByteString;)V
+	public synthetic fun <init> (Ljava/lang/String;ZIFLstream/video/sfu/event/VideoLayerSetting$Priority;Lstream/video/sfu/models/Codec;ILokio/ByteString;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun copy (Ljava/lang/String;ZIFLstream/video/sfu/event/VideoLayerSetting$Priority;Lstream/video/sfu/models/Codec;ILokio/ByteString;)Lstream/video/sfu/event/VideoLayerSetting;
+	public static synthetic fun copy$default (Lstream/video/sfu/event/VideoLayerSetting;Ljava/lang/String;ZIFLstream/video/sfu/event/VideoLayerSetting$Priority;Lstream/video/sfu/models/Codec;ILokio/ByteString;ILjava/lang/Object;)Lstream/video/sfu/event/VideoLayerSetting;
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getActive ()Z
 	public final fun getCodec ()Lstream/video/sfu/models/Codec;
 	public final fun getMax_bitrate ()I
+	public final fun getMax_framerate ()I
 	public final fun getName ()Ljava/lang/String;
 	public final fun getPriority ()Lstream/video/sfu/event/VideoLayerSetting$Priority;
 	public final fun getScale_resolution_down_by ()F
@@ -10371,6 +10391,49 @@ public final class stream/video/sfu/signal/SendAnswerResponse : com/squareup/wir
 }
 
 public final class stream/video/sfu/signal/SendAnswerResponse$Companion {
+}
+
+public final class stream/video/sfu/signal/SendStatsRequest : com/squareup/wire/Message {
+	public static final field ADAPTER Lcom/squareup/wire/ProtoAdapter;
+	public static final field Companion Lstream/video/sfu/signal/SendStatsRequest$Companion;
+	public fun <init> ()V
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Lokio/ByteString;)V
+	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Lokio/ByteString;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun copy (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Lokio/ByteString;)Lstream/video/sfu/signal/SendStatsRequest;
+	public static synthetic fun copy$default (Lstream/video/sfu/signal/SendStatsRequest;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Lokio/ByteString;ILjava/lang/Object;)Lstream/video/sfu/signal/SendStatsRequest;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getPublisher_stats ()Ljava/lang/String;
+	public final fun getSdk ()Ljava/lang/String;
+	public final fun getSdk_version ()Ljava/lang/String;
+	public final fun getSession_id ()Ljava/lang/String;
+	public final fun getSubscriber_stats ()Ljava/lang/String;
+	public final fun getWebrtc_version ()Ljava/lang/String;
+	public fun hashCode ()I
+	public synthetic fun newBuilder ()Lcom/squareup/wire/Message$Builder;
+	public synthetic fun newBuilder ()Ljava/lang/Void;
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class stream/video/sfu/signal/SendStatsRequest$Companion {
+}
+
+public final class stream/video/sfu/signal/SendStatsResponse : com/squareup/wire/Message {
+	public static final field ADAPTER Lcom/squareup/wire/ProtoAdapter;
+	public static final field Companion Lstream/video/sfu/signal/SendStatsResponse$Companion;
+	public fun <init> ()V
+	public fun <init> (Lstream/video/sfu/models/Error;Lokio/ByteString;)V
+	public synthetic fun <init> (Lstream/video/sfu/models/Error;Lokio/ByteString;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun copy (Lstream/video/sfu/models/Error;Lokio/ByteString;)Lstream/video/sfu/signal/SendStatsResponse;
+	public static synthetic fun copy$default (Lstream/video/sfu/signal/SendStatsResponse;Lstream/video/sfu/models/Error;Lokio/ByteString;ILjava/lang/Object;)Lstream/video/sfu/signal/SendStatsResponse;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getError ()Lstream/video/sfu/models/Error;
+	public fun hashCode ()I
+	public synthetic fun newBuilder ()Lcom/squareup/wire/Message$Builder;
+	public synthetic fun newBuilder ()Ljava/lang/Void;
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class stream/video/sfu/signal/SendStatsResponse$Companion {
 }
 
 public final class stream/video/sfu/signal/SetPublisherRequest : com/squareup/wire/Message {

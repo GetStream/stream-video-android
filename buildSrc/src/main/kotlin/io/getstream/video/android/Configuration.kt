@@ -12,4 +12,5 @@ object Configuration {
     const val snapshotVersionName = "$majorVersion.$minorVersion.${patchVersion + 1}-SNAPSHOT"
     const val artifactGroup = "io.getstream"
     const val streamVideoCallGooglePlayVersion = "1.0.5"
+    const val streamWebRtcVersionName = "1.1.1"
 }
