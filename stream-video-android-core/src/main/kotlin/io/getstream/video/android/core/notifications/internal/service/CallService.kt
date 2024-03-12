@@ -226,7 +226,20 @@ internal class CallService : ConnectionService() {
         callDisplayName = intent?.streamCallDisplayName(INTENT_EXTRA_CALL_DISPLAY_NAME)
         val trigger = intent?.getStringExtra(TRIGGER_KEY)
         val streamVideo = StreamVideo.instanceOrNull() as? StreamVideoImpl
+
         val started = if (callId != null && streamVideo != null && trigger != null) {
+            val type = callId!!.type
+            val id = callId!!.id
+            val call = streamVideo.call(type, id)
+            val permissionCheckPass =
+                streamVideo.permissionCheck.checkAndroidPermissions(applicationContext, call)
+            if (!permissionCheckPass) {
+                // Crash early with a meaningful message if Call is used without system permissions.
+                throw IllegalStateException(
+                    "\nCallService attempted to start without required permissions (e.g. android.manifest.permission.RECORD_AUDIO).\n" + "This can happen if you call [Call.join()] without the required permissions being granted by the user.\n" + "If you are using compose and [LaunchCallPermissions] ensure that you rely on the [onRequestResult] callback\n" + "to ensure that the permission is granted prior to calling [Call.join()] or similar.\n" + "Optionally you can use [LaunchPermissionRequest] to ensure permissions are granted.\n" + "If you are not using the [stream-video-android-ui-compose] library,\n" + "ensure that permissions are granted prior calls to [Call.join()].\n" + "You can re-define your permissions and their expected state by overriding the [permissionCheck] in [StreamVideoBuilder]\n",
+                )
+            }
+
             val notificationData: Pair<Notification?, Int> = when (trigger) {
                 TRIGGER_ONGOING_CALL -> Pair(
                     first = streamVideo.getOngoingCallNotification(
@@ -289,7 +302,12 @@ internal class CallService : ConnectionService() {
 
         if (!started) {
             logger.w { "Foreground service did not start!" }
+            // Call stopSelf() and return START_REDELIVER_INTENT.
+            // Because of stopSelf() the service is not restarted.
+            // Because START_REDELIVER_INTENT is returned
+            // the exception RemoteException: Service did not call startForeground... is not thrown.
             stopService()
+            return START_REDELIVER_INTENT
         } else {
             initializeCallAndSocket(streamVideo!!, callId!!)
             if (trigger == TRIGGER_INCOMING_CALL) {
@@ -303,8 +321,8 @@ internal class CallService : ConnectionService() {
             }
             observeCallState(callId!!, streamVideo)
             registerToggleCameraBroadcastReceiver()
+            return START_NOT_STICKY
         }
-        return START_NOT_STICKY
     }
 
     @RequiresApi(Build.VERSION_CODES.O)

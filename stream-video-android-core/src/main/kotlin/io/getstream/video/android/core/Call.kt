@@ -307,6 +307,19 @@ public class Call(
         ring: Boolean = false,
         notify: Boolean = false,
     ): Result<RtcSession> {
+        val permissionPass =
+            clientImpl.permissionCheck.checkAndroidPermissions(clientImpl.context, this)
+        // Check android permissions and log a warning to make sure developers requested adequate permissions prior to using the call.
+        if (!permissionPass) {
+            logger.w {
+                "\n[Call.join()] called without having the required permissions.\n" +
+                    "This will work only if you have [runForegroundServiceForCalls = false] in the StreamVideoBuilder.\n" +
+                    "The reason is that [Call.join()] will by default start an ongoing call foreground service,\n" +
+                    "To start this service and send the appropriate audio/video tracks the permissions are required,\n" +
+                    "otherwise the service will fail to start, resulting in a crash.\n" +
+                    "You can re-define your permissions and their expected state by overriding the [permissionCheck] in [StreamVideoBuilder]\n"
+            }
+        }
         // if we are a guest user, make sure we wait for the token before running the join flow
         clientImpl.guestUserJob?.await()
         // the join flow should retry up to 3 times

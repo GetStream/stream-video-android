@@ -22,10 +22,10 @@ androidxActivity = "1.8.0"
 androidxDataStore = "1.0.0"
 googleService = "4.3.14"
 
-androidxComposeBom = "2024.02.00"
+androidxComposeBom = "2024.02.02"
 androidxComposeCompiler = "1.5.10"
 androidxComposeTracing = "1.0.0-beta01"
-androidxHiltNavigation = "1.1.0"
+androidxHiltNavigation = "1.2.0"
 androidxComposeNavigation = "2.7.6"
 composeStableMarker = "1.0.2"
 
