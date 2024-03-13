@@ -23,11 +23,6 @@
 
 package org.openapitools.client.models
 
-import org.openapitools.client.models.CallResponse
-import org.openapitools.client.models.Credentials
-import org.openapitools.client.models.MemberResponse
-import org.openapitools.client.models.OwnCapability
-import org.openapitools.client.models.StatsOptions
 
 
 
@@ -43,41 +38,13 @@ import org.openapitools.client.infrastructure.Serializer
 /**
  *
  *
- * @param call
- * @param created
- * @param credentials
- * @param duration
- * @param members
- * @param ownCapabilities
- * @param statsOptions
- * @param membership
+ * @param reportingIntervalMs
  */
 
 
-data class JoinCallResponse (
+data class StatsOptions (
 
-    @Json(name = "call")
-    val call: CallResponse,
-
-    @Json(name = "created")
-    val created: kotlin.Boolean,
-
-    @Json(name = "credentials")
-    val credentials: Credentials,
-
-    @Json(name = "duration")
-    val duration: kotlin.String,
-
-    @Json(name = "members")
-    val members: kotlin.collections.List<MemberResponse>,
-
-    @Json(name = "own_capabilities")
-    val ownCapabilities: kotlin.collections.List<OwnCapability>,
-
-    @Json(name = "stats_options")
-    val statsOptions: StatsOptions,
-
-    @Json(name = "membership")
-    val membership: MemberResponse? = null
+    @Json(name = "reporting_interval_ms")
+    val reportingIntervalMs: kotlin.Int
 
 )

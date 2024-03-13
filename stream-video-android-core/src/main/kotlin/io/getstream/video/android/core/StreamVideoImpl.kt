@@ -947,23 +947,6 @@ internal class StreamVideoImpl internal constructor(
         }
     }
 
-    suspend fun sendStats(
-        callType: String,
-        id: String,
-        data: Map<String, Any>,
-    ) {
-//        TODO: Change with new APIs
-//        val request = SendCallStatsRequest(data)
-
-        try {
-            wrapAPICall {
-//                connectionModule.localApi.sendCallStats(callType, id, request)
-            }
-        } catch (e: Exception) {
-            logger.i { "Error sending stats $e" }
-        }
-    }
-
     suspend fun sendReaction(
         callType: String,
         id: String,

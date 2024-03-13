@@ -18,6 +18,11 @@ package io.getstream.video.android.core
 
 import io.getstream.video.android.core.call.stats.model.RtcStatsReport
 import io.getstream.video.android.core.internal.InternalStreamVideoApi
+import io.getstream.video.android.core.model.StreamPeerType
+import org.json.JSONArray
+import org.json.JSONException
+import org.json.JSONObject
+import org.webrtc.RTCStats
 
 @InternalStreamVideoApi
 data class CallStatsReport(
@@ -26,3 +31,45 @@ data class CallStatsReport(
     val local: LocalStats?,
     val stateStats: CallStats,
 )
+
+fun CallStatsReport.toJson(peerType: StreamPeerType): String {
+    val statsKey: String
+    val stats: Map<String, RTCStats>?
+
+    if (peerType == StreamPeerType.PUBLISHER) {
+        statsKey = "publisherStats"
+        stats = publisher?.origin?.statsMap
+    } else {
+        statsKey = "subscriberStats"
+        stats = subscriber?.origin?.statsMap
+    }
+
+    return JSONObject().apply {
+        put(
+            statsKey,
+            JSONArray().also { array ->
+                stats?.forEach { statsEntry ->
+                    array.put(
+                        JSONObject().apply {
+                            put(
+                                statsEntry.key,
+                                JSONObject().apply {
+                                    statsEntry.value.members.forEach { (key, value) ->
+                                        put(
+                                            key,
+                                            try {
+                                                JSONObject(value.toString())
+                                            } catch (e: JSONException) {
+                                                value
+                                            },
+                                        )
+                                    }
+                                },
+                            )
+                        },
+                    )
+                }
+            },
+        )
+    }.toString(4)
+}
