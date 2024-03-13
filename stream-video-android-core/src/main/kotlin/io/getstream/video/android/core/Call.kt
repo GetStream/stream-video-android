@@ -487,9 +487,6 @@ public class Call(
         }
     }
 
-    public fun sendStats(data: Map<String, Any>) {
-    }
-
     private suspend fun handleSignalChannelDisconnect(isRetry: Boolean) {
         // Prevent multiple starts of the reconnect flow. For the start call
         // first check if sfuSocketReconnectionTime isn't already set - if yes

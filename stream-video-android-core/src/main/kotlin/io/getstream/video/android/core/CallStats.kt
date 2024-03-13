@@ -25,7 +25,6 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.stateIn
-import kotlinx.coroutines.launch
 import org.webrtc.CameraEnumerationAndroid
 import org.webrtc.RTCStats
 import stream.video.sfu.models.TrackType
@@ -206,12 +205,6 @@ public class CallStats(val call: Call, val callScope: CoroutineScope) {
         statGroups.forEach {
             logger.i { "statgroup ${it.key}:${it.value}" }
         }
-
-        scope.launch {
-            val toMap = mutableMapOf<String, Any>()
-            toMap["data"] = stats.origin.statsMap
-            call.sendStats(toMap)
-        }
     }
 
     fun updateLocalStats() {
@@ -239,13 +232,5 @@ public class CallStats(val call: Call, val callScope: CoroutineScope) {
             deviceModel = deviceModel,
         )
         _local.value = local
-
-        scope.launch {
-            val toMap = mutableMapOf<String, Any>()
-            toMap["availableResolutions"] = availableResolutions
-            toMap["maxResolution"] = maxResolution ?: ""
-            toMap["displayingAt"] = displayingAt
-            call.sendStats(toMap)
-        }
     }
 }

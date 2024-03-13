@@ -59,7 +59,6 @@ public final class io/getstream/video/android/core/Call {
 	public final fun sendCustomEvent (Ljava/util/Map;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public final fun sendReaction (Ljava/lang/String;Ljava/lang/String;Ljava/util/Map;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public static synthetic fun sendReaction$default (Lio/getstream/video/android/core/Call;Ljava/lang/String;Ljava/lang/String;Ljava/util/Map;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
-	public final fun sendStats (Ljava/util/Map;)V
 	public final fun setAudioFilter (Lio/getstream/video/android/core/call/audio/AudioFilter;)V
 	public final fun setVideoFilter (Lio/getstream/video/android/core/call/video/VideoFilter;)V
 	public final fun setVisibility (Ljava/lang/String;Lstream/video/sfu/models/TrackType;Z)V
@@ -955,7 +954,6 @@ public final class io/getstream/video/android/core/call/RtcSession {
 	public final fun onNegotiationNeeded (Lio/getstream/video/android/core/call/connection/StreamPeerConnection;Lio/getstream/video/android/core/model/StreamPeerType;)V
 	public final fun reconnect (ZLkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public final fun requestSubscriberIceRestart (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
-	public final fun sendCallStats (Lio/getstream/video/android/core/CallStatsReport;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public final fun setScreenShareTrack ()V
 	public final fun setSubscriber (Lio/getstream/video/android/core/call/connection/StreamPeerConnection;)V
 	public final fun setTracks (Ljava/util/Map;)V
