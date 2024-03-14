@@ -184,7 +184,6 @@ class DirectCallActivity : ComponentActivity() {
     }
     private fun leave() {
         lifecycleScope.launch(Dispatchers.IO) {
-            //call.reject()
             withContext(Dispatchers.Main) {
                 finish()
             }

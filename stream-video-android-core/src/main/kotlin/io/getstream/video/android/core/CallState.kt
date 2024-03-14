@@ -904,14 +904,15 @@ public class CallState(
         Log.d("RingingState", "Current: ${_ringingState.value}")
         val rejectedByMeBool = !rejectedByMe.isNullOrBlank()
         Log.d(
-            "RingingState", "Flags: [\n" +
-                    "acceptedByMe: ${!acceptedByMe.isNullOrBlank()},\n" +
-                    "rejectedByMe: $rejectedByMeBool,\n" +
-                    "hasActiveCall: $hasActiveCall\n" +
-                    "hasRingingCall: $hasRingingCall\n" +
-                    "userIsParticipant: $userIsParticipant,\n" +
-                    "timeout: $timeout\n" +
-                    "]"
+            "RingingState",
+            "Flags: [\n" +
+                "acceptedByMe: ${!acceptedByMe.isNullOrBlank()},\n" +
+                "rejectedByMe: $rejectedByMeBool,\n" +
+                "hasActiveCall: $hasActiveCall\n" +
+                "hasRingingCall: $hasRingingCall\n" +
+                "userIsParticipant: $userIsParticipant,\n" +
+                "timeout: $timeout\n" +
+                "]",
         )
 
         // no members - call is empty, we can join
@@ -1198,7 +1199,7 @@ public class CallState(
         pins[sessionId] = PinUpdateAtTime(
             PinUpdate(userId, sessionId),
             OffsetDateTime.now(Clock.systemUTC()),
-            PinType.Local
+            PinType.Local,
         )
         _localPins.value = pins
     }

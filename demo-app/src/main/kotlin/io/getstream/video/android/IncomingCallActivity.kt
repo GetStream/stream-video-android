@@ -139,7 +139,8 @@ class IncomingCallActivity : ComponentActivity() {
                                     finish()
                                 },
                             )
-                        }, onNoAnswerContent = {
+                        },
+                        onNoAnswerContent = {
                             LaunchedEffect(key1 = call) {
                                 call.leave()
                                 finish()
