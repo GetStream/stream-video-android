@@ -161,6 +161,9 @@ class DirectCallActivity : ComponentActivity() {
                                 },
                             )
                         },
+                        onNoAnswerContent = {
+                            leave()
+                        },
                         onRejectedContent = {
                             reject(call)
                         },
@@ -174,6 +177,14 @@ class DirectCallActivity : ComponentActivity() {
     private fun reject(call: Call) {
         lifecycleScope.launch(Dispatchers.IO) {
             call.reject()
+            withContext(Dispatchers.Main) {
+                finish()
+            }
+        }
+    }
+    private fun leave() {
+        lifecycleScope.launch(Dispatchers.IO) {
+            //call.reject()
             withContext(Dispatchers.Main) {
                 finish()
             }

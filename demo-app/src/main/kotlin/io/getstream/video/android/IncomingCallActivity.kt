@@ -139,6 +139,11 @@ class IncomingCallActivity : ComponentActivity() {
                                     finish()
                                 },
                             )
+                        }, onNoAnswerContent = {
+                            LaunchedEffect(key1 = call) {
+                                call.leave()
+                                finish()
+                            }
                         },
                         onRejectedContent = {
                             LaunchedEffect(key1 = call) {
