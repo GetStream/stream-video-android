@@ -235,6 +235,9 @@ message VideoMediaRequest {
 }
 
 
+// VideoLayerSetting is used to specify various parameters of a particular encoding in simulcast.
+// The parameters are specified here - https://developer.mozilla.org/en-US/docs/Web/API/RTCRtpEncodingParameters
+// SDKs use these parameters sent from the server to dynamically adjust these parameters to save CPU, bandwidth
 message VideoLayerSetting {
   string name = 1;
   bool active = 2;
@@ -248,6 +251,7 @@ message VideoLayerSetting {
   }
   Priority priority = 5;
   models.Codec codec = 6;
+  uint32 max_framerate = 7;
 }
 
 message VideoSender {
