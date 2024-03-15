@@ -25,6 +25,7 @@ io.getstream.video.android.core.model
 io.getstream.video.android.core.notifications
 io.getstream.video.android.core.notifications.internal.receivers
 io.getstream.video.android.core.permission
+io.getstream.video.android.core.permission.android
 io.getstream.video.android.core.socket
 io.getstream.video.android.core.sounds
 io.getstream.video.android.core.utils
@@ -43,7 +44,6 @@ io.getstream.video.android.compose.permission
 io.getstream.video.android.compose.state.ui.internal
 io.getstream.video.android.compose.state.ui.participants
 io.getstream.video.android.compose.theme
-io.getstream.video.android.compose.theme.base
 io.getstream.video.android.compose.ui.components.audio
 io.getstream.video.android.compose.ui.components.avatar
 io.getstream.video.android.compose.ui.components.background
