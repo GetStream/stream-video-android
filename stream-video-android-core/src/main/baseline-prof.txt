@@ -176,16 +176,13 @@ PLio/getstream/video/android/core/MicrophoneManager;->pause(Z)V
 PLio/getstream/video/android/core/MicrophoneManager;->setEnabled$default(Lio/getstream/video/android/core/MicrophoneManager;ZZILjava/lang/Object;)V
 PLio/getstream/video/android/core/MicrophoneManager;->setEnabled(ZZ)V
 PLio/getstream/video/android/core/MicrophoneManager;->setup$stream_video_android_core_release()V
-Lio/getstream/video/android/core/MicrophoneManager$$ExternalSyntheticApiModelOutline0;
-HSPLio/getstream/video/android/core/MicrophoneManager$$ExternalSyntheticApiModelOutline0;->m(Landroid/content/res/Resources;I)F
-PLio/getstream/video/android/core/MicrophoneManager$$ExternalSyntheticApiModelOutline0;->m(Landroid/media/AudioManager;I)V
 PLio/getstream/video/android/core/MicrophoneManager$isEnabled$1;-><clinit>()V
 PLio/getstream/video/android/core/MicrophoneManager$isEnabled$1;-><init>()V
 PLio/getstream/video/android/core/MicrophoneManager$isEnabled$1;->invoke(Lio/getstream/video/android/core/DeviceStatus;)Ljava/lang/Boolean;
 PLio/getstream/video/android/core/MicrophoneManager$isEnabled$1;->invoke(Ljava/lang/Object;)Ljava/lang/Object;
 PLio/getstream/video/android/core/MicrophoneManager$setup$1;-><init>(Lio/getstream/video/android/core/MicrophoneManager;)V
 PLio/getstream/video/android/core/MicrophoneManager$setup$1;->invoke(Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object;
-PLio/getstream/video/android/core/MicrophoneManager$setup$1;->invoke(Ljava/util/List;Lcom/twilio/audioswitch/AudioDevice;)V
+HPLio/getstream/video/android/core/MicrophoneManager$setup$1;->invoke(Ljava/util/List;Lcom/twilio/audioswitch/AudioDevice;)V
 PLio/getstream/video/android/core/ParticipantState$Media;-><init>(Ljava/lang/String;Lio/getstream/video/android/core/model/MediaTrack;ZLstream/video/sfu/models/TrackType;)V
 PLio/getstream/video/android/core/ParticipantState$Media;-><init>(Ljava/lang/String;Lio/getstream/video/android/core/model/MediaTrack;ZLstream/video/sfu/models/TrackType;Lkotlin/jvm/internal/DefaultConstructorMarker;)V
 PLio/getstream/video/android/core/ParticipantState$Media;->getType()Lstream/video/sfu/models/TrackType;
@@ -195,7 +192,7 @@ PLio/getstream/video/android/core/ParticipantState$Video;->getEnabled()Z
 PLio/getstream/video/android/core/ParticipantState$Video;->getSessionId()Ljava/lang/String;
 PLio/getstream/video/android/core/ParticipantState$Video;->getTrack()Lio/getstream/video/android/core/model/MediaTrack;
 PLio/getstream/video/android/core/ParticipantState$Video;->getTrack()Lio/getstream/video/android/core/model/VideoTrack;
-PLio/getstream/video/android/core/PeerConnectionStats;-><init>()V
+PLio/getstream/video/android/core/PeerConnectionStats;-><init>(Lkotlinx/coroutines/CoroutineScope;)V
 Lio/getstream/video/android/core/R$raw;
 PLio/getstream/video/android/core/RealtimeConnection$PreJoin;-><clinit>()V
 PLio/getstream/video/android/core/RealtimeConnection$PreJoin;-><init>()V
@@ -225,8 +222,8 @@ HSPLio/getstream/video/android/core/StreamVideo$Companion;->instanceOrNull()Lio/
 HSPLio/getstream/video/android/core/StreamVideo$Companion;->isInstalled()Z
 Lio/getstream/video/android/core/StreamVideoBuilder;
 HPLio/getstream/video/android/core/StreamVideoBuilder;->$r8$lambda$pMgDc5J8j4FPKtaaFxhMHOjet2k(Lio/getstream/video/android/core/StreamVideoBuilder;Lio/getstream/log/Priority;Ljava/lang/String;)Z
-HSPLio/getstream/video/android/core/StreamVideoBuilder;-><init>(Landroid/content/Context;Ljava/lang/String;Lio/getstream/video/android/core/GEO;Lio/getstream/video/android/model/User;Ljava/lang/String;Lkotlin/jvm/functions/Function2;Lio/getstream/video/android/core/logging/LoggingLevel;Lio/getstream/video/android/core/notifications/NotificationConfig;Lkotlin/jvm/functions/Function1;JZLjava/lang/String;ZLjava/lang/String;Lio/getstream/video/android/core/sounds/Sounds;)V
-HSPLio/getstream/video/android/core/StreamVideoBuilder;-><init>(Landroid/content/Context;Ljava/lang/String;Lio/getstream/video/android/core/GEO;Lio/getstream/video/android/model/User;Ljava/lang/String;Lkotlin/jvm/functions/Function2;Lio/getstream/video/android/core/logging/LoggingLevel;Lio/getstream/video/android/core/notifications/NotificationConfig;Lkotlin/jvm/functions/Function1;JZLjava/lang/String;ZLjava/lang/String;Lio/getstream/video/android/core/sounds/Sounds;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+HSPLio/getstream/video/android/core/StreamVideoBuilder;-><init>(Landroid/content/Context;Ljava/lang/String;Lio/getstream/video/android/core/GEO;Lio/getstream/video/android/model/User;Ljava/lang/String;Lkotlin/jvm/functions/Function2;Lio/getstream/video/android/core/logging/LoggingLevel;Lio/getstream/video/android/core/notifications/NotificationConfig;Lkotlin/jvm/functions/Function1;JZLjava/lang/String;ZLjava/lang/String;Lio/getstream/video/android/core/sounds/Sounds;Lio/getstream/video/android/core/permission/android/StreamPermissionCheck;)V
+HSPLio/getstream/video/android/core/StreamVideoBuilder;-><init>(Landroid/content/Context;Ljava/lang/String;Lio/getstream/video/android/core/GEO;Lio/getstream/video/android/model/User;Ljava/lang/String;Lkotlin/jvm/functions/Function2;Lio/getstream/video/android/core/logging/LoggingLevel;Lio/getstream/video/android/core/notifications/NotificationConfig;Lkotlin/jvm/functions/Function1;JZLjava/lang/String;ZLjava/lang/String;Lio/getstream/video/android/core/sounds/Sounds;Lio/getstream/video/android/core/permission/android/StreamPermissionCheck;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 HSPLio/getstream/video/android/core/StreamVideoBuilder;->access$getUser$p(Lio/getstream/video/android/core/StreamVideoBuilder;)Lio/getstream/video/android/model/User;
 HPLio/getstream/video/android/core/StreamVideoBuilder;->build$lambda$0(Lio/getstream/video/android/core/StreamVideoBuilder;Lio/getstream/log/Priority;Ljava/lang/String;)Z
 HSPLio/getstream/video/android/core/StreamVideoBuilder;->build()Lio/getstream/video/android/core/StreamVideo;
@@ -250,7 +247,7 @@ HSPLio/getstream/video/android/core/StreamVideoBuilder$build$4;-><init>(Lio/gets
 HSPLio/getstream/video/android/core/StreamVideoBuilder$build$4;->create(Ljava/lang/Object;Lkotlin/coroutines/Continuation;)Lkotlin/coroutines/Continuation;
 HSPLio/getstream/video/android/core/StreamVideoBuilder$build$4;->invokeSuspend(Ljava/lang/Object;)Ljava/lang/Object;
 Lio/getstream/video/android/core/StreamVideoImpl;
-HSPLio/getstream/video/android/core/StreamVideoImpl;-><init>(Landroid/content/Context;Lkotlinx/coroutines/CoroutineScope;Lio/getstream/video/android/model/User;Ljava/lang/String;Ljava/lang/String;Landroidx/lifecycle/Lifecycle;Lio/getstream/video/android/core/logging/LoggingLevel;Lio/getstream/video/android/core/internal/module/ConnectionModule;Lkotlin/jvm/functions/Function2;Lio/getstream/video/android/core/notifications/internal/StreamNotificationManager;ZLjava/lang/String;Lio/getstream/video/android/core/sounds/Sounds;)V
+HSPLio/getstream/video/android/core/StreamVideoImpl;-><init>(Landroid/content/Context;Lkotlinx/coroutines/CoroutineScope;Lio/getstream/video/android/model/User;Ljava/lang/String;Ljava/lang/String;Landroidx/lifecycle/Lifecycle;Lio/getstream/video/android/core/logging/LoggingLevel;Lio/getstream/video/android/core/internal/module/ConnectionModule;Lkotlin/jvm/functions/Function2;Lio/getstream/video/android/core/notifications/internal/StreamNotificationManager;ZLjava/lang/String;Lio/getstream/video/android/core/sounds/Sounds;Lio/getstream/video/android/core/permission/android/StreamPermissionCheck;)V
 HSPLio/getstream/video/android/core/StreamVideoImpl;->_selectLocation(Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 HSPLio/getstream/video/android/core/StreamVideoImpl;->access$getCalls$p(Lio/getstream/video/android/core/StreamVideoImpl;)Ljava/util/Map;
 HSPLio/getstream/video/android/core/StreamVideoImpl;->access$getLifecycleObserver$p(Lio/getstream/video/android/core/StreamVideoImpl;)Lio/getstream/video/android/core/lifecycle/internal/StreamLifecycleObserver;
@@ -513,8 +510,6 @@ HSPLio/getstream/video/android/core/lifecycle/internal/StreamLifecycleObserver;-
 Lio/getstream/video/android/core/lifecycle/internal/StreamLifecycleObserver$observe$2;
 HSPLio/getstream/video/android/core/lifecycle/internal/StreamLifecycleObserver$observe$2;-><init>(Lio/getstream/video/android/core/lifecycle/internal/StreamLifecycleObserver;Lkotlin/coroutines/Continuation;)V
 HSPLio/getstream/video/android/core/lifecycle/internal/StreamLifecycleObserver$observe$2;->create(Ljava/lang/Object;Lkotlin/coroutines/Continuation;)Lkotlin/coroutines/Continuation;
-HSPLio/getstream/video/android/core/lifecycle/internal/StreamLifecycleObserver$observe$2;->invoke(Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object;
-HSPLio/getstream/video/android/core/lifecycle/internal/StreamLifecycleObserver$observe$2;->invoke(Lkotlinx/coroutines/CoroutineScope;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 HSPLio/getstream/video/android/core/lifecycle/internal/StreamLifecycleObserver$observe$2;->invokeSuspend(Ljava/lang/Object;)Ljava/lang/Object;
 Lio/getstream/video/android/core/logging/HttpLoggingLevel;
 HSPLio/getstream/video/android/core/logging/HttpLoggingLevel;->$values()[Lio/getstream/video/android/core/logging/HttpLoggingLevel;
@@ -600,6 +595,9 @@ HSPLio/getstream/video/android/core/notifications/internal/storage/DeviceTokenSt
 HSPLio/getstream/video/android/core/notifications/internal/storage/DeviceTokenStorage;->getDataStore(Landroid/content/Context;)Landroidx/datastore/core/DataStore;
 Lio/getstream/video/android/core/notifications/internal/storage/DeviceTokenStorage$special$$inlined$map$1;
 HSPLio/getstream/video/android/core/notifications/internal/storage/DeviceTokenStorage$special$$inlined$map$1;-><init>(Lkotlinx/coroutines/flow/Flow;)V
+Lio/getstream/video/android/core/permission/android/DefaultStreamPermissionCheck;
+HSPLio/getstream/video/android/core/permission/android/DefaultStreamPermissionCheck;-><init>()V
+Lio/getstream/video/android/core/permission/android/StreamPermissionCheck;
 Lio/getstream/video/android/core/socket/CoordinatorSocket;
 HSPLio/getstream/video/android/core/socket/CoordinatorSocket;-><init>(Ljava/lang/String;Lio/getstream/video/android/model/User;Ljava/lang/String;Lkotlinx/coroutines/CoroutineScope;Lokhttp3/OkHttpClient;Lio/getstream/video/android/core/internal/network/NetworkStateProvider;)V
 HSPLio/getstream/video/android/core/socket/CoordinatorSocket;->authenticate()V
@@ -608,8 +606,8 @@ HPLio/getstream/video/android/core/socket/CoordinatorSocket;->onMessage(Lokhttp3
 Lio/getstream/video/android/core/socket/CoordinatorSocket$1;
 HSPLio/getstream/video/android/core/socket/CoordinatorSocket$1;-><init>(Lkotlin/coroutines/Continuation;)V
 Lio/getstream/video/android/core/socket/CoordinatorSocket$onMessage$2;
-HPLio/getstream/video/android/core/socket/CoordinatorSocket$onMessage$2;-><init>(Ljava/lang/String;Lio/getstream/video/android/core/socket/CoordinatorSocket;Lkotlin/coroutines/Continuation;)V
-HSPLio/getstream/video/android/core/socket/CoordinatorSocket$onMessage$2;->create(Ljava/lang/Object;Lkotlin/coroutines/Continuation;)Lkotlin/coroutines/Continuation;
+HSPLio/getstream/video/android/core/socket/CoordinatorSocket$onMessage$2;-><init>(Ljava/lang/String;Lio/getstream/video/android/core/socket/CoordinatorSocket;Lkotlin/coroutines/Continuation;)V
+HPLio/getstream/video/android/core/socket/CoordinatorSocket$onMessage$2;->create(Ljava/lang/Object;Lkotlin/coroutines/Continuation;)Lkotlin/coroutines/Continuation;
 HPLio/getstream/video/android/core/socket/CoordinatorSocket$onMessage$2;->invokeSuspend(Ljava/lang/Object;)Ljava/lang/Object;
 Lio/getstream/video/android/core/socket/ErrorResponse;
 Lio/getstream/video/android/core/socket/PersistentSocket;
@@ -671,7 +669,7 @@ HSPLio/getstream/video/android/core/socket/SocketState$NotConnected;-><init>()V
 Lio/getstream/video/android/core/socket/internal/HealthMonitor;
 HSPLio/getstream/video/android/core/socket/internal/HealthMonitor;-><init>(Lio/getstream/video/android/core/socket/internal/HealthMonitor$HealthCallback;Lkotlinx/coroutines/CoroutineScope;)V
 PLio/getstream/video/android/core/socket/internal/HealthMonitor;->access$getHealthCallback$p(Lio/getstream/video/android/core/socket/internal/HealthMonitor;)Lio/getstream/video/android/core/socket/internal/HealthMonitor$HealthCallback;
-HSPLio/getstream/video/android/core/socket/internal/HealthMonitor;->access$needToReconnect(Lio/getstream/video/android/core/socket/internal/HealthMonitor;)Z
+HPLio/getstream/video/android/core/socket/internal/HealthMonitor;->access$needToReconnect(Lio/getstream/video/android/core/socket/internal/HealthMonitor;)Z
 HPLio/getstream/video/android/core/socket/internal/HealthMonitor;->ack()V
 HPLio/getstream/video/android/core/socket/internal/HealthMonitor;->needToReconnect()Z
 HSPLio/getstream/video/android/core/socket/internal/HealthMonitor;->start()V
@@ -694,7 +692,7 @@ HSPLio/getstream/video/android/core/sounds/Sounds;-><init>(Ljava/lang/Integer;Lj
 PLio/getstream/video/android/core/utils/CallClientUtilsKt;->buildAudioConstraints()Lorg/webrtc/MediaConstraints;
 Lio/getstream/video/android/core/utils/DebugInfo;
 HSPLio/getstream/video/android/core/utils/DebugInfo;-><init>(Lio/getstream/video/android/core/StreamVideoImpl;)V
-PLio/getstream/video/android/core/utils/DebugInfo;->getLogger()Lio/getstream/log/TaggedLogger;
+HPLio/getstream/video/android/core/utils/DebugInfo;->getLogger()Lio/getstream/log/TaggedLogger;
 HPLio/getstream/video/android/core/utils/DebugInfo;->log()V
 HSPLio/getstream/video/android/core/utils/DebugInfo;->start()V
 HSPLio/getstream/video/android/core/utils/DebugInfo;->trackTime(Ljava/lang/String;)Lio/getstream/video/android/core/utils/Timer;
@@ -742,7 +740,7 @@ PLio/getstream/video/android/core/utils/StateFlowKt$mapState$$inlined$map$1$2$1;
 PLio/getstream/video/android/core/utils/StateFlowKt$mapState$1;-><init>(Lkotlin/jvm/functions/Function1;Lkotlinx/coroutines/flow/StateFlow;)V
 PLio/getstream/video/android/core/utils/StateFlowKt$mapState$1;->invoke()Ljava/lang/Object;
 Lio/getstream/video/android/core/utils/StringUtilsKt;
-HPLio/getstream/video/android/core/utils/StringUtilsKt;->initials(Ljava/lang/String;)Ljava/lang/String;
+HSPLio/getstream/video/android/core/utils/StringUtilsKt;->initials(Ljava/lang/String;)Ljava/lang/String;
 Lio/getstream/video/android/core/utils/StringUtilsKt$initials$1;
 HSPLio/getstream/video/android/core/utils/StringUtilsKt$initials$1;-><clinit>()V
 HSPLio/getstream/video/android/core/utils/StringUtilsKt$initials$1;-><init>()V
@@ -1057,7 +1055,7 @@ PLorg/openapitools/client/models/OwnCapability$MuteUsers;-><clinit>()V
 PLorg/openapitools/client/models/OwnCapability$MuteUsers;-><init>()V
 Lorg/openapitools/client/models/OwnCapability$OwnCapabilityAdapter;
 HSPLorg/openapitools/client/models/OwnCapability$OwnCapabilityAdapter;-><init>()V
-HPLorg/openapitools/client/models/OwnCapability$OwnCapabilityAdapter;->fromJson(Lcom/squareup/moshi/JsonReader;)Lorg/openapitools/client/models/OwnCapability;
+PLorg/openapitools/client/models/OwnCapability$OwnCapabilityAdapter;->fromJson(Lcom/squareup/moshi/JsonReader;)Lorg/openapitools/client/models/OwnCapability;
 PLorg/openapitools/client/models/OwnCapability$PinForEveryone;-><clinit>()V
 PLorg/openapitools/client/models/OwnCapability$PinForEveryone;-><init>()V
 PLorg/openapitools/client/models/OwnCapability$ReadCall;-><clinit>()V
@@ -1155,8 +1153,8 @@ PLorg/openapitools/client/models/TranscriptionSettings$Mode;-><clinit>()V
 PLorg/openapitools/client/models/TranscriptionSettings$Mode;-><init>(Ljava/lang/String;)V
 PLorg/openapitools/client/models/TranscriptionSettings$Mode;-><init>(Ljava/lang/String;Lkotlin/jvm/internal/DefaultConstructorMarker;)V
 PLorg/openapitools/client/models/TranscriptionSettings$Mode;->toString()Ljava/lang/String;
-PLorg/openapitools/client/models/TranscriptionSettings$Mode$Available;-><clinit>()V
-PLorg/openapitools/client/models/TranscriptionSettings$Mode$Available;-><init>()V
+PLorg/openapitools/client/models/TranscriptionSettings$Mode$AutoOn;-><clinit>()V
+PLorg/openapitools/client/models/TranscriptionSettings$Mode$AutoOn;-><init>()V
 PLorg/openapitools/client/models/TranscriptionSettings$Mode$Companion;-><init>()V
 PLorg/openapitools/client/models/TranscriptionSettings$Mode$Companion;-><init>(Lkotlin/jvm/internal/DefaultConstructorMarker;)V
 PLorg/openapitools/client/models/TranscriptionSettings$Mode$Companion;->fromString(Ljava/lang/String;)Lorg/openapitools/client/models/TranscriptionSettings$Mode;
@@ -1275,7 +1273,7 @@ PLorg/webrtc/EglRenderer;->init(Lorg/webrtc/EglBase$Context;[ILorg/webrtc/Render
 PLorg/webrtc/EglRenderer;->lambda$init$0$org-webrtc-EglRenderer(Lorg/webrtc/EglBase$Context;[I)V
 PLorg/webrtc/EglRenderer;->lambda$release$1$org-webrtc-EglRenderer(Ljava/util/concurrent/CountDownLatch;)V
 PLorg/webrtc/EglRenderer;->lambda$release$2$org-webrtc-EglRenderer(Landroid/os/Looper;)V
-PLorg/webrtc/EglRenderer;->logD(Ljava/lang/String;)V
+HPLorg/webrtc/EglRenderer;->logD(Ljava/lang/String;)V
 HPLorg/webrtc/EglRenderer;->logStatistics()V
 PLorg/webrtc/EglRenderer;->postToRenderThread(Ljava/lang/Runnable;)V
 PLorg/webrtc/EglRenderer;->release()V
@@ -1331,10 +1329,10 @@ PLorg/webrtc/JniHelper;->getStringBytes(Ljava/lang/String;)[B
 PLorg/webrtc/JniHelper;->getValue(Ljava/util/Map$Entry;)Ljava/lang/Object;
 PLorg/webrtc/Logging;-><clinit>()V
 PLorg/webrtc/Logging;->createFallbackLogger()Ljava/util/logging/Logger;
-PLorg/webrtc/Logging;->d(Ljava/lang/String;Ljava/lang/String;)V
+HPLorg/webrtc/Logging;->d(Ljava/lang/String;Ljava/lang/String;)V
 PLorg/webrtc/Logging;->e(Ljava/lang/String;Ljava/lang/String;)V
 PLorg/webrtc/Logging;->injectLoggable(Lorg/webrtc/Loggable;Lorg/webrtc/Logging$Severity;)V
-PLorg/webrtc/Logging;->log(Lorg/webrtc/Logging$Severity;Ljava/lang/String;Ljava/lang/String;)V
+HPLorg/webrtc/Logging;->log(Lorg/webrtc/Logging$Severity;Ljava/lang/String;Ljava/lang/String;)V
 PLorg/webrtc/Logging;->w(Ljava/lang/String;Ljava/lang/String;)V
 PLorg/webrtc/Logging$1;-><clinit>()V
 PLorg/webrtc/Logging$Severity;->$values()[Lorg/webrtc/Logging$Severity;

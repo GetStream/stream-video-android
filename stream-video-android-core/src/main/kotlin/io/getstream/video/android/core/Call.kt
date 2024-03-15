@@ -112,15 +112,15 @@ public class Call(
     val id: String,
     val user: User,
 ) {
-    private var statsGatheringJob: Job? = null
     private var location: String? = null
-
     private var subscriptions = mutableSetOf<EventSubscription>()
 
     internal val clientImpl = client as StreamVideoImpl
-    private val logger by taggedLogger("Call")
 
+    private val logger by taggedLogger("Call")
     private val supervisorJob = SupervisorJob()
+    private var callStatsReportingJob: Job? = null
+
     private val scope = CoroutineScope(clientImpl.scope.coroutineContext + supervisorJob)
 
     /** The call state contains all state such as the participant list, reactions etc */
@@ -303,6 +303,19 @@ public class Call(
         ring: Boolean = false,
         notify: Boolean = false,
     ): Result<RtcSession> {
+        val permissionPass =
+            clientImpl.permissionCheck.checkAndroidPermissions(clientImpl.context, this)
+        // Check android permissions and log a warning to make sure developers requested adequate permissions prior to using the call.
+        if (!permissionPass) {
+            logger.w {
+                "\n[Call.join()] called without having the required permissions.\n" +
+                    "This will work only if you have [runForegroundServiceForCalls = false] in the StreamVideoBuilder.\n" +
+                    "The reason is that [Call.join()] will by default start an ongoing call foreground service,\n" +
+                    "To start this service and send the appropriate audio/video tracks the permissions are required,\n" +
+                    "otherwise the service will fail to start, resulting in a crash.\n" +
+                    "You can re-define your permissions and their expected state by overriding the [permissionCheck] in [StreamVideoBuilder]\n"
+            }
+        }
         // if we are a guest user, make sure we wait for the token before running the join flow
         clientImpl.guestUserJob?.await()
         // the join flow should retry up to 3 times
@@ -422,18 +435,36 @@ public class Call(
         }
 
         monitor.start()
+        client.state.setActiveCall(this)
+        startCallStatsReporting(result.value.statsOptions.reportingIntervalMs.toLong())
 
-        val statsGatheringInterval = 5000L
+        // listen to Signal WS
+        scope.launch {
+            session?.let {
+                it.sfuSocketState.collect { sfuSocketState ->
+                    if (sfuSocketState is SocketState.DisconnectedPermanently) {
+                        handleSignalChannelDisconnect(isRetry = false)
+                    }
+                }
+            }
+        }
 
-        statsGatheringJob = scope.launch {
-            // wait a bit before we capture stats
-            delay(statsGatheringInterval)
+        timer.finish()
+
+        return Success(value = session!!)
+    }
+
+    private suspend fun startCallStatsReporting(reportingIntervalMs: Long = 10_000) {
+        callStatsReportingJob?.cancel()
+        callStatsReportingJob = scope.launch {
+            // Wait a bit before we start capturing stats
+            delay(reportingIntervalMs)
 
             while (isActive) {
-                delay(statsGatheringInterval)
+                delay(reportingIntervalMs)
 
-                val publisherStats = session?.publisher?.getStats()
-                val subscriberStats = session?.subscriber?.getStats()
+                val publisherStats = session?.getPublisherStats()
+                val subscriberStats = session?.getSubscriberStats()
                 state.stats.updateFromRTCStats(publisherStats, isPublisher = true)
                 state.stats.updateFromRTCStats(subscriberStats, isPublisher = false)
                 state.stats.updateLocalStats()
@@ -450,25 +481,10 @@ public class Call(
                 if (statLatencyHistory.value.size > 20) {
                     statLatencyHistory.value = statLatencyHistory.value.takeLast(20)
                 }
+
+                session?.sendCallStats(report)
             }
         }
-
-        client.state.setActiveCall(this)
-
-        // listen to Signal WS
-        scope.launch {
-            session?.let {
-                it.sfuSocketState.collect { sfuSocketState ->
-                    if (sfuSocketState is SocketState.DisconnectedPermanently) {
-                        handleSignalChannelDisconnect(isRetry = false)
-                    }
-                }
-            }
-        }
-
-        timer.finish()
-
-        return Success(value = session!!)
     }
 
     private suspend fun handleSignalChannelDisconnect(isRetry: Boolean) {
@@ -518,10 +534,6 @@ public class Call(
                 sfuSocketReconnectionTime = null
             }
         }
-    }
-
-    suspend fun sendStats(data: Map<String, Any>) {
-        return clientImpl.sendStats(type, id, data)
     }
 
     suspend fun switchSfu() {
@@ -988,7 +1000,7 @@ public class Call(
         monitor.stop()
         session?.cleanup()
         supervisorJob.cancel()
-        statsGatheringJob?.cancel()
+        callStatsReportingJob?.cancel()
         mediaManager.cleanup()
         session = null
     }

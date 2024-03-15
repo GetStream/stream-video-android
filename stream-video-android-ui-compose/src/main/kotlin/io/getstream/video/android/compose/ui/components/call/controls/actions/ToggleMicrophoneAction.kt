@@ -26,7 +26,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.tooling.preview.Preview
-import io.getstream.video.android.compose.theme.base.VideoTheme
+import io.getstream.video.android.compose.theme.VideoTheme
+import io.getstream.video.android.compose.ui.components.base.styling.StreamFixedSizeButtonStyle
 import io.getstream.video.android.core.call.state.CallAction
 import io.getstream.video.android.core.call.state.ToggleMicrophone
 
@@ -48,6 +49,8 @@ public fun ToggleMicrophoneAction(
     disabledColor: Color? = null,
     enabledIconTint: Color? = null,
     disabledIconTint: Color? = null,
+    onStyle: StreamFixedSizeButtonStyle? = null,
+    offStyle: StreamFixedSizeButtonStyle? = null,
     onCallAction: (ToggleMicrophone) -> Unit,
 ): Unit = ToggleAction(
     modifier = modifier,
@@ -58,6 +61,8 @@ public fun ToggleMicrophoneAction(
     enabledIconTint = enabledIconTint,
     disabledIconTint = disabledIconTint,
     isActionActive = isMicrophoneEnabled,
+    onStyle = onStyle,
+    offStyle = offStyle,
     iconOnOff = Pair(Icons.Default.Mic, Icons.Default.MicOff),
 ) {
     onCallAction(ToggleMicrophone(isMicrophoneEnabled.not()))

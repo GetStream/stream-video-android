@@ -41,7 +41,7 @@ fun LiveMain(
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(VideoTheme.colors.appBackground),
+            .background(VideoTheme.colors.baseSheetPrimary),
     ) {
         Column(
             modifier = Modifier.fillMaxSize(),
@@ -53,14 +53,14 @@ fun LiveMain(
                     .width(300.dp)
                     .height(64.dp),
                 colors = ButtonDefaults.buttonColors(
-                    contentColor = VideoTheme.colors.primaryAccent,
-                    backgroundColor = VideoTheme.colors.primaryAccent,
+                    contentColor = VideoTheme.colors.brandPrimary,
+                    backgroundColor = VideoTheme.colors.brandPrimary,
                 ),
                 onClick = {
                     navController.navigate(LiveScreens.Host.destination)
                 },
             ) {
-                Text(text = "host", color = VideoTheme.colors.textHighEmphasis)
+                Text(text = "host", color = VideoTheme.colors.basePrimary)
             }
 
             Spacer(modifier = Modifier.height(14.dp))
@@ -70,14 +70,14 @@ fun LiveMain(
                     .width(300.dp)
                     .height(64.dp),
                 colors = ButtonDefaults.buttonColors(
-                    contentColor = VideoTheme.colors.primaryAccent,
-                    backgroundColor = VideoTheme.colors.primaryAccent,
+                    contentColor = VideoTheme.colors.brandPrimary,
+                    backgroundColor = VideoTheme.colors.brandPrimary,
                 ),
                 onClick = {
                     navController.navigate(LiveScreens.Guest.destination)
                 },
             ) {
-                Text(text = "guest", color = VideoTheme.colors.textHighEmphasis)
+                Text(text = "guest", color = VideoTheme.colors.basePrimary)
             }
         }
     }

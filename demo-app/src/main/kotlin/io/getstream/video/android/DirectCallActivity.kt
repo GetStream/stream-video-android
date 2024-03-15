@@ -28,7 +28,7 @@ import androidx.compose.ui.Modifier
 import androidx.lifecycle.lifecycleScope
 import dagger.hilt.android.AndroidEntryPoint
 import io.getstream.result.Result
-import io.getstream.video.android.compose.theme.base.VideoTheme
+import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.call.ringing.RingingCallContent
 import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.StreamVideo
@@ -161,6 +161,9 @@ class DirectCallActivity : ComponentActivity() {
                                 },
                             )
                         },
+                        onNoAnswerContent = {
+                            leave()
+                        },
                         onRejectedContent = {
                             reject(call)
                         },
@@ -174,6 +177,13 @@ class DirectCallActivity : ComponentActivity() {
     private fun reject(call: Call) {
         lifecycleScope.launch(Dispatchers.IO) {
             call.reject()
+            withContext(Dispatchers.Main) {
+                finish()
+            }
+        }
+    }
+    private fun leave() {
+        lifecycleScope.launch(Dispatchers.IO) {
             withContext(Dispatchers.Main) {
                 finish()
             }

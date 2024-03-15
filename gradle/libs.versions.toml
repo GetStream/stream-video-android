@@ -22,10 +22,10 @@ androidxActivity = "1.8.0"
 androidxDataStore = "1.0.0"
 googleService = "4.3.14"
 
-androidxComposeBom = "2024.02.00"
+androidxComposeBom = "2024.02.02"
 androidxComposeCompiler = "1.5.10"
 androidxComposeTracing = "1.0.0-beta01"
-androidxHiltNavigation = "1.1.0"
+androidxHiltNavigation = "1.2.0"
 androidxComposeNavigation = "2.7.6"
 composeStableMarker = "1.0.2"
 
@@ -72,7 +72,6 @@ playAuth = "20.7.0"
 playAppUpdate = "2.1.0"
 
 hilt = "2.50"
-desugar = "2.0.4"
 leakCanary = "2.12"
 binaryCompatabilityValidator = "0.14.0"
 playPublisher = "3.8.4"
@@ -114,7 +113,6 @@ compose-stable-marker = { group = "com.github.skydoves", name = "compose-stable-
 
 coil = { group = "io.coil-kt", name = "coil", version.ref = "coil" }
 coil-compose = { group = "io.coil-kt", name = "coil-compose", version.ref = "coil" }
-desugar = { group = "com.android.tools", name = "desugar_jdk_libs", version.ref = "desugar" }
 
 landscapist-coil = { group = "com.github.skydoves", name = "landscapist-coil", version.ref = "landscapist" }
 landscapist-animation = { group = "com.github.skydoves", name = "landscapist-animation", version.ref = "landscapist" }

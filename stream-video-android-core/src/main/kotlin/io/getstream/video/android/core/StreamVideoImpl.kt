@@ -43,6 +43,8 @@ import io.getstream.video.android.core.model.UpdateUserPermissionsData
 import io.getstream.video.android.core.model.toRequest
 import io.getstream.video.android.core.notifications.NotificationHandler
 import io.getstream.video.android.core.notifications.internal.StreamNotificationManager
+import io.getstream.video.android.core.permission.android.DefaultStreamPermissionCheck
+import io.getstream.video.android.core.permission.android.StreamPermissionCheck
 import io.getstream.video.android.core.socket.ErrorResponse
 import io.getstream.video.android.core.socket.PersistentSocket
 import io.getstream.video.android.core.socket.SocketState
@@ -137,6 +139,7 @@ internal class StreamVideoImpl internal constructor(
     internal val runForegroundService: Boolean = true,
     internal val testSfuAddress: String? = null,
     internal val sounds: Sounds,
+    internal val permissionCheck: StreamPermissionCheck = DefaultStreamPermissionCheck(),
 ) : StreamVideo,
     NotificationHandler by streamNotificationManager {
 
@@ -941,23 +944,6 @@ internal class StreamVideoImpl internal constructor(
                     connectionModule.api.listRecordingsTypeIdSession1(type, id, sessionId)
                 }
             result
-        }
-    }
-
-    suspend fun sendStats(
-        callType: String,
-        id: String,
-        data: Map<String, Any>,
-    ) {
-//        TODO: Change with new APIs
-//        val request = SendCallStatsRequest(data)
-
-        try {
-            wrapAPICall {
-//                connectionModule.localApi.sendCallStats(callType, id, request)
-            }
-        } catch (e: Exception) {
-            logger.i { "Error sending stats $e" }
         }
     }
 
