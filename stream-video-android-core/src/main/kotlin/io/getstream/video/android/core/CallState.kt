@@ -16,6 +16,7 @@
 
 package io.getstream.video.android.core
 
+import android.util.Log
 import androidx.compose.runtime.Stable
 import io.getstream.log.taggedLogger
 import io.getstream.video.android.core.call.RtcSession
@@ -158,6 +159,7 @@ public sealed interface RealtimeConnection {
      */
     public data object Reconnecting :
         RealtimeConnection // reconnecting to recover from temporary issues
+
     public data object Migrating : RealtimeConnection
     public data class Failed(val error: Any) : RealtimeConnection // permanent failure
     public data object Disconnected : RealtimeConnection // normal disconnect by the app
@@ -885,7 +887,7 @@ public class CallState(
         }
     }
 
-    private fun updateRingingState() {
+    private fun updateRingingState(timeout: Boolean = false) {
         // this is only true when we are in the session (we have accepted/joined the call)
         val userIsParticipant =
             _session.value?.participants?.find { it.user.id == client.userId } != null
@@ -894,16 +896,38 @@ public class CallState(
         val acceptedBy = _acceptedBy.value
         val createdBy = _createdBy.value
         val members = _members.value
+        val rejectedByMe = _rejectedBy.value.findLast { it == client.userId }
         val acceptedByMe = _acceptedBy.value.findLast { it == client.userId }
         val hasActiveCall = client.state.activeCall.value != null
         val hasRingingCall = client.state.ringingCall.value != null
+
+        Log.d("RingingState", "Current: ${_ringingState.value}")
+        val rejectedByMeBool = !rejectedByMe.isNullOrBlank()
+        Log.d(
+            "RingingState",
+            "Flags: [\n" +
+                "acceptedByMe: ${!acceptedByMe.isNullOrBlank()},\n" +
+                "rejectedByMe: $rejectedByMeBool,\n" +
+                "hasActiveCall: $hasActiveCall\n" +
+                "hasRingingCall: $hasRingingCall\n" +
+                "userIsParticipant: $userIsParticipant,\n" +
+                "timeout: $timeout\n" +
+                "]",
+        )
 
         // no members - call is empty, we can join
         val state: RingingState = if (hasActiveCall) {
             RingingState.Active
         } else if (rejectedBy.isNotEmpty() && acceptedBy.isEmpty() && rejectedBy.size >= outgoingMembersCount) {
-            // Call was rejected. Listener should leave the call with call.leave()
-            RingingState.RejectedByAll
+            // Call leave same as CallEndedEvent we do not want to receive updates anymore,
+            // since we or the caller timed-out or the call was rejected.
+            // We leave the call, we do not depend on the SDK user to call leave()
+            call.leave()
+            if (timeout || !rejectedByMeBool) {
+                RingingState.TimeoutNoAnswer
+            } else {
+                RingingState.RejectedByAll
+            }
         } else if (hasRingingCall && createdBy?.id != client.userId) {
             // Member list is not empty, it's not rejected - it's an incoming call
             // If it's already accepted by me then we are in an Active call
@@ -924,6 +948,11 @@ public class CallState(
                 // call is accepted and we are already in the call
                 RingingState.Active
             }
+        } else if (timeout) {
+            // It was an outgoing, or incoming call, but timeout was reached
+            // Call leave same as CallEndedEvent we do not want to receive updates anymore
+            call.leave()
+            RingingState.TimeoutNoAnswer
         } else {
             RingingState.Idle
         }
@@ -934,6 +963,8 @@ public class CallState(
             // handle the auto-cancel for outgoing ringing calls
             if (state is RingingState.Outgoing && !state.acceptedByCallee) {
                 startRingingTimer()
+            } else if (state is RingingState.Incoming && !state.acceptedByMe) {
+                startRingingTimer()
             } else {
                 ringingTimerJob?.cancel()
                 ringingTimerJob = null
@@ -941,6 +972,7 @@ public class CallState(
 
             // stop the call ringing timer if it's running
         }
+        Log.d("RingingState", "Update: $state")
         _ringingState.value = state
     }
 
@@ -981,9 +1013,10 @@ public class CallState(
                 delay(autoCancelTimeout.toLong())
 
                 // double check that we are still in Outgoing call state and call is not active
-                if (_ringingState.value is RingingState.Outgoing && client.state.activeCall.value == null) {
+                if (_ringingState.value is RingingState.Outgoing || _ringingState.value is RingingState.Incoming && client.state.activeCall.value == null) {
                     call.reject()
                     call.leave()
+                    updateRingingState(true)
                 }
             } else {
                 logger.w { "[startRingingTimer] No autoCancelTimeoutMs set - call ring with no timeout" }
@@ -1163,7 +1196,11 @@ public class CallState(
 
     fun pin(userId: String, sessionId: String) {
         val pins = _localPins.value.toMutableMap()
-        pins[sessionId] = PinUpdateAtTime(PinUpdate(userId, sessionId), OffsetDateTime.now(Clock.systemUTC()), PinType.Local)
+        pins[sessionId] = PinUpdateAtTime(
+            PinUpdate(userId, sessionId),
+            OffsetDateTime.now(Clock.systemUTC()),
+            PinType.Local,
+        )
         _localPins.value = pins
     }
 
