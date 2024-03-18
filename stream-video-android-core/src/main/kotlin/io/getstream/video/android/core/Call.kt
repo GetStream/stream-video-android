@@ -87,6 +87,7 @@ import org.webrtc.VideoSink
 import org.webrtc.audio.JavaAudioDeviceModule.AudioSamples
 import stream.video.sfu.models.TrackType
 import stream.video.sfu.models.VideoDimension
+import java.util.Collections
 import kotlin.coroutines.resume
 
 /**
@@ -113,7 +114,7 @@ public class Call(
     val user: User,
 ) {
     private var location: String? = null
-    private var subscriptions = mutableSetOf<EventSubscription>()
+    private var subscriptions = Collections.synchronizedSet(mutableSetOf<EventSubscription>())
 
     internal val clientImpl = client as StreamVideoImpl
 
@@ -309,11 +310,11 @@ public class Call(
         if (!permissionPass) {
             logger.w {
                 "\n[Call.join()] called without having the required permissions.\n" +
-                    "This will work only if you have [runForegroundServiceForCalls = false] in the StreamVideoBuilder.\n" +
-                    "The reason is that [Call.join()] will by default start an ongoing call foreground service,\n" +
-                    "To start this service and send the appropriate audio/video tracks the permissions are required,\n" +
-                    "otherwise the service will fail to start, resulting in a crash.\n" +
-                    "You can re-define your permissions and their expected state by overriding the [permissionCheck] in [StreamVideoBuilder]\n"
+                        "This will work only if you have [runForegroundServiceForCalls = false] in the StreamVideoBuilder.\n" +
+                        "The reason is that [Call.join()] will by default start an ongoing call foreground service,\n" +
+                        "To start this service and send the appropriate audio/video tracks the permissions are required,\n" +
+                        "otherwise the service will fail to start, resulting in a crash.\n" +
+                        "You can re-define your permissions and their expected state by overriding the [permissionCheck] in [StreamVideoBuilder]\n"
             }
         }
         // if we are a guest user, make sure we wait for the token before running the join flow
@@ -338,7 +339,7 @@ public class Call(
                 } else {
                     logger.w {
                         "[join] Call settings were null - this should never happen after a call" +
-                            "is joined. MediaManager will not be initialised with server settings."
+                                "is joined. MediaManager will not be initialised with server settings."
                     }
                 }
                 return result
@@ -510,9 +511,9 @@ public class Call(
 
             // We were not able to restore the SFU peer connection in time
             if (System.currentTimeMillis() - (
-                    sfuSocketReconnectionTime
-                        ?: System.currentTimeMillis()
-                    ) > sfuReconnectTimeoutMillis
+                        sfuSocketReconnectionTime
+                            ?: System.currentTimeMillis()
+                        ) > sfuReconnectTimeoutMillis
             ) {
                 leave(Error("Failed to do a full reconnect - connection issue?"))
                 return
@@ -563,7 +564,7 @@ public class Call(
             } else {
                 logger.e {
                     "[switchSfu] Failed to get a join response during " +
-                        "migration - falling back to reconnect. Error ${joinResponse.errorOrNull()}"
+                            "migration - falling back to reconnect. Error ${joinResponse.errorOrNull()}"
                 }
                 state._connection.value = RealtimeConnection.Reconnecting
             }
@@ -822,7 +823,7 @@ public class Call(
     public fun subscribeFor(
         vararg eventTypes: Class<out VideoEvent>,
         listener: VideoEventListener<VideoEvent>,
-    ): EventSubscription {
+    ): EventSubscription = synchronized(subscriptions) {
         val filter = { event: VideoEvent ->
             eventTypes.any { type -> type.isInstance(event) }
         }
@@ -833,7 +834,7 @@ public class Call(
 
     public fun subscribe(
         listener: VideoEventListener<VideoEvent>,
-    ): EventSubscription {
+    ): EventSubscription = synchronized(subscriptions) {
         val sub = EventSubscription(listener)
         subscriptions.add(sub)
         return sub
@@ -877,7 +878,7 @@ public class Call(
         return clientImpl.updateMembers(type, id, request)
     }
 
-    fun fireEvent(event: VideoEvent) {
+    fun fireEvent(event: VideoEvent) = synchronized(subscriptions) {
         subscriptions.forEach { sub ->
             if (!sub.isDisposed) {
                 // subs without filters should always fire
