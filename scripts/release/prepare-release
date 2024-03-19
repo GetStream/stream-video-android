@@ -1,0 +1,138 @@
+#!/bin/bash
+
+required_branch="auto-release-test"
+### Ensure on develop branch
+if [ "$current_branch" != "required_branch" ]; then
+    echo "You are not on the '$required_branch' branch. Please switch to '$required_branch' to continue."
+    exit 1
+### Change the required files
+fi
+
+echo "Move into ../../buildSrc/src/main/kotlin/io/getstream/video/android/"
+cd ../../buildSrc/src/main/kotlin/io/getstream/video/android/
+file_path="Configuration.kt"
+
+# Function to extract version components
+extract_version_components() {
+    grep "const val $1" "$file_path" | awk -F"=" '{print $2}' | tr -d ' ;'
+}
+
+# Extracting the major, minor, and patch versions
+majorVersion=$(extract_version_components "majorVersion")
+minorVersion=$(extract_version_components "minorVersion")
+patchVersion=$(extract_version_components "patchVersion")
+
+# Automatically increment the patch version
+let "patchVersion+=1"
+
+# Combining them into a version string
+extracted_version="$majorVersion.$minorVersion.$patchVersion"
+
+validate_version_format() {
+    if [[ $1 =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+        return 0 # Valid format
+    else
+        return 1 # Invalid format
+    fi
+}
+
+# Prompting the user for input with validation
+while true; do
+    read -p "Enter version (Press Enter to use $extracted_version or format X.Y.Z): " input_version
+    # Use the extracted version if no input is provided
+    if [[ -z "$input_version" ]]; then
+        version=$extracted_version
+        break
+    elif validate_version_format "$input_version"; then
+        version=$input_version
+        break
+    else
+        echo "Invalid version format. Please use the format X.Y.Z (e.g., 1.2.3)."
+    fi
+done
+
+# Use the extracted version if no input is provided
+version=${input_version:-$extracted_version}
+
+# Split the version into major, minor, and patch numbers
+IFS='.' read -r input_majorVersion input_minorVersion input_patchVersion <<< "$version"
+
+# Function to update version components in the file
+update_version_in_file() {
+    local component=$1
+    local value=$2
+    # For macOS compatibility, check if we need to use an empty string with '-i'
+    if [[ "$OSTYPE" == "darwin"* ]]; then
+        sed -i '' "s/const val $component =.*/const val $component = $value/" "$file_path"
+    else
+        sed -i "s/const val $component =.*/const val $component = $value/" "$file_path"
+    fi
+}
+
+# Updating the versions in the Kotlin file
+update_version_in_file "majorVersion" "$input_majorVersion"
+update_version_in_file "minorVersion" "$input_minorVersion"
+update_version_in_file "patchVersion" "$input_patchVersion"
+
+echo "Version updated to: $version"
+
+# Define the new branch name based on the version
+branch_name="release/$version"
+
+# Create and switch to the new branch
+git checkout -b "$branch_name"
+
+# Optionally, push the new branch to your remote repository
+git push -u origin "$branch_name"
+
+echo "Branch $branch_name created and pushed to remote."
+
+if ! command -v gh >/dev/null 2>&1; then
+    echo "Install and login to 'gh' if you want to create the PR automatically"
+    exit 1
+else
+    # Create the PR and get its number, using $required_branch as the base
+        pr_number=$(gh pr create --title "$pr_title" --body "$pr_body" --base "$required_branch" --head "$branch_name" --json number --jq .number)
+        echo "PR #$pr_number created targeting the '$required_branch' branch."
+
+    # Immediately enable auto-merge
+    gh pr merge "$pr_number" --auto --merge
+    echo "Auto-merge enabled for PR #$pr_number."
+
+    # Initially set ci_status to a dummy value
+    ci_status="pending"
+
+    # Loop until all checks have completed
+    while [ "$ci_status" == "pending" ]; do
+        # Fetch the status of the latest runs
+        summaries=$(gh pr checks "$pr_number" --json status,conclusion)
+
+        # Check if there are any checks that are not completed yet
+        pending_checks=$(echo "$summaries" | jq '[.[] | select(.status != "COMPLETED")] | length')
+
+        if [ "$pending_checks" -gt 0 ]; then
+            echo "CI checks are still running. Waiting..."
+            sleep 30 # Wait for 30 seconds before checking again
+        else
+            # Once all checks are completed, update ci_status to exit the loop
+            ci_status="completed"
+            echo "All CI checks have completed."
+
+            # Optional: Further actions based on check conclusions can be added here
+        fi
+    done
+
+    # Check CI checks outcome and decide if PR should be closed (in case of failures)
+    failed_checks=$(echo "$summaries" | jq '[.[] | select(.conclusion != "SUCCESS")] | length')
+    if [ "$failed_checks" -gt 0 ]; then
+        echo "Detected failing checks in PR #$pr_number. Closing PR..."
+        # Close the PR if necessary
+        # Note: Closing a PR that has auto-merge enabled might require manual intervention or additional logic
+    else
+        echo "All checks passed for PR #$pr_number."
+    fi
+fi
+
+
+
+
