@@ -87,6 +87,7 @@ import org.webrtc.VideoSink
 import org.webrtc.audio.JavaAudioDeviceModule.AudioSamples
 import stream.video.sfu.models.TrackType
 import stream.video.sfu.models.VideoDimension
+import java.util.Collections
 import kotlin.coroutines.resume
 
 /**
@@ -113,7 +114,7 @@ public class Call(
     val user: User,
 ) {
     private var location: String? = null
-    private var subscriptions = mutableSetOf<EventSubscription>()
+    private var subscriptions = Collections.synchronizedSet(mutableSetOf<EventSubscription>())
 
     internal val clientImpl = client as StreamVideoImpl
 
@@ -822,7 +823,7 @@ public class Call(
     public fun subscribeFor(
         vararg eventTypes: Class<out VideoEvent>,
         listener: VideoEventListener<VideoEvent>,
-    ): EventSubscription {
+    ): EventSubscription = synchronized(subscriptions) {
         val filter = { event: VideoEvent ->
             eventTypes.any { type -> type.isInstance(event) }
         }
@@ -833,7 +834,7 @@ public class Call(
 
     public fun subscribe(
         listener: VideoEventListener<VideoEvent>,
-    ): EventSubscription {
+    ): EventSubscription = synchronized(subscriptions) {
         val sub = EventSubscription(listener)
         subscriptions.add(sub)
         return sub
@@ -877,7 +878,7 @@ public class Call(
         return clientImpl.updateMembers(type, id, request)
     }
 
-    fun fireEvent(event: VideoEvent) {
+    fun fireEvent(event: VideoEvent) = synchronized(subscriptions) {
         subscriptions.forEach { sub ->
             if (!sub.isDisposed) {
                 // subs without filters should always fire
