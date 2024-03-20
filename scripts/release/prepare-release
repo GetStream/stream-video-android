@@ -115,7 +115,6 @@ else
     pr_link=$(gh pr create --title "Prepare release: $version" --body "Automatic release PR for version $version." --base "$required_branch" --head "$branch_name")
     # Check if a PR was created
     existing_pr=$(gh pr list --state open --base "$required_branch" | grep "$branch_name" | awk '{print $1}')
-
     if [ -n "$existing_pr" ]; then
        # PR was created
        pr_number=$(echo "$pr_link" | grep -o '[0-9]*$')
@@ -161,33 +160,13 @@ else
                fi
            done
        }
-
-       # Function to check PR checks status and react accordingly
-       check_and_close_pr_if_checks_failed() {
-           checks_output=$(gh pr checks "$pr_number")
-           checks_failed=$(echo "$checks_output" | grep -E 'x|failure' | wc -l)
-
-           if [ "$checks_failed" -gt 0 ]; then
-               echo "Some checks have failed. Closing PR #$pr_number..."
-
-               # Close the PR. Replace "main" with your default branch if different.
-               gh pr close "$pr_number" --delete-branch
-
-               echo "PR #$pr_number has been closed and the branch has been deleted due to failed checks."
-               exit 1
-           else
-               echo "No failed checks detected."
-           fi
-       }
-       ## Initial check
-       check_and_close_pr_if_checks_failed
        # Loop until all checks have completed successfully, ignoring skipped ones
        # Use the function to wait for checks to complete
        if wait_for_checks_to_succeed; then
           echo "All checks passed for PR #$pr_number."
           # Now, wait for the PR to be merged
-          gh pr merge "$pr_number" --auto --merge
-          echo "Auto-merge enabled for PR #$pr_number."
+          gh pr merge "$pr_number" --squash
+          echo "Merge PR #$pr_number."
           pr_state=$(gh pr view "$pr_number" --json state --jq .state)
           while [ "$pr_state" != "MERGED" ]; do
               sleep 30 # Adjust sleep time as needed
@@ -216,6 +195,7 @@ else
               fi
           done
        else
+
            echo "Failed PR checks."
            exit 1
        fi
