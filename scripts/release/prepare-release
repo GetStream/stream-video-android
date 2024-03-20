@@ -1,15 +1,17 @@
 #!/bin/bash
 
-required_branch="auto-release-test"
+required_branch="develop-test"
+release_branch="release-test"
 ### Ensure on develop branch
-if [ "$current_branch" != "required_branch" ]; then
+# Fetch the current Git branch
+current_branch=$(git rev-parse --abbrev-ref HEAD)
+if [ "$current_branch" != "$required_branch" ]; then
     echo "You are not on the '$required_branch' branch. Please switch to '$required_branch' to continue."
     exit 1
-### Change the required files
 fi
 
 echo "Move into ../../buildSrc/src/main/kotlin/io/getstream/video/android/"
-cd ../../buildSrc/src/main/kotlin/io/getstream/video/android/
+cd ../../buildSrc/src/main/kotlin/io/getstream/video/android/ || exit
 file_path="Configuration.kt"
 
 # Function to extract version components
@@ -79,57 +81,148 @@ echo "Version updated to: $version"
 # Define the new branch name based on the version
 branch_name="release/$version"
 
+# If logged in with gh
+git config --global credential.helper
+
 # Create and switch to the new branch
 git checkout -b "$branch_name"
-
-# Optionally, push the new branch to your remote repository
-git push -u origin "$branch_name"
-
-echo "Branch $branch_name created and pushed to remote."
+git add "$file_path"
+git commit -m "Update version to: $version"
+echo "Committed the version update to $file_path."
 
 if ! command -v gh >/dev/null 2>&1; then
-    echo "Install and login to 'gh' if you want to create the PR automatically"
+    echo "Install and login to 'gh' if you want to continue automatic deployment."
+    echo "As next steps you need to manually commit than push the '$branch_name' and create a PR to '$required_branch'. Then proceed to merge $required_branch into $ and do a Release on Github"
     exit 1
 else
+    # Print authentication status just in case
+    gh auth status
+    # Use auth from gh
+    git config --global credential.helper cache
+
+    # Optionally if gh is installed, push the new branch to your remote repository
+    git push -u origin "$branch_name"
+    echo "Branch $branch_name created and pushed to remote."
+
     # Create the PR and get its number, using $required_branch as the base
-        pr_number=$(gh pr create --title "$pr_title" --body "$pr_body" --base "$required_branch" --head "$branch_name" --json number --jq .number)
-        echo "PR #$pr_number created targeting the '$required_branch' branch."
+    old_pr=$(gh pr list --state open --base "$required_branch" | grep "$branch_name" | awk '{print $1}')
+    if [ -n "$old_pr" ]; then
+      echo "There is already PR for this $version, closing it."
+      pr_number=$(echo "$pr_link" | grep -o '[0-9]*$')
+      gh pr close "$pr_number"
+    fi
+    # Create PR
+    pr_link=$(gh pr create --title "Prepare release: $version" --body "Automatic release PR for version $version." --base "$required_branch" --head "$branch_name")
+    # Check if a PR was created
+    existing_pr=$(gh pr list --state open --base "$required_branch" | grep "$branch_name" | awk '{print $1}')
 
-    # Immediately enable auto-merge
-    gh pr merge "$pr_number" --auto --merge
-    echo "Auto-merge enabled for PR #$pr_number."
+    if [ -n "$existing_pr" ]; then
+       # PR was created
+       pr_number=$(echo "$pr_link" | grep -o '[0-9]*$')
+       echo "PR #$pr_number created: '$release_branch'->'$required_branch'"
+       echo "Waiting for all checks to complete successfully (excluding any skipped checks)..."
+       # Function to wait for all checks to succeed
+       # Function to check and wait for PR checks to complete successfully.
+       wait_for_checks_to_succeed() {
+           # Initially, there may be no checks reported. We need to wait for them to start.
+           started_checks=false
+           while true; do
+               checks_output=$(gh pr checks "$pr_number")
 
-    # Initially set ci_status to a dummy value
-    ci_status="pending"
+               # Count the total number of checks reported (including pending, success, failure)
+               checks_total=$(echo "$checks_output" | grep -E 'Expected|✓|success|x|failure|pending' | wc -l)
 
-    # Loop until all checks have completed
-    while [ "$ci_status" == "pending" ]; do
-        # Fetch the status of the latest runs
-        summaries=$(gh pr checks "$pr_number" --json status,conclusion)
+               # If we haven't seen any checks yet, and still see zero, it's possible they haven't started.
+               # We wait until at least one check is reported to proceed.
+               if ! $started_checks && [ "$checks_total" -eq 0 ]; then
+                   echo "Waiting for checks to start..."
+                   sleep 30
+                   continue
+               fi
 
-        # Check if there are any checks that are not completed yet
-        pending_checks=$(echo "$summaries" | jq '[.[] | select(.status != "COMPLETED")] | length')
+               started_checks=true  # Once we see checks, this is always true.
 
-        if [ "$pending_checks" -gt 0 ]; then
-            echo "CI checks are still running. Waiting..."
-            sleep 30 # Wait for 30 seconds before checking again
-        else
-            # Once all checks are completed, update ci_status to exit the loop
-            ci_status="completed"
-            echo "All CI checks have completed."
+               # Count successful and pending checks
+               checks_success=$(echo "$checks_output" | grep -E '✓|success' | wc -l)
+               checks_pending=$(echo "$checks_output" | grep 'pending' | wc -l)
 
-            # Optional: Further actions based on check conclusions can be added here
-        fi
-    done
+               echo -ne "\rChecks status: $checks_success successful, $checks_pending pending out of $checks_total total."
 
-    # Check CI checks outcome and decide if PR should be closed (in case of failures)
-    failed_checks=$(echo "$summaries" | jq '[.[] | select(.conclusion != "SUCCESS")] | length')
-    if [ "$failed_checks" -gt 0 ]; then
-        echo "Detected failing checks in PR #$pr_number. Closing PR..."
-        # Close the PR if necessary
-        # Note: Closing a PR that has auto-merge enabled might require manual intervention or additional logic
+               if [ "$checks_pending" -eq 0 ] && [ "$checks_total" -gt 0 ]; then
+                   if [ "$checks_success" -eq "$checks_total" ]; then
+                       echo "All checks have successfully completed."
+                       break
+                   else
+                       echo "Some checks have failed."
+                       return 1  # Exit the loop and indicate failure.
+                   fi
+               else
+                   sleep 30
+               fi
+           done
+       }
+
+       # Function to check PR checks status and react accordingly
+       check_and_close_pr_if_checks_failed() {
+           checks_output=$(gh pr checks "$pr_number")
+           checks_failed=$(echo "$checks_output" | grep -E 'x|failure' | wc -l)
+
+           if [ "$checks_failed" -gt 0 ]; then
+               echo "Some checks have failed. Closing PR #$pr_number..."
+
+               # Close the PR. Replace "main" with your default branch if different.
+               gh pr close "$pr_number" --delete-branch
+
+               echo "PR #$pr_number has been closed and the branch has been deleted due to failed checks."
+               exit 1
+           else
+               echo "No failed checks detected."
+           fi
+       }
+       ## Initial check
+       check_and_close_pr_if_checks_failed
+       # Loop until all checks have completed successfully, ignoring skipped ones
+       # Use the function to wait for checks to complete
+       if wait_for_checks_to_succeed; then
+          echo "All checks passed for PR #$pr_number."
+          # Now, wait for the PR to be merged
+          gh pr merge "$pr_number" --auto --merge
+          echo "Auto-merge enabled for PR #$pr_number."
+          pr_state=$(gh pr view "$pr_number" --json state --jq .state)
+          while [ "$pr_state" != "MERGED" ]; do
+              sleep 30 # Adjust sleep time as needed
+              pr_state=$(gh pr view "$pr_number" --json state --jq .state)
+              if [ "$pr_state" == "MERGED" ]; then
+                  echo "PR #$pr_number has been successfully merged."
+                  # Step 1: Switch to the required branch and pull the latest changes
+                  git checkout "$required_branch"
+                  git pull origin "$required_branch"
+                  echo "Updated $required_branch with the latest changes."
+                  git checkout $release_branch
+                  git pull origin "$release_branch"
+                  git merge "$required_branch" -m "Merging $required_branch into $release_branch"
+                  echo "Merged $required_branch into $release_branch."
+                  # Step 3: Push the updated main branch to the remote repository
+                  git push origin "$release_branch"
+                  echo "Pushed the updated '$release_branch' branch to the remote repository. Go to Github/Releases and Draft a new release with tag number $version. The target branch should be '$release_branch'"
+
+                  break
+              elif [ "$pr_state" == "CLOSED" ]; then
+                  echo "PR #$pr_number was closed without being merged. Please check manually what happened"
+                  exit 1
+                  break
+              else
+                  echo "PR #$pr_number is not merged yet. Checking again in 30 seconds..."
+              fi
+          done
+       else
+           echo "Failed PR checks."
+           exit 1
+       fi
     else
-        echo "All checks passed for PR #$pr_number."
+        # PR was not created, exit
+        echo "PR for '$branch_name' into '$required_branch'. Failed to create."
+        exit 1
     fi
 fi
 
