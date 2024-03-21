@@ -52,7 +52,7 @@ public fun rememberCallPermissionsState(
         )
     },
     onPermissionsResult: ((Map<String, Boolean>) -> Unit)? = null,
-    onAllPermissionsGranted: (() -> Unit)? = null,
+    onAllPermissionsGranted: (suspend () -> Unit)? = null,
 ): VideoPermissionsState {
     if (LocalInspectionMode.current) return fakeVideoPermissionsState
 
@@ -103,7 +103,7 @@ public fun rememberCallPermissionsState(
 public fun LaunchCallPermissions(
     call: Call,
     onPermissionsResult: ((Map<String, Boolean>) -> Unit)? = null,
-    onAllPermissionsGranted: (() -> Unit)? = null,
+    onAllPermissionsGranted: (suspend () -> Unit)? = null,
 ) {
     val callPermissionsState =
         rememberCallPermissionsState(
