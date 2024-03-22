@@ -52,6 +52,7 @@ public fun rememberCallPermissionsState(
         )
     },
     onPermissionsResult: ((Map<String, Boolean>) -> Unit)? = null,
+    onAllPermissionsGranted: (suspend () -> Unit)? = null,
 ): VideoPermissionsState {
     if (LocalInspectionMode.current) return fakeVideoPermissionsState
 
@@ -70,6 +71,14 @@ public fun rememberCallPermissionsState(
             }
         }
     }
+
+    val allPermissionsGranted = permissionState.allPermissionsGranted
+    LaunchedEffect(key1 = allPermissionsGranted) {
+        if (allPermissionsGranted) {
+            onAllPermissionsGranted?.invoke()
+        }
+    }
+
     return remember(call, permissions) {
         object : VideoPermissionsState {
             override val allPermissionsGranted: Boolean
@@ -94,8 +103,13 @@ public fun rememberCallPermissionsState(
 public fun LaunchCallPermissions(
     call: Call,
     onPermissionsResult: ((Map<String, Boolean>) -> Unit)? = null,
+    onAllPermissionsGranted: (suspend () -> Unit)? = null,
 ) {
     val callPermissionsState =
-        rememberCallPermissionsState(call = call, onPermissionsResult = onPermissionsResult)
+        rememberCallPermissionsState(
+            call = call,
+            onPermissionsResult = onPermissionsResult,
+            onAllPermissionsGranted = onAllPermissionsGranted,
+        )
     LaunchedEffect(key1 = call) { callPermissionsState.launchPermissionRequest() }
 }

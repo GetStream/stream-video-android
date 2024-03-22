@@ -100,7 +100,6 @@ public fun CallContent(
     call: Call,
     modifier: Modifier = Modifier,
     layout: LayoutType = LayoutType.DYNAMIC,
-    isShowingOverlayAppBar: Boolean = false,
     permissions: VideoPermissionsState = rememberCallPermissionsState(call = call),
     onBackPressed: () -> Unit = {},
     onCallAction: (CallAction) -> Unit = { DefaultOnCallActionHandler.onCallAction(call, it) },
