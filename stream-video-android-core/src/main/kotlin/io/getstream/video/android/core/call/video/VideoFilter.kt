@@ -30,7 +30,7 @@ open class VideoFilter internal constructor()
  * [RawVideoFilter] because we do YUV<->ARGB conversions internally.
  */
 abstract class BitmapVideoFilter : VideoFilter() {
-    abstract fun filter(videoFrameBitmap: Bitmap)
+    abstract fun applyFilter(videoFrameBitmap: Bitmap)
 }
 
 /**
@@ -38,7 +38,7 @@ abstract class BitmapVideoFilter : VideoFilter() {
  * complex work.
  */
 abstract class RawVideoFilter : VideoFilter() {
-    abstract fun filter(
+    abstract fun applyFilter(
         videoFrame: VideoFrame,
         surfaceTextureHelper: SurfaceTextureHelper,
     ): VideoFrame

@@ -76,7 +76,7 @@ public class VirtualBackgroundVideoFilter(
     private var latestFrameWidth: Int? = null
     private var latestFrameHeight: Int? = null
 
-    override fun filter(videoFrameBitmap: Bitmap) {
+    override fun applyFilter(videoFrameBitmap: Bitmap) {
         // Apply segmentation
         val mlImage = InputImage.fromBitmap(videoFrameBitmap, 0)
         val task = segmenter.process(mlImage)

@@ -54,7 +54,7 @@ public class BlurredBackgroundVideoFilter(
         )
     }
 
-    override fun filter(videoFrameBitmap: Bitmap) {
+    override fun applyFilter(videoFrameBitmap: Bitmap) {
         // Apply segmentation
         val mlImage = InputImage.fromBitmap(videoFrameBitmap, 0)
         val task = segmenter.process(mlImage)
