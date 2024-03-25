@@ -106,7 +106,7 @@ internal fun SettingsMenu(
     val onToggleAudioFilterClick: () -> Unit = {
         if (call.audioFilter == null) {
             call.audioFilter = object : AudioFilter {
-                override fun filter(
+                override fun applyFilter(
                     audioFormat: Int,
                     channelCount: Int,
                     sampleRate: Int,
