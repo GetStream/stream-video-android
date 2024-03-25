@@ -20,6 +20,7 @@ import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.Canvas
+import android.graphics.Matrix
 import android.graphics.Paint
 import android.graphics.PorterDuff
 import android.graphics.PorterDuffXfermode
@@ -52,6 +53,8 @@ public class VirtualBackgroundVideoFilter(
             .build()
     private val segmenter = Segmentation.getClient(options)
     private lateinit var segmentationMask: SegmentationMask
+    private lateinit var segmentationMatrix: Matrix
+
     private var foregroundThreshold: Double = foregroundThreshold.coerceIn(0.0, 1.0)
     private val foregroundBitmap by lazy {
         Bitmap.createBitmap(
@@ -60,20 +63,26 @@ public class VirtualBackgroundVideoFilter(
             Bitmap.Config.ARGB_8888,
         )
     }
-    private val virtualBackgroundBitmap by lazy {
-        convertVirtualBackgroundToBitmap(backgroundImage)
-    }
     private val foregroundPaint by lazy {
         Paint().apply { xfermode = PorterDuffXfermode(PorterDuff.Mode.DST_OUT) }
     }
 
+    private val virtualBackgroundBitmap by lazy {
+        convertVirtualBackgroundToBitmap(backgroundImage)
+    }
+    private var scaledVirtualBackgroundBitmap: Bitmap? = null
+    private var scaledVirtualBackgroundBitmapCopy: Bitmap? = null
+
+    private var latestFrameWidth: Int? = null
+    private var latestFrameHeight: Int? = null
+
     override fun filter(videoFrameBitmap: Bitmap) {
-        // 1. Apply segmentation
+        // Apply segmentation
         val mlImage = InputImage.fromBitmap(videoFrameBitmap, 0)
         val task = segmenter.process(mlImage)
         segmentationMask = Tasks.await(task)
 
-        // 2. Copy the foreground segment to a new bitmap (the person)
+        // Copy the foreground segment (the person) to a new bitmap - foregroundBitmap
         copySegment(
             segment = Segment.FOREGROUND,
             source = videoFrameBitmap,
@@ -82,23 +91,42 @@ public class VirtualBackgroundVideoFilter(
             confidenceThreshold = foregroundThreshold,
         )
 
-        val videoFrameCanvas = Canvas(videoFrameBitmap)
-
         virtualBackgroundBitmap?.let { virtualBackgroundBitmap ->
-            val matrix = newSegmentationMaskMatrix(videoFrameBitmap, segmentationMask)
+            val videoFrameCanvas = Canvas(videoFrameBitmap)
 
-            // 3. Scale the virtual background bitmap to the height of the video frame
-            val scaledVirtualBackgroundBitmap = scaleVirtualBackgroundBitmap(
-                bitmap = virtualBackgroundBitmap,
-                targetHeight = videoFrameCanvas.height,
-            )
+            // Scale the virtual background bitmap to the height of the video frame, if needed
+            if (scaledVirtualBackgroundBitmap == null ||
+                videoFrameCanvas.width != latestFrameWidth ||
+                videoFrameCanvas.height != latestFrameHeight
+            ) {
+                scaledVirtualBackgroundBitmap = scaleVirtualBackgroundBitmap(
+                    bitmap = virtualBackgroundBitmap,
+                    targetHeight = videoFrameCanvas.height,
+                )
+                // Make a copy of the scaled virtual background bitmap. Used when processing each frame.
+                scaledVirtualBackgroundBitmapCopy = scaledVirtualBackgroundBitmap!!.copy(
+                    /* config = */
+                    scaledVirtualBackgroundBitmap!!.config,
+                    /* isMutable = */
+                    true,
+                )
 
-            // 4. Cut-out the person from the virtual background
-            val backgroundCanvas = Canvas(scaledVirtualBackgroundBitmap)
-            backgroundCanvas.drawBitmap(foregroundBitmap, matrix, foregroundPaint)
+                latestFrameWidth = videoFrameBitmap.width
+                latestFrameHeight = videoFrameBitmap.height
 
-            // 5. Draw the virtual background on the original bitmap
-            videoFrameCanvas.drawBitmap(scaledVirtualBackgroundBitmap, 0f, 0f, null)
+                segmentationMatrix = newSegmentationMaskMatrix(videoFrameBitmap, segmentationMask)
+            }
+
+            // Restore the virtual background after cutting-out the person in the previous frame
+            val backgroundCanvas = Canvas(scaledVirtualBackgroundBitmapCopy!!)
+            backgroundCanvas.drawBitmap(scaledVirtualBackgroundBitmap!!, 0f, 0f, null)
+
+            // Cut out the person from the virtual background
+
+            backgroundCanvas.drawBitmap(foregroundBitmap, segmentationMatrix, foregroundPaint)
+
+            // Draw the virtual background (with the cutout) on the video frame bitmap
+            videoFrameCanvas.drawBitmap(scaledVirtualBackgroundBitmapCopy!!, 0f, 0f, null)
         }
     }
 
