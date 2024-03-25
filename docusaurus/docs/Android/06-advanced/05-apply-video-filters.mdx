@@ -59,7 +59,7 @@ There are two types of filters that you can create:
 - By extending the `BitmapVideoFilter` abstract class. This gives you a bitmap for each video frame, which you can manipulate directly.
 ```kotlin
 abstract class BitmapVideoFilter : VideoFilter() {
-    fun filter(videoFrameBitmap: Bitmap)
+    fun applyFilter(videoFrameBitmap: Bitmap)
 }
 ```
 
@@ -68,7 +68,7 @@ You need to manipulate the original bitmap instance to apply the filters. You ca
 - By extending the `RawVideoFilter` abstract class. This gives you direct access to the `VideoFrame` WebRTC object.
 ```kotlin
 abstract class RawVideoFilter : VideoFilter() {
-    abstract fun filter(
+    abstract fun applyFilter(
         videoFrame: VideoFrame,
         surfaceTextureHelper: SurfaceTextureHelper,
     ): VideoFrame
@@ -85,7 +85,7 @@ We can create and set a simple black and white filter like this:
 
 ```kotlin
 call.videoFilter = object : BitmapVideoFilter() {
-    override fun filter(videoFrameBitmap: Bitmap) {
+    override fun applyFilter(videoFrameBitmap: Bitmap) {
         val c = Canvas(videoFrameBitmap)
         val paint = Paint()
         val cm = ColorMatrix()
@@ -114,7 +114,7 @@ interface AudioFilter {
      *
      * @param audioFormat format in android.media.AudioFormat
      */
-    fun filter(audioFormat: Int, channelCount: Int, sampleRate: Int, sampleData: ByteBuffer)
+    fun applyFilter(audioFormat: Int, channelCount: Int, sampleRate: Int, sampleData: ByteBuffer)
 }
 ```
 
@@ -127,7 +127,7 @@ In the following example, we will build a simple audio filter that gives the use
 // Create a simple filter (pitch modification) and assign it to the call
 
 call.audioFilter = object : AudioFilter {
-    override fun filter(audioFormat: Int, channelCount: Int, sampleRate: Int, sampleData: ByteBuffer) {
+    override fun applyFilter(audioFormat: Int, channelCount: Int, sampleRate: Int, sampleData: ByteBuffer) {
         // You can modify the pitch factor to achieve a bit different effect
         val pitchShiftFactor = 0.8f
         val inputBuffer = audioBuffer.duplicate()
