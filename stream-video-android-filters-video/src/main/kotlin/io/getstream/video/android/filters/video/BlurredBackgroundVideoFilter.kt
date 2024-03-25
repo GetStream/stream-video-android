@@ -55,12 +55,12 @@ public class BlurredBackgroundVideoFilter(
     }
 
     override fun filter(videoFrameBitmap: Bitmap) {
-        // 1. Apply segmentation
+        // Apply segmentation
         val mlImage = InputImage.fromBitmap(videoFrameBitmap, 0)
         val task = segmenter.process(mlImage)
         segmentationMask = Tasks.await(task)
 
-        // 2. Copy the background segment to a new bitmap
+        // Copy the background segment to a new bitmap - backgroundBitmap
         copySegment(
             segment = Segment.BACKGROUND,
             source = videoFrameBitmap,
@@ -69,10 +69,10 @@ public class BlurredBackgroundVideoFilter(
             confidenceThreshold = foregroundThreshold,
         )
 
-        // 3. Blur the background bitmap
+        // Blur the background bitmap
         val blurredBackgroundBitmap = Toolkit.blur(backgroundBitmap, blurIntensity.radius)
 
-        // 4. Draw the blurred background bitmap on the original bitmap
+        // Draw the blurred background bitmap on the original bitmap
         val canvas = Canvas(videoFrameBitmap)
         val matrix = newSegmentationMaskMatrix(videoFrameBitmap, segmentationMask)
         canvas.drawBitmap(blurredBackgroundBitmap, matrix, null)
