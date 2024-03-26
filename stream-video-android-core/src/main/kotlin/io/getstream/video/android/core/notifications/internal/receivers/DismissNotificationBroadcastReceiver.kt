@@ -16,13 +16,15 @@
 
 package io.getstream.video.android.core.notifications.internal.receivers
 
+import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
+import android.os.Build
 import androidx.core.app.NotificationManagerCompat
 import io.getstream.log.taggedLogger
 import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.notifications.NotificationHandler
-import io.getstream.video.android.core.notifications.NotificationHandler.Companion.INTENT_EXTRA_NEXT_ACTION_BUNDLE
+import io.getstream.video.android.core.notifications.NotificationHandler.Companion.INTENT_EXTRA_NEXT_ACTION
 import io.getstream.video.android.core.notifications.NotificationHandler.Companion.INTENT_EXTRA_NOTIFICATION_ID
 
 /**
@@ -30,21 +32,30 @@ import io.getstream.video.android.core.notifications.NotificationHandler.Compani
  */
 internal class DismissNotificationBroadcastReceiver : GenericCallActionBroadcastReceiver() {
 
-    val logger by taggedLogger("AcceptCallBroadcastReceiver")
+    val logger by taggedLogger("DismissNotificationBroadcastReceiver")
     override val action = NotificationHandler.ACTION_DISMISS_NOTIFICATION
 
+    override fun onReceive(context: Context?, intent: Intent?) {
+        // Dismiss notification right away
+        val notificationId = intent?.getIntExtra(INTENT_EXTRA_NOTIFICATION_ID, 0)
+        if (context != null && notificationId != null) {
+            NotificationManagerCompat.from(context).cancel(notificationId)
+        }
+        // Proceed with processing see GenericCallActionBroadcastReceiver for details
+        super.onReceive(context, intent)
+    }
+
     override suspend fun onReceive(call: Call, context: Context, intent: Intent) {
-        val notificationId = intent.getIntExtra(INTENT_EXTRA_NOTIFICATION_ID, 0)
-        NotificationManagerCompat.from(context).cancel(notificationId)
-        val nextAction = intent.getStringExtra(NotificationHandler.INTENT_EXTRA_NEXT_ACTION)
+        val nextAction: PendingIntent? = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            intent.getParcelableExtra(INTENT_EXTRA_NEXT_ACTION, PendingIntent::class.java)
+        } else {
+            intent.getParcelableExtra(INTENT_EXTRA_NEXT_ACTION)
+        }
         if (nextAction == null) {
             logger.w { "You dismissed a notification, but did not proceed further with the actions." }
         } else {
-            val nextIntent = Intent(nextAction).apply {
-                if (intent.hasExtra(NotificationHandler.INTENT_EXTRA_NEXT_ACTION_BUNDLE)) {
-                    val bundle = intent.getBundleExtra(INTENT_EXTRA_NEXT_ACTION_BUNDLE)
-                }
-            }
+            // Send the pending intent
+            nextAction.send()
         }
     }
 }

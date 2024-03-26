@@ -21,11 +21,10 @@ import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.content.pm.ResolveInfo
-import android.os.Bundle
-import androidx.core.os.bundleOf
 import io.getstream.log.taggedLogger
 import io.getstream.video.android.core.notifications.DefaultNotificationHandler
 import io.getstream.video.android.core.notifications.NotificationHandler
+import io.getstream.video.android.core.notifications.NotificationHandler.Companion.ACTION_ACCEPT_CALL
 import io.getstream.video.android.core.notifications.NotificationHandler.Companion.ACTION_LIVE_CALL
 import io.getstream.video.android.core.notifications.NotificationHandler.Companion.ACTION_ONGOING_CALL
 import io.getstream.video.android.core.notifications.NotificationHandler.Companion.ACTION_REJECT_CALL
@@ -112,9 +111,10 @@ internal class DefaultStreamIntentResolver(val context: Context) {
         callId: StreamCallId,
     ): PendingIntent? = searchDismissNotificationPendingIntent(
         callId,
-        NotificationHandler.ACTION_ACCEPT_CALL,
-        bundleOf(
-            INTENT_EXTRA_CALL_CID to callId,
+        searchActivityPendingIntent(
+            Intent(ACTION_ACCEPT_CALL),
+            callId,
+            INCOMING_CALL_NOTIFICATION_ID,
         ),
     )
 
@@ -127,14 +127,10 @@ internal class DefaultStreamIntentResolver(val context: Context) {
      */
     internal fun searchDismissNotificationPendingIntent(
         callId: StreamCallId,
-        nextAction: String,
-        nextActionData: Bundle? = null,
+        nextIntent: PendingIntent? = null,
     ): PendingIntent? {
         val baseIntent = Intent(NotificationHandler.ACTION_DISMISS_NOTIFICATION)
-        baseIntent.putExtra(NotificationHandler.INTENT_EXTRA_NEXT_ACTION, nextAction)
-        nextActionData?.let {
-            baseIntent.putExtra(NotificationHandler.INTENT_EXTRA_NEXT_ACTION_BUNDLE, nextActionData)
-        }
+        baseIntent.putExtra(NotificationHandler.INTENT_EXTRA_NEXT_ACTION, nextIntent)
         return searchBroadcastPendingIntent(
             baseIntent,
             callId,
