@@ -150,7 +150,6 @@ open class IntegrationTestBase(connectCoordinatorWS: Boolean = true) : TestBase(
             geo = GEO.GlobalEdgeNetwork,
             testData.users["thierry"]!!,
             testData.tokens["thierry"]!!,
-            ensureSingleInstance = false,
             loggingLevel = LoggingLevel(priority = Priority.VERBOSE),
         )
 //        if (BuildConfig.CORE_TEST_LOCAL == "1") {
