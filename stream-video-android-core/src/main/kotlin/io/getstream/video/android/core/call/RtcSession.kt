@@ -354,7 +354,7 @@ public class RtcSession internal constructor(
         }
 
         clientImpl.peerConnectionFactory.setAudioRecordDataCallback { audioFormat, channelCount, sampleRate, sampleData ->
-            call.audioFilter?.filter(
+            call.audioFilter?.applyFilter(
                 audioFormat = audioFormat,
                 channelCount = channelCount,
                 sampleRate = sampleRate,

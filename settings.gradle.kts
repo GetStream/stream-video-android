@@ -34,6 +34,7 @@ include(":stream-video-android-core")
 include(":stream-video-android-ui-core")
 include(":stream-video-android-ui-xml")
 include(":stream-video-android-ui-compose")
+include(":stream-video-android-filters-video")
 include(":stream-video-android-previewdata")
 include(":stream-video-android-bom")
 

@@ -164,7 +164,7 @@ private fun StreamDialogPreview() {
             },
             negativeButton = Triple(
                 "Leave call",
-                ButtonStyles.tetriaryButtonStyle(StyleSize.S),
+                ButtonStyles.tertiaryButtonStyle(StyleSize.S),
             ) {
                 // Do nothing
             },
@@ -228,7 +228,7 @@ private fun StreamDialogWithInputPreview() {
             },
             negativeButton = Triple(
                 "Not now",
-                ButtonStyles.tetriaryButtonStyle(StyleSize.S),
+                ButtonStyles.tertiaryButtonStyle(StyleSize.S),
             ) {
                 // Do nothing
             },

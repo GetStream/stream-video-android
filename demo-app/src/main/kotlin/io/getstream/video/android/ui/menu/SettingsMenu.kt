@@ -21,7 +21,6 @@ import android.app.Activity
 import android.app.DownloadManager
 import android.content.Context
 import android.content.Context.DOWNLOAD_SERVICE
-import android.graphics.Bitmap
 import android.media.MediaCodecList
 import android.media.projection.MediaProjectionManager
 import android.net.Uri
@@ -30,6 +29,8 @@ import android.os.Environment
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.height
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.VideoFile
 import androidx.compose.runtime.Composable
@@ -39,6 +40,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.IntOffset
@@ -51,15 +53,13 @@ import com.google.accompanist.permissions.rememberPermissionState
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.call.audio.AudioFilter
-import io.getstream.video.android.core.call.video.BitmapVideoFilter
 import io.getstream.video.android.core.mapper.ReactionMapper
 import io.getstream.video.android.tooling.extensions.toPx
 import io.getstream.video.android.ui.call.ReactionsMenu
 import io.getstream.video.android.ui.menu.base.ActionMenuItem
 import io.getstream.video.android.ui.menu.base.DynamicMenu
 import io.getstream.video.android.ui.menu.base.MenuItem
-import io.getstream.video.android.util.BlurredBackgroundVideoFilter
-import io.getstream.video.android.util.SampleAudioFilter
+import io.getstream.video.android.util.filters.SampleAudioFilter
 import kotlinx.coroutines.launch
 import java.nio.ByteBuffer
 
@@ -67,11 +67,11 @@ import java.nio.ByteBuffer
 @Composable
 internal fun SettingsMenu(
     call: Call,
+    selectedVideoFilter: Int,
     showDebugOptions: Boolean,
-    isBackgroundBlurEnabled: Boolean,
     onDismissed: () -> Unit,
+    onSelectVideoFilter: (Int) -> Unit,
     onShowFeedback: () -> Unit,
-    onToggleBackgroundBlur: () -> Unit,
     onShowCallStats: () -> Unit,
 ) {
     val context = LocalContext.current
@@ -103,26 +103,10 @@ internal fun SettingsMenu(
         }
     }
 
-    val onToggleBackgroundBlurClick: () -> Unit = {
-        onToggleBackgroundBlur()
-
-        if (call.videoFilter == null) {
-            call.videoFilter = object : BitmapVideoFilter() {
-                val filter = BlurredBackgroundVideoFilter()
-
-                override fun filter(bitmap: Bitmap) {
-                    filter.applyFilter(bitmap)
-                }
-            }
-        } else {
-            call.videoFilter = null
-        }
-    }
-
     val onToggleAudioFilterClick: () -> Unit = {
         if (call.audioFilter == null) {
             call.audioFilter = object : AudioFilter {
-                override fun filter(
+                override fun applyFilter(
                     audioFormat: Int,
                     channelCount: Int,
                     sampleRate: Int,
@@ -211,6 +195,15 @@ internal fun SettingsMenu(
                 ) {
                     onDismissed()
                 }
+                Spacer(Modifier.height(VideoTheme.dimens.spacingS))
+                VideoFiltersMenu(
+                    selectedFilterIndex = selectedVideoFilter,
+                    onSelectFilter = { filterIndex ->
+                        onDismissed()
+                        onSelectVideoFilter(filterIndex)
+                    },
+                )
+                Spacer(Modifier.height(VideoTheme.dimens.spacingS))
             },
             items = defaultStreamMenu(
                 showDebugOptions = showDebugOptions,
@@ -229,10 +222,8 @@ internal fun SettingsMenu(
                 onRestartPublisherIceClick = onRestartPublisherIceClick,
                 onRestartSubscriberIceClick = onRestartSubscriberIceClick,
                 onToggleAudioFilterClick = onToggleAudioFilterClick,
-                onToggleBackgroundBlurClick = onToggleBackgroundBlurClick,
                 onSwitchSfuClick = onSwitchSfuClick,
                 onShowCallStats = onShowCallStats,
-                isBackgroundBlurEnabled = isBackgroundBlurEnabled,
                 isScreenShareEnabled = isScreenSharing,
                 loadRecordings = onLoadRecordings,
             ),
@@ -284,18 +275,15 @@ private fun SettingsMenuPreview() {
                 onCodecSelected = {
                 },
                 isScreenShareEnabled = false,
-                isBackgroundBlurEnabled = true,
                 onToggleScreenShare = { },
                 onShowCallStats = { },
-                onToggleBackgroundBlurClick = { },
                 onToggleAudioFilterClick = { },
                 onRestartSubscriberIceClick = { },
                 onRestartPublisherIceClick = { },
                 onKillSfuWsClick = { },
                 onSwitchSfuClick = { },
                 availableDevices = emptyList(),
-                onDeviceSelected = {
-                },
+                onDeviceSelected = {},
                 onShowFeedback = {},
                 loadRecordings = { emptyList() },
             ),

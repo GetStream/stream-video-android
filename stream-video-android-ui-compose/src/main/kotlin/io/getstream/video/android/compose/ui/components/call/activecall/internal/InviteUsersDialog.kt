@@ -52,7 +52,7 @@ internal fun InviteUsersDialog(
         },
         negativeButton = Triple(
             stringResource(R.string.stream_video_invite_users_cancel),
-            VideoTheme.styles.buttonStyles.tetriaryButtonStyle(),
+            VideoTheme.styles.buttonStyles.tertiaryButtonStyle(),
         ) {
             onDismiss()
         },

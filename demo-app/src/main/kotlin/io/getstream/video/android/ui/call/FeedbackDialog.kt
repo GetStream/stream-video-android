@@ -116,7 +116,7 @@ fun FeedbackDialog(call: Call, onDismiss: () -> Unit) {
                     StreamButton(
                         modifier = Modifier.align(Alignment.BottomEnd),
                         text = "Close",
-                        style = VideoTheme.styles.buttonStyles.tetriaryButtonStyle(),
+                        style = VideoTheme.styles.buttonStyles.tertiaryButtonStyle(),
                     ) {
                         onDismiss()
                     }
@@ -190,7 +190,7 @@ fun FeedbackDialog(call: Call, onDismiss: () -> Unit) {
             },
             negativeButton = Triple(
                 "Not now",
-                ButtonStyles.tetriaryButtonStyle(StyleSize.S),
+                ButtonStyles.tertiaryButtonStyle(StyleSize.S),
             ) {
                 onDismiss()
             },
