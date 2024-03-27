@@ -59,7 +59,7 @@ public fun IncomingCallControls(
 
         if (isVideoCall) {
             ToggleCameraAction(
-                onStyle = VideoTheme.styles.buttonStyles.tetriaryIconButtonStyle(),
+                onStyle = VideoTheme.styles.buttonStyles.tertiaryIconButtonStyle(),
                 offStyle = VideoTheme.styles.buttonStyles.secondaryIconButtonStyle(),
                 isCameraEnabled = isCameraEnabled,
                 onCallAction = onCallAction,

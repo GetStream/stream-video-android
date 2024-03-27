@@ -60,7 +60,7 @@ internal class FilterVideoProcessor(
         }
 
         if (currentFilter is RawVideoFilter) {
-            val filteredFrame = currentFilter.filter(frame, surfaceTextureHelper.invoke())
+            val filteredFrame = currentFilter.applyFilter(frame, surfaceTextureHelper.invoke())
             sink?.onFrame(filteredFrame)
         } else if (currentFilter is BitmapVideoFilter) {
             // first prepare a Bitmap for the client
@@ -75,7 +75,7 @@ internal class FilterVideoProcessor(
                 )
 
                 // now ask client to make modifications
-                currentFilter.filter(inputFrameBitmap!!)
+                currentFilter.applyFilter(inputFrameBitmap!!)
 
                 // feed back the modified bitmap
                 GLES20.glTexParameteri(

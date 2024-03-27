@@ -24,8 +24,6 @@ import androidx.compose.material.icons.automirrored.filled.ReadMore
 import androidx.compose.material.icons.filled.Audiotrack
 import androidx.compose.material.icons.filled.AutoGraph
 import androidx.compose.material.icons.filled.BluetoothAudio
-import androidx.compose.material.icons.filled.BlurOff
-import androidx.compose.material.icons.filled.BlurOn
 import androidx.compose.material.icons.filled.Feedback
 import androidx.compose.material.icons.filled.Headphones
 import androidx.compose.material.icons.filled.HeadsetMic
@@ -51,10 +49,8 @@ fun defaultStreamMenu(
     codecList: List<MediaCodecInfo>,
     onCodecSelected: (MediaCodecInfo) -> Unit,
     isScreenShareEnabled: Boolean,
-    isBackgroundBlurEnabled: Boolean,
     onToggleScreenShare: () -> Unit = {},
     onShowCallStats: () -> Unit,
-    onToggleBackgroundBlurClick: () -> Unit,
     onToggleAudioFilterClick: () -> Unit,
     onRestartSubscriberIceClick: () -> Unit,
     onRestartPublisherIceClick: () -> Unit,
@@ -77,13 +73,6 @@ fun defaultStreamMenu(
             title = "Call stats",
             icon = Icons.Default.AutoGraph,
             action = onShowCallStats,
-        ),
-    )
-    add(
-        ActionMenuItem(
-            title = if (isBackgroundBlurEnabled) "Disable background blur" else "Enable background blur",
-            icon = if (isBackgroundBlurEnabled) Icons.Default.BlurOff else Icons.Default.BlurOn,
-            action = onToggleBackgroundBlurClick,
         ),
     )
     add(

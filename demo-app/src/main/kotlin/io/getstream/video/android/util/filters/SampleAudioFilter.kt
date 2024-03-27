@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package io.getstream.video.android.util
+package io.getstream.video.android.util.filters
 
 import java.nio.ByteBuffer
 import java.nio.ByteOrder

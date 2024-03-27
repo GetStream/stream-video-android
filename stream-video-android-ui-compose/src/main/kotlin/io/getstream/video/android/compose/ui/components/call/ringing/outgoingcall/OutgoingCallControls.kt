@@ -55,13 +55,13 @@ public fun OutgoingCallControls(
             isMicrophoneEnabled = isMicrophoneEnabled,
             onCallAction = onCallAction,
             offStyle = VideoTheme.styles.buttonStyles.secondaryIconButtonStyle(),
-            onStyle = VideoTheme.styles.buttonStyles.tetriaryIconButtonStyle(),
+            onStyle = VideoTheme.styles.buttonStyles.tertiaryIconButtonStyle(),
         )
 
         if (isVideoCall) {
             ToggleCameraAction(
                 offStyle = VideoTheme.styles.buttonStyles.secondaryIconButtonStyle(),
-                onStyle = VideoTheme.styles.buttonStyles.tetriaryIconButtonStyle(),
+                onStyle = VideoTheme.styles.buttonStyles.tertiaryIconButtonStyle(),
                 isCameraEnabled = isCameraEnabled,
                 onCallAction = onCallAction,
             )
