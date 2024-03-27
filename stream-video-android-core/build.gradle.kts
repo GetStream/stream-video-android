@@ -202,6 +202,7 @@ dependencies {
     testImplementation(libs.kotlinx.coroutines.test)
     testImplementation(libs.kotlin.test.junit)
     testImplementation(libs.kotlinx.coroutines.debug)
+    testImplementation(libs.kotlinx.serialization.converter)
 
     // instrument tests
     androidTestImplementation(libs.stream.log.android)
