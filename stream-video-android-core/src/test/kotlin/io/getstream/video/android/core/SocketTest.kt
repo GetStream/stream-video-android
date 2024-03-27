@@ -16,12 +16,9 @@
 
 package io.getstream.video.android.core
 
-import android.content.Context
-import android.net.ConnectivityManager
 import app.cash.turbine.testIn
 import com.google.common.truth.Truth.assertThat
-import io.getstream.video.android.core.base.TestBase
-import io.getstream.video.android.core.dispatchers.DispatcherProvider
+import io.getstream.video.android.core.base.SocketTestBase
 import io.getstream.video.android.core.internal.network.NetworkStateProvider
 import io.getstream.video.android.core.socket.CoordinatorSocket
 import io.getstream.video.android.core.socket.PersistentSocket
@@ -29,22 +26,16 @@ import io.getstream.video.android.core.socket.SfuSocket
 import io.getstream.video.android.core.socket.SocketState
 import io.getstream.video.android.core.socket.SocketState.Connected
 import io.mockk.every
-import io.mockk.impl.annotations.RelaxedMockK
 import io.mockk.mockk
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.runTest
-import okhttp3.OkHttpClient
-import okhttp3.WebSocket
-import okhttp3.logging.HttpLoggingInterceptor
 import org.junit.Ignore
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.openapitools.client.models.VideoEvent
 import org.robolectric.RobolectricTestRunner
-import java.util.concurrent.TimeUnit
 
 /**
  * Test coverage for the sockets
@@ -68,69 +59,6 @@ import java.util.concurrent.TimeUnit
  * Other than it's mostly the same logic
  *
  */
-open class SocketTestBase : TestBase() {
-    val coordinatorUrl =
-        "https://video.stream-io-api.com/video/connect?api_key=hd8szvscpxvd&stream-auth-type=jwt&X-Stream-Client=stream-video-android"
-    val sfuUrl = "wss://sfu-f079b1a.dpk-den1.stream-io-video.com/ws"
-    val sfuToken =
-        "eyJhbGciOiJFUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiI4ZDBlYjU0NDg4ZDFiYTUxOTk3Y2Y1NWRmYTY0Y2NiMCIsInN1YiI6InVzZXIvdGhpZXJyeSIsImF1ZCI6WyJzZnUtZjA3OWIxYS5kcGstZGVuMS5zdHJlYW0taW8tdmlkZW8uY29tIl0sImV4cCI6MTY4NDI5NTQyMiwibmJmIjoxNjg0MjczODIyLCJpYXQiOjE2ODQyNzM4MjIsImFwcF9pZCI6MTEyOTUyOCwiY2FsbF9pZCI6ImRlZmF1bHQ6ZTJjMDRkZjYtYTNiMy00YTcyLWIxMjctOTJiNjkyZmMxMDA2IiwidXNlciI6eyJpZCI6InRoaWVycnkiLCJuYW1lIjoiVGhpZXJyeSIsImltYWdlIjoiaGVsbG8iLCJ0cCI6IkdvNGhUc3R4MEhoUDFXRnBDa0NlT0w0ZmpxVDRCQWx1In0sInJvbGVzIjpbInVzZXIiXSwib3duZXIiOnRydWV9.Fp5z70vshi6UoGMMNV1aZd1AIAS4fvm46jJ_O3YGfdyReUXl7gDHeonxwrbT0OJ-rd2tyGVHCCrbvkqGEznwKg"
-
-    @RelaxedMockK
-    lateinit var mockedWebSocket: WebSocket
-
-    /**
-     * Mocks
-     * - network state, so we can fake going offline/online
-     * - socket, so we can pretend the network is unavailable or we get an error
-     */
-
-    val networkStateProvider = NetworkStateProvider(
-        connectivityManager = context
-            .getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager,
-    )
-    val scope = CoroutineScope(DispatcherProvider.IO)
-
-    fun buildOkHttp(): OkHttpClient {
-        val connectionTimeoutInMs = 10000L
-        return OkHttpClient.Builder()
-            .addInterceptor(
-                HttpLoggingInterceptor().apply {
-                    level = HttpLoggingInterceptor.Level.BASIC
-                },
-            )
-            .connectTimeout(connectionTimeoutInMs, TimeUnit.MILLISECONDS)
-            .writeTimeout(connectionTimeoutInMs, TimeUnit.MILLISECONDS)
-            .readTimeout(connectionTimeoutInMs, TimeUnit.MILLISECONDS)
-            .callTimeout(connectionTimeoutInMs, TimeUnit.MILLISECONDS)
-            .build()
-    }
-
-    fun collectEvents(socket: CoordinatorSocket): Pair<List<VideoEvent>, List<Throwable>> {
-        val events = mutableListOf<VideoEvent>()
-        val errors = mutableListOf<Throwable>()
-
-        runBlocking {
-            val job = launch {
-                socket.events.collect {
-                    events.add(it)
-                }
-            }
-
-            val job2 = launch {
-                socket.errors.collect() {
-                    errors.add(it)
-                }
-            }
-
-            delay(1000)
-            socket.disconnect(PersistentSocket.DisconnectReason.ByRequest)
-            job.cancel()
-            job2.cancel()
-        }
-
-        return Pair(events, errors)
-    }
-}
 
 @RunWith(RobolectricTestRunner::class)
 class CoordinatorSocketTest : SocketTestBase() {
@@ -142,7 +70,7 @@ class CoordinatorSocketTest : SocketTestBase() {
         val socket = CoordinatorSocket(
             coordinatorUrl,
             testData.users["thierry"]!!,
-            testData.tokens["thierry"]!!,
+            authData?.token!!,
             scope,
             buildOkHttp(),
             networkStateProvider,
@@ -207,7 +135,7 @@ class CoordinatorSocketTest : SocketTestBase() {
         val socket = CoordinatorSocket(
             coordinatorUrl,
             testData.users["thierry"]!!,
-            testData.tokens["thierry"]!!,
+            authData?.token!!,
             scope,
             buildOkHttp(),
             mockedNetworkStateProvider,
@@ -261,7 +189,7 @@ class CoordinatorSocketTest : SocketTestBase() {
         val socket = CoordinatorSocket(
             coordinatorUrl,
             testData.users["thierry"]!!,
-            testData.tokens["thierry"]!!,
+            authData?.token!!,
             // make sure to use the TestScope because the exceptions will be swallowed by regular CoroutineScope
             scope = this,
             buildOkHttp(),
@@ -283,7 +211,7 @@ class CoordinatorSocketTest : SocketTestBase() {
         val socket = CoordinatorSocket(
             coordinatorUrl,
             testData.users["thierry"]!!,
-            testData.tokens["thierry"]!!,
+            authData?.token!!,
             // make sure to use the TestScope because the exceptions will be swallowed by regular CoroutineScope
             scope = this,
             buildOkHttp(),
