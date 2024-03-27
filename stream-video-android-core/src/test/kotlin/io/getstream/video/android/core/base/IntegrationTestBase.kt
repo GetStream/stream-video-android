@@ -87,10 +87,10 @@ open class IntegrationTestBase(val connectCoordinatorWS: Boolean = true) : TestB
     fun setupVideo() {
         builder = StreamVideoBuilder(
             context = ApplicationProvider.getApplicationContext(),
-            apiKey = "hd8szvscpxvd",
+            apiKey = authData?.apiKey!!,
             geo = GEO.GlobalEdgeNetwork,
-            testData.users["thierry"]!!,
-            testData.tokens["thierry"]!!,
+            user = testData.users["thierry"]!!,
+            token = authData?.token!!,
             loggingLevel = LoggingLevel(Priority.DEBUG, HttpLoggingLevel.BASIC),
         )
 //        if (BuildConfig.CORE_TEST_LOCAL == "1") {

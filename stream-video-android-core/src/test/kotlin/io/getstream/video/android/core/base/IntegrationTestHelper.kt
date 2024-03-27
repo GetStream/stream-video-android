@@ -27,7 +27,7 @@ public class IntegrationTestHelper {
     val context: Context
 
     val expiredToken =
-        "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoidGhpZXJyeUBnZXRzdHJlYW0uaW8iLCJpc3MiOiJwcm9udG8iLCJzdWIiOiJ1c2VyL3RoaWVycnlAZ2V0c3RyZWFtLmlvIiwiaWF0IjoxNjgxMjUxMDg4LCJleHAiOjE2ODEyNjE4OTN9.VinzXBwvT_AGXNBG8QTz9HJFSR6LhqIEtVpIlmY1aEc"
+        "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoiNW9STEJjMXQiLCJpc3MiOiJodHRwczovL3Byb250by5nZXRzdHJlYW0uaW8iLCJzdWIiOiJ1c2VyLzVvUkxCYzF0IiwiaWF0IjoxNzExNTIzNzkxLCJleHAiOjE3MTIxMjg1OTZ9.VzKQ1aMsL5LnJb6xHdV3stBfqTo-GU57FXLmrF4xpkI"
 
     val fakeSDP = """
         v=0
