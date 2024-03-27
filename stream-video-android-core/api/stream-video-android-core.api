@@ -4112,6 +4112,7 @@ public final class io/getstream/video/android/core/notifications/NotificationCon
 
 public abstract interface class io/getstream/video/android/core/notifications/NotificationHandler : io/getstream/android/push/permissions/NotificationPermissionHandler {
 	public static final field ACTION_ACCEPT_CALL Ljava/lang/String;
+	public static final field ACTION_DISMISS_NOTIFICATION Ljava/lang/String;
 	public static final field ACTION_INCOMING_CALL Ljava/lang/String;
 	public static final field ACTION_LEAVE_CALL Ljava/lang/String;
 	public static final field ACTION_LIVE_CALL Ljava/lang/String;
@@ -4123,6 +4124,8 @@ public abstract interface class io/getstream/video/android/core/notifications/No
 	public static final field INCOMING_CALL_NOTIFICATION_ID I
 	public static final field INTENT_EXTRA_CALL_CID Ljava/lang/String;
 	public static final field INTENT_EXTRA_CALL_DISPLAY_NAME Ljava/lang/String;
+	public static final field INTENT_EXTRA_NEXT_ACTION Ljava/lang/String;
+	public static final field INTENT_EXTRA_NEXT_ACTION_BUNDLE Ljava/lang/String;
 	public static final field INTENT_EXTRA_NOTIFICATION_ID Ljava/lang/String;
 	public abstract fun getOngoingCallNotification (Lio/getstream/video/android/model/StreamCallId;)Landroid/app/Notification;
 	public abstract fun getRingingCallNotification (Lio/getstream/video/android/core/RingingState;Lio/getstream/video/android/model/StreamCallId;Ljava/lang/String;)Landroid/app/Notification;
@@ -4133,6 +4136,7 @@ public abstract interface class io/getstream/video/android/core/notifications/No
 
 public final class io/getstream/video/android/core/notifications/NotificationHandler$Companion {
 	public static final field ACTION_ACCEPT_CALL Ljava/lang/String;
+	public static final field ACTION_DISMISS_NOTIFICATION Ljava/lang/String;
 	public static final field ACTION_INCOMING_CALL Ljava/lang/String;
 	public static final field ACTION_LEAVE_CALL Ljava/lang/String;
 	public static final field ACTION_LIVE_CALL Ljava/lang/String;
@@ -4143,6 +4147,8 @@ public final class io/getstream/video/android/core/notifications/NotificationHan
 	public static final field INCOMING_CALL_NOTIFICATION_ID I
 	public static final field INTENT_EXTRA_CALL_CID Ljava/lang/String;
 	public static final field INTENT_EXTRA_CALL_DISPLAY_NAME Ljava/lang/String;
+	public static final field INTENT_EXTRA_NEXT_ACTION Ljava/lang/String;
+	public static final field INTENT_EXTRA_NEXT_ACTION_BUNDLE Ljava/lang/String;
 	public static final field INTENT_EXTRA_NOTIFICATION_ID Ljava/lang/String;
 }
 

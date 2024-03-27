@@ -76,6 +76,13 @@
             </intent-filter>
         </receiver>
 
+        <receiver android:name=".notifications.internal.receivers.DismissNotificationBroadcastReceiver"
+            android:exported="false">
+            <intent-filter android:priority="-1">
+                <action android:name="io.getstream.video.android.action.DISMISS_NOTIFICATION" />
+            </intent-filter>
+        </receiver>
+
 
         <service android:name=".notifications.internal.service.CallService"
             android:foregroundServiceType="shortService|microphone"/>
