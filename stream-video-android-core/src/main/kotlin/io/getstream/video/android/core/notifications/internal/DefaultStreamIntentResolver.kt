@@ -119,11 +119,10 @@ internal class DefaultStreamIntentResolver(val context: Context) {
     )
 
     /**
-     * Search for a broadcast that will dismiss a notification and will then proceed to call the [nextAction].
+     * Search for a broadcast that will dismiss a notification and will then proceed to call the [nextIntent].
      *
      * @param callId the callID
-     * @param nextAction the next action to be invoked
-     * @param nextActionData data to be propagated to the next action intent.
+     * @param nextIntent the next action intent.
      */
     internal fun searchDismissNotificationPendingIntent(
         callId: StreamCallId,
