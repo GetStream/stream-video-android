@@ -113,6 +113,7 @@ modules=(
   "stream-video-android-core"
   "stream-video-android-ui-core"
   "stream-video-android-ui-compose"
+  "stream-video-android-filters-video"
   "stream-video-android-ui-xml"
 )
 
