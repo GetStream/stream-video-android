@@ -132,7 +132,7 @@ class SpeakerManager(
      * setSpeakerPhone(enable, StreamAudioDevice.Earpiece)
      * ```
      *
-     * @param enable if ture, enables the speakerphone, if false disables it and selects another device.
+     * @param enable if true, enables the speakerphone, if false disables it and selects another device.
      * @param defaultFallback when [enable] is false this is used to select the next device after the speaker.
      * */
     fun setSpeakerPhone(enable: Boolean, defaultFallback: StreamAudioDevice? = null) {
