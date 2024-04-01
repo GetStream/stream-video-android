@@ -1,0 +1,186 @@
+#!/bin/bash
+# Get the directory where the script is located
+script_dir="$(dirname "$0")"
+# Change to the script's directory
+cd "$script_dir" || exit
+# Go to the buildSrc dir where the Configuration.kt is
+cd ../../buildSrc/src/main/kotlin/io/getstream/video/android/ || exit
+file_path="Configuration.kt"
+# Start time
+start_time=$(date +%s)
+# Format the time
+format_time() {
+    local seconds=$1
+    local hours=$((seconds / 3600))
+    local minutes=$(( (seconds % 3600) / 60))
+    local seconds=$((seconds % 60))
+
+    if [ $hours -gt 0 ]; then
+        printf "%dh %dm %ds" $hours $minutes $seconds
+    else
+        printf "%dm %ds" $minutes $seconds
+    fi
+}
+# Function to extract version components
+extract_version_components() {
+    grep "const val $1" "$file_path" | awk -F"=" '{print $2}' | tr -d ' ;'
+}
+
+# Extracting the major, minor, and patch versions
+majorVersion=$(extract_version_components "majorVersion")
+minorVersion=$(extract_version_components "minorVersion")
+patchVersion=$(extract_version_components "patchVersion")
+nameOfVersion=$(extract_version_components "versionName")
+
+# Automatically increment the patch version
+let "patchVersion+=1"
+
+# Combining them into a version string
+extracted_version="$majorVersion.$minorVersion.$patchVersion"
+
+validate_version_format() {
+    if [[ $1 =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+        return 0 # Valid format
+    else
+        return 1 # Invalid format
+    fi
+}
+
+# Prompting the user for input with validation
+while true; do
+    read -p "Enter version (Press Enter to use $extracted_version or format X.Y.Z): " input_version
+    # Use the extracted version if no input is provided
+    if [[ -z "$input_version" ]]; then
+        version=$extracted_version
+        break
+    elif validate_version_format "$input_version"; then
+        version=$input_version
+        break
+    else
+        echo "Invalid version format. Please use the format X.Y.Z (e.g., 1.2.3)."
+    fi
+done
+
+# Use the extracted version if no input is provided
+version=${input_version:-$extracted_version}
+
+# Split the version into major, minor, and patch numbers
+IFS='.' read -r input_majorVersion input_minorVersion input_patchVersion <<< "$version"
+
+# Function to update version components in the file
+update_version_in_file() {
+    local component=$1
+    local value=$2
+    # For macOS compatibility, check if we need to use an empty string with '-i'
+    if [[ "$OSTYPE" == "darwin"* ]]; then
+        sed -i '' "s/const val $component =.*/const val $component = $value/" "$file_path"
+    else
+        sed -i "s/const val $component =.*/const val $component = $value/" "$file_path"
+    fi
+}
+
+# Get current date in a specific format, YYYYMMDDHHMMSS to use as suffix
+current_date=$(date +%Y%m%d%H%M%S)
+version_name="$input_majorVersion.$input_minorVersion.$input_patchVersion-local-$current_date"
+# Updating the versions in the Kotlin file
+update_version_in_file "majorVersion" "$input_majorVersion"
+update_version_in_file "minorVersion" "$input_minorVersion"
+update_version_in_file "patchVersion" "$input_patchVersion"
+update_version_in_file "versionName" "\"$version_name\""
+
+echo -e "Version updated to: \033[33m$version_name\033[0m"
+# Move back to the root of the project to be able to run ./gradlew
+# Change to the script's directory
+cd ../../../../../../../../scripts || exit
+gradleFilePath="publish-module.gradle"
+# Create a backup of the original .gradle file
+backupFilePath="${gradleFilePath}.backup"
+cp "$gradleFilePath" "$backupFilePath"
+
+# Pattern that marks the beginning of the block to remove
+startPattern="signing {"
+
+# Pattern that marks the end of the block to remove
+endPattern="}"
+
+# sed to remove the block from the startPattern to the endPattern, inclusive
+sed -i '' "/$startPattern/,/$endPattern/d" "$gradleFilePath"
+
+cd ..
+# Define an array of module names
+modules=(
+  "stream-video-android-previewdata"
+  "stream-video-android-core"
+  "stream-video-android-ui-core"
+  "stream-video-android-ui-compose"
+  "stream-video-android-filters-video"
+  "stream-video-android-ui-xml"
+)
+
+restoreAnyModifiedFiles() {
+    # Restore publish-module.gradle
+    cd "$script_dir" || exit
+    cd ..
+    cp "$backupFilePath" "$gradleFilePath"
+    rm "$backupFilePath"
+    # Restore Configuration.kt and update version
+    cd ..
+    cd "$script_dir" || exit
+    cd ../../buildSrc/src/main/kotlin/io/getstream/video/android/ || exit
+    let patchVersion-=1
+    update_version_in_file "majorVersion" "$majorVersion"
+    update_version_in_file "minorVersion" "$minorVersion"
+    update_version_in_file "patchVersion" "$patchVersion"
+    update_version_in_file "versionName" "$nameOfVersion"
+}
+
+total=${#modules[@]}
+completed=0
+echo "Publishing to MavenLocal"
+# Initial display of the progress bar
+printf "[%-20s] %3s%%" "" "0"
+echo -n $'\r'
+sleep 5 # For effect :)
+
+for module in "${modules[@]}"; do
+  #Progress
+  ((completed++))
+  percent=$((completed * 100 / total))
+  bar=$((completed * 20 / total)) # Assuming a 20-char width progress bar
+  filled=$(printf '%0.s█' $(seq 1 $bar))
+  unfilled=$(printf '%0.s ' $(seq 1 $((20 - bar))))
+  # Adjust unfilled to include only necessary spaces
+  if [ $bar -eq 20 ]; then
+    unfilled=""
+  fi
+  printf "\r[%s%s] %3d%%" "$filled" "$unfilled" "$percent"
+
+  ./gradlew "${module}":publishToMavenLocal -x test > /dev/null
+  if [ $? -ne 0 ]; then
+    echo -e "\033[31mPublishing $module failed.\033[0m"
+    restoreAnyModifiedFiles
+    echo -e "\033[41m\033[97mBUILD FAILED\033[0m\033[31m: One or more modules failed to publish.\033[0m"
+    exit 1
+  fi
+done
+
+restoreAnyModifiedFiles
+echo ""
+# Calculate elapsed time
+current_time=$(date +%s)
+elapsed_seconds=$((current_time - start_time))
+elapsed_time=$(format_time $elapsed_seconds)
+
+echo "Gradle usage:"
+echo -e '\033[33mimplementation\033[0m\033[37m(\033[0m"\033[32mio.getstream:stream-video-android-ui-compose:'"$version_name"'\033[0m\033[37m")\033[0m'
+echo -e '\033[33mimplementation\033[0m\033[37m(\033[0m"\033[32mio.getstream:stream-video-android-ui-xml:'"$version_name"'\033[0m\033[37m")\033[0m'
+echo "Elapsed time: $elapsed_time"
+echo -e "\033[42m\033[97mBUILD SUCCESS\033[0m\033[32m: All modules published successfully.\033[0m"
+
+
+
+
+
+
+
+

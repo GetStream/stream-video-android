@@ -93,11 +93,15 @@ import io.getstream.video.android.compose.ui.components.call.renderer.copy
 import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.RealtimeConnection
 import io.getstream.video.android.core.call.state.ChooseLayout
+import io.getstream.video.android.filters.video.BlurredBackgroundVideoFilter
+import io.getstream.video.android.filters.video.VirtualBackgroundVideoFilter
 import io.getstream.video.android.mock.StreamPreviewDataUtils
 import io.getstream.video.android.mock.previewCall
 import io.getstream.video.android.tooling.extensions.toPx
 import io.getstream.video.android.tooling.util.StreamFlavors
 import io.getstream.video.android.ui.menu.SettingsMenu
+import io.getstream.video.android.ui.menu.VideoFilter
+import io.getstream.video.android.ui.menu.availableVideoFilters
 import io.getstream.video.android.util.config.AppConfig
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.delay
@@ -118,9 +122,8 @@ fun CallScreen(
     val speakingWhileMuted by call.state.speakingWhileMuted.collectAsStateWithLifecycle()
     var isShowingSettingMenu by remember { mutableStateOf(false) }
     var isShowingLayoutChooseMenu by remember { mutableStateOf(false) }
-    var isShowingReactionsMenu by remember { mutableStateOf(false) }
     var isShowingAvailableDeviceMenu by remember { mutableStateOf(false) }
-    var isBackgroundBlurEnabled by remember { mutableStateOf(false) }
+    var selectedVideoFilter by remember { mutableIntStateOf(0) }
     var isShowingFeedbackDialog by remember { mutableStateOf(false) }
     var isShowingStats by remember { mutableStateOf(false) }
     var layout by remember { mutableStateOf(LayoutType.DYNAMIC) }
@@ -378,7 +381,7 @@ fun CallScreen(
                             ),
                             onIcon = Icons.Default.MoreVert,
                             onStyle = VideoTheme.styles.buttonStyles.secondaryIconButtonStyle(),
-                            offStyle = VideoTheme.styles.buttonStyles.tetriaryIconButtonStyle(),
+                            offStyle = VideoTheme.styles.buttonStyles.tertiaryIconButtonStyle(),
                         ) {
                             showingLandscapeControls = when (it) {
                                 ToggleableState.On -> false
@@ -445,22 +448,32 @@ fun CallScreen(
         if (isShowingSettingMenu) {
             SettingsMenu(
                 call = call,
+                selectedVideoFilter = selectedVideoFilter,
                 showDebugOptions = showDebugOptions,
-                isBackgroundBlurEnabled = isBackgroundBlurEnabled,
                 onDismissed = { isShowingSettingMenu = false },
+                onSelectVideoFilter = { filterIndex ->
+                    selectedVideoFilter = filterIndex
+
+                    when (val filter = availableVideoFilters[filterIndex]) {
+                        is VideoFilter.None -> {
+                            call.videoFilter = null
+                        }
+                        is VideoFilter.BlurredBackground -> {
+                            call.videoFilter = BlurredBackgroundVideoFilter()
+                        }
+                        is VideoFilter.VirtualBackground -> {
+                            call.videoFilter = VirtualBackgroundVideoFilter(context, filter.drawable)
+                        }
+                    }
+                },
                 onShowFeedback = {
                     isShowingSettingMenu = false
                     isShowingFeedbackDialog = true
                 },
-                onToggleBackgroundBlur = {
-                    isBackgroundBlurEnabled = !isBackgroundBlurEnabled
-                    isShowingSettingMenu = false
-                },
-                onShowCallStats = {
-                    isShowingStats = true
-                    isShowingSettingMenu = false
-                },
-            )
+            ) {
+                isShowingStats = true
+                isShowingSettingMenu = false
+            }
         }
 
         if (isShowingFeedbackDialog) {
@@ -511,7 +524,7 @@ fun CallScreen(
                 },
                 negativeButton = Triple(
                     "Leave",
-                    VideoTheme.styles.buttonStyles.tetriaryButtonStyle(),
+                    VideoTheme.styles.buttonStyles.tertiaryButtonStyle(),
                 ) {
                     showRecordingWarning = false
                     acceptedCallRecording = false
@@ -534,7 +547,7 @@ fun CallScreen(
                 },
                 negativeButton = Triple(
                     "Cancel",
-                    VideoTheme.styles.buttonStyles.tetriaryButtonStyle(),
+                    VideoTheme.styles.buttonStyles.tertiaryButtonStyle(),
                 ) {
                     showEndRecordingDialog = false
                 },

@@ -20,10 +20,13 @@ import io.getstream.log.Priority
 import io.getstream.log.StreamLog
 import io.getstream.log.streamLog
 import io.getstream.result.Result
+import io.getstream.video.android.core.base.auth.GetAuthDataResponse
+import io.getstream.video.android.core.base.auth.StreamService
 import io.getstream.video.android.core.call.connection.StreamPeerConnectionFactory
 import io.mockk.MockKAnnotations
 import io.mockk.impl.annotations.MockK
 import io.mockk.junit4.MockKRule
+import kotlinx.coroutines.runBlocking
 import org.junit.Before
 import org.junit.Rule
 import org.threeten.bp.Clock
@@ -42,14 +45,22 @@ public open class TestBase {
 
     val nowUtc = OffsetDateTime.now(Clock.systemUTC())
 
-    /** API Key */
-    val apiKey = "hd8szvscpxvd"
-
     @get:Rule
     val mockkRule = MockKRule(this)
 
     @MockK(relaxUnitFun = true, relaxed = true)
     lateinit var mockedPCFactory: StreamPeerConnectionFactory
+
+    var authData: GetAuthDataResponse? = null
+
+    init {
+        runBlocking {
+            authData = StreamService.instance.getAuthData(
+                environment = "pronto",
+                userId = testData.users["thierry"]!!.id,
+            )
+        }
+    }
 
     @Before
     fun setUp() {

@@ -33,18 +33,18 @@
     <!-- Base -->
     <color name="stream_video_base_primary">#E3E4E5</color>
     <color name="stream_video_base_secondary">#979CA0</color>
-    <color name="stream_video_base_tetriary">#4C535B</color>
+    <color name="stream_video_base_tertiary">#4C535B</color>
     <color name="stream_video_base_quaternary">#656B72</color>
     <color name="stream_video_base_quinary">#7E8389</color>
     <color name="stream_video_base_senary">#323B44</color>
     <color name="stream_video_base_sheet_primary">#101213</color>
     <color name="stream_video_base_sheet_secondary">#0C0D0E</color>
-    <color name="stream_video_base_sheet_tetriary">#19232D</color>
+    <color name="stream_video_base_sheet_tertiary">#19232D</color>
     <color name="stream_video_base_sheet_quaternary">#A60C0D0E</color>
     <color name="stream_video_base_sheet_quinary">#0C0D0EA6</color>
 
     <!-- Buttons -->
-    <color name="stream_video_button_primary_default">@color/stream_video_base_sheet_tetriary</color>
+    <color name="stream_video_button_primary_default">@color/stream_video_base_sheet_tertiary</color>
     <color name="stream_video_button_primary_pressed">@color/stream_video_base_sheet_secondary</color>
     <color name="stream_video_button_primary_disabled">@color/stream_video_brand_secondary_transparent</color>
     <color name="stream_video_button_brand_default">@color/stream_video_brand_primary</color>
