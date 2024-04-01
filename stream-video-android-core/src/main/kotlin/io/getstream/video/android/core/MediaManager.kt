@@ -388,6 +388,7 @@ class MicrophoneManager(
         enforceSetup {
             if (enabled) {
                 enable(fromUser = fromUser)
+                mediaManager.speaker.setEnabled(enabled = false, fromUser = false)
             } else {
                 disable(fromUser = fromUser)
             }
