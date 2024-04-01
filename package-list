@@ -36,6 +36,8 @@ io.getstream.video.android.model.mapper
 org.openapitools.client.apis
 org.openapitools.client.infrastructure
 org.openapitools.client.models
+module:stream-video-android-filters-video
+io.getstream.video.android.filters.video
 module:stream-video-android-previewdata
 io.getstream.video.android.mock
 module:stream-video-android-ui-compose
