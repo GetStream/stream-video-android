@@ -122,8 +122,20 @@ class SpeakerManager(
         }
     }
 
-    /** enables or disables the speakerphone */
-    fun setSpeakerPhone(enable: Boolean) {
+    /**
+     * Enables or disables the speakerphone.
+     *
+     * When the speaker is disabled the device that gets selected next is by default the first device
+     * that is NOT a speakerphone. To override this use [defaultFallback].
+     * If you want the earpice to be selected if the speakerphone is disabled do
+     * ```kotlin
+     * setSpeakerPhone(enable, StreamAudioDevice.Earpiece)
+     * ```
+     *
+     * @param enable if true, enables the speakerphone, if false disables it and selects another device.
+     * @param defaultFallback when [enable] is false this is used to select the next device after the speaker.
+     * */
+    fun setSpeakerPhone(enable: Boolean, defaultFallback: StreamAudioDevice? = null) {
         microphoneManager.setup()
         val devices = devices.value
         if (enable) {
@@ -134,9 +146,12 @@ class SpeakerManager(
         } else {
             _speakerPhoneEnabled.value = false
             // swap back to the old one
-            val fallback =
-                selectedBeforeSpeaker
-                    ?: devices.firstOrNull { it !is StreamAudioDevice.Speakerphone }
+            val defaultFallbackFromType = defaultFallback?.let {
+                devices.filterIsInstance(defaultFallback::class.java)
+            }?.firstOrNull()
+            val fallback = defaultFallbackFromType ?: selectedBeforeSpeaker ?: devices.firstOrNull {
+                it !is StreamAudioDevice.Speakerphone
+            }
             microphoneManager.select(fallback)
         }
     }
