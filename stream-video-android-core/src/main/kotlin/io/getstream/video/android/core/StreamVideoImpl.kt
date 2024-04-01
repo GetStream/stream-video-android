@@ -499,14 +499,6 @@ internal class StreamVideoImpl internal constructor(
             callEvent?.getCallCID()
         } ?: ""
 
-        if (selectedCid.isNotEmpty()) {
-            calls[selectedCid]?.let {
-                it.state.handleEvent(event)
-                it.session?.handleEvent(event)
-                it.handleEvent(event)
-            }
-        }
-
         // client level subscriptions
         subscriptions.forEach { sub ->
             if (!sub.isDisposed) {
@@ -526,6 +518,14 @@ internal class StreamVideoImpl internal constructor(
         // call level subscriptions
         if (selectedCid.isNotEmpty()) {
             calls[selectedCid]?.fireEvent(event)
+        }
+
+        if (selectedCid.isNotEmpty()) {
+            calls[selectedCid]?.let {
+                it.state.handleEvent(event)
+                it.session?.handleEvent(event)
+                it.handleEvent(event)
+            }
         }
     }
 
