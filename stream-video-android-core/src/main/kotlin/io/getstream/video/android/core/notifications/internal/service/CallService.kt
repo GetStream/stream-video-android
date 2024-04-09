@@ -45,10 +45,9 @@ import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
+import org.openapitools.client.models.CallAcceptedEvent
 import org.openapitools.client.models.CallEndedEvent
 import org.openapitools.client.models.CallRejectedEvent
-import java.lang.IllegalArgumentException
-import java.lang.IllegalStateException
 
 /**
  * A foreground service that is running when there is an active call.
@@ -333,9 +332,16 @@ internal class CallService : Service() {
         // Call state
         serviceScope.launch {
             val call = streamVideo.call(callId.type, callId.id)
-            call.subscribe {
-                logger.i { "Received event in service: $it" }
-                when (it) {
+            call.subscribe { event ->
+                logger.i { "Received event in service: $event" }
+                when (event) {
+                    is CallAcceptedEvent -> {
+                        handleCallAcceptedOnAnotherDevice(
+                            acceptedByUserId = event.user.id,
+                            callRingingState = call.state.ringingState.value,
+                        )
+                    }
+
                     is CallRejectedEvent -> {
                         // When call is rejected by the caller
                         stopService()
@@ -381,6 +387,16 @@ internal class CallService : Service() {
             if (mediaPlayer?.isPlaying == true) mediaPlayer?.stop()
         } catch (e: IllegalStateException) {
             logger.d { "Error stopping call sound. MediaPlayer might have already been released." }
+        }
+    }
+
+    private fun handleCallAcceptedOnAnotherDevice(acceptedByUserId: String, callRingingState: RingingState) {
+        val myUserId = StreamVideo.instanceOrNull()?.userId
+
+        // If call was accepted by me, but current device is still ringing, it means the call was accepted on another device
+        if (acceptedByUserId == myUserId && callRingingState is RingingState.Incoming) {
+            // So stop ringing on this device
+            stopService()
         }
     }
 
