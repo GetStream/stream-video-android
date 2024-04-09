@@ -14,4 +14,30 @@
      See the License for the specific language governing permissions and
      limitations under the License.
 -->
-<manifest />
+<manifest
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    >
+
+
+    <application>
+        <activity
+        android:name=".ui.ComposeStreamCallActivity"
+        android:supportsPictureInPicture="true"
+        android:showOnLockScreen="true"
+        android:showWhenLocked="true"
+        android:launchMode="singleTop"
+        android:exported="true">
+        <intent-filter android:priority="1">
+            <action android:name="io.getstream.video.android.action.INCOMING_CALL" />
+            <action android:name="io.getstream.video.android.action.NOTIFICATION" />
+            <action android:name="io.getstream.video.android.action.LIVE_CALL" />
+            <action android:name="io.getstream.video.android.action.ONGOING_CALL" />
+            <action android:name="io.getstream.video.android.action.ACCEPT_CALL" />
+            <action android:name="io.getstream.video.android.action.OUTGOING_CALL" />
+        </intent-filter>
+    </activity>
+
+    </application>
+
+</manifest>
