@@ -1,3 +1,19 @@
+/*
+ * Copyright (c) 2014-2024 Stream.io Inc. All rights reserved.
+ *
+ * Licensed under the Stream License;
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    https://github.com/GetStream/stream-video-android/blob/main/LICENSE
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package io.getstream.video.android.ui.common
 
 import android.app.PictureInPictureParams
@@ -41,7 +57,6 @@ import org.openapitools.client.models.CallSessionParticipantLeftEvent
 import org.openapitools.client.models.OwnCapability
 import org.openapitools.client.models.VideoEvent
 
-
 public abstract class StreamCallActivity : ComponentActivity() {
     // Factory and creation
     public companion object {
@@ -61,24 +76,6 @@ public abstract class StreamCallActivity : ComponentActivity() {
          * @param cid the Call id
          * @param members list of members
          * @param action android action.
-         */
-        public fun callIntent(
-            context: Context,
-            cid: StreamCallId,
-            members: List<String> = defaultExtraMembers,
-            leaveWhenLastInCall: Boolean = DEFAULT_LEAVE_WHEN_LAST,
-            action: String? = null
-        ): Intent = callIntent(
-            context, cid, members, leaveWhenLastInCall, action, StreamCallActivity::class.java
-        )
-
-        /**
-         * Factory method used to build an intent to start this activity.
-         *
-         * @param context the context.
-         * @param cid the Call id
-         * @param members list of members
-         * @param action android action.
          * @param clazz the class of the Activity
          */
         public fun <T : StreamCallActivity> callIntent(
@@ -87,7 +84,7 @@ public abstract class StreamCallActivity : ComponentActivity() {
             members: List<String> = defaultExtraMembers,
             leaveWhenLastInCall: Boolean = DEFAULT_LEAVE_WHEN_LAST,
             action: String? = null,
-            clazz: Class<T>
+            clazz: Class<T>,
         ): Intent {
             return Intent(context, clazz).apply {
                 // Setup the outgoing call action
@@ -124,7 +121,8 @@ public abstract class StreamCallActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         onPreCreate(savedInstanceState, null)
         logger.d { "Entered [onCreate(Bundle?)" }
-        initializeCallOrFail(savedInstanceState,
+        initializeCallOrFail(
+            savedInstanceState,
             null,
             onSuccess = { instanceState, persistentState, call, action ->
                 logger.d { "Calling [onCreate(Call)], because call is initialized $call" }
@@ -136,17 +134,19 @@ public abstract class StreamCallActivity : ComponentActivity() {
             onError = {
                 logger.e(it) { "Failed to initialize call." }
                 throw it
-            })
+            },
+        )
     }
 
     public final override fun onCreate(
         savedInstanceState: Bundle?,
-        persistentState: PersistableBundle?
+        persistentState: PersistableBundle?,
     ) {
         super.onCreate(savedInstanceState)
         onPreCreate(savedInstanceState, persistentState)
         logger.d { "Entered [onCreate(Bundle, PersistableBundle?)" }
-        initializeCallOrFail(savedInstanceState,
+        initializeCallOrFail(
+            savedInstanceState,
             persistentState,
             onSuccess = { instanceState, persistedState, call, action ->
                 logger.d { "Calling [onCreate(Call)], because call is initialized $call" }
@@ -158,9 +158,9 @@ public abstract class StreamCallActivity : ComponentActivity() {
             onError = {
                 logger.e(it) { "Failed to initialize call." }
                 throw it
-            })
+            },
+        )
     }
-
 
     public final override fun onResume() {
         super.onResume()
@@ -175,7 +175,6 @@ public abstract class StreamCallActivity : ComponentActivity() {
             super.onPause()
         }
     }
-
 
     public final override fun onStop() {
         withCachedCall {
@@ -195,7 +194,9 @@ public abstract class StreamCallActivity : ComponentActivity() {
      * @see NotificationHandler
      */
     public open fun onIntentAction(
-        call: Call, action: String?, onError: (suspend (Exception) -> Unit)? = onErrorFinish
+        call: Call,
+        action: String?,
+        onError: (suspend (Exception) -> Unit)? = onErrorFinish,
     ) {
         when (action) {
             NotificationHandler.ACTION_ACCEPT_CALL -> {
@@ -218,18 +219,27 @@ public abstract class StreamCallActivity : ComponentActivity() {
                 // Extract the members and the call ID and place the outgoing call
                 val members = intent.getStringArrayListExtra(EXTRA_MEMBERS_ARRAY) ?: emptyList()
                 create(
-                    call, members = members, ring = true, onError = onError
+                    call,
+                    members = members,
+                    ring = true,
+                    onError = onError,
                 )
             }
 
             else -> {
-                logger.w { "No action provided to the intent will try to join call by default [action: $action], [cid: ${call.cid}]" }
+                logger.w {
+                    "No action provided to the intent will try to join call by default [action: $action], [cid: ${call.cid}]"
+                }
                 val members = intent.getStringArrayListExtra(EXTRA_MEMBERS_ARRAY) ?: emptyList()
                 // If the call does not exist it will be created.
                 create(
-                    call, members = members, ring = false, onSuccess = {
+                    call,
+                    members = members,
+                    ring = false,
+                    onSuccess = {
                         join(call, onError = onError)
-                    }, onError = onError
+                    },
+                    onError = onError,
                 )
             }
         }
@@ -250,7 +260,9 @@ public abstract class StreamCallActivity : ComponentActivity() {
      * is already available.
      */
     public open fun onCreate(
-        savedInstanceState: Bundle?, persistentState: PersistableBundle?, call: Call
+        savedInstanceState: Bundle?,
+        persistentState: PersistableBundle?,
+        call: Call,
     ) {
         logger.d { "[onCreate(Bundle,PersistableBundle,Call)] setting up compose delegate." }
         val uiDelegate = uiDelegate<StreamCallActivity>()
@@ -335,7 +347,8 @@ public abstract class StreamCallActivity : ComponentActivity() {
                 }.build(),
             )
         } else {
-            @Suppress("DEPRECATION") enterPictureInPictureMode()
+            @Suppress("DEPRECATION")
+            enterPictureInPictureMode()
         }
     }
 
@@ -381,7 +394,7 @@ public abstract class StreamCallActivity : ComponentActivity() {
                 // List of all users, containing the caller also
                 memberIds = members + instance.userId,
                 // If other users will get push notification.
-                ring = ring
+                ring = ring,
             )
             result.onOutcome(call, onSuccess, onError)
         }
@@ -631,28 +644,33 @@ public abstract class StreamCallActivity : ComponentActivity() {
 
         if (cid == null) {
             val e = IllegalArgumentException("CallActivity started without call ID.")
-            logger.e(e) { "Failed to initialize call because call ID is not found in the intent. $intent" }
+            logger.e(
+                e,
+            ) { "Failed to initialize call because call ID is not found in the intent. $intent" }
             onError?.let {
-
             } ?: throw e
             // Finish
             return
         }
 
         call(
-            cid, onSuccess = { call ->
+            cid,
+            onSuccess = { call ->
                 cachedCall = call
                 subscription?.dispose()
                 subscription = cachedCall.subscribe { event ->
                     onCallEvent(cachedCall, event)
                 }
                 onSuccess?.invoke(
-                    savedInstanceState, persistentState, cachedCall, intent.action
+                    savedInstanceState,
+                    persistentState,
+                    cachedCall,
+                    intent.action,
                 )
-            }, onError = onError
+            },
+            onError = onError,
         )
     }
-
 
     private fun withCachedCall(action: (Call) -> Unit) {
         if (!::cachedCall.isInitialized) {
@@ -671,7 +689,7 @@ public abstract class StreamCallActivity : ComponentActivity() {
         call: Call,
         onSuccess: (suspend (Call) -> Unit)?,
         onError: (suspend (Exception) -> Unit)?,
-        what: suspend (Call) -> Result<RtcSession>
+        what: suspend (Call) -> Result<RtcSession>,
     ) {
         logger.d { "Accept or join, ${call.cid}" }
         lifecycleScope.launch(Dispatchers.IO) {
@@ -724,5 +742,4 @@ public abstract class StreamCallActivity : ComponentActivity() {
         withContext(Dispatchers.IO) { accept().flatMap { join() } }
 
     // Compose Delegate
-
 }
