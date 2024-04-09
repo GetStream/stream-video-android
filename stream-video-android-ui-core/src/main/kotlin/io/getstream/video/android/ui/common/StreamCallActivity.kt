@@ -49,6 +49,7 @@ import io.getstream.video.android.core.events.ParticipantLeftEvent
 import io.getstream.video.android.core.notifications.NotificationHandler
 import io.getstream.video.android.model.StreamCallId
 import io.getstream.video.android.model.streamCallId
+import io.getstream.video.android.ui.common.util.StreamCallActivityDelicateApi
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -57,6 +58,7 @@ import org.openapitools.client.models.CallSessionParticipantLeftEvent
 import org.openapitools.client.models.OwnCapability
 import org.openapitools.client.models.VideoEvent
 
+@OptIn(StreamCallActivityDelicateApi::class)
 public abstract class StreamCallActivity : ComponentActivity() {
     // Factory and creation
     public companion object {
@@ -321,12 +323,14 @@ public abstract class StreamCallActivity : ComponentActivity() {
     }
 
     // Decision making
+    @StreamCallActivityDelicateApi
     public open fun isVideoCall(call: Call): Boolean = call.hasCapability(OwnCapability.SendVideo)
 
     // Picture in picture (for Video calls)
     /**
      * Enter picture in picture mode. By default supported for video calls.
      */
+    @StreamCallActivityDelicateApi
     public fun enterPictureInPicture(): Unit = withCachedCall { call ->
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             val currentOrientation = resources.configuration.orientation
@@ -363,6 +367,7 @@ public abstract class StreamCallActivity : ComponentActivity() {
      * @param onSuccess callback where the [Call] object is returned
      * @param onError callback when the [Call] was not returned.
      */
+    @StreamCallActivityDelicateApi
     public open fun call(
         cid: StreamCallId,
         onSuccess: ((Call) -> Unit)? = null,
@@ -381,6 +386,7 @@ public abstract class StreamCallActivity : ComponentActivity() {
      * @param onSuccess invoked when operation is sucessfull
      * @param onError invoked when operation failed.
      */
+    @StreamCallActivityDelicateApi
     public open fun create(
         call: Call,
         ring: Boolean,
@@ -407,6 +413,7 @@ public abstract class StreamCallActivity : ComponentActivity() {
      * @param onSuccess invoked when operation is sucessfull
      * @param onError invoked when operation failed.
      */
+    @StreamCallActivityDelicateApi
     public open fun get(
         call: Call,
         onSuccess: (suspend (Call) -> Unit)? = null,
@@ -425,6 +432,7 @@ public abstract class StreamCallActivity : ComponentActivity() {
      * @param onSuccess invoked when the [Call.join] has finished.
      * @param onError invoked when operation failed.
      * */
+    @StreamCallActivityDelicateApi
     public open fun join(
         call: Call,
         onSuccess: (suspend (Call) -> Unit)? = null,
@@ -443,6 +451,7 @@ public abstract class StreamCallActivity : ComponentActivity() {
      * @param onSuccess invoked when the [Call.join] has finished.
      * @param onError invoked when operation failed.
      * */
+    @StreamCallActivityDelicateApi
     public open fun accept(
         call: Call,
         onSuccess: (suspend (Call) -> Unit)? = null,
@@ -463,6 +472,7 @@ public abstract class StreamCallActivity : ComponentActivity() {
      * @param onSuccess optionally get notified if the operation was success.
      * @param onError optionally get notified if the operation failed.
      */
+    @StreamCallActivityDelicateApi
     public open fun reject(
         call: Call,
         onSuccess: (suspend (Call) -> Unit)? = null,
@@ -485,6 +495,7 @@ public abstract class StreamCallActivity : ComponentActivity() {
      * @param onSuccess optionally get notified if the operation was success.
      * @param onError optionally get notified if the operation failed.
      */
+    @StreamCallActivityDelicateApi
     public open fun cancel(
         call: Call,
         onSuccess: (suspend (Call) -> Unit)? = null,
@@ -498,6 +509,7 @@ public abstract class StreamCallActivity : ComponentActivity() {
      * @param onSuccess optionally get notified if the operation was success.
      * @param onError optionally get notified if the operation failed.
      */
+    @StreamCallActivityDelicateApi
     public open fun leave(
         call: Call,
         onSuccess: (suspend (Call) -> Unit)? = null,
@@ -522,6 +534,7 @@ public abstract class StreamCallActivity : ComponentActivity() {
      * @param onSuccess optionally get notified if the operation was success.
      * @param onError optionally get notified if the operation failed.
      */
+    @StreamCallActivityDelicateApi
     public open fun end(
         call: Call,
         onSuccess: (suspend (Call) -> Unit)? = null,
@@ -615,6 +628,7 @@ public abstract class StreamCallActivity : ComponentActivity() {
      *
      * @param call the call.
      */
+    @CallSuper
     public open fun onLastParticipant(call: Call) {
         logger.d { "You are the last participant." }
         val leaveWhenLastInCall =
@@ -628,6 +642,7 @@ public abstract class StreamCallActivity : ComponentActivity() {
      * Get notified when the activity enters picture in picture.
      *
      */
+    @CallSuper
     public open fun onPictureInPicture(call: Call) {
         // No-op by default
     }
@@ -740,6 +755,4 @@ public abstract class StreamCallActivity : ComponentActivity() {
 
     private suspend fun Call.acceptThenJoin() =
         withContext(Dispatchers.IO) { accept().flatMap { join() } }
-
-    // Compose Delegate
 }
