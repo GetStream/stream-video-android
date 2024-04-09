@@ -343,8 +343,11 @@ internal class CallService : Service() {
                     }
 
                     is CallRejectedEvent -> {
-                        // When call is rejected by the caller
-                        stopService()
+                        stopServiceIfCallRejectedByMeOrCaller(
+                            rejectedByUserId = event.user.id,
+                            myUserId = streamVideo.userId,
+                            createdByUserId = call.state.createdBy.value?.id,
+                        )
                     }
 
                     is CallEndedEvent -> {
@@ -396,6 +399,13 @@ internal class CallService : Service() {
         // If call was accepted by me, but current device is still ringing, it means the call was accepted on another device
         if (acceptedByUserId == myUserId && callRingingState is RingingState.Incoming) {
             // So stop ringing on this device
+            stopService()
+        }
+    }
+
+    private fun stopServiceIfCallRejectedByMeOrCaller(rejectedByUserId: String, myUserId: String, createdByUserId: String?) {
+        if (rejectedByUserId == myUserId || rejectedByUserId == createdByUserId) {
+            // If call is rejected by me (even on another device) OR the caller, stop the service
             stopService()
         }
     }
