@@ -336,15 +336,19 @@ internal class CallService : Service() {
                 logger.i { "Received event in service: $event" }
                 when (event) {
                     is CallAcceptedEvent -> {
-                        handleCallAcceptedOnAnotherDevice(
+                        stopServiceIfCallAcceptedByMeOnAnotherDevice(
                             acceptedByUserId = event.user.id,
+                            myUserId = streamVideo.userId,
                             callRingingState = call.state.ringingState.value,
                         )
                     }
 
                     is CallRejectedEvent -> {
-                        // When call is rejected by the caller
-                        stopService()
+                        stopServiceIfCallRejectedByMeOrCaller(
+                            rejectedByUserId = event.user.id,
+                            myUserId = streamVideo.userId,
+                            createdByUserId = call.state.createdBy.value?.id,
+                        )
                     }
 
                     is CallEndedEvent -> {
@@ -390,12 +394,17 @@ internal class CallService : Service() {
         }
     }
 
-    private fun handleCallAcceptedOnAnotherDevice(acceptedByUserId: String, callRingingState: RingingState) {
-        val myUserId = StreamVideo.instanceOrNull()?.userId
-
-        // If call was accepted by me, but current device is still ringing, it means the call was accepted on another device
+    private fun stopServiceIfCallAcceptedByMeOnAnotherDevice(acceptedByUserId: String, myUserId: String, callRingingState: RingingState) {
+        // If incoming call was accepted by me, but current device is still ringing, it means the call was accepted on another device
         if (acceptedByUserId == myUserId && callRingingState is RingingState.Incoming) {
             // So stop ringing on this device
+            stopService()
+        }
+    }
+
+    private fun stopServiceIfCallRejectedByMeOrCaller(rejectedByUserId: String, myUserId: String, createdByUserId: String?) {
+        // If incoming call is rejected by me (even on another device) OR cancelled by the caller, stop the service
+        if (rejectedByUserId == myUserId || rejectedByUserId == createdByUserId) {
             stopService()
         }
     }

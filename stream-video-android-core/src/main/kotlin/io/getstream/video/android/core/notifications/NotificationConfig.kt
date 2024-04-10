@@ -23,4 +23,12 @@ public data class NotificationConfig(
     val pushDeviceGenerators: List<PushDeviceGenerator> = emptyList(),
     val requestPermissionOnAppLaunch: () -> Boolean = { true },
     val notificationHandler: NotificationHandler = NoOpNotificationHandler,
+    /**
+     * Set this to true if you want to make the ringing notifications as low-priority
+     * in case the application is in foreground. This will prevent the notification from
+     * interrupting the user while he is in the app. In this case you need to make sure to
+     * handle this call state and display an incoming call screen.
+     * NOTE: This setting has only an effect if you don't set a custom [NotificationHandler]!
+     */
+    val hideRingingNotificationInForeground: Boolean = false,
 )

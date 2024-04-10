@@ -151,7 +151,10 @@ internal class StreamNotificationManager private constructor(
                 } else {
                     val application = context.applicationContext as? Application
                     val updatedNotificationConfig =
-                        notificationConfig.overrideDefault(application)
+                        notificationConfig.overrideDefault(
+                            application = application,
+                            hideRingingNotificationInForeground = notificationConfig.hideRingingNotificationInForeground,
+                        )
                     val onPermissionStatus: (NotificationPermissionStatus) -> Unit = { nps ->
                         with(updatedNotificationConfig.notificationHandler) {
                             when (nps) {
@@ -182,11 +185,17 @@ internal class StreamNotificationManager private constructor(
             }
         }
 
-        private fun NotificationConfig.overrideDefault(application: Application?): NotificationConfig {
+        private fun NotificationConfig.overrideDefault(
+            application: Application?,
+            hideRingingNotificationInForeground: Boolean,
+        ): NotificationConfig {
             return application?.let {
                 val notificationHandler = notificationHandler
                     .takeUnless { it == NoOpNotificationHandler }
-                    ?: DefaultNotificationHandler(application)
+                    ?: DefaultNotificationHandler(
+                        application = application,
+                        hideRingingNotificationInForeground = hideRingingNotificationInForeground,
+                    )
                 this.copy(notificationHandler = notificationHandler)
             } ?: this
         }
