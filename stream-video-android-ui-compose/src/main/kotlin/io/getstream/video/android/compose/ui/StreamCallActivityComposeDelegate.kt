@@ -29,6 +29,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -36,6 +37,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.getstream.log.taggedLogger
+import io.getstream.video.android.compose.R
 import io.getstream.video.android.compose.permission.LaunchPermissionRequest
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.base.StreamDialogPositiveNegative
@@ -191,7 +193,7 @@ public open class StreamCallActivityComposeDelegate : StreamActivityUiDelegate<S
             onCallAction = {
                 onCallAction(call, it)
             },
-            durationPlaceholder = duration ?: "Calling...",
+            durationPlaceholder = duration ?: stringResource(id = R.string.stream_audio_call_ui_calling),
         )
     }
 
@@ -221,7 +223,7 @@ public open class StreamCallActivityComposeDelegate : StreamActivityUiDelegate<S
         StreamDialogPositiveNegative(
             content = {
                 Text(
-                    text = "Some permissions are required",
+                    text = stringResource(id = R.string.stream_default_call_ui_permissions_rationale_title),
                     style = TextStyle(
                         fontSize = 24.sp,
                         lineHeight = 28.sp,
@@ -232,7 +234,7 @@ public open class StreamCallActivityComposeDelegate : StreamActivityUiDelegate<S
                 )
                 Spacer(modifier = Modifier.size(8.dp))
                 Text(
-                    text = "The app needs access to your microphone.",
+                    text = stringResource(id = R.string.stream_default_call_ui_microphone_rationale),
                     style = TextStyle(
                         fontSize = 16.sp,
                         lineHeight = 18.5.sp,
@@ -244,7 +246,7 @@ public open class StreamCallActivityComposeDelegate : StreamActivityUiDelegate<S
             },
             style = StreamDialogStyles.defaultDialogStyle(),
             positiveButton = Triple(
-                "Settings",
+                stringResource(id = R.string.stream_default_call_ui_settings_button),
                 ButtonStyles.secondaryButtonStyle(StyleSize.S),
             ) {
                 val intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
@@ -253,7 +255,7 @@ public open class StreamCallActivityComposeDelegate : StreamActivityUiDelegate<S
                 startActivity(intent)
             },
             negativeButton = Triple(
-                "Not now",
+                stringResource(id = R.string.stream_default_call_ui_not_now_button),
                 ButtonStyles.tertiaryButtonStyle(StyleSize.S),
             ) {
                 finish()

@@ -27,7 +27,7 @@
         android:showOnLockScreen="true"
         android:showWhenLocked="true"
         android:launchMode="singleTop"
-        android:exported="true">
+        android:exported="false">
         <intent-filter android:priority="1">
             <action android:name="io.getstream.video.android.action.INCOMING_CALL" />
             <action android:name="io.getstream.video.android.action.NOTIFICATION" />
