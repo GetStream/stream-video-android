@@ -127,6 +127,9 @@ public final class io/getstream/video/android/ui/common/util/ResourcesKt {
 	public static final fun getFloatResource (Landroid/content/Context;I)F
 }
 
+public abstract interface annotation class io/getstream/video/android/ui/common/util/StreamCallActivityDelicateApi : java/lang/annotation/Annotation {
+}
+
 public final class io/getstream/video/android/ui/common/view/ParticipantContentView : android/widget/LinearLayout {
 	public fun <init> (Landroid/content/Context;)V
 	public fun <init> (Landroid/content/Context;Landroid/util/AttributeSet;)V

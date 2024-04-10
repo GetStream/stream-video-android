@@ -223,7 +223,9 @@ public open class StreamCallActivityComposeDelegate : StreamActivityUiDelegate<S
         StreamDialogPositiveNegative(
             content = {
                 Text(
-                    text = stringResource(id = R.string.stream_default_call_ui_permissions_rationale_title),
+                    text = stringResource(
+                        id = R.string.stream_default_call_ui_permissions_rationale_title,
+                    ),
                     style = TextStyle(
                         fontSize = 24.sp,
                         lineHeight = 28.sp,
@@ -234,7 +236,9 @@ public open class StreamCallActivityComposeDelegate : StreamActivityUiDelegate<S
                 )
                 Spacer(modifier = Modifier.size(8.dp))
                 Text(
-                    text = stringResource(id = R.string.stream_default_call_ui_microphone_rationale),
+                    text = stringResource(
+                        id = R.string.stream_default_call_ui_microphone_rationale,
+                    ),
                     style = TextStyle(
                         fontSize = 16.sp,
                         lineHeight = 18.5.sp,

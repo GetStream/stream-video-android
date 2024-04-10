@@ -14,13 +14,10 @@
  * limitations under the License.
  */
 
-
 package io.getstream.video.android.compose.ui
 
-import io.getstream.video.android.core.Call
 import io.getstream.video.android.ui.common.StreamActivityUiDelegate
 import io.getstream.video.android.ui.common.StreamCallActivity
-import io.getstream.video.android.ui.common.util.StreamCallActivityDelicateApi
 
 /**
  * Default [StreamCallActivity] for use with compose.
