@@ -395,7 +395,7 @@ internal class CallService : Service() {
     }
 
     private fun stopServiceIfCallAcceptedByMeOnAnotherDevice(acceptedByUserId: String, myUserId: String, callRingingState: RingingState) {
-        // If call was accepted by me, but current device is still ringing, it means the call was accepted on another device
+        // If incoming call was accepted by me, but current device is still ringing, it means the call was accepted on another device
         if (acceptedByUserId == myUserId && callRingingState is RingingState.Incoming) {
             // So stop ringing on this device
             stopService()
@@ -403,8 +403,8 @@ internal class CallService : Service() {
     }
 
     private fun stopServiceIfCallRejectedByMeOrCaller(rejectedByUserId: String, myUserId: String, createdByUserId: String?) {
+        // If incoming call is rejected by me (even on another device) OR cancelled by the caller, stop the service
         if (rejectedByUserId == myUserId || rejectedByUserId == createdByUserId) {
-            // If call is rejected by me (even on another device) OR the caller, stop the service
             stopService()
         }
     }
