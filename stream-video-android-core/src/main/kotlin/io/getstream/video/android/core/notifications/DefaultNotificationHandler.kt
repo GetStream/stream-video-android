@@ -17,6 +17,7 @@
 package io.getstream.video.android.core.notifications
 
 import android.annotation.SuppressLint
+import android.app.ActivityManager
 import android.app.Application
 import android.app.Notification
 import android.app.NotificationChannel
@@ -48,6 +49,13 @@ public open class DefaultNotificationHandler(
     private val notificationPermissionHandler: NotificationPermissionHandler =
         DefaultNotificationPermissionHandler
             .createDefaultNotificationPermissionHandler(application),
+    /**
+     * Set this to true if you want to make the ringing notifications as low-priority
+     * in case the application is in foreground. This will prevent the notification from
+     * interrupting the user while he is in the app. In this case you need to make sure to
+     * handle this call state and display an incoming call screen.
+     */
+    val hideRingingNotificationInForeground: Boolean = false,
 ) : NotificationHandler,
     NotificationPermissionHandler by notificationPermissionHandler {
 
@@ -126,13 +134,33 @@ public open class DefaultNotificationHandler(
         rejectCallPendingIntent: PendingIntent,
         callDisplayName: String,
     ): Notification {
+        // if the app is in foreground then don't interrupt the user with a high priority
+        // notification (popup). The application will display an incoming ringing call
+        // screen instead - but this needs to be handled by the application.
+        // The default behaviour is that all notification are high priority
+        val showAsHighPriority = !hideRingingNotificationInForeground || !isInForeground()
+
         val channelId = application.getString(
-            R.string.stream_video_incoming_call_notification_channel_id,
+            if (showAsHighPriority) {
+                R.string.stream_video_incoming_call_notification_channel_id
+            } else {
+                R.string.stream_video_incoming_call_low_priority_notification_channel_id
+            },
         )
         maybeCreateChannel(channelId, application) {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                description = application.getString(R.string.stream_video_incoming_call_notification_channel_description)
-                importance = NotificationManager.IMPORTANCE_HIGH
+                description = application.getString(
+                    if (showAsHighPriority) {
+                        R.string.stream_video_incoming_call_notification_channel_description
+                    } else {
+                        R.string.stream_video_incoming_call_low_priority_notification_channel_description
+                    },
+                )
+                importance = if (showAsHighPriority) {
+                    NotificationManager.IMPORTANCE_HIGH
+                } else {
+                    NotificationManager.IMPORTANCE_LOW
+                }
                 this.lockscreenVisibility = Notification.VISIBILITY_PUBLIC
                 this.setShowBadge(true)
             }
@@ -381,6 +409,15 @@ public open class DefaultNotificationHandler(
                 ).build(),
             )
         }
+    }
+
+    private fun isInForeground(): Boolean {
+        val appProcessInfo = ActivityManager.RunningAppProcessInfo()
+        ActivityManager.getMyMemoryState(appProcessInfo)
+        return (
+            appProcessInfo.importance == ActivityManager.RunningAppProcessInfo.IMPORTANCE_FOREGROUND ||
+                appProcessInfo.importance == ActivityManager.RunningAppProcessInfo.IMPORTANCE_VISIBLE
+            )
     }
 
     open fun getChannelId(): String = application.getString(
