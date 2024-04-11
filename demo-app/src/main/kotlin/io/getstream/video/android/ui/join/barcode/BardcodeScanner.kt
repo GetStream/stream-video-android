@@ -69,7 +69,7 @@ import com.google.mlkit.vision.common.InputImage
 import io.getstream.video.android.DeeplinkingActivity
 import io.getstream.video.android.R
 import io.getstream.video.android.analytics.FirebaseEvents
-import io.getstream.video.android.compose.theme.base.VideoTheme
+import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.base.StreamButton
 import java.util.concurrent.Executor
 import java.util.concurrent.Executors

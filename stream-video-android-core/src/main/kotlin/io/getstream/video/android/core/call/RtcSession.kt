@@ -22,7 +22,9 @@ import io.getstream.result.Result
 import io.getstream.result.Result.Failure
 import io.getstream.result.Result.Success
 import io.getstream.result.onSuccessSuspend
+import io.getstream.video.android.core.BuildConfig
 import io.getstream.video.android.core.Call
+import io.getstream.video.android.core.CallStatsReport
 import io.getstream.video.android.core.DeviceStatus
 import io.getstream.video.android.core.MediaManagerImpl
 import io.getstream.video.android.core.ScreenShareManager
@@ -52,6 +54,7 @@ import io.getstream.video.android.core.model.StreamPeerType
 import io.getstream.video.android.core.model.VideoTrack
 import io.getstream.video.android.core.model.toPeerType
 import io.getstream.video.android.core.socket.SocketState
+import io.getstream.video.android.core.toJson
 import io.getstream.video.android.core.utils.SdpSession
 import io.getstream.video.android.core.utils.buildAudioConstraints
 import io.getstream.video.android.core.utils.buildConnectionConfiguration
@@ -111,6 +114,7 @@ import stream.video.sfu.signal.ICERestartResponse
 import stream.video.sfu.signal.ICETrickleResponse
 import stream.video.sfu.signal.SendAnswerRequest
 import stream.video.sfu.signal.SendAnswerResponse
+import stream.video.sfu.signal.SendStatsRequest
 import stream.video.sfu.signal.SetPublisherRequest
 import stream.video.sfu.signal.SetPublisherResponse
 import stream.video.sfu.signal.TrackMuteState
@@ -350,7 +354,7 @@ public class RtcSession internal constructor(
         }
 
         clientImpl.peerConnectionFactory.setAudioRecordDataCallback { audioFormat, channelCount, sampleRate, sampleData ->
-            call.audioFilter?.filter(
+            call.audioFilter?.applyFilter(
                 audioFormat = audioFormat,
                 channelCount = channelCount,
                 sampleRate = sampleRate,
@@ -1530,6 +1534,28 @@ public class RtcSession internal constructor(
      */
     suspend fun getSubscriberStats(): RtcStatsReport? {
         return subscriber?.getStats()
+    }
+
+    internal suspend fun sendCallStats(report: CallStatsReport) {
+        val result = wrapAPICall {
+            sfuConnectionModule.signalService.sendStats(
+                sendStatsRequest = SendStatsRequest(
+                    session_id = sessionId,
+                    sdk = "stream-android",
+                    sdk_version = BuildConfig.STREAM_VIDEO_VERSION,
+                    webrtc_version = BuildConfig.STREAM_WEBRTC_VERSION,
+                    publisher_stats = report.toJson(StreamPeerType.PUBLISHER),
+                    subscriber_stats = report.toJson(StreamPeerType.SUBSCRIBER),
+                ),
+            )
+        }
+
+        logger.d {
+            "sendStats: " + when (result) {
+                is Success -> "Success"
+                is Failure -> "Failure. Reason: ${result.value.message}"
+            }
+        }
     }
 
     /***

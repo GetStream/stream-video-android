@@ -27,6 +27,8 @@
     <string name="stream_video_screen_sharing_notification_channel_description">Required to be enabled for screen sharing</string>
     <string name="stream_video_incoming_call_notification_channel_id" translatable="false">incoming_calls</string>
     <string name="stream_video_incoming_call_notification_channel_title">Incoming Calls</string>
+    <string name="stream_video_incoming_call_low_priority_notification_channel_id" translatable="false">incoming_calls_low_priority</string>
+    <string name="stream_video_incoming_call_low_priority_notification_channel_description">Incoming audio and video call alerts</string>
     <string name="stream_video_incoming_call_notification_channel_description">Incoming audio and video call alerts</string>
     <string name="stream_video_incoming_call_notification_title">Incoming call</string>
     <string name="stream_video_outgoing_call_notification_title" tools:ignore="TypographyEllipsis">Calling...</string>

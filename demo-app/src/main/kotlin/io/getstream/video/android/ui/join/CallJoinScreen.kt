@@ -91,7 +91,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.getstream.video.android.BuildConfig
 import io.getstream.video.android.DirectCallActivity
 import io.getstream.video.android.R
-import io.getstream.video.android.compose.theme.base.VideoTheme
+import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.avatar.UserAvatar
 import io.getstream.video.android.compose.ui.components.base.StreamButton
 import io.getstream.video.android.compose.ui.components.base.StreamDialogPositiveNegative
@@ -304,7 +304,7 @@ private fun CallJoinHeader(
                             StreamButton(
                                 modifier = Modifier.fillMaxWidth(),
                                 icon = Icons.Default.Logout,
-                                style = VideoTheme.styles.buttonStyles.tetriaryButtonStyle(),
+                                style = VideoTheme.styles.buttonStyles.tertiaryButtonStyle(),
                                 text = stringResource(id = R.string.sign_out),
                                 onClick = {
                                     showMenu = false
@@ -392,7 +392,7 @@ private fun CallActualContent(
         )
         Spacer(modifier = Modifier.height(VideoTheme.dimens.spacingS))
         StreamButton(
-            style = VideoTheme.styles.buttonStyles.tetriaryButtonStyle(),
+            style = VideoTheme.styles.buttonStyles.tertiaryButtonStyle(),
             modifier = Modifier
                 .fillMaxWidth()
                 .testTag("scan_qr_code"),
@@ -531,7 +531,7 @@ private fun SignOutDialog(
         },
         negativeButton = Triple(
             stringResource(R.string.cancel),
-            VideoTheme.styles.buttonStyles.tetriaryButtonStyle(),
+            VideoTheme.styles.buttonStyles.tertiaryButtonStyle(),
         ) {
             onDismissRequest()
         },

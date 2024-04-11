@@ -17,10 +17,11 @@
 package io.getstream.video.android.compose.theme
 
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.CornerSize
+import androidx.compose.foundation.shape.CutCornerShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
-import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.unit.dp
 
@@ -37,20 +38,14 @@ import androidx.compose.ui.unit.dp
  */
 @Immutable
 public data class StreamShapes(
-    public val avatar: Shape,
+    public val circle: Shape,
+    public val square: Shape,
+    public val button: Shape,
+    public val input: Shape,
     public val dialog: Shape,
-    public val callButton: Shape,
-    public val callControls: Shape,
-    public val callControlsLandscape: Shape,
-    public val callControlsButton: Shape,
-    public val participantsInfoMenuButton: Shape,
-    public val connectionIndicatorBar: Shape,
-    public val soundIndicatorBar: Shape,
-    public val floatingParticipant: Shape,
-    public val connectionQualityIndicator: Shape,
-    public val indicatorBackground: Shape,
-    val participantLabelShape: Shape,
-    val participantContainerShape: Shape,
+    public val sheet: Shape,
+    public val indicator: Shape,
+    public val container: Shape,
 ) {
     public companion object {
         /**
@@ -59,21 +54,15 @@ public data class StreamShapes(
          * @return A [StreamShapes] that holds our default shapes.
          */
         @Composable
-        public fun defaultShapes(): StreamShapes = StreamShapes(
-            avatar = CircleShape,
-            dialog = RoundedCornerShape(16.dp),
-            callButton = CircleShape,
-            callControls = RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp),
-            callControlsLandscape = RectangleShape,
-            callControlsButton = CircleShape,
-            participantsInfoMenuButton = RoundedCornerShape(32.dp),
-            connectionIndicatorBar = RoundedCornerShape(16.dp),
-            soundIndicatorBar = RoundedCornerShape(16.dp),
-            floatingParticipant = RoundedCornerShape(16.dp),
-            connectionQualityIndicator = RoundedCornerShape(topStart = 5.dp),
-            indicatorBackground = RoundedCornerShape(5.dp),
-            participantLabelShape = RoundedCornerShape(topEnd = 5.dp),
-            participantContainerShape = RoundedCornerShape(16.dp),
+        public fun defaultShapes(dimens: StreamDimens): StreamShapes = StreamShapes(
+            circle = CircleShape,
+            button = RoundedCornerShape(dimens.roundnessXl),
+            input = RoundedCornerShape(dimens.roundnessXl),
+            sheet = RoundedCornerShape(dimens.roundnessM),
+            dialog = RoundedCornerShape(dimens.roundnessL),
+            container = RoundedCornerShape(dimens.roundnessXl),
+            indicator = RoundedCornerShape(dimens.roundnessS),
+            square = CutCornerShape(CornerSize(0.dp)),
         )
     }
 }

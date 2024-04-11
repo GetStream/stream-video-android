@@ -205,6 +205,7 @@ dependencies {
     // Stream Video SDK
     implementation(project(":stream-video-android-ui-compose"))
     implementation(project(":stream-video-android-ui-xml"))
+    implementation(project(":stream-video-android-filters-video"))
     compileOnly(project(":stream-video-android-previewdata"))
 
     // Stream Chat SDK
@@ -268,6 +269,9 @@ dependencies {
     // Video Filters
     implementation(libs.google.mlkit.selfie.segmentation)
     implementation(files("libs/renderscript-toolkit.aar"))
+
+    // Http
+    implementation(libs.okhttp)
 
     // Memory detection
     debugImplementation(libs.leakCanary)

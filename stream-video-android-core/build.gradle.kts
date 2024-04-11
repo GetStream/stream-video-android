@@ -74,7 +74,7 @@ android {
         buildConfigField("Integer", "STREAM_VIDEO_VERSION_MAJOR", "${Configuration.majorVersion}")
         buildConfigField("Integer", "STREAM_VIDEO_VERSION_MINOR", "${Configuration.minorVersion}")
         buildConfigField("Integer", "STREAM_VIDEO_VERSION_PATCH", "${Configuration.patchVersion}")
-
+        buildConfigField("String", "STREAM_WEBRTC_VERSION", "\"${Configuration.streamWebRtcVersionName}\"")
     }
 
     buildFeatures {
@@ -142,7 +142,7 @@ dependencies {
     implementation(libs.audioswitch)
 
     // video filter dependencies
-    implementation (libs.libyuv)
+    implementation(libs.libyuv)
 
     // androidx
     implementation(libs.androidx.core.ktx)
@@ -205,6 +205,7 @@ dependencies {
     testImplementation(libs.kotlinx.coroutines.test)
     testImplementation(libs.kotlin.test.junit)
     testImplementation(libs.kotlinx.coroutines.debug)
+    testImplementation(libs.kotlinx.serialization.converter)
 
     // instrument tests
     androidTestImplementation(libs.stream.log.android)

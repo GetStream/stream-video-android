@@ -33,11 +33,12 @@ import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import io.getstream.video.android.compose.theme.base.VideoTheme
+import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.base.styling.StyleSize
 import io.getstream.video.android.mock.StreamPreviewDataUtils
 import io.getstream.video.android.mock.previewParticipantsList
 import io.getstream.video.android.model.User
+import io.getstream.video.android.ui.common.R
 
 /**
  * Represents the [User] avatar that's shown on the Messages screen or in headers of DMs.
@@ -124,7 +125,7 @@ private fun UserAvatarPreview() {
             userName = userName,
             modifier = Modifier.size(82.dp),
             isShowingOnlineIndicator = true,
-            previewPlaceholder = io.getstream.video.android.ui.common.R.drawable.stream_video_call_sample,
+            previewPlaceholder = R.drawable.stream_video_call_sample,
         )
     }
 }

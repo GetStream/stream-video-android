@@ -1,141 +1,109 @@
 ---
-title: Video & Audio filters
-description: How to build video or audio filters
+title: Video & Audio Filters
+description: How to use video and audio filters
+toc_max_heading_level: 5
 ---
 
 ## Video Filters
 
-Some calling apps allow filters to be applied to the current user's video, such as blurring the background, adding AR elements (glasses, moustaches, etc) or applying image filters (such as sepia, bloom etc). StreamVideo's Android SDK has support for injecting your custom filter into the calling experience.
+Some apps allow filters to be applied to the current user's video, such as blurred or virtual background, AR elements (glasses, moustaches etc) or color filters (such as sepia, bloom etc).
 
-How does this work? You can inject a filter through `Call.videoFilter`, you will receive each frame of the user's local video as `Bitmap`, allowing you to apply the filters (by mutating the `Bitmap`). This way you have complete freedom over the processing pipeline.
+Our SDK offers background blurring and virtual backgrounds out of the box and also has support for injecting your custom filter into the calling experience.
 
-## Adding a Video Filter
+### AI Filters
 
-Create a `BitmapVideoFilter` or `RawVideoFilter` instance in your project. Here is how the abstract classes are defined:
+We ship two AI video filters, _background blur_ and _virtual background_, in a separate artifact. To use these filters, add the video filter library as a dependency:
 
-```kotlin
-abstract class BitmapVideoFilter : VideoFilter() {
-    fun filter(bitmap: Bitmap)
-}
-
-abstract class RawVideoFilter : VideoFilter() {
-    abstract fun filter(videoFrame: VideoFrame, surfaceTextureHelper: SurfaceTextureHelper): VideoFrame
+```groovy
+dependencies {
+    implementation "io.getstream:stream-video-android-filters-video:$stream_version"
 }
 ```
-The `BitmapVideoFilter` is a simpler filter that gives you a `Bitmap` which you can then manipulate directly. But it's less performant than using the `RawVideoFilter` which gives you direct access to `VideoFrame` from WebRTC and there is no overhead compared to `BitmapVideoFilter` (like YUV <-> ARGB conversions).
 
-And then set the video filter into `Call.videoFilter`.
+#### Background Blur
+
+Use the `BlurredBackgroundVideoFilter` class to add a background blur effect to the video feed. Pass an instance of it to the `videoFilter` call property.
+
+```kotlin
+call.videoFilter = BlurredBackgroundVideoFilter()
+```
+
+The `BlurredBackgroundVideoFilter` class has the following parameters:
+
+| Parameter             | Description                                                                                                                                                                                 | Default Value          |
+|-----------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|------------------------|
+| `blurIntensity`       | Intensity of the blur effect. Three options available in the `BlurIntensity` enum: `LIGHT`, `MEDIUM`, `HEAVY`.                                                                              | `BlurIntensity.MEDIUM` |
+| `foregroundThreshold` | Confidence threshold for the foreground. Pixels with a confidence value greater than or equal to this threshold are considered to be in the foreground. Coerced between 0 and 1, inclusive. | `0.99999`              |
+
+#### Virtual Backgrounds
+
+Pass an instance of `VirtualBackgroundFilter` to the `videoFilter` call property to set a custom image as the participant's background.
+
+```kotlin
+call.videoFilter = VirtualBackgroundVideoFilter(context, R.drawable.background_image)
+```
+
+The `VirtualBackgroundFilter` class has the following parameters:
+
+| Parameter             | Description                                                                                                                                                                                 | Default Value |
+|-----------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|---------------|
+| `context`             | Context used to access resources.                                                                                                                                                           | None          |
+| `backgroundImage`     | The drawable resource ID of the image to be used as a virtual background.                                                                                                                   | None          |
+| `foregroundThreshold` | Confidence threshold for the foreground. Pixels with a confidence value greater than or equal to this threshold are considered to be in the foreground. Coerced between 0 and 1, inclusive. | `0.99999`     |
+
+## Adding Your Custom Filter
+
+You can inject your own filter through the `Call.videoFilter` property. You will receive each frame of the user's local video, so you have complete freedom over the image processing that you perform.
+
+There are two types of filters that you can create:
+- By extending the `BitmapVideoFilter` abstract class. This gives you a bitmap for each video frame, which you can manipulate directly.
+```kotlin
+abstract class BitmapVideoFilter : VideoFilter() {
+    fun applyFilter(videoFrameBitmap: Bitmap)
+}
+```
+
+You need to manipulate the original bitmap instance to apply the filters. You can of course create a new bitmap in the process, but you need to draw it on the `videoFrameBitmap` instance you get in the `filter` callback.
+
+- By extending the `RawVideoFilter` abstract class. This gives you direct access to the `VideoFrame` WebRTC object.
+```kotlin
+abstract class RawVideoFilter : VideoFilter() {
+    abstract fun applyFilter(
+        videoFrame: VideoFrame,
+        surfaceTextureHelper: SurfaceTextureHelper,
+    ): VideoFrame
+}
+```
+
+:::note
+`BitmapVideoFilter` is less performant than `RawVideoFilter` due to the overhead of certain operations, like _YUV <-> ARGB_ conversions.
+:::
+
+### Example: Black & White Filter
 
 We can create and set a simple black and white filter like this:
+
 ```kotlin
-call.videoFilter = object: BitmapVideoFilter() {
-    override fun filter(bitmap: Bitmap) {
-        val c = Canvas(bitmap)
+call.videoFilter = object : BitmapVideoFilter() {
+    override fun applyFilter(videoFrameBitmap: Bitmap) {
+        val c = Canvas(videoFrameBitmap)
         val paint = Paint()
         val cm = ColorMatrix()
         cm.setSaturation(0f)
         val f = ColorMatrixColorFilter(cm)
         paint.colorFilter = f
-        c.drawBitmap(bitmap, 0f, 0f, paint)
+        c.drawBitmap(videoFrameBitmap, 0f, 0f, paint)
     }
 }
 ```
-
-:::note
-You need to manipulate the original bitmap instance to apply the filters. You can of course create a new bitmap in the process, but you need to then draw it on the `bitmap` instance you get in the `filter` callback
-:::
-
-## Adding AI Filters
-
-In some cases, you might also want to apply AI filters. That can be an addition to the user's face (glasses, moustaches, etc), or an ML filter. In this section this use-case will be covered. Specifically, you will use the [Selfie Segmentation](https://developers.google.com/ml-kit/vision/selfie-segmentation/android) from Google's ML kit to change the background behind you.
-
-First include the necessary dependency (check for latest version [here](https://developers.google.com/ml-kit/vision/selfie-segmentation/android#before_you_begin)
-
-```gradle
-dependencies {
-  implementation 'com.google.mlkit:segmentation-selfie:16.0.0-beta4'
-}
-```
-
-Create a class that will hold your custom filter. The initialisation of the `Segmentation` class is done according to the [official docs](https://developers.google.com/ml-kit/vision/selfie-segmentation/android#enable_raw_size_mask).
-
-```kotlin
-class SelfieSegmentation {
-
-    private val options =
-        SelfieSegmenterOptions.Builder()
-            .setDetectorMode(SelfieSegmenterOptions.STREAM_MODE)
-            .enableRawSizeMask()
-            .build()
-    private val segmenter = Segmentation.getClient(options)
-
-    fun applyFilter(bitmap: Bitmap) {
-        // Send the bitmap into ML Kit for processing
-        val mlImage = InputImage.fromBitmap(bitmap, 0)
-        val task = segmenter.process(mlImage)
-        // Wait for result synchronously on same thread
-        val mask = Tasks.await(task)
-
-        val isRawSizeMaskEnabled =  mask.width != bitmap.width || mask.height != bitmap.height
-        val scaleX = bitmap.width * 1f / mask.width
-        val scaleY = bitmap.height * 1f / mask.height
-
-        // Create a bitmap mask to cover the background
-        val maskBitmap = Bitmap.createBitmap(
-            maskColorsFromByteBuffer(mask), mask.width, mask.height, Bitmap.Config.ARGB_8888
-        )
-        // Create a canvas from the frame bitmap
-        val canvas = Canvas(bitmap)
-        val matrix = Matrix()
-        if (isRawSizeMaskEnabled) {
-            matrix.preScale(scaleX, scaleY)
-        }
-        // And now draw the bitmap mask onto the original bitmap
-        canvas.drawBitmap(maskBitmap, matrix, null)
-
-        maskBitmap.recycle()
-    }
-
-    private fun maskColorsFromByteBuffer(mask: SegmentationMask): IntArray {
-        val colors = IntArray(mask.width * mask.height)
-        for (i in 0 until mask.width * mask.height) {
-            val backgroundLikelihood = 1 - mask.buffer.float
-            if (backgroundLikelihood > 0.9) {
-                colors[i] = Color.argb(128, 0, 0, 255)
-            } else if (backgroundLikelihood > 0.2) {
-                val alpha = (182.9 * backgroundLikelihood - 36.6 + 0.5).toInt()
-                colors[i] = Color.argb(alpha, 0, 0, 255)
-            }
-        }
-        return colors
-    }
-}
-```
-
-And now set the custom filter into our SDK:
-
-```kotlin
-call.videoFilter = object: BitmapVideoFilter() {
-
-val selfieFilter = SelfieSegmentation()
-
-    override fun filter(bitmap: Bitmap) {
-        selfieFilter.applyFilter(bitmap)
-    }
-}
-```
-
-The result:
-
-![Stream Filter](../assets/screenshot_video_filter.png)
 
 ## Audio Filters
 
-The StreamVideo SDK also supports custom audio processing of the local track. This opens up possibilities for custom echo filtering, voice changing or other audio effects.
+The Stream Video SDK also supports custom audio processing of the local track. This opens up possibilities for custom echo filtering, voice changing or other audio effects.
 
-If you want to have custom audio processing, you need to provide your own implementation of the `AudioFilter` interface to `Call.audioFilter`.
+If you want to do custom audio processing, you need to provide your own implementation of the `AudioFilter` interface to `Call.audioFilter`.
 
-The `AudioFilter` is defined like this:
+The `AudioFilter` interface is defined like this:
 
 ```kotlin
 interface AudioFilter {
@@ -146,9 +114,11 @@ interface AudioFilter {
      *
      * @param audioFormat format in android.media.AudioFormat
      */
-    fun filter(audioFormat: Int, channelCount: Int, sampleRate: Int, sampleData: ByteBuffer)
+    fun applyFilter(audioFormat: Int, channelCount: Int, sampleRate: Int, sampleData: ByteBuffer)
 }
 ```
+
+### Example: Robot Voice
 
 In the following example, we will build a simple audio filter that gives the user's voice a robotic touch.
 
@@ -156,9 +126,8 @@ In the following example, we will build a simple audio filter that gives the use
 // We assume that you already have a call instance (call is started)
 // Create a simple filter (pitch modification) and assign it to the call
 
-call.audioFilter = object: AudioFilter {
-
-    override fun filter(audioFormat: Int, channelCount: Int, sampleRate: Int, sampleData: ByteBuffer) {
+call.audioFilter = object : AudioFilter {
+    override fun applyFilter(audioFormat: Int, channelCount: Int, sampleRate: Int, sampleData: ByteBuffer) {
         // You can modify the pitch factor to achieve a bit different effect
         val pitchShiftFactor = 0.8f
         val inputBuffer = audioBuffer.duplicate()
@@ -192,4 +161,4 @@ call.audioFilter = object: AudioFilter {
     }
 }
 ```
-This is a simple algorithm that just does shifting of the indexes. For a more complex one, you can also use some voice processing library. The important part is that you update the `channelBuffer` with the filtered values.
+This is a simple algorithm that just does index shifting. For a more complex scenario you can use a voice processing library. The important part is that you update the `channelBuffer` with the filtered values.

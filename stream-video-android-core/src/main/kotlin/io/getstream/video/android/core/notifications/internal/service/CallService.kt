@@ -49,6 +49,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
 import org.jetbrains.annotations.ApiStatus.ScheduledForRemoval
+import org.openapitools.client.models.CallAcceptedEvent
 import org.openapitools.client.models.CallEndedEvent
 import org.openapitools.client.models.CallRejectedEvent
 import java.lang.IllegalArgumentException
@@ -187,7 +188,20 @@ internal class CallService : Service() {
         callDisplayName = intent?.streamCallDisplayName(INTENT_EXTRA_CALL_DISPLAY_NAME)
         val trigger = intent?.getStringExtra(TRIGGER_KEY)
         val streamVideo = StreamVideo.instanceOrNull() as? StreamVideoImpl
+
         val started = if (callId != null && streamVideo != null && trigger != null) {
+            val type = callId!!.type
+            val id = callId!!.id
+            val call = streamVideo.call(type, id)
+            val permissionCheckPass =
+                streamVideo.permissionCheck.checkAndroidPermissions(applicationContext, call)
+            if (!permissionCheckPass) {
+                // Crash early with a meaningful message if Call is used without system permissions.
+                throw IllegalStateException(
+                    "\nCallService attempted to start without required permissions (e.g. android.manifest.permission.RECORD_AUDIO).\n" + "This can happen if you call [Call.join()] without the required permissions being granted by the user.\n" + "If you are using compose and [LaunchCallPermissions] ensure that you rely on the [onRequestResult] callback\n" + "to ensure that the permission is granted prior to calling [Call.join()] or similar.\n" + "Optionally you can use [LaunchPermissionRequest] to ensure permissions are granted.\n" + "If you are not using the [stream-video-android-ui-compose] library,\n" + "ensure that permissions are granted prior calls to [Call.join()].\n" + "You can re-define your permissions and their expected state by overriding the [permissionCheck] in [StreamVideoBuilder]\n",
+                )
+            }
+
             val notificationData: Pair<Notification?, Int> = when (trigger) {
                 TRIGGER_ONGOING_CALL -> Pair(
                     first = streamVideo.getOngoingCallNotification(
@@ -250,7 +264,12 @@ internal class CallService : Service() {
 
         if (!started) {
             logger.w { "Foreground service did not start!" }
+            // Call stopSelf() and return START_REDELIVER_INTENT.
+            // Because of stopSelf() the service is not restarted.
+            // Because START_REDELIVER_INTENT is returned
+            // the exception RemoteException: Service did not call startForeground... is not thrown.
             stopService()
+            return START_REDELIVER_INTENT
         } else {
             initializeCallAndSocket(streamVideo!!, callId!!)
 
@@ -262,8 +281,8 @@ internal class CallService : Service() {
             }
             observeCallState(callId!!, streamVideo)
             registerToggleCameraBroadcastReceiver()
+            return START_NOT_STICKY
         }
-        return START_NOT_STICKY
     }
 
     private fun updateRingingCall(
@@ -323,12 +342,23 @@ internal class CallService : Service() {
         // Call state
         serviceScope.launch {
             val call = streamVideo.call(callId.type, callId.id)
-            call.subscribe {
-                logger.i { "Received event in service: $it" }
-                when (it) {
+            call.subscribe { event ->
+                logger.i { "Received event in service: $event" }
+                when (event) {
+                    is CallAcceptedEvent -> {
+                        stopServiceIfCallAcceptedByMeOnAnotherDevice(
+                            acceptedByUserId = event.user.id,
+                            myUserId = streamVideo.userId,
+                            callRingingState = call.state.ringingState.value,
+                        )
+                    }
+
                     is CallRejectedEvent -> {
-                        // When call is rejected by the caller
-                        stopService()
+                        stopServiceIfCallRejectedByMeOrCaller(
+                            rejectedByUserId = event.user.id,
+                            myUserId = streamVideo.userId,
+                            createdByUserId = call.state.createdBy.value?.id,
+                        )
                     }
 
                     is CallEndedEvent -> {
@@ -371,6 +401,21 @@ internal class CallService : Service() {
             if (mediaPlayer?.isPlaying == true) mediaPlayer?.stop()
         } catch (e: IllegalStateException) {
             logger.d { "Error stopping call sound. MediaPlayer might have already been released." }
+        }
+    }
+
+    private fun stopServiceIfCallAcceptedByMeOnAnotherDevice(acceptedByUserId: String, myUserId: String, callRingingState: RingingState) {
+        // If incoming call was accepted by me, but current device is still ringing, it means the call was accepted on another device
+        if (acceptedByUserId == myUserId && callRingingState is RingingState.Incoming) {
+            // So stop ringing on this device
+            stopService()
+        }
+    }
+
+    private fun stopServiceIfCallRejectedByMeOrCaller(rejectedByUserId: String, myUserId: String, createdByUserId: String?) {
+        // If incoming call is rejected by me (even on another device) OR cancelled by the caller, stop the service
+        if (rejectedByUserId == myUserId || rejectedByUserId == createdByUserId) {
+            stopService()
         }
     }
 

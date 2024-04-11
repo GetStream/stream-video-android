@@ -27,6 +27,21 @@ service SignalServer {
   rpc UpdateMuteStates(UpdateMuteStatesRequest) returns (UpdateMuteStatesResponse);
 
   rpc IceRestart(ICERestartRequest) returns (ICERestartResponse);
+
+  rpc SendStats(SendStatsRequest) returns (SendStatsResponse);
+}
+
+message SendStatsRequest {
+  string session_id = 1;
+  string subscriber_stats = 2;
+  string publisher_stats = 3;
+  string webrtc_version = 4;
+  string sdk = 5;
+  string sdk_version = 6;
+}
+
+message SendStatsResponse {
+  models.Error error = 1;
 }
 
 message ICERestartRequest {

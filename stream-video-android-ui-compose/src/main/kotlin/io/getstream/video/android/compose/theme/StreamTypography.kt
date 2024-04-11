@@ -20,10 +20,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
-import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
-import io.getstream.video.android.compose.utils.textSizeResource
-import io.getstream.video.android.ui.common.R
+import androidx.compose.ui.unit.sp
 
 /**
  * Contains all the typography we provide for our components.
@@ -42,17 +40,20 @@ import io.getstream.video.android.ui.common.R
  */
 @Immutable
 public data class StreamTypography(
-    public val title1: TextStyle,
-    public val title3: TextStyle,
-    public val title3Bold: TextStyle,
-    public val body: TextStyle,
-    public val bodyItalic: TextStyle,
-    public val bodyBold: TextStyle,
-    public val footnote: TextStyle,
-    public val footnoteItalic: TextStyle,
-    public val footnoteBold: TextStyle,
-    public val captionBold: TextStyle,
-    public val tabBar: TextStyle,
+    public val titleL: TextStyle,
+    public val titleM: TextStyle,
+    public val titleS: TextStyle,
+    public val titleXs: TextStyle,
+    public val subtitleL: TextStyle,
+    public val subtitleM: TextStyle,
+    public val subtitleS: TextStyle,
+    public val bodyL: TextStyle,
+    public val bodyM: TextStyle,
+    public val bodyS: TextStyle,
+    public val labelL: TextStyle,
+    public val labelM: TextStyle,
+    public val labelS: TextStyle,
+    public val labelXS: TextStyle,
 ) {
 
     public companion object {
@@ -64,71 +65,108 @@ public data class StreamTypography(
          */
         @Composable
         public fun defaultTypography(
+            colors: StreamColors,
+            dimens: StreamDimens,
             fontFamily: FontFamily? = null,
         ): StreamTypography = StreamTypography(
-            title1 = TextStyle(
-                fontSize = textSizeResource(id = R.dimen.stream_video_title1TextSize),
-                lineHeight = textSizeResource(id = R.dimen.stream_video_title1LineHeight),
+            titleL = TextStyle(
+                fontSize = dimens.textSizeXxl,
+                lineHeight = dimens.lineHeightXxl,
+                fontFamily = fontFamily,
                 fontWeight = FontWeight.W500,
-                fontFamily = fontFamily,
+                color = colors.basePrimary,
             ),
-            title3 = TextStyle(
-                fontSize = textSizeResource(id = R.dimen.stream_video_title3TextSize),
-                lineHeight = textSizeResource(id = R.dimen.stream_video_title3LineHeight),
-                fontWeight = FontWeight.W400,
+            titleM = TextStyle(
+                fontSize = dimens.textSizeXl,
+                lineHeight = dimens.lineHeightXl,
                 fontFamily = fontFamily,
-            ),
-            title3Bold = TextStyle(
-                fontSize = textSizeResource(id = R.dimen.stream_video_title3TextSize),
-                lineHeight = textSizeResource(id = R.dimen.stream_video_title3LineHeight),
                 fontWeight = FontWeight.W500,
-                fontFamily = fontFamily,
+                color = colors.basePrimary,
             ),
-            body = TextStyle(
-                fontSize = textSizeResource(id = R.dimen.stream_video_bodyTextSize),
-                fontWeight = FontWeight.W400,
+            titleS = TextStyle(
+                fontSize = dimens.textSizeL,
+                lineHeight = dimens.lineHeightL,
                 fontFamily = fontFamily,
-            ),
-            bodyItalic = TextStyle(
-                fontSize = textSizeResource(id = R.dimen.stream_video_bodyTextSize),
-                fontWeight = FontWeight.W400,
-                fontStyle = FontStyle.Italic,
-                fontFamily = fontFamily,
-            ),
-            bodyBold = TextStyle(
-                fontSize = textSizeResource(id = R.dimen.stream_video_bodyTextSize),
                 fontWeight = FontWeight.W500,
-                fontFamily = fontFamily,
+                color = colors.basePrimary,
             ),
-            footnote = TextStyle(
-                fontSize = textSizeResource(id = R.dimen.stream_video_footnoteTextSize),
-                lineHeight = textSizeResource(id = R.dimen.stream_video_footnoteLineHeight),
-                fontWeight = FontWeight.W400,
+            subtitleL = TextStyle(
+                fontSize = dimens.textSizeL,
+                lineHeight = dimens.lineHeightM,
                 fontFamily = fontFamily,
-            ),
-            footnoteItalic = TextStyle(
-                fontSize = textSizeResource(id = R.dimen.stream_video_footnoteTextSize),
-                lineHeight = textSizeResource(id = R.dimen.stream_video_footnoteLineHeight),
-                fontWeight = FontWeight.W400,
-                fontStyle = FontStyle.Italic,
-                fontFamily = fontFamily,
-            ),
-            footnoteBold = TextStyle(
-                fontSize = textSizeResource(id = R.dimen.stream_video_footnoteTextSize),
-                lineHeight = textSizeResource(id = R.dimen.stream_video_footnoteLineHeight),
                 fontWeight = FontWeight.W500,
-                fontFamily = fontFamily,
+                color = colors.baseTertiary,
             ),
-            captionBold = TextStyle(
-                fontSize = textSizeResource(id = R.dimen.stream_video_captionTextSize),
-                lineHeight = textSizeResource(id = R.dimen.stream_video_captionLineHeight),
-                fontWeight = FontWeight.W700,
+            subtitleM = TextStyle(
+                fontSize = dimens.textSizeM,
+                lineHeight = dimens.lineHeightS,
                 fontFamily = fontFamily,
+                fontWeight = FontWeight.W500,
+                color = colors.baseTertiary,
             ),
-            tabBar = TextStyle(
-                fontSize = textSizeResource(id = R.dimen.stream_video_tabBarTextSize),
+            subtitleS = TextStyle(
+                fontSize = dimens.textSizeS,
+                lineHeight = dimens.lineHeightXs,
+                fontFamily = fontFamily,
+                fontWeight = FontWeight.W500,
+                color = colors.baseTertiary,
+            ),
+            titleXs = TextStyle(
+                fontSize = dimens.textSizeXs,
+                lineHeight = dimens.lineHeightM,
+                fontFamily = fontFamily,
+                fontWeight = FontWeight.W600,
+                color = colors.baseQuinary,
+                letterSpacing = 1.sp,
+            ),
+            bodyL = TextStyle(
+                fontSize = dimens.textSizeM,
+                lineHeight = dimens.lineHeightXl,
+                fontFamily = fontFamily,
                 fontWeight = FontWeight.W400,
+                color = colors.baseQuinary,
+            ),
+            bodyM = TextStyle(
+                fontSize = dimens.textSizeS,
+                lineHeight = dimens.lineHeightL,
                 fontFamily = fontFamily,
+                fontWeight = FontWeight.W400,
+                color = colors.baseQuinary,
+            ),
+            bodyS = TextStyle(
+                fontSize = dimens.textSizeXs,
+                lineHeight = dimens.lineHeightM,
+                fontFamily = fontFamily,
+                fontWeight = FontWeight.W400,
+                color = colors.baseQuinary,
+            ),
+            labelL = TextStyle(
+                fontSize = dimens.textSizeM,
+                lineHeight = dimens.lineHeightL,
+                fontFamily = fontFamily,
+                fontWeight = FontWeight.W600,
+                color = colors.basePrimary,
+            ),
+            labelM = TextStyle(
+                fontSize = dimens.textSizeS,
+                lineHeight = dimens.lineHeightL,
+                fontFamily = fontFamily,
+                fontWeight = FontWeight.W600,
+                color = colors.basePrimary,
+            ),
+            labelS = TextStyle(
+                fontSize = dimens.textSizeXs,
+                lineHeight = dimens.lineHeightS,
+                fontFamily = fontFamily,
+                fontWeight = FontWeight.W500,
+                color = colors.basePrimary,
+            ),
+            labelXS = TextStyle(
+                fontSize = dimens.textSizeXs,
+                lineHeight = dimens.lineHeightXs,
+                fontFamily = fontFamily,
+                fontWeight = FontWeight.W500,
+                color = colors.basePrimary,
             ),
         )
     }

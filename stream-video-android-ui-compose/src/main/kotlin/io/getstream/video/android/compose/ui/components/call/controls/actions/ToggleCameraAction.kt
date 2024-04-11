@@ -71,7 +71,7 @@ public fun ToggleCameraAction(
 @Preview
 @Composable
 public fun ToggleCameraActionPreview() {
-    io.getstream.video.android.compose.theme.base.VideoTheme {
+    VideoTheme {
         Column {
             Row {
                 ToggleCameraAction(isCameraEnabled = false) {

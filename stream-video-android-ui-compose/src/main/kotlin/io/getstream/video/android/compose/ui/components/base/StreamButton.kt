@@ -16,6 +16,8 @@
 
 package io.getstream.video.android.compose.ui.components.base
 
+import androidx.annotation.DrawableRes
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
@@ -24,6 +26,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.requiredHeight
@@ -52,11 +55,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.state.ToggleableState
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.times
-import io.getstream.video.android.compose.theme.base.VideoTheme
+import io.getstream.video.android.compose.R
+import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.base.styling.ButtonStyles
 import io.getstream.video.android.compose.ui.components.base.styling.StreamBadgeStyles
 import io.getstream.video.android.compose.ui.components.base.styling.StreamButtonStyle
@@ -163,6 +167,43 @@ public fun StreamIconButton(
                 contentDescription = icon.name,
             )
         }
+    }
+}
+
+@Composable
+public fun StreamDrawableButton(
+    modifier: Modifier = Modifier,
+    @DrawableRes drawable: Int,
+    style: StreamFixedSizeButtonStyle,
+    enabled: Boolean = true,
+    interactionSource: MutableInteractionSource = remember { MutableInteractionSource() },
+    onClick: () -> Unit = {},
+) {
+    val state = styleState(interactionSource = interactionSource, enabled = enabled)
+    val drawableStyle = style.drawableStyle.of(state = state).value
+
+    Button(
+        interactionSource = interactionSource,
+        enabled = enabled,
+        modifier = modifier
+            .requiredWidth(style.width)
+            .requiredHeight(style.height)
+            .aspectRatio(style.height / style.width),
+        elevation = style.elevation,
+        shape = style.shape,
+        colors = style.colors,
+        border = style.border,
+        contentPadding = drawableStyle.padding,
+        onClick = onClick,
+    ) {
+        Image(
+            painterResource(id = drawable),
+            contentDescription = null,
+            modifier = Modifier.fillMaxSize(),
+            contentScale = drawableStyle.scale,
+            alpha = drawableStyle.alpha,
+            colorFilter = drawableStyle.colorFilter,
+        )
     }
 }
 
@@ -298,6 +339,43 @@ public fun StreamToggleButton(
     },
 )
 
+@Composable
+public fun StreamDrawableToggleButton(
+    modifier: Modifier = Modifier,
+    toggleState: State<ToggleableState> = rememberUpdatedState(newValue = ToggleableState(false)),
+    @DrawableRes onDrawable: Int,
+    @DrawableRes offDrawable: Int = onDrawable,
+    onStyle: StreamFixedSizeButtonStyle,
+    offStyle: StreamFixedSizeButtonStyle = onStyle,
+    enabled: Boolean = true,
+    interactionSource: MutableInteractionSource = remember { MutableInteractionSource() },
+    onClick: (ToggleableState) -> Unit = {},
+) {
+    GenericToggleButton(
+        modifier = modifier,
+        toggleState = toggleState,
+        onClick = onClick,
+        onContent = {
+            StreamDrawableButton(
+                drawable = onDrawable,
+                style = onStyle,
+                enabled = enabled,
+                interactionSource = interactionSource,
+                onClick = { it(toggleState.value) },
+            )
+        },
+        offContent = {
+            StreamDrawableButton(
+                drawable = offDrawable,
+                style = offStyle,
+                enabled = enabled,
+                interactionSource = interactionSource,
+                onClick = { it(toggleState.value) },
+            )
+        },
+    )
+}
+
 // Start of previews
 @Preview
 @Composable
@@ -317,7 +395,7 @@ private fun StreamIconButtonPreview() {
                 Spacer(modifier = Modifier.size(16.dp))
                 StreamIconButton(
                     icon = Icons.Default.Settings,
-                    style = ButtonStyles.tetriaryIconButtonStyle(),
+                    style = ButtonStyles.tertiaryIconButtonStyle(),
                 )
                 Spacer(modifier = Modifier.size(16.dp))
                 StreamIconButton(
@@ -343,7 +421,7 @@ private fun StreamIconButtonPreview() {
                 StreamIconButton(
                     enabled = false,
                     icon = Icons.Default.Settings,
-                    style = ButtonStyles.tetriaryIconButtonStyle(),
+                    style = ButtonStyles.tertiaryIconButtonStyle(),
                 )
                 Spacer(modifier = Modifier.size(16.dp))
                 StreamIconButton(
@@ -377,6 +455,27 @@ private fun StreamIconButtonPreview() {
 
 @Preview
 @Composable
+private fun StreamDrawableButtonPreview() {
+    VideoTheme {
+        Column {
+            Row {
+                StreamDrawableButton(
+                    drawable = R.drawable.example,
+                    style = ButtonStyles.primaryDrawableButtonStyle(),
+                )
+                Spacer(modifier = Modifier.size(16.dp))
+                StreamDrawableButton(
+                    drawable = R.drawable.example,
+                    style = ButtonStyles.primaryDrawableButtonStyle(),
+                    enabled = false,
+                )
+            }
+        }
+    }
+}
+
+@Preview
+@Composable
 private fun StreamButtonPreview() {
     VideoTheme {
         Column {
@@ -392,8 +491,8 @@ private fun StreamButtonPreview() {
             )
             Spacer(modifier = Modifier.height(24.dp))
             StreamButton(
-                text = "Tetriary Button",
-                style = ButtonStyles.tetriaryButtonStyle(),
+                text = "Tertiary Button",
+                style = ButtonStyles.tertiaryButtonStyle(),
             )
             Spacer(modifier = Modifier.height(48.dp))
             StreamButton(
@@ -417,8 +516,8 @@ private fun StreamButtonPreview() {
             Spacer(modifier = Modifier.height(24.dp))
             StreamButton(
                 enabled = false,
-                text = "Tetriary Button",
-                style = ButtonStyles.tetriaryButtonStyle(),
+                text = "Tertiary Button",
+                style = ButtonStyles.tertiaryButtonStyle(),
             )
             Spacer(modifier = Modifier.height(24.dp))
             StreamButton(
@@ -451,8 +550,8 @@ private fun StreamButtonWithIconPreview() {
             Spacer(modifier = Modifier.height(24.dp))
             StreamButton(
                 icon = Icons.Filled.AccessAlarm,
-                text = "Tetriary Button",
-                style = ButtonStyles.tetriaryButtonStyle(),
+                text = "Tertiary Button",
+                style = ButtonStyles.tertiaryButtonStyle(),
             )
         }
     }
@@ -521,6 +620,35 @@ private fun StreamToggleIconButtonPreview() {
                     offIcon = Icons.Default.VideocamOff,
                 )
             }
+        }
+    }
+}
+
+@Preview
+@Composable
+private fun StreamDrawableToggleButtonPreview() {
+    VideoTheme {
+        Row {
+            StreamDrawableToggleButton(
+                toggleState = rememberUpdatedState(newValue = ToggleableState.On), // On
+                onDrawable = R.drawable.example,
+                onStyle = ButtonStyles.drawableToggleButtonStyleOn(), // On
+            )
+            Spacer(modifier = Modifier.width(8.dp))
+            StreamDrawableToggleButton(
+                toggleState = rememberUpdatedState(newValue = ToggleableState.Off), // Off
+                onDrawable = R.drawable.example,
+                onStyle = ButtonStyles.drawableToggleButtonStyleOn(),
+                offStyle = ButtonStyles.drawableToggleButtonStyleOff(),
+            )
+            Spacer(modifier = Modifier.width(8.dp))
+            StreamDrawableToggleButton(
+                toggleState = rememberUpdatedState(newValue = ToggleableState.On),
+                onDrawable = R.drawable.example,
+                onStyle = ButtonStyles.drawableToggleButtonStyleOn(),
+                offStyle = ButtonStyles.drawableToggleButtonStyleOff(),
+                enabled = false, // Disabled
+            )
         }
     }
 }

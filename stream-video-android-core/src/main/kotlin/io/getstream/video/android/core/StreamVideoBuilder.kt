@@ -32,6 +32,8 @@ import io.getstream.video.android.core.logging.LoggingLevel
 import io.getstream.video.android.core.notifications.NotificationConfig
 import io.getstream.video.android.core.notifications.internal.StreamNotificationManager
 import io.getstream.video.android.core.notifications.internal.storage.DeviceTokenStorage
+import io.getstream.video.android.core.permission.android.DefaultStreamPermissionCheck
+import io.getstream.video.android.core.permission.android.StreamPermissionCheck
 import io.getstream.video.android.core.sounds.Sounds
 import io.getstream.video.android.model.ApiKey
 import io.getstream.video.android.model.User
@@ -71,6 +73,7 @@ import java.util.UUID
  * @property runForegroundServiceForCalls If set to true, when there is an active call the SDK will run a foreground service to keep the process alive. (default: true)
  * @property localSfuAddress Local SFU address (IP:port) to be used for testing. Leave null if not needed.
  * @property sounds Overwrite the default SDK sounds. See [Sounds].
+ * @property permissionCheck used to check for system permission based on call capabilities. See [StreamPermissionCheck].
  */
 public class StreamVideoBuilder @JvmOverloads constructor(
     context: Context,
@@ -90,6 +93,7 @@ public class StreamVideoBuilder @JvmOverloads constructor(
     private val runForegroundServiceForCalls: Boolean = true,
     private val localSfuAddress: String? = null,
     private val sounds: Sounds = Sounds(),
+    private val permissionCheck: StreamPermissionCheck = DefaultStreamPermissionCheck(),
 ) {
     private val context: Context = context.applicationContext
 
@@ -169,6 +173,7 @@ public class StreamVideoBuilder @JvmOverloads constructor(
             runForegroundService = runForegroundServiceForCalls,
             testSfuAddress = localSfuAddress,
             sounds = sounds,
+            permissionCheck = permissionCheck,
         )
 
         if (user.type == UserType.Guest) {

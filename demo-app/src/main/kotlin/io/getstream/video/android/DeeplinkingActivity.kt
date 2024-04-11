@@ -36,7 +36,7 @@ import dagger.hilt.android.AndroidEntryPoint
 import io.getstream.android.push.permissions.NotificationPermissionManager
 import io.getstream.android.push.permissions.NotificationPermissionStatus
 import io.getstream.log.taggedLogger
-import io.getstream.video.android.compose.theme.base.VideoTheme
+import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.core.StreamVideo
 import io.getstream.video.android.datastore.delegate.StreamUserDataStore
 import io.getstream.video.android.model.StreamCallId

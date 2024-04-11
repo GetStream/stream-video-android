@@ -20,7 +20,7 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
-import io.getstream.video.android.compose.theme.base.VideoTheme
+import io.getstream.video.android.compose.theme.VideoTheme
 
 /**
  * Represents an icon style. Consists of color and padding.
@@ -34,7 +34,7 @@ public data class IconStyle(
 ) : StreamStyle
 
 /**
- * Contains state styles for the icons.
+ * Contains state styles for the icon.
  */
 public data class StreamIconStyle(
     override val default: IconStyle,

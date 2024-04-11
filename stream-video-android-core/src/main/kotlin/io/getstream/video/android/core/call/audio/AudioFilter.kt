@@ -26,5 +26,5 @@ interface AudioFilter {
      *
      * @param audioFormat format in android.media.AudioFormat
      */
-    fun filter(audioFormat: Int, channelCount: Int, sampleRate: Int, sampleData: ByteBuffer)
+    fun applyFilter(audioFormat: Int, channelCount: Int, sampleRate: Int, sampleData: ByteBuffer)
 }

@@ -80,7 +80,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.getstream.video.android.BuildConfig
 import io.getstream.video.android.R
-import io.getstream.video.android.compose.theme.base.VideoTheme
+import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.base.StreamButton
 import io.getstream.video.android.compose.ui.components.base.StreamDialogPositiveNegative
 import io.getstream.video.android.compose.ui.components.base.StreamIconToggleButton
@@ -278,7 +278,7 @@ private fun LoginContent(
                                 icon = Icons.Outlined.GroupAdd,
                                 enabled = !isLoading,
                                 text = stringResource(id = R.string.random_user_sign_in),
-                                style = ButtonStyles.tetriaryButtonStyle(),
+                                style = ButtonStyles.tertiaryButtonStyle(),
                                 onClick = {
                                     login(true, null)
                                 },
@@ -394,7 +394,7 @@ fun SelectableDialog(
                                     selectedText = item.displayName
                                     showDialog = !showDialog
                                 },
-                                style = ButtonStyles.tetriaryButtonStyle(),
+                                style = ButtonStyles.tertiaryButtonStyle(),
                                 modifier = Modifier.padding(horizontal = 8.dp).fillMaxWidth(),
                             )
                         }

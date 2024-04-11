@@ -19,15 +19,12 @@ package io.getstream.video.android.compose.ui.components.call.ringing.outgoingca
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.dp
-import io.getstream.video.android.compose.theme.base.VideoTheme
+import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.call.controls.actions.CancelCallAction
 import io.getstream.video.android.compose.ui.components.call.controls.actions.ToggleCameraAction
 import io.getstream.video.android.compose.ui.components.call.controls.actions.ToggleMicrophoneAction
@@ -43,34 +40,32 @@ import io.getstream.video.android.core.call.state.CallAction
  */
 @Composable
 public fun OutgoingCallControls(
+    modifier: Modifier = Modifier,
+    isVideoCall: Boolean = true,
     isCameraEnabled: Boolean,
     isMicrophoneEnabled: Boolean,
-    modifier: Modifier = Modifier,
     onCallAction: (CallAction) -> Unit,
 ) {
-    Column(
+    Row(
         modifier = modifier.fillMaxWidth(),
-        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.SpaceEvenly,
     ) {
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.SpaceEvenly,
-        ) {
-            ToggleMicrophoneAction(
-                isMicrophoneEnabled = isMicrophoneEnabled,
-                onCallAction = onCallAction,
-            )
+        ToggleMicrophoneAction(
+            isMicrophoneEnabled = isMicrophoneEnabled,
+            onCallAction = onCallAction,
+            offStyle = VideoTheme.styles.buttonStyles.secondaryIconButtonStyle(),
+            onStyle = VideoTheme.styles.buttonStyles.tertiaryIconButtonStyle(),
+        )
 
+        if (isVideoCall) {
             ToggleCameraAction(
                 offStyle = VideoTheme.styles.buttonStyles.secondaryIconButtonStyle(),
-                onStyle = VideoTheme.styles.buttonStyles.tetriaryIconButtonStyle(),
+                onStyle = VideoTheme.styles.buttonStyles.tertiaryIconButtonStyle(),
                 isCameraEnabled = isCameraEnabled,
                 onCallAction = onCallAction,
             )
         }
-
-        Spacer(modifier = Modifier.height(32.dp))
 
         CancelCallAction(
             onCallAction = onCallAction,
@@ -90,6 +85,13 @@ private fun OutgoingCallOptionsPreview() {
             )
 
             OutgoingCallControls(
+                isMicrophoneEnabled = false,
+                isCameraEnabled = false,
+                onCallAction = { },
+            )
+
+            OutgoingCallControls(
+                isVideoCall = false,
                 isMicrophoneEnabled = false,
                 isCameraEnabled = false,
                 onCallAction = { },

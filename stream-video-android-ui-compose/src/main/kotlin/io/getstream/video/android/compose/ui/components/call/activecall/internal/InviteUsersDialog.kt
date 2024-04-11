@@ -21,7 +21,7 @@ import androidx.compose.material.icons.filled.GroupAdd
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
-import io.getstream.video.android.compose.theme.base.VideoTheme
+import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.base.StreamDialogPositiveNegative
 import io.getstream.video.android.mock.previewUsers
 import io.getstream.video.android.model.User
@@ -52,7 +52,7 @@ internal fun InviteUsersDialog(
         },
         negativeButton = Triple(
             stringResource(R.string.stream_video_invite_users_cancel),
-            VideoTheme.styles.buttonStyles.tetriaryButtonStyle(),
+            VideoTheme.styles.buttonStyles.tertiaryButtonStyle(),
         ) {
             onDismiss()
         },
