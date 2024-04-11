@@ -17,6 +17,7 @@
 package io.getstream.video.android.core
 
 import android.content.Context
+import androidx.core.telecom.CallsManager
 import androidx.lifecycle.Lifecycle
 import io.getstream.android.push.PushDevice
 import io.getstream.log.taggedLogger
@@ -140,6 +141,7 @@ internal class StreamVideoImpl internal constructor(
     internal val testSfuAddress: String? = null,
     internal val sounds: Sounds,
     internal val permissionCheck: StreamPermissionCheck = DefaultStreamPermissionCheck(),
+    internal val callsManager: CallsManager? = null,
 ) : StreamVideo,
     NotificationHandler by streamNotificationManager {
 

@@ -139,10 +139,7 @@ class ClientState(client: StreamVideo) {
             PlatformCallManagement.checkSupport(
                 context,
                 supported = {
-                    PlatformCallManagement.instance.addCall(
-                        callId = StreamCallId.fromCallCid(call.cid),
-                        trigger = trigger,
-                    )
+                    // Do nothing.
                 },
                 notSupported = {
                     val serviceIntent = CallService.buildStartIntent(
@@ -162,7 +159,7 @@ class ClientState(client: StreamVideo) {
             PlatformCallManagement.checkSupport(
                 context,
                 supported = {
-                    PlatformCallManagement.instance.endAll()
+                    // Do nothing
                 },
                 notSupported = {
                     val serviceIntent = CallService.buildStopIntent(context)

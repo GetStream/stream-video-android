@@ -158,6 +158,12 @@ public class StreamVideoBuilder @JvmOverloads constructor(
             deviceTokenStorage = deviceTokenStorage,
         )
 
+        // Register stream with platform's call manager
+
+        val callManager = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            registerWithTelecomAPI()
+        } else null
+
         // create the client
         val client = StreamVideoImpl(
             context = context,
@@ -174,6 +180,7 @@ public class StreamVideoBuilder @JvmOverloads constructor(
             testSfuAddress = localSfuAddress,
             sounds = sounds,
             permissionCheck = permissionCheck,
+            callsManager = callManager
         )
 
         if (user.type == UserType.Guest) {
@@ -201,12 +208,6 @@ public class StreamVideoBuilder @JvmOverloads constructor(
             streamLog { "location initialized: ${location.getOrNull()}" }
         }
 
-        // Register stream with platform's call manager
-
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            registerWithTelecomAPI()
-        }
-
         // installs Stream Video instance
         StreamVideo.install(client)
 
@@ -222,11 +223,12 @@ public class StreamVideoBuilder @JvmOverloads constructor(
     }
 
     @RequiresApi(Build.VERSION_CODES.O)
-    private fun registerWithTelecomAPI() {
+    private fun registerWithTelecomAPI() : CallsManager {
         val callsManager = CallsManager(context)
         val capabilities: @CallsManager.Companion.Capability Int =
             CallsManager.CAPABILITY_BASELINE or CallsManager.CAPABILITY_SUPPORTS_VIDEO_CALLING
         callsManager.registerAppWithTelecom(capabilities)
+        return callsManager
     }
 }
 

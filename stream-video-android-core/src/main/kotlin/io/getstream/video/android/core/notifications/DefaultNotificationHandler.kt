@@ -37,6 +37,7 @@ import io.getstream.log.TaggedLogger
 import io.getstream.log.taggedLogger
 import io.getstream.video.android.core.R
 import io.getstream.video.android.core.RingingState
+import io.getstream.video.android.core.StreamVideo
 import io.getstream.video.android.core.notifications.NotificationHandler.Companion.ACTION_LIVE_CALL
 import io.getstream.video.android.core.notifications.NotificationHandler.Companion.ACTION_NOTIFICATION
 import io.getstream.video.android.core.notifications.NotificationHandler.Companion.INCOMING_CALL_NOTIFICATION_ID
@@ -45,6 +46,9 @@ import io.getstream.video.android.core.notifications.internal.service.CallServic
 import io.getstream.video.android.core.notifications.internal.service.CallTriggers
 import io.getstream.video.android.core.notifications.internal.service.PlatformCallManagement
 import io.getstream.video.android.model.StreamCallId
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 
 public open class DefaultNotificationHandler(
     private val application: Application,
@@ -63,6 +67,7 @@ public open class DefaultNotificationHandler(
 
     private val logger: TaggedLogger by taggedLogger("Video:DefaultNotificationHandler")
     private val intentResolver = DefaultStreamIntentResolver(application)
+    private val notificationScope: CoroutineScope = CoroutineScope(Dispatchers.Default)
     private val notificationManager: NotificationManagerCompat by lazy {
         NotificationManagerCompat.from(application).also {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
@@ -85,11 +90,9 @@ public open class DefaultNotificationHandler(
         PlatformCallManagement.checkSupport(
             application.applicationContext,
             supported = {
-                PlatformCallManagement.instance.addCall(
-                    callId,
-                    callDisplayName,
-                    CallTriggers.TRIGGER_INCOMING_CALL,
-                )
+                notificationScope.launch {
+                    PlatformCallManagement.addCall(callId, callDisplayName)
+                }
             },
             notSupported = {
                 val serviceIntent = CallService.buildStartIntent(

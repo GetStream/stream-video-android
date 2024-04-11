@@ -18,6 +18,7 @@ package io.getstream.video.android.core
 
 import android.content.Intent
 import android.graphics.Bitmap
+import android.os.Build
 import androidx.annotation.VisibleForTesting
 import androidx.compose.runtime.Stable
 import io.getstream.log.taggedLogger
@@ -39,6 +40,8 @@ import io.getstream.video.android.core.model.SortField
 import io.getstream.video.android.core.model.UpdateUserPermissionsData
 import io.getstream.video.android.core.model.VideoTrack
 import io.getstream.video.android.core.model.toIceServer
+import io.getstream.video.android.core.notifications.internal.service.CallTriggers
+import io.getstream.video.android.core.notifications.internal.service.PlatformCallManagement
 import io.getstream.video.android.core.socket.SocketState
 import io.getstream.video.android.core.utils.RampValueUpAndDownHelper
 import io.getstream.video.android.core.utils.toQueriedMembers
@@ -169,6 +172,15 @@ public class Call(
     })
     private val audioLevelOutputHelper = RampValueUpAndDownHelper()
 
+    val telecomIntegration: PlatformCallManagement? = clientImpl.callsManager?.let {
+        // Platform call management is not supported on API < 26
+        if (PlatformCallManagement.isSupported(clientImpl.context)) {
+            PlatformCallManagement(this, it)
+        } else {
+            null
+        }
+    }
+
     /**
      * This returns the local microphone volume level. The audio volume is a linear
      * value between 0 (no sound) and 1 (maximum volume). This is not a raw output -
@@ -272,8 +284,14 @@ public class Call(
         }
 
         response.onSuccess {
+
             state.updateFromResponse(it)
             if (ring) {
+                scope.launch {
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                        telecomIntegration?.addCall(this@Call.cid, CallTriggers.TRIGGER_OUTGOING_CALL)
+                    }
+                }
                 client.state.addRingingCall(this, RingingState.Outgoing())
             }
         }
@@ -339,7 +357,7 @@ public class Call(
                 } else {
                     logger.w {
                         "[join] Call settings were null - this should never happen after a call" +
-                            "is joined. MediaManager will not be initialised with server settings."
+                                "is joined. MediaManager will not be initialised with server settings."
                     }
                 }
                 return result
@@ -450,6 +468,13 @@ public class Call(
             }
         }
 
+
+        scope.launch {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                telecomIntegration?.active()
+            }
+        }
+
         timer.finish()
 
         return Success(value = session!!)
@@ -511,9 +536,9 @@ public class Call(
 
             // We were not able to restore the SFU peer connection in time
             if (System.currentTimeMillis() - (
-                    sfuSocketReconnectionTime
-                        ?: System.currentTimeMillis()
-                    ) > sfuReconnectTimeoutMillis
+                        sfuSocketReconnectionTime
+                            ?: System.currentTimeMillis()
+                        ) > sfuReconnectTimeoutMillis
             ) {
                 leave(Error("Failed to do a full reconnect - connection issue?"))
                 return
@@ -564,7 +589,7 @@ public class Call(
             } else {
                 logger.e {
                     "[switchSfu] Failed to get a join response during " +
-                        "migration - falling back to reconnect. Error ${joinResponse.errorOrNull()}"
+                            "migration - falling back to reconnect. Error ${joinResponse.errorOrNull()}"
                 }
                 state._connection.value = RealtimeConnection.Reconnecting
             }
@@ -617,6 +642,7 @@ public class Call(
 
     /** ends the call for yourself as well as other users */
     suspend fun end(): Result<Unit> {
+        scope.launch { telecomIntegration?.endCall() }
         // end the call for everyone
         val result = clientImpl.endCall(type, id)
         // cleanup
@@ -998,6 +1024,7 @@ public class Call(
     }
 
     fun cleanup() {
+        scope.launch { telecomIntegration?.disconnect() }
         monitor.stop()
         session?.cleanup()
         supervisorJob.cancel()
@@ -1015,10 +1042,12 @@ public class Call(
     }
 
     suspend fun accept(): Result<AcceptCallResponse> {
+        telecomIntegration?.answerCall()
         return clientImpl.accept(type, id)
     }
 
     suspend fun reject(): Result<RejectCallResponse> {
+        telecomIntegration?.rejectCall()
         return clientImpl.reject(type, id)
     }
 

@@ -28,14 +28,13 @@ import androidx.core.telecom.CallAttributesCompat.Companion.CALL_TYPE_VIDEO_CALL
 import androidx.core.telecom.CallControlScope
 import androidx.core.telecom.CallsManager
 import io.getstream.log.taggedLogger
+import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.StreamVideo
 import io.getstream.video.android.core.events.JoinCallResponseEvent
 import io.getstream.video.android.core.notifications.internal.service.CallTriggers.TRIGGER_INCOMING_CALL
 import io.getstream.video.android.core.notifications.internal.service.CallTriggers.TRIGGER_ONGOING_CALL
 import io.getstream.video.android.core.notifications.internal.service.CallTriggers.TRIGGER_OUTGOING_CALL
 import io.getstream.video.android.model.StreamCallId
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import org.openapitools.client.models.CallAcceptedEvent
 import org.openapitools.client.models.CallEndedEvent
@@ -45,14 +44,9 @@ import kotlin.contracts.ExperimentalContracts
 import kotlin.contracts.InvocationKind
 import kotlin.contracts.contract
 
-class PlatformCallManagement
-private constructor(
-    private val scope: CoroutineScope,
-    private val callManager: CallsManager,
-) {
+class PlatformCallManagement(private val call: Call, private val callManager: CallsManager) {
     companion object {
         private val logger by taggedLogger("PlatformCallManagement")
-        lateinit var instance: PlatformCallManagement
 
         // Utility methods
         /**
@@ -78,7 +72,6 @@ private constructor(
             }
         }
 
-        @OptIn(ExperimentalContracts::class)
         fun isSupported(
             context: Context,
         ): Boolean = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
@@ -101,134 +94,109 @@ private constructor(
             false
         }
 
-        // Factory
-        /**
-         * Create an instance of [PlatformCallManagement] to manage the current call.
-         */
-        @RequiresApi(Build.VERSION_CODES.O)
-        fun initialize(
-            context: Context,
-            scope: CoroutineScope = CoroutineScope(Dispatchers.Default),
-        ) {
-            logger.e { "[telecom] Initializing..." }
-            instance = PlatformCallManagement(
-                scope = scope, callManager = CallsManager(context),
-            )
+        suspend fun addCall(callId: StreamCallId, displayName: String) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                val call = StreamVideo.instance().call(callId.type, callId.id)
+                val telecomIntegration = call.telecomIntegration
+                telecomIntegration?.addCall(displayName, trigger = TRIGGER_INCOMING_CALL)
+            }
         }
     }
 
     // Internal variables
-    private val managedCalls: MutableMap<String, Pair<Int, CallControlScope>> = mutableMapOf()
 
     // API
-    @RequiresApi(Build.VERSION_CODES.O)
-    fun answerCall(callId: StreamCallId) {
-        scope.launch {
-            managedCalls[callId.id]?.let {
-                it.second.answer(it.first)
-            }
-        }
-    }
+    private lateinit var callControlScope: CallControlScope
+    private var callType: Int = 0
+
+    suspend fun answerCall() = callControlScope.answer(callType)
+
+    suspend fun active() = callControlScope.setActive()
+
+    suspend fun rejectCall() =
+        callControlScope.disconnect(DisconnectCause(DisconnectCause.REJECTED))
+
+    @RequiresApi(Build.VERSION_CODES.N_MR1)
+    suspend fun answeredElsewhere() =
+        callControlScope.disconnect(DisconnectCause(DisconnectCause.ANSWERED_ELSEWHERE))
+
+    suspend fun missed() = callControlScope.disconnect(DisconnectCause(DisconnectCause.MISSED))
+
+    suspend fun endCall() = callControlScope.disconnect(DisconnectCause(DisconnectCause.LOCAL))
 
     @RequiresApi(Build.VERSION_CODES.O)
-    fun rejectCall(callId: StreamCallId) {
-        scope.launch {
-            managedCalls[callId.id]?.second?.disconnect(DisconnectCause(DisconnectCause.REJECTED))
-        }
-    }
-
-    @RequiresApi(Build.VERSION_CODES.O)
-    fun endCall(callId: StreamCallId) {
-        scope.launch {
-            managedCalls[callId.id]?.second?.disconnect(DisconnectCause(DisconnectCause.LOCAL))
-        }
-    }
-
-    fun endAll() {
-        scope.launch {
-            managedCalls.forEach {
-                it.value.second.disconnect(DisconnectCause(DisconnectCause.LOCAL))
-            }
-        }
-    }
-
-    @RequiresApi(Build.VERSION_CODES.O)
-    fun addCall(
-        callId: StreamCallId,
-        displayName: String = callId.id,
+    suspend fun addCall(
+        displayName: String = call.id,
         @CallTrigger trigger: String,
     ) {
-        scope.launch {
-            val call = StreamVideo.instanceOrNull()?.call(callId.type, callId.id)
-            call?.get() // update the call
-            val direction = when (trigger) {
-                TRIGGER_INCOMING_CALL -> {
-                    CallAttributesCompat.DIRECTION_INCOMING
-                }
-
-                TRIGGER_OUTGOING_CALL -> {
-                    CallAttributesCompat.DIRECTION_OUTGOING
-                }
-
-                TRIGGER_ONGOING_CALL -> {
-                    CallAttributesCompat.DIRECTION_OUTGOING
-                }
-
-                else -> {
-                    throw IllegalArgumentException("Wrong trigger: $trigger")
-                }
-            }
-            val type = when (callId.type) {
-                "default" -> CALL_TYPE_VIDEO_CALL or CALL_TYPE_AUDIO_CALL
-                else -> CALL_TYPE_AUDIO_CALL
+        call.get() // update the call
+        val direction = when (trigger) {
+            TRIGGER_INCOMING_CALL -> {
+                CallAttributesCompat.DIRECTION_INCOMING
             }
 
-            logger.e { "[telecom] Adding call [${callId.cid}, $displayName, $trigger, $type, $direction]" }
-            callManager.addCall(
-                CallAttributesCompat(
-                    displayName = displayName,
-                    address = Uri.parse("https://getstream.io/video/join/${callId.cid}"),
-                    direction = direction,
-                    callType = type,
-                    callCapabilities = CallAttributesCompat.SUPPORTS_SET_INACTIVE,
-                ),
-                onDisconnect = {
-                    call?.leave()
-                },
-                onAnswer = {
-                    call?.join()
-                },
-                onSetActive = {
-                    call?.join()
-                },
-                onSetInactive = {
-                    call?.leave()
-                },
-            ) {
-                val callScope = this
-                logger.e { "[telecom] Call scope created for call: [${callId.cid}]" }
+            TRIGGER_OUTGOING_CALL -> {
+                CallAttributesCompat.DIRECTION_OUTGOING
+            }
 
-                managedCalls[callId.id] = Pair(type, callScope)
-                scope.launch {
-                    call?.subscribe { event ->
-                        launch {
-                            when (event) {
-                                is CallRejectedEvent -> {
-                                    callScope.disconnect(DisconnectCause(DisconnectCause.REJECTED))
-                                }
+            TRIGGER_ONGOING_CALL -> {
+                CallAttributesCompat.DIRECTION_OUTGOING
+            }
 
-                                is CallEndedEvent -> {
-                                    callScope.disconnect(DisconnectCause(DisconnectCause.REMOTE))
-                                }
+            else -> {
+                throw IllegalArgumentException("Wrong trigger: $trigger")
+            }
+        }
+        callType = when (call.type) {
+            "default" -> CALL_TYPE_VIDEO_CALL or CALL_TYPE_AUDIO_CALL
+            else -> CALL_TYPE_AUDIO_CALL
+        }
 
-                                is CallAcceptedEvent, is JoinCallResponseEvent, is CallSessionParticipantJoinedEvent -> {
-                                    callScope.answer(type)
-                                }
-                            }
+        logger.e { "[telecom] Adding call [${call.cid}, $displayName, $trigger, $callType, $direction]" }
+        callManager.addCall(
+            CallAttributesCompat(
+                displayName = displayName,
+                address = Uri.parse("https://getstream.io/video/join/${call.cid}"),
+                direction = direction,
+                callType = callType,
+                callCapabilities = CallAttributesCompat.SUPPORTS_SET_INACTIVE,
+            ),
+            onDisconnect = {
+                call?.leave()
+            },
+            onAnswer = {
+                call?.join()
+            },
+            onSetActive = {
+                call?.join()
+            },
+            onSetInactive = {
+                call?.leave()
+            },
+        ) {
+            callControlScope = this
+            logger.e { "[telecom] Call scope created for call: [${call.cid}]" }
+            call?.subscribe { event ->
+                launch {
+                    when (event) {
+                        is CallRejectedEvent -> {
+                            callControlScope.disconnect(DisconnectCause(DisconnectCause.REJECTED))
+                        }
+
+                        is CallEndedEvent -> {
+                            callControlScope.disconnect(DisconnectCause(DisconnectCause.REMOTE))
+                        }
+
+                        is CallAcceptedEvent, is JoinCallResponseEvent, is CallSessionParticipantJoinedEvent -> {
+                            callControlScope.answer(callType)
                         }
                     }
                 }
             }
         }
+    }
+
+    suspend fun disconnect() {
+        callControlScope.disconnect(DisconnectCause(DisconnectCause.UNKNOWN))
     }
 }
