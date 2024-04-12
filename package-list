@@ -46,6 +46,7 @@ io.getstream.video.android.compose.permission
 io.getstream.video.android.compose.state.ui.internal
 io.getstream.video.android.compose.state.ui.participants
 io.getstream.video.android.compose.theme
+io.getstream.video.android.compose.ui
 io.getstream.video.android.compose.ui.components.audio
 io.getstream.video.android.compose.ui.components.avatar
 io.getstream.video.android.compose.ui.components.background
