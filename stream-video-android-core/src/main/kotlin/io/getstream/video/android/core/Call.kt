@@ -284,12 +284,14 @@ public class Call(
         }
 
         response.onSuccess {
-
             state.updateFromResponse(it)
             if (ring) {
                 scope.launch {
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                        telecomIntegration?.addCall(this@Call.cid, CallTriggers.TRIGGER_OUTGOING_CALL)
+                        telecomIntegration?.addCall(
+                            this@Call.cid,
+                            CallTriggers.TRIGGER_OUTGOING_CALL,
+                        )
                     }
                 }
                 client.state.addRingingCall(this, RingingState.Outgoing())
@@ -357,7 +359,7 @@ public class Call(
                 } else {
                     logger.w {
                         "[join] Call settings were null - this should never happen after a call" +
-                                "is joined. MediaManager will not be initialised with server settings."
+                            "is joined. MediaManager will not be initialised with server settings."
                     }
                 }
                 return result
@@ -468,7 +470,6 @@ public class Call(
             }
         }
 
-
         scope.launch {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                 telecomIntegration?.active()
@@ -536,9 +537,9 @@ public class Call(
 
             // We were not able to restore the SFU peer connection in time
             if (System.currentTimeMillis() - (
-                        sfuSocketReconnectionTime
-                            ?: System.currentTimeMillis()
-                        ) > sfuReconnectTimeoutMillis
+                    sfuSocketReconnectionTime
+                        ?: System.currentTimeMillis()
+                    ) > sfuReconnectTimeoutMillis
             ) {
                 leave(Error("Failed to do a full reconnect - connection issue?"))
                 return
@@ -589,7 +590,7 @@ public class Call(
             } else {
                 logger.e {
                     "[switchSfu] Failed to get a join response during " +
-                            "migration - falling back to reconnect. Error ${joinResponse.errorOrNull()}"
+                        "migration - falling back to reconnect. Error ${joinResponse.errorOrNull()}"
                 }
                 state._connection.value = RealtimeConnection.Reconnecting
             }
