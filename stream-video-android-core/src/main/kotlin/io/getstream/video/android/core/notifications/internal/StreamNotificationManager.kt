@@ -80,6 +80,11 @@ internal class StreamNotificationManager private constructor(
                     deviceTokenStorage.updateUserDevice(pushDevice.toDevice())
                     Result.Success(newDevice)
                 } catch (e: Exception) {
+                    logger.e(e) {
+                        "Failed to register device for push notifications " +
+                            "(PN will not work!). Does the push provider key " +
+                            "(${pushDevice.pushProvider.key}) match the key in the Stream Dashboard?"
+                    }
                     Result.Failure(Error.ThrowableError("Device couldn't be created", e))
                 }
             }
@@ -151,7 +156,10 @@ internal class StreamNotificationManager private constructor(
                 } else {
                     val application = context.applicationContext as? Application
                     val updatedNotificationConfig =
-                        notificationConfig.overrideDefault(application)
+                        notificationConfig.overrideDefault(
+                            application = application,
+                            hideRingingNotificationInForeground = notificationConfig.hideRingingNotificationInForeground,
+                        )
                     val onPermissionStatus: (NotificationPermissionStatus) -> Unit = { nps ->
                         with(updatedNotificationConfig.notificationHandler) {
                             when (nps) {
@@ -182,11 +190,17 @@ internal class StreamNotificationManager private constructor(
             }
         }
 
-        private fun NotificationConfig.overrideDefault(application: Application?): NotificationConfig {
+        private fun NotificationConfig.overrideDefault(
+            application: Application?,
+            hideRingingNotificationInForeground: Boolean,
+        ): NotificationConfig {
             return application?.let {
                 val notificationHandler = notificationHandler
                     .takeUnless { it == NoOpNotificationHandler }
-                    ?: DefaultNotificationHandler(application)
+                    ?: DefaultNotificationHandler(
+                        application = application,
+                        hideRingingNotificationInForeground = hideRingingNotificationInForeground,
+                    )
                 this.copy(notificationHandler = notificationHandler)
             } ?: this
         }

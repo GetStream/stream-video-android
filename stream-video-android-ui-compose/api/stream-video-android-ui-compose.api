@@ -29,8 +29,8 @@ public abstract interface class io/getstream/video/android/compose/permission/La
 }
 
 public final class io/getstream/video/android/compose/permission/SinglePermissionKt {
-	public static final fun LaunchCameraPermissions (Lio/getstream/video/android/core/Call;Landroidx/compose/runtime/Composer;I)V
-	public static final fun LaunchMicrophonePermissions (Lio/getstream/video/android/core/Call;Landroidx/compose/runtime/Composer;I)V
+	public static final fun LaunchCameraPermissions (Lio/getstream/video/android/core/Call;Lkotlin/jvm/functions/Function1;Landroidx/compose/runtime/Composer;I)V
+	public static final fun LaunchMicrophonePermissions (Lio/getstream/video/android/core/Call;Lkotlin/jvm/functions/Function1;Landroidx/compose/runtime/Composer;I)V
 	public static final fun rememberBluetoothPermissionState (Lio/getstream/video/android/core/Call;Lkotlin/jvm/functions/Function1;Landroidx/compose/runtime/Composer;I)Lio/getstream/video/android/compose/permission/VideoPermissionsState;
 	public static final fun rememberCameraPermissionState (Lio/getstream/video/android/core/Call;Lkotlin/jvm/functions/Function1;Landroidx/compose/runtime/Composer;II)Lio/getstream/video/android/compose/permission/VideoPermissionsState;
 	public static final fun rememberMicrophonePermissionState (Lio/getstream/video/android/core/Call;Lkotlin/jvm/functions/Function1;Landroidx/compose/runtime/Composer;II)Lio/getstream/video/android/compose/permission/VideoPermissionsState;
@@ -351,6 +351,35 @@ public final class io/getstream/video/android/compose/theme/VideoTheme : io/gets
 
 public final class io/getstream/video/android/compose/theme/VideoThemeKt {
 	public static final fun VideoTheme (ZLio/getstream/video/android/compose/theme/StreamColors;Lio/getstream/video/android/compose/theme/StreamDimens;Lio/getstream/video/android/compose/theme/StreamTypography;Lio/getstream/video/android/compose/theme/StreamShapes;Landroidx/compose/material/ripple/RippleTheme;Lio/getstream/video/android/core/mapper/ReactionMapper;ZLio/getstream/video/android/compose/ui/components/base/styling/CompositeStyleProvider;Lkotlin/jvm/functions/Function2;Landroidx/compose/runtime/Composer;II)V
+}
+
+public final class io/getstream/video/android/compose/ui/ComposableSingletons$StreamCallActivityComposeDelegateKt {
+	public static final field INSTANCE Lio/getstream/video/android/compose/ui/ComposableSingletons$StreamCallActivityComposeDelegateKt;
+	public static field lambda-1 Lkotlin/jvm/functions/Function2;
+	public fun <init> ()V
+	public final fun getLambda-1$stream_video_android_ui_compose_release ()Lkotlin/jvm/functions/Function2;
+}
+
+public class io/getstream/video/android/compose/ui/ComposeStreamCallActivity : io/getstream/video/android/ui/common/StreamCallActivity {
+	public static final field $stable I
+	public fun <init> ()V
+	public fun uiDelegate ()Lio/getstream/video/android/ui/common/StreamActivityUiDelegate;
+}
+
+public class io/getstream/video/android/compose/ui/StreamCallActivityComposeDelegate : io/getstream/video/android/ui/common/StreamActivityUiDelegate {
+	public static final field $stable I
+	public static final field Companion Lio/getstream/video/android/compose/ui/StreamCallActivityComposeDelegate$Companion;
+	public fun <init> ()V
+	public fun AudioCallContent (Lio/getstream/video/android/ui/common/StreamCallActivity;Lio/getstream/video/android/core/Call;Landroidx/compose/runtime/Composer;I)V
+	public fun DefaultCallContent (Lio/getstream/video/android/ui/common/StreamCallActivity;Lio/getstream/video/android/core/Call;Landroidx/compose/runtime/Composer;I)V
+	public fun NoAnswerContent (Lio/getstream/video/android/ui/common/StreamCallActivity;Lio/getstream/video/android/core/Call;Landroidx/compose/runtime/Composer;I)V
+	public fun NoPermissions (Lio/getstream/video/android/ui/common/StreamCallActivity;Ljava/util/List;Ljava/util/List;ZLandroidx/compose/runtime/Composer;II)V
+	public fun RejectedContent (Lio/getstream/video/android/ui/common/StreamCallActivity;Lio/getstream/video/android/core/Call;Landroidx/compose/runtime/Composer;I)V
+	public fun RootContent (Lio/getstream/video/android/ui/common/StreamCallActivity;Lio/getstream/video/android/core/Call;Landroidx/compose/runtime/Composer;I)V
+	public fun setContent (Lio/getstream/video/android/ui/common/StreamCallActivity;Lio/getstream/video/android/core/Call;)V
+}
+
+public final class io/getstream/video/android/compose/ui/StreamCallActivityComposeDelegate$Companion {
 }
 
 public final class io/getstream/video/android/compose/ui/components/audio/AudioAppBarKt {

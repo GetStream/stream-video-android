@@ -52,8 +52,12 @@ public fun rememberCameraPermissionState(
  * - android.Manifest.permission.CAMERA
  */
 @Composable
-public fun LaunchCameraPermissions(call: Call) {
-    val callPermissionsState = rememberCameraPermissionState(call = call)
+public fun LaunchCameraPermissions(
+    call: Call,
+    onPermissionsResult: (Boolean) -> Unit,
+) {
+    val callPermissionsState =
+        rememberCameraPermissionState(call = call, onPermissionsResult = onPermissionsResult)
     LaunchedEffect(key1 = call) { callPermissionsState.launchPermissionRequest() }
 }
 
@@ -87,8 +91,12 @@ public fun rememberMicrophonePermissionState(
  * - android.Manifest.permission.RECORD_AUDIO
  */
 @Composable
-public fun LaunchMicrophonePermissions(call: Call) {
-    val callPermissionsState = rememberMicrophonePermissionState(call = call)
+public fun LaunchMicrophonePermissions(
+    call: Call,
+    onPermissionsResult: (Boolean) -> Unit,
+) {
+    val callPermissionsState =
+        rememberMicrophonePermissionState(call = call, onPermissionsResult = onPermissionsResult)
     LaunchedEffect(key1 = call) { callPermissionsState.launchPermissionRequest() }
 }
 
