@@ -24,6 +24,7 @@ import io.getstream.result.Error
 import io.getstream.result.Result
 import io.getstream.result.Result.Failure
 import io.getstream.result.Result.Success
+import io.getstream.video.android.core.audio.AudioFilter
 import io.getstream.video.android.core.call.connection.StreamPeerConnectionFactory
 import io.getstream.video.android.core.errors.VideoErrorCode
 import io.getstream.video.android.core.events.VideoEventListener
@@ -140,6 +141,7 @@ internal class StreamVideoImpl internal constructor(
     internal val testSfuAddress: String? = null,
     internal val sounds: Sounds,
     internal val permissionCheck: StreamPermissionCheck = DefaultStreamPermissionCheck(),
+    internal val audioFilter: AudioFilter? = null,
 ) : StreamVideo,
     NotificationHandler by streamNotificationManager {
 
@@ -161,7 +163,7 @@ internal class StreamVideoImpl internal constructor(
     private lateinit var connectContinuation: Continuation<Result<ConnectedEvent>>
 
     @InternalStreamVideoApi
-    public var peerConnectionFactory = StreamPeerConnectionFactory(context)
+    public var peerConnectionFactory = StreamPeerConnectionFactory(context, scope, audioFilter)
     public override val userId = user.id
 
     private val logger by taggedLogger("Call:StreamVideo")
@@ -1048,6 +1050,14 @@ internal class StreamVideoImpl internal constructor(
         return wrapAPICall {
             connectionModule.api.getCall(type, id, ring = true)
         }
+    }
+
+    internal fun isAudioFilterEnabled(): Boolean {
+        return peerConnectionFactory.isAudioFilterEnabled()
+    }
+
+    internal fun toggleAudioFilter(): Boolean {
+        return peerConnectionFactory.toggleAudioFilter()
     }
 }
 

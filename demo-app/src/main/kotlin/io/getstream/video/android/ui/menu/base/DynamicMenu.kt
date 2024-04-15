@@ -222,6 +222,7 @@ private fun DynamicMenuPreview() {
                 availableDevices = emptyList(),
                 onDeviceSelected = {},
                 onShowFeedback = {},
+                onNoiseCancellation = {},
                 loadRecordings = { emptyList() },
             ),
         )
@@ -248,6 +249,7 @@ private fun DynamicMenuDebugOptionPreview() {
                 availableDevices = emptyList(),
                 onDeviceSelected = {},
                 onShowFeedback = {},
+                onNoiseCancellation = {},
                 loadRecordings = { emptyList() },
             ),
         )

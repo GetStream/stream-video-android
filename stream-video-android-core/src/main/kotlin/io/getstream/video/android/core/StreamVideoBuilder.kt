@@ -23,6 +23,7 @@ import com.jakewharton.threetenabp.AndroidThreeTen
 import io.getstream.log.StreamLog
 import io.getstream.log.android.AndroidStreamLogger
 import io.getstream.log.streamLog
+import io.getstream.video.android.core.audio.AudioFilter
 import io.getstream.video.android.core.dispatchers.DispatcherProvider
 import io.getstream.video.android.core.internal.module.ConnectionModule
 import io.getstream.video.android.core.logging.LoggingLevel
@@ -91,6 +92,7 @@ public class StreamVideoBuilder @JvmOverloads constructor(
     private val localSfuAddress: String? = null,
     private val sounds: Sounds = Sounds(),
     private val permissionCheck: StreamPermissionCheck = DefaultStreamPermissionCheck(),
+    private val audioFilter: AudioFilter? = null,
 ) {
     private val context: Context = context.applicationContext
 
@@ -171,6 +173,7 @@ public class StreamVideoBuilder @JvmOverloads constructor(
             testSfuAddress = localSfuAddress,
             sounds = sounds,
             permissionCheck = permissionCheck,
+            audioFilter = audioFilter,
         )
 
         if (user.type == UserType.Guest) {

@@ -1065,6 +1065,14 @@ public class Call(
         return state.ownCapabilities.value.containsAll(elements)
     }
 
+    fun isAudioFilterEnabled(): Boolean {
+        return clientImpl.isAudioFilterEnabled()
+    }
+
+    fun toggleAudioFilter(): Boolean {
+        return clientImpl.toggleAudioFilter()
+    }
+
     @InternalStreamVideoApi
     public val debug = Debug(this)
 

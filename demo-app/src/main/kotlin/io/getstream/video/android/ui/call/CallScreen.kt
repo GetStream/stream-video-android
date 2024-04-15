@@ -446,10 +446,14 @@ fun CallScreen(
         }
 
         if (isShowingSettingMenu) {
+            var isNoiseCancellationEnabled by remember {
+                mutableStateOf(call.isAudioFilterEnabled())
+            }
             SettingsMenu(
                 call = call,
                 selectedVideoFilter = selectedVideoFilter,
                 showDebugOptions = showDebugOptions,
+                noiseCancellationEnabled = isNoiseCancellationEnabled,
                 onDismissed = { isShowingSettingMenu = false },
                 onSelectVideoFilter = { filterIndex ->
                     selectedVideoFilter = filterIndex
@@ -469,6 +473,9 @@ fun CallScreen(
                 onShowFeedback = {
                     isShowingSettingMenu = false
                     isShowingFeedbackDialog = true
+                },
+                onNoiseCancellation = {
+                    isNoiseCancellationEnabled = call.toggleAudioFilter()
                 },
             ) {
                 isShowingStats = true

@@ -19,9 +19,11 @@ package io.getstream.video.android.core.call.connection
 import android.content.Context
 import android.os.Build
 import io.getstream.log.taggedLogger
+import io.getstream.video.android.core.audio.AudioFilter
 import io.getstream.video.android.core.call.video.FilterVideoProcessor
 import io.getstream.video.android.core.model.IceCandidate
 import io.getstream.video.android.core.model.StreamPeerType
+import java.nio.ByteBuffer
 import kotlinx.coroutines.CoroutineScope
 import org.webrtc.AudioSource
 import org.webrtc.AudioTrack
@@ -38,14 +40,21 @@ import org.webrtc.VideoSource
 import org.webrtc.VideoTrack
 import org.webrtc.audio.JavaAudioDeviceModule
 import org.webrtc.audio.JavaAudioDeviceModule.AudioSamples
-import java.nio.ByteBuffer
 
 /**
  * Builds a factory that provides [PeerConnection]s when requested.
  *
  * @param context Used to build the underlying native components for the factory.
  */
-public class StreamPeerConnectionFactory(private val context: Context) {
+public class StreamPeerConnectionFactory(
+    private val context: Context,
+    private val scope: CoroutineScope,
+    private var audioFilter: AudioFilter? = null
+) {
+
+    private companion object {
+        private const val TAG = "StreamPeerConnectionFactory"
+    }
 
     private val webRtcLogger by taggedLogger("Call:WebRTC")
     private val audioLogger by taggedLogger("Call:AudioTrackCallback")
@@ -80,6 +89,10 @@ public class StreamPeerConnectionFactory(private val context: Context) {
         audioRecordDataCallback = callback
     }
 
+    public fun setAudioFilter(audioFilter: AudioFilter?) {
+        this.audioFilter = audioFilter
+    }
+
     /**
      * Represents the EGL rendering context.
      */
@@ -102,9 +115,9 @@ public class StreamPeerConnectionFactory(private val context: Context) {
     private val videoEncoderFactory by lazy {
         SimulcastAlignedVideoEncoderFactory(
             eglBase.eglBaseContext,
-            enableIntelVp8Encoder = true,
-            enableH264HighProfile = true,
-            resolutionAdjustment = ResolutionAdjustment.MULTIPLE_OF_16,
+            true,
+            true,
+            ResolutionAdjustment.MULTIPLE_OF_16,
         )
     }
 
@@ -144,6 +157,11 @@ public class StreamPeerConnectionFactory(private val context: Context) {
         )
 
         PeerConnectionFactory.builder()
+            .also { builder ->
+                audioFilter?.delegate?.also {
+                    builder.setAudioProcessingFactory(it)
+                }
+            }
             .setVideoDecoderFactory(videoDecoderFactory)
             .setVideoEncoderFactory(videoEncoderFactory)
             .setAudioDeviceModule(
@@ -336,4 +354,19 @@ public class StreamPeerConnectionFactory(private val context: Context) {
         source: AudioSource,
         trackId: String,
     ): AudioTrack = factory.createAudioTrack(trackId, source)
+
+
+    /**
+     * True if the audio processing is enabled, false otherwise.
+     */
+    public fun isAudioFilterEnabled(): Boolean {
+        return audioFilter?.isEnabled ?: false
+    }
+
+    /**
+     * Toggles the audio processing on and off.
+     */
+    public fun toggleAudioFilter(): Boolean {
+        return audioFilter?.toggle() ?: false
+    }
 }

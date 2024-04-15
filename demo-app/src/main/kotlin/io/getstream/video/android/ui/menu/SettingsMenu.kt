@@ -69,9 +69,11 @@ internal fun SettingsMenu(
     call: Call,
     selectedVideoFilter: Int,
     showDebugOptions: Boolean,
+    noiseCancellationEnabled: Boolean,
     onDismissed: () -> Unit,
     onSelectVideoFilter: (Int) -> Unit,
     onShowFeedback: () -> Unit,
+    onNoiseCancellation: () -> Unit,
     onShowCallStats: () -> Unit,
 ) {
     val context = LocalContext.current
@@ -207,6 +209,7 @@ internal fun SettingsMenu(
             },
             items = defaultStreamMenu(
                 showDebugOptions = showDebugOptions,
+                noiseCancellationEnabled = noiseCancellationEnabled,
                 codecList = codecInfos,
                 availableDevices = availableDevices,
                 onDeviceSelected = {
@@ -224,6 +227,7 @@ internal fun SettingsMenu(
                 onToggleAudioFilterClick = onToggleAudioFilterClick,
                 onSwitchSfuClick = onSwitchSfuClick,
                 onShowCallStats = onShowCallStats,
+                onNoiseCancellation = onNoiseCancellation,
                 isScreenShareEnabled = isScreenSharing,
                 loadRecordings = onLoadRecordings,
             ),
@@ -285,6 +289,7 @@ private fun SettingsMenuPreview() {
                 availableDevices = emptyList(),
                 onDeviceSelected = {},
                 onShowFeedback = {},
+                onNoiseCancellation = {},
                 loadRecordings = { emptyList() },
             ),
         )
