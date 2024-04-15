@@ -156,6 +156,7 @@ public fun OutgoingCallContent(
             modifier = Modifier
                 .align(Alignment.BottomCenter)
                 .padding(bottom = VideoTheme.dimens.componentHeightM),
+            isVideoCall = isVideoType,
             isCameraEnabled = isCameraEnabled,
             isMicrophoneEnabled = isMicrophoneEnabled,
             onCallAction = onCallAction,
