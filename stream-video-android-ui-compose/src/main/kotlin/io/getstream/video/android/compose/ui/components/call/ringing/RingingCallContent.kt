@@ -74,12 +74,58 @@ public fun RingingCallContent(
     onAcceptedContent: @Composable () -> Unit,
     onRejectedContent: @Composable () -> Unit = {},
     onNoAnswerContent: @Composable () -> Unit = {},
+    onIncomingContent: (
+        @Composable (
+            modifier: Modifier,
+            call: Call,
+            isVideoType: Boolean,
+            isShowingHeader: Boolean,
+            headerContent: (@Composable ColumnScope.() -> Unit)?,
+            detailsContent: (
+                @Composable ColumnScope.(
+                    participants: List<MemberState>,
+                    topPadding: Dp,
+                ) -> Unit
+            )?,
+            controlsContent: (@Composable BoxScope.() -> Unit)?,
+            onBackPressed: () -> Unit,
+            onCallAction: (CallAction) -> Unit,
+        ) -> Unit
+    )? = null,
+    onOutgoingContent: (
+        @Composable (
+            modifier: Modifier,
+            call: Call,
+            isVideoType: Boolean,
+            isShowingHeader: Boolean,
+            headerContent: (@Composable ColumnScope.() -> Unit)?,
+            detailsContent: (
+                @Composable ColumnScope.(
+                    participants: List<MemberState>,
+                    topPadding: Dp,
+                ) -> Unit
+            )?,
+            controlsContent: (@Composable BoxScope.() -> Unit)?,
+            onBackPressed: () -> Unit,
+            onCallAction: (CallAction) -> Unit,
+        ) -> Unit
+    )? = null,
 ) {
     val ringingState by call.state.ringingState.collectAsStateWithLifecycle()
 
     when (ringingState) {
         is RingingState.Incoming -> {
-            IncomingCallContent(
+            onIncomingContent?.invoke(
+                modifier,
+                call,
+                isVideoType,
+                isShowingHeader,
+                headerContent,
+                detailsContent,
+                controlsContent,
+                onBackPressed,
+                onCallAction,
+            ) ?: IncomingCallContent(
                 call = call,
                 isVideoType = isVideoType,
                 modifier = modifier,
@@ -93,7 +139,17 @@ public fun RingingCallContent(
         }
 
         is RingingState.Outgoing -> {
-            OutgoingCallContent(
+            onOutgoingContent?.invoke(
+                modifier,
+                call,
+                isVideoType,
+                isShowingHeader,
+                headerContent,
+                detailsContent,
+                controlsContent,
+                onBackPressed,
+                onCallAction,
+            ) ?: OutgoingCallContent(
                 call = call,
                 isVideoType = isVideoType,
                 modifier = modifier,
