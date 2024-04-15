@@ -22,14 +22,18 @@ import android.net.Uri
 import android.provider.Settings
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.size
+import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
@@ -74,6 +78,26 @@ public open class StreamCallActivityComposeDelegate : StreamActivityUiDelegate<S
 
     public companion object {
         private val logger by taggedLogger("StreamCallActivityUiDelegate")
+    }
+
+    /**
+     * Shows a progressbar until everything is set.
+     */
+    override fun loadingContent(activity: StreamCallActivity) {
+        activity.setContent {
+            VideoTheme {
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .background(VideoTheme.colors.baseSheetPrimary),
+                ) {
+                    CircularProgressIndicator(
+                        modifier = Modifier.align(Alignment.Center),
+                        color = VideoTheme.colors.brandPrimary,
+                    )
+                }
+            }
+        }
     }
 
     /**
@@ -316,7 +340,7 @@ public open class StreamCallActivityComposeDelegate : StreamActivityUiDelegate<S
                 onCallAction(call, it)
             },
             durationPlaceholder = duration
-                ?: stringResource(id = R.string.stream_audio_call_ui_calling),
+                ?: "...",
         )
     }
 
