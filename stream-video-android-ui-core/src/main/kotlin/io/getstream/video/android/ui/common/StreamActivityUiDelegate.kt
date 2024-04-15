@@ -21,6 +21,12 @@ import io.getstream.video.android.core.Call
 public interface StreamActivityUiDelegate<T : StreamCallActivity> {
 
     /**
+     * Called when the [setContent] cannot yet be invoked (missing [Call] for e.g.).
+     * Used to show some UI in the activity if the call is not yet loaded.
+     */
+    public fun loadingContent(activity: T)
+
+    /**
      * Set the content for the activity,
      *
      * @param activity the activity
