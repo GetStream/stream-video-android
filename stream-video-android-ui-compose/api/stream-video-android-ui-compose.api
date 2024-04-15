@@ -374,6 +374,8 @@ public class io/getstream/video/android/compose/ui/StreamCallActivityComposeDele
 	public fun DefaultCallContent (Lio/getstream/video/android/ui/common/StreamCallActivity;Lio/getstream/video/android/core/Call;Landroidx/compose/runtime/Composer;I)V
 	public fun NoAnswerContent (Lio/getstream/video/android/ui/common/StreamCallActivity;Lio/getstream/video/android/core/Call;Landroidx/compose/runtime/Composer;I)V
 	public fun NoPermissions (Lio/getstream/video/android/ui/common/StreamCallActivity;Ljava/util/List;Ljava/util/List;ZLandroidx/compose/runtime/Composer;II)V
+	public fun OnIncomingCallContent (Landroidx/compose/ui/Modifier;Lio/getstream/video/android/core/Call;ZZLkotlin/jvm/functions/Function3;Lkotlin/jvm/functions/Function5;Lkotlin/jvm/functions/Function3;Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function1;Landroidx/compose/runtime/Composer;I)V
+	public fun OnOutgoingCallContent (Landroidx/compose/ui/Modifier;Lio/getstream/video/android/core/Call;ZZLkotlin/jvm/functions/Function3;Lkotlin/jvm/functions/Function5;Lkotlin/jvm/functions/Function3;Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function1;Landroidx/compose/runtime/Composer;I)V
 	public fun RejectedContent (Lio/getstream/video/android/ui/common/StreamCallActivity;Lio/getstream/video/android/core/Call;Landroidx/compose/runtime/Composer;I)V
 	public fun RootContent (Lio/getstream/video/android/ui/common/StreamCallActivity;Lio/getstream/video/android/core/Call;Landroidx/compose/runtime/Composer;I)V
 	public fun setContent (Lio/getstream/video/android/ui/common/StreamCallActivity;Lio/getstream/video/android/core/Call;)V
@@ -1584,7 +1586,7 @@ public final class io/getstream/video/android/compose/ui/components/call/ringing
 }
 
 public final class io/getstream/video/android/compose/ui/components/call/ringing/RingingCallContentKt {
-	public static final fun RingingCallContent (Lio/getstream/video/android/core/Call;Landroidx/compose/ui/Modifier;ZZLkotlin/jvm/functions/Function3;Lkotlin/jvm/functions/Function5;Lkotlin/jvm/functions/Function3;Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function2;Lkotlin/jvm/functions/Function2;Lkotlin/jvm/functions/Function2;Landroidx/compose/runtime/Composer;III)V
+	public static final fun RingingCallContent (Lio/getstream/video/android/core/Call;Landroidx/compose/ui/Modifier;ZZLkotlin/jvm/functions/Function3;Lkotlin/jvm/functions/Function5;Lkotlin/jvm/functions/Function3;Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function2;Lkotlin/jvm/functions/Function2;Lkotlin/jvm/functions/Function2;Lkotlin/jvm/functions/Function11;Lkotlin/jvm/functions/Function11;Landroidx/compose/runtime/Composer;III)V
 }
 
 public final class io/getstream/video/android/compose/ui/components/call/ringing/incomingcall/ComposableSingletons$IncomingCallContentKt {

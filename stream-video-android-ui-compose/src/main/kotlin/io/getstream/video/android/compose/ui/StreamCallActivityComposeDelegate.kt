@@ -22,6 +22,8 @@ import android.net.Uri
 import android.provider.Settings
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.BoxScope
+import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.Text
@@ -33,6 +35,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -46,12 +49,17 @@ import io.getstream.video.android.compose.ui.components.base.styling.StreamDialo
 import io.getstream.video.android.compose.ui.components.base.styling.StyleSize
 import io.getstream.video.android.compose.ui.components.call.activecall.CallContent
 import io.getstream.video.android.compose.ui.components.call.ringing.RingingCallContent
+import io.getstream.video.android.compose.ui.components.call.ringing.incomingcall.IncomingCallContent
+import io.getstream.video.android.compose.ui.components.call.ringing.outgoingcall.OutgoingCallContent
 import io.getstream.video.android.core.Call
+import io.getstream.video.android.core.MemberState
 import io.getstream.video.android.core.RealtimeConnection
+import io.getstream.video.android.core.call.state.CallAction
 import io.getstream.video.android.core.call.state.DeclineCall
 import io.getstream.video.android.core.call.state.LeaveCall
 import io.getstream.video.android.ui.common.StreamActivityUiDelegate
 import io.getstream.video.android.ui.common.StreamCallActivity
+import io.getstream.video.android.ui.common.util.StreamCallActivityDelicateApi
 
 /**
  * A default implementation of the compose delegate for the call activity.
@@ -87,6 +95,7 @@ public open class StreamCallActivityComposeDelegate : StreamActivityUiDelegate<S
      *
      * @param call the call object.
      */
+    @OptIn(StreamCallActivityDelicateApi::class)
     @Composable
     public open fun StreamCallActivity.RootContent(call: Call) {
         VideoTheme {
@@ -112,6 +121,59 @@ public open class StreamCallActivityComposeDelegate : StreamActivityUiDelegate<S
                         modifier = Modifier.background(color = VideoTheme.colors.baseSheetPrimary),
                         onBackPressed = {
                             onBackPressed(call)
+                        },
+                        onOutgoingContent = { modifier: Modifier,
+                                              call: Call,
+                                              isVideoType: Boolean,
+                                              isShowingHeader: Boolean,
+                                              headerContent: @Composable (ColumnScope.() -> Unit)?,
+                                              detailsContent: @Composable (
+                                                  ColumnScope.(
+                                                      participants: List<MemberState>,
+                                                      topPadding: Dp,
+                                                  ) -> Unit
+                                              )?,
+                                              controlsContent: @Composable (BoxScope.() -> Unit)?,
+                                              onBackPressed: () -> Unit,
+                                              onCallAction: (CallAction) -> Unit,
+                            ->
+                            OnOutgoingCallContent(
+                                call = call,
+                                isVideoType = isVideoType,
+                                modifier = modifier,
+                                isShowingHeader = isShowingHeader,
+                                headerContent = headerContent,
+                                detailsContent = detailsContent,
+                                controlsContent = controlsContent,
+                                onBackPressed = onBackPressed,
+                                onCallAction = onCallAction,
+                            )
+                        },
+                        onIncomingContent = { modifier: Modifier,
+                                              call: Call,
+                                              isVideoType: Boolean, isShowingHeader: Boolean,
+                                              headerContent: @Composable (ColumnScope.() -> Unit)?,
+                                              detailsContent: @Composable (
+                                                  ColumnScope.(
+                                                      participants: List<MemberState>,
+                                                      topPadding: Dp,
+                                                  ) -> Unit
+                                              )?,
+                                              controlsContent: @Composable (BoxScope.() -> Unit)?,
+                                              onBackPressed: () -> Unit,
+                                              onCallAction: (CallAction) -> Unit,
+                            ->
+                            OnIncomingCallContent(
+                                call = call,
+                                isVideoType = isVideoType,
+                                modifier = modifier,
+                                isShowingHeader = isShowingHeader,
+                                headerContent = headerContent,
+                                detailsContent = detailsContent,
+                                controlsContent = controlsContent,
+                                onBackPressed = onBackPressed,
+                                onCallAction = onCallAction,
+                            )
                         },
                         onAcceptedContent = {
                             if (isVideoCall(call)) {
@@ -154,6 +216,66 @@ public open class StreamCallActivityComposeDelegate : StreamActivityUiDelegate<S
         }
     }
 
+    @Composable
+    public open fun OnOutgoingCallContent(
+        modifier: Modifier,
+        call: Call,
+        isVideoType: Boolean,
+        isShowingHeader: Boolean,
+        headerContent: (@Composable ColumnScope.() -> Unit)?,
+        detailsContent: (
+            @Composable ColumnScope.(
+                participants: List<MemberState>,
+                topPadding: Dp,
+            ) -> Unit
+        )?,
+        controlsContent: (@Composable BoxScope.() -> Unit)?,
+        onBackPressed: () -> Unit,
+        onCallAction: (CallAction) -> Unit,
+    ) {
+        OutgoingCallContent(
+            call = call,
+            isVideoType = isVideoType,
+            modifier = modifier,
+            isShowingHeader = isShowingHeader,
+            headerContent = headerContent,
+            detailsContent = detailsContent,
+            controlsContent = controlsContent,
+            onBackPressed = onBackPressed,
+            onCallAction = onCallAction,
+        )
+    }
+
+    @Composable
+    public open fun OnIncomingCallContent(
+        modifier: Modifier,
+        call: Call,
+        isVideoType: Boolean,
+        isShowingHeader: Boolean,
+        headerContent: (@Composable ColumnScope.() -> Unit)?,
+        detailsContent: (
+            @Composable ColumnScope.(
+                participants: List<MemberState>,
+                topPadding: Dp,
+            ) -> Unit
+        )?,
+        controlsContent: (@Composable BoxScope.() -> Unit)?,
+        onBackPressed: () -> Unit,
+        onCallAction: (CallAction) -> Unit,
+    ) {
+        IncomingCallContent(
+            call = call,
+            isVideoType = isVideoType,
+            modifier = modifier,
+            isShowingHeader = isShowingHeader,
+            headerContent = headerContent,
+            detailsContent = detailsContent,
+            controlsContent = controlsContent,
+            onBackPressed = onBackPressed,
+            onCallAction = onCallAction,
+        )
+    }
+
     /**
      * Content when the call is not answered.
      *
@@ -193,7 +315,8 @@ public open class StreamCallActivityComposeDelegate : StreamActivityUiDelegate<S
             onCallAction = {
                 onCallAction(call, it)
             },
-            durationPlaceholder = duration ?: stringResource(id = R.string.stream_audio_call_ui_calling),
+            durationPlaceholder = duration
+                ?: stringResource(id = R.string.stream_audio_call_ui_calling),
         )
     }
 
