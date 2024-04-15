@@ -121,6 +121,8 @@ public abstract class StreamCallActivity : ComponentActivity() {
     // Platform restriction
     public final override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        val uiDelegate = uiDelegate<StreamCallActivity>()
+        uiDelegate.loadingContent(this)
         onPreCreate(savedInstanceState, null)
         logger.d { "Entered [onCreate(Bundle?)" }
         initializeCallOrFail(
@@ -145,6 +147,8 @@ public abstract class StreamCallActivity : ComponentActivity() {
         persistentState: PersistableBundle?,
     ) {
         super.onCreate(savedInstanceState)
+        val uiDelegate = uiDelegate<StreamCallActivity>()
+        uiDelegate.loadingContent(this)
         onPreCreate(savedInstanceState, persistentState)
         logger.d { "Entered [onCreate(Bundle, PersistableBundle?)" }
         initializeCallOrFail(
