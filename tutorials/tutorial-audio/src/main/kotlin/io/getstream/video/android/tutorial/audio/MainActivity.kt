@@ -24,9 +24,10 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.lifecycle.lifecycleScope
+import io.getstream.video.android.compose.permission.LaunchMicrophonePermissions
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.audio.AudioRoomContent
 import io.getstream.video.android.core.GEO
@@ -59,13 +60,16 @@ class MainActivity : ComponentActivity() {
             token = userToken,
         ).build()
 
-        // step3 - join a call, which type is `default` and id is `123`.
-        val call = client.call("audio_room", callId)
-        lifecycleScope.launch {
-            call.join(create = true)
-        }
-
         setContent {
+            // step3 - join a call, which type is `default` and id is `123`.
+            val call = client.call("audio_room", callId)
+            val scope = rememberCoroutineScope()
+            LaunchMicrophonePermissions(call = call) {
+                scope.launch {
+                    call.join(create = true)
+                }
+            }
+
             // step4 - apply VideoTheme
             VideoTheme {
                 val connect by call.state.connection.collectAsState()
