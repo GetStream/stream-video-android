@@ -1,0 +1,53 @@
+package io.getstream.video.android.ui.common
+
+import android.os.Bundle
+
+
+internal object StreamCallActivityConfigStrings {
+    const val EXTRA_STREAM_CONFIG = "stream-activity-config"
+    const val EXTRA_CLOSE_ON_ERROR = "close-on-error"
+    const val EXTRA_CLOSE_ON_ENDED = "close-on-ended"
+    const val EXTRA_CUSTOM = "custom-fields"
+}
+
+/**
+ * A configuration that controls various behaviors of the [StreamCallActivity].
+ */
+public data class StreamCallActivityConfiguration(
+    /** When there has been a technical error, close the screen. */
+    val closeScreenOnError: Boolean = true,
+    /** When the call has ended for any reason, close the screen */
+    val closeScreenOnCallEnded: Boolean = true,
+    /**
+     * Custom configuration extension for any extending classes.
+     * Can be used same as normal extras.
+     */
+    val custom: Bundle? = null
+)
+
+/**
+ * Extract a [StreamCallActivityConfigStrings] from bundle.
+ */
+public fun Bundle.extractStreamActivityConfig(): StreamCallActivityConfiguration {
+    val closeScreenOnError =
+        getBoolean(StreamCallActivityConfigStrings.EXTRA_CLOSE_ON_ERROR, true)
+    val closeScreenOnCallEnded =
+        getBoolean(StreamCallActivityConfigStrings.EXTRA_CLOSE_ON_ENDED, true)
+    val custom = getBundle(StreamCallActivityConfigStrings.EXTRA_CUSTOM)
+    return StreamCallActivityConfiguration(
+        closeScreenOnError = closeScreenOnError,
+        closeScreenOnCallEnded = closeScreenOnCallEnded,
+        custom = custom
+    )
+}
+
+/**
+ * Add a [StreamCallActivityConfiguration] into a bundle.
+ */
+public fun StreamCallActivityConfiguration.toBundle(): Bundle {
+    val bundle = Bundle()
+    bundle.putBoolean(StreamCallActivityConfigStrings.EXTRA_CLOSE_ON_ERROR, closeScreenOnError)
+    bundle.putBoolean(StreamCallActivityConfigStrings.EXTRA_CLOSE_ON_ENDED, closeScreenOnCallEnded)
+    bundle.putBundle(StreamCallActivityConfigStrings.EXTRA_CUSTOM, custom)
+    return bundle
+}
