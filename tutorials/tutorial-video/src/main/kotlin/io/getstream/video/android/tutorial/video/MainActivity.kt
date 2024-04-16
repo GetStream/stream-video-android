@@ -17,14 +17,16 @@
 package io.getstream.video.android.tutorial.video
 
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.Text
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -37,7 +39,6 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.lifecycleScope
 import io.getstream.video.android.compose.permission.LaunchCallPermissions
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.call.renderer.FloatingParticipantVideo
@@ -47,7 +48,6 @@ import io.getstream.video.android.core.GEO
 import io.getstream.video.android.core.RealtimeConnection
 import io.getstream.video.android.core.StreamVideoBuilder
 import io.getstream.video.android.model.User
-import kotlinx.coroutines.launch
 
 /**
  * This tutorial demonstrates how to implement a video call screen by using low-level APIs, such as
@@ -61,6 +61,8 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+        // replace the secrets with the following instruction:
+        // https://getstream.io/video/docs/android/playground/demo-credentials/
         val userId = "REPLACE_WITH_USER_ID"
         val userToken = "REPLACE_WITH_TOKEN"
         val callId = "REPLACE_WITH_CALL_ID"
@@ -75,33 +77,34 @@ class MainActivity : ComponentActivity() {
         // step2 - initialize StreamVideo. For a production app we recommend adding the client to your Application class or di module.
         val client = StreamVideoBuilder(
             context = applicationContext,
-            apiKey = "hd8szvscpxvd", // demo API key
+            apiKey = "REPLACE_WITH_API_KEY", // demo API key
             geo = GEO.GlobalEdgeNetwork,
             user = user,
             token = userToken,
         ).build()
 
-        // step3 - join a call, which type is `default` and id is `123`.
-        val call = client.call(type = "default", id = callId)
-        lifecycleScope.launch {
-            call.join(create = true)
-        }
-
         setContent {
+            // step3 - request permissions and join a call, which type is `default` and id is `123`.
+            val call = client.call(type = "default", id = callId)
+            LaunchCallPermissions(call = call) {
+                call.join(create = true)
+            }
+
             // step4 - apply VideTheme
             VideoTheme {
                 // step5 - define required properties.
                 val remoteParticipants by call.state.remoteParticipants.collectAsState()
                 val remoteParticipant = remoteParticipants.firstOrNull()
-                val me by call.state.me.collectAsState()
+                val me by call.state.localParticipant.collectAsState()
                 val connection by call.state.connection.collectAsState()
                 var parentSize: IntSize by remember { mutableStateOf(IntSize(0, 0)) }
 
-                // step6 - request permissions.
-                LaunchCallPermissions(call = call)
+                LaunchedEffect(key1 = connection) {
+                    Log.e("Test", "connection: $connection")
+                }
 
-                // step7 - render a local and remote videos.
-                Box(
+                // step5 - render a local and remote videos.
+                BoxWithConstraints(
                     contentAlignment = Alignment.Center,
                     modifier = Modifier
                         .fillMaxSize()
