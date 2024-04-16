@@ -120,8 +120,8 @@ public final class io/getstream/video/android/ui/common/util/ColorUtilsKt {
 
 public final class io/getstream/video/android/ui/common/util/ParticipantsTextKt {
 	public static final fun buildLargeCallText (Landroid/content/Context;Ljava/util/List;)Ljava/lang/String;
-	public static final fun buildSmallCallText (Landroid/content/Context;Ljava/util/List;I)Ljava/lang/String;
-	public static synthetic fun buildSmallCallText$default (Landroid/content/Context;Ljava/util/List;IILjava/lang/Object;)Ljava/lang/String;
+	public static final fun buildSmallCallText (Landroid/content/Context;Ljava/util/List;IZ)Ljava/lang/String;
+	public static synthetic fun buildSmallCallText$default (Landroid/content/Context;Ljava/util/List;IZILjava/lang/Object;)Ljava/lang/String;
 }
 
 public final class io/getstream/video/android/ui/common/util/ResourcesKt {
