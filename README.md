@@ -145,7 +145,6 @@ Video roadmap and changelog is available [here](https://github.com/GetStream/pro
 
 - [X] Improve Compose UI SDK performance by marking WebRTC models as stable.
 - [X] Development token to support a development environment
-- [X] Blur & AI video filters
 
 ### 1.0.0 milestone - April
 
