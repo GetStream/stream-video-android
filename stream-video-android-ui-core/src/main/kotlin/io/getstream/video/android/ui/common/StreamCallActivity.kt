@@ -90,7 +90,7 @@ public abstract class StreamCallActivity : ComponentActivity() {
             leaveWhenLastInCall: Boolean = DEFAULT_LEAVE_WHEN_LAST,
             action: String? = null,
             clazz: Class<T>,
-            configuration: StreamCallActivityConfiguration = StreamCallActivityConfiguration()
+            configuration: StreamCallActivityConfiguration = StreamCallActivityConfiguration(),
         ): Intent {
             return Intent(context, clazz).apply {
                 // Setup the outgoing call action
@@ -618,7 +618,6 @@ public abstract class StreamCallActivity : ComponentActivity() {
     public open fun onCallAction(call: Call, action: CallAction) {
         logger.d { "======-- Action --======\n$action\n================" }
         val onSuccess = {
-
         }
         when (action) {
             is LeaveCall -> {

@@ -33,6 +33,7 @@ public abstract class io/getstream/video/android/ui/common/StreamCallActivity : 
 	public static synthetic fun call$default (Lio/getstream/video/android/ui/common/StreamCallActivity;Lio/getstream/video/android/model/StreamCallId;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)V
 	public fun cancel (Lio/getstream/video/android/core/Call;Lkotlin/jvm/functions/Function2;Lkotlin/jvm/functions/Function2;)V
 	public static synthetic fun cancel$default (Lio/getstream/video/android/ui/common/StreamCallActivity;Lio/getstream/video/android/core/Call;Lkotlin/jvm/functions/Function2;Lkotlin/jvm/functions/Function2;ILjava/lang/Object;)V
+	public fun configuration ()Lio/getstream/video/android/ui/common/StreamCallActivityConfiguration;
 	public fun create (Lio/getstream/video/android/core/Call;ZLjava/util/List;Lkotlin/jvm/functions/Function2;Lkotlin/jvm/functions/Function2;)V
 	public static synthetic fun create$default (Lio/getstream/video/android/ui/common/StreamCallActivity;Lio/getstream/video/android/core/Call;ZLjava/util/List;Lkotlin/jvm/functions/Function2;Lkotlin/jvm/functions/Function2;ILjava/lang/Object;)V
 	public fun end (Lio/getstream/video/android/core/Call;Lkotlin/jvm/functions/Function2;Lkotlin/jvm/functions/Function2;)V
@@ -48,9 +49,12 @@ public abstract class io/getstream/video/android/ui/common/StreamCallActivity : 
 	public fun onBackPressed (Lio/getstream/video/android/core/Call;)V
 	public fun onCallAction (Lio/getstream/video/android/core/Call;Lio/getstream/video/android/core/call/state/CallAction;)V
 	public fun onCallEvent (Lio/getstream/video/android/core/Call;Lorg/openapitools/client/models/VideoEvent;)V
+	public fun onConnectionEvent (Lio/getstream/video/android/core/Call;Lio/getstream/video/android/core/RealtimeConnection;)V
 	public final fun onCreate (Landroid/os/Bundle;)V
 	public final fun onCreate (Landroid/os/Bundle;Landroid/os/PersistableBundle;)V
 	public fun onCreate (Landroid/os/Bundle;Landroid/os/PersistableBundle;Lio/getstream/video/android/core/Call;)V
+	public fun onEnded (Lio/getstream/video/android/core/Call;)V
+	public fun onFailed (Ljava/lang/Exception;)V
 	public fun onIntentAction (Lio/getstream/video/android/core/Call;Ljava/lang/String;Lkotlin/jvm/functions/Function2;)V
 	public static synthetic fun onIntentAction$default (Lio/getstream/video/android/ui/common/StreamCallActivity;Lio/getstream/video/android/core/Call;Ljava/lang/String;Lkotlin/jvm/functions/Function2;ILjava/lang/Object;)V
 	public fun onLastParticipant (Lio/getstream/video/android/core/Call;)V
@@ -68,8 +72,30 @@ public abstract class io/getstream/video/android/ui/common/StreamCallActivity : 
 }
 
 public final class io/getstream/video/android/ui/common/StreamCallActivity$Companion {
-	public final fun callIntent (Landroid/content/Context;Lio/getstream/video/android/model/StreamCallId;Ljava/util/List;ZLjava/lang/String;Ljava/lang/Class;)Landroid/content/Intent;
-	public static synthetic fun callIntent$default (Lio/getstream/video/android/ui/common/StreamCallActivity$Companion;Landroid/content/Context;Lio/getstream/video/android/model/StreamCallId;Ljava/util/List;ZLjava/lang/String;Ljava/lang/Class;ILjava/lang/Object;)Landroid/content/Intent;
+	public final fun callIntent (Landroid/content/Context;Lio/getstream/video/android/model/StreamCallId;Ljava/util/List;ZLjava/lang/String;Ljava/lang/Class;Lio/getstream/video/android/ui/common/StreamCallActivityConfiguration;)Landroid/content/Intent;
+	public static synthetic fun callIntent$default (Lio/getstream/video/android/ui/common/StreamCallActivity$Companion;Landroid/content/Context;Lio/getstream/video/android/model/StreamCallId;Ljava/util/List;ZLjava/lang/String;Ljava/lang/Class;Lio/getstream/video/android/ui/common/StreamCallActivityConfiguration;ILjava/lang/Object;)Landroid/content/Intent;
+}
+
+public final class io/getstream/video/android/ui/common/StreamCallActivityConfiguration {
+	public fun <init> ()V
+	public fun <init> (ZZLandroid/os/Bundle;)V
+	public synthetic fun <init> (ZZLandroid/os/Bundle;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Z
+	public final fun component2 ()Z
+	public final fun component3 ()Landroid/os/Bundle;
+	public final fun copy (ZZLandroid/os/Bundle;)Lio/getstream/video/android/ui/common/StreamCallActivityConfiguration;
+	public static synthetic fun copy$default (Lio/getstream/video/android/ui/common/StreamCallActivityConfiguration;ZZLandroid/os/Bundle;ILjava/lang/Object;)Lio/getstream/video/android/ui/common/StreamCallActivityConfiguration;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getCloseScreenOnCallEnded ()Z
+	public final fun getCloseScreenOnError ()Z
+	public final fun getCustom ()Landroid/os/Bundle;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class io/getstream/video/android/ui/common/StreamCallActivityConfigurationKt {
+	public static final fun extractStreamActivityConfig (Landroid/os/Bundle;)Lio/getstream/video/android/ui/common/StreamCallActivityConfiguration;
+	public static final fun toBundle (Lio/getstream/video/android/ui/common/StreamCallActivityConfiguration;)Landroid/os/Bundle;
 }
 
 public final class io/getstream/video/android/ui/common/databinding/StreamVideoContentParticipantBinding : androidx/viewbinding/ViewBinding {

@@ -110,7 +110,7 @@ public fun RingingCallContent(
             onCallAction: (CallAction) -> Unit,
         ) -> Unit
     )? = null,
-    onIdle: @Composable () -> Unit = {}
+    onIdle: @Composable () -> Unit = {},
 ) {
     val ringingState by call.state.ringingState.collectAsStateWithLifecycle()
 

@@ -40,10 +40,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -53,7 +51,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -72,11 +69,7 @@ import io.getstream.video.android.compose.ui.components.call.ringing.incomingcal
 import io.getstream.video.android.compose.ui.components.call.ringing.outgoingcall.OutgoingCallContent
 import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.MemberState
-import io.getstream.video.android.core.RealtimeConnection
 import io.getstream.video.android.core.call.state.CallAction
-import io.getstream.video.android.core.call.state.DeclineCall
-import io.getstream.video.android.core.call.state.LeaveCall
-import io.getstream.video.android.ui.common.StreamActivityUiDelegate
 import io.getstream.video.android.ui.common.StreamCallActivity
 import io.getstream.video.android.ui.common.util.StreamCallActivityDelicateApi
 
@@ -111,7 +104,7 @@ public open class StreamCallActivityComposeDelegate : StreamCallActivityComposeU
                     IndeterminateProgressBar(
                         modifier = Modifier
                             .align(Alignment.Center)
-                            .padding(16.dp)
+                            .padding(16.dp),
                     )
                 }
             }
@@ -154,10 +147,10 @@ public open class StreamCallActivityComposeDelegate : StreamCallActivityComposeU
                                 isShowingHeader: Boolean,
                                 headerContent: @Composable (ColumnScope.() -> Unit)?,
                                 detailsContent: @Composable (
-                                ColumnScope.(
-                                    participants: List<MemberState>,
-                                    topPadding: Dp,
-                                ) -> Unit
+                                    ColumnScope.(
+                                        participants: List<MemberState>,
+                                        topPadding: Dp,
+                                    ) -> Unit
                                 )?,
                                 controlsContent: @Composable (BoxScope.() -> Unit)?,
                                 onBackPressed: () -> Unit,
@@ -181,10 +174,10 @@ public open class StreamCallActivityComposeDelegate : StreamCallActivityComposeU
                                 isVideoType: Boolean, isShowingHeader: Boolean,
                                 headerContent: @Composable (ColumnScope.() -> Unit)?,
                                 detailsContent: @Composable (
-                                ColumnScope.(
-                                    participants: List<MemberState>,
-                                    topPadding: Dp,
-                                ) -> Unit
+                                    ColumnScope.(
+                                        participants: List<MemberState>,
+                                        topPadding: Dp,
+                                    ) -> Unit
                                 )?,
                                 controlsContent: @Composable (BoxScope.() -> Unit)?,
                                 onBackPressed: () -> Unit,
@@ -240,12 +233,12 @@ public open class StreamCallActivityComposeDelegate : StreamCallActivityComposeU
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .background(VideoTheme.colors.baseSheetPrimary)
+                .background(VideoTheme.colors.baseSheetPrimary),
         ) {
             IndeterminateProgressBar(
                 modifier = Modifier
                     .align(Alignment.Center)
-                    .padding(16.dp)
+                    .padding(16.dp),
             )
         }
     }
@@ -285,10 +278,10 @@ public open class StreamCallActivityComposeDelegate : StreamCallActivityComposeU
         isShowingHeader: Boolean,
         headerContent: (@Composable ColumnScope.() -> Unit)?,
         detailsContent: (
-        @Composable ColumnScope.(
-            participants: List<MemberState>,
-            topPadding: Dp,
-        ) -> Unit
+            @Composable ColumnScope.(
+                participants: List<MemberState>,
+                topPadding: Dp,
+            ) -> Unit
         )?,
         controlsContent: (@Composable BoxScope.() -> Unit)?,
         onBackPressed: () -> Unit,
@@ -315,10 +308,10 @@ public open class StreamCallActivityComposeDelegate : StreamCallActivityComposeU
         isShowingHeader: Boolean,
         headerContent: (@Composable ColumnScope.() -> Unit)?,
         detailsContent: (
-        @Composable ColumnScope.(
-            participants: List<MemberState>,
-            topPadding: Dp,
-        ) -> Unit
+            @Composable ColumnScope.(
+                participants: List<MemberState>,
+                topPadding: Dp,
+            ) -> Unit
         )?,
         controlsContent: (@Composable BoxScope.() -> Unit)?,
         onBackPressed: () -> Unit,
@@ -356,7 +349,7 @@ public open class StreamCallActivityComposeDelegate : StreamCallActivityComposeU
         call: Call,
         granted: List<String>,
         notGranted: List<String>,
-        showRationale: Boolean
+        showRationale: Boolean,
     ) {
         if (!showRationale) {
             logger.w { "Permissions were not granted, but rationale is required to be skipped." }
@@ -421,8 +414,9 @@ public open class StreamCallActivityComposeDelegate : StreamCallActivityComposeU
             targetValue = 1f,
             animationSpec = infiniteRepeatable(
                 animation = tween(durationMillis = 1000, easing = LinearEasing),
-                repeatMode = RepeatMode.Restart
-            ), label = ""
+                repeatMode = RepeatMode.Restart,
+            ),
+            label = "",
         )
 
         Box(
@@ -430,16 +424,19 @@ public open class StreamCallActivityComposeDelegate : StreamCallActivityComposeU
                 .height(4.dp)
                 .fillMaxWidth()
                 .background(
-                    shape = CircleShape, color = VideoTheme.colors.baseSheetSecondary
+                    shape = CircleShape,
+                    color = VideoTheme.colors.baseSheetSecondary,
                 )
-                .clip(CircleShape)
+                .clip(CircleShape),
         ) {
             Box(
                 modifier = Modifier
                     .height(8.dp)
                     .width(50.dp)
                     .background(VideoTheme.colors.brandPrimary)
-                    .offset(x = (translateAnim.value * with(LocalDensity.current) { 300.dp.toPx() }).dp)
+                    .offset(
+                        x = (translateAnim.value * with(LocalDensity.current) { 300.dp.toPx() }).dp,
+                    ),
             )
         }
     }
