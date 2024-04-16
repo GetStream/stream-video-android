@@ -38,7 +38,6 @@ public interface NotificationHandler : NotificationPermissionHandler {
         const val ACTION_INCOMING_CALL = "io.getstream.video.android.action.INCOMING_CALL"
         const val ACTION_OUTGOING_CALL = "io.getstream.video.android.action.OUTGOING_CALL"
         const val ACTION_ACCEPT_CALL = "io.getstream.video.android.action.ACCEPT_CALL"
-        const val ACTION_DISMISS_NOTIFICATION = "io.getstream.video.android.action.DISMISS_NOTIFICATION"
         const val ACTION_REJECT_CALL = "io.getstream.video.android.action.REJECT_CALL"
         const val ACTION_LEAVE_CALL = "io.getstream.video.android.action.LEAVE_CALL"
         const val ACTION_ONGOING_CALL = "io.getstream.video.android.action.ONGOING_CALL"
@@ -47,10 +46,6 @@ public interface NotificationHandler : NotificationPermissionHandler {
 
         const val INTENT_EXTRA_NOTIFICATION_ID: String =
             "io.getstream.video.android.intent-extra.notification_id"
-        const val INTENT_EXTRA_NEXT_ACTION: String =
-            "io.getstream.video.android.intent-extra.next_action"
-        const val INTENT_EXTRA_NEXT_ACTION_BUNDLE: String =
-            "io.getstream.video.android.intent-extra.next_action_data"
         const val INCOMING_CALL_NOTIFICATION_ID = 24756
     }
 }

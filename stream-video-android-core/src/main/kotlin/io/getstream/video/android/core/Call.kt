@@ -1015,6 +1015,8 @@ public class Call(
     }
 
     suspend fun accept(): Result<AcceptCallResponse> {
+        clientImpl.state.removeRingingCall()
+        clientImpl.state.maybeStopForegroundService()
         return clientImpl.accept(type, id)
     }
 
