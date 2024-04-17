@@ -118,20 +118,56 @@ public abstract class StreamCallActivity : ComponentActivity() {
     private var callSocketConnectionMonitor: Job? = null
     private lateinit var cachedCall: Call
     private lateinit var config: StreamCallActivityConfiguration
+    private lateinit var delegate: StreamActivityUiDelegate<StreamCallActivity>
     private val onSuccessFinish: suspend (Call) -> Unit = { call ->
         logger.w { "The call was successfully finished! Closing activity" }
         onEnded(call)
-        if (configuration().closeScreenOnCallEnded) {
+        if (configuration.closeScreenOnCallEnded) {
             finish()
         }
     }
     private val onErrorFinish: suspend (Exception) -> Unit = { error ->
         logger.e(error) { "Something went wrong, finishing the activity!" }
         onFailed(error)
-        if (configuration().closeScreenOnError) {
+        if (configuration.closeScreenOnError) {
             finish()
         }
     }
+
+    // Public values
+    /**
+     * Each activity needs its onw ui delegate that will set content to the activity.
+     *
+     * Any extending activity must provide its own ui delegate that manages the UI.
+     */
+    public abstract val uiDelegate: StreamActivityUiDelegate<StreamCallActivity>
+
+    /**
+     * A configuration object returned for this activity controlling various behaviors of the activity.
+     * Can be overridden for further control on the behavior.
+     *
+     * This is delicate API because it loads the config from the extra, you can pass the
+     * configuration object in the [callIntent] method and it will be correctly passed here.
+     * You can override it and return a custom configuration all the time, in which case
+     * the configuration passed in [callIntent] is ignored.
+     */
+    @StreamCallActivityDelicateApi
+    public open val configuration: StreamCallActivityConfiguration
+        get() {
+            if (!::config.isInitialized) {
+                try {
+                    val bundledConfig =
+                        intent.getBundleExtra(StreamCallActivityConfigStrings.EXTRA_STREAM_CONFIG)
+                    config =
+                        bundledConfig?.extractStreamActivityConfig()
+                            ?: StreamCallActivityConfiguration()
+                } catch (e: Exception) {
+                    config = StreamCallActivityConfiguration()
+                    logger.e(e) { "Failed to load config using default!" }
+                }
+            }
+            return config
+        }
 
     // Platform restriction
     public final override fun onCreate(savedInstanceState: Bundle?) {
@@ -270,9 +306,8 @@ public abstract class StreamCallActivity : ComponentActivity() {
     @StreamCallActivityDelicateApi
     public open fun onPreCreate(savedInstanceState: Bundle?, persistentState: PersistableBundle?) {
         logger.d { "Pre-create" }
-        val config = configuration() // Called before the delegate because
+        val config = configuration // Called before the delegate
         logger.d { "Activity pre-created with configuration [$config]" }
-        val uiDelegate = uiDelegate<StreamCallActivity>()
         uiDelegate.loadingContent(this)
     }
 
@@ -288,35 +323,7 @@ public abstract class StreamCallActivity : ComponentActivity() {
         call: Call,
     ) {
         logger.d { "[onCreate(Bundle,PersistableBundle,Call)] setting up compose delegate." }
-        val uiDelegate = uiDelegate<StreamCallActivity>()
         uiDelegate.setContent(this, call)
-    }
-
-    /**
-     * Returns a delegate that uses compose for its UI.
-     *
-     */
-    public abstract fun <T : StreamCallActivity> uiDelegate(): StreamActivityUiDelegate<T>
-
-    /**
-     * A configuration object returned for this activity controlling various behaviors of the activity.
-     * Can be overridden for further control on the behavior.
-     */
-    @StreamCallActivityDelicateApi
-    public open fun configuration(): StreamCallActivityConfiguration {
-        if (!::config.isInitialized) {
-            try {
-                val bundledConfig =
-                    intent.getBundleExtra(StreamCallActivityConfigStrings.EXTRA_STREAM_CONFIG)
-                config =
-                    bundledConfig?.extractStreamActivityConfig()
-                        ?: StreamCallActivityConfiguration()
-            } catch (e: Exception) {
-                config = StreamCallActivityConfiguration()
-                logger.e(e) { "Failed to load config using default!" }
-            }
-        }
-        return config
     }
 
     /**

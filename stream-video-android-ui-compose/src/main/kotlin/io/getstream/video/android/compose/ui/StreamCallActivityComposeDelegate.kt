@@ -131,7 +131,6 @@ public open class StreamCallActivityComposeDelegate : StreamCallActivityComposeU
         VideoTheme {
             LaunchPermissionRequest(listOf(Manifest.permission.RECORD_AUDIO)) {
                 AllPermissionsGranted {
-                    val configuration = configuration()
                     // All permissions granted
                     RingingCallContent(
                         isVideoType = isVideoCall(call),

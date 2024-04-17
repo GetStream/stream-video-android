@@ -363,7 +363,7 @@ public final class io/getstream/video/android/compose/ui/ComposableSingletons$St
 public class io/getstream/video/android/compose/ui/ComposeStreamCallActivity : io/getstream/video/android/ui/common/StreamCallActivity {
 	public static final field $stable I
 	public fun <init> ()V
-	public fun uiDelegate ()Lio/getstream/video/android/ui/common/StreamActivityUiDelegate;
+	public fun getUiDelegate ()Lio/getstream/video/android/ui/common/StreamActivityUiDelegate;
 }
 
 public class io/getstream/video/android/compose/ui/StreamCallActivityComposeDelegate : io/getstream/video/android/compose/ui/StreamCallActivityComposeUi {

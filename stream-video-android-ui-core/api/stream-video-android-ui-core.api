@@ -33,7 +33,6 @@ public abstract class io/getstream/video/android/ui/common/StreamCallActivity : 
 	public static synthetic fun call$default (Lio/getstream/video/android/ui/common/StreamCallActivity;Lio/getstream/video/android/model/StreamCallId;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)V
 	public fun cancel (Lio/getstream/video/android/core/Call;Lkotlin/jvm/functions/Function2;Lkotlin/jvm/functions/Function2;)V
 	public static synthetic fun cancel$default (Lio/getstream/video/android/ui/common/StreamCallActivity;Lio/getstream/video/android/core/Call;Lkotlin/jvm/functions/Function2;Lkotlin/jvm/functions/Function2;ILjava/lang/Object;)V
-	public fun configuration ()Lio/getstream/video/android/ui/common/StreamCallActivityConfiguration;
 	public fun create (Lio/getstream/video/android/core/Call;ZLjava/util/List;Lkotlin/jvm/functions/Function2;Lkotlin/jvm/functions/Function2;)V
 	public static synthetic fun create$default (Lio/getstream/video/android/ui/common/StreamCallActivity;Lio/getstream/video/android/core/Call;ZLjava/util/List;Lkotlin/jvm/functions/Function2;Lkotlin/jvm/functions/Function2;ILjava/lang/Object;)V
 	public fun end (Lio/getstream/video/android/core/Call;Lkotlin/jvm/functions/Function2;Lkotlin/jvm/functions/Function2;)V
@@ -41,6 +40,8 @@ public abstract class io/getstream/video/android/ui/common/StreamCallActivity : 
 	public final fun enterPictureInPicture ()V
 	public fun get (Lio/getstream/video/android/core/Call;Lkotlin/jvm/functions/Function2;Lkotlin/jvm/functions/Function2;)V
 	public static synthetic fun get$default (Lio/getstream/video/android/ui/common/StreamCallActivity;Lio/getstream/video/android/core/Call;Lkotlin/jvm/functions/Function2;Lkotlin/jvm/functions/Function2;ILjava/lang/Object;)V
+	public fun getConfiguration ()Lio/getstream/video/android/ui/common/StreamCallActivityConfiguration;
+	public abstract fun getUiDelegate ()Lio/getstream/video/android/ui/common/StreamActivityUiDelegate;
 	public fun isVideoCall (Lio/getstream/video/android/core/Call;)Z
 	public fun join (Lio/getstream/video/android/core/Call;Lkotlin/jvm/functions/Function2;Lkotlin/jvm/functions/Function2;)V
 	public static synthetic fun join$default (Lio/getstream/video/android/ui/common/StreamCallActivity;Lio/getstream/video/android/core/Call;Lkotlin/jvm/functions/Function2;Lkotlin/jvm/functions/Function2;ILjava/lang/Object;)V
@@ -68,7 +69,6 @@ public abstract class io/getstream/video/android/ui/common/StreamCallActivity : 
 	public fun onStop (Lio/getstream/video/android/core/Call;)V
 	public fun reject (Lio/getstream/video/android/core/Call;Lkotlin/jvm/functions/Function2;Lkotlin/jvm/functions/Function2;)V
 	public static synthetic fun reject$default (Lio/getstream/video/android/ui/common/StreamCallActivity;Lio/getstream/video/android/core/Call;Lkotlin/jvm/functions/Function2;Lkotlin/jvm/functions/Function2;ILjava/lang/Object;)V
-	public abstract fun uiDelegate ()Lio/getstream/video/android/ui/common/StreamActivityUiDelegate;
 }
 
 public final class io/getstream/video/android/ui/common/StreamCallActivity$Companion {
