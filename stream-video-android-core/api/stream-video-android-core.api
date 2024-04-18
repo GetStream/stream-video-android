@@ -3634,7 +3634,6 @@ public final class io/getstream/video/android/core/model/CallStatus$Outgoing : i
 
 public final class io/getstream/video/android/core/model/CallUser : java/io/Serializable {
 	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/util/List;Lio/getstream/video/android/core/model/CallUserState;Ljava/util/Date;Ljava/util/Date;)V
-	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/util/List;Lio/getstream/video/android/core/model/CallUserState;Ljava/util/Date;Ljava/util/Date;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun component1 ()Ljava/lang/String;
 	public final fun component2 ()Ljava/lang/String;
 	public final fun component3 ()Ljava/lang/String;

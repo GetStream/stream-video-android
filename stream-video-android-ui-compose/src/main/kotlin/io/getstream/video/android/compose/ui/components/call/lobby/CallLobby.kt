@@ -206,7 +206,7 @@ private fun OnDisabledContent(user: User) {
                 .size(VideoTheme.dimens.genericMax)
                 .align(Alignment.Center),
             userImage = user.image,
-            userName = user.name.takeUnless { it.isNullOrEmpty() } ?: user.id,
+            userName = user.name.ifBlank { user.id },
         )
     }
 }

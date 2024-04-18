@@ -70,12 +70,12 @@ public object OffsetDateTimeSerializer : KSerializer<OffsetDateTime> {
 public data class User(
     /** ID is required, the rest is optional */
     val id: String = "",
-    val role: String? = null,
-    val type: UserType = UserType.Authenticated, // TODO nullable: should this also be null by default?
-    val name: String? = null,
-    val image: String? = null,
-    val teams: List<String>? = null, // TODO nullable: change needed here also?
-    val custom: Map<String, String>? = null, // TODO nullable: change needed here also?
+    val role: String = "",
+    val type: UserType = UserType.Authenticated,
+    val name: String = "",
+    val image: String = "",
+    val teams: List<String> = emptyList(),
+    val custom: Map<String, String> = emptyMap(),
     @Serializable(with = OffsetDateTimeSerializer::class)
     val createdAt: OffsetDateTime? = null,
     @Serializable(with = OffsetDateTimeSerializer::class)
@@ -88,5 +88,5 @@ public data class User(
     }
 
     public val userNameOrId: String
-        inline get() = if (name.isNullOrEmpty()) id else name
+        inline get() = name.ifEmpty { id }
 }

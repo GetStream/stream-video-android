@@ -86,7 +86,7 @@ public class AvatarView : ShapeableImageView {
             data = user.imageUrl,
             placeholderDrawable = AvatarPlaceholderDrawable(
                 context = context,
-                initials = (user.name.takeUnless { it.isNullOrEmpty() } ?: user.id).initials(),
+                initials = user.name.ifEmpty { user.id }.initials(),
                 initialsTextStyle = avatarStyle.avatarInitialsTextStyle,
             ),
         )
