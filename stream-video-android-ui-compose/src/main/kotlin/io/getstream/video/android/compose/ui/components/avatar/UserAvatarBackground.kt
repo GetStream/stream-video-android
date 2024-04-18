@@ -103,7 +103,7 @@ private fun UserAvatarBackgroundPreview() {
         UserAvatarBackground(
             modifier = Modifier.fillMaxSize(),
             userImage = user.image,
-            userName = user.name.ifBlank { user.id },
+            userName = user.name.takeUnless { it.isNullOrBlank() } ?: user.id,
             previewModePlaceholder = R.drawable.stream_video_call_sample,
         )
     }
