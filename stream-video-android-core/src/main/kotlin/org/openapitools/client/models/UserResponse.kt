@@ -57,16 +57,16 @@ data class UserResponse (
     val createdAt: org.threeten.bp.OffsetDateTime,
 
     @Json(name = "custom")
-    val custom: kotlin.collections.Map<kotlin.String, kotlin.Any?>,
+    val custom: kotlin.collections.Map<kotlin.String, kotlin.Any?>?, // TODO nullable: change OpenAPI definition or keep non-nullable
 
     @Json(name = "id")
     val id: kotlin.String,
 
     @Json(name = "role")
-    val role: kotlin.String,
+    val role: kotlin.String?, // TODO nullable: change OpenAPI definition or keep non-nullable
 
     @Json(name = "teams")
-    val teams: kotlin.collections.List<kotlin.String>,
+    val teams: kotlin.collections.List<kotlin.String>?, // TODO nullable: change OpenAPI definition or keep non-nullable
 
     /* Date/time of the last update */
     @Json(name = "updated_at")

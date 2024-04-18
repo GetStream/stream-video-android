@@ -91,7 +91,7 @@ private fun UserAvatarBackgroundPreview() {
     VideoTheme {
         val user = previewUsers[0]
         UserAvatarBackground(
-            userName = user.name.ifBlank { user.id },
+            userName = user.name.takeUnless { it.isNullOrEmpty() } ?: user.id,
             userImage = user.image,
             modifier = Modifier.fillMaxSize(),
             previewPlaceholder = R.drawable.stream_video_call_sample,

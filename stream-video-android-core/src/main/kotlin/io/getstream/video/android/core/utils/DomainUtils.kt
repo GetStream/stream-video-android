@@ -94,10 +94,10 @@ internal fun UserResponse.toUser(): User {
     return User(
         id = id,
         role = role,
-        name = name ?: "",
-        image = image ?: "",
+        name = name,
+        image = image,
         teams = teams,
-        custom = custom.mapValues { it.value.toString() },
+        custom = custom?.mapValues { it.value.toString() },
     )
 }
 
@@ -182,4 +182,4 @@ internal fun EdgeResponse.toEdge(): EdgeData {
 
 @JvmSynthetic
 @InternalStreamVideoApi
-fun CallUser.getNameOrId(): String = name.ifEmpty { id }
+fun CallUser.getNameOrId(): String = name.takeUnless { it.isNullOrEmpty() } ?: id
