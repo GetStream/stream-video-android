@@ -66,9 +66,9 @@ public class CoordinatorSocket(
             token = token,
             userDetails = ConnectUserDetailsRequest(
                 id = user.id,
-                name = user.name,
-                image = user.image,
-                custom = user.custom,
+                name = user.name.takeUnless { it.isEmpty() },
+                image = user.image.takeUnless { it.isEmpty() },
+                custom = user.custom.takeUnless { it.isEmpty() },
             ),
         )
         val message = adapter.toJson(authRequest)
