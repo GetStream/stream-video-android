@@ -35,20 +35,27 @@ import androidx.compose.ui.unit.dp
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.mock.StreamPreviewDataUtils
 import io.getstream.video.android.mock.previewUsers
+import io.getstream.video.android.model.User
 import io.getstream.video.android.ui.common.R
 
 /**
- * A background that displays a user avatar and a background that reflects the avatar.
+ * Component that displays a user avatar and a background that reflects the avatar.
  *
- * @param modifier Modifier for styling.
- * @param shape The shape of the avatar.
- * @param avatarSize The size to decide avatar image.
- * @param contentScale The scale option used for the content.
- * @param contentDescription The content description of the avatar.
- * @param requestSize The actual request size.
- * @param initialsAvatarOffset The initials offset to apply to the avatar.
- * @param previewPlaceholder A placeholder that will be displayed on the Compose preview (IDE).
- * @param loadingPlaceholder A placeholder that will be displayed while loading an image.
+ * @param modifier Modifier used for styling.
+ * @param userImage The URL of the image to be displayed. Usually [User.image].
+ * @param userName The name to be used for the initials fallback. Usually [User.name].
+ * @param shape The shape of the avatar. `CircleShape` by default.
+ * @param avatarSize The size of the avatar.
+ * @param imageScale The scale rule used for the image. `Crop` by default.
+ * @param imageDescription The image content description for accessibility. `Null` by default.
+ * @param imageRequestSize The image size to be requested. Original size by default.
+ * @param loadingPlaceholder Placeholder image to be displayed while loading the remote image.
+ * @param previewModePlaceholder Placeholder image to be displayed in Compose previews (IDE).
+ * @param textStyle The [TextStyle] to be used for the initials text fallback. The `fontSize`, `fontFamily` and `fontWeight` properties are used.
+ * If the font size is too large, it will be gradually decreased automatically.
+ * @param textOffset Offset to be applied to the initials text.
+ *
+ * @see [UserAvatar]
  */
 @Composable
 public fun UserAvatarBackground(

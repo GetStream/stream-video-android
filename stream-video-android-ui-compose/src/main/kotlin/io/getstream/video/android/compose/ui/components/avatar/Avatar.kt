@@ -48,20 +48,22 @@ import io.getstream.video.android.ui.common.R
 
 /**
  * An avatar that renders an image from the provided image URL. In case the image URL
- * was empty or there was an error loading the image, it falls back to the initials avatar.
+ * is empty or there was an error loading the image, it falls back to showing name initials.
+ * If needed, the initials font size is gradually decreased automatically until the text fits within the avatar boundaries.
  *
- * @param modifier Modifier for styling.
- * @param imageUrl The URL of the image to load.
- * @param fallbackText The fallback text.
+ * @param modifier Modifier used for styling.
+ * @param imageUrl The URL of the image to be displayed.
+ * @param fallbackText The fallback text to be used for the initials avatar.
  * @param shape The shape of the avatar.
- * @param textStyle The text style of the [fallbackText] text.
- * @param imageScale The scale option used for the image.
- * @param imageDescription Description of the image.
- * @param imageRequestSize The actual request size.
- * @param previewPlaceholder A placeholder that will be displayed on the Compose preview (IDE).
- * @param loadingPlaceholder A placeholder that will be displayed while loading an image.
- * @param textOffset The initials offset to apply to the avatar.
- * @param onClick OnClick action, that can be nullable.
+ * @param imageScale The scale rule used for the image.
+ * @param imageDescription Accessibility description for the image.
+ * @param imageRequestSize The image size to be requested.
+ * @param loadingPlaceholder Placeholder image to be displayed while loading the remote image.
+ * @param previewModePlaceholder Placeholder image to be displayed in Compose previews (IDE).
+ * @param textStyle The text style of the [fallbackText] text. The `fontSize`, `fontFamily` and `fontWeight` properties are used.
+ * If the font size is too large, it will be gradually decreased automatically.
+ * @param textOffset Offset to be applied to the initials text.
+ * @param onClick Handler to be called when the user clicks on the avatar.
  */
 @Composable
 public fun Avatar(

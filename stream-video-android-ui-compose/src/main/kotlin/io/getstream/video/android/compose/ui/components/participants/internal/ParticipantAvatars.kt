@@ -35,6 +35,13 @@ import io.getstream.video.android.core.MemberState
 import io.getstream.video.android.mock.StreamPreviewDataUtils
 import io.getstream.video.android.mock.previewMemberListState
 
+/**
+ * Component that renders user avatars for call participants.
+ *
+ * @param participants The list of participants to render avatars for.
+ *
+ * @see [UserAvatar]
+ */
 @Composable
 public fun ParticipantAvatars(
     participants: List<MemberState>,
