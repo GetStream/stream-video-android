@@ -69,8 +69,8 @@ public fun UserAvatar(
     imageScale: ContentScale = ContentScale.Crop,
     imageDescription: String? = null,
     imageRequestSize: IntSize = IntSize(DEFAULT_IMAGE_SIZE, DEFAULT_IMAGE_SIZE),
-    @DrawableRes previewPlaceholder: Int = LocalAvatarPreviewProvider.getLocalAvatarPreviewPlaceholder(),
     @DrawableRes loadingPlaceholder: Int? = LocalAvatarPreviewProvider.getLocalAvatarLoadingPlaceholder(),
+    @DrawableRes previewModePlaceholder: Int = LocalAvatarPreviewProvider.getLocalAvatarPreviewPlaceholder(),
     textStyle: TextStyle = VideoTheme.typography.titleM,
     textOffset: DpOffset = DpOffset(0.dp, 0.dp),
     isShowingOnlineIndicator: Boolean = false,
@@ -89,8 +89,8 @@ public fun UserAvatar(
             imageScale = imageScale,
             imageDescription = imageDescription,
             imageRequestSize = imageRequestSize,
-            previewPlaceholder = previewPlaceholder,
             loadingPlaceholder = loadingPlaceholder,
+            previewModePlaceholder = previewModePlaceholder,
             textStyle = textStyle,
             textOffset = textOffset,
             onClick = onClick,
@@ -123,7 +123,7 @@ private fun UserAvatarPreview() {
             modifier = Modifier.size(82.dp),
             userImage = userImage,
             userName = userName,
-            previewPlaceholder = R.drawable.stream_video_call_sample,
+            previewModePlaceholder = R.drawable.stream_video_call_sample,
             isShowingOnlineIndicator = true,
         )
     }

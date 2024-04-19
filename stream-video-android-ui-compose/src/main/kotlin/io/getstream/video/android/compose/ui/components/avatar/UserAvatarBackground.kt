@@ -26,6 +26,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.DpOffset
@@ -56,12 +57,13 @@ public fun UserAvatarBackground(
     userName: String?,
     shape: Shape = VideoTheme.shapes.circle,
     avatarSize: Dp = VideoTheme.dimens.genericMax,
-    contentScale: ContentScale = ContentScale.Crop,
-    contentDescription: String? = null,
-    requestSize: IntSize = IntSize(DEFAULT_IMAGE_SIZE, DEFAULT_IMAGE_SIZE),
-    initialsAvatarOffset: DpOffset = DpOffset(0.dp, 0.dp),
-    @DrawableRes previewPlaceholder: Int = LocalAvatarPreviewProvider.getLocalAvatarPreviewPlaceholder(),
+    imageScale: ContentScale = ContentScale.Crop,
+    imageDescription: String? = null,
+    imageRequestSize: IntSize = IntSize(DEFAULT_IMAGE_SIZE, DEFAULT_IMAGE_SIZE),
     @DrawableRes loadingPlaceholder: Int? = LocalAvatarPreviewProvider.getLocalAvatarLoadingPlaceholder(),
+    @DrawableRes previewModePlaceholder: Int = LocalAvatarPreviewProvider.getLocalAvatarPreviewPlaceholder(),
+    textStyle: TextStyle = VideoTheme.typography.titleM,
+    textOffset: DpOffset = DpOffset(0.dp, 0.dp),
 ) {
     Box(modifier = modifier.fillMaxSize()) {
         Box(
@@ -73,12 +75,13 @@ public fun UserAvatarBackground(
                 userImage = userImage,
                 userName = userName,
                 shape = shape,
-                imageScale = contentScale,
-                imageDescription = contentDescription,
-                imageRequestSize = requestSize,
-                previewPlaceholder = previewPlaceholder,
+                imageScale = imageScale,
+                imageDescription = imageDescription,
+                imageRequestSize = imageRequestSize,
                 loadingPlaceholder = loadingPlaceholder,
-                textOffset = initialsAvatarOffset,
+                previewModePlaceholder = previewModePlaceholder,
+                textStyle = textStyle,
+                textOffset = textOffset,
             )
         }
     }
@@ -94,7 +97,7 @@ private fun UserAvatarBackgroundPreview() {
             modifier = Modifier.fillMaxSize(),
             userImage = user.image,
             userName = user.name.ifBlank { user.id },
-            previewPlaceholder = R.drawable.stream_video_call_sample,
+            previewModePlaceholder = R.drawable.stream_video_call_sample,
         )
     }
 }

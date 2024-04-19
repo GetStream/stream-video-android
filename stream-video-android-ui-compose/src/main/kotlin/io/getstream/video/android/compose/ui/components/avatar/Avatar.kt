@@ -72,8 +72,8 @@ public fun Avatar(
     imageScale: ContentScale = ContentScale.Crop,
     imageDescription: String? = null,
     imageRequestSize: IntSize = IntSize(DEFAULT_IMAGE_SIZE, DEFAULT_IMAGE_SIZE),
-    @DrawableRes previewPlaceholder: Int = LocalAvatarPreviewProvider.getLocalAvatarPreviewPlaceholder(),
     @DrawableRes loadingPlaceholder: Int? = LocalAvatarPreviewProvider.getLocalAvatarLoadingPlaceholder(),
+    @DrawableRes previewModePlaceholder: Int = LocalAvatarPreviewProvider.getLocalAvatarPreviewPlaceholder(),
     textStyle: TextStyle = VideoTheme.typography.titleM,
     textOffset: DpOffset = DpOffset(0.dp, 0.dp),
     onClick: (() -> Unit)? = null,
@@ -84,7 +84,7 @@ public fun Avatar(
                 .fillMaxSize()
                 .clip(CircleShape)
                 .testTag("avatar"),
-            painter = painterResource(id = previewPlaceholder),
+            painter = painterResource(id = previewModePlaceholder),
             contentScale = ContentScale.Crop,
             contentDescription = null,
         )
@@ -120,7 +120,7 @@ public fun Avatar(
             contentScale = imageScale,
             requestSize = imageRequestSize,
         ),
-        previewPlaceholder = painterResource(id = previewPlaceholder),
+        previewPlaceholder = painterResource(id = previewModePlaceholder),
         component = rememberImageComponent {
             +CrossfadePlugin()
             loadingPlaceholder?.let {
@@ -157,7 +157,7 @@ internal fun AvatarImagePreview() {
         Avatar(
             modifier = Modifier.size(72.dp),
             fallbackText = null,
-            previewPlaceholder = R.drawable.stream_video_call_sample,
+            previewModePlaceholder = R.drawable.stream_video_call_sample,
         )
     }
 }
