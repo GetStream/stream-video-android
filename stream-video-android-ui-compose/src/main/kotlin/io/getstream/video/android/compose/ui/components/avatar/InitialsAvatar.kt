@@ -91,18 +91,6 @@ internal fun InitialsAvatar(
                     readyToDrawText = true
                 }
             },
-            // TODO: understand how it will be used and what params to offer (starting from ParticipantAvatars, UserAvatar, Avatar, InitialsAvatar)
-            // remove textSize, add textStyle in all, use fontSize from textStyle as default, scale if overflowing. Scale step param needed? Test
-            // TODO: --understand usage scenarios for avatars (textSize, style, offset, other params)
-            // TODO: --tweak starting font size and decrease step. Offer params.
-            // TODO: --handle possible exceptions
-            // TODO: --compare avatars on emulator with device
-            // TODO: --why does preview show a correct size for letters if I use 0.7 or 0.5?
-            // TODO: --how to add a proportional space around the text?
-            // TODO: --what is the initial font size
-            // TODO: deprecate unneeded params?
-            // TODO: --add readyToDraw
-            // TODO: test in demo app & AUDIO call sample
         )
     }
 }
