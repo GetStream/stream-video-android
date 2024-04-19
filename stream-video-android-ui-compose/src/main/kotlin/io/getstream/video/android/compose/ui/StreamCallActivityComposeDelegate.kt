@@ -65,11 +65,11 @@ import io.getstream.video.android.compose.ui.components.base.styling.StreamDialo
 import io.getstream.video.android.compose.ui.components.base.styling.StyleSize
 import io.getstream.video.android.compose.ui.components.call.activecall.CallContent
 import io.getstream.video.android.compose.ui.components.call.ringing.RingingCallContent
-import io.getstream.video.android.compose.ui.components.call.ringing.incomingcall.IncomingCallContent
-import io.getstream.video.android.compose.ui.components.call.ringing.outgoingcall.OutgoingCallContent
 import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.MemberState
+import io.getstream.video.android.core.RealtimeConnection
 import io.getstream.video.android.core.call.state.CallAction
+import io.getstream.video.android.core.call.state.LeaveCall
 import io.getstream.video.android.ui.common.StreamCallActivity
 import io.getstream.video.android.ui.common.util.StreamCallActivityDelicateApi
 
@@ -195,10 +195,12 @@ public open class StreamCallActivityComposeDelegate : StreamCallActivityComposeU
                             )
                         },
                         onAcceptedContent = {
-                            if (isVideoCall(call)) {
-                                VideoCallContent(call = call)
-                            } else {
-                                AudioCallContent(call = call)
+                            ConnectionAvailable(call = call) { theCall ->
+                                if (isVideoCall(theCall)) {
+                                    VideoCallContent(call = theCall)
+                                } else {
+                                    AudioCallContent(call = theCall)
+                                }
                             }
                         },
                         onNoAnswerContent = {
@@ -217,13 +219,28 @@ public open class StreamCallActivityComposeDelegate : StreamCallActivityComposeU
                 }
 
                 SomeGranted { granted, notGranted, showRationale ->
-                    PermissionsRationaleContent(call, granted, notGranted, showRationale)
+                    InternalPermissionContent(showRationale, call, granted, notGranted)
                 }
 
                 NoneGranted {
-                    PermissionsRationaleContent(call, emptyList(), emptyList(), it)
+                    InternalPermissionContent(it, call, emptyList(), emptyList())
                 }
             }
+        }
+    }
+
+    @Composable
+    private fun StreamCallActivity.InternalPermissionContent(
+        showRationale: Boolean,
+        call: Call,
+        granted: List<String>,
+        notGranted: List<String>
+    ) {
+        if (!showRationale && configuration.canSkiPermissionRationale) {
+            logger.w { "Permissions were not granted, but rationale is required to be skipped." }
+            finish()
+        } else {
+            PermissionsRationaleContent(call, granted, notGranted)
         }
     }
 
@@ -241,6 +258,34 @@ public open class StreamCallActivityComposeDelegate : StreamCallActivityComposeU
             )
         }
     }
+
+    @Composable
+    private fun StreamCallActivity.ConnectionAvailable(call: Call, content: @Composable (call: Call) -> Unit) {
+        val connection by call.state.connection.collectAsStateWithLifecycle()
+        when (connection) {
+            RealtimeConnection.Disconnected -> {
+                if (!configuration.closeScreenOnCallEnded) {
+                    CallDisconnectedContent(call)
+                } else {
+                    // This is just for safety, will be called from other place as well.
+                    finish()
+                }
+            }
+            is RealtimeConnection.Failed -> {
+                if (!configuration.closeScreenOnError) {
+                    val err = Exception("${(connection as? RealtimeConnection.Failed)?.error}")
+                    CallFailedContent(call, err)
+                } else {
+                    // This is just for safety, will be called from other place as well.
+                    finish()
+                }
+            }
+            else -> {
+                content.invoke(call)
+            }
+        }
+    }
+
 
     @Composable
     override fun StreamCallActivity.AudioCallContent(call: Call) {
@@ -344,63 +389,77 @@ public open class StreamCallActivityComposeDelegate : StreamCallActivityComposeU
     }
 
     @Composable
+    override fun StreamCallActivity.CallFailedContent(call: Call, exception: java.lang.Exception) {
+        // By default we finish the activity regardless of config.
+        // There is not default UI for call failed content.
+        finish()
+    }
+
+    @Composable
+    override fun StreamCallActivity.CallDisconnectedContent(call: Call) {
+        // By default we finish the activity regardless of config.
+        // There is not default UI for call ended content.
+        finish()
+    }
+
+    @Composable
     override fun StreamCallActivity.PermissionsRationaleContent(
         call: Call,
         granted: List<String>,
         notGranted: List<String>,
-        showRationale: Boolean,
     ) {
-        if (!showRationale) {
-            logger.w { "Permissions were not granted, but rationale is required to be skipped." }
-            finish()
-            return
+        // Show default dialog to go to settings.
+        Box(modifier = Modifier
+            .fillMaxSize()
+            .background(VideoTheme.colors.baseSheetPrimary)) {
+            // Proceed as normal
+            StreamDialogPositiveNegative(
+                content = {
+                    Text(
+                        text = stringResource(
+                            id = R.string.stream_default_call_ui_permissions_rationale_title,
+                        ),
+                        style = TextStyle(
+                            fontSize = 24.sp,
+                            lineHeight = 28.sp,
+                            fontWeight = FontWeight(500),
+                            color = VideoTheme.colors.basePrimary,
+                            textAlign = TextAlign.Center,
+                        ),
+                    )
+                    Spacer(modifier = Modifier.size(8.dp))
+                    Text(
+                        text = stringResource(
+                            id = R.string.stream_default_call_ui_microphone_rationale,
+                        ),
+                        style = TextStyle(
+                            fontSize = 16.sp,
+                            lineHeight = 18.5.sp,
+                            fontWeight = FontWeight(400),
+                            color = VideoTheme.colors.baseSecondary,
+                            textAlign = TextAlign.Center,
+                        ),
+                    )
+                },
+                style = StreamDialogStyles.defaultDialogStyle(),
+                positiveButton = Triple(
+                    stringResource(id = R.string.stream_default_call_ui_settings_button),
+                    ButtonStyles.secondaryButtonStyle(StyleSize.S),
+                ) {
+                    val intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
+                        data = Uri.fromParts("package", packageName, null)
+                    }
+                    startActivity(intent)
+                },
+                negativeButton = Triple(
+                    stringResource(id = R.string.stream_default_call_ui_not_now_button),
+                    ButtonStyles.tertiaryButtonStyle(StyleSize.S),
+                ) {
+                    // No permissions, leave the call
+                    onCallAction(call, LeaveCall)
+                },
+            )
         }
-        // Proceed as normal
-        StreamDialogPositiveNegative(
-            content = {
-                Text(
-                    text = stringResource(
-                        id = R.string.stream_default_call_ui_permissions_rationale_title,
-                    ),
-                    style = TextStyle(
-                        fontSize = 24.sp,
-                        lineHeight = 28.sp,
-                        fontWeight = FontWeight(500),
-                        color = VideoTheme.colors.basePrimary,
-                        textAlign = TextAlign.Center,
-                    ),
-                )
-                Spacer(modifier = Modifier.size(8.dp))
-                Text(
-                    text = stringResource(
-                        id = R.string.stream_default_call_ui_microphone_rationale,
-                    ),
-                    style = TextStyle(
-                        fontSize = 16.sp,
-                        lineHeight = 18.5.sp,
-                        fontWeight = FontWeight(400),
-                        color = VideoTheme.colors.baseSecondary,
-                        textAlign = TextAlign.Center,
-                    ),
-                )
-            },
-            style = StreamDialogStyles.defaultDialogStyle(),
-            positiveButton = Triple(
-                stringResource(id = R.string.stream_default_call_ui_settings_button),
-                ButtonStyles.secondaryButtonStyle(StyleSize.S),
-            ) {
-                val intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
-                    data = Uri.fromParts("package", packageName, null)
-                }
-                startActivity(intent)
-            },
-            negativeButton = Triple(
-                stringResource(id = R.string.stream_default_call_ui_not_now_button),
-                ButtonStyles.tertiaryButtonStyle(StyleSize.S),
-            ) {
-                finish()
-            },
-        )
     }
 
     // To not depend on the Compose progress bar due to this

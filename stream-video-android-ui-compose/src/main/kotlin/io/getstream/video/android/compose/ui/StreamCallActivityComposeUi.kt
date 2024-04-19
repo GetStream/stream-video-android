@@ -27,6 +27,7 @@ import io.getstream.video.android.core.call.state.CallAction
 import io.getstream.video.android.ui.common.StreamActivityUiDelegate
 import io.getstream.video.android.ui.common.StreamCallActivity
 import io.getstream.video.android.ui.common.util.StreamCallActivityDelicateApi
+import java.lang.Exception
 
 public interface StreamCallActivityComposeUi : StreamActivityUiDelegate<StreamCallActivity> {
 
@@ -136,6 +137,22 @@ public interface StreamCallActivityComposeUi : StreamActivityUiDelegate<StreamCa
     public fun StreamCallActivity.RejectedContent(call: Call)
 
     /**
+     * Content when the call has failed for whatever reason.
+     *
+     * @param call the call
+     */
+    @Composable
+    public fun StreamCallActivity.CallFailedContent(call: Call, exception: Exception)
+
+    /**
+     * Content when the call has failed for whatever reason.
+     *
+     * @param call the call
+     */
+    @Composable
+    public fun StreamCallActivity.CallDisconnectedContent(call: Call)
+
+    /**
      * Content shown when the required permissions are not granted and the call cannot happen.
      * Note: There are other places that permissions are required like in the service etc..
      * Best practice is to request these permissions a screen before starting the call.
@@ -144,7 +161,6 @@ public interface StreamCallActivityComposeUi : StreamActivityUiDelegate<StreamCa
     public fun StreamCallActivity.PermissionsRationaleContent(
         call: Call,
         granted: List<String>,
-        notGranted: List<String>,
-        showRationale: Boolean,
+        notGranted: List<String>
     )
 }

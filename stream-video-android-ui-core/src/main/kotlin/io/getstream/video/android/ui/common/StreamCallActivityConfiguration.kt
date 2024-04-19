@@ -22,6 +22,7 @@ internal object StreamCallActivityConfigStrings {
     const val EXTRA_STREAM_CONFIG = "stream-activity-config"
     const val EXTRA_CLOSE_ON_ERROR = "close-on-error"
     const val EXTRA_CLOSE_ON_ENDED = "close-on-ended"
+    const val EXTRA_CAN_SKIP_RATIONALE = "skip-rationale-allowed"
     const val EXTRA_CUSTOM = "custom-fields"
 }
 
@@ -33,12 +34,15 @@ public data class StreamCallActivityConfiguration(
     val closeScreenOnError: Boolean = true,
     /** When the call has ended for any reason, close the screen */
     val closeScreenOnCallEnded: Boolean = true,
+    /** When set to false, the activity will simply ignore the `showRationale` from the system and show the rationale screen anyway. */
+    val canSkiPermissionRationale: Boolean = true,
     /**
      * Custom configuration extension for any extending classes.
      * Can be used same as normal extras.
      */
     val custom: Bundle? = null,
-)
+) {
+}
 
 /**
  * Extract a [StreamCallActivityConfigStrings] from bundle.
@@ -48,10 +52,13 @@ public fun Bundle.extractStreamActivityConfig(): StreamCallActivityConfiguration
         getBoolean(StreamCallActivityConfigStrings.EXTRA_CLOSE_ON_ERROR, true)
     val closeScreenOnCallEnded =
         getBoolean(StreamCallActivityConfigStrings.EXTRA_CLOSE_ON_ENDED, true)
+    val canSkipPermissionRationale =
+        getBoolean(StreamCallActivityConfigStrings.EXTRA_CAN_SKIP_RATIONALE, true)
     val custom = getBundle(StreamCallActivityConfigStrings.EXTRA_CUSTOM)
     return StreamCallActivityConfiguration(
         closeScreenOnError = closeScreenOnError,
         closeScreenOnCallEnded = closeScreenOnCallEnded,
+        canSkiPermissionRationale = canSkipPermissionRationale,
         custom = custom,
     )
 }
@@ -63,6 +70,10 @@ public fun StreamCallActivityConfiguration.toBundle(): Bundle {
     val bundle = Bundle()
     bundle.putBoolean(StreamCallActivityConfigStrings.EXTRA_CLOSE_ON_ERROR, closeScreenOnError)
     bundle.putBoolean(StreamCallActivityConfigStrings.EXTRA_CLOSE_ON_ENDED, closeScreenOnCallEnded)
+    bundle.putBoolean(
+        StreamCallActivityConfigStrings.EXTRA_CAN_SKIP_RATIONALE,
+        canSkiPermissionRationale
+    )
     bundle.putBundle(StreamCallActivityConfigStrings.EXTRA_CUSTOM, custom)
     return bundle
 }

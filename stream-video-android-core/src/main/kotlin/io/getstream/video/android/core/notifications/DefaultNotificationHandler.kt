@@ -25,6 +25,8 @@ import android.app.NotificationManager
 import android.app.PendingIntent
 import android.content.Context
 import android.os.Build
+import androidx.annotation.DrawableRes
+import androidx.annotation.IntegerRes
 import androidx.core.app.NotificationChannelCompat
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationCompat.CallStyle
@@ -56,6 +58,11 @@ public open class DefaultNotificationHandler(
      * handle this call state and display an incoming call screen.
      */
     val hideRingingNotificationInForeground: Boolean = false,
+
+    /**
+     * The notification icon for call notifications.
+     */
+    @DrawableRes val notificationIconRes: Int = android.R.drawable.ic_menu_call,
 ) : NotificationHandler,
     NotificationPermissionHandler by notificationPermissionHandler {
 
@@ -236,16 +243,20 @@ public open class DefaultNotificationHandler(
 
     override fun onLiveCall(callId: StreamCallId, callDisplayName: String) {
         val notificationId = callId.hashCode()
-        intentResolver.searchLiveCallPendingIntent(callId, notificationId)?.let { liveCallPendingIntent ->
-            showLiveCallNotification(
-                liveCallPendingIntent,
-                callDisplayName,
-                notificationId,
-            )
-        } ?: logger.e { "Couldn't find any activity for $ACTION_LIVE_CALL" }
+        intentResolver.searchLiveCallPendingIntent(callId, notificationId)
+            ?.let { liveCallPendingIntent ->
+                showLiveCallNotification(
+                    liveCallPendingIntent,
+                    callDisplayName,
+                    notificationId,
+                )
+            } ?: logger.e { "Couldn't find any activity for $ACTION_LIVE_CALL" }
     }
 
-    override fun getOngoingCallNotification(callId: StreamCallId): Notification? {
+    override fun getOngoingCallNotification(
+        callDisplayName: String?,
+        callId: StreamCallId
+    ): Notification? {
         val notificationId = callId.hashCode() // Notification ID
 
         // Intents
@@ -266,9 +277,14 @@ public open class DefaultNotificationHandler(
             }
         }
 
+        if (endCallIntent == null) {
+            logger.e { "End call intent is null, not showing notification!" }
+            return null
+        }
+
         // Build notification
         return NotificationCompat.Builder(application, ongoingCallsChannelId)
-            .setSmallIcon(android.R.drawable.presence_video_online)
+            .setSmallIcon(notificationIconRes)
             .also {
                 // If the intent is configured, clicking the notification will return to the call
                 if (ongoingCallIntent != null) {
@@ -285,13 +301,7 @@ public open class DefaultNotificationHandler(
             )
             .setAutoCancel(false)
             .setOngoing(true)
-            .addAction(
-                NotificationCompat.Action.Builder(
-                    android.R.drawable.ic_menu_close_clear_cancel,
-                    application.getString(R.string.stream_video_call_notification_action_leave),
-                    endCallIntent,
-                ).build(),
-            )
+            .addHangupAction(endCallIntent, callDisplayName ?: callId.toString())
             .build()
     }
 
@@ -372,10 +382,34 @@ public open class DefaultNotificationHandler(
         builder: NotificationCompat.Builder.() -> Unit,
     ): Notification {
         return NotificationCompat.Builder(application, getChannelId())
-            .setSmallIcon(android.R.drawable.presence_video_online)
+            .setSmallIcon(notificationIconRes)
             .setAutoCancel(true)
             .apply(builder)
             .build()
+    }
+
+    private fun NotificationCompat.Builder.addHangupAction(
+        rejectCallPendingIntent: PendingIntent,
+        callDisplayName: String,
+    ): NotificationCompat.Builder = apply {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            setStyle(
+                CallStyle.forOngoingCall(
+                    Person.Builder()
+                        .setName(callDisplayName)
+                        .build(),
+                    rejectCallPendingIntent,
+                ),
+            )
+        } else {
+            addAction(
+                NotificationCompat.Action.Builder(
+                    null,
+                    application.getString(R.string.stream_video_call_notification_action_leave),
+                    rejectCallPendingIntent,
+                ).build(),
+            )
+        }
     }
 
     private fun NotificationCompat.Builder.addCallActions(
@@ -415,17 +449,19 @@ public open class DefaultNotificationHandler(
         val appProcessInfo = ActivityManager.RunningAppProcessInfo()
         ActivityManager.getMyMemoryState(appProcessInfo)
         return (
-            appProcessInfo.importance == ActivityManager.RunningAppProcessInfo.IMPORTANCE_FOREGROUND ||
-                appProcessInfo.importance == ActivityManager.RunningAppProcessInfo.IMPORTANCE_VISIBLE
-            )
+                appProcessInfo.importance == ActivityManager.RunningAppProcessInfo.IMPORTANCE_FOREGROUND ||
+                        appProcessInfo.importance == ActivityManager.RunningAppProcessInfo.IMPORTANCE_VISIBLE
+                )
     }
 
     open fun getChannelId(): String = application.getString(
         R.string.stream_video_incoming_call_notification_channel_id,
     )
+
     open fun getChannelName(): String = application.getString(
         R.string.stream_video_incoming_call_notification_channel_title,
     )
+
     open fun getChannelDescription(): String = application.getString(
         R.string.stream_video_incoming_call_notification_channel_description,
     )

@@ -25,6 +25,6 @@ import io.getstream.video.android.ui.common.StreamCallActivity
  */
 public open class ComposeStreamCallActivity : StreamCallActivity() {
 
-    override val uiDelegate: StreamActivityUiDelegate<StreamCallActivity>
-        get() = StreamCallActivityComposeDelegate()
+    override val uiDelegate: StreamActivityUiDelegate<StreamCallActivity> =
+        StreamCallActivityComposeDelegate()
 }

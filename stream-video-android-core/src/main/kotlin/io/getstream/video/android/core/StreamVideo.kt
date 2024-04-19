@@ -16,6 +16,7 @@
 
 package io.getstream.video.android.core
 
+import android.content.ComponentCallbacks
 import android.content.Context
 import android.os.Build
 import androidx.compose.runtime.Stable
@@ -32,6 +33,8 @@ import io.getstream.video.android.core.utils.TokenUtils
 import io.getstream.video.android.model.Device
 import io.getstream.video.android.model.User
 import kotlinx.coroutines.Deferred
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import org.openapitools.client.models.VideoEvent
 
 /**
@@ -138,6 +141,7 @@ public interface StreamVideo : NotificationHandler {
     public fun logOut()
 
     public companion object {
+
         /**
          * Represents if [StreamVideo] is already installed or not.
          * Lets you know if the internal [StreamVideo] instance is being used as the
@@ -152,6 +156,16 @@ public interface StreamVideo : NotificationHandler {
          */
         @Volatile
         private var internalStreamVideo: StreamVideo? = null
+            private set(value) {
+                field = value
+                // We know its MutableStateFlow
+                (instanceState as MutableStateFlow).value = field
+            }
+
+        /**
+         * This allows an alternative way to observe when an instance is available.
+         */
+        public val instanceState : StateFlow<StreamVideo?> = MutableStateFlow(internalStreamVideo)
 
         /**
          * Returns an installed [StreamVideo] instance or throw an exception if its not installed.

@@ -195,6 +195,7 @@ internal class CallService : Service() {
             val notificationData: Pair<Notification?, Int> = when (trigger) {
                 TRIGGER_ONGOING_CALL -> Pair(
                     first = streamVideo.getOngoingCallNotification(
+                        callDisplayName = callDisplayName,
                         callId = callId!!,
                     ),
                     second = callId.hashCode(),
@@ -226,7 +227,7 @@ internal class CallService : Service() {
             if (notification != null) {
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
                     val foregroundServiceType = when (trigger) {
-                        TRIGGER_ONGOING_CALL -> ServiceInfo.FOREGROUND_SERVICE_TYPE_MICROPHONE
+                        TRIGGER_ONGOING_CALL -> ServiceInfo.FOREGROUND_SERVICE_TYPE_PHONE_CALL
                         TRIGGER_INCOMING_CALL -> ServiceInfo.FOREGROUND_SERVICE_TYPE_SHORT_SERVICE
                         TRIGGER_OUTGOING_CALL -> ServiceInfo.FOREGROUND_SERVICE_TYPE_SHORT_SERVICE
                         else -> ServiceInfo.FOREGROUND_SERVICE_TYPE_SHORT_SERVICE
