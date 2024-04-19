@@ -34,7 +34,6 @@ import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.getstream.video.android.compose.theme.VideoTheme
-import io.getstream.video.android.compose.ui.components.base.styling.StyleSize
 import io.getstream.video.android.mock.StreamPreviewDataUtils
 import io.getstream.video.android.mock.previewParticipantsList
 import io.getstream.video.android.model.User
@@ -50,30 +49,30 @@ import io.getstream.video.android.ui.common.R
  * @param modifier Modifier for styling.
  * @param shape The shape of the avatar.
  * @param textStyle The [TextStyle] that will be used for the initials.
- * @param contentScale The scale option used for the content.
- * @param contentDescription The content description of the avatar.
- * @param requestSize The actual request size.
+ * @param imageScale The scale option used for the content.
+ * @param imageDescription The content description of the avatar.
+ * @param imageRequestSize The actual request size.
  * @param previewPlaceholder A placeholder that will be displayed on the Compose preview (IDE).
  * @param loadingPlaceholder A placeholder that will be displayed while loading an image.
  * @param isShowingOnlineIndicator Represents to show an online indicator.
  * @param onlineIndicatorAlignment An alignment for positioning the online indicator.
  * @param onlineIndicator A custom composable to represent an online indicator.
- * @param initialsAvatarOffset The initials offset to apply to the avatar.
+ * @param textOffset The initials offset to apply to the avatar.
  * @param onClick The handler when the user clicks on the avatar.
  */
 @Composable
 public fun UserAvatar(
-    userName: String?,
-    userImage: String?,
     modifier: Modifier = Modifier,
+    userImage: String?,
+    userName: String?,
     shape: Shape = VideoTheme.shapes.circle,
-    contentScale: ContentScale = ContentScale.Crop,
-    contentDescription: String? = null,
-    textSize: StyleSize = StyleSize.XL,
-    requestSize: IntSize = IntSize(DEFAULT_IMAGE_SIZE, DEFAULT_IMAGE_SIZE),
+    imageScale: ContentScale = ContentScale.Crop,
+    imageDescription: String? = null,
+    imageRequestSize: IntSize = IntSize(DEFAULT_IMAGE_SIZE, DEFAULT_IMAGE_SIZE),
     @DrawableRes previewPlaceholder: Int = LocalAvatarPreviewProvider.getLocalAvatarPreviewPlaceholder(),
     @DrawableRes loadingPlaceholder: Int? = LocalAvatarPreviewProvider.getLocalAvatarLoadingPlaceholder(),
-    initialsAvatarOffset: DpOffset = DpOffset(0.dp, 0.dp),
+    textStyle: TextStyle = VideoTheme.typography.titleM,
+    textOffset: DpOffset = DpOffset(0.dp, 0.dp),
     isShowingOnlineIndicator: Boolean = false,
     onlineIndicatorAlignment: OnlineIndicatorAlignment = OnlineIndicatorAlignment.TopEnd,
     onlineIndicator: @Composable BoxScope.() -> Unit = {
@@ -84,17 +83,17 @@ public fun UserAvatar(
     Box(modifier = modifier) {
         Avatar(
             modifier = Modifier.fillMaxSize(),
-            textSize = textSize,
             imageUrl = userImage,
-            initials = userName,
+            fallbackText = userName,
             shape = shape,
-            contentScale = contentScale,
-            contentDescription = contentDescription,
-            requestSize = requestSize,
-            loadingPlaceholder = loadingPlaceholder,
+            imageScale = imageScale,
+            imageDescription = imageDescription,
+            imageRequestSize = imageRequestSize,
             previewPlaceholder = previewPlaceholder,
+            loadingPlaceholder = loadingPlaceholder,
+            textStyle = textStyle,
+            textOffset = textOffset,
             onClick = onClick,
-            initialsAvatarOffset = initialsAvatarOffset,
         )
 
         if (isShowingOnlineIndicator) {
@@ -121,11 +120,11 @@ private fun UserAvatarPreview() {
         val userName by participant.userNameOrId.collectAsStateWithLifecycle()
 
         UserAvatar(
+            modifier = Modifier.size(82.dp),
             userImage = userImage,
             userName = userName,
-            modifier = Modifier.size(82.dp),
-            isShowingOnlineIndicator = true,
             previewPlaceholder = R.drawable.stream_video_call_sample,
+            isShowingOnlineIndicator = true,
         )
     }
 }

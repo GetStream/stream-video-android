@@ -497,7 +497,7 @@ public final class io/getstream/video/android/compose/ui/components/audio/Regula
 }
 
 public final class io/getstream/video/android/compose/ui/components/avatar/AvatarKt {
-	public static final fun Avatar-zf1_rLo (Landroidx/compose/ui/Modifier;Ljava/lang/String;Ljava/lang/String;Landroidx/compose/ui/graphics/Shape;Lio/getstream/video/android/compose/ui/components/base/styling/StyleSize;Landroidx/compose/ui/text/TextStyle;Landroidx/compose/ui/layout/ContentScale;Ljava/lang/String;JILjava/lang/Integer;JLkotlin/jvm/functions/Function0;Landroidx/compose/runtime/Composer;III)V
+	public static final fun Avatar-RIwbUY4 (Landroidx/compose/ui/Modifier;Ljava/lang/String;Ljava/lang/String;Landroidx/compose/ui/graphics/Shape;Landroidx/compose/ui/layout/ContentScale;Ljava/lang/String;JILjava/lang/Integer;Landroidx/compose/ui/text/TextStyle;JLkotlin/jvm/functions/Function0;Landroidx/compose/runtime/Composer;III)V
 }
 
 public final class io/getstream/video/android/compose/ui/components/avatar/ComposableSingletons$AvatarKt {
@@ -551,11 +551,11 @@ public final class io/getstream/video/android/compose/ui/components/avatar/Onlin
 }
 
 public final class io/getstream/video/android/compose/ui/components/avatar/UserAvatarBackgroundKt {
-	public static final fun UserAvatarBackground-xr0SGnQ (Ljava/lang/String;Ljava/lang/String;Landroidx/compose/ui/Modifier;Landroidx/compose/ui/graphics/Shape;FLandroidx/compose/ui/layout/ContentScale;Ljava/lang/String;JJILjava/lang/Integer;Landroidx/compose/runtime/Composer;III)V
+	public static final fun UserAvatarBackground-xr0SGnQ (Landroidx/compose/ui/Modifier;Ljava/lang/String;Ljava/lang/String;Landroidx/compose/ui/graphics/Shape;FLandroidx/compose/ui/layout/ContentScale;Ljava/lang/String;JJILjava/lang/Integer;Landroidx/compose/runtime/Composer;III)V
 }
 
 public final class io/getstream/video/android/compose/ui/components/avatar/UserAvatarKt {
-	public static final fun UserAvatar-8W8krDU (Ljava/lang/String;Ljava/lang/String;Landroidx/compose/ui/Modifier;Landroidx/compose/ui/graphics/Shape;Landroidx/compose/ui/layout/ContentScale;Ljava/lang/String;Lio/getstream/video/android/compose/ui/components/base/styling/StyleSize;JILjava/lang/Integer;JZLio/getstream/video/android/compose/ui/components/avatar/OnlineIndicatorAlignment;Lkotlin/jvm/functions/Function3;Lkotlin/jvm/functions/Function0;Landroidx/compose/runtime/Composer;III)V
+	public static final fun UserAvatar-S9GcbaY (Landroidx/compose/ui/Modifier;Ljava/lang/String;Ljava/lang/String;Landroidx/compose/ui/graphics/Shape;Landroidx/compose/ui/layout/ContentScale;Ljava/lang/String;JILjava/lang/Integer;Landroidx/compose/ui/text/TextStyle;JZLio/getstream/video/android/compose/ui/components/avatar/OnlineIndicatorAlignment;Lkotlin/jvm/functions/Function3;Lkotlin/jvm/functions/Function0;Landroidx/compose/runtime/Composer;III)V
 }
 
 public final class io/getstream/video/android/compose/ui/components/background/CallBackgroundKt {

@@ -44,7 +44,6 @@ import com.skydoves.landscapist.coil.CoilImage
 import com.skydoves.landscapist.components.rememberImageComponent
 import com.skydoves.landscapist.placeholder.placeholder.PlaceholderPlugin
 import io.getstream.video.android.compose.theme.VideoTheme
-import io.getstream.video.android.compose.ui.components.base.styling.StyleSize
 import io.getstream.video.android.ui.common.R
 
 /**
@@ -53,36 +52,30 @@ import io.getstream.video.android.ui.common.R
  *
  * @param modifier Modifier for styling.
  * @param imageUrl The URL of the image to load.
- * @param initials The fallback text.
+ * @param fallbackText The fallback text.
  * @param shape The shape of the avatar.
- * @param textStyle The text style of the [initials] text.
- * @param contentScale The scale option used for the content.
- * @param contentDescription Description of the image.
- * @param requestSize The actual request size.
+ * @param textStyle The text style of the [fallbackText] text.
+ * @param imageScale The scale option used for the image.
+ * @param imageDescription Description of the image.
+ * @param imageRequestSize The actual request size.
  * @param previewPlaceholder A placeholder that will be displayed on the Compose preview (IDE).
  * @param loadingPlaceholder A placeholder that will be displayed while loading an image.
- * @param initialsAvatarOffset The initials offset to apply to the avatar.
+ * @param textOffset The initials offset to apply to the avatar.
  * @param onClick OnClick action, that can be nullable.
  */
 @Composable
 public fun Avatar(
     modifier: Modifier = Modifier,
     imageUrl: String? = null,
-    initials: String? = null,
+    fallbackText: String? = null,
     shape: Shape = VideoTheme.shapes.circle,
-    textSize: StyleSize = StyleSize.XL,
+    imageScale: ContentScale = ContentScale.Crop,
+    imageDescription: String? = null,
+    imageRequestSize: IntSize = IntSize(DEFAULT_IMAGE_SIZE, DEFAULT_IMAGE_SIZE),
+    @DrawableRes previewPlaceholder: Int = LocalAvatarPreviewProvider.getLocalAvatarPreviewPlaceholder(),
+    @DrawableRes loadingPlaceholder: Int? = LocalAvatarPreviewProvider.getLocalAvatarLoadingPlaceholder(),
     textStyle: TextStyle = VideoTheme.typography.titleM,
-    contentScale: ContentScale = ContentScale.Crop,
-    contentDescription: String? = null,
-    requestSize: IntSize = IntSize(
-        DEFAULT_IMAGE_SIZE,
-        DEFAULT_IMAGE_SIZE,
-    ),
-    @DrawableRes previewPlaceholder: Int =
-        LocalAvatarPreviewProvider.getLocalAvatarPreviewPlaceholder(),
-    @DrawableRes loadingPlaceholder: Int? =
-        LocalAvatarPreviewProvider.getLocalAvatarLoadingPlaceholder(),
-    initialsAvatarOffset: DpOffset = DpOffset(0.dp, 0.dp),
+    textOffset: DpOffset = DpOffset(0.dp, 0.dp),
     onClick: (() -> Unit)? = null,
 ) {
     if (LocalInspectionMode.current && !imageUrl.isNullOrEmpty()) {
@@ -98,13 +91,13 @@ public fun Avatar(
         return
     }
 
-    if (imageUrl.isNullOrEmpty() && !initials.isNullOrBlank()) {
+    if (imageUrl.isNullOrEmpty() && !fallbackText.isNullOrBlank()) {
         InitialsAvatar(
             modifier = modifier,
-            initials = initials,
-            textSize = textSize,
-            shape = shape,
+            text = fallbackText,
             textStyle = textStyle,
+            textOffset = textOffset,
+            shape = shape,
         )
         return
     }
@@ -123,9 +116,9 @@ public fun Avatar(
         modifier = clickableModifier.clip(shape),
         imageModel = { imageUrl },
         imageOptions = ImageOptions(
-            contentDescription = contentDescription,
-            contentScale = contentScale,
-            requestSize = requestSize,
+            contentDescription = imageDescription,
+            contentScale = imageScale,
+            requestSize = imageRequestSize,
         ),
         previewPlaceholder = painterResource(id = previewPlaceholder),
         component = rememberImageComponent {
@@ -137,10 +130,10 @@ public fun Avatar(
         failure = {
             InitialsAvatar(
                 modifier = modifier,
-                initials = initials.orEmpty(),
-                shape = shape,
+                text = fallbackText.orEmpty(),
                 textStyle = textStyle,
-                avatarOffset = initialsAvatarOffset,
+                textOffset = textOffset,
+                shape = shape,
             )
         },
     )
@@ -152,7 +145,7 @@ private fun AvatarInitialPreview() {
     VideoTheme {
         Avatar(
             modifier = Modifier.size(72.dp),
-            initials = "Thierry",
+            fallbackText = "Thierry",
         )
     }
 }
@@ -163,7 +156,7 @@ internal fun AvatarImagePreview() {
     VideoTheme {
         Avatar(
             modifier = Modifier.size(72.dp),
-            initials = null,
+            fallbackText = null,
             previewPlaceholder = R.drawable.stream_video_call_sample,
         )
     }

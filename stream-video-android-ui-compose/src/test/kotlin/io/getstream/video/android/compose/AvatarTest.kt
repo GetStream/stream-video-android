@@ -42,7 +42,7 @@ internal class AvatarTest : BaseComposeTest() {
         snapshot {
             Avatar(
                 modifier = Modifier.size(72.dp),
-                initials = "Thierry",
+                fallbackText = "Thierry",
             )
         }
     }
@@ -53,9 +53,9 @@ internal class AvatarTest : BaseComposeTest() {
             val name by previewParticipant.name.collectAsStateWithLifecycle()
             val image by previewParticipant.image.collectAsStateWithLifecycle()
             UserAvatar(
+                modifier = Modifier.size(82.dp),
                 userImage = image,
                 userName = name,
-                modifier = Modifier.size(82.dp),
                 isShowingOnlineIndicator = true,
             )
         }

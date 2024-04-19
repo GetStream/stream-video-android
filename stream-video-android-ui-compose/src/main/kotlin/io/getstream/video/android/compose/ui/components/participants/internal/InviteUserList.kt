@@ -38,7 +38,6 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.avatar.UserAvatar
-import io.getstream.video.android.compose.ui.components.base.styling.StyleSize
 import io.getstream.video.android.core.ParticipantState
 import io.getstream.video.android.mock.StreamPreviewDataUtils
 import io.getstream.video.android.mock.previewParticipantsList
@@ -106,9 +105,8 @@ internal fun InviteUserItem(
 
         UserAvatar(
             modifier = Modifier.size(VideoTheme.dimens.componentHeightL),
-            userName = userName,
-            textSize = StyleSize.S,
             userImage = userImage,
+            userName = userName,
             isShowingOnlineIndicator = true,
         )
 

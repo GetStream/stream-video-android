@@ -51,9 +51,9 @@ import io.getstream.video.android.ui.common.R
  */
 @Composable
 public fun UserAvatarBackground(
-    userName: String?,
-    userImage: String?,
     modifier: Modifier = Modifier,
+    userImage: String?,
+    userName: String?,
     shape: Shape = VideoTheme.shapes.circle,
     avatarSize: Dp = VideoTheme.dimens.genericMax,
     contentScale: ContentScale = ContentScale.Crop,
@@ -70,15 +70,15 @@ public fun UserAvatarBackground(
                 .align(Alignment.Center),
         ) {
             UserAvatar(
-                userName = userName,
                 userImage = userImage,
+                userName = userName,
                 shape = shape,
-                contentScale = contentScale,
-                contentDescription = contentDescription,
-                requestSize = requestSize,
-                initialsAvatarOffset = initialsAvatarOffset,
+                imageScale = contentScale,
+                imageDescription = contentDescription,
+                imageRequestSize = requestSize,
                 previewPlaceholder = previewPlaceholder,
                 loadingPlaceholder = loadingPlaceholder,
+                textOffset = initialsAvatarOffset,
             )
         }
     }
@@ -91,9 +91,9 @@ private fun UserAvatarBackgroundPreview() {
     VideoTheme {
         val user = previewUsers[0]
         UserAvatarBackground(
-            userName = user.name.ifBlank { user.id },
-            userImage = user.image,
             modifier = Modifier.fillMaxSize(),
+            userImage = user.image,
+            userName = user.name.ifBlank { user.id },
             previewPlaceholder = R.drawable.stream_video_call_sample,
         )
     }

@@ -50,22 +50,21 @@ import io.getstream.video.android.core.utils.initials
  * Represents a special avatar case when we need to show the initials instead of an image. Usually happens when there
  * are no images to show in the avatar.
  *
- * @param initials The initials to show.
+ * @param text The initials to show.
  * @param modifier Modifier for styling.
  * @param shape The shape of the avatar.
  * @param textStyle The [TextStyle] that will be used for the initials.
- * @param avatarOffset The initials offset to apply to the avatar.
- * @param initialTransformer A custom transformer to tweak initials.
+ * @param textOffset The initials offset to apply to the avatar.
+ * @param initialsTransformer A custom transformer to tweak initials.
  */
 @Composable
 internal fun InitialsAvatar(
-    initials: String,
     modifier: Modifier = Modifier,
-    shape: Shape = VideoTheme.shapes.circle,
-    textSize: StyleSize = StyleSize.XL,
+    text: String,
     textStyle: TextStyle = VideoTheme.typography.titleM,
-    avatarOffset: DpOffset = DpOffset(0.dp, 0.dp),
-    initialTransformer: (String) -> String = { it.initials() },
+    textOffset: DpOffset = DpOffset(0.dp, 0.dp),
+    shape: Shape = VideoTheme.shapes.circle,
+    initialsTransformer: (String) -> String = { it.initials() },
 ) {
     val colors = initialsColors(initials = initials)
     var fontSize by remember { mutableStateOf(50.sp) }
@@ -123,19 +122,19 @@ private fun InitialsAvatarPreview() {
     VideoTheme {
         Column {
             Avatar(
-                initials = "Jaewoong Eum",
+                fallbackText = "Jaewoong Eum",
             )
             Spacer(modifier = Modifier.size(24.dp))
             Avatar(
-                initials = "Aleksandar Apostolov",
+                fallbackText = "Aleksandar Apostolov",
             )
             Spacer(modifier = Modifier.size(24.dp))
             Avatar(
-                initials = "Danie",
+                fallbackText = "Danie",
             )
             Spacer(modifier = Modifier.size(24.dp))
             Avatar(
-                initials = "Jaewoong Eum",
+                fallbackText = "Jaewoong Eum",
             )
             Spacer(modifier = Modifier.size(24.dp))
         }

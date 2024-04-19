@@ -86,11 +86,11 @@ public fun ParticipantAudio(
     ) {
         Box(modifier = Modifier.fillMaxSize()) {
             UserAvatar(
-                userName = nameOrId,
-                userImage = userImage,
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(VideoTheme.dimens.spacingM),
+                userImage = userImage,
+                userName = nameOrId,
             )
 
             if (isSpeaking && style.isShowingSpeakingBorder) {
