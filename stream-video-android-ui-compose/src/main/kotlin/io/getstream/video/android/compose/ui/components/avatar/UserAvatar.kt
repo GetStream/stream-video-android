@@ -34,11 +34,11 @@ import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.getstream.video.android.compose.theme.VideoTheme
+import io.getstream.video.android.compose.ui.components.participants.ParticipantAvatars
 import io.getstream.video.android.mock.StreamPreviewDataUtils
 import io.getstream.video.android.mock.previewParticipantsList
 import io.getstream.video.android.model.User
 import io.getstream.video.android.ui.common.R
-import io.getstream.video.android.compose.ui.components.participants.internal.ParticipantAvatars
 
 /**
  * Component that renders an image as an avatar. If the image is unavailable, it uses name initials as a fallback.

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package io.getstream.video.android.compose.ui.components.participants.internal
+package io.getstream.video.android.compose.ui.components.participants
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box

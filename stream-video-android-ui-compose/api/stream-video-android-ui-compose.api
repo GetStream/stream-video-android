@@ -1810,13 +1810,6 @@ public final class io/getstream/video/android/compose/ui/components/participants
 	public final fun getLambda-1$stream_video_android_ui_compose_release ()Lkotlin/jvm/functions/Function2;
 }
 
-public final class io/getstream/video/android/compose/ui/components/participants/internal/ComposableSingletons$ParticipantAvatarsKt {
-	public static final field INSTANCE Lio/getstream/video/android/compose/ui/components/participants/internal/ComposableSingletons$ParticipantAvatarsKt;
-	public static field lambda-1 Lkotlin/jvm/functions/Function2;
-	public fun <init> ()V
-	public final fun getLambda-1$stream_video_android_ui_compose_release ()Lkotlin/jvm/functions/Function2;
-}
-
 public final class io/getstream/video/android/compose/ui/components/participants/internal/ComposableSingletons$ParticipantInformationKt {
 	public static final field INSTANCE Lio/getstream/video/android/compose/ui/components/participants/internal/ComposableSingletons$ParticipantInformationKt;
 	public static field lambda-1 Lkotlin/jvm/functions/Function2;
@@ -1826,10 +1819,6 @@ public final class io/getstream/video/android/compose/ui/components/participants
 	public final fun getLambda-1$stream_video_android_ui_compose_release ()Lkotlin/jvm/functions/Function2;
 	public final fun getLambda-2$stream_video_android_ui_compose_release ()Lkotlin/jvm/functions/Function2;
 	public final fun getLambda-3$stream_video_android_ui_compose_release ()Lkotlin/jvm/functions/Function2;
-}
-
-public final class io/getstream/video/android/compose/ui/components/participants/internal/ParticipantAvatarsKt {
-	public static final fun ParticipantAvatars (Ljava/util/List;Landroidx/compose/runtime/Composer;I)V
 }
 
 public final class io/getstream/video/android/compose/ui/components/participants/internal/ParticipantInformationKt {
