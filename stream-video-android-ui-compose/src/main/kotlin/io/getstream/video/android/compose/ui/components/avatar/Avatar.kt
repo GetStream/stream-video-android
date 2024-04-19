@@ -47,8 +47,8 @@ import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.ui.common.R
 
 /**
- * An avatar that renders an image from the provided image URL. In case the image URL
- * is empty or there was an error loading the image, it falls back to showing name initials.
+ * An avatar that renders an image or a fallback text. In case the image URL
+ * is empty or there was an error loading the image, it falls back to showing initials.
  * If needed, the initials font size is gradually decreased automatically until the text fits within the avatar boundaries.
  *
  * @param modifier Modifier used for styling.
@@ -66,7 +66,7 @@ import io.getstream.video.android.ui.common.R
  * @param onClick Handler to be called when the user clicks on the avatar.
  */
 @Composable
-public fun Avatar(
+internal fun Avatar(
     modifier: Modifier = Modifier,
     imageUrl: String? = null,
     fallbackText: String? = null,

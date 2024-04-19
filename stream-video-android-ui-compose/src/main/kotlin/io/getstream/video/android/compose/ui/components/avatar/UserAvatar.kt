@@ -41,20 +41,20 @@ import io.getstream.video.android.model.User
 import io.getstream.video.android.ui.common.R
 
 /**
- * Component that renders an image as an avatar. If the image is unavailable, it uses name initials as a fallback.
+ * Component that renders an image or a name as an avatar. If the image is `null` or unavailable, it uses the name initials.
  * Can also show an "is online" indicator.
  * If needed, the initials font size is gradually decreased automatically until the text fits within the avatar boundaries.
  *
  * @param modifier Modifier used for styling.
  * @param userImage The URL of the image to be displayed. Usually [User.image].
- * @param userName The name to be used for the initials fallback. Usually [User.name].
+ * @param userName The name to be used for the initials. Usually [User.name].
  * @param shape The shape of the avatar. `CircleShape` by default.
  * @param imageScale The scale rule used for the image. `Crop` by default.
  * @param imageDescription The image content description for accessibility. `Null` by default.
  * @param imageRequestSize The image size to be requested. Original size by default.
  * @param loadingPlaceholder Placeholder image to be displayed while loading the remote image.
  * @param previewModePlaceholder Placeholder image to be displayed in Compose previews (IDE).
- * @param textStyle The [TextStyle] to be used for the initials text fallback. The `fontSize`, `fontFamily` and `fontWeight` properties are used.
+ * @param textStyle The [TextStyle] to be used for the initials text. The `fontSize`, `fontFamily` and `fontWeight` properties are used.
  * If the font size is too large, it will be gradually decreased automatically.
  * @param textOffset Offset to be applied to the initials text.
  * @param isShowingOnlineIndicator Flag used to display/hide the "is online" indicator. `False` by default.
@@ -68,8 +68,8 @@ import io.getstream.video.android.ui.common.R
 @Composable
 public fun UserAvatar(
     modifier: Modifier = Modifier,
-    userImage: String?,
-    userName: String?,
+    userImage: String? = null,
+    userName: String? = null,
     shape: Shape = VideoTheme.shapes.circle,
     imageScale: ContentScale = ContentScale.Crop,
     imageDescription: String? = null,
