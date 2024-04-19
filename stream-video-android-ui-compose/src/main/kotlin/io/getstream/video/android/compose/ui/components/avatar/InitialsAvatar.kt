@@ -40,9 +40,7 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import io.getstream.video.android.compose.theme.VideoTheme
-import io.getstream.video.android.compose.ui.components.base.styling.StyleSize
 import io.getstream.video.android.compose.utils.initialsColors
 import io.getstream.video.android.core.utils.initials
 
@@ -66,8 +64,8 @@ internal fun InitialsAvatar(
     shape: Shape = VideoTheme.shapes.circle,
     initialsTransformer: (String) -> String = { it.initials() },
 ) {
-    val colors = initialsColors(initials = initials)
-    var fontSize by remember { mutableStateOf(50.sp) }
+    val colors = initialsColors(text = text)
+    var fontSize by remember { mutableStateOf(textStyle.fontSize) }
     var readyToDrawText by remember { mutableStateOf(false) }
 
     Box(
@@ -77,41 +75,34 @@ internal fun InitialsAvatar(
             .clip(shape)
             .background(color = colors.second),
     ) {
-        val resolvedTextSize = when (textSize) {
-            StyleSize.L -> VideoTheme.dimens.textSizeL
-            StyleSize.XS -> VideoTheme.dimens.textSizeXs
-            StyleSize.S -> VideoTheme.dimens.textSizeS
-            StyleSize.M -> VideoTheme.dimens.textSizeM
-            StyleSize.XL -> VideoTheme.dimens.textSizeXl
-            StyleSize.XXL -> VideoTheme.dimens.textSizeXxl
-        }
         Text(
             modifier = Modifier
                 .align(Alignment.Center)
-                .offset(avatarOffset.x, avatarOffset.y)
+                .offset(textOffset.x, textOffset.y)
                 .drawWithContent { if (readyToDrawText) drawContent() },
-            text = initialTransformer.invoke(initials),
+            text = initialsTransformer.invoke(text),
             fontSize = fontSize,
             style = textStyle.copy(color = colors.first),
             onTextLayout = { layoutResult ->
                 Log.d("InitialsAvatar", "fontSize: $fontSize")
                 if (layoutResult.didOverflowWidth || layoutResult.didOverflowHeight) {
-                    fontSize *= 0.5
+                    fontSize *= 0.37
                 } else {
-                    if (!readyToDrawText) fontSize = (fontSize.value * 0.8).sp // One last scale to 80%
                     readyToDrawText = true
                 }
             },
-            // TODO: understand usage scenarios for avatars (textSize, style, offset, other params)
-            // TODO: tweak starting font size and decrease step
-            // TODO: handle possible exceptions
-            // TODO: compare avatars on emulator with device
+            // TODO: understand how it will be used and what params to offer (starting from ParticipantAvatars, UserAvatar, Avatar, InitialsAvatar)
+            // remove textSize, add textStyle in all, use fontSize from textStyle as default, scale if overflowing. Scale step param needed? Test
+            // TODO: --understand usage scenarios for avatars (textSize, style, offset, other params)
+            // TODO: --tweak starting font size and decrease step. Offer params.
+            // TODO: --handle possible exceptions
+            // TODO: --compare avatars on emulator with device
             // TODO: --why does preview show a correct size for letters if I use 0.7 or 0.5?
-            // TODO: how to add a proportional space around the text?
-            // TODO: what is the initial font size
-            // TODO: deprecate unneeded params
+            // TODO: --how to add a proportional space around the text?
+            // TODO: --what is the initial font size
+            // TODO: deprecate unneeded params?
             // TODO: --add readyToDraw
-            // TODO: test in UserAvatar & in apps
+            // TODO: test in demo app & AUDIO call sample
         )
     }
 }
