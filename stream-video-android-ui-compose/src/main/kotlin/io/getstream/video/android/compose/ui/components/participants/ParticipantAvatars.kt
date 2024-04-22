@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package io.getstream.video.android.compose.ui.components.participants.internal
+package io.getstream.video.android.compose.ui.components.participants
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -35,6 +35,13 @@ import io.getstream.video.android.core.MemberState
 import io.getstream.video.android.mock.StreamPreviewDataUtils
 import io.getstream.video.android.mock.previewMemberListState
 
+/**
+ * Component that renders user avatars for call participants.
+ *
+ * @param participants The list of participants to render avatars for.
+ *
+ * @see [UserAvatar]
+ */
 @Composable
 public fun ParticipantAvatars(
     participants: List<MemberState>,

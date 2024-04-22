@@ -25,11 +25,11 @@ import kotlin.math.abs
 
 @Composable
 @ReadOnlyComposable
-internal fun initialsColors(initials: String): Pair<Color, Color> {
+internal fun initialsColors(text: String): Pair<Color, Color> {
     val gradientBaseColors =
         LocalContext.current.resources.getIntArray(R.array.stream_video_avatar_gradient_colors)
 
-    val baseColorIndex = abs(initials.hashCode()) % gradientBaseColors.size
+    val baseColorIndex = abs(text.hashCode()) % gradientBaseColors.size
     val baseColor = Color(gradientBaseColors[baseColorIndex])
     return Pair(baseColor, baseColor.copy(alpha = 0.16f))
 }
