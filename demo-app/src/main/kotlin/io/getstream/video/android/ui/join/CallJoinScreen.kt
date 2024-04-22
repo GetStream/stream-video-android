@@ -96,7 +96,6 @@ import io.getstream.video.android.compose.ui.components.base.StreamButton
 import io.getstream.video.android.compose.ui.components.base.StreamDialogPositiveNegative
 import io.getstream.video.android.compose.ui.components.base.StreamIconToggleButton
 import io.getstream.video.android.compose.ui.components.base.StreamTextField
-import io.getstream.video.android.compose.ui.components.base.styling.StyleSize
 import io.getstream.video.android.mock.StreamPreviewDataUtils
 import io.getstream.video.android.mock.previewUsers
 import io.getstream.video.android.model.User
@@ -224,9 +223,8 @@ private fun CallJoinHeader(
             ) {
                 UserAvatar(
                     modifier = Modifier.size(VideoTheme.dimens.componentHeightL),
-                    textSize = StyleSize.S,
-                    userName = it.userNameOrId,
                     userImage = it.image,
+                    userName = it.userNameOrId,
                 )
             }
 

@@ -45,7 +45,6 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.avatar.UserAvatar
-import io.getstream.video.android.compose.ui.components.base.styling.StyleSize
 import io.getstream.video.android.core.ParticipantState
 import io.getstream.video.android.mock.StreamPreviewDataUtils
 import io.getstream.video.android.mock.previewParticipantsList
@@ -123,10 +122,9 @@ private fun CallParticipantInfoItem(
         val userName by participant.userNameOrId.collectAsStateWithLifecycle()
         val userImage by participant.image.collectAsStateWithLifecycle()
         UserAvatar(
-            textSize = StyleSize.S,
             modifier = Modifier.size(VideoTheme.dimens.genericL),
-            userName = userName,
             userImage = userImage,
+            userName = userName,
             isShowingOnlineIndicator = true,
         )
 
