@@ -66,8 +66,8 @@ public class CoordinatorSocket(
             token = token,
             userDetails = ConnectUserDetailsRequest(
                 id = user.id,
-                name = user.name.takeUnless { it.isEmpty() },
-                image = user.image.takeUnless { it.isEmpty() },
+                name = user.name.takeUnless { it.isBlank() },
+                image = user.image.takeUnless { it.isBlank() },
                 custom = user.custom.takeUnless { it.isEmpty() },
             ),
         )
