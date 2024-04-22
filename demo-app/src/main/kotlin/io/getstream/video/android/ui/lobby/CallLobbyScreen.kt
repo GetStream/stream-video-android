@@ -68,7 +68,6 @@ import io.getstream.video.android.R
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.avatar.UserAvatar
 import io.getstream.video.android.compose.ui.components.base.StreamButton
-import io.getstream.video.android.compose.ui.components.base.styling.StyleSize
 import io.getstream.video.android.compose.ui.components.call.lobby.CallLobby
 import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.call.state.ToggleCamera
@@ -173,10 +172,9 @@ private fun CallLobbyHeaderContent(
         val userValue = user.value
         if (userValue != null) {
             UserAvatar(
-                textSize = StyleSize.S,
                 modifier = Modifier.size(32.dp),
-                userName = userValue.userNameOrId,
                 userImage = userValue.image,
+                userName = userValue.userNameOrId,
             )
 
             Spacer(modifier = Modifier.width(4.dp))

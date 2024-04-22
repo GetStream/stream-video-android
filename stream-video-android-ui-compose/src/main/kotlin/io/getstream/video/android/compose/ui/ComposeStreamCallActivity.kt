@@ -25,8 +25,6 @@ import io.getstream.video.android.ui.common.StreamCallActivity
  */
 public open class ComposeStreamCallActivity : StreamCallActivity() {
 
-    @Suppress("UNCHECKED_CAST")
-    override fun <T : StreamCallActivity> uiDelegate(): StreamActivityUiDelegate<T> {
-        return StreamCallActivityComposeDelegate() as StreamActivityUiDelegate<T>
-    }
+    override val uiDelegate: StreamActivityUiDelegate<StreamCallActivity>
+        get() = StreamCallActivityComposeDelegate()
 }
