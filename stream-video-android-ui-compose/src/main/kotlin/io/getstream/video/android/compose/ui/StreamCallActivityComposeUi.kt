@@ -161,6 +161,6 @@ public interface StreamCallActivityComposeUi : StreamActivityUiDelegate<StreamCa
     public fun StreamCallActivity.PermissionsRationaleContent(
         call: Call,
         granted: List<String>,
-        notGranted: List<String>
+        notGranted: List<String>,
     )
 }

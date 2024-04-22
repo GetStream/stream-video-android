@@ -26,7 +26,6 @@ import android.app.PendingIntent
 import android.content.Context
 import android.os.Build
 import androidx.annotation.DrawableRes
-import androidx.annotation.IntegerRes
 import androidx.core.app.NotificationChannelCompat
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationCompat.CallStyle
@@ -255,7 +254,7 @@ public open class DefaultNotificationHandler(
 
     override fun getOngoingCallNotification(
         callDisplayName: String?,
-        callId: StreamCallId
+        callId: StreamCallId,
     ): Notification? {
         val notificationId = callId.hashCode() // Notification ID
 
@@ -449,9 +448,9 @@ public open class DefaultNotificationHandler(
         val appProcessInfo = ActivityManager.RunningAppProcessInfo()
         ActivityManager.getMyMemoryState(appProcessInfo)
         return (
-                appProcessInfo.importance == ActivityManager.RunningAppProcessInfo.IMPORTANCE_FOREGROUND ||
-                        appProcessInfo.importance == ActivityManager.RunningAppProcessInfo.IMPORTANCE_VISIBLE
-                )
+            appProcessInfo.importance == ActivityManager.RunningAppProcessInfo.IMPORTANCE_FOREGROUND ||
+                appProcessInfo.importance == ActivityManager.RunningAppProcessInfo.IMPORTANCE_VISIBLE
+            )
     }
 
     open fun getChannelId(): String = application.getString(

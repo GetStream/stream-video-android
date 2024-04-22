@@ -234,7 +234,7 @@ public open class StreamCallActivityComposeDelegate : StreamCallActivityComposeU
         showRationale: Boolean,
         call: Call,
         granted: List<String>,
-        notGranted: List<String>
+        notGranted: List<String>,
     ) {
         if (!showRationale && configuration.canSkiPermissionRationale) {
             logger.w { "Permissions were not granted, but rationale is required to be skipped." }
@@ -260,7 +260,10 @@ public open class StreamCallActivityComposeDelegate : StreamCallActivityComposeU
     }
 
     @Composable
-    private fun StreamCallActivity.ConnectionAvailable(call: Call, content: @Composable (call: Call) -> Unit) {
+    private fun StreamCallActivity.ConnectionAvailable(
+        call: Call,
+        content: @Composable (call: Call) -> Unit,
+    ) {
         val connection by call.state.connection.collectAsStateWithLifecycle()
         when (connection) {
             RealtimeConnection.Disconnected -> {
@@ -285,7 +288,6 @@ public open class StreamCallActivityComposeDelegate : StreamCallActivityComposeU
             }
         }
     }
-
 
     @Composable
     override fun StreamCallActivity.AudioCallContent(call: Call) {
@@ -409,9 +411,11 @@ public open class StreamCallActivityComposeDelegate : StreamCallActivityComposeU
         notGranted: List<String>,
     ) {
         // Show default dialog to go to settings.
-        Box(modifier = Modifier
-            .fillMaxSize()
-            .background(VideoTheme.colors.baseSheetPrimary)) {
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(VideoTheme.colors.baseSheetPrimary),
+        ) {
             // Proceed as normal
             StreamDialogPositiveNegative(
                 content = {

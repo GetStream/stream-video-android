@@ -41,8 +41,7 @@ public data class StreamCallActivityConfiguration(
      * Can be used same as normal extras.
      */
     val custom: Bundle? = null,
-) {
-}
+)
 
 /**
  * Extract a [StreamCallActivityConfigStrings] from bundle.
@@ -72,7 +71,7 @@ public fun StreamCallActivityConfiguration.toBundle(): Bundle {
     bundle.putBoolean(StreamCallActivityConfigStrings.EXTRA_CLOSE_ON_ENDED, closeScreenOnCallEnded)
     bundle.putBoolean(
         StreamCallActivityConfigStrings.EXTRA_CAN_SKIP_RATIONALE,
-        canSkiPermissionRationale
+        canSkiPermissionRationale,
     )
     bundle.putBundle(StreamCallActivityConfigStrings.EXTRA_CUSTOM, custom)
     return bundle

@@ -16,7 +16,6 @@
 
 package io.getstream.video.android.core
 
-import android.content.ComponentCallbacks
 import android.content.Context
 import android.os.Build
 import androidx.compose.runtime.Stable
@@ -165,7 +164,7 @@ public interface StreamVideo : NotificationHandler {
         /**
          * This allows an alternative way to observe when an instance is available.
          */
-        public val instanceState : StateFlow<StreamVideo?> = MutableStateFlow(internalStreamVideo)
+        public val instanceState: StateFlow<StreamVideo?> = MutableStateFlow(internalStreamVideo)
 
         /**
          * Returns an installed [StreamVideo] instance or throw an exception if its not installed.
