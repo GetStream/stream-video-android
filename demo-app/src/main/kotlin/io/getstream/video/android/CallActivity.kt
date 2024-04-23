@@ -16,42 +16,24 @@
 
 package io.getstream.video.android
 
-import android.content.Context
 import android.content.Intent
-import android.os.Bundle
-import android.util.Log
-import android.view.WindowManager
-import android.widget.Toast
-import androidx.activity.compose.setContent
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.ui.Modifier
-import androidx.lifecycle.lifecycleScope
 import io.getstream.chat.android.client.ChatClient
 import io.getstream.chat.android.models.Filters
 import io.getstream.chat.android.models.querysort.QuerySortByField
-import io.getstream.result.Result
 import io.getstream.result.onSuccessSuspend
 import io.getstream.video.android.compose.ui.ComposeStreamCallActivity
 import io.getstream.video.android.compose.ui.StreamCallActivityComposeDelegate
 import io.getstream.video.android.core.Call
-import io.getstream.video.android.core.StreamVideo
-import io.getstream.video.android.core.call.state.LeaveCall
-import io.getstream.video.android.core.notifications.NotificationHandler
-import io.getstream.video.android.model.StreamCallId
-import io.getstream.video.android.model.streamCallId
 import io.getstream.video.android.ui.call.CallScreen
 import io.getstream.video.android.ui.common.StreamActivityUiDelegate
 import io.getstream.video.android.ui.common.StreamCallActivity
 import io.getstream.video.android.ui.common.StreamCallActivityConfiguration
 import io.getstream.video.android.ui.common.util.StreamCallActivityDelicateApi
 import io.getstream.video.android.util.FullScreenCircleProgressBar
-import kotlinx.coroutines.launch
-import java.lang.Exception
 
 @OptIn(StreamCallActivityDelicateApi::class)
 class CallActivity : ComposeStreamCallActivity() {

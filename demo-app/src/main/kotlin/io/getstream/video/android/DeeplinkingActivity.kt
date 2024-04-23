@@ -183,7 +183,7 @@ class DeeplinkingActivity : ComponentActivity() {
                         val intent = StreamCallActivity.callIntent(
                             context = this@DeeplinkingActivity,
                             cid = callId,
-                            clazz = CallActivity::class.java
+                            clazz = CallActivity::class.java,
                         ).apply {
                             flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
                         }

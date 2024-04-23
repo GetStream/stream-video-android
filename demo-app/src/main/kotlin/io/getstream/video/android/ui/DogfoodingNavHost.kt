@@ -28,14 +28,12 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import io.getstream.video.android.CallActivity
 import io.getstream.video.android.core.notifications.NotificationHandler
-import io.getstream.video.android.model.StreamCallId
 import io.getstream.video.android.ui.common.StreamCallActivity
 import io.getstream.video.android.ui.join.CallJoinScreen
 import io.getstream.video.android.ui.join.barcode.BarcodeScanner
 import io.getstream.video.android.ui.lobby.CallLobbyScreen
 import io.getstream.video.android.ui.login.LoginScreen
 import io.getstream.video.android.ui.outgoing.DirectCallJoinScreen
-import java.util.UUID
 
 @Composable
 fun AppNavHost(
@@ -97,7 +95,7 @@ fun AppNavHost(
                             context = context,
                             cid = cid,
                             members = members.split(","),
-                            clazz = CallActivity::class.java
+                            clazz = CallActivity::class.java,
                         ),
                     )
                 },

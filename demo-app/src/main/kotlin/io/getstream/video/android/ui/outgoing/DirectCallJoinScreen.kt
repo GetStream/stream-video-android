@@ -153,7 +153,8 @@ private fun Body(
                     Modifier
                         .fillMaxWidth()
                         .align(Alignment.BottomCenter)
-                        .padding(bottom = 10.dp), horizontalArrangement = Arrangement.SpaceEvenly
+                        .padding(bottom = 10.dp),
+                    horizontalArrangement = Arrangement.SpaceEvenly,
                 ) {
                     StreamButton(
                         // Floating button
