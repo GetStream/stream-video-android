@@ -555,6 +555,12 @@ public class CallState(
     private var autoJoiningCall: Job? = null
     private var ringingTimerJob: Job? = null
 
+    internal var acceptedOnThisDevice: Boolean = false
+
+    init {
+        logger.d { "[init] acceptedOnThisDevice: $acceptedOnThisDevice" }
+    }
+
     fun handleEvent(event: VideoEvent) {
         logger.d { "Updating call state with event ${event::class.java}" }
         when (event) {
@@ -594,6 +600,9 @@ public class CallState(
                         call.join()
                         autoJoiningCall = null
                     }
+                } else if (callRingState is RingingState.Incoming) {
+                    logger.d { "[CallAcceptedEvent] acceptedOnThisDevice: $acceptedOnThisDevice" }
+                    if (!acceptedOnThisDevice) call.leave()
                 }
             }
 

@@ -1015,6 +1015,9 @@ public class Call(
     }
 
     suspend fun accept(): Result<AcceptCallResponse> {
+        state.acceptedOnThisDevice = true
+        logger.d { "[accept] acceptedOnThisDevice: ${state.acceptedOnThisDevice}" }
+
         clientImpl.state.removeRingingCall()
         clientImpl.state.maybeStopForegroundService()
         return clientImpl.accept(type, id)
