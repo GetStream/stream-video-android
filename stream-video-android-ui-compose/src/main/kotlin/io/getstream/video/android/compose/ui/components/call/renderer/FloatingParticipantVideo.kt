@@ -31,6 +31,7 @@ import androidx.compose.material.Card
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -96,8 +97,8 @@ public fun BoxScope.FloatingParticipantVideo(
     },
 ) {
     var videoSize by remember { mutableStateOf(IntSize(0, 0)) }
-    var offsetX by remember { mutableStateOf(0f) }
-    var offsetY by remember { mutableStateOf(0f) }
+    var offsetX by remember { mutableFloatStateOf(0f) }
+    var offsetY by remember { mutableFloatStateOf(0f) }
     val offset by animateOffsetAsState(targetValue = Offset(offsetX, offsetY), label = "offsets")
     val density = LocalDensity.current
 

@@ -21,7 +21,9 @@ package io.getstream.video.android.ui.common.util
 @Target(
     AnnotationTarget.FUNCTION,
     AnnotationTarget.PROPERTY_GETTER,
+    AnnotationTarget.FIELD,
     AnnotationTarget.PROPERTY_SETTER,
+    AnnotationTarget.PROPERTY,
 )
 @RequiresOptIn(
     level = RequiresOptIn.Level.WARNING,

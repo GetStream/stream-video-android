@@ -26,6 +26,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.DpOffset
@@ -34,34 +35,42 @@ import androidx.compose.ui.unit.dp
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.mock.StreamPreviewDataUtils
 import io.getstream.video.android.mock.previewUsers
+import io.getstream.video.android.model.User
 import io.getstream.video.android.ui.common.R
 
 /**
- * A background that displays a user avatar and a background that reflects the avatar.
+ * Component that displays a user avatar and a background that reflects the avatar.
  *
- * @param modifier Modifier for styling.
- * @param shape The shape of the avatar.
- * @param avatarSize The size to decide avatar image.
- * @param contentScale The scale option used for the content.
- * @param contentDescription The content description of the avatar.
- * @param requestSize The actual request size.
- * @param initialsAvatarOffset The initials offset to apply to the avatar.
- * @param previewPlaceholder A placeholder that will be displayed on the Compose preview (IDE).
- * @param loadingPlaceholder A placeholder that will be displayed while loading an image.
+ * @param modifier Modifier used for styling.
+ * @param userImage The URL of the image to be displayed. Usually [User.image].
+ * @param userName The name to be used for the initials fallback. Usually [User.name].
+ * @param shape The shape of the avatar. `CircleShape` by default.
+ * @param avatarSize The size of the avatar.
+ * @param imageScale The scale rule used for the image. `Crop` by default.
+ * @param imageDescription The image content description for accessibility. `Null` by default.
+ * @param imageRequestSize The image size to be requested. Original size by default.
+ * @param loadingPlaceholder Placeholder image to be displayed while loading the remote image.
+ * @param previewModePlaceholder Placeholder image to be displayed in Compose previews (IDE).
+ * @param textStyle The [TextStyle] to be used for the initials text fallback. The `fontSize`, `fontFamily` and `fontWeight` properties are used.
+ * If the font size is too large, it will be gradually decreased automatically.
+ * @param textOffset Offset to be applied to the initials text.
+ *
+ * @see [UserAvatar]
  */
 @Composable
 public fun UserAvatarBackground(
-    userName: String?,
-    userImage: String?,
     modifier: Modifier = Modifier,
+    userImage: String?,
+    userName: String?,
     shape: Shape = VideoTheme.shapes.circle,
     avatarSize: Dp = VideoTheme.dimens.genericMax,
-    contentScale: ContentScale = ContentScale.Crop,
-    contentDescription: String? = null,
-    requestSize: IntSize = IntSize(DEFAULT_IMAGE_SIZE, DEFAULT_IMAGE_SIZE),
-    initialsAvatarOffset: DpOffset = DpOffset(0.dp, 0.dp),
-    @DrawableRes previewPlaceholder: Int = LocalAvatarPreviewProvider.getLocalAvatarPreviewPlaceholder(),
+    imageScale: ContentScale = ContentScale.Crop,
+    imageDescription: String? = null,
+    imageRequestSize: IntSize = IntSize(DEFAULT_IMAGE_SIZE, DEFAULT_IMAGE_SIZE),
     @DrawableRes loadingPlaceholder: Int? = LocalAvatarPreviewProvider.getLocalAvatarLoadingPlaceholder(),
+    @DrawableRes previewModePlaceholder: Int = LocalAvatarPreviewProvider.getLocalAvatarPreviewPlaceholder(),
+    textStyle: TextStyle = VideoTheme.typography.titleM,
+    textOffset: DpOffset = DpOffset(0.dp, 0.dp),
 ) {
     Box(modifier = modifier.fillMaxSize()) {
         Box(
@@ -70,15 +79,16 @@ public fun UserAvatarBackground(
                 .align(Alignment.Center),
         ) {
             UserAvatar(
-                userName = userName,
                 userImage = userImage,
+                userName = userName,
                 shape = shape,
-                contentScale = contentScale,
-                contentDescription = contentDescription,
-                requestSize = requestSize,
-                initialsAvatarOffset = initialsAvatarOffset,
-                previewPlaceholder = previewPlaceholder,
+                imageScale = imageScale,
+                imageDescription = imageDescription,
+                imageRequestSize = imageRequestSize,
                 loadingPlaceholder = loadingPlaceholder,
+                previewModePlaceholder = previewModePlaceholder,
+                textStyle = textStyle,
+                textOffset = textOffset,
             )
         }
     }
@@ -91,10 +101,10 @@ private fun UserAvatarBackgroundPreview() {
     VideoTheme {
         val user = previewUsers[0]
         UserAvatarBackground(
-            userName = user.name.ifBlank { user.id },
-            userImage = user.image,
             modifier = Modifier.fillMaxSize(),
-            previewPlaceholder = R.drawable.stream_video_call_sample,
+            userImage = user.image,
+            userName = user.name.ifBlank { user.id },
+            previewModePlaceholder = R.drawable.stream_video_call_sample,
         )
     }
 }

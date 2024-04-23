@@ -28,12 +28,12 @@ import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.size
-import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.ui.Alignment
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
@@ -53,15 +53,14 @@ import io.getstream.video.android.compose.ui.components.base.styling.StreamDialo
 import io.getstream.video.android.compose.ui.components.base.styling.StyleSize
 import io.getstream.video.android.compose.ui.components.call.activecall.CallContent
 import io.getstream.video.android.compose.ui.components.call.ringing.RingingCallContent
-import io.getstream.video.android.compose.ui.components.call.ringing.incomingcall.IncomingCallContent
-import io.getstream.video.android.compose.ui.components.call.ringing.outgoingcall.OutgoingCallContent
 import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.MemberState
 import io.getstream.video.android.core.RealtimeConnection
 import io.getstream.video.android.core.call.state.CallAction
+import io.getstream.video.android.core.call.state.CancelCall
+import io.getstream.video.android.core.call.state.CustomAction
 import io.getstream.video.android.core.call.state.DeclineCall
 import io.getstream.video.android.core.call.state.LeaveCall
-import io.getstream.video.android.ui.common.StreamActivityUiDelegate
 import io.getstream.video.android.ui.common.StreamCallActivity
 import io.getstream.video.android.ui.common.util.StreamCallActivityDelicateApi
 
@@ -73,31 +72,20 @@ import io.getstream.video.android.ui.common.util.StreamCallActivityDelicateApi
 // We suppress build fails since we do not have default parameters in our abstract @Composable
 // Remove the @Suppress line once the listed issue is fixed.
 // https://issuetracker.google.com/issues/322121224
+@OptIn(StreamCallActivityDelicateApi::class)
 @Suppress("ABSTRACT_COMPOSABLE_DEFAULT_PARAMETER_VALUE")
-public open class StreamCallActivityComposeDelegate : StreamActivityUiDelegate<StreamCallActivity> {
+public open class StreamCallActivityComposeDelegate : StreamCallActivityComposeUi {
 
     public companion object {
-        private val logger by taggedLogger("StreamCallActivityUiDelegate")
+        private val logger by taggedLogger("StreamCallActivityComposeDelegate")
     }
 
     /**
      * Shows a progressbar until everything is set.
      */
+    @StreamCallActivityDelicateApi
     override fun loadingContent(activity: StreamCallActivity) {
-        activity.setContent {
-            VideoTheme {
-                Box(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .background(VideoTheme.colors.baseSheetPrimary),
-                ) {
-                    CircularProgressIndicator(
-                        modifier = Modifier.align(Alignment.Center),
-                        color = VideoTheme.colors.brandPrimary,
-                    )
-                }
-            }
-        }
+        // Nothing to set, by default.
     }
 
     /**
@@ -107,133 +95,126 @@ public open class StreamCallActivityComposeDelegate : StreamActivityUiDelegate<S
      * @param call the call
      */
     override fun setContent(activity: StreamCallActivity, call: Call) {
-        logger.d { "[onCreate(activity, call)] invoked from compose delegate." }
+        logger.d { "[setContent(activity, call)] invoked from compose delegate." }
         activity.setContent {
             logger.d { "[setContent] with RootContent" }
             activity.RootContent(call = call)
         }
     }
 
-    /**
-     * Root content of the screen.
-     *
-     * @param call the call object.
-     */
-    @OptIn(StreamCallActivityDelicateApi::class)
+    @StreamCallActivityDelicateApi
     @Composable
-    public open fun StreamCallActivity.RootContent(call: Call) {
+    override fun StreamCallActivity.RootContent(call: Call) {
         VideoTheme {
-            LaunchPermissionRequest(listOf(Manifest.permission.RECORD_AUDIO)) {
-                AllPermissionsGranted {
-                    // All permissions granted
-                    val connection by call.state.connection.collectAsStateWithLifecycle()
-                    LaunchedEffect(key1 = connection) {
-                        if (connection == RealtimeConnection.Disconnected) {
-                            logger.w { "Call disconnected." }
-                            finish()
-                        } else if (connection is RealtimeConnection.Failed) {
-                            // Safely cast, no need to crash if the error message is missing
-                            val conn = connection as? RealtimeConnection.Failed
-                            logger.e(Exception("${conn?.error}")) { "Call connection failed." }
-                            finish()
+            var callAction: CallAction by remember {
+                mutableStateOf(CustomAction(tag = "initial"))
+            }
+
+            when (callAction) {
+                is LeaveCall, is DeclineCall, is CancelCall -> {
+                    CallDisconnectedContent(call)
+                }
+
+                else -> {
+                    LaunchPermissionRequest(listOf(Manifest.permission.RECORD_AUDIO)) {
+                        AllPermissionsGranted {
+                            // All permissions granted
+                            RingingCallContent(
+                                isVideoType = isVideoCall(call),
+                                call = call,
+                                modifier = Modifier.background(
+                                    color = VideoTheme.colors.baseSheetPrimary,
+                                ),
+                                onBackPressed = {
+                                    onBackPressed(call)
+                                },
+                                onOutgoingContent = {
+                                        modifier: Modifier,
+                                        call: Call,
+                                        isVideoType: Boolean,
+                                        isShowingHeader: Boolean,
+                                        headerContent: @Composable (ColumnScope.() -> Unit)?,
+                                        detailsContent: @Composable (
+                                            ColumnScope.(
+                                                participants: List<MemberState>,
+                                                topPadding: Dp,
+                                            ) -> Unit
+                                        )?,
+                                        controlsContent: @Composable (BoxScope.() -> Unit)?,
+                                        onBackPressed: () -> Unit,
+                                        onCallAction: (CallAction) -> Unit,
+                                    ->
+                                    OutgoingCallContent(
+                                        call = call,
+                                        isVideoType = isVideoType,
+                                        modifier = modifier,
+                                        isShowingHeader = isShowingHeader,
+                                        headerContent = headerContent,
+                                        detailsContent = detailsContent,
+                                        controlsContent = controlsContent,
+                                        onBackPressed = onBackPressed,
+                                        onCallAction = onCallAction,
+                                    )
+                                },
+                                onIncomingContent = {
+                                        modifier: Modifier,
+                                        call: Call,
+                                        isVideoType: Boolean, isShowingHeader: Boolean,
+                                        headerContent: @Composable (ColumnScope.() -> Unit)?,
+                                        detailsContent: @Composable (
+                                            ColumnScope.(
+                                                participants: List<MemberState>,
+                                                topPadding: Dp,
+                                            ) -> Unit
+                                        )?,
+                                        controlsContent: @Composable (BoxScope.() -> Unit)?,
+                                        onBackPressed: () -> Unit,
+                                        onCallAction: (CallAction) -> Unit,
+                                    ->
+                                    IncomingCallContent(
+                                        call = call,
+                                        isVideoType = isVideoType,
+                                        modifier = modifier,
+                                        isShowingHeader = isShowingHeader,
+                                        headerContent = headerContent,
+                                        detailsContent = detailsContent,
+                                        controlsContent = controlsContent,
+                                        onBackPressed = onBackPressed,
+                                        onCallAction = onCallAction,
+                                    )
+                                },
+                                onAcceptedContent = {
+                                    ConnectionAvailable(call = call) { theCall ->
+                                        if (isVideoCall(theCall)) {
+                                            VideoCallContent(call = theCall)
+                                        } else {
+                                            AudioCallContent(call = theCall)
+                                        }
+                                    }
+                                },
+                                onNoAnswerContent = {
+                                    NoAnswerContent(call)
+                                },
+                                onRejectedContent = {
+                                    RejectedContent(call)
+                                },
+                                onCallAction = {
+                                    onCallAction(call, it)
+                                    callAction = it
+                                },
+                                onIdle = {
+                                    LoadingContent(call)
+                                },
+                            )
                         }
-                    }
 
-                    RingingCallContent(
-                        isVideoType = isVideoCall(call),
-                        call = call,
-                        modifier = Modifier.background(color = VideoTheme.colors.baseSheetPrimary),
-                        onBackPressed = {
-                            onBackPressed(call)
-                        },
-                        onOutgoingContent = { modifier: Modifier,
-                                              call: Call,
-                                              isVideoType: Boolean,
-                                              isShowingHeader: Boolean,
-                                              headerContent: @Composable (ColumnScope.() -> Unit)?,
-                                              detailsContent: @Composable (
-                                                  ColumnScope.(
-                                                      participants: List<MemberState>,
-                                                      topPadding: Dp,
-                                                  ) -> Unit
-                                              )?,
-                                              controlsContent: @Composable (BoxScope.() -> Unit)?,
-                                              onBackPressed: () -> Unit,
-                                              onCallAction: (CallAction) -> Unit,
-                            ->
-                            OnOutgoingCallContent(
-                                call = call,
-                                isVideoType = isVideoType,
-                                modifier = modifier,
-                                isShowingHeader = isShowingHeader,
-                                headerContent = headerContent,
-                                detailsContent = detailsContent,
-                                controlsContent = controlsContent,
-                                onBackPressed = onBackPressed,
-                                onCallAction = onCallAction,
-                            )
-                        },
-                        onIncomingContent = { modifier: Modifier,
-                                              call: Call,
-                                              isVideoType: Boolean, isShowingHeader: Boolean,
-                                              headerContent: @Composable (ColumnScope.() -> Unit)?,
-                                              detailsContent: @Composable (
-                                                  ColumnScope.(
-                                                      participants: List<MemberState>,
-                                                      topPadding: Dp,
-                                                  ) -> Unit
-                                              )?,
-                                              controlsContent: @Composable (BoxScope.() -> Unit)?,
-                                              onBackPressed: () -> Unit,
-                                              onCallAction: (CallAction) -> Unit,
-                            ->
-                            OnIncomingCallContent(
-                                call = call,
-                                isVideoType = isVideoType,
-                                modifier = modifier,
-                                isShowingHeader = isShowingHeader,
-                                headerContent = headerContent,
-                                detailsContent = detailsContent,
-                                controlsContent = controlsContent,
-                                onBackPressed = onBackPressed,
-                                onCallAction = onCallAction,
-                            )
-                        },
-                        onAcceptedContent = {
-                            if (isVideoCall(call)) {
-                                DefaultCallContent(call = call)
-                            } else {
-                                AudioCallContent(call = call)
-                            }
-                        },
-                        onNoAnswerContent = {
-                            NoAnswerContent(call)
-                        },
-                        onRejectedContent = {
-                            RejectedContent(call)
-                        },
-                        onCallAction = {
-                            onCallAction(call, it)
-                        },
-                    )
-                }
+                        SomeGranted { granted, notGranted, showRationale ->
+                            InternalPermissionContent(showRationale, call, granted, notGranted)
+                        }
 
-                SomeGranted { granted, notGranted, showRationale ->
-                    // Some of the permissions were granted, you can check which ones.
-                    if (showRationale) {
-                        NoPermissions(granted, notGranted, true)
-                    } else {
-                        logger.w { "No permission, closing activity without rationale! [notGranted: [$notGranted]" }
-                        finish()
-                    }
-                }
-                NoneGranted {
-                    // None of the permissions were granted.
-                    if (it) {
-                        NoPermissions(showRationale = true)
-                    } else {
-                        logger.w { "No permission, closing activity without rationale!" }
-                        finish()
+                        NoneGranted {
+                            InternalPermissionContent(it, call, emptyList(), emptyList())
+                        }
                     }
                 }
             }
@@ -241,93 +222,57 @@ public open class StreamCallActivityComposeDelegate : StreamActivityUiDelegate<S
     }
 
     @Composable
-    public open fun OnOutgoingCallContent(
-        modifier: Modifier,
+    private fun StreamCallActivity.InternalPermissionContent(
+        showRationale: Boolean,
         call: Call,
-        isVideoType: Boolean,
-        isShowingHeader: Boolean,
-        headerContent: (@Composable ColumnScope.() -> Unit)?,
-        detailsContent: (
-            @Composable ColumnScope.(
-                participants: List<MemberState>,
-                topPadding: Dp,
-            ) -> Unit
-        )?,
-        controlsContent: (@Composable BoxScope.() -> Unit)?,
-        onBackPressed: () -> Unit,
-        onCallAction: (CallAction) -> Unit,
+        granted: List<String>,
+        notGranted: List<String>,
     ) {
-        OutgoingCallContent(
-            call = call,
-            isVideoType = isVideoType,
-            modifier = modifier,
-            isShowingHeader = isShowingHeader,
-            headerContent = headerContent,
-            detailsContent = detailsContent,
-            controlsContent = controlsContent,
-            onBackPressed = onBackPressed,
-            onCallAction = onCallAction,
-        )
+        if (!showRationale && configuration.canSkiPermissionRationale) {
+            logger.w { "Permissions were not granted, but rationale is required to be skipped." }
+            finish()
+        } else {
+            PermissionsRationaleContent(call, granted, notGranted)
+        }
     }
 
     @Composable
-    public open fun OnIncomingCallContent(
-        modifier: Modifier,
+    override fun StreamCallActivity.LoadingContent(call: Call) {
+        // No loading screen by default...
+    }
+
+    @Composable
+    private fun StreamCallActivity.ConnectionAvailable(
         call: Call,
-        isVideoType: Boolean,
-        isShowingHeader: Boolean,
-        headerContent: (@Composable ColumnScope.() -> Unit)?,
-        detailsContent: (
-            @Composable ColumnScope.(
-                participants: List<MemberState>,
-                topPadding: Dp,
-            ) -> Unit
-        )?,
-        controlsContent: (@Composable BoxScope.() -> Unit)?,
-        onBackPressed: () -> Unit,
-        onCallAction: (CallAction) -> Unit,
+        content: @Composable (call: Call) -> Unit,
     ) {
-        IncomingCallContent(
-            call = call,
-            isVideoType = isVideoType,
-            modifier = modifier,
-            isShowingHeader = isShowingHeader,
-            headerContent = headerContent,
-            detailsContent = detailsContent,
-            controlsContent = controlsContent,
-            onBackPressed = onBackPressed,
-            onCallAction = onCallAction,
-        )
+        val connection by call.state.connection.collectAsStateWithLifecycle()
+        when (connection) {
+            RealtimeConnection.Disconnected -> {
+                if (!configuration.closeScreenOnCallEnded) {
+                    CallDisconnectedContent(call)
+                } else {
+                    // This is just for safety, will be called from other place as well.
+                    finish()
+                }
+            }
+            is RealtimeConnection.Failed -> {
+                if (!configuration.closeScreenOnError) {
+                    val err = Exception("${(connection as? RealtimeConnection.Failed)?.error}")
+                    CallFailedContent(call, err)
+                } else {
+                    // This is just for safety, will be called from other place as well.
+                    finish()
+                }
+            }
+            else -> {
+                content.invoke(call)
+            }
+        }
     }
 
-    /**
-     * Content when the call is not answered.
-     *
-     * @param call the call.
-     */
     @Composable
-    public open fun StreamCallActivity.NoAnswerContent(call: Call) {
-        onCallAction(call, LeaveCall)
-    }
-
-    /**
-     * Content when the call is rejected.
-     *
-     * @param call the call.
-     */
-    @Composable
-    public open fun StreamCallActivity.RejectedContent(call: Call) {
-        onCallAction(call, DeclineCall)
-    }
-
-    /**
-     * Content for audio calls.
-     * Call type must be "audio_call"
-     *
-     * @param call the call.
-     */
-    @Composable
-    public open fun StreamCallActivity.AudioCallContent(call: Call) {
+    override fun StreamCallActivity.AudioCallContent(call: Call) {
         val micEnabled by call.microphone.isEnabled.collectAsStateWithLifecycle()
         val duration by call.state.durationInDateFormat.collectAsStateWithLifecycle()
         io.getstream.video.android.compose.ui.components.call.activecall.AudioCallContent(
@@ -344,13 +289,8 @@ public open class StreamCallActivityComposeDelegate : StreamActivityUiDelegate<S
         )
     }
 
-    /**
-     * Content for all other calls.
-     *
-     * @param call the call.
-     */
     @Composable
-    public open fun StreamCallActivity.DefaultCallContent(call: Call) {
+    override fun StreamCallActivity.VideoCallContent(call: Call) {
         CallContent(call = call, onCallAction = {
             onCallAction(call, it)
         }, onBackPressed = {
@@ -358,59 +298,151 @@ public open class StreamCallActivityComposeDelegate : StreamActivityUiDelegate<S
         })
     }
 
-    /**
-     * Content when permissions are missing.
-     */
     @Composable
-    public open fun StreamCallActivity.NoPermissions(
-        granted: List<String> = emptyList(),
-        notGranted: List<String> = emptyList(),
-        showRationale: Boolean,
+    override fun StreamCallActivity.OutgoingCallContent(
+        modifier: Modifier,
+        call: Call,
+        isVideoType: Boolean,
+        isShowingHeader: Boolean,
+        headerContent: (@Composable ColumnScope.() -> Unit)?,
+        detailsContent: (
+            @Composable ColumnScope.(
+                participants: List<MemberState>,
+                topPadding: Dp,
+            ) -> Unit
+        )?,
+        controlsContent: (@Composable BoxScope.() -> Unit)?,
+        onBackPressed: () -> Unit,
+        onCallAction: (CallAction) -> Unit,
     ) {
-        StreamDialogPositiveNegative(
-            content = {
-                Text(
-                    text = stringResource(
-                        id = R.string.stream_default_call_ui_permissions_rationale_title,
-                    ),
-                    style = TextStyle(
-                        fontSize = 24.sp,
-                        lineHeight = 28.sp,
-                        fontWeight = FontWeight(500),
-                        color = VideoTheme.colors.basePrimary,
-                        textAlign = TextAlign.Center,
-                    ),
-                )
-                Spacer(modifier = Modifier.size(8.dp))
-                Text(
-                    text = stringResource(
-                        id = R.string.stream_default_call_ui_microphone_rationale,
-                    ),
-                    style = TextStyle(
-                        fontSize = 16.sp,
-                        lineHeight = 18.5.sp,
-                        fontWeight = FontWeight(400),
-                        color = VideoTheme.colors.baseSecondary,
-                        textAlign = TextAlign.Center,
-                    ),
-                )
-            },
-            style = StreamDialogStyles.defaultDialogStyle(),
-            positiveButton = Triple(
-                stringResource(id = R.string.stream_default_call_ui_settings_button),
-                ButtonStyles.secondaryButtonStyle(StyleSize.S),
-            ) {
-                val intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
-                    data = Uri.fromParts("package", packageName, null)
-                }
-                startActivity(intent)
-            },
-            negativeButton = Triple(
-                stringResource(id = R.string.stream_default_call_ui_not_now_button),
-                ButtonStyles.tertiaryButtonStyle(StyleSize.S),
-            ) {
-                finish()
-            },
+        io.getstream.video.android.compose.ui.components.call.ringing.outgoingcall.OutgoingCallContent(
+            call = call,
+            isVideoType = isVideoType,
+            modifier = modifier,
+            isShowingHeader = isShowingHeader,
+            headerContent = headerContent,
+            detailsContent = detailsContent,
+            controlsContent = controlsContent,
+            onBackPressed = onBackPressed,
+            onCallAction = onCallAction,
         )
+    }
+
+    @Composable
+    override fun StreamCallActivity.IncomingCallContent(
+        modifier: Modifier,
+        call: Call,
+        isVideoType: Boolean,
+        isShowingHeader: Boolean,
+        headerContent: (@Composable ColumnScope.() -> Unit)?,
+        detailsContent: (
+            @Composable ColumnScope.(
+                participants: List<MemberState>,
+                topPadding: Dp,
+            ) -> Unit
+        )?,
+        controlsContent: (@Composable BoxScope.() -> Unit)?,
+        onBackPressed: () -> Unit,
+        onCallAction: (CallAction) -> Unit,
+    ) {
+        io.getstream.video.android.compose.ui.components.call.ringing.incomingcall.IncomingCallContent(
+            call = call,
+            isVideoType = isVideoType,
+            modifier = modifier,
+            isShowingHeader = isShowingHeader,
+            headerContent = headerContent,
+            detailsContent = detailsContent,
+            controlsContent = controlsContent,
+            onBackPressed = onBackPressed,
+            onCallAction = onCallAction,
+        )
+    }
+
+    @Composable
+    override fun StreamCallActivity.NoAnswerContent(call: Call) {
+        // There is not default UI for no-answer content.
+        CallDisconnectedContent(call = call)
+    }
+
+    @Composable
+    override fun StreamCallActivity.RejectedContent(call: Call) {
+        // There is not default UI for rejected content.
+        CallDisconnectedContent(call = call)
+    }
+
+    @Composable
+    override fun StreamCallActivity.CallFailedContent(call: Call, exception: java.lang.Exception) {
+        // By default we finish the activity regardless of config.
+        // There is not default UI for call failed content.
+        finish()
+    }
+
+    @Composable
+    override fun StreamCallActivity.CallDisconnectedContent(call: Call) {
+        // By default we finish the activity regardless of config.
+        // There is not default UI for call ended content.
+        finish()
+    }
+
+    @Composable
+    override fun StreamCallActivity.PermissionsRationaleContent(
+        call: Call,
+        granted: List<String>,
+        notGranted: List<String>,
+    ) {
+        // Show default dialog to go to settings.
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(VideoTheme.colors.baseSheetSecondary),
+        ) {
+            // Proceed as normal
+            StreamDialogPositiveNegative(
+                content = {
+                    Text(
+                        text = stringResource(
+                            id = R.string.stream_default_call_ui_permissions_rationale_title,
+                        ),
+                        style = TextStyle(
+                            fontSize = 24.sp,
+                            lineHeight = 28.sp,
+                            fontWeight = FontWeight(500),
+                            color = VideoTheme.colors.basePrimary,
+                            textAlign = TextAlign.Center,
+                        ),
+                    )
+                    Spacer(modifier = Modifier.size(8.dp))
+                    Text(
+                        text = stringResource(
+                            id = R.string.stream_default_call_ui_microphone_rationale,
+                        ),
+                        style = TextStyle(
+                            fontSize = 16.sp,
+                            lineHeight = 18.5.sp,
+                            fontWeight = FontWeight(400),
+                            color = VideoTheme.colors.baseSecondary,
+                            textAlign = TextAlign.Center,
+                        ),
+                    )
+                },
+                style = StreamDialogStyles.defaultDialogStyle(),
+                positiveButton = Triple(
+                    stringResource(id = R.string.stream_default_call_ui_settings_button),
+                    ButtonStyles.secondaryButtonStyle(StyleSize.S),
+                ) {
+                    val intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
+                        data = Uri.fromParts("package", packageName, null)
+                    }
+                    startActivity(intent)
+                },
+                negativeButton = Triple(
+                    stringResource(id = R.string.stream_default_call_ui_not_now_button),
+                    ButtonStyles.tertiaryButtonStyle(StyleSize.S),
+                ) {
+                    // No permissions, leave the call
+                    onCallAction(call, LeaveCall)
+                },
+            )
+        }
     }
 }

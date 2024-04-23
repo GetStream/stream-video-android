@@ -47,6 +47,7 @@ You can find sample projects below that demonstrates use cases of Stream Video S
 - [WhatsApp Clone Compose](https://github.com/getstream/whatsapp-clone-compose): WhatsApp clone project demonstrates modern Android development built with Jetpack Compose and Stream Chat/Video SDK for Compose.
 - [Twitch Clone Compose](https://github.com/skydoves/twitch-clone-compose): Twitch clone project demonstrates modern Android development built with Jetpack Compose and Stream Chat/Video SDK for Compose.
 - [Meeting Room Compose](https://github.com/GetStream/meeting-room-compose): A real-time meeting room app built with Jetpack Compose to demonstrate video communications.
+- [Audio Only Demo](https://github.com/GetStream/audio-call-sample-android): A sample implementation of an audio-only caller application with Android Video SDK. 
 
 ## 👩‍💻 Free for Makers 👨‍💻
 
@@ -143,14 +144,29 @@ Video roadmap and changelog is available [here](https://github.com/GetStream/pro
 ### 0.5.0 milestone
 
 - [X] Improve Compose UI SDK performance by marking WebRTC models as stable.
-- [X] Development token to support a development environment  
-- [ ] H264 workaround on Samsung 23? (see https://github.com/livekit/client-sdk-android/blob/main/livekit-android-sdk/src/main/java/io/livekit/android/webrtc/SimulcastVideoEncoderFactoryWrapper.kt#L34 and
-- https://github.com/react-native-webrtc/react-native-webrtc/issues/983#issuecomment-975624906)
+- [X] Development token to support a development environment
+
+### 1.0.0 milestone - April
+
+- [X] Blur & AI video filters
+- [X] Analytics and stats for calls
+- [X] New `StreamCallActivity` for easier integration 
+
+### 1.1.0 milestone - June
+
+- [ ] Android Telecom framework integration
+- [ ] Noise cancelling support
+- [ ] Waiting rooms
+- [ ] Session timers
+- [ ] Closed Captions and multi language support for transcriptions
+
+### After 1.1 release
 - [ ] Test coverage
 - [ ] Dynascale 2.0 (depending backend support)
 - [ ] Testing on more devices
 - [ ] Camera controls
 - [ ] Tap to focus
+- [ ] Breakout rooms
 
 
 ### Dynascale 2.0

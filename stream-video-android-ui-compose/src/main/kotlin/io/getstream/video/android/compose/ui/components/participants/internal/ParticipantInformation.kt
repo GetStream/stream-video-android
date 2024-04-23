@@ -40,6 +40,8 @@ import io.getstream.video.android.core.model.CallStatus
 import io.getstream.video.android.core.utils.toCallUser
 import io.getstream.video.android.mock.StreamPreviewDataUtils
 import io.getstream.video.android.mock.previewMemberListState
+import io.getstream.video.android.mock.previewThreeMembers
+import io.getstream.video.android.mock.previewTwoMembers
 import io.getstream.video.android.ui.common.util.buildLargeCallText
 import io.getstream.video.android.ui.common.util.buildSmallCallText
 
@@ -55,7 +57,7 @@ public fun ParticipantInformation(
     ) {
         val context = LocalContext.current
         val callUsers by remember { derivedStateOf { participants.map { it.toCallUser() } } }
-        val text = if (participants.size < 3) {
+        val text = if (participants.size <= 3) {
             buildSmallCallText(context, callUsers)
         } else {
             buildLargeCallText(context, callUsers)
@@ -102,7 +104,33 @@ public fun ParticipantInformation(
     }
 }
 
-@Preview
+@Preview("2 users")
+@Composable
+private fun ParticipantInformationTwoUsersPreview() {
+    StreamPreviewDataUtils.initializeStreamVideo(LocalContext.current)
+    VideoTheme {
+        ParticipantInformation(
+            isVideoType = true,
+            callStatus = CallStatus.Incoming,
+            participants = previewTwoMembers,
+        )
+    }
+}
+
+@Preview("3 users")
+@Composable
+private fun ParticipantInformationThreeUsersPreview() {
+    StreamPreviewDataUtils.initializeStreamVideo(LocalContext.current)
+    VideoTheme {
+        ParticipantInformation(
+            isVideoType = true,
+            callStatus = CallStatus.Incoming,
+            participants = previewThreeMembers,
+        )
+    }
+}
+
+@Preview("More than 3 users")
 @Composable
 private fun ParticipantInformationPreview() {
     StreamPreviewDataUtils.initializeStreamVideo(LocalContext.current)

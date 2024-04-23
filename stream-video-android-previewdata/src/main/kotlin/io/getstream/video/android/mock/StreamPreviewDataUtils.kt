@@ -170,3 +170,9 @@ public val previewParticipant: ParticipantState
 /** Preview a new [MemberState]. */
 public val previewMember: MemberState
     inline get() = previewMemberListState[0]
+
+public val previewTwoMembers: List<MemberState>
+    inline get() = previewMemberListState.take(2)
+
+public val previewThreeMembers: List<MemberState>
+    inline get() = previewMemberListState.take(3)

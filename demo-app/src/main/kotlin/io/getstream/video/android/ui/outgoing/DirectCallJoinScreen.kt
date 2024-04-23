@@ -52,7 +52,6 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.avatar.UserAvatar
 import io.getstream.video.android.compose.ui.components.base.StreamButton
-import io.getstream.video.android.compose.ui.components.base.styling.StyleSize
 import io.getstream.video.android.mock.previewUsers
 import io.getstream.video.android.model.User
 import io.getstream.video.android.models.GoogleAccount
@@ -96,10 +95,9 @@ private fun Header(user: User?) {
         Row {
             user?.let {
                 UserAvatar(
-                    textSize = StyleSize.XS,
                     modifier = Modifier.size(24.dp),
-                    userName = it.userNameOrId,
                     userImage = it.image,
+                    userName = it.userNameOrId,
                 )
                 Spacer(modifier = Modifier.width(8.dp))
             }
@@ -213,10 +211,9 @@ private fun UserRow(
     ) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             UserAvatar(
-                textSize = StyleSize.M,
                 modifier = Modifier.size(50.dp),
-                userName = name,
                 userImage = avatarUrl,
+                userName = name,
             )
             Spacer(modifier = Modifier.width(10.dp))
             Text(

@@ -25,7 +25,7 @@ public interface NotificationHandler : NotificationPermissionHandler {
     fun onRingingCall(callId: StreamCallId, callDisplayName: String)
     fun onNotification(callId: StreamCallId, callDisplayName: String)
     fun onLiveCall(callId: StreamCallId, callDisplayName: String)
-    fun getOngoingCallNotification(callId: StreamCallId): Notification?
+    fun getOngoingCallNotification(callDisplayName: String?, callId: StreamCallId): Notification?
     fun getRingingCallNotification(
         ringingState: RingingState,
         callId: StreamCallId,

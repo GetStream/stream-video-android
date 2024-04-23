@@ -110,6 +110,7 @@ public fun RingingCallContent(
             onCallAction: (CallAction) -> Unit,
         ) -> Unit
     )? = null,
+    onIdle: @Composable () -> Unit = {},
 ) {
     val ringingState by call.state.ringingState.collectAsStateWithLifecycle()
 
@@ -174,12 +175,9 @@ public fun RingingCallContent(
             onAcceptedContent.invoke()
         }
 
-        RingingState.Idle -> {
-            // Call state is not ready yet? Show loading?
-        }
-
         else -> {
-            // Unknown
+            // Includes Idle
+            onIdle.invoke()
         }
     }
 }

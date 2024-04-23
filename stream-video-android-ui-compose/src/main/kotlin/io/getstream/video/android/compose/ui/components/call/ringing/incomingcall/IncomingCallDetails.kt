@@ -25,7 +25,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import io.getstream.video.android.compose.theme.VideoTheme
-import io.getstream.video.android.compose.ui.components.participants.internal.ParticipantAvatars
+import io.getstream.video.android.compose.ui.components.participants.ParticipantAvatars
 import io.getstream.video.android.compose.ui.components.participants.internal.ParticipantInformation
 import io.getstream.video.android.core.MemberState
 import io.getstream.video.android.core.model.CallStatus

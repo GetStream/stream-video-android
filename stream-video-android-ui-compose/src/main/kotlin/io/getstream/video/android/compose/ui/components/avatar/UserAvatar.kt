@@ -34,46 +34,50 @@ import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.getstream.video.android.compose.theme.VideoTheme
-import io.getstream.video.android.compose.ui.components.base.styling.StyleSize
+import io.getstream.video.android.compose.ui.components.participants.ParticipantAvatars
 import io.getstream.video.android.mock.StreamPreviewDataUtils
 import io.getstream.video.android.mock.previewParticipantsList
 import io.getstream.video.android.model.User
 import io.getstream.video.android.ui.common.R
 
 /**
- * Represents the [User] avatar that's shown on the Messages screen or in headers of DMs.
+ * Component that renders an image or a name as an avatar. If the image is `null` or unavailable, it uses the name initials.
+ * Can also show an "is online" indicator.
+ * If needed, the initials font size is gradually decreased automatically until the text fits within the avatar boundaries.
  *
- * Based on the state within the [User], we either show an image or their initials.
+ * @param modifier Modifier used for styling.
+ * @param userImage The URL of the image to be displayed. Usually [User.image].
+ * @param userName The name to be used for the initials. Usually [User.name].
+ * @param shape The shape of the avatar. `CircleShape` by default.
+ * @param imageScale The scale rule used for the image. `Crop` by default.
+ * @param imageDescription The image content description for accessibility. `Null` by default.
+ * @param imageRequestSize The image size to be requested. Original size by default.
+ * @param loadingPlaceholder Placeholder image to be displayed while loading the remote image.
+ * @param previewModePlaceholder Placeholder image to be displayed in Compose previews (IDE).
+ * @param textStyle The [TextStyle] to be used for the initials text. The `fontSize`, `fontFamily` and `fontWeight` properties are used.
+ * If the font size is too large, it will be gradually decreased automatically.
+ * @param textOffset Offset to be applied to the initials text.
+ * @param isShowingOnlineIndicator Flag used to display/hide the "is online" indicator. `False` by default.
+ * @param onlineIndicatorAlignment Alignment of the "is online" indicator. `TopEnd` by default.
+ * @param onlineIndicator A custom composable to represent the "is online" indicator. [DefaultOnlineIndicator] by default.
+ * @param onClick Handler to be called when the user clicks on the avatar.
  *
- * @param userName The user name whose avatar we want to show.
- * @param userImage The user image whose avatar we want to show.
- * @param modifier Modifier for styling.
- * @param shape The shape of the avatar.
- * @param textStyle The [TextStyle] that will be used for the initials.
- * @param contentScale The scale option used for the content.
- * @param contentDescription The content description of the avatar.
- * @param requestSize The actual request size.
- * @param previewPlaceholder A placeholder that will be displayed on the Compose preview (IDE).
- * @param loadingPlaceholder A placeholder that will be displayed while loading an image.
- * @param isShowingOnlineIndicator Represents to show an online indicator.
- * @param onlineIndicatorAlignment An alignment for positioning the online indicator.
- * @param onlineIndicator A custom composable to represent an online indicator.
- * @param initialsAvatarOffset The initials offset to apply to the avatar.
- * @param onClick The handler when the user clicks on the avatar.
+ * @see [ParticipantAvatars]
+ * @see [UserAvatarBackground]
  */
 @Composable
 public fun UserAvatar(
-    userName: String?,
-    userImage: String?,
     modifier: Modifier = Modifier,
+    userImage: String? = null,
+    userName: String? = null,
     shape: Shape = VideoTheme.shapes.circle,
-    contentScale: ContentScale = ContentScale.Crop,
-    contentDescription: String? = null,
-    textSize: StyleSize = StyleSize.XL,
-    requestSize: IntSize = IntSize(DEFAULT_IMAGE_SIZE, DEFAULT_IMAGE_SIZE),
-    @DrawableRes previewPlaceholder: Int = LocalAvatarPreviewProvider.getLocalAvatarPreviewPlaceholder(),
+    imageScale: ContentScale = ContentScale.Crop,
+    imageDescription: String? = null,
+    imageRequestSize: IntSize = IntSize(DEFAULT_IMAGE_SIZE, DEFAULT_IMAGE_SIZE),
     @DrawableRes loadingPlaceholder: Int? = LocalAvatarPreviewProvider.getLocalAvatarLoadingPlaceholder(),
-    initialsAvatarOffset: DpOffset = DpOffset(0.dp, 0.dp),
+    @DrawableRes previewModePlaceholder: Int = LocalAvatarPreviewProvider.getLocalAvatarPreviewPlaceholder(),
+    textStyle: TextStyle = VideoTheme.typography.titleM,
+    textOffset: DpOffset = DpOffset(0.dp, 0.dp),
     isShowingOnlineIndicator: Boolean = false,
     onlineIndicatorAlignment: OnlineIndicatorAlignment = OnlineIndicatorAlignment.TopEnd,
     onlineIndicator: @Composable BoxScope.() -> Unit = {
@@ -84,17 +88,17 @@ public fun UserAvatar(
     Box(modifier = modifier) {
         Avatar(
             modifier = Modifier.fillMaxSize(),
-            textSize = textSize,
             imageUrl = userImage,
-            initials = userName,
+            fallbackText = userName,
             shape = shape,
-            contentScale = contentScale,
-            contentDescription = contentDescription,
-            requestSize = requestSize,
+            imageScale = imageScale,
+            imageDescription = imageDescription,
+            imageRequestSize = imageRequestSize,
             loadingPlaceholder = loadingPlaceholder,
-            previewPlaceholder = previewPlaceholder,
+            previewModePlaceholder = previewModePlaceholder,
+            textStyle = textStyle,
+            textOffset = textOffset,
             onClick = onClick,
-            initialsAvatarOffset = initialsAvatarOffset,
         )
 
         if (isShowingOnlineIndicator) {
@@ -104,7 +108,7 @@ public fun UserAvatar(
 }
 
 /**
- * The default online indicator for channel members.
+ * The default "is online" indicator for [UserAvatar].
  */
 @Composable
 internal fun BoxScope.DefaultOnlineIndicator(onlineIndicatorAlignment: OnlineIndicatorAlignment) {
@@ -121,11 +125,11 @@ private fun UserAvatarPreview() {
         val userName by participant.userNameOrId.collectAsStateWithLifecycle()
 
         UserAvatar(
+            modifier = Modifier.size(82.dp),
             userImage = userImage,
             userName = userName,
-            modifier = Modifier.size(82.dp),
+            previewModePlaceholder = R.drawable.stream_video_call_sample,
             isShowingOnlineIndicator = true,
-            previewPlaceholder = R.drawable.stream_video_call_sample,
         )
     }
 }
