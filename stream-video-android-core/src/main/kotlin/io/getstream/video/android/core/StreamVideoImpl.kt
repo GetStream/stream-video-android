@@ -139,6 +139,7 @@ internal class StreamVideoImpl internal constructor(
     internal val runForegroundService: Boolean = true,
     internal val testSfuAddress: String? = null,
     internal val sounds: Sounds,
+    internal val crashOnMissingPermission: Boolean = true,
     internal val permissionCheck: StreamPermissionCheck = DefaultStreamPermissionCheck(),
 ) : StreamVideo,
     NotificationHandler by streamNotificationManager {

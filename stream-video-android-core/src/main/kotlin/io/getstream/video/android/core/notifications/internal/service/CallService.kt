@@ -187,14 +187,20 @@ internal class CallService : Service() {
                 streamVideo.permissionCheck.checkAndroidPermissions(applicationContext, call)
             if (!permissionCheckPass) {
                 // Crash early with a meaningful message if Call is used without system permissions.
-                throw IllegalStateException(
+                val exception = IllegalStateException(
                     "\nCallService attempted to start without required permissions (e.g. android.manifest.permission.RECORD_AUDIO).\n" + "This can happen if you call [Call.join()] without the required permissions being granted by the user.\n" + "If you are using compose and [LaunchCallPermissions] ensure that you rely on the [onRequestResult] callback\n" + "to ensure that the permission is granted prior to calling [Call.join()] or similar.\n" + "Optionally you can use [LaunchPermissionRequest] to ensure permissions are granted.\n" + "If you are not using the [stream-video-android-ui-compose] library,\n" + "ensure that permissions are granted prior calls to [Call.join()].\n" + "You can re-define your permissions and their expected state by overriding the [permissionCheck] in [StreamVideoBuilder]\n",
                 )
+                if (streamVideo.crashOnMissingPermission) {
+                    throw exception
+                } else {
+                    logger.e(exception) { "Ensure you have right permissions!" }
+                }
             }
 
             val notificationData: Pair<Notification?, Int> = when (trigger) {
                 TRIGGER_ONGOING_CALL -> Pair(
                     first = streamVideo.getOngoingCallNotification(
+                        callDisplayName = callDisplayName,
                         callId = callId!!,
                     ),
                     second = callId.hashCode(),
@@ -226,7 +232,7 @@ internal class CallService : Service() {
             if (notification != null) {
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
                     val foregroundServiceType = when (trigger) {
-                        TRIGGER_ONGOING_CALL -> ServiceInfo.FOREGROUND_SERVICE_TYPE_MICROPHONE
+                        TRIGGER_ONGOING_CALL -> ServiceInfo.FOREGROUND_SERVICE_TYPE_PHONE_CALL
                         TRIGGER_INCOMING_CALL -> ServiceInfo.FOREGROUND_SERVICE_TYPE_SHORT_SERVICE
                         TRIGGER_OUTGOING_CALL -> ServiceInfo.FOREGROUND_SERVICE_TYPE_SHORT_SERVICE
                         else -> ServiceInfo.FOREGROUND_SERVICE_TYPE_SHORT_SERVICE

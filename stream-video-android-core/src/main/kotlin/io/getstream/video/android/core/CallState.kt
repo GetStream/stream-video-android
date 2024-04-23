@@ -917,6 +917,7 @@ public class CallState(
 
         // no members - call is empty, we can join
         val state: RingingState = if (hasActiveCall) {
+            cancelTimeout()
             RingingState.Active
         } else if (rejectedBy.isNotEmpty() && acceptedBy.isEmpty() && rejectedBy.size >= outgoingMembersCount) {
             // Call leave same as CallEndedEvent we do not want to receive updates anymore,
@@ -924,14 +925,17 @@ public class CallState(
             // We leave the call, we do not depend on the SDK user to call leave()
             call.leave()
             if (timeout || !rejectedByMeBool) {
+                cancelTimeout()
                 RingingState.TimeoutNoAnswer
             } else {
+                cancelTimeout()
                 RingingState.RejectedByAll
             }
         } else if (hasRingingCall && createdBy?.id != client.userId) {
             // Member list is not empty, it's not rejected - it's an incoming call
             // If it's already accepted by me then we are in an Active call
             if (userIsParticipant) {
+                cancelTimeout()
                 RingingState.Active
             } else {
                 RingingState.Incoming(acceptedByMe = acceptedByMe != null)
@@ -946,12 +950,14 @@ public class CallState(
                 RingingState.Outgoing(acceptedByCallee = true)
             } else {
                 // call is accepted and we are already in the call
+                cancelTimeout()
                 RingingState.Active
             }
         } else if (timeout) {
             // It was an outgoing, or incoming call, but timeout was reached
             // Call leave same as CallEndedEvent we do not want to receive updates anymore
             call.leave()
+            cancelTimeout()
             RingingState.TimeoutNoAnswer
         } else {
             RingingState.Idle
@@ -966,14 +972,18 @@ public class CallState(
             } else if (state is RingingState.Incoming && !state.acceptedByMe) {
                 startRingingTimer()
             } else {
-                ringingTimerJob?.cancel()
-                ringingTimerJob = null
+                cancelTimeout()
             }
 
             // stop the call ringing timer if it's running
         }
         Log.d("RingingState", "Update: $state")
         _ringingState.value = state
+    }
+
+    private fun cancelTimeout() {
+        ringingTimerJob?.cancel()
+        ringingTimerJob = null
     }
 
     private fun updateFromJoinResponse(event: JoinCallResponseEvent) {

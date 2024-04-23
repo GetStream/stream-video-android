@@ -118,7 +118,6 @@ public abstract class StreamCallActivity : ComponentActivity() {
     private var callSocketConnectionMonitor: Job? = null
     private lateinit var cachedCall: Call
     private lateinit var config: StreamCallActivityConfiguration
-    private lateinit var delegate: StreamActivityUiDelegate<StreamCallActivity>
     private val onSuccessFinish: suspend (Call) -> Unit = { call ->
         logger.w { "The call was successfully finished! Closing activity" }
         onEnded(call)
@@ -624,8 +623,6 @@ public abstract class StreamCallActivity : ComponentActivity() {
     @CallSuper
     public open fun onCallAction(call: Call, action: CallAction) {
         logger.d { "======-- Action --======\n$action\n================" }
-        val onSuccess = {
-        }
         when (action) {
             is LeaveCall -> {
                 leave(call, onSuccessFinish, onErrorFinish)
