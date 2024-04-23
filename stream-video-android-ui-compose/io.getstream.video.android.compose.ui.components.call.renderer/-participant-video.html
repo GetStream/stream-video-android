@@ -41,7 +41,7 @@
 <a class="library-name--link" href="../../index.html">
                             stream-video-android
                     </a>            </div>
-            <div class="library-version">0.5.6
+            <div class="library-version">0.5.7
             </div>
         </div>
         <div class="filter-section" id="filter-section">
@@ -75,7 +75,7 @@
     }<span class="token punctuation">, </span></span><span class="parameter ">videoFallbackContent<span class="token operator">: </span><span><span class="token annotation builtin">@</span><a href="https://developer.android.com/reference/kotlin/androidx/compose/runtime/Composable.html"><span class="token annotation builtin">Composable</span></a>&nbsp;</span><span class="token punctuation">(</span><a href="../../stream-video-android-core/io.getstream.video.android.core/-call/index.html">Call</a><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-unit/index.html">Unit</a><span class="token operator"> = </span>{
         val userName by participant.userNameOrId.collectAsStateWithLifecycle()
         val userImage by participant.image.collectAsStateWithLifecycle()
-        UserAvatarBackground(userName = userName, userImage = userImage)
+        UserAvatarBackground(userImage = userImage, userName = userName)
     }<span class="token punctuation">, </span></span><span class="parameter ">reactionContent<span class="token operator">: </span><span><span class="token annotation builtin">@</span><a href="https://developer.android.com/reference/kotlin/androidx/compose/runtime/Composable.html"><span class="token annotation builtin">Composable</span></a>&nbsp;</span><a href="https://developer.android.com/reference/kotlin/androidx/compose/foundation/layout/BoxScope.html">BoxScope</a><span class="token punctuation">.</span><span class="token punctuation">(</span><a href="../../stream-video-android-core/io.getstream.video.android.core/-participant-state/index.html">ParticipantState</a><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-unit/index.html">Unit</a><span class="token operator"> = </span>{
         DefaultReaction(
             participant = participant,
