@@ -36,6 +36,7 @@ import androidx.compose.material.RadioButtonDefaults
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Call
+import androidx.compose.material.icons.filled.VideoCall
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -53,13 +54,15 @@ import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.avatar.UserAvatar
 import io.getstream.video.android.compose.ui.components.base.StreamButton
 import io.getstream.video.android.mock.previewUsers
+import io.getstream.video.android.model.StreamCallId
 import io.getstream.video.android.model.User
 import io.getstream.video.android.models.GoogleAccount
+import java.util.UUID
 
 @Composable
 fun DirectCallJoinScreen(
     viewModel: DirectCallJoinViewModel = hiltViewModel(),
-    navigateToDirectCall: (memberList: String) -> Unit,
+    navigateToDirectCall: (cid: StreamCallId, memberList: String) -> Unit,
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
@@ -125,7 +128,7 @@ private fun Header(user: User?) {
 private fun Body(
     uiState: DirectCallUiState,
     toggleUserSelection: (Int) -> Unit,
-    onStartCallClick: (membersList: String) -> Unit,
+    onStartCallClick: (cid: StreamCallId, membersList: String) -> Unit,
 ) {
     Box(
         modifier = Modifier
@@ -145,23 +148,51 @@ private fun Body(
                     entries = users,
                     onUserClick = { clickedIndex -> toggleUserSelection(clickedIndex) },
                 )
-                StreamButton(
-                    // Floating button
-                    modifier = Modifier
+
+                Row(
+                    Modifier
+                        .fillMaxWidth()
                         .align(Alignment.BottomCenter)
-                        .padding(bottom = 10.dp),
-                    enabled = users.any { it.isSelected },
-                    icon = Icons.Default.Call,
-                    text = "Start call",
-                    style = VideoTheme.styles.buttonStyles.secondaryButtonStyle(),
-                    onClick = {
-                        onStartCallClick(
-                            users
-                                .filter { it.isSelected }
-                                .joinToString(separator = ",") { it.account.id ?: "" },
-                        )
-                    },
-                )
+                        .padding(bottom = 10.dp), horizontalArrangement = Arrangement.SpaceEvenly
+                ) {
+                    StreamButton(
+                        // Floating button
+                        modifier = Modifier
+                            .align(Alignment.CenterVertically)
+                            .padding(bottom = 10.dp),
+                        enabled = users.any { it.isSelected },
+                        icon = Icons.Default.Call,
+                        text = "Audio call",
+                        style = VideoTheme.styles.buttonStyles.secondaryButtonStyle(),
+                        onClick = {
+                            onStartCallClick(
+                                StreamCallId("audio_call", UUID.randomUUID().toString()),
+                                users
+                                    .filter { it.isSelected }
+                                    .joinToString(separator = ",") { it.account.id ?: "" },
+                            )
+                        },
+                    )
+
+                    StreamButton(
+                        // Floating button
+                        modifier = Modifier
+                            .align(Alignment.CenterVertically)
+                            .padding(bottom = 10.dp),
+                        enabled = users.any { it.isSelected },
+                        icon = Icons.Default.VideoCall,
+                        text = "Video call",
+                        style = VideoTheme.styles.buttonStyles.secondaryButtonStyle(),
+                        onClick = {
+                            onStartCallClick(
+                                StreamCallId("default", UUID.randomUUID().toString()),
+                                users
+                                    .filter { it.isSelected }
+                                    .joinToString(separator = ",") { it.account.id ?: "" },
+                            )
+                        },
+                    )
+                }
             } ?: Text(
                 text = stringResource(io.getstream.video.android.R.string.cannot_load_google_account_list),
                 modifier = Modifier
@@ -256,7 +287,7 @@ private fun HeaderPreview() {
                 },
             ),
             toggleUserSelection = {},
-        ) {
+        ) { _, _ ->
         }
     }
 }

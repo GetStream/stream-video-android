@@ -26,12 +26,16 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
-import io.getstream.video.android.DirectCallActivity
+import io.getstream.video.android.CallActivity
+import io.getstream.video.android.core.notifications.NotificationHandler
+import io.getstream.video.android.model.StreamCallId
+import io.getstream.video.android.ui.common.StreamCallActivity
 import io.getstream.video.android.ui.join.CallJoinScreen
 import io.getstream.video.android.ui.join.barcode.BarcodeScanner
 import io.getstream.video.android.ui.lobby.CallLobbyScreen
 import io.getstream.video.android.ui.login.LoginScreen
 import io.getstream.video.android.ui.outgoing.DirectCallJoinScreen
+import java.util.UUID
 
 @Composable
 fun AppNavHost(
@@ -46,7 +50,8 @@ fun AppNavHost(
     ) {
         composable(AppScreens.Login.route) { backStackEntry ->
             LoginScreen(
-                autoLogIn = backStackEntry.arguments?.getString("auto_log_in")?.let { it.toBoolean() } ?: true,
+                autoLogIn = backStackEntry.arguments?.getString("auto_log_in")
+                    ?.let { it.toBoolean() } ?: true,
                 navigateToCallJoin = {
                     navController.navigate(AppScreens.CallJoin.route) {
                         popUpTo(AppScreens.Login.route) { inclusive = true }
@@ -85,11 +90,14 @@ fun AppNavHost(
         composable(AppScreens.DirectCallJoin.route) {
             val context = LocalContext.current
             DirectCallJoinScreen(
-                navigateToDirectCall = { members ->
+                navigateToDirectCall = { cid, members ->
                     context.startActivity(
-                        DirectCallActivity.createIntent(
-                            context,
+                        StreamCallActivity.callIntent(
+                            action = NotificationHandler.ACTION_OUTGOING_CALL,
+                            context = context,
+                            cid = cid,
                             members = members.split(","),
+                            clazz = CallActivity::class.java
                         ),
                     )
                 },
@@ -109,6 +117,7 @@ enum class AppScreens(val route: String) {
     CallLobby("call_lobby/{cid}"),
     DirectCallJoin("direct_call_join"),
     BarcodeScanning("barcode_scanning"), ;
+
     fun routeWithArg(argValue: Any): String = when (this) {
         Login -> this.route.replace("{auto_log_in}", argValue.toString())
         CallLobby -> this.route.replace("{cid}", argValue.toString())
