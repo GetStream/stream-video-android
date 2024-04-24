@@ -600,7 +600,9 @@ public class CallState(
                         call.join()
                         autoJoiningCall = null
                     }
-                } else if (callRingState is RingingState.Incoming) {
+                } else if (callRingState is RingingState.Incoming && event.user.id == client.userId) {
+                    // Call accepted by me + this device is Incoming => I accepted on another device
+                    // Then leave the call on this device
                     logger.d { "[CallAcceptedEvent] acceptedOnThisDevice: $acceptedOnThisDevice" }
                     if (!acceptedOnThisDevice) call.leave()
                 }
