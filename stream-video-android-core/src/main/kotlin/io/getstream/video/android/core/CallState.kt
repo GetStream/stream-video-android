@@ -557,10 +557,6 @@ public class CallState(
 
     internal var acceptedOnThisDevice: Boolean = false
 
-    init {
-        logger.d { "[init] acceptedOnThisDevice: $acceptedOnThisDevice" }
-    }
-
     fun handleEvent(event: VideoEvent) {
         logger.d { "Updating call state with event ${event::class.java}" }
         when (event) {
@@ -603,7 +599,6 @@ public class CallState(
                 } else if (callRingState is RingingState.Incoming && event.user.id == client.userId) {
                     // Call accepted by me + this device is Incoming => I accepted on another device
                     // Then leave the call on this device
-                    logger.d { "[CallAcceptedEvent] acceptedOnThisDevice: $acceptedOnThisDevice" }
                     if (!acceptedOnThisDevice) call.leave()
                 }
             }
