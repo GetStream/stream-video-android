@@ -237,7 +237,7 @@ private fun CallJoinHeader(
         Text(
             modifier = Modifier.weight(1f),
             color = Color.White,
-            text = user?.userNameOrId ?: "",
+            text = user?.userNameOrId.orEmpty(),
             maxLines = 1,
             fontSize = 16.sp,
         )

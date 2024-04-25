@@ -168,8 +168,8 @@ object StreamVideoInitHelper {
 
         val chatUser = io.getstream.chat.android.models.User(
             id = user.id,
-            name = user.name ?: "",
-            image = user.image ?: "",
+            name = user.name.orEmpty(),
+            image = user.image.orEmpty(),
         )
 
         chatClient.connectUser(
