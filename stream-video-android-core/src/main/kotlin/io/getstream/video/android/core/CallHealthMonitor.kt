@@ -118,7 +118,7 @@ public class CallHealthMonitor(
 
         val subscriberState = call.session?.subscriber?.state?.value
         val publisherState = call.session?.publisher?.state?.value
-        val healthyPeerConnections = subscriberState in goodStates && (publisherState in goodStates || publisherState == null)
+        val healthyPeerConnections = subscriberState in goodStates && publisherState in goodStates
 
         logger.d {
             "checking call health: peers are healthy: $healthyPeerConnections publisher $publisherState subscriber $subscriberState"

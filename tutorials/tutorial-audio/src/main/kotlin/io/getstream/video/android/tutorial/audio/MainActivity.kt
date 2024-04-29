@@ -51,22 +51,22 @@ import io.getstream.video.android.compose.ui.components.audio.AudioRoomContent
 import io.getstream.video.android.compose.ui.components.avatar.UserAvatar
 import io.getstream.video.android.compose.ui.components.call.controls.actions.ToggleMicrophoneAction
 import io.getstream.video.android.core.Call
-import io.getstream.video.android.core.CreateCallOptions
 import io.getstream.video.android.core.GEO
 import io.getstream.video.android.core.ParticipantState
 import io.getstream.video.android.core.RealtimeConnection
 import io.getstream.video.android.core.StreamVideo
 import io.getstream.video.android.core.StreamVideoBuilder
 import io.getstream.video.android.model.User
+import kotlinx.coroutines.flow.merge
 import kotlinx.coroutines.launch
-import org.openapitools.client.models.MemberRequest
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
 //        val userToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoiQW5ha2luX1NvbG8iLCJpc3MiOiJodHRwczovL3Byb250by5nZXRzdHJlYW0uaW8iLCJzdWIiOiJ1c2VyL0FuYWtpbl9Tb2xvIiwiaWF0IjoxNzE0MTE1MzkzLCJleHAiOjE3MTQ3MjAxOTh9.ro7JxpfzuGgcEtQ4QnjULPC2Z8qW-swVJAxHlVdpne8"
-        val userId = "Liviu-NonMember-User"
+        val userId = "Liviu-Host-11"
+//        val userId = "Liviu-Host-11"
 //        val userId = "Liviu-Listener-12"
         val userToken = StreamVideo.devToken(userId)
 //        val userToken = runBlocking {
@@ -96,31 +96,51 @@ class MainActivity : ComponentActivity() {
         // step3 - join a call, which type is `audio_room` and id is `123`.
         val call = client.call("audio_room", callId)
         lifecycleScope.launch {
-            val result = call.join(
-                create = true,
-                createOptions = CreateCallOptions(
-                    members = listOf(
-                        MemberRequest(userId = userId, role = "user", custom = emptyMap()),
-                        MemberRequest(userId = "Liviu-Host-10", role = "host", custom = emptyMap()),
-                        MemberRequest(userId = "Liviu-Host-11", role = "user", custom = emptyMap()),
-                    ),
-                    custom = mapOf(
-                        "title" to "Compose Trends",
-                        "description" to "Talk about how easy compose makes it to reuse and combine UI",
-                    ),
-                ),
-            )
-//            val result = call.join()
+//            val result = call.join(
+//                create = true,
+//                createOptions = CreateCallOptions(
+//                    members = listOf(
+//                        MemberRequest(userId = "Liviu-1", role = "user", custom = emptyMap()), // creator
+//                        MemberRequest(userId = "Liviu-Host-10", role = "host", custom = emptyMap()),
+//                        MemberRequest(userId = "Liviu-Host-11", role = "user", custom = emptyMap()),
+//                    ),
+//                    custom = mapOf(
+//                        "title" to "Compose Trends",
+//                        "description" to "Talk about how easy compose makes it to reuse and combine UI",
+//                    ),
+//                ),
+//            )
+            val result = call.join()
+
+//            val grantResponse = call.grantPermissions("Liviu-Host-11", listOf("send-video", "send-audio"))
+//            Log.d(
+//                "RtcDebug",
+//                "[Permissions] grantResponse: ${grantResponse.isSuccess}. Error: ${grantResponse.errorOrNull()?.message}",
+//            )
 
             result.onError {
                 Toast.makeText(applicationContext, it.message, Toast.LENGTH_LONG).show()
             }
         }
 
-        Log.d("RtcDebug", "[CallActivity] User: ${call.user.id}, role: ${call.user.role}")
+        Log.d("RtcDebug", "[MainActivity] User: ${call.user.id}, role: ${call.user.role}")
         lifecycleScope.launch {
             call.state.connection.collect {
-                Log.d("RtcDebug", "[CallActivity] RtcConnection: $it")
+                Log.d("RtcDebug", "[RtcConnection] RtcConnection: $it")
+            }
+        }
+
+        lifecycleScope.launch {
+            merge(call.state.hasPermission("send-audio"), call.state.ownCapabilities).collect {
+                when (it) {
+                    is Boolean -> {
+                        Log.d("RtcDebug", "[Permissions] hasPermission send-audio: $it")
+                    }
+
+                    is List<*> -> {
+                        Log.d("RtcDebug", "[Permissions] ownCapabilities: ${it.joinToString()}")
+                    }
+                }
             }
         }
 
