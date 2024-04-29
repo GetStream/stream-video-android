@@ -16,6 +16,7 @@
 
 package io.getstream.video.android.core
 
+import android.util.Log
 import io.getstream.log.taggedLogger
 import io.getstream.video.android.core.internal.network.NetworkStateProvider
 import kotlinx.coroutines.CoroutineScope
@@ -117,11 +118,16 @@ public class CallHealthMonitor(
 
         val subscriberState = call.session?.subscriber?.state?.value
         val publisherState = call.session?.publisher?.state?.value
-        val healthyPeerConnections = subscriberState in goodStates && publisherState in goodStates
+        val healthyPeerConnections = subscriberState in goodStates && (publisherState in goodStates || publisherState == null)
 
         logger.d {
             "checking call health: peers are healthy: $healthyPeerConnections publisher $publisherState subscriber $subscriberState"
         }
+
+        Log.d(
+            "Call:HealthMonitor",
+            "userId ${call.user.id}, publisher $publisherState, subscriber $subscriberState",
+        )
 
         if (healthyPeerConnections) {
             // don't reconnect if things are healthy

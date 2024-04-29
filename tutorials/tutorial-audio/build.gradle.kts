@@ -23,6 +23,7 @@ import java.util.*
 plugins {
     id("io.getstream.android.application.compose")
     id("io.getstream.spotless")
+    id(libs.plugins.kotlin.serialization.get().pluginId)
 }
 
 android {
@@ -48,4 +49,9 @@ dependencies {
     implementation(libs.androidx.compose.runtime)
     implementation(libs.androidx.compose.foundation)
     implementation(libs.androidx.compose.material)
+
+    implementation(libs.retrofit)
+    implementation(libs.moshi.kotlin)
+    implementation(libs.kotlinx.serialization.json)
+    implementation(libs.kotlinx.serialization.converter)
 }
