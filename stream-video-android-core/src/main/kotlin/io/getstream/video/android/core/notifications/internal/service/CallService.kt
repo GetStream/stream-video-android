@@ -16,6 +16,7 @@
 
 package io.getstream.video.android.core.notifications.internal.service
 
+import android.annotation.SuppressLint
 import android.app.Notification
 import android.app.Service
 import android.content.Context
@@ -172,12 +173,14 @@ internal class CallService : Service() {
         }
     }
 
+    @SuppressLint("MissingPermission")
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-        logger.i { "Starting CallService. $intent" }
         callId = intent?.streamCallId(INTENT_EXTRA_CALL_CID)
         callDisplayName = intent?.streamCallDisplayName(INTENT_EXTRA_CALL_DISPLAY_NAME)
         val trigger = intent?.getStringExtra(TRIGGER_KEY)
         val streamVideo = StreamVideo.instanceOrNull() as? StreamVideoImpl
+
+        logger.i { "[onStartCommand]. callId: $callId, trigger: $trigger" }
 
         val started = if (callId != null && streamVideo != null && trigger != null) {
             val type = callId!!.type
@@ -230,21 +233,27 @@ internal class CallService : Service() {
             }
             val notification = notificationData.first
             if (notification != null) {
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
-                    val foregroundServiceType = when (trigger) {
-                        TRIGGER_ONGOING_CALL -> ServiceInfo.FOREGROUND_SERVICE_TYPE_PHONE_CALL
-                        TRIGGER_INCOMING_CALL -> ServiceInfo.FOREGROUND_SERVICE_TYPE_SHORT_SERVICE
-                        TRIGGER_OUTGOING_CALL -> ServiceInfo.FOREGROUND_SERVICE_TYPE_SHORT_SERVICE
-                        else -> ServiceInfo.FOREGROUND_SERVICE_TYPE_SHORT_SERVICE
-                    }
-                    ServiceCompat.startForeground(
-                        this@CallService,
-                        callId.hashCode(),
-                        notification,
-                        foregroundServiceType,
-                    )
+                if (trigger == TRIGGER_INCOMING_CALL) {
+                    NotificationManagerCompat
+                        .from(this)
+                        .notify(callId.hashCode(), notification)
                 } else {
-                    startForeground(callId.hashCode(), notification)
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+                        val foregroundServiceType = when (trigger) {
+                            TRIGGER_ONGOING_CALL -> ServiceInfo.FOREGROUND_SERVICE_TYPE_PHONE_CALL
+//                            TRIGGER_INCOMING_CALL -> ServiceInfo.FOREGROUND_SERVICE_TYPE_SHORT_SERVICE
+                            TRIGGER_OUTGOING_CALL -> ServiceInfo.FOREGROUND_SERVICE_TYPE_SHORT_SERVICE
+                            else -> ServiceInfo.FOREGROUND_SERVICE_TYPE_SHORT_SERVICE
+                        }
+                        ServiceCompat.startForeground(
+                            this@CallService,
+                            callId.hashCode(),
+                            notification,
+                            foregroundServiceType,
+                        )
+                    } else {
+                        startForeground(callId.hashCode(), notification)
+                    }
                 }
                 true
             } else {
@@ -454,15 +463,20 @@ internal class CallService : Service() {
      * Handle all aspects of stopping the service.
      */
     private fun stopService() {
+        logger.i { "[stopService]. callId: $callId" }
+
         // Cancel the notification
         val notificationManager = NotificationManagerCompat.from(this)
         callId?.let {
             val notificationId = callId.hashCode()
             notificationManager.cancel(notificationId)
+
+            logger.i { "[stopService]. Cancelled notification: $notificationId" }
         }
 
         // Optionally cancel any incoming call notification
         notificationManager.cancel(INCOMING_CALL_NOTIFICATION_ID)
+        logger.i { "[stopService]. Cancelled incoming call notification: $INCOMING_CALL_NOTIFICATION_ID" }
 
         // Camera privacy
         unregisterToggleCameraBroadcastReceiver()

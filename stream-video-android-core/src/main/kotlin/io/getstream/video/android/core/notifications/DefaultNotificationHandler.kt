@@ -31,7 +31,6 @@ import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationCompat.CallStyle
 import androidx.core.app.NotificationManagerCompat
 import androidx.core.app.Person
-import androidx.core.content.ContextCompat
 import io.getstream.android.push.permissions.DefaultNotificationPermissionHandler
 import io.getstream.android.push.permissions.NotificationPermissionHandler
 import io.getstream.log.TaggedLogger
@@ -91,7 +90,8 @@ public open class DefaultNotificationHandler(
             CallService.TRIGGER_INCOMING_CALL,
             callDisplayName,
         )
-        ContextCompat.startForegroundService(application.applicationContext, serviceIntent)
+//        ContextCompat.startForegroundService(application.applicationContext, serviceIntent)
+        application.startService(serviceIntent)
     }
 
     override fun getRingingCallNotification(
