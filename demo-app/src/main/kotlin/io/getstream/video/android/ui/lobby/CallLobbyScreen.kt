@@ -64,6 +64,7 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.getstream.video.android.BuildConfig
+import io.getstream.video.android.CallActivity
 import io.getstream.video.android.R
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.avatar.UserAvatar
@@ -76,7 +77,7 @@ import io.getstream.video.android.mock.StreamPreviewDataUtils
 import io.getstream.video.android.mock.previewCall
 import io.getstream.video.android.mock.previewUsers
 import io.getstream.video.android.model.User
-import io.getstream.video.android.ui.call.CallActivity
+import io.getstream.video.android.ui.common.StreamCallActivity
 import io.getstream.video.android.util.LockScreenOrientation
 import kotlinx.coroutines.delay
 
@@ -338,9 +339,10 @@ private fun HandleCallLobbyUiState(
     LaunchedEffect(key1 = callLobbyUiState) {
         when (callLobbyUiState) {
             is CallLobbyUiState.JoinCompleted -> {
-                val intent = CallActivity.createIntent(
+                val intent = StreamCallActivity.callIntent(
                     context = context,
-                    callId = callLobbyViewModel.callId,
+                    cid = callLobbyViewModel.callId,
+                    clazz = CallActivity::class.java,
                 ).apply {
                     flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
                 }

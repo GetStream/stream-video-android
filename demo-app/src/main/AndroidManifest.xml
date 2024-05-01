@@ -52,33 +52,6 @@
         </activity>
 
         <activity
-            android:name="io.getstream.video.android.ui.call.CallActivity"
-            android:configChanges="screenSize|smallestScreenSize|screenLayout|orientation"
-            android:exported="true"
-            android:launchMode="singleTask"
-            android:hardwareAccelerated="true"
-            android:supportsPictureInPicture="true"
-            android:windowSoftInputMode="adjustResize">
-            <intent-filter android:priority="1">
-                <action android:name="io.getstream.video.android.action.ONGOING_CALL" />
-            </intent-filter>
-        </activity>
-
-        <activity
-            android:name="io.getstream.video.android.IncomingCallActivity"
-            android:exported="false"
-            android:showOnLockScreen="true"
-            android:showWhenLocked="true"
-            android:supportsPictureInPicture="true">
-            <intent-filter android:priority="1">
-                <action android:name="io.getstream.video.android.action.INCOMING_CALL" />
-                <action android:name="io.getstream.video.android.action.NOTIFICATION" />
-                <action android:name="io.getstream.video.android.action.LIVE_CALL" />
-                <action android:name="io.getstream.video.android.action.ACCEPT_CALL" />
-            </intent-filter>
-        </activity>
-
-        <activity
             android:name=".DeeplinkingActivity"
             android:exported="true"
             android:launchMode="singleTask">
@@ -99,13 +72,18 @@
         </activity>
 
         <activity
-            android:name="io.getstream.video.android.DirectCallActivity"
-            android:configChanges="screenSize|smallestScreenSize|screenLayout|orientation"
-            android:exported="true"
-            android:hardwareAccelerated="true"
+            android:name=".CallActivity"
             android:supportsPictureInPicture="true"
-            android:windowSoftInputMode="adjustResize">
+            android:showOnLockScreen="true"
+            android:showWhenLocked="true"
+            android:launchMode="singleTop"
+            android:exported="false">
             <intent-filter android:priority="1">
+                <action android:name="io.getstream.video.android.action.INCOMING_CALL" />
+                <action android:name="io.getstream.video.android.action.NOTIFICATION" />
+                <action android:name="io.getstream.video.android.action.LIVE_CALL" />
+                <action android:name="io.getstream.video.android.action.ONGOING_CALL" />
+                <action android:name="io.getstream.video.android.action.ACCEPT_CALL" />
                 <action android:name="io.getstream.video.android.action.OUTGOING_CALL" />
             </intent-filter>
         </activity>

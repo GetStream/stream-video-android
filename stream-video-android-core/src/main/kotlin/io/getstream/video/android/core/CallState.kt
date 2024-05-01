@@ -555,6 +555,8 @@ public class CallState(
     private var autoJoiningCall: Job? = null
     private var ringingTimerJob: Job? = null
 
+    internal var acceptedOnThisDevice: Boolean = false
+
     fun handleEvent(event: VideoEvent) {
         logger.d { "Updating call state with event ${event::class.java}" }
         when (event) {
@@ -594,6 +596,10 @@ public class CallState(
                         call.join()
                         autoJoiningCall = null
                     }
+                } else if (callRingState is RingingState.Incoming && event.user.id == client.userId) {
+                    // Call accepted by me + this device is Incoming => I accepted on another device
+                    // Then leave the call on this device
+                    if (!acceptedOnThisDevice) call.leave()
                 }
             }
 
