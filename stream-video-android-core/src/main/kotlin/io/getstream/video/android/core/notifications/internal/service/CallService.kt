@@ -22,7 +22,6 @@ import android.app.Service
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
-import android.content.pm.ServiceInfo
 import android.content.pm.ServiceInfo.FOREGROUND_SERVICE_TYPE_PHONE_CALL
 import android.media.MediaPlayer
 import android.os.Build
@@ -49,14 +48,11 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import org.openapitools.client.models.CallAcceptedEvent
 import org.openapitools.client.models.CallEndedEvent
 import org.openapitools.client.models.CallRejectedEvent
-
 
 public class CallManagement(
     val callId: StreamCallId,
@@ -91,7 +87,9 @@ class StreamCallManager {
     /**
      * Wrapper around `items.value.forEach { }`
      */
-    fun forEach(action: (id: StreamCallId, callManagement: CallManagement) -> Unit) = _items.value.forEach(action)
+    fun forEach(
+        action: (id: StreamCallId, callManagement: CallManagement) -> Unit,
+    ) = _items.value.forEach(action)
 
     private inline fun modify(what: (MutableMap<StreamCallId, CallManagement>).() -> Unit) {
         val updated = _items.value.toMutableMap().apply {
@@ -113,7 +111,6 @@ internal class CallService : Service() {
     // Data
     // Initially the service does not manage any calls.
     private val managedCalls = StreamCallManager()
-
 
     // Service scope
     private val serviceScope: CoroutineScope = CoroutineScope(Dispatchers.IO)
@@ -181,8 +178,10 @@ internal class CallService : Service() {
          */
         fun buildStopIntent(context: Context) = Intent(context, CallService::class.java)
 
-        fun buildRejectIntent(context: Context, callId: StreamCallId) = Intent(context, CallService::class.java).apply {
-
+        fun buildRejectIntent(context: Context, callId: StreamCallId) = Intent(
+            context,
+            CallService::class.java,
+        ).apply {
         }
     }
 
@@ -231,7 +230,6 @@ internal class CallService : Service() {
         }
     }
 
-
     @SuppressLint("MissingPermission")
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         val callId = intent?.streamCallId(INTENT_EXTRA_CALL_CID)
@@ -262,7 +260,6 @@ internal class CallService : Service() {
                     logger.e(exception) { "Ensure you have right permissions!" }
                 }
             }
-
 
             val notificationData: Pair<Notification?, Int> = when (trigger) {
                 TRIGGER_ONGOING_CALL -> Pair(
@@ -472,7 +469,7 @@ internal class CallService : Service() {
     private fun stopServiceIfCallAcceptedByMeOnAnotherDevice(
         acceptedByUserId: String,
         myUserId: String,
-        callRingingState: RingingState
+        callRingingState: RingingState,
     ) {
         // If incoming call was accepted by me, but current device is still ringing, it means the call was accepted on another device
         if (acceptedByUserId == myUserId && callRingingState is RingingState.Incoming) {
@@ -484,7 +481,7 @@ internal class CallService : Service() {
     private fun stopServiceIfCallRejectedByMeOrCaller(
         rejectedByUserId: String,
         myUserId: String,
-        createdByUserId: String?
+        createdByUserId: String?,
     ) {
         // If incoming call is rejected by me (even on another device) OR cancelled by the caller, stop the service
         if (rejectedByUserId == myUserId || rejectedByUserId == createdByUserId) {

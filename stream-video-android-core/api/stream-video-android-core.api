@@ -4158,6 +4158,20 @@ public final class io/getstream/video/android/core/notifications/internal/receiv
 	public fun onReceive (Landroid/content/Context;Landroid/content/Intent;)V
 }
 
+public final class io/getstream/video/android/core/notifications/internal/service/CallManagement {
+	public fun <init> (Lio/getstream/video/android/model/StreamCallId;Ljava/lang/String;)V
+	public final fun getCallId ()Lio/getstream/video/android/model/StreamCallId;
+	public final fun getDisplayName ()Ljava/lang/String;
+}
+
+public final class io/getstream/video/android/core/notifications/internal/service/StreamCallManager {
+	public fun <init> ()V
+	public final fun add (Lio/getstream/video/android/core/Call;Ljava/lang/String;)V
+	public final fun forEach (Lkotlin/jvm/functions/Function2;)V
+	public final fun getItems ()Lkotlinx/coroutines/flow/StateFlow;
+	public final fun remove (Lio/getstream/video/android/core/Call;)V
+}
+
 public final class io/getstream/video/android/core/permission/PermissionRequest {
 	public fun <init> (Lio/getstream/video/android/core/Call;Lio/getstream/video/android/model/User;Lorg/threeten/bp/OffsetDateTime;Ljava/util/List;Lorg/threeten/bp/OffsetDateTime;Lorg/threeten/bp/OffsetDateTime;)V
 	public synthetic fun <init> (Lio/getstream/video/android/core/Call;Lio/getstream/video/android/model/User;Lorg/threeten/bp/OffsetDateTime;Ljava/util/List;Lorg/threeten/bp/OffsetDateTime;Lorg/threeten/bp/OffsetDateTime;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
