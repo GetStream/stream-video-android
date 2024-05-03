@@ -430,7 +430,7 @@ public final class io/getstream/video/android/compose/ui/components/audio/AudioR
 }
 
 public final class io/getstream/video/android/compose/ui/components/audio/AudioRoomContentKt {
-	public static final fun AudioRoomContent (Landroidx/compose/ui/Modifier;Lio/getstream/video/android/core/Call;ZLio/getstream/video/android/compose/permission/VideoPermissionsState;Ljava/lang/String;Lkotlin/jvm/functions/Function3;Lio/getstream/video/android/compose/ui/components/audio/AudioRendererStyle;Lkotlin/jvm/functions/Function4;Lkotlin/jvm/functions/Function4;Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function3;Landroidx/compose/runtime/Composer;III)V
+	public static final fun AudioRoomContent (Landroidx/compose/ui/Modifier;Lio/getstream/video/android/core/Call;ZLio/getstream/video/android/compose/permission/VideoPermissionsState;Ljava/lang/String;Lkotlin/jvm/functions/Function3;Lio/getstream/video/android/compose/ui/components/audio/AudioRendererStyle;Lkotlin/jvm/functions/Function4;Lkotlin/jvm/functions/Function4;Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function0;ZLkotlin/jvm/functions/Function3;Lkotlin/jvm/functions/Function3;Landroidx/compose/runtime/Composer;III)V
 }
 
 public final class io/getstream/video/android/compose/ui/components/audio/ComposableSingletons$AudioAppBarKt {
