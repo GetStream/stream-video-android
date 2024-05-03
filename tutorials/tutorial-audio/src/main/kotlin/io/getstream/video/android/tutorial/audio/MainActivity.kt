@@ -79,6 +79,10 @@ class MainActivity : ComponentActivity() {
                     AudioRoomContent(
                         call = call,
                         title = "Audio Room Number 05",
+                        onLeaveRoom = {
+                            call.leave()
+                            finish()
+                        },
                     )
                 } else {
                     Box(modifier = Modifier.fillMaxSize()) {

@@ -17,6 +17,7 @@
 package io.getstream.video.android.compose.ui.components.audio
 
 import android.content.res.Configuration
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
@@ -27,7 +28,9 @@ import androidx.compose.material.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.platform.testTag
@@ -36,8 +39,12 @@ import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import io.getstream.log.StreamLog
+import io.getstream.video.android.compose.lifecycle.MediaPiPLifecycle
 import io.getstream.video.android.compose.permission.VideoPermissionsState
 import io.getstream.video.android.compose.permission.rememberMicrophonePermissionState
+import io.getstream.video.android.compose.pip.enterPictureInPicture
+import io.getstream.video.android.compose.pip.isInPictureInPictureMode
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.ParticipantState
@@ -55,6 +62,8 @@ import io.getstream.video.android.mock.previewCall
  * @param controlsContent Content is shown that allows users to trigger different actions to control a joined call.
  * @param audioRenderer A single audio renderer renders each individual participant.
  * @param onLeaveRoom A lambda that will be invoked when the leave quietly button was clicked.
+ * @param enableInPictureInPicture If the user has engaged in Picture-In-Picture mode.
+ * @param pictureInPictureContent Content shown when the user enters Picture in Picture mode, if it's been enabled in the app.
  * @param audioContent Content is shown by rendering audio when we're connected to a call successfully.
  */
 @Composable
@@ -95,6 +104,12 @@ public fun AudioRoomContent(
         )
     },
     onLeaveRoom: (() -> Unit)? = null,
+    onBackPressed: () -> Unit = {},
+    enableInPictureInPicture: Boolean = true,
+    pictureInPictureContent: @Composable (
+        call: Call,
+        orientation: Int,
+    ) -> Unit = { call, _ -> DefaultPictureInPictureContent(call, audioContent) },
     controlsContent: @Composable (call: Call) -> Unit = {
         AudioControlActions(
             modifier = Modifier
@@ -105,29 +120,67 @@ public fun AudioRoomContent(
         )
     },
 ) {
+    val context = LocalContext.current
+    val orientation = LocalConfiguration.current.orientation
+    val isInPictureInPicture = context.isInPictureInPictureMode
+
     DefaultPermissionHandler(videoPermission = permissions)
 
-    Scaffold(
-        modifier = modifier
-            .background(VideoTheme.colors.baseSheetPrimary)
-            .padding(32.dp),
-        contentColor = VideoTheme.colors.baseSheetPrimary,
-        topBar = {
-            if (isShowingAppBar) {
-                appBarContent.invoke(call)
-            }
-        },
-        bottomBar = { controlsContent.invoke(call) },
-        content = { paddings ->
-            Box(
-                modifier = Modifier
-                    .background(color = VideoTheme.colors.baseSheetPrimary)
-                    .padding(paddings),
-            ) {
-                audioContent.invoke(this, call)
-            }
-        },
+    MediaPiPLifecycle(
+        call = call,
+        enableInPictureInPicture = enableInPictureInPicture,
     )
+
+    BackHandler {
+        if (enableInPictureInPicture) {
+            try {
+                enterPictureInPicture(context = context, call = call)
+            } catch (e: Exception) {
+                StreamLog.e(tag = "AudioRoomContent") { e.stackTraceToString() }
+                call.leave()
+            }
+        } else {
+            onBackPressed.invoke()
+        }
+    }
+
+    if (isInPictureInPicture && enableInPictureInPicture) {
+        pictureInPictureContent(call, orientation)
+    } else {
+        Scaffold(
+            modifier = modifier
+                .background(VideoTheme.colors.baseSheetPrimary)
+                .padding(32.dp),
+            contentColor = VideoTheme.colors.baseSheetPrimary,
+            topBar = {
+                if (isShowingAppBar) {
+                    appBarContent.invoke(call)
+                }
+            },
+            bottomBar = { controlsContent.invoke(call) },
+            content = { paddings ->
+                Box(
+                    modifier = Modifier
+                        .background(color = VideoTheme.colors.baseSheetPrimary)
+                        .padding(paddings),
+                ) {
+                    audioContent.invoke(this, call)
+                }
+            },
+        )
+    }
+}
+
+@Composable
+internal fun DefaultPictureInPictureContent(
+    call: Call,
+    audioContent: @Composable BoxScope.(call: Call) -> Unit,
+) {
+    Box(
+        modifier = Modifier.background(color = VideoTheme.colors.baseSheetPrimary),
+    ) {
+        audioContent.invoke(this, call)
+    }
 }
 
 @Composable
