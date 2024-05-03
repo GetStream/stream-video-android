@@ -30,6 +30,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.platform.testTag
@@ -106,8 +107,9 @@ public fun AudioRoomContent(
     onBackPressed: () -> Unit = {},
     enableInPictureInPicture: Boolean = true,
     pictureInPictureContent: @Composable (
-        Call,
-    ) -> Unit = { DefaultPictureInPictureContent(it, audioContent) },
+        call: Call,
+        orientation: Int,
+    ) -> Unit = { call, _ -> DefaultPictureInPictureContent(call, audioContent) },
     controlsContent: @Composable (call: Call) -> Unit = {
         AudioControlActions(
             modifier = Modifier
@@ -119,6 +121,7 @@ public fun AudioRoomContent(
     },
 ) {
     val context = LocalContext.current
+    val orientation = LocalConfiguration.current.orientation
     val isInPictureInPicture = context.isInPictureInPictureMode
 
     DefaultPermissionHandler(videoPermission = permissions)
@@ -142,7 +145,7 @@ public fun AudioRoomContent(
     }
 
     if (isInPictureInPicture && enableInPictureInPicture) {
-        pictureInPictureContent(call)
+        pictureInPictureContent(call, orientation)
     } else {
         Scaffold(
             modifier = modifier

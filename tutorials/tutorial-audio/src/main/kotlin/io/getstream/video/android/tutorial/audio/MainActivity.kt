@@ -50,7 +50,7 @@ class MainActivity : ComponentActivity() {
             name = "Tutorial", // name and image are used in the UI
             role = "admin",
         )
-
+a
         // step2 - initialize StreamVideo. For a production app we recommend adding the client to your Application class or di module.
         val client = StreamVideoBuilder(
             context = applicationContext,
@@ -79,6 +79,10 @@ class MainActivity : ComponentActivity() {
                     AudioRoomContent(
                         call = call,
                         title = "Audio Room Number 05",
+                        onLeaveRoom = {
+                            call.leave()
+                            finish()
+                        },
                     )
                 } else {
                     Box(modifier = Modifier.fillMaxSize()) {
