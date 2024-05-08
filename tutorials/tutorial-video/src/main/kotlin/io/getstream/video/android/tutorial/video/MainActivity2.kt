@@ -45,21 +45,23 @@ class MainActivity2 : ComponentActivity() {
 
         // replace the secrets with the following instruction:
         // https://getstream.io/video/docs/android/playground/demo-credentials/
-        val userId = "REPLACE_WITH_USER_ID"
+        val apiKey = "REPLACE_WITH_API_KEY"
         val userToken = "REPLACE_WITH_TOKEN"
+        val userId = "REPLACE_WITH_orange-flower-9"
         val callId = "REPLACE_WITH_CALL_ID"
 
         // step1 - create a user.
         val user = User(
             id = userId, // any string
             name = "Tutorial", // name and image are used in the UI
+            image = "https://bit.ly/2TIt8NR",
             role = "admin",
         )
 
         // step2 - initialize StreamVideo. For a production app we recommend adding the client to your Application class or di module.
         val client = StreamVideoBuilder(
             context = applicationContext,
-            apiKey = "REPLACE_WITH_API_KEY", // demo API key
+            apiKey = apiKey, // demo API key
             geo = GEO.GlobalEdgeNetwork,
             user = user,
             token = userToken,
