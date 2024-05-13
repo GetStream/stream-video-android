@@ -26,6 +26,7 @@ import android.content.pm.ServiceInfo
 import android.media.MediaPlayer
 import android.os.Build
 import android.os.IBinder
+import android.util.Log
 import androidx.annotation.RawRes
 import androidx.core.app.NotificationManagerCompat
 import androidx.core.app.ServiceCompat
@@ -57,6 +58,7 @@ internal class CallService : Service() {
     private val logger by taggedLogger("CallService")
 
     // Data
+    private val calls: MutableList<StreamCallId?> = mutableListOf()
     private var callId: StreamCallId? = null
     private var callDisplayName: String? = null
 
@@ -76,6 +78,7 @@ internal class CallService : Service() {
         const val TRIGGER_INCOMING_CALL = "incoming_call"
         const val TRIGGER_OUTGOING_CALL = "outgoing_call"
         const val TRIGGER_ONGOING_CALL = "ongoing_call"
+        const val TRIGGER_REMOVE_CALL = "remove_call"
 
         /**
          * Build start intent.
@@ -122,6 +125,14 @@ internal class CallService : Service() {
          * @param context the context.
          */
         fun buildStopIntent(context: Context) = Intent(context, CallService::class.java)
+
+        // TODO: addCall method?
+        fun removeCall(context: Context, callId: StreamCallId): Intent {
+            return Intent(context, CallService::class.java).apply {
+                putExtra(TRIGGER_KEY, TRIGGER_REMOVE_CALL)
+                putExtra(INTENT_EXTRA_CALL_CID, callId)
+            }
+        }
     }
 
     override fun onTimeout(startId: Int) {
@@ -182,6 +193,12 @@ internal class CallService : Service() {
 
         logger.i { "[onStartCommand]. callId: $callId, trigger: $trigger" }
 
+        if (trigger == TRIGGER_REMOVE_CALL) {
+            // TODO: separate method that removes call and: removes notification, what else? - see stopService - and calls stopService if calls is empty
+            //
+            calls.remove(callId)
+        }
+
         val started = if (callId != null && streamVideo != null && trigger != null) {
             val type = callId!!.type
             val id = callId!!.id
@@ -234,6 +251,8 @@ internal class CallService : Service() {
             val notification = notificationData.first
             if (notification != null) {
                 if (trigger == TRIGGER_INCOMING_CALL) {
+                    calls.add(callId)
+                    // TODO: cover outgoing call case?
                     NotificationManagerCompat
                         .from(this)
                         .notify(callId.hashCode(), notification)
@@ -451,6 +470,8 @@ internal class CallService : Service() {
     }
 
     override fun onDestroy() {
+        Log.d("ServiceDebug", "[onDestroy()]")
+
         stopService()
         super.onDestroy()
     }
