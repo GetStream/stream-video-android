@@ -26,7 +26,6 @@ import android.content.pm.ServiceInfo
 import android.media.MediaPlayer
 import android.os.Build
 import android.os.IBinder
-import android.util.Log
 import androidx.annotation.RawRes
 import androidx.core.app.NotificationManagerCompat
 import androidx.core.app.ServiceCompat
@@ -96,8 +95,6 @@ internal class CallService : Service() {
             val serviceIntent = Intent(context, CallService::class.java)
             serviceIntent.putExtra(INTENT_EXTRA_CALL_CID, callId)
 
-            Log.d("ServiceDebug", "[buildStartIntent] callId: ${callId.id}, trigger: $trigger")
-
             when (trigger) {
                 TRIGGER_INCOMING_CALL -> {
                     serviceIntent.putExtra(TRIGGER_KEY, TRIGGER_INCOMING_CALL)
@@ -136,8 +133,6 @@ internal class CallService : Service() {
             val hasActiveCall = StreamVideo.instanceOrNull()?.state?.activeCall?.value != null
 
             if (!hasActiveCall) {
-                Log.d("ServiceDebug", "[showIncomingCall] will call startForegroundService()")
-
                 ContextCompat.startForegroundService(
                     context,
                     buildStartIntent(
@@ -145,31 +140,27 @@ internal class CallService : Service() {
                         callId,
                         TRIGGER_INCOMING_CALL,
                         callDisplayName,
-                    )
+                    ),
                 )
             } else {
-                Log.d("ServiceDebug", "[showIncomingCall] will call startService()")
-
                 context.startService(
                     buildStartIntent(
                         context,
                         callId,
                         TRIGGER_INCOMING_CALL,
                         callDisplayName,
-                    )
+                    ),
                 )
             }
         }
 
         fun removeIncomingCall(context: Context, callId: StreamCallId) {
-            Log.d("ServiceDebug", "[removeIncomingCall]")
-
             context.startService(
                 buildStartIntent(
                     context,
                     callId,
                     TRIGGER_REMOVE_INCOMING_CALL,
-                )
+                ),
             )
         }
     }
@@ -177,7 +168,6 @@ internal class CallService : Service() {
     override fun onTimeout(startId: Int) {
         super.onTimeout(startId)
         logger.w { "Timeout received from the system, service will stop." }
-        Log.d("ServiceDebug", "[onTimeout] will call stopService()")
         stopService()
     }
 
@@ -185,7 +175,6 @@ internal class CallService : Service() {
         super.onTaskRemoved(rootIntent)
 
         endCall()
-        Log.d("ServiceDebug", "[onTaskRemoved] will call stopService()")
         stopService()
     }
 
@@ -231,7 +220,6 @@ internal class CallService : Service() {
 
         val intentCallId = intent?.streamCallId(INTENT_EXTRA_CALL_CID)
         val intentCallDisplayName = intent?.streamCallDisplayName(INTENT_EXTRA_CALL_DISPLAY_NAME)
-
 
         logger.i { "[onStartCommand]. callId: ${intentCallId?.id}, trigger: $trigger" }
 
@@ -290,10 +278,11 @@ internal class CallService : Service() {
 
             val notification = notificationData.first
             if (notification != null) {
-                Log.d("ServiceDebug", "[onStartCommand] Notification not null, trigger: $trigger")
-
                 if (trigger == TRIGGER_INCOMING_CALL) {
-                    showIncomingCall(notification = notification, notificationId = notificationData.second)
+                    showIncomingCall(
+                        notification = notification,
+                        notificationId = notificationData.second,
+                    )
                 } else {
                     callId = intentCallId
 
@@ -315,8 +304,6 @@ internal class CallService : Service() {
                 }
                 true
             } else {
-                Log.d("ServiceDebug", "[onStartCommand] Notification is null, trigger: $trigger")
-
                 if (trigger == TRIGGER_REMOVE_INCOMING_CALL) {
                     removeIncomingCall(notificationId = notificationData.second)
                     true
@@ -338,12 +325,9 @@ internal class CallService : Service() {
             // Because of stopSelf() the service is not restarted.
             // Because START_REDELIVER_INTENT is returned
             // the exception RemoteException: Service did not call startForeground... is not thrown.
-            Log.d("ServiceDebug", "[onStartCommand !started] will call stopService()")
             stopService()
             return START_REDELIVER_INTENT
         } else {
-            Log.d("ServiceDebug", "[onStartCommand] started: $started, trigger: $trigger")
-
             initializeCallAndSocket(streamVideo!!, intentCallId!!)
 
             if (trigger == TRIGGER_INCOMING_CALL) {
@@ -375,12 +359,10 @@ internal class CallService : Service() {
             val call = streamVideo.call(callId.type, callId.id)
             call.state.ringingState.collect {
                 logger.i { "Ringing state: $it" }
-                Log.d("ServiceDebug", "[observeCallState] Call ID: ${call.id}, Ringing state: $it")
 
                 when (it) {
                     is RingingState.Incoming -> {
                         if (!it.acceptedByMe) {
-                            Log.d("ServiceDebug", "[observeCallState] Ringing state: $it, acceptedByMe: false")
                             playCallSound(streamVideo.sounds.incomingCallSound)
                         } else {
                             stopCallSound() // Stops sound sooner than Active. More responsive.
@@ -401,7 +383,6 @@ internal class CallService : Service() {
 
                     is RingingState.RejectedByAll -> {
                         stopCallSound()
-                        Log.d("ServiceDebug", "[RejectedByAll] will call stopService()")
                         stopService()
                     }
 
@@ -435,13 +416,12 @@ internal class CallService : Service() {
                             rejectedByUserId = event.user.id,
                             myUserId = streamVideo.userId,
                             createdByUserId = call.state.createdBy.value?.id,
-                            activeCallExists = streamVideo.state.activeCall.value != null
+                            activeCallExists = streamVideo.state.activeCall.value != null,
                         )
                     }
 
                     is CallEndedEvent -> {
                         // When call ends for any reason
-                        Log.d("ServiceDebug", "[CallEnded] will call stopService()")
                         stopService()
                     }
                 }
@@ -487,7 +467,6 @@ internal class CallService : Service() {
         // If accepted event was received, with event user being me, but current device is still ringing, it means the call was accepted on another device
         if (acceptedByUserId == myUserId && callRingingState is RingingState.Incoming) {
             // So stop ringing on this device
-            Log.d("ServiceDebug", "[stopServiceIfCallAcceptedByMeOnAnotherDevice] will call stopService()")
             stopService()
         }
     }
@@ -496,10 +475,8 @@ internal class CallService : Service() {
         // If rejected event was received (even from another device), with event user being me OR the caller, remove incoming call / stop service.
         if (rejectedByUserId == myUserId || rejectedByUserId == createdByUserId) {
             if (activeCallExists) {
-                Log.d("ServiceDebug", "[stopServiceIfCallRejectedByMeOrCaller] will call removeIncomingCall()")
                 removeIncomingCall(INCOMING_CALL_NOTIFICATION_ID)
             } else {
-                Log.d("ServiceDebug", "[stopServiceIfCallRejectedByMeOrCaller] will call stopService()")
                 stopService()
             }
         }
@@ -520,7 +497,6 @@ internal class CallService : Service() {
                 } ?: let {
                     logger.e { "Failed to update call." }
                 }
-                Log.d("ServiceDebug", "[initializeCallAndSocket] will call stopService()")
                 stopService() // Failed to update call
                 return@launch
             }
@@ -533,8 +509,6 @@ internal class CallService : Service() {
     }
 
     override fun onDestroy() {
-        Log.d("ServiceDebug", "[onDestroy] will call stopService()")
-
         stopService()
         super.onDestroy()
     }
@@ -546,10 +520,11 @@ internal class CallService : Service() {
     @SuppressLint("MissingPermission")
     private fun showIncomingCall(notification: Notification, notificationId: Int) {
         if (callId == null) { // If there isn't another call in progress (callId is set in onStartCommand())
-            Log.d("ServiceDebug", "[addIncomingCall] callId is null. Will startForeground().")
-            startForeground(notificationId, notification) // The service was started with startForegroundService() (from companion object), so we need to call startForeground().
+            startForeground(
+                notificationId,
+                notification,
+            ) // The service was started with startForegroundService() (from companion object), so we need to call startForeground().
         } else {
-            Log.d("ServiceDebug", "[addIncomingCall] callId: ${callId?.id}. Will show notification.")
             NotificationManagerCompat // Else, we show a simple notification (the service was already started as a foreground service).
                 .from(this)
                 .notify(notificationId, notification)
@@ -559,20 +534,13 @@ internal class CallService : Service() {
     private fun removeIncomingCall(notificationId: Int) {
         NotificationManagerCompat.from(this).cancel(notificationId)
 
-        Log.d("ServiceDebug", "[removeIncomingCall] callId: ${callId?.id}")
-
-        if (callId == null) {
-            Log.d("ServiceDebug", "[removeIncomingCall] callId is null. Will call stopService().")
-            stopService()
-        }
+        if (callId == null) stopService()
     }
 
     /**
      * Handle all aspects of stopping the service.
      */
     private fun stopService() {
-        Log.d("ServiceDebug", "[stopService]")
-
         // Cancel the notification
         val notificationManager = NotificationManagerCompat.from(this)
         callId?.let {
