@@ -256,6 +256,7 @@ internal class CallService : Service() {
                         ringingState = RingingState.Incoming(),
                         callId = intentCallId,
                         callDisplayName = intentCallDisplayName!!,
+                        shouldHaveContentIntent = streamVideo.state.activeCall.value == null,
                     ),
                     second = INCOMING_CALL_NOTIFICATION_ID,
                 )

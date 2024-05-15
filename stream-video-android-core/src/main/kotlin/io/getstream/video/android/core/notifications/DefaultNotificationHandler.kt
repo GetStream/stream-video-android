@@ -24,6 +24,7 @@ import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.PendingIntent
 import android.content.Context
+import android.content.Intent
 import android.os.Build
 import android.util.Log
 import androidx.annotation.DrawableRes
@@ -93,6 +94,7 @@ public open class DefaultNotificationHandler(
         ringingState: RingingState,
         callId: StreamCallId,
         callDisplayName: String,
+        shouldHaveContentIntent: Boolean,
     ): Notification? {
         return if (ringingState is RingingState.Incoming) {
             val fullScreenPendingIntent = intentResolver.searchIncomingCallPendingIntent(callId)
@@ -105,6 +107,7 @@ public open class DefaultNotificationHandler(
                     acceptCallPendingIntent,
                     rejectCallPendingIntent,
                     callDisplayName,
+                    shouldHaveContentIntent,
                 )
             } else {
                 logger.e { "Ringing call notification not shown, one of the intents is null." }
@@ -134,6 +137,7 @@ public open class DefaultNotificationHandler(
         acceptCallPendingIntent: PendingIntent,
         rejectCallPendingIntent: PendingIntent,
         callDisplayName: String,
+        shouldHaveContentIntent: Boolean,
     ): Notification {
         // if the app is in foreground then don't interrupt the user with a high priority
         // notification (popup). The application will display an incoming ringing call
@@ -177,9 +181,20 @@ public open class DefaultNotificationHandler(
             setContentText(callDisplayName)
             setChannelId(channelId)
             setOngoing(false)
-            setContentIntent(fullScreenPendingIntent)
-            setFullScreenIntent(fullScreenPendingIntent, true)
             setCategory(NotificationCompat.CATEGORY_CALL)
+            setFullScreenIntent(fullScreenPendingIntent, true)
+            if (shouldHaveContentIntent) {
+                setContentIntent(fullScreenPendingIntent)
+            } else {
+                val emptyIntent = PendingIntent.getActivity(
+                    application,
+                    0,
+                    Intent(),
+                    PendingIntent.FLAG_IMMUTABLE,
+                )
+                setContentIntent(emptyIntent)
+                setAutoCancel(false)
+            }
             addCallActions(acceptCallPendingIntent, rejectCallPendingIntent, callDisplayName)
         }
     }
