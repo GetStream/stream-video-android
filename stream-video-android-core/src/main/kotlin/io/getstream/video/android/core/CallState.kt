@@ -853,7 +853,7 @@ public class CallState(
         }
     }
 
-    private fun updateRingingState(timeout: Boolean = false) {
+    private fun updateRingingState(timedOut: Boolean = false) {
         // this is only true when we are in the session (we have accepted/joined the call)
         val userIsParticipant =
             _session.value?.participants?.find { it.user.id == client.userId } != null
@@ -877,7 +877,7 @@ public class CallState(
                 "hasActiveCall: $hasActiveCall\n" +
                 "hasRingingCall: $hasRingingCall\n" +
                 "userIsParticipant: $userIsParticipant,\n" +
-                "timeout: $timeout\n" +
+                "timedOut: $timedOut\n" +
                 "]",
         )
 
@@ -890,7 +890,7 @@ public class CallState(
             // since we or the caller timed-out or the call was rejected.
             // We leave the call, we do not depend on the SDK user to call leave()
             call.leave()
-            if (timeout || !rejectedByMeBool) {
+            if (timedOut || !rejectedByMeBool) {
                 cancelTimeout()
                 RingingState.TimeoutNoAnswer
             } else {
@@ -919,7 +919,7 @@ public class CallState(
                 cancelTimeout()
                 RingingState.Active
             }
-        } else if (timeout) {
+        } else if (timedOut) {
             // It was an outgoing, or incoming call, but timeout was reached
             // Call leave same as CallEndedEvent we do not want to receive updates anymore
             call.leave()
