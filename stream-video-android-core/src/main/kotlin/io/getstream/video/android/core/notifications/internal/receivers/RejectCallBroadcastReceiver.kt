@@ -18,11 +18,10 @@ package io.getstream.video.android.core.notifications.internal.receivers
 
 import android.content.Context
 import android.content.Intent
-import androidx.core.app.NotificationManagerCompat
+import android.util.Log
 import io.getstream.log.taggedLogger
 import io.getstream.result.Result
 import io.getstream.video.android.core.Call
-import io.getstream.video.android.core.notifications.NotificationHandler
 import io.getstream.video.android.core.notifications.NotificationHandler.Companion.ACTION_REJECT_CALL
 import io.getstream.video.android.core.notifications.internal.service.CallService
 import io.getstream.video.android.model.StreamCallId
@@ -42,13 +41,7 @@ internal class RejectCallBroadcastReceiver : GenericCallActionBroadcastReceiver(
             is Result.Success -> logger.d { "[onReceive] rejectCall, Success: $rejectResult" }
             is Result.Failure -> logger.d { "[onReceive] rejectCall, Failure: $rejectResult" }
         }
-        val serviceIntent = CallService.buildStopIntent(context)
-//        context.stopService(serviceIntent)
-        CallService.removeCall(context, StreamCallId.fromCallCid(call.cid))
-
-        // As a second precaution cancel also the notification
-        NotificationManagerCompat.from(
-            context,
-        ).cancel(NotificationHandler.INCOMING_CALL_NOTIFICATION_ID)
+        Log.d("ServiceDebug", "[reject onReceive] callId: ${call.id}")
+        CallService.removeIncomingCall(context, StreamCallId.fromCallCid(call.cid))
     }
 }

@@ -25,6 +25,7 @@ import android.app.NotificationManager
 import android.app.PendingIntent
 import android.content.Context
 import android.os.Build
+import android.util.Log
 import androidx.annotation.DrawableRes
 import androidx.core.app.NotificationChannelCompat
 import androidx.core.app.NotificationCompat
@@ -84,14 +85,8 @@ public open class DefaultNotificationHandler(
     }
 
     override fun onRingingCall(callId: StreamCallId, callDisplayName: String) {
-        val serviceIntent = CallService.buildStartIntent(
-            this.application,
-            callId,
-            CallService.TRIGGER_INCOMING_CALL,
-            callDisplayName,
-        )
-//        ContextCompat.startForegroundService(application.applicationContext, serviceIntent)
-        application.startService(serviceIntent)
+        Log.d("ServiceDebug", "[onRingingCall] callId: ${callId.id}")
+        CallService.showIncomingCall(application, callId, callDisplayName)
     }
 
     override fun getRingingCallNotification(
