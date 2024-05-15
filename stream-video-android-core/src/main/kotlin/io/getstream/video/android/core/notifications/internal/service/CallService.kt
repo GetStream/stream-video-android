@@ -423,7 +423,7 @@ internal class CallService : Service() {
                 logger.i { "Received event in service: $event" }
                 when (event) {
                     is CallAcceptedEvent -> {
-                        stopServiceIfCallAcceptedByMeOnAnotherDevice(
+                        handleIncomingCallAcceptedByMeOnAnotherDevice(
                             acceptedByUserId = event.user.id,
                             myUserId = streamVideo.userId,
                             callRingingState = call.state.ringingState.value,
@@ -431,10 +431,11 @@ internal class CallService : Service() {
                     }
 
                     is CallRejectedEvent -> {
-                        stopServiceIfCallRejectedByMeOrCaller(
+                        handleIncomingCallRejectedByMeOrCaller(
                             rejectedByUserId = event.user.id,
                             myUserId = streamVideo.userId,
                             createdByUserId = call.state.createdBy.value?.id,
+                            activeCallExists = streamVideo.state.activeCall.value != null
                         )
                     }
 
@@ -482,18 +483,25 @@ internal class CallService : Service() {
         }
     }
 
-    private fun stopServiceIfCallAcceptedByMeOnAnotherDevice(acceptedByUserId: String, myUserId: String, callRingingState: RingingState) {
-        // If incoming call was accepted by me, but current device is still ringing, it means the call was accepted on another device
+    private fun handleIncomingCallAcceptedByMeOnAnotherDevice(acceptedByUserId: String, myUserId: String, callRingingState: RingingState) {
+        // If accepted event was received, with event user being me, but current device is still ringing, it means the call was accepted on another device
         if (acceptedByUserId == myUserId && callRingingState is RingingState.Incoming) {
             // So stop ringing on this device
+            Log.d("ServiceDebug", "[stopServiceIfCallAcceptedByMeOnAnotherDevice] will call stopService()")
             stopService()
         }
     }
 
-    private fun stopServiceIfCallRejectedByMeOrCaller(rejectedByUserId: String, myUserId: String, createdByUserId: String?) {
-        // If incoming call is rejected by me (even on another device) OR cancelled by the caller, stop the service
+    private fun handleIncomingCallRejectedByMeOrCaller(rejectedByUserId: String, myUserId: String, createdByUserId: String?, activeCallExists: Boolean) {
+        // If rejected event was received (even from another device), with event user being me OR the caller, remove incoming call / stop service.
         if (rejectedByUserId == myUserId || rejectedByUserId == createdByUserId) {
-            stopService()
+            if (activeCallExists) {
+                Log.d("ServiceDebug", "[stopServiceIfCallRejectedByMeOrCaller] will call removeIncomingCall()")
+                removeIncomingCall(INCOMING_CALL_NOTIFICATION_ID)
+            } else {
+                Log.d("ServiceDebug", "[stopServiceIfCallRejectedByMeOrCaller] will call stopService()")
+                stopService()
+            }
         }
     }
 
