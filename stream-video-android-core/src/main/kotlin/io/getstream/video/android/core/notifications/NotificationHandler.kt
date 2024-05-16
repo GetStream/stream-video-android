@@ -30,6 +30,7 @@ public interface NotificationHandler : NotificationPermissionHandler {
         ringingState: RingingState,
         callId: StreamCallId,
         callDisplayName: String,
+        shouldHaveContentIntent: Boolean = true,
     ): Notification?
 
     companion object {
