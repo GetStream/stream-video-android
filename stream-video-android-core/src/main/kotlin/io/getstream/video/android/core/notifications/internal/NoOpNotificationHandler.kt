@@ -33,6 +33,7 @@ internal object NoOpNotificationHandler : NotificationHandler {
         ringingState: RingingState,
         callId: StreamCallId,
         callDisplayName: String,
+        shouldHaveContentIntent: Boolean,
     ): Notification? = null
 
     override fun onPermissionDenied() { /* NoOp */ }
